@@ -30,7 +30,7 @@ is <code>read_database</code>, which reads the database from a given
 input file.
 
 <li>
-<b>database_enumerator</b>: An enumeration object for traversing the
+<b>peptide_enumerator</b>: An enumeration object for traversing the
 peptides in a database.  This object may enumerate only the peptides
 within a specified mass-to-charge range.
 
@@ -46,10 +46,17 @@ mass-to-charge and intensity.  The peak also has a (possibly empty)
 list of associated fragments.
 
 <li>
+<b>spectrum_collection</b>: A collection of spectra.
+
+<li>
+<b>spectrum_enumerator</b>: An enumeration object for traversing the spectra
+in a spectrum_collection.
+
+<li>
 <b>spectrum</b>: A collection of peaks.
 
 <li>
-<b>spectrum_enumerator</b>: An enumeration object for traversing the
+<b>peak_enumerator</b>: An enumeration object for traversing the
 peaks in a spectrum.
 
 <li>
