@@ -1,9 +1,7 @@
 /**
  * \file spectrum.h 
- * AUTHOR: Aaron Klammer
- * CREATE DATE: 6/15/06
- * VERSION: $Revision: 1.1 $
- * DESCRIPTION: Object for representing one spectrum.
+ * $Revision: 1.2 $
+ * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
 #define SPECTRUM_H
@@ -13,69 +11,110 @@
 #include <stdio.h>
 
 /**
- * \typedef The spectrum type definition.
+ * \typedef SPECTRUM_T 
  */
 typedef struct spectrum SPECTRUM_T;
 
 /**
- * \returns A spectrum object.
+ * \typedef SPECTRUM_TYPE_T The spectrum type (MS, MS-MS, MS-MS-MS)
+ */
+typedef enum type { ms1, ms2, ms3 } SPECTRUM_TYPE_T;
+
+/**
+ * \returns An (empty) spectrum object.
  */
 SPECTRUM_T* allocate_spectrum(void);
 
 /**
- * \struct spectrum The spectrum struct.
+ * \returns A new spectrum object, populated with the user specified parameters.
  */
-struct spectrum* new_spectrum(
-  char*   filename,
-  float mz,
-  int    assumed_z,
-  float  assumed_m,
-  float  min_peak_mz,
-  float  max_peak_mz,
-  int    num_peaks,
-  double total_energy,
-  double* peak_mz,
-  double* peak_intensity,
-	int    first_scan,
-	int    last_scan,
-  char*   comment);
+SPECTRUM_T* new_spectrum(
+  int               first_scan,         ///< The number of the first scan
+	int               last_scan,          ///< The number of the last scan
+  SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum.
+  float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra)
+  int*              possible_z,         ///< The possible charge states of this spectrum
+  char*             filename);          ///< Optional filename
 
-void free_spectrum
-(SPECTRUM_T* spectrum);
+/**
+ * Frees an allocated spectrum object.
+ */
+void free_spectrum (SPECTRUM_T* spectrum);
 
-int get_num_peaks
-(SPECTRUM_T* spectrum);
+/**
+ * Prints a spectrum object to file.
+ */
+void print_spectrum(SPECTRUM_T* spectrum, FILE* file);
 
-float get_total_energy
-(SPECTRUM_T* spectrum);
+/**
+ * Prints a spectrum object to STDOUT.
+ */
+void print_spectrum_stdout(SPECTRUM_T* spectrum);
 
-float get_mass
-(SPECTRUM_T* spectrum);
+/**
+ * Copies spectrum object src to dest.
+ */
+void copy_spectrum(
+  SPECTRUM_T* src,
+  SPECTRUM_T* dest);
 
-float get_precursor_mz
-(SPECTRUM_T* spectrum);
+/**
+ * Parses a spectrum from file.
+ * \returns TRUE if success. FALSE is failure.
+ */
+int parse_spectrum_file(
+  SPECTRUM_T* spectrum,
+  FILE* file);
 
-int get_charge
-(SPECTRUM_T* spectrum);
+/**
+ * \returns TRUE if success. FALSE is failure.
+ */
+int parse_spectrum(
+  SPECTRUM_T* spectrum,
+  char*      filename);
 
-int get_first_scan
-(SPECTRUM_T* spectrum);
+/** 
+ * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
+ * Each module should also provide new_<object>, free_<object> and print_<object> functions.
+ * FIXME Chris, could you create the get and set methods for the object fields?
+ */
 
-void parse_spectrum
-(char*       filename,
- SPECTRUM_T* spectrum);
+/**
+ * Additional get and set methods
+ */
 
-void parse_spectrum_fh
-(FILE*       infile,
- SPECTRUM_T* spectrum);
+/**
+ * \returns The intensity of the peak with the maximum intensity.
+ */
+float get_spectrum_base_peak_intensity(SPECTRUM_T* spectrum);
 
-void print_spectrum
-(FILE*       file,
- char*       label,
- SPECTRUM_T* s);
+/**
+ * \returns The mass of the charged precursor ion, according to the formula 
+ * mass = m/z * charge
+ */
+float get_spectrum_mass(SPECTRUM_T* spectrum, int charge);
 
-void copy_spectrum
-(SPECTRUM_T* src,
- SPECTRUM_T* dest);
+/**
+ * \returns The mass of the neutral precursor ion, according to the formula 
+ * mass = m/z * charge - mass_H * charge
+ */
+float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge);
 
+/**
+ * \returns The mass of the singly charged precursor ion, according to the formula 
+ * mass = m/z * charge - (mass_H * (charge - 1))
+ */
+float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum);
+
+/**
+ * Adds a peak to the spectrum, modifying num_peaks, and max_ and min_peak_mz, if necessary.
+ */
+float add_peak(SPECTRUM_T* spectrum, PEAK_T* peak);
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
 #endif

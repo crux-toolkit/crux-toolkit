@@ -34,11 +34,6 @@ typedef int VERBOSE_T;
 #define LINELENGTH 4096
 
 #define EPS 1E-10
-#define MASS_NH3 17.0306
-#define MASS_H2O 18.0153
-#define MASS_H 1.007
-#define MASS_O 16.0013
-#define MASS_CO 28.0101
 
 #define BIG HUGE_VAL
 #define LITTLE -BIG
