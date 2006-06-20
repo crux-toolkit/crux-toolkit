@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -62,14 +62,14 @@ void copy_spectrum(
  * Parses a spectrum from file.
  * \returns TRUE if success. FALSE is failure.
  */
-int parse_spectrum_file(
+BOOLEAN_T parse_spectrum_file(
   SPECTRUM_T* spectrum,
   FILE* file);
 
 /**
- * \returns TRUE if success. FALSE is failure.
+ * \returns TRUE if success. FALSE if failure.
  */
-int parse_spectrum(
+BOOLEAN_T parse_spectrum(
   SPECTRUM_T* spectrum,
   char*      filename);
 
@@ -86,7 +86,7 @@ int parse_spectrum(
 /**
  * \returns The intensity of the peak with the maximum intensity.
  */
-float get_spectrum_base_peak_intensity(SPECTRUM_T* spectrum);
+float get_spectrum_max_peak_intensity(SPECTRUM_T* spectrum);
 
 /**
  * \returns The mass of the charged precursor ion, according to the formula 
@@ -107,7 +107,7 @@ float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge);
 float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum);
 
 /**
- * Adds a peak to the spectrum, modifying num_peaks, and max_ and min_peak_mz, if necessary.
+ * Adds a peak to the spectrum.
  */
 float add_peak(SPECTRUM_T* spectrum, PEAK_T* peak);
 
