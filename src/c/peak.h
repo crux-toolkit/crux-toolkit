@@ -1,6 +1,6 @@
 /**
  * \file peak.h
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for representing one peak in a spectrum.
  *
  * A peak is primarily identified via its intensity (height) and location
@@ -27,6 +27,20 @@ PEAK_T* new_peak (
   float location
 );
 
+/**
+ * \frees A PEAK_T object
+ */
+void free_peak (PEAK_T* garbage_peak);
+
+/**
+ * \returns the intensity of PEAK_T object
+ */
+float peak_intensity(PEAK_T* working_peak);
+
+/**
+ * \returns the location of PEAK_T object
+ */
+float peak_location(PEAK_T* working_peak);
 
 /*
  * Local Variables:

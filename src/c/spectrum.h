@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -30,7 +30,7 @@ SPECTRUM_T* allocate_spectrum(void);
  */
 SPECTRUM_T* new_spectrum(
   int               first_scan,         ///< The number of the first scan
-	int               last_scan,          ///< The number of the last scan
+  int               last_scan,          ///< The number of the last scan
   SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum.
   float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra)
   int*              possible_z,         ///< The possible charge states of this spectrum
@@ -82,6 +82,59 @@ BOOLEAN_T parse_spectrum(
 /**
  * Additional get and set methods
  */
+
+/**
+ * \returns the number of the first scan
+ */
+int get_spectrum_first_scan(SPECTRUM_T* spectrum);
+
+void set_spectrum_first_scan(SPECTRUM_T* spectrum, int first_scan);
+
+
+int get_spectrum_last_scan(SPECTRUM_T* spectrum);
+
+void set_spectrum_last_scan(SPECTRUM_T* spectrum, int last_scan);
+
+
+int get_spectrum_id(SPECTRUM_T* spectrum);
+
+void set_spectrum_id(SPECTRUM_T* spectrum, int id);
+
+
+SPECTRUM_TYPE_T get_spectrum_spectrum_type(SPECTRUM_T* spectrum);
+
+void set_spectrum_spectrum_type(SPECTRUM_T* spectrum, SPECTRUM_TYPE_T spectrum_type);
+
+
+float get_spectrum_precursor_mz(SPECTRUM_T* spectrum);
+
+void set_spectrum_precursor_mz(SPECTRUM_T* spectrum, float precursor_mz);
+
+
+float get_spectrum_min_peak_mz(SPECTRUM_T* spectrum);
+
+void set_spectrum_min_peak_mz(SPECTRUM_T* spectrum, float min_peak_mz);
+
+
+
+float get_spectrum_max_peak_mz(SPECTRUM_T* spectrum);
+
+void set_spectrum_max_peak_mz(SPECTRUM_T* spectrum, float max_peak_mz);
+
+
+int get_spectrum_num_peaks(SPECTRUM_T* spectrum);
+
+void set_spectrum_num_peaks(SPECTRUM_T* spectrum, int num_peaks);
+
+
+double get_spectrum_total_energy(SPECTRUM_T* spectrum);
+
+void set_spectrum_total_energy(SPECTRUM_T* spectrum, double total_energy);
+
+
+char* get_spectrum_filename(SPECTRUM_T* spectrum);
+
+void set_spectrum_filename(SPECTRUM_T* spectrum, char* filename);
 
 /**
  * \returns The intensity of the peak with the maximum intensity.
