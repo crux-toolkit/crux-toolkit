@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -88,54 +88,82 @@ BOOLEAN_T parse_spectrum(
  */
 int get_spectrum_first_scan(SPECTRUM_T* spectrum);
 
+/**
+ * \sets the number of the first scan
+ */
 void set_spectrum_first_scan(SPECTRUM_T* spectrum, int first_scan);
 
-
+/**
+ * \returns the number of the last scan
+ */
 int get_spectrum_last_scan(SPECTRUM_T* spectrum);
 
+/**
+ * \sets the number of the last scan
+ */
 void set_spectrum_last_scan(SPECTRUM_T* spectrum, int last_scan);
 
-
+/**
+ * \returns the spectrum_id
+ */
 int get_spectrum_id(SPECTRUM_T* spectrum);
 
+/**
+ * \sets the spectrum_id
+ */
 void set_spectrum_id(SPECTRUM_T* spectrum, int id);
 
-
+/**
+ * \returns the spectrum_type
+ */
 SPECTRUM_TYPE_T get_spectrum_spectrum_type(SPECTRUM_T* spectrum);
 
+/**
+ * \sets the spectrum_type
+ */
 void set_spectrum_spectrum_type(SPECTRUM_T* spectrum, SPECTRUM_TYPE_T spectrum_type);
 
-
+/**
+ * \returns the m/z of the precursor
+ */
 float get_spectrum_precursor_mz(SPECTRUM_T* spectrum);
 
+/**
+ * \sets the m/z of the precursor
+ */
 void set_spectrum_precursor_mz(SPECTRUM_T* spectrum, float precursor_mz);
 
-
+/**
+ * \returns the minimum m/z of all peaks
+ */
 float get_spectrum_min_peak_mz(SPECTRUM_T* spectrum);
 
-void set_spectrum_min_peak_mz(SPECTRUM_T* spectrum, float min_peak_mz);
-
-
-
+/**
+ * \returns the maximum m/z of all peaks
+ */
 float get_spectrum_max_peak_mz(SPECTRUM_T* spectrum);
 
-void set_spectrum_max_peak_mz(SPECTRUM_T* spectrum, float max_peak_mz);
-
-
+/**
+ * \returns the number of peaks
+ */
 int get_spectrum_num_peaks(SPECTRUM_T* spectrum);
 
-void set_spectrum_num_peaks(SPECTRUM_T* spectrum, int num_peaks);
-
-
+/**
+ * \returns the sum of intensities in all peaks
+ */
 double get_spectrum_total_energy(SPECTRUM_T* spectrum);
 
-void set_spectrum_total_energy(SPECTRUM_T* spectrum, double total_energy);
-
-
+/**
+ * \returns the filename of the ms2 file the spectrum was parsed
+ */
 char* get_spectrum_filename(SPECTRUM_T* spectrum);
 
+/**
+ * \sets the filename of the ms2 file the spectrum was parsed
+ */
 void set_spectrum_filename(SPECTRUM_T* spectrum, char* filename);
 
+///////////////
 /**
  * \returns The intensity of the peak with the maximum intensity.
  */
@@ -162,7 +190,7 @@ float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum);
 /**
  * Adds a peak to the spectrum.
  */
-float add_peak(SPECTRUM_T* spectrum, PEAK_T* peak);
+BOOLEAN_T add_peak(SPECTRUM_T* spectrum, PEAK_T* peak);
 
 /*
  * Local Variables:
