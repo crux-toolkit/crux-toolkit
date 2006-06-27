@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.13 $
+ * REVISION: $Revision: 1.14 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -41,6 +41,14 @@ struct spectrum {
   double            total_energy;  ///< The sum of intensities in all peaks
   char*             filename;      ///< Optional filename
 };    
+
+/**
+ * \struct peak_iterator
+ */
+struct peak_iterator {
+  SPECTRUM_T* spectrum; ///< The spectrum whose peaks to iterate over. 
+  int  peak_idx;        ///< The index of the current peak
+};
 
 /**
  * Parses the 'S' line of the a spectrum
@@ -655,6 +663,7 @@ float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge){
 float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge){
   return (get_spectrum_mass(spectrum, charge) - (charge-1));  //need to use real H mass
 }
+
 
 /*
  * Local Variables:

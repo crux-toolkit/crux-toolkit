@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -14,6 +14,12 @@
  * \typedef SPECTRUM_T 
  */
 typedef struct spectrum SPECTRUM_T;
+
+/**
+ * \typedef PEAK_ITERATOR_T An object to iterate over the peaks in a
+ * spectrum object.
+ */
+typedef struct peak_iterator PEAK_ITERATOR_T;
 
 /**
  * \typedef SPECTRUM_TYPE_T The spectrum type (MS, MS-MS, MS-MS-MS)
@@ -251,6 +257,28 @@ BOOLEAN_T add_peak_to_spectrum(
   SPECTRUM_T* spectrum, 
   float intensity,
   float location_mz );
+
+
+
+/******************************************************************************/
+
+/**
+ * Instantiates a new peak_iterator from a spectrum.
+ * \returns a PEAK_ITERATOR_T object.
+ */
+PEAK_ITERATOR_T* new_peak_iterator(SPECTRUM_T* spectrum);        
+
+/**
+ * Frees an allocated peak_iterator object.
+ */
+void free_peak_iterator(PEAK_ITERATOR_T* peak_iterator);
+
+/**
+ * The basic iterator functions.
+ */
+
+BOOLEAN_T peak_iterator_has_next(PEAK_ITERATOR_T* peak_iterator);
+PEAK_T* peak_iterator_next(PEAK_ITERATOR_T* peak_iterator);
 
 /*
  * Local Variables:
