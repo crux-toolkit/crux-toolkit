@@ -3,7 +3,7 @@
  * AUTHOR: Tobias P. Mann
  * CREATE DATE: 19 Sept 2003
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.6 $
+ * REVISION: $Revision: 1.7 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -79,7 +79,7 @@ SPECTRUM_T* new_spectrum(
   SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum.
   float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra)
   int*              possible_z,         ///< The possible charge states of this spectrum
-  int               num_possible_z      ///< The number of possible charge states of this spectrum  
+  int               num_possible_z,     ///< The number of possible charge states of this spectrum  
   char*             filename)          ///< Optional filename
 {
   SPECTRUM_T* fresh_spectrum = allocate_spectrum();
@@ -89,6 +89,7 @@ SPECTRUM_T* new_spectrum(
   fresh_spectrum->precursor_mz = precursor_mz;
   set_spectrum_new_possible_z(fresh_spectrum, possible_z, num_possible_z);
   set_spectrum_new_filename(fresh_spectrum, filename);
+  return fresh_spectrum;
 }
 
 
@@ -577,7 +578,7 @@ void set_spectrum_possible_z(SPECTRUM_T* spectrum,
                              int* possible_z, 
                              int num_possible_z){
   free(spectrum->possible_z);
-  set_specrum_new_possible_z(spectrum, possible_z, num_possible_z);
+  set_spectrum_new_possible_z(spectrum, possible_z, num_possible_z);
 }
 
 /**
