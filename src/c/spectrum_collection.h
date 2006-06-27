@@ -1,6 +1,6 @@
 /**
  * \file spectrum_collection.h 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -13,6 +13,12 @@
  * \typedef SPECTRUM_COLLECTION_T 
  */
 typedef struct spectrum_collection SPECTRUM_COLLECTION_T;
+
+/**
+ * \typedef SPECTRUM_ITERATOR_T An object to iterate over the spectra in a
+ * spectrum_collection object.
+ */
+typedef struct spectrum_iterator SPECTRUM_ITERATOR_T;
 
 /**
  * \returns An (empty) spectrum_collection object.
@@ -84,14 +90,6 @@ void remove_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,
   SPECTRUM_T* spectrum); 
 
-/**
- * \struct spectrum_iterator
- */
-struct spectrum_iterator {
-  SPECTRUM_COLLECTION_T* spectra;  ///< The spectrum_collection whose spectra to iterate over
-  int  spectrum_idx;     ///< The index of the current spectrum
-}
-
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
  * FIXME Chris, could you create the get and set methods for the object fields?
@@ -102,12 +100,6 @@ struct spectrum_iterator {
  */
 
 /******************************************************************************/
-
-/**
- * \typedef SPECTRUM_ITERATOR_T An object to iterate over the spectra in a
- * spectrum_collection object.
- */
-typedef struct spectrum_iterator SPECTRUM_ITERATOR_T;
 
 /**
  * Instantiates a new spectrum_iterator from spectrum_collection.
