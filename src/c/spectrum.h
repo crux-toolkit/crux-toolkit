@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -19,23 +19,6 @@ typedef struct spectrum SPECTRUM_T;
  * \typedef SPECTRUM_TYPE_T The spectrum type (MS, MS-MS, MS-MS-MS)
  */
 typedef enum _spectrum_type { MS1, MS2, MS3 } SPECTRUM_TYPE_T;
-
-/**
- * \returns An (empty) spectrum object.
- */
-SPECTRUM_T* allocate_spectrum(void);
-
-/**
- * \returns A new spectrum object, populated with the user specified parameters.
- */
-SPECTRUM_T* new_spectrum(
-  int               first_scan,         ///< The number of the first scan
-  int               last_scan,          ///< The number of the last scan
-  SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum.
-  float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra)
-  int*              possible_z,         ///< The possible charge states of this spectrum
-  int               num_possible_z,     ///< The number of possible charge states of this spectrum  
-  char*             filename);          ///< Optional filename
 
 /**
  * Frees an allocated spectrum object.
@@ -251,6 +234,32 @@ BOOLEAN_T add_peak_to_spectrum(
   SPECTRUM_T* spectrum, 
   float intensity,
   float location_mz );
+
+/******************************************************************************/
+
+/**
+ * \typedef PEAK_ITERATOR_T An object to iterate over the peaks in a
+ * spectrum object.
+ */
+typedef struct peak_iterator PEAK_ITERATOR_T;
+
+/**
+ * Instantiates a new peak_iterator from a spectrum.
+ * \returns a PEAK_ITERATOR_T object.
+ */
+PEAK_ITERATOR_T* new_peak_iterator(SPECTRUM_T* spectrum);        
+
+/**
+ * Frees an allocated peak_iterator object.
+ */
+void free_peak_iterator(PEAK_ITERATOR_T* peak_iterator);
+
+/**
+ * The basic iterator functions.
+ */
+
+BOOLEAN_T peak_iterator_has_next(PEAK_ITERATOR_T* peak_iterator);
+PEAK_T* peak_iterator_next(PEAK_ITERATOR_T* peak_iterator);
 
 /*
  * Local Variables:
