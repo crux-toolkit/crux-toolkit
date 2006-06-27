@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -134,6 +134,31 @@ float get_spectrum_precursor_mz(SPECTRUM_T* spectrum);
 void set_spectrum_precursor_mz(SPECTRUM_T* spectrum, float precursor_mz);
 
 /**
+ * \returns the possible charge states of this spectrum
+ * returns an int* to a heap allocated copy of the src spectrum
+ * thus, the user must free the memory
+ * number of possible charge states can be gained by 
+ * the get_num_possible_z function.
+ */
+int* get_spectrum_possible_z(SPECTRUM_T* spectrum);
+ 
+/**
+ * \sets the possible charge states of this spectrum
+ * the function copies the possible_z into a heap allocated memory
+ * num_possible_z must match the array size of possible_z 
+ * frees the memory of the possible_z that is replaced
+ * updates the number of possible charge states field
+ */
+void set_spectrum_possible_z(SPECTRUM_T* spectrum, 
+                             int* possible_z, 
+                             int num_possible_z);
+
+/**
+ * \returns the number of possible charge states of this spectrum
+ */
+int get_spectrum_num_possible_z(SPECTRUM_T* spectrum);
+
+/**
  * \returns the minimum m/z of all peaks
  */
 float get_spectrum_min_peak_mz(SPECTRUM_T* spectrum);
@@ -155,15 +180,28 @@ double get_spectrum_total_energy(SPECTRUM_T* spectrum);
 
 /**
  * \returns the filename of the ms2 file the spectrum was parsed
+ * returns a char* to a heap allocated copy of the filename
+ * user must free the memory
  */
 char* get_spectrum_filename(SPECTRUM_T* spectrum);
 
 /**
  * \sets the filename of the ms2 file the spectrum was parsed
+ * copies the value from arguement char* filename into a heap allocated memory
+ * frees memory for the filename that is replaced
  */
 void set_spectrum_filename(SPECTRUM_T* spectrum, char* filename);
 
-///////////////
+
+/**
+ * \sets the filename of the ms2 file the spectrum was parsed
+ * this function should be used only the first time the filename is set
+ * to change existing filename use set_spectrum_filename
+ * copies the value from arguement char* filename into a heap allocated memory
+ */
+void set_spectrum_new_filename(SPECTRUM_T* spectrum, char* filename);
+
+
 /**
  * \returns The intensity of the peak with the maximum intensity.
  */
@@ -185,12 +223,22 @@ float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge);
  * \returns The mass of the singly charged precursor ion, according to the formula 
  * mass = m/z * charge - (mass_H * (charge - 1))
  */
-float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum);
+float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge);
 
 /**
  * Adds a peak to the spectrum.
  */
 BOOLEAN_T add_peak(SPECTRUM_T* spectrum, PEAK_T* peak);
+
+
+/**
+ * Adds a peak to the spectrum given a intensity and location
+ * calls add_peak function
+ */
+BOOLEAN_T add_peak_to_spectrum(
+  SPECTRUM_T* spectrum, 
+  float intensity,
+  float location_mz );
 
 /*
  * Local Variables:
