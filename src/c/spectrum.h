@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -275,9 +275,13 @@ void free_peak_iterator(PEAK_ITERATOR_T* peak_iterator);
 
 /**
  * The basic iterator functions.
+ * \returns TRUE if there are additional peaks to iterate over, FALSE if not.
  */
-
 BOOLEAN_T peak_iterator_has_next(PEAK_ITERATOR_T* peak_iterator);
+
+/**
+ * \returns The next peak object in the spectrum.
+ */
 PEAK_T* peak_iterator_next(PEAK_ITERATOR_T* peak_iterator);
 
 /*

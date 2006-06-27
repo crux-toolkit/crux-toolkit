@@ -1,6 +1,6 @@
 /**
  * \file spectrum_collection.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -33,9 +33,9 @@ SPECTRUM_COLLECTION_T* allocate_spectrum_collection(void);
  * \returns TRUE if instantiation is successful (i.e. the file exists, and
  * is not empty, but no format checking) and FALSE if instantiation fails. 
  */
-BOOLEAN_T* new_spectrum_collection(
+BOOLEAN_T new_spectrum_collection(
   SPECTRUM_COLLECTION_T* 
-    spectrum_collection,  /// An (empty) allocated spectrum_collection
+    spectrum_collection,  ///< An (empty) allocated spectrum_collection
   char* filename);        ///< The spectrum collection filename.
 
 /**
@@ -58,7 +58,7 @@ void copy_spectrum_collection(
   SPECTRUM_COLLECTION_T* dest);
 
 /**
- * Parses a all the spectra from file designated by the filename member
+ * Parses all the spectra from file designated by the filename member
  * variable.
  * \returns TRUE if the spectra are parsed successfully. FALSE if otherwise.
  */
@@ -71,9 +71,9 @@ BOOLEAN_T parse_spectrum_collection(
  * \returns TRUE if the spectrum with. FALSE is failure.
  */
 BOOLEAN_T get_spectrum_collection_spectrum(
-  SPECTRUM_COLLECTION_T* spectrum_collection, 
-  int first_scan,      
-  SPECTRUM_T* spectrum ///< The (empty) allocated SPECTRUM_T object.
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< The spectrum collection
+  int first_scan,      ///< The first scan of the spectrum to retrieve 
+  SPECTRUM_T* spectrum ///< The (empty) allocated SPECTRUM_T object
   );
 
 /**
@@ -102,7 +102,7 @@ void remove_spectrum(
 /******************************************************************************/
 
 /**
- * Instantiates a new spectrum_iterator from spectrum_collection.
+ * Instantiates a new spectrum_iterator object from spectrum_collection.
  * \returns a SPECTRUM_ITERATOR_T object.
  */
 SPECTRUM_ITERATOR_T* new_spectrum_iterator(
@@ -114,10 +114,13 @@ SPECTRUM_ITERATOR_T* new_spectrum_iterator(
 void free_spectrum_iterator(SPECTRUM_ITERATOR_T* spectrum_iterator);
 
 /**
- * The basic iterator functions.
+ * The basic iterator function has_next.
  */
-
 BOOLEAN_T spectrum_iterator_has_next(SPECTRUM_ITERATOR_T* spectrum_iterator);
+
+/**
+ * The basic iterator function next.
+ */
 SPECTRUM_T* spectrum_iterator_next(SPECTRUM_ITERATOR_T* spectrum_iterator);
 
 /*
