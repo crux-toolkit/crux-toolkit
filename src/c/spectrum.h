@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -18,7 +18,7 @@ typedef struct spectrum SPECTRUM_T;
 /**
  * \typedef SPECTRUM_TYPE_T The spectrum type (MS, MS-MS, MS-MS-MS)
  */
-typedef enum type { ms1, ms2, ms3 } SPECTRUM_TYPE_T;
+typedef enum _spectrum_type { MS1, MS2, MS3 } SPECTRUM_TYPE_T;
 
 /**
  * \returns An (empty) spectrum object.
@@ -76,7 +76,6 @@ BOOLEAN_T parse_spectrum(
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
- * Each module should also provide new_<object>, free_<object> and print_<object> functions.
  * FIXME Chris, could you create the get and set methods for the object fields?
  */
 
@@ -244,10 +243,9 @@ float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge);
  */
 BOOLEAN_T add_peak(SPECTRUM_T* spectrum, PEAK_T* peak);
 
-
 /**
- * Adds a peak to the spectrum given a intensity and location
- * calls add_peak function
+ * Adds a peak to the spectrum given an intensity and location.
+ * Calls add_peak function
  */
 BOOLEAN_T add_peak_to_spectrum(
   SPECTRUM_T* spectrum, 
