@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -34,6 +34,7 @@ SPECTRUM_T* new_spectrum(
   SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum.
   float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra)
   int*              possible_z,         ///< The possible charge states of this spectrum
+  int               num_possible_z,     ///< The number of possible charge states of this spectrum  
   char*             filename);          ///< Optional filename
 
 /**
