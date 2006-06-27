@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -153,6 +153,19 @@ void set_spectrum_possible_z(SPECTRUM_T* spectrum,
                              int* possible_z, 
                              int num_possible_z);
 
+
+/**
+ * \sets the possible charge states of this spectrum
+ * this function should only be used when possible_z is set to NULL
+ * to change existing possible_z use set_spectrum_possible_z()
+ * the function copies the possible_z into a heap allocated memory
+ * num_possible_z must match the array size of possible_z 
+ * updates the number of possible charge states field
+ */
+void set_spectrum_new_possible_z(SPECTRUM_T* spectrum, 
+                                 int* possible_z, 
+                                 int num_possible_z);
+
 /**
  * \returns the number of possible charge states of this spectrum
  */
@@ -195,7 +208,7 @@ void set_spectrum_filename(SPECTRUM_T* spectrum, char* filename);
 
 /**
  * \sets the filename of the ms2 file the spectrum was parsed
- * this function should be used only the first time the filename is set
+ * this function should be used only the first time the filename is set(set to NULL)
  * to change existing filename use set_spectrum_filename
  * copies the value from arguement char* filename into a heap allocated memory
  */

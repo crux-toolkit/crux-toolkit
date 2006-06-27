@@ -3,7 +3,7 @@
  * AUTHOR: Tobias P. Mann
  * CREATE DATE: 19 Sept 2003
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.5 $
+ * REVISION: $Revision: 1.6 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -73,13 +73,13 @@ SPECTRUM_T* allocate_spectrum(){
  * \returns A new spectrum object, populated with the user specified parameters.
  */
 
-/*
 SPECTRUM_T* new_spectrum(
   int               first_scan,         ///< The number of the first scan
   int               last_scan,          ///< The number of the last scan
   SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum.
   float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra)
   int*              possible_z,         ///< The possible charge states of this spectrum
+  int               num_possible_z      ///< The number of possible charge states of this spectrum  
   char*             filename)          ///< Optional filename
 {
   SPECTRUM_T* fresh_spectrum = allocate_spectrum();
@@ -87,10 +87,10 @@ SPECTRUM_T* new_spectrum(
   fresh_spectrum->last_scan = last_scan;
   fresh_spectrum->spectrum_type = spectrum_type;
   fresh_spectrum->precursor_mz = precursor_mz;
-  fresh_spectrum->possible_z = possible_z;
-  fresh_spectrum->filename = filename; //optional, needs some work done on this.is it the file it reads?
-} /////needs more work//////
-*/
+  set_spectrum_new_possible_z(fresh_spectrum, possible_z, num_possible_z);
+  set_spectrum_new_filename(fresh_spectrum, filename);
+}
+
 
 /**
  * Frees an allocated spectrum object.
@@ -544,6 +544,30 @@ int* get_spectrum_possible_z(SPECTRUM_T* spectrum){
  
 /**
  * \sets the possible charge states of this spectrum
+ * this function should only be used when possible_z is set to NULL
+ * to change existing possible_z use set_spectrum_possible_z()
+ * the function copies the possible_z into a heap allocated memory
+ * num_possible_z must match the array size of possible_z 
+ * updates the number of possible charge states field
+ */
+void set_spectrum_new_possible_z(SPECTRUM_T* spectrum, 
+                                 int* possible_z, 
+                                 int num_possible_z){
+  int possible_z_index = 0;
+  int* new_possible_z = 
+    (int*)mymalloc(sizeof(int)*num_possible_z);
+  
+  for(; possible_z_index < num_possible_z; ++possible_z_index){
+    new_possible_z[possible_z_index] = possible_z[possible_z_index];
+  }
+  
+  spectrum->possible_z = new_possible_z;
+  spectrum->num_possible_z = num_possible_z;
+
+}
+
+/**
+ * \sets the possible charge states of this spectrum
  * the function copies the possible_z into a heap allocated memory
  * num_possible_z must match the array size of possible_z 
  * frees the memory of the possible_z that is replaced
@@ -552,17 +576,8 @@ int* get_spectrum_possible_z(SPECTRUM_T* spectrum){
 void set_spectrum_possible_z(SPECTRUM_T* spectrum, 
                              int* possible_z, 
                              int num_possible_z){
-  int possible_z_index = 0;
-  int* new_possible_z = 
-    (int*)mymalloc(sizeof(int)*num_possible_z);
-  
   free(spectrum->possible_z);
-  for(; possible_z_index < num_possible_z; ++possible_z_index){
-    new_possible_z[possible_z_index] = possible_z[possible_z_index];
-  }
-  
-  spectrum->possible_z = new_possible_z;
-  spectrum->num_possible_z = num_possible_z;
+  set_specrum_new_possible_z(spectrum, possible_z, num_possible_z);
 }
 
 /**
