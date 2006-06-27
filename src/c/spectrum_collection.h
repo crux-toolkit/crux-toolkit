@@ -1,6 +1,6 @@
 /**
  * \file spectrum_collection.h 
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -67,7 +67,7 @@ BOOLEAN_T parse_spectrum_collection(
 BOOLEAN_T get_spectrum_collection_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection, 
   int first_scan,      
-  SPECTRUM_T* spectrum ///< The (empty) allocated SPECTRUM_T object.
+  SPECTRUM_T* spectrum ///< The (empty) allocated SPECTRUM_T object, in which to place the retrieved spectrum.
   );
 
 /**
@@ -84,6 +84,15 @@ void remove_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,
   SPECTRUM_T* spectrum); 
 
+/**
+ * Instantiates a new spectrum_iterator for spectrum_collection.
+ * \returns spectrum_iterator
+ */
+SPECTRUM_ITERATOR_T* get_spectrum_collection_iterator(
+  SPECTRUM_COLLECTION_T* spectrum_collection);
+
+
+
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
  * FIXME Chris, could you create the get and set methods for the object fields?
@@ -92,6 +101,34 @@ void remove_spectrum(
 /**
  * Additional get and set methods
  */
+
+/******************************************************************************/
+
+/**
+ * \typedef SPECTRUM_ITERATOR_T An object to iterate over the spectra in a
+ * spectrum_collection object.
+ */
+typedef struct spectrum_iterator SPECTRUM_ITERATOR_T;
+
+
+/**
+ * Instantiates a new spectrum_iterator from spectrum_collection.
+ * \returns a SPECTRUM_ITERATOR_T object.
+ */
+SPECTRUM_ITERATOR_T* new_spectrum_iterator(
+    SPECTRUM_COLLECTION_T* spectrum_collection);        
+
+/**
+ * Frees an allocated spectrum_iterator object.
+ */
+void free_spectrum_iterator(SPECTRUM_ITERATOR_T* spectrum_iterator);
+
+/**
+ * The basic iterator functions.
+ */
+
+BOOLEAN_T spectrum_iterator_has_next(SPECTRUM_ITERATOR_T* spectrum_iterator);
+SPECTRUM_T* spectrum_iterator_next(SPECTRUM_ITERATOR_T* spectrum_iterator);
 
 
 /*
