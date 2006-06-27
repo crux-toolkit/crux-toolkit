@@ -1,9 +1,9 @@
 /*****************************************************************************
  * \file spectrum.c
  * AUTHOR: Chris Park
- * CREATE DATE: 28 June 2006
+ * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.8 $
+ * REVISION: $Revision: 1.9 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -14,6 +14,7 @@
 #include "spectrum.h"
 #include "peak.h"
 #include "utils.h"
+#include "mass.h"
 
 /**
  * \define constants
@@ -201,23 +202,30 @@ BOOLEAN_T parse_spectrum_file(
        (new_line[0] == 'Z' ||  new_line[0] == 'I' ||
         new_line[0] == 'D' )){ // might add more checks
       file_format = FALSE;
-      fprintf(stderr, "line: %s\n", new_line);
+      fprintf(stderr, "Incorrect order of line (S,Z, Peaks)\n");
+      fprintf(stderr, "At line: %s", new_line);
       break; //File format incorrect
     }
     // Reads the 'S' line
     else if(new_line[0] == 'S' && !record_S){
       record_S = TRUE;
-      parse_S_line(spectrum, new_line, buf_length);
+      if(!parse_S_line(spectrum, new_line, buf_length)){
+        file_format = FALSE;
+        break; //File format incorrect
+      }
     }
     // Reads the 'Z' line 
     else if(new_line[0] == 'Z'){
       record_Z = TRUE;
-      parse_Z_line(spectrum, new_line);
+      if(!parse_Z_line(spectrum, new_line)){
+        file_format = FALSE;
+        break; //File format incorrect
+      }
     }
     // Stops, when encounters the start of next spectrum
     else if(new_line[0] == 'S' && start_add_peaks){ //start of next spectrum
       fprintf(stderr, "line: %s\n", new_line);
-      break;
+      break; //File format incorrect
     }
     // Reads the 'peak' lines, only if 'Z','S' line has been read
     else if(record_Z && record_S &&  
@@ -225,6 +233,21 @@ BOOLEAN_T parse_spectrum_file(
       file_format = TRUE;
       start_add_peaks = TRUE;
       add_peak_to_spectrum(spectrum, intensity, location_mz);
+    }
+    // checks if the peaks are in correct format and order
+    else if((!record_Z || !record_S) &&  
+            (sscanf(new_line,"%f %f", &location_mz, &intensity) == 2)){
+      file_format = FALSE;
+      fprintf(stderr, "Incorrect order of line (S,Z, Peaks)\n");
+      fprintf(stderr, "At line: %s", new_line);
+      break; //File format incorrect
+    }
+    
+    else if(sscanf(new_line,"%f %f", &location_mz, &intensity) == 1){
+      file_format = FALSE;
+      fprintf(stderr, "Incorrect Z line\n");
+      fprintf(stderr, "At line: %s", new_line);
+      break; //File format incorrect
     }
   }
 
@@ -278,9 +301,10 @@ BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length){
     ++line_index;
   }
   spliced_line[spliced_line_index] = '\0';
+  
   if ( sscanf(spliced_line,"%i %i %f", 
               &first_scan, &last_scan, &precursor_mz) != 3) {
-    fprintf(stderr,"Failed to parse S line %s",line);
+    fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
     return FALSE;
   }
   set_spectrum_first_scan( spectrum, first_scan);
@@ -300,10 +324,16 @@ BOOLEAN_T parse_Z_line(SPECTRUM_T* spectrum, char* line){
   char line_name;
   int charge;
   float m_h_plus;
-  if( (tokens = 
+  
+  // check if Z line is in correct format
+  if( /*((tokens = 
+        sscanf(line, "%c %f", &line_name, &m_h_plus)) == 2) || */
+       (tokens = 
        sscanf(line, "%c %d %f", &line_name, &charge, &m_h_plus)) != 3){
+    fprintf(stderr,"Failed to parse 'Z' line:\n %s",line);
     return FALSE;
   }  
+
   return add_possible_z(spectrum, charge);
 }
 
@@ -616,7 +646,7 @@ float get_spectrum_mass(SPECTRUM_T* spectrum, int charge){
  * mass = m/z * charge - mass_H * charge
  */
 float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge){
-  return (get_spectrum_mass(spectrum, charge) - charge); //need to use real H mass
+  return (get_spectrum_mass(spectrum, charge) - MASS_H*charge); //need to use real H mass
 }
 
 /**
