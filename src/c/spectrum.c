@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.11 $
+ * REVISION: $Revision: 1.12 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -11,28 +11,37 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include "spectrum.h"
 #include "peak.h"
 #include "utils.h"
 #include "mass.h"
-#include "spectrum.h"
+
+/**
+ * \define constants
+ */
+#define MAX_PEAKS 4000
+#define MAX_CHARGE 2
+
 
 /**
  * \struct spectrum 
  */
 struct spectrum {
-  int               first_scan;   ///< The number of the first scan
-	int               last_scan;    ///< The number of the last scan
-  int               id;           ///< A unique identifier
-  SPECTRUM_TYPE_T   spectrum_type;///< The type of spectrum.
-  float             precursor_mz; ///< The m/z of the precursor (for MS-MS spectra)
-  int*              possible_z;   ///< The possible charge states of this spectrum
-  PEAK_T*           peaks;        ///< The spectrum peaks
-  float             min_peak_mz;  ///< The minimum m/z of all peaks
-  float             max_peak_mz;  ///< The maximum m/z of all peaks
-  int               num_peaks;    ///< The number of peaks
-  double            total_energy; ///< The sum of intensities in all peaks
-  char*             filename;     ///< Optional filename
+  int               first_scan;    ///< The number of the first scan
+  int               last_scan;     ///< The number of the last scan
+  int               id;            ///< A unique identifier
+  SPECTRUM_TYPE_T   spectrum_type; ///< The type of spectrum.
+  float             precursor_mz;  ///< The m/z of the precursor (for MS-MS spectra)
+  int*              possible_z;    ///< The possible charge states of this spectrum
+  int               num_possible_z;///< The num of possible chare states of this spectrum
+  PEAK_T*           peaks[MAX_PEAKS];         ///< The spectrum peaks
+  float             min_peak_mz;   ///< The minimum m/z of all peaks
+  float             max_peak_mz;   ///< The maximum m/z of all peaks
+  int               num_peaks;     ///< The number of peaks
+  double            total_energy;  ///< The sum of intensities in all peaks
+  char*             filename;      ///< Optional filename
 };    
+
 
 /**
  * Parses the 'S' line of the a spectrum
@@ -647,16 +656,6 @@ float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge){
 float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge){
   return (get_spectrum_mass(spectrum, charge) - (charge-1));  //need to use real H mass
 }
-
-/******************************************************************************/
-
-/*
- * \struct spectrum_iterator
- */
-struct spectrum_iterator {
-  SPECTRUM_T* spectrum; ///< The spectrum whose peaks to iterate over. 
-  int  peak_idx;   ///< The index of the current peak
-};
 
 /*
  * Local Variables:
