@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.9 $
+ * REVISION: $Revision: 1.10 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -242,10 +242,10 @@ BOOLEAN_T parse_spectrum_file(
       fprintf(stderr, "At line: %s", new_line);
       break; //File format incorrect
     }
-    
+    // check for peak line format
     else if(sscanf(new_line,"%f %f", &location_mz, &intensity) == 1){
       file_format = FALSE;
-      fprintf(stderr, "Incorrect Z line\n");
+      fprintf(stderr, "Incorrect peak line\n");
       fprintf(stderr, "At line: %s", new_line);
       break; //File format incorrect
     }
@@ -325,7 +325,7 @@ BOOLEAN_T parse_Z_line(SPECTRUM_T* spectrum, char* line){
   int charge;
   float m_h_plus;
   
-  // check if Z line is in correct format
+  // check if Z line is in correct format  ////////////////////////needs more work///
   if( /*((tokens = 
         sscanf(line, "%c %f", &line_name, &m_h_plus)) == 2) || */
        (tokens = 
