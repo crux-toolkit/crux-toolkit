@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.12 $
+ * REVISION: $Revision: 1.13 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -41,7 +41,6 @@ struct spectrum {
   double            total_energy;  ///< The sum of intensities in all peaks
   char*             filename;      ///< Optional filename
 };    
-
 
 /**
  * Parses the 'S' line of the a spectrum

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2003
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.3 $
+ * REVISION: $Revision: 1.4 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -25,5 +25,13 @@ struct spectrum_collection {
   char* comment;        ///< The spectrum_collection header lines
   BOOLEAN_T* is_parsed; ///< Have we parsed all the spectra from the file?
 };    
+
+/**
+ * \struct spectrum_iterator
+ */
+struct spectrum_iterator {
+  SPECTRUM_T* spectrum; ///< The spectrum whose peaks to iterate over. 
+  int  peak_idx;        ///< The index of the current peak
+};
 
 
