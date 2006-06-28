@@ -1,6 +1,6 @@
 /**
  * \file spectrum_collection.h 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -30,10 +30,9 @@ SPECTRUM_COLLECTION_T* allocate_spectrum_collection(void);
  * Does *NOT* parse all spectra in the file. 
  * This will be done lazily depending on the subsequent method
  * calls (parse_spectrum_collection get_spectrum_collection_spectrum).
- * \returns TRUE if instantiation is successful (i.e. the file exists, and
- * is not empty, but no format checking) and FALSE if instantiation fails. 
+ * \returns  SPECTRUM_COLLECTION_T
  */
-BOOLEAN_T new_spectrum_collection(
+SPECTRUM_COLLECTION_T* new_spectrum_collection(
   SPECTRUM_COLLECTION_T* 
     spectrum_collection,  ///< An (empty) allocated spectrum_collection
   char* filename);        ///< The spectrum collection filename.
