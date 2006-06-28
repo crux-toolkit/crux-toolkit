@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.14 $
+ * REVISION: $Revision: 1.15 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -202,7 +202,8 @@ BOOLEAN_T parse_spectrum_file(
   BOOLEAN_T record_Z = FALSE; //check's if it read Z line
   BOOLEAN_T start_add_peaks = FALSE; //check's if it started reading peaks
   BOOLEAN_T file_format = FALSE; //is the file format correct so far
-
+  long file_index = ftell(file); //stores the location of the current working line in the file
+  
   while( (line_length =  getline(&new_line, &buf_length, file)) != -1){
     // checks if 'S' is not the first line
     if((!record_S || (record_S && start_add_peaks)) && 
@@ -231,8 +232,8 @@ BOOLEAN_T parse_spectrum_file(
     }
     // Stops, when encounters the start of next spectrum
     else if(new_line[0] == 'S' && start_add_peaks){ //start of next spectrum
-      fprintf(stderr, "line: %s\n", new_line);
-      break; //File format incorrect
+      //fprintf(stderr, "line: %s\n", new_line);
+      break;
     }
     // Reads the 'peak' lines, only if 'Z','S' line has been read
     else if(record_Z && record_S &&  
@@ -256,10 +257,14 @@ BOOLEAN_T parse_spectrum_file(
       fprintf(stderr, "At line: %s", new_line);
       break; //File format incorrect
     }
-  }
 
+    file_index = ftell(file); // updates the current working line location
+  }
+  
+  // set the file pointer back to the start of the next 's' line
+  fseek(file, file_index, SEEK_SET);
   myfree(new_line);
-  set_spectrum_new_filename(spectrum,"test.ms2"); //temp field assignment
+  set_spectrum_new_filename(spectrum,"test.ms2"); //FIXME temp field assignment
 
   //File format incorrect
   if(!file_format){ 
@@ -332,7 +337,7 @@ BOOLEAN_T parse_Z_line(SPECTRUM_T* spectrum, char* line){
   int charge;
   float m_h_plus;
   
-  // check if Z line is in correct format  ////////////////////////needs more work///
+  // check if Z line is in correct format  //FIXME needs more work///
   if( /*((tokens = 
         sscanf(line, "%c %f", &line_name, &m_h_plus)) == 2) || */
        (tokens = 
@@ -391,6 +396,7 @@ BOOLEAN_T parse_spectrum(
     fclose(file);
     return TRUE;
   }
+  fclose(file);
   return FALSE;
 }
 
@@ -653,7 +659,7 @@ float get_spectrum_mass(SPECTRUM_T* spectrum, int charge){
  * mass = m/z * charge - mass_H * charge
  */
 float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge){
-  return (get_spectrum_mass(spectrum, charge) - MASS_H*charge); //need to use real H mass
+  return (get_spectrum_mass(spectrum, charge) - MASS_H*charge); //TESTME
 }
 
 /**
@@ -661,7 +667,7 @@ float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge){
  * mass = m/z * charge - (mass_H * (charge - 1))
  */
 float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge){
-  return (get_spectrum_mass(spectrum, charge) - (charge-1));  //need to use real H mass
+  return (get_spectrum_mass(spectrum, charge) - MASS_H*(charge-1));  //TESTME
 }
 
 
