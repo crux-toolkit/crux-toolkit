@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.16 $
+ * REVISION: $Revision: 1.17 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -48,7 +48,7 @@ struct spectrum {
  */
 struct peak_iterator {
   SPECTRUM_T* spectrum; ///< The spectrum whose peaks to iterate over. 
-  int  peak_idx;        ///< The index of the current peak
+  int  peak_index;        ///< The index of the current peak
 };
 
 /**
@@ -706,6 +706,44 @@ float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge){
  */
 float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge){
   return (get_spectrum_mass(spectrum, charge) - MASS_H*(charge-1));  //TESTME
+}
+
+
+/******************************************************************************/
+// Iterator 
+
+/**
+ * Instantiates a new peak_iterator from a spectrum.
+ * \returns a PEAK_ITERATOR_T object.
+ */
+PEAK_ITERATOR_T* new_peak_iterator(SPECTRUM_T* spectrum){
+  PEAK_ITERATOR_T* peak_iterator = (PEAK_ITERATOR_T*)mycalloc(1,sizeof(PEAK_ITERATOR_T));
+  peak_iterator->spectrum = spectrum;
+  return peak_iterator;
+}        
+
+/**
+ * Frees an allocated peak_iterator object.
+ */
+void free_peak_iterator(PEAK_ITERATOR_T* peak_iterator){
+  free(peak_iterator);
+}
+
+/**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional peaks to iterate over, FALSE if not.
+ */
+BOOLEAN_T peak_iterator_has_next(PEAK_ITERATOR_T* peak_iterator){
+  return  (peak_iterator->peak_index < get_spectrum_num_peaks(peak_iterator->spectrum));
+}
+
+/**
+ * \returns The next peak object in the spectrum.
+ */
+PEAK_T* peak_iterator_next(PEAK_ITERATOR_T* peak_iterator){
+  PEAK_T* next_peak = peak_iterator->spectrum->peaks[peak_iterator->peak_index];
+  ++peak_iterator->peak_index;
+  return next_peak;
 }
 
 

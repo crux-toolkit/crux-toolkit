@@ -2,7 +2,7 @@
  * \file peak.c
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.2 $
+ * VERSION: $Revision: 1.3 $
  * DESCRIPTION: Object for representing one peak in a spectrum.
  *****************************************************************************/
 #include "peak.h"
@@ -39,6 +39,17 @@ float peak_intensity(PEAK_T* working_peak){
 float peak_location(PEAK_T* working_peak){
   return working_peak->location;
 }
+
+
+/**
+ * \prints the intensity and location of PEAK_T object to stdout
+ */
+void print_peak(PEAK_T* working_peak){
+  printf("%.1f %.1f\n", 
+         working_peak->location,
+         working_peak->intensity);
+}
+
 /*
  * Local Variables:
  * mode: c
