@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.15 $
+ * REVISION: $Revision: 1.16 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -25,12 +25,13 @@
 
 /**
  * \struct spectrum 
+ *  FIXME spectrum_type needs to be written..look at the file name .ms2
  */
 struct spectrum {
   int               first_scan;    ///< The number of the first scan
   int               last_scan;     ///< The number of the last scan
   int               id;            ///< A unique identifier
-  SPECTRUM_TYPE_T   spectrum_type; ///< The type of spectrum.
+  SPECTRUM_TYPE_T   spectrum_type; ///< The type of spectrum. 
   float             precursor_mz;  ///< The m/z of the precursor (for MS-MS spectra)
   int*              possible_z;    ///< The possible charge states of this spectrum
   int               num_possible_z;///< The num of possible chare states of this spectrum
@@ -79,7 +80,7 @@ SPECTRUM_T* allocate_spectrum(){
 
 /**
  * \returns A new spectrum object, populated with the user specified parameters.
- */
+ */ 
 
 SPECTRUM_T* new_spectrum(
   int               first_scan,         ///< The number of the first scan
@@ -187,7 +188,8 @@ void copy_spectrum(
 /**
  * Parses a spectrum from file.
  * \returns TRUE if success. FALSE is failure.
- * 
+ * Must not include the Header line "H"
+ * FIXME if need to read 'H' header line
  */
 BOOLEAN_T parse_spectrum_file(
   SPECTRUM_T* spectrum,
@@ -203,12 +205,15 @@ BOOLEAN_T parse_spectrum_file(
   BOOLEAN_T start_add_peaks = FALSE; //check's if it started reading peaks
   BOOLEAN_T file_format = FALSE; //is the file format correct so far
   long file_index = ftell(file); //stores the location of the current working line in the file
+  float test_float;
+  char test_char;
   
   while( (line_length =  getline(&new_line, &buf_length, file)) != -1){
     // checks if 'S' is not the first line
     if((!record_S || (record_S && start_add_peaks)) && 
-       (new_line[0] == 'Z' ||  new_line[0] == 'I' ||
-        new_line[0] == 'D' )){ // might add more checks
+       (new_line[0] == 'Z' ||  
+        new_line[0] == 'I' ||
+        new_line[0] == 'D' )){
       file_format = FALSE;
       fprintf(stderr, "Incorrect order of line (S,Z, Peaks)\n");
       fprintf(stderr, "At line: %s", new_line);
@@ -235,28 +240,41 @@ BOOLEAN_T parse_spectrum_file(
       //fprintf(stderr, "line: %s\n", new_line);
       break;
     }
-    // Reads the 'peak' lines, only if 'Z','S' line has been read
-    else if(record_Z && record_S &&  
-            (sscanf(new_line,"%f %f", &location_mz, &intensity) == 2)){
-      file_format = TRUE;
-      start_add_peaks = TRUE;
-      add_peak_to_spectrum(spectrum, intensity, location_mz);
-    }
-    // checks if the peaks are in correct format and order
-    else if((!record_Z || !record_S) &&  
-            (sscanf(new_line,"%f %f", &location_mz, &intensity) == 2)){
-      file_format = FALSE;
-      fprintf(stderr, "Incorrect order of line (S,Z, Peaks)\n");
-      fprintf(stderr, "At line: %s", new_line);
-      break; //File format incorrect
-    }
-    // check for peak line format
-    else if(sscanf(new_line,"%f %f", &location_mz, &intensity) == 1){
-      file_format = FALSE;
-      fprintf(stderr, "Incorrect peak line\n");
-      fprintf(stderr, "At line: %s", new_line);
-      break; //File format incorrect
-    }
+
+    //*****parse peak line******
+    else if(new_line[0] != 'Z' &&  
+            new_line[0] != 'I' &&
+            new_line[0] != 'D' &&
+            new_line[0] != '\n')
+      {
+        // checks if the peaks are in correct order of lines
+        if((!record_Z || !record_S)){
+          file_format = FALSE;
+          fprintf(stderr, "Incorrect order of line (S,Z, Peaks)\n");
+          fprintf(stderr, "At line: %s", new_line);
+          break; //File format incorrect
+        }
+        // check for peak line format
+        else if((sscanf(new_line,"%f %f %f",//test format:peak line has more than 2 fields
+                        &test_float, &test_float, &test_float) > 2)||
+                (sscanf(new_line,"%f %f %c",//test format:peak line has more than 2 fields
+                        &test_float, &test_float, &test_char) > 2)||
+                (sscanf(new_line,"%f %f",//test format:peak line has less than 2 fields
+                        &test_float, &test_float) != 2)){
+          file_format = FALSE;
+          fprintf(stderr, "Incorrect peak line\n");
+          fprintf(stderr, "At line: %s", new_line);
+          break; //File format incorrect
+        }
+        // Reads the 'peak' lines, only if 'Z','S' line has been read
+        else if(record_Z && record_S &&
+                (sscanf(new_line,"%f %f", &location_mz, &intensity) == 2)){
+          file_format = TRUE;
+          start_add_peaks = TRUE;
+          add_peak_to_spectrum(spectrum, intensity, location_mz);
+        }
+      }
+    //*************************
 
     file_index = ftell(file); // updates the current working line location
   }
@@ -286,14 +304,21 @@ BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length){
   int first_scan;
   int last_scan;
   float precursor_mz;
-  
+  float test_float;
+  char test_char;
+
   //deletes empty space & 0
-  while(line[line_index] == 'S' || line[line_index] == '\t' ||
-        line[line_index] == ' ' || line[line_index] == '0'){
+  while((line[line_index] !='\0') && 
+        (line[line_index] == 'S' || 
+         line[line_index] == '\t'||
+         line[line_index] == ' ' || 
+         line[line_index] == '0')){
     ++line_index;
   }
   // reads in line value
-  while(line[line_index] != ' ' && line[line_index] != '\t'){
+  while(line[line_index] !='\0' && 
+        line[line_index] != ' ' && 
+        line[line_index] != '\t'){
     spliced_line[spliced_line_index] =  line[line_index];
     ++spliced_line_index;
     ++line_index;
@@ -302,8 +327,10 @@ BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length){
   ++spliced_line_index;
   ++line_index;
   //deletes empty space & zeros
-  while(line[line_index] == '\t' || line[line_index] == ' ' || 
-        line[line_index] == '0'){
+  while((line[line_index] !='\0') && 
+        (line[line_index] == '\t' || 
+         line[line_index] == ' ' || 
+         line[line_index] == '0')){
     ++line_index;
   }
   // read last scan & precursor m/z
@@ -314,8 +341,13 @@ BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length){
   }
   spliced_line[spliced_line_index] = '\0';
   
-  if ( sscanf(spliced_line,"%i %i %f", 
-              &first_scan, &last_scan, &precursor_mz) != 3) {
+  // check if S line is in correct format
+  if ( (sscanf(spliced_line,"%f %f %f %f",//test format:S line has more than 3 fields
+               &test_float, &test_float, &test_float, &test_float) > 3) ||
+       (sscanf(spliced_line,"%f %f %f %c",//test format:S line has more than 3 fields 
+               &test_float, &test_float, &test_float, &test_char) > 3) ||
+       (sscanf(spliced_line,"%i %i %f", // S line is parsed here
+              &first_scan, &last_scan, &precursor_mz) != 3)) {
     fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
     return FALSE;
   }
@@ -336,11 +368,17 @@ BOOLEAN_T parse_Z_line(SPECTRUM_T* spectrum, char* line){
   char line_name;
   int charge;
   float m_h_plus;
-  
-  // check if Z line is in correct format  //FIXME needs more work///
-  if( /*((tokens = 
-        sscanf(line, "%c %f", &line_name, &m_h_plus)) == 2) || */
-       (tokens = 
+  float test_float;
+  char test_char;
+
+  // check if Z line is in correct format
+  if( ((tokens =  // test format: Z line has less than 3 fields
+        sscanf(line, "%c %f %f", &test_char, &test_float, &test_float)) < 3) ||
+      ((tokens =   //test format: Z line has more than 3 fields
+        sscanf(line, "%c %f %f %f", &test_char, &test_float, &test_float, &test_float)) >  3) ||
+      ((tokens =  // test format: Z line has more than 3 fields
+        sscanf(line, "%c %f %f %c", &test_char, &test_float, &test_float, &test_char)) >  3) ||
+      (tokens = // Z line is parsed here
        sscanf(line, "%c %d %f", &line_name, &charge, &m_h_plus)) != 3){
     fprintf(stderr,"Failed to parse 'Z' line:\n %s",line);
     return FALSE;
