@@ -1,6 +1,6 @@
 /**
  * \file spectrum_collection.h 
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -32,10 +32,7 @@ SPECTRUM_COLLECTION_T* allocate_spectrum_collection(void);
  * calls (parse_spectrum_collection get_spectrum_collection_spectrum).
  * \returns  SPECTRUM_COLLECTION_T
  */
-SPECTRUM_COLLECTION_T* new_spectrum_collection(
-  SPECTRUM_COLLECTION_T* 
-    spectrum_collection,  ///< An (empty) allocated spectrum_collection
-  char* filename);        ///< The spectrum collection filename.
+SPECTRUM_COLLECTION_T* new_spectrum_collection(char* filename);///< The spectrum collection filename.
 
 /**
  * Frees an allocated spectrum_collection object.
