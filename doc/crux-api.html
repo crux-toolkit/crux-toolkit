@@ -14,15 +14,14 @@ two properties: name (e.g., acetylation, water-loss, etc.) and mass
 offset.
 
 <li>
-<b>peptide</b>: A string of amino acids, with properties such as
+<b><a href="./html/protein_8h.html">peptide</a></b>: A string of amino acids, with properties such as
 length, charge (possibly "unknown"), mass, and mass-to-charge.  The
 function <code>get_proteins</code> returns a list of proteins in which
 the peptide occurs.
 
 <li>
-<b>protein</b>: A longer string of amino acids, plus a collection of
-peptides, with indices indicating where each peptide occurs in the
-protein.
+<b><a href="./html/protein_8h.html">protein</a></b>
+: A longer string of amino acids. 
 
 <li>
 <b>database</b>: An unordered set of peptides.  The primary function
@@ -30,8 +29,8 @@ is <code>read_database</code>, which reads the database from a given
 input file.
 
 <li>
-<b>peptide_enumerator</b>: An enumeration object for traversing the
-peptides in a database.  This object may enumerate only the peptides
+<b><a href="./html/peptide__iterator_8h.html">peptide_iterator</a></b>: An object for traversing the
+peptides in a database.  This object may iterate over only the peptides
 within a specified mass-to-charge range.
 
 <li>
@@ -50,15 +49,14 @@ list of associated fragments.
 information.
 
 <li>
+<b><a href="./html/spectrum_8h.html">peak_iterator</a></b>: An object for traversing the peaks in a spectrum.
+
+<li>
 <b><a href="./html/spectrum__collection_8h.html">spectrum_collection</a></b>: A collection of spectra.
 
 <li>
-<b>spectrum_enumerator</b>: An enumeration object for traversing the spectra
-in a spectrum_collection.
-
-<li>
-<b>peak_enumerator</b>: An enumeration object for traversing the
-peaks in a spectrum.
+<b><a href="./html/spectrum__collection_8h.html">spectrum_iterator</a></b>: 
+An object for traversing the spectra in a spectrum_collection.
 
 <li>
 <b>peptide_spectrum_match</b>: A spectrum and an associated peptide.

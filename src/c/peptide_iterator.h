@@ -1,7 +1,15 @@
-
 /**
- * Iterator
- */
+ * \file peptide_iterator.h 
+ * $Revision: 1.2 $
+ * \brief Object for iterator over peptides.
+ *****************************************************************************/
+#ifndef PEPTIDE_ITERATOR_H
+#define PEPTIDE_ITERATOR_H
+
+#include <stdio.h>
+#include "utils.h"
+#include "peptide.h"
+#include "protein.h"
 
 /**
  * Instantiates a new peptide_iterator from a peptide.
@@ -31,4 +39,10 @@ BOOLEAN_T peptide_iterator_has_next(PEPTIDE_ITERATOR_T* peptide_iterator);
  * \returns The next peptide (a character) in the peptide.
  */
 PEPTIDE_T* peptide_iterator_next(PEPTIDE_ITERATOR_T* peptide_iterator);
-
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+#endif
