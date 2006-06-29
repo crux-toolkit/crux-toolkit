@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
+	<TITLE>generate-peptides</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20050830;17560800">
+	<META NAME="CHANGED" CONTENT="20050902;15510500">
+	<!-- FILE: generate-peptides.html
+AUTHOR: Aaron Klammer
+CREATE DATE: 2005-08-23
+PROJECT: generate-peptides
+REVISION: $Revision: 1.1 $
+-->
+</HEAD>
+<BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
+<H1 ALIGN=CENTER>generate-peptides</H1>
+<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Description:</B>
+</BLOCKQUOTE>
+Given a protein fasta sequence database as input, generate a list of 
+peptides in the database that meet certain criteria (e.g. mass, length,
+trypticity) as output.
+<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in">
+<B>Usage:</B>
+<pre>generate-peptides [options] 
+  &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
+  &nbsp;&lt;peptide&nbsp;output&nbsp;filename&gt;</pre>
+</BLOCKQUOTE>
+<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Input:</B>
+</BLOCKQUOTE>
+<UL>
+  <LI><BLOCKQUOTE>&lt;protein input filename&gt; &ndash; 
+  The name of the file (in fasta format) from which to parse proteins.
+	</BLOCKQUOTE>
+    </UL>
+<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Output:</B>
+</BLOCKQUOTE>
+<UL>
+  <LI><BLOCKQUOTE>&lt;peptide output filename&gt; &ndash; 
+  The name of the file in which to place the peptides, with the suffix .pep. 
+  The file has the following format: 
+  <br>
+  <br>
+  A series of header lines, describing how the peptides were generated, and
+  according to what criteria.
+  <pre>
+  # PROTEIN DATABASE: &lt;protein input filename&gt;
+  # OPTIONS:  &lt; options used to generate the file&gt;</pre>
+  Then a series of tab delimited lines with the following fields, where
+  &lt; &gt; indicate an optional field.
+  <pre>
+  mass \t protein-id \t peptide-start \t peptide-length &lt;\t peptide-sequence&gt; \n</pre>
+	</BLOCKQUOTE>
+
+	</BLOCKQUOTE>
+</UL>
+<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Options:</B>
+</BLOCKQUOTE>
+<UL>
+<LI><BLOCKQUOTE>[--output-peptide-sequence] &ndash; Output the peptide
+sequence as well as the protein id and start and stop.
+	</BLOCKQUOTE>
+<LI><BLOCKQUOTE>[--min-mass float] &ndash; The minimum neutral mass of the peptides to output
+put. DEFAULT: 200
+	</BLOCKQUOTE>
+<LI><BLOCKQUOTE>[--max-mass float] &ndash; The maximum neutral mass of the peptides to output. DEFAULT: 2400
+	</BLOCKQUOTE>
+<LI><BLOCKQUOTE>[--min-length int] &ndash; The minimum length of the peptides to
+output. DEFAULT: 6
+	</BLOCKQUOTE>
+<LI><BLOCKQUOTE>[--max-length int] &ndash; The maximum length of the peptides to
+output. DEFAULT: 50
+	</BLOCKQUOTE>
+  <LI><BLOCKQUOTE>[--tryptic | --non-tryptic ] &ndash; 
+  Three mutually exclusive options describing the trypticity of the peptides
+  to output. DEFAULT: tryptic peptides only.   
+  <br>
+  <br>
+  <UL>
+  <LI>--tryptic &ndash; indicates peptides that result from a complete in
+  silico digestion of proteins after residues K or R except when followed by P.
+  <br>
+  <br>
+  <LI>--non-tryptic &ndash; indicates peptides that result from a complete in
+  silico digestion of proteins after any residue.
+  </UL>
+</UL>
+</UL>
+
+</UL>
+<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Warning
+messages:</B> 
+</BLOCKQUOTE>
+<UL>
+  <LI><BLOCKQUOTE><I>Fatal: The file "protein input filename" does
+  not exist (or is not readable, or is empty). 
+	</I></BLOCKQUOTE>
+  <LI><BLOCKQUOTE><I>Fatal: The file "peptide output filename" already exists
+  (or cannot be created). 
+	</I></BLOCKQUOTE>
+</UL>
+<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Bugs:</B> 
+</BLOCKQUOTE>
+<UL>
+	<LI><BLOCKQUOTE>generate-peptides does not have bugs, it has features.
+	</BLOCKQUOTE>
+</UL>
+<HR>
+<P><A HREF="crux.html">Crux</A> 
+</P>
+</BODY>
+</HTML>
