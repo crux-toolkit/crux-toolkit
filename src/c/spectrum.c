@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.17 $
+ * REVISION: $Revision: 1.18 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -588,7 +588,7 @@ void set_spectrum_filename(SPECTRUM_T* spectrum, char* filename){
   set_spectrum_new_filename(spectrum, filename);
 }
 
-/**
+/**  //////TESTME////
  * \sets the filename of the ms2 file the spectrum was parsed
  * this function should be used only the first time the filename is set
  * to change existing filename use set_spectrum_filename
