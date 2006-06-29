@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -36,7 +36,6 @@ struct peptide_iterator {
   unsigned char cur_length; ///< The length of the current peptide.
 };
 
-  
 /*
  * Local Variables:
  * mode: c
