@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.5 $
+# VERSION: $Revision: 1.6 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -37,6 +37,7 @@ LIBOBJS = ${OBJDIR}/peak.o \
 	${OBJDIR}/peptide.o \
 	${OBJDIR}/protein.o 
 	#${OBJDIR}/spectrum_collection.o 
+	#${OBJDIR}/objects.o 
 
 # These are the names of the programs.
 #PROGS = \

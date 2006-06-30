@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -8,13 +8,10 @@
 
 #include <stdio.h>
 #include "utils.h"
+#include "objects.h"
+#include "peptide.h"
 
 /* CHRIS This is probably an object for which you can crib code for from an outside source. Even from in-house (like Charles).*/
-
-/**
- * \typedef PROTEIN_T
- */
-typedef struct protein PROTEIN_T;
 
 /**
  * \returns An (empty) protein object.
@@ -78,13 +75,6 @@ BOOLEAN_T parse_protein_fasta_file(
  * Instantiates a new peptide_iterator from a peptide.
  * \returns a PEPTIDE_ITERATOR_T object.
  */
-
-/**
- * \typedef PEPTIDE_ITERATOR_T
- */
-typedef struct peptide_iterator PEPTIDE_ITERATOR_T;
-
-
 PEPTIDE_ITERATOR_T* new_peptide_iterator(PROTEIN_T* protein);        
 
 /**

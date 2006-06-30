@@ -1,24 +1,14 @@
 /**
  * \file spectrum_collection.h 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
 #define SPECTRUM_COLLECTION_H
 
+#include "objects.h"
 #include "spectrum.h"
 #include <stdio.h>
-
-/**
- * \typedef SPECTRUM_COLLECTION_T 
- */
-typedef struct spectrum_collection SPECTRUM_COLLECTION_T;
-
-/**
- * \typedef SPECTRUM_ITERATOR_T An object to iterate over the spectra in a
- * spectrum_collection object.
- */
-typedef struct spectrum_iterator SPECTRUM_ITERATOR_T;
 
 /**
  * \returns An (empty) spectrum_collection object.

@@ -2,12 +2,20 @@
  * \file peak.c
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.3 $
+ * VERSION: $Revision: 1.4 $
  * DESCRIPTION: Object for representing one peak in a spectrum.
  *****************************************************************************/
 #include "peak.h"
 #include "utils.h"
 #include <string.h>
+
+/**
+ * \struct peak
+ */
+struct peak {
+  float intensity;  ///< The intensity of the peak.
+  float location;   ///< The location of the peak.
+};    
 
 /**
  * \returns A PEAK_T object, 
