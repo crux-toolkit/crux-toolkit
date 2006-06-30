@@ -1,6 +1,8 @@
 /**
  * \file spectrum_collection.h 
- * $Revision: 1.10 $
+ * AUTHOR: Chris Park
+ * CREATE DATE: 28 June 2006
+ * $Revision: 1.11 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
