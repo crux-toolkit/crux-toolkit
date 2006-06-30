@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -8,18 +8,8 @@
 
 #include "utils.h"
 #include <stdio.h>
+#include "objects.h"
 #include "protein.h"
-
-/**
- * \typedef PEPTIDE_T
- */
-typedef struct peptide PEPTIDE_T;
-
-/**
- * \typedef RESIDUE_ITERATOR_T An object to iterate over the residues
- * in a peptide.
- */
-typedef struct residue_iterator RESIDUE_ITERATOR_T;
 
 /**
  * \typedef PEPTIDE_TYPE_T The peptide type, with regard to trypticity.
@@ -48,7 +38,9 @@ PEPTIDE_T* new_peptide(
  * - charge (possibly "unknown"),
  * - mass-to-charge. 
  *   The function get_proteins 
- *   returns a list of proteins in which the peptide occurs */
+ *   returns a list of proteins in which the peptide occurs 
+ *   fxn: add_protein
+ *   */
 
 
 /**
