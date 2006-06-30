@@ -60,6 +60,7 @@ int main(int argc, char** argv){
     spectrum_found = FALSE;
   }
   
+
   free_spectrum(spectrum);
   free_spectrum_collection(collection);
   

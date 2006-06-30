@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.7 $
+# VERSION: $Revision: 1.8 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -9,7 +9,7 @@ CC	= gcc
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 #DEBUG   = -DDEBUG -g
 OFLAGS  = -O3
-CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
+CFLAGS = $(OFLAGS) $(DEBUG) -Wall -O -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
 ##### Global variable definitions
@@ -32,15 +32,19 @@ LIBS = ${LIBFILE} -lm
 #LIBS = ${LIBFILE} -lm -lefence
 
 # Objects to compile into the library
-LIBOBJS = ${OBJDIR}/peak.o \
+LIBOBJS =\
+	${OBJDIR}/utils.o \
+	${OBJDIR}/peak.o \
 	${OBJDIR}/spectrum.o  \
 	${OBJDIR}/peptide.o \
 	${OBJDIR}/protein.o \
-	#${OBJDIR}/spectrum_collection.o 
+	${OBJDIR}/spectrum_collection.o \
+	${OBJDIR}/get_ms2_spectrum.o
 	#${OBJDIR}/objects.o 
 
 # These are the names of the programs.
-#PROGS = \
+PROGS = \
+	${BINDIR}/get_ms2_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \
 #	${BINDIR}/precursor
