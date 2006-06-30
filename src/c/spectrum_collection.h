@@ -1,6 +1,6 @@
 /**
  * \file spectrum_collection.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -84,6 +84,16 @@ void remove_spectrum(
 /**
  * Additional get and set methods
  */
+
+
+/**  //////TESTME////
+ * \sets the filename of the ms2 file the spectra was parsed
+ * this function should be used only the first time the filename is set
+ * to change existing filename use set_spectrum_collection_filename
+ * copies the value from arguement char* filename into a heap allocated memory
+ */
+void set_spectrum_collection_filename(SPECTRUM_COLLECTION_T* spectrum_collection, char* filename);
+
 
 /******************************************************************************/
 
