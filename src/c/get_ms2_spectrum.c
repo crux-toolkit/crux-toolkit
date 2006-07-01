@@ -35,6 +35,8 @@ int main(int argc, char** argv){
   //FIXME
   // test argument type correct
   // file exist and doesn't exit..
+  // need to output to file
+
   if (sscanf(argv[1], "%d", &scan_num) != 1) {
     fprintf (stderr, "ERROR:second arguement must be type int\n");
     fprintf (stderr, "%s", USAGE);

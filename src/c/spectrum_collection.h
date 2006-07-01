@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -17,6 +17,7 @@
  */
 SPECTRUM_COLLECTION_T* allocate_spectrum_collection(void);
 
+
 /**
  * Instantiates a new spectrum_collection object from a filename. 
  * Does *NOT* parse all spectra in the file. 
@@ -24,26 +25,31 @@ SPECTRUM_COLLECTION_T* allocate_spectrum_collection(void);
  * calls (parse_spectrum_collection get_spectrum_collection_spectrum).
  * \returns  SPECTRUM_COLLECTION_T
  */
-SPECTRUM_COLLECTION_T* new_spectrum_collection(char* filename);///< The spectrum collection filename.
+SPECTRUM_COLLECTION_T* new_spectrum_collection(
+  char* filename///< The spectrum collection filename. -in
+  );
 
 /**
  * Frees an allocated spectrum_collection object.
  */
-void free_spectrum_collection(SPECTRUM_COLLECTION_T* spectrum_collection);
-
+void free_spectrum_collection(
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum collection to free - in
+);
 /**
  * Prints a spectrum_collection object to file.
  */
 void print_spectrum_collection(
-  SPECTRUM_COLLECTION_T* spectrum_collection, 
-  FILE* file);
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< spectrum_collection to print -in 
+  FILE* file ///< file for output -out
+  );
 
 /**
  * Copies spectrum_collection object from src to dest.
  */
 void copy_spectrum_collection(
-  SPECTRUM_COLLECTION_T* src,
-  SPECTRUM_COLLECTION_T* dest);
+  SPECTRUM_COLLECTION_T* src,///< spectrum to copy from -in
+  SPECTRUM_COLLECTION_T* dest///< spectrum to copy to -out
+  );
 
 /**
  * Parses all the spectra from file designated by the filename member
@@ -51,7 +57,8 @@ void copy_spectrum_collection(
  * \returns TRUE if the spectra are parsed successfully. FALSE if otherwise.
  */
 BOOLEAN_T parse_spectrum_collection(
-    SPECTRUM_COLLECTION_T* spectrum_collection);
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< empty spectrum to parse into -out
+);
 
 /**
  * Parses a single spectrum from a spectrum_collection with first scan
@@ -59,24 +66,27 @@ BOOLEAN_T parse_spectrum_collection(
  * \returns TRUE if the spectrum with. FALSE is failure.
  */
 BOOLEAN_T get_spectrum_collection_spectrum(
-  SPECTRUM_COLLECTION_T* spectrum_collection, ///< The spectrum collection
-  int first_scan,      ///< The first scan of the spectrum to retrieve 
-  SPECTRUM_T* spectrum ///< The (empty) allocated SPECTRUM_T object
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< The spectrum collection -out
+  int first_scan,      ///< The first scan of the spectrum to retrieve -in
+  SPECTRUM_T* spectrum ///< The (empty) allocated SPECTRUM_T object -in
   );
 
 /**
  * Adds a spectrum to the spectrum_collection.
+ *\returns TRUE if succeed to add, else FALSE 
  */
-void add_spectrum(
-  SPECTRUM_COLLECTION_T* spectrum_collection,
-  SPECTRUM_T* spectrum); 
+BOOLEAN_T add_spectrum(
+  SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
+  SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
+); 
 
 /**
  * Removes a spectrum from the spectrum_collection.
  */
 void remove_spectrum(
-  SPECTRUM_COLLECTION_T* spectrum_collection,
-  SPECTRUM_T* spectrum); 
+  SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
+  SPECTRUM_T* spectrum ///< spectrum to be removed from spectrum_collection -in
+  ); 
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
@@ -87,14 +97,67 @@ void remove_spectrum(
  * Additional get and set methods
  */
 
-
 /**  //////TESTME////
- * \sets the filename of the ms2 file the spectra was parsed
+ * \sets the filename of the ms2 file the spectra were parsed
  * this function should be used only the first time the filename is set
  * to change existing filename use set_spectrum_collection_filename
  * copies the value from arguement char* filename into a heap allocated memory
  */
-void set_spectrum_collection_filename(SPECTRUM_COLLECTION_T* spectrum_collection, char* filename);
+void set_spectrum_collection_new_filename(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection save filename -out
+  char* filename ///< filename -in
+  );
+
+/**
+ * \returns the filename of the ms2 file the spectra were parsed
+ * returns a char* to a heap allocated copy of the filename
+ * user must free the memory
+ */
+void set_spectrum_collection_filename(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection save filename -out
+  char* filename ///< filename -in
+  );
+
+/**
+ * \returns the filename of the ms2 file the spectra was parsed
+ * returns a char* to a heap allocated copy of the filename
+ * user must free the memory
+ */
+char* get_spectrum_collection_filename(
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum collection's filename -in 
+  );
+
+/**
+ * \returns the current number of spectrum in the spectrum_collection
+ */
+int get_spectrum_collection_num_spectra(
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in                                         
+  );
+
+/**
+ * \returns the comments from the spectrum_collection
+ * the return char* points to a newly heap allocated copy of the comments
+ */
+char* get_spectrum_collection_comment(
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in                                         
+  );
+
+
+/**
+ * \sets the comment of the spectrum_collection
+ * copies the new_comment into a newly heap allocated copy of the comment
+ */
+void set_spectrum_collection_comment(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection save comment -in                                         
+  char* new_comment ///< the new comments to be copied
+  );
+
+/**
+ * \returns TRUE if the spectrum_collection file has been parsed
+ */
+BOOLEAN_T get_spectrum_collection_is_parsed(
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in                                         
+);
 
 
 /******************************************************************************/
@@ -104,22 +167,29 @@ void set_spectrum_collection_filename(SPECTRUM_COLLECTION_T* spectrum_collection
  * \returns a SPECTRUM_ITERATOR_T object.
  */
 SPECTRUM_ITERATOR_T* new_spectrum_iterator(
-    SPECTRUM_COLLECTION_T* spectrum_collection);        
+  SPECTRUM_COLLECTION_T* spectrum_collection///< spectrum_collection to iterate -in
+);        
 
 /**
  * Frees an allocated spectrum_iterator object.
  */
-void free_spectrum_iterator(SPECTRUM_ITERATOR_T* spectrum_iterator);
+void free_spectrum_iterator(
+  SPECTRUM_ITERATOR_T* spectrum_iterator///< free spectrum_iterator -in
+);
 
 /**
  * The basic iterator function has_next.
  */
-BOOLEAN_T spectrum_iterator_has_next(SPECTRUM_ITERATOR_T* spectrum_iterator);
+BOOLEAN_T spectrum_iterator_has_next(
+  SPECTRUM_ITERATOR_T* spectrum_iterator///< is there a next spectrum? -in
+);
 
 /**
  * The basic iterator function next.
  */
-SPECTRUM_T* spectrum_iterator_next(SPECTRUM_ITERATOR_T* spectrum_iterator);
+SPECTRUM_T* spectrum_iterator_next(
+  SPECTRUM_ITERATOR_T* spectrum_iterator///< return the next spectrum -in
+);
 
 /*
  * Local Variables:
