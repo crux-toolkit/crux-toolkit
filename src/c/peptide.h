@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -12,11 +12,15 @@
 #include "protein.h"
 
 /**
+ * The enum for peptide type, with regard to trypticity.
+ */
+enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC}; 
+
+/**
  * \typedef PEPTIDE_TYPE_T 
  * The typedef for peptide type, with regard to trypticity.
  */
-typedef enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC} 
-  PEPTIDE_TYPE_T;
+typedef enum _peptide_type PEPTIDE_TYPE_T;
 
 /**
  * \returns An (empty) peptide object.

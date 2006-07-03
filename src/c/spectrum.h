@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -12,10 +12,15 @@
 #include <stdio.h>
 
 /**
- * \typedef SPECTRUM_TYPE_T 
- * The spectrum type (MS1, MS2, MS3)
+ * The enum for spectrum type (MS1, MS2, MS3)
  */
-typedef enum _spectrum_type { MS1, MS2, MS3 } SPECTRUM_TYPE_T;
+enum _spectrum_type { MS1, MS2, MS3 };
+
+/**
+ * \typedef SPECTRUM_TYPE_T 
+ * The typedef for spectrum type (MS1, MS2, MS3)
+ */
+typedef enum _spectrum_type SPECTRUM_TYPE_T;
 
 /**
  * \returns An (empty) spectrum object.
