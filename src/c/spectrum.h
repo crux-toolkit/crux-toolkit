@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -298,3 +298,10 @@ PEAK_T* peak_iterator_next(PEAK_ITERATOR_T* peak_iterator);
  * End:
  */
 #endif
+
+/** \mainpage The crux API documentation page.
+ * \section Introduction
+ * Welcome to crux, a C software package for analysis of tandem mass
+ * spectrometry data. Click on the links above to see documentation for
+ * crux objects and their user interfaces.
+ */
