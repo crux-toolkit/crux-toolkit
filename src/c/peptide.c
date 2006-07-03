@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -17,7 +17,7 @@
  * A subsequence of a protein.
  */
 struct peptide {
-  PROTEIN_T* protein;       ///< The protein from whence the peptide came
+  char* sequence;       ///< The protein sequence that contains the peptide.
   unsigned short int start; ///< The starting idx of the peptide 
   unsigned char length;     ///< The length of the peptide
 };
