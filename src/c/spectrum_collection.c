@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.10 $
+ * REVISION: $Revision: 1.11 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -215,15 +215,17 @@ BOOLEAN_T add_spectrum(
 /**
  * Removes a spectrum from the spectrum_collection.
  */
+/*
 void remove_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
   SPECTRUM_T* spectrum ///< spectrum to be removed from spectrum_collection -in
   )
 {
-
+  
   ///WRITEME
 
 } 
+*/
 
 /**
  * Parses a single spectrum from a spectrum_collection with first scan
@@ -479,6 +481,7 @@ int get_spectrum_collection_num_spectra(
  * \returns the comments from the spectrum_collection
  * the return char* points to a newly heap allocated copy of the comments
  */
+/*
 char* get_spectrum_collection_comment(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in                                         
   )
@@ -486,12 +489,13 @@ char* get_spectrum_collection_comment(
   return "yeah!";
 
 }
-
+*/
 
 /**
  * \sets the comment of the spectrum_collection
  * copies the new_comment into a newly heap allocated copy of the comment
  */
+/*
 void set_spectrum_collection_comment(
   SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection save comment -in                                         
   char* new_comment ///< the new comments to be copied
@@ -499,6 +503,7 @@ void set_spectrum_collection_comment(
 {
   ///WRITEME
 }
+*/
 
 /**
  * \returns TRUE if the spectrum_collection file has been parsed
