@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.9 $
+ * REVISION: $Revision: 1.10 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -173,16 +173,18 @@ BOOLEAN_T parse_spectrum_collection(
   while(parse_spectrum_file(parsed_spectrum, file)){
     //is spectrum capacity not full?
     if(!add_spectrum(spectrum_collection, parsed_spectrum)){
-      free(parsed_spectrum);
+      free_spectrum(parsed_spectrum);
+      fclose(file);
       return FALSE;
     }
     parsed_spectrum = allocate_spectrum();
   }
   
-  free(parsed_spectrum);
-  
-  spectrum_collection->is_parsed = TRUE;
+  free_spectrum(parsed_spectrum); //CHECKME why free_spectrum??
+  fclose(file);
 
+  spectrum_collection->is_parsed = TRUE;
+  
   //good job!
   return TRUE;
 }
