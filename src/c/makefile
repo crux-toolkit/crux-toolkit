@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.10 $
+# VERSION: $Revision: 1.11 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -56,8 +56,7 @@ bins: ${PROGS}
 
 python: ${PYTHON}
 
-# FIXME: I'm not sure what the real dependencies are here. WSN 7/3/06
-doc:	bins libs TAGS  
+doc:	*.h *.c
 	doxygen Doxyfile
 
 # Remove extraneous files.

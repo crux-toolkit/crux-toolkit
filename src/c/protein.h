@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -12,11 +12,6 @@
 #include "peptide.h"
 
 /* CHRIS This is probably an object for which you can crib code for from an outside source. Even from in-house (like Charles).*/
-
-/**
- * \returns An (empty) protein object.
- */
-PROTEIN_T* allocate_protein(void);
 
 /**
  * \returns An (empty) protein object.
