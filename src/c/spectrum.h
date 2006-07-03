@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -12,13 +12,13 @@
 
 /**
  * \typedef SPECTRUM_T 
- * A spectrum
+ * \brief A spectrum
  */
 typedef struct spectrum SPECTRUM_T;
 
 /**
  * \typedef PEAK_ITERATOR_T 
- * An object to iterate over the peaks in a spectrum
+ * \brief An object to iterate over the peaks in a spectrum
  */
 typedef struct peak_iterator PEAK_ITERATOR_T;
 
@@ -29,7 +29,7 @@ enum _spectrum_type { MS1, MS2, MS3 };
 
 /**
  * \typedef SPECTRUM_TYPE_T 
- * The typedef for spectrum type (MS1, MS2, MS3)
+ * \brief The typedef for spectrum type (MS1, MS2, MS3)
  */
 typedef enum _spectrum_type SPECTRUM_TYPE_T;
 

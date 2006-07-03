@@ -2,7 +2,7 @@
  * \file peak.c
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.5 $
+ * VERSION: $Revision: 1.6 $
  * DESCRIPTION: Object for representing one peak in a spectrum.
  *****************************************************************************/
 #include "peak.h"
@@ -11,7 +11,7 @@
 
 /**
  * \struct peak
- * A spectrum peak.
+ * \brief A spectrum peak.
  */
 struct peak {
   float intensity;  ///< The intensity of the peak.
