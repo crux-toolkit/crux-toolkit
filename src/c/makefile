@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.8 $
+# VERSION: $Revision: 1.9 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -49,7 +49,7 @@ PROGS = \
 #	${BINDIR}/charge-vector-ms2 \
 #	${BINDIR}/precursor
 
-all: bins libs TAGS
+all: bins libs TAGS doc
 libs: ${LIBFILE}(${LIBOBJS})
 
 bins: ${PROGS}
