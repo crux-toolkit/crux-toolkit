@@ -1,6 +1,6 @@
 /**
  * \file peak.h
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for representing one peak in a spectrum.
  *
  * A peak is primarily identified via its intensity (height) and location
@@ -10,7 +10,12 @@
 #ifndef PEAK_H
 #define PEAK_H
 #include <stdio.h>
-#include "objects.h"
+
+/**
+ * \typedef PEAK_T 
+ * A peak in a spectrum
+ */
+typedef struct peak PEAK_T;
 
 /**
  * \returns A PEAK_T object

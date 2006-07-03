@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -8,8 +8,18 @@
 
 #include "utils.h"
 #include <stdio.h>
-#include "objects.h"
-#include "protein.h"
+
+/**
+ * \typedef PEPTIDE_T
+ * A peptide subsequence of a protein
+ */
+typedef struct peptide PEPTIDE_T;
+
+/**
+ * \typedef RESIDUE_ITERATOR_T 
+ * An object to iterate over the residues in a peptide
+ */
+typedef struct residue_iterator RESIDUE_ITERATOR_T;
 
 /**
  * The enum for peptide type, with regard to trypticity.
@@ -32,7 +42,7 @@ PEPTIDE_T* allocate_peptide(void);
  * \returns A new peptide object, populated with the user specified parameters.
  */
 PEPTIDE_T* new_peptide(
-  PROTEIN_T* my_protein,       ///< The protein from whence the peptide came
+  char* my_sequence,        ///< The sequence of the protein that that contains the peptide.
   unsigned short int start, ///< The starting idx of the peptide 
   unsigned char length,     ///< The length of the peptide
   double peptide_mass
