@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: generate-peptides
-REVISION: $Revision: 1.2 $
+REVISION: $Revision: 1.3 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -24,10 +24,14 @@ trypticity) as output.
 <br>
 <br>
 <B>Usage:</B>
-<pre>generate-peptides [options] 
-  &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
-</pre>
 
+<blockquote>
+<code>generate-peptides [options] 
+  &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
+</code>
+</blockquote>
+
+<p>
 <B>Input:</B>
 
 <UL>
@@ -38,15 +42,19 @@ trypticity) as output.
 <B>Output:</B>
 
 <UL>
-  <LI>STDOUT
   <br>
-  A series of header lines, describing how the peptides were generated, and
-  according to what criteria.
+
+  The program prints to standard output a series of header lines,
+  describing how the peptides were generated, and according to what
+  criteria, as follows:
+
   <pre>
   # PROTEIN DATABASE: &lt;protein input filename&gt;
   # OPTIONS:  &lt; options used to generate the file&gt;</pre>
-  Then a series of tab delimited lines with the following fields, where
-  &lt; &gt; indicate an optional field.
+
+  Then the program prints a series of tab delimited lines with the
+  following fields, where &lt; &gt; indicates an optional field:
+
   <pre>
   mass \t protein-id \t peptide-start \t peptide-length &lt;\t peptide-sequence&gt; \n</pre>
 	
@@ -57,36 +65,28 @@ trypticity) as output.
 <LI>[--output-sequence] &ndash; Output the peptide
 sequence as well as the protein id and start and stop.
 	
-<LI>[--min-mass float] &ndash; The minimum neutral mass of the peptides to output
-put. DEFAULT: 200
+<LI>[--min-mass float] &ndash; The minimum neutral mass of the
+peptides to output Default=200
 	
-<LI>[--max-mass float] &ndash; The maximum neutral mass of the peptides to output. DEFAULT: 2400
+<LI>[--max-mass float] &ndash; The maximum neutral mass of the
+peptides to output. Default=2400
 	
 <LI>[--min-length int] &ndash; The minimum length of the peptides to
-output. DEFAULT: 6
+output. Default=6
 	
 <LI>[--max-length int] &ndash; The maximum length of the peptides to
-output. DEFAULT: 50
+output. Default=50
 	
-  <LI>[--tryptic | --non-tryptic ] &ndash; 
-  Mutually exclusive options describing the trypticity of the peptides
-  to output. DEFAULT: tryptic peptides only.   
-  <UL>
-  <LI>--tryptic &ndash; indicates peptides that result from a complete in
-  silico digestion of proteins after residues K or R except when followed by P.
-  <LI>--non-tryptic &ndash; indicates peptides that result from a complete in
-  silico digestion of proteins after any residue.
-  </UL>
+<LI>[--cleavages tryptic|all ] &ndash; Type of cleavages to allow.
+The <code>tryptic</code> option outputs peptides that result from a
+complete in silico digestion of proteins after residues K or R except
+when followed by P, wherease <code>all</code> outputs all possible
+peptides.  Default=tryptic.
 
-  <LI>[--sort-mass | --sort-length] &ndash;  Mutually exclusive options
-  governing how the output should be sorted. DEFAULT: sort by mass.
-  <UL>
-  <LI>--sort-mass &ndash; sort the peptides by their mass.
-  <LI>--sort-length &ndash; sort the peptides by length.
-  </UL>
+<LI>[--sort mass|length|none] &ndash; Specify the order in which
+peptides are printed to standard output.  By default, the output is
+not sorted.
 
-
-	
 </UL>
 
 
@@ -98,11 +98,7 @@ messages:</B>
 
 <UL>
   <LI><I>Fatal: The file "protein input filename" does
-  not exist (or is not readable, or is empty). 
-	</I>
-  <LI><I>Fatal: The file "peptide output filename" already exists
-  (or cannot be created). 
-	</I>
+  not exist (or is not readable, or is empty).</I>
 </UL>
 <B>Bugs:</B> 
 
