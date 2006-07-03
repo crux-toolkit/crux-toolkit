@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -11,24 +11,24 @@
 
 /**
  * \typedef PEPTIDE_T
- * A peptide subsequence of a protein
+ * \brief A peptide subsequence of a protein
  */
 typedef struct peptide PEPTIDE_T;
 
 /**
  * \typedef RESIDUE_ITERATOR_T 
- * An object to iterate over the residues in a peptide
+ * \brief An object to iterate over the residues in a peptide
  */
 typedef struct residue_iterator RESIDUE_ITERATOR_T;
 
 /**
- * The enum for peptide type, with regard to trypticity.
+ * \brief The enum for peptide type, with regard to trypticity.
  */
 enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC}; 
 
 /**
  * \typedef PEPTIDE_TYPE_T 
- * The typedef for peptide type, with regard to trypticity.
+ * \brief The typedef for peptide type, with regard to trypticity.
  */
 typedef enum _peptide_type PEPTIDE_TYPE_T;
 

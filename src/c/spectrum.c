@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.21 $
+ * REVISION: $Revision: 1.22 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -25,8 +25,9 @@
 
 /**
  * \struct spectrum 
- *  FIXME spectrum_type needs to be written..look at the file name .ms2
+ * \brief A mass spectrum
  */
+// FIXME spectrum_type needs to be written..look at the file name .ms2
 struct spectrum {
   int               first_scan;    ///< The number of the first scan
   int               last_scan;     ///< The number of the last scan
@@ -45,7 +46,7 @@ struct spectrum {
 
 /**
  * \struct peak_iterator
- * Object to iterate over the peaks in a spectrum.
+ * \brief Object to iterate over the peaks in a spectrum.
  */
 struct peak_iterator {
   SPECTRUM_T* spectrum; ///< The spectrum whose peaks to iterate over. 

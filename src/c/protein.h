@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -14,13 +14,13 @@
 
 /**
  * \typedef PROTEIN_T
- * A protein sequence
+ * \brief A protein sequence
  */
 typedef struct protein PROTEIN_T;
 
 /**
  * \typedef PEPTIDE_ITERATOR_T
- * An objects to iterate over the peptides in a protein sequence
+ * \brief An object to iterate over the peptides in a protein sequence
  */
 typedef struct peptide_iterator PEPTIDE_ITERATOR_T;
 

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.12 $
+ * REVISION: $Revision: 1.13 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -31,7 +31,7 @@ int match_first_scan_line(
 
 /**
  * \struct spectrum_collection 
- * Holds one or more spectrum objects.
+ * \brief A object to group together one or more spectrum objects.
  */
 struct spectrum_collection {
   SPECTRUM_T* spectra[MAX_SPECTRA];  ///< The spectrum peaks
@@ -43,7 +43,7 @@ struct spectrum_collection {
 
 /**
  * \struct spectrum_iterator
- * Allows iteration over the spectra within a spectrum_collection.
+ * \brief An object to iterate over the spectra within a spectrum_collection.
  */
 struct spectrum_iterator {
   SPECTRUM_COLLECTION_T* spectrum_collection;///< The collection whose spectrum to iterate over. 
