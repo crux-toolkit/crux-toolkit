@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -14,7 +14,7 @@
 
 /**
  * \struct peptide
- * A subsequence of a protein.
+ * \brief A subsequence of a protein.
  */
 struct peptide {
   char* sequence;       ///< The protein sequence that contains the peptide.
