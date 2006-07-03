@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.19 $
+ * REVISION: $Revision: 1.20 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -45,6 +45,7 @@ struct spectrum {
 
 /**
  * \struct peak_iterator
+ * Object to iterate over the peaks in a spectrum.
  */
 struct peak_iterator {
   SPECTRUM_T* spectrum; ///< The spectrum whose peaks to iterate over. 
@@ -474,7 +475,7 @@ int get_spectrum_first_scan(SPECTRUM_T* spectrum){
 }
 
 /**
- * \sets the number of the first scan
+ * sets the number of the first scan
  */
 void set_spectrum_first_scan(SPECTRUM_T* spectrum, int first_scan){
   spectrum->first_scan = first_scan;
@@ -488,7 +489,7 @@ int get_spectrum_last_scan(SPECTRUM_T* spectrum){
 }
 
 /**
- * \sets the number of the last scan
+ * sets the number of the last scan
  */
 void set_spectrum_last_scan(SPECTRUM_T* spectrum, int last_scan){
   spectrum->last_scan = last_scan;
@@ -502,7 +503,7 @@ int get_spectrum_id(SPECTRUM_T* spectrum){
 }
 
 /**
- * \sets the spectrum_id
+ * sets the spectrum_id
  */
 void set_spectrum_id(SPECTRUM_T* spectrum, int id){
   spectrum->id = id;
@@ -516,7 +517,7 @@ SPECTRUM_TYPE_T get_spectrum_spectrum_type(SPECTRUM_T* spectrum){
 }
 
 /**
- * \sets the spectrum_type
+ * sets the spectrum_type
  */
 void set_spectrum_spectrum_type(SPECTRUM_T* spectrum, SPECTRUM_TYPE_T spectrum_type){
   spectrum->spectrum_type = spectrum_type;
@@ -530,7 +531,7 @@ float get_spectrum_precursor_mz(SPECTRUM_T* spectrum){
 }
 
 /**
- * \sets the m/z of the precursor
+ * sets the m/z of the precursor
  */
 void set_spectrum_precursor_mz(SPECTRUM_T* spectrum, float precursor_mz){
   spectrum->precursor_mz = precursor_mz;
@@ -579,7 +580,7 @@ char* get_spectrum_filename(SPECTRUM_T* spectrum){
 }
 
 /**
- * \sets the filename of the ms2 file the spectrum was parsed
+ * sets the filename of the ms2 file the spectrum was parsed
  * copies the value from arguement char* filename into a heap allocated memory
  * frees memory for the filename that is replaced
  */
@@ -589,7 +590,7 @@ void set_spectrum_filename(SPECTRUM_T* spectrum, char* filename){
 }
 
 /**  //////TESTME////
- * \sets the filename of the ms2 file the spectrum was parsed
+ * sets the filename of the ms2 file the spectrum was parsed
  * this function should be used only the first time the filename is set
  * to change existing filename use set_spectrum_filename
  * copies the value from arguement char* filename into a heap allocated memory
@@ -625,7 +626,7 @@ int* get_spectrum_possible_z(SPECTRUM_T* spectrum){
 }
  
 /**
- * \sets the possible charge states of this spectrum
+ * sets the possible charge states of this spectrum
  * this function should only be used when possible_z is set to NULL
  * to change existing possible_z use set_spectrum_possible_z()
  * the function copies the possible_z into a heap allocated memory
@@ -649,7 +650,7 @@ void set_spectrum_new_possible_z(SPECTRUM_T* spectrum,
 }
 
 /**
- * \sets the possible charge states of this spectrum
+ * sets the possible charge states of this spectrum
  * the function copies the possible_z into a heap allocated memory
  * num_possible_z must match the array size of possible_z 
  * frees the memory of the possible_z that is replaced

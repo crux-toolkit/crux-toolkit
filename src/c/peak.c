@@ -2,7 +2,7 @@
  * \file peak.c
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.4 $
+ * VERSION: $Revision: 1.5 $
  * DESCRIPTION: Object for representing one peak in a spectrum.
  *****************************************************************************/
 #include "peak.h"
@@ -11,6 +11,7 @@
 
 /**
  * \struct peak
+ * A spectrum peak.
  */
 struct peak {
   float intensity;  ///< The intensity of the peak.
@@ -19,7 +20,7 @@ struct peak {
 
 /**
  * \returns A PEAK_T object, 
- * \heap allocated, must be freed using free_peak method
+ * heap allocated, must be freed using free_peak method
  */
 PEAK_T* new_peak (float intensity, float location){
   PEAK_T* fresh_peak =(PEAK_T*)mymalloc(sizeof(PEAK_T));
@@ -28,7 +29,7 @@ PEAK_T* new_peak (float intensity, float location){
   return fresh_peak;
 }
 /**
- * \frees A PEAK_T object
+ * frees A PEAK_T object
  */
 void free_peak (PEAK_T* garbage_peak){
   free(garbage_peak);
@@ -50,7 +51,7 @@ float peak_location(PEAK_T* working_peak){
 
 
 /**
- * \prints the intensity and location of PEAK_T object to stdout
+ * prints the intensity and location of PEAK_T object to stdout
  */
 void print_peak(PEAK_T* working_peak){
   printf("%.1f %.1f\n", 

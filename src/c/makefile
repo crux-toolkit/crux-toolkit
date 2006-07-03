@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.11 $
+# VERSION: $Revision: 1.12 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -35,7 +35,7 @@ LIBS = ${LIBFILE} -lm
 LIBOBJS =\
 	${OBJDIR}/utils.o \
 	${OBJDIR}/peak.o \
-	${OBJDIR}/spectrum.o  \
+	${OBJDIR}/spectrum.o \
 	${OBJDIR}/peptide.o \
 	${OBJDIR}/protein.o \
 	${OBJDIR}/spectrum_collection.o \
@@ -49,7 +49,7 @@ PROGS = \
 #	${BINDIR}/charge-vector-ms2 \
 #	${BINDIR}/precursor
 
-all: bins libs TAGS doc
+all: libs bins TAGS 
 libs: ${LIBFILE}(${LIBOBJS})
 
 bins: ${PROGS}

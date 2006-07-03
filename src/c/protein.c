@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -19,6 +19,7 @@
 
 /**
  * \struct protein 
+ * A protein sequence.
  */
 struct protein {
   char*         id; ///< The protein sequence id.
@@ -29,6 +30,7 @@ struct protein {
 
 /**
  * \struct peptide_iterator
+ * Object to iterate over the peptides within a protein.
  */
 struct peptide_iterator {
   PROTEIN_T* protein; ///< The spectrum whose peaks to iterate over. 
