@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -14,6 +14,7 @@
 
 /**
  * \struct peptide
+ * A subsequence of a protein.
  */
 struct peptide {
   PROTEIN_T* protein;       ///< The protein from whence the peptide came
@@ -23,6 +24,7 @@ struct peptide {
 
 /**
  * \struct residue_iterator
+ * Object to iterate over the residues in a peptide.
  */
 struct residue_iterator {
   PEPTIDE_T*  peptide; ///< The peptide whose residues to iterate over.

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.11 $
+ * REVISION: $Revision: 1.12 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -419,7 +419,7 @@ int match_first_scan_line(
 /******************************************************************************/
 
 /**  //////TESTME////
- * \sets the filename of the ms2 file the spectra were parsed
+ * sets the filename of the ms2 file the spectra were parsed
  * this function should be used only the first time the filename is set
  * to change existing filename use set_spectrum_collection_filename
  * copies the value from arguement char* filename into a heap allocated memory
@@ -438,7 +438,7 @@ void set_spectrum_collection_new_filename(
 }
 
 /**
- * \sets the filename of the ms2 file the spectrum_collection was parsed
+ * sets the filename of the ms2 file the spectrum_collection was parsed
  * copies the value from arguement char* filename into a heap allocated memory
  * frees memory for the filename that is replaced
  */
@@ -492,7 +492,7 @@ char* get_spectrum_collection_comment(
 */
 
 /**
- * \sets the comment of the spectrum_collection
+ * sets the comment of the spectrum_collection
  * copies the new_comment into a newly heap allocated copy of the comment
  */
 /*
