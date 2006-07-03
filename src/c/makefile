@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.9 $
+# VERSION: $Revision: 1.10 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -40,7 +40,7 @@ LIBOBJS =\
 	${OBJDIR}/protein.o \
 	${OBJDIR}/spectrum_collection.o \
 	${OBJDIR}/get_ms2_spectrum.o
-	#${OBJDIR}/objects.o 
+#	${OBJDIR}/objects.o 
 
 # These are the names of the programs.
 PROGS = \
@@ -56,7 +56,8 @@ bins: ${PROGS}
 
 python: ${PYTHON}
 
-doc:	all
+# FIXME: I'm not sure what the real dependencies are here. WSN 7/3/06
+doc:	bins libs TAGS  
 	doxygen Doxyfile
 
 # Remove extraneous files.
