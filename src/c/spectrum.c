@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.20 $
+ * REVISION: $Revision: 1.21 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -52,19 +52,19 @@ struct peak_iterator {
   int  peak_index;        ///< The index of the current peak
 };
 
-/**
+/*
  * Parses the 'S' line of a spectrum
  * \returns TRUE if success. FALSE is failure.
  */
 BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length);
 
-/**
+/*
  * Parses the 'Z' line of the a spectrum
  * \returns TRUE if success. FALSE is failure.
  */
 BOOLEAN_T parse_Z_line(SPECTRUM_T* spectrum, char* line);
 
-/**
+/*
  * Adds a possible charge(z) to the spectrum.
  * Must not exceed the MAX_CHARGE capacity
  */
