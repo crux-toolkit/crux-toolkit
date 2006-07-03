@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.18 $
+ * REVISION: $Revision: 1.19 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -34,7 +34,7 @@ struct spectrum {
   SPECTRUM_TYPE_T   spectrum_type; ///< The type of spectrum. 
   float             precursor_mz;  ///< The m/z of the precursor (for MS-MS spectra)
   int*              possible_z;    ///< The possible charge states of this spectrum
-  int               num_possible_z;///< The num of possible chare states of this spectrum
+  int               num_possible_z;///< The number of possible charge states of this spectrum
   PEAK_T*           peaks[MAX_PEAKS];         ///< The spectrum peaks
   float             min_peak_mz;   ///< The minimum m/z of all peaks
   float             max_peak_mz;   ///< The maximum m/z of all peaks
@@ -52,7 +52,7 @@ struct peak_iterator {
 };
 
 /**
- * Parses the 'S' line of the a spectrum
+ * Parses the 'S' line of a spectrum
  * \returns TRUE if success. FALSE is failure.
  */
 BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length);
