@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.22 $
+ * REVISION: $Revision: 1.23 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -197,6 +197,7 @@ BOOLEAN_T parse_spectrum_file(
   SPECTRUM_T* spectrum,
   FILE* file)
 {
+  long file_index = ftell(file); //stores the location of the current working line in the file
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
@@ -206,7 +207,7 @@ BOOLEAN_T parse_spectrum_file(
   BOOLEAN_T record_Z = FALSE; //check's if it read Z line
   BOOLEAN_T start_add_peaks = FALSE; //check's if it started reading peaks
   BOOLEAN_T file_format = FALSE; //is the file format correct so far
-  long file_index = ftell(file); //stores the location of the current working line in the file
+  
   float test_float;
   char test_char;
   
@@ -237,9 +238,8 @@ BOOLEAN_T parse_spectrum_file(
         break; //File format incorrect
       }
     }
-    // Stops, when encounters the start of next spectrum
+    // Stops, when encounters the start of next spectrum 'S' line
     else if(new_line[0] == 'S' && start_add_peaks){ //start of next spectrum
-      //fprintf(stderr, "line: %s\n", new_line);
       break;
     }
 
@@ -277,7 +277,6 @@ BOOLEAN_T parse_spectrum_file(
         }
       }
     //*************************
-
     file_index = ftell(file); // updates the current working line location
   }
   
@@ -285,7 +284,12 @@ BOOLEAN_T parse_spectrum_file(
   fseek(file, file_index, SEEK_SET);
   myfree(new_line);
   set_spectrum_new_filename(spectrum,"test.ms2"); //FIXME temp field assignment
-
+  
+  //No more spectrum in .ms file
+  if(!record_S && !file_format){
+    return FALSE;
+  }
+  
   //File format incorrect
   if(!file_format){ 
     fprintf(stderr, "incorrect file format\n");

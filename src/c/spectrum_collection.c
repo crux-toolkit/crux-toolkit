@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.13 $
+ * REVISION: $Revision: 1.14 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -144,6 +144,33 @@ void copy_spectrum_collection(
   free_spectrum_iterator(spectrum_iterator);
 }
 
+
+//TESTME might have to check for bad format
+/**
+ * parses all 'H' line into the spectrum_collection comments
+ *
+ */
+void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection,FILE* file){
+  long file_index = ftell(file); //stores the location of the current working line in the file
+  char* new_line = NULL;
+  int line_length;
+  size_t buf_length = 0;
+ 
+  while( (line_length =  getline(&new_line, &buf_length, file)) != -1){
+    if(new_line[0] == 'H'){
+      //do something
+      
+    }
+    else if(new_line[0] == 'S'){
+      break;
+    }
+    file_index = ftell(file);
+  }
+  free(new_line); // might change
+  fseek(file, file_index, SEEK_SET);
+}
+
+
 //FIXME must be able to parse 'H' line
 /**
  * Parses all the spectra from file designated by the filename member
@@ -167,7 +194,9 @@ BOOLEAN_T parse_spectrum_collection(
     fprintf(stderr,"File %s could not be opened",spectrum_collection->filename);
     return (FALSE);
   }
-  
+  //parse header lines 'H' into spectrum_collection comment 
+  parse_header_line(spectrum_collection, file);
+
   parsed_spectrum = allocate_spectrum();
   //parse one spectrum at a time
   while(parse_spectrum_file(parsed_spectrum, file)){
@@ -273,7 +302,7 @@ long binary_search_spectrum(
   int first_scan///< query scan num -in
 )
 {   
-  long low_index  = ftell(file); 
+  long low_index = ftell(file); 
   long high_index;
   long mid_index;
   long working_index;
@@ -282,7 +311,7 @@ long binary_search_spectrum(
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
-
+  
   //set initial high and low position
   if(fseek(file, 1,SEEK_END) != -1){
     high_index = ftell(file);
