@@ -1,13 +1,15 @@
 /**
  * \file peptide.h 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
 #define PEPTIDE_H
 
 #include "utils.h"
+#include "mass.h"
 #include <stdio.h>
+
 
 /**
  * \typedef PEPTIDE_T
@@ -49,20 +51,29 @@ PEPTIDE_T* allocate_peptide(void);
  */
 PEPTIDE_T* new_peptide(
   char* my_sequence,        ///< The sequence of the protein that that contains the peptide.
-  unsigned short int start, ///< The starting idx of the peptide 
   unsigned char length,     ///< The length of the peptide
-  double peptide_mass
+  double peptide_mass       ///< The neutral mass of the peptide
 );
   
 
-/* possible additional fields and methods
- * - charge (possibly "unknown"),
- * - mass-to-charge. 
- *   The function get_proteins 
- *   returns a list of proteins in which the peptide occurs 
- *   fxn: add_protein
- *   */
+/** 
+ * \returns the neutral mass of the peptide
+ */
+float get_peptide_neutral_mass(PEPTIDE_T* peptide);
 
+/** 
+ * \returns the mass of the peptide if it had charge "charge"
+ */
+float get_peptide_charged_mass(
+    PEPTIDE_T* peptide, 
+    int charge);
+
+/** 
+ * \returns the m/z of the peptide if it had charge "charge"
+ */
+float get_peptide_mz(
+    PEPTIDE_T* peptide, 
+    int charge);
 
 /**
  * Frees an allocated peptide object.
