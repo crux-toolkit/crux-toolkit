@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -90,11 +90,17 @@ BOOLEAN_T parse_peptide_file(
   FILE* file);
 
 /**
+ * Allocates a new (empty) peptide_constraint object.
+ * \returns An allocated PEPTIDE_CONSTRAINT_T object.
+ */
+PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void);
+
+/**
  * Instantiates a new peptide_constraint object.
  * \returns An allocated PEPTIDE_CONSTRAINT_T object.
  */
 PEPTIDE_CONSTRAINT_T* new_peptide_constraint(PEPTIDE_TYPE_T* peptide_type,
-    float min_mass, float max_mass);
+    float min_mass, float max_mass, int min_length, int max_length);
 
 /** 
  * Determines if a peptide satisfies a peptide_constraint.
