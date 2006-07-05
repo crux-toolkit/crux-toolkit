@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.23 $
+ * REVISION: $Revision: 1.24 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -26,8 +26,22 @@
 /**
  * \struct spectrum 
  * \brief A mass spectrum
+ * A mass spectrum consists mainly of a list of peak objects along with
+ * some identifying information. A single spectrum is generated from one 
+ * or more "scans" of the mass spectrometer; each scan is identified by 
+ * a unique increasing positive integer. The range of scans that
+ * generated a particular spectrum are indicated by the member variables 
+ * "first_scan" and "last_scan". In addition to scan information, 
+ * a tandem fragmentation mass spectrum has information 
+ * about the m/z of the intact ion that generated the spectrum, which is
+ * indicated by "precursor_mz" member variable.
+ * Also, while the m/z of particular spectrum is known, the charge state of
+ * the originating ion is unknown; the possible charge states of the 
+ * precursor ion is stored "possible_z" and "num_possible_z". 
+ * Finally, some summary information that can be derived from the spectrum
+ * peaks but is convenient to have is stored as "min_peak_mz",
+ * "max_peak_mz", and "total_energy".
  */
-// FIXME spectrum_type needs to be written..look at the file name .ms2
 struct spectrum {
   int               first_scan;    ///< The number of the first scan
   int               last_scan;     ///< The number of the last scan
