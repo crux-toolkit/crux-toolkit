@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -14,6 +14,13 @@
  * \brief A peptide subsequence of a protein
  */
 typedef struct peptide PEPTIDE_T;
+
+/**
+ * \typedef PEPTIDE_CONSTRAINT_T
+ * \brief An object representing constraints which a peptide may or may not
+ * satisfy.
+ */
+typedef struct peptide_constraint PEPTIDE_CONSTRAINT_T;
 
 /**
  * \typedef RESIDUE_ITERATOR_T 
@@ -37,7 +44,6 @@ typedef enum _peptide_type PEPTIDE_TYPE_T;
  */
 PEPTIDE_T* allocate_peptide(void);
 
-/* FIXME what about peptides in multiple proteins? */
 /**
  * \returns A new peptide object, populated with the user specified parameters.
  */
@@ -82,6 +88,26 @@ void copy_peptide(
 BOOLEAN_T parse_peptide_file(
   PEPTIDE_T* peptide,
   FILE* file);
+
+/**
+ * Instantiates a new peptide_constraint object.
+ * \returns An allocated PEPTIDE_CONSTRAINT_T object.
+ */
+PEPTIDE_CONSTRAINT_T* new_peptide_constraint(PEPTIDE_TYPE_T* peptide_type,
+    float min_mass, float max_mass);
+
+/** 
+ * Determines if a peptide satisfies a peptide_constraint.
+ * \returns TRUE if the constraint is satisified. FALSE if not.
+ */
+BOOLEAN_T peptide_constraint_is_satisfied(
+    PEPTIDE_CONSTRAINT_T* peptide_constraint, 
+    PEPTIDE_T* peptide);
+
+/**
+ * Frees an allocated residue_iterator object.
+ */
+void free_peptide_constraint(PEPTIDE_CONSTRAINT_T* peptide_constraint);
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
