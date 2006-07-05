@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.13 $
+# VERSION: $Revision: 1.14 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -40,7 +40,6 @@ LIBOBJS =\
 	${OBJDIR}/protein.o \
 	${OBJDIR}/spectrum_collection.o \
 	${OBJDIR}/get_ms2_spectrum.o
-#	${OBJDIR}/objects.o 
 
 # These are the names of the programs.
 PROGS = \
@@ -52,7 +51,7 @@ PROGS = \
 all: libs bins TAGS 
 libs: ${LIBFILE}(${LIBOBJS})
 
-bins: ${PROGS}
+bins: ${PROGS} libs
 
 python: ${PYTHON}
 
