@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -81,7 +81,7 @@ BOOLEAN_T parse_protein_fasta_file(
  * Instantiates a new peptide_iterator from a peptide.
  * \returns a PROTEIN_PEPTIDE_ITERATOR_T object.
  */
-PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(PROTEIN_T* protein);        
+PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(PROTEIN_T* protein);
 
 /**
  * Frees an allocated peptide_iterator object.
@@ -97,7 +97,7 @@ BOOLEAN_T protein_peptide_iterator_has_next(
     PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator);
 
 /**
- * \returns The next peptide (a character) in the peptide.
+ * \returns The next peptide in the protein, in an unspecified order
  */
 PEPTIDE_T* protein_peptide_iterator_next(
     PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator);
