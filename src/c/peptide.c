@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -30,6 +30,8 @@ struct peptide_constraint {
   PEPTIDE_TYPE_T*  peptide_type; ///< The type of peptides.
   float min_mass; ///< The minimum mass of the peptide
   float max_mass; ///< The maximum mass of the peptide
+  int min_length; ///< The minimum length of the peptide
+  int max_length; ///< The maximum length of the peptide
 };
  
 /**
