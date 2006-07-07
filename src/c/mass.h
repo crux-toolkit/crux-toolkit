@@ -1,6 +1,6 @@
 /**
  * \file mass.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -32,5 +32,10 @@
  * Mass of carbon monoxide
  */
 #define MASS_CO 28.0101
+
+/**
+ * \returns The mass of the given peptide.
+ */
+//float calc_peptide_mass(PEPTIDE_T* peptide);
 
 #endif
