@@ -22,7 +22,6 @@ int main(int argc, char** argv){
   SPECTRUM_T * spectrum; ///<the spectrum of interest
   BOOLEAN_T spectrum_found; ///<did we find the spectrum?
   int scan_num; ///< the query scan number
-  char* option_name = NULL; ///< the option flag
   FILE* output_file; ///< output file name
   BOOLEAN_T options = FALSE; ///< do we want options?
   char* USAGE = 
