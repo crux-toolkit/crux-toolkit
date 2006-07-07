@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.25 $
+ * REVISION: $Revision: 1.26 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -71,26 +71,37 @@ struct peak_iterator {
  * Parses the 'S' line of a spectrum
  * \returns TRUE if success. FALSE is failure.
  */
-BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length);
+BOOLEAN_T parse_S_line(
+  SPECTRUM_T* spectrum, ///< place S line into this spectrum -out 
+  char* line, ///< 'S' line to parse -in
+  int buf_length ///< line length -in
+);
 
 /*
  * Parses the 'Z' line of the a spectrum
  * \returns TRUE if success. FALSE is failure.
  */
-BOOLEAN_T parse_Z_line(SPECTRUM_T* spectrum, char* line);
+BOOLEAN_T parse_Z_line(
+  SPECTRUM_T* spectrum, ///< place Z line into this spectrum -out  
+  char* line  ///< 'Z' line to parse -in
+);
 
 /*
  * Adds a possible charge(z) to the spectrum.
  * Must not exceed the MAX_CHARGE capacity
  */
-BOOLEAN_T add_possible_z(SPECTRUM_T* spectrum, int charge );
+BOOLEAN_T add_possible_z(
+  SPECTRUM_T* spectrum,  ///< place Z line into this spectrum -out   
+  int charge  ///< charge to add
+);
 
 /**
  * \returns An (empty) spectrum object.
  */
-SPECTRUM_T* allocate_spectrum(){
+SPECTRUM_T* allocate_spectrum(void){
   SPECTRUM_T* fresh_spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
   fresh_spectrum->possible_z = (int*)mymalloc(sizeof(int) * MAX_CHARGE);
+  fresh_spectrum->peaks = allocate_peak_array(MAX_PEAKS);
   return fresh_spectrum;
 }
 
@@ -99,13 +110,13 @@ SPECTRUM_T* allocate_spectrum(){
  */ 
 
 SPECTRUM_T* new_spectrum(
-  int               first_scan,         ///< The number of the first scan
-  int               last_scan,          ///< The number of the last scan
-  SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum.
-  float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra)
-  int*              possible_z,         ///< The possible charge states of this spectrum
-  int               num_possible_z,     ///< The number of possible charge states of this spectrum  
-  char*             filename)          ///< Optional filename
+  int               first_scan,         ///< The number of the first scan -in
+  int               last_scan,          ///< The number of the last scan -in
+  SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum. -in
+  float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra) -in
+  int*              possible_z,         ///< The possible charge states of this spectrum  -in
+  int               num_possible_z,     ///< The number of possible charge states of this spectrum  -in
+  char*             filename)          ///< Optional filename -in
 {
   SPECTRUM_T* fresh_spectrum = allocate_spectrum();
   fresh_spectrum->first_scan = first_scan;
@@ -121,7 +132,10 @@ SPECTRUM_T* new_spectrum(
 /**
  * Frees an allocated spectrum object.
  */
-void free_spectrum (SPECTRUM_T* spectrum){
+void free_spectrum (
+  SPECTRUM_T* spectrum ///< the spectrum to free -in
+)
+{
   free(spectrum->possible_z);
   free(spectrum->filename);
   free(spectrum->peaks);
@@ -132,7 +146,11 @@ void free_spectrum (SPECTRUM_T* spectrum){
 /**
  * Prints a spectrum object to file.
  */
-void print_spectrum(SPECTRUM_T* spectrum, FILE* file){
+void print_spectrum(
+  SPECTRUM_T* spectrum, ///< spectrum to print -in
+  FILE* file ///< output file to print at -out
+  )
+{
   int num_z_index = 0;
   int num_peak_index = 0;
 
@@ -158,7 +176,10 @@ void print_spectrum(SPECTRUM_T* spectrum, FILE* file){
 /**
  * Prints a spectrum object to STDOUT.
  */
-void print_spectrum_stdout(SPECTRUM_T* spectrum){
+void print_spectrum_stdout(
+  SPECTRUM_T* spectrum ///< the spectrum to print -in
+  )
+{
   print_spectrum(spectrum, stdout);
 }
 
@@ -167,8 +188,9 @@ void print_spectrum_stdout(SPECTRUM_T* spectrum){
  * must pass in a memory allocated SPECTRUM_T* dest
  */
 void copy_spectrum(
-  SPECTRUM_T* src,
-  SPECTRUM_T* dest)
+  SPECTRUM_T* src, ///< the source spectrum -in
+  SPECTRUM_T* dest ///< the destination spectrum -out
+  )
 {
   int num_peak_index = 0;
   int* possible_z;
@@ -207,8 +229,9 @@ void copy_spectrum(
  * FIXME if need to read 'H' header line
  */
 BOOLEAN_T parse_spectrum_file(
-  SPECTRUM_T* spectrum,
-  FILE* file)
+  SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
+  FILE* file ///< the input file stream -in
+  )
 {
   long file_index = ftell(file); //stores the location of the current working line in the file
   char* new_line = NULL;
@@ -316,7 +339,12 @@ BOOLEAN_T parse_spectrum_file(
  * \returns TRUE if success. FALSE is failure.
  * 
  */
-BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length){
+BOOLEAN_T parse_S_line(
+  SPECTRUM_T* spectrum, ///< place S line into this spectrum -out 
+  char* line, ///< 'S' line to parse -in
+  int buf_length ///< line length -in
+  )
+{
   char spliced_line[buf_length];
   int line_index = 0;
   int spliced_line_index = 0;
@@ -382,7 +410,11 @@ BOOLEAN_T parse_S_line(SPECTRUM_T* spectrum, char* line, int buf_length){
  * \returns TRUE if success. FALSE is failure.
  * 
  */
-BOOLEAN_T parse_Z_line(SPECTRUM_T* spectrum, char* line){
+BOOLEAN_T parse_Z_line(
+  SPECTRUM_T* spectrum, ///< place Z line into this spectrum -out  
+  char* line  ///< 'Z' line to parse -in
+  )
+{
   int tokens;
   char line_name;
   int charge;
@@ -410,17 +442,21 @@ BOOLEAN_T parse_Z_line(SPECTRUM_T* spectrum, char* line){
  * Adds a possible charge(z) to the spectrum.
  * Must not exceed the MAX_CHARGE capacity
  */
-BOOLEAN_T add_possible_z(SPECTRUM_T* spectrum, int charge){
+BOOLEAN_T add_possible_z(
+  SPECTRUM_T* spectrum,  ///< place Z line into this spectrum -out   
+  int charge  ///< charge to add
+  )
+{
   int* possible_charge = (int *)mymalloc(sizeof(int));
-   *possible_charge = charge;
-   if(spectrum->num_possible_z < MAX_CHARGE){ // change to dynamic sometime...
-     spectrum->possible_z[spectrum->num_possible_z] = *possible_charge; 
-     ++spectrum->num_possible_z;
-     free(possible_charge);
-     return TRUE;
-   }
-   free(possible_charge);
-   return FALSE;
+  *possible_charge = charge;
+  if(spectrum->num_possible_z < MAX_CHARGE){ // change to dynamic sometime...
+    spectrum->possible_z[spectrum->num_possible_z] = *possible_charge; 
+    ++spectrum->num_possible_z;
+    free(possible_charge);
+    return TRUE;
+  }
+  free(possible_charge);
+  return FALSE;
 }
 
 /**
@@ -428,9 +464,10 @@ BOOLEAN_T add_possible_z(SPECTRUM_T* spectrum, int charge){
  * calls update_spectrum_fields to update num_peaks, min_peak ...
  */
 BOOLEAN_T add_peak_to_spectrum(
-  SPECTRUM_T* spectrum, 
-  float intensity, 
-  float location_mz )
+  SPECTRUM_T* spectrum,///< spectrum to add the peak to -out 
+  float intensity, ///< the intensity of peak to add -in
+  float location_mz ///< the location of peak to add -in
+  )
 {
   if(spectrum->num_peaks < MAX_PEAKS){  //FIXME someday change it to be dynamic
     set_peak_intensity(find_peak(spectrum->peaks, spectrum->num_peaks), intensity);
@@ -446,8 +483,9 @@ BOOLEAN_T add_peak_to_spectrum(
  * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T parse_spectrum(
-  SPECTRUM_T* spectrum,
-  char*      filename)
+  SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
+  char*      filename ///< the file to parse -in
+  )
 {
   FILE* file;
   if ((file = fopen(filename,"r")) == NULL) {
@@ -467,9 +505,10 @@ BOOLEAN_T parse_spectrum(
  * updates num_peaks, min_peak_mz, max_peak_mz, total_energy fields in spectrum
  */
 void update_spectrum_fields(
-  SPECTRUM_T* spectrum,
-  float intensity, 
-  float location)
+  SPECTRUM_T* spectrum, ///< the spectrum fields to update -out
+  float intensity, ///< the intensity of the peak that has been added -in
+  float location ///< the location of the peak that has been added -in
+  )
 {
   ++spectrum->num_peaks;
  
@@ -491,98 +530,145 @@ void update_spectrum_fields(
 /**
  * \returns the number of the first scan
  */
-int get_spectrum_first_scan(SPECTRUM_T* spectrum){
+int get_spectrum_first_scan(
+  SPECTRUM_T* spectrum ///< the spectrum to query the first scan -in
+  )
+{
   return spectrum->first_scan;
 }
 
 /**
  * sets the number of the first scan
  */
-void set_spectrum_first_scan(SPECTRUM_T* spectrum, int first_scan){
+void set_spectrum_first_scan(
+  SPECTRUM_T* spectrum,  ///< the spectrum to set the first scan -out
+  int first_scan ///< the first_scan -in
+  )
+{
   spectrum->first_scan = first_scan;
 }
 
 /**
  * \returns the number of the last scan
  */
-int get_spectrum_last_scan(SPECTRUM_T* spectrum){
+int get_spectrum_last_scan(
+  SPECTRUM_T* spectrum  ///< the spectrum to query the last scan -in
+  )
+{
   return spectrum->last_scan;
 }
 
 /**
  * sets the number of the last scan
  */
-void set_spectrum_last_scan(SPECTRUM_T* spectrum, int last_scan){
+void set_spectrum_last_scan(
+  SPECTRUM_T* spectrum,  ///< the spectrum to set the last scan -out
+  int last_scan ///< the last scan -in
+  )
+{
   spectrum->last_scan = last_scan;
 }
 
 /**
  * \returns the spectrum_id
  */
-int get_spectrum_id(SPECTRUM_T* spectrum){
+int get_spectrum_id(
+  SPECTRUM_T* spectrum  ///< the spectrum to query the id -in
+  )
+{
   return spectrum->id;
 }
 
 /**
  * sets the spectrum_id
  */
-void set_spectrum_id(SPECTRUM_T* spectrum, int id){
+void set_spectrum_id(
+  SPECTRUM_T* spectrum,  ///< the spectrum to set the id -out
+  int id ///< the id -in
+  )
+{
   spectrum->id = id;
 }
 
 /**
  * \returns the spectrum_type
  */
-SPECTRUM_TYPE_T get_spectrum_spectrum_type(SPECTRUM_T* spectrum){
+SPECTRUM_TYPE_T get_spectrum_spectrum_type(
+  SPECTRUM_T* spectrum  ///< the spectrum to query the spectrum_type -in
+  )
+{
   return spectrum->spectrum_type;
 }
 
 /**
  * sets the spectrum_type
  */
-void set_spectrum_spectrum_type(SPECTRUM_T* spectrum, SPECTRUM_TYPE_T spectrum_type){
+void set_spectrum_spectrum_type(
+  SPECTRUM_T* spectrum,  ///< the spectrum to set the spectrum_type -out
+  SPECTRUM_TYPE_T spectrum_type ///< the spectrum type -in
+  )
+{
   spectrum->spectrum_type = spectrum_type;
 }
 
 /**
  * \returns the m/z of the precursor
  */
-float get_spectrum_precursor_mz(SPECTRUM_T* spectrum){
+float get_spectrum_precursor_mz(
+  SPECTRUM_T* spectrum  ///< the spectrum to query the precursor_mz -in
+  )
+{
   return spectrum->precursor_mz;
 }
 
 /**
  * sets the m/z of the precursor
  */
-void set_spectrum_precursor_mz(SPECTRUM_T* spectrum, float precursor_mz){
+void set_spectrum_precursor_mz(
+  SPECTRUM_T* spectrum,  ///< the spectrum to set the precursor_mz -out
+  float precursor_mz ///< the precursor_mz -in
+  )
+{
   spectrum->precursor_mz = precursor_mz;
 }
 
 /**
  * \returns the minimum m/z of all peaks
  */
-float get_spectrum_min_peak_mz(SPECTRUM_T* spectrum){
+float get_spectrum_min_peak_mz(
+  SPECTRUM_T* spectrum ///< the spectrum to query min_peak_mz -in
+  )
+{
   return spectrum->min_peak_mz;
 }
 
 /**
  * \returns the maximum m/z of all peaks
  */
-float get_spectrum_max_peak_mz(SPECTRUM_T* spectrum){
+float get_spectrum_max_peak_mz(
+  SPECTRUM_T* spectrum  ///< the spectrum to query max_peak_mz -in
+  )
+{
   return spectrum->max_peak_mz;
 }
 
 /**
  * \returns the number of peaks
  */
-int get_spectrum_num_peaks(SPECTRUM_T* spectrum){
+int get_spectrum_num_peaks(
+  SPECTRUM_T* spectrum  ///< the spectrum to query number of peaks -in
+  )
+{
   return spectrum->num_peaks;
 }
 
 /**
  * \returns the sum of intensities in all peaks
  */
-double get_spectrum_total_energy(SPECTRUM_T* spectrum){
+double get_spectrum_total_energy(
+  SPECTRUM_T* spectrum  ///< the spectrum to query total energy -in
+  )
+{
   return spectrum->total_energy;
 }
 
@@ -592,7 +678,10 @@ double get_spectrum_total_energy(SPECTRUM_T* spectrum){
  * returns a char* to a heap allocated copy of the filename
  * user must free the memory
  */
-char* get_spectrum_filename(SPECTRUM_T* spectrum){
+char* get_spectrum_filename(
+  SPECTRUM_T* spectrum  ///< the spectrum to query filename -in
+  )
+{
   
   int filename_length = strlen(spectrum->filename) +1; //+\0
   char * copy_filename = 
@@ -605,18 +694,26 @@ char* get_spectrum_filename(SPECTRUM_T* spectrum){
  * copies the value from arguement char* filename into a heap allocated memory
  * frees memory for the filename that is replaced
  */
-void set_spectrum_filename(SPECTRUM_T* spectrum, char* filename){
+void set_spectrum_filename(
+  SPECTRUM_T* spectrum,  ///< the spectrum to set the filename -out
+  char* filename ///< the filename -in
+  )
+{
   free(spectrum->filename);
   set_spectrum_new_filename(spectrum, filename);
 }
 
-/**  //////TESTME////
+/**
  * sets the filename of the ms2 file the spectrum was parsed
  * this function should be used only the first time the filename is set
  * to change existing filename use set_spectrum_filename
  * copies the value from arguement char* filename into a heap allocated memory
  */
-void set_spectrum_new_filename(SPECTRUM_T* spectrum, char* filename){
+void set_spectrum_new_filename(
+  SPECTRUM_T* spectrum,   ///< the spectrum to set the filename -out
+  char* filename ///< the filename -in
+  )
+{
   int filename_length = strlen(filename) +1; //+\0
   char * copy_filename = 
     (char *)mymalloc(sizeof(char)*filename_length);
@@ -632,7 +729,10 @@ void set_spectrum_new_filename(SPECTRUM_T* spectrum, char* filename){
  * number of possible charge states can be gained by 
  * the get_num_possible_z function.
  */
-int* get_spectrum_possible_z(SPECTRUM_T* spectrum){
+int* get_spectrum_possible_z(
+  SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
+  )
+{
   int num_possible_z_index = 0;
   int* new_possible_z = 
     (int*)mymalloc(sizeof(int)*spectrum->num_possible_z);
@@ -654,9 +754,13 @@ int* get_spectrum_possible_z(SPECTRUM_T* spectrum){
  * num_possible_z must match the array size of possible_z 
  * updates the number of possible charge states field
  */
-void set_spectrum_new_possible_z(SPECTRUM_T* spectrum, 
-                                 int* possible_z, 
-                                 int num_possible_z){
+void set_spectrum_new_possible_z(
+  SPECTRUM_T* spectrum,  ///< the spectrum to set the new_possible_z -out
+  int* possible_z, ///< possible z array -in
+  int num_possible_z ///< possible z array size -in
+  )
+{
+  
   int possible_z_index = 0;
   int* new_possible_z = 
     (int*)mymalloc(sizeof(int)*num_possible_z);
@@ -677,9 +781,12 @@ void set_spectrum_new_possible_z(SPECTRUM_T* spectrum,
  * frees the memory of the possible_z that is replaced
  * updates the number of possible charge states field
  */
-void set_spectrum_possible_z(SPECTRUM_T* spectrum, 
-                             int* possible_z, 
-                             int num_possible_z){
+void set_spectrum_possible_z(
+  SPECTRUM_T* spectrum,  ///< the spectrum to set the new_possible_z -out
+  int* possible_z, ///< possible z array -in
+  int num_possible_z ///< possible z array size -in
+  )
+{
   free(spectrum->possible_z);
   set_spectrum_new_possible_z(spectrum, possible_z, num_possible_z);
 }
@@ -687,14 +794,20 @@ void set_spectrum_possible_z(SPECTRUM_T* spectrum,
 /**
  * \returns the number of possible charge states of this spectrum
  */
-int get_spectrum_num_possible_z(SPECTRUM_T* spectrum){
+int get_spectrum_num_possible_z(
+  SPECTRUM_T* spectrum  ///< the spectrum to query length of possible_z array -in
+  )
+{
   return spectrum->num_possible_z;
 }
 
 /**
  * \returns The intensity of the peak with the maximum intensity.
  */
-float get_spectrum_max_peak_intensity(SPECTRUM_T* spectrum){
+float get_spectrum_max_peak_intensity(
+  SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
+  )
+{
   int num_peak_index = 0;
   float max_intensity = -1;
 
@@ -710,7 +823,11 @@ float get_spectrum_max_peak_intensity(SPECTRUM_T* spectrum){
  * \returns The mass of the charged precursor ion, according to the formula 
  * mass = m/z * charge
  */
-float get_spectrum_mass(SPECTRUM_T* spectrum, int charge){
+float get_spectrum_mass(
+  SPECTRUM_T* spectrum,  ///< the spectrum to query spectrum mass -in
+  int charge ///< the charge of precursor ion -in
+  )
+{
   return get_spectrum_precursor_mz(spectrum)*charge;
 }
 
@@ -718,7 +835,11 @@ float get_spectrum_mass(SPECTRUM_T* spectrum, int charge){
  * \returns The mass of the neutral precursor ion, according to the formula 
  * mass = m/z * charge - mass_H * charge
  */
-float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge){
+float get_spectrum_neutral_mass(
+  SPECTRUM_T* spectrum,  ///< the spectrum to query neutral_mass -in
+  int charge ///< the charge of precursor ion -in
+  )
+{
   return (get_spectrum_mass(spectrum, charge) - MASS_H*charge); //TESTME
 }
 
@@ -726,7 +847,11 @@ float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge){
  * \returns The mass of the singly charged precursor ion, according to the formula 
  * mass = m/z * charge - (mass_H * (charge - 1))
  */
-float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge){
+float get_spectrum_singly_charged_mass(
+  SPECTRUM_T* spectrum,  ///< the spectrum to query charged_mass -in
+  int charge ///< the charge of the precursor ion -in
+  )
+{
   return (get_spectrum_mass(spectrum, charge) - MASS_H*(charge-1));  //TESTME
 }
 
@@ -738,7 +863,10 @@ float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge){
  * Instantiates a new peak_iterator from a spectrum.
  * \returns a PEAK_ITERATOR_T object.
  */
-PEAK_ITERATOR_T* new_peak_iterator(SPECTRUM_T* spectrum){
+PEAK_ITERATOR_T* new_peak_iterator(
+  SPECTRUM_T* spectrum ///< the spectrum peaks to iterate -in
+  )
+{
   PEAK_ITERATOR_T* peak_iterator = (PEAK_ITERATOR_T*)mycalloc(1,sizeof(PEAK_ITERATOR_T));
   peak_iterator->spectrum = spectrum;
   return peak_iterator;
@@ -747,7 +875,10 @@ PEAK_ITERATOR_T* new_peak_iterator(SPECTRUM_T* spectrum){
 /**
  * Frees an allocated peak_iterator object.
  */
-void free_peak_iterator(PEAK_ITERATOR_T* peak_iterator){
+void free_peak_iterator(
+  PEAK_ITERATOR_T* peak_iterator ///< the interator to free -in
+  )
+{
   free(peak_iterator);
 }
 
@@ -755,14 +886,20 @@ void free_peak_iterator(PEAK_ITERATOR_T* peak_iterator){
  * The basic iterator functions.
  * \returns TRUE if there are additional peaks to iterate over, FALSE if not.
  */
-BOOLEAN_T peak_iterator_has_next(PEAK_ITERATOR_T* peak_iterator){
+BOOLEAN_T peak_iterator_has_next(
+  PEAK_ITERATOR_T* peak_iterator ///< the interator for the peaks -in
+  )
+{
   return  (peak_iterator->peak_index < get_spectrum_num_peaks(peak_iterator->spectrum));
 }
 
 /**
  * \returns The next peak object in the spectrum.
  */
-PEAK_T* peak_iterator_next(PEAK_ITERATOR_T* peak_iterator){
+PEAK_T* peak_iterator_next(
+  PEAK_ITERATOR_T* peak_iterator  ///< the interator for the peaks -in
+  )
+{
   PEAK_T* next_peak = find_peak(peak_iterator->spectrum->peaks, peak_iterator->peak_index);
   ++peak_iterator->peak_index;
   return next_peak;
