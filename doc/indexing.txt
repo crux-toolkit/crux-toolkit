@@ -6,7 +6,7 @@ vary the way in which the mass of the peptides can be calculated.
 In the simplest form of the problem, the mass of each peptide can be
 calculated merely by adding the fixed masses of its constituent amino
 acids, and so there is a fixed one-to-one mapping between peptide and
-mass. An obvious solution to this problem is to precompute the mass of
+mass. An obvious solution to this problem is to pre-compute the mass of
 each peptide for a particular proteome, and then create an index sorted
 on mass with pointers into the sequence database for each peptide.
 
