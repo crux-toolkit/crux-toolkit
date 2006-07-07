@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.24 $
+ * REVISION: $Revision: 1.25 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -50,7 +50,7 @@ struct spectrum {
   float             precursor_mz;  ///< The m/z of the precursor (for MS-MS spectra)
   int*              possible_z;    ///< The possible charge states of this spectrum
   int               num_possible_z;///< The number of possible charge states of this spectrum
-  PEAK_T*           peaks[MAX_PEAKS];         ///< The spectrum peaks
+  PEAK_T*           peaks;         ///< The spectrum peaks
   float             min_peak_mz;   ///< The minimum m/z of all peaks
   float             max_peak_mz;   ///< The maximum m/z of all peaks
   int               num_peaks;     ///< The number of peaks
@@ -122,12 +122,9 @@ SPECTRUM_T* new_spectrum(
  * Frees an allocated spectrum object.
  */
 void free_spectrum (SPECTRUM_T* spectrum){
-  int num_peaks_index = 0;
   free(spectrum->possible_z);
-  for(; num_peaks_index < spectrum->num_peaks; ++num_peaks_index){
-    free_peak(spectrum->peaks[num_peaks_index]);
-  }
   free(spectrum->filename);
+  free(spectrum->peaks);
   free(spectrum);
 }
 
@@ -138,21 +135,23 @@ void free_spectrum (SPECTRUM_T* spectrum){
 void print_spectrum(SPECTRUM_T* spectrum, FILE* file){
   int num_z_index = 0;
   int num_peak_index = 0;
-  
+
   fprintf(file, "Filename: %s\n", spectrum->filename);
   fprintf(file, "S\t%06d\t%06d\t%.2f\n", 
          spectrum->first_scan,
          spectrum->last_scan,
          spectrum->precursor_mz);
+  //print 'Z' line
   for(; num_z_index < spectrum->num_possible_z; ++num_z_index){
     fprintf(file, "Z\t%d\t%.2f\n", spectrum->possible_z[num_z_index],
             get_spectrum_singly_charged_mass(spectrum,
                                              spectrum->possible_z[num_z_index]));
   }
+  //print peaks
   for(; num_peak_index < spectrum->num_peaks; ++num_peak_index){
     fprintf(file, "%.1f %.1f\n", 
-           peak_location(spectrum->peaks[num_peak_index]),
-           peak_intensity(spectrum->peaks[num_peak_index]));
+            get_peak_location(find_peak(spectrum->peaks, num_peak_index)),
+            get_peak_intensity(find_peak(spectrum->peaks, num_peak_index)));
   }
 }
 
@@ -195,8 +194,8 @@ void copy_spectrum(
   
   //copy each peak
   for(; num_peak_index < get_spectrum_num_peaks(src); ++num_peak_index){
-    add_peak_to_spectrum(dest, peak_intensity(src->peaks[num_peak_index]),
-                         peak_location(src->peaks[num_peak_index])); 
+    add_peak_to_spectrum(dest, get_peak_intensity(find_peak(src->peaks, num_peak_index)),
+                         get_peak_location(find_peak(src->peaks, num_peak_index))); 
   }
 }
 
@@ -426,15 +425,21 @@ BOOLEAN_T add_possible_z(SPECTRUM_T* spectrum, int charge){
 
 /**
  * Adds a peak to the spectrum given a intensity and location
- * calls add_peak function
+ * calls update_spectrum_fields to update num_peaks, min_peak ...
  */
 BOOLEAN_T add_peak_to_spectrum(
   SPECTRUM_T* spectrum, 
   float intensity, 
   float location_mz )
 {
-  PEAK_T* peak = new_peak(intensity, location_mz);
-  return add_peak(spectrum, peak); //think about return value on this..
+  if(spectrum->num_peaks < MAX_PEAKS){  //FIXME someday change it to be dynamic
+    set_peak_intensity(find_peak(spectrum->peaks, spectrum->num_peaks), intensity);
+    set_peak_location(find_peak(spectrum->peaks, spectrum->num_peaks), location_mz);
+    update_spectrum_fields(spectrum, intensity, location_mz);
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 /**
@@ -459,30 +464,27 @@ BOOLEAN_T parse_spectrum(
 }
 
 /**
- * Adds a peak to the spectrum.
- * update num_peaks, min_peak_mz, max_peak_mz, total_energy fields in spectrum
+ * updates num_peaks, min_peak_mz, max_peak_mz, total_energy fields in spectrum
  */
-BOOLEAN_T add_peak(SPECTRUM_T* spectrum, PEAK_T* peak){
-  float location = peak_location(peak);
-  
-  if(spectrum->num_peaks < MAX_PEAKS){  // need to change it so that  it's dynamic
-    spectrum->peaks[spectrum->num_peaks] = peak;
-    ++spectrum->num_peaks;
-    // is new peak the smallest peak
-    if(spectrum->num_peaks == 1 || 
-       spectrum->min_peak_mz > location){
-      spectrum->min_peak_mz = location;
-    }
-    // is new peak the largest peak
-    if(spectrum->num_peaks == 1 || 
-       spectrum->max_peak_mz < location){
-      spectrum->max_peak_mz = location;
-    }
-    //update total_energy
-    spectrum->total_energy += peak_intensity(peak);
-    return TRUE;
+void update_spectrum_fields(
+  SPECTRUM_T* spectrum,
+  float intensity, 
+  float location)
+{
+  ++spectrum->num_peaks;
+ 
+  // is new peak the smallest peak
+  if(spectrum->num_peaks == 1 || 
+     spectrum->min_peak_mz > location){
+    spectrum->min_peak_mz = location;
   }
-  return FALSE;
+  // is new peak the largest peak
+  if(spectrum->num_peaks == 1 || 
+     spectrum->max_peak_mz < location){
+    spectrum->max_peak_mz = location;
+  }
+  //update total_energy
+  spectrum->total_energy += intensity;
 }
 
 
@@ -697,8 +699,8 @@ float get_spectrum_max_peak_intensity(SPECTRUM_T* spectrum){
   float max_intensity = -1;
 
   for(; num_peak_index < get_spectrum_num_peaks(spectrum); ++num_peak_index){
-    if(max_intensity <= peak_intensity(spectrum->peaks[num_peak_index])){
-      max_intensity = peak_intensity(spectrum->peaks[num_peak_index]);
+    if(max_intensity <= get_peak_intensity(find_peak(spectrum->peaks, num_peak_index))){
+      max_intensity = get_peak_intensity(find_peak(spectrum->peaks, num_peak_index));
     }
   }
   return max_intensity; 
@@ -761,7 +763,7 @@ BOOLEAN_T peak_iterator_has_next(PEAK_ITERATOR_T* peak_iterator){
  * \returns The next peak object in the spectrum.
  */
 PEAK_T* peak_iterator_next(PEAK_ITERATOR_T* peak_iterator){
-  PEAK_T* next_peak = peak_iterator->spectrum->peaks[peak_iterator->peak_index];
+  PEAK_T* next_peak = find_peak(peak_iterator->spectrum->peaks, peak_iterator->peak_index);
   ++peak_iterator->peak_index;
   return next_peak;
 }

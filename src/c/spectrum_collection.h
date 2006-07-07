@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -55,6 +55,7 @@ void print_spectrum_collection(
 
 /**
  * Copies spectrum_collection object from src to dest.
+ *  must pass in a memory allocated SPECTRUM_COLLECTION_T* dest
  */
 void copy_spectrum_collection(
   SPECTRUM_COLLECTION_T* src,///< spectrum to copy from -in
@@ -83,12 +84,27 @@ BOOLEAN_T get_spectrum_collection_spectrum(
 
 /**
  * Adds a spectrum to the spectrum_collection.
+ * adds the spectrum in correct order into the spectra array
+ * spectrum must be heap allocated
  *\returns TRUE if succeed to add, else FALSE 
  */
 BOOLEAN_T add_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
   SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
 ); 
+
+/**
+ * Adds a spectrum to the spectrum_collection.
+ * adds the spectrum to the end of the spectra array
+ * should only be used when the adding in increasing scan num order
+ * when adding in random order should use add_spectrum
+ * spectrum must be heap allocated
+ *\returns TRUE if succeed to add, else FALSE 
+ */
+BOOLEAN_T add_spectrum_to_end(
+  SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
+  SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
+  );
 
 /**
  * Removes a spectrum from the spectrum_collection.
@@ -147,6 +163,7 @@ int get_spectrum_collection_num_spectra(
 /**
  * \returns the comments from the spectrum_collection
  * the return char* points to a newly heap allocated copy of the comments
+ * user must free the new string object
  */
 char* get_spectrum_collection_comment(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in                                         

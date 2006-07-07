@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -252,13 +252,13 @@ float get_spectrum_neutral_mass(SPECTRUM_T* spectrum, int charge);
 float get_spectrum_singly_charged_mass(SPECTRUM_T* spectrum, int charge);
 
 /**
- * Adds a peak to the spectrum.
+ * updates num_peaks, min_peak_mz, max_peak_mz, total_energy fields in spectrum
  */
-BOOLEAN_T add_peak(SPECTRUM_T* spectrum, PEAK_T* peak);
+void update_spectrum_fields(SPECTRUM_T* spectrum, float intensity, float location);
 
 /**
- * Adds a peak to the spectrum given an intensity and location.
- * Calls add_peak function
+ * Adds a peak to the spectrum given a intensity and location
+ * calls update_spectrum_fields to update num_peaks, min_peak ...
  */
 BOOLEAN_T add_peak_to_spectrum(
   SPECTRUM_T* spectrum, 
