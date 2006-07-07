@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.14 $
+ * REVISION: $Revision: 1.15 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -18,7 +18,7 @@
 #include "unistd.h"
 
 #define MAX_SPECTRA 40000 ///< max number of spectrums
-
+#define MAX_COMMENT 1000 ///< max length of comment
 
 
 long binary_search_spectrum(FILE* file, int first_scan);
@@ -36,8 +36,8 @@ int match_first_scan_line(
 struct spectrum_collection {
   SPECTRUM_T* spectra[MAX_SPECTRA];  ///< The spectrum peaks
   int  num_spectra;     ///< The number of spectra
-  char*   filename;     ///< Optional filename
-  char* comment;        ///< The spectrum_collection header lines
+  char* filename;     ///< Optional filename
+  char comment[MAX_COMMENT];    ///< The spectrum_collection header lines
   BOOLEAN_T is_parsed; ///< Have we parsed all the spectra from the file?
 };    
 
@@ -97,7 +97,6 @@ void free_spectrum_collection(
     free_spectrum(spectrum_collection->spectra[spectrum_index]);
   }
   free(spectrum_collection->filename);
-  free(spectrum_collection->comment);
   free(spectrum_collection);
 }
 
@@ -111,8 +110,8 @@ void print_spectrum_collection(
 {
   SPECTRUM_ITERATOR_T* spectrum_iterator;
   
-  fprintf(file,"comment: %s\n", spectrum_collection->comment);
-  fprintf(file,"filename: %s\n", spectrum_collection->filename);
+  fprintf(file,"comment:\n%s", spectrum_collection->comment);
+  fprintf(file,".ms2 Filename: %s\n", spectrum_collection->filename);
   
   //print each spectrum
   spectrum_iterator = new_spectrum_iterator(spectrum_collection);
@@ -131,15 +130,18 @@ void copy_spectrum_collection(
   SPECTRUM_COLLECTION_T* dest///< spectrum to copy to -out
   )
 {
+  SPECTRUM_T* new_spectrum;
   //copy each varible
   set_spectrum_collection_filename(dest,src->filename);
-  //set_spectrum_collection_comment(dest,src->comment);
+  set_spectrum_collection_comment(dest,src->comment);
   dest->is_parsed = src->is_parsed;
   
   //copy spectrum
   SPECTRUM_ITERATOR_T* spectrum_iterator = new_spectrum_iterator(src);
   while(spectrum_iterator_has_next(spectrum_iterator)){
-    add_spectrum(dest, spectrum_iterator_next(spectrum_iterator));
+    new_spectrum = allocate_spectrum();
+    copy_spectrum(spectrum_iterator_next(spectrum_iterator), new_spectrum);
+    add_spectrum_to_end(dest, new_spectrum);
   }
   free_spectrum_iterator(spectrum_iterator);
 }
@@ -147,22 +149,32 @@ void copy_spectrum_collection(
 
 //TESTME might have to check for bad format
 /**
- * parses all 'H' line into the spectrum_collection comments
- *
+ * parses 'H' line into the spectrum_collection comments
+ * all reminding comments are ignored if max length of comments are reached
  */
-void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection,FILE* file){
+void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection, FILE* file){
   long file_index = ftell(file); //stores the location of the current working line in the file
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
- 
+  int new_line_length;
+  int comment_field_length;
+
   while( (line_length =  getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == 'H'){
-      //do something
+      new_line_length = strlen(new_line);
+      comment_field_length = strlen(spectrum_collection->comment);
       
+      //check if max capacifty is too full for new comment
+      if(new_line_length + comment_field_length + 1 < MAX_COMMENT){
+        strcat(spectrum_collection->comment, new_line);
+      }
+      else{
+        break; //exceed max comments
+      }
     }
     else if(new_line[0] == 'S'){
-      break;
+      break; //end of 'H' lines
     }
     file_index = ftell(file);
   }
@@ -170,8 +182,6 @@ void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection,FILE* file){
   fseek(file, file_index, SEEK_SET);
 }
 
-
-//FIXME must be able to parse 'H' line
 /**
  * Parses all the spectra from file designated by the filename member
  * variable.
@@ -201,7 +211,7 @@ BOOLEAN_T parse_spectrum_collection(
   //parse one spectrum at a time
   while(parse_spectrum_file(parsed_spectrum, file)){
     //is spectrum capacity not full?
-    if(!add_spectrum(spectrum_collection, parsed_spectrum)){
+    if(!add_spectrum_to_end(spectrum_collection, parsed_spectrum)){
       free_spectrum(parsed_spectrum);
       fclose(file);
       return FALSE;
@@ -221,9 +231,12 @@ BOOLEAN_T parse_spectrum_collection(
 //CHECKME test if capacity is correct might be off by one
 /**
  * Adds a spectrum to the spectrum_collection.
+ * adds the spectrum to the end of the spectra array
+ * should only be used when the adding in increasing scan num order
+ * when adding in random order should use add_spectrum
  * spectrum must be heap allocated
  */
-BOOLEAN_T add_spectrum(
+BOOLEAN_T add_spectrum_to_end(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
   SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
   )
@@ -240,21 +253,80 @@ BOOLEAN_T add_spectrum(
   return TRUE;
 }
 
+/**
+ * Adds a spectrum to the spectrum_collection.
+ * adds the spectrum in correct order into the spectra array
+ * spectrum must be heap allocated
+ */
+BOOLEAN_T add_spectrum(
+  SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
+  SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
+  )
+{
+  //FIXME eventually might want it to grow dynamically
+  int add_index = 0;
+  int spectrum_index;
+  
+  //check if spectrum capacity is full
+  if(get_spectrum_collection_num_spectra(spectrum_collection) == MAX_SPECTRA){
+    fprintf(stderr,"ERROR: cannot add spectrum, capacity full\n"); 
+    return FALSE;
+  }
+  //find correct location
+  for(; add_index < spectrum_collection->num_spectra; ++add_index){
+    if(get_spectrum_first_scan(spectrum_collection->spectra[add_index])>
+       get_spectrum_first_scan(spectrum)){
+      break;
+    }
+  }
+  //do we add to end?
+  if(add_index != spectrum_collection->num_spectra +1){
+    spectrum_index = spectrum_collection->num_spectra;
+    //shift all spectrum that have greater or equal index to add_index to right  
+    for(; spectrum_index >= add_index; --spectrum_index){
+      spectrum_collection->spectra[spectrum_index+1] = 
+        spectrum_collection->spectra[spectrum_index];
+    }
+  }
+  
+  //set spectrum
+  spectrum_collection->spectra[add_index] = spectrum;
+  ++spectrum_collection->num_spectra;
+  return TRUE;
+}
 
+
+//FIXME maybe a faster way? can't perform binary search since we must know the array index
 /**
  * Removes a spectrum from the spectrum_collection.
  */
-/*
 void remove_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
   SPECTRUM_T* spectrum ///< spectrum to be removed from spectrum_collection -in
   )
 {
+  int scan_num = get_spectrum_first_scan(spectrum);
+  int spectrum_index = 0;
   
-  ///WRITEME
-
+  //find where the spectrum is located in the spectrum array
+  for(; spectrum_index < spectrum_collection->num_spectra; ++spectrum_index){
+    if(scan_num ==
+       get_spectrum_first_scan(spectrum_collection->spectra[spectrum_index])){
+      break;
+    }
+  }
+  
+  free_spectrum(spectrum_collection->spectra[spectrum_index]);
+  
+  //shift all the spectra to the left to fill in the gap
+  for(; spectrum_index < spectrum_collection->num_spectra; ++spectrum_index){
+    spectrum_collection->spectra[spectrum_index] =
+      spectrum_collection->spectra[spectrum_index+1];
+  }
+  
+  --spectrum_collection->num_spectra;
 } 
-*/
+
 
 /**
  * Parses a single spectrum from a spectrum_collection with first scan
@@ -492,7 +564,7 @@ char* get_spectrum_collection_filename(
   int filename_length = strlen(spectrum_collection->filename) +1; //+\0
   char * copy_filename = 
     (char *)mymalloc(sizeof(char)*filename_length);
-  return strncpy(copy_filename,spectrum_collection->filename,filename_length);  
+  return strncpy(copy_filename, spectrum_collection->filename, filename_length);  
 }
 
 /**
@@ -509,30 +581,36 @@ int get_spectrum_collection_num_spectra(
 /**
  * \returns the comments from the spectrum_collection
  * the return char* points to a newly heap allocated copy of the comments
+ * user must free the new string object
  */
-/*
+
 char* get_spectrum_collection_comment(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in                                         
   )
 {
-  return "yeah!";
-
+  char* comments = (char *)mycalloc(1, sizeof(char)*MAX_COMMENT);
+  return strncpy(comments, spectrum_collection->comment, MAX_COMMENT); 
 }
-*/
 
 /**
  * sets the comment of the spectrum_collection
  * copies the new_comment into a newly heap allocated copy of the comment
  */
-/*
+
 void set_spectrum_collection_comment(
   SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection save comment -in                                         
   char* new_comment ///< the new comments to be copied
   )
 {
-  ///WRITEME
+  //is there enough memory for new comments?
+  if(strlen(new_comment) + strlen(spectrum_collection->comment) +1 < MAX_COMMENT){
+    strncat(spectrum_collection->comment, new_comment, MAX_COMMENT); 
+  }
+  else{
+    fprintf(stderr,"max comment exceeded\n");
+  }
 }
-*/
+
 
 /**
  * \returns TRUE if the spectrum_collection file has been parsed
