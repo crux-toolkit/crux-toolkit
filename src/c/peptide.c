@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
+#include "mass.h"
 #include "protein.h"
 #include "peptide.h"
 
