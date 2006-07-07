@@ -2,7 +2,7 @@
  * \file peak.c
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.7 $
+ * VERSION: $Revision: 1.8 $
  * DESCRIPTION: Object for representing one peak in a spectrum.
  *****************************************************************************/
 #include "peak.h"
@@ -83,7 +83,7 @@ PEAK_T* allocate_peak_array(int num_peaks){
 }
 
 /**
- * \frees A PEAK_T object array
+ * frees A PEAK_T object array
  */
 void free_peak_array(PEAK_T* garbage_peak){
   free(garbage_peak);
