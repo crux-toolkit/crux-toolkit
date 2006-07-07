@@ -1,0 +1,43 @@
+The scientific problem is the following: given a protein sequence database
+(e.g. the human proteome) rapidly extract a set of peptides that have
+a mass within a given mass range. Variations on the problem incorporate
+vary the way in which the mass of the peptides can be calculated.
+
+In the simplest form of the problem, the mass of each peptide can be
+calculated merely by adding the fixed masses of its constituent amino
+acids, and so there is a fixed one-to-one mapping between peptide and
+mass. An obvious solution to this problem is to precompute the mass of
+each peptide for a particular proteome, and then create an index sorted
+on mass with pointers into the sequence database for each peptide.
+
+In a more sophisticated form of the problem, the query specifies not
+just the mass range, but also a one-to-one mapping between amino acids
+to masses. In this case, there is still a one-to-one mapping between
+peptide and mass, but unlike before, the peptide's mass is not fixed,
+so one cannot pre-compute the mass of each peptide in advance.
+
+A still more challenging form of the problem involves a query in which
+each amino acid can have multiple masses. In this case, there is a
+one-to-many relationship between peptide and mass.
+
+These three problems can be described a little more abstractly in the
+following way:
+
+Given a set of sequences S from an alphabet A and a mapping M of A
+to the real numbers, extract all subsequences of S with weight sums
+in a particular range W_range.  In all problems, S and A are fixed,
+and can be organized in an arbitrary way.  In the first problem, M
+is a fixed one-to-one mapping between A and the real numbers, and the
+query consists merely of W_range.  In the second problem, M is again a
+one-to-one mapping between A and the real numbers, but it is specified
+as part of the query along with W_range. And in the third problem, M is
+a one-to-many mapping between A and the real numbers, and again is part
+of the query along with W_range.
+
+How can S and A be organized to make the three kinds of queries described
+fast? A typical size for S is 3 x 10^8 characters, A is 20 characters,
+and M can vary depending on the problem.
+
+
+
+
