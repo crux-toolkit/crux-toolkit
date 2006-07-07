@@ -1,12 +1,13 @@
 /**
  * \file mass.h 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
 #define _MASS_H
 
 #include "peptide.h"
+
 /**
  * Mass of ammonia
  */
@@ -35,7 +36,6 @@
 /**
  * \returns The mass of the given peptide.
  */
-float calc_peptide_mass(
-    PEPTIDE_T* peptide);
+float calc_peptide_mass(PEPTIDE_T* peptide);
 
 #endif
