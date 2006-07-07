@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -40,6 +40,13 @@ enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC};
  * \brief The typedef for peptide type, with regard to trypticity.
  */
 typedef enum _peptide_type PEPTIDE_TYPE_T;
+
+
+/**
+ * \returns The mass of the given peptide.
+ */
+float calc_peptide_mass(PEPTIDE_T* peptide);
+
 
 /**
  * \returns An (empty) peptide object.
