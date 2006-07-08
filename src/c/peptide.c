@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -20,6 +20,7 @@
 struct peptide {
   char* sequence;       ///< A pointer to the peptide sequence.
   unsigned char length; ///< The length of the peptide
+  float peptide_mass;   ///< The peptide's mass.
 };
 
 /**
