@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -10,6 +10,35 @@
 #include "utils.h"
 #include "mass.h"
 #include "objects.h"
+
+
+
+/**
+ * \typedef PEPTIDE_T
+ * \brief A peptide subsequence of a protein
+ */
+typedef struct peptide PEPTIDE_T;
+
+/**
+ * \struct peptide_constraint
+ * \brief Object to represent constraints which a peptide may or may not
+ *  satisfy.
+ * def TRYPTIC: a protein that ends with either K or R and 
+ *              any other K and R in the sequence must be followed by a P
+ */
+typedef struct peptide_constraint PEPTIDE_CONSTRAINT_T;
+
+/**
+ * \typedef RESIDUE_ITERATOR_T 
+ * \brief An object to iterate over the residues in a peptide
+ */
+typedef struct residue_iterator RESIDUE_ITERATOR_T;
+
+/**
+ * \typedef PEPTIDE_TYPE_T 
+ * \brief The typedef for peptide type, with regard to trypticity.
+ */
+typedef enum _peptide_type PEPTIDE_TYPE_T;
 
 /**
  * \returns The mass of the given peptide.
@@ -62,6 +91,7 @@ void free_peptide (
 
 /**
  * Prints a peptide object to file.
+ * mass \t peptide-length \t peptide-sequence \n
  */
 void print_peptide(
   PEPTIDE_T* peptide,  ///< the query peptide -in
