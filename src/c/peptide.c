@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -27,10 +27,12 @@ struct peptide {
 /**
  * \struct peptide_constraint
  * \brief Object to represent constraints which a peptide may or may not
- * satisfy.
+ *  satisfy.
+ * def TRYPTIC: a protein that ends with either K or R and 
+ *              any other K and R in the sequence must be followed by a P
  */
 struct peptide_constraint {
-  PEPTIDE_TYPE_T  peptide_type; ///< The type of peptides.
+  BOOLEAN_T is_tryptic; ///< The type of peptides, is there a possibility to be TRYPTIC.
   float min_mass; ///< The minimum mass of the peptide
   float max_mass; ///< The maximum mass of the peptide
   int min_length; ///< The minimum length of the peptide
@@ -129,7 +131,6 @@ float get_peptide_mz(
     )
 {
   return ((get_peptide_peptide_mass(peptide) + MASS_H * charge)/ charge);
-
 }
 
 /**
@@ -145,15 +146,16 @@ void free_peptide (
 
 /**
  * Prints a peptide object to file.
+ * mass \t peptide-length \t peptide-sequence \n
  */
 void print_peptide(
   PEPTIDE_T* peptide,  ///< the query peptide -in
   FILE* file  ///< the out put stream -out
   )
 {
+  fprintf(file,"%.2f\t",peptide->peptide_mass);
+  fprintf(file,"%d\t",peptide->length);
   fprintf(file,"%s\n",peptide->sequence);
-  fprintf(file,"length:%d\n",peptide->length);
-  fprintf(file,"mass:%.2f\n",peptide->peptide_mass);
 }
 
 /**
@@ -176,7 +178,29 @@ void copy_peptide(
  */
 BOOLEAN_T parse_peptide_file(
   PEPTIDE_T* peptide,
-  FILE* file);
+  FILE* file
+  )
+{
+  char* new_line = NULL;
+  int line_length;
+  size_t buf_length = 0;
+  char* sequence;
+  float peptide_mass;
+  int peptide_length;
+
+  line_length =  getline(&new_line, &buf_length, file);
+  if( (sscanf(new_line,"%f\t%d\t%s\n", // parse peptide line
+              &peptide_mass, &peptide_length, sequence) != 3) && 
+      (!isalpha((int)sequence[0]))){
+    free(new_line);
+    return FALSE;
+  }
+  set_peptide_sequence(sequence);  // CHECK IF THIS READS the /n as well !!!!!
+  set_peptide_peptide_mass(peptide_mass);
+  set_peptide_length(peptide_length);
+  free(new_line);
+  return TRUE;
+}
 
 /**
  * Allocates a new (empty) peptide_constraint object.
@@ -193,7 +217,7 @@ PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void){
  * \returns An allocated PEPTIDE_CONSTRAINT_T object.
  */
 PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
-  PEPTIDE_TYPE_T* peptide_type, ///< the peptide_type -in
+  BOOLEAN_T is_tryptic, ///< The type of peptides, is there a possibility to be TRYPTIC -in
   float min_mass, ///< the minimum mass -in
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
@@ -203,7 +227,7 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   (PEPTIDE_CONSTRAINT_T*) peptide_constraint =
     allocate_peptide_constraint();
 
-  set_peptide_constraint_peptide_type(peptide_constraint, peptide_type);
+  set_peptide_constraint_is_tryptic(peptide_constraint, is_tryptic);
   set_peptide_constraint_min_mass(peptide_constraint, min_mass);
   set_peptide_constraint_max_mass(peptide_constraint, max_mass);
   set_peptide_constraint_min_length(peptide_constraint, min_length);
@@ -212,7 +236,7 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
 }
 
 
-//FIXME add peptide type
+//FIXME add is_tryptic?
 /** 
  * Determines if a peptide satisfies a peptide_constraint.
  * \returns TRUE if the constraint is satisified. FALSE if not.
@@ -333,22 +357,22 @@ float get_peptide_peptide_mass(
 /**
  * sets the peptide type of the peptide_constraint
  */
-void set_peptide_constraint_peptide_type(
+void set_peptide_constraint_is_tryptic(
   PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
-  PEPTIDE_TYPE_T peptide_type ///< the type of the peptide constraint - in
+  BOOLEAN_T is_tryptic ///< the type of the peptide constraint - in
   )
 {
-  peptide_constraint->peptide_type = peptide_type;
+  peptide_constraint->is_tryptic = is_tryptic;
 }
 
 /**
  * \returns the peptide type of the peptide_constraint
  */
-PEPTIDE_TYPE_T* get_peptide_constraint_peptide_type(
+BOOLEAN_T get_peptide_constraint_is_tryptic(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   )
 {
-  return peptide_constraint->peptide_type;
+  return peptide_constraint->is_tryptic;
 }
 
 /**
