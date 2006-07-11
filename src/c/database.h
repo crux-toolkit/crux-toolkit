@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -8,28 +8,11 @@
 
 #include <stdio.h>
 #include "utils.h"
+#include "objects.h"
 #include "peptide.h"
 #include "protein.h"
 
 /* CHRIS This is probably an object for which you can crib code for from an outside source. Even from in-house (like Charles).*/
-
-/**
- * \typedef DATABASE_T
- * \brief A database of protein sequences.
- */
-typedef struct database DATABASE_T;
-
-/**
- * \typedef DATABASE_PROTEIN_ITERATOR_T
- * \brief An object to iterate over the proteins in a database 
- */
-typedef struct database_protein_iterator DATABASE_PROTEIN_ITERATOR_T;
-
-/**
- * \typedef DATABASE_PEPTIDE_ITERATOR_T
- * \brief An object to iterate over the peptides in a database 
- */
-typedef struct database_peptide_iterator DATABASE_PEPTIDE_ITERATOR_T;
 
 /**
  * \returns An (empty) database object.

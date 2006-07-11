@@ -1,12 +1,10 @@
 /**
  * \file mass.h 
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
 #define _MASS_H
-
-#include "peptide.h"
 
 /**
  * Mass of ammonia
