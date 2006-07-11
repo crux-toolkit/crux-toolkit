@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -8,21 +8,10 @@
 
 #include <stdio.h>
 #include "utils.h"
+#include "objects.h"
 #include "peptide.h"
 
 /* CHRIS This is probably an object for which you can crib code for from an outside source. Even from in-house (like Charles).*/
-
-/**
- * \typedef PROTEIN_T
- * \brief A protein sequence
- */
-typedef struct protein PROTEIN_T;
-
-/**
- * \typedef PROTEIN_PEPTIDE_ITERATOR_T
- * \brief An object to iterate over the peptides in a protein sequence
- */
-typedef struct protein_peptide_iterator PROTEIN_PEPTIDE_ITERATOR_T;
 
 /**
  * \returns An (empty) protein object.

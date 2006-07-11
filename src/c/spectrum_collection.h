@@ -2,26 +2,15 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
 #define SPECTRUM_COLLECTION_H
 
-#include "spectrum.h"
 #include <stdio.h>
-
-/**
- * \typedef SPECTRUM_COLLECTION_T 
- * \brief A collection of spectra
- */
-typedef struct spectrum_collection SPECTRUM_COLLECTION_T;
-
-/**
- * \typedef SPECTRUM_ITERATOR_T 
- * \brief An object to iterate over the spectra in a spectrum_collection
- */
-typedef struct spectrum_iterator SPECTRUM_ITERATOR_T;
+#include "objects.h"
+#include "spectrum.h"
 
 /**
  * \returns An (empty) spectrum_collection object.

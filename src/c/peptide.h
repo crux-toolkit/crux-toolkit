@@ -1,52 +1,20 @@
 /**
  * \file peptide.h 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
 #define PEPTIDE_H
 
+#include <stdio.h>
 #include "utils.h"
 #include "mass.h"
-#include <stdio.h>
-
-
-/**
- * \typedef PEPTIDE_T
- * \brief A peptide subsequence of a protein
- */
-typedef struct peptide PEPTIDE_T;
-
-/**
- * \typedef PEPTIDE_CONSTRAINT_T
- * \brief An object representing constraints which a peptide may or may not
- * satisfy.
- */
-typedef struct peptide_constraint PEPTIDE_CONSTRAINT_T;
-
-/**
- * \typedef RESIDUE_ITERATOR_T 
- * \brief An object to iterate over the residues in a peptide
- */
-typedef struct residue_iterator RESIDUE_ITERATOR_T;
-
-/**
- * \brief The enum for peptide type, with regard to trypticity.
- */
-enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC}; 
-
-/**
- * \typedef PEPTIDE_TYPE_T 
- * \brief The typedef for peptide type, with regard to trypticity.
- */
-typedef enum _peptide_type PEPTIDE_TYPE_T;
-
+#include "objects.h"
 
 /**
  * \returns The mass of the given peptide.
  */
 float calc_peptide_mass(PEPTIDE_T* peptide);
-
 
 /**
  * \returns An (empty) peptide object.
@@ -61,7 +29,6 @@ PEPTIDE_T* new_peptide(
   unsigned char length,     ///< The length of the peptide
   double peptide_mass       ///< The neutral mass of the peptide
 );
-  
 
 /** 
  * \returns the neutral mass of the peptide

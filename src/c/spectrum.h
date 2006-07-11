@@ -1,37 +1,15 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
 #define SPECTRUM_H
 
-#include "utils.h"
-#include "peak.h"
 #include <stdio.h>
-
-/**
- * \typedef SPECTRUM_T 
- * \brief A spectrum
- */
-typedef struct spectrum SPECTRUM_T;
-
-/**
- * \typedef PEAK_ITERATOR_T 
- * \brief An object to iterate over the peaks in a spectrum
- */
-typedef struct peak_iterator PEAK_ITERATOR_T;
-
-/**
- * The enum for spectrum type (MS1, MS2, MS3)
- */
-enum _spectrum_type { MS1, MS2, MS3 };
-
-/**
- * \typedef SPECTRUM_TYPE_T 
- * \brief The typedef for spectrum type (MS1, MS2, MS3)
- */
-typedef enum _spectrum_type SPECTRUM_TYPE_T;
+#include "utils.h"
+#include "objects.h"
+#include "peak.h"
 
 /**
  * \returns An (empty) spectrum object.
