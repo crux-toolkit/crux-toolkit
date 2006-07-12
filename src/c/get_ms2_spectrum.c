@@ -25,11 +25,15 @@ int main(int argc, char** argv){
   FILE* output_file; ///< output file name
   BOOLEAN_T options = FALSE; ///< do we want options?
   char* USAGE = 
-    "USAGE: get_ms2_spectrum [options]\n"
+    "USAGE: get_ms2_spectrum"
     "\t<scan number>\n"
     "\t<input filename>\n"
-    "\t<output filename>\n";
-
+    "\t<output filename>\n"
+    "\t[--stats]\n"
+    "SYNOPSIS: get_ms2_spectrum scan_number input_file input_file [--stats]\n"  
+    "OPTIONS: --stats\n"
+    "\tOutput some summary statistics for the particular spectrum to STDOUT\n"; 
+  
   //check command line argument count
   if (argc != 4) {
     if(argc == 5 && 
