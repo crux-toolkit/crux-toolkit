@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_peptide_association.h
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 #ifndef PROTEIN_PEPTIDE_ASSOCIATION_H
@@ -47,6 +47,15 @@ void free_one_protein_peptide_association(
 void print_protein_peptide_association(
   PROTEIN_PEPTIDE_ASSOCIATION_T* protein_peptide_association, ///< object to print -in 
   FILE* file  ///< the out put stream -out
+  );
+
+/**
+ * Copies the entire linklist of protein_peptide_association object src to dest.
+ * dest must be a heap allocated protein_peptide_association
+ */
+void copy_protein_peptide_association(
+  PROTEIN_PEPTIDE_ASSOCIATION_T* src, ///< source protein_peptide_association -in
+  PROTEIN_PEPTIDE_ASSOCIATION_T* dest ///< destination protein_peptide_association -out
   );
 
 /**

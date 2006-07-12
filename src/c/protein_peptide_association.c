@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_peptide_association.c
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -100,6 +100,27 @@ void print_protein_peptide_association(
   }
   else if(peptide_type = NON_TRYPTIC){
     fprintf(file, "peptide type:&s\n", "NON_TRYPTIC");
+  }
+}
+
+/**
+ * Copies the entire linklist of protein_peptide_association object src to dest.
+ * dest must be a heap allocated protein_peptide_association
+ */
+void copy_protein_peptide_association(
+  PROTEIN_PEPTIDE_ASSOCIATION_T* src, ///< source protein_peptide_association -in
+  PROTEIN_PEPTIDE_ASSOCIATION_T* dest ///< destination protein_peptide_association -out
+  )
+{
+  PROTEIN_PEPTIDE_ASSOCIATION_T* next_association;
+  set_protein_peptide_association_peptide_type(dest, src->peptide_type);
+  set_protein_peptide_association_parent_protein(dest, src->parent_protein);
+  set_protein_peptide_association_start_idx(dest, src->start_idx);
+  //check if end of the linklist
+  if(get_protein_peptide_association_next_association(src) != NULL){
+    next_association = allocate_protein_peptide_association();
+    dest->next_association = next_association;
+    copy_protein_peptide_association(src->next_association, next_association);
   }
 }
 
