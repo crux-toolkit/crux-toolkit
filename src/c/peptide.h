@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -9,36 +9,8 @@
 #include <stdio.h>
 #include "utils.h"
 #include "mass.h"
+#include "protein.h"
 #include "objects.h"
-
-
-
-/**
- * \typedef PEPTIDE_T
- * \brief A peptide subsequence of a protein
- */
-typedef struct peptide PEPTIDE_T;
-
-/**
- * \struct peptide_constraint
- * \brief Object to represent constraints which a peptide may or may not
- *  satisfy.
- * def TRYPTIC: a protein that ends with either K or R and 
- *              any other K and R in the sequence must be followed by a P
- */
-typedef struct peptide_constraint PEPTIDE_CONSTRAINT_T;
-
-/**
- * \typedef RESIDUE_ITERATOR_T 
- * \brief An object to iterate over the residues in a peptide
- */
-typedef struct residue_iterator RESIDUE_ITERATOR_T;
-
-/**
- * \typedef PEPTIDE_TYPE_T 
- * \brief The typedef for peptide type, with regard to trypticity.
- */
-typedef enum _peptide_type PEPTIDE_TYPE_T;
 
 /**
  * \returns The mass of the given peptide.
@@ -54,9 +26,12 @@ PEPTIDE_T* allocate_peptide(void);
  * \returns A new peptide object, populated with the user specified parameters.
  */
 PEPTIDE_T* new_peptide(
-  char* my_sequence,        ///< The sequence of the protein that that contains the peptide.
-  unsigned char length,     ///< The length of the peptide
-  double peptide_mass       ///< The neutral mass of the peptide
+  char* my_sequence,        ///< The sequence of the protein that that contains the peptide. -in
+  unsigned char length,     ///< The length of the peptide -in
+  double peptide_mass,       ///< The neutral mass of the peptide -in
+  PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
+  int start ///< the start index of this peptide in the protein sequence -in
+  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC) -in
 );
 
 /** 
@@ -125,7 +100,7 @@ PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void);
  * \returns An allocated PEPTIDE_CONSTRAINT_T object.
  */
 PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
-  PEPTIDE_TYPE_T* peptide_type, ///< the peptide_type -in
+  PEPTIDE_TYPE_T peptide_type, ///< the peptide_type -in
   float min_mass, ///< the minimum mass -in
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in

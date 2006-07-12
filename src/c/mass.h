@@ -1,6 +1,6 @@
 /**
  * \file mass.h 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -30,5 +30,27 @@
  * Mass of carbon monoxide
  */
 #define MASS_CO 28.0101
+
+
+/**
+ * \returns The mass of the given amino acid.
+ */
+float get_mass_amino_acid(
+  char amino_acid ///< the query amino acid -in
+  );
+
+/**
+ * \returns The average mass of the given amino acid.
+ */
+float get_mass_amino_acid_average(
+  char amino_acid ///< the query amino acid -in
+  );
+
+/**
+ * \returns The monoisotopic mass of the given amino acid.
+ */
+float get_mass_amino_acid_monoisotopic(
+  char amino_acid ///< the query amino acid -in
+  );
 
 #endif

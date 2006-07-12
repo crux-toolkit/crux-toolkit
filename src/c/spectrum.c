@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.26 $
+ * REVISION: $Revision: 1.27 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -11,6 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include "objects.h"
 #include "spectrum.h"
 #include "peak.h"
 #include "utils.h"

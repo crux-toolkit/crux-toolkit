@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -8,7 +8,10 @@
 #include <assert.h>
 #include <ctype.h>
 #include "utils.h"
+#include "objects.h"
+#include "peptide.h"
 #include "protein.h"
+#include "protein_peptide_association.h"
 
 /*
  * Constants
