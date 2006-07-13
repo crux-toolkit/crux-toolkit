@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -67,6 +67,13 @@ typedef struct peptide_constraint PEPTIDE_CONSTRAINT_T;
  * \brief An object to iterate over the residues in a peptide
  */
 typedef struct residue_iterator RESIDUE_ITERATOR_T;
+
+/**
+ * \typedef PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T 
+ * \brief An object to iterate over the protein peptide associations in a peptide
+ */
+typedef struct protein_peptide_association_iterator PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T;
+
 
 /**
  * \brief The enum for peptide type, with regard to trypticity.

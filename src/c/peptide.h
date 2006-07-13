@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -28,9 +28,9 @@ PEPTIDE_T* allocate_peptide(void);
 PEPTIDE_T* new_peptide(
   char* my_sequence,        ///< The sequence of the protein that that contains the peptide. -in
   unsigned char length,     ///< The length of the peptide -in
-  double peptide_mass,       ///< The neutral mass of the peptide -in
+  float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
-  int start ///< the start index of this peptide in the protein sequence -in
+  int start_idx, ///< the start index of this peptide in the protein sequence -in
   PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC) -in
 );
 
@@ -183,6 +183,41 @@ float get_peptide_peptide_mass(
   );
 
 /**
+ * sets the protein_peptide_association field in the peptide
+ * must pass on a heap allocated protein_peptide_association object
+ * does not copy in the object, just the pointer to the object.
+ */
+void set_peptide_protein_peptide_association(
+  PEPTIDE_T* peptide,  ///< the peptide to set -out                                             
+  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association ///< new protein_peptide_association -in
+);
+
+/**
+ * this method adds the new_association to the end of the existing peptide's 
+ * linklist of protein_peptide_associations
+ * must pass on a heap allocated protein_peptide_association object
+ * does not copy in the object, just the pointer to the object.
+ */
+void add_peptide_protein_peptide_association(
+  PEPTIDE_T* peptide,  ///< the peptide to set -out
+  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association ///< new protein_peptide_association -in
+  );
+
+/**
+ * returns a point to the peptide_protein_association field of the peptide
+ */
+PROTEIN_PEPTIDE_ASSOCIATION_T* get_peptide_protein_peptide_association(
+  PEPTIDE_T* peptide  ///< the peptide to query the peptide_protein_peptide_association -in
+);
+
+
+
+//add new peptide_association objects to an existing peptide
+
+
+/**peptide_constraint**/
+
+/**
  * sets the peptide type of the peptide_constraint
  */
 void set_peptide_constraint_peptide_type(
@@ -193,7 +228,7 @@ void set_peptide_constraint_peptide_type(
 /**
  * \returns the peptide type of the peptide_constraint
  */
-PEPTIDE_TYPE_T* get_peptide_constraint_peptide_type(
+PEPTIDE_TYPE_T get_peptide_constraint_peptide_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
 
@@ -257,11 +292,10 @@ int get_peptide_constraint_max_length(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
 
+
 /**
- * Iterator
+ * Residue Iterator
  */
-
-
 
 /**
  * Instantiates a new residue_iterator from a peptide.
@@ -292,6 +326,41 @@ BOOLEAN_T residue_iterator_has_next(
 char residue_iterator_next(
   RESIDUE_ITERATOR_T* residue_iterator  ///< the query iterator -in
   );
+
+/**
+ * Protein peptide association Iterator
+ */
+
+/**
+ * Instantiates a new protein_peptide_association_iterator from a peptide.
+ * \returns a PROTEIN_PEPTIDE_ASSOCIATION_T object.
+ */
+PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* new_protein_peptide_association_iterator(
+  PEPTIDE_T* peptide ///< peptide's fields to iterate -in
+  );
+
+/**
+ * Frees an allocated protein_peptide_association_iterator object.
+ */
+void free_protein_peptide_association_iterator(
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator ///< free this object -in
+  );
+
+/**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional protein_peptide_associations to iterate over, FALSE if not.
+ */
+BOOLEAN_T protein_peptide_association_iterator_has_next(
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator///< the query iterator -in
+  );
+
+/**
+ * \returns The next protein_peptide_associations in the peptide.
+ */
+PROTEIN_PEPTIDE_ASSOCIATION_T* protein_peptide_association_iterator_next(
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator///< the query iterator -in
+  );
+
 
 /*
  * Local Variables:

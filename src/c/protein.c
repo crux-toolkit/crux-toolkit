@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -45,6 +45,42 @@ struct protein_peptide_iterator {
   unsigned int peptide_idx; ///< The index of the current peptide.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The type of peptide to iterate over.
 };
+
+
+/**
+ * \returns An (empty) protein object.
+ */
+PROTEIN_T* allocate_protein(void){
+  PROTEIN_T* protein = (PROTEIN_T*)mycalloc(1, sizeof(PROTEIN_T));
+  return protein;
+}
+
+/**
+ * \returns A new protein object.
+ */
+PROTEIN_T* new_protein(
+  char*         id, ///< The protein sequence id.
+  char*   sequence, ///< The protein sequence.
+  int       length, ///< The length of the protein sequence.
+  char* annotation  ///< Optional protein annotation. 
+  )
+{
+  PROTEIN_T* protein = allocate_protein(); //change
+}         
+
+
+/**
+ * Frees an allocated protein object.
+ */
+void free_protein(PROTEIN_T* protein)
+{
+  free(protein);
+}
+
+char* get_protein_sequence(PROTEIN_T* protein)
+{
+  return "ya!";
+}
 
 /*
  * Local Variables:
