@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_peptide_association.h
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 #ifndef PROTEIN_PEPTIDE_ASSOCIATION_H
@@ -107,6 +107,7 @@ int get_protein_peptide_association_start_idx(
 
 /**
  * sets the next protein_peptide_association on the link list
+ * assumes that the src_association's next_association feild is NULL
  */
 void set_protein_peptide_association_next_association(
   PROTEIN_PEPTIDE_ASSOCIATION_T* src_association, ///< the protein_peptide_association to set -out   

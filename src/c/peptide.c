@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -51,10 +51,19 @@ struct residue_iterator {
 };
 
 /**
+ * \struct protein_peptide_association_iterator
+ * \brief Object to iterate over the protein_peptide_associations linklist in a peptide
+ */
+struct protein_peptide_association_iterator{
+  PEPTIDE_T*  peptide; ///< The peptide whose protein_peptide_associations to iterate over.
+  PROTEIN_PEPTIDE_ASSOCIATION_T* current; ///< the current protein_peptide_associations
+};
+
+/**
  * \returns An (empty) peptide object.
  */
 PEPTIDE_T* allocate_peptide(void){
-  (PEPTIDE_T*) peptide = (PEPTIDE_T*)mycalloc(1, sizeof(PEPTIDE_T));
+  PEPTIDE_T* peptide = (PEPTIDE_T*)mycalloc(1, sizeof(PEPTIDE_T));
   peptide->protein_peptide_association = NULL; //CHECK for memory leak
   return peptide;
 }
@@ -70,8 +79,9 @@ float calc_peptide_mass(
   RESIDUE_ITERATOR_T * residue_iterator = new_residue_iterator(peptide);
   
   while(residue_iterator_has_next(residue_iterator)){
-    peptide_mass += get_mass_amino_acid(residue_iterator_next(residue_iterator));
+    peptide_mass += get_mass_amino_acid_average(residue_iterator_next(residue_iterator));
   }
+  free_residue_iterator(residue_iterator);
   return peptide_mass;
 }
 
@@ -84,7 +94,7 @@ PEPTIDE_T* new_peptide(
   unsigned char length,     ///< The length of the peptide -in
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
-  int start, ///< the start index of this peptide in the protein sequence -in
+  int start_idx, ///< the start index of this peptide in the protein sequence -in
   PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC) -in
   )
 {
@@ -153,19 +163,20 @@ void print_peptide(
   FILE* file  ///< the out put stream -out
   )
 {
-  PROTEIN_PEPTIDE_ASSOCIATION_T* current_association = peptide->protein_peptide_association;
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* iterator = 
+    new_protein_peptide_association_iterator(peptide);
   fprintf(file,"%s\n","Peptide");
   fprintf(file,"%.2f\t",peptide->peptide_mass);
   fprintf(file,"%d\t",peptide->length);
   fprintf(file,"%s\n",peptide->sequence);
   //interate through the linklist of possible parent proteins
-  while(current_association != NULL){
-    print_protein_peptide_association(current_association, file);
-    current_association = get_protein_peptide_association_next_association(current_association);
+  while(protein_peptide_association_iterator_has_next(iterator)){
+    //protein_peptide_association_iterator_next(iterator); //temp
+    print_protein_peptide_association(protein_peptide_association_iterator_next(iterator), file);
   }
+  free_protein_peptide_association_iterator(iterator);
 }
 
-//FIXME
 /**
  * Copies peptide object src to dest.
  * dest must be a heap allocated peptide
@@ -175,9 +186,15 @@ void copy_peptide(
   PEPTIDE_T* dest ///< destination peptide -out
   )
 {
-  set_peptide_sequence(dest, get_peptide_sequence(src));
+  char* sequence =  get_peptide_sequence(src);
+  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association =
+    allocate_protein_peptide_association();
+  set_peptide_sequence(dest, sequence);
+  free(sequence);
   set_peptide_length(dest, get_peptide_length(src));
   set_peptide_peptide_mass(dest, get_peptide_peptide_mass(src));
+  copy_protein_peptide_association(src->protein_peptide_association, new_association);//wrong..
+  set_peptide_protein_peptide_association(dest, new_association);
 }
 
 //FIXME needs to be rewritten for the new output format -Chris
@@ -190,6 +207,7 @@ BOOLEAN_T parse_peptide_file(
   FILE* file
   )
 {
+  /*
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
@@ -208,6 +226,7 @@ BOOLEAN_T parse_peptide_file(
   set_peptide_peptide_mass(peptide_mass);
   set_peptide_length(peptide_length);
   free(new_line);
+  */
   return TRUE;
 }
 
@@ -216,7 +235,7 @@ BOOLEAN_T parse_peptide_file(
  * \returns An allocated PEPTIDE_CONSTRAINT_T object.
  */
 PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void){
-  (PEPTIDE_CONSTRAINT_T*) peptide_constraint =
+  PEPTIDE_CONSTRAINT_T* peptide_constraint =
     (PEPTIDE_CONSTRAINT_T*)mycalloc(1, sizeof(PEPTIDE_CONSTRAINT_T));
   return peptide_constraint;
 }
@@ -226,14 +245,14 @@ PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void){
  * \returns An allocated PEPTIDE_CONSTRAINT_T object.
  */
 PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
-  PEPTIDE_TYPE_T peptide_type; ///< The type of peptides, is it TRYPTIC -in
+  PEPTIDE_TYPE_T peptide_type, ///< The type of peptides, is it TRYPTIC -in
   float min_mass, ///< the minimum mass -in
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
   int max_length  ///< the maximum lenth of peptide -in
   )
 {
-  (PEPTIDE_CONSTRAINT_T*) peptide_constraint =
+  PEPTIDE_CONSTRAINT_T* peptide_constraint =
     allocate_peptide_constraint();
 
   set_peptide_constraint_peptide_type(peptide_constraint, peptide_type);
@@ -255,10 +274,10 @@ BOOLEAN_T peptide_constraint_is_satisfied(
     PEPTIDE_T* peptide ///< the query peptide -in
     )
 {
-  if(get_peptide_length(peptide) <= get_peptide_constraints_max_length(peptide_constraint) &&
-     get_peptide_length(peptide) >= get_peptide_constraints_min_length(peptide_constraint) &&
-     get_peptide_peptide_mass(peptide) <= get_peptide_constraints_max_mass(peptide_constraint) &&
-     get_peptide_peptide_mass(peptide) >= get_peptide_constraints_min_mass(peptide_constraint)
+  if(get_peptide_length(peptide) <= get_peptide_constraint_max_length(peptide_constraint) &&
+     get_peptide_length(peptide) >= get_peptide_constraint_min_length(peptide_constraint) &&
+     get_peptide_peptide_mass(peptide) <= get_peptide_constraint_max_mass(peptide_constraint) &&
+     get_peptide_peptide_mass(peptide) >= get_peptide_constraint_min_mass(peptide_constraint)
      )
     {
       return TRUE;
@@ -361,23 +380,21 @@ float get_peptide_peptide_mass(
   return peptide->peptide_mass;
 }
 
-
-
 /**
  * sets the peptide type of the peptide_constraint
  */
 void set_peptide_constraint_peptide_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
-  PEPTIDE_TYPE_T peptide_type, ///< the peptide_type for the constraint -in
+  PEPTIDE_TYPE_T peptide_type ///< the peptide_type for the constraint -in
   )
 {
-  peptide_constraint->peptide_type = peptide;
+  peptide_constraint->peptide_type = peptide_type;
 }
 
 /**
  * \returns the peptide type of the peptide_constraint
  */
-PEPTIDE_TYPE_T get_peptide_constraint_is_tryptic(
+PEPTIDE_TYPE_T get_peptide_constraint_peptide_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   )
 {
@@ -469,6 +486,51 @@ int get_peptide_constraint_max_length(
   return peptide_constraint->max_length;
 }
 
+/**
+ * sets the protein_peptide_association field in the peptide
+ * this method should be ONLY used when the peptide has no existing list of protein_peptide_association
+ * use add_peptide_protein_peptide_association method to add to existing list
+ * must pass on a heap allocated protein_peptide_association object
+ * does not copy in the object, just the pointer to the object.
+ */
+void set_peptide_protein_peptide_association(
+  PEPTIDE_T* peptide,  ///< the peptide to set -out                                             
+  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association ///< new protein_peptide_association -in
+  )
+{
+  peptide->protein_peptide_association = new_association;
+}
+
+/**
+ * this method adds the new_association to the end of the existing peptide's 
+ * linklist of protein_peptide_associations
+ * must pass on a heap allocated protein_peptide_association object
+ * does not copy in the object, just the pointer to the object.
+ */
+void add_peptide_protein_peptide_association(
+  PEPTIDE_T* peptide,  ///< the peptide to set -out
+  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association ///< new protein_peptide_association -in
+  )
+{
+  PROTEIN_PEPTIDE_ASSOCIATION_T* add_association = peptide->protein_peptide_association;
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR* iterator =
+    new_peptide_protein_peptide_association_iterator(peptide);
+  //find the last protein_peptide_association object in the list
+  while(peptide_protein_peptide_association_iterator_has_next(peptide)){
+    add_location = peptide_protein_peptide_association_iterator_next(peptide);
+  }
+  set_protein_peptide_association_next_association(add_association, new_association);
+}
+
+/**
+ * returns a point to the peptide_protein_association field of the peptide
+ */
+PROTEIN_PEPTIDE_ASSOCIATION_T* get_peptide_protein_peptide_association(
+  PEPTIDE_T* peptide  ///< the peptide to query the peptide_protein_peptide_association -in
+  )
+{
+  return peptide->protein_peptide_association;
+}
 
 /**
  * Iterator
@@ -482,7 +544,7 @@ RESIDUE_ITERATOR_T* new_residue_iterator(
   PEPTIDE_T* peptide ///< peptide sequence to iterate -in
   )
 {
-  (RESIDUE_ITERATOR_T*) residue_iterator =
+  RESIDUE_ITERATOR_T* residue_iterator =
     (RESIDUE_ITERATOR_T*)mycalloc(1, sizeof(RESIDUE_ITERATOR_T));
   
   residue_iterator->peptide =  peptide;
@@ -518,11 +580,71 @@ char residue_iterator_next(
   RESIDUE_ITERATOR_T* residue_iterator  ///< the query iterator -in
   )
 {
-  ++residue_idx;
-  return residue_iterator->peptide->sequence[residue_idx-1];
+  ++residue_iterator->residue_idx;
+  return residue_iterator->peptide->sequence[residue_iterator->residue_idx - 1];
 }
 
 
+/**
+ * Protein peptide association Iterator
+ */
+
+/**
+ * Instantiates a new protein_peptide_association_iterator from a peptide.
+ * \returns a PROTEIN_PEPTIDE_ASSOCIATION_T object.
+ */
+PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* new_protein_peptide_association_iterator(
+  PEPTIDE_T* peptide ///< peptide's fields to iterate -in
+  )
+{
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* association_iterator =
+    (PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T*)mycalloc(1,sizeof(PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T));
+  association_iterator->peptide = peptide;
+  association_iterator->current = peptide->protein_peptide_association;
+  return association_iterator;
+}
+
+/**
+ * Frees an allocated protein_peptide_association_iterator object.
+ */
+void free_protein_peptide_association_iterator(
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator ///< free this object -in
+  )
+{
+  free(protein_peptide_association_iterator);
+
+}
+
+/**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional protein_peptide_associations to iterate over, FALSE if not.
+ */
+BOOLEAN_T protein_peptide_association_iterator_has_next(
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator///< the query iterator -in
+  )
+{
+  return !(protein_peptide_association_iterator->current == NULL);
+}
+
+/**
+ * \returns The next protein_peptide_associations in the peptide.
+ */
+PROTEIN_PEPTIDE_ASSOCIATION_T* protein_peptide_association_iterator_next(
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator///< the query iterator -in
+  )
+{
+  PROTEIN_PEPTIDE_ASSOCIATION_T* previous = protein_peptide_association_iterator->current;
+  if(protein_peptide_association_iterator->current != NULL){
+    protein_peptide_association_iterator->current = 
+      get_protein_peptide_association_next_association(protein_peptide_association_iterator->current);
+  }
+  else{
+    free(protein_peptide_association_iterator);
+    fprintf(stderr,"ERROR: no more protein_peptide_associations to iterate\n");
+    exit(1);
+  }
+  return previous;
+}
   
 /*
  * Local Variables:

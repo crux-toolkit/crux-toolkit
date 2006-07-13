@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_peptide_association.c
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -32,7 +32,7 @@ struct protein_peptide_association{
  * \returns An (empty) protein_peptide_association object.
  */
 PROTEIN_PEPTIDE_ASSOCIATION_T* allocate_protein_peptide_association(void){
-  (PROTEIN_PEPTIDE_ASSOCIATION_T*) protein_peptide_association =
+  PROTEIN_PEPTIDE_ASSOCIATION_T* protein_peptide_association =
     mymalloc(sizeof(PROTEIN_PEPTIDE_ASSOCIATION_T));
 
   protein_peptide_association->next_association = NULL;
@@ -90,16 +90,16 @@ void print_protein_peptide_association(
 {
   PEPTIDE_TYPE_T peptide_type = get_protein_peptide_association_peptide_type(protein_peptide_association);
 
-  fprintf(file, "parent protein:&s\n", 
-          get_protein_sequence(protein_peptide_association->parent_protein));
-  if(peptide_type = TRYPTIC){
-    fprintf(file, "peptide type:&s\n", "TRYPTIC");
+  fprintf(file, "parent protein:%s\n", 
+          get_protein_sequence(protein_peptide_association->parent_protein)); //FREE MEMORY ISSUES
+  if(peptide_type == TRYPTIC){
+    fprintf(file, "peptide type:%s\n", "TRYPTIC");
   }
-  else if(peptide_type = PARTIALLY_TRYPTIC){
-    fprintf(file, "peptide type:&s\n", "PARTIALLY_TRYPTIC");
+  else if(peptide_type == PARTIALLY_TRYPTIC){
+    fprintf(file, "peptide type:%s\n", "PARTIALLY_TRYPTIC");
   }
-  else if(peptide_type = NON_TRYPTIC){
-    fprintf(file, "peptide type:&s\n", "NON_TRYPTIC");
+  else if(peptide_type == NON_TRYPTIC){
+    fprintf(file, "peptide type:%s\n", "NON_TRYPTIC");
   }
 }
 
@@ -193,6 +193,7 @@ int get_protein_peptide_association_start_idx(
 
 /**
  * sets the next protein_peptide_association on the link list
+ * assumes that the src_association's next_association feild is NULL
  */
 void set_protein_peptide_association_next_association(
   PROTEIN_PEPTIDE_ASSOCIATION_T* src_association, ///< the protein_peptide_association to set -out   
