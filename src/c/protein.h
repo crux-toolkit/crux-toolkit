@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -63,8 +63,8 @@ BOOLEAN_T parse_protein_fasta_file(
  * Additional get and set methods
  */
 
-/*int get_protein_peptides(PROTEIN_T* protein);*/
-/*int get_protein_peptides(PROTEIN_T* protein);*/
+/*PEPTIDE_T** get_protein_peptides(PROTEIN_T* protein, PEPTIDE_CONSTRAINT*
+ * peptide_constraint);*/
 
 char* get_protein_sequence(PROTEIN_T* protein);
 

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -156,7 +156,7 @@ void free_peptide (
 //FIXME documentation
 /**
  * Prints a peptide object to file.
- * mass \t peptide-length \t peptide-sequence \n
+ * mass \\t peptide-length \\t peptide-sequence \\n
  */
 void print_peptide(
   PEPTIDE_T* peptide,  ///< the query peptide -in
