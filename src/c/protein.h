@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -32,27 +32,35 @@ PROTEIN_T* new_protein(
 /**
  * Frees an allocated protein object.
  */
-void free_protein(PROTEIN_T* protein);
+void free_protein(
+  PROTEIN_T* protein ///< object to free -in
+  );
 
 /**
  * Prints a protein object to file.
  */
-void print_protein(PROTEIN_T* protein, FILE* file);
+void print_protein(
+  PROTEIN_T* protein, ///< protein to print -in
+  FILE* file ///< output stream -out
+  );
 
 /**
  * Copies protein object src to dest.
+ * dest must be a heap allocated object 
  */
 void copy_protein(
-  PROTEIN_T* src,
-  PROTEIN_T* dest);
+  PROTEIN_T* src,///< protein to copy -in
+  PROTEIN_T* dest ///< protein to copy to -out
+  );
 
 /**
  * Parses a protein from an open (FASTA) file.
  * \returns TRUE if success. FALSE is failure.
  */
 BOOLEAN_T parse_protein_fasta_file(
-  PROTEIN_T* protein,
-  FILE* file);
+  PROTEIN_T* protein, ///< protein object to fill in -out
+  FILE* file ///< fasta file -in
+  );
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
@@ -66,8 +74,78 @@ BOOLEAN_T parse_protein_fasta_file(
 /*PEPTIDE_T** get_protein_peptides(PROTEIN_T* protein, PEPTIDE_CONSTRAINT*
  * peptide_constraint);*/
 
-char* get_protein_sequence(PROTEIN_T* protein);
+/**
+ *\returns the id of the protein
+ * returns a heap allocated new copy of the id
+ * user must free the return id
+ */
+char* get_protein_id(
+  PROTEIN_T* protein ///< the query protein -in 
+);
 
+/**
+ * sets the id of the protein
+ */
+void set_protein_id(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  char* id ///< the sequence to add -in
+);
+
+/**
+ *\returns the sequence of the protein
+ * returns a heap allocated new copy of the sequence
+ * user must free the return sequence 
+ */
+char* get_protein_sequence(
+  PROTEIN_T* protein ///< the query protein -in 
+);
+
+/**
+ * sets the sequence of the protein
+ */
+void set_protein_sequence(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  char* sequence ///< the sequence to add -in
+);
+
+/**
+ *\returns the length of the protein
+ */
+int get_protein_length(
+  PROTEIN_T* protein ///< the query protein -in 
+);
+
+/**
+ * sets the id of the protein
+ */
+void set_protein_length(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  int length ///< the length to add -in
+);
+
+/**
+ *\returns the annotation of the protein
+ * returns a heap allocated new copy of the annotation
+ * user must free the return annotation
+ */
+char* get_protein_annotation(
+  PROTEIN_T* protein ///< the query protein -in 
+);
+
+/**
+ * sets the annotation of the protein
+ */
+void set_protein_annotation(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  char* annotation ///< the sequence to add -in
+);
+
+
+
+/**
+ * Iterator
+ * iterates over the peptides given a partent protein and constraints
+ */
 
 /**
  * Instantiates a new peptide_iterator from a peptide.

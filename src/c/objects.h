@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -78,7 +78,7 @@ typedef struct protein_peptide_association_iterator PROTEIN_PEPTIDE_ASSOCIATION_
 /**
  * \brief The enum for peptide type, with regard to trypticity.
  */
-enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC}; 
+enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC}; 
 
 /**
  * \typedef PEPTIDE_TYPE_T 
