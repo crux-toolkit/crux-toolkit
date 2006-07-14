@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -33,7 +33,7 @@ struct peptide {
  *              any other K and R in the sequence must be followed by a P
  */
 struct peptide_constraint {
-  PEPTIDE_TYPE_T peptide_type; ///< The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC)
+  PEPTIDE_TYPE_T peptide_type;///< The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC)
   float min_mass; ///< The minimum mass of the peptide
   float max_mass; ///< The maximum mass of the peptide
   int min_length; ///< The minimum length of the peptide
@@ -95,7 +95,7 @@ PEPTIDE_T* new_peptide(
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC) -in
+  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
   )
 {
   PEPTIDE_T* peptide = allocate_peptide();
@@ -177,6 +177,7 @@ void print_peptide(
   free_protein_peptide_association_iterator(iterator);
 }
 
+//TESTME
 /**
  * Copies peptide object src to dest.
  * dest must be a heap allocated peptide
@@ -187,14 +188,18 @@ void copy_peptide(
   )
 {
   char* sequence =  get_peptide_sequence(src);
-  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association =
-    allocate_protein_peptide_association();
+  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association;
+
   set_peptide_sequence(dest, sequence);
-  free(sequence);
   set_peptide_length(dest, get_peptide_length(src));
   set_peptide_peptide_mass(dest, get_peptide_peptide_mass(src));
-  copy_protein_peptide_association(src->protein_peptide_association, new_association);//wrong..
+
+  //copy all of the protein_peptide_association in the peptide
+  new_association = allocate_protein_peptide_association();
+  copy_protein_peptide_association(current, new_association);
   set_peptide_protein_peptide_association(dest, new_association);
+  
+  free(sequence);
 }
 
 //FIXME needs to be rewritten for the new output format -Chris

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_peptide_association.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -98,8 +98,11 @@ void print_protein_peptide_association(
   else if(peptide_type == PARTIALLY_TRYPTIC){
     fprintf(file, "peptide type:%s\n", "PARTIALLY_TRYPTIC");
   }
-  else if(peptide_type == NON_TRYPTIC){
-    fprintf(file, "peptide type:%s\n", "NON_TRYPTIC");
+  else if(peptide_type == NOT_TRYPTIC){
+    fprintf(file, "peptide type:%s\n", "NOT_TRYPTIC");
+  }
+  else if(peptide_type == ANY_TRYPTIC){
+    fprintf(file, "peptide type:%s\n", "ANY_TRYPTIC");
   }
 }
 
