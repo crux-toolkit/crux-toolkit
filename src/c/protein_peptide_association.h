@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_peptide_association.h
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 #ifndef PROTEIN_PEPTIDE_ASSOCIATION_H
@@ -22,7 +22,7 @@ PROTEIN_PEPTIDE_ASSOCIATION_T* allocate_protein_peptide_association(void);
 PROTEIN_PEPTIDE_ASSOCIATION_T* new_protein_peptide_association(
   PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
   PROTEIN_T* parent_protein, ///< the parent of this preptide -in
-  int start_idx ///< start index of the peptide in the protein sequence -in
+  int start_idx ///< start index of the peptide in the protein sequence, first residue is 1 -in
   );
 
 

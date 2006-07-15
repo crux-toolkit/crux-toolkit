@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -31,8 +31,8 @@ PEPTIDE_T* new_peptide(
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC) -in
-);
+  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
+  );
 
 /** 
  * \returns the neutral mass of the peptide
