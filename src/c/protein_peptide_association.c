@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_peptide_association.c
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -23,7 +23,7 @@
 struct protein_peptide_association{
   PEPTIDE_TYPE_T peptide_type; ///< the peptide type for the corresponding protein
   PROTEIN_T* parent_protein; ///< the parent of this preptide
-  int start_idx; ///< start index of the peptide in the protein sequence
+  int start_idx; ///< start index of the peptide in the protein sequence, first residue is 1 
   PROTEIN_PEPTIDE_ASSOCIATION_T* next_association; ///< a linklist of protein_peptide_association   
 };
 

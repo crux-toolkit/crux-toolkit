@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -196,7 +196,7 @@ void copy_peptide(
 
   //copy all of the protein_peptide_association in the peptide
   new_association = allocate_protein_peptide_association();
-  copy_protein_peptide_association(current, new_association);
+  copy_protein_peptide_association(src->protein_peptide_association, new_association);
   set_peptide_protein_peptide_association(dest, new_association);
   
   free(sequence);
@@ -518,11 +518,11 @@ void add_peptide_protein_peptide_association(
   )
 {
   PROTEIN_PEPTIDE_ASSOCIATION_T* add_association = peptide->protein_peptide_association;
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR* iterator =
-    new_peptide_protein_peptide_association_iterator(peptide);
+  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* iterator =
+    new_protein_peptide_association_iterator(peptide);
   //find the last protein_peptide_association object in the list
-  while(peptide_protein_peptide_association_iterator_has_next(peptide)){
-    add_location = peptide_protein_peptide_association_iterator_next(peptide);
+  while(protein_peptide_association_iterator_has_next(iterator)){
+    add_association = protein_peptide_association_iterator_next(iterator);
   }
   set_protein_peptide_association_next_association(add_association, new_association);
 }
