@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -104,7 +104,8 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   float min_mass, ///< the minimum mass -in
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
-  int max_length  ///< the maximum lenth of peptide -in
+  int max_length, ///< the maximum lenth of peptide -in
+  int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
   );
 
 /** 
@@ -292,6 +293,21 @@ int get_peptide_constraint_max_length(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
 
+
+/**
+ * sets the num_mis_cleavage of the peptide_constraint
+ */
+void set_peptide_constraint_num_mis_cleavage(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out 
+  int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
+  );
+
+/**
+ * \returns the num_mis_cleavage of the peptide_constraint
+ */
+int get_peptide_constraint_num_mis_cleavage(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
+  );
 
 /**
  * Residue Iterator

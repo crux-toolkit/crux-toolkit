@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -38,6 +38,7 @@ struct peptide_constraint {
   float max_mass; ///< The maximum mass of the peptide
   int min_length; ///< The minimum length of the peptide
   int max_length; ///< The maximum length of the peptide
+  int num_mis_cleavage; ///< The maximum mis cleavage of the peptide
 };
  
 /**
@@ -171,7 +172,6 @@ void print_peptide(
   fprintf(file,"%s\n",peptide->sequence);
   //interate through the linklist of possible parent proteins
   while(protein_peptide_association_iterator_has_next(iterator)){
-    //protein_peptide_association_iterator_next(iterator); //temp
     print_protein_peptide_association(protein_peptide_association_iterator_next(iterator), file);
   }
   free_protein_peptide_association_iterator(iterator);
@@ -254,7 +254,8 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   float min_mass, ///< the minimum mass -in
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
-  int max_length  ///< the maximum lenth of peptide -in
+  int max_length,  ///< the maximum lenth of peptide -in
+  int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
   )
 {
   PEPTIDE_CONSTRAINT_T* peptide_constraint =
@@ -265,11 +266,13 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   set_peptide_constraint_max_mass(peptide_constraint, max_mass);
   set_peptide_constraint_min_length(peptide_constraint, min_length);
   set_peptide_constraint_max_length(peptide_constraint, max_length);
+  set_peptide_constraint_num_mis_cleavage(peptide_constraint, num_mis_cleavage);
   return peptide_constraint;
 }
 
 
 //FIXME check the association..as long as there is one tryptic parent then true
+// num_miss_cleavage is not implemented..add if needed
 /** 
  * Determines if a peptide satisfies a peptide_constraint.
  * \returns TRUE if the constraint is satisified. FALSE if not.
@@ -491,6 +494,31 @@ int get_peptide_constraint_max_length(
   return peptide_constraint->max_length;
 }
 
+
+/**
+ * sets the num_mis_cleavage of the peptide_constraint
+ */
+void set_peptide_constraint_num_mis_cleavage(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out 
+  int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
+  )
+{
+  peptide_constraint->num_mis_cleavage = num_mis_cleavage;
+}
+
+/**
+ * \returns the num_mis_cleavage of the peptide_constraint
+ */
+int get_peptide_constraint_num_mis_cleavage(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
+  )
+{
+  return peptide_constraint->num_mis_cleavage;
+}
+
+
+
+
 /**
  * sets the protein_peptide_association field in the peptide
  * this method should be ONLY used when the peptide has no existing list of protein_peptide_association
@@ -525,6 +553,7 @@ void add_peptide_protein_peptide_association(
     add_association = protein_peptide_association_iterator_next(iterator);
   }
   set_protein_peptide_association_next_association(add_association, new_association);
+  free_protein_peptide_association_iterator(iterator);
 }
 
 /**

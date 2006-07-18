@@ -1,13 +1,15 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include <ctype.h>
 #include "utils.h"
+#include "alphabet.h"
 #include "objects.h"
 #include "peptide.h"
 #include "protein.h"
@@ -49,6 +51,7 @@ struct protein_peptide_iterator {
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The type of peptide to iterate over.
   float** mass_matrix; ///< stores all the peptide's mass
   BOOLEAN_T has_next; ///< is there a next? 
+  int num_mis_cleavage; ///< The maximum mis cleavage of the peptide
 };
 
 //def bellow
@@ -86,10 +89,10 @@ PROTEIN_T* new_protein(
   )
 {
   PROTEIN_T* protein = allocate_protein();
-  set_protein_id(id);
-  set_protein_sequence(sequence);
-  set_protein_length(length);
-  set_protein_annotation(annotation);
+  set_protein_id(protein, id);
+  set_protein_sequence(protein, sequence);
+  set_protein_length(protein, length);
+  set_protein_annotation(protein, annotation);
   return protein;
 }         
 
@@ -118,16 +121,16 @@ void print_protein(
   int   sequence_length = get_protein_length(protein);
   char* sequence = get_protein_sequence(protein);
   char* id = get_protein_id(protein);
-  char* annotation = get_protein_annotation(protein)
-
-  fprintf(file, ">%s %s\n", id, protein);
+  char* annotation = get_protein_annotation(protein);
+  
+  fprintf(file, ">%s %s\n", id, annotation);
 
   sequence_index = 0;
   while (sequence_length - sequence_index > FASTA_LINE) {
     fprintf(file, "%.*s\n", FASTA_LINE, &(sequence[sequence_index]));
     sequence_index += FASTA_LINE;
   }
-  fprintf(outfile, "%s\n\n", &(sequence[sequence_index]));
+  fprintf(file, "%s\n\n", &(sequence[sequence_index]));
 
   free(sequence);
   free(id);
@@ -159,6 +162,7 @@ void copy_protein(
 
 
 //FIXME ID line and annotation might need to be fixed
+VERBOSE_T verbosity = NORMAL_VERBOSE;
 /**
  * Parses a protein from an open (FASTA) file.
  * \returns TRUE if success. FALSE is failure.
@@ -175,17 +179,21 @@ BOOLEAN_T parse_protein_fasta_file(
   static int sequence_length; //the sequence length
 
   // Read the title line.
-  if (!read_title_line(fasta_file, name, desc)) {
+  if (!read_title_line(file, name, desc)) {
     return(FALSE);
   }
   
-  // Read the sequence.
+  //need this line to initialize alphabet to set for protein instead of DNA
+  set_alphabet(verbosity, "ACDEFGHIKLMNPQRSTVWY"); 
   buffer[0] = '\0';
-  if (!read_raw_sequence(fasta_file, name, PROTEIN_SEQUENCE_LENGTH, buffer, &sequence_length)) {
+
+  // Read the sequence.
+  if (!read_raw_sequence(file, name, PROTEIN_SEQUENCE_LENGTH, buffer, &sequence_length)) {
     die("Sequence %s is too long.\n", name);
   }
     
   //update the protein object.
+  set_protein_length(protein, sequence_length);
   set_protein_id(protein, name);
   set_protein_sequence(protein, buffer);
   set_protein_annotation(protein, desc);
@@ -345,7 +353,7 @@ void set_protein_id(
   char* id ///< the sequence to add -in
   )
 {
-  free(peptide->id);
+  free(protein->id);
   int id_length = strlen(id) +1; //+\0
   char* copy_id = 
     (char *)mymalloc(sizeof(char)*id_length);
@@ -418,7 +426,7 @@ char* get_protein_annotation(
   int annotation_length = strlen(protein->annotation) +1; //+\0
   char * copy_annotation = 
     (char *)mymalloc(sizeof(char)*annotation_length);
-  return strncpy(copy_annotation, protein->annotation, sequence_annotation);  
+  return strncpy(copy_annotation, protein->annotation, annotation_length);  
 }
 
 /**
@@ -441,6 +449,77 @@ void set_protein_annotation(
  * Iterator
  * iterates over the peptides given a partent protein and constraints
  */
+
+/**
+ * examines the peptide with context of it's parent protein to determine it's type
+ * \returns the peptide type
+ */
+PEPTIDE_TYPE_T examine_peptide_type(
+  char* sequence, ///< the parent protein -in
+  int start_idx, ///< the start index of peptide, 1 is the first residue -in 
+  int end_idx ///< the end index of peptide -in
+  )
+{
+  int current_idx = start_idx-1;
+  BOOLEAN_T start = TRUE;
+  BOOLEAN_T end =TRUE;
+
+  //check start position must be cleaved at K or R residue
+  if(current_idx != 0){
+    if(sequence[current_idx-1] != 'K' && sequence[current_idx-1] != 'R'){
+      start = FALSE;
+    }
+    else if(sequence[current_idx] == 'P'){
+      start = FALSE;
+    }         
+  }
+
+  //check if last residue is K or R not followed by P
+  if(end_idx < strlen(sequence)){
+    if(sequence[end_idx-1] != 'K' && sequence[end_idx-1] != 'R'){
+      end = FALSE;
+    }
+    else if(sequence[end_idx] == 'P'){
+      end = FALSE;
+    }
+  }
+  
+  if(start && end){
+    return TRYPTIC;
+  }
+  else if(start || end){
+    return PARTIALLY_TRYPTIC;
+  }
+  else{
+    return NOT_TRYPTIC;
+  }
+}
+
+//FIXME only examines if there is a mis-cleavage or not
+// eventually would like to implement so that it will return the total number of mis-cleavage
+/**
+ * examines the peptide if it contains miscleavage sites within it's sequence
+ * \returns 0 if no miscleavage sites, 1 if there exist at least 1 mis cleavage sites
+ */
+int examine_peptide_cleavage(
+  char* sequence, ///< the parent protein -in
+  int start_idx, ///< the start index of peptide, 1 is the first residue -in 
+  int end_idx ///< the end index of peptide -in
+  )
+{
+  int current_idx = start_idx-1;
+
+  //check for instances of K, R in the sequence excluding the last residue
+  for(; current_idx < end_idx-1; ++current_idx){
+    if(sequence[current_idx] == 'K' || sequence[current_idx] == 'R'){
+      if(sequence[current_idx+1] != 'P'){
+        return 1;
+      }
+    }
+  }
+  return 0;
+
+}
 
 /**
  * recursively calls itself to find the next peptide that fits the constraints
@@ -475,9 +554,9 @@ BOOLEAN_T iterator_state_help(
   }
 
   //is mass with in range
-  if(iterator->mass_max[iterator->cur_length-1][iterator->cur_start-1] < min_mass ||
-        iterator->mass_max[iterator->cur_length-1][iterator->cur_start-1] > max_mass){
-    if(iterator->mass_max[iterator->cur_length-1][iterator->cur_start-1] == 0){
+  if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] < min_mass ||
+        iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] > max_mass){
+    if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] == 0){
       ++iterator->cur_length;
       iterator->cur_start = 1;
     }
@@ -487,16 +566,28 @@ BOOLEAN_T iterator_state_help(
     return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
   }
   
-  //examin tryptic type
+  //examin tryptic type and cleavage
   if(peptide_type != ANY_TRYPTIC){
-    if(examine_tryptic_type(iterator->protein->sequence, 
-                            iterator->start_index, 
-                            iterator->length - iterator->start_index) != peptide_type)
+    if((examine_peptide_type(iterator->protein->sequence, 
+                             iterator->cur_start, 
+                             iterator->cur_length + iterator->cur_start -1) != peptide_type))
       {
         ++iterator->cur_start;
         return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
       }
   }
+
+  //examine cleavage
+  if(iterator->num_mis_cleavage == 0){
+    if(examine_peptide_cleavage(iterator->protein->sequence, 
+                                iterator->cur_start, 
+                                iterator->cur_length + iterator->cur_start -1) != 0)
+      {
+        ++iterator->cur_start;
+        return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
+      }
+  }
+  
   
   return TRUE;
 }
@@ -517,59 +608,6 @@ BOOLEAN_T set_iterator_state(
   PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(iterator->peptide_constraint);
   
   return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
-}
-
-/**
- * examines the peptide with context of it's parent protein to determine it's type
- * \returns the peptide type
- */
-PEPTIDE_TYPE_T examin_peptide_type(
-  char* sequence, ///< the parent protein -in
-  int start_idx, ///< the start index of peptide, 1 is the first residue -in 
-  int end_idx, ///< the end index of peptide -in
-  )
-{
-  int current_idx = start_idx-1;
-  BOOLEAN_T start = TRUE;
-  BOOLEAN_T end =TRUE;
-
-  //check start position must be cleaved at K or R residue
-  if(current_idx != 0){
-    if(sequence[current_idx-1] != 'K' && sequence[current_idx-1] != 'R'){
-      start = FALSE;
-    }
-    //FIXME ask Aaron what this case is????
-    else if(sequence[current_idx] == 'P'){
-      start = FALSE;
-    }         
-  }
-  //check for instances of K, R in the sequence excluding the last residue
-  for(; current_idx < end_idx-1; ++current_idx){
-    if(sequence[current_idx] == 'K' || sequence[current_idx] == 'R'){
-      if(sequence[current_idx+1] != 'P'){
-        return NOT_TRYPTIC;
-      }
-    }
-  }
-  //check if last residue is K or R not followed by P
-  if(end_idx < strlen(sequence)){
-    if(sequence[end_idx-1] != 'K' && sequence[end_idx-1] != 'R'){
-      end = FALSE;
-    }
-    else if(sequence[end_idx] == 'P'){
-      end = FALSE;
-    }
-  }
-  
-  if(start && end){
-    return TRYPTIC;
-  }
-  else if(start || end){
-    return PARTIALLY_TRYPTIC;
-  }
-  else{
-    return NOT_TRYPTIC;
-  }
 }
 
 
@@ -600,29 +638,13 @@ void set_mass_matrix(
   
   //fill in the mass matrix
   for(; start_index < start_size; ++start_index){
-    for(; length_index < length_size; ++length_index){
+    for(length_index = 1; length_index < length_size; ++length_index){
       if(start_index + length_index < protein->length){
         mass_matrix[length_index][start_index] = 
           mass_matrix[length_index - 1][start_index] + mass_matrix[0][start_index + length_index]; 
       }
     }
   }
-}
-
-/**
- * free the heap allocated mass_matrix
- */
-void free_mass_matrix(
-  float** mass_matrix,  ///< the mass matrix to free -in
-  int length_size, ///< the x axis size -in
-  )
-{
-  int matrix_idx = 0;
-  for (; matrix_idx  < length_size; ++matrix_idx){
-    free(mass_matrix[matrix_idx]);
-  }
-
-  free(mass_matrix);
 }
 
 /**
@@ -642,8 +664,8 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
 
   //create mass_matrix
   iterator->mass_matrix = (float**)mycalloc(max_length, sizeof(float*));
-  for (; matrix_index < max_length ; i++){
-    iterator->mass_matrix[matrix_index] = (int*)mycalloc(protein->length, sizeof(float));
+  for (; matrix_index < max_length ; ++matrix_index){
+    iterator->mass_matrix[matrix_index] = (float*)mycalloc(protein->length, sizeof(float));
   }  
   set_mass_matrix(iterator->mass_matrix, protein->length, max_length, peptide_constraint, protein);
   
@@ -654,7 +676,25 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   iterator->cur_start = 1; // must cur_start-1 for access mass_matrix
   iterator->cur_length = 1;  // must cur_length-1 for access mass_matrix
   iterator->has_next = set_iterator_state(iterator);
+  iterator->num_mis_cleavage = get_peptide_constraint_num_mis_cleavage(iterator->peptide_constraint);
   return iterator;
+}
+
+
+/**
+ * free the heap allocated mass_matrix
+ */
+void free_mass_matrix(
+  float** mass_matrix,  ///< the mass matrix to free -in
+  int length_size ///< the x axis size -in
+  )
+{
+  int matrix_idx = 0;
+  for (; matrix_idx  < length_size; ++matrix_idx){
+    free(mass_matrix[matrix_idx]);
+  }
+
+  free(mass_matrix);
 }
 
 /**
@@ -664,7 +704,8 @@ void free_protein_peptide_iterator(
   PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator ///< the iterator to free -in
   )
 {
-  free_mass_matrix(mass, get_peptide_constraint_max_length(peptide_constraint));
+  free_mass_matrix(protein_peptide_iterator->mass_matrix, 
+                   get_peptide_constraint_max_length(protein_peptide_iterator->peptide_constraint));
   free(protein_peptide_iterator);
 }
 
@@ -688,21 +729,21 @@ PEPTIDE_T* protein_peptide_iterator_next(
   PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator
   )
 {
-  char* peptide_sequence;
   PEPTIDE_TYPE_T peptide_type;
 
-  if(protein_peptide_iterator->has_next){
+  if(!protein_peptide_iterator->has_next){
     free_protein_peptide_iterator(protein_peptide_iterator);
     fprintf(stderr, "ERROR: no more peptides\n");
     exit(1);
   }
   
   //copy peptide sequence
-  peptide_sequence = char[protein_peptide_iterator->cur_length + 1];
+  char peptide_sequence[protein_peptide_iterator->cur_length + 1];
+  
   strncpy(peptide_sequence, 
           &protein_peptide_iterator->protein->sequence[protein_peptide_iterator->cur_start-1],
           protein_peptide_iterator->cur_length);
-  peptide_sequence[protein_peptide_iterator->cur_length + 1] = '\O';
+  peptide_sequence[protein_peptide_iterator->cur_length] = '\0';
   
   //set peptide type
   if(get_peptide_constraint_peptide_type(protein_peptide_iterator->peptide_constraint) != ANY_TRYPTIC){
@@ -713,9 +754,9 @@ PEPTIDE_T* protein_peptide_iterator_next(
   //possible to skip this step and leave it as ANY_TRYPTIC
   else{
       peptide_type = 
-        examin_peptide_type(protein_peptide_iterator->protein->sequence,
-                            protein_peptide_iterator->cur_start,
-                            protein_peptide_iterator->cur_start + protein_peptide_iterator->cur_length -1);
+        examine_peptide_type(protein_peptide_iterator->protein->sequence,
+                             protein_peptide_iterator->cur_start,
+                             protein_peptide_iterator->cur_start + protein_peptide_iterator->cur_length -1);
   }
  
   //create new peptide
@@ -723,7 +764,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
     new_peptide
     (peptide_sequence, 
      protein_peptide_iterator->cur_length, 
-     protein_peptide_iterator->mass_matrix[protein_peptide_iterator->cur_start-1][protein_peptide_iterator->cur_length-1],
+     protein_peptide_iterator->mass_matrix[protein_peptide_iterator->cur_length-1][protein_peptide_iterator->cur_start-1],
      protein_peptide_iterator->protein,
      protein_peptide_iterator->cur_start,
      peptide_type);
