@@ -39,17 +39,19 @@ Methods:
               Sort the PSMs by retention time (i.e. scan number) and iterate
               through each PSM. For each PSM calculate the hydrophobic 
               distance between
-              that PSMs peptide (the bait) and the next identified peptide (the
-              prey). Call this distance the score for a TP. Now, calculate
+              that PSM's peptide (the bait) and the next PSM's peptide (the
+              prey). Call this distance the score for a TP PSM. Now, calculate
               the distance between the bait and all candidate peptides in
-              the same mass window as the prey. Call these distances FPs. 
-              Now plot an ROC. A point on the ROC will reflect the fraction
+              the same mass window as the prey PSM. Call these distances the
+              scores for FP PSMs. 
+              Now plot an ROC relating TP to RP hydrophobic distance scores. 
+              A point on the ROC will reflect the fraction
               of TP peptide IDs that we can hope to maintain at a given
               hydrophobic distance threshold while excluding a given
               fraction of FP candidate peptides.
               <br><br>
               Perform this experiment for a couple of different measures of
-              hydrophobic distance.
+              hydrophobic distance, shown below:
               <br><br>
 <table border=1>
 <thead> <tr valign=top> 
@@ -68,7 +70,8 @@ Methods:
     <td>
       <p align=center>
       Difference between the sum of hydrophobicity scores of 
-      each residue from Krokhin et al. (2004). (This is their first score).
+      each residue from Krokhin et al. (2004). (This is the first score
+      mentioned in the paper).
       </p>
 	  </td>
     	</tr>
@@ -93,7 +96,7 @@ Methods:
 	  </td>
     <td>
       <p align=center>
-      The average of the second score for Krokhin et al, for the two
+      The average of the second score for Krokhin et al. (2004), for the two
       most-recent bait peptides (instead of just the most recent).
       </p>
 	  </td>
