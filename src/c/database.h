@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -52,6 +52,17 @@ void copy_database(
 BOOLEAN_T parse_database(
   DATABASE_T* database ///< An allocated database
   );
+
+
+/**
+ * \returns FALSE if database has not yet been parsed or if the nth protein
+ * cannot be parsed.
+ */
+BOOLEAN_T get_database_protein_at_idx(
+    DATABASE_T* database, ///< A parsed database object -in
+    int protein_idx, ///< The index of the protein to retrieve -in
+    PROTEIN_T** ///< A pointer to a pointer to a PROTEIN object -out
+    );
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
