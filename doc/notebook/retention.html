@@ -1,0 +1,195 @@
+                     o
+Retention
+                      </font></b></code>
+<br><br><hr><br><code><b><font face="Helvetica, monospace">
+              July 18, 2006
+                </font></b></code>
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Purpose:
+                </font></b></code><br><br>
+                To explore using retention time-related quantities 
+                for use in peptide sequence database indexing.
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Methods:
+                </font></b></code><br><br>
+                Retention time can be used to reduce the
+                number of candidate peptides that must be examined for a
+                given spectrum in a given mass window. 
+                Certain peptides are not expected to elute at certain
+                retention times; for example, in a typical reverse phase
+                experiment, very hydrophilic
+                peptides should elute early and very hydrophobic peptides
+                should elute late. Put another way, peptides of similar 
+                hydrophobicity should elute at roughly the same time. 
+              <br><br>
+                Thus,
+                given a measure of hydrophobicity, 
+                and a peptide that is known to elute 
+                at a particular time (the bait),
+                one should be able to exclude from search those peptides 
+                that should not elute near that time, i.e., peptides that are
+                greater than some distance 
+                in hydrophobicity from the bait peptide.
+              <br><br>
+              To test this hypothesis, I ran the following experiment:
+              
+              Start with a set of known PSMs from a single RP run. 
+              Sort the PSMs by retention time (i.e. scan number) and iterate
+              through each PSM. For each PSM calculate the hydrophobic 
+              distance between
+              that PSMs peptide (the bait) and the next identified peptide (the
+              prey). Call this distance the score for a TP. Now, calculate
+              the distance between the bait and all candidate peptides in
+              the same mass window as the prey. Call these distances FPs. 
+              Now plot an ROC. A point on the ROC will reflect the fraction
+              of TP peptide IDs that we can hope to maintain at a given
+              hydrophobic distance threshold while excluding a given
+              fraction of FP candidate peptides.
+              <br><br>
+              Perform this experiment for a couple of different measures of
+              hydrophobic distance.
+              <br><br>
+<table border=1>
+<thead> <tr valign=top> 
+    <th> <p align=center>Short name below</p>
+		</th>
+    <th> <p align=center>Method description</p>
+		</th>
+    <th>
+	</thead>
+    <tr>
+    <td>
+      <p align=center>
+      ismb-train-06
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      Difference between the sum of hydrophobicity scores of 
+      each residue from Krokhin et al. (2004). (This is their first score).
+      </p>
+	  </td>
+    	</tr>
+    <tr>
+    <td>
+      <p align=center>
+      *second
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      The second score from Krokhin et al. (2004), which 
+      uses information about N-terminal residues.
+      </p>
+	  </td>
+	</tr>
+  <tr>
+    <td>
+      <p align=center>
+      *two
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      The average of the second score for Krokhin et al, for the two
+      most-recent bait peptides (instead of just the most recent).
+      </p>
+	  </td>
+	</tr>
+  <tr>
+    <td>
+      <p align=center>
+      *scandist
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      A function that attempts to normalize for the distance between 
+      bait and prey retention times, by dividing by the difference between
+      their first scan numbers.
+      </p>
+	  </td>
+	</tr>
+</table>
+<br><br>
+              Run
+              <br><br>
+              retentionRoc.py ismb-train-06.pickledpsm ismb-train-06,msdb.peps
+              <br><br>
+              To generate the input to plot-roc for the roc curves below.
+              <br><br><code><b><font face="Helvetica, monospace">
+Results:
+                </font></b></code><br><br>
+                <br><br>
+                <img src="./Images/ismb-train-06.png"> 
+                <br><br>
+
+<table border=1>
+<thead> <tr valign=top> 
+    <th> <p align=center>Method</p>
+		</th>
+    <th> <p align=center>AUC</p>
+		</th>
+    <th>
+	</thead>
+    <tr>
+    <td>
+      <p align=center>
+      ismb-train-06
+      </p>
+	  </td>
+    <td>
+      <p align=center></p>
+	  </td>
+	</tr>
+    <tr>
+    <td>
+      <p align=center>
+      *second
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      </p>
+	  </td>
+	</tr>
+  <tr>
+    <td>
+      <p align=center>
+      *two
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      </p>
+	  </td>
+	</tr>
+  <tr>
+    <td>
+      <p align=center>
+      *scandist
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      </p>
+	  </td>
+	</tr>
+
+
+</table>
+
+            <br><br><code><b><font face="Helvetica, monospace">
+Discussion:
+                </font></b></code><br><br>
+                For the best distance method (*two) we can maintain 90% of
+                our TP ids while eliminating 50% of the FP (candidate
+                peptides), for an estimated 2-fold decrease in analysis time.
+                Of course this is not cross-validated, but still is a
+                promising result, given that it is as good as charge-czar,
+                without really trying that hard.
+<hr>
+
+</html>
