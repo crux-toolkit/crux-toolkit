@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_peptide_association.c
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -89,9 +89,8 @@ void print_protein_peptide_association(
   )
 {
   PEPTIDE_TYPE_T peptide_type = get_protein_peptide_association_peptide_type(protein_peptide_association);
-
-  fprintf(file, "parent protein:%s\n", 
-          get_protein_sequence(protein_peptide_association->parent_protein)); //FREE MEMORY ISSUES
+  char* sequence = get_protein_sequence(protein_peptide_association->parent_protein);
+  fprintf(file, "parent protein:%s\n", sequence);
   if(peptide_type == TRYPTIC){
     fprintf(file, "peptide type:%s\n", "TRYPTIC");
   }
@@ -104,6 +103,7 @@ void print_protein_peptide_association(
   else if(peptide_type == ANY_TRYPTIC){
     fprintf(file, "peptide type:%s\n", "ANY_TRYPTIC");
   }
+  free(sequence);
 }
 
 /**
