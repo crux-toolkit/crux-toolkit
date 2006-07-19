@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include "utils.h"
+#include "crux-utils.h"
 #include "peptide.h"
 #include "protein.h"
 #include "database.h"
@@ -25,7 +26,7 @@ struct database{
                                 ///  associated file.
   int num_proteins;             ///< Number of proteins in this database.
   BOOLEAN_T is_parsed;          ///< Has this database been parsed yet.
-  PROTEIN_T* proteins;   ///< Proteins in this database (not yet needed.)
+  PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database (not yet needed.)
 };    
 
 /**
@@ -84,7 +85,14 @@ void free_database(
   DATABASE_T* database ///< An allocated database -in
   )
 {
-  database->filename;
+  int protein_idx = 0;
+
+  free(database->filename);
+  fclose(databse->file);
+  
+  for(; protein_idx < database->num_proteins; ++protein_idx){
+    free_protein(database->proteins[protein_idx]);
+  }
   free(database);
 }
 
@@ -107,7 +115,8 @@ void copy_database(
  * Scans the database for start positions of protein sequences (using the
  * '>' character) and stores the locations of the starts in the database 
  * member variable starts. Set the is_parsed member variable to true.
- */
+ * IF false to parse protein, then frees all existing proteins, closes FILE* and resets num_protein to 0;
+*/
 BOOLEAN_T parse_database(
   DATABASE_T* database ///< An allocated database -in
   )
@@ -117,13 +126,15 @@ BOOLEAN_T parse_database(
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
-  
+  PROTEIN_T* new_protein;
+
   //check if already parsed
   if(database->is_parsed){
     return TRUE;
   }
+
   //set memory for all proteins
-  database->proteins = mycalloc(MAX_PROTEINS, sizeof
+  database->proteins = (PROTEIN_T*)mycalloc(MAX_PROTEINS, sizeof(PROTEIN_T));
   
 
   //open file and 
@@ -139,7 +150,28 @@ BOOLEAN_T parse_database(
         fprintf(stderr, "ERROR: exceeds protein index array size\n");
         return FALSE;
       }
-      working_index = database->starts[database->num_proteins];
+      
+      new_protein = allocate_protein();
+
+      //rewind to the begining of the protein to include ">" line
+      fseek(file, working_idex, SEEK_SET);
+      
+      //failed to parse the protein from fasta file
+      if(!parse_protein_fasta_file(new_protein ,file)){
+        fclose(file);
+        free_protein(new_protein);
+        for(; protein_idx < database->num_proteins; ++protein_idx){
+          free_protein(database->proteins[protein_idx]);
+        }
+        database->num_proteins = 0;
+        return FALSE;
+      }
+
+      database->proteins[database->num_proteins] = new_protein;
+
+      /* insert code need for light/heavy functionality for proteins
+      set_protein_offset(new_protein, working_index);
+      */
       ++database->num_proteins;
     }
     working_index = ftell(file);
@@ -157,13 +189,73 @@ BOOLEAN_T parse_database(
 BOOLEAN_T get_database_protein_at_idx(
     DATABASE_T* database, ///< A parsed database object -in
     int protein_idx,      ///< The index of the protein to retrieve -in
-    PROTEIN_T** protein   ///< A pointer to a pointer to a PROTEIN object -out
-    )
+    PROTEIN_T* protein   ///< A pointer to a pointer to a PROTEIN object -out
+    );
+
+
+
+
+/**
+ *\returns the filename of the database
+ * returns a heap allocated new copy of the filename
+ * user must free the return filename
+ */
+char* get_database_filename(
+  DATABASE_T* database ///< the query database -in 
+  )
 {
-
-
-
+  return copy_string(database->filename);
 }
+
+/**
+ * sets the filename of the database
+ * protein->sequence must been initiailized
+ */
+void set_database_filename(
+  DATABASE_T* database, ///< the database to set it's fields -out
+  char* filename ///< the filename to add -in
+  )
+{
+  free(database->filename);
+  database->filename = copy_string(filename);
+}
+
+
+/**
+ * \struct database
+ * \brief A database of protein sequences
+ */
+struct database{
+  char*          filename;      ///< Original database filename.
+  FILE_T*        file;          ///< Open filehandle for this database.
+                                ///  A database has only one
+                                ///  associated file.
+  int num_proteins;             ///< Number of proteins in this database.
+  BOOLEAN_T is_parsed;          ///< Has this database been parsed yet.
+  PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database (not yet needed.)
+};    
+
+
+/**
+ *\returns the FILE* of the database
+ * returns a heap allocated new copy of the filename
+ * user must free the return filename
+ */
+char* get_database_filename(
+  DATABASE_T* database ///< the query database -in 
+  )
+{
+  return copy_string(database->filename);
+}
+
+/**
+ * sets the filename of the database
+ * protein->sequence must been initiailized
+ */
+void set_database_filename(
+  DATABASE_T* database, ///< the database to set it's fields -out
+  char* filename ///< the filename to add -in
+  )
 
 
 /*

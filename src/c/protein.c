@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -29,12 +29,14 @@
  * \brief A protein sequence.
  */
 struct protein{
+  DATABASE_T*  database; ///< Which database is this protein part of
+  unsigned long  offset; ///< The file location in the source file in the database
+  BOOLEAN_T    is_light; ///< is the protein a light protein?
   char*              id; ///< The protein sequence id.
   char*        sequence; ///< The protein sequence.
   int            length; ///< The length of the protein sequence.
   char*      annotation; ///< Optional protein annotation. 
 };    
-
 
 /**
  * \struct protein_peptide_iterator
