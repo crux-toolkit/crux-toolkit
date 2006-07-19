@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -11,8 +11,6 @@
 #include "objects.h"
 #include "peptide.h"
 #include "protein.h"
-
-/* CHRIS This is probably an object for which you can crib code for from an outside source. Even from in-house (like Charles).*/
 
 /**
  * \returns An (empty) database object.

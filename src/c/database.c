@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -23,10 +23,9 @@ struct database{
   FILE_T*        file;          ///< Open filehandle for this database.
                                 ///  A database has only one
                                 ///  associated file.
-  long long int starts[MAX_PROTEINS];  ///< Start positions of proteins in file.
   int num_proteins;             ///< Number of proteins in this database.
   BOOLEAN_T is_parsed;          ///< Has this database been parsed yet.
-  // PROTEIN_T**    proteins;   ///< Proteins in this database (not yet needed.)
+  PROTEIN_T* proteins;   ///< Proteins in this database (not yet needed.)
 };    
 
 /**
@@ -45,14 +44,63 @@ struct database_protein_iterator {
  */
 struct database_peptide_iterator {
   DATABASE_PROTEIN_ITERATOR_T* 
-    database_protein_iterator; ///<The protein iterator. 
+  database_protein_iterator; ///<The protein iterator. 
   PROTEIN_PEPTIDE_ITERATOR_T* 
-    cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
+  cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
   };
 
 // FIXME I think all of these fields are necessary? But maybe some can go
 // in the PROTEIN_PEPTIDE_ITERATOR?
+
+
+
+/**
+ * \returns An (empty) database object.
+ */
+DATABASE_T* allocate_database(void){
+  DATABASE_T* database = (DATABASE_T*)mycalloc(1,sizeof(DATABASE_T));
+  database->is_parsed = FALSE;
+  return database;
+}
+
+/**
+ * \returns A new database object.
+ */
+DATABASE_T* new_database(
+  char*         filename ///< The file from which to parse the database.
+  )
+{
+  DATABASE_T* database = allocate_database();
+  set_database_filename(database, filename);
+  return database;
+}  
+
+//FIXME think about what you're going to do for FILE* file
+/**
+ * Frees an allocated protein object.
+ */
+void free_database(
+  DATABASE_T* database ///< An allocated database -in
+  )
+{
+  database->filename;
+  free(database);
+}
+
+/**
+ * Prints a database object to file.
+ */
+void print_database(DATABASE_T* database, FILE* file);
+
+// START HERE
+
+/**
+ * Copies database object src to dest.
+ */
+void copy_database(
+  DATABASE_T* src,
+  DATABASE_T* dest);
 
 
 /*
@@ -61,8 +109,62 @@ struct database_peptide_iterator {
  * member variable starts. Set the is_parsed member variable to true.
  */
 BOOLEAN_T parse_database(
-  DATABASE_T* database ///< An allocated database
-  );
+  DATABASE_T* database ///< An allocated database -in
+  )
+{
+  unsigned long working_index;
+  
+  char* new_line = NULL;
+  int line_length;
+  size_t buf_length = 0;
+  
+  //check if already parsed
+  if(database->is_parsed){
+    return TRUE;
+  }
+  //set memory for all proteins
+  database->proteins = mycalloc(MAX_PROTEINS, sizeof
+  
+
+  //open file and 
+  FILE* file = fopen(database->filename, "r");
+
+  working_index = ftell(file);
+  //check each line until reach 'S' line
+  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+    if(new_line[0] == '>'){
+      if(database->num_proteins == MAX_PROTEINS+1){
+        fclose(file);
+        free(new_line);
+        fprintf(stderr, "ERROR: exceeds protein index array size\n");
+        return FALSE;
+      }
+      working_index = database->starts[database->num_proteins];
+      ++database->num_proteins;
+    }
+    working_index = ftell(file);
+  }
+  free(new_line);
+  database->file = file;
+  return TRUE;
+}
+
+
+/**
+ * \returns FALSE if database has not yet been parsed or if the nth protein
+ * cannot be parsed.
+ */
+BOOLEAN_T get_database_protein_at_idx(
+    DATABASE_T* database, ///< A parsed database object -in
+    int protein_idx,      ///< The index of the protein to retrieve -in
+    PROTEIN_T** protein   ///< A pointer to a pointer to a PROTEIN object -out
+    )
+{
+
+
+
+}
+
 
 /*
  * Local Variables:

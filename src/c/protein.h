@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -139,8 +139,6 @@ void set_protein_annotation(
   PROTEIN_T* protein, ///< the protein to set it's fields -out
   char* annotation ///< the sequence to add -in
 );
-
-
 
 /**
  * Iterator
