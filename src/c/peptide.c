@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -22,7 +22,7 @@ struct peptide {
   char* sequence;       ///< A pointer to the peptide sequence.
   unsigned char length; ///< The length of the peptide
   float peptide_mass;   ///< The peptide's mass.
-  PROTEIN_PEPTIDE_ASSOCIATION_T* protein_peptide_association; ///< a linklist of protein_peptide_association   
+  PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
 };
 
 /**
@@ -52,12 +52,12 @@ struct residue_iterator {
 };
 
 /**
- * \struct protein_peptide_association_iterator
- * \brief Object to iterate over the protein_peptide_associations linklist in a peptide
+ * \struct peptide_src_iterator
+ * \brief Object to iterate over the peptide_srcs linklist in a peptide
  */
-struct protein_peptide_association_iterator{
-  PEPTIDE_T*  peptide; ///< The peptide whose protein_peptide_associations to iterate over.
-  PROTEIN_PEPTIDE_ASSOCIATION_T* current; ///< the current protein_peptide_associations
+struct peptide_src_iterator{
+  PEPTIDE_T*  peptide; ///< The peptide whose peptide_srcs to iterate over.
+  PEPTIDE_SRC_T* current; ///< the current peptide_srcs
 };
 
 /**
@@ -65,7 +65,7 @@ struct protein_peptide_association_iterator{
  */
 PEPTIDE_T* allocate_peptide(void){
   PEPTIDE_T* peptide = (PEPTIDE_T*)mycalloc(1, sizeof(PEPTIDE_T));
-  peptide->protein_peptide_association = NULL; //CHECK for memory leak
+  peptide->peptide_src = NULL; //CHECK for memory leak
   return peptide;
 }
 
@@ -103,8 +103,8 @@ PEPTIDE_T* new_peptide(
   set_peptide_sequence( peptide, my_sequence);
   set_peptide_length( peptide, length);
   set_peptide_peptide_mass( peptide, peptide_mass);
-  peptide->protein_peptide_association =
-    new_protein_peptide_association( peptide_type, parent_protein, start_idx );
+  peptide->peptide_src =
+    new_peptide_src( peptide_type, parent_protein, start_idx );
   return peptide;
 }
   
@@ -150,7 +150,7 @@ void free_peptide (
   )
 {
   free(peptide->sequence);
-  free_protein_peptide_association(peptide->protein_peptide_association); //CHECK might if NULL??
+  free_peptide_src(peptide->peptide_src); //CHECK might if NULL??
   free(peptide);
 }
 
@@ -164,17 +164,17 @@ void print_peptide(
   FILE* file  ///< the out put stream -out
   )
 {
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* iterator = 
-    new_protein_peptide_association_iterator(peptide);
+  PEPTIDE_SRC_ITERATOR_T* iterator = 
+    new_peptide_src_iterator(peptide);
   fprintf(file,"%s\n","Peptide");
   fprintf(file,"%.2f\t",peptide->peptide_mass);
   fprintf(file,"%d\t",peptide->length);
   fprintf(file,"%s\n",peptide->sequence);
   //interate through the linklist of possible parent proteins
-  while(protein_peptide_association_iterator_has_next(iterator)){
-    print_protein_peptide_association(protein_peptide_association_iterator_next(iterator), file);
+  while(peptide_src_iterator_has_next(iterator)){
+    print_peptide_src(peptide_src_iterator_next(iterator), file);
   }
-  free_protein_peptide_association_iterator(iterator);
+  free_peptide_src_iterator(iterator);
 }
 
 //TESTME
@@ -188,16 +188,16 @@ void copy_peptide(
   )
 {
   char* sequence =  get_peptide_sequence(src);
-  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association;
+  PEPTIDE_SRC_T* new_association;
 
   set_peptide_sequence(dest, sequence);
   set_peptide_length(dest, get_peptide_length(src));
   set_peptide_peptide_mass(dest, get_peptide_peptide_mass(src));
 
-  //copy all of the protein_peptide_association in the peptide
-  new_association = allocate_protein_peptide_association();
-  copy_protein_peptide_association(src->protein_peptide_association, new_association);
-  set_peptide_protein_peptide_association(dest, new_association);
+  //copy all of the peptide_src in the peptide
+  new_association = allocate_peptide_src();
+  copy_peptide_src(src->peptide_src, new_association);
+  set_peptide_peptide_src(dest, new_association);
   
   free(sequence);
 }
@@ -207,12 +207,13 @@ void copy_peptide(
  * Parses a peptide from file.
  * \returns TRUE if success. FALSE if failure.
  */
+/*
 BOOLEAN_T parse_peptide_file(
   PEPTIDE_T* peptide,
   FILE* file
   )
 {
-  /*
+
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
@@ -231,9 +232,10 @@ BOOLEAN_T parse_peptide_file(
   set_peptide_peptide_mass(peptide_mass);
   set_peptide_length(peptide_length);
   free(new_line);
-  */
+  
   return TRUE;
 }
+*/
 
 /**
  * Allocates a new (empty) peptide_constraint object.
@@ -520,50 +522,50 @@ int get_peptide_constraint_num_mis_cleavage(
 
 
 /**
- * sets the protein_peptide_association field in the peptide
- * this method should be ONLY used when the peptide has no existing list of protein_peptide_association
- * use add_peptide_protein_peptide_association method to add to existing list
- * must pass on a heap allocated protein_peptide_association object
+ * sets the peptide_src field in the peptide
+ * this method should be ONLY used when the peptide has no existing list of peptide_src
+ * use add_peptide_peptide_src method to add to existing list
+ * must pass on a heap allocated peptide_src object
  * does not copy in the object, just the pointer to the object.
  */
-void set_peptide_protein_peptide_association(
+void set_peptide_peptide_src(
   PEPTIDE_T* peptide,  ///< the peptide to set -out                                             
-  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association ///< new protein_peptide_association -in
+  PEPTIDE_SRC_T* new_association ///< new peptide_src -in
   )
 {
-  peptide->protein_peptide_association = new_association;
+  peptide->peptide_src = new_association;
 }
 
 /**
  * this method adds the new_association to the end of the existing peptide's 
- * linklist of protein_peptide_associations
- * must pass on a heap allocated protein_peptide_association object
+ * linklist of peptide_srcs
+ * must pass on a heap allocated peptide_src object
  * does not copy in the object, just the pointer to the object.
  */
-void add_peptide_protein_peptide_association(
+void add_peptide_peptide_src(
   PEPTIDE_T* peptide,  ///< the peptide to set -out
-  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association ///< new protein_peptide_association -in
+  PEPTIDE_SRC_T* new_association ///< new peptide_src -in
   )
 {
-  PROTEIN_PEPTIDE_ASSOCIATION_T* add_association = peptide->protein_peptide_association;
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* iterator =
-    new_protein_peptide_association_iterator(peptide);
-  //find the last protein_peptide_association object in the list
-  while(protein_peptide_association_iterator_has_next(iterator)){
-    add_association = protein_peptide_association_iterator_next(iterator);
+  PEPTIDE_SRC_T* add_association = peptide->peptide_src;
+  PEPTIDE_SRC_ITERATOR_T* iterator =
+    new_peptide_src_iterator(peptide);
+  //find the last peptide_src object in the list
+  while(peptide_src_iterator_has_next(iterator)){
+    add_association = peptide_src_iterator_next(iterator);
   }
-  set_protein_peptide_association_next_association(add_association, new_association);
-  free_protein_peptide_association_iterator(iterator);
+  set_peptide_src_next_association(add_association, new_association);
+  free_peptide_src_iterator(iterator);
 }
 
 /**
  * returns a point to the peptide_protein_association field of the peptide
  */
-PROTEIN_PEPTIDE_ASSOCIATION_T* get_peptide_protein_peptide_association(
-  PEPTIDE_T* peptide  ///< the peptide to query the peptide_protein_peptide_association -in
+PEPTIDE_SRC_T* get_peptide_peptide_src(
+  PEPTIDE_T* peptide  ///< the peptide to query the peptide_peptide_src -in
   )
 {
-  return peptide->protein_peptide_association;
+  return peptide->peptide_src;
 }
 
 /**
@@ -624,57 +626,57 @@ char residue_iterator_next(
  */
 
 /**
- * Instantiates a new protein_peptide_association_iterator from a peptide.
- * \returns a PROTEIN_PEPTIDE_ASSOCIATION_T object.
+ * Instantiates a new peptide_src_iterator from a peptide.
+ * \returns a PEPTIDE_SRC_T object.
  */
-PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* new_protein_peptide_association_iterator(
+PEPTIDE_SRC_ITERATOR_T* new_peptide_src_iterator(
   PEPTIDE_T* peptide ///< peptide's fields to iterate -in
   )
 {
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* association_iterator =
-    (PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T*)mycalloc(1,sizeof(PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T));
+  PEPTIDE_SRC_ITERATOR_T* association_iterator =
+    (PEPTIDE_SRC_ITERATOR_T*)mycalloc(1,sizeof(PEPTIDE_SRC_ITERATOR_T));
   association_iterator->peptide = peptide;
-  association_iterator->current = peptide->protein_peptide_association;
+  association_iterator->current = peptide->peptide_src;
   return association_iterator;
 }
 
 /**
- * Frees an allocated protein_peptide_association_iterator object.
+ * Frees an allocated peptide_src_iterator object.
  */
-void free_protein_peptide_association_iterator(
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator ///< free this object -in
+void free_peptide_src_iterator(
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator ///< free this object -in
   )
 {
-  free(protein_peptide_association_iterator);
+  free(peptide_src_iterator);
 
 }
 
 /**
  * The basic iterator functions.
- * \returns TRUE if there are additional protein_peptide_associations to iterate over, FALSE if not.
+ * \returns TRUE if there are additional peptide_srcs to iterate over, FALSE if not.
  */
-BOOLEAN_T protein_peptide_association_iterator_has_next(
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator///< the query iterator -in
+BOOLEAN_T peptide_src_iterator_has_next(
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   )
 {
-  return !(protein_peptide_association_iterator->current == NULL);
+  return !(peptide_src_iterator->current == NULL);
 }
 
 /**
- * \returns The next protein_peptide_associations in the peptide.
+ * \returns The next peptide_srcs in the peptide.
  */
-PROTEIN_PEPTIDE_ASSOCIATION_T* protein_peptide_association_iterator_next(
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator///< the query iterator -in
+PEPTIDE_SRC_T* peptide_src_iterator_next(
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   )
 {
-  PROTEIN_PEPTIDE_ASSOCIATION_T* previous = protein_peptide_association_iterator->current;
-  if(protein_peptide_association_iterator->current != NULL){
-    protein_peptide_association_iterator->current = 
-      get_protein_peptide_association_next_association(protein_peptide_association_iterator->current);
+  PEPTIDE_SRC_T* previous = peptide_src_iterator->current;
+  if(peptide_src_iterator->current != NULL){
+    peptide_src_iterator->current = 
+      get_peptide_src_next_association(peptide_src_iterator->current);
   }
   else{
-    free(protein_peptide_association_iterator);
-    fprintf(stderr,"ERROR: no more protein_peptide_associations to iterate\n");
+    free(peptide_src_iterator);
+    fprintf(stderr,"ERROR: no more peptide_srcs to iterate\n");
     exit(1);
   }
   return previous;

@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -69,10 +69,10 @@ typedef struct peptide_constraint PEPTIDE_CONSTRAINT_T;
 typedef struct residue_iterator RESIDUE_ITERATOR_T;
 
 /**
- * \typedef PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T 
+ * \typedef PEPTIDE_SRC_ITERATOR_T 
  * \brief An object to iterate over the protein peptide associations in a peptide
  */
-typedef struct protein_peptide_association_iterator PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T;
+typedef struct peptide_src_iterator PEPTIDE_SRC_ITERATOR_T;
 
 
 /**
@@ -87,10 +87,10 @@ enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC};
 typedef enum _peptide_type PEPTIDE_TYPE_T;
 
 /**
- * \typedef PROTEIN_PEPTIDE_ASSOCIATION_T
+ * \typedef PEPTIDE_SRC_T
  * \brief object for mapping a peptide to it's parent protein.
  */
-typedef struct protein_peptide_association PROTEIN_PEPTIDE_ASSOCIATION_T;
+typedef struct peptide_src PEPTIDE_SRC_T;
 
 
 /**

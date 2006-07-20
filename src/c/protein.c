@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -13,7 +13,7 @@
 #include "objects.h"
 #include "peptide.h"
 #include "protein.h"
-#include "protein_peptide_association.h"
+#include "peptide_src.h"
 
 /**
  * Constants
@@ -483,7 +483,7 @@ PEPTIDE_TYPE_T examine_peptide_type(
   }
 
   //check if last residue is K or R not followed by P
-  if(end_idx < strlen(sequence)){
+  if(end_idx < (int)strlen(sequence)){
     if(sequence[end_idx-1] != 'K' && sequence[end_idx-1] != 'R'){
       end = FALSE;
     }
@@ -631,7 +631,6 @@ void set_mass_matrix(
   float** mass_matrix,  ///< the mass matrix -out
   int start_size,  ///< the y axis size -in
   int length_size, ///< the x axis size -in
-  PEPTIDE_CONSTRAINT_T* peptide_constraint,  ///< the peptide constraints -in
   PROTEIN_T* protein  ///< the parent protein -in
   )
 {
@@ -675,7 +674,7 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   for (; matrix_index < max_length ; ++matrix_index){
     iterator->mass_matrix[matrix_index] = (float*)mycalloc(protein->length, sizeof(float));
   }  
-  set_mass_matrix(iterator->mass_matrix, protein->length, max_length, peptide_constraint, protein);
+  set_mass_matrix(iterator->mass_matrix, protein->length, max_length, protein);
   
   //initialize iterator
   iterator->protein = protein;
