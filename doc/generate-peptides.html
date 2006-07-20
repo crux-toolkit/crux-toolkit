@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: generate-peptides
-REVISION: $Revision: 1.3 $
+REVISION: $Revision: 1.4 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -86,6 +86,10 @@ peptides.  Default=tryptic.
 <LI>[--sort mass|length|none] &ndash; Specify the order in which
 peptides are printed to standard output.  By default, the output is
 not sorted.
+
+<LI>[--redundancy redundant|unique] &ndash; Specify whether peptides that
+come from different proteins yet with identical sequences should appear
+on separate lines (redundant) or on the same line (unique). 
 
 </UL>
 
