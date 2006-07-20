@@ -1,5 +1,5 @@
 CFLAGS= -g -Wall
-SRC =  ../utils.c ../peak.c ../spectrum.c ../peptide.c ../protein.c ../protein_peptide_association.c ../mass.c ../alphabet.c ../array.c unit-tests-peptide.c check-peptide.c
+SRC =  ../utils.c ../peak.c ../spectrum.c ../peptide.c ../protein.c ../protein_peptide_association.c ../mass.c ../alphabet.c ../array.c unit-tests-protein.c check-protein.c ../crux-utils.c ../database.c
 unittests:  $(SRC)
 	$(CC) -o unittests $(CFLAGS) $(SRC) -lcheck -lm -D_GNU_SOURCE
 

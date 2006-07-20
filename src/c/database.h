@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -34,15 +34,6 @@ void free_database(DATABASE_T* protein);
  */
 void print_database(DATABASE_T* database, FILE* file);
 
-// START HERE
-
-/**
- * Copies database object src to dest.
- */
-void copy_database(
-  DATABASE_T* src,
-  DATABASE_T* dest);
-
 /**
  * Parses a database from the file in the filename member variable
  * \returns TRUE if success. FALSE if failure.
@@ -71,8 +62,52 @@ BOOLEAN_T get_database_protein_at_idx(
  * Additional get and set methods
  */
 
-/*int get_protein_peptides(PROTEIN_T* protein);*/
-/*int get_protein_peptides(PROTEIN_T* protein);*/
+/**
+ *\returns the filename of the database
+ * returns a heap allocated new copy of the filename
+ * user must free the return filename
+ */
+char* get_database_filename(
+  DATABASE_T* database ///< the query database -in 
+  );
+
+/**
+ * sets the filename of the database
+ * protein->sequence must been initiailized
+ */
+void set_database_filename(
+  DATABASE_T* database, ///< the database to set it's fields -out
+  char* filename ///< the filename to add -in
+  );
+
+/**
+ *\returns TRUE|FALSE whether the database has been parsed?
+ */
+BOOLEAN_T get_database_is_parsed(
+  DATABASE_T* database ///< the query database -in 
+  );
+
+/**
+ *\returns the total number of proteins of the database
+ */
+int get_database_num_proteins(
+  DATABASE_T* database ///< the query database -in 
+  );
+
+/**
+ *\returns the src FILE* of the database
+ */
+FILE* get_database_file(
+  DATABASE_T* database ///< the query database -in 
+  );
+
+/**
+ * sets the src FILE* of the database
+ */
+void set_database_file(
+  DATABASE_T* database, ///< the database to set it's fields -out
+  FILE* file ///< the src file to add -in
+  );
 
 /***********************************************
  * Iterators
@@ -83,53 +118,62 @@ BOOLEAN_T get_database_protein_at_idx(
  * \returns a DATABASE_PROTEIN_ITERATOR_T object.
  */
 DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
-    DATABASE_T* protein);        
+    DATABASE_T* database ///< the database to create a protein iterator -in
+    );        
 
 /**
  * Frees an allocated database_protein_iterator object.
  */
 void free_database_protein_iterator(
-    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator);
+    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator  ///< the iterator to free -in
+    );
 
 /**
  * The basic iterator functions.
  * \returns TRUE if there are additional proteins to iterate over, FALSE if not.
  */
 BOOLEAN_T database_protein_iterator_has_next(
-    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator);
+    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator of interest -in
+    );
 
 /**
  * \returns The next protein in the database.
  */
 PROTEIN_T* database_protein_iterator_next(
-    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator);
+    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator of interest -in
+    );
+
 
 /**
  * Instantiates a new database_peptide_iterator from a database.
  * \returns a DATABASE_PEPTIDE_ITERATOR_T object.
  */
 DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
-    DATABASE_T* protein,
-    PEPTIDE_CONSTRAINT_T* peptide_constraint);
+  DATABASE_T* database, ///< the database of interest -in
+  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
+  );
 
 /**
  * Frees an allocated database_peptide_iterator object.
  */
 void free_database_peptide_iterator(
-    DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator);
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator to free -in
+  );
 
 /**
  * The basic iterator functions.
  * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
  */
 BOOLEAN_T database_peptide_iterator_has_next(
-    DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator);
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
+  );
 
 /**
  * \returns The next peptide in the database.
  */
 PEPTIDE_T* database_peptide_iterator_next(
-    DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator);
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
+  );
 
 
 /*

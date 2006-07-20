@@ -1,10 +1,14 @@
 #ifndef CRUX_UTILS_H
 #define CRUX_UTILS_H
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
+#include "utils.h"
 
-char* copy_string(char* src);
+char* my_copy_string(char* src);
 
 
 #endif
