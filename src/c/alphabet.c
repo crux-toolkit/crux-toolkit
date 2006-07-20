@@ -43,9 +43,11 @@ void set_alphabet
     any_char = ANY_AMINO;
     strcpy(alphabet, given_alphabet);
     strcat(alphabet, AMINO_AMBIGS);
+    /* chris edited
     if (verbose >= NORMAL_VERBOSE) {
       fprintf(stderr, "Using amino acid alphabet (%s).\n", alphabet);
     }
+    */
   }
 
   else if (strlen(given_alphabet) == NUM_BASES) {

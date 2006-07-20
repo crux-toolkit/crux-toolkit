@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -184,31 +184,31 @@ float get_peptide_peptide_mass(
   );
 
 /**
- * sets the protein_peptide_association field in the peptide
- * must pass on a heap allocated protein_peptide_association object
+ * sets the peptide_src field in the peptide
+ * must pass on a heap allocated peptide_src object
  * does not copy in the object, just the pointer to the object.
  */
-void set_peptide_protein_peptide_association(
+void set_peptide_peptide_src(
   PEPTIDE_T* peptide,  ///< the peptide to set -out                                             
-  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association ///< new protein_peptide_association -in
+  PEPTIDE_SRC_T* new_association ///< new peptide_src -in
 );
 
 /**
  * this method adds the new_association to the end of the existing peptide's 
- * linklist of protein_peptide_associations
- * must pass on a heap allocated protein_peptide_association object
+ * linklist of peptide_srcs
+ * must pass on a heap allocated peptide_src object
  * does not copy in the object, just the pointer to the object.
  */
-void add_peptide_protein_peptide_association(
+void add_peptide_peptide_src(
   PEPTIDE_T* peptide,  ///< the peptide to set -out
-  PROTEIN_PEPTIDE_ASSOCIATION_T* new_association ///< new protein_peptide_association -in
+  PEPTIDE_SRC_T* new_association ///< new peptide_src -in
   );
 
 /**
  * returns a point to the peptide_protein_association field of the peptide
  */
-PROTEIN_PEPTIDE_ASSOCIATION_T* get_peptide_protein_peptide_association(
-  PEPTIDE_T* peptide  ///< the peptide to query the peptide_protein_peptide_association -in
+PEPTIDE_SRC_T* get_peptide_peptide_src(
+  PEPTIDE_T* peptide  ///< the peptide to query the peptide_peptide_src -in
 );
 
 
@@ -348,33 +348,33 @@ char residue_iterator_next(
  */
 
 /**
- * Instantiates a new protein_peptide_association_iterator from a peptide.
- * \returns a PROTEIN_PEPTIDE_ASSOCIATION_T object.
+ * Instantiates a new peptide_src_iterator from a peptide.
+ * \returns a PEPTIDE_SRC_T object.
  */
-PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* new_protein_peptide_association_iterator(
+PEPTIDE_SRC_ITERATOR_T* new_peptide_src_iterator(
   PEPTIDE_T* peptide ///< peptide's fields to iterate -in
   );
 
 /**
- * Frees an allocated protein_peptide_association_iterator object.
+ * Frees an allocated peptide_src_iterator object.
  */
-void free_protein_peptide_association_iterator(
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator ///< free this object -in
+void free_peptide_src_iterator(
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator ///< free this object -in
   );
 
 /**
  * The basic iterator functions.
- * \returns TRUE if there are additional protein_peptide_associations to iterate over, FALSE if not.
+ * \returns TRUE if there are additional peptide_srcs to iterate over, FALSE if not.
  */
-BOOLEAN_T protein_peptide_association_iterator_has_next(
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator///< the query iterator -in
+BOOLEAN_T peptide_src_iterator_has_next(
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
 
 /**
- * \returns The next protein_peptide_associations in the peptide.
+ * \returns The next peptide_srcs in the peptide.
  */
-PROTEIN_PEPTIDE_ASSOCIATION_T* protein_peptide_association_iterator_next(
-  PROTEIN_PEPTIDE_ASSOCIATION_ITERATOR_T* protein_peptide_association_iterator///< the query iterator -in
+PEPTIDE_SRC_T* peptide_src_iterator_next(
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
 
 
