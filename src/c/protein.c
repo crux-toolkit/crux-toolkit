@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -204,47 +204,6 @@ BOOLEAN_T parse_protein_fasta_file(
 
 }
 
-
-
-/**
- * modified from original code by William Stafford Noble
- * Read all the protein sequences from a FASTA file at once.
- *\return the number of total protein sequences parsed
- */
-#define NUM_ALLOC 1000 /* Allocate how many sequences at once? */
-int parse_all_protein_fasta_file(
-  FILE*      fasta_file,
-  PROTEIN_T*   protein_array) 
-{
-  int num_sequence;
-  int i_seq;         /* Index of the current sequence. */
-  int num_allocated; /* Number of pointers currently allocated. */
-
-  /* Allocate initial memory. */
-  num_allocated = NUM_ALLOC;
-  protein_array = (PROTEIN_T*)mycalloc(num_allocated, sizeof(PROTEIN_T));
-  
-  /* Read the sequences one by one. */
-  i_seq = 0;
-  while (parse_protein_fasta_file(fasta_file, &(protein_array[i_seq]) {
-    i_seq++;
-
-    /* Allocate more space, if need be. */
-    if (i_seq >= num_allocated) {
-      num_allocated += NUM_ALLOC;
-      protein_array = (PROTEIN_T*)myrealloc(protein_array, 
-				      sizeof(PROTEIN_T) * num_allocated);
-    }
-  }
-
-  /* Record the total number of sequences. */
-  num_sequences = i_seq;
-
-  /* Complain if nothing was read. */
-  if (i_seq == 0) {
-    die("Failed to read a single sequence from the given FASTA file.\n");
-  }
-}
 
 
 
@@ -814,10 +773,9 @@ PEPTIDE_T* protein_peptide_iterator_next(
     (peptide_sequence, 
      protein_peptide_iterator->cur_length, 
      protein_peptide_iterator->mass_matrix[protein_peptide_iterator->cur_length-1][protein_peptide_iterator->cur_start-1],
+     protein_peptide_iterator->protein,
      protein_peptide_iterator->cur_start,
-     peptide_type,
-     protein_peptide_iterator->protein->database,
-     protein_peptide_iterator->protein->protein_idx);
+     peptide_type);
   
   //FIXME Not sure what the use delete this field if needed
   ++protein_peptide_iterator->peptide_idx;
