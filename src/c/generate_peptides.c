@@ -20,8 +20,10 @@
 #include "parse_arguments.h"
 
 void wrong_command(char* arg){
+  char* usage = parse_arguments_get_usage("generate_peptides");
   fprintf(stderr, "ERROR: incorrect argument %s\n", arg);
-  fprintf(stderr, "%s", parse_arguments_get_usage("generate_peptides"));
+  fprintf(stderr, "%s", usage);
+  free(usage);
 }
 
 int main(int argc, char** argv){
@@ -41,7 +43,7 @@ int main(int argc, char** argv){
   int result = 0;
 
 
-  /* Define optional command line arguments */
+  /* Define optional command line arguments */ 
   parse_arguments_set_opt(
     "output-sequence", 
     "Output the peptide sequence as well as the protein id and start and stop.", 
@@ -168,10 +170,12 @@ int main(int argc, char** argv){
       free_database(database);
   } 
   else {
+    char* usage = parse_arguments_get_usage("generate_peptides");
     result = parse_arguments_get_error(&error_message);
     fprintf(stderr, "Error in command line. Error # %d\n", result);
     fprintf(stderr, "%s\n", error_message);
-    fprintf(stderr, "%s", parse_arguments_get_usage("generate_peptides"));
+    fprintf(stderr, "%s", usage);
+    free(usage);
     return result;
   }
   exit(1);
