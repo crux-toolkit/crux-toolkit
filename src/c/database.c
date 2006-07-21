@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -445,6 +445,16 @@ PEPTIDE_T* database_peptide_iterator_next(
   }
   return next_peptide;
 }
+
+
+/*
+ * Scans the database for start positions of protein sequences (using the
+ * '>' character) and stores the locations of the starts in the database 
+ * member variable starts. Set the is_parsed member variable to true.
+ */
+BOOLEAN_T parse_database(
+  DATABASE_T* database ///< An allocated database
+  );
 
 /*
  * Local Variables:
