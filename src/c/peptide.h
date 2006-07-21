@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include "utils.h"
+#include "crux-utils.h"
 #include "mass.h"
 #include "protein.h"
 #include "objects.h"
@@ -26,7 +27,6 @@ PEPTIDE_T* allocate_peptide(void);
  * \returns A new peptide object, populated with the user specified parameters.
  */
 PEPTIDE_T* new_peptide(
-  char* my_sequence,        ///< The sequence of the protein that that contains the peptide. -in
   unsigned char length,     ///< The length of the peptide -in
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
@@ -70,6 +70,17 @@ void free_peptide (
  */
 void print_peptide(
   PEPTIDE_T* peptide,  ///< the query peptide -in
+  FILE* file  ///< the out put stream -out
+  );
+
+/**
+ * Prints a peptide object to file.
+ * mass \t protein-id \t peptide-start \t peptide-length <\t peptide-sequence> \n
+ * prints in correct format for generate_peptide
+ */
+void print_peptide_in_format(
+  PEPTIDE_T* peptide,  ///< the query peptide -in
+  BOOLEAN_T flag_out, ///< print peptide sequence? -in
   FILE* file  ///< the out put stream -out
   );
 
@@ -133,19 +144,9 @@ void free_peptide_constraint(
  * Additional get and set methods
  */
 
-
-
-/**
- * sets the sequence of the peptide
- * copies in the sequence into a new heap allocated string 
- */
-void set_peptide_sequence( 
-  PEPTIDE_T* peptide,  ///< the peptide to set the sequence -out
-  char* sequence ///< the sequence to copy -in
-  );
-
 /**
  * \returns the sequence of peptide
+ * goes to the first peptide_src to gain sequence, thus must have at least one peptide src
  * returns a char* to a heap allocated copy of the sequence
  * user must free the memory
  */

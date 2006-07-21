@@ -42,41 +42,59 @@ int main(int argc, char** argv){
 
 
   /* Define optional command line arguments */
-  parse_arguments_set_opt("output-sequence", "Output the peptide sequence as well as the protein id and start and stop.", 
-                          (void *) &flag_opt, 
-                          FLAG_ARG);
+  parse_arguments_set_opt(
+    "output-sequence", 
+    "Output the peptide sequence as well as the protein id and start and stop.", 
+    (void *) &flag_opt, 
+    FLAG_ARG);
 
-  parse_arguments_set_opt("min-mass", "The minimum neutral mass of the peptides to output", 
-                          (void *) &min_mass, 
-                          DOUBLE_ARG);
+  parse_arguments_set_opt(
+    "min-mass", 
+    "The minimum neutral mass of the peptides to output", 
+    (void *) &min_mass, 
+    DOUBLE_ARG);
 
-  parse_arguments_set_opt("max-mass", "The maximum neutral mass of the peptides to output", 
-                          (void *) &max_mass, 
-                          DOUBLE_ARG);
+  parse_arguments_set_opt(
+    "max-mass", 
+    "The maximum neutral mass of the peptides to output", 
+    (void *) &max_mass, 
+    DOUBLE_ARG);
 
-  parse_arguments_set_opt("min-length", "The minimum length of the peptides to output.",
-                          (void *) &min_length, 
-                          INT_ARG);
+  parse_arguments_set_opt(
+    "min-length", 
+    "The minimum length of the peptides to output.",
+    (void *) &min_length, 
+    INT_ARG);
 
-  parse_arguments_set_opt("max-length", "The maximum length of the peptides to output.",
-                          (void *) &max_length, 
-                          INT_ARG);
+  parse_arguments_set_opt(
+    "max-length", 
+    "The maximum length of the peptides to output.",
+    (void *) &max_length, 
+    INT_ARG);
 
-  parse_arguments_set_opt("cleavages", "Type of cleavages to allow. The tryptic option outputs peptides that result from a complete in silico digestion of proteins after residues K or R except when followed by P, wherease all outputs all possible peptides.", 
-                          (void *) &cleavages, 
-                          STRING_ARG);
+  parse_arguments_set_opt(
+    "cleavages", 
+    "Type of cleavages to allow. tryptic, partial or all", 
+    (void *) &cleavages, 
+    STRING_ARG);
 
-  parse_arguments_set_opt("mis-cleavages", "Allow mis cleavage sites with in a peptide.",
-                          (void *) &mis_cleavages, 
-                          FLAG_ARG);
+  parse_arguments_set_opt(
+    "mis-cleavages", 
+    "Allow mis cleavage sites with in a peptide. Default, do not allow mis-cleavage.",
+    (void *) &mis_cleavages, 
+    FLAG_ARG);
   
-  parse_arguments_set_opt("sort", "Specify the order in which peptides are printed to standard output. By default, the output is not sorted.", 
-                          (void *) &sort, 
-                          STRING_ARG);
+  parse_arguments_set_opt(
+    "sort", 
+    "Specify the order in which peptides are printed to standard output. Default, not sorted.", 
+    (void *) &sort, 
+    STRING_ARG);
 
   /* Define required command line arguments */
-  parse_arguments_set_req("protein input filename", "The name of the file (in fasta format) from which to parse proteins.", 
-                          (void *) &in_file, STRING_ARG);
+  parse_arguments_set_req(
+    "protein input filename", 
+    "The name of the file (in fasta format) from which to parse proteins.", 
+    (void *) &in_file, STRING_ARG);
 
 
   /* Parse the command line */
@@ -92,6 +110,9 @@ int main(int argc, char** argv){
     }
     else if(strcmp(cleavages, "tryptic")==0){
       peptide_type = TRYPTIC;
+    }
+    else if(strcmp(cleavages, "partial")==0){
+      peptide_type = PARTIALLY_TRYPTIC;
     }
     else{
       wrong_command(cleavages);
@@ -137,7 +158,7 @@ int main(int argc, char** argv){
       //print each peptide
       while(database_peptide_iterator_has_next(iterator)){
         peptide = database_peptide_iterator_next(iterator);
-        print_peptide(peptide, stdout);
+        print_peptide_in_format(peptide, flag_opt, stdout);
         free_peptide(peptide);
       }
     }

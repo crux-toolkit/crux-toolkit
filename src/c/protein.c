@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -234,11 +234,27 @@ static BOOLEAN_T read_title_line
       return(FALSE);
     }
   }
+  //chris edited, added this block to make sure all of comment line is read 
+  //although might not be stored, to ensure the file* is at start of the sequence
+  {
+    char* new_line = NULL;
+    int line_length;
+    size_t buf_length = 0;
 
+    if((line_length =  getline(&new_line, &buf_length, fasta_file)) == -1){
+      die("Error reading Fasta file.\n");
+    }
+    strncpy(id_line, new_line, LONGEST_LINE-1);
+    free(new_line);
+  }
+
+  //this is Bill's old code
+  /*
   // Read the ID and comment line.
   if (fgets(id_line, LONGEST_LINE-1, fasta_file) == NULL) {
     die("Error reading Fasta file.\n");
   }
+  */
 
   // Remove EOL.
   id_line[strlen(id_line) - 1] = '\0';
@@ -352,6 +368,16 @@ char* get_protein_id(
 }
 
 /**
+ *\returns a pointer to the id of the protein
+ */
+char* get_protein_id_pointer(
+  PROTEIN_T* protein ///< the query protein -in 
+  )
+{
+  return protein->id; 
+}
+
+/**
  * sets the id of the protein
  */
 void set_protein_id(
@@ -380,6 +406,16 @@ char* get_protein_sequence(
   char * copy_sequence = 
     (char *)mymalloc(sizeof(char)*sequence_length);
   return strncpy(copy_sequence, protein->sequence, sequence_length);  
+}
+
+/**
+ *\returns a pointer to the sequence of the protein
+ */
+char* get_protein_sequence_pointer(
+  PROTEIN_T* protein ///< the query protein -in 
+  )
+{
+  return protein->sequence;
 }
 
 /**
@@ -555,7 +591,7 @@ BOOLEAN_T iterator_state_help(
   }
   
   //reached end of length column, check next length
-  if(iterator->cur_start > iterator->protein->length){
+  if(iterator->cur_start + iterator->cur_length - 1 > iterator->protein->length){ //iterator->cur_start > iterator->protein->length){
     ++iterator->cur_length;
     iterator->cur_start = 1;
     return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
@@ -744,14 +780,6 @@ PEPTIDE_T* protein_peptide_iterator_next(
     exit(1);
   }
   
-  //copy peptide sequence
-  char peptide_sequence[protein_peptide_iterator->cur_length + 1];
-  
-  strncpy(peptide_sequence, 
-          &protein_peptide_iterator->protein->sequence[protein_peptide_iterator->cur_start-1],
-          protein_peptide_iterator->cur_length);
-  peptide_sequence[protein_peptide_iterator->cur_length] = '\0';
-  
   //set peptide type
   if(get_peptide_constraint_peptide_type(protein_peptide_iterator->peptide_constraint) != ANY_TRYPTIC){
     peptide_type = get_peptide_constraint_peptide_type(protein_peptide_iterator->peptide_constraint);
@@ -765,12 +793,12 @@ PEPTIDE_T* protein_peptide_iterator_next(
                              protein_peptide_iterator->cur_start,
                              protein_peptide_iterator->cur_start + protein_peptide_iterator->cur_length -1);
   }
- 
+  
+
   //create new peptide
   PEPTIDE_T* peptide = 
     new_peptide
-    (peptide_sequence, 
-     protein_peptide_iterator->cur_length, 
+    (protein_peptide_iterator->cur_length, 
      protein_peptide_iterator->mass_matrix[protein_peptide_iterator->cur_length-1][protein_peptide_iterator->cur_start-1],
      protein_peptide_iterator->protein,
      protein_peptide_iterator->cur_start,

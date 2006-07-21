@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -91,6 +91,9 @@ void print_peptide_src(
   PEPTIDE_TYPE_T peptide_type = get_peptide_src_peptide_type(peptide_src);
   char* sequence = get_protein_sequence(peptide_src->parent_protein);
   fprintf(file, "parent protein:%s\n", sequence);
+
+  fprintf(file, "peptide start: %d\n", peptide_src->start_idx);
+
   if(peptide_type == TRYPTIC){
     fprintf(file, "peptide type:%s\n", "TRYPTIC");
   }
