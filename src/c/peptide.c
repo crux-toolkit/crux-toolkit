@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
+#include "crux-utils.h"
 #include "objects.h"
 #include "mass.h"
 #include "peptide.h"
@@ -19,7 +20,6 @@
  * \brief A subsequence of a protein.
  */
 struct peptide {
-  char* sequence;       ///< A pointer to the peptide sequence.
   unsigned char length; ///< The length of the peptide
   float peptide_mass;   ///< The peptide's mass.
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
@@ -48,6 +48,7 @@ struct peptide_constraint {
  */
 struct residue_iterator {
   PEPTIDE_T*  peptide; ///< The peptide whose residues to iterate over.
+  char*   sequence;    ///< The peptide sequence
   int     residue_idx; ///< The index of the current peak
 };
 
@@ -91,7 +92,6 @@ float calc_peptide_mass(
  * \returns A new peptide object, populated with the user specified parameters.
  */
 PEPTIDE_T* new_peptide(
-  char* my_sequence,        ///< The sequence of the protein that that contains the peptide. -in
   unsigned char length,     ///< The length of the peptide -in
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
@@ -100,7 +100,6 @@ PEPTIDE_T* new_peptide(
   )
 {
   PEPTIDE_T* peptide = allocate_peptide();
-  set_peptide_sequence( peptide, my_sequence);
   set_peptide_length( peptide, length);
   set_peptide_peptide_mass( peptide, peptide_mass);
   peptide->peptide_src =
@@ -149,32 +148,62 @@ void free_peptide (
   PEPTIDE_T* peptide ///< peptide to free -in
   )
 {
-  free(peptide->sequence);
   free_peptide_src(peptide->peptide_src); //CHECK might if NULL??
   free(peptide);
 }
 
-//FIXME documentation
 /**
  * Prints a peptide object to file.
- * mass \\t peptide-length \\t peptide-sequence \\n
+ * prints all information.
  */
 void print_peptide(
   PEPTIDE_T* peptide,  ///< the query peptide -in
   FILE* file  ///< the out put stream -out
   )
 {
+  char* sequence = get_peptide_sequence(peptide);
+  
   PEPTIDE_SRC_ITERATOR_T* iterator = 
     new_peptide_src_iterator(peptide);
   fprintf(file,"%s\n","Peptide");
   fprintf(file,"%.2f\t",peptide->peptide_mass);
   fprintf(file,"%d\t",peptide->length);
-  fprintf(file,"%s\n",peptide->sequence);
+  fprintf(file,"%s\n",sequence);
   //interate through the linklist of possible parent proteins
   while(peptide_src_iterator_has_next(iterator)){
     print_peptide_src(peptide_src_iterator_next(iterator), file);
   }
   free_peptide_src_iterator(iterator);
+  free(sequence);
+}
+
+/**
+ * Prints a peptide object to file.
+ * mass \t protein-id \t peptide-start \t peptide-length <\t peptide-sequence> \n
+ * prints in correct format for generate_peptide
+ */
+void print_peptide_in_format(
+  PEPTIDE_T* peptide,  ///< the query peptide -in
+  BOOLEAN_T flag_out, ///< print peptide sequence? -in
+  FILE* file  ///< the out put stream -out
+  )
+{
+  PROTEIN_T* parent = get_peptide_src_parent_protein(peptide->peptide_src);
+  char* id = get_protein_id_pointer(parent);
+  int start_idx = get_peptide_src_start_idx(peptide->peptide_src);
+  char* sequence = NULL;
+
+  fprintf(file, "%.2f\t%s\t%d\t%d", peptide->peptide_mass, id, start_idx, peptide->length);
+  
+  //print peptide sequence?
+  if(flag_out){
+    sequence = get_peptide_sequence(peptide);
+    fprintf(file, "\t%s\n", sequence);
+    free(sequence);
+  }
+  else{
+    fprintf(file, "\n");
+  }
 }
 
 //TESTME
@@ -187,10 +216,9 @@ void copy_peptide(
   PEPTIDE_T* dest ///< destination peptide -out
   )
 {
-  char* sequence =  get_peptide_sequence(src);
+ 
   PEPTIDE_SRC_T* new_association;
 
-  set_peptide_sequence(dest, sequence);
   set_peptide_length(dest, get_peptide_length(src));
   set_peptide_peptide_mass(dest, get_peptide_peptide_mass(src));
 
@@ -198,8 +226,6 @@ void copy_peptide(
   new_association = allocate_peptide_src();
   copy_peptide_src(src->peptide_src, new_association);
   set_peptide_peptide_src(dest, new_association);
-  
-  free(sequence);
 }
 
 //FIXME needs to be rewritten for the new output format -Chris
@@ -228,7 +254,7 @@ BOOLEAN_T parse_peptide_file(
     free(new_line);
     return FALSE;
   }
-  set_peptide_sequence(sequence);  // CHECK IF THIS READS the /n as well !!!!!
+  set_peptide_sequence(sequence);  
   set_peptide_peptide_mass(peptide_mass);
   set_peptide_length(peptide_length);
   free(new_line);
@@ -316,25 +342,8 @@ void free_peptide_constraint(
  */
 
 /**
- * sets the sequence of the peptide
- * copies in the sequence into a new heap allocated string 
- */
-void set_peptide_sequence( 
-  PEPTIDE_T* peptide,  ///< the peptide to set the sequence -out
-  char* sequence ///< the sequence to copy -in
-)
-{
-  free(peptide->sequence);
-  int sequence_length = strlen(sequence) +1; //+\0
-  char * copy_sequence = 
-    (char *)mymalloc(sizeof(char)*sequence_length);
-
-  peptide->sequence =
-    strncpy(copy_sequence, sequence, sequence_length);  
-}
-
-/**
  * \returns the sequence of peptide
+ * goes to the first peptide_src to gain sequence, thus must have at least one peptide src
  * returns a char* to a heap allocated copy of the sequence
  * user must free the memory
  */
@@ -342,10 +351,18 @@ char* get_peptide_sequence(
  PEPTIDE_T* peptide ///< peptide to query sequence -in
  )
 {
-  int sequence_length = strlen(peptide->sequence) +1; //+\0
-  char * copy_sequence = 
-    (char *)mymalloc(sizeof(char)*sequence_length);
-  return strncpy(copy_sequence, peptide->sequence, sequence_length);  
+  if(peptide->peptide_src == NULL){
+    fprintf(stderr, "ERROR: no peptide_src to retrieve peptide sequence\n");
+    exit(1);
+  }
+
+  char* parent_sequence = 
+    get_protein_sequence_pointer(get_peptide_src_parent_protein(peptide->peptide_src));
+  int start_idx = get_peptide_src_start_idx(peptide->peptide_src);
+
+  char* copy_sequence = copy_string_part(&parent_sequence[start_idx-1], peptide->length);
+ 
+  return copy_sequence; 
 }
 
 /**
@@ -585,6 +602,7 @@ RESIDUE_ITERATOR_T* new_residue_iterator(
   
   residue_iterator->peptide =  peptide;
   residue_iterator->residue_idx = 0;
+  residue_iterator->sequence = get_peptide_sequence(peptide);
   return residue_iterator;
 }        
 
@@ -595,6 +613,7 @@ void free_residue_iterator(
   RESIDUE_ITERATOR_T* residue_iterator ///< free this object -in
   )
 {
+  free(residue_iterator->sequence);
   free(residue_iterator);
 }
 
@@ -617,7 +636,7 @@ char residue_iterator_next(
   )
 {
   ++residue_iterator->residue_idx;
-  return residue_iterator->peptide->sequence[residue_iterator->residue_idx - 1];
+  return residue_iterator->sequence[residue_iterator->residue_idx - 1];
 }
 
 

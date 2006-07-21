@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -84,6 +84,13 @@ char* get_protein_id(
 );
 
 /**
+ *\returns a pointer to the id of the protein
+ */
+char* get_protein_id_pointer(
+  PROTEIN_T* protein ///< the query protein -in 
+  );
+
+/**
  * sets the id of the protein
  */
 void set_protein_id(
@@ -99,6 +106,13 @@ void set_protein_id(
 char* get_protein_sequence(
   PROTEIN_T* protein ///< the query protein -in 
 );
+
+/**
+ *\returns a pointer to the sequence of the protein
+ */
+char* get_protein_sequence_pointer(
+  PROTEIN_T* protein ///< the query protein -in 
+  );
 
 /**
  * sets the sequence of the protein

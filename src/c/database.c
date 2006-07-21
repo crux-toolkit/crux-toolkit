@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -146,7 +146,7 @@ BOOLEAN_T parse_database(
   file = fopen(database->filename, "r");
 
   working_index = ftell(file);
-  //check each line until reach 'S' line
+  //check each line until reach '>' line
   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == '>'){
       if(database->num_proteins == MAX_PROTEINS+1){
@@ -381,6 +381,21 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
     //set new protein peptide iterator
     database_peptide_iterator->cur_protein_peptide_iterator =
       new_protein_peptide_iterator(next_protein, database_peptide_iterator->peptide_constraint);
+ 
+    //if first protein does not contain a match peptide, reinitailize
+    while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+      //end of list of peptides for database_peptide_iterator
+      if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
+        break;
+      }
+      else{ //create new protein_peptide_iterator for next protein
+        free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
+        database_peptide_iterator->cur_protein_peptide_iterator =
+          new_protein_peptide_iterator(
+            database_protein_iterator_next(database_peptide_iterator->database_protein_iterator), 
+            database_peptide_iterator->peptide_constraint);
+      }
+    }
   }
   else{ //no proteins to create peptides from
     fprintf(stderr, "ERROR: failed to create a database_peptide_iterator, no proteins in database\n");
@@ -412,10 +427,9 @@ BOOLEAN_T database_peptide_iterator_has_next(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator  ///< the iterator of interest -in
   )
 {
-  if(protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+  if(protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){ 
     return TRUE;
   }
-  
   return FALSE;
 }
 
