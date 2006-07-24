@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #include <math.h>
@@ -18,7 +18,7 @@ BOOLEAN_T initlialized_amino_masses = FALSE;
 
 //FIXME need to find the monoisotopic mass for some AA -chris
 /**
- * initializes the amino mass array
+ * initializes the mass array
  */
 void initialize_amino_masses (void)
 {
@@ -75,6 +75,7 @@ void initialize_amino_masses (void)
   amino_masses['X' - 'A' + 26] = 113.1594; //find
   amino_masses['Y' - 'A' + 26] = 163.06333;
   amino_masses['Z' - 'A' + 26] = 128.6231; //find
+  
 }
 
 /**

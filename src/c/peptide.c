@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -84,7 +84,7 @@ float calc_peptide_mass(
     peptide_mass += get_mass_amino_acid_average(residue_iterator_next(residue_iterator));
   }
   free_residue_iterator(residue_iterator);
-  return peptide_mass;
+  return peptide_mass + MASS_H2O;
 }
 
 //FIXME association part might be need to change

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -601,7 +601,7 @@ BOOLEAN_T iterator_state_help(
   }
   
   //reached end of length column, check next length
-  if(iterator->cur_start + iterator->cur_length - 1 > iterator->protein->length){ //iterator->cur_start > iterator->protein->length){
+  if(iterator->cur_start + iterator->cur_length - 1 > iterator->protein->length){
     ++iterator->cur_length;
     iterator->cur_start = 1;
     goto LOOP;
@@ -644,9 +644,7 @@ BOOLEAN_T iterator_state_help(
     
   return TRUE;
   
-  
 }
-
 
 /**
  * sets the iterator to the next peptide that fits the constraints
@@ -686,7 +684,7 @@ void set_mass_matrix(
 
   //initialize mass matrix
   for(; start_index < start_size; ++start_index){
-    mass_matrix[0][start_index] = get_mass_amino_acid_average(protein->sequence[start_index]);
+    mass_matrix[0][start_index] = get_mass_amino_acid_average(protein->sequence[start_index]) + MASS_H2O;
   }
   start_index = 0;
   
