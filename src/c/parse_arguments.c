@@ -588,12 +588,15 @@ char * parse_arguments_get_usage(const char * name) {
     /* Add the optional argument usage comments */
     strcat(usage, "\nOptional Arguments:\n");
     for (i = 0; i < optional_count; i++) {
+      strcat(usage, "  [--");
+      /*
       if (optional[i].type != FLAG_ARG) {
         strcat(usage, "  [--");
       }
       else{
         strcat(usage, "  [-");
       }
+      */
       strcat(usage, optional[i].name);
       if (optional[i].type != FLAG_ARG) {
         strcat(usage, " <");
