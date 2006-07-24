@@ -1,6 +1,6 @@
 /**
  * \file mass.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -14,7 +14,7 @@
 /**
  * Mass of water
  */
-#define MASS_H2O 18.0153
+#define MASS_H2O 18.0156
 
 /**
  * Mass of hydrogen
@@ -30,7 +30,6 @@
  * Mass of carbon monoxide
  */
 #define MASS_CO 28.0101
-
 
 /**
  * \returns The mass of the given amino acid.
