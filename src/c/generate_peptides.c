@@ -52,13 +52,13 @@ int main(int argc, char** argv){
 
   parse_arguments_set_opt(
     "min-mass", 
-    "The minimum neutral mass of the peptides to output", 
+    "The minimum neutral mass of the peptides to output.", 
     (void *) &min_mass, 
     DOUBLE_ARG);
 
   parse_arguments_set_opt(
     "max-mass", 
-    "The maximum neutral mass of the peptides to output", 
+    "The maximum neutral mass of the peptides to output.", 
     (void *) &max_mass, 
     DOUBLE_ARG);
 
@@ -76,19 +76,19 @@ int main(int argc, char** argv){
 
   parse_arguments_set_opt(
     "cleavages", 
-    "Type of cleavages to allow. tryptic, partial or all", 
+    "Type of cleavages to allow. tryptic, partial or all.", 
     (void *) &cleavages, 
     STRING_ARG);
 
   parse_arguments_set_opt(
-    "mis-cleavages", 
-    "Allow mis cleavage sites with in a peptide. Default, do not allow mis-cleavage.",
+    "missed-cleavages", 
+    "Allow missed cleavage sites with in a peptide. ",
     (void *) &mis_cleavages, 
     FLAG_ARG);
   
   parse_arguments_set_opt(
     "sort", 
-    "Specify the order in which peptides are printed to standard output. Default, not sorted.", 
+    "Specify the order in which peptides are printed to standard output. ", 
     (void *) &sort, 
     STRING_ARG);
 
@@ -133,18 +133,18 @@ int main(int argc, char** argv){
     //print header line
     printf("# PROTEIN DATABASE: %s\n", in_file);
     printf("# OPTIONS:\n");
-    printf("\tmin-mass: %.2f\n", min_mass);
-    printf("\tmax-mass: %.2f\n", max_mass);
-    printf("\tmin-length: %d\n", min_length);
-    printf("\tmax-length: %d\n", max_length);
-    printf("\tcleavages: %s\n", cleavages);
+    printf("#\tmin-mass: %.2f\n", min_mass);
+    printf("#\tmax-mass: %.2f\n", max_mass);
+    printf("#\tmin-length: %d\n", min_length);
+    printf("#\tmax-length: %d\n", max_length);
+    printf("#\tcleavages: %s\n", cleavages);
     if(mis_cleavages){
-      printf("\tallow mis-cleavages: TRUE\n");
+      printf("#\tallow missed-cleavages: TRUE\n");
     }
     else{
-      printf("\tallow mis-cleavages: FALSE\n");
+      printf("#\tallow missed-cleavages: FALSE\n");
     }
-    printf("\tsort: %s (needs to be implemented)\n", sort);
+    printf("#\tsort: %s (needs to be implemented)\n", sort);
     
 
     //create a new database

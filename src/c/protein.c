@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -19,10 +19,11 @@
  * Constants
  */
 #define PROTEIN_ID_LENGTH 100
-#define PROTEIN_SEQUENCE_LENGTH 10000
+#define PROTEIN_SEQUENCE_LENGTH 20000
 #define PROTEIN_ANNOTATION_LENGTH 100
 #define LONGEST_LINE PROTEIN_ID_LENGTH + PROTEIN_ID_LENGTH
 #define FASTA_LINE 50
+#define SMALLEST_MASS 71
 
 /**
  * \struct protein 
@@ -565,8 +566,10 @@ int examine_peptide_cleavage(
 
 }
 
+
+
 /**
- * recursively calls itself to find the next peptide that fits the constraints
+ * Finds the next peptide that fits the constraints
  * \returns TRUE if there is a next peptide. FALSE if not.
  */
 BOOLEAN_T iterator_state_help(
@@ -578,6 +581,13 @@ BOOLEAN_T iterator_state_help(
   PEPTIDE_TYPE_T peptide_type  ///< constraints: peptide type -in
   )
 {
+  LOOP:
+  
+  //check if the smallest mass of a length is larger than max_mass
+  if(iterator->cur_length * SMALLEST_MASS > max_mass){
+    return FALSE;
+  }
+  
   //check if out of mass_max idex size
   if(iterator->cur_length > max_length ||
      iterator->cur_length > iterator->protein->length){
@@ -587,14 +597,14 @@ BOOLEAN_T iterator_state_help(
   //check if less than min length
   if(iterator->cur_length < min_length){
     ++iterator->cur_length;
-    return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
+    goto LOOP;
   }
   
   //reached end of length column, check next length
   if(iterator->cur_start + iterator->cur_length - 1 > iterator->protein->length){ //iterator->cur_start > iterator->protein->length){
     ++iterator->cur_length;
     iterator->cur_start = 1;
-    return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
+    goto LOOP;
   }
 
   //is mass with in range
@@ -607,7 +617,7 @@ BOOLEAN_T iterator_state_help(
     else{
       ++iterator->cur_start;
     }
-    return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
+    goto LOOP;
   }
   
   //examin tryptic type and cleavage
@@ -617,7 +627,7 @@ BOOLEAN_T iterator_state_help(
                              iterator->cur_length + iterator->cur_start -1) != peptide_type))
       {
         ++iterator->cur_start;
-        return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
+        goto LOOP;
       }
   }
 
@@ -628,12 +638,13 @@ BOOLEAN_T iterator_state_help(
                                 iterator->cur_length + iterator->cur_start -1) != 0)
       {
         ++iterator->cur_start;
-        return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
+        goto LOOP;
       }
   }
-  
-  
+    
   return TRUE;
+  
+  
 }
 
 

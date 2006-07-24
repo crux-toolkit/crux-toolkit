@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -13,7 +13,7 @@
 #include "protein.h"
 #include "database.h"
 
-#define MAX_PROTEINS 10000 ///< The maximum number of proteins in a database.
+#define MAX_PROTEINS 30000 ///< The maximum number of proteins in a database.
 
 /**
  * \struct database
