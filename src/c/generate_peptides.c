@@ -34,9 +34,13 @@ int main(int argc, char** argv){
   double max_mass = 2400;
   int min_length = 6;
   int max_length = 50;
-  char* cleavages = "tryptic";   // or all
+  char* cleavages = "tryptic"; 
+  char* isotopic_mass = "average" ;
+  int  verbosity = 100;
+  char* redundancy = "redundant";
+
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
-  int mis_cleavages = FALSE;
+  int missed_cleavages = FALSE;
   char* sort = "none";      // mass or length or none
   char * in_file = NULL;
   const char * error_message;
@@ -76,14 +80,14 @@ int main(int argc, char** argv){
 
   parse_arguments_set_opt(
     "cleavages", 
-    "Type of cleavages to allow. tryptic, partial or all.", 
+    "Type of cleavages to allow. tryptic|partial|all.", 
     (void *) &cleavages, 
     STRING_ARG);
 
   parse_arguments_set_opt(
     "missed-cleavages", 
     "Allow missed cleavage sites with in a peptide. ",
-    (void *) &mis_cleavages, 
+    (void *) &missed_cleavages, 
     FLAG_ARG);
   
   parse_arguments_set_opt(
@@ -91,6 +95,27 @@ int main(int argc, char** argv){
     "Specify the order in which peptides are printed to standard output. ", 
     (void *) &sort, 
     STRING_ARG);
+
+  parse_arguments_set_opt(
+    "isotopic-mass", 
+    "Specify the type of isotopic masses to use when calculating the peptide mass. average|mono.",
+    (void *) &isotopic_mass, 
+    STRING_ARG);
+
+  parse_arguments_set_opt(
+    "verbosity", 
+    "Specify the verbosity of the current processes from 0-100.",
+    (void *) &verbosity, 
+    INT_ARG);
+
+  parse_arguments_set_opt(
+    "redundancy", 
+    "Specify whether peptides that come from different proteins yet with identical sequences should appear on separate lines or on the same line. redundant|unique.",
+    (void *) &redundancy, 
+    STRING_ARG);
+
+
+
 
   /* Define required command line arguments */
   parse_arguments_set_req(
@@ -118,11 +143,35 @@ int main(int argc, char** argv){
     }
     else{
       wrong_command(cleavages);
-      exit;
+      exit(1);
     }
+    
+    //determine isotopic mass option
+    if(strcmp(isotopic_mass, "average")==0){
 
+    }
+    else if(strcmp(isotopic_mass, "mono")==0){
+
+    }
+    else{
+      wrong_command(isotopic_mass);
+      exit(1);
+    }
+    
+    //determine redundancy option
+    if(strcmp(redundancy, "redundant")==0){
+      
+    }
+    else if(strcmp(redundancy, "unique")==0){
+      
+    }
+    else{
+      wrong_command(redundancy);
+      exit(1);
+    }
+  
     //peptide constraint
-    constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, mis_cleavages);
+    constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages);
  
     //check if input file exist
     if(access(in_file, F_OK)){
@@ -138,7 +187,7 @@ int main(int argc, char** argv){
     printf("#\tmin-length: %d\n", min_length);
     printf("#\tmax-length: %d\n", max_length);
     printf("#\tcleavages: %s\n", cleavages);
-    if(mis_cleavages){
+    if(missed_cleavages){
       printf("#\tallow missed-cleavages: TRUE\n");
     }
     else{
