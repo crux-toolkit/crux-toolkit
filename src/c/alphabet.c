@@ -13,6 +13,7 @@
 #include <math.h>
 #include "alphabet.h"
 #include "utils.h"
+#include "carp.h"
 
 #ifndef AMBIG_DEBUG
 #define AMBIG_DEBUG 0
@@ -48,6 +49,7 @@ void set_alphabet
       fprintf(stderr, "Using amino acid alphabet (%s).\n", alphabet);
     }
     */
+    carp(CARP_INFO,"Using amino acid alphabet (%s).", alphabet);
   }
 
   else if (strlen(given_alphabet) == NUM_BASES) {

@@ -1,6 +1,6 @@
 /**
  * \file carp.h 
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Provides methods for logging error messages, and setting verbosity level.
  *****************************************************************************/
 #ifndef CARP_H 
@@ -12,7 +12,7 @@
 #define CARP_INFO 30
 #define CARP_DEBUG 40
 #define CARP_DETAILED_DEBUG 50
-#define CARP_MAX 60
+#define CARP_MAX 100
 
 #include <stdio.h>
 #include "utils.h"

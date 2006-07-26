@@ -1,6 +1,9 @@
+#include "objects.h"
+#include "carp.h"
+
 /**
  * \file mass.h 
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -14,7 +17,8 @@
 /**
  * Mass of water
  */
-#define MASS_H2O 18.0156
+#define MASS_H2O_MONO 18.01056
+#define MASS_H2O_AVERAGE 18.0153
 
 /**
  * Mass of hydrogen
@@ -35,7 +39,8 @@
  * \returns The mass of the given amino acid.
  */
 float get_mass_amino_acid(
-  char amino_acid ///< the query amino acid -in
+  char amino_acid, ///< the query amino acid -in
+  MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
   );
 
 /**

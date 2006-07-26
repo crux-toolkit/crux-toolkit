@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -14,6 +14,7 @@
 #include "peptide.h"
 #include "protein.h"
 #include "peptide_src.h"
+#include "carp.h"
 
 /**
  * Constants
@@ -310,7 +311,7 @@ static BOOLEAN_T read_raw_sequence
     // Skip non-alphabetic characters.
     if (!isalpha((int)a_char)) {
       if ((a_char != ' ') && (a_char != '\t') && (a_char != '\n') && (a_char != '\r')) {
-	fprintf(stderr, "Warning: Skipping character %c in sequence %s.\n",
+	carp(CARP_WARNING,"Skipping character %c in sequence %s.\n",
 		a_char, name);
       }
 
@@ -319,9 +320,9 @@ static BOOLEAN_T read_raw_sequence
       // Convert invalid characters to X.
       a_char = toupper((int)a_char);
       if (!char_in_string(get_alphabet(TRUE), a_char)) {
-	fprintf(stderr, "Warning: Converting illegal character %c to X ",
+	carp(CARP_WARNING, "Converting illegal character %c to X ",
 		a_char);
-	fprintf(stderr, "in sequence %s.\n", name);
+	carp(CARP_WARNING, "in sequence %s.", name);
 	a_char = 'X';
       }
       raw_sequence[i_seq] = a_char;
@@ -676,15 +677,23 @@ void set_mass_matrix(
   float** mass_matrix,  ///< the mass matrix -out
   int start_size,  ///< the y axis size -in
   int length_size, ///< the x axis size -in
-  PROTEIN_T* protein  ///< the parent protein -in
+  PROTEIN_T* protein, ///< the parent protein -in
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
   int start_index = 0;
   int length_index = 1;
+  float mass_h2o = MASS_H2O_AVERAGE;
 
+  //set correct H2O mass
+  if(mass_type == MONO){
+    mass_h2o = MASS_H2O_MONO;
+  }
+  
   //initialize mass matrix
   for(; start_index < start_size; ++start_index){
-    mass_matrix[0][start_index] = get_mass_amino_acid_average(protein->sequence[start_index]) + MASS_H2O;
+    mass_matrix[0][start_index] = 
+      get_mass_amino_acid(protein->sequence[start_index], mass_type) + mass_h2o;
   }
   start_index = 0;
   
@@ -710,7 +719,8 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
 {
   int matrix_index = 0;
   int max_length = get_peptide_constraint_max_length(peptide_constraint);
-  
+  MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(peptide_constraint);
+
   PROTEIN_PEPTIDE_ITERATOR_T* iterator = 
     (PROTEIN_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(PROTEIN_PEPTIDE_ITERATOR_T));
 
@@ -719,7 +729,7 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   for (; matrix_index < max_length ; ++matrix_index){
     iterator->mass_matrix[matrix_index] = (float*)mycalloc(protein->length, sizeof(float));
   }  
-  set_mass_matrix(iterator->mass_matrix, protein->length, max_length, protein);
+  set_mass_matrix(iterator->mass_matrix, protein->length, max_length, protein, mass_type);
   
   //initialize iterator
   iterator->protein = protein;
@@ -785,8 +795,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
 
   if(!protein_peptide_iterator->has_next){
     free_protein_peptide_iterator(protein_peptide_iterator);
-    fprintf(stderr, "ERROR: no more peptides\n");
-    exit(1);
+    die("ERROR: no more peptides\n");
   }
   
   //set peptide type

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.h
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 #ifndef PROTEIN_PEPTIDE_ASSOCIATION_H
@@ -10,6 +10,7 @@
 #include "mass.h"
 #include <stdio.h>
 #include "objects.h"
+#include "carp.h"
 
 /**
  * \returns An (empty) peptide_src object.

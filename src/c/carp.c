@@ -1,12 +1,13 @@
 /*****************************************************************************
  * \file carp.c
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include "utils.h"
+#include "carp.h"
 
 /**
  * Constants
@@ -21,19 +22,33 @@ int get_verbosity_level(void){
   return G_verbosity;
 }
 
-void carp(
+BOOLEAN_T carp(
     int verbosity, 
     char* format,
     ...){
   if (verbosity <= G_verbosity){
     va_list  argp;
-    fprintf(stderr, "WARNING: ");
+
+    if(verbosity == CARP_WARNING){
+      fprintf(stderr, "WARNING: ");
+    }
+    else if(verbosity == CARP_ERROR){
+      fprintf(stderr, "ERROR: ");
+    }
+    else if(verbosity == CARP_FATAL){
+      fprintf(stderr, "FATAL: ");
+    }
+    else{
+      fprintf(stderr, "INFO: ");
+    }
+
     va_start(argp, format);
     vfprintf(stderr, format, argp);
     va_end(argp);
     fprintf(stderr, "\n");
     fflush(stderr);
   } 
+  return TRUE;
 }
 
 /*

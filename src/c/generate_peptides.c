@@ -13,17 +13,48 @@
 #include <assert.h>
 #include <ctype.h>
 #include <unistd.h>
+#include "carp.h"
 #include "peptide.h"
 #include "protein_peptide_association.h"
 #include "protein.h"
 #include "database.h"
 #include "parse_arguments.h"
 
+/**
+ * when wrong command is seen carp, and exit
+ */
 void wrong_command(char* arg){
   char* usage = parse_arguments_get_usage("generate_peptides");
-  fprintf(stderr, "ERROR: incorrect argument %s\n", arg);
+  carp(CARP_FATAL, "incorrect argument %s", arg);
   fprintf(stderr, "%s", usage);
   free(usage);
+  exit(1);
+}
+
+/**
+ * progress indicator, displays a spinning | to standout
+ */
+void show_progress(int* num){
+  putc('\b', stderr);
+  if(*num / 150 == 37){
+    putc('|', stderr);
+    fflush(stderr);
+  }
+  else if(*num / 150 == 74){
+    putc('/', stderr);
+    fflush(stderr);
+  }
+  else if(*num / 150 == 111){
+    putc('-', stderr);
+    fflush(stderr);
+  }
+  else if(*num / 150 == 149){
+    putc('\\', stderr);
+    fflush(stderr);
+    *num = 0;
+    return;
+  }
+  ++*num;
 }
 
 int main(int argc, char** argv){
@@ -36,16 +67,17 @@ int main(int argc, char** argv){
   int max_length = 50;
   char* cleavages = "tryptic"; 
   char* isotopic_mass = "average" ;
-  int  verbosity = 100;
+  int  verbosity = CARP_MAX;
   char* redundancy = "redundant";
 
+  MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
   int missed_cleavages = FALSE;
   char* sort = "none";      // mass or length or none
   char * in_file = NULL;
   const char * error_message;
   int result = 0;
-
+  BOOLEAN_T is_unique = FALSE;
 
   /* Define optional command line arguments */ 
   parse_arguments_set_opt(
@@ -114,9 +146,6 @@ int main(int argc, char** argv){
     (void *) &redundancy, 
     STRING_ARG);
 
-
-
-
   /* Define required command line arguments */
   parse_arguments_set_req(
     "protein input filename", 
@@ -143,39 +172,44 @@ int main(int argc, char** argv){
     }
     else{
       wrong_command(cleavages);
-      exit(1);
     }
     
     //determine isotopic mass option
     if(strcmp(isotopic_mass, "average")==0){
-
+      mass_type = AVERAGE;
     }
     else if(strcmp(isotopic_mass, "mono")==0){
-
+      mass_type = MONO;
     }
     else{
       wrong_command(isotopic_mass);
-      exit(1);
     }
-    
+   
     //determine redundancy option
     if(strcmp(redundancy, "redundant")==0){
-      
+      is_unique = FALSE;
     }
     else if(strcmp(redundancy, "unique")==0){
-      
+      is_unique = TRUE;
     }
     else{
       wrong_command(redundancy);
-      exit(1);
+    }
+
+    //set verbosity
+    if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
+      set_verbosity_level(verbosity);
+    }
+    else{
+      wrong_command("verbosity");
     }
   
     //peptide constraint
-    constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages);
+    constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages, mass_type);
  
     //check if input file exist
     if(access(in_file, F_OK)){
-      fprintf(stderr,"Fatal: The file \"%s\" does not exist (or is not readable, or is empty).\n", in_file);
+      carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty).", in_file);
       exit(1);
     }
     
@@ -194,7 +228,19 @@ int main(int argc, char** argv){
       printf("#\tallow missed-cleavages: FALSE\n");
     }
     printf("#\tsort: %s (needs to be implemented)\n", sort);
-    
+    if(mass_type == AVERAGE){
+      printf("#\tisotopic mass type: average\n");
+    }
+    else{
+      printf("#\tisotopic mass type: mono\n");
+    }
+    printf("#\tverbosity: %d\n", verbosity);
+    if(is_unique){
+      printf("#\tredundancy: unique\n");
+    }
+    else{
+      printf("#\tredundancy: redundant\n");
+    }
 
     //create a new database
     database = new_database(in_file);
@@ -203,20 +249,26 @@ int main(int argc, char** argv){
     
     //check if any peptides are found
     if(!database_peptide_iterator_has_next(iterator)){
-      printf("no matches found\n");
+      carp(CARP_WARNING, "no matches found\n");
     }
     else{
+      int progress = 0;
+      fprintf(stderr, "Running:\n");
       //print each peptide
       while(database_peptide_iterator_has_next(iterator)){
+        show_progress(&progress);
         peptide = database_peptide_iterator_next(iterator);
         print_peptide_in_format(peptide, flag_opt, stdout);
         free_peptide(peptide);
       }
+      putc('\n', stderr);
+      fflush(stderr);
     }
       //free database, iterator, constraint
       free_database_peptide_iterator(iterator);
       free_peptide_constraint(constraint);
-      free_database(database);
+      free_database(database);      
+      exit(0);
   } 
   else {
     char* usage = parse_arguments_get_usage("generate_peptides");
@@ -225,7 +277,6 @@ int main(int argc, char** argv){
     fprintf(stderr, "%s\n", error_message);
     fprintf(stderr, "%s", usage);
     free(usage);
-    return result;
-  }
-  exit(1);
+    exit(1);
+  }  
 }

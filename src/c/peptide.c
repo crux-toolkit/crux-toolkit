@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -13,6 +13,7 @@
 #include "mass.h"
 #include "peptide.h"
 #include "protein.h"
+#include "carp.h"
 
 
 /**
@@ -39,6 +40,7 @@ struct peptide_constraint {
   int min_length; ///< The minimum length of the peptide
   int max_length; ///< The maximum length of the peptide
   int num_mis_cleavage; ///< The maximum mis cleavage of the peptide
+  MASS_TYPE_T mass_type; ///< isotopic mass type (AVERAGE, MONO)
 };
  
 /**
@@ -74,17 +76,22 @@ PEPTIDE_T* allocate_peptide(void){
  * \returns The mass of the given peptide.
  */
 float calc_peptide_mass(
-  PEPTIDE_T* peptide ///< the query peptide -in
+  PEPTIDE_T* peptide, ///< the query peptide -in
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
   float peptide_mass = 0;
   RESIDUE_ITERATOR_T * residue_iterator = new_residue_iterator(peptide);
   
   while(residue_iterator_has_next(residue_iterator)){
-    peptide_mass += get_mass_amino_acid_average(residue_iterator_next(residue_iterator));
+    peptide_mass += get_mass_amino_acid(residue_iterator_next(residue_iterator), mass_type);
   }
   free_residue_iterator(residue_iterator);
-  return peptide_mass + MASS_H2O;
+
+  if(mass_type == AVERAGE){
+    return peptide_mass + MASS_H2O_AVERAGE;
+  }
+  return peptide_mass + MASS_H2O_MONO;
 }
 
 //FIXME association part might be need to change
@@ -129,7 +136,6 @@ float get_peptide_charged_mass(
   return get_peptide_mz(peptide, charge) * charge;
 }
 
-//TESTME check if this returns a float
 /** 
  * \returns the m/z of the peptide if it had charge "charge"
  */
@@ -283,7 +289,8 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
   int max_length,  ///< the maximum lenth of peptide -in
-  int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
+  int num_mis_cleavage, ///< The maximum mis cleavage of the peptide -in
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
   PEPTIDE_CONSTRAINT_T* peptide_constraint =
@@ -295,6 +302,7 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   set_peptide_constraint_min_length(peptide_constraint, min_length);
   set_peptide_constraint_max_length(peptide_constraint, max_length);
   set_peptide_constraint_num_mis_cleavage(peptide_constraint, num_mis_cleavage);
+  set_peptide_constraint_mass_type(peptide_constraint, mass_type);
   return peptide_constraint;
 }
 
@@ -352,8 +360,7 @@ char* get_peptide_sequence(
  )
 {
   if(peptide->peptide_src == NULL){
-    fprintf(stderr, "ERROR: no peptide_src to retrieve peptide sequence\n");
-    exit(1);
+    die("ERROR: no peptide_src to retrieve peptide sequence\n");
   }
 
   char* parent_sequence = 
@@ -535,8 +542,26 @@ int get_peptide_constraint_num_mis_cleavage(
   return peptide_constraint->num_mis_cleavage;
 }
 
+/**
+ * sets the mass type of the peptide_constraint
+ */
+void set_peptide_constraint_mass_type(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
+  MASS_TYPE_T mass_type ///< the peptide_type for the constraint -in
+  )
+{
+  peptide_constraint->mass_type = mass_type;
+}
 
-
+/**
+ * \returns the mass type of the mass_constraint
+ */
+MASS_TYPE_T get_peptide_constraint_mass_type(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
+  )
+{
+  return peptide_constraint->mass_type;
+}
 
 /**
  * sets the peptide_src field in the peptide
@@ -695,8 +720,7 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
   }
   else{
     free(peptide_src_iterator);
-    fprintf(stderr,"ERROR: no more peptide_srcs to iterate\n");
-    exit(1);
+    die("ERROR: no more peptide_srcs to iterate\n");
   }
   return previous;
 }

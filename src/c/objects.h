@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -85,6 +85,17 @@ enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC};
  * \brief The typedef for peptide type, with regard to trypticity.
  */
 typedef enum _peptide_type PEPTIDE_TYPE_T;
+
+/**
+ * The enum for isotopic mass type (average, mono)
+ */
+enum _mass_type {AVERAGE, MONO };
+
+/**
+ * \typedef MASS_TYPE_T
+ * \brief The typedef for mass type (average, mono);
+ */
+typedef enum _mass_type MASS_TYPE_T;
 
 /**
  * \typedef PEPTIDE_SRC_T
