@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -11,6 +11,7 @@
 #include "objects.h"
 #include "peptide.h"
 #include "peptide_src.h"
+#include "carp.h"
 
 /* CHRIS This is probably an object for which you can crib code for from an outside source. Even from in-house (like Charles).*/
 

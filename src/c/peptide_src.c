@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "carp.h"
 #include "utils.h"
 #include "mass.h"
 #include "objects.h"

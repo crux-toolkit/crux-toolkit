@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief Object for representing one peptide.
  *****************************************************************************/
 #ifndef PEPTIDE_H 
@@ -12,11 +12,15 @@
 #include "mass.h"
 #include "protein.h"
 #include "objects.h"
+#include "carp.h"
 
 /**
  * \returns The mass of the given peptide.
  */
-float calc_peptide_mass(PEPTIDE_T* peptide);
+float calc_peptide_mass(
+  PEPTIDE_T* peptide, ///< the query peptide -in
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+  );
 
 /**
  * \returns An (empty) peptide object.
@@ -116,7 +120,8 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
   int max_length, ///< the maximum lenth of peptide -in
-  int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
+  int num_mis_cleavage, ///< The maximum mis cleavage of the peptide -in
+  MASS_TYPE_T mass_type  ///< isotopic mass type (AVERAGE, MONO) -in
   );
 
 /** 
@@ -309,6 +314,22 @@ void set_peptide_constraint_num_mis_cleavage(
 int get_peptide_constraint_num_mis_cleavage(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
+
+/**
+ * sets the mass type of the peptide_constraint
+ */
+void set_peptide_constraint_mass_type(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
+  MASS_TYPE_T mass_type ///< the peptide_type for the constraint -in
+  );
+
+/**
+ * \returns the mass type of the mass_constraint
+ */
+MASS_TYPE_T get_peptide_constraint_mass_type(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
+  );
+
 
 /**
  * Residue Iterator

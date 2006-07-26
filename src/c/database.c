@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -12,6 +12,7 @@
 #include "peptide.h"
 #include "protein.h"
 #include "database.h"
+#include "carp.h"
 
 #define MAX_PROTEINS 30000 ///< The maximum number of proteins in a database.
 
@@ -20,7 +21,7 @@
  * \brief A database of protein sequences
  */
 struct database{
-  char*          filename;      ///< Original database filename.
+  char*        filename;      ///< Original database filename.
   FILE*        file;          ///< Open filehandle for this database.
                                 ///  A database has only one
                                 ///  associated file.
@@ -152,7 +153,7 @@ BOOLEAN_T parse_database(
       if(database->num_proteins == MAX_PROTEINS+1){
         fclose(file);
         free(new_line);
-        fprintf(stderr, "ERROR: exceeds protein index array size\n");
+        carp(CARP_ERROR, "exceeds protein index array size");
         return FALSE;
       }
       //the new protein to be parsed
@@ -169,6 +170,7 @@ BOOLEAN_T parse_database(
           free_protein(database->proteins[protein_idx]);
         }
         database->num_proteins = 0;
+        carp(CARP_ERROR, "failed to parse fasta file");
         return FALSE;
       }
 
@@ -294,7 +296,7 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
   if(!database->is_parsed){
     //failed to parse database
     if(!parse_database(database)){
-      fprintf(stderr, "ERROR: failed to parse database, cannot create iterator\n");
+      carp(CARP_FATAL, "failed to parse database, cannot create iterator");
       exit(1);
     }
   }
@@ -398,7 +400,7 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
     }
   }
   else{ //no proteins to create peptides from
-    fprintf(stderr, "ERROR: failed to create a database_peptide_iterator, no proteins in database\n");
+    carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
     free_database_protein_iterator(database_peptide_iterator->database_protein_iterator);
     free(database_peptide_iterator);
     exit(1);

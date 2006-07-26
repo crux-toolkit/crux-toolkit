@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #include <math.h>
@@ -12,6 +12,7 @@
 #include "mass.h"
 #include "protein.h"
 #include "peptide.h"
+#include "carp.h"
 
 float amino_masses[('Z' - 'A')*2 + 2];
 BOOLEAN_T initlialized_amino_masses = FALSE;
@@ -25,7 +26,7 @@ void initialize_amino_masses (void)
   //average mass
   amino_masses['A' - 'A'] = 71.0788;
   amino_masses['B' - 'A'] = 114.5962;
-  amino_masses['C' - 'A'] = 103.1388;
+  amino_masses['C' - 'A'] = 103.1388  + 57.000;
   amino_masses['D' - 'A'] = 115.0886;
   amino_masses['E' - 'A'] = 129.1155;
   amino_masses['F' - 'A'] = 147.1766;
@@ -51,8 +52,8 @@ void initialize_amino_masses (void)
   
   //monoisotopic mass
   amino_masses['A' - 'A' + 26] = 71.03711;
-  amino_masses['B' - 'A' + 26] = 114.5962; //find
-  amino_masses['C' - 'A' + 26] = 103.00919;
+  amino_masses['B' - 'A' + 26] = 114.53494;
+  amino_masses['C' - 'A' + 26] = 103.00919  + 57.000;
   amino_masses['D' - 'A' + 26] = 115.02694;
   amino_masses['E' - 'A' + 26] = 129.04259;
   amino_masses['F' - 'A' + 26] = 147.06841;
@@ -63,19 +64,40 @@ void initialize_amino_masses (void)
   amino_masses['L' - 'A' + 26] = 113.08406;
   amino_masses['M' - 'A' + 26] = 131.04049;
   amino_masses['N' - 'A' + 26] = 114.04293;
-  amino_masses['O' - 'A' + 26] = 114.1472; //find
+  amino_masses['O' - 'A' + 26] = 114.07931;
   amino_masses['P' - 'A' + 26] = 97.05276;
   amino_masses['Q' - 'A' + 26] = 128.05858;
   amino_masses['R' - 'A' + 26] = 156.10111;
   amino_masses['S' - 'A' + 26] = 87.03203;
   amino_masses['T' - 'A' + 26] = 101.04768;
-  amino_masses['U' - 'A' + 26] = 150.0388; //find
+  amino_masses['U' - 'A' + 26] = 150.04344;
   amino_masses['V' - 'A' + 26] = 99.06841;
   amino_masses['W' - 'A' + 26] = 186.07931;
-  amino_masses['X' - 'A' + 26] = 113.1594; //find
+  amino_masses['X' - 'A' + 26] = 113.08406;
   amino_masses['Y' - 'A' + 26] = 163.06333;
-  amino_masses['Z' - 'A' + 26] = 128.6231; //find
+  amino_masses['Z' - 'A' + 26] = 128.55059;
   
+}
+
+/**
+ * \returns The mass of the given amino acid.
+ */
+float get_mass_amino_acid(
+  char amino_acid, ///< the query amino acid -in
+  MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
+  )
+{
+  if(mass_type == AVERAGE){
+    return get_mass_amino_acid_average(amino_acid);
+  }
+  else if(mass_type == MONO){
+    return get_mass_amino_acid_monoisotopic(amino_acid);
+  }
+  else{
+    die("ERROR: mass type does not exist\n");
+    //avoid compiler warning
+    return -1;
+  }
 }
 
 /**

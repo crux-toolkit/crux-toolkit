@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -11,6 +11,7 @@
 #include "objects.h"
 #include "peptide.h"
 #include "protein.h"
+#include "carp.h"
 
 /**
  * \returns An (empty) database object.
