@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.27 $
+ * REVISION: $Revision: 1.28 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -27,6 +27,7 @@
 /**
  * \struct spectrum 
  * \brief A mass spectrum
+
  * A mass spectrum consists mainly of a list of peak objects along with
  * some identifying information. A single spectrum is generated from one 
  * or more "scans" of the mass spectrometer; each scan is identified by 
