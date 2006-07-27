@@ -1,5 +1,5 @@
 /**************************************************************************
- * FILE: parse_arguments.h
+ * FILE parse_arguments.h
  *
  * CREATE DATE: 5/22/2004
  
@@ -17,15 +17,18 @@
  * option value. Any argument that does not start with '-' and is
  * not an option value will be taken to be a required argument
  **************************************************************************/
-#ifndef PARSE_ARGUMENTS
+#ifndef PARSE_ARGUMENTS_H
 
-#define PARSE_ARGUMENTS
+#define PARSE_ARGUMENTS_H
 
 enum argument_type { FLAG_ARG, INT_ARG, LONG_ARG, DOUBLE_ARG, STRING_ARG };
 enum argument_error { NO_ERROR, UNKNOWN_OPTION, MISSING_VALUE,
                        INVALID_VALUE, UNKNOWN_REQ_ARG, MISSING_REQ_ARG,
                         TOO_MANY_REQ_ARGS, TOO_MANY_OPT_ARGS};
 
+/**
+ * The argument struct holds information about a command line argument.
+ */
 typedef struct {
   const char *name;
   const char *usage;

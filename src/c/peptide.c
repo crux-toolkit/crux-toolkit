@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -30,6 +30,7 @@ struct peptide {
  * \struct peptide_constraint
  * \brief Object to represent constraints which a peptide may or may not
  *  satisfy.
+ *
  * def TRYPTIC: a protein that ends with either K or R and 
  *              any other K and R in the sequence must be followed by a P
  */
@@ -185,7 +186,7 @@ void print_peptide(
 
 /**
  * Prints a peptide object to file.
- * mass \t protein-id \t peptide-start \t peptide-length <\t peptide-sequence> \n
+ * mass \\t protein-id \\t peptide-start \\t peptide-length \\t peptide-sequence> \\n
  * prints in correct format for generate_peptide
  */
 void print_peptide_in_format(

@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #include <math.h>
@@ -14,8 +14,15 @@
 #include "peptide.h"
 #include "carp.h"
 
+/**
+ * Array to store the amino acid masses
+ */
 float amino_masses[('Z' - 'A')*2 + 2];
-BOOLEAN_T initlialized_amino_masses = FALSE;
+
+/**
+ * Have we initialized the amino acid masses?
+ */
+BOOLEAN_T initialized_amino_masses = FALSE;
 
 //FIXME need to find the monoisotopic mass for some AA -chris
 /**
@@ -108,9 +115,9 @@ float get_mass_amino_acid_average(
   )
 {
   // has the amino_masses array been initialized?
-  if(!initlialized_amino_masses){
+  if(!initialized_amino_masses){
     initialize_amino_masses();
-    initlialized_amino_masses = TRUE;
+    initialized_amino_masses = TRUE;
   }
   return(amino_masses[(short int)amino_acid - 'A']);
 }
@@ -123,9 +130,9 @@ float get_mass_amino_acid_monoisotopic(
   )
 {
   // has the amino_masses array been initialized?
-  if(!initlialized_amino_masses){
+  if(!initialized_amino_masses){
     initialize_amino_masses();
-    initlialized_amino_masses = TRUE;
+    initialized_amino_masses = TRUE;
   }
   return(amino_masses[(short int)amino_acid - 'A' + 26 ]);
 }
