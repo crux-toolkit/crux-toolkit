@@ -1,5 +1,5 @@
 /********************************************************************
- * FILE: utils.h
+ * \file utils.h
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 9-8-97
  * PROJECT: shared

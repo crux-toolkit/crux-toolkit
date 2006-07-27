@@ -3,7 +3,7 @@
 
 /**
  * \file mass.h 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -14,11 +14,8 @@
  */
 #define MASS_NH3 17.0306
 
-/**
- * Mass of water
- */
-#define MASS_H2O_MONO 18.01056
-#define MASS_H2O_AVERAGE 18.0153
+#define MASS_H2O_MONO 18.01056 ///< Mass of water (monoisotopic)
+#define MASS_H2O_AVERAGE 18.0153 ///< Mass of water (average)
 
 /**
  * Mass of hydrogen
