@@ -1,8 +1,8 @@
 /**
  * \file peptide.h 
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief Object for representing one peptide.
- *****************************************************************************/
+ */
 #ifndef PEPTIDE_H 
 #define PEPTIDE_H
 

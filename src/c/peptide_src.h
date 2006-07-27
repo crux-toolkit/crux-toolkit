@@ -1,10 +1,10 @@
-/*****************************************************************************
+/**
  * \file peptide_src.h
- * $Revision: 1.2 $
- * \brief: Object for mapping a peptide to it's parent protein.
- ****************************************************************************/
-#ifndef PROTEIN_PEPTIDE_ASSOCIATION_H
-#define PROTEIN_PEPTIDE_ASSOCIATION_H
+ * $Revision: 1.3 $
+ * \brief Object for mapping a peptide to it's parent protein.
+ */
+#ifndef PEPTIDE_SRC_H
+#define PEPTIDE_SRC_H
 
 #include "utils.h"
 #include "mass.h"

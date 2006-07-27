@@ -18,8 +18,11 @@
  * not an option value will be taken to be a required argument
  **************************************************************************/
 #ifndef PARSE_ARGUMENTS_H
-
 #define PARSE_ARGUMENTS_H
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#define DOXYGEN_SHOULD_SKIP_THIS
+
 
 enum argument_type { FLAG_ARG, INT_ARG, LONG_ARG, DOUBLE_ARG, STRING_ARG };
 enum argument_error { NO_ERROR, UNKNOWN_OPTION, MISSING_VALUE,
@@ -30,8 +33,8 @@ enum argument_error { NO_ERROR, UNKNOWN_OPTION, MISSING_VALUE,
  * The argument struct holds information about a command line argument.
  */
 typedef struct {
-  const char *name;
-  const char *usage;
+  const char *name; 
+  const char *usage; 
   void *container;
   enum argument_type type;
 } argument;
@@ -44,4 +47,5 @@ int parse_arguments(int argc, char * argv[], int die_on_error);
 int parse_arguments_get_error(const char ** s);
 char * parse_arguments_get_usage(const char * name);
 
-#endif /*PARSE_ARGUMENTS*/
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+#endif /* PARSE_ARGUMENTS_H */
