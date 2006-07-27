@@ -1,3 +1,9 @@
+/**
+ * \file crux-utils.h
+ * $Revision: 1.4 $
+ * $Author: aklammer $
+ * \brief Utilities for the crux project
+ */
 #ifndef CRUX_UTILS_H
 #define CRUX_UTILS_H
 #include <math.h>
