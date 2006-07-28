@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -133,5 +133,29 @@ typedef struct database_protein_iterator DATABASE_PROTEIN_ITERATOR_T;
  * \brief An object to iterate over the peptides in a database 
  */
 typedef struct database_peptide_iterator DATABASE_PEPTIDE_ITERATOR_T;
+
+
+/**
+ * The enum for sort type (mass, length)
+ */
+enum _sort_type {MASS, LENGTH};
+
+/**
+ * \typedef SORT_TYPE_T
+ * \brief The typedef for sort type (mass, length)
+ */
+typedef enum _sort_type SORT_TYPE_T;
+
+/**
+ * \typedef DATABASE_SORTED_PEPTIDE_ITERATOR_T
+ * \brief An object to iterate over the peptides in a database in sorted order 
+ */
+typedef struct database_sorted_peptide_iterator DATABASE_SORTED_PEPTIDE_ITERATOR_T;
+
+/**
+ * \struct peptide_wrapper
+ * \brief A database of protein sequences
+ */
+typedef struct peptide_wrapper PEPTIDE_WRAPPER_T;
 
 #endif

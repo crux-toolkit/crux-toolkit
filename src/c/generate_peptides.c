@@ -252,17 +252,12 @@ int main(int argc, char** argv){
       carp(CARP_WARNING, "no matches found\n");
     }
     else{
-      int progress = 0;
-      fprintf(stderr, "Running:\n");
       //print each peptide
       while(database_peptide_iterator_has_next(iterator)){
-        show_progress(&progress);
         peptide = database_peptide_iterator_next(iterator);
         print_peptide_in_format(peptide, flag_opt, stdout);
         free_peptide(peptide);
       }
-      putc('\n', stderr);
-      fflush(stderr);
     }
       //free database, iterator, constraint
       free_database_peptide_iterator(iterator);

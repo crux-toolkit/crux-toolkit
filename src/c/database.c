@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -50,6 +50,29 @@ struct database_peptide_iterator {
     cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
   };
+
+/**
+ * \struct database_sorted_peptide_iterator
+ * \brief Object to iterate over the peptides within a database, in an
+ * specified sorted order.
+ */
+struct database_sorted_peptide_iterator {
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; ///<The protein iterator. 
+  PROTEIN_PEPTIDE_ITERATOR_T* 
+    cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
+  PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
+  SORT_TYPE_T sort_type; ///< The sort type for this iterator (MASS, LENGTH);
+  PEPTIDE_WRAPPER_T* peptide_wrapper; ///< a linklist of peptide wrappers
+};
+
+/**
+ * \struct peptide_wrapper
+ * \brief A database of protein sequences
+ */
+struct peptide_wrapper{
+  PEPTIDE_WRAPPER_T* next_wrapper; ///< the next peptide wrapper
+  PEPTIDE_T* peptide;   ///< the core, the peptide
+};    
 
 /**
  * \returns An (empty) database object.
@@ -345,6 +368,14 @@ PROTEIN_T* database_protein_iterator_next(
     )
 {
   ++database_protein_iterator->cur_protein;
+
+  //print number of protein generated to STDERR for every 500 protein reached
+  if(database_protein_iterator->cur_protein % 500 == 0){
+    carp(CARP_INFO, "reached protein %d out of %d", 
+         database_protein_iterator->cur_protein,
+         database_protein_iterator->database->num_proteins);
+  }
+
   return database_protein_iterator->database->proteins[database_protein_iterator->cur_protein-1];
 }
 
@@ -462,7 +493,6 @@ PEPTIDE_T* database_peptide_iterator_next(
   return next_peptide;
 }
 
-
 /*
  * Scans the database for start positions of protein sequences (using the
  * '>' character) and stores the locations of the starts in the database 
@@ -470,6 +500,227 @@ PEPTIDE_T* database_peptide_iterator_next(
  */
 BOOLEAN_T parse_database(
   DATABASE_T* database ///< An allocated database
+  );
+
+/***********************************
+ * database sorted peptide iterator
+ ***********************************/
+
+/**
+ * \struct database_sorted_peptide_iterator
+ * \brief Object to iterate over the peptides within a database, in an
+ * specified sorted order.
+ */
+struct database_sorted_peptide_iterator {
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; ///<The protein iterator. 
+  PROTEIN_PEPTIDE_ITERATOR_T* 
+    cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
+  PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
+  SORT_TYPE_T sort_type; ///< The sort type for this iterator (MASS, LENGTH);
+  PEPTIDE_WRAPPER_T* peptide_wrapper; ///< a linklist of peptide wrappers
+};
+
+/**
+ * \struct peptide_wrapper
+ * \brief A database of protein sequences
+ */
+struct peptide_wrapper{
+  PEPTIDE_WRAPPER_T* next_wrapper; ///< the next peptide wrapper
+  PEPTIDE_T* peptide;   ///< the core, the peptide
+};    
+
+/**
+ * Instantiates a new database_sorted_peptide_iterator from a database.
+ * \returns a DATABASE_SORTED_PEPTIDE_ITERATOR_T object.
+ */
+DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
+  DATABASE_T* database, ///< the database of interest -in
+  PEPTIDE_CONSTRAINT_T* peptide_constraint, ///< the peptide_constraint to filter peptides -in
+  SORT_TYPE_T sort_type ///< the sort type for this iterator
+  )
+{
+  PROTEIN_T* next_protein;
+  PEPTIDE_T* next_peptide;
+  PEPTIDE_WRAPPER_T* master_list_wrapper = NULL;
+  PEPTIDE_WRAPPER_T* list_wrapper = NULL;
+  PEPTIDE_WRAPPER_T* current_wrapper = NULL;
+  PEPTIDE_WRAPPER_T* new_wrapper = NULL;
+  BOOLEAN_T start = TRUE;
+
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator =
+    (DATABASE_SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_SORTED_PEPTIDE_ITERATOR_T));
+
+  //initialize
+  if(initialize_peptide_iterator(database_sorted_peptide_iterator, database)){
+    do{
+      //skip first time
+      if(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+        //if there's more proteins in database...
+        if(database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator)){
+          //create new protein_peptide_iterator for next protein
+          free_protein_peptide_iterator(database_sorted_peptide_iterator->cur_protein_peptide_iterator);
+          database_sorted_peptide_iterator->cur_protein_peptide_iterator =
+            new_protein_peptide_iterator(
+               database_protein_iterator_next(database_sorted_peptide_iterator->database_protein_iterator), 
+               database_sorted_peptide_iterator->peptide_constraint);
+        }
+      }
+
+      
+      while(protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+        if(start){
+          start = FALSE;
+          current_wrapper =
+            wrap_peptide(protein_peptide_iterator_next(database_peptide_iterator->cur_protein_peptide_iterator));
+          list_wrapper = current_wrapper;
+        }
+        else{
+          //wrap the next protein
+          new_wrapper =
+            wrap_peptide(protein_peptide_iterator_next(database_peptide_iterator->cur_protein_peptide_iterator));
+          current_wrapper->next_wrapper = new_wrapper;
+          current_wrapper = new_wrapper;
+        }
+        
+        //end of peptides from one protein
+        if(!protein_peptide_iterator_has_next(database_sorted_peptide_iterator->cur_protein_peptide_iterator)){
+          if(master_list_wrapper == NULL){
+            master_list_wrapper = list_wrapper;
+          }
+          else{
+            master_list_wrapper = merge_sort(master_list_wrapper, list_wrapper, sort_type);
+          }
+          list_wrapper = NULL;      
+          
+        }
+      }
+    }
+    while(database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator));
+
+    database_sorted_peptide_iterator->peptide_wrapper = master_list_wrapper;
+  }
+  else{ //no proteins to create peptides from or peptides.
+    carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
+    free_database_protein_iterator(database_sorted_peptide_iterator->database_protein_iterator);
+    free(database_sorted_peptide_iterator);
+    exit(1);
+  }
+  return database_sorted_peptide_iterator;
+}
+
+//merge sort
+PEPTIDE_WRAPPER_T* merge_sort(
+  PEPTIDE_WRAPPER_T* wrapper_one, ///<
+  PEPTIDE_WRAPPER_T* wrapper_two, ///<
+  SORT_TYPE_T* sort_type ///<
+  )
+{
+
+  return wrapper_one;
+}
+
+//wrap the peptide up
+PEPTIDE_WRAPPER_T* wrap_peptide(
+  PEPTIDE_T* peptide
+  )
+{
+  PEPTIDE_WRAPPER_T* new_wrapper = (PEPTIDE_WRAPPER_T*)mycalloc(1, sizeof(PEPTIDE_WRAPPER_T));
+  new_wrapper->peptide = peptide;
+  return new_wrapper;    
+}
+
+
+
+//check if there are any peptides at all to return????? i think so...
+BOOLEAN_T initialize_peptide_iterator(
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator,
+  DATABASE_T* database, ///< the database of interest -in
+)
+{
+  //set a new protein iterator
+  database_sorted_peptide_iterator->database_protein_iterator =
+    new_database_protein_iterator(database);
+
+  //set peptide constraint
+  database_sorted_peptide_iterator->peptide_constraint = peptide_constraint;
+
+  if(database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator)){
+    next_protein =
+      database_protein_iterator_next(database_sorted_peptide_iterator->database_protein_iterator);
+
+    //set new protein peptide iterator
+    database_sorted_peptide_iterator->cur_protein_peptide_iterator =
+      new_protein_peptide_iterator(next_protein, database_sorted_peptide_iterator->peptide_constraint);
+ 
+    //if first protein does not contain a match peptide, reinitailize
+    while(!protein_peptide_iterator_has_next(database_sorted_peptide_iterator->cur_protein_peptide_iterator)){
+      //end of list of peptides for database_peptide_iterator
+      if(!database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator)){
+        break;
+      }
+      else{ //create new protein_peptide_iterator for next protein
+        free_protein_peptide_iterator(database_sorted_peptide_iterator->cur_protein_peptide_iterator);
+        database_sorted_peptide_iterator->cur_protein_peptide_iterator =
+          new_protein_peptide_iterator(
+            database_protein_iterator_next(database_sorted_peptide_iterator->database_protein_iterator), 
+            database_sorted_peptide_iterator->peptide_constraint);
+      }
+    }
+    if(protein_peptide_iterator_has_next(database_sorted_peptide_iterator->cur_protein_peptide_iterator)){
+      return TRUE;
+    }
+  }
+  
+  return FALSE;
+}
+
+/**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T database_sorted_peptide_iterator_has_next(
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
+  )
+{
+
+ if(protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){ 
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * \returns The next peptide in the database.
+ */
+PEPTIDE_T* database_sorted_peptide_iterator_next(
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
+  )
+{
+  PEPTIDE_T* next_peptide =
+    protein_peptide_iterator_next(database_peptide_iterator->cur_protein_peptide_iterator);
+  
+  //reset database_peptide_iterator if needed
+  while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+    //end of list of peptides for database_peptide_iterator
+    if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
+      break;
+    }
+    else{ //create new protein_peptide_iterator for next protein
+      free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
+      database_peptide_iterator->cur_protein_peptide_iterator =
+        new_protein_peptide_iterator(
+          database_protein_iterator_next(database_peptide_iterator->database_protein_iterator), 
+          database_peptide_iterator->peptide_constraint);
+    }
+  }
+  return next_peptide;
+}
+
+/**
+ * Frees an allocated database_sorted_peptide_iterator object.
+ */
+void free_database_sorted_peptide_iterator(
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator to free -in
   );
 
 /*

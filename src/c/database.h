@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -174,6 +174,42 @@ BOOLEAN_T database_peptide_iterator_has_next(
  */
 PEPTIDE_T* database_peptide_iterator_next(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
+  );
+
+/***********************************
+ * database sorted peptide iterator
+ ***********************************/
+
+/**
+ * Instantiates a new database_sorted_peptide_iterator from a database.
+ * \returns a DATABASE_SORTED_PEPTIDE_ITERATOR_T object.
+ */
+DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
+  DATABASE_T* database, ///< the database of interest -in
+  PEPTIDE_CONSTRAINT_T* peptide_constraint, ///< the peptide_constraint to filter peptides -in
+  SORT_TYPE_T sort_type ///< the sort type for this iterator
+  );
+
+/**
+ * Frees an allocated database_sorted_peptide_iterator object.
+ */
+void free_database_sorted_peptide_iterator(
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator to free -in
+  );
+
+/**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T database_sorted_peptide_iterator_has_next(
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
+  );
+
+/**
+ * \returns The next peptide in the database.
+ */
+PEPTIDE_T* database_sorted_peptide_iterator_next(
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
   );
 
 

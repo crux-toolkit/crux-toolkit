@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -122,7 +122,12 @@ PEPTIDE_SRC_T* get_peptide_src_next_association(
   PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
   );
 
-
+/**
+ * \returns a pointer to the start of the peptide with in it's parent protein sequence
+ */
+char* get_peptide_src_sequence_pointer(
+  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
+  );
 
 /*
  * Local Variables:

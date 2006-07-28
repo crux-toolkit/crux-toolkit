@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -27,7 +27,6 @@ struct peptide_src{
   int start_idx; ///< start index of the peptide in the protein sequence, first residue is 1 
   PEPTIDE_SRC_T* next_association; ///< a linklist of peptide_src   
 };
-
 
 /**
  * \returns An (empty) peptide_src object.
@@ -220,6 +219,16 @@ PEPTIDE_SRC_T* get_peptide_src_next_association(
   return peptide_src->next_association;
 }
 
+/**
+ * \returns a pointer to the start of the peptide with in it's parent protein sequence
+ */
+char* get_peptide_src_sequence_pointer(
+  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
+  )
+{
+  char* start_pointer = get_protein_sequence_pointer(peptide_src->parent_protein);
+  return &(start_pointer[peptide_src->start_idx - 1]);
+}
 
 /*
  * Local Variables:

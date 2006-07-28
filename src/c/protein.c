@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -828,7 +828,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
   //update poisiton of iterator
   ++protein_peptide_iterator->cur_start;
   protein_peptide_iterator->has_next = set_iterator_state(protein_peptide_iterator);
- 
+
   return peptide;
 }
 
