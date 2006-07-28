@@ -1,2 +1,2 @@
-test_generate_peptides | standard_get_ms2_spectrum.out | ../../../bin/generate_peptides test.fasta 
-test_get_ms2_spectrum  | ../../../bin/get_ms2_spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out | standard_get_ms2_spectrum.out
+test_generate_peptides = standard_get_ms2_spectrum.out = ../../../bin/generate_peptides test.fasta 
+test_get_ms2_spectrum  = ../../../bin/get_ms2_spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out = standard_generate_peptides.out

@@ -15,7 +15,7 @@ Usage: crux-test.pl [-u] <test list file>
 
 The crux-test.pl script provides a framework for testing the overall 
 functionality of programs in the crux distribution. It read a list of
-tests from a pipe-delimited file, one test per line. Each test is described
+tests from a '='-delimited file, one test per line. Each test is described
 by 3 fields:
 
 =over 4
@@ -79,7 +79,7 @@ while ($line = <ARGV>) {
 
   # Parse the test parameters
   chomp $line;
-  @fields = split "|", $line;
+  @fields = split "=", $line;
   $test_name = $fields[0];
   $standard_filename = $fields[1];
   $cmd = $fields[2];
