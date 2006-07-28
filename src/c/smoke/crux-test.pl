@@ -31,13 +31,14 @@ the command line implementing the test
 
 =back
 
-The command line for each test is executed with the standard output
-captured to a file. The test output is compared to the known good
+The command line for each test is executed with the STDOUT
+captured to a file. STDERR is written as is. 
+The test output is compared to the known good
 output contained in the file specified in the 2nd field. If the test
 output matches the known good output the test succeeds, otherwise
 it fails. The results are printed to the standard output. If the 
 '-u' option is specified, the files containing the known good output
-will be replaced by the output of the test.
+will be replaced by the output of the test. 
 
 It is assumed that the command to be tested sends its output to
 standard out.
@@ -85,7 +86,7 @@ while ($line = <ARGV>) {
   $cmd = $fields[2];
 
   # Execute the test
-  print "### Running test $test_name ###\n";
+  print "\n----- Running test $test_name \n";
   my ($output_fh, $output_filename) = tempfile();
   if (!$output_filename) {
     die("Unable to create output file.\n");
@@ -93,10 +94,10 @@ while ($line = <ARGV>) {
   $result = &test_cmd($cmd, $standard_filename, $output_filename);
   $num_tests++;
   if ($result == 0) {
-    print "### Test $test_name succeded ###\n";
+    print "----- SUCCESS - test $test_name\n";
     $num_successful_tests++;
   } else {
-    print "### Test $test_name failed ###\n";
+    print "----- FAILURE - test $test_name\n";
   }    
 
   # Clean up
@@ -111,12 +112,12 @@ while ($line = <ARGV>) {
 }
 
 # Print the summary of the tests.
-print "#########################\n";
-print "Successful Tests: $num_successful_tests\n";
+print "\n-------------------------------\n";
+print "----- Successful Tests: $num_successful_tests\n";
 my $num_failed_tests = $num_tests - $num_successful_tests;
-print "Failed Tests: $num_failed_tests\n";
-print "Total Tests: $num_tests\n";
-print "#########################\n";
+print "----- Failed Tests: $num_failed_tests\n";
+print "----- Total Tests: $num_tests\n";
+print "-------------------------------\n\n";
 exit($num_failed_tests);
 
 =head2 test_cmd($cmd, $standard_filename, $output_filename)
