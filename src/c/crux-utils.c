@@ -36,7 +36,7 @@ char* copy_string_part(char* src, int length){
  * to the range of the numbers, allowing a single epsilon to be used for many, 
  * or perhaps all compares.
  */
-int compare_float(float float_a, float float_b){
+inline int compare_float(float float_a, float float_b){
   float EPSILON = 0.0000005;
   float sum = float_a + float_b;
 
