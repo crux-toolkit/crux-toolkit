@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include "carp.h"
 #include "peptide.h"
-#include "protein_peptide_association.h"
+#include "peptide_src.h"
 #include "protein.h"
 #include "database.h"
 #include "parse_arguments.h"
