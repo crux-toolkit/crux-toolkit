@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -399,6 +399,35 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
 
+/////
+
+/**
+ * Compare peptide sequence
+ * \returns TRUE if peptide sequence is identical else FALSE
+ */
+BOOLEAN_T compare_peptide_sequence(
+  PEPTIDE_T* peptide_one,
+  PEPTIDE_T* peptide_two
+  );
+
+/**
+ * Compare peptide mass
+ * \returns 0 if peptide mass is identical else 1 if peptide_one is larger, -1 if peptide_two is larger
+ */
+int compare_peptide_mass(
+  PEPTIDE_T* peptide_one,
+  PEPTIDE_T* peptide_two
+  );
+
+/**
+ * Merge to identical peptides, copy all peptide_src into one of the peptide
+ * \returns TRUE if merge is successful else FALSE
+ */
+BOOLEAN_T merge_peptides(
+  PEPTIDE_T* peptide_dest,
+  PEPTIDE_T* peptide_bye
+  );
+                           
 
 /*
  * Local Variables:

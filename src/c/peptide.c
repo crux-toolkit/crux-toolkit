@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -186,7 +186,9 @@ void print_peptide(
 
 /**
  * Prints a peptide object to file.
- * mass \\t protein-id \\t peptide-start \\t peptide-length \\t peptide-sequence> \\n
+ * prints all peptide_src object it's associated 
+ * mass \t protein-id \t peptide-start \t peptide-length <\t peptide-sequence> \n
+ *      \t protein-id \t peptide-start \t peptide-length <\t peptide-sequence> \n
  * prints in correct format for generate_peptide
  */
 void print_peptide_in_format(
@@ -195,21 +197,41 @@ void print_peptide_in_format(
   FILE* file  ///< the out put stream -out
   )
 {
-  PROTEIN_T* parent = get_peptide_src_parent_protein(peptide->peptide_src);
-  char* id = get_protein_id_pointer(parent);
-  int start_idx = get_peptide_src_start_idx(peptide->peptide_src);
+  PROTEIN_T* parent = NULL;
+  PEPTIDE_SRC_T* next_src = peptide->peptide_src;
+  char* id = NULL;
+  int start_idx = 0;
   char* sequence = NULL;
 
-  fprintf(file, "%.2f\t%s\t%d\t%d", peptide->peptide_mass, id, start_idx, peptide->length);
-  
-  //print peptide sequence?
+  //print mass of the peptide
+  fprintf(file, "%.2f", peptide->peptide_mass);
+
+  //obtain peptide sequence
   if(flag_out){
     sequence = get_peptide_sequence(peptide);
-    fprintf(file, "\t%s\n", sequence);
-    free(sequence);
   }
-  else{
-    fprintf(file, "\n");
+
+  //iterate over all peptide src
+  while(next_src != NULL){
+    parent = get_peptide_src_parent_protein(next_src);
+    id = get_protein_id_pointer(parent);
+    start_idx = get_peptide_src_start_idx(next_src);
+        
+    fprintf(file, "\t%s\t%d\t%d", id, start_idx, peptide->length);
+  
+    //print peptide sequence?
+    if(flag_out){
+      fprintf(file, "\t%s\n", sequence);
+    }
+    else{
+      fprintf(file, "\n");
+    }
+    next_src = get_peptide_src_next_association(next_src);
+  }
+
+  //free sequence if allocated
+  if(flag_out){
+    free(sequence);
   }
 }
 
@@ -724,6 +746,79 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
     die("ERROR: no more peptide_srcs to iterate\n");
   }
   return previous;
+}
+ 
+/////
+
+/**
+ * Compare peptide sequence
+ * \returns TRUE if peptide sequence is identical else FALSE
+ */
+BOOLEAN_T compare_peptide_sequence(
+  PEPTIDE_T* peptide_one,  ///< the peptide sequence to compare  -out
+  PEPTIDE_T* peptide_two  ///< the peptide sequence to compare  -out
+  )
+{
+  //is Mass and Length identical
+  if(compare_float(peptide_one->peptide_mass, peptide_two->peptide_mass) != 0 ||
+     peptide_one->length != peptide_two->length){
+    return FALSE;
+  }
+  else{
+    int current_idx = 0;
+    char* start_one = get_peptide_src_sequence_pointer(peptide_one->peptide_src);
+    char* start_two = get_peptide_src_sequence_pointer(peptide_two->peptide_src);
+    
+    while(current_idx < peptide_one->length){
+      if(start_one[current_idx] != start_two[current_idx]){
+        return FALSE;
+      }
+      ++current_idx;
+    } 
+  }
+  return TRUE;
+}
+
+/**
+ * Compare peptide mass
+ * \returns 0 if peptide mass is identical else 1 if peptide_one is larger, -1 if peptide_two is larger
+ */
+int compare_peptide_mass(
+  PEPTIDE_T* peptide_one,  ///< the peptide mass to compare  -out
+  PEPTIDE_T* peptide_two  ///< the peptide mass to compare  -out
+  )
+{
+  return compare_float(peptide_one->peptide_mass, peptide_two->peptide_mass);
+}
+
+/**
+ * Merge to identical peptides, copy all peptide_src into one of the peptide
+ * peptide_dest, peptide_bye must have at least one peptide src
+ * frees the peptide_bye, once the peptide_src are re-linked to the peptide_dest
+ * \returns TRUE if merge is successful else FALSE
+ */
+BOOLEAN_T merge_peptides(
+  PEPTIDE_T* peptide_dest, ///< the peptide to merge into  -out
+  PEPTIDE_T* peptide_bye ///< the peptide to be merged  -in
+  )
+{
+  PEPTIDE_SRC_T* current_src = peptide_dest->peptide_src;
+  PEPTIDE_SRC_T* next_src = get_peptide_src_next_association(current_src);
+  
+  //does all peptides have at least one peptide_src?
+  if(current_src == NULL || peptide_bye->peptide_src == NULL){
+    carp(CARP_ERROR, "failed to merge two peptides");
+    return FALSE;
+  }
+
+  //find the end of the peptide src link list..
+  while(next_src != NULL){
+    current_src = next_src;
+    next_src =  get_peptide_src_next_association(current_src);
+  }
+  set_peptide_src_next_association(current_src, peptide_bye->peptide_src);
+  free(peptide_bye);
+  return TRUE;
 }
   
 /*

@@ -10,11 +10,14 @@
 #include "../peptide_src.h"
 #include "../protein.h"
 #include "../database.h"
+#include "../carp.h"
+#include "../crux-utils.h"
 
 PEPTIDE_T* peptide2;
 PEPTIDE_T* peptide3;
 PEPTIDE_T* peptide4;
 PEPTIDE_T* peptide5;
+PEPTIDE_T* peptide6;
 PEPTIDE_T* peptide1;
 PROTEIN_T* protein1;
 PROTEIN_T* protein2;
@@ -60,7 +63,7 @@ START_TEST (test_create){
   */
 
   //peptide constraint
-  constraint = new_peptide_constraint(ANY_TRYPTIC, 0, 350, 2, 3,1);
+  constraint = new_peptide_constraint(ANY_TRYPTIC, 0, 350, 2, 3,1, AVERAGE);
   /*
   //create iterator
   iterator = new_protein_peptide_iterator(protein3, constraint);
@@ -85,12 +88,42 @@ START_TEST (test_create){
   DATABASE_PEPTIDE_ITERATOR_T* iterator =
     new_database_peptide_iterator(database, constraint);
 
+  int n = 0;
   while(database_peptide_iterator_has_next(iterator)){
-    peptide4 = database_peptide_iterator_next(iterator);
-    print_peptide(peptide4, stdout);
-    free_peptide(peptide4);
-  }
+    if(n == 0){
+      peptide5 = database_peptide_iterator_next(iterator);
+      //print_peptide(peptide4, stdout);
 
+    }
+    else if(n == 4){
+      peptide6 = database_peptide_iterator_next(iterator);
+    }
+    else{
+      peptide4 = database_peptide_iterator_next(iterator);
+      print_peptide(peptide4, stdout);
+      free_peptide(peptide4);
+    }
+    ++n;
+  }
+  
+  printf("the comparison seq between two peptides is: %d\n", compare_peptide_sequence(peptide5, peptide6));
+  printf("the comparison mass between two peptides is: %d\n", compare_peptide_mass(peptide5, peptide6));
+  print_peptide(peptide5, stdout);
+  print_peptide(peptide6, stdout);
+
+  if(merge_peptides(peptide5, peptide6)){
+    printf("merge complete\n");
+  }
+  else{
+    printf("merge failded\n");
+  }
+  
+  print_peptide(peptide5, stdout);
+  print_peptide_in_format(peptide5, TRUE,  stdout);
+
+
+  free_peptide(peptide5);
+  //free_peptide(peptide6);
 
   //free database
   free_database_peptide_iterator(iterator);

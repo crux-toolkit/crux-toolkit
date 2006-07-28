@@ -1,9 +1,8 @@
 CFLAGS= -g -Wall
 BINDIR=../../../bin/
-SRC =	../utils.c ../peak.c ../spectrum.c ../peptide.c ../protein.c ../peptide_src.c ../mass.c ../alphabet.c ../array.c unit-tests-protein.c check-protein.c ../crux-utils.c ../database.c
-unittests:	$(SRC)
+SRC =  ../utils.c ../peak.c ../spectrum.c ../peptide.c ../protein.c ../peptide_src.c ../mass.c ../alphabet.c ../array.c unit-tests-protein.c check-protein.c ../crux-utils.c ../database.c ../carp.c
+unittests:  $(SRC)
 	$(CC) -o unittests $(CFLAGS) $(SRC) -lcheck -lm -D_GNU_SOURCE
-
 .PHONY : check clean
 
 check: unittests
