@@ -63,7 +63,7 @@ START_TEST (test_create){
   */
 
   //peptide constraint
-  constraint = new_peptide_constraint(ANY_TRYPTIC, 0, 350, 2, 3,1, AVERAGE);
+  constraint = new_peptide_constraint(TRYPTIC, 0, 1000, 4, 9,1, AVERAGE);
   /*
   //create iterator
   iterator = new_protein_peptide_iterator(protein3, constraint);
@@ -82,6 +82,8 @@ START_TEST (test_create){
   
   free_protein(protein3);
   */
+
+  /** test 2
   //create a new database
   DATABASE_T* database = new_database("small_fasta");
   
@@ -129,6 +131,48 @@ START_TEST (test_create){
   free_database_peptide_iterator(iterator);
   free_peptide_constraint(constraint);
   free_database(database);
+
+  */
+  /*test 3*/
+  printf("\nstart sorted\n");
+   DATABASE_T* database = new_database("/var/noble/data/protein_database/fly-NCBI-011505_contam.fasta");
+  
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* iterator =
+    new_database_sorted_peptide_iterator(database, constraint, LEXICAL);
+
+  while(database_sorted_peptide_iterator_has_next(iterator)){
+      peptide5 = database_sorted_peptide_iterator_next(iterator);
+      print_peptide_in_format(peptide5, TRUE,  stdout);
+      //print_peptide(peptide5, stdout);
+      free_peptide(peptide5);
+  }
+  /*
+  printf("start un-sorted\n");
+  DATABASE_T* database2 = new_database("small_fasta");
+  
+  DATABASE_PEPTIDE_ITERATOR_T* iterator2 =
+    new_database_peptide_iterator(database2, constraint);
+
+  while(database_peptide_iterator_has_next(iterator2)){
+      peptide5 = database_peptide_iterator_next(iterator2);
+      print_peptide_in_format(peptide5, TRUE,  stdout);
+      //print_peptide(peptide5, stdout);
+      free_peptide(peptide5);
+  }
+  */
+  //  print_peptide_in_format(peptide5, TRUE,  stdout);
+
+
+  //free_peptide(peptide5);
+  //free_peptide(peptide6);
+
+  //free database
+  free_database_sorted_peptide_iterator(iterator);
+  //free_database_peptide_iterator(iterator2);
+  free_peptide_constraint(constraint);
+  free_database(database);
+  //free_database(database2);
+
 
 }
 END_TEST

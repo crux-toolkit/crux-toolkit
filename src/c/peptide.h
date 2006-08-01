@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -158,6 +158,15 @@ void free_peptide_constraint(
 char* get_peptide_sequence(
  PEPTIDE_T* peptide ///< peptide to query sequence -in
  );
+
+/**
+ * \returns a pointer to the start of peptide sequence with in it's protein parent sequence
+ * goes to the first peptide_src to find the location of start, thus must have at least one peptide src
+ * should not print, will result in printing the entire protein sequence
+ */
+char* get_peptide_sequence_pointer(
+  PEPTIDE_T* peptide ///< peptide to query sequence -in
+  );
 
 /**
  * sets the sequence length of the peptide

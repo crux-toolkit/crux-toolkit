@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.26 $
+ * $Revision: 1.27 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -393,6 +393,27 @@ char* get_peptide_sequence(
   char* copy_sequence = copy_string_part(&parent_sequence[start_idx-1], peptide->length);
  
   return copy_sequence; 
+}
+
+/**
+ * \returns a pointer to the start of peptide sequence with in it's protein parent sequence
+ * goes to the first peptide_src to find the location of start, thus must have at least one peptide src
+ * should not print, will result in printing the entire protein sequence
+ */
+char* get_peptide_sequence_pointer(
+  PEPTIDE_T* peptide ///< peptide to query sequence -in
+  )
+{
+  if(peptide->peptide_src == NULL){
+    die("ERROR: no peptide_src to retrieve peptide sequence pointer\n");
+  }
+  char* parent_sequence = 
+    get_protein_sequence_pointer(get_peptide_src_parent_protein(peptide->peptide_src));
+  int start_idx = get_peptide_src_start_idx(peptide->peptide_src);
+
+  char* pointer_peptide_sequence = &parent_sequence[start_idx-1];
+  
+  return pointer_peptide_sequence;
 }
 
 /**
