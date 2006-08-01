@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -13,6 +13,7 @@
 #include "protein.h"
 #include "database.h"
 #include "carp.h"
+#include "objects.h"
 
 #define MAX_PROTEINS 30000 ///< The maximum number of proteins in a database.
 
@@ -57,6 +58,9 @@ struct database_peptide_iterator {
  * specified sorted order.
  */
 struct database_sorted_peptide_iterator {
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; ///<The protein iterator. 
+  PROTEIN_PEPTIDE_ITERATOR_T* 
+    cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
   SORT_TYPE_T sort_type; ///< The sort type for this iterator (MASS, LENGTH);
   PEPTIDE_WRAPPER_T* peptide_wrapper; ///< a linklist of peptide wrappers
@@ -519,43 +523,40 @@ PEPTIDE_WRAPPER_T* wrap_peptide(
 BOOLEAN_T initialize_peptide_iterator(
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator,
   DATABASE_T* database, ///< the database of interest -in
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator, //The protein iterator -in
-  PROTEIN_PEPTIDE_ITERATOR_T* 
-    cur_protein_peptide_iterator,  ///< The peptide iterator for the current protein -in
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
 )
 {
   PROTEIN_T* next_protein = NULL;
 
   //set a new protein iterator
-  database_protein_iterator = new_database_protein_iterator(database);
+   database_sorted_peptide_iterator->database_protein_iterator = new_database_protein_iterator(database);
 
   //set peptide constraint
   database_sorted_peptide_iterator->peptide_constraint = peptide_constraint;
 
-  if(database_protein_iterator_has_next(database_protein_iterator)){
+  if(database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator)){
     next_protein =
-      database_protein_iterator_next(database_protein_iterator);
+      database_protein_iterator_next(database_sorted_peptide_iterator->database_protein_iterator);
 
     //set new protein peptide iterator
-    cur_protein_peptide_iterator =
+    database_sorted_peptide_iterator->cur_protein_peptide_iterator =
       new_protein_peptide_iterator(next_protein, database_sorted_peptide_iterator->peptide_constraint);
  
     //if first protein does not contain a match peptide, reinitailize
-    while(!protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
+    while(!protein_peptide_iterator_has_next(database_sorted_peptide_iterator->cur_protein_peptide_iterator)){
       //end of list of peptides for database_peptide_iterator
-      if(!database_protein_iterator_has_next(database_protein_iterator)){
+      if(!database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator)){
         break;
       }
       else{ //create new protein_peptide_iterator for next protein
-        free_protein_peptide_iterator(cur_protein_peptide_iterator);
-        cur_protein_peptide_iterator =
+        free_protein_peptide_iterator(database_sorted_peptide_iterator->cur_protein_peptide_iterator);
+        database_sorted_peptide_iterator->cur_protein_peptide_iterator =
           new_protein_peptide_iterator(
-            database_protein_iterator_next(database_protein_iterator), 
+            database_protein_iterator_next(database_sorted_peptide_iterator->database_protein_iterator), 
             peptide_constraint);
       }
     }
-    if(protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
+    if(protein_peptide_iterator_has_next(database_sorted_peptide_iterator->cur_protein_peptide_iterator)){
       return TRUE;
     }
   }
@@ -563,14 +564,82 @@ BOOLEAN_T initialize_peptide_iterator(
   return FALSE;
 }
 
+//FIXME: write lexical compare
 /**
- * merge sort wrapper list one and list two by length
- * assumes that each list one and two are pre-sorted by length
+ * compares two peptides with the give sort type (length, mass, lexical)
+ * /returns 0 if eq, 1 if one < two, -1 if one > two
+ */
+int compareTo(
+  PEPTIDE_T* peptide_one,
+  PEPTIDE_T* peptide_two,
+  SORT_TYPE_T sort_type
+  )
+{
+  //length order
+  if(sort_type == LENGTH){
+    if(get_peptide_length(peptide_one) >
+       get_peptide_length(peptide_two)){
+      return 1;
+    }
+    else if(get_peptide_length(peptide_one) ==
+       get_peptide_length(peptide_two)){
+      return 0;
+    }
+    else{
+      return -1;
+    }
+  }
+  //mass order
+  else if(sort_type == MASS){
+    return compare_float(get_peptide_peptide_mass(peptide_one), 
+                         get_peptide_peptide_mass(peptide_two));
+  }
+  //lexicographic order
+  else if(sort_type == LEXICAL){
+    char* peptide_one_sequence = get_peptide_sequence_pointer(peptide_one);
+    char* peptide_two_sequence = get_peptide_sequence_pointer(peptide_two);
+    int peptide_one_length = get_peptide_length(peptide_one);
+    int peptide_two_length = get_peptide_length(peptide_two);
+    int current_idx = 0;
+    
+    //check if all alphabetically identical
+    while(current_idx < peptide_one_length &&
+          current_idx < peptide_two_length){
+      if(peptide_one_sequence[current_idx] > peptide_two_sequence[current_idx]){
+        return 1;
+      }
+      else if(peptide_one_sequence[current_idx] < peptide_two_sequence[current_idx]){
+        return -1;
+      }
+      ++current_idx;
+    }
+    
+    //alphabetically identical, check if same length
+    if(peptide_one_length > peptide_two_length){
+      return 1;
+    }
+    else if(peptide_one_length < peptide_two_length){
+      return -1;
+    }
+    else{
+      return 0;
+    }
+  }
+  
+  die("ERROR: no matching sort_type");
+  //quiet compiler
+  return 0;
+}
+
+/**
+ * merge wrapper list one and list two by sort type
  *\returns a sorted wrapper list
  */   
-PEPTIDE_WRAPPER_T* merge_sort_length(
+PEPTIDE_WRAPPER_T* merge(
   PEPTIDE_WRAPPER_T* wrapper_one, ///<
-  PEPTIDE_WRAPPER_T* wrapper_two ///<
+  PEPTIDE_WRAPPER_T* wrapper_two, ///<
+  SORT_TYPE_T sort_type, ///<
+  BOOLEAN_T unique
   )
 {
   PEPTIDE_WRAPPER_T* wrapper_final = NULL;
@@ -579,7 +648,7 @@ PEPTIDE_WRAPPER_T* merge_sort_length(
   //loop around until there are no more wrappers to merge
  LOOP:
 
-  if(wrapper_one != NULL && wrapper_two != NULL){
+  if(wrapper_one != NULL || wrapper_two != NULL){
     if(wrapper_one == NULL){
       //there are wrappers on the current list
       if(wrapper_current != NULL){
@@ -602,11 +671,11 @@ PEPTIDE_WRAPPER_T* merge_sort_length(
       }
       wrapper_one = NULL;
     }
-    else if(compare_float(get_peptide_peptide_mass(wrapper_one->peptide), 
-                          get_peptide_peptide_mass(wrapper_two->peptide)) == 1){
+    else if(compareTo(wrapper_one->peptide, wrapper_two->peptide, sort_type) == 1){
       //there are wrappers on the current list
       if(wrapper_current != NULL){
         wrapper_current->next_wrapper = wrapper_two;        
+        wrapper_current = wrapper_current->next_wrapper;
       }
       //there are no wrappers on the current list
       else{
@@ -618,7 +687,8 @@ PEPTIDE_WRAPPER_T* merge_sort_length(
     else{
       //there are wrappers on the current list
       if(wrapper_current != NULL){
-        wrapper_current->next_wrapper = wrapper_one;        
+        wrapper_current->next_wrapper = wrapper_one; 
+        wrapper_current = wrapper_current->next_wrapper;
       }
       //there are no wrappers on the current list
       else{
@@ -627,41 +697,80 @@ PEPTIDE_WRAPPER_T* merge_sort_length(
       }
       wrapper_one = wrapper_one->next_wrapper;
     }
+    
     goto LOOP;
   }
   return wrapper_final;
 }
 
 /**
- * merge sort wrapper list one and list two by mass
- *\returns a sorted wrapper list
- */   
-PEPTIDE_WRAPPER_T* merge_sort_mass(
-  PEPTIDE_WRAPPER_T* wrapper_one, ///<
-  PEPTIDE_WRAPPER_T* wrapper_two ///<
+ * spilt a wrapper list into two equal size lists
+ * \returns array of two pointers of each split array
+ * user must free the array, heap allocated
+ */
+PEPTIDE_WRAPPER_T** split(
+  PEPTIDE_WRAPPER_T* wrapper_src ///< wrapper list to split
   )
 {
-  wrapper_one = wrapper_two;
-  return wrapper_two;
+  PEPTIDE_WRAPPER_T** split_wrapper = 
+    (PEPTIDE_WRAPPER_T**)mycalloc(2, sizeof(PEPTIDE_WRAPPER_T*));
+  
+  if(wrapper_src == NULL){
+    return split_wrapper;
+  }
+  else if(wrapper_src->next_wrapper == NULL){
+    split_wrapper[0] = wrapper_src;
+    return split_wrapper;
+  }
+  //recursively split the list except the first two wrappers
+  PEPTIDE_WRAPPER_T** recursive_split = 
+    split(wrapper_src->next_wrapper->next_wrapper);
+  
+  //return result of putting the first wrapper at the front of the first list,
+  //and the second wrapper on the second list
+  wrapper_src->next_wrapper->next_wrapper = recursive_split[1];
+  split_wrapper[1] = wrapper_src->next_wrapper;
+  wrapper_src->next_wrapper = recursive_split[0];
+  split_wrapper[0] = wrapper_src;
+  free(recursive_split);
+  
+  return split_wrapper;
 }
+
 
 /**
  * merge sort wrapper list one and list two
  *\returns a sorted wrapper list
  */   
 PEPTIDE_WRAPPER_T* merge_sort(
-  PEPTIDE_WRAPPER_T* wrapper_one, ///<
-  PEPTIDE_WRAPPER_T* wrapper_two, ///<
-  SORT_TYPE_T sort_type ///<
+  PEPTIDE_WRAPPER_T* wrapper_list, ///<
+  SORT_TYPE_T sort_type, ///<
+  BOOLEAN_T unique ///< return a list of unique peptides?
   )
 {
-  if(sort_type == MASS){
-    merge_sort_mass(wrapper_one, wrapper_two);
+  PEPTIDE_WRAPPER_T* final_sorted_list = NULL;
+  PEPTIDE_WRAPPER_T* first_half = NULL;
+  PEPTIDE_WRAPPER_T* second_half = NULL;
+  
+  //split wrapper list into two equal lists
+  PEPTIDE_WRAPPER_T** wrapper_split = 
+    split(wrapper_list);
+
+  first_half = wrapper_split[0];
+  second_half = wrapper_split[1];
+  free(wrapper_split);
+
+
+  //recursivelly sort each half
+  if(first_half != NULL && second_half != NULL){
+    first_half = merge_sort(first_half, sort_type, unique);
+    second_half = merge_sort(second_half, sort_type, unique);
+    final_sorted_list = merge(first_half, second_half, sort_type, unique);
   }
-  else if(sort_type == LENGTH){
-    merge_sort_length(wrapper_one, wrapper_two);
+  else if(first_half != NULL || second_half != NULL){
+    final_sorted_list = merge(first_half, second_half, sort_type, unique);
   }
-  return wrapper_one;
+  return final_sorted_list;
 }
 
 
@@ -694,7 +803,8 @@ void free_peptide_wrapper_all(
 DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   DATABASE_T* database, ///< the database of interest -in
   PEPTIDE_CONSTRAINT_T* peptide_constraint, ///< the peptide_constraint to filter peptides -in
-  SORT_TYPE_T sort_type ///< the sort type for this iterator
+  SORT_TYPE_T sort_type, ///< the sort type for this iterator
+  BOOLEAN_T unique
   )
 {
   //PROTEIN_T* next_protein;
@@ -708,19 +818,23 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
     (DATABASE_SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_SORTED_PEPTIDE_ITERATOR_T));
   
   //The protein iterator 
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator = NULL; 
-    
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator = NULL;
+  
  /// The peptide iterator for the current protein
   PROTEIN_PEPTIDE_ITERATOR_T* cur_protein_peptide_iterator = NULL;
 
   //initialize
   if(initialize_peptide_iterator(
     database_sorted_peptide_iterator, 
-    database, 
-    database_protein_iterator, 
-    cur_protein_peptide_iterator,
+    database,
     peptide_constraint)){
     
+    //strip all sub iterators from database, just to avoid mutiple references
+    database_protein_iterator = database_sorted_peptide_iterator->database_protein_iterator;
+    cur_protein_peptide_iterator = database_sorted_peptide_iterator->cur_protein_peptide_iterator;
+    database_sorted_peptide_iterator->database_protein_iterator = NULL;
+    database_sorted_peptide_iterator->cur_protein_peptide_iterator = NULL;
+
     do{
       //move to next protein if no peptides from current protein
       if(!protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
@@ -750,11 +864,16 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
         
         //end of peptides from one parent protein merge list into master list
         if(!protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
+          //assumes that each peptide from the same protein is alrady sorted by length
+          if(sort_type != LENGTH || unique){
+            list_wrapper = merge_sort(list_wrapper, sort_type, unique);
+          }
+          //merge into the complied master list
           if(master_list_wrapper == NULL){
             master_list_wrapper = list_wrapper;
           }
           else{
-            master_list_wrapper = merge_sort(master_list_wrapper, list_wrapper, sort_type);
+            master_list_wrapper = merge(master_list_wrapper, list_wrapper, sort_type, unique);
           }
           list_wrapper = NULL;      
           start = TRUE;
@@ -767,8 +886,8 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   }
   else{ //no proteins to create peptides from or peptides.
     carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
-    free_database_protein_iterator(database_protein_iterator);
-    free_protein_peptide_iterator(cur_protein_peptide_iterator);
+    free_database_protein_iterator(database_sorted_peptide_iterator->database_protein_iterator);
+    free_protein_peptide_iterator(database_sorted_peptide_iterator->cur_protein_peptide_iterator);
     free(database_sorted_peptide_iterator);
     exit(1);
   }

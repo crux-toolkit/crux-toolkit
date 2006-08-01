@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -136,9 +136,9 @@ typedef struct database_peptide_iterator DATABASE_PEPTIDE_ITERATOR_T;
 
 
 /**
- * The enum for sort type (mass, length)
+ * The enum for sort type (mass, length, lexical)
  */
-enum _sort_type {MASS, LENGTH};
+enum _sort_type {MASS, LENGTH, LEXICAL};
 
 /**
  * \typedef SORT_TYPE_T

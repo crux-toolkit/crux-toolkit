@@ -39,13 +39,15 @@ char* copy_string_part(char* src, int length){
 inline int compare_float(float float_a, float float_b){
   float EPSILON = 0.0000005;
   float sum = float_a + float_b;
-
+  //a == b
   if( fabsf(float_a - float_b) <= fabsf(sum)* EPSILON ){
     return 0;
   }
+  //a > b
   else if((float_a - float_b) > fabsf(sum)* EPSILON){
     return 1;
   }
+  // a < b
   else{
     return -1;
   }
