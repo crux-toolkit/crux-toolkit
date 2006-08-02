@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -187,7 +187,8 @@ PEPTIDE_T* database_peptide_iterator_next(
 DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   DATABASE_T* database, ///< the database of interest -in
   PEPTIDE_CONSTRAINT_T* peptide_constraint, ///< the peptide_constraint to filter peptides -in
-  SORT_TYPE_T sort_type ///< the sort type for this iterator
+  SORT_TYPE_T sort_type, ///< the sort type for this iterator
+  BOOLEAN_T unique ///< only return unique peptides? -in
   );
 
 /**

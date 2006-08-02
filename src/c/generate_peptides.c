@@ -73,11 +73,12 @@ int main(int argc, char** argv){
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
   int missed_cleavages = FALSE;
-  char* sort = "none";      // mass or length or none
+  char* sort = "none";      // mass, length, lexical, none  
   char * in_file = NULL;
   const char * error_message;
   int result = 0;
   BOOLEAN_T is_unique = FALSE;
+  SORT_TYPE_T sort_type = NONE;
 
   /* Define optional command line arguments */ 
   parse_arguments_set_opt(
@@ -124,7 +125,7 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "sort", 
-    "Specify the order in which peptides are printed to standard output. ", 
+    "Specify the order in which peptides are printed to standard output. none|mass|length|lexical.", 
     (void *) &sort, 
     STRING_ARG);
 
@@ -146,6 +147,7 @@ int main(int argc, char** argv){
     (void *) &redundancy, 
     STRING_ARG);
 
+
   /* Define required command line arguments */
   parse_arguments_set_req(
     "protein input filename", 
@@ -156,7 +158,8 @@ int main(int argc, char** argv){
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
     PEPTIDE_CONSTRAINT_T* constraint;
-    DATABASE_PEPTIDE_ITERATOR_T* iterator;
+    DATABASE_PEPTIDE_ITERATOR_T* iterator = NULL;
+    DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
     DATABASE_T* database;
     PEPTIDE_T* peptide;
    
@@ -196,6 +199,23 @@ int main(int argc, char** argv){
       wrong_command(redundancy);
     }
 
+    //determine sort type option
+    if(strcmp(sort, "mass")==0){
+      sort_type = MASS;
+    }
+    else if(strcmp(sort, "length")==0){
+      sort_type = LENGTH;
+    }
+    else if(strcmp(sort, "lexical")==0){
+      sort_type = LEXICAL;
+    }
+    else if(strcmp(sort, "none")==0){
+      sort_type = NONE;
+    }
+    else{
+      wrong_command(sort);
+    }
+    
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
@@ -227,7 +247,7 @@ int main(int argc, char** argv){
     else{
       printf("#\tallow missed-cleavages: FALSE\n");
     }
-    printf("#\tsort: %s (needs to be implemented)\n", sort);
+    printf("#\tsort: %s\n", sort);
     if(mass_type == AVERAGE){
       printf("#\tisotopic mass type: average\n");
     }
@@ -244,26 +264,60 @@ int main(int argc, char** argv){
 
     //create a new database
     database = new_database(in_file);
-    //create peptide iterator
-    iterator = new_database_peptide_iterator(database, constraint);
     
-    //check if any peptides are found
-    if(!database_peptide_iterator_has_next(iterator)){
-      carp(CARP_WARNING, "no matches found\n");
-    }
-    else{
-      //print each peptide
-      while(database_peptide_iterator_has_next(iterator)){
-        peptide = database_peptide_iterator_next(iterator);
-        print_peptide_in_format(peptide, flag_opt, stdout);
-        free_peptide(peptide);
+    //no sort, redundant
+    if(!is_unique && sort_type == NONE){ 
+      //create peptide iterator
+      iterator = new_database_peptide_iterator(database, constraint);
+      
+      //check if any peptides are found
+      if(!database_peptide_iterator_has_next(iterator)){
+        carp(CARP_WARNING, "no matches found\n");
       }
-    }
-      //free database, iterator, constraint
+      else{
+        //print each peptide
+        while(database_peptide_iterator_has_next(iterator)){
+          peptide = database_peptide_iterator_next(iterator);
+          print_peptide_in_format(peptide, flag_opt, stdout);
+          free_peptide(peptide);
+        }
+      }
+      //free iterator
       free_database_peptide_iterator(iterator);
-      free_peptide_constraint(constraint);
-      free_database(database);      
-      exit(0);
+    }
+    //sort or check for unique
+    else{
+      //only sort, by default will be sorted by mass
+      if(sort_type == NONE){
+        //create peptide iterator
+        sorted_iterator = 
+          new_database_sorted_peptide_iterator(database, constraint, MASS, TRUE);
+      }
+      //create peptide iterator
+      else{
+        sorted_iterator = 
+          new_database_sorted_peptide_iterator(database, constraint, sort_type, is_unique);
+      }
+      
+      //check if any peptides are found
+      if(!database_sorted_peptide_iterator_has_next(sorted_iterator)){
+        carp(CARP_WARNING, "no matches found\n");
+      }
+      else{
+        //print each peptide
+        while(database_sorted_peptide_iterator_has_next(sorted_iterator)){
+          peptide = database_sorted_peptide_iterator_next(sorted_iterator);
+          print_peptide_in_format(peptide, flag_opt, stdout);
+          free_peptide(peptide);
+        }
+      }
+      //free iterator
+      free_database_sorted_peptide_iterator(sorted_iterator);
+    }
+    //free database, iterator, constraint
+    free_peptide_constraint(constraint);
+    free_database(database);      
+    exit(0);
   } 
   else {
     char* usage = parse_arguments_get_usage("generate_peptides");
