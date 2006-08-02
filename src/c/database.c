@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -582,7 +582,7 @@ int compareTo(
       return 1;
     }
     else if(get_peptide_length(peptide_one) ==
-       get_peptide_length(peptide_two)){
+            get_peptide_length(peptide_two)){
       return 0;
     }
     else{
@@ -631,6 +631,69 @@ int compareTo(
   return 0;
 }
 
+PEPTIDE_WRAPPER_T* merge_duplicates_same_list(
+  PEPTIDE_WRAPPER_T* wrapper_list
+  )
+{
+  PEPTIDE_WRAPPER_T* current = wrapper_list;
+  
+  while(current->next_wrapper != NULL &&
+        compareTo(wrapper_list->peptide, current->next_wrapper->peptide, MASS)==0){
+  
+    if(compareTo(wrapper_list->peptide, current->next_wrapper->peptide, LEXICAL)==0){
+      PEPTIDE_WRAPPER_T* wrapper_to_delete = current->next_wrapper;
+      //merge peptides
+      merge_peptides(wrapper_list->peptide, wrapper_to_delete->peptide);
+      current->next_wrapper = current->next_wrapper->next_wrapper;
+      free(wrapper_to_delete);
+    }
+    else{
+      current = current->next_wrapper;
+    }
+  }
+  return wrapper_list;
+}
+
+PEPTIDE_WRAPPER_T* merge_duplicates_different_list(
+  PEPTIDE_WRAPPER_T* wrapper_list,
+  PEPTIDE_WRAPPER_T* wrapper_list_second
+  )
+{
+  PEPTIDE_WRAPPER_T* current = wrapper_list_second;
+  PEPTIDE_WRAPPER_T* previous = wrapper_list_second;
+  
+  while(current != NULL &&
+        compareTo(wrapper_list->peptide, current->peptide, MASS) == 0){
+    
+    if(compareTo(wrapper_list->peptide, current->peptide, LEXICAL) == 0){
+      PEPTIDE_WRAPPER_T* wrapper_to_delete = current;
+      //merge peptides
+      merge_peptides(wrapper_list->peptide, wrapper_to_delete->peptide);
+      //for first wrapper in the list
+      if(previous == current){
+        current = current->next_wrapper;
+        previous = current;
+        wrapper_list_second = current;
+      }
+      else{
+        current = current->next_wrapper;
+        previous->next_wrapper = current;
+      }
+      free(wrapper_to_delete);
+    }
+    else{
+      if(previous == current){
+        current = current->next_wrapper;
+      }
+      else{
+        previous = current;
+        current = current->next_wrapper;
+      }
+    }
+  }
+  return wrapper_list_second;
+}
+
 /**
  * merge wrapper list one and list two by sort type
  *\returns a sorted wrapper list
@@ -644,7 +707,8 @@ PEPTIDE_WRAPPER_T* merge(
 {
   PEPTIDE_WRAPPER_T* wrapper_final = NULL;
   PEPTIDE_WRAPPER_T* wrapper_current = wrapper_final;
-  
+  int compared;
+
   //loop around until there are no more wrappers to merge
  LOOP:
 
@@ -671,7 +735,9 @@ PEPTIDE_WRAPPER_T* merge(
       }
       wrapper_one = NULL;
     }
-    else if(compareTo(wrapper_one->peptide, wrapper_two->peptide, sort_type) == 1){
+    
+    else if((compared = 
+             compareTo(wrapper_one->peptide, wrapper_two->peptide, sort_type)) == 1){
       //there are wrappers on the current list
       if(wrapper_current != NULL){
         wrapper_current->next_wrapper = wrapper_two;        
@@ -685,23 +751,66 @@ PEPTIDE_WRAPPER_T* merge(
       wrapper_two = wrapper_two->next_wrapper;
     }
     else{
-      //there are wrappers on the current list
-      if(wrapper_current != NULL){
-        wrapper_current->next_wrapper = wrapper_one; 
-        wrapper_current = wrapper_current->next_wrapper;
+      int compared_mass = -1;
+
+      //if duplicate peptide, merge into one peptide only if unique is TRUE
+      if(compared == 0 && unique){
+        //only check if same peptide if mass is identical
+        if(sort_type == MASS ||
+           (compared_mass = compareTo(wrapper_one->peptide, wrapper_two->peptide, MASS))==0){
+             //must be identical peptide, since mass & lexicographically same
+          if(sort_type == LEXICAL ||
+             compareTo(wrapper_one->peptide, wrapper_two->peptide, LEXICAL)==0){
+            
+            PEPTIDE_WRAPPER_T* wrapper_to_delete = wrapper_two;
+            //merge peptides
+            merge_peptides(wrapper_one->peptide, wrapper_two->peptide);
+            wrapper_two = wrapper_two->next_wrapper;
+            free(wrapper_to_delete);
+          }
+        }
+        //merge all other instances of the same peptide in the list before adding to master list
+        if(sort_type == MASS || sort_type == LENGTH){
+          wrapper_one = merge_duplicates_same_list(wrapper_one);
+          wrapper_two = merge_duplicates_different_list(wrapper_one, wrapper_two);
+        }
       }
-      //there are no wrappers on the current list
+
+      //when sorting by length and unique, sort also by mass to speed up the unique check
+      //thus, when identical length add the peptide with smaller mass to the list first
+      if(unique && sort_type == LENGTH && compared == 0 && compared_mass == 1){
+        //there are wrappers on the current list
+        if(wrapper_current != NULL){
+          wrapper_current->next_wrapper = wrapper_two;        
+          wrapper_current = wrapper_current->next_wrapper;
+        }
+        //there are no wrappers on the current list
+        else{
+          wrapper_current = wrapper_two;
+          wrapper_final = wrapper_current;
+        }
+        wrapper_two = wrapper_two->next_wrapper;
+      }
       else{
-        wrapper_current = wrapper_one;
-        wrapper_final = wrapper_current;
+        //add wrapper to the merged list
+        //there are wrappers on the current list
+        if(wrapper_current != NULL){
+          wrapper_current->next_wrapper = wrapper_one; 
+          wrapper_current = wrapper_current->next_wrapper;
+        }
+        //there are no wrappers on the current list
+        else{
+          wrapper_current = wrapper_one;
+          wrapper_final = wrapper_current;
+        }
+        wrapper_one = wrapper_one->next_wrapper;
       }
-      wrapper_one = wrapper_one->next_wrapper;
     }
-    
     goto LOOP;
   }
   return wrapper_final;
 }
+
 
 /**
  * spilt a wrapper list into two equal size lists
@@ -743,9 +852,9 @@ PEPTIDE_WRAPPER_T** split(
  *\returns a sorted wrapper list
  */   
 PEPTIDE_WRAPPER_T* merge_sort(
-  PEPTIDE_WRAPPER_T* wrapper_list, ///<
-  SORT_TYPE_T sort_type, ///<
-  BOOLEAN_T unique ///< return a list of unique peptides?
+  PEPTIDE_WRAPPER_T* wrapper_list, ///< the list of wrappers to sort -in
+  SORT_TYPE_T sort_type, ///<the sort type (length, mass, lexicographical) -in
+  BOOLEAN_T unique ///< return a list of unique peptides? -in
   )
 {
   PEPTIDE_WRAPPER_T* final_sorted_list = NULL;
@@ -803,8 +912,8 @@ void free_peptide_wrapper_all(
 DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   DATABASE_T* database, ///< the database of interest -in
   PEPTIDE_CONSTRAINT_T* peptide_constraint, ///< the peptide_constraint to filter peptides -in
-  SORT_TYPE_T sort_type, ///< the sort type for this iterator
-  BOOLEAN_T unique
+  SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
+  BOOLEAN_T unique ///< only return unique peptides? -in
   )
 {
   //PROTEIN_T* next_protein;
