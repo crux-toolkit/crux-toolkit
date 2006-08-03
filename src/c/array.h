@@ -3,11 +3,14 @@
  * AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University
- * VERSION: $Revision: 1.1 $
+ * VERSION: $Revision: 1.2 $
  * DESCRIPTION: Some simple array-handling routines.
  ********************************************************************/
 #ifndef ARRAY_H
 #define ARRAY_H
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#define DOXYGEN_SHOULD_SKIP_THIS
 
 #include <stdio.h>
 #include "utils.h"
@@ -46,19 +49,19 @@
 #endif
 #endif
 
-/***********************************************************************
+/**************************************************************************
  * Define the array type.  Include internal structure of the type here
  * in order to allow macro access.
- ***********************************************************************/
+ */
 typedef struct array_t {
   int    num_items;
   ATYPE  key; /* Only used when sorting a matrix. */
   ATYPE* items;
 }ARRAY_T;
 
-/***********************************************************************
+/*
  * Allocate one array.
- ***********************************************************************/
+ */
 ARRAY_T* allocate_array
   (const int length);
 
@@ -380,6 +383,7 @@ void add_noise
 void all_positive
   (ARRAY_T* array);
 
+#endif
 #endif
 #endif
 
