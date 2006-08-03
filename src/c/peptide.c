@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -311,11 +311,16 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   float min_mass, ///< the minimum mass -in
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
-  int max_length,  ///< the maximum lenth of peptide -in
+  int max_length,  ///< the maximum lenth of peptide(max limit = 255) -in
   int num_mis_cleavage, ///< The maximum mis cleavage of the peptide -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
+  //max length must be less or equal than 255 becuase of the unsigned char limit of 255
+  if(max_length > 255){
+    die("ERROR: cannot set max length higer than 255");
+  }
+
   PEPTIDE_CONSTRAINT_T* peptide_constraint =
     allocate_peptide_constraint();
 
@@ -418,6 +423,7 @@ char* get_peptide_sequence_pointer(
 
 /**
  * sets the sequence length of the peptide
+ * length maximum of 255
  */
 void set_peptide_length( 
   PEPTIDE_T* peptide,  ///< the peptide to set the length -out
@@ -545,12 +551,19 @@ int get_peptide_constraint_min_length(
 
 /**
  * sets the max length of the peptide_constraint
+ * maximum limit 255
  */
 void set_peptide_constraint_max_length(
   PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out 
   int max_length  ///< the max length of the peptide constraint - in
   )
 {
+  //check if maximum length is with in range <= 255
+  if(max_length > 255){
+    carp(CARP_FATAL, "maximum length:%d over limit 255.", max_length);
+    exit(1);
+  }
+  
   peptide_constraint->max_length = max_length;
 }
 
