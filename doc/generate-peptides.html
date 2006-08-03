@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: generate-peptides
-REVISION: $Revision: 1.5 $
+REVISION: $Revision: 1.6 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -97,6 +97,10 @@ By default, verbosity is set to 100.
 come from different proteins yet with identical sequences should appear
 on separate lines (redundant) or on the same line (unique). 
 
+<LI>[--use-index T|F] &ndash; Specify whether a pre-computed on-disk
+index should be used for retrieving the peptides from the fasta file
+(rather than the fasta file itself).
+
 </UL>
 
 
@@ -108,6 +112,8 @@ messages:</B>
 
 <UL>
   <LI><I>Fatal: The file "protein input filename" does
+  not exist (or is not readable, or is empty).</I>
+  <LI><I>Fatal: The index for "protein input filename" does
   not exist (or is not readable, or is empty).</I>
 </UL>
 <B>Bugs:</B> 
