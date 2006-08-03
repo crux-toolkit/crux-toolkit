@@ -7,7 +7,7 @@
 #include "../spectrum.h"
 #include "../peak.h"
 #include "../peptide.h"
-#include "../protein_peptide_association.h"
+#include "../peptide_src.h"
 #include "../protein.h"
 
 PEPTIDE_T* peptide1;
@@ -19,9 +19,9 @@ PROTEIN_T* protein1;
 PROTEIN_T* protein2;
 PROTEIN_T* protein3;
 PEPTIDE_CONSTRAINT_T* constraint;
-PROTEIN_PEPTIDE_ASSOCIATION_T* association1;
-PROTEIN_PEPTIDE_ASSOCIATION_T* association2;
-PROTEIN_PEPTIDE_ASSOCIATION_T* association3;
+PEPTIDE_SRC_T* association1;
+PEPTIDE_SRC_T* association2;
+PEPTIDE_SRC_T* association3;
 
 void setup(void){
   peptide4 = allocate_peptide();
@@ -39,11 +39,18 @@ START_TEST (test_create){
   protein2 = new_protein("33 Magic", "AADAA", 5, "this is a test protein");
   protein3 = new_protein("32 Shaq", "AADAAKAGAAKFFADFGTS", 19, "this is a test protein");
 
+  /*
+  //peptides
+  peptide1 = new_peptide( 5, 546.5958, protein1,2, TRYPTIC);
+  peptide2 = new_peptide( 5*3, 546.5958*3, protein2,2, PARTIALLY_TRYPTIC);
+  peptide3 = new_peptide( 5*5, 546.5958*5 , protein3,2, NOT_TRYPTIC);
+  */
+
   //peptides
   peptide1 = new_peptide("CDEAK", 5, 546.5958, protein1,2, TRYPTIC);
   peptide2 = new_peptide("CDEAKCDEAKCDEAK", 5*3, 546.5958*3, protein2,2, PARTIALLY_TRYPTIC);
   peptide3 = new_peptide("CDEAKCDEAKCDEAKCDEAKCDEAKCDEAK", 5*5, 546.5958*5 , protein3,2, NOT_TRYPTIC);
-
+  
   print_peptide(peptide1, stdout);
   print_peptide(peptide2, stdout);
   print_peptide(peptide3, stdout);
@@ -111,30 +118,32 @@ START_TEST (test_create){
   print_peptide(peptide4, stdout);
 
 
-  //check protein_peptide_association
-  association1 = new_protein_peptide_association(TRYPTIC, protein1, 4);
-  association2 = new_protein_peptide_association(NOT_TRYPTIC, protein2, 8); //try to add this to end
-  association3 = allocate_protein_peptide_association();
-  copy_protein_peptide_association(association1, association3);
+  //check peptide_src
+  association1 = new_peptide_src(TRYPTIC, protein1, 4);
+  association2 = new_peptide_src(NOT_TRYPTIC, protein2, 8); //try to add this to end
+  association3 = allocate_peptide_src();
+  copy_peptide_src(association1, association3);
 
   
 
   //
-  add_peptide_protein_peptide_association(peptide4, association1);
-  add_peptide_protein_peptide_association(peptide4, association2);
-  add_peptide_protein_peptide_association(peptide4, association3);
+  add_peptide_peptide_src(peptide4, association1);
+  add_peptide_peptide_src(peptide4, association2);
+  add_peptide_peptide_src(peptide4, association3);
   print_peptide(peptide4, stdout);
 
+
   /*
- get_protein_peptide_association_peptide_type
- set_protein_peptide_association_peptide_type
+ get_peptide_src_peptide_type
+ set_peptide_src_peptide_type
 
- get_protein_peptide_association_parent_protein   
- set_protein_peptide_association_parent_protein
+ get_peptide_src_parent_protein   
+ set_peptide_src_parent_protein
 
- get_protein_peptide_association_start_idx
- set_protein_peptide_association_start_idx
+ get_peptide_src_start_idx
+ set_peptide_src_start_idx
   */
+ 
   free_peptide_constraint(constraint);
   free_peptide(peptide1);
   free_peptide(peptide2);

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -932,7 +932,7 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
  /// The peptide iterator for the current protein
   PROTEIN_PEPTIDE_ITERATOR_T* cur_protein_peptide_iterator = NULL;
 
-  //initialize
+  //initialize, return true if there's at least one peptide to return
   if(initialize_peptide_iterator(
     database_sorted_peptide_iterator, 
     database,
@@ -993,12 +993,11 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
 
     database_sorted_peptide_iterator->peptide_wrapper = master_list_wrapper;
   }
-  else{ //no proteins to create peptides from or peptides.
-    carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
+  else{ //no peptides to be created
     free_database_protein_iterator(database_sorted_peptide_iterator->database_protein_iterator);
     free_protein_peptide_iterator(database_sorted_peptide_iterator->cur_protein_peptide_iterator);
-    free(database_sorted_peptide_iterator);
-    exit(1);
+    database_sorted_peptide_iterator->peptide_wrapper = NULL;
+    return database_sorted_peptide_iterator;
   }
 
   free_database_protein_iterator(database_protein_iterator);

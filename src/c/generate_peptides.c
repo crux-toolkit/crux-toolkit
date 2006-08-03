@@ -107,7 +107,7 @@ int main(int argc, char** argv){
 
   parse_arguments_set_opt(
     "max-length", 
-    "The maximum length of the peptides to output.",
+    "The maximum length of the peptides to output. maximum limit = 255.",
     (void *) &max_length, 
     INT_ARG);
 
@@ -153,7 +153,7 @@ int main(int argc, char** argv){
     "protein input filename", 
     "The name of the file (in fasta format) from which to parse proteins.", 
     (void *) &in_file, STRING_ARG);
-
+  
 
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
@@ -175,6 +175,12 @@ int main(int argc, char** argv){
     }
     else{
       wrong_command(cleavages);
+    }
+    
+    //check if maximum length is with in range <= 255
+    if(max_length > 255){
+      carp(CARP_FATAL, "maximum length:%d over limit 255.", max_length);
+      exit(1);
     }
     
     //determine isotopic mass option
@@ -272,7 +278,7 @@ int main(int argc, char** argv){
       
       //check if any peptides are found
       if(!database_peptide_iterator_has_next(iterator)){
-        carp(CARP_WARNING, "no matches found\n");
+        carp(CARP_WARNING, "no matches found");
       }
       else{
         //print each peptide
@@ -301,7 +307,7 @@ int main(int argc, char** argv){
       
       //check if any peptides are found
       if(!database_sorted_peptide_iterator_has_next(sorted_iterator)){
-        carp(CARP_WARNING, "no matches found\n");
+        carp(CARP_WARNING, "no matches found");
       }
       else{
         //print each peptide
