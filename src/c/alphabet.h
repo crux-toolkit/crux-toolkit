@@ -1,5 +1,5 @@
 /********************************************************************
- * FILE: alphabet.h
+ * \file alphabet.h
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 4-17-97
  * PROJECT: MHMM
