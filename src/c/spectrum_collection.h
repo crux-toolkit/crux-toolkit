@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -160,7 +160,7 @@ char* get_spectrum_collection_comment(
 
 
 /**
- * sets the comment of the spectrum_collection
+ * sets the comment of the spectrum_collection, If comments exist add this to the end
  * copies the new_comment into a newly heap allocated copy of the comment
  */
 void set_spectrum_collection_comment(
