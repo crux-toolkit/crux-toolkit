@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "objects.h"
 #include "carp.h"
+#include "peptide_constraint.h"
 
 /**
  * \returns An (empty) peptide_src object.

@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -13,6 +13,7 @@
 #include "protein.h"
 #include "objects.h"
 #include "carp.h"
+#include "peptide_constraint.h"
 
 /**
  * \returns The mass of the given peptide.
@@ -104,42 +105,6 @@ BOOLEAN_T parse_peptide_file(
   PEPTIDE_T* peptide,
   FILE* file);
 
-/**
- * Allocates a new (empty) peptide_constraint object.
- * \returns An allocated PEPTIDE_CONSTRAINT_T object.
- */
-PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void);
-
-/**
- * Instantiates a new peptide_constraint object.
- * \returns An allocated PEPTIDE_CONSTRAINT_T object.
- */
-PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
-  PEPTIDE_TYPE_T peptide_type, ///< the peptide_type -in
-  float min_mass, ///< the minimum mass -in
-  float max_mass, ///< the maximum mass -in
-  int min_length, ///< the minimum length of peptide -in
-  int max_length, ///< the maximum lenth of peptide -in
-  int num_mis_cleavage, ///< The maximum mis cleavage of the peptide -in
-  MASS_TYPE_T mass_type  ///< isotopic mass type (AVERAGE, MONO) -in
-  );
-
-/** 
- * Determines if a peptide satisfies a peptide_constraint.
- * \returns TRUE if the constraint is satisified. FALSE if not.
- */
-BOOLEAN_T peptide_constraint_is_satisfied(
-   PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraints to enforce -in
-   PEPTIDE_T* peptide ///< the query peptide -in
-   );
-
-/**
- * Frees an allocated peptide_constraint object.
- */
-void free_peptide_constraint(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< object to free -in 
-  );
-
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
  * FIXME Chris, could you create the get and set methods for the object fields?
@@ -225,120 +190,6 @@ void add_peptide_peptide_src(
 PEPTIDE_SRC_T* get_peptide_peptide_src(
   PEPTIDE_T* peptide  ///< the peptide to query the peptide_peptide_src -in
 );
-
-
-
-//add new peptide_association objects to an existing peptide
-
-
-/**peptide_constraint**/
-
-/**
- * sets the peptide type of the peptide_constraint
- */
-void set_peptide_constraint_peptide_type(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
-  PEPTIDE_TYPE_T peptide_type ///< the type of the peptide constraint - in
-  );
-
-/**
- * \returns the peptide type of the peptide_constraint
- */
-PEPTIDE_TYPE_T get_peptide_constraint_peptide_type(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
-  );
-
-/**
- * sets the min mass of the peptide_constraint
- */
-void set_peptide_constraint_min_mass(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint, ///< the peptide constraint to set -out
-  float min_mass  ///< the min mass of the peptide constraint - in
-  );
-
-/**
- * \returns the min mass of the peptide_constraint
- */
-float get_peptide_constraint_min_mass(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
-  );
-
-/**
- * sets the max mass of the peptide_constraint
- */
-void set_peptide_constraint_max_mass(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out 
-  float max_mass  ///< the max mass of the peptide constraint - in
-  );
-
-/**
- * \returns the max mass of the peptide_constraint
- */
-float get_peptide_constraint_max_mass(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
-  );
-
-/**
- * sets the min length of the peptide_constraint
- */
-void set_peptide_constraint_min_length(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out 
-  int min_length  ///< the min length of the peptide constraint - in
-  );
-
-/**
- * \returns the min length of the peptide_constraint
- */
-int get_peptide_constraint_min_length(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
-  );
-
-/**
- * sets the max length of the peptide_constraint
- */
-void set_peptide_constraint_max_length(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out 
-  int max_length  ///< the max length of the peptide constraint - in
-  );
-
-/**
- * \returns the max length of the peptide_constraint
- */
-int get_peptide_constraint_max_length(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
-  );
-
-
-/**
- * sets the num_mis_cleavage of the peptide_constraint
- */
-void set_peptide_constraint_num_mis_cleavage(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out 
-  int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
-  );
-
-/**
- * \returns the num_mis_cleavage of the peptide_constraint
- */
-int get_peptide_constraint_num_mis_cleavage(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
-  );
-
-/**
- * sets the mass type of the peptide_constraint
- */
-void set_peptide_constraint_mass_type(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
-  MASS_TYPE_T mass_type ///< the peptide_type for the constraint -in
-  );
-
-/**
- * \returns the mass type of the mass_constraint
- */
-MASS_TYPE_T get_peptide_constraint_mass_type(
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
-  );
-
 
 /**
  * Residue Iterator
@@ -456,7 +307,7 @@ BOOLEAN_T load_peptide(
   );
  
 
-
+#endif
 
 /*
  * Local Variables:
@@ -464,4 +315,3 @@ BOOLEAN_T load_peptide(
  * c-basic-offset: 2
  * End:
  */
-#endif

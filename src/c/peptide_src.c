@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -15,7 +15,7 @@
 #include "peptide.h"
 #include "protein.h"
 #include "peptide_src.h"
-
+#include "peptide_constraint.h"
 
 /**
  * \struct peptide_src
