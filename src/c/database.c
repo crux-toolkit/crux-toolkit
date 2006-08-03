@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -14,6 +14,7 @@
 #include "database.h"
 #include "carp.h"
 #include "objects.h"
+#include "peptide_constraint.h"
 
 #define MAX_PROTEINS 30000 ///< The maximum number of proteins in a database.
 
