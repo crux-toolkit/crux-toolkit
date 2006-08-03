@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -56,20 +56,20 @@ struct database_peptide_iterator {
 /**
  * \struct database_sorted_peptide_iterator
  * \brief Object to iterate over the peptides within a database, in an
- * specified sorted order.
+ * specified sorted order.(mass, length, lexical)
  */
 struct database_sorted_peptide_iterator {
   DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; ///<The protein iterator. 
   PROTEIN_PEPTIDE_ITERATOR_T* 
     cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
-  SORT_TYPE_T sort_type; ///< The sort type for this iterator (MASS, LENGTH);
+  SORT_TYPE_T sort_type; ///< The sort type for this iterator (MASS, LENGTH, LEXICAL);
   PEPTIDE_WRAPPER_T* peptide_wrapper; ///< a linklist of peptide wrappers
 };
 
 /**
  * \struct peptide_wrapper
- * \brief A database of protein sequences
+ * \brief Object to wrap the peptide to build a linklist
  */
 struct peptide_wrapper{
   PEPTIDE_WRAPPER_T* next_wrapper; ///< the next peptide wrapper
@@ -89,7 +89,7 @@ DATABASE_T* allocate_database(void){
  * \returns A new database object.
  */
 DATABASE_T* new_database(
-  char*         filename ///< The file from which to parse the database.
+  char*         filename ///< The file from which to parse the database. -in
   )
 {
   DATABASE_T* database = allocate_database();
@@ -97,7 +97,6 @@ DATABASE_T* new_database(
   return database;
 }  
 
-//FIXME think about what you're going to do for FILE* file
 /**
  * Frees an allocated protein object.
  */
@@ -109,7 +108,7 @@ void free_database(
 
   free(database->filename);
   fclose(database->file);
-  
+  //free each protein in the array
   for(; protein_idx < database->num_proteins; ++protein_idx){
     free_protein(database->proteins[protein_idx]);
   }
@@ -120,15 +119,15 @@ void free_database(
  * Prints a database object to file.
  */
 void print_database(
-  DATABASE_T* database, 
-  FILE* file
+  DATABASE_T* database,  ///< database to print -in
+  FILE* file    ///< output file stream -out             
   )
 {
  
   fprintf(file, "filename:%s\n", database->filename);
   fprintf(file, "is_parsed:");
   
-
+  //has the database been parsed?
   if(database->is_parsed){
     fprintf(file, "TRUE\n");
     DATABASE_PROTEIN_ITERATOR_T* iterator = new_database_protein_iterator(database);
@@ -143,13 +142,12 @@ void print_database(
   }
 }
 
-// START HERE
-
-/*
- * Scans the database for start positions of protein sequences (using the
- * '>' character) and stores the locations of the starts in the database 
- * member variable starts. Set the is_parsed member variable to true.
- * IF false to parse protein, then frees all existing proteins, closes FILE* and resets num_protein to 0;
+/**
+ * Parses a database from the file in the filename member variable
+ * reads in all proteins in the fasta file and creates a protein object
+ * and adds them to the database protein array
+ * total proteins in fasta file must not exceed MAX_PROTEIN constant
+ * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T parse_database(
   DATABASE_T* database ///< An allocated database -in
@@ -231,10 +229,6 @@ BOOLEAN_T get_database_protein_at_idx(
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
- */
-
-/**
- * Additional get and set methods
  */
 
 /**
@@ -495,22 +489,16 @@ PEPTIDE_T* database_peptide_iterator_next(
   return next_peptide;
 }
 
-/*
- * Scans the database for start positions of protein sequences (using the
- * '>' character) and stores the locations of the starts in the database 
- * member variable starts. Set the is_parsed member variable to true.
- */
-BOOLEAN_T parse_database(
-  DATABASE_T* database ///< An allocated database
-  );
-
 /***********************************
  * database sorted peptide iterator
  ***********************************/
 
-//wrap the peptide up
+/**
+ *wrap the peptide up in the a peptide_wrapper object
+ *\returns a peptide_wrapper object that contains the peptide
+ */
 PEPTIDE_WRAPPER_T* wrap_peptide(
-  PEPTIDE_T* peptide ///< peptide to be wrapped
+  PEPTIDE_T* peptide ///< peptide to be wrapped -in
   )
 {
   PEPTIDE_WRAPPER_T* new_wrapper = (PEPTIDE_WRAPPER_T*)mycalloc(1, sizeof(PEPTIDE_WRAPPER_T));
@@ -519,10 +507,12 @@ PEPTIDE_WRAPPER_T* wrap_peptide(
 }
 
 
-
-//check if there are any peptides at all to return????? i think so...
+/**
+ *Initialize the peptide iterator
+ *\returns FALSE if there are no peptides to return, TRUE if peptide iterator has at least one peptide
+ */
 BOOLEAN_T initialize_peptide_iterator(
-  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator,
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator, ///< initialize iterator -in
   DATABASE_T* database, ///< the database of interest -in
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
 )
@@ -535,6 +525,7 @@ BOOLEAN_T initialize_peptide_iterator(
   //set peptide constraint
   database_sorted_peptide_iterator->peptide_constraint = peptide_constraint;
 
+  //are there any proteins to create peptides?
   if(database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator)){
     next_protein =
       database_protein_iterator_next(database_sorted_peptide_iterator->database_protein_iterator);
@@ -565,15 +556,14 @@ BOOLEAN_T initialize_peptide_iterator(
   return FALSE;
 }
 
-//FIXME: write lexical compare
 /**
  * compares two peptides with the give sort type (length, mass, lexical)
- * /returns 0 if eq, 1 if one < two, -1 if one > two
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
  */
 int compareTo(
-  PEPTIDE_T* peptide_one,
-  PEPTIDE_T* peptide_two,
-  SORT_TYPE_T sort_type
+  PEPTIDE_T* peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T* peptide_two, ///< peptide to compare two -in
+  SORT_TYPE_T sort_type  ///< sort type(LENGTH, MASS, LEXICAL) -in
   )
 {
   //length order
@@ -632,15 +622,21 @@ int compareTo(
   return 0;
 }
 
+/**
+ *check if any duplicate peptides exist to the first peptide on the wrapper
+ *then, merge duplicate peptides to the first peptide 
+ *assumes that the list is sorted by mass
+ *\returns the wrapper list which first peptide is unique in the list
+ */
 PEPTIDE_WRAPPER_T* merge_duplicates_same_list(
-  PEPTIDE_WRAPPER_T* wrapper_list
+  PEPTIDE_WRAPPER_T* wrapper_list  ///< peptide wrapper list examine -mod
   )
 {
   PEPTIDE_WRAPPER_T* current = wrapper_list;
-  
+  //for all peptides that have equal mass
   while(current->next_wrapper != NULL &&
-        compareTo(wrapper_list->peptide, current->next_wrapper->peptide, MASS)==0){
-  
+        compareTo(wrapper_list->peptide, current->next_wrapper->peptide, MASS)==0){  
+    //check identical peptide
     if(compareTo(wrapper_list->peptide, current->next_wrapper->peptide, LEXICAL)==0){
       PEPTIDE_WRAPPER_T* wrapper_to_delete = current->next_wrapper;
       //merge peptides
@@ -655,22 +651,30 @@ PEPTIDE_WRAPPER_T* merge_duplicates_same_list(
   return wrapper_list;
 }
 
+/**
+ *check if any duplicate peptides exist in the wrapper_list_second
+ *compared to the first peptide of the wrapper_list_first
+ *then, remove the peptide from seond list and merge 
+ *duplicate peptides to the first peptide in the first list
+ *assumes that the list is sorted by mass
+ *\returns the modified second wrapper list
+ */
 PEPTIDE_WRAPPER_T* merge_duplicates_different_list(
-  PEPTIDE_WRAPPER_T* wrapper_list,
-  PEPTIDE_WRAPPER_T* wrapper_list_second
+  PEPTIDE_WRAPPER_T* wrapper_list_first,  ///< fist peptide wrapper list examine -mod
+  PEPTIDE_WRAPPER_T* wrapper_list_second  ///<second peptide wrapper list examine -mod
   )
 {
   PEPTIDE_WRAPPER_T* current = wrapper_list_second;
   PEPTIDE_WRAPPER_T* previous = wrapper_list_second;
   
   while(current != NULL &&
-        compareTo(wrapper_list->peptide, current->peptide, MASS) == 0){
+        compareTo(wrapper_list_first->peptide, current->peptide, MASS) == 0){
     
-    if(compareTo(wrapper_list->peptide, current->peptide, LEXICAL) == 0){
+    if(compareTo(wrapper_list_first->peptide, current->peptide, LEXICAL) == 0){
       PEPTIDE_WRAPPER_T* wrapper_to_delete = current;
       //merge peptides
-      merge_peptides(wrapper_list->peptide, wrapper_to_delete->peptide);
-      //for first wrapper in the list
+      merge_peptides(wrapper_list_first->peptide, wrapper_to_delete->peptide);
+      //for first wrapper in the list 
       if(previous == current){
         current = current->next_wrapper;
         previous = current;
@@ -697,13 +701,14 @@ PEPTIDE_WRAPPER_T* merge_duplicates_different_list(
 
 /**
  * merge wrapper list one and list two by sort type
- *\returns a sorted wrapper list
+ * assumes that each list one and two are sorted by the same sort type
+ *\returns a sorted wrapper list result of merging list one and two
  */   
 PEPTIDE_WRAPPER_T* merge(
-  PEPTIDE_WRAPPER_T* wrapper_one, ///<
-  PEPTIDE_WRAPPER_T* wrapper_two, ///<
-  SORT_TYPE_T sort_type, ///<
-  BOOLEAN_T unique
+  PEPTIDE_WRAPPER_T* wrapper_one, ///< fist peptide wrapper list -in
+  PEPTIDE_WRAPPER_T* wrapper_two, ///< second peptide wrapper list -in
+  SORT_TYPE_T sort_type, ///< the sort type of the new merged list -in
+  BOOLEAN_T unique ///< do you merge two lists into a uniqe list? -in
   )
 {
   PEPTIDE_WRAPPER_T* wrapper_final = NULL;
@@ -814,17 +819,18 @@ PEPTIDE_WRAPPER_T* merge(
 
 
 /**
- * spilt a wrapper list into two equal size lists
+ * spilt a wrapper list into two equal or almost equal size lists
  * \returns array of two pointers of each split array
  * user must free the array, heap allocated
  */
 PEPTIDE_WRAPPER_T** split(
-  PEPTIDE_WRAPPER_T* wrapper_src ///< wrapper list to split
+  PEPTIDE_WRAPPER_T* wrapper_src ///< wrapper list to split -in
   )
 {
   PEPTIDE_WRAPPER_T** split_wrapper = 
     (PEPTIDE_WRAPPER_T**)mycalloc(2, sizeof(PEPTIDE_WRAPPER_T*));
-  
+
+  //check if there's more than one list
   if(wrapper_src == NULL){
     return split_wrapper;
   }
@@ -849,7 +855,7 @@ PEPTIDE_WRAPPER_T** split(
 
 
 /**
- * merge sort wrapper list one and list two
+ * merge sort wrapper list by the sort type
  *\returns a sorted wrapper list
  */   
 PEPTIDE_WRAPPER_T* merge_sort(
@@ -886,6 +892,7 @@ PEPTIDE_WRAPPER_T* merge_sort(
 
 /**
  * Frees an allocated database_sorted_peptide_iterator object.
+ * does not free the peptide it contains
  */
 void free_peptide_wrapper(
   PEPTIDE_WRAPPER_T* peptide_wrapper ///< the wrapper to free -in
@@ -897,7 +904,7 @@ void free_peptide_wrapper(
 /**
  * Frees an allocated database_sorted_peptide_iterator object.
  * This frees the peptide the wrapper contains as well
-*/
+ */
 void free_peptide_wrapper_all(
   PEPTIDE_WRAPPER_T* peptide_wrapper ///< the wrapper to free -in
   )
@@ -917,8 +924,6 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   BOOLEAN_T unique ///< only return unique peptides? -in
   )
 {
-  //PROTEIN_T* next_protein;
-  //PEPTIDE_T* next_peptide;
   PEPTIDE_WRAPPER_T* master_list_wrapper = NULL;
   PEPTIDE_WRAPPER_T* list_wrapper = NULL;
   PEPTIDE_WRAPPER_T* current_wrapper = NULL;
@@ -1021,14 +1026,16 @@ BOOLEAN_T database_sorted_peptide_iterator_has_next(
 }
 
 /**
+ * returns each peptide in sorted order
  * \returns The next peptide in the database.
  */
 PEPTIDE_T* database_sorted_peptide_iterator_next(
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator ///< the iterator of interest -in
   )
 {
+  //strip the peptide out of the peptide wrapper
   PEPTIDE_T* next_peptide = database_sorted_peptide_iterator->peptide_wrapper->peptide;
-  //peptide_wrapper to free, already parsed the peptide
+  //free the empty peptide wrapper
   PEPTIDE_WRAPPER_T* old_wrapper =  database_sorted_peptide_iterator->peptide_wrapper;
   database_sorted_peptide_iterator->peptide_wrapper = 
     database_sorted_peptide_iterator->peptide_wrapper->next_wrapper;

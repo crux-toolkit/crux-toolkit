@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -22,25 +22,33 @@ DATABASE_T* allocate_database(void);
  * \returns A new database object.
  */
 DATABASE_T* new_database(
-  char*         filename ///< The file from which to parse the database.
+  char*         filename ///< The file from which to parse the database. -in
   );         
 
 /**
  * Frees an allocated protein object.
  */
-void free_database(DATABASE_T* protein);
+void free_database(
+  DATABASE_T* database ///< An allocated database -in
+  );
 
 /**
  * Prints a database object to file.
  */
-void print_database(DATABASE_T* database, FILE* file);
+void print_database(
+  DATABASE_T* database,  ///< database to print -in
+  FILE* file    ///< output file stream -out             
+  );
 
 /**
  * Parses a database from the file in the filename member variable
+ * reads in all proteins in the fasta file and creates a protein object
+ * and adds them to the database protein array
+ * total proteins in fasta file must not exceed MAX_PROTEIN constant
  * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T parse_database(
-  DATABASE_T* database ///< An allocated database
+  DATABASE_T* database ///< An allocated database to parse -in
   );
 
 
@@ -152,6 +160,9 @@ PROTEIN_T* database_protein_iterator_next(
     DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator of interest -in
     );
 
+/***********************************************
+ * database_peptide_Iterators
+ ***********************************************/
 
 /**
  * Instantiates a new database_peptide_iterator from a database.
@@ -215,6 +226,7 @@ BOOLEAN_T database_sorted_peptide_iterator_has_next(
   );
 
 /**
+ * returns each peptide in sorted order
  * \returns The next peptide in the database.
  */
 PEPTIDE_T* database_sorted_peptide_iterator_next(
