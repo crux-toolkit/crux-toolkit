@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -429,7 +429,7 @@ int compare_peptide_mass(
   );
 
 /**
- * Merge to identical peptides, copy all peptide_src into one of the peptide
+ * Merge two identical peptides, copy all peptide_src into one of the peptide
  * \returns TRUE if merge is successful else FALSE
  */
 BOOLEAN_T merge_peptides(
@@ -437,6 +437,26 @@ BOOLEAN_T merge_peptides(
   PEPTIDE_T* peptide_bye
   );
                            
+/**
+ * Serialize a peptide to a FILE
+ * \returns TRUE if serialization is successful, else FALSE
+ */
+BOOLEAN_T serialize_peptide(
+  PEPTIDE_T* peptide,
+  FILE* file
+  );
+ 
+/**
+ * Load a peptide from the FILE
+ * \returns TRUE if load is successful, else FALSE
+ */
+BOOLEAN_T load_peptide(
+  PEPTIDE_T* peptide, ///< An allocated peptide
+  FILE* file ///< The file pointing to the location of the peptide
+  );
+ 
+
+
 
 /*
  * Local Variables:

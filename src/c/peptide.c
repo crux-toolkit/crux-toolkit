@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -187,8 +187,8 @@ void print_peptide(
 /**
  * Prints a peptide object to file.
  * prints all peptide_src object it's associated 
- * mass \t protein-id \t peptide-start \t peptide-length <\t peptide-sequence> \n
- *      \t protein-id \t peptide-start \t peptide-length <\t peptide-sequence> \n
+ * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
+ *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
  * prints in correct format for generate_peptide
  */
 void print_peptide_in_format(
@@ -854,11 +854,61 @@ BOOLEAN_T merge_peptides(
   free(peptide_bye);
   return TRUE;
 }
-  
+
+/*
+ * Serialize a peptide to a FILE
+ * \returns TRUE if serialization is successful, else FALSE
+ *
+ * The peptide serialization format looks like this:
+ *
+ * unsigned char - length
+ * float - peptide_mass
+ * int - number_of_sources
+ *
+ * and then repeating the following depending on number of sources. This
+ * part can be implemented either here or in the PEPTIDE_SRC and PROTEIN objects
+ * as serialization methods there, whatever seems easiest
+ *
+ * unsigned char - corresponding to the peptide type
+ * int - start_idx of the peptide in this protein
+ * int - the protein in the indexed database DATABASE_T in the protein object
+ */
+BOOLEAN_T serialize_peptide(
+  PEPTIDE_T* peptide,
+  FILE* file
+  );
+ 
+/*
+ * Load a peptide from the FILE
+ * \returns TRUE if load is successful, else FALSE
+ *
+ * See serialize_peptide above for the serialization format
+ */
+BOOLEAN_T load_peptide(
+  PEPTIDE_T* peptide, ///< An allocated peptide
+  FILE* file ///< The file pointing to the location of the peptide
+  );
+ 
+
 /*
  * Local Variables:
  * mode: c
  * c-basic-offset: 2
  * End:
  */
+
+/* Aaron's archive */
+/**
+ * \struct flat_peptide
+ * \brief A flattened version of a peptide.
+ */
+/*struct flat_peptide {
+  unsigned char length; ///< The length of the peptide
+  float peptide_mass;   ///< The peptide's mass.
+  unsigned char peptide_type; ///< (From PEPTIDE_SRC's PEPTIDE_TYPE_T) The peptide type
+  int start_idx; ///< (From PEPTIDE_SRC) The start of the peptide in the protein
+  int protein_idx; ///< (From PROTEIN_T and its DATABASE object) The index of the protein in it's database
+  unsigned long long int offset; ///< The offset of the real peptide when it's necessary to retrieve it (Not yet used)
+};*/
+
 

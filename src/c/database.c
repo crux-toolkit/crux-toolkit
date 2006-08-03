@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -28,7 +28,8 @@ struct database{
                                 ///  associated file.
   int num_proteins;             ///< Number of proteins in this database.
   BOOLEAN_T is_parsed;          ///< Has this database been parsed yet.
-  PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database (not yet needed.)
+  PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database 
+  unsigned long int size; ///< The size of the database in bytes (convenience)
 };    
 
 /**
