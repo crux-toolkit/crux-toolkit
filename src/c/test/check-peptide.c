@@ -34,30 +34,47 @@ void teardown(void){
 
 START_TEST (test_create){
   protein = allocate_protein();
+  
   //proteins...
-  protein1 = new_protein("23 Jordan", "AADAAKAGAAKFFA", 14, "this is a test protein");
-  protein2 = new_protein("33 Magic", "AADAA", 5, "this is a test protein");
-  protein3 = new_protein("32 Shaq", "AADAAKAGAAKFFADFGTS", 19, "this is a test protein");
-
   /*
-  //peptides
-  peptide1 = new_peptide( 5, 546.5958, protein1,2, TRYPTIC);
-  peptide2 = new_peptide( 5*3, 546.5958*3, protein2,2, PARTIALLY_TRYPTIC);
-  peptide3 = new_peptide( 5*5, 546.5958*5 , protein3,2, NOT_TRYPTIC);
+  protein1 = new_protein("23 Jordan", "AADAAKAGAAKFFA", 14, "this is a test protein1");
+  protein2 = new_protein("33 Magic", "AADAA", 5, "this is a test protein2");
+  protein3 = new_protein("32 Shaq", "AADAAKAGAAKFFADFGTS", 19, "this is a test protein3");
   */
+  protein = new_protein("yo!",
 
+"MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERI
+FAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEA
+RGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYS
+AAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPC
+LIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLIT
+QSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAAL
+ARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW
+"
+                        , 490, "this is a my test protein");
+                        
+                        
+
+  //create peptides
+  peptide1 = new_peptide( 6, 774.83, protein, 239, TRYPTIC); //QVPDAR
+  peptide2 = new_peptide( 6, 656.69, protein, 6, PARTIALLY_TRYPTIC);//FGGTSV
+  peptide3 = new_peptide( 9, 1341.32, protein, 221, NOT_TRYPTIC); //DCCEIWTDV
+  
+  /*
   //peptides
   peptide1 = new_peptide("CDEAK", 5, 546.5958, protein1,2, TRYPTIC);
   peptide2 = new_peptide("CDEAKCDEAKCDEAK", 5*3, 546.5958*3, protein2,2, PARTIALLY_TRYPTIC);
   peptide3 = new_peptide("CDEAKCDEAKCDEAKCDEAKCDEAKCDEAK", 5*5, 546.5958*5 , protein3,2, NOT_TRYPTIC);
-  
+  */
+  /*
   print_peptide(peptide1, stdout);
   print_peptide(peptide2, stdout);
   print_peptide(peptide3, stdout);
+  */
   
   //check mass
-  fail_unless( 546.5958 -0.1<= get_peptide_peptide_mass(peptide1) <= 546.5958 + 0.1, "failed mass");
-  fail_unless(get_peptide_peptide_mass(peptide1)-0.1<= calc_peptide_mass(peptide1)<= get_peptide_peptide_mass(peptide1) + 0.1, "failed mass");
+  fail_unless( compare_float(get_peptide_peptide_mass(peptide1), 774.83) ==0, "failed mass");
+  fail_unless( compare_float(calc_peptide_mass(peptide1, AVERAGE), 774.83) == 0 , "failed mass");
   
   fail_unless( 546.5958 -0.1<= get_peptide_neutral_mass(peptide1) <= 546.5958 + 0.1, "failed mass");
   printf("peptide charged mass(charge2): %f\n", get_peptide_charged_mass(peptide1, 2));
