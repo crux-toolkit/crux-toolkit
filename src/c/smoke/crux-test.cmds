@@ -1,5 +1,5 @@
-generate_peptides_default = standard_generate_peptides_default.out = ../../../bin/generate_peptides test.fasta 
-generate_peptides_sort_mass_unique = standard_generate_peptides_mass.out = ../../../bin/generate_peptides test.fasta --output-sequence --cleavages --missed-cleavages --sort mass --redundancy unique test.fasta 
-generate_peptides_sort_length_unique = standard_generate_peptides_length.out = ../../../bin/generate_peptides test.fasta --output-sequence --cleavages --missed-cleavages --sort length --redundancy unique test.fasta 
-generate_peptides_sort_lexical_unique = standard_generate_peptides_lexical.out = ../../../bin/generate_peptides test.fasta --output-sequence --cleavages --missed-cleavages --sort lexical --redundancy unique test.fasta 
+generate_peptides_default = standard_generate_peptides_default.out = ../../../bin/generate_peptides --output-sequence  test.fasta 
+generate_peptides_sort_mass_unique = standard_generate_peptides_mass.out = ../../../bin/generate_peptides --output-sequence --cleavages all --missed-cleavages --sort mass --redundancy unique test.fasta 
+generate_peptides_sort_length_unique = standard_generate_peptides_length.out = ../../../bin/generate_peptides --output-sequence --cleavages tryptic --missed-cleavages --sort length --redundancy unique test.fasta 
+generate_peptides_sort_lexical_unique = standard_generate_peptides_lexical.out = ../../../bin/generate_peptides --output-sequence --cleavages partial --missed-cleavages --sort lexical --redundancy unique test.fasta 
 get_ms2_spectrum = standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; ../../../bin/get_ms2_spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out
