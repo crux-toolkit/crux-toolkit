@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.21 $
+# VERSION: $Revision: 1.22 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -69,10 +69,6 @@ python: ${PYTHON}
 
 doc:	*.h *.c
 	doxygen Doxyfile
-
-# run smoke test
-smoke: all
-	smoke/crux-test.pl smoke/crux-test.cmds
 
 # Remove extraneous files.
 clean: 
