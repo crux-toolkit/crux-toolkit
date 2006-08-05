@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -12,6 +12,7 @@
 #include "peptide.h"
 #include "protein.h"
 #include "carp.h"
+#include "peptide_constraint.h"
 
 /**
  * \returns An (empty) index object.
@@ -22,7 +23,10 @@ INDEX_T* allocate_index(void);
  * \returns A new index object.
  */
 INDEX_T* new_index(
-    char* fasta_filename
+  char* fasta_filename,  ///< The fasta file
+  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
+  float mass_range,  ///< the range of mass that each index file should be partitioned into
+  unsigned int max_size  ///< maximum limit of each index file
 );         
 
 /**
@@ -56,6 +60,16 @@ BOOLEAN_T create_index(
  */
 BOOLEAN_T index_exists(
   INDEX_T* index ///< An allocated index
+  );
+
+/**
+ * prints all the index files to a file
+ * this file is used later by the index object to index the files with a given interval
+ * \returns TRUE if it creates a list of infex files. FALSE if it fails.
+ */
+BOOLEAN_T create_index_files(
+  INDEX_T* index, ///< An allocated index
+  FILE* file ///< output stream to print
   );
 
 /***********************************************
