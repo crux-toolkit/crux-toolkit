@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -14,6 +14,7 @@
 #include "index.h"
 #include "carp.h"
 #include "objects.h"
+#include "peptide_constraint.h"
 
 #define INDEX_MAX_FILES 10000
 
@@ -72,10 +73,103 @@
 struct index{
   DATABASE_T* database; ///< The database that has been indexed.
   char* directory; ///< The directory containing the indexed files
-  char* filenames[INDEX_MAX_FILES]; ///< The files that contain the peptides
+  //char* filenames[INDEX_MAX_FILES]; ///< The files that contain the peptides
   PEPTIDE_CONSTRAINT_T* constraint; ///< Constraint which these peptides satisfy
-  BOOLEAN_T is_on_disk; ///< Does this index exist on disk yet?
+  BOOLEAN_T on_disk; ///< Does this index exist on disk yet?
 };    
+
+/**
+ * \struct index files
+ * \brief A struct that contains the information of each file
+ */
+struct index_file{
+  char* filenames;  ///< The file name that contain the peptides
+  float start_mass; ///< the start mass limit in this file
+  float interval;   ///< the interval of the peptides in this file
+}INDEX_FILE_T;
+
+
+/**
+ * \returns An (empty) index object.
+ */
+INDEX_T* allocate_index(void){
+  INDEX_T* index = (INDEX_T*)mycalloc(1, sizeof(INDEX_T));
+  return index;
+}
+
+/**
+ * given a fasta_file name it returns the index file directory name
+ * format: myfasta_crux_index
+ * \returns A heap allocated index file directory name of the given fasta file
+ */
+char* generate_directory_name(
+  char* fasta_filename
+  )
+{
+  int len = strlen(fasta_filename);
+  int end_idx = len;
+  int end_path = len;  //index of where the "." is located in the file
+  char* dir_name = NULL;
+  char* dir_name_tag =  "_crux_index";
+  
+  //cut off the ".fasta" if needed
+  for(; end_idx > 0; --end_idx){
+    if(strcmp(fasta_filename[end_idx - 1], ".") == 0){
+      end_path = end_idx - 1;
+      break;
+    }
+  }
+  
+  dir_name = (char*)mycalloc(end_path + strlen(dir_name_tag) + 1, sizeof(char));
+  strncpy(dir_name, fasta_filename, end_path);
+  strcat(dir_name, dir_name_tag);
+  return dir_name;
+}
+  
+
+
+/**
+ * \returns A new index object.
+ */
+INDEX_T* new_index(
+  char* fasta_filename,  ///< The fasta file
+  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
+  float mass_range,  ///< the range of mass that each index file should be partitioned into
+  unsigned int max_size  ///< maximum limit of each index file
+  )
+{
+  char* working_dir = NULL;
+  INDEX_T* index = allocate_index();
+  DATABASE_T* database = new_database(fasta_filename);
+  
+
+  set_index_peptide_constraint(index, constraint);
+  
+  working_dir = parse_file_path(fasta_filename);
+
+  //are we currently in the crux dircetory
+  if(working_dir == NULL){
+    opendir("fasta_filename" )
+    //scandir(".", &namelist, 0, alphasort);
+  }
+  set_index_on_disk(index, FALSE);
+  set_index_database(index, database);
+  
+}         
+
+/**
+ * Frees an allocated index object.
+ */
+void free_index(
+  INDEX_T* index
+  )
+{
+  free_database(index->database);
+  free(index->directory);
+  free_peptide_constraint(index->constraint);
+  free(index);
+}
+
 
 /**
  * The main index method. Does all the heavy lifting, creating files
@@ -89,7 +183,22 @@ struct index{
  */
 BOOLEAN_T create_index(
   INDEX_T* index ///< An allocated index
-  );
+  )
+{
+  FILE* output = NULL;
+
+  //check if already created index
+  if(index->on_disk){
+    return TRUE;
+  }
+  
+  
+  
+  
+  
+
+
+}
 
 /*
  * Private methods

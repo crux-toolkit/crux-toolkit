@@ -52,3 +52,29 @@ inline int compare_float(float float_a, float float_b){
     return -1;
   }
 }
+
+/**
+ * parses the file path  
+ * returns NULL if only a filename was passed in
+ * ex) ../../file_name => returns ../../
+ *     file_name => returns NULL
+ *\returns A heap allocated path to the location of the file
+ */
+char* parse_file_path(char* file){
+  int len = strlen(file);
+  int end_idx = len;
+  int end_path = -1;  //index of where the last "/" is located
+  char* path = NULL;
+
+  for(; end_idx > 0; --end_idx){
+    if(strcmp(file[end_idx - 1], "/") == 0){
+      end_path = end_idx;
+      break;
+    }
+  }
+  //there is a "/" in the file
+  if(end_path != -1){
+    path = copy_string_part(file, end_path);
+  }
+  return path;
+}
