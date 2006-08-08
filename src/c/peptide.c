@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -627,9 +627,40 @@ BOOLEAN_T merge_peptides(
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide,
   FILE* file
-  );
+  )
+{
+  PEPTIDE_SRC_ITERATOR_T* iterator = 
+    new_peptide_src_iterator(peptide);
+
+  //print length of the peptide
+  fprintf(file,"%d\n",peptide->length);
+  //print mass of the peptide
+  fprintf(file, "%.2f\n", peptide->peptide_mass);
+  //print number of src
+  fprintf(file, "%d\n", 0); //FIXME..might have to set then comeback..urr
+
+  if(peptide_src_iterator_has_next(iterator)){
+    carp(CARP_WARNING, "no peptide src");
+    return FALSE;
+  }
+
+  //interate through the linklist of possible parent proteins
+  while(peptide_src_iterator_has_next(iterator)){
+    PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(iterator);
+    //id = get_protein_id_pointer(parent);
+    fprintf(file, "\t");
+    print_peptide_type(get_peptide_src_peptide_type(peptide_src), file);
+    fprintf(file, "\n");
+    fprintf(file, "\t%d\n", get_peptide_src_start_idx(peptide_src));
+  
+    //what next ??? 
+  }
+  
+  free_peptide_src_iterator(iterator);
+  return TRUE;
+}
  
-/*
+/**
  * Load a peptide from the FILE
  * \returns TRUE if load is successful, else FALSE
  *

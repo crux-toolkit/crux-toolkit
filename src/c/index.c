@@ -1,12 +1,15 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "utils.h"
 #include "crux-utils.h"
 #include "peptide.h"
@@ -15,6 +18,8 @@
 #include "carp.h"
 #include "objects.h"
 #include "peptide_constraint.h"
+#include "database.h"
+
 
 #define INDEX_MAX_FILES 10000
 
@@ -76,6 +81,8 @@ struct index{
   //char* filenames[INDEX_MAX_FILES]; ///< The files that contain the peptides
   PEPTIDE_CONSTRAINT_T* constraint; ///< Constraint which these peptides satisfy
   BOOLEAN_T on_disk; ///< Does this index exist on disk yet?
+  float mass_range;  ///< the range of mass that each index file should be partitioned into
+  unsigned int max_size;  ///< maximum limit of each index file
 };    
 
 /**
@@ -114,7 +121,7 @@ char* generate_directory_name(
   
   //cut off the ".fasta" if needed
   for(; end_idx > 0; --end_idx){
-    if(strcmp(fasta_filename[end_idx - 1], ".") == 0){
+    if(strcmp(&fasta_filename[end_idx - 1], ".") == 0){
       end_path = end_idx - 1;
       break;
     }
@@ -129,6 +136,7 @@ char* generate_directory_name(
 
 
 /**
+ * Assumes that the fasta file is always in the ??? directory
  * \returns A new index object.
  */
 INDEX_T* new_index(
@@ -138,23 +146,48 @@ INDEX_T* new_index(
   unsigned int max_size  ///< maximum limit of each index file
   )
 {
+  char** filename_and_path = NULL;
   char* working_dir = NULL;
   INDEX_T* index = allocate_index();
   DATABASE_T* database = new_database(fasta_filename);
+    
+  filename_and_path = parse_filename_path(fasta_filename);
+  working_dir = generate_directory_name(filename_and_path[0]);
   
-
-  set_index_peptide_constraint(index, constraint);
-  
-  working_dir = parse_file_path(fasta_filename);
-
+  //check if the index files are on disk
   //are we currently in the crux dircetory
-  if(working_dir == NULL){
-    opendir("fasta_filename" )
-    //scandir(".", &namelist, 0, alphasort);
+  if(filename_and_path[1] == NULL){
+    if(opendir(working_dir) != NULL){ //maybe memleak
+      set_index_on_disk(index, TRUE);
+    }
+    else{
+      set_index_on_disk(index, FALSE);
+    }
   }
-  set_index_on_disk(index, FALSE);
-  set_index_database(index, database);
+  else{//we are not in crux directory
+    char* full_path = cat_string(filename_and_path[1],  working_dir);
+    if(opendir(full_path) != NULL){ //string cat..might not work
+      set_index_on_disk(index, TRUE);
+    }
+    else{
+      set_index_on_disk(index, FALSE);
+    }
+    free(full_path);
+  }
   
+  //set each field
+  set_index_directory(index, working_dir);
+  set_index_constraint(index, constraint);
+  set_index_database(index, database);
+  set_index_mass_range(index, mass_range);
+  set_index_max_size(index, max_size);
+
+  //free filename and path string array
+  free(filename_and_path[0]);
+  free(filename_and_path[1]);
+  free(filename_and_path);
+  
+  return index;
 }         
 
 /**
@@ -177,6 +210,8 @@ void free_index(
  * a standard suffix (e.g. cruxidx), so that a given fasta file will have
  * an obvious index location.
  *
+ * assumes that the current directory is the crux directory where the fasta file is located
+ *
  * Note: create an index .info file as to map masses to files and to store 
  * all information that was used to create this index.
  * \returns TRUE if success. FALSE if failure.
@@ -186,18 +221,96 @@ BOOLEAN_T create_index(
   )
 {
   FILE* output = NULL;
+  //FILE* info_out = NULL;
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
+  PEPTIDE_T* peptide = NULL;
+  int num_peptides = 0; //current number of peptides index file 
+  int num_file = 1; //the ith number of index file created
+  float current_mass_limit = index->mass_range;
+  char* filename_tag = "crux_index_";
+  char* file_num = NULL;
 
   //check if already created index
   if(index->on_disk){
     return TRUE;
   }
+  //create temporary directory
+  if(mkdir("crux_temp", S_IRWXG) !=0 &&  chdir("crux_temp") != 0){
+    carp(CARP_WARNING, "cannot create temporary directory");
+    return FALSE;
+  }
   
-  
-  
-  
-  
+  //create peptide iterator
+  sorted_iterator = 
+    new_database_sorted_peptide_iterator(index->database, index->constraint, MASS, TRUE);
+     
+  //check if any peptides are found
+  if(!database_sorted_peptide_iterator_has_next(sorted_iterator)){
+    carp(CARP_WARNING, "no matches found");
+    return FALSE;
+  }
+ 
+  do{ 
+    char* filename;
+
+    //open the next index file
+    if(num_peptides == 0){
+      file_num = int_to_char(num_file);
+      filename = cat_string(filename_tag, file_num);
+      output = fopen(filename, "w" );
+      free(file_num);
+      free(filename);
+    }
+    
+    peptide = database_sorted_peptide_iterator_next(sorted_iterator);
+    
+    //set the index file to the correct interval
+    while(get_peptide_peptide_mass(peptide) > current_mass_limit ||
+       num_peptides > index->max_size){
+      fclose(output);
+      ++num_file;
+      num_peptides = 0;
+      file_num = int_to_char(num_file);
+      filename = cat_string(filename_tag, file_num);
+      output = fopen(filename, "w");
+      free(file_num);
+      free(filename);
+    }
+    
+    serialize_peptide(peptide, output);
+    free_peptide(peptide);
+    
+    ++num_peptides;
+      
+  } //serialize the peptides into index files
+  while(database_sorted_peptide_iterator_has_next(sorted_iterator));
+
+  fclose(output);
+  //free iterator
+  free_database_sorted_peptide_iterator(sorted_iterator);
 
 
+  chdir("..");
+  //rename crux_temp to final directory name
+  if(rename("crux_temp", index->directory) != 0){
+    carp(CARP_WARNING, "cannot rename directory");
+    return FALSE;
+  }
+
+  index->on_disk = TRUE;
+  return TRUE;
+}
+
+/**
+ * Does this index exist on disk?
+ *
+ * \returns TRUE if it does. FALSE if it does not.
+ */
+BOOLEAN_T index_exists(
+  INDEX_T* index ///< An allocated index
+  )
+{
+  return index->on_disk;
 }
 
 /*
@@ -211,9 +324,147 @@ char* get_peptide_file_name(
     INDEX_T* index,
     PEPTIDE_T* peptide
     );
-/*
- * Iterators
+
+
+
+/*********************************************
+ * set and get methods for the object fields
+ *********************************************/
+
+/**
+ *\returns the directory of the index
+ * returns a heap allocated new copy of the directory
+ * user must free the return directory name
  */
+char* get_index_directory(
+  INDEX_T* index ///< The index -in
+  )
+{
+  return my_copy_string(index->directory);
+}
+
+/**
+ * sets the directory of the index
+ * index->directory must been initiailized
+ */
+void set_index_directory(
+  INDEX_T* index, ///< The index -in
+  char* directory ///< the directory to add -in
+  )
+{
+  free(index->directory);
+  index->directory = my_copy_string(directory);
+}
+
+/**
+ *\returns a pointer to the database
+ */
+DATABASE_T* get_index_database(
+  INDEX_T* index ///< The index -in
+  )
+{
+  return index->database;
+}
+
+/**
+ * sets the database of the index
+ */
+void set_index_database(
+  INDEX_T* index, ///< The index -in
+  DATABASE_T* database ///< The database that has been indexed. -in
+  )
+{
+  index->database = database;
+}
+
+/**
+ *\returns a pointer to the peptides constraint
+ */
+PEPTIDE_CONSTRAINT_T* get_index_constraint(
+  INDEX_T* index ///< The index -in
+  )
+{
+  return index->constraint;
+}
+
+/**
+ * sets the peptides constraint
+ */
+void set_index_constraint(
+  INDEX_T* index, ///< The index -in
+  PEPTIDE_CONSTRAINT_T* constraint ///< Constraint which these peptides satisfy -in
+  )
+{
+  index->constraint = constraint;
+}
+
+/**
+ *\returns TRUE if index files are on disk else FALSE
+ */
+BOOLEAN_T get_index_on_disk(
+  INDEX_T* index ///< The index -in
+  )
+{
+  return index->on_disk;
+}
+
+/**
+ * sets the on disk field of index
+ */
+void set_index_on_disk(
+  INDEX_T* index, ///< The index -in
+  BOOLEAN_T on_disk ///< Does this index exist on disk yet? -in
+  )
+{
+  index->on_disk = on_disk;
+}
+
+/**
+ *\returns the range of mass that each index file should be partitioned into
+ */
+float get_index_mass_range(
+  INDEX_T* index ///< The index -in
+  )
+{
+  return index->mass_range;
+}
+
+/**
+ * sets the mass_range field of index
+ */
+void set_index_mass_range(
+  INDEX_T* index, ///< The index -in
+  float mass_range  ///< the range of mass that each index file should be partitioned into -in
+  )
+{
+  index->mass_range = mass_range;
+}
+
+/**
+ *\returns maximum limit of each index file
+ */
+unsigned int get_index_max_size(
+  INDEX_T* index ///< The index -in
+  )
+{
+  return index->max_size;
+}
+
+/**
+ * sets the maximum limit of each index file for the index object
+ */
+void set_index_max_size(
+  INDEX_T* index, ///< The index -in
+  unsigned int max_size  ///< maximum limit of each index file -in
+  )
+{
+  index->max_size = max_size;
+}
+
+
+/**************************
+ * Iterators
+ **************************/
 
 /**
  * \struct index_peptide_iterator

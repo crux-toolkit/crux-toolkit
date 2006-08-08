@@ -12,7 +12,7 @@
 #include "../database.h"
 #include "../index.h"
 
-INDEX_T* index;
+INDEX_T* _index;
 DATABASE_T* database;
 PEPTIDE_CONSTRAINT_T* constraint;
 INDEX_PEPTIDE_ITERATOR_T* iterator;
@@ -22,7 +22,7 @@ void setup(void){
 }
 
 void teardown(void){
-  free_index(index);
+  free_index(_index);
 }
 
 START_TEST (test_create){
@@ -34,14 +34,14 @@ START_TEST (test_create){
                            0, 5000, 
                            0, 255, 
                            TRUE, AVERAGE);
-    index = 
+    _index = 
       new_index("test.fasta",
                 constraint,
                 mass_range,
                 max_size);
 
-    fail_unless(create_index(index), "failed to create a index");
-    fail_unless(index_exists(index), "index exist method failed");
+    fail_unless(create_index(_index), "failed to create a index");
+    fail_unless(index_exists(_index), "index exist method failed");
     
 }
 END_TEST

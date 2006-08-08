@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include "utils.h"
+#include "objects.h"
 
 /**
  * returns a heap allocated copy of the src string
@@ -54,27 +55,81 @@ inline int compare_float(float float_a, float float_b){
 }
 
 /**
- * parses the file path  
- * returns NULL if only a filename was passed in
- * ex) ../../file_name => returns ../../
- *     file_name => returns NULL
- *\returns A heap allocated path to the location of the file
+ * parses the filename and path  
+ * returns an array A, with A[0] the filename and A[1] the path to the filename
+ * returns A[1] NULL if only a filename was passed in
+ * ex) ../../file_name => returns filename , ../../
+ *     file_name => returns filename, NULL
+ *\returns A heap allocated array of both filename and path
  */
-char* parse_file_path(char* file){
+char** parse_filename_path(char* file){
   int len = strlen(file);
   int end_idx = len;
   int end_path = -1;  //index of where the last "/" is located
   char* path = NULL;
+  char* filename = NULL;
+  char** result = (char**)mycalloc(2, sizeof(char*));
 
   for(; end_idx > 0; --end_idx){
-    if(strcmp(file[end_idx - 1], "/") == 0){
+    if(strcmp(&file[end_idx - 1], "/") == 0){
       end_path = end_idx;
       break;
     }
   }
-  //there is a "/" in the file
+  //copy path, if there is a "/" in the file
   if(end_path != -1){
     path = copy_string_part(file, end_path);
   }
-  return path;
+  //copy filename
+  filename = copy_string_part(&file[end_idx], len); 
+  
+  //set result with filename and path
+  result[0] = filename;
+  result[1] = path;
+  
+  return result;
+}
+
+/**
+ * convert the integer into a string
+ * \returns a heap allocated string
+ */
+char* int_to_char(int i){
+  int digit = i / 10;
+  char* int_string = (char*)mycalloc(digit+2, sizeof(char));
+  sprintf(int_string, "%d", i);
+  return int_string;
+}
+ 
+
+/**
+ *prints the peptide type given it's enum value
+ */
+void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file){
+  if(peptide_type == TRYPTIC){
+    fprintf(file, "%s", "TRYPTIC");
+  }
+  else if(peptide_type == PARTIALLY_TRYPTIC){
+    fprintf(file, "%s", "PARTIALLY_TRYPTIC");
+  }
+  else if(peptide_type == NOT_TRYPTIC){
+    fprintf(file, "%s", "NOT_TRYPTIC");
+  }
+  else if(peptide_type == ANY_TRYPTIC){
+    fprintf(file, "%s", "ANY_TRYPTIC");
+  }
+}
+
+/**
+ * given two strings return a concatenated third string
+ * \returns a heap allocated string that concatenates the two inputs
+ */
+char* cat_string(char* string_one, char* string_two){
+  int len_one = strlen(string_one);
+  int len_two = strlen(string_two);
+  
+  char* result = (char*)mycalloc(len_one + len_two + 1, sizeof(char));
+  strncpy(result, string_one, len_one);
+  strncpy(&result[len_one], string_two, len_two);
+  return result;
 }

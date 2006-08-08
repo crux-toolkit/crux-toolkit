@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -13,6 +13,7 @@
 #include "protein.h"
 #include "carp.h"
 #include "peptide_constraint.h"
+#include "database.h"
 
 /**
  * \returns An (empty) index object.
@@ -70,6 +71,104 @@ BOOLEAN_T index_exists(
 BOOLEAN_T create_index_files(
   INDEX_T* index, ///< An allocated index
   FILE* file ///< output stream to print
+  );
+
+
+/*********************************************
+ * set and get methods for the object fields
+ *********************************************/
+
+/**
+ *\returns the directory of the index
+ * returns a heap allocated new copy of the directory
+ * user must free the return directory name
+ */
+char* get_index_directory(
+  INDEX_T* index ///< The index -in
+  );
+
+/**
+ * sets the directory of the index
+ * index->directory must been initiailized
+ */
+void set_index_directory(
+  INDEX_T* index, ///< The index -in
+  char* directory ///< the directory to add -in
+  );
+
+/**
+ *\returns a pointer to the database
+ */
+DATABASE_T* get_index_database(
+  INDEX_T* index ///< The index -in
+  );
+
+/**
+ * sets the database of the index
+ */
+void set_index_database(
+  INDEX_T* index, ///< The index -in
+  DATABASE_T* database ///< The database that has been indexed. -in
+  );
+
+/**
+ *\returns a pointer to the peptides constraint
+ */
+PEPTIDE_CONSTRAINT_T* get_index_constraint(
+  INDEX_T* index ///< The index -in
+  );
+
+/**
+ * sets the peptides constraint
+ */
+void set_index_constraint(
+  INDEX_T* index, ///< The index -in
+  PEPTIDE_CONSTRAINT_T* constraint ///< Constraint which these peptides satisfy -in
+  );
+
+/**
+ *\returns TRUE if index files are on disk else FALSE
+ */
+BOOLEAN_T get_index_on_disk(
+  INDEX_T* index ///< The index -in
+  );
+
+/**
+ * sets the on disk field of index
+ */
+void set_index_on_disk(
+  INDEX_T* index, ///< The index -in
+  BOOLEAN_T on_disk ///< Does this index exist on disk yet? -in
+  );
+
+/**
+ *\returns the range of mass that each index file should be partitioned into
+ */
+float get_index_mass_range(
+  INDEX_T* index ///< The index -in
+  );
+
+/**
+ * sets the mass_range field of index
+ */
+void set_index_mass_range(
+  INDEX_T* index, ///< The index -in
+  float mass_range  ///< the range of mass that each index file should be partitioned into -in
+  );
+
+/**
+ *\returns maximum limit of each index file
+ */
+unsigned int get_index_max_size(
+  INDEX_T* index ///< The index -in
+  );
+
+/**
+ * sets the maximum limit of each index file for the index object
+ */
+void set_index_max_size(
+  INDEX_T* index, ///< The index -in
+  unsigned int max_size  ///< maximum limit of each index file -in
   );
 
 /***********************************************
