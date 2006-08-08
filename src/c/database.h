@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
