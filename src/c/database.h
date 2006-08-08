@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -60,15 +60,6 @@ BOOLEAN_T get_database_protein_at_idx(
     DATABASE_T* database, ///< A parsed database object -in
     unsigned long int protein_idx, ///< The index of the protein to retrieve -in
     PROTEIN_T** protein   ///< A pointer to a pointer to a PROTEIN object -out
-    );
-
-/**
- * \returns FALSE if protein cannot be found in database
- */
-BOOLEAN_T get_database_idx_for_protein(
-    DATABASE_T* database, ///< A parsed database object -in
-    PROTEIN_T** protein,  ///< A pointer to a pointer to a PROTEIN object -in
-    unsigned long int* idx  ///< A pointer to the idx of the protein -out
     );
 
 /** 

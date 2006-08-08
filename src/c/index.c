@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -49,8 +49,19 @@
  *        designed for this purpose, and writes a peptide in a format from
  *        which it can be reconstructed
  *
+ *        - Serialize peptide needs to serialize the peptide_src objects. To
+ *        do that, it needs the idx of the peptide_src's protein objects in
+ *        the database. This is retrieved from the protein idx member
+ *        variable (i.e. this protein is the 0th protein, 1st protein etc.)
+ *        which is set at database creation. Note, that this won't have to 
+ *        change when we move to light proteins.
+ *
  * LATER At some point we will index each of the peptide files too (in a TOC), 
  * so that we can retrieve them rapidly later. 
+ *
+ * LATER We implement light proteins and possibly an 
+ * LATER create_index for protein locations in the database allowing rapid
+ * creation of light protein objects.
  */
 
 /* 
@@ -69,6 +80,12 @@
  * - Then starts iterating through peptides, which are being loaded from
  *   disk, and outputs them as before
  * 
+ * LATER We implement light proteins.
+ * LATER use an index for protein offsets in the database allowing rapid
+ * creation of light protein objects.
+ *
+ * LATER Develop a conversion from light to heavy and heavy to light protein
+ * objects to avoid excessive memory use.
  */
 
 /**
