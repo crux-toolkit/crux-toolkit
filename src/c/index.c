@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 #include "utils.h"
 #include "crux-utils.h"
 #include "peptide.h"
@@ -138,7 +139,7 @@ char* generate_directory_name(
   
   //cut off the ".fasta" if needed
   for(; end_idx > 0; --end_idx){
-    if(strcmp(&fasta_filename[end_idx - 1], ".") == 0){
+    if(strcmp(&fasta_filename[end_idx - 1], ".fasta") == 0){
       end_path = end_idx - 1;
       break;
     }
@@ -170,11 +171,12 @@ INDEX_T* new_index(
     
   filename_and_path = parse_filename_path(fasta_filename);
   working_dir = generate_directory_name(filename_and_path[0]);
-  
+  DIR* check_dir = NULL;
+
   //check if the index files are on disk
   //are we currently in the crux dircetory
   if(filename_and_path[1] == NULL){
-    if(opendir(working_dir) != NULL){ //maybe memleak
+    if((check_dir =  opendir(working_dir)) != NULL){
       set_index_on_disk(index, TRUE);
     }
     else{
@@ -183,7 +185,7 @@ INDEX_T* new_index(
   }
   else{//we are not in crux directory
     char* full_path = cat_string(filename_and_path[1],  working_dir);
-    if(opendir(full_path) != NULL){ //string cat..might not work
+    if((check_dir = opendir(full_path)) != NULL){
       set_index_on_disk(index, TRUE);
     }
     else{
@@ -200,6 +202,8 @@ INDEX_T* new_index(
   set_index_max_size(index, max_size);
 
   //free filename and path string array
+  free(check_dir);
+  free(working_dir);
   free(filename_and_path[0]);
   free(filename_and_path[1]);
   free(filename_and_path);
@@ -220,6 +224,25 @@ void free_index(
   free(index);
 }
 
+/**
+ * write to the file stream various information of the
+ * index files created
+ */
+BOOLEAN_T write_header(
+  INDEX_T* index, ///< the working index -in
+  FILE* file ///< out put stream for crux_index_map -in
+  )
+{
+  time_t hold_time;
+  hold_time = time(0);
+
+  fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
+  fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
+  fprintf(file, "#\tmaximum size of each index file: %d\n", index->max_size);
+  fprintf(file, "#\ttarget mass range for index file: %.2f\n", index->mass_range);
+  fprintf(file, "#\tcopyright: %s\n", "William Noble");
+  return TRUE;
+}
 
 /**
  * The main index method. Does all the heavy lifting, creating files
@@ -234,11 +257,11 @@ void free_index(
  * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T create_index(
-  INDEX_T* index ///< An allocated index
+  INDEX_T* index ///< An allocated index -in
   )
 {
-  FILE* output = NULL;
-  //FILE* info_out = NULL;
+  FILE* output = NULL; // the file stream for each index file
+  FILE* info_out = NULL; // the file stream where the index creation infomation is sent
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
   PEPTIDE_T* peptide = NULL;
   int num_peptides = 0; //current number of peptides index file 
@@ -249,10 +272,11 @@ BOOLEAN_T create_index(
 
   //check if already created index
   if(index->on_disk){
+    carp(CARP_INFO, "index already been created on disk");
     return TRUE;
   }
   //create temporary directory
-  if(mkdir("crux_temp", S_IRWXG) !=0 &&  chdir("crux_temp") != 0){
+  if(mkdir("crux_temp", S_IRWXU) !=0){
     carp(CARP_WARNING, "cannot create temporary directory");
     return FALSE;
   }
@@ -266,7 +290,17 @@ BOOLEAN_T create_index(
     carp(CARP_WARNING, "no matches found");
     return FALSE;
   }
- 
+  
+  //move into temporary directory
+  if(chdir("crux_temp") != 0){
+    carp(CARP_WARNING, "cannot enter temporary directory");
+    return FALSE;
+  }
+  
+  //create the index map & info
+  info_out = fopen("crux_index_map", "w");
+  write_header(index, info_out);
+
   do{ 
     char* filename;
 
@@ -275,6 +309,7 @@ BOOLEAN_T create_index(
       file_num = int_to_char(num_file);
       filename = cat_string(filename_tag, file_num);
       output = fopen(filename, "w" );
+      fprintf(info_out, "%s\t%.2f\t", filename, 0.00);
       free(file_num);
       free(filename);
     }
@@ -283,29 +318,48 @@ BOOLEAN_T create_index(
     
     //set the index file to the correct interval
     while(get_peptide_peptide_mass(peptide) > current_mass_limit ||
-       num_peptides > index->max_size){
+       num_peptides > index->max_size-1){
       fclose(output);
       ++num_file;
       num_peptides = 0;
       file_num = int_to_char(num_file);
       filename = cat_string(filename_tag, file_num);
       output = fopen(filename, "w");
+     
+      //reset mass limit and update crux_index_map
+      if(get_peptide_peptide_mass(peptide) > current_mass_limit){
+        fprintf(info_out, "%.2f\n", index->mass_range);
+        fprintf(info_out, "%s\t%.2f\t", filename, current_mass_limit+0.01);//!!boarder conditions
+        current_mass_limit += index->mass_range;
+      }
+      else{ //num_peptides > index->max_size
+        fprintf(info_out, "%.2f\n",
+                index->mass_range - 
+                (current_mass_limit - get_peptide_peptide_mass(peptide))-0.01);
+        fprintf(info_out, "%s\t%.2f\t", filename, get_peptide_peptide_mass(peptide));
+        current_mass_limit = index->mass_range + get_peptide_peptide_mass(peptide);
+      }
+
       free(file_num);
       free(filename);
     }
-    
+
     serialize_peptide(peptide, output);
     free_peptide(peptide);
     
     ++num_peptides;
-      
   } //serialize the peptides into index files
   while(database_sorted_peptide_iterator_has_next(sorted_iterator));
-
+  
+  //print land line in crux index map
+  fprintf(info_out, "%.2f\n", index->mass_range);
+  
+  //close last index file and crux_index_map file
+  fclose(info_out);
   fclose(output);
+
   //free iterator
   free_database_sorted_peptide_iterator(sorted_iterator);
-
 
   chdir("..");
   //rename crux_temp to final directory name

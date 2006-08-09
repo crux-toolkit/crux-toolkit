@@ -10,3 +10,4 @@ check: unittests
 
 clean:
 	rm -f *.o unittests
+

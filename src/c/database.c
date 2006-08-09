@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -106,12 +106,16 @@ void free_database(
   )
 {
   int protein_idx = 0;
-
+  
   free(database->filename);
-  fclose(database->file);
-  //free each protein in the array
-  for(; protein_idx < database->num_proteins; ++protein_idx){
-    free_protein(database->proteins[protein_idx]);
+  
+  //only free proteins if been parsed and file has been opened
+  if(database->is_parsed){
+    fclose(database->file);
+    //free each protein in the array
+    for(; protein_idx < database->num_proteins; ++protein_idx){
+      free_protein(database->proteins[protein_idx]);
+    }
   }
   free(database);
 }
