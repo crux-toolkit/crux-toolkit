@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.32 $
+ * $Revision: 1.33 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -627,7 +627,45 @@ BOOLEAN_T merge_peptides(
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide,
   FILE* file
-  );
+  )
+{
+  PEPTIDE_SRC_ITERATOR_T* iterator = 
+    new_peptide_src_iterator(peptide);
+  long num_src_location;
+  long original_location;
+  int num_src = 0;
+
+  //print length of the peptide
+  fprintf(file,"%d\n",peptide->length);
+  //print mass of the peptide
+  fprintf(file, "%.2f\n", peptide->peptide_mass);
+  //print number of src
+  num_src_location = ftell(file);
+  fprintf(file, "%s\n", "      ");
+
+  //there must be at least one peptide src
+  if(!peptide_src_iterator_has_next(iterator)){
+    carp(CARP_WARNING, "no peptide src");
+    return FALSE;
+  }
+
+  //interate through the linklist of possible parent proteins
+  while(peptide_src_iterator_has_next(iterator)){
+    PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(iterator);
+    fprintf(file, "\t%d\n", get_peptide_src_peptide_type(peptide_src));
+    fprintf(file, "\t%d\n", get_peptide_src_start_idx(peptide_src));
+    //print protein indx
+    ++num_src;
+  }
+  free_peptide_src_iterator(iterator);
+  
+  original_location = ftell(file);
+  fseek(file, num_src_location, SEEK_SET);
+  fprintf(file, "%d", num_src);
+  //update
+  fseek(file, original_location, SEEK_SET);
+  return TRUE;
+}
  
 /*
  * Load a peptide from the FILE

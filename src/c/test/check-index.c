@@ -22,13 +22,14 @@ void setup(void){
 }
 
 void teardown(void){
-  free_index(_index);
+
 }
 
 START_TEST (test_create){
-  float mass_range = 10.0;
-  int max_size =  500;
-  
+  float mass_range = 1000.0;
+  int max_size =  70;
+  set_verbosity_level(CARP_MAX);
+
   constraint = 
     new_peptide_constraint(TRYPTIC,
                            0, 5000, 
@@ -43,6 +44,7 @@ START_TEST (test_create){
     fail_unless(create_index(_index), "failed to create a index");
     fail_unless(index_exists(_index), "index exist method failed");
     
+    free_index(_index);
 }
 END_TEST
 
