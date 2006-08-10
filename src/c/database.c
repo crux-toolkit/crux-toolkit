@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -191,6 +191,7 @@ BOOLEAN_T parse_database(
       fseek(file, working_index, SEEK_SET);
       
       //failed to parse the protein from fasta file
+      //protein offset is set in the parse_protein_fasta_file method
       if(!parse_protein_fasta_file(new_protein ,file)){
         fclose(file);
         free_protein(new_protein);
@@ -208,6 +209,8 @@ BOOLEAN_T parse_database(
       set_protein_offset(new_protein, working_index);
       */
       ++database->num_proteins;
+      //set protein index
+      set_protein_protein_idx(new_protein, database->num_proteins);
     }
     working_index = ftell(file);
   }

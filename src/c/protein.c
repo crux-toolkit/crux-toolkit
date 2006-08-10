@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -64,7 +64,8 @@ struct protein_peptide_iterator {
 static BOOLEAN_T read_title_line
   (FILE* fasta_file,
    char* name,
-   char* description);
+   char* description,
+   PROTEIN_T* protein);
 
 //def bellow
 static BOOLEAN_T read_raw_sequence
@@ -91,7 +92,9 @@ PROTEIN_T* new_protein(
   char*         id, ///< The protein sequence id. -in
   char*   sequence, ///< The protein sequence. -in
   int       length, ///< The length of the protein sequence. -in
-  char* annotation  ///< Optional protein annotation.  -in
+  char* annotation,  ///< Optional protein annotation.  -in
+  unsigned long int offset, ///< The file location in the source file in the database -in
+  unsigned int protein_idx ///< The index of the protein in it's database.-in
   )
 {
   PROTEIN_T* protein = allocate_protein();
@@ -99,6 +102,8 @@ PROTEIN_T* new_protein(
   set_protein_sequence(protein, sequence);
   set_protein_length(protein, length);
   set_protein_annotation(protein, annotation);
+  set_protein_offset(protein, offset);
+  set_protein_protein_idx(protein, protein_idx);
   return protein;
 }         
 
@@ -160,6 +165,8 @@ void copy_protein(
   set_protein_sequence(dest, sequence);
   set_protein_length(dest, get_protein_length(src));
   set_protein_annotation(dest, annotation);
+  set_protein_offset(dest, src->offset);
+  set_protein_protein_idx(dest, src->protein_idx);
 
   free(id);
   free(sequence);
@@ -171,6 +178,7 @@ void copy_protein(
 VERBOSE_T verbosity = NORMAL_VERBOSE;
 /**
  * Parses a protein from an open (FASTA) file.
+ * the protein_idx field of the protein must be added before or after you parse the protein
  * \returns TRUE if success. FALSE is failure.
  * protein must be a heap allocated
  */
@@ -185,7 +193,7 @@ BOOLEAN_T parse_protein_fasta_file(
   static int sequence_length; //the sequence length
 
   // Read the title line.
-  if (!read_title_line(file, name, desc)) {
+  if (!read_title_line(file, name, desc, protein)) {
     return(FALSE);
   }
   
@@ -226,7 +234,8 @@ BOOLEAN_T parse_protein_fasta_file(
 static BOOLEAN_T read_title_line
   (FILE* fasta_file,
    char* name,
-   char* description)
+   char* description,
+   PROTEIN_T* protein)
 {
   static char id_line[LONGEST_LINE];  // Line containing the ID and comment.
   int a_char;                         // The most recently read character.
@@ -237,6 +246,8 @@ static BOOLEAN_T read_title_line
     if (a_char == EOF) {
       return(FALSE);
     }
+    //set protein offset                   FIXME: might not need to "-1" -CHRIS
+    protein->offset = ftell(fasta_file) - 1;
   }
   //chris edited, added this block to make sure all of comment line is read 
   //although might not be stored, to ensure the file* is at start of the sequence
@@ -491,7 +502,47 @@ void set_protein_annotation(
     strncpy(copy_annotation, annotation, annotation_length);  
 }
 
+/**
+ * sets the offset of the protein in the fasta file
+ */
+void set_protein_offset(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  unsigned long int offset ///< The file location in the source file in the database -in
+  )
+{
+  protein->offset = offset;
+}
 
+/**
+ *\returns the offset the protein
+ */
+unsigned long int get_protein_offset(
+  PROTEIN_T* protein ///< the query protein -in 
+  )
+{
+  return protein->offset;
+}
+
+/**
+ * sets the protein_idx (if, idx=n, nth protein in the fasta file)
+ */
+void set_protein_protein_idx(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  unsigned int protein_idx ///< The index of the protein in it's database. -in
+  )
+{
+  protein->protein_idx = protein_idx;
+}
+
+/**
+ *\returns the protein_idx field
+ */
+unsigned int get_protein_protein_idx(
+  PROTEIN_T* protein ///< the query protein -in 
+  )
+{
+  return protein->protein_idx;
+}
 
 /**
  * Iterator
