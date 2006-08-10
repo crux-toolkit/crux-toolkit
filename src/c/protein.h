@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -28,7 +28,9 @@ PROTEIN_T* new_protein(
   char*         id, ///< The protein sequence id.
   char*   sequence, ///< The protein sequence.
   int       length, ///< The length of the protein sequence.
-  char* annotation  ///< Optional protein annotation. 
+  char* annotation,  ///< Optional protein annotation.  -in
+  unsigned long int offset, ///< The file location in the source file in the database -in
+  unsigned int protein_idx ///< The index of the protein in it's database. -in
   );         
 
 /**
@@ -155,6 +157,41 @@ void set_protein_annotation(
   PROTEIN_T* protein, ///< the protein to set it's fields -out
   char* annotation ///< the sequence to add -in
 );
+
+
+/**
+ * sets the offset of the protein in the fasta file
+ */
+void set_protein_offset(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  unsigned long int offset ///< The file location in the source file in the database -in
+  );
+
+/**
+ *\returns the offset the protein
+ */
+unsigned long int get_protein_offset(
+  PROTEIN_T* protein ///< the query protein -in 
+  );
+
+/**
+ * sets the protein_idx (if, idx=n, nth protein in the fasta file)
+ */
+void set_protein_protein_idx(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  unsigned int protein_idx ///< The index of the protein in it's database. -in
+  );
+
+/**
+ *\returns the protein_idx field
+ */
+unsigned int get_protein_protein_idx(
+  PROTEIN_T* protein ///< the query protein -in 
+  );
+
+
+
+
 
 /**
  * Iterator

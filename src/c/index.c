@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -264,7 +264,7 @@ BOOLEAN_T create_index(
   FILE* info_out = NULL; // the file stream where the index creation infomation is sent
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
   PEPTIDE_T* peptide = NULL;
-  int num_peptides = 0; //current number of peptides index file 
+  unsigned int num_peptides = 0; //current number of peptides index file 
   int num_file = 1; //the ith number of index file created
   float current_mass_limit = index->mass_range;
   char* filename_tag = "crux_index_";
@@ -318,7 +318,7 @@ BOOLEAN_T create_index(
     
     //set the index file to the correct interval
     while(get_peptide_peptide_mass(peptide) > current_mass_limit ||
-       num_peptides > index->max_size-1){
+          num_peptides > index->max_size-1){
       fclose(output);
       ++num_file;
       num_peptides = 0;

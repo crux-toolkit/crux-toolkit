@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.33 $
+ * $Revision: 1.34 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -649,12 +649,12 @@ BOOLEAN_T serialize_peptide(
     return FALSE;
   }
 
-  //interate through the linklist of possible parent proteins
+  //interate through the linklist of possible parent proteins, print each parent protein
   while(peptide_src_iterator_has_next(iterator)){
     PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(iterator);
     fprintf(file, "\t%d\n", get_peptide_src_peptide_type(peptide_src));
     fprintf(file, "\t%d\n", get_peptide_src_start_idx(peptide_src));
-    //print protein indx
+    fprintf(file, "\t%d\n", get_protein_protein_idx(get_peptide_src_parent_protein(peptide_src)));
     ++num_src;
   }
   free_peptide_src_iterator(iterator);

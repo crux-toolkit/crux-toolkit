@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: create-index
-REVISION: $Revision: 1.1 $
+REVISION: $Revision: 1.2 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -53,10 +53,10 @@ all of its peptides on disk.
 <B>Options:</B>
 
 <UL>
-<LI>[--max-file-size] &ndash; The maximum size of a file to create in the
+<LI>[--max-file-size int] &ndash; The maximum size of a file to create in the
 index.  Default=2GB (can be implemented later)
 	
-<LI>[--mass-range] &ndash; The mass range contained in each index file.
+<LI>[--mass-range float] &ndash; The mass range contained in each index file.
 Default=1Da
 	
 <LI>[--min-mass float] &ndash; The minimum neutral mass of the
@@ -71,15 +71,24 @@ place in the index. Default=6
 <LI>[--max-length int] &ndash; The maximum length of the peptides to
 place in the index. Default=50
 	
-<LI>[--cleavages tryptic|all ] &ndash; Type of cleavages to allow.
+<LI>[--cleavages tryptic|partial|all ] &ndash; Type of cleavages to allow.
 The <code>tryptic</code> option outputs peptides that result from a
 complete in silico digestion of proteins after residues K or R except
 when followed by P, wherease <code>all</code> outputs all possible
-peptides.  Default=tryptic.
+peptides.  Default=tryptic
 
 <LI>[--redundancy redundant|unique] &ndash; Specify whether peptides that
 come from different proteins yet with identical sequences should appear
-on separate lines (redundant) or on the same line (unique). 
+on separate lines (redundant) or on the same line (unique). Default=unique
+
+<LI>[--missed-cleavages] &ndash; Allow missed cleavage sites with in a peptide.
+Default=TRUE 
+
+<LI>[--isotopic-mass|average|mono] &ndash; Specify the type of isotopic masses
+to use when calculating the peptide mass. Default=average 
+
+<LI>[--verbosity int] &ndash; Specify the verbosity of the current processes from 0-100.  
+Default=100 
 
 </UL>
 
