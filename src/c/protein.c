@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -21,7 +21,7 @@
  * Constants
  */
 #define PROTEIN_ID_LENGTH 100
-#define PROTEIN_SEQUENCE_LENGTH 20000
+#define PROTEIN_SEQUENCE_LENGTH 40000
 #define PROTEIN_ANNOTATION_LENGTH 100
 #define LONGEST_LINE PROTEIN_ID_LENGTH + PROTEIN_ID_LENGTH
 #define FASTA_LINE 50
