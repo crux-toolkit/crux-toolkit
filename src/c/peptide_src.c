@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -199,7 +199,7 @@ int get_peptide_src_start_idx(
 
 /**
  * sets the next peptide_src on the link list
- * assumes that the src_association's next_association feild is NULL
+ * assumes that the src_association's next_association field is NULL
  */
 void set_peptide_src_next_association(
   PEPTIDE_SRC_T* src_association, ///< the peptide_src to set -out   

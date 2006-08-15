@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -151,6 +151,15 @@ BOOLEAN_T database_protein_iterator_has_next(
 PROTEIN_T* database_protein_iterator_next(
     DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator of interest -in
     );
+
+/**
+ * \returns the protein to the corresponding protein_idx in the database.
+ */
+PROTEIN_T* database_protein_iterator_protein_idx(
+    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator, ///< the iterator of interest -in
+    int protein_idx ///< protein_idx to which protein to return -in
+    );
+
 
 /***********************************************
  * database_peptide_Iterators

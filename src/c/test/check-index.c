@@ -16,6 +16,7 @@ INDEX_T* _index;
 DATABASE_T* database;
 PEPTIDE_CONSTRAINT_T* constraint;
 INDEX_PEPTIDE_ITERATOR_T* iterator;
+PEPTIDE_T* peptide;
 
 void setup(void){
 
@@ -28,23 +29,59 @@ void teardown(void){
 START_TEST (test_create){
   float mass_range = 1000.0;
   int max_size =  70;
+  BOOLEAN_T ok_seq = TRUE;
   set_verbosity_level(CARP_MAX);
+  
+  /**************************
+   *check creating index
+   ***************************/
 
   constraint = 
     new_peptide_constraint(TRYPTIC,
                            0, 5000, 
                            0, 255, 
                            TRUE, AVERAGE);
-    _index = 
-      new_index("test.fasta",
-                constraint,
-                mass_range,
-                max_size);
 
-    fail_unless(create_index(_index), "failed to create a index");
-    fail_unless(index_exists(_index), "index exist method failed");
+  //create index
+  _index = 
+    new_index("test.fasta",
+              constraint,
+              mass_range,
+              max_size);
+  
+  fail_unless(create_index(_index), "failed to create a index");
+  fail_unless(index_exists(_index), "index exist method failed");
+  free(_index);
+
+  
+  /**************************
+   * check read in index
+   ***************************/
+  constraint = 
+    new_peptide_constraint(TRYPTIC,
+                           500, 2500, 
+                           0, 255, 
+                           TRUE, AVERAGE);
+
+  _index = 
+    new_index("test.fasta",
+              constraint,
+              mass_range,
+              max_size);
+  
+ 
+  //create index peptide interator
+  iterator = new_index_peptide_iterator(_index, ok_seq);
     
-    free_index(_index);
+  //iterate over all peptides
+  while(index_peptide_iterator_has_next(iterator)){
+    peptide = index_peptide_iterator_next(iterator);
+    print_peptide_in_format(peptide, ok_seq, stdout);
+    free_peptide(peptide);
+  }
+  
+  free_index(_index);
+  free_index_peptide_iterator(iterator);
 }
 END_TEST
 

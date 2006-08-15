@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.34 $
+ * $Revision: 1.35 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -389,6 +389,7 @@ void set_peptide_peptide_src(
 /**
  * this method adds the new_association to the end of the existing peptide's 
  * linklist of peptide_srcs
+ * if no prior existing list, adds it at the front
  * must pass on a heap allocated peptide_src object
  * does not copy in the object, just the pointer to the object.
  */
@@ -398,12 +399,22 @@ void add_peptide_peptide_src(
   )
 {
   PEPTIDE_SRC_T* add_association = peptide->peptide_src;
-  PEPTIDE_SRC_ITERATOR_T* iterator =
-    new_peptide_src_iterator(peptide);
+  PEPTIDE_SRC_ITERATOR_T* iterator = NULL;
+  
+  //is the peptide src list empty?
+  if(add_association == NULL){
+    peptide->peptide_src = new_association;
+    return;
+  }
+
+  //create peptide src iterator
+  iterator = new_peptide_src_iterator(peptide);
+
   //find the last peptide_src object in the list
   while(peptide_src_iterator_has_next(iterator)){
     add_association = peptide_src_iterator_next(iterator);
   }
+  
   set_peptide_src_next_association(add_association, new_association);
   free_peptide_src_iterator(iterator);
 }
@@ -612,10 +623,10 @@ BOOLEAN_T merge_peptides(
  *
  * The peptide serialization format looks like this:
  *
+ * '*' float - peptide_mass 
  * unsigned char - length
- * float - peptide_mass
  * int - number_of_sources
- *
+ * 
  * and then repeating the following depending on number of sources. This
  * part can be implemented either here or in the PEPTIDE_SRC and PROTEIN objects
  * as serialization methods there, whatever seems easiest
@@ -634,11 +645,11 @@ BOOLEAN_T serialize_peptide(
   long num_src_location;
   long original_location;
   int num_src = 0;
-
+  
+  //print mass of the peptide
+  fprintf(file, "* %.2f\n", peptide->peptide_mass);
   //print length of the peptide
   fprintf(file,"%d\n",peptide->length);
-  //print mass of the peptide
-  fprintf(file, "%.2f\n", peptide->peptide_mass);
   //print number of src
   num_src_location = ftell(file);
   fprintf(file, "%s\n", "      ");

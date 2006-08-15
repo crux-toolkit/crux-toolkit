@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -21,9 +21,10 @@
 #include "peptide_constraint.h"
 #include "database.h"
 
-
-#define INDEX_MAX_FILES 10000
-
+//maximum proteins the index can handle
+#define MAX_PROTEIN 30000
+#define MAX_INDEX_FILES 30000
+#define MAX_FILE_NAME_LENGTH 30
 
 /* 
  * How does the create_index (the routine) work?
@@ -108,11 +109,34 @@ struct index{
  * \brief A struct that contains the information of each file
  */
 struct index_file{
-  char* filenames;  ///< The file name that contain the peptides
+  char* filename;  ///< The file name that contain the peptides
   float start_mass; ///< the start mass limit in this file
   float interval;   ///< the interval of the peptides in this file
-}INDEX_FILE_T;
+};
+typedef struct index_file INDEX_FILE_T;
 
+
+/**
+ * \struct index_peptide_iterator
+ * \brief An iterator to iterate over the peptides in a database
+ */
+struct index_peptide_iterator{
+  INDEX_T* index; ///< The index object which we are iterating over
+  //PEPTIDE_CONSTRAINT_T* constraint; ///< The constraints which peptides should satisfy
+  DATABASE_PROTEIN_ITERATOR_T* db_protein_iterator; ///< used to access the protein array in database
+  INDEX_FILE_T* index_files[MAX_INDEX_FILES]; ///< the index file array that contain information of each index file 
+  int total_index_files; ///< the total count of index_files
+  int current_index_file; ///< the current working index_file
+  //unsigned int peptide_idx; ///< The (non-object) index of the current peptide.
+  //char* current_index_filename; ///< The current filename that we are reading from
+  FILE* index_file; ///< The current file stream that we are reading from
+  BOOLEAN_T has_next; ///< Is there another peptide?
+  PEPTIDE_T* peptide; ///< the next peptide to return
+};    
+
+/************
+ * index
+ ************/
 
 /**
  * \returns An (empty) index object.
@@ -532,24 +556,560 @@ void set_index_max_size(
   index->max_size = max_size;
 }
 
-
 /**************************
- * Iterators
+ * Index file
  **************************/
 
+//FIXME see if filename is a heap allocated
 /**
- * \struct index_peptide_iterator
- * \brief An iterator to iterate over the peptides in a database
+ *\returns a new heap allocated index file object
  */
-struct index_peptide_iterator{
-  INDEX_T* index; ///< The index object which we are iterating over
-  PEPTIDE_CONSTRAINT_T* constraint; ///< The constraints which peptides should satisfy
-  unsigned int peptide_idx; ///< The (non-object) index of the current peptide.
-  char* current_index_filename; ///< The current file that we are reading from
-  BOOLEAN_T has_next; ///< Is there another peptide?
-};    
+INDEX_FILE_T* new_index_file(
+  char* filename,  ///< the filename to add -in
+  float start_mass,  ///< the start mass of the index file  -in
+  float range  ///< the mass range of the index file  -in
+  )
+{
+  INDEX_FILE_T* index_file =
+    (INDEX_FILE_T*)mycalloc(1, sizeof(INDEX_FILE_T));
+  
+  index_file->filename = filename;
+  index_file->start_mass = start_mass;
+  index_file->interval = range;
 
-/// TODO new_index_peptide_iterator should to see if the index exists on disk
+  return index_file;
+}
+
+/**
+ * adds a new index_file object to the index_file
+ * \returns TRUE if successfully added the new index_file
+ */
+BOOLEAN_T add_new_index_file(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator,  ///< the index_peptide_iterator to add file -out
+  char* filename_parsed,  ///< the filename to add -in
+  float start_mass,  ///< the start mass of the index file  -in
+  float range  ///< the mass range of the index file  -in
+  )
+{
+  char* filename = my_copy_string(filename_parsed);
+  
+  //check if total index files exceed MAX limit
+  if(index_peptide_iterator->total_index_files > MAX_INDEX_FILES-1){
+    carp(CARP_WARNING, "too many index files to read");
+    return FALSE;
+  }
+  //create new index_file
+  index_peptide_iterator->index_files[index_peptide_iterator->total_index_files] =
+    new_index_file(filename, start_mass, range);
+  
+  ++index_peptide_iterator->total_index_files;
+  return TRUE;
+}
+
+/**
+ * frees the index file
+ */
+void free_index_file(
+  INDEX_FILE_T* index_file  ///< the index file object to free -in
+  )
+{
+  free(index_file->filename);
+  free(index_file);
+}
+
+/*************************************
+ * index_peptide iterator subroutines
+ *************************************/
+
+/**
+ * parses the "crux_index_map" file that contains the mapping between
+ * each crun_index_* file and mass range
+ * Adds all crux_index_* files that are with in the peptide constraint mass range
+ * \returns TRUE if successfully parses crux_index_map
+ */
+BOOLEAN_T parse_crux_index_map(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator
+  )
+{
+  FILE* file = NULL;
+  
+  //used to parse each line from file
+  char* new_line = NULL;
+  int line_length;
+  size_t buf_length = 0;
+  
+  //used to parse with in a line
+  char filename[MAX_FILE_NAME_LENGTH] = "";
+  float start_mass;
+  float range;
+  BOOLEAN_T start_file = FALSE;
+  float min_mass = 
+    get_peptide_constraint_min_mass(index_peptide_iterator->index->constraint);
+  float max_mass = 
+    get_peptide_constraint_max_mass(index_peptide_iterator->index->constraint);
+
+  //move into the dir crux_files
+  chdir(index_peptide_iterator->index->directory);
+  
+  //open crux_index_file
+  file = fopen("crux_index_map", "r");
+  if(file == NULL){
+    carp(CARP_WARNING, "cannot open crux_index_map file");
+    return FALSE;
+  }
+  
+  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+    //skip header lines
+    if(new_line[0] == '#'){
+      continue;
+    }
+    //is it a line for a crux_index_*
+    else if(new_line[0] == 'c' && new_line[1] == 'r'){
+      //read the crux_index_file information
+      if(sscanf(new_line,"%s %f %f", 
+                filename, &start_mass, &range) < 3){
+        free(new_line);
+        carp(CARP_WARNING, "incorrect file format");
+        return FALSE;
+      }
+      //find the first index file with in mass range
+      else if(!start_file){
+        if(min_mass > start_mass + range){
+          continue;
+        }
+        else{
+          start_file = TRUE;
+          if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
+            carp(CARP_WARNING, "failed to add index file");
+            return FALSE;
+          }
+          continue;
+        }
+      }
+      //add all index_files that are with in peptide constraint mass interval
+      else if(min_mass < (start_mass + range) + 0.01){
+        if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
+          carp(CARP_WARNING, "failed to add index file");
+          return FALSE;
+        }
+        continue;
+      }
+      //out of mass range
+      break;
+    }
+  }
+  free(new_line);
+  
+  return TRUE;
+}
+
+
+/**
+ * fast forward the index file pointer to the beginning of the
+ * first peptide that would meet the peptide constraint, reads in
+ * the length, mass then poistions the pointer at the start of peptide src count.
+ * \returns TRUE if successfully finds the beginning of a peptide that meets the constraints
+ */
+BOOLEAN_T fast_forward_index_file(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator, ///< working index_peptide_iterator -in
+  FILE* file, ///< the file stream to fast foward -in
+  int* peptide_length_out, ///< the length of the peptide to be parsed -out
+  float* peptide_mass_out  ///< the mass of the peptide to be parsed -out
+  )
+{
+  //used to parse each line from file
+  char* new_line = NULL;
+  int line_length;
+  size_t buf_length = 0;
+  char temp_string[5] = "";
+  BOOLEAN_T in_peptide = FALSE;
+  BOOLEAN_T is_mass_ok = FALSE;
+
+  //peptide fields
+  int peptide_length;
+  float peptide_mass;
+
+  //parse each line
+  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+    
+    //find start of peptide
+    if(!in_peptide){
+      if(new_line[0] != '*'){
+        //skip all lines until the start of peptide sign '*'
+        continue;
+      }
+      else{
+        in_peptide = TRUE;
+      }
+    }
+    
+    //with in peptide fields
+    if(in_peptide){
+      
+      //check peptide mass
+      if(!is_mass_ok){
+        //parse peptide mass
+        if(sscanf(new_line,"%s %f", 
+                  temp_string, &peptide_mass) < 2){                   //FIXME might have to set sring up
+          die("crux_index incorrect file format");
+          return FALSE;
+        }
+        
+        //check peptide mass within peptide constraint
+        if(peptide_mass > get_peptide_constraint_max_mass(index_peptide_iterator->index->constraint) ||
+           peptide_mass < get_peptide_constraint_min_mass(index_peptide_iterator->index->constraint)) {
+          in_peptide = FALSE;
+          continue;
+        }
+        else{
+          is_mass_ok = TRUE;
+          continue;
+        }
+      }
+      
+      //check length
+      if(is_mass_ok){
+        //read in the peptide length
+        if(sscanf(new_line,"%d", &peptide_length) != 1){
+          die("crux_index incorrect file format");
+        }
+        //check peptide mass within peptide constraint
+        if(peptide_length > get_peptide_constraint_max_length(index_peptide_iterator->index->constraint) ||
+           peptide_length < get_peptide_constraint_min_length(index_peptide_iterator->index->constraint)) {
+          in_peptide = FALSE;
+          is_mass_ok = FALSE;
+          continue;
+        }
+        else{
+          free(new_line);
+          //set file pointer
+          index_peptide_iterator->index_file = file;
+
+          //set the peptide mass, length
+          *peptide_length_out = peptide_length;
+          *peptide_mass_out = peptide_mass;
+          
+          //found a peptide that meets constraint
+          return TRUE;
+        }        
+      }
+    }
+  }
+  //there's no petide that fits the peptide constraint
+  free(new_line);
+  return FALSE;
+}
+
+
+/**
+ * Assumes that the file* is set at the start of the peptide_src count field
+ * creates a new peptide and then adds it to the iterator to return
+ * \returns TRUE if successfully parsed the pepdtide from the crux_index_* file
+ */
+BOOLEAN_T parse_peptide_index_file(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator, 
+  float peptide_mass, 
+  int peptide_length
+  )
+{
+  PEPTIDE_T* peptide = allocate_peptide();
+  FILE* file = index_peptide_iterator->index_file;
+  PROTEIN_T* parent_protein = NULL;
+  int num_src = -1;
+  int current_src = 1;
+  int peptide_type = -1;
+  //PEPTIDE_TYPE_T peptide_type = -1;
+  int start_idx = -1;
+  int protein_idx = -1;
+
+  //variables used to parse each line
+  char* new_line = NULL;
+  int line_length;
+  size_t buf_length = 0;
+
+
+  //set peptide fields
+  set_peptide_length( peptide, peptide_length);
+  set_peptide_peptide_mass( peptide, peptide_mass);
+
+  //parse each line
+  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+    //get total number of peptide src
+    if(num_src == -1){
+      if(sscanf(new_line,"%d", &num_src) != 1){
+        carp(CARP_WARNING, "failed to read number of peptide source, mass: %.2f", peptide_mass);
+      }
+      continue;
+    }
+    //get peptide_type
+    if(peptide_type == -1){
+      if(sscanf(new_line,"%d", &peptide_type) != 1){
+        carp(CARP_WARNING, "failed to read peptide_type, mass: %.2f", peptide_mass);
+      }
+      //peptide_type = new_line[1];
+      continue;
+    }
+    //get start_idx
+    if(start_idx == -1){
+      if(sscanf(new_line,"%d", &start_idx) != 1){
+        carp(CARP_WARNING, "failed to read start_idx, mass: %.2f", peptide_mass);
+      }
+      //start_idx = new_line[1];
+      continue;
+    }
+    //get protein idx
+    if(protein_idx == -1){
+      if(sscanf(new_line,"%d", &protein_idx) != 1){
+        carp(CARP_WARNING, "failed to read protein_idx, mass: %.2f", peptide_mass);
+      }
+      //protein_idx = new_line[1];
+    }
+    
+    //set the parent protein
+    parent_protein = 
+      database_protein_iterator_protein_idx( index_peptide_iterator->db_protein_iterator, 
+                                             protein_idx);
+    
+    //create peptide src, then add it to peptide
+    add_peptide_peptide_src(peptide,
+                            new_peptide_src( peptide_type, parent_protein, start_idx));
+    
+    //update current_src
+    ++current_src;
+  
+    //check if there's anymore peptide src to parse
+    if(current_src > num_src){
+      break;
+    }
+    //reset variables
+    peptide_type = -1;
+    start_idx = -1;
+    protein_idx = -1;
+  }
+  //set new peptide in interator
+  index_peptide_iterator->peptide = peptide;
+  
+  return TRUE;   
+}
+
+/**
+ * \returns TRUE if successfully initiallized the index_peptide_iterator
+ */
+BOOLEAN_T initialize_index_peptide_iterator(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator ///< the index_peptide_iterator to initialize -in
+  )
+{
+  FILE* file = NULL;
+  char* filename = NULL;
+  int* peptide_length = (int*)mymalloc(sizeof(int));
+  float* peptide_mass = (float*)mymalloc(sizeof(float));
+  index_peptide_iterator->has_next = FALSE;
+
+  do{
+    //no more index_files to search
+    if(index_peptide_iterator->current_index_file >= index_peptide_iterator->total_index_files){
+      free(peptide_length);
+      free(peptide_mass);
+      return TRUE;
+    }
+    
+    filename = 
+      index_peptide_iterator->index_files[index_peptide_iterator->current_index_file]->filename;
+    
+    //update current index file
+    ++index_peptide_iterator->current_index_file;
+    
+    //close previous file
+    if(file != NULL){
+      fclose(file);
+    }
+
+    //open next index file
+    file = fopen(filename, "r");
+    if(file == NULL){
+      carp(CARP_WARNING, "cannot open %s file", filename);
+      free(peptide_length);
+      free(peptide_mass);
+      return FALSE;
+    }
+  } 
+  //move file* to the begining of the first peptide that meets the constraint
+  while(!fast_forward_index_file(index_peptide_iterator, file, peptide_length, peptide_mass));
+  
+  //parse the peptide, adds it to the iterator to return
+  if(!parse_peptide_index_file(index_peptide_iterator, *peptide_mass, *peptide_length)){
+    carp(CARP_WARNING, "failed to parse peptide in file: %s", filename);
+    free(peptide_length);
+    free(peptide_mass);
+    return FALSE;
+  }
+  
+  //set interator to TRUE, yes there's a next peptide to return
+  index_peptide_iterator->has_next = TRUE;
+  free(peptide_length);
+  free(peptide_mass);
+  return TRUE;
+}
+
+
+/**
+ * \returns TRUE if successfully setup the index_peptide_iterator for the next iteration
+ */
+BOOLEAN_T setup_index_peptide_iterator(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator ///< the index_peptide_iterator to initialize -in
+  )
+{
+  
+  FILE* file = index_peptide_iterator->index_file;
+  char* filename = NULL;
+  int* peptide_length = (int*)mymalloc(sizeof(int));
+  float* peptide_mass = (float*)mymalloc(sizeof(float));
+  index_peptide_iterator->has_next = FALSE;
+
+  //move file* to the begining of the first peptide that meets the constraint
+  while(!fast_forward_index_file(index_peptide_iterator, file, peptide_length, peptide_mass)){
+    
+    //no more index_files to search
+    if(index_peptide_iterator->current_index_file >= index_peptide_iterator->total_index_files){
+      free(peptide_length);
+      free(peptide_mass);
+      return TRUE;
+    }
+    
+    filename = 
+      index_peptide_iterator->index_files[index_peptide_iterator->current_index_file]->filename;
+    
+    //update current index file
+    ++index_peptide_iterator->current_index_file;
+
+    //open index file
+    fclose(file);
+    file = fopen(filename, "r");
+    if(file == NULL){
+      carp(CARP_WARNING, "cannot open %s file", filename);
+      free(peptide_length);
+      free(peptide_mass);
+      return FALSE;
+    }
+  }
+  
+  //parse the peptide, adds it to the iterator to return
+  if(!parse_peptide_index_file(index_peptide_iterator, *peptide_mass, *peptide_length)){
+    carp(CARP_WARNING, "failed to parse peptide in file: %s", filename);
+    free(peptide_length);
+    free(peptide_mass);
+    return FALSE;
+  }
+  
+  //successfully parse peptide
+  index_peptide_iterator->has_next = TRUE;
+  free(peptide_length);
+  free(peptide_mass);
+  return TRUE;
+}
+
+/***********************************************
+ *  The basic index_peptide_iterator functions.
+ ***********************************************/
+
+
+/**
+ * Instantiates a new index_peptide_iterator from a index.
+ * \returns a new heap allocated index_peptide_iterator object
+ */
+INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
+  INDEX_T* index, ///< The index object which we are iterating over -in
+  BOOLEAN_T seq ///< output sequence -in
+  )
+{
+  //allocate a new index_peptide_iterator object
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator =
+    (INDEX_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(INDEX_PEPTIDE_ITERATOR_T));
+  
+  //set index
+  index_peptide_iterator->index = index;
+  
+  //parse all protein objects from fasta file (the protein array is stored in database object)
+  index_peptide_iterator->db_protein_iterator =
+    new_database_protein_iterator(index->database);
+  
+  //parse index_files that are with in peptide_constraint from crux_index_map
+  if(!parse_crux_index_map( index_peptide_iterator)){
+    //failed to parse crux_index_map
+    die("failed to parse crux_index_map file");
+  }
+
+  // if no index files to parse, then there's no peptides to return
+  // initialize index_file stream at the first new peptide
+  if(index_peptide_iterator->total_index_files == 0 ||
+     !initialize_index_peptide_iterator(index_peptide_iterator)){
+    //no peptides to return
+    index_peptide_iterator->has_next = FALSE;
+  }
+  
+  return index_peptide_iterator;
+}
+
+/**
+ *  The basic iterator functions.
+ * \returns The next peptide in the index.
+ */
+PEPTIDE_T* index_peptide_iterator_next(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator ///< the index_peptide_iterator to initialize -in
+  )
+{
+  PEPTIDE_T* peptide_to_return = index_peptide_iterator->peptide;
+
+  //check if there's actually a peptide to return
+  if(!index_peptide_iterator_has_next(index_peptide_iterator) ||
+     index_peptide_iterator->peptide == NULL){
+    die("index_peptide_iterator, no peptides to return");
+  }
+  
+  //setup the interator for the next peptide, if avaliable
+  if(!setup_index_peptide_iterator(index_peptide_iterator)){
+    die("failed to setup index_peptide_iterator for next iteration");
+  }
+ 
+  return peptide_to_return;
+}
+
+/**
+ * The basic iterator functions.
+ * check to see if the index_peptide_iterator has more peptides to return
+ *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T index_peptide_iterator_has_next(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator ///< the index_peptide_iterator to initialize -in
+  )
+{
+  return index_peptide_iterator->has_next; 
+}
+
+/**
+ * Frees an allocated index_peptide_iterator object.
+ */
+void free_index_peptide_iterator(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator ///< the iterator to free -in
+  )
+{
+  int file_idx = 0;
+  
+  //free database_protein_iterator
+  free_database_protein_iterator(index_peptide_iterator->db_protein_iterator);
+  //free all index files
+  for(; file_idx < index_peptide_iterator->total_index_files; ++file_idx){
+    free_index_file(index_peptide_iterator->index_files[file_idx]);
+  }
+  //close last file
+  fclose(index_peptide_iterator->index_file);
+  
+  //if did not iterate over all peptides, free the last peptide not returned
+  if(index_peptide_iterator_has_next(index_peptide_iterator)){
+    free_peptide(index_peptide_iterator->peptide);
+  }
+  free(index_peptide_iterator);
+}
 
 /*
  * Local Variables:
