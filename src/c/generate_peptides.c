@@ -69,7 +69,9 @@ int main(int argc, char** argv){
   char* isotopic_mass = "average" ;
   int  verbosity = CARP_MAX;
   char* redundancy = "redundant";
-
+  char* use_index = "F";
+  
+  BOOLEAN use_index_boolean = FALSE;
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
   int missed_cleavages = FALSE;
@@ -145,6 +147,12 @@ int main(int argc, char** argv){
     "redundancy", 
     "Specify whether peptides that come from different proteins yet with identical sequences should appear on separate lines or on the same line. redundant|unique.",
     (void *) &redundancy, 
+    STRING_ARG);
+  
+  parse_arguments_set_opt(
+    "use-index", 
+    "Specify whether a pre-computed on-disk index should be used for retrieving the peptides. T|F",
+    (void *) &use_index, 
     STRING_ARG);
 
 
@@ -222,6 +230,17 @@ int main(int argc, char** argv){
       wrong_command(sort);
     }
     
+    //determine use index command
+    if(strcmp(use_index, "F")==0){
+      use_index_boolean = FALSE;
+    }
+    else if(strcmp(use_index, "T")==0){
+      use_index_boolean = TRUE;
+    }
+    else{
+      wrong_command(use_index);
+    }
+
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);

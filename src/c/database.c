@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -342,8 +342,8 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
  * Frees an allocated database_protein_iterator object.
  */
 void free_database_protein_iterator(
-    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator to free -in
-    )
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator to free -in
+  )
 {
   free(database_protein_iterator);
 }
@@ -353,8 +353,8 @@ void free_database_protein_iterator(
  * \returns TRUE if there are additional proteins to iterate over, FALSE if not.
  */
 BOOLEAN_T database_protein_iterator_has_next(
-    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the query iterator -in
-    )
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the query iterator -in
+  )
 {
   if(database_protein_iterator->cur_protein <
      get_database_num_proteins(database_protein_iterator->database)){
@@ -368,8 +368,8 @@ BOOLEAN_T database_protein_iterator_has_next(
  * \returns The next protein in the database.
  */
 PROTEIN_T* database_protein_iterator_next(
-    DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator  ///< the query iterator -in
-    )
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator  ///< the query iterator -in
+  )
 {
   ++database_protein_iterator->cur_protein;
 
@@ -383,7 +383,23 @@ PROTEIN_T* database_protein_iterator_next(
   return database_protein_iterator->database->proteins[database_protein_iterator->cur_protein-1];
 }
 
-
+/**
+ * \returns the protein to the corresponding protein_idx in the database.
+ */
+PROTEIN_T* database_protein_iterator_protein_idx(
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator, ///< the iterator of interest -in
+  int protein_idx ///< protein_idx to which protein to return -in
+  )
+{
+  if(!database_protein_iterator_has_next(database_protein_iterator)){
+    die("no proteins to return in protein iterator");
+  }
+  else if(protein_idx < 1 || //might have to be 1 
+          protein_idx > database_protein_iterator->database->num_proteins){
+    die("protein_idx index out of bounds");
+  }
+  return database_protein_iterator->database->proteins[protein_idx-1];
+}
 
 /***********************************************
  * database_peptide_Iterators
