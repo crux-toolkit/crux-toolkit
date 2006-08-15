@@ -2,6 +2,60 @@
 Retention
                       </font></b></code>
 <br><br><hr><br><code><b><font face="Helvetica, monospace">
+              Aug 15, 2006
+                </font></b></code>
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Purpose:
+                </font></b></code><br><br>
+                To see how well an SVR regressed predicted 
+                retention time trained on
+                the first ?? min of a reverse phase run correlates with actual
+                retention time for the rest of the run.
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Methods:
+                </font></b></code><br><br>
+                Filter +2 SEQUEST results by Xcorr = 0.1 and DeltCN = 0.3.
+                for 1S-4.pickledpsm. Split into 1S-4-train.pickledpsm and
+                1S-4-test.pickledpsm, corresponding roughly to the 181
+                and 648 PSMs (unique peptides) taken from throughout 
+                the run, respectively.
+                This is in contrast to previous experiment, where the
+                training data was taken from the beginning of the run, and
+                the testing data was taken from the end.
+                Train on *train* and test on *test* using a polynomial
+                degree 2 kernel and C value = 10 and epsilon = 0.10. 
+                Also, for two sanity checks, train and test on the train, by
+                itself, and the test, by itself.
+ 
+<br><br><code><b><font face="Helvetica, monospace">
+Results:
+                </font></b></code>
+                <br><br>
+                Train on *train*, test on *test*
+                <br><br>
+                <img src="./Images/1S-4-train-test.png">
+                <br><br>
+                Train on *train*, test on *train*
+                <br><br>
+                <img src="./Images/1S-4-train-train.png">
+                <br><br>
+                Train on *test*, test on *test*
+                <br><br>
+                <img src="./Images/1S-4-test-test.png">
+                <br><br>
+
+<br><br><code><b><font face="Helvetica, monospace">
+Discussion:
+                </font></b></code><br><br>
+    The sanity checks look okay, but the training testing doesn't. 
+    It doesn't seem like overfitting to this extent should be possible in
+    this problem domain, but maybe we are? Mike's results seemed
+    substantially better, but I believe he was using DTASelect, and possibly
+    a run with better chromatography?
+
+<br><br><hr><br><code><b><font face="Helvetica, monospace">
               Aug 1, 2006
                 </font></b></code>
 
