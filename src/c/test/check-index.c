@@ -38,7 +38,7 @@ START_TEST (test_create){
 
   constraint = 
     new_peptide_constraint(TRYPTIC,
-                           0, 5000, 
+                           0, 50000, 
                            0, 255, 
                            TRUE, AVERAGE);
 
@@ -51,7 +51,7 @@ START_TEST (test_create){
   
   fail_unless(create_index(_index), "failed to create a index");
   fail_unless(index_exists(_index), "index exist method failed");
-  free(_index);
+  free_index(_index);
 
   
   /**************************
@@ -59,29 +59,28 @@ START_TEST (test_create){
    ***************************/
   constraint = 
     new_peptide_constraint(TRYPTIC,
-                           500, 2500, 
+                           300, 4000, 
                            0, 255, 
                            TRUE, AVERAGE);
+  
+    _index = 
+    new_search_index("test.fasta",
+              constraint);
 
-  _index = 
-    new_index("test.fasta",
-              constraint,
-              mass_range,
-              max_size);
-  
- 
-  //create index peptide interator
-  iterator = new_index_peptide_iterator(_index, ok_seq);
+    if(_index != NULL){
+      //create index peptide interator
+      iterator = new_index_peptide_iterator(_index);//, ok_seq);
     
-  //iterate over all peptides
-  while(index_peptide_iterator_has_next(iterator)){
-    peptide = index_peptide_iterator_next(iterator);
-    print_peptide_in_format(peptide, ok_seq, stdout);
-    free_peptide(peptide);
-  }
-  
-  free_index(_index);
-  free_index_peptide_iterator(iterator);
+      //iterate over all peptides
+      while(index_peptide_iterator_has_next(iterator)){
+        peptide = index_peptide_iterator_next(iterator);
+        print_peptide_in_format(peptide, ok_seq, stdout);
+        free_peptide(peptide);
+      }
+      
+      free_index(_index);
+      free_index_peptide_iterator(iterator);
+    }
 }
 END_TEST
 
