@@ -19,6 +19,7 @@
 #include "protein.h"
 #include "database.h"
 #include "parse_arguments.h"
+#include "index.h"
 
 /**
  * when wrong command is seen carp, and exit
@@ -70,8 +71,8 @@ int main(int argc, char** argv){
   int  verbosity = CARP_MAX;
   char* redundancy = "redundant";
   char* use_index = "F";
-  
-  BOOLEAN use_index_boolean = FALSE;
+
+  BOOLEAN_T use_index_boolean = FALSE;
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
   int missed_cleavages = FALSE;
@@ -83,6 +84,7 @@ int main(int argc, char** argv){
   SORT_TYPE_T sort_type = NONE;
 
   /* Define optional command line arguments */ 
+  
   parse_arguments_set_opt(
     "output-sequence", 
     "Output the peptide sequence as well as the protein id and start and stop.", 
@@ -168,9 +170,11 @@ int main(int argc, char** argv){
     PEPTIDE_CONSTRAINT_T* constraint;
     DATABASE_PEPTIDE_ITERATOR_T* iterator = NULL;
     DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
-    DATABASE_T* database;
-    PEPTIDE_T* peptide;
-   
+    DATABASE_T* database = NULL;
+    PEPTIDE_T* peptide = NULL;
+    INDEX_T* index = NULL;
+    INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator = NULL;
+
     //FIXME may add additional types such as non-trypticc or partially-tryptic
     if(strcmp(cleavages, "all")==0){
       peptide_type = ANY_TRYPTIC;
@@ -286,63 +290,100 @@ int main(int argc, char** argv){
     else{
       printf("#\tredundancy: redundant\n");
     }
-
-    //create a new database
-    database = new_database(in_file);
-    
-    //no sort, redundant
-    if(!is_unique && sort_type == NONE){ 
-      //create peptide iterator
-      iterator = new_database_peptide_iterator(database, constraint);
-      
-      //check if any peptides are found
-      if(!database_peptide_iterator_has_next(iterator)){
-        carp(CARP_WARNING, "no matches found");
-      }
-      else{
-        //print each peptide
-        while(database_peptide_iterator_has_next(iterator)){
-          peptide = database_peptide_iterator_next(iterator);
-          print_peptide_in_format(peptide, flag_opt, stdout);
-          free_peptide(peptide);
-        }
-      }
-      //free iterator
-      free_database_peptide_iterator(iterator);
+    if(use_index_boolean){
+      printf("#\tuse index: TRUE\n");
     }
-    //sort or check for unique
     else{
-      //only sort, by default will be sorted by mass
-      if(sort_type == NONE){
-        //create peptide iterator
-        sorted_iterator = 
-          new_database_sorted_peptide_iterator(database, constraint, MASS, TRUE);
-      }
-      //create peptide iterator
-      else{
-        sorted_iterator = 
-          new_database_sorted_peptide_iterator(database, constraint, sort_type, is_unique);
-      }
+      printf("#\tuse index: FALSE\n");
+    }
+
+    /***********************
+     * use index file
+     **********************/
+    if(use_index_boolean){
       
-      //check if any peptides are found
-      if(!database_sorted_peptide_iterator_has_next(sorted_iterator)){
-        carp(CARP_WARNING, "no matches found");
-      }
-      else{
-        //print each peptide
-        while(database_sorted_peptide_iterator_has_next(sorted_iterator)){
-          peptide = database_sorted_peptide_iterator_next(sorted_iterator);
+      index = new_search_index(in_file, constraint);
+
+      if(index != NULL){
+        //create index peptide interator
+        index_peptide_iterator = new_index_peptide_iterator(index);//, ok_seq);
+        
+        //iterate over all peptides
+        while(index_peptide_iterator_has_next(index_peptide_iterator)){
+          peptide = index_peptide_iterator_next(index_peptide_iterator);
           print_peptide_in_format(peptide, flag_opt, stdout);
           free_peptide(peptide);
         }
+        
+        free_index(index);
+        free_index_peptide_iterator(index_peptide_iterator);
       }
-      //free iterator
-      free_database_sorted_peptide_iterator(sorted_iterator);
+      else{
+        carp(CARP_ERROR, "failed to perform search");
+        exit(1);
+      }
     }
-    //free database, iterator, constraint
-    free_peptide_constraint(constraint);
-    free_database(database);      
-    exit(0);
+    /*********************************************
+     *read in from fasta file, don't use index file
+     ************************************************/
+    else{
+      //create a new database
+      database = new_database(in_file);
+      
+      //no sort, redundant
+      if(!is_unique && sort_type == NONE){ 
+        //create peptide iterator
+        iterator = new_database_peptide_iterator(database, constraint);
+        
+        //check if any peptides are found
+        if(!database_peptide_iterator_has_next(iterator)){
+          carp(CARP_WARNING, "no matches found");
+        }
+        else{
+          //print each peptide
+          while(database_peptide_iterator_has_next(iterator)){
+            peptide = database_peptide_iterator_next(iterator);
+            print_peptide_in_format(peptide, flag_opt, stdout);
+            free_peptide(peptide);
+          }
+        }
+        //free iterator
+        free_database_peptide_iterator(iterator);
+      }      
+      //sort or check for unique
+      else{
+        //only sort, by default will be sorted by mass
+        if(sort_type == NONE){
+          //create peptide iterator
+          sorted_iterator = 
+            new_database_sorted_peptide_iterator(database, constraint, MASS, TRUE);
+        }
+        //create peptide iterator
+        else{
+          sorted_iterator = 
+            new_database_sorted_peptide_iterator(database, constraint, sort_type, is_unique);
+        }
+        
+        //check if any peptides are found
+        if(!database_sorted_peptide_iterator_has_next(sorted_iterator)){
+          carp(CARP_WARNING, "no matches found");
+        }
+        else{
+          //print each peptide
+          while(database_sorted_peptide_iterator_has_next(sorted_iterator)){
+            peptide = database_sorted_peptide_iterator_next(sorted_iterator);
+            print_peptide_in_format(peptide, flag_opt, stdout);
+            free_peptide(peptide);
+          }
+        }
+        //free iterator
+        free_database_sorted_peptide_iterator(sorted_iterator);
+      }
+      //free database, iterator, constraint
+      free_peptide_constraint(constraint);
+      free_database(database);      
+      exit(0);
+    }
   } 
   else {
     char* usage = parse_arguments_get_usage("generate_peptides");

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -755,7 +755,7 @@ void set_mass_matrix(
     for(length_index = 1; length_index < length_size; ++length_index){
       if(start_index + length_index < protein->length){
         mass_matrix[length_index][start_index] = 
-          mass_matrix[length_index - 1][start_index] + mass_matrix[0][start_index + length_index]; 
+          mass_matrix[length_index - 1][start_index] + mass_matrix[0][start_index + length_index] - mass_h2o; 
       }
     }
   }
@@ -790,8 +790,8 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   iterator->peptide_constraint = peptide_constraint;
   iterator->cur_start = 1; // must cur_start-1 for access mass_matrix
   iterator->cur_length = 1;  // must cur_length-1 for access mass_matrix
-  iterator->has_next = set_iterator_state(iterator);
   iterator->num_mis_cleavage = get_peptide_constraint_num_mis_cleavage(iterator->peptide_constraint);
+  iterator->has_next = set_iterator_state(iterator);
   return iterator;
 }
 

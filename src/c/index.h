@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -29,6 +29,16 @@ INDEX_T* new_index(
   float mass_range,  ///< the range of mass that each index file should be partitioned into
   unsigned int max_size  ///< maximum limit of each index file
 );         
+
+/**
+ * wrapper function, create index object for search purpose
+ * If no crux_index files been created, returns null
+ * \returns A new index object ready for search.
+ */
+INDEX_T* new_search_index(
+  char* fasta_filename,  ///< The fasta file
+  PEPTIDE_CONSTRAINT_T* constraint  ///< Constraint which these peptides satisfy
+  );
 
 /**
  * Frees an allocated index object.
@@ -181,8 +191,8 @@ void set_index_max_size(
  * that will require reading in one file (e.g a 1m/z range). 
  */
 INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
-  INDEX_T* index, ///< The index -in
-  BOOLEAN_T seq ///< output sequence -in
+  INDEX_T* index ///< The index -in
+  //BOOLEAN_T seq ///< output sequence -in
   );
 
 /**
