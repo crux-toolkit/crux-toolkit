@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -25,7 +25,7 @@
 #define MAX_PROTEIN 30000
 #define MAX_INDEX_FILES 30000
 #define MAX_FILE_NAME_LENGTH 30
-#define NUM_CHECK_LINES 7
+#define NUM_CHECK_LINES 8
 
 /* 
  * How does the create_index (the routine) work?
@@ -103,6 +103,7 @@ struct index{
   BOOLEAN_T on_disk; ///< Does this index exist on disk yet?
   float mass_range;  ///< the range of mass that each index file should be partitioned into
   unsigned int max_size;  ///< maximum limit of each index file
+  BOOLEAN_T is_unique; ///< only unique peptides? -in
 };    
 
 /**
@@ -186,7 +187,8 @@ INDEX_T* new_index(
   char* fasta_filename,  ///< The fasta file
   PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
   float mass_range,  ///< the range of mass that each index file should be partitioned into
-  unsigned int max_size  ///< maximum limit of each index file
+  unsigned int max_size, ///< maximum limit of each index file
+  BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
   char** filename_and_path = NULL;
@@ -225,6 +227,7 @@ INDEX_T* new_index(
   set_index_database(index, database);
   set_index_mass_range(index, mass_range);
   set_index_max_size(index, max_size);
+  set_index_is_unique(index, is_unique);
 
   //free filename and path string array
   free(check_dir);
@@ -243,13 +246,14 @@ INDEX_T* new_index(
  */
 INDEX_T* new_search_index(
   char* fasta_filename,  ///< The fasta file
-  PEPTIDE_CONSTRAINT_T* constraint  ///< Constraint which these peptides satisfy
+  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
+  BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
   INDEX_T* search_index = NULL;
 
   //sets mass_range, max_size to an arbitrary 0
-  search_index = new_index(fasta_filename, constraint, 0, 0);
+  search_index = new_index(fasta_filename, constraint, 0, 0, is_unique);
   
   //check if crux_index files have been made
   if(!get_index_on_disk(search_index)){
@@ -295,6 +299,7 @@ BOOLEAN_T write_header(
   fprintf(file, "#\tpeptide_type: %d\n", get_peptide_constraint_peptide_type(constraint));
   fprintf(file, "#\tmissed_cleavage: %d\n", get_peptide_constraint_num_mis_cleavage(constraint));
   fprintf(file, "#\tmass_type: %d\n", get_peptide_constraint_mass_type(constraint));
+  fprintf(file, "#\tredundancy: %d\n", get_index_is_unique(index));
   
   fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
   fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
@@ -343,7 +348,8 @@ BOOLEAN_T create_index(
   
   //create peptide iterator
   sorted_iterator = 
-    new_database_sorted_peptide_iterator(index->database, index->constraint, MASS, TRUE);
+    new_database_sorted_peptide_iterator(index->database, 
+                                         index->constraint, MASS, get_index_is_unique(index));
      
   //check if any peptides are found
   if(!database_sorted_peptide_iterator_has_next(sorted_iterator)){
@@ -592,6 +598,29 @@ void set_index_max_size(
   index->max_size = max_size;
 }
 
+
+/**
+ *\returns TRUE if only allow unique peptides else FALSE
+ */
+BOOLEAN_T get_index_is_unique(
+  INDEX_T* index ///< The index -in
+  )
+{
+  return index->is_unique;
+}
+
+/**
+ * sets the is_unique field
+ */
+void set_index_is_unique(
+  INDEX_T* index, ///< The index -in
+  BOOLEAN_T is_unique ///< do you allow duplicate peptides? -in
+  )
+{
+  index->is_unique = is_unique;
+}
+
+
 /**************************
  * Index file
  **************************/
@@ -666,9 +695,10 @@ void free_index_file(
  */
 BOOLEAN_T check_index_db_boundary(
   char* new_line,  ///< the parsed header line -in
-  PEPTIDE_CONSTRAINT_T* constraint ///< the query peptide constraint -in
+  INDEX_T* index ///< the query index -in
   )
 {
+  PEPTIDE_CONSTRAINT_T* constraint = index->constraint;///< the query peptide constraint -in
   float check_value;
   float real_value;
   char temp_string[2] = "";
@@ -728,6 +758,13 @@ BOOLEAN_T check_index_db_boundary(
       return FALSE;
     }
   }
+  //check redundancy
+  else if(strncmp("redundancy:", field, 11) == 0){
+    if(compare_float(check_value, (real_value = get_index_is_unique(index))) != 0){
+      carp(CARP_ERROR, "peptide redundancy:%d does not match the database supported type %d ", (int)real_value, (int)check_value);
+      return FALSE;
+    }
+  }
   
   return TRUE;
 
@@ -777,8 +814,7 @@ BOOLEAN_T parse_crux_index_map(
     if(new_line[0] == '#'){
       //check if crux_index_database was created in a condition which the current query is supported
       if(num_line < NUM_CHECK_LINES && 
-         !check_index_db_boundary(new_line, 
-                                  index_peptide_iterator->index->constraint)){
+         !check_index_db_boundary(new_line, index_peptide_iterator->index)){
         carp(CARP_ERROR, "The current crux_index database does not support the query");
         fclose(file);
         free(new_line);

@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -27,7 +27,8 @@ INDEX_T* new_index(
   char* fasta_filename,  ///< The fasta file
   PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
   float mass_range,  ///< the range of mass that each index file should be partitioned into
-  unsigned int max_size  ///< maximum limit of each index file
+  unsigned int max_size,  ///< maximum limit of each index file
+  BOOLEAN_T is_unique ///< only unique peptides? -in
 );         
 
 /**
@@ -37,7 +38,8 @@ INDEX_T* new_index(
  */
 INDEX_T* new_search_index(
   char* fasta_filename,  ///< The fasta file
-  PEPTIDE_CONSTRAINT_T* constraint  ///< Constraint which these peptides satisfy
+  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
+  BOOLEAN_T is_unique ///< only unique peptides? -in
   );
 
 /**
@@ -179,6 +181,22 @@ unsigned int get_index_max_size(
 void set_index_max_size(
   INDEX_T* index, ///< The index -in
   unsigned int max_size  ///< maximum limit of each index file -in
+  );
+
+
+/**
+ *\returns TRUE if only allow unique peptides else FALSE
+ */
+BOOLEAN_T get_index_is_unique(
+  INDEX_T* index ///< The index -in
+  );
+
+/**
+ * sets the is_unique field
+ */
+void set_index_is_unique(
+  INDEX_T* index, ///< The index -in
+  BOOLEAN_T is_unique ///< do you allow duplicate peptides? -in
   );
 
 /***********************************************
