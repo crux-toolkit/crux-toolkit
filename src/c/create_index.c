@@ -238,8 +238,8 @@ int main(int argc, char** argv){
       new_index(in_file,
                 constraint,
                 mass_range,
-                max_file_size);
-    
+                max_file_size,
+                is_unique   
     //create crux_index files
     create_index(crux_index);
     
