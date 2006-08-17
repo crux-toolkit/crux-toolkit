@@ -240,6 +240,7 @@ int main(int argc, char** argv){
                 mass_range,
                 max_file_size,
                 is_unique   
+                );
     //create crux_index files
     create_index(crux_index);
     
