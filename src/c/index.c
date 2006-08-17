@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -25,6 +25,7 @@
 #define MAX_PROTEIN 30000
 #define MAX_INDEX_FILES 30000
 #define MAX_FILE_NAME_LENGTH 30
+#define NUM_CHECK_LINES 7
 
 /* 
  * How does the create_index (the routine) work?
@@ -285,7 +286,16 @@ BOOLEAN_T write_header(
 {
   time_t hold_time;
   hold_time = time(0);
+  PEPTIDE_CONSTRAINT_T* constraint = index->constraint;
 
+  fprintf(file, "#\tmin_mass: %.2f\n", get_peptide_constraint_min_mass(constraint));
+  fprintf(file, "#\tmax_mass: %.2f\n", get_peptide_constraint_max_mass(constraint));
+  fprintf(file, "#\tmin_length: %d\n", get_peptide_constraint_min_length(constraint));
+  fprintf(file, "#\tmax_length: %d\n", get_peptide_constraint_max_length(constraint));
+  fprintf(file, "#\tpeptide_type: %d\n", get_peptide_constraint_peptide_type(constraint));
+  fprintf(file, "#\tmissed_cleavage: %d\n", get_peptide_constraint_num_mis_cleavage(constraint));
+  fprintf(file, "#\tmass_type: %d\n", get_peptide_constraint_mass_type(constraint));
+  
   fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
   fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
   fprintf(file, "#\tmaximum size of each index file: %d\n", index->max_size);
@@ -647,6 +657,82 @@ void free_index_file(
  * index_peptide iterator subroutines
  *************************************/
 
+
+
+/**
+ * Checks up to the NUM_CHECK_LINES limit
+ * checks if the peptide query is supported by the crux_index database
+ * \returns TRUE if the database supports the peptide query FALSE if not
+ */
+BOOLEAN_T check_index_db_boundary(
+  char* new_line,  ///< the parsed header line -in
+  PEPTIDE_CONSTRAINT_T* constraint ///< the query peptide constraint -in
+  )
+{
+  float check_value;
+  float real_value;
+  char temp_string[2] = "";
+  char field[20] = "";
+
+  //parse the # ..... line
+  if(sscanf(new_line,"%s %s %f", 
+            temp_string, field, &check_value) < 3){
+    return FALSE;
+  }
+  //check peptide min mass
+  if(strncmp("min_mass:", field, 9) == 0){
+    if(check_value > (real_value = get_peptide_constraint_min_mass(constraint))){
+      carp(CARP_ERROR, "min_mass: %.2f is below supported database mass %.2f", real_value, check_value);
+      return FALSE;
+    }
+  }
+  //check peptide max mass  
+  else if(strncmp("max_mass:", field, 9) == 0){
+    if(check_value < (real_value = get_peptide_constraint_max_mass(constraint))){
+      carp(CARP_ERROR, "max_mass: %.2f is above supported database mass %.2f", real_value, check_value);
+      return FALSE;
+    }
+  }
+  //check peptide min length
+  else if(strncmp("min_length:", field, 11) == 0){
+    if(check_value > (real_value = get_peptide_constraint_min_length(constraint))){
+      carp(CARP_ERROR, "min_length: %d is below supported database length %d", (int)real_value, (int)check_value);
+      return FALSE;
+    }
+  }
+  //check peptide max length
+  else if(strncmp("max_length:", field, 11) == 0){
+    if(check_value < (real_value = get_peptide_constraint_max_length(constraint))){
+      carp(CARP_ERROR, "max_length: %d is above supported database length %d", (int)real_value, (int)check_value);
+      return FALSE;
+    }
+  }
+  //check peptide_type
+  else if(strncmp("peptide_type:", field, 13) == 0){
+    if(compare_float(check_value, (real_value = get_peptide_constraint_peptide_type(constraint))) != 0){
+      carp(CARP_ERROR, "peptide_type:%d does not match the database supported type %d ", (int)real_value, (int)check_value);
+      return FALSE;
+    }
+  }
+  //check peptide missed_cleavage
+  else if(strncmp("missed_cleavage:", field, 16) == 0){
+    if(compare_float(check_value, (real_value = get_peptide_constraint_num_mis_cleavage(constraint))) != 0){
+      carp(CARP_ERROR, "missed_cleavage:%d does not match the database supported %d ", (int)real_value, (int)check_value);
+      return FALSE;
+    }
+  }
+  //check peptide mass_type
+  else if(strncmp("mass_type:", field, 10) == 0){
+    if(compare_float(check_value, (real_value = get_peptide_constraint_mass_type(constraint))) != 0){
+      carp(CARP_ERROR, "mass_type:%d does not match the database supported type %d ", (int)real_value, (int)check_value);
+      return FALSE;
+    }
+  }
+  
+  return TRUE;
+
+}
+
 /**
  * parses the "crux_index_map" file that contains the mapping between
  * each crun_index_* file and mass range
@@ -673,6 +759,7 @@ BOOLEAN_T parse_crux_index_map(
     get_peptide_constraint_min_mass(index_peptide_iterator->index->constraint);
   float max_mass = 
     get_peptide_constraint_max_mass(index_peptide_iterator->index->constraint);
+  int num_line = 0;
 
   //move into the dir crux_files
   chdir(index_peptide_iterator->index->directory);
@@ -686,8 +773,18 @@ BOOLEAN_T parse_crux_index_map(
   }
   
   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
-    //skip header lines
+    //check header lines
     if(new_line[0] == '#'){
+      //check if crux_index_database was created in a condition which the current query is supported
+      if(num_line < NUM_CHECK_LINES && 
+         !check_index_db_boundary(new_line, 
+                                  index_peptide_iterator->index->constraint)){
+        carp(CARP_ERROR, "The current crux_index database does not support the query");
+        fclose(file);
+        free(new_line);
+        return FALSE;
+      }
+      ++num_line;
       continue;
     }
     //is it a line for a crux_index_*
@@ -710,6 +807,7 @@ BOOLEAN_T parse_crux_index_map(
           if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
             carp(CARP_WARNING, "failed to add index file");
             fclose(file);
+            free(new_line);
             return FALSE;
           }
           continue;
@@ -719,6 +817,7 @@ BOOLEAN_T parse_crux_index_map(
       else if(max_mass > (start_mass - 0.01)){
         if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
           carp(CARP_WARNING, "failed to add index file");
+          free(new_line);
           return FALSE;
         }
         continue;
@@ -1041,6 +1140,8 @@ INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
   //parse index_files that are with in peptide_constraint from crux_index_map
   if(!parse_crux_index_map( index_peptide_iterator)){
     //failed to parse crux_index_map
+    free_index(index_peptide_iterator->index);
+    free_index_peptide_iterator(index_peptide_iterator);
     die("failed to parse crux_index_map file");
   }
 
