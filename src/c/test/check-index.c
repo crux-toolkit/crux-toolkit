@@ -38,7 +38,7 @@ START_TEST (test_create){
 
   constraint = 
     new_peptide_constraint(TRYPTIC,
-                           0, 5000, 
+                           0, 50000, 
                            0, 255, 
                            TRUE, AVERAGE);
 
@@ -47,8 +47,14 @@ START_TEST (test_create){
     new_index("test.fasta",
               constraint,
               mass_range,
-              max_size);
+              max_size,
+              TRUE);
   
+
+  fail_unless(compare_float(get_index_mass_range(_index),mass_range)==0, "failed to set mass_range, index");
+  fail_unless(get_index_max_size(_index)== max_size, "failed to set max_size, index");
+  fail_unless(get_index_is_unique(_index) == TRUE, "failed to set is_unique, index"  );
+
   fail_unless(create_index(_index), "failed to create a index");
   fail_unless(index_exists(_index), "index exist method failed");
   free_index(_index);
@@ -59,13 +65,13 @@ START_TEST (test_create){
    ***************************/
   constraint = 
     new_peptide_constraint(TRYPTIC,
-                           0, 500, 
-                           0, 25, 
+                           0, 5000, 
+                           2, 25, 
                            TRUE, AVERAGE);
   
     _index = 
     new_search_index("test.fasta",
-              constraint);
+              constraint, TRUE);
 
     if(_index != NULL){
       //create index peptide interator
@@ -77,7 +83,7 @@ START_TEST (test_create){
         print_peptide_in_format(peptide, ok_seq, stdout);
         free_peptide(peptide);
       }
-      
+
       free_index(_index);
       free_index_peptide_iterator(iterator);
     }

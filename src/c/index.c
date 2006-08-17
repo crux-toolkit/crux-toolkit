@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -341,7 +341,7 @@ BOOLEAN_T create_index(
     return TRUE;
   }
   //create temporary directory
-  if(mkdir("crux_temp", S_IRWXU) !=0){
+  if(mkdir("crux_temp", S_IRWXU+S_IRWXG+S_IRWXO) != 0){
     carp(CARP_WARNING, "cannot create temporary directory");
     return FALSE;
   }
