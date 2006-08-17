@@ -38,7 +38,7 @@ START_TEST (test_create){
 
   constraint = 
     new_peptide_constraint(TRYPTIC,
-                           0, 50000, 
+                           0, 5000, 
                            0, 255, 
                            TRUE, AVERAGE);
 
@@ -59,8 +59,8 @@ START_TEST (test_create){
    ***************************/
   constraint = 
     new_peptide_constraint(TRYPTIC,
-                           300, 4000, 
-                           0, 255, 
+                           0, 500, 
+                           0, 25, 
                            TRUE, AVERAGE);
   
     _index = 

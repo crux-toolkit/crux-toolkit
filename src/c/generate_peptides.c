@@ -69,7 +69,7 @@ int main(int argc, char** argv){
   char* cleavages = "tryptic"; 
   char* isotopic_mass = "average" ;
   int  verbosity = CARP_MAX;
-  char* redundancy = "redundant";
+  char* redundancy = "unique";
   char* use_index = "F";
 
   BOOLEAN_T use_index_boolean = FALSE;
@@ -301,7 +301,12 @@ int main(int argc, char** argv){
      * use index file
      **********************/
     if(use_index_boolean){
-      
+      if((sort_type != MASS && sort_type != NONE) || !is_unique){
+        carp(CARP_ERROR, " when using index, cannot sort other than by mass and only returns unique peptides");
+        carp(CARP_ERROR, "failed to perform search");
+        exit(1);
+      }
+
       index = new_search_index(in_file, constraint);
 
       if(index != NULL){
