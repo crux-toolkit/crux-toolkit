@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -27,7 +27,7 @@ PROTEIN_T* allocate_protein(void);
 PROTEIN_T* new_protein(
   char*         id, ///< The protein sequence id.
   char*   sequence, ///< The protein sequence.
-  int       length, ///< The length of the protein sequence.
+  unsigned int length, ///< The length of the protein sequence.
   char* annotation,  ///< Optional protein annotation.  -in
   unsigned long int offset, ///< The file location in the source file in the database -in
   unsigned int protein_idx ///< The index of the protein in it's database. -in
@@ -129,7 +129,7 @@ void set_protein_sequence(
 /**
  *\returns the length of the protein
  */
-int get_protein_length(
+unsigned int get_protein_length(
   PROTEIN_T* protein ///< the query protein -in 
 );
 
@@ -138,7 +138,7 @@ int get_protein_length(
  */
 void set_protein_length(
   PROTEIN_T* protein, ///< the protein to set it's fields -out
-  int length ///< the length to add -in
+  unsigned int length ///< the length to add -in
 );
 
 /**

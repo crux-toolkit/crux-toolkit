@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.35 $
+ * $Revision: 1.36 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -364,7 +364,7 @@ void set_peptide_peptide_mass(
 /**
  * \returns the peptide mass
  */
-float get_peptide_peptide_mass( 
+inline float get_peptide_peptide_mass( 
   PEPTIDE_T* peptide  ///< the peptide to query the mass -in
   )
 {

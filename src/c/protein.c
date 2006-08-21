@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.31 $
+ * $Revision: 1.32 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -38,7 +38,7 @@ struct protein{
   BOOLEAN_T    is_light; ///< is the protein a light protein?
   char*              id; ///< The protein sequence id.
   char*        sequence; ///< The protein sequence.
-  int            length; ///< The length of the protein sequence.
+  unsigned int   length; ///< The length of the protein sequence.
   char*      annotation; ///< Optional protein annotation. 
 };    
 
@@ -58,6 +58,9 @@ struct protein_peptide_iterator {
   float** mass_matrix; ///< stores all the peptide's mass
   BOOLEAN_T has_next; ///< is there a next? 
   int num_mis_cleavage; ///< The maximum mis cleavage of the peptide
+  unsigned int* seq_marker; ///< The array that marks all the 'K | R | P'
+  unsigned int kr_idx; //idx for the closest to cur_start K | R is located
+  unsigned int first_kr_idx; //idx for the first K | R is located
 };
 
 //def bellow
@@ -71,9 +74,9 @@ static BOOLEAN_T read_title_line
 static BOOLEAN_T read_raw_sequence
   (FILE* fasta_file,   // Input Fasta file.
    char* name,         // Sequence ID (used in error messages).
-   int   max_chars,    // Maximum number of allowed characters.
+   unsigned int   max_chars,    // Maximum number of allowed characters.
    char* raw_sequence, // Pre-allocated sequence.
-   int* sequence_length // the sequence length -chris added
+   unsigned int* sequence_length // the sequence length -chris added
    );
 
 
@@ -91,7 +94,7 @@ PROTEIN_T* allocate_protein(void){
 PROTEIN_T* new_protein(
   char*         id, ///< The protein sequence id. -in
   char*   sequence, ///< The protein sequence. -in
-  int       length, ///< The length of the protein sequence. -in
+  unsigned int length, ///< The length of the protein sequence. -in
   char* annotation,  ///< Optional protein annotation.  -in
   unsigned long int offset, ///< The file location in the source file in the database -in
   unsigned int protein_idx ///< The index of the protein in it's database.-in
@@ -129,7 +132,7 @@ void print_protein(
   )
 {
   int   sequence_index;
-  int   sequence_length = get_protein_length(protein);
+  unsigned int   sequence_length = get_protein_length(protein);
   char* sequence = get_protein_sequence(protein);
   char* id = get_protein_id(protein);
   char* annotation = get_protein_annotation(protein);
@@ -190,7 +193,7 @@ BOOLEAN_T parse_protein_fasta_file(
   static char name[LONGEST_LINE];     // Just the sequence ID.
   static char desc[LONGEST_LINE];     // Just the comment field.
   static char buffer[PROTEIN_SEQUENCE_LENGTH];        // The sequence, as it's read in.
-  static int sequence_length; //the sequence length
+  static unsigned int sequence_length; //the sequence length
 
   // Read the title line.
   if (!read_title_line(file, name, desc, protein)) {
@@ -296,20 +299,20 @@ static BOOLEAN_T read_title_line
 static BOOLEAN_T read_raw_sequence
   (FILE* fasta_file,   // Input Fasta file.
    char* name,         // Sequence ID (used in error messages).
-   int   max_chars,    // Maximum number of allowed characters.
+   unsigned int   max_chars,    // Maximum number of allowed characters.
    char* raw_sequence, // Pre-allocated sequence.
-   int* sequence_length // the sequence length -chris added
+   unsigned int* sequence_length // the sequence length -chris added
    )
 {
   // char a_char;
   // tlb; change a_char to integer so it will compile on SGI
   int a_char;
-  int i_seq;
+  unsigned int i_seq;
   BOOLEAN_T return_value = TRUE;
 
   // Start at the end of the given sequence.
   i_seq = strlen(raw_sequence);
-  assert((int)strlen(raw_sequence) < max_chars);
+  assert((unsigned int)strlen(raw_sequence) < max_chars);
 
   // Read character by character.
   while ((a_char = getc(fasta_file)) != EOF) {
@@ -417,7 +420,7 @@ char* get_protein_sequence(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
-  int sequence_length = strlen(protein->sequence) +1; //+\0
+  unsigned int sequence_length = strlen(protein->sequence) +1; //+\0
   char * copy_sequence = 
     (char *)mymalloc(sizeof(char)*sequence_length);
   return strncpy(copy_sequence, protein->sequence, sequence_length);  
@@ -442,7 +445,7 @@ void set_protein_sequence(
   )
 {
   free(protein->sequence);
-  int sequence_length = strlen(sequence) +1; //+\0
+  unsigned int sequence_length = strlen(sequence) +1; //+\0
   char * copy_sequence = 
     (char *)mymalloc(sizeof(char)*sequence_length);
 
@@ -453,7 +456,7 @@ void set_protein_sequence(
 /**
  *\returns the length of the protein
  */
-int get_protein_length(
+unsigned int get_protein_length(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
@@ -465,7 +468,7 @@ int get_protein_length(
  */
 void set_protein_length(
   PROTEIN_T* protein, ///< the protein to set it's fields -out
-  int length ///< the length to add -in
+  unsigned int length ///< the length to add -in
   )
 {
   protein->length = length;
@@ -548,11 +551,10 @@ unsigned int get_protein_protein_idx(
  * Iterator
  * iterates over the peptides given a partent protein and constraints
  */
-
 /**
  * examines the peptide with context of it's parent protein to determine it's type
  * \returns the peptide type
- */
+ *
 PEPTIDE_TYPE_T examine_peptide_type(
   char* sequence, ///< the parent protein -in
   int start_idx, ///< the start index of peptide, 1 is the first residue -in 
@@ -596,10 +598,10 @@ PEPTIDE_TYPE_T examine_peptide_type(
 
 //FIXME only examines if there is a mis-cleavage or not
 // eventually would like to implement so that it will return the total number of mis-cleavage
-/**
+**
  * examines the peptide if it contains miscleavage sites within it's sequence
  * \returns 0 if no miscleavage sites, 1 if there exist at least 1 mis cleavage sites
- */
+ *
 int examine_peptide_cleavage(
   char* sequence, ///< the parent protein -in
   int start_idx, ///< the start index of peptide, 1 is the first residue -in 
@@ -619,8 +621,99 @@ int examine_peptide_cleavage(
   return 0;
 
 }
+*/
+/**
+ * find if there's a K or R in the middle of peptide, skips K|R with P after them
+ * returns TRUE if no missed cleavage sites discovered
+ */
+BOOLEAN_T find_krp(
+  unsigned int* seq_marker,
+  unsigned int kr_idx,
+  unsigned int start_idx, ///< the start index of peptide, 1 is the first residue -in 
+  unsigned int end_idx
+  ){
+  if(kr_idx < end_idx && 
+     kr_idx >= start_idx){
+    //is there a P after the K|R 
+    if(seq_marker[kr_idx] == 1){ //check boundary
+      return find_krp(seq_marker, seq_marker[kr_idx-1], start_idx, end_idx);
+    }
+    return FALSE;
+  }
+  
+  else if(kr_idx >= end_idx || seq_marker[kr_idx-1] >= end_idx){
+    return TRUE;
+  }
+  else if(seq_marker[kr_idx-1] < end_idx && 
+          seq_marker[kr_idx-1] >= start_idx){
+    //is there a P after the K|R 
+    if(seq_marker[seq_marker[kr_idx-1]] == 1){ //check boundary
+      return find_krp(seq_marker, seq_marker[kr_idx-1], start_idx, end_idx);
+    }
+    return FALSE;
+  }
+  return TRUE;
+}
 
+//FIXME only examines if there is a mis-cleavage or not
+// eventually would like to implement so that it will return the total number of mis-cleavage
+/**
+ * examines the peptide if it contains miscleavage sites within it's sequence
+ * \returns 0 if no miscleavage sites, 1 if there exist at least 1 mis cleavage sites
+ */
+int examine_peptide_cleavage(
+  PROTEIN_PEPTIDE_ITERATOR_T* iterator, ///< working iterator -in
+  unsigned int start_idx, ///< the start index of peptide, 1 is the first residue -in 
+  unsigned int end_idx ///< the end index of peptide -in
+  )
+{
+  //the K|R|P index array
+  unsigned int* seq_marker = iterator->seq_marker; 
+  unsigned int kr_idx = iterator->kr_idx;
+  
+  if(kr_idx == iterator->protein->length + 1 || 
+     find_krp(seq_marker, kr_idx, start_idx, end_idx)){
+    return 0;
+  }
+  return 1;
+}
 
+/**
+ * examines the peptide with context of it's parent protein to determine it's type
+ * \returns the peptide type
+ */
+PEPTIDE_TYPE_T examine_peptide_type(
+  PROTEIN_PEPTIDE_ITERATOR_T* iterator, ///< working iterator -in
+  unsigned int start_idx, ///< the start index of peptide, 1 is the first residue -in 
+  unsigned int end_idx ///< the end index of peptide -in
+  )
+{
+  //the K|R|P index array
+  unsigned int* seq_marker = iterator->seq_marker; 
+  BOOLEAN_T front = FALSE;
+  BOOLEAN_T back = FALSE;
+  
+  //examine front cleavage site
+  if(start_idx == 1 || ((seq_marker[start_idx-2] > 1) && seq_marker[start_idx-1] != 1)){
+    front = TRUE;
+  }
+  
+  //exaimine end cleavage site
+  if(end_idx == iterator->protein->length || 
+     ((seq_marker[end_idx-1] > 1) && seq_marker[end_idx] != 1)){
+    back = TRUE;
+  }
+
+  if(front && back){
+    return TRYPTIC;
+  }
+  else if(front || back){
+    return PARTIALLY_TRYPTIC;
+  }
+  else{
+    return NOT_TRYPTIC;
+  }
+}
 
 /**
  * Finds the next peptide that fits the constraints
@@ -637,6 +730,16 @@ BOOLEAN_T iterator_state_help(
 {
   LOOP:
   
+  //set kr_idx position
+  if(iterator->seq_marker[iterator->kr_idx-1] < iterator->cur_start){
+    iterator->kr_idx = iterator->seq_marker[iterator->kr_idx-1];
+  }
+  else if(iterator->kr_idx != iterator->first_kr_idx &&
+          iterator->kr_idx > iterator->cur_start){
+    iterator->kr_idx = iterator->first_kr_idx;
+  }
+
+
   //check if the smallest mass of a length is larger than max_mass
   if(iterator->cur_length * SMALLEST_MASS > max_mass){
     return FALSE;
@@ -655,7 +758,7 @@ BOOLEAN_T iterator_state_help(
   }
   
   //reached end of length column, check next length
-  if(iterator->cur_start + iterator->cur_length - 1 > iterator->protein->length){
+  if((unsigned int)(iterator->cur_start + iterator->cur_length - 1) > iterator->protein->length){
     ++iterator->cur_length;
     iterator->cur_start = 1;
     goto LOOP;
@@ -676,7 +779,7 @@ BOOLEAN_T iterator_state_help(
   
   //examin tryptic type and cleavage
   if(peptide_type != ANY_TRYPTIC){
-    if((examine_peptide_type(iterator->protein->sequence, 
+    if((examine_peptide_type(iterator, 
                              iterator->cur_start, 
                              iterator->cur_length + iterator->cur_start -1) != peptide_type))
       {
@@ -687,7 +790,7 @@ BOOLEAN_T iterator_state_help(
 
   //examine cleavage
   if(iterator->num_mis_cleavage == 0){
-    if(examine_peptide_cleavage(iterator->protein->sequence, 
+    if(examine_peptide_cleavage(iterator, 
                                 iterator->cur_start, 
                                 iterator->cur_length + iterator->cur_start -1) != 0)
       {
@@ -728,14 +831,14 @@ BOOLEAN_T set_iterator_state(
  */
 void set_mass_matrix(
   float** mass_matrix,  ///< the mass matrix -out
-  int start_size,  ///< the y axis size -in
-  int length_size, ///< the x axis size -in
+  unsigned int start_size,  ///< the y axis size -in
+  unsigned int length_size, ///< the x axis size -in
   PROTEIN_T* protein, ///< the parent protein -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
-  int start_index = 0;
-  int length_index = 1;
+  unsigned int start_index = 0;
+  unsigned int length_index = 1;
   float mass_h2o = MASS_H2O_AVERAGE;
 
   //set correct H2O mass
@@ -762,6 +865,54 @@ void set_mass_matrix(
 }
 
 /**
+ * set seq_marker array in protein_peptide_iterator
+ * creates an int array the length of the protein sequence.
+ * 0 if not 'K | R | P', if 'P' 1, for 'K|R' you store the index of the next incident of 'K|R'  
+ * thus, you can look at the index if it is K|R, and if it is you can tell where the next K|R is
+ * sets the sequence idx(starts 1) where the first incident of K | R, returns protein_length+1 if no K|R exist
+ */
+void set_seq_marker(
+  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator  ///< the iterator to set -out
+  )
+{
+  char* sequence = protein_peptide_iterator->protein->sequence;
+  unsigned int protein_length = protein_peptide_iterator->protein->length;
+  unsigned int sequence_idx = 0;
+  unsigned int previous_kr = 0;
+  unsigned int first_kr = protein_length+1;
+  BOOLEAN_T first = FALSE; //have we seen a K | R so far
+
+  //create seq_marker
+  unsigned int* seq_marker = (unsigned int*)mycalloc(protein_length, sizeof(unsigned int));
+  
+  //iterate through the sequence
+  for(; sequence_idx < protein_length; ++sequence_idx){
+    if(sequence[sequence_idx] == 'K' || sequence[sequence_idx] == 'R'){
+      if(first){
+        seq_marker[previous_kr] = sequence_idx + 1;
+      }
+      else{
+        first = TRUE;
+        first_kr = sequence_idx+1;
+      }
+      previous_kr = sequence_idx;
+    }
+    else if(sequence[sequence_idx] == 'P'){
+      seq_marker[sequence_idx] = 1;
+    }
+  }
+  if(first){
+    //last K|R is set to protein length
+    seq_marker[previous_kr] = sequence_idx + 1;
+  }
+  
+  //set the complete seq_marker
+  protein_peptide_iterator->seq_marker = seq_marker;
+  protein_peptide_iterator->first_kr_idx = first_kr;
+  protein_peptide_iterator->kr_idx = first_kr;
+}
+
+/**
  * Instantiates a new peptide_iterator from a peptide.
  * \returns a PROTEIN_PEPTIDE_ITERATOR_T object.
  */
@@ -770,8 +921,8 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraints -in
   )
 {
-  int matrix_index = 0;
-  int max_length = get_peptide_constraint_max_length(peptide_constraint);
+  unsigned int matrix_index = 0;
+  unsigned int max_length = get_peptide_constraint_max_length(peptide_constraint);
   MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(peptide_constraint);
 
   PROTEIN_PEPTIDE_ITERATOR_T* iterator = 
@@ -791,6 +942,7 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   iterator->cur_start = 1; // must cur_start-1 for access mass_matrix
   iterator->cur_length = 1;  // must cur_length-1 for access mass_matrix
   iterator->num_mis_cleavage = get_peptide_constraint_num_mis_cleavage(iterator->peptide_constraint);
+  set_seq_marker(iterator);
   iterator->has_next = set_iterator_state(iterator);
   return iterator;
 }
@@ -801,10 +953,10 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
  */
 void free_mass_matrix(
   float** mass_matrix,  ///< the mass matrix to free -in
-  int length_size ///< the x axis size -in
+  unsigned int length_size ///< the x axis size -in
   )
 {
-  int matrix_idx = 0;
+  unsigned int matrix_idx = 0;
   for (; matrix_idx  < length_size; ++matrix_idx){
     free(mass_matrix[matrix_idx]);
   }
@@ -821,6 +973,7 @@ void free_protein_peptide_iterator(
 {
   free_mass_matrix(protein_peptide_iterator->mass_matrix, 
                    get_peptide_constraint_max_length(protein_peptide_iterator->peptide_constraint));
+  free(protein_peptide_iterator->seq_marker);
   free(protein_peptide_iterator);
 }
 
@@ -860,7 +1013,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
   //possible to skip this step and leave it as ANY_TRYPTIC
   else{
       peptide_type = 
-        examine_peptide_type(protein_peptide_iterator->protein->sequence,
+        examine_peptide_type(protein_peptide_iterator,
                              protein_peptide_iterator->cur_start,
                              protein_peptide_iterator->cur_start + protein_peptide_iterator->cur_length -1);
   }

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -16,7 +16,7 @@
 #include "objects.h"
 #include "peptide_constraint.h"
 
-#define MAX_PROTEINS 30000 ///< The maximum number of proteins in a database.
+#define MAX_PROTEINS 2500000 ///< The maximum number of proteins in a database.
 
 /**
  * \struct database
@@ -847,6 +847,7 @@ PEPTIDE_WRAPPER_T* merge(
  * \returns array of two pointers of each split array
  * user must free the array, heap allocated
  */
+
 PEPTIDE_WRAPPER_T** split(
   PEPTIDE_WRAPPER_T* wrapper_src ///< wrapper list to split -in
   )
@@ -854,29 +855,58 @@ PEPTIDE_WRAPPER_T** split(
   PEPTIDE_WRAPPER_T** split_wrapper = 
     (PEPTIDE_WRAPPER_T**)mycalloc(2, sizeof(PEPTIDE_WRAPPER_T*));
 
-  //check if there's more than one list
-  if(wrapper_src == NULL){
-    return split_wrapper;
+  PEPTIDE_WRAPPER_T* split1 = NULL;
+  PEPTIDE_WRAPPER_T* split1_current = split1;
+  PEPTIDE_WRAPPER_T* split2 = NULL;
+  PEPTIDE_WRAPPER_T* split2_current = split2;
+  BOOLEAN_T one = TRUE;
+
+  //split wrapper until no more wrapper left in wrapper_src
+  while(wrapper_src != NULL){
+    //do i add it to the first list?
+    if(one){
+      //first time adding wrapper
+      if(split1_current == NULL){
+        split1_current = wrapper_src;
+        split1 = split1_current;       
+      }
+      //add one wrapper to the end of the first list 
+      else{
+        split1_current->next_wrapper = wrapper_src;
+        split1_current = split1_current->next_wrapper;
+      }
+      one = FALSE;
+    }
+    //add to second list
+    else{
+      //first time adding wrapper
+      if(split2_current == NULL){
+        split2_current = wrapper_src;
+        split2 = split2_current;
+      }
+      //add one wrapper to the end of the second list 
+      else{
+        split2_current->next_wrapper = wrapper_src;
+        split2_current = split2_current->next_wrapper;
+      }
+      one = TRUE;
+    }
+    wrapper_src = wrapper_src->next_wrapper;
   }
-  else if(wrapper_src->next_wrapper == NULL){
-    split_wrapper[0] = wrapper_src;
-    return split_wrapper;
+  
+  //add list one and two to thesplit_wrapper to return
+  if(split1 != NULL){
+    split1_current->next_wrapper = NULL;
+    split_wrapper[0] = split1;
   }
-  //recursively split the list except the first two wrappers
-  PEPTIDE_WRAPPER_T** recursive_split = 
-    split(wrapper_src->next_wrapper->next_wrapper);
-  
-  //return result of putting the first wrapper at the front of the first list,
-  //and the second wrapper on the second list
-  wrapper_src->next_wrapper->next_wrapper = recursive_split[1];
-  split_wrapper[1] = wrapper_src->next_wrapper;
-  wrapper_src->next_wrapper = recursive_split[0];
-  split_wrapper[0] = wrapper_src;
-  free(recursive_split);
-  
+
+  if(split2 != NULL){
+    split2_current->next_wrapper = NULL;
+    split_wrapper[1] = split2;
+  }
+
   return split_wrapper;
 }
-
 
 /**
  * merge sort wrapper list by the sort type
@@ -912,7 +942,6 @@ PEPTIDE_WRAPPER_T* merge_sort(
   }
   return final_sorted_list;
 }
-
 
 /**
  * Frees an allocated database_sorted_peptide_iterator object.
@@ -1003,16 +1032,14 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
         
         //end of peptides from one parent protein merge list into master list
         if(!protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
-          //assumes that each peptide from the same protein is alrady sorted by length
-          if(sort_type != LENGTH || unique){
-            list_wrapper = merge_sort(list_wrapper, sort_type, unique);
-          }
-          //merge into the complied master list
+          //add all peptides to the complied master list
           if(master_list_wrapper == NULL){
             master_list_wrapper = list_wrapper;
           }
           else{
-            master_list_wrapper = merge(master_list_wrapper, list_wrapper, sort_type, unique);
+            current_wrapper->next_wrapper = master_list_wrapper;
+            master_list_wrapper =  list_wrapper;
+            current_wrapper = NULL;
           }
           list_wrapper = NULL;      
           start = TRUE;
@@ -1020,6 +1047,9 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
       }
     } //iterate over all proteins in database
     while(database_protein_iterator_has_next(database_protein_iterator));
+
+    //sort the master list using merge sort
+    master_list_wrapper = merge_sort(master_list_wrapper, sort_type, unique);
 
     database_sorted_peptide_iterator->peptide_wrapper = master_list_wrapper;
   }

@@ -1,14 +1,14 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.23 $
+# VERSION: $Revision: 1.24 $
 #######################################################################
 
 # The GNU C compiler is preferred.
 CC	= gcc
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
-DEBUG   = -DDEBUG -g
-OFLAGS  = -O3
+DEBUG   = -DDEBUG -g -pg
+OFLAGS  = -O 
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -O -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 

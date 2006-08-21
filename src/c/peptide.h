@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -159,7 +159,7 @@ void set_peptide_peptide_mass(
 /**
  * \returns the peptide mass
  */
-float get_peptide_peptide_mass( 
+inline float get_peptide_peptide_mass( 
   PEPTIDE_T* peptide  ///< the peptide to query the mass -in
   );
 
