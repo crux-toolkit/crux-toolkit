@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file carp.c
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -38,8 +38,11 @@ BOOLEAN_T carp(
     else if(verbosity == CARP_FATAL){
       fprintf(stderr, "FATAL: ");
     }
-    else{
+    else if(verbosity == CARP_INFO){
       fprintf(stderr, "INFO: ");
+    }
+    else{
+      fprintf(stderr, "DEBUG: ");
     }
 
     va_start(argp, format);
