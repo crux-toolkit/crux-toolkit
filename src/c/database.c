@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -966,6 +966,7 @@ void free_peptide_wrapper_all(
   free(peptide_wrapper);
 }
 
+unsigned long total_number_peptide = 0;
 /**
  * Instantiates a new database_sorted_peptide_iterator from a database.
  * \returns a DATABASE_SORTED_PEPTIDE_ITERATOR_T object.
@@ -1017,6 +1018,12 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
       }
       //iterate over all peptides in a protein
       while(protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
+         //debug purpuse
+        ++total_number_peptide;
+        if(total_number_peptide % 1000000 == 0){
+           carp(DEBUG, "number of peptides(not unique): %u", total_number_peptide); 
+        }
+
         if(start){
           start = FALSE;
           current_wrapper =
@@ -1047,6 +1054,8 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
       }
     } //iterate over all proteins in database
     while(database_protein_iterator_has_next(database_protein_iterator));
+    
+    carp(DEBUG, "total number of peptides(not unique): %u", total_number_peptide); 
 
     //sort the master list using merge sort
     master_list_wrapper = merge_sort(master_list_wrapper, sort_type, unique);
