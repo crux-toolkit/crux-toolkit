@@ -14,17 +14,19 @@ Purpose:
                 <br><br><code><b><font face="Helvetica, monospace">
 Methods:
                 </font></b></code><br><br>
-                Filtered +2 SEQUEST results requiring Xcorr &gte; 0.4 and
-                DeltCN &gte; 0.1 and percent ion matched &gte; 0.2
+                Filtered +2 SEQUEST results requiring Xcorr &gt; 0.4 and
+                DeltCN &gt; 0.1 and fraction ion matched &gt; 0.2
                 from mass spectrometry run 1S-4. 
                 Split 1S-4 into train-0-1S-4.pickledpsm and
-                train-1S-4.pickledpsm, corresponding 252 and 138 peptides.
-                taken from throughout the run, respectively.
+                train-1S-4.pickledpsm, corresponding 252 and 138 peptides,
+                respectively.
                 Train on the train* set and test on the test* set 
                 using a degree 2 kernel and C values ranging from 0.001 to
                 100 and SVR epsilon values ranging from 0.10 to 10. 
                 Also, for a sanity check, train and test on the train* by
-                itself, using C value of 10 and eps of 0.010.
+                itself, using C value of 10 and eps of 0.010. Evaluate
+                performance by visual inspection of the resulting
+                regression.
  
 <br><br><code><b><font face="Helvetica, monospace">
 Results:
@@ -33,20 +35,50 @@ Results:
                 <br><br>
                 Train on train*, test on train*
                 <br><br>
-                <img src="./Images/">
+                <img src="./Images/train-train-1S-4.png"><br><br>
                 <br><br>
                 Train on train*, test on test* with various SVR epsilon and
                 C value parameters.
 
+<img src="./Images/train-0-1S-4.svrinput0.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,10.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,11.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,12.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,13.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,14.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,15.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,16.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,17.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,18.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,19.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,1.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,20.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,21.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,22.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,23.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,24.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,25.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,26.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,27.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,28.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,29.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,2.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,30.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,3.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,4.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,5.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,6.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,7.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,8.png"><br><br>
+<img src="./Images/train-0-1S-4.svrinput,9.png"><br><br>
 <br><br><code><b><font face="Helvetica, monospace">
 Discussion:
                 </font></b></code><br><br>
-                The sanity checks look okay, but indicates overfitting, as
-                very combination of C and eps values look bad on the test
+                The sanity check looks okay, but indicates overfitting, as
+                every combination of C and eps values look bad on the test
                 data.
     It doesn't seem like overfitting to this extent should be possible in
-    this problem domain, but maybe we are? 
-
+    this problem domain, but it looks like we are? 
 
 <br><br><hr><br><code><b><font face="Helvetica, monospace">
               Aug 15, 2006
