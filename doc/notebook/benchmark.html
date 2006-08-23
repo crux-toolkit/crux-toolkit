@@ -1,7 +1,134 @@
                      
 Benchmark
                       </font></b></code>
-<br><br><hr><br><code><b><font face="Helvetica, monospace">
+                      <br><br>
+ <hr>
+                      <br><code><b><font face="Helvetica, monospace">
+              Aug 21, 2006
+                </font></b></code>
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Purpose:
+                </font></b></code><br><br>
+                To examine size of indexed databases on disk.
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Methods:
+                </font></b></code><br><br>
+                Run create_index on ecoli+contam.fasta, and examine the
+                relative size of the fasta file to the index, using unique
+                and all peptides (no enzyme specificity). Use this to
+                extrapolate for larger fasta files. This is done with ASCII
+                files, with whitespace and peptide delimiters.
+                <br><br>
+
+                <br><br>
+ 
+<br><br><code><b><font face="Helvetica, monospace">
+Results:
+                </font></b></code><br><br>
+<table border=1>
+<thead> <tr valign=top> 
+    <th> <p align=center>Proteome</p>
+		</th>
+    <th> <p align=center>Extrapolated</p>
+		</th>
+    <th> <p align=center>Fasta Size (GB)</p>
+		</th>
+    <th> <p align=center>Index Size (GB)</p>
+		</th>
+    <th>
+	</thead>
+    <tr>
+    <td>
+      <p align=center>
+      E. coli
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      N
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      0.00162
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      0.314
+      </p>
+	  </td>
+    </tr>
+
+    <tr>
+    <td>
+      <p align=center>
+      Human
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      Y
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+
+      </p>
+	  </td>
+    </tr>
+
+    <tr>
+    <td>
+      <p align=center>
+      MSDB
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      Y
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+
+      </p>
+	  </td>
+    </tr>
+
+    <tr>
+    <td>
+      <p align=center>
+      NrDB
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      Y
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+
+      </p>
+	  </td>
+    </tr>
+</table>
+<br><br>
+<hr>
+                      <br><code><b><font face="Helvetica, monospace">
               Aug 11, 2006
                 </font></b></code>
 
