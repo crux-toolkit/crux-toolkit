@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -13,6 +13,7 @@
 #include "protein.h"
 #include "carp.h"
 #include "peptide_constraint.h"
+#include "sorter.h"
 
 /**
  * \returns An (empty) database object.
@@ -23,7 +24,8 @@ DATABASE_T* allocate_database(void);
  * \returns A new database object.
  */
 DATABASE_T* new_database(
-  char*         filename ///< The file from which to parse the database. -in
+  char*         filename, ///< The file from which to parse the database. -in
+  BOOLEAN_T use_light_protein
   );         
 
 /**
@@ -56,11 +58,13 @@ BOOLEAN_T parse_database(
 /**
  * \returns FALSE if nth protein cannot be parsed or does not exist 
  */
+/**
 BOOLEAN_T get_database_protein_at_idx(
     DATABASE_T* database, ///< A parsed database object -in
     unsigned long int protein_idx, ///< The index of the protein to retrieve -in
     PROTEIN_T** protein   ///< A pointer to a pointer to a PROTEIN object -out
     );
+**/
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
@@ -99,7 +103,7 @@ BOOLEAN_T get_database_is_parsed(
 /**
  *\returns the total number of proteins of the database
  */
-int get_database_num_proteins(
+unsigned int get_database_num_proteins(
   DATABASE_T* database ///< the query database -in 
   );
 
@@ -116,6 +120,29 @@ FILE* get_database_file(
 void set_database_file(
   DATABASE_T* database, ///< the database to set it's fields -out
   FILE* file ///< the src file to add -in
+  );
+
+/**
+ *\returns the nth protein of the database
+ */
+PROTEIN_T* get_database_protein_at_idx(
+  DATABASE_T* database, ///< the query database -in 
+  unsigned int protein_idx ///< The index of the protein to retrieve -in
+  );
+
+/**
+ * sets the use_light_protein of the database
+ */
+void set_database_use_light_protein(
+  DATABASE_T* database, ///< the database to set it's fields -out
+  BOOLEAN_T use ///< should I use the light/heavy functionality?
+  );
+
+/**
+ *\returns TRUE|FALSE whether the database uses light/heavy
+ */
+BOOLEAN_T get_database_use_light_protein(
+  DATABASE_T* database ///< the query database -in 
   );
 
 /***********************************************
@@ -202,6 +229,7 @@ PEPTIDE_T* database_peptide_iterator_next(
 
 /**
  * Instantiates a new database_sorted_peptide_iterator from a database.
+ * uses a sorted_peptide_iterator as it's engine
  * \returns a DATABASE_SORTED_PEPTIDE_ITERATOR_T object.
  */
 DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(

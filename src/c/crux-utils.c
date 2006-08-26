@@ -94,8 +94,8 @@ char** parse_filename_path(char* file){
  * convert the integer into a string
  * \returns a heap allocated string
  */
-char* int_to_char(int i){
-  int digit = i / 10;
+char* int_to_char(unsigned int i){
+  unsigned int digit = i / 10;
   char* int_string = (char*)mycalloc(digit+2, sizeof(char));
   sprintf(int_string, "%d", i);
   return int_string;

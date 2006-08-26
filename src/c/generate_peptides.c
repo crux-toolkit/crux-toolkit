@@ -333,7 +333,7 @@ int main(int argc, char** argv){
      ************************************************/
     else{
       //create a new database
-      database = new_database(in_file);
+      database = new_database(in_file, TRUE);         //needs to change this....by given option
       
       //no sort, redundant
       if(!is_unique && sort_type == NONE){ 

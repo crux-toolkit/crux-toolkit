@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -420,13 +420,23 @@ void add_peptide_peptide_src(
 }
 
 /**
- * returns a point to the peptide_protein_association field of the peptide
+ * returns a pointer to the peptide_protein_association field of the peptide
  */
 PEPTIDE_SRC_T* get_peptide_peptide_src(
   PEPTIDE_T* peptide  ///< the peptide to query the peptide_peptide_src -in
   )
 {
   return peptide->peptide_src;
+}
+
+/**
+ * returns a pointer to the peptide's first parent protein field of the peptide
+ */
+PROTEIN_T* get_peptide_parent_protein(
+  PEPTIDE_T* peptide  ///< the peptide to query the parent_protein -in
+  )
+{
+  return get_peptide_src_parent_protein(peptide->peptide_src);
 }
 
 /**

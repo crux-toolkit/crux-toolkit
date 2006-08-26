@@ -1,13 +1,13 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.24 $
+# VERSION: $Revision: 1.25 $
 #######################################################################
 
 # The GNU C compiler is preferred.
 CC	= gcc
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
-DEBUG   = -DDEBUG -g -pg
+DEBUG   = -DDEBUG -g
 OFLAGS  = -O 
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -O -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
@@ -49,6 +49,7 @@ LIBOBJS =\
 	${OBJDIR}/carp.o \
 	${OBJDIR}/mass.o \
 	${OBJDIR}/index.o \
+	${OBJDIR}/sorter.o \
 	${OBJDIR}/get_ms2_spectrum.o \
 	${OBJDIR}/generate_peptides.o \
 	${OBJDIR}/create_index.o

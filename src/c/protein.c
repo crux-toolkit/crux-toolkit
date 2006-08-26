@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.32 $
+ * $Revision: 1.33 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -14,6 +14,7 @@
 #include "peptide.h"
 #include "protein.h"
 #include "peptide_src.h"
+#include "database.h"
 #include "carp.h"
 #include "peptide_constraint.h"
 
@@ -107,8 +108,58 @@ PROTEIN_T* new_protein(
   set_protein_annotation(protein, annotation);
   set_protein_offset(protein, offset);
   set_protein_protein_idx(protein, protein_idx);
+  set_protein_is_light(protein, FALSE);
   return protein;
 }         
+
+/**
+ * convert light protein to heavy, by parsing all the sequence from fasta file
+ * \returns TRUE if successfully converts the protein to heavy 
+ */
+BOOLEAN_T protein_to_heavy(
+  PROTEIN_T* protein ///< protein to convert to heavy -in 
+  )
+{
+  //protein already heavy
+  if(!protein->is_light){
+    return TRUE;
+  }
+  
+  FILE* file = get_database_file(protein->database);
+  
+  //rewind to the begining of the protein to include ">" line
+  fseek(file, protein->offset, SEEK_SET);
+  
+  //failed to parse the protein from fasta file
+  //protein offset is set in the parse_protein_fasta_file method
+  if(!parse_protein_fasta_file(protein ,file)){
+    carp(CARP_ERROR, "failed convert protein to heavy, cannot parse fasta file");
+    return FALSE;
+  }
+      
+  protein->is_light = FALSE;
+  return TRUE;
+}                            
+
+/**
+ * covert heavy protein back to light
+ * \returns TRUE if successfully converts the protein to light
+ */
+BOOLEAN_T protein_to_light(
+  PROTEIN_T* protein ///< protein to convert back to light -in 
+  )
+{
+  //protein already light
+  if(protein->is_light){
+    return TRUE;
+  }
+  //free all char* in protein object
+  free(protein->sequence);
+  free(protein->annotation);
+  free(protein->id);
+  
+  return (protein->is_light = TRUE);
+}                            
 
 /**
  * Frees an allocated protein object.
@@ -117,20 +168,27 @@ void free_protein(
   PROTEIN_T* protein ///< object to free -in
   )
 {
-  free(protein->id);
-  free(protein->sequence);
-  free(protein->annotation);
+  if(!protein->is_light){
+    free(protein->id);
+    free(protein->sequence);
+    free(protein->annotation);
+  }
   free(protein);
 }
 
 /**
  * Prints a protein object to file.
+ * if light protein coverts it to heavy protein
  */
 void print_protein(
   PROTEIN_T* protein, ///< protein to print -in
   FILE* file ///< output stream -out
   )
 {
+  //covnert to heavy protein
+  if(protein->is_light){
+    protein_to_heavy(protein);
+  }
   int   sequence_index;
   unsigned int   sequence_length = get_protein_length(protein);
   char* sequence = get_protein_sequence(protein);
@@ -153,6 +211,7 @@ void print_protein(
 
 /**
  * Copies protein object src to dest.
+ * assumes that the protein is heavy
  * dest must be a heap allocated object 
  */
 void copy_protein(
@@ -170,6 +229,7 @@ void copy_protein(
   set_protein_annotation(dest, annotation);
   set_protein_offset(dest, src->offset);
   set_protein_protein_idx(dest, src->protein_idx);
+  set_protein_is_light(dest, src->is_light);
 
   free(id);
   free(sequence);
@@ -374,24 +434,35 @@ static BOOLEAN_T read_raw_sequence
  *\returns the id of the protein
  * returns a heap allocated new copy of the id
  * user must free the return id
+ * assumes that the protein is heavy
  */
 char* get_protein_id(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
+  //if protein is light convert to heavy
+  if(protein->is_light){
+    die("protein is light, must be heavy");
+  }
+  
   int id_length = strlen(protein->id) +1; //+\0
   char* copy_id = 
     (char *)mymalloc(sizeof(char)*id_length);
+  
   return strncpy(copy_id, protein->id, id_length); 
 }
 
 /**
  *\returns a pointer to the id of the protein
+ * assumes that the protein is heavy
  */
 char* get_protein_id_pointer(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
+  if(protein->is_light){
+    die("protein is light, must be heavy");
+  }
   return protein->id; 
 }
 
@@ -415,11 +486,15 @@ void set_protein_id(
  *\returns the sequence of the protein
  * returns a heap allocated new copy of the sequence
  * user must free the return sequence 
+ * assumes that the protein is heavy
  */
 char* get_protein_sequence(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
+  if(protein->is_light){
+    die("protein is light, must be heavy");
+  }
   unsigned int sequence_length = strlen(protein->sequence) +1; //+\0
   char * copy_sequence = 
     (char *)mymalloc(sizeof(char)*sequence_length);
@@ -428,11 +503,15 @@ char* get_protein_sequence(
 
 /**
  *\returns a pointer to the sequence of the protein
+ * assumes that the protein is heavy
  */
 char* get_protein_sequence_pointer(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
+  if(protein->is_light){
+    die("protein is light, must be heavy");
+  }
   return protein->sequence;
 }
 
@@ -455,6 +534,7 @@ void set_protein_sequence(
 
 /**
  *\returns the length of the protein
+ * assumes that the protein is heavy
  */
 unsigned int get_protein_length(
   PROTEIN_T* protein ///< the query protein -in 
@@ -478,11 +558,15 @@ void set_protein_length(
  *\returns the annotation of the protein
  * returns a heap allocated new copy of the annotation
  * user must free the return annotation
+ * assumes that the protein is heavy
  */
 char* get_protein_annotation(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
+  if(protein->is_light){
+    die("protein is light, must be heavy");
+  }
   int annotation_length = strlen(protein->annotation) +1; //+\0
   char * copy_annotation = 
     (char *)mymalloc(sizeof(char)*annotation_length);
@@ -548,80 +632,52 @@ unsigned int get_protein_protein_idx(
 }
 
 /**
+ * sets the is_light field (is the protein a light protein?)
+ */
+void set_protein_is_light(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  BOOLEAN_T is_light ///< is the protein a light protein? -in
+  )
+{
+  protein->is_light = is_light;
+}
+
+/**
+ *\returns TRUE if the protein is light protein
+ */
+BOOLEAN_T get_protein_is_light(
+  PROTEIN_T* protein ///< the query protein -in 
+  )
+{
+  return protein->is_light;
+}
+
+/**
+ * sets the database for protein
+ */
+void set_protein_database(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  DATABASE_T*  database ///< Which database is this protein part of -in
+  )
+{
+  protein->database = database;
+}
+
+/**
+ *\returns Which database is this protein part of
+ */
+DATABASE_T* get_protein_database(
+  PROTEIN_T* protein ///< the query protein -in 
+  )
+{
+  return protein->database;
+}
+
+/**
  * Iterator
  * iterates over the peptides given a partent protein and constraints
  */
-/**
- * examines the peptide with context of it's parent protein to determine it's type
- * \returns the peptide type
- *
-PEPTIDE_TYPE_T examine_peptide_type(
-  char* sequence, ///< the parent protein -in
-  int start_idx, ///< the start index of peptide, 1 is the first residue -in 
-  int end_idx ///< the end index of peptide -in
-  )
-{
-  int current_idx = start_idx-1;
-  BOOLEAN_T start = TRUE;
-  BOOLEAN_T end =TRUE;
 
-  //check start position must be cleaved at K or R residue
-  if(current_idx != 0){
-    if(sequence[current_idx-1] != 'K' && sequence[current_idx-1] != 'R'){
-      start = FALSE;
-    }
-    else if(sequence[current_idx] == 'P'){
-      start = FALSE;
-    }         
-  }
-
-  //check if last residue is K or R not followed by P
-  if(end_idx < (int)strlen(sequence)){
-    if(sequence[end_idx-1] != 'K' && sequence[end_idx-1] != 'R'){
-      end = FALSE;
-    }
-    else if(sequence[end_idx] == 'P'){
-      end = FALSE;
-    }
-  }
-  
-  if(start && end){
-    return TRYPTIC;
-  }
-  else if(start || end){
-    return PARTIALLY_TRYPTIC;
-  }
-  else{
-    return NOT_TRYPTIC;
-  }
-}
-
-//FIXME only examines if there is a mis-cleavage or not
-// eventually would like to implement so that it will return the total number of mis-cleavage
-**
- * examines the peptide if it contains miscleavage sites within it's sequence
- * \returns 0 if no miscleavage sites, 1 if there exist at least 1 mis cleavage sites
- *
-int examine_peptide_cleavage(
-  char* sequence, ///< the parent protein -in
-  int start_idx, ///< the start index of peptide, 1 is the first residue -in 
-  int end_idx ///< the end index of peptide -in
-  )
-{
-  int current_idx = start_idx-1;
-
-  //check for instances of K, R in the sequence excluding the last residue
-  for(; current_idx < end_idx-1; ++current_idx){
-    if(sequence[current_idx] == 'K' || sequence[current_idx] == 'R'){
-      if(sequence[current_idx+1] != 'P'){
-        return 1;
-      }
-    }
-  }
-  return 0;
-
-}
-*/
 /**
  * find if there's a K or R in the middle of peptide, skips K|R with P after them
  * returns TRUE if no missed cleavage sites discovered
@@ -915,6 +971,7 @@ void set_seq_marker(
 /**
  * Instantiates a new peptide_iterator from a peptide.
  * \returns a PROTEIN_PEPTIDE_ITERATOR_T object.
+ * assumes that the protein is heavy
  */
 PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   PROTEIN_T* protein, ///< the protein's peptide to iterate -in
@@ -1036,6 +1093,16 @@ PEPTIDE_T* protein_peptide_iterator_next(
   protein_peptide_iterator->has_next = set_iterator_state(protein_peptide_iterator);
 
   return peptide;
+}
+
+/**
+ *\returns the protein that the iterator was created on
+ */
+PROTEIN_T* get_protein_peptide_iterator_portein(
+  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator ///< working protein_peptide_iterator -in
+  )
+{
+  return protein_peptide_iterator->protein;
 }
 
 /*

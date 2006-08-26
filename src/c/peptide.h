@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.26 $
+ * $Revision: 1.27 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -190,6 +190,13 @@ void add_peptide_peptide_src(
 PEPTIDE_SRC_T* get_peptide_peptide_src(
   PEPTIDE_T* peptide  ///< the peptide to query the peptide_peptide_src -in
 );
+
+/**
+ * returns a pointer to the peptide's first parent protein field of the peptide
+ */
+PROTEIN_T* get_peptide_parent_protein(
+  PEPTIDE_T* peptide  ///< the peptide to query the parent_protein -in
+  );
 
 /**
  * Residue Iterator

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -15,8 +15,9 @@
 #include "carp.h"
 #include "objects.h"
 #include "peptide_constraint.h"
+#include "sorter.h"
 
-#define MAX_PROTEINS 2500000 ///< The maximum number of proteins in a database.
+#define MAX_PROTEINS 2400000 ///< The maximum number of proteins in a database.
 
 /**
  * \struct database
@@ -27,10 +28,11 @@ struct database{
   FILE*        file;          ///< Open filehandle for this database.
                                 ///  A database has only one
                                 ///  associated file.
-  int num_proteins;             ///< Number of proteins in this database.
+  unsigned int num_proteins;             ///< Number of proteins in this database.
   BOOLEAN_T is_parsed;          ///< Has this database been parsed yet.
   PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database 
   unsigned long int size; ///< The size of the database in bytes (convenience)
+  BOOLEAN_T use_light_protein; //should I use the light/heavy protein option
 };    
 
 /**
@@ -39,7 +41,7 @@ struct database{
  */
 struct database_protein_iterator {
   DATABASE_T* database;  ///< The database whose proteins to iterate over 
-  int cur_protein;      ///< The index of the current protein
+  unsigned int cur_protein;      ///< The index of the current protein
 };
 
 /**
@@ -52,7 +54,9 @@ struct database_peptide_iterator {
   PROTEIN_PEPTIDE_ITERATOR_T* 
     cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
-  };
+  PROTEIN_T* prior_protein; ///< the protein that was used before the current working protein
+  BOOLEAN_T first_passed; ///< is it ok to convert prior_protein to light?
+};
 
 /**
  * \struct database_sorted_peptide_iterator
@@ -60,22 +64,14 @@ struct database_peptide_iterator {
  * specified sorted order.(mass, length, lexical)
  */
 struct database_sorted_peptide_iterator {
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; ///<The protein iterator. 
-  PROTEIN_PEPTIDE_ITERATOR_T* 
-    cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
-  PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
-  SORT_TYPE_T sort_type; ///< The sort type for this iterator (MASS, LENGTH, LEXICAL);
-  PEPTIDE_WRAPPER_T* peptide_wrapper; ///< a linklist of peptide wrappers
+  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator;
+  //DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; ///<The protein iterator. 
+  //PROTEIN_PEPTIDE_ITERATOR_T* 
+  //  cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
+  //PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
+  //SORT_TYPE_T sort_type; ///< The sort type for this iterator (MASS, LENGTH, LEXICAL);
+  //PEPTIDE_WRAPPER_T* peptide_wrapper; ///< a linklist of peptide wrappers
 };
-
-/**
- * \struct peptide_wrapper
- * \brief Object to wrap the peptide to build a linklist
- */
-struct peptide_wrapper{
-  PEPTIDE_WRAPPER_T* next_wrapper; ///< the next peptide wrapper
-  PEPTIDE_T* peptide;   ///< the core, the peptide
-};    
 
 /**
  * \returns An (empty) database object.
@@ -90,11 +86,13 @@ DATABASE_T* allocate_database(void){
  * \returns A new database object.
  */
 DATABASE_T* new_database(
-  char*         filename ///< The file from which to parse the database. -in
+  char*         filename, ///< The file from which to parse the database. -in
+  BOOLEAN_T use_light_protein //should I use the light/heavy protein option
   )
 {
   DATABASE_T* database = allocate_database();
   set_database_filename(database, filename);
+  database->use_light_protein = use_light_protein;
   return database;
 }  
 
@@ -105,7 +103,7 @@ void free_database(
   DATABASE_T* database ///< An allocated database -in
   )
 {
-  int protein_idx = 0;
+  unsigned int protein_idx = 0;
   
   free(database->filename);
   
@@ -128,7 +126,8 @@ void print_database(
   FILE* file    ///< output file stream -out             
   )
 {
- 
+  PROTEIN_T* protein = NULL;
+
   fprintf(file, "filename:%s\n", database->filename);
   fprintf(file, "is_parsed:");
   
@@ -138,7 +137,16 @@ void print_database(
     DATABASE_PROTEIN_ITERATOR_T* iterator = new_database_protein_iterator(database);
  
     while(database_protein_iterator_has_next(iterator)){
-      print_protein(database_protein_iterator_next(iterator), stdout);
+      protein = database_protein_iterator_next(iterator);
+      //if the database uses light/heavy functionality
+      if(database->use_light_protein){
+        protein_to_heavy(protein);
+      }
+      print_protein(protein, stdout);
+      //if the database uses light/heavy functionality
+      if(database->use_light_protein){
+        protein_to_light(protein);
+      }
     }
     free_database_protein_iterator(iterator);
   }
@@ -152,6 +160,7 @@ void print_database(
  * reads in all proteins in the fasta file and creates a protein object
  * and adds them to the database protein array
  * total proteins in fasta file must not exceed MAX_PROTEIN constant
+ * IF using light_protein functionality will not read in the sequence or id.
  * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T parse_database(
@@ -164,7 +173,7 @@ BOOLEAN_T parse_database(
   int line_length;
   size_t buf_length = 0;
   PROTEIN_T* new_protein;
-  int protein_idx = 0;
+  unsigned int protein_idx = 0;
 
   //check if already parsed
   if(database->is_parsed){
@@ -184,33 +193,40 @@ BOOLEAN_T parse_database(
         carp(CARP_ERROR, "exceeds protein index array size");
         return FALSE;
       }
-      //the new protein to be parsed
+      //the new protein to be added
       new_protein = allocate_protein();
 
-      //rewind to the begining of the protein to include ">" line
-      fseek(file, working_index, SEEK_SET);
-      
-      //failed to parse the protein from fasta file
-      //protein offset is set in the parse_protein_fasta_file method
-      if(!parse_protein_fasta_file(new_protein ,file)){
-        fclose(file);
-        free_protein(new_protein);
-        for(; protein_idx < database->num_proteins; ++protein_idx){
-          free_protein(database->proteins[protein_idx]);
-        }
-        database->num_proteins = 0;
-        carp(CARP_ERROR, "failed to parse fasta file");
-        return FALSE;
+      //do not parse the protein sequence if using light/heavy functionality
+      if(database->use_light_protein){
+        //set light and offset
+        set_protein_offset(new_protein, working_index);
+        set_protein_is_light(new_protein, TRUE);
       }
-
+      else{
+        //rewind to the begining of the protein to include ">" line
+        fseek(file, working_index, SEEK_SET);
+        
+        //failed to parse the protein from fasta file
+        //protein offset is set in the parse_protein_fasta_file method
+        if(!parse_protein_fasta_file(new_protein ,file)){
+          fclose(file);
+          free_protein(new_protein);
+          for(; protein_idx < database->num_proteins; ++protein_idx){
+            free_protein(database->proteins[protein_idx]);
+          }
+          database->num_proteins = 0;
+          carp(CARP_ERROR, "failed to parse fasta file");
+          return FALSE;
+        }
+        set_protein_is_light(new_protein, FALSE);
+      }
+      
+      //add protein to database
       database->proteins[database->num_proteins] = new_protein;
-
-      /* insert code need for light/heavy functionality for proteins
-      set_protein_offset(new_protein, working_index);
-      */
       ++database->num_proteins;
-      //set protein index
+      //set protein index, database
       set_protein_protein_idx(new_protein, database->num_proteins);
+      set_protein_database(new_protein, database);
     }
     working_index = ftell(file);
   }
@@ -220,7 +236,6 @@ BOOLEAN_T parse_database(
   database->file = file;
   return TRUE;
 }
-
 
 //FIXME needs to be implemented at some stage..if needed...
 /**
@@ -275,9 +290,30 @@ BOOLEAN_T get_database_is_parsed(
 }
 
 /**
+ * sets the use_light_protein of the database
+ */
+void set_database_use_light_protein(
+  DATABASE_T* database, ///< the database to set it's fields -out
+  BOOLEAN_T use ///< should I use the light/heavy functionality?
+  )
+{
+  database->use_light_protein = use;
+}
+
+/**
+ *\returns TRUE|FALSE whether the database uses light/heavy
+ */
+BOOLEAN_T get_database_use_light_protein(
+  DATABASE_T* database ///< the query database -in 
+  )
+{
+  return database->use_light_protein;
+}
+
+/**
  *\returns the total number of proteins of the database
  */
-int get_database_num_proteins(
+unsigned int get_database_num_proteins(
   DATABASE_T* database ///< the query database -in 
   )
 {
@@ -305,6 +341,16 @@ void set_database_file(
   database->file = file;
 }
 
+/**
+ *\returns the nth protein of the database
+ */
+PROTEIN_T* get_database_protein_at_idx(
+  DATABASE_T* database, ///< the query database -in 
+  unsigned int protein_idx ///< The index of the protein to retrieve -in
+  )
+{
+  return database->proteins[protein_idx-1];
+}
 
 
 /***********************************************
@@ -386,9 +432,10 @@ PROTEIN_T* database_protein_iterator_next(
 /**
  * \returns the protein to the corresponding protein_idx in the database.
  */
+/*
 PROTEIN_T* database_protein_iterator_protein_idx(
   DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator, ///< the iterator of interest -in
-  int protein_idx ///< protein_idx to which protein to return -in
+  unsigned int protein_idx ///< protein_idx to which protein to return -in
   )
 {
   if(!database_protein_iterator_has_next(database_protein_iterator)){
@@ -400,9 +447,10 @@ PROTEIN_T* database_protein_iterator_protein_idx(
   }
   return database_protein_iterator->database->proteins[protein_idx-1];
 }
+*/
 
 /***********************************************
- * database_peptide_Iterators
+ * database_peptide_Iterators - can use the light protein functionality to save space
  ***********************************************/
 
 /**
@@ -414,11 +462,11 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
   )
 {
-  PROTEIN_T* next_protein;
+  PROTEIN_T* next_protein = NULL;
   
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator =
     (DATABASE_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_PEPTIDE_ITERATOR_T));
-
+  
   //set a new protein iterator
   database_peptide_iterator->database_protein_iterator =
     new_database_protein_iterator(database);
@@ -431,22 +479,52 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
     next_protein =
       database_protein_iterator_next(database_peptide_iterator->database_protein_iterator);
 
+    //if using light/heavy functionality parse the light protein
+    if(database->use_light_protein && get_protein_is_light(next_protein)){
+      if(!protein_to_heavy(next_protein)){
+        carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
+        free_database_protein_iterator(database_peptide_iterator->database_protein_iterator);
+        free(database_peptide_iterator);
+        exit(1);
+      }
+    }
+
     //set new protein peptide iterator
     database_peptide_iterator->cur_protein_peptide_iterator =
       new_protein_peptide_iterator(next_protein, database_peptide_iterator->peptide_constraint);
  
     //if first protein does not contain a match peptide, reinitailize
     while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+      // covert the heavy back to light
+      if(database->use_light_protein && !get_protein_is_light(next_protein)){
+        protein_to_light(next_protein);
+      }
+
       //end of list of peptides for database_peptide_iterator
       if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
         break;
       }
       else{ //create new protein_peptide_iterator for next protein
+        //free old iterator
         free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
+        
+        //get next protein
+        next_protein = 
+          database_protein_iterator_next(database_peptide_iterator->database_protein_iterator);
+
+         //if using light/heavy functionality parse the light protein
+        if(database->use_light_protein && get_protein_is_light(next_protein)){
+          if(!protein_to_heavy(next_protein)){
+            carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
+            free_database_protein_iterator(database_peptide_iterator->database_protein_iterator);
+            free(database_peptide_iterator);
+            exit(1);
+          }
+        }
+        //creat new protein_peptide_iterator
         database_peptide_iterator->cur_protein_peptide_iterator =
-          new_protein_peptide_iterator(
-            database_protein_iterator_next(database_peptide_iterator->database_protein_iterator), 
-            database_peptide_iterator->peptide_constraint);
+          new_protein_peptide_iterator(next_protein, 
+                                       database_peptide_iterator->peptide_constraint);
       }
     }
   }
@@ -456,6 +534,9 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
     free(database_peptide_iterator);
     exit(1);
   }
+  //set the current working protein
+  database_peptide_iterator->prior_protein = next_protein;
+  
   return database_peptide_iterator;
 }
 
@@ -493,23 +574,68 @@ PEPTIDE_T* database_peptide_iterator_next(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
   )
 {
+   //did you reset working protein?
+  BOOLEAN_T reset = FALSE;
+  
+  //the ppeptide to return
   PEPTIDE_T* next_peptide =
     protein_peptide_iterator_next(database_peptide_iterator->cur_protein_peptide_iterator);
   
+  DATABASE_T* database = database_peptide_iterator->database_protein_iterator->database;
+  
   //reset database_peptide_iterator if needed
   while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+    reset = TRUE;
+    PROTEIN_T* next_protein = NULL; 
+    
+    // covert the heavy back to light
+    if(database->use_light_protein && next_protein != NULL && !get_protein_is_light(next_protein)){
+      protein_to_light(next_protein);
+    }
+    
     //end of list of peptides for database_peptide_iterator
     if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
       break;
     }
     else{ //create new protein_peptide_iterator for next protein
+      //free old iterator
       free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
+      
+      //get next protein
+      next_protein = 
+        database_protein_iterator_next(database_peptide_iterator->database_protein_iterator);
+      
+      //if using light/heavy functionality parse the light protein
+      if(database->use_light_protein && get_protein_is_light(next_protein)){
+        if(!protein_to_heavy(next_protein)){
+          carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
+          free_database_protein_iterator(database_peptide_iterator->database_protein_iterator);
+          free(database_peptide_iterator);
+          exit(1);
+        }
+      }
+      //creat new protein_peptide_iterator
       database_peptide_iterator->cur_protein_peptide_iterator =
-        new_protein_peptide_iterator(
-          database_protein_iterator_next(database_peptide_iterator->database_protein_iterator), 
-          database_peptide_iterator->peptide_constraint);
+        new_protein_peptide_iterator(next_protein, 
+                                     database_peptide_iterator->peptide_constraint);
+    }        
+  }
+
+  //are we using the light functionality?
+  if(database->use_light_protein){
+    //get the current working protein
+    PROTEIN_T* protein_bye = get_protein_peptide_iterator_portein(database_peptide_iterator->cur_protein_peptide_iterator);
+    //set first passed, shows that we extraced at least one protein since we moved on to the next protein
+    if(!reset && !database_peptide_iterator->first_passed){
+      database_peptide_iterator->first_passed = TRUE;
+    }
+    //convert prior_protein to light
+    else if(!reset && database_peptide_iterator->first_passed && (protein_bye != database_peptide_iterator->prior_protein)){
+      protein_to_light(database_peptide_iterator->prior_protein);
+      database_peptide_iterator->prior_protein = protein_bye;
     }
   }
+  
   return next_peptide;
 }
 
@@ -518,457 +644,8 @@ PEPTIDE_T* database_peptide_iterator_next(
  ***********************************/
 
 /**
- *wrap the peptide up in the a peptide_wrapper object
- *\returns a peptide_wrapper object that contains the peptide
- */
-PEPTIDE_WRAPPER_T* wrap_peptide(
-  PEPTIDE_T* peptide ///< peptide to be wrapped -in
-  )
-{
-  PEPTIDE_WRAPPER_T* new_wrapper = (PEPTIDE_WRAPPER_T*)mycalloc(1, sizeof(PEPTIDE_WRAPPER_T));
-  new_wrapper->peptide = peptide;
-  return new_wrapper;    
-}
-
-
-/**
- *Initialize the peptide iterator
- *\returns FALSE if there are no peptides to return, TRUE if peptide iterator has at least one peptide
- */
-BOOLEAN_T initialize_peptide_iterator(
-  DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator, ///< initialize iterator -in
-  DATABASE_T* database, ///< the database of interest -in
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
-)
-{
-  PROTEIN_T* next_protein = NULL;
-
-  //set a new protein iterator
-   database_sorted_peptide_iterator->database_protein_iterator = new_database_protein_iterator(database);
-
-  //set peptide constraint
-  database_sorted_peptide_iterator->peptide_constraint = peptide_constraint;
-
-  //are there any proteins to create peptides?
-  if(database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator)){
-    next_protein =
-      database_protein_iterator_next(database_sorted_peptide_iterator->database_protein_iterator);
-
-    //set new protein peptide iterator
-    database_sorted_peptide_iterator->cur_protein_peptide_iterator =
-      new_protein_peptide_iterator(next_protein, database_sorted_peptide_iterator->peptide_constraint);
- 
-    //if first protein does not contain a match peptide, reinitailize
-    while(!protein_peptide_iterator_has_next(database_sorted_peptide_iterator->cur_protein_peptide_iterator)){
-      //end of list of peptides for database_peptide_iterator
-      if(!database_protein_iterator_has_next(database_sorted_peptide_iterator->database_protein_iterator)){
-        break;
-      }
-      else{ //create new protein_peptide_iterator for next protein
-        free_protein_peptide_iterator(database_sorted_peptide_iterator->cur_protein_peptide_iterator);
-        database_sorted_peptide_iterator->cur_protein_peptide_iterator =
-          new_protein_peptide_iterator(
-            database_protein_iterator_next(database_sorted_peptide_iterator->database_protein_iterator), 
-            peptide_constraint);
-      }
-    }
-    if(protein_peptide_iterator_has_next(database_sorted_peptide_iterator->cur_protein_peptide_iterator)){
-      return TRUE;
-    }
-  }
-  
-  return FALSE;
-}
-
-/**
- * compares two peptides with the give sort type (length, mass, lexical)
- * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
- */
-int compareTo(
-  PEPTIDE_T* peptide_one, ///< peptide to compare one -in
-  PEPTIDE_T* peptide_two, ///< peptide to compare two -in
-  SORT_TYPE_T sort_type  ///< sort type(LENGTH, MASS, LEXICAL) -in
-  )
-{
-  //length order
-  if(sort_type == LENGTH){
-    if(get_peptide_length(peptide_one) >
-       get_peptide_length(peptide_two)){
-      return 1;
-    }
-    else if(get_peptide_length(peptide_one) ==
-            get_peptide_length(peptide_two)){
-      return 0;
-    }
-    else{
-      return -1;
-    }
-  }
-  //mass order
-  else if(sort_type == MASS){
-    return compare_float(get_peptide_peptide_mass(peptide_one), 
-                         get_peptide_peptide_mass(peptide_two));
-  }
-  //lexicographic order
-  else if(sort_type == LEXICAL){
-    char* peptide_one_sequence = get_peptide_sequence_pointer(peptide_one);
-    char* peptide_two_sequence = get_peptide_sequence_pointer(peptide_two);
-    int peptide_one_length = get_peptide_length(peptide_one);
-    int peptide_two_length = get_peptide_length(peptide_two);
-    int current_idx = 0;
-    
-    //check if all alphabetically identical
-    while(current_idx < peptide_one_length &&
-          current_idx < peptide_two_length){
-      if(peptide_one_sequence[current_idx] > peptide_two_sequence[current_idx]){
-        return 1;
-      }
-      else if(peptide_one_sequence[current_idx] < peptide_two_sequence[current_idx]){
-        return -1;
-      }
-      ++current_idx;
-    }
-    
-    //alphabetically identical, check if same length
-    if(peptide_one_length > peptide_two_length){
-      return 1;
-    }
-    else if(peptide_one_length < peptide_two_length){
-      return -1;
-    }
-    else{
-      return 0;
-    }
-  }
-  
-  die("ERROR: no matching sort_type");
-  //quiet compiler
-  return 0;
-}
-
-/**
- *check if any duplicate peptides exist to the first peptide on the wrapper
- *then, merge duplicate peptides to the first peptide 
- *assumes that the list is sorted by mass
- *\returns the wrapper list which first peptide is unique in the list
- */
-PEPTIDE_WRAPPER_T* merge_duplicates_same_list(
-  PEPTIDE_WRAPPER_T* wrapper_list  ///< peptide wrapper list examine -mod
-  )
-{
-  PEPTIDE_WRAPPER_T* current = wrapper_list;
-  //for all peptides that have equal mass
-  while(current->next_wrapper != NULL &&
-        compareTo(wrapper_list->peptide, current->next_wrapper->peptide, MASS)==0){  
-    //check identical peptide
-    if(compareTo(wrapper_list->peptide, current->next_wrapper->peptide, LEXICAL)==0){
-      PEPTIDE_WRAPPER_T* wrapper_to_delete = current->next_wrapper;
-      //merge peptides
-      merge_peptides(wrapper_list->peptide, wrapper_to_delete->peptide);
-      current->next_wrapper = current->next_wrapper->next_wrapper;
-      free(wrapper_to_delete);
-    }
-    else{
-      current = current->next_wrapper;
-    }
-  }
-  return wrapper_list;
-}
-
-/**
- *check if any duplicate peptides exist in the wrapper_list_second
- *compared to the first peptide of the wrapper_list_first
- *then, remove the peptide from seond list and merge 
- *duplicate peptides to the first peptide in the first list
- *assumes that the list is sorted by mass
- *\returns the modified second wrapper list
- */
-PEPTIDE_WRAPPER_T* merge_duplicates_different_list(
-  PEPTIDE_WRAPPER_T* wrapper_list_first,  ///< fist peptide wrapper list examine -mod
-  PEPTIDE_WRAPPER_T* wrapper_list_second  ///<second peptide wrapper list examine -mod
-  )
-{
-  PEPTIDE_WRAPPER_T* current = wrapper_list_second;
-  PEPTIDE_WRAPPER_T* previous = wrapper_list_second;
-  
-  while(current != NULL &&
-        compareTo(wrapper_list_first->peptide, current->peptide, MASS) == 0){
-    
-    if(compareTo(wrapper_list_first->peptide, current->peptide, LEXICAL) == 0){
-      PEPTIDE_WRAPPER_T* wrapper_to_delete = current;
-      //merge peptides
-      merge_peptides(wrapper_list_first->peptide, wrapper_to_delete->peptide);
-      //for first wrapper in the list 
-      if(previous == current){
-        current = current->next_wrapper;
-        previous = current;
-        wrapper_list_second = current;
-      }
-      else{
-        current = current->next_wrapper;
-        previous->next_wrapper = current;
-      }
-      free(wrapper_to_delete);
-    }
-    else{
-      if(previous == current){
-        current = current->next_wrapper;
-      }
-      else{
-        previous = current;
-        current = current->next_wrapper;
-      }
-    }
-  }
-  return wrapper_list_second;
-}
-
-/**
- * merge wrapper list one and list two by sort type
- * assumes that each list one and two are sorted by the same sort type
- *\returns a sorted wrapper list result of merging list one and two
- */   
-PEPTIDE_WRAPPER_T* merge(
-  PEPTIDE_WRAPPER_T* wrapper_one, ///< fist peptide wrapper list -in
-  PEPTIDE_WRAPPER_T* wrapper_two, ///< second peptide wrapper list -in
-  SORT_TYPE_T sort_type, ///< the sort type of the new merged list -in
-  BOOLEAN_T unique ///< do you merge two lists into a uniqe list? -in
-  )
-{
-  PEPTIDE_WRAPPER_T* wrapper_final = NULL;
-  PEPTIDE_WRAPPER_T* wrapper_current = wrapper_final;
-  int compared;
-
-  //loop around until there are no more wrappers to merge
- LOOP:
-
-  if(wrapper_one != NULL || wrapper_two != NULL){
-    if(wrapper_one == NULL){
-      //there are wrappers on the current list
-      if(wrapper_current != NULL){
-        wrapper_current->next_wrapper = wrapper_two;
-      }
-      //there are no wrappers on the current list
-      else{
-        wrapper_final = wrapper_two;
-      }
-      wrapper_two = NULL;
-    }
-    else if(wrapper_two == NULL){
-      //there are wrappers on the current list
-      if(wrapper_current != NULL){
-        wrapper_current->next_wrapper = wrapper_one;        
-      }
-      //there are no wrappers on the current list
-      else{
-        wrapper_final = wrapper_one;
-      }
-      wrapper_one = NULL;
-    }
-    
-    else if((compared = 
-             compareTo(wrapper_one->peptide, wrapper_two->peptide, sort_type)) == 1){
-      //there are wrappers on the current list
-      if(wrapper_current != NULL){
-        wrapper_current->next_wrapper = wrapper_two;        
-        wrapper_current = wrapper_current->next_wrapper;
-      }
-      //there are no wrappers on the current list
-      else{
-        wrapper_current = wrapper_two;
-        wrapper_final = wrapper_current;
-      }
-      wrapper_two = wrapper_two->next_wrapper;
-    }
-    else{
-      int compared_mass = -1;
-
-      //if duplicate peptide, merge into one peptide only if unique is TRUE
-      if(compared == 0 && unique){
-        //only check if same peptide if mass is identical
-        if(sort_type == MASS ||
-           (compared_mass = compareTo(wrapper_one->peptide, wrapper_two->peptide, MASS))==0){
-             //must be identical peptide, since mass & lexicographically same
-          if(sort_type == LEXICAL ||
-             compareTo(wrapper_one->peptide, wrapper_two->peptide, LEXICAL)==0){
-            
-            PEPTIDE_WRAPPER_T* wrapper_to_delete = wrapper_two;
-            //merge peptides
-            merge_peptides(wrapper_one->peptide, wrapper_two->peptide);
-            wrapper_two = wrapper_two->next_wrapper;
-            free(wrapper_to_delete);
-          }
-        }
-        //merge all other instances of the same peptide in the list before adding to master list
-        if(sort_type == MASS || sort_type == LENGTH){
-          wrapper_one = merge_duplicates_same_list(wrapper_one);
-          wrapper_two = merge_duplicates_different_list(wrapper_one, wrapper_two);
-        }
-      }
-
-      //when sorting by length and unique, sort also by mass to speed up the unique check
-      //thus, when identical length add the peptide with smaller mass to the list first
-      if(unique && sort_type == LENGTH && compared == 0 && compared_mass == 1){
-        //there are wrappers on the current list
-        if(wrapper_current != NULL){
-          wrapper_current->next_wrapper = wrapper_two;        
-          wrapper_current = wrapper_current->next_wrapper;
-        }
-        //there are no wrappers on the current list
-        else{
-          wrapper_current = wrapper_two;
-          wrapper_final = wrapper_current;
-        }
-        wrapper_two = wrapper_two->next_wrapper;
-      }
-      else{
-        //add wrapper to the merged list
-        //there are wrappers on the current list
-        if(wrapper_current != NULL){
-          wrapper_current->next_wrapper = wrapper_one; 
-          wrapper_current = wrapper_current->next_wrapper;
-        }
-        //there are no wrappers on the current list
-        else{
-          wrapper_current = wrapper_one;
-          wrapper_final = wrapper_current;
-        }
-        wrapper_one = wrapper_one->next_wrapper;
-      }
-    }
-    goto LOOP;
-  }
-  return wrapper_final;
-}
-
-
-/**
- * spilt a wrapper list into two equal or almost equal size lists
- * \returns array of two pointers of each split array
- * user must free the array, heap allocated
- */
-
-PEPTIDE_WRAPPER_T** split(
-  PEPTIDE_WRAPPER_T* wrapper_src ///< wrapper list to split -in
-  )
-{
-  PEPTIDE_WRAPPER_T** split_wrapper = 
-    (PEPTIDE_WRAPPER_T**)mycalloc(2, sizeof(PEPTIDE_WRAPPER_T*));
-
-  PEPTIDE_WRAPPER_T* split1 = NULL;
-  PEPTIDE_WRAPPER_T* split1_current = split1;
-  PEPTIDE_WRAPPER_T* split2 = NULL;
-  PEPTIDE_WRAPPER_T* split2_current = split2;
-  BOOLEAN_T one = TRUE;
-
-  //split wrapper until no more wrapper left in wrapper_src
-  while(wrapper_src != NULL){
-    //do i add it to the first list?
-    if(one){
-      //first time adding wrapper
-      if(split1_current == NULL){
-        split1_current = wrapper_src;
-        split1 = split1_current;       
-      }
-      //add one wrapper to the end of the first list 
-      else{
-        split1_current->next_wrapper = wrapper_src;
-        split1_current = split1_current->next_wrapper;
-      }
-      one = FALSE;
-    }
-    //add to second list
-    else{
-      //first time adding wrapper
-      if(split2_current == NULL){
-        split2_current = wrapper_src;
-        split2 = split2_current;
-      }
-      //add one wrapper to the end of the second list 
-      else{
-        split2_current->next_wrapper = wrapper_src;
-        split2_current = split2_current->next_wrapper;
-      }
-      one = TRUE;
-    }
-    wrapper_src = wrapper_src->next_wrapper;
-  }
-  
-  //add list one and two to thesplit_wrapper to return
-  if(split1 != NULL){
-    split1_current->next_wrapper = NULL;
-    split_wrapper[0] = split1;
-  }
-
-  if(split2 != NULL){
-    split2_current->next_wrapper = NULL;
-    split_wrapper[1] = split2;
-  }
-
-  return split_wrapper;
-}
-
-/**
- * merge sort wrapper list by the sort type
- *\returns a sorted wrapper list
- */   
-PEPTIDE_WRAPPER_T* merge_sort(
-  PEPTIDE_WRAPPER_T* wrapper_list, ///< the list of wrappers to sort -in
-  SORT_TYPE_T sort_type, ///<the sort type (length, mass, lexicographical) -in
-  BOOLEAN_T unique ///< return a list of unique peptides? -in
-  )
-{
-  PEPTIDE_WRAPPER_T* final_sorted_list = NULL;
-  PEPTIDE_WRAPPER_T* first_half = NULL;
-  PEPTIDE_WRAPPER_T* second_half = NULL;
-  
-  //split wrapper list into two equal lists
-  PEPTIDE_WRAPPER_T** wrapper_split = 
-    split(wrapper_list);
-
-  first_half = wrapper_split[0];
-  second_half = wrapper_split[1];
-  free(wrapper_split);
-
-
-  //recursivelly sort each half
-  if(first_half != NULL && second_half != NULL){
-    first_half = merge_sort(first_half, sort_type, unique);
-    second_half = merge_sort(second_half, sort_type, unique);
-    final_sorted_list = merge(first_half, second_half, sort_type, unique);
-  }
-  else if(first_half != NULL || second_half != NULL){
-    final_sorted_list = merge(first_half, second_half, sort_type, unique);
-  }
-  return final_sorted_list;
-}
-
-/**
- * Frees an allocated database_sorted_peptide_iterator object.
- * does not free the peptide it contains
- */
-void free_peptide_wrapper(
-  PEPTIDE_WRAPPER_T* peptide_wrapper ///< the wrapper to free -in
-  )
-{
-  free(peptide_wrapper);
-}
-
-/**
- * Frees an allocated database_sorted_peptide_iterator object.
- * This frees the peptide the wrapper contains as well
- */
-void free_peptide_wrapper_all(
-  PEPTIDE_WRAPPER_T* peptide_wrapper ///< the wrapper to free -in
-  )
-{
-  free_peptide(peptide_wrapper->peptide);
-  free(peptide_wrapper);
-}
-
-unsigned long total_number_peptide = 0;
-/**
  * Instantiates a new database_sorted_peptide_iterator from a database.
+ * uses a sorted_peptide_iterator as it's engine
  * \returns a DATABASE_SORTED_PEPTIDE_ITERATOR_T object.
  */
 DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
@@ -978,99 +655,23 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   BOOLEAN_T unique ///< only return unique peptides? -in
   )
 {
-  PEPTIDE_WRAPPER_T* master_list_wrapper = NULL;
-  PEPTIDE_WRAPPER_T* list_wrapper = NULL;
-  PEPTIDE_WRAPPER_T* current_wrapper = NULL;
-  BOOLEAN_T start = TRUE;
-
+  //create database sorted peptide iterator
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator =
     (DATABASE_SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_SORTED_PEPTIDE_ITERATOR_T));
+
+  //create the database peptide iterator
+  DATABASE_PEPTIDE_ITERATOR_T* db_peptide_iterator =
+    new_database_peptide_iterator(database, peptide_constraint);
+
+  //create a sorted peptide iterator that will sort all the peptides from db peptide iterator
+  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =
+    new_sorted_peptide_iterator_database(db_peptide_iterator, sort_type, unique);
+
+  //set sorted_peptide_iterator
+  database_sorted_peptide_iterator->sorted_peptide_iterator = sorted_peptide_iterator;
   
-  //The protein iterator 
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator = NULL;
-  
- /// The peptide iterator for the current protein
-  PROTEIN_PEPTIDE_ITERATOR_T* cur_protein_peptide_iterator = NULL;
+  free_database_peptide_iterator(db_peptide_iterator); //CHECK ME might wanna check this...
 
-  //initialize, return true if there's at least one peptide to return
-  if(initialize_peptide_iterator(
-    database_sorted_peptide_iterator, 
-    database,
-    peptide_constraint)){
-    
-    //strip all sub iterators from database, just to avoid mutiple references
-    database_protein_iterator = database_sorted_peptide_iterator->database_protein_iterator;
-    cur_protein_peptide_iterator = database_sorted_peptide_iterator->cur_protein_peptide_iterator;
-    database_sorted_peptide_iterator->database_protein_iterator = NULL;
-    database_sorted_peptide_iterator->cur_protein_peptide_iterator = NULL;
-
-    do{
-      //move to next protein if no peptides from current protein
-      if(!protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
-        //if there's more proteins in database...
-        if(database_protein_iterator_has_next(database_protein_iterator)){
-          //create new protein_peptide_iterator for next protein
-          free_protein_peptide_iterator(cur_protein_peptide_iterator);
-          cur_protein_peptide_iterator =
-            new_protein_peptide_iterator(
-               database_protein_iterator_next(database_protein_iterator), peptide_constraint);
-        }
-      }
-      //iterate over all peptides in a protein
-      while(protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
-         //debug purpuse
-        ++total_number_peptide;
-        if(total_number_peptide % 1000000 == 0){
-           carp(DEBUG, "number of peptides(not unique): %u", total_number_peptide); 
-        }
-
-        if(start){
-          start = FALSE;
-          current_wrapper =
-            wrap_peptide(protein_peptide_iterator_next(cur_protein_peptide_iterator));
-          list_wrapper = current_wrapper;
-        }
-        else{
-          //wrap the next protein
-          current_wrapper->next_wrapper =
-            wrap_peptide(protein_peptide_iterator_next(cur_protein_peptide_iterator));
-          current_wrapper = current_wrapper->next_wrapper;
-        }
-        
-        //end of peptides from one parent protein merge list into master list
-        if(!protein_peptide_iterator_has_next(cur_protein_peptide_iterator)){
-          //add all peptides to the complied master list
-          if(master_list_wrapper == NULL){
-            master_list_wrapper = list_wrapper;
-          }
-          else{
-            current_wrapper->next_wrapper = master_list_wrapper;
-            master_list_wrapper =  list_wrapper;
-            current_wrapper = NULL;
-          }
-          list_wrapper = NULL;      
-          start = TRUE;
-        }
-      }
-    } //iterate over all proteins in database
-    while(database_protein_iterator_has_next(database_protein_iterator));
-    
-    carp(DEBUG, "total number of peptides(not unique): %u", total_number_peptide); 
-
-    //sort the master list using merge sort
-    master_list_wrapper = merge_sort(master_list_wrapper, sort_type, unique);
-
-    database_sorted_peptide_iterator->peptide_wrapper = master_list_wrapper;
-  }
-  else{ //no peptides to be created
-    free_database_protein_iterator(database_sorted_peptide_iterator->database_protein_iterator);
-    free_protein_peptide_iterator(database_sorted_peptide_iterator->cur_protein_peptide_iterator);
-    database_sorted_peptide_iterator->peptide_wrapper = NULL;
-    return database_sorted_peptide_iterator;
-  }
-
-  free_database_protein_iterator(database_protein_iterator);
-  free_protein_peptide_iterator(cur_protein_peptide_iterator);
   return database_sorted_peptide_iterator;
 }
 
@@ -1082,10 +683,7 @@ BOOLEAN_T database_sorted_peptide_iterator_has_next(
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator ///< the iterator of interest -in
   )
 {
-  if(database_sorted_peptide_iterator->peptide_wrapper != NULL){
-    return TRUE;
-  }
-  return FALSE;
+  return sorted_peptide_iterator_has_next(database_sorted_peptide_iterator->sorted_peptide_iterator);
 }
 
 /**
@@ -1096,14 +694,7 @@ PEPTIDE_T* database_sorted_peptide_iterator_next(
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator ///< the iterator of interest -in
   )
 {
-  //strip the peptide out of the peptide wrapper
-  PEPTIDE_T* next_peptide = database_sorted_peptide_iterator->peptide_wrapper->peptide;
-  //free the empty peptide wrapper
-  PEPTIDE_WRAPPER_T* old_wrapper =  database_sorted_peptide_iterator->peptide_wrapper;
-  database_sorted_peptide_iterator->peptide_wrapper = 
-    database_sorted_peptide_iterator->peptide_wrapper->next_wrapper;
-  free_peptide_wrapper(old_wrapper);
-  return next_peptide;
+  return sorted_peptide_iterator_next(database_sorted_peptide_iterator->sorted_peptide_iterator);
 }
 
 /**
@@ -1113,14 +704,7 @@ void free_database_sorted_peptide_iterator(
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator ///< the iterator to free -in
   )
 {
-  PEPTIDE_WRAPPER_T* old_wrapper = NULL;
-  //free all peptide wrappers the iterator contains
-  while(database_sorted_peptide_iterator->peptide_wrapper != NULL){
-    old_wrapper = database_sorted_peptide_iterator->peptide_wrapper;
-    database_sorted_peptide_iterator->peptide_wrapper = 
-      database_sorted_peptide_iterator->peptide_wrapper->next_wrapper;
-    free_peptide_wrapper_all(old_wrapper);
-  }
+  free_sorted_peptide_iterator(database_sorted_peptide_iterator->sorted_peptide_iterator);
   free(database_sorted_peptide_iterator);
 }
 

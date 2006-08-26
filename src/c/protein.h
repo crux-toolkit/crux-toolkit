@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -32,6 +32,22 @@ PROTEIN_T* new_protein(
   unsigned long int offset, ///< The file location in the source file in the database -in
   unsigned int protein_idx ///< The index of the protein in it's database. -in
   );         
+
+/**
+ * convert light protein to heavy, by parsing all the sequence from fasta file
+ * \returns TRUE if successfully converts the protein to heavy 
+ */
+BOOLEAN_T protein_to_heavy(
+  PROTEIN_T* protein ///< protein to convert to heavy -in 
+  );
+                         
+/**
+ * covert heavy protein back to light
+ * \returns TRUE if successfully converts the protein to light
+ */
+BOOLEAN_T protein_to_light(
+  PROTEIN_T* protein ///< protein to convert back to light -in 
+  );
 
 /**
  * Frees an allocated protein object.
@@ -190,7 +206,35 @@ unsigned int get_protein_protein_idx(
   );
 
 
+/**
+ * sets the is_light field (is the protein a light protein?)
+ */
+void set_protein_is_light(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  BOOLEAN_T is_light ///< is the protein a light protein? -in
+  );
 
+/**
+ *\returns TRUE if the protein is light protein
+ */
+BOOLEAN_T get_protein_is_light(
+  PROTEIN_T* protein ///< the query protein -in 
+  );
+
+/**
+ * sets the database for protein
+ */
+void set_protein_database(
+  PROTEIN_T* protein, ///< the protein to set it's fields -out
+  DATABASE_T*  database ///< Which database is this protein part of -in
+  );
+
+/**
+ *\returns Which database is this protein part of
+ */
+DATABASE_T* get_protein_database(
+  PROTEIN_T* protein ///< the query protein -in 
+  );
 
 
 /**
@@ -224,6 +268,12 @@ BOOLEAN_T protein_peptide_iterator_has_next(
 PEPTIDE_T* protein_peptide_iterator_next(
     PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator);
 
+/**
+ *\returns the protein that the iterator was created on
+ */
+PROTEIN_T* get_protein_peptide_iterator_portein(
+  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator ///< working protein_peptide_iterator -in
+  );
 /*
  * Local Variables:
  * mode: c

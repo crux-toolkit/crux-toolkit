@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -11,6 +11,7 @@
 #include "objects.h"
 #include "peptide.h"
 #include "protein.h"
+#include "sorter.h"
 #include "carp.h"
 #include "peptide_constraint.h"
 #include "database.h"
@@ -200,7 +201,7 @@ void set_index_is_unique(
   );
 
 /***********************************************
- * Iterators
+ * Iterators index
  ***********************************************/
 
 /**
@@ -234,6 +235,82 @@ BOOLEAN_T index_peptide_iterator_has_next(
 PEPTIDE_T* index_peptide_iterator_next(
     INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator ///< the iterator of interest -in
     );
+
+/***********************************************
+ * Iterators BIN
+ ***********************************************/
+
+
+/**
+ * Instantiates a new bin_peptide_iterator from a gvien bin file handler.
+ * \returns a new heap allocated bin_peptide_iterator object
+ */
+BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
+  INDEX_T* index, ///< The index object which we are iterating over -in
+  FILE* file
+  );
+
+/**
+ *  The basic iterator functions.
+ * \returns The next peptide in the index.
+ */
+PEPTIDE_T* bin_peptide_iterator_next(
+  BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< the bin_peptide_iterator to get peptide -in
+  );
+
+/**
+ * The basic iterator functions.
+ * check to see if the bin_peptide_iterator has more peptides to return
+ *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T bin_peptide_iterator_has_next(
+  BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< the bin_peptide_iterator to initialize -in
+  );
+
+/**
+ * Frees an allocated bin_peptide_iterator object.
+ */
+void free_bin_peptide_iterator(
+  BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< the iterator to free -in
+  );
+
+/***********************************************
+ * Iterators sorted BIN
+ ***********************************************/
+
+/**
+ * Instantiates a new sorted_bin_peptide_iterator from a gvien bin file handler.
+ * \returns a new heap allocated sorted_bin_peptide_iterator object
+ */
+BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
+  INDEX_T* index, ///< The index object which we are iterating over -in
+  FILE* file
+  );
+
+/**
+ *  The basic iterator functions.
+ * \returns The next peptide in the index.
+ */
+PEPTIDE_T* bin_sorted_peptide_iterator_next(
+  BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator ///< the bin_peptide_iterator to get peptide -in
+  );
+
+/**
+ * The basic iterator functions.
+ * check to see if the bin_sorted_peptide_iterator has more peptides to return
+ *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T bin_sorted_peptide_iterator_has_next(
+  BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator ///< the bin_peptide_iterator to initialize -in
+  );
+
+/**
+ * Frees an allocated bin_peptide_iterator object.
+ */
+void free_bin_sorted_peptide_iterator(
+  BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator ///< the iterator to free -in
+  );
+
 
 /*
  * Local Variables:

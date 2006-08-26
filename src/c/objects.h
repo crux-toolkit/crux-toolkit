@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -169,5 +169,36 @@ typedef struct index INDEX_T;
  * \brief An object to iterate over the peptides in an index
  */
 typedef struct index_peptide_iterator INDEX_PEPTIDE_ITERATOR_T;
+
+/**
+ * \typedef SORTED_PEPTIDE_ITERATOR_T
+ * \brief An object to iterate over the peptides in sorted order 
+ */
+typedef struct sorted_peptide_iterator SORTED_PEPTIDE_ITERATOR_T;
+
+
+/**
+ * The enum for index type
+ */
+enum _index_type {DB_INDEX, BIN_INDEX};
+
+/**
+ * \typedef INDEX_TYPE_T
+ * \brief The typedef for index type (db_index, bin_index)
+ */
+typedef enum _index_type INDEX_TYPE_T;
+
+/**
+ * \struct bin_peptide_iterator
+ * \brief An iterator to iterate over the peptides in a bin( one file handler)
+ */
+typedef struct bin_peptide_iterator BIN_PEPTIDE_ITERATOR_T;
+
+/**
+ * \struct bin_sorted_peptide_iterator
+ * \brief Object to iterate over the peptides within a bin, in an
+ * sort in mass
+ */
+typedef struct bin_sorted_peptide_iterator BIN_SORTED_PEPTIDE_ITERATOR_T;
 
 #endif
