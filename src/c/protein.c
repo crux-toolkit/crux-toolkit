@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.33 $
+ * $Revision: 1.34 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -129,7 +129,7 @@ BOOLEAN_T protein_to_heavy(
   
   //rewind to the begining of the protein to include ">" line
   fseek(file, protein->offset, SEEK_SET);
-  
+
   //failed to parse the protein from fasta file
   //protein offset is set in the parse_protein_fasta_file method
   if(!parse_protein_fasta_file(protein ,file)){
@@ -138,6 +138,7 @@ BOOLEAN_T protein_to_heavy(
   }
       
   protein->is_light = FALSE;
+  
   return TRUE;
 }                            
 
@@ -155,8 +156,11 @@ BOOLEAN_T protein_to_light(
   }
   //free all char* in protein object
   free(protein->sequence);
+  protein->sequence = NULL;
   free(protein->annotation);
+  protein->annotation = NULL;
   free(protein->id);
+  protein->id = NULL;
   
   return (protein->is_light = TRUE);
 }                            
@@ -308,10 +312,11 @@ static BOOLEAN_T read_title_line
     // If we hit the end of the file, return FALSE.
     if (a_char == EOF) {
       return(FALSE);
-    }
-    //set protein offset                   FIXME: might not need to "-1" -CHRIS
-    protein->offset = ftell(fasta_file) - 1;
+    }  
   }
+  //set protein offset                   FIXME: might not need to "-1" -CHRIS
+  protein->offset = ftell(fasta_file) - 1;
+
   //chris edited, added this block to make sure all of comment line is read 
   //although might not be stored, to ensure the file* is at start of the sequence
   {
@@ -440,7 +445,7 @@ char* get_protein_id(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
-  //if protein is light convert to heavy
+  
   if(protein->is_light){
     die("protein is light, must be heavy");
   }
@@ -449,7 +454,9 @@ char* get_protein_id(
   char* copy_id = 
     (char *)mymalloc(sizeof(char)*id_length);
   
-  return strncpy(copy_id, protein->id, id_length); 
+  strncpy(copy_id, protein->id, id_length); 
+
+  return copy_id;
 }
 
 /**
@@ -581,7 +588,9 @@ void set_protein_annotation(
   char* annotation ///< the sequence to add -in
   )
 {
-  free(protein->annotation);
+  if(!protein->is_light){
+    free(protein->annotation);
+  }
   int annotation_length = strlen(annotation) +1; //+\0
   char * copy_annotation = 
     (char *)mymalloc(sizeof(char)*annotation_length);

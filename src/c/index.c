@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -423,7 +423,7 @@ long generate_file_handlers(
   *file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
   
   //create all the file handlers need for create index
-  for(; bin_indx < num_bins; ++num_bins){
+  for(; bin_indx < num_bins; ++bin_indx){
     filename = get_crux_filename(bin_indx, 0);
     file = fopen(filename, "w" );
     free(filename);
@@ -538,11 +538,26 @@ BOOLEAN_T create_index(
   }
   
   //create temporary directory
-  if((temp_dir_name = mkdtemp(make_temp_dir_template()))== NULL){
+  if(mkdir((temp_dir_name = "crux_temp"), S_IRWXU+S_IRWXG+S_IRWXO) != 0){
     carp(CARP_WARNING, "cannot create temporary directory");
     return FALSE;
   }
   
+  //move into temporary directory
+  if(chdir("crux_temp") != 0){
+    carp(CARP_WARNING, "cannot enter temporary directory");
+    return FALSE;
+  }
+  
+
+  /*
+  //create temporary directory
+  if((temp_dir_name = mkdtemp(make_temp_dir_template()))== NULL){
+    carp(CARP_WARNING, "cannot create temporary directory");
+    return FALSE;
+  }
+  */
+
   //create file handlers
   if((num_bins = generate_file_handlers(index, &file_array, &mass_limits)) == -1){
     carp(CARP_WARNING, "cannot create FILE handlers");

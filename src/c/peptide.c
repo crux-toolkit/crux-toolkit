@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -13,6 +13,7 @@
 #include "mass.h"
 #include "peptide.h"
 #include "protein.h"
+#include "database.h"
 #include "carp.h"
 
 
@@ -185,18 +186,36 @@ void print_peptide_in_format(
   char* id = NULL;
   int start_idx = 0;
   char* sequence = NULL;
+  BOOLEAN_T light = FALSE;
 
   //print mass of the peptide
   fprintf(file, "%.2f", peptide->peptide_mass);
 
   //obtain peptide sequence
   if(flag_out){
+    parent = get_peptide_src_parent_protein(next_src);
+    
+    //covnert to heavy protein
+    if(get_protein_is_light(parent)){
+      protein_to_heavy(parent);
+      light = TRUE;
+    }
+
     sequence = get_peptide_sequence(peptide);
   }
 
   //iterate over all peptide src
   while(next_src != NULL){
-    parent = get_peptide_src_parent_protein(next_src);
+    if(!light){
+      parent = get_peptide_src_parent_protein(next_src);
+      
+      //covnert to heavy protein
+      if(get_protein_is_light(parent)){
+        protein_to_heavy(parent);
+        light = TRUE;
+      }
+    }
+
     id = get_protein_id_pointer(parent);
     start_idx = get_peptide_src_start_idx(next_src);
         
@@ -210,6 +229,12 @@ void print_peptide_in_format(
       fprintf(file, "\n");
     }
     next_src = get_peptide_src_next_association(next_src);
+    
+    //convert back to light
+    if(light){
+      protein_to_light(parent);
+      light = FALSE;
+    }
   }
 
   //free sequence if allocated
