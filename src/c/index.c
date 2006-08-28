@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -373,13 +373,82 @@ char* get_crux_filename(
 }
 
 /**
+ * set stuff
+ */
+long get_num_bins_needed(
+  INDEX_T* index,
+  int* mass_limits
+  )
+{
+  int min_length = get_peptide_constraint_min_length(index->constraint);
+  int max_length = get_peptide_constraint_max_length(index->constraint);
+  float min_mass = get_peptide_constraint_min_mass(index->constraint);
+  float max_mass = get_peptide_constraint_max_mass(index->constraint);
+  float min_mass_limit = min_mass;
+  float max_mass_limit = max_mass;
+  long num_bins = 0;
+
+  //reset minimum mass limit
+  if(min_length * 57 + MASS_H2O_MONO > min_mass){
+    min_mass_limit = min_length * 57 + MASS_H2O_MONO; 
+  }
+  
+  //reset maximum mass limit
+  if(max_length * 187 + MASS_H2O_AVERAGE < max_mass){
+    max_mass_limit = max_length * 187 + MASS_H2O_AVERAGE;
+  }
+
+  //set mass limit info array
+  min_mass_limit = (int)min_mass_limit;
+  max_mass_limit = (int)max_mass_limit + 1;
+
+  (mass_limits)[0] = min_mass_limit;
+  (mass_limits)[1] = max_mass_limit;
+  
+
+  num_bins = (max_mass_limit - min_mass_limit) / index->mass_range;  //check..
+  //must have at least 1 bin
+  if(num_bins == 0){
+    ++num_bins;
+  }
+  return num_bins;
+}                         
+
+
+BOOLEAN_T generate_file_handlers(
+  FILE** file_array,
+  long num_bins
+  )
+{
+  long bin_indx = 0;
+  FILE* file = NULL;
+  char* filename = NULL;
+  
+  //create all the file handlers need for create index
+  for(; bin_indx < num_bins; ++bin_indx){
+    filename = get_crux_filename(bin_indx, 0);
+    file = fopen(filename, "w+" );
+    free(filename);
+    if(file == NULL){
+      carp(CARP_WARNING, "cannot open all file handlers needed");
+      free(file_array);
+      return FALSE;
+    }
+    (file_array)[bin_indx] = file;
+  }
+  
+  return TRUE;
+}
+
+/**
  * heap allocates the file handler array, user must free
  *\returns the total number of file handlers created, returns -1 if failed to create
  */
+/*
 long generate_file_handlers(
   INDEX_T* index,
   FILE*** file_array,
-  float** mass_limits
+  float* mass_limits
   )
 {
   int min_length = get_peptide_constraint_min_length(index->constraint);
@@ -409,9 +478,9 @@ long generate_file_handlers(
   min_mass_limit = (int)min_mass_limit;
   max_mass_limit = (int)max_mass_limit + 1;
 
-  *mass_limits = (float*)mycalloc(2, sizeof(float));
-  *mass_limits[0] = min_mass_limit;
-  *mass_limits[0] = max_mass_limit;
+  //mass_limits = (float*)mycalloc(2, sizeof(float));
+  (mass_limits)[0] = min_mass_limit;
+  (mass_limits)[1] = max_mass_limit;
   
 
   num_bins = (max_mass_limit - min_mass_limit) / index->mass_range;  //check..
@@ -432,11 +501,12 @@ long generate_file_handlers(
       free(file_array);
       return -1;
     }
-    *file_array[bin_indx] = file;
+    (*file_array)[bin_indx] = file;
   }
   
   return num_bins;
 }
+*/
 
 /**
  * given a mass, it finds the correct bin for that mass and returns
@@ -444,13 +514,15 @@ long generate_file_handlers(
  *\returns the FILE handler that the mass should be collected
  */
 FILE* get_bin_file(
-  float mass, ///< the query mass -in
-  float* mass_limits,///< the mass limit array -in
-  FILE** file_array ///< file handler array -in
+  int mass, ///< the query mass -in
+  int low_mass,///< the mass limit array -in
+  FILE*** file_array ///< file handler array -in
   )
 {
-  long bin_idx = (long)(mass - mass_limits[0]) + 1;
-  return file_array[bin_idx];
+  FILE* file = NULL;
+  long bin_idx = (mass - low_mass)/100 + 1;
+  file = (*file_array)[bin_idx];
+  return file;
 }
 
 /**
@@ -483,7 +555,7 @@ FILE* sort_bin(
   file = fopen(filename, "w" );
   
   //serialize all peptides in sorted order
-  while(!bin_sorted_peptide_iterator_has_next(peptide_iterator)){
+  while(bin_sorted_peptide_iterator_has_next(peptide_iterator)){
     working_peptide = bin_sorted_peptide_iterator_next(peptide_iterator);
     serialize_peptide(working_peptide, file);
     free_peptide(working_peptide);
@@ -512,24 +584,18 @@ BOOLEAN_T create_index(
   )
 {
   FILE* info_out = NULL; // the file stream where the index creation infomation is sent
-  //unsigned int num_peptides = 0; //current number of peptides index file 
-  //int num_file = 1; //the ith number of index file created
-  //float current_mass_limit = index->mass_range;
-  //char* filename_tag = "crux_index_";
-  //char* file_num = NULL;
-
   
   //new stuff
   char* temp_dir_name = NULL;
   FILE** file_array = NULL;
-  float* mass_limits = NULL;
+  int* mass_limits = (int*)mycalloc(2, sizeof(int));//  NULL;
   long num_bins = 0;
   DATABASE_PEPTIDE_ITERATOR_T* peptide_iterator = NULL;
-  //  PROTEIN_PEPTIDE_ITERATOR_T* peptide_iterator = NULL;
   PEPTIDE_T* working_peptide = NULL;
   float working_mass;
-  FILE* working_file = NULL;
   char* filename = NULL;
+  FILE* working_file = NULL;
+  float mass_range = index->mass_range;
 
   //check if already created index
   if(index->on_disk){
@@ -558,12 +624,20 @@ BOOLEAN_T create_index(
   }
   */
 
+  //new code
+  num_bins = get_num_bins_needed(index, mass_limits);
+  file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
+  generate_file_handlers(file_array, num_bins);
+
+
+  /*
   //create file handlers
-  if((num_bins = generate_file_handlers(index, &file_array, &mass_limits)) == -1){
+  if((num_bins = generate_file_handlers(index, &file_array, mass_limits)) == -1){
     carp(CARP_WARNING, "cannot create FILE handlers");
     fcloseall();
     return FALSE;
   }
+  */
 
   //create the index map & info
   info_out = fopen("crux_index_map", "w");
@@ -572,23 +646,29 @@ BOOLEAN_T create_index(
   //create database peptide_iterator   ..............MAKE SURE YOU SET THE DATABASE TO USE light
   peptide_iterator =
     new_database_peptide_iterator(index->database, index->constraint);
-  
+
+  long int file_idx = 0;
+  int low_mass = mass_limits[0];
   //iterate through all peptides
-  while(!database_peptide_iterator_has_next(peptide_iterator)){    
+  while(database_peptide_iterator_has_next(peptide_iterator)){    
+    printf("I'm here");
     working_peptide = database_peptide_iterator_next(peptide_iterator);
     working_mass = get_peptide_peptide_mass(working_peptide);
-    working_file = get_bin_file(working_mass, mass_limits, file_array);
+    file_idx = ((int)working_mass - low_mass) / mass_range;
+    working_file = file_array[file_idx];
     serialize_peptide(working_peptide, working_file);
     free_peptide(working_peptide);
   }
     
   long bin_idx = 0;
   for(; bin_idx < num_bins; ++bin_idx){
+    
     if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index)) == NULL){
       carp(CARP_WARNING, "failed to sort each bin");
       fcloseall();
       return FALSE;
     }
+    
     
     //split if too big
     //print to crux_map
@@ -683,7 +763,7 @@ BOOLEAN_T create_index(
     if(num_peptides == 0){
       file_num = int_to_char(num_file);
       filename = cat_string(filename_tag, file_num);
-      output = fopen(filename, "w" );
+      output = fopen(filename, "r+" );
       fprintf(info_out, "%s\t%.2f\t", filename, 0.00);
       free(file_num);
       free(filename);
@@ -1601,6 +1681,7 @@ BOOLEAN_T initialize_bin_peptide_iterator(
   int peptide_length;
   float peptide_mass;
 
+ 
   //parse each line
   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
     
@@ -1658,7 +1739,7 @@ BOOLEAN_T initialize_bin_peptide_iterator(
   
   bin_peptide_iterator->has_next = FALSE;
   free(new_line);
-  return FALSE;
+  return TRUE;
 }
 
 /**
@@ -1754,7 +1835,10 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
   //create database sorted peptide iterator
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator =
     (BIN_SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(BIN_SORTED_PEPTIDE_ITERATOR_T));
-  
+
+  //reset file to start
+  rewind(file);
+
   //create bin_peptide_iterator
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator =
     new_bin_peptide_iterator(index, file);
