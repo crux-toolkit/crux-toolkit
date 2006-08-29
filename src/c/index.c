@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -441,74 +441,6 @@ BOOLEAN_T generate_file_handlers(
 }
 
 /**
- * heap allocates the file handler array, user must free
- *\returns the total number of file handlers created, returns -1 if failed to create
- */
-/*
-long generate_file_handlers(
-  INDEX_T* index,
-  FILE*** file_array,
-  float* mass_limits
-  )
-{
-  int min_length = get_peptide_constraint_min_length(index->constraint);
-  int max_length = get_peptide_constraint_max_length(index->constraint);
-  float min_mass = get_peptide_constraint_min_mass(index->constraint);
-  float max_mass = get_peptide_constraint_max_mass(index->constraint);
-  float min_mass_limit = min_mass;
-  float max_mass_limit = max_mass;
-  long num_bins = 0;
-  long bin_indx = 0;
-  //char* file_num = 0;
-  //char* filename_tag = "crux_index_";
-  FILE* file = NULL;
-  char* filename = NULL;
-
-  //reset minimum mass limit
-  if(min_length * 57 + MASS_H2O_MONO > min_mass){
-    min_mass_limit = min_length * 57 + MASS_H2O_MONO; 
-  }
-  
-  //reset maximum mass limit
-  if(max_length * 187 + MASS_H2O_AVERAGE < max_mass){
-    max_mass_limit = max_length * 187 + MASS_H2O_AVERAGE;
-  }
-
-  //set mass limit info array
-  min_mass_limit = (int)min_mass_limit;
-  max_mass_limit = (int)max_mass_limit + 1;
-
-  //mass_limits = (float*)mycalloc(2, sizeof(float));
-  (mass_limits)[0] = min_mass_limit;
-  (mass_limits)[1] = max_mass_limit;
-  
-
-  num_bins = (max_mass_limit - min_mass_limit) / index->mass_range;  //check..
-  //must have at least 1 bin
-  if(num_bins == 0){
-    ++num_bins;
-  }
-
-  *file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
-  
-  //create all the file handlers need for create index
-  for(; bin_indx < num_bins; ++bin_indx){
-    filename = get_crux_filename(bin_indx, 0);
-    file = fopen(filename, "w" );
-    free(filename);
-    if(file == NULL){
-      carp(CARP_WARNING, "cannot open all file handlers needed");
-      free(file_array);
-      return -1;
-    }
-    (*file_array)[bin_indx] = file;
-  }
-  
-  return num_bins;
-}
-*/
-
-/**
  * given a mass, it finds the correct bin for that mass and returns
  * the file handler to that bin
  *\returns the FILE handler that the mass should be collected
@@ -624,34 +556,37 @@ BOOLEAN_T create_index(
   }
   */
 
-  //new code
+  //get number of bins needed
   num_bins = get_num_bins_needed(index, mass_limits);
+
+  //create file handler array
   file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
-  generate_file_handlers(file_array, num_bins);
-
-
-  /*
-  //create file handlers
-  if((num_bins = generate_file_handlers(index, &file_array, mass_limits)) == -1){
+  
+  //open all file handlers
+  if(!generate_file_handlers(file_array, num_bins)){
     carp(CARP_WARNING, "cannot create FILE handlers");
     fcloseall();
     return FALSE;
   }
-  */
-
+  
   //create the index map & info
   info_out = fopen("crux_index_map", "w");
   write_header(index, info_out);
 
-  //create database peptide_iterator   ..............MAKE SURE YOU SET THE DATABASE TO USE light
+  //create database peptide_iterator
   peptide_iterator =
     new_database_peptide_iterator(index->database, index->constraint);
 
   long int file_idx = 0;
   int low_mass = mass_limits[0];
+  long int count_peptide = 0;
+
   //iterate through all peptides
   while(database_peptide_iterator_has_next(peptide_iterator)){    
-    printf("I'm here");
+    ++count_peptide;
+    if(count_peptide % 1000 == 0){
+      fprintf(stderr,"reached peptide: %d\n", (int)count_peptide);
+    }
     working_peptide = database_peptide_iterator_next(peptide_iterator);
     working_mass = get_peptide_peptide_mass(working_peptide);
     file_idx = ((int)working_mass - low_mass) / mass_range;
@@ -1729,7 +1664,6 @@ BOOLEAN_T initialize_bin_peptide_iterator(
           return FALSE;
         }
         else{
-          free(new_line);
           bin_peptide_iterator->has_next = TRUE;
           return TRUE;
         }
