@@ -2,7 +2,55 @@
 Retention
                       </font></b></code>
 <br><br><hr><br><code><b><font face="Helvetica, monospace">
-      Aug 23, 2006
+      Aug 30, 2006
+                </font></b></code>
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Purpose:
+                </font></b></code><br><br>
+  To perform the SVR on a different data set, to determine if it gives
+  better results.                
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Methods:
+                </font></b></code><br><br>
+                Xianhua was nice enough to give a dataset performed on yeast
+                whole-cell lysate, a fairly complex mixture
+                (080706-oldpps2hr*.ms2). I created training set by
+                subsetting out hits with +2 charge state, DeltCN &gte; 0.1
+                and Xcorr &gte; 2.5 and % matched ions &gte; 0.2.
+
+                I then split into a test and train set, and 
+                plotted the predicted retention time vs. the real retention
+                time, for both a linear and polynomial kernel, without
+                normalization (per suggestion by Ass Ben-Hur). 
+                As a control, I also plotted the hydrophobicity
+                calculation from Krokhin et al. vs retention time.
+<br><br><code><b><font face="Helvetica, monospace">
+Results:
+                </font></b></code>
+                <br><br>
+                Linear Kernel
+               <br>
+                <img src="./Images/xianhua-regression-1.png">
+                <br><br>
+                Second Order Kernel
+                <br>
+                <img src="./Images/xianhua-regression-2.png">
+                <br><br>
+                Krokhin weights
+                <br>
+                <img src="./Images/xianhua-krokhin.png">
+
+<br><br><code><b><font face="Helvetica, monospace">
+      Discussion:
+                </font></b></code>
+                It appears that the linear kernel does the best,
+                followed by a tie between the second degree SVR and the
+                Krokhin unlearned weights. This is promising!
+
+ 
+<br><br><hr><br><code><b><font face="Helvetica, monospace">
                 </font></b></code>
 
                 <br><br><code><b><font face="Helvetica, monospace">
