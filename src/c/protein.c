@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.34 $
+ * $Revision: 1.35 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -26,7 +26,7 @@
 #define PROTEIN_ANNOTATION_LENGTH 100
 #define LONGEST_LINE PROTEIN_ID_LENGTH + PROTEIN_ID_LENGTH
 #define FASTA_LINE 50
-#define SMALLEST_MASS 71
+#define SMALLEST_MASS 57
 
 /**
  * \struct protein 
@@ -400,12 +400,14 @@ static BOOLEAN_T read_raw_sequence
 
       // Convert invalid characters to X.
       a_char = toupper((int)a_char);
+      /*
       if (!char_in_string(get_alphabet(TRUE), a_char)) {
 	carp(CARP_WARNING, "Converting illegal character %c to X ",
 		a_char);
 	carp(CARP_WARNING, "in sequence %s.", name);
 	a_char = 'X';
       }
+      */
       raw_sequence[i_seq] = a_char;
       i_seq++;
     }

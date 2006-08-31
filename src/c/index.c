@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -216,7 +216,7 @@ INDEX_T* new_index(
   char** filename_and_path = NULL;
   char* working_dir = NULL;
   INDEX_T* index = allocate_index();
-  DATABASE_T* database = new_database(fasta_filename, TRUE); //probably should change
+  DATABASE_T* database = new_database(fasta_filename, FALSE); //probably should change
 
   filename_and_path = parse_filename_path(fasta_filename);
   working_dir = generate_directory_name(filename_and_path[0]);
