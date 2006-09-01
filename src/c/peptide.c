@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -655,6 +655,8 @@ BOOLEAN_T merge_peptides(
 /*
  * Serialize a peptide to a FILE
  * \returns TRUE if serialization is successful, else FALSE
+ * the num_digits identifies the number of digits it should print the mass in
+ * currently only supports for 2, and 3
  *
  * The peptide serialization format looks like this:
  *
@@ -672,7 +674,8 @@ BOOLEAN_T merge_peptides(
  */
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide,
-  FILE* file
+  FILE* file,
+  int num_digits
   )
 {
   PEPTIDE_SRC_ITERATOR_T* iterator = 
@@ -682,7 +685,13 @@ BOOLEAN_T serialize_peptide(
   int num_src = 0;
   
   //print mass of the peptide
-  fprintf(file, "* %.2f\n", peptide->peptide_mass);
+  if(num_digits == 2){
+    fprintf(file, "* %.2f\n", peptide->peptide_mass);
+  }
+  else{//default if not 2, it's 3
+    fprintf(file, "* %.3f\n", peptide->peptide_mass);
+  }
+
   //print length of the peptide
   fprintf(file,"%d\n",peptide->length);
   //print number of src

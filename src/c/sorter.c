@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file sorter.c
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -290,7 +290,7 @@ PEPTIDE_WRAPPER_T* merge(
         }
         //merge all other instances of the same peptide in the list before adding to master list
         if(sort_type == MASS || sort_type == LENGTH){
-          wrapper_one = merge_duplicates_same_list(wrapper_one);
+          //wrapper_one = merge_duplicates_same_list(wrapper_one);
           wrapper_two = merge_duplicates_different_list(wrapper_one, wrapper_two);
         }
       }

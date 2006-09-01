@@ -693,18 +693,22 @@ int is_numeric(const char * s) {
       found_decimal = 1; 
     }
     s++;
+    
     while (*s) {
       if (*s == '.' || isdigit(*s)) {
-        if (*s == '.' && found_decimal) {
-          break;
-        } else {
+        if (*s == '.') {
+          if(found_decimal){
+            break;
+          }
           found_decimal = 1;
-        }
-      } else {
+        } 
+      } 
+      else {
         break;
       }
       s++;
     }
+    
     if (*s) {
       /* if *s != 0 must have broken out of the while */
       result = 0;

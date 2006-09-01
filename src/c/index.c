@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -353,8 +353,8 @@ char* make_temp_dir_template(void){
  *\returns the filename for the given index
  */
 char* get_crux_filename(
-  long bin_idx,
-  int part
+  long bin_idx,  ///< the bin_indx name you want -in
+  int part  ///< the what sub part of the dir is it? only needed when spliting -in
   )
 {
   char* file_num = 0;
@@ -373,11 +373,12 @@ char* get_crux_filename(
 }
 
 /**
- * set stuff
+ * Calculate the total number of bins( file handlers) that will be needed
+ * \returns the total number of bins needed
  */
 long get_num_bins_needed(
-  INDEX_T* index,
-  int* mass_limits
+  INDEX_T* index, ///< working index -in
+  int* mass_limits  ///< an array that holds the min/max mass limit -in
   )
 {
   int min_length = get_peptide_constraint_min_length(index->constraint);
@@ -404,20 +405,21 @@ long get_num_bins_needed(
 
   (mass_limits)[0] = min_mass_limit;
   (mass_limits)[1] = max_mass_limit;
-  
 
-  num_bins = (max_mass_limit - min_mass_limit) / index->mass_range;  //check..
-  //must have at least 1 bin
-  if(num_bins == 0){
-    ++num_bins;
-  }
+  num_bins = ((max_mass_limit - min_mass_limit) / index->mass_range) + 1;  //check..
+
   return num_bins;
 }                         
 
-
+/**
+ * user MUST set the unix system max allowed file handlers enough to allow this procsess
+ * check and change on command line by "ulimit -n", need root permission to change...
+ *generates all the file handlers(bins) that are needed
+ *\returns TRUE, if successfully opened all needed bins, else FALSE
+ */
 BOOLEAN_T generate_file_handlers(
-  FILE** file_array,
-  long num_bins
+  FILE** file_array,  ///< the file handler array -out
+  long num_bins  ///< total number of bins needed
   )
 {
   long bin_indx = 0;
@@ -469,7 +471,6 @@ FILE* sort_bin(
 {
   char* filename = NULL;
 
-  //CHECK ME see if really is empty!!!!
   //check if file is empty
   if(ftell(file) == 0){
     return file;
@@ -489,7 +490,7 @@ FILE* sort_bin(
   //serialize all peptides in sorted order
   while(bin_sorted_peptide_iterator_has_next(peptide_iterator)){
     working_peptide = bin_sorted_peptide_iterator_next(peptide_iterator);
-    serialize_peptide(working_peptide, file);
+    serialize_peptide(working_peptide, file, 2);
     free_peptide(working_peptide);
   }
   
@@ -589,22 +590,21 @@ BOOLEAN_T create_index(
     }
     working_peptide = database_peptide_iterator_next(peptide_iterator);
     working_mass = get_peptide_peptide_mass(working_peptide);
-    file_idx = ((int)working_mass - low_mass) / mass_range;
+    file_idx = (working_mass - low_mass) / mass_range;
     working_file = file_array[file_idx];
-    serialize_peptide(working_peptide, working_file);
+    serialize_peptide(working_peptide, working_file, 3);
     free_peptide(working_peptide);
   }
-    
+  
+  //sort each bin
   long bin_idx = 0;
   for(; bin_idx < num_bins; ++bin_idx){
-    
     if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index)) == NULL){
       carp(CARP_WARNING, "failed to sort each bin");
       fcloseall();
       return FALSE;
     }
-    
-    
+        
     //split if too big
     //print to crux_map
     filename = get_crux_filename(bin_idx, 0); //0 can change if need split the file
@@ -1160,7 +1160,7 @@ BOOLEAN_T parse_crux_index_map(
       }
       //find the first index file with in mass range
       else if(!start_file){
-        if(min_mass > start_mass + range){
+        if(min_mass > start_mass + range - 0.0001){
           continue;
         }
         else{
@@ -1175,7 +1175,7 @@ BOOLEAN_T parse_crux_index_map(
         }
       }
       //add all index_files that are with in peptide constraint mass interval
-      else if(max_mass > (start_mass - 0.01)){
+      else if(max_mass > (start_mass - 0.0001)){
         if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
           carp(CARP_WARNING, "failed to add index file");
           free(new_line);
