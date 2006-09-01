@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -62,5 +62,9 @@ void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file);
  * \returns a heap allocated string that concatenates the two inputs
  */
 char* cat_string(char* string_one, char* string_two);
+/**
+ *\returns TRUE if float_a is between the interaval of min and max, else FALSE
+ */
+inline BOOLEAN_T compare_float_three(float float_a, float min, float max);
 
 #endif

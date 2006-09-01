@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.35 $
+ * $Revision: 1.36 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -27,6 +27,7 @@
 #define LONGEST_LINE PROTEIN_ID_LENGTH + PROTEIN_ID_LENGTH
 #define FASTA_LINE 50
 #define SMALLEST_MASS 57
+#define LARGEST_MASS 190
 
 /**
  * \struct protein 
@@ -830,11 +831,13 @@ BOOLEAN_T iterator_state_help(
     iterator->cur_start = 1;
     goto LOOP;
   }
-
+  
   //is mass with in range
   if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] < min_mass ||
         iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] > max_mass){
-    if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] == 0){
+    //does this length have any possibility of having a peptide within mass range?
+    if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] == 0 ||
+       iterator->cur_length * LARGEST_MASS + 19 < min_mass){
       ++iterator->cur_length;
       iterator->cur_start = 1;
     }

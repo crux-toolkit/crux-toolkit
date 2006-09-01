@@ -7,6 +7,10 @@
 #include "utils.h"
 #include "objects.h"
 
+//PRECISION, determines the precision of the compare float, users
+//should lower the number if need more precision
+#define PRECISION 0.000000005 
+
 /**
  * returns a heap allocated copy of the src string
  */
@@ -38,7 +42,7 @@ char* copy_string_part(char* src, int length){
  * or perhaps all compares.
  */
 inline int compare_float(float float_a, float float_b){
-  float EPSILON = 0.0000005;
+  float EPSILON = PRECISION;
   float sum = float_a + float_b;
   //a == b
   if( fabsf(float_a - float_b) <= fabsf(sum)* EPSILON ){
@@ -52,6 +56,17 @@ inline int compare_float(float float_a, float float_b){
   else{
     return -1;
   }
+}
+
+/**
+ *\returns TRUE if float_a is between the interaval of min and max, else FALSE
+ */
+inline BOOLEAN_T compare_float_three(float float_a, float min, float max){
+  if(compare_float(float_a, min) == -1 ||
+     compare_float(float_a, max) ==  1){
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /**

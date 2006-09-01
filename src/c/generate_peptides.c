@@ -308,17 +308,28 @@ int main(int argc, char** argv){
       }
 
       index = new_search_index(in_file, constraint, is_unique);
-
+      
       if(index != NULL){
         //create index peptide interator
-        index_peptide_iterator = new_index_peptide_iterator(index);//, ok_seq);
-        
+        index_peptide_iterator = new_index_peptide_iterator(index);
+      
+        //count peptides, DEBUG purpose
+        long int total_peptides = 0;
+
         //iterate over all peptides
         while(index_peptide_iterator_has_next(index_peptide_iterator)){
+          ++total_peptides;
           peptide = index_peptide_iterator_next(index_peptide_iterator);
           print_peptide_in_format(peptide, flag_opt, stdout);
           free_peptide(peptide);
+          //debug purpose
+          if(total_peptides% 10000 == 0){
+            carp(CARP_DEBUG, "reached peptide: %d", total_peptides);
+          }
         }
+        
+        //debug purpose
+        carp(CARP_INFO, "total peptides: %d", total_peptides);
         
         free_index(index);
         free_index_peptide_iterator(index_peptide_iterator);
