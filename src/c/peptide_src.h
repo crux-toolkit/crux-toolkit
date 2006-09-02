@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -27,6 +27,26 @@ PEPTIDE_SRC_T* new_peptide_src(
   int start_idx ///< start index of the peptide in the protein sequence, first residue is 1 -in
   );
 
+/**
+ *\returns an array of PROTEIN_PEPTIDE_SRC object
+ * only used in index.c, when the peptide src count for  peptide is known
+ */
+PEPTIDE_SRC_T* new_peptide_src_array(
+  int size ///< the size of the peptide_src array -in
+  );
+
+/**
+ *\returns the PROTEIN_PEPTIDE_SRC object in the array with the index
+ * index starts at 0.
+ * only used in index.c, when the peptide src count for  peptide is known
+ */
+void set_peptide_src_array(
+  PEPTIDE_SRC_T* src_array , ///< the working peptide src_arry -out
+  int array_idx, ///< array index of the peptide_src to set
+  PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
+  PROTEIN_T* parent_protein, ///< the parent of this preptide -in
+  int start_idx ///< start index of the peptide in the protein sequence -in
+  );
 
 /**
  * Frees the entire allocated peptide_src linklist object

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.39 $
+ * $Revision: 1.40 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -443,6 +443,25 @@ void add_peptide_peptide_src(
   set_peptide_src_next_association(add_association, new_association);
   free_peptide_src_iterator(iterator);
 }
+
+/**
+ * this method adds the peptide src array to an EMPTY peptide
+ * only used in index.c, when the peptide src count for  peptide is known
+ */
+void add_peptide_peptide_src_array(
+  PEPTIDE_T* peptide,  ///< the peptide to set -out
+  PEPTIDE_SRC_T* peptide_src_array ///< new peptide_src -in
+  )
+{
+  //should be empty peptide src list
+  if(peptide->peptide_src == NULL){
+    peptide->peptide_src = peptide_src_array;
+  }
+  else{
+    die("peptide src list should be empty");
+  }
+}
+
 
 /**
  * returns a pointer to the peptide_protein_association field of the peptide

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -54,6 +54,45 @@ PEPTIDE_SRC_T* new_peptide_src(
   set_peptide_src_start_idx(new_association, start_idx);
   return new_association;
 }
+
+/**
+ *\returns an array of PROTEIN_PEPTIDE_SRC object
+ * only used in index.c, when the peptide src count for  peptide is known
+ */
+PEPTIDE_SRC_T* new_peptide_src_array(
+  int size ///< the size of the peptide_src array -in
+  )
+{
+  int array_idx = 0;
+  PEPTIDE_SRC_T* src_array = (PEPTIDE_SRC_T*)mycalloc(size, sizeof(PEPTIDE_SRC_T));
+  
+  //set all next peptide src pointers
+  for(;array_idx < size - 1; ++array_idx){
+    ((PEPTIDE_SRC_T*)(&(src_array[array_idx])))->next_association = &src_array[array_idx + 1];
+  }
+  return src_array;
+}
+
+/**
+ *\returns the PROTEIN_PEPTIDE_SRC object in the array with the index
+ * index starts at 0.
+ * only used in index.c, when the peptide src count for  peptide is known
+ */
+void set_peptide_src_array(
+  PEPTIDE_SRC_T* src_array , ///< the working peptide src_arry -out
+  int array_idx, ///< array index of the peptide_src to set
+  PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
+  PROTEIN_T* parent_protein, ///< the parent of this preptide -in
+  int start_idx ///< start index of the peptide in the protein sequence -in
+  )
+{
+  //set all valuse
+  PEPTIDE_SRC_T* peptide_src = &src_array[array_idx];
+  peptide_src->peptide_type = peptide_type;
+  peptide_src->parent_protein = parent_protein;
+  peptide_src->start_idx = start_idx;
+}
+
 
 /**
  * Frees the entire allocated peptide_src linklist object

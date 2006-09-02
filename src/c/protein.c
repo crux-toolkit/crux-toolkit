@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -63,6 +63,7 @@ struct protein_peptide_iterator {
   unsigned int* seq_marker; ///< The array that marks all the 'K | R | P'
   unsigned int kr_idx; //idx for the closest to cur_start K | R is located
   unsigned int first_kr_idx; //idx for the first K | R is located
+  BOOLEAN_T is_kr; //is there a K|R found in this sequence
 };
 
 //def bellow
@@ -799,14 +800,15 @@ BOOLEAN_T iterator_state_help(
   LOOP:
   
   //set kr_idx position
-  if(iterator->seq_marker[iterator->kr_idx-1] < iterator->cur_start){
-    iterator->kr_idx = iterator->seq_marker[iterator->kr_idx-1];
+  if(iterator->is_kr){
+    if(iterator->seq_marker[iterator->kr_idx-1] < iterator->cur_start){
+      iterator->kr_idx = iterator->seq_marker[iterator->kr_idx-1];
+    }
+    else if(iterator->kr_idx != iterator->first_kr_idx &&
+            iterator->kr_idx > iterator->cur_start){
+      iterator->kr_idx = iterator->first_kr_idx;
+    }
   }
-  else if(iterator->kr_idx != iterator->first_kr_idx &&
-          iterator->kr_idx > iterator->cur_start){
-    iterator->kr_idx = iterator->first_kr_idx;
-  }
-
 
   //check if the smallest mass of a length is larger than max_mass
   if(iterator->cur_length * SMALLEST_MASS > max_mass){
@@ -980,6 +982,7 @@ void set_seq_marker(
   protein_peptide_iterator->seq_marker = seq_marker;
   protein_peptide_iterator->first_kr_idx = first_kr;
   protein_peptide_iterator->kr_idx = first_kr;
+  protein_peptide_iterator->is_kr = first;
 }
 
 /**

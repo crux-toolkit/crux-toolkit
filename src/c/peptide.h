@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -182,6 +182,15 @@ void set_peptide_peptide_src(
 void add_peptide_peptide_src(
   PEPTIDE_T* peptide,  ///< the peptide to set -out
   PEPTIDE_SRC_T* new_association ///< new peptide_src -in
+  );
+
+/**
+ * this method adds the peptide src array to an EMPTY peptide
+ * only used in index.c, when the peptide src count for  peptide is known
+ */
+void add_peptide_peptide_src_array(
+  PEPTIDE_T* peptide,  ///< the peptide to set -out
+  PEPTIDE_SRC_T* peptide_src_array ///< new peptide_src -in
   );
 
 /**
