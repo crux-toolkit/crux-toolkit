@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -443,6 +443,32 @@ BOOLEAN_T generate_file_handlers(
 }
 
 /**
+ * user MUST set the unix system max allowed file handlers enough to allow this procsess
+ * check and change on command line by "ulimit -n", need root permission to change...
+ *generates all the file handlers(bins) that are needed
+ *\returns TRUE, if successfully opened bin, else FALSE
+ */
+BOOLEAN_T generate_file_handler(
+  FILE** file_array,  ///< the file handler array -out                            
+  long bin_index ///< the bin index to create a file handler -in
+  )
+{
+  FILE* file = NULL;
+  char* filename = NULL;
+  
+  //create the file handler needed for create index
+  filename = get_crux_filename(bin_index, 0);
+  file = fopen(filename, "w+" );
+  free(filename);
+  if(file == NULL){
+    carp(CARP_WARNING, "cannot open all file handlers needed");
+    return FALSE;
+  }
+  file_array[bin_index] = file;
+  return TRUE;
+}
+
+/**
  * given a mass, it finds the correct bin for that mass and returns
  * the file handler to that bin
  *\returns the FILE handler that the mass should be collected
@@ -560,15 +586,13 @@ BOOLEAN_T create_index(
   //get number of bins needed
   num_bins = get_num_bins_needed(index, mass_limits);
 
+
+  //debug
+  //num_bins = 10000;
+
+
   //create file handler array
   file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
-  
-  //open all file handlers
-  if(!generate_file_handlers(file_array, num_bins)){
-    carp(CARP_WARNING, "cannot create FILE handlers");
-    fcloseall();
-    return FALSE;
-  }
   
   //create the index map & info
   info_out = fopen("crux_index_map", "w");
@@ -582,29 +606,48 @@ BOOLEAN_T create_index(
   int low_mass = mass_limits[0];
   long int count_peptide = 0;
 
+  
   //iterate through all peptides
   while(database_peptide_iterator_has_next(peptide_iterator)){    
     ++count_peptide;
     if(count_peptide % 1000 == 0){
       fprintf(stderr,"reached peptide: %d\n", (int)count_peptide);
     }
+    //DEBUG
+    //else if(count_peptide == 380001){
+    //  fcloseall();
+    //  return FALSE;
+    //}
     working_peptide = database_peptide_iterator_next(peptide_iterator);
     working_mass = get_peptide_peptide_mass(working_peptide);
     file_idx = (working_mass - low_mass) / mass_range;
+    //check if fir time using this bin, if so create new file handler
+    if(file_array[file_idx] == NULL){
+      if(!generate_file_handler(file_array, file_idx)){
+        carp(CARP_ERROR, "check filehandler limit on system");
+        fcloseall();
+        return FALSE;
+      }
+    }
     working_file = file_array[file_idx];
     serialize_peptide(working_peptide, working_file, 3);
     free_peptide(working_peptide);
   }
-  
-  //sort each bin
+
+
   long bin_idx = 0;
+  //sort each bin  
   for(; bin_idx < num_bins; ++bin_idx){
+    if(file_array[bin_idx] == NULL){
+      continue;
+    }
+    /*
     if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index)) == NULL){
       carp(CARP_WARNING, "failed to sort each bin");
       fcloseall();
       return FALSE;
     }
-        
+    */
     //split if too big
     //print to crux_map
     filename = get_crux_filename(bin_idx, 0); //0 can change if need split the file
@@ -1221,6 +1264,7 @@ BOOLEAN_T parse_peptide_index_file(
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
+  PEPTIDE_SRC_T* peptide_src_array = NULL;
 
   //cast peptide iterator to correct type
   if(index_type == DB_INDEX){
@@ -1247,6 +1291,9 @@ BOOLEAN_T parse_peptide_index_file(
       if(sscanf(new_line,"%d", &num_src) != 1){
         carp(CARP_WARNING, "failed to read number of peptide source, mass: %.2f", peptide_mass);
       }
+      //create all needed peptide srcm than add to peptide
+      peptide_src_array =  new_peptide_src_array(num_src);
+      add_peptide_peptide_src_array(peptide, peptide_src_array);
       continue;
     }
     //get peptide_type
@@ -1254,7 +1301,7 @@ BOOLEAN_T parse_peptide_index_file(
       if(sscanf(new_line,"%d", &peptide_type) != 1){
         carp(CARP_WARNING, "failed to read peptide_type, mass: %.2f", peptide_mass);
       }
-      //peptide_type = new_line[1];
+      //peptide_type = new_line[1]
       continue;
     }
     //get start_idx
@@ -1262,7 +1309,7 @@ BOOLEAN_T parse_peptide_index_file(
       if(sscanf(new_line,"%d", &start_idx) != 1){
         carp(CARP_WARNING, "failed to read start_idx, mass: %.2f", peptide_mass);
       }
-      //start_idx = new_line[1];
+      //start_idx = new_line[1]
       continue;
     }
     //get protein idx
@@ -1270,15 +1317,15 @@ BOOLEAN_T parse_peptide_index_file(
       if(sscanf(new_line,"%d", &protein_idx) != 1){
         carp(CARP_WARNING, "failed to read protein_idx, mass: %.2f", peptide_mass);
       }
-      //protein_idx = new_line[1];
+      //protein_idx = new_line[1]
     }
     
+    //get the petide src parent protein
     parent_protein = 
       get_database_protein_at_idx(database, protein_idx);
     
-    //create peptide src, then add it to peptide
-    add_peptide_peptide_src(peptide,
-                            new_peptide_src( peptide_type, parent_protein, start_idx));
+    //set the peptide src with the correct values
+    set_peptide_src_array( peptide_src_array, current_src-1, peptide_type, parent_protein, start_idx);
     
     //update current_src
     ++current_src;
