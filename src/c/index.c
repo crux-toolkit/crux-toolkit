@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -27,7 +27,7 @@
 #define MAX_INDEX_FILES 30000
 #define MAX_FILE_NAME_LENGTH 30
 #define NUM_CHECK_LINES 8
-
+#define MAX_PROTEIN_IN_BIN 2500
 /* 
  * How does the create_index (the routine) work?
  *
@@ -198,8 +198,6 @@ char* generate_directory_name(
   strcat(dir_name, dir_name_tag);
   return dir_name;
 }
-  
-
 
 /**
  * Assumes that the fasta file is always in the directory where the crux_index_file directory is located
@@ -336,15 +334,13 @@ BOOLEAN_T write_header(
   return TRUE;
 }
 
-
-
 /**
  * heap allocated, users must free
  * \returns a temporary directory name template
  */
 char* make_temp_dir_template(void){
-  char* template = (char*)mycalloc(11, sizeof(char));
-  strcpy(template, "crux_XXXXX");
+  char* template = (char*)mycalloc(12, sizeof(char));
+  strcpy(template, "crux_XXXXXX");
   return template;
 }
 
@@ -448,7 +444,7 @@ BOOLEAN_T generate_file_handlers(
  *generates all the file handlers(bins) that are needed
  *\returns TRUE, if successfully opened bin, else FALSE
  */
-BOOLEAN_T generate_file_handler(
+BOOLEAN_T generate_one_file_handler(
   FILE** file_array,  ///< the file handler array -out                            
   long bin_index ///< the bin index to create a file handler -in
   )
@@ -487,7 +483,7 @@ FILE* get_bin_file(
 
 /**
  * given the file bin, reparses the peptides, sort them then reprint them in the crux_index file
- *\returns 
+ *\returns the sorted bin
  */
 FILE* sort_bin(
   FILE* file, ///< the working file handler to the bin -in
@@ -527,6 +523,87 @@ FILE* sort_bin(
 }
 
 /**
+ * stores the peptide in the correct bin, if bin exceeds MAX_PROTEIN_IN_BIN, serialize all 
+ * peptides in the bin.
+ *\returns TRUE, if successful in storing the peptide or serializing peptides, else FALSE
+ */
+BOOLEAN_T dump_peptide(
+  FILE** file_array,  ///< the working file handler array to the bins -in/out
+  long int file_idx, ///< the index of the file array that the peptide belongs to -in
+  PEPTIDE_T* working_peptide, ///< the peptide to be stored -in
+  PEPTIDE_T** peptide_array, ///< the peptide array that stores the peptides before they get serialized -out
+  int* bin_count ///< the count array of peptides in each bin -in
+  )
+{  
+  int peptide_idx = 0;
+  FILE* file = NULL;
+  int current_count;
+  
+  //if the peptide count is over the limit
+  if((current_count = bin_count[file_idx]) > MAX_PROTEIN_IN_BIN){
+    file = file_array[file_idx];
+    //print out all peptides
+    for(; peptide_idx < current_count; ++peptide_idx){
+      serialize_peptide(peptide_array[peptide_idx] , file, 3);
+      free_peptide(peptide_array[peptide_idx]);
+    }
+    serialize_peptide(working_peptide, file, 3);
+    free_peptide(working_peptide);
+    bin_count[file_idx] = 0;
+  }
+  //if the peptide count is bellow the limit
+  else{
+    //store peptide in peptide array , these peptides will be printed later togehter
+    peptide_array[(bin_count[file_idx])] = working_peptide;
+    ++bin_count[file_idx];
+  }
+  return TRUE;
+}
+
+/**
+ * serializes all peptides left int he peptide array, should be used at very last
+ *\returns TRUE, if successful in serializing all peptides, else FALSE
+ *frees both peptide_array and bin_count once all serialized
+ */
+BOOLEAN_T dump_peptide_all(
+  FILE** file_array,   ///< the working file handler array to the bins -out
+  PEPTIDE_T*** peptide_array, ///< the peptide array that stores the peptides before they get serialized -in
+  int* bin_count, ///< the count array of peptides in each bin -in
+  int num_bins ///< the total number of bins -in
+  )
+{  
+  int peptide_idx = 0;
+  FILE* file = NULL;
+  PEPTIDE_T** working_array = NULL;
+  int bin_idx = 0;
+  int file_idx = 0;
+  
+  //print out all remaining peptides in the file_array
+  for(; file_idx < num_bins; ++file_idx){
+    //no peptides in this bin
+    if((file = file_array[file_idx]) == NULL){
+      free(peptide_array[file_idx]);
+      continue;
+    }
+    working_array = peptide_array[file_idx];
+    bin_idx = bin_count[file_idx];
+    //print out all peptides in this specific bin
+    while(bin_idx > 0){
+      serialize_peptide(working_array[peptide_idx] , file, 3);
+      free_peptide(working_array[peptide_idx]);
+      --bin_idx;
+      ++peptide_idx;
+    }
+    peptide_idx = 0;
+    free(peptide_array[file_idx]);
+  }
+  //free both peptide array and bin_count array , bye bye
+  free(bin_count);
+  free(peptide_array);
+  return TRUE;
+}
+
+/**
  * The main index method. Does all the heavy lifting, creating files
  * serializing peptides, etc. The index directory itself should have 
  * a standard suffix (e.g. cruxidx), so that a given fasta file will have
@@ -547,13 +624,12 @@ BOOLEAN_T create_index(
   //new stuff
   char* temp_dir_name = NULL;
   FILE** file_array = NULL;
-  int* mass_limits = (int*)mycalloc(2, sizeof(int));//  NULL;
+  int* mass_limits = (int*)mycalloc(2, sizeof(int));
   long num_bins = 0;
   DATABASE_PEPTIDE_ITERATOR_T* peptide_iterator = NULL;
   PEPTIDE_T* working_peptide = NULL;
   float working_mass;
   char* filename = NULL;
-  FILE* working_file = NULL;
   float mass_range = index->mass_range;
 
   //check if already created index
@@ -563,37 +639,32 @@ BOOLEAN_T create_index(
   }
   
   //create temporary directory
-  if(mkdir((temp_dir_name = "crux_temp"), S_IRWXU+S_IRWXG+S_IRWXO) != 0){
-    carp(CARP_WARNING, "cannot create temporary directory");
-    return FALSE;
-  }
-  
-  //move into temporary directory
-  if(chdir("crux_temp") != 0){
-    carp(CARP_WARNING, "cannot enter temporary directory");
-    return FALSE;
-  }
-  
-
-  /*
-  //create temporary directory
   if((temp_dir_name = mkdtemp(make_temp_dir_template()))== NULL){
     carp(CARP_WARNING, "cannot create temporary directory");
     return FALSE;
   }
-  */
 
+  //move into temporary directory
+  if(chdir(temp_dir_name) != 0){
+    carp(CARP_WARNING, "cannot enter temporary directory");
+    return FALSE;
+  }
+  
   //get number of bins needed
   num_bins = get_num_bins_needed(index, mass_limits);
-
-
-  //debug
-  //num_bins = 10000;
-
-
+  
   //create file handler array
   file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
-  
+
+  //peptide array to store the peptides before serializing them all together
+  PEPTIDE_T*** peptide_array = (PEPTIDE_T***)mycalloc(num_bins, sizeof(PEPTIDE_T**));
+  int sub_indx = 0;
+  for(; sub_indx < num_bins; ++sub_indx){
+    peptide_array[sub_indx] = (PEPTIDE_T**)mycalloc(MAX_PROTEIN_IN_BIN, sizeof(PEPTIDE_T*));
+  }
+  // int array that stores the peptide count for each peptide array branch
+  int* bin_count = (int*)mycalloc(num_bins, sizeof(int));
+
   //create the index map & info
   info_out = fopen("crux_index_map", "w");
   write_header(index, info_out);
@@ -613,27 +684,26 @@ BOOLEAN_T create_index(
     if(count_peptide % 1000 == 0){
       fprintf(stderr,"reached peptide: %d\n", (int)count_peptide);
     }
-    //DEBUG
-    //else if(count_peptide == 380001){
-    //  fcloseall();
-    //  return FALSE;
-    //}
+
     working_peptide = database_peptide_iterator_next(peptide_iterator);
     working_mass = get_peptide_peptide_mass(working_peptide);
     file_idx = (working_mass - low_mass) / mass_range;
-    //check if fir time using this bin, if so create new file handler
+
+    //check if first time using this bin, if so create new file handler
     if(file_array[file_idx] == NULL){
-      if(!generate_file_handler(file_array, file_idx)){
+      if(!generate_one_file_handler(file_array, file_idx)){
         carp(CARP_ERROR, "check filehandler limit on system");
         fcloseall();
         return FALSE;
       }
     }
-    working_file = file_array[file_idx];
-    serialize_peptide(working_peptide, working_file, 3);
-    free_peptide(working_peptide);
+    //dump peptide in bin or temporary matrix
+    dump_peptide(file_array, file_idx, working_peptide, peptide_array[file_idx], bin_count); 
   }
 
+  //dump all the left over peptides
+  dump_peptide_all(file_array, peptide_array, bin_count, num_bins);
+  
 
   long bin_idx = 0;
   //sort each bin  
@@ -641,13 +711,13 @@ BOOLEAN_T create_index(
     if(file_array[bin_idx] == NULL){
       continue;
     }
-    /*
+    // sort each bin
     if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index)) == NULL){
       carp(CARP_WARNING, "failed to sort each bin");
       fcloseall();
       return FALSE;
     }
-    */
+
     //split if too big
     //print to crux_map
     filename = get_crux_filename(bin_idx, 0); //0 can change if need split the file
@@ -665,12 +735,17 @@ BOOLEAN_T create_index(
   free_database_peptide_iterator(peptide_iterator);
 
   chdir("..");
-  //rename crux_temp to final directory name
+  
+  //rename temporary direcotry to final directory name
   if(rename(temp_dir_name, index->directory) != 0){
     carp(CARP_WARNING, "cannot rename directory");
     return FALSE;
   }
-  
+  free(temp_dir_name);
+
+  //set permission for the directory
+  chmod(index->directory, S_IRWXU+S_IRWXG+S_IROTH+S_IXOTH);
+
   index->on_disk = TRUE;
   return TRUE;
 }
@@ -1053,8 +1128,6 @@ void free_index_file(
 /*************************************
  * index_peptide iterator subroutines
  *************************************/
-
-
 
 /**
  * Checks up to the NUM_CHECK_LINES limit
@@ -1451,7 +1524,6 @@ BOOLEAN_T fast_forward_index_file(
   free(new_line);
   return FALSE;
 }
-
 
 /**
  * \returns TRUE if successfully initiallized the index_peptide_iterator
