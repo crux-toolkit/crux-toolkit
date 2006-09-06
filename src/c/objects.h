@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -169,6 +169,13 @@ typedef struct index INDEX_T;
  * \brief An object to iterate over the peptides in an index
  */
 typedef struct index_peptide_iterator INDEX_PEPTIDE_ITERATOR_T;
+
+
+/**
+ * \struct index_filtered_peptide_iterator
+ * \brief An iterator to filter out the peptides wanted from the index_peptide_iterator
+ */
+typedef struct index_filtered_peptide_iterator INDEX_FILTERED_PEPTIDE_ITERATOR_T;
 
 /**
  * \typedef SORTED_PEPTIDE_ITERATOR_T
