@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -70,6 +70,16 @@ void free_peptide (
   );
 
 /**
+ * Frees an allocated peptide object.
+ * This one is used when the peptides is created throuh
+ * parsing the index, the peptide_src is not a link list, but
+ * an array, thus needs it's own free_peptide version
+ */
+void free_peptide_for_array(
+  PEPTIDE_T* peptide ///< peptide to free -in
+  );
+
+/**
  * Prints a peptide object to file.
  * mass \t peptide-length \t peptide-sequence \n
  */
@@ -87,6 +97,20 @@ void print_peptide_in_format(
   PEPTIDE_T* peptide,  ///< the query peptide -in
   BOOLEAN_T flag_out, ///< print peptide sequence? -in
   FILE* file  ///< the out put stream -out
+  );
+
+/**
+ * Prints a peptide object to file.
+ * ONLY prints peptide_src that match the peptide_src
+ * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
+ *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
+ * prints in correct format for generate_peptide
+ */
+void print_filtered_peptide_in_format(
+  PEPTIDE_T* peptide,  ///< the query peptide -in
+  BOOLEAN_T flag_out, ///< print peptide sequence? -in
+  FILE* file,  ///< the out put stream -out
+  PEPTIDE_TYPE_T peptide_type ///< the peptide_type of src to print -in
   );
 
 /**

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -139,7 +139,23 @@ void free_peptide (
   PEPTIDE_T* peptide ///< peptide to free -in
   )
 {
-  free_peptide_src(peptide->peptide_src); //CHECK might if NULL??
+  //link list
+  free_peptide_src(peptide->peptide_src);
+  free(peptide);
+}
+
+/**
+ * Frees an allocated peptide object.
+ * This one is used when the peptides is created throuh
+ * parsing the index, the peptide_src is not a link list, but
+ * an array, thus needs it's own free_peptide version
+ */
+void free_peptide_for_array(
+  PEPTIDE_T* peptide ///< peptide to free -in
+  )
+{
+  //array
+  free(peptide->peptide_src);
   free(peptide);
 }
 
@@ -242,6 +258,87 @@ void print_peptide_in_format(
     free(sequence);
   }
 }
+
+/**
+ * Prints a peptide object to file.
+ * ONLY prints peptide_src that match the peptide_src
+ * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
+ *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
+ * prints in correct format for generate_peptide
+ */
+void print_filtered_peptide_in_format(
+  PEPTIDE_T* peptide,  ///< the query peptide -in
+  BOOLEAN_T flag_out, ///< print peptide sequence? -in
+  FILE* file,  ///< the out put stream -out
+  PEPTIDE_TYPE_T peptide_type ///< the peptide_type of src to print -in
+  )
+{
+  PROTEIN_T* parent = NULL;
+  PEPTIDE_SRC_T* next_src = peptide->peptide_src;
+  char* id = NULL;
+  int start_idx = 0;
+  char* sequence = NULL;
+  BOOLEAN_T light = FALSE;
+
+  //print mass of the peptide
+  fprintf(file, "%.2f", peptide->peptide_mass);
+
+  //obtain peptide sequence
+  if(flag_out){
+    parent = get_peptide_src_parent_protein(next_src);
+    
+    //covnert to heavy protein
+    if(get_protein_is_light(parent)){
+      protein_to_heavy(parent);
+      light = TRUE;
+    }
+
+    sequence = get_peptide_sequence(peptide);
+  }
+
+  //iterate over all peptide src
+  while(next_src != NULL){
+    if(peptide_type == ANY_TRYPTIC ||
+       peptide_type == get_peptide_src_peptide_type(next_src)){
+
+      if(!light){
+        parent = get_peptide_src_parent_protein(next_src);
+        
+        //covnert to heavy protein
+        if(get_protein_is_light(parent)){
+          protein_to_heavy(parent);
+          light = TRUE;
+        }
+      }
+      
+      id = get_protein_id_pointer(parent);
+      start_idx = get_peptide_src_start_idx(next_src);
+      
+      fprintf(file, "\t%s\t%d\t%d", id, start_idx, peptide->length);
+      
+      //print peptide sequence?
+      if(flag_out){
+        fprintf(file, "\t%s\n", sequence);
+      }
+      else{
+        fprintf(file, "\n");
+      }
+    
+      //convert back to light
+      if(light){
+        protein_to_light(parent);
+        light = FALSE;
+      }
+    }
+    next_src = get_peptide_src_next_association(next_src);
+  }
+
+  //free sequence if allocated
+  if(flag_out){
+    free(sequence);
+  }
+}
+
 
 //TESTME
 /**

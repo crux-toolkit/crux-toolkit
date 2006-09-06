@@ -174,6 +174,7 @@ int main(int argc, char** argv){
     PEPTIDE_T* peptide = NULL;
     INDEX_T* index = NULL;
     INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator = NULL;
+    INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator = NULL;
 
     //FIXME may add additional types such as non-trypticc or partially-tryptic
     if(strcmp(cleavages, "all")==0){
@@ -310,29 +311,51 @@ int main(int argc, char** argv){
       index = new_search_index(in_file, constraint, is_unique);
       
       if(index != NULL){
-        //create index peptide interator
-        index_peptide_iterator = new_index_peptide_iterator(index);
-      
         //count peptides, DEBUG purpose
         long int total_peptides = 0;
-
-        //iterate over all peptides
-        while(index_peptide_iterator_has_next(index_peptide_iterator)){
-          ++total_peptides;
-          peptide = index_peptide_iterator_next(index_peptide_iterator);
-          print_peptide_in_format(peptide, flag_opt, stdout);
-          free_peptide(peptide);
-          //debug purpose
-          if(total_peptides% 10000 == 0){
-            carp(CARP_DEBUG, "reached peptide: %d", total_peptides);
-          }
-        }
         
+        //only resrict peptide by mass and length, default iterator
+        if(peptide_type == ANY_TRYPTIC){
+           //create index peptide interator
+           index_peptide_iterator = new_index_peptide_iterator(index);
+           
+           //iterate over all peptides
+           while(index_peptide_iterator_has_next(index_peptide_iterator)){
+             ++total_peptides;
+             peptide = index_peptide_iterator_next(index_peptide_iterator);
+             print_peptide_in_format(peptide, flag_opt, stdout);
+             //this peptide is created with peptide-src which are an array
+             free_peptide_for_array(peptide);
+             //debug purpose
+             if(total_peptides% 10000 == 0){
+               carp(CARP_DEBUG, "reached peptide: %d", total_peptides);
+             }
+           }
+           free_index_peptide_iterator(index_peptide_iterator);
+        }
+        //if need to select among peptides by peptide_type and etc.
+        else{
+          //create index_filtered_peptide_iterator
+          index_filtered_peptide_iterator = new_index_filtered_peptide_iterator(index);
+          
+          //iterate over all peptides
+           while(index_filtered_peptide_iterator_has_next(index_filtered_peptide_iterator)){
+             ++total_peptides;
+             peptide = index_filtered_peptide_iterator_next(index_filtered_peptide_iterator);
+             print_filtered_peptide_in_format(peptide, flag_opt, stdout, peptide_type);
+             //this peptide is created with peptide-src which are an array
+             free_peptide_for_array(peptide);
+             //debug purpose
+             if(total_peptides% 10000 == 0){
+               carp(CARP_DEBUG, "reached peptide: %d", total_peptides);
+             }
+           }
+           free_index_filtered_peptide_iterator(index_filtered_peptide_iterator);
+        }
         //debug purpose
         carp(CARP_INFO, "total peptides: %d", total_peptides);
         
         free_index(index);
-        free_index_peptide_iterator(index_peptide_iterator);
       }
       else{
         carp(CARP_ERROR, "failed to perform search");

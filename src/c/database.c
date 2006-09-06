@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -17,7 +17,7 @@
 #include "peptide_constraint.h"
 #include "sorter.h"
 
-#define MAX_PROTEINS 2400000 ///< The maximum number of proteins in a database.
+#define MAX_PROTEINS 3300000 ///< The maximum number of proteins in a database.
 
 /**
  * \struct database
@@ -187,7 +187,7 @@ BOOLEAN_T parse_database(
   //check each line until reach '>' line
   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == '>'){
-      if(database->num_proteins == MAX_PROTEINS+1){
+      if(database->num_proteins == MAX_PROTEINS){
         fclose(file);
         free(new_line);
         carp(CARP_ERROR, "exceeds protein index array size");
