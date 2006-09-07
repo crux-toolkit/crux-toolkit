@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -28,6 +28,41 @@
 #define MAX_FILE_NAME_LENGTH 30
 #define NUM_CHECK_LINES 8
 #define MAX_PROTEIN_IN_BIN 2500
+#define MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN  500000000
+
+//global variable to store the temp directory
+//used for deleting directory when SIGINT
+char temp_folder_name[12] = "";
+
+/**
+ * clean_up
+ * cleans up the temporary directory when SIGINT
+ */
+void clean_up( int dummy ) {
+
+  struct dirent **namelist =NULL;
+  int num_file =0;
+
+  fcloseall();
+  chdir(temp_folder_name);
+  //collect all files in temp dir
+  num_file = scandir(".", &namelist, 0, alphasort);
+
+  //delete all files in temp dir
+  while(num_file--){
+    remove(namelist[num_file]->d_name);
+    free(namelist[num_file]);
+  }
+  free(namelist);
+
+  chdir("..");
+  //rmdir(temp_folder_name);
+  exit(-1);
+
+  //quiet compiler
+  dummy = dummy;
+}
+
 /* 
  * How does the create_index (the routine) work?
  *
@@ -216,13 +251,14 @@ INDEX_T* new_index(
   PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
   float mass_range,  ///< the range of mass that each index file should be partitioned into
   unsigned int max_size, ///< maximum limit of each index file
-  BOOLEAN_T is_unique ///< only unique peptides? -in
+  BOOLEAN_T is_unique, ///< only unique peptides? -in
+  BOOLEAN_T use_light ///< should i use light/heavy functionality? -in
   )
 {
   char** filename_and_path = NULL;
   char* working_dir = NULL;
   INDEX_T* index = allocate_index();
-  DATABASE_T* database = new_database(fasta_filename, FALSE); //probably should change
+  DATABASE_T* database = new_database(fasta_filename, use_light); //probably should change
 
   filename_and_path = parse_filename_path(fasta_filename);
   working_dir = generate_directory_name(filename_and_path[0]);
@@ -290,9 +326,21 @@ INDEX_T* new_search_index(
   )
 {
   INDEX_T* search_index = NULL;
+  BOOLEAN_T use_light = FALSE;
 
+  /**
+   * use heavy/light protein function if the fasta file is larger thatn limit
+   * this way it only parse the proteins that are need when going through the index
+   * for smaller size fasta files it's faster to just parse all of them
+   */
+  if(get_filesize(fasta_filename) >  MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN){
+    use_light = TRUE;
+    carp(CARP_INFO, "Using heavy/light protein function for file size: %d",
+         (int)get_filesize(fasta_filename));
+  }
+  
   //sets mass_range, max_size to an arbitrary 0
-  search_index = new_index(fasta_filename, constraint, 0, 0, is_unique);
+  search_index = new_index(fasta_filename, constraint, 0, 0, is_unique, use_light);
   
   //check if crux_index files have been made
   if(!get_index_on_disk(search_index)){
@@ -657,6 +705,9 @@ BOOLEAN_T create_index(
     carp(CARP_WARNING, "cannot create temporary directory");
     return FALSE;
   }
+  
+  //copy temporary folder name for SIGINT cleanup purpose
+  strncpy(temp_folder_name, temp_dir_name, 12); 
 
   //move into temporary directory
   if(chdir(temp_dir_name) != 0){
@@ -1213,27 +1264,41 @@ BOOLEAN_T check_index_db_boundary(
   //check peptide missed_cleavage
   else if(strncmp("missed_cleavage:", field, 16) == 0){
     if(compare_float(check_value, (real_value = get_peptide_constraint_num_mis_cleavage(constraint))) != 0){
-      carp(CARP_ERROR, "missed_cleavage:%d does not match the database supported %d ", (int)real_value, (int)check_value);
+      if((int)real_value != TRUE){
+        carp(CARP_ERROR, "missed_cleavage:FALSE, does not match the database supported TRUE");
+      }
+      else{
+        carp(CARP_ERROR, "missed_cleavage:TRUE, does not match the database supported FALSE");
+      }
       return FALSE;
     }
   }
   //check peptide mass_type
   else if(strncmp("mass_type:", field, 10) == 0){
     if(compare_float(check_value, (real_value = get_peptide_constraint_mass_type(constraint))) != 0){
-      carp(CARP_ERROR, "mass_type:%d does not match the database supported type %d ", (int)real_value, (int)check_value);
+      if((int)real_value != AVERAGE){
+        carp(CARP_ERROR, "mass_type: MONO, does not match the database supported type AVERAGE");
+      }
+      else{
+        carp(CARP_ERROR, "mass_type: AVERAGE, does not match the database supported type MONO");
+      }
       return FALSE;
     }
   }
   //check redundancy
   else if(strncmp("redundancy:", field, 11) == 0){
     if(compare_float(check_value, (real_value = get_index_is_unique(index))) != 0){
-      carp(CARP_ERROR, "peptide redundancy:%d does not match the database supported type %d ", (int)real_value, (int)check_value);
+      if((int)real_value == FALSE){
+        carp(CARP_ERROR, "peptide redundancy: REDUNDANT, does not match the database supported type UNIQUE");
+      }
+      else{
+        carp(CARP_ERROR, "peptide redundancy: UNIQUE, does not match the database supported type REDUNDANT");
+      }
       return FALSE;
     }
   }
   
   return TRUE;
-
 }
 
 /**

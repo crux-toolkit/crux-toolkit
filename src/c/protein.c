@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -402,7 +402,11 @@ static BOOLEAN_T read_raw_sequence
 
       // Convert invalid characters to X.
       a_char = toupper((int)a_char);
-      /*
+
+      /**
+       * this code check the character against to what verbosity you set
+       * bill's code, char_in_string can be found in utils.c
+       * very slow!!
       if (!char_in_string(get_alphabet(TRUE), a_char)) {
 	carp(CARP_WARNING, "Converting illegal character %c to X ",
 		a_char);
@@ -410,6 +414,19 @@ static BOOLEAN_T read_raw_sequence
 	a_char = 'X';
       }
       */
+      
+      /**
+       * To speed up the process, checks the ASCII code, 
+       * if the char is above or bellow the A(65)~Z(90)range,
+       * converts the character to a 'X'
+       */
+      if ( (int)a_char < 65 || (int)a_char  > 90 ) {
+	carp(CARP_WARNING, "Converting illegal character %c to X ",
+		a_char);
+	carp(CARP_WARNING, "in sequence %s.", name);
+	a_char = 'X';
+      }
+      
       raw_sequence[i_seq] = a_char;
       i_seq++;
     }

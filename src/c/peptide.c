@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.41 $
+ * $Revision: 1.42 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -246,11 +246,15 @@ void print_peptide_in_format(
     }
     next_src = get_peptide_src_next_association(next_src);
     
+    /** 
+     * uncomment this code if you want to restore a protein to 
+     * light after converted to heavy
     //convert back to light
     if(light){
       protein_to_light(parent);
       light = FALSE;
     }
+    */
   }
 
   //free sequence if allocated
@@ -324,11 +328,15 @@ void print_filtered_peptide_in_format(
         fprintf(file, "\n");
       }
     
+      /** 
+       * uncomment this code if you want to restore a protein to 
+       * light after converted to heavy
       //convert back to light
       if(light){
         protein_to_light(parent);
         light = FALSE;
       }
+      */
     }
     next_src = get_peptide_src_next_association(next_src);
   }

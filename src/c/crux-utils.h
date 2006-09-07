@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -66,5 +66,10 @@ char* cat_string(char* string_one, char* string_two);
  *\returns TRUE if float_a is between the interaval of min and max, else FALSE
  */
 inline BOOLEAN_T compare_float_three(float float_a, float min, float max);
+
+/**
+ * returns the file size of the given filename
+ */
+long get_filesize(char *FileName);
 
 #endif
