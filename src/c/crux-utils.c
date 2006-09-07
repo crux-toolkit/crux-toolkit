@@ -4,6 +4,8 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "utils.h"
 #include "objects.h"
 
@@ -147,4 +149,17 @@ char* cat_string(char* string_one, char* string_two){
   strncpy(result, string_one, len_one);
   strncpy(&result[len_one], string_two, len_two);
   return result;
+}
+
+
+/**
+ * returns the file size of the given filename
+ */
+long get_filesize(char *FileName){
+    struct stat file;
+    //return file size
+    if(!stat(FileName,&file)){
+      return file.st_size;
+    }
+    return 0;
 }

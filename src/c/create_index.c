@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <signal.h>
 #include "carp.h"
 #include "peptide.h"
 #include "peptide_src.h"
@@ -58,8 +59,14 @@ void show_progress(int* num){
   }
   ++*num;
 }
-
+      
 int main(int argc, char** argv){
+
+  // connect various signals to our clean-up function
+  signal( SIGTERM, clean_up );
+  signal( SIGINT, clean_up );
+  signal( SIGQUIT, clean_up );
+  signal( SIGHUP, clean_up ); 
 
   /* Set default values for any options here */
   double min_mass = 200;
@@ -239,10 +246,13 @@ int main(int argc, char** argv){
                 constraint,
                 mass_range,
                 max_file_size,
-                is_unique   
+                is_unique,
+                FALSE
                 );
     //create crux_index files
-    create_index(crux_index);
+    if(!create_index(crux_index)){
+      die("failed to create index");
+    }
     
     //free index(frees constraint together);
     free_index(crux_index);      

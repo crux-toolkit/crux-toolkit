@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -16,6 +16,13 @@
 #include "peptide_constraint.h"
 #include "database.h"
 
+
+/**
+ * clean_up
+ *
+ */
+void clean_up( int dummy );
+
 /**
  * \returns An (empty) index object.
  */
@@ -29,7 +36,8 @@ INDEX_T* new_index(
   PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
   float mass_range,  ///< the range of mass that each index file should be partitioned into
   unsigned int max_size,  ///< maximum limit of each index file
-  BOOLEAN_T is_unique ///< only unique peptides? -in
+  BOOLEAN_T is_unique, ///< only unique peptides? -in
+  BOOLEAN_T use_light ///< should I use light/heavy functionality? -in
 );         
 
 /**

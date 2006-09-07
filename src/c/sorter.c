@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file sorter.c
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -123,11 +123,15 @@ int compareTo(
     }
     
   EXIT:
+    /** 
+     * uncomment this code if you want to restore a protein to 
+     * light after converted to heavy
     //convert the protein back to light if needed
     if(get_database_use_light_protein(get_protein_database(get_peptide_parent_protein(peptide_one)))){
       protein_to_light(get_peptide_parent_protein(peptide_one));
       protein_to_light(get_peptide_parent_protein(peptide_two));
     }
+    */
     return result;
   }
   

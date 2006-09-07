@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.26 $
+ * $Revision: 1.27 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -65,12 +65,6 @@ struct database_peptide_iterator {
  */
 struct database_sorted_peptide_iterator {
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator;
-  //DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; ///<The protein iterator. 
-  //PROTEIN_PEPTIDE_ITERATOR_T* 
-  //  cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
-  //PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
-  //SORT_TYPE_T sort_type; ///< The sort type for this iterator (MASS, LENGTH, LEXICAL);
-  //PEPTIDE_WRAPPER_T* peptide_wrapper; ///< a linklist of peptide wrappers
 };
 
 /**
@@ -144,9 +138,13 @@ void print_database(
       }
       print_protein(protein, stdout);
       //if the database uses light/heavy functionality
+      /** 
+       * uncomment this code if you want to restore a protein to 
+       * light after converted to heavy
       if(database->use_light_protein){
         protein_to_light(protein);
       }
+      */
     }
     free_database_protein_iterator(iterator);
   }
@@ -496,9 +494,13 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
     //if first protein does not contain a match peptide, reinitailize
     while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
       // covert the heavy back to light
+      /** 
+       * uncomment this code if you want to restore a protein to 
+       * light after converted to heavy
       if(database->use_light_protein && !get_protein_is_light(next_protein)){
         protein_to_light(next_protein);
       }
+      */
 
       //end of list of peptides for database_peptide_iterator
       if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
@@ -588,11 +590,15 @@ PEPTIDE_T* database_peptide_iterator_next(
     reset = TRUE;
     PROTEIN_T* next_protein = NULL; 
     
+    /** 
+     * uncomment this code if you want to restore a protein to 
+     * light after converted to heavy
     // covert the heavy back to light
     if(database->use_light_protein && next_protein != NULL && !get_protein_is_light(next_protein)){
       protein_to_light(next_protein);
     }
-    
+    */
+
     //end of list of peptides for database_peptide_iterator
     if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
       break;
@@ -631,7 +637,11 @@ PEPTIDE_T* database_peptide_iterator_next(
     }
     //convert prior_protein to light
     else if(!reset && database_peptide_iterator->first_passed && (protein_bye != database_peptide_iterator->prior_protein)){
+      /** 
+       * uncomment this code if you want to restore a protein to 
+       * light after converted to heavy
       protein_to_light(database_peptide_iterator->prior_protein);
+      */
       database_peptide_iterator->prior_protein = protein_bye;
     }
   }
