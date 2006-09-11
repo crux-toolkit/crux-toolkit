@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -93,6 +93,7 @@ PROTEIN_T* allocate_protein(void){
 
 /**
  * \returns A new protein object.
+ * The protein is does not constain a database, users must provide one.
  */
 PROTEIN_T* new_protein(
   char*         id, ///< The protein sequence id. -in
@@ -111,6 +112,7 @@ PROTEIN_T* new_protein(
   set_protein_offset(protein, offset);
   set_protein_protein_idx(protein, protein_idx);
   set_protein_is_light(protein, FALSE);
+  protein->is_light = FALSE;
   return protein;
 }         
 
@@ -236,6 +238,7 @@ void copy_protein(
   set_protein_offset(dest, src->offset);
   set_protein_protein_idx(dest, src->protein_idx);
   set_protein_is_light(dest, src->is_light);
+  dest->database = src->database;
 
   free(id);
   free(sequence);

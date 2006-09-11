@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -71,5 +71,12 @@ inline BOOLEAN_T compare_float_three(float float_a, float min, float max);
  * returns the file size of the given filename
  */
 long get_filesize(char *FileName);
+
+/**
+ * deletes a given directory and it's files inside.
+ * assumes that there's no sub directories, only files
+ * \returns TRUE if successfully deleted directory
+ */
+BOOLEAN_T delete_dir(char* dir);
 
 #endif
