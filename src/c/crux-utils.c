@@ -6,8 +6,12 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <time.h>
 #include "utils.h"
 #include "objects.h"
+
 
 //PRECISION, determines the precision of the compare float, users
 //should lower the number if need more precision
@@ -162,4 +166,34 @@ long get_filesize(char *FileName){
       return file.st_size;
     }
     return 0;
+}
+
+/**
+ * deletes a given directory and it's files inside.
+ * assumes that there's no sub directories, only files
+ * \returns TRUE if successfully deleted directory
+ */
+BOOLEAN_T delete_dir(char* dir) {
+  struct dirent **namelist =NULL;
+  int num_file =0;
+  int result;
+
+  chdir(dir);
+  //collect all files in dir
+  num_file = scandir(".", &namelist, 0, alphasort);
+
+  //delete all files in temp dir
+  while(num_file--){
+    remove(namelist[num_file]->d_name);
+    free(namelist[num_file]);
+  }
+  free(namelist);
+
+  chdir("..");
+  result = rmdir(dir);
+  if(result == FALSE){
+    return FALSE;
+  }
+  
+  return TRUE;
 }

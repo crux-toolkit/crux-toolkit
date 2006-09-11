@@ -12,21 +12,16 @@ SPECTRUM_T * second_spectrum;
 char* file_name;
 FILE* file;
 
-void setup(void){
-  spectrum = allocate_spectrum();
-  file = fopen("test.ms2", "r" );
-  second_spectrum = allocate_spectrum();
-}
-
-void teardown(void){
-  free_spectrum(spectrum);
-  free_spectrum(second_spectrum);
-  fclose(file);
-}
 
 START_TEST (test_create){
+  //set up
+  spectrum = allocate_spectrum();
+  second_spectrum = allocate_spectrum();
+
+
   fail_unless(parse_spectrum(spectrum, "test.ms2"), "failed to open and create new spectrum from ms2 file");
-  fail_unless( parse_spectrum_file(spectrum, file), "failed to open and create new spectrum from ms2 file");
+  file = fopen("test.ms2", "r" );
+  fail_unless(parse_spectrum_file(spectrum, file), "failed to open and create new spectrum from ms2 file");
   
   fail_unless(get_spectrum_first_scan(spectrum) == 15, "first_scan field incorrect");
   fail_unless(get_spectrum_last_scan(spectrum) == 15, "last_scan field incorrect");
@@ -54,7 +49,12 @@ START_TEST (test_create){
   fail_unless(compare_float(get_spectrum_total_energy(second_spectrum),64.4) ==0 , "total_energy field incorrect");
   file_name = get_spectrum_filename(second_spectrum);
   fail_unless((strcmp("test.ms2", file_name) == 0),"file name incorrect" );
-  free(file_name);  
+  free(file_name);
+  
+  //free
+  free_spectrum(spectrum);
+  free_spectrum(second_spectrum);
+  fclose(file);
 }
 END_TEST
 
@@ -63,6 +63,6 @@ Suite *spectrum_suite(void){
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);
-  tcase_add_checked_fixture(tc_core, setup, teardown);
+  //tcase_add_checked_fixture(tc_core, setup, teardown);
   return s;
 }

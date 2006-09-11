@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -40,25 +40,10 @@ char temp_folder_name[12] = "";
  */
 void clean_up( int dummy ) {
 
-  struct dirent **namelist =NULL;
-  int num_file =0;
-
   fcloseall();
-  chdir(temp_folder_name);
-  //collect all files in temp dir
-  num_file = scandir(".", &namelist, 0, alphasort);
-
-  //delete all files in temp dir
-  while(num_file--){
-    remove(namelist[num_file]->d_name);
-    free(namelist[num_file]);
-  }
-  free(namelist);
-
-  chdir("..");
-  //rmdir(temp_folder_name);
+  delete_dir(temp_folder_name);
   exit(-1);
-
+  
   //quiet compiler
   dummy = dummy;
 }

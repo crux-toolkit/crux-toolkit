@@ -89,12 +89,16 @@ int main(int argc, char** argv){
   BOOLEAN_T is_unique = FALSE;
 
   /* Define optional command line arguments */ 
+
+  /**
+   * if need to restrict file size use this..
+   *
   parse_arguments_set_opt(
     "max-file-size", 
     "The maximum number of peptides in one index file.",
     (void *) &max_file_size, 
     INT_ARG);
-  
+  */
   parse_arguments_set_opt(
     "mass-range", 
     "The mass range contained in each index file.",
@@ -193,13 +197,17 @@ int main(int argc, char** argv){
       carp(CARP_FATAL, "mass_range:%d must be greater than 0.", mass_range);
       exit(1);
     }
-    
-    //check if max_file_size less than 1
+
+    /**
+     * if need to restrict file size use this..
+     *
+     //check if max_file_size less than 1
     if(max_file_size < 1){
       carp(CARP_FATAL, "max_file_size:%d must be greater than 1.", max_file_size);
       exit(1);
     }
-        
+    */
+
     //determine isotopic mass option
     if(strcmp(isotopic_mass, "average")==0){
       mass_type = AVERAGE;

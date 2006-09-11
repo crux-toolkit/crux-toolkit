@@ -12,6 +12,8 @@
 #include "../database.h"
 #include "../carp.h"
 #include "../crux-utils.h"
+#include "../database.h"
+
 
 PEPTIDE_T* peptide2;
 PEPTIDE_T* peptide3;
@@ -29,151 +31,72 @@ PEPTIDE_SRC_T* association1;
 PEPTIDE_SRC_T* association2;
 PEPTIDE_SRC_T* association3;
 
-void setup(void){
-  //peptide4 = allocate_peptide();
-  
-}
+DATABASE_T* db;
 
-void teardown(void){
-  //  free_protein(protein);
-}
 
 START_TEST (test_create){
-  /*
+  char* name = NULL;
+  char* name2 = NULL;
+  
+  //try create a new database
+  db = new_database("fasta_file", TRUE);
+  fail_unless(parse_database(db), "failed to parse database");
+  fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
+  fail_unless(get_database_is_parsed(db), "database parsed field not correctly set");
+  fail_unless(get_database_num_proteins(db) == 3, "database number of proteins not set correctly");
+  
   //check the fasta file parsing
-  FILE* file = fopen("fasta_file", "r");  //"/var/noble/data/protein_database/E_coli_contam_rand.fasta", "r");
+  FILE* file = fopen("fasta_file", "r");
   protein3 = allocate_protein();
-  if(!parse_protein_fasta_file(protein3, file)){
-    fprintf(stderr, "parsing failed");
-  }
-  fclose(file);
+  fail_unless(parse_protein_fasta_file(protein3, file), "failed to parse protein from fasta file");
   print_protein(protein3, stdout);
   
  
-  protein1 = new_protein("23 Jordan", "AADAAKAGAAKFFA", 14, "this is a test protein");
+  protein1 = new_protein("23 Jordan", "AADAAKAGAAKFFA", 14, "this is a test protein", 45, 3);
   print_protein(protein1, stdout);
  
   //try copy protein
   protein2 = allocate_protein();
   copy_protein(protein1, protein2);
-  print_protein(protein1, stdout);
- 
-
-  //parse protein
-  */
-
+  fail_unless(strcmp((name = get_protein_id(protein1)), (name2=get_protein_id(protein2))) == 0, "protein, id not correct");
+  free(name); 
+  free(name2);
+  fail_unless(strcmp((name = get_protein_sequence(protein1)), (name2 = get_protein_sequence(protein2))) == 0, "protein, sequence not correct");
+  free(name); 
+  free(name2);
+  fail_unless(strcmp((name = get_protein_annotation(protein1)), (name2 = get_protein_annotation(protein2))) == 0, "protein, annotation not correct");
+  free(name); 
+  free(name2);
+  fail_unless(get_protein_length(protein1) == get_protein_length(protein2), "protein, protein length not correct");
+  fail_unless(get_protein_offset(protein1) == get_protein_offset(protein2), "protein, protein offset not correct");
+  fail_unless(get_protein_protein_idx(protein1) == get_protein_protein_idx(protein2), "protein, protein idx not correct");
+  fail_unless(get_protein_is_light(protein1) == get_protein_is_light(protein2), "protein, protein is_light not correct");
+  
   //peptide constraint
   constraint = new_peptide_constraint(TRYPTIC, 0, 1200, 1, 10, 1, AVERAGE);
-  /*
+  
+  /** test, protein_peptide_iterator **/
+  
   //create iterator
   iterator = new_protein_peptide_iterator(protein3, constraint);
   
   //iterate over all possible peptides
   while(protein_peptide_iterator_has_next(iterator)){
     peptide1 = protein_peptide_iterator_next(iterator);
-    print_peptide(peptide1, stdout);
+    //print_peptide(peptide1, stdout);
     free_peptide(peptide1);
   }  
 
-  free_protein_peptide_iterator(iterator);
-  free_protein(protein1);
-  free_protein(protein2);
-
-  
-  free_protein(protein3);
-  */
-
-  /** test 2
-  //create a new database
-  DATABASE_T* database = new_database("small_fasta");
-  
-  DATABASE_PEPTIDE_ITERATOR_T* iterator =
-    new_database_peptide_iterator(database, constraint);
-
-  int n = 0;
-  while(database_peptide_iterator_has_next(iterator)){
-    if(n == 0){
-      peptide5 = database_peptide_iterator_next(iterator);
-      //print_peptide(peptide4, stdout);
-
-    }
-    else if(n == 4){
-      peptide6 = database_peptide_iterator_next(iterator);
-    }
-    else{
-      peptide4 = database_peptide_iterator_next(iterator);
-      print_peptide(peptide4, stdout);
-      free_peptide(peptide4);
-    }
-    ++n;
-  }
-  
-  printf("the comparison seq between two peptides is: %d\n", compare_peptide_sequence(peptide5, peptide6));
-  printf("the comparison mass between two peptides is: %d\n", compare_peptide_mass(peptide5, peptide6));
-  print_peptide(peptide5, stdout);
-  print_peptide(peptide6, stdout);
-
-  if(merge_peptides(peptide5, peptide6)){
-    printf("merge complete\n");
-  }
-  else{
-    printf("merge failded\n");
-  }
-  
-  print_peptide(peptide5, stdout);
-  print_peptide_in_format(peptide5, TRUE,  stdout);
-
-
-  free_peptide(peptide5);
-  //free_peptide(peptide6);
-
-  //free database
-  free_database_peptide_iterator(iterator);
-  free_peptide_constraint(constraint);
-  free_database(database);
-
-  */
-  /*test 3*/
-  printf("\nstart sorted\n");
-   DATABASE_T* database = new_database("small_fasta");
-  
-  DATABASE_SORTED_PEPTIDE_ITERATOR_T* iterator =
-    new_database_sorted_peptide_iterator(database, constraint, LENGTH, TRUE);
-
-  while(database_sorted_peptide_iterator_has_next(iterator)){
-      peptide5 = database_sorted_peptide_iterator_next(iterator);
-      print_peptide_in_format(peptide5, TRUE,  stdout);
-      //print_peptide(peptide5, stdout);
-      free_peptide(peptide5);
-  }
- 
-  printf("start un-sorted\n");
-  DATABASE_T* database2 = new_database("small_fasta");
-  
-  DATABASE_PEPTIDE_ITERATOR_T* iterator2 =
-    new_database_peptide_iterator(database2, constraint);
-
-  while(database_peptide_iterator_has_next(iterator2)){
-      peptide5 = database_peptide_iterator_next(iterator2);
-      print_peptide_in_format(peptide5, TRUE,  stdout);
-      //print_peptide(peptide5, stdout);
-      free_peptide(peptide5);
-  }
- 
   //  print_peptide_in_format(peptide5, TRUE,  stdout);
 
-
-  //free_peptide(peptide5);
-  //free_peptide(peptide6);
-
-  //free database
-  free_database_sorted_peptide_iterator(iterator);
-  free_database_peptide_iterator(iterator2);
+  //free stuff
+  free_protein(protein1);
+  free_protein(protein2);
+  free_protein(protein3);
+  free_protein_peptide_iterator(iterator);
   free_peptide_constraint(constraint);
-  free_database(database);
-  free_database(database2);
-
-
+  free_database(db);
+  fclose(file);
 }
 END_TEST
 
@@ -182,6 +105,6 @@ Suite* protein_suite(void){
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);
-  tcase_add_checked_fixture(tc_core, setup, teardown);
+  //tcase_add_checked_fixture(tc_core, setup, teardown);
   return s;
 }
