@@ -70,7 +70,7 @@ int main(int argc, char** argv){
 
   /* Set default values for any options here */
   double min_mass = 200;
-  double max_mass = 2400;
+  double max_mass = 7200;
   double mass_range = 1;
   int max_file_size = 2000;
   int min_length = 6;
