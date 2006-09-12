@@ -40,10 +40,13 @@ START_TEST (test_create){
 "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW"
                         , 490, "this is a my test protein", 44, 4); //offset and protein_idx are random
   
-                        
+  protein2 = new_protein("test protein",
+
+"MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW"
+                        , 490, "this is a my test protein", 44, 4);
 
   //create peptides
-  peptide1 = new_peptide( 6, 774.83, protein, 239, TRYPTIC); //QVPDAR
+  peptide1 = new_peptide( 6, 684.75, protein, 239, TRYPTIC); //QVPDAR
   peptide2 = new_peptide( 6, 656.69, protein, 6, PARTIALLY_TRYPTIC);//FGGTSV
   peptide3 = new_peptide( 9, 1341.32, protein, 221, NOT_TRYPTIC); //DCCEIWTDV
   
@@ -53,19 +56,22 @@ START_TEST (test_create){
   free(seq);
   //test
   printf("peptide mass %.2f\n", get_peptide_peptide_mass(peptide1));
-  fail_unless( compare_float(get_peptide_peptide_mass(peptide1), 774.83) ==0, "failed mass #1");
-  fail_unless( compare_float(calc_peptide_mass(peptide1, AVERAGE), 774.83) == 0 , "failed mass #2");
+  fail_unless( compare_float(get_peptide_peptide_mass(peptide1), 684.75) ==0, "failed mass #1");
+  //debug
+  printf("The peptide1 mass: %.2f\n", calc_peptide_mass(peptide1, AVERAGE));
+
+  fail_unless(684.74 < calc_peptide_mass(peptide1, AVERAGE) &&  calc_peptide_mass(peptide1, AVERAGE) < 684.76, "failed mass #2");
   
-  fail_unless( 546.5958 -0.1<= get_peptide_neutral_mass(peptide1) <= 546.5958 + 0.1, "failed mass #3");
+  fail_unless( compare_float(get_peptide_neutral_mass(peptide1), 684.75) == 0, "failed mass #3");
   printf("peptide charged mass(charge2): %f\n", get_peptide_charged_mass(peptide1, 2));
   printf("peptide mz(charge2): %f\n", get_peptide_mz(peptide1, 2));
 
 
   /*************peptide constraint**************/
-  constraint = new_peptide_constraint(PARTIALLY_TRYPTIC, 600, 2000, 7, 20, 1, AVERAGE);
+  constraint = new_peptide_constraint(PARTIALLY_TRYPTIC, 660, 2000, 7, 20, 1, AVERAGE);
   fail_unless(!peptide_constraint_is_satisfied(constraint, peptide1), "constraint fail1");
-  fail_unless(peptide_constraint_is_satisfied(constraint, peptide2), "constraint fail1");
-  fail_unless(!peptide_constraint_is_satisfied(constraint, peptide3), "constraint fail1");
+  fail_unless(!peptide_constraint_is_satisfied(constraint, peptide2), "constraint fail2");
+  fail_unless(peptide_constraint_is_satisfied(constraint, peptide3), "constraint fail3");
   
   //get, set for peptide_constraint (TRYPTIC ,400, 3000, 4, 26)
   set_peptide_constraint_peptide_type(constraint, TRYPTIC);
@@ -108,7 +114,7 @@ START_TEST (test_create){
 
 
   //check peptide_src
-  association1 = new_peptide_src(TRYPTIC, protein1, 4);
+  association1 = new_peptide_src(TRYPTIC, protein, 4);
   association2 = new_peptide_src(NOT_TRYPTIC, protein2, 8); //try to add this to end
   association3 = allocate_peptide_src();
   copy_peptide_src(association1, association3);
@@ -119,7 +125,7 @@ START_TEST (test_create){
   add_peptide_peptide_src(peptide4, association3);
  
   fail_unless(get_peptide_src_peptide_type(association3) == TRYPTIC, "failed to copy | set peptide type");
-  fail_unless(get_peptide_src_parent_protein(association3) == protein1, "failed to copy | set parent protein");
+  fail_unless(get_peptide_src_parent_protein(association3) == protein, "failed to copy | set parent protein");
   fail_unless(get_peptide_src_start_idx(association3) == 4, "failed to copy | set start idx");
  
   //try printing peptide in various forms..to ensure nothing blows up
@@ -134,9 +140,7 @@ START_TEST (test_create){
   free_peptide(peptide3);
   free_peptide(peptide4);
   free_protein(protein);
-  free_protein(protein1);
   free_protein(protein2);
-  free_protein(protein3);
 }
 END_TEST
 

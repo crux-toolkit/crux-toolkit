@@ -20,6 +20,7 @@ int main(void){
   Suite* suite_database = database_suite();
   Suite* suite_index = index_suite(); 
   
+  
   //add each suite to Runner
   SRunner *sr = srunner_create(NULL);
   srunner_add_suite(sr,suite_peak);
@@ -27,8 +28,9 @@ int main(void){
   srunner_add_suite(sr,suite_spectrum_collection);
   srunner_add_suite(sr,suite_peptide);
   srunner_add_suite(sr,suite_protein);
-  srunner_add_suite(sr,suite_index);
   srunner_add_suite(sr,suite_database);
+  srunner_add_suite(sr,suite_index);
+
 
   //run each check suite
   srunner_run_all(sr, CK_NORMAL);
