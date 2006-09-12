@@ -52,24 +52,11 @@ START_TEST (test_create){
   //peptide constraint
   constraint = new_peptide_constraint(TRYPTIC, 0, 1200, 1, 10, 1, AVERAGE);
   
-  /* test database protein iterator */
-  DATABASE_PROTEIN_ITERATOR_T* iterator2 =
-    new_database_protein_iterator(db);
-
-  int n = 0;
-  while(database_protein_iterator_has_next(iterator2)){
-    protein1 = database_protein_iterator_next(iterator2);
-    free_protein(protein1);
-    ++n;
-  }
-  fail_unless(n == 3, "failed to iterate over all proteins");
-  free_database_protein_iterator(iterator2);
-  
   /* test database peptide iterator */
   DATABASE_PEPTIDE_ITERATOR_T* iterator3 =
     new_database_peptide_iterator(db, constraint);
 
-  n = 0;
+  int n = 0;
   while(database_peptide_iterator_has_next(iterator3)){
     peptide4 = database_peptide_iterator_next(iterator3);
     if(n == 0){
@@ -86,10 +73,7 @@ START_TEST (test_create){
   //print_peptide_in_format(peptide5, TRUE,  stdout);
   
   free_peptide(peptide5);
-  
-  //free
-  free_database_peptide_iterator(iterator3);
-  
+    
   /* test database sorted peptide iterator */
   
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* iterator4 =
@@ -101,7 +85,22 @@ START_TEST (test_create){
     //print_peptide(peptide5, stdout);
     free_peptide(peptide5);
   }
+
+    
+  /* test database protein iterator */
+  DATABASE_PROTEIN_ITERATOR_T* iterator2 =
+    new_database_protein_iterator(db);
+
+  n = 0;
+  while(database_protein_iterator_has_next(iterator2)){
+    protein1 = database_protein_iterator_next(iterator2);
+    ++n;
+  }
+  fail_unless(n == 3, "failed to iterate over all proteins");
   
+  //free
+  free_database_protein_iterator(iterator2);
+  free_database_peptide_iterator(iterator3);
   free_database_sorted_peptide_iterator(iterator4);
   free_peptide_constraint(constraint);
   free_database(db);

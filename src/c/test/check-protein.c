@@ -42,6 +42,7 @@ START_TEST (test_create){
   db = new_database("fasta_file", TRUE);
   fail_unless(parse_database(db), "failed to parse database");
   fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
+  free(name);
   fail_unless(get_database_is_parsed(db), "database parsed field not correctly set");
   fail_unless(get_database_num_proteins(db) == 3, "database number of proteins not set correctly");
   
