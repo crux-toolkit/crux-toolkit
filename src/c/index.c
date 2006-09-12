@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -732,7 +732,7 @@ BOOLEAN_T create_index(
   while(database_peptide_iterator_has_next(peptide_iterator)){    
     ++count_peptide;
     if(count_peptide % 1000 == 0){
-      fprintf(stderr,"reached peptide: %d\n", (int)count_peptide);
+      carp(CARP_INFO, "reached peptide: %d\n", (int)count_peptide);
     }
 
     working_peptide = database_peptide_iterator_next(peptide_iterator);

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file sorter.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -491,7 +491,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
     //debug purpuse
     ++total_number_peptide;
     if(total_number_peptide % 1000000 == 0){
-      carp(CARP_DEBUG, "number of peptides(not unique): %u", total_number_peptide); 
+      carp(CARP_INFO, "number of peptides(not unique): %u", total_number_peptide); 
     }
     
     if(start){
@@ -510,7 +510,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
   //add all peptides to the complied master list
   master_list_wrapper = list_wrapper;
   
-  carp(CARP_DEBUG, "total number of peptides(not unique): %u", total_number_peptide); 
+  carp(CARP_INFO, "total number of peptides(not unique): %u", total_number_peptide); 
 
   //sort the master list using merge sort
   master_list_wrapper = merge_sort(master_list_wrapper, sort_type, unique);
@@ -543,7 +543,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
     //debug purpuse
     ++total_number_peptide;
     if(total_number_peptide % 1000000 == 0){
-      carp(CARP_DEBUG, "number of peptides(not unique): %u", total_number_peptide); 
+      carp(CARP_INFO, "number of peptides(not unique): %u", total_number_peptide); 
     }
     
     if(start){
@@ -564,7 +564,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
   //add all peptides to the complied master list
   master_list_wrapper = list_wrapper;
   
-  carp(CARP_DEBUG, "total number of peptides(not unique): %u", total_number_peptide); 
+  carp(CARP_INFO, "total number of peptides(not unique): %u", total_number_peptide); 
 
   //sort the master list using merge sort
   master_list_wrapper = merge_sort(master_list_wrapper, sort_type, unique);

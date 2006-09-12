@@ -328,7 +328,7 @@ int main(int argc, char** argv){
              free_peptide_for_array(peptide);
              //debug purpose
              if(total_peptides% 10000 == 0){
-               carp(CARP_DEBUG, "reached peptide: %d", total_peptides);
+               carp(CARP_INFO, "reached peptide: %d", total_peptides);
              }
            }
            free_index_peptide_iterator(index_peptide_iterator);
@@ -347,7 +347,7 @@ int main(int argc, char** argv){
              free_peptide_for_array(peptide);
              //debug purpose
              if(total_peptides% 10000 == 0){
-               carp(CARP_DEBUG, "reached peptide: %d", total_peptides);
+               carp(CARP_INFO, "reached peptide: %d", total_peptides);
              }
            }
            free_index_filtered_peptide_iterator(index_filtered_peptide_iterator);

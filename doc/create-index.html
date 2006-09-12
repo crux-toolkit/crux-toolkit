@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: create-index
-REVISION: $Revision: 1.3 $
+REVISION: $Revision: 1.4 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -53,8 +53,8 @@ all of its peptides on disk.
 <B>Options:</B>
 
 <UL>
-<LI>[--max-file-size int] &ndash; The maximum size of a file to create in the
-index.  Default=2GB (can be implemented later)
+<!-- <LI>[--max-file-size int] &ndash; The maximum size of a file to create in the
+index.  Default=2GB (can be implemented later) -->
 	
 <LI>[--mass-range float] &ndash; The mass range contained in each index file.
 Default=1Da
@@ -107,6 +107,7 @@ messages:</B>
 
 <UL>
 	<LI>All floats are supported up to 2 decimal digits
+       	<LI>User must ensure that file handler limit is sufficient enough for create-index. use "ulimit -n [#file hanlders]" on command line to increase number of allowed filehandlers. A typical default is 1024, should reset to ~20,000. 
 	
 </UL>
 <B>Bugs:</B> 
