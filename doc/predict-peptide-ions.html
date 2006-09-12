@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: predict-peptide-ions
-REVISION: $Revision: 1.1 $
+REVISION: $Revision: 1.2 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -18,9 +18,9 @@ REVISION: $Revision: 1.1 $
 <B>Description:</B>
 <br>
 <br>
-Given a peptide and a charge state, predict the ions according to some
-constraints. This program will be used primarily for debugging the
-spectrum annotation code, and it's main functionality will be wrapped in
+Given a peptide and a charge state, predict the ions according to the 
+provided options. The program will be used primarily for validating the
+ion prediction code, and it's main functionality will ultimately be wrapped in
 <a href='./search-spectrum.html'>search-spectrum</a>.
 <br>
 <br>
@@ -37,9 +37,9 @@ spectrum annotation code, and it's main functionality will be wrapped in
 
 <UL>
 <LI>&lt;peptide sequence&gt; &ndash; The literal peptide sequence (e.g.
-EAMAPK) that is used to annotate the spectrum.
+EAMAPK) that is used to predict the ions.
 <LI>&lt;charge state&gt; &ndash; The charge state of the peptide used to
-annotate the spectrum.
+predict the ions.
 </UL>
 <B>Output:</B>
 
@@ -52,7 +52,7 @@ annotate the spectrum.
   <pre>
   # PEPTIDE: &lt;peptide sequence&gt;
   # CHARGE: &lt;peptide charge&gt;</pre>
-  And then the predicted ions, the following format:
+  And then the predicted ions, in the following format:
   <pre>
   &lt;m/z&gt; \t &lt;mass&gt; \t &lt;ion-charge-state&gt; \t &lt;primary-ion&gt; \t &lt;peptide-bond-index&gt; \t &lt;neutral-loss&gt; \n</pre>
   Where
@@ -60,9 +60,9 @@ annotate the spectrum.
   &lt;m/z&gt; is the ion's mass-to-charge
   &lt;mass&gt; is the ion's (charged) mass
   &lt;charge-state&gt; is the ion's charge e.g. 1,2,3
-  &lt;ion-series&gt; is in (b,y,p)
-  &lt;bond-index&gt; is in (1...n), where n is peptide length
-  &lt;neutral-loss&gt; is in (none|nh3|co|h2o)
+  &lt;ion-series&gt; is one of (b,y,p)
+  &lt;bond-index&gt; is in [1...n), where n is peptide length
+  &lt;neutral-loss&gt; is one of (none|nh3|co|h2o)
   </pre>
 
 
@@ -70,41 +70,32 @@ annotate the spectrum.
 <B>Options:</B>
 
 <UL>
-<LI>[--primary-ions b|y|by] &ndash; Annotate the spectrum with the
+<LI>[--primary-ions b|y|by] &ndash; Predict the
 specified primary ion series. 'b' indicates b-ions only, 'y' indicates
 y-ions only, 'by' indicates both. (Possibly add additional ions-series
-later ('a', 'c', etc.). (Default=by)
+later ('a', 'c', etc.)? (Default=by)
 
-<LI>[--precursor-ion T|F] &ndash; Annotate the spectrum with the
-precursor ion, and all associated ions (neutral-losses, multiple charge
-states) consistent with other options. 
+<LI>[--precursor-ion T|F] &ndash; Predict the 
+precursor ions, and all associated ions (neutral-losses, multiple charge
+states) consistent with the other specified options. 
 
-<LI>[--neutral-losses none|h2o|co|nh3|all] &ndash; Annotate the
-spectrum with the specified neutral loss peaks ('none' indicates no
+<LI>[--neutral-losses none|h2o|co|nh3|all] &ndash; Predict the
+the specified neutral loss peaks ('none' indicates no
 neutral losses, 'h2o' indicates water loss only, 'co' indicates a-ions
-only, 'nh3' indicates ammonia losses only, 'all' indicates all three
-losses). (Default=all)
+only, 'nh3' indicates ammonia losses only, 'all' indicates all three kinds
+of losses). (Default=all)
 
-<LI>[--max-ion-charge 1|2|3|spectrum] &ndash; Annotate the spectrum with
+<LI>[--max-ion-charge 1|2|3|peptide] &ndash; Predict 
 ions up to this charge-state. The integer options ('1','2' and '3') specify a
-fixed maximum charge-state. The 'spectrum' option 
+fixed maximum charge-state. The 'peptide' option 
 indicates that the ions should range
-up to the maximum charge-state of the spectrum itself (thus, a +2 charge
-state spectrum would have ions of +1 and +2). (Default=spectrum)
-
-<LI>[--mz-range spectrum|full] &ndash; Annotate the spectrum with ions
-in the specified mz-range. 'spectrum' indicates only annotate with ions
-in the range of mz's present in the spectrum; 'full' indicates annotate
-with all possible ions for the specified peptide. (Default=spectrum)
+up to the maximum charge-state of the peptide itself (thus, a +2 charge
+state peptide would have ions of +1 and +2). (Default=peptide)
 </UL>
 <B>Warning
 messages:</B> 
 
 <UL>
-  <LI><I>FATAL: The file "spectrum input filename" does
-  not exist (or is not readable, or is empty).</I>
-  <LI><I>FATAL: The file "spectrum input filename" does
-  not contain the spectrum scan number "scan number".</I>
   <LI><I>FATAL: The sequence "peptide" is not a valid peptide sequence.</I>
   <LI><I>FATAL: The value "charge" is not a valid charge state.</I>
 </UL>
