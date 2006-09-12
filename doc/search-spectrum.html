@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
+	<TITLE>search-spectrum</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20050830;17560800">
+	<META NAME="CHANGED" CONTENT="20050902;15510500">
+<!-- FILE: search-spectrum.html
+AUTHOR: Aaron Klammer
+CREATE DATE: 2005-08-23
+PROJECT: search-spectrum
+REVISION: $Revision: 1.1 $
+-->
+</HEAD>
+<BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
+<H1 ALIGN=CENTER>search-spectrum</H1>
+<B>Description:</B>
+<br>
+<br>
+Given as input an ms2 file, a spectrum scan number within that file, 
+a sequence database, and an optional parameter file, search the 
+spectrum against the peptides in the sequence database, and return 
+high scoring peptides.
+<br>
+<br>
+<B>Usage:</B>
+<br>
+<br>
+<code>search-spectrum 
+  &nbsp;&lt;ms2&nbsp;input&nbsp;filename&gt; 
+  &nbsp;&lt;ms2&nbsp;scan&nbsp;number&gt; 
+  &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
+  &nbsp;[parameter&nbsp;filename]
+</code>
+
+<p>
+<B>Input:</B>
+
+<UL>
+  <LI>&lt;ms2 &gt; &ndash; 
+  The name of the file (in MS2 format) from which to parse the spectrum.
+  <LI>&lt;scan number&gt; &ndash; The scan number for the MS-MS spectrum
+  to extract from the MS2 file. This is an integer in the range [1, 100000], 
+  and uniquely identifies a particular MS-MS spectrum within a <a
+  href="http://etd.caltech.edu/etd/available/etd-05262006-095948/unrestricted/Graumann_PhD-Thesis_Chapter_4,_Appendix_B,_McDonald_2004.pdf">.ms2</a> file.
+  <LI>&lt;protein input filename&gt; &ndash; 
+  The name of the file (in fasta format) from which to retrieve proteins and
+  peptides.
+</UL>
+<B>Output:</B>
+
+<UL>
+  <br>
+
+  The program prints to standard output a series of header lines,
+  describing how the code were generated, and according to what
+  criteria, as follows:
+
+  <pre>
+  # SPECTRUM FILE: &lt;spectrum input file&gt;
+  # SCAN NUMBER: &lt;ms2 scan number&gt;
+  # PROTEIN DATABASE: &lt;protein input filename&gt;
+  </pre>
+
+</UL>
+<B>Options:</B>
+
+<UL>
+<LI>[--output-sequence] &ndash; Output the peptide
+sequence as well as the protein id and start and stop.
+	
+<LI>[--min-mass float] &ndash; The minimum neutral mass of the
+peptides to output Default=200
+	
+<LI>[--max-mass float] &ndash; The maximum neutral mass of the
+peptides to output. Default=2400
+	
+<LI>[--min-length int] &ndash; The minimum length of the peptides to
+output. Default=6
+	
+<LI>[--max-length int] &ndash; The maximum length of the peptides to
+output. Default=50
+	
+<LI>[--cleavages tryptic|all ] &ndash; Type of cleavages to allow.
+The <code>tryptic</code> option outputs peptides that result from a
+complete in silico digestion of proteins after residues K or R except
+when followed by P, wherease <code>all</code> outputs all possible
+peptides.  Default=tryptic.
+
+<LI>[--sort mass|length|none] &ndash; Specify the order in which
+peptides are printed to standard output.  By default, the output is
+not sorted.
+
+<LI>[--isotopic-mass|average|mono] &ndash; Specify the type of isotopic masses
+to use when calculating the peptide mass.  By default, average mass is used. 
+
+<LI>[--verbosity int] &ndash; Specify the verbosity of the current processes from 0-100.  
+By default, verbosity is set to 100. 
+
+<LI>[--redundancy redundant|unique] &ndash; Specify whether peptides that
+come from different proteins yet with identical sequences should appear
+on separate lines (redundant) or on the same line (unique). 
+
+<LI>[--use-index T|F] &ndash; Specify whether a pre-computed on-disk
+index should be used for retrieving the peptides from the fasta file
+(rather than the fasta file itself).
+
+</UL>
+
+
+</UL>
+
+</UL>
+<B>Warning
+messages:</B> 
+
+<UL>
+  <LI><I>Fatal: The file "protein input filename" does
+  not exist (or is not readable, or is empty).</I>
+  <LI><I>Fatal: The index for "protein input filename" does
+  not exist (or is not readable, or is empty).</I>
+</UL>
+<B>Bugs:</B> 
+
+<UL>
+	<LI>search-spectrum does not have bugs, it has features.
+	
+</UL>
+<HR>
+<P><A HREF="crux.html">Crux</A> 
+</P>
+</BODY>
+</HTML>
