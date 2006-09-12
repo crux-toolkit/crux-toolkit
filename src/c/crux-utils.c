@@ -178,7 +178,11 @@ BOOLEAN_T delete_dir(char* dir) {
   int num_file =0;
   int result;
 
-  chdir(dir);
+  //does the directory to remove exist?, if so move into it..
+  if(chdir(dir) == -1){
+    return FALSE;
+  }
+
   //collect all files in dir
   num_file = scandir(".", &namelist, 0, alphasort);
 

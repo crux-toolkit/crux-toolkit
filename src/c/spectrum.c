@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.28 $
+ * REVISION: $Revision: 1.29 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -47,7 +47,7 @@
 struct spectrum {
   int               first_scan;    ///< The number of the first scan
   int               last_scan;     ///< The number of the last scan
-  int               id;            ///< A unique identifier
+  int               id;            ///< A unique identifier FIXME, this field is not set when parsing..
   SPECTRUM_TYPE_T   spectrum_type; ///< The type of spectrum. 
   float             precursor_mz;  ///< The m/z of the precursor (for MS-MS spectra)
   int*              possible_z;    ///< The possible charge states of this spectrum
@@ -227,8 +227,8 @@ void copy_spectrum(
 /**
  * Parses a spectrum from file.
  * \returns TRUE if success. FALSE is failure.
- * Must not include the Header line "H"
- * FIXME if need to read 'H' header line
+ * Skips Header line "H"
+ * FIXME if need to read 'H','I' header line, does not parse ID
  */
 BOOLEAN_T parse_spectrum_file(
   SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
@@ -250,11 +250,16 @@ BOOLEAN_T parse_spectrum_file(
   char test_char;
   
   while( (line_length =  getline(&new_line, &buf_length, file)) != -1){
+    //skip header line
+    //if(new_line[0] == 'H'){
+    //  file_index = ftell(file);
+    //  continue;
+    //}
     // checks if 'S' is not the first line
     if((!record_S || (record_S && start_add_peaks)) && 
-       (new_line[0] == 'Z' ||  
-        new_line[0] == 'I' ||
-        new_line[0] == 'D' )){
+            (new_line[0] == 'Z' ||  
+             new_line[0] == 'I' ||
+             new_line[0] == 'D' )){
       file_format = FALSE;
       fprintf(stderr, "Incorrect order of line (S,Z, Peaks)\n");
       fprintf(stderr, "At line: %s", new_line);

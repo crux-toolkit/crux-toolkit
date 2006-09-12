@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -181,6 +181,12 @@ BOOLEAN_T parse_database(
   //open file and 
   file = fopen(database->filename, "r");
 
+  //check if succesfully opened file
+  if(file == NULL){
+    carp(CARP_FATAL, "failed to open file to parse database");
+    return FALSE;
+  }
+
   working_index = ftell(file);
   //check each line until reach '>' line
   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
@@ -357,6 +363,7 @@ PROTEIN_T* get_database_protein_at_idx(
 
 /**
  * Instantiates a new database_protein_iterator from a database.
+ * DO NOT free the proteins, proteins are freed up together when free the database
  * \returns a DATABASE_PROTEIN_ITERATOR_T object.
  */
 DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(

@@ -77,7 +77,7 @@ int main(int argc, char** argv){
   int max_length = 50;
   char* cleavages = "tryptic"; 
   char* isotopic_mass = "average" ;
-  int  verbosity = CARP_MAX;
+  int  verbosity = CARP_INFO;
   char* redundancy = "redundant";
 
   MASS_TYPE_T mass_type = AVERAGE;
