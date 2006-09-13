@@ -8,7 +8,7 @@
 #	allow missed-cleavages: FALSE
 #	sort: none
 #	isotopic mass type: average
-#	verbosity: 100
+#	verbosity: 30
 #	redundancy: redundant
 #	use index: FALSE
 1722.91	gi|16127995|ref|NP_414542.1|	4	18	ISTTITTTITITTGNGAG

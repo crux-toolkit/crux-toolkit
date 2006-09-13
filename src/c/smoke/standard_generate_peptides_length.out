@@ -8,7 +8,7 @@
 #	allow missed-cleavages: TRUE
 #	sort: length
 #	isotopic mass type: average
-#	verbosity: 100
+#	verbosity: 30
 #	redundancy: unique
 #	use index: FALSE
 672.79	gi|16127996|ref|NP_414543.1|	173	6	RIAASR
