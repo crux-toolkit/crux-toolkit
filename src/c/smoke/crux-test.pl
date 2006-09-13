@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.4  2006/09/13 01:20:12  cpark
+#add create index smoke test
+#
 #Revision 1.3  2006/07/28 01:49:59  aklammer
 #*** empty log message ***
 #
@@ -98,7 +101,7 @@ while ($line = <ARGV>) {
   }
   # are we testing create_index?
   if($is_index eq " index"){
-      $result = &test_cmd_index($cmd, $standard_filename, $output_filename);      
+      $result = &test_cmd_index($cmd, $standard_filename, $output_filename);
   }
   else{
       $result = &test_cmd($cmd, $standard_filename, $output_filename);
@@ -191,55 +194,34 @@ sub sigint_handler {
 }
 
 sub test_cmd_index() {
+    system("rm -rf test_crux_index");
     my ($cmd, $standard_filename, $output_filename) = @_;
     my ($diff_fh, $diff_filename) = tempfile();
     if (!$diff_filename) {
         die("unable to create diff file.\n");
     }
-    #$cmd .= " > $output_filename";
-    #$standard_filename = chomp($standard_filename);
-    $standard_filename =~s/\s+$//; #replace trailing spaces with nothing
-    my $index_result = system($cmd);
+     my $index_result = system($cmd);
     if ($index_result == 0) {
-        #system("cd test_crux_index/");
-        # The command was successful, now vet the output for each crux_index file.
-        for( my $i = 1; $i <= 8; ++$i){
-            my $diff_cmd;
-            if($i != 8){
-                print  "diff $standard_filename/crux_index_$i test_crux_index/crux_index_$i > $diff_filename";
-                $diff_cmd = "diff $standard_filename/crux_index_$i test_crux_index/crux_index_$i > $diff_filename";
+       # The command was successful, now vet the output.
+        my $diff_cmd = "diff -r -I time $standard_filename test_crux_index > $diff_filename";
+        $result = system($diff_cmd);
+        if ($result == 0) {
+            # The output of the command matches the expected output.
+        } else {
+            # The output of the command doesn't match the expected output.
+            # Print the diff ouput.
+            open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
+            my $diff_line;
+            while ($diff_line = <DIFF>) {
+                print $diff_line;
             }
-            else{
-                $diff_cmd = "diff $standard_filename/crux_index_map test_crux_index/crux_index_map > $diff_filename";
-            }
-            $index_result = system($diff_cmd);
-            
-            if ($index_result == 0) {
-                # The output of the command matches the expected output.
-            } else {
-                if($result == 0){
-                    $result = 1;
-                }
-                # The output of the command doesn't match the expected output.
-                # Print the diff ouput.
-                open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
-                my $diff_line;
-                if($i != 8){
-                    print "#\tdiff results for crux_index_$i";
-                }
-                else{
-                    print "#\tdiff results for crux_index_map";
-                }
-                while ($diff_line = <DIFF>) {
-                    print $diff_line;
-                }
-                close DIFF;
-                unlink $diff_filename;
-            }
+            close DIFF;
+            unlink $diff_filename;
         }
     } else {
         # The command was not succesful
         die("Testing failed.");
     }
+    system("rm -rf test_crux_index");
     return $result;
 }
