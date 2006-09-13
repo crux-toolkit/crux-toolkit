@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.3  2006/07/28 01:49:59  aklammer
+#*** empty log message ***
+#
 #Revision 1.2  2005/08/17 23:32:25  cegrant
 #Scripts for testing crux software.
 #
@@ -69,7 +72,7 @@ my $caught_interrupt = 0;
 $SIG{'INT'} = 'sigint_handler';
 
 # Read each test from the file and execute it.
-my ($line, @fields, $test_name, $standard_filename, $cmd, $result);
+my ($line, @fields, $test_name, $standard_filename, $cmd, $result, $is_index);
 my $num_tests = 0;
 my $num_successful_tests = 0;
 while ($line = <ARGV>) {
@@ -84,21 +87,31 @@ while ($line = <ARGV>) {
   $test_name = $fields[0];
   $standard_filename = $fields[1];
   $cmd = $fields[2];
+  $is_index =  $fields[3];
+  chomp($is_index);
 
   # Execute the test
   print "\n----- Running test $test_name \n";
   my ($output_fh, $output_filename) = tempfile();
   if (!$output_filename) {
-    die("Unable to create output file.\n");
+      die("Unable to create output file.\n");
   }
-  $result = &test_cmd($cmd, $standard_filename, $output_filename);
+  # are we testing create_index?
+  if($is_index eq " index"){
+      $result = &test_cmd_index($cmd, $standard_filename, $output_filename);      
+  }
+  else{
+      $result = &test_cmd($cmd, $standard_filename, $output_filename);
+  }
+
   $num_tests++;
   if ($result == 0) {
-    print "----- SUCCESS - test $test_name\n";
-    $num_successful_tests++;
+      print "----- SUCCESS - test $test_name\n";
+      $num_successful_tests++;
   } else {
-    print "----- FAILURE - test $test_name\n";
+      print "----- FAILURE - test $test_name\n";
   }    
+
 
   # Clean up
   close $output_fh;
@@ -175,4 +188,58 @@ sub test_cmd() {
 
 sub sigint_handler {
   $caught_interrupt = 1;
+}
+
+sub test_cmd_index() {
+    my ($cmd, $standard_filename, $output_filename) = @_;
+    my ($diff_fh, $diff_filename) = tempfile();
+    if (!$diff_filename) {
+        die("unable to create diff file.\n");
+    }
+    #$cmd .= " > $output_filename";
+    #$standard_filename = chomp($standard_filename);
+    $standard_filename =~s/\s+$//; #replace trailing spaces with nothing
+    my $index_result = system($cmd);
+    if ($index_result == 0) {
+        #system("cd test_crux_index/");
+        # The command was successful, now vet the output for each crux_index file.
+        for( my $i = 1; $i <= 8; ++$i){
+            my $diff_cmd;
+            if($i != 8){
+                print  "diff $standard_filename/crux_index_$i test_crux_index/crux_index_$i > $diff_filename";
+                $diff_cmd = "diff $standard_filename/crux_index_$i test_crux_index/crux_index_$i > $diff_filename";
+            }
+            else{
+                $diff_cmd = "diff $standard_filename/crux_index_map test_crux_index/crux_index_map > $diff_filename";
+            }
+            $index_result = system($diff_cmd);
+            
+            if ($index_result == 0) {
+                # The output of the command matches the expected output.
+            } else {
+                if($result == 0){
+                    $result = 1;
+                }
+                # The output of the command doesn't match the expected output.
+                # Print the diff ouput.
+                open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
+                my $diff_line;
+                if($i != 8){
+                    print "#\tdiff results for crux_index_$i";
+                }
+                else{
+                    print "#\tdiff results for crux_index_map";
+                }
+                while ($diff_line = <DIFF>) {
+                    print $diff_line;
+                }
+                close DIFF;
+                unlink $diff_filename;
+            }
+        }
+    } else {
+        # The command was not succesful
+        die("Testing failed.");
+    }
+    return $result;
 }
