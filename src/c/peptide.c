@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.42 $
+ * $Revision: 1.43 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -222,7 +222,7 @@ void print_peptide_in_format(
 
   //iterate over all peptide src
   while(next_src != NULL){
-    if(!light){
+    //if(!light){
       parent = get_peptide_src_parent_protein(next_src);
       
       //covnert to heavy protein
@@ -230,7 +230,7 @@ void print_peptide_in_format(
         protein_to_heavy(parent);
         light = TRUE;
       }
-    }
+      //}
 
     id = get_protein_id_pointer(parent);
     start_idx = get_peptide_src_start_idx(next_src);
@@ -305,15 +305,15 @@ void print_filtered_peptide_in_format(
     if(peptide_type == ANY_TRYPTIC ||
        peptide_type == get_peptide_src_peptide_type(next_src)){
 
-      if(!light){
-        parent = get_peptide_src_parent_protein(next_src);
+      //if(!light){
+      parent = get_peptide_src_parent_protein(next_src);
         
-        //covnert to heavy protein
-        if(get_protein_is_light(parent)){
-          protein_to_heavy(parent);
-          light = TRUE;
-        }
+      //covnert to heavy protein
+      if(get_protein_is_light(parent)){
+        protein_to_heavy(parent);
+        light = TRUE;
       }
+        //}
       
       id = get_protein_id_pointer(parent);
       start_idx = get_peptide_src_start_idx(next_src);

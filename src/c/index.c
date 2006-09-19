@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -28,7 +28,7 @@
 #define MAX_FILE_NAME_LENGTH 30
 #define NUM_CHECK_LINES 8
 #define MAX_PROTEIN_IN_BIN 2500
-#define MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN  500000000
+#define MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN 500000000
 
 //global variable to store the temp directory
 //used for deleting directory when SIGINT
