@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -18,10 +18,12 @@
  */
 struct ion {
   ION_TYPE_T type;  ///< type of the ion 
-  int cleavage_idx; ///< index of peptide amide that fragments to form this ion
+  int cleavage_idx; ///< index of peptide amide that fragments to form this ion, starting from the N-term end 
+  // N.b. this is different than the b1,y1 index, in that it always starts
+  // from the N-term
   int charge; ///< the ion charge
-  PEPTIDE_T* peptide; ///< the peptide that fragments to form this ion
-  ION_MODIFICATION_T modifications[MAX_MODIFICATIONS]; ///< an array of ion modifications
+  char* peptide; ///< the peptide sequence that fragments to form this ion
+  ION_MODIFICATION_T modification_counts[MAX_MODIFICATIONS]; ///< an array of the number of different ion modifications
   float ion_mass;   ///< The (neutral) mass of the ion. 
 };
 

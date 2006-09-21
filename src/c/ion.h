@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -17,7 +17,7 @@ ION_T* new_ion (
   ION_TYPE_T type,   ///< intensity for the new ion -in 
   int cleavage_idx, ///< index into the peptide amide bonds of this ion
   int charge, ///< charge of the ion
-  PEPTIDE_T* peptide ///< location for the new ion -in
+  char* peptide ///< location for the new ion -in
   );
 
 /**
@@ -37,7 +37,7 @@ float get_ion_mass(
 
 /**
  * sets the mass of the ION_T object
- * while this can be calculated from the PEPTIDE_T, cleavage_idx and
+ * while this can be calculated from the char*, cleavage_idx and
  * modifications, it allows some optimizations if we allow it to be set
  * instead
  */

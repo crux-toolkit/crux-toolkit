@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: predict-peptide-ions
-REVISION: $Revision: 1.2 $
+REVISION: $Revision: 1.3 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -54,15 +54,16 @@ predict the ions.
   # CHARGE: &lt;peptide charge&gt;</pre>
   And then the predicted ions, in the following format:
   <pre>
-  &lt;m/z&gt; \t &lt;mass&gt; \t &lt;ion-charge-state&gt; \t &lt;primary-ion&gt; \t &lt;peptide-bond-index&gt; \t &lt;neutral-loss&gt; \n</pre>
+  &lt;m/z&gt; \t &lt;mass&gt; \t &lt;charge&gt; \t &lt;ion-type&gt; \t &lt;bond-index&gt; \t &lt;modifications&gt; \n</pre>
   Where
   <pre>
   &lt;m/z&gt; is the ion's mass-to-charge
   &lt;mass&gt; is the ion's (charged) mass
-  &lt;charge-state&gt; is the ion's charge e.g. 1,2,3
-  &lt;ion-series&gt; is one of (b,y,p)
-  &lt;bond-index&gt; is in [1...n), where n is peptide length
-  &lt;neutral-loss&gt; is one of (none|nh3|co|h2o)
+  &lt;charge&gt; is the ion's charge e.g. 1,2,3
+  &lt;ion-type&gt; is one of (b,y,p)
+  &lt;bond-index&gt; is in [1...n), where n is peptide length. Consistent with standard mass spec terminology, where a y-1 and b-1 ions result from cleavage of
+  completely different bonds
+  &lt;modifications&gt; is a string made up of multiple strings, concatenated by commas, from ('nh3'|'h2o') or 'none' if no modifications
   </pre>
 
 
@@ -79,11 +80,15 @@ later ('a', 'c', etc.)? (Default=by)
 precursor ions, and all associated ions (neutral-losses, multiple charge
 states) consistent with the other specified options. 
 
-<LI>[--neutral-losses none|h2o|co|nh3|all] &ndash; Predict the
+<LI>[--neutral-losses none|h2o|nh3|all] &ndash; Predict the
 the specified neutral loss peaks ('none' indicates no
 neutral losses, 'h2o' indicates water loss only, 'co' indicates a-ions
 only, 'nh3' indicates ammonia losses only, 'all' indicates all three kinds
 of losses). (Default=all)
+
+<LI>[--isotope 0|1|2] &ndash; Predict the given number of isotope peaks. (Default=none)
+
+<LI>[--flanking T|F] &ndash; Predict flanking peaks for b- and y-ions.  (Default=F)
 
 <LI>[--max-ion-charge 1|2|3|peptide] &ndash; Predict 
 ions up to this charge-state. The integer options ('1','2' and '3') specify a

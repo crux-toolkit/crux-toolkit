@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -226,7 +226,7 @@ typedef enum _ion_type ION_TYPE_T;
 /**
  * The enum for an ion modification
  */
-enum _ion_modification {NH3, H2O, FIRST_ISOTOPE, SECOND_ISOTOPE};
+enum _ion_modification {NH3, H2O, FIRST_ISOTOPE, SECOND_ISOTOPE, FLANKING_LEFT, FLANKING_RIGHT};
 
 /**
  * \typedef ION_MODIFICATION_T
@@ -246,18 +246,5 @@ typedef struct bin_peptide_iterator BIN_PEPTIDE_ITERATOR_T;
  * sort in mass
  */
 typedef struct bin_sorted_peptide_iterator BIN_SORTED_PEPTIDE_ITERATOR_T;
-
-
-/**
- * \struct protein_index
- * \brief Object to store the protein relation to the fasta file
- */
-typedef struct protein_index PROTEIN_INDEX_T;
-
-/**
- * \struct protein_index_iterator
- * \brief Object to iterate over the protein index in the protein index file
- */
-typedef struct protein_index_iterator PROTEIN_INDEX_ITERATOR_T;
 
 #endif

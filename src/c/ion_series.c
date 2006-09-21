@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.2 $
+ * REVISION: $Revision: 1.3 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -23,10 +23,12 @@
  * For which additional data structures will be created as needed 
  */
 struct ion_series {
-  PEPTIDE_T* peptide; ///< The peptide for this ion series
+  char* peptide; ///< The peptide for this ion series
+  int charge; ///< The charge state of the peptide for this ion series
   ION_CONSTRAINT_T* constraint; ///< The constraints which the ions in this series obey
   ION_T* ions[MAX_IONS]; ///< The ions in this series
   int num_ions; ///< the number of ions in this series
+
 };
 
 /**
