@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.26 $
+ * $Revision: 1.27 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -320,8 +320,8 @@ INDEX_T* new_search_index(
    */
   if(get_filesize(fasta_filename) >  MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN){
     use_light = TRUE;
-    carp(CARP_INFO, "Using heavy/light protein function for file size: %d",
-         (int)get_filesize(fasta_filename));
+    carp(CARP_INFO, "Using heavy/light protein function for file size: %ld",
+         get_filesize(fasta_filename));
   }
   
   //sets mass_range, max_size to an arbitrary 0
