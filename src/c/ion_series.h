@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -22,7 +22,8 @@ ION_SERIES_T* allocate_ion_series(void);
  * Instantiates a new ion_series object from a filename. 
  */
 ION_SERIES_T* new_ion_series(
-  PEPTIDE_T* peptide, ///< The peptide for this ion series. -in
+  char* peptide, ///< The peptide for this ion series. -in
+  int charge, ///< The charge for this ion series -in
   ION_CONSTRAINT_T* constraint ///< The constraints which the ions in this series obey.
   );
 

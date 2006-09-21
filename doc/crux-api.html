@@ -34,15 +34,21 @@ peptides in a database.  This object may iterate over only the peptides
 within a specified mass-to-charge range.
 
 <li>
-<b>fragment</b>: A fragment of a peptide, with a pointer to the
-originating peptide.  The fragment has five properties: ion series (b
-or y), cleavage location, charge, a list of chemical modifications,
-and isotope offset (in Daltons).
+<b><a href="./html/ion_8h.html">ion</a></b>
+A (fragment) ion of a peptide, with a pointer to the
+originating peptide. In addition to mass
+the ion has four properties: ion type (b or y), 
+cleavage location, charge, a list of chemical modifications (i.e.
+neutral loss). 
+
+<li>
+<b><a href="./html/ion__series_8h.html">ion-series</a></b>
+A series of fragment ions.
 
 <li>
 <b><a href="./html/peak_8h.html">peak</a></b>: A single peak in a mass spectrum, with two properties:
 mass-to-charge and intensity.  The peak also has a (possibly empty)
-list of associated fragments.
+list of associated ions.
 
 <li>
 <b><a href="./html/spectrum_8h.html">spectrum</a></b>: A collection of peaks and some other identifying spectrum
