@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -183,6 +183,23 @@ typedef struct index_filtered_peptide_iterator INDEX_FILTERED_PEPTIDE_ITERATOR_T
  */
 typedef struct sorted_peptide_iterator SORTED_PEPTIDE_ITERATOR_T;
 
+/**
+ * \typedef ION_T 
+ * \brief An object to represent a (fragment) ion of a peptide
+ */
+typedef struct ion ION_T;
+
+/**
+ * \typedef ION_SERIES_T 
+ * \brief An object to represent a series of ions
+ */
+typedef struct ion_series ION_SERIES_T;
+
+/**
+ * \typedef ION_CONSTRAINT_T
+ * \brief An object to represent a constraint to be applied to ions
+ */
+typedef struct ion_constraint ION_CONSTRAINT_T;
 
 /**
  * The enum for index type
@@ -194,6 +211,28 @@ enum _index_type {DB_INDEX, BIN_INDEX};
  * \brief The typedef for index type (db_index, bin_index)
  */
 typedef enum _index_type INDEX_TYPE_T;
+
+/**
+ * The enum for an ion type (P_ion is the precursor ion)
+ */
+enum _ion_type {A_ION, B_ION, C_ION, X_ION, Y_ION, Z_ION, P_ION};
+
+/**
+ * \typedef ION_TYPE_T
+ * \brief The typedef for ion type (a,b,c,x,y,z ions)
+ */
+typedef enum _ion_type ION_TYPE_T;
+
+/**
+ * The enum for an ion modification
+ */
+enum _ion_modification {NH3, H2O, FIRST_ISOTOPE, SECOND_ISOTOPE};
+
+/**
+ * \typedef ION_MODIFICATION_T
+ * \brief The typedef for ion modification type (NH3, H2O etc.)
+ */
+typedef enum _ion_modification ION_MODIFICATION_T;
 
 /**
  * \struct bin_peptide_iterator

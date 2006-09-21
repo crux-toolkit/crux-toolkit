@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.1 $
+ * REVISION: $Revision: 1.2 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include "objects.h"
 #include "ion.h"
+#include "utils.h"
 
 #define MAX_IONS 10000
 
@@ -37,7 +38,7 @@ struct ion_series {
  */
 struct ion_constraint {
   BOOLEAN_T* use_neutral_losses; ///< A boolean to determine if the ions series should include neutral losses
-}
+};
 
 /*
  * Local Variables:

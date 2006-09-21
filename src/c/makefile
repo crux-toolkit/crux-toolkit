@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.29 $
+# VERSION: $Revision: 1.30 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -46,6 +46,8 @@ LIBOBJS =\
 	${OBJDIR}/crux-utils.o \
 	${OBJDIR}/array.o \
 	${OBJDIR}/alphabet.o \
+	${OBJDIR}/ion.o \
+	${OBJDIR}/ion_series.o \
 	${OBJDIR}/carp.o \
 	${OBJDIR}/mass.o \
 	${OBJDIR}/index.o \
