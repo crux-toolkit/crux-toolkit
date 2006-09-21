@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -207,5 +207,18 @@ typedef struct bin_peptide_iterator BIN_PEPTIDE_ITERATOR_T;
  * sort in mass
  */
 typedef struct bin_sorted_peptide_iterator BIN_SORTED_PEPTIDE_ITERATOR_T;
+
+
+/**
+ * \struct protein_index
+ * \brief Object to store the protein relation to the fasta file
+ */
+typedef struct protein_index PROTEIN_INDEX_T;
+
+/**
+ * \struct protein_index_iterator
+ * \brief Object to iterate over the protein index in the protein index file
+ */
+typedef struct protein_index_iterator PROTEIN_INDEX_ITERATOR_T;
 
 #endif

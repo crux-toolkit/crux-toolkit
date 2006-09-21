@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -78,5 +78,15 @@ long get_filesize(char *FileName);
  * \returns TRUE if successfully deleted directory
  */
 BOOLEAN_T delete_dir(char* dir);
+
+/**
+ * given a fasta_file name it returns a name with the name_tag add to the end
+ * format: myfasta_nameTag
+ * \returns A heap allocated file name of the given fasta file
+ */
+char* generate_name(
+  char* fasta_filename,
+  char* name_tag
+  );
 
 #endif

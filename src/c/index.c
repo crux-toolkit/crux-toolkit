@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -768,7 +768,7 @@ BOOLEAN_T create_index(
       return FALSE;
     }
 
-    //split if too big
+    //ADD HERE IF NEEDED:split if file too big
     //print to crux_map
     filename = get_crux_filename(bin_idx, 0); //0 can change if need split the file
     fprintf(info_out, "%s\t%.2f\t", filename, mass_limits[0] + (bin_idx * index->mass_range));
@@ -2096,7 +2096,7 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
 
   //create a sorted peptide iterator that will sort all the peptides from bin peptide_iterator
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =
-    new_sorted_peptide_iterator_bin(bin_peptide_iterator, MASS, TRUE);
+    new_sorted_peptide_iterator_bin(bin_peptide_iterator, MASS, index->is_unique);
 
   //set sorted_peptide_iterator
   bin_sorted_peptide_iterator->sorted_peptide_iterator = sorted_peptide_iterator;
