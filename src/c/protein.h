@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -22,7 +22,7 @@
 PROTEIN_T* allocate_protein(void);
 
 /**
- * \returns A new protein object.
+ * \returns A new protein object(heavy).
  */
 PROTEIN_T* new_protein(
   char*         id, ///< The protein sequence id.
@@ -32,6 +32,14 @@ PROTEIN_T* new_protein(
   unsigned long int offset, ///< The file location in the source file in the database -in
   unsigned int protein_idx ///< The index of the protein in it's database. -in
   );         
+
+/**
+ * \returns A new light protein object.
+ */
+PROTEIN_T* new_light_protein(
+  unsigned long int offset, ///< The file location in the source file in the database -in
+  unsigned int protein_idx ///< The index of the protein in it's database. -in
+  );
 
 /**
  * convert light protein to heavy, by parsing all the sequence from fasta file

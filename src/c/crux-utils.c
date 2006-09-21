@@ -201,3 +201,32 @@ BOOLEAN_T delete_dir(char* dir) {
   
   return TRUE;
 }
+
+/**
+ * given a fasta_file name it returns a name with the name_tag add to the end
+ * format: myfasta_nameTag
+ * \returns A heap allocated file name of the given fasta file
+ */
+char* generate_name(
+  char* fasta_filename,
+  char* name_tag
+  )
+{
+  int len = strlen(fasta_filename);
+  int end_idx = len;
+  int end_path = len;  //index of where the "." is located in the file
+  char* name = NULL;
+  
+  //cut off the ".fasta" if needed
+  for(; end_idx > 0; --end_idx){
+    if(strcmp(&fasta_filename[end_idx - 1], ".fasta") == 0){
+      end_path = end_idx - 1;
+      break;
+    }
+  }
+  
+  name = (char*)mycalloc(end_path + strlen(name_tag) + 1, sizeof(char));
+  strncpy(name, fasta_filename, end_path);
+  strcat(name, name_tag);
+  return name;
+}

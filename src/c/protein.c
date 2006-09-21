@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.39 $
+ * $Revision: 1.40 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -92,7 +92,7 @@ PROTEIN_T* allocate_protein(void){
 }
 
 /**
- * \returns A new protein object.
+ * \returns A new protein object(heavy).
  * The protein is does not constain a database, users must provide one.
  */
 PROTEIN_T* new_protein(
@@ -115,6 +115,22 @@ PROTEIN_T* new_protein(
   protein->is_light = FALSE;
   return protein;
 }         
+
+/**
+ * \returns A new light protein object.
+ */
+PROTEIN_T* new_light_protein(
+  unsigned long int offset, ///< The file location in the source file in the database -in
+  unsigned int protein_idx ///< The index of the protein in it's database. -in
+  )
+{
+  PROTEIN_T* protein = allocate_protein();
+  set_protein_is_light(protein, TRUE);
+  set_protein_offset(protein, offset);
+  set_protein_protein_idx(protein, protein_idx);
+  return protein;
+}
+
 
 /**
  * convert light protein to heavy, by parsing all the sequence from fasta file

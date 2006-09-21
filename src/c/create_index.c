@@ -22,6 +22,7 @@
 #include "database.h"
 #include "parse_arguments.h"
 #include "index.h"
+#include "protein_index.h"
 
 /**
  * when wrong command is seen carp, and exit
@@ -238,6 +239,14 @@ int main(int argc, char** argv){
       wrong_command("verbosity");
     }
   
+    //create protein index if not already present
+    if(!protein_index_on_disk(in_file)){
+      if(!create_protein_index(in_file)){
+        carp(CARP_FATAL, "failed to create protein index on disk");
+        exit(1);
+      }
+    }
+
     //peptide constraint
     constraint = 
       new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages, mass_type);

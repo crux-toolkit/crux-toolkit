@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -16,6 +16,7 @@
 #include "objects.h"
 #include "peptide_constraint.h"
 #include "sorter.h"
+#include "protein_index.h"
 
 #define MAX_PROTEINS 3300000 ///< The maximum number of proteins in a database.
 
@@ -161,6 +162,7 @@ void print_database(
  * IF using light_protein functionality will not read in the sequence or id.
  * \returns TRUE if success. FALSE if failure.
  */
+/*
 BOOLEAN_T parse_database(
   DATABASE_T* database ///< An allocated database -in
   )
@@ -240,6 +242,119 @@ BOOLEAN_T parse_database(
   database->file = file;
   return TRUE;
 }
+*/
+
+BOOLEAN_T parse_database(
+  DATABASE_T* database ///< An allocated database -in
+  )
+{
+  unsigned long working_index;
+  FILE* file = NULL;
+  char* new_line = NULL;
+  int line_length;
+  size_t buf_length = 0;
+  PROTEIN_T* new_protein;
+  unsigned int protein_idx = 0;
+
+  //check if already parsed
+  if(database->is_parsed){
+    return TRUE;
+  }
+  
+  //open file and 
+  file = fopen(database->filename, "r");
+  
+  //check if succesfully opened file
+  if(file == NULL){
+    carp(CARP_FATAL, "failed to open file to parse database");
+    return FALSE;
+  }
+  
+  //check if use light protein and parse thos light proteins fomr protein index
+  if(database->use_light_protein && protein_index_on_disk(database->filename)){
+    //let the user know that protein index file is being used
+    carp(CARP_INFO, "using protein index file");
+
+    //create a protein index iterator
+    PROTEIN_INDEX_ITERATOR_T* protein_index_iterator =
+      new_protein_index_iterator(database->filename);
+
+    //iterate over all proteins in protein index
+    while(protein_index_iterator_has_next(protein_index_iterator)){
+      //check if there's space for more proteins
+      if(database->num_proteins == MAX_PROTEINS){
+        free_protein_index_iterator(protein_index_iterator);
+        carp(CARP_ERROR, "exceeds protein index array size");
+        return FALSE;
+      }
+      
+      new_protein = protein_index_iterator_next(protein_index_iterator);
+      set_protein_database(new_protein, database);
+      
+      //add protein to database
+      database->proteins[database->num_proteins] = new_protein;
+      ++database->num_proteins;
+    }
+    //job well done..free iterator
+    free_protein_index_iterator(protein_index_iterator);
+  }
+  else{  
+    working_index = ftell(file);
+    //check each line until reach '>' line
+    while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+      if(new_line[0] == '>'){
+        if(database->num_proteins == MAX_PROTEINS){
+          fclose(file);
+          free(new_line);
+          carp(CARP_ERROR, "exceeds protein index array size");
+          return FALSE;
+        }
+        //the new protein to be added
+        new_protein = allocate_protein();
+        
+        //do not parse the protein sequence if using light/heavy functionality
+        if(database->use_light_protein){
+          //set light and offset
+          set_protein_offset(new_protein, working_index);
+          set_protein_is_light(new_protein, TRUE);
+        }
+        else{
+          //rewind to the begining of the protein to include ">" line
+          fseek(file, working_index, SEEK_SET);
+          
+          //failed to parse the protein from fasta file
+          //protein offset is set in the parse_protein_fasta_file method
+          if(!parse_protein_fasta_file(new_protein ,file)){
+            fclose(file);
+            free_protein(new_protein);
+            for(; protein_idx < database->num_proteins; ++protein_idx){
+              free_protein(database->proteins[protein_idx]);
+            }
+            database->num_proteins = 0;
+            carp(CARP_ERROR, "failed to parse fasta file");
+            return FALSE;
+          }
+          set_protein_is_light(new_protein, FALSE);
+        }
+        
+        //add protein to database
+        database->proteins[database->num_proteins] = new_protein;
+        ++database->num_proteins;
+        //set protein index, database
+        set_protein_protein_idx(new_protein, database->num_proteins);
+        set_protein_database(new_protein, database);
+      }
+      working_index = ftell(file);
+    }
+    free(new_line);
+  }
+  
+  //yes the database is paresed now..!!
+  database->is_parsed = TRUE;
+  database->file = file;
+  return TRUE;
+}
+
 
 //FIXME needs to be implemented at some stage..if needed...
 /**
