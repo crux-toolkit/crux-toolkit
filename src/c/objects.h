@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -226,7 +226,7 @@ typedef enum _ion_type ION_TYPE_T;
 /**
  * The enum for an ion modification
  */
-enum _ion_modification {NH3, H2O, FIRST_ISOTOPE, SECOND_ISOTOPE, FLANKING_LEFT, FLANKING_RIGHT};
+enum _ion_modification {NH3, H2O, ISOTOPE, FLANK}; 
 
 /**
  * \typedef ION_MODIFICATION_T
