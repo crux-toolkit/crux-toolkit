@@ -67,6 +67,5 @@ Suite *spectrum_suite(void){
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);
-  //tcase_add_checked_fixture(tc_core, setup, teardown);
   return s;
 }

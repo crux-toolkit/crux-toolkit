@@ -7,11 +7,14 @@
 #include "check-protein.h"
 #include "check-index.h"
 #include "check-database.h"
+#include "check-ion.h"
+//#include "check-ion_series.h"
 
 //must set bash export CK_FORK=no
 int main(void){
   int nf;
   //create all check suite
+
   Suite* suite_peak = peak_suite();
   Suite* suite_spectrum = spectrum_suite();
   Suite* suite_spectrum_collection = spectrum_collection_suite();
@@ -19,10 +22,14 @@ int main(void){
   Suite* suite_protein = protein_suite(); 
   Suite* suite_database = database_suite();
   Suite* suite_index = index_suite(); 
+
+  Suite* suite_ion = ion_suite(); 
+  //Suite* suite_ion_series = ion_series_suite(); 
   
   
   //add each suite to Runner
   SRunner *sr = srunner_create(NULL);
+
   srunner_add_suite(sr,suite_peak);
   srunner_add_suite(sr,suite_spectrum);
   srunner_add_suite(sr,suite_spectrum_collection);
@@ -31,7 +38,9 @@ int main(void){
   srunner_add_suite(sr,suite_database);
   srunner_add_suite(sr,suite_index);
 
-
+  srunner_add_suite(sr,suite_ion);
+  //srunner_add_suite(sr,suite_ion_series);
+    
   //run each check suite
   srunner_run_all(sr, CK_NORMAL);
   nf = srunner_ntests_failed(sr);

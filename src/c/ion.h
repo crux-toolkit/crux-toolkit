@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -8,16 +8,41 @@
 #define ION_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
+#include "objects.h"
+#include "utils.h"
+#include "mass.h"
 #include "objects.h"
 
 /**
+ * The peptide sequence is copied as a pointer.
+ * only copies the pointer to the peptide sequence
+ * cleavage index starts from 0...n (ex 0:A:1:K:2:V:3:..n:L)
  * \returns an ION_T object
  */
 ION_T* new_ion (
   ION_TYPE_T type,   ///< intensity for the new ion -in 
   int cleavage_idx, ///< index into the peptide amide bonds of this ion
   int charge, ///< charge of the ion
-  char* peptide ///< location for the new ion -in
+  char* peptide, ///< location for the new ion -in
+  MASS_TYPE_T mass_type ///< mass type (average, mono) -in
+  );
+
+/**
+ * only copies the pointer to the peptide sequence
+ * inputs a array of all the modification counts
+ * \returns an ION_T object
+ */
+ION_T* new_modified_ion(
+  ION_TYPE_T type,   ///< intensity for the new ion -in 
+  int cleavage_idx, ///< index into the peptide amide bonds of this ion
+  int charge, ///< charge of the ion
+  char* peptide, ///< location for the new ion -in
+  MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  int* modification_counts ///< an array of modification counts for each modification -in
   );
 
 /**
@@ -25,25 +50,6 @@ ION_T* new_ion (
  */
 void free_ion (
   ION_T* garbage_ion ///< the ion to free -in
-  );
-
-/**
- * \returns the location of ION_T object
- */
-float get_ion_mass(
-  ION_T* working_ion///< return the location of this ion -in 
-  );
-
-
-/**
- * sets the mass of the ION_T object
- * while this can be calculated from the char*, cleavage_idx and
- * modifications, it allows some optimizations if we allow it to be set
- * instead
- */
-void set_ion_mass(
-  ION_T* working_ion, ///<set the m/z location of this ion -out
-  float mass ///< the m/z location -in
   );
 
 /**
@@ -75,9 +81,113 @@ void print_ion(
  */
 void add_modification(
   ION_T* ion,///< ion to which to add the modification -mod
-  ION_MODIFICATION_T modification ///< add this modification to the ion -in
+  ION_MODIFICATION_T modification, ///< add this modification to the ion -in
+  int modification_count,  ///< the number of modifications
+  MASS_TYPE_T mass_type ///< mass type (average, mono) -in
   );
 
+
+
+/*********************************
+ * get, set methods for ion fields
+ *********************************/
+
+/**
+ * \returns the location of ION_T object
+ */
+float get_ion_mass_z(
+  ION_T* working_ion///< return the location of this ion -in 
+  );
+
+/**
+ * sets the mass/z of the ION_T object
+ * while this can be calculated from the char*, cleavage_idx and
+ * modifications, it allows some optimizations if we allow it to be set
+ * instead
+ */
+void set_ion_mass_z(
+  ION_T* working_ion, ///<set the m/z location of this ion -out
+  float mass_z ///< the m/z location -in
+  );
+
+
+/**
+ * return the cleavage_idx of the ion object
+ */
+int get_ion_cleavage_idx(
+  ION_T* working_ion///< the working ion -in                          
+  );
+
+/**
+ * set the cleavage_idx of the ion object
+ */
+void set_ion_cleavage_idx(
+  ION_T* working_ion, ///< the working ion -out
+  int cleavage_idx ///< the cleavage index in the peptide -in
+  );
+
+/**
+ * return the cleavage_idx of the ion object
+ */
+int get_ion_charge(
+  ION_T* working_ion ///< the working ion -in                          
+  );
+
+/**
+ * set the cleavage_idx of the ion object
+ */
+void set_ion_charge(
+  ION_T* working_ion, ///< the working ion -out
+  int charge ///< the charge of this ion -in
+  );
+
+/**
+ * return the ION_TYPE_T of the ion object
+ */
+ION_TYPE_T get_ion_type(
+  ION_T* working_ion ///< the working ion -in                          
+  );
+
+/**
+ * set the ION_TYPE_T of the ion object
+ */
+void set_ion_type(
+  ION_T* working_ion, ///< the working ion -out
+  ION_TYPE_T ion_type ///< the ion type of this ion -in 
+  );
+
+/**
+ * return the parent peptide sequence of the ion object
+ * returns a pointer to the sequence, should not free
+ */
+char* get_ion_peptide_sequence(
+  ION_T* working_ion ///< the working ion -in                          
+  );
+
+
+/**
+ * set the parent peptide_sequence of the ion object
+ */
+void set_ion_peptide_sequence(
+  ION_T* working_ion, ///< the working ion -out
+  char* peptide_sequence ///< the parent peptide's sequence of this ion -in 
+  );
+
+
+/**
+ * is_modified, indiciates if there are any modification to the ion
+ * speeds up the proccess if FLASE.
+ *\returns TRUE if successfully computes the mass/z of the ion, else FALSE
+ */
+BOOLEAN_T calc_ion_mass_z(
+  ION_T* working_ion, ///< the working ion -out/in
+  MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
+  );
+
+/**
+ *
+ */
 /*
  * Local Variables:
  * mode: c
