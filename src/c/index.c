@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -128,7 +128,7 @@ struct index{
 };    
 
 /**
- * \struct index files
+ * \struct index_file
  * \brief A struct that contains the information of each file
  */
 struct index_file{
@@ -183,7 +183,7 @@ struct bin_peptide_iterator{
  * sort in mass
  */
 struct bin_sorted_peptide_iterator {
-  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator;
+  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator; ///< the peptide iterator that sorts the peptides form the bin
 };
 
 /************

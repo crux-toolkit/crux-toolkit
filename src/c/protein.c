@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -61,9 +61,9 @@ struct protein_peptide_iterator {
   BOOLEAN_T has_next; ///< is there a next? 
   int num_mis_cleavage; ///< The maximum mis cleavage of the peptide
   unsigned int* seq_marker; ///< The array that marks all the 'K | R | P'
-  unsigned int kr_idx; //idx for the closest to cur_start K | R is located
-  unsigned int first_kr_idx; //idx for the first K | R is located
-  BOOLEAN_T is_kr; //is there a K|R found in this sequence
+  unsigned int kr_idx; ///<idx for the closest to cur_start K | R is located
+  unsigned int first_kr_idx; ///<idx for the first K | R is located
+  BOOLEAN_T is_kr; ///<is there a K|R found in this sequence
 };
 
 //def bellow

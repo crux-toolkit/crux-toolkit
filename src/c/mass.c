@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #include <math.h>
@@ -13,6 +13,7 @@
 #include "protein.h"
 #include "peptide.h"
 #include "carp.h"
+#include "ion.h"
 
 /**
  * Array to store the amino acid masses

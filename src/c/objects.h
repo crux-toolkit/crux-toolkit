@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -172,7 +172,7 @@ typedef struct index_peptide_iterator INDEX_PEPTIDE_ITERATOR_T;
 
 
 /**
- * \struct index_filtered_peptide_iterator
+ * \typedef INDEX_FILTERED_PEPTIDE_ITERATOR_T
  * \brief An iterator to filter out the peptides wanted from the index_peptide_iterator
  */
 typedef struct index_filtered_peptide_iterator INDEX_FILTERED_PEPTIDE_ITERATOR_T;
@@ -235,16 +235,28 @@ enum _ion_modification {NH3, H2O, ISOTOPE, FLANK};
 typedef enum _ion_modification ION_MODIFICATION_T;
 
 /**
- * \struct bin_peptide_iterator
+ * \typedef BIN_PEPTIDE_ITERATOR_T
  * \brief An iterator to iterate over the peptides in a bin( one file handler)
  */
 typedef struct bin_peptide_iterator BIN_PEPTIDE_ITERATOR_T;
 
 /**
- * \struct bin_sorted_peptide_iterator
+ * \typedef BIN_SORTED_PEPTIDE_ITERATOR_T
  * \brief Object to iterate over the peptides within a bin, in an
  * sort in mass
  */
 typedef struct bin_sorted_peptide_iterator BIN_SORTED_PEPTIDE_ITERATOR_T;
+
+/**
+ * \typedef  PROTEIN_INDEX_T
+ * \brief Object to store the protein relation to the fasta file
+ */
+typedef struct protein_index PROTEIN_INDEX_T;
+
+/**
+ * \typedef PROTEIN_INDEX_ITERATOR_T
+ * \brief Object to iterate over the protein index in the protein index file
+ */
+typedef struct protein_index_iterator PROTEIN_INDEX_ITERATOR_T;
 
 #endif

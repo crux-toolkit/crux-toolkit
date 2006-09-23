@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -33,7 +33,7 @@ struct database{
   BOOLEAN_T is_parsed;          ///< Has this database been parsed yet.
   PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database 
   unsigned long int size; ///< The size of the database in bytes (convenience)
-  BOOLEAN_T use_light_protein; //should I use the light/heavy protein option
+  BOOLEAN_T use_light_protein; ///< should I use the light/heavy protein option
 };    
 
 /**
@@ -65,7 +65,7 @@ struct database_peptide_iterator {
  * specified sorted order.(mass, length, lexical)
  */
 struct database_sorted_peptide_iterator {
-  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator;
+  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator; ///< the peptide iterator that sorts the peptides
 };
 
 /**
@@ -82,7 +82,7 @@ DATABASE_T* allocate_database(void){
  */
 DATABASE_T* new_database(
   char*         filename, ///< The file from which to parse the database. -in
-  BOOLEAN_T use_light_protein //should I use the light/heavy protein option
+  BOOLEAN_T use_light_protein ///< should I use the light/heavy protein option -in
   )
 {
   DATABASE_T* database = allocate_database();
