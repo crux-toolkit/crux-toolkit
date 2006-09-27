@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -215,7 +215,7 @@ typedef enum _index_type INDEX_TYPE_T;
 /**
  * The enum for an ion type (P_ion is the precursor ion)
  */
-enum _ion_type {A_ION, B_ION, C_ION, X_ION, Y_ION, Z_ION, P_ION};
+enum _ion_type {A_ION, B_ION, C_ION, X_ION, Y_ION, Z_ION, P_ION, ALL_ION};
 
 /**
  * \typedef ION_TYPE_T
@@ -226,7 +226,7 @@ typedef enum _ion_type ION_TYPE_T;
 /**
  * The enum for an ion modification
  */
-enum _ion_modification {NH3, H2O, ISOTOPE, FLANK}; 
+enum _ion_modification {NH3, H2O, ISOTOPE, FLANK, ALL_MODIFICATION}; 
 
 /**
  * \typedef ION_MODIFICATION_T
@@ -258,5 +258,11 @@ typedef struct protein_index PROTEIN_INDEX_T;
  * \brief Object to iterate over the protein index in the protein index file
  */
 typedef struct protein_index_iterator PROTEIN_INDEX_ITERATOR_T;
+
+/**
+ *\struct ion_iterator
+ *\brief An object to iterate over all ion objects in the ion_series
+ */
+typedef struct ion_iterator ION_ITERATOR_T;
 
 #endif

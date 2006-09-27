@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -12,7 +12,7 @@
 #include "mass.h"
 #include "utils.h"
 
-#define MAX_MODIFICATIONS 4
+// MAX_MODIFICATIONS 4, defined in ion.h, because ion_series.c needs the information
 
 /**
  * Array to store the modification masses
@@ -39,6 +39,7 @@ struct ion {
   float ion_mass_z;   ///< The mass/z of the ion. 
 };
 
+
 /**
  * initializes the mass array
  */
@@ -64,9 +65,40 @@ void initialize_modification_masses(
 }
 
 
+/**
+ * \returns An (empty) ion object.
+ */
+ION_T* allocate_ion(void){
+  ION_T* ion = (ION_T*)mycalloc(1, sizeof(ION_T));
+  return ion;
+}
+
+/**
+ * helper function
+ * only copies the pointer to the peptide sequence
+ * creates an heap allocated ion, ion mass is not calculated.
+ * \returns an ION_T object
+ */
+ION_T* new_basic_ion (
+  ION_TYPE_T type,   ///< intensity for the new ion -in 
+  int cleavage_idx, ///< index into the peptide amide bonds of this ion
+  int charge, ///< charge of the ion
+  char* peptide ///< location for the new ion -in
+  )
+{
+  //allocate new ion
+  ION_T* ion = (ION_T*)mycalloc(1, sizeof(ION_T));
+  ion->type = type;
+  ion->cleavage_idx = cleavage_idx;
+  ion->charge = charge;
+  ion->peptide_sequence = peptide;
+  return ion;
+}
+
 
 /**
  * only copies the pointer to the peptide sequence
+ * ion mass/z with out any modification
  * \returns an ION_T object
  */
 ION_T* new_ion (
@@ -77,12 +109,8 @@ ION_T* new_ion (
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
   )
 {
-  //allocate new ion
-  ION_T* ion = (ION_T*)mycalloc(1, sizeof(ION_T));
-  ion->type = type;
-  ion->cleavage_idx = cleavage_idx;
-  ion->charge = charge;
-  ion->peptide_sequence = peptide;
+  //get new basic ion
+  ION_T* ion = new_basic_ion(type, cleavage_idx, charge, peptide);
   
   //calculate and set ion mass/z
   if(!calc_ion_mass_z(ion, mass_type, FALSE)){
@@ -107,12 +135,8 @@ ION_T* new_modified_ion(
   int* modification_counts ///< an array of modification counts for each modification -in
   )
 {
-  //allocate new ion
-  ION_T* ion = (ION_T*)mymalloc(sizeof(ION_T));
-  ion->type = type;
-  ion->cleavage_idx = cleavage_idx;
-  ion->charge = charge;
-  ion->peptide_sequence = peptide;
+  //get new basic ion
+  ION_T* ion = new_basic_ion(type, cleavage_idx, charge, peptide);
   
   //set all modification counts in the ion
   int modification_idx = 0;
@@ -129,6 +153,38 @@ ION_T* new_modified_ion(
   return ion;
 }
 
+/**
+ * only copies the pointer to the peptide sequence
+ * inputs a array of all the modification counts
+ * inputs the pre modified mass, of just all AA mass summed up.
+ * \returns an ION_T object
+ */
+ION_T* new_modified_ion_with_mass(
+  ION_TYPE_T type,   ///< intensity for the new ion -in 
+  int cleavage_idx, ///< index into the peptide amide bonds of this ion
+  int charge, ///< charge of the ion
+  char* peptide, ///< location for the new ion -in
+  MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  float base_mass, ///< the base mass of the ion -in
+  int* modification_counts ///< an array of modification counts for each modification -in
+  )
+{
+  //get new basic ion
+  ION_T* ion = new_basic_ion(type, cleavage_idx, charge, peptide);
+  
+  //set all modification counts in the ion
+  int modification_idx = 0;
+  for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
+    ion->modification_counts[modification_idx] = modification_counts[modification_idx];
+  }
+  
+  //calculate and set ion mass/z
+  if(!calc_ion_mass_z_with_mass(ion, mass_type, base_mass, TRUE)){
+    carp(CARP_ERROR, "failed to calculate ion mass/z");
+    exit(1);
+  } 
+  return ion;
+}
 
 /**
  * frees A ION_T object
@@ -294,13 +350,13 @@ float modify_ion_mass(
  * speeds up the proccess if FLASE.
  *\returns TRUE if successfully computes the mass/z of the ion, else FALSE
  */
-BOOLEAN_T calc_ion_mass_z(
+BOOLEAN_T calc_ion_mass_z_with_mass(
   ION_T* ion, ///< the working ion -out/in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  float mass, ///< the basic mass of the ion -in
   BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
   )
 {
-  float mass = get_ion_mass(ion, mass_type);
   float h_mass = MASS_H_MONO;
 
   //alter mass according to the modification
@@ -315,7 +371,7 @@ BOOLEAN_T calc_ion_mass_z(
       }
     }
   }
-
+  
   //reset h mass if needed
   if(mass_type == AVERAGE){
     h_mass = MASS_H_AVERAGE;
@@ -326,6 +382,48 @@ BOOLEAN_T calc_ion_mass_z(
 
   return TRUE;
 }
+
+/**
+ * is_modified, indiciates if there are any modification to the ion
+ * speeds up the proccess if FLASE.
+ *\returns TRUE if successfully computes the mass/z of the ion, else FALSE
+ */
+BOOLEAN_T calc_ion_mass_z(
+  ION_T* ion, ///< the working ion -out/in
+  MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
+  )
+{
+  float mass = get_ion_mass(ion, mass_type);
+  return calc_ion_mass_z_with_mass(ion, mass_type, mass, is_modified);
+}
+
+
+/**
+ * Copies ion object from src to dest.
+ * must pass in a seperate pointer peptide sequence from its own ion_series object
+ * must pass in a memory allocated ION_T* dest
+ */
+void copy_ion(
+  ION_T* src,///< ion to copy from -in
+  ION_T* dest,///< ion to copy to -out
+  char* peptide_sequence ///< the peptide sequence that the dest should refer to -in
+  )
+{
+  dest->type = src->type;
+  dest->cleavage_idx = src->cleavage_idx;
+  dest->charge = src->charge;
+  
+  //set all modification counts in the ion
+  int modification_idx = 0;
+  for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
+    dest->modification_counts[modification_idx] = src->modification_counts[modification_idx];
+  }
+  
+  dest->ion_mass_z = src->ion_mass_z;
+  dest->peptide_sequence = peptide_sequence;
+}
+
 
 /*********************************
  * get, set methods for ion fields

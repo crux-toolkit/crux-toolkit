@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -74,7 +74,7 @@ void copy_ion_series(
 ION_ITERATOR_T* new_ion_iterator(
   ION_SERIES_T* ion_series, ///< ion_series to iterate -in
   ION_CONSTRAINT_T* constraint  ///< ion_constraint which returned ions satisfy
-);        
+  );        
 
 /**
  * Frees an allocated ion_iterator object.

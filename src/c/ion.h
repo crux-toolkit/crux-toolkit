@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -16,6 +16,13 @@
 #include "utils.h"
 #include "mass.h"
 #include "objects.h"
+
+#define MAX_MODIFICATIONS 4
+
+/**
+ * \returns An (empty) ion object.
+ */
+ION_T* allocate_ion(void);
 
 /**
  * The peptide sequence is copied as a pointer.
@@ -42,6 +49,22 @@ ION_T* new_modified_ion(
   int charge, ///< charge of the ion
   char* peptide, ///< location for the new ion -in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  int* modification_counts ///< an array of modification counts for each modification -in
+  );
+
+/**
+ * only copies the pointer to the peptide sequence
+ * inputs a array of all the modification counts
+ * inputs the pre modified mass, of just all AA mass summed up.
+ * \returns an ION_T object
+ */
+ION_T* new_modified_ion_with_mass(
+  ION_TYPE_T type,   ///< intensity for the new ion -in 
+  int cleavage_idx, ///< index into the peptide amide bonds of this ion
+  int charge, ///< charge of the ion
+  char* peptide, ///< location for the new ion -in
+  MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  float base_mass, ///< the base mass of the ion -in
   int* modification_counts ///< an array of modification counts for each modification -in
   );
 
@@ -86,7 +109,16 @@ void add_modification(
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
   );
 
-
+/**
+ * Copies ion object from src to dest.
+ * must pass in a seperate pointer peptide sequence from its own ion_series object
+ * must pass in a memory allocated ION_T* dest
+ */
+void copy_ion(
+  ION_T* src,///< ion to copy from -in
+  ION_T* dest,///< ion to copy to -out
+  char* peptide_sequence ///< the peptide sequence that the dest should refer to -in
+  );
 
 /*********************************
  * get, set methods for ion fields
@@ -182,6 +214,18 @@ void set_ion_peptide_sequence(
 BOOLEAN_T calc_ion_mass_z(
   ION_T* working_ion, ///< the working ion -out/in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
+  );
+
+/**
+ * is_modified, indiciates if there are any modification to the ion
+ * speeds up the proccess if FLASE.
+ *\returns TRUE if successfully computes the mass/z of the ion, else FALSE
+ */
+BOOLEAN_T calc_ion_mass_z_with_mass(
+  ION_T* ion, ///< the working ion -out/in
+  MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  float mass, ///< the basic mass of the ion -in
   BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
   );
 
