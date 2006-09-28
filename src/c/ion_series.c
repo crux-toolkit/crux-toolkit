@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.5 $
+ * REVISION: $Revision: 1.6 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -106,7 +106,6 @@ void free_ion_series(
   )
 {
   free(ion_series->peptide);
-  free_ion_constraint(ion_series->constraint); //might have to change
   
   //iterate over all ions, and free them
   while(ion_series->num_ions > 0){
@@ -130,7 +129,10 @@ void print_ion_series(
     carp(CARP_ERROR, "ion series has not predicted ions");
     return;
   }
-
+  
+  //print header
+  fprintf(file, "m/z\tmass\tcharge\tion-series\tpeptide-bond-index\tNH3\tH2O\tISOTOPE\tFLANK\n");
+  
   int ion_idx = 0;
   
   //print each ion in the ion series
@@ -174,12 +176,12 @@ BOOLEAN_T add_ions_by_charge(
   ION_SERIES_T* ion_series, ///< the ion series to predict ions for -in
   float mass, ///< the base mass of the ion to add
   int cleavage_idx, ///< the absolute cleavage index (A,B,C from left X,Y,Z from right)
-  int* modification_counts ///< the different modifications required
+  int* modification_counts, ///< the different modifications required
+  ION_TYPE_T ion_type ///< the ion type of the ions to be added
   )
 {
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
   int charge_idx = 1;
-  ION_TYPE_T ion_type = constraint->ion_type;
   ION_T* ion = NULL;
   int max_charge;
 
@@ -204,6 +206,13 @@ BOOLEAN_T add_ions_by_charge(
                                      constraint->mass_type, mass, modification_counts); 
     //add ion to ion series
     ion_series->ions[ion_series->num_ions++] = ion;
+
+    //debug//
+    /*
+    ++TOTAL_IONS_ADDED;
+    print_ion(ion, stdout);
+    printf("total ions: %d\n", TOTAL_IONS_ADDED);
+    */
   }
 
   return TRUE;
@@ -238,7 +247,7 @@ BOOLEAN_T add_ions(
     }
 
     //add ions up to max charge
-    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts)){
+    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, A_ION)){
       carp(CARP_ERROR, "failed to add ions by different charge for A ion");
       return FALSE;
     }
@@ -250,7 +259,7 @@ BOOLEAN_T add_ions(
     mass = mass_matrix[cleavage_idx];
 
     //add ions up to max charge
-    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts)){
+    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, B_ION)){
       carp(CARP_ERROR, "failed to add ions by different charge for B ion");
       return FALSE;
     }
@@ -269,7 +278,7 @@ BOOLEAN_T add_ions(
     }
     
     //add ions up to max charge
-    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts)){
+    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, C_ION)){
       carp(CARP_ERROR, "failed to add ions by different charge for C ion");
       return FALSE;
     }
@@ -288,7 +297,7 @@ BOOLEAN_T add_ions(
     }
 
     //add ions up to max charge
-    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts)){
+    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, X_ION)){
       carp(CARP_ERROR, "failed to add ions by different charge for X ion");
       return FALSE;
     }
@@ -307,7 +316,7 @@ BOOLEAN_T add_ions(
     }
     
     //add ions up to max charge
-    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts)){
+    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, Y_ION)){
       carp(CARP_ERROR, "failed to add ions by different charge Y ion");
       return FALSE;
     }
@@ -327,7 +336,7 @@ BOOLEAN_T add_ions(
     }
     
     //add ions up to max charge
-    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts)){
+    if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, Z_ION)){
       carp(CARP_ERROR, "failed to add ions by different charge Z ion");
       return FALSE;
     }
@@ -355,6 +364,19 @@ void predict_ions(
   int isotope_idx = 0;
   int flank_idx = 0;
 
+  //determine the increment value for index (either 1 or -1)
+  int nh3_increment = 1;
+  int h2o_increment = 1;
+
+  //reset modification increment
+  if(modifications[NH3] < 0){
+    nh3_increment = -1;
+  }
+  if(modifications[H2O] < 0){
+    h2o_increment = -1;
+  }
+
+
   //create a mass matrix
   float* mass_matrix = create_ion_mass_matrix(ion_series->peptide, constraint->mass_type);  
   
@@ -366,13 +388,13 @@ void predict_ions(
   for(; cleavage_idx < peptide_length; ++cleavage_idx){
     //FIXME add additional for loops when add new modiications
     //iterate over all different modification counts
-    for(; nh3_idx <= modifications[NH3]; ++nh3_idx){
+    for(nh3_idx = 0; abs(nh3_idx) <= abs(modifications[NH3]); nh3_idx += nh3_increment){
       modification_counts[NH3] = nh3_idx;
-      for(; h2o_idx <= modifications[H2O]; ++h2o_idx){
+      for(h2o_idx = 0; abs(h2o_idx) <= abs(modifications[H2O]); h2o_idx += h2o_increment){
         modification_counts[H2O] = h2o_idx;
-        for(; isotope_idx <= modifications[ISOTOPE]; ++isotope_idx){
-          modification_counts[isotope_idx] = isotope_idx;
-          for(; flank_idx <= modifications[FLANK]; ++flank_idx){
+        for(isotope_idx = 0; isotope_idx <= modifications[ISOTOPE]; ++isotope_idx){
+          modification_counts[ISOTOPE] = isotope_idx;
+          for(flank_idx = 0; flank_idx <= modifications[FLANK]; ++flank_idx){
             modification_counts[FLANK] = flank_idx;
             
             //add ions
@@ -386,6 +408,11 @@ void predict_ions(
       }
     }
   }
+  //set predicted to TRUE
+  ion_series->is_predicted = TRUE;
+  
+  //free mass matrix
+  free(mass_matrix);
 }
 
 
@@ -404,9 +431,8 @@ void copy_ion_series(
   dest->peptide = my_copy_string(src->peptide);
   dest->charge = src->charge;
 
-  //add copy of ion constraint
-  dest->constraint = allocate_ion_constraint();
-  copy_ion_constraint(src->constraint, dest->constraint);
+  //add copy of pointer ion constraint
+  dest->constraint = src->constraint;
 
   //add copy ion, add ion_filtered_iterator
   ION_ITERATOR_T* iterator = new_ion_iterator(src);
@@ -419,6 +445,8 @@ void copy_ion_series(
     copy_ion(src_ion, dest_ion, dest->peptide);
     dest->ions[dest->num_ions++] = dest_ion;
   }
+  //free up iterator
+  free_ion_iterator(iterator);
 
   dest->is_predicted = TRUE;
 }

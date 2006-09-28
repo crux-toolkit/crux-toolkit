@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -220,9 +220,6 @@ void print_ion(
   FILE* file ///< to this file -in
   )
 {
-  //print header
-  fprintf(file, "m/z\tmass\tcharge\tion-series\tpeptide-bond-index\tNH3\tH2O\tISOTOPE\tFLANK\n");
-
   //print all fields of ion
   fprintf(file, "%.2f\t%.2f\t%d\t%d\t%d", ion->ion_mass_z, (ion->ion_mass_z)*ion->charge, ion->charge, 
           (int)ion->type, ion->cleavage_idx);
