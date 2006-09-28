@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -264,5 +264,11 @@ typedef struct protein_index_iterator PROTEIN_INDEX_ITERATOR_T;
  *\brief An object to iterate over all ion objects in the ion_series
  */
 typedef struct ion_iterator ION_ITERATOR_T;
+
+/**
+ *\struct ion_filtered_iterator
+ *\brief An object to iterate over ion objects that meet constraint in the ion_series
+ */
+typedef struct ion_filtered_iterator ION_FILTERED_ITERATOR_T;
 
 #endif

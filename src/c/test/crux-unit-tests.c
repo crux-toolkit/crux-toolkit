@@ -8,7 +8,7 @@
 #include "check-index.h"
 #include "check-database.h"
 #include "check-ion.h"
-//#include "check-ion_series.h"
+#include "check-ion_series.h"
 
 //must set bash export CK_FORK=no
 int main(void){
@@ -22,9 +22,8 @@ int main(void){
   Suite* suite_protein = protein_suite(); 
   Suite* suite_database = database_suite();
   Suite* suite_index = index_suite(); 
-
   Suite* suite_ion = ion_suite(); 
-  //Suite* suite_ion_series = ion_series_suite(); 
+  Suite* suite_ion_series = ion_series_suite(); 
   
   
   //add each suite to Runner
@@ -39,7 +38,7 @@ int main(void){
   srunner_add_suite(sr,suite_index);
 
   srunner_add_suite(sr,suite_ion);
-  //srunner_add_suite(sr,suite_ion_series);
+  srunner_add_suite(sr,suite_ion_series);
     
   //run each check suite
   srunner_run_all(sr, CK_NORMAL);

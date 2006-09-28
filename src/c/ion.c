@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -476,7 +476,7 @@ void set_ion_cleavage_idx(
 }
 
 /**
- * return the cleavage_idx of the ion object
+ * return the charge of the ion object
  */
 int get_ion_charge(
   ION_T* working_ion ///< the working ion -in                          
@@ -486,7 +486,7 @@ int get_ion_charge(
 }
 
 /**
- * set the cleavage_idx of the ion object
+ * set the charge of the ion object
  */
 void set_ion_charge(
   ION_T* working_ion, ///< the working ion -out
@@ -526,6 +526,16 @@ char* get_ion_peptide_sequence(
   )
 {
   return working_ion->peptide_sequence;
+}
+
+/**
+ * return a pointer to the modification_count array of the ion object
+ */
+int* get_ion_modification_counts(
+  ION_T* working_ion ///< the working ion -in                          
+  )
+{
+  return working_ion->modification_counts;
 }
 
 /**

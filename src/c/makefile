@@ -1,14 +1,14 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.31 $
+# VERSION: $Revision: 1.32 $
 #######################################################################
 
 # The GNU C compiler is preferred.
 CC	= gcc
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
-OFLAGS  = -O2 
+OFLAGS  = #-O2 
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
@@ -38,6 +38,7 @@ LIBOBJS =\
 	${OBJDIR}/spectrum.o \
 	${OBJDIR}/peptide.o \
 	${OBJDIR}/protein.o \
+	${OBJDIR}/protein_index.o \
 	${OBJDIR}/peptide_src.o \
 	${OBJDIR}/peptide_constraint.o \
 	${OBJDIR}/database.o \
@@ -60,6 +61,7 @@ LIBOBJS =\
 PROGS = \
 	${BINDIR}/get_ms2_spectrum \
 	${BINDIR}/generate_peptides \
+	${BINDIR}/create_peptide_index \
 	${BINDIR}/create_index 
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \
