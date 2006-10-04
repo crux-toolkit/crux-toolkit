@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -137,6 +137,7 @@ ION_CONSTRAINT_T* new_ion_constraint(
   MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
   int max_charge, ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
   ION_TYPE_T ion_type, ///< the ion types the peptide series should include
+  BOOLEAN_T precursor_ion, ///< should include precursor ion?
   int nh3_count, ///< the number of modifications of nh3
   int h2o_count, ///< the number of modifications of h2o
   int isotope_count, ///< the number of modifications of isotope

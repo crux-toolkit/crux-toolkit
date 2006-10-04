@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -185,6 +185,38 @@ ION_T* new_modified_ion_with_mass(
   } 
   return ion;
 }
+
+/**
+ * only copies the pointer to the peptide sequence
+ * inputs the pre modified mass, of just all AA mass summed up.
+ * \returns an ION_T object
+ */
+ION_T* new_ion_with_mass(
+  ION_TYPE_T type,   ///< intensity for the new ion -in 
+  int cleavage_idx, ///< index into the peptide amide bonds of this ion
+  int charge, ///< charge of the ion
+  char* peptide, ///< location for the new ion -in
+  MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  float base_mass ///< the base mass of the ion -in
+  )
+{
+  //get new basic ion
+  ION_T* ion = new_basic_ion(type, cleavage_idx, charge, peptide);
+  
+  //set all modification counts in the ion
+  int modification_idx = 0;
+  for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
+    ion->modification_counts[modification_idx] = 0;
+  }
+  
+  //calculate and set ion mass/z
+  if(!calc_ion_mass_z_with_mass(ion, mass_type, base_mass, TRUE)){
+    carp(CARP_ERROR, "failed to calculate ion mass/z");
+    exit(1);
+  } 
+  return ion;
+}
+
 
 /**
  * frees A ION_T object
@@ -422,6 +454,44 @@ void copy_ion(
 }
 
 
+/**
+ *\returns TRUE if forward ion_type(A,B,C), else reverse ion_type(X,Y,Z) FALSE
+ */
+BOOLEAN_T is_forward_ion_type(
+  ION_T* ion ///< the ion to check if can lose nh3 -in                         
+  )
+{
+  //is ion forward type?
+  if(ion->type == B_ION ||
+     ion->type == A_ION ||
+     ion->type == C_ION)
+    {
+      return TRUE;
+    }
+
+  //reverse type ion
+  return FALSE;
+}
+
+/**
+ *\returns TRUE if the ion has modifications, else FALSE
+ */
+BOOLEAN_T ion_is_modified(
+  ION_T* ion ///< the ion to check if can lose nh3 -in
+  )
+{
+  int by_modification = 0;
+
+  //only add ions with no modifications
+  for(; by_modification < MAX_MODIFICATIONS; ++by_modification){
+    if(ion->modification_counts[by_modification] != 0){
+      return TRUE;
+    }
+  }
+  
+  return FALSE;
+}
+
 /*********************************
  * get, set methods for ion fields
  *********************************/
@@ -534,6 +604,18 @@ int* get_ion_modification_counts(
 {
   return working_ion->modification_counts;
 }
+
+/**
+ * return the count of in the modification_count array of the ion object
+ */
+int get_ion_single_modification_count(
+  ION_T* working_ion, ///< the working ion -in                          
+  ION_MODIFICATION_T mod_type ///< the modification count wanted -in
+  )
+{
+  return working_ion->modification_counts[mod_type];
+}
+
 
 /**
  * set the parent peptide_sequence of the ion object

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.7 $
+ * REVISION: $Revision: 1.8 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -36,8 +36,8 @@ struct ion_series {
   int last_STED_idx; ///< the cleavage idx where the last instance of amino acid(S|T|E|D) occur
   int first_RKQN_idx; ///< the cleavage idx where the first instance of amino acid(R|K|Q|N) occur
   int last_RKQN_idx; ///< the cleavage idx where the last instance of amino acid(R|K|Q|N) occur
-  BOOLEAN_T forward_type_ions; ///< the forward type ions exist?
-  BOOLEAN_T reverse_type_ions; ///< the reverse type ions exist?
+  //BOOLEAN_T forward_type_ions; ///< the forward type ions exist?
+  //BOOLEAN_T reverse_type_ions; ///< the reverse type ions exist?
 };
 
 /**
@@ -53,6 +53,7 @@ struct ion_constraint {
   MASS_TYPE_T mass_type; ///< the mass_type to use MONO|AVERAGE
   int max_charge; ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
   ION_TYPE_T ion_type; ///< the ion types the peptide series should include
+  BOOLEAN_T precursor_ion; ///< include precursor-ion in ion_series?
 };
 
 /**
@@ -107,6 +108,7 @@ ION_SERIES_T* new_ion_series(
   ion_series->constraint = constraint;
 
   //set the type of ions the ion series contain
+  /*
   if(constraint->ion_type == ALL_ION){
     ion_series->forward_type_ions = TRUE;
     ion_series->reverse_type_ions = TRUE;
@@ -120,7 +122,7 @@ ION_SERIES_T* new_ion_series(
     ion_series->forward_type_ions = FALSE;
     ion_series->reverse_type_ions = TRUE;
   }
-
+  */
   return ion_series;  
 }
 
@@ -186,22 +188,22 @@ void scan_for_aa_for_neutral_loss(
   //search for the first instance of the amino acids
   for(; cleavage_idx < peptide_length; ++cleavage_idx){
     //is the AA  (S|T|E|D) ?
-    if(!found_sted ||
-       sequence[cleavage_idx] == 'S' ||
-       sequence[cleavage_idx] == 'T' ||
-       sequence[cleavage_idx] == 'E' ||
-       sequence[cleavage_idx] == 'D' 
+    if(!found_sted &&
+       (sequence[cleavage_idx] == 'S' ||
+        sequence[cleavage_idx] == 'T' ||
+        sequence[cleavage_idx] == 'E' ||
+        sequence[cleavage_idx] == 'D' )
        )
       {
         ion_series->first_STED_idx = cleavage_idx + 1;
         found_sted = TRUE;
       }
     //is the AA  (R|K|Q|N) ?
-    if(!found_rkqn ||
-       sequence[cleavage_idx] == 'R' ||
-       sequence[cleavage_idx] == 'K' ||
-       sequence[cleavage_idx] == 'Q' ||
-       sequence[cleavage_idx] == 'N' 
+    if(!found_rkqn &&
+       (sequence[cleavage_idx] == 'R' ||
+        sequence[cleavage_idx] == 'K' ||
+        sequence[cleavage_idx] == 'Q' ||
+        sequence[cleavage_idx] == 'N' )
        )
       {
         ion_series->first_RKQN_idx = cleavage_idx + 1;
@@ -224,7 +226,7 @@ void scan_for_aa_for_neutral_loss(
         sequence[cleavage_idx] == 'D' )
        )
       {
-        ion_series->last_STED_idx = peptide_length - cleavage_idx + 2;
+        ion_series->last_STED_idx = peptide_length - cleavage_idx;
         found_sted = FALSE;
       }
     //is the AA  (R|K|Q|N) ?
@@ -235,7 +237,7 @@ void scan_for_aa_for_neutral_loss(
         sequence[cleavage_idx] == 'N' )
        )
       {
-        ion_series->last_RKQN_idx = peptide_length - cleavage_idx + 2;
+        ion_series->last_RKQN_idx = peptide_length - cleavage_idx;
         found_rkqn = FALSE;
       }
 
@@ -245,7 +247,6 @@ void scan_for_aa_for_neutral_loss(
     }
   }
 }
-
 
 /**
  * index starts at 1, the length of the peptide is stored at index 0.
@@ -282,7 +283,6 @@ BOOLEAN_T add_ions_by_charge(
   ION_SERIES_T* ion_series, ///< the ion series to predict ions for -in
   float mass, ///< the base mass of the ion to add
   int cleavage_idx, ///< the absolute cleavage index (A,B,C from left X,Y,Z from right)
-  int* modification_counts, ///< the different modifications required
   ION_TYPE_T ion_type ///< the ion type of the ions to be added
   )
 {
@@ -305,47 +305,41 @@ BOOLEAN_T add_ions_by_charge(
     max_charge = constraint->max_charge;
   }
 
-  //iterate over all different charge ////FIXME..make sure that max charge isn't too high!!!!!!!!!!
+  //iterate over all different charge
   for(; charge_idx <= max_charge; ++charge_idx){
     //create ion
-    ion = new_modified_ion_with_mass(ion_type, cleavage_idx, charge_idx, ion_series->peptide, 
-                                     constraint->mass_type, mass, modification_counts); 
+    ion = new_ion_with_mass(ion_type, cleavage_idx, charge_idx, ion_series->peptide, 
+                            constraint->mass_type, mass); 
     //add ion to ion series
-    ion_series->ions[ion_series->num_ions++] = ion;
-
-    //debug//
-    /*
-    ++TOTAL_IONS_ADDED;
-    print_ion(ion, stdout);
-    printf("total ions: %d\n", TOTAL_IONS_ADDED);
-    */
+    ion_series->ions[ion_series->num_ions++] = ion;   
   }
-
+  
   return TRUE;
 }
 
+
 /**
- * helper function: predict_ions
- * adds ions to the ion series according to their type
- *\returns TRUE is successfully adds all the types of ions, ELSE flase
+ * creates all the ions with no modifications up to the max charge
+ * Adds each ion to ion_series
+ *\returns TRUE if successfully generates all the ions, else FALSE
  */
-BOOLEAN_T add_ions(         
-  ION_SERIES_T* ion_series, ///< the ion series to predict ions for -in/out
-  int cleavage_idx, ///< the cleavage indx starting from the left -in
-  float* mass_matrix, ///< the mass matrix that hold all ions base mass -in
-  int* modification_counts, ///< the different modifications required -in
-  BOOLEAN_T add_forward_ions, ///< should add any forward ions(A|B|C) -in
-  BOOLEAN_T add_backward_ions ///< should add any backward ions(X|Y|Z) -in
+BOOLEAN_T generate_ions_no_modification(
+  ION_SERIES_T* ion_series, ///< ion_series to print -in/out
+  float* mass_matrix ///< the mass matrix that stores the mass
   )
 {
-  float mass = 0;
+  int cleavage_idx = 1;
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
-  ION_TYPE_T ion_type = constraint->ion_type;
+  float mass = 0;
 
-  //should add forward ions?
-  if(add_forward_ions){
+  //get peptide length
+  int peptide_length = (int)mass_matrix[0];
+
+  //iterate over all cleavage index
+  for(; cleavage_idx < peptide_length; ++cleavage_idx){
+    
     //add A ion
-    if(ion_type == A_ION){
+    if(constraint->ion_type == A_ION){
       //set mass
       mass = mass_matrix[cleavage_idx];
       
@@ -357,26 +351,26 @@ BOOLEAN_T add_ions(
       }
       
       //add ions up to max charge
-      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, A_ION)){
+      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, A_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge for A ion");
       return FALSE;
       }
     }
     
     //add B ion
-    if(ion_type == ALL_ION || ion_type == B_ION){
+    if(constraint->ion_type == ALL_ION || constraint->ion_type == B_ION){
       //set mass
       mass = mass_matrix[cleavage_idx];
       
       //add ions up to max charge
-      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, B_ION)){
+      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, B_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge for B ion");
         return FALSE;
       }
     }
     
     //add C ion
-    if(ion_type == C_ION){
+    if(constraint->ion_type == C_ION){
       //set mass
       mass = mass_matrix[cleavage_idx];
       
@@ -388,20 +382,17 @@ BOOLEAN_T add_ions(
       }
       
       //add ions up to max charge
-      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, C_ION)){
+      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, C_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge for C ion");
         return FALSE;
       }
     }
-  }
-  
-  //should add backward ions?
-  if(add_backward_ions){
+    
     //add X ion
-    if(ion_type == X_ION){
+    if(constraint->ion_type == X_ION){
       //set mass 
-      mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[cleavage_idx];
-      
+      mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[(int)mass_matrix[0] - cleavage_idx];
+
       if(constraint->mass_type == MONO){
         mass += MASS_CO_MONO + MASS_H2O_MONO;     
       }
@@ -410,16 +401,16 @@ BOOLEAN_T add_ions(
       }
       
       //add ions up to max charge
-      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, X_ION)){
+      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, X_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge for X ion");
         return FALSE;
       }
     }
     
     //add Y ion
-    if(ion_type == ALL_ION || ion_type == Y_ION){
+    if(constraint->ion_type == ALL_ION || constraint->ion_type == Y_ION){
       //set mass 
-      mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[cleavage_idx];
+      mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[(int)mass_matrix[0] - cleavage_idx];
       
       if(constraint->mass_type == MONO){
         mass += MASS_H2O_MONO; 
@@ -429,7 +420,7 @@ BOOLEAN_T add_ions(
       }
       
       //add ions up to max charge
-      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, Y_ION)){
+      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, Y_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge Y ion");
         return FALSE;
       }
@@ -437,9 +428,10 @@ BOOLEAN_T add_ions(
     }
     
     //add Z ion
-    if(ion_type == Z_ION){
+    if(constraint->ion_type == Z_ION){
+
       //set mass 
-      mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[cleavage_idx];
+      mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[(int)mass_matrix[0] - cleavage_idx];
       
       if(constraint->mass_type == MONO){
         mass = mass - MASS_NH3_MONO + MASS_H2O_MONO; 
@@ -449,10 +441,234 @@ BOOLEAN_T add_ions(
       }
       
       //add ions up to max charge
-      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, modification_counts, Z_ION)){
+      if(!add_ions_by_charge(ion_series, mass, cleavage_idx, Z_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge Z ion");
         return FALSE;
       }
+    }
+  }
+
+  //add P ion(precursor ion)?
+  if(ion_series->constraint->precursor_ion){
+    
+    //set mass 
+    mass = mass_matrix[(int)mass_matrix[0]];
+    
+    //mass type
+    if(constraint->mass_type == MONO){
+      mass += MASS_H2O_MONO; 
+    }
+    else{ //average
+      mass += MASS_H2O_AVERAGE;
+    }
+    
+    //add ions up to max charge
+    if(!add_ions_by_charge(ion_series, mass, (int)mass_matrix[0], P_ION)){
+      carp(CARP_ERROR, "failed to add ions by different charge P ion");
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * The modification depends on the loss/add && if the ion contains RKQN or STED
+ *\returns TRUE if the ion can lose the mod_type modification, else FALSE
+ */
+BOOLEAN_T can_ion_lose_modification(
+  ION_SERIES_T* ion_series, ///< ion_series to print -in/out  
+  ION_T* ion, ///< the ion to check if can lose nh3 -in
+  ION_MODIFICATION_T mod_type, ///< generate ions of this modification_type -in/out
+  int increment  ///< the add/loss of the modification
+  )
+{
+  int cleavage_idx = get_ion_cleavage_idx(ion);
+
+  //check for NH3 modification
+  if(mod_type == NH3){
+    // adding is ok
+    if(increment >= 0){
+      return TRUE;
+    }
+    
+    //is forward ion_type(ABC)?
+    if(is_forward_ion_type(ion)){
+      //does this ion contain the RKQN
+      if(ion_series->first_RKQN_idx > 0 && cleavage_idx >= ion_series->first_RKQN_idx){
+        return TRUE;
+      }
+      return FALSE;
+    }
+    else{// XYZ
+      //does this ion contain the RKQN
+      if(ion_series->last_RKQN_idx > 0 && cleavage_idx >= ion_series->last_RKQN_idx){
+        return TRUE;
+      }
+      return FALSE;
+    }
+  }
+  
+  //check for H2O modification
+  else if(mod_type == H2O){
+    // adding is ok
+    if(increment >= 0){
+      return TRUE;
+    }
+
+    //is forward ion_type(ABC)?
+    if(is_forward_ion_type(ion)){
+      //does this ion contain the STED
+      if(ion_series->first_STED_idx > 0 && cleavage_idx >= ion_series->first_STED_idx){
+        return TRUE;
+      }
+      return FALSE;
+    }
+    else{// XYZ
+      //does this ion contain the STED
+      if(ion_series->last_STED_idx > 0 && cleavage_idx >= ion_series->last_STED_idx){
+        return TRUE;
+      }
+      return FALSE;
+    }
+  }
+  //check for ISOTOPE modification
+  else if(mod_type == ISOTOPE){
+    // adding is ok
+    if(increment >= 0 && get_ion_type(ion) != P_ION){
+      return TRUE;
+    }
+    //add more constraint if needed
+  }
+  //check for FLANK modification
+  else if(mod_type == FLANK){
+    //only add flanking ions to type B,Y ions
+    if(get_ion_type(ion) == B_ION || get_ion_type(ion) == Y_ION){
+      //only add ions with no modifications
+      if(!ion_is_modified(ion)){
+        return TRUE;
+      }
+    }
+  }
+  
+  return FALSE;
+}
+
+/**
+ * creates all the ions with specific modifications up to the max charge
+ * copies all the existing ions that can be modified,
+ * then applies the different modifications then adds the new modified ions to ion_series
+ *\returns TRUE if successfully generates all the ions with modifications, else FALSE
+ */
+BOOLEAN_T generate_ions(
+  ION_SERIES_T* ion_series, ///< ion_series to print -in/out  
+  ION_MODIFICATION_T mod_type ///< generate ions of this modification_type -in/out
+  )
+{
+  int ion_idx = 0;
+  int total_ion = ion_series->num_ions;
+  ION_T* working_ion = NULL;
+  ION_T* new_ion = NULL;
+  int* modifications = ion_series->constraint->modifications;
+
+  //modification index
+  int type_idx = 0;
+  int type_increment = 1;
+
+  //check if there's enough space to add the new ions
+  if(ion_series->num_ions*2 > MAX_IONS){
+    carp(CARP_ERROR, "exceeds ion array size in ion_series");
+    return FALSE;
+  }
+
+  //reset modification increment, if mod_type loss
+  if(modifications[mod_type] < 0){
+    type_increment = -1;
+  }
+  
+  //iterate over all the ions to determine which ones should be copies and modified
+  for(; ion_idx < total_ion; ++ion_idx){
+    working_ion = ion_series->ions[ion_idx];
+    
+    //can this ion generate a mod_type modification?, if not skip to next ion
+    if(!(can_ion_lose_modification(ion_series, working_ion, mod_type, type_increment))){      
+      continue;
+    }
+     
+    // add/sub thorugh all mod_type modifications!!!
+    for(type_idx = type_increment; abs(type_idx) <= abs(modifications[mod_type]); type_idx += type_increment){
+      //copy the src ion, into new ion
+      new_ion = allocate_ion();
+      copy_ion(working_ion, new_ion, get_ion_peptide_sequence(working_ion));
+      
+      //add the modification to the new ion
+      add_modification(new_ion, mod_type, type_idx, ion_series->constraint->mass_type);
+      
+      //add ion to ion_series
+      ion_series->ions[ion_series->num_ions++] = new_ion;
+    }
+  }
+  return TRUE;
+}
+
+/**
+ * creates all the flanking ions up to the max charge
+ * can only create flanking ions that are B|Y ions and don't have modification
+ * assumes the ions with no modification all are at the begining of the ion[] in ion_series
+ * copies all the existing ions that can be modified,
+ * then applies the different modifications then adds the new modified ions to ion_series
+ *\returns TRUE if successfully generates all the ions with modifications, else FALSE
+ */
+BOOLEAN_T generate_ions_flank(
+  ION_SERIES_T* ion_series ///< ion_series to print -in/out
+  )
+{
+  int ion_idx = 0;
+  int total_ion = ion_series->num_ions;
+  ION_T* working_ion = NULL;
+  ION_T* new_ion = NULL;
+  ION_T* new_ion2 = NULL;
+  int* modifications = ion_series->constraint->modifications;
+
+  //modification index
+  int type_idx = 0;
+  int type_increment = 1;
+
+  //check if there's enough space to add the new ions
+  if(ion_series->num_ions*2 > MAX_IONS){
+    carp(CARP_ERROR, "exceeds ion array size in ion_series");
+    return FALSE;
+  }
+  
+  //iterate over all the ions to determine which ones should be copies and modified
+  for(; ion_idx < total_ion; ++ion_idx){
+    working_ion = ion_series->ions[ion_idx];
+    
+    //no more ions that are not modified, thus done
+    if(get_ion_single_modification_count(working_ion, NH3) != 0){
+      break;
+    }
+
+    //can this ion generate a mod_type modification?, if not skip to next ion
+    if(!can_ion_lose_modification(ion_series, working_ion, FLANK, type_increment)){      
+      continue;
+    }
+     
+    // add/sub thorugh all mod_type modifications!!!
+    for(type_idx = type_increment; type_idx <= modifications[FLANK]; type_idx += type_increment){
+      //copy the src ion, into new ion
+      new_ion = allocate_ion();
+      new_ion2 = allocate_ion();
+      copy_ion(working_ion, new_ion, get_ion_peptide_sequence(working_ion));
+      copy_ion(working_ion, new_ion2, get_ion_peptide_sequence(working_ion));
+      
+      //add the modification to the new ion
+      add_modification(new_ion, FLANK, type_idx, ion_series->constraint->mass_type);
+      add_modification(new_ion2, FLANK, -type_idx, ion_series->constraint->mass_type);
+
+      //add ion to ion_series
+      ion_series->ions[ion_series->num_ions++] = new_ion;
+      ion_series->ions[ion_series->num_ions++] = new_ion2;
     }
   }
   return TRUE;
@@ -464,7 +680,7 @@ BOOLEAN_T add_ions(
  * Predict ion series
  */
 void predict_ions(
-  ION_SERIES_T* ion_series ///< the ion series to predict ions for
+  ION_SERIES_T* ion_series ///< the ion series to predict ions for -in
   )
 {
   if(ion_series->is_predicted){
@@ -473,134 +689,69 @@ void predict_ions(
   }
 
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
-  int modification_counts[MAX_MODIFICATIONS];
-  int* modifications = constraint->modifications;
   
-  //modification indecies
-  int nh3_idx = 0;
-  int h2o_idx = 0;
-  int isotope_idx = 0;
-  int flank_idx = 0;
-  int sign_idx = 0;
-
-  //determine the increment value for index (either 1 or -1)
-  int nh3_increment = 1;
-  int h2o_increment = 1;
-
-  //reset modification increment
-  if(modifications[NH3] < 0){
-    nh3_increment = -1;
-  }
-  if(modifications[H2O] < 0){
-    h2o_increment = -1;
-  }
-
-
-  //debug
-  int total_ions = 0;
-
   //create a mass matrix
   float* mass_matrix = create_ion_mass_matrix(ion_series->peptide, constraint->mass_type);  
   
-  //get peptide length
-  int peptide_length = (int)mass_matrix[0];
+  //scan for the first and last  (S, T, E, D)  (R, K, Q, N), initialize to determine modification is ok
+  //the first, last of STED, RKQN are stored in ion_series
+  scan_for_aa_for_neutral_loss(ion_series, mass_matrix[0]);
   
-  //scan for the first and last  (S, T, E, D)  (R, K, Q, N)
-  scan_for_aa_for_neutral_loss(ion_series, peptide_length);
+  //generate ions without any modifications
+  if(!generate_ions_no_modification(ion_series, mass_matrix)){
+    carp(CARP_ERROR, "failed to generate ions, no modifications");
+    free(mass_matrix);
+    exit(1);
+  }
 
-  //add ions for each cleavage indecies
-  int cleavage_idx = 1;
-  BOOLEAN_T generate_foward_ions_nh3 = FALSE;
-  BOOLEAN_T generate_backward_ions_nh3 = FALSE;
-  BOOLEAN_T generate_foward_ions_h2o = FALSE;
-  BOOLEAN_T generate_backward_ions_h2o = FALSE;
-
-  for(; cleavage_idx < peptide_length; ++cleavage_idx){
-    //FIXME add additional for loops when add new modications
-    //iterate over all different modification counts
+  //create modification ions?
+  if(ion_series->constraint->use_neutral_losses){
     
-    // add/sub NH3!!!
-    for(nh3_idx = 0; abs(nh3_idx) <= abs(modifications[NH3]); nh3_idx += nh3_increment){
-      modification_counts[NH3] = nh3_idx;
-      
-      //check if possible to generate foward or backward ions with the current nh3_index
-      if(nh3_idx < 0 && !(generate_foward_ions_nh3 || generate_foward_ions_nh3)){
-        //forward ions possible?
-        if(ion_series->forward_type_ions && ion_series->first_RKQN_idx <= cleavage_idx){
-          generate_foward_ions_nh3 = TRUE;
-        }
-        //backward ions possible?
-        if(ion_series->reverse_type_ions && ion_series->last_RKQN_idx <= cleavage_idx){
-          generate_backward_ions_nh3 = TRUE;
-        }
-        //non possible goto next nh3_idex
-        if(!generate_foward_ions_nh3 && !generate_backward_ions_nh3){
-          continue;
-        }
-      }
-
-      // add/sub H2O!!!
-      for(h2o_idx = 0; abs(h2o_idx) <= abs(modifications[H2O]); h2o_idx += h2o_increment){
-        modification_counts[H2O] = h2o_idx;
-        
-        //check if possible to generate foward or backward ions with the current h2o_index
-        if(h2o_idx < 0 && !(generate_foward_ions_h2o || generate_foward_ions_h2o)){
-          //forward ions possible?
-          if(ion_series->forward_type_ions && ion_series->first_RKQN_idx <= cleavage_idx){
-            generate_foward_ions_h2o = TRUE;
-          }
-          //backward ions possible?
-          if(ion_series->reverse_type_ions && ion_series->last_RKQN_idx <= cleavage_idx){
-            generate_backward_ions_h2o = TRUE;
-          }
-          //non possible goto next nh3_idex
-          if(!generate_foward_ions_h2o && !generate_backward_ions_h2o){
-            continue;
-          }
-        }
-        
-        // only add istope!!!
-        for(isotope_idx = 0; isotope_idx <= modifications[ISOTOPE]; ++isotope_idx){
-          modification_counts[ISOTOPE] = isotope_idx;
-
-          //add both flanking ions!!!, however 0 is only adds 1 ion
-          for(flank_idx = 0; flank_idx <= modifications[FLANK]; ++flank_idx){
-            modification_counts[FLANK] = flank_idx;
-
-            //add ions with charge up to maximum
-            for(sign_idx = 0; sign_idx < 2; ++sign_idx){
-              
-              //add ions
-              if(!add_ions(ion_series, cleavage_idx, mass_matrix, modification_counts,
-                           (generate_foward_ions_h2o && generate_foward_ions_nh3) || nh3_idx == 0,
-                           (generate_backward_ions_h2o && generate_backward_ions_nh3) || h2o_idx == 0)){
-              
-                //debug
-                ++total_ions;
-                
-                //if flanking idx is 0, no need to add the flanking ion.
-                if(flank_idx == 0){
-                  break;
-                }
-                //set the flanking idx the complement sign
-                else{
-                  modification_counts[FLANK] = -flank_idx;
-                }
-              }
-            }
-          }
-        }
+    //generate ions with nh3 modification
+    if(abs(constraint->modifications[NH3]) > 0){
+      if(!generate_ions(ion_series, NH3)){
+        carp(CARP_ERROR, "failed to generate ions, NH3 modifications");
+        free(mass_matrix);
+        exit(1);
       }
     }
+    
+    //generate ions with h2o modification
+    if(abs(constraint->modifications[H2O]) > 0){
+      if(!generate_ions(ion_series, H2O)){
+        carp(CARP_ERROR, "failed to generate ions, H2O modifications");
+        free(mass_matrix);
+        exit(1);
+      }
+    }
+
+    //generate ions with isotope modification
+    if(constraint->modifications[ISOTOPE] > 0){
+      if(!generate_ions(ion_series, ISOTOPE)){
+        carp(CARP_ERROR, "failed to generate ions, ISOTOPE modifications");
+        free(mass_matrix);
+        exit(1);
+      }
+    }
+
+    //generate ions with flank modification
+    if(constraint->modifications[FLANK] > 0){
+      if(!generate_ions_flank(ion_series)){
+        carp(CARP_ERROR, "failed to generate ions, FLANK modifications");
+        free(mass_matrix);
+        exit(1);
+      }
+    }
+    
+    //add more modifications here
+
   }
-  //set predicted to TRUE
-  ion_series->is_predicted = TRUE;
   
+  //ion series now been predicted
+  ion_series->is_predicted = TRUE;
+
   //free mass matrix
   free(mass_matrix);
-  
-  //total number of ions
-  printf("\ntotal ions: %d\n", total_ions);
 }
 
 
@@ -733,6 +884,7 @@ ION_CONSTRAINT_T* new_ion_constraint(
   MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
   int max_charge, ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
   ION_TYPE_T ion_type, ///< the ion types the peptide series should include
+  BOOLEAN_T precursor_ion, ///< should include precursor ion?
   int nh3_count, ///< the number of modifications of nh3
   int h2o_count, ///< the number of modifications of h2o
   int isotope_count, ///< the number of modifications of isotope
@@ -754,6 +906,7 @@ ION_CONSTRAINT_T* new_ion_constraint(
   constraint->mass_type = mass_type;
   constraint->max_charge = max_charge;
   constraint->ion_type = ion_type;
+  constraint->precursor_ion = precursor_ion;
 
   return constraint;
 }
@@ -791,9 +944,10 @@ void copy_ion_constraint(
   dest->mass_type = src->mass_type;
   dest->max_charge = src->max_charge;
   dest->ion_type = src->ion_type;
+  dest->precursor_ion = src->precursor_ion;
 }
 
-/** 
+/** FIXME!!!! double check
  * Determines if a ion satisfies a ion_constraint.
  * \returns TRUE if the constraint is satisified. FALSE if not.
  */

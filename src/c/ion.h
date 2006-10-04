@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -69,6 +69,20 @@ ION_T* new_modified_ion_with_mass(
   );
 
 /**
+ * only copies the pointer to the peptide sequence
+ * inputs the pre modified mass, of just all AA mass summed up.
+ * \returns an ION_T object
+ */
+ION_T* new_ion_with_mass(
+  ION_TYPE_T type,   ///< intensity for the new ion -in 
+  int cleavage_idx, ///< index into the peptide amide bonds of this ion
+  int charge, ///< charge of the ion
+  char* peptide, ///< location for the new ion -in
+  MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+  float base_mass ///< the base mass of the ion -in
+  );
+
+/**
  * frees A ION_T object
  */
 void free_ion (
@@ -118,6 +132,20 @@ void copy_ion(
   ION_T* src,///< ion to copy from -in
   ION_T* dest,///< ion to copy to -out
   char* peptide_sequence ///< the peptide sequence that the dest should refer to -in
+  );
+
+/**
+ *\returns TRUE if forward ion_type(A,B,C), else reverse ion_type(X,Y,Z) FALSE
+ */
+BOOLEAN_T is_forward_ion_type(
+  ION_T* ion ///< the ion to check if can lose nh3 -in                         
+  );
+
+/**
+ *\returns TRUE if the ion has modifications, else FALSE
+ */
+BOOLEAN_T ion_is_modified(
+  ION_T* ion ///< the ion to check if can lose nh3 -in
   );
 
 /*********************************
@@ -201,6 +229,14 @@ char* get_ion_peptide_sequence(
  */
 int* get_ion_modification_counts(
   ION_T* working_ion ///< the working ion -in                          
+  );
+
+/**
+ * return the count of in the modification_count array of the ion object
+ */
+int get_ion_single_modification_count(
+  ION_T* working_ion, ///< the working ion -in                          
+  ION_MODIFICATION_T mod_type ///< the modification count wanted -in
   );
 
 /**
