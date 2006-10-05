@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -108,7 +108,6 @@ ION_CONSTRAINT_T* get_ion_series_ion_constraint(
   );
 
 /**
- * frees the old ion_constraint, and replace with the given new constraint 
  * set the of the ion_series object
  */
 void set_ion_series_ion_constraint(
@@ -116,7 +115,20 @@ void set_ion_series_ion_constraint(
   ION_CONSTRAINT_T* constraint///<  -in
   );
 
+/**
+ *\returns the total number of ions in the ion_series object
+ */
+int get_ion_series_num_ions(
+  ION_SERIES_T* ion_series ///< the working ion_series -in                          
+  );
 
+/**
+ *\returns the total number of ion_type in the ion_series object
+ */
+int get_ion_series_num_ions_one_type(
+  ION_SERIES_T* ion_series, ///< the working ion_series -in                          
+  ION_TYPE_T ion_type ///< the type of ions -in
+  );
 
 /*************************
  * ION_CONSTRAINT methods
@@ -128,20 +140,26 @@ void set_ion_series_ion_constraint(
 ION_CONSTRAINT_T* allocate_ion_constraint(void);
 
 /**
- * add more modifications as needed
- * copies the modifications, into its own array only if use_neutral_losses == TURE
+ * modification, all modifications 0
+ * add more modifications as needed using the set_ion_constraint_modification
  *\returns a new heap allocated ion_constraint
  */
 ION_CONSTRAINT_T* new_ion_constraint(
-  BOOLEAN_T use_neutral_losses, ///< A boolean to determine if the ions series should include neutral losses
   MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
   int max_charge, ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
   ION_TYPE_T ion_type, ///< the ion types the peptide series should include
-  BOOLEAN_T precursor_ion, ///< should include precursor ion?
-  int nh3_count, ///< the number of modifications of nh3
-  int h2o_count, ///< the number of modifications of h2o
-  int isotope_count, ///< the number of modifications of isotope
-  int flank_count ///< the number of modifications of flank
+  BOOLEAN_T precursor_ion  ///< should include precursor ion?
+  );
+
+/**
+ * modification, sets all fields for sequest settings
+ *\returns a new heap allocated ion_constraint
+ */
+ION_CONSTRAINT_T* new_ion_constraint_sequest(
+  MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
+  int max_charge, ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
+  ION_TYPE_T ion_type, ///< the ion types the peptide series should include
+  BOOLEAN_T precursor_ion ///< should include precursor ion?
   );
 
 /**
@@ -168,6 +186,24 @@ BOOLEAN_T ion_constraint_is_satisfied(
    ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
    ION_T* ion ///< query ion -in
    );
+
+/**
+ * sets the modification count
+ * can only add isotopes
+ */
+void set_ion_constraint_modification(
+  ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
+  ION_MODIFICATION_T mod_type, ///< ion modification type -in
+  int count  ///< the count of the modification -in  
+  );
+
+/**
+ * gets the modification count for specific mod_type
+ */
+int get_ion_constraint_modification(
+  ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
+  ION_MODIFICATION_T mod_type ///< ion modification type -in
+  );
 
 /**************************
  *  ION_ITERATOR_T object
