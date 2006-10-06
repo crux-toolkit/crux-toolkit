@@ -20,6 +20,24 @@
 #include "crux-utils.h"
 #include "objects.h"
 
+/**
+ * when wrong command is seen carp, and exit
+ */
+void wrong_command(char* arg, char* comment){
+  char* usage = parse_arguments_get_usage("predict_peptide_ions");
+  carp(CARP_FATAL, "incorrect argument: %s", arg);
+
+  //print comment if given
+  if(comment != NULL){
+    carp(CARP_FATAL, "%s", comment);
+  }
+
+  //FIXME uncomment this print if want to print usage whenever error message is printed
+  //fprintf(stderr, "%s", usage);
+  free(usage);
+  exit(1);
+}
+
 int main(int argc, char** argv){
 
   char* primary_ions = "by";
@@ -108,6 +126,11 @@ int main(int argc, char** argv){
    BOOLEAN_T is_modification_nh3 = TRUE;
    int max_charge = charge_state;
 
+   //check if charge >= 0
+   if(charge_state < 0){
+     wrong_command("peptide charge cannot be bellow 0", NULL);
+   }
+
    //primary_ions
    if(strcmp(primary_ions, "b") == 0){
      ion_type = B_ION;
@@ -118,13 +141,19 @@ int main(int argc, char** argv){
    else if(strcmp(primary_ions, "by")== 0){
      ion_type = ALL_ION;
    }
-   
+   else{
+     wrong_command(primary_ions, "primary_ions are b|y|by");
+   }
+
    //precursor_ions
    if(strcmp(precursor_ions, "F")== 0){
      use_precursor_ions = FALSE;
    }
    else if(strcmp(precursor_ions, "T")== 0){
      use_precursor_ions = TRUE;
+   }
+   else{
+     wrong_command(precursor_ions, "must pick between T|F");
    }
 
    //neutral_losses
@@ -149,11 +178,14 @@ int main(int argc, char** argv){
      is_modification_h2o = FALSE;
      is_modification_nh3 = TRUE;
    }
+   else if(strcmp(neutral_losses, "all")!= 0){
+     wrong_command(neutral_losses, "neutral loss can be none|h2o|nh3|all");
+   }
    
    //isotope
    if(isotope_count < 0 || isotope_count > 3){
      //out of bounds...error
-
+     wrong_command("isotope not an integer between 0 and 3", NULL);
    } 
    else{
      neutral_loss_count[ISOTOPE] = isotope_count;
@@ -161,10 +193,14 @@ int main(int argc, char** argv){
 
    //flanking
    if(strcmp(flanking, "T")== 0){
+     is_modification = TRUE;
      neutral_loss_count[FLANK] = 1;
    }
    else if(strcmp(flanking, "F")== 0){
      neutral_loss_count[FLANK] = 0;
+   }
+   else{
+     wrong_command(flanking, "must pick between T|F");
    }
 
    //max_ion_charge
@@ -180,31 +216,47 @@ int main(int argc, char** argv){
    else if(strcmp(max_ion_charge, "peptide")== 0){
      max_charge = charge_state;
    }
+   else{
+     wrong_command(max_ion_charge, "max_ion_charge must be 1|2|3|peptide");
+   }
    
    //set nh3, h2o
-   neutral_loss_count[NH3] = nh3_count;
-   neutral_loss_count[H2O] = h2o_count;
-   
+   if(is_modification_nh3){
+     neutral_loss_count[NH3] = nh3_count;
+   }
+   if(is_modification_h2o){
+     neutral_loss_count[H2O] = h2o_count;
+   }
+
    //creat ion_constraint
    ION_CONSTRAINT_T* ion_constraint = 
      new_ion_constraint(MONO, max_charge, ion_type, use_precursor_ions);
 
    
-   //set ion_constraint3 modification counts
-   set_ion_constraint_modification( ion_constraint, NH3, neutral_loss_count[NH3]);
-   set_ion_constraint_modification( ion_constraint, H2O, neutral_loss_count[H2O]);
-   set_ion_constraint_modification( ion_constraint, ISOTOPE, neutral_loss_count[ISOTOPE]);
-   set_ion_constraint_modification( ion_constraint, FLANK, neutral_loss_count[FLANK]);
-   
+   //set ion_constraint3 modification counts, if modifications should occur
+   if(is_modification){
+     set_ion_constraint_modification( ion_constraint, NH3, neutral_loss_count[NH3]);
+     set_ion_constraint_modification( ion_constraint, H2O, neutral_loss_count[H2O]);
+     set_ion_constraint_modification( ion_constraint, ISOTOPE, neutral_loss_count[ISOTOPE]);
+     set_ion_constraint_modification( ion_constraint, FLANK, neutral_loss_count[FLANK]);
+   }
+
    //create ion_series
    ION_SERIES_T* ion_series = new_ion_series(peptide_sequence, charge_state, ion_constraint);
    
    //now predict ions
    predict_ions(ion_series);
    
-   //print
+   //print settings
    printf("# PEPTIDE: %s\n",peptide_sequence);
    printf("# CHARGE: %d\n", charge_state);
+   printf("# MAX-ION-CHRAGE: %s\n", max_ion_charge);
+   printf("# NH3 modification: %d\n", neutral_loss_count[NH3]);
+   printf("# H2O modification: %d\n", neutral_loss_count[H2O] );
+   printf("# ISOTOPE modification: %d\n", neutral_loss_count[ISOTOPE] );
+   printf("# FLANK modification: %d\n", neutral_loss_count[FLANK]);
+
+   //print ions
    print_ion_series(ion_series, stdout);
 
 
@@ -213,7 +265,7 @@ int main(int argc, char** argv){
    free_ion_series(ion_series);
  }
  else {
-   char* usage = parse_arguments_get_usage("generate_peptides");
+   char* usage = parse_arguments_get_usage("predict_peptide_ions");
    result = parse_arguments_get_error(&error_message);
    fprintf(stderr, "Error in command line. Error # %d\n", result);
    fprintf(stderr, "%s\n", error_message);
