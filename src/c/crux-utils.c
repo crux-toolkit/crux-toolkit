@@ -122,6 +122,16 @@ char* int_to_char(unsigned int i){
   return int_string;
 }
  
+/**
+ * convert the integer into a string
+ * \returns a heap allocated string
+ */
+char* signed_int_to_char(int i){
+  int digit = abs(i)/ 10;
+  char* int_string = (char*)mycalloc(digit+2, sizeof(char));
+  sprintf(int_string, "%d", i);
+  return int_string;
+}
 
 /**
  *prints the peptide type given it's enum value

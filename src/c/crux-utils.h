@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -51,6 +51,11 @@ char** parse_filename_path(char* file);
  */
 char* int_to_char(int i);
 
+/**
+ * convert the integer into a string
+ * \returns a heap allocated string
+ */
+char* signed_int_to_char(int i);
 
 /**
  *prints the peptide type given it's enum value

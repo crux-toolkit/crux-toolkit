@@ -158,7 +158,7 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
   req = NULL;
   for (i = 1; i < argc; i++) {
     n = strlen(argv[i]);
-    if (argv[i][0] == '-' && n > 1) {
+    if (argv[i][0] == '-' && argv[i][1] == '-' && n > 1) {
       if ((option = find_option(&(argv[i][1]))) != NULL) {
         error = assign_value_from_option(option, &i);
         if (error != NO_ERROR) {
@@ -318,7 +318,7 @@ int assign_value_from_option(const argument * option,  int *index) {
 
   if (*index < argument_count -1) {
      more_args = 1;
-     if (arguments[(*index) + 1][0] == '-') {
+     if (arguments[(*index) + 1][1] == '-') {
        next_arg_is_not_option = 0;
      }
   }
