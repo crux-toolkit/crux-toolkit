@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.9 $
+ * REVISION: $Revision: 1.10 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -86,7 +86,7 @@ struct ion_filtered_iterator {
 };
 
 /**
- * \Returns An (empty) ion_series object.
+ * \returns An (empty) ion_series object.
  */
 ION_SERIES_T* allocate_ion_series(void){
   int ion_type_idx = 0;
