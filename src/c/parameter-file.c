@@ -1,7 +1,7 @@
 /******************************************************************************
  * FILE: parameter-file.c
- * AUTHOR: ??
- * CREATE DATE: ??
+ * AUTHOR: Tobias Mann and Chris Park
+ * CREATE DATE: 2006 Oct 09
  * DESCRIPTION: General parameter handling utilities.
  *****************************************************************************/
 #include "utils.h"
