@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.2 $
+ * REVISION: $Revision: 1.3 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -19,15 +19,11 @@
 
 /**
  * \struct scorer
- * \brief An object to score a series of ions, and organize them!
- * For which additional data structures will be created as needed 
+ * \brief An object to score spectrum v. spectrum or spectrum v. ion_series
  */
 struct scorer {
   SCORER_TYPE_T type; ///< The type of scorer
 };
-
-
-
 
 /*
  * Local Variables:

@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -260,21 +260,33 @@ typedef struct protein_index PROTEIN_INDEX_T;
 typedef struct protein_index_iterator PROTEIN_INDEX_ITERATOR_T;
 
 /**
- *\struct ion_iterator
- *\brief An object to iterate over all ion objects in the ion_series
+ * \typedef ION_ITERATOR_T
+ * \brief An object to iterate over all ion objects in the ion_series
  */
 typedef struct ion_iterator ION_ITERATOR_T;
 
 /**
- *\struct ion_filtered_iterator
- *\brief An object to iterate over ion objects that meet constraint in the ion_series
+ * \typedef ION_FILTERED_ITERATOR_T
+ * \brief An object to iterate over ion objects that meet constraint in the ion_series
  */
 typedef struct ion_filtered_iterator ION_FILTERED_ITERATOR_T;
 
 /**
- *\struct scorer
- *\brief An object to score a spectrum v. ion_series or spectrum v. spectrum
+ * \typedef SCORER_T
+ * \brief An object to score a spectrum v. ion_series or spectrum v. spectrum
  */
 typedef struct scorer SCORER_T;
+
+/**
+ * The enum for scorer type (SP, XCORR, DOTP)
+ */
+enum _scorer_type { SP, XCORR, DOTP };
+
+/**
+ * \typedef SCORER_TYPE_T
+ * \brief The typedef for scorer type (SP, XCORR, DOTP)
+ */
+typedef enum _scorer_type SCORER_TYPE_T;
+
 
 #endif
