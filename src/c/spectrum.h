@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -320,6 +320,18 @@ BOOLEAN_T add_peak_to_spectrum(
   float intensity, ///< the intensity of peak to add -in
   float location_mz ///< the location of peak to add -in
   );
+
+/**
+ * \returns The sum of intensities within 'resolution' of 'mz' in 'spectrum'
+ * NOTE: Chris, this should lazily create the data structures within the
+ * spectrum object that it needs.
+ */
+float get_nearby_intensity_sum(
+  SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
+  float mz,             ///< the mz of the peak around which to sum intensities
+  float resolution      ///< how close are the intensities we will sum?
+  );
+
 
 /******************************************************************************/
 
