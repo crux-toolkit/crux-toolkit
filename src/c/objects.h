@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -272,6 +272,13 @@ typedef struct ion_iterator ION_ITERATOR_T;
 typedef struct ion_filtered_iterator ION_FILTERED_ITERATOR_T;
 
 /**
+ *\struct loss_limit
+ *\brief An object that specifies the max amount of neutral loss possible at a given cleavage index
+ * all numbers are for forward ions(A,B,C) subtract from total to get reverse limit
+ */
+typedef struct loss_limit LOSS_LIMIT_T;
+
+/**
  * \typedef SCORER_T
  * \brief An object to score a spectrum v. ion_series or spectrum v. spectrum
  */
@@ -287,6 +294,5 @@ enum _scorer_type { SP, XCORR, DOTP };
  * \brief The typedef for scorer type (SP, XCORR, DOTP)
  */
 typedef enum _scorer_type SCORER_TYPE_T;
-
 
 #endif

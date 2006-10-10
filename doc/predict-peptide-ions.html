@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: predict-peptide-ions
-REVISION: $Revision: 1.3 $
+REVISION: $Revision: 1.4 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -78,7 +78,7 @@ later ('a', 'c', etc.)? (Default=by)
 
 <LI>[--precursor-ion T|F] &ndash; Predict the 
 precursor ions, and all associated ions (neutral-losses, multiple charge
-states) consistent with the other specified options. 
+states) consistent with the other specified options.(Default=F) 
 
 <LI>[--neutral-losses none|h2o|nh3|all] &ndash; Predict the
 the specified neutral loss peaks ('none' indicates no
@@ -96,6 +96,12 @@ fixed maximum charge-state. The 'peptide' option
 indicates that the ions should range
 up to the maximum charge-state of the peptide itself (thus, a +2 charge
 state peptide would have ions of +1 and +2). (Default=peptide)
+
+<LI>[--nh3 int] &ndash; Predict peaks with the following max nh3 modification.  (Default=1)
+<LI>[--h2o int] &ndash; Predict peaks with the following max h2o modification.  (Default=1)
+
+
+
 </UL>
 <B>Warning
 messages:</B> 
