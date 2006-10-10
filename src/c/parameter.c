@@ -1,6 +1,6 @@
 /******************************************************************************
  * FILE: parameter-file.c
- * AUTHOR: Tobias Mann and Chris Park
+ * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * CREATE DATE: 2006 Oct 09
  * DESCRIPTION: General parameter handling utilities.
  *****************************************************************************/
@@ -12,19 +12,31 @@
 #include <math.h>
 #include <limits.h>
 
-// The parameters are stored as a global variable.
+/**
+ *\struct parameter
+ *\brief the structure that handles the one parameter value
+ * The parameters are stored as a global variable.
+ */
 struct parameter{
-  BOOLEAN_T used;
-  char parameter_name[PARAMETER_LENGTH];
-  char parameter_value[PARAMETER_LENGTH];
+  BOOLEAN_T used;  ///< has this parameter been used, in other words has the user extracted the information
+  char parameter_name[PARAMETER_LENGTH];  ///< the name of the parameter
+  char parameter_value[PARAMETER_LENGTH]; ///< the actual parameter value corresponding to the name
 };
 
+/**
+ *\struct stores all the different parameters
+ *\brief the array that hold all the parameters
+ */
 struct parameter_array{
-  int num_parameters;
-  struct parameter parameters[NUM_PARAMS];
+  int num_parameters;   ///< number of the total number of parameters
+  struct parameter parameters[NUM_PARAMS]; ///< the paraters
 };
 
-struct parameter_array parameters;
+/**
+ *\struct many parameters, parameter array
+ *\brief short hand notation for parameter_array
+ */
+struct parameter_array parameters; ///< short hand notation for parameter_array
 
 /********************************************************************
  *
@@ -32,12 +44,20 @@ struct parameter_array parameters;
  * separated by an equals sign.
  *
  *******************************************************************/
-void parse_parameter_file(char* parameter_filename){
+
+/**
+ *
+ * parse the parameter file given the filename
+ */
+void parse_parameter_file(
+  char* parameter_filename ///< the parameter file to be parsed -in
+  )
+{
   FILE *f;
   char *line;
   int idx;
 
-  line = (char*) calloc(MAX_LINE_LENGTH, sizeof(char));
+  line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));
   parameters.num_parameters = 0;
 
   f = fopen(parameter_filename, "r");
@@ -91,17 +111,18 @@ void parse_parameter_file(char* parameter_filename){
   myfree(line);
 }
 
-/*******************************************************************
+/**
  * 
  * Each of the following functions searches through the list of
  * parameters, looking for one whose name matches the string.  The
  * function returns the corresponding value, or the default value if
  * the parameter is not found.
- *
- *******************************************************************/
-BOOLEAN_T get_boolean_parameter
-(char*     name, 
- BOOLEAN_T default_value)
+ * \returns TRUE if paramater value or default is TRUE, else FALSE
+ */ 
+BOOLEAN_T get_boolean_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ BOOLEAN_T default_value  ///< the dafault value to use if not found -in
+ )
 {
   int idx;
   static char buffer[PARAMETER_LENGTH];
@@ -130,19 +151,17 @@ BOOLEAN_T get_boolean_parameter
   return(default_value);
 }
 
-/*******************************************************************
- * 
+/**
  * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string.  This function returns 1 if the
- * parameter is in the parameter_array, and 0 otherwise.  This
- * function exits if there is a conversion error. If all goes well,
- * then the value of the parameter is written to the passed pointer i.
- * If there is an error, then the value of *i is not changed.
- *
- *******************************************************************/
-int get_int_parameter
-(char* name, 
- int default_value)
+ * parameter_name matches the string.  This function returns the parameter value if the
+ * parameter is in the parameter_array, and the dafault otherwise.  This
+ * function exits if there is a conversion error. 
+ *\returns the int value of the parameter or default value
+ */
+int get_int_parameter(
+  char* name,  ///< the name of the parameter looking for -in
+  int default_value  ///< the dafault value to use if not found -in
+  )
 {
   int idx;
   char *endptr;
@@ -170,14 +189,17 @@ int get_int_parameter
   return(default_value);
 }
 
-/*******************************************************************
- * 
- * Same as above, but for a double.
- *
- *******************************************************************/
-double get_double_parameter
-(char* name,
- double default_value)
+/**
+ * Searches through the list of parameters, looking for one whose
+ * parameter_name matches the string.  This function returns the parameter value if the
+ * parameter is in the parameter_array, and the dafault otherwise.  This
+ * function exits if there is a conversion error. 
+ *\returns the double value of the parameter of the default value
+ */
+double get_double_parameter(
+  char* name,   ///< the name of the parameter looking for -in
+  double default_value   ///< the dafault value to use if not found -in
+  )
 {
   int idx;
   char *endptr;
@@ -203,15 +225,16 @@ double get_double_parameter
   return(default_value);
 }
 
-/*******************************************************************
- * 
- * Similar to above, but for a string.  The return value is allocated
- * here and must be freed by the caller.  If the value is not found,
- * return NULL.
- *
- *******************************************************************/
-char* get_string_parameter
-(char* name)
+/**
+ * Searches through the list of parameters, looking for one whose
+ * parameter_name matches the string. 
+ * The return value is allocated here and must be freed by the caller.
+ * If the value is not found, return NULL.
+ * \returns the string value to which matches the parameter name, else returns NULL
+ */
+char* get_string_parameter(
+  char* name  ///< the name of the parameter looking for -in
+  )
 {
   int idx;
   char* return_value = NULL;
@@ -237,17 +260,16 @@ char* get_string_parameter
   return(NULL);
 }
 
-/**********************************************************************
- *
+/**
  * Prints the parameters.  If lead_string is not null, preprends it to
  * each line.
- *
- *********************************************************************/
-void print_parameters
-(char* first_line,
- char* parameter_filename,
- char* lead_string,
- FILE* outstream)
+ */
+void print_parameters(
+  char* first_line,  ///< the first line to be printed before the parameter list -in
+  char* parameter_filename,  ///< the parameter file name -in
+  char* lead_string,  ///< the lead string to be printed before each line -in
+  FILE* outstream  ///< the output stream -out
+  )
 {
   int idx;
 
@@ -276,12 +298,10 @@ void print_parameters
   }
 }
 
-/**********************************************************************
- *
+/**
  * Check to see if any parameters were not used.  Issue a warning.
- *
- *********************************************************************/
-void check_unused_parameters ()
+ */
+void check_unused_parameters(void)
 {
   int idx;
 
