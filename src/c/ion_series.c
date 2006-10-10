@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.10 $
+ * REVISION: $Revision: 1.11 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -25,6 +25,7 @@
  * \struct ion_series
  * \brief An object to represent a series of ions, and organize them!
  * For which additional data structures will be created as needed 
+ * loss_limit can be equal to NULL, thus if need to use should always sheck that it is not NULL.
  */
 struct ion_series {
   char* peptide; ///< The peptide for this ion series
@@ -33,19 +34,22 @@ struct ion_series {
   ION_T* ions[MAX_IONS]; ///< The ions in this series
   int num_ions; ///< the number of ions in this series
   BOOLEAN_T is_predicted; ///< has this ion_series been predicted ions already?
-  int first_STED_idx; ///< the cleavage idx where the first instance of amino acid(S|T|E|D) occur
-  int last_STED_idx; ///< the cleavage idx where the last instance of amino acid(S|T|E|D) occur
-  int first_RKQN_idx; ///< the cleavage idx where the first instance of amino acid(R|K|Q|N) occur
-  int last_RKQN_idx; ///< the cleavage idx where the last instance of amino acid(R|K|Q|N) occur
   int num_specific_ions[MAX_NUM_ION_TYPE]; ///< the number of ions of a specific ion_type
   ION_T* specific_ions[MAX_NUM_ION_TYPE][MAX_IONS]; ///< specific ions in the series, reference to master array of ions
+  LOSS_LIMIT_T* loss_limit; ///< nh3, h2o loss limit for a given cleavage index, before using this array should always sheck if not NULL
+  int peptide_length;   ///< the length of the peptide
+ 
+};
 
-  /*
-  ION_T* b_ions[MAX_IONS]; ///< The b ions in this series, selected reference to master array of ions
-  int num_b_ions;  ///< the total number of b ions
-  ION_T* y_ions[MAX_IONS]; ///< The y ions in this series, selected reference to master array of ions
-  int num_y_ions;  ///< the total number of y ions
-  */
+/**
+ *\struct loss_limit
+ *\brief An object that specifies the max amount of neutral loss possible at a given cleavage index
+ * all numbers are for forward ions(A,B,C) subtract from total to get reverse limit
+ */
+struct loss_limit{
+  int nh3;
+  int h2o;
+  //add more if needed for other neutral loss
 };
 
 /**
@@ -117,24 +121,12 @@ ION_SERIES_T* new_ion_series(
   ion_series->peptide = my_copy_string(peptide);
   ion_series->charge = charge;
   ion_series->constraint = constraint;
+  ion_series->peptide_length = strlen(peptide);
+  
+  //create the loss limit array
+  ion_series->loss_limit = (LOSS_LIMIT_T*)mycalloc(ion_series->peptide_length, sizeof(LOSS_LIMIT_T));
 
-  //set the type of ions the ion series contain
-  /*
-  if(constraint->ion_type == ALL_ION){
-    ion_series->forward_type_ions = TRUE;
-    ion_series->reverse_type_ions = TRUE;
-  }
-  else if(constraint->ion_type == B_ION || 
-          constraint->ion_type == A_ION || constraint->ion_type == C_ION){
-    ion_series->forward_type_ions = TRUE;
-    ion_series->reverse_type_ions = FALSE;
-  }
-  else{ //X,Y,Z ions
-    ion_series->forward_type_ions = FALSE;
-    ion_series->reverse_type_ions = TRUE;
-  }
-  */
-  return ion_series;  
+  return ion_series;
 }
 
 /**
@@ -145,13 +137,14 @@ void free_ion_series(
   )
 {
   free(ion_series->peptide);
-  
+  free(ion_series->loss_limit);
+
   //iterate over all ions, and free them
   while(ion_series->num_ions > 0){
     free_ion(ion_series->ions[ion_series->num_ions-1]);
     --ion_series->num_ions;
   }
-  
+   
   free(ion_series);
 }
 
@@ -181,80 +174,48 @@ void print_ion_series(
 }
 
 /**
- * scan for the first and last instances of amino acid (S|T|E|D), (R|K|Q|N)
- * set the cleavage indecies of the instances in ion_series
- * if no instance of amino acid, the index is assigned to 0
- * the information is used to determine if nh3 or h2o neutral loss is possible.
+ * scan for instances of amino acid (S|T|E|D), (R|K|Q|N)
+ * set the count of those aa that has been observed so far for each cleavage index
+ * if no instance of amino acid, the count is assigned to 0
+ * the information is used to determine if howm any nh3 or h2o neutral losses are possible.
  */
 void scan_for_aa_for_neutral_loss(
-  ION_SERIES_T* ion_series, ///< ion_series to print -in/out
-  int peptide_length ///< peptide length of the parent peptide in the ion series -in
+  ION_SERIES_T* ion_series ///< ion_series to print -in/out
   )
 {
+  int peptide_length = ion_series->peptide_length;
   char* sequence = ion_series->peptide;
   int cleavage_idx = 0;
-  BOOLEAN_T found_sted = FALSE;
-  BOOLEAN_T found_rkqn = FALSE;
+  int h2o_aa = 0;
+  int nh3_aa = 0;
+  LOSS_LIMIT_T* loss_limit_count = NULL; //debug
 
   //search for the first instance of the amino acids
   for(; cleavage_idx < peptide_length; ++cleavage_idx){
     //is the AA  (S|T|E|D) ?
-    if(!found_sted &&
-       (sequence[cleavage_idx] == 'S' ||
-        sequence[cleavage_idx] == 'T' ||
-        sequence[cleavage_idx] == 'E' ||
-        sequence[cleavage_idx] == 'D' )
-       )
-      {
-        ion_series->first_STED_idx = cleavage_idx + 1;
-        found_sted = TRUE;
-      }
-    //is the AA  (R|K|Q|N) ?
-    if(!found_rkqn &&
-       (sequence[cleavage_idx] == 'R' ||
-        sequence[cleavage_idx] == 'K' ||
-        sequence[cleavage_idx] == 'Q' ||
-        sequence[cleavage_idx] == 'N' )
-       )
-      {
-        ion_series->first_RKQN_idx = cleavage_idx + 1;
-        found_rkqn = TRUE;
-      }
-
-    //found first indcies of both cases
-    if(found_rkqn && found_sted){
-      break;
-    }
-  }
-
-  //search for the last instance of the amino acids
-  for(cleavage_idx = peptide_length-1; cleavage_idx >= 0; --cleavage_idx){
-    //is the AA  (S|T|E|D) ?
-    if(found_sted && 
-       (sequence[cleavage_idx] == 'S' ||
+    if(sequence[cleavage_idx] == 'S' ||
        sequence[cleavage_idx] == 'T' ||
        sequence[cleavage_idx] == 'E' ||
-        sequence[cleavage_idx] == 'D' )
-       )
+       sequence[cleavage_idx] == 'D' )
       {
-        ion_series->last_STED_idx = peptide_length - cleavage_idx;
-        found_sted = FALSE;
+        loss_limit_count = &ion_series->loss_limit[cleavage_idx];
+        loss_limit_count->h2o = ++h2o_aa;
+        loss_limit_count->nh3 = nh3_aa;
       }
     //is the AA  (R|K|Q|N) ?
-    if(found_rkqn &&
-       (sequence[cleavage_idx] == 'R' ||
-        sequence[cleavage_idx] == 'K' ||
-        sequence[cleavage_idx] == 'Q' ||
-        sequence[cleavage_idx] == 'N' )
-       )
+    else if(sequence[cleavage_idx] == 'R' ||
+            sequence[cleavage_idx] == 'K' ||
+            sequence[cleavage_idx] == 'Q' ||
+            sequence[cleavage_idx] == 'N' )
       {
-        ion_series->last_RKQN_idx = peptide_length - cleavage_idx;
-        found_rkqn = FALSE;
+        loss_limit_count = &ion_series->loss_limit[cleavage_idx];
+        loss_limit_count->nh3 = ++nh3_aa;
+        loss_limit_count->h2o = h2o_aa;
       }
-
-    //found last indecies of both cases or the peptide don't have the AAs present
-    if(!found_rkqn && !found_sted){
-      break;
+    else{
+      loss_limit_count = &ion_series->loss_limit[cleavage_idx];
+      loss_limit_count->h2o = h2o_aa;
+      loss_limit_count->nh3 = nh3_aa;
     }
   }
 }
@@ -266,10 +227,10 @@ void scan_for_aa_for_neutral_loss(
  */
 float* create_ion_mass_matrix(
   char* peptide, ///< The peptide for this ion series. -in
-  MASS_TYPE_T mass_type ///< the mass_type to use MONO|AVERAGE
+  MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
+  int peptide_length ///< the length of the peptide
   )
 {
-  int peptide_length = strlen(peptide);
   float* mass_matrix = (float*)mymalloc(sizeof(float)*(peptide_length+1));
   
   //at index 0, the length of the peptide is stored
@@ -501,6 +462,8 @@ BOOLEAN_T generate_ions_no_modification(
 
 /**
  * The modification depends on the loss/add && if the ion contains RKQN or STED
+ * The number of losses possible cannot exceed the number of RKQN or STED in the ion
+ * The loss_limit array in the ion_series must be populated prior to this method call
  *\returns TRUE if the ion can lose the mod_type modification, else FALSE
  */
 BOOLEAN_T can_ion_lose_modification(
@@ -521,44 +484,59 @@ BOOLEAN_T can_ion_lose_modification(
     
     //is forward ion_type(ABC)?
     if(is_forward_ion_type(ion)){
-      //does this ion contain the RKQN
-      if(ion_series->first_RKQN_idx > 0 && cleavage_idx >= ion_series->first_RKQN_idx){
-        return TRUE;
+      //does this ion contain enough counts of the RKQN
+      if(-increment >  (&ion_series->loss_limit[cleavage_idx-1])->nh3){
+        return FALSE;
       }
-      return FALSE;
+      return TRUE;
     }
-    else{// XYZ
-      //does this ion contain the RKQN
-      if(ion_series->last_RKQN_idx > 0 && cleavage_idx >= ion_series->last_RKQN_idx){
-        return TRUE;
+    else{// backward ions XYZ
+      //does this ion contain enough counts of the RKQN
+      if(cleavage_idx == ion_series->peptide_length){
+        if(-increment > (&ion_series->loss_limit[ion_series->peptide_length-1])->nh3){
+          return FALSE;
+        }
       }
-      return FALSE;
+      else if(-increment >  
+              ((&ion_series->loss_limit[ion_series->peptide_length-1])->nh3 - 
+               (&ion_series->loss_limit[ion_series->peptide_length - cleavage_idx - 1])->nh3)){
+        return FALSE;
+      }
+      return TRUE;
     }
   }
-  
+
   //check for H2O modification
-  else if(mod_type == H2O){
+  if(mod_type == H2O){
     // adding is ok
     if(increment >= 0){
       return TRUE;
     }
-
+    
     //is forward ion_type(ABC)?
     if(is_forward_ion_type(ion)){
-      //does this ion contain the STED
-      if(ion_series->first_STED_idx > 0 && cleavage_idx >= ion_series->first_STED_idx){
-        return TRUE;
+      //does this ion contain enough counts of the STED
+      if(-increment >  (&ion_series->loss_limit[cleavage_idx-1])->h2o){
+        return FALSE;
       }
-      return FALSE;
+      return TRUE;
     }
-    else{// XYZ
-      //does this ion contain the STED
-      if(ion_series->last_STED_idx > 0 && cleavage_idx >= ion_series->last_STED_idx){
-        return TRUE;
+    else{// backward ions XYZ
+      //does this ion contain enough counts of the STED
+      if(cleavage_idx == ion_series->peptide_length){
+        if(-increment > (&ion_series->loss_limit[ion_series->peptide_length-1])->h2o){
+          return FALSE;
+        }
       }
-      return FALSE;
+      else if(-increment >  
+              ((&ion_series->loss_limit[ion_series->peptide_length-1])->h2o - 
+               (&ion_series->loss_limit[ion_series->peptide_length - cleavage_idx - 1])->h2o)){
+        return FALSE;
+      }
+      return TRUE;
     }
   }
+  
   //check for ISOTOPE modification
   else if(mod_type == ISOTOPE){
     // adding is ok
@@ -623,7 +601,7 @@ BOOLEAN_T generate_ions(
     }
      
     // add/sub thorugh all mod_type modifications!!!
-    for(type_idx = type_increment; abs(type_idx) <= abs(modifications[mod_type]); type_idx += type_increment){
+    for(type_idx = type_increment; abs(type_idx) <= abs(modifications[mod_type]); ){
       //copy the src ion, into new ion
       new_ion = allocate_ion();
       copy_ion(working_ion, new_ion, get_ion_peptide_sequence(working_ion));
@@ -633,7 +611,11 @@ BOOLEAN_T generate_ions(
       
       //add ion to ion_series
       add_ion_to_ion_series(ion_series, new_ion);
-      
+     
+      //can this ion generate a mod_type modification for the next count of modification?, 
+      if(!(can_ion_lose_modification(ion_series, working_ion, mod_type, (type_idx += type_increment)))){      
+        break;
+      }
     }
   }
   return TRUE;
@@ -719,11 +701,12 @@ void predict_ions(
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
   
   //create a mass matrix
-  float* mass_matrix = create_ion_mass_matrix(ion_series->peptide, constraint->mass_type);  
+  float* mass_matrix = 
+    create_ion_mass_matrix(ion_series->peptide, constraint->mass_type, ion_series->peptide_length);  
   
   //scan for the first and last  (S, T, E, D)  (R, K, Q, N), initialize to determine modification is ok
   //the first, last of STED, RKQN are stored in ion_series
-  scan_for_aa_for_neutral_loss(ion_series, mass_matrix[0]);
+  scan_for_aa_for_neutral_loss(ion_series);
   
   //generate ions without any modifications
   if(!generate_ions_no_modification(ion_series, mass_matrix)){
@@ -786,6 +769,7 @@ void predict_ions(
 /**
  * Copies ion_series object from src to dest.
  *  must pass in a memory allocated ION_SERIES_T* dest
+ * does not copy the loss_limit.
  */
 void copy_ion_series(
   ION_SERIES_T* src,///< ion to copy from -in
@@ -797,6 +781,7 @@ void copy_ion_series(
   
   dest->peptide = my_copy_string(src->peptide);
   dest->charge = src->charge;
+  dest->peptide_length = src->peptide_length;
 
   //add copy of pointer ion constraint
   dest->constraint = src->constraint;

@@ -75,11 +75,11 @@ START_TEST (test_create){
 
   //now predict ions
   predict_ions(ion_series);
-  
+
   //check the number of ions predicted
-  fail_unless(get_ion_series_num_ions(ion_series) == 834, "the total number of ions not predicted correctly");
-  fail_unless(get_ion_series_num_ions_one_type(ion_series, B_ION) == 444, "the B ion number of ions not predicted correctly");
-  fail_unless(get_ion_series_num_ions_one_type(ion_series, Y_ION) == 372, "the Y ion number of ions not predicted correctly");
+  fail_unless(get_ion_series_num_ions(ion_series) == 678, "the total number of ions not predicted correctly");
+  fail_unless(get_ion_series_num_ions_one_type(ion_series, B_ION) == 330, "the B ion number of ions not predicted correctly");
+  fail_unless(get_ion_series_num_ions_one_type(ion_series, Y_ION) == 330, "the Y ion number of ions not predicted correctly");
   fail_unless(get_ion_series_num_ions_one_type(ion_series, A_ION) == 0, "the A ion number of ions not predicted correctly");
   fail_unless(get_ion_series_num_ions_one_type(ion_series, C_ION) == 0, "the C ion number of ions not predicted correctly");
   fail_unless(get_ion_series_num_ions_one_type(ion_series, X_ION) == 0, "the X ion number of ions not predicted correctly");
