@@ -4,13 +4,19 @@
  * CREATE DATE: 2006 Oct 09
  * DESCRIPTION: General parameter handling utilities.
  *****************************************************************************/
-#include "utils.h"
-#include "parameter-file.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include "objects.h"
+#include "spectrum.h"
+#include "peak.h"
+#include "carp.h"
+#include "mass.h"
+#include "scorer.h"
+#include "utils.h"
+#include "parameter.h"
 
 /**
  *\struct parameter
@@ -32,11 +38,14 @@ struct parameter_array{
   struct parameter parameters[NUM_PARAMS]; ///< the paraters
 };
 
+
 /**
- *\struct many parameters, parameter array
- *\brief short hand notation for parameter_array
+ * Global variable
  */
-struct parameter_array parameters; ///< short hand notation for parameter_array
+
+// declare a parameter array to be used
+struct parameter_array parameters;
+BOOLEAN_T parameter_parsed = FALSE; //have I parsed the parameter file?
 
 /********************************************************************
  *
@@ -109,6 +118,9 @@ void parse_parameter_file(
 
   fclose(f);
   myfree(line);
+
+  //now we have parsed the parameter file
+  parameter_parsed = TRUE;
 }
 
 /**
@@ -126,6 +138,12 @@ BOOLEAN_T get_boolean_parameter(
 {
   int idx;
   static char buffer[PARAMETER_LENGTH];
+
+  //check if parameter file has been parsed
+  if(!parameter_parsed){
+    carp(CARP_WARNING, "parameter file has not been parsed yet, using default value");
+    return(default_value);
+  }
 
   for(idx = 0; idx < parameters.num_parameters; idx++){
     if(!strcmp(parameters.parameters[idx].parameter_name, name)){
@@ -167,6 +185,12 @@ int get_int_parameter(
   char *endptr;
   long int value;
 
+  //check if parameter file has been parsed
+  if(!parameter_parsed){
+    carp(CARP_WARNING, "parameter file has not been parsed yet, using default value");
+    return(default_value);
+  }
+
   for(idx = 0; idx < parameters.num_parameters; idx++){
     if(!strcmp(parameters.parameters[idx].parameter_name, name)){
 
@@ -205,6 +229,12 @@ double get_double_parameter(
   char *endptr;
   double value;
 
+  //check if parameter file has been parsed
+  if(!parameter_parsed){
+    carp(CARP_WARNING, "parameter file has not been parsed yet, using default value");
+    return(default_value);
+  }
+  
   for(idx = 0; idx < parameters.num_parameters; idx++){
     if(!strcmp(parameters.parameters[idx].parameter_name, name)){
       /* there is a parameter with the right name.  Now 
@@ -238,6 +268,12 @@ char* get_string_parameter(
 {
   int idx;
   char* return_value = NULL;
+
+  //check if parameter file has been parsed
+  if(!parameter_parsed){
+    carp(CARP_WARNING, "parameter file has not been parsed yet, returning NULL");
+    return(NULL);
+  }
 
   return_value = (char*)mymalloc(sizeof(char) * PARAMETER_LENGTH);
 
