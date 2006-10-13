@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.11 $
+ * REVISION: $Revision: 1.12 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -87,6 +87,8 @@ struct ion_filtered_iterator {
   BOOLEAN_T has_next; ///< the boolean which the iterator has a next ion
   int ion_idx; ///< the current ion that is being returned 
   ION_T* ion; ///< the next ion to return when called upon
+  ION_T** ion_array; ///< the specfic ion array we are iterating over, could be B ion, Y ion or all..
+  int array_size; ///< size of the ion_array
 };
 
 /**
@@ -966,6 +968,26 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest(
 }
 
 /**
+ * modification, sets all fields for sequest Sp scoring settings
+ *\returns a new heap allocated ion_constraint
+ */
+ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(void)
+{
+  ION_CONSTRAINT_T* constraint = new_ion_constraint(MONO, 1,ALL_ION, FALSE);
+
+  //set                                                     
+  constraint->use_neutral_losses = TRUE;
+  
+  //set all modifications count for sequest
+  constraint->modifications[NH3] = 0;
+  constraint->modifications[H2O] = 0;
+  constraint->modifications[ISOTOPE] = 0;
+  constraint->modifications[FLANK] = 0;
+  
+  return constraint;
+}
+
+/**
  * Frees an allocated ion_constraint object.
  */
 void free_ion_constraint(
@@ -1151,9 +1173,9 @@ BOOLEAN_T setup_ion_filtered_iterator(
   ION_T* ion = NULL;
 
   //iterate over ions until discovers the first ion that meets the ion constraint
-  while(ion_iterator->ion_idx < ion_iterator->ion_series->num_ions){
+  while(ion_iterator->ion_idx < ion_iterator->array_size){
     //get next ion
-    ion = ion_iterator->ion_series->ions[ion_iterator->ion_idx];
+    ion = ion_iterator->ion_array[ion_iterator->ion_idx];
     
     //check if the current ion satisfies the ion_constraint for the iterator
     if(ion_constraint_is_satisfied(ion_iterator->constraint, ion)){
@@ -1188,6 +1210,16 @@ ION_FILTERED_ITERATOR_T* new_ion_filtered_iterator(
   iterator->ion_series = ion_series;
   iterator->has_next = FALSE;
 
+  //set the working array of ions
+  if(constraint->ion_type == ALL_ION){
+    iterator->ion_array = ion_series->ions;
+    iterator->array_size = ion_series->num_ions;
+  }
+  else{
+    iterator->ion_array = ion_series->specific_ions[constraint->ion_type];
+    iterator->array_size = ion_series->num_specific_ions[constraint->ion_type];
+  }
+  
   //initialize iterator
   setup_ion_filtered_iterator(iterator);
 

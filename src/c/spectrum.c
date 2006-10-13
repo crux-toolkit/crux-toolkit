@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.29 $
+ * REVISION: $Revision: 1.30 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -16,13 +16,14 @@
 #include "peak.h"
 #include "utils.h"
 #include "mass.h"
+#include "parameter.h"
+#include "scorer.h"
 
 /**
  * \define constants
  */
 #define MAX_PEAKS 4000
 #define MAX_CHARGE 2
-
 
 /**
  * \struct spectrum 
@@ -58,6 +59,11 @@ struct spectrum {
   int               num_peaks;     ///< The number of peaks
   double            total_energy;  ///< The sum of intensities in all peaks
   char*             filename;      ///< Optional filename
+
+  //spectrum scoring fields
+  BOOLEAN_T         sum_array_exist; ///< does the sum array exist?
+  float*            intensity_sum_array; ///< intesity sum array used for 
+  float             sp_sum_resolution;  ///< the resolution of the intesity sum, the closure of which the array was created  
 };    
 
 /**
@@ -104,6 +110,7 @@ SPECTRUM_T* allocate_spectrum(void){
   SPECTRUM_T* fresh_spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
   fresh_spectrum->possible_z = (int*)mymalloc(sizeof(int) * MAX_CHARGE);
   fresh_spectrum->peaks = allocate_peak_array(MAX_PEAKS);
+  fresh_spectrum->sum_array_exist = FALSE;
   return fresh_spectrum;
 }
 
@@ -910,6 +917,157 @@ PEAK_T* peak_iterator_next(
   PEAK_T* next_peak = find_peak(peak_iterator->spectrum->peaks, peak_iterator->peak_index);
   ++peak_iterator->peak_index;
   return next_peak;
+}
+
+
+
+/******************************************************************
+ * The scoring relating methods
+ ******************************************************************/
+
+/**
+ *\returns the index of which the intensity sum array corresponds to the theoretical mz
+ */
+int hash_sum_array(
+  SCORER_T* scorer,        ///< the scorer object -in  
+  SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
+  float peak_mz ///< the theoretical peaks mz -in
+  )
+{
+  //set sum array bounderies, and other needed variables
+  float min_mz = get_scorer_sp_min_mz(scorer);
+  float max_mz = get_scorer_sp_max_mz(scorer);
+  float sp_array_resolution = get_scorer_sp_array_resolution(scorer);
+  
+  //check if mz within mz handle limit
+  if(peak_mz < min_mz || peak_mz > max_mz){
+    carp(CARP_ERROR, "peaks mz not supported, bellow minimum mz");
+    exit(1); //FIXME maybe should not die..
+  }
+  
+  //get base index fraction
+  float index_fraction = (peak_mz - min_mz)/sp_array_resolution;
+  
+  //get the base index
+  int hash_index = (int)index_fraction;
+  
+  //if the intensity is closer to the next index, return next index
+  if(index_fraction - hash_index > sp_array_resolution){
+    ++hash_index;
+  }
+  
+  return hash_index;
+}
+
+/**
+ * adds the intensity to the summ array
+ * adds to all the bins that the interval of mz fits the intensity
+ */
+void add_intensity_to_sum_array(
+  SCORER_T* scorer,        ///< the scorer object -in
+  SPECTRUM_T* spectrum, ///< the spectrum to add the intensity -in
+  int array_size, ///< the size of the array -in
+  float intensity, ///< the intensity to add -in
+  float mz ///< the peaks mz whose intensity to add -in
+  )
+{
+  float* sum_array = spectrum->intensity_sum_array; ///< the sum array to add 
+  float sp_sum_resolution = spectrum->sp_sum_resolution; ///< the resolution of the intensity sum 
+  float sp_array_resolution = get_scorer_sp_array_resolution(scorer);
+
+  //get the base index
+  int hash_index = hash_sum_array(scorer, spectrum, mz);
+  int sum_index = hash_index;
+
+  sum_array[sum_index] += intensity;
+
+  //add to bins after hashed bin
+  while(mz <= (++sum_index)*sp_array_resolution + sp_sum_resolution &&
+        mz >= (sum_index)*sp_array_resolution - sp_sum_resolution){
+      sum_array[sum_index] += intensity;
+  }
+
+  sum_index = hash_index;       //check for index going over 0 or max
+
+  //add to bins before hased bin
+  while(mz <= (--sum_index)*sp_array_resolution + sp_sum_resolution &&
+        mz >= (sum_index)*sp_array_resolution - sp_sum_resolution &&
+        sum_index >= 0){
+    sum_array[sum_index] += intensity;
+  }
+
+}
+
+/**
+ * creates the intensity sum array with in the given resolution 
+ *\returns TRUE if successfully creates the sum array, else FALSE
+ */
+BOOLEAN_T create_intensity_sum_array(
+  SCORER_T* scorer,        ///< the scorer object -in
+  SPECTRUM_T* spectrum ///< the spectrum to query the intensity sum -in
+  //float resolution      ///< how close are the intensities we will sum?
+  )
+{
+  int peak_idx = 0;
+  float intensity = 0;
+  PEAK_T* peak = NULL;
+  
+  //check if sum array already exist
+  if(spectrum->sum_array_exist){
+    carp(CARP_WARNING, "intensity sum array alread existed, recreating intensity sum array");
+    free(spectrum->intensity_sum_array);
+  }
+  
+  //set sum array bounderies, and other needed variables
+  float min_mz = get_scorer_sp_min_mz(scorer);
+  float max_mz = get_scorer_sp_max_mz(scorer);
+  float sp_array_resolution = get_scorer_sp_array_resolution(scorer);
+  
+  //create the sp_array
+  int array_size = (max_mz - min_mz)/sp_array_resolution;
+  spectrum->intensity_sum_array = (float*)mycalloc(array_size, sizeof(float));
+  spectrum->sp_sum_resolution = get_scorer_sp_sum_resolution(scorer);
+
+  //iterate over all peaks and add the intensity to the correct array sum bins
+  for(; peak_idx > spectrum->num_peaks; ++peak_idx){
+    peak = find_peak(spectrum->peaks, peak_idx);
+    intensity = get_peak_intensity(peak);
+    add_intensity_to_sum_array(scorer, spectrum, array_size, intensity, get_peak_location(peak));
+  }
+  
+  return TRUE;
+}
+
+
+/**
+ * \returns The sum of intensities within 'resolution' of 'mz' in 'spectrum'
+ * NOTE: Chris, this should lazily create the data structures within the
+ * spectrum object that it needs.
+ */
+float get_nearby_intensity_sum(
+  SCORER_T* scorer,        ///< the scorer object -in                          
+  SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
+  float mz             ///< the mz of the peak around which to sum intensities
+  //float resolution      ///< how close are the intensities we will sum?
+  )
+{
+  // check if sum array already exist
+  if(!spectrum->sum_array_exist){
+    carp(CARP_INFO, "creating intensity sum array");
+    create_intensity_sum_array(scorer, spectrum);
+  }
+  // check if resolution matches the resolution wanted
+  // if doesn't match, create a new intensity sum_array
+  else if(spectrum->sp_sum_resolution != get_scorer_sp_sum_resolution(scorer)){
+    carp(CARP_INFO, "existing array doesn't support the query resolution: %.2f", get_scorer_sp_sum_resolution(scorer));
+    create_intensity_sum_array(scorer, spectrum);
+  }
+
+  //get hash index into sum_array
+  int hash_index = hash_sum_array(scorer, spectrum, mz);
+
+  //return the sum of the intensities
+  return spectrum->intensity_sum_array[hash_index];
 }
 
 

@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -327,9 +327,9 @@ BOOLEAN_T add_peak_to_spectrum(
  * spectrum object that it needs.
  */
 float get_nearby_intensity_sum(
+  SCORER_T* scorer,        ///< the scorer object -in                           
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
-  float mz,             ///< the mz of the peak around which to sum intensities
-  float resolution      ///< how close are the intensities we will sum?
+  float mz             ///< the mz of the peak around which to sum intensities
   );
 
 
@@ -365,12 +365,13 @@ PEAK_T* peak_iterator_next(
   PEAK_ITERATOR_T* peak_iterator  ///< the interator for the peaks -in
   );
 
-/*
+/**
  * Local Variables:
  * mode: c
  * c-basic-offset: 2
  * End:
  */
+
 #endif
 
 /** \mainpage The crux API documentation page.
