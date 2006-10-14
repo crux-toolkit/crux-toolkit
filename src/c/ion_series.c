@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.12 $
+ * REVISION: $Revision: 1.13 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1105,6 +1105,15 @@ int get_ion_constraint_modification(
   return ion_constraint->modifications[mod_type];
 }
 
+/**
+ * gets the mass type of the ion_constraint
+ */
+MASS_TYPE_T get_ion_constraint_mass_type(
+  ION_CONSTRAINT_T* ion_constraint ///< the ion constraints to enforce -in
+  )
+{
+  return ion_constraint->mass_type;
+}
 
 /**************************
  *  ION_ITERATOR_T object
