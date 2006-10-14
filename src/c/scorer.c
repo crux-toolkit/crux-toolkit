@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.4 $
+ * REVISION: $Revision: 1.5 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -95,10 +95,13 @@ int calculate_ion_type_sp(
 {
   int before_cleavage_idx = -1;
   int cleavage_idx = 0;
+  ION_T* ion = NULL;
+  int one_intensity = 0;
+  int ion_match = 0;
 
   //create ion constraint
   ION_CONSTRAINT_T* ion_constraint = 
-    new_ion_constraint(get_ion_constraint_mass_type(get_ion_series_constraint(ion_series)), 1, ion_type, FALSE);
+    new_ion_constraint(get_ion_constraint_mass_type(get_ion_series_ion_constraint(ion_series)), 1, ion_type, FALSE);
   
   //create the filtered iterator that will select among the ions
   ION_FILTERED_ITERATOR_T* ion_iterator = new_ion_filtered_iterator(ion_series, ion_constraint);
@@ -106,7 +109,7 @@ int calculate_ion_type_sp(
   //while there are ion's in ion iterator, add matched observed peak intensity
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
-    one_intensity = get_nearby_intensity_sum(scorer, specturm, get_ion_mz(ion));
+    one_intensity = get_nearby_intensity_sum(scorer, spectrum, get_ion_mass_z(ion));
     
     //if there is a match in the observed spectrum
     if(one_intensity != 0){
@@ -123,9 +126,10 @@ int calculate_ion_type_sp(
     }
   }
     
-  //free ion iterator
+  //free ion iterator, ion_constraint
+  free_ion_constraint(ion_constraint);
   free_ion_filtered_iterator(ion_iterator);
-  
+
   return ion_match;
 }
 
@@ -143,18 +147,19 @@ float gen_score_sp(
   float intensity_sum = 0;
   int ion_match = 0;
   int repeat_count = 0;
-  
+  int amino_count = 0;
+
   //get gama and beta
   float gamma = scorer->sp_gamma; 
   float beta = scorer->sp_beta;
   
   //calculate the B_ION and Y_ION portions of the Sp score
-  int ion_match = calculate_ion_type_sp(scorer, spectrum, ion_series, &intensity_sum, B_ION, &repeat_count) +
+  ion_match = calculate_ion_type_sp(scorer, spectrum, ion_series, &intensity_sum, B_ION, &repeat_count) +
     calculate_ion_type_sp(scorer, spectrum, ion_series, &intensity_sum, Y_ION, &repeat_count);
   
   //calculate Sp score.
   final_score = 
-    intensity_sum * ion_match * (1+repeat_count * beta) * (1+amino_count * gama) / get_ion_series_num_ions(ion_series);
+    intensity_sum * ion_match * (1+repeat_count * beta) * (1+amino_count * gamma) / get_ion_series_num_ions(ion_series);
   
   //return score
   return final_score;
@@ -172,7 +177,7 @@ float score_spectrum_v_ion_series(
   float final_score = 0;
 
   //if score type equals SP
-  if(scorer->scorer_type == SP){
+  if(scorer->type == SP){
     final_score = gen_score_sp(scorer, spectrum, ion_series);
   }
   //FIXME, later add different score types...

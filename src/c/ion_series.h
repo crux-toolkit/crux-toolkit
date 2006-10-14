@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -209,6 +209,13 @@ void set_ion_constraint_modification(
 int get_ion_constraint_modification(
   ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
   ION_MODIFICATION_T mod_type ///< ion modification type -in
+  );
+
+/**
+ * gets the mass type of the ion_constraint
+ */
+MASS_TYPE_T get_ion_constraint_mass_type(
+  ION_CONSTRAINT_T* ion_constraint///< the ion constraints to enforce -in
   );
 
 /**************************
