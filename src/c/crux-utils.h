@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -93,5 +93,11 @@ char* generate_name(
   char* fasta_filename,
   char* name_tag
   );
+
+/**
+ * checks if each AA is an AA
+ *\returns TRUE if sequence is valid else, FALSE
+ */
+BOOLEAN_T valid_peptide_sequence( char* sequence);
 
 #endif

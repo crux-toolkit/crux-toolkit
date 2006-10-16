@@ -131,6 +131,11 @@ int main(int argc, char** argv){
      wrong_command("peptide charge cannot be bellow 0", NULL);
    }
 
+   //check peptide sequence
+   if(!valid_peptide_sequence(peptide_sequence)){
+     wrong_command(peptide_sequence, "not a valid peptide sequence");
+   }
+
    //primary_ions
    if(strcmp(primary_ions, "b") == 0){
      ion_type = B_ION;

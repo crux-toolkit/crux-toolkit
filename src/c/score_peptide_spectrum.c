@@ -121,7 +121,12 @@ int main(int argc, char** argv){
    else{
      wrong_command(charge, "The peptide charge. 1|2|3");
    }
-   
+
+   //check peptide sequence
+   if(!valid_peptide_sequence(peptide_sequence)){
+     wrong_command(peptide_sequence, "not a valid peptide sequence");
+   }
+
    //score type
    if(strcmp(type, "SP")== 0){
      score_type = SP;

@@ -240,3 +240,19 @@ char* generate_name(
   strcat(name, name_tag);
   return name;
 }
+
+/**
+ * checks if each AA is an AA
+ *\returns TRUE if sequence is valid else, FALSE
+ */
+BOOLEAN_T valid_peptide_sequence( char* sequence){
+  //iterate over all AA and check if with in range
+  while(sequence[0] != '\0'){
+    if(sequence[0] < 65 || sequence[0] > 90 ){
+      return FALSE;
+    }
+    ++sequence;
+  }
+  return TRUE;
+}
+                                
