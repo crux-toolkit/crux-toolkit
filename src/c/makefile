@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.34 $
+# VERSION: $Revision: 1.35 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -58,8 +58,8 @@ LIBOBJS =\
 	${OBJDIR}/create_index.o \
 	${OBJDIR}/predict_peptide_ions.o \
 	${OBJDIR}/scorer.o \
-	${OBJDIR}/parameter.o 
-#	${OBJDIR}/score_peptide_spectrum.o
+	${OBJDIR}/parameter.o \
+	${OBJDIR}/score_peptide_spectrum.o
 
 # These are the names of the programs.
 PROGS = \
@@ -67,8 +67,8 @@ PROGS = \
 	${BINDIR}/generate_peptides \
 	${BINDIR}/create_peptide_index \
 	${BINDIR}/create_index \
-	${BINDIR}/predict_peptide_ions
-#	${BINDIR}/score_peptide_spectrum
+	${BINDIR}/predict_peptide_ions \
+	${BINDIR}/score_peptide_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \
 #	${BINDIR}/precursor
