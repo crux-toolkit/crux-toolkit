@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.5 $
+ * REVISION: $Revision: 1.6 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -158,8 +158,10 @@ float gen_score_sp(
     calculate_ion_type_sp(scorer, spectrum, ion_series, &intensity_sum, Y_ION, &repeat_count);
   
   //calculate Sp score.
-  final_score = 
-    intensity_sum * ion_match * (1+repeat_count * beta) * (1+amino_count * gamma) / get_ion_series_num_ions(ion_series);
+  if(ion_match != 0){
+    final_score = 
+      intensity_sum * ion_match * (1+repeat_count * beta) * (1+amino_count * gamma) / get_ion_series_num_ions(ion_series);
+  }
   
   //return score
   return final_score;
