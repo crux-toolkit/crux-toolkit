@@ -101,6 +101,7 @@ int main(int argc, char** argv){
    ION_SERIES_T* ion_series = NULL;
    SCORER_T* scorer = NULL;
    float score = 0;
+   int  verbosity = CARP_INFO;
 
    //list file parsing
    FILE* file = NULL;
@@ -108,6 +109,9 @@ int main(int argc, char** argv){
    int line_length;
    size_t buf_length = 0;
    
+   //set verbosity
+   set_verbosity_level(verbosity);
+
    //score type
    if(strcmp(type, "SP")== 0){
      score_type = SP;

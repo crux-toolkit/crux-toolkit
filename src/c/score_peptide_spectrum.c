@@ -107,7 +107,11 @@ int main(int argc, char** argv){
    ION_SERIES_T* ion_series = NULL;
    SCORER_T* scorer = NULL;
    float score = 0;
-   
+   int  verbosity = CARP_INFO;
+
+   //set verbosity
+   set_verbosity_level(verbosity);
+
    //peptide charge
    if(strcmp(charge, "1")== 0){
      peptide_charge = 1;
