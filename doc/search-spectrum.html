@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: search-spectrum
-REVISION: $Revision: 1.3 $
+REVISION: $Revision: 1.4 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -65,9 +65,13 @@ high scoring peptides.
 
 </UL>
 <B>Options:</B>
-
-</UL>
-
+<UL>
+<LI>[--charge 1|2|3] &ndash; The peptide charge. Default = '2'.
+<LI>[--prelim-score-type sp] &ndash; The type of scoring function to use.  Default = use parameter file.
+<LI>[--score-type sp] &ndash; The type of scoring function to use.  Default = use parameter file.
+<LI>[--parameter-file filename] &ndash; The crux parameter file to parse
+parameter from. Default = Default to crux project defaults (to be
+determined).
 </UL>
 <B>Warning
 messages:</B> 
