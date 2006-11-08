@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.13 $
+ * REVISION: $Revision: 1.14 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -971,10 +971,20 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest(
  * modification, sets all fields for sequest Sp scoring settings
  *\returns a new heap allocated ion_constraint
  */
-ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(void)
+ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(
+  int charge ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
+  )
 {
-  ION_CONSTRAINT_T* constraint = new_ion_constraint(MONO, 1,ALL_ION, FALSE);
-
+  ION_CONSTRAINT_T* constraint = NULL;
+  //charge = 1;
+  if(charge == 1){
+    constraint = new_ion_constraint(MONO, 1,ALL_ION, FALSE);
+  }  
+  else{
+    --charge;
+    constraint = new_ion_constraint(MONO, charge, ALL_ION, FALSE);
+  }
+  
   //set                                                     
   constraint->use_neutral_losses = TRUE;
   

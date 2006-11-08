@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.31 $
+ * REVISION: $Revision: 1.32 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -60,10 +60,12 @@ struct spectrum {
   double            total_energy;  ///< The sum of intensities in all peaks
   char*             filename;      ///< Optional filename
 
-  //spectrum scoring fields
-  BOOLEAN_T         sum_array_exist; ///< does the sum array exist?
-  float*            intensity_sum_array; ///< intesity sum array used for 
-  float             sp_sum_resolution;  ///< the resolution of the intesity sum, the closure of which the array was created  
+  //spectrum scoring fields, all these fields are valid only after make sum array
+  //BOOLEAN_T         sum_array_exist; ///< does the sum array exist?
+  //float*            intensity_sum_array; ///< intesity sum array used for 
+  //float             sp_sum_resolution;  ///< the resolution of the intesity sum, the closure of which the array was created  
+  float             max_intensity;   ///< the maximum intensity of peaks, only valid after sum array is created
+  BOOLEAN_T         ready_for_sp; ///< has this spectrum been processed for SP?
 };    
 
 /**
@@ -110,7 +112,8 @@ SPECTRUM_T* allocate_spectrum(void){
   SPECTRUM_T* fresh_spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
   fresh_spectrum->possible_z = (int*)mymalloc(sizeof(int) * MAX_CHARGE);
   fresh_spectrum->peaks = allocate_peak_array(MAX_PEAKS);
-  fresh_spectrum->sum_array_exist = FALSE;
+  //fresh_spectrum->sum_array_exist = FALSE;
+  fresh_spectrum->ready_for_sp = FALSE;
   return fresh_spectrum;
 }
 
@@ -148,7 +151,7 @@ void free_spectrum (
   free(spectrum->possible_z);
   free(spectrum->filename);
   free(spectrum->peaks);
-  free(spectrum->intensity_sum_array);
+  //free(spectrum->intensity_sum_array);
   free(spectrum);
 }
 
@@ -196,6 +199,7 @@ void print_spectrum_stdout(
 /**
  * Copies spectrum object src to dest.
  * must pass in a memory allocated SPECTRUM_T* dest
+ * doesn't copy the sum array related fields
  */
 void copy_spectrum(
   SPECTRUM_T* src, ///< the source spectrum -in
@@ -230,7 +234,6 @@ void copy_spectrum(
                          get_peak_location(find_peak(src->peaks, num_peak_index))); 
   }
 }
-
 
 /**
  * Parses a spectrum from file.
@@ -834,6 +837,24 @@ float get_spectrum_max_peak_intensity(
   return max_intensity; 
 }
 
+
+/**
+ * Only should be used after process spectrum, other times use get_spectrum_max_peak_intensity
+ * \returns The intensity of the peak with the maximum intensity.
+ */
+float get_spectrum_max_intensity(
+  SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
+  )
+{ 
+  // check if max_intensity value is valid
+  if(!spectrum->ready_for_sp){
+    carp(CARP_ERROR, "cannot use max_intensity must first process spectrum");
+    exit(1);
+  }
+  
+  return spectrum->max_intensity;
+}
+
 /**
  * \returns The mass of the charged precursor ion, according to the formula 
  * mass = m/z * charge
@@ -869,6 +890,7 @@ float get_spectrum_singly_charged_mass(
 {
   return (get_spectrum_mass(spectrum, charge) - MASS_H*(charge-1));  //TESTME
 }
+
 
 
 /******************************************************************************/
@@ -926,9 +948,184 @@ PEAK_T* peak_iterator_next(
  * The scoring relating methods
  ******************************************************************/
 
+
+/**
+ * For SP!
+ * Adds a peak to the spectrum given a intensity and location, if
+ * the peak has a unique m/z, if not, sets the peak with the same m/z with the
+ * largest intensity. Thus, only one peak per m/z
+ * In spectrum fields, only updates the num peaks, other fields are left unchanged
+ */
+BOOLEAN_T add_or_update_peak_to_spectrum_for_sp(
+  SPECTRUM_T* spectrum,///< spectrum to add the peak to -out 
+  float intensity, ///< the intensity of peak to add -in
+  int location_mz ///< the location of peak to add -in
+  )
+{
+  PEAK_T* prior_peak = NULL;
+  
+  if(spectrum->num_peaks < MAX_PEAKS){  //FIXME someday change it to be dynamic
+    //check if only there are any prior peaks added
+    if(spectrum->num_peaks > 0){
+      prior_peak = find_peak(spectrum->peaks, spectrum->num_peaks-1);
+      
+      //there is a peak with same m/z
+      if((int)get_peak_location(prior_peak) == location_mz){
+        //if peak's intensity is smaller than the new intensity, replace with new intensity
+        if(get_peak_intensity(prior_peak) < intensity){
+          set_peak_intensity(prior_peak, intensity);
+        }
+        return TRUE;
+      }
+    }
+        
+    set_peak_intensity(find_peak(spectrum->peaks, spectrum->num_peaks), intensity);
+    set_peak_location(find_peak(spectrum->peaks, spectrum->num_peaks), location_mz);
+    ++spectrum->num_peaks;
+    return TRUE;
+  }
+  
+  return FALSE;
+}
+
+/**
+ * Copies spectrum object src to dest.
+ * must pass in a memory allocated SPECTRUM_T* dest
+ * excludes peaks that are 15u around the precuros ion and larger than 50+experimental mass
+ * Square roots all the intensity
+ * sets the maximum_peak_intensity field, rounds all peak location to nearest int 
+ */
+void copy_spectrum_for_sp(
+  SPECTRUM_T* src, ///< the source spectrum -in
+  SPECTRUM_T* dest ///< the destination spectrum -out
+  )
+{
+  int num_peak_index = 0;
+  int* possible_z;
+  char* new_filename;
+
+  //FIXME...might not be correct!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  float experimental_mass_cut_off = get_spectrum_precursor_mz(src)*src->possible_z[0] + 50;
+
+  //FIXME maybe add 0.5
+  int precursor_mz = (int)(get_spectrum_precursor_mz(src)+0.5);
+  float max_intensity = 0;
+  float working_intensity = 0;
+  float peak_location = 0;
+  int working_location = 0;
+
+  //copy necessary varibles
+  set_spectrum_spectrum_type(dest,get_spectrum_spectrum_type(src));
+  set_spectrum_precursor_mz(dest, precursor_mz);
+
+  //copy possible_z
+  possible_z = get_spectrum_possible_z(src);
+  set_spectrum_possible_z(dest,possible_z, 
+                          get_spectrum_num_possible_z(src));
+  free(possible_z);
+  
+  //copy filename
+  new_filename = get_spectrum_filename(src);
+  set_spectrum_filename(dest, new_filename);
+  free(new_filename);
+  
+  //copy each peak
+  for(; num_peak_index < get_spectrum_num_peaks(src); ++num_peak_index){
+    
+    //get peak location
+    peak_location = get_peak_location(find_peak(src->peaks, num_peak_index));
+
+    //do not add any ion above the experimental mass
+    if(peak_location > experimental_mass_cut_off){
+      break;
+    }
+    
+    //round the location to nearest int
+    working_location = (int)(peak_location + 0.5);
+    
+    //skip all peaks within 15u of precursor_mz
+    if(working_location <= precursor_mz + 15 && working_location >= precursor_mz - 15){
+      continue;
+    }
+    
+    //square root peak's intensity
+    working_intensity = sqrt(get_peak_intensity(find_peak(src->peaks, num_peak_index)));
+
+    //set maximum intensity if largest so far
+    if(working_intensity > max_intensity){
+      max_intensity = working_intensity;
+    }
+    
+    //add or updates an existing peak to dest
+    add_or_update_peak_to_spectrum_for_sp(dest, working_intensity, working_location); 
+  }
+
+  //set maximum peak intensity
+  dest->max_intensity = max_intensity;
+}
+
+
+/**
+ * process the spectrum, for SP
+ */
+void sp_process_spectrum(
+  SPECTRUM_T* dest ///< the spectrum to processes -in/out
+  )
+{
+  
+  //keep only 200 most abundant ions
+  if(dest->num_peaks > 200){
+    dest->num_peaks = 200;
+  }
+  
+  //re sort back to intensity order
+  //sort the peak by location
+  sort_peaks(dest->peaks, dest->num_peaks, _PEAK_LOCATION);    
+
+}
+
+/**
+ * process the spectrum, according the score type
+ *\returns a new spectrum that has been preprocessed
+ */
+SPECTRUM_T* process_spectrum(
+  SPECTRUM_T* spectrum, ///< the spectrum to processes -in
+  SCORER_TYPE_T score_type ///< the score type to which the spectrum should be sorted -in
+  )
+{
+  //copy spectrum to dest, make a duplicate spectrum to produce a preprocessed spectrum
+  SPECTRUM_T* dest = (SPECTRUM_T*)allocate_spectrum();
+  
+  if(score_type == SP){
+    //copy the spectrum, excluding peaks 15u around the precursor ion
+    copy_spectrum_for_sp(spectrum, dest);
+    
+    //sort the peak by intensity
+    sort_peaks(dest->peaks, dest->num_peaks, _PEAK_INTENSITY);
+    
+    sp_process_spectrum(dest);
+    
+    //now ready for sp scoring
+    dest->ready_for_sp = TRUE;
+  }
+  else if(score_type == XCORR){
+    //add code here for xcore
+  }
+  
+  //debug
+  //print_spectrum_stdout(dest);
+
+  return dest;
+}
+
+/******************************
+ * OLD routines
+ ******************************/
+
 /**
  *\returns the index of which the intensity sum array corresponds to the theoretical mz
  */
+/*
 int hash_sum_array(
   SCORER_T* scorer,        ///< the scorer object -in  
   //SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
@@ -953,18 +1150,20 @@ int hash_sum_array(
   int hash_index = (int)index_fraction;
   
   //if the intensity is closer to the next index, return next index
-  /*
-  if(index_fraction - hash_index > sp_array_resolution){
-    ++hash_index;
-  }
-  */
+  
+  //if(index_fraction - hash_index > sp_array_resolution){
+  //  ++hash_index;
+  // }
+  
   return hash_index;
 }
+*/
 
 /**
  * adds the intensity to the summ array
  * adds to all the bins that the interval of mz fits the intensity
  */
+/*
 void add_intensity_to_sum_array(
   SCORER_T* scorer,        ///< the scorer object -in
   SPECTRUM_T* spectrum, ///< the spectrum to add the intensity -in
@@ -979,7 +1178,7 @@ void add_intensity_to_sum_array(
   float min_mz = get_scorer_sp_min_mz(scorer);
 
   //get the base index
-  int hash_index = hash_sum_array(scorer, /*spectrum,*/ mz);
+  int hash_index = hash_sum_array(scorer, mz);
   int sum_index = hash_index;
 
   sum_array[sum_index] += intensity;
@@ -1000,11 +1199,200 @@ void add_intensity_to_sum_array(
     sum_array[sum_index] += intensity;
   }
 }
+*/
+
+
+/**
+ * process the spectrum, according the score type
+ *\returns a new spectrum that has been preprocessed
+ */
+/*
+SPECTRUM_T* process_spectrum(
+  SPECTRUM_T* spectrum, ///< the spectrum to processes -in
+  SCORER_TYPE_T score_type ///< the score type to which the spectrum should be sorted -in
+  )
+{
+  //copy spectrum to dest, make a duplicate spectrum to produce a preprocessed spectrum
+  SPECTRUM_T* dest = (SPECTRUM_T*)allocate_spectrum();
+
+  //copy the spectrum, excluding peaks 10u around the precursor ion
+  //also sets the maximum intensity field in dest
+  copy_spectrum_for_process(spectrum, dest);
+  
+  //sort the peak by intensity
+  sort_peaks(dest->peaks, dest->num_peaks, _PEAK_INTENSITY);
+  
+  if(score_type == SP){
+    sp_process_spectrum(dest);
+  }
+  else if(score_type == XCORR){
+    //add code here for xcore
+  }
+  
+  //debug
+  //print_spectrum_stdout(dest);
+
+  return dest;
+}
+*/
+
+/**
+ * process the spectrum
+ *\returns a new spectrum that has been preprocessed, frees old one.
+ */
+/*
+SPECTRUM_T* process_spectrum(
+  SPECTRUM_T* spectrum ///< the spectrum to processes -in
+  )
+{
+  
+  dest = (SPECTRUM_T*)allocate_spectrum();
+
+  int peak_idx = 0;
+  int* possible_z;
+  char* new_filename;
+  
+  //copy each varible
+  set_spectrum_first_scan(dest,get_spectrum_first_scan(src));
+  set_spectrum_last_scan(dest,get_spectrum_last_scan(src));
+  set_spectrum_id(dest,get_spectrum_id(src));
+  set_spectrum_spectrum_type(dest,get_spectrum_spectrum_type(src));
+  set_spectrum_precursor_mz(dest,get_spectrum_precursor_mz(src));
+  
+  //copy possible_z
+  possible_z = get_spectrum_possible_z(src);
+  set_spectrum_possible_z(dest,possible_z, 
+                          get_spectrum_num_possible_z(src));
+  free(possible_z);
+  
+  //copy filename
+  new_filename = get_spectrum_filename(src);
+  set_spectrum_filename(dest, new_filename);
+  free(new_filename);
+  
+  //copy each peak
+  for(; num_peak_index < src->num_peaks; ++num_peak_index){
+    peak = find_peak(spectrum->peaks, peak_idx);
+    intensity = get_peak_intensity(peak);
+    peak_mz = get_peak_location(peak);
+
+    add_peak_to_spectrum(dest, get_peak_intensity(find_peak(src->peaks, num_peak_index)),
+                         get_peak_location(find_peak(src->peaks, num_peak_index))); 
+  }
+  */
+  /*
+  int peak_idx = 0;
+  float intensity = 0;
+  PEAK_T* peak = NULL;
+  PEAK_T* peak_around = NULL;
+  //float max_intensity = 0;
+  float peak_mz = 0;
+  
+  //iterate over all peaks and add the intensity to the correct array sum bins
+  for(; peak_idx < spectrum->num_peaks; ++peak_idx){
+    peak = find_peak(spectrum->peaks, peak_idx);
+    intensity = get_peak_intensity(peak);
+    peak_mz = get_peak_location(peak);
+
+    peak_around = find_peak(spectrum->peaks, peak_idx+1);
+    if(peak_idx != spectrum->num_peaks-1 && peak_mz+1 > get_peak_location(peak_around)){
+      if(intensity > get_peak_intensity(peak_around)){
+        set_peak_intensity(peak_around, intensity);
+      }
+      else{
+        set_peak_intensity(peak, get_peak_intensity(peak_around));
+      }
+    }
+
+    peak_around = find_peak(spectrum->peaks, peak_idx-1);
+    if(peak_idx != 0 && peak_mz-1 < get_peak_location(peak_around)){
+      if(intensity > get_peak_intensity(peak_around)){
+        set_peak_intensity(peak_around, intensity);
+      }
+      else{
+        set_peak_intensity(peak, get_peak_intensity(peak_around));
+      }
+    }
+  }
+}
+*/
+
+/**
+ *
+ *\set the peak intensity to the highest of it's +/- 1u peaks
+ */
+/*
+void equalize_peak(
+  SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
+  int peak_idx, ///< the current peak idx -in
+  float* intensity, ///< the peak's intensity to equalize -in/out
+  float peak_mz,  ///< the peak's location -in
+  float sp_equalize_resolution ///< the eualization resolution -in
+  )
+{
+  int working_idx = peak_idx+1;
+  PEAK_T* peak = NULL;
+  float mz = 0;
+  float working_intensity;
+
+  //FIXME, this is to avoid float rounding problems (ex, 0.9999)
+  sp_equalize_resolution += 0.01;
+
+  //iterate over all peaks and add the intensity to the correct array sum bins
+  for(; working_idx < spectrum->num_peaks; ++working_idx){
+    peak = find_peak(spectrum->peaks, working_idx);
+    mz = get_peak_location(peak);
+    
+    //too small go to next peak
+    if(mz < (peak_mz - sp_equalize_resolution)){
+      continue;
+    }
+    
+    //beyond range, break
+    if(mz > (peak_mz + sp_equalize_resolution)){
+      break;
+    }
+
+    working_intensity = get_peak_intensity(peak);
+    
+    //check it the intensity is larger than the peak to equalize
+    if(*intensity < working_intensity){
+      *intensity = working_intensity;
+    }
+  }
+
+  working_idx = peak_idx-1;
+
+  //iterate over all peaks and add the intensity to the correct array sum bins
+  for(; working_idx >= 0; --working_idx){
+    peak = find_peak(spectrum->peaks, working_idx);
+    mz = get_peak_location(peak);
+    
+    //too small go to next peak
+    if(mz < (peak_mz - sp_equalize_resolution)){
+      break;
+    }
+    
+    //beyond range, break
+    if(mz > (peak_mz + sp_equalize_resolution)){
+      continue;
+    }
+
+    working_intensity = get_peak_intensity(peak);
+    
+    //check it the intensity is larger than the peak to equalize
+    if(*intensity < working_intensity){
+      *intensity = working_intensity;
+    }
+  }
+}
+*/
 
 /**
  * creates the intensity sum array with in the given resolution 
  *\returns TRUE if successfully creates the sum array, else FALSE
  */
+/*
 BOOLEAN_T create_intensity_sum_array(
   SCORER_T* scorer,        ///< the scorer object -in
   SPECTRUM_T* spectrum ///< the spectrum to query the intensity sum -in
@@ -1014,7 +1402,8 @@ BOOLEAN_T create_intensity_sum_array(
   int peak_idx = 0;
   float intensity = 0;
   PEAK_T* peak = NULL;
-  
+  float peak_mz = 0;
+
   //check if sum array already exist
   if(spectrum->sum_array_exist){
     carp(CARP_WARNING, "intensity sum array alread existed, recreating intensity sum array");
@@ -1025,7 +1414,8 @@ BOOLEAN_T create_intensity_sum_array(
   float min_mz = get_scorer_sp_min_mz(scorer);
   float max_mz = get_scorer_sp_max_mz(scorer);
   float sp_array_resolution = get_scorer_sp_array_resolution(scorer);
-  
+  float sp_equalize_resolution = get_scorer_sp_equalize_resolution(scorer);
+
   //create the sp_array
   int array_size = (max_mz - min_mz)/sp_array_resolution;
   spectrum->intensity_sum_array = (float*)mycalloc(array_size, sizeof(float));
@@ -1035,21 +1425,28 @@ BOOLEAN_T create_intensity_sum_array(
   for(; peak_idx < spectrum->num_peaks; ++peak_idx){
     peak = find_peak(spectrum->peaks, peak_idx);
     intensity = get_peak_intensity(peak);
+    peak_mz = get_peak_location(peak);
+    
+    //set the peak intensity to the highest of it's +/- 1u peaks
+    equalize_peak(spectrum, peak_idx, &intensity, peak_mz, sp_equalize_resolution);
+
+    //add to sum array
     add_intensity_to_sum_array(scorer, spectrum, array_size, intensity, get_peak_location(peak));
   }
   
   //now we have create the sum array
   spectrum->sum_array_exist = TRUE;
-
+  
   return TRUE;
 }
-
+*/
 
 /**
  * \returns The sum of intensities within 'resolution' of 'mz' in 'spectrum'
  * NOTE: Chris, this should lazily create the data structures within the
  * spectrum object that it needs.
  */
+/*
 float get_nearby_intensity_sum(
   SCORER_T* scorer,        ///< the scorer object -in                          
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
@@ -1070,12 +1467,12 @@ float get_nearby_intensity_sum(
   }
 
   //get hash index into sum_array
-  int hash_index = hash_sum_array(scorer, /*spectrum,*/ mz);
+  int hash_index = hash_sum_array(scorer, mz);
 
   //return the sum of the intensities
   return spectrum->intensity_sum_array[hash_index];
 }
-
+*/
 
 /*
  * Local Variables:

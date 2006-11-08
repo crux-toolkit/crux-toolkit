@@ -1,6 +1,6 @@
 /**
  * \file peak.h
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief Object for representing one peak in a spectrum.
  *
  * A peak is primarily identified via its intensity (height) and location
@@ -10,6 +10,7 @@
 #ifndef PEAK_H
 #define PEAK_H
 #include <stdio.h>
+#include <stdlib.h>
 #include "objects.h"
 
 /**
@@ -86,6 +87,42 @@ void free_peak_array(
 PEAK_T* find_peak(
   PEAK_T* peak_array,///< peak_array to search -in
   int index ///< the index of peak to fine -in
+  );
+
+/***********************************************
+ * Sort peaks
+ * also functions for lib. function qsort(),
+ * although maybe used for other purposes
+ ************************************************/
+
+/**
+ * Written for the use of lib. function, qsort()
+ * compare the intensity of peaks
+ *\returns 1 if peak_1 is larger, -1 if peak_2, 0 if equal
+ */
+int compare_peaks_by_intensity(
+  const void* peak_1, ///< peak one to compare -in
+  const void* peak_2  ///< peak two to compare -in
+  );
+
+/**
+ * Written for the use of lib. function, qsort()
+ * compare the mz(location) of peaks
+ *\returns 1 if peak_1 is larger, -1 if peak_2, 0 if equal
+ */
+int compare_peaks_by_mz(
+  const void* peak_1, ///< peak one to compare -in
+  const void* peak_2  ///< peak two to compare -in
+  );
+
+/**
+ * sort peaks by their intensity or location
+ * use the lib. function, qsort()
+ */
+void sort_peaks(
+  PEAK_T* peak_array, ///< peak array to sort -in/out
+  int num_peaks,  ///< number of total peaks -in
+  PEAK_SORT_TYPE_T sort_type ///< the sort type(location or intensity)
   );
 
 /*

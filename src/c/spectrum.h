@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -52,6 +52,8 @@ void print_spectrum_stdout(
 
 /**
  * Copies spectrum object src to dest.
+ * must pass in a memory allocated SPECTRUM_T* dest
+ * doesn't copy the sum array related fields
  */
 void copy_spectrum(
   SPECTRUM_T* src, ///< the source spectrum -in
@@ -276,6 +278,14 @@ float get_spectrum_max_peak_intensity(
   );
 
 /**
+ * Only should be used after constructed a sum array, other times use get_spectrum_max_peak_intensity
+ * \returns The intensity of the peak with the maximum intensity.
+ */
+float get_spectrum_max_intensity(
+  SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
+  );
+
+/**
  * \returns The mass of the charged precursor ion, according to the formula 
  * mass = m/z * charge
  */
@@ -332,6 +342,14 @@ float get_nearby_intensity_sum(
   float mz             ///< the mz of the peak around which to sum intensities
   );
 
+/**
+ * process the spectrum, according the score type
+ *\returns a new spectrum that has been preprocessed
+ */
+SPECTRUM_T* process_spectrum(
+  SPECTRUM_T* spectrum, ///< the spectrum to processes -in
+  SCORER_TYPE_T score_type ///< the score type to which the spectrum should be sorted -in
+  );
 
 /******************************************************************************/
 

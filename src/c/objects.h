@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.26 $
+ * $Revision: 1.27 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -13,6 +13,17 @@
  * A peak in a spectrum
  */
 typedef struct peak PEAK_T;
+
+/**
+ * The enum for peak sort type(_PEAK_LOCATION, _PEAK_INTENSITY)
+ */
+enum _peak_sort_type {_PEAK_LOCATION, _PEAK_INTENSITY};
+
+/**
+ * \typedef  PEAK_SORT_TYPE_T 
+ * \brief The typedef for peak sort type(_PEAK_LOCATION, _PEAK_INTENSITY)
+ */
+typedef enum _peak_sort_type PEAK_SORT_TYPE_T;
 
 /**
  * \typedef SPECTRUM_T 

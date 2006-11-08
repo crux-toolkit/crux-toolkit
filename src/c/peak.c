@@ -2,13 +2,17 @@
  * \file peak.c
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.10 $
+ * VERSION: $Revision: 1.11 $
  * DESCRIPTION: Object for representing one peak in a spectrum.
  *****************************************************************************/
 #include "peak.h"
 #include "utils.h"
 #include <string.h>
 #include "objects.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include "carp.h"
+
 /**
  * \struct peak
  * \brief A spectrum peak.
@@ -130,6 +134,84 @@ PEAK_T* find_peak(
   return &peak_array[index];
 }
 
+
+/***********************************************
+ * Sort peaks
+ * also functions for lib. function qsort(),
+ * although maybe used for other purposes
+ ************************************************/
+
+/**
+ * Written for the use of lib. function, qsort()
+ * compare the intensity of peaks
+ *\returns -1 if peak_1 is larger, 1 if peak_2, 0 if equal
+ */
+int compare_peaks_by_intensity(
+  const void* peak_1, ///< peak one to compare -in
+  const void* peak_2  ///< peak two to compare -in
+  )
+{
+  PEAK_T* peak_one = (PEAK_T*)peak_1;
+  PEAK_T* peak_two = (PEAK_T*)peak_2;
+  
+  if(peak_one->intensity > peak_two->intensity){
+    return -1;
+  }
+  else if(peak_one->intensity < peak_two->intensity){
+    return 1;
+  }
+  //peak_one == peak_two
+  return 0;
+}
+
+
+/**
+ * Written for the use of lib. function, qsort()
+ * compare the mz(location) of peaks
+ *\returns 1 if peak_1 is larger, -1 if peak_2, 0 if equal
+ */
+int compare_peaks_by_mz(
+  const void* peak_1, ///< peak one to compare -in
+  const void* peak_2  ///< peak two to compare -in
+  )
+{
+  PEAK_T* peak_one = (PEAK_T*)peak_1;
+  PEAK_T* peak_two = (PEAK_T*)peak_2;
+  
+  if(peak_one->location > peak_two->location){
+    return 1;
+  }
+  else if(peak_one->location < peak_two->location){
+    return -1;
+  }
+  //peak_one == peak_two
+  return 0;
+}
+
+/**
+ * sort peaks by their intensity or location
+ * use the lib. function, qsort()
+ * sorts intensity in descending order
+ */
+void sort_peaks(
+  PEAK_T* peak_array, ///< peak array to sort -in/out
+  int num_peaks,  ///< number of total peaks -in
+  PEAK_SORT_TYPE_T sort_type ///< the sort type(location or intensity)
+  )
+{
+  if(sort_type == _PEAK_INTENSITY){
+    //sort the peaks by intensity
+    qsort((void*)peak_array, num_peaks, sizeof(PEAK_T), compare_peaks_by_intensity);
+  }
+  else if(sort_type == _PEAK_LOCATION){
+    //sort the peaks by location
+    qsort((void*)peak_array, num_peaks, sizeof(PEAK_T), compare_peaks_by_mz);
+  }
+  else{
+    carp(CARP_ERROR, "no matching peak sort type");
+    exit(1);
+  }
+}
 /*
  * Local Variables:
  * mode: c

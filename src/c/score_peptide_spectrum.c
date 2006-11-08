@@ -51,7 +51,7 @@ int main(int argc, char** argv){
 
   //optional variables
   char* charge = "2";
-  char* type = "SP";
+  char* type = "sp";
   char* parameter_file = "crux_parameter";
   
   //parsing variables
@@ -67,7 +67,7 @@ int main(int argc, char** argv){
     STRING_ARG);
   
   parse_arguments_set_opt(
-    "score type", 
+    "score_type", 
     "The type of scoring function to use. sp",
     (void *) &type, 
     STRING_ARG);
@@ -122,6 +122,9 @@ int main(int argc, char** argv){
    else if(strcmp(charge, "3")== 0){
      peptide_charge = 3;
    }
+   else if(strcmp(charge, "4")== 0){
+     peptide_charge = 4;
+   }
    else{
      wrong_command(charge, "The peptide charge. 1|2|3");
    }
@@ -132,7 +135,7 @@ int main(int argc, char** argv){
    }
 
    //score type
-   if(strcmp(type, "SP")== 0){
+   if(strcmp(type, "sp")== 0){
      score_type = SP;
    }
    else{
@@ -143,7 +146,7 @@ int main(int argc, char** argv){
    parse_parameter_file(parameter_file);
 
    //set ion constraint to sequest settings
-   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp();  
+   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
    
    //create new ion series
    ion_series = new_ion_series(peptide_sequence, peptide_charge, ion_constraint);
