@@ -2,7 +2,7 @@
  * \file scorer.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. scorer
  *****************************************************************************/
 #ifndef SCORER_H 
@@ -163,6 +163,21 @@ float get_scorer_sp_sum_resolution(
 void set_scorer_sp_sum_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
   float sp_sum_resolution ///< used for Sp: the sp_sum_resolution variable -in
+  );
+
+/**
+ *\returns the equalize_resolution value of the scorer
+ */
+float get_scorer_sp_equalize_resolution(
+  SCORER_T* scorer ///< the scorer object -in
+  );
+
+/**
+ *\sets the scorer equalize_resolution value
+ */
+void set_scorer_sp_equalize_resolution(
+  SCORER_T* scorer, ///< the scorer object -out                     
+  float sp_equalize_resolution ///< used for Sp: the equalize_resolution variable -in
   );
 
 /*

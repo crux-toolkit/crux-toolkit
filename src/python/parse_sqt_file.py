@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.4
+#!PYTHON
 # FILE: parse_sqt_file.py
 # AUTHOR: CHRIS PARK
 # CREATE DATE: 20 OCTOBER 2006
@@ -19,7 +19,7 @@ class SqtObject:
         self.file = file
         self.spectrums = []
 
-        if not self.parse(file):
+        if not self.__parse():
             print "%s\n" % "failed to create sqt object"
             self = None;
             
@@ -36,17 +36,17 @@ class SqtObject:
         # might have to split lines
         # iterate over all line of sqt file
         for line in sqt_file:
-            if line.startswith('H') || line.startswith('L') : continue
+            if line.startswith('H') or line.startswith('L') : continue
             elif line.startswith('S'):
                 #parse spectrum
                 fields = line.rstrip('\n').split()
                 id = fields[1].lstrip('0')
-                self.spectrums.append(spectrum((int)id, (int)fields[3], float(fields[6])))
+                self.spectrums.append(Spectrum(int(id), int(fields[3]), float(fields[6])))
                 
             elif line.startswith('M'):
                 #parse peptide
                 fields = line.rstrip('\n').split()
-                peptide = Pepetide(float(fields[5]),float(fields[6]), \
+                peptide = Peptide(int(fields[1]), float(fields[5]),float(fields[6]), \
                                    float(fields[3]), fields[9])
                 self.spectrums[len(self.spectrums)-1].addPeptide(peptide)
         sqt_file.close()
@@ -79,15 +79,16 @@ class Spectrum:
 class Peptide:
     """an object that contains info for the peptide"""
     # xcore, Sp, mass, sequence,  
-    def __init__(self, xcore, sp, mass, sequence):
+    def __init__(self, xcore_rank, xcore, sp, mass, sequence):
         """  fill in the peptide object with all its components """
         self.components = {}
+        self.components["xcore_rank"] = xcore_rank
         self.components["xcore"] = xcore
         self.components["sp"] = sp
         self.components["mass"] = mass
-        self.components["sequence"] = __extractSequence(sequence)
+        self.components["sequence"] = self.__extractSequence(sequence)
 
-    def __extractSequence(sequence):
+    def __extractSequence(self, sequence):
         """ extracts the sequence from the two dots in between """
         real_sequence = sequence.split('.')
         return real_sequence[1]

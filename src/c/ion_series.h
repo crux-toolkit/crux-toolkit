@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -166,7 +166,9 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest(
  * modification, sets all fields for sequest Sp scoring settings
  *\returns a new heap allocated ion_constraint
  */
-ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(void);
+ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(
+  int max_charge ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
+  );
 
 /**
  * Frees an allocated ion_constraint object.
