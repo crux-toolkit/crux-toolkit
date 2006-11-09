@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -305,5 +305,12 @@ enum _scorer_type { SP, XCORR, DOTP };
  * \brief The typedef for scorer type (SP, XCORR, DOTP)
  */
 typedef enum _scorer_type SCORER_TYPE_T;
+
+/**
+ *\typedef GENERATE_PEPTIDES_ITERATOR_T
+ *\brief An object that navigates the options and selects the correct peptide iterator to use
+ */
+typedef struct generate_peptides_iterator_t GENERATE_PEPTIDES_ITERATOR_T;
+
 
 #endif
