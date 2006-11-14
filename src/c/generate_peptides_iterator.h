@@ -2,11 +2,11 @@
  * \file generate_peptide_iterator.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 8 Nov 2007
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * DESCRIPTION: object to return candidate peptides
  *****************************************************************************/
-#ifndef GENERATE_PEPTIDE_ITERATOR_H 
-#define GENERATE_PEPTIDE_ITERATOR_H 
+#ifndef GENERATE_PEPTIDES_ITERATOR_H 
+#define GENERATE_PEPTIDES_ITERATOR_H 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,31 +30,42 @@
 /**
  *\returns a empty generate_peptide_iterator object
  */
-GENERATE_PEPTIDE_ITERATOR_T* allocate_generate_peptide_iterator(void);
+GENERATE_PEPTIDES_ITERATOR_T* allocate_generate_peptides_iterator(void);
 
 /**
  *\returns a new generate_peptide_iterator object
  */
-GENERATE_PEPTIDE_ITERATOR_T* new_generate_peptide_iterator(void);
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void);
 
 /**
  *\returns TRUE, if there is a next peptide, else FALSE
  */
-BOOLEAN_T generate_peptide_iterator_has_next(
-  GENERATE_PEPTIDE_ITERATOR_T* generate_peptide_iterator ///< working iterator
+BOOLEAN_T generate_peptides_iterator_has_next(
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator ///< working iterator
   );
 
 /**
  *\returns the next peptide in the iterator
  */
-PEPTIDE_T* generate_peptide_iterator_next(
-  GENERATE_PEPTIDE_ITERATOR_T* generate_peptide_iterator ///< working iterator
+PEPTIDE_T* generate_peptides_iterator_next(
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator ///< working iterator
   );
 
 /**
+ * Don't free the iterator until completed with the peptides generated
  * Frees an allocated generate_peptide_iterator object
  */
-void free_generate_peptide_iterator(
-  GENERATE_PEPTIDE_ITERATOR_T* generate_peptide_iterator ///< iterator to free
+void free_generate_peptides_iterator(
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator ///< iterator to free
   );
 
+/**
+ * Always free peptides created by the generate_peptide_iterator through this method
+ * Frees the allocated peptide with the correct free-method according to it's type
+ */
+void free_peptide_produced_by_iterator(
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator, ///< the iterator which the peptide was produced -in
+  PEPTIDE_T* peptide ///< the peptide to free -in
+  );
+
+#endif

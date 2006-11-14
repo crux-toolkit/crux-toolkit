@@ -19,7 +19,9 @@
 #include "protein.h"
 #include "database.h"
 #include "parse_arguments.h"
+#include "parameter.h"
 #include "index.h"
+#include "generate_peptides_iterator.h"
 
 /**
  * when wrong command is seen carp, and exit
@@ -71,17 +73,13 @@ int main(int argc, char** argv){
   int  verbosity = CARP_INFO;
   char* redundancy = "redundant";
   char* use_index = "F";
+  char* parameter_file = NULL;
 
-  BOOLEAN_T use_index_boolean = FALSE;
-  MASS_TYPE_T mass_type = AVERAGE;
-  PEPTIDE_TYPE_T peptide_type = TRYPTIC;
   int missed_cleavages = FALSE;
   char* sort = "none";      // mass, length, lexical, none  
   char * in_file = NULL;
-  const char * error_message;
+  char * error_message;
   int result = 0;
-  BOOLEAN_T is_unique = FALSE;
-  SORT_TYPE_T sort_type = NONE;
 
   /* Define optional command line arguments */ 
   
@@ -157,95 +155,26 @@ int main(int argc, char** argv){
     (void *) &use_index, 
     STRING_ARG);
 
+  parse_arguments_set_opt(
+    "parameter-file",
+    "The crux parameter file to parse parameter from.",
+    (void *) &parameter_file,
+    STRING_ARG);
 
   /* Define required command line arguments */
   parse_arguments_set_req(
-    "protein input filename", 
+    "fasta-file", 
     "The name of the file (in fasta format) from which to parse proteins.", 
     (void *) &in_file, STRING_ARG);
   
 
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
-    PEPTIDE_CONSTRAINT_T* constraint;
-    DATABASE_PEPTIDE_ITERATOR_T* iterator = NULL;
-    DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
-    DATABASE_T* database = NULL;
+    long total_peptides = 0;
+    GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator = NULL; 
     PEPTIDE_T* peptide = NULL;
-    INDEX_T* index = NULL;
-    INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator = NULL;
-    INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator = NULL;
-
-    //FIXME may add additional types such as non-trypticc or partially-tryptic
-    if(strcmp(cleavages, "all")==0){
-      peptide_type = ANY_TRYPTIC;
-    }
-    else if(strcmp(cleavages, "tryptic")==0){
-      peptide_type = TRYPTIC;
-    }
-    else if(strcmp(cleavages, "partial")==0){
-      peptide_type = PARTIALLY_TRYPTIC;
-    }
-    else{
-      wrong_command(cleavages);
-    }
+    BOOLEAN_T output_sequence;
     
-    //check if maximum length is with in range <= 255
-    if(max_length > 255){
-      carp(CARP_FATAL, "maximum length:%d over limit 255.", max_length);
-      exit(1);
-    }
-    
-    //determine isotopic mass option
-    if(strcmp(isotopic_mass, "average")==0){
-      mass_type = AVERAGE;
-    }
-    else if(strcmp(isotopic_mass, "mono")==0){
-      mass_type = MONO;
-    }
-    else{
-      wrong_command(isotopic_mass);
-    }
-   
-    //determine redundancy option
-    if(strcmp(redundancy, "redundant")==0){
-      is_unique = FALSE;
-    }
-    else if(strcmp(redundancy, "unique")==0){
-      is_unique = TRUE;
-    }
-    else{
-      wrong_command(redundancy);
-    }
-
-    //determine sort type option
-    if(strcmp(sort, "mass")==0){
-      sort_type = MASS;
-    }
-    else if(strcmp(sort, "length")==0){
-      sort_type = LENGTH;
-    }
-    else if(strcmp(sort, "lexical")==0){
-      sort_type = LEXICAL;
-    }
-    else if(strcmp(sort, "none")==0){
-      sort_type = NONE;
-    }
-    else{
-      wrong_command(sort);
-    }
-    
-    //determine use index command
-    if(strcmp(use_index, "F")==0){
-      use_index_boolean = FALSE;
-    }
-    else if(strcmp(use_index, "T")==0){
-      use_index_boolean = TRUE;
-    }
-    else{
-      wrong_command(use_index);
-    }
-
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
@@ -253,176 +182,55 @@ int main(int argc, char** argv){
     else{
       wrong_command("verbosity");
     }
-  
-    //peptide constraint
-    constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages, mass_type);
- 
-    //check if input file exist
-    if(access(in_file, F_OK)){
-      carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty).", in_file);
-      exit(1);
-    }
-    
+
+    //first, parse paramter file
+    //Next, updates the parameter files with command line options
+    parse_update_parameters(parameter_file);
+        
+    //parameters are now confirmed, can't be changed
+    parameters_confirmed();
+
     //print header line
-    printf("# PROTEIN DATABASE: %s\n", in_file);
+    printf("# PROTEIN DATABASE: %s\n", get_string_parameter_pointer("fasta-file"));
     printf("# OPTIONS:\n");
-    printf("#\tmin-mass: %.2f\n", min_mass);
-    printf("#\tmax-mass: %.2f\n", max_mass);
-    printf("#\tmin-length: %d\n", min_length);
-    printf("#\tmax-length: %d\n", max_length);
-    printf("#\tcleavages: %s\n", cleavages);
-    if(missed_cleavages){
-      printf("#\tallow missed-cleavages: TRUE\n");
-    }
-    else{
-      printf("#\tallow missed-cleavages: FALSE\n");
-    }
-    printf("#\tsort: %s\n", sort);
-    if(mass_type == AVERAGE){
-      printf("#\tisotopic mass type: average\n");
-    }
-    else{
-      printf("#\tisotopic mass type: mono\n");
-    }
+    printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass", 0));
+    printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass", 0));
+    printf("#\tmin-length: %d\n", get_int_parameter("min-length", 0));
+    printf("#\tmax-length: %d\n", get_int_parameter("max-length", 0));
+    printf("#\tcleavages: %s\n", get_string_parameter_pointer("cleavages"));
+    printf("#\tallow missed-cleavages: %s\n", get_string_parameter_pointer("missed-cleavages"));
+    printf("#\tsort: %s\n",  get_string_parameter_pointer("sort"));
+    printf("#\tisotopic mass type: %s\n", get_string_parameter_pointer("isotopic-mass"));
     printf("#\tverbosity: %d\n", verbosity);
-    if(is_unique){
-      printf("#\tredundancy: unique\n");
-    }
-    else{
-      printf("#\tredundancy: redundant\n");
-    }
-    if(use_index_boolean){
-      printf("#\tuse index: TRUE\n");
-    }
-    else{
-      printf("#\tuse index: FALSE\n");
-    }
+    printf("#\tredundancy: %s\n", get_string_parameter_pointer("redundancy"));
+    printf("#\tuse index: %s\n", get_string_parameter_pointer("use-index"));
+    
+    
+    //create peptide interator
+    peptide_iterator = new_generate_peptides_iterator();
+    
+    //should I output sequence?
+    output_sequence = get_boolean_parameter("output-sequence", FALSE);
 
-    /***********************
-     * use index file
-     **********************/
-    if(use_index_boolean){
-      if((sort_type != MASS && sort_type != NONE)){
-        carp(CARP_ERROR, " when using index, cannot sort other than by mass");
-        carp(CARP_ERROR, "failed to perform search");
-        exit(1);
-      }
+    //iterate over all peptides
+    while(generate_peptides_iterator_has_next(peptide_iterator)){
+      ++total_peptides;
+      peptide = generate_peptides_iterator_next(peptide_iterator);
+      print_peptide_in_format(peptide, output_sequence, stdout);
+      
+      //free peptide, must free with the
+      free_peptide_produced_by_iterator(peptide_iterator, peptide);
 
-      index = new_search_index(in_file, constraint, is_unique);
-      
-      if(index != NULL){
-        //count peptides, DEBUG purpose
-        long int total_peptides = 0;
-        
-        //only resrict peptide by mass and length, default iterator
-        if(peptide_type == ANY_TRYPTIC){
-           //create index peptide interator
-           index_peptide_iterator = new_index_peptide_iterator(index);
-           
-           //iterate over all peptides
-           while(index_peptide_iterator_has_next(index_peptide_iterator)){
-             ++total_peptides;
-             peptide = index_peptide_iterator_next(index_peptide_iterator);
-             print_peptide_in_format(peptide, flag_opt, stdout);
-             //this peptide is created with peptide-src which are an array
-             free_peptide_for_array(peptide);
-             //debug purpose
-             if(total_peptides% 10000 == 0){
-               carp(CARP_INFO, "reached peptide: %d", total_peptides);
-             }
-           }
-           free_index_peptide_iterator(index_peptide_iterator);
-        }
-        //if need to select among peptides by peptide_type and etc.
-        else{
-          //create index_filtered_peptide_iterator
-          index_filtered_peptide_iterator = new_index_filtered_peptide_iterator(index);
-          
-          //iterate over all peptides
-           while(index_filtered_peptide_iterator_has_next(index_filtered_peptide_iterator)){
-             ++total_peptides;
-             peptide = index_filtered_peptide_iterator_next(index_filtered_peptide_iterator);
-             print_filtered_peptide_in_format(peptide, flag_opt, stdout, peptide_type);
-             //this peptide is created with peptide-src which are an array
-             free_peptide_for_array(peptide);
-             //debug purpose
-             if(total_peptides% 10000 == 0){
-               carp(CARP_INFO, "reached peptide: %d", total_peptides);
-             }
-           }
-           free_index_filtered_peptide_iterator(index_filtered_peptide_iterator);
-        }
-        //debug purpose
-        carp(CARP_INFO, "total peptides: %d", total_peptides);
-        
-        free_index(index);
-      }
-      else{
-        carp(CARP_ERROR, "failed to perform search");
-        exit(1);
+      //debug purpose
+      if(total_peptides% 10000 == 0){
+        carp(CARP_INFO, "reached peptide: %d", total_peptides);
       }
     }
-    /*********************************************
-     *read in from fasta file, don't use index file
-     ************************************************/
-    else{
-      //create a new database
-      database = new_database(in_file, FALSE);         //needs to change this....by given option
-      
-      //no sort, redundant
-      if(!is_unique && sort_type == NONE){ 
-        //create peptide iterator
-        iterator = new_database_peptide_iterator(database, constraint);
-        
-        //check if any peptides are found
-        if(!database_peptide_iterator_has_next(iterator)){
-          carp(CARP_WARNING, "no matches found");
-        }
-        else{
-          //print each peptide
-          while(database_peptide_iterator_has_next(iterator)){
-            peptide = database_peptide_iterator_next(iterator);
-            print_peptide_in_format(peptide, flag_opt, stdout);
-            free_peptide(peptide);
-          }
-        }
-        //free iterator
-        free_database_peptide_iterator(iterator);
-      }      
-      //sort or check for unique
-      else{
-        //only sort, by default will be sorted by mass
-        if(sort_type == NONE){
-          //create peptide iterator
-          sorted_iterator = 
-            new_database_sorted_peptide_iterator(database, constraint, MASS, TRUE);
-        }
-        //create peptide iterator
-        else{
-          sorted_iterator = 
-            new_database_sorted_peptide_iterator(database, constraint, sort_type, is_unique);
-        }
-        
-        //check if any peptides are found
-        if(!database_sorted_peptide_iterator_has_next(sorted_iterator)){
-          carp(CARP_WARNING, "no matches found");
-        }
-        else{
-          //print each peptide
-          while(database_sorted_peptide_iterator_has_next(sorted_iterator)){
-            peptide = database_sorted_peptide_iterator_next(sorted_iterator);
-            print_peptide_in_format(peptide, flag_opt, stdout);
-            free_peptide(peptide);
-          }
-        }
-        //free iterator
-        free_database_sorted_peptide_iterator(sorted_iterator);
-      }
-      //free database, iterator, constraint
-      free_peptide_constraint(constraint);
-      free_database(database);      
-      exit(0);
-    }
+    free_generate_peptides_iterator(peptide_iterator);
+    
+    //debug purpose
+    carp(CARP_INFO, "total peptides: %d", total_peptides);
+    exit(0);
   } 
   else {
     char* usage = parse_arguments_get_usage("generate_peptides");

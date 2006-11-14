@@ -17,6 +17,7 @@
 #include "scorer.h"
 #include "utils.h"
 #include "parameter.h"
+#include "parse_arguments.h"
 
 /**
  *\struct parameter
@@ -38,14 +39,56 @@ struct parameter_array{
   struct parameter parameters[NUM_PARAMS]; ///< the paraters
 };
 
-
 /**
  * Global variable
  */
 
 // declare a parameter array to be used
 struct parameter_array parameters;
+BOOLEAN_T parameter_initialized = FALSE; //have the parameters been initialized?
 BOOLEAN_T parameter_parsed = FALSE; //have I parsed the parameter file?
+BOOLEAN_T parameter_plasticity = TRUE; //can the parameters be changed?
+
+
+//initialize parameters
+// ONLY add optional parameters here!!!
+void initialize_parameters(void){
+
+  //check if parameters been initialized
+  if(parameter_initialized){
+    carp(CARP_ERROR, "parameters has already been initialized");
+    return;
+  }
+  
+  //set number of parameters to zero
+  parameters.num_parameters = 0;
+
+  //set perameters
+  set_string_parameter("parameter-file", "crux_parameter");
+
+  //generate_peptide perameters
+  set_double_parameter("min-mass", 200);
+  set_double_parameter("max-mass", 2400);
+  set_int_parameter("min-length", 6);
+  set_int_parameter("max-length", 50);
+  set_string_parameter("cleavages", "tryptic");
+  set_string_parameter("isotopic-mass","average");
+  set_string_parameter("redundancy", "redundant");
+  set_string_parameter("use-index", "F");
+  set_string_parameter("sort", "none");      // mass, length, lexical, none  
+  //set_string_parameter("fasta-file", "NULL");
+  set_boolean_parameter("output-sequence", FALSE);
+  set_boolean_parameter("missed-cleavages", FALSE);
+  
+  //score_peptide_spectrum perameters
+  set_double_parameter("beta", 0.075);
+  set_double_parameter("max-mz", 4000);
+  set_int_parameter("charge", 2);
+  set_string_parameter("score-type", "sp"); 
+
+  //now we have initialized the parameters
+  parameter_initialized = TRUE;
+}
 
 /********************************************************************
  *
@@ -53,6 +96,102 @@ BOOLEAN_T parameter_parsed = FALSE; //have I parsed the parameter file?
  * separated by an equals sign.
  *
  *******************************************************************/
+
+/**
+ * add parameters to parameter list
+ */
+BOOLEAN_T add_parameter(
+  char*     name,  ///< the name of the parameter to add -in
+  char* set_value  ///< the value to be added -in                  
+  )
+{
+  //but is there space?
+  if(parameters.num_parameters >= NUM_PARAMS){
+    carp(CARP_ERROR, "no more space for any additional paramerters");
+    return FALSE;
+  }
+
+  // copy the name/value pairs to the right parameter
+  parameters.parameters[parameters.num_parameters].used = FALSE;
+  strncpy(parameters.parameters[parameters.num_parameters].parameter_name, 
+          name,
+          PARAMETER_LENGTH);
+  strncpy(parameters.parameters[parameters.num_parameters].parameter_value,
+          set_value,
+          PARAMETER_LENGTH);
+  parameters.num_parameters++;
+
+  return TRUE;
+}
+
+/**
+ * copy parameters to parameter list
+ * there must be a matching name in the parameter list
+ */
+BOOLEAN_T copy_parameter(
+  char*     name,  ///< the name of the parameter to add -in
+  char* set_value  ///< the value to be added -in                  
+  )
+{
+  
+  int idx;
+  
+  //check if parameters has been initlialized
+  if(!parameter_initialized){
+    carp(CARP_ERROR, "must inilialize parameters before copying");
+    return FALSE;
+  }
+    
+  //check if parameters can be changed
+  if(!parameter_plasticity){
+   carp(CARP_ERROR, "can't change parameters once they are confirmed");
+   return FALSE;
+  }
+  
+  //check if parameter name already exist?
+  for(idx = 0; idx < parameters.num_parameters; idx++){
+    //if exist ovewrite it!
+    if(!strcmp(parameters.parameters[idx].parameter_name, name)){
+      strcpy(parameters.parameters[idx].parameter_value, set_value);
+      return TRUE;
+    }	
+  }
+  
+  carp(CARP_ERROR, "incorrect parameter name: %s from the parameter file", name);
+  return FALSE;
+}
+
+/**
+ * This method should be called only after parsed command line
+ * first, parse paramter file
+ * Next, updates the parameter files with command line options
+ * command line arguments have higher precedence 
+ * parse the parameter file given the filename
+ */
+void parse_update_parameters(
+  char* parameter_file ///< the parameter file to be parsed -in
+  )
+{
+  //initialize
+  initialize_parameters();
+  
+  //if no parameter file name has been specified in command line,
+  // use default parameter filename
+  if(parameter_file != NULL){
+    //parse parameter file
+    parse_parameter_file(parameter_file);
+  }
+  else{
+    //parse parameter file
+    parse_parameter_file(get_string_parameter_pointer("parameter-file"));
+  }
+  
+  //update the parameters if any comman line arguments exist
+  if(!update_parameter()){
+    fprintf(stderr, "failed to combine command line arguemnts and parameter file");
+    exit(-1);
+  }
+}
 
 /**
  *
@@ -66,8 +205,20 @@ void parse_parameter_file(
   char *line;
   int idx;
 
+  //check if parameters cah be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    exit(-1);
+  }
+
+  //check if parameter file exist, if not exit use default parameters
+  if(access(parameter_filename, F_OK)){
+     carp(CARP_INFO, "no parameter_file, using default parameters");
+     return;
+  }
+
   line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));
-  parameters.num_parameters = 0;
+
 
   f = fopen(parameter_filename, "r");
   if(f == NULL){
@@ -98,23 +249,20 @@ void parse_parameter_file(
 	exit(-1);
       }
       line[idx] = '\0';
-
+      
       // copy the name/value pairs to the right parameter
-      parameters.parameters[parameters.num_parameters].used = FALSE;
-      strncpy(parameters.parameters[parameters.num_parameters].parameter_name, 
-	      line,
-	      PARAMETER_LENGTH);
-      strncpy(parameters.parameters[parameters.num_parameters].parameter_value,
-	      &(line[idx+1]),
-	      PARAMETER_LENGTH);
-      parameters.num_parameters++;
+      if(!copy_parameter(line, &(line[idx+1]))){
+        exit(-1);
+      }
     }
   }
 
   // Tell the user what we found.
-  if (verbosity > NORMAL_VERBOSE) {
+  /*
+  if(get_verbosity_level() >= CARP_INFO) {
     print_parameters("Using parameters:", parameter_filename, "  ", stderr);
   }
+  */
 
   fclose(f);
   myfree(line);
@@ -140,8 +288,8 @@ BOOLEAN_T get_boolean_parameter(
   static char buffer[PARAMETER_LENGTH];
 
   //check if parameter file has been parsed
-  if(!parameter_parsed){
-    carp(CARP_WARNING, "parameter file has not been parsed yet, using default value");
+  if(!parameter_parsed && !parameter_initialized){
+    carp(CARP_WARNING, "parameters has not been set yet, using default value");
     return(default_value);
   }
 
@@ -166,7 +314,60 @@ BOOLEAN_T get_boolean_parameter(
       }
     }
   }
+  carp(CARP_ERROR, "parameter name: %s doesn't exit, using default value", name);
   return(default_value);
+}
+
+/**
+ * Parameter file must be parsed first!
+ * searches through the list of parameters, 
+ * looking for one whose name matches the string.  
+ * The function sets the corresponding value,
+ * if the parameter is not found or parameters has already been confirmed don't change
+ * \returns TRUE if paramater value is set, else FALSE
+ */ 
+BOOLEAN_T set_boolean_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ BOOLEAN_T set_value  ///< the value to be set -in
+ )
+{
+  int idx;
+  BOOLEAN_T result;
+    
+  //check if parameters cah be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+
+  //only check if parameter file has already been parsed
+  if(parameter_parsed){
+    //check if parameter name already exist?
+    for(idx = 0; idx < parameters.num_parameters; idx++){
+      //if exist ovewrite it!
+      if(!strcmp(parameters.parameters[idx].parameter_name, name)){
+        //set to TRUE
+        if(set_value){
+          strcpy(parameters.parameters[idx].parameter_value, "TRUE");
+        }
+        //set to FALSE
+        else{
+          strcpy(parameters.parameters[idx].parameter_value, "FALSE");
+        }
+        return TRUE;
+      }	
+    }
+  }
+
+  //if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  if(set_value){
+    result = add_parameter(name, "TRUE");
+  }
+  else{
+    result = add_parameter(name, "FALSE");
+  }
+  
+  return result;
 }
 
 /**
@@ -186,8 +387,8 @@ int get_int_parameter(
   long int value;
 
   //check if parameter file has been parsed
-  if(!parameter_parsed){
-    carp(CARP_WARNING, "parameter file has not been parsed yet, using default value");
+  if(!parameter_parsed && !parameter_initialized){
+    carp(CARP_WARNING, "parameters has not been set yet, using default value");
     return(default_value);
   }
 
@@ -209,8 +410,52 @@ int get_int_parameter(
       }
     }
   }
-
+  carp(CARP_ERROR, "parameter name: %s doesn't exit, using default value", name);
   return(default_value);
+}
+
+/**
+ * Parameter file must be parsed first!
+ * searches through the list of parameters, 
+ * looking for one whose name matches the string.  
+ * The function sets the corresponding value,
+ * if the parameter is not found or parameters has already been confirmed don't change
+ * \returns TRUE if paramater value is set, else FALSE
+ */ 
+BOOLEAN_T set_int_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ int set_value  ///< the value to be set -in
+ )
+{
+  int idx;
+  BOOLEAN_T result;
+  char buffer[PARAMETER_LENGTH];
+  
+  //check if parameters cah be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  //only check if parameter file has already been parsed
+  if(parameter_parsed){
+    //check if parameter name already exist?
+    for(idx = 0; idx < parameters.num_parameters; idx++){
+      //if exist ovewrite it!
+      if(!strcmp(parameters.parameters[idx].parameter_name, name)){
+        snprintf(parameters.parameters[idx].parameter_value, PARAMETER_LENGTH, "%d", set_value);
+        //itoa(set_value, parameters.parameters[idx].parameter_value, 10);
+        return TRUE;
+      }	
+    }
+  }
+  
+  //if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  snprintf(buffer, PARAMETER_LENGTH, "%d", set_value);
+  //  itoa(set_value, buffer, 10);
+  result = add_parameter(name, buffer);
+    
+  return result;
 }
 
 /**
@@ -230,8 +475,8 @@ double get_double_parameter(
   double value;
 
   //check if parameter file has been parsed
-  if(!parameter_parsed){
-    carp(CARP_WARNING, "parameter file has not been parsed yet, using default value");
+  if(!parameter_parsed && !parameter_initialized){
+    carp(CARP_WARNING, "parameters has not been set yet, using default value");
     return(default_value);
   }
   
@@ -252,7 +497,53 @@ double get_double_parameter(
       // }
     }
   }
+  carp(CARP_ERROR, "parameter name: %s doesn't exit, using default value", name);
   return(default_value);
+}
+
+/**
+ * Parameter file must be parsed first!
+ * searches through the list of parameters, 
+ * looking for one whose name matches the string.  
+ * The function sets the corresponding value,
+ * if the parameter is not found or parameters has already been confirmed don't change
+ * \returns TRUE if paramater value is set, else FALSE
+ */ 
+BOOLEAN_T set_double_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ double set_value  ///< the value to be set -in
+ )
+{
+  int idx;
+  BOOLEAN_T result;
+  char buffer[PARAMETER_LENGTH];
+  
+  //check if parameters cah be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  //convert to string
+  sprintf(buffer, "%f", set_value);
+
+  //only check if parameter file has already been parsed
+  if(parameter_parsed){
+    //check if parameter name already exist?
+    for(idx = 0; idx < parameters.num_parameters; idx++){
+      //if exist ovewrite it!
+      if(!strcmp(parameters.parameters[idx].parameter_name, name)){
+        //set to TRUE
+        strncpy(parameters.parameters[idx].parameter_value, buffer, PARAMETER_LENGTH);
+        return TRUE;
+      }	
+    }
+  }
+
+  //if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  result = add_parameter(name, buffer);
+    
+  return result;
 }
 
 /**
@@ -270,11 +561,11 @@ char* get_string_parameter(
   char* return_value = NULL;
 
   //check if parameter file has been parsed
-  if(!parameter_parsed){
-    carp(CARP_WARNING, "parameter file has not been parsed yet, returning NULL");
+  if(!parameter_parsed && !parameter_initialized){
+    carp(CARP_WARNING, "parameters has not been set yet, returning NULL");
     return(NULL);
   }
-
+  
   return_value = (char*)mymalloc(sizeof(char) * PARAMETER_LENGTH);
 
   for(idx = 0; idx < parameters.num_parameters; idx++){
@@ -293,7 +584,77 @@ char* get_string_parameter(
       return(return_value);
     }
   }
+  carp(CARP_ERROR, "parameter name: %s doesn't exit, return NULL", name);
   return(NULL);
+}
+
+/**
+ * Searches through the list of parameters, looking for one whose
+ * parameter_name matches the string. 
+ * The return value is a pointer to the original string
+ * Thus, user should no free, good for printing
+ * If the value is not found, return NULL.
+ * \returns the string value to which matches the parameter name, else returns NULL
+ */
+char* get_string_parameter_pointer(
+  char* name  ///< the name of the parameter looking for -in
+  )
+{
+  int idx;
+    
+  //check if parameter file has been parsed
+  if(!parameter_parsed && !parameter_initialized){
+    carp(CARP_WARNING, "parameters has not been set yet, returning NULL");
+    return(NULL);
+  }
+  
+  for(idx = 0; idx < parameters.num_parameters; idx++){
+    if(!strcmp(parameters.parameters[idx].parameter_name, name)){
+      return parameters.parameters[idx].parameter_value;
+    }
+  }
+  carp(CARP_ERROR, "parameter name: %s doesn't exit, return NULL", name);
+  return(NULL);
+}
+
+/**
+ * Parameter file must be parsed first!
+ * searches through the list of parameters, 
+ * looking for one whose name matches the string.  
+ * The function sets the corresponding value,
+ * if the parameter is not found or parameters has already been confirmed don't change
+ * \returns TRUE if paramater value is set, else FALSE
+ */ 
+BOOLEAN_T set_string_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ char* set_value  ///< the value to be set -in
+ )
+{
+  int idx;
+  BOOLEAN_T result;
+  
+  //check if parameters cah be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  //only check if parameter file has already been parsed
+  if(parameter_parsed){
+    //check if parameter name already exist?
+    for(idx = 0; idx < parameters.num_parameters; idx++){
+      //if exist ovewrite it!
+      if(!strcmp(parameters.parameters[idx].parameter_name, name)){
+        strcpy(parameters.parameters[idx].parameter_value, set_value);
+        return TRUE;
+      }	
+    }
+  }
+
+  //if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  result = add_parameter(name, set_value);
+    
+  return result;
 }
 
 /**
@@ -350,3 +711,60 @@ void check_unused_parameters(void)
   }
 }
 
+
+/**
+ * set the parameters to confirmed, thus blocks any additional changes to the parameters
+ */
+void parameters_confirmed(){
+  parameter_plasticity = FALSE;
+}
+
+
+/**
+ * Parameter file must be parsed first!
+ * searches through the list of parameters, 
+ * looking for one whose name matches the string.  
+ * then the function sets the corresponding value.
+ * if the parameter is not found, return FALSE
+ * \returns TRUE if paramater value is set, else FALSE
+ */ 
+BOOLEAN_T set_options_command_line(
+  char*     name,  ///< the name of the parameter looking for -in
+  char* set_value,  ///< the value to be set -in
+  BOOLEAN_T required ///< is this a required option -in
+  )
+{
+  int idx;
+  
+  //check if parameters has been initlialized
+  if(!parameter_initialized && !parameter_parsed){
+    carp(CARP_ERROR, "must inilialize parameters before copying");
+    return FALSE;
+  }
+  
+  //check if parameters cah be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  //for required options, there are not in the parameter list, thus must add
+  if(required){
+    if(add_parameter(name, set_value)){
+      return TRUE;
+    }
+    return FALSE;
+  }
+  
+  //check if parameter name already exist?
+  for(idx = 0; idx < parameters.num_parameters; idx++){
+    //if exist ovewrite it!
+    if(!strcmp(parameters.parameters[idx].parameter_name, name)){
+      strcpy(parameters.parameters[idx].parameter_value, set_value);
+      return TRUE;
+    }	
+  }
+  
+  carp(CARP_ERROR, "incorrect parameter name: %s from the parameter file", name);
+  return FALSE;
+} 

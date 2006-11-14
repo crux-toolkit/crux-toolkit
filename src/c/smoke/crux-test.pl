@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.5  2006/09/13 22:11:34  cpark
+#added smoke test for create-index
+#
 #Revision 1.4  2006/09/13 01:20:12  cpark
 #add create index smoke test
 #
@@ -203,7 +206,7 @@ sub test_cmd_index() {
      my $index_result = system($cmd);
     if ($index_result == 0) {
        # The command was successful, now vet the output.
-        my $diff_cmd = "diff -r -I time $standard_filename test_crux_index > $diff_filename";
+        my $diff_cmd = "diff -r -x CVS -I time $standard_filename test_crux_index > $diff_filename";
         $result = system($diff_cmd);
         if ($result == 0) {
             # The output of the command matches the expected output.

@@ -53,7 +53,7 @@ int main(int argc, char** argv){
   
   //parsing variables
   int result = 0;
-  const char * error_message;
+  char * error_message;
 
  /* Define optional command line arguments */ 
  parse_arguments_set_opt(

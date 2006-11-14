@@ -4,7 +4,8 @@
  * CREATE DATE: 5/22/2004
  
  * AUTHOR: Charles E. Grant
- 
+ * MODIFIED: Chris Park
+
  * PROJECT: utilities
  
  * COPYRIGHT: 2004, University of Washington
@@ -23,29 +24,38 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define DOXYGEN_SHOULD_SKIP_THIS
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
+#include <unistd.h>
+#include "carp.h"
+#include "parse_arguments.h"
+#include "objects.h"
 
 enum argument_type { FLAG_ARG, INT_ARG, LONG_ARG, DOUBLE_ARG, STRING_ARG };
 enum argument_error { NO_ERROR, UNKNOWN_OPTION, MISSING_VALUE,
                        INVALID_VALUE, UNKNOWN_REQ_ARG, MISSING_REQ_ARG,
                         TOO_MANY_REQ_ARGS, TOO_MANY_OPT_ARGS};
 
-/**
- * The argument struct holds information about a command line argument.
- */
-typedef struct {
-  const char *name; 
-  const char *usage; 
-  void *container;
-  enum argument_type type;
-} argument;
 
-int parse_arguments_set_opt(const char * name, const char * usage, 
+int parse_arguments_set_opt(/*const*/ char * name, /*const*/ char * usage, 
                                 void * container, enum argument_type type);
-int parse_arguments_set_req(const char * name, const char * usage, 
+int parse_arguments_set_req(/*const*/ char * name, /*const*/ char * usage, 
                               void * container, enum argument_type type);
 int parse_arguments(int argc, char * argv[], int die_on_error);
-int parse_arguments_get_error(const char ** s);
-char * parse_arguments_get_usage(const char * name);
+int parse_arguments_get_error(/*const*/ char ** s);
+char * parse_arguments_get_usage(/*const*/ char * name);
+
+
+/**
+ * updates all the parameters in the parameter file with the 
+ * higher precedence command line parameters
+ * returns TRUE is sucessful, else FALSE
+ */
+BOOLEAN_T update_parameter(void);
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #endif /* PARSE_ARGUMENTS_H */
