@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -223,6 +223,32 @@ PEPTIDE_T* database_peptide_iterator_next(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
   );
 
+/**********************************************************************
+ * wrapper, for generate_peptides_iterator, cast back to original type
+ ***********************************************************************/
+
+/**
+ * Frees an allocated database_peptide_iterator object.
+ */
+void void_free_database_peptide_iterator(
+  void* database_peptide_iterator ///< the iterator to free -in
+  );
+
+/**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T void_database_peptide_iterator_has_next(
+  void* database_peptide_iterator ///< the iterator of interest -in
+  );
+
+/**
+ * \returns The next peptide in the database.
+ */
+PEPTIDE_T* void_database_peptide_iterator_next(
+  void* database_peptide_iterator ///< the iterator of interest -in
+  );
+
 /***********************************
  * database sorted peptide iterator
  ***********************************/
@@ -260,6 +286,33 @@ BOOLEAN_T database_sorted_peptide_iterator_has_next(
  */
 PEPTIDE_T* database_sorted_peptide_iterator_next(
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
+  );
+
+/**********************************************************************
+ * wrapper, for generate_peptides_iterator, cast back to original type
+ ***********************************************************************/
+
+/**
+ * Frees an allocated database_sorted_peptide_iterator object.
+ */
+void void_free_database_sorted_peptide_iterator(
+  void* database_peptide_iterator ///< the iterator to free -in
+  );
+
+/**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T void_database_sorted_peptide_iterator_has_next(
+  void* database_peptide_iterator ///< the iterator of interest -in
+  );
+
+/**
+ * returns each peptide in sorted order
+ * \returns The next peptide in the database.
+ */
+PEPTIDE_T* void_database_sorted_peptide_iterator_next(
+  void* database_peptide_iterator ///< the iterator of interest -in
   );
 
 

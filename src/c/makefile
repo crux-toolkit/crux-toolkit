@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.37 $
+# VERSION: $Revision: 1.38 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -55,6 +55,7 @@ LIBOBJS =\
 	${OBJDIR}/sorter.o \
 	${OBJDIR}/get_ms2_spectrum.o \
 	${OBJDIR}/generate_peptides.o \
+	${OBJDIR}/generate_peptides_iterator.o \
 	${OBJDIR}/create_index.o \
 	${OBJDIR}/predict_peptide_ions.o \
 	${OBJDIR}/scorer.o \

@@ -52,11 +52,11 @@ int main(int argc, char** argv){
   //optional variables
   char* charge = "2";
   char* type = "sp";
-  char* parameter_file = "crux_parameter";
+  char* parameter_file = NULL;
   
   //parsing variables
   int result = 0;
-  const char * error_message;
+  char * error_message;
 
 
  /* Define optional command line arguments */ 
@@ -67,89 +67,82 @@ int main(int argc, char** argv){
     STRING_ARG);
   
   parse_arguments_set_opt(
-    "score_type", 
+    "score-type", 
     "The type of scoring function to use. sp",
     (void *) &type, 
     STRING_ARG);
 
   parse_arguments_set_opt(
-    "parameter_file",
+    "parameter-file",
     "The crux parameter file to parse parameter from.",
     (void *) &parameter_file,
     STRING_ARG);
 
  /* Define required command line arguments */
   parse_arguments_set_req(
-    "peptide_sequence", 
+    "peptide-sequence", 
     "The literal peptide sequence (e.g. EAMAPK) that is used to predict the ions.", 
     (void *) &peptide_sequence, 
     STRING_ARG);
 
   parse_arguments_set_req(
-    "scan number", 
+    "scan-number", 
     "The scan number for the MS-MS spectrum to extract from the ms2 file. This is an integer in the range [1, 100000], and uniquely identifies a particular MS-MS spectrum within an .ms2 file.",
     (void *) &scan_num, INT_ARG);
 
   parse_arguments_set_req(
-    "ms2 file name", 
+    "ms2-filename", 
     "A file containing multiple MS-MS spectra in .ms2 format.",
     (void *) &ms2_file,
     STRING_ARG);
 
- /* Parse the command line */
- if (parse_arguments(argc, argv, 0)) {
-   //parsed arguments
-   int peptide_charge = 1;
-   SCORER_TYPE_T score_type = SP; 
+  /* Parse the command line */
+  if (parse_arguments(argc, argv, 0)) {
+    //parsed arguments
+    int peptide_charge = 1;
+    SCORER_TYPE_T score_type = SP; 
+    
+    SPECTRUM_T* spectrum = NULL;
+    SPECTRUM_COLLECTION_T * collection = NULL;
+    ION_SERIES_T* ion_series = NULL;
+    SCORER_T* scorer = NULL;
+    float score = 0;
+    int  verbosity = CARP_INFO;
+    
+    //set verbosity
+    set_verbosity_level(verbosity);
 
-   SPECTRUM_T* spectrum = NULL;
-   SPECTRUM_COLLECTION_T * collection = NULL;
-   ION_SERIES_T* ion_series = NULL;
-   SCORER_T* scorer = NULL;
-   float score = 0;
-   int  verbosity = CARP_INFO;
+    //parse and update parameters
+    parse_update_parameters(parameter_file);
+    
 
-   //set verbosity
-   set_verbosity_level(verbosity);
+    peptide_charge = get_int_parameter("charge", peptide_charge);
+    
+    if( peptide_charge < 1 || peptide_charge > 3){
+      wrong_command(charge, "The peptide charge. 1|2|3");
+    }
 
-   //peptide charge
-   if(strcmp(charge, "1")== 0){
-     peptide_charge = 1;
-   }
-   else if(strcmp(charge, "2")== 0){
-     peptide_charge = 2;
-   }
-   else if(strcmp(charge, "3")== 0){
-     peptide_charge = 3;
-   }
-   else if(strcmp(charge, "4")== 0){
-     peptide_charge = 4;
-   }
-   else{
-     wrong_command(charge, "The peptide charge. 1|2|3");
-   }
+    //check peptide sequence
+    if(!valid_peptide_sequence(peptide_sequence)){
+      wrong_command(peptide_sequence, "not a valid peptide sequence");
+    }
+    
+    //score type
+    if(strcmp(get_string_parameter_pointer("score-type"), "sp")== 0){
+      score_type = SP;
+    }
+    else{
+      wrong_command(type, "The type of scoring function to use. sp");
+    }
+    
+    //parameters are now confirmed, can't be changed
+    parameters_confirmed();
 
-   //check peptide sequence
-   if(!valid_peptide_sequence(peptide_sequence)){
-     wrong_command(peptide_sequence, "not a valid peptide sequence");
-   }
-
-   //score type
-   if(strcmp(type, "sp")== 0){
-     score_type = SP;
-   }
-   else{
-     wrong_command(type, "The type of scoring function to use. sp");
-   }
-     
-   //parse paramter file
-   parse_parameter_file(parameter_file);
-
-   //set ion constraint to sequest settings
-   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
-   
-   //create new ion series
-   ion_series = new_ion_series(peptide_sequence, peptide_charge, ion_constraint);
+    //set ion constraint to sequest settings
+    ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
+    
+    //create new ion series
+    ion_series = new_ion_series(peptide_sequence, peptide_charge, ion_constraint);
    
    //now predict ions
    predict_ions(ion_series);
@@ -157,7 +150,7 @@ int main(int argc, char** argv){
    //read ms2 file
    collection = new_spectrum_collection(ms2_file);
    spectrum = allocate_spectrum();
-  
+   
    //search for spectrum with correct scan number
    if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
      carp(CARP_WARNING, "failed to find spectrum with  scan_num: %d", scan_num);

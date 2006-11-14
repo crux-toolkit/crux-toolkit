@@ -20,7 +20,7 @@
 #include "database.h"
 #include "parameter.h"
 #include "index.h"
-
+#include "generate_peptides_iterator.h"
 
 
 /**
@@ -28,47 +28,48 @@
  *\brief An object that navigates the options and selects the correct peptide iterator to use 
  */
 struct generate_peptides_iterator_t{
-  void* iterator;  ///< the object iterator that will be selected
-  void* has_next;  ///< the function pointer to *_has_next
-  void* next;      ///< the function pointer to *_next
-  void* free;      ///< the function pointer to *_free
+  void* iterator;     ///< the object iterator that will be selected
+  BOOLEAN_T (*has_next)(void*);     ///< the function pointer to *_has_next
+  PEPTIDE_T* (*next)(void*);         ///< the function pointer to *_next
+  void (*free)(void*);         ///< the function pointer to *_free
+  void (*free_peptide)(PEPTIDE_T*); ///< the function pointer to *_free_peptide
   INDEX_T* index;  ///< the index object needed
   DATABASE_T* database; ///< the database object needed
   PEPTIDE_CONSTRAINT_T* constraint; ///< peptide constraint
-}
+};
 
 
 /**
- *\returns a empty generate_peptide_iterator object
+ *\returns a empty generate_peptides_iterator object
  */
-GENERATE_PEPTIDE_ITERATOR_T* allocate_generate_peptide_iterator(){
+GENERATE_PEPTIDES_ITERATOR_T* allocate_generate_peptides_iterator(){
   //allocate an empty iterator
-  GENERATE_PEPTIDE_ITERATOR_T* iterator = 
-    (GENERATE_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(GENERATE_PEPTIDE_ITERATOR_T));
+  GENERATE_PEPTIDES_ITERATOR_T* iterator = 
+    (GENERATE_PEPTIDES_ITERATOR_T*)mycalloc(1, sizeof(GENERATE_PEPTIDES_ITERATOR_T));
 
   return iterator;
 }
 
 /**
- *\returns a new generate_peptide_iterator object
+ *\returns a new generate_peptides_iterator object
  */
-GENERATE_PEPTIDE_ITERATOR_T* new_generate_peptide_iterator(){
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
   //get perameters
-  double min_mass = get_double_parameter("min_mass", 200);
-  double max_mass = get_double_parameter("max_mass", 2400);
-  int min_length = get_int_parameter("min_length", 6);
-  int max_length = get_int_parameter("max_length", 50);
-  char* cleavages = get_string_parameter("cleavages", "tryptic");
-  char* isotopic_mass = get_string_parameter("isotopic_mass","average");
-  char* redundancy = get_string_parameter("redundancy", "redundant");
-  char* use_index = get_string_parameter("use_index", "F");
-  char* sort = get_string_parameter("sort", "none");      // mass, length, lexical, none  
+  double min_mass = get_double_parameter("min-mass", 200);
+  double max_mass = get_double_parameter("max-mass", 2400);
+  int min_length = get_int_parameter("min-length", 6);
+  int max_length = get_int_parameter("max-length", 50);
+  char* cleavages = get_string_parameter_pointer("cleavages");
+  char* isotopic_mass = get_string_parameter_pointer("isotopic-mass");
+  char* redundancy = get_string_parameter_pointer("redundancy");
+  char* use_index = get_string_parameter_pointer("use-index");
+  char* sort = get_string_parameter_pointer("sort");   // mass, length, lexical, none  
 
   BOOLEAN_T use_index_boolean = FALSE;
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
-  int missed_cleavages = get_int_parameter("missed_cleavages", FALSE);
-  char* in_file = get_string_parameter("fasta_file", NULL);
+  BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages", FALSE);
+  char* in_file = get_string_parameter_pointer("fasta-file");
   BOOLEAN_T is_unique = FALSE;
   SORT_TYPE_T sort_type = NONE;
 
@@ -76,7 +77,6 @@ GENERATE_PEPTIDE_ITERATOR_T* new_generate_peptide_iterator(){
   DATABASE_PEPTIDE_ITERATOR_T* iterator = NULL;
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
   DATABASE_T* database = NULL;
-  PEPTIDE_T* peptide = NULL;
   INDEX_T* index = NULL;
   INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator = NULL;
   INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator = NULL;
@@ -159,7 +159,7 @@ GENERATE_PEPTIDE_ITERATOR_T* new_generate_peptide_iterator(){
   }
  
   //allocate an empty iterator
-  GENERATE_PEPTIDE_ITERATOR_T* gen_peptide_iterator = allocate_generate_peptide_iterator();
+  GENERATE_PEPTIDES_ITERATOR_T* gen_peptide_iterator = allocate_generate_peptides_iterator();
   
   //peptide constraint
   PEPTIDE_CONSTRAINT_T* constraint = 
@@ -179,55 +179,50 @@ GENERATE_PEPTIDE_ITERATOR_T* new_generate_peptide_iterator(){
       exit(1);
     }
     
-    //create index and set to generate_peptide_iterator
+    //create index and set to generate_peptides_iterator
     index = new_search_index(in_file, constraint, is_unique);
     gen_peptide_iterator->index = index;
     
     if(index != NULL){
-      //count peptides, DEBUG purpose
-      long int total_peptides = 0;
-        
       //only resrict peptide by mass and length, default iterator
       if(peptide_type == ANY_TRYPTIC){
-        //create index peptide interator & set generate_peptide_iterator
+        //create index peptide interator & set generate_peptides_iterator
         index_peptide_iterator = new_index_peptide_iterator(index);        
         gen_peptide_iterator->iterator = index_peptide_iterator;
-        gen_peptide_iterator->has_next = &index_peptide_iterator_has_next;
-        gen_peptide_iterator->next = &index_peptide_iterator_next;
-        gen_peptide_iterator->free = &index_peptide_iterator_free;
+        gen_peptide_iterator->has_next = &void_index_peptide_iterator_has_next;
+        gen_peptide_iterator->next = &void_index_peptide_iterator_next;
+        gen_peptide_iterator->free = &void_free_index_peptide_iterator;
       }
       //if need to select among peptides by peptide_type and etc.
       else{
-        //create index_filtered_peptide_iterator  & set generate_peptide_iterator
+        //create index_filtered_peptide_iterator  & set generate_peptides_iterator
         index_filtered_peptide_iterator = new_index_filtered_peptide_iterator(index);
         gen_peptide_iterator->iterator = index_filtered_peptide_iterator;
-        gen_peptide_iterator->has_next = &index_filtered_peptide_iterator_has_next;
-        gen_peptide_iterator->next = &index_filtered_peptide_iterator_next;
-        gen_peptide_iterator->free = &index_filtered_peptide_iterator_free;
+        gen_peptide_iterator->has_next = &void_index_filtered_peptide_iterator_has_next;
+        gen_peptide_iterator->next = &void_index_filtered_peptide_iterator_next;
+        gen_peptide_iterator->free = &void_free_index_filtered_peptide_iterator;
       }
-      else{
-        carp(CARP_ERROR, "failed to perform search");
-        exit(1);
-      }
+      //set the correct free peptide method
+      gen_peptide_iterator->free_peptide = &free_peptide_for_array;
     }
   }
   /*********************************************
    *read in from fasta file, don't use index file
    ************************************************/
   else{
-    //create a new database & set generate_peptide_iterator
+    //create a new database & set generate_peptides_iterator
     database = new_database(in_file, FALSE);         //needs to change this....by given option
     gen_peptide_iterator->database = database;
     
     //no sort, redundant
     if(!is_unique && sort_type == NONE){ 
       
-      //create peptide iterator  & set generate_peptide_iterator
+      //create peptide iterator  & set generate_peptides_iterator
       iterator = new_database_peptide_iterator(database, constraint);
-      generate_peptide_iterator->iterator = iterator;
-      gen_peptide_iterator->has_next = &database_peptide_iterator_has_next;
-      gen_peptide_iterator->next = &database_peptide_iterator_next;
-      gen_peptide_iterator->free = &databse_peptide_iterator_free;
+      gen_peptide_iterator->iterator = iterator;
+      gen_peptide_iterator->has_next = &void_database_peptide_iterator_has_next;
+      gen_peptide_iterator->next = &void_database_peptide_iterator_next;
+      gen_peptide_iterator->free = &void_free_database_peptide_iterator;
       
     }      
     //sort or check for unique
@@ -244,13 +239,15 @@ GENERATE_PEPTIDE_ITERATOR_T* new_generate_peptide_iterator(){
           new_database_sorted_peptide_iterator(database, constraint, sort_type, is_unique);
       }
       
-      // set generate_peptide_iterator 
+      // set generate_peptides_iterator 
       gen_peptide_iterator->iterator = sorted_iterator;
-      gen_peptide_iterator->has_next = &database_sorted_peptide_iterator_has_next;
-      gen_peptide_iterator->next = &database_sorted_peptide_iterator_next;
-      gen_peptide_iterator->free = &databse_sorted_peptide_iterator_free;
+      gen_peptide_iterator->has_next = &void_database_sorted_peptide_iterator_has_next;
+      gen_peptide_iterator->next = &void_database_sorted_peptide_iterator_next;
+      gen_peptide_iterator->free = &void_free_database_sorted_peptide_iterator;
       
     }
+    //set the correct free peptide method
+    gen_peptide_iterator->free_peptide = &free_peptide;
   }
   return gen_peptide_iterator;
 }
@@ -258,41 +255,57 @@ GENERATE_PEPTIDE_ITERATOR_T* new_generate_peptide_iterator(){
 /**
  *\returns TRUE, if there is a next peptide, else FALSE
  */
-BOOLEAN_T generate_peptide_iterator_has_next(
-  GENERATE_PEPTIDE_ITERATOR_T* generate_peptide_iterator ///< working iterator
+BOOLEAN_T generate_peptides_iterator_has_next(
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< working iterator
   )
 {
-  return generate_peptide_iterator->has_next(generate_peptide_iterator->iterator);
+  return generate_peptides_iterator->has_next(generate_peptides_iterator->iterator);
 }
 
 /**
  *\returns the next peptide in the iterator
  */
-PEPTIDE_T* generate_peptide_iterator_next(
-  GENERATE_PEPTIDE_ITERATOR_T* generate_peptide_iterator ///< working iterator
+PEPTIDE_T* generate_peptides_iterator_next(
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< working iterator
   )
 {
-  return generate_peptide_iterator->next(generate_peptide_iterator->iterator);
+  return generate_peptides_iterator->next(generate_peptides_iterator->iterator);
 }
 
 /**
- * Frees an allocated generate_peptide_iterator object
+ * Don't free the iterator until completed with the peptides generated
+ * Frees an allocated generate_peptides_iterator object
  */
-void free_generate_peptide_iterator(
-  GENERATE_PEPTIDE_ITERATOR_T* generate_peptide_iterator ///< iterator to free
+void free_generate_peptides_iterator(
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< iterator to free
   )
 {
   //free the nested iterator
-  generate_peptide_iterator->free(generate_peptide_iterator->iterator);
+  generate_peptides_iterator->free(generate_peptides_iterator->iterator);
 
   //free database or index, if exist
-  if(generate_peptide_iterator->database != NULL){
-    free_database(generate_peptide_iterator->database);
+  if(generate_peptides_iterator->database != NULL){
+    free_database(generate_peptides_iterator->database);
   }
-  if(generate_peptide_iterator->index != NULL){
-    free_index(generate_peptide_iterator->index);
+  if(generate_peptides_iterator->index != NULL){
+    free_index(generate_peptides_iterator->index);
   }
+  
+  //free peptide constraint
+  free_peptide_constraint(generate_peptides_iterator->constraint);
 
-  free(generate_peptide_iterator);
+  free(generate_peptides_iterator);
 }
 
+/**
+ * Always free peptides created by the generate_peptides_iterator through this method
+ * Frees the allocated peptide with the correct free-method according to it's type
+ */
+void free_peptide_produced_by_iterator(
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator, ///< the iterator which the peptide was produced -in
+  PEPTIDE_T* peptide ///< the peptide to free -in
+  )
+{
+  //free peptide with the correct free peptide method
+  generate_peptides_iterator->free_peptide(peptide);
+}

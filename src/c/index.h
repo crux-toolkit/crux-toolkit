@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -244,6 +244,32 @@ PEPTIDE_T* index_peptide_iterator_next(
     INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator ///< the iterator of interest -in
     );
 
+/**********************************************************************
+ * wrapper, for generate_peptides_iterator, cast back to original type
+ ***********************************************************************/
+/**
+ * Frees an allocated index_peptide_iterator object.
+ */
+void void_free_index_peptide_iterator(
+    void* index_peptide_iterator  ///< the iterator to free -in
+    );
+
+/**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T void_index_peptide_iterator_has_next(
+    void* index_peptide_iterator ///< the iterator of interest -in
+    );
+
+/**
+ * \returns The next peptide in the index.
+ */
+PEPTIDE_T* void_index_peptide_iterator_next(
+    void* index_peptide_iterator ///< the iterator of interest -in
+    );
+
+
 /***********************************************
  * index_filtered_peptide_iterator
  ***********************************************/
@@ -279,6 +305,36 @@ BOOLEAN_T index_filtered_peptide_iterator_has_next(
 void free_index_filtered_peptide_iterator(
   INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
   );
+
+/**********************************************************************
+ * wrapper, for generate_peptides_iterator, cast back to original type
+ ***********************************************************************/
+
+/**
+ *  The basic iterator functions.
+ * \returns The next peptide in the index.
+ */
+PEPTIDE_T* void_index_filtered_peptide_iterator_next(
+  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
+  );
+
+/**
+ * The basic iterator functions.
+ * check to see if the index_filtered_peptide_iterator has more peptides to return
+ *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ */
+BOOLEAN_T void_index_filtered_peptide_iterator_has_next(
+  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
+  );
+
+/**
+ * Frees an allocated index_filtered_peptide_iterator object.
+ */
+void void_free_index_filtered_peptide_iterator(
+  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
+  );
+
+
 
 /***********************************************
  * Iterators BIN
@@ -317,6 +373,7 @@ BOOLEAN_T bin_peptide_iterator_has_next(
 void free_bin_peptide_iterator(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< the iterator to free -in
   );
+
 
 /***********************************************
  * Iterators sorted BIN

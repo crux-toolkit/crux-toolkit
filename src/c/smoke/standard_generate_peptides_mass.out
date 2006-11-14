@@ -10,7 +10,7 @@
 #	isotopic mass type: average
 #	verbosity: 30
 #	redundancy: unique
-#	use index: FALSE
+#	use index: F
 416.43	gi|16127996|ref|NP_414543.1|	474	6	GGVGGA
 444.49	gi|16127996|ref|NP_414543.1|	472	6	GVGGVG
 444.49	gi|16127996|ref|NP_414543.1|	473	6	VGGVGG

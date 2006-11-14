@@ -2,7 +2,14 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <assert.h>
+#include <ctype.h>
+#include <unistd.h>
+#include "carp.h"
+#include "parameter.h"
 #include "parse_arguments.h"
+#include "objects.h"
+
 
 /* Limits on the number of arguments */
 #define MAX_OPT_ARGS 25
@@ -15,6 +22,20 @@
 #define MAX_VALUE_STRLEN 50 
 #define MAX_ARG_LENGTH 250
 #define MAX_MESSAGE_BUFFER 510
+
+
+
+/**
+ * The argument struct holds information about a command line argument.
+ */
+typedef struct {
+  BOOLEAN_T command_line; //did the value come from the command line
+  /*const*/ char *name; 
+  /*const*/ char *usage; 
+  void *container;
+  enum argument_type type;
+} argument;
+
 
 /* These variables are for error handling */
 enum argument_error error = NO_ERROR;
@@ -30,16 +51,17 @@ argument required[MAX_REQ_ARGS];
 char * usage = NULL;
 
 /* Forward declarations */
-int assign_value_from_required(const argument * req,  const char * value);
-int assign_value_from_option(const argument * option,  int *index);
-const argument * get_next_req_argument();
-const argument * find_option(char * name);
-const char * base_name(const char *s);
-void build_message(const char * arg);
-size_t get_usage_size(const char * name);
+
+int assign_value_from_required(/*const*/ argument * req,  /*const*/ char * value);
+int assign_value_from_option(/*const*/ argument * option,  int *index);
+/*const*/ argument * get_next_req_argument();
+/*const*/ argument * find_option(char * name);
+/*const*/ char * base_name(/*const*/ char *s);
+void build_message(/*const*/ char * arg);
+size_t get_usage_size(/*const*/ char * name);
 int sprintf_option_default_value(argument * o);
 char * get_option_value_type(argument * o);
-int is_numeric(const char * s);
+int is_numeric(/*const*/ char * s);
 
 /***********************************************************************
  * Function:    parse_arguments_set_opt
@@ -61,7 +83,7 @@ int is_numeric(const char * s);
  *              been exceeded.
  * 
  ***********************************************************************/
-int parse_arguments_set_opt(const char * name, const char * usage, void * container, 
+int parse_arguments_set_opt(/*const*/ char * name, /*const*/ char * usage, void * container, 
                 enum argument_type type) {
         
   int result = 0;
@@ -71,6 +93,7 @@ int parse_arguments_set_opt(const char * name, const char * usage, void * contai
     optional[optional_count].usage = usage;
     optional[optional_count].container = container;
     optional[optional_count].type = type;
+    optional[optional_count].command_line = FALSE;
     optional_count++;
     result = 1;
   } else {
@@ -102,7 +125,7 @@ int parse_arguments_set_opt(const char * name, const char * usage, void * contai
  *              been exceeded.
  * 
  ***********************************************************************/
-int parse_arguments_set_req(const char * name, const char * usage, void * container, 
+int parse_arguments_set_req(/*const*/ char * name, /*const*/ char * usage, void * container, 
                 enum argument_type type) {
 
   int result = 0;
@@ -112,6 +135,7 @@ int parse_arguments_set_req(const char * name, const char * usage, void * contai
     required[required_count].usage = usage;
     required[required_count].container = container;
     required[required_count].type = type;
+    required[required_count].command_line = FALSE;
     required_count++;
     result = 1;
   } else {
@@ -148,8 +172,8 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
   int i;
   int n;
   int result = 0;
-  const argument * option;
-  const argument * req;
+  /*const*/ argument * option;
+  /*const*/ argument * req;
 
   argument_count = argc;
   arguments = argv;
@@ -213,9 +237,9 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
  * Returns:      A pointer to the next required argument, NULL if no required
  *               arguments remain.
  ***********************************************************************/
-const argument * get_next_req_argument() {
+/*const*/ argument * get_next_req_argument() {
 
-  const argument *result = NULL;
+  /*const*/ argument *result = NULL;
 
   if (required_index < required_count) {
     result = &(required[required_index]);
@@ -238,9 +262,9 @@ const argument * get_next_req_argument() {
  * 
  * Returns:      A pointer to the matching optional argument, NULL if no match found.
  ***********************************************************************/
-const argument * find_option(char * name) {
+/*const*/ argument * find_option(char * name) {
 
-  const argument * option_found = NULL;
+  /*const*/ argument * option_found = NULL;
   int i;
 
   /* Skip over extra '-' for long style options */
@@ -272,7 +296,7 @@ const argument * find_option(char * name) {
  * 
  * Returns:      An integer should always be NO_ERROR
  ***********************************************************************/
-int assign_value_from_required(const argument * req,  const char * value) {
+int assign_value_from_required(/*const*/ argument * req,  /*const*/ char * value) {
 
   switch (req->type) {
     case FLAG_ARG:
@@ -288,9 +312,13 @@ int assign_value_from_required(const argument * req,  const char * value) {
       *((double *) req->container) = atof(value);
       break;
     case STRING_ARG:
-      *((const char **) req->container) = value;
+      *((/*const*/ char **) req->container) = value;
       break;
   }
+  
+  //yes this required value came from the command line
+  req->command_line = TRUE;
+
   return NO_ERROR;
 }
 
@@ -309,12 +337,12 @@ int assign_value_from_required(const argument * req,  const char * value) {
  * 
  * Returns:      An integer from the argument_error enumeration
  ***********************************************************************/
-int assign_value_from_option(const argument * option,  int *index) {
+int assign_value_from_option(/*const*/ argument * option,  int *index) {
 
   int more_args = 0;
   int next_arg_is_not_option = 1;
   enum argument_error result = NO_ERROR;
-  const char * value = NULL;
+  /*const*/ char * value = NULL;
 
   if (*index < argument_count -1) {
      more_args = 1;
@@ -388,7 +416,7 @@ int assign_value_from_option(const argument * option,  int *index) {
         /* Next argument should be value */
         (*index)++;
         value = arguments[*index];
-        *((const char **) option->container) = value;
+        *((/*const*/ char **) option->container) = value;
         result = NO_ERROR;
       } else {
         /* Missing value */
@@ -396,6 +424,10 @@ int assign_value_from_option(const argument * option,  int *index) {
       }
       break;
   }
+  
+  //yes this optional value came from the command line
+  option->command_line = TRUE;
+
   return result;
 }
 
@@ -412,7 +444,7 @@ int assign_value_from_option(const argument * option,  int *index) {
  * Returns:      An member of the argument_error enumeration
  *               describing the error that occured
  ***********************************************************************/
-int parse_arguments_get_error(const char ** s) {
+int parse_arguments_get_error(/*const*/ char ** s) {
   *s = message;
   return error;
 }
@@ -428,7 +460,7 @@ int parse_arguments_get_error(const char ** s) {
  *
  * Returns:      the amount of memory needed for the usage string
  ***********************************************************************/
-size_t get_usage_size(const char * name) {
+size_t get_usage_size(/*const*/ char * name) {
   size_t memory_used = 0;
   int i = 0;
   memory_used += 100; /* Fixed text and slack */
@@ -562,7 +594,7 @@ int sprintf_option_default_value(argument * o) {
  *               failed. We must be out of memory and printing a usage
  *               statment is the least of our worries.
  ***********************************************************************/
-char * parse_arguments_get_usage(const char * name) {
+char * parse_arguments_get_usage(/*const*/ char * name) {
 
   int i = 0;
   /* Caclulate the size of the buffer we'll need                     */
@@ -639,14 +671,14 @@ char * parse_arguments_get_usage(const char * name) {
  *              the size of the message buffer to accomodate your
  *              your changes without overflowing.
  ***********************************************************************/
-void build_message(const char * arg) {
+void build_message(/*const*/ char * arg) {
   
   /* Keep the error messages well below MAX_MESSAGE_BUFFER */
   /* in size, to make sure we don't truncate them          */
   /* The error message are in 1-1 correspondence with the  */
   /* argument_error enumeration                            */
 
-  const char * error_messages[] = {
+  /*const*/ char * error_messages[] = {
     "no error.",
     "%s is not a valid option.",
     "the option %s is missing its value.",
@@ -683,7 +715,7 @@ void build_message(const char * arg) {
  *
  * Returns      1 if the string was numeric, 0 otherwise
  ***********************************************************************/
-int is_numeric(const char * s) {
+int is_numeric(/*const*/ char * s) {
 
   int result = 0;
   int found_decimal = 0;
@@ -731,10 +763,10 @@ int is_numeric(const char * s) {
  * Returns      Pointer to a null terminated string containing
  *              the base name of a path
  ***********************************************************************/
-const char * base_name(const char *s) {
+/*const*/ char * base_name(/*const*/ char *s) {
 
   size_t l = 0;
-  const char * p = NULL;
+  /*const*/ char * p = NULL;
 
   l = strlen(s);
   p = s + l;
@@ -747,4 +779,104 @@ const char * base_name(const char *s) {
     }
   }
   return p;
+}
+
+/**
+ * updates all the parameters in the parameter file with the 
+ * higher precedence command line parameters
+ * returns TRUE is sucessful, else FALSE
+ */
+BOOLEAN_T update_parameter(){
+  int array_idx = 0;
+  argument* optional_arg = NULL;
+  argument* required_arg = NULL;
+  char dest[PARAMETER_LENGTH];
+  int result = 0;
+  char* bool = "FALSE";
+  
+  //look at every optional arg and update parameter file
+  // if the valuse were set from command line
+  for(array_idx = 0; array_idx < optional_count; ++array_idx){
+    optional_arg = &optional[array_idx];
+    
+    //skip the arguments that are set from default
+    if(!optional_arg->command_line){
+      continue;
+    }
+    
+    //convert to string
+    switch (optional_arg->type){
+      case FLAG_ARG:
+        if(*((int *) optional_arg->container) == 1){
+          bool = "TRUE";
+        }
+        result = snprintf(dest, PARAMETER_LENGTH, "%s", 
+                          bool);
+        break;
+      case INT_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%d", 
+                        *((int *) optional_arg->container));
+        break;
+      case LONG_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%ld", 
+                        *((long *) optional_arg->container));
+        break;
+      case DOUBLE_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%g",
+                        *((double *) optional_arg->container));
+        break;
+      case STRING_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%s", 
+                          *((char **) optional_arg->container));
+        break;
+    }
+
+    //update value in paramters
+    if(!set_options_command_line(optional_arg->name, dest, FALSE) || result < 1){
+      fprintf(stderr,"failed to update parameters from command line\n");
+      return FALSE;
+    } 
+  }
+
+  //look at every required arg and update parameter file
+  for( array_idx = 0; array_idx < required_count; ++array_idx){
+    required_arg = &required[array_idx];
+        
+    //convert to string
+    switch (required_arg->type){
+      case FLAG_ARG:
+        if(*((int *)required_arg->container) == 1){
+          bool = "TRUE";
+        }
+        else{
+          bool = "FALSE";
+        }
+        result = snprintf(dest, PARAMETER_LENGTH, "%s", 
+                          bool);
+        break;
+      case INT_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%d", 
+                        *((int *) required_arg->container));
+        break;
+      case LONG_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%ld", 
+                        *((long *) required_arg->container));
+        break;
+      case DOUBLE_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%g",
+                        *((double *) required_arg->container));
+        break;
+      case STRING_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%s", 
+                          *((char **) required_arg->container));
+        break;
+    }
+
+    //update value in paramters
+    if(!set_options_command_line(required_arg->name, dest, TRUE) || result < 1){
+      fprintf(stderr,"failed to update parameters from command line\n");
+      return FALSE;
+    } 
+  }
+  return TRUE;
 }

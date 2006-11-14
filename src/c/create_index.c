@@ -85,7 +85,7 @@ int main(int argc, char** argv){
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
   int missed_cleavages = FALSE;
   char * in_file = NULL;
-  const char * error_message;
+  /*const*/ char * error_message;
   int result = 0;
   BOOLEAN_T is_unique = FALSE;
 

@@ -10,7 +10,7 @@
 #	isotopic mass type: average
 #	verbosity: 30
 #	redundancy: unique
-#	use index: FALSE
+#	use index: F
 1311.55	gi|16127996|ref|NP_414543.1|	79	13	AAAQPGFPLAQLK
 2025.30	gi|16127996|ref|NP_414543.1|	418	20	AALARANINIVAIAQGSSER
 702.82	gi|16127996|ref|NP_414543.1|	120	6	AALICR
