@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -100,4 +100,9 @@ char* generate_name(
  */
 BOOLEAN_T valid_peptide_sequence( char* sequence);
 
+/**
+ *
+ *quickSort for floats
+ */
+void quicksort(float numbers[], int array_size);
 #endif

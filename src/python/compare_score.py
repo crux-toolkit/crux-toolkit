@@ -104,14 +104,14 @@ result_array2 = ([],[])
 totalCount = 0
 
 for working_spectrum in sqt_object.spectrums:
-    if totalCount >= 3000:
+    if totalCount >= 1500:
         break
     scanNum = working_spectrum.fields["id"]
     charge = working_spectrum.fields["charge"]
     for working_peptide in working_spectrum.peptides:
         (exit_code, result) = \
                     commands.getstatusoutput("score_peptide_spectrum " + \
-                                             "--charge " + `charge` + " --score_type " + score_type + " " + \
+                                             "--charge " + `charge` + " --score-type " + score_type + " " + \
                                              working_peptide.components["sequence"] + " " + \
                                              `scanNum` + " " + \
                                              ms2_file 
@@ -125,6 +125,7 @@ for working_spectrum in sqt_object.spectrums:
         #        print line
         #        continue
         #    elif line.startswith('S'):
+        
         result = result.split(': ')
         #if working_peptide.components["xcore_rank"] < 10:
         result_array[0].append(working_peptide.components[score_type])
@@ -133,7 +134,7 @@ for working_spectrum in sqt_object.spectrums:
         #    result_array2[1].append(float(result[2]))
         totalCount += 1
             #if working_peptide.components[score_type] >= 210:
-            #print "Sequest: %.2f, CRUX: %.2f, sequence: %s" % (working_peptide.components[score_type], float(result[1]),working_peptide.components["sequence"])
+        print "Sequest: %.2f, CRUX: %.2f, sequence: %s" % (working_peptide.components[score_type], float(result[1]),working_peptide.components["sequence"])
         if totalCount % 100 == 0:
             print "totalCount: %d" % totalCount
             #break
