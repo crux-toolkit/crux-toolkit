@@ -59,7 +59,7 @@ int main(int argc, char** argv){
   char * error_message;
 
 
- /* Define optional command line arguments */ 
+  /* Define optional command line arguments */ 
   parse_arguments_set_opt(
     "charge", 
     "The peptide charge. 1|2|3",
@@ -107,7 +107,7 @@ int main(int argc, char** argv){
     ION_SERIES_T* ion_series = NULL;
     SCORER_T* scorer = NULL;
     float score = 0;
-    int  verbosity = CARP_INFO;
+    int  verbosity = CARP_ERROR;//;     CARP_ERROR
     
     //set verbosity
     set_verbosity_level(verbosity);

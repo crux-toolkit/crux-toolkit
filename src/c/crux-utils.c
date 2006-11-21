@@ -255,4 +255,38 @@ BOOLEAN_T valid_peptide_sequence( char* sequence){
   }
   return TRUE;
 }
-                                
+
+void swap_quick(
+  float* a,
+  int idx,
+  int jdx
+  )
+{
+  float temp = 0;
+  temp = a[idx];
+  a[idx] = a[jdx];
+  a[jdx] = temp;
+}
+ 
+int Random(int i, int j) {
+  return i + rand() % (j-i+1);
+}
+
+void quick_sort(float a[], int left, int right) {
+  int last = left, i;
+
+  if (left >= right) return;
+  
+  swap_quick(a,left,Random(left,right));
+  for (i = left + 1; i <= right; i++)
+    if (a[i] > a[left]) ///CHECK THIS!!
+      swap_quick(a,++last,i);
+  swap_quick(a,left,last);
+  quick_sort(a,left,last-1);
+  quick_sort(a,last+1,right);
+}
+
+void quicksort(float a[], int array_size){
+  quick_sort(a, 0, array_size-1);
+}
+
