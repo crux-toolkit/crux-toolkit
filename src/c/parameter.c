@@ -157,7 +157,7 @@ BOOLEAN_T copy_parameter(
     }	
   }
   
-  carp(CARP_ERROR, "incorrect parameter name: %s from the parameter file", name);
+  carp(CARP_ERROR, "incorrect parameter name: %s, from the parameter file", name);
   return FALSE;
 }
 
@@ -314,7 +314,7 @@ BOOLEAN_T get_boolean_parameter(
       }
     }
   }
-  carp(CARP_ERROR, "parameter name: %s doesn't exit, using default value", name);
+  carp(CARP_ERROR, "parameter name: %s, doesn't exit, using default value: %d (1=TRUE, 0=FALSE)", name, default_value);
   return(default_value);
 }
 
@@ -410,7 +410,7 @@ int get_int_parameter(
       }
     }
   }
-  carp(CARP_ERROR, "parameter name: %s doesn't exit, using default value", name);
+  carp(CARP_ERROR, "parameter name: %s, doesn't exit, using default value: %d", name, default_value);
   return(default_value);
 }
 
@@ -497,7 +497,7 @@ double get_double_parameter(
       // }
     }
   }
-  carp(CARP_ERROR, "parameter name: %s doesn't exit, using default value", name);
+  carp(CARP_ERROR, "parameter name: %s doesn't exit, using default value: %.2f", name, default_value);
   return(default_value);
 }
 
@@ -550,8 +550,8 @@ BOOLEAN_T set_double_parameter(
  * Searches through the list of parameters, looking for one whose
  * parameter_name matches the string. 
  * The return value is allocated here and must be freed by the caller.
- * If the value is not found, return NULL.
- * \returns the string value to which matches the parameter name, else returns NULL
+ * If the value is not found, abort.
+ * \returns the string value to which matches the parameter name, else aborts
  */
 char* get_string_parameter(
   char* name  ///< the name of the parameter looking for -in
@@ -562,7 +562,8 @@ char* get_string_parameter(
 
   //check if parameter file has been parsed
   if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_WARNING, "parameters has not been set yet, returning NULL");
+    carp(CARP_WARNING, "parameters has not been set yet");
+    exit(1);
     return(NULL);
   }
   
@@ -584,7 +585,9 @@ char* get_string_parameter(
       return(return_value);
     }
   }
-  carp(CARP_ERROR, "parameter name: %s doesn't exit, return NULL", name);
+  carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
+  free(return_value);
+  exit(1);
   return(NULL);
 }
 
@@ -593,8 +596,7 @@ char* get_string_parameter(
  * parameter_name matches the string. 
  * The return value is a pointer to the original string
  * Thus, user should no free, good for printing
- * If the value is not found, return NULL.
- * \returns the string value to which matches the parameter name, else returns NULL
+ * \returns the string value to which matches the parameter name, else aborts
  */
 char* get_string_parameter_pointer(
   char* name  ///< the name of the parameter looking for -in
@@ -604,7 +606,8 @@ char* get_string_parameter_pointer(
     
   //check if parameter file has been parsed
   if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_WARNING, "parameters has not been set yet, returning NULL");
+    carp(CARP_WARNING, "parameters has not been set yet");
+    exit(1);
     return(NULL);
   }
   
@@ -613,7 +616,8 @@ char* get_string_parameter_pointer(
       return parameters.parameters[idx].parameter_value;
     }
   }
-  carp(CARP_ERROR, "parameter name: %s doesn't exit, return NULL", name);
+  carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
+  exit(1);
   return(NULL);
 }
 
@@ -765,6 +769,6 @@ BOOLEAN_T set_options_command_line(
     }	
   }
   
-  carp(CARP_ERROR, "incorrect parameter name: %s from the parameter file", name);
+  carp(CARP_ERROR, "incorrect parameter name: %s, from the parameter file", name);
   return FALSE;
 } 

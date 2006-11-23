@@ -100,8 +100,8 @@ BOOLEAN_T set_double_parameter(
  * Searches through the list of parameters, looking for one whose
  * parameter_name matches the string. 
  * The return value is allocated here and must be freed by the caller.
- * If the value is not found, return NULL.
- * \returns the string value to which matches the parameter name, else returns NULL
+ * If the value is not found, abort.
+ * \returns the string value to which matches the parameter name, else abort.
  */
 char* get_string_parameter(
   char* name  ///< the name of the parameter looking for -in
@@ -112,8 +112,8 @@ char* get_string_parameter(
  * parameter_name matches the string. 
  * The return value is a pointer to the original string
  * Thus, user should no free, good for printing
- * If the value is not found, return NULL.
- * \returns the string value to which matches the parameter name, else returns NULL
+ * If the value is not found, abort.
+ * \returns the string value to which matches the parameter name, else abort.
  */
 char* get_string_parameter_pointer(
   char* name  ///< the name of the parameter looking for -in
