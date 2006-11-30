@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -300,6 +300,9 @@ typedef struct scorer SCORER_T;
  */
 enum _scorer_type { SP, XCORR, DOTP };
 
+//the number of different score types
+#define _SCORE_TYPE_NUM 3
+
 /**
  * \typedef SCORER_TYPE_T
  * \brief The typedef for scorer type (SP, XCORR, DOTP)
@@ -312,5 +315,16 @@ typedef enum _scorer_type SCORER_TYPE_T;
  */
 typedef struct generate_peptides_iterator_t GENERATE_PEPTIDES_ITERATOR_T;
 
+/**
+ *\typedef MATCH_T
+ *\brief An object that contains the information of a peptide and the scoring of multiple types
+ */
+typedef struct match MATCH_T;
+
+/**
+ *\typedef MATCH_ITERATOR_T
+ *\brief An object that navigates the matches
+ */
+typedef struct match_iterator MATCH_ITERATOR_T;
 
 #endif

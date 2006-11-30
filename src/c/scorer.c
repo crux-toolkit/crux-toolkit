@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.9 $
+ * REVISION: $Revision: 1.10 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -38,6 +38,7 @@ struct scorer {
   //float sp_equalize_resolution; ///<  used for Sp: the resolution to which interval of peaks should be equalized to the highest peak
   float* intensity_array; ///< used for Sp: the intensity array, which can be indexed using the m/z
   float max_intensity; ///< the max intensity in the intensity array
+  BOOLEAN_T initialized; ///< has the scorer been initialized?
 };
 
 /**
@@ -78,8 +79,9 @@ SCORER_T* new_scorer(
     scorer->max_intensity = 0;
   }
 
-  printf("%s\n",get_string_parameter("dummy"));
-  
+  //the scorer as not been initialized yet.
+  scorer->initialized = FALSE;
+
   return scorer;
 }
 
@@ -483,8 +485,12 @@ BOOLEAN_T create_intensity_array(
   //equalize peaks
   equalize_peaks(scorer);
   
-  
+  //free peak iterator
   free_peak_iterator(peak_iterator);
+  
+  //scorer now been initialized!, ready to score peptides..
+  scorer->initialized = TRUE;
+
   return TRUE;
 }
 
@@ -575,19 +581,19 @@ float gen_score_sp(
   float intensity_sum = 0;
   int ion_match = 0;
   int repeat_count = 0;
-    
-  //get gama and beta
-  float beta = scorer->sp_beta;
-
-  //create intensity array
-  if(!create_intensity_array(spectrum, scorer)){
-    carp(CARP_ERROR, "failed to produce Sp");
-    free(spectrum);
-    free(ion_series);
-    free(scorer);
-    exit(1);
-  }
   
+  //initialize the scorer before scoring if necessary
+  if(!scorer->initialized){
+    //create intensity array
+    if(!create_intensity_array(spectrum, scorer)){
+      carp(CARP_ERROR, "failed to produce Sp");
+      free(spectrum);
+      free(ion_series);
+      free(scorer);
+      exit(1);
+    }
+  }
+
   //calculate the B_ION and Y_ION portions of the Sp score
   ion_match = calculate_ion_type_sp(scorer, ion_series, &intensity_sum, B_ION, &repeat_count) +
     calculate_ion_type_sp(scorer, ion_series, &intensity_sum, Y_ION, &repeat_count);
@@ -600,7 +606,7 @@ float gen_score_sp(
   //calculate Sp score.
   if(ion_match != 0){
     final_score = 
-      (intensity_sum * ion_match) * (1+ (repeat_count * beta)) / get_ion_series_num_ions(ion_series);
+      (intensity_sum * ion_match) * (1+ (repeat_count * scorer->sp_beta)) / get_ion_series_num_ions(ion_series);
   }
   
   //return score
