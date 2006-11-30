@@ -218,7 +218,7 @@ int main(int argc, char** argv){
       peptide = generate_peptides_iterator_next(peptide_iterator);
       print_peptide_in_format(peptide, output_sequence, stdout);
       
-      //free peptide, must free with the
+      //free peptide, must free with the through the free method provided by iterator
       free_peptide_produced_by_iterator(peptide_iterator, peptide);
 
       //debug purpose
