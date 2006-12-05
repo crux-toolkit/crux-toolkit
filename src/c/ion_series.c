@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.14 $
+ * REVISION: $Revision: 1.15 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -808,6 +808,17 @@ void copy_ion_series(
 /*************************************
  * ION_SERIES_T: get and set methods
  ************************************/
+
+/**
+ *\returns the peptide length of which the ions are made
+ */
+int get_ion_series_peptide_length(
+  ION_SERIES_T* ion_series ///< the working ion_series -in                          
+  )
+{
+
+  return ion_series->peptide_length;
+}
 
 /**
  * User should not free the peptide sequence seperate from the ion_series

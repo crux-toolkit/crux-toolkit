@@ -63,6 +63,9 @@ void initialize_parameters(void){
   //set number of parameters to zero
   parameters.num_parameters = 0;
 
+  //set verbosity
+  set_int_parameter("verbosity", CARP_ERROR);
+
   //set perameters
   set_string_parameter("parameter-file", "crux_parameter");
 
@@ -188,7 +191,7 @@ void parse_update_parameters(
   
   //update the parameters if any comman line arguments exist
   if(!update_parameter()){
-    fprintf(stderr, "failed to combine command line arguemnts and parameter file");
+    fprintf(stderr, "failed to combine command line arguemnts and parameter file\n");
     exit(-1);
   }
 }

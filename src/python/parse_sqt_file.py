@@ -79,7 +79,7 @@ class Spectrum:
 class Peptide:
     """an object that contains info for the peptide"""
     # xcore, Sp, mass, sequence,  
-    def __init__(self, xcore_rank, xcore, sp, mass, sequence):
+    def __init__(self, xcore_rank, xcore, sp, mass, sequence, sp_rank=None):
         """  fill in the peptide object with all its components """
         self.components = {}
         self.components["xcore_rank"] = xcore_rank
@@ -87,7 +87,8 @@ class Peptide:
         self.components["sp"] = sp
         self.components["mass"] = mass
         self.components["sequence"] = self.__extractSequence(sequence)
-
+        self.components["sp_rank"] = sp_rank
+        
     def __extractSequence(self, sequence):
         """ extracts the sequence from the two dots in between """
         real_sequence = sequence.split('.')
