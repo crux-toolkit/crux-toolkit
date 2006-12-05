@@ -53,7 +53,8 @@ int main(int argc, char** argv){
   char* charge = "2";
   char* type = "sp";
   char* parameter_file = NULL;
-  
+  int  verbosity = CARP_ERROR;
+
   //parsing variables
   int result = 0;
   char * error_message;
@@ -77,6 +78,12 @@ int main(int argc, char** argv){
     "The crux parameter file to parse parameter from.",
     (void *) &parameter_file,
     STRING_ARG);
+
+  parse_arguments_set_opt(
+    "verbosity", 
+    "Specify the verbosity of the current processes from 0-100.",
+    (void *) &verbosity, 
+    INT_ARG);
 
  /* Define required command line arguments */
   parse_arguments_set_req(
@@ -107,8 +114,15 @@ int main(int argc, char** argv){
     ION_SERIES_T* ion_series = NULL;
     SCORER_T* scorer = NULL;
     float score = 0;
-    int  verbosity = CARP_ERROR;//;     CARP_ERROR
     
+    //set verbosity
+    if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
+      set_verbosity_level(verbosity);
+    }
+    else{
+      wrong_command("verbosity", "verbosity level must be between 0-100");
+    }
+
     //set verbosity
     set_verbosity_level(verbosity);
 

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.10 $
+ * REVISION: $Revision: 1.11 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -379,10 +379,31 @@ void equalize_peaks(
 {
   int idx;
 
+
   //equalize peaks to it's greatest intensity +/- window
   for(idx = 1; idx < (int)scorer->sp_max_mz-1; ++idx){
     if(scorer->intensity_array[idx] > 0){
-    
+      
+      if(scorer->intensity_array[idx] < scorer->intensity_array[idx-1]){
+        scorer->intensity_array[idx] = scorer->intensity_array[idx-1];
+      }
+      
+      if(scorer->intensity_array[idx] < scorer->intensity_array[idx+1]){
+        scorer->intensity_array[idx] = scorer->intensity_array[idx+1];
+      }
+      
+      //DEBUG print all temp array values
+      carp(CARP_INFO, "final data[%d]=%.3f",idx, scorer->intensity_array[idx]);
+    }
+  }
+
+  
+  
+  /*
+  //equalize peaks to it's greatest intensity +/- window
+  for(idx = (int)scorer->sp_max_mz-2; idx > 0; --idx){
+    if(scorer->intensity_array[idx] > 0){
+      
       if(scorer->intensity_array[idx] < scorer->intensity_array[idx-1]){
         scorer->intensity_array[idx] = scorer->intensity_array[idx-1];
       }
@@ -395,6 +416,8 @@ void equalize_peaks(
       carp(CARP_INFO, "final data[%d]=%.3f",idx, scorer->intensity_array[idx]);
     }
   }
+  */
+  
 }
     
 /**
@@ -412,12 +435,12 @@ BOOLEAN_T create_intensity_array(
   float max_intensity = 0;
   int mz = 0;
   float intensity = 0;
-  float experimental_mass_cut_off = get_spectrum_precursor_mz(spectrum)*get_int_parameter("charge",2) + 50;
-  int precursor_mz = (int)(get_spectrum_precursor_mz(spectrum)+0.5);
-
   //FIXME, later be able pick between average and mono
   float bin_width = bin_width_mono;
+  float experimental_mass_cut_off = get_spectrum_precursor_mz(spectrum)*get_int_parameter("charge",2) + 50;
+  int precursor_mz = (int)(get_spectrum_precursor_mz(spectrum)/bin_width + 0.5);
 
+  
   //DEBUG
   carp(CARP_INFO, "precursor_mz: %d", precursor_mz);
   
@@ -444,9 +467,16 @@ BOOLEAN_T create_intensity_array(
     }
     
     //skip all peaks within precursor ion mz +/- 15
-    if(mz <= precursor_mz + 15 && mz >= precursor_mz - 15){
+    if(mz < precursor_mz + 15 && mz > precursor_mz - 15){
       continue;
     }
+
+    /*
+    //skip all peaks within precursor ion mz +/- 15
+    if(mz < precursor_mz + 15 && mz > precursor_mz - 15){
+      continue;
+    }
+    */
 
     //get intensity
     intensity = sqrt(get_peak_intensity(peak));
@@ -535,8 +565,67 @@ int calculate_ion_type_sp(
     //get the intensity matching to ion's m/z
     one_intensity = scorer->intensity_array[(int)(get_ion_mass_z(ion)/bin_width_mono + 0.5)];
     
+
     //if there is a match in the observed spectrum
     if(one_intensity > 0){
+      
+      //////////////// DEBUG
+      int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
+      printf("idx = %d\n", idx);
+
+      int cleavage_count = get_ion_series_peptide_length(ion_series)-1;//get_ion_cleavage_idx(ion)+1;      
+      
+      for(; cleavage_count > 0; --cleavage_count){
+        if(one_intensity < scorer->intensity_array[idx-cleavage_count]){
+          //one_intensity = scorer->intensity_array[idx-cleavage_count];
+        }    
+        if(one_intensity < scorer->intensity_array[idx+cleavage_count]){
+          one_intensity = scorer->intensity_array[idx+cleavage_count];
+        }
+      }
+
+      /*
+      if(one_intensity < scorer->intensity_array[idx-1]){
+        one_intensity = scorer->intensity_array[idx-1];
+      }    
+      if(one_intensity < scorer->intensity_array[idx+1]){
+        one_intensity = scorer->intensity_array[idx+1];
+      }
+      if(one_intensity < scorer->intensity_array[idx-2]){
+        one_intensity = scorer->intensity_array[idx-2];
+      }    
+      if(one_intensity < scorer->intensity_array[idx+2]){
+        one_intensity = scorer->intensity_array[idx+2];
+      }
+      if(one_intensity < scorer->intensity_array[idx-3]){
+        one_intensity = scorer->intensity_array[idx-3];
+      }    
+      if(one_intensity < scorer->intensity_array[idx+3]){
+        one_intensity = scorer->intensity_array[idx+3];
+      }
+      
+      
+      if(one_intensity < scorer->intensity_array[idx-4]){
+        one_intensity = scorer->intensity_array[idx-4];
+      }    
+      if(one_intensity < scorer->intensity_array[idx+4]){
+        one_intensity = scorer->intensity_array[idx+4];
+      }
+      if(one_intensity < scorer->intensity_array[idx-5]){
+        one_intensity = scorer->intensity_array[idx-5];
+      }    
+      if(one_intensity < scorer->intensity_array[idx+5]){
+        one_intensity = scorer->intensity_array[idx+5];
+      }
+      */
+      ///////////////////
+
+
+
+
+
+
+
       
       //DEBUG
       carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);

@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -73,6 +73,13 @@ void copy_ion_series(
  *\returns a pointer to the original parent peptide sequence of the ion_series object
  */
 char* get_ion_series_peptide(
+  ION_SERIES_T* ion_series ///< the working ion_series -in                          
+  );
+
+/**
+ *\returns the peptide length of which the ions are made
+ */
+int get_ion_series_peptide_length(
   ION_SERIES_T* ion_series ///< the working ion_series -in                          
   );
 
