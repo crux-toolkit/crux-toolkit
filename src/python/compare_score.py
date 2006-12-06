@@ -133,8 +133,9 @@ for working_spectrum in sqt_object.spectrums:
         #    result_array2[0].append(working_peptide.components["xcore_rank"])
         #    result_array2[1].append(float(result[2]))
         #totalCount += 1
-        #if abs(working_peptide.components[score_type] - float(result[1])) > 50:
-        print "Sequest: %.2f, CRUX: %.2f, sequence: %s" % (working_peptide.components[score_type], float(result[1]),working_peptide.components["sequence"])
+        if abs(working_peptide.components[score_type] - float(result[1])) > 0.09:
+            print "Sequest: %.1f, CRUX: %.1f, sequence: %s" % (working_peptide.components[score_type], float(result[1]),working_peptide.components["sequence"])
+            #print "Scan number: %s, charge: %s" % scanNum, charge
         totalCount += 1
         if totalCount % 100 == 0:
             print "totalCount: %d" % totalCount

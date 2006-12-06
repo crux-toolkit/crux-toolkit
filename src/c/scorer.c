@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.11 $
+ * REVISION: $Revision: 1.12 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -22,6 +22,12 @@
 //the bin width
 #define bin_width_mono 1.0005079
 #define bin_width_average 1.0011413
+
+//DEBUG
+float debug_array[2000];
+int debug_size;
+float debug_mz;
+int last_idx;
 
 /**
  * \struct scorer
@@ -81,6 +87,12 @@ SCORER_T* new_scorer(
 
   //the scorer as not been initialized yet.
   scorer->initialized = FALSE;
+
+
+
+  //DEBUG
+  debug_size = 0;
+  last_idx = 0;
 
   return scorer;
 }
@@ -269,12 +281,18 @@ void zero_peak_mean_stdev(
     
     //iterate over all positions and extract peaks
     if(original_array[idx] > (mean + step*stdev)){
-      //set new array with modified intensity
+
+      //DEBUG
       new_array[idx] = original_array[idx] - (mean - stdev);
-      
+      debug_array[debug_size++] = new_array[idx];
+               
       //DEBUG
       carp(CARP_INFO, "extract peak: %.2f at idx: %d", original_array[idx], idx);
-      
+      if(last_idx < idx){
+        last_idx = idx;
+      }
+      //
+
       //for step 1,
       if(step == 1){
         //zero out original peak
@@ -305,6 +323,14 @@ void zero_peaks(
   //replace intensity_array with new intensity array
   free(scorer->intensity_array);
   scorer->intensity_array = new_array;
+
+  //DEBUG
+  int idx = 0;
+  for(; idx < debug_size; ++idx){
+    carp(CARP_INFO, "extracted peaks: %.2f, at idx %d", debug_array[idx], idx);
+  }
+
+
 }
 
 /**
@@ -349,7 +375,7 @@ void extract_peaks(
   //also, normalize peaks to max_intensity to 100
   for(idx = 0; idx < (int)scorer->sp_max_mz; ++idx){
     //DEBUG print all temp array values
-    carp(CARP_INFO, "scorted data[%d]=%.3f",idx, temp_array[idx]);
+    carp(CARP_INFO, "sorted data[%d]=%.3f",idx, temp_array[idx]);
 
     if(original_array[idx] > 0){
       //is it bellow cut off?
@@ -369,34 +395,50 @@ void extract_peaks(
 }
  
 /**
- * equalize peaks +/- 1 mz to largest peak
+ * equalize all peaks in a continous region to the largest peak within the continous bins
  * start from left to right
- * yes, the former peaks equalization will affect the later peaks
  */
 void equalize_peaks(
   SCORER_T* scorer ///< the scorer object -in/out
   )
 {
   int idx;
-
-
-  //equalize peaks to it's greatest intensity +/- window
-  for(idx = 1; idx < (int)scorer->sp_max_mz-1; ++idx){
+  int equalize_idx;
+  //int array_size = (int)scorer->sp_max_mz-2;
+  
+  //equalize peaks to it's greatest intensity
+  //should use array size, but sequest seems to have a bug
+  // last idx is thus, modification to fit sequest
+  for(idx = 0; idx < last_idx/*array_size*/; ++idx){
+    
     if(scorer->intensity_array[idx] > 0){
+    
+      equalize_idx = idx + 1;
       
-      if(scorer->intensity_array[idx] < scorer->intensity_array[idx-1]){
-        scorer->intensity_array[idx] = scorer->intensity_array[idx-1];
+      while(scorer->intensity_array[equalize_idx] > 0){
+        if(equalize_idx == last_idx/*array_size*/){
+          break;
+        }
+
+        if(scorer->intensity_array[idx] < scorer->intensity_array[equalize_idx]){
+          scorer->intensity_array[idx] = scorer->intensity_array[equalize_idx];
+        }
+        else{
+          scorer->intensity_array[equalize_idx] = scorer->intensity_array[idx];
+        }
+
+        ++equalize_idx;
+        
+              
       }
-      
-      if(scorer->intensity_array[idx] < scorer->intensity_array[idx+1]){
-        scorer->intensity_array[idx] = scorer->intensity_array[idx+1];
-      }
-      
+    
       //DEBUG print all temp array values
       carp(CARP_INFO, "final data[%d]=%.3f",idx, scorer->intensity_array[idx]);
     }
   }
 
+    //DEBUG print all temp array values
+    //carp(CARP_INFO, "final before data[%d]=%.3f",idx, scorer->intensity_array[idx]);
   
   
   /*
@@ -432,17 +474,21 @@ BOOLEAN_T create_intensity_array(
 {
   PEAK_T* peak = NULL;
   PEAK_ITERATOR_T* peak_iterator = NULL;
+  float peak_location = 0;
   float max_intensity = 0;
   int mz = 0;
   float intensity = 0;
   //FIXME, later be able pick between average and mono
   float bin_width = bin_width_mono;
-  float experimental_mass_cut_off = get_spectrum_precursor_mz(spectrum)*get_int_parameter("charge",2) + 50;
-  int precursor_mz = (int)(get_spectrum_precursor_mz(spectrum)/bin_width + 0.5);
+  float precursor_mz = get_spectrum_precursor_mz(spectrum);
+  float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge",2) + 50;
 
   
   //DEBUG
-  carp(CARP_INFO, "precursor_mz: %d", precursor_mz);
+  debug_mz = precursor_mz;
+
+  //DEBUG
+  carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
   
   //if score type equals SP
   if(scorer->type != SP){
@@ -459,25 +505,21 @@ BOOLEAN_T create_intensity_array(
   //while there are more peaks to iterate over..
   while(peak_iterator_has_next(peak_iterator)){
     peak = peak_iterator_next(peak_iterator);
-    mz = (int)(get_peak_location(peak)/bin_width + 0.5);
+    peak_location = get_peak_location(peak);
     
     //skip all peaks larger than experimental mass
-    if(mz > experimental_mass_cut_off){
+    if(peak_location > experimental_mass_cut_off){
       continue;
     }
     
     //skip all peaks within precursor ion mz +/- 15
-    if(mz < precursor_mz + 15 && mz > precursor_mz - 15){
+    if(peak_location < precursor_mz + 15 &&  peak_location > precursor_mz - 15){
       continue;
     }
-
-    /*
-    //skip all peaks within precursor ion mz +/- 15
-    if(mz < precursor_mz + 15 && mz > precursor_mz - 15){
-      continue;
-    }
-    */
-
+    
+    //map peak location to bin
+    mz = (int)(peak_location/bin_width + 0.5);
+    
     //get intensity
     intensity = sqrt(get_peak_intensity(peak));
     
@@ -568,65 +610,9 @@ int calculate_ion_type_sp(
 
     //if there is a match in the observed spectrum
     if(one_intensity > 0){
-      
-      //////////////// DEBUG
       int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
       printf("idx = %d\n", idx);
-
-      int cleavage_count = get_ion_series_peptide_length(ion_series)-1;//get_ion_cleavage_idx(ion)+1;      
-      
-      for(; cleavage_count > 0; --cleavage_count){
-        if(one_intensity < scorer->intensity_array[idx-cleavage_count]){
-          //one_intensity = scorer->intensity_array[idx-cleavage_count];
-        }    
-        if(one_intensity < scorer->intensity_array[idx+cleavage_count]){
-          one_intensity = scorer->intensity_array[idx+cleavage_count];
-        }
-      }
-
-      /*
-      if(one_intensity < scorer->intensity_array[idx-1]){
-        one_intensity = scorer->intensity_array[idx-1];
-      }    
-      if(one_intensity < scorer->intensity_array[idx+1]){
-        one_intensity = scorer->intensity_array[idx+1];
-      }
-      if(one_intensity < scorer->intensity_array[idx-2]){
-        one_intensity = scorer->intensity_array[idx-2];
-      }    
-      if(one_intensity < scorer->intensity_array[idx+2]){
-        one_intensity = scorer->intensity_array[idx+2];
-      }
-      if(one_intensity < scorer->intensity_array[idx-3]){
-        one_intensity = scorer->intensity_array[idx-3];
-      }    
-      if(one_intensity < scorer->intensity_array[idx+3]){
-        one_intensity = scorer->intensity_array[idx+3];
-      }
-      
-      
-      if(one_intensity < scorer->intensity_array[idx-4]){
-        one_intensity = scorer->intensity_array[idx-4];
-      }    
-      if(one_intensity < scorer->intensity_array[idx+4]){
-        one_intensity = scorer->intensity_array[idx+4];
-      }
-      if(one_intensity < scorer->intensity_array[idx-5]){
-        one_intensity = scorer->intensity_array[idx-5];
-      }    
-      if(one_intensity < scorer->intensity_array[idx+5]){
-        one_intensity = scorer->intensity_array[idx+5];
-      }
-      */
-      ///////////////////
-
-
-
-
-
-
-
-      
+  
       //DEBUG
       carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);
 
