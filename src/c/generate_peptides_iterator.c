@@ -24,7 +24,7 @@
 
 
 /**
- *\struct generate_peptides_iterator
+ *\struct generate_peptides_iterator_t
  *\brief An object that navigates the options and selects the correct peptide iterator to use 
  */
 struct generate_peptides_iterator_t{

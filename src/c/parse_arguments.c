@@ -29,11 +29,11 @@
  * The argument struct holds information about a command line argument.
  */
 typedef struct {
-  BOOLEAN_T command_line; //did the value come from the command line
-  /*const*/ char *name; 
-  /*const*/ char *usage; 
-  void *container;
-  enum argument_type type;
+  BOOLEAN_T command_line; ///<  the value come from the command line
+  /*const*/ char *name;  ///< the name of arguemt
+  /*const*/ char *usage; ///< the type of argument
+  void *container;  ///< A pointer to storage for the parsed value of the option. 
+  enum argument_type type; ///< arguemnt type, (int, char ...?)
 } argument;
 
 

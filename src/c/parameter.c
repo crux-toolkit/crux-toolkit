@@ -31,8 +31,8 @@ struct parameter{
 };
 
 /**
- *\struct stores all the different parameters
- *\brief the array that hold all the parameters
+ *\struct parameter_array
+ *\brief the array that holds all the different parameters
  */
 struct parameter_array{
   int num_parameters;   ///< number of the total number of parameters

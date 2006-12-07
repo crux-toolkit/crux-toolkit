@@ -2,7 +2,7 @@
  * \file scorer.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. scorer
  *****************************************************************************/
 #ifndef SCORER_H 
@@ -65,7 +65,7 @@ SCORER_TYPE_T get_scorer_type(
   );
 
 /**
- *\sets the scorer type
+ *sets the scorer type
  */
 void set_scorer_type(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -80,7 +80,7 @@ float get_scorer_sp_beta(
   );
 
 /**
- *\sets the scorer beta value
+ *sets the scorer beta value
  */
 void set_scorer_sp_beta(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -95,7 +95,7 @@ float get_scorer_sp_gamma(
   );
 
 /**
- *\sets the scorer gamma value
+ *sets the scorer gamma value
  */
 void set_scorer_sp_gamma(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -111,7 +111,7 @@ float get_scorer_sp_min_mz(
   );
 
 /**
- *\sets the scorer min_mz value
+ *sets the scorer min_mz value
  */
 void set_scorer_sp_min_mz(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -127,7 +127,7 @@ float get_scorer_sp_max_mz(
   );
 
 /**
- *\sets the scorer max_mz value
+ *sets the scorer max_mz value
  */
 void set_scorer_sp_max_mz(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -143,7 +143,7 @@ float get_scorer_sp_array_resolution(
   );
 
 /**
- *\sets the scorer sp_array_resolution value
+ *sets the scorer sp_array_resolution value
  */
 void set_scorer_sp_array_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -158,7 +158,7 @@ float get_scorer_sp_sum_resolution(
   );
 
 /**
- *\sets the scorer sp_sum_resolution value
+ *sets the scorer sp_sum_resolution value
  */
 void set_scorer_sp_sum_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -173,7 +173,7 @@ float get_scorer_sp_equalize_resolution(
   );
 
 /**
- *\sets the scorer equalize_resolution value
+ *sets the scorer equalize_resolution value
  */
 void set_scorer_sp_equalize_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
