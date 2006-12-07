@@ -2,7 +2,7 @@
  * FILE: parameter-file.c
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * CREATE DATE: 2006 Oct 09
- * DESCRIPTION: General parameter handling utilities.
+ * DESCRIPTION: General parameter handling utilities. MUST declare ALL optional command parameters here inside initalialize_parameters
  *****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,15 +43,17 @@ struct parameter_array{
  * Global variable
  */
 
-// declare a parameter array to be used
 struct parameter_array parameters;
 BOOLEAN_T parameter_initialized = FALSE; //have the parameters been initialized?
 BOOLEAN_T parameter_parsed = FALSE; //have I parsed the parameter file?
 BOOLEAN_T parameter_plasticity = TRUE; //can the parameters be changed?
 
 
-//initialize parameters
-// ONLY add optional parameters here!!!
+/**
+ * initialize parameters
+ * ONLY add optional parameters here!!!
+ * MUST declare ALL optional parameters in array to be used
+ */
 void initialize_parameters(void){
 
   //check if parameters been initialized
