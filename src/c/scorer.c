@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.12 $
+ * REVISION: $Revision: 1.13 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -737,7 +737,7 @@ SCORER_TYPE_T get_scorer_type(
 }
 
 /**
- *\sets the scorer type
+ *sets the scorer type
  */
 void set_scorer_type(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -758,7 +758,7 @@ float get_scorer_sp_beta(
 }
 
 /**
- *\sets the scorer beta value
+ *sets the scorer beta value
  */
 void set_scorer_sp_beta(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -781,7 +781,7 @@ float get_scorer_sp_gamma(
 */
 
 /**
- *\sets the scorer gamma value
+ *set the scorer gamma value
  */
 /*
 void set_scorer_sp_gamma(
@@ -806,7 +806,7 @@ float get_scorer_sp_min_mz(
 */
 
 /**
- *\sets the scorer min_mz value
+ *set the scorer min_mz value
  */
 /*
 void set_scorer_sp_min_mz(
@@ -829,7 +829,7 @@ float get_scorer_sp_max_mz(
 }
 
 /**
- *\sets the scorer max_mz value
+ *set the scorer max_mz value
  */
 void set_scorer_sp_max_mz(
   SCORER_T* scorer, ///< the scorer object -out                     
@@ -852,7 +852,7 @@ float get_scorer_sp_array_resolution(
 */
 
 /**
- *\sets the scorer array_resolution value
+ *set the scorer array_resolution value
  */
 /*
 void set_scorer_sp_array_resolution(
@@ -877,7 +877,7 @@ float get_scorer_sp_sum_resolution(
 */
 
 /**
- *\sets the scorer sum_resolution value
+ *set the scorer sum_resolution value
  */
 /*
 void set_scorer_sp_sum_resolution(
@@ -902,7 +902,7 @@ float get_scorer_sp_equalize_resolution(
 */
 
 /**
- *\sets the scorer equalize_resolution value
+ *set the scorer equalize_resolution value
  */
 /*
 void set_scorer_sp_equalize_resolution(

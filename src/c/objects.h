@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -283,7 +283,7 @@ typedef struct ion_iterator ION_ITERATOR_T;
 typedef struct ion_filtered_iterator ION_FILTERED_ITERATOR_T;
 
 /**
- *\struct loss_limit
+ *\typedef LOSS_LIMIT
  *\brief An object that specifies the max amount of neutral loss possible at a given cleavage index
  * all numbers are for forward ions(A,B,C) subtract from total to get reverse limit
  */

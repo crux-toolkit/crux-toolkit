@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.15 $
+ * REVISION: $Revision: 1.16 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -47,8 +47,8 @@ struct ion_series {
  * all numbers are for forward ions(A,B,C) subtract from total to get reverse limit
  */
 struct loss_limit{
-  int nh3;
-  int h2o;
+  int nh3; ///< the limit to how many NH3 may be lost
+  int h2o; ///< the limit to how many H2O may be lost
   //add more if needed for other neutral loss
 };
 

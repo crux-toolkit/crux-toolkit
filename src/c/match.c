@@ -38,7 +38,7 @@ struct match{
 };
 
 /**
- *\struct match iterator
+ *\struct match_iterator
  *\brief An object that generates score match objects with a given spectrum and peptide database
  */
 struct match_iterator{
