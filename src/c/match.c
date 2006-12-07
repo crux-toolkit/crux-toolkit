@@ -29,24 +29,24 @@
 
 /**
  *\struct match
- *\brief An object that stores the score for each match of spectrum & peptide
+ *\brief An object that stores the score & rank for each match of spectrum & peptide
  */
 struct match{
-  PEPTIDE_T* peptide;
-  float match_scores[_SCORE_TYPE_NUM];
-  int match_rank[_SCORE_TYPE_NUM];
+  PEPTIDE_T* peptide;  ///< the peptide we are scoring
+  float match_scores[_SCORE_TYPE_NUM]; ///< the scoring result array (use enum_type SCORER_TYPE_T to index)
+  int match_rank[_SCORE_TYPE_NUM];  ///< the rank of scoring result (use enum_type SCORER_TYPE_T to index)
 };
 
 /**
- *\struct match
- *\brief An object that stores the score for each match of spectrum & peptide
+ *\struct match iterator
+ *\brief An object that generates score match objects with a given spectrum and peptide database
  */
 struct match_iterator{
-  MATCH_T* match[MAX_NUMBER_PEPTIDES];
-  SCORER_TYPE_T match_mode; ///< the working mode (SP, XCORR) -in
+  MATCH_T* match[MAX_NUMBER_PEPTIDES]; ///< array of match object
+  SCORER_TYPE_T match_mode; ///< the current score working mode (SP, XCORR)
   BOOLEAN_T scored_type[_SCORE_TYPE_NUM]; ///< has the score type been computed in each match
-  SPECTRUM_T* spectrum;
-  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator;
+  SPECTRUM_T* spectrum; ///< the spectrum to score
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator; ///< the peptide database to score against spectrum
   int match_idx; ///< current match to return
   int match_total; ///< total_match_count
 };
@@ -61,7 +61,7 @@ MATCH_T* new_match(void){
 
 /**
  * free the memory allocated match
- * must provide the match iterator to use the correct method to free peptide field
+ * must provide the match iterator to use the correct method to free peptide contained in match
  */
 void free_match(
   MATCH_T* match, ///< the match to free -in
@@ -75,10 +75,11 @@ void free_match(
 
 /**
  * create a new memory allocated match iterator
- * first, creates the generate_peptides_iterator
+ * creates a new the generate_peptides_iterator inside the match_iterator
+ *\returns a new memory allocated match iterator
  */
 MATCH_ITERATOR_T* new_match_iterator(
-  SPECTRUM_T* spectrum ///< the object iterator that will be selected  -in
+  SPECTRUM_T* spectrum ///< the spectrum to match peptides -in
   )
 {
   //allocate a new match iterator
@@ -119,7 +120,9 @@ int compare_match_sp(
 }
 
 /**
- * scores all sp scores in the matches
+ * given a match_iterator, generates sp scores in the match objects
+ * Also, since this is the first socring method required,
+ * it creates new match object for each scoring pair
  * \returns TRUE if all scores been calculated in match iterator, else FALSE
  */
 BOOLEAN_T score_match_iterator_sp(
@@ -195,6 +198,7 @@ BOOLEAN_T score_match_iterator_sp(
 }
 
 /**
+ * given a match_iterator, generates scores in the match objects for the given score type
  * scores all the matches with correct match_mode(score type)
  * \returns TRUE if all scores been calculated in match iterator, else FALSE
  */
@@ -219,8 +223,9 @@ BOOLEAN_T score_match_iterator(
 
 /**
  * sets the match_iterator mode.
- * creates the scorer for the correct mode,
- * then sort the match structs so that return in decreasing score order.
+ * If not already scored in iterator, creates the scorer for the correct mode and claculates the scores for,
+ * each match object, then sort the match structs so that return in decreasing score order.
+ * MUST, use this method to set match_iterator ready for a given score type before iterating through scores
  * \returns TRUE if match iterator is successfully set to the correct mode
  */
 BOOLEAN_T set_mode_match_iterator(
@@ -275,6 +280,7 @@ BOOLEAN_T set_mode_match_iterator(
 /**
  * Does the match_iterator have another match struct to return?
  * MUST set the iterator to correct mode before calling this method
+ *\returns TRUE, if match iter has a next match, else False
  */
 BOOLEAN_T mode_match_iterator_has_next(
   MATCH_ITERATOR_T* match_iterator, ///< the working  match iterator -in
@@ -291,8 +297,9 @@ BOOLEAN_T mode_match_iterator_has_next(
 }
 
 /**
- * return the next match struct?
- * MUST set the iterator to correct mode before calling this method
+ * return the next match struct!
+ * MUST set the iterator to correct mode before initialially calling this method
+ *\returns the match in decreasing score order for the match_mode(SCORER_TYPE_T)
  */
 MATCH_T* mode_match_iterator_next(
   MATCH_ITERATOR_T* match_iterator, ///< the working match iterator -in

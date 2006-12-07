@@ -29,9 +29,10 @@
  */
 MATCH_T* new_match(void);
 
+
 /**
  * free the memory allocated match
- * must provide the match iterator to use the correct method to free peptide field
+ * must provide the match iterator to use the correct method to free peptide contained in match
  */
 void free_match(
   MATCH_T* match, ///< the match to free -in
@@ -40,17 +41,18 @@ void free_match(
 
 /**
  * create a new memory allocated match iterator
- * first, creates the generate_peptide_iterator
+ * creates a new the generate_peptides_iterator inside the match_iterator
+ *\returns a new memory allocated match iterator
  */
 MATCH_ITERATOR_T* new_match_iterator(
-  SPETRUM_T* spectrum ///< the object iterator that will be selected  -in
-  );
+  SPECTRUM_T* spectrum ///< the spectrum to match peptides -in
+  )
 
 /**
  * sets the match_iterator mode.
- * creates the scorer for the correct mode,
- * then sort the match structs so that return in decreasing score order.
- * Before using match iterator must always set to type of match mode!
+ * If not already scored in iterator, creates the scorer for the correct mode and claculates the scores for,
+ * each match object, then sort the match structs so that return in decreasing score order.
+ * MUST, use this method to set match_iterator ready for a given score type before iterating through scores
  * \returns TRUE if match iterator is successfully set to the correct mode
  */
 BOOLEAN_T set_mode_match_iterator(
@@ -61,6 +63,7 @@ BOOLEAN_T set_mode_match_iterator(
 /**
  * Does the match_iterator have another match struct to return?
  * MUST set the iterator to correct mode before calling this method
+ *\returns TRUE, if match iter has a next match, else False
  */
 BOOLEAN_T mode_match_iterator_has_next(
   MATCH_ITERATOR_T* match_iterator, ///< the working  match iterator -in
@@ -68,8 +71,9 @@ BOOLEAN_T mode_match_iterator_has_next(
   );
 
 /**
- * return the next match struct?
- * MUST set the iterator to correct mode before calling this method
+ * return the next match struct!
+ * MUST set the iterator to correct mode before initialially calling this method
+ *\returns the match in decreasing score order for the match_mode(SCORER_TYPE_T)
  */
 MATCH_T* mode_match_iterator_next(
   MATCH_ITERATOR_T* match_iterator, ///< the working match iterator -in
