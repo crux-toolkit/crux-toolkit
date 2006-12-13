@@ -1,7 +1,7 @@
-/*****************************************************************************
+/**
  * \file sorter.h
- * $Revision: 1.1 $
- * \brief: Object to sort objects
+ * $Revision: 1.2 $
+ * \brief Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,10 +1,12 @@
-/********************************************************************
- * FILE: array.h
- * AUTHOR: William Stafford Noble
+/**
+ * \file array.h
+ * \brief Some simple array-handling routines.
+ */
+
+/* AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University
- * VERSION: $Revision: 1.2 $
- * DESCRIPTION: Some simple array-handling routines.
+ * VERSION: $Revision: 1.3 $
  ********************************************************************/
 #ifndef ARRAY_H
 #define ARRAY_H

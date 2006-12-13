@@ -1,9 +1,12 @@
 /**
  * \file scorer.h 
+ * \brief object to score spectrum vs. spectrum or spectrum vs. scorer
+ */
+
+/*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.5 $
- * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. scorer
+ * $Revision: 1.6 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H

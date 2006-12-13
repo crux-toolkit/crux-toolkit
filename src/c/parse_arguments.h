@@ -1,7 +1,9 @@
-/**************************************************************************
- * FILE parse_arguments.h
- *
- * CREATE DATE: 5/22/2004
+/**
+ * \file parse_arguments.h
+ * \brief  Support for parsing of arguments from command line
+ */
+
+/* CREATE DATE: 5/22/2004
  
  * AUTHOR: Charles E. Grant
  * MODIFIED: Chris Park

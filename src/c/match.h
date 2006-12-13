@@ -1,10 +1,7 @@
-/*****************************************************************************
- * \file score_peptide_spectrum
- * AUTHOR: Chris Park
- * CREATE DATE: 10/13 2006
- * DESCRIPTION: Object for given a peptide and a spectrum, generate a perliminary score(ex, Sp)
- *
- * REVISION: 
+/**
+ * \file match.h
+ * $Revision: 1.3 $ 
+ * \brief Object for given a peptide and a spectrum, generate a perliminary score(ex, Sp)
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>

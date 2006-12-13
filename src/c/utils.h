@@ -1,11 +1,12 @@
-/********************************************************************
+/**
  * \file utils.h
- * AUTHOR: William Stafford Noble
- * CREATE DATE: 9-8-97
- * PROJECT: shared
- * COPYRIGHT: 1997-2001, Columbia University
- * DESCRIPTION: Various useful generic utilities.
+ * \brief Various useful generic utilities.
  ********************************************************************/
+// AUTHOR: William Stafford Noble
+// CREATE DATE: 9-8-97
+// PROJECT: shared
+// COPYRIGHT: 1997-2001, Columbia University
+
 #ifndef UTILS_H
 #define UTILS_H
 #include <stdio.h>

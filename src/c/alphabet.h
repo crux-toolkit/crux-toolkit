@@ -1,10 +1,12 @@
-/********************************************************************
+/**
  * \file alphabet.h
- * AUTHOR: William Stafford Noble
+ * \brief Define the amino acid and nucleotide alphabets.(never used directly in CRUX)
+ */
+
+/* AUTHOR: William Stafford Noble
  * CREATE DATE: 4-17-97
  * PROJECT: MHMM
  * COPYRIGHT: 1997-2001, Columbia University
- * DESCRIPTION: Define the amino acid and nucleotide alphabets.
  ********************************************************************/
 #ifndef ALPHABET_H
 #define ALPHABET_H
