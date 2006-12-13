@@ -1,9 +1,7 @@
-/*****************************************************************************
- * \file generate_peptide_iterator.h 
- * AUTHOR: Chris Park
- * CREATE DATE: 8 Nov 2007
- * $Revision: 1.2 $
- * DESCRIPTION: object to return candidate peptides
+/**
+ * \file generate_peptides_iterator.h 
+ * $Revision: 1.3 $
+ * \brief object to return candidate peptides from database
  *****************************************************************************/
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
 #define GENERATE_PEPTIDES_ITERATOR_H 

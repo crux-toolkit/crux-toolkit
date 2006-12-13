@@ -1,8 +1,7 @@
-/******************************************************************************
- * FILE: parameter-file.h
- * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
- * CREATE DATE: 2006 Oct 09
- * DESCRIPTION: General parameter handling utilities.
+/**
+ * \file parameter.h
+ * $Revision: 1.5 $
+ * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  *****************************************************************************/
 #ifndef PARAMETER_FILE_H
 #define PARAMETER_FILE_H

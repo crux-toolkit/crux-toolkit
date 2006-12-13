@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.13 $
+ * REVISION: $Revision: 1.14 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -23,12 +23,6 @@
 #define bin_width_mono 1.0005079
 #define bin_width_average 1.0011413
 
-//DEBUG
-float debug_array[2000];
-int debug_size;
-float debug_mz;
-int last_idx;
-
 /**
  * \struct scorer
  * \brief An object to score spectrum v. spectrum or spectrum v. ion_series
@@ -45,6 +39,7 @@ struct scorer {
   float* intensity_array; ///< used for Sp: the intensity array, which can be indexed using the m/z
   float max_intensity; ///< the max intensity in the intensity array
   BOOLEAN_T initialized; ///< has the scorer been initialized?
+  int last_idx; ///< the last index in the array, the data size of the array
 };
 
 /**
@@ -83,16 +78,11 @@ SCORER_T* new_scorer(
     //allocate the intensity array
     scorer->intensity_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
     scorer->max_intensity = 0;
+    scorer->last_idx = 0;
   }
 
   //the scorer as not been initialized yet.
   scorer->initialized = FALSE;
-
-
-
-  //DEBUG
-  debug_size = 0;
-  last_idx = 0;
 
   return scorer;
 }
@@ -135,7 +125,7 @@ void nomalize_intensity_array(
     intensity_array[mz_idx] = intensity_array[mz_idx] * threshold / max_intensity;
 
     //DEBUG
-    carp(CARP_INFO, "norm data[%d] = %.2f",mz_idx, intensity_array[mz_idx]); 
+    //carp(CARP_INFO, "norm data[%d] = %.2f",mz_idx, intensity_array[mz_idx]); 
   }
 }
 
@@ -153,7 +143,6 @@ void smooth_peaks(
   //create a new array, which will replace the original intensity array
   float* new_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
 
-  
   switch (scorer->type){
     case SP:
       //iterate over all peaks
@@ -162,7 +151,13 @@ void smooth_peaks(
         new_array[idx] = (array[idx-2]+4*array[idx-1]+6*array[idx]+4*array[idx+1]+array[idx+2])/16;
 
         //DEBUG
-        carp(CARP_INFO, "smooth data[%d] = %f",idx, new_array[idx]); 
+        //carp(CARP_INFO, "smooth data[%d] = %f",idx, new_array[idx]); 
+        
+        //set last idx in the array
+        if(scorer->last_idx < idx && new_array[idx] == 0){
+          scorer->last_idx = idx -1;
+          break;
+        }
       }
       break;
       
@@ -277,23 +272,21 @@ void zero_peak_mean_stdev(
     stdev = get_stdev_from_array(original_array, array_size, idx, mean, peak_count);
     
     //DEBUG
-    carp(CARP_INFO, "zero idx: %d mean: %.8f, stdev: %.8f", idx, mean, stdev);
+    //carp(CARP_INFO, "zero idx: %d mean: %.8f, stdev: %.8f", idx, mean, stdev);
     
     //iterate over all positions and extract peaks
     if(original_array[idx] > (mean + step*stdev)){
-
-      //DEBUG
       new_array[idx] = original_array[idx] - (mean - stdev);
-      debug_array[debug_size++] = new_array[idx];
                
       //DEBUG
-      carp(CARP_INFO, "extract peak: %.2f at idx: %d", original_array[idx], idx);
-      if(last_idx < idx){
-        last_idx = idx;
+      //carp(CARP_INFO, "extract peak: %.2f at idx: %d", original_array[idx], idx);
+      
+      //reset the last idx
+      if(scorer->last_idx < idx){
+        scorer->last_idx = idx;
       }
-      //
-
-      //for step 1,
+      
+      //for only step 1,
       if(step == 1){
         //zero out original peak
         original_array[idx] = 0;
@@ -325,11 +318,12 @@ void zero_peaks(
   scorer->intensity_array = new_array;
 
   //DEBUG
+  /*
   int idx = 0;
   for(; idx < debug_size; ++idx){
     carp(CARP_INFO, "extracted peaks: %.2f, at idx %d", debug_array[idx], idx);
   }
-
+  */
 
 }
 
@@ -357,7 +351,7 @@ void extract_peaks(
       temp_array[temp_idx] = original_array[idx];
 
       //DEBUG print all temp array values
-      carp(CARP_INFO, "before sort data[%d]=%.3f",temp_idx, temp_array[temp_idx]);
+      //carp(CARP_INFO, "before sort data[%d]=%.3f",temp_idx, temp_array[temp_idx]);
       
       ++temp_idx;
     }
@@ -375,7 +369,7 @@ void extract_peaks(
   //also, normalize peaks to max_intensity to 100
   for(idx = 0; idx < (int)scorer->sp_max_mz; ++idx){
     //DEBUG print all temp array values
-    carp(CARP_INFO, "sorted data[%d]=%.3f",idx, temp_array[idx]);
+    //carp(CARP_INFO, "sorted data[%d]=%.3f",idx, temp_array[idx]);
 
     if(original_array[idx] > 0){
       //is it bellow cut off?
@@ -403,63 +397,38 @@ void equalize_peaks(
   )
 {
   int idx;
-  int equalize_idx;
   //int array_size = (int)scorer->sp_max_mz-2;
   
+  float max_intensity = 0;
+  int end_idx = 0;
+  int last_idx = scorer->last_idx;
+
   //equalize peaks to it's greatest intensity
   //should use array size, but sequest seems to have a bug
   // last idx is thus, modification to fit sequest
+  // consequences are we will not equalize the very last peak.
   for(idx = 0; idx < last_idx/*array_size*/; ++idx){
-    
+    //are we inside a continous block?
     if(scorer->intensity_array[idx] > 0){
-    
-      equalize_idx = idx + 1;
+      max_intensity = scorer->intensity_array[idx];
+      end_idx = idx + 1;
       
-      while(scorer->intensity_array[equalize_idx] > 0){
-        if(equalize_idx == last_idx/*array_size*/){
-          break;
+      //loop to find the largest peak in the continous block
+      while(end_idx < last_idx && scorer->intensity_array[end_idx] > 0){
+        //reset max intensity
+        if(scorer->intensity_array[end_idx] > max_intensity){
+           max_intensity = scorer->intensity_array[end_idx];
         }
-
-        if(scorer->intensity_array[idx] < scorer->intensity_array[equalize_idx]){
-          scorer->intensity_array[idx] = scorer->intensity_array[equalize_idx];
-        }
-        else{
-          scorer->intensity_array[equalize_idx] = scorer->intensity_array[idx];
-        }
-
-        ++equalize_idx;
         
-              
-      }
-    
-      //DEBUG print all temp array values
-      carp(CARP_INFO, "final data[%d]=%.3f",idx, scorer->intensity_array[idx]);
-    }
-  }
-
-    //DEBUG print all temp array values
-    //carp(CARP_INFO, "final before data[%d]=%.3f",idx, scorer->intensity_array[idx]);
-  
-  
-  /*
-  //equalize peaks to it's greatest intensity +/- window
-  for(idx = (int)scorer->sp_max_mz-2; idx > 0; --idx){
-    if(scorer->intensity_array[idx] > 0){
-      
-      if(scorer->intensity_array[idx] < scorer->intensity_array[idx-1]){
-        scorer->intensity_array[idx] = scorer->intensity_array[idx-1];
+        ++end_idx;
       }
       
-      if(scorer->intensity_array[idx] < scorer->intensity_array[idx+1]){
-        scorer->intensity_array[idx] = scorer->intensity_array[idx+1];
+      //set all peaks in block to max_intesity
+      for(; idx < end_idx; ++idx){
+        scorer->intensity_array[idx] = max_intensity;
       }
-
-      //DEBUG print all temp array values
-      carp(CARP_INFO, "final data[%d]=%.3f",idx, scorer->intensity_array[idx]);
     }
   }
-  */
-  
 }
     
 /**
@@ -483,12 +452,8 @@ BOOLEAN_T create_intensity_array(
   float precursor_mz = get_spectrum_precursor_mz(spectrum);
   float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge",2) + 50;
 
-  
   //DEBUG
-  debug_mz = precursor_mz;
-
-  //DEBUG
-  carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
+  //carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
   
   //if score type equals SP
   if(scorer->type != SP){
@@ -528,10 +493,14 @@ BOOLEAN_T create_intensity_array(
       scorer->intensity_array[mz] = intensity;
       
       //check if max_intensity
-      //TEST ME, THIS COULD CHAGE!!
       if(intensity > max_intensity){
         max_intensity = intensity;
       }
+    }
+    
+    //set last idx to the largest added peak mz value
+    if(scorer->last_idx < mz){
+      scorer->last_idx = mz;
     }
   }
 
@@ -539,11 +508,11 @@ BOOLEAN_T create_intensity_array(
   scorer->max_intensity = max_intensity;
   
   //DEBUG!!
-  carp(CARP_INFO, "exp_cut_off: %.2f max_intensity: %.2f", experimental_mass_cut_off, (max_intensity*max_intensity));
+  //carp(CARP_INFO, "exp_cut_off: %.2f max_intensity: %.2f", experimental_mass_cut_off, (max_intensity*max_intensity));
 
   
   //normalize intensity
-  nomalize_intensity_array(scorer->intensity_array, scorer->sp_max_mz, scorer->max_intensity, 100);
+  nomalize_intensity_array(scorer->intensity_array, scorer->last_idx+1, scorer->max_intensity, 100);
   
   //smooth peaks
   smooth_peaks(scorer);
@@ -592,7 +561,7 @@ int calculate_ion_type_sp(
   for(; cleavage_array_idx < get_ion_series_charge(ion_series); ++cleavage_array_idx){
     before_cleavage[cleavage_array_idx] = -1;
   }
-
+  
   //create ion constraint
   ION_CONSTRAINT_T* ion_constraint = 
     new_ion_constraint(get_ion_constraint_mass_type(get_ion_series_ion_constraint(ion_series)), get_ion_series_charge(ion_series), ion_type, FALSE);
@@ -614,7 +583,7 @@ int calculate_ion_type_sp(
       printf("idx = %d\n", idx);
   
       //DEBUG
-      carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);
+      //carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);
 
       ++ion_match;
       *intensity_sum = *intensity_sum + one_intensity;
@@ -674,9 +643,11 @@ float gen_score_sp(
     calculate_ion_type_sp(scorer, ion_series, &intensity_sum, Y_ION, &repeat_count);
   
   //// DEBUG!!!!
+  /*
   carp(CARP_INFO, "# repeat count: %d ion_match count: %d, total_ion count: %d sum: %.2f", 
        repeat_count, ion_match, get_ion_series_num_ions(ion_series),
        intensity_sum);
+  */
 
   //calculate Sp score.
   if(ion_match != 0){
@@ -914,174 +885,6 @@ void set_scorer_sp_equalize_resolution(
 }
 */
 
-
-/**************************
- *OLD code
- *
- **************************/
-
-/**
- * calculates all the necessay values for Sp score, related to the specfic ion_type
- * adds to intensity_sum and repeat_count
- *\returns the number of matches found from the predicted ions
- */
-/*
-int calculate_ion_type_sp(
-  SCORER_T* scorer,        ///< the scorer object -in                          
-  SPECTRUM_T* spectrum,     ///< the spectrum to score -in
-  ION_SERIES_T* ion_series, ///< the ion series to score against the spectrum -in
-  float* intensity_sum,     ///< the total intensity sum of all matches so far -out
-  ION_TYPE_T ion_type,      ///< the ion type to check -in
-  int* repeat_count         ///< the repeated count of ions (ex. consecutive b ions) -out
-  )
-{
-  int before_cleavage_idx = -1;
-  int cleavage_idx = 0;
-  ION_T* ion = NULL;
-  int one_intensity = 0;
-  int ion_match = 0;
-
-  //create ion constraint
-  ION_CONSTRAINT_T* ion_constraint = 
-    new_ion_constraint(get_ion_constraint_mass_type(get_ion_series_ion_constraint(ion_series)), 1, ion_type, FALSE);
-  
-  //create the filtered iterator that will select among the ions
-  ION_FILTERED_ITERATOR_T* ion_iterator = new_ion_filtered_iterator(ion_series, ion_constraint);
-  
-  //while there are ion's in ion iterator, add matched observed peak intensity
-  while(ion_filtered_iterator_has_next(ion_iterator)){
-    ion = ion_filtered_iterator_next(ion_iterator);
-    one_intensity = get_nearby_intensity_sum(scorer, spectrum, get_ion_mass_z(ion));
-    
-    //if there is a match in the observed spectrum
-    if(one_intensity != 0){
-      ++ion_match;
-      *intensity_sum += one_intensity;
-      
-      //check if repeated ion b1, b2, ...
-      if((cleavage_idx = get_ion_cleavage_idx(ion)) == before_cleavage_idx + 1){
-        ++*repeat_count;
-      }
-      
-      //reset the previous cleavage index 
-      before_cleavage_idx = cleavage_idx;
-    }
-  }
-    
-  //free ion iterator, ion_constraint
-  free_ion_constraint(ion_constraint);
-  free_ion_filtered_iterator(ion_iterator);
-
-  return ion_match;
-}
-*/
-
-/**
- * given a spectrum and ions calculates the Sp score
- *\returns the sp score 
- */
-/*
-// old SP implementation..
-float gen_score_sp(
-  SCORER_T* scorer,        ///< the scorer object -in
-  SPECTRUM_T* spectrum,    ///< the spectrum to score -in
-  ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
-  )
-{
-  float final_score = 0;
-  float intensity_sum = 0;
-  int ion_match = 0;
-  int repeat_count = 0;
-  int amino_count = 0;
-  SPECTRUM_T* processed_spectrum = NULL;
-
-  //get gama and beta
-  float gamma = scorer->sp_gamma; 
-  float beta = scorer->sp_beta;
-  
-  //get a processed spectrum
-  processed_spectrum = process_spectrum(spectrum, SP);
-
-  //calculate the B_ION and Y_ION portions of the Sp score
-  ion_match = calculate_ion_type_sp(scorer, processed_spectrum, ion_series, &intensity_sum, B_ION, &repeat_count) +
-    calculate_ion_type_sp(scorer, processed_spectrum, ion_series, &intensity_sum, Y_ION, &repeat_count);
-  
-  //normalize the intensity_sum to 100
-  intensity_sum = intensity_sum * 100.0 / get_spectrum_max_intensity(processed_spectrum);
-
-  //// DEBUG!!!!
-  //carp(CARP_INFO, "# max intensity: %.2f ion_match count: %d, total_ion count: %d", 
-  //     get_spectrum_max_intensity(processed_spectrum), ion_match, get_ion_series_num_ions(ion_series));
-
-  //calculate Sp score.
-  if(ion_match != 0){
-    final_score = 
-      intensity_sum * ion_match * (1+repeat_count * beta) * (1+amino_count * gamma) / get_ion_series_num_ions(ion_series);
-  }
-  
-  //free the processed_spectrum
-  free_spectrum(processed_spectrum);
-
-  //return score
-  return final_score;
-}
-*/
-
-/**
- * given a spectrum and ion series calculates the Sp score
- *\returns the sp score 
- */
-/*
-float gen_score_sp(
-  SCORER_T* scorer,        ///< the scorer object -in
-  SPECTRUM_T* spectrum,    ///< the spectrum to score -in
-  ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
-  )
-{
-  float final_score = 0;
-  float intensity_sum = 0;
-  int ion_match = 0;
-  int repeat_count = 0;
-  SPECTRUM_T* processed_spectrum = NULL;
-  
-  //get gama and beta
-  float beta = scorer->sp_beta;
-
-  //get a processed spectrum
-  processed_spectrum = process_spectrum(spectrum, SP);
-
-  //fill in the intensity array, that is normalized to 100 in scorer
-  if(!fill_intensity_array(processed_spectrum, scorer)){
-    carp(CARP_ERROR, "failed to produce Sp");
-    free(spectrum);
-    free(ion_series);
-    free(scorer);
-    exit(1);
-  }
-  
-  //calculate the B_ION and Y_ION portions of the Sp score
-  ion_match = calculate_ion_type_sp(scorer, ion_series, &intensity_sum, B_ION, &repeat_count) +
-    calculate_ion_type_sp(scorer, ion_series, &intensity_sum, Y_ION, &repeat_count);
-  
-  //// DEBUG!!!!
-  //  carp(CARP_INFO, "# max intensity: %.2f ion_match count: %d, total_ion count: %d sum: %.2f", 
-  //   get_spectrum_max_intensity(processed_spectrum), ion_match, get_ion_series_num_ions(ion_series),
-  //   intensity_sum);
-
-  //calculate Sp score.
-  if(ion_match != 0){
-    final_score = 
-      (intensity_sum * ion_match) * (1+ (repeat_count * beta))) / get_ion_series_num_ions(ion_series);
-    //(get_ion_series_charge(ion_series) 
-  }
-  
-//free the processed_spectrum
-  free_spectrum(processed_spectrum);
-
-  //return score
-  return final_score;
-}
-*/
 /*
  * Local Variables:
  * mode: c
