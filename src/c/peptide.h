@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -36,7 +36,8 @@ PEPTIDE_T* new_peptide(
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
+  PEPTIDE_TYPE_T peptide_type, ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
+  void* free_peptide ///< the function pointer to *_free_peptide
   );
 
 /** 
@@ -66,6 +67,13 @@ float get_peptide_mz(
  * Frees an allocated peptide object.
  */
 void free_peptide (
+  PEPTIDE_T* peptide ///< peptide to free -in
+  );
+
+/**
+ * Frees an allocated peptide object for normal curcumstances.
+ */
+void free_peptide_normal(
   PEPTIDE_T* peptide ///< peptide to free -in
   );
 
@@ -137,6 +145,14 @@ BOOLEAN_T parse_peptide_file(
 /**
  * Additional get and set methods
  */
+
+/**
+ * set the correct free method for free peptide
+ */
+void set_peptide_free_peptide(
+  PEPTIDE_T* peptide, ///< working peptide -in                              
+  void* free_peptide ///< functional pointer to the correctf free peptide method -in
+  );
 
 /**
  * \returns the sequence of peptide

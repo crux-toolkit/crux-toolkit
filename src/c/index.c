@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1746,7 +1746,8 @@ PEPTIDE_T* index_peptide_iterator_next(
   if(!setup_index_peptide_iterator(index_peptide_iterator)){
     die("failed to setup index_peptide_iterator for next iteration");
   }
- 
+  //set the correct freeing method
+  set_peptide_free_peptide(peptide_to_return, &free_peptide_for_array);
   return peptide_to_return;
 }
 
@@ -2039,7 +2040,8 @@ PEPTIDE_T* bin_peptide_iterator_next(
   if(!initialize_bin_peptide_iterator(bin_peptide_iterator)){
     die("failed to setup bin_peptide_iterator for next iteration");
   }
- 
+  //set the correct freeing method
+  set_peptide_free_peptide(peptide_to_return, &free_peptide_normal);
   return peptide_to_return;
 }
 
@@ -2114,7 +2116,10 @@ PEPTIDE_T* bin_sorted_peptide_iterator_next(
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator ///< the bin_peptide_iterator to get peptide -in
   )
 {
-  return sorted_peptide_iterator_next(bin_sorted_peptide_iterator->sorted_peptide_iterator);
+  PEPTIDE_T* peptide = sorted_peptide_iterator_next(bin_sorted_peptide_iterator->sorted_peptide_iterator);
+  //set the correct freeing methode
+  set_peptide_free_peptide(peptide, &free_peptide_normal);
+  return peptide;
 }
 
 /**
@@ -2212,11 +2217,6 @@ PEPTIDE_T* void_index_peptide_iterator_next(
 
   return index_peptide_iterator_next((INDEX_PEPTIDE_ITERATOR_T*)index_peptide_iterator);
 }
-
-
-
-
-
 
 /*
  * Local Variables:

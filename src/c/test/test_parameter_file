@@ -1,6 +1,2 @@
 beta=0.075
-gama=0.15
-min_mz=0 
-max_mz=4000
-sp_array_resolution=0.1
-sp_sum_resolution=1
+max-mz=4000

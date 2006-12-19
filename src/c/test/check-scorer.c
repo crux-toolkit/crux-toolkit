@@ -21,12 +21,16 @@ START_TEST (test_create){
   ION_SERIES_T* ion_series = NULL;
   SCORER_T* scorer = NULL;
   float score = 0;
+  int peptide_charge = get_int_parameter("charge", 1);
 
   //parse paramter file
-  parse_parameter_file(parameter_file);
+  parse_update_parameters(parameter_file);
 
+  //parameters has been confirmed
+  parameters_confirmed();
+  
   //set ion constraint to sequest settings
-  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp();  
+  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
   
   //create new ion series
   ion_series = new_ion_series("AKLVKNMT", 2, ion_constraint);
@@ -43,13 +47,20 @@ START_TEST (test_create){
 
   //create new scorer
   scorer = new_scorer(SP);  
-  
+
+  //check if scorer has been set right
+  fail_unless(get_scorer_type(scorer) == SP, "failed to set scorer type");
+  fail_unless(compare_float(get_scorer_sp_beta(scorer), 0.075) == 0, "failed to set beta");
+  fail_unless(compare_float(get_scorer_sp_max_mz(scorer), 4000) == 0, "failed to set max mz");
+
   //calculates the Sp score
   score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
 
   //print the Sp score
   printf("Sp score is: %.2f\n", score);
-
+  
+  fail_unless(compare_float(score, 5.35885334014892578125) == 0, "sp score does not match the expected value");
+  
   //free heap
   free_scorer(scorer);
   free_ion_constraint(ion_constraint);

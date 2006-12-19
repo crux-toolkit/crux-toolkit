@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.3 $ 
+ * $Revision: 1.4 $ 
  * \brief Object for given a peptide and a spectrum, generate a perliminary score(ex, Sp)
  ****************************************************************************/
 #include <math.h>
@@ -26,62 +26,11 @@
  */
 MATCH_T* new_match(void);
 
-
 /**
  * free the memory allocated match
- * must provide the match iterator to use the correct method to free peptide contained in match
  */
 void free_match(
   MATCH_T* match, ///< the match to free -in
-  MATCH_ITERATOR_T* match_iterator ///< the working match iterator -in
-  );
-
-/**
- * create a new memory allocated match iterator
- * creates a new the generate_peptides_iterator inside the match_iterator
- *\returns a new memory allocated match iterator
- */
-MATCH_ITERATOR_T* new_match_iterator(
-  SPECTRUM_T* spectrum ///< the spectrum to match peptides -in
-  )
-
-/**
- * sets the match_iterator mode.
- * If not already scored in iterator, creates the scorer for the correct mode and claculates the scores for,
- * each match object, then sort the match structs so that return in decreasing score order.
- * MUST, use this method to set match_iterator ready for a given score type before iterating through scores
- * \returns TRUE if match iterator is successfully set to the correct mode
- */
-BOOLEAN_T set_mode_match_iterator(
-  MATCH_ITERATOR_T* match_iterator, ///< the match iterator to set -out
-  SCORE_TYPE_T match_mode ///< the mode to set (MATCH_SP, MATCH_XCORR) -in
-  );
-
-/**
- * Does the match_iterator have another match struct to return?
- * MUST set the iterator to correct mode before calling this method
- *\returns TRUE, if match iter has a next match, else False
- */
-BOOLEAN_T mode_match_iterator_has_next(
-  MATCH_ITERATOR_T* match_iterator, ///< the working  match iterator -in
-  SCORE_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
-  );
-
-/**
- * return the next match struct!
- * MUST set the iterator to correct mode before initialially calling this method
- *\returns the match in decreasing score order for the match_mode(SCORER_TYPE_T)
- */
-MATCH_T* mode_match_iterator_next(
-  MATCH_ITERATOR_T* match_iterator, ///< the working match iterator -in
-  SCORE_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
-  );
-
-/**
- * free the memory allocated iterator
- */
-void free_match_iterator(
-  MATCH_ITERATOR_T* match_iterator ///< the match iterator to free
   );
 
 /**
@@ -91,6 +40,75 @@ void print_match(
   MATCH_T* match, ///< the match to print -in  
   FILE* file, ///< output stream -out
   BOOLEAN_T output_sequence, ///< should I output peptide sequence -in
-  SCORE_TYPE_T output_mode  ///< the output mode -in
+  SCORER_TYPE_T output_mode  ///< the output mode -in
 );
 
+/****************************
+ * match get, set methods
+ ***************************/
+
+/**
+ * Must ask for score that has been computed
+ *\returns the match_mode score in the match object
+ */
+float get_match_score(
+  MATCH_T* match, ///< the match to print -in  
+  SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
+  );
+
+/**
+ * sets the match score
+ */
+void set_match_score(
+  MATCH_T* match, ///< the match to print -out
+  SCORER_TYPE_T match_mode, ///< the working mode (SP, XCORR) -in
+  float match_score ///< the score of the match -in
+  );
+
+/**
+ * Must ask for score that has been computed
+ *\returns the match_mode rank in the match object
+ */
+float get_match_rank(
+  MATCH_T* match, ///< the match to print -in  
+  SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
+  );
+
+/**
+ * sets the rank of the match
+ */
+void set_match_rank(
+  MATCH_T* match, ///< the match to print -in  
+  SCORER_TYPE_T match_mode, ///< the working mode (SP, XCORR) -in
+  int match_rank ///< the rank of the match -in
+  );
+
+/**
+ *\returns the spectrum in the match object
+ */
+SPECTRUM_T* get_match_spectrum(
+  MATCH_T* match ///< the match to print -in  
+  );
+
+/**
+ * sets the match spectrum
+ */
+void set_match_spectrum(
+  MATCH_T* match, ///< the match to print -out
+  SPECTRUM_T* spectrum  ///< the working spectrum -in
+  );
+
+/**
+ *\returns the peptide in the match object
+ */
+PEPTIDE_T* get_match_peptide(
+  MATCH_T* match ///< the match to print -in  
+  );
+
+/**
+ * sets the match peptide
+ */
+void set_match_peptide(
+  MATCH_T* match, ///< the match to print -out
+  PEPTIDE_T* peptide  ///< the working peptide -in
+  );

@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.39 $
+# VERSION: $Revision: 1.40 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -61,7 +61,7 @@ LIBOBJS =\
 	${OBJDIR}/scorer.o \
 	${OBJDIR}/parameter.o \
 	${OBJDIR}/score_peptide_spectrum.o \
-	${OBJDIR}/match.o 
+#	${OBJDIR}/match.o 
 #	${OBJDIR}/score_peptide_list_spectrum.o
 
 # These are the names of the programs.

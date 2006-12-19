@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -143,6 +143,24 @@ void set_database_use_light_protein(
  */
 BOOLEAN_T get_database_use_light_protein(
   DATABASE_T* database ///< the query database -in 
+  );
+
+
+/**
+ * increase the pointer_count produced by this database
+ * used to keep track of when the database can be freed
+ */
+void add_database_pointer_count(
+  DATABASE_T* database ///< the query database -in/out
+  );
+
+/**
+ * subtract the pointer_count produced by this database
+ * used to keep track of when the database can be freed
+ * If refernce is 0, free database!
+ */
+void sub_database_pointer_count(
+  DATABASE_T* database ///< the query database -in/out
   );
 
 /***********************************************

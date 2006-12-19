@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.14 $
+ * REVISION: $Revision: 1.15 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -579,8 +579,8 @@ int calculate_ion_type_sp(
 
     //if there is a match in the observed spectrum
     if(one_intensity > 0){
-      int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
-      printf("idx = %d\n", idx);
+      //int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
+      //carp(CARP_INFO, "idx = %d\n", idx);
   
       //DEBUG
       //carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);

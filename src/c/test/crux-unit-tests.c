@@ -10,6 +10,7 @@
 #include "check-ion.h"
 #include "check-ion_series.h"
 #include "check-scorer.h"
+#include "check-match.h"
 
 //must set bash export CK_FORK=no
 int main(void){
@@ -26,7 +27,8 @@ int main(void){
   Suite* suite_ion = ion_suite(); 
   Suite* suite_ion_series = ion_series_suite(); 
   Suite* suite_scorer = scorer_suite(); 
-  
+  Suite* suite_match = match_suite(); 
+
   //add each suite to Runner
   SRunner *sr = srunner_create(NULL);
 
@@ -41,6 +43,7 @@ int main(void){
   srunner_add_suite(sr,suite_ion);
   srunner_add_suite(sr,suite_ion_series);
   srunner_add_suite(sr,suite_scorer);
+  srunner_add_suite(sr,suite_match);
 
   //run each check suite
   srunner_run_all(sr, CK_NORMAL);

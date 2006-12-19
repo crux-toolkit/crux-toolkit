@@ -32,7 +32,6 @@ struct generate_peptides_iterator_t{
   BOOLEAN_T (*has_next)(void*);     ///< the function pointer to *_has_next
   PEPTIDE_T* (*next)(void*);         ///< the function pointer to *_next
   void (*free)(void*);         ///< the function pointer to *_free
-  void (*free_peptide)(PEPTIDE_T*); ///< the function pointer to *_free_peptide
   INDEX_T* index;  ///< the index object needed
   DATABASE_T* database; ///< the database object needed
   PEPTIDE_CONSTRAINT_T* constraint; ///< peptide constraint
@@ -202,8 +201,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
         gen_peptide_iterator->next = &void_index_filtered_peptide_iterator_next;
         gen_peptide_iterator->free = &void_free_index_filtered_peptide_iterator;
       }
-      //set the correct free peptide method
-      gen_peptide_iterator->free_peptide = &free_peptide_for_array;
     }
   }
   /*********************************************
@@ -244,10 +241,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
       gen_peptide_iterator->has_next = &void_database_sorted_peptide_iterator_has_next;
       gen_peptide_iterator->next = &void_database_sorted_peptide_iterator_next;
       gen_peptide_iterator->free = &void_free_database_sorted_peptide_iterator;
-      
     }
-    //set the correct free peptide method
-    gen_peptide_iterator->free_peptide = &free_peptide;
   }
   return gen_peptide_iterator;
 }
@@ -292,20 +286,7 @@ void free_generate_peptides_iterator(
   }
   
   //free peptide constraint
-  free_peptide_constraint(generate_peptides_iterator->constraint);
+  //free_peptide_constraint(generate_peptides_iterator->constraint);
 
   free(generate_peptides_iterator);
-}
-
-/**
- * Always free peptides created by the generate_peptides_iterator through this method
- * Frees the allocated peptide with the correct free-method according to it's type
- */
-void free_peptide_produced_by_iterator(
-  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator, ///< the iterator which the peptide was produced -in
-  PEPTIDE_T* peptide ///< the peptide to free -in
-  )
-{
-  //free peptide with the correct free peptide method
-  generate_peptides_iterator->free_peptide(peptide);
 }

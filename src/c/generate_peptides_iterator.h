@@ -1,6 +1,6 @@
 /**
  * \file generate_peptides_iterator.h 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief object to return candidate peptides from database
  *****************************************************************************/
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
@@ -11,9 +11,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <time.h>
 #include "utils.h"
 #include "crux-utils.h"
 #include "peptide.h"
@@ -55,15 +52,6 @@ PEPTIDE_T* generate_peptides_iterator_next(
  */
 void free_generate_peptides_iterator(
   GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator ///< iterator to free
-  );
-
-/**
- * Always free peptides created by the generate_peptide_iterator through this method
- * Frees the allocated peptide with the correct free-method according to it's type
- */
-void free_peptide_produced_by_iterator(
-  GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator, ///< the iterator which the peptide was produced -in
-  PEPTIDE_T* peptide ///< the peptide to free -in
   );
 
 #endif

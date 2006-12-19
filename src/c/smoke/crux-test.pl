@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.6  2006/11/14 01:14:48  cpark
+#hu..finished the parameter file system
+#
 #Revision 1.5  2006/09/13 22:11:34  cpark
 #added smoke test for create-index
 #
@@ -94,7 +97,7 @@ while ($line = <ARGV>) {
   $standard_filename = $fields[1];
   $cmd = $fields[2];
   $is_index =  $fields[3];
-  chomp($is_index);
+  #chomp($is_index);
 
   # Execute the test
   print "\n----- Running test $test_name \n";
