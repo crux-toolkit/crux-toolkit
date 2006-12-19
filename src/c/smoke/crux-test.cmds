@@ -4,3 +4,4 @@ generate_peptides_sort_length_unique = standard_generate_peptides_length.out = .
 generate_peptides_sort_lexical_unique = standard_generate_peptides_lexical.out = ../../../bin/generate_peptides --output-sequence --cleavages partial --missed-cleavages --sort lexical --redundancy unique test.fasta = file
 get_ms2_spectrum = standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; ../../../bin/get_ms2_spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out = file
 create_index = standard_crux_index = ../../../bin/create_index --mass-range 500 test.fasta = index
+generate_peptides_use_index = standard_generate_peptides_use_index.out = ../../../bin/generate_peptides --output-sequence --use-index T standard.fasta

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.43 $
+ * $Revision: 1.44 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -25,6 +25,7 @@ struct peptide {
   unsigned char length; ///< The length of the peptide
   float peptide_mass;   ///< The peptide's mass.
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
+  void (*free_peptide)(PEPTIDE_T*); ///< the function pointer to *_free_peptide
 };
 
  
@@ -88,7 +89,8 @@ PEPTIDE_T* new_peptide(
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
+  PEPTIDE_TYPE_T peptide_type, ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
+  void* free_peptide ///< the function pointer to *_free_peptide
   )
 {
   PEPTIDE_T* peptide = allocate_peptide();
@@ -96,6 +98,7 @@ PEPTIDE_T* new_peptide(
   set_peptide_peptide_mass( peptide, peptide_mass);
   peptide->peptide_src =
     new_peptide_src( peptide_type, parent_protein, start_idx );
+  peptide->free_peptide = free_peptide;
   return peptide;
 }
   
@@ -134,8 +137,20 @@ float get_peptide_mz(
 
 /**
  * Frees an allocated peptide object.
+ * calles the free peptide functional pointer
  */
-void free_peptide (
+void free_peptide(
+  PEPTIDE_T* peptide ///< peptide to free -in
+  )
+{
+  peptide->free_peptide(peptide);
+}
+
+
+/**
+ * Frees an allocated peptide object for normal curcumstances.
+ */
+void free_peptide_normal(
   PEPTIDE_T* peptide ///< peptide to free -in
   )
 {
@@ -363,6 +378,7 @@ void copy_peptide(
 
   set_peptide_length(dest, get_peptide_length(src));
   set_peptide_peptide_mass(dest, get_peptide_peptide_mass(src));
+  dest->free_peptide = src->free_peptide;
 
   //copy all of the peptide_src in the peptide
   new_association = allocate_peptide_src();
@@ -413,6 +429,17 @@ BOOLEAN_T parse_peptide_file(
 /**
  * Additional get and set methods
  */
+
+/**
+ * set the correct free method for free peptide
+ */
+void set_peptide_free_peptide(
+  PEPTIDE_T* peptide, ///< working peptide -in                              
+  void* free_peptide ///< functional pointer to the correctf free peptide method -in
+  )
+{
+  peptide->free_peptide = free_peptide;
+}
 
 /**
  * \returns the sequence of peptide

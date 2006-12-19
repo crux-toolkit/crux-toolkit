@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.41 $
+ * $Revision: 1.42 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -1136,7 +1136,9 @@ PEPTIDE_T* protein_peptide_iterator_next(
      protein_peptide_iterator->mass_matrix[protein_peptide_iterator->cur_length-1][protein_peptide_iterator->cur_start-1],
      protein_peptide_iterator->protein,
      protein_peptide_iterator->cur_start,
-     peptide_type);
+     peptide_type,
+     free_peptide
+     );
   
   //FIXME Not sure what the use delete this field if needed
   ++protein_peptide_iterator->peptide_idx;
@@ -1145,6 +1147,12 @@ PEPTIDE_T* protein_peptide_iterator_next(
   ++protein_peptide_iterator->cur_start;
   protein_peptide_iterator->has_next = set_iterator_state(protein_peptide_iterator);
 
+  //set free_peptide method
+  set_peptide_free_peptide(peptide, &free_peptide_normal);
+
+  //increment the database count of peptides produced
+  add_database_peptide_count(protein_peptide_iterator->protein);
+  
   return peptide;
 }
 

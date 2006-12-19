@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.31 $
+ * $Revision: 1.32 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -34,6 +34,7 @@ struct database{
   PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database 
   unsigned long int size; ///< The size of the database in bytes (convenience)
   BOOLEAN_T use_light_protein; ///< should I use the light/heavy protein option
+  int pointer_count; ///< number of pointers referencing  this database, at 0 should be freed
 };    
 
 /**
@@ -88,6 +89,7 @@ DATABASE_T* new_database(
   DATABASE_T* database = allocate_database();
   set_database_filename(database, filename);
   database->use_light_protein = use_light_protein;
+  add_database_pointer_count(database);
   return database;
 }  
 
@@ -471,6 +473,33 @@ PROTEIN_T* get_database_protein_at_idx(
   return database->proteins[protein_idx-1];
 }
 
+/**
+ * increase the pointer_count produced by this database
+ * used to keep track of when the database can be freed
+ */
+void add_database_pointer_count(
+  DATABASE_T* database ///< the query database -in/out
+  )
+{
+  ++database->pointer_count;
+}
+
+
+/**
+ * subtract the pointer_count produced by this database
+ * used to keep track of when the database can be freed
+ * If refernce is 0, free database!
+ */
+void sub_database_pointer_count(
+  DATABASE_T* database ///< the query database -in/out
+  )
+{
+  //free database if no more pointers to the database
+  if(--database->pointer_count == 0){
+    free_database(database);
+  }
+}
+
 
 /***********************************************
  * Iterators
@@ -499,6 +528,9 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
     (DATABASE_PROTEIN_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_PROTEIN_ITERATOR_T));
   iterator->database = database;
   iterator->cur_protein = 0;
+
+  //increment database pointer counter
+  add_database_pointer_count(database);
   
   return iterator;
 }        

@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  *****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -11,13 +11,6 @@
 #define NUM_PARAMS 512
 #define MAX_LINE_LENGTH 4096
 
-/**
- *
- * parse the parameter file given the filename
- */
-void parse_parameter_file(
-  char* parameter_filename ///< the parameter file to be parsed -in
-  );
 
 /**
  * 
