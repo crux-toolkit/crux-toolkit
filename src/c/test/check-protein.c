@@ -50,10 +50,11 @@ START_TEST (test_create){
   FILE* file = fopen("fasta_file", "r");
   protein3 = allocate_protein();
   fail_unless(parse_protein_fasta_file(protein3, file), "failed to parse protein from fasta file");
+  set_protein_database(protein3, db);
   print_protein(protein3, stdout);
   
  
-  protein1 = new_protein("23 Jordan", "AADAAKAGAAKFFA", 14, "this is a test protein", 45, 3);
+  protein1 = new_protein("23 Jordan", "AADAAKAGAAKFFA", 14, "this is a test protein", 45, 3, db);
   print_protein(protein1, stdout);
  
   //try copy protein

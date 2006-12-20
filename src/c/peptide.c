@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.44 $
+ * $Revision: 1.45 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -99,6 +99,10 @@ PEPTIDE_T* new_peptide(
   peptide->peptide_src =
     new_peptide_src( peptide_type, parent_protein, start_idx );
   peptide->free_peptide = free_peptide;
+  
+  //increment the database pointer count
+  add_database_pointer_count(get_protein_database(parent_protein));
+  
   return peptide;
 }
   
@@ -154,6 +158,9 @@ void free_peptide_normal(
   PEPTIDE_T* peptide ///< peptide to free -in
   )
 {
+  //decrement the pointer count
+  free_database(get_peptide_first_src_database(peptide));
+
   //link list
   free_peptide_src(peptide->peptide_src);
   free(peptide);
@@ -169,6 +176,9 @@ void free_peptide_for_array(
   PEPTIDE_T* peptide ///< peptide to free -in
   )
 {
+  //decrement the pointer count
+  free_database(get_peptide_first_src_database(peptide));
+  
   //array
   free(peptide->peptide_src);
   free(peptide);
@@ -384,6 +394,10 @@ void copy_peptide(
   new_association = allocate_peptide_src();
   copy_peptide_src(src->peptide_src, new_association);
   set_peptide_peptide_src(dest, new_association);
+
+  //increment the database pointer count
+  //since we are creating a new peptide
+  add_database_pointer_count(get_peptide_first_src_database(src));
 }
 
 //FIXME needs to be rewritten for the new output format -Chris
@@ -429,6 +443,16 @@ BOOLEAN_T parse_peptide_file(
 /**
  * Additional get and set methods
  */
+
+/**
+ * get the peptide->first peptide_src->parent protein->database
+ */
+DATABASE_T* get_peptide_first_src_database(
+  PEPTIDE_T* peptide ///< working peptide -in
+  )
+{
+  return get_protein_database(get_peptide_src_parent_protein(peptide->peptide_src));
+}
 
 /**
  * set the correct free method for free peptide
@@ -792,6 +816,9 @@ BOOLEAN_T merge_peptides(
     carp(CARP_ERROR, "failed to merge two peptides");
     return FALSE;
   }
+
+  //decrement the database pointer count
+  free_database(get_peptide_first_src_database(peptide_bye));
 
   //find the end of the peptide src link list..
   while(next_src != NULL){

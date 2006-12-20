@@ -10,6 +10,7 @@
 #include "../peptide_src.h"
 #include "../peptide_constraint.h"
 #include "../protein.h"
+#include "../database.h"
 
 /********************************************
  * to check peptide.c & peptide_constraint.c
@@ -29,21 +30,23 @@ PEPTIDE_CONSTRAINT_T* constraint;
 PEPTIDE_SRC_T* association1;
 PEPTIDE_SRC_T* association2;
 PEPTIDE_SRC_T* association3;
-
+DATABASE_T* database;
 
 START_TEST (test_create){
+  database = new_database("test", FALSE);
+
   peptide4 = allocate_peptide();
   char* seq = NULL;
   
   protein = new_protein("test protein",
 
 "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW"
-                        , 490, "this is a my test protein", 44, 4); //offset and protein_idx are random
+                        , 490, "this is a my test protein", 44, 4, database); //offset and protein_idx are random
   
   protein2 = new_protein("test protein",
 
 "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW"
-                        , 490, "this is a my test protein", 44, 4);
+                        , 490, "this is a my test protein", 44, 4, database);
 
   //create peptides
   peptide1 = new_peptide( 6, 684.75, protein, 239, TRYPTIC, &free_peptide_normal); //QVPDAR
@@ -133,6 +136,7 @@ START_TEST (test_create){
   print_peptide_in_format(peptide4, TRUE, stdout);
   serialize_peptide(peptide4, stdout, 3);
  
+  free_database(database);
   free_peptide_constraint(constraint);
   free_peptide(peptide1);
   free_peptide(peptide2);

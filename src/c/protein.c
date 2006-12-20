@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.42 $
+ * $Revision: 1.43 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -101,7 +101,8 @@ PROTEIN_T* new_protein(
   unsigned int length, ///< The length of the protein sequence. -in
   char* annotation,  ///< Optional protein annotation.  -in
   unsigned long int offset, ///< The file location in the source file in the database -in
-  unsigned int protein_idx ///< The index of the protein in it's database.-in
+  unsigned int protein_idx, ///< The index of the protein in it's database.-in
+  DATABASE_T* database ///< the database of its origin
   )
 {
   PROTEIN_T* protein = allocate_protein();
@@ -113,6 +114,7 @@ PROTEIN_T* new_protein(
   set_protein_protein_idx(protein, protein_idx);
   set_protein_is_light(protein, FALSE);
   protein->is_light = FALSE;
+  protein->database = database;
   return protein;
 }         
 
@@ -255,7 +257,7 @@ void copy_protein(
   set_protein_protein_idx(dest, src->protein_idx);
   set_protein_is_light(dest, src->is_light);
   dest->database = src->database;
-
+  
   free(id);
   free(sequence);
   free(annotation);
@@ -1137,7 +1139,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
      protein_peptide_iterator->protein,
      protein_peptide_iterator->cur_start,
      peptide_type,
-     free_peptide
+     free_peptide_normal
      );
   
   //FIXME Not sure what the use delete this field if needed
@@ -1148,10 +1150,10 @@ PEPTIDE_T* protein_peptide_iterator_next(
   protein_peptide_iterator->has_next = set_iterator_state(protein_peptide_iterator);
 
   //set free_peptide method
-  set_peptide_free_peptide(peptide, &free_peptide_normal);
+  //set_peptide_free_peptide(peptide, &free_peptide_normal);
 
   //increment the database count of peptides produced
-  add_database_peptide_count(protein_peptide_iterator->protein);
+  //add_database_peptide_count(get_protein_database(protein_peptide_iterator->protein));
   
   return peptide;
 }
