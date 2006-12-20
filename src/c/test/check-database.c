@@ -74,19 +74,6 @@ START_TEST (test_create){
   
   free_peptide(peptide5);
     
-  /* test database sorted peptide iterator */
-  
-  DATABASE_SORTED_PEPTIDE_ITERATOR_T* iterator4 =
-    new_database_sorted_peptide_iterator(db, constraint, MASS, TRUE);
-
-  while(database_sorted_peptide_iterator_has_next(iterator4)){
-    peptide5 = database_sorted_peptide_iterator_next(iterator4);
-    //print_peptide_in_format(peptide5, TRUE,  stdout);
-    //print_peptide(peptide5, stdout);
-    free_peptide(peptide5);
-  }
-
-    
   /* test database protein iterator */
   DATABASE_PROTEIN_ITERATOR_T* iterator2 =
     new_database_protein_iterator(db);
@@ -97,13 +84,34 @@ START_TEST (test_create){
     ++n;
   }
   fail_unless(n == 3, "failed to iterate over all proteins");
+
+  /* test database sorted peptide iterator */
+  
+  DATABASE_SORTED_PEPTIDE_ITERATOR_T* iterator4 =
+    new_database_sorted_peptide_iterator(db, constraint, MASS, TRUE);
+
+  /**
+   * You should have to keep the database pointer around
+   * The database pointer count system should be able to free database once
+   * no longer any valid pointers are avaliable to the database
+   */
+  free_database(db);
+
+
+  while(database_sorted_peptide_iterator_has_next(iterator4)){
+    peptide5 = database_sorted_peptide_iterator_next(iterator4);
+
+    //this print statement should still work eventhough we call "free_database(db)" before.
+    print_peptide_in_format(peptide5, TRUE,  stdout);
+    //print_peptide(peptide5, stdout);
+    free_peptide(peptide5);
+  }
   
   //free
   free_database_protein_iterator(iterator2);
   free_database_peptide_iterator(iterator3);
   free_database_sorted_peptide_iterator(iterator4);
   free_peptide_constraint(constraint);
-  free_database(db);
 }
 END_TEST
 

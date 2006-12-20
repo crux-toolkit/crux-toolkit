@@ -98,6 +98,9 @@ void initialize_parameters(void){
   set_int_parameter("charge", 2);
   set_string_parameter("score-type", "sp"); 
 
+  //match_collection parameters
+  set_double_parameter("mass-window", 3);
+
   //now we have initialized the parameters
   parameter_initialized = TRUE;
 }

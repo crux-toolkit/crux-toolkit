@@ -36,6 +36,7 @@ struct match{
   PEPTIDE_T* peptide;  ///< the peptide we are scoring
   float match_scores[_SCORE_TYPE_NUM]; ///< the scoring result array (use enum_type SCORER_TYPE_T to index)
   int match_rank[_SCORE_TYPE_NUM];  ///< the rank of scoring result (use enum_type SCORER_TYPE_T to index)
+  int pointer_count; ///< the number of pointers to this match object (when reach 0, free memory)
 };
 
 /**
@@ -43,6 +44,7 @@ struct match{
  */
 MATCH_T* new_match(void){
   MATCH_T* match = (MATCH_T*)mycalloc(1, sizeof(MATCH_T));
+  ++match->pointer_count;
   return match;
 }
 
@@ -54,9 +56,12 @@ void free_match(
   MATCH_T* match ///< the match to free -in
   )
 {
-  //free peptide
-  free_peptide(match->peptide);
-  free(match);  
+  //only free match when pointer count reaches
+  if(--match->pointer_count == 0){
+    //free peptide
+    free_peptide(match->peptide);
+    free(match);  
+  }
 }
 
 /**

@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.31 $
+ * $Revision: 1.32 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -145,6 +145,13 @@ BOOLEAN_T parse_peptide_file(
 /**
  * Additional get and set methods
  */
+
+/**
+ * get the peptide->first peptide_src->parent protein->database
+ */
+DATABASE_T* get_peptide_first_src_database(
+  PEPTIDE_T* peptide ///< working peptide -in
+);
 
 /**
  * set the correct free method for free peptide

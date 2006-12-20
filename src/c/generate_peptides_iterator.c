@@ -52,10 +52,12 @@ GENERATE_PEPTIDES_ITERATOR_T* allocate_generate_peptides_iterator(){
 /**
  *\returns a new generate_peptides_iterator object
  */
-GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
+  double min_mass, ///< the min mass of peptides to generate
+  double max_mass  ///< the maximum mas of peptide to generate
+)
+{
   //get perameters
-  double min_mass = get_double_parameter("min-mass", 200);
-  double max_mass = get_double_parameter("max-mass", 2400);
   int min_length = get_int_parameter("min-length", 6);
   int max_length = get_int_parameter("max-length", 50);
   char* cleavages = get_string_parameter_pointer("cleavages");
@@ -247,6 +249,32 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
 }
 
 /**
+ *\returns a new generate_peptide_iterator object with custom min, max mass for SP
+ */
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
+  float neutral_mass ///< the neutral_mass that which the peptides will be searched -in
+  )
+{
+  //get perameters
+  double mass_window = get_double_parameter("mass-window", 3);
+  double min_mass = neutral_mass - mass_window;
+  double max_mass = neutral_mass + mass_window;
+  
+  return new_generate_peptides_iterator_general(min_mass, max_mass);
+}
+
+/**
+ *\returns a new generate_peptides_iterator object from all parameters from parameters.c 
+ */
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
+  //get perameters from parameter.c
+  double min_mass = get_double_parameter("min-mass", 200);
+  double max_mass = get_double_parameter("max-mass", 2400);
+
+  return new_generate_peptides_iterator_general(min_mass, max_mass);
+}
+
+/**
  *\returns TRUE, if there is a next peptide, else FALSE
  */
 BOOLEAN_T generate_peptides_iterator_has_next(
@@ -280,13 +308,13 @@ void free_generate_peptides_iterator(
   //free database or index, if exist
   if(generate_peptides_iterator->database != NULL){
     free_database(generate_peptides_iterator->database);
+    
+    //free peptide constraint
+    free_peptide_constraint(generate_peptides_iterator->constraint);
   }
   if(generate_peptides_iterator->index != NULL){
     free_index(generate_peptides_iterator->index);
   }
   
-  //free peptide constraint
-  //free_peptide_constraint(generate_peptides_iterator->constraint);
-
   free(generate_peptides_iterator);
 }

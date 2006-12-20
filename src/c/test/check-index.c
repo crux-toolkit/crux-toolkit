@@ -85,7 +85,8 @@ START_TEST (test_create){
     ++n;
     fail_unless((peptide = index_peptide_iterator_next(iterator)) != NULL, "index_peptide_iterator failed");
     print_peptide_in_format(peptide, TRUE, stdout);
-    free_peptide_for_array(peptide);    
+    //free_peptide_for_array(peptide);    
+    free_peptide(peptide);
   }
   fail_unless(n==22, "index peptide iterator did not return expected total number of peptides");
   free_index_peptide_iterator(iterator);

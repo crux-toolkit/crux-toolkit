@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1420,17 +1420,24 @@ BOOLEAN_T parse_peptide_index_file(
       (INDEX_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
     file = peptide_iterator_db->index_file;
     database = peptide_iterator_db->index->database;
+    //set the correct freeing method
+    set_peptide_free_peptide(peptide, &free_peptide_for_array);
   }
   else if(index_type == BIN_INDEX){
     peptide_iterator_bin = 
       (BIN_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
     file = peptide_iterator_bin->index_file;
     database = peptide_iterator_bin->index->database;
+    //set the correct freeing method
+    set_peptide_free_peptide(peptide, &free_peptide_normal);
   }
   
   //set peptide fields
   set_peptide_length( peptide, peptide_length);
   set_peptide_peptide_mass( peptide, peptide_mass);
+    
+  //increment the database pointer count
+  add_database_pointer_count(database);
 
   //parse each line
   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
@@ -1723,6 +1730,9 @@ INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
     index_peptide_iterator->has_next = FALSE;
   }
   
+  //increment the database pointer count
+  add_database_pointer_count(index_peptide_iterator->index->database);
+
   return index_peptide_iterator;
 }
 
@@ -1746,8 +1756,7 @@ PEPTIDE_T* index_peptide_iterator_next(
   if(!setup_index_peptide_iterator(index_peptide_iterator)){
     die("failed to setup index_peptide_iterator for next iteration");
   }
-  //set the correct freeing method
-  set_peptide_free_peptide(peptide_to_return, &free_peptide_for_array);
+
   return peptide_to_return;
 }
 
@@ -1781,6 +1790,10 @@ void free_index_peptide_iterator(
   if(index_peptide_iterator_has_next(index_peptide_iterator)){
     free_peptide_for_array(index_peptide_iterator->peptide);
   }
+  
+  //decrement database pointer count
+  free_database(index_peptide_iterator->index->database);
+  
   free(index_peptide_iterator);
 }
 
@@ -2015,6 +2028,9 @@ BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
     carp(CARP_WARNING, "failed to initalize bin peptide iterator");
     bin_peptide_iterator->has_next = FALSE;
   }
+
+  //increment the database pointer count
+  add_database_pointer_count(bin_peptide_iterator->index->database);
     
   return bin_peptide_iterator;
 }
@@ -2040,8 +2056,7 @@ PEPTIDE_T* bin_peptide_iterator_next(
   if(!initialize_bin_peptide_iterator(bin_peptide_iterator)){
     die("failed to setup bin_peptide_iterator for next iteration");
   }
-  //set the correct freeing method
-  set_peptide_free_peptide(peptide_to_return, &free_peptide_normal);
+ 
   return peptide_to_return;
 }
 
@@ -2069,6 +2084,10 @@ void free_bin_peptide_iterator(
   if(bin_peptide_iterator_has_next(bin_peptide_iterator)){
     free_peptide(bin_peptide_iterator->peptide);
   }
+
+  //decrement the database pointer count
+  free_database(bin_peptide_iterator->index->database);
+  
   free(bin_peptide_iterator);
 }
 
@@ -2117,8 +2136,8 @@ PEPTIDE_T* bin_sorted_peptide_iterator_next(
   )
 {
   PEPTIDE_T* peptide = sorted_peptide_iterator_next(bin_sorted_peptide_iterator->sorted_peptide_iterator);
-  //set the correct freeing methode
-  set_peptide_free_peptide(peptide, &free_peptide_normal);
+  //FIXME set the correct freeing methode
+  //set_peptide_free_peptide(peptide, &free_peptide_normal);
   return peptide;
 }
 
