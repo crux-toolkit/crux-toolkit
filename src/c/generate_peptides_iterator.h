@@ -1,6 +1,6 @@
 /**
  * \file generate_peptides_iterator.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief object to return candidate peptides from database
  *****************************************************************************/
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
@@ -60,5 +60,10 @@ PEPTIDE_T* generate_peptides_iterator_next(
 void free_generate_peptides_iterator(
   GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator ///< iterator to free
   );
-
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
 #endif

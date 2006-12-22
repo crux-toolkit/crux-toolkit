@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.32 $
+ * $Revision: 1.33 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -172,7 +172,7 @@ char* get_peptide_sequence(
  );
 
 /**
- * \returns a pointer to the start of peptide sequence with in it's protein parent sequence
+ * \returns a pointer to the start of peptide sequence with in it's protein parent sequence, thus does not have terminating signe until end of parent protein
  * goes to the first peptide_src to find the location of start, thus must have at least one peptide src
  * should not print, will result in printing the entire protein sequence
  */

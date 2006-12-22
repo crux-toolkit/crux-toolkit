@@ -25,7 +25,6 @@
 #include "scorer.h" 
 #include "generate_peptides_iterator.h" 
 
-#define MAX_NUMBER_PEPTIDES 500000 //What to set?
 
 /**
  *\struct match
@@ -44,6 +43,14 @@ struct match{
  */
 MATCH_T* new_match(void){
   MATCH_T* match = (MATCH_T*)mycalloc(1, sizeof(MATCH_T));
+  
+  //initialize   score, rank !!!!DEBUG
+  int index = 0;
+  for(; index < _SCORE_TYPE_NUM; ++index){
+    match->match_rank[index] = 0;
+    match->match_scores[index] = 0;
+  }
+  
   ++match->pointer_count;
   return match;
 }
@@ -69,12 +76,22 @@ void free_match(
  * \returns the difference between sp score in match_a and match_b
  */
 int compare_match_sp(
-  MATCH_T* match_a, ///< the first match -in  
-  MATCH_T* match_b  ///< the scond match -in
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
 )
 {
   //might have to worry about cases below 1 and -1
-  return (int)(match_b->match_scores[SP] - match_a->match_scores[SP]);
+  //return (int)((*match_b)->match_scores[SP] - (*match_a)->match_scores[SP]);
+
+
+  if((*match_b)->match_scores[SP] > (*match_a)->match_scores[SP]){
+    return 1;
+  }
+  else if((*match_b)->match_scores[SP] < (*match_a)->match_scores[SP]){
+    return -1;
+  }
+  return 0;
+
 }
 
 /**
@@ -87,6 +104,8 @@ void print_match(
   SCORER_TYPE_T output_mode  ///< the output mode -in
   )
 {
+  char* peptide_sequence = NULL;
+  
   //print according to the output mode
   switch (output_mode) {
   case SP:
@@ -94,7 +113,9 @@ void print_match(
     
     //should I print sequence
     if(output_sequence){
-      fprintf(file, "%s\n", get_peptide_sequence_pointer(match->peptide));
+      peptide_sequence = get_peptide_sequence(match->peptide);
+      fprintf(file, "%s\n", peptide_sequence);
+      free(peptide_sequence);
     }
     
     break;
@@ -107,6 +128,17 @@ void print_match(
   }
 }
 
+/**
+ * sort the match array with the corresponding compare method
+ */
+void qsort_match(
+  MATCH_T** match_array, ///< the match array to sort -in  
+  int match_total,  ///< the total number of match objects -in
+  void* compare_method ///< the compare method to use -in
+  )
+{
+  qsort(match_array, match_total, sizeof(MATCH_T*), compare_method);
+}
 
 /****************************
  * match get, set methods
@@ -117,7 +149,7 @@ void print_match(
  *\returns the match_mode score in the match object
  */
 float get_match_score(
-  MATCH_T* match, ///< the match to print -in  
+  MATCH_T* match, ///< the match to work -in  
   SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
   )
 {
@@ -128,7 +160,7 @@ float get_match_score(
  * sets the match score
  */
 void set_match_score(
-  MATCH_T* match, ///< the match to print -out
+  MATCH_T* match, ///< the match to work -out
   SCORER_TYPE_T match_mode, ///< the working mode (SP, XCORR) -in
   float match_score ///< the score of the match -in
   )
@@ -141,7 +173,7 @@ void set_match_score(
  *\returns the match_mode rank in the match object
  */
 float get_match_rank(
-  MATCH_T* match, ///< the match to print -in  
+  MATCH_T* match, ///< the match to work -in  
   SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
   )
 {
@@ -152,7 +184,7 @@ float get_match_rank(
  * sets the rank of the match
  */
 void set_match_rank(
-  MATCH_T* match, ///< the match to print -in  
+  MATCH_T* match, ///< the match to work -in  
   SCORER_TYPE_T match_mode, ///< the working mode (SP, XCORR) -in
   int match_rank ///< the rank of the match -in
   )
@@ -164,7 +196,7 @@ void set_match_rank(
  *\returns the spectrum in the match object
  */
 SPECTRUM_T* get_match_spectrum(
-  MATCH_T* match ///< the match to print -in  
+  MATCH_T* match ///< the match to work -in  
   )
 {
   return match->spectrum;
@@ -174,7 +206,7 @@ SPECTRUM_T* get_match_spectrum(
  * sets the match spectrum
  */
 void set_match_spectrum(
-  MATCH_T* match, ///< the match to print -out
+  MATCH_T* match, ///< the match to work -out
   SPECTRUM_T* spectrum  ///< the working spectrum -in
   )
 {
@@ -185,7 +217,7 @@ void set_match_spectrum(
  *\returns the peptide in the match object
  */
 PEPTIDE_T* get_match_peptide(
-  MATCH_T* match ///< the match to print -in  
+  MATCH_T* match ///< the match to work -in  
   )
 {
   return match->peptide;
@@ -195,9 +227,18 @@ PEPTIDE_T* get_match_peptide(
  * sets the match peptide
  */
 void set_match_peptide(
-  MATCH_T* match, ///< the match to print -out
+  MATCH_T* match, ///< the match to work -out
   PEPTIDE_T* peptide  ///< the working peptide -in
   )
 {
   match->peptide = peptide;
 }
+
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+

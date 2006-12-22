@@ -242,3 +242,9 @@ int main(int argc, char** argv){
   }
   exit(0);
 }
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */

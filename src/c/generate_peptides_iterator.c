@@ -318,3 +318,9 @@ void free_generate_peptides_iterator(
   
   free(generate_peptides_iterator);
 }
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
