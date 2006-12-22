@@ -21,7 +21,6 @@ START_TEST (test_create){
   ION_SERIES_T* ion_series = NULL;
   SCORER_T* scorer = NULL;
   float score = 0;
-  int peptide_charge = get_int_parameter("charge", 1);
 
   //parse paramter file
   parse_update_parameters(parameter_file);
@@ -29,6 +28,8 @@ START_TEST (test_create){
   //parameters has been confirmed
   parameters_confirmed();
   
+  int peptide_charge = get_int_parameter("charge", 1);
+
   //set ion constraint to sequest settings
   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
   

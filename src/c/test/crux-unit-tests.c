@@ -16,6 +16,7 @@
 int main(void){
   int nf;
   //create all check suite
+
   Suite* suite_peak = peak_suite();
   Suite* suite_spectrum = spectrum_suite();
   Suite* suite_spectrum_collection = spectrum_collection_suite();
@@ -25,13 +26,14 @@ int main(void){
   Suite* suite_index = index_suite(); 
   Suite* suite_ion = ion_suite(); 
   Suite* suite_ion_series = ion_series_suite(); 
-  Suite* suite_scorer = scorer_suite(); 
+  Suite* suite_scorer = scorer_suite();
+
   Suite* suite_match = match_suite(); 
 
 
   //add each suite to Runner
   SRunner *sr = srunner_create(NULL);
-  
+
   srunner_add_suite(sr,suite_peak);
   srunner_add_suite(sr,suite_spectrum);
   srunner_add_suite(sr,suite_spectrum_collection);
@@ -43,6 +45,7 @@ int main(void){
   srunner_add_suite(sr,suite_ion);
   srunner_add_suite(sr,suite_ion_series);
   srunner_add_suite(sr,suite_scorer);
+
   srunner_add_suite(sr,suite_match);
   
   //run each check suite
