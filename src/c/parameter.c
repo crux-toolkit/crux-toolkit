@@ -787,3 +787,11 @@ BOOLEAN_T set_options_command_line(
   carp(CARP_ERROR, "incorrect parameter name: %s, from the parameter file", name);
   return FALSE;
 } 
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+

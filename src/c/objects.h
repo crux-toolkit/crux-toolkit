@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -320,6 +320,12 @@ typedef struct generate_peptides_iterator_t GENERATE_PEPTIDES_ITERATOR_T;
  *\brief An object that contains the information of a peptide and the scoring of multiple types
  */
 typedef struct match MATCH_T;
+
+/**
+ *\typedef MATCH_COLLECTION_T
+ *\brief An object that contains mutiple match objects
+ */
+typedef struct match_collection MATCH_COLLECTION_T;
 
 /**
  *\typedef MATCH_ITERATOR_T
