@@ -101,6 +101,9 @@ void initialize_parameters(void){
   //match_collection parameters
   set_double_parameter("mass-window", 3);
 
+  //score_spectrum
+  set_string_parameter("perlim-score-type", "sp");
+
   //now we have initialized the parameters
   parameter_initialized = TRUE;
 }
