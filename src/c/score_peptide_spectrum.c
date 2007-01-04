@@ -57,7 +57,7 @@ int main(int argc, char** argv){
 
   //parsing variables
   int result = 0;
-  char * error_message;
+  char * error_message; 
 
 
   /* Define optional command line arguments */ 
