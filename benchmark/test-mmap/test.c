@@ -20,12 +20,6 @@ int main(int argc, char** argv){
   int page_number = atoi(argv[2]);
   int iterations = atoi(argv[3]);
   pagesize = getpagesize();
-  /*int bufsize = sizeof(char) * pagesize;
-  c = (char *) malloc(bufsize);
-  int retval = read(fd, c, pagesize * sizeof(char));
-   printf("%s\n", c);*/
-
-  // data = mmap((caddr_t)0, pagesize, PROT_READ, MAP_SHARED, fd, pagesize);
 
   int offset = 0;
   char *data = mmap((caddr_t)0, page_number * pagesize, PROT_READ, MAP_SHARED, fd, offset);
@@ -40,7 +34,6 @@ int main(int argc, char** argv){
   for (idx=0; idx < iterations; idx++){
     double a = rand()/((double)RAND_MAX+1);
     int offset = (int)(max_offset * a);
-//    printf("%i\n", offset);
     temp = (char)data[offset];
     printf("%c", temp);
     array[idx%5] = temp;
