@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#define RANDOM 0
 
 int main(int argc, char** argv){
   if (argc < 4){
@@ -32,10 +33,15 @@ int main(int argc, char** argv){
   int idx;
   char temp;
   for (idx=0; idx < iterations; idx++){
-    double a = rand()/((double)RAND_MAX+1);
-    int offset = (int)(max_offset * a);
+    int offset;
+    if (RANDOM==1){
+      double a = rand()/((double)RAND_MAX+1);
+      offset = (int)(max_offset * a);
+    } else{
+      offset = (int)((float)idx / iterations * max_offset);
+    }
     temp = (char)data[offset];
-    printf("%c", temp);
+    //printf("%c", temp);
     array[idx%5] = temp;
   }
 

@@ -31,7 +31,9 @@ Methods:
 <code><b><font face="Helvetica, monospace">
 Results:
                 </font></b></code><br><br>
-
+Random access
+<br>
+<br>
 <table border=1>
 <thead> <tr valign=top> 
     <th> <p align=center>Proteome</p>
@@ -128,15 +130,115 @@ Results:
     </tr>
 
 
+
 </table>
+<br>
+Serial access
+<br>
+<br>
+<table border=1>
+<thead> <tr valign=top> 
+    <th> <p align=center>Proteome</p>
+		</th>
+    <th> <p align=center>Bytes accessed (MB)</p>
+		</th>
+    <th> <p align=center>Number of accesses</p>
+		</th>
+    <th> <p align=center>Real time - mmap</p>
+		</th>
+    <th> <p align=center>CPU time - mmap</p>
+		</th>
+    <th> <p align=center>Real time - lseek</p>
+		</th>
+    <th> <p align=center>CPU time - lseek</p>
+		</th>
+
+	</thead>
+    <tr>
+    <td>
+      <p align=center>
+      Human
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      16
+      </p>
+	  </td>
+
+    <td>
+      <p align=center>
+      10 million
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      0.607s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      0.570s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      12.958s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      12.530s
+      </p>
+	  </td>
+    </tr>
+    <tr>
+    <td>
+      <p align=center>
+     NRdb 
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      1600
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      10 million
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      3.475s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      3.300s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      16.019s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      15.430s
+      </p>
+	  </td>
+    </tr>
+</table>
+
+
 
 <br><code><b><font face="Helvetica, monospace">
       Discussion:
                 </font></b></code><br><br>
-                Memory mapping looks clearly superior to random access, as
-                expected.
-
-
+                Memory mapping looks clearly superior to lseek when using
+                random access, as expected. Unexpectedly (for me), using the memory 
+                map is faster with serial access as well.
  <hr>
                       <br><code><b><font face="Helvetica, monospace">
               Aug 21, 2006
