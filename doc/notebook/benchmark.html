@@ -229,6 +229,7 @@ Serial access
       </p>
 	  </td>
     </tr>
+
 </table>
 
 
@@ -239,6 +240,18 @@ Serial access
                 Memory mapping looks clearly superior to lseek when using
                 random access, as expected. Unexpectedly (for me), using the memory 
                 map is faster with serial access as well.
+
+                It does look like (from data not shown, but created by the
+                scripts) that if the number of page accesses is less than
+                the number of pages, and the number of pages is greater
+                than the maximum number of pages available for memory,
+                then seeking is better than memory mapping for serial (but
+                not random) access. Otherwise memory mapping is better.
+                This makes sense,
+                because there is some overhead to memmapping, and if you
+                don't get a chance to use the same page more than once,
+                then why bother with paging?
+
  <hr>
                       <br><code><b><font face="Helvetica, monospace">
               Aug 21, 2006
