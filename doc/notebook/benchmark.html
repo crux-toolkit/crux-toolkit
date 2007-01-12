@@ -2,6 +2,141 @@
 Benchmark
                       </font></b></code>
                       <br><br>
+<hr>
+                      <br><code><b><font face="Helvetica, monospace">
+              Jan 12, 2006
+                </font></b></code>
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Purpose:
+                </font></b></code><br><br>
+                To determine the difference in speed between seeking in a
+                file and memory mapping the file.
+
+                <br><br><code><b><font face="Helvetica, monospace">
+Methods:
+                </font></b></code><br><br>
+                Run run.sh in crux/results/mmap. This runs two c
+                executables, test (which uses the memory mapped file) 
+                and test-seek (which uses lseek), using various 
+                sizes of database and various numbers accesses, on two
+                different fasta files, nrdb and ecoli. The accesses are
+                randomly scattered throughout the file, with a maximum of
+                'bytes accessed'. Real time is akin to wall clock time.
+                CPU time is user + kernel time (the sum of the second 
+                two fields from the command time).
+                <br><br>
+
+ 
+<code><b><font face="Helvetica, monospace">
+Results:
+                </font></b></code><br><br>
+
+<table border=1>
+<thead> <tr valign=top> 
+    <th> <p align=center>Proteome</p>
+		</th>
+    <th> <p align=center>Bytes accessed (MB)</p>
+		</th>
+    <th> <p align=center>Number of accesses</p>
+		</th>
+    <th> <p align=center>Real time - mmap</p>
+		</th>
+    <th> <p align=center>CPU time - mmap</p>
+		</th>
+    <th> <p align=center>Real time - lseek</p>
+		</th>
+    <th> <p align=center>CPU time - lseek</p>
+		</th>
+
+	</thead>
+    <tr>
+    <td>
+      <p align=center>
+      Human
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      16
+      </p>
+	  </td>
+
+    <td>
+      <p align=center>
+      10 million
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      3.058s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      3.020s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      19.100s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      19.050s
+      </p>
+	  </td>
+    </tr>
+    <tr>
+    <td>
+      <p align=center>
+     NRdb 
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      1600
+      </p>
+	  </td>
+
+    <td>
+      <p align=center>
+      10 million
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      6.386s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      6.250s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      17m28.320s
+      </p>
+	  </td>
+    <td>
+      <p align=center>
+      25.870s
+      </p>
+	  </td>
+    </tr>
+
+
+</table>
+
+<br><code><b><font face="Helvetica, monospace">
+      Discussion:
+                </font></b></code><br><br>
+                Memory mapping looks clearly superior to random access, as
+                expected.
+
+
  <hr>
                       <br><code><b><font face="Helvetica, monospace">
               Aug 21, 2006
@@ -126,6 +261,7 @@ Results:
 	  </td>
     </tr>
 </table>
+
 <br><br>
 <hr>
                       <br><code><b><font face="Helvetica, monospace">
