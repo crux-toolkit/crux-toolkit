@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.33 $
+ * $Revision: 1.34 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -36,8 +36,7 @@ PEPTIDE_T* new_peptide(
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type, ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
-  void* free_peptide ///< the function pointer to *_free_peptide
+  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
   );
 
 /** 
@@ -71,13 +70,8 @@ void free_peptide (
   );
 
 /**
- * Frees an allocated peptide object for normal curcumstances.
- */
-void free_peptide_normal(
-  PEPTIDE_T* peptide ///< peptide to free -in
-  );
-
-/**
+ *FIXME Don't need this any more, may delete
+ *
  * Frees an allocated peptide object.
  * This one is used when the peptides is created throuh
  * parsing the index, the peptide_src is not a link list, but
@@ -253,6 +247,11 @@ PEPTIDE_SRC_T* get_peptide_peptide_src(
 PROTEIN_T* get_peptide_parent_protein(
   PEPTIDE_T* peptide  ///< the peptide to query the parent_protein -in
   );
+
+/**
+ *\returns the protein struct size, value of sizeof function
+ */
+int get_peptide_sizeof(void);
 
 /**
  * Residue Iterator

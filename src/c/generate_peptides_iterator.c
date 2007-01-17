@@ -174,6 +174,9 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
    * use index file
    **********************/
   if(use_index_boolean){
+
+    carp(CARP_INFO, "using index for peptide generation");
+
     if((sort_type != MASS && sort_type != NONE)){
       carp(CARP_ERROR, " when using index, cannot sort other than by mass");
       carp(CARP_ERROR, "failed to perform search");
@@ -196,6 +199,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
       }
       //if need to select among peptides by peptide_type and etc.
       else{
+        carp(CARP_INFO, "using filtered index peptide generation");
+
         //create index_filtered_peptide_iterator  & set generate_peptides_iterator
         index_filtered_peptide_iterator = new_index_filtered_peptide_iterator(index);
         gen_peptide_iterator->iterator = index_filtered_peptide_iterator;
@@ -209,6 +214,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
    *read in from fasta file, don't use index file
    ************************************************/
   else{
+    carp(CARP_INFO, "using fasta_file for peptide generation");
+
     //create a new database & set generate_peptides_iterator
     database = new_database(in_file, FALSE);         //needs to change this....by given option
     gen_peptide_iterator->database = database;
@@ -259,7 +266,9 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
   double mass_window = get_double_parameter("mass-window", 3);
   double min_mass = neutral_mass - mass_window;
   double max_mass = neutral_mass + mass_window;
-  
+
+  carp(CARP_DEBUG,"searching peptide in %.2f ~ %.2f", min_mass, max_mass); 
+
   return new_generate_peptides_iterator_general(min_mass, max_mass);
 }
 

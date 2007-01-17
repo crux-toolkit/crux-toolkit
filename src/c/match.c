@@ -109,7 +109,7 @@ void print_match(
   //print according to the output mode
   switch (output_mode) {
   case SP:
-    fprintf(file, "%d\t%.2f\t", match->match_rank[SP], match->match_scores[SP]);
+    fprintf(file, "%d\t%.2f\t%.2f\t", match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[SP]);
     
     //should I print sequence
     if(output_sequence){
