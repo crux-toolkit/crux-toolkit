@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -268,6 +268,13 @@ char* get_peptide_src_sequence_pointer(
 {
   char* start_pointer = get_protein_sequence_pointer(peptide_src->parent_protein);
   return &(start_pointer[peptide_src->start_idx - 1]);
+}
+
+/**
+ *\returns the peptide_src strct size, value of sizeof function
+ */
+int get_peptide_src_sizeof(){
+  return sizeof(PEPTIDE_SRC_T);
 }
 
 /*

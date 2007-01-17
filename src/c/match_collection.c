@@ -26,7 +26,7 @@
 #include "match.h"
 #include "match_collection.h"
 
-#define MAX_NUMBER_PEPTIDES 500000 //What to set?
+#define MAX_NUMBER_PEPTIDES 1000000 //What to set?
 
 /**
  *\struct match_collection
@@ -263,7 +263,7 @@ BOOLEAN_T score_match_collection_sp(
   float score = 0;
   PEPTIDE_T* peptide = NULL;
   ION_SERIES_T* ion_series = NULL;
-
+  
   //iterate over all peptides
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     peptide = generate_peptides_iterator_next(peptide_iterator);
@@ -303,10 +303,18 @@ BOOLEAN_T score_match_collection_sp(
     
     //increment total match count
     ++match_collection->match_total;
+
+    //DEBUG, print total peptided scored so far
+    if(match_collection->match_total % 1000 == 0){
+      carp(CARP_INFO, "scored peptide for sp: %d", match_collection->match_total);
+    }
     
     free(peptide_sequence);
     free_ion_series(ion_series);
   }
+
+  //DEBUG, print total peptided scored so far
+  carp(CARP_INFO, "total peptide scored for sp: %d", match_collection->match_total);
   
   //free heap
   free_scorer(scorer);

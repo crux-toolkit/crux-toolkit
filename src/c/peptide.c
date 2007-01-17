@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.45 $
+ * $Revision: 1.46 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -25,7 +25,6 @@ struct peptide {
   unsigned char length; ///< The length of the peptide
   float peptide_mass;   ///< The peptide's mass.
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
-  void (*free_peptide)(PEPTIDE_T*); ///< the function pointer to *_free_peptide
 };
 
  
@@ -89,8 +88,7 @@ PEPTIDE_T* new_peptide(
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type, ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
-  void* free_peptide ///< the function pointer to *_free_peptide
+  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
   )
 {
   PEPTIDE_T* peptide = allocate_peptide();
@@ -98,7 +96,6 @@ PEPTIDE_T* new_peptide(
   set_peptide_peptide_mass( peptide, peptide_mass);
   peptide->peptide_src =
     new_peptide_src( peptide_type, parent_protein, start_idx );
-  peptide->free_peptide = free_peptide;
   
   //increment the database pointer count
   add_database_pointer_count(get_protein_database(parent_protein));
@@ -141,20 +138,8 @@ float get_peptide_mz(
 
 /**
  * Frees an allocated peptide object.
- * calles the free peptide functional pointer
  */
 void free_peptide(
-  PEPTIDE_T* peptide ///< peptide to free -in
-  )
-{
-  peptide->free_peptide(peptide);
-}
-
-
-/**
- * Frees an allocated peptide object for normal curcumstances.
- */
-void free_peptide_normal(
   PEPTIDE_T* peptide ///< peptide to free -in
   )
 {
@@ -167,6 +152,8 @@ void free_peptide_normal(
 }
 
 /**
+ * FIXME, don't need this anymore, may delete
+ *
  * Frees an allocated peptide object.
  * This one is used when the peptides is created throuh
  * parsing the index, the peptide_src is not a link list, but
@@ -388,7 +375,6 @@ void copy_peptide(
 
   set_peptide_length(dest, get_peptide_length(src));
   set_peptide_peptide_mass(dest, get_peptide_peptide_mass(src));
-  dest->free_peptide = src->free_peptide;
 
   //copy all of the peptide_src in the peptide
   new_association = allocate_peptide_src();
@@ -452,17 +438,6 @@ DATABASE_T* get_peptide_first_src_database(
   )
 {
   return get_protein_database(get_peptide_src_parent_protein(peptide->peptide_src));
-}
-
-/**
- * set the correct free method for free peptide
- */
-void set_peptide_free_peptide(
-  PEPTIDE_T* peptide, ///< working peptide -in                              
-  void* free_peptide ///< functional pointer to the correctf free peptide method -in
-  )
-{
-  peptide->free_peptide = free_peptide;
 }
 
 /**
@@ -638,6 +613,14 @@ PROTEIN_T* get_peptide_parent_protein(
 {
   return get_peptide_src_parent_protein(peptide->peptide_src);
 }
+
+/**
+ *\returns the protein struct size, value of sizeof function
+ */
+int get_peptide_sizeof(){
+  return sizeof(PEPTIDE_T);
+}
+
 
 /**
  * Iterator
@@ -850,10 +833,66 @@ BOOLEAN_T merge_peptides(
  * int - start_idx of the peptide in this protein
  * int - the protein in the indexed database DATABASE_T in the protein object
  */
+
 BOOLEAN_T serialize_peptide(
-  PEPTIDE_T* peptide,
-  FILE* file,
-  int num_digits
+  PEPTIDE_T* peptide, ///< the peptide to serialize -in
+  FILE* file, ///< the output file to serlize -out
+  int num_digits ///< the number of floating point digits to record -in
+  )
+{
+  //quiet compiler
+  num_digits = num_digits;
+
+  PEPTIDE_SRC_ITERATOR_T* iterator = 
+    new_peptide_src_iterator(peptide);
+  long num_src_location;
+  long original_location;
+  int num_src = 0;
+  int protein_idx = 0;
+
+  //write the peptide struct
+  fwrite(peptide, sizeof(PEPTIDE_T), 1, file);
+  
+  //store number of src location in file
+  num_src_location = ftell(file);
+
+  //write dummie peptide src count
+  fwrite(&num_src, sizeof(int), 1, file);
+
+  //there must be at least one peptide src
+  if(!peptide_src_iterator_has_next(iterator)){
+    carp(CARP_WARNING, "no peptide src");
+    return FALSE;
+  }
+
+  //interate through the linklist of possible parent proteins, print each parent protein
+  while(peptide_src_iterator_has_next(iterator)){
+    PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(iterator);
+    //write protein index in database
+    protein_idx = get_protein_protein_idx(get_peptide_src_parent_protein(peptide_src));
+    fwrite(&protein_idx, sizeof(int), 1, file);
+    //write the single peptide_src struct
+    fwrite(peptide_src, get_peptide_src_sizeof(), 1, file);        
+    ++num_src;
+  }
+  free_peptide_src_iterator(iterator);
+  
+  original_location = ftell(file);
+  fseek(file, num_src_location, SEEK_SET);
+  
+  //over write the dummie peptide_src count with real value
+  fwrite(&num_src, sizeof(int), 1, file);
+  
+  //return to original poistion
+  fseek(file, original_location, SEEK_SET);
+  return TRUE;
+  
+}
+/*
+BOOLEAN_T serialize_peptide(
+  PEPTIDE_T* peptide, ///< the peptide to serialize -in
+  FILE* file, ///< the output file to serlize -out
+  int num_digits ///< the number of floating point digits to record -in
   )
 {
   PEPTIDE_SRC_ITERATOR_T* iterator = 
@@ -899,7 +938,8 @@ BOOLEAN_T serialize_peptide(
   fseek(file, original_location, SEEK_SET);
   return TRUE;
 }
- 
+*/
+
 /*
  * Load a peptide from the FILE
  * \returns TRUE if load is successful, else FALSE

@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -149,6 +149,11 @@ PEPTIDE_SRC_T* get_peptide_src_next_association(
 char* get_peptide_src_sequence_pointer(
   PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
   );
+
+/**
+ *\returns the peptide_src strct size, value of sizeof function
+ */
+int get_peptide_src_sizeof(void);
 
 /*
  * Local Variables:

@@ -159,6 +159,11 @@ int main(int argc, char** argv){
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
  
+    //print header
+    fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
+    fprintf(stdout, "# SCAN NUMBER: %d\n", scan_num);
+    fprintf(stdout, "# PROTEIN DATABASE: %s\n", fasta_file);
+
     //read ms2 file
     collection = new_spectrum_collection(ms2_file);
     spectrum = allocate_spectrum();

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.31 $
+ * $Revision: 1.32 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1388,6 +1388,101 @@ BOOLEAN_T parse_crux_index_map(
  * creates a new peptide and then adds it to the iterator to return
  * \returns TRUE if successfully parsed the pepdtide from the crux_index_* file
  */
+
+BOOLEAN_T parse_peptide_index_file(
+  void* general_peptide_iterator,  ///< working peptide_iterator -in/out
+  PEPTIDE_T* peptide, ///< the peptide to finish parse -out
+  INDEX_TYPE_T index_type ///< the calling peptide iterator  -out
+  )
+{
+  INDEX_PEPTIDE_ITERATOR_T* peptide_iterator_db = NULL;
+  BIN_PEPTIDE_ITERATOR_T* peptide_iterator_bin = NULL; 
+  
+  DATABASE_T* database = NULL;
+  FILE* file = NULL;
+  PROTEIN_T* parent_protein = NULL;
+  PEPTIDE_SRC_T* peptide_src = NULL;
+  PEPTIDE_SRC_T* peptide_src_previous = NULL;
+  int num_peptide_src = -1;
+  int protein_idx = -1;
+  int src_index =  0;
+  
+  //cast peptide iterator to correct type
+  if(index_type == DB_INDEX){
+    peptide_iterator_db = 
+      (INDEX_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
+    file = peptide_iterator_db->index_file;
+    database = peptide_iterator_db->index->database;
+  }
+  else if(index_type == BIN_INDEX){
+    peptide_iterator_bin = 
+      (BIN_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
+    file = peptide_iterator_bin->index_file;
+    database = peptide_iterator_bin->index->database;
+  }
+  
+  //increment the database pointer count
+  add_database_pointer_count(database);
+
+  //get total number of peptide_src for this peptide
+  //peptide must have at least one peptide src
+  if(fread(&num_peptide_src, sizeof(int), 1, file) != 1 || num_peptide_src < 1){
+    carp(CARP_ERROR, "index file corrupted, peptide must have at least one peptide src");
+    free(peptide);
+    return FALSE;
+  }
+  
+  //parse and add all peptide src to peptide
+  for(; src_index < num_peptide_src; ++src_index){
+    //get protein index
+    if(fread(&protein_idx, (sizeof(int)), 1, file) != 1){
+      carp(CARP_ERROR, "index file corrupted, incorrect protein index");
+      free(peptide);
+      return FALSE;
+    }
+    
+    //get the petide src parent protein
+    parent_protein = 
+      get_database_protein_at_idx(database, protein_idx);
+    
+    peptide_src = allocate_peptide_src();
+
+    //read peptide src
+    if(fread(peptide_src, get_peptide_src_sizeof(), 1, file) != 1){
+      carp(CARP_ERROR, "index file corrupted, failed to read peptide src");
+      free(peptide_src);
+      free(peptide);
+      return FALSE;
+    }
+    
+    //set parent protein
+    set_peptide_src_parent_protein(peptide_src, parent_protein);
+    
+    //if first peptide_src to add
+    if(src_index == 0){ //add to peptide
+      set_peptide_peptide_src(peptide, peptide_src);
+    }
+    else{//add to the tail of the previous peptide_src
+      set_peptide_src_next_association(peptide_src_previous, peptide_src);
+    }
+    
+    //set for next iteration
+    peptide_src_previous = peptide_src;
+  }
+  
+  //set new peptide in interator
+  //cast peptide iterator to correct type
+  if(index_type == DB_INDEX){
+    peptide_iterator_db->peptide = peptide;
+  }
+  else if(index_type == BIN_INDEX){
+    peptide_iterator_bin->peptide = peptide;
+  }
+  
+  return TRUE;   
+}
+
+/*
 BOOLEAN_T parse_peptide_index_file(
   void* general_peptide_iterator, 
   float peptide_mass, 
@@ -1506,6 +1601,7 @@ BOOLEAN_T parse_peptide_index_file(
   free(new_line);
   return TRUE;   
 }
+*/
 
 /**
  * fast forward the index file pointer to the beginning of the
@@ -1513,6 +1609,70 @@ BOOLEAN_T parse_peptide_index_file(
  * parse the peptide, then adds it to the index-peptide-iterator to return
  * \returns TRUE if successfully finds and parses a peptide that meets the constraints
  */
+
+BOOLEAN_T fast_forward_index_file(
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator, ///< working index_peptide_iterator -in/out
+  FILE* file ///< the file stream to fast foward -in
+  )
+{
+  //first peptide to parse
+  PEPTIDE_T* peptide = allocate_peptide();
+  float peptide_mass = 0;
+  int peptide_length = 0;
+  BOOLEAN_T in_peptide = FALSE;
+  int num_peptide_src = 0;
+
+  //loop until we get to a peptide
+  while(!in_peptide){
+    //read first peptide
+    if(fread(peptide, get_peptide_sizeof(), 1, file) != 1){
+      //there is no peptide
+      free(peptide);
+      return FALSE;
+    }
+
+    //get mass & length
+    peptide_mass = get_peptide_peptide_mass(peptide);
+    peptide_length = get_peptide_length(peptide);
+    
+    //check peptide mass larger than peptide constraint, break no more peptides to return
+    if(peptide_mass > get_peptide_constraint_max_mass(index_peptide_iterator->index->constraint)){
+      //there is no peptide
+      free(peptide);
+      return FALSE;
+    }
+    //check peptide mass larger than peptide constraint, continue to next peptide
+    //check peptide mass within peptide constraint
+    else if(peptide_mass < get_peptide_constraint_min_mass(index_peptide_iterator->index->constraint) ||
+            peptide_length > get_peptide_constraint_max_length(index_peptide_iterator->index->constraint) ||
+            peptide_length < get_peptide_constraint_min_length(index_peptide_iterator->index->constraint)){
+      fread(&num_peptide_src, sizeof(int), 1, file);
+      //skip the number of peptide src in the file to reach the start
+      //of the next peptide
+      fseek(file, num_peptide_src*(sizeof(int) + get_peptide_src_sizeof()), SEEK_CUR);
+      continue;
+    }
+    //ok now we finally got the peptide
+    else{
+      in_peptide = TRUE;
+    }
+  }
+  
+  index_peptide_iterator->index_file = file;
+  
+  //parse the rest of the peptide, its peptid_src, once finished 
+  //adds the peptide to the iterator to return
+  if(!parse_peptide_index_file(index_peptide_iterator, peptide, DB_INDEX)){
+    carp(CARP_WARNING, "failed to parse peptide, mass: %.2f, length: %d", 
+         peptide_mass, peptide_length);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+
+/*
 BOOLEAN_T fast_forward_index_file(
   INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator, ///< working index_peptide_iterator -in/out
   FILE* file ///< the file stream to fast foward -in
@@ -1606,6 +1766,7 @@ BOOLEAN_T fast_forward_index_file(
   free(new_line);
   return FALSE;
 }
+*/
 
 /**
  * \returns TRUE if successfully initiallized the index_peptide_iterator
@@ -1788,7 +1949,7 @@ void free_index_peptide_iterator(
   
   //if did not iterate over all peptides, free the last peptide not returned
   if(index_peptide_iterator_has_next(index_peptide_iterator)){
-    free_peptide_for_array(index_peptide_iterator->peptide);
+    free_peptide(index_peptide_iterator->peptide);
   }
   
   //decrement database pointer count
@@ -1839,7 +2000,7 @@ BOOLEAN_T setup_index_filtered_peptide_iterator(
       iterator->has_next = TRUE;
       return TRUE;
     }
-    free_peptide_for_array(peptide);
+    free_peptide(peptide);
   }
   //no peptides meet the constraint
   iterator->has_next = FALSE;
@@ -1916,7 +2077,7 @@ void free_index_filtered_peptide_iterator(
     
   //if did not iterate over all peptides, free the last peptide not returned
   if(index_filtered_peptide_iterator_has_next(index_filtered_peptide_iterator)){
-    free_peptide_for_array(index_filtered_peptide_iterator->peptide);
+    free_peptide(index_filtered_peptide_iterator->peptide);
   }
   free(index_filtered_peptide_iterator);
 }
@@ -1930,6 +2091,38 @@ void free_index_filtered_peptide_iterator(
  * parse the peptide, then adds it to the bin-peptide-iterator to return
  * \returns TRUE if successfully initializes the bin_peptide_iterator
  */
+BOOLEAN_T initialize_bin_peptide_iterator(
+  BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< working bin_peptide_iterator -in/out
+  )
+{
+  FILE* file = bin_peptide_iterator->index_file;
+  //allocate peptide to used to parse
+  PEPTIDE_T* peptide = allocate_peptide();
+  
+  //read peptide
+  if(fread(peptide, get_peptide_sizeof(), 1, file) != 1){
+    //there is no more peptide to parse
+    free(peptide);
+    bin_peptide_iterator->has_next = FALSE;
+    return TRUE; //return TRUE, because although no peptide to return all process worked fine
+  }
+  
+  //set file pointer
+  bin_peptide_iterator->index_file = file;
+        
+  //parse the peptide, adds it to the iterator to return
+  if(!parse_peptide_index_file(bin_peptide_iterator, peptide, BIN_INDEX)){
+    carp(CARP_WARNING, "failed to parse peptide, mass: %.2f, length: %d", 
+         get_peptide_peptide_mass(peptide), get_peptide_length(peptide));
+    return FALSE;
+  }
+  else{
+    bin_peptide_iterator->has_next = TRUE;
+    return TRUE;
+  }
+}
+
+/*
 BOOLEAN_T initialize_bin_peptide_iterator(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< working bin_peptide_iterator -in/out
   )
@@ -2006,7 +2199,7 @@ BOOLEAN_T initialize_bin_peptide_iterator(
   free(new_line);
   return TRUE;
 }
-
+*/
 /**
  * Instantiates a new bin_peptide_iterator from a gvien bin file handler.
  * \returns a new heap allocated bin_peptide_iterator object
@@ -2136,8 +2329,6 @@ PEPTIDE_T* bin_sorted_peptide_iterator_next(
   )
 {
   PEPTIDE_T* peptide = sorted_peptide_iterator_next(bin_sorted_peptide_iterator->sorted_peptide_iterator);
-  //FIXME set the correct freeing methode
-  //set_peptide_free_peptide(peptide, &free_peptide_normal);
   return peptide;
 }
 
