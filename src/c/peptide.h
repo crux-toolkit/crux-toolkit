@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.34 $
+ * $Revision: 1.35 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -356,8 +356,7 @@ BOOLEAN_T merge_peptides(
  */
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide,
-  FILE* file,
-  int num_digits
+  FILE* file
   );
  
 /**

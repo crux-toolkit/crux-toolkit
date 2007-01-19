@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.46 $
+ * $Revision: 1.47 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -814,34 +814,22 @@ BOOLEAN_T merge_peptides(
 }
 
 /*
- * Serialize a peptide to a FILE
+ * Serialize a peptide to a FILE in binary
  * \returns TRUE if serialization is successful, else FALSE
- * the num_digits identifies the number of digits it should print the mass in
- * currently only supports for 2, and 3
  *
  * The peptide serialization format looks like this:
  *
- * '*' float - peptide_mass 
- * unsigned char - length
- * int - number_of_sources
- * 
- * and then repeating the following depending on number of sources. This
- * part can be implemented either here or in the PEPTIDE_SRC and PROTEIN objects
- * as serialization methods there, whatever seems easiest
+ *<PEPTIDE_T: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_SRC_T: peptide_src struct>]+
+ * the bracket peptide src information repeats for the number of peptide src listed before the bracket
+ * the protein index is the index of the parent protein in the database DATABASE_T
  *
- * unsigned char - corresponding to the peptide type
- * int - start_idx of the peptide in this protein
- * int - the protein in the indexed database DATABASE_T in the protein object
  */
 
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide, ///< the peptide to serialize -in
-  FILE* file, ///< the output file to serlize -out
-  int num_digits ///< the number of floating point digits to record -in
+  FILE* file ///< the output file to serlize -out
   )
 {
-  //quiet compiler
-  num_digits = num_digits;
 
   PEPTIDE_SRC_ITERATOR_T* iterator = 
     new_peptide_src_iterator(peptide);

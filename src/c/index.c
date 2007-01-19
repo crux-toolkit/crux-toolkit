@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.32 $
+ * $Revision: 1.33 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -559,7 +559,7 @@ FILE* sort_bin(
   //serialize all peptides in sorted order
   while(bin_sorted_peptide_iterator_has_next(peptide_iterator)){
     working_peptide = bin_sorted_peptide_iterator_next(peptide_iterator);
-    serialize_peptide(working_peptide, file, 2);
+    serialize_peptide(working_peptide, file);
     free_peptide(working_peptide);
   }
   
@@ -591,10 +591,10 @@ BOOLEAN_T dump_peptide(
     file = file_array[file_idx];
     //print out all peptides
     for(; peptide_idx < current_count; ++peptide_idx){
-      serialize_peptide(peptide_array[peptide_idx] , file, 3);
+      serialize_peptide(peptide_array[peptide_idx] , file);
       free_peptide(peptide_array[peptide_idx]);
     }
-    serialize_peptide(working_peptide, file, 3);
+    serialize_peptide(working_peptide, file);
     free_peptide(working_peptide);
     bin_count[file_idx] = 0;
   }
@@ -636,7 +636,7 @@ BOOLEAN_T dump_peptide_all(
     bin_idx = bin_count[file_idx];
     //print out all peptides in this specific bin
     while(bin_idx > 0){
-      serialize_peptide(working_array[peptide_idx] , file, 3);
+      serialize_peptide(working_array[peptide_idx] , file);
       free_peptide(working_array[peptide_idx]);
       --bin_idx;
       ++peptide_idx;

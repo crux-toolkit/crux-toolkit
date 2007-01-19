@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.33 $
+ * $Revision: 1.34 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -34,6 +34,8 @@ struct database{
   PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database 
   unsigned long int size; ///< The size of the database in bytes (convenience)
   BOOLEAN_T use_light_protein; ///< should I use the light/heavy protein option
+  BOOLEAN_T is_memmap; ///< are we using a memory mapped fasta file, thus proteins are all memory mapped
+  void* data_address; ///< pointer to the begining of the memory mapped data, MUST not modify this pointer!!!
   int pointer_count; ///< number of pointers referencing  this database, at 0 should be freed
 };    
 
@@ -82,14 +84,16 @@ DATABASE_T* allocate_database(void){
  * \returns A new database object.
  */
 DATABASE_T* new_database(
-  char*         filename, ///< The file from which to parse the database. -in
-  BOOLEAN_T use_light_protein ///< should I use the light/heavy protein option -in
-  )
+  char*         filename, ///< The file from which to parse the database. either text fasta file or binary fasta file -in
+  BOOLEAN_T use_light_protein,///< do we use linght/heavy protein -in
+  BOOLEAN_T is_memmap ///< are we using a memory mapped binary fasta file, thus proteins are all memory mapped -in
+  )         
 {
   DATABASE_T* database = allocate_database();
   set_database_filename(database, filename);
   database->use_light_protein = use_light_protein;
-  
+  database->is_memmap = is_memmap;
+
   //increment database pointer counter
   add_database_pointer_count(database);
   
@@ -124,6 +128,11 @@ void free_database(
     //free each protein in the array
     for(; protein_idx < database->num_proteins; ++protein_idx){
       free_protein(database->proteins[protein_idx]);
+    }
+    
+    //free memory mapped binary file from memory
+    if(database->is_memmap){
+      //un map!!
     }
   }
   free(database);
@@ -171,96 +180,14 @@ void print_database(
 }
 
 /**
- * Parses a database from the file in the filename member variable
+ * Parses a database from the text based fasta file in the filename member variable
  * reads in all proteins in the fasta file and creates a protein object
  * and adds them to the database protein array
  * total proteins in fasta file must not exceed MAX_PROTEIN constant
  * IF using light_protein functionality will not read in the sequence or id.
  * \returns TRUE if success. FALSE if failure.
  */
-/*
-BOOLEAN_T parse_database(
-  DATABASE_T* database ///< An allocated database -in
-  )
-{
-  unsigned long working_index;
-  FILE* file = NULL;
-  char* new_line = NULL;
-  int line_length;
-  size_t buf_length = 0;
-  PROTEIN_T* new_protein;
-  unsigned int protein_idx = 0;
-
-  //check if already parsed
-  if(database->is_parsed){
-    return TRUE;
-  }
-  
-  //open file and 
-  file = fopen(database->filename, "r");
-
-  //check if succesfully opened file
-  if(file == NULL){
-    carp(CARP_FATAL, "failed to open file to parse database");
-    return FALSE;
-  }
-
-  working_index = ftell(file);
-  //check each line until reach '>' line
-  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
-    if(new_line[0] == '>'){
-      if(database->num_proteins == MAX_PROTEINS){
-        fclose(file);
-        free(new_line);
-        carp(CARP_ERROR, "exceeds protein index array size");
-        return FALSE;
-      }
-      //the new protein to be added
-      new_protein = allocate_protein();
-
-      //do not parse the protein sequence if using light/heavy functionality
-      if(database->use_light_protein){
-        //set light and offset
-        set_protein_offset(new_protein, working_index);
-        set_protein_is_light(new_protein, TRUE);
-      }
-      else{
-        //rewind to the begining of the protein to include ">" line
-        fseek(file, working_index, SEEK_SET);
-        
-        //failed to parse the protein from fasta file
-        //protein offset is set in the parse_protein_fasta_file method
-        if(!parse_protein_fasta_file(new_protein ,file)){
-          fclose(file);
-          free_protein(new_protein);
-          for(; protein_idx < database->num_proteins; ++protein_idx){
-            free_protein(database->proteins[protein_idx]);
-          }
-          database->num_proteins = 0;
-          carp(CARP_ERROR, "failed to parse fasta file");
-          return FALSE;
-        }
-        set_protein_is_light(new_protein, FALSE);
-      }
-      
-      //add protein to database
-      database->proteins[database->num_proteins] = new_protein;
-      ++database->num_proteins;
-      //set protein index, database
-      set_protein_protein_idx(new_protein, database->num_proteins);
-      set_protein_database(new_protein, database);
-    }
-    working_index = ftell(file);
-  }
-  //yes the database is paresed now..!!
-  database->is_parsed = TRUE;
-  free(new_line);
-  database->file = file;
-  return TRUE;
-}
-*/
-
-BOOLEAN_T parse_database(
+BOOLEAN_T parse_database_text_fasta(
   DATABASE_T* database ///< An allocated database -in
   )
 {
@@ -368,6 +295,181 @@ BOOLEAN_T parse_database(
   //yes the database is paresed now..!!
   database->is_parsed = TRUE;
   database->file = file;
+  return TRUE;
+}
+
+/**
+ * memory maps the binary fasta file for the database
+ *\return TRUE if successfully memory map binary fasta file, else FALSE
+ */
+BOOLEAN_T memory_map_database(
+  DATABASE_T* database ///< An allocated database -in/out
+  )
+{
+  struct stat file_info;
+  
+  //get information of the binary fasta file
+  if (stat(database->filename, &file_info) == -1) {
+    carp(CARP_ERROR, "failed to retrieve information of binary fasta file: %s", database->filename);
+    return FALSE;
+  }
+  
+  //memory map the entire binary fasta file!
+  if ((database->data = mmap((caddr_t)0, file_info.st_size, PROT_READ, MAP_SHARED, database->file, 0)) \
+      == (caddr_t)(-1)) {
+    carp(CARP_ERROR, "failed to use mmap function for binary fasta file: %s", database->filename);
+    return FALSE;
+  }
+  
+  return TRUE;
+}
+
+/**
+ * Assumes that there is a "*" at the very end after all the proteins in binary file
+ *\return TRUE successfully populates the proteins from memory mapped binary fasta file, else FALSE
+ */
+BOOLEAN_T populate_proteins_from_memmap(
+  DATABASE_T* database ///< An allocated database -in/out
+  )
+{
+  unsigned long working_index;
+  PROTEIN_T* new_protein;
+  unsigned int protein_idx = 0;
+  char* data = database->data_address;
+  
+  //parse proteins until the end of list
+  while(data[0] != "*"){
+    //check if anymore space for protein
+    if(database->num_proteins == MAX_PROTEINS){
+      carp(CARP_ERROR, "exceeds protein index array size");
+      //free all proteins before return
+      for(protein_idx = 0; protein_idx < database->num_proteins; ++protein_idx){
+        free_protein(database->proteins[protein_idx]);
+      }
+      database->num_proteins = 0;
+      return FALSE;
+    }
+    
+    //the new protein to be added
+    new_protein = allocate_protein();
+    
+    //parse protein from memory map
+    if(!parse_protein_binary_memmap(new_protein, data)){
+      //failed to parse the protein from memmap
+      //free all proteins, and return FALSE
+      free_protein(new_protein);
+      for(; protein_idx < database->num_proteins; ++protein_idx){
+        free_protein(database->proteins[protein_idx]);
+      }
+      database->num_proteins = 0;
+      carp(CARP_ERROR, "failed to parse fasta file");
+      return FALSE;
+    }
+    set_protein_is_light(new_protein, FALSE);
+    
+    //add protein to database
+    database->proteins[database->num_proteins] = new_protein;
+    ++database->num_proteins;
+    //set protein index, database
+    set_protein_protein_idx(new_protein, database->num_proteins);
+    set_protein_database(new_protein, database);
+  }
+
+  return TRUE;
+}
+
+/**
+ * Parses a database from the binary fasta file in the filename member variable
+ * Memory maps the binary fasta file into memory
+ * The protein sequences are not copied, but just pointed to the memory mapped location
+ * \returns TRUE if success. FALSE if failure.
+ */
+BOOLEAN_T parse_database_memmap_binary(
+  DATABASE_T* database ///< An allocated database -in
+  )
+{
+  FILE* file = NULL;
+ 
+  //check if already parsed
+  if(database->is_parsed){
+    return TRUE;
+  }
+  
+  //open file and 
+  file = fopen(database->filename, O_RDONLY);
+  
+  //check if succesfully opened file
+  if(file == NULL){
+    carp(CARP_FATAL, "failed to open file to parse database");
+    return FALSE;
+  }
+
+  //FIXME, if what to use some light protein for binary file change here...
+  //check if user request light protein
+  // When using a binary file in memory map, cannot use light protein
+  // change to FALSE on light protein useage
+  if(database->use_light_protein){
+    carp(CARP_WARNING, "memory mapping does not support light protein,changing settings to use heavy protein");
+    database->use_light_protein = FALSE;;
+  }
+
+  //memory map the binary fasta file into memory
+  if(!memory_map_database(database)){
+    carp(CARP_FATAL, "failed to memory map binary fasta file into memory");
+    return FALSE;
+  }
+
+  //populate the proteins from the memory mapped fasta file
+  if(!populate_proteins_from_memmap(database)){
+    carp(CARP_FATAL, "failed to populate the proteins from memory mapped fasta file");
+    return FALSE;
+  }
+   
+  //yes the database is paresed now..!!
+  database->is_parsed = TRUE;
+  database->file = file;
+  return TRUE;
+}
+
+
+/**
+ * Parses a database from the file in the filename member variable
+ * The is_memmap field in the database struct determines whether the
+ * input file is a binary fasta file or normal text fasta file.
+ *
+ * IF is_memmap is true, memory maps the entire binary fasta file into memory
+ * and then creates protein objects that point to the memory mapped binary file
+ *
+ * IF is_memmap is fasle, uses the traditional text fasta file which it prases out the various
+ * for each protein. Only when using text fasta file can you use light/heavy protein, in which
+ * if using light_protein functionality will not read in the sequence or id. Will parse sequence if protein 
+ * is needed, lazy parsing.
+ *
+ * For Both cases, reads in all proteins in file and creates a protein object
+ * and adds them to the database protein array
+ * total proteins in fasta file must not exceed MAX_PROTEIN constant
+ *
+ * \returns TRUE if success. FALSE if failure.
+ */
+BOOLEAN_T parse_database(
+  DATABASE_T* database ///< An allocated database -in
+  )
+{
+  //should we parse the database using memory mapped binary fasta file?
+  if(database->is_memmap){
+    if(!parse_database_memmap_binary(database)){
+      carp(CARP_ERROR, "failed to parse database for memory mapped binary fasta file");
+      return FALSE;
+    }    
+  }
+  else{ //parse database from normal text fasta file, no memory mapping!
+    if(!parse_database_text_fasta(database)){
+      carp(CARP_ERROR, "failed to parse database for text fasta file");
+      return FALSE;
+    }
+  }
+  
+  //succeded to parse database!
   return TRUE;
 }
 
