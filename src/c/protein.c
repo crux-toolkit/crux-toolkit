@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.44 $
+ * $Revision: 1.45 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -38,6 +38,7 @@ struct protein{
   unsigned long int offset; ///< The file location in the source file in the database
   unsigned int protein_idx; ///< The index of the protein in it's database.
   BOOLEAN_T    is_light; ///< is the protein a light protein?
+  BOOLEAN_T    is_memmap; ///< is the protein produced from memory mapped file
   char*              id; ///< The protein sequence id.
   char*        sequence; ///< The protein sequence.
   unsigned int   length; ///< The length of the protein sequence.
@@ -101,7 +102,7 @@ PROTEIN_T* new_protein(
   unsigned int length, ///< The length of the protein sequence. -in
   char* annotation,  ///< Optional protein annotation.  -in
   unsigned long int offset, ///< The file location in the source file in the database -in
-  unsigned int protein_idx, ///< The index of the protein in it's database.-in
+  unsigned int protein_idx, ///< The index of the protein in it's database.-in  
   DATABASE_T* database ///< the database of its origin
   )
 {
@@ -113,8 +114,8 @@ PROTEIN_T* new_protein(
   set_protein_offset(protein, offset);
   set_protein_protein_idx(protein, protein_idx);
   set_protein_is_light(protein, FALSE);
-  protein->is_light = FALSE;
   protein->database = database;
+  protein->is_memmap = FALSE;
   return protein;
 }         
 
@@ -194,7 +195,7 @@ void free_protein(
   PROTEIN_T* protein ///< object to free -in
   )
 {
-  if(!protein->is_light){
+  if(!protein->is_memmap || !protein->is_light){
     free(protein->id);
     free(protein->sequence);
     free(protein->annotation);
@@ -235,6 +236,51 @@ void print_protein(
   free(annotation);
 }
 
+
+/**
+ * prints a binary representation of the protein
+ * 
+ * FORMAT
+ * <int: id length><char: id><int: annotation length><char: annotation><int: sequence length><char: sequence>
+ *
+ * make sure when rading the binary data, add one to the length so that it will read in the terminating char as well
+ */
+void serialize_protein(
+  PROTEIN_T* protein, ///< protein to print as binary -in
+  FILE* file ///< output stream -out
+  )
+{
+  //covnert to heavy protein
+  if(protein->is_light){
+    protein_to_heavy(protein);
+  }
+  
+  int id_length = strlen(protein->id);
+  int annotation_length = strlen(protein->annotation);
+
+  //write the protein id length
+  fwrite(&id_length, sizeof(int), 1, file);
+  
+  //write the protein id 
+ //include "/0"
+  fwrite(protein->id, sizeof(char), id_length+1, file);
+
+  //write the protein annotation length
+  fwrite(&annotation_length, sizeof(int), 1, file);
+
+  //write the protein annotation
+  //include "/0"
+  fwrite(protein->annotation, sizeof(char), annotation_length+1, file);
+  
+  //write the protein sequence length
+  fwrite(&protein->length, sizeof(unsigned int), 1, file);
+  
+  //write the protein sequence
+  //include "/0"
+  fwrite(protein->sequence, sizeof(char), protein->length+1, file);
+}
+
+
 /**
  * Copies protein object src to dest.
  * assumes that the protein is heavy
@@ -263,6 +309,86 @@ void copy_protein(
   free(annotation);
 }
 
+
+/**
+ * Parses a protein from an memory mapped binary fasta file
+ * the protein_idx field of the protein must be added before or after you parse the protein
+ * \returns TRUE if success. FALSE is failure.
+ * protein must be a heap allocated
+ * 
+ * Assume memmap pointer is set at beginning of protein
+ * Assume protein binary format
+ * <int: id length><char: id><int: annotation length><char: annotation><int: sequence length><char: sequence>
+ *
+ * modifies the *memmap pointer!
+ */
+BOOLEAN_T parse_protein_binary_memmap(
+  PROTEIN_T* protein, ///< protein object to fill in -out
+  void** memmap ///< a pointer to a pointer to the memory mapped binary fasta file -in
+  )
+{
+  int** memmap_as_int = (int**)memmap;
+  char** memmap_as_char = (char**)memmap;
+
+  int id_length = 0;
+  int annotation_length = 0;
+  int sequence_length = 0;
+
+  /* FIXME, maybe use this to check if still within file
+  if(*memmap_as_char[0] == EOF){
+    carp(CARP_ERROR, "end of file");
+  }
+  */
+
+  /***set protein ID***/
+
+  //read id length
+  id_length = (*memmap_as_int)[0];
+
+  //reset pointer to start of id
+  ++*memmap_as_int;
+
+  //set protein id to mem mapped id
+  protein->id = *memmap_as_char;
+
+  //reset pointer to move to annotation_length
+  *memmap_as_char += (id_length + 1);
+
+
+  /***set protein annotation***/
+
+  //read annotation length
+  annotation_length = (*memmap_as_int)[0];
+
+  //reset pointer to start of annotation
+  ++*memmap_as_int;
+
+  //set protein annotation to mem mapped annotation
+  protein->annotation = *memmap_as_char;
+
+  //reset pointer to move to sequence_length
+  *memmap_as_char += (annotation_length + 1);
+
+
+  /***set protein sequence***/
+  
+  //read sequence length
+  sequence_length = (*memmap_as_int)[0];
+  
+  //reset pointer to start of sequence
+  ++*memmap_as_int;
+
+  //set protein annotation to mem mapped sequence
+  protein->sequence = *memmap_as_char;
+
+  //reset pointer to move to start of next protein
+  *memmap_as_char += (sequence_length + 1);
+  
+  //now this protein has been created from memory mapped!
+  protein->is_memmap = TRUE;
+
+  return TRUE;
+}
 
 //FIXME ID line and annotation might need to be fixed
 VERBOSE_T verbosity = NORMAL_VERBOSE;
