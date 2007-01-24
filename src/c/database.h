@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -86,6 +86,14 @@ char* get_database_filename(
   );
 
 /**
+ *\returns the pointer to the filename of the database
+ * user must not free or change the filename
+ */
+char* get_database_filename_pointer(
+  DATABASE_T* database ///< the query database -in 
+  );
+
+/**
  * sets the filename of the database
  * protein->sequence must been initiailized
  */
@@ -144,6 +152,14 @@ void set_database_use_light_protein(
  */
 BOOLEAN_T get_database_use_light_protein(
   DATABASE_T* database ///< the query database -in 
+  );
+
+/**
+ *sets TRUE,FALSE whether the database uses memory mapped
+ */
+void set_database_memmap(
+  DATABASE_T* database, ///< the query database -in 
+  BOOLEAN_T is_memmap  ///< is the database memory mapped?
   );
 
 

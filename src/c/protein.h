@@ -1,6 +1,6 @@
 /**
  * \file protein.h 
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
 #ifndef PROTEIN_H 
@@ -89,6 +89,23 @@ void copy_protein(
 BOOLEAN_T parse_protein_fasta_file(
   PROTEIN_T* protein, ///< protein object to fill in -out
   FILE* file ///< fasta file -in
+  );
+
+/**
+ * Parses a protein from an memory mapped binary fasta file
+ * the protein_idx field of the protein must be added before or after you parse the protein
+ * \returns TRUE if success. FALSE is failure.
+ * protein must be a heap allocated
+ * 
+ * Assume memmap pointer is set at beginning of protein
+ * Assume protein binary format
+ * <int: id length><char: id><int: annotation length><char: annotation><int: sequence length><char: sequence>
+ *
+ * modifies the *memmap pointer!
+ */
+BOOLEAN_T parse_protein_binary_memmap(
+  PROTEIN_T* protein, ///< protein object to fill in -out
+  void** memmap ///< a pointer to a pointer to the memory mapped binary fasta file -in
   );
 
 /** 
@@ -245,6 +262,18 @@ DATABASE_T* get_protein_database(
   PROTEIN_T* protein ///< the query protein -in 
   );
 
+/**
+ * prints a binary representation of the protein
+ * 
+ * FORMAT
+ * <int: id length><char: id><int: annotation length><char: annotation><int: sequence length><char: sequence>
+ *
+ * make sure when rading the binary data, add one to the length so that it will read in the terminating char as well
+ */
+void serialize_protein(
+  PROTEIN_T* protein, ///< protein to print as binary -in
+  FILE* file ///< output stream -out
+  );
 
 /**
  * Iterator

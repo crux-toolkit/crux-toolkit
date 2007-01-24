@@ -1,6 +1,6 @@
 /**
  * \file protein_index.h
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for creating a protein index
  *****************************************************************************/
 #ifndef PROTEIN_INDEX_H
@@ -50,10 +50,13 @@ void free_protein_index(
 /**
  * input is the fasta file name which the protein index
  * should have been created.
- *\returns TRUE if protein index is on disk, else FALSE
+ * or if creating binary fasta file, is that already on disk?
+ *
+ *\returns TRUE if protein index or binary fasta file is on disk, else FALSE
  */
 BOOLEAN_T protein_index_on_disk(
-  char* fasta
+  char* fasta_file, ///< input fasta file -in
+  BOOLEAN_T is_binary ///< are we looking for the binary fasta file? or preotein index
   );
 
 /**
@@ -94,6 +97,32 @@ PROTEIN_T* protein_index_iterator_next(
 );
 
 
+/**
+ * creates a binary fasta file on to the output_file
+ * \returns TRUE if successfully creates a binary fasta file, else false
+ */
+BOOLEAN_T create_binary_fasta(
+  char* fasta_file  ///< input fasta file -in
+  );
+
+/**
+ * creates a binary fasta file on to the output_file in currenty directory
+ * sets the output file name to the pointer passed in as argument
+ * \returns TRUE if successfully creates a binary fasta file, else false
+ */
+BOOLEAN_T create_binary_fasta_in_cur(
+  char* fasta_file_w_path, ///< input fasta file with full path -in
+  char* fasta_filename, ///< input fasta a file, only filename -in
+  char** output_file_name ///< get output filename -out
+  );
+
+/**
+ * Heap allocated char*, user must free
+ *\returns the binary fasta name which was created from the given fasta file
+ */
+char* get_binary_fasta_name(
+  char* fasta_file  ///< input fasta file -in                            
+  );
 
 /*
  * Local Variables:

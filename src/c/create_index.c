@@ -80,6 +80,7 @@ int main(int argc, char** argv){
   char* isotopic_mass = "average" ;
   int  verbosity = CARP_INFO;
   char* redundancy = "redundant";
+  char* binary_fasta_file = NULL;
 
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
@@ -238,24 +239,40 @@ int main(int argc, char** argv){
     else{
       wrong_command("verbosity");
     }
-  
+    
+    /*
     //create protein index if not already present
-    if(!protein_index_on_disk(in_file)){
+    if(!protein_index_on_disk(in_file, FALSE)){
       if(!create_protein_index(in_file)){
         carp(CARP_FATAL, "failed to create protein index on disk");
         exit(1);
       }
     }
+    */
 
-    //peptide constraint
-    constraint = 
-      new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages, mass_type);
- 
     //check if input file exist
     if(access(in_file, F_OK)){
       carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty).", in_file);
       exit(1);
     }
+    
+    /*
+    //create binary fasta file if not already present
+    if(!protein_index_on_disk(in_file, TRUE)){
+      if(!create_binary_fasta(in_file)){
+        carp(CARP_FATAL, "failed to create binary fasta file on disk");
+        exit(1);
+      }
+    }
+    
+    //get name of binary fasta file
+    binary_fasta_file = get_binary_fasta_name(in_file);
+    */
+
+    //peptide constraint
+    constraint = 
+      new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages, mass_type);
+ 
     
     //create new index object
     crux_index = 
@@ -266,13 +283,15 @@ int main(int argc, char** argv){
                 is_unique,
                 FALSE
                 );
+
     //create crux_index files
     if(!create_index(crux_index)){
       die("failed to create index");
     }
     
     //free index(frees constraint together);
-    free_index(crux_index);      
+    free_index(crux_index);     
+    free(binary_fasta_file);
     exit(0);
   } 
   else {

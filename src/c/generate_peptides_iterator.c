@@ -185,30 +185,36 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
     
     //create index and set to generate_peptides_iterator
     index = new_search_index(in_file, constraint, is_unique);
+    
+    if(index == NULL){
+      carp(CARP_FATAL, "failed to create peptides from index");
+      free(gen_peptide_iterator);
+      exit(1);
+    }
+
     gen_peptide_iterator->index = index;
     
-    if(index != NULL){
-      //only resrict peptide by mass and length, default iterator
-      if(peptide_type == ANY_TRYPTIC){
-        //create index peptide interator & set generate_peptides_iterator
-        index_peptide_iterator = new_index_peptide_iterator(index);        
-        gen_peptide_iterator->iterator = index_peptide_iterator;
-        gen_peptide_iterator->has_next = &void_index_peptide_iterator_has_next;
-        gen_peptide_iterator->next = &void_index_peptide_iterator_next;
-        gen_peptide_iterator->free = &void_free_index_peptide_iterator;
-      }
-      //if need to select among peptides by peptide_type and etc.
-      else{
-        carp(CARP_INFO, "using filtered index peptide generation");
-
-        //create index_filtered_peptide_iterator  & set generate_peptides_iterator
-        index_filtered_peptide_iterator = new_index_filtered_peptide_iterator(index);
-        gen_peptide_iterator->iterator = index_filtered_peptide_iterator;
-        gen_peptide_iterator->has_next = &void_index_filtered_peptide_iterator_has_next;
-        gen_peptide_iterator->next = &void_index_filtered_peptide_iterator_next;
-        gen_peptide_iterator->free = &void_free_index_filtered_peptide_iterator;
-      }
+    //only resrict peptide by mass and length, default iterator
+    if(peptide_type == ANY_TRYPTIC){
+      //create index peptide interator & set generate_peptides_iterator
+      index_peptide_iterator = new_index_peptide_iterator(index);        
+      gen_peptide_iterator->iterator = index_peptide_iterator;
+      gen_peptide_iterator->has_next = &void_index_peptide_iterator_has_next;
+      gen_peptide_iterator->next = &void_index_peptide_iterator_next;
+      gen_peptide_iterator->free = &void_free_index_peptide_iterator;
     }
+    //if need to select among peptides by peptide_type and etc.
+    else{
+      carp(CARP_INFO, "using filtered index peptide generation");
+      
+      //create index_filtered_peptide_iterator  & set generate_peptides_iterator
+      index_filtered_peptide_iterator = new_index_filtered_peptide_iterator(index);
+      gen_peptide_iterator->iterator = index_filtered_peptide_iterator;
+      gen_peptide_iterator->has_next = &void_index_filtered_peptide_iterator_has_next;
+      gen_peptide_iterator->next = &void_index_filtered_peptide_iterator_next;
+      gen_peptide_iterator->free = &void_free_index_filtered_peptide_iterator;
+    }
+  
   }
   /*********************************************
    *read in from fasta file, don't use index file
@@ -217,7 +223,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
     carp(CARP_INFO, "using fasta_file for peptide generation");
 
     //create a new database & set generate_peptides_iterator
-    database = new_database(in_file, FALSE);         //needs to change this....by given option
+    database = new_database(in_file, FALSE, FALSE);         //needs to change this....by given option
     gen_peptide_iterator->database = database;
     
     //no sort, redundant

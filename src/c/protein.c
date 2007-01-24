@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.45 $
+ * $Revision: 1.46 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -195,7 +195,7 @@ void free_protein(
   PROTEIN_T* protein ///< object to free -in
   )
 {
-  if(!protein->is_memmap || !protein->is_light){
+  if(!protein->is_memmap && !protein->is_light){
     free(protein->id);
     free(protein->sequence);
     free(protein->annotation);
@@ -374,7 +374,8 @@ BOOLEAN_T parse_protein_binary_memmap(
   
   //read sequence length
   sequence_length = (*memmap_as_int)[0];
-  
+  protein->length = sequence_length;
+
   //reset pointer to start of sequence
   ++*memmap_as_int;
 

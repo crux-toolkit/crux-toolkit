@@ -1,12 +1,16 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.34 $
+ * $Revision: 1.35 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "utils.h"
 #include "crux-utils.h"
 #include "peptide.h"
@@ -37,6 +41,7 @@ struct database{
   BOOLEAN_T is_memmap; ///< are we using a memory mapped fasta file, thus proteins are all memory mapped
   void* data_address; ///< pointer to the begining of the memory mapped data, MUST not modify this pointer!!!
   int pointer_count; ///< number of pointers referencing  this database, at 0 should be freed
+  long file_size; ///< the size of the binary fasta file, only populated when memory mapping
 };    
 
 /**
@@ -124,7 +129,7 @@ void free_database(
   
   //only free proteins if been parsed and file has been opened
   if(database->is_parsed){
-    fclose(database->file);
+    
     //free each protein in the array
     for(; protein_idx < database->num_proteins; ++protein_idx){
       free_protein(database->proteins[protein_idx]);
@@ -132,7 +137,14 @@ void free_database(
     
     //free memory mapped binary file from memory
     if(database->is_memmap){
-      //un map!!
+      //un map the memory!!
+      if(munmap(database->data_address, database->file_size) != 0){
+        carp(CARP_ERROR, "failed to unmap the memory of binary fasta file");
+      }
+    }
+    else{//not memory mapped
+      //close file handler
+      fclose(database->file);
     }
   }
   free(database);
@@ -214,7 +226,7 @@ BOOLEAN_T parse_database_text_fasta(
   }
   
   //check if use light protein and parse thos light proteins fomr protein index
-  if(database->use_light_protein && protein_index_on_disk(database->filename)){
+  if(database->use_light_protein && protein_index_on_disk(database->filename, FALSE)){
     //let the user know that protein index file is being used
     carp(CARP_INFO, "using protein index file");
 
@@ -303,7 +315,8 @@ BOOLEAN_T parse_database_text_fasta(
  *\return TRUE if successfully memory map binary fasta file, else FALSE
  */
 BOOLEAN_T memory_map_database(
-  DATABASE_T* database ///< An allocated database -in/out
+  DATABASE_T* database, ///< An allocated database -in/out
+  int file_d  ///<  file descriptor -in
   )
 {
   struct stat file_info;
@@ -314,9 +327,15 @@ BOOLEAN_T memory_map_database(
     return FALSE;
   }
   
+  //set size of the binary fasta file in database
+  // this is used later to know how much to unmap
+  database->file_size = file_info.st_size;
+  
   //memory map the entire binary fasta file!
-  if ((database->data = mmap((caddr_t)0, file_info.st_size, PROT_READ, MAP_SHARED, database->file, 0)) \
-      == (caddr_t)(-1)) {
+  database->data_address = mmap((caddr_t)0, file_info.st_size, PROT_READ, MAP_SHARED, file_d, 0);
+
+  //check if memory mapping has succeeded
+  if ((caddr_t)(database->data_address) == (caddr_t)(-1)) {
     carp(CARP_ERROR, "failed to use mmap function for binary fasta file: %s", database->filename);
     return FALSE;
   }
@@ -332,13 +351,12 @@ BOOLEAN_T populate_proteins_from_memmap(
   DATABASE_T* database ///< An allocated database -in/out
   )
 {
-  unsigned long working_index;
   PROTEIN_T* new_protein;
   unsigned int protein_idx = 0;
   char* data = database->data_address;
   
   //parse proteins until the end of list
-  while(data[0] != "*"){
+  while(data[0] != '*'){
     //check if anymore space for protein
     if(database->num_proteins == MAX_PROTEINS){
       carp(CARP_ERROR, "exceeds protein index array size");
@@ -354,7 +372,7 @@ BOOLEAN_T populate_proteins_from_memmap(
     new_protein = allocate_protein();
     
     //parse protein from memory map
-    if(!parse_protein_binary_memmap(new_protein, data)){
+    if(!parse_protein_binary_memmap(new_protein, (void**)&data)){
       //failed to parse the protein from memmap
       //free all proteins, and return FALSE
       free_protein(new_protein);
@@ -388,7 +406,7 @@ BOOLEAN_T parse_database_memmap_binary(
   DATABASE_T* database ///< An allocated database -in
   )
 {
-  FILE* file = NULL;
+  int file_d = -1;
  
   //check if already parsed
   if(database->is_parsed){
@@ -396,10 +414,10 @@ BOOLEAN_T parse_database_memmap_binary(
   }
   
   //open file and 
-  file = fopen(database->filename, O_RDONLY);
+  file_d = open(database->filename, O_RDONLY);
   
   //check if succesfully opened file
-  if(file == NULL){
+  if(file_d == -1){
     carp(CARP_FATAL, "failed to open file to parse database");
     return FALSE;
   }
@@ -414,7 +432,7 @@ BOOLEAN_T parse_database_memmap_binary(
   }
 
   //memory map the binary fasta file into memory
-  if(!memory_map_database(database)){
+  if(!memory_map_database(database, file_d)){
     carp(CARP_FATAL, "failed to memory map binary fasta file into memory");
     return FALSE;
   }
@@ -427,7 +445,6 @@ BOOLEAN_T parse_database_memmap_binary(
    
   //yes the database is paresed now..!!
   database->is_parsed = TRUE;
-  database->file = file;
   return TRUE;
 }
 
@@ -492,6 +509,17 @@ BOOLEAN_T get_database_protein_at_idx(
  */
 
 /**
+ *sets TRUE,FALSE whether the database uses memory mapped
+ */
+void set_database_memmap(
+  DATABASE_T* database, ///< the query database -in 
+  BOOLEAN_T is_memmap  ///< is the database memory mapped?
+  )
+{
+  database->is_memmap = is_memmap;
+}
+
+/**
  *\returns the filename of the database
  * returns a heap allocated new copy of the filename
  * user must free the return filename
@@ -501,6 +529,18 @@ char* get_database_filename(
   )
 {
   return my_copy_string(database->filename);
+}
+
+
+/**
+ *\returns the pointer to the filename of the database
+ * user must not free or change the filename
+ */
+char* get_database_filename_pointer(
+  DATABASE_T* database ///< the query database -in 
+  )
+{
+  return database->filename;
 }
 
 /**
