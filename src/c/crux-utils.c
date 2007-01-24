@@ -165,6 +165,18 @@ char* cat_string(char* string_one, char* string_two){
   return result;
 }
 
+/**
+ * given the path and the filename return a file with path
+ * "path/filename"
+ * \returns a heap allocated string, "path/filename"
+ */
+char* get_full_filename(char* path, char* filename){
+  char* ready_path = cat_string(path, "/");
+  char* result = cat_string(ready_path, filename);
+  free(ready_path);
+  return result;
+}
+
 
 /**
  * returns the file size of the given filename

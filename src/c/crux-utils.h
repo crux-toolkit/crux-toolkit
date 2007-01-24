@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -67,6 +67,14 @@ void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file);
  * \returns a heap allocated string that concatenates the two inputs
  */
 char* cat_string(char* string_one, char* string_two);
+
+/**
+ * given the path and the filename return a file with path
+ * "path/filename"
+ * \returns a heap allocated string, "path/filename"
+ */
+char* get_full_filename(char* path, char* filename);
+
 /**
  *\returns TRUE if float_a is between the interaval of min and max, else FALSE
  */

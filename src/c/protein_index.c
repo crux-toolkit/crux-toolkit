@@ -1,7 +1,7 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.1 $
- * \brief: Object for creating a protein index
+ * $Revision: 1.2 $
+ * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,10 +47,20 @@ struct protein_index_iterator{
  *\returns the file handler for the output file
  */
 FILE* get_output_file(
-  char* fasta_file  ///< input fasta file -in
+  char* fasta_file,  ///< input fasta file -in
+  BOOLEAN_T is_binary_file  ///< Are we creating a binary fasta file?
   )
 {
-  char* name = generate_name(fasta_file, "_protein_index");
+  char* name = NULL;
+  
+  //create a binary fasa file?
+  if(is_binary_file){
+    name = generate_name(fasta_file, "_binary_fasta");
+  }
+  else{//create a normal protein index file
+    name = generate_name(fasta_file, "_protein_index");
+  }
+  
   FILE* file = fopen(name, "w");
   free(name);
   return file;
@@ -83,7 +93,7 @@ BOOLEAN_T create_protein_index(
   }
 
   //get output file
-  output_file = get_output_file(fasta_file);
+  output_file = get_output_file(fasta_file, FALSE);
 
   //check if succesfully created file
   if(output_file == NULL){
@@ -142,14 +152,25 @@ void free_protein_index(
 /**
  * input is the fasta file name which the protein index
  * should have been created.
- *\returns TRUE if protein index is on disk, else FALSE
+ * or if creating binary fasta file, is that already on disk?
+ *
+ *\returns TRUE if protein index or binary fasta file is on disk, else FALSE
  */
 BOOLEAN_T protein_index_on_disk(
-  char* fasta_file
+  char* fasta_file, ///< input fasta file -in
+  BOOLEAN_T is_binary ///< are we looking for the binary fasta file? or preotein index
   )
 {
-  char* name = generate_name(fasta_file, "_protein_index");
-
+  char* name = NULL;
+  
+  //create a binary fasa file?
+  if(is_binary){
+    name = generate_name(fasta_file, "_binary_fasta");
+  }
+  else{//create a normal protein index file
+    name = generate_name(fasta_file, "_protein_index");
+  }
+  
   //check if can open file
   if(access(name, F_OK)){
     free(name);
@@ -304,6 +325,145 @@ PROTEIN_T* protein_index_iterator_next(
   
   return protein;
 }
+
+/***********************************************
+ *
+ * Create binary fasta file
+ *
+ ***********************************************/
+
+/**
+ * creates a binary fasta file on to the output_file
+ * \returns TRUE if successfully creates a binary fasta file, else false
+ */
+BOOLEAN_T create_binary_fasta_fuction(
+  char* fasta_file,  ///< input fasta file -in
+  FILE* output_file  ///< the output filestream -out
+  )
+{
+  unsigned long working_index;
+  FILE* file = NULL;
+  char* new_line = NULL;
+  int line_length;
+  size_t buf_length = 0;
+  unsigned int protein_idx = 0;
+  PROTEIN_T* new_protein = NULL;
+
+  //open file and 
+  file = fopen(fasta_file, "r");
+
+  //check if succesfully opened file
+  if(file == NULL){
+    carp(CARP_FATAL, "failed to open fasta file");
+    return FALSE;
+  }
+
+  //check if succesfully created file
+  if(output_file == NULL){
+    carp(CARP_FATAL, "failed to create protein index file");
+    fclose(file);
+    return FALSE;
+  }
+  
+  working_index = ftell(file);
+  //check each line until reach '>' line
+  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+    if(new_line[0] == '>'){
+      //the new protein to be serialize
+      new_protein = allocate_protein();
+      
+      //rewind to the begining of the protein to include ">" line
+      fseek(file, working_index, SEEK_SET);
+          
+      //failed to parse the protein from fasta file
+      //protein offset is set in the parse_protein_fasta_file method
+      if(!parse_protein_fasta_file(new_protein ,file)){
+        fclose(file);
+        free_protein(new_protein);
+        carp(CARP_ERROR, "failed to parse fasta file");
+        return FALSE;
+      }
+      set_protein_is_light(new_protein, FALSE);
+      
+      //serialize protein as binary to output file
+      serialize_protein(new_protein, output_file);
+
+      //update protein count
+      ++protein_idx;
+
+      //free this protein
+      free_protein(new_protein);
+    }
+    
+    //print status
+    if(protein_idx % 1000 == 0){
+      carp(CARP_INFO, "reached protein: %d", protein_idx);
+    }
+
+    working_index = ftell(file);
+  }
+
+  //write the end character to binary fasta file
+  fwrite("*", sizeof(char), 2, output_file);
+
+  //print final status
+  carp(CARP_INFO, "serialzed total protein: %d", protein_idx);
+  
+    
+  free(new_line);
+  fclose(file);
+  fclose(output_file);
+
+  return TRUE;
+}
+
+/**
+ * creates a binary fasta file on to the output_file in the same directory as fasta file
+ * \returns TRUE if successfully creates a binary fasta file, else false
+ */
+BOOLEAN_T create_binary_fasta(
+  char* fasta_file  ///< input fasta file -in
+  )
+{
+  //get output file
+  FILE* output_file = get_output_file(fasta_file, TRUE);
+  
+  return create_binary_fasta_fuction(fasta_file, output_file);
+}
+
+/**
+ * creates a binary fasta file on to the output_file in currenty directory
+ * sets the output file name to the pointer passed in as argument
+ * \returns TRUE if successfully creates a binary fasta file, else false
+ */
+BOOLEAN_T create_binary_fasta_in_cur(
+  char* fasta_file_w_path, ///< input fasta file with full path -in
+  char* fasta_filename, ///< input fasta a file, only filename -in
+  char** output_file_name ///< get output filename -out
+  )
+{
+  //get output filename
+  *output_file_name = generate_name(fasta_filename, "_binary_fasta");
+  
+  //open output file
+  FILE* file = fopen(*output_file_name, "w");
+  
+  return create_binary_fasta_fuction(fasta_file_w_path, file);
+}
+
+
+/**
+ * Heap allocated char*, user must free
+ *\returns the binary fasta name which was created from the given fasta file
+ */
+char* get_binary_fasta_name(
+  char* fasta_file  ///< input fasta file -in                            
+  )
+{
+  return generate_name(fasta_file, "_binary_fasta");
+}
+
+
 /*
  * Local Variables:
  * mode: c

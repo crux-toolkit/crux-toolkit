@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.33 $
+ * $Revision: 1.34 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -21,6 +21,7 @@
 #include "objects.h"
 #include "peptide_constraint.h"
 #include "database.h"
+#include "protein_index.h"
 
 //maximum proteins the index can handle
 #define MAX_PROTEIN 30000
@@ -228,37 +229,47 @@ char* generate_directory_name(
 }
 
 /**
+ * foo.fasta --> foo_crux_index/foo_binary_fasta
+ * \returns the binary fasta file name with crux directory name
+ */
+char* get_binary_fasta_name_in_crux_dir(
+  char* fasta_filename
+)
+{
+  //dreictory name
+  char* crux_dir = generate_directory_name(fasta_filename);
+
+  //get binary fasta file name
+  char* binary_file = get_binary_fasta_name(fasta_filename);
+  
+  //get full path binary fasta file
+  char* file_w_path = get_full_filename(crux_dir, binary_file);
+  
+  //free temp names
+  free(crux_dir);
+  free(binary_file);
+  
+  return file_w_path;
+}
+
+/**
  * Assumes that the fasta file is always in the directory where the crux_index_file directory is located
  * \returns A new index object.
  */
-INDEX_T* new_index(
-  char* fasta_filename,  ///< The fasta file
-  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
-  float mass_range,  ///< the range of mass that each index file should be partitioned into
-  unsigned int max_size, ///< maximum limit of each index file
-  BOOLEAN_T is_unique, ///< only unique peptides? -in
-  BOOLEAN_T use_light ///< should i use light/heavy functionality? -in
+INDEX_T* set_new_index(
+  INDEX_T* index,  ///< Index to set -out                       
+  char* fasta_filename,  ///< The fasta file -in
+  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy -in
+  float mass_range,  ///< the range of mass that each index file should be partitioned into -in
+  unsigned int max_size, ///< maximum limit of each index file -in
+  BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
   char** filename_and_path = NULL;
   char* working_dir = NULL;
-  INDEX_T* index = allocate_index();
-  DATABASE_T* database = new_database(fasta_filename, use_light); //probably should change
-
   filename_and_path = parse_filename_path(fasta_filename);
   working_dir = generate_directory_name(filename_and_path[0]);
   DIR* check_dir = NULL;
-
-  //check if already parsed
-  if(!get_database_is_parsed(database)){
-    if(!parse_database(database)){
-      carp(CARP_FATAL, "failed to parse database, cannot create new index");
-      free_database(database);
-      free(index);
-      fcloseall();
-      exit(1);
-    }
-  }
   
   //check if the index files are on disk
   //are we currently in the crux dircetory
@@ -280,11 +291,10 @@ INDEX_T* new_index(
     }
     free(full_path);
   }
-  
+
   //set each field
   set_index_directory(index, working_dir);
   set_index_constraint(index, constraint);
-  set_index_database(index, database);
   set_index_mass_range(index, mass_range);
   set_index_max_size(index, max_size);
   set_index_is_unique(index, is_unique);
@@ -297,6 +307,38 @@ INDEX_T* new_index(
   free(filename_and_path);
   
   return index;
+
+}
+
+
+/**
+ * Assumes that the fasta file is always in the directory where the crux_index_file directory is located
+ * USE this constructor when creating index, does not parse database
+ * database is later transformed into memory mapped database and parse in create index
+ * For peptide searching, use new_search_index routine
+ * \returns A new index object.
+ */
+INDEX_T* new_index(
+  char* fasta_filename,  ///< The fasta file
+  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
+  float mass_range,  ///< the range of mass that each index file should be partitioned into
+  unsigned int max_size, ///< maximum limit of each index file
+  BOOLEAN_T is_unique, ///< only unique peptides? -in
+  BOOLEAN_T use_light ///< should i use light/heavy functionality? -in
+  )
+{
+  INDEX_T* index = allocate_index();
+  DATABASE_T* database = NULL;
+  
+  //now create a database
+  //First, create a database that does not use memory mapping
+  //once binary fasta file has been creaated this will change to memmapped database
+  database = new_database(fasta_filename, use_light, FALSE);
+
+  //set database, has not been parsed
+  set_index_database(index, database);
+    
+  return set_new_index(index, fasta_filename, constraint, mass_range, max_size, is_unique);
 }         
 
 /**
@@ -312,6 +354,7 @@ INDEX_T* new_search_index(
 {
   INDEX_T* search_index = NULL;
   BOOLEAN_T use_light = FALSE;
+  DATABASE_T* database = NULL;
 
   /**
    * use heavy/light protein function if the fasta file is larger thatn limit
@@ -324,8 +367,11 @@ INDEX_T* new_search_index(
          get_filesize(fasta_filename));
   }
   
+  //allocate heap for index
+  search_index = allocate_index();
+  
   //sets mass_range, max_size to an arbitrary 0
-  search_index = new_index(fasta_filename, constraint, 0, 0, is_unique, use_light);
+  search_index = set_new_index(search_index, fasta_filename, constraint, 0, 0, is_unique);
   
   //check if crux_index files have been made
   if(!get_index_on_disk(search_index)){
@@ -334,7 +380,40 @@ INDEX_T* new_search_index(
     free_index(search_index);
     return NULL;
   }
+  
+  //get binary fasta file name with path to crux directory 
+  char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_filename);
+  
+  //check if input file exist
+  if(access(binary_fasta, F_OK)){
+    carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty) for crux index.", binary_fasta);
+    free(database);
+    free(search_index);
+    free(binary_fasta);
+    exit(1);
+  }
+  
+  //now create a database, using binary fasta file
+  database = new_database(binary_fasta, use_light, TRUE);
+  
+  //check if already parsed
+  if(!get_database_is_parsed(database)){
+    if(!parse_database(database)){
+      carp(CARP_FATAL, "failed to parse database, cannot create new index");
+      free_database(database);
+      free(search_index);
+      free(binary_fasta);
+      fcloseall();
+      exit(1);
+    }
+  }
 
+  //now set database in index
+  set_index_database(search_index, database);
+  
+  //free string
+  free(binary_fasta);
+    
   return search_index;
 }
 
@@ -345,7 +424,10 @@ void free_index(
   INDEX_T* index
   )
 {
-  free_database(index->database);
+  if(index->database != NULL){
+    free_database(index->database);
+  }
+
   free(index->directory);
   free_peptide_constraint(index->constraint);
   free(index);
@@ -650,6 +732,58 @@ BOOLEAN_T dump_peptide_all(
   return TRUE;
 }
 
+/***
+ * This function does the following things...
+ * 1. create binary fasta file in temporary directory
+ * 2. transform database into memory mapped database from text base database
+ * 3. then, parse database
+ *\returns TRUE, if all processes are successful, else FALSE
+ */
+BOOLEAN_T transform_database_to_memmap_database(
+  INDEX_T* index ///< An allocated index -in/out
+  )
+{
+  char* binary_fasta = NULL;
+
+  //get the fasta file name with correct path
+  char* fasta_file = cat_string("../", get_database_filename_pointer(index->database));
+
+  //create binary fasta file inside temp directory
+  if(!create_binary_fasta_in_cur(fasta_file, get_database_filename_pointer(index->database), &binary_fasta)){
+    carp(CARP_FATAL, "failed to create protein index on disk");
+    //remove directory
+    chdir("..");
+    clean_up(1);
+    //free index
+    free_index(index);
+    free(fasta_file);
+    exit(1);
+  }
+
+  //change name of file to binary fasta
+  set_database_filename(index->database, binary_fasta);
+  set_database_memmap(index->database, TRUE);
+
+  //check if already parsed
+  if(!get_database_is_parsed(index->database)){
+    if(!parse_database(index->database)){
+      carp(CARP_FATAL, "failed to parse database, cannot create new index");
+      free_database(index->database);
+      free(index);
+      free(fasta_file);
+      free(binary_fasta);
+      fcloseall();
+      exit(1);
+    }
+  }
+  
+  //free file name
+  free(fasta_file);
+  free(binary_fasta);
+
+  return TRUE;
+}
+
 /**
  * The main index method. Does all the heavy lifting, creating files
  * serializing peptides, etc. The index directory itself should have 
@@ -699,6 +833,11 @@ BOOLEAN_T create_index(
     carp(CARP_WARNING, "cannot enter temporary directory");
     return FALSE;
   }
+
+  //1. create binary fasta file in temporary directory
+  //2. transform database into memory mapped database from text base database
+  //3. then, parse database
+  transform_database_to_memmap_database(index);
   
   //get number of bins needed
   num_bins = get_num_bins_needed(index, mass_limits);
@@ -1878,7 +2017,6 @@ INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
   //parse index_files that are with in peptide_constraint from crux_index_map
   if(!parse_crux_index_map( index_peptide_iterator)){
     //failed to parse crux_index_map
-    free_index(index_peptide_iterator->index);
     free_index_peptide_iterator(index_peptide_iterator);
     die("failed to parse crux_index_map file");
   }
