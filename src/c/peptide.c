@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.47 $
+ * $Revision: 1.48 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -214,7 +214,7 @@ void print_peptide_in_format(
   char* id = NULL;
   int start_idx = 0;
   char* sequence = NULL;
-  BOOLEAN_T light = FALSE;
+  //BOOLEAN_T light = FALSE;
 
   //print mass of the peptide
   fprintf(file, "%.2f", peptide->peptide_mass);
@@ -224,11 +224,13 @@ void print_peptide_in_format(
     parent = get_peptide_src_parent_protein(next_src);
     
     //covnert to heavy protein
+    /*
+      FIXME, IF use light heavy put back
     if(get_protein_is_light(parent)){
       protein_to_heavy(parent);
       light = TRUE;
     }
-
+    */
     sequence = get_peptide_sequence(peptide);
   }
 
@@ -238,10 +240,13 @@ void print_peptide_in_format(
       parent = get_peptide_src_parent_protein(next_src);
       
       //covnert to heavy protein
+      /*
+        FIXME, IF use light heavy put back
       if(get_protein_is_light(parent)){
         protein_to_heavy(parent);
         light = TRUE;
       }
+      */
       //}
 
     id = get_protein_id_pointer(parent);
@@ -294,7 +299,7 @@ void print_filtered_peptide_in_format(
   char* id = NULL;
   int start_idx = 0;
   char* sequence = NULL;
-  BOOLEAN_T light = FALSE;
+  //BOOLEAN_T light = FALSE;
 
   //print mass of the peptide
   fprintf(file, "%.2f", peptide->peptide_mass);
@@ -304,11 +309,13 @@ void print_filtered_peptide_in_format(
     parent = get_peptide_src_parent_protein(next_src);
     
     //covnert to heavy protein
+    /*
+    FIXME, IF use light heavy put back
     if(get_protein_is_light(parent)){
       protein_to_heavy(parent);
       light = TRUE;
     }
-
+    */
     sequence = get_peptide_sequence(peptide);
   }
 
@@ -321,10 +328,13 @@ void print_filtered_peptide_in_format(
       parent = get_peptide_src_parent_protein(next_src);
         
       //covnert to heavy protein
+      /*
+      FIXME, IF use light heavy put back
       if(get_protein_is_light(parent)){
         protein_to_heavy(parent);
         light = TRUE;
       }
+      */
         //}
       
       id = get_protein_id_pointer(parent);
