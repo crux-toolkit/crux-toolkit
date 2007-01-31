@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.26 $
+ * $Revision: 1.27 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -169,6 +169,16 @@ void set_spectrum_precursor_mz(
  * the get_num_possible_z function.
  */
 int* get_spectrum_possible_z(
+  SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
+  );
+
+/**
+ * \returns a pointer to an array of the possible charge states of this spectrum
+ * User must NOT free this or alter, not a copy
+ * number of possible charge states can be gained by 
+ * the get_num_possible_z function.
+ */
+int* get_spectrum_possible_z_pointer(
   SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
   );
  

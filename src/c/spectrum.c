@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.33 $
+ * REVISION: $Revision: 1.34 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -762,6 +762,19 @@ int* get_spectrum_possible_z(
       = spectrum->possible_z[num_possible_z_index];
   }
   return new_possible_z;
+}
+
+/**
+ * \returns a pointer to an array of the possible charge states of this spectrum
+ * User must NOT free this or alter, not a copy
+ * number of possible charge states can be gained by 
+ * the get_num_possible_z function.
+ */
+int* get_spectrum_possible_z_pointer(
+  SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
+  )
+{
+  return spectrum->possible_z;
 }
  
 /**

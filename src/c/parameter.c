@@ -99,7 +99,7 @@ void initialize_parameters(void){
   set_string_parameter("score-type", "sp"); 
 
   //match_collection parameters
-  set_double_parameter("mass-window", 3);
+  set_double_parameter("mass-window", 3.0);
 
   //score_spectrum
   set_string_parameter("perlim-score-type", "sp");
