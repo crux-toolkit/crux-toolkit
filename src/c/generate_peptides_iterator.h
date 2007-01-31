@@ -1,6 +1,6 @@
 /**
  * \file generate_peptides_iterator.h 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief object to return candidate peptides from database
  *****************************************************************************/
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
@@ -38,6 +38,27 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void);
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
   float neutral_mass ///< the neutral_mass that which the peptides will be searched -in
 );
+
+/**
+ * Used for when need to resue genearte peptide iterator mutiple times
+ * only changing by the mass window
+ * MUST use it with index
+ * MUST call set_generate_peptides_mutable before using this iterator
+ *\returns a new generate_peptides_iterator object that can is mutable
+ */
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable(void);
+
+/**
+ * sets the mutable generate_peptides_iterator for the next iteration of creating peptides
+ * user provides the mass window the iterator will operate
+ */
+void set_generate_peptides_mutable(
+  GENERATE_PEPTIDES_ITERATOR_T* gen_peptides_iterator, ///< working mutable iterator
+  float max_mass, ///< the max mass which the peptides will be searched -in
+  float min_mass ///< the min mass that which the peptides will be searched -in
+  );
+
+/***********************************************************/
 
 /**
  *\returns TRUE, if there is a next peptide, else FALSE

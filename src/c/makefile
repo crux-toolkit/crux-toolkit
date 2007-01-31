@@ -1,14 +1,14 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.45 $
+# VERSION: $Revision: 1.46 $
 #######################################################################
 
 # The GNU C compiler is preferred.
 CC	= gcc
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
-OFLAGS  =  -O2 
+OFLAGS  =  #-O2 
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
@@ -64,7 +64,8 @@ LIBOBJS =\
 	${OBJDIR}/score_peptide_spectrum.o \
 	${OBJDIR}/match.o \
 	${OBJDIR}/match_collection.o \
-	${OBJDIR}/search_spectrum.o 
+	${OBJDIR}/search_spectrum.o \
+	${OBJDIR}/search_spectra.o 
 #	${OBJDIR}/score_peptide_list_spectrum.o
 
 # These are the names of the programs.
@@ -75,7 +76,8 @@ PROGS = \
 	${BINDIR}/create_index \
 	${BINDIR}/predict_peptide_ions \
 	${BINDIR}/score_peptide_spectrum \
-	${BINDIR}/search_spectrum
+	${BINDIR}/search_spectrum \
+	${BINDIR}/search_spectra
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \

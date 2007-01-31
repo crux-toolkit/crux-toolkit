@@ -58,7 +58,8 @@ BOOLEAN_T score_match_collection_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
   int charge,       ///< the charge of the spectrum -in
-  int max_rank     ///< max number of top rank matches to keep from SP -in
+  int max_rank,     ///< max number of top rank matches to keep from SP -in
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< peptide iteartor to use, must set it first before use
   );
 
 BOOLEAN_T score_match_collection_xcorr(
@@ -104,6 +105,7 @@ void free_match_collection(
 
 /**
  * create a new match collection from spectrum
+ * creates a peptide iterator for given mass window
  * return the top max_rank matches, by score_type(SP, XCORR);
  *\returns a new match_collection object that is scored by score_type and contains the top max_rank matches
  */
@@ -116,8 +118,12 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
 {
   MATCH_COLLECTION_T* match_collection = allocate_match_collection();
   
+  //create a generate peptide iterator
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //FIXME use neutral_mass, might chage to pick
+    new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge));
+  
   //score SP match_collection
-  if(!score_match_collection_sp(match_collection, spectrum, charge, max_rank)){
+  if(!score_match_collection_sp(match_collection, spectrum, charge, max_rank, peptide_iterator)){
     carp(CARP_ERROR, "failed to score match collection for SP");
   }
   
@@ -129,6 +135,57 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
     }
     */
   }
+
+  //free generate_peptides_iterator
+  free_generate_peptides_iterator(peptide_iterator);
+  
+  return match_collection;
+}
+
+/**
+ * create a new match collection from spectrum
+ * return the top max_rank matches, by score_type(SP, XCORR);
+ * uses a provided peptide iterator, MUST be a mutable iterator
+ * Sets the iterator before useage.
+ *\returns a new match_collection object that is scored by score_type and contains the top max_rank matches
+ */
+MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
+ SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
+ int charge,       ///< the charge of the spectrum -in
+ int max_rank,     ///< max number of top rank matches to keep from SP -in
+ SCORER_TYPE_T score_type, ///< the score type (SP, XCORR) -in
+ GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< peptide iteartor to use, must set it first before use
+ )
+{
+  MATCH_COLLECTION_T* match_collection = allocate_match_collection();
+  
+  //get perameters
+  float neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
+  double mass_window = get_double_parameter("mass-window", 3);
+  double min_mass = neutral_mass - mass_window;
+  double max_mass = neutral_mass + mass_window;
+    
+  carp(CARP_DEBUG,"searching peptide in %.2f ~ %.2f", min_mass, max_mass); 
+  
+  //set the generate_peptides_iterator for the next round of peptides
+  set_generate_peptides_mutable(peptide_iterator, max_mass, min_mass);
+  
+  //score SP match_collection
+  if(!score_match_collection_sp(match_collection, spectrum, charge, max_rank, peptide_iterator)){
+    carp(CARP_ERROR, "failed to score match collection for SP");
+  }
+  
+  //should we score for XCORR?
+  if(score_type == XCORR){
+    /* implement later
+    if(!score_match_collection_xcorr(match_collection, spectrum, charge)){
+      carp(CARP_ERROR, "failed to score match collection for XCORR");
+    }
+    */
+  }
+
+  //free generate_peptides_iterator
+  free_generate_peptides_iterator(peptide_iterator);
   
   return match_collection;
 }
@@ -221,7 +278,7 @@ BOOLEAN_T populate_match_rank_match_collection(
  * scores the match_collection, the score type SP
  * Assumes this is the first time scoring with this score_collection,
  * thus, prior number match object is 0.
- * the routine will create generate_peptides than for each peptide will create a match
+ * the routine will use generate_peptides for each peptide will create a match
  * that maps the peptide to the spectrum.
  * If the score has already been computed simply returns TRUE 
  *\returns  TRUE, if successfully populates the sp score matches in the match_collection
@@ -230,7 +287,8 @@ BOOLEAN_T score_match_collection_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
   int charge,       ///< the charge of the spectrum -in
-  int max_rank     ///< max number of top rank matches to keep from SP -in
+  int max_rank,     ///< max number of top rank matches to keep from SP -in
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< the peptide iterator to score
   )
 {
   //is this a empty collection?
@@ -248,8 +306,8 @@ BOOLEAN_T score_match_collection_sp(
   */
 
   //create a generate peptide iterator
-  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //FIXME use neutral_mass, might chage to pick
-    new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge));
+  //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //FIXME use neutral_mass, might chage to pick
+  //  new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge));
   
   //set ion constraint to sequest settings
   ION_CONSTRAINT_T* ion_constraint = 
@@ -319,7 +377,7 @@ BOOLEAN_T score_match_collection_sp(
   //free heap
   free_scorer(scorer);
   free_ion_constraint(ion_constraint);
-  free_generate_peptides_iterator(peptide_iterator);
+  //free_generate_peptides_iterator(peptide_iterator);
 
   //save only the top max_rank matches, sort and free the other matches
   truncate_match_collection(match_collection, max_rank, SP);

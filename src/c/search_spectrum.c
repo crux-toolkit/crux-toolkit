@@ -26,7 +26,7 @@
  * when wrong command is seen carp, and exit
  */
 void wrong_command(char* arg, char* comment){
-  char* usage = parse_arguments_get_usage("predict_peptide_ions");
+  char* usage = parse_arguments_get_usage("search_spectrum");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
   //print comment if given
@@ -54,6 +54,7 @@ int main(int argc, char** argv){
   char* ms2_file = NULL;
   int scan_num = 0;
   char* fasta_file = NULL;
+  double mass_window = 3;
 
   //parsing variables
   int result = 0;
@@ -89,6 +90,12 @@ int main(int argc, char** argv){
     "The type of scoring function to use. sp",
     (void *) &perlim_score_type, 
     STRING_ARG);
+
+  parse_arguments_set_opt(
+    "mass-window", 
+    "The peptide mass tolerance window", 
+    (void *) &mass_window, 
+    DOUBLE_ARG);
   
   /* Define required command line arguments */
   parse_arguments_set_req(
@@ -172,6 +179,7 @@ int main(int argc, char** argv){
     if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
       carp(CARP_ERROR, "no matching scan number: %d, in ms2 file: %s", scan_num, ms2_file);
       //free, exit
+      exit(1);
     }
 
     //get match collection with perlim match collection

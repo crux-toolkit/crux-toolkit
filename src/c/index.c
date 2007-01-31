@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.34 $
+ * $Revision: 1.35 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -361,12 +361,15 @@ INDEX_T* new_search_index(
    * this way it only parse the proteins that are need when going through the index
    * for smaller size fasta files it's faster to just parse all of them
    */
+  /*
+  // Use this code if you want to use automated heavy/light protein usage depending on fasta file size
   if(get_filesize(fasta_filename) >  MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN){
     use_light = TRUE;
     carp(CARP_INFO, "Using heavy/light protein function for file size: %ld",
          get_filesize(fasta_filename));
   }
-  
+  */
+
   //allocate heap for index
   search_index = allocate_index();
   
@@ -759,10 +762,12 @@ BOOLEAN_T transform_database_to_memmap_database(
     free(fasta_file);
     exit(1);
   }
-
+  
   //change name of file to binary fasta
-  set_database_filename(index->database, binary_fasta);
-  set_database_memmap(index->database, TRUE);
+  //set_database_filename(index->database, binary_fasta);
+  //set_database_memmap(index->database, TRUE);
+  set_database_filename(index->database, fasta_file);
+
 
   //check if already parsed
   if(!get_database_is_parsed(index->database)){
@@ -871,7 +876,7 @@ BOOLEAN_T create_index(
   while(database_peptide_iterator_has_next(peptide_iterator)){    
     ++count_peptide;
     if(count_peptide % 1000 == 0){
-      carp(CARP_INFO, "reached peptide: %d\n", (int)count_peptide);
+      carp(CARP_INFO, "reached peptide: %d", (int)count_peptide);
     }
 
     working_peptide = database_peptide_iterator_next(peptide_iterator);
