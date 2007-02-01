@@ -29,60 +29,68 @@ Seattle, WA, USA
 
 \section{Introduction}
 
-In algorithms such as SEQUEST (Eng et al. 1995) that are used to
-search sequence databases with tandem MS spectra data, one major
-bottleneck is the identification of candidate peptides within a given
-mass window. Especially for larger proteomes the search space is quite
-large. For instance, the human proteome includes 550 million peptides
-with lengths between 6 and 50 amino acids. We present an efficient
-method for retrieving all peptides within a given mass window by using
-a precomputed peptide database.  Compared to SEQUEST, our method
-dramatically reduces the running time for large proteome searches.
-The method is implemented in a publicly available software package
-called ``Crux.''
+In algorithms that are used to search
+tandem-MS-spectra data against a sequence database, a major bottle-neck is
+the identification of candidate peptides within a given mass window. We
+present an efficient method for generating peptides in a particular mass
+window by using a pre-computed peptide database. Our method reduces the
+runtime dramatically for large proteome searches compared to SEQUEST
+(Eng et al. 1995), a common identification algorithm that does not use
+any pre-computed database. We provide our indexing code as a tool for
+the wider proteomics community. While there are other recent attempts
+to avoid re-generating peptides for each search (Dutta et al, 2007,
+[turbo SEQUEST reference]), these programs are either not publicly
+available or require large amounts of disk space.
 
 \section{Methods}
 
-Searching with Crux requires two phases.  First, a user creates a
-peptide database on disk for the proteome of interest. During this
-process, computed peptides get swapped in and out of memory onto disk
-to prevent memory shortages. Also, to reduce the disk size of the
-database, instead of storing the sequence of each individual peptide,
-only the protein index, the start index and the peptide length are
-stored.  Once the peptide database is stored on disk, retrieving all
-peptides within a given mass window can be accomplished efficiently.
-This use of the peptide database eliminates the need to re-scan the
-peptide database for each search.
+ First a user creates a peptide database on
+disk for the proteome of interest. Instead of storing the sequence of
+each individual peptide, done in methods like TurboSequest [turbo SEQUEST
+reference], our method only stores the protein index, the start index
+and the peptide length. This is a key aspect of our method which allows
+quick retrieval of peptide sequences from the original Fasta file, while
+also maintaining a manageable peptide database size.  Once the peptide
+database is on disk, for all queries given a mass window, peptides
+that meet the constraint are simply parsed out from the pre-computed
+peptide database. This use of the peptide database eliminates the need
+to re-compute peptides for each search.
 
 \section{Preliminary Data}
-
-Using Crux, we precomputed a peptide database for the {\em E.\ coli}
-and human proteomes.  For {\em E.\ coli} this procedure required 1 hr
-40 mins of computation and 1.8GB of disk space.  For the human
-proteome, the requirements were 34 hrs of computation time and 17GB of
-disk space.
-
-SEQUEST uses a preliminary score called ``Sp'' to extract the top 500
-candidate peptides prior to the final cross-correlation analysis.  We
-re-implemented the computation of this score, and we searched ten
-spectra against the {\em E.\ coli} and human proteomes using SEQUEST
-and using our software.  For each spectrum, we verified that SEQUEST
-and Crux retrieve the same total number of candidate peptides, and
-that the top 500 peptides (which are the only ones reported by
-SEQUEST) are identical.
-
-Finally, we compared the efficiency of SEQUEST and Crux for retrieving
-and assigning preliminary scores to peptides.  We searched X spectra
-against the {\em E.\ coli} and human proteomes using an m/z window of
-X.  For {\em E.\ coli}, the average running time was XXX s for SEQUEST
-and XXX s for Crux.  For the human proteome, the running times were
-XXX s and XXX s.
+We tested our method by comparing
+its runtime to SEQUEST. First, the runtime comparison was conducted by
+running 100 different spectra against the MSDB proteome using both
+SEQUEST and our method with a mass tolerance of 3, for tryptic cleavage
+peptides. SEQUEST uses a preliminary scoring method called `Sp' to
+extract the top 500 candidate peptides before the final cross-correlation
+analysis. Since we are unable to directly measure the runtime for SEQUEST
+to generate its candidate peptides, we compare the combined runtime
+of generating a list of candidate peptides, and performing Sp on all
+the peptides. We have implemented Sp in our method that is identical
+to SEQUEST. The results show that our method of using a pre-computed
+peptide database outperforms SEQUEST, especially on large proteomes. The
+SEQUEST runtime against the MSDB proteome took 213mins16sec clock time
+and 212mins 20sec CPU time. Our method took 35mins 36sec clock time and
+34mins 26sec CPU time, which is roughly a 6 fold speed improvement.
+We also tested our results on smaller mass tolerance windows. With
+high-resolution mass spectrometry instrumentation, such as the FT-ICR
+LTQ, a smaller mass tolerance window can be applied to reduce the number
+of candidate peptides. We repeated the same experiments described
+above but instead used a smaller mass tolerance window of 0.1. The
+SEQUEST runtime against the MSDB proteome took XXmins XXsec clock time,
+compared to XXmins XXsec for our method. In SEQUEST, all peptides must
+be evaluated on each separate search, thus there is a minimal runtime
+reduction for smaller mass windows. However, in our method the runtime is
+directly proportional to the number of peptides generated. Therefore, for
+smaller mass tolerances windows the runtime can be dramatically reduced.
+Finally, the tryptic cleavage peptide database creation required 16hrs
+of computation time and 14GB disk size for the MSDB proteome. [Maybe a
+comparison to TurboSEQUEST].
 
 \section{Novel Aspect}
-
-When compared to current searching methods, our method uses a
-precomputed peptide database that yields faster peptide searches for
-large proteomes.
+When compared to current searching methods,
+our method uses a compact pre-computed peptide database that yields
+faster peptide searches for large proteomes.
 
 \end{document}
 
