@@ -36,7 +36,7 @@ to re-compute peptides for each search.
 
 3.	Preliminary Data (298 / 300) We tested our method by comparing
 its runtime to SEQUEST. First, the runtime comparison was conducted by
-running eight different spectra against the MSDB proteome using both
+running 100 different spectra against the MSDB proteome using both
 SEQUEST and our method with a mass tolerance of 3, for tryptic cleavage
 peptides. SEQUEST uses a preliminary scoring method called `Sp' to
 extract the top 500 candidate peptides before the final cross-correlation
@@ -46,22 +46,22 @@ of generating a list of candidate peptides, and performing Sp on all
 the peptides. We have implemented Sp in our method that is identical
 to SEQUEST. The results show that our method of using a pre-computed
 peptide database outperforms SEQUEST, especially on large proteomes. The
-SEQUEST runtime against the MSDB proteome took 19mins56sec clock time
-and 19mins 25sec CPU time. Our method took 4mins 1sec clock time and
-XXmins XXsec CPU time, which is roughly a 5 fold speed improvement.
+SEQUEST runtime against the MSDB proteome took 213mins16sec clock time
+and 212mins 20sec CPU time. Our method took 35mins 36sec clock time and
+34mins 26sec CPU time, which is roughly a 6 fold speed improvement.
 We also tested our results on smaller mass tolerance windows. With
 high-resolution mass spectrometry instrumentation, such as the FT-ICR
 LTQ, a smaller mass tolerance window can be applied to reduce the number
 of candidate peptides. We repeated the same experiments described
 above but instead used a smaller mass tolerance window of 0.1. The
-SEQUEST runtime against the MSDB proteome took 19mins 56sec clock time,
+SEQUEST runtime against the MSDB proteome took XXmins XXsec clock time,
 compared to XXmins XXsec for our method. In SEQUEST, all peptides must
 be evaluated on each separate search, thus there is a minimal runtime
 reduction for smaller mass windows. However, in our method the runtime is
 directly proportional to the number of peptides generated. Therefore, for
 smaller mass tolerances windows the runtime can be dramatically reduced.
-Finally, the tryptic cleavage peptide database creation required XXhrs
-of computation time and 13GB disk size for the MSDB proteome. [Maybe a
+Finally, the tryptic cleavage peptide database creation required 16hrs
+of computation time and 14GB disk size for the MSDB proteome. [Maybe a
 comparison to TurboSEQUEST].
 
 4.	Novel Aspect (22 / 20) When compared to current searching methods,
