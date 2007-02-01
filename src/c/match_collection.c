@@ -185,7 +185,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
   }
 
   //free generate_peptides_iterator
-  free_generate_peptides_iterator(peptide_iterator);
+  //free_generate_peptides_iterator(peptide_iterator);
   
   return match_collection;
 }
