@@ -35,18 +35,17 @@ candidate peptides within a given mass window. We present an efficient
 method for generating peptides in a particular mass window by using a
 pre-computed peptide database. Our method reduces the runtime
 dramatically for large proteome searches compared to SEQUEST (Eng et
-al. 1995).  The method is implemented in a publicly available software
+al. 1995).  The peptide index method is implemented in a publicly available software
 package called ``Crux.''  Other methods that avoid re-generating
 peptides for each search are either not publicly available (Dutta et
-al, 2007) or require large amounts of disk space [turbo SEQUEST
-reference].
+al, 2007) or require large amounts of disk space like TurboSequest.
 
 \section{Methods}
 
 Searching with Crux requires two phases.  First, a user creates a
 peptide database on disk for the proteome of interest.  Instead of
-storing the sequence of individual peptides, as in TurboSequest [turbo
-SEQUEST reference], Crux only stores the protein index, the start
+storing the sequence of individual peptides, as in TurboSequest, 
+Crux only stores the protein index, the start
 index and the peptide length.  This allows quick retrieval of peptide
 sequences from the database, while maintaining a manageable peptide
 database size.  Once the peptide database is on disk, retrieving all
@@ -82,8 +81,8 @@ instrumentation.  As the mass tolerance window decreases, Crux's speed
 improves, because fewer candidate peptides are retrieved from the
 database.  SEQUEST, by contrast, must traverse the entire database,
 regardless of the mass tolerance.  With a mass tolerance window of
-0.1, SEQUEST requires xxx hrs clock time, whereas Crux requires xxx
-hrs.  This represents an X-fold improvement.
+0.1, SEQUEST requires 3.5hrs clock time, whereas Crux requires 
+0.1hrs.  This represents an 30-fold improvement.
 
 These results show that our method of using a pre-computed peptide
 database outperforms SEQUEST, especially on large proteomes or when
