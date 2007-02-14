@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -347,7 +347,8 @@ void void_free_index_filtered_peptide_iterator(
  */
 BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
   INDEX_T* index, ///< The index object which we are iterating over -in
-  FILE* file
+  FILE* file, ///< the bin to parse peptides
+  BOOLEAN_T use_array  ///< should I use array peptide_src or link list when parsing peptides -in
   );
 
 /**

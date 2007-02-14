@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -36,6 +36,14 @@ PEPTIDE_SRC_T* new_peptide_src_array(
   );
 
 /**
+ *\returns a linklist of PROTEIN_PEPTIDE_SRC object
+ * only used in index.c, when the peptide src count for peptide is known
+ */
+PEPTIDE_SRC_T* new_peptide_src_linklist(
+  int size ///< the size of the peptide_src array -in
+  );
+
+/**
  *\returns the PROTEIN_PEPTIDE_SRC object in the array with the index
  * index starts at 0.
  * only used in index.c, when the peptide src count for  peptide is known
@@ -50,6 +58,7 @@ void set_peptide_src_array(
 
 /**
  * Frees the entire allocated peptide_src linklist object
+ * Assumes that peptide src is Link list implementation
  */
 void free_peptide_src(
   PEPTIDE_SRC_T* peptide_src ///< object to free -in 
@@ -154,6 +163,14 @@ char* get_peptide_src_sequence_pointer(
  *\returns the peptide_src strct size, value of sizeof function
  */
 int get_peptide_src_sizeof(void);
+
+/**
+ * serialize peptide src in binary
+ */
+void serialize_peptide_src(
+  PEPTIDE_SRC_T* peptide_src, ///< peptide_src to serialize -in   
+  FILE* file  ///< output file -in   
+  );
 
 /*
  * Local Variables:

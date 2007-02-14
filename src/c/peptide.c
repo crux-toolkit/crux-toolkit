@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.48 $
+ * $Revision: 1.49 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -16,6 +16,12 @@
 #include "database.h"
 #include "carp.h"
 
+/**
+ * static global variable
+ * determines if the peptide src are created by link lists or array
+ * if TRUE, peptides are implented with link list peptide src, else array
+ */
+static BOOLEAN_T PEPTIDE_SRC_USE_LINK_LIST;
 
 /**
  * \struct peptide
@@ -138,6 +144,8 @@ float get_peptide_mz(
 
 /**
  * Frees an allocated peptide object.
+ * Depending on peptide_src implementation determines how to free srcs
+ * This decision is made by global variable PEPTIDE_SRC_USE_LINK_LIST
  */
 void free_peptide(
   PEPTIDE_T* peptide ///< peptide to free -in
@@ -146,8 +154,16 @@ void free_peptide(
   //decrement the pointer count
   free_database(get_peptide_first_src_database(peptide));
 
-  //link list
-  free_peptide_src(peptide->peptide_src);
+  //check which implementation peptide_src uses
+  if(!PEPTIDE_SRC_USE_LINK_LIST){
+    //array implementation
+    free(peptide->peptide_src);
+  }
+  else{
+    //link list implementation
+    free_peptide_src(peptide->peptide_src);
+  }
+
   free(peptide);
 }
 
@@ -588,6 +604,7 @@ void add_peptide_peptide_src(
 /**
  * this method adds the peptide src array to an EMPTY peptide
  * only used in index.c, when the peptide src count for  peptide is known
+ * Any existing peptide_src will lose it's reference
  */
 void add_peptide_peptide_src_array(
   PEPTIDE_T* peptide,  ///< the peptide to set -out
@@ -595,12 +612,8 @@ void add_peptide_peptide_src_array(
   )
 {
   //should be empty peptide src list
-  if(peptide->peptide_src == NULL){
-    peptide->peptide_src = peptide_src_array;
-  }
-  else{
-    die("peptide src list should be empty");
-  }
+  peptide->peptide_src = peptide_src_array;
+
 }
 
 
@@ -631,7 +644,17 @@ int get_peptide_sizeof(){
   return sizeof(PEPTIDE_T);
 }
 
-
+/**
+ * sets the peptide src implementation in the peptide object
+ * This should be set only once and not be altered
+ */
+void set_peptide_src_implementation(
+  BOOLEAN_T use_link_list ///< does the peptide use link list peptide src
+  )
+{  
+  PEPTIDE_SRC_USE_LINK_LIST = use_link_list; 
+}
+                                    
 /**
  * Iterator
  */
@@ -794,6 +817,7 @@ int compare_peptide_mass(
  * Merge to identical peptides, copy all peptide_src into one of the peptide
  * peptide_dest, peptide_bye must have at least one peptide src
  * frees the peptide_bye, once the peptide_src are re-linked to the peptide_dest
+ * Assumes that both peptides use linklist implemenation for peptide_src
  * \returns TRUE if merge is successful else FALSE
  */
 BOOLEAN_T merge_peptides(
@@ -829,12 +853,11 @@ BOOLEAN_T merge_peptides(
  *
  * The peptide serialization format looks like this:
  *
- *<PEPTIDE_T: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_SRC_T: peptide_src struct>]+
+ *<PEPTIDE_T: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>]+
  * the bracket peptide src information repeats for the number of peptide src listed before the bracket
  * the protein index is the index of the parent protein in the database DATABASE_T
  *
  */
-
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide, ///< the peptide to serialize -in
   FILE* file ///< the output file to serlize -out
@@ -843,11 +866,11 @@ BOOLEAN_T serialize_peptide(
 
   PEPTIDE_SRC_ITERATOR_T* iterator = 
     new_peptide_src_iterator(peptide);
+  PEPTIDE_SRC_T* peptide_src = NULL;
   long num_src_location;
   long original_location;
   int num_src = 0;
-  int protein_idx = 0;
-
+  
   //write the peptide struct
   fwrite(peptide, sizeof(PEPTIDE_T), 1, file);
   
@@ -863,14 +886,13 @@ BOOLEAN_T serialize_peptide(
     return FALSE;
   }
 
-  //interate through the linklist of possible parent proteins, print each parent protein
+  //interate through the peptide src for this peptide, serialize each peptide src
   while(peptide_src_iterator_has_next(iterator)){
-    PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(iterator);
-    //write protein index in database
-    protein_idx = get_protein_protein_idx(get_peptide_src_parent_protein(peptide_src));
-    fwrite(&protein_idx, sizeof(int), 1, file);
-    //write the single peptide_src struct
-    fwrite(peptide_src, get_peptide_src_sizeof(), 1, file);        
+    peptide_src = peptide_src_iterator_next(iterator);
+
+    //serialize the peptide src
+    serialize_peptide_src(peptide_src, file);
+    
     ++num_src;
   }
   free_peptide_src_iterator(iterator);
@@ -884,7 +906,6 @@ BOOLEAN_T serialize_peptide(
   //return to original poistion
   fseek(file, original_location, SEEK_SET);
   return TRUE;
-  
 }
 /*
 BOOLEAN_T serialize_peptide(
