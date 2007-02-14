@@ -169,8 +169,9 @@ int main(int argc, char** argv){
     spectrum_iterator = new_spectrum_iterator(collection);
     
     //create a generate peptide iterator
-    GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //FIXME use neutral_mass, might chage to pick
+    GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //NULL;//FIXME use neutral_mass, might chage to pick
       new_generate_peptides_iterator_mutable();
+
 
     //iterate over all spectrum in ms2 file
     while(spectrum_iterator_has_next(spectrum_iterator)){
@@ -193,11 +194,17 @@ int main(int argc, char** argv){
         fprintf(stdout, "# SPECTRUM CHARGE: %d\n", possible_charge_array[charge_index]);
         fprintf(stdout, "# %s\t%s\t%s\t%s\n", "rank", "mass", "sp", "sequence");  
 
+        //DEBUG                
+        //peptide_iterator =  //FIXME use neutral_mass, might chage to pick
+        //new_generate_peptides_iterator_mutable();
+
+
         //get match collection with perlim match collection
-        match_collection = 
+        match_collection =
           new_match_collection_spectrum_with_peptide_iterator(spectrum, 
                                                               possible_charge_array[charge_index], 
                                                               500, perlim_score, peptide_iterator);
+        
         
         //later add scoring for main_score here!
         

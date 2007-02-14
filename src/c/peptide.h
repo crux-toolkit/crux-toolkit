@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.35 $
+ * $Revision: 1.36 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -64,6 +64,8 @@ float get_peptide_mz(
 
 /**
  * Frees an allocated peptide object.
+ * Depending on peptide_src implementation determines how to free srcs
+ * This decision is made by global variable PEPTIDE_SRC_USE_LINK_LIST
  */
 void free_peptide (
   PEPTIDE_T* peptide ///< peptide to free -in
@@ -228,6 +230,7 @@ void add_peptide_peptide_src(
 /**
  * this method adds the peptide src array to an EMPTY peptide
  * only used in index.c, when the peptide src count for  peptide is known
+ * Any existing peptide_src will lose it's reference
  */
 void add_peptide_peptide_src_array(
   PEPTIDE_T* peptide,  ///< the peptide to set -out
@@ -252,6 +255,15 @@ PROTEIN_T* get_peptide_parent_protein(
  *\returns the protein struct size, value of sizeof function
  */
 int get_peptide_sizeof(void);
+
+
+/**
+ * sets the peptide src implementation in the peptide object
+ * This should be set only once and not be altered
+ */
+void set_peptide_src_implementation(
+  BOOLEAN_T use_link_list ///< does the peptide use link list peptide src
+  );
 
 /**
  * Residue Iterator
@@ -342,7 +354,10 @@ int compare_peptide_mass(
   );
 
 /**
- * Merge two identical peptides, copy all peptide_src into one of the peptide
+ * Merge to identical peptides, copy all peptide_src into one of the peptide
+ * peptide_dest, peptide_bye must have at least one peptide src
+ * frees the peptide_bye, once the peptide_src are re-linked to the peptide_dest
+ * Assumes that both peptides use linklist implemenation for peptide_src
  * \returns TRUE if merge is successful else FALSE
  */
 BOOLEAN_T merge_peptides(
@@ -350,9 +365,16 @@ BOOLEAN_T merge_peptides(
   PEPTIDE_T* peptide_bye
   );
                            
-/**
- * Serialize a peptide to a FILE
+/*
+ * Serialize a peptide to a FILE in binary
  * \returns TRUE if serialization is successful, else FALSE
+ *
+ * The peptide serialization format looks like this:
+ *
+ *<PEPTIDE_T: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>]+
+ * the bracket peptide src information repeats for the number of peptide src listed before the bracket
+ * the protein index is the index of the parent protein in the database DATABASE_T
+ *
  */
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide,

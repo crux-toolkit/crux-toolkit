@@ -63,12 +63,15 @@ void free_match(
   MATCH_T* match ///< the match to free -in
   )
 {
+  --match->pointer_count;
+  
   //only free match when pointer count reaches
-  if(--match->pointer_count == 0){
+  if(match->pointer_count == 0){
     //free peptide
     free_peptide(match->peptide);
     free(match);  
   }
+
 }
 
 /**

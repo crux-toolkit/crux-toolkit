@@ -177,6 +177,10 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
 
     carp(CARP_INFO, "using index for peptide generation");
 
+    //set for all peptide src use array implementation
+    // this routine sets the static global in peptide.c
+    set_peptide_src_implementation(FALSE);
+
     if((sort_type != MASS && sort_type != NONE)){
       carp(CARP_ERROR, " when using index, cannot sort other than by mass");
       carp(CARP_ERROR, "failed to perform search");
@@ -221,6 +225,10 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
    ************************************************/
   else{
     carp(CARP_INFO, "using fasta_file for peptide generation");
+
+    //set for all peptide src use link list implementation
+    // this routine sets the static global in peptide.c
+    set_peptide_src_implementation(TRUE);
 
     //create a new database & set generate_peptides_iterator
     database = new_database(in_file, FALSE, FALSE);         //needs to change this....by given option
@@ -416,6 +424,10 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
    **********************/
   if(use_index_boolean){
     carp(CARP_INFO, "using index for peptide generation");
+    
+    //set for all peptide src use array implementation
+    // this routine sets the static global in peptide.c
+    set_peptide_src_implementation(FALSE);
     
     //check is user ask for unacceptable sort type
     if((sort_type != MASS && sort_type != NONE)){

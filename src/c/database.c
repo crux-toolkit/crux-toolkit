@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.35 $
+ * $Revision: 1.36 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -332,10 +332,10 @@ BOOLEAN_T memory_map_database(
   database->file_size = file_info.st_size;
   
   //memory map the entire binary fasta file!
-  database->data_address = mmap((caddr_t)0, file_info.st_size, PROT_READ, MAP_SHARED, file_d, 0);
+  database->data_address = mmap((caddr_t)0, file_info.st_size, PROT_READ, MAP_PRIVATE /*MAP_SHARED*/, file_d, 0);
 
   //check if memory mapping has succeeded
-  if ((caddr_t)(database->data_address) == (caddr_t)(-1)) {
+  if ((caddr_t)(database->data_address) == (caddr_t)(-1)){
     carp(CARP_ERROR, "failed to use mmap function for binary fasta file: %s", database->filename);
     return FALSE;
   }
@@ -777,6 +777,10 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
   )
 {
+  //set peptide implementation to linklist peptide_src
+  //this determines which peptide free method to use
+  set_peptide_src_implementation(TRUE);
+
   PROTEIN_T* next_protein = NULL;
   
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator =

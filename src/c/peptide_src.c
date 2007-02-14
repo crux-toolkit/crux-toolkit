@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -25,7 +25,7 @@ struct peptide_src{
   PEPTIDE_TYPE_T peptide_type; ///< the peptide type for the corresponding protein
   PROTEIN_T* parent_protein; ///< the parent of this preptide
   int start_idx; ///< start index of the peptide in the protein sequence, first residue is 1 
-  PEPTIDE_SRC_T* next_association; ///< a linklist of peptide_src   
+  PEPTIDE_SRC_T* next_association; ///< a linklist of peptide_src     
 };
 
 /**
@@ -75,6 +75,27 @@ PEPTIDE_SRC_T* new_peptide_src_array(
 }
 
 /**
+ *\returns a linklist of PROTEIN_PEPTIDE_SRC object
+ * only used in index.c, when the peptide src count for peptide is known
+ */
+PEPTIDE_SRC_T* new_peptide_src_linklist(
+  int size ///< the size of the peptide_src array -in
+  )
+{
+  int src_idx = 1;
+  PEPTIDE_SRC_T* src_list = (PEPTIDE_SRC_T*)mycalloc(1, sizeof(PEPTIDE_SRC_T));
+  PEPTIDE_SRC_T* curr_src = src_list;
+
+  //set all next peptide src pointers
+  for(;src_idx < size - 1; ++src_idx){
+    curr_src->next_association = (PEPTIDE_SRC_T*)mycalloc(1, sizeof(PEPTIDE_SRC_T));
+    curr_src = curr_src->next_association;
+  }
+
+  return src_list;
+}
+
+/**
  *\returns the PROTEIN_PEPTIDE_SRC object in the array with the index
  * index starts at 0.
  * only used in index.c, when the peptide src count for  peptide is known
@@ -97,6 +118,7 @@ void set_peptide_src_array(
 
 /**
  * Frees the entire allocated peptide_src linklist object
+ * Assumes that peptide src is Link list implementation
  */
 void free_peptide_src(
   PEPTIDE_SRC_T* peptide_src  ///< object to free -in 
@@ -104,7 +126,8 @@ void free_peptide_src(
 {
   if(peptide_src->next_association != NULL){
     free_peptide_src(peptide_src->next_association);
-  }    
+  }
+  
   free(peptide_src);  
 }
 
@@ -275,6 +298,35 @@ char* get_peptide_src_sequence_pointer(
  */
 int get_peptide_src_sizeof(){
   return sizeof(PEPTIDE_SRC_T);
+}
+
+/**
+ * serialize peptide src in binary
+ * The peptide serialization format looks like this:
+ *
+ *<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>
+ * the protein index is the index of the parent protein in the database DATABASE_T
+ *
+ */
+void serialize_peptide_src(
+  PEPTIDE_SRC_T* peptide_src, ///< peptide_src to serialize -in   
+  FILE* file  ///< output file -in   
+  )
+{
+  //write protein index in database
+  int protein_idx = get_protein_protein_idx(peptide_src->parent_protein);
+  fwrite(&protein_idx, sizeof(int), 1, file);
+    
+  /*
+  //write the single peptide_src struct
+  fwrite(peptide_src, get_peptide_src_sizeof(), 1, file);        
+  */
+
+  //write peptide src type(tryptic, all, ...)
+  fwrite(&(peptide_src->peptide_type), sizeof(PEPTIDE_TYPE_T), 1, file);
+  //write start index in protein of peptide in this peptide src
+  fwrite(&(peptide_src->start_idx), sizeof(int), 1, file);
+  
 }
 
 /*

@@ -98,7 +98,8 @@ void free_match_collection(
 {
   //free all matches, actually we are only decrementing the pointer count in each match object
   while(match_collection->match_total > 0){
-    free_match(match_collection->match[--match_collection->match_total]);
+    --match_collection->match_total;
+    free_match(match_collection->match[match_collection->match_total]);
   }
   free(match_collection);
 }
@@ -246,7 +247,6 @@ void truncate_match_collection(
     free_match(match_collection->match[match_collection->match_total - 1]);
     --match_collection->match_total;
   }
-
 }
 
 /**
@@ -322,6 +322,7 @@ BOOLEAN_T score_match_collection_sp(
   PEPTIDE_T* peptide = NULL;
   ION_SERIES_T* ion_series = NULL;
   
+
   //iterate over all peptides
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     peptide = generate_peptides_iterator_next(peptide_iterator);
@@ -381,7 +382,7 @@ BOOLEAN_T score_match_collection_sp(
 
   //save only the top max_rank matches, sort and free the other matches
   truncate_match_collection(match_collection, max_rank, SP);
-
+  
   //now that the match_collection is sorted, populate the rank of each match object
   if(!populate_match_rank_match_collection(match_collection, SP)){
     carp(CARP_ERROR, "failed to populate match rank in match_collection");
