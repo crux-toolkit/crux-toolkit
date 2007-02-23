@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -34,6 +34,14 @@ char* copy_string_part(char*src, int length);
  * or perhaps all compares.
  */
 int compare_float(float float_a, float float_b);
+
+/**
+ * \returns the 0 if equal, 1 if float_a is larger, -1 if float_b is larger
+ * fast and simple, but some limitations. Assumes,
+ * "Two floats in memory, interpret their bit pattern as integers, 
+ * and compare them, we can tell which is larger"
+ */
+inline int compare_float_fast(float float_a, float float_b);
 
 /**
  * parses the filename and path  

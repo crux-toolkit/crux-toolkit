@@ -116,7 +116,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
    
   //determine redundancy option
   if(strcmp(redundancy, "redundant")==0){
-    is_unique = FALSE;
+    is_unique = FALSE;    
   }
   else if(strcmp(redundancy, "unique")==0){
     is_unique = TRUE;

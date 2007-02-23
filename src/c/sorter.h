@@ -1,6 +1,6 @@
 /**
  * \file sorter.h
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -44,7 +44,8 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
 SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator, ///< the peptide iterator to extend -in
   SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
-  BOOLEAN_T unique ///< only return unique peptides? -in
+  BOOLEAN_T unique, ///< only return unique peptides? -in
+  unsigned int peptide_count ///< the total peptide count in the bin -in
   );
 
 /**

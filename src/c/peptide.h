@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -351,6 +351,37 @@ BOOLEAN_T compare_peptide_sequence(
 int compare_peptide_mass(
   PEPTIDE_T* peptide_one,
   PEPTIDE_T* peptide_two
+  );
+
+
+/**
+ * compares two peptides with the mass sort type
+ * if peptide mass is identical sort by lexicographical order
+ * used for qsort function
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_mass_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
+  );
+
+/**
+ * compares two peptides with the lexical sort type
+ * for qsort
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_lexical_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
+  );
+
+/**
+ * compares two peptides with the length sort type
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_length_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
   );
 
 /**

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.49 $
+ * $Revision: 1.50 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -772,6 +772,10 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
  
 /////
 
+/*************************************
+ * compare peptide method
+ ************************************/
+
 /**
  * Compare peptide sequence
  * \returns TRUE if peptide sequence is identical else FALSE
@@ -799,6 +803,102 @@ BOOLEAN_T compare_peptide_sequence(
     } 
   }
   return TRUE;
+}
+
+
+/**
+ * compares two peptides with the lexical sort type
+ * for qsort
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_lexical_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
+  )
+{
+  //convert the protein to heavy if needed
+  /* uncomment if needed, to use light heavy protein
+  protein_to_heavy(get_peptide_parent_protein(peptide_one));
+  protein_to_heavy(get_peptide_parent_protein(peptide_two));
+  */
+  PEPTIDE_T* peptide_1 = *peptide_one;
+  PEPTIDE_T* peptide_2 = *peptide_two;
+  char* peptide_one_sequence = get_peptide_sequence_pointer(peptide_1);
+  char* peptide_two_sequence = get_peptide_sequence_pointer(peptide_2);
+  int peptide_one_length = peptide_1->length;
+  int peptide_two_length = peptide_2->length;
+  int current_idx = 0;
+  
+  //check if all alphabetically identical
+  while(current_idx < peptide_one_length &&
+        current_idx < peptide_two_length){
+    if(peptide_one_sequence[current_idx] > peptide_two_sequence[current_idx]){        
+      return 1;
+    }
+    else if(peptide_one_sequence[current_idx] < peptide_two_sequence[current_idx]){
+      return -1;
+    }
+    ++current_idx;
+  }
+  
+  //alphabetically identical, check if same length
+  if(peptide_one_length > peptide_two_length){
+    return 1;
+  }
+  else if(peptide_one_length < peptide_two_length){
+    return -1;
+  }
+  else{
+    return 0;
+  }
+}
+
+/**
+ * compares two peptides with the mass sort type
+ * if peptide mass is identical sort by lexicographical order
+ * used for qsort function
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_mass_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
+  )
+{
+  //determine mass order
+  int result = compare_float_fast((*peptide_one)->peptide_mass, 
+                                  (*peptide_two)->peptide_mass);
+
+  //if identical mass, sort in lexical order
+  if(result == 0){
+    return compare_peptide_lexical_qsort(peptide_one, peptide_two);
+  }
+  else{//if not identical
+    return result;
+  }
+}
+
+/**
+ * compares two peptides with the length sort type
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_length_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
+  )
+{
+  int peptide_one_length = (*peptide_one)->length;
+  int peptide_two_length = (*peptide_two)->length;
+  
+  //alphabetically identical, check if same length
+  if(peptide_one_length > peptide_two_length){
+    return 1;
+  }
+  else if(peptide_one_length < peptide_two_length){
+    return -1;
+  }
+  else{
+    return 0;
+  }
 }
 
 /**
