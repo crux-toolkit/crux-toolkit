@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -621,18 +621,19 @@ FILE* get_bin_file(
 FILE* sort_bin(
   FILE* file, ///< the working file handler to the bin -in
   long bin_idx, ///< bin index in the file array -in
-  INDEX_T* index ///< working index -in
+  INDEX_T* index, ///< working index -in
+  unsigned int peptide_count ///< the total peptide count in the bin -in
   )
 {
   char* filename = NULL;
 
   //check if file is empty
-  if(ftell(file) == 0){
+  if(peptide_count == 0){
     return file;
   }
 
   BIN_SORTED_PEPTIDE_ITERATOR_T* peptide_iterator =
-    new_bin_sorted_peptide_iterator(index, file);
+    new_bin_sorted_peptide_iterator(index, file, peptide_count);
   PEPTIDE_T* working_peptide = NULL;
   
   //get the filename for this file bin
@@ -818,6 +819,7 @@ BOOLEAN_T create_index(
   float working_mass;
   char* filename = NULL;
   float mass_range = index->mass_range;
+  unsigned int* peptide_count_array = NULL;
 
   //check if already created index
   if(index->on_disk){
@@ -858,7 +860,13 @@ BOOLEAN_T create_index(
     peptide_array[sub_indx] = (PEPTIDE_T**)mycalloc(MAX_PROTEIN_IN_BIN, sizeof(PEPTIDE_T*));
   }
   // int array that stores the peptide count for each peptide array branch
+  // this is used to determine when to output all peptides in buffer
+  // does not represent the total peptide count in the bin
+  // total count of peptide in bin is sotred in peptide_count_array
   int* bin_count = (int*)mycalloc(num_bins, sizeof(int));
+
+  //create peptide count array that stores the total count of peptides in each bin
+  peptide_count_array = (unsigned int*)mycalloc(num_bins, sizeof(unsigned int));
 
   //create the index map & info
   info_out = fopen("crux_index_map", "w");
@@ -892,6 +900,10 @@ BOOLEAN_T create_index(
         return FALSE;
       }
     }
+    
+    //increment total peptide count of bin
+    ++peptide_count_array[file_idx];
+
     //dump peptide in bin or temporary matrix
     dump_peptide(file_array, file_idx, working_peptide, peptide_array[file_idx], bin_count); 
   }
@@ -907,7 +919,7 @@ BOOLEAN_T create_index(
       continue;
     }
     // sort each bin
-    if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index)) == NULL){
+    if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index, peptide_count_array[bin_idx])) == NULL){
       carp(CARP_WARNING, "failed to sort each bin");
       fcloseall();
       return FALSE;
@@ -927,6 +939,7 @@ BOOLEAN_T create_index(
   fclose(info_out);
   free(mass_limits);
   free(file_array);
+  free(peptide_count_array);
   free_database_peptide_iterator(peptide_iterator);
 
   chdir("..");
@@ -2323,7 +2336,8 @@ void free_bin_peptide_iterator(
  */
 BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
   INDEX_T* index, ///< The index object which we are iterating over -in
-  FILE* file ///< the working bin file handler -in
+  FILE* file, ///< the working bin file handler -in
+  unsigned int peptide_count ///< the total peptide count in the bin -in
   )
 {
   //set peptide implementation to array peptide_src
@@ -2344,7 +2358,7 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
 
   //create a sorted peptide iterator that will sort all the peptides from bin peptide_iterator
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =
-    new_sorted_peptide_iterator_bin(bin_peptide_iterator, MASS, index->is_unique);
+    new_sorted_peptide_iterator_bin(bin_peptide_iterator, MASS, index->is_unique, peptide_count);
 
   //set sorted_peptide_iterator
   bin_sorted_peptide_iterator->sorted_peptide_iterator = sorted_peptide_iterator;

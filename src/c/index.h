@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -386,7 +386,8 @@ void free_bin_peptide_iterator(
  */
 BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
   INDEX_T* index, ///< The index object which we are iterating over -in
-  FILE* file
+  FILE* file,///< the working file handler to the bin -in
+  unsigned int peptide_count ///< the total peptide count in the bin -in
   );
 
 /**

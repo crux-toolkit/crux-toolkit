@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -124,11 +124,25 @@ void free_peptide_src(
   PEPTIDE_SRC_T* peptide_src  ///< object to free -in 
   )
 {
+  PEPTIDE_SRC_T* to_free = peptide_src;
+  PEPTIDE_SRC_T* next = peptide_src->next_association;
+
+  //free first peptide_src
+  free(to_free);
+  
+  //iterate over all peptide_srcs
+  while(next != NULL){
+    to_free = next;
+    next = next->next_association;
+    free(to_free);
+  }
+
+  /*
   if(peptide_src->next_association != NULL){
     free_peptide_src(peptide_src->next_association);
-  }
-  
+  }  
   free(peptide_src);  
+  */
 }
 
 /**

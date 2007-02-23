@@ -9,13 +9,25 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <time.h>
+#include "carp.h"
 #include "utils.h"
 #include "objects.h"
 
 
-//PRECISION, determines the precision of the compare float, users
-//should lower the number if need more precision
+/**
+ * PRECISION, determines the precision of the compare float, users
+ * should lower the number if need more precision
+ */
 #define PRECISION 0.000000005 
+
+/**
+ * the maximum error in terms of Units in the Last Place. 
+ * This specifies how big an error we are willing to accept in terms of the value of the least significant 
+ * digit of the floating point numbers representation. 
+ * MAX_ULPS can also be interpreted in terms of how many representable floats 
+ * we are willing to accept between A and B. This function will allow MAX_ULPS-1 floats between A and B.
+ */
+#define MAX_ULPS 1
 
 /**
  * returns a heap allocated copy of the src string
@@ -61,6 +73,39 @@ inline int compare_float(float float_a, float float_b){
   // a < b
   else{
     return -1;
+  }
+}
+
+/**
+ * \returns the 0 if equal, 1 if float_a is larger, -1 if float_b is larger
+ * fast and simple, but some limitations. Assumes,
+ * "Two floats in memory, interpret their bit pattern as integers, 
+ * and compare them, we can tell which is larger"
+ */
+inline int compare_float_fast(float float_a, float float_b){
+  //check if current architecture
+  if(sizeof(float) != sizeof(int)){
+    carp(CARP_WARNING, "current architecture does not support fast float comparison");
+    return compare_float(float_a, float_b);
+  }
+  
+  //check start off equal?
+  if(float_a == float_b){
+    return 0;
+  }
+
+  //try more detail check
+  int int_diff = *(int*)&float_a - *(int*)&float_b;
+  
+  //equal?
+  if(abs(int_diff) <= MAX_ULPS){
+    return 0;
+  }
+  else if(int_diff < 0){  
+    return -1;
+  }
+  else{//int_diff > 0
+    return 1;
   }
 }
 
