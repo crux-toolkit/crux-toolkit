@@ -216,10 +216,11 @@ int main(int argc, char** argv){
           match = match_iterator_next(match_iterator);
           print_match(match, stdout, TRUE, SP);
         }
-        
+                
         //free match iterator
         free_match_iterator(match_iterator);
         free_match_collection(match_collection);
+
       }
 
       //THEy are all freed in free_spectrum collection

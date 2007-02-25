@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.50 $
+ * $Revision: 1.51 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -142,6 +142,7 @@ float get_peptide_mz(
   return ((get_peptide_peptide_mass(peptide) + MASS_H * charge)/ charge);
 }
 
+
 /**
  * Frees an allocated peptide object.
  * Depending on peptide_src implementation determines how to free srcs
@@ -157,9 +158,11 @@ void free_peptide(
   //check which implementation peptide_src uses
   if(!PEPTIDE_SRC_USE_LINK_LIST){
     //array implementation
-    free(peptide->peptide_src);
+    //fprintf(stderr, "i'm here\n");
+    free(peptide->peptide_src);    
   }
   else{
+    //fprintf(stderr, "Ooops\n");
     //link list implementation
     free_peptide_src(peptide->peptide_src);
   }
@@ -865,8 +868,8 @@ int compare_peptide_mass_qsort(
   )
 {
   //determine mass order
-  int result = compare_float_fast((*peptide_one)->peptide_mass, 
-                                  (*peptide_two)->peptide_mass);
+  int result = compare_float((*peptide_one)->peptide_mass, 
+                             (*peptide_two)->peptide_mass);
 
   //if identical mass, sort in lexical order
   if(result == 0){

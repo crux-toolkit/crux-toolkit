@@ -322,7 +322,6 @@ BOOLEAN_T score_match_collection_sp(
   PEPTIDE_T* peptide = NULL;
   ION_SERIES_T* ion_series = NULL;
   
-
   //iterate over all peptides
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     peptide = generate_peptides_iterator_next(peptide_iterator);
@@ -392,7 +391,7 @@ BOOLEAN_T score_match_collection_sp(
   
   //yes, we have now scored for the match-mode: SP
   match_collection->scored_type[SP] = TRUE;
-  
+    
   return TRUE;
 }
 
