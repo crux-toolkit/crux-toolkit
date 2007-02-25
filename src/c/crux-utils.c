@@ -27,7 +27,7 @@
  * MAX_ULPS can also be interpreted in terms of how many representable floats 
  * we are willing to accept between A and B. This function will allow MAX_ULPS-1 floats between A and B.
  */
-#define MAX_ULPS 1
+#define MAX_ULPS 2
 
 /**
  * returns a heap allocated copy of the src string
