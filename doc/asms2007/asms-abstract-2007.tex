@@ -55,14 +55,15 @@ sequence file for each search.
 
 \section{Preliminary Data}
 
-SEQUEST uses a preliminary score called ``Sp'' to extract the top 500
-candidate peptides prior to the final cross-correlation analysis.
-We re-implemented Sp in Crux, and verified that it is identical to the
-Sp computed by SEQUEST.
 
 % Use either clock time or CPU time, not both.
 % Report all times in a single unit, with decimals (e.g., 1.23 hrs
 % or 82.4 min).
+
+SEQUEST uses a preliminary score called ``Sp'' to extract the top 500
+candidate peptides prior to the final cross-correlation analysis.
+We re-implemented Sp in Crux, and verified that it is identical to the
+Sp computed by SEQUEST.
 
 First, using Crux, we precomputed a peptide database for the tryptic
 peptides in the MSDB (2344227 proteins).  This procedure required 16
