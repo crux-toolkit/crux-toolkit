@@ -203,7 +203,7 @@ int main(int argc, char** argv){
     free_spectrum(spectrum);
   }
   else{
-    char* usage = parse_arguments_get_usage("score_spectrum");
+    char* usage = parse_arguments_get_usage("search_spectrum");
     result = parse_arguments_get_error(&error_message);
     fprintf(stderr, "Error in command line. Error # %d\n", result);
     fprintf(stderr, "%s\n", error_message);
