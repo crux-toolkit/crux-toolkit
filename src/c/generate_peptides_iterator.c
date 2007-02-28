@@ -392,8 +392,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
     carp(CARP_ERROR, "incorrect argument %s, using default value", sort);
   }
 
-  fprintf(stderr, "use_index: %s\n", use_index);
-    
   //determine use index command
   if(strcmp(use_index, "F")==0){
     use_index_boolean = FALSE;
