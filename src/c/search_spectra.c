@@ -148,6 +148,9 @@ int main(int argc, char** argv){
       wrong_command(perlim_score_type, "The type of perliminary scoring function to use. sp");
     }
 
+    //always use index when search spectra!
+    set_string_parameter("use-index", "T");
+
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
  
@@ -235,7 +238,7 @@ int main(int argc, char** argv){
     free_generate_peptides_iterator(peptide_iterator);
   }
   else{
-    char* usage = parse_arguments_get_usage("score_spectra");
+    char* usage = parse_arguments_get_usage("search_spectra");
     result = parse_arguments_get_error(&error_message);
     fprintf(stderr, "Error in command line. Error # %d\n", result);
     fprintf(stderr, "%s\n", error_message);
