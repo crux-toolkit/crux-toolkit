@@ -315,7 +315,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
   char* cleavages = get_string_parameter_pointer("cleavages");
   char* isotopic_mass = get_string_parameter_pointer("isotopic-mass");
   char* redundancy = get_string_parameter_pointer("redundancy");
-  char* use_index = get_string_parameter_pointer("use-index");
+  //char* use_index = get_string_parameter_pointer("use-index");
   char* sort = get_string_parameter_pointer("sort");   // mass, length, lexical, none  
 
 
@@ -392,17 +392,23 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
     carp(CARP_ERROR, "incorrect argument %s, using default value", sort);
   }
 
+
+  //FIXME always use index for mustable generate_peptides at this point
+  use_index_boolean = TRUE;
+  
+  /*
   //determine use index command
   if(strcmp(use_index, "F")==0){
     use_index_boolean = FALSE;
   }
   else if(strcmp(use_index, "T")==0){
+    
     use_index_boolean = TRUE;
   }
   else{
     carp(CARP_ERROR, "incorrect argument %s, using default value", use_index);
   }
-
+  */
   //check if input file exist
   if(access(in_file, F_OK)){
     carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty).", in_file);
