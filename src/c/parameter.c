@@ -668,6 +668,9 @@ BOOLEAN_T set_string_parameter(
       //if exist ovewrite it!
       if(!strcmp(parameters.parameters[idx].parameter_name, name)){
         strcpy(parameters.parameters[idx].parameter_value, set_value);
+        
+        fprintf(stderr, "use-index: %s\n", parameters.parameters[idx].parameter_value);
+        
         return TRUE;
       }	
     }
