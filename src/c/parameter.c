@@ -667,17 +667,12 @@ BOOLEAN_T set_string_parameter(
     for(idx = 0; idx < parameters.num_parameters; idx++){
       //if exist ovewrite it!
       if(!strcmp(parameters.parameters[idx].parameter_name, name)){
-        strcpy(parameters.parameters[idx].parameter_value, set_value);
-        
-        fprintf(stderr, "use-index: %s\n", parameters.parameters[idx].parameter_value);
-        
+        strcpy(parameters.parameters[idx].parameter_value, set_value);                
         return TRUE;
       }	
     }
   }
   
-  fprintf(stderr, "use-index: %s\n", "no no no");
-
   //if it doesn't already exist(wasn't in the parameter file), add to parameter list
   result = add_parameter(name, set_value);
     
