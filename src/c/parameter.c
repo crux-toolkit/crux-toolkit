@@ -675,6 +675,8 @@ BOOLEAN_T set_string_parameter(
       }	
     }
   }
+  
+  fprintf(stderr, "use-index: %s\n", "no no no");
 
   //if it doesn't already exist(wasn't in the parameter file), add to parameter list
   result = add_parameter(name, set_value);
