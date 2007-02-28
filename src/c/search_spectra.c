@@ -149,7 +149,9 @@ int main(int argc, char** argv){
     }
 
     //always use index when search spectra!
-    set_string_parameter("use-index", "T");
+    if(!set_string_parameter("use-index", "T")){
+      fprintf(stderr, "fuck\n\n");
+    }
 
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
