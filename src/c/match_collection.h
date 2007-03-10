@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -34,8 +34,8 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
  SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
  int charge,       ///< the charge of the spectrum -in
  int max_rank,     ///< max number of top rank matches to keep from SP -in
- SCORER_TYPE_T score_type, ///< the score type (SP, XCORR) -in
- GENERATE_PEPTIDES_ITERATOR_T* mutable_peptide_iterator ///< peptide iteartor to use, must set it first before use
+ SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
+ //GENERATE_PEPTIDES_ITERATOR_T* mutable_peptide_iterator ///< peptide iteartor to use, must set it first before use
  );
 
 /**

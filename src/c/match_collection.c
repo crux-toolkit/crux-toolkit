@@ -154,8 +154,8 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
  SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
  int charge,       ///< the charge of the spectrum -in
  int max_rank,     ///< max number of top rank matches to keep from SP -in
- SCORER_TYPE_T score_type, ///< the score type (SP, XCORR) -in
- GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< peptide iteartor to use, must set it first before use
+ SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
+ //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< peptide iteartor to use, must set it first before use
  )
 {
   MATCH_COLLECTION_T* match_collection = allocate_match_collection();
@@ -168,11 +168,17 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
     
   carp(CARP_DEBUG,"searching peptide in %.2f ~ %.2f", min_mass, max_mass); 
   
+  //free(peptide_iterator);
+  chdir("/home/cpark/crux/bin");
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator2 =  //NULL;//FIXME use neutral_mass, might chage to pick
+    new_generate_peptides_iterator_mutable();
+  //chdir("human-NCBI-042104_crux_index/");
+
   //set the generate_peptides_iterator for the next round of peptides
-  set_generate_peptides_mutable(peptide_iterator, max_mass, min_mass);
+  set_generate_peptides_mutable(peptide_iterator2, max_mass, min_mass);
   
   //score SP match_collection
-  if(!score_match_collection_sp(match_collection, spectrum, charge, max_rank, peptide_iterator)){
+  if(!score_match_collection_sp(match_collection, spectrum, charge, max_rank, peptide_iterator2)){
     carp(CARP_ERROR, "failed to score match collection for SP");
   }
   
@@ -186,7 +192,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
   }
 
   //free generate_peptides_iterator
-  //free_generate_peptides_iterator(peptide_iterator);
+  free_generate_peptides_iterator(peptide_iterator2);
   
   return match_collection;
 }
@@ -327,6 +333,7 @@ BOOLEAN_T score_match_collection_sp(
     peptide = generate_peptides_iterator_next(peptide_iterator);
     peptide_sequence = get_peptide_sequence(peptide);
     
+
     //create new ion series
     ion_series = new_ion_series(peptide_sequence, charge, ion_constraint);
     
@@ -335,7 +342,7 @@ BOOLEAN_T score_match_collection_sp(
     
     //calculates the Sp score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
-    
+
     //create a new match
     match = new_match();
     
