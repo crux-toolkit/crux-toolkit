@@ -73,13 +73,13 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. sp",
+    "The type of scoring function to use. sp | xcorr",
     (void *) &score_type, 
     STRING_ARG);
 
   parse_arguments_set_opt(
     "perlim-score-type", 
-    "The type of scoring function to use. sp",
+    "The type of preliminary scoring function to use. sp",
     (void *) &perlim_score_type, 
     STRING_ARG);
 
@@ -136,8 +136,11 @@ int main(int argc, char** argv){
     if(strcmp(get_string_parameter_pointer("score-type"), "sp")== 0){
       main_score = SP;
     }
+    else if(strcmp(get_string_parameter_pointer("score-type"), "xcorr")== 0){
+      main_score = XCORR;
+    }
     else{
-      wrong_command(score_type, "The type of scoring function to use. sp");
+      wrong_command(score_type, "The type of scoring function to use. sp | xcorr");
     }
 
     //score type
