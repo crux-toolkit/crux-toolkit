@@ -98,6 +98,26 @@ int compare_match_sp(
 }
 
 /**
+ * compare two matches, used for qsort
+ * \returns the difference between xcorr score in match_a and match_b
+ */
+int compare_match_xcorr(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+)
+{
+
+  if((*match_b)->match_scores[XCORR] > (*match_a)->match_scores[XCORR]){
+    return 1;
+  }
+  else if((*match_b)->match_scores[XCORR] < (*match_a)->match_scores[XCORR]){
+    return -1;
+  }
+  return 0;
+
+}
+
+/**
  * print the information of the match
  */
 void print_match(
@@ -123,7 +143,15 @@ void print_match(
     
     break;
   case XCORR:
-    //fill in
+    fprintf(file, "%d.\t%d.\t%.2f\t%.2f\t%.2f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[XCORR], match->match_scores[SP]);
+    
+    //should I print sequence
+    if(output_sequence){
+      peptide_sequence = get_peptide_sequence(match->peptide);
+      fprintf(file, "%s\n", peptide_sequence);
+      free(peptide_sequence);
+    }
+    
     break;
   case DOTP:
     //fill in

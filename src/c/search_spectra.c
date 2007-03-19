@@ -44,8 +44,8 @@ int main(int argc, char** argv){
   /* Set default values for any options here */
 
   //optional
-  char* perlim_score_type = "sp";
-  char* score_type = "sp";
+  //char* perlim_score_type = "sp";
+  char* score_type = "xcorr";
   char* parameter_file = NULL;
   int verbosity = CARP_ERROR;
   
@@ -77,11 +77,13 @@ int main(int argc, char** argv){
     (void *) &score_type, 
     STRING_ARG);
 
+  /*
   parse_arguments_set_opt(
     "perlim-score-type", 
     "The type of preliminary scoring function to use. sp",
     (void *) &perlim_score_type, 
     STRING_ARG);
+  */
 
   parse_arguments_set_opt(
     "mass-window", 
@@ -104,9 +106,10 @@ int main(int argc, char** argv){
   
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
+
     //parse arguments
-    SCORER_TYPE_T main_score = SP; 
-    SCORER_TYPE_T perlim_score = SP; 
+    SCORER_TYPE_T main_score = XCORR; 
+    //SCORER_TYPE_T perlim_score = SP; 
     
     SPECTRUM_T* spectrum = NULL;
     SPECTRUM_COLLECTION_T* collection = NULL; ///<spectrum collection
@@ -143,6 +146,7 @@ int main(int argc, char** argv){
       wrong_command(score_type, "The type of scoring function to use. sp | xcorr");
     }
 
+    /*
     //score type
     if(strcmp(get_string_parameter_pointer("perlim-score-type"), "sp")== 0){
       perlim_score = SP;
@@ -150,10 +154,11 @@ int main(int argc, char** argv){
     else{
       wrong_command(perlim_score_type, "The type of perliminary scoring function to use. sp");
     }
+    */
 
     //always use index when search spectra!
     set_string_parameter("use-index", "T");
-      
+    
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
  
@@ -198,7 +203,6 @@ int main(int argc, char** argv){
 
         //print working state
         fprintf(stdout, "# SPECTRUM CHARGE: %d\n", possible_charge_array[charge_index]);
-        fprintf(stdout, "# %s\t%s\t%s\t%s\n", "rank", "mass", "sp", "sequence");  
 	
         //DEBUG 
 	//chdir("/home/cpark/crux/bin");
@@ -206,22 +210,28 @@ int main(int argc, char** argv){
 	//new_generate_peptides_iterator_mutable();
 
 
-        //get match collection with perlim match collection
+        //get match collection with scored, ranked match collection
         match_collection =
           new_match_collection_spectrum_with_peptide_iterator(spectrum, 
                                                               possible_charge_array[charge_index], 
-                                                              500, perlim_score);//, peptide_iterator);
+                                                              500, main_score);//, peptide_iterator);
         
-        
-        //later add scoring for main_score here!
-        
+                
         //create match iterator, TRUE: return match in sorted order of main_score type
         match_iterator = new_match_iterator(match_collection, main_score, TRUE);
+        
+        //print header
+        if(main_score == SP){
+          fprintf(stdout, "# %s\t%s\t%s\t%s\n", "sp_rank", "mass", "sp", "sequence");  
+        }
+        else if( main_score == XCORR){
+          fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  
+        }
         
         //iterate over all matches
         while(match_iterator_has_next(match_iterator)){
           match = match_iterator_next(match_iterator);
-          print_match(match, stdout, TRUE, SP);
+          print_match(match, stdout, TRUE, main_score);
         }
 	
         //free match iterator

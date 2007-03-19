@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -460,7 +460,28 @@ char* get_binary_fasta_name(
   char* fasta_file  ///< input fasta file -in                            
   )
 {
-  return generate_name(fasta_file, "_binary_fasta");
+  printf("fasta name: %s\n", fasta_file);
+
+  //separate path from file name
+  char** path_filename = parse_filename_path(fasta_file);
+
+  printf("fasta name: %s\n",path_filename[0]);
+
+  //get binary fasta name
+  char* binary_fasta_name = generate_name(path_filename[0], "_binary_fasta");
+
+
+
+  //free path and filename
+  free(path_filename[0]);
+  if(path_filename[1] != NULL){
+    free(path_filename[1]);
+  }
+  free(path_filename);
+  
+  printf("binary fasta name: %s\n", binary_fasta_name);
+
+  return binary_fasta_name;
 }
 
 

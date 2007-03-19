@@ -28,6 +28,7 @@
 
 #define MAX_NUMBER_PEPTIDES 1000000 //What to set?
 
+static BOOLEAN_T is_first_spectrum = TRUE;
 /**
  *\struct match_collection
  *\brief An object that contains match objects with a given spectrum and peptide database
@@ -130,11 +131,9 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   
   //should we score for XCORR?
   if(score_type == XCORR){
-    /* implement later
     if(!score_match_collection_xcorr(match_collection, spectrum, charge)){
       carp(CARP_ERROR, "failed to score match collection for XCORR");
     }
-    */
   }
 
   //free generate_peptides_iterator
@@ -169,30 +168,35 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
   carp(CARP_DEBUG,"searching peptide in %.2f ~ %.2f", min_mass, max_mass); 
   
   //free(peptide_iterator);
-  chdir("/home/cpark/crux/bin");
-  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator2 =  //NULL;//FIXME use neutral_mass, might chage to pick
+
+  //move out of crux index dir
+  if(!is_first_spectrum){
+    chdir("..");
+  }else{
+    is_first_spectrum = FALSE;
+  }
+
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //NULL;//FIXME use neutral_mass, might chage to pick
     new_generate_peptides_iterator_mutable();
   //chdir("human-NCBI-042104_crux_index/");
 
   //set the generate_peptides_iterator for the next round of peptides
-  set_generate_peptides_mutable(peptide_iterator2, max_mass, min_mass);
+  set_generate_peptides_mutable(peptide_iterator, max_mass, min_mass);
   
   //score SP match_collection
-  if(!score_match_collection_sp(match_collection, spectrum, charge, max_rank, peptide_iterator2)){
+  if(!score_match_collection_sp(match_collection, spectrum, charge, max_rank, peptide_iterator)){
     carp(CARP_ERROR, "failed to score match collection for SP");
   }
   
   //should we score for XCORR?
   if(score_type == XCORR){
-    /* implement later
     if(!score_match_collection_xcorr(match_collection, spectrum, charge)){
       carp(CARP_ERROR, "failed to score match collection for XCORR");
     }
-    */
   }
 
   //free generate_peptides_iterator
-  free_generate_peptides_iterator(peptide_iterator2);
+  free_generate_peptides_iterator(peptide_iterator);
   
   return match_collection;
 }
@@ -220,8 +224,8 @@ BOOLEAN_T sort_match_collection(
     return TRUE;
   case XCORR:
     //sort the match to decreasing XCORR order for the return
-    //qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_xcorr);
-    //match_collection->last_sorted = XCORR;
+    qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_xcorr);
+    match_collection->last_sorted = XCORR;
     return TRUE;
   case DOTP:
     //implement later
@@ -391,7 +395,7 @@ BOOLEAN_T score_match_collection_sp(
   
   //now that the match_collection is sorted, populate the rank of each match object
   if(!populate_match_rank_match_collection(match_collection, SP)){
-    carp(CARP_ERROR, "failed to populate match rank in match_collection");
+    carp(CARP_ERROR, "failed to populate match rank for SP in match_collection");
     free_match_collection(match_collection);
     exit(-1);
   }
@@ -403,19 +407,87 @@ BOOLEAN_T score_match_collection_sp(
 }
 
 /**
+ * Assumes that match collection was scored under SP first
  * \returns TRUE, if successfully scores matches for xcorr
  */
-/*
 BOOLEAN_T score_match_collection_xcorr(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
   int charge       ///< the charge of the spectrum -in
   )
 {
-  //implement later
+  int match_idx = 0;
+  MATCH_T* match = NULL;
+  char* peptide_sequence = NULL;
+  ION_SERIES_T* ion_series = NULL;
+  float score = 0;
+  
+  /*
+  //is this a empty collection?
+  if(match_collection->match_total > 0){
+    carp(CARP_ERROR, "must start with SP scored match collection");
+    return FALSE;
+  }
+  */
+  
+  //set ion constraint to sequest settings
+  ION_CONSTRAINT_T* ion_constraint = 
+    new_ion_constraint_sequest_xcorr(charge); 
+  
+  //create new scorer
+  SCORER_T* scorer = new_scorer(XCORR);  
+
+  //we are string xcorr!
+  carp(CARP_INFO, "start scoring for XCORR");
+
+  //iterate over all matches to score for xcorr
+  for(; match_idx < match_collection->match_total; ++match_idx){
+    match = match_collection->match[match_idx];
+    peptide_sequence = get_peptide_sequence(get_match_peptide(match));
+    
+    //create new ion series
+    ion_series = new_ion_series(peptide_sequence, charge, ion_constraint);
+    
+    //now predict ions
+    predict_ions(ion_series);
+    
+    //calculates the Xcorr score
+    score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+    
+
+    //set all fields in match
+    set_match_score(match, XCORR, score);
+    
+    //free heap
+    free(peptide_sequence);
+    free_ion_series(ion_series);
+  }
+
+  //we are starting xcorr!
+  carp(CARP_INFO, "total peptides scored for XCORR: %d", match_idx);
+
+  //free heap
+  free_scorer(scorer);
+  free_ion_constraint(ion_constraint);
+
+  //sort match collection by score type
+  if(!sort_match_collection(match_collection, XCORR)){
+    carp(CARP_ERROR, "failed to sort match collection");
+    exit(-1);
+  }
+  
+  //now that the match_collection is sorted, populate the rank of each match object
+  if(!populate_match_rank_match_collection(match_collection, XCORR)){
+    carp(CARP_ERROR, "failed to populate match rank for Xcorr in match_collection");
+    free_match_collection(match_collection);
+    exit(-1);
+  }
+
+  //yes, we have now scored for the match-mode: XCORR
+  match_collection->scored_type[XCORR] = TRUE;
+
   return TRUE;
 }
-*/
 
 /**
  * match_collection get, set method
@@ -490,7 +562,7 @@ MATCH_ITERATOR_T* new_match_iterator(
   
   //set items
   match_iterator->match_collection = match_collection;
-  match_iterator->match_mode = SP;
+  match_iterator->match_mode = score_type;
   match_iterator->match_idx = 0;
   match_iterator->match_total = match_collection->match_total;
 

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.16 $
+ * REVISION: $Revision: 1.17 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -329,7 +329,10 @@ BOOLEAN_T generate_ions_no_modification(
   for(; cleavage_idx < peptide_length; ++cleavage_idx){
     
     //add A ion
-    if(constraint->ion_type == A_ION){
+    if(constraint->ion_type == A_ION 
+       || constraint->ion_type == BYA_ION 
+       || constraint->ion_type == ALL_ION){
+
       //set mass
       mass = mass_matrix[cleavage_idx];
       
@@ -348,7 +351,11 @@ BOOLEAN_T generate_ions_no_modification(
     }
     
     //add B ion
-    if(constraint->ion_type == ALL_ION || constraint->ion_type == B_ION){
+    if(constraint->ion_type == ALL_ION 
+       || constraint->ion_type == BY_ION
+       || constraint->ion_type == BYA_ION
+       || constraint->ion_type == B_ION){
+      
       //set mass
       mass = mass_matrix[cleavage_idx];
       
@@ -360,7 +367,7 @@ BOOLEAN_T generate_ions_no_modification(
     }
     
     //add C ion
-    if(constraint->ion_type == C_ION){
+    if(constraint->ion_type == C_ION || constraint->ion_type == ALL_ION){
       //set mass
       mass = mass_matrix[cleavage_idx];
       
@@ -379,7 +386,7 @@ BOOLEAN_T generate_ions_no_modification(
     }
     
     //add X ion
-    if(constraint->ion_type == X_ION){
+    if(constraint->ion_type == X_ION || constraint->ion_type == ALL_ION){
       //set mass 
       mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[(int)mass_matrix[0] - cleavage_idx];
 
@@ -398,7 +405,11 @@ BOOLEAN_T generate_ions_no_modification(
     }
     
     //add Y ion
-    if(constraint->ion_type == ALL_ION || constraint->ion_type == Y_ION){
+    if(constraint->ion_type == ALL_ION || 
+       constraint->ion_type == BY_ION ||
+       constraint->ion_type == BYA_ION ||
+       constraint->ion_type == Y_ION){
+
       //set mass 
       mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[(int)mass_matrix[0] - cleavage_idx];
       
@@ -418,7 +429,8 @@ BOOLEAN_T generate_ions_no_modification(
     }
     
     //add Z ion
-    if(constraint->ion_type == Z_ION){
+    if(constraint->ion_type == Z_ION ||
+       constraint->ion_type == ALL_ION ){
 
       //set mass 
       mass = mass_matrix[(int)mass_matrix[0]] - mass_matrix[(int)mass_matrix[0] - cleavage_idx];
@@ -980,6 +992,7 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest(
 
 /**
  * modification, sets all fields for sequest Sp scoring settings
+ * make B, Y type ions
  *\returns a new heap allocated ion_constraint
  */
 ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(
@@ -989,11 +1002,11 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(
   ION_CONSTRAINT_T* constraint = NULL;
   //charge = 1;
   if(charge == 1){
-    constraint = new_ion_constraint(MONO, 1,ALL_ION, FALSE);
+    constraint = new_ion_constraint(MONO, 1, BY_ION, FALSE);
   }  
   else{
     --charge;
-    constraint = new_ion_constraint(MONO, charge, ALL_ION, FALSE);
+    constraint = new_ion_constraint(MONO, charge, BY_ION, FALSE);
   }
   
   //set                                                     
@@ -1003,6 +1016,38 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(
   constraint->modifications[NH3] = 0;
   constraint->modifications[H2O] = 0;
   constraint->modifications[ISOTOPE] = 0;
+  constraint->modifications[FLANK] = 0;
+  
+  return constraint;
+}
+
+
+/**
+ * modification, sets all fields for Sequest Xcorr scoring settings
+ * make B, Y, A type ions
+ *\returns a new heap allocated ion_constraint
+ */
+ION_CONSTRAINT_T* new_ion_constraint_sequest_xcorr(
+  int charge ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
+  )
+{
+  ION_CONSTRAINT_T* constraint = NULL;
+  //charge = 1;
+  if(charge == 1){
+    constraint = new_ion_constraint(MONO, 1, BYA_ION, FALSE);
+  }  
+  else{
+    --charge;
+    constraint = new_ion_constraint(MONO, charge, BYA_ION, FALSE);
+  }
+  
+  //set                                                     
+  constraint->use_neutral_losses = TRUE;
+  
+  //set all modifications count for sequest
+  constraint->modifications[NH3] = 1;
+  constraint->modifications[H2O] = 1;
+  constraint->modifications[ISOTOPE] = 0;//not sure
   constraint->modifications[FLANK] = 0;
   
   return constraint;
@@ -1058,8 +1103,15 @@ BOOLEAN_T ion_constraint_is_satisfied(
 
   //check ion type
   if(get_ion_type(ion) != ion_constraint->ion_type &&
-     !((ion_constraint->ion_type == ALL_ION) && 
-       (get_ion_type(ion) == B_ION || get_ion_type(ion) == Y_ION))){
+     
+     !((ion_constraint->ion_type == BY_ION) && 
+       (get_ion_type(ion) == B_ION || get_ion_type(ion) == Y_ION)) &&
+
+     !((ion_constraint->ion_type == BYA_ION) && 
+       (get_ion_type(ion) == B_ION || get_ion_type(ion) == Y_ION || get_ion_type(ion) == A_ION)) &&
+     
+     (ion_constraint->ion_type != ALL_ION)
+     ){
      
     //precursor ion?
     if(!(ion_constraint->precursor_ion && get_ion_type(ion) == P_ION)){
@@ -1241,7 +1293,10 @@ ION_FILTERED_ITERATOR_T* new_ion_filtered_iterator(
   iterator->has_next = FALSE;
 
   //set the working array of ions
-  if(constraint->ion_type == ALL_ION){
+  if(constraint->ion_type == ALL_ION ||
+     constraint->ion_type == BY_ION ||
+     constraint->ion_type == BYA_ION){
+
     iterator->ion_array = ion_series->ions;
     iterator->array_size = ion_series->num_ions;
   }

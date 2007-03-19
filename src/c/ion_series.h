@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -175,6 +175,15 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest(
  */
 ION_CONSTRAINT_T* new_ion_constraint_sequest_sp(
   int max_charge ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
+  );
+
+/**
+ * modification, sets all fields for Sequest Xcorr scoring settings
+ * make B, Y, A type ions
+ *\returns a new heap allocated ion_constraint
+ */
+ION_CONSTRAINT_T* new_ion_constraint_sequest_xcorr(
+  int charge ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
   );
 
 /**

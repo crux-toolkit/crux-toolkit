@@ -118,7 +118,7 @@ int main(int argc, char** argv){
 
  /* Parse the command line */
  if (parse_arguments(argc, argv, 0)) {
-   ION_TYPE_T ion_type = ALL_ION;
+   ION_TYPE_T ion_type = BY_ION;
    BOOLEAN_T use_precursor_ions = FALSE;
    int neutral_loss_count[MAX_MODIFICATIONS];
    BOOLEAN_T is_modification = TRUE;
@@ -144,7 +144,7 @@ int main(int argc, char** argv){
      ion_type = Y_ION;
    }
    else if(strcmp(primary_ions, "by")== 0){
-     ion_type = ALL_ION;
+     ion_type = BY_ION;
    }
    else{
      wrong_command(primary_ions, "primary_ions are b|y|by");

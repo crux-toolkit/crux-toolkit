@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.5 $ 
+ * $Revision: 1.6 $ 
  * \brief Object for given a peptide and a spectrum, generate a perliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -50,6 +50,15 @@ void qsort_match(
  * \returns the difference between sp score in match_a and match_b
  */
 int compare_match_sp(
+  MATCH_T* match_a, ///< the first match -in  
+  MATCH_T* match_b  ///< the scond match -in
+  );
+
+/**
+ * compare two matches, used for qsort
+ * \returns the difference between xcorr score in match_a and match_b
+ */
+int compare_match_xcorr(
   MATCH_T* match_a, ///< the first match -in  
   MATCH_T* match_b  ///< the scond match -in
   );
