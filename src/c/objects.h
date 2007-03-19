@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.31 $
+ * $Revision: 1.32 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -225,8 +225,9 @@ typedef enum _index_type INDEX_TYPE_T;
 
 /**
  * The enum for an ion type (P_ion is the precursor ion)
+ * BY_ION(B & Y ion), BYA_ION(B & Y & A ion)
  */
-enum _ion_type {A_ION, B_ION, C_ION, X_ION, Y_ION, Z_ION, P_ION, ALL_ION};
+enum _ion_type {A_ION, B_ION, C_ION, X_ION, Y_ION, Z_ION, P_ION, BY_ION, BYA_ION, ALL_ION};
 
 /**
  * \typedef ION_TYPE_T

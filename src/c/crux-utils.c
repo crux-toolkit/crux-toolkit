@@ -137,7 +137,7 @@ char** parse_filename_path(char* file){
   char** result = (char**)mycalloc(2, sizeof(char*));
 
   for(; end_idx > 0; --end_idx){
-    if(strcmp(&file[end_idx - 1], "/") == 0){
+    if(strncmp(&file[end_idx - 1], "/", 1) == 0){
       end_path = end_idx;
       break;
     }
@@ -298,6 +298,12 @@ char* generate_name(
   return name;
 }
 
+/***
+ *
+ */
+
+
+
 /**
  * checks if each AA is an AA
  *\returns TRUE if sequence is valid else, FALSE
@@ -312,6 +318,7 @@ BOOLEAN_T valid_peptide_sequence( char* sequence){
   }
   return TRUE;
 }
+
 
 void swap_quick(
   float* a,

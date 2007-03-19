@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -269,9 +269,10 @@ INDEX_T* set_new_index(
   char** filename_and_path = NULL;
   char* working_dir = NULL;
   filename_and_path = parse_filename_path(fasta_filename);
-  working_dir = generate_directory_name(filename_and_path[0]);
+  working_dir = generate_directory_name(fasta_filename); //filename_and_path[0]);
   DIR* check_dir = NULL;
   
+  /*
   //check if the index files are on disk
   //are we currently in the crux dircetory
   if(filename_and_path[1] == NULL){
@@ -291,6 +292,13 @@ INDEX_T* set_new_index(
       set_index_on_disk(index, FALSE);
     }
     free(full_path);
+  }
+  */
+  if((check_dir = opendir(working_dir)) != NULL){
+    set_index_on_disk(index, TRUE);
+  }
+  else{
+    set_index_on_disk(index, FALSE);
   }
 
   //set each field
@@ -1525,6 +1533,9 @@ BOOLEAN_T parse_crux_index_map(
       }
       //add all index_files that are with in peptide constraint mass interval
       else if(max_mass > (start_mass - 0.0001)){
+
+        printf("index file to read: %s\n", filename);
+
         if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
           carp(CARP_WARNING, "failed to add index file");
           free(new_line);
