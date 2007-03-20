@@ -81,7 +81,7 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. sp",
+    "The type of scoring function to use. sp | xcorr",
     (void *) &score_type, 
     STRING_ARG);
 
@@ -151,6 +151,9 @@ int main(int argc, char** argv){
     if(strcmp(get_string_parameter_pointer("score-type"), "sp")== 0){
       main_score = SP;
     }
+    else if(strcmp(get_string_parameter_pointer("score-type"), "xcorr")== 0){
+      main_score = XCORR;
+    }
     else{
       wrong_command(score_type, "The type of scoring function to use. sp");
     }
@@ -183,7 +186,7 @@ int main(int argc, char** argv){
     }
 
     //get match collection with perlim match collection
-    match_collection = new_match_collection_spectrum(spectrum, charge, 500, perlim_score);
+    match_collection = new_match_collection_spectrum(spectrum, charge, 500, main_score);
     
     //later add scoring for main_score here!
 
@@ -193,7 +196,7 @@ int main(int argc, char** argv){
     //iterate over all matches
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
-      print_match(match, stdout, TRUE, SP);
+      print_match(match, stdout, TRUE, main_score);
     }
 
     //free match iterator

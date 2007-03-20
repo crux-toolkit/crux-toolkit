@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1861,7 +1861,8 @@ BOOLEAN_T fast_forward_index_file(
       fread(&num_peptide_src, sizeof(int), 1, file);
       //skip the number of peptide src in the file to reach the start
       //of the next peptide
-      fseek(file, num_peptide_src*(sizeof(int) + get_peptide_src_sizeof()), SEEK_CUR);
+      // skip #peptide src* ((int) # protein  + (PEPTIDE_TYPE_T) + (int) # start index) 
+      fseek(file, num_peptide_src*(sizeof(int)*2 + sizeof(PEPTIDE_TYPE_T)), SEEK_CUR);
       continue;
     }
     //ok now we finally got the peptide
