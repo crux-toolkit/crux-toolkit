@@ -69,7 +69,7 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. sp",
+    "The type of scoring function to use. sp | xcorr",
     (void *) &type, 
     STRING_ARG);
 
@@ -129,7 +129,7 @@ int main(int argc, char** argv){
     //parse and update parameters
     parse_update_parameters(parameter_file);
     
-
+    
     peptide_charge = get_int_parameter("charge", peptide_charge);
     
     if( peptide_charge < 1 || peptide_charge > 3){
@@ -145,41 +145,51 @@ int main(int argc, char** argv){
     if(strcmp(get_string_parameter_pointer("score-type"), "sp")== 0){
       score_type = SP;
     }
+    else if(strcmp(get_string_parameter_pointer("score-type"), "xcorr")== 0){
+      score_type = XCORR;
+    }
     else{
-      wrong_command(type, "The type of scoring function to use. sp");
+      wrong_command(type, "The type of scoring function to use. sp | xcorr");
     }
     
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
-
-    //set ion constraint to sequest settings
-    ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
     
+    //set ion constraint to sequest settings
+    ION_CONSTRAINT_T* ion_constraint = NULL;
+    
+    if(score_type == SP){
+      ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
+      //create new scorer
+      scorer = new_scorer(SP);  
+    }
+    else if(score_type == XCORR){
+      ion_constraint = new_ion_constraint_sequest_xcorr(peptide_charge);  
+      scorer = new_scorer(XCORR);  
+    }
+
     //create new ion series
     ion_series = new_ion_series(peptide_sequence, peptide_charge, ion_constraint);
    
    //now predict ions
-   predict_ions(ion_series);
+    predict_ions(ion_series);
    
    //read ms2 file
-   collection = new_spectrum_collection(ms2_file);
-   spectrum = allocate_spectrum();
-   
-   //search for spectrum with correct scan number
-   if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
-     carp(CARP_WARNING, "failed to find spectrum with  scan_num: %d", scan_num);
-     free_ion_constraint(ion_constraint);
-     free_ion_series(ion_series);
-     free_spectrum_collection(collection);
-     free_spectrum(spectrum);
-     exit(1);
-   }
-
-   //create new scorer
-   scorer = new_scorer(SP);  
-   
-   //calculates the Sp score
-   score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+    collection = new_spectrum_collection(ms2_file);
+    spectrum = allocate_spectrum();
+    
+    //search for spectrum with correct scan number
+    if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
+      carp(CARP_WARNING, "failed to find spectrum with  scan_num: %d", scan_num);
+      free_ion_constraint(ion_constraint);
+      free_ion_series(ion_series);
+      free_spectrum_collection(collection);
+      free_spectrum(spectrum);
+      exit(1);
+    }
+        
+    //calculates the Sp score
+    score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
    
    //print the Sp score
    printf("Sp score is: %.2f\n", score);

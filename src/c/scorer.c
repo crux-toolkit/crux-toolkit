@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.16 $
+ * REVISION: $Revision: 1.17 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -739,7 +739,7 @@ BOOLEAN_T create_intensity_array_observed(
   float peak_location = 0;
   int mz = 0;
   float intensity = 0;
-  //float bin_width = bin_width_mono;
+  float bin_width = bin_width_mono;
   float precursor_mz = get_spectrum_precursor_mz(spectrum);
   float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge",2) + 50;
 
@@ -772,7 +772,7 @@ BOOLEAN_T create_intensity_array_observed(
     }
     
     //map peak location to bin
-    mz = (int)(peak_location + 0.5);
+    mz = (int)(peak_location / bin_width + 0.5);
     region = mz / region_selector;
 
     //don't let index beyond array
@@ -818,6 +818,7 @@ BOOLEAN_T create_intensity_array_theoretical(
   ION_T* ion = NULL;
   int intensity_array_idx = 0;
   ION_TYPE_T ion_type;
+  float bin_width = bin_width_mono;
 
   //create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
@@ -825,7 +826,7 @@ BOOLEAN_T create_intensity_array_theoretical(
   //while there are ion's in ion iterator, add matched observed peak intensity
   while(ion_iterator_has_next(ion_iterator)){
     ion = ion_iterator_next(ion_iterator);
-    intensity_array_idx = (int)(get_ion_mass_z(ion) + 0.5);
+    intensity_array_idx = (int)(get_ion_mass_z(ion) / bin_width + 0.5);
     ion_type = get_ion_type(ion);
 
     //skip ions that are located beyond max mz limit
@@ -841,9 +842,11 @@ BOOLEAN_T create_intensity_array_theoretical(
       if(ion_is_modified(ion)){
         //Add peaks of intensity of 10.0 for neutral loss of H2O, ammonia.
         //In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each neutral loss.
+        /*
         add_intensity(theoretical, intensity_array_idx, 10);
         add_intensity(theoretical, intensity_array_idx + 1, 10);
         add_intensity(theoretical, intensity_array_idx - 1, 10);
+        */
       }
       else{
         //Add peaks of intensity 50.0 for B, Y type ions. 
@@ -858,9 +861,11 @@ BOOLEAN_T create_intensity_array_theoretical(
     else if(ion_type == A_ION){
       //Add peaks of intensity 10.0 for A type ions. 
       //In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each A type ion.
+      /*
       add_intensity(theoretical, intensity_array_idx, 10);
       add_intensity(theoretical, intensity_array_idx + 1, 10);
       add_intensity(theoretical, intensity_array_idx - 1, 10);
+      */
     }
     else{//ERROR!, only should create B, Y, A type ions for xcorr theoreical 
       carp(CARP_ERROR, "only should create B, Y, A type ions for xcorr theoreical spectrum");
@@ -925,6 +930,33 @@ float cross_correlation(
   int observed_idx = 0;
   int theoretical_idx = 0;
   float* observed = scorer->observed;
+
+
+
+  int i;
+  float sx,sy,mx, my,denom;
+  
+  /* Calculate the mean of the two series x[], y[] */
+  mx = 0;
+  my = 0;
+
+  for (i=0;i<size;i++) {
+    mx += observed[i];
+    my += theoretical[i];
+  }
+  mx /= size;
+  my /= size;
+
+
+  /* Calculate the denominator */
+  sx = 0;
+  sy = 0;
+  for (i=0;i<size;i++) {
+    sx += ((observed[i] - mx) * (observed[i] - mx));
+    sy += ((theoretical[i] - my) * (theoretical[i] - my));
+  }
+  denom = sqrt(sx*sy);
+
   
   //perform cross_correlation from -max_offset to +max_offset
   for(; delay < max_offset; ++delay){
@@ -941,9 +973,12 @@ float cross_correlation(
         continue;
       }
       else{
-        one_offset_score += observed[observed_idx] * theoretical[theoretical_idx];
+        one_offset_score += ((observed[observed_idx] - mx) * (theoretical[theoretical_idx] - my));
       }      
     }
+
+    one_offset_score /= denom;
+
     //add to total score
     total_score += one_offset_score;
     
@@ -956,7 +991,7 @@ float cross_correlation(
   carp(CARP_INFO, "score_at_zero: %.2f, total_score: %.2f", score_at_zero, total_score);
 
 
-  return score_at_zero - (total_score / (2 * max_offset));
+  return (score_at_zero - (total_score / (2 * max_offset)));
 }
 
 /**
