@@ -46,7 +46,7 @@ int main(int argc, char** argv){
   //optional
   int charge = 2;
   char* perlim_score_type = "sp";
-  char* score_type = "sp";
+  char* score_type = "xcorr";
   char* parameter_file = NULL;
   int verbosity = CARP_ERROR;
   
@@ -119,7 +119,7 @@ int main(int argc, char** argv){
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
     //parse arguments
-    SCORER_TYPE_T main_score = SP; 
+    SCORER_TYPE_T main_score = XCORR; 
     SCORER_TYPE_T perlim_score = SP; 
     
     SPECTRUM_T* spectrum = NULL;
