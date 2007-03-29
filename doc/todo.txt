@@ -1,0 +1,11 @@
+#------------
+# Pending modifications to crux
+#------------
+
+- all executable options (--option) should have dashes rather than underscores
+- the crux index info file should have text (e.g. for peptide type) rather than numbers
+  in general, it should be human interpretable. if you'd like to have another separate file that is
+  more machine interpretable, that's fine too.
+- executables that use an index should default to the parameter values in the index, 
+  unless a parameter in the parameter file or on the command line contradicts the index parameters,
+  in which case it should error out
