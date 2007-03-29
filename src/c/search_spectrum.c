@@ -127,7 +127,8 @@ int main(int argc, char** argv){
     MATCH_COLLECTION_T* match_collection = NULL;
     MATCH_ITERATOR_T* match_iterator = NULL;
     MATCH_T* match = NULL;
-    
+    unsigned int max_rank = 500;
+
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
@@ -165,14 +166,29 @@ int main(int argc, char** argv){
     else{
       wrong_command(perlim_score_type, "The type of perliminary scoring function to use. sp");
     }
+    
+    //set max number of matches to return
+    if(main_score == SP){
+      //return all matches
+      max_rank = _MAX_NUMBER_PEPTIDES;
+    }
+    else if(main_score == XCORR){
+      // keep top 500 from SP to xcorr
+      max_rank = 500;
+    }
+    else{
+      //default 500
+      max_rank = 500;
+    }
 
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
  
-    //print header
+    //print header 1/2
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
-    fprintf(stdout, "# SCAN NUMBER: %d\n", scan_num);
     fprintf(stdout, "# PROTEIN DATABASE: %s\n", fasta_file);
+    fprintf(stdout, "# SPECTRUM SCAN NUMBER: %d\n", scan_num);
+
 
     //read ms2 file
     collection = new_spectrum_collection(ms2_file);
@@ -185,13 +201,27 @@ int main(int argc, char** argv){
       exit(1);
     }
 
+    //print header 2/2
+    fprintf(stdout, "# SPECTRUM ID NUMBER: %d\n", get_spectrum_id(spectrum));
+    fprintf(stdout, "# SPECTRUM PRECURSOR m/z: %.2f\n", get_spectrum_precursor_mz(spectrum));
+    fprintf(stdout, "# SPECTRUM CHARGE: %d\n", charge);
+
+    
     //get match collection with perlim match collection
-    match_collection = new_match_collection_spectrum(spectrum, charge, 500, main_score);
+    match_collection = new_match_collection_spectrum(spectrum, charge, max_rank, main_score);
     
     //later add scoring for main_score here!
 
     //create match iterator, TRUE: return match in sorted order of main_score type
     match_iterator = new_match_iterator(match_collection, main_score, TRUE);
+
+    //print header
+    if(main_score == SP){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\n", "sp_rank", "mass", "sp", "sequence");  
+    }
+    else if( main_score == XCORR){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  
+    }
 
     //iterate over all matches
     while(match_iterator_has_next(match_iterator)){

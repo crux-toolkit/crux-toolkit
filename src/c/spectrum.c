@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.34 $
+ * REVISION: $Revision: 1.35 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -18,12 +18,15 @@
 #include "mass.h"
 #include "parameter.h"
 #include "scorer.h"
+#include "carp.h"
 
 /**
  * \define constants
  */
 #define MAX_PEAKS 4000
 #define MAX_CHARGE 2
+#define MAX_I_LINES 2 //number of 'I' lines alb eto parse for one spectrum object
+#define MAX_D_LINES 2 //number of 'D' lines alb eto parse for one spectrum object
 
 /**
  * \struct spectrum 
@@ -59,13 +62,8 @@ struct spectrum {
   int               num_peaks;     ///< The number of peaks
   double            total_energy;  ///< The sum of intensities in all peaks
   char*             filename;      ///< Optional filename
-
-  //spectrum scoring fields, all these fields are valid only after make sum array
-  //BOOLEAN_T         sum_array_exist; ///< does the sum array exist?
-  //float*            intensity_sum_array; ///< intesity sum array used for 
-  //float             sp_sum_resolution;  ///< the resolution of the intesity sum, the closure of which the array was created  
-  float             max_intensity;   ///< the maximum intensity of peaks, only valid after sum array is created
-  BOOLEAN_T         ready_for_sp; ///< has this spectrum been processed for SP?
+  char*             i_lines[MAX_I_LINES]; ///< store i lines, upto MAX_I_LINES
+  char*             d_lines[MAX_D_LINES]; ///< store d lines, upto MAX_D_LINES 
 };    
 
 /**
@@ -97,6 +95,24 @@ BOOLEAN_T parse_Z_line(
 );
 
 /*
+ * Parses the 'D' line of the a spectrum
+ * \returns TRUE if success. FALSE is failure.
+ */
+BOOLEAN_T parse_D_line(
+  SPECTRUM_T* spectrum, ///< place D line into this spectrum -out  
+  char* line  ///< 'D' line to parse -in
+);
+
+/*
+ * Parses the 'I' line of the a spectrum
+ * \returns TRUE if success. FALSE is failure.
+ */
+BOOLEAN_T parse_I_line(
+  SPECTRUM_T* spectrum, ///< place I line into this spectrum -out  
+  char* line  ///< 'I' line to parse -in
+);
+
+/*
  * Adds a possible charge(z) to the spectrum.
  * Must not exceed the MAX_CHARGE capacity
  */
@@ -109,11 +125,21 @@ BOOLEAN_T add_possible_z(
  * \returns An (empty) spectrum object.
  */
 SPECTRUM_T* allocate_spectrum(void){
+  int line_idx;
   SPECTRUM_T* fresh_spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
   fresh_spectrum->possible_z = (int*)mymalloc(sizeof(int) * MAX_CHARGE);
   fresh_spectrum->peaks = allocate_peak_array(MAX_PEAKS);
-  //fresh_spectrum->sum_array_exist = FALSE;
-  fresh_spectrum->ready_for_sp = FALSE;
+  
+  //initialize D lines
+  for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
+    fresh_spectrum->d_lines[line_idx] = NULL;
+  }
+
+  //initialize I lines
+  for(line_idx = 0; line_idx < MAX_I_LINES; ++line_idx){
+    fresh_spectrum->i_lines[line_idx] = NULL;
+  }
+  
   return fresh_spectrum;
 }
 
@@ -148,10 +174,31 @@ void free_spectrum (
   SPECTRUM_T* spectrum ///< the spectrum to free -in
 )
 {
+  int line_idx;
   free(spectrum->possible_z);
   free(spectrum->filename);
   free(spectrum->peaks);
-  //free(spectrum->intensity_sum_array);
+
+  //free D lines
+  for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
+    if(spectrum->d_lines[line_idx] != NULL){
+      free(spectrum->d_lines[line_idx]);
+    }
+    else{
+      break;
+    }
+  }
+  
+  //free I lines
+  for(line_idx = 0; line_idx < MAX_I_LINES; ++line_idx){
+    if(spectrum->i_lines[line_idx] != NULL){
+      free(spectrum->i_lines[line_idx]);
+    }
+    else{
+      break;
+    }
+  }
+  
   free(spectrum);
 }
 
@@ -165,6 +212,8 @@ void print_spectrum(
   )
 {
   int num_z_index = 0;
+  int num_d_index = 0;
+  int num_i_index = 0;
   int num_peak_index = 0;
 
   fprintf(file, "Filename: %s\n", spectrum->filename);
@@ -172,12 +221,33 @@ void print_spectrum(
          spectrum->first_scan,
          spectrum->last_scan,
          spectrum->precursor_mz);
-  //print 'Z' line
+
+  //print 'I' line
+  for(; num_i_index < MAX_I_LINES; ++num_i_index){
+    if(spectrum->i_lines[num_i_index] == NULL){
+      break;
+    }
+
+    fprintf(file, "%s", spectrum->i_lines[num_i_index]);
+  }
+  
+  //print 'Z', 'D' line
   for(; num_z_index < spectrum->num_possible_z; ++num_z_index){
+
+    //print 'Z' line
     fprintf(file, "Z\t%d\t%.2f\n", spectrum->possible_z[num_z_index],
             get_spectrum_singly_charged_mass(spectrum,
                                              spectrum->possible_z[num_z_index]));
+
+    //are there any 'D' lines to print?
+    if(num_d_index < MAX_D_LINES){
+      if(spectrum->d_lines[num_d_index] != NULL){
+        fprintf(file, "%s", spectrum->d_lines[num_d_index]);
+      }
+      ++num_d_index;
+    }
   }
+  
   //print peaks
   for(; num_peak_index < spectrum->num_peaks; ++num_peak_index){
     fprintf(file, "%.1f %.1f\n", 
@@ -209,6 +279,7 @@ void copy_spectrum(
   int num_peak_index = 0;
   int* possible_z;
   char* new_filename;
+  int line_idx;
 
   //copy each varible
   set_spectrum_first_scan(dest,get_spectrum_first_scan(src));
@@ -228,6 +299,26 @@ void copy_spectrum(
   set_spectrum_filename(dest, new_filename);
   free(new_filename);
   
+  //copy 'D', 'I' lines
+  for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
+    if(src->d_lines[line_idx] != NULL){
+      dest->d_lines[line_idx] = my_copy_string(src->d_lines[line_idx]);
+    }
+    else{
+      break;
+    }
+  }
+  
+  //copy 'D', 'I' lines
+  for(line_idx = 0; line_idx < MAX_I_LINES; ++line_idx){
+    if(src->i_lines[line_idx] != NULL){
+      dest->i_lines[line_idx] = my_copy_string(src->i_lines[line_idx]);
+    }
+    else{
+      break;
+    }
+  }
+
   //copy each peak
   for(; num_peak_index < get_spectrum_num_peaks(src); ++num_peak_index){
     add_peak_to_spectrum(dest, get_peak_intensity(find_peak(src->peaks, num_peak_index)),
@@ -238,8 +329,9 @@ void copy_spectrum(
 /**
  * Parses a spectrum from file.
  * \returns TRUE if success. FALSE is failure.
+ * 'I'
  * Skips Header line "H"
- * FIXME if need to read 'H','I' header line, does not parse ID
+ * FIXME if need to read 'H', header line, does not parse ID
  */
 BOOLEAN_T parse_spectrum_file(
   SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
@@ -292,6 +384,23 @@ BOOLEAN_T parse_spectrum_file(
         break; //File format incorrect
       }
     }
+
+    // Reads the 'D' line 
+    else if(new_line[0] == 'D'){
+      if(!parse_D_line(spectrum, new_line)){
+        file_format = FALSE;
+        break; //File format incorrect
+      }
+    }
+
+    // Reads the 'I' line 
+    else if(new_line[0] == 'I'){
+      if(!parse_I_line(spectrum, new_line)){
+        file_format = FALSE;
+        break; //File format incorrect
+      }
+    }
+    
     // Stops, when encounters the start of next spectrum 'S' line
     else if(new_line[0] == 'S' && start_add_peaks){ //start of next spectrum
       break;
@@ -348,133 +457,206 @@ BOOLEAN_T parse_spectrum_file(
   if(!file_format){ 
     fprintf(stderr, "incorrect file format\n");
     return FALSE;
+   }
+   return TRUE;
+ }
+
+ /**
+  * Parses the 'S' line of the a spectrum
+  * \returns TRUE if success. FALSE is failure.
+  * 
+  */
+ BOOLEAN_T parse_S_line(
+   SPECTRUM_T* spectrum, ///< place S line into this spectrum -out 
+   char* line, ///< 'S' line to parse -in
+   int buf_length ///< line length -in
+   )
+ {
+   char spliced_line[buf_length];
+   int line_index = 0;
+   int spliced_line_index = 0;
+   int first_scan;
+   int last_scan;
+   float precursor_mz;
+   float test_float;
+   char test_char;
+
+   //deletes empty space & 0
+   while((line[line_index] !='\0') && 
+         (line[line_index] == 'S' || 
+          line[line_index] == '\t'||
+          line[line_index] == ' ' || 
+          line[line_index] == '0')){
+     ++line_index;
+   }
+   // reads in line value
+   while(line[line_index] !='\0' && 
+         line[line_index] != ' ' && 
+         line[line_index] != '\t'){
+     spliced_line[spliced_line_index] =  line[line_index];
+     ++spliced_line_index;
+     ++line_index;
+   }
+   spliced_line[spliced_line_index] =  line[line_index];
+   ++spliced_line_index;
+   ++line_index;
+   //deletes empty space & zeros
+   while((line[line_index] !='\0') && 
+         (line[line_index] == '\t' || 
+          line[line_index] == ' ' || 
+          line[line_index] == '0')){
+     ++line_index;
+   }
+   // read last scan & precursor m/z
+   while(line[line_index] !='\0'){
+     spliced_line[spliced_line_index] =  line[line_index];
+     ++spliced_line_index;
+     ++line_index;
+   }
+   spliced_line[spliced_line_index] = '\0';
+
+   // check if S line is in correct format
+   if ( (sscanf(spliced_line,"%f %f %f %f",//test format:S line has more than 3 fields
+                &test_float, &test_float, &test_float, &test_float) > 3) ||
+        (sscanf(spliced_line,"%f %f %f %c",//test format:S line has more than 3 fields 
+                &test_float, &test_float, &test_float, &test_char) > 3) ||
+        (sscanf(spliced_line,"%i %i %f", // S line is parsed here
+               &first_scan, &last_scan, &precursor_mz) != 3)) {
+     fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
+     return FALSE;
+   }
+   set_spectrum_first_scan( spectrum, first_scan);
+   set_spectrum_last_scan( spectrum, last_scan);
+   set_spectrum_precursor_mz( spectrum, precursor_mz);
+
+   return TRUE;
+ }
+
+ /**
+  * Parses the 'Z' line of the a spectrum
+  * \returns TRUE if success. FALSE is failure.
+  * 
+  */
+ BOOLEAN_T parse_Z_line(
+   SPECTRUM_T* spectrum, ///< place Z line into this spectrum -out  
+   char* line  ///< 'Z' line to parse -in
+   )
+ {
+   int tokens;
+   char line_name;
+   int charge;
+   float m_h_plus;
+   float test_float;
+   char test_char;
+
+   // check if Z line is in correct format
+   if( ((tokens =  // test format: Z line has less than 3 fields
+         sscanf(line, "%c %f %f", &test_char, &test_float, &test_float)) < 3) ||
+       ((tokens =   //test format: Z line has more than 3 fields
+         sscanf(line, "%c %f %f %f", &test_char, &test_float, &test_float, &test_float)) >  3) ||
+       ((tokens =  // test format: Z line has more than 3 fields
+         sscanf(line, "%c %f %f %c", &test_char, &test_float, &test_float, &test_char)) >  3) ||
+       (tokens = // Z line is parsed here
+        sscanf(line, "%c %d %f", &line_name, &charge, &m_h_plus)) != 3){
+     fprintf(stderr,"Failed to parse 'Z' line:\n %s",line);
+     return FALSE;
+   }  
+
+   return add_possible_z(spectrum, charge);
+ }
+
+ /**
+  * Adds a possible charge(z) to the spectrum.
+  * Must not exceed the MAX_CHARGE capacity
+  */
+ BOOLEAN_T add_possible_z(
+   SPECTRUM_T* spectrum,  ///< place Z line into this spectrum -out   
+   int charge  ///< charge to add
+   )
+ {
+   int* possible_charge = (int *)mymalloc(sizeof(int));
+   *possible_charge = charge;
+   if(spectrum->num_possible_z < MAX_CHARGE){ // change to dynamic sometime...
+     spectrum->possible_z[spectrum->num_possible_z] = *possible_charge; 
+     ++spectrum->num_possible_z;
+     free(possible_charge);
+     return TRUE;
+   }
+   free(possible_charge);
+   return FALSE;
+ }
+
+
+ /**
+  * FIXME currently does not parse D line, just copies the entire line
+  * Parses the 'D' line of the a spectrum
+  * \returns TRUE if success. FALSE is failure.
+  */
+ BOOLEAN_T parse_D_line(
+   SPECTRUM_T* spectrum, ///< place D line into this spectrum -out  
+   char* line  ///< 'D' line to parse -in
+   )
+ {
+   int line_idx;
+   int length = strlen(line)+1;
+   char* d_line = (char*)mycalloc(length, sizeof(char));
+
+   strncpy(d_line, line, length-3);
+   d_line[length-2] = '\0';
+   d_line[length-3] = '\n';
+   
+   //find empty spot D lines
+   for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
+     //check for empty space
+     if(spectrum->d_lines[line_idx] == NULL){
+       spectrum->d_lines[line_idx] = d_line;
+       break;
+     }
+   }
+
+   //check if added new d line to spectrum
+   if(line_idx == MAX_D_LINES){
+     free(d_line);
+     carp(CARP_WARNING, "no more space for additional D lines, max: %d", MAX_D_LINES);
+   }
+
+   return TRUE;
+ }
+
+ /**
+  * FIXME currently does not parse I line, just copies the entire line
+  * Parses the 'I' line of the a spectrum
+  * \returns TRUE if success. FALSE is failure.
+  */
+ BOOLEAN_T parse_I_line(
+   SPECTRUM_T* spectrum, ///< place I line into this spectrum -out  
+   char* line  ///< 'I' line to parse -in
+   )
+ {
+   int line_idx;
+   int length = strlen(line)+1;
+   char* i_line = (char*)mycalloc(length, sizeof(char));
+
+   strncpy(i_line, line, length-3);
+   i_line[length-2] = '\0';
+   i_line[length-3] = '\n';
+
+  //find empty spot I lines
+  for(line_idx = 0; line_idx < MAX_I_LINES; ++line_idx){
+    //check for empty space
+    if(spectrum->i_lines[line_idx] == NULL){
+      spectrum->i_lines[line_idx] = i_line;
+      break;
+    }
   }
+
+  //check if added new i line to spectrum
+  if(line_idx == MAX_I_LINES){
+    free(i_line);
+    carp(CARP_WARNING, "no more space for additional I lines, max: %d", MAX_I_LINES);
+  }
+
   return TRUE;
-}
-
-/**
- * Parses the 'S' line of the a spectrum
- * \returns TRUE if success. FALSE is failure.
- * 
- */
-BOOLEAN_T parse_S_line(
-  SPECTRUM_T* spectrum, ///< place S line into this spectrum -out 
-  char* line, ///< 'S' line to parse -in
-  int buf_length ///< line length -in
-  )
-{
-  char spliced_line[buf_length];
-  int line_index = 0;
-  int spliced_line_index = 0;
-  int first_scan;
-  int last_scan;
-  float precursor_mz;
-  float test_float;
-  char test_char;
-
-  //deletes empty space & 0
-  while((line[line_index] !='\0') && 
-        (line[line_index] == 'S' || 
-         line[line_index] == '\t'||
-         line[line_index] == ' ' || 
-         line[line_index] == '0')){
-    ++line_index;
-  }
-  // reads in line value
-  while(line[line_index] !='\0' && 
-        line[line_index] != ' ' && 
-        line[line_index] != '\t'){
-    spliced_line[spliced_line_index] =  line[line_index];
-    ++spliced_line_index;
-    ++line_index;
-  }
-  spliced_line[spliced_line_index] =  line[line_index];
-  ++spliced_line_index;
-  ++line_index;
-  //deletes empty space & zeros
-  while((line[line_index] !='\0') && 
-        (line[line_index] == '\t' || 
-         line[line_index] == ' ' || 
-         line[line_index] == '0')){
-    ++line_index;
-  }
-  // read last scan & precursor m/z
-  while(line[line_index] !='\0'){
-    spliced_line[spliced_line_index] =  line[line_index];
-    ++spliced_line_index;
-    ++line_index;
-  }
-  spliced_line[spliced_line_index] = '\0';
-  
-  // check if S line is in correct format
-  if ( (sscanf(spliced_line,"%f %f %f %f",//test format:S line has more than 3 fields
-               &test_float, &test_float, &test_float, &test_float) > 3) ||
-       (sscanf(spliced_line,"%f %f %f %c",//test format:S line has more than 3 fields 
-               &test_float, &test_float, &test_float, &test_char) > 3) ||
-       (sscanf(spliced_line,"%i %i %f", // S line is parsed here
-              &first_scan, &last_scan, &precursor_mz) != 3)) {
-    fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
-    return FALSE;
-  }
-  set_spectrum_first_scan( spectrum, first_scan);
-  set_spectrum_last_scan( spectrum, last_scan);
-  set_spectrum_precursor_mz( spectrum, precursor_mz);
-  
-  return TRUE;
-}
-
-/**
- * Parses the 'Z' line of the a spectrum
- * \returns TRUE if success. FALSE is failure.
- * 
- */
-BOOLEAN_T parse_Z_line(
-  SPECTRUM_T* spectrum, ///< place Z line into this spectrum -out  
-  char* line  ///< 'Z' line to parse -in
-  )
-{
-  int tokens;
-  char line_name;
-  int charge;
-  float m_h_plus;
-  float test_float;
-  char test_char;
-
-  // check if Z line is in correct format
-  if( ((tokens =  // test format: Z line has less than 3 fields
-        sscanf(line, "%c %f %f", &test_char, &test_float, &test_float)) < 3) ||
-      ((tokens =   //test format: Z line has more than 3 fields
-        sscanf(line, "%c %f %f %f", &test_char, &test_float, &test_float, &test_float)) >  3) ||
-      ((tokens =  // test format: Z line has more than 3 fields
-        sscanf(line, "%c %f %f %c", &test_char, &test_float, &test_float, &test_char)) >  3) ||
-      (tokens = // Z line is parsed here
-       sscanf(line, "%c %d %f", &line_name, &charge, &m_h_plus)) != 3){
-    fprintf(stderr,"Failed to parse 'Z' line:\n %s",line);
-    return FALSE;
-  }  
-
-  return add_possible_z(spectrum, charge);
-}
-
-/**
- * Adds a possible charge(z) to the spectrum.
- * Must not exceed the MAX_CHARGE capacity
- */
-BOOLEAN_T add_possible_z(
-  SPECTRUM_T* spectrum,  ///< place Z line into this spectrum -out   
-  int charge  ///< charge to add
-  )
-{
-  int* possible_charge = (int *)mymalloc(sizeof(int));
-  *possible_charge = charge;
-  if(spectrum->num_possible_z < MAX_CHARGE){ // change to dynamic sometime...
-    spectrum->possible_z[spectrum->num_possible_z] = *possible_charge; 
-    ++spectrum->num_possible_z;
-    free(possible_charge);
-    return TRUE;
-  }
-  free(possible_charge);
-  return FALSE;
 }
 
 /**
@@ -852,23 +1034,6 @@ float get_spectrum_max_peak_intensity(
 
 
 /**
- * Only should be used after process spectrum, other times use get_spectrum_max_peak_intensity
- * \returns The intensity of the peak with the maximum intensity.
- */
-float get_spectrum_max_intensity(
-  SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
-  )
-{ 
-  // check if max_intensity value is valid
-  if(!spectrum->ready_for_sp){
-    carp(CARP_ERROR, "cannot use max_intensity must first process spectrum");
-    exit(1);
-  }
-  
-  return spectrum->max_intensity;
-}
-
-/**
  * \returns The mass of the charged precursor ion, according to the formula 
  * mass = m/z * charge
  */
@@ -956,182 +1121,6 @@ PEAK_T* peak_iterator_next(
 }
 
 
-
-/******************************************************************
- * The scoring relating methods
- ******************************************************************/
-
-
-/**
- * For SP!
- * Adds a peak to the spectrum given a intensity and location, if
- * the peak has a unique m/z, if not, sets the peak with the same m/z with the
- * largest intensity. Thus, only one peak per m/z
- * In spectrum fields, only updates the num peaks, other fields are left unchanged
- */
-BOOLEAN_T add_or_update_peak_to_spectrum_for_sp(
-  SPECTRUM_T* spectrum,///< spectrum to add the peak to -out 
-  float intensity, ///< the intensity of peak to add -in
-  int location_mz ///< the location of peak to add -in
-  )
-{
-  PEAK_T* prior_peak = NULL;
-  
-  if(spectrum->num_peaks < MAX_PEAKS){  //FIXME someday change it to be dynamic
-    //check if only there are any prior peaks added
-    if(spectrum->num_peaks > 0){
-      prior_peak = find_peak(spectrum->peaks, spectrum->num_peaks-1);
-      
-      //there is a peak with same m/z
-      if((int)get_peak_location(prior_peak) == location_mz){
-        //if peak's intensity is smaller than the new intensity, replace with new intensity
-        if(get_peak_intensity(prior_peak) < intensity){
-          set_peak_intensity(prior_peak, intensity);
-        }
-        return TRUE;
-      }
-    }
-        
-    set_peak_intensity(find_peak(spectrum->peaks, spectrum->num_peaks), intensity);
-    set_peak_location(find_peak(spectrum->peaks, spectrum->num_peaks), location_mz);
-    ++spectrum->num_peaks;
-    return TRUE;
-  }
-  
-  return FALSE;
-}
-
-/**
- * Copies spectrum object src to dest.
- * must pass in a memory allocated SPECTRUM_T* dest
- * excludes peaks that are 15u around the precuros ion and larger than 50+experimental mass
- * Square roots all the intensity
- * sets the maximum_peak_intensity field, rounds all peak location to nearest int 
- */
-void copy_spectrum_for_sp(
-  SPECTRUM_T* src, ///< the source spectrum -in
-  SPECTRUM_T* dest ///< the destination spectrum -out
-  )
-{
-  int num_peak_index = 0;
-  int* possible_z;
-  char* new_filename;
-
-  //FIXME...might not be correct!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  float experimental_mass_cut_off = get_spectrum_precursor_mz(src)*src->possible_z[0] + 50;
-
-  //FIXME maybe add 0.5
-  int precursor_mz = (int)(get_spectrum_precursor_mz(src)+0.5);
-  float max_intensity = 0;
-  float working_intensity = 0;
-  float peak_location = 0;
-  int working_location = 0;
-
-  //copy necessary varibles
-  set_spectrum_spectrum_type(dest,get_spectrum_spectrum_type(src));
-  set_spectrum_precursor_mz(dest, precursor_mz);
-
-  //copy possible_z
-  possible_z = get_spectrum_possible_z(src);
-  set_spectrum_possible_z(dest,possible_z, 
-                          get_spectrum_num_possible_z(src));
-  free(possible_z);
-  
-  //copy filename
-  new_filename = get_spectrum_filename(src);
-  set_spectrum_filename(dest, new_filename);
-  free(new_filename);
-  
-  //copy each peak
-  for(; num_peak_index < get_spectrum_num_peaks(src); ++num_peak_index){
-    
-    //get peak location
-    peak_location = get_peak_location(find_peak(src->peaks, num_peak_index));
-
-    //do not add any ion above the experimental mass
-    if(peak_location > experimental_mass_cut_off){
-      break;
-    }
-    
-    //round the location to nearest int
-    working_location = (int)(peak_location + 0.5);
-    
-    //skip all peaks within 15u of precursor_mz
-    if(working_location <= precursor_mz + 15 && working_location >= precursor_mz - 15){
-      continue;
-    }
-    
-    //square root peak's intensity
-    working_intensity = sqrt(get_peak_intensity(find_peak(src->peaks, num_peak_index)));
-
-    //set maximum intensity if largest so far
-    if(working_intensity > max_intensity){
-      max_intensity = working_intensity;
-    }
-    
-    //add or updates an existing peak to dest
-    add_or_update_peak_to_spectrum_for_sp(dest, working_intensity, working_location); 
-  }
-
-  //set maximum peak intensity
-  dest->max_intensity = max_intensity;
-}
-
-
-/**
- * process the spectrum, for SP
- */
-void sp_process_spectrum(
-  SPECTRUM_T* dest ///< the spectrum to processes -in/out
-  )
-{
-  
-  //keep only 200 most abundant ions
-  if(dest->num_peaks > 200){
-    dest->num_peaks = 200;
-  }
-  
-  //re sort back to intensity order
-  //sort the peak by location
-  sort_peaks(dest->peaks, dest->num_peaks, _PEAK_LOCATION);    
-
-}
-
-/**
- * process the spectrum, according the score type
- *\returns a new spectrum that has been preprocessed
- */
-SPECTRUM_T* process_spectrum(
-  SPECTRUM_T* spectrum, ///< the spectrum to processes -in
-  SCORER_TYPE_T score_type ///< the score type to which the spectrum should be sorted -in
-  )
-{
-  //copy spectrum to dest, make a duplicate spectrum to produce a preprocessed spectrum
-  SPECTRUM_T* dest = (SPECTRUM_T*)allocate_spectrum();
-  
-  if(score_type == SP){
-    //copy the spectrum, excluding peaks 15u around the precursor ion
-    copy_spectrum_for_sp(spectrum, dest);
-    
-    /*
-    //sort the peak by intensity
-    sort_peaks(dest->peaks, dest->num_peaks, _PEAK_INTENSITY);
-    
-    sp_process_spectrum(dest);
-    */
-
-    //now ready for sp scoring
-    dest->ready_for_sp = TRUE;
-  }
-  else if(score_type == XCORR){
-    //add code here for xcore
-  }
-  
-  //debug
-  //print_spectrum_stdout(dest);
-
-  return dest;
-}
 
 /*
  * Local Variables:

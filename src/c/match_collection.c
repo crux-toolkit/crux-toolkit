@@ -26,15 +26,13 @@
 #include "match.h"
 #include "match_collection.h"
 
-#define MAX_NUMBER_PEPTIDES 1000000 //What to set?
-
 static BOOLEAN_T is_first_spectrum = TRUE;
 /**
  *\struct match_collection
  *\brief An object that contains match objects with a given spectrum and peptide database
  */
 struct match_collection{
-  MATCH_T* match[MAX_NUMBER_PEPTIDES]; ///< array of match object
+  MATCH_T* match[_MAX_NUMBER_PEPTIDES]; ///< array of match object
   BOOLEAN_T scored_type[_SCORE_TYPE_NUM]; ///< has the score type been computed in each match
   int match_total; ///< total_match_count
   SCORER_TYPE_T last_sorted; ///< the last type the match has been sorted(if -1, then unsorted, if ever change the order must change to -1)
@@ -356,8 +354,8 @@ BOOLEAN_T score_match_collection_sp(
     set_match_spectrum(match, spectrum);
     
     //check if enough space for peptide match
-    if(match_collection->match_total >= MAX_NUMBER_PEPTIDES){
-      carp(CARP_ERROR, "peptide count exceed max match limit: %d", MAX_NUMBER_PEPTIDES);
+    if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
+      carp(CARP_ERROR, "peptide count exceed max match limit: %d", _MAX_NUMBER_PEPTIDES);
       //free heap
       free(peptide_sequence);
       free_ion_series(ion_series);

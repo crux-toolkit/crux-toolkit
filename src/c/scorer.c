@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.17 $
+ * REVISION: $Revision: 1.18 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -32,12 +32,7 @@
 struct scorer {
   SCORER_TYPE_T type; ///< The type of scorer
   float sp_beta; ///< used for Sp: the beta variable 
-  //float sp_gamma; ///< used for Sp: the gamma variable 
-  //float sp_min_mz; ///< used for Sp: the min mz for the intensity sum array
   float sp_max_mz; ///< used for Sp: the max mz for the intensity array
-  //float sp_array_resolution; ///< used for Sp: the resolution for intensity sum array indecies
-  //float sp_sum_resolution; ///<  used for Sp: the resolution to which interval of peaks to add of intensity sum
-  //float sp_equalize_resolution; ///<  used for Sp: the resolution to which interval of peaks should be equalized to the highest peak
   float* intensity_array; ///< used for Sp: the intensity array, which can be indexed using the m/z
   float max_intensity; ///< the max intensity in the intensity array
   BOOLEAN_T initialized; ///< has the scorer been initialized?
@@ -81,13 +76,7 @@ SCORER_T* new_scorer(
   //set fields needed for each score type
   if(type == SP){
     scorer->sp_beta = get_double_parameter("beta", 0.075);
-    //scorer->sp_gamma = get_double_parameter("gama", 0.15);
-    //scorer->sp_min_mz = get_double_parameter("min_mz", 0); 
     scorer->sp_max_mz = get_double_parameter("max-mz", 4000);
-    //scorer->sp_array_resolution = get_double_parameter("sp_array_resolution", 0.5);
-    //scorer->sp_sum_resolution = get_double_parameter("sp_sum_resolution", 1);
-    //scorer->sp_equalize_resolution = get_double_parameter("sp_equalize_resolution", 1);
-
     //allocate the intensity array
     scorer->intensity_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
     scorer->max_intensity = 0;
@@ -96,7 +85,6 @@ SCORER_T* new_scorer(
   else if(type == XCORR){
     scorer->sp_max_mz = get_double_parameter("max-mz", 4000);
     scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
-    //scorer->theoretical = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
     scorer->last_idx = 0;
   }
 
@@ -842,11 +830,9 @@ BOOLEAN_T create_intensity_array_theoretical(
       if(ion_is_modified(ion)){
         //Add peaks of intensity of 10.0 for neutral loss of H2O, ammonia.
         //In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each neutral loss.
-        /*
         add_intensity(theoretical, intensity_array_idx, 10);
         add_intensity(theoretical, intensity_array_idx + 1, 10);
         add_intensity(theoretical, intensity_array_idx - 1, 10);
-        */
       }
       else{
         //Add peaks of intensity 50.0 for B, Y type ions. 
@@ -931,18 +917,16 @@ float cross_correlation(
   int theoretical_idx = 0;
   float* observed = scorer->observed;
 
-
-
-  int i;
-  float sx,sy,mx, my,denom;
+  int mz_idx;
+  float sx, sy, mx, my, denom;
   
   /* Calculate the mean of the two series x[], y[] */
   mx = 0;
   my = 0;
 
-  for (i=0;i<size;i++) {
-    mx += observed[i];
-    my += theoretical[i];
+  for(mz_idx = 0; mz_idx < size; mz_idx++) {
+    mx += observed[mz_idx];
+    my += theoretical[mz_idx];
   }
   mx /= size;
   my /= size;
@@ -951,9 +935,9 @@ float cross_correlation(
   /* Calculate the denominator */
   sx = 0;
   sy = 0;
-  for (i=0;i<size;i++) {
-    sx += ((observed[i] - mx) * (observed[i] - mx));
-    sy += ((theoretical[i] - my) * (theoretical[i] - my));
+  for (mz_idx = 0; mz_idx < size; mz_idx++) {
+    sx += ((observed[mz_idx] - mx) * (observed[mz_idx] - mx));
+    sy += ((theoretical[mz_idx] - my) * (theoretical[mz_idx] - my));
   }
   denom = sqrt(sx*sy);
 

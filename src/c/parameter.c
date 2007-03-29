@@ -96,7 +96,7 @@ void initialize_parameters(void){
   set_double_parameter("beta", 0.075);
   set_double_parameter("max-mz", 4000);
   set_int_parameter("charge", 2);
-  set_string_parameter("score-type", "sp"); 
+  set_string_parameter("score-type", "xcorr"); 
 
   //match_collection parameters
   set_double_parameter("mass-window", 3.0);
