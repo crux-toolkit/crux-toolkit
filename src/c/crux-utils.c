@@ -77,39 +77,6 @@ inline int compare_float(float float_a, float float_b){
 }
 
 /**
- * \returns the 0 if equal, 1 if float_a is larger, -1 if float_b is larger
- * fast and simple, but some limitations. Assumes,
- * "Two floats in memory, interpret their bit pattern as integers, 
- * and compare them, we can tell which is larger"
- */
-inline int compare_float_fast(float float_a, float float_b){
-  //check if current architecture
-  if(sizeof(float) != sizeof(int)){
-    carp(CARP_WARNING, "current architecture does not support fast float comparison");
-    return compare_float(float_a, float_b);
-  }
-  
-  //check start off equal?
-  if(float_a == float_b){
-    return 0;
-  }
-
-  //try more detail check
-  int int_diff = *(int*)&float_a - *(int*)&float_b;
-  
-  //equal?
-  if(abs(int_diff) <= MAX_ULPS){
-    return 0;
-  }
-  else if(int_diff < 0){  
-    return -1;
-  }
-  else{//int_diff > 0
-    return 1;
-  }
-}
-
-/**
  *\returns TRUE if float_a is between the interaval of min and max, else FALSE
  */
 inline BOOLEAN_T compare_float_three(float float_a, float min, float max){

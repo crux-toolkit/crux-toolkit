@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.39 $
+ * $Revision: 1.40 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1533,9 +1533,6 @@ BOOLEAN_T parse_crux_index_map(
       }
       //add all index_files that are with in peptide constraint mass interval
       else if(max_mass > (start_mass - 0.0001)){
-
-        printf("index file to read: %s\n", filename);
-
         if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
           carp(CARP_WARNING, "failed to add index file");
           free(new_line);

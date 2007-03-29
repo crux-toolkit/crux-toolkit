@@ -120,6 +120,7 @@ int main(int argc, char** argv){
     int possible_charge = 0;
     int* possible_charge_array = NULL;
     int charge_index = 0;
+    unsigned int max_rank = 500;
     
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
@@ -179,6 +180,20 @@ int main(int argc, char** argv){
     //create spectrum iterator
     spectrum_iterator = new_spectrum_iterator(collection);
     
+    
+    //set max number of matches to return
+    if(main_score == SP){
+      //return all matches
+      max_rank = _MAX_NUMBER_PEPTIDES;
+    }
+    else if(main_score == XCORR){
+      // keep top 500 from SP to xcorr
+      max_rank = 500;
+    }
+    else{
+      //default 500
+      max_rank = 500;
+    }
     //create a generate peptide iterator
     //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator = //FIXME use neutral_mass, might chage to pick
     //new_generate_peptides_iterator_mutable();
@@ -214,7 +229,7 @@ int main(int argc, char** argv){
         match_collection =
           new_match_collection_spectrum_with_peptide_iterator(spectrum, 
                                                               possible_charge_array[charge_index], 
-                                                              500, main_score);//, peptide_iterator);
+                                                              max_rank, main_score);//, peptide_iterator);
         
                 
         //create match iterator, TRUE: return match in sorted order of main_score type

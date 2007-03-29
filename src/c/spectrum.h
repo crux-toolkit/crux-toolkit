@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -284,14 +284,6 @@ void set_spectrum_new_filename(
  * \returns The intensity of the peak with the maximum intensity.
  */
 float get_spectrum_max_peak_intensity(
-  SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
-  );
-
-/**
- * Only should be used after constructed a sum array, other times use get_spectrum_max_peak_intensity
- * \returns The intensity of the peak with the maximum intensity.
- */
-float get_spectrum_max_intensity(
   SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
   );
 
