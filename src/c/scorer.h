@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
@@ -55,6 +55,30 @@ float score_spectrum_v_spectrum(
   SPECTRUM_T* second_spectrum ///<  the second spectrum to score -in
 );
 
+/*************************************
+ * Score for LOGP_EXP_SP
+ *
+ *
+ *
+ ************************************/
+
+/**
+ *
+ *
+ */
+float score_logp_exp_sp(
+  float sp_score, ///< The sp score for the scoring peptide -in
+  float mean      ///< The overall mean of the sp scored peptides -in
+  );
+/**
+ *
+ *
+ */
+float score_logp_bonf_exp_sp(
+  float sp_score, ///< The sp score for the scoring peptide -in
+  float mean,      ///< The overall mean of the sp scored peptides -in
+  int num_peptide  ///< The number of peptides scored for sp
+  );
 
 /*******************************
  * get, set methods for scorer
@@ -181,6 +205,13 @@ float get_scorer_sp_equalize_resolution(
 void set_scorer_sp_equalize_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
   float sp_equalize_resolution ///< used for Sp: the equalize_resolution variable -in
+  );
+
+/**
+ *\returns the fraction of b,y ions matched for scoring SP, the values is valid for the last ion series scored with this scorer object
+ */
+float get_scorer_sp_b_y_ion_match(
+  SCORER_T* scorer ///< the scorer object -out
   );
 
 /*

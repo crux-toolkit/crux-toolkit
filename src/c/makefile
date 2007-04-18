@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.51 $
+# VERSION: $Revision: 1.52 $
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -65,6 +65,7 @@ LIBOBJS =\
 	${OBJDIR}/match.o \
 	${OBJDIR}/match_collection.o \
 	${OBJDIR}/search_spectrum.o \
+	${OBJDIR}/RemoteControl.o \
 	${OBJDIR}/search_spectra.o 
 #	${OBJDIR}/score_peptide_list_spectrum.o
 
@@ -102,10 +103,10 @@ clean:
 depend: 
 	rm -f .depend
 	touch .depend
-	makedepend -Y -p'$${OBJDIR}/' -f .depend *.c *.h
+	makedepend -Y -p'$${OBJDIR}/' -f .depend *.c *.h *.cpp##
 
 # Build a tags file for emacs.
-TAGS: *.c *.h
+TAGS: *.c *.h *.cpp
 	etags *.c *.h
 	ctags *.c *.h
 
@@ -134,6 +135,12 @@ include .depend
 ${OBJDIR}/%.o: %.c
 	@mkdir -p ${OBJDIR}
 	${CC} ${CFLAGS} -c -o ${OBJDIR}/$*.o $<
+
+#################
+${OBJDIR}/%.o: %.cpp
+	@mkdir -p ${OBJDIR}
+	${CC} ${CFLAGS} -c -o ${OBJDIR}/$*.o $<
+##################
 
 # Rule for adding .o files to an archive library
 (%.o): %.o

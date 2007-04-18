@@ -2,7 +2,7 @@
  * \file score_peptide_spectrum
  * AUTHOR: Chris Park
  * CREATE DATE: 10/13 2006
- * DESCRIPTION: Object for given a peptide and a spectrum, generate a perliminary score(ex, Sp)
+ * DESCRIPTION: Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  *
  * REVISION: 
  ****************************************************************************/
@@ -51,7 +51,7 @@ int main(int argc, char** argv){
 
   //optional variables
   char* charge = "2";
-  char* type = "sp";
+  char* type = "xcorr";
   char* parameter_file = NULL;
   int  verbosity = CARP_ERROR;
 
@@ -107,10 +107,10 @@ int main(int argc, char** argv){
   if (parse_arguments(argc, argv, 0)) {
     //parsed arguments
     int peptide_charge = 1;
-    SCORER_TYPE_T score_type = SP; 
+    SCORER_TYPE_T score_type = XCORR; 
     
     SPECTRUM_T* spectrum = NULL;
-    SPECTRUM_COLLECTION_T * collection = NULL;
+    SPECTRUM_COLLECTION_T* collection = NULL;
     ION_SERIES_T* ion_series = NULL;
     SCORER_T* scorer = NULL;
     float score = 0;

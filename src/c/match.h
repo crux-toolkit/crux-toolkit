@@ -1,7 +1,7 @@
 /**
  * \file match.h
- * $Revision: 1.6 $ 
- * \brief Object for given a peptide and a spectrum, generate a perliminary score(ex, Sp)
+ * $Revision: 1.7 $ 
+ * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
 #define MATCH_H

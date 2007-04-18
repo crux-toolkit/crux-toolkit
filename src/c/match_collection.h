@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -15,19 +15,21 @@ MATCH_COLLECTION_T* allocate_match_collection(void);
 
 /**
  * create a new match collection from spectrum
- * return the top max_rank matches, by score_type(SP, XCORR);
+ * creates a peptide iterator for given mass window
+ * return the top max_rank matches, first scored by prelim_score(SP), then by score_type(XCORR, LOGP_EXP_SP)
  *\returns a new match_collection object that is scored by score_type and contains the top max_rank matches
  */
 MATCH_COLLECTION_T* new_match_collection_spectrum(
  SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
  int charge,       ///< the charge of the spectrum -in
- int max_rank,     ///< max number of top rank matches to keep -in
- SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
+ int max_rank,     ///< max number of top rank matches to keep from SP -in
+ SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
+ SCORER_TYPE_T score_type ///< the score type (XCORR, LOGP_EXP_SP) -in
  );
 
 /**
  * create a new match collection from spectrum
- * return the top max_rank matches, by score_type(SP, XCORR);
+ * return the top max_rank matches, first scored by prelim_score(SP), then by score_type(XCORR, LOGP_EXP_SP);
  * uses a provided peptide iterator, MUST be a mutable iterator
  * Sets the iterator before useage.
  *\returns a new match_collection object that is scored by score_type and contains the top max_rank matches
@@ -35,9 +37,10 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
 MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
  SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
  int charge,       ///< the charge of the spectrum -in
- int max_rank,     ///< max number of top rank matches to keep from SP -in
- SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
- //GENERATE_PEPTIDES_ITERATOR_T* mutable_peptide_iterator ///< peptide iteartor to use, must set it first before use
+ int max_rank,     ///< max number of top rank matches to keep from SP -in 
+ SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
+ SCORER_TYPE_T score_type ///< the score type (XCORR, LOGP_EXP_SP) -in
+ //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< peptide iteartor to use, must set it first before use
  );
 
 /**

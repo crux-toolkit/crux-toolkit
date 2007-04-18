@@ -102,7 +102,10 @@ void initialize_parameters(void){
   set_double_parameter("mass-window", 3.0);
 
   //score_spectrum
-  set_string_parameter("perlim-score-type", "sp");
+  set_string_parameter("prelim-score-type", "sp");
+
+  //set the top ranking peptides of SP to score for LOGP_EXP_SP
+  set_int_parameter("top_rank_p_value", 1);
 
   //now we have initialized the parameters
   parameter_initialized = TRUE;

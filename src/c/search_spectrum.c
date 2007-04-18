@@ -45,8 +45,8 @@ int main(int argc, char** argv){
 
   //optional
   int charge = 2;
-  char* perlim_score_type = "sp";
-  char* score_type = "xcorr";
+  char* prelim_score_type = "sp";
+  char* score_type = "logp_exp_sp";
   char* parameter_file = NULL;
   int verbosity = CARP_ERROR;
   
@@ -81,14 +81,14 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. sp | xcorr",
+    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | xcorr",
     (void *) &score_type, 
     STRING_ARG);
 
   parse_arguments_set_opt(
-    "perlim-score-type", 
+    "prelim-score-type", 
     "The type of scoring function to use. sp",
-    (void *) &perlim_score_type, 
+    (void *) &prelim_score_type, 
     STRING_ARG);
 
   parse_arguments_set_opt(
@@ -119,8 +119,8 @@ int main(int argc, char** argv){
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
     //parse arguments
-    SCORER_TYPE_T main_score = XCORR; 
-    SCORER_TYPE_T perlim_score = SP; 
+    SCORER_TYPE_T main_score = LOGP_EXP_SP; 
+    SCORER_TYPE_T prelim_score = SP; 
     
     SPECTRUM_T* spectrum = NULL;
     SPECTRUM_COLLECTION_T* collection = NULL; ///<spectrum collection
@@ -149,26 +149,29 @@ int main(int argc, char** argv){
     }
 
     //score type
-    if(strcmp(get_string_parameter_pointer("score-type"), "sp")== 0){
-      main_score = SP;
+    if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
+      main_score = LOGP_EXP_SP;
     }
+    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_bonf_exp_sp")== 0){
+      main_score = LOGP_BONF_EXP_SP;
+    }    
     else if(strcmp(get_string_parameter_pointer("score-type"), "xcorr")== 0){
       main_score = XCORR;
     }
     else{
-      wrong_command(score_type, "The type of scoring function to use. sp");
+      wrong_command(score_type, "The type of scoring function to use. logp_exp_sp | xcorr");
     }
 
     //score type
-    if(strcmp(get_string_parameter_pointer("perlim-score-type"), "sp")== 0){
-      perlim_score = SP;
+    if(strcmp(get_string_parameter_pointer("prelim-score-type"), "sp")== 0){
+      prelim_score = SP;
     }
     else{
-      wrong_command(perlim_score_type, "The type of perliminary scoring function to use. sp");
+      wrong_command(prelim_score_type, "The type of preliminary scoring function to use. sp");
     }
     
     //set max number of matches to return
-    if(main_score == SP){
+    if(main_score == LOGP_EXP_SP || main_score == LOGP_BONF_EXP_SP){
       //return all matches
       max_rank = _MAX_NUMBER_PEPTIDES;
     }
@@ -207,8 +210,8 @@ int main(int argc, char** argv){
     fprintf(stdout, "# SPECTRUM CHARGE: %d\n", charge);
 
     
-    //get match collection with perlim match collection
-    match_collection = new_match_collection_spectrum(spectrum, charge, max_rank, main_score);
+    //get match collection with prelim match collection
+    match_collection = new_match_collection_spectrum(spectrum, charge, max_rank, prelim_score, main_score);
     
     //later add scoring for main_score here!
 
@@ -216,10 +219,13 @@ int main(int argc, char** argv){
     match_iterator = new_match_iterator(match_collection, main_score, TRUE);
 
     //print header
-    if(main_score == SP){
-      fprintf(stdout, "# %s\t%s\t%s\t%s\n", "sp_rank", "mass", "sp", "sequence");  
+    if(main_score == LOGP_EXP_SP){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_exp_sp_rank", "sp_rank", "mass", "logp_exp_sp", "sp", "sequence");  
     }
-    else if( main_score == XCORR){
+    else if(main_score == LOGP_BONF_EXP_SP){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_exp_sp_rank", "sp_rank", "mass", "logp_bonf_exp_sp", "sp", "sequence");  
+    }
+    else if(main_score == XCORR){
       fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  
     }
 
