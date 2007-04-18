@@ -2,7 +2,7 @@
  * \file match.c
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * DESCRIPTION: Object for matching a peptide and a spectrum, generate a perliminary score(ex, Sp)
+ * DESCRIPTION: Object for matching a peptide and a spectrum, generate a preliminary score(ex, Sp)
  *
  * REVISION: 
  ****************************************************************************/
@@ -36,6 +36,7 @@ struct match{
   float match_scores[_SCORE_TYPE_NUM]; ///< the scoring result array (use enum_type SCORER_TYPE_T to index)
   int match_rank[_SCORE_TYPE_NUM];  ///< the rank of scoring result (use enum_type SCORER_TYPE_T to index)
   int pointer_count; ///< the number of pointers to this match object (when reach 0, free memory)
+  float b_y_ion_match; ///< the fraction of the b, y ion matched while scoring for SP
 };
 
 /**
@@ -132,7 +133,7 @@ void print_match(
   //print according to the output mode
   switch (output_mode) {
   case SP:
-    fprintf(file, "P %d\t%.2f\t%.2f\t", match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[SP]);
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EXP_SP], match->match_scores[SP]);
     
     //should I print sequence
     if(output_sequence){
@@ -151,10 +152,29 @@ void print_match(
       fprintf(file, "%s\n", peptide_sequence);
       free(peptide_sequence);
     }
-    
     break;
   case DOTP:
     //fill in
+    break;
+  case LOGP_EXP_SP:
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EXP_SP], match->match_scores[SP]);
+    
+    //should I print sequence
+    if(output_sequence){
+      peptide_sequence = get_peptide_sequence(match->peptide);
+      fprintf(file, "%s\n", peptide_sequence);
+      free(peptide_sequence);
+    }
+  case LOGP_BONF_EXP_SP:
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_EXP_SP], match->match_scores[SP]);
+    
+    //should I print sequence
+    if(output_sequence){
+      peptide_sequence = get_peptide_sequence(match->peptide);
+      fprintf(file, "%s\n", peptide_sequence);
+      free(peptide_sequence);
+    }
+    
     break;
   }
 }

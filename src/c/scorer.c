@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.18 $
+ * REVISION: $Revision: 1.19 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -33,6 +33,7 @@ struct scorer {
   SCORER_TYPE_T type; ///< The type of scorer
   float sp_beta; ///< used for Sp: the beta variable 
   float sp_max_mz; ///< used for Sp: the max mz for the intensity array
+  float sp_b_y_ion_match; ///< The most recent ion_collection fraction of the b, y ion matched while scoring for SP
   float* intensity_array; ///< used for Sp: the intensity array, which can be indexed using the m/z
   float max_intensity; ///< the max intensity in the intensity array
   BOOLEAN_T initialized; ///< has the scorer been initialized?
@@ -81,15 +82,24 @@ SCORER_T* new_scorer(
     scorer->intensity_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
     scorer->max_intensity = 0;
     scorer->last_idx = 0;
+    //the scorer as not been initialized yet.
+    scorer->initialized = FALSE;
   }
   else if(type == XCORR){
     scorer->sp_max_mz = get_double_parameter("max-mz", 4000);
     scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
     scorer->last_idx = 0;
+    //the scorer as not been initialized yet.
+    scorer->initialized = FALSE;
   }
-
-  //the scorer as not been initialized yet.
-  scorer->initialized = FALSE;
+  else if(type == LOGP_EXP_SP || type == LOGP_BONF_EXP_SP){
+    //the scorer does not need to be initialized for logp_exp_sp.
+    scorer->initialized = TRUE;
+  }
+  else{
+    //the scorer as not been initialized yet.
+    scorer->initialized = FALSE;
+  }
 
   return scorer;
 }
@@ -135,7 +145,7 @@ void nomalize_intensity_array(
     intensity_array[mz_idx] = intensity_array[mz_idx] * threshold / max_intensity;
 
     //DEBUG
-    //carp(CARP_INFO, "norm data[%d] = %.2f",mz_idx, intensity_array[mz_idx]); 
+    //carp(CARP_INFO, "norm data[%d] = %.4f",mz_idx, intensity_array[mz_idx]); 
   }
 }
 
@@ -175,6 +185,11 @@ void smooth_peaks(
     break;
     
   case DOTP:
+    break;
+
+  case LOGP_EXP_SP:
+    break;
+  case LOGP_BONF_EXP_SP:
     break;
   }
   free(scorer->intensity_array);
@@ -330,11 +345,10 @@ void zero_peaks(
   //DEBUG
   /*
   int idx = 0;
-  for(; idx < debug_size; ++idx){
-    carp(CARP_INFO, "extracted peaks: %.2f, at idx %d", debug_array[idx], idx);
+  for(; idx < scorer->sp_max_mz; ++idx){
+    carp(CARP_INFO, "extracted peaks: %.2f, at idx %d", new_array[idx], idx);
   }
   */
-
 }
 
 /**
@@ -373,7 +387,7 @@ void extract_peaks(
   
   //set max and cut_off
   max_intensity = temp_array[0];
-  cut_off = temp_array[top_rank-1] + 0.0001;
+  cut_off = temp_array[top_rank-1];
   
   //remove peaks bellow cut_off 
   //also, normalize peaks to max_intensity to 100
@@ -535,6 +549,17 @@ BOOLEAN_T create_intensity_array_sp(
 
   //equalize peaks
   equalize_peaks(scorer);
+
+  //Debug
+  /*
+  int idx; int count = 0;
+  for(idx = 0; idx < scorer->last_idx; ++idx){
+    if(scorer->intensity_array[idx] > 0){
+      carp(CARP_INFO, "scoring array[%d], %d = %.4f", idx, count, scorer->intensity_array[idx]);
+      ++count;
+    }
+  }
+  */
   
   //free peak iterator
   free_peak_iterator(peak_iterator);
@@ -658,6 +683,9 @@ float gen_score_sp(
   ion_match = calculate_ion_type_sp(scorer, ion_series, &intensity_sum, B_ION, &repeat_count) +
     calculate_ion_type_sp(scorer, ion_series, &intensity_sum, Y_ION, &repeat_count);
   
+  //set the fraction of  b,y ions matched for this ion_series
+  scorer->sp_b_y_ion_match = (float)ion_match / get_ion_series_num_ions(ion_series);
+
   //// DEBUG!!!!
   /*
   carp(CARP_INFO, "# repeat count: %d ion_match count: %d, total_ion count: %d sum: %.2f", 
@@ -972,7 +1000,7 @@ float cross_correlation(
   }
 
   //debug
-  carp(CARP_INFO, "score_at_zero: %.2f, total_score: %.2f", score_at_zero, total_score);
+  //carp(CARP_INFO, "score_at_zero: %.2f, total_score: %.2f", score_at_zero, total_score);
 
 
   return (score_at_zero - (total_score / (2 * max_offset)));
@@ -1018,13 +1046,54 @@ float gen_score_xcorr(
   free(theoretical);
 
   //debug
-  carp(CARP_INFO, "xcorr: %.2f", final_score);
+  //carp(CARP_INFO, "xcorr: %.2f", final_score);
 
   
   //return score
   return final_score;
 }
 
+/*************************************
+ * Score for LOGP_EXP_SP && LOGP_BONF_EXP_SP
+ *
+ *
+ *
+ ************************************/
+
+/**
+ *
+ *
+ */
+float score_logp_exp_sp(
+  float sp_score, ///< The sp score for the scoring peptide -in
+  float mean      ///< The overall mean of the sp scored peptides -in
+  )
+{
+  return -log( exp(-(1/mean) * sp_score) );
+}
+
+/**
+ *
+ *
+ */
+float score_logp_bonf_exp_sp(
+  float sp_score, ///< The sp score for the scoring peptide -in
+  float mean,      ///< The overall mean of the sp scored peptides -in
+  int num_peptide  ///< The number of peptides scored for sp
+  )
+{
+  double p_value = exp(-(1/mean) * sp_score);
+  
+  //The Bonferroni correction 
+  //use original equation 1-(1-p_value)^n when p is small
+  if(p_value < 0.000001){
+    return -log(1-pow((1-p_value), num_peptide));
+  }
+  //else, use the approximation
+  else{
+    return -log(p_value*num_peptide);
+  }
+}
 
 /*****************************************************
  * General purpose functions
@@ -1199,6 +1268,16 @@ void add_intensity(
   if(intensity_array[add_idx] < intensity){
     intensity_array[add_idx] = intensity;
   }
+}
+
+/**
+ *\returns the fraction of b,y ions matched for scoring SP, the values is valid for the last ion series scored with this scorer object
+ */
+float get_scorer_sp_b_y_ion_match(
+  SCORER_T* scorer ///< the scorer object -out
+  )
+{
+  return scorer->sp_b_y_ion_match;
 }
 
 /**
