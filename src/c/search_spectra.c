@@ -120,8 +120,9 @@ int main(int argc, char** argv){
     int possible_charge = 0;
     int* possible_charge_array = NULL;
     int charge_index = 0;
-    unsigned int max_rank = 500;
-    
+    long int max_rank_preliminary = 500;
+    long int max_rank_result = 500;
+
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
@@ -136,7 +137,7 @@ int main(int argc, char** argv){
     //parse and update parameters
     parse_update_parameters(parameter_file);
     
-    //score type
+    //main score type
     if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
       main_score = LOGP_EXP_SP;
     }
@@ -150,7 +151,7 @@ int main(int argc, char** argv){
       wrong_command(score_type, "The type of scoring function to use. logp_exp_sp | xcorr");
     }
 
-    //score type
+    //preliminary score type
     if(strcmp(get_string_parameter_pointer("prelim-score-type"), "sp")== 0){
       prelim_score = SP;
     }
@@ -163,6 +164,12 @@ int main(int argc, char** argv){
     
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
+
+    //set max number of preliminary scored peptides to use for final scoring
+    max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
+
+    //set max number of final scoring matches to print as output
+    max_rank_result = get_int_parameter("max-rank-result", 500);
  
     //print header
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
@@ -180,20 +187,7 @@ int main(int argc, char** argv){
     
     //create spectrum iterator
     spectrum_iterator = new_spectrum_iterator(collection);
-        
-    //set max number of matches to return
-    if(main_score == LOGP_EXP_SP || main_score == LOGP_BONF_EXP_SP){
-      //return all matches
-      max_rank = _MAX_NUMBER_PEPTIDES;
-    }
-    else if(main_score == XCORR){
-      // keep top 500 from SP to xcorr
-      max_rank = 500;
-    }
-    else{
-      //default 500
-      max_rank = 500;
-    }
+   
     //create a generate peptide iterator
     //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator = //FIXME use neutral_mass, might chage to pick
     //new_generate_peptides_iterator_mutable();
@@ -229,7 +223,7 @@ int main(int argc, char** argv){
         match_collection =
           new_match_collection_spectrum_with_peptide_iterator(spectrum, 
                                                               possible_charge_array[charge_index], 
-                                                              max_rank, prelim_score, main_score);//, peptide_iterator);
+                                                              max_rank_preliminary, prelim_score, main_score);//, peptide_iterator);
         
                 
         //create match iterator, TRUE: return match in sorted order of main_score type
@@ -246,10 +240,17 @@ int main(int argc, char** argv){
           fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  
         }
         
-        //iterate over all matches
+        //iterate over matches
+        int match_count = 0;
         while(match_iterator_has_next(match_iterator)){
+          ++match_count;
           match = match_iterator_next(match_iterator);
           print_match(match, stdout, TRUE, main_score);
+          
+          //print only up to max_rank_result of the matches
+          if(match_count >= max_rank_result){
+            break;
+          }
         }
 	
         //free match iterator

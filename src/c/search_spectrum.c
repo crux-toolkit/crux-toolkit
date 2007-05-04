@@ -127,7 +127,8 @@ int main(int argc, char** argv){
     MATCH_COLLECTION_T* match_collection = NULL;
     MATCH_ITERATOR_T* match_iterator = NULL;
     MATCH_T* match = NULL;
-    unsigned int max_rank = 500;
+    long int max_rank_preliminary = 500;
+    long int max_rank_result = 500;
 
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
@@ -170,23 +171,15 @@ int main(int argc, char** argv){
       wrong_command(prelim_score_type, "The type of preliminary scoring function to use. sp");
     }
     
-    //set max number of matches to return
-    if(main_score == LOGP_EXP_SP || main_score == LOGP_BONF_EXP_SP){
-      //return all matches
-      max_rank = _MAX_NUMBER_PEPTIDES;
-    }
-    else if(main_score == XCORR){
-      // keep top 500 from SP to xcorr
-      max_rank = 500;
-    }
-    else{
-      //default 500
-      max_rank = 500;
-    }
-
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
- 
+
+    //set max number of preliminary scored peptides to use for final scoring
+    max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
+
+    //set max number of final scoring matches to print as output
+    max_rank_result = get_int_parameter("max-rank-result", 500);
+    
     //print header 1/2
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
     fprintf(stdout, "# PROTEIN DATABASE: %s\n", fasta_file);
@@ -211,10 +204,8 @@ int main(int argc, char** argv){
 
     
     //get match collection with prelim match collection
-    match_collection = new_match_collection_spectrum(spectrum, charge, max_rank, prelim_score, main_score);
+    match_collection = new_match_collection_spectrum(spectrum, charge, max_rank_preliminary, prelim_score, main_score);
     
-    //later add scoring for main_score here!
-
     //create match iterator, TRUE: return match in sorted order of main_score type
     match_iterator = new_match_iterator(match_collection, main_score, TRUE);
 
@@ -229,10 +220,17 @@ int main(int argc, char** argv){
       fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  
     }
 
-    //iterate over all matches
+    //iterate over matches
+    int match_count = 0;
     while(match_iterator_has_next(match_iterator)){
+      ++match_count;
       match = match_iterator_next(match_iterator);
       print_match(match, stdout, TRUE, main_score);
+      
+      //print only up to max_rank_result of the matches
+      if(match_count >= max_rank_result){
+        break;
+      }
     }
 
     //free match iterator

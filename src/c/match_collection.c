@@ -326,6 +326,8 @@ void truncate_match_collection(
   }
 
   //is there any matches to free?
+  //DEBUG
+  max_rank = max_rank;
   while(match_collection->match_total > max_rank){
     free_match(match_collection->match[match_collection->match_total - 1]);
     --match_collection->match_total;

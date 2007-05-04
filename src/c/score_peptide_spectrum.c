@@ -191,8 +191,13 @@ int main(int argc, char** argv){
     //calculates the Sp score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
    
-   //print the Sp score
-   printf("Sp score is: %.2f\n", score);
+    //print the Sp score
+    if(score_type == SP){
+      printf("Sp score is: %.2f\n", score);
+    }
+    else if(score_type == XCORR){
+      printf("Xcorr score is: %.2f\n", score);
+    }
       
    //free heap
    free_scorer(scorer);

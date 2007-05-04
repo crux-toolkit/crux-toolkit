@@ -144,7 +144,7 @@ void print_match(
     
     break;
   case XCORR:
-    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[XCORR], match->match_scores[SP]);
+    fprintf(file, "P %d\t%d\t%.3f\t%.3f\t%.3f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[XCORR], match->match_scores[SP]);
     
     //should I print sequence
     if(output_sequence){
@@ -165,6 +165,7 @@ void print_match(
       fprintf(file, "%s\n", peptide_sequence);
       free(peptide_sequence);
     }
+    break;
   case LOGP_BONF_EXP_SP:
     fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_EXP_SP], match->match_scores[SP]);
     
