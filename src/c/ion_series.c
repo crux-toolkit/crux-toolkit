@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.17 $
+ * REVISION: $Revision: 1.18 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1045,8 +1045,8 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest_xcorr(
   constraint->use_neutral_losses = TRUE;
   
   //set all modifications count for sequest
-  constraint->modifications[NH3] = 1;
-  constraint->modifications[H2O] = 1;
+  constraint->modifications[NH3] = 0;//-1;
+  constraint->modifications[H2O] = 0;//-1;
   constraint->modifications[ISOTOPE] = 0;//not sure
   constraint->modifications[FLANK] = 0;
   

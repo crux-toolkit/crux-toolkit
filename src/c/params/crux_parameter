@@ -1,0 +1,65 @@
+#verbosity level for run 0~100
+verbosity=100
+
+########generate_peptide perameters##########
+#min mass for peptides
+min-mass=200.0
+
+#man mass for peptides
+max-mass=2400.0
+
+#min length for peptides
+min-length=6
+
+#max length for peptides
+max-length=50
+
+#cleavage type allowed (tryptic|partial|all)
+cleavages=all
+
+#mass type to use (average|mono)
+isotopic-mass=average
+
+#allow redudnat peptides? (redundant|unique)
+redundancy=unique
+
+#use index to create peptides or use index? (T|F)
+use-index=T
+
+#which order to sort the peptides? (none|mass|length|lexical)
+sort=none
+
+#output the sequence along with scores?(TRUE|FALSE)
+output-sequence=TRUE
+
+#Allow missed cleaave sites by trypsin?(TRUE|FALSE)
+missed-cleavages=TRUE
+
+##########perameters used for scoring peptide, spectrum match ############
+#SP parameter used
+beta=0.075
+
+#SP max mz used in scoring 
+max-mz=4000
+
+#In search_spectrum, charge state of the spectrum scoring (search_spectra uses the charge state from the MS2 file)
+charge=2
+
+#mass window of peptides to select for scoring
+mass-window=3.0
+
+#the main scoring type (logp_exp_sp | logp_bonf_exp_sp | xcorr)
+score-type=xcorr 
+
+#preliminary score type (sp)
+prelim-score-type=sp
+
+#max number of preliminary scored peptides to be seleceted for main scoring (_MAX_NUMBER_PEPTIDES 1000000, to select all peptides)
+max-rank-preliminary=500
+
+#max number of final scored peptides to be printed as output (_MAX_NUMBER_PEPTIDES 1000000, to select all peptides)
+max-rank-result=500
+
+#set the number of top ranking peptides of SP to score for LOGP_EXP_SP (This is different compared to max-rank-preliminary, because it does not limit the count of preliminary scored peptides, thus some peptides can be outputed without being scored by main)
+top_rank_p_value=1
+

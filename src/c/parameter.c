@@ -103,6 +103,8 @@ void initialize_parameters(void){
 
   //score_spectrum
   set_string_parameter("prelim-score-type", "sp");
+  set_int_parameter("max-rank-preliminary", 500);
+  set_int_parameter("max-rank-result", 500);
 
   //set the top ranking peptides of SP to score for LOGP_EXP_SP
   set_int_parameter("top_rank_p_value", 1);
@@ -249,7 +251,8 @@ void parse_parameter_file(
 
   while(fgets(line, MAX_LINE_LENGTH, f)==line){
     // if a line begins with "#", it is ignored as a comment 
-    if(line[0] != '#'){
+    // FIXME Also empty lines are ignored, probably amore robust check of new line is required
+    if(line[0] != '#' && line[0] != '\n'){
     /* find the '=' in the line.  Exit with error if the line 
        has no equals sign. */
       idx = 0;

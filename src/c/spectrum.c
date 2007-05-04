@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.35 $
+ * REVISION: $Revision: 1.36 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -250,7 +250,7 @@ void print_spectrum(
   
   //print peaks
   for(; num_peak_index < spectrum->num_peaks; ++num_peak_index){
-    fprintf(file, "%.1f %.1f\n", 
+    fprintf(file, "%.2f %.13f\n", 
             get_peak_location(find_peak(spectrum->peaks, num_peak_index)),
             get_peak_intensity(find_peak(spectrum->peaks, num_peak_index)));
   }
