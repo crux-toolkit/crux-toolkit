@@ -135,48 +135,39 @@ void print_match(
   case SP:
     fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EXP_SP], match->match_scores[SP]);
     
-    //should I print sequence
-    if(output_sequence){
-      peptide_sequence = get_peptide_sequence(match->peptide);
-      fprintf(file, "%s\n", peptide_sequence);
-      free(peptide_sequence);
-    }
-    
     break;
   case XCORR:
     fprintf(file, "P %d\t%d\t%.3f\t%.3f\t%.3f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[XCORR], match->match_scores[SP]);
     
-    //should I print sequence
-    if(output_sequence){
-      peptide_sequence = get_peptide_sequence(match->peptide);
-      fprintf(file, "%s\n", peptide_sequence);
-      free(peptide_sequence);
-    }
+    
     break;
   case DOTP:
-    //fill in
+    //FIXME fill in once implemented
     break;
   case LOGP_EXP_SP:
     fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EXP_SP], match->match_scores[SP]);
     
-    //should I print sequence
-    if(output_sequence){
-      peptide_sequence = get_peptide_sequence(match->peptide);
-      fprintf(file, "%s\n", peptide_sequence);
-      free(peptide_sequence);
-    }
     break;
   case LOGP_BONF_EXP_SP:
     fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_EXP_SP], match->match_scores[SP]);
     
-    //should I print sequence
-    if(output_sequence){
-      peptide_sequence = get_peptide_sequence(match->peptide);
-      fprintf(file, "%s\n", peptide_sequence);
-      free(peptide_sequence);
-    }
+    break;
+    
+  case LOGP_EVD_XCORR:
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EVD_XCORR], match->match_scores[XCORR], match->match_scores[SP]);
     
     break;
+  case LOGP_BONF_EVD_XCORR:
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_EVD_XCORR], match->match_scores[XCORR], match->match_scores[SP]);
+    
+    break;
+  }
+
+  //should I print sequence?
+  if(output_sequence){
+    peptide_sequence = get_peptide_sequence(match->peptide);
+    fprintf(file, "%s\n", peptide_sequence);
+    free(peptide_sequence);
   }
 }
 
@@ -284,6 +275,16 @@ void set_match_peptide(
   )
 {
   match->peptide = peptide;
+}
+
+/**
+ *Increments the pointer count to the match object
+ */
+void increment_match_pointer_count(
+  MATCH_T* match ///< the match to work -in  
+  )
+{
+  ++match->pointer_count;
 }
 
 
