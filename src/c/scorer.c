@@ -3,8 +3,9 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.20 $
+ * REVISION: $Revision: 1.21 $
  ****************************************************************************/
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,6 +26,13 @@
 
 //cross correlation offset range(Xcorr)
 #define MAX_XCORR_OFFSET 75
+
+// Constants for EVD p_value calculation
+// These constants are hardware dependent.
+// These values should be good for double precision floating point
+// numbers compatible with the IEEE 754 standard.
+#define DBL_EPSILON  2.2204460492503131e-16
+#define DBL_MAX_10_EXP 308
 
 /**
  * \struct scorer
@@ -192,6 +200,10 @@ void smooth_peaks(
   case LOGP_EXP_SP:
     break;
   case LOGP_BONF_EXP_SP:
+    break;
+  case LOGP_EVD_XCORR:
+    break;
+  case LOGP_BONF_EVD_XCORR:
     break;
   }
   free(scorer->intensity_array);
@@ -802,8 +814,8 @@ BOOLEAN_T create_intensity_array_observed(
     scorer->sp_max_mz = 512;
   }
 
-
-  carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
+  //DEBUG
+  //carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
   scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
   
   //store the max intensity in each 10 regions to later normalize
@@ -1172,8 +1184,8 @@ float gen_score_xcorr(
  ************************************/
 
 /**
- *
- *
+ * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
+ *\returns the -log(p_value) of the exponential distribution
  */
 float score_logp_exp_sp(
   float sp_score, ///< The sp score for the scoring peptide -in
@@ -1184,8 +1196,8 @@ float score_logp_exp_sp(
 }
 
 /**
- *
- *
+ * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
+ *\returns the -log(p_value) of the exponential distribution with Bonferroni correction
  */
 float score_logp_bonf_exp_sp(
   float sp_score, ///< The sp score for the scoring peptide -in
@@ -1195,6 +1207,99 @@ float score_logp_bonf_exp_sp(
 {
   double p_value = exp(-(1/mean) * sp_score);
   
+  //The Bonferroni correction 
+  //use original equation 1-(1-p_value)^n when p is small
+  if(p_value < 0.000001){
+    return -log(1-pow((1-p_value), num_peptide));
+  }
+  //else, use the approximation
+  else{
+    return -log(p_value*num_peptide);
+  }
+}
+
+/**
+ * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
+ * Function: ExtremeValueP()
+ * 
+ * Purpose:  Calculate P(S>x) according to an extreme
+ *           value distribution, given x and the parameters
+ *           of the distribution (characteristic
+ *           value mu, decay constant lambda).
+ *           
+ *           This function is exquisitely prone to
+ *           floating point exceptions if it isn't coded
+ *           carefully.
+ *           
+ * Args:     x      = score
+ *           mu     = characteristic value of extreme value distribution
+ *           lambda = decay constant of extreme value distribution
+ *           
+ *\returns P(S>x)
+ */
+double compute_evd_pvalue(
+  float score, ///< The xcorr score for the scoring peptide -in
+  float evd_mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  float evd_lambda ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+  )
+{
+  // These constants are hardware dependent.
+  // These values should be good for double precision floating point
+  // numbers compatible with the IEEE 754 standard.
+  // DBL_EPSILON = 2.2204460492503131e-16
+  // DBL_MAX_10_EXP = 308
+  
+  double p_value = 0;
+  
+  // avoid exceptions near P=1.0
+  if((evd_lambda * (score - evd_mu)) <= -1.0 * log(-1.0 * log(DBL_EPSILON))){
+    return 1.0;
+  }
+  
+  // avoid underflow fp exceptions near P=0.0
+  if((evd_lambda * (score - evd_mu)) >= 2.3 * DBL_MAX_10_EXP){
+    return 0.0;
+  }
+  
+  // a roundoff issue arises; use 1 - e^-x --> x for small x
+  p_value = exp(-1.0 * evd_lambda * (score - evd_mu));
+  if (p_value < 1e-7){
+    return p_value;
+  }
+  else{
+    return (1.0 - exp(-1.0 * p_value));
+  }
+}
+
+/**
+ * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
+ *\returns the -log(p_value) of the EVD distribution 
+ */
+float score_logp_evd_xcorr(
+  float xcorr_score, ///< The xcorr score for the scoring peptide -in
+  float mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  float l_value ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+  )
+{
+  return -log(compute_evd_pvalue(xcorr_score, mu, l_value));
+}
+
+/**
+ * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
+ *\returns the -log(p_value) of the EVD distribution with Bonferroni correction
+ */
+float score_logp_bonf_evd_xcorr(
+  float xcorr_score, ///< The xcorr score for the scoring peptide -in
+  float mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  float l_value, ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+  int num_peptide  ///< The number of peptides scored for sp -in
+  )
+{
+  double p_value = compute_evd_pvalue(xcorr_score, mu, l_value);
+
+  //DEBUG
+  //carp(CARP_DEBUG, "experiment_size: %d", num_peptide);
+
   //The Bonferroni correction 
   //use original equation 1-(1-p_value)^n when p is small
   if(p_value < 0.000001){

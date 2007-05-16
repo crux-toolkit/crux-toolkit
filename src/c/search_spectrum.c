@@ -81,7 +81,7 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | xcorr",
+    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr",
     (void *) &score_type, 
     STRING_ARG);
 
@@ -149,6 +149,7 @@ int main(int argc, char** argv){
       wrong_command(NULL, "The peptide charge. 1|2|3"); ///FIXME
     }
 
+    //main score type
     //score type
     if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
       main_score = LOGP_EXP_SP;
@@ -159,10 +160,17 @@ int main(int argc, char** argv){
     else if(strcmp(get_string_parameter_pointer("score-type"), "xcorr")== 0){
       main_score = XCORR;
     }
+    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_evd_xcorr")== 0){
+      main_score = LOGP_EVD_XCORR;
+    }
+    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_bonf_evd_xcorr")== 0){
+      main_score = LOGP_BONF_EVD_XCORR;
+    }
     else{
-      wrong_command(score_type, "The type of scoring function to use. logp_exp_sp | xcorr");
+      wrong_command(score_type, "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr");
     }
 
+    //preliminary score type
     //score type
     if(strcmp(get_string_parameter_pointer("prelim-score-type"), "sp")== 0){
       prelim_score = SP;
@@ -219,6 +227,13 @@ int main(int argc, char** argv){
     else if(main_score == XCORR){
       fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  
     }
+    else if(main_score == LOGP_EVD_XCORR){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\t%s\n", "logp_evd_xcorr_rank", "sp_rank", "mass", "logp_evd_xcorr", "xcorr", "sp", "sequence");  
+    }
+    else if(main_score == LOGP_BONF_EVD_XCORR){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_evd_xcorr_rank", "sp_rank", "mass", "logp_bonf_evd_xcorr", "xcorr", "sp", "sequence");  
+    }
+    
 
     //iterate over matches
     int match_count = 0;

@@ -106,8 +106,12 @@ void initialize_parameters(void){
   set_int_parameter("max-rank-preliminary", 500);
   set_int_parameter("max-rank-result", 500);
 
-  //set the top ranking peptides of SP to score for LOGP_EXP_SP
-  set_int_parameter("top_rank_p_value", 1);
+  //set the top ranking peptides to score for LOGP_*
+  set_int_parameter("top-rank-p-value", 1);
+  
+  //how many peptides to sample for EVD perameter estimation
+  set_int_parameter("sample-count", 500);
+  
 
   //now we have initialized the parameters
   parameter_initialized = TRUE;

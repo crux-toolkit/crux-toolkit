@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
@@ -56,28 +56,47 @@ float score_spectrum_v_spectrum(
 );
 
 /*************************************
- * Score for LOGP_EXP_SP
- *
- *
- *
+ * Score for LOGP_*
  ************************************/
 
 /**
- *
- *
+ * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
+ *\returns the -log(p_value) of the exponential distribution
  */
 float score_logp_exp_sp(
   float sp_score, ///< The sp score for the scoring peptide -in
   float mean      ///< The overall mean of the sp scored peptides -in
   );
+
 /**
- *
- *
+ * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
+ *\returns the -log(p_value) of the exponential distribution with Bonferroni correction
  */
 float score_logp_bonf_exp_sp(
   float sp_score, ///< The sp score for the scoring peptide -in
   float mean,      ///< The overall mean of the sp scored peptides -in
   int num_peptide  ///< The number of peptides scored for sp
+  );
+
+/**
+ * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
+ *\returns the -log(p_value) of the EVD distribution 
+ */
+float score_logp_evd_xcorr(
+  float xcorr_score, ///< The xcorr score for the scoring peptide -in
+  float mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  float l_value ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+  );
+
+/**
+ * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
+ *\returns the -log(p_value) of the EVD distribution with Bonferroni correction
+ */
+float score_logp_bonf_evd_xcorr(
+  float xcorr_score, ///< The xcorr score for the scoring peptide -in
+  float mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  float l_value, ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+  int num_peptide  ///< The number of peptides scored for sp -in
   );
 
 /*******************************

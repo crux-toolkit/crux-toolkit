@@ -48,11 +48,14 @@ charge=2
 #mass window of peptides to select for scoring
 mass-window=3.0
 
-#the main scoring type (logp_exp_sp | logp_bonf_exp_sp | xcorr)
+#the main scoring type (logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr)
 score-type=xcorr 
 
 #preliminary score type (sp)
 prelim-score-type=sp
+
+#how many peptides to sample for EVD perameter estimation
+sample-count=500
 
 #max number of preliminary scored peptides to be seleceted for main scoring  (use 1000000, to select all peptides, _MAX_NUMBER_PEPTIDES)
 max-rank-preliminary=500
@@ -61,5 +64,5 @@ max-rank-preliminary=500
 max-rank-result=500
 
 #set the number of top ranking peptides of SP to score for LOGP_EXP_SP (This is different compared to max-rank-preliminary, because it does not limit the count of preliminary scored peptides, thus some peptides can be outputed without being scored by main)
-top_rank_p_value=1
+top-rank-p-value=1
 

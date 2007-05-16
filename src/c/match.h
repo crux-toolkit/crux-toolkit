@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.7 $ 
+ * $Revision: 1.8 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -141,6 +141,13 @@ PEPTIDE_T* get_match_peptide(
 void set_match_peptide(
   MATCH_T* match, ///< the match to work -out
   PEPTIDE_T* peptide  ///< the working peptide -in
+  );
+
+/**
+ *Increments the pointer count to the match object
+ */
+void increment_match_pointer_count(
+  MATCH_T* match ///< the match to work -in  
   );
 
 /*
