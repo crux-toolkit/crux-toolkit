@@ -228,10 +228,10 @@ int main(int argc, char** argv){
       fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  
     }
     else if(main_score == LOGP_EVD_XCORR){
-      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\t%s\n", "logp_evd_xcorr_rank", "sp_rank", "mass", "logp_evd_xcorr", "xcorr", "sp", "sequence");  
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_evd_xcorr_rank", "sp_rank", "mass", "logp_evd_xcorr", "sp", "sequence");  
     }
     else if(main_score == LOGP_BONF_EVD_XCORR){
-      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_evd_xcorr_rank", "sp_rank", "mass", "logp_bonf_evd_xcorr", "xcorr", "sp", "sequence");  
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_evd_xcorr_rank", "sp_rank", "mass", "logp_bonf_evd_xcorr", "sp", "sequence");  
     }
     
 

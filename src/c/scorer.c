@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.21 $
+ * REVISION: $Revision: 1.22 $
  ****************************************************************************/
 
 #include <math.h>
@@ -33,6 +33,9 @@
 // numbers compatible with the IEEE 754 standard.
 #define DBL_EPSILON  2.2204460492503131e-16
 #define DBL_MAX_10_EXP 308
+
+#define BONFERRONI_CUT_OFF_P 0.0001
+#define BONFERRONI_CUT_OFF_NP 0.01
 
 /**
  * \struct scorer
@@ -1208,8 +1211,8 @@ float score_logp_bonf_exp_sp(
   double p_value = exp(-(1/mean) * sp_score);
   
   //The Bonferroni correction 
-  //use original equation 1-(1-p_value)^n when p is small
-  if(p_value < 0.000001){
+  //use original equation 1-(1-p_value)^n when p is not too small
+  if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
     return -log(1-pow((1-p_value), num_peptide));
   }
   //else, use the approximation
@@ -1298,11 +1301,11 @@ float score_logp_bonf_evd_xcorr(
   double p_value = compute_evd_pvalue(xcorr_score, mu, l_value);
 
   //DEBUG
-  //carp(CARP_DEBUG, "experiment_size: %d", num_peptide);
+  carp(CARP_DEBUG, "p_value: %E, experiment_size: %d", p_value, num_peptide);
 
   //The Bonferroni correction 
-  //use original equation 1-(1-p_value)^n when p is small
-  if(p_value < 0.000001){
+  //use original equation 1-(1-p_value)^n when p is not too small
+  if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
     return -log(1-pow((1-p_value), num_peptide));
   }
   //else, use the approximation
