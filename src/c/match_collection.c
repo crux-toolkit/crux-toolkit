@@ -28,6 +28,9 @@
 #include "match_collection.h"
 
 static BOOLEAN_T is_first_spectrum = TRUE;
+
+int DEBUG_COUNT = 0;
+
 /**
  *\struct match_collection
  *\brief An object that contains match objects with a given spectrum and peptide database
@@ -721,7 +724,6 @@ BOOLEAN_T score_match_collection_sp(
     peptide = generate_peptides_iterator_next(peptide_iterator);
     peptide_sequence = get_peptide_sequence(peptide);
     
-
     //create new ion series
     ion_series = new_ion_series(peptide_sequence, charge, ion_constraint);
     
