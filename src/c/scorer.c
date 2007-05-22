@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.22 $
+ * REVISION: $Revision: 1.23 $
  ****************************************************************************/
 
 #include <math.h>
@@ -966,7 +966,12 @@ BOOLEAN_T create_intensity_array_theoretical(
         //Add peaks of intensity 50.0 for B, Y type ions. 
         //In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
         add_intensity(theoretical, intensity_array_idx, 50);
-        add_intensity(theoretical, intensity_array_idx + 1, 25);
+
+        //skip ions that are located beyond max mz limit
+        if((intensity_array_idx + 1)< scorer->sp_max_mz){
+          add_intensity(theoretical, intensity_array_idx + 1, 25);
+        }
+        
         add_intensity(theoretical, intensity_array_idx - 1, 25);
 
         //add neutral loss of water and NH3
@@ -978,7 +983,7 @@ BOOLEAN_T create_intensity_array_theoretical(
         }
 
         int nh3_array_idx = (int)((get_ion_mass_z(ion) -  MASS_NH3_MONO/*charge*/) / bin_width + 0.5);
-        add_intensity(theoretical, nh3_array_idx, 10);
+        add_intensity(theoretical, nh3_array_idx, 10);        
       }
       
 
