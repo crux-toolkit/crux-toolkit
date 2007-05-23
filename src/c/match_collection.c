@@ -29,8 +29,6 @@
 
 static BOOLEAN_T is_first_spectrum = TRUE;
 
-int DEBUG_COUNT = 0;
-
 /**
  *\struct match_collection
  *\brief An object that contains match objects with a given spectrum and peptide database
@@ -478,7 +476,7 @@ BOOLEAN_T populate_match_rank_match_collection(
       return FALSE;
     }
   }
-  
+
   //set match rank for all match objects
   int match_index = 0;
   for(; match_index < match_collection->match_total; ++match_index){
@@ -684,7 +682,7 @@ BOOLEAN_T score_match_collection_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
   int charge,       ///< the charge of the spectrum -in
-  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< the peptide iterator to score
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< the peptide iterator to score -in
   )
 {
   
@@ -716,18 +714,20 @@ BOOLEAN_T score_match_collection_sp(
   char* peptide_sequence = NULL;
   MATCH_T* match = NULL;
   float score = 0;
-  PEPTIDE_T* peptide = NULL;
-  ION_SERIES_T* ion_series = NULL;
+  PEPTIDE_T* peptide = NULL;  
+
+  //create a generic ion_series, that will be reused for each peptide sequence
+  ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);    
   
   //iterate over all peptides
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     peptide = generate_peptides_iterator_next(peptide_iterator);
     peptide_sequence = get_peptide_sequence(peptide);
     
-    //create new ion series
-    ion_series = new_ion_series(peptide_sequence, charge, ion_constraint);
-    
-    //now predict ions
+    //update ion_series for the peptide instance    
+    update_ion_series(ion_series, peptide_sequence);
+
+    //now predict ions for this peptide
     predict_ions(ion_series);
     
     //calculates the Sp score
@@ -735,7 +735,7 @@ BOOLEAN_T score_match_collection_sp(
 
     //increment the total sp score
     match_collection->sp_scores_mean += score;
-
+    
     //create a new match
     match = new_match();
     
@@ -768,9 +768,11 @@ BOOLEAN_T score_match_collection_sp(
     }
     
     free(peptide_sequence);
-    free_ion_series(ion_series);
   }
-
+  //free ion_series now that we are done iterating over all peptides
+  free_ion_series(ion_series);
+  
+  
   //calculate the final sp score mean
   match_collection->sp_scores_mean /= match_collection->match_total;
   
@@ -783,18 +785,7 @@ BOOLEAN_T score_match_collection_sp(
   //free heap
   free_scorer(scorer);
   free_ion_constraint(ion_constraint);
-  //free_generate_peptides_iterator(peptide_iterator);
-
-  //DEBUG
-  /*
-  MATCH_COLLECTION_T* sample_collection = random_sample_match_collection(match_collection, 300);
-  
-  //debug
-  free_match_collection(match_collection);
-  *match_collection1 = sample_collection;
-  match_collection = sample_collection;
-  */
-
+    
   //now that the match_collection is sorted, populate the rank of each match object
   if(!populate_match_rank_match_collection(match_collection, SP)){
     carp(CARP_ERROR, "failed to populate match rank for SP in match_collection");
@@ -804,7 +795,7 @@ BOOLEAN_T score_match_collection_sp(
   
   //yes, we have now scored for the match-mode: SP
   match_collection->scored_type[SP] = TRUE;
-    
+  
   return TRUE;
 }
 
@@ -929,8 +920,7 @@ BOOLEAN_T score_match_collection_xcorr(
 {
   int match_idx = 0;
   MATCH_T* match = NULL;
-  char* peptide_sequence = NULL;
-  ION_SERIES_T* ion_series = NULL;
+  char* peptide_sequence = NULL;  
   float score = 0;
   
   /*
@@ -948,6 +938,9 @@ BOOLEAN_T score_match_collection_xcorr(
   //create new scorer
   SCORER_T* scorer = new_scorer(XCORR);  
 
+  //create a generic ion_series, that will be reused for each peptide sequence
+  ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);    
+  
   //we are string xcorr!
   carp(CARP_INFO, "start scoring for XCORR");
 
@@ -956,8 +949,8 @@ BOOLEAN_T score_match_collection_xcorr(
     match = match_collection->match[match_idx];
     peptide_sequence = get_peptide_sequence(get_match_peptide(match));
     
-    //create new ion series
-    ion_series = new_ion_series(peptide_sequence, charge, ion_constraint);
+    //update ion_series for the peptide instance    
+    update_ion_series(ion_series, peptide_sequence);
     
     //now predict ions
     predict_ions(ion_series);
@@ -970,10 +963,12 @@ BOOLEAN_T score_match_collection_xcorr(
     set_match_score(match, XCORR, score);
     
     //free heap
-    free(peptide_sequence);
-    free_ion_series(ion_series);
-  }
+    free(peptide_sequence);   
+  }  
 
+  //free ion_series now that we are done iterating over all peptides
+  free_ion_series(ion_series);
+  
   //we are starting xcorr!
   carp(CARP_INFO, "total peptides scored for XCORR: %d", match_idx);
 
@@ -999,6 +994,7 @@ BOOLEAN_T score_match_collection_xcorr(
 
   return TRUE;
 }
+
 
 /**
  * The match collection must be scored under Xcorr first

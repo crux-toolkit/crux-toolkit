@@ -1,14 +1,14 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.55 $
+# VERSION: $Revision: 1.56 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
 CC	= gcc
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
-OFLAGS  =  #-O2 
+OFLAGS  = -O2 
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
@@ -65,7 +65,6 @@ LIBOBJS =\
 	${OBJDIR}/match.o \
 	${OBJDIR}/match_collection.o \
 	${OBJDIR}/search_spectrum.o \
-	${OBJDIR}/RemoteControl.o \
 	${OBJDIR}/search_spectra.o 
 #	${OBJDIR}/score_peptide_list_spectrum.o
 
@@ -103,7 +102,7 @@ clean:
 depend: 
 	rm -f .depend
 	touch .depend
-	makedepend -Y -p'$${OBJDIR}/' -f .depend *.c *.h *.cpp##
+	makedepend -Y -p'$${OBJDIR}/' -f .depend *.c *.h #*.cpp##
 
 # Build a tags file for emacs.
 TAGS: *.c *.h *.cpp

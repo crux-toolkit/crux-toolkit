@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.18 $
+ * REVISION: $Revision: 1.19 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -16,6 +16,7 @@
 #include "ion_series.h"
 #include "utils.h"
 #include "crux-utils.h"
+#include "parameter.h"
 #include "mass.h"
 
 #define MAX_IONS 10000
@@ -38,7 +39,6 @@ struct ion_series {
   ION_T* specific_ions[MAX_NUM_ION_TYPE][MAX_IONS]; ///< specific ions in the series, reference to master array of ions
   LOSS_LIMIT_T* loss_limit; ///< nh3, h2o loss limit for a given cleavage index, before using this array should always sheck if not NULL
   int peptide_length;   ///< the length of the peptide
- 
 };
 
 /**
@@ -50,6 +50,7 @@ struct loss_limit{
   int nh3; ///< the limit to how many NH3 may be lost
   int h2o; ///< the limit to how many H2O may be lost
   //add more if needed for other neutral loss
+  //If change this struct, must also modify update_ion_series method
 };
 
 /**
@@ -110,7 +111,12 @@ ION_SERIES_T* allocate_ion_series(void){
 
 /**
  * copies in the peptide sequence
- * Instantiates a new ion_series object from a filename. 
+ * Use this method to create ion_series only when few are needed,
+ * because the memory allocation process is expensive.
+ * If need a repeated new ion-series for different peptides, 
+ * use "new_ion_series_generic" & "update_ion_series" combination, thus only allocate one 
+ * ion_seires object.
+ *\returns Instantiates a new ion_series object from the given peptide sequence and charge
  */
 ION_SERIES_T* new_ion_series(
   char* peptide, ///< The peptide for this ion series. -in
@@ -119,6 +125,7 @@ ION_SERIES_T* new_ion_series(
   )
 {
   ION_SERIES_T* ion_series = allocate_ion_series();
+
   //copy the peptide sequence
   ion_series->peptide = my_copy_string(peptide);
   ion_series->charge = charge;
@@ -130,6 +137,75 @@ ION_SERIES_T* new_ion_series(
 
   return ion_series;
 }
+
+/**
+ * Creates a heap allocated generic ion_series object that must be updated by "update_ion_series" method
+ * to transform the object into a ion-series for a specific instance of a peptide sequence and charge.
+ *\returns Instantiates a new generic ion_series object that must be updated for each peptide instance
+ */
+ION_SERIES_T* new_ion_series_generic(
+  ION_CONSTRAINT_T* constraint, ///< The constraints which the ions in this series obey.
+  int charge ///< The charge for this ion series -in
+  )
+{
+  ION_SERIES_T* ion_series = allocate_ion_series();
+  ion_series->constraint = constraint;
+  ion_series->charge = charge;
+  //create loss_limit array, that can be used for all peptides, thus set to max peptide length
+  ion_series->loss_limit = (LOSS_LIMIT_T*)mycalloc(get_int_parameter("max-length", 50), sizeof(LOSS_LIMIT_T));
+  return ion_series;
+}
+
+/**
+ * Updates an ion_series to a specific instance of a peptide sequence.
+ * If the ion_series has been already generated its ions, will free ions up.
+ * Copies in the peptide sequence.
+ * and re-initialize for the new peptide sequence.
+ */
+void update_ion_series(
+  ION_SERIES_T* ion_series, ///< the working ion_series -in
+  char* peptide ///< The peptide sequence for this ion series. -in
+  )
+{
+  int ion_type_idx = 0;
+  int ion_idx = 0;
+
+  /** Initialize the ion_series object for the new peptide sequence **/
+  
+  //free old peptide sequence
+  free(ion_series->peptide);
+  
+  //iterate over all ions, and free them
+  while(ion_series->num_ions > 0){
+    free_ion(ion_series->ions[ion_series->num_ions-1]);
+    --ion_series->num_ions;
+  }
+  
+  //initialize all num_specific_ion count back to 0
+  for(; ion_type_idx < MAX_NUM_ION_TYPE; ++ion_type_idx){
+    ion_series->num_specific_ions[ion_type_idx] = 0;
+  }
+  
+  ion_series->num_ions = 0;
+  ion_series->is_predicted = FALSE;
+  
+  /** set ion_series for new instance of peptide **/
+  
+  //copy the peptide sequence
+  ion_series->peptide = my_copy_string(peptide);
+  ion_series->peptide_length = strlen(peptide);
+
+  
+  /** one more initialization, because need new peptide length, ion loss limit all back to 0 */
+  
+  //Initialize the loss limit array for the new peptide
+  for(ion_idx =0; ion_idx < ion_series->peptide_length; ++ion_idx){
+    ion_series->loss_limit->h2o = 0;
+    ion_series->loss_limit->nh3 = 0;
+    //add more initialize count if more added
+  }
+}
+
 
 /**
  * Frees an allocated ion_series object.
@@ -146,7 +222,7 @@ void free_ion_series(
     free_ion(ion_series->ions[ion_series->num_ions-1]);
     --ion_series->num_ions;
   }
-   
+
   free(ion_series);
 }
 

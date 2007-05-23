@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -20,12 +20,41 @@
 ION_SERIES_T* allocate_ion_series(void);
 
 /**
- * Instantiates a new ion_series object from a filename. 
+ * copies in the peptide sequence
+ * Use this method to create ion_series only when few are needed,
+ * because the memory allocation process is expensive.
+ * If need a repeated new ion-series for different peptides, 
+ * use "new_ion_series_generic" & "update_ion_series" combination, thus only allocate one 
+ * ion_seires object.
+ *\returns Instantiates a new ion_series object from the given peptide sequence and charge
  */
 ION_SERIES_T* new_ion_series(
   char* peptide, ///< The peptide for this ion series. -in
   int charge, ///< The charge for this ion series -in
   ION_CONSTRAINT_T* constraint ///< The constraints which the ions in this series obey.
+  );
+
+
+/**
+ * Creates a heap allocated generic ion_series object that must be updated by "update_ion_series" method
+ * to transform the object into a ion-series for a specific instance of a peptide sequence and charge.
+ *\returns Instantiates a new generic ion_series object that must be updated for each peptide instance
+ */
+ION_SERIES_T* new_ion_series_generic(
+  ION_CONSTRAINT_T* constraint, ///< The constraints which the ions in this series obey.
+  int charge ///< The charge for this ion series -in
+  );
+
+
+/**
+ * Updates an ion_series to a specific instance of a peptide sequence.
+ * If the ion_series has been already generated its ions, will free ions up.
+ * Copies in the peptide sequence.
+ * and re-initialize for the new peptide sequence.
+ */
+void update_ion_series(
+  ION_SERIES_T* ion_series, ///< the working ion_series -in
+  char* peptide ///< The peptide sequence for this ion series. -in
   );
 
 /**
@@ -136,6 +165,9 @@ int get_ion_series_num_ions_one_type(
   ION_SERIES_T* ion_series, ///< the working ion_series -in                          
   ION_TYPE_T ion_type ///< the type of ions -in
   );
+
+
+/******************************/
 
 /*************************
  * ION_CONSTRAINT methods
