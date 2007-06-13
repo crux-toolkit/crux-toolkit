@@ -57,7 +57,7 @@ ln(NumSp):log of number peptide in mass range</FONT></SPAN></FONT></CODE></P>
 <P STYLE="margin-bottom: 0in; font-weight: medium"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">3.
-Intra-spectra(run) specific features:</FONT></FONT></SPAN></CODE></P>
+Run-specific features (i.e. features that are derived from multiple spectra):</FONT></FONT></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in; font-weight: medium"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none">&nbsp;&nbsp;&nbsp;<FONT SIZE=3 STYLE="font-size: 13pt"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">ln(numPep),
@@ -106,26 +106,26 @@ specific features</FONT></FONT></SPAN></CODE></CODE></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">}</FONT></FONT></SPAN></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">The
-run specific features are either not considered in our Plan B, or
-will be incorporated through a separate object &ldquo;feature_vector&rdquo;
-in Plan A.</FONT></FONT></SPAN></SPAN></CODE></P>
+<hr>
+<br>
+<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">The run-specific features are either not considered in <b>Plan B</b>, or
+will be incorporated after PSM scoring, through a separate object &ldquo;feature_vector&rdquo;
+in <b>Plan A</b>.</FONT></FONT></SPAN></SPAN></CODE></P>
+<br>
+<hr>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0in"><FONT SIZE=3 STYLE="font-size: 13pt"><CODE><B><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Plan
-A.</FONT></FONT></B></CODE></FONT></P>
+<P STYLE="margin-bottom: 0in"><FONT SIZE=3 STYLE="font-size: 13pt"><CODE><B><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Plan A.</FONT></FONT></B></CODE></FONT></P>
 <P STYLE="margin-bottom: 0in"><FONT SIZE=3 STYLE="font-size: 13pt"><CODE><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">In
 plan A, the database search and Percolator interface are clearly
 decoupled.</FONT></FONT></SPAN></CODE></FONT></P>
 <P STYLE="margin-bottom: 0in"><FONT SIZE=3 STYLE="font-size: 13pt"><CODE><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">The
-Percolator interface can be run separately on the PSM database output
+Percolator interface can be run separately on PSM feature-vector output
 files, which allows more straight forward parallelization for
-potential cluster usage. However, the code complexity increases with
-more book keeping and addition functionality added.</FONT></FONT></SPAN></CODE></FONT></P>
+potential cluster usage. However, the code complexity increases with more bookkeeping (e.g. keeping track of PSM identifications) and a data serialization step.</FONT></FONT></SPAN></CODE></FONT></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Key
-functions,</FONT></FONT></SPAN></SPAN></CODE></P>
+<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Key functions:</FONT></FONT></SPAN></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">//Serialize
@@ -143,10 +143,11 @@ match_collection features to be serialized</FONT></FONT></SPAN></SPAN></CODE></C
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">)</FONT></FONT></SPAN></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">//Generate
-the run specific features from the</FONT></FONT></SPAN></SPAN></CODE></P>
+<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">//Append
+run specific features from the</FONT></FONT></SPAN></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">//feature_vector
 that is instantiated from the output file</FONT></FONT></SPAN></SPAN></CODE></P>
+<b>Chris where is this method getting the run-specific features from? We probably need a RUN_T object, or something like that. A hash-like object to keep track of peptides, spectra, and proteins, that can be instantiated after a run. Probably from a directory with the serialized percolator files?</b>
 <P STYLE="margin-bottom: 0in"><FONT SIZE=3 STYLE="font-size: 13pt"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">void
 process_run_specific_features(</FONT></FONT></SPAN></SPAN></CODE></FONT></P>
 <P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;&nbsp;&nbsp;</SPAN></CODE><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt">FEATURE_VECTOR_T*
@@ -172,10 +173,10 @@ pseudo-code</FONT></FONT></SPAN></SPAN></CODE></P>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">//top_match_collection
 will store all top ranked PSMs</FONT></FONT></SPAN></SPAN></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Match_collection_t*
+<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">MATCH_COLLECTION_T*
 top_</FONT></FONT></SPAN></SPAN><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">match_collection
 = new_match_collection();</FONT></FONT></SPAN></SPAN></CODE></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Match_collection_t*
+<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">MATCH_COLLECTION_T*
 </FONT></FONT></SPAN></SPAN><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">match_collection;</FONT></FONT></SPAN></SPAN></CODE></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">int
 keep_top_rank = 5 </FONT></FONT></SPAN></SPAN></CODE>
@@ -232,12 +233,14 @@ PSM with features to Percolator</FONT></FONT></SPAN></SPAN></CODE></P>
 get_percolator_features(<CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">vector</FONT></FONT></SPAN></SPAN></CODE>));</FONT></FONT></SPAN></SPAN></CODE></FONT></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
+<hr>
+<br>
 <P STYLE="margin-bottom: 0in"><FONT SIZE=3 STYLE="font-size: 13pt"><CODE><B><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Plan
 B.</FONT></FONT></B></CODE></FONT></P>
 <P STYLE="margin-bottom: 0in"><CODE><FONT FACE="Courier, monospace"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt">In
 plan B, database search and Percolator interface are run together.
 W<SPAN STYLE="text-decoration: none"><SPAN STYLE="text-decoration: none"><SPAN STYLE="text-decoration: none">hen
-time to register PSMs, u<FONT FACE="Courier, monospace">se
+it is time to register PSMs, u<FONT FACE="Courier, monospace">se
 &ldquo;</FONT></SPAN></SPAN></SPAN></FONT></SPAN><SPAN STYLE="text-decoration: none"><SPAN STYLE="text-decoration: none"><SPAN STYLE="text-decoration: none"><CODE><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">get_percolator_features&rdquo;
 method that takes a match and its match_collection as </FONT></FONT></SPAN></CODE><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">a</FONT>rguments
 and returns a float array in the Percolator input format. No
@@ -258,16 +261,18 @@ match</FONT></FONT></SPAN></SPAN></CODE><SPAN STYLE="font-weight: medium"><FONT 
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">/***************</FONT></FONT></SPAN></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">*
-pseudo-code</FONT></FONT></SPAN></SPAN></CODE></P>
+pseudo-code</FONT>
+search_spectra
+</FONT></SPAN></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">***************/</FONT></FONT></SPAN></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in; font-weight: medium"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">//top_match_collection
 will store all top ranked PSMs</FONT></FONT></SPAN></SPAN></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Match_collection_t*
+<P STYLE="margin-bottom: 0in"><CODE><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">MATCH_COLLECTION_T*
 top_</FONT></FONT></SPAN></SPAN><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">match_collection
 = new_match_collection();</FONT></FONT></SPAN></SPAN></CODE></FONT></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">Match_collection_t*
+<P STYLE="margin-bottom: 0in"><CODE><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">MATCH_COLLECTION_T*
 </FONT></FONT></SPAN></SPAN><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">match_collection;</FONT></FONT></SPAN></SPAN></CODE></FONT></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><SPAN STYLE="font-weight: medium"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">int
 keep_top_rank = 5</FONT></FONT></SPAN></SPAN></CODE></P>
