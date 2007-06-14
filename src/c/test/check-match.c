@@ -26,9 +26,13 @@ START_TEST (test_create){
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_ITERATOR_T* match_iterator = NULL;
   MATCH_T* match = NULL;
-  int  verbosity = CARP_INFO;
+
+  
+  /********** comment this parameter section out, when using CK_FORK=no, valgrind ******/
+  // Parameters have been already confirmed in check_scorer.
   
   //set verbbosity level
+  int  verbosity = CARP_INFO;
   set_verbosity_level(verbosity);
 
   //parse paramter file
@@ -39,7 +43,8 @@ START_TEST (test_create){
 
   //parameters has been confirmed
   parameters_confirmed();
-  
+  /***************************************************/
+
   //read ms2 file
   collection = new_spectrum_collection(ms2_file);
   spectrum = allocate_spectrum();
@@ -47,12 +52,14 @@ START_TEST (test_create){
   //search for spectrum with correct scan number
   fail_unless(get_spectrum_collection_spectrum(collection, scan_num, spectrum), "failed to find scan_num in ms3 file");
   
-  //get match collection with SP
-  match_collection = new_match_collection_spectrum(spectrum, 1, 500, SP);
+  //get match collection with perliminary score of SP, and main score of XCORR
+  match_collection = new_match_collection_spectrum(spectrum, 1, 500, SP, XCORR);
   
   fail_unless(get_match_collection_scored_type(match_collection, SP), "failed to set match_collection scored type, SP");
-  //xcorr should not be scored yet
-  fail_unless(!get_match_collection_scored_type(match_collection, XCORR), "failed to set match_collection scored type, xcorr");
+  fail_unless(get_match_collection_scored_type(match_collection, XCORR), "failed to set match_collection scored type, SP");
+
+  //LOGP_EXP_SP should not be scored yet
+  fail_unless(!get_match_collection_scored_type(match_collection, LOGP_EXP_SP), "failed to set match_collection scored type, xcorr");
   fail_unless(!get_match_collection_iterator_lock(match_collection), "match_collection lock is not set correctly"); 
   
   //create match iterator

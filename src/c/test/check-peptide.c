@@ -33,8 +33,11 @@ PEPTIDE_SRC_T* association3;
 DATABASE_T* database;
 
 START_TEST (test_create){
-  database = new_database("test", FALSE);
-
+  database = new_database("test", FALSE, TRUE);
+  
+  //test on link_list implementaion of peptide_src
+  set_peptide_src_implementation(TRUE);
+  
   peptide4 = allocate_peptide();
   char* seq = NULL;
   
@@ -49,9 +52,9 @@ START_TEST (test_create){
                         , 490, "this is a my test protein", 44, 4, database);
 
   //create peptides
-  peptide1 = new_peptide( 6, 684.75, protein, 239, TRYPTIC, &free_peptide_normal); //QVPDAR
-  peptide2 = new_peptide( 6, 656.69, protein, 6, PARTIALLY_TRYPTIC, &free_peptide_normal);//FGGTSV
-  peptide3 = new_peptide( 9, 1341.32, protein, 221, NOT_TRYPTIC, &free_peptide_normal); //DCCEIWTDV
+  peptide1 = new_peptide( 6, 684.75, protein, 239, TRYPTIC); //QVPDAR
+  peptide2 = new_peptide( 6, 656.69, protein, 6, PARTIALLY_TRYPTIC);//FGGTSV
+  peptide3 = new_peptide( 9, 1341.32, protein, 221, NOT_TRYPTIC); //DCCEIWTDV
   
   
   //check peptide
@@ -134,7 +137,7 @@ START_TEST (test_create){
   //try printing peptide in various forms..to ensure nothing blows up
   print_peptide(peptide4, stdout);
   print_peptide_in_format(peptide4, TRUE, stdout);
-  serialize_peptide(peptide4, stdout, 3);
+  serialize_peptide(peptide4, stdout);
  
   free_database(database);
   free_peptide_constraint(constraint);
