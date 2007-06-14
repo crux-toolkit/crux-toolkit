@@ -27,7 +27,6 @@ int main(void){
   Suite* suite_ion = ion_suite(); 
   Suite* suite_ion_series = ion_series_suite(); 
   Suite* suite_scorer = scorer_suite();
-
   Suite* suite_match = match_suite(); 
 
 

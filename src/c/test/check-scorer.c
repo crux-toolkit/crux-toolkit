@@ -24,7 +24,10 @@ START_TEST (test_create){
 
   //parse paramter file
   parse_update_parameters(parameter_file);
-
+  
+  //set parameter for fasta_file, although not used here...
+  set_string_parameter("fasta-file", "fasta_file");
+  
   //parameters has been confirmed
   parameters_confirmed();
   
