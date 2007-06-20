@@ -2,29 +2,29 @@
 <HTML>
 <HEAD>
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
-	<TITLE>search-spectra</TITLE>
+	<TITLE>match-search</TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20050830;17560800">
 	<META NAME="CHANGED" CONTENT="20050902;15510500">
-<!-- FILE: search-spectrum.html
+<!-- FILE: match-search.html
 AUTHOR: Chris Park
-CREATE DATE: 2007-02-27
-PROJECT: search-spectra
-REVISION: $Revision: 1.2 $
+CREATE DATE: 2007-06-19
+PROJECT: match-search
+REVISION: $Revision: 1.1 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
-<H1 ALIGN=CENTER>search-spectra</H1>
+<H1 ALIGN=CENTER>match-search</H1>
 <B>Description:</B>
 <br>
 <br>
-Given as input an ms2 file, a sequence database, and an optional parameter file, search all the spectrum against the peptides in the sequence database, and return high scoring peptides.
+Given as input an ms2 file, a sequence database, and an optional parameter file, search all the spectrum against the peptides in the sequence database, and return the resulting PSMs with some additional features in serialized output files or a sqt files.
 <br>
 <br>
 <B>Usage:</B>
 <br>
 <br>
-<code>search_spectra
+<code>match_search
   &nbsp;[options]
   &nbsp;&lt;ms2&nbsp;input&nbsp;filename&gt; 
   &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
@@ -46,19 +46,18 @@ Given as input an ms2 file, a sequence database, and an optional parameter file,
 <UL>
   <br>
 
-  The program prints to standard output a series of header lines,
-  describing how the code were generated, and according to what
-  criteria, as follows:
-
-  <pre>
-  # SPECTRUM FILE: &lt;spectrum input file&gt;
-  # SCAN NUMBER: &lt;ms2 scan number&gt;
-  # PROTEIN DATABASE: &lt;protein input filename&gt;
-  </pre>
+  The program outputs to a user specified folder a binary file
+  that contains the PSMs and additional features.
+  <br>
+  Also optionally, the result can be output in a human readable
+  Sqt format file.
+  <br>
 
 </UL>
 <B>Options:</B>
 <UL>
+<LI>[--output-folder string] &ndash; The output folder to store the serialized output files. Default = current directory.
+<LI>[--output-sqt] &ndash; Output Sqt result file along with serialized binary file.
 <LI>[--mass-window float] &ndash; The peptide mass tolerance window. Default = 3.
 <LI>[--prelim-score-type sp] &ndash; The type of scoring function to use.  Default = sp.
 <LI>[--score-type logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr] &ndash; The type of scoring function to use.  Default = sp.
@@ -78,7 +77,7 @@ messages:</B>
 <B>Bugs:</B> 
 
 <UL>
-	<LI>search-spectra does not have bugs, it has features.
+	<LI>match-search does not have bugs, it has features.
 	
 </UL>
 <HR>
