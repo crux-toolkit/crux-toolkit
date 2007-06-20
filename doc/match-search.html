@@ -10,7 +10,7 @@
 AUTHOR: Chris Park
 CREATE DATE: 2007-06-19
 PROJECT: match-search
-REVISION: $Revision: 1.2 $
+REVISION: $Revision: 1.3 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -18,7 +18,10 @@ REVISION: $Revision: 1.2 $
 <B>Description:</B>
 <br>
 <br>
-Given as input an ms2 file, a sequence database, and an optional parameter file, search all the spectrum against the peptides in the sequence database, and return the resulting PSMs with some additional features in serialized output files or a sqt files.
+Given as input an ms2 file, a sequence database, and an optional parameter
+file, search each spectrum against the peptides in the sequence database,
+and return the resulting PSMs with some additional features in serialized
+binary output files or an SQT files.
 <br>
 <br>
 <B>Usage:</B>
@@ -36,7 +39,7 @@ Given as input an ms2 file, a sequence database, and an optional parameter file,
 
 <UL>
   <LI>&lt;ms2 &gt; &ndash; 
-  The name of the file (in MS2 format) from which to parse the spectrum.
+  The name of the file (in MS2 format) from which to parse the spectra.
   <LI>&lt;protein input filename&gt; &ndash; 
   The name of the file (in fasta format) from which to retrieve proteins and
   peptides.
@@ -49,16 +52,21 @@ Given as input an ms2 file, a sequence database, and an optional parameter file,
   The program outputs to a user specified folder a binary file
   that contains the PSMs and additional features.
   <br>
-  Also optionally, the result can be output in a human readable
-  Sqt format file.
+  Optionally, the result can be output in a human readable
+  Sqt format file, or both binary and Sqt formats.
   <br>
 
 </UL>
 <B>Options:</B>
 <UL>
-<LI>[--psm-result-folder string] &ndash; The output folder to store the serialized output files. Default = current directory.
-<LI>[--output-sqt] &ndash; Output Sqt result file along with serialized binary file.
-<LI>[--mass-window float] &ndash; The peptide mass tolerance window. Default = 3.
+<LI>[--output-mode sqt|binary|all ] &ndash; The output format. Default = binary.
+<LI>[--match-output-folder string] &ndash; The output folder to store the serialized binary output files. Default = current directory.
+<LI>[--sqt-output-file] &ndash; Name of the sqt file to place matches.
+Default = Prefix of <code>&lt;ms2 input filename&gt;</code>.psm.
+<LI>[--min-mass float] &ndash; The lowest spectrum m/z to search in the ms2
+file. Default = 0.0
+<LI>[--max-mass float] &ndash; The highest spectrum m/z to search in the ms2
+file. Default = Positive Infinity.
 <LI>[--prelim-score-type sp] &ndash; The type of scoring function to use.  Default = sp.
 <LI>[--score-type logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr] &ndash; The type of scoring function to use.  Default = sp.
 <LI>[--parameter-file filename] &ndash; The crux parameter file to parse
@@ -73,6 +81,11 @@ messages:</B>
   not exist (or is not readable, or is empty).</I>
   <LI><I>Fatal: The file "protein input filename" does
   not exist (or is not readable, or is empty).</I>
+  <LI><I>Fatal: The following options are incompatible:
+  <ul>
+    <li>--output-mode = sqt    and --match-output-folder
+    <li>--output-mode = binary and --sqt-output-file
+  </ul>
 </UL>
 <B>Bugs:</B> 
 

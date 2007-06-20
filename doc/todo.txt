@@ -9,3 +9,5 @@
 - executables that use an index should default to the parameter values in the index, 
   unless a parameter in the parameter file or on the command line contradicts the index parameters,
   in which case it should error out
+- it looks get_ms2_spectrum prints a line "Filename:test.ms2" to the beginning
+  of the output. If it does, it shouldn't.
