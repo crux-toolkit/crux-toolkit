@@ -123,6 +123,7 @@ int main(int argc, char** argv){
     int charge_index = 0;
     long int max_rank_preliminary = 500;
     long int max_rank_result = 500;
+    float mass_offset = 0;
 
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
@@ -178,6 +179,9 @@ int main(int argc, char** argv){
     //set max number of final scoring matches to print as output
     max_rank_result = get_int_parameter("max-rank-result", 500);
  
+    //get mass offset from precursor mass to search for candidate peptides
+    mass_offset = get_double_parameter("mass-offset", 0);
+
     //print header
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
     fprintf(stdout, "# PROTEIN DATABASE: %s\n", fasta_file);
@@ -210,7 +214,8 @@ int main(int argc, char** argv){
       fprintf(stdout, "# SPECTRUM SCAN NUMBER: %d\n", get_spectrum_first_scan(spectrum));
       fprintf(stdout, "# SPECTRUM ID NUMBER: %d\n", get_spectrum_id(spectrum));
       fprintf(stdout, "# SPECTRUM PRECURSOR m/z: %.2f\n", get_spectrum_precursor_mz(spectrum));
-
+      fprintf(stdout, "# MASS OFFSET: %.2f\n", mass_offset);
+      
       //iterate over all possible charge states
       for(charge_index = 0; charge_index < possible_charge; ++charge_index){
         ++spectra_idx;
@@ -222,7 +227,8 @@ int main(int argc, char** argv){
         match_collection =
           new_match_collection_spectrum_with_peptide_iterator(spectrum, 
                                                               possible_charge_array[charge_index], 
-                                                              max_rank_preliminary, prelim_score, main_score);
+                                                              max_rank_preliminary, prelim_score, 
+                                                              main_score, mass_offset);
         
                 
         //create match iterator, TRUE: return match in sorted order of main_score type

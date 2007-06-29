@@ -151,7 +151,8 @@ int main(int argc, char** argv){
     long int max_rank_result = 500;
     int top_match = 1;
     MATCH_SEARCH_OUPUT_MODE_T output_type = BINARY_OUTPUT;
-    
+    float mass_offset = 0;
+
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
@@ -228,6 +229,9 @@ int main(int argc, char** argv){
     
     //set max number of matches to be serialized per spectrum
     top_match = get_int_parameter("top-match", 1);
+
+    //get mass offset from precursor mass to search for candidate peptides
+    mass_offset = get_double_parameter("mass-offset", 0);    
     
     /************** done with parameter setting **************/
     
@@ -296,7 +300,8 @@ int main(int argc, char** argv){
         match_collection =
           new_match_collection_spectrum_with_peptide_iterator(spectrum, 
                                                               possible_charge_array[charge_index], 
-                                                              max_rank_preliminary, prelim_score, main_score);
+                                                              max_rank_preliminary, prelim_score, 
+                                                              main_score, mass_offset);
         
         //serialize the psm features to ouput file upto 'top_match' number of 
         //top peptides among the match_collection

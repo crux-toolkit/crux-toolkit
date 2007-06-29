@@ -91,6 +91,9 @@ void initialize_parameters(void){
   set_boolean_parameter("output-sequence", FALSE);
   set_boolean_parameter("missed-cleavages", FALSE);
   
+  //searching peptides
+  set_double_parameter("mass-offset", 0);
+
   //score_peptide_spectrum perameters
   set_double_parameter("beta", 0.075);
   set_double_parameter("max-mz", 4000);
