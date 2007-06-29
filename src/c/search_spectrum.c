@@ -131,6 +131,7 @@ int main(int argc, char** argv){
     MATCH_T* match = NULL;
     long int max_rank_preliminary = 500;
     long int max_rank_result = 500;
+    float mass_offset = 0;
 
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
@@ -184,6 +185,9 @@ int main(int argc, char** argv){
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
 
+    //get mass offset from precursor mass to search for candidate peptides
+    mass_offset = get_double_parameter("mass-offset", 0);
+    
     //set max number of preliminary scored peptides to use for final scoring
     max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
 
@@ -194,7 +198,6 @@ int main(int argc, char** argv){
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
     fprintf(stdout, "# PROTEIN DATABASE: %s\n", fasta_file);
     fprintf(stdout, "# SPECTRUM SCAN NUMBER: %d\n", scan_num);
-
 
     //read ms2 file
     collection = new_spectrum_collection(ms2_file);
@@ -211,10 +214,11 @@ int main(int argc, char** argv){
     fprintf(stdout, "# SPECTRUM ID NUMBER: %d\n", get_spectrum_id(spectrum));
     fprintf(stdout, "# SPECTRUM PRECURSOR m/z: %.2f\n", get_spectrum_precursor_mz(spectrum));
     fprintf(stdout, "# SPECTRUM CHARGE: %d\n", charge);
+    fprintf(stdout, "# MASS OFFSET: %.2f\n", mass_offset);
 
-    
     //get match collection with prelim match collection
-    match_collection = new_match_collection_spectrum(spectrum, charge, max_rank_preliminary, prelim_score, main_score);
+    match_collection = new_match_collection_spectrum(spectrum, charge, max_rank_preliminary, 
+                                                     prelim_score, main_score, mass_offset);
     
     //create match iterator, TRUE: return match in sorted order of main_score type
     match_iterator = new_match_iterator(match_collection, main_score, TRUE);
@@ -257,9 +261,10 @@ int main(int argc, char** argv){
     free_spectrum(spectrum);
 
     //test function
+    /*
     pcEndRegistration();
-    printf("did it happen?\n");
-
+    carp(CARP_DEBUG, "Percolator, did it happen?");
+    */
   }
   else{
     char* usage = parse_arguments_get_usage("search_spectrum");

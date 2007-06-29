@@ -196,7 +196,8 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
  int charge,       ///< the charge of the spectrum -in
  int max_rank,     ///< max number of top rank matches to keep from SP -in
  SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
- SCORER_TYPE_T score_type ///< the score type (XCORR, LOGP_EXP_SP, LOGP_BONF_EXP_SP) -in
+ SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP, LOGP_BONF_EXP_SP) -in
+ float mass_offset  ///< the mass offset from neutral_mass to search for candidate peptides -in
  )
 {
   MATCH_COLLECTION_T* match_collection = allocate_match_collection();
@@ -211,7 +212,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   
   //create a generate peptide iterator
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //FIXME use neutral_mass, might chage to pick
-    new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge));
+    new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge) + mass_offset);
   
   /***************Preliminary scoring**************************/
   //score SP match_collection
@@ -289,7 +290,8 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
  int charge,       ///< the charge of the spectrum -in
  int max_rank,     ///< max number of top rank matches to keep from SP -in 
  SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
- SCORER_TYPE_T score_type ///< the score type (XCORR, LOGP_EXP_SP, LOGP_BONF_EXP_SP) -in
+ SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP, LOGP_BONF_EXP_SP) -in
+ float mass_offset  ///< the mass offset from neutral_mass to search for candidate peptides -in
  //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< peptide iteartor to use, must set it first before use
  )
 {
@@ -299,7 +301,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
   match_collection->charge = charge;
   
   //get perameters
-  float neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
+  float neutral_mass = get_spectrum_neutral_mass(spectrum, charge) + mass_offset;
   double mass_window = get_double_parameter("mass-window", 3);
   int sample_count = get_int_parameter("sample-count",500);
   double min_mass = neutral_mass - mass_window;
@@ -322,7 +324,6 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
 
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //NULL;//FIXME use neutral_mass, might chage to pick
     new_generate_peptides_iterator_mutable();
-  //chdir("human-NCBI-042104_crux_index/");
 
   //set the generate_peptides_iterator for the next round of peptides
   set_generate_peptides_mutable(peptide_iterator, max_mass, min_mass);

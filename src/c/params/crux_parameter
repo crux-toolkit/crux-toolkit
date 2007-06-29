@@ -36,6 +36,9 @@ output-sequence=TRUE
 missed-cleavages=TRUE
 
 ##########perameters used for scoring peptide, spectrum match ############
+#mass offset to search candidate peptides from the precursor mass
+mass-offset=0.0
+
 #SP parameter used
 beta=0.075
 
