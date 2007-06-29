@@ -22,6 +22,8 @@
 #include "parameter.h"
 #include "match.h"
 #include "match_collection.h"
+#include "PercolatorCInterface.h"
+
 /**
  * when wrong command is seen carp, and exit
  */
@@ -253,6 +255,11 @@ int main(int argc, char** argv){
     free_match_collection(match_collection);
     free_spectrum_collection(collection);
     free_spectrum(spectrum);
+
+    //test function
+    pcEndRegistration();
+    printf("did it happen?\n");
+
   }
   else{
     char* usage = parse_arguments_get_usage("search_spectrum");

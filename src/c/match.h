@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.8 $ 
+ * $Revision: 1.9 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -73,6 +73,11 @@ void print_match(
   SCORER_TYPE_T output_mode  ///< the output mode -in
 );
 
+void serialize_match(
+  MATCH_T* match, ///< the match to print -in
+  FILE* file ///< output stream -out
+  );
+
 /****************************
  * match get, set methods
  ***************************/
@@ -99,7 +104,7 @@ void set_match_score(
  * Must ask for score that has been computed
  *\returns the match_mode rank in the match object
  */
-float get_match_rank(
+int get_match_rank(
   MATCH_T* match, ///< the match to work -in  
   SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
   );

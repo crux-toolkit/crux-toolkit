@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.16 $
+ * REVISION: $Revision: 1.17 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -14,6 +14,7 @@
 #include "objects.h"
 #include "spectrum.h"
 #include "spectrum_collection.h" 
+#include "protein_index.h" 
 #include "peak.h"
 #include "utils.h"
 #include "unistd.h"
@@ -74,14 +75,17 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   )
 {
   SPECTRUM_COLLECTION_T* spectrum_collection =  allocate_spectrum_collection();
-
-  if(access(filename, F_OK)){
-    fprintf(stderr,"File %s could not be opened\n",filename);
+  char* absolute_path_file =  canonicalize_file_name(filename);
+  
+  if(access(absolute_path_file, F_OK)){
+    fprintf(stderr,"File %s could not be opened\n", absolute_path_file);
     free(spectrum_collection);
+    free(absolute_path_file);
     exit(1);
   } //FIXME check if file is empty
   
-  set_spectrum_collection_filename(spectrum_collection, filename); ///FIXME might need to use new
+  set_spectrum_collection_filename(spectrum_collection, absolute_path_file);
+  free(absolute_path_file);
   
   return spectrum_collection;
 }
@@ -210,7 +214,7 @@ BOOLEAN_T parse_spectrum_collection(
 
   parsed_spectrum = allocate_spectrum();
   //parse one spectrum at a time
-  while(parse_spectrum_file(parsed_spectrum, file)){
+  while(parse_spectrum_file(parsed_spectrum, file, spectrum_collection->filename)){
     //is spectrum capacity not full?
     if(!add_spectrum_to_end(spectrum_collection, parsed_spectrum)){
       free_spectrum(parsed_spectrum);
@@ -347,7 +351,7 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     fprintf(stderr,"File %s could not be opened",spectrum_collection->filename);
     return (FALSE);
   }
-  
+
   target_index = binary_search_spectrum(file, first_scan);
   // first_scan not found
   if(target_index == -1){
@@ -355,8 +359,8 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     return FALSE;
   }
   fseek(file, target_index, SEEK_SET);
-  // failed to parse spectrum
-  if(!parse_spectrum_file(spectrum, file)){
+  //parse spectrum, check if failed to parse spectrum return false
+  if(!parse_spectrum_file(spectrum, file, spectrum_collection->filename)){
     fclose(file);
     return FALSE;
   }
@@ -622,6 +626,65 @@ BOOLEAN_T get_spectrum_collection_is_parsed(
 {
   return spectrum_collection->is_parsed;
 }
+
+/**
+ * Takes the spectrum file name and creates a file with unique filename.
+ * This file is used for PSM result serializations.
+ * Template: "fileName_XXXXXX", where XXXXXX is random generated to be unique.
+ * Also sets psm_result_filename to a heap allocated filename.
+ *\returns file handler to the newly created file and sets psm_result_filename.
+ */
+FILE* get_spectrum_collection_psm_result_filename(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection -in
+  char* psm_result_folder_name, ///< the folder name for where the result file should be placed -in
+  char** psm_result_filename, ///< pointer to the filename for the psm results to be placed in -out
+  char* file_extension ///< the file extension of the spectrum file(i.e. ".ms2")
+  )
+{
+  int file_descriptor = -1;
+  
+  //check if psm_result_folder exist?
+  if(access(psm_result_folder_name, F_OK)){
+    //create PSM result folder
+    if(mkdir(psm_result_folder_name, S_IRWXU+S_IRWXG+S_IRWXO) != 0){
+      carp(CARP_ERROR, "failed to create psm result folder: %s", psm_result_folder_name);
+    }
+  }
+  
+  //extract filename from absolute path
+  char** spectrum_file_path = parse_filename_path(spectrum_collection->filename);
+  
+  //create a filename template that has psm_result_folder_name/spectrum_filename
+  char* filename_template = get_full_filename(psm_result_folder_name, spectrum_file_path[0]); 
+  
+  //generate psm_result filename as psm_result_folder_name/spectrum_filename_XXXXXX
+  *psm_result_filename = generate_name(filename_template, "_XXXXXX", file_extension);
+  FILE* psm_output_file;
+  
+  if((file_descriptor = mkstemp(*psm_result_filename)) == -1 ||
+     //FIXME might want to change to w+ instead of a+(append)
+     (psm_output_file = fdopen(file_descriptor, "a+")) == NULL){
+    
+    if(file_descriptor != -1){
+      unlink(*psm_result_filename);
+      close(file_descriptor);
+    }
+    free(spectrum_file_path[0]);
+    free(spectrum_file_path[1]);
+    free(spectrum_file_path);
+    free(filename_template);
+    carp(CARP_ERROR, "failed to create PSM output file");
+    return NULL;
+  }
+  //set permission for the directory
+  chmod(*psm_result_filename, 0664);
+  free(spectrum_file_path[0]);
+  free(spectrum_file_path[1]);
+  free(spectrum_file_path);
+  free(filename_template);
+  return psm_output_file;  
+}
+
 
 /******************************************************************************/
 

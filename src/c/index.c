@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -457,7 +457,8 @@ BOOLEAN_T write_header(
   time_t hold_time;
   hold_time = time(0);
   PEPTIDE_CONSTRAINT_T* constraint = index->constraint;
-
+  
+  
   fprintf(file, "#\tmin_mass: %.2f\n", get_peptide_constraint_min_mass(constraint));
   fprintf(file, "#\tmax_mass: %.2f\n", get_peptide_constraint_max_mass(constraint));
   fprintf(file, "#\tmin_length: %d\n", get_peptide_constraint_min_length(constraint));
@@ -472,6 +473,24 @@ BOOLEAN_T write_header(
   fprintf(file, "#\tmaximum size of each index file: %d\n", index->max_size);
   fprintf(file, "#\ttarget mass range for index file: %.2f\n", index->mass_range);
   fprintf(file, "#\tcopyright: %s\n", "William Noble");
+  
+  /*
+  fprintf(file, "#\tmin_mass: %.2f\n", get_peptide_constraint_min_mass(constraint));
+  fprintf(file, "#\tmax_mass: %.2f\n", get_peptide_constraint_max_mass(constraint));
+  fprintf(file, "#\tmin_length: %d\n", get_peptide_constraint_min_length(constraint));
+  fprintf(file, "#\tmax_length: %d\n", get_peptide_constraint_max_length(constraint));
+  fprintf(file, "#\tpeptide_type: %s\n", ((get_peptide_constraint_peptide_type(constraint)==TRYPTIC)? "tryptic":
+                                          ((get_peptide_constraint_peptide_type(constraint)==ANY_TRYPTIC)? "all":"partial")));
+  fprintf(file, "#\tmissed_cleavage: %s\n", (get_peptide_constraint_num_mis_cleavage(constraint)? "true":"false"));
+  fprintf(file, "#\tmass_type: %s\n", (get_peptide_constraint_mass_type(constraint)==AVERAGE? "average":"mono"));
+  fprintf(file, "#\tredundancy: %s\n", (get_index_is_unique(index)? "unique":"redundant"));
+  
+  fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
+  fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
+  fprintf(file, "#\tmaximum size of each index file: %d\n", index->max_size);
+  fprintf(file, "#\ttarget mass range for index file: %.2f\n", index->mass_range);
+  fprintf(file, "#\tcopyright: %s\n", "William Stafford Noble");
+  */
   return TRUE;
 }
 

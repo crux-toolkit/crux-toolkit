@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -55,10 +55,10 @@ FILE* get_output_file(
   
   //create a binary fasa file?
   if(is_binary_file){
-    name = generate_name(fasta_file, "_binary_fasta");
+    name = generate_name(fasta_file, "_binary_fasta", ".fasta");
   }
   else{//create a normal protein index file
-    name = generate_name(fasta_file, "_protein_index");
+    name = generate_name(fasta_file, "_protein_index", ".fasta");
   }
   
   FILE* file = fopen(name, "w");
@@ -165,10 +165,10 @@ BOOLEAN_T protein_index_on_disk(
   
   //create a binary fasa file?
   if(is_binary){
-    name = generate_name(fasta_file, "_binary_fasta");
+    name = generate_name(fasta_file, "_binary_fasta", ".fasta");
   }
   else{//create a normal protein index file
-    name = generate_name(fasta_file, "_protein_index");
+    name = generate_name(fasta_file, "_protein_index", ".fasta");
   }
   
   //check if can open file
@@ -252,7 +252,7 @@ PROTEIN_INDEX_ITERATOR_T* new_protein_index_iterator(
   char* fasta_file ///< input fasta file -in
   )
 {
-  char* name = generate_name(fasta_file, "_protein_index");
+  char* name = generate_name(fasta_file, "_protein_index", ".fasta");
   FILE* file = fopen(name, "r");
 
   if(file == NULL){
@@ -443,7 +443,7 @@ BOOLEAN_T create_binary_fasta_in_cur(
   )
 {
   //get output filename
-  *output_file_name = generate_name(fasta_filename, "_binary_fasta");
+  *output_file_name = generate_name(fasta_filename, "_binary_fasta", ".fasta");
   
   //open output file
   FILE* file = fopen(*output_file_name, "w");
@@ -464,7 +464,7 @@ char* get_binary_fasta_name(
   char** path_filename = parse_filename_path(fasta_file);
 
   //get binary fasta name
-  char* binary_fasta_name = generate_name(path_filename[0], "_binary_fasta");
+  char* binary_fasta_name = generate_name(path_filename[0], "_binary_fasta", ".fasta");
 
   //free path and filename
   free(path_filename[0]);

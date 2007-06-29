@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -67,15 +67,59 @@ BOOLEAN_T get_match_collection_scored_type(
  *\returns TRUE, if there is a  match_iterators instantiated by match collection 
  */
 BOOLEAN_T get_match_collection_iterator_lock(
-  MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
 );
 
 /**
  *\returns the total match objects in match_collection
  */
 int get_match_collection_match_total(
-  MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
 );
+
+/**
+ *\returns the charge of the spectrum that the match collection was created
+ */
+int get_match_collection_charge(
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
+);
+
+/**
+ * Must have been scored by Xcorr, returns error if not scored by Xcorr
+ *\returns the delta cn value(difference in top and second ranked Xcorr values)
+ */
+float get_match_collection_delta_cn(
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
+);
+
+/**
+ * Serialize the psm features to ouput file upto 'top_match' number of 
+ * top peptides among the match_collection
+ *\returns TRUE, if sucessfully serializes the PSMs, else FALSE 
+ */
+BOOLEAN_T serialize_psm_features(
+  MATCH_COLLECTION_T* match_collection, ///< working match collection -in
+  SPECTRUM_T* spectrum, ///< the working spectrum -in
+  FILE* output,  ///< ouput file handle -out
+  int top_match, ///< number of top match to serialize -in
+  SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
+  SCORER_TYPE_T main_score ///<  the main score to report -in
+  );
+
+/**
+ * Print the psm features to output file upto 'top_match' number of 
+ * top peptides among the match_collection in sqt file format
+ *\returns TRUE, if sucessfully print sqt format of the PSMs, else FALSE 
+ */
+BOOLEAN_T print_match_collection_sqt(
+  FILE* output, ///< the output file -out
+  int top_match, ///< the top matches to output -in
+  int charge, ///< the charge of the of spectrum -in
+  MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
+  SPECTRUM_T* spectrum, ///< the spectrum to print sqt -in
+  SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
+  SCORER_TYPE_T main_score  ///< the main score to report -in
+  );
 
 /**
  * match_iterator routines!

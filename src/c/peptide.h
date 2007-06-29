@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -175,6 +175,30 @@ char* get_peptide_sequence(
 char* get_peptide_sequence_pointer(
   PEPTIDE_T* peptide ///< peptide to query sequence -in
   );
+
+/**
+ * \returns the sequence of peptide with each flanking AA
+ *  template "*.peptide_sequence.*", where "*" are flanking amino acids
+ * "*", left empty if no flanking sequence
+ * goes to the first peptide_src to gain sequence, thus must have at least one peptide src
+ * returns a char* to a heap allocated copy of the sequence
+ * user must free the memory
+ */
+char* get_peptide_sequence_sqt(
+ PEPTIDE_T* peptide ///< peptide to query sequence -in
+ );
+
+/**
+ * \returns the sequence of peptide with each flanking AA from the specified peptide_src(protein)
+ *  template "*.peptide_sequence.*", where "*" are flanking amino acids
+ * "*", left empty if no flanking sequence
+ * returns a char* to a heap allocated copy of the sequence
+ * user must free the memory
+ */
+char* get_peptide_sequence_from_peptide_src_sqt(
+ PEPTIDE_T* peptide, ///< peptide to query sequence -in
+ PEPTIDE_SRC_T* peptide_src ///< peptide_src -in 
+ );
 
 /**
  * sets the sequence length of the peptide

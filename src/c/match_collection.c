@@ -40,6 +40,9 @@ struct match_collection{
   int match_total; ///< total_match_count
   SCORER_TYPE_T last_sorted; ///< the last type the match has been sorted(if -1, then unsorted, if ever change the order must change to -1)
   BOOLEAN_T iterator_lock; ///< is there a iterator been curretly created?, if TRUE cannot manipulate match collection
+  int charge; ///< the charge of the spectrum that the match collection was created
+  //values used for various scoring functions.
+  float delta_cn; ///< the difference in top and second Xcorr scores
   float sp_scores_mean;  ///< the mean value of the scored peptides sp score
   float mu; ///< EVD parameter Xcorr(characteristic value of extreme value distribution)
   float l_value; ///< EVD parameter Xcorr(decay constant of extreme value distribution)
@@ -197,6 +200,9 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
  )
 {
   MATCH_COLLECTION_T* match_collection = allocate_match_collection();
+  
+  //set charge of match_collection creation
+  match_collection->charge = charge;
 
   //top_rank_for_p_value is the amount of top ranked sp scored peptides to score for LOGP_EXP_SP
   //This parameter can only be set from crux_parameter file
@@ -288,6 +294,10 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
  )
 {
   MATCH_COLLECTION_T* match_collection = allocate_match_collection();
+  
+  //set charge of match_collection creation
+  match_collection->charge = charge;
+  
   //get perameters
   float neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
   double mass_window = get_double_parameter("mass-window", 3);
@@ -357,7 +367,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
     if(!score_match_collection_xcorr(match_collection, spectrum, charge)){
       carp(CARP_ERROR, "failed to score match collection for XCORR");
     }
-    
+   
     //Additional scoring with Xcorr? (EVD p_value based scoring)
     //should we score for LOGP_BONF_EVD_XCORR?
     if(score_type == LOGP_BONF_EVD_XCORR){
@@ -446,9 +456,13 @@ void truncate_match_collection(
   )
 {
   //sort match collection by score type
-  if(!sort_match_collection(match_collection, score_type)){
-    carp(CARP_ERROR, "failed to sort match collection");
-    exit(-1);
+  //check if the match collection is in the correct sorted order
+  if(match_collection->last_sorted != score_type){
+    //sort match collection by score type
+    if(!sort_match_collection(match_collection, score_type)){
+      carp(CARP_ERROR, "failed to sort match collection");
+      exit(-1);
+    }
   }
 
   //is there any matches to free?
@@ -633,7 +647,7 @@ BOOLEAN_T estimate_evd_perameters(
       carp(CARP_ERROR, "failed to score match collection for XCORR");
     }
   }
-  //FIXME Add different scorin gif needed
+  //FIXME Add different scoring if needed
   //...
 
   //estimate the EVD parameters
@@ -989,6 +1003,15 @@ BOOLEAN_T score_match_collection_xcorr(
     exit(-1);
   }
 
+  //calculate delta cn value(difference in top and second ranked Xcorr values)
+  if(match_collection->match_total > 1){
+    match_collection->delta_cn = get_match_score(match_collection->match[0], XCORR) -
+      get_match_score(match_collection->match[1], XCORR);
+  }
+  else{
+    match_collection->delta_cn = 0;
+  }
+  
   //yes, we have now scored for the match-mode: XCORR
   match_collection->scored_type[XCORR] = TRUE;
 
@@ -1126,7 +1149,7 @@ BOOLEAN_T get_match_collection_scored_type(
  *\returns TRUE, if there is a  match_iterators instantiated by match collection 
  */
 BOOLEAN_T get_match_collection_iterator_lock(
-  MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
   )
 {
   return match_collection->iterator_lock;
@@ -1136,12 +1159,190 @@ BOOLEAN_T get_match_collection_iterator_lock(
  *\returns the total match objects in match_collection
  */
 int get_match_collection_match_total(
-  MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
   )
 {
   return match_collection->match_total;
 }
 
+/**
+ *\returns the charge of the spectrum that the match collection was created
+ */
+int get_match_collection_charge(
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
+  )
+{
+  return match_collection->charge;
+}
+
+/**
+ * Must have been scored by Xcorr, returns error if not scored by Xcorr
+ *\returns the delta cn value(difference in top and second ranked Xcorr values)
+ */
+float get_match_collection_delta_cn(
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
+  )
+{
+  //Check if xcorr value has been scored, thus delta cn value is valid
+  if(match_collection->scored_type[XCORR]){
+    return match_collection->delta_cn;
+  }
+  else{
+    carp(CARP_ERROR, "must score match_collection with XCORR to get delta cn value");
+    return 0.0;
+  }
+}
+
+/**
+ * Serialize the psm features to ouput file upto 'top_match' number of 
+ * top peptides among the match_collection
+ *\returns TRUE, if sucessfully serializes the PSMs, else FALSE 
+ */
+BOOLEAN_T serialize_psm_features(
+  MATCH_COLLECTION_T* match_collection, ///< working match collection -in
+  SPECTRUM_T* spectrum, ///< the working spectrum -in
+  FILE* output,  ///< ouput file handle -out
+  int top_match, ///< number of top match to serialize -in
+  SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
+  SCORER_TYPE_T main_score ///<  the main score to report -in
+  )
+{
+  MATCH_T* match = NULL;
+
+  //create match iterator, TRUE: return match in sorted order of main_score type
+  MATCH_ITERATOR_T* match_iterator = new_match_iterator(match_collection, main_score, TRUE);
+  
+  //first, serialize the spectrum info of the match collection
+  serialize_spectrum(spectrum, output);
+  fwrite(&(match_collection->charge), sizeof(int), 1, output); //the charge of the spectrum
+  
+  float delta_cn =  get_match_collection_delta_cn(match_collection);
+  float ln_delta_cn = logf(delta_cn);
+  float ln_experiment_size = logf(match_collection->experiment_size);
+
+  //spectrum specific features
+  fwrite(&(match_collection->match_total), sizeof(int), 1, output);
+  fwrite(&delta_cn, sizeof(float), 1, output);
+  fwrite(&ln_delta_cn, sizeof(float), 1, output);
+  fwrite(&ln_experiment_size, sizeof(float), 1, output);
+  
+  //Second, iterate over matches
+  int match_count = 0;
+  while(match_iterator_has_next(match_iterator)){
+    ++match_count;
+    match = match_iterator_next(match_iterator);    
+    
+    prelim_score = prelim_score;
+    //serialize matches
+    serialize_match(match, output); //FIXME main, preliminary type
+    
+    //print only up to max_rank_result of the matches
+    if(match_count >= top_match){
+      break;
+    }
+  }
+  
+  free_match_iterator(match_iterator);
+  
+  return TRUE;
+}
+
+
+/**
+ * Print the psm features to output file upto 'top_match' number of 
+ * top peptides among the match_collection in sqt file format
+ *\returns TRUE, if sucessfully print sqt format of the PSMs, else FALSE 
+ */
+BOOLEAN_T print_match_collection_sqt(
+  FILE* output, ///< the output file -out
+  int top_match, ///< the top matches to output -in
+  int charge, ///< the charge of the of spectrum -in
+  MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
+  SPECTRUM_T* spectrum, ///< the spectrum to print sqt -in
+  SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
+  SCORER_TYPE_T main_score  ///< the main score to report -in
+  )
+{
+  time_t hold_time;
+  hold_time = time(0);
+  float delta_cn =  get_match_collection_delta_cn(match_collection);
+  
+  //print header
+  fprintf(output, "H\tSQTGenerator CRUX\n");
+  fprintf(output, "H\tTime\t%s", ctime(&hold_time));
+  
+  //print spectrum info
+  //<first scan><last scan><charge><precursor m/z><# sequence match>
+  fprintf(output, "S\t%d\t%d\t%d\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%d\n", 
+          get_spectrum_first_scan(spectrum), 
+          get_spectrum_last_scan(spectrum),
+          charge, 
+          0.0, //FIXME dummy <process time>
+          "server", //FIXME dummy <server>
+          get_spectrum_precursor_mz(spectrum), 
+          0.0, //FIXME dummy
+          0.0, //FIXME dummy <lowest sp>
+          match_collection->experiment_size);
+  
+  MATCH_T* match = NULL;
+  PEPTIDE_T* peptide = NULL;
+  PROTEIN_T* protein = NULL;
+  char* sequence = NULL;
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = NULL;
+  PEPTIDE_SRC_T* peptide_src = NULL;
+  char* protein_id = NULL;
+  
+  //create match iterator, TRUE: return match in sorted order of main_score type
+  MATCH_ITERATOR_T* match_iterator = new_match_iterator(match_collection, main_score, TRUE);
+  
+  //Second, iterate over matches
+  int match_count = 0;
+  while(match_iterator_has_next(match_iterator)){
+    ++match_count;
+    match = match_iterator_next(match_iterator);    
+    peptide = get_match_peptide(match);
+    sequence = get_peptide_sequence_sqt(peptide);
+    
+    //print match info
+    fprintf(output, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\n",
+            get_match_rank(match, main_score),
+            get_match_rank(match, prelim_score),
+            get_peptide_peptide_mass(peptide),
+            delta_cn,
+            get_match_score(match, main_score),
+            get_match_score(match, prelim_score),
+            0, //FIXME dummy <matched ions>
+            0, //FIXME dummy <expected ions>
+            sequence
+            );
+    free(sequence);
+
+    peptide_src_iterator = new_peptide_src_iterator(peptide);
+
+    while(peptide_src_iterator_has_next(peptide_src_iterator)){
+      peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+      protein = get_peptide_src_parent_protein(peptide_src);
+      protein_id = get_protein_id(protein);
+      sequence = get_peptide_sequence_from_peptide_src_sqt(peptide, peptide_src);
+      //print match info
+      fprintf(output, "L\t%s\t%s\n", protein_id, sequence);
+      
+      free(protein_id);
+      free(sequence);
+    }
+
+    free_peptide_src_iterator(peptide_src_iterator);
+
+    //print only up to max_rank_result of the matches
+    if(match_count >= top_match){
+      break;
+    }
+  }
+  
+  free_match_iterator(match_iterator);
+  
+  return TRUE;
+}
 
 /**
  * match_iterator routines!

@@ -88,7 +88,6 @@ void initialize_parameters(void){
   set_string_parameter("redundancy", "redundant");
   set_string_parameter("use-index", "F");
   set_string_parameter("sort", "none");      // mass, length, lexical, none  
-  //set_string_parameter("fasta-file", "NULL");
   set_boolean_parameter("output-sequence", FALSE);
   set_boolean_parameter("missed-cleavages", FALSE);
   
@@ -105,13 +104,20 @@ void initialize_parameters(void){
   set_string_parameter("prelim-score-type", "sp");
   set_int_parameter("max-rank-preliminary", 500);
   set_int_parameter("max-rank-result", 500);
-
+  
   //set the top ranking peptides to score for LOGP_*
   set_int_parameter("top-rank-p-value", 1);
   
   //how many peptides to sample for EVD perameter estimation
   set_int_parameter("sample-count", 500);
   
+  //match_search
+  set_string_parameter("match-output-folder", ".");
+  set_string_parameter("output-mode", "binary");
+  set_string_parameter("sqt-output-file", "Prefix of <ms2 input filename>.psm");
+  set_double_parameter("spectrum-min-mass", 0.0);
+  set_double_parameter("spectrum-max-mass", INFINITY);
+  set_int_parameter("top-match", 1);
 
   //now we have initialized the parameters
   parameter_initialized = TRUE;

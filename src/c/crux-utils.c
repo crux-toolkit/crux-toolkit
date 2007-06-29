@@ -243,7 +243,8 @@ BOOLEAN_T delete_dir(char* dir) {
  */
 char* generate_name(
   char* fasta_filename,
-  char* name_tag
+  char* name_tag,
+  char* file_extension
   )
 {
   int len = strlen(fasta_filename);
@@ -251,9 +252,9 @@ char* generate_name(
   int end_path = len;  //index of where the "." is located in the file
   char* name = NULL;
   
-  //cut off the ".fasta" if needed
+  //cut off the file extension if needed
   for(; end_idx > 0; --end_idx){
-    if(strcmp(&fasta_filename[end_idx - 1], ".fasta") == 0){
+    if(strcmp(&fasta_filename[end_idx - 1], file_extension) == 0){
       end_path = end_idx - 1;
       break;
     }
@@ -264,12 +265,6 @@ char* generate_name(
   strcat(name, name_tag);
   return name;
 }
-
-/***
- *
- */
-
-
 
 /**
  * checks if each AA is an AA
@@ -286,6 +281,28 @@ BOOLEAN_T valid_peptide_sequence( char* sequence){
   return TRUE;
 }
 
+/**
+ * Open and create a file handle of a file that is named 
+ * and located in user specified location
+ * Assumes the directory exists
+ *\returns a file handle of a file that is named and located in user specified location
+ */
+FILE* create_file_in_path(
+  char* filename,  ///< the filename to create & open -in
+  char* directory  ///< the directory to open the file in -in
+  )
+{
+  char* file_full_path = get_full_filename(directory, filename);
+  FILE* file = fopen(file_full_path, "a+");
+  
+  if(file == NULL){
+    carp(CARP_ERROR, "failed to create and open file: %s", file_full_path);
+  }
+  
+  free(file_full_path);
+  
+  return file;
+}
 
 void swap_quick(
   float* a,

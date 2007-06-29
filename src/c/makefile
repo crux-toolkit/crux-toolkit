@@ -1,14 +1,14 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.56 $   #-Werror \
+# VERSION: $Revision: 1.57 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
 CC	= gcc
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
-OFLAGS  = -O2 
+OFLAGS  = #-O2 
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
@@ -65,7 +65,9 @@ LIBOBJS =\
 	${OBJDIR}/match.o \
 	${OBJDIR}/match_collection.o \
 	${OBJDIR}/search_spectrum.o \
-	${OBJDIR}/search_spectra.o 
+	${OBJDIR}/search_spectra.o \
+	${OBJDIR}/match_search.o
+#	${OBJDIR}/match_analysis.o
 #	${OBJDIR}/score_peptide_list_spectrum.o
 
 # These are the names of the programs.
@@ -77,7 +79,9 @@ PROGS = \
 	${BINDIR}/predict_peptide_ions \
 	${BINDIR}/score_peptide_spectrum \
 	${BINDIR}/search_spectrum \
-	${BINDIR}/search_spectra
+	${BINDIR}/search_spectra \
+	${BINDIR}/match_search
+#	${BINDIR}/match_analysis
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \
@@ -154,4 +158,4 @@ ${OBJDIR}/%.o: %.cpp
 # Rules for compiling programs
 ${BINDIR}/%: ${OBJDIR}/%.o ${RANLIBFILE}
 	@mkdir -p ${BINDIR}
-	${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS}
+	${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS} ${LIBDIR}/libpercolator.a  -lstdc++

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.51 $
+ * $Revision: 1.52 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -158,11 +158,9 @@ void free_peptide(
   //check which implementation peptide_src uses
   if(!PEPTIDE_SRC_USE_LINK_LIST){
     //array implementation
-    //fprintf(stderr, "i'm here\n");
     free(peptide->peptide_src);    
   }
   else{
-    //fprintf(stderr, "Ooops\n");
     //link list implementation
     free_peptide_src(peptide->peptide_src);
   }
@@ -511,6 +509,73 @@ char* get_peptide_sequence_pointer(
   char* pointer_peptide_sequence = &parent_sequence[start_idx-1];
   
   return pointer_peptide_sequence;
+}
+
+/**
+ * \returns the sequence of peptide with each flanking AA from the specified peptide_src(protein)
+ *  template "*.peptide_sequence.*", where "*" are flanking amino acids
+ * "*", left empty if no flanking sequence
+ * returns a char* to a heap allocated copy of the sequence
+ * user must free the memory
+ */
+char* get_peptide_sequence_from_peptide_src_sqt(
+ PEPTIDE_T* peptide, ///< peptide to query sequence -in
+ PEPTIDE_SRC_T* peptide_src ///< peptide_src -in 
+ )
+{
+  char* copy_sequence = NULL;
+  PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
+  //get peptide start idx of protein in prarent protein
+  int start_idx = get_peptide_src_start_idx(peptide_src);
+  //parent protein length
+  int protein_length = get_protein_length(protein);
+  //parent protein length
+  char* parent_sequence = 
+    get_protein_sequence_pointer(protein);
+
+  //allocate peptide memory
+  //Template "*.peptide.*", where "*" are flanking amino acids
+  copy_sequence = (char*)mycalloc(peptide->length+5, sizeof(char));
+  //first copy over the peptide sequences
+  strncpy(&copy_sequence[2], &parent_sequence[start_idx-1], peptide->length);
+  
+  //copy over template
+  copy_sequence[1] = '.';
+  copy_sequence[peptide->length+2] = '.';
+  copy_sequence[peptide->length+4] = '\0';
+
+  //copy flanking AA
+  //is there a AA before?
+  if(start_idx != 1){
+    copy_sequence[0] = parent_sequence[start_idx-2];
+  }
+  //is there a AA after?
+  if((start_idx + peptide->length - 1) < protein_length){
+    copy_sequence[peptide->length+3] = parent_sequence[start_idx+peptide->length-1];
+  }
+  
+  //yeah return!!
+  return copy_sequence; 
+}
+
+/**
+ * \returns the sequence of peptide with each flanking AA
+ *  template "*.peptide_sequence.*", where "*" are flanking amino acids
+ * "*", left empty if no flanking sequence
+ * goes to the first peptide_src to gain sequence, thus must have at least one peptide src
+ * returns a char* to a heap allocated copy of the sequence
+ * user must free the memory
+ */
+char* get_peptide_sequence_sqt(
+ PEPTIDE_T* peptide ///< peptide to query sequence -in
+ )
+{
+  if(peptide->peptide_src == NULL){
+    die("ERROR: no peptide_src to retrieve peptide sequence\n");
+  }
+  
+  //yeah return!!
+  return get_peptide_sequence_from_peptide_src_sqt(peptide, peptide->peptide_src);
 }
 
 /**
