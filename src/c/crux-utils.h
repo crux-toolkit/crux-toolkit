@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -99,7 +99,19 @@ BOOLEAN_T delete_dir(char* dir);
  */
 char* generate_name(
   char* fasta_filename,
-  char* name_tag
+  char* name_tag,
+  char* file_extension
+  );
+
+/**
+ * Open and create a file handle of a file that is named 
+ * and located in user specified location
+ * Assumes the directory exists
+ *\returns a file handle of a file that is named and located in user specified location
+ */
+FILE* create_file_in_path(
+  char* filename,  ///< the filename to create & open -in
+  char* directory  ///< the directory to open the file in -in
   );
 
 /**

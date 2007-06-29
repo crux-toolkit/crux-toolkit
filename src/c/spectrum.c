@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.36 $
+ * REVISION: $Revision: 1.37 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -48,7 +48,7 @@
  * peaks but is convenient to have is stored as "min_peak_mz",
  * "max_peak_mz", and "total_energy".
  */
-struct spectrum {
+struct spectrum{
   int               first_scan;    ///< The number of the first scan
   int               last_scan;     ///< The number of the last scan
   int               id;            ///< A unique identifier FIXME, this field is not set when parsing..
@@ -65,6 +65,30 @@ struct spectrum {
   char*             i_lines[MAX_I_LINES]; ///< store i lines, upto MAX_I_LINES
   char*             d_lines[MAX_D_LINES]; ///< store d lines, upto MAX_D_LINES 
 };    
+
+/**
+ * serialize the spectrum in binary
+ * Form,
+ * <int: first_scan><int: last_scan><int: id><SPECTRUM_TYPE_T: spectrum_type>
+ * <float: precursor_mz><float: retention_time>
+ */
+void serialize_spectrum(
+  SPECTRUM_T* spectrum, ///< the spectrum to serialize -in
+  FILE* file ///< output stream -out
+  )
+{
+  //serialize each field
+  //
+  fwrite(&(spectrum->first_scan), sizeof(int), 1, file);
+  fwrite(&(spectrum->last_scan), sizeof(int), 1, file);
+  fwrite(&(spectrum->id), sizeof(int), 1, file);
+  fwrite(&(spectrum->spectrum_type), sizeof(SPECTRUM_TYPE_T), 1, file);
+  fwrite(&(spectrum->precursor_mz), sizeof(float), 1, file);  
+  //retention_time
+  //fwrite(&(spectrum->rt_time), sizeof(float), 1, file);  
+  //FIXME add additional fields.
+}
+
 
 /**
  * \struct peak_iterator
@@ -178,7 +202,7 @@ void free_spectrum (
   free(spectrum->possible_z);
   free(spectrum->filename);
   free(spectrum->peaks);
-
+  
   //free D lines
   for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
     if(spectrum->d_lines[line_idx] != NULL){
@@ -335,7 +359,8 @@ void copy_spectrum(
  */
 BOOLEAN_T parse_spectrum_file(
   SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
-  FILE* file ///< the input file stream -in
+  FILE* file, ///< the input file stream -in
+  char* filename ///< filename of the spectrum, should not free -in
   )
 {
   long file_index = ftell(file); //stores the location of the current working line in the file
@@ -446,7 +471,9 @@ BOOLEAN_T parse_spectrum_file(
   // set the file pointer back to the start of the next 's' line
   fseek(file, file_index, SEEK_SET);
   myfree(new_line);
-  set_spectrum_new_filename(spectrum,"test.ms2"); //FIXME temp field assignment
+  
+  //set filename of empty spectrum
+  set_spectrum_new_filename(spectrum, filename);
   
   //No more spectrum in .ms file
   if(!record_S && !file_format){
@@ -693,7 +720,7 @@ BOOLEAN_T parse_spectrum(
     return (FALSE);  //exit(1);
   }
   // might check if spectrum is NULL?? Close file??
-  if(parse_spectrum_file(spectrum, file)){
+  if(parse_spectrum_file(spectrum, file, filename)){
     fclose(file);
     return TRUE;
   }

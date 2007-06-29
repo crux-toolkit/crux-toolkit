@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -63,10 +63,14 @@ void copy_spectrum(
 /**
  * Parses a spectrum from file.
  * \returns TRUE if success. FALSE is failure.
+ * 'I'
+ * Skips Header line "H"
+ * FIXME if need to read 'H', header line, does not parse ID
  */
 BOOLEAN_T parse_spectrum_file(
   SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
-  FILE* file ///< the input file stream -in
+  FILE* file, ///< the input file stream -in
+  char* filename ///< filename of the spectrum, should not free -in
   );
 
 /**
@@ -351,6 +355,17 @@ float get_nearby_intensity_sum(
 SPECTRUM_T* process_spectrum(
   SPECTRUM_T* spectrum, ///< the spectrum to processes -in
   SCORER_TYPE_T score_type ///< the score type to which the spectrum should be sorted -in
+  );
+
+/**
+ * serialize the spectrum in binary
+ * Form,
+ * <int: first_scan><int: last_scan><int: id><SPECTRUM_TYPE_T: spectrum_type>
+ * <float: precursor_mz><float: retention_time>
+ */
+void serialize_spectrum(
+  SPECTRUM_T* spectrum, ///< the spectrum to serialize -in
+  FILE* file ///< output stream -out
   );
 
 /******************************************************************************/

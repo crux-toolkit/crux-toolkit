@@ -45,7 +45,7 @@ struct match{
 MATCH_T* new_match(void){
   MATCH_T* match = (MATCH_T*)mycalloc(1, sizeof(MATCH_T));
   
-  //initialize   score, rank !!!!DEBUG
+  //initialize score, rank !!!!DEBUG
   int index = 0;
   for(; index < _SCORE_TYPE_NUM; ++index){
     match->match_rank[index] = 0;
@@ -183,6 +183,30 @@ void qsort_match(
   qsort(match_array, match_total, sizeof(MATCH_T*), compare_method);
 }
 
+/**
+ * serializes the match in binary
+ *
+ */
+void serialize_match(
+  MATCH_T* match, ///< the match to print -in
+  FILE* file ///< output stream -out
+  )
+{
+  //first serialize peptide
+  serialize_peptide(match->peptide, file);
+  
+  //Serialize each score and rank
+  int score_type_idx = 0;
+  for(; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+    fwrite(&(match->match_scores[_SCORE_TYPE_NUM]), sizeof(float), 1, file);
+    fwrite(&(match->match_rank[_SCORE_TYPE_NUM]), sizeof(int), 1, file);
+  }
+  
+  //b/y ion matches ratio
+  fwrite(&(match->b_y_ion_match), sizeof(float), 1, file);
+  
+}
+
 /****************************
  * match get, set methods
  ***************************/
@@ -215,7 +239,7 @@ void set_match_score(
  * Must ask for score that has been computed
  *\returns the match_mode rank in the match object
  */
-float get_match_rank(
+int get_match_rank(
   MATCH_T* match, ///< the match to work -in  
   SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
   )

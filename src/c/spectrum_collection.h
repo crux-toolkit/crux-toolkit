@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -172,9 +172,22 @@ void set_spectrum_collection_comment(
  * \returns TRUE if the spectrum_collection file has been parsed
  */
 BOOLEAN_T get_spectrum_collection_is_parsed(
-  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in                                         
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in
 );
 
+/**
+ * Takes the spectrum file name and creates a file with unique filename.
+ * This file is used for PSM result serializations.
+ * Template: "fileName_XXXXXX", where XXXXXX is random generated to be unique.
+ * Also sets psm_result_filename to a heap allocated filename.
+ *\returns file handler to the newly created file and sets psm_result_filename.
+ */
+FILE* get_spectrum_collection_psm_result_filename(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection -in
+  char* psm_result_folder_name, ///< the folder name for where the result file should be placed -in
+  char** psm_result_filename, ///< pointer to the filename for the psm results to be placed in -out
+  char* file_extension ///< the file extension of the spectrum file(i.e. ".ms2")
+  );
 
 /******************************************************************************/
 

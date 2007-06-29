@@ -1,5 +1,5 @@
 /*****************************************************************************
- * \file search_spectra
+ * \file match_search.c
  * AUTHOR: Chris Park
  * CREATE DATE: Jan 03 2007
  * DESCRIPTION: Given as input an ms2 file, a sequence database, and an optional parameter file, 
@@ -8,6 +8,7 @@
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "carp.h"
 #include "peptide.h"
 #include "protein.h"
@@ -47,19 +48,22 @@ int main(int argc, char** argv){
 
   //optional
   char* prelim_score_type = "sp";
-  char* score_type = "logp_exp_sp";
+  char* score_type = "xcorr";
   char* parameter_file = NULL;
   int verbosity = CARP_ERROR;
-  int spectra_count = 20;
+  char* match_output_folder = "."; //FIXME if needed..
+  char* output_mode = "binary";
+  char* sqt_output_file = "Prefix of <ms2 input filename>.psm";
+  double spectrum_min_mass = 0;
+  double spectrum_max_mass = INFINITY;
     
   //required
   char* ms2_file = NULL;
   char* fasta_file = NULL;
-  double mass_window = 3;
-
+  
   //parsing variables
   int result = 0;
-  char * error_message;
+  char* error_message;
 
   /* Define optional command line arguments */   
   parse_arguments_set_opt(
@@ -67,6 +71,36 @@ int main(int argc, char** argv){
     "Specify the verbosity of the current processes from 0-100.",
     (void *) &verbosity, 
     INT_ARG);
+
+  parse_arguments_set_opt(
+    "match-output-folder",
+    "The output folder to store the serialized binary output files.",
+    (void *) &match_output_folder,
+    STRING_ARG); 
+  
+  parse_arguments_set_opt(
+    "output-mode",
+    "The output format. sqt|binary|all",
+    (void *) &output_mode,
+    STRING_ARG); 
+  
+  parse_arguments_set_opt(
+    "sqt-output-file",
+    "Name of the sqt file to place matches.",
+    (void *) &sqt_output_file,
+    STRING_ARG); 
+  
+  parse_arguments_set_opt(
+    "spectrum-min-mass", 
+    "The lowest spectrum m/z to search in the ms2 file.",
+    (void *) &spectrum_min_mass, 
+    DOUBLE_ARG);
+
+  parse_arguments_set_opt(
+    "spectrum-max-mass", 
+    "The highest spectrum m/z to search in the ms2 file.",
+    (void *) &spectrum_max_mass, 
+    DOUBLE_ARG);
 
   parse_arguments_set_opt(
     "parameter-file",
@@ -85,12 +119,6 @@ int main(int argc, char** argv){
     "The type of preliminary scoring function to use. sp",
     (void *) &prelim_score_type, 
     STRING_ARG);
-
-  parse_arguments_set_opt(
-    "mass-window", 
-    "The peptide mass tolerance window", 
-    (void *) &mass_window, 
-    DOUBLE_ARG);
   
   /* Define required command line arguments */
   parse_arguments_set_req(
@@ -109,21 +137,21 @@ int main(int argc, char** argv){
   if (parse_arguments(argc, argv, 0)) {
 
     //parse arguments
-    SCORER_TYPE_T main_score = LOGP_EXP_SP; 
+    SCORER_TYPE_T main_score = XCORR; 
     SCORER_TYPE_T prelim_score = SP; 
     
     SPECTRUM_T* spectrum = NULL;
     SPECTRUM_COLLECTION_T* collection = NULL; ///<spectrum collection
     SPECTRUM_ITERATOR_T* spectrum_iterator = NULL;
     MATCH_COLLECTION_T* match_collection = NULL;
-    MATCH_ITERATOR_T* match_iterator = NULL;
-    MATCH_T* match = NULL;
     int possible_charge = 0;
     int* possible_charge_array = NULL;
     int charge_index = 0;
     long int max_rank_preliminary = 500;
     long int max_rank_result = 500;
-
+    int top_match = 1;
+    MATCH_SEARCH_OUPUT_MODE_T output_type = BINARY_OUTPUT;
+    
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
@@ -169,18 +197,43 @@ int main(int argc, char** argv){
     //always use index when search spectra!
     set_string_parameter("use-index", "T");
     
+    //generate sqt ouput file if not set by user
+    if(strcmp(get_string_parameter_pointer("sqt-output-file"),"Prefix of <ms2 input filename>.psm") ==0){
+      sqt_output_file = generate_name(ms2_file, ".psm", ".ms2");
+      set_string_parameter("sqt-output-file", sqt_output_file);
+    }
+    
+    //get output-mode
+    if(strcmp(get_string_parameter_pointer("output-mode"), "binary")== 0){
+      output_type = BINARY_OUTPUT;
+    }
+    else if(strcmp(get_string_parameter_pointer("output-mode"), "sqt")== 0){
+      output_type = SQT_OUTPUT;
+    }
+    else if(strcmp(get_string_parameter_pointer("output-mode"), "all")== 0){
+      output_type = ALL_OUTPUT;
+    }
+    else{
+      wrong_command(output_mode, "The output mode to use. binary|sqt|all");
+    }
+    
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
 
     //set max number of preliminary scored peptides to use for final scoring
     max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
 
-    //set max number of final scoring matches to print as output
+    //set max number of final scoring matches to print as output in sqt
     max_rank_result = get_int_parameter("max-rank-result", 500);
- 
-    //print header
-    fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
-    fprintf(stdout, "# PROTEIN DATABASE: %s\n", fasta_file);
+    
+    //set max number of matches to be serialized per spectrum
+    top_match = get_int_parameter("top-match", 1);
+    
+    /************** done with parameter setting **************/
+    
+    char* psm_result_filename = NULL;
+    FILE* psm_result_file = NULL;
+    FILE* psm_result_file_sqt = NULL;
     
     //read ms2 file
     collection = new_spectrum_collection(ms2_file);
@@ -192,84 +245,79 @@ int main(int argc, char** argv){
       exit(1);
     }
     
-
     //create spectrum iterator
     spectrum_iterator = new_spectrum_iterator(collection);
-   
+    
+    //get psm_result file handler
+    psm_result_file = 
+      get_spectrum_collection_psm_result_filename(collection,
+                                                  match_output_folder,
+                                                  &psm_result_filename,
+                                                  ".ms2"
+                                                  );
+    //get psm_result sqt file handle if needed
+    if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
+      psm_result_file_sqt = 
+        create_file_in_path(sqt_output_file, match_output_folder);
+    }
+    
+    //did we get the file handles?
+    if(psm_result_file == NULL ||
+       ((output_type == SQT_OUTPUT || output_type == ALL_OUTPUT) &&
+       psm_result_file_sqt == NULL)){
+      carp(CARP_ERROR, "failed with output mode");
+      free(sqt_output_file);
+      free(psm_result_filename);
+      exit(-1);
+    }
+
     int spectra_idx = 0;
     //iterate over all spectrum in ms2 file
     while(spectrum_iterator_has_next(spectrum_iterator)){
       //get next spectrum
       spectrum = spectrum_iterator_next(spectrum_iterator);
+
+      //select spectra that are within m/z target interval
+      if(get_spectrum_precursor_mz(spectrum) < spectrum_min_mass ||
+         get_spectrum_precursor_mz(spectrum) > spectrum_max_mass)
+        {
+          continue;
+        }
       
       //get possible charge state
       possible_charge = get_spectrum_num_possible_z(spectrum);
       possible_charge_array = get_spectrum_possible_z_pointer(spectrum);
       
-      //print spectrum info
-      fprintf(stdout, "# SPECTRUM SCAN NUMBER: %d\n", get_spectrum_first_scan(spectrum));
-      fprintf(stdout, "# SPECTRUM ID NUMBER: %d\n", get_spectrum_id(spectrum));
-      fprintf(stdout, "# SPECTRUM PRECURSOR m/z: %.2f\n", get_spectrum_precursor_mz(spectrum));
-
       //iterate over all possible charge states
       for(charge_index = 0; charge_index < possible_charge; ++charge_index){
         ++spectra_idx;
         
-        //print working state
-        fprintf(stdout, "# SPECTRUM CHARGE: %d\n", possible_charge_array[charge_index]);
-	
         //get match collection with scored, ranked match collection
         match_collection =
           new_match_collection_spectrum_with_peptide_iterator(spectrum, 
                                                               possible_charge_array[charge_index], 
                                                               max_rank_preliminary, prelim_score, main_score);
         
-                
-        //create match iterator, TRUE: return match in sorted order of main_score type
-        match_iterator = new_match_iterator(match_collection, main_score, TRUE);
+        //serialize the psm features to ouput file upto 'top_match' number of 
+        //top peptides among the match_collection
+        serialize_psm_features(match_collection, spectrum, psm_result_file, top_match, prelim_score, main_score);
         
-        //print header
-        if(main_score == LOGP_EXP_SP){
-          fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_exp_sp_rank", "sp_rank", "mass", "logp_exp_sp", "sp", "sequence");  
-        }
-        else if(main_score == LOGP_BONF_EXP_SP){
-          fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_exp_sp_rank", "sp_rank", "mass", "logp_bonf_exp_sp", "sp", "sequence");  
-        }
-        else if(main_score == XCORR){
-          fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  
-        }
-        else if(main_score == LOGP_EVD_XCORR){
-          fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_evd_xcorr_rank", "sp_rank", "mass", "logp_evd_xcorr", "sp", "sequence");  
-        }
-        else if(main_score == LOGP_BONF_EVD_XCORR){
-          fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_evd_xcorr_rank", "sp_rank", "mass", "logp_bonf_evd_xcorr", "sp", "sequence");  
-        }
-        
-        //iterate over matches
-        int match_count = 0;
-        while(match_iterator_has_next(match_iterator)){
-          ++match_count;
-          match = match_iterator_next(match_iterator);
-          print_match(match, stdout, TRUE, main_score);
-          
-          //print only up to max_rank_result of the matches
-          if(match_count >= max_rank_result){
-            break;
-          }
-        }
-	
-        //free match iterator
-        free_match_iterator(match_iterator);
-        free_match_collection(match_collection);
-	
-        //now we are down scoring
-        if(spectra_idx >= spectra_count){
-          exit(0);
+        //should I ouput the match_collection result as a SQT file?
+        //FIXME ONLY one header
+        if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
+          print_match_collection_sqt(psm_result_file_sqt, max_rank_result, charge_index, 
+                                     match_collection, spectrum, prelim_score, main_score);
         }        
+        free_match_collection(match_collection);
       }
-      
     }
     
+    free(sqt_output_file);
+    if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
+      fclose(psm_result_file_sqt);
+    }
+    fclose(psm_result_file);
+    free(psm_result_filename);
     free_spectrum_iterator(spectrum_iterator);
     free_spectrum_collection(collection);
   }
