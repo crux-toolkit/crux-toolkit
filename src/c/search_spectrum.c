@@ -223,6 +223,10 @@ int main(int argc, char** argv){
     //create match iterator, TRUE: return match in sorted order of main_score type
     match_iterator = new_match_iterator(match_collection, main_score, TRUE);
 
+    //print additional header
+    fprintf(stdout, "# PEPTIDES SEARCHED: %d\n", get_match_collection_experimental_size(match_collection));
+    fprintf(stdout, "# PEPTIDES SAMPLED FOR LOGP_SP: %d\n",get_match_collection_top_fit_sp(match_collection) );
+    
     //print header
     if(main_score == LOGP_EXP_SP){
       fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_exp_sp_rank", "sp_rank", "mass", "logp_exp_sp", "sp", "sequence");  

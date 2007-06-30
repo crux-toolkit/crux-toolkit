@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -73,11 +73,25 @@ BOOLEAN_T get_match_collection_iterator_lock(
 );
 
 /**
- *\returns the total match objects in match_collection
+ *\returns the total match objects avaliable in current match_collection
  */
 int get_match_collection_match_total(
   MATCH_COLLECTION_T* match_collection ///< working match collection -in
 );
+
+/**
+ *\returns the total peptides searched in the experiment in match_collection
+ */
+int get_match_collection_experimental_size(
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
+  );
+
+/**
+ *\returns the top peptide count used in the logp_exp_sp in match_collection
+ */
+int get_match_collection_top_fit_sp(
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
+  );
 
 /**
  *\returns the charge of the spectrum that the match collection was created
