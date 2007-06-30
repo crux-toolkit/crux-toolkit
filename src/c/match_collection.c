@@ -46,6 +46,8 @@ struct match_collection{
   float sp_scores_mean;  ///< the mean value of the scored peptides sp score
   float mu; ///< EVD parameter Xcorr(characteristic value of extreme value distribution)
   float l_value; ///< EVD parameter Xcorr(decay constant of extreme value distribution)
+  int top_fit_sp; ///< The top ranked sp scored peptides to use as EXP_SP parameter estimation
+  float base_score_sp; ///< The lowest sp score withint the top_fit_sp, used as the base score to rescle sp scores
 };
 
 /**
@@ -140,6 +142,16 @@ BOOLEAN_T estimate_evd_perameters(
   );
 
 /**
+ * For the #top_count SP ranked peptides, calculate the mean for which the
+ * #top_ranked peptide score is set to 0, thus scaling the SP scores.
+ *\returns TRUE, if successfully calculates the EXP_SP parameters
+ */
+BOOLEAN_T estimate_exp_sp_perameters(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
+  int top_count ///< the number of top SP peptides to use for the match_collection -in
+  );
+
+/**
  * keeps the top max_rank number of matches and frees the rest
  * sorts by score_type(SP, XCORR, ...)
  */
@@ -209,6 +221,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   //This parameter can only be set from crux_parameter file
   int top_rank_for_p_value = get_int_parameter("top-rank-p-value", 1);
   int sample_count = get_int_parameter("sample-count",500);
+  int top_fit_sp = get_int_parameter("top-fit-sp", 1000);
   
   //create a generate peptide iterator
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //FIXME use neutral_mass, might chage to pick
@@ -229,10 +242,14 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   if(score_type == LOGP_EVD_XCORR || score_type == LOGP_BONF_EVD_XCORR){
     estimate_evd_perameters(match_collection, sample_count, XCORR, spectrum, charge);
   }
+  //if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
+  else if(score_type == LOGP_EXP_SP || score_type == LOGP_BONF_EXP_SP){
+    estimate_exp_sp_perameters(match_collection, top_fit_sp);
+  }
 
   //save only the top max_rank matches from prelim_scoring, sort and free the other matches
   truncate_match_collection(match_collection, max_rank, prelim_score);
-
+  
   /***************Main scoring*******************************/
   //should we score for LOGP_EXP_SP?
   if(score_type == LOGP_EXP_SP){
@@ -685,6 +702,53 @@ BOOLEAN_T estimate_evd_perameters(
 
 
 /**
+ * For the #top_count SP ranked peptides, calculate the mean for which the
+ * #top_ranked peptide score is set to 0, thus scaling the SP scores.
+ *\returns TRUE, if successfully calculates the EXP_SP parameters
+ */
+BOOLEAN_T estimate_exp_sp_perameters(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
+  int top_count ///< the number of top SP peptides to use for the match_collection -in
+  )
+{
+  float top_sp_score = 0.0;
+  float base_score = 0.0;
+  int count  = 0;
+  
+  //sort match collection by SP
+  //check if the match collection is in the correct sorted order
+  if(match_collection->last_sorted != SP){
+    //sort match collection by score type
+    if(!sort_match_collection(match_collection, SP)){
+      carp(CARP_ERROR, "failed to sort match collection");
+      exit(-1);
+    }
+  }
+  
+  //adjust the number of top ranked peptides to sample
+  //because the the total number of peptides are less than top_count
+  if(top_count > match_collection->match_total){
+    top_count = match_collection->match_total;
+    carp(CARP_INFO, "");
+  }
+  
+  //set the base score to which score is set to 0
+  base_score = get_match_score(match_collection->match[top_count-1], SP);
+  
+  //compile the scores
+  while(count < top_count){
+    top_sp_score += get_match_score(match_collection->match[count], SP);
+    ++count;
+  }
+  
+  match_collection->sp_scores_mean = ((top_sp_score) / count - base_score);
+  match_collection->base_score_sp = base_score;
+  match_collection->top_fit_sp = top_count;
+  
+  return TRUE;
+}
+
+/**
  * scores the match_collection, the score type SP
  * Assumes this is the first time scoring with this score_collection,
  * thus, prior number match object is 0.
@@ -850,7 +914,8 @@ BOOLEAN_T score_match_collection_logp_exp_sp(
   //iterate over all matches to score for LOGP_EXP_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
     match = match_collection->match[match_idx];
-    score = score_logp_exp_sp(get_match_score(match, SP), match_collection->sp_scores_mean);
+    //scale the SP score by the base score found from estimate_exp_sp_perameters routine
+    score = score_logp_exp_sp((get_match_score(match, SP) - match_collection->base_score_sp), match_collection->sp_scores_mean);
     
     //set all fields in match
     set_match_score(match, LOGP_EXP_SP, score);
@@ -905,7 +970,8 @@ BOOLEAN_T score_match_collection_logp_bonf_exp_sp(
   //iterate over all matches to score for LOGP_BONF_EXP_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
     match = match_collection->match[match_idx];
-    score = score_logp_bonf_exp_sp(get_match_score(match, SP), match_collection->sp_scores_mean, match_collection->experiment_size);
+    //scale the SP score by the base score found from estimate_exp_sp_perameters routine
+    score = score_logp_bonf_exp_sp((get_match_score(match, SP) - match_collection->base_score_sp), match_collection->sp_scores_mean, match_collection->experiment_size);
     
     //set all fields in match
     set_match_score(match, LOGP_BONF_EXP_SP, score);
@@ -1157,13 +1223,33 @@ BOOLEAN_T get_match_collection_iterator_lock(
 }
 
 /**
- *\returns the total match objects in match_collection
+ *\returns the total match objects avaliable in current match_collection
  */
 int get_match_collection_match_total(
   MATCH_COLLECTION_T* match_collection ///< working match collection -in
   )
 {
   return match_collection->match_total;
+}
+
+/**
+ *\returns the total peptides searched in the experiment in match_collection
+ */
+int get_match_collection_experimental_size(
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
+  )
+{
+  return match_collection->experiment_size;
+}
+
+/**
+ *\returns the top peptide count used in the logp_exp_sp in match_collection
+ */
+int get_match_collection_top_fit_sp(
+  MATCH_COLLECTION_T* match_collection ///< working match collection -in
+  )
+{
+  return match_collection->top_fit_sp;
 }
 
 /**

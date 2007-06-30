@@ -1,9 +1,10 @@
 /*****************************************************************************
  * \file match_search.c
  * AUTHOR: Chris Park
- * CREATE DATE: Jan 03 2007
+ * CREATE DATE: 6/18/2007
  * DESCRIPTION: Given as input an ms2 file, a sequence database, and an optional parameter file, 
  * search all the spectrum against the peptides in the sequence database, and return high scoring peptides. 
+ * ouput as binary ouput and optional sqt file format
  * REVISION: 
  ****************************************************************************/
 #include <stdlib.h>

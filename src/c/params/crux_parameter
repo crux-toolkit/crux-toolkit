@@ -69,3 +69,5 @@ max-rank-result=500
 #set the number of top ranking peptides to score for LOGP_* (This is different compared to max-rank-preliminary, because it does not limit the count of preliminary scored peptides, thus some peptides can be outputed without being scored by main)
 top-rank-p-value=1
 
+#The top number of sp ranked peptides to use for scoring of EXP_SP
+top-fit-sp=10000
