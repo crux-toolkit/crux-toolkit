@@ -22,7 +22,6 @@
 #include "parameter.h"
 #include "match.h"
 #include "match_collection.h"
-#include "PercolatorCInterface.h"
 
 /**
  * when wrong command is seen carp, and exit

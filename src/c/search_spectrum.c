@@ -22,7 +22,6 @@
 #include "parameter.h"
 #include "match.h"
 #include "match_collection.h"
-#include "PercolatorCInterface.h"
 
 /**
  * when wrong command is seen carp, and exit
@@ -83,7 +82,10 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr",
+    "The type of scoring function to use: "
+    "logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr |"
+    "logp_weibull_sp | logp_bonf_weibull_sp | logp_weibull_xcorr | "
+    "logp_bonf_weibull_xcorr | xcorr",
     (void *) &score_type, 
     STRING_ARG);
 
@@ -154,23 +156,40 @@ int main(int argc, char** argv){
 
     //main score type
     //score type
-    if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
+    char* score_type = get_string_parameter_pointer("score-type");
+    if(strcmp(score_type, "logp_exp_sp")== 0){
       main_score = LOGP_EXP_SP;
     }
-    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_bonf_exp_sp")== 0){
+    else if(strcmp(score_type, "logp_bonf_exp_sp")== 0){
       main_score = LOGP_BONF_EXP_SP;
     }    
-    else if(strcmp(get_string_parameter_pointer("score-type"), "xcorr")== 0){
+    else if(strcmp(score_type, "logp_weibull_sp")== 0){
+      main_score = LOGP_WEIBULL_SP;
+    }
+    else if(strcmp(score_type, "logp_bonf_weibull_sp")== 0){
+      main_score = LOGP_BONF_WEIBULL_SP;
+    }    
+    else if(strcmp(score_type, "logp_weibull_xcorr")== 0){
+      main_score = LOGP_WEIBULL_XCORR;
+    }
+    else if(strcmp(score_type, "logp_bonf_weibull_xcorr")== 0){
+      main_score = LOGP_BONF_WEIBULL_XCORR;
+    }    
+    else if(strcmp(score_type, "xcorr")== 0){
       main_score = XCORR;
     }
-    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_evd_xcorr")== 0){
+    else if(strcmp(score_type, "logp_evd_xcorr")== 0){
       main_score = LOGP_EVD_XCORR;
     }
-    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_bonf_evd_xcorr")== 0){
+    else if(strcmp(score_type, "logp_bonf_evd_xcorr")== 0){
       main_score = LOGP_BONF_EVD_XCORR;
     }
     else{
-      wrong_command(score_type, "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr");
+      wrong_command(score_type, "The type of scoring function must be: "
+          "logp_exp_sp | logp_bonf_exp_sp | "
+          "logp_weibull_sp | logp_bonf_weibull_sp |"
+          "logp_weibull_xcorr | logp_bonf_weibull_xcorr |"
+          "logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr");
     }
 
     //preliminary score type
@@ -233,6 +252,18 @@ int main(int argc, char** argv){
     }
     else if(main_score == LOGP_BONF_EXP_SP){
       fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_exp_sp_rank", "sp_rank", "mass", "logp_bonf_exp_sp", "sp", "sequence");  
+    }
+    else if(main_score == LOGP_BONF_WEIBULL_SP){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_weibull_sp_rank", "sp_rank", "mass", "logp_bonf_weibull_sp", "sp", "sequence");  
+    }
+    else if(main_score == LOGP_WEIBULL_SP){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_weibull_sp_rank", "sp_rank", "mass", "logp_weibull_sp", "sp", "sequence");  
+    }
+    else if(main_score == LOGP_BONF_WEIBULL_XCORR){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_weibull_xcorr_rank", "sp_rank", "mass", "logp_bonf_weibull_xcorr", "sp", "sequence");  
+    }
+    else if(main_score == LOGP_WEIBULL_XCORR){
+      fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_weibull_xcorr_rank", "sp_rank", "mass", "logp_weibull_xcorr", "sp", "sequence");  
     }
     else if(main_score == XCORR){
       fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "xcorr_rank", "sp_rank", "mass", "xcorr", "sp", "sequence");  

@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.35 $
+ * $Revision: 1.36 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -297,12 +297,13 @@ typedef struct loss_limit LOSS_LIMIT_T;
 typedef struct scorer SCORER_T;
 
 /**
- * The enum for scorer type (SP, XCORR, DOTP, LOGP_EXP_SP)
+ * The enum for scorer type
  */
-enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR };
+enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR };
+
 
 //the number of different score types
-#define _SCORE_TYPE_NUM 7
+#define _SCORE_TYPE_NUM 11
 
 /**
  * \typedef SCORER_TYPE_T

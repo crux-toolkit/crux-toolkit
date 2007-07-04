@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.23 $
+ * REVISION: $Revision: 1.24 $
  ****************************************************************************/
 
 #include <math.h>
@@ -194,20 +194,17 @@ void smooth_peaks(
       }
       break;
       
-  case XCORR:
-    break;
-    
-  case DOTP:
-    break;
-
-  case LOGP_EXP_SP:
-    break;
-  case LOGP_BONF_EXP_SP:
-    break;
-  case LOGP_EVD_XCORR:
-    break;
-  case LOGP_BONF_EVD_XCORR:
-    break;
+    case XCORR:
+    case DOTP:
+    case LOGP_EXP_SP:
+    case LOGP_BONF_EXP_SP:
+    case LOGP_WEIBULL_SP:
+    case LOGP_BONF_WEIBULL_SP:
+    case LOGP_WEIBULL_XCORR:
+    case LOGP_BONF_WEIBULL_XCORR:
+    case LOGP_EVD_XCORR:
+    case LOGP_BONF_EVD_XCORR:
+      break;
   }
   free(scorer->intensity_array);
   scorer->intensity_array = new_array;
@@ -1224,6 +1221,43 @@ float score_logp_bonf_exp_sp(
   else{
     return -log(p_value*num_peptide);
   }
+}
+
+/**
+ * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
+ *\returns the -log(p_value)
+ */
+float score_logp_weibull(
+  float score, ///< The score for the scoring peptide -in
+  float eta,  ///< The eta parameter of the Weibull
+  float beta ///< The beta parameter of the Weibull
+  ){
+  return pow(score/eta, beta);
+}
+
+
+/**
+ * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
+ *\returns the -log(p_value)
+ */
+float score_logp_bonf_weibull(
+  float score, ///< The score for the scoring peptide -in
+  float eta,  ///< The eta parameter of the Weibull
+  float beta, ///< The beta parameter of the Weibull
+  int num_peptide ///< The beta parameter of the Weibull
+  ){
+  // TODO implement
+  float p_value = exp( - pow(score/eta, beta));
+  //The Bonferroni correction 
+  //use original equation 1-(1-p_value)^n when p is not too small
+  if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
+    return -log(1-pow((1-p_value), num_peptide));
+  }
+  //else, use the approximation
+  else{
+    return -log(p_value*num_peptide);
+  }
+
 }
 
 /**

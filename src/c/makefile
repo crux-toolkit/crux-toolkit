@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.59 $   #-Werror \
+# VERSION: $Revision: 1.60 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -158,4 +158,5 @@ ${OBJDIR}/%.o: %.cpp
 # Rules for compiling programs
 ${BINDIR}/%: ${OBJDIR}/%.o ${RANLIBFILE}
 	@mkdir -p ${BINDIR}
-	${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS} ${LIBDIR}/libpercolator.a  -lstdc++
+# ${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS} ${LIBDIR}/libpercolator.a  -lstdc++
+	${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS} -lstdc++
