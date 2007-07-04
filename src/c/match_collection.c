@@ -196,7 +196,10 @@ BOOLEAN_T estimate_exp_sp_perameters(
  */
 BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
-  SCORER_TYPE_T score_type
+  SCORER_TYPE_T score_type,
+  int sample_count, 
+  SPECTRUM_T* spectrum,
+  int charge
   );
 
 /**
@@ -296,10 +299,10 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   }
   //if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
   else if(score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP){
-    estimate_weibull_parameters(match_collection, SP);
+    estimate_weibull_parameters(match_collection, SP, 0, spectrum, charge);
   }
   else if(score_type == LOGP_WEIBULL_XCORR || score_type == LOGP_BONF_WEIBULL_XCORR){
-    estimate_weibull_parameters(match_collection, XCORR);
+    estimate_weibull_parameters(match_collection, XCORR, sample_count, spectrum, charge);
   }
 
   //save only the top max_rank matches from prelim_scoring, sort and free the other matches
@@ -773,17 +776,41 @@ BOOLEAN_T estimate_evd_perameters(
  */
 BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
-  SCORER_TYPE_T score_type
+  SCORER_TYPE_T score_type,
+  int sample_count,
+  SPECTRUM_T* spectrum,
+  int charge
   )
 {
+  // TODO why does xcorr need spectrum and charge but sp scoring function doesn't?
+  // TODO document routine
   // TODO make max_idx a parameter in parameter file
   // TODO should not be fixed number
+  MATCH_COLLECTION_T* sample_collection = match_collection;
+  if (sample_count != 0){
+    sample_collection = random_sample_match_collection(match_collection, sample_count);
+  }
   int max_idx = 400;
 
+  //print info
+  carp(CARP_INFO, "Estimate Weibull parameters, sample count: %d", sample_count);
+  
+  //first score the sample match_collection
+  // TODO change to a single routine score_match_collection
+  if(score_type == XCORR){
+    if(!score_match_collection_xcorr(sample_collection, spectrum, charge)){
+      carp(CARP_ERROR, "failed to score match collection for XCORR");
+    }
+  } else if (score_type == SP){
+    // TODO score_match_collection_sp should probably not take a peptide iterator?
+    // FIXME assumes scored by SP already
+    ;
+  }
+
   //check if the match collection is in the correct sorted order
-  if(match_collection->last_sorted != score_type){
+  if(sample_collection->last_sorted != score_type){
     //sort match collection by score type
-    if(!sort_match_collection(match_collection, score_type)){
+    if(!sort_match_collection(sample_collection, score_type)){
       carp(CARP_ERROR, "failed to sort match collection");
       exit(-1);
     }
@@ -791,28 +818,33 @@ BOOLEAN_T estimate_weibull_parameters(
 
   // implementation of Weibull distribution parameter estimation from 
   // http://www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
-  float* F_T = malloc(sizeof(float) * match_collection->match_total);
   int idx;
+  float* X   = malloc(sizeof(float) * sample_collection->match_total);
   for(idx=0; idx < max_idx; idx++){
-    int reverse_idx = match_collection->match_total - idx;
+    float score = get_match_score(sample_collection->match[idx], score_type);
+    if (score <= 0.0){
+      carp(CARP_DEBUG, "Reached negative score at idx %i", idx);
+      max_idx = idx;
+      break;
+    } 
+    X[idx] = log(score);
+    carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
+  }
+
+  float* F_T = malloc(sizeof(float) * sample_collection->match_total);
+  for(idx=0; idx < max_idx; idx++){
+    int reverse_idx = sample_collection->match_total - idx;
     // magic numbers 0.3 and 0.4 are never changed
-    F_T[idx] = (reverse_idx - 0.3) / (match_collection->match_total + 0.4);
+    F_T[idx] = (reverse_idx - 0.3) / (sample_collection->match_total + 0.4);
     carp(CARP_DEBUG, "F[%i]=%.6f", idx, F_T[idx]);
   }
 
-  float* Y   = malloc(sizeof(float) * match_collection->match_total);
+  float* Y   = malloc(sizeof(float) * sample_collection->match_total);
   for(idx=0; idx < max_idx; idx++){
     Y[idx] = log( -log(1.0 - F_T[idx]) );
     carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
   }
 
-  float* X   = malloc(sizeof(float) * match_collection->match_total);
-  for(idx=0; idx < max_idx; idx++){
-    float score = get_match_score(match_collection->match[idx], score_type);
-    X[idx] = log(score);
-    carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
-  }
-  
   int N = max_idx;
   float sum_Y  = 0.0;
   float sum_X  = 0.0;
@@ -839,6 +871,7 @@ BOOLEAN_T estimate_weibull_parameters(
   float beta = b_hat;
   float eta  = exp( - a_hat / beta );
   
+  // store the parameters back in the original collection
   match_collection->beta = beta;
   match_collection->eta  = eta;
 
@@ -1236,7 +1269,6 @@ BOOLEAN_T score_match_collection_logp_weibull_xcorr(
     //scale the XCORR score by the base score found from estimate_weibull_parameters routine
     score = score_logp_weibull(get_match_score(match, XCORR),
           match_collection->eta, match_collection->beta);
-    
     //set all fields in match
     set_match_score(match, LOGP_WEIBULL_XCORR, score);
     ++match_idx;
