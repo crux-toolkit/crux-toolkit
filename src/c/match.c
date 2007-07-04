@@ -131,44 +131,37 @@ void print_match(
   char* peptide_sequence = NULL;
   
   //print according to the output mode
+  //
+
+  SCORER_TYPE_T primary_score = output_mode;
+  SCORER_TYPE_T secondary_score;
   switch (output_mode) {
-  case SP:
-    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EXP_SP], match->match_scores[SP]);
-    
-    break;
-  case XCORR:
-    fprintf(file, "P %d\t%d\t%.3f\t%.3f\t%.3f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[XCORR], match->match_scores[SP]);
-    
-    
-    break;
-  case DOTP:
-    //FIXME fill in once implemented
-    break;
-  case LOGP_EXP_SP:
-    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EXP_SP], match->match_scores[SP]);
-    break;
-
-  case LOGP_BONF_EXP_SP:
-    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_EXP_SP], match->match_scores[SP]);
-    break;
-
-  case LOGP_WEIBULL_SP:
-    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_WEIBULL_SP], match->match_scores[SP]);
-    break;
-
-  case LOGP_BONF_WEIBULL_SP:
-    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_WEIBULL_SP], match->match_scores[SP]);
-    break;
-    
-  case LOGP_EVD_XCORR:
-    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EVD_XCORR], match->match_scores[SP]);
-    break;
-
-  case LOGP_BONF_EVD_XCORR:
-    fprintf(file, "P %d\t%d\t%.2f\t%.5f\t%.2f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_EVD_XCORR], match->match_scores[SP]);
-    break;
+    case DOTP:
+      //FIXME fill in once implemented
+      break;
+    case SP:
+    case XCORR:
+    case LOGP_EXP_SP:
+    case LOGP_BONF_EXP_SP:
+    case LOGP_WEIBULL_SP:
+    case LOGP_BONF_WEIBULL_SP:
+    case LOGP_EVD_XCORR:
+    case LOGP_BONF_EVD_XCORR:
+    case LOGP_WEIBULL_XCORR:
+    case LOGP_BONF_WEIBULL_XCORR:
+      secondary_score = SP;
+      break;
   }
 
+  fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", 
+      match->match_rank[primary_score], 
+      match->match_rank[secondary_score], 
+      get_peptide_peptide_mass(match->peptide), 
+      match->match_scores[primary_score], 
+      match->match_scores[secondary_score]);
+
+  // TODO resolve spectrum_header output and above to not be coupled
+ 
   //should I print sequence?
   if(output_sequence){
     peptide_sequence = get_peptide_sequence(match->peptide);
