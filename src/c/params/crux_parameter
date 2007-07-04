@@ -35,8 +35,9 @@ output-sequence=TRUE
 #Allow missed cleaave sites by trypsin?(TRUE|FALSE)
 missed-cleavages=TRUE
 
-##########perameters used for scoring peptide, spectrum match ############
-#mass offset to search candidate peptides from the precursor mass
+##########parameters used for scoring peptide, spectrum match ############
+# mass offset to search candidate peptides from the precursor mass
+# set to a non-zero value to simulate a null-distribution
 mass-offset=0.0
 
 #SP parameter used

@@ -146,20 +146,26 @@ void print_match(
     break;
   case LOGP_EXP_SP:
     fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EXP_SP], match->match_scores[SP]);
-    
     break;
+
   case LOGP_BONF_EXP_SP:
     fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_EXP_SP], match->match_scores[SP]);
-    
+    break;
+
+  case LOGP_WEIBULL_SP:
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_WEIBULL_SP], match->match_scores[SP]);
+    break;
+
+  case LOGP_BONF_WEIBULL_SP:
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[SP], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_WEIBULL_SP], match->match_scores[SP]);
     break;
     
   case LOGP_EVD_XCORR:
     fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_EVD_XCORR], match->match_scores[SP]);
-    
     break;
+
   case LOGP_BONF_EVD_XCORR:
     fprintf(file, "P %d\t%d\t%.2f\t%.5f\t%.2f\t", match->match_rank[XCORR], match->match_rank[SP], get_peptide_peptide_mass(match->peptide), match->match_scores[LOGP_BONF_EVD_XCORR], match->match_scores[SP]);
-    
     break;
   }
 
