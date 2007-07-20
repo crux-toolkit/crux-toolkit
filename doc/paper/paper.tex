@@ -96,6 +96,9 @@ SEQUEST\citep{eng:approach}
 \section{Algorithms}
 
 \subsection*{Indexing}
+The main difficulties in creating a database is first, dealing with memory shortage problems caused by the large number of peptides, 
+second, reducing the disk size of the database. The key strategy to resolve the memory shortage problem was to temporary store peptides 
+in separate bins(file handles) divided by a certain mass interval, then sort each bin individually. By partitioning the peptides into different mass bins, the total amount of peptides needed to be sorted at one instance reduces dramatically compared to sorting all the peptides together, thus reducing the amount of memory needed to store the peptides. Reducing the disk size of the database was accomplished by only storing information that was not already present in the fasta file. For instance, instead of storing the sequence of each individual peptide, only the protein index, the start index and the peptide length are stored, thus when needed, the program can quickly retrieve the sequence from the original fasta file.
 \subsection*{Scoring}
 \subsection*{Null peptide generation}
 \subsection*{Percolator}
