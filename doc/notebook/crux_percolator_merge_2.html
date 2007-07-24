@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OOo-dev 2.0  (Linux)">
 	<META NAME="CREATED" CONTENT="20070611;14101900">
-	<META NAME="CHANGED" CONTENT="20070619;16202500">
+	<META NAME="CHANGED" CONTENT="20070706;15263900">
 	<STYLE>
 	<!--
 		@page { size: 8.5in 11in; margin: 0.79in }
@@ -37,7 +37,7 @@ keep track of PSM identifications from the binary output file, two
 new objects are created. First, rich_match_collection and second
 rich_match. rich_match_collection is an extension of match_collection
 but is instantiated by the binary output files. Similarly, rich_match
-is an extension of match object. The  </FONT></FONT><CODE><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">rich_match_collection
+is an extension of match object. The </FONT></FONT><CODE><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">rich_match_collection
 and rich_match objects will together provide the functionality to
 generate run specific features.</FONT></FONT></CODE></CODE></P>
 <P STYLE="margin-bottom: 0in"><BR>
@@ -69,13 +69,14 @@ number of spectra&gt;</FONT></FONT></SPAN></CODE></P>
 number spectrum features&gt;</FONT></FONT></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">&lt;int:
 number of top rank peptide&gt;</FONT></FONT></SPAN></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace"><FONT FACE="Courier, monospace">&lt;char[20]:
-ms2 file name&gt;</FONT></FONT></FONT></FONT></SPAN></CODE></CODE></P>
+<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">&lt;int:
+ms2 file length&gt;&lt;char[*]: ms2 file name&gt;</FONT></FONT></SPAN></CODE></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">&lt;int:
 auxiliary feature count&gt;&lt;float: <CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">auxiliary
-</FONT></FONT></SPAN></CODE>features&gt;*  </FONT></FONT></SPAN></CODE>
+</FONT></FONT></SPAN></CODE>features&gt;* </FONT></FONT></SPAN></CODE>
 </P>
-<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">&lt;char[20]:
+<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">&lt;int:
+database file length&gt;</FONT></FONT></SPAN></CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">&lt;char[*]:
 database filename&gt;</FONT></FONT></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">[parameter
 file]</FONT></FONT></SPAN></CODE></P>
@@ -111,9 +112,9 @@ peptide_type&gt;&lt;int: peptide start index&gt;]+</FONT></FONT></SPAN></CODE></
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">/***************</FONT></FONT></SPAN></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;</SPAN></CODE><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none">*
-match_search.c</SPAN></FONT></FONT></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;</SPAN></CODE><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none">***************/</SPAN></FONT></FONT></CODE></P>
+<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;</SPAN></CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">*
+match_search.c</FONT></FONT></SPAN></CODE></P>
+<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;</SPAN></CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">***************/</FONT></FONT></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">MATCH_COLLECTION_T*
@@ -122,9 +123,9 @@ match_search.c</SPAN></FONT></FONT></CODE></P>
 output_top_rank = 5 </FONT></FONT></SPAN></CODE>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">FILE*
-output_file;</FONT></FONT></SPAN></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">FILE*
 output_sqt;</FONT></FONT></SPAN></CODE></P>
+<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">FILE*
+output_file = get_output_file(p</FONT></FONT></SPAN><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">sm_result_folder);</FONT></FONT></SPAN></CODE></CODE></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">foreach
@@ -138,7 +139,7 @@ a match_collection from the spectrum </FONT></FONT></SPAN></CODE>
 the PSM's match &amp; spectrum features to output file up to
 output_top_rank </FONT></FONT></SPAN></CODE></CODE>
 </P>
-<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none">&nbsp;&nbsp;&nbsp;<FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">serialize_psm_features(psm_result_folder,
+<P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none">&nbsp;&nbsp;&nbsp;<FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">serialize_psm_features(<CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">output_file</FONT></FONT></SPAN></CODE>,
 output_top_rank, </FONT></FONT></SPAN><CODE><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">match_collection);</FONT></FONT></SPAN></CODE></CODE></CODE></P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none">&nbsp;&nbsp;&nbsp;<FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">//Also
 output PSMs in sqt file</FONT></FONT></SPAN></CODE></P>
@@ -152,9 +153,9 @@ match_collection</FONT></FONT></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">/******************</FONT></FONT></SPAN></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;</SPAN></CODE><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none">*
-match_analysis.c</SPAN></FONT></FONT></CODE></P>
-<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;</SPAN></CODE><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace"><SPAN STYLE="text-decoration: none">*******************/</SPAN></FONT></FONT></CODE></P>
+<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;</SPAN></CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">*
+match_analysis.c</FONT></FONT></SPAN></CODE></P>
+<P STYLE="margin-bottom: 0in"><CODE><CODE><SPAN STYLE="text-decoration: none">&nbsp;</SPAN></CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">*******************/</FONT></FONT></SPAN></CODE></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><CODE><SPAN STYLE="text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><FONT FACE="Courier, monospace">//create
