@@ -2,27 +2,6 @@
 \copyrightyear{0000}
 \pubyear{0000}
 
-%%
-%% Process using latex, since I use ps graphics (pdflatex requires bitmap).
-%%
-%% To get the \textcolor command to display, I processed using regular
-%% latex.  The dvi file does not show the red text, but after
-%% converting to either postscript (using dvips) or pdf (using
-%% dvipdf), the color shows.
-%%
-%% For multiple footnotes.  Usage:
-%%
-%%     \footnoteremember{myfootnote}{This is my footnote}
-%%
-%% and then refer to this footnote again with
-%%
-%%     \footnoterecall{myfootnote}.
-\newcommand{\footnoteremember}[2]{
-  \footnote{#2} \newcounter{#1} \setcounter{#1}{\value{footnote}}}
-
-\newcommand{\footnoterecall}[1]{\footnotemark[\value{#1}]}
-
-
 \begin{document}
 \firstpage{1}
 
@@ -98,19 +77,20 @@ search. Thus, resulting in dramatic reduction in runtime for large
 proteome searches. TurboSEQUEST, a extension of SEQUEST, utilizes a
 precomputed peptide database, however the application is not publicly
 available.
+
 % Paragraph - Related Work - Target decoy searches
 % Paragraph - Related Work - Percolator
 % Paragraph - Contribution - Four points of improvement
 %  - Indexing
-%  - Null peptide generation
 %  - "Open source" implementation of scoring functions
+%  - Null peptide generation
 %  - Percolator post processing
 % Paragraph - Contribution - Brief results description
 
 
 \begin{figure}
   \centering
-  \includegraphics[width=2.6in]{Images/dummy.eps}
+  Insert figure here
   \caption{Peptide indexing allows rapid generation of candidate peptide
   lists.}
   \label{figure:indexing}
@@ -119,8 +99,8 @@ available.
 \begin{figure}
   \centering
   \begin{tabular}{c}
-  \includegraphics[width=2.6in]{Images/dummy.eps} \\
-  \includegraphics[width=2.6in]{Images/dummy.eps} \\
+  Insert figure here \\
+  Insert figure here \\
   \caption{Re-implementation of Sp and Xcorr scoring functions.}
   \label{figure:indexing}
   \end{tabular}
@@ -128,7 +108,7 @@ available.
 
 \begin{figure}
   \centering
-  \includegraphics[width=2.6in]{Images/dummy.eps}
+  Insert figure here
   \caption{Positives vs. q-value (a measure of false discovery rate) for
   standard database search algorithms, and our implementation.}
   \label{figure:indexing}
@@ -224,7 +204,7 @@ Acknowledge this!
 % NIH grants U01~HG003161 and R01~GM071923.
 
 
-% N.b. to use the bibliography, check out the 'refs' CVS module and add it to
+% N.B. To use the bibliography, check out the 'refs' CVS module and add it to
 % your Bibtex path.
 
 \bibliographystyle{plainnat}
