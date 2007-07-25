@@ -1,15 +1,10 @@
-all: paper.pdf \
-	cover.pdf
+all: paper.pdf
 
 # Check out the 'refs' CVS module and add this directory to your BIBTEX path.
 REFS = $(HOME)/refs/refs.bib
 
 paper.bbl: paper.tex \
 	$(REFS)
-
-cover.dvi: cover.tex
-	latex cover
-	latex cover
 
 %.bbl: %.tex \
 	$(REFS)
