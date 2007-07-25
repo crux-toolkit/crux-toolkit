@@ -1,9 +1,9 @@
-all: paper.pdf
+all: crux.pdf
 
 # Check out the 'refs' CVS module and add this directory to your BIBTEX path.
 REFS = $(HOME)/refs/refs.bib
 
-paper.bbl: paper.tex \
+crux.bbl: crux.tex \
 	$(REFS)
 
 %.bbl: %.tex \
