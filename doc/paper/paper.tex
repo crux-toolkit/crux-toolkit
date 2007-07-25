@@ -53,14 +53,51 @@ We identify peptides better than anyone else!
 % Paragraph - Motivation   - Define the peptide identification problem
 Peptide identification is hard!
 
-Identifying proteins that are expressed in different cells under varying conditions is one of the major challenges today in Biology. With the recent instrumental and computational development, Tandem mass spectrometry has become the method of choice for many protein identification studies. However, protein identification through spectral analysis has been technically challenging. Many factors such as poor quality of spectra and large possible protein candidates has contributed to the difficulty in protein identification. In addition, the process is further complicated because each spectrum is a result of a cleaved peptide product, while the information we desire is the original source protein. Thus, the protein identification problem can be divided into two steps. First, the user must identify the peptide from the spectrum. Second, with the peptide spectrum match information the source proteins must be inferred. Majority of the effort in the field has been focused on improving peptide identification, because still many algorithms fail to accurately identify peptides in a timely manner. Our focus will be concentrated on the peptide identification step. 
+Identifying proteins that are expressed in different cells under
+varying conditions is one of the major challenges today in
+Biology. With the recent instrumental and computational development,
+Tandem mass spectrometry has become the method of choice for many
+protein identification studies. However, protein identification
+through spectral analysis has been technically challenging. Many
+factors such as poor quality of spectra and large possible protein
+candidates has contributed to the difficulty in protein
+identification. In addition, the process is further complicated
+because each spectrum is a result of a cleaved peptide product, while
+the information we desire is the original source protein. Thus, the
+protein identification problem can be divided into two steps. First,
+the user must identify the peptide from the spectrum. Second, with the
+peptide spectrum match information the source proteins must be
+inferred. Majority of the effort in the field has been focused on
+improving peptide identification, because still many algorithms fail
+to accurately identify peptides in a timely manner. Our focus will be
+concentrated on the peptide identification step.
 
 % Paragraph - Related Work - SEQUEST, Tandem as open source?
-SEQUEST\citep{eng:approach}
-There are two major approaches for peptide identifications. First, the de novo sequencing approach, which tries to infer the most statistically significant sequence from the spectrum without any peptide database. Among such algorithms, include PepNovo and Lutefisk. Second, the peptide database approach, where all candidate peptides are compared to the query spectrum in which the highest scoring peptide is identified. SEQUEST, InsPecT and PeptideProphet are among the most wide used database search algorithms. In practice, the peptide database approach is most widely used because of the lack of accuracy in de novo sequencing.
+SEQUEST\citep{eng:approach} There are two major approaches for peptide
+identifications. First, the de novo sequencing approach, which tries
+to infer the most statistically significant sequence from the spectrum
+without any peptide database. Among such algorithms, include PepNovo
+and Lutefisk. Second, the peptide database approach, where all
+candidate peptides are compared to the query spectrum in which the
+highest scoring peptide is identified. SEQUEST, InsPecT and
+PeptideProphet are among the most wide used database search
+algorithms. In practice, the peptide database approach is most widely
+used because of the lack of accuracy in de novo sequencing.
 
 % Paragraph - Related Work - Indexing
-In algorithms that are used to search tandem MS spectra data against a sequence database, a major bottleneck is the identification of candidate peptides within a given mass window. Because scoring functions are expensive procedure, all database algorithms produce a smaller list of candidate peptides to be analyzed. However, generating candidate peptides separately for each search can be wasteful for large proteomes, because many times there are overlapping mass windows of peptides. Therefore, by using a precomputed database, database scoring algorithms can avoid re-generating peptides for each search. Thus, resulting in dramatic reduction in runtime for large proteome searches. TurboSEQUEST, a extension of SEQUEST, utilizes a precomputed peptide database, however the application is not publicly available. 
+In algorithms that are used to search tandem MS spectra data against a
+sequence database, a major bottleneck is the identification of
+candidate peptides within a given mass window. Because scoring
+functions are expensive procedure, all database algorithms produce a
+smaller list of candidate peptides to be analyzed. However, generating
+candidate peptides separately for each search can be wasteful for
+large proteomes, because many times there are overlapping mass windows
+of peptides. Therefore, by using a precomputed database, database
+scoring algorithms can avoid re-generating peptides for each
+search. Thus, resulting in dramatic reduction in runtime for large
+proteome searches. TurboSEQUEST, a extension of SEQUEST, utilizes a
+precomputed peptide database, however the application is not publicly
+available.
 % Paragraph - Related Work - Target decoy searches
 % Paragraph - Related Work - Percolator
 % Paragraph - Contribution - Four points of improvement
@@ -102,11 +139,36 @@ In algorithms that are used to search tandem MS spectra data against a sequence 
 \section{Algorithms}
 
 \subsection*{Indexing}
-When given a protein fasta file as input, we generate an index of all of its peptides on disk. The database created on disk is then used during runtime as an input to generate candidate peptides within the mass window of the query spectrum m/z. The main difficulties in creating a database is first, dealing with memory shortage problems caused by the large number of peptides,second, reducing the disk size of the database. The key strategy to resolve the memory shortage problem was to temporary store peptides in separate bins(file handles) divided by mass interval, then sort each bin individually. By partitioning the peptides into different mass bins, the total amount of peptides needed to be sorted at one instance reduces dramatically compared to sorting all the peptides together, thus reducing the amount of memory needed to store the peptides. Reducing the disk size of the database was accomplished by only storing information that was not already present in the fasta file. For instance, instead of storing the sequence of each individual peptide, only the protein index, the start index and the peptide length are stored, thus when needed, the program can quickly retrieve the sequence from the original fasta file.
+When given a protein fasta file as input, we generate an index of all
+of its peptides on disk. The database created on disk is then used
+during runtime as an input to generate candidate peptides within the
+mass window of the query spectrum m/z. The main difficulties in
+creating a database is first, dealing with memory shortage problems
+caused by the large number of peptides,second, reducing the disk size
+of the database. The key strategy to resolve the memory shortage
+problem was to temporary store peptides in separate bins(file handles)
+divided by mass interval, then sort each bin individually. By
+partitioning the peptides into different mass bins, the total amount
+of peptides needed to be sorted at one instance reduces dramatically
+compared to sorting all the peptides together, thus reducing the
+amount of memory needed to store the peptides. Reducing the disk size
+of the database was accomplished by only storing information that was
+not already present in the fasta file. For instance, instead of
+storing the sequence of each individual peptide, only the protein
+index, the start index and the peptide length are stored, thus when
+needed, the program can quickly retrieve the sequence from the
+original fasta file.
 
 \subsection*{Scoring}
-We re-implemented the two scoring functions Sp, Xcorr  used in SEQUEST for Crux.  First, the preliminary scoring function Sp is used to extract the top 500 candidate peptides. To avoid erroneous scores by noise, the spectrum is preprocessed by square rooting and smoothing all peak intensities before extracting the top 200 abundant peaks to be scored for Sp. 
-Second, The main scoring function Xcorr is used for the final cross-correlation analysis. A similar preprocessing step used in Sp is applied in Xcorr. For further detail on scoring function and preprocessing steps refer to source code.
+We re-implemented the two scoring functions Sp, Xcorr used in SEQUEST
+for Crux.  First, the preliminary scoring function Sp is used to
+extract the top 500 candidate peptides. To avoid erroneous scores by
+noise, the spectrum is preprocessed by square rooting and smoothing
+all peak intensities before extracting the top 200 abundant peaks to
+be scored for Sp.  Second, The main scoring function Xcorr is used for
+the final cross-correlation analysis. A similar preprocessing step
+used in Sp is applied in Xcorr. For further detail on scoring function
+and preprocessing steps refer to source code.
 
 \subsection*{Null peptide generation}
 \subsection*{Percolator}
@@ -114,33 +176,41 @@ Second, The main scoring function Xcorr is used for the final cross-correlation 
 
 \section{Results}
 
-Hardware: All experiments were performed on RedHat linux machine with Athlon MP 2000, 2 x 1.67 GHz processor and 2GB of RAM.
-First, using Crux, we precomputed a peptide database for tryptic
-peptides of length 6 to 50 amino acids while allowing missed cleavage sites in the nr-db(06/02/2007, 3,292,818 proteins). This procedure required 19hrs and 14GB of disk space.
+Hardware: All experiments were performed on RedHat linux machine with
+Athlon MP 2000, 2 x 1.67 GHz processor and 2GB of RAM.  First, using
+Crux, we precomputed a peptide database for tryptic peptides of length
+6 to 50 amino acids while allowing missed cleavage sites in the
+nr-db(06/02/2007, 3,292,818 proteins). This procedure required 19hrs
+and 14GB of disk space.
 
-Second, we verified that our re-implemented SP and Xcorr scoring functions are identical to the
-scores computed by SEQUEST. 
+Second, we verified that our re-implemented SP and Xcorr scoring
+functions are identical to the scores computed by SEQUEST.
 
-Third, to test our indexing method for candidate peptide generation, we compared its runtime to SEQUEST.  
-We use a modified version of SEQUEST that only computes Sp (and not XCorr),
-and we compare its running time to that of Crux.  For both methods, we
-performed searches with 100 different spectra, using a mass tolerance
-of 3.  SEQUEST required 3.55hrs clock time. Crux required 0.58hrs clock time, 
-which is roughly a six-fold speed improvement. We also tested Crux using a smaller mass tolerance window, such
-as might be used with high-resolution mass spectrometry
-instrumentation.  As the mass tolerance window decreases, Crux's speed
-improves, because fewer candidate peptides are retrieved from the
-database.  SEQUEST, by contrast, must traverse the entire database,
-regardless of the mass tolerance.  With a mass tolerance window of
-0.1, SEQUEST requires 3.5hrs clock time, whereas Crux requires 
-0.1hrs.  This represents an 30-fold improvement.These results show that our method of using a pre-computed peptide
-database outperforms SEQUEST, especially on large proteomes or when
-searching with a small mass tolerance.
+Third, to test our indexing method for candidate peptide generation,
+we compared its runtime to SEQUEST.  We use a modified version of
+SEQUEST that only computes Sp (and not XCorr), and we compare its
+running time to that of Crux.  For both methods, we performed searches
+with 100 different spectra, using a mass tolerance of 3.  SEQUEST
+required 3.55hrs clock time. Crux required 0.58hrs clock time, which
+is roughly a six-fold speed improvement. We also tested Crux using a
+smaller mass tolerance window, such as might be used with
+high-resolution mass spectrometry instrumentation.  As the mass
+tolerance window decreases, Crux's speed improves, because fewer
+candidate peptides are retrieved from the database.  SEQUEST, by
+contrast, must traverse the entire database, regardless of the mass
+tolerance.  With a mass tolerance window of 0.1, SEQUEST requires
+3.5hrs clock time, whereas Crux requires 0.1hrs.  This represents an
+30-fold improvement.These results show that our method of using a
+pre-computed peptide database outperforms SEQUEST, especially on large
+proteomes or when searching with a small mass tolerance.
 
-Finally, we test our false discovery rate for Crux using the Percolator algorithm compared to stadndard database searching algorithms.
+Finally, we test our false discovery rate for Crux using the
+Percolator algorithm compared to stadndard database searching
+algorithms.
 
 \subsection*{Datasets}
-We use the following publicly available tandem mass spectrometry data sets.
+We use the following publicly available tandem mass spectrometry data
+sets.
 
 \section{Discussion}
 % Mention Ting Chen's contribution
