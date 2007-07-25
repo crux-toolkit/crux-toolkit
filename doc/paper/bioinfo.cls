@@ -387,6 +387,8 @@
 \def\vol#1{\global\def\@vol{#1}}
 \def\issue#1{\global\def\@issue{#1}}
 \def\address#1{\global\def\@issue{#1}}
+\def\history#1{\global\def\@history{#1}}
+\def\editor#1{\global\def\@editor{#1}}
 \def\pubyear#1{\global\def\@pubyear{#1}}
 \def\copyrightyear#1{\global\def\@copyrightyear{#1}}
 \def\address#1{\global\def\@address{#1}}
@@ -421,12 +423,16 @@
   \global\let\maketitle\relax
   \global\let\@maketitle\relax
   \global\let\@address\@empty
+  \global\let\@history\@empty
+  \global\let\@editor\@empty
   \global\let\@thanks\@empty
   \global\let\@author\@empty
   \global\let\@date\@empty
   \global\let\@title\@empty
   \global\let\@pubyear\@empty
   \global\let\address\relax
+  \global\let\history\relax
+  \global\let\editor\relax
   \global\let\title\relax
   \global\let\author\relax
   \global\let\date\relax
@@ -448,7 +454,7 @@
   \hbox to \textwidth{%
   {\helvetica\itshape\bfseries\fontsize{19}{12}\selectfont {\color{gray}BIOINFORMATICS}
     \hfil
-    APPLICATIONS NOTE\hfil % Removed \if@appnotes from the beginning and \fi from the end
+    \if@appnotes APPLICATIONS NOTE\hfil\fi
     }%
 \enskip  \parbox[b]{11.3pc}{%
     \helvetica
@@ -466,7 +472,11 @@
     {\helvetica\fontsize{13}{15}\selectfont\raggedright \@author \par}%
         \vspace{4\p@}
     {\helvetica\fontsize{10}{12}\selectfont\raggedright \@address \par}%
-    \vspace{20\p@}
+    \vspace{4\p@}
+    {\helvetica\fontsize{8}{10}\selectfont\raggedright \@history \par}
+    \vspace{24\p@}
+    {\helvetica\fontsize{10}{12}\selectfont\raggedright \@editor \par}
+    %\vspace{20\p@}
     }%
   }
   \vspace{14.5\p@}%
@@ -485,7 +495,7 @@
   \let\section\absection
   \helvetica\fontsize{8}{11}\selectfont
   {\fontseries{b}\selectfont ABSTRACT}\par}
-{\endgroup\bigskip\@afterheading\@afterindentfalse}
+{\endgroup\bigskip\@afterheading\@afterindentfalse\vskip 12pt plus 3pt minus 1pt}
 
 % Section macros
 
@@ -496,17 +506,17 @@
 
 \def\section{%
   \@startsection{section}{1}{\z@}
-  {-11\p@ plus -3\p@}{3\p@}
+  {-22\p@ plus -3\p@}{3\p@}
   {\reset@font\raggedright\helveticabold\fontsize{10}{12}\selectfont\MakeUppercase}}
   
 \def\subsection{%
   \@startsection{subsection}{2}{\z@}
-  {-5\p@ plus -2\p@}{3\p@}
+  {-11\p@ plus -2\p@}{3\p@}
   {\reset@font\raggedright\mathversion{bold}\fontseries{b}\fontsize{10}{12}\selectfont}}
  
 \def\subsubsection{%
   \@startsection{subsubsection}{3}{\z@}
-  {-6\p@ plus -1\p@}{-1em}
+  {-11\p@ plus -1\p@}{-1em}
   {\reset@font\normalfont\normalsize\itshape}}
 
 %% \def\paragraph{%
@@ -666,6 +676,7 @@
    \labelsep      0.5em
    \listparindent \parindent
    \itemindent    \z@
+   \topsep 11\p@
 }
 
 \def\enumerate{%
@@ -696,6 +707,7 @@
    \rightmargin   \z@
    \listparindent \parindent
    \itemindent    \z@
+   \topsep11\p@
 }
 
 \def\itemize{%
@@ -860,7 +872,7 @@
   \begingroup
 \def\section{%
   \@startsection{section}{1}{\z@}
-  {-11\p@ plus -3\p@}{4\p@}
+  {-24\p@ plus -3\p@}{4\p@}
   {\reset@font\raggedright\helveticabold\fontsize{10}{12}\selectfont\MakeUppercase}}
  \def\subsection{%
   \@startsection{subsection}{2}{\z@}
