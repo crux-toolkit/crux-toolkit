@@ -75,10 +75,10 @@ void initialize_parameters(void){
   //set verbosity
   set_int_parameter("verbosity", CARP_ERROR);
 
-  //set perameters
+  //set parameters
   set_string_parameter("parameter-file", "crux_parameter");
 
-  //generate_peptide perameters
+  //generate_peptide parameters
   set_double_parameter("min-mass", 200);
   set_double_parameter("max-mass", 2400);
   set_int_parameter("min-length", 6);
@@ -94,7 +94,7 @@ void initialize_parameters(void){
   //searching peptides
   set_double_parameter("mass-offset", 0);
 
-  //score_peptide_spectrum perameters
+  //score_peptide_spectrum parameters
   set_double_parameter("beta", 0.075);
   set_double_parameter("max-mz", 4000);
   set_int_parameter("charge", 2);
@@ -112,8 +112,10 @@ void initialize_parameters(void){
   //set the top ranking peptides to score for LOGP_*
   set_int_parameter("top-rank-p-value", 1);
   
-  //how many peptides to sample for EVD perameter estimation
-  set_int_parameter("sample-count", 500);
+  //how many peptides to sample for EVD parameter estimation
+  set_int_parameter("sample-count", 2000);
+  set_int_parameter("top-scores-to-fit", 400);
+  set_int_parameter("skip-first-score", 1);
   
   //match_search
   set_string_parameter("match-output-folder", ".");
