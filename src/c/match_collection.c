@@ -48,7 +48,7 @@ struct match_collection{
   float l_value; ///< EVD parameter Xcorr(decay constant of extreme value distribution)
   int top_fit_sp; ///< The top ranked sp scored peptides to use as EXP_SP parameter estimation
   float base_score_sp; ///< The lowest sp score withint the top_fit_sp, used as the base score to rescle sp scores
-  float eta;  ///< The eta parameter for the Weibull distribution.i
+  float eta;  ///< The eta parameter for the Weibull distribution.
   float beta; ///< The beta parameter for the Weibull distribution.
 };
 
@@ -62,6 +62,7 @@ struct match_iterator{
   int match_idx; ///< current match to return
   int match_total; ///< total_match_count
 };
+
 
 /**
  * typedef, for descrition look below.
@@ -155,7 +156,7 @@ BOOLEAN_T score_match_collection_logp_bonf_evd_xcorr(
 
 /**
  * Randomly samples max_count peptides from the peptide distribution and try to esitimate the Xcorr distribution of the the entire peptide distribution 
- * from the sampled peptide distribution. Populates the two EVD perameters mu, lambda in the match_collection.
+ * from the sampled peptide distribution. Populates the two EVD parameters mu, lambda in the match_collection.
  *
  * This function finds the location parameter, mu, and scale parameter, 1/L, 
  * that maximize the log likelihood of the data given an extreme value 
@@ -172,8 +173,8 @@ BOOLEAN_T score_match_collection_logp_bonf_evd_xcorr(
  * Throws an exception if Newton-Raphson fails to converge.
  *\returns TRUE, if successfully calculates the EVD parameters for the xcorr peptide distribution., else FALSE.
  */
-BOOLEAN_T estimate_evd_perameters(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
+BOOLEAN_T estimate_evd_parameters(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   int sample_count, ///< the number of peptides to sample from the match_collection -in
   SCORER_TYPE_T score_type, ///< score_type to estimate EVD distribution -in
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
@@ -185,8 +186,8 @@ BOOLEAN_T estimate_evd_perameters(
  * #top_ranked peptide score is set to 0, thus scaling the SP scores.
  *\returns TRUE, if successfully calculates the EXP_SP parameters
  */
-BOOLEAN_T estimate_exp_sp_perameters(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
+BOOLEAN_T estimate_exp_sp_parameters(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   int top_count ///< the number of top SP peptides to use for the match_collection -in
   );
 
@@ -195,9 +196,8 @@ BOOLEAN_T estimate_exp_sp_perameters(
  *\returns TRUE, if successfully calculates the Weibull Sp parameters
  */
 BOOLEAN_T estimate_weibull_parameters(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   SCORER_TYPE_T score_type,
-  int sample_count, 
   SPECTRUM_T* spectrum,
   int charge
   );
@@ -291,18 +291,18 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   //Sample before truncate match collection so that the sampling will be from 
   //the entire peptide distribution.
   if(score_type == LOGP_EVD_XCORR || score_type == LOGP_BONF_EVD_XCORR){
-    estimate_evd_perameters(match_collection, sample_count, XCORR, spectrum, charge);
+    estimate_evd_parameters(match_collection, sample_count, XCORR, spectrum, charge);
   }
   //if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
   else if(score_type == LOGP_EXP_SP || score_type == LOGP_BONF_EXP_SP){
-    estimate_exp_sp_perameters(match_collection, top_fit_sp);
+    estimate_exp_sp_parameters(match_collection, top_fit_sp);
   }
   //if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
   else if(score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP){
-    estimate_weibull_parameters(match_collection, SP, 0, spectrum, charge);
+    estimate_weibull_parameters(match_collection, SP, spectrum, charge);
   }
   else if(score_type == LOGP_WEIBULL_XCORR || score_type == LOGP_BONF_WEIBULL_XCORR){
-    estimate_weibull_parameters(match_collection, XCORR, sample_count, spectrum, charge);
+    estimate_weibull_parameters(match_collection, XCORR, spectrum, charge);
   }
 
   //save only the top max_rank matches from prelim_scoring, sort and free the other matches
@@ -370,6 +370,9 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
       }
     }
   }
+  // TODO make sure new_match_collection_spectrum_with_peptide_iterator
+  // and new_match_collection_spectrum are somehow consistent. Or merge
+  // them.
   
   //free generate_peptides_iterator
   free_generate_peptides_iterator(peptide_iterator);
@@ -399,7 +402,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
   //set charge of match_collection creation
   match_collection->charge = charge;
   
-  //get perameters
+  //get parameters
   float neutral_mass = get_spectrum_neutral_mass(spectrum, charge) + mass_offset;
   double mass_window = get_double_parameter("mass-window", 3);
   int sample_count = get_int_parameter("sample-count",500);
@@ -440,7 +443,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
   //Sample before truncate match collection so that the sampling will be from 
   //the entire peptide distribution.
   if(score_type == LOGP_EVD_XCORR || score_type == LOGP_BONF_EVD_XCORR){
-    estimate_evd_perameters(match_collection, sample_count, XCORR, spectrum, charge);
+    estimate_evd_parameters(match_collection, sample_count, XCORR, spectrum, charge);
   }
 
   //save only the top max_rank matches from prelim_scoring, sort and free the other matches
@@ -476,7 +479,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
         carp(CARP_ERROR, "failed to score match collection for LOGP_BONF_EVD_XCORR");
       }
     }
-    //should we score for LOGP_EVD_XCORR?
+    // should we score for LOGP_EVD_XCORR?
     else if(score_type == LOGP_EVD_XCORR){
       //score the top_rank_for_p_value amount of top ranked peptides their -log(p_value) match_collection
       if(!score_match_collection_logp_evd_xcorr(match_collection, top_rank_for_p_value)){
@@ -500,7 +503,7 @@ BOOLEAN_T sort_match_collection(
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
   )
 {
-  //check if we are allowed to alter match_collection
+  // check if we are allowed to alter match_collection
   if(match_collection->iterator_lock){
     carp(CARP_ERROR, "cannot alter match_collection when a match iterator is already been instantiated");
     return FALSE;
@@ -508,14 +511,15 @@ BOOLEAN_T sort_match_collection(
 
   switch(score_type){
   case DOTP:
-    //implement later
+    // implement later
     return FALSE;
   case XCORR:
   case LOGP_EVD_XCORR:
   case LOGP_BONF_EVD_XCORR:
   case LOGP_WEIBULL_XCORR: 
   case LOGP_BONF_WEIBULL_XCORR: 
-    //LOGP_BONF_EVD_XCORR and XCORR have same order, sort the match to decreasing XCORR order for the return
+    // LOGP_BONF_EVD_XCORR and XCORR have same order, 
+    // sort the matches by decreasing XCORR order for the return
     qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_xcorr);
     match_collection->last_sorted = XCORR;
     return TRUE;
@@ -524,7 +528,8 @@ BOOLEAN_T sort_match_collection(
   case LOGP_BONF_EXP_SP: 
   case LOGP_WEIBULL_SP: 
   case LOGP_BONF_WEIBULL_SP: 
-    //LOGP_EXP_SP and SP have same order, thus sort the match to decreasing SP order for the return
+    // LOGP_EXP_SP and SP have same order, thus sort the matches by
+    // decreasing SP order for the return
     qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_sp);
     match_collection->last_sorted = SP;
     return TRUE;
@@ -646,7 +651,7 @@ MATCH_COLLECTION_T* random_sample_match_collection(
  *\returns the final exponential values of the score and sets the value of the function and its derivative.
  */
 void constraint_function(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -in
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -in
   SCORER_TYPE_T score_type, ///< score_type to estimate EVD distribution -in
   float l_value,  ///< L value -in
   float* function,  ///< the output function value -out
@@ -690,7 +695,7 @@ void constraint_function(
 
 /**
  * Randomly samples max_count peptides from the peptide distribution and try to esitimate the Xcorr distribution of the the entire peptide distribution 
- * from the sampled peptide distribution. Populates the two EVD perameters mu, lambda in the match_collection.
+ * from the sampled peptide distribution. Populates the two EVD parameters mu, lambda in the match_collection.
  *
  * This function finds the location parameter, mu, and scale parameter, 1/L, 
  * that maximize the log likelihood of the data given an extreme value 
@@ -707,8 +712,8 @@ void constraint_function(
  * Throws an exception if Newton-Raphson fails to converge.
  *\returns TRUE, if successfully calculates the EVD parameters for the xcorr peptide distribution., else FALSE.
  */
-BOOLEAN_T estimate_evd_perameters(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
+BOOLEAN_T estimate_evd_parameters(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   int sample_count, ///< the number of peptides to sample from the match_collection -in
   SCORER_TYPE_T score_type, ///< score_type to estimate EVD distribution -in
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
@@ -726,7 +731,7 @@ BOOLEAN_T estimate_evd_perameters(
   int idx = 0;
 
   //print info
-  carp(CARP_INFO, "Estimate EVD perameters, sample count: %d", sample_count);
+  carp(CARP_INFO, "Estimate EVD parameters, sample count: %d", sample_count);
   
   //first score the sample match_collection
   if(score_type == XCORR){
@@ -775,22 +780,24 @@ BOOLEAN_T estimate_evd_perameters(
  *\returns TRUE, if successfully calculates the Weibull parameters
  */
 BOOLEAN_T estimate_weibull_parameters(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   SCORER_TYPE_T score_type,
-  int sample_count,
   SPECTRUM_T* spectrum,
   int charge
   )
 {
   // TODO why does xcorr need spectrum and charge but sp scoring function doesn't?
   // TODO document routine
-  // TODO make max_idx a parameter in parameter file
-  // TODO should not be fixed number
   MATCH_COLLECTION_T* sample_collection = match_collection;
+  int sample_count = get_int_parameter("sample-count", 2000);
   if (sample_count != 0){
     sample_collection = random_sample_match_collection(match_collection, sample_count);
   }
-  int max_idx = 400;
+
+  int max_idx = get_int_parameter("top-scores-to-fit", 400);
+  max_idx = max_idx < sample_collection->match_total ? max_idx :
+     sample_collection->match_total; 
+
 
   //print info
   carp(CARP_INFO, "Estimate Weibull parameters, sample count: %d", sample_count);
@@ -820,7 +827,12 @@ BOOLEAN_T estimate_weibull_parameters(
   // http://www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
   int idx;
   float* X   = malloc(sizeof(float) * sample_collection->match_total);
-  for(idx=0; idx < max_idx; idx++){
+
+  // skip the first score in all iterations, since that is the highest score 
+  // TODO maybe add to other parameter estimation routines
+  int skip_first_score = get_int_parameter("skip-first-score", 1);
+  carp(CARP_DETAILED_DEBUG, "max_idx=%i", max_idx);
+  for(idx=skip_first_score; idx < max_idx; idx++){
     float score = get_match_score(sample_collection->match[idx], score_type);
     if (score <= 0.0){
       carp(CARP_DEBUG, "Reached negative score at idx %i", idx);
@@ -828,11 +840,11 @@ BOOLEAN_T estimate_weibull_parameters(
       break;
     } 
     X[idx] = log(score);
-    carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
+    carp(CARP_DETAILED_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
   }
 
   float* F_T = malloc(sizeof(float) * sample_collection->match_total);
-  for(idx=0; idx < max_idx; idx++){
+  for(idx=skip_first_score; idx < max_idx; idx++){
     int reverse_idx = sample_collection->match_total - idx;
     // magic numbers 0.3 and 0.4 are never changed
     F_T[idx] = (reverse_idx - 0.3) / (sample_collection->match_total + 0.4);
@@ -840,7 +852,7 @@ BOOLEAN_T estimate_weibull_parameters(
   }
 
   float* Y   = malloc(sizeof(float) * sample_collection->match_total);
-  for(idx=0; idx < max_idx; idx++){
+  for(idx=skip_first_score; idx < max_idx; idx++){
     Y[idx] = log( -log(1.0 - F_T[idx]) );
     carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
   }
@@ -850,24 +862,25 @@ BOOLEAN_T estimate_weibull_parameters(
   float sum_X  = 0.0;
   float sum_XY = 0.0;
   float sum_XX = 0.0;
-  for(idx=0; idx < N; idx++){
+  for(idx=skip_first_score; idx < N; idx++){
     sum_Y  += Y[idx];
     sum_X  += X[idx];
     sum_XX += X[idx] * X[idx];
     sum_XY += X[idx] * Y[idx];
   }
-  carp(CARP_DEBUG, "sum_X=%.6f", sum_X);
-  carp(CARP_DEBUG, "sum_Y=%.6f", sum_Y);
-  carp(CARP_DEBUG, "sum_XX=%.6f", sum_XX);
-  carp(CARP_DEBUG, "sum_XY=%.6f", sum_XY);
+  carp(CARP_DETAILED_DEBUG, "sum_X=%.6f", sum_X);
+  carp(CARP_DETAILED_DEBUG, "sum_Y=%.6f", sum_Y); 
+  carp(CARP_DETAILED_DEBUG, "sum_XX=%.6f", sum_XX);
+  carp(CARP_DETAILED_DEBUG, "sum_XY=%.6f", sum_XY);
 
-  float b_num    = sum_XY - (sum_X * sum_Y / N);
+  int corrected_N = N - skip_first_score;
+  float b_num    = sum_XY - (sum_X * sum_Y / corrected_N );
   carp(CARP_DEBUG, "b_num=%.6f", b_num);
-  float b_denom  = sum_XX - sum_X * sum_X / N;
+  float b_denom  = sum_XX - sum_X * sum_X / corrected_N;
   carp(CARP_DEBUG, "b_denom=%.6f", b_denom);
   float b_hat    = b_num / b_denom;
 
-  float a_hat    = (sum_Y - b_hat * sum_X) / N;
+  float a_hat    = (sum_Y - b_hat * sum_X) / corrected_N;
   float beta = b_hat;
   float eta  = exp( - a_hat / beta );
   
@@ -891,8 +904,8 @@ BOOLEAN_T estimate_weibull_parameters(
  * #top_ranked peptide score is set to 0, thus scaling the SP scores.
  *\returns TRUE, if successfully calculates the EXP_SP parameters
  */
-BOOLEAN_T estimate_exp_sp_perameters(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd perameters -out
+BOOLEAN_T estimate_exp_sp_parameters(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   int top_count ///< the number of top SP peptides to use for the match_collection -in
   )
 {
@@ -1099,7 +1112,7 @@ BOOLEAN_T score_match_collection_logp_exp_sp(
   //iterate over all matches to score for LOGP_EXP_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
     match = match_collection->match[match_idx];
-    //scale the SP score by the base score found from estimate_exp_sp_perameters routine
+    //scale the SP score by the base score found from estimate_exp_sp_parameters routine
     score = score_logp_exp_sp((get_match_score(match, SP) - match_collection->base_score_sp), match_collection->sp_scores_mean);
     
     //set all fields in match
@@ -1155,7 +1168,7 @@ BOOLEAN_T score_match_collection_logp_bonf_exp_sp(
   //iterate over all matches to score for LOGP_BONF_EXP_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
     match = match_collection->match[match_idx];
-    //scale the SP score by the base score found from estimate_exp_sp_perameters routine
+    //scale the SP score by the base score found from estimate_exp_sp_parameters routine
     score = score_logp_bonf_exp_sp((get_match_score(match, SP) - match_collection->base_score_sp), match_collection->sp_scores_mean, match_collection->experiment_size);
     
     //set all fields in match
@@ -1210,7 +1223,7 @@ BOOLEAN_T score_match_collection_logp_weibull_sp(
   //iterate over all matches to score for LOGP_WEIBULL_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
     match = match_collection->match[match_idx];
-    //scale the SP score by the base score found from estimate_weibull_sp_perameters routine
+    //scale the SP score by the base score found from estimate_weibull_sp_parameters routine
     score = score_logp_weibull(get_match_score(match, SP),
           match_collection->eta, match_collection->beta);
     
@@ -1381,7 +1394,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_sp(
   //iterate over all matches to score for LOGP_BONF_WEIBULL_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
     match = match_collection->match[match_idx];
-    //scale the SP score by the params from estimate_weibull_sp_perameters
+    //scale the SP score by the params from estimate_weibull_sp_parameters
     score = score_logp_bonf_weibull(get_match_score(match, SP),
           match_collection->eta, match_collection->beta, 
           match_collection->experiment_size);
@@ -1427,8 +1440,7 @@ BOOLEAN_T score_match_collection_xcorr(
   */
   
   //set ion constraint to sequest settings
-  ION_CONSTRAINT_T* ion_constraint = 
-    new_ion_constraint_sequest_xcorr(charge); 
+  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_xcorr(charge); 
   
   //create new scorer
   SCORER_T* scorer = new_scorer(XCORR);  
@@ -1440,7 +1452,7 @@ BOOLEAN_T score_match_collection_xcorr(
   carp(CARP_INFO, "start scoring for XCORR");
 
   //iterate over all matches to score for xcorr
-  for(; match_idx < match_collection->match_total; ++match_idx){
+  for(match_idx=0; match_idx < match_collection->match_total; ++match_idx){
     match = match_collection->match[match_idx];
     peptide_sequence = get_peptide_sequence(get_match_peptide(match));
     
@@ -1452,7 +1464,6 @@ BOOLEAN_T score_match_collection_xcorr(
     
     //calculates the Xcorr score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
-    
 
     //set all fields in match
     set_match_score(match, XCORR, score);
@@ -1493,11 +1504,12 @@ BOOLEAN_T score_match_collection_xcorr(
     match_collection->delta_cn = 0;
   }
   
-  //yes, we have now scored for the match-mode: XCORR
+  //we have now scored for the match-mode XCORR
   match_collection->scored_type[XCORR] = TRUE;
 
   return TRUE;
 }
+
 
 
 /**

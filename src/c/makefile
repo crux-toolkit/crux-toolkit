@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.60 $   #-Werror \
+# VERSION: $Revision: 1.61 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -109,9 +109,9 @@ depend:
 	makedepend -Y -p'$${OBJDIR}/' -f .depend *.c *.h #*.cpp##
 
 # Build a tags file for emacs.
-TAGS: *.c *.h *.cpp
-	etags *.c *.h
-	ctags *.c *.h
+# TAGS: *.c *.h # *.cpp
+#	etags *.c *.h
+#	ctags *.c *.h
 
 ##### Dependencies
 

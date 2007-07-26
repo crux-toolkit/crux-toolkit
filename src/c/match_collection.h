@@ -1,13 +1,12 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
 #define MATCH_COLLECTION_H
 
 #define _MAX_NUMBER_PEPTIDES 1000000 //What to set?
-#define _MIN_SP 0.010
 
 /**
  * \returns An (empty) match_collection object.
