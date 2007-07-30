@@ -41,18 +41,49 @@ accurate methods of mapping from the observed fragmentation spectra to
 the corresponding peptides.
 
 % Paragraph - Related Work - SEQUEST, Tandem as open source?
-SEQUEST\citep{eng:approach} There are two major approaches for peptide
-identifications. First, the de novo sequencing approach, which tries
-to infer the most statistically significant sequence from the spectrum
-without any peptide database. Among such algorithms, include PepNovo
-and Lutefisk. Second, the peptide database approach, where all
-candidate peptides are compared to the query spectrum in which the
-highest scoring peptide is identified. SEQUEST, InsPecT and
-PeptideProphet are among the most wide used database search
-algorithms. In practice, the peptide database approach is most widely
-used because of the lack of accuracy in de novo sequencing.
+The most widely used methods for peptide identification, such as
+SEQUEST \cite{eng:approach}, MASCOT \cite{}, Tandem \cite{} and
+Inspect \cite{}, exploit a database of known protein sequences.  For
+each observed spectrum, these methods search the database for the
+peptide whose theoretical spectrum best matches the observed spectrum.
+The resulting peptide-spectrum matches (PSMs) can be ranked using a
+pre-defined score function, or by using machine learning methods such
+as linear discriminant analysis \cite{}, support vector machines
+\cite{} or decision trees \cite{}.
 
-% Paragraph - Related Work - Indexing
+In this work, we describe a computational tool called Crux that solves
+the peptide identification problem efficiently and accurately.  As
+illustrated in Figure~\ref{figure:crux}, Crux incorporates a rapid
+peptide lookup scheme, a static scoring system for relative ranking of
+peptides with respect to each spectrum, a null model based on a decoy
+database of shuffled peptides generated on the fly, and a dynamically
+trained support vector machine for ranking the complete collection of
+PSMs.  Relative to the current state of the art, Crux makes three
+primary contributions:
+
+\begin{itemize}
+
+\item {\bf Efficient retrieval of candidate peptides.}  Given a
+  spectrum with a specified precursor mass-to-charge ratio (m/z), Crux
+  uses a precomputed peptide database to retrieve efficiently all
+  peptides whose m/z lies within a user-specified window around the
+  target m/z (called {\em candidate peptides}).  The database is
+  sorted by peptide mass and is stored on disk, with mass indices
+  stored in memory.  We show that, relative to SEQUEST's strategy of
+  reading the protein sequence database from disk for each new
+  spectrum, the indexed database decreases search time by X\% on
+  average.
+
+\item {\bf On-the-fly generation of decoy peptides.}  In evaluating
+  the statistical significance of a PSM, mass spectrometrists
+  frequently employ a {\em decoy database} comprised of protein
+  sequences that have been reversed, shuffled or generated from a
+  Markov chain derived from the original {\em target database}.
+  The number of matches to the decoy database yields an estimate of
+  the false discovery rate associated with a collection of target
+  PSMs.  Crux uses this strategy, but generates decoy peptides on the
+  fly by shuffling the non-terminal amino acids 
+
 In algorithms that are used to search tandem MS spectra data against a
 sequence database, a major bottleneck is the identification of
 candidate peptides within a given mass window. Because scoring
