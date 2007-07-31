@@ -193,8 +193,13 @@ and preprocessing steps refer to source code.
 \begin{figure}
   \centering
   Insert figure here
-  \caption{Peptide indexing allows rapid generation of candidate peptide
-  lists.}
+  \caption{{\bf Rapid database searching.}  The figure plots the total
+  running time required to search 10,000 tandem mass spectra against
+  the non-redundant protein database, plotted as a function of the m/z
+  tolerance used to define candidate peptides.  The two series
+  correspond to searching with SEQUEST and searching with Crux.  For
+  purposes of comparison, Crux's decoy searching and the Percolator
+  post-processor are turned off.
   \label{figure:indexing}
 \end{figure}
 
@@ -203,11 +208,11 @@ and preprocessing steps refer to source code.
   \begin{tabular}{c}
   Insert figure here \\
   Insert figure here \\
-  \caption{Re-implementation of Sp and Xcorr scoring functions.}  The
-  figure plots, for a collection of peptide-spectrum matches, the Sp
-  (panel A) and XCorr (panel B) scores as computed by Crux as a
+  \caption{{\bf Re-implementation of Sp and Xcorr scoring functions.}
+  The figure plots, for a collection of peptide-spectrum matches, the
+  Sp (panel A) and XCorr (panel B) scores as computed by Crux as a
   function of the same scores as computed by SEQUEST.
-  \label{figure:indexing}
+  \label{figure:indexing}}
   \end{tabular}
 \end{figure}
 
@@ -248,28 +253,30 @@ pre-computed peptide database outperforms SEQUEST, especially on large
 proteomes or when searching with a small mass tolerance.
 
 Finally, we test our false discovery rate for Crux using the
-Percolator algorithm compared to stadndard database searching
+Percolator algorithm compared to standard database searching
 algorithms.
 
 \subsection*{Datasets}
+
 We use the following publicly available tandem mass spectrometry data
 sets.
 
 \section{Discussion}
-% Mention Ting Chen's contribution
-Discuss this!
+
+
+% N.B. We should make sure to mention the file-handle limit at some point.
 
 \section*{Funding}
 
 \section*{Acknowledgment}
 
-Acknowledge this!
+% Mention Ting Chen's contribution
 
 % We thank Grant and Tobias Mann for helpful advice. Funding:
 % NIH grants U01~HG003161 and R01~GM071923.
 
 
-% N.B. We should make sure to mention the file-handle limit at some point.
+
 % N.B. To use the bibliography, check out the 'refs' CVS module and add it to
 % your Bibtex path.
 
