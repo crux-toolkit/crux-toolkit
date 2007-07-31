@@ -18,6 +18,8 @@ from optparse import OptionParser
 def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectrum, score_type="xcorr"):
     """compares runtime for each scoring method """
 
+    print "generating figures"
+    
     prefix = "Crux, Squest runtime comparison"
     title(prefix, size=20)
     xlabel("mass window (da)", size=15)
@@ -70,9 +72,9 @@ for window in mass_windows:
                                          "-Psequest.params" + "_" + window + \
                                          " *.dta"
                                          )
-
-    print result
-    print exit_code
+    #debug
+    #print result
+    #print exit_code
     
     if exit_code == "1":
         print "%s %s" % ("failed to run Sequest on mass window:", window)
@@ -82,7 +84,8 @@ for window in mass_windows:
         result = result.split('\n')
         for line in result:
             #get user time
-            if line.startswith('user '):
+            #FIXME is it user or real?
+            if line.startswith('real '):
                 fields = line. rstrip('\n').split()
                 sequest_results.append(float(fields[1]))
 
@@ -94,9 +97,9 @@ for window in mass_windows:
                                          + `ms2_file` + " " \
                                          + `fasta_file`
                                          )
-
-    print result
-    print exit_code
+    #debug
+    #print result
+    #print exit_code
     
     if exit_code == "1":
         print "%s %s" % ("failed to run Crux on mass window:", window)
@@ -112,8 +115,8 @@ for window in mass_windows:
             elif line.startswith('# SPECTRUM SCAN'):
                 number_of_spectrum += 1
 
-
-print crux_results, sequest_results, mass_windows
+#Debug
+#print crux_results, sequest_results, mass_windows
 
 #now plot the results
 plot_compare_data(crux_results, sequest_results, [ float(i) for i in mass_windows], number_of_spectrum)

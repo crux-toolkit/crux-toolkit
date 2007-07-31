@@ -1,15 +1,18 @@
 #!/bin/bash
-if [[ $# != 2 ]]
-then 
-  echo "$0: two arguments allowed <ms2 file> <fasta file>" 1>&2
-  exit 1
-fi
 
-if [[ ! -f "$1" || ! -f "$2" ]]
-then 
-  echo "Error: file or directiry does not match " 1>&2
-  exit 1
-fi
+ms2='test.ms2'
+fasta='test.fasta'
+#if [[ $# != 2 ]]
+#then 
+#  echo "$0: two arguments allowed <ms2 file> <fasta file>" 1>&2
+#  exit 1
+#fi
+
+#if [[ ! -f "$1" || ! -f "$2" ]]
+#then 
+#  echo "Error: file or directiry does not match " 1>&2
+#  exit 1
+#fi
 
 if [[ ! -f "crux_parameter" ]]
 then
@@ -17,11 +20,12 @@ then
 default settings"
 fi
 
-echo "Should I make new index? y|n"
-read -e  ANSWER
+if [[ ! -e "test_crux_index" ]]
+#echo "make new index(must make index if does not exist)? y|n"
+#read -e  ANSWER
 
 #Check if we should make index?
-if [[ "$ANSWER" == "y" ]]
+#if [[ "$ANSWER" == "y" ]]
 then
     #make index
     echo "creating index"
@@ -35,19 +39,21 @@ then
     
     #now creating real index
     (time create_index --parameter-file curx_parameter --cleavages all \
-        --missed-cleavages --verbosity 100  --redundancy unique $2) &> index_creation_result    
+        --missed-cleavages --verbosity 100  --redundancy unique $fasta) &> index_creation_result    
 fi
+
+echo "Comparing runtime"
 
 #first remove any pre existing *.dta files
 rm -rf *.dta
 
 #make .dta files for Sequest
-./ms22dta.pl $1
+./ms22dta.pl $ms2
 
 #now run Sequest and Crux compare and plot runtime
-python compare_runtime.py $1 $2
+python compare_runtime.py $ms2 $fasta
 
 #now that were are done, remove all *.dta files
-#rm -rf *.dta
+rm -rf *.dta
 
 

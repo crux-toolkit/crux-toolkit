@@ -169,5 +169,6 @@ for dta_file in dta_file_list:
 #print result_array_xcorr
 
 # plot the data
+print "generating figure"
 plot_compare_data(result_array_sp, "sp")
 plot_compare_data(result_array_xcorr, "xcorr")
