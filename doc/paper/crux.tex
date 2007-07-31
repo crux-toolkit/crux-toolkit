@@ -5,8 +5,8 @@
 \begin{document}
 \firstpage{1}
 
-\title[Open-source peptide identification algorithm]{Open-source
-peptide identification algorithm}
+\title[Rapid and accurate peptide identification]{Rapid and accurate
+  peptide identification from tandem mass spectra}
 \author[Park \textit{et~al}]{Christopher Park$^{\rm a}$, Aaron Klammer$^{\rm a}$,
 Lukas K\"{a}ll$^{\rm a}$, 
 William S. Noble\,$^{\rm a,b,}$\footnote{To whom correspondence should be addressed}}
@@ -22,9 +22,24 @@ $^{\rm b}$Department of Genome Sciences, University of Washington,
 \maketitle
 
 \begin{abstract}
-\section{Motivation:}
+\section{Motivation:}  Mass spectrometry, the core technology in the
+field of proteomics, promises to enable scientists to identify and
+quantify the entire complement of proteins in a complex biological
+sample.  Currently, the primary bottleneck in this type of experiment
+is computational.  Existing algorithms for interpreting mass spectra
+are slow and fail to identify a large proportion of the given spectra.
 
-\section{Results:}
+\section{Results:} We describe a database search program called Crux
+that extends the state of the art in peptide identification in several
+significant respects.  Crux reimplements and extends the widely used
+database search program SEQUEST.  For speed, Crux uses a peptide
+indexing scheme to rapidly retrieve candidate peptides for a given
+spectrum.  For each peptide in the target database, Crux generates
+shuffled decoy peptides on the fly, providing a good null model and,
+hence, accurate false discovery rate estimates.  In a second analysis
+stage, Crux trains a machine learning model to discriminate between
+target and decoy peptides, thereby significantly improving the overall
+rate of peptide identification.
 
 \section{Availability:}
 \href{http://noble.gs.washington.edu/proj/crux}{http://noble.gs.washington.edu/proj/crux}
@@ -33,12 +48,11 @@ $^{\rm b}$Department of Genome Sciences, University of Washington,
 
 \section{Introduction}
 
-% Paragraph - Motivation   - Define the peptide identification problem
 Tandem mass spectrometry is the method of choice for many protein
-identification studies.  However, this technology currently suffers
-from an analysis bottleneck, with a need for more efficient and more
-accurate methods of mapping from the observed fragmentation spectra to
-the corresponding peptides.
+identification studies.  However, this technology suffers from an
+analysis bottleneck, with a need for more efficient and more accurate
+methods of mapping from the observed fragmentation spectra to the
+corresponding peptides.
 
 The most widely used methods for peptide identification, such as
 SEQUEST \cite{eng:approach}, MASCOT \cite{}, Tandem \cite{} and
@@ -47,8 +61,9 @@ each observed spectrum, these methods search the database for the
 peptide whose theoretical spectrum best matches the observed spectrum.
 The resulting peptide-spectrum matches (PSMs) can be ranked using a
 pre-defined score function, or by using machine learning methods such
-as linear discriminant analysis \cite{}, support vector machines
-\cite{} or decision trees \cite{}.
+as linear discriminant analysis \cite{keller:empirical}, support
+vector machines \cite{anderson:new, kall:semi-supervised} or decision
+trees \cite{elias:intensity}.
 
 \begin{figure}
 \centering
@@ -93,9 +108,9 @@ following primary contributions:
   Crux uses this target-decoy strategy, generating decoys by shuffling
   the target peptides.  This approach ensures that each decoy peptide
   exhibits precisely the same amino acid composition and total mass as
-  the corresponding target decoy.  Furthermore, in order to avoid the
-  memory overhead associated with storing shuffled, non-overlapping
-  decoy peptides in memory, Crux generates decoy peptides on the fly.
+  the corresponding target decoy.  To avoid the memory overhead
+  associated with storing shuffled, non-overlapping decoy peptides in
+  memory, Crux generates decoy peptides on the fly.
 
 \item {\bf Dynamically trained PSM scoring function.}  After scoring
   all peptides with respect to a given spectrum, the top-ranked PSM
@@ -104,19 +119,23 @@ following primary contributions:
   (XCorr), have been used to carry out both relative ranking and
   absolute rankings; however, numerous studies have demonstrated that
   better absolute rankings can be achieved by using machine learning
-  methods \cite{}.  Recently, we described a method for training a
-  machine learning method to discriminate between target and decoy
-  PSMs.  This approach allows the learning phase to incorporate
-  specific characteristics of the given data set.
+  methods \cite{keller:empirical, anderson:new, elias:intensity,
+  kall:semi-supervised}.  Crux incorporates a recently described
+  method, called Percolator, for training a machine learning method to
+  discriminate between target and decoy PSMs.  This dynamically
+  trained model incorporates specific characteristics of the given
+  data set.  Furthermore, Crux's implementation of Percolator allows
+  the user to include the observed and predicted liquid chromatography
+  retention time \cite{klammer:effect} as an additional feature.
 
 \item {\bf False discovery rate estimates.}  Crux uses
   well-established statistical methods to estimate false discovery
-  rates based upon decoy PSMs.  To avoid biasing the estimates,
-  separate sets of decoy PSMs are used to train the machine learning
-  method and to estimate the final false discovery rate.  Crux
-  reports, along with each PSM, a $q$-value, which is defined as the
-  minimal false discovery rate threshold at which a given PSM is
-  deemed correct.
+  rates based upon decoy PSMs \cite{benjamini:controlling}.  To avoid
+  biasing the estimates, separate sets of decoy PSMs are used to train
+  the machine learning method and to estimate the final false
+  discovery rate.  Crux reports, along with each PSM, a $q$-value,
+  which is defined as the minimal false discovery rate threshold at
+  which a given PSM is deemed correct \cite{storey:statistical}.
 
 \end{itemize}
 
@@ -184,7 +203,10 @@ and preprocessing steps refer to source code.
   \begin{tabular}{c}
   Insert figure here \\
   Insert figure here \\
-  \caption{Re-implementation of Sp and Xcorr scoring functions.}
+  \caption{Re-implementation of Sp and Xcorr scoring functions.}  The
+  figure plots, for a collection of peptide-spectrum matches, the Sp
+  (panel A) and XCorr (panel B) scores as computed by Crux as a
+  function of the same scores as computed by SEQUEST.
   \label{figure:indexing}
   \end{tabular}
 \end{figure}
