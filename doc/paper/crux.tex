@@ -40,7 +40,6 @@ from an analysis bottleneck, with a need for more efficient and more
 accurate methods of mapping from the observed fragmentation spectra to
 the corresponding peptides.
 
-% Paragraph - Related Work - SEQUEST, Tandem as open source?
 The most widely used methods for peptide identification, such as
 SEQUEST \cite{eng:approach}, MASCOT \cite{}, Tandem \cite{} and
 Inspect \cite{}, exploit a database of known protein sequences.  For
@@ -51,6 +50,16 @@ pre-defined score function, or by using machine learning methods such
 as linear discriminant analysis \cite{}, support vector machines
 \cite{} or decision trees \cite{}.
 
+\begin{figure}
+\centering
+Insert figure here.
+\caption{{\bf The Crux algorithm.}  Crux takes as input a collection
+  of fragmentation spectra and a target protein sequence database, and
+  produces a list of peptide-spectrum matches, each with an associated
+  $q$-value.
+  \label{figure:crux}}
+\end{figure}
+
 In this work, we describe a computational tool called Crux that solves
 the peptide identification problem efficiently and accurately.  As
 illustrated in Figure~\ref{figure:crux}, Crux incorporates a rapid
@@ -58,8 +67,8 @@ peptide lookup scheme, a static scoring system for relative ranking of
 peptides with respect to each spectrum, a null model based on a decoy
 database of shuffled peptides generated on the fly, and a dynamically
 trained support vector machine for ranking the complete collection of
-PSMs.  Relative to the current state of the art, Crux makes three
-primary contributions:
+PSMs.  Relative to the current state of the art, Crux makes the
+following primary contributions:
 
 \begin{itemize}
 
@@ -78,35 +87,44 @@ primary contributions:
   the statistical significance of a PSM, mass spectrometrists
   frequently employ a {\em decoy database} comprised of protein
   sequences that have been reversed, shuffled or generated from a
-  Markov chain derived from the original {\em target database}.
-  The number of matches to the decoy database yields an estimate of
-  the false discovery rate associated with a collection of target
-  PSMs.  Crux uses this strategy, but generates decoy peptides on the
-  fly by shuffling the non-terminal amino acids 
+  Markov chain derived from the given {\em target database}.  The
+  number of matches to the decoy database yields an estimate of the
+  false discovery rate associated with a collection of target PSMs.
+  Crux uses this target-decoy strategy, generating decoys by shuffling
+  the target peptides.  This approach ensures that each decoy peptide
+  exhibits precisely the same amino acid composition and total mass as
+  the corresponding target decoy.  Furthermore, in order to avoid the
+  memory overhead associated with storing shuffled, non-overlapping
+  decoy peptides in memory, Crux generates decoy peptides on the fly.
 
-In algorithms that are used to search tandem MS spectra data against a
-sequence database, a major bottleneck is the identification of
-candidate peptides within a given mass window. Because scoring
-functions are expensive procedure, all database algorithms produce a
-smaller list of candidate peptides to be analyzed. However, generating
-candidate peptides separately for each search can be wasteful for
-large proteomes, because many times there are overlapping mass windows
-of peptides. Therefore, by using a precomputed database, database
-scoring algorithms can avoid re-generating peptides for each
-search. Thus, resulting in dramatic reduction in runtime for large
-proteome searches. TurboSEQUEST, a extension of SEQUEST, utilizes a
-precomputed peptide database, however the application is not publicly
-available.
+\item {\bf Dynamically trained PSM scoring function.}  After scoring
+  all peptides with respect to a given spectrum, the top-ranked PSM
+  must be ranked with respect to other PSMs from the same data set.
+  Some score functions, such as SEQUEST's cross-correlation score
+  (XCorr), have been used to carry out both relative ranking and
+  absolute rankings; however, numerous studies have demonstrated that
+  better absolute rankings can be achieved by using machine learning
+  methods \cite{}.  Recently, we described a method for training a
+  machine learning method to discriminate between target and decoy
+  PSMs.  This approach allows the learning phase to incorporate
+  specific characteristics of the given data set.
 
-% Paragraph - Related Work - Target decoy searches
-% Paragraph - Related Work - Percolator
-% Paragraph - Contribution - Four points of improvement
-%  - Indexing
-%  - "Open source" implementation of scoring functions
-%  - Null peptide generation
-%  - Percolator post processing
-% Paragraph - Contribution - Brief results description
+\item {\bf False discovery rate estimates.}  Crux uses
+  well-established statistical methods to estimate false discovery
+  rates based upon decoy PSMs.  To avoid biasing the estimates,
+  separate sets of decoy PSMs are used to train the machine learning
+  method and to estimate the final false discovery rate.  Crux
+  reports, along with each PSM, a $q$-value, which is defined as the
+  minimal false discovery rate threshold at which a given PSM is
+  deemed correct.
 
+\end{itemize}
+
+Perhaps most significantly, from the perspective of the mass
+spectrometry research community, Crux provides all of the above in a
+single stand-alone C++ program which is distributed, with source code,
+free for academic use.  Below, we demonstrate that Crux is both
+efficient and accurate, yielding FIXME.
 
 \section{Approach}
 
