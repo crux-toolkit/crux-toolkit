@@ -1,6 +1,6 @@
 # comment lines begin with a '#' in the first position
 [SEQUEST]
-database_name = test.fasta
+database_name = yeast.aa
 peptide_mass_tolerance = 1
 create_output_files = 0                ; 0=no, 1=yes
 ion_series = 0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
@@ -57,7 +57,7 @@ add_S_Serine = 0.0000                  ; added to S - avg.  87.0782, mono.  87.0
 add_P_Proline = 0.0000                 ; added to P - avg.  97.1167, mono.  97.05276
 add_V_Valine = 0.0000                  ; added to V - avg.  99.1326, mono.  99.06841
 add_T_Threonine = 0.0000               ; added to T - avg. 101.1051, mono. 101.04768
-add_C_Cysteine = 57.0000               ; added to C - avg. 103.1388, mono. 103.00919
+add_C_Cysteine = 0.0000               ; added to C - avg. 103.1388, mono. 103.00919
 add_L_Leucine = 0.0000                 ; added to L - avg. 113.1594, mono. 113.08406
 add_I_Isoleucine = 0.0000              ; added to I - avg. 113.1594, mono. 113.08406
 add_X_LorI = 0.0000                    ; added to X - avg. 113.1594, mono. 113.08406

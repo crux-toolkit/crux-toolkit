@@ -28,18 +28,21 @@ if [[ ! -e "test_crux_index" ]]
 #if [[ "$ANSWER" == "y" ]]
 then
     #make index
-    echo "creating index"
-    
-    count=`ulimit -n`
-    if [ $count -lt 2000 ]
-        then
-        #set file handle count, must have root permission
-        ulimit -n 1000000
-    fi
+##    echo "creating index"
+    echo "copy index"
+##    
+##    count=`ulimit -n`
+##    if [ $count -lt 2000 ]
+##        then
+##        #set file handle count, must have root permission
+##        ulimit -n 1000000
+##    fi
     
     #now creating real index
-    (time create_index --parameter-file curx_parameter --cleavages all \
-        --missed-cleavages --verbosity 100  --redundancy unique $fasta) &> index_creation_result    
+##    (time create_index --parameter-file curx_parameter --cleavages all \
+##        --missed-cleavages --verbosity 100  --redundancy unique $fasta) &> index_creation_result    
+
+    cp -R /var/noble/data/protein_database/test_crux_index/ .
 fi
 
 echo "Comparing runtime"
