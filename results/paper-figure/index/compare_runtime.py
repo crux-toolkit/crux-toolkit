@@ -20,17 +20,15 @@ def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectru
 
     print "generating figures"
     
-    prefix = "Crux, Squest runtime comparison"
-    title(prefix, size=20)
-    xlabel("mass window (da)", size=15)
-    ylabel("Runtime for " + `number_of_spectrum` + " spectra (Sec.)", size=15)
+    xlabel("mass window (Da)", size=15)
+    ylabel("Runtime for " + `number_of_spectrum` + " spectra (s)", size=15)
     
     plot(mass_windows, crux_array, label="Crux")
-    plot(mass_windows, sequest_array, label="Sequest")
+    plot(mass_windows, sequest_array, label="SEQUEST")
     legend()
     
-    savefig("fig-1-index" + ".eps")
-    savefig("fig-1-index" + ".png")
+    savefig("indexing" + ".eps")
+    savefig("indexing" + ".png")
 
 
 #_________________________________________
