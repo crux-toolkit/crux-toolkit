@@ -55,15 +55,15 @@ methods of mapping from the observed fragmentation spectra to the
 corresponding peptides.
 
 The most widely used methods for peptide identification, such as
-SEQUEST \cite{eng:approach}, MASCOT \cite{}, Tandem \cite{} and
-Inspect \cite{}, exploit a database of known protein sequences.  For
-each observed spectrum, these methods search the database for the
-peptide whose theoretical spectrum best matches the observed spectrum.
-The resulting peptide-spectrum matches (PSMs) can be ranked using a
-pre-defined score function, or by using machine learning methods such
-as linear discriminant analysis \cite{keller:empirical}, support
-vector machines \cite{anderson:new, kall:semi-supervised} or decision
-trees \cite{elias:intensity}.
+SEQUEST \cite{eng:approach}, MASCOT \cite{FIXME}, Tandem \cite{FIXME}
+and Inspect \cite{FIXME}, exploit a database of known protein
+sequences.  For each observed spectrum, these methods search the
+database for the peptide whose theoretical spectrum best matches the
+observed spectrum.  The resulting peptide-spectrum matches (PSMs) can
+be ranked using a pre-defined score function, or by using machine
+learning methods such as linear discriminant analysis
+\cite{keller:empirical}, support vector machines \cite{anderson:new,
+kall:semi-supervised} or decision trees \cite{elias:intensity}.
 
 \begin{figure}
 \centering
@@ -128,7 +128,7 @@ following primary contributions:
   the user to include the observed and predicted liquid chromatography
   retention time \cite{klammer:effect} as an additional feature.
 
-\item {\bf False discovery rate estimates.}  Crux uses
+\item {\bf Accurate false discovery rate estimates.}  Crux uses
   well-established statistical methods to estimate false discovery
   rates based upon decoy PSMs \cite{benjamini:controlling}.  To avoid
   biasing the estimates, separate sets of decoy PSMs are used to train
@@ -192,7 +192,7 @@ and preprocessing steps refer to source code.
 
 \begin{figure}
   \centering
-  Insert figure here
+  \includegraphics[width=3in]{indexing.eps}
   \caption{{\bf Rapid database searching.}  The figure plots the total
   running time required to search 10,000 tandem mass spectra against
   the non-redundant protein database, plotted as a function of the m/z
@@ -200,21 +200,22 @@ and preprocessing steps refer to source code.
   correspond to searching with SEQUEST and searching with Crux.  For
   purposes of comparison, Crux's decoy searching and the Percolator
   post-processor are turned off.
-  \label{figure:indexing}
+  \label{figure:indexing}}
 \end{figure}
 
-\begin{figure}
+\begin{figure*}
   \centering
-  \begin{tabular}{c}
+  \begin{tabular}{cc}
+  Insert figure here &
   Insert figure here \\
-  Insert figure here \\
+  A & B \\
+  \end{tabular}
   \caption{{\bf Re-implementation of Sp and Xcorr scoring functions.}
   The figure plots, for a collection of peptide-spectrum matches, the
   Sp (panel A) and XCorr (panel B) scores as computed by Crux as a
   function of the same scores as computed by SEQUEST.
   \label{figure:indexing}}
-  \end{tabular}
-\end{figure}
+\end{figure*}
 
 \begin{figure}
   \centering
