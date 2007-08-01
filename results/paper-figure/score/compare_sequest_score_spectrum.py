@@ -107,6 +107,7 @@ for dta_file in dta_file_list:
     dta_components = dta_file.rstrip('\n').split('.')
     charge = dta_components[-2]
     scan_number = dta_components[-3]
+
     
     print "running comparison with charge: %s scan_number: %s" % (charge, scan_number)
     
@@ -150,7 +151,9 @@ for dta_file in dta_file_list:
         if exit_code == "1":
             print "failed to run score_peptide_spectrum"
             sys.exit(1)
-                
+
+        #print result_crux
+        
         result_crux = result_crux.split(': ')
 
         if score_type == "sp":
