@@ -7,8 +7,9 @@
 
 \title[Rapid and accurate peptide identification]{Rapid and accurate
   peptide identification from tandem mass spectra}
-\author[Park \textit{et~al}]{Christopher Park$^{\rm a}$, Aaron Klammer$^{\rm a}$,
-Lukas K\"{a}ll$^{\rm a}$, 
+\author[Park \textit{et~al}]{Christopher Park$^{\rm a}$,
+Aaron Klammer$^{\rm b}$,
+Lukas K\"{a}ll$^{\rm b}$, 
 William S. Noble\,$^{\rm a,b,}$\footnote{To whom correspondence should be addressed}}
 \address{
 $^{\rm a}$Department of Computer Science and Engineering,
@@ -65,15 +66,15 @@ learning methods such as linear discriminant analysis
 \cite{keller:empirical}, support vector machines \cite{anderson:new,
 kall:semi-supervised} or decision trees \cite{elias:intensity}.
 
-\begin{figure}
+\begin{figure*}
 \centering
-Insert figure here.
+\includegraphics[width=6.5in]{schematic.eps}
 \caption{{\bf The Crux algorithm.}  Crux takes as input a collection
   of fragmentation spectra and a target protein sequence database, and
   produces a list of peptide-spectrum matches, each with an associated
   $q$-value.
   \label{figure:crux}}
-\end{figure}
+\end{figure*}
 
 In this work, we describe a computational tool called Crux that solves
 the peptide identification problem efficiently and accurately.  As
@@ -117,7 +118,7 @@ following primary contributions:
   must be ranked with respect to other PSMs from the same data set.
   Some score functions, such as SEQUEST's cross-correlation score
   (XCorr), have been used to carry out both relative ranking and
-  absolute rankings; however, numerous studies have demonstrated that
+  absolute ranking; however, numerous studies have demonstrated that
   better absolute rankings can be achieved by using machine learning
   methods \cite{keller:empirical, anderson:new, elias:intensity,
   kall:semi-supervised}.  Crux incorporates a recently described

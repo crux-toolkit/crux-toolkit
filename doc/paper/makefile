@@ -5,6 +5,7 @@ REFS = $(HOME)/refs/refs.bib
 
 crux.bbl: crux.tex \
 	$(REFS) \
+	schematic.eps \
 	indexing.eps
 
 indexing.eps: ../../results/paper-figure/index/runall \
@@ -14,6 +15,9 @@ indexing.eps: ../../results/paper-figure/index/runall \
 	../../results/paper-figure/index/compare_runtime.py
 	cd ../../results/paper-figure/index; ./runall
 	cp ../../results/paper-figure/index/indexing.eps .
+
+%.eps: %.fig
+	fig2dev -L eps schematic.fig > schematic.eps
 
 %.bbl: %.tex \
 	$(REFS)
