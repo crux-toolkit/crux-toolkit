@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.46 $
+ * $Revision: 1.47 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -941,8 +941,11 @@ PEPTIDE_TYPE_T examine_peptide_type(
   if(front && back){
     return TRYPTIC;
   }
-  else if(front || back){
-    return PARTIALLY_TRYPTIC;
+  else if(front){
+    return N_TRYPTIC;
+  }
+  else if(back){
+    return C_TRYPTIC;
   }
   else{
     return NOT_TRYPTIC;

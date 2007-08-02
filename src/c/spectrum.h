@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -79,6 +79,14 @@ BOOLEAN_T parse_spectrum_file(
 BOOLEAN_T parse_spectrum(
   SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
   char*      filename ///< the file to parse -in
+  );
+
+/**
+ * Parse the spectrum from the serialized spectrum
+ *\returns the parsed spectrum , else returns NULL for failed parse
+ */
+SPECTRUM_T* parse_spectrum_binary(
+  FILE* file ///< output stream -out
   );
 
 /** 

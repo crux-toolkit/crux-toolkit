@@ -1,12 +1,13 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
 #define MATCH_COLLECTION_H
 
 #define _MAX_NUMBER_PEPTIDES 1000000 //What to set?
+#define _MIN_SP 0.010
 
 /**
  * \returns An (empty) match_collection object.
@@ -26,24 +27,8 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
  int max_rank,     ///< max number of top rank matches to keep from SP -in
  SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
  SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP) -in
- float mass_offset  ///< the mass offset from neutral_mass to search for candidate peptides -in
- );
-
-/**
- * create a new match collection from spectrum
- * return the top max_rank matches, first scored by prelim_score(SP), then by score_type(XCORR, LOGP_EXP_SP);
- * uses a provided peptide iterator, MUST be a mutable iterator
- * Sets the iterator before useage.
- *\returns a new match_collection object that is scored by score_type and contains the top max_rank matches
- */
-MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
- SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
- int charge,       ///< the charge of the spectrum -in
- int max_rank,     ///< max number of top rank matches to keep from SP -in 
- SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
- SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP) -in
- float mass_offset  ///< the mass offset from neutral_mass to search for candidate peptides -in
- //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< peptide iteartor to use, must set it first before use
+ float mass_offset,  ///< the mass offset from neutral_mass to search for candidate peptides -in
+ BOOLEAN_T null_peptide_collection ///< is this match_collection a null peptide collection? -in
  );
 
 /**
@@ -51,6 +36,15 @@ MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
  */
 void free_match_collection(
   MATCH_COLLECTION_T* match_collection ///< the match collection to free -out
+  );
+
+/**
+ * sort the match collection by score_type(SP, XCORR, ... )
+ *\returns TRUE, if successfully sorts the match_collection
+ */
+BOOLEAN_T sort_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
+  SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
   );
 
 /**
@@ -116,7 +110,6 @@ float get_match_collection_delta_cn(
  */
 BOOLEAN_T serialize_psm_features(
   MATCH_COLLECTION_T* match_collection, ///< working match collection -in
-  SPECTRUM_T* spectrum, ///< the working spectrum -in
   FILE* output,  ///< ouput file handle -out
   int top_match, ///< number of top match to serialize -in
   SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
@@ -131,7 +124,6 @@ BOOLEAN_T serialize_psm_features(
 BOOLEAN_T print_match_collection_sqt(
   FILE* output, ///< the output file -out
   int top_match, ///< the top matches to output -in
-  int charge, ///< the charge of the of spectrum -in
   MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
   SPECTRUM_T* spectrum, ///< the spectrum to print sqt -in
   SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
@@ -176,6 +168,63 @@ MATCH_T* match_iterator_next(
  */
 void free_match_iterator(
   MATCH_ITERATOR_T* match_iterator ///< the match iterator to free
+  );
+
+
+/*******************************************
+ * match_collection post_process extension
+ ******************************************/
+
+/**
+ * create a new match collection from the serialized PSM output files
+ *\returns a new match_collection object that is instantiated by the PSm output files
+ */
+MATCH_COLLECTION_T* new_match_collection_psm_output(
+ char* output_file_directory, ///< the directory path where the PSM output files are located -in
+ char* fasta_file ///< The name of the file (in fasta format) from which to retrieve proteins and peptides. -in
+ );
+
+/**
+ * Fill the match objects score with the given the float array. 
+ * The match object order must not have been altered since scoring.
+ * The result array size must match the match_total count.
+ *\returns TRUE, if successfully fills the scores into match object, else FALSE.
+ */
+BOOLEAN_T fill_result_to_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -out
+  double* results,  ///< The result score array to fill the match objects -in
+  SCORER_TYPE_T score_type  ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
+  );
+
+/**
+ * Process run specific features from all the PSMs
+ */
+void process_run_specific_features(
+  MATCH_COLLECTION_T* match_collection ///< the match collection to free -out
+  );
+
+/**
+ *\returns the match_collection protein counter for the protein idx
+ */
+int get_match_collection_protein_counter(
+  MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
+  int protein_idx ///< the protein index to return protein counter -in
+  );
+
+/**
+ *\returns the match_collection protein peptide counter for the protein idx
+ */
+int get_match_collection_protein_peptide_counter(
+  MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
+  int protein_idx ///< the protein index to return protein peptiide counter -in
+  );
+
+/**
+ *\returns the match_collection hash value of PSMS for which this is the best scoring peptide
+ */
+int get_match_collection_hash(
+  MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
+  PEPTIDE_T* peptide  ///< the peptide to check hash value
   );
 
 /*

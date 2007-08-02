@@ -46,7 +46,7 @@ int main(int argc, char** argv){
 
   //optional
   char* prelim_score_type = "sp";
-  char* score_type = "logp_exp_sp";
+  char* score_type = "xcorr";
   char* parameter_file = NULL;
   int verbosity = CARP_ERROR;
   int spectra_count = 20;
@@ -137,6 +137,14 @@ int main(int argc, char** argv){
 
     //parse and update parameters
     parse_update_parameters(parameter_file);
+
+    //always use index when search spectra!
+    set_string_parameter("use-index", "T");
+    
+    //parameters are now confirmed, can't be changed
+    parameters_confirmed();
+    
+    /******* All parameters must be taken through get_*_parameter() method ******/
     
     //main score type
     if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
@@ -146,7 +154,7 @@ int main(int argc, char** argv){
       main_score = LOGP_BONF_EXP_SP;
     }    
     else if(strcmp(get_string_parameter_pointer("score-type"), "xcorr")== 0){
-      main_score = XCORR;
+      main_score = XCORR;    
     }
     else if(strcmp(get_string_parameter_pointer("score-type"), "logp_evd_xcorr")== 0){
       main_score = LOGP_EVD_XCORR;
@@ -165,13 +173,7 @@ int main(int argc, char** argv){
     else{
       wrong_command(prelim_score_type, "The type of preliminary scoring function to use. sp");
     }
-
-    //always use index when search spectra!
-    set_string_parameter("use-index", "T");
     
-    //parameters are now confirmed, can't be changed
-    parameters_confirmed();
-
     //set max number of preliminary scored peptides to use for final scoring
     max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
 
@@ -224,11 +226,14 @@ int main(int argc, char** argv){
 	
         //get match collection with scored, ranked match collection
         match_collection =
-          new_match_collection_spectrum_with_peptide_iterator(spectrum, 
-                                                              possible_charge_array[charge_index], 
-                                                              max_rank_preliminary, prelim_score, 
-                                                              main_score, mass_offset);
+          new_match_collection_spectrum(spectrum, 
+                                        possible_charge_array[charge_index], 
+                                        max_rank_preliminary, prelim_score, 
+                                        main_score, mass_offset, FALSE);
         
+        //print additional header
+        fprintf(stdout, "# PEPTIDES SEARCHED: %d\n", get_match_collection_experimental_size(match_collection));
+        fprintf(stdout, "# PEPTIDES SAMPLED FOR LOGP_SP: %d\n",get_match_collection_top_fit_sp(match_collection));
                 
         //create match iterator, TRUE: return match in sorted order of main_score type
         match_iterator = new_match_iterator(match_collection, main_score, TRUE);

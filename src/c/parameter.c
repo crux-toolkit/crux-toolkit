@@ -77,8 +77,9 @@ void initialize_parameters(void){
 
   //set parameters
   set_string_parameter("parameter-file", "crux_parameter");
-
-  //generate_peptide parameters
+    
+  //generate_peptide, create_index parameters
+  set_double_parameter("mass-range", 1);
   set_double_parameter("min-mass", 200);
   set_double_parameter("max-mass", 2400);
   set_int_parameter("min-length", 6);
@@ -113,9 +114,7 @@ void initialize_parameters(void){
   set_int_parameter("top-rank-p-value", 1);
   
   //how many peptides to sample for EVD parameter estimation
-  set_int_parameter("sample-count", 2000);
-  set_int_parameter("top-scores-to-fit", 400);
-  set_int_parameter("skip-first-score", 1);
+  set_int_parameter("sample-count", 500);
   
   //match_search
   set_string_parameter("match-output-folder", ".");
@@ -124,6 +123,10 @@ void initialize_parameters(void){
   set_double_parameter("spectrum-min-mass", 0.0);
   set_double_parameter("spectrum-max-mass", INFINITY);
   set_int_parameter("top-match", 1);
+  set_int_parameter("number-decoy-set", 2);
+
+  //match_analysis
+  set_string_parameter("algorithm", "percolator");
 
   //now we have initialized the parameters
   parameter_initialized = TRUE;

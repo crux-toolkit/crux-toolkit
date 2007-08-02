@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -177,6 +177,12 @@ void print_peptide_src(
   else if(peptide_type == PARTIALLY_TRYPTIC){
     fprintf(file, "peptide type:%s\n", "PARTIALLY_TRYPTIC");
   }
+  else if(peptide_type == N_TRYPTIC){
+    fprintf(file, "%s", "N_TRYPTIC");
+  }
+  else if(peptide_type == C_TRYPTIC){
+    fprintf(file, "%s", "C_TRYPTIC");
+  }
   else if(peptide_type == NOT_TRYPTIC){
     fprintf(file, "peptide type:%s\n", "NOT_TRYPTIC");
   }
@@ -209,7 +215,7 @@ void copy_peptide_src(
 
 /**
  * sets the peptide type
- * peptide type: TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC
+ * peptide type: TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NON_TRYPTIC
  */
 void set_peptide_src_peptide_type( 
   PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
@@ -221,7 +227,7 @@ void set_peptide_src_peptide_type(
 
 /**
  * \returns the peptide type with association to the parent protein
- * peptide type: TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC
+ * peptide type: TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NON_TRYPTIC
  */
 PEPTIDE_TYPE_T get_peptide_src_peptide_type( 
   PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   

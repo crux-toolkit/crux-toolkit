@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.9 $ 
+ * $Revision: 1.10 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -50,8 +50,8 @@ void qsort_match(
  * \returns the difference between sp score in match_a and match_b
  */
 int compare_match_sp(
-  MATCH_T* match_a, ///< the first match -in  
-  MATCH_T* match_b  ///< the scond match -in
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
   );
 
 /**
@@ -59,8 +59,17 @@ int compare_match_sp(
  * \returns the difference between xcorr score in match_a and match_b
  */
 int compare_match_xcorr(
-  MATCH_T* match_a, ///< the first match -in  
-  MATCH_T* match_b  ///< the scond match -in
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * compare two matches, used for qsort
+ * \returns the difference between xcorr score in match_a and match_b
+ */
+int compare_match_q_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
   );
 
 /**
@@ -78,9 +87,42 @@ void serialize_match(
   FILE* file ///< output stream -out
   );
 
+
+/*******************************************
+ * match post_process extension
+ ******************************************/
+/**
+ * Constructs the 20 feature array that pass over to percolator registration
+ *\returns the feature float array
+ */
+double* get_match_percolator_features(
+  MATCH_T* match, ///< the match to work -in                                          
+  MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
+  );
+
+/**
+ *
+ *\returns a match object that is parsed from the serialized result file
+ */
+MATCH_T* parse_match(
+  FILE* result_file,  ///< the result file to parse PSMs -in
+  DATABASE_T* database ///< the database to which the peptides are created -in
+  //int num_top_match  ///< number of top PSMs serialized per spectrum -in
+  );
+
 /****************************
  * match get, set methods
  ***************************/
+
+/**
+ * Returns a heap allocaated peptide sequence of the PSM
+ * User must free the sequence.
+ *\returns the match peptide sequence
+ */
+char* get_match_sequence(
+  MATCH_T* match ///< the match to work -in
+  );
+
 
 /**
  * Must ask for score that has been computed
@@ -149,10 +191,86 @@ void set_match_peptide(
   );
 
 /**
+ * sets the match charge
+ */
+void set_match_charge(
+  MATCH_T* match, ///< the match to work -out
+  int charge  ///< the charge of spectrum -in
+  );
+
+/**
+ * gets the match charge
+ */
+int get_match_charge(
+  MATCH_T* match ///< the match to work -out
+  );
+
+/**
+ * sets the match delta_cn
+ */
+void set_match_delta_cn(
+  MATCH_T* match, ///< the match to work -out
+  float delta_cn  ///< the delta cn value of PSM -in
+  );
+
+/**
+ * gets the match delta_cn
+ */
+float get_match_delta_cn(
+  MATCH_T* match ///< the match to work -out
+  );
+
+/**
+ * sets the match ln_delta_cn
+ */
+void set_match_ln_delta_cn(
+  MATCH_T* match, ///< the match to work -out
+  float ln_delta_cn  ///< the ln delta cn value of PSM -in
+  );
+
+/**
+ * gets the match ln_delta_cn
+ */
+float get_match_ln_delta_cn(
+  MATCH_T* match ///< the match to work -out
+  );
+
+/**
+ * sets the match ln_experiment_size
+ */
+void set_match_ln_experiment_size(
+  MATCH_T* match, ///< the match to work -out
+  float ln_experiment_size ///< the ln_experiment_size value of PSM -in
+  );
+
+/**
+ * gets the match ln_experiment_size
+ */
+float get_match_ln_experiment_size(
+  MATCH_T* match ///< the match to work -out
+  );
+
+/**
  *Increments the pointer count to the match object
  */
 void increment_match_pointer_count(
   MATCH_T* match ///< the match to work -in  
+  );
+
+/**
+ * sets the match if it is a null_peptide match
+ */
+void set_match_null_peptide(
+  MATCH_T* match, ///< the match to work -out
+  BOOLEAN_T is_null_peptid  ///< is the match a null peptide? -in
+  );
+
+/**
+ * gets the match if it is a null_peptide match
+ *\returns TRUE if match is null peptide, else FALSE
+ */
+BOOLEAN_T get_match_null_peptide(
+  MATCH_T* match ///< the match to work -out
   );
 
 /*

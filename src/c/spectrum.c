@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.37 $
+ * REVISION: $Revision: 1.38 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -64,31 +64,8 @@ struct spectrum{
   char*             filename;      ///< Optional filename
   char*             i_lines[MAX_I_LINES]; ///< store i lines, upto MAX_I_LINES
   char*             d_lines[MAX_D_LINES]; ///< store d lines, upto MAX_D_LINES 
+  BOOLEAN_T         has_peaks;  ///< Does the spectrum contain peak information?
 };    
-
-/**
- * serialize the spectrum in binary
- * Form,
- * <int: first_scan><int: last_scan><int: id><SPECTRUM_TYPE_T: spectrum_type>
- * <float: precursor_mz><float: retention_time>
- */
-void serialize_spectrum(
-  SPECTRUM_T* spectrum, ///< the spectrum to serialize -in
-  FILE* file ///< output stream -out
-  )
-{
-  //serialize each field
-  //
-  fwrite(&(spectrum->first_scan), sizeof(int), 1, file);
-  fwrite(&(spectrum->last_scan), sizeof(int), 1, file);
-  fwrite(&(spectrum->id), sizeof(int), 1, file);
-  fwrite(&(spectrum->spectrum_type), sizeof(SPECTRUM_TYPE_T), 1, file);
-  fwrite(&(spectrum->precursor_mz), sizeof(float), 1, file);  
-  //retention_time
-  //fwrite(&(spectrum->rt_time), sizeof(float), 1, file);  
-  //FIXME add additional fields.
-}
-
 
 /**
  * \struct peak_iterator
@@ -164,6 +141,8 @@ SPECTRUM_T* allocate_spectrum(void){
     fresh_spectrum->i_lines[line_idx] = NULL;
   }
   
+  fresh_spectrum->has_peaks = FALSE;
+
   return fresh_spectrum;
 }
 
@@ -199,28 +178,32 @@ void free_spectrum (
 )
 {
   int line_idx;
-  free(spectrum->possible_z);
-  free(spectrum->filename);
-  free(spectrum->peaks);
   
-  //free D lines
-  for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
-    if(spectrum->d_lines[line_idx] != NULL){
-      free(spectrum->d_lines[line_idx]);
+  //only non post_process spectrum has these features to free
+  if(spectrum->has_peaks){
+    free(spectrum->possible_z);
+    free(spectrum->peaks);
+    free(spectrum->filename);
+    
+    //free D lines
+    for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
+      if(spectrum->d_lines[line_idx] != NULL){
+        free(spectrum->d_lines[line_idx]);
+      }
+      else{
+        break;
+      }
     }
-    else{
-      break;
-    }
-  }
-  
-  //free I lines
-  for(line_idx = 0; line_idx < MAX_I_LINES; ++line_idx){
-    if(spectrum->i_lines[line_idx] != NULL){
-      free(spectrum->i_lines[line_idx]);
-    }
-    else{
-      break;
-    }
+    
+    //free I lines
+    for(line_idx = 0; line_idx < MAX_I_LINES; ++line_idx){
+      if(spectrum->i_lines[line_idx] != NULL){
+        free(spectrum->i_lines[line_idx]);
+      }
+      else{
+        break;
+      }
+    }    
   }
   
   free(spectrum);
@@ -467,7 +450,10 @@ BOOLEAN_T parse_spectrum_file(
     //*************************
     file_index = ftell(file); // updates the current working line location
   }
-  
+
+  //now we have peak information
+  spectrum->has_peaks = TRUE;
+    
   // set the file pointer back to the start of the next 's' line
   fseek(file, file_index, SEEK_SET);
   myfree(new_line);
@@ -700,6 +686,7 @@ BOOLEAN_T add_peak_to_spectrum(
     set_peak_intensity(find_peak(spectrum->peaks, spectrum->num_peaks), intensity);
     set_peak_location(find_peak(spectrum->peaks, spectrum->num_peaks), location_mz);
     update_spectrum_fields(spectrum, intensity, location_mz);
+    spectrum->has_peaks = TRUE;
     return TRUE;
   }
 
@@ -1097,6 +1084,54 @@ float get_spectrum_singly_charged_mass(
 }
 
 
+/**
+ * serialize the spectrum in binary
+ * Form,
+ * <int: first_scan><int: last_scan><int: id><SPECTRUM_TYPE_T: spectrum_type>
+ * <float: precursor_mz><float: retention_time>
+ */
+void serialize_spectrum(
+  SPECTRUM_T* spectrum, ///< the spectrum to serialize -in
+  FILE* file ///< output stream -out
+  )
+{
+  //serialize the spectrum struct
+  fwrite(spectrum, sizeof(SPECTRUM_T), 1, file);
+
+  /*
+    fwrite(&(spectrum->first_scan), sizeof(int), 1, file);
+    fwrite(&(spectrum->last_scan), sizeof(int), 1, file);
+    fwrite(&(spectrum->id), sizeof(int), 1, file);
+    fwrite(&(spectrum->spectrum_type), sizeof(SPECTRUM_TYPE_T), 1, file);
+    fwrite(&(spectrum->precursor_mz), sizeof(float), 1, file);  
+  */
+  //retention_time
+  //fwrite(&(spectrum->rt_time), sizeof(float), 1, file);  
+  //FIXME add additional fields.
+}
+
+/**
+ * Parse the spectrum from the serialized spectrum
+ *\returns the parsed spectrum , else returns NULL for failed parse
+ */
+SPECTRUM_T* parse_spectrum_binary(
+  FILE* file ///< output stream -out
+  )
+{
+  SPECTRUM_T* spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
+  
+  //get spectrum struct
+  if(fread(spectrum, (sizeof(SPECTRUM_T)), 1, file) != 1){
+    carp(CARP_ERROR, "serialize file corrupted, incorrect spectrum format");
+    free(spectrum);
+    return NULL;
+  }
+  
+  spectrum->has_peaks = FALSE;
+  
+  return spectrum;
+}
+
 
 /******************************************************************************/
 // Iterator 
@@ -1109,6 +1144,12 @@ PEAK_ITERATOR_T* new_peak_iterator(
   SPECTRUM_T* spectrum ///< the spectrum peaks to iterate -in
   )
 {
+  //now we have peak information
+  if(!spectrum->has_peaks){
+    carp(CARP_ERROR, "Spectrum does not contain peak information");
+    exit(-1);
+  }
+
   PEAK_ITERATOR_T* peak_iterator = (PEAK_ITERATOR_T*)mycalloc(1,sizeof(PEAK_ITERATOR_T));
   peak_iterator->spectrum = spectrum;
   return peak_iterator;

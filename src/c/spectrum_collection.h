@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -187,6 +187,16 @@ FILE* get_spectrum_collection_psm_result_filename(
   char* psm_result_folder_name, ///< the folder name for where the result file should be placed -in
   char** psm_result_filename, ///< pointer to the filename for the psm results to be placed in -out
   char* file_extension ///< the file extension of the spectrum file(i.e. ".ms2")
+  );
+
+/**
+ * Serializes the header information for the binary PSM serialized files
+ *\returns TRUE if serialized header successfully, else FALSE
+ */
+BOOLEAN_T serialize_header(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection -in
+  char* fasta_file, ///< the fasta file 
+  FILE* psm_file ///< the file to serialize the header information -out
   );
 
 /******************************************************************************/

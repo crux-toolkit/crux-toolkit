@@ -23,9 +23,13 @@
 #include "objects.h"
 #include "parameter.h"
 #include "scorer.h" 
+#include "index.h"
 #include "generate_peptides_iterator.h" 
 #include "match.h"
 #include "match_collection.h"
+#include "hash.h"
+#include "peptide_src.h"
+#include "PercolatorCInterface.h"
 
 static BOOLEAN_T is_first_spectrum = TRUE;
 
@@ -41,6 +45,9 @@ struct match_collection{
   SCORER_TYPE_T last_sorted; ///< the last type the match has been sorted(if -1, then unsorted, if ever change the order must change to -1)
   BOOLEAN_T iterator_lock; ///< is there a iterator been curretly created?, if TRUE cannot manipulate match collection
   int charge; ///< the charge of the spectrum that the match collection was created
+    
+  BOOLEAN_T null_peptide_collection; ///< Is the match_collection a null peptide collection?
+  
   //values used for various scoring functions.
   float delta_cn; ///< the difference in top and second Xcorr scores
   float sp_scores_mean;  ///< the mean value of the scored peptides sp score
@@ -48,8 +55,16 @@ struct match_collection{
   float l_value; ///< EVD parameter Xcorr(decay constant of extreme value distribution)
   int top_fit_sp; ///< The top ranked sp scored peptides to use as EXP_SP parameter estimation
   float base_score_sp; ///< The lowest sp score withint the top_fit_sp, used as the base score to rescle sp scores
-  float eta;  ///< The eta parameter for the Weibull distribution.
+  float eta;  ///< The eta parameter for the Weibull distribution.i
   float beta; ///< The beta parameter for the Weibull distribution.
+
+  //The following features (post_*) are only valid when post_process_collection boolean is TRUE
+  BOOLEAN_T post_process_collection; ///< Is this a post process match_collection?
+  int post_protein_counter_size; ///< the size of the portein counter array, usualy the number of proteins in database
+  int* post_protein_counter; ///< the counter for how many each protein has matches other PSMs
+  int* post_protein_peptide_counter; ///< the counter for how many each unique peptides each protein has matches other PSMs
+  HASH_T* post_hash; ///< hash table that keep tracks of the peptides
+  BOOLEAN_T post_scored_type_set; ///< has the scored type been confirmed for the match collection, is is set afte rthe first match collection is extended
 };
 
 /**
@@ -62,7 +77,6 @@ struct match_iterator{
   int match_idx; ///< current match to return
   int match_total; ///< total_match_count
 };
-
 
 /**
  * typedef, for descrition look below.
@@ -198,6 +212,7 @@ BOOLEAN_T estimate_exp_sp_parameters(
 BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   SCORER_TYPE_T score_type,
+  int sample_count, 
   SPECTRUM_T* spectrum,
   int charge
   );
@@ -229,7 +244,9 @@ MATCH_COLLECTION_T* allocate_match_collection()
   //set last score to -1, thus nothing has been done yet
   match_collection->last_sorted = -1;
   match_collection->iterator_lock = FALSE;
-
+  match_collection->post_process_collection = FALSE;
+  match_collection->null_peptide_collection = FALSE;
+  
   return match_collection;
 }
 
@@ -245,6 +262,19 @@ void free_match_collection(
     --match_collection->match_total;
     free_match(match_collection->match[match_collection->match_total]);
   }
+  
+  //free post_process_collection specific memory
+  if(match_collection->post_process_collection){
+    //free protein counter
+    free(match_collection->post_protein_counter);
+    
+    //free protein peptide counter
+    free(match_collection->post_protein_peptide_counter);
+  
+    //free hash table
+    free_hash(match_collection->post_hash);
+  }
+
   free(match_collection);
 }
 
@@ -260,31 +290,45 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
  int max_rank,     ///< max number of top rank matches to keep from SP -in
  SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
  SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP, LOGP_BONF_EXP_SP) -in
- float mass_offset  ///< the mass offset from neutral_mass to search for candidate peptides -in
+ float mass_offset,  ///< the mass offset from neutral_mass to search for candidate peptides -in
+ BOOLEAN_T null_peptide_collection ///< is this match_collection a null peptide collection? -in
  )
 {
   MATCH_COLLECTION_T* match_collection = allocate_match_collection();
   
   //set charge of match_collection creation
   match_collection->charge = charge;
-
+  match_collection->null_peptide_collection = null_peptide_collection;
+  
   //top_rank_for_p_value is the amount of top ranked sp scored peptides to score for LOGP_EXP_SP
   //This parameter can only be set from crux_parameter file
   int top_rank_for_p_value = get_int_parameter("top-rank-p-value", 1);
   int sample_count = get_int_parameter("sample-count",500);
   int top_fit_sp = get_int_parameter("top-fit-sp", 1000);
   
+  //move out of crux index dir
+  if(!is_first_spectrum){
+    chdir("..");
+  }else{
+    is_first_spectrum = FALSE;
+  }
+  
   //create a generate peptide iterator
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //FIXME use neutral_mass, might chage to pick
     new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge) + mass_offset);
   
   /***************Preliminary scoring**************************/
+  // When creating match objects for first time, must set the
+  // null peptide boolean paramter
+  
   //score SP match_collection
   if(prelim_score == SP){
     if(!score_match_collection_sp(match_collection, spectrum, charge, peptide_iterator)){
       carp(CARP_ERROR, "failed to score match collection for SP");
     }
   }
+
+  /*********** Estimate parameters *****************************/
 
   //if scoring for EVD xcorr, sample from the original distribution of peptides 
   //for evd parameter estimation
@@ -299,10 +343,10 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   }
   //if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
   else if(score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP){
-    estimate_weibull_parameters(match_collection, SP, spectrum, charge);
+    estimate_weibull_parameters(match_collection, SP, 0, spectrum, charge);
   }
   else if(score_type == LOGP_WEIBULL_XCORR || score_type == LOGP_BONF_WEIBULL_XCORR){
-    estimate_weibull_parameters(match_collection, XCORR, spectrum, charge);
+    estimate_weibull_parameters(match_collection, XCORR, sample_count, spectrum, charge);
   }
 
   //save only the top max_rank matches from prelim_scoring, sort and free the other matches
@@ -370,123 +414,6 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
       }
     }
   }
-  // TODO make sure new_match_collection_spectrum_with_peptide_iterator
-  // and new_match_collection_spectrum are somehow consistent. Or merge
-  // them.
-  
-  //free generate_peptides_iterator
-  free_generate_peptides_iterator(peptide_iterator);
-  
-  return match_collection;
-}
-
-/**
- * create a new match collection from spectrum
- * return the top max_rank matches, first scored by prelim_score(SP), then by score_type(XCORR, LOGP_EXP_SP, LOGP_BONF_EXP_SP);
- * uses a provided peptide iterator, MUST be a mutable iterator
- * Sets the iterator before useage.
- *\returns a new match_collection object that is scored by score_type and contains the top max_rank matches
- */
-MATCH_COLLECTION_T* new_match_collection_spectrum_with_peptide_iterator(
- SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
- int charge,       ///< the charge of the spectrum -in
- int max_rank,     ///< max number of top rank matches to keep from SP -in 
- SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
- SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP, LOGP_BONF_EXP_SP) -in
- float mass_offset  ///< the mass offset from neutral_mass to search for candidate peptides -in
- //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator ///< peptide iteartor to use, must set it first before use
- )
-{
-  MATCH_COLLECTION_T* match_collection = allocate_match_collection();
-  
-  //set charge of match_collection creation
-  match_collection->charge = charge;
-  
-  //get parameters
-  float neutral_mass = get_spectrum_neutral_mass(spectrum, charge) + mass_offset;
-  double mass_window = get_double_parameter("mass-window", 3);
-  int sample_count = get_int_parameter("sample-count",500);
-  double min_mass = neutral_mass - mass_window;
-  double max_mass = neutral_mass + mass_window;
-
-  //top_rank_for_p_value is the amount of top ranked sp scored peptides to score for LOGP_EXP_SP
-  //This parameter can only be set from crux_parameter file
-  int top_rank_for_p_value = get_int_parameter("top-rank-p-value", 1);
-
-  carp(CARP_DEBUG,"searching peptide in %.2f ~ %.2f", min_mass, max_mass); 
-  
-  //free(peptide_iterator);
-
-  //move out of crux index dir
-  if(!is_first_spectrum){
-    chdir("..");
-  }else{
-    is_first_spectrum = FALSE;
-  }
-
-  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //NULL;//FIXME use neutral_mass, might chage to pick
-    new_generate_peptides_iterator_mutable();
-
-  //set the generate_peptides_iterator for the next round of peptides
-  set_generate_peptides_mutable(peptide_iterator, max_mass, min_mass);
-  
-  /**********Preliminary scoring*****************/
-  //score SP match_collection
-  if(prelim_score == SP){
-    if(!score_match_collection_sp(match_collection, spectrum, charge, peptide_iterator)){
-      carp(CARP_ERROR, "failed to score match collection for SP");
-    }
-  }
-
-  //if scoring for EVD xcorr, sample from the original distribution of peptides 
-  //for evd parameter estimation
-  //Sample before truncate match collection so that the sampling will be from 
-  //the entire peptide distribution.
-  if(score_type == LOGP_EVD_XCORR || score_type == LOGP_BONF_EVD_XCORR){
-    estimate_evd_parameters(match_collection, sample_count, XCORR, spectrum, charge);
-  }
-
-  //save only the top max_rank matches from prelim_scoring, sort and free the other matches
-  truncate_match_collection(match_collection, max_rank, prelim_score);
-  
-  /**********Main scoring***************/
-  //should we score for LOGP_EXP_SP?
-  if(score_type == LOGP_EXP_SP){
-    //score the top_rank_for_p_value amount of top ranked peptides their -log(p_value) match_collection
-    if(!score_match_collection_logp_exp_sp(match_collection, top_rank_for_p_value)){
-      carp(CARP_ERROR, "failed to score match collection for LOGP_EXP_SP");
-    }
-  }
-  //should we score for LOGP_BONF_EXP_SP?
-  else if(score_type == LOGP_BONF_EXP_SP){
-    //score the top_rank_for_p_value amount of top ranked peptides their -log(p_value * number_of_peptides_scored) match_collection
-    if(!score_match_collection_logp_bonf_exp_sp(match_collection, top_rank_for_p_value)){
-      carp(CARP_ERROR, "failed to score match collection for LOGP_BONF_EXP_SP");
-    }
-  }
-  //should we score for XCORR?
-  else if(score_type == XCORR || score_type == LOGP_BONF_EVD_XCORR || score_type == LOGP_EVD_XCORR){
-    //for all score types score for xcorr
-    if(!score_match_collection_xcorr(match_collection, spectrum, charge)){
-      carp(CARP_ERROR, "failed to score match collection for XCORR");
-    }
-   
-    //Additional scoring with Xcorr? (EVD p_value based scoring)
-    //should we score for LOGP_BONF_EVD_XCORR?
-    if(score_type == LOGP_BONF_EVD_XCORR){
-      //score the top_rank_for_p_value amount of top ranked peptides their -log(p_value * number_of_peptides_scored) match_collection
-      if(!score_match_collection_logp_bonf_evd_xcorr(match_collection, top_rank_for_p_value)){
-        carp(CARP_ERROR, "failed to score match collection for LOGP_BONF_EVD_XCORR");
-      }
-    }
-    // should we score for LOGP_EVD_XCORR?
-    else if(score_type == LOGP_EVD_XCORR){
-      //score the top_rank_for_p_value amount of top ranked peptides their -log(p_value) match_collection
-      if(!score_match_collection_logp_evd_xcorr(match_collection, top_rank_for_p_value)){
-        carp(CARP_ERROR, "failed to score match collection for LOGP_EVD_XCORR");
-      }
-    }
-  }
   
   //free generate_peptides_iterator
   free_generate_peptides_iterator(peptide_iterator);
@@ -503,7 +430,7 @@ BOOLEAN_T sort_match_collection(
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
   )
 {
-  // check if we are allowed to alter match_collection
+  //check if we are allowed to alter match_collection
   if(match_collection->iterator_lock){
     carp(CARP_ERROR, "cannot alter match_collection when a match iterator is already been instantiated");
     return FALSE;
@@ -511,15 +438,14 @@ BOOLEAN_T sort_match_collection(
 
   switch(score_type){
   case DOTP:
-    // implement later
+    //implement later
     return FALSE;
   case XCORR:
   case LOGP_EVD_XCORR:
   case LOGP_BONF_EVD_XCORR:
   case LOGP_WEIBULL_XCORR: 
   case LOGP_BONF_WEIBULL_XCORR: 
-    // LOGP_BONF_EVD_XCORR and XCORR have same order, 
-    // sort the matches by decreasing XCORR order for the return
+    //LOGP_BONF_EVD_XCORR and XCORR have same order, sort the match to decreasing XCORR order for the return
     qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_xcorr);
     match_collection->last_sorted = XCORR;
     return TRUE;
@@ -528,10 +454,14 @@ BOOLEAN_T sort_match_collection(
   case LOGP_BONF_EXP_SP: 
   case LOGP_WEIBULL_SP: 
   case LOGP_BONF_WEIBULL_SP: 
-    // LOGP_EXP_SP and SP have same order, thus sort the matches by
-    // decreasing SP order for the return
+    //LOGP_EXP_SP and SP have same order, thus sort the match to decreasing SP order for the return
     qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_sp);
     match_collection->last_sorted = SP;
+    return TRUE;
+  case Q_VALUE:
+  case PERCOLATOR_SCORE:
+    qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_q_value);
+    match_collection->last_sorted = Q_VALUE;
     return TRUE;
   }
   return FALSE;
@@ -782,22 +712,20 @@ BOOLEAN_T estimate_evd_parameters(
 BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   SCORER_TYPE_T score_type,
+  int sample_count,
   SPECTRUM_T* spectrum,
   int charge
   )
 {
   // TODO why does xcorr need spectrum and charge but sp scoring function doesn't?
   // TODO document routine
+  // TODO make max_idx a parameter in parameter file
+  // TODO should not be fixed number
   MATCH_COLLECTION_T* sample_collection = match_collection;
-  int sample_count = get_int_parameter("sample-count", 2000);
   if (sample_count != 0){
     sample_collection = random_sample_match_collection(match_collection, sample_count);
   }
-
-  int max_idx = get_int_parameter("top-scores-to-fit", 400);
-  max_idx = max_idx < sample_collection->match_total ? max_idx :
-     sample_collection->match_total; 
-
+  int max_idx = 400;
 
   //print info
   carp(CARP_INFO, "Estimate Weibull parameters, sample count: %d", sample_count);
@@ -827,12 +755,7 @@ BOOLEAN_T estimate_weibull_parameters(
   // http://www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
   int idx;
   float* X   = malloc(sizeof(float) * sample_collection->match_total);
-
-  // skip the first score in all iterations, since that is the highest score 
-  // TODO maybe add to other parameter estimation routines
-  int skip_first_score = get_int_parameter("skip-first-score", 1);
-  carp(CARP_DETAILED_DEBUG, "max_idx=%i", max_idx);
-  for(idx=skip_first_score; idx < max_idx; idx++){
+  for(idx=0; idx < max_idx; idx++){
     float score = get_match_score(sample_collection->match[idx], score_type);
     if (score <= 0.0){
       carp(CARP_DEBUG, "Reached negative score at idx %i", idx);
@@ -840,11 +763,11 @@ BOOLEAN_T estimate_weibull_parameters(
       break;
     } 
     X[idx] = log(score);
-    carp(CARP_DETAILED_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
+    carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
   }
 
   float* F_T = malloc(sizeof(float) * sample_collection->match_total);
-  for(idx=skip_first_score; idx < max_idx; idx++){
+  for(idx=0; idx < max_idx; idx++){
     int reverse_idx = sample_collection->match_total - idx;
     // magic numbers 0.3 and 0.4 are never changed
     F_T[idx] = (reverse_idx - 0.3) / (sample_collection->match_total + 0.4);
@@ -852,7 +775,7 @@ BOOLEAN_T estimate_weibull_parameters(
   }
 
   float* Y   = malloc(sizeof(float) * sample_collection->match_total);
-  for(idx=skip_first_score; idx < max_idx; idx++){
+  for(idx=0; idx < max_idx; idx++){
     Y[idx] = log( -log(1.0 - F_T[idx]) );
     carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
   }
@@ -862,25 +785,24 @@ BOOLEAN_T estimate_weibull_parameters(
   float sum_X  = 0.0;
   float sum_XY = 0.0;
   float sum_XX = 0.0;
-  for(idx=skip_first_score; idx < N; idx++){
+  for(idx=0; idx < N; idx++){
     sum_Y  += Y[idx];
     sum_X  += X[idx];
     sum_XX += X[idx] * X[idx];
     sum_XY += X[idx] * Y[idx];
   }
-  carp(CARP_DETAILED_DEBUG, "sum_X=%.6f", sum_X);
-  carp(CARP_DETAILED_DEBUG, "sum_Y=%.6f", sum_Y); 
-  carp(CARP_DETAILED_DEBUG, "sum_XX=%.6f", sum_XX);
-  carp(CARP_DETAILED_DEBUG, "sum_XY=%.6f", sum_XY);
+  carp(CARP_DEBUG, "sum_X=%.6f", sum_X);
+  carp(CARP_DEBUG, "sum_Y=%.6f", sum_Y);
+  carp(CARP_DEBUG, "sum_XX=%.6f", sum_XX);
+  carp(CARP_DEBUG, "sum_XY=%.6f", sum_XY);
 
-  int corrected_N = N - skip_first_score;
-  float b_num    = sum_XY - (sum_X * sum_Y / corrected_N );
+  float b_num    = sum_XY - (sum_X * sum_Y / N);
   carp(CARP_DEBUG, "b_num=%.6f", b_num);
-  float b_denom  = sum_XX - sum_X * sum_X / corrected_N;
+  float b_denom  = sum_XX - sum_X * sum_X / N;
   carp(CARP_DEBUG, "b_denom=%.6f", b_denom);
   float b_hat    = b_num / b_denom;
 
-  float a_hat    = (sum_Y - b_hat * sum_X) / corrected_N;
+  float a_hat    = (sum_Y - b_hat * sum_X) / N;
   float beta = b_hat;
   float eta  = exp( - a_hat / beta );
   
@@ -947,6 +869,22 @@ BOOLEAN_T estimate_exp_sp_parameters(
 }
 
 /**
+ * Preliminary scoring methods
+ *
+ * Preliminary scoring methods create new match objects.
+ * Also, they must set the match object null peptide boolean value.
+ * To get the peptide sequence the order should always be
+ * 1. get peptide object from generate_peptides or some other sources.
+ * 2. create new match object.
+ * 3. set match object null_peptide value.
+ * 4. set peptide as match objects peptide.
+ * 5. Finally get peptide sequence through get_match_sequence method
+ */
+
+/**
+ * Preliminary scoring method: 
+ * creates new match objects, and sets them as to which they are null peptide or not
+ *
  * scores the match_collection, the score type SP
  * Assumes this is the first time scoring with this score_collection,
  * thus, prior number match object is 0.
@@ -968,18 +906,6 @@ BOOLEAN_T score_match_collection_sp(
     carp(CARP_ERROR, "must start with empty match collection");
     return FALSE;
   }
-  //FIXME, might need this..
-  //has the match collection already been scored by sp?
-  /*
-  if(match_collection->scored_type[SP]){
-    carp(CARP_INFO, "match collection has already been scored in SP");
-    return TRUE;
-  }
-  */
-
-  //create a generate peptide iterator
-  //GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  //FIXME use neutral_mass, might chage to pick
-  //  new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge));
   
   //set ion constraint to sequest settings
   ION_CONSTRAINT_T* ion_constraint = 
@@ -999,7 +925,18 @@ BOOLEAN_T score_match_collection_sp(
   //iterate over all peptides
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     peptide = generate_peptides_iterator_next(peptide_iterator);
-    peptide_sequence = get_peptide_sequence(peptide);
+    
+    //create a new match
+    match = new_match();
+    //set match if it is to be generated as null peptide match
+    set_match_null_peptide(match, match_collection->null_peptide_collection);
+    
+    //now set peptide and spectrum
+    set_match_peptide(match, peptide);
+    set_match_spectrum(match, spectrum);
+    
+    //get peptide sequence    
+    peptide_sequence = get_match_sequence(match);
     
     //update ion_series for the peptide instance    
     update_ion_series(ion_series, peptide_sequence);
@@ -1012,14 +949,9 @@ BOOLEAN_T score_match_collection_sp(
 
     //increment the total sp score
     match_collection->sp_scores_mean += score;
-    
-    //create a new match
-    match = new_match();
-    
-    //set all fields in match
+        
+    //set score in match
     set_match_score(match, SP, score);
-    set_match_peptide(match, peptide);
-    set_match_spectrum(match, spectrum);
     
     //check if enough space for peptide match
     if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
@@ -1075,6 +1007,15 @@ BOOLEAN_T score_match_collection_sp(
   
   return TRUE;
 }
+
+
+/**
+ * Main scoring methods
+ * 
+ * Unlike preliminary scoring methods only updates existing mathc objects with new scores.
+ * In all cases should get peptide sequence only through get_match_sequence method.
+ */
+
 
 /**
  * The match collection must be scored under SP first
@@ -1440,7 +1381,8 @@ BOOLEAN_T score_match_collection_xcorr(
   */
   
   //set ion constraint to sequest settings
-  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_xcorr(charge); 
+  ION_CONSTRAINT_T* ion_constraint = 
+    new_ion_constraint_sequest_xcorr(charge); 
   
   //create new scorer
   SCORER_T* scorer = new_scorer(XCORR);  
@@ -1452,7 +1394,7 @@ BOOLEAN_T score_match_collection_xcorr(
   carp(CARP_INFO, "start scoring for XCORR");
 
   //iterate over all matches to score for xcorr
-  for(match_idx=0; match_idx < match_collection->match_total; ++match_idx){
+  for(; match_idx < match_collection->match_total; ++match_idx){
     match = match_collection->match[match_idx];
     peptide_sequence = get_peptide_sequence(get_match_peptide(match));
     
@@ -1464,6 +1406,7 @@ BOOLEAN_T score_match_collection_xcorr(
     
     //calculates the Xcorr score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+    
 
     //set all fields in match
     set_match_score(match, XCORR, score);
@@ -1504,12 +1447,11 @@ BOOLEAN_T score_match_collection_xcorr(
     match_collection->delta_cn = 0;
   }
   
-  //we have now scored for the match-mode XCORR
+  //yes, we have now scored for the match-mode: XCORR
   match_collection->scored_type[XCORR] = TRUE;
 
   return TRUE;
 }
-
 
 
 /**
@@ -1713,7 +1655,6 @@ float get_match_collection_delta_cn(
  */
 BOOLEAN_T serialize_psm_features(
   MATCH_COLLECTION_T* match_collection, ///< working match collection -in
-  SPECTRUM_T* spectrum, ///< the working spectrum -in
   FILE* output,  ///< ouput file handle -out
   int top_match, ///< number of top match to serialize -in
   SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
@@ -1721,31 +1662,45 @@ BOOLEAN_T serialize_psm_features(
   )
 {
   MATCH_T* match = NULL;
-
+  
   //create match iterator, TRUE: return match in sorted order of main_score type
   MATCH_ITERATOR_T* match_iterator = new_match_iterator(match_collection, main_score, TRUE);
-  
-  //first, serialize the spectrum info of the match collection
-  serialize_spectrum(spectrum, output);
-  fwrite(&(match_collection->charge), sizeof(int), 1, output); //the charge of the spectrum
   
   float delta_cn =  get_match_collection_delta_cn(match_collection);
   float ln_delta_cn = logf(delta_cn);
   float ln_experiment_size = logf(match_collection->experiment_size);
 
   //spectrum specific features
+  //first, serialize the spectrum info of the match collection  
+  /*
+   *<int: charge state of the spectrum>
+   *<int: The total match objects in the match_collection searched with the spectrum
+   *<float: delta_cn>
+   *<float: ln_dleta_cn>
+   *<float: ln_experiment_size>
+   *<BOOLEAN_T: did the score type been scored?>
+   */
+  fwrite(&(match_collection->charge), sizeof(int), 1, output); //the charge of the spectrum
   fwrite(&(match_collection->match_total), sizeof(int), 1, output);
   fwrite(&delta_cn, sizeof(float), 1, output);
   fwrite(&ln_delta_cn, sizeof(float), 1, output);
   fwrite(&ln_experiment_size, sizeof(float), 1, output);
   
+  //Serialize each boolean for scored type 
+  int score_type_idx = 0;
+  for(; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+    fwrite(&(match_collection->scored_type[score_type_idx]), sizeof(BOOLEAN_T), 1, output);
+  }
+  
   //Second, iterate over matches
   int match_count = 0;
   while(match_iterator_has_next(match_iterator)){
     ++match_count;
-    match = match_iterator_next(match_iterator);    
+    match = match_iterator_next(match_iterator);        
     
+    //FIXME
     prelim_score = prelim_score;
+    
     //serialize matches
     serialize_match(match, output); //FIXME main, preliminary type
     
@@ -1769,7 +1724,6 @@ BOOLEAN_T serialize_psm_features(
 BOOLEAN_T print_match_collection_sqt(
   FILE* output, ///< the output file -out
   int top_match, ///< the top matches to output -in
-  int charge, ///< the charge of the of spectrum -in
   MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
   SPECTRUM_T* spectrum, ///< the spectrum to print sqt -in
   SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
@@ -1779,7 +1733,9 @@ BOOLEAN_T print_match_collection_sqt(
   time_t hold_time;
   hold_time = time(0);
   float delta_cn =  get_match_collection_delta_cn(match_collection);
-  
+  /// the charge of the of spectrum used to score
+  int charge = match_collection->charge; 
+
   //print header
   fprintf(output, "H\tSQTGenerator CRUX\n");
   fprintf(output, "H\tTime\t%s", ctime(&hold_time));
@@ -1881,7 +1837,7 @@ MATCH_ITERATOR_T* new_match_iterator(
   
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[score_type]){
-    carp(CARP_ERROR, "the collection has not been score for request score type");
+    carp(CARP_ERROR, "the match collection has not been score for request score type");
     exit(-1);
   }
   
@@ -1958,11 +1914,484 @@ void free_match_iterator(
   free(match_iterator);
 }
 
+/*******************************************
+ * match_collection post_process extension
+ ******************************************/
+
+/**
+ * parse all the match objects and add to match collection
+ *\returns TRUE, if successfully parse all PSMs in result_file, else FALSE
+ */
+BOOLEAN_T extend_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
+  DATABASE_T* database, ///< the database to which the peptides are created -in
+  FILE* result_file   ///< the result file to parse PSMs -in
+  );
+
+/**
+ * Adds the match object to match_collection
+ * Must not exceed the _MAX_NUMBER_PEPTIDES to be match added
+ *\returns TRUE if successfully adds the match to the match_collection, else FALSE
+ */
+BOOLEAN_T add_match_to_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
+  MATCH_T* match ///< the match to add -in
+  );
+
+/**
+ * updates the protein_counter and protein_peptide_counter for 
+ * run specific features
+ */
+void update_protein_counters(
+  MATCH_COLLECTION_T* match_collection, ///< working match collection -in
+  PEPTIDE_T* peptide  ///< peptide information to update counters -in
+  );
+
+/**
+ * create a new match collection from the serialized PSM output files
+ *\returns a new match_collection object that is instantiated by the PSm output files
+ */
+MATCH_COLLECTION_T* new_match_collection_psm_output(
+ char* output_file_directory, ///< the directory path where the PSM output files are located -in
+ char* fasta_file ///< The name of the file (in fasta format) from which to retrieve proteins and peptides. -in
+ )
+{
+  DIR* working_directory = NULL;
+  struct dirent* directory_entry = NULL;
+  FILE* result_file = NULL;
+  MATCH_COLLECTION_T* match_collection = NULL;
+  DATABASE_T* database = NULL;
+  char* use_index = get_string_parameter_pointer("use-index");
+  BOOLEAN_T use_index_boolean = FALSE;
+  char* file_in_dir = NULL;
+
+  //open PSM file directory
+  working_directory = opendir(output_file_directory);
+  
+  if(working_directory == NULL){
+    carp(CARP_ERROR, "failed to open PSM result directory: %s", output_file_directory);
+    exit(-1);
+  }
+  
+  //determine use index command
+  if(strcmp(use_index, "F")==0){
+    use_index_boolean = FALSE;
+  }
+  else if(strcmp(use_index, "T")==0){
+    use_index_boolean = TRUE;
+  }
+  else{
+    carp(CARP_ERROR, "incorrect argument %s, using default value", use_index);
+  }
+  
+  //get binary fasta file name with path to crux directory 
+  char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_file);
+  
+  //check if input file exist
+  if(access(binary_fasta, F_OK)){
+    carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty) for crux index.", binary_fasta);
+    free(binary_fasta);
+    exit(1);
+  }
+  
+  //now create a database, using fasta file either binary_file(index) or fastafile
+  database = new_database(binary_fasta, FALSE, use_index_boolean);
+  
+  //check if already parsed
+  if(!get_database_is_parsed(database)){
+    if(!parse_database(database)){
+      carp(CARP_FATAL, "failed to parse database, cannot create new index");
+      free_database(database);
+      exit(-1);
+    }
+  }
+  
+  //allocate match_collection object
+  match_collection = allocate_match_collection();
+
+  //set this as a post_process match collection
+  match_collection->post_process_collection = TRUE;
+  
+  //the protein counter size, create protein counter
+  match_collection->post_protein_counter_size = get_database_num_proteins(database);
+  match_collection->post_protein_counter = (int*)mycalloc(match_collection->post_protein_counter_size,
+                                                          sizeof(int));
+  match_collection->post_protein_peptide_counter = (int*)mycalloc(match_collection->post_protein_counter_size,
+                                                                  sizeof(int));
+  //create hash table for peptides
+  //Set initial capacity to protein count.
+  match_collection->post_hash = new_hash(match_collection->post_protein_counter_size);
+  
+  //iterate over all PSM result files in directory
+  while((directory_entry = readdir(working_directory))){
+    if (strcmp(directory_entry->d_name, ".") == 0 ||
+        strcmp(directory_entry->d_name, "..") == 0 ||
+        !suffix_compare(directory_entry->d_name, "crux_match_")
+        ) {
+      continue;
+    }
+    file_in_dir = get_full_filename(output_file_directory, directory_entry->d_name);
+    result_file = fopen(file_in_dir, "r");
+    //add all the match objects from result_file
+    extend_match_collection(match_collection, database, result_file);
+    fclose(result_file);
+    free(file_in_dir);
+  }
+  
+  closedir(working_directory);  
+  
+  //decrement one pointer count for database
+  free_database(database);
+  
+  //free string
+  free(binary_fasta);
+  
+  return match_collection;
+}
+
+
+/**
+ * parse all the match objects and add to match collection
+ *\returns TRUE, if successfully parse all PSMs in result_file, else FALSE
+ */
+BOOLEAN_T extend_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
+  DATABASE_T* database, ///< the database to which the peptides are created -in
+  FILE* result_file   ///< the result file to parse PSMs -in
+  )
+{
+  int total_spectra = 0;
+  int match_idx = 0;
+  int spectrum_idx = 0;
+  int charge = 0;
+  MATCH_T* match = NULL;
+  int num_top_match = 0;
+  int num_spectrum_features = 0;
+  float delta_cn =  0;
+  float ln_delta_cn = 0;
+  float ln_experiment_size = 0;
+  int match_total_of_serialized_collection = 0;
+  int score_type_idx = 0;
+  BOOLEAN_T type_scored = FALSE;
+
+  //only for post_process_collections
+  if(!match_collection->post_process_collection){
+    carp(CARP_ERROR, "Must be a post process match collection");
+    return FALSE;
+  }
+  
+  //read in file specific info
+  
+  //get number of spectra serialized in the file
+  if(fread(&total_spectra, (sizeof(int)), 1, result_file) != 1){
+    carp(CARP_ERROR, "serialized file corrupted, incorrect number of spectra");  
+    return FALSE;
+  }
+
+  //get number of spectra features serialized in the file
+  if(fread(&num_spectrum_features, (sizeof(int)), 1, result_file) != 1){
+    carp(CARP_ERROR, "serialized file corrupted, incorrect number of spectrum features");
+    return FALSE;
+  }
+  
+  //get number top ranked peptides serialized
+  if(fread(&num_top_match, (sizeof(int)), 1, result_file) != 1){
+    carp(CARP_ERROR, "serialized file corrupted, incorrect number of top match");  
+    return FALSE;
+  }
+
+  //FIXME
+  //could parse fasta file and ms2 file
+  
+  
+  //now iterate over all spectra serialized
+  for(; spectrum_idx < total_spectra; ++spectrum_idx){
+    /*** get all spectrum specific features ****/
+    
+    //get charge of the spectrum
+    if(fread(&charge, (sizeof(int)), 1, result_file) != 1){
+      carp(CARP_ERROR, "serialized file corrupted, incorrect match_total_of_serialized_collection value");  
+      return FALSE;
+    }
+    
+    //get serialized match_total
+    if(fread(&match_total_of_serialized_collection, (sizeof(int)), 1, result_file) != 1){
+      carp(CARP_ERROR, "serialized file corrupted, incorrect match_total_of_serialized_collection value");  
+      return FALSE;
+    }
+    
+    //get delta_cn value
+    if(fread(&delta_cn, (sizeof(float)), 1, result_file) != 1){
+      carp(CARP_ERROR, "serialized file corrupted, incorrect dleta cn value for top match");  
+      return FALSE;
+    }
+    
+    //get ln_delta_cn value
+    if(fread(&ln_delta_cn, (sizeof(float)), 1, result_file) != 1){
+      carp(CARP_ERROR, "serialized file corrupted, incorrect ln_delta cn value for top match");  
+      return FALSE;
+    }
+    
+    //get ln_experiment_size
+    if(fread(&ln_experiment_size, (sizeof(float)), 1, result_file) != 1){
+      carp(CARP_ERROR, "serialized file corrupted, incorrect ln_experiment_size cn value for top match");  
+      return FALSE;
+    }
+    
+    //Read each boolean for scored type 
+    //parse all boolean indicators for scored match object
+    for(score_type_idx = 0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+      fread(&(type_scored), sizeof(BOOLEAN_T), 1, result_file);
+      
+      //if this is the first time extending the match collection
+      //set scored boolean values
+      if(!match_collection->post_scored_type_set){
+        match_collection->scored_type[score_type_idx] = type_scored;
+      }
+      else{
+        //if boolean values already been set compare if no conflicting scored types
+        if(match_collection->scored_type[score_type_idx] != type_scored){
+          carp(CARP_ERROR, "Serialized match objects has not been scored as other match objects");
+        }
+      }
+      
+      //now once we are done with setting scored type
+      //set match collection status as set!
+      if(!match_collection->post_scored_type_set &&
+         score_type_idx == (_SCORE_TYPE_NUM-1)){
+        match_collection->post_scored_type_set = TRUE;
+      }
+    }
+    
+    //now iterate over all 
+    for(match_idx = 0; match_idx < num_top_match; ++match_idx){
+      //break if there are no match objects serialized
+      if(match_total_of_serialized_collection < match_idx){
+        break;
+      }
+      
+      //parse match object
+      if((match = parse_match(result_file, database))==NULL){
+        carp(CARP_ERROR, "failed to parse serialized PSM match");
+        return FALSE;
+      }
+      
+      //set all spectrum specific features to parsed match
+      set_match_charge(match, charge);
+      set_match_delta_cn(match, delta_cn);
+      set_match_ln_delta_cn(match, ln_delta_cn);
+      set_match_ln_experiment_size(match, ln_experiment_size);
+      
+      //now add match to match collection
+      add_match_to_match_collection(match_collection, match);
+    }
+  }
+  
+  return TRUE;
+}
+
+/**
+ * Adds the match object to match_collection
+ * Must not exceed the _MAX_NUMBER_PEPTIDES to be match added
+ *\returns TRUE if successfully adds the match to the match_collection, else FALSE
+ */
+BOOLEAN_T add_match_to_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
+  MATCH_T* match ///< the match to add -in
+  )
+{
+  PEPTIDE_T* peptide = NULL;
+
+  //only for post_process_collections
+  if(!match_collection->post_process_collection){
+    carp(CARP_ERROR, "Must be a post process match collection");
+    return FALSE;
+  }
+  
+  //check if enough space for peptide match
+  if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
+    carp(CARP_ERROR, "rich match count exceed max match limit: %d", _MAX_NUMBER_PEPTIDES);
+    return FALSE;
+  }
+  
+  //add a new match to array
+  match_collection->match[match_collection->match_total] = match;
+  
+  //increment total rich match count
+  ++match_collection->match_total;
+  
+  //DEBUG, print total peptided scored so far
+  if(match_collection->match_total % 1000 == 0){
+    carp(CARP_INFO, "parsed PSM: %d", match_collection->match_total);
+  }
+  
+  //match peptide
+  peptide = get_match_peptide(match);
+  
+  //update protein counter, protein_peptide counter
+  update_protein_counters(match_collection, peptide);
+  
+  //update hash table
+  char* hash_value = get_peptide_hash_value(peptide);
+  add_hash(match_collection->post_hash, hash_value, NULL);
+  
+  return TRUE;
+}
+
+/**
+ * updates the protein_counter and protein_peptide_counter for 
+ * run specific features
+ */
+void update_protein_counters(
+  MATCH_COLLECTION_T* match_collection, ///< working match collection -in
+  PEPTIDE_T* peptide  ///< peptide information to update counters -in
+  )
+{
+  PEPTIDE_SRC_ITERATOR_T* src_iterator = NULL;
+  PEPTIDE_SRC_T* peptide_src = NULL;
+  PROTEIN_T* protein = NULL;
+  unsigned int protein_idx = 0;
+  int hash_count = 0;
+  BOOLEAN_T unique = FALSE;
+  
+  //only for post_process_collections
+  if(!match_collection->post_process_collection){
+    carp(CARP_ERROR, "Must be a post process match collection");
+    exit(-1);
+  }
+  
+  //See if this peptide has been observed before?
+  char* hash_value = get_peptide_hash_value(peptide);
+  hash_count = get_hash_count(match_collection->post_hash, hash_value);
+  free(hash_value);
+
+  if(hash_count < 1){
+    //yes this peptide is first time observed
+    unique = TRUE;
+  }
+
+  //first update protein counter
+  src_iterator = new_peptide_src_iterator(peptide);
+  
+  //iterate overall parent proteins
+  while(peptide_src_iterator_has_next(src_iterator)){
+    peptide_src = peptide_src_iterator_next(src_iterator);
+    protein = get_peptide_src_parent_protein(peptide_src);
+    protein_idx = get_protein_protein_idx(protein);
+    
+    //update the number of PSM this protein matches
+    ++match_collection->post_protein_counter[protein_idx-1];
+    
+    //number of peptides match this protein
+    if(unique){
+      ++match_collection->post_protein_peptide_counter[protein_idx-1];
+    }
+  }  
+  
+  free_peptide_src_iterator(src_iterator);
+}
+
+/**
+ * Fill the match objects score with the given the float array. 
+ * The match object order must not have been altered since scoring.
+ * The result array size must match the match_total count.
+ *\returns TRUE, if successfully fills the scores into match object, else FALSE.
+ */
+BOOLEAN_T fill_result_to_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -out
+  double* results,  ///< The result score array to fill the match objects -in
+  SCORER_TYPE_T score_type  ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
+  )
+{
+  int match_idx = 0;
+  MATCH_T* match = NULL;
+
+  //iterate over match object in collection, set scores
+  for(; match_idx < match_collection->match_total; ++match_idx){
+    match = match_collection->match[match_idx];
+    set_match_score(match, score_type, results[match_idx]);    
+  }
+
+  //populate the rank of each match object
+  if(!populate_match_rank_match_collection(match_collection, score_type)){
+    carp(CARP_ERROR, "failed to populate match rank in match_collection");
+    free_match_collection(match_collection);
+    exit(-1);
+  }
+  
+  match_collection->scored_type[score_type] = TRUE;
+  
+  return TRUE;
+}
+
+/**
+ * Process run specific features from all the PSMs
+ */
+void process_run_specific_features(
+  MATCH_COLLECTION_T* match_collection ///< the match collection to free -out
+  );
+
+
 /**********************************
  * match_collection get, set methods
  **********************************/
 
+/**
+ *\returns the match_collection protein counter for the protein idx
+ */
+int get_match_collection_protein_counter(
+  MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
+  int protein_idx ///< the protein index to return protein counter -in
+  )
+{
+  //only for post_process_collections
+  if(!match_collection->post_process_collection){
+    carp(CARP_ERROR, "Must be a post process match collection");
+    exit(-1);
+  }
 
+  //number of PSMs match this protein
+  return match_collection->post_protein_counter[protein_idx-1];
+}
+
+/**
+ *\returns the match_collection protein peptide counter for the protein idx
+ */
+int get_match_collection_protein_peptide_counter(
+  MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
+  int protein_idx ///< the protein index to return protein peptiide counter -in
+  )
+{
+  //only for post_process_collections
+  if(!match_collection->post_process_collection){
+    carp(CARP_ERROR, "Must be a post process match collection");
+    exit(-1);
+  }
+  
+  //number of peptides match this protein
+  return match_collection->post_protein_peptide_counter[protein_idx-1];
+}
+
+/**
+ *\returns the match_collection hash value of PSMS for which this is the best scoring peptide
+ */
+int get_match_collection_hash(
+  MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
+  PEPTIDE_T* peptide  ///< the peptide to check hash value -in
+  )
+{
+  //only for post_process_collections
+  if(!match_collection->post_process_collection){
+    carp(CARP_ERROR, "Must be a post process match collection");
+    exit(-1);
+  }
+  
+  char* hash_value = get_peptide_hash_value(peptide);
+  int count = get_hash_count(match_collection->post_hash, hash_value);
+  free(hash_value);
+  
+  return count;
+}
 
 /*
  * Local Variables:

@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -87,9 +87,10 @@ typedef struct peptide_src_iterator PEPTIDE_SRC_ITERATOR_T;
 
 
 /**
+ * Being PARTIALLY_TRYPTIC is N or C terminus tryptic
  * \brief The enum for peptide type, with regard to trypticity.
  */
-enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC}; 
+enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC}; 
 
 /**
  * \typedef PEPTIDE_TYPE_T 
@@ -299,11 +300,11 @@ typedef struct scorer SCORER_T;
 /**
  * The enum for scorer type
  */
-enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR };
+enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE};
 
 
 //the number of different score types
-#define _SCORE_TYPE_NUM 11
+#define _SCORE_TYPE_NUM 13
 
 /**
  * \typedef SCORER_TYPE_T
@@ -340,12 +341,52 @@ typedef struct match_iterator MATCH_ITERATOR_T;
  */
 enum _match_search_ouput_mode {BINARY_OUTPUT, SQT_OUTPUT, ALL_OUTPUT};
 
-
 /**
  * \typedef MATCH_SEARCH_OUPUT_MODE_T
  * \brief The typedef for match_search_ouput_mode (binary, sqt, all)
  */
 typedef enum _match_search_ouput_mode MATCH_SEARCH_OUPUT_MODE_T; 
 
+
+/**
+ *\typedef RICH_MATCH_T
+ *\brief An object that contains the information of a peptide and the scoring of multiple types
+ */
+typedef struct rich_match RICH_MATCH_T;
+
+/**
+ *\typedef RICH_MATCH_COLLECTION_T
+ *\brief An object that contains mutiple rich_match objects
+ */
+typedef struct rich_match_collection RICH_MATCH_COLLECTION_T;
+
+/**
+ *\typedef RICH_MATCH_ITERATOR_T
+ *\brief An object that navigates the rich_matches
+ */
+typedef struct rich_match_iterator RICH_MATCH_ITERATOR_T;
+
+/**
+ * The enum for algorithm type (PERCOLATOR, CZAR, ALL)
+ */
+enum _algorithm {PERCOLATOR, CZAR, ALL};
+
+/**
+ * \typedef ALGORITHM_TYPE_T
+ * \brief The typedef for _algorithm (PERCOLATOR, CZAR, ALL)
+ */
+typedef enum _algorithm ALGORITHM_TYPE_T;
+
+/**
+ * \struct record
+ * \brief record for each value/key pair
+ */
+typedef struct record RECORD_T;
+
+/**
+ * \struct hash
+ * \brief hash table, contains the records
+ */
+typedef struct hash HASH_T;
 
 #endif

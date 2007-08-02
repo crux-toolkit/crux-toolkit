@@ -11,6 +11,7 @@
 #include <time.h>
 #include "carp.h"
 #include "utils.h"
+#include "crux-utils.h"
 #include "objects.h"
 
 
@@ -124,6 +125,32 @@ char** parse_filename_path(char* file){
 }
 
 /**
+ * parses the filename
+ * ex) ../../file_name => returns filename
+ *\returns A heap allocated array of filename
+ */
+char* parse_filename(char* file){
+  int len = strlen(file);
+  int end_idx = len;
+  int end_path = -1;  //index of where the last "/" is located
+  char* filename = NULL;
+  
+  for(; end_idx > 0; --end_idx){
+    if(strncmp(&file[end_idx - 1], "/", 1) == 0){
+      end_path = end_idx;
+      break;
+    }
+  }
+  
+  //copy filename
+  filename = copy_string_part(&file[end_idx], len); 
+  
+  return filename;
+}
+
+
+
+/**
  * convert the integer into a string
  * \returns a heap allocated string
  */
@@ -155,6 +182,12 @@ void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file){
   else if(peptide_type == PARTIALLY_TRYPTIC){
     fprintf(file, "%s", "PARTIALLY_TRYPTIC");
   }
+  else if(peptide_type == N_TRYPTIC){
+    fprintf(file, "%s", "N_TRYPTIC");
+  }
+  else if(peptide_type == C_TRYPTIC){
+    fprintf(file, "%s", "C_TRYPTIC");
+  }
   else if(peptide_type == NOT_TRYPTIC){
     fprintf(file, "%s", "NOT_TRYPTIC");
   }
@@ -175,6 +208,29 @@ char* cat_string(char* string_one, char* string_two){
   strncpy(result, string_one, len_one);
   strncpy(&result[len_one], string_two, len_two);
   return result;
+}
+
+/**
+ * check if the string has the correct suffix
+ * \returns TRUE, if the string starts with the suffix, else FALSE
+ */
+BOOLEAN_T suffix_compare(
+  char* string, ///< The string suffix to compare
+  char* suffix  ///< The suffix to compare
+  )
+{
+  int len = strlen(string);
+  int len_suffix = strlen(suffix);
+
+  if(len_suffix > len){
+    return FALSE;
+  }
+  
+  if(strncmp(string, suffix, len_suffix) == 0){
+    return TRUE;
+  }
+  
+  return FALSE;
 }
 
 /**
@@ -238,20 +294,26 @@ BOOLEAN_T delete_dir(char* dir) {
 
 /**
  * given a fasta_file name it returns a name with the name_tag add to the end
- * format: myfasta_nameTag
+ * Suffix may be NULL
+ * format: suffix_myfasta_nameTag
  * \returns A heap allocated file name of the given fasta file
  */
 char* generate_name(
   char* fasta_filename,
   char* name_tag,
-  char* file_extension
+  char* file_extension,
+  char* suffix
   )
 {
   int len = strlen(fasta_filename);
   int end_idx = len;
   int end_path = len;  //index of where the "." is located in the file
   char* name = NULL;
-  
+  char* after_suffix = NULL;
+  int suffix_length = 0;
+  char** file_n_path = NULL;
+  int length = 0;
+
   //cut off the file extension if needed
   for(; end_idx > 0; --end_idx){
     if(strcmp(&fasta_filename[end_idx - 1], file_extension) == 0){
@@ -260,9 +322,39 @@ char* generate_name(
     }
   }
   
-  name = (char*)mycalloc(end_path + strlen(name_tag) + 1, sizeof(char));
-  strncpy(name, fasta_filename, end_path);
-  strcat(name, name_tag);
+  //check suffix
+  if(suffix != NULL){
+    suffix_length = strlen(suffix);
+    file_n_path = parse_filename_path(fasta_filename);
+  }
+
+  name = (char*)mycalloc(suffix_length + end_path + strlen(name_tag) + 1, sizeof(char));
+  after_suffix = name;
+  
+  //if suffix exit add to top
+  if(suffix_length != 0){
+    length = strlen(file_n_path[1]);
+    if(file_n_path[1] != NULL){
+      strncpy(name, file_n_path[1], length);
+      after_suffix = &name[length];
+    }    
+    strncpy(after_suffix, suffix, suffix_length);
+    after_suffix = &after_suffix[suffix_length];
+    
+    length = strlen(file_n_path[0]);
+    
+    strncpy(after_suffix, file_n_path[0], (length - (len-end_path)));
+    after_suffix = &after_suffix[(length - (len-end_path))];
+    
+    free(file_n_path[0]);
+    free(file_n_path[1]);
+    free(file_n_path);
+  }
+  else{
+    strncpy(after_suffix, fasta_filename, end_path);
+  }
+  
+  strcat(after_suffix, name_tag);
   return name;
 }
 
@@ -302,6 +394,75 @@ FILE* create_file_in_path(
   free(file_full_path);
   
   return file;
+}
+
+/**
+ *\returns a heap allocated feature name array for the algorithm type
+ */
+char** generate_feature_name_array(
+  ALGORITHM_TYPE_T algorithm ///< the algorithm's feature name to produce -in
+)
+{
+  char** name_array = NULL;
+
+  switch(algorithm){
+  case PERCOLATOR:
+  case CZAR:
+  case ALL:
+    name_array = (char**)mycalloc(20, sizeof(20));
+    name_array[0] =  my_copy_string("XCorr");
+    name_array[1] =  my_copy_string("DeltCN");
+    name_array[2] =  my_copy_string("DeltLCN");
+    name_array[3] =  my_copy_string("Sp");
+    name_array[4] =  my_copy_string("lnrSp");
+    name_array[5] =  my_copy_string("dM");
+    name_array[6] =  my_copy_string("absdM");
+    name_array[7] =  my_copy_string("Mass");
+    name_array[8] =  my_copy_string("ionFrac");
+    name_array[9] =  my_copy_string("lnSM");
+    name_array[10] =  my_copy_string("enzN");
+    name_array[11] =  my_copy_string("enzC");
+    name_array[12] =  my_copy_string("enzInt");
+    name_array[13] =  my_copy_string("pepLen");
+    name_array[14] =  my_copy_string("charge1");
+    name_array[15] =  my_copy_string("charge2");
+    name_array[16] =  my_copy_string("charge3");
+    name_array[17] =  my_copy_string("numPep");
+    name_array[18] =  my_copy_string("numProt");
+    name_array[19] =  my_copy_string("pepSite");
+  }
+  
+  return name_array;
+}
+
+/**
+ * User define our upper and our lower bounds.
+ * The random number will always be 
+ * between low and high, inclusive.
+ * There is no seeding in this function, user must do it for themselves
+ *\returns a random number between the interval user provides
+ */
+int get_random_number_interval(
+  int low, ///< the number for lower bound -in
+  int high ///< the number for higher bound -in
+  )
+{  
+  return (rand() % (high - low + 1) + low);
+}
+
+/**
+ *\returns the number of digits in the number
+ */
+int get_number_digits(
+  int number ///< the number to count digits
+  )
+{
+  int idx = 0;
+  for(; number >= 10; ++idx){
+    number = number/10;    
+  }
+
+  return ++idx;
 }
 
 void swap_quick(

@@ -148,11 +148,16 @@ int main(int argc, char** argv){
 
     //parse and update parameters
     parse_update_parameters(parameter_file);
-    
+
     //check charge 
     if( charge < 1 || charge > 3){
       wrong_command(NULL, "The peptide charge. 1|2|3"); ///FIXME
     }
+    
+    //parameters are now confirmed, can't be changed
+    parameters_confirmed();
+
+    /***** All parameters must be taken through get_*_parameter() method ******/
 
     //main score type
     //score type
@@ -201,9 +206,6 @@ int main(int argc, char** argv){
       wrong_command(prelim_score_type, "The type of preliminary scoring function to use. sp");
     }
     
-    //parameters are now confirmed, can't be changed
-    parameters_confirmed();
-
     //get mass offset from precursor mass to search for candidate peptides
     mass_offset = get_double_parameter("mass-offset", 0);
     
@@ -237,7 +239,7 @@ int main(int argc, char** argv){
 
     //get match collection with prelim match collection
     match_collection = new_match_collection_spectrum(spectrum, charge, max_rank_preliminary, 
-                                                     prelim_score, main_score, mass_offset);
+                                                     prelim_score, main_score, mass_offset, FALSE);
     
     //create match iterator, TRUE: return match in sorted order of main_score type
     match_iterator = new_match_iterator(match_collection, main_score, TRUE);

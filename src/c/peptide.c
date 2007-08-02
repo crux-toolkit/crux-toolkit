@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.52 $
+ * $Revision: 1.53 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -33,7 +33,7 @@ struct peptide {
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
 };
 
- 
+
 /**
  * \struct residue_iterator
  * \brief Object to iterate over the residues in a peptide, starting at the
@@ -94,7 +94,7 @@ PEPTIDE_T* new_peptide(
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
+  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, C_TRYPTIC, N_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
   )
 {
   PEPTIDE_T* peptide = allocate_peptide();
@@ -722,7 +722,39 @@ void set_peptide_src_implementation(
 {  
   PEPTIDE_SRC_USE_LINK_LIST = use_link_list; 
 }
-                                    
+                            
+/**
+ * Examines the peptide sequence and counts how many tryptic missed
+ * cleavage sites exist. 
+ *\returns the number of missed cleavage sites in the peptide
+ */
+int get_peptide_missed_cleavage_sites(
+  PEPTIDE_T* peptide  ///< the peptide to query -in
+  )
+{
+  int missed_count = 0;
+  int aa_idx = 0;
+  char* sequence = get_peptide_sequence_pointer(peptide);
+
+  //count the missed cleavage sites
+  for(; aa_idx < peptide->length-1; ++aa_idx){
+    if(sequence[aa_idx] == 'K' ||
+       sequence[aa_idx] == 'R'){
+      
+      //skip one that are followed by a P
+      if(sequence[aa_idx+1] == 'P'){
+        continue;
+      }
+      else{
+        ++missed_count;
+      }      
+    } 
+  }
+  
+  return missed_count;
+}
+
+        
 /**
  * Iterator
  */
@@ -1015,6 +1047,112 @@ BOOLEAN_T merge_peptides(
   return TRUE;
 }
 
+/**
+ * Parse the binary serialized peptide use for match_analysis
+ * Assumes that the file* is set at the start of the peptide_src count field
+ *\returns the Peptide if successful parse the peptide form the serialized file, else NULL
+ */
+PEPTIDE_T* parse_peptide(
+  FILE* file, ///< the serialized peptide file -in
+  DATABASE_T* database, ///< the database to which the peptides are created -in
+  BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
+  )
+{  
+  PROTEIN_T* parent_protein = NULL;
+  PEPTIDE_SRC_T* peptide_src = NULL;
+  PEPTIDE_SRC_T* current_peptide_src = NULL;
+  int num_peptide_src = -1;
+  int protein_idx = -1;
+  int src_index =  0;
+  PEPTIDE_TYPE_T peptide_type = -1;
+  int start_index = -1;
+  
+  //the peptide to parse into
+  PEPTIDE_T* peptide = allocate_peptide();
+  
+  //read peptide struct
+  if(fread(peptide, get_peptide_sizeof(), 1, file) != 1){
+    //there is no peptide
+    free(peptide);
+    return NULL;
+  }
+  
+  //get total number of peptide_src for this peptide
+  //peptide must have at least one peptide src
+  if(fread(&num_peptide_src, sizeof(int), 1, file) != 1 || num_peptide_src < 1){
+    carp(CARP_ERROR, "index file corrupted, peptide must have at least one peptide src");
+    free(peptide);
+    return NULL;
+  }
+  
+  //which implemenation of peptide_src to use? Array or linklist?
+  if(use_array){
+    //allocate an array of empty peptide_src to be parsed information into
+    // we want to allocate the number of peptide src the current protein needs
+    peptide_src = new_peptide_src_array(num_peptide_src);
+  }
+  else{//link list
+    peptide_src = new_peptide_src_linklist(num_peptide_src);
+  }
+  
+  //set peptide src array to peptide
+  add_peptide_peptide_src_array(peptide, peptide_src);
+  
+  //set the current peptide src to parse information into
+  current_peptide_src = peptide_src;
+
+  //parse and fill all peptide src information into peptide
+  for(; src_index < num_peptide_src; ++src_index){
+    //**read peptide src fields**//
+    
+    //get protein index
+    if(fread(&protein_idx, (sizeof(int)), 1, file) != 1){
+      carp(CARP_ERROR, "index file corrupted, incorrect protein index");
+      free(peptide);
+      return NULL;
+    }
+    
+    //read peptide type of peptide src
+    if(fread(&peptide_type, sizeof(PEPTIDE_TYPE_T), 1, file) != 1){
+      carp(CARP_ERROR, "index file corrupted, failed to read peptide src");
+      free(peptide_src);
+      free(peptide);
+      return NULL;
+    }
+
+    //read start index of peptide in parent protein of thsi peptide src
+    if(fread(&start_index, sizeof(int), 1, file) != 1){
+      carp(CARP_ERROR, "index file corrupted, failed to read peptide src");
+      free(peptide_src);
+      free(peptide);
+      return NULL;
+    }
+    
+    /** set all fields in peptide src that has been read **/
+
+    //get the petide src parent protein
+    parent_protein = 
+      get_database_protein_at_idx(database, protein_idx);
+    
+    //set parent protein of the peptide src
+    set_peptide_src_parent_protein(current_peptide_src, parent_protein);
+
+    //set peptide type of peptide src
+    set_peptide_src_peptide_type(current_peptide_src, peptide_type);
+
+    //set start index of peptide src
+    set_peptide_src_start_idx(current_peptide_src, start_index);
+    
+    //set current_peptide_src to the next empty peptide src
+    current_peptide_src = get_peptide_src_next_association(current_peptide_src);    
+  }
+  
+  //increment the database pointer count
+  add_database_pointer_count(database);
+  
+  return peptide;
+}
+
 /*
  * Serialize a peptide to a FILE in binary
  * \returns TRUE if serialization is successful, else FALSE
@@ -1075,57 +1213,85 @@ BOOLEAN_T serialize_peptide(
   fseek(file, original_location, SEEK_SET);
   return TRUE;
 }
-/*
-BOOLEAN_T serialize_peptide(
-  PEPTIDE_T* peptide, ///< the peptide to serialize -in
-  FILE* file, ///< the output file to serlize -out
-  int num_digits ///< the number of floating point digits to record -in
+
+
+/**
+ * Creates a heap allocated hash_value for the peptide that should
+ * uniquely identify the peptide
+ *\returns the string of "<first src protein idx><start idx><length>"
+ */
+char* get_peptide_hash_value( 
+  PEPTIDE_T*  peptide ///< The peptide whose residues to iterate over.
   )
 {
-  PEPTIDE_SRC_ITERATOR_T* iterator = 
-    new_peptide_src_iterator(peptide);
-  long num_src_location;
-  long original_location;
-  int num_src = 0;
+  char* hash_value = NULL;
+  int peptide_length_space = get_number_digits(peptide->length);
+  int protein_idx = get_protein_protein_idx(get_peptide_src_parent_protein(peptide->peptide_src));
+  int protein_idx_space = get_number_digits(protein_idx);
+  int peptide_start_idx = get_peptide_src_start_idx(peptide->peptide_src);
+  int peptide_start_idx_space = get_number_digits(peptide_start_idx);
+  int status;
+  int space = peptide_length_space + protein_idx_space + peptide_start_idx_space + 1;
+
+  //allocate space for three integers
+  hash_value = (char*)mycalloc(space,sizeof(char));
   
-  //print mass of the peptide
-  if(num_digits == 2){
-    fprintf(file, "* %.2f\n", peptide->peptide_mass);
-  }
-  else{//default if not 2, it's 3
-    fprintf(file, "* %.3f\n", peptide->peptide_mass);
-  }
-
-  //print length of the peptide
-  fprintf(file,"%d\n",peptide->length);
-  //print number of src
-  num_src_location = ftell(file);
-  fprintf(file, "%s\n", "      ");
-
-  //there must be at least one peptide src
-  if(!peptide_src_iterator_has_next(iterator)){
-    carp(CARP_WARNING, "no peptide src");
-    return FALSE;
-  }
-
-  //interate through the linklist of possible parent proteins, print each parent protein
-  while(peptide_src_iterator_has_next(iterator)){
-    PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(iterator);
-    fprintf(file, "\t%d\n", get_peptide_src_peptide_type(peptide_src));
-    fprintf(file, "\t%d\n", get_peptide_src_start_idx(peptide_src));
-    fprintf(file, "\t%d\n", get_protein_protein_idx(get_peptide_src_parent_protein(peptide_src)));
-    ++num_src;
-  }
-  free_peptide_src_iterator(iterator);
+  //copy over the itegers
+  status = snprintf(hash_value, 
+                    space,
+                    "%d%d%d", 
+                   protein_idx, 
+                   peptide_start_idx, 
+                   peptide->length);
   
-  original_location = ftell(file);
-  fseek(file, num_src_location, SEEK_SET);
-  fprintf(file, "%d", num_src);
-  //update
-  fseek(file, original_location, SEEK_SET);
-  return TRUE;
+  if(status != (space-1)){
+    carp(CARP_ERROR, "failed to create peptide hash value");
+  }
+  
+  return hash_value;
 }
-*/
+
+ 
+/**
+ * 
+ *\returns a randomly shuffled sequence but preserves the tryptic property
+ */
+char* generate_shuffled_sequence(
+  PEPTIDE_T* peptide, ///< The peptide sequence to shuffle -in                                
+  PEPTIDE_TYPE_T peptide_type ///< The peptide type to enfore on the shuffled sequence
+  )
+{
+  char* sequence = get_peptide_sequence(peptide);
+  int length = peptide->length;
+  int start_idx = 0;
+  int end_idx = length - 1;
+  int switch_idx = 0;
+  char temp_char = 0;
+
+  //set shuffle bound
+  if(peptide_type == TRYPTIC){
+    ++start_idx;
+    --end_idx;
+  }
+  else if(peptide_type == N_TRYPTIC){
+    ++start_idx;
+  }
+  else if(peptide_type == C_TRYPTIC){
+    --end_idx;
+  }
+  
+  //shuffle from left ot right
+  //using the Knuth algorithm for shuffle
+  while(start_idx < end_idx){
+    switch_idx = get_random_number_interval(start_idx, end_idx);
+    temp_char = sequence[start_idx];
+    sequence[start_idx] = sequence[switch_idx];
+    sequence[switch_idx] = temp_char;
+    ++start_idx;
+  }
+  
+  return sequence;
+}
 
 /*
  * Load a peptide from the FILE
@@ -1137,7 +1303,6 @@ BOOLEAN_T load_peptide(
   PEPTIDE_T* peptide, ///< An allocated peptide
   FILE* file ///< The file pointing to the location of the peptide
   );
- 
 
 /*
  * Local Variables:
