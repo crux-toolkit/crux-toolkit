@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -35,7 +35,6 @@ INDEX_T* new_index(
   char* fasta_filename,  ///< The fasta file
   PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
   float mass_range,  ///< the range of mass that each index file should be partitioned into
-  unsigned int max_size,  ///< maximum limit of each index file
   BOOLEAN_T is_unique, ///< only unique peptides? -in
   BOOLEAN_T use_light ///< should I use light/heavy functionality? -in
 );         
@@ -94,6 +93,13 @@ BOOLEAN_T create_index_files(
   FILE* file ///< output stream to print
   );
 
+/**
+ * foo.fasta --> foo_crux_index/foo_binary_fasta
+ * \returns the binary fasta file name with crux directory name
+ */
+char* get_binary_fasta_name_in_crux_dir(
+  char* fasta_filename  ///< fasta file name -in
+  );
 
 /*********************************************
  * set and get methods for the object fields
@@ -175,21 +181,6 @@ float get_index_mass_range(
 void set_index_mass_range(
   INDEX_T* index, ///< The index -in
   float mass_range  ///< the range of mass that each index file should be partitioned into -in
-  );
-
-/**
- *\returns maximum limit of each index file
- */
-unsigned int get_index_max_size(
-  INDEX_T* index ///< The index -in
-  );
-
-/**
- * sets the maximum limit of each index file for the index object
- */
-void set_index_max_size(
-  INDEX_T* index, ///< The index -in
-  unsigned int max_size  ///< maximum limit of each index file -in
   );
 
 

@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -290,6 +290,15 @@ void set_peptide_src_implementation(
   );
 
 /**
+ * Examines the peptide sequence and counts how many tryptic missed
+ * cleavage sites exist. 
+ *\returns the number of missed cleavage sites in the peptide
+ */
+int get_peptide_missed_cleavage_sites(
+  PEPTIDE_T* peptide  ///< the peptide to query -in
+);
+
+/**
  * Residue Iterator
  */
 
@@ -436,6 +445,35 @@ BOOLEAN_T serialize_peptide(
   FILE* file
   );
  
+/**
+ * Parse the binary serialized peptide use for match_analysis
+ * Assumes that the file* is set at the start of the peptide_src count field
+ *\returns the Peptide if successful parse the peptide form the serialized file, else NULL
+ */
+PEPTIDE_T* parse_peptide(
+  FILE* file, ///< the serialized peptide file -in
+  DATABASE_T* database, ///< the database to which the peptides are created -in
+  BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
+  );
+
+/**
+ * Creates a heap allocated hash_value for the peptide that should
+ * uniquely identify the peptide
+ *\returns the string of "<first src protein idx><start idx><length>"
+ */
+char* get_peptide_hash_value( 
+  PEPTIDE_T*  peptide ///< The peptide whose residues to iterate over.
+  );
+
+/**
+ * 
+ *\returns a randomly shuffled sequence but preserves the tryptic property
+ */
+char* generate_shuffled_sequence(
+  PEPTIDE_T* peptide, ///< The peptide sequence to shuffle -in                                
+  PEPTIDE_TYPE_T peptide_type ///< The peptide type to enfore on the shuffled sequence
+  );
+
 /**
  * Load a peptide from the FILE
  * \returns TRUE if load is successful, else FALSE

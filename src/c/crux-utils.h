@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * $Author: cpark $
  * \brief Utilities for the crux project
  */
@@ -15,8 +15,10 @@
 #include "utils.h"
 #include "objects.h"
 
+/**
+ *\returns a heap copy of the given string
+ */
 char* my_copy_string(char* src);
-
 
 /**
  * returns copy of the src string upto the specified length
@@ -46,10 +48,17 @@ int compare_float(float float_a, float float_b);
 char** parse_filename_path(char* file);
 
 /**
+ * parses the filename
+ * ex) ../../file_name => returns filename
+ *\returns A heap allocated array of filename
+ */
+char* parse_filename(char* file);
+
+/**
  * convert the integer into a string
  * \returns a heap allocated string
  */
-char* int_to_char(int i);
+char* int_to_char(unsigned int i);
 
 /**
  * convert the integer into a string
@@ -100,7 +109,8 @@ BOOLEAN_T delete_dir(char* dir);
 char* generate_name(
   char* fasta_filename,
   char* name_tag,
-  char* file_extension
+  char* file_extension,
+  char* suffix
   );
 
 /**
@@ -115,6 +125,15 @@ FILE* create_file_in_path(
   );
 
 /**
+ * check if the string has the correct suffix
+ * \returns TRUE, if the string starts with the suffix, else FALSE
+ */
+BOOLEAN_T suffix_compare(
+  char* string, ///< The string suffix to compare
+  char* suffix  ///< The suffix to compare
+  );
+
+/**
  * checks if each AA is an AA
  *\returns TRUE if sequence is valid else, FALSE
  */
@@ -122,7 +141,34 @@ BOOLEAN_T valid_peptide_sequence( char* sequence);
 
 /**
  *
- *quickSort for floats
+ * quickSort for floats
  */
 void quicksort(float numbers[], int array_size);
+
+/**
+ *\returns a heap allocated feature name array for the algorithm type
+ */
+char** generate_feature_name_array(
+  ALGORITHM_TYPE_T algorithm ///< the algorithm's feature name to produce -in
+  );
+
+/**
+ *\returns the number of digits in the number
+ */
+int get_number_digits(
+  int number ///< the number to count digits
+  );
+
+/**
+ * User define our upper and our lower bounds.
+ * The random number will always be 
+ * between low and high, inclusive.
+ * There is no seeding in this function, user must do it for themselves
+ *\returns a random number between the interval user provides
+ */
+int get_random_number_interval(
+  int low, ///< the number for lower bound -in
+  int high ///< the number for higher bound -in
+  );
+
 #endif

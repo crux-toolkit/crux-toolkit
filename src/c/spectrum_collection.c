@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.17 $
+ * REVISION: $Revision: 1.18 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -18,6 +18,7 @@
 #include "peak.h"
 #include "utils.h"
 #include "unistd.h"
+#include "parameter.h"
 
 #define MAX_SPECTRA 40000 ///< max number of spectrums
 #define MAX_COMMENT 1000 ///< max length of comment
@@ -658,12 +659,12 @@ FILE* get_spectrum_collection_psm_result_filename(
   char* filename_template = get_full_filename(psm_result_folder_name, spectrum_file_path[0]); 
   
   //generate psm_result filename as psm_result_folder_name/spectrum_filename_XXXXXX
-  *psm_result_filename = generate_name(filename_template, "_XXXXXX", file_extension);
+  *psm_result_filename = generate_name(filename_template, "_XXXXXX", file_extension, "crux_match_");
   FILE* psm_output_file;
   
   if((file_descriptor = mkstemp(*psm_result_filename)) == -1 ||
      //FIXME might want to change to w+ instead of a+(append)
-     (psm_output_file = fdopen(file_descriptor, "a+")) == NULL){
+     (psm_output_file = fdopen(file_descriptor, "w+")) == NULL){
     
     if(file_descriptor != -1){
       unlink(*psm_result_filename);
@@ -682,9 +683,80 @@ FILE* get_spectrum_collection_psm_result_filename(
   free(spectrum_file_path[1]);
   free(spectrum_file_path);
   free(filename_template);
+
   return psm_output_file;  
 }
 
+/**
+ * <int: number spectra>
+ * <int: number of spectrum features>
+ * <int: number of top ranked peptides serialized per spectra>
+ * <int: ms2 file length><char*: ms2 filename>
+ * <int: fasta file length><char*: fasta filename>
+ *
+ * Serializes the header information for the binary PSM serialized files
+ *\returns TRUE if serialized header successfully, else FALSE
+ */
+BOOLEAN_T serialize_header(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection -in
+  char* fasta_file, ///< the fasta file 
+  FILE* psm_file ///< the file to serialize the header information -out
+  )
+{
+  int num_spectrum_features = 0;
+  //set max number of matches to be serialized per spectrum
+  int number_top_rank_peptide = get_int_parameter("top-match", 1);
+  char* file_fasta = parse_filename(fasta_file);
+  //int file_fasta_length = strlen(file_fasta);
+  char* file_ms2 = parse_filename(spectrum_collection->filename);
+  //int file_ms2_length = strlen(file_ms2);
+  
+  fwrite(&(spectrum_collection->num_spectra), sizeof(int), 1, psm_file);
+  fwrite(&(num_spectrum_features), sizeof(int), 1, psm_file);
+  fwrite(&(number_top_rank_peptide), sizeof(int), 1, psm_file);
+  
+  /*
+  //serialize ms2 file name
+  fwrite(&(file_ms2_length), sizeof(int), 1, psm_file);
+  fwrite(file_ms2, sizeof(char), file_ms2_length, psm_file);
+  
+  //serialize fasta file name
+  fwrite(&(file_fasta_length), sizeof(int), 1, psm_file);
+  fwrite(file_fasta, sizeof(char), file_fasta_length, psm_file);
+  
+  //parameter file
+  set_double_parameter("min-mass", 200);
+  set_double_parameter("max-mass", 2400);
+  set_int_parameter("min-length", 6);
+  set_int_parameter("max-length", 50);
+  set_string_parameter("cleavages", "tryptic");
+  set_string_parameter("isotopic-mass","average");
+  set_string_parameter("redundancy", "redundant");
+  set_string_parameter("use-index", "F");
+  set_string_parameter("sort", "none");
+  set_boolean_parameter("missed-cleavages", FALSE);
+  set_double_parameter("mass-offset", 0);
+  set_double_parameter("beta", 0.075);
+  set_double_parameter("max-mz", 4000);
+  set_string_parameter("score-type", "xcorr"); 
+  set_double_parameter("mass-window", 3.0);
+  set_string_parameter("prelim-score-type", "sp");
+  set_int_parameter("max-rank-preliminary", 500);
+  set_int_parameter("max-rank-result", 500);
+  set_int_parameter("top-fit-sp", 1000);
+  set_int_parameter("top-rank-p-value", 1);
+  set_int_parameter("sample-count", 500);
+  set_double_parameter("spectrum-min-mass", 0.0);
+  set_double_parameter("spectrum-max-mass", INFINITY);
+  set_int_parameter("top-match", 1);
+  */
+
+  //free up files
+  free(file_ms2);
+  free(file_fasta);
+  
+  return TRUE;
+}
 
 /******************************************************************************/
 

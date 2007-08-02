@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.61 $   #-Werror \
+# VERSION: $Revision: 1.62 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -11,6 +11,10 @@ DEBUG   = -DDEBUG -g
 OFLAGS  = #-O2 
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
+CPP_FLAGS =  -lstdc++
+
+##### Different module directories ####
+PERCOLATOR_DIR = ../../../percolator
 
 ##### Global variable definitions
 
@@ -25,6 +29,7 @@ LIBDIR = ../../lib
 
 # Archive file.
 LIBFILE = ${LIBDIR}/libcrux.a
+PERCOLATOR_LIB = ${PERCOLATOR_DIR}/src/Release/lib/libpercolator.a
 RANLIBFILE = ${LIBDIR}/libcrux.ranlib
 
 # Libraries to use
@@ -66,8 +71,9 @@ LIBOBJS =\
 	${OBJDIR}/match_collection.o \
 	${OBJDIR}/search_spectrum.o \
 	${OBJDIR}/search_spectra.o \
-	${OBJDIR}/match_search.o
-#	${OBJDIR}/match_analysis.o
+	${OBJDIR}/hash.o \
+	${OBJDIR}/match_search.o \
+	${OBJDIR}/match_analysis.o
 #	${OBJDIR}/score_peptide_list_spectrum.o
 
 # These are the names of the programs.
@@ -80,14 +86,14 @@ PROGS = \
 	${BINDIR}/score_peptide_spectrum \
 	${BINDIR}/search_spectrum \
 	${BINDIR}/search_spectra \
-	${BINDIR}/match_search
-#	${BINDIR}/match_analysis
+	${BINDIR}/match_search \
+	${BINDIR}/match_analysis
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \
 #	${BINDIR}/precursor
 
-all: libs bins TAGS 
+all: Percolator libs bins TAGS 
 libs: ${LIBFILE}(${LIBOBJS})
 
 bins: ${PROGS} libs
@@ -106,12 +112,19 @@ clean:
 depend: 
 	rm -f .depend
 	touch .depend
-	makedepend -Y -p'$${OBJDIR}/' -f .depend *.c *.h #*.cpp##
+	makedepend -Y -p'$${OBJDIR}/' -p '$(PERCOLATOR_DIR)/src/Release/' -f .depend *.c *.h *.cpp
 
 # Build a tags file for emacs.
-# TAGS: *.c *.h # *.cpp
-#	etags *.c *.h
-#	ctags *.c *.h
+TAGS: *.c *.h *.cpp
+	etags *.c *.h
+	ctags *.c *.h
+
+# Make Percolator and copy over header and library file to CRUX
+Percolator:
+	# make percolator 
+	@cd $(PERCOLATOR_DIR)/src ; make
+	#@cp $(PERCOLATOR_DIR)/src/PercolatorCInterface.h  . ;
+	#@cp $(PERCOLATOR_DIR)/src/Release/lib/libpercolator.a ${LIBDIR} ;
 
 ##### Dependencies
 
@@ -158,5 +171,4 @@ ${OBJDIR}/%.o: %.cpp
 # Rules for compiling programs
 ${BINDIR}/%: ${OBJDIR}/%.o ${RANLIBFILE}
 	@mkdir -p ${BINDIR}
-# ${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS} ${LIBDIR}/libpercolator.a  -lstdc++
-	${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS} -lstdc++
+	${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS} ${PERCOLATOR_LIB}  ${CPP_FLAGS}

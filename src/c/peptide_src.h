@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -100,7 +100,7 @@ void set_peptide_src_peptide_type(
 
 /**
  * \returns the peptide type with association to the parent protein
- * peptide type: TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC
+ * peptide type: TRYPTIC, N_TRYPTIC, C_TRYPTIC, NON_TRYPTIC
  */
 PEPTIDE_TYPE_T get_peptide_src_peptide_type( 
   PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   

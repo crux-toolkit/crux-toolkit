@@ -180,7 +180,7 @@ int main(int argc, char** argv){
     
     //search for spectrum with correct scan number
     if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
-      carp(CARP_WARNING, "failed to find spectrum with  scan_num: %d", scan_num);
+      carp(CARP_ERROR, "failed to find spectrum with  scan_num: %d", scan_num);
       free_ion_constraint(ion_constraint);
       free_ion_series(ion_series);
       free_spectrum_collection(collection);
@@ -197,6 +197,9 @@ int main(int argc, char** argv){
     }
     else if(score_type == XCORR){
       printf("Xcorr score is: %.2f\n", score);
+    }
+    else{
+      carp(CARP_ERROR, "invalid score type for the application");
     }
       
    //free heap

@@ -1,7 +1,7 @@
 #verbosity level for run 0~100
 verbosity=100
 
-########generate_peptide perameters##########
+########generate_peptide, create_index perameters##########
 #min mass for peptides
 min-mass=200.0
 
@@ -13,6 +13,9 @@ min-length=6
 
 #max length for peptides
 max-length=50
+
+#The mass range contained in each index file
+mass-range=1.0
 
 #cleavage type allowed (tryptic|partial|all)
 cleavages=all
@@ -72,3 +75,6 @@ top-rank-p-value=1
 
 #The top number of sp ranked peptides to use for scoring of EXP_SP
 top-fit-sp=10000
+
+#number of decoy sets to generate for percolator input
+number-decoy-set=2

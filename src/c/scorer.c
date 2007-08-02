@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.26 $
+ * REVISION: $Revision: 1.27 $
  ****************************************************************************/
 
 #include <math.h>
@@ -204,6 +204,8 @@ void smooth_peaks(
     case LOGP_BONF_WEIBULL_XCORR:
     case LOGP_EVD_XCORR:
     case LOGP_BONF_EVD_XCORR:
+    case Q_VALUE:
+    case PERCOLATOR_SCORE:  
       break;
   }
   free(scorer->intensity_array);
@@ -1177,11 +1179,6 @@ float gen_score_xcorr(
   //carp(CARP_INFO, "xcorr: %.2f", final_score);
 
   
-/*#ifdef _MIN_XCORR
-  final_score = final_score < _MIN_XCORR ? _MIN_XCORR : final_score;
-#endif*/
-
-  final_score += 1.0; // FIX!
   //return score
   return final_score;
 }

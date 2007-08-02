@@ -57,7 +57,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
   double max_mass  ///< the maximum mas of peptide to generate
 )
 {
-  //get perameters
+  //get parameters
   int min_length = get_int_parameter("min-length", 6);
   int max_length = get_int_parameter("max-length", 50);
   char* cleavages = get_string_parameter_pointer("cleavages");
@@ -92,7 +92,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
   }
   else if(strcmp(cleavages, "partial")==0){
     peptide_type = PARTIALLY_TRYPTIC;
-  }
+  }  
   else{
     carp(CARP_ERROR, "incorrect argument %s, using default value", cleavages);
   }
@@ -276,7 +276,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
   float neutral_mass ///< the neutral_mass that which the peptides will be searched -in
   )
 {
-  //get perameters
+  //get parameters
   double mass_window = get_double_parameter("mass-window", 3);
   double min_mass = neutral_mass - mass_window;
   double max_mass = neutral_mass + mass_window;
@@ -290,7 +290,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
  *\returns a new generate_peptides_iterator object from all parameters from parameters.c 
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
-  //get perameters from parameter.c
+  //get parameters from parameter.c
   double min_mass = get_double_parameter("min-mass", 200);
   double max_mass = get_double_parameter("max-mass", 2400);
 
@@ -309,7 +309,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
 {
-  //get perameters
+  //get parameters
   int min_length = get_int_parameter("min-length", 6);
   int max_length = get_int_parameter("max-length", 50);
   char* cleavages = get_string_parameter_pointer("cleavages");

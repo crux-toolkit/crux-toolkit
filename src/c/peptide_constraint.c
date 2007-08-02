@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_constraint.c
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
@@ -25,7 +25,7 @@
  *              any other K and R in the sequence must be followed by a P
  */
 struct peptide_constraint {
-  PEPTIDE_TYPE_T peptide_type;///< The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC)
+  PEPTIDE_TYPE_T peptide_type;///< The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC)
   float min_mass; ///< The minimum mass of the peptide
   float max_mass; ///< The maximum mass of the peptide
   int min_length; ///< The minimum length of the peptide

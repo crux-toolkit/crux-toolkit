@@ -56,6 +56,7 @@ int main(int argc, char** argv){
   char* sqt_output_file = "Prefix of <ms2 input filename>.psm";
   double spectrum_min_mass = 0;
   double spectrum_max_mass = INFINITY;
+  int number_decoy_set = 2;
     
   //required
   char* ms2_file = NULL;
@@ -119,6 +120,12 @@ int main(int argc, char** argv){
     "The type of preliminary scoring function to use. sp",
     (void *) &prelim_score_type, 
     STRING_ARG);
+
+  parse_arguments_set_opt(
+    "number-decoy-set", 
+    "Specify the number of decoy sets to generate for match_analysis.",
+    (void *) &number_decoy_set, 
+    INT_ARG);
   
   /* Define required command line arguments */
   parse_arguments_set_req(
@@ -160,13 +167,30 @@ int main(int argc, char** argv){
     else{
       wrong_command("verbosity", "verbosity level must be between 0-100");
     }
-
+    
     //set verbosity
     set_verbosity_level(verbosity);
 
     //parse and update parameters
     parse_update_parameters(parameter_file);
     
+    //always use index when search spectra!
+    set_string_parameter("use-index", "T");
+
+    //generate sqt ouput file if not set by user
+    if(strcmp(get_string_parameter_pointer("sqt-output-file"), "Prefix of <ms2 input filename>.psm") ==0){
+      sqt_output_file = generate_name(ms2_file, ".psm", ".ms2", NULL);
+      set_string_parameter("sqt-output-file", sqt_output_file);
+    }
+    
+    //parameters are now confirmed, can't be changed
+    parameters_confirmed();
+    
+    /***** Now, must get all parameters through get_*_parameter ****/
+    
+    //number_decoy_set
+    number_decoy_set = get_int_parameter("number-decoy-set", 2);
+
     //main score type
     if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
       main_score = LOGP_EXP_SP;
@@ -194,16 +218,7 @@ int main(int argc, char** argv){
     else{
       wrong_command(prelim_score_type, "The type of preliminary scoring function to use. sp");
     }
-
-    //always use index when search spectra!
-    set_string_parameter("use-index", "T");
-    
-    //generate sqt ouput file if not set by user
-    if(strcmp(get_string_parameter_pointer("sqt-output-file"),"Prefix of <ms2 input filename>.psm") ==0){
-      sqt_output_file = generate_name(ms2_file, ".psm", ".ms2");
-      set_string_parameter("sqt-output-file", sqt_output_file);
-    }
-    
+        
     //get output-mode
     if(strcmp(get_string_parameter_pointer("output-mode"), "binary")== 0){
       output_type = BINARY_OUTPUT;
@@ -218,15 +233,12 @@ int main(int argc, char** argv){
       wrong_command(output_mode, "The output mode to use. binary|sqt|all");
     }
     
-    //parameters are now confirmed, can't be changed
-    parameters_confirmed();
-
     //set max number of preliminary scored peptides to use for final scoring
     max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
 
     //set max number of final scoring matches to print as output in sqt
     max_rank_result = get_int_parameter("max-rank-result", 500);
-    
+
     //set max number of matches to be serialized per spectrum
     top_match = get_int_parameter("top-match", 1);
 
@@ -259,6 +271,7 @@ int main(int argc, char** argv){
                                                   &psm_result_filename,
                                                   ".ms2"
                                                   );
+    
     //get psm_result sqt file handle if needed
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
       psm_result_file_sqt = 
@@ -274,7 +287,10 @@ int main(int argc, char** argv){
       free(psm_result_filename);
       exit(-1);
     }
-
+    
+    //serialize the header information
+    serialize_header(collection, fasta_file, psm_result_file);
+    
     int spectra_idx = 0;
     //iterate over all spectrum in ms2 file
     while(spectrum_iterator_has_next(spectrum_iterator)){
@@ -298,20 +314,21 @@ int main(int argc, char** argv){
         
         //get match collection with scored, ranked match collection
         match_collection =
-          new_match_collection_spectrum_with_peptide_iterator(spectrum, 
-                                                              possible_charge_array[charge_index], 
-                                                              max_rank_preliminary, prelim_score, 
-                                                              main_score, mass_offset);
+          new_match_collection_spectrum(spectrum, 
+                                        possible_charge_array[charge_index], 
+                                        max_rank_preliminary, prelim_score, 
+                                        main_score, mass_offset, FALSE);
         
         //serialize the psm features to ouput file upto 'top_match' number of 
         //top peptides among the match_collection
-        serialize_psm_features(match_collection, spectrum, psm_result_file, top_match, prelim_score, main_score);
+        serialize_psm_features(match_collection, psm_result_file, top_match, prelim_score, main_score);
         
         //should I ouput the match_collection result as a SQT file?
         //FIXME ONLY one header
         if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-          print_match_collection_sqt(psm_result_file_sqt, max_rank_result, charge_index, 
-                                     match_collection, spectrum, prelim_score, main_score);
+          print_match_collection_sqt(psm_result_file_sqt, max_rank_result,
+                                     match_collection, spectrum, 
+                                     prelim_score, main_score);
         }        
         free_match_collection(match_collection);
       }
@@ -327,7 +344,7 @@ int main(int argc, char** argv){
     free_spectrum_collection(collection);
   }
   else{
-    char* usage = parse_arguments_get_usage("search_spectra");
+    char* usage = parse_arguments_get_usage("match_search");
     result = parse_arguments_get_error(&error_message);
     fprintf(stderr, "Error in command line. Error # %d\n", result);
     fprintf(stderr, "%s\n", error_message);
