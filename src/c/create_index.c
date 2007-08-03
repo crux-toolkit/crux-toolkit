@@ -245,9 +245,9 @@ int main(int argc, char** argv){
     //set other parameters to final
     min_mass = get_double_parameter("min-mass", 200);
     max_mass = get_double_parameter("max-mass", 2400);
-    min_length = get_double_parameter("min-length", 6);
-    max_length = get_double_parameter("max-length", 50);
-    missed_cleavages = get_double_parameter("missed-cleavages", FALSE);
+    min_length = get_int_parameter("min-length", 6);
+    max_length = get_int_parameter("max-length", 50);
+    missed_cleavages = get_boolean_parameter("missed-cleavages", FALSE);
 
     //peptide constraint
     constraint = 
