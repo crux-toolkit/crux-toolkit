@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include "carp.h"
 #include "peptide.h"
 #include "protein.h"
@@ -159,7 +160,7 @@ int main(int argc, char** argv){
     int top_match = 1;
     MATCH_SEARCH_OUPUT_MODE_T output_type = BINARY_OUTPUT;
     float mass_offset = 0;
-
+    
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
@@ -244,13 +245,36 @@ int main(int argc, char** argv){
 
     //get mass offset from precursor mass to search for candidate peptides
     mass_offset = get_double_parameter("mass-offset", 0);    
-    
+
+    //seed for random rnumber generation
+    if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
+      //use current time to seed
+      
+      time_t seconds;
+      // Get value from system clock and
+      // place in seconds variable.
+      //
+      time(&seconds);
+      
+      //  Convert seconds to a unsigned
+      //  integer.
+      srand((unsigned int) seconds);
+    }
+    else{
+      srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
+      //FIXME add more ways to seed the random generator
+    }
+
+
     /************** done with parameter setting **************/
     
-    char* psm_result_filename = NULL;
-    FILE* psm_result_file = NULL;
+    char** psm_result_filenames = NULL;
+    FILE** psm_result_file = NULL;
     FILE* psm_result_file_sqt = NULL;
-    
+    int total_files = number_decoy_set + 1; //plus one for target file
+    int file_idx = 0;
+    BOOLEAN_T is_decoy = FALSE;
+
     //read ms2 file
     collection = new_spectrum_collection(ms2_file);
     
@@ -264,11 +288,13 @@ int main(int argc, char** argv){
     //create spectrum iterator
     spectrum_iterator = new_spectrum_iterator(collection);
     
-    //get psm_result file handler
+    //get psm_result file handler array
+    //this includes one for the target and for the decoys
     psm_result_file = 
       get_spectrum_collection_psm_result_filename(collection,
                                                   match_output_folder,
-                                                  &psm_result_filename,
+                                                  &psm_result_filenames,
+                                                  number_decoy_set,
                                                   ".ms2"
                                                   );
     
@@ -279,20 +305,23 @@ int main(int argc, char** argv){
     }
     
     //did we get the file handles?
-    if(psm_result_file == NULL ||
+    //check for at least there's one for result
+    if(psm_result_file[0] == NULL ||
        ((output_type == SQT_OUTPUT || output_type == ALL_OUTPUT) &&
        psm_result_file_sqt == NULL)){
       carp(CARP_ERROR, "failed with output mode");
       free(sqt_output_file);
-      free(psm_result_filename);
+      free(psm_result_filenames);
       exit(-1);
     }
-    
-    //serialize the header information
-    serialize_header(collection, fasta_file, psm_result_file);
-    
+        
+    //serialize the header information for all files(target & decoy)
+    for(; file_idx < total_files; ++file_idx){
+      serialize_header(collection, fasta_file, psm_result_file[file_idx]);
+    }
+
     int spectra_idx = 0;
-    //iterate over all spectrum in ms2 file
+    //iterate over all spectrum in ms2 file and score
     while(spectrum_iterator_has_next(spectrum_iterator)){
       //get next spectrum
       spectrum = spectrum_iterator_next(spectrum_iterator);
@@ -308,29 +337,45 @@ int main(int argc, char** argv){
       possible_charge = get_spectrum_num_possible_z(spectrum);
       possible_charge_array = get_spectrum_possible_z_pointer(spectrum);
       
-      //iterate over all possible charge states
+      //iterate over all possible charge states for each spectrum
       for(charge_index = 0; charge_index < possible_charge; ++charge_index){
         ++spectra_idx;
         
-        //get match collection with scored, ranked match collection
-        match_collection =
-          new_match_collection_spectrum(spectrum, 
-                                        possible_charge_array[charge_index], 
-                                        max_rank_preliminary, prelim_score, 
-                                        main_score, mass_offset, FALSE);
-        
-        //serialize the psm features to ouput file upto 'top_match' number of 
-        //top peptides among the match_collection
-        serialize_psm_features(match_collection, psm_result_file, top_match, prelim_score, main_score);
-        
-        //should I ouput the match_collection result as a SQT file?
-        //FIXME ONLY one header
-        if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-          print_match_collection_sqt(psm_result_file_sqt, max_rank_result,
-                                     match_collection, spectrum, 
-                                     prelim_score, main_score);
-        }        
-        free_match_collection(match_collection);
+
+        //iterate over first for target next and for all decoy sets
+        for(file_idx = 0; file_idx < total_files; ++file_idx){
+          //is it target ?
+          if(file_idx == 0){
+            is_decoy = FALSE;
+          }
+          else{
+            is_decoy = TRUE;
+          }
+
+          //get match collection with scored, ranked match collection
+          match_collection =
+            new_match_collection_spectrum(spectrum, 
+                                          possible_charge_array[charge_index], 
+                                          max_rank_preliminary, prelim_score, 
+                                          main_score, mass_offset, is_decoy);
+          
+          //serialize the psm features to ouput file upto 'top_match' number of 
+          //top peptides among the match_collection
+          serialize_psm_features(match_collection, psm_result_file[file_idx], top_match, prelim_score, main_score);
+          
+          //should I ouput the match_collection result as a SQT file?
+          // Output only for the target set
+          //FIXME ONLY one header
+          if(!is_decoy &&
+             (output_type == SQT_OUTPUT || output_type == ALL_OUTPUT)){
+            print_match_collection_sqt(psm_result_file_sqt, max_rank_result,
+                                       match_collection, spectrum, 
+                                       prelim_score, main_score);
+          }        
+          
+          //free up match_collection
+          free_match_collection(match_collection);          
+        }
       }
     }
     
@@ -338,8 +383,15 @@ int main(int argc, char** argv){
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
       fclose(psm_result_file_sqt);
     }
-    fclose(psm_result_file);
-    free(psm_result_filename);
+
+    // ok, now close all psm_result_files and free filenames
+    for(file_idx = 0; file_idx < total_files; ++file_idx){
+      fclose(psm_result_file[file_idx]);
+      free(psm_result_filenames[file_idx]);
+    }
+
+    free(psm_result_filenames);
+    free(psm_result_file);
     free_spectrum_iterator(spectrum_iterator);
     free_spectrum_collection(collection);
   }

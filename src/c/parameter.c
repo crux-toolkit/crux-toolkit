@@ -119,6 +119,7 @@ void initialize_parameters(void){
   //match_search
   set_string_parameter("match-output-folder", ".");
   set_string_parameter("output-mode", "binary");
+  set_string_parameter("seed", "time");
   set_string_parameter("sqt-output-file", "Prefix of <ms2 input filename>.psm");
   set_double_parameter("spectrum-min-mass", 0.0);
   set_double_parameter("spectrum-max-mass", INFINITY);
@@ -127,6 +128,7 @@ void initialize_parameters(void){
 
   //match_analysis
   set_string_parameter("algorithm", "percolator");
+  set_double_parameter("pi0", 0.9);
 
   //now we have initialized the parameters
   parameter_initialized = TRUE;

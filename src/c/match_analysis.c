@@ -131,72 +131,87 @@ int main(int argc, char** argv){
     unsigned int number_features = 20;
     double* results_q = NULL;
     double* results_score = NULL;
-    double pi0 = 0.9; ///???
-    NSet sets  = TWO_SETS;
+    double pi0 = get_double_parameter("pi0", 0.9);
     char** feature_names = generate_feature_name_array(algorithm);
-    double* features = NULL;
-    char* sequence = NULL;
+    double* features = NULL;    
+    MATCH_ITERATOR_T* match_iterator = NULL;
+    MATCH_COLLECTION_T* match_collection = NULL;
+    MATCH_COLLECTION_T* target_match_collection = NULL;
+    int set_idx = 0;
+    
+    //create MATCH_COLLECTION_ITERATOR_T object
+    //which willd read in the serialized output PSM results and return
+    // first the match_collection of TARGET fallowed the decoy match_collections.
+    MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
+      new_match_collection_iterator(psm_result_folder, fasta_file);
 
-    //create MATCH_COLLECTION_T object and read in the output PSM results.
-    MATCH_COLLECTION_T* match_collection = new_match_collection_psm_output(psm_result_folder, fasta_file);
-    //result array that stores the algorithm scores
-    results_q = (double*)mycalloc(get_match_collection_match_total(match_collection), sizeof(double));
-    results_score = (double*)mycalloc(get_match_collection_match_total(match_collection), sizeof(double));
-    
-    //Process PSM output and generate the run specific features
-    //process_run_specific_features(match_collection);
-    
-    
-    // Call that initiates percolator
-    pcInitiate(sets, number_features, get_match_collection_match_total(match_collection), feature_names, pi0);
-    
 
-    //Call that sets verbosity level
-    //0 is quiet, 2 is default, 5 is more than you want
-    if(verbosity < CARP_ERROR){
-      pcSetVerbosity(0);
-    }    
-    else if(verbosity < CARP_INFO){
-      pcSetVerbosity(1);
-    }
-    else{
-      pcSetVerbosity(2);
-    }
+    //iterate over each, TARGET, DECOY1~..3 match_collection sets
+    while(match_collection_iterator_has_next(match_collection_iterator)){
 
-    //create iterator, to register each PSM feature to Percolator
-    MATCH_ITERATOR_T* match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
-    
-    while(match_iterator_has_next(match_iterator)){
-      match = match_iterator_next(match_iterator);
+      //get the next match_collection
+      match_collection = match_collection_iterator_next(match_collection_iterator);
       
-      //Register PSM with features to Percolator    
-      features = get_match_percolator_features(match, match_collection);
-      sequence = get_match_sequence(match);
-      
-      pcRegisterPSM(TARGET, 
-                    sequence, 
-                    features);
-     
-      pcRegisterPSM(DECOY1, 
-                    sequence, 
-                    features);
-      
-      free(sequence);
-      free(features);
-    }
+      //intialize percolator, using information from first match_collection
+      if(set_idx == 0){
+        //the first match_collection is the target_match_collection
+        target_match_collection = match_collection;
 
+        //result array that stores the algorithm scores
+        results_q = (double*)mycalloc(get_match_collection_match_total(match_collection), sizeof(double));
+        results_score = (double*)mycalloc(get_match_collection_match_total(match_collection), sizeof(double));
+        
+        // Call that initiates percolator
+        pcInitiate((NSet)get_match_collection_iterator_number_collections(match_collection_iterator), 
+                   number_features, get_match_collection_match_total(match_collection), feature_names, pi0);
+    
+        
+        //Call that sets verbosity level
+        //0 is quiet, 2 is default, 5 is more than you want
+        if(verbosity < CARP_ERROR){
+          pcSetVerbosity(0);
+        }    
+        else if(verbosity < CARP_INFO){
+          pcSetVerbosity(1);
+        }
+        else{
+          pcSetVerbosity(2);
+        }
+      }
+
+      //create iterator, to register each PSM feature to Percolator
+      match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
+      
+      while(match_iterator_has_next(match_iterator)){
+        match = match_iterator_next(match_iterator);
+        
+        //Register PSM with features to Percolator    
+        features = get_match_percolator_features(match, match_collection);
+        
+        pcRegisterPSM((SetType)set_idx, 
+                      NULL, //no sequence used
+                      features);
+        
+        free(features);
+      }
+
+      //ok free & update for net set
+      free_match_iterator(match_iterator);
+
+      //don't free the target_match_collection
+      if(set_idx != 0){
+        free_match_collection(match_collection);
+      }
+
+      ++set_idx;
+    }
+    
     /***** PERCOLATOR run *********/
 
     // Function called when we want to start processing
     pcExecute(); 
     
     /****************************/
-
-    free_match_iterator(match_iterator);
-
-    //create new iterator, to print result in sorted order of Q_Value
-    //match_iterator = new_match_iterator(match_collection, Q_VALUE, TRUE);
-    
     
     /** Function called when retrieving target scores and q-values after processing,
      * the array should be numSpectra long and will be filled in the same order
@@ -204,13 +219,13 @@ int main(int argc, char** argv){
     pcGetScores(results_score, results_q); 
     
     //fill results for Q_VALUE
-    fill_result_to_match_collection(match_collection, results_q, Q_VALUE);
+    fill_result_to_match_collection(target_match_collection, results_q, Q_VALUE);
     
     //fill results for PERCOLATOR_SCORE
-    fill_result_to_match_collection(match_collection, results_score, PERCOLATOR_SCORE);
+    fill_result_to_match_collection(target_match_collection, results_score, PERCOLATOR_SCORE);
     
     //create match iterator, TRUE: return match in sorted order of main_score type
-    match_iterator = new_match_iterator(match_collection, Q_VALUE, TRUE);
+    match_iterator = new_match_iterator(target_match_collection, Q_VALUE, TRUE);
     
     //iterate over matches
     int match_count = 0;
@@ -236,8 +251,9 @@ int main(int argc, char** argv){
 
     free(results_q);
     free(results_score);
+    free_match_collection_iterator(match_collection_iterator);
     free_match_iterator(match_iterator);
-    free_match_collection(match_collection);
+    free_match_collection(target_match_collection);
   }
   else{
     char* usage = parse_arguments_get_usage("match_analysis");
