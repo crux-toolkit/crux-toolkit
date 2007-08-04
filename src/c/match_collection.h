@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -180,8 +180,8 @@ void free_match_iterator(
  *\returns a new match_collection object that is instantiated by the PSm output files
  */
 MATCH_COLLECTION_T* new_match_collection_psm_output(
- char* output_file_directory, ///< the directory path where the PSM output files are located -in
- char* fasta_file ///< The name of the file (in fasta format) from which to retrieve proteins and peptides. -in
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator, ///< the working match_collection_iterator -in
+  SET_TYPE_T set_type  ///< what set of match collection are we creating? (TARGET, DECOY1~3) -in 
  );
 
 /**
@@ -225,6 +225,49 @@ int get_match_collection_protein_peptide_counter(
 int get_match_collection_hash(
   MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
   PEPTIDE_T* peptide  ///< the peptide to check hash value
+  );
+
+/******************************
+ * match_collection_iterator
+ ******************************/
+
+/**
+ * Create a match_collection iterator from a directory of serialized files
+ * Only hadles up to one target and three decoy sets per folder
+ *\returns match_collection iterator instantiated from a result folder
+ */
+MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
+  char* output_file_directory, ///< the directory path where the PSM output files are located -in
+  char* fasta_file ///< The name of the file (in fasta format) from which to retrieve proteins and peptides for match_collections. -in
+  );
+
+/**
+ *\returns TRUE, if there's another match_collection to return, else return FALSE
+ */
+BOOLEAN_T match_collection_iterator_has_next(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
+  );
+
+/**
+ * free match_collection_iterator
+ */
+void free_match_collection_iterator(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
+  );
+
+/**
+ * returns the next match collection object and sets up fro the next iteration
+ *\returns the next match collection object
+ */
+MATCH_COLLECTION_T* match_collection_iterator_next(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
+  );
+
+/**
+ *\returns the total number of match_collections to return
+ */
+int get_match_collection_iterator_number_collections(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
   );
 
 /*

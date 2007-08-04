@@ -78,3 +78,10 @@ top-fit-sp=10000
 
 #number of decoy sets to generate for percolator input
 number-decoy-set=2
+
+#used for percolator parameter
+pi0=0.9
+
+#used for decoy null peptide generation
+#set random seed
+seed=time

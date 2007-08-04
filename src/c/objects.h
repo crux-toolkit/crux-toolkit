@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -347,24 +347,11 @@ enum _match_search_ouput_mode {BINARY_OUTPUT, SQT_OUTPUT, ALL_OUTPUT};
  */
 typedef enum _match_search_ouput_mode MATCH_SEARCH_OUPUT_MODE_T; 
 
-
 /**
- *\typedef RICH_MATCH_T
- *\brief An object that contains the information of a peptide and the scoring of multiple types
+ *\typedef MATCH_COLLECTION_ITERATOR_T
+ *\brief An object that navigates the match_collection objects
  */
-typedef struct rich_match RICH_MATCH_T;
-
-/**
- *\typedef RICH_MATCH_COLLECTION_T
- *\brief An object that contains mutiple rich_match objects
- */
-typedef struct rich_match_collection RICH_MATCH_COLLECTION_T;
-
-/**
- *\typedef RICH_MATCH_ITERATOR_T
- *\brief An object that navigates the rich_matches
- */
-typedef struct rich_match_iterator RICH_MATCH_ITERATOR_T;
+typedef struct match_collection_iterator MATCH_COLLECTION_ITERATOR_T;
 
 /**
  * The enum for algorithm type (PERCOLATOR, CZAR, ALL)
@@ -388,5 +375,16 @@ typedef struct record RECORD_T;
  * \brief hash table, contains the records
  */
 typedef struct hash HASH_T;
+
+/**
+ * Identifying which set the PSM belongs to
+ */
+enum  _set_type {SET_TARGET=0,SET_DECOY1,SET_DECOY2,SET_DECOY3};
+
+/**
+ * \typedef SET_TYPE_T
+ * \brief the typedef for set types for match type TARGET, DECOY1, DECOY2, DECOY3
+ */
+typedef enum _set_type SET_TYPE_T;
 
 #endif

@@ -223,7 +223,7 @@ void print_match(
     case LOGP_BONF_EVD_XCORR:
     case LOGP_WEIBULL_XCORR:
     case LOGP_BONF_WEIBULL_XCORR:
-    case Q_VALUE:
+    case Q_VALUE:      
     case PERCOLATOR_SCORE:  
       secondary_score = SP;
       break;
@@ -371,14 +371,15 @@ double* get_match_percolator_features(
   //iterate overall parent proteins
   //find largest numProt and pepSite among the parent proteins
   while(peptide_src_iterator_has_next(src_iterator)){
+    peptide_src = peptide_src_iterator_next(src_iterator);
     protein = get_peptide_src_parent_protein(peptide_src);
     protein_idx = get_protein_protein_idx(protein);
     
     //numProt
     if(feature_array[18] < get_match_collection_protein_counter(match_collection,
-                                                                     protein_idx)){
+                                                                protein_idx)){
       feature_array[18] = get_match_collection_protein_counter(match_collection, 
-                                                                    protein_idx);
+                                                               protein_idx);
     }
     
     //pepSite

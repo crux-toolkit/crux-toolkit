@@ -79,6 +79,20 @@ struct match_iterator{
 };
 
 /**
+ *\struct match_collection_iterator
+ *\brief An object that iterates over the match_collection objects in the specified directory of serialized match_collections
+ */
+struct match_collection_iterator{
+  DIR* working_directory; ///< the working directory for the iterator to find match_collections
+  char* directory_name; ///< the directory name in char
+  DATABASE_T* database; ///< the database to which the match_collection is created
+  int number_collections; ///< the total number of match_collections in the directory to return(target+decoy)
+  int collection_idx;  ///< the current collectioon to return
+  MATCH_COLLECTION_T* match_collection; ///< the match collection to return
+  BOOLEAN_T is_another_collection; ///< is there another match_collection to return?
+};
+
+/**
  * typedef, for descrition look below.
  */
 BOOLEAN_T score_match_collection_sp(
@@ -1837,7 +1851,7 @@ MATCH_ITERATOR_T* new_match_iterator(
   
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[score_type]){
-    carp(CARP_ERROR, "the match collection has not been score for request score type");
+    carp(CARP_ERROR, "the match collection has not been scored for request score type");
     exit(-1);
   }
   
@@ -1952,62 +1966,18 @@ void update_protein_counters(
  *\returns a new match_collection object that is instantiated by the PSm output files
  */
 MATCH_COLLECTION_T* new_match_collection_psm_output(
- char* output_file_directory, ///< the directory path where the PSM output files are located -in
- char* fasta_file ///< The name of the file (in fasta format) from which to retrieve proteins and peptides. -in
- )
-{
-  DIR* working_directory = NULL;
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator, ///< the working match_collection_iterator -in
+  SET_TYPE_T set_type  ///< what set of match collection are we creating? (TARGET, DECOY1~3) -in 
+  )
+{ 
   struct dirent* directory_entry = NULL;
-  FILE* result_file = NULL;
-  MATCH_COLLECTION_T* match_collection = NULL;
-  DATABASE_T* database = NULL;
-  char* use_index = get_string_parameter_pointer("use-index");
-  BOOLEAN_T use_index_boolean = FALSE;
   char* file_in_dir = NULL;
-
-  //open PSM file directory
-  working_directory = opendir(output_file_directory);
-  
-  if(working_directory == NULL){
-    carp(CARP_ERROR, "failed to open PSM result directory: %s", output_file_directory);
-    exit(-1);
-  }
-  
-  //determine use index command
-  if(strcmp(use_index, "F")==0){
-    use_index_boolean = FALSE;
-  }
-  else if(strcmp(use_index, "T")==0){
-    use_index_boolean = TRUE;
-  }
-  else{
-    carp(CARP_ERROR, "incorrect argument %s, using default value", use_index);
-  }
-  
-  //get binary fasta file name with path to crux directory 
-  char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_file);
-  
-  //check if input file exist
-  if(access(binary_fasta, F_OK)){
-    carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty) for crux index.", binary_fasta);
-    free(binary_fasta);
-    exit(1);
-  }
-  
-  //now create a database, using fasta file either binary_file(index) or fastafile
-  database = new_database(binary_fasta, FALSE, use_index_boolean);
-  
-  //check if already parsed
-  if(!get_database_is_parsed(database)){
-    if(!parse_database(database)){
-      carp(CARP_FATAL, "failed to parse database, cannot create new index");
-      free_database(database);
-      exit(-1);
-    }
-  }
+  FILE* result_file = NULL;
+  char suffix[25];
+  DATABASE_T* database = match_collection_iterator->database;
   
   //allocate match_collection object
-  match_collection = allocate_match_collection();
+  MATCH_COLLECTION_T* match_collection = allocate_match_collection();
 
   //set this as a post_process match collection
   match_collection->post_process_collection = TRUE;
@@ -2022,29 +1992,33 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   //Set initial capacity to protein count.
   match_collection->post_hash = new_hash(match_collection->post_protein_counter_size);
   
+  //set the suffix of the serialized files to parse
+  // Also, set the if match_collection type is null_peptide_collection
+  if(set_type == TARGET){
+    sprintf(suffix, "crux_match_target");
+    match_collection->null_peptide_collection = FALSE;
+  }
+  else{
+    sprintf(suffix, "crux_match_decoy_%d", (int)set_type);
+    match_collection->null_peptide_collection = TRUE;
+  }
+  
   //iterate over all PSM result files in directory
-  while((directory_entry = readdir(working_directory))){
+  while((directory_entry = readdir(match_collection_iterator->working_directory))){
     if (strcmp(directory_entry->d_name, ".") == 0 ||
         strcmp(directory_entry->d_name, "..") == 0 ||
-        !suffix_compare(directory_entry->d_name, "crux_match_")
+        !suffix_compare(directory_entry->d_name, suffix)
         ) {
       continue;
     }
-    file_in_dir = get_full_filename(output_file_directory, directory_entry->d_name);
+    file_in_dir = get_full_filename(match_collection_iterator->directory_name, 
+                                    directory_entry->d_name);
     result_file = fopen(file_in_dir, "r");
     //add all the match objects from result_file
     extend_match_collection(match_collection, database, result_file);
     fclose(result_file);
     free(file_in_dir);
   }
-  
-  closedir(working_directory);  
-  
-  //decrement one pointer count for database
-  free_database(database);
-  
-  //free string
-  free(binary_fasta);
   
   return match_collection;
 }
@@ -2391,6 +2365,220 @@ int get_match_collection_hash(
   free(hash_value);
   
   return count;
+}
+
+/******************************
+ * match_collection_iterator
+ ******************************/
+     
+/**
+ * Parses the next match_collection from directory if avaliable
+ *\returns TRUE, if successfully setsup the match_collection_iterator for next iteration
+ */
+void setup_match_collection_iterator(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the match_collection_iterator to set up -in/out
+  )
+{
+  //is there any more match_collections to return?
+  if(match_collection_iterator->collection_idx < match_collection_iterator->number_collections){
+    //ok then go parse the match_collection
+    match_collection_iterator->match_collection = 
+      new_match_collection_psm_output(match_collection_iterator, 
+                                      (SET_TYPE_T)match_collection_iterator->collection_idx);
+
+    //ok we have another match_collection to return
+    match_collection_iterator->is_another_collection = TRUE;
+    
+    //let;s move on to the next one next time
+    ++match_collection_iterator->collection_idx;
+
+    //reset directory
+    rewinddir(match_collection_iterator->working_directory);
+  }
+  else{
+    //ok we done, no more match_collection to return
+    match_collection_iterator->is_another_collection = FALSE;
+  }
+}
+
+/**
+ * Create a match_collection iterator from a directory of serialized files
+ * Only hadles up to one target and three decoy sets per folder
+ *\returns match_collection iterator instantiated from a result folder
+ */
+MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
+  char* output_file_directory, ///< the directory path where the PSM output files are located -in
+  char* fasta_file ///< The name of the file (in fasta format) from which to retrieve proteins and peptides for match_collections. -in
+  )
+{
+  //allocate match_collection
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
+    (MATCH_COLLECTION_ITERATOR_T*)mycalloc(1, sizeof(MATCH_COLLECTION_ITERATOR_T));
+
+  DIR* working_directory = NULL;
+  struct dirent* directory_entry = NULL;
+  DATABASE_T* database = NULL;
+  char* use_index = get_string_parameter_pointer("use-index");
+  BOOLEAN_T use_index_boolean = FALSE;  
+  int total_sets = 0;
+
+  //do we have these files in the 
+  BOOLEAN_T boolean_result = FALSE;
+  BOOLEAN_T decoy_1 = FALSE;
+  BOOLEAN_T decoy_2 = FALSE;
+  BOOLEAN_T decoy_3 = FALSE;
+
+  //open PSM file directory
+  working_directory = opendir(output_file_directory);
+  
+  if(working_directory == NULL){
+    carp(CARP_ERROR, "failed to open PSM result directory: %s", output_file_directory);
+    exit(-1);
+  }
+  
+  //determine use index command
+  if(strcmp(use_index, "F")==0){
+    use_index_boolean = FALSE;
+  }
+  else if(strcmp(use_index, "T")==0){
+    use_index_boolean = TRUE;
+  }
+  else{
+    carp(CARP_ERROR, "incorrect argument %s, using default value", use_index);
+  }
+  
+  //get binary fasta file name with path to crux directory 
+  char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_file);
+  
+  //check if input file exist
+  if(access(binary_fasta, F_OK)){
+    carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty) for crux index.", binary_fasta);
+    free(binary_fasta);
+    exit(1);
+  }
+  
+  //now create a database, using fasta file either binary_file(index) or fastafile
+  database = new_database(binary_fasta, FALSE, use_index_boolean);
+  
+  //check if already parsed
+  if(!get_database_is_parsed(database)){
+    if(!parse_database(database)){
+      carp(CARP_FATAL, "failed to parse database, cannot create new index");
+      free_database(database);
+      exit(-1);
+    }
+  }
+  
+  //determine how many decoy sets we have
+  while((directory_entry = readdir(working_directory))){
+    if(suffix_compare(directory_entry->d_name, "crux_match_target")){
+      boolean_result = TRUE;
+    }
+    else if(suffix_compare(directory_entry->d_name, "crux_match_decoy_1")) {
+      decoy_1 = TRUE;
+    }
+    else if(suffix_compare(directory_entry->d_name, "crux_match_decoy_2")) {
+      decoy_2 = TRUE;
+    }
+    else if(suffix_compare(directory_entry->d_name, "crux_match_decoy_3")) {
+      decoy_3 = TRUE;
+      break;
+    }    
+  }
+  
+  //set total_sets count
+  if(decoy_3){
+    total_sets = 4; //3 decoys + 1 target
+  }
+  else if(decoy_2){
+    total_sets = 3; //2 decoys + 1 target
+  }
+  else if(decoy_1){
+    total_sets = 2; //1 decoys + 1 target
+  }
+  else{
+    carp(CARP_ERROR, "No decoy sets exist in directory: %s", output_file_directory);
+  }
+
+  free(binary_fasta);
+
+  //reset directory
+  rewinddir(working_directory);
+  
+  //set match_collection_iterator fields
+  match_collection_iterator->working_directory = working_directory;
+  match_collection_iterator->database = database;  
+  match_collection_iterator->number_collections = total_sets;
+  match_collection_iterator->directory_name = my_copy_string(output_file_directory);
+  match_collection_iterator->is_another_collection = FALSE;
+
+  //setup the match collection iterator for iteration
+  //here it will go parse files to construct match collections
+  setup_match_collection_iterator(match_collection_iterator);
+
+  return match_collection_iterator;
+}
+
+/**
+ *\returns TRUE, if there's another match_collection to return, else return FALSE
+ */
+BOOLEAN_T match_collection_iterator_has_next(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
+  )
+{
+  //Do we have another match_collection to return
+  return match_collection_iterator->is_another_collection;
+}
+
+/**
+ * free match_collection_iterator
+ */
+void free_match_collection_iterator(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
+  )
+{
+  // free unclaimed match_collection
+  if(match_collection_iterator->match_collection != NULL){
+    free_match_collection(match_collection_iterator->match_collection);
+  }
+  
+  //free up all match_collection_iterator 
+  free(match_collection_iterator->directory_name);
+  free_database(match_collection_iterator->database);
+  closedir(match_collection_iterator->working_directory); 
+  free(match_collection_iterator);
+}
+
+/**
+ * returns the next match collection object and sets up fro the next iteration
+ *\returns the next match collection object
+ */
+MATCH_COLLECTION_T* match_collection_iterator_next(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
+  )
+{
+  MATCH_COLLECTION_T* match_collection = NULL;
+  
+  if(match_collection_iterator->is_another_collection){
+    match_collection = match_collection_iterator->match_collection;
+    match_collection_iterator->match_collection = NULL;
+    setup_match_collection_iterator(match_collection_iterator);
+    return match_collection;
+  }
+  else{
+    carp(CARP_ERROR, "No match_collection to return");
+    return NULL;
+  }
+}
+
+/**
+ *\returns the total number of match_collections to return
+ */
+int get_match_collection_iterator_number_collections(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
+  )
+{
+  return match_collection_iterator->number_collections;
 }
 
 /*
