@@ -69,6 +69,7 @@ def plot_histogram_data(data_array, score_type="none"):
     
     #axis('scaled')
 
+    #FIXME Still need a way how to plot all data neatly
     #plot data as histogram
     hist(data_array, normed=False, bins=5)
     
