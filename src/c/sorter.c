@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file sorter.c
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -37,10 +37,9 @@ struct sorted_peptide_iterator {
   /***for sorting with array***/
   //use array for bin sorting
   PEPTIDE_T** peptide_array; ///< an array of peptides
-  //number of peptides in peptide_array
-  unsigned int peptide_count;
-  //the next peptide idx to return
-  unsigned int current_idx;
+  
+  unsigned int peptide_count; ///< number of peptides in peptide_array  
+  unsigned int current_idx; ///< the next peptide idx to return
 };
 
 /**

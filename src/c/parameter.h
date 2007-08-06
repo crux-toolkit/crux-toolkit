@@ -1,15 +1,15 @@
 /**
  * \file parameter.h
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  *****************************************************************************/
 #ifndef PARAMETER_FILE_H
 #define PARAMETER_FILE_H
 #include "utils.h"
 
-#define PARAMETER_LENGTH 1024
-#define NUM_PARAMS 512
-#define MAX_LINE_LENGTH 4096
+#define PARAMETER_LENGTH 1024 ///< max length of parameter name and value in characters
+#define NUM_PARAMS 512 ///< max number of parameters allowed
+#define MAX_LINE_LENGTH 4096 ///< maximum length of a line on the parameter file
 
 
 /**

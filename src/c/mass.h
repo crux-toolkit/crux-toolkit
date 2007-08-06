@@ -3,7 +3,7 @@
 
 /**
  * \file mass.h 
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -12,8 +12,8 @@
 /**
  * Mass of ammonia
  */
-#define MASS_NH3_MONO  17.02655
-#define MASS_NH3_AVERAGE 17.03056
+#define MASS_NH3_MONO  17.02655 ///< Mass of NH3 (monoisotopic)
+#define MASS_NH3_AVERAGE 17.03056 ///< Mass of NH3 (average)
 
 
 //mass of water
@@ -23,22 +23,22 @@
 /**
  * Mass of hydrogen
  */
-#define MASS_H_MONO 1.0078246
-#define MASS_H_AVERAGE 1.00794
+#define MASS_H_MONO 1.0078246 ///< Mass of hydrogen (monoisotopic)
+#define MASS_H_AVERAGE 1.00794 ///< Mass of hydrogen (average)
 
 //FIXME, change in spectrum, peptide to be able to pick mono, average
-#define MASS_H 1.0078246
+#define MASS_H 1.0078246 ///< mass of hydrogen
 
 /**
  * Mass of oxygen
  */
-#define MASS_O 16.0013
+#define MASS_O 16.0013 ///< mass of oxygen
 
 /**
  * Mass of carbon monoxide
  */
-#define MASS_CO_MONO 27.9949
-#define MASS_CO_AVERAGE 28.0101
+#define MASS_CO_MONO 27.9949 ///< Mass of  (monoisotopic)
+#define MASS_CO_AVERAGE 28.0101 ///< Mass of  (average)
 
 /**
  * \returns The mass of the given amino acid.

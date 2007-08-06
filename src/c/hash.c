@@ -1,7 +1,7 @@
 /*****************************************************************************
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -31,10 +31,10 @@ static const float load_factor = 0.65;
  * \brief record for each value/key pair
  */
 struct record {
-  unsigned int hash;
-  char* key;
-  void* value;
-  int count;
+  unsigned int hash; ///< hash algorithm code
+  char* key; ///< the key for the record
+  void* value; ///< value the record contains
+  int count; ///< count for duplicate adds(if adding two of the same key count 1 is added)
 };
 
 /**
@@ -42,9 +42,9 @@ struct record {
  * \brief hash table, contains the records
  */
 struct hash {
-  RECORD_T* records;
-  unsigned int records_count;
-  unsigned int size_index;
+  RECORD_T* records; ///< record holds key & values
+  unsigned int records_count; ///< number of records
+  unsigned int size_index; ///< index into the size array, thus can get the size of the hash table
 };
 
 /**
