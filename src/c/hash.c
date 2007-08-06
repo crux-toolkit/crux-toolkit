@@ -1,7 +1,7 @@
 /*****************************************************************************
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -48,8 +48,7 @@ struct hash {
 };
 
 /**
- * add key and value to hash table.
- *\returns TRUE if successfully adds to new record, else FALSE
+ * Function definition, description found below
  */
 BOOLEAN_T add_hash_when_grow(
   HASH_T* h, ///< Hash object to add -in/out

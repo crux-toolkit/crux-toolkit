@@ -93,7 +93,7 @@ struct match_collection_iterator{
 };
 
 /**
- * typedef, for descrition look below.
+ * typedef, for description look below.
  */
 BOOLEAN_T score_match_collection_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
@@ -109,98 +109,48 @@ BOOLEAN_T score_match_collection_xcorr(
   );
 
 /**
- * The match collection must be scored under SP first
- * \returns TRUE, if successfully scores matches for LOGP_EXP_SP
+ * Function definition, description found below
  */
 BOOLEAN_T score_match_collection_logp_exp_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked sp scored peptides to score for logp_exp_sp -in
   );
 
-/**
- * The match collection must be scored under SP first
- * \returns TRUE, if successfully scores matches for LOGP_BONF_EXP_SP
- */
 BOOLEAN_T score_match_collection_logp_bonf_exp_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked sp scored peptides to score for logp_bonf_exp_sp -in
   );
 
-/**
- * The match collection must be scored under SP first
- * \returns TRUE, if successfully scores matches for LOGP_WEIBULL_SP
- */
 BOOLEAN_T score_match_collection_logp_weibull_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked sp scored peptides to score for logp_weibull_sp -in
   );
 
-/**
- * The match collection must be scored under SP first
- * \returns TRUE, if successfully scores matches for LOGP_WEIBULL_EXP_SP
- */
 BOOLEAN_T score_match_collection_logp_bonf_weibull_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked sp scored peptides to score for logp_bonf_weibull_sp -in
   );
 
-/**
- * The match collection must be scored under XCORR first
- * \returns TRUE, if successfully scores matches for LOGP_WEIBULL_XCORR
- */
 BOOLEAN_T score_match_collection_logp_weibull_xcorr(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked Xcorr scored peptides to score for logp_weibull_sp -in
   );
 
-/**
- * The match collection must be scored under XCORR first
- * \returns TRUE, if successfully scores matches for LOGP_WEIBULL_EXP_XCORR
- */
 BOOLEAN_T score_match_collection_logp_bonf_weibull_xcorr(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked xcorr scored peptides to score for logp_bonf_weibull_sp -in
   );
 
-
-/**
- * The match collection must be scored under Xcorr first
- * \returns TRUE, if successfully scores matches for LOGP_EVD_XCORR
- */
 BOOLEAN_T score_match_collection_logp_evd_xcorr(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked xcorr scored peptides to score for logp_evd_xcorr -in
   );
 
-/**
- * The match collection must be scored under Xcorr first
- * \returns TRUE, if successfully scores matches for LOGP_BONF_EVD_XCORR
- */
 BOOLEAN_T score_match_collection_logp_bonf_evd_xcorr(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked xcorr scored peptides to score for logp_bonf_evd_xcorr -in
   );
 
-
-/**
- * Randomly samples max_count peptides from the peptide distribution and try to esitimate the Xcorr distribution of the the entire peptide distribution 
- * from the sampled peptide distribution. Populates the two EVD parameters mu, lambda in the match_collection.
- *
- * This function finds the location parameter, mu, and scale parameter, 1/L, 
- * that maximize the log likelihood of the data given an extreme value 
- * distribution.  It finds the parameters by using Newton-Raphson to find 
- * the zero of the constraint function.  The zero of the constraint function 
- * corresponds to the scale parameter giving the maximum log likelihood for the 
- * data.
- *
- * The parameter values contains the list of the data values.
- * The parameter starting_L contains a staring guess for L.
- * The parameter contains the tolerence for determining convergence.
- *
- * Returns the values of mu and L that maximize the log likelihood.
- * Throws an exception if Newton-Raphson fails to converge.
- *\returns TRUE, if successfully calculates the EVD parameters for the xcorr peptide distribution., else FALSE.
- */
 BOOLEAN_T estimate_evd_parameters(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   int sample_count, ///< the number of peptides to sample from the match_collection -in
@@ -209,20 +159,11 @@ BOOLEAN_T estimate_evd_parameters(
   int charge       ///< the charge of the spectrum -in
   );
 
-/**
- * For the #top_count SP ranked peptides, calculate the mean for which the
- * #top_ranked peptide score is set to 0, thus scaling the SP scores.
- *\returns TRUE, if successfully calculates the EXP_SP parameters
- */
 BOOLEAN_T estimate_exp_sp_parameters(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   int top_count ///< the number of top SP peptides to use for the match_collection -in
   );
 
-/**
- * For the #top_count SP ranked peptides, 
- *\returns TRUE, if successfully calculates the Weibull Sp parameters
- */
 BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -out
   SCORER_TYPE_T score_type,
@@ -231,15 +172,14 @@ BOOLEAN_T estimate_weibull_parameters(
   int charge
   );
 
-/**
- * keeps the top max_rank number of matches and frees the rest
- * sorts by score_type(SP, XCORR, ...)
- */
 void truncate_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to truncate -out
   int max_rank,     ///< max number of top rank matches to keep from SP -in
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
   );
+
+/********* end of function definition *******************/
+
 
 /**
  * \returns An (empty) match_collection object.
