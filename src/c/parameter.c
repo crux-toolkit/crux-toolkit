@@ -1,4 +1,4 @@
-/******************************************************************************
+******************************************************************************
  * FILE: parameter.c
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * CREATE DATE: 2006 Oct 09
@@ -49,7 +49,6 @@ BOOLEAN_T parameter_parsed = FALSE; //have I parsed the parameter file?
 BOOLEAN_T parameter_plasticity = TRUE; //can the parameters be changed?
 
 /**
- *
  * parse the parameter file given the filename
  */
 void parse_parameter_file(
