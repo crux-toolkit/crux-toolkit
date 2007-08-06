@@ -1,7 +1,7 @@
 /*****************************************************************************
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -47,9 +47,8 @@ struct hash {
   unsigned int size_index; ///< index into the size array, thus can get the size of the hash table
 };
 
-/**
- * Function definition, description found below
- */
+
+// Function definition, description found below 
 BOOLEAN_T add_hash_when_grow(
   HASH_T* h, ///< Hash object to add -in/out
   char *key, ///< key of the record to add -in
