@@ -48,9 +48,8 @@ BOOLEAN_T parameter_initialized = FALSE; //have the parameters been initialized?
 BOOLEAN_T parameter_parsed = FALSE; //have I parsed the parameter file?
 BOOLEAN_T parameter_plasticity = TRUE; //can the parameters be changed?
 
-/**
- * parse the parameter file given the filename
- */
+
+// parse the parameter file given the filename
 void parse_parameter_file(
   char* parameter_filename ///< the parameter file to be parsed -in
   );

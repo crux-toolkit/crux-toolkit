@@ -92,9 +92,7 @@ struct match_collection_iterator{
   BOOLEAN_T is_another_collection; ///< is there another match_collection to return?
 };
 
-/**
- * typedef, for description look below.
- */
+// typedef, for description look below.
 BOOLEAN_T score_match_collection_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
@@ -108,9 +106,8 @@ BOOLEAN_T score_match_collection_xcorr(
   int charge       ///< the charge of the spectrum -in
   );
 
-/**
- * Function definition, description found below
- */
+// Function definition, description found below
+
 BOOLEAN_T score_match_collection_logp_exp_sp(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
   int peptide_to_score ///< the number of top ranked sp scored peptides to score for logp_exp_sp -in
@@ -176,6 +173,23 @@ void truncate_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to truncate -out
   int max_rank,     ///< max number of top rank matches to keep from SP -in
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
+  );
+
+BOOLEAN_T extend_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
+  DATABASE_T* database, ///< the database to which the peptides are created -in
+  FILE* result_file   ///< the result file to parse PSMs -in
+  );
+
+
+BOOLEAN_T add_match_to_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
+  MATCH_T* match ///< the match to add -in
+  );
+
+void update_protein_counters(
+  MATCH_COLLECTION_T* match_collection, ///< working match collection -in
+  PEPTIDE_T* peptide  ///< peptide information to update counters -in
   );
 
 /********* end of function definition *******************/
@@ -1871,35 +1885,6 @@ void free_match_iterator(
 /*******************************************
  * match_collection post_process extension
  ******************************************/
-
-/**
- * parse all the match objects and add to match collection
- *\returns TRUE, if successfully parse all PSMs in result_file, else FALSE
- */
-BOOLEAN_T extend_match_collection(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
-  DATABASE_T* database, ///< the database to which the peptides are created -in
-  FILE* result_file   ///< the result file to parse PSMs -in
-  );
-
-/**
- * Adds the match object to match_collection
- * Must not exceed the _MAX_NUMBER_PEPTIDES to be match added
- *\returns TRUE if successfully adds the match to the match_collection, else FALSE
- */
-BOOLEAN_T add_match_to_match_collection(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
-  MATCH_T* match ///< the match to add -in
-  );
-
-/**
- * updates the protein_counter and protein_peptide_counter for 
- * run specific features
- */
-void update_protein_counters(
-  MATCH_COLLECTION_T* match_collection, ///< working match collection -in
-  PEPTIDE_T* peptide  ///< peptide information to update counters -in
-  );
 
 /**
  * create a new match collection from the serialized PSM output files
