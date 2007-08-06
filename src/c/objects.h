@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -285,7 +285,7 @@ typedef struct ion_iterator ION_ITERATOR_T;
 typedef struct ion_filtered_iterator ION_FILTERED_ITERATOR_T;
 
 /**
- *\typedef LOSS_LIMIT
+ *\typedef LOSS_LIMIT_T
  *\brief An object that specifies the max amount of neutral loss possible at a given cleavage index
  * all numbers are for forward ions(A,B,C) subtract from total to get reverse limit
  */
@@ -302,9 +302,7 @@ typedef struct scorer SCORER_T;
  */
 enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE};
 
-
-//the number of different score types
-#define _SCORE_TYPE_NUM 13
+#define _SCORE_TYPE_NUM 13 ///< the number of different score types
 
 /**
  * \typedef SCORER_TYPE_T
@@ -365,14 +363,14 @@ enum _algorithm {PERCOLATOR, CZAR, ALL};
 typedef enum _algorithm ALGORITHM_TYPE_T;
 
 /**
- * \struct record
- * \brief record for each value/key pair
+ * \typedef RECORD_T
+ * \brief RECORD_T for each value/key pair
  */
 typedef struct record RECORD_T;
 
 /**
- * \struct hash
- * \brief hash table, contains the records
+ * \typedef HASH_T
+ * \brief HASH_T hash table, contains the records
  */
 typedef struct hash HASH_T;
 

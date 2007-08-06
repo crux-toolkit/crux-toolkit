@@ -67,14 +67,13 @@ struct match{
   BOOLEAN_T null_peptide; ///< Is the match a null peptide match?
   char* peptide_sequence; ///< cached peptide sequence, if not called before set as NULL
   PEPTIDE_TYPE_T overall_type; ///< the overall peptide trypticity, this is set in set_match_peptide routine, go to README top
-  
+  int charge; ///< the charge state of the match collection created
   //post_process match object features
   //only valid when post_process_match is TRUE
   BOOLEAN_T post_process_match; ///< Is this a post process match object?
-  int charge;
   float delta_cn; ///< the difference in top and second Xcorr scores
-  float ln_delta_cn;
-  float ln_experiment_size;
+  float ln_delta_cn; ///< the natural log of delta_cn
+  float ln_experiment_size; ///< the natural log of total number of candidate peptides evaluated
 };
 
 /**

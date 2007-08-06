@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -17,7 +17,7 @@
 #include "mass.h"
 #include "objects.h"
 
-#define MAX_MODIFICATIONS 4
+#define MAX_MODIFICATIONS 4 ///< maximum modifications allowed per ion
 
 /**
  * \returns An (empty) ion object.
