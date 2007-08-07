@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.8  2007/08/07 18:05:13  cpark
+#fixed some more bugs
+#
 #Revision 1.7  2006/12/19 01:12:06  cpark
 #before change peptide freeing method
 #
@@ -111,6 +114,9 @@ while ($line = <ARGV>) {
   # are we testing create_index?
   if($is_index eq " index"){
       $result = &test_cmd_index($cmd, $standard_filename, $output_filename);
+  }
+  elsif($is_index eq " analysis"){
+      $result = &test_cmd_analysis($cmd, $standard_filename, $output_filename);
   }
   else{
       $result = &test_cmd($cmd, $standard_filename, $output_filename);
@@ -238,5 +244,43 @@ sub test_cmd_index() {
         die("Testing failed.");
     }
     system("rm -rf test_crux_index");
+    return $result;
+}
+
+sub test_cmd_analysis() {    
+    my ($cmd, $standard_filename, $output_filename) = @_;
+    my ($diff_fh, $diff_filename) = tempfile();
+    if (!$diff_filename) {
+        die("unable to create diff file.\n");
+    }
+    my $index_result = system($cmd);
+    if ($index_result == 0) {
+       # The command was successful, now vet the output.
+        
+        #now try analysis
+        my $analysis_cmd = "../../../bin/match_analysis --match-output-folder match_result --parameter-file smoke_params standard2.fasta > $output_filename";
+        system($analysis_cmd);
+        
+        #compare if the peptides parsed match
+        my $diff_cmd = "diff -I ITFSLEDVLL $standard_filename $output_filename > $diff_filename";
+        $result = system($diff_cmd);
+        if ($result == 0) {
+            # The output of the command matches the expected output.
+        } else {
+            # The output of the command doesn't match the expected output.
+            # Print the diff ouput.
+            open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
+            my $diff_line;
+            while ($diff_line = <DIFF>) {
+                print $diff_line;
+            }
+            close DIFF;
+            unlink $diff_filename;
+        }
+    } else {
+        # The command was not succesful
+        die("Testing failed.");
+    }
+    system("rm -rf match_result");
     return $result;
 }

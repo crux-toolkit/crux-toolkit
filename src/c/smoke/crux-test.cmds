@@ -7,3 +7,4 @@ generate_peptides_use_index = standard_generate_peptides_use_index.out = ../../.
 create_index = standard_generate_peptides_use_index.out = ../../../bin/create_index --mass-range 500 test.fasta = index
 search_spectrum = standard_search_spectrum.out =  ../../../bin/search_spectrum --parameter-file smoke_params --verbosity 100 test.ms2 6 standard2.fasta = file
 search_spectra = standard_search_spectra.out = ../../../bin/search_spectra --number-runs 7  --parameter-file smoke_params --verbosity 100 test.ms2 standard2.fasta = file
+match_search_analysis = standard_match_search_analysis.out = ../../../bin/match_search --match-output-folder match_result --number-runs 6 --parameter-file smoke_params test.ms2 standard2.fasta = analysis
