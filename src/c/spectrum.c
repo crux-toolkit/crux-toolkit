@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.38 $
+ * REVISION: $Revision: 1.39 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1147,7 +1147,7 @@ PEAK_ITERATOR_T* new_peak_iterator(
   //now we have peak information
   if(!spectrum->has_peaks){
     carp(CARP_ERROR, "Spectrum does not contain peak information");
-    exit(-1);
+    exit(1);
   }
 
   PEAK_ITERATOR_T* peak_iterator = (PEAK_ITERATOR_T*)mycalloc(1,sizeof(PEAK_ITERATOR_T));

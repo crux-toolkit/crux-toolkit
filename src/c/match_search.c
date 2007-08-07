@@ -312,7 +312,7 @@ int main(int argc, char** argv){
       carp(CARP_ERROR, "failed with output mode");
       free(sqt_output_file);
       free(psm_result_filenames);
-      exit(-1);
+      exit(1);
     }
         
     //serialize the header information for all files(target & decoy)

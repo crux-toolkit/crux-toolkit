@@ -424,7 +424,7 @@ MATCH_T* parse_match(
   //parse score, ranks of the match    
   if((peptide = parse_peptide(result_file, database, TRUE))== NULL){
     carp(CARP_ERROR, "failed to parse peptide");
-    exit(-1);
+    exit(1);
   }
   
   //parse each score and rank of match

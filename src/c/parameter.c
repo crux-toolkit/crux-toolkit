@@ -231,7 +231,7 @@ void parse_update_parameters(
   //update the parameters if any comman line arguments exist
   if(!update_parameter()){
     fprintf(stderr, "failed to combine command line arguemnts and parameter file\n");
-    exit(-1);
+    exit(1);
   }
 }
 
@@ -250,7 +250,7 @@ void parse_parameter_file(
   //check if parameters cah be changed
   if(!parameter_plasticity){
     carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    exit(-1);
+    exit(1);
   }
 
   //check if parameter file exist, if not exit use default parameters
@@ -265,7 +265,7 @@ void parse_parameter_file(
   f = fopen(parameter_filename, "r");
   if(f == NULL){
     printf("couldn't open file: %s\n", parameter_filename);
-    exit(-1);
+    exit(1);
   }
 
   while(fgets(line, MAX_LINE_LENGTH, f)==line){
@@ -289,13 +289,13 @@ void parse_parameter_file(
 	printf("name=value\n");
 	printf("in file %s, the line:\n%s\ndoes not have this format\n",
 	       parameter_filename, line);
-	exit(-1);
+	exit(1);
       }
       line[idx] = '\0';
       
       // copy the name/value pairs to the right parameter
       if(!copy_parameter(line, &(line[idx+1]))){
-        exit(-1);
+        exit(1);
       }
     }
   }
