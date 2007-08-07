@@ -292,7 +292,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
   //get parameters from parameter.c
   double min_mass = get_double_parameter("min-mass", 200);
-  double max_mass = get_double_parameter("max-mass", 2400);
+  double max_mass = get_double_parameter("max-mass", 7200);
 
   return new_generate_peptides_iterator_general(min_mass, max_mass);
 }

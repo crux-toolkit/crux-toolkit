@@ -920,6 +920,9 @@ BOOLEAN_T score_match_collection_sp(
         
     //set score in match
     set_match_score(match, SP, score);
+
+    //set b_y_ion_match field
+    set_match_b_y_ion_match(match, get_scorer_sp_b_y_ion_match(scorer));
     
     //check if enough space for peptide match
     if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
@@ -1412,7 +1415,8 @@ BOOLEAN_T score_match_collection_xcorr(
       get_match_score(match_collection->match[1], XCORR);
   }
   else{
-    match_collection->delta_cn = 0;
+    //set to very small number
+    match_collection->delta_cn = 0.000001;
   }
   
   //yes, we have now scored for the match-mode: XCORR
@@ -1982,6 +1986,8 @@ BOOLEAN_T extend_match_collection(
   //read in file specific info
   
   //get number of spectra serialized in the file
+  //FIXME
+  //If want to be selctive of the nu
   if(fread(&total_spectra, (sizeof(int)), 1, result_file) != 1){
     carp(CARP_ERROR, "serialized file corrupted, incorrect number of spectra");  
     return FALSE;
@@ -2065,7 +2071,7 @@ BOOLEAN_T extend_match_collection(
     //now iterate over all 
     for(match_idx = 0; match_idx < num_top_match; ++match_idx){
       //break if there are no match objects serialized
-      if(match_total_of_serialized_collection < match_idx){
+      if(match_total_of_serialized_collection <= 0){
         break;
       }
       

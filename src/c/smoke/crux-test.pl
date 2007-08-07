@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.7  2006/12/19 01:12:06  cpark
+#before change peptide freeing method
+#
 #Revision 1.6  2006/11/14 01:14:48  cpark
 #hu..finished the parameter file system
 #
@@ -173,7 +176,7 @@ sub test_cmd() {
   my $result = system($cmd);
   if ($result == 0) {
     # The command was successful, now vet the output.
-    my $diff_cmd = "diff $standard_filename $output_filename > $diff_filename";
+    my $diff_cmd = "diff  -I '# PROTEIN DATABASE' $standard_filename $output_filename > $diff_filename";
     $result = system($diff_cmd);
     if ($result == 0) {
       # The output of the command matches the expected output.
@@ -206,10 +209,16 @@ sub test_cmd_index() {
     if (!$diff_filename) {
         die("unable to create diff file.\n");
     }
-     my $index_result = system($cmd);
+    my $index_result = system($cmd);
     if ($index_result == 0) {
        # The command was successful, now vet the output.
-        my $diff_cmd = "diff -r -x CVS -I time $standard_filename test_crux_index > $diff_filename";
+        
+        #now try parsing the peptides
+        my $parse_cmd = "../../../bin/generate_peptides --output-sequence --use-index T test.fasta > $output_filename";
+        system($parse_cmd);
+           
+        #compare if the peptides parsed match
+        my $diff_cmd = "diff -I '# PROTEIN DATABASE' $standard_filename $output_filename > $diff_filename";
         $result = system($diff_cmd);
         if ($result == 0) {
             # The output of the command matches the expected output.

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.53 $
+ * $Revision: 1.54 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -339,8 +339,11 @@ void print_filtered_peptide_in_format(
   //iterate over all peptide src
   while(next_src != NULL){
     if(peptide_type == ANY_TRYPTIC ||
-       peptide_type == get_peptide_src_peptide_type(next_src)){
-
+       peptide_type == get_peptide_src_peptide_type(next_src) ||
+       (peptide_type == PARTIALLY_TRYPTIC && 
+        (get_peptide_src_peptide_type(next_src) == N_TRYPTIC ||
+         get_peptide_src_peptide_type(next_src) == C_TRYPTIC)) ){
+      
       //if(!light){
       parent = get_peptide_src_parent_protein(next_src);
         
@@ -413,40 +416,6 @@ void copy_peptide(
   add_database_pointer_count(get_peptide_first_src_database(src));
 }
 
-//FIXME needs to be rewritten for the new output format -Chris
-/**
- * Parses a peptide from file.
- * \returns TRUE if success. FALSE if failure.
- */
-/*
-BOOLEAN_T parse_peptide_file(
-  PEPTIDE_T* peptide,
-  FILE* file
-  )
-{
-
-  char* new_line = NULL;
-  int line_length;
-  size_t buf_length = 0;
-  char* sequence;
-  float peptide_mass;
-  int peptide_length;
-
-  line_length =  getline(&new_line, &buf_length, file);
-  if( (sscanf(new_line,"%f\t%d\t%s\n", // parse peptide line
-              &peptide_mass, &peptide_length, sequence) != 3) && 
-      (!isalpha((int)sequence[0]))){
-    free(new_line);
-    return FALSE;
-  }
-  set_peptide_sequence(sequence);  
-  set_peptide_peptide_mass(peptide_mass);
-  set_peptide_length(peptide_length);
-  free(new_line);
-  
-  return TRUE;
-}
-*/
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
