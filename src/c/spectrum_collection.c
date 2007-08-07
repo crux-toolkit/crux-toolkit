@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.20 $
+ * REVISION: $Revision: 1.21 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -732,13 +732,17 @@ FILE** get_spectrum_collection_psm_result_filename(
 }
 
 /**
- * <int: number spectra>
+ * <int: number spectra> <--this will be over written by serialize_total_number_of_spectra method
  * <int: number of spectrum features>
  * <int: number of top ranked peptides serialized per spectra>
  * <int: ms2 file length><char*: ms2 filename>
  * <int: fasta file length><char*: fasta filename>
  *
  * Serializes the header information for the binary PSM serialized files
+ * Must run in pair with serialize_total_number_of_spectra.
+ *
+ * General order is, 
+ * serialize_header -> serialize_psm_features -> serialize_total_number_of_spectra
  *\returns TRUE if serialized header successfully, else FALSE
  */
 BOOLEAN_T serialize_header(
@@ -757,6 +761,8 @@ BOOLEAN_T serialize_header(
   
   //FIXME later if you want to be selective on charge to run
   // must refine the current serialize methods
+  
+  //num_charged_spectra will be over written by serialize_total_number_of_spectra method
   fwrite(&(spectrum_collection->num_charged_spectra), sizeof(int), 1, psm_file);
   fwrite(&(num_spectrum_features), sizeof(int), 1, psm_file);
   fwrite(&(number_top_rank_peptide), sizeof(int), 1, psm_file);
@@ -804,6 +810,30 @@ BOOLEAN_T serialize_header(
   return TRUE;
 }
 
+/**
+ * Modifies the serialized header information for the binary PSM serialized files
+ * Sets the total number of spectra seerialized in the file
+ * Assumes the first field in the file is the number total spectra serialized
+ * Must be run after serialize_header
+ *
+ * General order is, 
+ * serialize_header -> serialize_psm_features -> serialize_total_number_of_spectra
+ *
+ *\returns TRUE if total number of spectra seerialized in the file, else FALSE
+ */
+BOOLEAN_T serialize_total_number_of_spectra(
+  int spectra_idx, ///< the number of spectra serialized in PSM file -in 
+  FILE* psm_file ///< the file to serialize the header information -out
+  )
+{
+  //set to begining of file
+  rewind(psm_file);
+
+  //serialize the total number of spectra seerialized in the file
+  fwrite(&(spectra_idx), sizeof(int), 1, psm_file);
+
+  return TRUE;
+}
 /******************************************************************************/
 
 /**

@@ -52,6 +52,13 @@ max-mz=4000
 #In search_spectrum, charge state of the spectrum scoring (search_spectra uses the charge state from the MS2 file)
 charge=2
 
+#The spectrum charges to search in match_search & search_spectra. 1|2|3|all
+spectrum-change=all
+
+#The number of spectrum search runs to perform in match_search & search_spectra.
+#INFINITY will run all spectra with all possible charges states in the ms2 file.
+number-runs=INFINITY
+
 #mass window of peptides to select for scoring
 mass-window=3.0
 

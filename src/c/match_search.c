@@ -58,7 +58,9 @@ int main(int argc, char** argv){
   double spectrum_min_mass = 0;
   double spectrum_max_mass = INFINITY;
   int number_decoy_set = 2;
-    
+  char* spectrum_charge = "all";
+  double number_runs = INFINITY;
+
   //required
   char* ms2_file = NULL;
   char* fasta_file = NULL;
@@ -127,7 +129,19 @@ int main(int argc, char** argv){
     "Specify the number of decoy sets to generate for match_analysis.",
     (void *) &number_decoy_set, 
     INT_ARG);
-  
+
+  parse_arguments_set_opt(
+    "spectrum-charge", 
+    "The spectrum charges to search. 1|2|3|all",
+    (void *) &spectrum_charge, 
+    STRING_ARG);
+
+  parse_arguments_set_opt(
+    "number-runs", 
+    "The number of spectrum search runs to perform.",
+    (void *) &number_runs, 
+    DOUBLE_ARG);
+
   /* Define required command line arguments */
   parse_arguments_set_req(
     "ms2", 
@@ -160,6 +174,8 @@ int main(int argc, char** argv){
     int top_match = 1;
     MATCH_SEARCH_OUPUT_MODE_T output_type = BINARY_OUTPUT;
     float mass_offset = 0;
+    BOOLEAN_T run_all_charges = TRUE;
+    int spectrum_charge_to_run = 0;
     
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
@@ -188,6 +204,29 @@ int main(int argc, char** argv){
     parameters_confirmed();
     
     /***** Now, must get all parameters through get_*_parameter ****/
+    
+    //how many runs of search to perform
+    number_runs = get_double_parameter("number-runs", INFINITY);
+
+    //what charge state of spectra to search
+    if(strcmp(get_string_parameter_pointer("spectrum-change"), "all")== 0){
+      run_all_charges = TRUE;      
+    }
+    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "1")== 0){
+      run_all_charges = FALSE;
+      spectrum_charge_to_run = 1;
+    }
+    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "2")== 0){
+      run_all_charges = FALSE;
+      spectrum_charge_to_run = 2;
+    }
+    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "3")== 0){
+      run_all_charges = FALSE;
+      spectrum_charge_to_run = 3;
+    }
+    else{
+      wrong_command(spectrum_charge, "The spectrum charges to search. 1|2|3|all");
+    }
     
     //number_decoy_set
     number_decoy_set = get_int_parameter("number-decoy-set", 2);
@@ -314,7 +353,12 @@ int main(int argc, char** argv){
       free(psm_result_filenames);
       exit(1);
     }
-        
+
+    /**
+     * General order of serialization is, 
+     * serialize_header -> serialize_psm_features -> serialize_total_number_of_spectra
+     */
+    
     //serialize the header information for all files(target & decoy)
     for(; file_idx < total_files; ++file_idx){
       serialize_header(collection, fasta_file, psm_result_file[file_idx]);
@@ -323,6 +367,12 @@ int main(int argc, char** argv){
     int spectra_idx = 0;
     //iterate over all spectrum in ms2 file and score
     while(spectrum_iterator_has_next(spectrum_iterator)){
+      
+      //check if total runs exceed limit user defined
+      if(number_runs <= spectra_idx){
+        break;
+      }
+      
       //get next spectrum
       spectrum = spectrum_iterator_next(spectrum_iterator);
 
@@ -339,9 +389,15 @@ int main(int argc, char** argv){
       
       //iterate over all possible charge states for each spectrum
       for(charge_index = 0; charge_index < possible_charge; ++charge_index){
+
+        //skip spectra that are not in the charge state to be run
+        if(!run_all_charges && 
+           spectrum_charge_to_run != possible_charge_array[charge_index]){
+          continue;
+        }
+        
         ++spectra_idx;
         
-
         //iterate over first for target next and for all decoy sets
         for(file_idx = 0; file_idx < total_files; ++file_idx){
           //is it target ?
@@ -379,6 +435,12 @@ int main(int argc, char** argv){
       }
     }
 
+    //Modify the header serialized information for all files(target & decoy)
+    //Set the total number of spectra serialized in the PSM result files
+    for(file_idx=0; file_idx < total_files; ++file_idx){
+      serialize_total_number_of_spectra(spectra_idx, psm_result_file[file_idx]);
+    }
+    
     //DEBUG
     carp(CARP_DEBUG, "total spectra runs: %d", spectra_idx);
 
