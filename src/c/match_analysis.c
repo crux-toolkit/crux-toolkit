@@ -124,7 +124,10 @@ int main(int argc, char** argv){
     else{
       wrong_command(psm_algorithm, "The analysis algorithm to use. percolator|retention-czar|all");
     }
-
+    
+    //always use index for match_analysis!
+    set_string_parameter("use-index", "T");
+    
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
     

@@ -244,7 +244,7 @@ int main(int argc, char** argv){
     
     //set other parameters to final
     min_mass = get_double_parameter("min-mass", 200);
-    max_mass = get_double_parameter("max-mass", 2400);
+    max_mass = get_double_parameter("max-mass", 7200);
     min_length = get_int_parameter("min-length", 6);
     max_length = get_int_parameter("max-length", 50);
     missed_cleavages = get_boolean_parameter("missed-cleavages", FALSE);

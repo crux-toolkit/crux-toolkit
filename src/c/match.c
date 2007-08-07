@@ -389,6 +389,15 @@ double* get_match_percolator_features(
     }
   }
   
+  //now check that no value is with in infinity
+  int check_idx = 0;
+  for(; check_idx < 20; ++check_idx){
+    if(feature_array[check_idx] <= -INFINITY ||
+       feature_array[check_idx] >= INFINITY){
+      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f", check_idx, feature_array[check_idx]);
+    }
+  }
+    
   free_peptide_src_iterator(src_iterator);
   
   return feature_array;
@@ -739,6 +748,29 @@ float get_match_ln_experiment_size(
 {
   return match->ln_experiment_size;
 }
+
+/**
+ * sets the match b_y_ion_match
+ */
+void set_match_b_y_ion_match(
+  MATCH_T* match, ///< the match to work -out
+  float b_y_ion_match ///< the b_y_ion_match value of PSM -in
+  )
+{
+  match->b_y_ion_match = b_y_ion_match; 
+}
+
+/**
+ * gets the match b_y_ion_match
+ */
+float get_match_b_y_ion_match(
+  MATCH_T* match ///< the match to work -out
+  )
+{
+  return match->b_y_ion_match;
+}
+
+
 
 /**
  *Increments the pointer count to the match object

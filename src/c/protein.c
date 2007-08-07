@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.47 $
+ * $Revision: 1.48 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -965,6 +965,8 @@ BOOLEAN_T iterator_state_help(
   PEPTIDE_TYPE_T peptide_type  ///< constraints: peptide type -in
   )
 {
+  PEPTIDE_TYPE_T candidate_peptide_type;
+
   LOOP:
   
   //set kr_idx position
@@ -1019,13 +1021,26 @@ BOOLEAN_T iterator_state_help(
   
   //examin tryptic type and cleavage
   if(peptide_type != ANY_TRYPTIC){
-    if((examine_peptide_type(iterator, 
-                             iterator->cur_start, 
-                             iterator->cur_length + iterator->cur_start -1) != peptide_type))
-      {
-        ++iterator->cur_start;
-        goto LOOP;
-      }
+
+    //get the peptide type for the examining candidate peptide
+    candidate_peptide_type = 
+      examine_peptide_type(iterator, 
+                           iterator->cur_start, 
+                           iterator->cur_length + 
+                           iterator->cur_start -1);
+
+
+    //ok if peptide type is Partially_Tryptic
+    // allow candidates that're PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC peptides
+    // otherwise, skip candidate peptides that do not match peptide type
+    if( !((peptide_type == PARTIALLY_TRYPTIC && 
+           (candidate_peptide_type == N_TRYPTIC ||
+            candidate_peptide_type == C_TRYPTIC)) ||
+          (peptide_type == candidate_peptide_type)) ){
+      
+      ++iterator->cur_start;
+      goto LOOP;
+    }
   }
 
   //examine cleavage

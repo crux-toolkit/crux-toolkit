@@ -175,7 +175,7 @@ int main(int argc, char** argv){
     //parse and update parameters
     parse_update_parameters(parameter_file);
     
-    //always use index when search spectra!
+    //always use index for match search!
     set_string_parameter("use-index", "T");
 
     //generate sqt ouput file if not set by user
@@ -378,7 +378,10 @@ int main(int argc, char** argv){
         }
       }
     }
-    
+
+    //DEBUG
+    carp(CARP_DEBUG, "total spectra runs: %d", spectra_idx);
+
     free(sqt_output_file);
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
       fclose(psm_result_file_sqt);

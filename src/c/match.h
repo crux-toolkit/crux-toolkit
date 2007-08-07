@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.10 $ 
+ * $Revision: 1.11 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -273,6 +273,20 @@ BOOLEAN_T get_match_null_peptide(
   MATCH_T* match ///< the match to work -out
   );
 
+/**
+ * sets the match b_y_ion_match
+ */
+void set_match_b_y_ion_match(
+  MATCH_T* match, ///< the match to work -out
+  float b_y_ion_match ///< the b_y_ion_match value of PSM -in
+  );
+
+/**
+ * gets the match b_y_ion_match
+ */
+float get_match_b_y_ion_match(
+  MATCH_T* match ///< the match to work -out
+  );
 /*
  * Local Variables:
  * mode: c

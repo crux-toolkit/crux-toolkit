@@ -154,6 +154,9 @@ int main(int argc, char** argv){
       wrong_command(NULL, "The peptide charge. 1|2|3"); ///FIXME
     }
     
+    //always use index when search spectrum!
+    set_string_parameter("use-index", "T");
+    
     //parameters are now confirmed, can't be changed
     parameters_confirmed();
 

@@ -1,4 +1,4 @@
-******************************************************************************
+/******************************************************************************
  * FILE: parameter.c
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * CREATE DATE: 2006 Oct 09
@@ -79,7 +79,7 @@ void initialize_parameters(void){
   //generate_peptide, create_index parameters
   set_double_parameter("mass-range", 1);
   set_double_parameter("min-mass", 200);
-  set_double_parameter("max-mass", 2400);
+  set_double_parameter("max-mass", 7200);
   set_int_parameter("min-length", 6);
   set_int_parameter("max-length", 50);
   set_string_parameter("cleavages", "tryptic");
@@ -384,7 +384,7 @@ BOOLEAN_T set_boolean_parameter(
   }
 
   //only check if parameter file has already been parsed
-  if(parameter_parsed){
+  if(parameter_parsed || parameter_initialized){
     //check if parameter name already exist?
     for(idx = 0; idx < parameters.num_parameters; idx++){
       //if exist ovewrite it!
@@ -481,7 +481,7 @@ BOOLEAN_T set_int_parameter(
   }
   
   //only check if parameter file has already been parsed
-  if(parameter_parsed){
+  if(parameter_parsed  || parameter_initialized){
     //check if parameter name already exist?
     for(idx = 0; idx < parameters.num_parameters; idx++){
       //if exist ovewrite it!
@@ -571,7 +571,7 @@ BOOLEAN_T set_double_parameter(
   sprintf(buffer, "%f", set_value);
 
   //only check if parameter file has already been parsed
-  if(parameter_parsed){
+  if(parameter_parsed || parameter_initialized){
     //check if parameter name already exist?
     for(idx = 0; idx < parameters.num_parameters; idx++){
       //if exist ovewrite it!
@@ -687,7 +687,7 @@ BOOLEAN_T set_string_parameter(
   }
   
   //only check if parameter file has already been parsed
-  if(parameter_parsed){
+  if(parameter_parsed  || parameter_initialized){
     //check if parameter name already exist?
     for(idx = 0; idx < parameters.num_parameters; idx++){
       //if exist ovewrite it!

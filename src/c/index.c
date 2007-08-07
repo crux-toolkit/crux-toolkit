@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.42 $
+ * $Revision: 1.43 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1966,7 +1966,11 @@ BOOLEAN_T setup_index_filtered_peptide_iterator(
     //mass, length has been already checked in index_peptide_iterator
     //check if peptide type matches the constraint
     while(src != NULL){
-      if(get_peptide_src_peptide_type(src) == peptide_type){
+      if(get_peptide_src_peptide_type(src) == peptide_type ||
+         (peptide_type == PARTIALLY_TRYPTIC && 
+          (get_peptide_src_peptide_type(src) == N_TRYPTIC ||
+           get_peptide_src_peptide_type(src) == C_TRYPTIC))
+         ){
         match = TRUE;
         break;
       }

@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -147,6 +147,13 @@ char* get_spectrum_collection_filename(
  */
 int get_spectrum_collection_num_spectra(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection -in                                         
+  );
+
+/**
+ * \returns The current number of spectra assuming differnt charge(i.e. one spectrum with two charge states are counted as two spectra) in the spectrum_collection
+ */
+int get_spectrum_collection_num_charged_spectra(
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection save filename -in
   );
 
 /**

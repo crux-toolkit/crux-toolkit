@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.19 $
+ * REVISION: $Revision: 1.20 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -39,6 +39,7 @@ int match_first_scan_line(
 struct spectrum_collection {
   SPECTRUM_T* spectra[MAX_SPECTRA];  ///< The spectrum peaks
   int  num_spectra;     ///< The number of spectra
+  int  num_charged_spectra; ///< The number of spectra assuming differnt charge(i.e. one spectrum with two charge states are counted as two spectra)
   char* filename;     ///< Optional filename
   char comment[MAX_COMMENT];    ///< The spectrum_collection header lines
   BOOLEAN_T is_parsed; ///< Have we parsed all the spectra from the file?
@@ -140,6 +141,7 @@ void copy_spectrum_collection(
   //copy each varible
   set_spectrum_collection_filename(dest,src->filename);
   set_spectrum_collection_comment(dest,src->comment);
+  dest->num_charged_spectra = src->num_charged_spectra;
   dest->is_parsed = src->is_parsed;
   
   //copy spectrum
@@ -256,6 +258,7 @@ BOOLEAN_T add_spectrum_to_end(
   //set spectrum
   spectrum_collection->spectra[spectrum_collection->num_spectra] = spectrum;
   ++spectrum_collection->num_spectra;
+  spectrum_collection->num_charged_spectra += get_spectrum_num_possible_z(spectrum);
   return TRUE;
 }
 
@@ -298,6 +301,7 @@ BOOLEAN_T add_spectrum(
   //set spectrum
   spectrum_collection->spectra[add_index] = spectrum;
   ++spectrum_collection->num_spectra;
+  spectrum_collection->num_charged_spectra += get_spectrum_num_possible_z(spectrum);
   return TRUE;
 }
 
@@ -331,6 +335,7 @@ void remove_spectrum(
   }
   
   --spectrum_collection->num_spectra;
+  spectrum_collection->num_charged_spectra -= get_spectrum_num_possible_z(spectrum);
 } 
 
 
@@ -583,6 +588,16 @@ int get_spectrum_collection_num_spectra(
   return spectrum_collection->num_spectra;
 }
 
+/**
+ * \returns The current number of spectra assuming differnt charge(i.e. one spectrum with two charge states are counted as two spectra) in the spectrum_collection
+ */
+int get_spectrum_collection_num_charged_spectra(
+  SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection save filename -in
+  )
+{
+  return spectrum_collection->num_charged_spectra;
+}
+
 
 /**
  * \returns the comments from the spectrum_collection
@@ -740,7 +755,9 @@ BOOLEAN_T serialize_header(
   char* file_ms2 = parse_filename(spectrum_collection->filename);
   //int file_ms2_length = strlen(file_ms2);
   
-  fwrite(&(spectrum_collection->num_spectra), sizeof(int), 1, psm_file);
+  //FIXME later if you want to be selective on charge to run
+  // must refine the current serialize methods
+  fwrite(&(spectrum_collection->num_charged_spectra), sizeof(int), 1, psm_file);
   fwrite(&(num_spectrum_features), sizeof(int), 1, psm_file);
   fwrite(&(number_top_rank_peptide), sizeof(int), 1, psm_file);
   
@@ -755,7 +772,7 @@ BOOLEAN_T serialize_header(
   
   //parameter file
   set_double_parameter("min-mass", 200);
-  set_double_parameter("max-mass", 2400);
+  set_double_parameter("max-mass", 7200);
   set_int_parameter("min-length", 6);
   set_int_parameter("max-length", 50);
   set_string_parameter("cleavages", "tryptic");
