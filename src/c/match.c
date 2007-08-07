@@ -207,7 +207,7 @@ void print_match(
   //
 
   SCORER_TYPE_T primary_score = output_mode;
-  SCORER_TYPE_T secondary_score;
+  SCORER_TYPE_T secondary_score = SP;
   switch (output_mode) {
     case DOTP:
       //FIXME fill in once implemented
