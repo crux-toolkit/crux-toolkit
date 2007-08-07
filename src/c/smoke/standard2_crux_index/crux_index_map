@@ -1,0 +1,18 @@
+#	min_mass: 200.00
+#	max_mass: 7200.00
+#	min_length: 6
+#	max_length: 50
+#	peptide_type: 5
+#	missed_cleavage: 0
+#	mass_type: 0
+#	redundancy: 0
+#	CRUX index directory: standard2_crux_index
+#	time created: Tue Aug  7 15:36:54 2007
+#	target mass range for index file: 500.00
+crux_index_1	360.00	500.00
+crux_index_2	860.00	500.00
+crux_index_3	1360.00	500.00
+crux_index_4	1860.00	500.00
+crux_index_5	2360.00	500.00
+crux_index_6	2860.00	500.00
+crux_index_7	3360.00	500.00
