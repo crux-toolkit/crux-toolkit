@@ -451,7 +451,7 @@ void truncate_match_collection(
     //sort match collection by score type
     if(!sort_match_collection(match_collection, score_type)){
       carp(CARP_ERROR, "failed to sort match collection");
-      exit(-1);
+      exit(1);
     }
   }
 
@@ -715,7 +715,7 @@ BOOLEAN_T estimate_weibull_parameters(
     //sort match collection by score type
     if(!sort_match_collection(sample_collection, score_type)){
       carp(CARP_ERROR, "failed to sort match collection");
-      exit(-1);
+      exit(1);
     }
   }
 
@@ -809,7 +809,7 @@ BOOLEAN_T estimate_exp_sp_parameters(
     //sort match collection by score type
     if(!sort_match_collection(match_collection, SP)){
       carp(CARP_ERROR, "failed to sort match collection");
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -970,7 +970,7 @@ BOOLEAN_T score_match_collection_sp(
   if(!populate_match_rank_match_collection(match_collection, SP)){
     carp(CARP_ERROR, "failed to populate match rank for SP in match_collection");
     free_match_collection(match_collection);
-    exit(-1);
+    exit(1);
   }
   
   //yes, we have now scored for the match-mode: SP
@@ -1004,7 +1004,7 @@ BOOLEAN_T score_match_collection_logp_exp_sp(
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[SP]){
     carp(CARP_ERROR, "the collection must be scored by SP first before LOGP_EXP_SP");
-    exit(-1);
+    exit(1);
   }
 
   //sort by SP if not already sorted.
@@ -1014,7 +1014,7 @@ BOOLEAN_T score_match_collection_logp_exp_sp(
     if(!sort_match_collection(match_collection, SP)){
       carp(CARP_ERROR, "failed to sort match collection by SP");
       free_match_collection(match_collection);
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -1060,7 +1060,7 @@ BOOLEAN_T score_match_collection_logp_bonf_exp_sp(
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[SP]){
     carp(CARP_ERROR, "the collection must be scored by SP first before LOGP_EXP_SP");
-    exit(-1);
+    exit(1);
   }
 
   //sort by SP if not already sorted.
@@ -1070,7 +1070,7 @@ BOOLEAN_T score_match_collection_logp_bonf_exp_sp(
     if(!sort_match_collection(match_collection, SP)){
       carp(CARP_ERROR, "failed to sort match collection by SP");
       free_match_collection(match_collection);
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -1115,7 +1115,7 @@ BOOLEAN_T score_match_collection_logp_weibull_sp(
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[SP]){
     carp(CARP_ERROR, "the collection must be scored by SP first before LOGP_WEIBULL_SP");
-    exit(-1);
+    exit(1);
   }
 
   //sort by SP if not already sorted.
@@ -1125,7 +1125,7 @@ BOOLEAN_T score_match_collection_logp_weibull_sp(
     if(!sort_match_collection(match_collection, SP)){
       carp(CARP_ERROR, "failed to sort match collection by SP");
       free_match_collection(match_collection);
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -1171,7 +1171,7 @@ BOOLEAN_T score_match_collection_logp_weibull_xcorr(
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[XCORR]){
     carp(CARP_ERROR, "the collection must be scored by XCORR first before LOGP_WEIBULL_XCORR");
-    exit(-1);
+    exit(1);
   }
 
   //sort by XCORR if not already sorted.
@@ -1181,7 +1181,7 @@ BOOLEAN_T score_match_collection_logp_weibull_xcorr(
     if(!sort_match_collection(match_collection, XCORR)){
       carp(CARP_ERROR, "failed to sort match collection by XCORR");
       free_match_collection(match_collection);
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -1227,7 +1227,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_xcorr(
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[XCORR]){
     carp(CARP_ERROR, "the collection must be scored by XCORR first before LOGP_WEIBULL_XCORR");
-    exit(-1);
+    exit(1);
   }
 
   //sort by XCORR if not already sorted.
@@ -1237,7 +1237,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_xcorr(
     if(!sort_match_collection(match_collection, XCORR)){
       carp(CARP_ERROR, "failed to sort match collection by XCORR");
       free_match_collection(match_collection);
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -1286,7 +1286,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_sp(
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[SP]){
     carp(CARP_ERROR, "the collection must be scored by SP first before LOGP_WEIBULL_SP");
-    exit(-1);
+    exit(1);
   }
 
   //sort by SP if not already sorted.
@@ -1296,7 +1296,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_sp(
     if(!sort_match_collection(match_collection, SP)){
       carp(CARP_ERROR, "failed to sort match collection by SP");
       free_match_collection(match_collection);
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -1399,14 +1399,14 @@ BOOLEAN_T score_match_collection_xcorr(
   //sort match collection by score type
   if(!sort_match_collection(match_collection, XCORR)){
     carp(CARP_ERROR, "failed to sort match collection");
-    exit(-1);
+    exit(1);
   }
   
   //now that the match_collection is sorted, populate the rank of each match object
   if(!populate_match_rank_match_collection(match_collection, XCORR)){
     carp(CARP_ERROR, "failed to populate match rank for Xcorr in match_collection");
     free_match_collection(match_collection);
-    exit(-1);
+    exit(1);
   }
 
   //calculate delta cn value(difference in top and second ranked Xcorr values)
@@ -1442,7 +1442,7 @@ BOOLEAN_T score_match_collection_logp_evd_xcorr(
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[XCORR]){
     carp(CARP_ERROR, "the collection must be scored by XCORR first before LOGP_EVD_XCORR");
-    exit(-1);
+    exit(1);
   }
 
   //sort by XCORR if not already sorted.
@@ -1452,7 +1452,7 @@ BOOLEAN_T score_match_collection_logp_evd_xcorr(
     if(!sort_match_collection(match_collection, XCORR)){
       carp(CARP_ERROR, "failed to sort match collection by XCORR");
       free_match_collection(match_collection);
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -1497,7 +1497,7 @@ BOOLEAN_T score_match_collection_logp_bonf_evd_xcorr(
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[XCORR]){
     carp(CARP_ERROR, "the collection must be scored by XCORR first before LOGP_BONF_EVD_XCORR");
-    exit(-1);
+    exit(1);
   }
 
   //sort by XCORR if not already sorted.
@@ -1507,7 +1507,7 @@ BOOLEAN_T score_match_collection_logp_bonf_evd_xcorr(
     if(!sort_match_collection(match_collection, XCORR)){
       carp(CARP_ERROR, "failed to sort match collection by XCORR");
       free_match_collection(match_collection);
-      exit(-1);
+      exit(1);
     }
   }
   
@@ -1804,13 +1804,13 @@ MATCH_ITERATOR_T* new_match_iterator(
   //is there any existing iterators?
   if(match_collection->iterator_lock){
     carp(CARP_ERROR, "can only have one match iterator instantiated at a time");
-    exit(-1);
+    exit(1);
   }
   
   //has the score type been populated in match collection?
   if(!match_collection->scored_type[score_type]){
     carp(CARP_ERROR, "the match collection has not been scored for request score type");
-    exit(-1);
+    exit(1);
   }
   
   //allocate a new match iterator
@@ -1840,7 +1840,7 @@ MATCH_ITERATOR_T* new_match_iterator(
       carp(CARP_ERROR, "failed to sort match collection");
       free_match_collection(match_collection);
       free(match_iterator);
-      exit(-1);
+      exit(1);
     }
   }
 
@@ -2162,7 +2162,7 @@ void update_protein_counters(
   //only for post_process_collections
   if(!match_collection->post_process_collection){
     carp(CARP_ERROR, "Must be a post process match collection");
-    exit(-1);
+    exit(1);
   }
   
   //See if this peptide has been observed before?
@@ -2221,7 +2221,7 @@ BOOLEAN_T fill_result_to_match_collection(
   if(!populate_match_rank_match_collection(match_collection, score_type)){
     carp(CARP_ERROR, "failed to populate match rank in match_collection");
     free_match_collection(match_collection);
-    exit(-1);
+    exit(1);
   }
   
   match_collection->scored_type[score_type] = TRUE;
@@ -2252,7 +2252,7 @@ int get_match_collection_protein_counter(
   //only for post_process_collections
   if(!match_collection->post_process_collection){
     carp(CARP_ERROR, "Must be a post process match collection");
-    exit(-1);
+    exit(1);
   }
 
   //number of PSMs match this protein
@@ -2270,7 +2270,7 @@ int get_match_collection_protein_peptide_counter(
   //only for post_process_collections
   if(!match_collection->post_process_collection){
     carp(CARP_ERROR, "Must be a post process match collection");
-    exit(-1);
+    exit(1);
   }
   
   //number of peptides match this protein
@@ -2288,7 +2288,7 @@ int get_match_collection_hash(
   //only for post_process_collections
   if(!match_collection->post_process_collection){
     carp(CARP_ERROR, "Must be a post process match collection");
-    exit(-1);
+    exit(1);
   }
   
   char* hash_value = get_peptide_hash_value(peptide);
@@ -2364,7 +2364,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   
   if(working_directory == NULL){
     carp(CARP_ERROR, "failed to open PSM result directory: %s", output_file_directory);
-    exit(-1);
+    exit(1);
   }
   
   //determine use index command
@@ -2396,7 +2396,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     if(!parse_database(database)){
       carp(CARP_FATAL, "failed to parse database, cannot create new index");
       free_database(database);
-      exit(-1);
+      exit(1);
     }
   }
   

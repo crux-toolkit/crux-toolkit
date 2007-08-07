@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.43 $
+ * $Revision: 1.44 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -44,7 +44,7 @@ void clean_up( int dummy ) {
 
   fcloseall();
   delete_dir(temp_folder_name);
-  exit(-1);
+  exit(1);
   
   //quiet compiler
   dummy = dummy;

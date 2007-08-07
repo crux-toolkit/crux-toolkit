@@ -221,7 +221,7 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
   if (result != 1 && die_on_error) {
     fprintf(stderr, "%s: %s\n", base_name(argv[0]), message);
     fprintf(stderr, "%s", parse_arguments_get_usage(base_name(argv[0])));
-    exit(-1);
+    exit(1);
   }
   return result;
 }
