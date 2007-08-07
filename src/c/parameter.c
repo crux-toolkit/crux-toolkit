@@ -113,6 +113,10 @@ void initialize_parameters(void){
   
   //how many peptides to sample for EVD parameter estimation
   set_int_parameter("sample-count", 500);
+
+  //what charge state spectra to run among the ones in ms2 file
+  set_string_parameter("spectrum-change", "all");
+  set_double_parameter("number-runs", INFINITY);
   
   //match_search
   set_string_parameter("match-output-folder", ".");
@@ -123,7 +127,7 @@ void initialize_parameters(void){
   set_double_parameter("spectrum-max-mass", INFINITY);
   set_int_parameter("top-match", 1);
   set_int_parameter("number-decoy-set", 2);
-
+  
   //match_analysis
   set_string_parameter("algorithm", "percolator");
   set_double_parameter("pi0", 0.9);

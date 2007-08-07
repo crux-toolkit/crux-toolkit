@@ -48,9 +48,10 @@ int main(int argc, char** argv){
   char* prelim_score_type = "sp";
   char* score_type = "xcorr";
   char* parameter_file = NULL;
+  char* spectrum_charge = "all";
   int verbosity = CARP_ERROR;
-  int spectra_count = 20;
-    
+  double number_runs = INFINITY;
+  
   //required
   char* ms2_file = NULL;
   char* fasta_file = NULL;
@@ -90,6 +91,18 @@ int main(int argc, char** argv){
     "The peptide mass tolerance window", 
     (void *) &mass_window, 
     DOUBLE_ARG);
+
+  parse_arguments_set_opt(
+    "spectrum-charge", 
+    "The spectrum charges to search. 1|2|3|all",
+    (void *) &spectrum_charge, 
+    STRING_ARG);
+
+  parse_arguments_set_opt(
+    "number-runs", 
+    "The number of spectrum search runs to perform.",
+    (void *) &number_runs, 
+    DOUBLE_ARG);
   
   /* Define required command line arguments */
   parse_arguments_set_req(
@@ -123,6 +136,8 @@ int main(int argc, char** argv){
     long int max_rank_preliminary = 500;
     long int max_rank_result = 500;
     float mass_offset = 0;
+    BOOLEAN_T run_all_charges = TRUE;
+    int spectrum_charge_to_run = 0;
 
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
@@ -145,6 +160,27 @@ int main(int argc, char** argv){
     parameters_confirmed();
     
     /******* All parameters must be taken through get_*_parameter() method ******/
+    
+    number_runs = get_double_parameter("number-runs", INFINITY);
+
+    if(strcmp(get_string_parameter_pointer("spectrum-change"), "all")== 0){
+      run_all_charges = TRUE;      
+    }
+    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "1")== 0){
+      run_all_charges = FALSE;
+      spectrum_charge_to_run = 1;
+    }
+    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "2")== 0){
+      run_all_charges = FALSE;
+      spectrum_charge_to_run = 2;
+    }
+    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "3")== 0){
+      run_all_charges = FALSE;
+      spectrum_charge_to_run = 3;
+    }
+    else{
+      wrong_command(spectrum_charge, "The spectrum charges to search. 1|2|3|all");
+    }
     
     //main score type
     if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
@@ -197,13 +233,18 @@ int main(int argc, char** argv){
       exit(1);
     }
     
-
     //create spectrum iterator
     spectrum_iterator = new_spectrum_iterator(collection);
    
     int spectra_idx = 0;
     //iterate over all spectrum in ms2 file
     while(spectrum_iterator_has_next(spectrum_iterator)){
+      
+      //check if total runs exceed limit user defined
+      if(number_runs <= spectra_idx){
+        break;
+      }
+
       //get next spectrum
       spectrum = spectrum_iterator_next(spectrum_iterator);
       
@@ -211,15 +252,22 @@ int main(int argc, char** argv){
       possible_charge = get_spectrum_num_possible_z(spectrum);
       possible_charge_array = get_spectrum_possible_z_pointer(spectrum);
       
-      //print spectrum info
-      fprintf(stdout, "# SPECTRUM SCAN NUMBER: %d\n", get_spectrum_first_scan(spectrum));
-      fprintf(stdout, "# SPECTRUM ID NUMBER: %d\n", get_spectrum_id(spectrum));
-      fprintf(stdout, "# SPECTRUM PRECURSOR m/z: %.2f\n", get_spectrum_precursor_mz(spectrum));
-      fprintf(stdout, "# MASS OFFSET: %.2f\n", mass_offset);
-      
       //iterate over all possible charge states
       for(charge_index = 0; charge_index < possible_charge; ++charge_index){
+        
+        //skip spectra that are not in the charge state to be run
+        if(!run_all_charges && 
+           spectrum_charge_to_run != possible_charge_array[charge_index]){
+          continue;
+        }
+        
         ++spectra_idx;
+
+        //print spectrum info
+        fprintf(stdout, "# SPECTRUM SCAN NUMBER: %d\n", get_spectrum_first_scan(spectrum));
+        fprintf(stdout, "# SPECTRUM ID NUMBER: %d\n", get_spectrum_id(spectrum));
+        fprintf(stdout, "# SPECTRUM PRECURSOR m/z: %.2f\n", get_spectrum_precursor_mz(spectrum));
+        fprintf(stdout, "# MASS OFFSET: %.2f\n", mass_offset);
         
         //print working state
         fprintf(stdout, "# SPECTRUM CHARGE: %d\n", possible_charge_array[charge_index]);
@@ -271,11 +319,6 @@ int main(int argc, char** argv){
         //free match iterator
         free_match_iterator(match_iterator);
         free_match_collection(match_collection);
-	
-        //now we are down scoring
-        if(spectra_idx >= spectra_count){
-          exit(0);
-        }        
       }
       
     }

@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -209,6 +209,22 @@ FILE** get_spectrum_collection_psm_result_filename(
 BOOLEAN_T serialize_header(
   SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection -in
   char* fasta_file, ///< the fasta file 
+  FILE* psm_file ///< the file to serialize the header information -out
+  );
+
+/**
+ * Modifies the serialized header information for the binary PSM serialized files
+ * Sets the total number of spectra seerialized in the file
+ * Assumes the first field in the file is the number total spectra serialized
+ * Must be run after serialize_header
+ *
+ * General order is, 
+ * serialize_header -> serialize_psm_features -> serialize_total_number_of_spectra
+ *
+ *\returns TRUE if total number of spectra seerialized in the file, else FALSE
+ */
+BOOLEAN_T serialize_total_number_of_spectra(
+  int spectra_idx, ///< the number of spectra serialized in PSM file -in 
   FILE* psm_file ///< the file to serialize the header information -out
   );
 

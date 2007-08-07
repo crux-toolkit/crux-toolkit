@@ -47,7 +47,7 @@ int main(int argc, char** argv){
   //optional
   int charge = 2;
   char* prelim_score_type = "sp";
-  char* score_type = "logp_exp_sp";
+  char* score_type = "xcorr";
   char* parameter_file = NULL;
   int verbosity = CARP_ERROR;
   
