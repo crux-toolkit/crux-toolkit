@@ -1,7 +1,7 @@
 /*****************************************************************************
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -120,7 +120,7 @@ HASH_T* new_hash(
   ) 
 {
   HASH_T* h;
-  unsigned int i, sind;
+  unsigned int i, sind = 0;
   
   capacity /= load_factor;
   
