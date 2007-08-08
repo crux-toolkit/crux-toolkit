@@ -1,28 +1,29 @@
 /**
  * \file parameter.h
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  *****************************************************************************/
 #ifndef PARAMETER_FILE_H
 #define PARAMETER_FILE_H
 #include "utils.h"
 
-#define PARAMETER_LENGTH 1024 ///< max length of parameter name and value in characters
-#define NUM_PARAMS 512 ///< max number of parameters allowed
+#define PARAMETER_LENGTH 1024 ///< default length of parameter name and value in characters
+#define NUM_PARAMS 512 ///< initial number of parameters allowed
 #define MAX_LINE_LENGTH 4096 ///< maximum length of a line on the parameter file
 
+/**
+ * free heap allocated parameters hash table
+ */
+void free_parameters(void);
 
 /**
- * 
- * Each of the following functions searches through the list of
+ * Each of the following functions searches through the hash table of
  * parameters, looking for one whose name matches the string.  The
- * function returns the corresponding value, or the default value if
- * the parameter is not found.
- * \returns TRUE if paramater value or default is TRUE, else FALSE
+ * function returns the corresponding value.
+ * \returns TRUE if paramater value is TRUE, else FALSE
  */ 
 BOOLEAN_T get_boolean_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- BOOLEAN_T default_value  ///< the dafault value to use if not found -in
+ char*     name  ///< the name of the parameter looking for -in
  );
 
 /**
@@ -40,14 +41,13 @@ BOOLEAN_T set_boolean_parameter(
 
 /**
  * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string.  This function returns the parameter value if the
- * parameter is in the parameter_array, and the dafault otherwise.  This
+ * name matches the string.  This function returns the parameter value if the
+ * parameter is in the parameter hash table.  This
  * function exits if there is a conversion error. 
- *\returns the int value of the parameter or default value
+ *\returns the int value of the parameter
  */
 int get_int_parameter(
-  char* name,  ///< the name of the parameter looking for -in
-  int default_value  ///< the dafault value to use if not found -in
+  char* name  ///< the name of the parameter looking for -in
   );
 
 /**
@@ -65,14 +65,13 @@ BOOLEAN_T set_int_parameter(
 
 /**
  * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string.  This function returns the parameter value if the
- * parameter is in the parameter_array, and the dafault otherwise.  This
+ * name matches the string.  This function returns the parameter value if the
+ * parameter is in the parameter hash table.  This
  * function exits if there is a conversion error. 
- *\returns the double value of the parameter of the default value
+ *\returns the double value of the parameter
  */
 double get_double_parameter(
-  char* name,   ///< the name of the parameter looking for -in
-  double default_value   ///< the dafault value to use if not found -in
+  char* name   ///< the name of the parameter looking for -in
   );
 
 /**
@@ -93,7 +92,7 @@ BOOLEAN_T set_double_parameter(
  * parameter_name matches the string. 
  * The return value is allocated here and must be freed by the caller.
  * If the value is not found, abort.
- * \returns the string value to which matches the parameter name, else abort.
+ * \returns the string value to which matches the parameter name, else aborts
  */
 char* get_string_parameter(
   char* name  ///< the name of the parameter looking for -in
@@ -103,9 +102,8 @@ char* get_string_parameter(
  * Searches through the list of parameters, looking for one whose
  * parameter_name matches the string. 
  * The return value is a pointer to the original string
- * Thus, user should no free, good for printing
- * If the value is not found, abort.
- * \returns the string value to which matches the parameter name, else abort.
+ * Thus, user should not free, good for printing
+ * \returns the string value to which matches the parameter name, else aborts
  */
 char* get_string_parameter_pointer(
   char* name  ///< the name of the parameter looking for -in
@@ -148,7 +146,7 @@ void parameters_confirmed(void);
 
 /**
  * Parameter file must be parsed first!
- * searches through the list of parameters, 
+ * searches through the hash table of parameters, 
  * looking for one whose name matches the string.  
  * then the function sets the corresponding value.
  * if the parameter is not found, return FALSE

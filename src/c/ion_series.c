@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.19 $
+ * REVISION: $Revision: 1.20 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -152,7 +152,7 @@ ION_SERIES_T* new_ion_series_generic(
   ion_series->constraint = constraint;
   ion_series->charge = charge;
   //create loss_limit array, that can be used for all peptides, thus set to max peptide length
-  ion_series->loss_limit = (LOSS_LIMIT_T*)mycalloc(get_int_parameter("max-length", 50), sizeof(LOSS_LIMIT_T));
+  ion_series->loss_limit = (LOSS_LIMIT_T*)mycalloc(get_int_parameter("max-length"), sizeof(LOSS_LIMIT_T));
   return ion_series;
 }
 

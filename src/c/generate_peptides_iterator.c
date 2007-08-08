@@ -58,8 +58,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
 )
 {
   //get parameters
-  int min_length = get_int_parameter("min-length", 6);
-  int max_length = get_int_parameter("max-length", 50);
+  int min_length = get_int_parameter("min-length");
+  int max_length = get_int_parameter("max-length");
   char* cleavages = get_string_parameter_pointer("cleavages");
   char* isotopic_mass = get_string_parameter_pointer("isotopic-mass");
   char* redundancy = get_string_parameter_pointer("redundancy");
@@ -69,7 +69,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
   BOOLEAN_T use_index_boolean = FALSE;
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
-  BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages", FALSE);
+  BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
   char* in_file = get_string_parameter_pointer("fasta-file");
   BOOLEAN_T is_unique = FALSE;
   SORT_TYPE_T sort_type = NONE;
@@ -277,7 +277,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
   )
 {
   //get parameters
-  double mass_window = get_double_parameter("mass-window", 3);
+  double mass_window = get_double_parameter("mass-window");
   double min_mass = neutral_mass - mass_window;
   double max_mass = neutral_mass + mass_window;
 
@@ -291,8 +291,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
   //get parameters from parameter.c
-  double min_mass = get_double_parameter("min-mass", 200);
-  double max_mass = get_double_parameter("max-mass", 7200);
+  double min_mass = get_double_parameter("min-mass");
+  double max_mass = get_double_parameter("max-mass");
 
   return new_generate_peptides_iterator_general(min_mass, max_mass);
 }
@@ -310,8 +310,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(){
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
 {
   //get parameters
-  int min_length = get_int_parameter("min-length", 6);
-  int max_length = get_int_parameter("max-length", 50);
+  int min_length = get_int_parameter("min-length");
+  int max_length = get_int_parameter("max-length");
   char* cleavages = get_string_parameter_pointer("cleavages");
   char* isotopic_mass = get_string_parameter_pointer("isotopic-mass");
   char* redundancy = get_string_parameter_pointer("redundancy");
@@ -326,7 +326,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
   BOOLEAN_T use_index_boolean = FALSE;
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
-  BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages", FALSE);
+  BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
   char* in_file = get_string_parameter_pointer("fasta-file");
   BOOLEAN_T is_unique = FALSE;
   SORT_TYPE_T sort_type = NONE;

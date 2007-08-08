@@ -193,10 +193,10 @@ int main(int argc, char** argv){
     //print header line
     printf("# PROTEIN DATABASE: %s\n", get_string_parameter_pointer("fasta-file"));
     printf("# OPTIONS:\n");
-    printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass", 0));
-    printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass", 0));
-    printf("#\tmin-length: %d\n", get_int_parameter("min-length", 0));
-    printf("#\tmax-length: %d\n", get_int_parameter("max-length", 0));
+    printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass"));
+    printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass"));
+    printf("#\tmin-length: %d\n", get_int_parameter("min-length"));
+    printf("#\tmax-length: %d\n", get_int_parameter("max-length"));
     printf("#\tcleavages: %s\n", get_string_parameter_pointer("cleavages"));
     printf("#\tallow missed-cleavages: %s\n", get_string_parameter_pointer("missed-cleavages"));
     printf("#\tsort: %s\n",  get_string_parameter_pointer("sort"));
@@ -210,7 +210,7 @@ int main(int argc, char** argv){
     peptide_iterator = new_generate_peptides_iterator();
     
     //should I output sequence?
-    output_sequence = get_boolean_parameter("output-sequence", FALSE);
+    output_sequence = get_boolean_parameter("output-sequence");
 
     //iterate over all peptides
     while(generate_peptides_iterator_has_next(peptide_iterator)){
@@ -230,6 +230,7 @@ int main(int argc, char** argv){
     
     //debug purpose
     carp(CARP_INFO, "total peptides: %d", total_peptides);
+    free_parameters();
     exit(0);
   } 
   else {

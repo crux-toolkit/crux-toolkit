@@ -130,7 +130,7 @@ int main(int argc, char** argv){
     parse_update_parameters(parameter_file);
     
     
-    peptide_charge = get_int_parameter("charge", peptide_charge);
+    peptide_charge = get_int_parameter("charge");
     
     if( peptide_charge < 1 || peptide_charge > 3){
       wrong_command(charge, "The peptide charge. 1|2|3");
@@ -208,6 +208,7 @@ int main(int argc, char** argv){
    free_ion_series(ion_series);
    free_spectrum_collection(collection);
    free_spectrum(spectrum);
+   free_parameters();
  }
  else{
    char* usage = parse_arguments_get_usage("score_peptide_spectrum");

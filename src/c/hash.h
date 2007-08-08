@@ -1,6 +1,6 @@
 /**
  * \file hash.h 
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for hashing.
  */
 #include "crux-utils.h"
@@ -27,12 +27,25 @@ void free_hash(
 /**
  * add key and value to hash table.
  * Must add a heap allocated key, value may be NULL
+ * If finds duplicate key, just increase count by 1
  *\returns TRUE if successfully adds to new record, else FALSE
  */
 BOOLEAN_T add_hash(
   HASH_T* h, ///< Hash object to add -in/out
   char *key, ///< key of the record to add -in
   void *value ///< value to add to be hashed if needed -in
+  );
+
+/**
+ * Updates the value for the key
+ * Must already have a existing value for the key
+ * Copies the value, thus no need to pass in a heap allocated value
+ *\returns TRUE if successfully updates hash value, else FALSE
+ */
+BOOLEAN_T update_hash_value(
+  HASH_T* h, ///< Hash object to add -in/out
+  char *key, ///< key of the record to update -in
+  void *value ///< value to add to be hash -in
   );
 
 /**

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.21 $
+ * REVISION: $Revision: 1.22 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -753,7 +753,7 @@ BOOLEAN_T serialize_header(
 {
   int num_spectrum_features = 0;
   //set max number of matches to be serialized per spectrum
-  int number_top_rank_peptide = get_int_parameter("top-match", 1);
+  int number_top_rank_peptide = get_int_parameter("top-match");
   char* file_fasta = parse_filename(fasta_file);
   //int file_fasta_length = strlen(file_fasta);
   char* file_ms2 = parse_filename(spectrum_collection->filename);

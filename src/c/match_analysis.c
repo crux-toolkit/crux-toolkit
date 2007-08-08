@@ -93,10 +93,7 @@ int main(int argc, char** argv){
     ALGORITHM_TYPE_T algorithm = PERCOLATOR;
     MATCH_T* match = NULL;
     unsigned int name_idx = 0;
-    
-    //set max number of final scoring matches to print as output
-    int max_rank_result = get_int_parameter("max-rank-result", 500);
-    
+        
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
@@ -110,6 +107,15 @@ int main(int argc, char** argv){
 
     //parse and update parameters
     parse_update_parameters(parameter_file);
+    
+    //always use index for match_analysis!
+    set_string_parameter("use-index", "T");
+    
+    //parameters are now confirmed, can't be changed
+    parameters_confirmed();
+    
+    //set max number of final scoring matches to print as output
+    int max_rank_result = get_int_parameter("max-rank-result");
     
     //select algorithm
     if(strcmp(get_string_parameter_pointer("algorithm"), "percolator")== 0){
@@ -125,16 +131,10 @@ int main(int argc, char** argv){
       wrong_command(psm_algorithm, "The analysis algorithm to use. percolator|retention-czar|all");
     }
     
-    //always use index for match_analysis!
-    set_string_parameter("use-index", "T");
-    
-    //parameters are now confirmed, can't be changed
-    parameters_confirmed();
-    
     unsigned int number_features = 20;
     double* results_q = NULL;
     double* results_score = NULL;
-    double pi0 = get_double_parameter("pi0", 0.9);
+    double pi0 = get_double_parameter("pi0");
     char** feature_names = generate_feature_name_array(algorithm);
     double* features = NULL;    
     MATCH_ITERATOR_T* match_iterator = NULL;
@@ -257,6 +257,7 @@ int main(int argc, char** argv){
     free_match_collection_iterator(match_collection_iterator);
     free_match_iterator(match_iterator);
     free_match_collection(target_match_collection);
+    free_parameters();
   }
   else{
     char* usage = parse_arguments_get_usage("match_analysis");
