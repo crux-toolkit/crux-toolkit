@@ -174,6 +174,7 @@ int compare_match_xcorr(
 
 /**
  * compare two matches, used for qsort
+ * The smaller the Q value the better!!!, this is opposite to other scores
  * \returns the difference between xcorr score in match_a and match_b
  */
 int compare_match_q_value(
@@ -182,10 +183,10 @@ int compare_match_q_value(
 )
 {
 
-  if((*match_b)->match_scores[Q_VALUE] > (*match_a)->match_scores[Q_VALUE]){
+  if((*match_b)->match_scores[Q_VALUE] < (*match_a)->match_scores[Q_VALUE]){
     return 1;
   }
-  else if((*match_b)->match_scores[Q_VALUE] < (*match_a)->match_scores[Q_VALUE]){
+  else if((*match_b)->match_scores[Q_VALUE] > (*match_a)->match_scores[Q_VALUE]){
     return -1;
   }
   return 0;
