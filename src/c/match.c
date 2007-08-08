@@ -229,7 +229,7 @@ void print_match(
       break;
   }
 
-  fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", 
+  fprintf(file, "P %d\t%d\t%.8f\t%.8f\t%.8f\t", 
       match->match_rank[primary_score], 
       match->match_rank[secondary_score], 
       get_peptide_peptide_mass(match->peptide), 
