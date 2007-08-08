@@ -210,13 +210,13 @@ int main(int argc, char** argv){
     }
     
     //get mass offset from precursor mass to search for candidate peptides
-    mass_offset = get_double_parameter("mass-offset", 0);
+    mass_offset = get_double_parameter("mass-offset");
     
     //set max number of preliminary scored peptides to use for final scoring
-    max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
+    max_rank_preliminary = get_int_parameter("max-rank-preliminary");
 
     //set max number of final scoring matches to print as output
-    max_rank_result = get_int_parameter("max-rank-result", 500);
+    max_rank_result = get_int_parameter("max-rank-result");
     
     //print header 1/2
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
@@ -299,12 +299,7 @@ int main(int argc, char** argv){
     free_match_collection(match_collection);
     free_spectrum_collection(collection);
     free_spectrum(spectrum);
-
-    //test function
-    /*
-    pcEndRegistration();
-    carp(CARP_DEBUG, "Percolator, did it happen?");
-    */
+    free_parameters();    
   }
   else{
     char* usage = parse_arguments_get_usage("search_spectrum");

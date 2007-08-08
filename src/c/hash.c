@@ -1,7 +1,7 @@
 /*****************************************************************************
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -148,11 +148,14 @@ void free_hash(
 {
   unsigned int idx = 0;
   unsigned int size = sizes[h->size_index];
-  //free up all key strings
+  //free up all key & values strings
   for(; idx < size; ++idx){
     if(h->records[idx].key != NULL){
       free(h->records[idx].key);
     }
+    if(h->records[idx].value != NULL){
+      free(h->records[idx].value);
+    }    
   }
   
   free(h->records);
@@ -162,6 +165,7 @@ void free_hash(
 /**
  * add key and value to hash table.
  * Must add a heap allocated key, value may be NULL
+ * If finds duplicate key, just increase count by 1
  *\returns TRUE if successfully adds to new record, else FALSE
  */
 BOOLEAN_T add_hash(
@@ -194,8 +198,9 @@ BOOLEAN_T add_hash(
       if ((code == recs[ind].hash) && recs[ind].key &&
           strcmp(key, recs[ind].key) == 0){
         //increment count
-        ++recs[ind].count;
+        ++recs[ind].count;        
         free(key);
+        free(value);
         return TRUE;
       }
       else{
@@ -255,6 +260,51 @@ BOOLEAN_T add_hash_when_grow(
     h->records_count++;
     
     return TRUE;
+}
+
+/**
+ * Updates the value for the key
+ * Must already have a existing value for the key
+ * Copies the value, thus no need to pass in a heap allocated value
+ *\returns TRUE if successfully updates hash value, else FALSE
+ */
+BOOLEAN_T update_hash_value(
+  HASH_T* h, ///< Hash object to add -in/out
+  char *key, ///< key of the record to update -in
+  void *value ///< value to add to be hash -in
+  )
+{
+  RECORD_T* recs;  
+  unsigned int off, ind, size, code;
+  
+  if (key == NULL || *key == '\0') return FALSE;
+  
+  code = strhash(key);
+  recs = h->records;
+  size = sizes[h->size_index];
+  
+  ind = code % size;
+  off = 0;
+  
+  //probe down until reach open slot
+  //Quadratic probing used
+  while (recs[ind].key){     
+    //if find duplicate key, thus identical item
+    if ((code == recs[ind].hash) && recs[ind].key &&
+        strcmp(key, recs[ind].key) == 0){
+      //free existing value
+      free(recs[ind].value);
+      //set new value
+      recs[ind].value = my_copy_string(value);              
+      return TRUE;
+    }
+    else{
+      //continue to search
+      ind = (code + (int)pow(++off,2)) % size;
+    }
+  }
+  carp(CARP_ERROR, "Failed to find key %s in hash table", key);
+  return FALSE;
 }
 
 /**

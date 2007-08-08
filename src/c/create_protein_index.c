@@ -89,7 +89,7 @@ int main(int argc, char** argv){
         carp(CARP_FATAL, "failed to create protein index on disk");
         exit(1);
       }
-    }
+    }    
     exit(0);
   } 
   else {

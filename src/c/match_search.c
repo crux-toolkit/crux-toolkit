@@ -206,7 +206,7 @@ int main(int argc, char** argv){
     /***** Now, must get all parameters through get_*_parameter ****/
     
     //how many runs of search to perform
-    number_runs = get_double_parameter("number-runs", INFINITY);
+    number_runs = get_double_parameter("number-runs");
 
     //what charge state of spectra to search
     if(strcmp(get_string_parameter_pointer("spectrum-change"), "all")== 0){
@@ -229,7 +229,7 @@ int main(int argc, char** argv){
     }
     
     //number_decoy_set
-    number_decoy_set = get_int_parameter("number-decoy-set", 2);
+    number_decoy_set = get_int_parameter("number-decoy-set");
 
     //main score type
     if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
@@ -274,16 +274,16 @@ int main(int argc, char** argv){
     }
     
     //set max number of preliminary scored peptides to use for final scoring
-    max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
+    max_rank_preliminary = get_int_parameter("max-rank-preliminary");
 
     //set max number of final scoring matches to print as output in sqt
-    max_rank_result = get_int_parameter("max-rank-result", 500);
+    max_rank_result = get_int_parameter("max-rank-result");
 
     //set max number of matches to be serialized per spectrum
-    top_match = get_int_parameter("top-match", 1);
+    top_match = get_int_parameter("top-match");
 
     //get mass offset from precursor mass to search for candidate peptides
-    mass_offset = get_double_parameter("mass-offset", 0);    
+    mass_offset = get_double_parameter("mass-offset");    
 
     //seed for random rnumber generation
     if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
@@ -459,6 +459,7 @@ int main(int argc, char** argv){
     free(psm_result_file);
     free_spectrum_iterator(spectrum_iterator);
     free_spectrum_collection(collection);
+    free_parameters();
   }
   else{
     char* usage = parse_arguments_get_usage("match_search");

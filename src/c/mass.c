@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #include <math.h>
@@ -61,7 +61,7 @@ void initialize_amino_masses (void)
   //monoisotopic mass
   amino_masses['A' - 'A' + 26] = 71.03711;
   amino_masses['B' - 'A' + 26] = 114.53494;
-  amino_masses['C' - 'A' + 26] = 103.00919;// + 57.000;
+  amino_masses['C' - 'A' + 26] = 103.00919; // + 57.000;
   amino_masses['D' - 'A' + 26] = 115.02694;
   amino_masses['E' - 'A' + 26] = 129.04259;
   amino_masses['F' - 'A' + 26] = 147.06841;
@@ -104,7 +104,7 @@ float get_mass_amino_acid(
   else{
     die("ERROR: mass type does not exist\n");
     //avoid compiler warning
-    return -1;
+    return 1;
   }
 }
 
@@ -138,3 +138,25 @@ float get_mass_amino_acid_monoisotopic(
   return(amino_masses[(short int)amino_acid - 'A' + 26 ]);
 }
 
+/**
+ * increase the amino acid mass for both mono and average
+ */
+void increase_amino_acid_mass(
+  char amino_acid, ///< the query amino acid -in
+  float update_mass ///< the mass amount to update for the amino acid -in
+  )
+{
+  // has the amino_masses array been initialized?
+  if(!initialized_amino_masses){
+    initialize_amino_masses();
+    initialized_amino_masses = TRUE;
+  }
+
+  //check if amino acid
+  if((short int)amino_acid < 'A' || (short int)amino_acid > 'Z'){
+    carp(CARP_ERROR, "cannot update mass, char: %c not part of amino acid");
+  }
+  
+  amino_masses[(short int)amino_acid - 'A' + 26 ] += update_mass;
+  amino_masses[(short int)amino_acid - 'A'] += update_mass;
+}

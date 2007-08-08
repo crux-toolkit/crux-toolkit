@@ -202,13 +202,13 @@ int main(int argc, char** argv){
     }
         
     //check if maximum length is with in range <= 255
-    max_length = get_int_parameter("max-length",50);
+    max_length = get_int_parameter("max-length");
     if(max_length > 255){
       carp(CARP_FATAL, "maximum length:%d over limit 255.", max_length);
       exit(1);
     }
     
-    mass_range = get_double_parameter("mass-range", 1);
+    mass_range = get_double_parameter("mass-range");
     if(compare_float(mass_range, 0) == 0){
       carp(CARP_FATAL, "mass_range:%d must be greater than 0.", mass_range);
       exit(1);
@@ -243,11 +243,11 @@ int main(int argc, char** argv){
     }
     
     //set other parameters to final
-    min_mass = get_double_parameter("min-mass", 200);
-    max_mass = get_double_parameter("max-mass", 7200);
-    min_length = get_int_parameter("min-length", 6);
-    max_length = get_int_parameter("max-length", 50);
-    missed_cleavages = get_boolean_parameter("missed-cleavages", FALSE);
+    min_mass = get_double_parameter("min-mass");
+    max_mass = get_double_parameter("max-mass");
+    min_length = get_int_parameter("min-length");
+    max_length = get_int_parameter("max-length");
+    missed_cleavages = get_boolean_parameter("missed-cleavages");
 
     //peptide constraint
     constraint = 
@@ -271,6 +271,7 @@ int main(int argc, char** argv){
     //free index(frees constraint together);
     free_index(crux_index);     
     free(binary_fasta_file);
+    free_parameters();
     exit(0);
   } 
   else {

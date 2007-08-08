@@ -161,7 +161,7 @@ int main(int argc, char** argv){
     
     /******* All parameters must be taken through get_*_parameter() method ******/
     
-    number_runs = get_double_parameter("number-runs", INFINITY);
+    number_runs = get_double_parameter("number-runs");
 
     if(strcmp(get_string_parameter_pointer("spectrum-change"), "all")== 0){
       run_all_charges = TRUE;      
@@ -211,13 +211,13 @@ int main(int argc, char** argv){
     }
     
     //set max number of preliminary scored peptides to use for final scoring
-    max_rank_preliminary = get_int_parameter("max-rank-preliminary", 500);
+    max_rank_preliminary = get_int_parameter("max-rank-preliminary");
 
     //set max number of final scoring matches to print as output
-    max_rank_result = get_int_parameter("max-rank-result", 500);
+    max_rank_result = get_int_parameter("max-rank-result");
  
     //get mass offset from precursor mass to search for candidate peptides
-    mass_offset = get_double_parameter("mass-offset", 0);
+    mass_offset = get_double_parameter("mass-offset");
 
     //print header
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
@@ -325,6 +325,7 @@ int main(int argc, char** argv){
     
     free_spectrum_iterator(spectrum_iterator);
     free_spectrum_collection(collection);
+    free_parameters();
   }
   else{
     char* usage = parse_arguments_get_usage("search_spectra");

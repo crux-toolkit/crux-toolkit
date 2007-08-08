@@ -270,9 +270,9 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   
   //top_rank_for_p_value is the amount of top ranked sp scored peptides to score for LOGP_EXP_SP
   //This parameter can only be set from crux_parameter file
-  int top_rank_for_p_value = get_int_parameter("top-rank-p-value", 1);
-  int sample_count = get_int_parameter("sample-count",500);
-  int top_fit_sp = get_int_parameter("top-fit-sp", 1000);
+  int top_rank_for_p_value = get_int_parameter("top-rank-p-value");
+  int sample_count = get_int_parameter("sample-count");
+  int top_fit_sp = get_int_parameter("top-fit-sp");
   
   //move out of crux index dir
   if(!is_first_spectrum){

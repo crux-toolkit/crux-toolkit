@@ -3,7 +3,7 @@
 
 /**
  * \file mass.h 
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -60,6 +60,14 @@ float get_mass_amino_acid_average(
  */
 float get_mass_amino_acid_monoisotopic(
   char amino_acid ///< the query amino acid -in
+  );
+
+/**
+ * increase the amino acid mass for both mono and average
+ */
+void increase_amino_acid_mass(
+  char amino_acid, ///< the query amino acid -in
+  float update_mass ///< the mass amount to update for the amino acid -in
   );
 
 #endif

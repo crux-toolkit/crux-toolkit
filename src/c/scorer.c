@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.27 $
+ * REVISION: $Revision: 1.28 $
  ****************************************************************************/
 
 #include <math.h>
@@ -88,8 +88,8 @@ SCORER_T* new_scorer(
   
   //set fields needed for each score type
   if(type == SP){
-    scorer->sp_beta = get_double_parameter("beta", 0.075);
-    scorer->sp_max_mz = get_double_parameter("max-mz", 4000);
+    scorer->sp_beta = get_double_parameter("beta");
+    scorer->sp_max_mz = get_double_parameter("max-mz");
     //allocate the intensity array
     scorer->intensity_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
     scorer->max_intensity = 0;
@@ -98,7 +98,7 @@ SCORER_T* new_scorer(
     scorer->initialized = FALSE;
   }
   else if(type == XCORR){
-    //scorer->sp_max_mz = get_double_parameter("max-mz", 4000);
+    //scorer->sp_max_mz = get_double_parameter("max-mz");
     //scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
     scorer->last_idx = 0;
     //the scorer as not been initialized yet.
@@ -490,7 +490,7 @@ BOOLEAN_T create_intensity_array_sp(
   //FIXME, later be able pick between average and mono
   float bin_width = bin_width_mono;
   float precursor_mz = get_spectrum_precursor_mz(spectrum);
-  float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge",2) + 50;
+  float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge") + 50;
   int top_bins = 200;
 
   //DEBUG
@@ -800,7 +800,7 @@ BOOLEAN_T create_intensity_array_observed(
   float intensity = 0;
   float bin_width = bin_width_mono;
   float precursor_mz = get_spectrum_precursor_mz(spectrum);
-  float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge",2) + 50;
+  float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge") + 50;
 
   //set max_mz and malloc space for the observed intensity array
   if(experimental_mass_cut_off > 512){
