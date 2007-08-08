@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.28 $
+ * REVISION: $Revision: 1.29 $
  ****************************************************************************/
 
 #include <math.h>
@@ -478,7 +478,8 @@ void equalize_peaks(
  */
 BOOLEAN_T create_intensity_array_sp(
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
-  SCORER_T* scorer        ///< the scorer object -in/out
+  SCORER_T* scorer,        ///< the scorer object -in/out
+  int charge               ///< the peptide charge -in 
   )
 {
   PEAK_T* peak = NULL;
@@ -490,7 +491,7 @@ BOOLEAN_T create_intensity_array_sp(
   //FIXME, later be able pick between average and mono
   float bin_width = bin_width_mono;
   float precursor_mz = get_spectrum_precursor_mz(spectrum);
-  float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge") + 50;
+  float experimental_mass_cut_off = precursor_mz*charge + 50;
   int top_bins = 200;
 
   //DEBUG
@@ -706,7 +707,7 @@ float gen_score_sp(
   //initialize the scorer before scoring if necessary
   if(!scorer->initialized){
     //create intensity array
-    if(!create_intensity_array_sp(spectrum, scorer)){
+    if(!create_intensity_array_sp(spectrum, scorer, get_ion_series_charge(ion_series))){
       carp(CARP_ERROR, "failed to produce Sp");
       free(spectrum);
       free(ion_series);
@@ -790,7 +791,8 @@ void normalize_each_region(
  */
 BOOLEAN_T create_intensity_array_observed(
   SCORER_T* scorer,        ///< the scorer object -in/out
-  SPECTRUM_T* spectrum    ///< the spectrum to score(observed) -in
+  SPECTRUM_T* spectrum,    ///< the spectrum to score(observed) -in
+  int charge               ///< the peptide charge -in 
   )
 {  
   PEAK_T* peak = NULL;
@@ -800,7 +802,7 @@ BOOLEAN_T create_intensity_array_observed(
   float intensity = 0;
   float bin_width = bin_width_mono;
   float precursor_mz = get_spectrum_precursor_mz(spectrum);
-  float experimental_mass_cut_off = precursor_mz*get_int_parameter("charge") + 50;
+  float experimental_mass_cut_off = precursor_mz*charge + 50;
 
   //set max_mz and malloc space for the observed intensity array
   if(experimental_mass_cut_off > 512){
@@ -1024,7 +1026,8 @@ BOOLEAN_T create_intensity_array_theoretical(
  */
 BOOLEAN_T create_intensity_array_xcorr(
   SPECTRUM_T* spectrum,    ///< the spectrum to score(observed) -in
-  SCORER_T* scorer        ///< the scorer object -in/out
+  SCORER_T* scorer,        ///< the scorer object -in/out
+  int charge               ///< the peptide charge -in 
   )
 {
 
@@ -1038,7 +1041,7 @@ BOOLEAN_T create_intensity_array_xcorr(
   }
     
   //create intensity array for observed spectrum 
-  if(!create_intensity_array_observed(scorer, spectrum)){
+  if(!create_intensity_array_observed(scorer, spectrum, charge)){
     carp(CARP_ERROR, "failed to preprocess observed spectrum for Xcorr");
     return FALSE;
   }
@@ -1150,7 +1153,7 @@ float gen_score_xcorr(
   //preprocess the observed spectrum in scorer
   if(!scorer->initialized){
     //create intensity array for observed spectrum, if already not been done
-    if(!create_intensity_array_xcorr(spectrum, scorer)){
+    if(!create_intensity_array_xcorr(spectrum, scorer, get_ion_series_charge(ion_series))){
       carp(CARP_ERROR, "failed to produce XCORR");
       free(spectrum);
       free(ion_series);
