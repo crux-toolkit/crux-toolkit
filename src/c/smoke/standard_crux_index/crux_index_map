@@ -7,7 +7,7 @@
 #	mass_type: 0
 #	redundancy: 0
 #	CRUX index directory: standard_crux_index
-#	time created: Mon Aug  6 14:44:57 2007
+#	time created: Wed Aug  8 15:15:49 2007
 #	target mass range for index file: 500.00
 crux_index_1	360.00	500.00
 crux_index_2	860.00	500.00
