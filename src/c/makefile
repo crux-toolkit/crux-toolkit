@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.62 $   #-Werror \
+# VERSION: $Revision: 1.63 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -87,7 +87,8 @@ PROGS = \
 	${BINDIR}/search_spectrum \
 	${BINDIR}/search_spectra \
 	${BINDIR}/match_search \
-	${BINDIR}/match_analysis
+	${BINDIR}/match_analysis \
+	${BINDIR}/create_ion_files
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \
@@ -123,7 +124,7 @@ TAGS: *.c *.h *.cpp
 Percolator:
 	# make percolator 
 	@cd $(PERCOLATOR_DIR)/src ; make
-	#@cp $(PERCOLATOR_DIR)/src/PercolatorCInterface.h  . ;
+	@cp $(PERCOLATOR_DIR)/src/PercolatorCInterface.h  . ;
 	#@cp $(PERCOLATOR_DIR)/src/Release/lib/libpercolator.a ${LIBDIR} ;
 
 ##### Dependencies
