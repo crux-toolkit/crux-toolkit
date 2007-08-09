@@ -36,7 +36,7 @@ sort=none
 output-sequence=TRUE
 
 #Output the peptide trypticiy in output.
-trypticity-opt=FALSE
+output-trypticity=FALSE
 
 #Allow missed cleaave sites by trypsin?(TRUE|FALSE)
 missed-cleavages=TRUE
