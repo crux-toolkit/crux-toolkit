@@ -24,8 +24,10 @@ if not len(args) == 2:
   print usage
   sys.exit(1)
 
+ms2_file = args[0]
+
 try:
-    scan_num_list = open(arg[1], "r")
+    scan_num_list = open(args[1], "r")
     
 except IOError:
     print "%s\n" % "failed to open file"
@@ -33,7 +35,7 @@ except IOError:
 
 random.seed()
 
-temp_file = "temp_file"
+temp_filename = "temp_file"
 for line in scan_num_list:
     if line.startswith('S'):
         fields = line.rstrip('\n').split()
@@ -42,7 +44,7 @@ for line in scan_num_list:
                     commands.getstatusoutput("get_ms2_spectrum  " + \
                                              `scan_number` + " " +\
                                              ms2_file + " "+ \
-                                             temp_file
+                                             temp_filename
                                              )
         if exit_code == "1":
             print "failed to run"
@@ -50,7 +52,7 @@ for line in scan_num_list:
 
 
         try:
-            temp_file = open(temp_file, "r")
+            temp_file = open(temp_filename, "r")
             
         except IOError:
             print "%s\n" % "failed to open file"
@@ -60,6 +62,8 @@ for line in scan_num_list:
         z_lines = []
         in_z_line = False
         for t_line  in temp_file:
+            if t_line.startswith('File'):
+              continue
             t_line = t_line.rstrip('\n')
             if t_line.startswith('Z'):
                 in_z_line = True
@@ -75,6 +79,6 @@ for line in scan_num_list:
                 
         
         (exit_code, result) = \
-                    commands.getstatusoutput("rm -rf " + temp_file)
+                    commands.getstatusoutput("rm -rf " + temp_filename)
         
                                              
