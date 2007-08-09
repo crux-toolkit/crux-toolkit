@@ -23,6 +23,8 @@ def plot_compare_data(result_array, score_type="none", data_type="none"):
     """ plots the results of two compared as a scattered plot """
     prefix = "Score comparison for " + score_type
     file_name = "fig-2-" + data_type + "-" + score_type
+
+    hold(False)
     
     axis('scaled')
     scatter(result_array[0], result_array[1])
@@ -55,6 +57,8 @@ def plot_compare_data(result_array, score_type="none", data_type="none"):
         xlim((0, 3))
         ylim((0, 3))
     
+    hold(False)
+
     savefig(file_name + ".eps")
     savefig(file_name + ".png")
 
@@ -71,22 +75,25 @@ def plot_histogram_data(data_array, score_type="none"):
 
     #FIXME Still need a way how to plot all data neatly
     #plot data as histogram
-    hist(data_array, normed=False, bins=5)
+    hold(False)
+    hist(data_array, normed=False, bins=10)
+    hold(True)
     
     if score_type == "sp":
         title(prefix, size=20)
-        xlim((0, 5))
+        # xlim((0, 5))
         xlabel(score_type, size=15)
         ylabel("score difference", size=15)
                 
     elif score_type == "xcorr":
         title(prefix, size=20)
-        xlim((0, 5))
+        # xlim((0, 5))
         xlabel(score_type, size=15)
         ylabel("score difference", size=15)
         
     savefig(file_name + ".eps")
     savefig(file_name + ".png")
+    hold(False)
 
 
 #-------------------
@@ -215,7 +222,7 @@ for dta_file in dta_file_list:
                 print "failed to run score_peptide_spectrum"
                 sys.exit(1)
 
-            #print result_crux
+            # print result_crux
         
             result_crux = result_crux.split(': ')
 
@@ -250,5 +257,5 @@ plot_compare_data(random_result_array_xcorr, "xcorr", "random")
 
 # third, plot the score difference of SP, and Xcorr for each peptide between Sequest and Crux
 # currently, the data is for both top and random peptides, thus twice much points compared to the other plots
-#plot_histogram_data(diff_sp, "sp")
-#plot_histogram_data(diff_xcorr, "xcorr")
+plot_histogram_data(diff_sp, "sp")
+plot_histogram_data(diff_xcorr, "xcorr")
