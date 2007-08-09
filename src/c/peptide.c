@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.54 $
+ * $Revision: 1.55 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -216,13 +216,14 @@ void print_peptide(
 /**
  * Prints a peptide object to file.
  * prints all peptide_src object it's associated 
- * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
- *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
+ * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
+ *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
  * prints in correct format for generate_peptide
  */
 void print_peptide_in_format(
   PEPTIDE_T* peptide,  ///< the query peptide -in
   BOOLEAN_T flag_out, ///< print peptide sequence? -in
+  BOOLEAN_T trypticity_opt, ///< print trypticity of peptide? -in
   FILE* file  ///< the out put stream -out
   )
 {
@@ -231,46 +232,46 @@ void print_peptide_in_format(
   char* id = NULL;
   int start_idx = 0;
   char* sequence = NULL;
-  //BOOLEAN_T light = FALSE;
 
   //print mass of the peptide
   fprintf(file, "%.2f", peptide->peptide_mass);
 
   //obtain peptide sequence
   if(flag_out){
-    parent = get_peptide_src_parent_protein(next_src);
-    
-    //covnert to heavy protein
-    /*
-      FIXME, IF use light heavy put back
-    if(get_protein_is_light(parent)){
-      protein_to_heavy(parent);
-      light = TRUE;
-    }
-    */
+    parent = get_peptide_src_parent_protein(next_src);        
     sequence = get_peptide_sequence(peptide);
   }
 
   //iterate over all peptide src
   while(next_src != NULL){
-    //if(!light){
-      parent = get_peptide_src_parent_protein(next_src);
-      
-      //covnert to heavy protein
-      /*
-        FIXME, IF use light heavy put back
-      if(get_protein_is_light(parent)){
-        protein_to_heavy(parent);
-        light = TRUE;
-      }
-      */
-      //}
-
+    parent = get_peptide_src_parent_protein(next_src);    
     id = get_protein_id_pointer(parent);
     start_idx = get_peptide_src_start_idx(next_src);
-        
+    
     fprintf(file, "\t%s\t%d\t%d", id, start_idx, peptide->length);
   
+    //print trypticity of peptide??
+    if(trypticity_opt){
+      if(get_peptide_src_peptide_type(next_src) == TRYPTIC){
+        fprintf(file, "\t%s", "TRYPTIC");
+      }
+      else if(get_peptide_src_peptide_type(next_src) == PARTIALLY_TRYPTIC){
+        fprintf(file, "\t%s", "PARTIALLY_TRYPTIC");
+      }
+      else if(get_peptide_src_peptide_type(next_src) == N_TRYPTIC){
+        fprintf(file, "\t%s", "N_TRYPTIC");
+      }
+      else if(get_peptide_src_peptide_type(next_src) == C_TRYPTIC){
+        fprintf(file, "\t%s", "C_TRYPTIC");
+      }
+      else if(get_peptide_src_peptide_type(next_src) == NOT_TRYPTIC){
+        fprintf(file, "\t%s", "NOT_TRYPTIC");
+      }
+      else if(get_peptide_src_peptide_type(next_src) == ANY_TRYPTIC){
+        fprintf(file, "\t%s", "ANY_TRYPTIC");
+      }
+    }
+
     //print peptide sequence?
     if(flag_out){
       fprintf(file, "\t%s\n", sequence);
@@ -278,17 +279,7 @@ void print_peptide_in_format(
     else{
       fprintf(file, "\n");
     }
-    next_src = get_peptide_src_next_association(next_src);
-    
-    /** 
-     * uncomment this code if you want to restore a protein to 
-     * light after converted to heavy
-    //convert back to light
-    if(light){
-      protein_to_light(parent);
-      light = FALSE;
-    }
-    */
+    next_src = get_peptide_src_next_association(next_src);    
   }
 
   //free sequence if allocated

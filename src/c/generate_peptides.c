@@ -64,6 +64,7 @@ int main(int argc, char** argv){
 
   /* Set default values for any options here */
   int flag_opt = FALSE;
+  int trypticity_opt = FALSE;
   double min_mass = 200;
   double max_mass = 2400;
   int min_length = 6;
@@ -83,12 +84,6 @@ int main(int argc, char** argv){
 
   /* Define optional command line arguments */ 
   
-  parse_arguments_set_opt(
-    "output-sequence", 
-    "Output the peptide sequence as well as the protein id and start and stop.", 
-    (void *) &flag_opt, 
-    FLAG_ARG);
-
   parse_arguments_set_opt(
     "min-mass", 
     "The minimum neutral mass of the peptides to output.", 
@@ -161,6 +156,18 @@ int main(int argc, char** argv){
     (void *) &parameter_file,
     STRING_ARG);
 
+  parse_arguments_set_opt(
+    "output-sequence", 
+    "Output the peptide sequence as well as the protein id and start and stop.", 
+    (void *) &flag_opt, 
+    FLAG_ARG);
+
+  parse_arguments_set_opt(
+    "output-trypticity", 
+    "Output the peptide trypticiy in output.", 
+    (void *) &trypticity_opt, 
+    FLAG_ARG);
+
   /* Define required command line arguments */
   parse_arguments_set_req(
     "fasta-file", 
@@ -216,7 +223,7 @@ int main(int argc, char** argv){
     while(generate_peptides_iterator_has_next(peptide_iterator)){
       ++total_peptides;
       peptide = generate_peptides_iterator_next(peptide_iterator);
-      print_peptide_in_format(peptide, output_sequence, stdout);
+      print_peptide_in_format(peptide, output_sequence, trypticity_opt, stdout);
       
       //free peptide
       free_peptide(peptide);
