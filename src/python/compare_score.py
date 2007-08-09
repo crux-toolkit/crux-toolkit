@@ -84,8 +84,8 @@ if not len(args) == 3:
 #set sp_score type
 score_type = args[0]
 
-# add more score
-if not score_type == "sp":
+# add more score 
+if not (score_type == "sp" or score_type == "xcorr"):
     print usage
     sys.exit(1)
 
@@ -104,9 +104,9 @@ result_array2 = ([],[])
 totalCount = 0
 
 for working_spectrum in sqt_object.spectrums:
-    if totalCount >= 1500:
+    if totalCount >= 500:
         break
-    scanNum = working_spectrum.fields["id"]
+    scanNum = working_spectrum.fields["scan"]
     charge = working_spectrum.fields["charge"]
     for working_peptide in working_spectrum.peptides:
         (exit_code, result) = \
@@ -125,7 +125,9 @@ for working_spectrum in sqt_object.spectrums:
         #        print line
         #        continue
         #    elif line.startswith('S'):        
+        print result
         result = result.split(': ')
+        #print result
         #if working_peptide.components["xcore_rank"] < 10:
         #if abs(working_peptide.components[score_type] - float(result[1])) > 10:
         result_array[0].append(working_peptide.components[score_type])
@@ -137,18 +139,10 @@ for working_spectrum in sqt_object.spectrums:
             print "Sequest: %.1f, CRUX: %.1f, sequence: %s" % (working_peptide.components[score_type], float(result[1]),working_peptide.components["sequence"])
             #print "Scan number: %s, charge: %s" % scanNum, charge
         totalCount += 1
-        if totalCount % 100 == 0:
+        if totalCount % 10 == 0:
             print "totalCount: %d" % totalCount
             #break
         
         
 #plot the data
 plot_compare_data(result_array, score_type)
-#plot_compare_rank(result_array2)
-
-#print each pair of score
-#(result1, result2) = result_array
-#n = 0
-#for stuff in result1:
-#    print "%.1f %.1f" % (stuff, result2[n])
-#    n += 1
