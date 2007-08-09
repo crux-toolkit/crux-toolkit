@@ -223,9 +223,11 @@ void print_match(
     case LOGP_BONF_EVD_XCORR:
     case LOGP_WEIBULL_XCORR:
     case LOGP_BONF_WEIBULL_XCORR:
+      secondary_score = SP;
+      break;
     case Q_VALUE:      
     case PERCOLATOR_SCORE:  
-      secondary_score = SP;
+      secondary_score = XCORR;
       break;
   }
 
@@ -236,7 +238,7 @@ void print_match(
       match->match_scores[primary_score], 
       match->match_scores[secondary_score]);
 
-  // TODO resolve spectrum_header output and above to not be coupled
+  //FIXME resolve spectrum_header output and above to not be coupled
  
   //should I print sequence?
   if(output_sequence){
