@@ -1,6 +1,7 @@
 #!/bin/bash
 
-ms2="spectra_random_1000.ms2"
+export PATH=../../../bin/:$PATH
+ms2="test.ms2"
 
 #if [[ $# != 1 ]]
 #then 
@@ -10,7 +11,7 @@ ms2="spectra_random_1000.ms2"
 
 if [[ ! -f "$ms2" ]]
 then 
-  echo "Error: file or directiry does not match " 1>&2
+  echo "Error: file or directory does not match " 1>&2
   exit 1
 fi
 
