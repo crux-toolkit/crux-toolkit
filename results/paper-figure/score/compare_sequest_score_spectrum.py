@@ -250,5 +250,5 @@ plot_compare_data(random_result_array_xcorr, "xcorr", "random")
 
 # third, plot the score difference of SP, and Xcorr for each peptide between Sequest and Crux
 # currently, the data is for both top and random peptides, thus twice much points compared to the other plots
-plot_histogram_data(diff_sp, "sp")
-plot_histogram_data(diff_xcorr, "xcorr")
+#plot_histogram_data(diff_sp, "sp")
+#plot_histogram_data(diff_xcorr, "xcorr")
