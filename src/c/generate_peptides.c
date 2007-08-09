@@ -66,7 +66,7 @@ int main(int argc, char** argv){
   int flag_opt = FALSE;
   int trypticity_opt = FALSE;
   double min_mass = 200;
-  double max_mass = 2400;
+  double max_mass = 7200;
   int min_length = 6;
   int max_length = 50;
   char* cleavages = "tryptic"; 

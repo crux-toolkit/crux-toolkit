@@ -82,6 +82,7 @@ void initialize_parameters(void){
   set_string_parameter("use-index", "F");
   set_string_parameter("sort", "none");      // mass, length, lexical, none  
   set_boolean_parameter("output-sequence", FALSE);
+  set_boolean_parameter("output-trypticity", FALSE);
   set_boolean_parameter("missed-cleavages", FALSE);
   
   //searching peptides
