@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.39 $
+ * $Revision: 1.40 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -94,12 +94,15 @@ void print_peptide(
 
 /**
  * Prints a peptide object to file.
- * mass \t protein-id \t peptide-start \t peptide-length <\t peptide-sequence> \n
+ * prints all peptide_src object it's associated 
+ * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
+ *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
  * prints in correct format for generate_peptide
  */
 void print_peptide_in_format(
   PEPTIDE_T* peptide,  ///< the query peptide -in
   BOOLEAN_T flag_out, ///< print peptide sequence? -in
+  BOOLEAN_T trypticity_opt, ///< print trypticity of peptide? -in
   FILE* file  ///< the out put stream -out
   );
 
