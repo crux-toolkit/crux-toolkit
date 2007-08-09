@@ -37,7 +37,7 @@ def plot_compare_data(result_array, score_type="none", data_type="none"):
         ylabel("CRUX", size=15)
 
 
-        t = range(0, 200)
+        t = range(0, 201)
         y = t
         plot(t, y, color='r')
         
@@ -50,7 +50,7 @@ def plot_compare_data(result_array, score_type="none", data_type="none"):
         title(prefix, size=20)
         xlabel("Sequest", size=15)
         ylabel("CRUX", size=15)
-        t = range(0, 3)
+        t = range(0, 4)
         y = t
         plot(t, y, color='r')
         
@@ -247,6 +247,8 @@ for dta_file in dta_file_list:
 # plot the data
 print "generating figure"
 
+plot_histogram_data(diff_sp, "sp")
+plot_histogram_data(diff_xcorr, "xcorr")
 # first plot top ranked peptide comparison
 plot_compare_data(top_result_array_sp, "sp", "top")
 plot_compare_data(top_result_array_xcorr, "xcorr", "top")
@@ -257,5 +259,3 @@ plot_compare_data(random_result_array_xcorr, "xcorr", "random")
 
 # third, plot the score difference of SP, and Xcorr for each peptide between Sequest and Crux
 # currently, the data is for both top and random peptides, thus twice much points compared to the other plots
-plot_histogram_data(diff_sp, "sp")
-plot_histogram_data(diff_xcorr, "xcorr")
