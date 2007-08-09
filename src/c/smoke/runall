@@ -1,0 +1,3 @@
+#!/bin/bash
+chmod 774 crux-test.pl
+crux-test.pl crux-test.cmds
