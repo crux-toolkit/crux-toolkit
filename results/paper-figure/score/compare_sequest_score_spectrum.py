@@ -36,13 +36,13 @@ def plot_compare_data(result_array, score_type="none", data_type="none"):
         xlabel("Sequest", size=15)
         ylabel("CRUX", size=15)
 
+        t = range(0, 251)
 
-        t = range(0, 201)
         y = t
         plot(t, y, color='r')
         
     
-        axis([0, 200, 0, 200])
+        axis([0, 250, 0, 250])
         xticks(size=10)
         yticks(size=10)
 
@@ -50,12 +50,14 @@ def plot_compare_data(result_array, score_type="none", data_type="none"):
         title(prefix, size=20)
         xlabel("Sequest", size=15)
         ylabel("CRUX", size=15)
-        t = range(0, 4)
+
+        t = range(0, 5)
+
         y = t
         plot(t, y, color='r')
         
-        xlim((0, 3))
-        ylim((0, 3))
+        xlim((0, 4))
+        ylim((0, 4))
     
     hold(False)
 
