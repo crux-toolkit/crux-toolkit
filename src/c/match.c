@@ -193,6 +193,26 @@ int compare_match_q_value(
 }
 
 /**
+ * compare two matches, used for PERCOLATOR_SCORE
+ * \returns the difference between PERCOLATOR_SCORE score in match_a and match_b
+ */
+int compare_match_percolator_score(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+)
+{
+
+  if((*match_b)->match_scores[PERCOLATOR_SCORE] > (*match_a)->match_scores[PERCOLATOR_SCORE]){
+    return 1;
+  }
+  else if((*match_b)->match_scores[PERCOLATOR_SCORE] < (*match_a)->match_scores[PERCOLATOR_SCORE]){
+    return -1;
+  }
+  return 0;
+
+}
+
+/**
  * print the information of the match
  */
 void print_match(
@@ -227,17 +247,28 @@ void print_match(
       break;
     case Q_VALUE:      
     case PERCOLATOR_SCORE:  
-      secondary_score = XCORR;
+      primary_score = PERCOLATOR_SCORE;
+      secondary_score = Q_VALUE;      
       break;
   }
 
-  fprintf(file, "P %d\t%d\t%.8f\t%.8f\t%.8f\t", 
-      match->match_rank[primary_score], 
-      match->match_rank[secondary_score], 
-      get_peptide_peptide_mass(match->peptide), 
-      match->match_scores[primary_score], 
-      match->match_scores[secondary_score]);
-
+  if(output_mode == Q_VALUE || output_mode == PERCOLATOR_SCORE){
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", 
+            match->match_rank[primary_score], 
+            match->match_rank[primary_score], 
+            get_peptide_peptide_mass(match->peptide), 
+            match->match_scores[primary_score], 
+            match->match_scores[secondary_score]);
+  }
+  else{
+    fprintf(file, "P %d\t%d\t%.2f\t%.2f\t%.2f\t", 
+            match->match_rank[primary_score], 
+            match->match_rank[secondary_score], 
+            get_peptide_peptide_mass(match->peptide), 
+            match->match_scores[primary_score], 
+            match->match_scores[secondary_score]);
+  }
+  
   //FIXME resolve spectrum_header output and above to not be coupled
  
   //should I print sequence?

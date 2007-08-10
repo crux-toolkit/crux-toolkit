@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.11 $ 
+ * $Revision: 1.12 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -68,6 +68,15 @@ int compare_match_xcorr(
  * \returns the difference between xcorr score in match_a and match_b
  */
 int compare_match_q_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * compare two matches, used for PERCOLATOR_SCORE
+ * \returns the difference between PERCOLATOR_SCORE score in match_a and match_b
+ */
+int compare_match_percolator_score(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );

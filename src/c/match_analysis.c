@@ -228,14 +228,14 @@ int main(int argc, char** argv){
     fill_result_to_match_collection(target_match_collection, results_score, PERCOLATOR_SCORE);
     
     //create match iterator, TRUE: return match in sorted order of main_score type
-    match_iterator = new_match_iterator(target_match_collection, Q_VALUE, TRUE);
+    match_iterator = new_match_iterator(target_match_collection, PERCOLATOR_SCORE, TRUE);
     
     //iterate over matches
     int match_count = 0;
     while(match_iterator_has_next(match_iterator)){
       ++match_count;
       match = match_iterator_next(match_iterator);
-      print_match(match, stdout, TRUE, Q_VALUE);
+      print_match(match, stdout, TRUE, PERCOLATOR_SCORE);
       
       //print only up to max_rank_result of the matches
       if(match_count >= max_rank_result){

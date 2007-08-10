@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.39 $
+ * REVISION: $Revision: 1.40 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -24,7 +24,7 @@
  * \define constants
  */
 #define MAX_PEAKS 4000
-#define MAX_CHARGE 2
+#define MAX_CHARGE 3
 #define MAX_I_LINES 2 //number of 'I' lines alb eto parse for one spectrum object
 #define MAX_D_LINES 2 //number of 'D' lines alb eto parse for one spectrum object
 
@@ -580,7 +580,7 @@ BOOLEAN_T parse_spectrum_file(
 
  /**
   * Adds a possible charge(z) to the spectrum.
-  * Must not exceed the MAX_CHARGE capacity
+  * Must not exceed the MAX_CARGE capacity
   */
  BOOLEAN_T add_possible_z(
    SPECTRUM_T* spectrum,  ///< place Z line into this spectrum -out   
