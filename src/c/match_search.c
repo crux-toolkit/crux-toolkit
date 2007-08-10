@@ -114,7 +114,7 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr",
+    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | logp_exp_sp | logp_bonf_exp_sp | xcorr",
     (void *) &score_type, 
     STRING_ARG);
 

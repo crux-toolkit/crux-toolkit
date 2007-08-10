@@ -29,7 +29,8 @@ SRC = \
 	../parse_arguments.c \
 	../generate_peptides_iterator.c \
 	../match.c \
-	../match_collection.c
+	../match_collection.c \
+	../hash.c
 TESTS = \
 	check-peak.c \
 	check-spectrum.c \

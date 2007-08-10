@@ -25,7 +25,7 @@ START_TEST (test_create){
   spectrum = allocate_spectrum();
 
   file = fopen("test.ms2", "r" );
-  fail_unless(parse_spectrum_file(spectrum, file), "failed to open and create new spectrum from ms2 file");
+  fail_unless(parse_spectrum_file(spectrum, file, "test.ms2"), "failed to open and create new spectrum from ms2 file");
   
   fail_unless(get_spectrum_first_scan(spectrum) == 15, "first_scan field incorrect");
   fail_unless(get_spectrum_last_scan(spectrum) == 15, "last_scan field incorrect");

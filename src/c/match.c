@@ -272,7 +272,7 @@ void print_match(
   //FIXME resolve spectrum_header output and above to not be coupled
  
   //should I print sequence?
-  if(output_sequence){
+  if(output_sequence){        
     peptide_sequence = get_match_sequence(match);
     fprintf(file, "%s\n", peptide_sequence);
     free(peptide_sequence);

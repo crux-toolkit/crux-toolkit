@@ -136,7 +136,7 @@ START_TEST (test_create){
  
   //try printing peptide in various forms..to ensure nothing blows up
   print_peptide(peptide4, stdout);
-  print_peptide_in_format(peptide4, TRUE, stdout);
+  print_peptide_in_format(peptide4, TRUE, TRUE, stdout);
   serialize_peptide(peptide4, stdout);
  
   free_database(database);

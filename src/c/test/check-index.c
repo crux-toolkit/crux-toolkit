@@ -22,8 +22,6 @@ PEPTIDE_T* peptide;
 START_TEST (test_create){
   delete_dir("fasta_file_crux_index");
   float mass_range = 1000.0;
-  int max_size =  70;
-  //BOOLEAN_T ok_seq = TRUE;
   set_verbosity_level(CARP_MAX);
   char* name = NULL;
 
@@ -42,13 +40,11 @@ START_TEST (test_create){
     new_index("fasta_file",
               constraint,
               mass_range,
-              max_size,
               TRUE,
               FALSE);
   
   
-  fail_unless(compare_float(get_index_mass_range(_index),mass_range)==0, "failed to set mass_range, index");
-  fail_unless(get_index_max_size(_index)== max_size, "failed to set max_size, index");
+  fail_unless(compare_float(get_index_mass_range(_index),mass_range)==0, "failed to set mass_range, index");  
   fail_unless(get_index_is_unique(_index) == TRUE, "failed to set is_unique, index"  );
   fail_unless(get_index_database(_index) != NULL, " failed to set database");
   fail_unless(get_index_constraint(_index) == constraint, " failed to set constraint");
@@ -84,7 +80,7 @@ START_TEST (test_create){
   while(index_peptide_iterator_has_next(iterator)){
     ++n;
     fail_unless((peptide = index_peptide_iterator_next(iterator)) != NULL, "index_peptide_iterator failed");
-    print_peptide_in_format(peptide, TRUE, stdout);
+    print_peptide_in_format(peptide, TRUE, TRUE, stdout);
     //free_peptide_for_array(peptide);    
     free_peptide(peptide);
   }

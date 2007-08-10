@@ -102,7 +102,7 @@ START_TEST (test_create){
     peptide5 = database_sorted_peptide_iterator_next(iterator4);
 
     //this print statement should still work eventhough we call "free_database(db)" before.
-    print_peptide_in_format(peptide5, TRUE,  stdout);
+    print_peptide_in_format(peptide5, TRUE, TRUE, stdout);
     //print_peptide(peptide5, stdout);
     free_peptide(peptide5);
   }
@@ -179,7 +179,7 @@ START_TEST (test_create){
     peptide5 = database_sorted_peptide_iterator_next(iterator4);
 
     //this print statement should still work eventhough we call "free_database(db)" before.
-    print_peptide_in_format(peptide5, TRUE,  stdout);
+    print_peptide_in_format(peptide5, TRUE, TRUE, stdout);
     //print_peptide(peptide5, stdout);
     free_peptide(peptide5);
   }
