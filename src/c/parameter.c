@@ -102,6 +102,8 @@ void initialize_parameters(void){
   set_int_parameter("max-rank-preliminary", 500);
   set_int_parameter("max-rank-result", 500);
   set_int_parameter("top-fit-sp", 1000);
+  set_int_parameter("top-scores-to-fit", 400);
+  set_int_parameter("skip-first-score", 0);
   
   //set the top ranking peptides to score for LOGP_*
   set_int_parameter("top-rank-p-value", 1);

@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.63 $   #-Werror \
+# VERSION: $Revision: 1.64 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -125,7 +125,7 @@ Percolator:
 	# make percolator 
 	@cd $(PERCOLATOR_DIR)/src ; make
 	@cp $(PERCOLATOR_DIR)/src/PercolatorCInterface.h  . ;
-	#@cp $(PERCOLATOR_DIR)/src/Release/lib/libpercolator.a ${LIBDIR} ;
+	@cp $(PERCOLATOR_DIR)/src/Release/lib/libpercolator.a ${LIBDIR} ;
 
 ##### Dependencies
 

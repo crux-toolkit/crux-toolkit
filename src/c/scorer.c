@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.29 $
+ * REVISION: $Revision: 1.30 $
  ****************************************************************************/
 
 #include <math.h>
@@ -717,7 +717,8 @@ float gen_score_sp(
   }
 
   //calculate the B_ION and Y_ION portions of the Sp score
-  ion_match = calculate_ion_type_sp(scorer, ion_series, &intensity_sum, B_ION, &repeat_count) +
+  ion_match = 
+    calculate_ion_type_sp(scorer, ion_series, &intensity_sum, B_ION, &repeat_count) +
     calculate_ion_type_sp(scorer, ion_series, &intensity_sum, Y_ION, &repeat_count);
   
   //set the fraction of  b,y ions matched for this ion_series
@@ -1397,6 +1398,72 @@ float score_spectrum_v_spectrum(
   SPECTRUM_T* second_spectrum ///<  the second spectrum to score
 );
 
+
+/**
+ * Create ion files (for GMTK) in the output directory
+ * \returns success
+ */
+/*int output_ion_files(
+  DIR* output_directory,    ///< directory in which to place the ion files -in
+  SPECTRUM_T* spectrum,     ///< input spectrum -in
+  ION_SERIES_T* ion_series  ///< ion series for which to output files -in
+){
+
+  //create ion constraint
+//  ION_CONSTRAINT_T* ion_constraint = 
+//    new_ion_constraint(get_ion_constraint_mass_type(get_ion_series_ion_constraint(ion_series)), get_ion_series_charge(ion_series), ion_type, FALSE);
+//  
+//  //create the filtered iterator that will select among the ions
+//  ION_FILTERED_ITERATOR_T* ion_iterator = new_ion_filtered_iterator(ion_series, ion_constraint);
+//  
+//  //while there are ion's in ion iterator, add matched observed peak intensity
+//  while(ion_filtered_iterator_has_next(ion_iterator)){
+//    ion = ion_filtered_iterator_next(ion_iterator);
+//    intensity_array_idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
+//    //get the intensity matching to ion's m/z
+//    if(intensity_array_idx < scorer->sp_max_mz){
+//      one_intensity = scorer->intensity_array[intensity_array_idx];
+//    }
+//    else{
+//      //printf("index out of bounds: %d scorer->sp_max_mz: %.2f ion_mass_z: %.2f\n", intensity_array_idx, scorer->sp_max_mz, get_ion_mass_z(ion));
+//      one_intensity = 0;
+//    }
+//
+//    //if there is a match in the observed spectrum
+//    if(one_intensity > 0){
+//      //int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
+//      //carp(CARP_INFO, "idx = %d\n", idx);
+//  
+//      //DEBUG
+//      //carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);
+//
+//      ++ion_match;
+//      *intensity_sum = *intensity_sum + one_intensity;
+//      
+//      //get ion charge
+//      ion_charge = get_ion_charge(ion) - 1;
+//      
+//      //check if repeated ion b1, b2, ...
+//      if((cleavage_idx = get_ion_cleavage_idx(ion)) == before_cleavage[ion_charge] + 1){
+//        ++*repeat_count;
+//      }
+//      
+//      //reset the previous cleavage index 
+//      before_cleavage[ion_charge] = cleavage_idx;
+//    }
+//  }
+//  
+//  
+//  //free ion iterator, ion_constraint
+//  free(before_cleavage);
+//  free_ion_constraint(ion_constraint);
+//  free_ion_filtered_iterator(ion_iterator);
+//
+//  return ion_match;
+//  DIR* d = output_directory;
+
+}
+*/
 
 
 /*******************************
