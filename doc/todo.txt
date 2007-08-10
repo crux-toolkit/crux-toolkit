@@ -14,3 +14,8 @@ V- the crux index info file should have text (e.g. for peptide type) rather than
 - write documentation on how to add modules to crux and compile
 - write update makefile
 - search_spectrum output documentation shouldbe written again...
+- it is annoying that you have to compile everything to get one executable
+  we should modify the makefile so that we can compile single executables
+  separately
+- should warn if amino acid masses in param file are inconsistent with those
+  in the index
