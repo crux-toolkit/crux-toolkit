@@ -428,8 +428,8 @@ BOOLEAN_T sort_match_collection(
     return TRUE;
   case Q_VALUE:
   case PERCOLATOR_SCORE:
-    qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_q_value);
-    match_collection->last_sorted = Q_VALUE;
+    qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_percolator_score);
+    match_collection->last_sorted = PERCOLATOR_SCORE;
     return TRUE;
   }
   return FALSE;
@@ -1834,6 +1834,10 @@ MATCH_ITERATOR_T* new_match_iterator(
     else if((score_type == LOGP_EVD_XCORR || score_type == LOGP_BONF_EVD_XCORR) &&
        match_collection->last_sorted == XCORR){
       //No need to sort, since the score_type has same rank as XCORR
+    }
+    else if((score_type == Q_VALUE) &&
+       match_collection->last_sorted == PERCOLATOR_SCORE){
+      //No need to sort, since the score_type has same rank as PERCOLATOR_SCORE
     }
     //sort match collection by score type
     else if(!sort_match_collection(match_collection, score_type)){
