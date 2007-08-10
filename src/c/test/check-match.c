@@ -26,7 +26,7 @@ START_TEST (test_create){
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_ITERATOR_T* match_iterator = NULL;
   MATCH_T* match = NULL;
-  
+    
   /********** comment this parameter section out, when using CK_FORK=no, valgrind ******/
   // Parameters have been already confirmed in check_scorer.
   
@@ -37,9 +37,9 @@ START_TEST (test_create){
   //parse paramter file
   parse_update_parameters(parameter_file);
 
-  //set fasta-file
-  //set_string_parameter("fasta-file", "fasta_file");
-
+  //add fasta file parameter_file fasta-file
+  add_parameter("fasta-file", "fasta_file");
+  
   //parameters has been confirmed
   parameters_confirmed();
   /***************************************************/
