@@ -26,7 +26,6 @@ START_TEST (test_create){
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_ITERATOR_T* match_iterator = NULL;
   MATCH_T* match = NULL;
-
   
   /********** comment this parameter section out, when using CK_FORK=no, valgrind ******/
   // Parameters have been already confirmed in check_scorer.
@@ -39,7 +38,7 @@ START_TEST (test_create){
   parse_update_parameters(parameter_file);
 
   //set fasta-file
-  set_string_parameter("fasta-file", "fasta_file");
+  //set_string_parameter("fasta-file", "fasta_file");
 
   //parameters has been confirmed
   parameters_confirmed();
@@ -53,7 +52,7 @@ START_TEST (test_create){
   fail_unless(get_spectrum_collection_spectrum(collection, scan_num, spectrum), "failed to find scan_num in ms3 file");
   
   //get match collection with perliminary score of SP, and main score of XCORR
-  match_collection = new_match_collection_spectrum(spectrum, 1, 500, SP, XCORR);
+  match_collection = new_match_collection_spectrum(spectrum, 1, 500, SP, XCORR, 0, FALSE);
   
   fail_unless(get_match_collection_scored_type(match_collection, SP), "failed to set match_collection scored type, SP");
   fail_unless(get_match_collection_scored_type(match_collection, XCORR), "failed to set match_collection scored type, SP");
@@ -83,6 +82,7 @@ START_TEST (test_create){
   free_match_collection(match_collection);
   free_spectrum_collection(collection);
   free_spectrum(spectrum);
+  free_parameters();
 }
 END_TEST
 

@@ -33,6 +33,7 @@ int main(void){
   //add each suite to Runner
   SRunner *sr = srunner_create(NULL);
 
+  /*
   srunner_add_suite(sr,suite_peak);
   srunner_add_suite(sr,suite_spectrum);
   srunner_add_suite(sr,suite_spectrum_collection);
@@ -44,7 +45,7 @@ int main(void){
   srunner_add_suite(sr,suite_ion);
   srunner_add_suite(sr,suite_ion_series);
   srunner_add_suite(sr,suite_scorer);
-
+  */
   srunner_add_suite(sr,suite_match);
   
   //run each check suite
