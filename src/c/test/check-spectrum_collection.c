@@ -40,9 +40,11 @@ START_TEST (test_create){
   parse_spectrum_collection(collection);
   fail_unless(get_spectrum_collection_is_parsed(collection), "should be parsed now");
   fail_unless(get_spectrum_collection_num_spectra(collection) == 6, "failed number of specrum field");
-  file_name = get_spectrum_collection_filename(collection);
-  fail_unless((strcmp("test2.ms2", file_name) == 0),"file name incorrect" );
+  file_name = get_spectrum_collection_filename(collection);  
+  char* filename_temp = parse_filename(file_name);
+  fail_unless((strcmp("test2.ms2", filename_temp) == 0),"file name incorrect" );
   free(file_name);
+  free(filename_temp);
 
   comment = get_spectrum_collection_comment(collection);
   fail_unless(strcmp("H       CreationDate    8/29/2004 3:06:54 AM\nH       Extractor       MakeMS2\nH       ExtractorVersion        1.0\nH       Comments        MakeMS2 written by Michael J. MacCoss, 2004\nH       ExtractorOptions        MS2/MS1\n", comment) == 0, "failed comment field");
@@ -54,8 +56,10 @@ START_TEST (test_create){
   fail_unless(get_spectrum_collection_is_parsed(copy), "should be parsed now");
   fail_unless(get_spectrum_collection_num_spectra(copy) == 6, "failed number of specrum field");
   file_name = get_spectrum_collection_filename(copy);
-  fail_unless((strcmp("test2.ms2", file_name) == 0),"file name incorrect" );
+  filename_temp = parse_filename(file_name);
+  fail_unless((strcmp("test2.ms2", filename_temp) == 0),"file name incorrect" );
   free(file_name);
+  free(filename_temp);
 
   comment = get_spectrum_collection_comment(copy);
   fail_unless(strcmp("H       CreationDate    8/29/2004 3:06:54 AM\nH       Extractor       MakeMS2\nH       ExtractorVersion        1.0\nH       Comments        MakeMS2 written by Michael J. MacCoss, 2004\nH       ExtractorOptions        MS2/MS1\n", comment) == 0, "failed comment field");
