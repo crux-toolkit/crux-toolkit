@@ -6,12 +6,13 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
 
 #include <stdio.h>
+#include <dirent.h>
 #include "objects.h"
 #include "peptide.h"
 #include "ion.h"
@@ -44,6 +45,16 @@ float score_spectrum_v_ion_series(
   SCORER_T* scorer,        ///< the scorer object -in
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
+);
+
+/**
+ * Create ion files (for GMTK) in the output directory
+ * \returns success
+ */
+int output_ion_files(
+  DIR* output_directory,    ///< directory in which to place the ion files
+  SPECTRUM_T* spectrum,     ///< input spectrum
+  ION_SERIES_T* ion_series  ///< ion series for which to output files
 );
 
 /**
