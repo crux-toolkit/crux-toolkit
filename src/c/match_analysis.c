@@ -148,11 +148,8 @@ int main(int argc, char** argv){
     MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
       new_match_collection_iterator(psm_result_folder, fasta_file);
 
-    int i = 0;
     //iterate over each, TARGET, DECOY1~..3 match_collection sets
     while(match_collection_iterator_has_next(match_collection_iterator)){
-      ++i;
-      printf("New match collection inplace: %d", i);
 
       //get the next match_collection
       match_collection = match_collection_iterator_next(match_collection_iterator);
