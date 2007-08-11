@@ -3,12 +3,6 @@
 export PATH=../../../bin/:$PATH
 ms2="spectra_random_1000.ms2"
 
-#if [[ $# != 1 ]]
-#then 
-#  echo "$0: two arguments allowed <ms2 file> use dta files in current directory" 1>&2
-#  exit 1
-#fi
-
 if [[ ! -f "$ms2" ]]
 then 
   echo "Error: file or directory does not match " 1>&2

@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH=../../../bin/:$PATH
 
 #File spectra_random_1000.ms2 is a randomly selected 1000spectra from 
 #file 090306-20cm-yeast-2h-04.ms2. Has one charge per spectrum
