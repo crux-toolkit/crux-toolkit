@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  *****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -11,7 +11,7 @@
 #define NUM_PARAMS 512 ///< initial number of parameters allowed
 #define MAX_LINE_LENGTH 4096 ///< maximum length of a line on the parameter file
 // CYGWIN
-#define INFINITY 1000000000.0
+//#define INFINITY 1000000000.0
 
 /**
  * free heap allocated parameters hash table

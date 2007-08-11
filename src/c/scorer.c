@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.30 $
+ * REVISION: $Revision: 1.31 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1072,33 +1072,6 @@ float cross_correlation(
   int observed_idx = 0;
   int theoretical_idx = 0;
   float* observed = scorer->observed;
-
-  //int mz_idx;
-  //float sx, sy, mx, my, denom;
-  
-  /* Calculate the mean of the two series x[], y[] */
-  /*
-  mx = 0;
-  my = 0;
-
-  for(mz_idx = 0; mz_idx < size; mz_idx++) {
-    mx += observed[mz_idx];
-    my += theoretical[mz_idx];
-  }
-  mx /= size;
-  my /= size;
-  */
-
-  /* Calculate the denominator */
-  /*
-  sx = 0;
-  sy = 0;
-  for (mz_idx = 0; mz_idx < size; mz_idx++) {
-    sx += ((observed[mz_idx] - mx) * (observed[mz_idx] - mx));
-    sy += ((theoretical[mz_idx] - my) * (theoretical[mz_idx] - my));
-  }
-  denom = sqrt(sx*sy);
-  */
   
   //perform cross_correlation from -max_offset to +max_offset
   for(; delay < max_offset; ++delay){
@@ -1511,56 +1484,6 @@ void set_scorer_sp_beta(
 {
   scorer->sp_beta = sp_beta;
 }
-
-/**
- *\returns the gamma value of the scorer
- */
-/*
-float get_scorer_sp_gamma(
-  SCORER_T* scorer ///< the scorer object -in
-  )
-{
-  return scorer->sp_gamma;
-}
-*/
-
-/**
- *set the scorer gamma value
- */
-/*
-void set_scorer_sp_gamma(
-  SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_gamma ///< used for Sp: the gamma variable -in
-  )
-{
-  scorer->sp_gamma = sp_gamma;
-}
-*/
-
-/**
- *\returns the min_mz value of the scorer
- */
-/*
-float get_scorer_sp_min_mz(
-  SCORER_T* scorer ///< the scorer object -in
-  )
-{
-  return scorer->sp_min_mz;
-}
-*/
-
-/**
- *set the scorer min_mz value
- */
-/*
-void set_scorer_sp_min_mz(
-  SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_min_mz ///< used for Sp: the min_mz variable -in
-  )
-{
-  scorer->sp_min_mz = sp_min_mz;
-}
-*/
 
 /**
  *\returns the max_mz value of the scorer
