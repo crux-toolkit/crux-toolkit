@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -105,6 +105,21 @@ float get_match_collection_delta_cn(
 /**
  * Serialize the psm features to ouput file upto 'top_match' number of 
  * top peptides among the match_collection
+ *
+ *
+ * spectrum specific features
+ * first, serialize the spectrum info of the match collection    
+ * Second, iterate over matches and serialize the structs
+ *
+ *<int: charge state of the spectrum>
+ *<int: The total match objects in the match_collection searched with the spectrum
+ *<float: delta_cn>
+ *<float: ln_dleta_cn>
+ *<float: ln_experiment_size>
+ *<BOOLEAN_T: did the score type been scored?>* <- for all score types
+ *<MATCH: serialize match struct> *<--serialize match structs upto top-match # ranks
+ *
+ *
  *\returns TRUE, if sucessfully serializes the PSMs, else FALSE 
  */
 BOOLEAN_T serialize_psm_features(

@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.12 $ 
+ * $Revision: 1.13 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -91,6 +91,19 @@ void print_match(
   SCORER_TYPE_T output_mode  ///< the output mode -in
 );
 
+/**
+ * serializes the match in binary
+ *
+ *
+ *
+ * <PEPTIDE_T: serialize peptide>
+ * <float: score><int: ranking>* <--serialize for all score types
+ * <SPECTRUM_T: serilize spectrum>
+ * <float: b_y ion match ratio for SP>
+ * <PEPTIDE_TYPE_T: the peptide type over-all peptide srcs>
+ * <BOOLEAN_T: is this a null peptide?>
+ *
+ */
 void serialize_match(
   MATCH_T* match, ///< the match to print -in
   FILE* file ///< output stream -out

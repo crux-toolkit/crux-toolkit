@@ -1623,6 +1623,21 @@ float get_match_collection_delta_cn(
 /**
  * Serialize the psm features to ouput file upto 'top_match' number of 
  * top peptides among the match_collection
+ *
+ *
+ * spectrum specific features
+ * first, serialize the spectrum info of the match collection    
+ * Second, iterate over matches and serialize the structs
+ *
+ *<int: charge state of the spectrum>
+ *<int: The total match objects in the match_collection searched with the spectrum
+ *<float: delta_cn>
+ *<float: ln_dleta_cn>
+ *<float: ln_experiment_size>
+ *<BOOLEAN_T: did the score type been scored?>* <- for all score types
+ *<MATCH: serialize match struct> *<--serialize match structs upto top-match # ranks
+ *
+ *
  *\returns TRUE, if sucessfully serializes the PSMs, else FALSE 
  */
 BOOLEAN_T serialize_psm_features(
@@ -1644,14 +1659,6 @@ BOOLEAN_T serialize_psm_features(
 
   //spectrum specific features
   //first, serialize the spectrum info of the match collection  
-  /*
-   *<int: charge state of the spectrum>
-   *<int: The total match objects in the match_collection searched with the spectrum
-   *<float: delta_cn>
-   *<float: ln_dleta_cn>
-   *<float: ln_experiment_size>
-   *<BOOLEAN_T: did the score type been scored?>
-   */
   fwrite(&(match_collection->charge), sizeof(int), 1, output); //the charge of the spectrum
   fwrite(&(match_collection->match_total), sizeof(int), 1, output);
   fwrite(&delta_cn, sizeof(float), 1, output);
@@ -1664,7 +1671,7 @@ BOOLEAN_T serialize_psm_features(
     fwrite(&(match_collection->scored_type[score_type_idx]), sizeof(BOOLEAN_T), 1, output);
   }
   
-  //Second, iterate over matches
+  //Second, iterate over matches and serilize them
   int match_count = 0;
   while(match_iterator_has_next(match_iterator)){
     ++match_count;

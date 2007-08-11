@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -202,8 +202,19 @@ FILE** get_spectrum_collection_psm_result_filename(
   char* file_extension ///< the file extension of the spectrum file(i.e. ".ms2") -in
   );
 
+
 /**
+ * <int: number spectra> <--this will be over written by serialize_total_number_of_spectra method
+ * <int: number of spectrum features>
+ * <int: number of top ranked peptides serialized per spectra>
+ * <int: ms2 file length><char*: ms2 filename>
+ * <int: fasta file length><char*: fasta filename>
+ *
  * Serializes the header information for the binary PSM serialized files
+ * Must run in pair with serialize_total_number_of_spectra.
+ *
+ * General order is, 
+ * serialize_header -> serialize_psm_features -> serialize_total_number_of_spectra
  *\returns TRUE if serialized header successfully, else FALSE
  */
 BOOLEAN_T serialize_header(
