@@ -160,10 +160,10 @@ int main(int argc, char** argv){
     predict_ions(ion_series);
        
    // GMTK create output directory for the files
-   DIR* output_directory = opendir(peptide_sequence)
+   // DIR* output_directory = opendir(peptide_sequence)
 
    // GMTK output peptide ion files
-   output_ion_files(output_directory, spectrum, ion_series);
+   // output_ion_files(output_directory, spectrum, ion_series);
    
    //free heap
    // GMTK free(output_directory);

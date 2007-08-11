@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.44 $
+ * $Revision: 1.45 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -848,10 +848,12 @@ BOOLEAN_T create_index(
   }
   
   //create temporary directory
-  if((temp_dir_name = mkdtemp(make_temp_dir_template()))== NULL){
+	// CYGWIN
+	temp_dir_name = "foo";
+  /*if((temp_dir_name = mkdtemp(make_temp_dir_template()))== NULL){
     carp(CARP_WARNING, "cannot create temporary directory");
     return FALSE;
-  }
+  }*/
   
   //copy temporary folder name for SIGINT cleanup purpose
   strncpy(temp_folder_name, temp_dir_name, 12); 
