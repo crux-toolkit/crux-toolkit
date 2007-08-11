@@ -47,7 +47,7 @@ int main(int argc, char** argv){
   //optional
   char* prelim_score_type = "sp";
   char* score_type = "xcorr";
-  char* parameter_file = NULL;
+  char* parameter_file = "crux_parameter";
   char* spectrum_charge = "all";
   int verbosity = CARP_ERROR;
   double number_runs = INFINITY;

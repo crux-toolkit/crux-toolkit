@@ -50,12 +50,26 @@ GENERATE_PEPTIDES_ITERATOR_T* allocate_generate_peptides_iterator(){
 }
 
 /**
- *\returns a new generate_peptides_iterator object
+ *\returns a new generate_peptides_iterator object, fasta-file from paramter hashtable
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
-  double min_mass, ///< the min mass of peptides to generate
-  double max_mass  ///< the maximum mas of peptide to generate
-)
+  double min_mass,  ///< the min mass of peptides to generate -in
+  double max_mass  ///< the maximum mas of peptide to generate -in
+  )
+{
+  
+  return new_generate_peptides_iterator_w_fileinput(min_mass, max_mass,
+                                                    get_string_parameter_pointer("fasta-file"));
+}
+
+/**
+ *\returns a new generate_peptides_iterator object, with fasta file input
+ */
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_w_fileinput(
+  double min_mass,  ///< the min mass of peptides to generate -in
+  double max_mass,  ///< the maximum mas of peptide to generate -in
+  char* in_file     ///< the fasta file to use to generate peptides -in
+  )
 {
   //get parameters
   int min_length = get_int_parameter("min-length");
@@ -70,7 +84,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_general(
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
-  char* in_file = get_string_parameter_pointer("fasta-file");
   BOOLEAN_T is_unique = FALSE;
   SORT_TYPE_T sort_type = NONE;
 

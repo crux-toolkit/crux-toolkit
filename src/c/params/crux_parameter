@@ -1,99 +1,142 @@
+#############################################################
+# Sample parameter file 
+#
+# Only lines starting with '#' will be ignored
+# Don't leave any space before or after a parameter setting
+# format: <parameter-name>=<value>
+# The paramers are fixed in the parameter.c file,
+# thus if you want to change default value or add a new parameter
+# must modify "initialize_parameters" method in parameter.c by
+# using the set_*_paramer method.
+#
+############################################################
+
 #verbosity level for run 0~100
 verbosity=100
 
 ########generate_peptide, create_index perameters##########
 #min mass for peptides
+#Default: 200.0
 min-mass=200.0
 
 #man mass for peptides
-max-mass=2400.0
+#Default: 7200.0
+max-mass=7200.0
 
 #min length for peptides
+#Default: 6
 min-length=6
 
 #max length for peptides
+#Default: 50
 max-length=50
 
 #The mass range contained in each index file
+#Default: 1.0
 mass-range=1.0
 
 #cleavage type allowed (tryptic|partial|all)
+#Default: tryptic
 cleavages=all
 
 #mass type to use (average|mono)
+#Default: average
 isotopic-mass=average
 
 #allow redudnat peptides? (redundant|unique)
+#Default: redundant
 redundancy=unique
 
 #use index to create peptides or use index? (T|F)
+#Default: F
 use-index=T
 
 #which order to sort the peptides? (none|mass|length|lexical)
+#Default: none
 sort=none
 
 #output the sequence along with scores?(TRUE|FALSE)
+#Default: FALSE
 output-sequence=TRUE
 
-#Output the peptide trypticiy in output.
+#Output the peptide trypticiy in output.(TRUE|FALSE)
+#Default: FALSE
 output-trypticity=FALSE
 
 #Allow missed cleaave sites by trypsin?(TRUE|FALSE)
+#Default: FALSE
 missed-cleavages=TRUE
 
 ##########parameters used for scoring peptide, spectrum match ############
 # mass offset to search candidate peptides from the precursor mass
 # set to a non-zero value to simulate a null-distribution
+#Default: 0.0
 mass-offset=0.0
 
 #SP parameter used
+#Default: 0.075
 beta=0.075
 
 #SP max mz used in scoring 
+#Default: 4000
 max-mz=4000
 
 #In search_spectrum, charge state of the spectrum scoring (search_spectra uses the charge state from the MS2 file)
+#Default: 2
 charge=2
 
 #The spectrum charges to search in match_search & search_spectra. 1|2|3|all
+#Default: all
 spectrum-change=all
 
 #The number of spectrum search runs to perform in match_search & search_spectra.
 #INFINITY will run all spectra with all possible charges states in the ms2 file.
+#Default: INFINITY
 number-runs=INFINITY
 
 #mass window of peptides to select for scoring
+#Default: 3.0
 mass-window=3.0
 
 #the main scoring type (logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr)
+#Default: xcorr
 score-type=xcorr 
 
 #preliminary score type (sp)
+#Default: sp
 prelim-score-type=sp
 
 #how many peptides to sample for EVD perameter estimation
+#Default: 500
 sample-count=500
 
 #max number of preliminary scored peptides to be seleceted for main scoring  (use 1000000, to select all peptides, _MAX_NUMBER_PEPTIDES)
+#Default: 500
 max-rank-preliminary=500
 
 #max number of final scored peptides to be printed as output (use 1000000, to select all peptides, _MAX_NUMBER_PEPTIDES)
+#Default: 500
 max-rank-result=500
 
 #set the number of top ranking peptides to score for LOGP_* (This is different compared to max-rank-preliminary, because it does not limit the count of preliminary scored peptides, thus some peptides can be outputed without being scored by main)
+#Default:1
 top-rank-p-value=1
 
 #The top number of sp ranked peptides to use for scoring of EXP_SP
-top-fit-sp=10000
+#Default: 1000
+top-fit-sp=1000
 
 #number of decoy sets to generate for percolator input
+#Default: 2
 number-decoy-set=2
 
 #used for percolator parameter
+#Default: 0.9
 pi0=0.9
 
 #used for decoy null peptide generation
-#set random seed
+#set random seed (time|<int>)
+#Default: time
 seed=time
 
 #add amino acid weight

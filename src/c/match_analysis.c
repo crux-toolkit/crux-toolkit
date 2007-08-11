@@ -45,7 +45,7 @@ void wrong_command(char* arg, char* comment){
 int main(int argc, char** argv){
   //optional
   int verbosity = CARP_ERROR;
-  char* parameter_file = NULL;
+  char* parameter_file = "crux_parameter";
   char* psm_algorithm = "percolator";
   char* psm_result_folder = NULL;
   

@@ -50,7 +50,7 @@ int main(int argc, char** argv){
   //optional
   char* prelim_score_type = "sp";
   char* score_type = "xcorr";
-  char* parameter_file = NULL;
+  char* parameter_file = "crux_parameter";
   int verbosity = CARP_ERROR;
   char* match_output_folder = "."; //FIXME if needed..
   char* output_mode = "binary";
