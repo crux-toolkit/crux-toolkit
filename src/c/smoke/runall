@@ -1,3 +1,5 @@
 #!/bin/bash
+# FIXME still need to resolve match_analysis results
+# once confirm value run "crux-test.pl -u crux-test.cmds"
 chmod 774 crux-test.pl
 crux-test.pl crux-test.cmds
