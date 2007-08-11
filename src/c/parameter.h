@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  *****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -169,6 +169,16 @@ BOOLEAN_T set_options_command_line(
  */
 void parse_update_parameters(
   char* parameter_file ///< the parameter file to be parsed -in
+  );
+
+/**
+ * add parameters to parameter list
+ * Should use this only for testing cases.
+ * Otherwiase use normal parameter system.
+ */
+BOOLEAN_T add_parameter(
+  char*     name,  ///< the name of the parameter to add -in
+  char* set_value  ///< the value to be added -in                  
   );
 
 #endif

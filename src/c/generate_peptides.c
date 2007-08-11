@@ -74,7 +74,7 @@ int main(int argc, char** argv){
   int  verbosity = CARP_INFO;
   char* redundancy = "redundant";
   char* use_index = "F";
-  char* parameter_file = NULL;
+  char* parameter_file = "crux_parameter";
 
   int missed_cleavages = FALSE;
   char* sort = "none";      // mass, length, lexical, none  

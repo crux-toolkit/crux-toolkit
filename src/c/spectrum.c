@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.41 $
+ * REVISION: $Revision: 1.42 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -26,8 +26,8 @@
  */
 #define MAX_PEAKS 4000
 #define MAX_CHARGE 3
-#define MAX_I_LINES 2 //number of 'I' lines alb eto parse for one spectrum object
-#define MAX_D_LINES 2 //number of 'D' lines alb eto parse for one spectrum object
+#define MAX_I_LINES 2 //number of 'I' lines albe to parse for one spectrum object
+#define MAX_D_LINES 2 //number of 'D' lines albe to parse for one spectrum object
 
 /**
  * \struct spectrum 
@@ -158,7 +158,7 @@ SPECTRUM_T* new_spectrum(
   float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra) -in
   int*              possible_z,         ///< The possible charge states of this spectrum  -in
   int               num_possible_z,     ///< The number of possible charge states of this spectrum  -in
-  char*             filename)          ///< Optional filename -in
+  char*             filename)           ///< Optional filename -in
 {
   SPECTRUM_T* fresh_spectrum = allocate_spectrum();
   fresh_spectrum->first_scan = first_scan;

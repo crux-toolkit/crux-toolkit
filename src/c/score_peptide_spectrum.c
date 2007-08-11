@@ -52,7 +52,7 @@ int main(int argc, char** argv){
   //optional variables
   char* charge = "2";
   char* type = "xcorr";
-  char* parameter_file = NULL;
+  char* parameter_file = "crux_parameter";
   int  verbosity = CARP_ERROR;
 
   //parsing variables
