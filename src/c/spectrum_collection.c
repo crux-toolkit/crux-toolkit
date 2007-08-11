@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.23 $
+ * REVISION: $Revision: 1.24 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -737,8 +737,10 @@ FILE** get_spectrum_collection_psm_result_filename(
  * <int: number spectra> <--this will be over written by serialize_total_number_of_spectra method
  * <int: number of spectrum features>
  * <int: number of top ranked peptides serialized per spectra>
- * <int: ms2 file length><char*: ms2 filename>
- * <int: fasta file length><char*: fasta filename>
+ *
+ * 
+ * //FIXME <int: ms2 file length><char*: ms2 filename>
+ * //FIXME <int: fasta file length><char*: fasta filename>
  *
  * Serializes the header information for the binary PSM serialized files
  * Must run in pair with serialize_total_number_of_spectra.
@@ -814,7 +816,7 @@ BOOLEAN_T serialize_header(
 
 /**
  * Modifies the serialized header information for the binary PSM serialized files
- * Sets the total number of spectra seerialized in the file
+ * Sets the total number of spectra serialized in the file
  * Assumes the first field in the file is the number total spectra serialized
  * Must be run after serialize_header
  *

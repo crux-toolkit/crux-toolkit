@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.42 $
+ * REVISION: $Revision: 1.43 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1099,16 +1099,6 @@ void serialize_spectrum(
   //serialize the spectrum struct
   fwrite(spectrum, sizeof(SPECTRUM_T), 1, file);
 
-  /*
-    fwrite(&(spectrum->first_scan), sizeof(int), 1, file);
-    fwrite(&(spectrum->last_scan), sizeof(int), 1, file);
-    fwrite(&(spectrum->id), sizeof(int), 1, file);
-    fwrite(&(spectrum->spectrum_type), sizeof(SPECTRUM_TYPE_T), 1, file);
-    fwrite(&(spectrum->precursor_mz), sizeof(float), 1, file);  
-  */
-  //retention_time
-  //fwrite(&(spectrum->rt_time), sizeof(float), 1, file);  
-  //FIXME add additional fields.
 }
 
 /**

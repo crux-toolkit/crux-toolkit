@@ -294,6 +294,15 @@ void qsort_match(
 /**
  * serializes the match in binary
  *
+ *
+ *
+ * <PEPTIDE_T: serialize peptide>
+ * <float: score><int: ranking>* <--serialize for all score types
+ * <SPECTRUM_T: serilize spectrum>
+ * <float: b_y ion match ratio for SP>
+ * <PEPTIDE_TYPE_T: the peptide type over-all peptide srcs>
+ * <BOOLEAN_T: is this a null peptide?>
+ *
  */
 void serialize_match(
   MATCH_T* match, ///< the match to print -in
