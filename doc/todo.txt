@@ -2,6 +2,7 @@
 # Pending modifications to crux
 #------------
 
+V- make match_analysis doc
 V- all executable options (--option) should have dashes rather than underscores
 V- the crux index info file should have text (e.g. for peptide type) rather than numbers
   in general, it should be human interpretable. if you'd like to have another separate file that is
@@ -9,13 +10,23 @@ V- the crux index info file should have text (e.g. for peptide type) rather than
 - executables that use an index should default to the parameter values in the index, 
   unless a parameter in the parameter file or on the command line contradicts the index parameters,
   in which case it should error out
-- write out the c++/c incorporation plan
-- update sample parameter file (with default)
-- write documentation on how to add modules to crux and compile
+V- write out the c++/c incorporation plan
+V- update sample parameter file (with default)
+V- write documentation on how to add modules to crux and compile
 - write update makefile
+- search_spectrum output documentation shouldbe written again...
+- parameter file, white spaces cases errors
+  for example, score-type=xcorr<white-space>
+  the <white-space> will cause a matching error in string comparison
+V- charge state for Z 4 in .ms2 files
+V- Update parameter file (1) read amino acid mass modification (2) use hash table
+- Update spectrum object to read RTime
+- peptide-> hydrophobicity
+- Code q-value calculation into match_analysis=======
 - search_spectrum output documentation shouldbe written again...
 - it is annoying that you have to compile everything to get one executable
   we should modify the makefile so that we can compile single executables
   separately
 - should warn if amino acid masses in param file are inconsistent with those
   in the index
+
