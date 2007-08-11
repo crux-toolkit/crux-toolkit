@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.25 $
+ * REVISION: $Revision: 1.26 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -88,7 +88,7 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   } //FIXME check if file is empty
   
   set_spectrum_collection_filename(spectrum_collection, absolute_path_file);
-  free(absolute_path_file);
+  //CYGWIN free(absolute_path_file);
   
   return spectrum_collection;
 }

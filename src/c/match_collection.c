@@ -1997,13 +1997,12 @@ BOOLEAN_T extend_match_collection(
   //read in file specific info
   
   //get number of spectra serialized in the file
-  //FIXME
-  //If want to be selctive of the nu
   if(fread(&total_spectra, (sizeof(int)), 1, result_file) != 1){
     carp(CARP_ERROR, "serialized file corrupted, incorrect number of spectra");  
     return FALSE;
   }
 
+  //FIXME unused feature, just set to 0
   //get number of spectra features serialized in the file
   if(fread(&num_spectrum_features, (sizeof(int)), 1, result_file) != 1){
     carp(CARP_ERROR, "serialized file corrupted, incorrect number of spectrum features");
