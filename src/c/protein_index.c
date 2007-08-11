@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -8,7 +8,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include "utils.h"
-#include "getline.h"
 #include "crux-utils.h"
 #include "peptide.h"
 #include "protein.h"
@@ -105,7 +104,7 @@ BOOLEAN_T create_protein_index(
 
   working_index = ftell(file);
   //check each line until reach '>' line
-  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+  while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == '>'){ 
       ++protein_idx;
       fprintf(output_file, "* %d ",protein_idx);
@@ -210,7 +209,7 @@ BOOLEAN_T setup_protein_index_iterator(
   PROTEIN_T* protein = NULL;
   BOOLEAN_T found = FALSE;
 
-  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+  while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
     //begining of the protein feilds
     if(new_line[0] == '*'){
       //read the crux_index_file information
@@ -368,7 +367,7 @@ BOOLEAN_T create_binary_fasta_fuction(
   
   working_index = ftell(file);
   //check each line until reach '>' line
-  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+  while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == '>'){
       //the new protein to be serialize
       new_protein = allocate_protein();

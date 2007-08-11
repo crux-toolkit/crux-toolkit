@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.67 $   #-Werror \
+# VERSION: $Revision: 1.68 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -125,8 +125,9 @@ TAGS: *.c *.h *.cpp
 Percolator:
 	# make percolator 
 	@cd $(PERCOLATOR_DIR)/src ; make
-	@cp $(PERCOLATOR_DIR)/src/PercolatorCInterface.h  . ;
-	@cp $(PERCOLATOR_DIR)/src/Release/lib/libpercolator.a ${LIBDIR}/ ;
+	@cp $(PERCOLATOR_DIR)/src/PercolatorCInterface.h  . 
+	@mkdir -p ${LIBDIR}
+	@cp $(PERCOLATOR_DIR)/src/Release/lib/libpercolator.a ${LIBDIR} 
 
 ##### Dependencies
 
@@ -151,18 +152,18 @@ include .depend
 
 # Rule for compiling C files into .o files.
 ${OBJDIR}/%.o: %.c
-	@mkdir -p ${OBJDIR}
+	mkdir -p ${OBJDIR}
 	${CC} ${CFLAGS} ${OS_FLAGS} -c -o ${OBJDIR}/$*.o $<
 
 #################
 ${OBJDIR}/%.o: %.cpp
-	@mkdir -p ${OBJDIR}
+	mkdir -p ${OBJDIR}
 	${CC} ${CFLAGS} ${OS_FLAGS} -c -o ${OBJDIR}/$*.o $<
 ##################
 
 # Rule for adding .o files to an archive library
 (%.o): %.o
-	@mkdir -p ${LIBDIR}
+	mkdir -p ${LIBDIR}
 	${AR} r $@ $*.o
 
 # Rule for doing ranlib.
