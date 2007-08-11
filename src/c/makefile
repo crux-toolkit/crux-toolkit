@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.64 $   #-Werror \
+# VERSION: $Revision: 1.65 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -12,6 +12,7 @@ OFLAGS  = #-O2
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 CPP_FLAGS =  -lstdc++
+OS_FLAGS = -DCYGWIN
 
 ##### Different module directories ####
 PERCOLATOR_DIR = ../../../percolator
@@ -151,12 +152,12 @@ include .depend
 # Rule for compiling C files into .o files.
 ${OBJDIR}/%.o: %.c
 	@mkdir -p ${OBJDIR}
-	${CC} ${CFLAGS} -c -o ${OBJDIR}/$*.o $<
+	${CC} ${CFLAGS} ${OS_FLAGS} -c -o ${OBJDIR}/$*.o $<
 
 #################
 ${OBJDIR}/%.o: %.cpp
 	@mkdir -p ${OBJDIR}
-	${CC} ${CFLAGS} -c -o ${OBJDIR}/$*.o $<
+	${CC} ${CFLAGS} ${OS_FLAGS} -c -o ${OBJDIR}/$*.o $<
 ##################
 
 # Rule for adding .o files to an archive library
@@ -172,4 +173,4 @@ ${OBJDIR}/%.o: %.cpp
 # Rules for compiling programs
 ${BINDIR}/%: ${OBJDIR}/%.o ${RANLIBFILE}
 	@mkdir -p ${BINDIR}
-	${CC} -DMAIN ${CFLAGS} -o ${BINDIR}/$* $*.c ${LIBS} ${PERCOLATOR_LIB}  ${CPP_FLAGS}
+	${CC} -DMAIN ${CFLAGS} ${OS_FLAGS} -o ${BINDIR}/$* $*.c ${LIBS} ${PERCOLATOR_LIB}  ${CPP_FLAGS}

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include "utils.h"
+#include "getline.h"
 #include "crux-utils.h"
 #include "peptide.h"
 #include "protein.h"

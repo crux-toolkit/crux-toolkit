@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "utils.h"
+#include "getline.h"
 #include "crux-utils.h"
 #include "peptide.h"
 #include "protein.h"
