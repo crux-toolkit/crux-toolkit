@@ -61,32 +61,38 @@ crux_results = []
 
 number_of_spectrum = 0
 
+charge_list = [1,2,3]
+
 #first run Sequest with varying mass windows
 for window in mass_windows:
 
     # 1, run Sequest
-    (exit_code, result) = \
-                commands.getstatusoutput("time -p ./sequest27 " + \
-                                         "-Psequest.params" + "_" + window + \
-                                         " *.dta"
-                                         )
-    #debug
-    #print result
-    #print exit_code
+    seq_time = 0.0
+    for charge in charge_list:
+        (exit_code, result) = \
+                    commands.getstatusoutput("time -p ./sequest27 " + \
+                                             "-Psequest.params" + "_" + window + \
+                                             " " + "*." + "$charge.dta"
+                                             )
+        #debug
+        print result
+        #print exit_code
     
-    if exit_code == "1":
-        print "%s %s" % ("failed to run Sequest on mass window:", window)
-        sys.exit(1)
-    else:
-        #now parse the runtime from the result output
-        result = result.split('\n')
-        for line in result:
-            #get user time
-            #FIXME is it user or real?
-            if line.startswith('real '):
-                fields = line. rstrip('\n').split()
-                sequest_results.append(float(fields[1]))
+        if exit_code == "1":
+            print "%s %s" % ("failed to run Sequest on mass window:", window)
+            sys.exit(1)
+        else:
+            #now parse the runtime from the result output
+            result = result.split('\n')
+            for line in result:
+                #get user time
+                #FIXME is it user or real?
+                if line.startswith('real '):
+                    fields = line. rstrip('\n').split()
+                    seq_time += float(fields[1])
+    sequest_results.append(seq_time)
 
+                
     # 2, now run Crux
     (exit_code, result) = \
                 commands.getstatusoutput("time -p search_spectra " + \
@@ -96,7 +102,7 @@ for window in mass_windows:
                                          + `fasta_file`
                                          )
     #debug
-    #print result
+    print result
     #print exit_code
     
     if exit_code == "1":
