@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -490,20 +490,6 @@ BOOLEAN_T parse_database(
   //succeded to parse database!
   return TRUE;
 }
-
-
-//FIXME needs to be implemented at some stage..if needed...
-/**
- * \returns FALSE if database has not yet been parsed or if the nth protein
- * cannot be parsed.
- */
-/*
-BOOLEAN_T get_database_protein_at_idx(
-    DATABASE_T* database, ///< A parsed database object -in
-    int protein_idx,      ///< The index of the protein to retrieve -in
-    PROTEIN_T** protein   ///< A pointer to a pointer to a PROTEIN object -out
-    );
-*/
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
