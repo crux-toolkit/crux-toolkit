@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -12,7 +12,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "utils.h"
-#include "getline.h"
 #include "crux-utils.h"
 #include "peptide.h"
 #include "protein.h"
@@ -257,7 +256,7 @@ BOOLEAN_T parse_database_text_fasta(
   else{  
     working_index = ftell(file);
     //check each line until reach '>' line
-    while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+    while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
       if(new_line[0] == '>'){
         if(database->num_proteins == MAX_PROTEINS){
           fclose(file);

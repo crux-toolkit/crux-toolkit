@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.45 $
+ * $Revision: 1.46 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1359,7 +1359,7 @@ BOOLEAN_T parse_crux_index_map(
     return FALSE;
   }
   
-  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+  while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
     //check header lines
     if(new_line[0] == '#'){
       //check if crux_index_database was created in a condition which the current query is supported
@@ -1612,7 +1612,7 @@ BOOLEAN_T parse_peptide_index_file(
   add_database_pointer_count(database);
   
   //parse each line
-  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
+  while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
     //get total number of peptide src
     if(num_src == -1){
       if(sscanf(new_line,"%d", &num_src) != 1){
