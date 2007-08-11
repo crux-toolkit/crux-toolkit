@@ -92,11 +92,12 @@ def plot_histogram_data(data_array, score_type="none"):
         # xlim((0, 5))
         xlabel(score_type, size=15)
         ylabel("score difference", size=15)
-        
+
+    hold(False)
     savefig(file_name + ".eps")
     savefig(file_name + ".png")
-    hold(False)
-
+    
+    
 
 #-------------------
 
