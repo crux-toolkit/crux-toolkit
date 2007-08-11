@@ -437,7 +437,7 @@ double* get_match_percolator_features(
   for(; check_idx < 20; ++check_idx){
     if(feature_array[check_idx] <= -INFINITY ||
        feature_array[check_idx] >= INFINITY){
-      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f", check_idx, feature_array[check_idx]);
+      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f", check_idx, feature_array[check_idx]);      
     }
   }
     
@@ -535,7 +535,7 @@ char* get_match_sequence(
   if(match->null_peptide){
     //generate the shuffled peptide sequence
     match->peptide_sequence = 
-      generate_shuffled_sequence(match->peptide, match->overall_type);
+      generate_shuffled_sequence(match->peptide, match->overall_type);    
   }
   else{
     // just go parse it out from protein, no need to shuffle
