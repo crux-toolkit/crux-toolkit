@@ -15,7 +15,7 @@ min-length=6
 max-length=50
 
 #cleavage type allowed (tryptic|partial|all)
-cleavages=all
+cleavages=tryptic
 
 #mass type to use (average|mono)
 isotopic-mass=average
