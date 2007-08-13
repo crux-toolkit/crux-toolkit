@@ -50,7 +50,7 @@ int main(int argc, char** argv){
   char* parameter_file = "crux_parameter";
   char* spectrum_charge = "all";
   int verbosity = CARP_ERROR;
-  double number_runs = INFINITY;
+  double number_runs = BILLION;
   
   //required
   char* ms2_file = NULL;

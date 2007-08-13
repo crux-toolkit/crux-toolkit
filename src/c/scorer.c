@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.31 $
+ * REVISION: $Revision: 1.32 $
  ****************************************************************************/
 
 #include <math.h>
@@ -11,13 +11,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <dirent.h>
 #include <ctype.h>
+#include <sys/stat.h>
 #include "objects.h"
 #include "ion_series.h"
 #include "crux-utils.h"
 #include "spectrum.h"
 #include "scorer.h"
 #include "parameter.h"
+#include "unistd.h"
 
 
 //the bin width(Sp)
@@ -36,6 +39,10 @@
 
 #define BONFERRONI_CUT_OFF_P 0.0001
 #define BONFERRONI_CUT_OFF_NP 0.01
+
+#define GMTK_SINGLE_MIN_CHARGE 1
+#define GMTK_SINGLE_MAX_CHARGE 3
+#define GMTK_SINGLE_MAX_ION_FILES 20
 
 /**
  * \struct scorer
@@ -1371,73 +1378,62 @@ float score_spectrum_v_spectrum(
   SPECTRUM_T* second_spectrum ///<  the second spectrum to score
 );
 
-
 /**
  * Create ion files (for GMTK) in the output directory
- * \returns success
+ * \returns TRUE for success 
  */
-/*int output_ion_files(
-  DIR* output_directory,    ///< directory in which to place the ion files -in
+BOOLEAN_T output_ion_files(
+  char* output_directory, ///< name of directory to place the ion files -in
   SPECTRUM_T* spectrum,     ///< input spectrum -in
   ION_SERIES_T* ion_series  ///< ion series for which to output files -in
 ){
 
-  //create ion constraint
-//  ION_CONSTRAINT_T* ion_constraint = 
-//    new_ion_constraint(get_ion_constraint_mass_type(get_ion_series_ion_constraint(ion_series)), get_ion_series_charge(ion_series), ion_type, FALSE);
-//  
-//  //create the filtered iterator that will select among the ions
-//  ION_FILTERED_ITERATOR_T* ion_iterator = new_ion_filtered_iterator(ion_series, ion_constraint);
-//  
-//  //while there are ion's in ion iterator, add matched observed peak intensity
-//  while(ion_filtered_iterator_has_next(ion_iterator)){
-//    ion = ion_filtered_iterator_next(ion_iterator);
-//    intensity_array_idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
-//    //get the intensity matching to ion's m/z
-//    if(intensity_array_idx < scorer->sp_max_mz){
-//      one_intensity = scorer->intensity_array[intensity_array_idx];
-//    }
-//    else{
-//      //printf("index out of bounds: %d scorer->sp_max_mz: %.2f ion_mass_z: %.2f\n", intensity_array_idx, scorer->sp_max_mz, get_ion_mass_z(ion));
-//      one_intensity = 0;
-//    }
-//
-//    //if there is a match in the observed spectrum
-//    if(one_intensity > 0){
-//      //int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
-//      //carp(CARP_INFO, "idx = %d\n", idx);
-//  
-//      //DEBUG
-//      //carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);
-//
-//      ++ion_match;
-//      *intensity_sum = *intensity_sum + one_intensity;
-//      
-//      //get ion charge
-//      ion_charge = get_ion_charge(ion) - 1;
-//      
-//      //check if repeated ion b1, b2, ...
-//      if((cleavage_idx = get_ion_cleavage_idx(ion)) == before_cleavage[ion_charge] + 1){
-//        ++*repeat_count;
-//      }
-//      
-//      //reset the previous cleavage index 
-//      before_cleavage[ion_charge] = cleavage_idx;
-//    }
-//  }
-//  
-//  
-//  //free ion iterator, ion_constraint
-//  free(before_cleavage);
-//  free_ion_constraint(ion_constraint);
-//  free_ion_filtered_iterator(ion_iterator);
-//
-//  return ion_match;
-//  DIR* d = output_directory;
-
+	// TODO where do we put ion types?
+	ION_TYPE_T ion_types[GMTK_SINGLE_MAX_ION_FILES] 
+		= { B_ION, Y_ION };
+	int num_ion_types = 2;
+	
+  // allocate objects
+	MASS_TYPE_T mass_type = 
+		get_ion_constraint_mass_type(get_ion_series_ion_constraint(ion_series));
+	int charge;
+	// iterate through each charge and ion type
+	char subdir[FILENAME_LENGTH];
+	char output_file[FILENAME_LENGTH];
+	char full_path[FILENAME_LENGTH];
+	int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
+	if(access(subdir, F_OK)){
+		if (mkdir(output_directory, dir_access) != 0){
+			carp(CARP_FATAL, "Trouble creating dir %s!", output_directory); 
+			exit(1);
+		}
+	}
+	// TODO should get min and max from ion_series
+	for (charge=GMTK_SINGLE_MIN_CHARGE; charge<=GMTK_SINGLE_MAX_CHARGE; charge++){
+		int ion_type_idx;
+		for (ion_type_idx=0; ion_type_idx < num_ion_types; ion_type_idx++){
+			ION_CONSTRAINT_T* ion_constraint = new_ion_constraint(
+				mass_type, charge, ion_types[ion_type_idx], FALSE);
+			sprintf(subdir, "%s/%i-%s", output_directory, 
+				get_spectrum_first_scan(spectrum), get_ion_series_peptide(ion_series));
+			if(access(subdir, F_OK)){
+				if(mkdir(subdir, dir_access) != 0){
+					carp(CARP_FATAL, "Trouble creating subdir %s!", subdir); exit(1);
+				}
+			}
+			sprintf(output_file, "%i+%i.hmmtrain", ion_type_idx, charge);
+			sprintf(full_path, "%s/%s", subdir, output_file);
+			FILE* out_file;
+			if (open_file(full_path, "w", FALSE, "output", "", &out_file)==FALSE){
+				carp(CARP_FATAL, "Trouble opening output file subdir!", full_path); 
+				exit(1);
+			}
+			print_ion_series_gmtk(ion_series, ion_constraint, out_file);
+  		free_ion_constraint(ion_constraint);
+		}
+	}
+	return TRUE;
 }
-*/
-
 
 /*******************************
  * get, set methods for scorer

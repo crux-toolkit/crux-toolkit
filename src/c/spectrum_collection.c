@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.26 $
+ * REVISION: $Revision: 1.27 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -802,7 +802,7 @@ BOOLEAN_T serialize_header(
   set_int_parameter("top-rank-p-value", 1);
   set_int_parameter("sample-count", 500);
   set_double_parameter("spectrum-min-mass", 0.0);
-  set_double_parameter("spectrum-max-mass", INFINITY);
+  set_double_parameter("spectrum-max-mass", BILLION);
   set_int_parameter("top-match", 1);
   */
 

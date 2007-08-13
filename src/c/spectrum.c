@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.44 $
+ * REVISION: $Revision: 1.45 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -359,8 +359,9 @@ BOOLEAN_T parse_spectrum_file(
   
   float test_float;
   char test_char;
+	// CYGWIN
   
-  while( (line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
+  while( (line_length = crux_getline(&new_line, &buf_length, file)) != -1){
     //skip header line
     //if(new_line[0] == 'H'){
     //  file_index = ftell(file);
@@ -692,6 +693,41 @@ BOOLEAN_T add_peak_to_spectrum(
 
   return FALSE;
 }
+
+/**
+ * \returns The closest intensity within 'max' of 'mz' in 'spectrum'
+ * This should lazily create the data structures within the
+ * spectrum object that it needs.
+ * TODO: reimplement with faster peak lookup
+ */
+float get_nearest_intensity(
+  SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
+  float mz, ///< the mz of the peak around which to sum intensities -in
+  float max ///< the maximum distance to get intensity -in
+  ){
+
+	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
+	PEAK_T* peak;
+	PEAK_T* closest_peak = NULL;
+	float min_distance = BILLION;
+	while(peak_iterator_has_next(peak_iterator)){
+		peak = peak_iterator_next(peak_iterator);
+		float peak_mz = get_peak_location(peak);
+		float distance = abs(mz - peak_mz);
+		if (distance > max){
+			continue;
+		}
+		if (distance < min_distance){
+			closest_peak = peak;
+		}
+	}
+	float nearest_intensity = 
+		closest_peak == NULL ? 0.0 : get_peak_intensity(closest_peak);
+	return nearest_intensity;
+}
+
+
+
 
 /**
  * \returns TRUE if success. FALSE if failure.
