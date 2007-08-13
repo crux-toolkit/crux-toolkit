@@ -2,9 +2,10 @@
  * \file match.c
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * DESCRIPTION: Object for matching a peptide and a spectrum, generate a preliminary score(ex, Sp)
+ * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
+ * 							preliminary score(e.g., Sp)
  *
- * REVISION: 
+ * REVISION: $Revision: 1.33 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -46,16 +47,16 @@
  * if there are one src protein where it is N tryptic and another where
  * it is C tryptic, overall we will call the peptide in the match tryptic.
  * 
- * There are for sure other methods, for example to randomly sample the src protein
- * and consider that protein as its src or to shuffle the flanking sequence of the peptide
- * in each of peptide and randomly sample from the shuffled flanking sequence to determine
- * the shuffled peptide's trypticity.
+ * There are for sure other methods, for example to randomly sample the src 
+ * protein and consider that protein as its src or to shuffle the flanking 
+ * sequence of the peptide in each of peptide and randomly sample from the 
+ * shuffled flanking sequence to determine the shuffled peptide's trypticity.
  *
  */
 
 /**
  *\struct match
- *\brief An object that stores the score & rank for each match of spectrum & peptide
+ *\brief An object that stores the score & rank for each pepide-spectrum match
  */
 struct match{
   SPECTRUM_T* spectrum; ///< the spectrum we are scoring with

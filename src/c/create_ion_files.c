@@ -2,9 +2,8 @@
  * \file create_ion_files
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
- * DESCRIPTION: Creates files describing ion series, to be used as input to GMTK.
- *
- * REVISION: 
+ * DESCRIPTION: Creates files describing ion series, for input to GMTK.
+ * REVISION: $Revision: 1.4 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -81,13 +80,13 @@ int main(int argc, char** argv){
  /* Define required command line arguments */
   parse_arguments_set_req(
     "peptide-sequence", 
-    "The literal peptide sequence (e.g. EAMAPK) that is used to predict the ions.", 
+    "The peptide sequence (e.g. EAMAPK) that is used to predict the ions.", 
     (void *) &peptide_sequence, 
     STRING_ARG);
 
   parse_arguments_set_req(
     "scan-number", 
-    "The scan number for the MS-MS spectrum to extract from the ms2 file. This is an integer in the range [1, 100000], and uniquely identifies a particular MS-MS spectrum within an .ms2 file.",
+    "The scan number for the MS-MS spectrum to extract from the ms2 file.",
     (void *) &scan_num, INT_ARG);
 
   parse_arguments_set_req(
