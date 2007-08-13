@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.31 $
+ * $Revision: 1.32 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -384,6 +384,20 @@ void serialize_spectrum(
   SPECTRUM_T* spectrum, ///< the spectrum to serialize -in
   FILE* file ///< output stream -out
   );
+
+/***********************************************************************
+ * Normalize peak intensities so that they sum to unity.
+ ***********************************************************************/
+void sum_normalize_spectrum(
+	SPECTRUM_T* spectrum
+	);
+
+/***********************************************************************
+ * Populate peaks with rank information.
+ ***********************************************************************/
+void rank_peaks(
+	SPECTRUM_T* spectrum
+	);
 
 /******************************************************************************/
 
