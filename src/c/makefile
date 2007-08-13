@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.69 $   #-Werror \
+# VERSION: $Revision: 1.70 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -12,7 +12,7 @@ OFLAGS  = #-O2
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 CPP_FLAGS =  -lstdc++
-OS_FLAGS = -DCYGWIN
+OS_FLAGS = -DCYGWIN -fno-strict-aliasing
 
 ##### Different module directories ####
 PERCOLATOR_DIR = ../../../percolator
@@ -79,6 +79,7 @@ LIBOBJS =\
 
 # These are the names of the programs.
 PROGS = \
+	${BINDIR}/create_ion_files \
 	${BINDIR}/get_ms2_spectrum \
 	${BINDIR}/generate_peptides \
 	${BINDIR}/create_protein_index \
@@ -88,8 +89,7 @@ PROGS = \
 	${BINDIR}/search_spectrum \
 	${BINDIR}/search_spectra \
 	${BINDIR}/match_search \
-	${BINDIR}/match_analysis \
-	${BINDIR}/create_ion_files
+	${BINDIR}/match_analysis 
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \

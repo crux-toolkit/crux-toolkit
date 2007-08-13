@@ -406,7 +406,8 @@ double* get_match_percolator_features(
   }
   
   //run specific features
-  feature_array[17] = get_match_collection_hash(match_collection, match->peptide);
+  feature_array[17] 
+		= get_match_collection_hash(match_collection, match->peptide);
   
   src_iterator = new_peptide_src_iterator(match->peptide);
   
@@ -418,26 +419,27 @@ double* get_match_percolator_features(
     protein_idx = get_protein_protein_idx(protein);
     
     //numProt
-    if(feature_array[18] < get_match_collection_protein_counter(match_collection,
-                                                                protein_idx)){
-      feature_array[18] = get_match_collection_protein_counter(match_collection, 
-                                                               protein_idx);
+    if(feature_array[18] < get_match_collection_protein_counter(
+														match_collection, protein_idx)){
+      feature_array[18] = get_match_collection_protein_counter(
+														match_collection, protein_idx);
     }
     
     //pepSite
-    if(feature_array[19] < get_match_collection_protein_peptide_counter(match_collection,
-                                                                             protein_idx)){
-      feature_array[19] = get_match_collection_protein_peptide_counter(match_collection,
-                                                                       protein_idx);      
+    if(feature_array[19] < get_match_collection_protein_peptide_counter(
+														match_collection, protein_idx)){
+      feature_array[19] = get_match_collection_protein_peptide_counter(
+														match_collection, protein_idx);      
     }
   }
   
   //now check that no value is with in infinity
   int check_idx = 0;
   for(; check_idx < 20; ++check_idx){
-    if(feature_array[check_idx] <= -INFINITY ||
-       feature_array[check_idx] >= INFINITY){
-      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f", check_idx, feature_array[check_idx]);      
+    if(feature_array[check_idx] <= -BILLION ||
+       feature_array[check_idx] >= BILLION){
+      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f",
+				check_idx, feature_array[check_idx]);
     }
   }
     

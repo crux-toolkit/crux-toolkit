@@ -113,7 +113,7 @@ void initialize_parameters(void){
 
   //what charge state spectra to run among the ones in ms2 file
   set_string_parameter("spectrum-change", "all");
-  set_double_parameter("number-runs", INFINITY);
+  set_double_parameter("number-runs", BILLION);
   
   //match_search
   set_string_parameter("match-output-folder", ".");
@@ -121,7 +121,7 @@ void initialize_parameters(void){
   set_string_parameter("seed", "time");
   set_string_parameter("sqt-output-file", "Prefix of <ms2 input filename>.psm");
   set_double_parameter("spectrum-min-mass", 0.0);
-  set_double_parameter("spectrum-max-mass", INFINITY);
+  set_double_parameter("spectrum-max-mass", BILLION);
   set_int_parameter("top-match", 1);
   set_int_parameter("number-decoy-set", 2);
   

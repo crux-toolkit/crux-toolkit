@@ -15,6 +15,9 @@ V- update sample parameter file (with default)
 V- write documentation on how to add modules to crux and compile
 - write update makefile
 - search_spectrum output documentation shouldbe written again...
+- use CARP consistently throughout the code, including utils.h
+- 80 chars per line
+	utils.*
 - parameter file, white spaces cases errors
   for example, score-type=xcorr<white-space>
   the <white-space> will cause a matching error in string comparison

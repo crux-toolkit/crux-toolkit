@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -376,7 +376,7 @@ float modify_ion_mass(
 
 /**
  * is_modified, indiciates if there are any modification to the ion
- * speeds up the proccess if FLASE.
+ * speeds up the proccess if FALSE.
  *\returns TRUE if successfully computes the mass/z of the ion, else FALSE
  */
 BOOLEAN_T calc_ion_mass_z_with_mass(

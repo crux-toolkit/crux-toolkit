@@ -15,6 +15,7 @@
 #include <math.h>
 #include <assert.h>
 #include "utils.h"
+#include "carp.h"
 
 
 /***********************************************************************
@@ -100,22 +101,22 @@ BOOLEAN_T open_file
    FILE **         afile)               /* Pointer to the open file. */
 {
   if (filename == NULL) {
-    fprintf(stderr, "Error: No %s filename specified.\n", file_description);
+    carp(CARP_ERROR, "No %s filename specified.\n", file_description);
     return(FALSE);
   } else if ((allow_stdin) && (strcmp(filename, "-") == 0)) {
     if (strchr(file_mode, 'r') != NULL) {
-      fprintf(stderr, "Reading %s from stdin.\n", content_description);
+    	carp(CARP_INFO, "Reading %s from stdin.\n", content_description);
       *afile = stdin;
     } else if (strchr(file_mode, 'w') != NULL) {
-      fprintf(stderr, "Writing %s to stdout.\n", content_description);
+			carp(CARP_INFO, "Writing %s to stdout.\n", content_description);
       *afile = stdout;
     } else {
-      fprintf(stderr, "Sorry, I can't figure out whether to use stdin ");
-      fprintf(stderr, "or stdout for %s.\n", content_description);
+			carp(CARP_INFO, "Sorry, I can't figure out whether to use stdin ");
+      carp(CARP_INFO, "or stdout for %s.\n", content_description);
       return(FALSE);
     }
   } else if ((*afile = fopen(filename, file_mode)) == NULL) {
-    fprintf(stderr, "Error opening file %s.\n", filename);
+		carp(CARP_INFO, "Error opening file %s.\n", filename);
     return(FALSE);
   }
   return(TRUE);
@@ -772,8 +773,6 @@ General Public License for more details.  */
 #else
 char *malloc (), *realloc ();
 #endif
-
-#include "crux_getline.h"
 
 /* Always add at least this many bytes when extending the buffer.  */
 #define MIN_CHUNK 64

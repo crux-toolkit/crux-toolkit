@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "crux_getline.h"
 /*#ifndef linux
 #include <ieeefp.h>
 #endif*/

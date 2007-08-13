@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -291,10 +291,6 @@ void set_spectrum_new_filename(
 /**
  * \returns The intensity of the peak with the maximum intensity.
  */
-
-/**
- * \returns The intensity of the peak with the maximum intensity.
- */
 float get_spectrum_max_peak_intensity(
   SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
   );
@@ -346,14 +342,27 @@ BOOLEAN_T add_peak_to_spectrum(
   );
 
 /**
- * \returns The sum of intensities within 'resolution' of 'mz' in 'spectrum'
- * NOTE: Chris, this should lazily create the data structures within the
+ * \returns The closest intensity within 'max' of 'mz' in 'spectrum'
+ * This should lazily create the data structures within the
  * spectrum object that it needs.
+ * NOTE: Not implemented!
+ */
+float get_nearest_intensity(
+  SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
+  float mz, ///< the mz of the peak around which to sum intensities -in
+  float max ///< the maximum distance to get intensity -in
+  );
+
+/**
+ * \returns The sum of intensities within 'tolerance' of 'mz' in 'spectrum'
+ * This should lazily create the data structures within the
+ * spectrum object that it needs.
+ * NOTE: Not implemented!
  */
 float get_nearby_intensity_sum(
-  SCORER_T* scorer,        ///< the scorer object -in                           
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
-  float mz             ///< the mz of the peak around which to sum intensities
+  float mz,             ///< the mz of the peak around which to sum intensities
+  float tol             ///< the tolerance within which to sum intensities
   );
 
 /**

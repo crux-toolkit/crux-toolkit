@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.20 $
+ * REVISION: $Revision: 1.21 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -249,6 +249,32 @@ void print_ion_series(
   for(; ion_idx < ion_series->num_ions; ++ion_idx){
     print_ion(ion_series->ions[ion_idx], file);
   }
+}
+
+void print_ion_series_gmtk(
+	ION_SERIES_T* ion_series, ///< ion_series to print -in 
+	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
+	FILE* file ///< file output
+								){
+
+	//create the filtered iterator that will select among the ions
+	ION_FILTERED_ITERATOR_T* ion_iterator = 
+		new_ion_filtered_iterator(ion_series, ion_constraint);
+  
+  //foreach ion in ion iterator, add matched observed peak intensity
+  ION_T* ion;
+  while(ion_filtered_iterator_has_next(ion_iterator)){
+    ion = ion_filtered_iterator_next(ion_iterator);
+		print_ion(ion, file);
+    /*float mz = get_ion_mass_z(ion);
+    float charge = get_ion_charge(ion);
+		float cleavage_idx = get_ion_cleavage_idx(ion);
+		float intensity = get_nearest_intensity(spectrum, mz, tol);
+		fprintf(stderr, "%.3f - %f - %f - %i - %f - %s \n", 
+		mz, charge, cleavage_idx, ion_type_idx, intensity, output_directory);
+		*/
+	}
+  free_ion_filtered_iterator(ion_iterator);
 }
 
 /**
@@ -1040,6 +1066,32 @@ ION_CONSTRAINT_T* new_ion_constraint(
 
   return constraint;
 }
+/**
+ * modification, sets all fields for gmtk settings
+ *\returns a new heap allocated ion_constraint
+ */
+ION_CONSTRAINT_T* new_ion_constraint_gmtk(
+  int max_charge ///< the maximum charge of the ions
+  )
+{
+  ION_CONSTRAINT_T* constraint = NULL;
+
+	int charge = 1;
+  if(max_charge >= 1){
+		charge = max_charge - 1;
+  }  
+  constraint = new_ion_constraint(MONO, 1, BY_ION, FALSE);
+
+  //set all modifications count for gmtk
+  constraint->use_neutral_losses = TRUE;
+  constraint->modifications[NH3] = 1;
+  constraint->modifications[H2O] = 1;
+  constraint->modifications[ISOTOPE] = 0;
+  constraint->modifications[FLANK] = 0;
+
+  return constraint;
+}
+
 
 /**
  * modification, sets all fields for sequest settings

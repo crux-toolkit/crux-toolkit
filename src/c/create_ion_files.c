@@ -36,8 +36,7 @@ void wrong_command(char* arg, char* comment){
     carp(CARP_FATAL, "%s", comment);
   }
 
-  //FIXME uncomment this print if want to print usage whenever error message is printed
-  //fprintf(stderr, "%s", usage);
+  fprintf(stderr, "%s", usage);
   free(usage);
   exit(1);
 }
@@ -48,6 +47,7 @@ int main(int argc, char** argv){
   char* ms2_file = NULL;
   int scan_num = 0;
   char* peptide_sequence = NULL;
+  char* output_directory = NULL;
 
   //optional variables
   char* charge = "2";
@@ -96,6 +96,12 @@ int main(int argc, char** argv){
     (void *) &ms2_file,
     STRING_ARG);
 
+	parse_arguments_set_req(
+    "output-dir", 
+    "A directory in which to place the ion files.",
+    (void *) &output_directory,
+    STRING_ARG);
+
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
 
@@ -119,7 +125,6 @@ int main(int argc, char** argv){
 
     //parse and update parameters
     parse_update_parameters(parameter_file);
-    
     
     peptide_charge = get_int_parameter("charge");
     
@@ -148,38 +153,36 @@ int main(int argc, char** argv){
     }
     
     //set ion constraint to sequest settings
-    ION_CONSTRAINT_T* ion_constraint = NULL;
-    
-    // GMTK what kind of ion constraint (if any?) should we use
-    ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
-
+    ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(peptide_charge);  
     //create new ion series
-    ion_series = new_ion_series(peptide_sequence, peptide_charge, ion_constraint);
+    ion_series = new_ion_series(
+									 peptide_sequence, peptide_charge, ion_constraint);
    
-   //now predict ions
-    predict_ions(ion_series);
+   	//now predict ions
+   	predict_ions(ion_series);
        
-   // GMTK create output directory for the files
-   // DIR* output_directory = opendir(peptide_sequence)
-
-   // GMTK output peptide ion files
-   // output_ion_files(output_directory, spectrum, ion_series);
+	 	// TODO figure out how to handle neutral losss
+	 	// TODO figure out the GMTK file input lists
+   	// GMTK output peptide ion files
+   	if (output_ion_files(output_directory, spectrum, ion_series) == FALSE){
+  		 carp(CARP_FATAL, "failed to create ion files for: %s %i %s", 
+				 ms2_file, scan_num, peptide_sequence);
+	 	}
    
-   //free heap
-   // GMTK free(output_directory);
-   free_ion_constraint(ion_constraint);
-   free_ion_series(ion_series);
-   free_spectrum_collection(collection);
-   free_spectrum(spectrum);
-   free_parameters();
- }
- else{
-   char* usage = parse_arguments_get_usage("create_ion_files");
-   result = parse_arguments_get_error(&error_message);
-   fprintf(stderr, "Error in command line. Error # %d\n", result);
-   fprintf(stderr, "%s\n", error_message);
-   fprintf(stderr, "%s", usage);
-   free(usage);
- }
- exit(0);
+   	//free heap
+   	free_ion_constraint(ion_constraint);
+   	free_ion_series(ion_series);
+   	free_spectrum_collection(collection);
+   	free_spectrum(spectrum);
+   	free_parameters();
+ 	}
+ 	else{
+   	char* usage = parse_arguments_get_usage("create_ion_files");
+   	result = parse_arguments_get_error(&error_message);
+   	fprintf(stderr, "Error in command line. Error # %d\n", result);
+   	fprintf(stderr, "%s\n", error_message);
+   	fprintf(stderr, "%s", usage);
+   	free(usage);
+ 	}
+ 	exit(0);
 }

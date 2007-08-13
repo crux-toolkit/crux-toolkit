@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -71,6 +71,15 @@ void print_ion_series(
   ION_SERIES_T* ion_series, ///< ion_series to print -in 
   FILE* file ///< file for output -out
   );
+
+/**
+ * Prints a ion_series object to file, in GMTK format.
+ */
+void print_ion_series_gmtk(
+	ION_SERIES_T* ion_series, ///< ion_series to print -in 
+	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
+	FILE* file ///< file output
+	);
 
 /**
  * Predict ion series
@@ -200,6 +209,15 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest(
   ION_TYPE_T ion_type, ///< the ion types the peptide series should include
   BOOLEAN_T precursor_ion ///< should include precursor ion?
   );
+
+/**
+ * modification, sets all fields for GMTK settings
+ *\returns a new heap allocated ion_constraint
+ */
+ION_CONSTRAINT_T* new_ion_constraint_gmtk(
+  int max_charge ///< the maximum charge of the ions
+  );
+
 
 /**
  * modification, sets all fields for sequest Sp scoring settings

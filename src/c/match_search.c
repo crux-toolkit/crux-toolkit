@@ -56,10 +56,10 @@ int main(int argc, char** argv){
   char* output_mode = "binary";
   char* sqt_output_file = "Prefix of <ms2 input filename>.psm";
   double spectrum_min_mass = 0;
-  double spectrum_max_mass = INFINITY;
+  double spectrum_max_mass = BILLION;
   int number_decoy_set = 2;
   char* spectrum_charge = "all";
-  double number_runs = INFINITY;
+  double number_runs = BILLION;
 
   //required
   char* ms2_file = NULL;
