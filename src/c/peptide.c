@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.55 $
+ * $Revision: 1.56 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
+#include "hash.h"
 #include "crux-utils.h"
 #include "objects.h"
 #include "mass.h"
@@ -61,6 +62,27 @@ PEPTIDE_T* allocate_peptide(void){
   PEPTIDE_T* peptide = (PEPTIDE_T*)mycalloc(1, sizeof(PEPTIDE_T));
   peptide->peptide_src = NULL;
   return peptide;
+}
+
+/**
+ * \returns The mass of the given peptide.
+ */
+float calc_sequence_mass(
+  char* peptide, ///< the query peptide -in
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+  )
+{
+  float peptide_mass = 0;
+  int idx = 0;
+  char amino;
+  while(peptide[idx] != '\0'){
+    amino = peptide[idx++];
+    peptide_mass += get_mass_amino_acid(amino, mass_type);
+  }
+  if(mass_type == AVERAGE){
+    return peptide_mass + MASS_H2O_AVERAGE;
+  }
+  return peptide_mass + MASS_H2O_MONO;
 }
 
 /**
@@ -407,10 +429,8 @@ void copy_peptide(
   add_database_pointer_count(get_peptide_first_src_database(src));
 }
 
-
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
- * FIXME Chris, could you create the get and set methods for the object fields?
  */
 
 /**

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -9,8 +9,10 @@
 #include <string.h>
 #include "objects.h"
 #include "ion.h"
+#include "peak.h"
 #include "mass.h"
 #include "utils.h"
+#include "alphabet.h"
 
 // MAX_MODIFICATIONS 4, defined in ion.h, because ion_series.c needs the information
 
@@ -37,8 +39,8 @@ struct ion {
   char* peptide_sequence; ///< the peptide sequence that fragments to form this ion
   int modification_counts[MAX_MODIFICATIONS]; ///< an array of the number of different ion modifications
   float ion_mass_z;   ///< The mass/z of the ion. 
+  PEAK_T* peak;  ///< The assigned peak. NULL if no peak // TODO add ptr count?
 };
-
 
 /**
  * initializes the mass array
@@ -63,6 +65,7 @@ void initialize_modification_masses(
 
   initialized_modification_masses = TRUE;
 }
+
 
 
 /**
@@ -92,6 +95,7 @@ ION_T* new_basic_ion (
   ion->cleavage_idx = cleavage_idx;
   ion->charge = charge;
   ion->peptide_sequence = peptide;
+  ion->peak = NULL;
   return ion;
 }
 
@@ -265,6 +269,76 @@ void print_ion(
   fprintf(file,"\n");
 }
 
+
+/**
+ * prints the ION_T object to the file, in the
+ * following format for GMTK single-ion models:
+ *
+ * 1. m/z ratio - ratio of the ion's mass-to-charge to the peptide's m/z
+ * 2. raw - raw intensity
+ * 3. rank - the ion rank
+ * 4. proton mobility - always set to 1 (for now) FIXME
+ * 5. m/z ratio int
+ * 6. index of the amide bond cleavage from N-term
+ * 7. index of the amide bond cleavage from C-term
+ * 8. Left amino acid ID
+ * 9. Right amino acid ID
+ * 10. Is this ion possible?
+ * 11. Is this ion detectable?
+ * 12. Is this ion detected?
+ */
+void print_ion_gmtk_single(
+  ION_T* ion, ///< print this ion -in
+  FILE* file  ///< to this file -in
+  ){
+  float intensity = 0.0;
+  float intensity_rank = 0.0;
+  if (ion->peak != NULL){
+    intensity = get_peak_intensity(ion->peak);
+    intensity_rank = get_peak_intensity_rank(ion->peak);
+  }
+  // TODO add binary option
+
+  // START with ranks
+  char* format = "%i\t%.6f\t%.6f\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n";
+  fprintf(file, format,
+      1,                                                        // 1 TODO 
+      intensity,                                                // 2 
+      intensity_rank,                                           // 3 TODO
+      1,                                                        // 4 
+      1,                                                        // 5 TODO
+      ion->cleavage_idx,                                        // 6
+      strlen(ion->peptide_sequence) - ion->cleavage_idx + 1,    // 7
+      amino_to_int(ion->peptide_sequence[ion->cleavage_idx-1]), // 8 
+      amino_to_int(ion->peptide_sequence[ion->cleavage_idx]),   // 9 
+      1, 1, 1                                                   // 10, 11, 12
+  );
+}
+
+/**
+ * prints the location and fields of ION_T object to the file, in the
+ * following format for GMTK paired-ion models:
+ *
+ * m/z \\t mass \\t charge \\t ion-series \\t  ...
+ *  peptide-bond-index \\t modifications \n
+ *
+ * Where:
+ *
+ * m/z - is the ion's mass-to-charge
+ * mass - is the ion's (charged) mass
+ * charge - is the ion's charge e.g. 1,2,3
+ * ion-series - is one of (b,y,p)
+ * bond-index - is in [1...n), where n is peptide length
+ * modifications - is one of (none|nh3|h2o)
+ *
+ * if the ion has more than one modification, each will be printed on a
+ * separate line, with the necessary number of tabs to right justify
+ */
+void print_ion_gmtk_paired(
+  ION_T* ion, ///< print this ion -in
+  FILE* file ///< to this file -in
+  );
+
 /**
  *\return the modified mass_z accodring to the modification type
  */
@@ -302,6 +376,15 @@ void add_modification(
                                        ion->charge, mass_type);
 }
 
+/**
+ * Adds the given ION_MODIFICATION to this ion
+ */
+void set_ion_peak(
+  ION_T* ion, ///< ion to which to add the peak -mod
+  PEAK_T* peak ///< peak to add to this ion -in
+  ){
+  ion->peak = peak;
+};
 
 /**
  *\returns the ion's AA mass added all up

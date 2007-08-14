@@ -22,7 +22,6 @@
 #include "crux-utils.h"
 #include "scorer.h"
 #include "objects.h"
-#include "parameter.h"
 #include "match.h"
 #include "match_collection.h"
 

@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -114,6 +114,54 @@ void print_ion(
   );
 
 /**
+ * prints the location and fields of ION_T object to the file, in the
+ * following format for GMTK single-ion models:
+ *
+ * m/z \\t mass \\t charge \\t ion-series \\t  ...
+ *  peptide-bond-index \\t modifications \n
+ *
+ * Where:
+ *
+ * m/z - is the ion's mass-to-charge
+ * mass - is the ion's (charged) mass
+ * charge - is the ion's charge e.g. 1,2,3
+ * ion-series - is one of (b,y,p)
+ * bond-index - is in [1...n), where n is peptide length
+ * modifications - is one of (none|nh3|h2o)
+ *
+ * if the ion has more than one modification, each will be printed on a
+ * separate line, with the necessary number of tabs to right justify
+ */
+void print_ion_gmtk_single(
+  ION_T* ion, ///< print this ion -in
+  FILE* file ///< to this file -in
+  );
+
+/**
+ * prints the location and fields of ION_T object to the file, in the
+ * following format for GMTK paired-ion models:
+ *
+ * m/z \\t mass \\t charge \\t ion-series \\t  ...
+ *  peptide-bond-index \\t modifications \n
+ *
+ * Where:
+ *
+ * m/z - is the ion's mass-to-charge
+ * mass - is the ion's (charged) mass
+ * charge - is the ion's charge e.g. 1,2,3
+ * ion-series - is one of (b,y,p)
+ * bond-index - is in [1...n), where n is peptide length
+ * modifications - is one of (none|nh3|h2o)
+ *
+ * if the ion has more than one modification, each will be printed on a
+ * separate line, with the necessary number of tabs to right justify
+ */
+void print_ion_gmtk_paired(
+  ION_T* ion, ///< print this ion -in
+  FILE* file ///< to this file -in
+  );
+
+/**
  * Adds the given ION_MODIFICATION to this ion
  */
 void add_modification(
@@ -121,6 +169,14 @@ void add_modification(
   ION_MODIFICATION_T modification, ///< add this modification to the ion -in
   int modification_count,  ///< the number of modifications
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
+  );
+
+/**
+ * Adds the given ION_MODIFICATION to this ion
+ */
+void set_ion_peak(
+  ION_T* ion, ///< ion to which to add the peak -mod
+  PEAK_T* peak ///< peak to add to this ion -in
   );
 
 /**

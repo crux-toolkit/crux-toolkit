@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.70 $   #-Werror \
+# VERSION: $Revision: 1.71 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -79,17 +79,17 @@ LIBOBJS =\
 
 # These are the names of the programs.
 PROGS = \
-	${BINDIR}/create_ion_files \
-	${BINDIR}/get_ms2_spectrum \
-	${BINDIR}/generate_peptides \
-	${BINDIR}/create_protein_index \
-	${BINDIR}/create_index \
-	${BINDIR}/predict_peptide_ions \
-	${BINDIR}/score_peptide_spectrum \
-	${BINDIR}/search_spectrum \
-	${BINDIR}/search_spectra \
-	${BINDIR}/match_search \
-	${BINDIR}/match_analysis 
+	${BINDIR}/create_ion_files 
+#	${BINDIR}/get_ms2_spectrum \
+#	${BINDIR}/generate_peptides \
+#	${BINDIR}/create_protein_index \
+#	${BINDIR}/create_index \
+#	${BINDIR}/predict_peptide_ions \
+#	${BINDIR}/score_peptide_spectrum \
+#	${BINDIR}/search_spectrum \
+#	${BINDIR}/search_spectra \
+#	${BINDIR}/match_search \
+#	${BINDIR}/match_analysis 
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \
@@ -152,18 +152,18 @@ include .depend
 
 # Rule for compiling C files into .o files.
 ${OBJDIR}/%.o: %.c
-	mkdir -p ${OBJDIR}
+	@mkdir -p ${OBJDIR}
 	${CC} ${CFLAGS} ${OS_FLAGS} -c -o ${OBJDIR}/$*.o $<
 
 #################
 ${OBJDIR}/%.o: %.cpp
-	mkdir -p ${OBJDIR}
+	@mkdir -p ${OBJDIR}
 	${CC} ${CFLAGS} ${OS_FLAGS} -c -o ${OBJDIR}/$*.o $<
 ##################
 
 # Rule for adding .o files to an archive library
 (%.o): %.o
-	mkdir -p ${LIBDIR}
+	@mkdir -p ${LIBDIR}
 	${AR} r $@ $*.o
 
 # Rule for doing ranlib.

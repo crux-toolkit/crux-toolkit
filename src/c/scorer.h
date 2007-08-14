@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
@@ -48,13 +48,24 @@ float score_spectrum_v_ion_series(
 );
 
 /**
+ * Creates the an array of ion constraints for GMTK models.
+ * TODO do we need one for paired and single? Do we want an iterator?
+ * TODO put this outside output_ion_files routine
+ */
+ION_CONSTRAINT_T** single_ion_constraints(
+  int* num_ion_constraints
+);
+
+/**
  * Create ion files (for GMTK) in the output directory
  * \returns TRUE for success
  */
 BOOLEAN_T output_ion_files(
   char* output_directory,  ///< name of directory to place the ion files
   SPECTRUM_T* spectrum,    ///< input spectrum
-  ION_SERIES_T* ion_series ///< ion series for which to output files
+  ION_SERIES_T* ion_series,  ///< ion series for which to output files
+  ION_CONSTRAINT_T** ion_constraints,
+  int num_ion_constraints 
 );
 
 /**
