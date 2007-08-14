@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.9 $
+ * REVISION: $Revision: 1.10 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -154,6 +154,7 @@ int main(int argc, char** argv){
 				carp(CARP_INFO, "At peptide %i of %i", peptide_idx + 1, num_lines);
 			}
 			peptide_sequence = peptides[peptide_idx++];
+      carp(CARP_DETAILED_DEBUG, "%s", peptide_sequence);
 			// check peptide sequence
     	if(!valid_peptide_sequence(peptide_sequence)){
       	wrong_command(peptide_sequence, "not a valid peptide sequence");
@@ -163,7 +164,7 @@ int main(int argc, char** argv){
     	ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(charge); 
     	ion_series = new_ion_series(
 									 	 peptide_sequence, charge, ion_constraint);
-   
+  
    		// now predict ions and assign them to their closest peaks
    		predict_ions(ion_series);
     	ion_series_assign_nearest_peaks(ion_series, spectrum);
