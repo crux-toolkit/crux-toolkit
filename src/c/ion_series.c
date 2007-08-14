@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.23 $
+ * REVISION: $Revision: 1.24 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -17,6 +17,7 @@
 #include "utils.h"
 #include "crux-utils.h"
 #include "parameter.h"
+#include "peptide.h"
 #include "mass.h"
 #include "spectrum.h"
 
@@ -31,6 +32,7 @@
  */
 struct ion_series {
   char* peptide; ///< The peptide for this ion series
+  float peptide_mass; ///< The peptide neutral mass. For efficiency. 
   int charge; ///< /<The charge state of the peptide for this ion series
   ION_CONSTRAINT_T* constraint; ///< The constraints which the ions in this series obey
   ION_T* ions[MAX_IONS]; ///< The ions in this series
@@ -133,6 +135,7 @@ ION_SERIES_T* new_ion_series(
 
   //copy the peptide sequence
   ion_series->peptide = my_copy_string(peptide);
+  ion_series->peptide_mass = calc_sequence_mass(peptide, MONO);
   ion_series->charge = charge;
   ion_series->constraint = constraint;
   ion_series->peptide_length = strlen(peptide);
