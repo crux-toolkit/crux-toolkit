@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -9,12 +9,14 @@
 #include <string.h>
 #include "objects.h"
 #include "ion.h"
+#include "peptide.h"
 #include "peak.h"
 #include "mass.h"
 #include "utils.h"
 #include "alphabet.h"
 
-// MAX_MODIFICATIONS 4, defined in ion.h, because ion_series.c needs the information
+#define MZ_INT_MAX 10
+#define MZ_INT_MIN 0
 
 /**
  * Array to store the modification masses
@@ -25,6 +27,7 @@ float modification_masses[MAX_MODIFICATIONS];
  * Have we initialized the modification_masses?
  */
 BOOLEAN_T initialized_modification_masses = FALSE;
+
 
 /**
  * \struct ion
@@ -37,6 +40,7 @@ struct ion {
   // from the N-term
   int charge; ///< the ion charge
   char* peptide_sequence; ///< the peptide sequence that fragments to form this ion
+  float peptide_mass; ///< the mass of the peptide. For efficiency
   int modification_counts[MAX_MODIFICATIONS]; ///< an array of the number of different ion modifications
   float ion_mass_z;   ///< The mass/z of the ion. 
   PEAK_T* peak;  ///< The assigned peak. NULL if no peak // TODO add ptr count?
@@ -95,6 +99,8 @@ ION_T* new_basic_ion (
   ion->cleavage_idx = cleavage_idx;
   ion->charge = charge;
   ion->peptide_sequence = peptide;
+  // TODO get mass type from param file
+  ion->peptide_mass = calc_sequence_mass(peptide, MONO); 
   ion->peak = NULL;
   return ion;
 }
@@ -298,14 +304,17 @@ void print_ion_gmtk_single(
     intensity_rank = get_peak_intensity_rank(ion->peak);
   }
   // TODO add binary option
+  // TODO add detectable etc.
 
+  // float mz_ratio = get_peak_location(ion->peak)/ion->peptide_mass;
+  //int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
   char* format = "%i\t%.6f\t%.6f\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n";
   fprintf(file, format,
-      1,                                                        // 1 TODO 
+      0.5, // mz_ratio,                                         // 1 TODO
       intensity,                                                // 2 
-      intensity_rank,                                           // 3 TODO
+      intensity_rank,                                           // 3 
       1,                                                        // 4 
-      1,                                                        // 5 TODO
+      5,  // mz_int,                                            // 5  TODO
       ion->cleavage_idx,                                        // 6
       strlen(ion->peptide_sequence) - ion->cleavage_idx + 1,    // 7
       amino_to_int(ion->peptide_sequence[ion->cleavage_idx-1]), // 8 
