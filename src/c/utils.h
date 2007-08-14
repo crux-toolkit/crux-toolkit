@@ -347,6 +347,14 @@ void copy_int_array
   int* source,
   int* target);
 
+/************************************************************************
+ * parses a file of length max_lines and returns an array of strings
+ ************************************************************************/
+char** parse_file(
+	char* file_name,
+	int max_lines
+	);
+
 /* crux_getline.c -- Replacement for GNU C library function crux_getline
 
 Copyright (C) 1993 Free Software Foundation, Inc.

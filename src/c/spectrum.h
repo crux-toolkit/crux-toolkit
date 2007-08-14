@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.35 $
+ * $Revision: 1.36 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -89,9 +89,22 @@ SPECTRUM_T* parse_spectrum_binary(
   FILE* file ///< output stream -out
   );
 
+/***********************************************************************
+ * Normalize peak intensities so that they sum to unity.
+ ***********************************************************************/
+void sum_normalize_spectrum(
+	SPECTRUM_T* spectrum
+	);
+
+/***********************************************************************
+ * Populate peaks with rank information.
+ ***********************************************************************/
+void spectrum_rank_peaks(
+	SPECTRUM_T* spectrum
+	);
+
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
- * FIXME Chris, could you create the get and set methods for the object fields?
  */
 
 /**

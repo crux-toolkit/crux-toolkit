@@ -689,6 +689,30 @@ void copy_int_array
     target[i] = source[i];
 }
 
+/**
+ * parses a file of length max_lines and returns an array of strings
+ */
+char** parse_file(
+	char* file_name,
+	int max_lines
+	){
+	FILE* file = NULL;
+	if (open_file(file_name, "r", FALSE, "input", "", &file) == FALSE){
+		carp(CARP_FATAL, "Could not open file %s", file_name);
+		exit(1);
+	}
+	char** lines = (char**) malloc(sizeof(char *) * max_lines);
+	size_t buf_size = 0; 
+	int line_idx = 0;
+	int length;
+	while( (length = crux_getline(&lines[line_idx++], &buf_size, file)) !=-1 ){
+					;
+	}
+	lines[line_idx] = NULL;
+	fclose(file);
+	return lines;
+}
+
 #ifdef MAIN
 
 
