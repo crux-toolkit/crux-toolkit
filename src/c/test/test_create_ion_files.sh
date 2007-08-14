@@ -4,4 +4,4 @@
 # make 
 # cd test
  rm -fr output
-../../../bin/create_ion_files LLRKLEAMAPK 18 test.ms2 output --verbosity 30
+../../../bin/create_ion_files peptides.txt 18 test.ms2 output --verbosity 100

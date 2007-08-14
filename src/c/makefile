@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.71 $   #-Werror \
+# VERSION: $Revision: 1.72 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -79,17 +79,18 @@ LIBOBJS =\
 
 # These are the names of the programs.
 PROGS = \
-	${BINDIR}/create_ion_files 
-#	${BINDIR}/get_ms2_spectrum \
-#	${BINDIR}/generate_peptides \
-#	${BINDIR}/create_protein_index \
-#	${BINDIR}/create_index \
-#	${BINDIR}/predict_peptide_ions \
-#	${BINDIR}/score_peptide_spectrum \
-#	${BINDIR}/search_spectrum \
-#	${BINDIR}/search_spectra \
-#	${BINDIR}/match_search \
-#	${BINDIR}/match_analysis 
+	${BINDIR}/utils \
+	${BINDIR}/create_ion_files \
+	${BINDIR}/get_ms2_spectrum \
+	${BINDIR}/generate_peptides \
+	${BINDIR}/create_protein_index \
+	${BINDIR}/create_index \
+	${BINDIR}/predict_peptide_ions \
+	${BINDIR}/score_peptide_spectrum \
+	${BINDIR}/search_spectrum \
+	${BINDIR}/search_spectra \
+	${BINDIR}/match_search \
+	${BINDIR}/match_analysis 
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \

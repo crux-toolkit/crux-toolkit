@@ -697,24 +697,28 @@ char** parse_file(
 	int max_lines,
 	int* num_lines
 	){
-	FILE* file = NULL;
-	if (open_file(file_name, "r", FALSE, "input", "", &file) == FALSE){
-		carp(CARP_FATAL, "Could not open file %s", file_name);
-		exit(1);
-	}
-	char** lines = (char**) mycalloc(max_lines, sizeof(char *));
-	size_t buf_size = 0; 
-	int line_idx = 0;
-	int length;
-	char** line;
-	while( (length = crux_getline(line, &buf_size, file)) !=-1 ){
-		(*line)[length-1] = '\0';
-		carp(CARP_DETAILED_DEBUG, "%s", *line);
-		lines[line_idx++] = *line;
-	}
-	*num_lines = line_idx;
-	fclose(file);
-	return lines;
+
+  FILE *infile;
+  if (open_file(file_name, "r", 1, "input", "", &infile) == 0)
+    exit(1);
+
+  size_t buf_length = 1024;
+  char** lines = (char**) malloc(max_lines * sizeof(char*));
+  int line_idx = 0;
+  int length;
+  while ((length = crux_getline(&lines[line_idx], &buf_length, infile)) != -1){
+    char* line = lines[line_idx];
+    if (line[length-2] == '\n' || line[length-2] == '\r'){
+      line[length-2] = '\0';
+    } else if (line[length-1] == '\n' || line[length-1] == '\r'){
+      line[length-1]='\0';
+    }
+    line_idx++;
+  }
+  fclose(infile);
+  *num_lines = line_idx;
+
+  return lines;
 }
 
 #ifdef MAIN
@@ -723,9 +727,6 @@ char** parse_file(
 int main (int argc, char *argv[])
 {
   FILE *infile;
-  char word[1000];
-  long seed;
-  int i, j;
 
   if (argc != 2) {
     die("USAGE: utils <filename>");
@@ -734,12 +735,27 @@ int main (int argc, char *argv[])
   if (open_file(argv[1], "r", 1, "input", "", &infile) == 0)
     exit(1);
 
-  while (fscanf(infile, "%s", word) == 1)
-    printf("%s ", word);
+  size_t buf_length = 1024;
+  char** lines = (char**) malloc(10000 * sizeof(char*));
+  int line_idx = 0;
+  int length;
+  while ((length = getline(&lines[line_idx], &buf_length, infile)) != -1){
+    char* line = lines[line_idx];
+    if (line[length-2] == '\n' || line[length-2] == '\r'){
+      line[length-2] = '\0';
+    } else if (line[length-1] == '\n' || line[length-1] == '\r'){
+      line[length-1]='\0';
+    }
+    line_idx++;
+  }
+  int new_line_idx;
+  for (new_line_idx=0; new_line_idx < line_idx; new_line_idx++){
+    printf("[%s]", lines[new_line_idx]);
+  }
 
   fclose(infile);
 
-  /* Test the random number generator. */
+  /* Test the random number generator. 
   seed = time(0);
   my_srand(seed);
   printf("\nSome random numbers (seed=%ld): \n", seed);
@@ -748,7 +764,7 @@ int main (int argc, char *argv[])
       printf("%6.4f ", my_drand());
     }
     printf("\n");
-  }
+  }*/
   return(0);
 }
 
