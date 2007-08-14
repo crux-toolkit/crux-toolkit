@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.49 $
+ * REVISION: $Revision: 1.50 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -24,6 +24,8 @@
  * \define constants
  */
 #define MAX_PEAKS 4000
+#define MZ_TO_PEAK_ARRAY_RESOLUTION 5 // i.e. 0.2 m/z unit
+#define MAX_PEAK_MZ 5000
 #define MAX_CHARGE 3
 #define MAX_I_LINES 2 //number of 'I' lines albe to parse for one spectrum object
 #define MAX_D_LINES 2 //number of 'D' lines albe to parse for one spectrum object
@@ -67,6 +69,8 @@ struct spectrum{
   BOOLEAN_T         has_peaks;  ///< Does the spectrum contain peak information?
 	BOOLEAN_T 				sorted_by_mz; ///< Are the spectrum peaks sorted by m/z ...
 	BOOLEAN_T 				sorted_by_intensity; ///< ... or by intensity?
+	BOOLEAN_T 				has_mz_peak_array; ///< Is the mz_peak_array populated.
+	PEAK_T** 					mz_peak_array;  ///< Allows rapid peak retrieval by mz.
 };    
 
 /**
@@ -168,7 +172,10 @@ SPECTRUM_T* new_spectrum(
   fresh_spectrum->spectrum_type = spectrum_type;
   fresh_spectrum->precursor_mz = precursor_mz;
 	fresh_spectrum->sorted_by_mz = FALSE;
+	fresh_spectrum->has_mz_peak_array = FALSE;
 	fresh_spectrum->sorted_by_intensity = FALSE;
+	fresh_spectrum->peaks = NULL;
+	fresh_spectrum->mz_peak_array = NULL;
   set_spectrum_new_possible_z(fresh_spectrum, possible_z, num_possible_z);
   set_spectrum_new_filename(fresh_spectrum, filename);
   return fresh_spectrum;
@@ -699,6 +706,38 @@ BOOLEAN_T add_peak_to_spectrum(
   return FALSE;
 }
 
+void populate_mz_peak_array(
+	SPECTRUM_T* spectrum
+	){
+	
+	if (spectrum->has_mz_peak_array == TRUE){
+		return;
+	}
+
+	int array_length = MZ_TO_PEAK_ARRAY_RESOLUTION * MAX_PEAK_MZ;
+	carp(CARP_DETAILED_DEBUG, "%i al", array_length);
+	PEAK_T** mz_peak_array = (PEAK_T**) 
+														mymalloc(array_length * sizeof(PEAK_T*));
+	int peak_idx;
+	for (peak_idx = 0; peak_idx < array_length; peak_idx++){
+		mz_peak_array[peak_idx] = NULL;
+	}
+	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
+	PEAK_T* peak = NULL;
+	while(peak_iterator_has_next(peak_iterator)){
+		peak = peak_iterator_next(peak_iterator);
+		float peak_mz = get_peak_location(peak);
+		int mz_idx = (int) peak_mz * MZ_TO_PEAK_ARRAY_RESOLUTION;
+		if (mz_peak_array[mz_idx] != NULL){
+			carp(CARP_ERROR, "Peak collision at mz %.3f", peak_mz);				
+		} else {
+			mz_peak_array[mz_idx] = peak; 
+		}
+	}
+	spectrum->mz_peak_array = mz_peak_array;
+	spectrum->has_mz_peak_array = TRUE;
+}
+
 /**
  * \returns The closest intensity within 'max' of 'mz' in 'spectrum'
  * NULL if no peak.
@@ -712,12 +751,23 @@ PEAK_T* get_nearest_peak(
   float max ///< the maximum distance to get intensity -in
   ){
 
-	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
+	populate_mz_peak_array(spectrum); // for rapid peak lookup by mz
+
+	float min_distance = BILLION;
+	int min_mz_idx = (int)((mz - max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
+	min_mz_idx = min_mz_idx < 0 ? 0 : min_mz_idx;
+	int max_mz_idx = (int)((mz + max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
+	int absolute_max_mz_idx = MAX_PEAK_MZ * MZ_TO_PEAK_ARRAY_RESOLUTION;
+	max_mz_idx = max_mz_idx > absolute_max_mz_idx 
+									? absolute_max_mz_idx : max_mz_idx;
 	PEAK_T* peak = NULL;
 	PEAK_T* nearest_peak = NULL;
-	float min_distance = BILLION;
-	while(peak_iterator_has_next(peak_iterator)){
-		peak = peak_iterator_next(peak_iterator);
+	carp(CARP_DETAILED_DEBUG, "%i to %i", min_mz_idx, max_mz_idx);
+	int peak_idx;
+	for (peak_idx=min_mz_idx; peak_idx < max_mz_idx + 1; peak_idx++){
+		if ((peak = spectrum->mz_peak_array[peak_idx]) == NULL){
+			continue;
+		}
 		float peak_mz = get_peak_location(peak);
 		float distance = abs(mz - peak_mz);
 		if (distance > max){
@@ -1183,6 +1233,8 @@ void spectrum_rank_peaks(
 	PEAK_T* peak = NULL;
 	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
 	sort_peaks(spectrum->peaks, spectrum->num_peaks, _PEAK_INTENSITY);
+	spectrum->sorted_by_intensity = TRUE;
+	spectrum->sorted_by_mz = FALSE;
 	int rank = spectrum->num_peaks;
 	while(peak_iterator_has_next(peak_iterator)){
 		peak = peak_iterator_next(peak_iterator);

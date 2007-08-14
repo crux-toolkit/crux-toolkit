@@ -709,6 +709,7 @@ char** parse_file(
 	char** line;
 	while( (length = crux_getline(line, &buf_size, file)) !=-1 ){
 		(*line)[length-1] = '\0';
+		carp(CARP_DETAILED_DEBUG, "%s", *line);
 		lines[line_idx++] = *line;
 	}
 	*num_lines = line_idx;

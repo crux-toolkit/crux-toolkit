@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.8 $
+ * REVISION: $Revision: 1.9 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -144,7 +144,7 @@ int main(int argc, char** argv){
 		// parse the peptides
 		int num_lines;
 		char** peptides = parse_file(peptide_file_name, MAX_PEPTIDES, &num_lines);
-    int peptide_charge = get_int_parameter("charge");
+    int charge = get_int_parameter("charge");
 				
 		// TODO simplify main
 		int peptide_idx = 0;
@@ -160,10 +160,9 @@ int main(int argc, char** argv){
     	}
 
     	// create new ion series
-    	ION_CONSTRAINT_T* ion_constraint = 
-				new_ion_constraint_gmtk(peptide_charge); 
+    	ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(charge); 
     	ion_series = new_ion_series(
-									 	 peptide_sequence, peptide_charge, ion_constraint);
+									 	 peptide_sequence, charge, ion_constraint);
    
    		// now predict ions and assign them to their closest peaks
    		predict_ions(ion_series);

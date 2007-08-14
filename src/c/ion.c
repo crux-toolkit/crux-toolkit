@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -299,7 +299,6 @@ void print_ion_gmtk_single(
   }
   // TODO add binary option
 
-  // START with ranks
   char* format = "%i\t%.6f\t%.6f\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n";
   fprintf(file, format,
       1,                                                        // 1 TODO 
