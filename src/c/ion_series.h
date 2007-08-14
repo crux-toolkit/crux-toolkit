@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -73,9 +73,18 @@ void print_ion_series(
   );
 
 /**
- * Prints a ion_series object to file, in GMTK format.
+ * Prints a ion_series object to file, in GMTK single-ion format.
  */
-void print_ion_series_gmtk(
+void print_ion_series_single_gmtk(
+	ION_SERIES_T* ion_series, ///< ion_series to print -in 
+	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
+	FILE* file ///< file output
+	);
+
+/**
+ * Prints a ion_series object to file, in GMTK paired-ion format.
+ */
+void print_ion_series_paired_gmtk(
 	ION_SERIES_T* ion_series, ///< ion_series to print -in 
 	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
 	FILE* file ///< file output
@@ -89,6 +98,13 @@ void predict_ions(
 );
 
 /**
+ * Assign peaks to the nearest ions, within a tolerance (set in param file)
+ */
+void ion_series_assign_nearest_peaks(
+    ION_SERIES_T* ion_series, 
+    SPECTRUM_T* spectrum);
+
+/**
  * Copies ion_series object from src to dest.
  *  must pass in a memory allocated ION_SERIES_T dest
  */
@@ -99,7 +115,6 @@ void copy_ion_series(
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
- * FIXME Chris, could you create the get and set methods for the object fields?
  */
 
 /*************************************
@@ -269,6 +284,14 @@ void set_ion_constraint_modification(
   ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
   ION_MODIFICATION_T mod_type, ///< ion modification type -in
   int count  ///< the count of the modification -in  
+  );
+
+/**
+ * sets the exact modification boolean 
+ */
+void set_ion_constraint_exact_modifications(
+  ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
+  BOOLEAN_T exact_modifications ///< whether to use exact mods or not -in
   );
 
 /**

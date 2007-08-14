@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -14,6 +14,14 @@
 #include "objects.h"
 #include "carp.h"
 #include "peptide_constraint.h"
+
+/**
+ * \returns The mass of the given peptide.
+ */
+float calc_sequence_mass(
+  char* peptide, ///< the query peptide -in
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+  );
 
 /**
  * \returns The mass of the given peptide.

@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.33 $
+ * $Revision: 1.34 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -342,12 +342,12 @@ BOOLEAN_T add_peak_to_spectrum(
   );
 
 /**
- * \returns The closest intensity within 'max' of 'mz' in 'spectrum'
+ * \returns The closest PEAK_T within 'max' of 'mz' in 'spectrum'
+ * NULL if no peak within 'max'
  * This should lazily create the data structures within the
  * spectrum object that it needs.
- * NOTE: Not implemented!
  */
-float get_nearest_intensity(
+PEAK_T* get_nearest_peak(
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
   float mz, ///< the mz of the peak around which to sum intensities -in
   float max ///< the maximum distance to get intensity -in

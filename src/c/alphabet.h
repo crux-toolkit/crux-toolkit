@@ -14,6 +14,7 @@
 #include "array.h"
 #include "utils.h"
 
+
 /* Define a type and a global variable for the alphabet type. */
 typedef enum {INVALID_ALPH, PROTEIN_ALPH, DNA_ALPH} ALPH_T;
 
@@ -34,7 +35,6 @@ typedef enum {INVALID_ALPH, PROTEIN_ALPH, DNA_ALPH} ALPH_T;
 #define NUM_BASE_AMBIGS 11
 #define BASE_AMBIGS "RYKMSWBDHVN"
 #define ANY_BASE 'N'
-
 
 /********************************************************************
   The accepted amino acid codes are:
@@ -132,5 +132,11 @@ void distribute_ambiguous_counts
  ********************************************************************/
 void zero_ambigs
   (ARRAY_T* freqs);
+
+/**
+ * Converts a character into an int using the global amino_hash 
+ */
+int amino_to_int
+  (char amino);
 
 #endif

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.46 $
+ * REVISION: $Revision: 1.47 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -701,19 +701,20 @@ BOOLEAN_T add_peak_to_spectrum(
 
 /**
  * \returns The closest intensity within 'max' of 'mz' in 'spectrum'
+ * NULL if no peak.
  * This should lazily create the data structures within the
  * spectrum object that it needs.
  * TODO: reimplement with faster peak lookup
  */
-float get_nearest_percentile(
+PEAK_T* get_nearest_peak(
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
   float mz, ///< the mz of the peak around which to sum intensities -in
   float max ///< the maximum distance to get intensity -in
   ){
 
 	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
-	PEAK_T* peak;
-	PEAK_T* closest_peak = NULL;
+	PEAK_T* peak = NULL;
+	PEAK_T* nearest_peak = NULL;
 	float min_distance = BILLION;
 	while(peak_iterator_has_next(peak_iterator)){
 		peak = peak_iterator_next(peak_iterator);
@@ -723,51 +724,11 @@ float get_nearest_percentile(
 			continue;
 		}
 		if (distance < min_distance){
-			closest_peak = peak;
+			nearest_peak = peak;
 		}
 	}
-	float nearest_intensity = 
-		closest_peak == NULL ? 0.0 : get_peak_intensity(closest_peak);
-	return nearest_intensity;
+	return nearest_peak;
 }
-
-
-
-
-/**
- * \returns The closest intensity within 'max' of 'mz' in 'spectrum'
- * This should lazily create the data structures within the
- * spectrum object that it needs.
- * TODO: reimplement with faster peak lookup
- */
-float get_nearest_intensity(
-  SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
-  float mz, ///< the mz of the peak around which to sum intensities -in
-  float max ///< the maximum distance to get intensity -in
-  ){
-
-	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
-	PEAK_T* peak;
-	PEAK_T* closest_peak = NULL;
-	float min_distance = BILLION;
-	while(peak_iterator_has_next(peak_iterator)){
-		peak = peak_iterator_next(peak_iterator);
-		float peak_mz = get_peak_location(peak);
-		float distance = abs(mz - peak_mz);
-		if (distance > max){
-			continue;
-		}
-		if (distance < min_distance){
-			closest_peak = peak;
-		}
-	}
-	float nearest_intensity = 
-		closest_peak == NULL ? 0.0 : get_peak_intensity(closest_peak);
-	return nearest_intensity;
-}
-
-
-
 
 /**
  * \returns TRUE if success. FALSE if failure.
@@ -1201,12 +1162,13 @@ SPECTRUM_T* parse_spectrum_binary(
 /***********************************************************************
  * Normalize peak intensities so that they sum to unity.
  ***********************************************************************/
-void sum_normalize_spectrum(SPECTRUM_T* spectrum){
+// TODO use peak_iterator
+/*void sum_normalize_spectrum(SPECTRUM_T* spectrum){
   int idx;
   for(idx = 0; idx < spectrum->num_peaks; idx++){
-    spectrum->peaks[idx].intensity/=spectrum->total_;
+    spectrum->peaks[idx].intensity/=spectrum->total_energy;
   }
-}
+}*/
 
 /***********************************************************************
  * Populate peaks with rank information.

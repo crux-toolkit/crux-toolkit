@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.21 $
+ * REVISION: $Revision: 1.22 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -18,6 +18,7 @@
 #include "crux-utils.h"
 #include "parameter.h"
 #include "mass.h"
+#include "spectrum.h"
 
 #define MAX_IONS 10000
 #define MAX_NUM_ION_TYPE 8 //number of different ion_types
@@ -30,7 +31,7 @@
  */
 struct ion_series {
   char* peptide; ///< The peptide for this ion series
-  int charge; ///< The charge state of the peptide for this ion series
+  int charge; ///< /<The charge state of the peptide for this ion series
   ION_CONSTRAINT_T* constraint; ///< The constraints which the ions in this series obey
   ION_T* ions[MAX_IONS]; ///< The ions in this series
   int num_ions; ///< the number of ions in this series
@@ -61,12 +62,16 @@ struct loss_limit{
  * of the predict-peptide-ions executable
  */
 struct ion_constraint {
-  BOOLEAN_T use_neutral_losses; ///< A boolean to determine if the ions series should include neutral losses
-  int modifications[MAX_MODIFICATIONS]; ///< an array of to indicate which modifications to perform
+  BOOLEAN_T use_neutral_losses; ///< A boolean to determine if the ions                                            ///< series should include neutral losses
+  int modifications[MAX_MODIFICATIONS]; ///< an array to indicate which modifications to perform
   MASS_TYPE_T mass_type; ///< the mass_type to use MONO|AVERAGE
   int max_charge; ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
   ION_TYPE_T ion_type; ///< the ion types the peptide series should include
   BOOLEAN_T precursor_ion; ///< include precursor-ion in ion_series?
+  int min_charge; 
+  BOOLEAN_T exact_modifications; 
+    ///< TRUE  = ints in modfications array indicate exact number of mods
+    ///< FALSE = ints in modfications array indicate maximum number of mods
 };
 
 /**
@@ -251,7 +256,32 @@ void print_ion_series(
   }
 }
 
-void print_ion_series_gmtk(
+/**
+ * Prints a ion_series object to file, in GMTK single-ion format.
+ */
+void print_ion_series_single_gmtk(
+	ION_SERIES_T* ion_series, ///< ion_series to print -in 
+	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
+	FILE* file ///< file output
+								){
+
+	//create the filtered iterator that will select among the ions
+	ION_FILTERED_ITERATOR_T* ion_iterator = 
+		new_ion_filtered_iterator(ion_series, ion_constraint);
+  
+  //foreach ion in ion iterator, add matched observed peak intensity
+  ION_T* ion;
+  while(ion_filtered_iterator_has_next(ion_iterator)){
+    ion = ion_filtered_iterator_next(ion_iterator);
+		print_ion_gmtk_single(ion, file);
+	}
+  free_ion_filtered_iterator(ion_iterator);
+}
+
+/**
+ * Prints a ion_series object to file, in GMTK paired-ion format.
+ */
+void print_ion_series_paired_gmtk(
 	ION_SERIES_T* ion_series, ///< ion_series to print -in 
 	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
 	FILE* file ///< file output
@@ -276,6 +306,7 @@ void print_ion_series_gmtk(
 	}
   free_ion_filtered_iterator(ion_iterator);
 }
+
 
 /**
  * scan for instances of amino acid (S|T|E|D), (R|K|Q|N)
@@ -816,26 +847,29 @@ void predict_ions(
 
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
   
-  //create a mass matrix
+  // create a mass matrix
   float* mass_matrix = 
     create_ion_mass_matrix(ion_series->peptide, constraint->mass_type, ion_series->peptide_length);  
   
-  //scan for the first and last  (S, T, E, D)  (R, K, Q, N), initialize to determine modification is ok
-  //the first, last of STED, RKQN are stored in ion_series
+  // scan for the first and last  (S, T, E, D) and (R, K, Q, N), 
+  // initialize to determine modification is ok.
+  // the first, last of STED, RKQN are stored in ion_series.
   scan_for_aa_for_neutral_loss(ion_series);
   
   //generate ions without any modifications
+  carp(CARP_DETAILED_DEBUG, "generating unmodified ions");
   if(!generate_ions_no_modification(ion_series, mass_matrix)){
     carp(CARP_ERROR, "failed to generate ions, no modifications");
     free(mass_matrix);
     exit(1);
   }
 
-  //create modification ions?
+  // create modification ions?
   if(ion_series->constraint->use_neutral_losses){
     
-    //generate ions with nh3 modification
+    // generate ions with nh3 modification
     if(abs(constraint->modifications[NH3]) > 0){
+      carp(CARP_DETAILED_DEBUG, "generating NH3 modifications");
       if(!generate_ions(ion_series, NH3)){
         carp(CARP_ERROR, "failed to generate ions, NH3 modifications");
         free(mass_matrix);
@@ -843,8 +877,9 @@ void predict_ions(
       }
     }
     
-    //generate ions with h2o modification
+    // generate ions with h2o modification
     if(abs(constraint->modifications[H2O]) > 0){
+      carp(CARP_DETAILED_DEBUG, "generating H2O modifications");
       if(!generate_ions(ion_series, H2O)){
         carp(CARP_ERROR, "failed to generate ions, H2O modifications");
         free(mass_matrix);
@@ -852,8 +887,9 @@ void predict_ions(
       }
     }
 
-    //generate ions with isotope modification
+    // generate ions with isotope modification
     if(constraint->modifications[ISOTOPE] > 0){
+      carp(CARP_DETAILED_DEBUG, "generating ISOTOPE modifications");
       if(!generate_ions(ion_series, ISOTOPE)){
         carp(CARP_ERROR, "failed to generate ions, ISOTOPE modifications");
         free(mass_matrix);
@@ -861,8 +897,9 @@ void predict_ions(
       }
     }
 
-    //generate ions with flank modification
+    // generate ions with flank modification
     if(constraint->modifications[FLANK] > 0){
+      carp(CARP_DETAILED_DEBUG, "generating FLANK modifications");
       if(!generate_ions_flank(ion_series)){
         carp(CARP_ERROR, "failed to generate ions, FLANK modifications");
         free(mass_matrix);
@@ -870,17 +907,35 @@ void predict_ions(
       }
     }
     
-    //add more modifications here
+    // add more modifications here
 
   }
   
-  //ion series now been predicted
+  // ion series now been predicted
   ion_series->is_predicted = TRUE;
 
-  //free mass matrix
+  // free mass matrix
   free(mass_matrix);
 }
+/**
+ * Assign peaks to the nearest ions, within a tolerance (set in param file)
+ */
+void ion_series_assign_nearest_peaks(
+    ION_SERIES_T* ion_series, 
+    SPECTRUM_T* spectrum){
 
+  float max = 3.0; // TODO set in param file 
+  ION_T* ion = NULL;
+  ION_ITERATOR_T* iterator = new_ion_iterator(ion_series);
+  PEAK_T* peak = NULL;
+  while(ion_iterator_has_next(iterator)){
+    ion = ion_iterator_next(iterator);
+    float mz = get_ion_mass_z(ion); // TODO change to mz, not mass_z
+    peak = get_nearest_peak(spectrum, mz, max);
+    set_ion_peak(ion, peak);
+  }
+  free_ion_iterator(iterator);
+}
 
 /**
  * Copies ion_series object from src to dest.
@@ -1061,6 +1116,8 @@ ION_CONSTRAINT_T* new_ion_constraint(
   //set all fields of constraint
   constraint->mass_type = mass_type;
   constraint->max_charge = max_charge;
+  constraint->min_charge = 0;
+  constraint->exact_modifications = FALSE;
   constraint->ion_type = ion_type;
   constraint->precursor_ion = precursor_ion;
 
@@ -1080,12 +1137,13 @@ ION_CONSTRAINT_T* new_ion_constraint_gmtk(
   if(max_charge >= 1){
 		charge = max_charge - 1;
   }  
-  constraint = new_ion_constraint(MONO, 1, BY_ION, FALSE);
+  constraint = new_ion_constraint(MONO, charge, BY_ION, FALSE);
 
   //set all modifications count for gmtk
   constraint->use_neutral_losses = TRUE;
-  constraint->modifications[NH3] = 1;
-  constraint->modifications[H2O] = 1;
+  constraint->min_charge = charge;
+  constraint->modifications[NH3] = -1;
+  constraint->modifications[H2O] = -1;
   constraint->modifications[ISOTOPE] = 0;
   constraint->modifications[FLANK] = 0;
 
@@ -1227,9 +1285,8 @@ BOOLEAN_T ion_constraint_is_satisfied(
    )
 {
   int* counts = NULL;
-  int modification_idx = 0;
 
-  //check ion type
+  // check ion type
   if(get_ion_type(ion) != ion_constraint->ion_type &&
      
      !((ion_constraint->ion_type == BY_ION) && 
@@ -1241,33 +1298,43 @@ BOOLEAN_T ion_constraint_is_satisfied(
      (ion_constraint->ion_type != ALL_ION)
      ){
      
-    //precursor ion?
+    // precursor ion?
     if(!(ion_constraint->precursor_ion && get_ion_type(ion) == P_ION)){
       return FALSE;
     }
   }
   
-  //check charge
+  // check charge
   if(get_ion_charge(ion) > ion_constraint->max_charge){
     return FALSE;
   }
   
-  //check modifications
+  if(get_ion_charge(ion) < ion_constraint->min_charge){
+    return FALSE;
+  }
+
+  // check modifications
   counts = get_ion_modification_counts(ion);
-  for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
-    if( ion_constraint->modifications[modification_idx] >= 0){
-      if(counts[modification_idx] > ion_constraint->modifications[modification_idx]){
+  int mod_idx = 0;
+  for(; mod_idx < MAX_MODIFICATIONS; ++mod_idx){
+    if(ion_constraint->modifications[mod_idx] >= 0){
+      if(counts[mod_idx] > ion_constraint->modifications[mod_idx]){
         return FALSE;
       }
     }
     else{
-      if(counts[modification_idx] < ion_constraint->modifications[modification_idx]){
+      if(counts[mod_idx] < ion_constraint->modifications[mod_idx]){
         return FALSE;
+      }
+    }
+    if (ion_constraint->exact_modifications){
+      if(counts[mod_idx] != ion_constraint->modifications[mod_idx]){
+        return FALSE; 
       }
     }
   }
   
-  //FIXME, add more checks here as more contraints are added
+  // Add more checks here as more contraints are added
 
   return TRUE;
 }
@@ -1295,6 +1362,17 @@ void set_ion_constraint_modification(
     ion_constraint->use_neutral_losses = TRUE;
   }
 }
+
+/**
+ * sets the exact modification boolean 
+ */
+void set_ion_constraint_exact_modifications(
+  ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
+  BOOLEAN_T exact_modifications ///< whether to use exact mods or not -in
+  ){
+  ion_constraint->exact_modifications = exact_modifications;
+}
+ 
 /**
  * gets the modification count for specific mod_type
  */
