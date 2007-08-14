@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H

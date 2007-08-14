@@ -694,21 +694,24 @@ void copy_int_array
  */
 char** parse_file(
 	char* file_name,
-	int max_lines
+	int max_lines,
+	int* num_lines
 	){
 	FILE* file = NULL;
 	if (open_file(file_name, "r", FALSE, "input", "", &file) == FALSE){
 		carp(CARP_FATAL, "Could not open file %s", file_name);
 		exit(1);
 	}
-	char** lines = (char**) malloc(sizeof(char *) * max_lines);
+	char** lines = (char**) mycalloc(max_lines, sizeof(char *));
 	size_t buf_size = 0; 
 	int line_idx = 0;
 	int length;
-	while( (length = crux_getline(&lines[line_idx++], &buf_size, file)) !=-1 ){
-					;
+	char** line;
+	while( (length = crux_getline(line, &buf_size, file)) !=-1 ){
+		(*line)[length-1] = '\0';
+		lines[line_idx++] = *line;
 	}
-	lines[line_idx] = NULL;
+	*num_lines = line_idx;
 	fclose(file);
 	return lines;
 }

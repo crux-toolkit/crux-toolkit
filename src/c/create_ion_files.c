@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.7 $
+ * REVISION: $Revision: 1.8 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -142,15 +142,18 @@ int main(int argc, char** argv){
 		spectrum_rank_peaks(spectrum); 
 
 		// parse the peptides
-		char** peptides = parse_file(peptide_file_name, MAX_PEPTIDES);
-		// START here, segfault
+		int num_lines;
+		char** peptides = parse_file(peptide_file_name, MAX_PEPTIDES, &num_lines);
     int peptide_charge = get_int_parameter("charge");
 				
 		// TODO simplify main
 		int peptide_idx = 0;
 		char* peptide_sequence = NULL;
-		while( (peptide_sequence = peptides[peptide_idx]) != NULL){
-
+		while(peptide_idx < num_lines){ 
+			if ((peptide_idx + 1)% 100 == 0){
+				carp(CARP_INFO, "At peptide %i of %i", peptide_idx + 1, num_lines);
+			}
+			peptide_sequence = peptides[peptide_idx++];
 			// check peptide sequence
     	if(!valid_peptide_sequence(peptide_sequence)){
       	wrong_command(peptide_sequence, "not a valid peptide sequence");
@@ -177,14 +180,15 @@ int main(int argc, char** argv){
   		 	carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
 				 ms2_file, scan_num, peptide_sequence);
 	 		}
-    	carp(CARP_INFO, "Done outputting files.");
   	} 
 
-   	// free heap
-   	free_ion_series(ion_series);
+   	carp(CARP_INFO, "Done outputting files.");
+
+   	// free heap TODO put this back in
+   	/*free_ion_series(ion_series);
    	free_spectrum_collection(collection);
    	free_spectrum(spectrum);
-   	free_parameters();
+   	free_parameters();*/
  	}
  	else{
    	char* usage = parse_arguments_get_usage("create_ion_files");

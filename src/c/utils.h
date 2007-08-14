@@ -352,7 +352,8 @@ void copy_int_array
  ************************************************************************/
 char** parse_file(
 	char* file_name,
-	int max_lines
+	int max_lines, 
+	int* num_lines
 	);
 
 /* crux_getline.c -- Replacement for GNU C library function crux_getline
