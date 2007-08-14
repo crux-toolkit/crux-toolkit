@@ -5,16 +5,15 @@ REFS = $(HOME)/refs/refs.bib
 
 crux.bbl: crux.tex \
 	$(REFS) \
-	schematic.eps \
-	indexing.eps
+	schematic.eps 
 
-indexing.eps: ../../results/paper-figure/index/runall \
+# indexing.eps: ../../results/paper-figure/index/runall \
 	../../results/paper-figure/index/test.ms2 \
 	../../results/paper-figure/index/test.fasta \
 	../../results/paper-figure/index/ms22dta.pl \
 	../../results/paper-figure/index/compare_runtime.py
-	cd ../../results/paper-figure/index; ./runall
-	cp ../../results/paper-figure/index/indexing.eps .
+#	cd ../../results/paper-figure/index; ./runall
+#	cp ../../results/paper-figure/index/indexing.eps .
 
 %.eps: %.fig
 	fig2dev -L eps schematic.fig > schematic.eps
