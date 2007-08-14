@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.6 $
+ * REVISION: $Revision: 1.7 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -22,6 +22,8 @@
 #include "objects.h"
 #include "parameter.h"
 #include "scorer.h"
+
+#define MAX_PEPTIDES 5000
 
 /**
  * when wrong command is seen carp, and exit
@@ -45,7 +47,7 @@ int main(int argc, char** argv){
   //required variables
   char* ms2_file = NULL;
   int scan_num = 0;
-  char* peptide_sequence = NULL;
+  char* peptide_file_name = NULL;
   char* output_directory = NULL;
 
   //optional variables
@@ -79,9 +81,9 @@ int main(int argc, char** argv){
 
  /* Define required command line arguments */
   parse_arguments_set_req(
-    "peptide-sequence", 
-    "The peptide sequence (e.g. EAMAPK) that is used to predict the ions.", 
-    (void *) &peptide_sequence, 
+    "peptide-file-name", 
+    "A file containing the peptide sequences for which to create ions files.", 
+    (void *) &peptide_file_name, 
     STRING_ARG);
 
   parse_arguments_set_req(
@@ -120,20 +122,9 @@ int main(int argc, char** argv){
     // parse and update parameters
     parse_update_parameters(parameter_file);
     
-    int peptide_charge = get_int_parameter("charge");
-    
-    if(peptide_charge < 1 || peptide_charge > 3){
-      wrong_command(charge, "The peptide charge. 1|2|3");
-    }
-
-    // check peptide sequence
-    if(!valid_peptide_sequence(peptide_sequence)){
-      wrong_command(peptide_sequence, "not a valid peptide sequence");
-    }
-    
-    // parameters are now confirmed, can't be changed
+    // parameters now can't be changed
     parameters_confirmed();
-    
+	
     // read ms2 file
     collection = new_spectrum_collection(ms2_file);
     spectrum = allocate_spectrum();
@@ -145,37 +136,50 @@ int main(int argc, char** argv){
       free_spectrum(spectrum);
       exit(1);
     }
-    
-    // set ion constraint to sequest settings
-    ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(peptide_charge);  
-    // create new ion series
-    ion_series = new_ion_series(
-									 peptide_sequence, peptide_charge, ion_constraint);
+
+		// prepare the spectrum 
+		sum_normalize_spectrum(spectrum);
+		spectrum_rank_peaks(spectrum); 
+
+		// parse the peptides
+		char** peptides = parse_file(peptide_file_name, MAX_PEPTIDES);
+		// START here, segfault
+    int peptide_charge = get_int_parameter("charge");
+				
+		// TODO simplify main
+		int peptide_idx = 0;
+		char* peptide_sequence = NULL;
+		while( (peptide_sequence = peptides[peptide_idx]) != NULL){
+
+			// check peptide sequence
+    	if(!valid_peptide_sequence(peptide_sequence)){
+      	wrong_command(peptide_sequence, "not a valid peptide sequence");
+    	}
+
+    	// create new ion series
+    	ION_CONSTRAINT_T* ion_constraint = 
+				new_ion_constraint_gmtk(peptide_charge); 
+    	ion_series = new_ion_series(
+									 	 peptide_sequence, peptide_charge, ion_constraint);
    
-   	// now predict ions
-   	predict_ions(ion_series);
-       
-    // TODO add these two methods
-    //spectrum_rank_intensities(spectrum);
+   		// now predict ions and assign them to their closest peaks
+   		predict_ions(ion_series);
+    	ion_series_assign_nearest_peaks(ion_series, spectrum);
 
-    ion_series_assign_nearest_peaks(ion_series, spectrum);
+    	// create our ion constraints
+    	int num_ion_constraints;
+    	ION_CONSTRAINT_T** ion_constraints = 
+      	single_ion_constraints(&num_ion_constraints);
 
-	 	// TODO figure out the GMTK file input lists
-    
-    // create our ion constraints
-    int num_ion_constraints;
-    ION_CONSTRAINT_T** ion_constraints = 
-      single_ion_constraints(&num_ion_constraints);
-
-    carp(CARP_INFO, "Starting to output files.");
-   	// output GMTK peptide ion files
-   	if (output_ion_files(output_directory, spectrum, ion_series, 
+   		// output GMTK peptide ion files
+   		if (output_ion_files(output_directory, spectrum, ion_series, 
           ion_constraints, num_ion_constraints) == FALSE){
-  		 carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
+  		 	carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
 				 ms2_file, scan_num, peptide_sequence);
-	 	}
-    carp(CARP_INFO, "Done outputting files.");
-   
+	 		}
+    	carp(CARP_INFO, "Done outputting files.");
+  	} 
+
    	// free heap
    	free_ion_series(ion_series);
    	free_spectrum_collection(collection);

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.27 $
+ * REVISION: $Revision: 1.28 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -165,7 +165,7 @@ void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection, FILE* file){
   long file_index = ftell(file); //stores the location of the current working line in the file
   char* new_line = NULL;
   int line_length;
-  size_t buf_length = 0;
+  size_t buf_length = 0; // TODO maybe should be more sensible length?
   int new_line_length;
   int comment_field_length;
 

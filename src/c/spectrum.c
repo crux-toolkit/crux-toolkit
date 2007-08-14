@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.48 $
+ * REVISION: $Revision: 1.49 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1162,20 +1162,33 @@ SPECTRUM_T* parse_spectrum_binary(
 /***********************************************************************
  * Normalize peak intensities so that they sum to unity.
  ***********************************************************************/
-// TODO use peak_iterator
-/*void sum_normalize_spectrum(SPECTRUM_T* spectrum){
-  int idx;
-  for(idx = 0; idx < spectrum->num_peaks; idx++){
-    spectrum->peaks[idx].intensity/=spectrum->total_energy;
-  }
-}*/
+void sum_normalize_spectrum(
+	SPECTRUM_T* spectrum
+	){
+	PEAK_T* peak = NULL;
+	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
+	while(peak_iterator_has_next(peak_iterator)){
+		peak = peak_iterator_next(peak_iterator);
+		float new_intensity = get_peak_intensity(peak) / spectrum->total_energy;
+		set_peak_intensity(peak, new_intensity);
+	}
+}
 
 /***********************************************************************
  * Populate peaks with rank information.
  ***********************************************************************/
-void rank_peaks(
+void spectrum_rank_peaks(
 	SPECTRUM_T* spectrum
-	);
+	){
+	PEAK_T* peak = NULL;
+	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
+	sort_peaks(spectrum->peaks, spectrum->num_peaks, _PEAK_INTENSITY);
+	int rank = spectrum->num_peaks;
+	while(peak_iterator_has_next(peak_iterator)){
+		peak = peak_iterator_next(peak_iterator);
+		set_peak_intensity_rank(peak, rank--/(float)spectrum->num_peaks);
+	}
+}
 
 /******************************************************************************/
 // Iterator 
