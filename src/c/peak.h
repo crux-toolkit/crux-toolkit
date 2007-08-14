@@ -1,6 +1,6 @@
 /**
  * \file peak.h
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief Object for representing one peak in a spectrum.
  *
  * A peak is primarily identified via its intensity (height) and location

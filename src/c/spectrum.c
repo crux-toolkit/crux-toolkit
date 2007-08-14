@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.47 $
+ * REVISION: $Revision: 1.48 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
