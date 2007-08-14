@@ -142,47 +142,57 @@ following primary contributions:
 
 Perhaps most significantly, from the perspective of the mass
 spectrometry research community, Crux provides all of the above in a
-single stand-alone C++ program which is distributed, with source code,
+single stand-alone C program which is distributed, with source code,
 free for academic use.  Below, we demonstrate that Crux is both
 efficient and accurate, yielding FIXME.
 
 \section{Approach}
 
-\subsection{Indexing}
-When given a protein fasta file as input, we generate an index of all
-of its peptides on disk. The database created on disk is then used
-during runtime as an input to generate candidate peptides within the
-mass window of the query spectrum m/z. The main difficulties in
-creating a database is first, dealing with memory shortage problems
-caused by the large number of peptides,second, reducing the disk size
-of the database. The key strategy to resolve the memory shortage
-problem was to temporary store peptides in separate bins(file handles)
-divided by mass interval, then sort each bin individually. By
-partitioning the peptides into different mass bins, the total amount
-of peptides needed to be sorted at one instance reduces dramatically
-compared to sorting all the peptides together, thus reducing the
-amount of memory needed to store the peptides. Reducing the disk size
-of the database was accomplished by only storing information that was
-not already present in the fasta file. For instance, instead of
-storing the sequence of each individual peptide, only the protein
-index, the start index and the peptide length are stored, thus when
-needed, the program can quickly retrieve the sequence from the
-original fasta file.
+\subsection{Rapid retrieval of candidate peptides}
 
-\subsection{Scoring}
-We re-implemented the two scoring functions Sp, Xcorr used in SEQUEST
-for Crux.  First, the preliminary scoring function Sp is used to
-extract the top 500 candidate peptides. To avoid erroneous scores by
-noise, the spectrum is preprocessed by square rooting and smoothing
-all peak intensities before extracting the top 200 abundant peaks to
-be scored for Sp.  Second, The main scoring function Xcorr is used for
-the final cross-correlation analysis. A similar preprocessing step
-used in Sp is applied in Xcorr. For further detail on scoring function
-and preprocessing steps refer to source code.
+When presented with a new query spectrum and its associated precursor
+mass, Crux must first retrieve from the sequence database all of the
+candidate peptides, whose masses lie within a specified range of the
+precursor mass.  A straightforward retrieval method is to read the
+entire database from disk for each query, retaining candidate peptides
+in memory.  This approach, which is used by SEQUEST, is
+space-efficient but can be slow.
+
+Crux implements the above approach, but it also offers an alternative
+strategy that allows for more efficient candidate peptide retrieval.
+In this approach, the user must pre-process a given protein database
+to produce a binary protein database and a binary peptide index.  The
+pre-processing step sorts all of the peptides in the database by mass
+and stores pointers to their locations in the protein database
+(sequence index, start position, and peptide length).  Crux can then
+quickly retrieve a set of candidate peptides via a simple range query
+on the peptide index.
+
+Crux stores the binary protein database and the peptide index as
+memory-mapped files.  This approach offloads to the operating system
+the decision about how much of the database to store in memory,
+ensuring that small databases are kept in memory and large databases
+get written to disk.  To facilitate retaining frequently accessed
+regions of the peptide index, the index is implemented as a collection
+of memory-mapped files, each corresonding to a small range of peptide
+masses.
+
+\subsection{Scoring peptide-spectrum matches}
+
+After retrieving all of the candidate peptides for a given spectrum,
+Crux follows the strategy used by SEQUEST.  First, the candidate
+peptides are ranked according to the preliminary SEQUEST score $Sp$.
+Second, the 500 top-scoring peptides are re-ranked according to the
+cross-correlation score $XCorr$.
+
+{\em FIXME[Aaron]: Insert description of pre-processing and scoring,
+one paragraph per score.}
 
 \subsection{Null peptide generation}
+
 \subsection{Percolator}
-\subsection{Parallelization}
+
+\subsection{$q$~value estimation}
 
 \begin{methods}
 \section{Methods}
@@ -193,7 +203,7 @@ and preprocessing steps refer to source code.
 
 \begin{figure}
   \centering
-  \includegraphics[width=3in]{./Images/dummy.eps}
+  \includegraphics[width=3in]{indexing.eps}
   \caption{{\bf Rapid database searching.}  The figure plots the total
   running time required to search 10,000 tandem mass spectra against
   the non-redundant protein database, plotted as a function of the m/z
@@ -207,19 +217,15 @@ and preprocessing steps refer to source code.
 \begin{figure*}
   \centering
   \begin{tabular}{cc}
-    \includegraphics[width=3in]{./Images/fig-2-random-sp.eps} &
-    \includegraphics[width=3in]{./Images/fig-2-random-xcorr.eps} \\
+    \includegraphics[width=3in]{./Images/random-sp.eps} &
+    \includegraphics[width=3in]{./Images/random-xcorr.eps} \\
   A & B \\
-    \includegraphics[width=3in]{./Images/fig-2-difference-sp.eps} &
-    \includegraphics[width=3in]{./Images/fig-2-difference-xcorr.eps} \\
-  C & D \\
   \end{tabular}
   \caption{{\bf Re-implementation of Sp and Xcorr scoring functions.}
   The figure plots, for a collection of peptide-spectrum matches, the
-  Sp (A) and XCorr (B) scores as computed by Crux as a
-  function of the same scores as computed by SEQUEST, and a histogram
-  of the differences between the same scores (C,D).
-  \label{figure:indexing}}
+  Sp (A) and XCorr (B) scores as computed by Crux as a function of the
+  same scores as computed by SEQUEST.
+  \label{figure:sp-xcorr}}
 \end{figure*}
 
 \begin{figure}
@@ -227,7 +233,7 @@ and preprocessing steps refer to source code.
   Insert figure here
   \caption{Positives vs. q-value (a measure of false discovery rate) for
   standard database search algorithms, and our implementation.}
-  \label{figure:indexing}
+  \label{figure:pq-plot}
 \end{figure}
 
 Hardware: All experiments were performed on RedHat linux machine with
