@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
