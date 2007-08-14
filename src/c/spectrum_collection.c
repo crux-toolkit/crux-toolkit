@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.28 $
+ * REVISION: $Revision: 1.29 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -77,8 +77,8 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   )
 {
   SPECTRUM_COLLECTION_T* spectrum_collection =  allocate_spectrum_collection();
-  // CYGWIN char* absolute_path_file =  canonicalize_file_name(filename);
-  char* absolute_path_file =  filename;
+  char* absolute_path_file =  canonicalize_file_name(filename);
+  // CYGWIN char* absolute_path_file =  filename;
   
   if(access(absolute_path_file, F_OK)){
     fprintf(stderr,"File %s could not be opened\n", absolute_path_file);
@@ -88,7 +88,8 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   } //FIXME check if file is empty
   
   set_spectrum_collection_filename(spectrum_collection, absolute_path_file);
-  //CYGWIN free(absolute_path_file);
+  //CYGWIN 
+  free(absolute_path_file);
   
   return spectrum_collection;
 }
