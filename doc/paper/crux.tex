@@ -152,30 +152,30 @@ efficient and accurate, yielding FIXME.
 
 When presented with a new query spectrum and its associated precursor
 mass, Crux must first retrieve from the sequence database all of the
-candidate peptides, whose masses lie within a specified range of the
-precursor mass.  A straightforward retrieval method is to read the
+candidate peptides with masses that lie within a specified range of the
+precursor mass. A straightforward retrieval method is to read the
 entire database from disk for each query, retaining candidate peptides
-in memory.  This approach, which is used by SEQUEST, is
-space-efficient but can be slow.
+in memory. This approach, which is used by SEQUEST, is
+space-efficient but can be slow for large databases.
 
-Crux implements the above approach, but it also offers an alternative
-strategy that allows for more efficient candidate peptide retrieval.
-In this approach, the user must pre-process a given protein database
-to produce a binary protein database and a binary peptide index.  The
-pre-processing step sorts all of the peptides in the database by mass
-and stores pointers to their locations in the protein database
-(sequence index, start position, and peptide length).  Crux can then
-quickly retrieve a set of candidate peptides via a simple range query
-on the peptide index.
+In addition to implementing the above approach, Crux offers an alternative
+strategy that allows for more efficient candidate peptide retrieval for
+large databases.  In this approach, the user must pre-process a given
+protein database to produce a binary protein database and a binary
+peptide index.  The pre-processing step sorts all of the peptides in
+the database by mass and stores pointers to their locations in the
+protein database (sequence index, start position, and peptide length).
+Crux can then quickly retrieve a set of candidate peptides via a simple
+range query on the peptide index.
 
-Crux stores the binary protein database and the peptide index as
-memory-mapped files.  This approach offloads to the operating system
-the decision about how much of the database to store in memory,
-ensuring that small databases are kept in memory and large databases
-get written to disk.  To facilitate retaining frequently accessed
-regions of the peptide index, the index is implemented as a collection
-of memory-mapped files, each corresonding to a small range of peptide
-masses.
+Upon execution, Crux accesses the binary protein database and peptide
+index files as memory-mapped files.  This approach offloads to the
+operating system the decision about how much of the database to store
+in memory, ensuring that small databases are read fully into memory,
+but large databases are paged into and out of memory only as needed.
+To facilitate parellelization, the peptide index is implemented as a
+collection of memory-mapped files, each corresonding to a small range
+of peptide masses.
 
 \subsection{Scoring peptide-spectrum matches}
 
@@ -275,6 +275,10 @@ sets.
 
 \section{Discussion}
 
+The peptide index can be extended to allow for
+storage of additional useful pieces of pre-computed information: 
+e.g.  predicted peak intensities, predicted peptide retention time,
+or peptide proteotypicity.  % probably not a word!
 
 % N.B. We should make sure to mention the file-handle limit at some point.
 
