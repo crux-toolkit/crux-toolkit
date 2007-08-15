@@ -443,13 +443,17 @@ void zero_ambigs
     set_array_item(num_chars + i_ambig, 0.0, freqs);
   }
 }      
-static int amino_array[AMINO_ARRAY_CAPACITY] ;
+
+static int amino_array[AMINO_ARRAY_CAPACITY];
 
 /**
  * Converts a character into an amino acid
  */
 static void populate_amino_array(void){
-  if (amino_array != NULL){
+  if (
+    amino_array['T'-'A'] == 16 &&
+    amino_array['N'-'A'] == 11
+      ){
     return;
   }
   amino_array['A'-'A'] = 0;
@@ -480,6 +484,8 @@ static void populate_amino_array(void){
  */
 int amino_to_int(char amino){
   populate_amino_array();
+  carp(CARP_DETAILED_DEBUG, "%c", amino);
   int value = amino_array[amino - 'A'];
+  carp(CARP_DETAILED_DEBUG, "%i", value);
   return value;
 }

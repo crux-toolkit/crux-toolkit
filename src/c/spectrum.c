@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.53 $
+ * REVISION: $Revision: 1.54 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1244,10 +1244,12 @@ void spectrum_rank_peaks(
 	while(peak_iterator_has_next(peak_iterator)){
 		peak = peak_iterator_next(peak_iterator);
     float new_rank = rank/(float)spectrum->num_peaks;
-    carp(CARP_DETAILED_DEBUG, "%i / %i = %.6f", rank, spectrum->num_peaks, new_rank);
+    carp(CARP_DETAILED_DEBUG, "%i / %i = %.6f", rank, 
+        spectrum->num_peaks, new_rank);
     rank--;
 		set_peak_intensity_rank(peak, new_rank); 
 	}
+  free_peak_iterator(peak_iterator);
 }
 
 /******************************************************************************/
