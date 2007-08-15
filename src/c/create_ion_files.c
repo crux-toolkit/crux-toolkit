@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.10 $
+ * REVISION: $Revision: 1.11 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -51,7 +51,7 @@ int main(int argc, char** argv){
   char* output_directory = NULL;
 
   //optional variables
-  char* charge = "2";
+  int charge = 2;
   char* parameter_file = NULL;
   int  verbosity = CARP_ERROR;
 
@@ -65,7 +65,7 @@ int main(int argc, char** argv){
     "charge", 
     "The peptide charge. 1|2|3",
     (void *) &charge, 
-    STRING_ARG);
+    INT_ARG);
   
   parse_arguments_set_opt(
     "parameter-file",
@@ -126,29 +126,37 @@ int main(int argc, char** argv){
     parameters_confirmed();
 	
     // read ms2 file
+    carp(CARP_INFO, "Reading ms2 file %s", ms2_file);
     collection = new_spectrum_collection(ms2_file);
     spectrum = allocate_spectrum();
     
     // search for spectrum with correct scan number
+    carp(CARP_INFO, "Retrieving spectrum %i", scan_num);
     if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
-      carp(CARP_ERROR, "failed to find spectrum with  scan_num: %d", scan_num);
+      carp(CARP_ERROR, "Failed to find spectrum with scan_num: %d", scan_num);
       free_spectrum_collection(collection);
       free_spectrum(spectrum);
       exit(1);
     }
 
 		// prepare the spectrum 
+    carp(CARP_INFO, "Normalizing spectrum %i", scan_num);
 		sum_normalize_spectrum(spectrum);
-		spectrum_rank_peaks(spectrum); 
+
+    // carp(CARP_INFO, "Ranking spectrum peaks %i", scan_num);
+    // START
+		//TODO  causes seg fault ! // spectrum_rank_peaks(spectrum); 
+    // TODO problem with rank output as well, very strange values!
 
 		// parse the peptides
 		int num_lines;
+    carp(CARP_INFO, "Parsing peptides from %s", peptide_file_name);
 		char** peptides = parse_file(peptide_file_name, MAX_PEPTIDES, &num_lines);
-    int charge = get_int_parameter("charge");
+    carp(CARP_INFO, "Done parsing peptides from %s", peptide_file_name);
 				
-		// TODO simplify main
 		int peptide_idx = 0;
 		char* peptide_sequence = NULL;
+    carp(CARP_INFO, "Creating and outputting ions");
 		while(peptide_idx < num_lines){ 
 			if ((peptide_idx + 1)% 100 == 0){
 				carp(CARP_INFO, "At peptide %i of %i", peptide_idx + 1, num_lines);
