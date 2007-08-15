@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.24 $
+ * REVISION: $Revision: 1.25 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -222,6 +222,7 @@ void free_ion_series(
   ION_SERIES_T* ion_series ///< the ion collection to free - in
   )
 {
+  free_ion_constraint(ion_series->constraint);
   free(ion_series->peptide);
   free(ion_series->loss_limit);
 

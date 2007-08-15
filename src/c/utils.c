@@ -703,9 +703,9 @@ char** parse_file(
     exit(1);
 
   size_t buf_length = 1024;
-  char** lines = (char**) malloc(max_lines * sizeof(char*));
+  char** lines = (char**) mycalloc(max_lines, sizeof(char*));
   int line_idx = 0;
-  int length;
+  int length = 0;
   while ((length = crux_getline(&lines[line_idx], &buf_length, infile)) != -1){
     char* line = lines[line_idx];
     if (line[length-2] == '\n' || line[length-2] == '\r'){
@@ -715,6 +715,7 @@ char** parse_file(
     }
     line_idx++;
   }
+  free(lines[line_idx]);
   fclose(infile);
   *num_lines = line_idx;
 
@@ -736,7 +737,7 @@ int main (int argc, char *argv[])
     exit(1);
 
   size_t buf_length = 1024;
-  char** lines = (char**) malloc(10000 * sizeof(char*));
+  char** lines = (char**) mycalloc(10000 * sizeof(char*));
   int line_idx = 0;
   int length;
   while ((length = getline(&lines[line_idx], &buf_length, infile)) != -1){
@@ -830,7 +831,12 @@ char *malloc (), *realloc ();
    the error.  */
 
 int
-getstr (char **lineptr, size_t *n, FILE *stream, char terminator, int offset)
+crux_getstr (
+    char **lineptr, 
+    size_t *n, 
+    FILE *stream, 
+    char terminator, 
+    int offset)
 {
   int nchars_avail;		/* Allocated but unused chars in *LINEPTR.  */
   char *read_pos;		/* Where we're reading into *LINEPTR. */
@@ -845,7 +851,7 @@ getstr (char **lineptr, size_t *n, FILE *stream, char terminator, int offset)
   if (!*lineptr)
     {
       *n = MIN_CHUNK;
-      *lineptr = (char *)malloc (*n);
+      *lineptr = (char *)mymalloc (*n);
       if (!*lineptr)
 	{
 	  errno = ENOMEM;
@@ -921,7 +927,7 @@ getstr (char **lineptr, size_t *n, FILE *stream, char terminator, int offset)
 
 int crux_getline (char **lineptr, size_t *n, FILE *stream)
 {
-  return getstr (lineptr, n, stream, '\n', 0);
+  return crux_getstr (lineptr, n, stream, '\n', 0);
 }
 
 /*

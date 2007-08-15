@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.33 $
+ * REVISION: $Revision: 1.34 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1378,6 +1378,21 @@ float score_spectrum_v_spectrum(
   SPECTRUM_T* first_spectrum, ///< the first spectrum to score 
   SPECTRUM_T* second_spectrum ///<  the second spectrum to score
 );
+
+/**
+ * Frees the single_ion_constraints array
+ */
+void free_single_ion_constraints(
+    ION_CONSTRAINT_T** ion_constraints,
+    int num_ion_constraints
+    ){
+  int constraint_idx;
+  for (constraint_idx=0; constraint_idx<num_ion_constraints; constraint_idx++){
+    free_ion_constraint(ion_constraints[constraint_idx]);
+  }
+  free(ion_constraints);
+}
+
 
 
 /**
