@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.51 $
+ * REVISION: $Revision: 1.52 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -137,6 +137,7 @@ SPECTRUM_T* allocate_spectrum(void){
   SPECTRUM_T* fresh_spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
   fresh_spectrum->possible_z = (int*)mymalloc(sizeof(int) * MAX_CHARGE);
   fresh_spectrum->peaks = allocate_peak_array(MAX_PEAKS);
+  fresh_spectrum->num_peaks = 0;
   
   //initialize D lines
   for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
@@ -1237,7 +1238,10 @@ void spectrum_rank_peaks(
 	int rank = spectrum->num_peaks;
 	while(peak_iterator_has_next(peak_iterator)){
 		peak = peak_iterator_next(peak_iterator);
-		set_peak_intensity_rank(peak, rank--/(float)spectrum->num_peaks);
+    float new_rank = rank/(float)spectrum->num_peaks;
+    carp(CARP_DETAILED_DEBUG, "%i / %i = %.6f", rank, spectrum->num_peaks, new_rank);
+    rank--;
+		set_peak_intensity_rank(peak, new_rank); 
 	}
 }
 

@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.72 $   #-Werror \
+# VERSION: $Revision: 1.73 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -79,9 +79,9 @@ LIBOBJS =\
 
 # These are the names of the programs.
 PROGS = \
+	${BINDIR}/create_ion_files 
+#	${BINDIR}/get_ms2_spectrum \
 	${BINDIR}/utils \
-	${BINDIR}/create_ion_files \
-	${BINDIR}/get_ms2_spectrum \
 	${BINDIR}/generate_peptides \
 	${BINDIR}/create_protein_index \
 	${BINDIR}/create_index \

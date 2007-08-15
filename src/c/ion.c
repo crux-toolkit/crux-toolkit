@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -28,6 +28,8 @@ float modification_masses[MAX_MODIFICATIONS];
  */
 BOOLEAN_T initialized_modification_masses = FALSE;
 
+#define DETECTABLE_MZ_MIN 200
+#define DETECTABLE_MZ_MAX 2400
 
 /**
  * \struct ion
@@ -297,29 +299,45 @@ void print_ion_gmtk_single(
   ION_T* ion, ///< print this ion -in
   FILE* file  ///< to this file -in
   ){
+
+
+  int has_mobile_proton = 1;
+  int is_possible = 1; 
+  int is_detectable = 0;
+  int is_detected = 0;
+
   float intensity = 0.0;
   float intensity_rank = 0.0;
   if (ion->peak != NULL){
     intensity = get_peak_intensity(ion->peak);
     intensity_rank = get_peak_intensity_rank(ion->peak);
+    is_detected = 1;
   }
-  // TODO add binary option
-  // TODO add detectable etc.
 
-  // float mz_ratio = get_peak_location(ion->peak)/ion->peptide_mass;
-  //int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
-  char* format = "%i\t%.6f\t%.6f\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n";
+  if ((ion->ion_mass_z >= DETECTABLE_MZ_MIN) &&
+      (ion->ion_mass_z <= DETECTABLE_MZ_MAX)){
+    is_detectable = 1;
+  }
+
+  // TODO add binary option
+
+  float mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
+  int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
+
+  char* format = "%.6f\t%.6f\t%.6f\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n";
   fprintf(file, format,
-      0.5, // mz_ratio,                                         // 1 TODO
+      mz_ratio,                                                 // 1 
       intensity,                                                // 2 
       intensity_rank,                                           // 3 
-      1,                                                        // 4 
-      5,  // mz_int,                                            // 5  TODO
+      has_mobile_proton,                                        // 4 
+      mz_int,                                                   // 5 
       ion->cleavage_idx,                                        // 6
       strlen(ion->peptide_sequence) - ion->cleavage_idx + 1,    // 7
       amino_to_int(ion->peptide_sequence[ion->cleavage_idx-1]), // 8 
       amino_to_int(ion->peptide_sequence[ion->cleavage_idx]),   // 9 
-      1, 1, 1                                                   // 10, 11, 12
+      is_possible,                                              // 10 
+      is_detectable,                                            // 11
+      is_detected                                               // 12
   );
 }
 
@@ -542,6 +560,7 @@ void copy_ion(
   
   dest->ion_mass_z = src->ion_mass_z;
   dest->peptide_sequence = peptide_sequence;
+  dest->peptide_mass = src->peptide_mass;
 }
 
 

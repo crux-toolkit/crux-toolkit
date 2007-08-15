@@ -1,7 +1,7 @@
  cd ../
- make clean
+# make clean
  rm -f ../../bin/create_ion_files
- make 
+ make
  cd test
  rm -fr output
-../../../bin/create_ion_files peptides.txt 18 test.ms2 output --verbosity 30
+../../../bin/create_ion_files peptides.txt 13002 test-3.ms2 output --verbosity 100
