@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.34 $
+ * REVISION: $Revision: 1.35 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1464,8 +1464,9 @@ BOOLEAN_T output_ion_files(
  
 	// create the sub dir for this spectrum and peptide, if not already
 	char subdir[FILENAME_LENGTH];
-  sprintf(subdir, "%s/%i-%s", output_directory, 
-    get_spectrum_first_scan(spectrum), get_ion_series_peptide(ion_series));
+  sprintf(subdir, "%s/%i-%i-%s", output_directory, 
+    get_spectrum_first_scan(spectrum), (int)get_spectrum_precursor_mz(spectrum), 
+    get_ion_series_peptide(ion_series));
   if(access(subdir, F_OK)){
     if(mkdir(subdir, dir_access) != 0){
       carp(CARP_FATAL, "Trouble creating subdir %s!", subdir); exit(1);
