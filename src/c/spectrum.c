@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.54 $
+ * REVISION: $Revision: 1.55 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -718,7 +718,6 @@ void populate_mz_peak_array(
 	}
 
 	int array_length = MZ_TO_PEAK_ARRAY_RESOLUTION * MAX_PEAK_MZ;
-	carp(CARP_DETAILED_DEBUG, "%i al", array_length);
 	PEAK_T** mz_peak_array = (PEAK_T**) 
 														mymalloc(array_length * sizeof(PEAK_T*));
 	int peak_idx;
@@ -730,9 +729,9 @@ void populate_mz_peak_array(
 	while(peak_iterator_has_next(peak_iterator)){
 		peak = peak_iterator_next(peak_iterator);
 		float peak_mz = get_peak_location(peak);
-		int mz_idx = (int) peak_mz * MZ_TO_PEAK_ARRAY_RESOLUTION;
+		int mz_idx = (int) (peak_mz * MZ_TO_PEAK_ARRAY_RESOLUTION);
 		if (mz_peak_array[mz_idx] != NULL){
-			carp(CARP_ERROR, "Peak collision at mz %.3f", peak_mz);				
+			carp(CARP_ERROR, "Peak collision at mz %.3f = %i", peak_mz, mz_idx);
 		} else {
 			mz_peak_array[mz_idx] = peak; 
 		}
@@ -766,7 +765,6 @@ PEAK_T* get_nearest_peak(
 									? absolute_max_mz_idx : max_mz_idx;
 	PEAK_T* peak = NULL;
 	PEAK_T* nearest_peak = NULL;
-	carp(CARP_DETAILED_DEBUG, "%i to %i", min_mz_idx, max_mz_idx);
 	int peak_idx;
 	for (peak_idx=min_mz_idx; peak_idx < max_mz_idx + 1; peak_idx++){
 		if ((peak = spectrum->mz_peak_array[peak_idx]) == NULL){
@@ -1244,8 +1242,6 @@ void spectrum_rank_peaks(
 	while(peak_iterator_has_next(peak_iterator)){
 		peak = peak_iterator_next(peak_iterator);
     float new_rank = rank/(float)spectrum->num_peaks;
-    carp(CARP_DETAILED_DEBUG, "%i / %i = %.6f", rank, 
-        spectrum->num_peaks, new_rank);
     rank--;
 		set_peak_intensity_rank(peak, new_rank); 
 	}

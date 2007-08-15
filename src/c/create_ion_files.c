@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.14 $
+ * REVISION: $Revision: 1.15 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -143,17 +143,13 @@ int main(int argc, char** argv){
     carp(CARP_INFO, "Normalizing spectrum %i", scan_num);
 		sum_normalize_spectrum(spectrum);
 
-    // carp(CARP_INFO, "Ranking spectrum peaks %i", scan_num);
-    // START
-		//TODO  causes seg fault ! // 
+    carp(CARP_INFO, "Ranking spectrum peaks %i", scan_num);
     spectrum_rank_peaks(spectrum); 
-    // TODO problem with rank output as well, very strange values!
 
 		// parse the peptides
 		int num_lines;
     carp(CARP_INFO, "Parsing peptides from %s", peptide_file_name);
 		char** peptides = parse_file(peptide_file_name, MAX_PEPTIDES, &num_lines);
-    carp(CARP_INFO, "Done parsing peptides from %s", peptide_file_name);
 				
 		int peptide_idx = 0;
 		char* peptide_sequence = NULL;
@@ -195,7 +191,7 @@ int main(int argc, char** argv){
   	} 
    	carp(CARP_INFO, "Done outputting files.");
 
-   	// free heap TODO put this back in
+   	// free heap 
     free(peptides);
    	free_spectrum_collection(collection);
    	free_spectrum(spectrum);

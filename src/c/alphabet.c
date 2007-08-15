@@ -484,8 +484,6 @@ static void populate_amino_array(void){
  */
 int amino_to_int(char amino){
   populate_amino_array();
-  carp(CARP_DETAILED_DEBUG, "%c", amino);
   int value = amino_array[amino - 'A'];
-  carp(CARP_DETAILED_DEBUG, "%i", value);
   return value;
 }
