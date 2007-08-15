@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
@@ -45,6 +45,14 @@ float score_spectrum_v_ion_series(
   SCORER_T* scorer,        ///< the scorer object -in
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
+);
+
+/**
+ * Frees the single_ion_constraints array
+ */
+void free_single_ion_constraints(
+  ION_CONSTRAINT_T** ion_constraints,
+  int num_ion_constraints
 );
 
 /**

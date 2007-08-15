@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.52 $
+ * REVISION: $Revision: 1.53 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -219,6 +219,9 @@ void free_spectrum (
     }    
   }
   
+  if(spectrum->has_mz_peak_array){
+    free(spectrum->mz_peak_array);
+  }
   free(spectrum);
 }
 
@@ -736,6 +739,7 @@ void populate_mz_peak_array(
 	}
 	spectrum->mz_peak_array = mz_peak_array;
 	spectrum->has_mz_peak_array = TRUE;
+  free_peak_iterator(peak_iterator);
 }
 
 /**
@@ -1222,6 +1226,7 @@ void sum_normalize_spectrum(
 		float new_intensity = get_peak_intensity(peak) / spectrum->total_energy;
 		set_peak_intensity(peak, new_intensity);
 	}
+  free_peak_iterator(peak_iterator);
 }
 
 /***********************************************************************

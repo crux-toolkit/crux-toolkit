@@ -443,7 +443,7 @@ void zero_ambigs
     set_array_item(num_chars + i_ambig, 0.0, freqs);
   }
 }      
-static int* amino_array = NULL;
+static int amino_array[AMINO_ARRAY_CAPACITY] ;
 
 /**
  * Converts a character into an amino acid
@@ -452,7 +452,6 @@ static void populate_amino_array(void){
   if (amino_array != NULL){
     return;
   }
-  amino_array = (int*) malloc( sizeof(int) * AMINO_ARRAY_CAPACITY);
   amino_array['A'-'A'] = 0;
   amino_array['C'-'A'] = 1;
   amino_array['D'-'A'] = 2;
