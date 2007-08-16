@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -340,6 +340,71 @@ void print_ion_gmtk_single(
       is_detected                                               // 12
   );
 }
+
+/*
+ * Same output as above, but in binary
+ *
+ * ints 
+ *
+ * 0. m/z ratio - ratio of the ion's mass-to-charge to the peptide's m/z
+ * 1. raw - raw intensity
+ * 2. rank - the ion rank
+ *
+ * floats 
+ *
+ * 0. proton mobility - always set to 1 (for now) FIXME
+ * 1. m/z ratio int
+ * 2. index of the amide bond cleavage from N-term
+ * 3. index of the amide bond cleavage from C-term
+ * 4. Left amino acid ID
+ * 5. Right amino acid ID
+ * 6. Is this ion possible?
+ * 7. Is this ion detectable?
+ * 8. Is this ion detected?
+
+ */
+void print_ion_gmtk_single_binary(
+  ION_T* ion, ///< print this ion -in
+  FILE* file  ///< to this file -in
+  ){
+
+	float float_array[3];
+	int int_array[9];
+  float_array[0] = (ion->ion_mass_z)/(ion->peptide_mass); // 0
+	float_array[1] = 0.0; 																	// 1
+	float_array[2] = 0.0; 																	// 2
+
+	int is_detected = 1; 																		
+  if (ion->peak != NULL){
+    float_array[1] = get_peak_intensity(ion->peak); 			// 1 
+    float_array[2] = get_peak_intensity_rank(ion->peak); 	// 2 
+    is_detected = 1; 																			
+  }
+
+	int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
+	int cterm_idx = strlen(ion->peptide_sequence) - age_idx + 1; 
+  int left_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx-1]);
+  int right_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx]);
+	int is_detectable = 0;
+  if ((ion->ion_mass_z >= DETECTABLE_MZ_MIN) &&
+      (ion->ion_mass_z <= DETECTABLE_MZ_MAX)){
+    is_detectable = 1;
+  }
+
+	int_array[0] = 1;																				// 0
+	int_array[1] = mz_int; 																	// 1
+	int_array[2] = ion->cleavage_idx;												// 2
+	int_array[3] = cterm_idx;																// 3
+	int_array[4] = left_amino;		 													// 4
+	int_array[5] = right_amino; 														// 5
+	int_array[6] = 1;							 													// 6
+	int_array[7] = is_detectable; 													// 7
+	int_array[8] = is_detected; 														// 8
+	
+	fwrite(int_array, sizeof(int), 3, file);
+	fwrite(float_array, sizeof(float), 9, file);
+}
+
 
 /**
  * prints the location and fields of ION_T object to the file, in the
