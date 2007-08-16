@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.35 $
+ * REVISION: $Revision: 1.36 $
  ****************************************************************************/
 
 #include <math.h>
@@ -41,9 +41,9 @@
 #define BONFERRONI_CUT_OFF_NP 0.01
 
 #define GMTK_MAX_ION_FILES 50
-#define GMTK_NUM_CHARGES 3
-#define GMTK_NUM_BASE_IONS 2
-#define GMTK_NUM_NEUTRAL_LOSS 2
+#define GMTK_NUM_CHARGES 1
+#define GMTK_NUM_BASE_IONS 1
+#define GMTK_NUM_NEUTRAL_LOSS 0
 
 /**
  * \struct scorer
@@ -1406,14 +1406,16 @@ ION_CONSTRAINT_T** single_ion_constraints(
   ION_CONSTRAINT_T** ion_constraints = (ION_CONSTRAINT_T**) 
     malloc(GMTK_MAX_ION_FILES * sizeof(ION_CONSTRAINT_T*));
 
-	ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION };
-  int charges[GMTK_NUM_CHARGES] = { 1, 2, 3 };
+	// ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION }; 
+	ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { Y_ION }; 
+  int charges[GMTK_NUM_CHARGES] = { 1 }; // , 2};
 
 	MASS_TYPE_T mass_type = MONO; // TODO maybe change to parameter file
 
   int ion_constraint_idx = 0;
 
   int ion_type_idx;
+  // b and y. NOTE keep in synch with GMTKmodel.py writeIonFilesC
   for (ion_type_idx=0; ion_type_idx < GMTK_NUM_BASE_IONS; ion_type_idx++){
 
     int charge_idx;

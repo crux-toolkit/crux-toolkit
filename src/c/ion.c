@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -319,8 +319,6 @@ void print_ion_gmtk_single(
     is_detectable = 1;
   }
 
-  // TODO add binary option
-
   float mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
   int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
 
@@ -370,7 +368,8 @@ void print_ion_gmtk_single_binary(
 
 	float float_array[3];
 	int int_array[9];
-  float_array[0] = (ion->ion_mass_z)/(ion->peptide_mass); // 0
+  float mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
+  float_array[0] = mz_ratio;                              // 0
 	float_array[1] = 0.0; 																	// 1
 	float_array[2] = 0.0; 																	// 2
 
@@ -382,7 +381,7 @@ void print_ion_gmtk_single_binary(
   }
 
 	int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
-	int cterm_idx = strlen(ion->peptide_sequence) - age_idx + 1; 
+	int cterm_idx = strlen(ion->peptide_sequence) - ion->cleavage_idx + 1; 
   int left_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx-1]);
   int right_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx]);
 	int is_detectable = 0;
