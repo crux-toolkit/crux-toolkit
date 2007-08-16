@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.25 $
+ * REVISION: $Revision: 1.26 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -21,6 +21,7 @@
 #include "mass.h"
 #include "spectrum.h"
 
+#define BINARY_GMTK 1
 #define MAX_IONS 10000
 #define MAX_NUM_ION_TYPE 8 //number of different ion_types
 
@@ -277,7 +278,11 @@ void print_ion_series_single_gmtk(
   ION_T* ion;
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
+#ifdef BINARY_GMTK
+		print_ion_gmtk_single_binary(ion, file);
+#else
 		print_ion_gmtk_single(ion, file);
+#endif
 	}
   free_ion_filtered_iterator(ion_iterator);
 }

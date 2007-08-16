@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.55 $
+ * REVISION: $Revision: 1.56 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -176,6 +176,7 @@ SPECTRUM_T* new_spectrum(
 	fresh_spectrum->has_mz_peak_array = FALSE;
 	fresh_spectrum->sorted_by_intensity = FALSE;
 	fresh_spectrum->peaks = NULL;
+	fresh_spectrum->num_peaks = 0;
 	fresh_spectrum->mz_peak_array = NULL;
   set_spectrum_new_possible_z(fresh_spectrum, possible_z, num_possible_z);
   set_spectrum_new_filename(fresh_spectrum, filename);
