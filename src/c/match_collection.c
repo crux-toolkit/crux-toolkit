@@ -687,16 +687,25 @@ BOOLEAN_T estimate_weibull_parameters(
 {
   // TODO why does xcorr need spectrum and charge but sp scoring function doesn't?
   // TODO document routine
-  // TODO make max_idx a parameter in parameter file
   // TODO should not be fixed number
   MATCH_COLLECTION_T* sample_collection = match_collection;
   if (sample_count != 0){
-    sample_collection = random_sample_match_collection(match_collection, sample_count);
+    sample_collection = 
+			random_sample_match_collection(match_collection, sample_count);
   }
-  int max_idx = 400;
+  int max_idx;
+	// less than 0.0 or 0 indicates use all peptides
+	double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
+	int number_to_fit = get_int_parameter("number-top-scores-to-fit");
+	if (fraction_to_fit > -0.5){
+		max_idx = (int)(sample_count * fraction_to_fit);
+	} else if (number_to_fit > -1 ){
+		max_idx = number_to_fit;
+	} else {
+		max_idx = sample_count;
+	}
 
-  //print info
-  carp(CARP_INFO, "Estimate Weibull parameters, sample count: %d", sample_count);
+  carp(CARP_INFO, "Estimate Weibull parameters, count: %d", sample_count);
   
   //first score the sample match_collection
   // TODO change to a single routine score_match_collection
@@ -705,7 +714,7 @@ BOOLEAN_T estimate_weibull_parameters(
       carp(CARP_ERROR, "failed to score match collection for XCORR");
     }
   } else if (score_type == SP){
-    // TODO score_match_collection_sp should probably not take a peptide iterator?
+    // TODO score_match_collection_sp should probably not take an iterator?
     // FIXME assumes scored by SP already
     ;
   }
