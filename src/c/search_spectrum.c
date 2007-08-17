@@ -56,6 +56,8 @@ int main(int argc, char** argv){
   int scan_num = 0;
   char* fasta_file = NULL;
   double mass_window = 3;
+	int number_top_scores_to_fit = -1;
+	double fraction_top_scores_to_fit = -1.0;
 
   //parsing variables
   int result = 0;
@@ -101,6 +103,18 @@ int main(int argc, char** argv){
     (void *) &mass_window, 
     DOUBLE_ARG);
   
+  parse_arguments_set_opt(
+    "number-top-scores-to-ft", 
+    "The number of peptides to fit (-1 = all)", 
+    (void *) &number_top_scores_to_fit, 
+    INT_ARG);
+ 
+	parse_arguments_set_opt(
+    "fraction-top-scores-to-ft", 
+    "The fraction of peptides to fit (-1.0 = all)", 
+    (void *) &fraction_top_scores_to_fit, 
+    DOUBLE_ARG);
+
   /* Define required command line arguments */
   parse_arguments_set_req(
     "ms2", 
