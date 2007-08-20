@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.15 $
+ * REVISION: $Revision: 1.16 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -188,6 +188,7 @@ int main(int argc, char** argv){
       free(peptide_sequence);
    	  free_ion_series(ion_series);
       free_single_ion_constraints(ion_constraints, num_ion_constraints);
+      free_ion_constraint(ion_constraint);
   	} 
    	carp(CARP_INFO, "Done outputting files.");
 

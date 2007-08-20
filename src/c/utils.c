@@ -737,7 +737,7 @@ int main (int argc, char *argv[])
     exit(1);
 
   size_t buf_length = 1024;
-  char** lines = (char**) mycalloc(10000 * sizeof(char*));
+  char** lines = (char**) mycalloc(10000, sizeof(char*));
   int line_idx = 0;
   int length;
   while ((length = getline(&lines[line_idx], &buf_length, infile)) != -1){
@@ -816,7 +816,7 @@ General Public License for more details.  */
 #elif STDC_HEADERS
 #include <stdlib.h>
 #else
-char *malloc (), *realloc ();
+//char *malloc (), *realloc ();
 #endif
 
 /* Always add at least this many bytes when extending the buffer.  */

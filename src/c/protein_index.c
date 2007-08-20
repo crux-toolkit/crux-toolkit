@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -397,7 +397,7 @@ BOOLEAN_T create_binary_fasta_fuction(
     
     //print status
     if(protein_idx % 1000 == 0){
-      carp(CARP_INFO, "reached protein: %d", protein_idx);
+      carp(CARP_INFO, "Reached protein: %d", protein_idx);
     }
 
     working_index = ftell(file);
@@ -407,7 +407,7 @@ BOOLEAN_T create_binary_fasta_fuction(
   fwrite("*", sizeof(char), 2, output_file);
 
   //print final status
-  carp(CARP_INFO, "serialzed total protein: %d", protein_idx);
+  carp(CARP_INFO, "Serialized total protein: %d", protein_idx);
   
     
   free(new_line);
