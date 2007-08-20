@@ -104,13 +104,13 @@ int main(int argc, char** argv){
     DOUBLE_ARG);
   
   parse_arguments_set_opt(
-    "number-top-scores-to-ft", 
+    "number-top-scores-to-fit", 
     "The number of peptides to fit (-1 = all)", 
     (void *) &number_top_scores_to_fit, 
     INT_ARG);
  
 	parse_arguments_set_opt(
-    "fraction-top-scores-to-ft", 
+    "fraction-top-scores-to-fit", 
     "The fraction of peptides to fit (-1.0 = all)", 
     (void *) &fraction_top_scores_to_fit, 
     DOUBLE_ARG);

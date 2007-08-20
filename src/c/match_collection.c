@@ -337,6 +337,7 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   }
   else if(score_type == LOGP_WEIBULL_SP){
     //score the top_rank_for_p_value amount of top ranked peptides their -log(p_value) match_collection
+    carp(CARP_DEBUG, "Scoring match collection for LOGP_WEIBULL_SP");
     if(!score_match_collection_logp_weibull_sp(match_collection, top_rank_for_p_value)){
       carp(CARP_ERROR, "failed to score match collection for LOGP_WEIBULL_SP");
     }
@@ -423,7 +424,9 @@ BOOLEAN_T sort_match_collection(
   case LOGP_WEIBULL_SP: 
   case LOGP_BONF_WEIBULL_SP: 
     //LOGP_EXP_SP and SP have same order, thus sort the match to decreasing SP order for the return
+    carp(CARP_DEBUG, "Sorting match_collection %i", match_collection->match_total);
     qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_sp);
+    carp(CARP_DEBUG, "Sorting match_collection %i", match_collection->match_total);
     match_collection->last_sorted = SP;
     return TRUE;
   case Q_VALUE:
@@ -689,23 +692,30 @@ BOOLEAN_T estimate_weibull_parameters(
   // TODO document routine
   // TODO should not be fixed number
   MATCH_COLLECTION_T* sample_collection = match_collection;
+  carp(CARP_INFO, "Estimating weibull params");
   if (sample_count != 0){
     sample_collection = 
 			random_sample_match_collection(match_collection, sample_count);
   }
+  int num_matches = sample_collection->match_total;
   int max_idx;
 	// less than 0.0 or 0 indicates use all peptides
 	double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
 	int number_to_fit = get_int_parameter("number-top-scores-to-fit");
+  carp(CARP_INFO, "Number to fit count: %i", number_to_fit);
+  carp(CARP_INFO, "Fraction to fit count: %.3f", fraction_to_fit);
 	if (fraction_to_fit > -0.5){
-		max_idx = (int)(sample_count * fraction_to_fit);
+    assert(fraction_to_fit <= 1.0);
+		max_idx = (int)(num_matches * fraction_to_fit);
+    carp(CARP_INFO, "Fraction count: %i", max_idx);
 	} else if (number_to_fit > -1 ){
-		max_idx = number_to_fit;
+		max_idx = number_to_fit < num_matches ? number_to_fit : num_matches;
+    carp(CARP_INFO, "Number count: %i", max_idx);
 	} else {
-		max_idx = sample_count;
+		max_idx = num_matches;
 	}
 
-  carp(CARP_INFO, "Estimate Weibull parameters, count: %d", sample_count);
+  carp(CARP_INFO, "Estimate Weibull parameters, count: %d", max_idx);
   
   //first score the sample match_collection
   // TODO change to a single routine score_match_collection
@@ -728,10 +738,12 @@ BOOLEAN_T estimate_weibull_parameters(
     }
   }
 
+  carp(CARP_INFO, "Calc X, count: %d", max_idx);
+
   // implementation of Weibull distribution parameter estimation from 
   // http://www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
   int idx;
-  float* X   = malloc(sizeof(float) * sample_collection->match_total);
+  float* X   = calloc(sizeof(float) , sample_collection->match_total);
   for(idx=0; idx < max_idx; idx++){
     float score = get_match_score(sample_collection->match[idx], score_type);
     if (score <= 0.0){
@@ -743,7 +755,8 @@ BOOLEAN_T estimate_weibull_parameters(
     carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
   }
 
-  float* F_T = malloc(sizeof(float) * sample_collection->match_total);
+  carp(CARP_INFO, "Calc F, count: %d", max_idx);
+  float* F_T = mymalloc(sizeof(float) * sample_collection->match_total);
   for(idx=0; idx < max_idx; idx++){
     int reverse_idx = sample_collection->match_total - idx;
     // magic numbers 0.3 and 0.4 are never changed
@@ -751,7 +764,7 @@ BOOLEAN_T estimate_weibull_parameters(
     carp(CARP_DEBUG, "F[%i]=%.6f", idx, F_T[idx]);
   }
 
-  float* Y   = malloc(sizeof(float) * sample_collection->match_total);
+  float* Y   = mymalloc(sizeof(float) * sample_collection->match_total);
   for(idx=0; idx < max_idx; idx++){
     Y[idx] = log( -log(1.0 - F_T[idx]) );
     carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
@@ -900,6 +913,7 @@ BOOLEAN_T score_match_collection_sp(
   ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);    
   
   //iterate over all peptides
+  carp(CARP_INFO, "Iterating over peptides");
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     peptide = generate_peptides_iterator_next(peptide_iterator);
     
