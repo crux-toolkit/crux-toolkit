@@ -714,6 +714,11 @@ char** parse_file(
       line[length-1]='\0';
     }
     line_idx++;
+    if (line_idx >= max_lines){
+      carp(CARP_FATAL, "Number of lines in %s exceeds maximum of %i!", 
+          file_name, max_lines);
+      exit(1);
+    }
   }
   free(lines[line_idx]);
   fclose(infile);

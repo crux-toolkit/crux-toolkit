@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.16 $
+ * REVISION: $Revision: 1.17 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -154,49 +154,25 @@ int main(int argc, char** argv){
 		int peptide_idx = 0;
 		char* peptide_sequence = NULL;
     carp(CARP_INFO, "Creating and outputting ions");
-		while(peptide_idx < num_lines){ 
-			if ((peptide_idx + 1)% 100 == 0){
-				carp(CARP_INFO, "At peptide %i of %i", peptide_idx + 1, num_lines);
-			}
-			peptide_sequence = peptides[peptide_idx++];
-      carp(CARP_DETAILED_DEBUG, "%s", peptide_sequence);
-			// check peptide sequence
-    	if(!valid_peptide_sequence(peptide_sequence)){
-      	wrong_command(peptide_sequence, "not a valid peptide sequence");
-    	}
 
-    	// create new ion series
-    	ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(charge); 
-    	ion_series = new_ion_series(
-									 	 peptide_sequence, charge, ion_constraint);
-  
-   		// now predict ions and assign them to their closest peaks
-   		predict_ions(ion_series);
-    	ion_series_assign_nearest_peaks(ion_series, spectrum);
+    // output GMTK peptide ion files
+    if (output_psm_files(output_directory, spectrum, peptides, num_lines) 
+          == FALSE){
+       carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
+          ms2_file, scan_num, peptide_file_name);
+    } else {
+      carp(CARP_INFO, "Done outputting files.");
+    }
 
-    	// create our ion constraints
-    	int num_ion_constraints;
-    	ION_CONSTRAINT_T** ion_constraints = 
-      	single_ion_constraints(&num_ion_constraints);
-
-   		// output GMTK peptide ion files
-   		if (output_ion_files(output_directory, spectrum, ion_series, 
-          ion_constraints, num_ion_constraints) == FALSE){
-  		 	carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
-				 ms2_file, scan_num, peptide_sequence);
-	 		}
-      free(peptide_sequence);
-   	  free_ion_series(ion_series);
-      free_single_ion_constraints(ion_constraints, num_ion_constraints);
-      free_ion_constraint(ion_constraint);
-  	} 
-   	carp(CARP_INFO, "Done outputting files.");
-
-   	// free heap 
+    // free heap 
+    int peptide_idx;
+    for (peptide_idx=0; peptide_idx < num_lines; peptide_idx++){
+      free(peptides[peptide_idx]);
+    }
     free(peptides);
-   	free_spectrum_collection(collection);
-   	free_spectrum(spectrum);
-   	free_parameters();
+    free_spectrum_collection(collection);
+    free_spectrum(spectrum);
+    free_parameters();
  	}
  	else{
    	char* usage = parse_arguments_get_usage("create_ion_files");
