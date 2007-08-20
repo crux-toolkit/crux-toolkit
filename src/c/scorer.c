@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.37 $
+ * REVISION: $Revision: 1.38 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1514,7 +1514,10 @@ BOOLEAN_T output_psm_files(
          constraint_idx++){
       // output the ions that obey this constraint
       print_ion_series_single_gmtk(ion_series, 
-          ion_constraints[constraint_idx], ion_series_files[constraint_idx]);
+          ion_constraints[constraint_idx], 
+          ion_series_files[constraint_idx],
+          peptide_idx,
+          constraint_idx);
     }
     carp(CARP_INFO, "Appended to ion files for: %s", peptide_sequence);
 

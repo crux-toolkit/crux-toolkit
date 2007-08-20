@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.76 $   #-Werror \
+# VERSION: $Revision: 1.77 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.

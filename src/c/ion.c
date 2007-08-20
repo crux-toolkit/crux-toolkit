@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -14,6 +14,9 @@
 #include "mass.h"
 #include "utils.h"
 #include "alphabet.h"
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <inttypes.h>
 
 #define MZ_INT_MAX 10
 #define MZ_INT_MIN 0
@@ -401,6 +404,14 @@ void print_ion_gmtk_single_binary(
 	int_array[6] = 1;							 													// 6
 	int_array[7] = is_detectable; 													// 7
 	int_array[8] = is_detected; 														// 8
+
+  int idx;
+  for (idx=0; idx < 8; idx++){
+    int_array[idx] = htonl(int_array[idx]);
+  }
+  for (idx=0; idx < 3; idx++){
+    float_array[idx] = htonl(float_array[idx]);
+  }
 	
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);

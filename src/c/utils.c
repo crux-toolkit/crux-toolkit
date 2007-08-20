@@ -732,34 +732,21 @@ char** parse_file(
 
 int main (int argc, char *argv[])
 {
-  FILE *infile;
+  FILE *outfile;
 
   if (argc != 2) {
-    die("USAGE: utils <filename>");
+    carp(CARP_FATAL, "USAGE: utils <filename>");
+    exit(1);
   }
 
-  if (open_file(argv[1], "r", 1, "input", "", &infile) == 0)
+  if (open_file(argv[1], "w", 1, "output", "", &outfile) == 0)
     exit(1);
 
-  size_t buf_length = 1024;
-  char** lines = (char**) mycalloc(10000, sizeof(char*));
-  int line_idx = 0;
-  int length;
-  while ((length = getline(&lines[line_idx], &buf_length, infile)) != -1){
-    char* line = lines[line_idx];
-    if (line[length-2] == '\n' || line[length-2] == '\r'){
-      line[length-2] = '\0';
-    } else if (line[length-1] == '\n' || line[length-1] == '\r'){
-      line[length-1]='\0';
-    }
-    line_idx++;
-  }
-  int new_line_idx;
-  for (new_line_idx=0; new_line_idx < line_idx; new_line_idx++){
-    printf("[%s]", lines[new_line_idx]);
-  }
-
-  fclose(infile);
+  // double double_array[8] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0};
+  // fwrite(double_array, sizeof(double), 8, outfile);
+  int int_array[8] = {1,2,3,4,5,6,7,8};
+  fwrite(int_array, sizeof(int), 8, outfile);
+  fclose(outfile);
 
   /* Test the random number generator. 
   seed = time(0);
@@ -821,7 +808,11 @@ General Public License for more details.  */
 #elif STDC_HEADERS
 #include <stdlib.h>
 #else
+<<<<<<< utils.c
+// char *malloc (), *realloc ();
+=======
 //char *malloc (), *realloc ();
+>>>>>>> 1.11
 #endif
 
 /* Always add at least this many bytes when extending the buffer.  */

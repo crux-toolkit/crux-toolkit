@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
