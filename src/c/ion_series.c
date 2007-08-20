@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.29 $
+ * REVISION: $Revision: 1.30 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -21,7 +21,7 @@
 #include "mass.h"
 #include "spectrum.h"
 
-#define BINARY_GMTK 1
+//#define BINARY_GMTK 1
 #define MAX_IONS 10000
 #define MAX_NUM_ION_TYPE 8 //number of different ion_types
 
