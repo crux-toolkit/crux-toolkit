@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -142,7 +142,9 @@ void print_ion_gmtk_single(
  */
 void print_ion_gmtk_single_binary(
   ION_T* ion, ///< print this ion -in
-  FILE* file ///< to this file -in
+  FILE* file, ///< to this file -in
+  int sentence_idx,
+  int frame_idx
   );
 
 /**

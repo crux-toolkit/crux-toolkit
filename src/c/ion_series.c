@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.28 $
+ * REVISION: $Revision: 1.29 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -264,9 +264,11 @@ void print_ion_series(
  * Prints a ion_series object to file, in GMTK single-ion format.
  */
 void print_ion_series_single_gmtk(
-	ION_SERIES_T* ion_series, ///< ion_series to print -in 
+	ION_SERIES_T* ion_series,         ///< ion_series to print -in 
 	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
-	FILE* file ///< file output
+	FILE* file,                       ///< file output
+  int sentence_idx,
+  int frame_idx
 								){
 
 	//create the filtered iterator that will select among the ions
@@ -278,7 +280,7 @@ void print_ion_series_single_gmtk(
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
 #ifdef BINARY_GMTK
-		print_ion_gmtk_single_binary(ion, file);
+		print_ion_gmtk_single_binary(ion, file, sentence_idx, frame_idx);
 #else
 		print_ion_gmtk_single(ion, file);
 #endif

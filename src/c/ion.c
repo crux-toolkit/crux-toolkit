@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -363,7 +363,9 @@ void print_ion_gmtk_single(
  */
 void print_ion_gmtk_single_binary(
   ION_T* ion, ///< print this ion -in
-  FILE* file  ///< to this file -in
+  FILE* file,  ///< to this file -in
+  int sentence_idx,
+  int frame_idx
   ){
 
 	float float_array[3];
@@ -400,8 +402,10 @@ void print_ion_gmtk_single_binary(
 	int_array[7] = is_detectable; 													// 7
 	int_array[8] = is_detected; 														// 8
 	
-	fwrite(int_array, sizeof(int), 3, file);
+  fwrite(&sentence_idx, sizeof(int), 1, file);
+  fwrite(&frame_idx, sizeof(int), 1, file);
 	fwrite(float_array, sizeof(float), 9, file);
+	fwrite(int_array, sizeof(int), 3, file);
 }
 
 
