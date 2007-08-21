@@ -97,6 +97,9 @@ void initialize_parameters(void){
   //match_collection parameters
   set_double_parameter("mass-window", 3.0);
 
+  // create_psm_files
+  set_int_parameter("starting-sentence-idx", 0);
+
   //score_spectrum
   set_string_parameter("prelim-score-type", "sp");
   set_int_parameter("max-rank-preliminary", 500);

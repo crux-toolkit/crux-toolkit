@@ -7,7 +7,8 @@ cd ..
 make
 cd -
 rm -fr output
-../../../bin/create_psm_files peptides.txt 13002 test-3.ms2 output --verbosity 100
+../../../bin/create_psm_files peptides.txt 13002 test-3.ms2 output --verbosity 100 --starting-sentence-idx 0
+../../../bin/create_psm_files peptides.txt 13002 test-3.ms2 output --verbosity 100 --starting-sentence-idx 1
 cd output/
 # pfile_create -o 0.pfile -i 0.prepfile -b -f 1 -l 1 
 # pfile_create -o 1.pfile -i 1.prepfile -b -f 1 -l 1 
