@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.38 $
+ * REVISION: $Revision: 1.39 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1471,7 +1471,7 @@ BOOLEAN_T output_psm_files(
   int ion_series_idx;
   for (ion_series_idx=0;ion_series_idx<GMTK_NUM_ION_SERIES;ion_series_idx++){
     char full_path[FILENAME_LENGTH];
-    sprintf(full_path, "%s/%i.pfile", output_directory, ion_series_idx);
+    sprintf(full_path, "%s/%i.prepfile", output_directory, ion_series_idx);
     if (open_file(full_path, "a", FALSE, "append", "", 
           &ion_series_files[ion_series_idx])==FALSE){
       carp(CARP_FATAL, "Trouble opening output file %s!", full_path); 
@@ -1486,12 +1486,12 @@ BOOLEAN_T output_psm_files(
   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(charge); 
   ION_CONSTRAINT_T** ion_constraints = single_ion_constraints();
 
-  int peptide_idx = 0;
-  while(peptide_idx < num_peptides){ 
+  int peptide_idx;
+  for(peptide_idx=0; peptide_idx < num_peptides; peptide_idx++){ 
     if ((peptide_idx + 1)% 100 == 0){
       carp(CARP_INFO, "At peptide %i of %i", peptide_idx + 1, num_peptides);
     }
-    peptide_sequence = peptides[peptide_idx++];
+    peptide_sequence = peptides[peptide_idx];
     carp(CARP_DETAILED_DEBUG, "%s", peptide_sequence);
 
     // check peptide sequence
@@ -1516,8 +1516,7 @@ BOOLEAN_T output_psm_files(
       print_ion_series_single_gmtk(ion_series, 
           ion_constraints[constraint_idx], 
           ion_series_files[constraint_idx],
-          peptide_idx,
-          constraint_idx);
+          peptide_idx);
     }
     carp(CARP_INFO, "Appended to ion files for: %s", peptide_sequence);
 

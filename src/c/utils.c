@@ -808,11 +808,7 @@ General Public License for more details.  */
 #elif STDC_HEADERS
 #include <stdlib.h>
 #else
-<<<<<<< utils.c
 // char *malloc (), *realloc ();
-=======
-//char *malloc (), *realloc ();
->>>>>>> 1.11
 #endif
 
 /* Always add at least this many bytes when extending the buffer.  */
