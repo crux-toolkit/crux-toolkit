@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.40 $
+ * REVISION: $Revision: 1.41 $
  ****************************************************************************/
 
 #include <math.h>
@@ -44,7 +44,7 @@
 #define GMTK_NUM_CHARGES 2
 // FIX !! check different charges
 #define GMTK_NUM_BASE_IONS 3
-#define GMTK_NUM_NEUTRAL_LOSS 2
+#define GMTK_NUM_NEUTRAL_LOSS 0
 #define GMTK_NUM_ION_SERIES \
   GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
 
@@ -1450,7 +1450,8 @@ BOOLEAN_T output_psm_files(
   char* output_directory, ///< name of directory to place the ion files -in
   SPECTRUM_T* spectrum,     ///< input spectrum -in
   char** peptides, ///< peptide sequences 
-  int num_peptides ///< number of peptide sequences
+  int num_peptides, ///< number of peptide sequences
+  int starting_sentence_idx ///< used to append to existing pfile
 ){
     
   char* peptide_sequence = NULL;
@@ -1516,7 +1517,7 @@ BOOLEAN_T output_psm_files(
       print_ion_series_single_gmtk(ion_series, 
           ion_constraints[constraint_idx], 
           ion_series_files[constraint_idx],
-          peptide_idx);
+          peptide_idx + starting_sentence_idx);
     }
     carp(CARP_INFO, "Appended to ion files for: %s", peptide_sequence);
 

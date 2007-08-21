@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.1 $
+ * REVISION: $Revision: 1.2 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -52,6 +52,7 @@ int main(int argc, char** argv){
 
   //optional variables
   int charge = 2;
+  int starting_sentence_idx = 0;
   char* parameter_file = NULL;
   int  verbosity = CARP_ERROR;
 
@@ -78,6 +79,12 @@ int main(int argc, char** argv){
     (void *) &verbosity, 
     INT_ARG);
 
+  parse_arguments_set_opt(
+    "starting-sentence-idx", 
+    "The first sentence idx (Default = 0).",
+    (void *) &starting_sentence_idx,
+    INT_ARG);
+
  /* Define required command line arguments */
   parse_arguments_set_req(
     "peptide-file-name", 
@@ -102,6 +109,7 @@ int main(int argc, char** argv){
     (void *) &output_directory,
     STRING_ARG);
 
+  
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
 
@@ -152,7 +160,8 @@ int main(int argc, char** argv){
     carp(CARP_INFO, "Creating and outputting ions");
 
     // output GMTK peptide ion files
-    if (output_psm_files(output_directory, spectrum, peptides, num_lines) 
+    if (output_psm_files(output_directory, spectrum, peptides, num_lines,
+          starting_sentence_idx) 
         == FALSE){
        carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
           ms2_file, scan_num, peptide_file_name);

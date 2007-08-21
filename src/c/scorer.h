@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
@@ -71,7 +71,8 @@ BOOLEAN_T output_psm_files(
   char* output_directory,  ///< name of directory to place the ion files
   SPECTRUM_T* spectrum,    ///< input spectrum
   char** peptides, ///< the peptide sequences
-  int num_peptides ///< the number of peptides sequences
+  int num_peptides, ///< the number of peptides sequences
+  int starting_sentence_idx ///< used to append to existing pfile
 );
 
 /**
