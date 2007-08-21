@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.31 $
+ * REVISION: $Revision: 1.32 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1148,7 +1148,7 @@ ION_CONSTRAINT_T* new_ion_constraint_gmtk(
   if(max_charge >= 1){
 		charge = max_charge - 1;
   }  
-  constraint = new_ion_constraint(MONO, charge, BY_ION, FALSE);
+  constraint = new_ion_constraint(MONO, charge, ALL_ION, FALSE);
 
   //set all modifications count for gmtk
   constraint->use_neutral_losses = TRUE;
@@ -1168,7 +1168,8 @@ ION_CONSTRAINT_T* new_ion_constraint_gmtk(
  */
 ION_CONSTRAINT_T* new_ion_constraint_sequest(
   MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
-  int max_charge, ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
+  int max_charge, ///< the maximum charge of the ions. 
+                  ///< cannot exceed the parent peptide's charge
   ION_TYPE_T ion_type, ///< the ion types the peptide series should include
   BOOLEAN_T precursor_ion ///< should include precursor ion?
   )

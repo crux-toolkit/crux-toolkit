@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.39 $
+ * REVISION: $Revision: 1.40 $
  ****************************************************************************/
 
 #include <math.h>
@@ -41,10 +41,10 @@
 #define BONFERRONI_CUT_OFF_NP 0.01
 
 #define GMTK_MAX_ION_FILES 50
-#define GMTK_NUM_CHARGES 1
+#define GMTK_NUM_CHARGES 2
 // FIX !! check different charges
-#define GMTK_NUM_BASE_IONS 2
-#define GMTK_NUM_NEUTRAL_LOSS 0
+#define GMTK_NUM_BASE_IONS 3
+#define GMTK_NUM_NEUTRAL_LOSS 2
 #define GMTK_NUM_ION_SERIES \
   GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
 
@@ -1403,12 +1403,12 @@ ION_CONSTRAINT_T** single_ion_constraints(
   void
 ){
 
+  carp(CARP_INFO, "Num ion series %i", GMTK_NUM_ION_SERIES);
   ION_CONSTRAINT_T** ion_constraints = (ION_CONSTRAINT_T**) 
     malloc(GMTK_NUM_ION_SERIES * sizeof(ION_CONSTRAINT_T*));
 
-	ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION }; 
-	// ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { Y_ION }; 
-  int charges[GMTK_NUM_CHARGES] = { 1 }; // , 2 }; 
+	ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION, A_ION }; 
+  int charges[GMTK_NUM_CHARGES] = { 1, 2 }; 
 
 	MASS_TYPE_T mass_type = MONO; // TODO maybe change to parameter file
 
