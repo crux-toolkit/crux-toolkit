@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -386,7 +386,7 @@ void print_ion_gmtk_single_binary(
   }
 
 	int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
-	int cterm_idx = strlen(ion->peptide_sequence) - ion->cleavage_idx + 1; 
+	int cterm_idx = strlen(ion->peptide_sequence) - ion->cleavage_idx; 
   int left_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx-1]);
   int right_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx]);
 	int is_detectable = 0;
@@ -406,17 +406,33 @@ void print_ion_gmtk_single_binary(
 	int_array[8] = is_detected; 														// 8
 
   int idx;
-  for (idx=0; idx < 8; idx++){
+  for (idx=0; idx < 9; idx++){
     int_array[idx] = htonl(int_array[idx]);
   }
   for (idx=0; idx < 3; idx++){
-    float_array[idx] = htonl(float_array[idx]);
+    // htonl does not seem to work on the floats (!!)
+    // so I will reverse the bytes by hand
+    float old_float;
+    float new_float;
+
+    old_float = float_array[idx];
+
+    char *forward_endian = (char*) &old_float;
+    char *reversed_endian = (char*) &new_float;
+
+    reversed_endian[0] = forward_endian[3];
+    reversed_endian[1] = forward_endian[2];
+    reversed_endian[2] = forward_endian[1];
+    reversed_endian[3] = forward_endian[0];
+    float_array[idx] = new_float;
   }
 	
-  fwrite(&sentence_idx, sizeof(int), 1, file);
-  fwrite(&frame_idx, sizeof(int), 1, file);
-	fwrite(float_array, sizeof(float), 9, file);
-	fwrite(int_array, sizeof(int), 3, file);
+  int big_end_sentence_idx = htonl(sentence_idx);
+  int big_end_frame_idx = htonl(frame_idx);
+  fwrite(&big_end_sentence_idx, sizeof(int), 1, file);
+  fwrite(&big_end_frame_idx, sizeof(int), 1, file);
+	fwrite(float_array, sizeof(float), 3, file);
+	fwrite(int_array, sizeof(int), 9, file);
 }
 
 
