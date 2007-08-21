@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -390,10 +390,19 @@ void print_ion_gmtk_single_binary(
   int left_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx-1]);
   int right_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx]);
 	int is_detectable = 0;
-  if ((ion->ion_mass_z >= DETECTABLE_MZ_MIN) &&
-      (ion->ion_mass_z <= DETECTABLE_MZ_MAX)){
+  if ( 
+       ((ion->ion_mass_z >= DETECTABLE_MZ_MIN) 
+              &&
+        (ion->ion_mass_z <= DETECTABLE_MZ_MAX)) 
+
+         || 
+         
+       is_detected
+
+     ){
     is_detectable = 1;
   }
+
 
 	int_array[0] = 1;																				// 0
 	int_array[1] = mz_int; 																	// 1
