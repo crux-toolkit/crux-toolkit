@@ -23,6 +23,17 @@ The Crux toolkit contains the following programs:
 <a href="get-ms2-spectrum.html">get-ms2-spectrum</a> Using a binary search, extract an MS-MS spectrum with a particular scan number from a .ms2 file, and output the spectrum. Optionally output some summary statistics for the MS-MS spectrum.
 
 <li>
+<a href="match-search.html">match-search</a> Given as input an ms2 file,
+a spectrum scan number within that file, a sequence database, and an
+optional parameter file, search the spectrum against the peptides in the
+sequence database, and return high scoring peptides (replaces search-spectra).
+
+<li>
+<a href="match-analysis.html">match-analysis</a> 
+Given as input a sequence database and PSMs generate additional run specific
+features and analyze with a user specified algorithm (e.g. Percolator).
+
+<li>
 <a href="predict-peptide-ions.html">predict-peptide-ions</a> Given a peptide and a charge state, predict the ions according to the provided options.
 
 <li>
@@ -33,8 +44,11 @@ The Crux toolkit contains the following programs:
 href="score-peptide-spectrum.html">score-peptide-spectrum</a> Score a spectrum against a single peptide, using the information in param and the specified scoring type.
 
 <li>
-<a
-href="search-spectrum.html">search-spectrum</a> Given as input an ms2 file, a spectrum scan number within that file, a sequence database, and an optional parameter file, search the spectrum against the peptides in the sequence database, and return high scoring peptides.
+<a href="search-spectrum.html">search-spectrum</a> Given as input an ms2 file,
+a spectrum scan number within that file, a sequence database, and an
+optional parameter file, search the spectrum against the peptides in the
+sequence database, and return high scoring peptides (Obsolete, replaced by
+match-search).
 
 <li>
 <a
