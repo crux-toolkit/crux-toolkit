@@ -32,4 +32,9 @@ V- Update parameter file (1) read amino acid mass modification (2) use hash tabl
   separately
 - should warn if amino acid masses in param file are inconsistent with those
   in the index
+- echo out parameter values to STDOUT
+- binary format option in parameter file
 
+- make sure copy routines copy new fields!!!
+- take out filename at top of get_ms2_spectrum output
+- rename to crux-*
