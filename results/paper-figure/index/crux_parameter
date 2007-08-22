@@ -38,7 +38,7 @@ missed-cleavages=TRUE
 ##########parameters used for scoring peptide, spectrum match ############
 # mass offset to search candidate peptides from the precursor mass
 # set to a non-zero value to simulate a null-distribution
-mass-offset=0.0
+# mass-offset=0.0
 
 #SP parameter used
 beta=0.075
@@ -72,6 +72,3 @@ max-rank-result=500
 #because it does not limit the count of preliminary scored peptides, 
 #thus some peptides can be outputed without being scored by main)
 top-rank-p-value=1
-
-#The top number of sp ranked peptides to use for scoring of EXP_SP
-top-fit-sp=10000
