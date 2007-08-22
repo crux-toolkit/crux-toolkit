@@ -9,7 +9,7 @@ This script compares the runtime between Crux and Sequest
 import os
 import sys
 import commands
-from scipy import *
+import scipy 
 from pylab import *
 from optparse import OptionParser
 
@@ -23,6 +23,16 @@ def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectru
     xlabel("mass window (Da)", size=15)
     ylabel("Runtime for " + `number_of_spectrum` + " spectra (s)", size=15)
     
+    fh = open("crux.xy", "w")
+    for idx in range(len(mass_windows)):
+      fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_array[idx]))
+    fh.close()
+
+    fh = open("sequest.xy", "w")
+    for idx in range(len(mass_windows)):
+      fh.write("%.8f\t%.8f\n" % (mass_windows[idx], sequest_array[idx]))
+    fh.close()
+
     plot(mass_windows, crux_array, label="Crux")
     plot(mass_windows, sequest_array, label="SEQUEST")
     legend()
@@ -72,7 +82,7 @@ for window in mass_windows:
         (exit_code, result) = \
                     commands.getstatusoutput("time -p ./sequest27 " + \
                                              "-Psequest.params" + "_" + window + \
-                                             " " + "*." + "$charge.dta"
+                                             " " + "*." + str(charge) + ".dta"
                                              )
         #debug
         print result

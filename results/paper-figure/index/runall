@@ -6,7 +6,9 @@ export PATH=../../../bin/:$PATH
 #that was randomly selected. Thus, a mix of 1, 2, 3 charged spectrua.
 
 ms2='spectra_random_1000.ms2'
-fasta='~/index/nr-NCBI-2006-02-16.fasta'
+# ms2='test.ms2'
+# fasta='E_coli_contam.fasta'
+fasta='nr-NCBI-2006-02-16.fasta'
 
 if [[ ! -f "crux_parameter" ]]
 then
@@ -14,44 +16,24 @@ then
 default settings"
 fi
 
-## used only for testing script, should use real index ###
-
-#if [[ ! -e "test_crux_index" ]]
-#echo "make new index(must make index if does not exist)? y|n"
-#read -e  ANSWER
-
-#Check if we should make index?
-#if [[ "$ANSWER" == "y" ]]
-#then
-    #make index
-##    echo "creating index"
-#    echo "copy index"
-##    
-##    count=`ulimit -n`
-##    if [ $count -lt 2000 ]
-##        then
-##        #set file handle count, must have root permission
-##        ulimit -n 1000000
-##    fi
-    
-    #now creating real index
-##    (time create_index --parameter-file curx_parameter --cleavages all \
-##        --missed-cleavages --verbosity 100  --redundancy unique $fasta) &> index_creation_result    
-
-#    cp -R /var/noble/data/protein_database/test_crux_index/ .
-#fi
+# make index
+#echo "creating index"
+#ulimit -n 1000000
+#(time create_index --parameter-file crux_parameter --cleavages all \
+#    --missed-cleavages --verbosity 100 --redundancy unique $fasta) \
+#    &> index_creation_result    
 
 echo "Comparing runtime"
 
-#first remove any pre existing *.dta files
+# first remove any pre existing *.dta files
 rm -rf *.dta
   
 
-#make .dta files for Sequest
-./ms22dta.pl $ms2
+# make .dta files for Sequest
+./ms22dta_right.pl $ms2
 
-#now run Sequest and Crux compare and plot runtime
-#python compare_runtime.py $ms2 $fasta
+# now run Sequest and Crux compare and plot runtime
+python compare_runtime.py $ms2 $fasta
 
-#now that were are done, remove all *.dta files
-rm -rf *.dta
+# now that were are done, remove all *.dta files
+# rm -rf *.dta
