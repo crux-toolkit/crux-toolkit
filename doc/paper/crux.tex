@@ -185,8 +185,24 @@ peptides are ranked according to the preliminary SEQUEST score $Sp$.
 Second, the 500 top-scoring peptides are re-ranked according to the
 cross-correlation score $XCorr$.
 
-{\em FIXME[Aaron]: Insert description of pre-processing and scoring,
-one paragraph per score.}
+For Sp scoring, a pre-processing step of the observed spectrum is 
+required to reduce spectral noise. First, Square root the intensity 
+and round the peak location to the nearest integer. Normalize the
+spectrum intensity, so that the maximum peak intensity equals 100.0. 
+Finally, through a subsequence smoothing and sampling process, extract 
+the top 200 abundant peaks. Use the final pre-processed observed spectrum 
+and the b and y fragment ions from the candidate peptide to compute Sp.
+
+Xcorr scoring also requires a pre-processing step of the observed spectrum. 
+Square root the intensity and round the peak location to the nearest integer. 
+Then, divide the spectrum into 10 regions and normalize the spectrum 
+intensity in each region to maximum 50.0. To create the theoretical spectrum 
+from the candidate peptide, construct an spectrum with peak intensity 50.0 
+for B and Y type ions and 25.0 for the +/- 1 m/z flanking  peaks of each B 
+and Y ion. Also, add intensity 10.0 for A type ions, neutral loss of H20 and
+ammonia for B ions and neutral loss of ammonia for Y ions. Compute Xcorr by
+cross correlation of the pre-processed observed spectrum and the theoretical
+spectrum.
 
 \subsection{Null peptide generation}
 
