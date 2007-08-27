@@ -1,4 +1,4 @@
-/*****************************************************************************
+#/*****************************************************************************
  * \file match_analysis.c
  * AUTHOR: Chris Park
  * CREATE DATE: Jan 03 2007
@@ -177,7 +177,7 @@ int main(int argc, char** argv){
           pcSetVerbosity(1);
         }
         else{
-          pcSetVerbosity(2);
+          pcSetVerbosity(5);
         }
       }
 
@@ -219,12 +219,12 @@ int main(int argc, char** argv){
      * the array should be numSpectra long and will be filled in the same order
      * as the features were inserted */
     pcGetScores(results_score, results_q); 
-    
+         
     //fill results for Q_VALUE
-    fill_result_to_match_collection(target_match_collection, results_q, Q_VALUE);
+    fill_result_to_match_collection(target_match_collection, results_q, Q_VALUE, TRUE);
     
     //fill results for PERCOLATOR_SCORE
-    fill_result_to_match_collection(target_match_collection, results_score, PERCOLATOR_SCORE);
+    fill_result_to_match_collection(target_match_collection, results_score, PERCOLATOR_SCORE, FALSE);
     
     //create match iterator, TRUE: return match in sorted order of main_score type
     match_iterator = new_match_iterator(target_match_collection, PERCOLATOR_SCORE, TRUE);
@@ -233,13 +233,16 @@ int main(int argc, char** argv){
     int match_count = 0;
     while(match_iterator_has_next(match_iterator)){
       ++match_count;
-      match = match_iterator_next(match_iterator);
-      print_match(match, stdout, TRUE, PERCOLATOR_SCORE);
-      
+
       //print only up to max_rank_result of the matches
       if(match_count >= max_rank_result){
         break;
       }
+      
+      match = match_iterator_next(match_iterator);
+      print_match(match, stdout, TRUE, PERCOLATOR_SCORE);
+      
+      
     }
     
     // Function that should be called after processing finished

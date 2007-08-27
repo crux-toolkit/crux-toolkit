@@ -2233,30 +2233,52 @@ void update_protein_counters(
  * Fill the match objects score with the given the float array. 
  * The match object order must not have been altered since scoring.
  * The result array size must match the match_total count.
+ * Match ranks are also populated to preserve the original order of the
+ * match input TRUE for preserve_order.
  *\returns TRUE, if successfully fills the scores into match object, else FALSE.
  */
 BOOLEAN_T fill_result_to_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -out
   double* results,  ///< The result score array to fill the match objects -in
-  SCORER_TYPE_T score_type  ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
+  SCORER_TYPE_T score_type,  ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
+  BOOLEAN_T preserve_order ///< preserve match order?
   )
 {
   int match_idx = 0;
   MATCH_T* match = NULL;
+  MATCH_T** match_array = NULL;
+  SCORER_TYPE_T score_type_old = match_collection->last_sorted;
 
   //iterate over match object in collection, set scores
   for(; match_idx < match_collection->match_total; ++match_idx){
     match = match_collection->match[match_idx];
     set_match_score(match, score_type, results[match_idx]);    
   }
+  
+  //if need to preserve order store a copy of array in original order 
+  if(preserve_order){
+    match_array = (MATCH_T**)mycalloc(match_collection->match_total, sizeof(MATCH_T*));
+    for(match_idx=0; match_idx < match_collection->match_total; ++match_idx){
+      match_array[match_idx] = match_collection->match[match_idx];
+    }
+  }
 
-  //populate the rank of each match object
+  //populate the rank of match_collection
   if(!populate_match_rank_match_collection(match_collection, score_type)){
     carp(CARP_ERROR, "failed to populate match rank in match_collection");
     free_match_collection(match_collection);
     exit(1);
   }
   
+  //restore match order if needed
+  if(preserve_order){
+    for(match_idx=0; match_idx < match_collection->match_total; ++match_idx){
+      match_collection->match[match_idx] = match_array[match_idx];
+    }
+    match_collection->last_sorted = score_type_old;
+    free(match_array);
+  }
+
   match_collection->scored_type[score_type] = TRUE;
   
   return TRUE;

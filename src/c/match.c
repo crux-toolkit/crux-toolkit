@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.34 $
+ * REVISION: $Revision: 1.35 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -201,7 +201,6 @@ int compare_match_percolator_score(
   MATCH_T** match_b  ///< the scond match -in
 )
 {
-
   if((*match_b)->match_scores[PERCOLATOR_SCORE] > (*match_a)->match_scores[PERCOLATOR_SCORE]){
     return 1;
   }
