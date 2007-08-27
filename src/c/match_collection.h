@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -202,12 +202,15 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
  * Fill the match objects score with the given the float array. 
  * The match object order must not have been altered since scoring.
  * The result array size must match the match_total count.
+ * Match ranks are also populated to preserve the original order of the
+ * match input TRUE for preserve_order.
  *\returns TRUE, if successfully fills the scores into match object, else FALSE.
  */
 BOOLEAN_T fill_result_to_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -out
   double* results,  ///< The result score array to fill the match objects -in
-  SCORER_TYPE_T score_type  ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
+  SCORER_TYPE_T score_type,  ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
+  BOOLEAN_T preserve_order ///< preserve match order?
   );
 
 /**
