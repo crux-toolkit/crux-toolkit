@@ -56,15 +56,16 @@ methods of mapping from the observed fragmentation spectra to the
 corresponding peptides.
 
 The most widely used methods for peptide identification, such as
-SEQUEST \cite{eng:approach}, MASCOT \cite{FIXME}, Tandem \cite{FIXME}
-and Inspect \cite{FIXME}, exploit a database of known protein
-sequences.  For each observed spectrum, these methods search the
-database for the peptide whose theoretical spectrum best matches the
-observed spectrum.  The resulting peptide-spectrum matches (PSMs) can
-be ranked using a pre-defined score function, or by using machine
-learning methods such as linear discriminant analysis
-\cite{keller:empirical}, support vector machines \cite{anderson:new,
-kall:semi-supervised} or decision trees \cite{elias:intensity}.
+SEQUEST \cite{eng:approach}, MASCOT \cite{perkins:probability},
+X!Tandem \cite{craig:tandem} and Inspect \cite{tanner:inspect},
+exploit a database of known protein sequences.  For each observed
+spectrum, these methods search the database for the peptide whose
+theoretical spectrum best matches the observed spectrum.  The
+resulting peptide-spectrum matches (PSMs) can be ranked using a
+pre-defined score function, or by using machine learning methods such
+as linear discriminant analysis \cite{keller:empirical}, support
+vector machines \cite{anderson:new, kall:semi-supervised} or decision
+trees \cite{elias:intensity}.
 
 \begin{figure*}
 \centering
@@ -190,8 +191,9 @@ Crux normalize the peak intensities to sum to 100.  Third, Crux
 extracts the top 200 highest intensity peaks.  Crux compares the
 resulting observed spectrum with the b and y fragment ions from the
 candidate peptide to compute $Sp$ as follows:
-
-\centerline{FIXME: Insert equation here}
+\[
+\mbox{FIXME: Insert equation here}
+\]
 
 $Xcorr$ scoring also requires some pre-processing of the observed
 spectrum.  As before, First, Crux takes the square root of each peak's
@@ -203,8 +205,9 @@ peak intensity 50.0 for b and y ions, 25.0 for the +/- 1 m/z flanking
 peaks of each b and y ion, and 10.0 for ions resulting from a neutral
 loss of ammonia from b or y ions or neutral loss of water
 from b ions.  Crux then computes $Xcorr$ as follows:
-
-\centerline{FIXME: Insert equation here}
+\[
+\mbox{FIXME: Insert equation here}
+\]
 
 \subsection{Null peptide generation}
 
