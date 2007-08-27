@@ -2,6 +2,9 @@
 \copyrightyear{2007}
 \pubyear{2007}
 
+% The default should be citep.
+\renewcommand{\cite}{\citep}
+
 \begin{document}
 \firstpage{1}
 
@@ -351,7 +354,7 @@ not need to scan the entire database to retrieve a small collection of
 candidate peptides.  The difference is most pronounced when the mass
 tolerance window is small.  For example, with a mass tolerance window
 of 0.1, SEQUEST requires 3.5~hrs clock time, whereas Crux requires
-0.1~hrs.  This represents an 35-fold improvement.  However, even when
+0.1~hrs.  This represents a 35-fold improvement.  However, even when
 we use a mass tolerance of 3, Crux yields a six-fold speed improvement
 (0.6~hours versus 3.6~hours).
 
