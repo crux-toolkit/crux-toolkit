@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.48 $
+ * $Revision: 1.49 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1268,15 +1268,15 @@ BOOLEAN_T check_index_db_boundary(
        (int)check_value != (int)get_peptide_constraint_peptide_type(constraint)){
      
       if((int)check_value == TRYPTIC){
-         carp(CARP_ERROR, "peptide_type does not match the database supported type: TRYPRIC");
+         carp(CARP_ERROR, "peptide_type does not match the database supported type: TRYPTIC");
       }
       else if((int)check_value == NOT_TRYPTIC){
-        carp(CARP_ERROR, "peptide_type does not match the database supported type: NON_TRYPRIC");
+        carp(CARP_ERROR, "peptide_type does not match the database supported type: NON_TRYPTIC");
       }
       else if((int)check_value == PARTIALLY_TRYPTIC ||
               (int)check_value == C_TRYPTIC ||
               (int)check_value == N_TRYPTIC){
-        carp(CARP_ERROR, "peptide_type does not match the database supported type: PARTIALLY_TRYPRIC");
+        carp(CARP_ERROR, "peptide_type does not match the database supported type: PARTIALLY_TRYPTIC");
       }
       return FALSE;
     }

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.56 $
+ * REVISION: $Revision: 1.57 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -732,7 +732,10 @@ void populate_mz_peak_array(
 		float peak_mz = get_peak_location(peak);
 		int mz_idx = (int) (peak_mz * MZ_TO_PEAK_ARRAY_RESOLUTION);
 		if (mz_peak_array[mz_idx] != NULL){
-			carp(CARP_ERROR, "Peak collision at mz %.3f = %i", peak_mz, mz_idx);
+			carp(CARP_INFO, "Peak collision at mz %.3f = %i", peak_mz, mz_idx);
+      if (get_peak_intensity(mz_peak_array[mz_idx]) < get_peak_intensity(peak)){
+        mz_peak_array[mz_idx] = peak;
+      }
 		} else {
 			mz_peak_array[mz_idx] = peak; 
 		}
@@ -761,7 +764,7 @@ PEAK_T* get_nearest_peak(
 	int min_mz_idx = (int)((mz - max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
 	min_mz_idx = min_mz_idx < 0 ? 0 : min_mz_idx;
 	int max_mz_idx = (int)((mz + max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
-	int absolute_max_mz_idx = MAX_PEAK_MZ * MZ_TO_PEAK_ARRAY_RESOLUTION;
+	int absolute_max_mz_idx = MAX_PEAK_MZ * MZ_TO_PEAK_ARRAY_RESOLUTION - 1;
 	max_mz_idx = max_mz_idx > absolute_max_mz_idx 
 									? absolute_max_mz_idx : max_mz_idx;
 	PEAK_T* peak = NULL;
@@ -778,6 +781,7 @@ PEAK_T* get_nearest_peak(
 		}
 		if (distance < min_distance){
 			nearest_peak = peak;
+      min_distance = distance;
 		}
 	}
 	return nearest_peak;

@@ -277,9 +277,9 @@ void parse_parameter_file(
 	idx++;
       }
       if(idx == 0 || idx >= (int)(strlen(line)-1)){
-	printf("lines in a parameter file must have the form:\n");
-	printf("name=value\n");
-	printf("in file %s, the line:\n%s\ndoes not have this format\n",
+	carp(CARP_ERROR, "Lines in a parameter file must have the form:\n");
+	carp(CARP_ERROR, "\n\tname=value\n\n");
+	carp(CARP_ERROR, "In file %s, the line:\n%s\ndoes not have this format\n",
 	       parameter_filename, line);
 	exit(1);
       }
