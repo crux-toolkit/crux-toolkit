@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.39 $
+ * $Revision: 1.40 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -144,6 +144,7 @@ void free_database(
     }
     else{//not memory mapped
       //close file handler
+      carp(CARP_INFO, "Closing database filehandle");
       fclose(database->file);
     }
   }

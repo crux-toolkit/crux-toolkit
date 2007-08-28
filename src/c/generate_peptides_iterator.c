@@ -201,7 +201,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_w_fileinput(
     }
     
     //create index and set to generate_peptides_iterator
-    index = new_search_index(in_file, constraint, is_unique);
+    index = new_search_index(in_file, is_unique);
+    set_index_constraint(index, constraint);
     
     if(index == NULL){
       carp(CARP_FATAL, "failed to create peptides from index");
@@ -456,7 +457,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
     }
     
     //create index and set to generate_peptides_iterator
-    gen_peptide_iterator->index = new_search_index(in_file, constraint, is_unique);
+    gen_peptide_iterator->index = new_search_index(in_file, is_unique);
+    set_index_constraint(gen_peptide_iterator->index, constraint);
     
     //check if index was created
     if(gen_peptide_iterator->index == NULL){

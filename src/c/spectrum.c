@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.57 $
+ * REVISION: $Revision: 1.58 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -240,7 +240,6 @@ void print_spectrum(
   int num_i_index = 0;
   int num_peak_index = 0;
 
-  fprintf(file, "Filename: %s\n", spectrum->filename);
   fprintf(file, "S\t%06d\t%06d\t%.2f\n", 
          spectrum->first_scan,
          spectrum->last_scan,
