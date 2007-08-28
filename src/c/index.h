@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -46,7 +46,6 @@ INDEX_T* new_index(
  */
 INDEX_T* new_search_index(
   char* fasta_filename,  ///< The fasta file
-  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
   BOOLEAN_T is_unique ///< only unique peptides? -in
   );
 

@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.9  2007/08/07 22:59:14  cpark
+#smoke test added for match_analysis/search
+#
 #Revision 1.8  2007/08/07 18:05:13  cpark
 #fixed some more bugs
 #
@@ -87,7 +90,8 @@ my $caught_interrupt = 0;
 $SIG{'INT'} = 'sigint_handler';
 
 # Read each test from the file and execute it.
-my ($line, @fields, $test_name, $standard_filename, $cmd, $result, $is_index);
+my ($line, @fields, $test_name, $standard_filename, $cmd, $result);
+my $is_index = "";
 my $num_tests = 0;
 my $num_successful_tests = 0;
 while ($line = <ARGV>) {

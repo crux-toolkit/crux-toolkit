@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.49 $
+ * $Revision: 1.50 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -257,6 +257,49 @@ char* get_binary_fasta_name_in_crux_dir(
  * Assumes that the fasta file is always in the directory where the crux_index_file directory is located
  * \returns A new index object.
  */
+INDEX_T* set_new_index_from_disk(
+  INDEX_T* index,  ///< Index to set -out                       
+  char* fasta_filename,  ///< The fasta file -in
+  float mass_range,  ///< the range of mass that each index file should be partitioned into -in
+  BOOLEAN_T is_unique ///< only unique peptides? -in
+  )
+{
+  // TODO most of the parameters to this routine should be determined
+  // from the index on disk, but are kept around for now
+  char** filename_and_path = NULL;
+  char* working_dir = NULL;
+  filename_and_path = parse_filename_path(fasta_filename);
+  working_dir = generate_directory_name(fasta_filename); //filename_and_path[0]);
+  DIR* check_dir = NULL;
+  
+  if((check_dir = opendir(working_dir)) != NULL){
+    set_index_on_disk(index, TRUE);
+  }
+  else{
+    set_index_on_disk(index, FALSE);
+  }
+
+  //set each field
+  set_index_directory(index, working_dir);
+  set_index_mass_range(index, mass_range);  
+  set_index_is_unique(index, is_unique);
+
+  //free filename and path string array
+  free(check_dir);
+  free(working_dir);
+  free(filename_and_path[0]);
+  free(filename_and_path[1]);
+  free(filename_and_path);
+  
+  return index;
+
+}
+
+
+/**
+ * Assumes that the fasta file is always in the directory where the crux_index_file directory is located
+ * \returns A new index object.
+ */
 INDEX_T* set_new_index(
   INDEX_T* index,  ///< Index to set -out                       
   char* fasta_filename,  ///< The fasta file -in
@@ -332,7 +375,6 @@ INDEX_T* new_index(
  */
 INDEX_T* new_search_index(
   char* fasta_filename,  ///< The fasta file
-  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
   BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
@@ -358,7 +400,7 @@ INDEX_T* new_search_index(
   search_index = allocate_index();
   
   //sets mass_range, max_size to an arbitrary 0
-  search_index = set_new_index(search_index, fasta_filename, constraint,  0, is_unique);
+  search_index = set_new_index_from_disk(search_index, fasta_filename, 0, is_unique);
   
   //check if crux_index files have been made
   if(!get_index_on_disk(search_index)){
