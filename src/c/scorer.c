@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.41 $
+ * REVISION: $Revision: 1.42 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1383,19 +1383,6 @@ float score_spectrum_v_spectrum(
 );
 
 /**
- * Frees the single_ion_constraints array
- */
-void free_single_ion_constraints(
-    ION_CONSTRAINT_T** ion_constraints
-    ){
-  int constraint_idx;
-  for (constraint_idx=0; constraint_idx<GMTK_NUM_ION_SERIES; constraint_idx++){
-    free_ion_constraint(ion_constraints[constraint_idx]);
-  }
-  free(ion_constraints);
-}
-
-/**
  * Creates the an array of ion constraints for GMTK models.
  * TODO do we need one for paired and single? Do we want an iterator?
  */
@@ -1440,6 +1427,19 @@ ION_CONSTRAINT_T** single_ion_constraints(
     }
   }
   return ion_constraints;
+}
+
+/**
+ * Frees the single_ion_constraints array
+ */
+void free_single_ion_constraints(
+    ION_CONSTRAINT_T** ion_constraints
+    ){
+  int constraint_idx;
+  for (constraint_idx=0; constraint_idx<GMTK_NUM_ION_SERIES; constraint_idx++){
+    free_ion_constraint(ion_constraints[constraint_idx]);
+  }
+  free(ion_constraints);
 }
 
 /**

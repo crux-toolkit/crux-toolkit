@@ -76,7 +76,7 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr",
+    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr | sp",
     (void *) &score_type, 
     STRING_ARG);
 
@@ -185,6 +185,9 @@ int main(int argc, char** argv){
     //main score type
     if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
       main_score = LOGP_EXP_SP;
+    }
+    else if(strcmp(get_string_parameter_pointer("score-type"), "sp")== 0){
+      main_score = SP;
     }
     else if(strcmp(get_string_parameter_pointer("score-type"), "logp_bonf_exp_sp")== 0){
       main_score = LOGP_BONF_EXP_SP;

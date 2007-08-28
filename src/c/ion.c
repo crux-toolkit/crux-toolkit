@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -357,7 +357,7 @@ void print_ion_gmtk_single(
  * 1. m/z ratio int
  * 2. index of the amide bond cleavage from N-term
  * 3. index of the amide bond cleavage from C-term
- * 4. Left amino acid ID
+ * 4. Left amino acid ID 
  * 5. Right amino acid ID
  * 6. Is this ion possible?
  * 7. Is this ion detectable?
@@ -378,11 +378,19 @@ void print_ion_gmtk_single_binary(
 	float_array[1] = 0.0; 																	// 1
 	float_array[2] = 0.0; 																	// 2
 
-	int is_detected = 1; 																		
+	int is_detected = 0; 																		
   if (ion->peak != NULL){
     float_array[1] = get_peak_intensity(ion->peak); 			// 1 
     float_array[2] = get_peak_intensity_rank(ion->peak); 	// 2 
     is_detected = 1; 																			
+
+#ifdef LOG_INTENSITY
+    // START
+    // replace the rank intensity with the negative log of the 
+    // TIC normalized intensity. A hack, I know
+    float_array[2] = -log(float_array[1]);
+#endif
+
   }
 
 	int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
@@ -400,7 +408,7 @@ void print_ion_gmtk_single_binary(
        is_detected
 
      ){
-    is_detectable = 1;
+    is_detectable = 1;                                    
   }
 
 
@@ -438,6 +446,7 @@ void print_ion_gmtk_single_binary(
 	
   int big_end_sentence_idx = htonl(sentence_idx);
   int big_end_frame_idx = htonl(frame_idx);
+
   fwrite(&big_end_sentence_idx, sizeof(int), 1, file);
   fwrite(&big_end_frame_idx, sizeof(int), 1, file);
 	fwrite(float_array, sizeof(float), 3, file);
@@ -449,8 +458,8 @@ void print_ion_gmtk_single_binary(
  * prints the location and fields of ION_T object to the file, in the
  * following format for GMTK paired-ion models:
  *
- * m/z \\t mass \\t charge \\t ion-series \\t  ...
- *  peptide-bond-index \\t modifications \n
+ * m/z \t mass \t charge \t ion-series \t  ...
+ *  peptide-bond-index \t modifications \n
  *
  * Where:
  *
