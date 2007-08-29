@@ -1,0 +1,16 @@
+#!/bin/bash
+rm -f crux_match_*
+# export MS2="test.ms2"
+export MS2="spectra_random_1000.ms2"
+export FASTA="../index/E_coli_contam.fasta"
+export OUTPUT="test.anal"
+export ON_CLUSTER=""
+export MASS_RANGE_FILE="mass.ranges"
+
+for line in `cat $MASS_RANGE_FILE`; { 
+  echo $line
+}
+# $ON_CLUSTER ../../../bin/match_search $MS2 $FASTA --parameter-file crux_parameter --min-mass $MIN_MASS --max-mass $MAX_MASS
+# ../../../bin/match_analysis $FASTA --parameter-file crux_parameter --algorithm percolator --match-output-folder `pwd` > $OUTPUT
+
+
