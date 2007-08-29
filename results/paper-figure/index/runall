@@ -7,8 +7,9 @@ export PATH=../../../bin/:$PATH
 
 ms2='spectra_random_1000.ms2'
 # ms2='test.ms2'
+# ms2="1000.ms2"
 # fasta='E_coli_contam.fasta'
-fasta='nr-NCBI-2006-02-16.fasta'
+fasta='/home/aklammer/nr-NCBI-2006-02-16.fasta'
 
 if [[ ! -f "crux_parameter" ]]
 then

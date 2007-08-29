@@ -2,15 +2,14 @@
 rm -f crux_match_*
 # export MS2="test.ms2"
 export MS2="spectra_random_1000.ms2"
-export FASTA="../index/E_coli_contam.fasta"
+export FASTA=`pwd`"/../index/E_coli_contam.fasta"
 export OUTPUT="test.anal"
-export ON_CLUSTER=""
 export MASS_RANGE_FILE="mass.ranges"
+export COMMAND_FILE="test.cmds"
 
-for line in `cat $MASS_RANGE_FILE`; { 
-  echo $line
-}
-# $ON_CLUSTER ../../../bin/match_search $MS2 $FASTA --parameter-file crux_parameter --min-mass $MIN_MASS --max-mass $MAX_MASS
+python create-search-commands.py $MASS_RANGE_FILE $MS2 $FASTA --parameter-file crux_parameter > $COMMAND_FILE
+chmod +x $COMMAND_FILE
+./$COMMAND_FILE
 # ../../../bin/match_analysis $FASTA --parameter-file crux_parameter --algorithm percolator --match-output-folder `pwd` > $OUTPUT
 
 
