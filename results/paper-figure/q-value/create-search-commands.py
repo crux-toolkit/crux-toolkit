@@ -12,7 +12,7 @@ fh = open(mass_range_file)
 cwd = os.getcwd()
 for line in fh:
   start, end = line.rstrip("\n").split()
-  cmdFile = "match_analysis_%s_%s" % (start, end)
+  cmdFile = os.getcwd() + os.sep + "match_analysis_%s_%s" % (start, end)
   outFh = open(cmdFile, "w")
   cmd = "%s --spectrum-min-mass %.3f --spectrum-max-mass %.3f %s \n" \
      % (MATCH_SEARCH_PATH, float(start), float(end), " ".join(match_analysis_args))

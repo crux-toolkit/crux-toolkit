@@ -1,15 +1,22 @@
 #!/bin/bash
 rm -f crux_match_*
-# export MS2="test.ms2"
-export MS2="spectra_random_1000.ms2"
-export FASTA=`pwd`"/../index/E_coli_contam.fasta"
-export OUTPUT="test.anal"
-export MASS_RANGE_FILE="mass.ranges"
-export COMMAND_FILE="test.cmds"
 
-python create-search-commands.py $MASS_RANGE_FILE $MS2 $FASTA --parameter-file crux_parameter > $COMMAND_FILE
+# export MS2="test.ms2"
+export MS2=`pwd`/"spectra_random_1000.ms2"
+export FASTA=`pwd`/yeast.fasta
+export RAND_FASTA=`pwd`/yeast-shuffled.fasta
+export OUTPUT=`pwd`/"test.anal"
+export MASS_RANGE_FILE=`pwd`/"mass.ranges"
+export COMMAND_FILE="test.cmds"
+export PARAM_FILE=`pwd`/crux.params
+
+# ~/crux/bin/create_index --max-mass 7200.0 --redundancy unique $FASTA 
+# ~/crux/bin/create_index --max-mass 7200.0 --redundancy unique $RAND_FASTA
+
+python create-search-commands.py $MASS_RANGE_FILE $MS2 $FASTA --parameter-file $PARAM_FILE > $COMMAND_FILE
+python create-search-commands.py $MASS_RANGE_FILE $MS2 $RAND_FASTA --parameter-file $PARAM_FILE > $COMMAND_FILE
 chmod +x $COMMAND_FILE
-./$COMMAND_FILE
+# ./$COMMAND_FILE
 # ../../../bin/match_analysis $FASTA --parameter-file crux_parameter --algorithm percolator --match-output-folder `pwd` > $OUTPUT
 
 
