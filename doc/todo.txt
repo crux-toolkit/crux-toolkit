@@ -39,3 +39,6 @@ V- Update parameter file (1) read amino acid mass modification (2) use hash tabl
 - take out filename at top of get_ms2_spectrum output
 - rename to crux-*
 - C is now +57.00 make sure documented somewhere
+- search_spectra, search_spectrum, and match_search should all be able to not
+  use an index!
+- why is ion_constraint in ion_series. shouldn't it be in ion.c?

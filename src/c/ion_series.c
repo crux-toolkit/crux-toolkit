@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.34 $
+ * REVISION: $Revision: 1.35 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -177,7 +177,6 @@ void update_ion_series(
   )
 {
   int ion_type_idx = 0;
-  int ion_idx = 0;
 
   /** Initialize the ion_series object for the new peptide sequence **/
   
@@ -191,7 +190,8 @@ void update_ion_series(
   }
   
   //initialize all num_specific_ion count back to 0
-  for(; ion_type_idx < MAX_NUM_ION_TYPE; ++ion_type_idx){
+  int ion_idx;
+  for(ion_idx=0; ion_type_idx < MAX_NUM_ION_TYPE; ++ion_type_idx){
     ion_series->num_specific_ions[ion_type_idx] = 0;
   }
   
@@ -252,10 +252,10 @@ void print_ion_series(
   //print header
   fprintf(file, "m/z\tmass\tcharge\tion-series\tpeptide-bond-index\tNH3\tH2O\tISOTOPE\tFLANK\n");
   
-  int ion_idx = 0;
   
   //print each ion in the ion series
-  for(; ion_idx < ion_series->num_ions; ++ion_idx){
+  int ion_idx;
+  for(ion_idx=0; ion_idx < ion_series->num_ions; ++ion_idx){
     print_ion(ion_series->ions[ion_idx], file);
   }
 }
@@ -331,13 +331,13 @@ void scan_for_aa_for_neutral_loss(
 {
   int peptide_length = ion_series->peptide_length;
   char* sequence = ion_series->peptide;
-  int cleavage_idx = 0;
   int h2o_aa = 0;
   int nh3_aa = 0;
   LOSS_LIMIT_T* loss_limit_count = NULL; //debug
 
   //search for the first instance of the amino acids
-  for(; cleavage_idx < peptide_length; ++cleavage_idx){
+  int cleavage_idx;
+  for(cleavage_idx=0; cleavage_idx < peptide_length; ++cleavage_idx){
     //is the AA  (S|T|E|D) ?
     if(sequence[cleavage_idx] == 'S' ||
        sequence[cleavage_idx] == 'T' ||
@@ -771,7 +771,8 @@ BOOLEAN_T generate_ions(
       add_ion_to_ion_series(ion_series, new_ion);
      
       //can this ion generate a mod_type modification for the next count of modification?, 
-      if(!(can_ion_lose_modification(ion_series, working_ion, mod_type, (type_idx += type_increment)))){      
+      if(!(can_ion_lose_modification(ion_series, working_ion, mod_type, 
+              (type_idx += type_increment)))){
         break;
       }
     }
@@ -1139,21 +1140,21 @@ ION_CONSTRAINT_T* new_ion_constraint(
  *\returns a new heap allocated ion_constraint
  */
 ION_CONSTRAINT_T* new_ion_constraint_gmtk(
-  int max_charge ///< the maximum charge of the ions
+  int charge 
   )
 {
   ION_CONSTRAINT_T* constraint = NULL;
 
-	int charge = 1;
-  if(max_charge >= 1){
-		charge = max_charge - 1;
+  int max_charge = 1;
+  if(charge > 1){
+		max_charge = charge;
   }  
-  constraint = new_ion_constraint(MONO, charge, ALL_ION, FALSE);
+  constraint = new_ion_constraint(MONO, max_charge, ALL_ION, FALSE);
 
   //set all modifications count for gmtk
   // FIX NEUTRAL losses
   // constraint->use_neutral_losses = TRUE;
-  constraint->min_charge = charge;
+  constraint->min_charge = 1;
   // constraint->modifications[NH3] = -1;
   // constraint->modifications[H2O] = -1;
   constraint->modifications[ISOTOPE] = 0;
@@ -1328,8 +1329,8 @@ BOOLEAN_T ion_constraint_is_satisfied(
 
   // check modifications
   counts = get_ion_modification_counts(ion);
-  int mod_idx = 0;
-  for(; mod_idx < MAX_MODIFICATIONS; ++mod_idx){
+  int mod_idx;
+  for(mod_idx=0; mod_idx < MAX_MODIFICATIONS; ++mod_idx){
     if(ion_constraint->modifications[mod_idx] >= 0){
       if(counts[mod_idx] > ion_constraint->modifications[mod_idx]){
         return FALSE;
@@ -1351,6 +1352,7 @@ BOOLEAN_T ion_constraint_is_satisfied(
 
   return TRUE;
 }
+
 
 /**
  * sets the modification count
@@ -1379,11 +1381,14 @@ void set_ion_constraint_modification(
 /**
  * sets the exact modification boolean 
  */
-void set_ion_constraint_exact_modifications(
+void set_ion_constraint_exactness(
   ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
-  BOOLEAN_T exact_modifications ///< whether to use exact mods or not -in
+  BOOLEAN_T exactness ///< whether to use exact mods or not -in
   ){
-  ion_constraint->exact_modifications = exact_modifications;
+  ion_constraint->exact_modifications = exactness;
+  if (exactness == TRUE){
+    ion_constraint->min_charge = ion_constraint->max_charge;
+  }
 }
  
 /**

@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.2 $
+ * REVISION: $Revision: 1.3 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -160,8 +160,8 @@ int main(int argc, char** argv){
     carp(CARP_INFO, "Creating and outputting ions");
 
     // output GMTK peptide ion files
-    if (output_psm_files(output_directory, spectrum, peptides, num_lines,
-          starting_sentence_idx) 
+    if (output_psm_files(output_directory, spectrum, peptides, num_lines, 
+          charge, starting_sentence_idx) 
         == FALSE){
        carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
           ms2_file, scan_num, peptide_file_name);

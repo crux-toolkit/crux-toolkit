@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -231,7 +231,7 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest(
  *\returns a new heap allocated ion_constraint
  */
 ION_CONSTRAINT_T* new_ion_constraint_gmtk(
-  int max_charge ///< the maximum charge of the ions
+  int charge ///< the charge of the peptide for which to predict ions
   );
 
 
@@ -278,7 +278,7 @@ BOOLEAN_T ion_constraint_is_satisfied(
    );
 
 /**
- * sets the modification count
+ * Sets the modification count
  * can only add isotopes
  */
 void set_ion_constraint_modification(
@@ -288,11 +288,15 @@ void set_ion_constraint_modification(
   );
 
 /**
- * sets the exact modification boolean 
+ * Sets the exact modification boolean to exactness criteria
+ * and if exactness is true sets min_charge = max_charge.
+ * In other words, the constraint is now exact, in that it refers to a
+ * particular ion series, charge states, and modification state, as opposed
+ * to e.g. b-ions of charge state +1 or +2, or with or without NH3 loss
  */
-void set_ion_constraint_exact_modifications(
+void set_ion_constraint_exactness(
   ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
-  BOOLEAN_T exact_modifications ///< whether to use exact mods or not -in
+  BOOLEAN_T exactness ///< whether to be exact or not -in
   );
 
 /**
