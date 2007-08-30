@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.42 $
+ * REVISION: $Revision: 1.43 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1412,7 +1412,7 @@ ION_CONSTRAINT_T** single_ion_constraints(
       for (neutral_idx=0; neutral_idx < GMTK_NUM_NEUTRAL_LOSS+1; neutral_idx++){
         ION_CONSTRAINT_T* ion_constraint = new_ion_constraint(
 		      mass_type, charges[charge_idx], ion_types[ion_type_idx], FALSE);
-        set_ion_constraint_exact_modifications(ion_constraint, TRUE);
+        set_ion_constraint_exactness(ion_constraint, TRUE);
         if (neutral_idx == 0){
           ;
         }
@@ -1443,15 +1443,16 @@ void free_single_ion_constraints(
 }
 
 /**
- * Create ion files (for GMTK) in the output directory
+ * Create ion files (for GMTK) in the output directory. 
  * \returns TRUE for success 
  */
 BOOLEAN_T output_psm_files(
   char* output_directory, ///< name of directory to place the ion files -in
   SPECTRUM_T* spectrum,     ///< input spectrum -in
-  char** peptides, ///< peptide sequences 
-  int num_peptides, ///< number of peptide sequences
-  int starting_sentence_idx ///< used to append to existing pfile
+  char** peptides, ///< peptide sequences -in 
+  int num_peptides, ///< number of peptide sequences -in
+  int charge, ///< the peptide charge -in
+  int starting_sentence_idx ///< used to append to existing pfile -in
 ){
     
   char* peptide_sequence = NULL;
@@ -1483,7 +1484,6 @@ BOOLEAN_T output_psm_files(
   // iterate through each peptide
   carp(CARP_INFO, "Iterating through each peptide.");
   ION_SERIES_T* ion_series;
-  int charge = 2; // TODO make more flexible
   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(charge); 
   ION_CONSTRAINT_T** ion_constraints = single_ion_constraints();
 
