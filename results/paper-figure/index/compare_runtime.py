@@ -16,29 +16,29 @@ from optparse import OptionParser
 #-------------------
 
 def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectrum, score_type="xcorr"):
-    """compares runtime for each scoring method """
+  """compares runtime for each scoring method """
 
-    print "generating figures"
-    
-    xlabel("mass window (Da)", size=15)
-    ylabel("Runtime for " + `number_of_spectrum` + " spectra (s)", size=15)
-    
-    fh = open("crux.xy", "w")
-    for idx in range(len(mass_windows)):
-      fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_array[idx]))
-    fh.close()
+  print "generating figures"
+  
+  xlabel("mass window (Da)", size=15)
+  ylabel("Runtime for " + `number_of_spectrum` + " spectra (s)", size=15)
+  
+  fh = open("crux.xy", "w")
+  for idx in range(len(mass_windows)):
+    fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_array[idx]))
+  fh.close()
 
-    fh = open("sequest.xy", "w")
-    for idx in range(len(mass_windows)):
-      fh.write("%.8f\t%.8f\n" % (mass_windows[idx], sequest_array[idx]))
-    fh.close()
+  fh = open("sequest.xy", "w")
+  for idx in range(len(mass_windows)):
+    fh.write("%.8f\t%.8f\n" % (mass_windows[idx], sequest_array[idx]))
+  fh.close()
 
-    plot(mass_windows, crux_array, label="Crux")
-    plot(mass_windows, sequest_array, label="SEQUEST")
-    legend()
-    
-    savefig("indexing" + ".eps")
-    savefig("indexing" + ".png")
+  plot(mass_windows, crux_array, label="Crux")
+  plot(mass_windows, sequest_array, label="SEQUEST")
+  legend()
+  
+  savefig("indexing" + ".eps")
+  savefig("indexing" + ".png")
 
 
 #_________________________________________
@@ -76,58 +76,56 @@ charge_list = [1,2,3]
 #first run Sequest with varying mass windows
 for window in mass_windows:
 
-    # 1, run Sequest
-    seq_time = 0.0
-    for charge in charge_list:
-        (exit_code, result) = \
-                    commands.getstatusoutput("time -p ./sequest27 " + \
-                                             "-Psequest.params" + "_" + window + \
-                                             " " + "*." + str(charge) + ".dta"
-                                             )
-        #debug
-        print result
-        #print exit_code
-    
-        if exit_code == "1":
-            print "%s %s" % ("failed to run Sequest on mass window:", window)
-            sys.exit(1)
-        else:
-            #now parse the runtime from the result output
-            result = result.split('\n')
-            for line in result:
-                #get user time
-                #FIXME is it user or real?
-                if line.startswith('real '):
-                    fields = line. rstrip('\n').split()
-                    seq_time += float(fields[1])
-    sequest_results.append(seq_time)
-
-                
-    # 2, now run Crux
-    (exit_code, result) = \
-                commands.getstatusoutput("time -p search_spectra " + \
-                                         "--mass-window " + window + " "  \
-                                         "--parameter-file " + "crux_parameter "
-                                         + `ms2_file` + " " \
-                                         + `fasta_file`
-                                         )
+  # 1, run Sequest
+  seq_time = 0.0
+  for charge in charge_list:
+    command = "time -p ./sequest27 -Psequest.params_%s *.%i.dta" \
+        % (window, charge)
+    print >>sys.stderr, "\nRunning %s\n" % command
+    (exit_code, result) = commands.getstatusoutput(command)
     #debug
     print result
     #print exit_code
-    
+  
     if exit_code == "1":
-        print "%s %s" % ("failed to run Crux on mass window:", window)
-        sys.exit(1)
+      print "%s %s" % ("failed to run Sequest on mass window:", window)
+      sys.exit(1)
     else:
-        #now parse the runtime from the result output
-        result = result.split('\n')
-        for line in result:
-            #get user time
-            if line.startswith('user '):
-                fields = line.rstrip('\n').split()
-                crux_results.append(float(fields[1]))
-            elif line.startswith('# SPECTRUM SCAN'):
-                number_of_spectrum += 1
+      #now parse the runtime from the result output
+      result = result.split('\n')
+      for line in result:
+        #get user time
+        #FIXME is it user or real?
+        if line.startswith('real '):
+          fields = line. rstrip('\n').split()
+          seq_time += float(fields[1])
+  sequest_results.append(seq_time)
+
+        
+  # 2, now run Crux
+  command = "time -p ./search_spectra --mass-window %s --parameter-file \
+      crux_parameter %s %s" % (window, ms2_file, fasta_file)
+  print >>sys.stderr, "\nRunning %s\n" % command
+
+  (exit_code, result) = \
+        commands.getstatusoutput(command)
+  #debug
+  print result
+  #print exit_code
+  
+  if exit_code == "1":
+    print "%s %s" % ("failed to run Crux on mass window:", window)
+    sys.exit(1)
+  else:
+    #now parse the runtime from the result output
+    result = result.split('\n')
+    for line in result:
+      #get user time
+      if line.startswith('user '):
+        fields = line.rstrip('\n').split()
+        crux_results.append(float(fields[1]))
+      elif line.startswith('# SPECTRUM SCAN'):
+        number_of_spectrum += 1
 
 #Debug
 #print crux_results, sequest_results, mass_windows
