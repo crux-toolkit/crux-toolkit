@@ -6,7 +6,7 @@ verbosity=100
 min-mass=200.0
 
 #man mass for peptides
-max-mass=2400.0
+max-mass=7200.0
 
 #min length for peptides
 min-length=6
@@ -15,7 +15,7 @@ min-length=6
 max-length=50
 
 #cleavage type allowed (tryptic|partial|all)
-cleavages=tryptic
+cleavages=all
 
 #mass type to use (average|mono)
 isotopic-mass=average
