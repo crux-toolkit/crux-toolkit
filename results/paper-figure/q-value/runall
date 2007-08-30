@@ -9,14 +9,14 @@ export OUTPUT=`pwd`/"test.anal"
 export MASS_RANGE_FILE=`pwd`/"mass.ranges"
 export COMMAND_FILE="test.cmds"
 export PARAM_FILE=`pwd`/crux.params
-
-# ~/crux/bin/create_index --max-mass 7200.0 --redundancy unique $FASTA 
-# ~/crux/bin/create_index --max-mass 7200.0 --redundancy unique $RAND_FASTA
-
+#
+#./create_index `basename $FASTA` --parameter-file $PARAM_FILE --redundancy unique 
+#./create_index `basename $RAND_FASTA` --parameter-file $PARAM_FILE --redundancy unique 
+#
 python create-search-commands.py $MASS_RANGE_FILE $MS2 $FASTA --parameter-file $PARAM_FILE > $COMMAND_FILE
 python create-search-commands.py $MASS_RANGE_FILE $MS2 $RAND_FASTA --parameter-file $PARAM_FILE > $COMMAND_FILE
 chmod +x $COMMAND_FILE
-# ./$COMMAND_FILE
+./$COMMAND_FILE
 # ../../../bin/match_analysis $FASTA --parameter-file crux_parameter --algorithm percolator --match-output-folder `pwd` > $OUTPUT
 
 
