@@ -86,7 +86,7 @@ void initialize_parameters(void){
   set_boolean_parameter("missed-cleavages", FALSE);
   
   //searching peptides
-  set_double_parameter("mass-offset", 0);
+  set_double_parameter("mass-offset", 0.0);
 
   //score_peptide_spectrum parameters
   set_double_parameter("beta", 0.075);
