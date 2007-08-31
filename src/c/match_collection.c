@@ -2408,7 +2408,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   BOOLEAN_T use_index_boolean = FALSE;  
   int total_sets = 0;
 
-  //do we have these files in the 
+  //do we have these files in the directory
   BOOLEAN_T boolean_result = FALSE;
   BOOLEAN_T decoy_1 = FALSE;
   BOOLEAN_T decoy_2 = FALSE;
