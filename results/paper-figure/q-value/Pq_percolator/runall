@@ -1,24 +1,20 @@
 #!/bin/bash
-#rm -f crux_match_*
-#rm -f match_search_*
+#------------
+. ../SOURCEME
+#------------
 
-# export PREFIX=`pwd`/test
-export PREFIX=`pwd`/spectra_random_1000
-export MS2=${PREFIX}.ms2
+#------------
 export OUTPUT=${PREFIX}.anal
 export COMMAND_FILE=${PREFIX}.cmds
-export FASTA=`pwd`/yeast.fasta
 export MASS_RANGE_FILE=`pwd`/mass.ranges
-export PARAM_FILE=`pwd`/../crux.params
-#
-# ./create_index `basename $FASTA` --parameter-file $PARAM_FILE --redundancy unique 
-# ./create_index `basename $RAND_FASTA` --parameter-file $PARAM_FILE --redundancy unique 
+
+#------------
+rm -f crux_match_*
+rm -f match_search_*
+ln -fs $FASTA; ln -fs $FASTA_INDEX; ln -fs $MS2;
+
 
 python generate-mass-range.py > $MASS_RANGE_FILE
-
 python create-search-commands.py $MASS_RANGE_FILE $MS2 $FASTA --parameter-file $PARAM_FILE > $COMMAND_FILE
 chmod +x $COMMAND_FILE
 $COMMAND_FILE
-# ./match_analysis $FASTA --match-output-folder `pwd` --parameter-file $PARAM_FILE --algorithm percolator  > $OUTPUT
-
-
