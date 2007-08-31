@@ -92,7 +92,6 @@ int main(int argc, char** argv){
   if (parse_arguments(argc, argv, 0)) {
     ALGORITHM_TYPE_T algorithm = PERCOLATOR;
     MATCH_T* match = NULL;
-    unsigned int name_idx = 0;
         
     //set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
@@ -248,18 +247,24 @@ int main(int argc, char** argv){
     // Function that should be called after processing finished
     pcCleanUp();
     
+    // TODO put free back in. took out because claimed it was double free
     //free names
-    for(; name_idx < number_features; ++name_idx){
+    /*unsigned int name_idx;
+    for(name_idx=0; name_idx < number_features; ++name_idx){
       free(feature_names[name_idx]);
     }
     free(feature_names);
+    */
 
     free(results_q);
     free(results_score);
     free_match_collection_iterator(match_collection_iterator);
     free_match_iterator(match_iterator);
     free_match_collection(target_match_collection);
-    free_parameters();
+
+    // TODO put free back in. took out because glibc claimed it was corrupted
+    // double linked list
+    // free_parameters();
   }
   else{
     char* usage = parse_arguments_get_usage("match_analysis");

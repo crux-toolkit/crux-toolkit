@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.35 $
+ * REVISION: $Revision: 1.36 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -433,12 +433,13 @@ double* get_match_percolator_features(
   }
   
   //now check that no value is with in infinity
-  int check_idx = 0;
-  for(; check_idx < 20; ++check_idx){
-    if(feature_array[check_idx] <= -BILLION ||
-       feature_array[check_idx] >= BILLION){
-      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f",
-				check_idx, feature_array[check_idx]);
+  int check_idx;
+  for(check_idx=0; check_idx < 20; ++check_idx){
+    float feature = feature_array[check_idx];
+    if(feature <= -BILLION || feature  >= BILLION){
+      feature_array[check_idx] = feature <= - BILLION ? -BILLION : BILLION;
+      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f. Set to new value %.2f",
+				check_idx, feature, feature_array[check_idx]);
     }
   }
     
