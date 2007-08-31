@@ -17,8 +17,8 @@ for line in fh:
   tag = "%s_%s_%s" % (start, end, base)
   cmdFile = os.getcwd() + os.sep + "match_search_%s" % tag
   outFh = open(cmdFile, "w")
-  cmd = "cd %s; %s --output-mode sqt --sqt-output-file %s.sqt --number-decoy-set 0 --spectrum-min-mass %.3f --spectrum-max-mass %.3f %s \n" \
-     % (os.getcwd(), MATCH_SEARCH_PATH, tag, float(start), float(end), " ".join(match_search_args))
+  cmd = "cd %s; %s --output-mode sqt --sqt-output-file %s.sqt --decoy-sqt-output-file %s-decoy.sqt --number-decoy-set 1 --spectrum-min-mass %.3f --spectrum-max-mass %.3f %s \n" \
+     % (os.getcwd(), MATCH_SEARCH_PATH, tag, tag, float(start), float(end), " ".join(match_search_args))
   outFh.write(cmd)
   outFh.close()
   clusterCmd = "qsub -o %s -e %s %s" % (cwd, cwd, cmdFile)
