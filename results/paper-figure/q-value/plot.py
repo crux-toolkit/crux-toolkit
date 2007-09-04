@@ -4,7 +4,7 @@ import pylab
 plotFuncs.plotXYsFromFile("Pq_onthefly/pq", label="On the fly null", style="k-")
 plotFuncs.plotXYsFromFile("Pq_static/pq", label="Static null", style="g-")
 plotFuncs.plotXYsFromFile("Pq_sequest/pq", label="Sequest", style="m-")
-# plotFuncs.plotXYsFromFile("Pq_percolator/pq", label="Percolator", style="b-")
+plotFuncs.plotXYsFromFile("Pq_percolator/pq", label="Percolator", style="b-")
 # plotFuncs.plotXYsFromFile("Pq_percolator-advanced/pq", label="Percolator extended", style="o-")
 pylab.legend()
 pylab.xlabel("q-value")
