@@ -1,3 +1,4 @@
+. ~/retention/SOURCEME
 export ROOT=~/crux/results/paper-figure/q-value/
 export PREFIX=$ROOT/data/spectra_random_1000
 export MS2=${PREFIX}.ms2
