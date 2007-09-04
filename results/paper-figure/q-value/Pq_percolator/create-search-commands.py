@@ -1,7 +1,9 @@
 import sys
 import os
+
 # simple python script to submit to the cluster
-MATCH_SEARCH_PATH=os.getcwd() + os.sep + ".." + os.sep + "match_search"
+
+MATCH_SEARCH_PATH = "/nfs/gs/home/aklammer/crux/results/paper-figure/q-value/match_search"
 
 if len(sys.argv) < 3:
   raise SystemExit, "%s: <mass-range-file> [mass-search args]*" % sys.argv[0]
