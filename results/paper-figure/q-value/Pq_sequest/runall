@@ -6,12 +6,12 @@
 #------------
 cd forward/; 
 ln -fs $FASTA; ln -fs $MS2;
-python ../submit_sequest.py `basename $MS2`
+python ../../submit_sequest.py `basename $MS2`
 cd ..
 
 #------------
 cd random/; 
 ln -fs $FASTA; ln -fs $MS2;
-python ../submit_sequest.py `basename $MS2`
+python ../../submit_sequest.py `basename $MS2`
 cd ..
 

@@ -4,7 +4,7 @@ import os
 import glob
 
 zsPerJob=3000
-scriptPath = "/nfs/gs/home/lukall/bin"
+scriptPath = "/nfs/gs/home/aklammer/crux/results/paper-figure/q-value/"
 thisScript = "%s/submit_sequest.py" % scriptPath
 
 def writeScript(scriptName,cmd):
