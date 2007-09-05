@@ -13,14 +13,22 @@ protein. Crux contains software for tandem mass spectrometry analysis,
 with a focus on peptide identification.
 
 <p>
-The Crux toolkit contains the following programs:
+The core programs in the Crux toolkit are</p>
 
 <ul>
 
 <li>
-<a href="create-index.html">create-index</a> Given a protein fasta sequence database as input, generate an index of all peptides on disk. 
+<a href="match-search.html">match-search</a></li>
+
 <li>
-<a href="get-ms2-spectrum.html">get-ms2-spectrum</a> Using a binary search, extract an MS-MS spectrum with a particular scan number from a .ms2 file, and output the spectrum. Optionally output some summary statistics for the MS-MS spectrum.
+<a href="match-analysis.html">match-analysis</a></li>
+
+</ul>
+
+<p>
+In addition, Crux contains the following utilities:</p>
+
+<ul>
 
 <li>
 <a href="match-search.html">match-search</a> Given as input an ms2 file,
@@ -37,26 +45,32 @@ features and analyze with a user specified algorithm (e.g. Percolator).
 <a href="predict-peptide-ions.html">predict-peptide-ions</a> Given a peptide and a charge state, predict the ions according to the provided options.
 
 <li>
-<a href="score-peptide-list-spectrum.html">score-peptide-list-spectrum</a> Score a spectrum against a peptide list(peptides with charge), using the information in param and the specified scoring type.
+<a href="get-ms2-spectrum.html">get-ms2-spectrum</a> Using a binary search, extract an MS-MS spectrum with a particular scan number from a .ms2 file, and output the spectrum. Optionally output some summary statistics for the MS-MS spectrum.</li>
+
+<li>
+<a href="predict-peptide-ions.html">predict-peptide-ions</a> Given a peptide and a charge state, predict the ions according to the provided options.</li>
+
+<li>
+<a href="score-peptide-list-spectrum.html">score-peptide-list-spectrum</a> Score a spectrum against a peptide list(peptides with charge), using the information in param and the specified scoring type.</li>
 
 <li>
 <a
-href="score-peptide-spectrum.html">score-peptide-spectrum</a> Score a spectrum against a single peptide, using the information in param and the specified scoring type.
-
-<li>
-<a href="search-spectrum.html">search-spectrum</a> Given as input an ms2 file,
-a spectrum scan number within that file, a sequence database, and an
-optional parameter file, search the spectrum against the peptides in the
-sequence database, and return high scoring peptides (Obsolete, replaced by
-match-search).
+href="score-peptide-spectrum.html">score-peptide-spectrum</a> Score a spectrum against a single peptide, using the information in param and the specified scoring type.</li>
 
 <li>
 <a
-href="search-spectra.html">search-spectra</a> Given as input an ms2 file, a sequence database, and an optional parameter file, search all the spectrum against the peptides in the sequence database, and return high scoring peptides.
+href="search-spectrum.html">search-spectrum</a> Given as input an ms2 file, a spectrum scan number within that file, a sequence database, and an optional parameter file, search the spectrum against the peptides in the sequence database, and return high scoring peptides.</li>
 
 <li>
 <a
-href="spectacle.html">spectacle</a> Create an image file of an annotated spectrum.</li> </ul>
+href="search-spectra.html">search-spectra</a> Given as input an ms2 file, a sequence database, and an optional parameter file, search all the spectrum against the peptides in the sequence database, and return high scoring peptides.</li>
+
+<li>
+<a
+href="spectacle.html">spectacle</a> Create an image file of an
+annotated spectrum.</li>
+
+</ul>
 
 <p>The current version of Crux is 1.0</p>
 
