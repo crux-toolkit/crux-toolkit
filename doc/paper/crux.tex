@@ -226,20 +226,16 @@ using a Markov model with parameters derived from the target sequences
 peptide-like amino acid sequences that are not in the target database.
 
 Crux uses a decoy strategy; however, rather than generating a fixed
-decoy database, Crux generates decoys on the fly.  For each
-computation of $Sp$ or $Xcorr$ between a spectrum and a target
-peptide, Crux generates a corresponding decoy peptide by shuffling the
-non-terminal amino acids of the target peptide.  Consequently, Crux
-reports for every target PSM a corresponding decoy PSM.  The decoy PSM
-score distribution is used during Percolator training
-(Section~\ref{section:percolator}) and to estimate $q$~values
-(Section~\ref{section:q-value}).  On-the-fly decoy generation
-introduces a small computational overhead but saves space, because the
-decoy database does not need to be stored.  Optionally, Crux can
-report multiple decoys per target.
-% BILL after looking at the code, the changes to this paragraph that
-% discussed seem correct. We cached the decoy peptide so that we 
-% use the same decoy peptide(s) for e.g Xcorr and Sp
+decoy database, Crux generates decoys on the fly.  For each comparison
+between a spectrum and a target peptide, Crux generates a
+corresponding decoy peptide by shuffling the non-terminal amino acids
+of the target peptide.  Consequently, Crux reports for every target
+PSM a corresponding decoy PSM.  The decoy PSM score distribution is
+used during Percolator training (Section~\ref{section:percolator}) and
+to estimate $q$~values (Section~\ref{section:q-value}).  On-the-fly
+decoy generation introduces a small computational overhead but saves
+space, because the decoy database does not need to be stored.
+Optionally, Crux can report multiple decoys per target.
 
 \subsection{Percolator}
 \label{section:percolator}
