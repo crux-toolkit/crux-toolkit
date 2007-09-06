@@ -41,12 +41,10 @@ def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectru
   savefig("indexing" + ".png")
 
 
-#_________________________________________
-#
+#-------------------------------------------
 # By, Christopher Park
 # This script compares the runtime between of Sequest and CRUX
-#_________________________________________
-
+#-------------------------------------------
 
 # Process command line options
 usage = "Usage: compare_runtime <ms2 file> <fasta_file>"
