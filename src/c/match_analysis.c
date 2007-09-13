@@ -75,7 +75,7 @@ int main(int argc, char** argv){
     (void *) &parameter_file,
     STRING_ARG); 
   
-  parse_arguments_set_opt(
+  parse_arguments_set_req(
     "match-output-folder", 
     "The name of folder in which all the psm result files are located.",
     (void *) &psm_result_folder, 
@@ -147,7 +147,7 @@ int main(int argc, char** argv){
     MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
       new_match_collection_iterator(psm_result_folder, fasta_file);
 
-    //iterate over each, TARGET, DECOY1~..3 match_collection sets
+    //iterate over each, TARGET, DECOY 1..3 match_collection sets
     while(match_collection_iterator_has_next(match_collection_iterator)){
 
       //get the next match_collection

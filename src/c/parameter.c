@@ -123,7 +123,8 @@ void initialize_parameters(void){
   set_string_parameter("match-output-folder", ".");
   set_string_parameter("output-mode", "binary");
   set_string_parameter("seed", "time");
-  set_string_parameter("sqt-output-file", "Prefix of <ms2 input filename>.psm");
+  set_string_parameter("sqt-output-file", "decoy.psm");
+  set_string_parameter("decoy-sqt-output-file", "decoy.psm");
   set_double_parameter("spectrum-min-mass", 0.0);
   set_double_parameter("spectrum-max-mass", BILLION);
   set_int_parameter("top-match", 1);
