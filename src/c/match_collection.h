@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -58,6 +58,13 @@ BOOLEAN_T get_match_collection_scored_type(
   SCORER_TYPE_T score_type ///< the score_type (MATCH_SP, MATCH_XCORR) -in
 );
 
+/**
+ * Samples count_max matches randomly from the match_collection
+ */
+MATCH_COLLECTION_T* random_sample_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to sample -out
+  int count_max ///< the number of matches to randomly select -in
+  );
 
 /**
  *\returns TRUE, if there is a  match_iterators instantiated by match collection 

@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -198,6 +198,13 @@ int* get_spectrum_possible_z(
   );
 
 /**
+ * \returns the number of possible charge states of this spectrum
+ */
+int get_num_possible_z(
+  SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
+  );
+
+/**
  * \returns a pointer to an array of the possible charge states of this spectrum
  * User must NOT free this or alter, not a copy
  * number of possible charge states can be gained by 
@@ -343,6 +350,16 @@ void update_spectrum_fields(
   float intensity, ///< the intensity of the peak that has been added -in
   float location ///< the location of the peak that has been added -in
   );
+
+
+/*
+ * Adds a possible charge(z) to the spectrum.
+ * Must not exceed the MAX_CHARGE capacity
+ */
+BOOLEAN_T add_possible_z(
+  SPECTRUM_T* spectrum,  ///< place Z line into this spectrum -out   
+  int charge  ///< charge to add
+);
 
 /**
  * Adds a peak to the spectrum given a intensity and location

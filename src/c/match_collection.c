@@ -1361,7 +1361,6 @@ BOOLEAN_T score_match_collection_xcorr(
   int charge       ///< the charge of the spectrum -in
   )
 {
-  int match_idx = 0;
   MATCH_T* match = NULL;
   char* peptide_sequence = NULL;  
   float score = 0;
@@ -1388,7 +1387,8 @@ BOOLEAN_T score_match_collection_xcorr(
   carp(CARP_INFO, "start scoring for XCORR");
 
   //iterate over all matches to score for xcorr
-  for(; match_idx < match_collection->match_total; ++match_idx){
+  int match_idx;
+  for(match_idx=0; match_idx < match_collection->match_total; ++match_idx){
     match = match_collection->match[match_idx];
     peptide_sequence = get_peptide_sequence(get_match_peptide(match));
     
@@ -1425,16 +1425,17 @@ BOOLEAN_T score_match_collection_xcorr(
     exit(1);
   }
   
-  //now that the match_collection is sorted, populate the rank of each match object
+  //now the match_collection is sorted, populate the rank of each match object
   if(!populate_match_rank_match_collection(match_collection, XCORR)){
-    carp(CARP_ERROR, "failed to populate match rank for Xcorr in match_collection");
+    carp(CARP_ERROR, "Failed to populate match rank in match_collection");
     free_match_collection(match_collection);
     exit(1);
   }
 
   //calculate delta cn value(difference in top and second ranked Xcorr values)
   if(match_collection->match_total > 1){
-    match_collection->delta_cn = get_match_score(match_collection->match[0], XCORR) -
+    match_collection->delta_cn = 
+      get_match_score(match_collection->match[0], XCORR) -
       get_match_score(match_collection->match[1], XCORR);
   }
   else{

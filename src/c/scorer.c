@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.43 $
+ * REVISION: $Revision: 1.44 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1067,7 +1067,8 @@ BOOLEAN_T create_intensity_array_xcorr(
 /**
  * Uses an iterative cross correlation
  *
- *\return the final cross coralation score between observed & theoretical spectrum
+ *\return the final cross correlation score between the observed and the
+ *theoretical spectra
  */
 float cross_correlation(
   SCORER_T* scorer,  ///< the scorer object that contains observed spectrum -in
@@ -1123,7 +1124,7 @@ float cross_correlation(
 
 /**
  * given a spectrum and ion series calculates the xcorr score
- *\returns the sp score 
+ *\returns the xcorr score 
  */
 float gen_score_xcorr(
   SCORER_T* scorer,        ///< the scorer object -in

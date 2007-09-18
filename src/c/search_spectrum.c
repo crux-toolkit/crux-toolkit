@@ -57,6 +57,7 @@ int main(int argc, char** argv){
   char* fasta_file = NULL;
   double mass_window = 3;
 	int number_top_scores_to_fit = -1;
+	int number_peptides_to_subset = 0;
 	double fraction_top_scores_to_fit = -1.0;
 
   //parsing variables
@@ -114,6 +115,12 @@ int main(int argc, char** argv){
     "The fraction of peptides to fit (-1.0 = all)", 
     (void *) &fraction_top_scores_to_fit, 
     DOUBLE_ARG);
+
+  parse_arguments_set_opt(
+    "number-peptides-to-subset", 
+    "The number of peptides to randomly subset (0 = all)", 
+    (void *) &number_peptides_to_subset, 
+    INT_ARG);
 
   /* Define required command line arguments */
   parse_arguments_set_req(
@@ -259,10 +266,18 @@ int main(int argc, char** argv){
                                                      prelim_score, main_score, mass_offset, FALSE);
     
     //create match iterator, TRUE: return match in sorted order of main_score type
+    if (number_peptides_to_subset != 0){
+      carp(CARP_INFO, "Subsetting %i peptides.", number_peptides_to_subset);
+      match_collection = random_sample_match_collection(
+          match_collection, number_peptides_to_subset);
+      carp(CARP_INFO, "Subsetted %i peptides.", get_match_collection_match_total(match_collection));
+    }
+
     match_iterator = new_match_iterator(match_collection, main_score, TRUE);
 
     //print additional header
     fprintf(stdout, "# PEPTIDES SEARCHED: %d\n", get_match_collection_experimental_size(match_collection));
+    fprintf(stdout, "# TOTAL MATCHES (AFTER SUBSET): %d\n", get_match_collection_match_total(match_collection));
     fprintf(stdout, "# PEPTIDES SAMPLED FOR LOGP_SP: %d\n",get_match_collection_top_fit_sp(match_collection) );
     
     //print header
