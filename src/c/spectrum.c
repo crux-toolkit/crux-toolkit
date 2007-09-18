@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.58 $
+ * REVISION: $Revision: 1.59 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1027,6 +1027,16 @@ void set_spectrum_new_filename(
 
   spectrum->filename =
     strncpy(copy_filename,filename,filename_length);  
+}
+
+/**
+ * \returns the number of possible charge states of this spectrum
+ */
+int get_num_possible_z(
+  SPECTRUM_T* spectrum ///< the spectrum to query possible z -in
+  )
+{
+  return spectrum->num_possible_z;
 }
 
 /**

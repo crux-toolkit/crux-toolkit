@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.79 $   #-Werror \
+# VERSION: $Revision: 1.80 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -91,7 +91,8 @@ PROGS = \
 	${BINDIR}/predict_peptide_ions \
 	${BINDIR}/score_peptide_spectrum \
 	${BINDIR}/match_search \
-	${BINDIR}/match_analysis 
+	${BINDIR}/match_analysis \
+	${BINDIR}/transform_ms2_spectra
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \

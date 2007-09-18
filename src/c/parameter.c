@@ -106,6 +106,7 @@ void initialize_parameters(void){
   set_int_parameter("max-rank-result", 500);
   set_int_parameter("top-fit-sp", 1000);
   set_int_parameter("number-top-scores-to-fit", -1);
+  set_int_parameter("number-peptides-to-subset", 0);
   set_double_parameter("fraction-top-scores-to-fit", -1.0);
   set_int_parameter("skip-first-score", 0);
   
