@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.44 $
+ * REVISION: $Revision: 1.45 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1235,9 +1235,10 @@ float score_logp_bonf_weibull(
   float score, ///< The score for the scoring peptide -in
   float eta,  ///< The eta parameter of the Weibull
   float beta, ///< The beta parameter of the Weibull
-  int num_peptide ///< The beta parameter of the Weibull
+  float shift, ///< The shift parameter of the Weibull
+  int num_peptide ///< The number of peptides
   ){
-  float p_value = exp( - pow(score/eta, beta));
+  float p_value = exp( - pow( (score+shift)/eta, beta));
   //The Bonferroni correction 
   //use original equation 1-(1-p_value)^n when p is not too small
   if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){

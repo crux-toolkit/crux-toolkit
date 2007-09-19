@@ -1,17 +1,24 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.18 $
- * $Author: cpark $
+ * $Revision: 1.19 $
+ * $Author: aklammer $
  * \brief Utilities for the crux project
  */
 #ifndef CRUX_UTILS_H
 #define CRUX_UTILS_H
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <time.h>
+#include "carp.h"
 #include "utils.h"
 #include "objects.h"
 
@@ -140,7 +147,6 @@ BOOLEAN_T suffix_compare(
 BOOLEAN_T valid_peptide_sequence( char* sequence);
 
 /**
- *
  * quickSort for floats
  */
 void quicksort(float numbers[], int array_size);
@@ -170,5 +176,38 @@ int get_random_number_interval(
   int low, ///< the number for lower bound -in
   int high ///< the number for higher bound -in
   );
+
+/**
+ * Fits a three-parameter Weibull distribution to the input data. 
+ * \returns eta, beta, c (which in this case is the amount the data should
+ * be shifted by) and the best correlation coefficient
+ */
+
+void fit_three_parameter_weibull(
+    float* data, ///< the data to be fit. should be in descending order -in
+    int fit_data_points, ///< the number of data points to fit -in
+    int total_data_points, ///< the total number of data points -in
+    float min_shift, ///< the minimum shift to allow -in
+    float max_shift, ///< the maximum shift to allow -in
+    float* eta,      ///< the eta parameter of the Weibull dist -out
+    float* beta,      ///< the beta parameter of the Weibull dist -out
+    float* shift,     ///< the best shift -out
+    float* correlation   ///< the best correlation -out
+    );
+
+/**
+ * Fits a two-parameter Weibull distribution to the input data. 
+ * \returns eta, beta and the correlation coefficient
+ */
+void fit_two_parameter_weibull(
+    float* data, ///< the data to be fit -in
+    int fit_data_points, ///< the number of data points to fit -in
+    int total_data_points, ///< the total number of data points -in
+    float shift, ///< the amount by which to shift our data -in
+    float* eta,      ///< the eta parameter of the Weibull dist -out
+    float* beta,      ///< the beta parameter of the Weibull dist -out
+    float* correlation ///< the best correlation -out
+    );
+
 
 #endif
