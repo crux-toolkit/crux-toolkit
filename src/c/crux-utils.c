@@ -1,19 +1,4 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <time.h>
-#include "carp.h"
-#include "utils.h"
 #include "crux-utils.h"
-#include "objects.h"
-
 
 /**
  * PRECISION, determines the precision of the compare float, users
@@ -498,4 +483,144 @@ void quick_sort(float a[], int left, int right) {
 void quicksort(float a[], int array_size){
   quick_sort(a, 0, array_size-1);
 }
+
+/**
+ * Fits a three-parameter Weibull distribution to the input data. 
+ * \returns eta, beta, c (which in this case is the amount the data should
+ * be shifted by) and the best correlation coefficient
+ */
+void fit_three_parameter_weibull(
+    float* data, ///< the data to be fit -in
+    int fit_data_points, ///< the number of data points to fit -in
+    int total_data_points, ///< the total number of data points to fit -in
+    float min_shift, ///< the minimum shift to allow -in
+    float max_shift, ///< the maximum shift to allow -in
+    float* eta,      ///< the eta parameter of the Weibull dist -out
+    float* beta,      ///< the beta parameter of the Weibull dist -out
+    float* shift,     ///< the best shift -out
+    float* correlation   ///< the best correlation -out
+    ){
+  
+  float step = 0.01; // step in shift
+  
+  float last_beta, last_eta, last_shift, last_correlation = 0.0;
+  float cur_shift;
+  for (cur_shift = max_shift; cur_shift > min_shift ; cur_shift -= step){
+
+    fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
+        cur_shift, eta, beta, correlation);
+
+    if (*correlation < last_correlation){
+      *beta = last_beta;
+      *eta = last_eta;
+      *shift = last_shift;
+      *correlation = last_correlation;
+      return;
+    }
+
+    last_beta  = *beta;
+    last_eta   = *eta;
+    last_correlation = *correlation;
+    last_shift = cur_shift;
+  }
+}
+
+/**
+ * Fits a two-parameter Weibull distribution to the input data. 
+ * \returns eta, beta and the correlation coefficient
+ */
+void fit_two_parameter_weibull(
+    float* data, ///< the data to be fit. should be in descending order -in
+    int fit_data_points, ///< the number of data points to fit -in
+    int total_data_points, ///< the total number of data points -in
+    float shift, ///< the amount by which to shift our data -in
+    float* eta,      ///< the eta parameter of the Weibull dist -out
+    float* beta,      ///< the beta parameter of the Weibull dist -out
+    float* correlation ///< the best correlation -out
+    ){
+
+  float* X   = calloc(sizeof(float) , total_data_points);
+
+  int idx;
+  for(idx=0; idx < fit_data_points; idx++){
+    float score = data[idx] + shift; // move right by shift
+    if (score <= 0.0){
+      carp(CARP_DEBUG, "Reached negative score at idx %i", idx);
+      fit_data_points = idx;
+      break;
+    } 
+    X[idx] = log(score);
+    carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
+  }
+
+  carp(CARP_INFO, "Calc F, count: %d", fit_data_points);
+  float* F_T = mymalloc(sizeof(float) * total_data_points);
+  for(idx=0; idx < fit_data_points; idx++){
+    int reverse_idx = total_data_points - idx;
+    // magic numbers 0.3 and 0.4 are never changed
+    F_T[idx] = (reverse_idx - 0.3) / (total_data_points + 0.4);
+    carp(CARP_DEBUG, "F[%i]=%.6f", idx, F_T[idx]);
+  }
+
+  float* Y   = mymalloc(sizeof(float) * total_data_points);
+  for(idx=0; idx < fit_data_points; idx++){
+    Y[idx] = log( -log(1.0 - F_T[idx]) );
+    carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
+  }
+
+  int N = fit_data_points; // rename for formula's sake
+  float sum_Y  = 0.0;
+  float sum_X  = 0.0;
+  float sum_XY = 0.0;
+  float sum_XX = 0.0;
+  for(idx=0; idx < fit_data_points; idx++){
+    sum_Y  += Y[idx];
+    sum_X  += X[idx];
+    sum_XX += X[idx] * X[idx];
+    sum_XY += X[idx] * Y[idx];
+  }
+  carp(CARP_DEBUG, "sum_X=%.6f", sum_X);
+  carp(CARP_DEBUG, "sum_Y=%.6f", sum_Y);
+  carp(CARP_DEBUG, "sum_XX=%.6f", sum_XX);
+  carp(CARP_DEBUG, "sum_XY=%.6f", sum_XY);
+
+  float b_num    = sum_XY - (sum_X * sum_Y / N);
+  carp(CARP_DEBUG, "b_num=%.6f", b_num);
+  float b_denom  = sum_XX - sum_X * sum_X / N;
+  carp(CARP_DEBUG, "b_denom=%.6f", b_denom);
+  float b_hat    = b_num / b_denom;
+
+  float a_hat    = (sum_Y - b_hat * sum_X) / N;
+  *beta = b_hat;
+  *eta  = exp( - a_hat / *beta );
+
+  float c_num   = 0.0;
+  float c_denom_X = 0.0;
+  float c_denom_Y = 0.0;
+  float mean_X = sum_X / N;
+  float mean_Y = sum_Y / N;
+  for (idx=0; idx < N; idx++){
+    float X_delta = X[idx] - mean_X; 
+    float Y_delta = Y[idx] - mean_Y;
+    c_num += X_delta * Y_delta;
+    c_denom_X += X_delta * X_delta;
+    c_denom_Y += Y_delta * Y_delta;
+  }
+  float c_denom = sqrt(c_denom_X * c_denom_Y);
+  if (c_denom == 0.0){
+    carp(CARP_FATAL, "Zero denominator in correlation calculation!");
+  }
+  *correlation = c_num / c_denom;
+
+  carp(CARP_DEBUG, "eta=%.6f", *eta);
+  carp(CARP_DEBUG, "beta=%.6f", *beta);
+  carp(CARP_DEBUG, "correlation=%.6f", *correlation);
+
+  free(F_T);
+  free(Y);
+  free(X);
+}
+
+
+
 
