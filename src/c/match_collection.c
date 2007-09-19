@@ -510,6 +510,12 @@ MATCH_COLLECTION_T* random_sample_match_collection(
   MATCH_COLLECTION_T* sample_collection = allocate_match_collection();
   srand(time(NULL));
 
+  // make sure we don't sample more than the matches in the match collection
+  if (count_max < match_collection->match_total){
+    free_match_collection(sample_collection);
+    return match_collection;
+  }
+
   //ranomly select matches upto count_max
   for(; count_idx < count_max; ++count_idx){
     match_idx = ((double)rand()/((double)RAND_MAX + (double)1)) * match_collection->match_total;
