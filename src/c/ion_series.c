@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.35 $
+ * REVISION: $Revision: 1.36 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -869,7 +869,6 @@ void predict_ions(
   scan_for_aa_for_neutral_loss(ion_series);
   
   //generate ions without any modifications
-  carp(CARP_DETAILED_DEBUG, "generating unmodified ions");
   if(!generate_ions_no_modification(ion_series, mass_matrix)){
     carp(CARP_ERROR, "failed to generate ions, no modifications");
     free(mass_matrix);
@@ -881,7 +880,6 @@ void predict_ions(
     
     // generate ions with nh3 modification
     if(abs(constraint->modifications[NH3]) > 0){
-      carp(CARP_DETAILED_DEBUG, "generating NH3 modifications");
       if(!generate_ions(ion_series, NH3)){
         carp(CARP_ERROR, "failed to generate ions, NH3 modifications");
         free(mass_matrix);
@@ -891,7 +889,6 @@ void predict_ions(
     
     // generate ions with h2o modification
     if(abs(constraint->modifications[H2O]) > 0){
-      carp(CARP_DETAILED_DEBUG, "generating H2O modifications");
       if(!generate_ions(ion_series, H2O)){
         carp(CARP_ERROR, "failed to generate ions, H2O modifications");
         free(mass_matrix);
@@ -901,7 +898,6 @@ void predict_ions(
 
     // generate ions with isotope modification
     if(constraint->modifications[ISOTOPE] > 0){
-      carp(CARP_DETAILED_DEBUG, "generating ISOTOPE modifications");
       if(!generate_ions(ion_series, ISOTOPE)){
         carp(CARP_ERROR, "failed to generate ions, ISOTOPE modifications");
         free(mass_matrix);
@@ -911,7 +907,6 @@ void predict_ions(
 
     // generate ions with flank modification
     if(constraint->modifications[FLANK] > 0){
-      carp(CARP_DETAILED_DEBUG, "generating FLANK modifications");
       if(!generate_ions_flank(ion_series)){
         carp(CARP_ERROR, "failed to generate ions, FLANK modifications");
         free(mass_matrix);

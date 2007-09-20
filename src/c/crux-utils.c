@@ -502,26 +502,35 @@ void fit_three_parameter_weibull(
     ){
   
   float step = 0.01; // step in shift
+
+  float correlation_tolerance = 0.1;
   
-  float last_beta, last_eta, last_shift, last_correlation = 0.0;
+  float best_eta = 0.0;
+  float best_beta = 0.0;
+  float best_shift = 0.0;
+  float best_correlation = 0.0;
+
+  float cur_eta = 0.0;
+  float cur_beta = 0.0;
+  float cur_correlation = 0.0;
   float cur_shift;
   for (cur_shift = max_shift; cur_shift > min_shift ; cur_shift -= step){
 
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
-        cur_shift, eta, beta, correlation);
+        cur_shift, &cur_eta, &cur_beta, &cur_correlation);
 
-    if (*correlation < last_correlation){
-      *beta = last_beta;
-      *eta = last_eta;
-      *shift = last_shift;
-      *correlation = last_correlation;
+    if (cur_correlation > best_correlation){
+      best_eta = cur_eta;
+      best_beta = cur_beta;
+      best_shift = cur_shift;
+      best_correlation = cur_correlation;
+    } else if (cur_correlation < best_correlation - correlation_tolerance){
+      *eta = best_eta;
+      *beta = best_beta;
+      *shift = best_shift;
+      *correlation = best_correlation;
       return;
     }
-
-    last_beta  = *beta;
-    last_eta   = *eta;
-    last_correlation = *correlation;
-    last_shift = cur_shift;
   }
 }
 

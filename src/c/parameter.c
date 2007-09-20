@@ -30,7 +30,7 @@ struct parameter_hash{
 };
 
 /**
- * Global variable
+ * Global variables
  */
 
 struct parameter_hash parameters_hash_table;
