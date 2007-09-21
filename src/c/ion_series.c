@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.36 $
+ * REVISION: $Revision: 1.37 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1295,31 +1295,44 @@ BOOLEAN_T ion_constraint_is_satisfied(
 {
   int* counts = NULL;
 
+  // TODO Fix
+  BOOLEAN_T return_val = TRUE;
+  // print_ion(ion, stderr);
+  // fprintf(stderr, "%i->%i\n", ion_constraint->min_charge, ion_constraint->max_charge);
   // check ion type
-  if(get_ion_type(ion) != ion_constraint->ion_type &&
+  ION_TYPE_T ion_type = get_ion_type(ion);
+  if(
+     !(ion_type == ion_constraint->ion_type)
+      
+     &&
      
-     !((ion_constraint->ion_type == BY_ION) && 
-       (get_ion_type(ion) == B_ION || get_ion_type(ion) == Y_ION)) &&
+     !((ion_constraint->ion_type == BY_ION) && (ion_type == B_ION || ion_type == Y_ION)) 
+     
+     &&
 
-     !((ion_constraint->ion_type == BYA_ION) && 
-       (get_ion_type(ion) == B_ION || get_ion_type(ion) == Y_ION || get_ion_type(ion) == A_ION)) &&
+     !((ion_constraint->ion_type == BYA_ION) 
+          && 
+       (ion_type == B_ION || ion_type == Y_ION || ion_type == A_ION)) 
      
-     (ion_constraint->ion_type != ALL_ION)
+     &&
+     
+     !(ion_constraint->ion_type == ALL_ION)
+
      ){
      
     // precursor ion?
-    if(!(ion_constraint->precursor_ion && get_ion_type(ion) == P_ION)){
-      return FALSE;
+    if(!(ion_constraint->precursor_ion && ion_type == P_ION)){
+      return_val = FALSE;
     }
   }
   
   // check charge
   if(get_ion_charge(ion) > ion_constraint->max_charge){
-    return FALSE;
+    return_val = FALSE;
   }
   
   if(get_ion_charge(ion) < ion_constraint->min_charge){
-    return FALSE;
+    return_val = FALSE;
   }
 
   // check modifications
@@ -1328,24 +1341,28 @@ BOOLEAN_T ion_constraint_is_satisfied(
   for(mod_idx=0; mod_idx < MAX_MODIFICATIONS; ++mod_idx){
     if(ion_constraint->modifications[mod_idx] >= 0){
       if(counts[mod_idx] > ion_constraint->modifications[mod_idx]){
-        return FALSE;
+        return_val = FALSE;
+        break;
       }
     }
     else{
       if(counts[mod_idx] < ion_constraint->modifications[mod_idx]){
-        return FALSE;
+        return_val = FALSE;
+        break;
       }
     }
     if (ion_constraint->exact_modifications){
       if(counts[mod_idx] != ion_constraint->modifications[mod_idx]){
-        return FALSE; 
+        return_val = FALSE; 
+        break;
       }
     }
   }
   
   // Add more checks here as more contraints are added
 
-  return TRUE;
+  // fprintf(stderr, "r = %i\n", return_val);
+  return return_val;
 }
 
 

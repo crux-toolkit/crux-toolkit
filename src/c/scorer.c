@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.45 $
+ * REVISION: $Revision: 1.46 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1507,6 +1507,7 @@ BOOLEAN_T output_psm_files(
 
     // now predict ions and assign them to their closest peaks
     predict_ions(ion_series);
+
     ion_series_assign_nearest_peaks(ion_series, spectrum);
 
     // create our ion constraints

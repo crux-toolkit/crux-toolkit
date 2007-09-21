@@ -449,8 +449,8 @@ void truncate_match_collection(
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
   )
 {
-  //sort match collection by score type
-  //check if the match collection is in the correct sorted order
+  // sort match collection by score type
+  // check if the match collection is in the correct sorted order
   if(match_collection->last_sorted != score_type){
     //sort match collection by score type
     if(!sort_match_collection(match_collection, score_type)){
@@ -459,7 +459,7 @@ void truncate_match_collection(
     }
   }
 
-  //is there any matches to free?
+  // are there any matches to free?
   while(match_collection->match_total > max_rank){
     free_match(match_collection->match[match_collection->match_total - 1]);
     --match_collection->match_total;
@@ -692,8 +692,13 @@ BOOLEAN_T estimate_evd_parameters(
  * For the #top_count ranked peptides, calculate the Weibull parameters
  *\returns TRUE, if successfully calculates the Weibull parameters
  */
-#define MIN_SHIFT -5.0
-#define MAX_SHIFT  5.0
+#define MIN_XCORR_SHIFT -5.0
+#define MAX_XCORR_SHIFT  5.0
+#define XCORR_SHIFT 0.05
+#define MIN_SP_SHIFT -100.0
+#define MAX_SP_SHIFT 300.0
+#define SP_SHIFT 5.0
+
 BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, 
   ///< the match collection for which to estimate weibull parameters -out
@@ -712,7 +717,7 @@ BOOLEAN_T estimate_weibull_parameters(
   }
 
   // how many things are we going to fit. We may want to just fit to the
-  // tail, thus the distinction betweent total* and fit*
+  // tail, thus the distinction between total* and fit*
   int total_data_points = sample_collection->match_total;
   int fit_data_points = total_data_points;
 
@@ -759,9 +764,17 @@ BOOLEAN_T estimate_weibull_parameters(
   }
 
   float correlation = 0.0;
-  fit_three_parameter_weibull(data, fit_data_points, total_data_points,
-    MIN_SHIFT, MAX_SHIFT, &(match_collection->eta), &(match_collection->beta),
-    &(match_collection->shift), &correlation);
+  if (score_type == XCORR){
+    fit_three_parameter_weibull(data, fit_data_points, total_data_points,
+      MIN_XCORR_SHIFT, MAX_XCORR_SHIFT, XCORR_SHIFT, 
+      &(match_collection->eta), &(match_collection->beta),
+      &(match_collection->shift), &correlation);
+  } else if (score_type == SP){
+    fit_three_parameter_weibull(data, fit_data_points, total_data_points,
+      MIN_SP_SHIFT, MAX_SP_SHIFT, SP_SHIFT, 
+      &(match_collection->eta), &(match_collection->beta), 
+      &(match_collection->shift), &correlation);
+  }
   carp(CARP_INFO, "Correlation: %.6f\nEta: %.6f\nBeta: %.6f\nShift: %.6f\n", 
       correlation, match_collection->eta, match_collection->beta,
       match_collection->shift);
@@ -931,14 +944,14 @@ BOOLEAN_T score_match_collection_sp(
     
     free(peptide_sequence);
   }
-  //free ion_series now that we are done iterating over all peptides
+  // free ion_series now that we are done iterating over all peptides
   free_ion_series(ion_series);
   
   
-  //calculate the final sp score mean
+  // calculate the final sp score mean
   match_collection->sp_scores_mean /= match_collection->match_total;
   
-  //total peptide experiment sample size
+  // total peptide experiment sample size
   match_collection->experiment_size = match_collection->match_total;
 
   //DEBUG, print total peptided scored so far

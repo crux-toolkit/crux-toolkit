@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -272,8 +272,8 @@ void print_ion(
           (int)ion->type, ion->cleavage_idx);
 
   //iterate over all modification counts
-  int modification_idx = 0;
-  for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
+  int modification_idx;
+  for(modification_idx=0; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
     fprintf(file,"\t%d", ion->modification_counts[modification_idx]);
   }
   
@@ -303,11 +303,10 @@ void print_ion_gmtk_single(
   FILE* file  ///< to this file -in
   ){
 
-
   int has_mobile_proton = 1;
-  int is_possible = 1; 
   int is_detectable = 0;
   int is_detected = 0;
+  int is_possible = 0;
 
   float intensity = 0.0;
   float intensity_rank = 0.0;
