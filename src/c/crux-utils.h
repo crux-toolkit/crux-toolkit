@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * $Author: aklammer $
  * \brief Utilities for the crux project
  */
@@ -189,6 +189,7 @@ void fit_three_parameter_weibull(
     int total_data_points, ///< the total number of data points -in
     float min_shift, ///< the minimum shift to allow -in
     float max_shift, ///< the maximum shift to allow -in
+    float step, ///< the step for shift modification -in
     float* eta,      ///< the eta parameter of the Weibull dist -out
     float* beta,      ///< the beta parameter of the Weibull dist -out
     float* shift,     ///< the best shift -out

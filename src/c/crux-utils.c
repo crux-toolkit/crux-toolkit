@@ -495,14 +495,13 @@ void fit_three_parameter_weibull(
     int total_data_points, ///< the total number of data points to fit -in
     float min_shift, ///< the minimum shift to allow -in
     float max_shift, ///< the maximum shift to allow -in
+    float step,      ///< step for shift -in
     float* eta,      ///< the eta parameter of the Weibull dist -out
     float* beta,      ///< the beta parameter of the Weibull dist -out
     float* shift,     ///< the best shift -out
     float* correlation   ///< the best correlation -out
     ){
   
-  float step = 0.01; // step in shift
-
   float correlation_tolerance = 0.1;
   
   float best_eta = 0.0;
@@ -520,10 +519,10 @@ void fit_three_parameter_weibull(
         cur_shift, &cur_eta, &cur_beta, &cur_correlation);
 
     if (cur_correlation > best_correlation){
-      best_eta = cur_eta;
-      best_beta = cur_beta;
-      best_shift = cur_shift;
-      best_correlation = cur_correlation;
+      *eta = best_eta = cur_eta;
+      *beta = best_beta = cur_beta;
+      *shift = best_shift = cur_shift;
+      *correlation = best_correlation = cur_correlation;
     } else if (cur_correlation < best_correlation - correlation_tolerance){
       *eta = best_eta;
       *beta = best_beta;
