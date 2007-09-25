@@ -36,7 +36,7 @@ are slow and fail to identify a large proportion of the given spectra.
 \section{Results:} We describe a database search program called Crux
 that extends the state of the art in peptide identification in several
 significant respects.  Crux reimplements and extends the widely used
-database search program SEQUEST.  For speed, Crux uses a peptide
+database search program {\sc sequest}.  For speed, Crux uses a peptide
 indexing scheme to rapidly retrieve candidate peptides for a given
 spectrum.  For each peptide in the target database, Crux generates
 shuffled decoy peptides on the fly, providing a good null model and,
@@ -59,7 +59,7 @@ methods of mapping from the observed fragmentation spectra to the
 corresponding peptides.
 
 The most widely used methods for peptide identification, such as
-SEQUEST \cite{eng:approach}, MASCOT \cite{perkins:probability},
+{\sc sequest} \cite{eng:approach}, MASCOT \cite{perkins:probability},
 X!Tandem \cite{craig:tandem} and Inspect \cite{tanner:inspect},
 exploit a database of known protein sequences.  For each observed
 spectrum, these methods search the database for the peptide whose
@@ -98,7 +98,7 @@ following primary contributions:
   peptides whose m/z lies within a user-specified window around the
   target m/z (called {\em candidate peptides}).  The database is
   sorted by peptide mass and is stored on disk, with mass indices
-  stored in memory.  We show that, relative to SEQUEST's strategy of
+  stored in memory.  We show that, relative to {\sc sequest}'s strategy of
   reading the protein sequence database from disk for each new
   spectrum, the indexed database decreases search time by X\% on
   average.
@@ -120,7 +120,7 @@ following primary contributions:
 \item {\bf Dynamically trained PSM scoring function.}  After scoring
   all peptides with respect to a given spectrum, the top-ranked PSM
   must be ranked with respect to other PSMs from the same data set.
-  Some score functions, such as SEQUEST's cross-correlation score
+  Some score functions, such as {\sc sequest}'s cross-correlation score
   (XCorr), have been used to carry out both relative ranking and
   absolute ranking; however, numerous studies have demonstrated that
   better absolute rankings can be achieved by using machine learning
@@ -160,7 +160,7 @@ candidate peptides, i.e., peptides whose masses lie within a specified
 range of the precursor mass.  A straightforward retrieval method is to
 read the entire database from disk for each query, evaluating
 candidate peptides as they are encountered.  This approach, which is
-used by SEQUEST, is space-efficient but can be slow for large
+used by {\sc sequest}, is space-efficient but can be slow for large
 databases.
 
 In addition to implementing the above approach, Crux offers an
@@ -182,8 +182,8 @@ but large databases are paged into and out of memory only as needed.
 \subsection{Scoring peptide-spectrum matches}
 
 After retrieving all of the candidate peptides for a given spectrum,
-Crux follows the strategy used by SEQUEST.  Initially, the candidate
-peptides are ranked according to the preliminary SEQUEST score $Sp$.
+Crux follows the strategy used by {\sc sequest}.  Initially, the candidate
+peptides are ranked according to the preliminary {\sc sequest} score $Sp$.
 Subsequently, the 500 top-scoring peptides are re-ranked according to
 the cross-correlation score $XCorr$.
 
@@ -310,20 +310,20 @@ sets.  FIXME
   \caption{{\bf Re-implementation of Sp and Xcorr scoring functions.}
   The figure plots, for a collection of peptide-spectrum matches, the
   Sp (A) and XCorr (B) scores as computed by Crux as a function of the
-  same scores as computed by SEQUEST.
+  same scores as computed by {\sc sequest}.
   \label{figure:sp-xcorr}}
 \end{figure*}
 
-SEQUEST is the first and one of the most widely used database search
+{\sc sequest} is the first and one of the most widely used database search
 methods for peptide identification from tandem mass spectra.  We
-wanted to begin with a reimplementation of the core of SEQUEST, which
+wanted to begin with a reimplementation of the core of {\sc sequest}, which
 is the $Sp$ and $Xcorr$ score functions.  Figure~\ref{figure:sp-xcorr}
 plots the Crux-calculated versions of these scores as a function of
-the SEQUEST-calculated versions of these scores.  The figure shows
+the {\sc sequest}-calculated versions of these scores.  The figure shows
 that the vast majority of the PSMs receive identical scores using
 either method.  Among a collection of FIXME spectra, searched with a
 mass window of FIXME m/z, the top-ranked peptide according to Crux
-differs from the top-ranked peptide according to SEQUEST in only FIXME
+differs from the top-ranked peptide according to {\sc sequest} in only FIXME
 cases.  
 
 \subsection{Efficient retrieval of candidate peptides}
@@ -332,10 +332,10 @@ cases.
   \centering
   \includegraphics[width=3in]{./Images/indexing.eps}
   \caption{{\bf Rapid database searching.}  The figure plots the total
-  running time required to search 10,000 tandem mass spectra against
-  the non-redundant protein database, plotted as a function of the m/z
+  running time required to search 1,000 tandem mass spectra against
+  the yeast protein database, plotted as a function of the m/z
   tolerance used to define candidate peptides.  The two series
-  correspond to searching with SEQUEST and searching with Crux.  For
+  correspond to searching with {\sc sequest} and searching with Crux.  For
   purposes of comparison, Crux's decoy searching and the Percolator
   post-processor are turned off.
   \label{figure:indexing}}
@@ -346,13 +346,13 @@ strategy, we searched with a collection of 100 spectra against the
 NRDB, generating candidate peptides from a series of increasing wider
 m/z windows.  Figure~\ref{figure:indexing} plots the search time as a
 function of m/z window width.  For this experiment, we use a modified
-version of SEQUEST that only computes Sp (and not XCorr), and we
+version of {\sc sequest} that only computes Sp (and not XCorr), and we
 compare its running time to that of Crux running in the same fashion.
-As expected, Crux runs more quickly than SEQUEST, because Crux does
+As expected, Crux runs more quickly than {\sc sequest}, because Crux does
 not need to scan the entire database to retrieve a small collection of
 candidate peptides.  The difference is most pronounced when the mass
 tolerance window is small.  For example, with a mass tolerance window
-of 0.1, SEQUEST requires 3.5~hrs clock time, whereas Crux requires
+of 0.1, {\sc sequest} requires 3.5~hrs clock time, whereas Crux requires
 0.1~hrs.  This represents a 35-fold improvement.  However, even when
 we use a mass tolerance of 3, Crux yields a six-fold speed improvement
 (0.6~hours versus 3.6~hours).
@@ -365,12 +365,14 @@ we use a mass tolerance of 3, Crux yields a six-fold speed improvement
 \caption{{\bf Improved peptide identification.}  The figure plots, for
   a variety of database search algorithms, the number of PSMs as a
   function of the estimated $q$~value.  The five series correspond to
-  SEQUEST, Crux's implementation of SEQUEST using a shuffled decoy
+  {\sc sequest}, Crux's implementation of {\sc sequest} using a shuffled decoy
   database, Crux using decoys generated on-the-fly, Crux with the
   Percolator post-processor enabled, and Crux with Percolator,
   including retention time features.
   \label{figure:pq-plot}}
 \end{figure}
+% TODO put in description of yeast proteome. We switched from nrdb because 
+% it took way too long
 
 \section{Discussion}
 

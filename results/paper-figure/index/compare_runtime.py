@@ -15,13 +15,13 @@ from optparse import OptionParser
 
 #-------------------
 
-def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectrum, score_type="xcorr"):
+def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectra, score_type="xcorr"):
   """compares runtime for each scoring method """
 
   print "generating figures"
   
   xlabel("mass window (Da)", size=15)
-  ylabel("Runtime for " + `number_of_spectrum` + " spectra (s)", size=15)
+  ylabel("Runtime for " + `number_of_spectra` + " spectra (sec)", size=15)
   
   fh = open("crux.xy", "w")
   for idx in range(len(mass_windows)):
@@ -67,7 +67,7 @@ mass_windows = ["0.1", "1", "3"]
 sequest_results = []
 crux_results = []
 
-number_of_spectrum = 0
+number_of_spectra = 0
 
 charge_list = [1,2,3]
 
@@ -125,11 +125,13 @@ for window in mass_windows:
       if line.startswith('user '):
         fields = line.rstrip('\n').split()
         crux_results.append(float(fields[1]))
-      elif line.startswith('# SPECTRUM SCAN'):
-        number_of_spectrum += 1
 
 #Debug
 #print crux_results, sequest_results, mass_windows
 
+# calculate number of spectra
+dtas = filter(lambda x: x.endswith("dta"), os.listdir(os.getcwd()))
+
+
 #now plot the results
-plot_compare_data(crux_results, sequest_results, [ float(i) for i in mass_windows], number_of_spectrum)
+plot_compare_data(crux_results, sequest_results, [ float(i) for i in mass_windows], len(dtas))
