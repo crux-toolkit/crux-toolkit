@@ -102,7 +102,7 @@ for window in mass_windows:
         
   # 2, now run Crux
   command = "time -p ./search_spectra --mass-window %s --parameter-file \
-      crux_parameter %s %s" % (window, ms2_file, fasta_file)
+      crux.params %s %s" % (window, ms2_file, fasta_file)
   print >>sys.stderr, "\nRunning %s\n" % command
 
   (exit_code, result) = \
