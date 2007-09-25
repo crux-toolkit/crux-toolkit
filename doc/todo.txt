@@ -25,7 +25,7 @@ V- charge state for Z 4 in .ms2 files
 V- Update parameter file (1) read amino acid mass modification (2) use hash table
 - Update spectrum object to read RTime
 - peptide-> hydrophobicity
-- Code q-value calculation into match_analysis=======
+- Code q-value calculation into match_analysis
 - search_spectrum output documentation shouldbe written again...
 - it is annoying that you have to compile everything to get one executable
   we should modify the makefile so that we can compile single executables
@@ -38,7 +38,47 @@ V- Update parameter file (1) read amino acid mass modification (2) use hash tabl
 - make sure copy routines copy new fields!!!
 - take out filename at top of get_ms2_spectrum output
 - rename to crux-*
+- precision of output as parameter
+- naming convention should be fixed with .fasta
+- default should be crux.params
+- allow absolute filenames being passed to create_index
+- make crux_decoy1 2 etc all have same suffix  ".matches" and random string
+- fix double freeing problem in match_analysis (and I believe percolator)
+- need match_analysis to output something more informative than P 1 and P 2
 - C is now +57.00 make sure documented somewhere
+- for(; should be replaced with initialization of variable
+- match_search should check mass, not m/z. needs to split possible charge
+  states for each spectrum out
+
+- code should not segfault when parameter file does not exist
+- should not rely on calloc to faithfully initialize values in structs to zero.
+  this has caused problems at least once. explicitly initialize fields in
+  new_* contructors.
 - search_spectra, search_spectrum, and match_search should all be able to not
   use an index!
 - why is ion_constraint in ion_series. shouldn't it be in ion.c?
+
+-----
+I think these may already be implemented:
+-----
+
+Make usage more consistent
+  - all options should have '--' not '-'
+  - use periods consistently
+  - Use 'Default' or '(default = XX )'
+  - Default for --cleavages is tryptic (not non-tryptic, as indicated in the Usage)
+  - Default for --cleavages should be one of the three options
+  - -mis-cleavages should be --missed-cleavages or --missing-cleavages. 
+
+Separate STDERR vs. STDOUT
+  - Maybe have the option echoing go to STDERR and the actual peptides go to STDOUT
+  - Option echoing should be consistently with or without preceding # (probably with)
+  - The 'Using alphabet' message should be consistent with the others
+
+Fix peptide mass calculation
+
+Include a 'reached protein XXXX' to STDERR
+
+Exiting with zero status should indicate success. Non-zero value indicates failure of some kind.
+
+
