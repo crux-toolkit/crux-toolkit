@@ -23,7 +23,7 @@ def submitJob(pos,n,tmpDir,ms2file):
   cmd = "%s %s %d %d" % (thisScript,ms2file,pos,n)
   writeScript(jobFileName,cmd)
   jname = "s-%04d" % n
-  command = "qsub -N %s %s" % (jname,jobFileName)
+  command = "qsub -cwd -N %s %s" % (jname,jobFileName)
 
   # Run the command, or submit the job.
   sys.stderr.write("Running (%s)\n" % command)
@@ -118,7 +118,7 @@ if mode==0:
   cmd= "%s %s %s.sqt\n" % (thisScript,ms2File,ms2File[:-4])
   writeScript(jobFileName,cmd)
   dep=",".join(submited)
-  os.system("qsub -N s-end -hold_jid %s %s" % (dep,jobFileName))
+  os.system("qsub -cwd -N s-end -hold_jid %s %s" % (dep,jobFileName))
 if mode==1:
   # convert out to sqt
   outFile = open(outFileName, "r")

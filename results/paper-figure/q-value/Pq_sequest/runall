@@ -3,15 +3,41 @@
 . ../SOURCEME
 #------------
 
+
+export MS2=/nfs/gs/home/aklammer/crux/results/paper-figure/q-value/Pq_sequest/omics.ms2
 #------------
-cd forward/; 
+# cd forward/; 
+# ln -fs $MS2;
+#python ../../submit_sequest.py `basename $MS2`
+#cd ..
+#
+##------------
+#cd random/; 
+#ln -fs $MS2;
+#python ../../submit_sequest.py `basename $MS2`
+#cd ..
+#
+##------------
+#cd forward-all/; 
+#ln -fs $MS2;
+#python ../../submit_sequest.py `basename $MS2`
+#cd ..
+#
+##------------
+#cd random-all/; 
+#ln -fs $MS2;
+#python ../../submit_sequest.py `basename $MS2`
+#cd ..
+#------------
+cd forward-omics/; 
 ln -fs $MS2;
 python ../../submit_sequest.py `basename $MS2`
 cd ..
 
 #------------
-cd random/; 
+cd random-omics/; 
 ln -fs $MS2;
 python ../../submit_sequest.py `basename $MS2`
 cd ..
+
 
