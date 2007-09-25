@@ -5,8 +5,9 @@ export PATH=../../../bin/:$PATH
 #file 090306-20cm-yeast-2h-04.ms2. Has one charge per spectrum
 #that was randomly selected. Thus, a mix of 1, 2, 3 charged spectrua.
 
-# ms2='spectra_random_1000.ms2'
-ms2='test.ms2'
+ms2='spectra_random_1000.ms2'
+# ms2='test.ms2'
+# ms2='test.100.ms2'
 # ms2="1000.ms2"
 # fasta='E_coli_contam.fasta'
 # fasta='/home/aklammer/nr-NCBI-2006-02-16.fasta'
