@@ -77,8 +77,8 @@ for window in mass_windows:
   # 1, run Sequest
   seq_time = 0.0
   for charge in charge_list:
-    command = "time -p ./sequest27 -Psequest.params_%s *.%i.dta" \
-        % (window, charge)
+    command = "time -p ./sequest27 -D%s -Psequest.params_%s *.%i.dta" \
+        % (fasta_file, window, charge)
     print >>sys.stderr, "\nRunning %s\n" % command
     (exit_code, result) = commands.getstatusoutput(command)
     #debug
@@ -101,8 +101,11 @@ for window in mass_windows:
 
         
   # 2, now run Crux
-  command = "time -p ./search_spectra --mass-window %s --parameter-file \
-      crux.params %s %s" % (window, ms2_file, fasta_file)
+  command = "time -p ./match_search \
+      --match-output-folder output \
+      --parameter-file crux.params_%s \
+      --number-decoy-set 0 \
+      %s %s" % (window, ms2_file, fasta_file)
   print >>sys.stderr, "\nRunning %s\n" % command
 
   (exit_code, result) = \
