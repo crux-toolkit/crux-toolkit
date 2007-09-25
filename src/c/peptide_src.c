@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -236,7 +236,6 @@ PEPTIDE_TYPE_T get_peptide_src_peptide_type(
   return peptide_src->peptide_type;
 }
 
-
 /**
  * sets the parent protein
  */
@@ -337,11 +336,6 @@ void serialize_peptide_src(
   int protein_idx = get_protein_protein_idx(peptide_src->parent_protein);
   fwrite(&protein_idx, sizeof(int), 1, file);
     
-  /*
-  //write the single peptide_src struct
-  fwrite(peptide_src, get_peptide_src_sizeof(), 1, file);        
-  */
-
   //write peptide src type(tryptic, all, ...)
   fwrite(&(peptide_src->peptide_type), sizeof(PEPTIDE_TYPE_T), 1, file);
   //write start index in protein of peptide in this peptide src

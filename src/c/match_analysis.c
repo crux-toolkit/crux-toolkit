@@ -1,9 +1,11 @@
-#/*****************************************************************************
+/*****************************************************************************
  * \file match_analysis.c
  * AUTHOR: Chris Park
  * CREATE DATE: Jan 03 2007
- * DESCRIPTION: Given as input an ms2 file, a sequence database, and an optional parameter file, 
- * search all the spectrum against the peptides in the sequence database, and return high scoring peptides. 
+ * DESCRIPTION: Given as input an ms2 file, a sequence database, and an 
+ *              optional parameter file, search all the spectrum against 
+ *              the peptides in the sequence database, and return the high 
+ *              scoring peptides. 
  * REVISION: 
  ****************************************************************************/
 #include <stdlib.h>
@@ -36,8 +38,7 @@ void wrong_command(char* arg, char* comment){
     carp(CARP_FATAL, "%s", comment);
   }
 
-  //FIXME uncomment this print if want to print usage whenever error message is printed
-  //fprintf(stderr, "%s", usage);
+  fprintf(stderr, "%s", usage);
   free(usage);
   exit(1);
 }
@@ -50,7 +51,8 @@ int main(int argc, char** argv){
   char* psm_result_folder = NULL;
   
   //required
-  char* fasta_file = NULL;
+  char* fasta_file   = NULL;
+  char* feature_file = NULL;
 
   //parsing variables
   int result = 0;
@@ -84,10 +86,17 @@ int main(int argc, char** argv){
   /* Define required command line arguments */
   parse_arguments_set_req(
     "fasta-file", 
-    "The name of the file (in fasta format) from which to retrieve proteins and peptides.",
+    "The name of the file (in fasta format) from which to retrieve proteins "
+    "and peptides.",
     (void *) &fasta_file, 
     STRING_ARG);
   
+  parse_arguments_set_opt(
+    "feature-file",
+    "Optional file in which to write the features",
+    (void *) &feature_file,
+    STRING_ARG); 
+
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
     ALGORITHM_TYPE_T algorithm = PERCOLATOR;
@@ -120,14 +129,16 @@ int main(int argc, char** argv){
     if(strcmp(get_string_parameter_pointer("algorithm"), "percolator")== 0){
       algorithm = PERCOLATOR;
     }
-    else if(strcmp(get_string_parameter_pointer("algorithm"), "retention-czar")== 0){
+    else if(strcmp(get_string_parameter_pointer("algorithm"), 
+                                                "retention-czar")== 0){
       algorithm = CZAR;
     }
     else if(strcmp(get_string_parameter_pointer("algorithm"), "all")== 0){
       algorithm = ALL;
     }
     else{
-      wrong_command(psm_algorithm, "The analysis algorithm to use. percolator|retention-czar|all");
+      wrong_command(psm_algorithm, 
+        "The analysis algorithm to use. percolator|retention-czar|all");
     }
     
     unsigned int number_features = 20;
@@ -141,34 +152,42 @@ int main(int argc, char** argv){
     MATCH_COLLECTION_T* target_match_collection = NULL;
     int set_idx = 0;
     
-    //create MATCH_COLLECTION_ITERATOR_T object
-    //which willd read in the serialized output PSM results and return
-    // first the match_collection of TARGET fallowed the decoy match_collections.
+    // create MATCH_COLLECTION_ITERATOR_T object
+    // which will read in the serialized output PSM results and return
+    // first the match_collection of TARGET followed by 
+    // the DECOY* match_collections.
     MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
       new_match_collection_iterator(psm_result_folder, fasta_file);
 
-    //iterate over each, TARGET, DECOY 1..3 match_collection sets
+    // iterate over each, TARGET, DECOY 1..3 match_collection sets
     while(match_collection_iterator_has_next(match_collection_iterator)){
 
-      //get the next match_collection
-      match_collection = match_collection_iterator_next(match_collection_iterator);
+      // get the next match_collection
+      match_collection = 
+        match_collection_iterator_next(match_collection_iterator);
       
-      //intialize percolator, using information from first match_collection
+      // intialize percolator, using information from first match_collection
       if(set_idx == 0){
-        //the first match_collection is the target_match_collection
+        // the first match_collection is the target_match_collection
         target_match_collection = match_collection;
 
-        //result array that stores the algorithm scores
-        results_q = (double*)mycalloc(get_match_collection_match_total(match_collection), sizeof(double));
-        results_score = (double*)mycalloc(get_match_collection_match_total(match_collection), sizeof(double));
+        // result array that stores the algorithm scores
+        results_q = (double*)mycalloc(
+            get_match_collection_match_total(match_collection), sizeof(double));
+        results_score = (double*)mycalloc(
+            get_match_collection_match_total(match_collection), sizeof(double));
         
         // Call that initiates percolator
-        pcInitiate((NSet)get_match_collection_iterator_number_collections(match_collection_iterator), 
-                   number_features, get_match_collection_match_total(match_collection), feature_names, pi0);
-    
+        pcInitiate(
+            (NSet)get_match_collection_iterator_number_collections(
+                    match_collection_iterator), 
+            number_features, 
+            get_match_collection_match_total(match_collection), 
+            feature_names, 
+            pi0);
         
-        //Call that sets verbosity level
-        //0 is quiet, 2 is default, 5 is more than you want
+        // Call that sets verbosity level
+        // 0 is quiet, 2 is default, 5 is more than you want
         if(verbosity < CARP_ERROR){
           pcSetVerbosity(0);
         }    
@@ -180,14 +199,39 @@ int main(int argc, char** argv){
         }
       }
 
-      //create iterator, to register each PSM feature to Percolator
+      // create iterator, to register each PSM feature to Percolator
       match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
       
+      FILE* feature_fh = NULL;
+      if (feature_file != NULL){
+        if((feature_fh = fopen(feature_file, "w")) == NULL){
+          carp(CARP_FATAL, "Problem opening output file %s", feature_file);
+          exit(1);
+        }
+      }
+
       while(match_iterator_has_next(match_iterator)){
         match = match_iterator_next(match_iterator);
-        
-        //Register PSM with features to Percolator    
+        // Register PSM with features to Percolator    
         features = get_match_percolator_features(match, match_collection);
+
+        if (feature_fh != NULL){
+          
+          if (get_match_null_peptide(match) == FALSE){
+            fprintf(feature_fh, "1\t");
+          } else { 
+            fprintf(feature_fh, "0\t");
+          };
+
+          unsigned int feature_idx;
+          for (feature_idx = 0; feature_idx < number_features; feature_idx++){
+            if (feature_idx < number_features - 1){
+              fprintf(feature_fh, "%.4f\t", features[feature_idx]);
+            } else {
+              fprintf(feature_fh, "%.4f\n", features[feature_idx]);
+            }
+          }
+        }
         
         pcRegisterPSM((SetType)set_idx, 
                       NULL, //no sequence used

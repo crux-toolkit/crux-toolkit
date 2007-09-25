@@ -133,6 +133,7 @@ void initialize_parameters(void){
   
   //match_analysis
   set_string_parameter("algorithm", "percolator");
+  set_string_parameter("feature-file", "match_analysis.features");
   set_double_parameter("pi0", 0.9);
 
   //now we have initialized the parameters

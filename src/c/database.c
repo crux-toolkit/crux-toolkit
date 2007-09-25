@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -98,8 +98,9 @@ DATABASE_T* new_database(
   set_database_filename(database, filename);
   database->use_light_protein = use_light_protein;
   database->is_memmap = is_memmap;
+  database->num_proteins = 0;
 
-  //increment database pointer counter
+  // increment database pointer counter
   add_database_pointer_count(database);
   
   return database;
@@ -275,11 +276,11 @@ BOOLEAN_T parse_database_text_fasta(
           set_protein_is_light(new_protein, TRUE);
         }
         else{
-          //rewind to the begining of the protein to include ">" line
+          // rewind to the beginning of the protein to include ">" line
           fseek(file, working_index, SEEK_SET);
           
-          //failed to parse the protein from fasta file
-          //protein offset is set in the parse_protein_fasta_file method
+          // failed to parse the protein from fasta file
+          // protein offset is set in the parse_protein_fasta_file method
           if(!parse_protein_fasta_file(new_protein ,file)){
             fclose(file);
             free_protein(new_protein);
@@ -487,7 +488,7 @@ BOOLEAN_T parse_database(
     }
   }
   
-  //succeded to parse database!
+  // succeeded in parsing database
   return TRUE;
 }
 

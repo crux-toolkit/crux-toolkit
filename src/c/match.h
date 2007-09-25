@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.13 $ 
+ * $Revision: 1.14 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -144,7 +144,6 @@ MATCH_T* parse_match(
 char* get_match_sequence(
   MATCH_T* match ///< the match to work -in
   );
-
 
 /**
  * Must ask for score that has been computed

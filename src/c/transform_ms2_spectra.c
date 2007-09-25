@@ -42,16 +42,32 @@ int main(int argc, char** argv){
   parse_spectrum_collection(collection);
   SPECTRUM_ITERATOR_T* iterator = new_spectrum_iterator(collection);
   
+
+  int length = 1000000;
+  int* seen = (int*) malloc(sizeof(int) * length);
+  int idx;
+  for (idx =0 ; idx < length; idx++){
+    seen[idx] = 0;
+  }
+
   while(spectrum_iterator_has_next(iterator)){
     spectrum = spectrum_iterator_next(iterator);
-    int num_z = get_num_possible_z(spectrum);
-    if (num_z == 1){
+    int scan = get_spectrum_first_scan(spectrum);
+    int* zs = get_spectrum_possible_z_pointer(spectrum);
+    if (zs[0] == 1){
       add_possible_z(spectrum, 2);
       add_possible_z(spectrum, 3);
-    } else {
+    } else if (zs[0] == 2){
       add_possible_z(spectrum, 1);
+      add_possible_z(spectrum, 3);
+    } else if (zs[0] == 3){
+      add_possible_z(spectrum, 1);
+      add_possible_z(spectrum, 2);
     }
-    print_spectrum(spectrum, stdout);
+    if (seen[scan] == 0){
+      print_spectrum(spectrum, stdout);
+      seen[scan] = 1;
+    }
   }
 
   return(0);
