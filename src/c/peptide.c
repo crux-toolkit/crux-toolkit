@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.56 $
+ * $Revision: 1.57 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -1237,8 +1237,10 @@ char* get_peptide_hash_value(
  *\returns a randomly shuffled sequence but preserves the tryptic property
  */
 char* generate_shuffled_sequence(
-  PEPTIDE_T* peptide, ///< The peptide sequence to shuffle -in                                
-  PEPTIDE_TYPE_T peptide_type ///< The peptide type to enfore on the shuffled sequence
+  PEPTIDE_T* peptide, 
+  ///< The peptide sequence to shuffle -in                                
+  PEPTIDE_TYPE_T peptide_type 
+  ///< The peptide type to enfore on the shuffled sequence
   )
 {
   char* sequence = get_peptide_sequence(peptide);
@@ -1248,7 +1250,7 @@ char* generate_shuffled_sequence(
   int switch_idx = 0;
   char temp_char = 0;
 
-  //set shuffle bound
+  // set shuffle bound
   if(peptide_type == TRYPTIC){
     ++start_idx;
     --end_idx;
@@ -1260,8 +1262,7 @@ char* generate_shuffled_sequence(
     --end_idx;
   }
   
-  //shuffle from left ot right
-  //using the Knuth algorithm for shuffle
+  // shuffle from left ot right, using the Knuth algorithm for shuffling.
   while(start_idx < end_idx){
     switch_idx = get_random_number_interval(start_idx, end_idx);
     temp_char = sequence[start_idx];

@@ -159,6 +159,14 @@ int main(int argc, char** argv){
     MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
       new_match_collection_iterator(psm_result_folder, fasta_file);
 
+    FILE* feature_fh = NULL;
+    if (feature_file != NULL){
+      if((feature_fh = fopen(feature_file, "w")) == NULL){
+        carp(CARP_FATAL, "Problem opening output file %s", feature_file);
+        exit(1);
+      }
+    }
+
     // iterate over each, TARGET, DECOY 1..3 match_collection sets
     while(match_collection_iterator_has_next(match_collection_iterator)){
 
@@ -202,14 +210,6 @@ int main(int argc, char** argv){
       // create iterator, to register each PSM feature to Percolator
       match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
       
-      FILE* feature_fh = NULL;
-      if (feature_file != NULL){
-        if((feature_fh = fopen(feature_file, "w")) == NULL){
-          carp(CARP_FATAL, "Problem opening output file %s", feature_file);
-          exit(1);
-        }
-      }
-
       while(match_iterator_has_next(match_iterator)){
         match = match_iterator_next(match_iterator);
         // Register PSM with features to Percolator    
@@ -234,7 +234,7 @@ int main(int argc, char** argv){
         }
         
         pcRegisterPSM((SetType)set_idx, 
-                      NULL, //no sequence used
+                      NULL, // no sequence used
                       features);
         
         free(features);
@@ -249,6 +249,10 @@ int main(int argc, char** argv){
       }
 
       ++set_idx;
+    } // end iteratation over each, TARGET, DECOY 1..3 match_collection sets
+
+    if (feature_fh != NULL){
+      fclose(feature_fh);
     }
     
     /***** PERCOLATOR run *********/

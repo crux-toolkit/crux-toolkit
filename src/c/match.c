@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.37 $
+ * REVISION: $Revision: 1.38 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -354,28 +354,30 @@ double* get_match_percolator_features(
   float weight_diff = get_peptide_peptide_mass(match->peptide) -
     get_spectrum_neutral_mass(match->spectrum, match->charge);
 
-  //Xcorr
+  // Xcorr
   feature_array[0] = get_match_score(match, XCORR);
-  //DeltCN
+  // DeltCN
   feature_array[1] = match->delta_cn;
-  //DeltLCN
+  // DeltLCN
   feature_array[2] = match->ln_delta_cn;
-  //SP
+  // SP
   feature_array[3] = get_match_score(match, SP);
-  //lnrSP
+  // lnrSP
   feature_array[4] = logf(get_match_rank(match, SP));
-  //dM
+  // dM
   feature_array[5] = weight_diff;
-  //absdM
+  // absdM
   feature_array[6] = fabsf(weight_diff);
-  //Mass
+  // Mass
   feature_array[7] = get_spectrum_neutral_mass(match->spectrum, match->charge);
-  //ionFrac
+  // ionFrac
   feature_array[8] = match->b_y_ion_match;
-  //lnSM
+  // lnSM
   feature_array[9] = match->ln_experiment_size;
   
-  //peptide cleavage info.
+  // peptide cleavage info.
+  // START figure out the right way to set these features for on the fly
+  // peptide generation
   if(match->overall_type == TRYPTIC){
     feature_array[10] = TRUE;
     feature_array[11] = TRUE;
@@ -387,13 +389,13 @@ double* get_match_percolator_features(
     feature_array[11] = TRUE;
   }
   
-  //get the missed cleave sites
+  // get the missed cleave sites
   feature_array[12] = get_peptide_missed_cleavage_sites(match->peptide);
   
-  //pepLen
+  // pepLen
   feature_array[13] = get_peptide_length(match->peptide);
   
-  //set charge
+  // set charge
   if(match->charge == 1){
     feature_array[14] = TRUE;
   }
@@ -404,27 +406,27 @@ double* get_match_percolator_features(
     feature_array[16] = TRUE;
   }
   
-  //run specific features
+  // run specific features
   feature_array[17] 
 		= get_match_collection_hash(match_collection, match->peptide);
   
   src_iterator = new_peptide_src_iterator(match->peptide);
   
-  //iterate overall parent proteins
-  //find largest numProt and pepSite among the parent proteins
+  // iterate overall parent proteins
+  // find largest numProt and pepSite among the parent proteins
   while(peptide_src_iterator_has_next(src_iterator)){
     peptide_src = peptide_src_iterator_next(src_iterator);
     protein = get_peptide_src_parent_protein(peptide_src);
     protein_idx = get_protein_protein_idx(protein);
     
-    //numProt
+    // numProt
     if(feature_array[18] < get_match_collection_protein_counter(
 														match_collection, protein_idx)){
       feature_array[18] = get_match_collection_protein_counter(
 														match_collection, protein_idx);
     }
     
-    //pepSite
+    // pepSite
     if(feature_array[19] < get_match_collection_protein_peptide_counter(
 														match_collection, protein_idx)){
       feature_array[19] = get_match_collection_protein_peptide_counter(
@@ -432,7 +434,7 @@ double* get_match_percolator_features(
     }
   }
   
-  //now check that no value is with in infinity
+  // now check that no value is with in infinity
   int check_idx;
   for(check_idx=0; check_idx < 20; ++check_idx){
     float feature = feature_array[check_idx];
@@ -462,37 +464,37 @@ MATCH_T* parse_match(
   SPECTRUM_T* spectrum = NULL;
   PEPTIDE_T* peptide = NULL;
   
-  //this is a post_process match object
+  // this is a post_process match object
   match->post_process_match = TRUE;
   int score_type_idx = 0;
   
-  //parse score, ranks of the match    
+  // parse score, ranks of the match    
   if((peptide = parse_peptide(result_file, database, TRUE))== NULL){
     carp(CARP_ERROR, "failed to parse peptide");
     exit(1);
   }
   
-  //parse each score and rank of match
+  // parse each score and rank of match
   for(; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
     fread(&(match->match_scores[score_type_idx]), sizeof(float), 1, result_file);
     fread(&(match->match_rank[score_type_idx]), sizeof(int), 1, result_file);
   }
   
-  //parse spectrum
+  // parse spectrum
   if((spectrum = parse_spectrum_binary(result_file))== NULL){
     carp(CARP_ERROR, "failed to");
   }
   
-  //spectrum specific features
+  // spectrum specific features
   fread(&(match->b_y_ion_match), sizeof(float), 1, result_file);
 
-  //parse match peptide overall trypticity
+  // parse match peptide overall trypticity
   fread(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, result_file);
   
-  //parse if match is it null_peptide?
+  // parse if match is it null_peptide?
   fread(&(match->null_peptide), sizeof(BOOLEAN_T), 1, result_file);
 
-  //assign fields
+  // assign fields
   match->peptide_sequence = NULL;
   match->spectrum = spectrum;
   match->peptide = peptide;
@@ -507,7 +509,7 @@ MATCH_T* parse_match(
 
 
 /**
- * Returns a heap allocaated peptide sequence of the PSM
+ * Returns a heap allocated peptide sequence of the PSM
  * User must free the sequence.
  *
  * Go to top README for N,C terminus tryptic feature info.
@@ -629,7 +631,7 @@ PEPTIDE_T* get_match_peptide(
 }
 
 /**
- * sets the match peptide, and also determines the overall trypticity of the peptide
+ * sets the match peptide, and also determines the peptide trypticity 
  * Go to top README for N,C terminus tryptic feature info.
  */
 void set_match_peptide(
@@ -637,28 +639,28 @@ void set_match_peptide(
   PEPTIDE_T* peptide  ///< the working peptide -in
   )
 {
-  //first set peptide
+  // first set peptide
   match->peptide = peptide;
   
-  //now set peptide overall trypticity
+  // now set peptide overall trypticity
   PEPTIDE_SRC_ITERATOR_T* src_iterator = 
     new_peptide_src_iterator(peptide);
 
   PEPTIDE_SRC_T* peptide_src = NULL;
 
-  //iterate overall parent proteins
-  //determine the match overal trypticity
-  //for more detail look at README at top
+  // iterate overall parent proteins
+  // determine the match overal trypticity
+  // for more detail look at README at top
   while(peptide_src_iterator_has_next(src_iterator)){
     peptide_src = peptide_src_iterator_next(src_iterator);
 
-    //now if its tryptic we are done
+    // now if its tryptic we are done
     if(get_peptide_src_peptide_type(peptide_src) == TRYPTIC){
       match->overall_type = TRYPTIC;
       break;
     }
     else if(get_peptide_src_peptide_type(peptide_src) == N_TRYPTIC){
-      //now there're at least tryptic on both side
+      // now there're at least tryptic on both side
       // thus now we set as Tryptic and are done
       if(match->overall_type == C_TRYPTIC){
         match->overall_type = TRYPTIC;
