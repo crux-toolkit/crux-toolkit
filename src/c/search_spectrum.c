@@ -48,7 +48,7 @@ int main(int argc, char** argv){
   int charge = 2;
   char* prelim_score_type = "sp";
   char* score_type = "xcorr";
-  char* parameter_file = "crux_parameter";
+  char* parameter_file = "crux.params";
   int verbosity = CARP_ERROR;
   
   //required

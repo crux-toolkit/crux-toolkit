@@ -51,7 +51,7 @@ int main(int argc, char** argv){
   
   //optional variables
   char* type = "SP";
-  char* parameter_file = "crux_parameter";
+  char* parameter_file = "crux.params";
   
   //parsing variables
   int result = 0;

@@ -26,32 +26,31 @@
 #include "match_collection.h"
 
 /**
- * when wrong command is seen carp, and exit
+ * When wrong command is seen carp, and exit
  */
 void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("search_spectra");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
-  //print comment if given
+  // print comment if given
   if(comment != NULL){
     carp(CARP_FATAL, "%s", comment);
   }
 
-  //FIXME uncomment this print if want to print usage whenever error message is printed
-  //fprintf(stderr, "%s", usage);
+  fprintf(stderr, "%s", usage);
   free(usage);
   exit(1);
 }
 
 int main(int argc, char** argv){
-  /* Set default values for any options here */
+  // Set default values for any options here
 
-  //optional
+  // optional
   char* prelim_score_type = "sp";
   char* score_type = "xcorr";
-  char* parameter_file = "crux_parameter";
+  char* parameter_file = "crux.params";
   int verbosity = CARP_ERROR;
-  char* match_output_folder = "."; //FIXME if needed..
+  char* match_output_folder = "."; 
   char* output_mode = "binary";
   char* sqt_output_file = "target.psm";
   char* decoy_sqt_output_file = "decoy.psm";
@@ -61,15 +60,15 @@ int main(int argc, char** argv){
   char* spectrum_charge = "all";
   double number_runs = BILLION;
 
-  //required
+  // required
   char* ms2_file = NULL;
   char* fasta_file = NULL;
   
-  //parsing variables
+  // parsing variables
   int result = 0;
   char* error_message;
 
-  /* Define optional command line arguments */   
+  // Define optional command line arguments
   parse_arguments_set_opt(
     "verbosity", 
     "Specify the verbosity of the current processes from 0-100.",
@@ -120,7 +119,7 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "score-type", 
-    "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | logp_exp_sp | logp_bonf_exp_sp | xcorr",
+    "The type of scoring function to use. xcorr | xcorr_logp | sp_logp",
     (void *) &score_type, 
     STRING_ARG);
 
@@ -148,7 +147,7 @@ int main(int argc, char** argv){
     (void *) &number_runs, 
     DOUBLE_ARG);
 
-  /* Define required command line arguments */
+  // Define required command line arguments
   parse_arguments_set_req(
     "ms2", 
     "The name of the file (in MS2 format) from which to parse the spectrum.",
@@ -157,11 +156,11 @@ int main(int argc, char** argv){
 
   parse_arguments_set_req(
     "fasta-file", 
-    "The name of the file (in fasta format) from which to retrieve proteins and peptides.",
+    "The name of the file (in fasta format) from which to retrieve peptides.",
     (void *) &fasta_file, 
     STRING_ARG);
   
-  /* Parse the command line */
+  // Parse the command line
   if (parse_arguments(argc, argv, 0)) {
 
     //parse arguments
@@ -201,7 +200,8 @@ int main(int argc, char** argv){
     set_string_parameter("use-index", "T");
 
     //generate sqt ouput file if not set by user
-    if(strcmp(get_string_parameter_pointer("sqt-output-file"), "Prefix of <ms2 input filename>.psm") ==0){
+    if(strcmp(
+          get_string_parameter_pointer("sqt-output-file"), "default.sqt") ==0){
       sqt_output_file = generate_name(ms2_file, ".psm", ".ms2", NULL);
       decoy_sqt_output_file = generate_name(ms2_file, ".decoypsm", ".ms2", NULL);
       set_string_parameter("sqt-output-file", sqt_output_file);
@@ -232,38 +232,32 @@ int main(int argc, char** argv){
       spectrum_charge_to_run = 3;
     }
     else{
-      wrong_command(spectrum_charge, "The spectrum charges to search. 1|2|3|all");
+      wrong_command(spectrum_charge, "The spectrum charges to search must "
+          "be one of the following: 1|2|3|all");
     }
     
     //number_decoy_set
     number_decoy_set = get_int_parameter("number-decoy-set");
 
     //main score type
-    if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
-      main_score = LOGP_EXP_SP;
-    }
-    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_bonf_exp_sp")== 0){
-      main_score = LOGP_BONF_EXP_SP;
-    }    
-    else if(strcmp(get_string_parameter_pointer("score-type"), "xcorr")== 0){
+    char* score_type = get_string_parameter_pointer("score-type");
+    if(strcmp(score_type, "xcorr")== 0){
       main_score = XCORR;
-    }
-    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_evd_xcorr")== 0){
-      main_score = LOGP_EVD_XCORR;
-    }
-    else if(strcmp(get_string_parameter_pointer("score-type"), "logp_bonf_evd_xcorr")== 0){
-      main_score = LOGP_BONF_EVD_XCORR;
-    }
-    else{
-      wrong_command(score_type, "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr");
+    } else if(strcmp(score_type, "xcorr_logp")== 0){
+      main_score = LOGP_BONF_WEIBULL_XCORR;
+    } else if(strcmp(score_type, "sp_logp")== 0){
+      main_score = LOGP_BONF_WEIBULL_SP;
+    } else {
+      wrong_command(score_type, "The main scoring function must be one of"
+          " the following: xcorr | xcorr_logp | sp_logp ");
     }
     
     //preliminary score type
     if(strcmp(get_string_parameter_pointer("prelim-score-type"), "sp")== 0){
       prelim_score = SP;
-    }
-    else{
-      wrong_command(prelim_score_type, "The type of preliminary scoring function to use. sp");
+    } else {
+      wrong_command(prelim_score_type, 
+          "The preliminary scoring function must be one of the following: sp");
     }
         
     //get output-mode
@@ -277,7 +271,8 @@ int main(int argc, char** argv){
       output_type = ALL_OUTPUT;
     }
     else{
-      wrong_command(output_mode, "The output mode to use. binary|sqt|all");
+      wrong_command(output_mode, "The output mode must be one of the following:"
+          " binary|sqt|all");
     }
     
     //set max number of preliminary scored peptides to use for final scoring
@@ -294,25 +289,25 @@ int main(int argc, char** argv){
 
     //seed for random rnumber generation
     if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
-      //use current time to seed
-      
+
+      // use current time to seed
       time_t seconds;
+
       // Get value from system clock and
       // place in seconds variable.
-      //
       time(&seconds);
       
-      //  Convert seconds to a unsigned
-      //  integer.
+      // Convert seconds to a unsigned
+      // integer.
       srand((unsigned int) seconds);
     }
     else{
       srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
-      //FIXME add more ways to seed the random generator
+      // TODO add more ways to seed the random generator
     }
 
 
-    /************** done with parameter setting **************/
+    /************** Finished parameter setting **************/
     
     char** psm_result_filenames = NULL;
     FILE** psm_result_file = NULL;
@@ -322,21 +317,21 @@ int main(int argc, char** argv){
     int file_idx = 0;
     BOOLEAN_T is_decoy = FALSE;
 
-    //read ms2 file
+    // read ms2 file
     collection = new_spectrum_collection(ms2_file);
     
-    //parse the ms2 file for spectra
+    // parse the ms2 file for spectra
     if(!parse_spectrum_collection(collection)){
       carp(CARP_ERROR, "failed to parse ms2 file: %s", ms2_file);
-      //free, exit
+      // free, exit
       exit(1);
     }
     
-    //create spectrum iterator
+    // create spectrum iterator
     spectrum_iterator = new_spectrum_iterator(collection);
     
-    //get psm_result file handler array
-    //this includes one for the target and for the decoys
+    // get psm_result file handler array
+    // this includes one for the target and for the decoys
     psm_result_file = 
       get_spectrum_collection_psm_result_filename(collection,
                                                   match_output_folder,
@@ -370,7 +365,7 @@ int main(int argc, char** argv){
      */
     
     // serialize the header information for all files(target & decoy)
-    for(; file_idx < total_files; ++file_idx){
+    for(file_idx=0; file_idx < total_files; ++file_idx){
       serialize_header(collection, fasta_file, psm_result_file[file_idx]);
     }
 
@@ -430,7 +425,7 @@ int main(int argc, char** argv){
           serialize_psm_features(match_collection, psm_result_file[file_idx], 
               top_match, prelim_score, main_score);
           
-          //should I ouput the match_collection result as a SQT file?
+          //should I output the match_collection result as a SQT file?
           // Output only for the target set
           //FIXME ONLY one header
           if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
