@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -53,11 +53,11 @@ FILE* get_output_file(
 {
   char* name = NULL;
   
-  //create a binary fasta file?
+  // create a binary fasta file?
   if(is_binary_file){
     name = generate_name(fasta_file, "_binary_fasta", ".fasta", NULL);
   }
-  else{//create a normal protein index file
+  else{// create a normal protein index file
     name = generate_name(fasta_file, "_protein_index", ".fasta", NULL);
   }
   
@@ -83,19 +83,19 @@ BOOLEAN_T create_protein_index(
   unsigned int protein_idx = 0;
   FILE* output_file = NULL;
 
-  //open file and 
+  // open file and 
   file = fopen(fasta_file, "r");
 
-  //check if succesfully opened file
+  // check if succesfully opened file
   if(file == NULL){
     carp(CARP_FATAL, "failed to open fasta file");
     return FALSE;
   }
 
-  //get output file
+  // get output file
   output_file = get_output_file(fasta_file, FALSE);
 
-  //check if succesfully created file
+  // check if succesfully created file
   if(output_file == NULL){
     carp(CARP_FATAL, "failed to create protein index file");
     fclose(file);
@@ -103,7 +103,7 @@ BOOLEAN_T create_protein_index(
   }
 
   working_index = ftell(file);
-  //check each line until reach '>' line
+  // check each line until reach '>' line
   while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == '>'){ 
       ++protein_idx;
@@ -163,15 +163,15 @@ BOOLEAN_T protein_index_on_disk(
 {
   char* name = NULL;
   
-  //create a binary fasa file?
+  // create a binary fasa file?
   if(is_binary){
     name = generate_name(fasta_file, "_binary_fasta", ".fasta", NULL);
   }
-  else{//create a normal protein index file
+  else{// create a normal protein index file
     name = generate_name(fasta_file, "_protein_index", ".fasta", NULL);
   }
   
-  //check if can open file
+  // check if can open file
   if(access(name, F_OK)){
     free(name);
     return FALSE;
@@ -195,13 +195,13 @@ BOOLEAN_T setup_protein_index_iterator(
   PROTEIN_INDEX_ITERATOR_T* protein_index_iterator ///< the iterator to setup -in
   )
 {
-  //used to parse each line from file
+  // used to parse each line from file
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
   FILE* file = protein_index_iterator->file;
 
-  //protein fields
+  // protein fields
   char star[2] = "";
   unsigned long int offset;
   unsigned int protein_idx;
@@ -210,9 +210,9 @@ BOOLEAN_T setup_protein_index_iterator(
   BOOLEAN_T found = FALSE;
 
   while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
-    //begining of the protein feilds
+    // begining of the protein feilds
     if(new_line[0] == '*'){
-      //read the crux_index_file information
+      // read the crux_index_file information
       if(sscanf(new_line,"%s %d %ld", 
                 star, &protein_idx, &offset) < 2){
         free(new_line);
@@ -223,19 +223,19 @@ BOOLEAN_T setup_protein_index_iterator(
       found = TRUE;
       break;
     }
-    //skip header lines
+    // skip header lines
     else if(new_line[0] == '#'){
       continue;
     }
   }
   
-  //there is a next protein to return
+  // there is a next protein to return
   if(found){
     protein = new_light_protein(offset, protein_idx);
     protein_index_iterator->next_protein = protein;
     protein_index_iterator->has_next = TRUE;
   }
-  //no more proteins..
+  // no more proteins..
   else{
     protein_index_iterator->has_next = FALSE;
   }
@@ -267,7 +267,7 @@ PROTEIN_INDEX_ITERATOR_T* new_protein_index_iterator(
   
   iterator->file = file;
   
-  //set up the protein_index_iterator
+  // set up the protein_index_iterator
   if(!setup_protein_index_iterator(iterator)){
     carp(CARP_FATAL, "failed to setup protein_index_iterator");
     exit(1);
@@ -283,14 +283,14 @@ void free_protein_index_iterator(
   PROTEIN_INDEX_ITERATOR_T* protein_index_iterator ///< the iterator to free -in
   )
 {
-  //free the file handler
+  // free the file handler
   fclose(protein_index_iterator->file);
 
-  //free unused protein
+  // free unused protein
   if(protein_index_iterator->next_protein != NULL){
     free_protein(protein_index_iterator->next_protein);
   }
-  //free iterator
+  // free iterator
   free(protein_index_iterator);
 }
 
@@ -316,7 +316,7 @@ PROTEIN_T* protein_index_iterator_next(
   PROTEIN_T* protein = protein_index_iterator->next_protein;
   protein_index_iterator->next_protein = NULL;
 
-  //set up the protein_index_iterator
+  // set up the protein_index_iterator
   if(!setup_protein_index_iterator(protein_index_iterator)){
     free_protein_index_iterator(protein_index_iterator);
     carp(CARP_FATAL, "failed to setup protein_index_iterator");
@@ -349,16 +349,16 @@ BOOLEAN_T create_binary_fasta_fuction(
   unsigned int protein_idx = 0;
   PROTEIN_T* new_protein = NULL;
 
-  //open file and 
+  // open file and 
   file = fopen(fasta_file, "r");
 
-  //check if succesfully opened file
+  // check if succesfully opened file
   if(file == NULL){
     carp(CARP_FATAL, "failed to open fasta file");
     return FALSE;
   }
 
-  //check if succesfully created file
+  // check if succesfully created file
   if(output_file == NULL){
     carp(CARP_FATAL, "failed to create protein index file");
     fclose(file);
@@ -366,17 +366,17 @@ BOOLEAN_T create_binary_fasta_fuction(
   }
   
   working_index = ftell(file);
-  //check each line until reach '>' line
+  // check each line until reach '>' line
   while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == '>'){
-      //the new protein to be serialize
+      // the new protein to be serialize
       new_protein = allocate_protein();
       
-      //rewind to the begining of the protein to include ">" line
+      // rewind to the begining of the protein to include ">" line
       fseek(file, working_index, SEEK_SET);
           
-      //failed to parse the protein from fasta file
-      //protein offset is set in the parse_protein_fasta_file method
+      // failed to parse the protein from fasta file
+      // protein offset is set in the parse_protein_fasta_file method
       if(!parse_protein_fasta_file(new_protein ,file)){
         fclose(file);
         free_protein(new_protein);
@@ -385,17 +385,17 @@ BOOLEAN_T create_binary_fasta_fuction(
       }
       set_protein_is_light(new_protein, FALSE);
       
-      //serialize protein as binary to output file
+      // serialize protein as binary to output file
       serialize_protein(new_protein, output_file);
 
-      //update protein count
+      // update protein count
       ++protein_idx;
 
-      //free this protein
+      // free this protein
       free_protein(new_protein);
     }
     
-    //print status
+    // print status
     if(protein_idx % 1000 == 0){
       carp(CARP_INFO, "Reached protein: %d", protein_idx);
     }
@@ -403,10 +403,10 @@ BOOLEAN_T create_binary_fasta_fuction(
     working_index = ftell(file);
   }
 
-  //write the end character to binary fasta file
+  // write the end character to binary fasta file
   fwrite("*", sizeof(char), 2, output_file);
 
-  //print final status
+  // print final status
   carp(CARP_INFO, "Serialized total protein: %d", protein_idx);
   
     
@@ -425,7 +425,7 @@ BOOLEAN_T create_binary_fasta(
   char* fasta_file  ///< input fasta file -in
   )
 {
-  //get output file
+  // get output file
   FILE* output_file = get_output_file(fasta_file, TRUE);
   
   return create_binary_fasta_fuction(fasta_file, output_file);
@@ -442,10 +442,10 @@ BOOLEAN_T create_binary_fasta_in_cur(
   char** output_file_name ///< get output filename -out
   )
 {
-  //get output filename
+  // get output filename
   *output_file_name = generate_name(fasta_filename, "_binary_fasta", ".fasta", NULL);
   
-  //open output file
+  // open output file
   FILE* file = fopen(*output_file_name, "w");
   
   return create_binary_fasta_fuction(fasta_file_w_path, file);
@@ -460,13 +460,13 @@ char* get_binary_fasta_name(
   char* fasta_file  ///< input fasta file -in                            
   )
 {
-  //separate path from file name
+  // separate path from file name
   char** path_filename = parse_filename_path(fasta_file);
 
-  //get binary fasta name
+  // get binary fasta name
   char* binary_fasta_name = generate_name(path_filename[0], "_binary_fasta", ".fasta", NULL);
 
-  //free path and filename
+  // free path and filename
   free(path_filename[0]);
   if(path_filename[1] != NULL){
     free(path_filename[1]);

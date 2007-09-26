@@ -182,7 +182,7 @@ int main(int argc, char** argv){
     PEPTIDE_T* peptide = NULL;
     BOOLEAN_T output_sequence;
     
-    //set verbosity
+    // set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
     }
@@ -190,14 +190,14 @@ int main(int argc, char** argv){
       wrong_command("verbosity");
     }
 
-    //first, parse paramter file
-    //Next, updates the parameter files with command line options
+    // first, parse paramter file
+    // Next, updates the parameter files with command line options
     parse_update_parameters(parameter_file);
         
-    //parameters are now confirmed, can't be changed
+    // parameters are now confirmed, can't be changed
     parameters_confirmed();
 
-    //print header line
+    // print header line
     printf("# PROTEIN DATABASE: %s\n", get_string_parameter_pointer("fasta-file"));
     printf("# OPTIONS:\n");
     printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass"));
@@ -213,29 +213,29 @@ int main(int argc, char** argv){
     printf("#\tuse index: %s\n", get_string_parameter_pointer("use-index"));
     
     
-    //create peptide interator
+    // create peptide interator
     peptide_iterator = new_generate_peptides_iterator();
     
-    //should I output sequence?
+    // should I output sequence?
     output_sequence = get_boolean_parameter("output-sequence");
 
-    //iterate over all peptides
+    // iterate over all peptides
     while(generate_peptides_iterator_has_next(peptide_iterator)){
       ++total_peptides;
       peptide = generate_peptides_iterator_next(peptide_iterator);
       print_peptide_in_format(peptide, output_sequence, trypticity_opt, stdout);
       
-      //free peptide
+      // free peptide
       free_peptide(peptide);
 
-      //debug purpose
+      // debug purpose
       if(total_peptides% 10000 == 0){
         carp(CARP_INFO, "reached peptide: %d", total_peptides);
       }
     }
     free_generate_peptides_iterator(peptide_iterator);
     
-    //debug purpose
+    // debug purpose
     carp(CARP_INFO, "total peptides: %d", total_peptides);
     free_parameters();
     exit(0);

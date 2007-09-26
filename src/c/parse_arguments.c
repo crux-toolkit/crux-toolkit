@@ -316,7 +316,7 @@ int assign_value_from_required(/*const*/ argument * req,  /*const*/ char * value
       break;
   }
   
-  //yes this required value came from the command line
+  // yes this required value came from the command line
   req->command_line = TRUE;
 
   return NO_ERROR;
@@ -425,7 +425,7 @@ int assign_value_from_option(/*const*/ argument * option,  int *index) {
       break;
   }
   
-  //yes this optional value came from the command line
+  // yes this optional value came from the command line
   option->command_line = TRUE;
 
   return result;
@@ -794,17 +794,17 @@ BOOLEAN_T update_parameter(){
   int result = 0;
   char* bool = "FALSE";
   
-  //look at every optional arg and update parameter file
+  // look at every optional arg and update parameter file
   // if the valuse were set from command line
   for(array_idx = 0; array_idx < optional_count; ++array_idx){
     optional_arg = &optional[array_idx];
     
-    //skip the arguments that are set from default
+    // skip the arguments that are set from default
     if(!optional_arg->command_line){
       continue;
     }
     
-    //convert to string
+    // convert to string
     switch (optional_arg->type){
       case FLAG_ARG:
         if(*((int *) optional_arg->container) == 1){
@@ -831,18 +831,18 @@ BOOLEAN_T update_parameter(){
         break;
     }
 
-    //update value in paramters
+    // update value in paramters
     if(!set_options_command_line(optional_arg->name, dest, FALSE) || result < 1){
       fprintf(stderr,"failed to update parameters from command line\n");
       return FALSE;
     } 
   }
 
-  //look at every required arg and update parameter file
+  // look at every required arg and update parameter file
   for( array_idx = 0; array_idx < required_count; ++array_idx){
     required_arg = &required[array_idx];
         
-    //convert to string
+    // convert to string
     switch (required_arg->type){
       case FLAG_ARG:
         if(*((int *)required_arg->container) == 1){
@@ -872,7 +872,7 @@ BOOLEAN_T update_parameter(){
         break;
     }
 
-    //update value in paramters
+    // update value in paramters
     if(!set_options_command_line(required_arg->name, dest, TRUE) || result < 1){
       fprintf(stderr,"failed to update parameters from command line\n");
       return FALSE;

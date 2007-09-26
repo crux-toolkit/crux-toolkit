@@ -171,7 +171,7 @@ int main(int argc, char** argv){
     PEPTIDE_CONSTRAINT_T* constraint;
     INDEX_T* crux_index;
     
-    //set verbosity
+    // set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
     }
@@ -179,15 +179,15 @@ int main(int argc, char** argv){
       wrong_command("verbosity");
     }
     
-    //parse and update parameters
+    // parse and update parameters
     parse_update_parameters(parameter_file);
 
-    //parameters are now confirmed, can't be changed
+    // parameters are now confirmed, can't be changed
     parameters_confirmed();
     
     /******* All parameters must be taken through get_*_parameter() method ******/
 
-    //FIXME may add additional types such as non-tryptic or partially-tryptic
+    // FIXME may add additional types such as non-tryptic or partially-tryptic
     if(strcmp(get_string_parameter_pointer("cleavages"), "all")==0){
       peptide_type = ANY_TRYPTIC;
     }
@@ -201,7 +201,7 @@ int main(int argc, char** argv){
       wrong_command(cleavages);
     }
         
-    //check if maximum length is with in range <= 255
+    // check if maximum length is with in range <= 255
     max_length = get_int_parameter("max-length");
     if(max_length > 255){
       carp(CARP_FATAL, "maximum length:%d over limit 255.", max_length);
@@ -214,7 +214,7 @@ int main(int argc, char** argv){
       exit(1);
     }
     
-    //determine isotopic mass option
+    // determine isotopic mass option
     if(strcmp(get_string_parameter_pointer("isotopic-mass"), "average")==0){
       mass_type = AVERAGE;
     }
@@ -225,7 +225,7 @@ int main(int argc, char** argv){
       wrong_command(isotopic_mass);
     }
    
-    //determine redundancy option
+    // determine redundancy option
     if(strcmp(get_string_parameter_pointer("redundancy"), "redundant")==0){
       is_unique = FALSE;
     }
@@ -236,25 +236,25 @@ int main(int argc, char** argv){
       wrong_command(redundancy);
     }
     
-    //check if input file exist
+    // check if input file exist
     if(access(in_file, F_OK)){
       carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty).", in_file);
       exit(1);
     }
     
-    //set other parameters to final
+    // set other parameters to final
     min_mass = get_double_parameter("min-mass");
     max_mass = get_double_parameter("max-mass");
     min_length = get_int_parameter("min-length");
     max_length = get_int_parameter("max-length");
     missed_cleavages = get_boolean_parameter("missed-cleavages");
 
-    //peptide constraint
+    // peptide constraint
     constraint = 
       new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages, mass_type);
  
     
-    //create new index object
+    // create new index object
     crux_index = 
       new_index(in_file,
                 constraint,
@@ -263,12 +263,12 @@ int main(int argc, char** argv){
                 FALSE
                 );
     
-    //create crux_index files
+    // create crux_index files
     if(!create_index(crux_index)){
       die("failed to create index");
     }
     
-    //free index(frees constraint together);
+    // free index(frees constraint together);
     free_index(crux_index);     
     free(binary_fasta_file);
     free_parameters();

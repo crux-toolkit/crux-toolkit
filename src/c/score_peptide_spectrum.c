@@ -31,31 +31,31 @@ void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("predict_peptide_ions");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
-  //print comment if given
+  // print comment if given
   if(comment != NULL){
     carp(CARP_FATAL, "%s", comment);
   }
 
-  //FIXME uncomment this print if want to print usage whenever error message is printed
-  //fprintf(stderr, "%s", usage);
+  // FIXME uncomment this print if want to print usage whenever error message is printed
+  // fprintf(stderr, "%s", usage);
   free(usage);
   exit(1);
 }
 
 int main(int argc, char** argv){
 
-  //required variables
+  // required variables
   char* ms2_file = NULL;
   int scan_num = 0;
   char* peptide_sequence = NULL;
 
-  //optional variables
+  // optional variables
   char* charge = "2";
   char* type = "xcorr";
   char* parameter_file = "crux.params";
   int  verbosity = CARP_ERROR;
 
-  //parsing variables
+  // parsing variables
   int result = 0;
   char * error_message; 
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv){
 
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
-    //parsed arguments
+    // parsed arguments
     int peptide_charge = 1;
     SCORER_TYPE_T score_type = XCORR; 
     
@@ -115,7 +115,7 @@ int main(int argc, char** argv){
     SCORER_T* scorer = NULL;
     float score = 0;
     
-    //set verbosity
+    // set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
     }
@@ -123,10 +123,10 @@ int main(int argc, char** argv){
       wrong_command("verbosity", "verbosity level must be between 0-100");
     }
 
-    //set verbosity
+    // set verbosity
     set_verbosity_level(verbosity);
 
-    //parse and update parameters
+    // parse and update parameters
     parse_update_parameters(parameter_file);
     
     
@@ -136,12 +136,12 @@ int main(int argc, char** argv){
       wrong_command(charge, "The peptide charge. 1|2|3");
     }
 
-    //check peptide sequence
+    // check peptide sequence
     if(!valid_peptide_sequence(peptide_sequence)){
       wrong_command(peptide_sequence, "not a valid peptide sequence");
     }
     
-    //score type
+    // score type
     if(strcmp(get_string_parameter_pointer("score-type"), "sp")== 0){
       score_type = SP;
     }
@@ -152,15 +152,15 @@ int main(int argc, char** argv){
       wrong_command(type, "The type of scoring function to use. sp | xcorr");
     }
     
-    //parameters are now confirmed, can't be changed
+    // parameters are now confirmed, can't be changed
     parameters_confirmed();
     
-    //set ion constraint to sequest settings
+    // set ion constraint to sequest settings
     ION_CONSTRAINT_T* ion_constraint = NULL;
     
     if(score_type == SP){
       ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
-      //create new scorer
+      // create new scorer
       scorer = new_scorer(SP);  
     }
     else if(score_type == XCORR){
@@ -168,17 +168,17 @@ int main(int argc, char** argv){
       scorer = new_scorer(XCORR);  
     }
 
-    //create new ion series
+    // create new ion series
     ion_series = new_ion_series(peptide_sequence, peptide_charge, ion_constraint);
    
-   //now predict ions
+   // now predict ions
     predict_ions(ion_series);
    
-   //read ms2 file
+   // read ms2 file
     collection = new_spectrum_collection(ms2_file);
     spectrum = allocate_spectrum();
     
-    //search for spectrum with correct scan number
+    // search for spectrum with correct scan number
     if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
       carp(CARP_ERROR, "failed to find spectrum with  scan_num: %d", scan_num);
       free_ion_constraint(ion_constraint);
@@ -188,10 +188,10 @@ int main(int argc, char** argv){
       exit(1);
     }
         
-    //calculates the Sp score
+    // calculates the Sp score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
    
-    //print the Sp score
+    // print the Sp score
     if(score_type == SP){
       printf("Sp score is: %.2f\n", score);
     }
@@ -202,7 +202,7 @@ int main(int argc, char** argv){
       carp(CARP_ERROR, "invalid score type for the application");
     }
       
-   //free heap
+   // free heap
    free_scorer(scorer);
    free_ion_constraint(ion_constraint);
    free_ion_series(ion_series);

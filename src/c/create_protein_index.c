@@ -60,7 +60,7 @@ int main(int argc, char** argv){
   if (parse_arguments(argc, argv, 0)) {
     set_verbosity_level(verbosity);
     
-    //check which file to create
+    // check which file to create
     if(strcmp(type_of_file, "binary") == 0){
       is_binary = TRUE;
     }
@@ -71,20 +71,20 @@ int main(int argc, char** argv){
       wrong_command(type_of_file);
     }
     
-    //create protein index if not already present
+    // create protein index if not already present
     if(protein_index_on_disk(in_file, is_binary)){
       carp(CARP_INFO, "protein %s fasta file already exist on disk", type_of_file);
       exit(0);
     }
     
-    //shoudl I create the binary fasta file?
+    // shoudl I create the binary fasta file?
     if(is_binary){
       if(!create_binary_fasta(in_file)){
         carp(CARP_FATAL, "failed to create binary fasta file on disk");
         exit(1);
       }
     }
-    else{//create protein index file
+    else{// create protein index file
       if(!create_protein_index(in_file)){
         carp(CARP_FATAL, "failed to create protein index on disk");
         exit(1);

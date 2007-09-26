@@ -3,7 +3,7 @@
 
 /**
  * \file mass.h 
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -16,7 +16,7 @@
 #define MASS_NH3_AVERAGE 17.03056 ///< Mass of NH3 (average)
 
 
-//mass of water
+// mass of water
 #define MASS_H2O_MONO 18.01056 ///< Mass of water (monoisotopic)
 #define MASS_H2O_AVERAGE 18.0153 ///< Mass of water (average)
 
@@ -26,7 +26,7 @@
 #define MASS_H_MONO 1.0078246 ///< Mass of hydrogen (monoisotopic)
 #define MASS_H_AVERAGE 1.00794 ///< Mass of hydrogen (average)
 
-//FIXME, change in spectrum, peptide to be able to pick mono, average
+// FIXME, change in spectrum, peptide to be able to pick mono, average
 #define MASS_H 1.0078246 ///< mass of hydrogen
 
 /**

@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -112,7 +112,7 @@ void remove_spectrum(
  * Additional get and set methods
  */
 
-/**  //////TESTME////
+/**  ////// TESTME////
  * \sets the filename of the ms2 file the spectra were parsed
  * this function should be used only the first time the filename is set
  * to change existing filename use set_spectrum_collection_filename

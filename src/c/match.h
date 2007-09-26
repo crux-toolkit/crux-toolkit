@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.14 $ 
+ * $Revision: 1.15 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -129,7 +129,7 @@ double* get_match_percolator_features(
 MATCH_T* parse_match(
   FILE* result_file,  ///< the result file to parse PSMs -in
   DATABASE_T* database ///< the database to which the peptides are created -in
-  //int num_top_match  ///< number of top PSMs serialized per spectrum -in
+  // int num_top_match  ///< number of top PSMs serialized per spectrum -in
   );
 
 /****************************

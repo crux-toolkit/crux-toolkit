@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.3 $
+ * REVISION: $Revision: 1.4 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -32,7 +32,7 @@ void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("predict_peptide_ions");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
-  //print comment if given
+  // print comment if given
   if(comment != NULL){
     carp(CARP_FATAL, "%s", comment);
   }
@@ -44,19 +44,19 @@ void wrong_command(char* arg, char* comment){
 
 int main(int argc, char** argv){
 
-  //required variables
+  // required variables
   char* ms2_file = NULL;
   int scan_num = 0;
   char* peptide_file_name = NULL;
   char* output_directory = NULL;
 
-  //optional variables
+  // optional variables
   int charge = 2;
   int starting_sentence_idx = 0;
   char* parameter_file = NULL;
   int  verbosity = CARP_ERROR;
 
-  //parsing variables
+  // parsing variables
   int result = 0;
   char * error_message; 
 

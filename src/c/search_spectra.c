@@ -30,13 +30,13 @@ void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("search_spectra");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
-  //print comment if given
+  // print comment if given
   if(comment != NULL){
     carp(CARP_FATAL, "%s", comment);
   }
 
-  //FIXME uncomment this print if want to print usage whenever error message is printed
-  //fprintf(stderr, "%s", usage);
+  // FIXME uncomment this print if want to print usage whenever error message is printed
+  // fprintf(stderr, "%s", usage);
   free(usage);
   exit(1);
 }
@@ -44,7 +44,7 @@ void wrong_command(char* arg, char* comment){
 int main(int argc, char** argv){
   /* Set default values for any options here */
 
-  //optional
+  // optional
   char* prelim_score_type = "sp";
   char* score_type = "xcorr";
   char* parameter_file = "crux.params";
@@ -52,12 +52,12 @@ int main(int argc, char** argv){
   int verbosity = CARP_ERROR;
   double number_runs = BILLION;
   
-  //required
+  // required
   char* ms2_file = NULL;
   char* fasta_file = NULL;
   double mass_window = 3;
 
-  //parsing variables
+  // parsing variables
   int result = 0;
   char * error_message;
 
@@ -120,7 +120,7 @@ int main(int argc, char** argv){
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
 
-    //parse arguments
+    // parse arguments
     SCORER_TYPE_T main_score = LOGP_EXP_SP; 
     SCORER_TYPE_T prelim_score = SP; 
     
@@ -139,7 +139,7 @@ int main(int argc, char** argv){
     BOOLEAN_T run_all_charges = TRUE;
     int spectrum_charge_to_run = 0;
 
-    //set verbosity
+    // set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
     }
@@ -147,16 +147,16 @@ int main(int argc, char** argv){
       wrong_command("verbosity", "verbosity level must be between 0-100");
     }
 
-    //set verbosity
+    // set verbosity
     set_verbosity_level(verbosity);
 
-    //parse and update parameters
+    // parse and update parameters
     parse_update_parameters(parameter_file);
 
-    //always use index when search spectra!
+    // always use index when search spectra!
     set_string_parameter("use-index", "T");
     
-    //parameters are now confirmed, can't be changed
+    // parameters are now confirmed, can't be changed
     parameters_confirmed();
     
     /******* All parameters must be taken through get_*_parameter() method ******/
@@ -182,7 +182,7 @@ int main(int argc, char** argv){
       wrong_command(spectrum_charge, "The spectrum charges to search. 1|2|3|all");
     }
     
-    //main score type
+    // main score type
     if(strcmp(get_string_parameter_pointer("score-type"), "logp_exp_sp")== 0){
       main_score = LOGP_EXP_SP;
     }
@@ -205,7 +205,7 @@ int main(int argc, char** argv){
       wrong_command(score_type, "The type of scoring function to use. logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr");
     }
     
-    //preliminary score type
+    // preliminary score type
     if(strcmp(get_string_parameter_pointer("prelim-score-type"), "sp")== 0){
       prelim_score = SP;
     }
@@ -213,52 +213,52 @@ int main(int argc, char** argv){
       wrong_command(prelim_score_type, "The type of preliminary scoring function to use. sp");
     }
     
-    //set max number of preliminary scored peptides to use for final scoring
+    // set max number of preliminary scored peptides to use for final scoring
     max_rank_preliminary = get_int_parameter("max-rank-preliminary");
 
-    //set max number of final scoring matches to print as output
+    // set max number of final scoring matches to print as output
     max_rank_result = get_int_parameter("max-rank-result");
  
-    //get mass offset from precursor mass to search for candidate peptides
+    // get mass offset from precursor mass to search for candidate peptides
     mass_offset = get_double_parameter("mass-offset");
 
-    //print header
+    // print header
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
     fprintf(stdout, "# PROTEIN DATABASE: %s\n", fasta_file);
     
-    //read ms2 file
+    // read ms2 file
     collection = new_spectrum_collection(ms2_file);
     
-    //parse the ms2 file for spectra
+    // parse the ms2 file for spectra
     if(!parse_spectrum_collection(collection)){
       carp(CARP_ERROR, "failed to parse ms2 file: %s", ms2_file);
-      //free, exit
+      // free, exit
       exit(1);
     }
     
-    //create spectrum iterator
+    // create spectrum iterator
     spectrum_iterator = new_spectrum_iterator(collection);
    
     int spectra_idx = 0;
-    //iterate over all spectrum in ms2 file
+    // iterate over all spectrum in ms2 file
     while(spectrum_iterator_has_next(spectrum_iterator)){
       
-      //check if total runs exceed limit user defined
+      // check if total runs exceed limit user defined
       if(number_runs <= spectra_idx){
         break;
       }
 
-      //get next spectrum
+      // get next spectrum
       spectrum = spectrum_iterator_next(spectrum_iterator);
       
-      //get possible charge state
+      // get possible charge state
       possible_charge = get_spectrum_num_possible_z(spectrum);
       possible_charge_array = get_spectrum_possible_z_pointer(spectrum);
       
-      //iterate over all possible charge states
+      // iterate over all possible charge states
       for(charge_index = 0; charge_index < possible_charge; ++charge_index){
         
-        //skip spectra that are not in the charge state to be run
+        // skip spectra that are not in the charge state to be run
         if(!run_all_charges && 
            spectrum_charge_to_run != possible_charge_array[charge_index]){
           continue;
@@ -266,30 +266,30 @@ int main(int argc, char** argv){
         
         ++spectra_idx;
 
-        //print spectrum info
+        // print spectrum info
         fprintf(stdout, "# SPECTRUM SCAN NUMBER: %d\n", get_spectrum_first_scan(spectrum));
         fprintf(stdout, "# SPECTRUM ID NUMBER: %d\n", get_spectrum_id(spectrum));
         fprintf(stdout, "# SPECTRUM PRECURSOR m/z: %.2f\n", get_spectrum_precursor_mz(spectrum));
         fprintf(stdout, "# MASS OFFSET: %.2f\n", mass_offset);
         
-        //print working state
+        // print working state
         fprintf(stdout, "# SPECTRUM CHARGE: %d\n", possible_charge_array[charge_index]);
 	
-        //get match collection with scored, ranked match collection
+        // get match collection with scored, ranked match collection
         match_collection =
           new_match_collection_spectrum(spectrum, 
                                         possible_charge_array[charge_index], 
                                         max_rank_preliminary, prelim_score, 
                                         main_score, mass_offset, FALSE);
         
-        //print additional header
+        // print additional header
         fprintf(stdout, "# PEPTIDES SEARCHED: %d\n", get_match_collection_experimental_size(match_collection));
         fprintf(stdout, "# PEPTIDES SAMPLED FOR LOGP_SP: %d\n",get_match_collection_top_fit_sp(match_collection));
                 
-        //create match iterator, TRUE: return match in sorted order of main_score type
+        // create match iterator, TRUE: return match in sorted order of main_score type
         match_iterator = new_match_iterator(match_collection, main_score, TRUE);
         
-        //print header
+        // print header
         if(main_score == LOGP_EXP_SP){
           fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_exp_sp_rank", "sp_rank", "mass", "logp_exp_sp", "sp", "sequence");  
         }
@@ -306,20 +306,20 @@ int main(int argc, char** argv){
           fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_bonf_evd_xcorr_rank", "sp_rank", "mass", "logp_bonf_evd_xcorr", "sp", "sequence");  
         }
         
-        //iterate over matches
+        // iterate over matches
         int match_count = 0;
         while(match_iterator_has_next(match_iterator)){
           ++match_count;
           match = match_iterator_next(match_iterator);
           print_match(match, stdout, TRUE, main_score);
           
-          //print only up to max_rank_result of the matches
+          // print only up to max_rank_result of the matches
           if(match_count >= max_rank_result){
             break;
           }
         }
 	
-        //free match iterator
+        // free match iterator
         free_match_iterator(match_iterator);
         free_match_collection(match_collection);
       }

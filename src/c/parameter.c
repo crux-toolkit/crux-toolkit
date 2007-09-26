@@ -35,9 +35,9 @@ struct parameter_hash{
 
 struct parameter_hash parameters_hash_table;
 struct parameter_hash* parameters = &parameters_hash_table;
-BOOLEAN_T parameter_initialized = FALSE; //have the parameters been initialized?
-BOOLEAN_T parameter_parsed = FALSE; //have I parsed the parameter file?
-BOOLEAN_T parameter_plasticity = TRUE; //can the parameters be changed?
+BOOLEAN_T parameter_initialized = FALSE; // have the parameters been initialized?
+BOOLEAN_T parameter_parsed = FALSE; // have I parsed the parameter file?
+BOOLEAN_T parameter_plasticity = TRUE; // can the parameters be changed?
 
 
 // parse the parameter file given the filename
@@ -52,25 +52,25 @@ void parse_parameter_file(
  */
 void initialize_parameters(void){
 
-  //check if parameters been initialized
+  // check if parameters been initialized
   if(parameter_initialized){
     carp(CARP_ERROR, "parameters has already been initialized");
     return;
   }
   
-  //allocate the hash table
+  // allocate the hash table
   parameters->hash = new_hash(NUM_PARAMS);
   
-  //set number of parameters to zero
+  // set number of parameters to zero
   parameters->num_parameters = 0;
 
-  //set verbosity
+  // set verbosity
   set_int_parameter("verbosity", CARP_ERROR);
 
-  //set parameters
+  // set parameters
   set_string_parameter("parameter-file", "crux.params");
     
-  //generate_peptide, create_index parameters  
+  // generate_peptide, create_index parameters  
   set_double_parameter("mass-range", 1);
   set_double_parameter("min-mass", 200);
   set_double_parameter("max-mass", 7200);
@@ -85,22 +85,22 @@ void initialize_parameters(void){
   set_boolean_parameter("output-trypticity", FALSE);
   set_boolean_parameter("missed-cleavages", FALSE);
   
-  //searching peptides
+  // searching peptides
   set_double_parameter("mass-offset", 0.0);
 
-  //score_peptide_spectrum parameters
+  // score_peptide_spectrum parameters
   set_double_parameter("beta", 0.075);
   set_double_parameter("max-mz", 4000);
   set_int_parameter("charge", 2);
   set_string_parameter("score-type", "xcorr"); 
 
-  //match_collection parameters
+  // match_collection parameters
   set_double_parameter("mass-window", 3.0);
 
   // create_psm_files
   set_int_parameter("starting-sentence-idx", 0);
 
-  //score_spectrum
+  // score_spectrum
   set_string_parameter("prelim-score-type", "sp");
   set_int_parameter("max-rank-preliminary", 500);
   set_int_parameter("max-rank-result", 500);
@@ -110,17 +110,17 @@ void initialize_parameters(void){
   set_double_parameter("fraction-top-scores-to-fit", -1.0);
   set_int_parameter("skip-first-score", 0);
   
-  //set the top ranking peptides to score for LOGP_*
+  // set the top ranking peptides to score for LOGP_*
   set_int_parameter("top-rank-p-value", 1);
   
-  //how many peptides to sample for EVD parameter estimation
+  // how many peptides to sample for EVD parameter estimation
   set_int_parameter("sample-count", 500);
 
-  //what charge state spectra to run among the ones in ms2 file
+  // what charge state spectra to run among the ones in ms2 file
   set_string_parameter("spectrum-change", "all");
   set_double_parameter("number-runs", BILLION);
   
-  //match_search
+  // match_search
   set_string_parameter("match-output-folder", ".");
   set_string_parameter("output-mode", "binary");
   set_string_parameter("seed", "time");
@@ -131,13 +131,13 @@ void initialize_parameters(void){
   set_int_parameter("top-match", 1);
   set_int_parameter("number-decoy-set", 2);
   
-  //match_analysis
+  // match_analysis
   set_string_parameter("algorithm", "percolator");
   set_string_parameter("feature-file", "match_analysis.features");
   set_double_parameter("pi0", 0.9);
   set_string_parameter("percolator-intraset-features", "F"); // for false
 
-  //now we have initialized the parameters
+  // now we have initialized the parameters
   parameter_initialized = TRUE;
 }
 
@@ -182,13 +182,13 @@ BOOLEAN_T copy_parameter(
   )
 {
   
-  //check if parameters has been initlialized
+  // check if parameters has been initlialized
   if(!parameter_initialized){
     carp(CARP_ERROR, "must inilialize parameters before copying");
     return FALSE;
   }
     
-  //check if parameters can be changed
+  // check if parameters can be changed
   if(!parameter_plasticity){
    carp(CARP_ERROR, "can't change parameters once they are confirmed");
    return FALSE;
@@ -208,21 +208,21 @@ void parse_update_parameters(
   char* parameter_file ///< the parameter file to be parsed -in
   )
 {
-  //initialize
+  // initialize
   initialize_parameters();
   
-  //if no parameter file name has been specified in command line,
+  // if no parameter file name has been specified in command line,
   // use default parameter filename
   if(parameter_file != NULL){
-    //parse parameter file
+    // parse parameter file
     parse_parameter_file(parameter_file);
   }
   else{
-    //parse parameter file
+    // parse parameter file
     parse_parameter_file(get_string_parameter_pointer("parameter-file"));
   }
   
-  //update the parameters if any comman line arguments exist
+  // update the parameters if any comman line arguments exist
   if(!update_parameter()){
     fprintf(stderr, "failed to combine command line arguemnts and parameter file\n");
     exit(1);
@@ -243,13 +243,13 @@ void parse_parameter_file(
   char *endptr;
   float update_mass;
 
-  //check if parameters cah be changed
+  // check if parameters cah be changed
   if(!parameter_plasticity){
     carp(CARP_ERROR, "can't change parameters once they are confirmed");
     exit(1);
   }
 
-  //check if parameter file exist, if not exit use default parameters
+  // check if parameter file exist, if not exit use default parameters
   if(access(parameter_filename, F_OK)){
      carp(CARP_INFO, "no parameter_file, using default parameters");
      return;
@@ -289,7 +289,7 @@ void parse_parameter_file(
       }
       line[idx] = '\0';
       
-      //check if it is amino acid mass update
+      // check if it is amino acid mass update
       if(strlen(line) == 1 && 
          (short int)line[0] >= 'A' && 
          (short int)line[0] <= 'Z'){
@@ -297,7 +297,7 @@ void parse_parameter_file(
         update_mass = strtod(&(line[idx+1]), &endptr);
         increase_amino_acid_mass(line[0], update_mass);
       }
-      //else, its a parameter value setting
+      // else, its a parameter value setting
       // copy the name/value pairs to the right parameter
       else if(!copy_parameter(line, &(line[idx+1]))){
         exit(1);
@@ -315,7 +315,7 @@ void parse_parameter_file(
   fclose(f);
   myfree(line);
 
-  //now we have parsed the parameter file
+  // now we have parsed the parameter file
   parameter_parsed = TRUE;
 }
 
@@ -331,7 +331,7 @@ BOOLEAN_T get_boolean_parameter(
 {
   static char buffer[PARAMETER_LENGTH];
   
-  //check if parameter file has been parsed
+  // check if parameter file has been parsed
   if(!parameter_parsed && !parameter_initialized){
     carp(CARP_ERROR, "parameters has not been set yet");
     exit(1);
@@ -339,7 +339,7 @@ BOOLEAN_T get_boolean_parameter(
 
   char* value = get_hash_value(parameters->hash, name);
 
-  //can't find parameter
+  // can't find parameter
   if(value == NULL){
     carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
     exit(1);
@@ -384,13 +384,13 @@ BOOLEAN_T set_boolean_parameter(
 {
   BOOLEAN_T result;
     
-  //check if parameters cah be changed
+  // check if parameters cah be changed
   if(!parameter_plasticity){
     carp(CARP_ERROR, "can't change parameters once they are confirmed");
     return FALSE;
   }
 
-  //only check if parameter file has already been parsed
+  // only check if parameter file has already been parsed
   if(parameter_parsed || parameter_initialized){
     if(set_value){
       return update_hash_value(parameters->hash, name, "TRUE");
@@ -400,7 +400,7 @@ BOOLEAN_T set_boolean_parameter(
     }
   }
 
-  //if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
   if(set_value){
     result = add_parameter(name, "TRUE");
   }
@@ -425,7 +425,7 @@ int get_int_parameter(
   char *endptr;
   long int value;
 
-  //check if parameter file has been parsed
+  // check if parameter file has been parsed
   if(!parameter_parsed && !parameter_initialized){
     carp(CARP_ERROR, "parameters has not been set yet");
     exit(1);
@@ -433,7 +433,7 @@ int get_int_parameter(
 
   char* int_value = get_hash_value(parameters->hash, name);
 
-  //can't find parameter
+  // can't find parameter
   if(int_value == NULL){
     carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
     exit(1);
@@ -469,19 +469,19 @@ BOOLEAN_T set_int_parameter(
   BOOLEAN_T result;
   char buffer[PARAMETER_LENGTH];
   
-  //check if parameters cah be changed
+  // check if parameters cah be changed
   if(!parameter_plasticity){
     carp(CARP_ERROR, "can't change parameters once they are confirmed");
     return FALSE;
   }
   
-  //only check if parameter file has already been parsed
+  // only check if parameter file has already been parsed
   if(parameter_parsed  || parameter_initialized){
     snprintf(buffer, PARAMETER_LENGTH, "%d", set_value);
     return update_hash_value(parameters->hash, name, buffer);
   }
   
-  //if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
   snprintf(buffer, PARAMETER_LENGTH, "%d", set_value);  
   result = add_parameter(name, buffer);
   
@@ -502,7 +502,7 @@ double get_double_parameter(
   char *endptr;
   double value;
   
-  //check if parameter file has been parsed
+  // check if parameter file has been parsed
   if(!parameter_parsed && !parameter_initialized){
     carp(CARP_ERROR, "parameters has not been set yet");
     exit(1);
@@ -510,7 +510,7 @@ double get_double_parameter(
 
   char* double_value = get_hash_value(parameters->hash, name);
  
-  //can't find parameter
+  // can't find parameter
   if(double_value == NULL){
     carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
     exit(1);
@@ -525,7 +525,7 @@ double get_double_parameter(
     die("Conversion error when trying to convert parameter %s with value %s to an double\n",
     name,
     double_value);*/
-  //} else {  
+  // } else {  
   return(value);
   // }
   
@@ -549,21 +549,21 @@ BOOLEAN_T set_double_parameter(
   BOOLEAN_T result;
   char buffer[PARAMETER_LENGTH];
   
-  //check if parameters cah be changed
+  // check if parameters cah be changed
   if(!parameter_plasticity){
     carp(CARP_ERROR, "can't change parameters once they are confirmed");
     return FALSE;
   }
   
-  //convert to string
+  // convert to string
   sprintf(buffer, "%f", set_value);
 
-  //only check if parameter file has already been parsed
+  // only check if parameter file has already been parsed
   if(parameter_parsed || parameter_initialized){
     return update_hash_value(parameters->hash, name, buffer);    
   }
 
-  //if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
   result = add_parameter(name, buffer);
     
   return result;
@@ -581,7 +581,7 @@ char* get_string_parameter(
   )
 {
   
-  //check if parameter file has been parsed
+  // check if parameter file has been parsed
   if(!parameter_parsed && !parameter_initialized){
     carp(CARP_WARNING, "parameters has not been set yet");
     exit(1);
@@ -590,7 +590,7 @@ char* get_string_parameter(
   
   char* string_value = get_hash_value(parameters->hash, name);
   
-  //can't find parameter
+  // can't find parameter
   if(string_value == NULL){
     carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
     exit(1);
@@ -610,7 +610,7 @@ char* get_string_parameter_pointer(
   char* name  ///< the name of the parameter looking for -in
   )
 {
-  //check if parameter file has been parsed
+  // check if parameter file has been parsed
   if(!parameter_parsed && !parameter_initialized){
     carp(CARP_WARNING, "parameters has not been set yet");
     exit(1);
@@ -619,7 +619,7 @@ char* get_string_parameter_pointer(
   
   char* string_value = get_hash_value(parameters->hash, name);
 
-  //can't find parameter
+  // can't find parameter
   if(string_value == NULL){
     carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
     exit(1);
@@ -644,18 +644,18 @@ BOOLEAN_T set_string_parameter(
 {
   BOOLEAN_T result;
   
-  //check if parameters cah be changed
+  // check if parameters cah be changed
   if(!parameter_plasticity){
     carp(CARP_ERROR, "can't change parameters once they are confirmed");
     return FALSE;
   }
   
-  //only check if parameter file has already been parsed
+  // only check if parameter file has already been parsed
   if(parameter_parsed  || parameter_initialized){
     return update_hash_value(parameters->hash, name, set_value);
   }
   
-  //if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
   result = add_parameter(name, set_value);
     
   return result;
@@ -722,19 +722,19 @@ BOOLEAN_T set_options_command_line(
   BOOLEAN_T required ///< is this a required option -in
   )
 {
-  //check if parameters has been initlialized
+  // check if parameters has been initlialized
   if(!parameter_initialized && !parameter_parsed){
     carp(CARP_ERROR, "must inilialize parameters before copying");
     return FALSE;
   }
   
-  //check if parameters cah be changed
+  // check if parameters cah be changed
   if(!parameter_plasticity){
     carp(CARP_ERROR, "can't change parameters once they are confirmed");
     return FALSE;
   }
   
-  //for required options, there are not in the parameter list, thus must add
+  // for required options, there are not in the parameter list, thus must add
   if(required){
     if(add_parameter(name, set_value)){
       return TRUE;
@@ -742,7 +742,7 @@ BOOLEAN_T set_options_command_line(
     return FALSE;
   }
 
-  //if exist ovewrite it!
+  // if exist ovewrite it!
   return update_hash_value(parameters->hash, name, set_value);  
 } 
 

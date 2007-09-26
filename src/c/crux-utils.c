@@ -48,11 +48,11 @@ char* copy_string_part(char* src, int length){
 inline int compare_float(float float_a, float float_b){
   float EPSILON = PRECISION;
   float sum = float_a + float_b;
-  //a == b
+  // a == b
   if( fabsf(float_a - float_b) <= fabsf(sum)* EPSILON ){
     return 0;
   }
-  //a > b
+  // a > b
   else if((float_a - float_b) > fabsf(sum)* EPSILON){
     return 1;
   }
@@ -84,7 +84,7 @@ inline BOOLEAN_T compare_float_three(float float_a, float min, float max){
 char** parse_filename_path(char* file){
   int len = strlen(file);
   int end_idx = len;
-  int end_path = -1;  //index of where the last "/" is located
+  int end_path = -1;  // index of where the last "/" is located
   char* path = NULL;
   char* filename = NULL;
   char** result = (char**)mycalloc(2, sizeof(char*));
@@ -95,14 +95,14 @@ char** parse_filename_path(char* file){
       break;
     }
   }
-  //copy path, if there is a "/" in the file
+  // copy path, if there is a "/" in the file
   if(end_path != -1){
     path = copy_string_part(file, end_path);
   }
-  //copy filename
+  // copy filename
   filename = copy_string_part(&file[end_idx], len); 
   
-  //set result with filename and path
+  // set result with filename and path
   result[0] = filename;
   result[1] = path;
   
@@ -117,7 +117,7 @@ char** parse_filename_path(char* file){
 char* parse_filename(char* file){
   int len = strlen(file);
   int end_idx = len;
-  int end_path = -1;  //index of where the last "/" is located
+  int end_path = -1;  // index of where the last "/" is located
   char* filename = NULL;
   
   for(; end_idx > 0; --end_idx){
@@ -127,7 +127,7 @@ char* parse_filename(char* file){
     }
   }
   
-  //copy filename
+  // copy filename
   filename = copy_string_part(&file[end_idx], len); 
   
   return filename;
@@ -236,7 +236,7 @@ char* get_full_filename(char* path, char* filename){
  */
 long get_filesize(char *FileName){
     struct stat file;
-    //return file size
+    // return file size
     if(!stat(FileName,&file)){
       return file.st_size;
     }
@@ -253,15 +253,15 @@ BOOLEAN_T delete_dir(char* dir) {
   int num_file =0;
   int result;
 
-  //does the directory to remove exist?, if so move into it..
+  // does the directory to remove exist?, if so move into it..
   if(chdir(dir) == -1){
     return FALSE;
   }
 
-  //collect all files in dir
+  // collect all files in dir
   num_file = scandir(".", &namelist, 0, alphasort);
 
-  //delete all files in temp dir
+  // delete all files in temp dir
   while(num_file--){
     remove(namelist[num_file]->d_name);
     free(namelist[num_file]);
@@ -292,14 +292,14 @@ char* generate_name(
 {
   int len = strlen(fasta_filename);
   int end_idx = len;
-  int end_path = len;  //index of where the "." is located in the file
+  int end_path = len;  // index of where the "." is located in the file
   char* name = NULL;
   char* after_suffix = NULL;
   int suffix_length = 0;
   char** file_n_path = NULL;
   int length = 0;
 
-  //cut off the file extension if needed
+  // cut off the file extension if needed
   for(; end_idx > 0; --end_idx){
     if(strcmp(&fasta_filename[end_idx - 1], file_extension) == 0){
       end_path = end_idx - 1;
@@ -307,7 +307,7 @@ char* generate_name(
     }
   }
   
-  //check suffix
+  // check suffix
   if(suffix != NULL){
     suffix_length = strlen(suffix);
     file_n_path = parse_filename_path(fasta_filename);
@@ -316,7 +316,7 @@ char* generate_name(
   name = (char*)mycalloc(suffix_length + end_path + strlen(name_tag) + 1, sizeof(char));
   after_suffix = name;
   
-  //if suffix exit add to top
+  // if suffix exit add to top
   if(suffix_length != 0){
     length = strlen(file_n_path[1]);
     if(file_n_path[1] != NULL){
@@ -348,7 +348,7 @@ char* generate_name(
  *\returns TRUE if sequence is valid else, FALSE
  */
 BOOLEAN_T valid_peptide_sequence( char* sequence){
-  //iterate over all AA and check if with in range
+  // iterate over all AA and check if with in range
   while(sequence[0] != '\0'){
     if(sequence[0] < 65 || sequence[0] > 90 ){
       return FALSE;
@@ -473,7 +473,7 @@ void quick_sort(float a[], int left, int right) {
   
   swap_quick(a,left,Random(left,right));
   for (i = left + 1; i <= right; i++)
-    if (a[i] > a[left]) ///CHECK THIS!!
+    if (a[i] > a[left]) /// CHECK THIS!!
       swap_quick(a,++last,i);
   swap_quick(a,left,last);
   quick_sort(a,left,last-1);

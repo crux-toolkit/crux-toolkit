@@ -33,7 +33,7 @@ void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("search_spectra");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
-  //print comment if given
+  // print comment if given
   if(comment != NULL){
     carp(CARP_FATAL, "%s", comment);
   }
@@ -44,17 +44,17 @@ void wrong_command(char* arg, char* comment){
 }
 
 int main(int argc, char** argv){
-  //optional
+  // optional
   int verbosity = CARP_ERROR;
   char* parameter_file = "crux.params";
   char* psm_algorithm = "percolator";
   char* psm_result_folder = NULL;
   
-  //required
+  // required
   char* fasta_file   = NULL;
   char* feature_file = NULL;
 
-  //parsing variables
+  // parsing variables
   int result = 0;
   char* error_message;
   
@@ -102,7 +102,7 @@ int main(int argc, char** argv){
     ALGORITHM_TYPE_T algorithm = PERCOLATOR;
     MATCH_T* match = NULL;
         
-    //set verbosity
+    // set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
     }
@@ -110,22 +110,22 @@ int main(int argc, char** argv){
       wrong_command("verbosity", "verbosity level must be between 0-100");
     }
     
-    //set verbosity
+    // set verbosity
     set_verbosity_level(verbosity);
 
-    //parse and update parameters
+    // parse and update parameters
     parse_update_parameters(parameter_file);
     
-    //always use index for match_analysis!
+    // always use index for match_analysis!
     set_string_parameter("use-index", "T");
     
-    //parameters are now confirmed, can't be changed
+    // parameters are now confirmed, can't be changed
     parameters_confirmed();
     
-    //set max number of final scoring matches to print as output
+    // set max number of final scoring matches to print as output
     int max_rank_result = get_int_parameter("max-rank-result");
     
-    //select algorithm
+    // select algorithm
     if(strcmp(get_string_parameter_pointer("algorithm"), "percolator")== 0){
       algorithm = PERCOLATOR;
     }
@@ -240,10 +240,10 @@ int main(int argc, char** argv){
         free(features);
       }
 
-      //ok free & update for net set
+      // ok free & update for net set
       free_match_iterator(match_iterator);
 
-      //don't free the target_match_collection
+      // don't free the target_match_collection
       if(set_idx != 0){
         free_match_collection(match_collection);
       }
@@ -267,21 +267,21 @@ int main(int argc, char** argv){
      * as the features were inserted */
     pcGetScores(results_score, results_q); 
          
-    //fill results for Q_VALUE
+    // fill results for Q_VALUE
     fill_result_to_match_collection(target_match_collection, results_q, Q_VALUE, TRUE);
     
-    //fill results for PERCOLATOR_SCORE
+    // fill results for PERCOLATOR_SCORE
     fill_result_to_match_collection(target_match_collection, results_score, PERCOLATOR_SCORE, FALSE);
     
-    //create match iterator, TRUE: return match in sorted order of main_score type
+    // create match iterator, TRUE: return match in sorted order of main_score type
     match_iterator = new_match_iterator(target_match_collection, PERCOLATOR_SCORE, TRUE);
     
-    //iterate over matches
+    // iterate over matches
     int match_count = 0;
     while(match_iterator_has_next(match_iterator)){
       ++match_count;
 
-      //print only up to max_rank_result of the matches
+      // print only up to max_rank_result of the matches
       if(match_count >= max_rank_result){
         break;
       }
@@ -296,7 +296,7 @@ int main(int argc, char** argv){
     pcCleanUp();
     
     // TODO put free back in. took out because claimed it was double free
-    //free names
+    // free names
     /*unsigned int name_idx;
     for(name_idx=0; name_idx < number_features; ++name_idx){
       free(feature_names[name_idx]);

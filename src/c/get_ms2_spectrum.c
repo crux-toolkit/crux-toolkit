@@ -34,7 +34,7 @@ int main(int argc, char** argv){
     "OPTIONS: --stats\n"
     "\tOutput some summary statistics for the particular spectrum to STDOUT\n"; 
   
-  //check command line argument count
+  // check command line argument count
   if (argc != 4) {
     if(argc == 5 && 
        strcmp(argv[4], "--stats")==0){
@@ -46,30 +46,30 @@ int main(int argc, char** argv){
     }
   }
   
-  //check if first argument is type int for scan number
+  // check if first argument is type int for scan number
   if (sscanf(argv[1], "%d", &scan_num) != 1) {
     fprintf (stderr, "ERROR:second arguement must be type int\n");
     fprintf (stderr, "%s", USAGE);
     exit(1);
   }
 
-  //check if the input file exist
+  // check if the input file exist
   if(access(argv[2], F_OK)){
     fprintf(stderr,"input file:\"%s\" could not be opened\n", argv[2]);
     exit(1);
   }
   
-  //check if the output file doesn't aleady exist
+  // check if the output file doesn't aleady exist
   if(!access(argv[3], F_OK)){
     fprintf(stderr,"output file:\"%s\" already exist\n", argv[3]);
     exit(1);
   }
 
-  //read input file
+  // read input file
   collection = new_spectrum_collection(argv[2]);
   spectrum = allocate_spectrum();
   
-  //search for spectrum with correct scan number
+  // search for spectrum with correct scan number
   if(get_spectrum_collection_spectrum(collection, scan_num, spectrum)){ 
     printf("Found a spectrum with correct scan number\n");
     output_file = fopen(argv[3], "w");
@@ -91,11 +91,11 @@ int main(int argc, char** argv){
   int* possible_z_array = get_spectrum_possible_z(spectrum);
   int possible_z;
   
-  //print only if found spectrum and with option flag
+  // print only if found spectrum and with option flag
   if(spectrum_found && options){
     printf("Precursor m/z:%.2f\n", get_spectrum_precursor_mz(spectrum));
     printf("Total Ion Current:%.2f\n", get_spectrum_total_energy(spectrum));
-    printf("Base Peak Intensity:%.1f\n", get_spectrum_max_peak_intensity(spectrum)); //base is max
+    printf("Base Peak Intensity:%.1f\n", get_spectrum_max_peak_intensity(spectrum)); // base is max
     printf("Number of peaks:%d\n", get_spectrum_num_peaks(spectrum));
     printf("Minimum m/z:%.1f\n", get_spectrum_min_peak_mz(spectrum));
     printf("Maximum m/z:%.1f\n", get_spectrum_max_peak_mz(spectrum));

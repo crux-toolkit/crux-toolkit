@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -209,7 +209,7 @@ void set_index_is_unique(
  */
 INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
   INDEX_T* index ///< The index -in
-  //BOOLEAN_T seq ///< output sequence -in
+  // BOOLEAN_T seq ///< output sequence -in
   );
 
 /**

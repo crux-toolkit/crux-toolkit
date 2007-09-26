@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.46 $
+ * REVISION: $Revision: 1.47 $
  ****************************************************************************/
 
 #include <math.h>
@@ -23,11 +23,11 @@
 #include "unistd.h"
 
 
-//the bin width(Sp)
+// the bin width(Sp)
 #define bin_width_mono 1.0005079
 #define bin_width_average 1.0011413
 
-//cross correlation offset range(Xcorr)
+// cross correlation offset range(Xcorr)
 #define MAX_XCORR_OFFSET 75
 
 // Constants for EVD p_value calculation
@@ -62,12 +62,12 @@ struct scorer {
   BOOLEAN_T initialized; ///< has the scorer been initialized?
   int last_idx; ///< the last index in the array, the data size of the array
 
-  ///used for xcorr
+  /// used for xcorr
   float* observed; ///< used for Xcorr: observed spectrum intensity array
   float* theoretical; ///< used for Xcorr: theoretical spectrum intensity array
 };
 
-//defined later
+// defined later
 void add_intensity(
   float* intensity_array, ///< the intensity array to add intensity at index add_idx -out
   int add_idx,            ///< the idex to add the intensity -in
@@ -91,36 +91,36 @@ SCORER_T* new_scorer(
   SCORER_TYPE_T type ///< the type of scorer -in
   )
 {
-  //get allocated scorer
+  // get allocated scorer
   SCORER_T* scorer = allocate_scorer();
   
-  //set score type
+  // set score type
   scorer->type = type;
   
-  //set fields needed for each score type
+  // set fields needed for each score type
   if(type == SP){
     scorer->sp_beta = get_double_parameter("beta");
     scorer->sp_max_mz = get_double_parameter("max-mz");
-    //allocate the intensity array
+    // allocate the intensity array
     scorer->intensity_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
     scorer->max_intensity = 0;
     scorer->last_idx = 0;
-    //the scorer as not been initialized yet.
+    // the scorer as not been initialized yet.
     scorer->initialized = FALSE;
   }
   else if(type == XCORR){
-    //scorer->sp_max_mz = get_double_parameter("max-mz");
-    //scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
+    // scorer->sp_max_mz = get_double_parameter("max-mz");
+    // scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
     scorer->last_idx = 0;
-    //the scorer as not been initialized yet.
+    // the scorer as not been initialized yet.
     scorer->initialized = FALSE;
   }
   else if(type == LOGP_EXP_SP || type == LOGP_BONF_EXP_SP){
-    //the scorer does not need to be initialized for logp_exp_sp.
+    // the scorer does not need to be initialized for logp_exp_sp.
     scorer->initialized = TRUE;
   }
   else{
-    //the scorer as not been initialized yet.
+    // the scorer as not been initialized yet.
     scorer->initialized = FALSE;
   }
 
@@ -134,7 +134,7 @@ void free_scorer(
   SCORER_T* scorer ///< the ion collection to free - in
   )
 {
-  //score type SP?
+  // score type SP?
   if(scorer->type == SP){
     free(scorer->intensity_array);
   }
@@ -158,18 +158,18 @@ void nomalize_intensity_array(
 {
   int mz_idx = 0;
 
-  //return if max_intensity is 0
+  // return if max_intensity is 0
   if(max_intensity < 0.00001){
     return;
   }
 
-  //normalize all peaks
+  // normalize all peaks
   for(; mz_idx < array_size; ++mz_idx){
-    //fprintf(stderr, "%.4f", intensity_array[mz_idx]);
+    // fprintf(stderr, "%.4f", intensity_array[mz_idx]);
     intensity_array[mz_idx] = intensity_array[mz_idx] * threshold / max_intensity;
 
-    //DEBUG
-    //carp(CARP_INFO, "norm data[%d] = %.4f, max_intensity: %.4f",mz_idx, intensity_array[mz_idx], max_intensity); 
+    // DEBUG
+    // carp(CARP_INFO, "norm data[%d] = %.4f, max_intensity: %.4f",mz_idx, intensity_array[mz_idx], max_intensity); 
   }
 }
 
@@ -184,20 +184,20 @@ void smooth_peaks(
   int idx = 2;
   float* array = scorer->intensity_array;
 
-  //create a new array, which will replace the original intensity array
+  // create a new array, which will replace the original intensity array
   float* new_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
 
   switch (scorer->type){
     case SP:
-      //iterate over all peaks
+      // iterate over all peaks
       for(; idx < (int)scorer->sp_max_mz-2; ++idx){
-        //smooooth
+        // smooooth
         new_array[idx] = (array[idx-2]+4*array[idx-1]+6*array[idx]+4*array[idx+1]+array[idx+2])/16;
 
-        //DEBUG
-        //carp(CARP_INFO, "smooth data[%d] = %f",idx, new_array[idx]); 
+        // DEBUG
+        // carp(CARP_INFO, "smooth data[%d] = %f",idx, new_array[idx]); 
         
-        //set last idx in the array
+        // set last idx in the array
         if(scorer->last_idx < idx && new_array[idx] == 0){
           scorer->last_idx = idx -1;
           break;
@@ -238,24 +238,24 @@ float get_mean_from_array(
   int start_idx = peak_idx - 50;
   int end_idx = peak_idx + 50;
 
-  //set upper bound
+  // set upper bound
   if(peak_idx + 50 >= array_size){
     end_idx = array_size-1;
   }
-  //set start index
+  // set start index
   if(peak_idx - 50 <= 0){
     start_idx = 0;
   }
   
-  //sum up the intensities
+  // sum up the intensities
   for(; start_idx <= end_idx; ++start_idx){
-    //printf("%.2f\n", original_array[start_idx]);
+    // printf("%.2f\n", original_array[start_idx]);
 
     ++*peak_count;
     total_intensity += original_array[start_idx];
   }
   
-  //BUG! it should divide by 101 but Sequest uses 100
+  // BUG! it should divide by 101 but Sequest uses 100
   return (total_intensity / (*peak_count-1));
 }
 
@@ -276,23 +276,23 @@ float get_stdev_from_array(
   int end_idx = peak_idx + 50;
   float dev = 0;
 
-  //set upper bound
+  // set upper bound
   if(peak_idx + 50 >= array_size){
     end_idx = array_size-1;
   }
-  //set start index
+  // set start index
   if(peak_idx - 50 <= 0){
     start_idx = 0;
   }
   
-  //sum up the intensities
+  // sum up the intensities
   for(; start_idx <= end_idx; ++start_idx){
-    //sum up all deviations squared
+    // sum up all deviations squared
     dev = original_array[start_idx] - mean;
     variance += (dev*dev);
   }
   
-  //return the stdev
+  // return the stdev
   return sqrt(variance/peak_count);
 }
 
@@ -315,32 +315,32 @@ void zero_peak_mean_stdev(
   float mean = 0;
   float stdev = 0;
 
-  //iterate over all peaks
+  // iterate over all peaks
   for(; idx < array_size; ++idx){
     peak_count = 0;
-    //get mean
+    // get mean
     mean = get_mean_from_array(original_array, array_size, idx, &peak_count);
-    //get stdev
+    // get stdev
     stdev = get_stdev_from_array(original_array, array_size, idx, mean, peak_count);
     
-    //DEBUG
-    //carp(CARP_INFO, "zero idx: %d mean: %.8f, stdev: %.8f", idx, mean, stdev);
+    // DEBUG
+    // carp(CARP_INFO, "zero idx: %d mean: %.8f, stdev: %.8f", idx, mean, stdev);
     
-    //iterate over all positions and extract peaks
+    // iterate over all positions and extract peaks
     if(original_array[idx] > (mean + step*stdev)){
       new_array[idx] = original_array[idx] - (mean - stdev);
                
-      //DEBUG
-      //carp(CARP_INFO, "extract peak: %.2f at idx: %d", original_array[idx], idx);
+      // DEBUG
+      // carp(CARP_INFO, "extract peak: %.2f at idx: %d", original_array[idx], idx);
       
-      //reset the last idx
+      // reset the last idx
       if(scorer->last_idx < idx){
         scorer->last_idx = idx;
       }
       
-      //for only step 1,
+      // for only step 1,
       if(step == 1){
-        //zero out original peak
+        // zero out original peak
         original_array[idx] = 0;
       }
     }
@@ -357,19 +357,19 @@ void zero_peaks(
   SCORER_T* scorer   ///< the scorer object -in/out
   )
 {
-  //create a new array, which will replace the original intensity array
+  // create a new array, which will replace the original intensity array
   float* new_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
   
-  //step 1,
+  // step 1,
   zero_peak_mean_stdev(scorer, scorer->intensity_array, new_array, 1);
-  //step 2,
+  // step 2,
   zero_peak_mean_stdev(scorer, scorer->intensity_array, new_array, 2);
   
-  //replace intensity_array with new intensity array
+  // replace intensity_array with new intensity array
   free(scorer->intensity_array);
   scorer->intensity_array = new_array;
 
-  //DEBUG
+  // DEBUG
   /*
   int idx = 0;
   for(; idx < scorer->sp_max_mz; ++idx){
@@ -388,7 +388,7 @@ void extract_peaks(
   int top_rank  ///< keep the top ranking peaks -in
   )
 {
-  //create a new array, which will replace the original intensity array
+  // create a new array, which will replace the original intensity array
   float* temp_array = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
   float* original_array = scorer->intensity_array;
   int idx = 0;
@@ -396,40 +396,40 @@ void extract_peaks(
   float cut_off = 0;
   float max_intensity;
 
-  //copy all peaks to temp_array
+  // copy all peaks to temp_array
   for(; idx < (int)scorer->sp_max_mz; ++idx){
     if(scorer->intensity_array[idx] > 0){
       temp_array[temp_idx] = original_array[idx];
 
-      //DEBUG print all temp array values
-      //carp(CARP_INFO, "before sort data[%d]=%.3f",temp_idx, temp_array[temp_idx]);
+      // DEBUG print all temp array values
+      // carp(CARP_INFO, "before sort data[%d]=%.3f",temp_idx, temp_array[temp_idx]);
       
       ++temp_idx;
     }
   }
   
-  //if there's over top_rank peaks, keep only top_rank peaks
-  //quick sort
+  // if there's over top_rank peaks, keep only top_rank peaks
+  // quick sort
   quicksort(temp_array, temp_idx);
   
-  //set max and cut_off
+  // set max and cut_off
   max_intensity = temp_array[0];
   cut_off = temp_array[top_rank-1];
   
-  //remove peaks bellow cut_off 
-  //also, normalize peaks to max_intensity to 100
+  // remove peaks bellow cut_off 
+  // also, normalize peaks to max_intensity to 100
   for(idx = 0; idx < (int)scorer->sp_max_mz; ++idx){
-    //DEBUG print all temp array values
-    //carp(CARP_INFO, "sorted data[%d]=%.3f",idx, temp_array[idx]);
+    // DEBUG print all temp array values
+    // carp(CARP_INFO, "sorted data[%d]=%.3f",idx, temp_array[idx]);
 
     if(original_array[idx] > 0){
-      //is it bellow cut off?
+      // is it bellow cut off?
       if(original_array[idx] < cut_off){
-        //remove peak
+        // remove peak
         original_array[idx] = 0;
       }
       else{
-        //nomalize peak to max 100
+        // nomalize peak to max 100
         original_array[idx] = original_array[idx] / max_intensity * 100;
       }
     }
@@ -448,25 +448,25 @@ void equalize_peaks(
   )
 {
   int idx;
-  //int array_size = (int)scorer->sp_max_mz-2;
+  // int array_size = (int)scorer->sp_max_mz-2;
   
   float max_intensity = 0;
   int end_idx = 0;
   int last_idx = scorer->last_idx;
 
-  //equalize peaks to it's greatest intensity
-  //should use array size, but sequest seems to have a bug
+  // equalize peaks to it's greatest intensity
+  // should use array size, but sequest seems to have a bug
   // last idx is thus, modification to fit sequest
   // consequences are we will not equalize the very last peak.
   for(idx = 0; idx < last_idx/*array_size*/; ++idx){
-    //are we inside a continous block?
+    // are we inside a continous block?
     if(scorer->intensity_array[idx] > 0){
       max_intensity = scorer->intensity_array[idx];
       end_idx = idx + 1;
       
-      //loop to find the largest peak in the continous block
+      // loop to find the largest peak in the continous block
       while(end_idx < last_idx && scorer->intensity_array[end_idx] > 0){
-        //reset max intensity
+        // reset max intensity
         if(scorer->intensity_array[end_idx] > max_intensity){
            max_intensity = scorer->intensity_array[end_idx];
         }
@@ -474,7 +474,7 @@ void equalize_peaks(
         ++end_idx;
       }
       
-      //set all peaks in block to max_intesity
+      // set all peaks in block to max_intesity
       for(; idx < end_idx; ++idx){
         scorer->intensity_array[idx] = max_intensity;
       }
@@ -499,89 +499,89 @@ BOOLEAN_T create_intensity_array_sp(
   float max_intensity = 0;
   int mz = 0;
   float intensity = 0;
-  //FIXME, later be able pick between average and mono
+  // FIXME, later be able pick between average and mono
   float bin_width = bin_width_mono;
   float precursor_mz = get_spectrum_precursor_mz(spectrum);
   float experimental_mass_cut_off = precursor_mz*charge + 50;
   int top_bins = 200;
 
-  //DEBUG
-  //carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
+  // DEBUG
+  // carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
   
-  //if score type equals SP
+  // if score type equals SP
   if(scorer->type != SP){
     carp(CARP_ERROR, "incorrect scorer type, only use this method for SP scorers");
     return FALSE;
   }
   
-  //check bin width type
-  //DO this at some time!!
+  // check bin width type
+  // DO this at some time!!
 
-  //create a peak iterator
+  // create a peak iterator
   peak_iterator = new_peak_iterator(spectrum);
   
-  //while there are more peaks to iterate over..
+  // while there are more peaks to iterate over..
   while(peak_iterator_has_next(peak_iterator)){
     peak = peak_iterator_next(peak_iterator);
     peak_location = get_peak_location(peak);
     
-    //skip all peaks larger than experimental mass
+    // skip all peaks larger than experimental mass
     if(peak_location > experimental_mass_cut_off){
       continue;
     }
     
-    //skip all peaks within precursor ion mz +/- 15
+    // skip all peaks within precursor ion mz +/- 15
     if(peak_location < precursor_mz + 15 &&  peak_location > precursor_mz - 15){
       continue;
     }
     
-    //map peak location to bin
+    // map peak location to bin
     mz = (int)(peak_location/bin_width + 0.5);
     
-    //get intensity
+    // get intensity
     intensity = sqrt(get_peak_intensity(peak));
     
-    //set intensity in array with correct mz, only if max peak in the bin
+    // set intensity in array with correct mz, only if max peak in the bin
     if(scorer->intensity_array[mz] < intensity){
       scorer->intensity_array[mz] = intensity;
       
-      //check if max_intensity
+      // check if max_intensity
       if(intensity > max_intensity){
         max_intensity = intensity;
       }
     }
     
-    //set last idx to the largest added peak mz value
+    // set last idx to the largest added peak mz value
     if(scorer->last_idx < mz){
       scorer->last_idx = mz;
     }
   }
 
-  //set max_intensity
+  // set max_intensity
   scorer->max_intensity = max_intensity;
   
-  //DEBUG!!
-  //carp(CARP_INFO, "exp_cut_off: %.2f max_intensity: %.2f", experimental_mass_cut_off, (max_intensity*max_intensity));
+  // DEBUG!!
+  // carp(CARP_INFO, "exp_cut_off: %.2f max_intensity: %.2f", experimental_mass_cut_off, (max_intensity*max_intensity));
 
   
-  //normalize intensity
+  // normalize intensity
   nomalize_intensity_array(scorer->intensity_array, scorer->last_idx+1, scorer->max_intensity, 100);
   
-  //smooth peaks
+  // smooth peaks
   smooth_peaks(scorer);
 
-  //zero peaks
+  // zero peaks
   zero_peaks(scorer);
   
-  //Sequest28 modifications.
-  //Determine number of top peaks to select based on the experimental mass
-  //In Sequest27, the top peaks were always selected as 200.
-  //keep top ions of square-root(16*experimental mass) ranking, but not exceeding 200 ions
+  // Sequest28 modifications.
+  // Determine number of top peaks to select based on the experimental mass
+  // In Sequest27, the top peaks were always selected as 200.
+  // keep top ions of square-root(16*experimental mass) ranking, but not exceeding 200 ions
   /*
   if(experimental_mass_cut_off-50 < 3200){
-    //top bins are sqrt of 16* experimental mass
+    // top bins are sqrt of 16* experimental mass
     top_bins = (int)(sqrt((experimental_mass_cut_off-50)*16) + 0.5);    
-    //however cannot exceed 200
+    // however cannot exceed 200
     if(top_bins > 200){
       top_bins = 200;
     }
@@ -591,28 +591,28 @@ BOOLEAN_T create_intensity_array_sp(
   }
   */
 
-  //extrace the top ions
+  // extrace the top ions
   extract_peaks(scorer, top_bins);
 
-  //equalize peaks
+  // equalize peaks
   equalize_peaks(scorer);
 
-  //Debug
+  // Debug
   /*
   int idx; int count = 0;
   for(idx = 0; idx < scorer->last_idx; ++idx){
     if(scorer->intensity_array[idx] > 0){
-      //DEBUG
+      // DEBUG
       carp(CARP_INFO, "scoring array[%d], %d = %.4f", idx, count, scorer->intensity_array[idx]);
       ++count;
     }
   }
   */
   
-  //free peak iterator
+  // free peak iterator
   free_peak_iterator(peak_iterator);
   
-  //scorer now been initialized!, ready to score peptides..
+  // scorer now been initialized!, ready to score peptides..
   scorer->initialized = TRUE;
 
   return TRUE;
@@ -641,57 +641,57 @@ int calculate_ion_type_sp(
   int* before_cleavage = (int*)mymalloc(get_ion_series_charge(ion_series)*sizeof(int));
   int cleavage_array_idx = 0;
 
-  //initialize before cleavage indecies
+  // initialize before cleavage indecies
   for(; cleavage_array_idx < get_ion_series_charge(ion_series); ++cleavage_array_idx){
     before_cleavage[cleavage_array_idx] = -1;
   }
   
-  //create ion constraint
+  // create ion constraint
   ION_CONSTRAINT_T* ion_constraint = 
     new_ion_constraint(get_ion_constraint_mass_type(get_ion_series_ion_constraint(ion_series)), get_ion_series_charge(ion_series), ion_type, FALSE);
   
-  //create the filtered iterator that will select among the ions
+  // create the filtered iterator that will select among the ions
   ION_FILTERED_ITERATOR_T* ion_iterator = new_ion_filtered_iterator(ion_series, ion_constraint);
   
-  //while there are ion's in ion iterator, add matched observed peak intensity
+  // while there are ion's in ion iterator, add matched observed peak intensity
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
     intensity_array_idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
-    //get the intensity matching to ion's m/z
+    // get the intensity matching to ion's m/z
     if(intensity_array_idx < scorer->sp_max_mz){
       one_intensity = scorer->intensity_array[intensity_array_idx];
     }
     else{
-      //printf("index out of bounds: %d scorer->sp_max_mz: %.2f ion_mass_z: %.2f\n", intensity_array_idx, scorer->sp_max_mz, get_ion_mass_z(ion));
+      // printf("index out of bounds: %d scorer->sp_max_mz: %.2f ion_mass_z: %.2f\n", intensity_array_idx, scorer->sp_max_mz, get_ion_mass_z(ion));
       one_intensity = 0;
     }
 
-    //if there is a match in the observed spectrum
+    // if there is a match in the observed spectrum
     if(one_intensity > 0){
-      //int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
-      //carp(CARP_INFO, "idx = %d\n", idx);
+      // int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
+      // carp(CARP_INFO, "idx = %d\n", idx);
   
-      //DEBUG
-      //carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);
+      // DEBUG
+      // carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);
 
       ++ion_match;
       *intensity_sum = *intensity_sum + one_intensity;
       
-      //get ion charge
+      // get ion charge
       ion_charge = get_ion_charge(ion) - 1;
       
-      //check if repeated ion b1, b2, ...
+      // check if repeated ion b1, b2, ...
       if((cleavage_idx = get_ion_cleavage_idx(ion)) == before_cleavage[ion_charge] + 1){
         ++*repeat_count;
       }
       
-      //reset the previous cleavage index 
+      // reset the previous cleavage index 
       before_cleavage[ion_charge] = cleavage_idx;
     }
   }
   
   
-  //free ion iterator, ion_constraint
+  // free ion iterator, ion_constraint
   free(before_cleavage);
   free_ion_constraint(ion_constraint);
   free_ion_filtered_iterator(ion_iterator);
@@ -715,9 +715,9 @@ float gen_score_sp(
   int ion_match = 0;
   int repeat_count = 0;
   
-  //initialize the scorer before scoring if necessary
+  // initialize the scorer before scoring if necessary
   if(!scorer->initialized){
-    //create intensity array
+    // create intensity array
     if(!create_intensity_array_sp(spectrum, scorer, get_ion_series_charge(ion_series))){
       carp(CARP_ERROR, "failed to produce Sp");
       free(spectrum);
@@ -727,12 +727,12 @@ float gen_score_sp(
     }
   }
 
-  //calculate the B_ION and Y_ION portions of the Sp score
+  // calculate the B_ION and Y_ION portions of the Sp score
   ion_match = 
     calculate_ion_type_sp(scorer, ion_series, &intensity_sum, B_ION, &repeat_count) +
     calculate_ion_type_sp(scorer, ion_series, &intensity_sum, Y_ION, &repeat_count);
   
-  //set the fraction of  b,y ions matched for this ion_series
+  // set the fraction of  b,y ions matched for this ion_series
   scorer->sp_b_y_ion_match = (float)ion_match / get_ion_series_num_ions(ion_series);
 
   //// DEBUG!!!!
@@ -741,13 +741,13 @@ float gen_score_sp(
        repeat_count, ion_match, get_ion_series_num_ions(ion_series),
        intensity_sum);
   */
-  //calculate Sp score.
+  // calculate Sp score.
   if(ion_match != 0){
     final_score = 
       (intensity_sum * ion_match) * (1+ (repeat_count * scorer->sp_beta)) / get_ion_series_num_ions(ion_series);
   }
   
-  //return score
+  // return score
   return final_score;
 }
 
@@ -773,23 +773,23 @@ void normalize_each_region(
   int region_idx = 0;
   float max_intensity = max_intensity_per_region[region_idx];
   
-  //normazlie each region
+  // normazlie each region
   for(; bin_idx < scorer->sp_max_mz; ++bin_idx){
     if(bin_idx >= region_selector*(region_idx+1) && region_idx < 9){
       ++region_idx;
       max_intensity = max_intensity_per_region[region_idx];;
     }
 
-    //don't normalize if no peaks in region
+    // don't normalize if no peaks in region
     if(max_intensity != 0){
-      //normalize intensity to max 50
+      // normalize intensity to max 50
       scorer->observed[bin_idx] = (scorer->observed[bin_idx] / max_intensity) * 50;
       
-      //DEBUG
-      //carp(CARP_INFO, "bin: %d, region idx: %d, obsered_mz: %.2f", bin_idx, region_idx, scorer->observed[bin_idx]);
+      // DEBUG
+      // carp(CARP_INFO, "bin: %d, region idx: %d, obsered_mz: %.2f", bin_idx, region_idx, scorer->observed[bin_idx]);
     }
 
-    //no more peaks beyong the 10 regions mark, exit out
+    // no more peaks beyong the 10 regions mark, exit out
     if(bin_idx > 10*region_selector){
       return;
     }
@@ -816,7 +816,7 @@ BOOLEAN_T create_intensity_array_observed(
   float precursor_mz = get_spectrum_precursor_mz(spectrum);
   float experimental_mass_cut_off = precursor_mz*charge + 50;
 
-  //set max_mz and malloc space for the observed intensity array
+  // set max_mz and malloc space for the observed intensity array
   if(experimental_mass_cut_off > 512){
     int x = (int)experimental_mass_cut_off / 1024;
     float y = experimental_mass_cut_off - (1024 * x);
@@ -830,62 +830,62 @@ BOOLEAN_T create_intensity_array_observed(
     scorer->sp_max_mz = 512;
   }
 
-  //DEBUG
-  //carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
+  // DEBUG
+  // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
   scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
   
-  //store the max intensity in each 10 regions to later normalize
+  // store the max intensity in each 10 regions to later normalize
   float* max_intensity_per_region = (float*)mycalloc(10, sizeof(float));
   int region_selector = (int)(get_spectrum_max_peak_mz(spectrum) / 10);
 
-  //DEBUG
-  //carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
+  // DEBUG
+  // carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
   
   int region = 0;
-  //create a peak iterator
+  // create a peak iterator
   peak_iterator = new_peak_iterator(spectrum);
   
-  //while there are more peaks to iterate over..
+  // while there are more peaks to iterate over..
   while(peak_iterator_has_next(peak_iterator)){
     peak = peak_iterator_next(peak_iterator);
     peak_location = get_peak_location(peak);
     
-    //skip all peaks larger than experimental mass
+    // skip all peaks larger than experimental mass
     if(peak_location > experimental_mass_cut_off){
       continue;
     }
     
-    //skip all peaks within precursor ion mz +/- 15
+    // skip all peaks within precursor ion mz +/- 15
     if(peak_location < precursor_mz + 15 &&  peak_location > precursor_mz - 15){
       continue;
     }
     
-    //map peak location to bin
+    // map peak location to bin
     mz = (int)(peak_location / bin_width + 0.5);
     region = mz / region_selector;
 
-    //don't let index beyond array
+    // don't let index beyond array
     if(region > 9){
       continue;
-      //region = 9;
+      // region = 9;
     }
 
-    //get intensity
-    //sqrt the original intensity
+    // get intensity
+    // sqrt the original intensity
     intensity = sqrt(get_peak_intensity(peak));
            
-    //set intensity in array with correct mz, only if max peak in the bin
+    // set intensity in array with correct mz, only if max peak in the bin
     if(scorer->observed[mz] < intensity){
       scorer->observed[mz] = intensity;
             
-      //check if this peak is max intensity in the region(one out of 10)
+      // check if this peak is max intensity in the region(one out of 10)
       if(max_intensity_per_region[region] < intensity){
         max_intensity_per_region[region] = intensity;
       }
     }    
   }
 
-  //DEBUG
+  // DEBUG
   /*
   int i = 0;
   for(; i < 10; i++){
@@ -893,10 +893,10 @@ BOOLEAN_T create_intensity_array_observed(
   }
   */
 
-  //normalize each 10 regions to max intensity of 50
+  // normalize each 10 regions to max intensity of 50
   normalize_each_region(scorer, max_intensity_per_region, region_selector);
   
-  //DEBUG
+  // DEBUG
   /*
   i = 0;
   for(; i < scorer->sp_max_mz; i++){
@@ -904,7 +904,7 @@ BOOLEAN_T create_intensity_array_observed(
   }
   */
 
-  //free heap
+  // free heap
   free(max_intensity_per_region);
   free_peak_iterator(peak_iterator);
 
@@ -926,22 +926,22 @@ BOOLEAN_T create_intensity_array_theoretical(
   int intensity_array_idx = 0;
   ION_TYPE_T ion_type;
   float bin_width = bin_width_mono;
-  //int charge = get_ion_series_charge(ion_series);
-  //create the ion iterator that will iterate through the ions
+  // int charge = get_ion_series_charge(ion_series);
+  // create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
   
-  //while there are ion's in ion iterator, add matched observed peak intensity
+  // while there are ion's in ion iterator, add matched observed peak intensity
   while(ion_iterator_has_next(ion_iterator)){
     ion = ion_iterator_next(ion_iterator);
     intensity_array_idx = (int)(get_ion_mass_z(ion) / bin_width + 0.5);
     ion_type = get_ion_type(ion);
 
-    //skip ions that are located beyond max mz limit
+    // skip ions that are located beyond max mz limit
     if(intensity_array_idx >= scorer->sp_max_mz){
       continue;
     }
 
-    //DEBUG
+    // DEBUG
     /*
     if(ion_type == B_ION){
       if(ion_is_modified(ion)){
@@ -963,32 +963,32 @@ BOOLEAN_T create_intensity_array_theoretical(
       carp(CARP_INFO, "idx: %d, adding ion type: %s",  intensity_array_idx,  "A");
     }
     */
-    //is it B, Y ion?
+    // is it B, Y ion?
     if(ion_type == B_ION || 
        ion_type == Y_ION){
 
-      //neutral loss peak?
+      // neutral loss peak?
       if(ion_is_modified(ion)){
-        //Add peaks of intensity of 10.0 for neutral loss of H2O, ammonia.
-        //In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each neutral loss.
-        //add_intensity(theoretical, intensity_array_idx, 10);
-        //add_intensity(theoretical, intensity_array_idx + 1, 10);
-        //add_intensity(theoretical, intensity_array_idx - 1, 10);
+        // Add peaks of intensity of 10.0 for neutral loss of H2O, ammonia.
+        // In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each neutral loss.
+        // add_intensity(theoretical, intensity_array_idx, 10);
+        // add_intensity(theoretical, intensity_array_idx + 1, 10);
+        // add_intensity(theoretical, intensity_array_idx - 1, 10);
       }
       else{
-        //Add peaks of intensity 50.0 for B, Y type ions. 
-        //In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
+        // Add peaks of intensity 50.0 for B, Y type ions. 
+        // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
         add_intensity(theoretical, intensity_array_idx, 50);
 
-        //skip ions that are located beyond max mz limit
+        // skip ions that are located beyond max mz limit
         if((intensity_array_idx + 1)< scorer->sp_max_mz){
           add_intensity(theoretical, intensity_array_idx + 1, 25);
         }
         
         add_intensity(theoretical, intensity_array_idx - 1, 25);
 
-        //add neutral loss of water and NH3
-        //mass_z + (modification_masses[(int)ion_modification]/(float)charge) * modification_count;  
+        // add neutral loss of water and NH3
+        // mass_z + (modification_masses[(int)ion_modification]/(float)charge) * modification_count;  
 
         if(ion_type == B_ION){
           int h2o_array_idx = (int)((get_ion_mass_z(ion) - MASS_H2O_MONO /*charge*/) / bin_width + 0.5);
@@ -1000,26 +1000,26 @@ BOOLEAN_T create_intensity_array_theoretical(
       }
       
 
-    }//is it A ion?
+    }// is it A ion?
     else if(ion_type == A_ION){
-      //Add peaks of intensity 10.0 for A type ions. 
-      //In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each A type ion.
+      // Add peaks of intensity 10.0 for A type ions. 
+      // In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each A type ion.
         add_intensity(theoretical, intensity_array_idx, 10);
       /*
       add_intensity(theoretical, intensity_array_idx + 1, 10);
       add_intensity(theoretical, intensity_array_idx - 1, 10);
       */
     }
-    else{//ERROR!, only should create B, Y, A type ions for xcorr theoreical 
+    else{// ERROR!, only should create B, Y, A type ions for xcorr theoreical 
       carp(CARP_ERROR, "only should create B, Y, A type ions for xcorr theoretical spectrum");
       return FALSE;
     }
   }
   
-  //free heap
+  // free heap
   free_ion_iterator(ion_iterator);
 
-  //DEBUG
+  // DEBUG
   /*
   int i = 0;
   for(; i < scorer->sp_max_mz; i++){
@@ -1043,22 +1043,22 @@ BOOLEAN_T create_intensity_array_xcorr(
   )
 {
 
-  //DEBUG
-  //carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
+  // DEBUG
+  // carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
   
-  //if score type equals XCORR
+  // if score type equals XCORR
   if(scorer->type != XCORR){
     carp(CARP_ERROR, "incorrect scorer type, only use this method for XCORR scorers");
     return FALSE;
   }
     
-  //create intensity array for observed spectrum 
+  // create intensity array for observed spectrum 
   if(!create_intensity_array_observed(scorer, spectrum, charge)){
     carp(CARP_ERROR, "failed to preprocess observed spectrum for Xcorr");
     return FALSE;
   }
   
-  //scorer now been initialized!, ready to score peptides..
+  // scorer now been initialized!, ready to score peptides..
   scorer->initialized = TRUE;
 
   return TRUE;
@@ -1085,29 +1085,29 @@ float cross_correlation(
   int theoretical_idx = 0;
   float* observed = scorer->observed;
   
-  //perform cross_correlation from -max_offset to +max_offset
+  // perform cross_correlation from -max_offset to +max_offset
   for(; delay < max_offset; ++delay){
-    //the score for this delay
+    // the score for this delay
     one_offset_score = 0;
     
     // compare each location in theoretical spectrum
     for(theoretical_idx = 0; theoretical_idx < size; ++theoretical_idx){
-      //get observed_idx 
+      // get observed_idx 
       observed_idx = theoretical_idx + delay;
 
-      //check if inidex out of bounds for observed_idx
+      // check if inidex out of bounds for observed_idx
       if (observed_idx < 0 || observed_idx >= size){
         continue;
       }
       else{
-        //one_offset_score += ((observed[observed_idx] - mx) * (theoretical[theoretical_idx] - my));
+        // one_offset_score += ((observed[observed_idx] - mx) * (theoretical[theoretical_idx] - my));
         one_offset_score += ((observed[observed_idx]) * (theoretical[theoretical_idx]));
       }      
     }
 
-    //one_offset_score /= denom;
+    // one_offset_score /= denom;
 
-    //add to total score
+    // add to total score
     total_score += one_offset_score;
     
     if(delay == 0){
@@ -1115,8 +1115,8 @@ float cross_correlation(
     }    
   }
 
-  //debug
-  //carp(CARP_INFO, "score_at_zero: %.2f, total_score: %.2f", score_at_zero, total_score);
+  // debug
+  // carp(CARP_INFO, "score_at_zero: %.2f, total_score: %.2f", score_at_zero, total_score);
 
 
   return (score_at_zero - (total_score / (2 * max_offset))) / 10000;
@@ -1135,10 +1135,10 @@ float gen_score_xcorr(
   float final_score = 0;
   float* theoretical = NULL;
 
-  //initialize the scorer before scoring if necessary
-  //preprocess the observed spectrum in scorer
+  // initialize the scorer before scoring if necessary
+  // preprocess the observed spectrum in scorer
   if(!scorer->initialized){
-    //create intensity array for observed spectrum, if already not been done
+    // create intensity array for observed spectrum, if already not been done
     if(!create_intensity_array_xcorr(spectrum, scorer, get_ion_series_charge(ion_series))){
       carp(CARP_ERROR, "failed to produce XCORR");
       free(spectrum);
@@ -1148,27 +1148,27 @@ float gen_score_xcorr(
     }
   }
   
-  //create theoretical array
+  // create theoretical array
   theoretical = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
   
-  //create intensity array for theoretical spectrum 
+  // create intensity array for theoretical spectrum 
   if(!create_intensity_array_theoretical(scorer, ion_series, theoretical)){
     carp(CARP_ERROR, "failed to create theoretical spectrum for Xcorr");
     return FALSE;
   }
   
-  //do cross correlation between observed spectrum(in scorer) and theoretical spectrum.
-  //use the two intensity arrays that were created
+  // do cross correlation between observed spectrum(in scorer) and theoretical spectrum.
+  // use the two intensity arrays that were created
   final_score = cross_correlation(scorer, theoretical, MAX_XCORR_OFFSET);
 
-  //free theoretical spectrum
+  // free theoretical spectrum
   free(theoretical);
 
-  //debug
-  //carp(CARP_INFO, "xcorr: %.2f", final_score);
+  // debug
+  // carp(CARP_INFO, "xcorr: %.2f", final_score);
 
   
-  //return score
+  // return score
   return final_score;
 }
 
@@ -1203,12 +1203,12 @@ float score_logp_bonf_exp_sp(
 {
   double p_value = exp(-(1/mean) * sp_score);
   
-  //The Bonferroni correction 
-  //use original equation 1-(1-p_value)^n when p is not too small
+  // The Bonferroni correction 
+  // use original equation 1-(1-p_value)^n when p is not too small
   if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
     return -log(1-pow((1-p_value), num_peptide));
   }
-  //else, use the approximation
+  // else, use the approximation
   else{
     return -log(p_value*num_peptide);
   }
@@ -1239,12 +1239,12 @@ float score_logp_bonf_weibull(
   int num_peptide ///< The number of peptides
   ){
   float p_value = exp( - pow( (score+shift)/eta, beta));
-  //The Bonferroni correction 
-  //use original equation 1-(1-p_value)^n when p is not too small
+  // The Bonferroni correction 
+  // use original equation 1-(1-p_value)^n when p is not too small
   if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
     return -log(1-pow((1-p_value), num_peptide));
   }
-  //else, use the approximation
+  // else, use the approximation
   else{
     return -log(p_value*num_peptide);
   }
@@ -1330,15 +1330,15 @@ float score_logp_bonf_evd_xcorr(
 {
   double p_value = compute_evd_pvalue(xcorr_score, mu, l_value);
 
-  //DEBUG
+  // DEBUG
   carp(CARP_DEBUG, "p_value: %E, experiment_size: %d", p_value, num_peptide);
 
-  //The Bonferroni correction 
-  //use original equation 1-(1-p_value)^n when p is not too small
+  // The Bonferroni correction 
+  // use original equation 1-(1-p_value)^n when p is not too small
   if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
     return -log(1-pow((1-p_value), num_peptide));
   }
-  //else, use the approximation
+  // else, use the approximation
   else{
     return -log(p_value*num_peptide);
   }
@@ -1360,14 +1360,14 @@ float score_spectrum_v_ion_series(
 {
   float final_score = 0;
 
-  //if score type equals SP
+  // if score type equals SP
   if(scorer->type == SP){
     final_score = gen_score_sp(scorer, spectrum, ion_series);
   }
   else if(scorer->type == XCORR){
     final_score = gen_score_xcorr(scorer, spectrum, ion_series);
   }
-  //FIXME, later add different score types...
+  // FIXME, later add different score types...
   else{
     carp(CARP_ERROR, "no scoring method availiable for the scorers' score type");
   }

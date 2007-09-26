@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.39 $
+ * REVISION: $Revision: 1.40 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -69,8 +69,8 @@ struct match{
   char* peptide_sequence; ///< cached peptide sequence, if not called before set as NULL
   PEPTIDE_TYPE_T overall_type; ///< the overall peptide trypticity, this is set in set_match_peptide routine, go to README top
   int charge; ///< the charge state of the match collection created
-  //post_process match object features
-  //only valid when post_process_match is TRUE
+  // post_process match object features
+  // only valid when post_process_match is TRUE
   BOOLEAN_T post_process_match; ///< Is this a post process match object?
   float delta_cn; ///< the difference in top and second Xcorr scores
   float ln_delta_cn; ///< the natural log of delta_cn
@@ -83,7 +83,7 @@ struct match{
 MATCH_T* new_match(void){
   MATCH_T* match = (MATCH_T*)mycalloc(1, sizeof(MATCH_T));
   
-  //initialize score, rank !!!!DEBUG
+  // initialize score, rank !!!!DEBUG
   int index = 0;
   for(; index < _SCORE_TYPE_NUM; ++index){
     match->match_rank[index] = 0;
@@ -92,11 +92,11 @@ MATCH_T* new_match(void){
   
   ++match->pointer_count;
 
-  //default is not a null peptide match
+  // default is not a null peptide match
   match->null_peptide = FALSE;
 
-  //set default as not tryptic
-  //a full evaluation is done when set peptide
+  // set default as not tryptic
+  // a full evaluation is done when set peptide
   match->overall_type = NOT_TRYPTIC;
 
   return match;
@@ -112,17 +112,17 @@ void free_match(
 {
   --match->pointer_count;
   
-  //only free match when pointer count reaches
+  // only free match when pointer count reaches
   if(match->pointer_count == 0){
-    //free peptide
+    // free peptide
     free_peptide(match->peptide);
     
     if(match->post_process_match){
-      //free spectrum
+      // free spectrum
       free_spectrum(match->spectrum);
     }
 
-    //free cached peptide sequence if not NULL
+    // free cached peptide sequence if not NULL
     free(match->peptide_sequence);
 
     free(match);  
@@ -138,8 +138,8 @@ int compare_match_sp(
   MATCH_T** match_b  ///< the scond match -in
   )
 {
-  //might have to worry about cases below 1 and -1
-  //return (int)((*match_b)->match_scores[SP] - (*match_a)->match_scores[SP]);
+  // might have to worry about cases below 1 and -1
+  // return (int)((*match_b)->match_scores[SP] - (*match_a)->match_scores[SP]);
 
   if((*match_b)->match_scores[SP] > (*match_a)->match_scores[SP]){
     return 1;
@@ -223,14 +223,14 @@ void print_match(
 {
   char* peptide_sequence = NULL;
   
-  //print according to the output mode
+  // print according to the output mode
   //
 
   SCORER_TYPE_T primary_score = output_mode;
   SCORER_TYPE_T secondary_score = SP;
   switch (output_mode) {
     case DOTP:
-      //FIXME fill in once implemented
+      // FIXME fill in once implemented
       break;
     case SP:
     case XCORR:
@@ -268,9 +268,9 @@ void print_match(
             match->match_scores[secondary_score]);
   }
   
-  //FIXME resolve spectrum_header output and above to not be coupled
+  // FIXME resolve spectrum_header output and above to not be coupled
  
-  //should I print sequence?
+  // should I print sequence?
   if(output_sequence){        
     peptide_sequence = get_match_sequence(match);
     fprintf(file, "%s\n", peptide_sequence);
@@ -311,26 +311,26 @@ void serialize_match(
   FILE* file ///< output stream -out
   )
 {
-  //first serialize peptide
+  // first serialize peptide
   serialize_peptide(match->peptide, file);
   
-  //Serialize each score and rank
+  // Serialize each score and rank
   int score_type_idx;
   for(score_type_idx = 0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
     fwrite(&(match->match_scores[score_type_idx]), sizeof(float), 1, file);
     fwrite(&(match->match_rank[score_type_idx]), sizeof(int), 1, file);
   }
   
-  //serialize spectrum in binary
+  // serialize spectrum in binary
   serialize_spectrum(match->spectrum, file);
   
-  //b/y ion matches ratio
+  // b/y ion matches ratio
   fwrite(&(match->b_y_ion_match), sizeof(float), 1, file);
 
-  //serialize match peptide overall trypticity
+  // serialize match peptide overall trypticity
   fwrite(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, file);
   
-  //serialize match is it null_peptide?
+  // serialize match is it null_peptide?
   fwrite(&(match->null_peptide), sizeof(BOOLEAN_T), 1, file);
 }
 
@@ -409,7 +409,7 @@ double* get_match_percolator_features(
     feature_array[16] = TRUE;
   }
   
-  //run specific features
+  // run specific features
   if (strcmp(
         get_string_parameter_pointer("percolator-intraset-features"), "T")==0){
     carp(CARP_DETAILED_DEBUG, "Using intraset features!");
@@ -417,21 +417,21 @@ double* get_match_percolator_features(
       = get_match_collection_hash(match_collection, match->peptide);
     
     src_iterator = new_peptide_src_iterator(match->peptide);
-    //iterate overall parent proteins
-    //find largest numProt and pepSite among the parent proteins
+    // iterate overall parent proteins
+    // find largest numProt and pepSite among the parent proteins
     while(peptide_src_iterator_has_next(src_iterator)){
       peptide_src = peptide_src_iterator_next(src_iterator);
       protein = get_peptide_src_parent_protein(peptide_src);
       protein_idx = get_protein_protein_idx(protein);
       
-      //numProt
+      // numProt
       if(feature_array[18] < get_match_collection_protein_counter(
                               match_collection, protein_idx)){
         feature_array[18] = get_match_collection_protein_counter(
                               match_collection, protein_idx);
       }
       
-      //pepSite
+      // pepSite
       if(feature_array[19] < get_match_collection_protein_peptide_counter(
                               match_collection, protein_idx)){
         feature_array[19] = get_match_collection_protein_peptide_counter(
@@ -465,7 +465,7 @@ double* get_match_percolator_features(
 MATCH_T* parse_match(
   FILE* result_file,  ///< the result file to parse PSMs -in
   DATABASE_T* database ///< the database to which the peptides are created -in
-  //int num_top_match  ///< number of top PSMs serialized per spectrum -in
+  // int num_top_match  ///< number of top PSMs serialized per spectrum -in
   )
 {
   MATCH_T* match = new_match();
@@ -528,7 +528,7 @@ char* get_match_sequence(
   MATCH_T* match ///< the match to work -in
   )
 {
-  //if the match is post_process_match and a null peptide you cannot get sequence
+  // if the match is post_process_match and a null peptide you cannot get sequence
   if(match->post_process_match && match->null_peptide){
     carp(CARP_ERROR, "cannot retrieve null peptide sequence for post_process_match");
     return NULL;
@@ -540,12 +540,12 @@ char* get_match_sequence(
     return my_copy_string(match->peptide_sequence);
   }
   
-  //if not cached go generate the sequence
+  // if not cached go generate the sequence
 
-  //First, is this a null peptide?
-  //Then must use the shuffled sequence
+  // First, is this a null peptide?
+  // Then must use the shuffled sequence
   if(match->null_peptide){
-    //generate the shuffled peptide sequence
+    // generate the shuffled peptide sequence
     match->peptide_sequence = 
       generate_shuffled_sequence(match->peptide, match->overall_type);    
   }

@@ -31,29 +31,29 @@ void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("predict_peptide_ions");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
-  //print comment if given
+  // print comment if given
   if(comment != NULL){
     carp(CARP_FATAL, "%s", comment);
   }
 
-  //FIXME uncomment this print if want to print usage whenever error message is printed
-  //fprintf(stderr, "%s", usage);
+  // FIXME uncomment this print if want to print usage whenever error message is printed
+  // fprintf(stderr, "%s", usage);
   free(usage);
   exit(1);
 }
 
 int main(int argc, char** argv){
 
-  //required variables
+  // required variables
   char* ms2_file = NULL;
   int scan_num = 0;
   char* list_file = NULL;
   
-  //optional variables
+  // optional variables
   char* type = "SP";
   char* parameter_file = "crux.params";
   
-  //parsing variables
+  // parsing variables
   int result = 0;
   const char * error_message;
 
@@ -91,7 +91,7 @@ int main(int argc, char** argv){
 
  /* Parse the command line */
  if (parse_arguments(argc, argv, 0)) {
-   //parsed arguments
+   // parsed arguments
    char peptide_sequence[52] = ""; 
    int peptide_charge = 1;
    SCORER_TYPE_T score_type = SP; 
@@ -103,16 +103,16 @@ int main(int argc, char** argv){
    float score = 0;
    int  verbosity = CARP_INFO;
 
-   //list file parsing
+   // list file parsing
    FILE* file = NULL;
    char* new_line = NULL;
    int line_length;
    size_t buf_length = 0;
    
-   //set verbosity
+   // set verbosity
    set_verbosity_level(verbosity);
 
-   //score type
+   // score type
    if(strcmp(type, "SP")== 0){
      score_type = SP;
    }
@@ -120,17 +120,17 @@ int main(int argc, char** argv){
      wrong_command(type, "The type of scoring function to use. sp");
    }
    
-   //parse paramter file
+   // parse paramter file
    parse_parameter_file(parameter_file);
    
-   //set ion constraint to sequest settings
+   // set ion constraint to sequest settings
    ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp();  
    
-   //read ms2 file
+   // read ms2 file
    collection = new_spectrum_collection(ms2_file);
    spectrum = allocate_spectrum();
    
-   //search for spectrum with correct scan number
+   // search for spectrum with correct scan number
    if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
      carp(CARP_WARNING, "failed to find spectrum with scan_num: %d", scan_num);
      free_ion_constraint(ion_constraint);
@@ -139,46 +139,46 @@ int main(int argc, char** argv){
      exit(1);
    }
    
-   //create new scorer
+   // create new scorer
    scorer = new_scorer(SP);  
    
-   //open file and 
+   // open file and 
    file = fopen(list_file, "r");
    
-   //check if succesfully opened file
+   // check if succesfully opened file
    if(file == NULL){
      carp(CARP_FATAL, "failed to open list file");
      exit(1);
    }
    
-   //parse each line for peptides
+   // parse each line for peptides
    while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
      if(line_length >= 3 && new_line[0] != ' '){ 
-       if(sscanf(new_line,"%s %d",//test format:peak line has more than 2 fields
+       if(sscanf(new_line,"%s %d",// test format:peak line has more than 2 fields
                  peptide_sequence, &peptide_charge) > 0){
          
-         //check peptide charge
+         // check peptide charge
          if(peptide_charge <1 || peptide_charge >3){
            free(new_line);
            wrong_command("peptide_charge", "The peptide charge. 1|2|3");
          }
 
          
-         //check peptide sequence
+         // check peptide sequence
          if(!valid_peptide_sequence(peptide_sequence)){           
            wrong_command(peptide_sequence, "not a valid peptide sequence");
          }
 
-         //create new ion series
+         // create new ion series
          ion_series = new_ion_series(peptide_sequence, peptide_charge, ion_constraint);
          
-         //now predict ions
+         // now predict ions
          predict_ions(ion_series);
 
-         //calculates the Sp score
+         // calculates the Sp score
          score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
          
-         //print the Sp score
+         // print the Sp score
          printf(/*"Sp score is:*/ "%.2f\n", score);
          
          free_ion_series(ion_series);
@@ -189,7 +189,7 @@ int main(int argc, char** argv){
    fclose(file);
    free(new_line);
    
-   //free heap
+   // free heap
    free_scorer(scorer);
    free_ion_constraint(ion_constraint);
    free_spectrum_collection(collection);
