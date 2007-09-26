@@ -81,7 +81,7 @@ int main(int argc, char** argv){
   int  verbosity = CARP_INFO;
   char* redundancy = "redundant";
   char* binary_fasta_file = NULL;
-  char* parameter_file = "crux_parameter";
+  char* parameter_file = "crux.params";
   
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;

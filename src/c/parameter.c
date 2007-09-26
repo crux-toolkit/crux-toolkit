@@ -68,7 +68,7 @@ void initialize_parameters(void){
   set_int_parameter("verbosity", CARP_ERROR);
 
   //set parameters
-  set_string_parameter("parameter-file", "crux_parameter");
+  set_string_parameter("parameter-file", "crux.params");
     
   //generate_peptide, create_index parameters  
   set_double_parameter("mass-range", 1);
