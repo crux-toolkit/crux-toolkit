@@ -1,7 +1,7 @@
 /*****************************************************************************
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -74,7 +74,7 @@ static int hash_grow(
   if (h->size_index == sizes_count - 1){
     return FALSE;
   }
-  //increase larger hash table
+  // increase larger hash table
   if ((h->records = mycalloc(sizes[++h->size_index],
                              sizeof(RECORD_T))) == NULL) {
     h->records = old_recs;
@@ -148,7 +148,7 @@ void free_hash(
 {
   unsigned int idx = 0;
   unsigned int size = sizes[h->size_index];
-  //free up all key & values strings
+  // free up all key & values strings
   for(; idx < size; ++idx){
     if(h->records[idx].key != NULL){
       free(h->records[idx].key);
@@ -191,20 +191,20 @@ BOOLEAN_T add_hash(
     ind = code % size;
     off = 0;
 
-    //probe down until reach open slot
-    //Quadratic probing used
+    // probe down until reach open slot
+    // Quadratic probing used
     while (recs[ind].key){     
-      //if find duplicate key, thus identical item
+      // if find duplicate key, thus identical item
       if ((code == recs[ind].hash) && recs[ind].key &&
           strcmp(key, recs[ind].key) == 0){
-        //increment count
+        // increment count
         ++recs[ind].count;        
         free(key);
         free(value);
         return TRUE;
       }
       else{
-        //continue to search
+        // continue to search
         ind = (code + (int)pow(++off,2)) % size;
       }
     }
@@ -247,7 +247,7 @@ BOOLEAN_T add_hash_when_grow(
     ind = code % size;
     off = 0;
 
-    //probe down until reach open slot
+    // probe down until reach open slot
     while (recs[ind].key){
       ind = (code + (int)pow(++off,2)) % size;
     }
@@ -286,20 +286,20 @@ BOOLEAN_T update_hash_value(
   ind = code % size;
   off = 0;
   
-  //probe down until reach open slot
-  //Quadratic probing used
+  // probe down until reach open slot
+  // Quadratic probing used
   while (recs[ind].key){     
-    //if find duplicate key, thus identical item
+    // if find duplicate key, thus identical item
     if ((code == recs[ind].hash) && recs[ind].key &&
         strcmp(key, recs[ind].key) == 0){
-      //free existing value
+      // free existing value
       free(recs[ind].value);
-      //set new value
+      // set new value
       recs[ind].value = my_copy_string(value);              
       return TRUE;
     }
     else{
-      //continue to search
+      // continue to search
       ind = (code + (int)pow(++off,2)) % size;
     }
   }
@@ -391,7 +391,7 @@ void* remove_hash(
         strcmp(key, recs[ind].key) == 0) {
       // do not erase hash, so probes for collisions succeed
       value = recs[ind].value;
-      //free key
+      // free key
       free(recs[ind].key);
       recs[ind].key = 0;
       recs[ind].value = 0;

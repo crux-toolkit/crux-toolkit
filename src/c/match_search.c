@@ -163,7 +163,7 @@ int main(int argc, char** argv){
   // Parse the command line
   if (parse_arguments(argc, argv, 0)) {
 
-    //parse arguments
+    // parse arguments
     SCORER_TYPE_T main_score = XCORR; 
     SCORER_TYPE_T prelim_score = SP; 
     
@@ -182,7 +182,7 @@ int main(int argc, char** argv){
     BOOLEAN_T run_all_charges = TRUE;
     int spectrum_charge_to_run = 0;
     
-    //set verbosity
+    // set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
     }
@@ -190,16 +190,16 @@ int main(int argc, char** argv){
       wrong_command("verbosity", "verbosity level must be between 0-100");
     }
     
-    //set verbosity
+    // set verbosity
     set_verbosity_level(verbosity);
 
-    //parse and update parameters
+    // parse and update parameters
     parse_update_parameters(parameter_file);
     
-    //always use index for match search!
+    // always use index for match search!
     set_string_parameter("use-index", "T");
 
-    //generate sqt ouput file if not set by user
+    // generate sqt ouput file if not set by user
     if(strcmp(
           get_string_parameter_pointer("sqt-output-file"), "default.sqt") ==0){
       sqt_output_file = generate_name(ms2_file, ".psm", ".ms2", NULL);
@@ -207,15 +207,15 @@ int main(int argc, char** argv){
       set_string_parameter("sqt-output-file", sqt_output_file);
     }
     
-    //parameters are now confirmed, can't be changed
+    // parameters are now confirmed, can't be changed
     parameters_confirmed();
     
     /***** Now, must get all parameters through get_*_parameter ****/
     
-    //how many runs of search to perform
+    // how many runs of search to perform
     number_runs = get_double_parameter("number-runs");
 
-    //what charge state of spectra to search
+    // what charge state of spectra to search
     if(strcmp(get_string_parameter_pointer("spectrum-change"), "all")== 0){
       run_all_charges = TRUE;      
     }
@@ -236,10 +236,10 @@ int main(int argc, char** argv){
           "be one of the following: 1|2|3|all");
     }
     
-    //number_decoy_set
+    // number_decoy_set
     number_decoy_set = get_int_parameter("number-decoy-set");
 
-    //main score type
+    // main score type
     char* score_type = get_string_parameter_pointer("score-type");
     if(strcmp(score_type, "xcorr")== 0){
       main_score = XCORR;
@@ -252,7 +252,7 @@ int main(int argc, char** argv){
           " the following: xcorr | xcorr_logp | sp_logp ");
     }
     
-    //preliminary score type
+    // preliminary score type
     if(strcmp(get_string_parameter_pointer("prelim-score-type"), "sp")== 0){
       prelim_score = SP;
     } else {
@@ -260,7 +260,7 @@ int main(int argc, char** argv){
           "The preliminary scoring function must be one of the following: sp");
     }
         
-    //get output-mode
+    // get output-mode
     if(strcmp(get_string_parameter_pointer("output-mode"), "binary")== 0){
       output_type = BINARY_OUTPUT;
     }
@@ -275,19 +275,19 @@ int main(int argc, char** argv){
           " binary|sqt|all");
     }
     
-    //set max number of preliminary scored peptides to use for final scoring
+    // set max number of preliminary scored peptides to use for final scoring
     max_rank_preliminary = get_int_parameter("max-rank-preliminary");
 
-    //set max number of final scoring matches to print as output in sqt
+    // set max number of final scoring matches to print as output in sqt
     max_rank_result = get_int_parameter("max-rank-result");
 
-    //set max number of matches to be serialized per spectrum
+    // set max number of matches to be serialized per spectrum
     top_match = get_int_parameter("top-match");
 
-    //get mass offset from precursor mass to search for candidate peptides
+    // get mass offset from precursor mass to search for candidate peptides
     mass_offset = get_double_parameter("mass-offset");    
 
-    //seed for random rnumber generation
+    // seed for random rnumber generation
     if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
 
       // use current time to seed
@@ -313,7 +313,7 @@ int main(int argc, char** argv){
     FILE** psm_result_file = NULL;
     FILE* psm_result_file_sqt = NULL;
     FILE* decoy_result_file_sqt  = NULL;
-    int total_files = number_decoy_set + 1; //plus one for target file
+    int total_files = number_decoy_set + 1; // plus one for target file
     int file_idx = 0;
     BOOLEAN_T is_decoy = FALSE;
 
@@ -340,7 +340,7 @@ int main(int argc, char** argv){
                                                   ".ms2"
                                                   );
     
-    //get psm_result sqt file handle if needed
+    // get psm_result sqt file handle if needed
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
       psm_result_file_sqt = 
         create_file_in_path(sqt_output_file, match_output_folder);
@@ -348,8 +348,8 @@ int main(int argc, char** argv){
         create_file_in_path(decoy_sqt_output_file, match_output_folder);
     }
     
-    //did we get the file handles?
-    //check for at least there's one for result
+    // did we get the file handles?
+    // check for at least there's one for result
     if(psm_result_file[0] == NULL ||
        ((output_type == SQT_OUTPUT || output_type == ALL_OUTPUT) &&
        psm_result_file_sqt == NULL)){
@@ -388,11 +388,11 @@ int main(int argc, char** argv){
           continue;
         }
       
-      //get possible charge state
+      // get possible charge state
       possible_charge = get_spectrum_num_possible_z(spectrum);
       possible_charge_array = get_spectrum_possible_z_pointer(spectrum);
       
-      //iterate over all possible charge states for each spectrum
+      // iterate over all possible charge states for each spectrum
       for(charge_index = 0; charge_index < possible_charge; ++charge_index){
 
         // skip spectra that are not in the charge state to be run
@@ -420,14 +420,14 @@ int main(int argc, char** argv){
                                           max_rank_preliminary, prelim_score, 
                                           main_score, mass_offset, is_decoy);
           
-          //serialize the psm features to ouput file upto 'top_match' number of 
-          //top peptides among the match_collection
+          // serialize the psm features to ouput file upto 'top_match' number of 
+          // top peptides among the match_collection
           serialize_psm_features(match_collection, psm_result_file[file_idx], 
               top_match, prelim_score, main_score);
           
-          //should I output the match_collection result as a SQT file?
+          // should I output the match_collection result as a SQT file?
           // Output only for the target set
-          //FIXME ONLY one header
+          // FIXME ONLY one header
           if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
             FILE* output = NULL;
             if (file_idx == 0){
@@ -439,19 +439,19 @@ int main(int argc, char** argv){
               match_collection, spectrum, prelim_score, main_score);
           }        
           
-          //free up match_collection
+          // free up match_collection
           free_match_collection(match_collection);          
         }
       }
     }
 
-    //Modify the header serialized information for all files(target & decoy)
-    //Set the total number of spectra serialized in the PSM result files
+    // Modify the header serialized information for all files(target & decoy)
+    // Set the total number of spectra serialized in the PSM result files
     for(file_idx=0; file_idx < total_files; ++file_idx){
       serialize_total_number_of_spectra(spectra_idx, psm_result_file[file_idx]);
     }
     
-    //DEBUG
+    // DEBUG
     carp(CARP_DEBUG, "total spectra runs: %d", spectra_idx);
 
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){

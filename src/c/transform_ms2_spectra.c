@@ -25,19 +25,19 @@ int main(int argc, char** argv){
     "\t<input filename>\n"
     "SYNOPSIS: transform_ms2_spectra input_file > output_file\n";
   
-  //check command line argument count
+  // check command line argument count
   if (argc != 2) {
     fprintf (stderr, "%s", USAGE);
     exit(1);
   }
   
-  //check if the input file exist
+  // check if the input file exist
   if(access(argv[1], F_OK)){
     fprintf(stderr,"input file:\"%s\" could not be opened\n", argv[1]);
     exit(1);
   }
   
-  //read input file
+  // read input file
   collection = new_spectrum_collection(argv[1]);
   parse_spectrum_collection(collection);
   SPECTRUM_ITERATOR_T* iterator = new_spectrum_iterator(collection);

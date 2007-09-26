@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.50 $
+ * $Revision: 1.51 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -68,14 +68,14 @@ struct protein_peptide_iterator {
   BOOLEAN_T is_kr; ///<is there a K|R found in this sequence
 };
 
-//def bellow
+// def bellow
 static BOOLEAN_T read_title_line
   (FILE* fasta_file,
    char* name,
    char* description,
    PROTEIN_T* protein);
 
-//def bellow
+// def bellow
 static BOOLEAN_T read_raw_sequence
   (FILE* fasta_file,   // Input Fasta file.
    char* name,         // Sequence ID (used in error messages).
@@ -144,18 +144,18 @@ BOOLEAN_T protein_to_heavy(
   PROTEIN_T* protein ///< protein to convert to heavy -in 
   )
 {
-  //protein already heavy
+  // protein already heavy
   if(!protein->is_light){
     return TRUE;
   }
   
   FILE* file = get_database_file(protein->database);
   
-  //rewind to the begining of the protein to include ">" line
+  // rewind to the begining of the protein to include ">" line
   fseek(file, protein->offset, SEEK_SET);
 
-  //failed to parse the protein from fasta file
-  //protein offset is set in the parse_protein_fasta_file method
+  // failed to parse the protein from fasta file
+  // protein offset is set in the parse_protein_fasta_file method
   if(!parse_protein_fasta_file(protein ,file)){
     carp(CARP_ERROR, "failed convert protein to heavy, cannot parse fasta file");
     return FALSE;
@@ -174,11 +174,11 @@ BOOLEAN_T protein_to_light(
   PROTEIN_T* protein ///< protein to convert back to light -in 
   )
 {
-  //protein already light
+  // protein already light
   if(protein->is_light){
     return TRUE;
   }
-  //free all char* in protein object
+  // free all char* in protein object
   free(protein->sequence);
   protein->sequence = NULL;
   free(protein->annotation);
@@ -213,7 +213,7 @@ void print_protein(
   FILE* file ///< output stream -out
   )
 {
-  //covnert to heavy protein
+  // covnert to heavy protein
   if(protein->is_light){
     protein_to_heavy(protein);
   }
@@ -251,7 +251,7 @@ void serialize_protein(
   FILE* file ///< output stream -out
   )
 {
-  //covnert to heavy protein
+  // covnert to heavy protein
   if(protein->is_light){
     protein_to_heavy(protein);
   }
@@ -259,25 +259,25 @@ void serialize_protein(
   int id_length = strlen(protein->id);
   int annotation_length = strlen(protein->annotation);
 
-  //write the protein id length
+  // write the protein id length
   fwrite(&id_length, sizeof(int), 1, file);
   
-  //write the protein id 
- //include "/0"
+  // write the protein id 
+ // include "/0"
   fwrite(protein->id, sizeof(char), id_length+1, file);
 
-  //write the protein annotation length
+  // write the protein annotation length
   fwrite(&annotation_length, sizeof(int), 1, file);
 
-  //write the protein annotation
-  //include "/0"
+  // write the protein annotation
+  // include "/0"
   fwrite(protein->annotation, sizeof(char), annotation_length+1, file);
   
-  //write the protein sequence length
+  // write the protein sequence length
   fwrite(&protein->length, sizeof(unsigned int), 1, file);
   
-  //write the protein sequence
-  //include "/0"
+  // write the protein sequence
+  // include "/0"
   fwrite(protein->sequence, sizeof(char), protein->length+1, file);
 }
 
@@ -343,56 +343,56 @@ BOOLEAN_T parse_protein_binary_memmap(
 
   /***set protein ID***/
 
-  //read id length
+  // read id length
   id_length = (*memmap_as_int)[0];
 
-  //reset pointer to start of id
+  // reset pointer to start of id
   ++*memmap_as_int;
 
-  //set protein id to mem mapped id
+  // set protein id to mem mapped id
   protein->id = *memmap_as_char;
 
-  //reset pointer to move to annotation_length
+  // reset pointer to move to annotation_length
   *memmap_as_char += (id_length + 1);
 
 
   /***set protein annotation***/
 
-  //read annotation length
+  // read annotation length
   annotation_length = (*memmap_as_int)[0];
 
-  //reset pointer to start of annotation
+  // reset pointer to start of annotation
   ++*memmap_as_int;
 
-  //set protein annotation to mem mapped annotation
+  // set protein annotation to mem mapped annotation
   protein->annotation = *memmap_as_char;
 
-  //reset pointer to move to sequence_length
+  // reset pointer to move to sequence_length
   *memmap_as_char += (annotation_length + 1);
 
 
   /***set protein sequence***/
   
-  //read sequence length
+  // read sequence length
   sequence_length = (*memmap_as_int)[0];
   protein->length = sequence_length;
 
-  //reset pointer to start of sequence
+  // reset pointer to start of sequence
   ++*memmap_as_int;
 
-  //set protein annotation to mem mapped sequence
+  // set protein annotation to mem mapped sequence
   protein->sequence = *memmap_as_char;
 
-  //reset pointer to move to start of next protein
+  // reset pointer to move to start of next protein
   *memmap_as_char += (sequence_length + 1);
   
-  //now this protein has been created from memory mapped!
+  // now this protein has been created from memory mapped!
   protein->is_memmap = TRUE;
 
   return TRUE;
 }
 
-//FIXME ID line and annotation might need to be fixed
+// FIXME ID line and annotation might need to be fixed
 VERBOSE_T verbosity = NORMAL_VERBOSE;
 /**
  * Parses a protein from an open (FASTA) file.
@@ -408,14 +408,14 @@ BOOLEAN_T parse_protein_fasta_file(
   static char name[LONGEST_LINE];     // Just the sequence ID.
   static char desc[LONGEST_LINE];     // Just the comment field.
   static char buffer[PROTEIN_SEQUENCE_LENGTH];        // The sequence, as it's read in.
-  static unsigned int sequence_length; //the sequence length
+  static unsigned int sequence_length; // the sequence length
 
   // Read the title line.
   if (!read_title_line(file, name, desc, protein)) {
     return(FALSE);
   }
   
-  //need this line to initialize alphabet to set for protein instead of DNA
+  // need this line to initialize alphabet to set for protein instead of DNA
   set_alphabet(verbosity, "ACDEFGHIKLMNPQRSTVWY"); 
   buffer[0] = '\0';
 
@@ -424,7 +424,7 @@ BOOLEAN_T parse_protein_fasta_file(
     die("Sequence %s is too long.\n", name);
   }
     
-  //update the protein object.
+  // update the protein object.
   set_protein_length(protein, sequence_length);
   set_protein_id(protein, name);
   set_protein_sequence(protein, buffer);
@@ -465,11 +465,11 @@ static BOOLEAN_T read_title_line
       return(FALSE);
     }  
   }
-  //set protein offset                   FIXME: might not need to "-1" -CHRIS
+  // set protein offset                   FIXME: might not need to "-1" -CHRIS
   protein->offset = ftell(fasta_file) - 1;
 
-  //chris edited, added this block to make sure all of comment line is read 
-  //although might not be stored, to ensure the file* is at start of the sequence
+  // chris edited, added this block to make sure all of comment line is read 
+  // although might not be stored, to ensure the file* is at start of the sequence
   {
     char* new_line = NULL;
     int line_length;
@@ -482,7 +482,7 @@ static BOOLEAN_T read_title_line
     free(new_line);
   }
 
-  //this is Bill's old code
+  // this is Bill's old code
   /*
   // Read the ID and comment line.
   if (fgets(id_line, LONGEST_LINE-1, fasta_file) == NULL) {
@@ -620,7 +620,7 @@ char* get_protein_id(
     die("protein is light, must be heavy");
   }
   
-  int id_length = strlen(protein->id) +1; //+\0
+  int id_length = strlen(protein->id) +1; // +\0
   char* copy_id = 
     (char *)mymalloc(sizeof(char)*id_length);
   
@@ -652,7 +652,7 @@ void set_protein_id(
   )
 {
   free(protein->id);
-  int id_length = strlen(id) +1; //+\0
+  int id_length = strlen(id) +1; // +\0
   char* copy_id = 
     (char *)mymalloc(sizeof(char)*id_length);
   protein->id =
@@ -672,7 +672,7 @@ char* get_protein_sequence(
   if(protein->is_light){
     die("protein is light, must be heavy");
   }
-  unsigned int sequence_length = strlen(protein->sequence) +1; //+\0
+  unsigned int sequence_length = strlen(protein->sequence) +1; // +\0
   char * copy_sequence = 
     (char *)mymalloc(sizeof(char)*sequence_length);
   return strncpy(copy_sequence, protein->sequence, sequence_length);  
@@ -701,7 +701,7 @@ void set_protein_sequence(
   )
 {
   free(protein->sequence);
-  unsigned int sequence_length = strlen(sequence) +1; //+\0
+  unsigned int sequence_length = strlen(sequence) +1; // +\0
   char * copy_sequence = 
     (char *)mymalloc(sizeof(char)*sequence_length);
 
@@ -744,7 +744,7 @@ char* get_protein_annotation(
   if(protein->is_light){
     die("protein is light, must be heavy");
   }
-  int annotation_length = strlen(protein->annotation) +1; //+\0
+  int annotation_length = strlen(protein->annotation) +1; // +\0
   char * copy_annotation = 
     (char *)mymalloc(sizeof(char)*annotation_length);
   return strncpy(copy_annotation, protein->annotation, annotation_length);  
@@ -761,7 +761,7 @@ void set_protein_annotation(
   if(!protein->is_light){
     free(protein->annotation);
   }
-  int annotation_length = strlen(annotation) +1; //+\0
+  int annotation_length = strlen(annotation) +1; // +\0
   char * copy_annotation = 
     (char *)mymalloc(sizeof(char)*annotation_length);
   protein->annotation =
@@ -869,8 +869,8 @@ BOOLEAN_T find_krp(
   ){
   if(kr_idx < end_idx && 
      kr_idx >= start_idx){
-    //is there a P after the K|R 
-    if(seq_marker[kr_idx] == 1){ //check boundary
+    // is there a P after the K|R 
+    if(seq_marker[kr_idx] == 1){ // check boundary
       return find_krp(seq_marker, seq_marker[kr_idx-1], start_idx, end_idx);
     }
     return FALSE;
@@ -881,8 +881,8 @@ BOOLEAN_T find_krp(
   }
   else if(seq_marker[kr_idx-1] < end_idx && 
           seq_marker[kr_idx-1] >= start_idx){
-    //is there a P after the K|R 
-    if(seq_marker[seq_marker[kr_idx-1]] == 1){ //check boundary
+    // is there a P after the K|R 
+    if(seq_marker[seq_marker[kr_idx-1]] == 1){ // check boundary
       return find_krp(seq_marker, seq_marker[kr_idx-1], start_idx, end_idx);
     }
     return FALSE;
@@ -890,7 +890,7 @@ BOOLEAN_T find_krp(
   return TRUE;
 }
 
-//FIXME only examines if there is a mis-cleavage or not
+// FIXME only examines if there is a mis-cleavage or not
 // eventually would like to implement so that it will return the total number of mis-cleavage
 /**
  * examines the peptide if it contains miscleavage sites within it's sequence
@@ -902,7 +902,7 @@ int examine_peptide_cleavage(
   unsigned int end_idx ///< the end index of peptide -in
   )
 {
-  //the K|R|P index array
+  // the K|R|P index array
   unsigned int* seq_marker = iterator->seq_marker; 
   unsigned int kr_idx = iterator->kr_idx;
   
@@ -923,17 +923,17 @@ PEPTIDE_TYPE_T examine_peptide_type(
   unsigned int end_idx ///< the end index of peptide -in
   )
 {
-  //the K|R|P index array
+  // the K|R|P index array
   unsigned int* seq_marker = iterator->seq_marker; 
   BOOLEAN_T front = FALSE;
   BOOLEAN_T back = FALSE;
   
-  //examine front cleavage site
+  // examine front cleavage site
   if(start_idx == 1 || ((seq_marker[start_idx-2] > 1) && seq_marker[start_idx-1] != 1)){
     front = TRUE;
   }
   
-  //exaimine end cleavage site
+  // exaimine end cleavage site
   if(end_idx == iterator->protein->length || 
      ((seq_marker[end_idx-1] > 1) && seq_marker[end_idx] != 1)){
     back = TRUE;
@@ -970,7 +970,7 @@ BOOLEAN_T iterator_state_help(
 
   LOOP:
   
-  //set kr_idx position
+  // set kr_idx position
   if(iterator->is_kr){
     if(iterator->seq_marker[iterator->kr_idx-1] < iterator->cur_start){
       iterator->kr_idx = iterator->seq_marker[iterator->kr_idx-1];
@@ -981,34 +981,34 @@ BOOLEAN_T iterator_state_help(
     }
   }
 
-  //check if the smallest mass of a length is larger than max_mass
+  // check if the smallest mass of a length is larger than max_mass
   if(iterator->cur_length * SMALLEST_MASS > max_mass){
     return FALSE;
   }
   
-  //check if out of mass_max idex size
+  // check if out of mass_max idex size
   if(iterator->cur_length > max_length ||
      iterator->cur_length > iterator->protein->length){
     return FALSE;
   }
   
-  //check if less than min length
+  // check if less than min length
   if(iterator->cur_length < min_length){
     ++iterator->cur_length;
     goto LOOP;
   }
   
-  //reached end of length column, check next length
+  // reached end of length column, check next length
   if((unsigned int)(iterator->cur_start + iterator->cur_length - 1) > iterator->protein->length){
     ++iterator->cur_length;
     iterator->cur_start = 1;
     goto LOOP;
   }
   
-  //is mass with in range
+  // is mass with in range
   if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] < min_mass ||
         iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] > max_mass){
-    //does this length have any possibility of having a peptide within mass range?
+    // does this length have any possibility of having a peptide within mass range?
     if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] == 0 ||
        iterator->cur_length * LARGEST_MASS + 19 < min_mass){
       ++iterator->cur_length;
@@ -1020,10 +1020,10 @@ BOOLEAN_T iterator_state_help(
     goto LOOP;
   }
   
-  //examin tryptic type and cleavage
+  // examin tryptic type and cleavage
   if(peptide_type != ANY_TRYPTIC){
 
-    //get the peptide type for the examining candidate peptide
+    // get the peptide type for the examining candidate peptide
     candidate_peptide_type = 
       examine_peptide_type(iterator, 
                            iterator->cur_start, 
@@ -1031,7 +1031,7 @@ BOOLEAN_T iterator_state_help(
                            iterator->cur_start -1);
 
 
-    //ok if peptide type is Partially_Tryptic
+    // ok if peptide type is Partially_Tryptic
     // allow candidates that're PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC peptides
     // otherwise, skip candidate peptides that do not match peptide type
     if( !((peptide_type == PARTIALLY_TRYPTIC && 
@@ -1044,7 +1044,7 @@ BOOLEAN_T iterator_state_help(
     }
   }
 
-  //examine cleavage
+  // examine cleavage
   if(iterator->num_mis_cleavage == 0){
     if(examine_peptide_cleavage(iterator, 
                                 iterator->cur_start, 
@@ -1077,9 +1077,9 @@ BOOLEAN_T set_iterator_state(
 }
 
 
-//start_size: total sequence size 
-//length_size: max_length from constraint;
-//float** mass_matrix = float[length_size][start_size];
+// start_size: total sequence size 
+// length_size: max_length from constraint;
+// float** mass_matrix = float[length_size][start_size];
 /**
  * Dynamically sets the mass of the mass_matrix
  * The mass matrix contains every peptide bellow max length
@@ -1097,19 +1097,19 @@ void set_mass_matrix(
   unsigned int length_index = 1;
   float mass_h2o = MASS_H2O_AVERAGE;
 
-  //set correct H2O mass
+  // set correct H2O mass
   if(mass_type == MONO){
     mass_h2o = MASS_H2O_MONO;
   }
   
-  //initialize mass matrix
+  // initialize mass matrix
   for(; start_index < start_size; ++start_index){
     mass_matrix[0][start_index] = 
       get_mass_amino_acid(protein->sequence[start_index], mass_type) + mass_h2o;
   }
   start_index = 0;
   
-  //fill in the mass matrix
+  // fill in the mass matrix
   for(; start_index < start_size; ++start_index){
     for(length_index = 1; length_index < length_size; ++length_index){
       if(start_index + length_index < protein->length){
@@ -1136,12 +1136,12 @@ void set_seq_marker(
   unsigned int sequence_idx = 0;
   unsigned int previous_kr = 0;
   unsigned int first_kr = protein_length+1;
-  BOOLEAN_T first = FALSE; //have we seen a K | R so far
+  BOOLEAN_T first = FALSE; // have we seen a K | R so far
 
-  //create seq_marker
+  // create seq_marker
   unsigned int* seq_marker = (unsigned int*)mycalloc(protein_length, sizeof(unsigned int));
   
-  //iterate through the sequence
+  // iterate through the sequence
   for(; sequence_idx < protein_length; ++sequence_idx){
     if(sequence[sequence_idx] == 'K' || sequence[sequence_idx] == 'R'){
       if(first){
@@ -1158,11 +1158,11 @@ void set_seq_marker(
     }
   }
   if(first){
-    //last K|R is set to protein length
+    // last K|R is set to protein length
     seq_marker[previous_kr] = sequence_idx + 1;
   }
   
-  //set the complete seq_marker
+  // set the complete seq_marker
   protein_peptide_iterator->seq_marker = seq_marker;
   protein_peptide_iterator->first_kr_idx = first_kr;
   protein_peptide_iterator->kr_idx = first_kr;
@@ -1186,14 +1186,14 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   PROTEIN_PEPTIDE_ITERATOR_T* iterator = 
     (PROTEIN_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(PROTEIN_PEPTIDE_ITERATOR_T));
 
-  //create mass_matrix
+  // create mass_matrix
   iterator->mass_matrix = (float**)mycalloc(max_length, sizeof(float*));
   for (; matrix_index < max_length ; ++matrix_index){
     iterator->mass_matrix[matrix_index] = (float*)mycalloc(protein->length, sizeof(float));
   }  
   set_mass_matrix(iterator->mass_matrix, protein->length, max_length, protein, mass_type);
   
-  //initialize iterator
+  // initialize iterator
   iterator->protein = protein;
   iterator->peptide_idx = 0;
   iterator->peptide_constraint = peptide_constraint;
@@ -1262,13 +1262,13 @@ PEPTIDE_T* protein_peptide_iterator_next(
     die("ERROR: no more peptides\n");
   }
   
-  //set peptide type
+  // set peptide type
   if(get_peptide_constraint_peptide_type(protein_peptide_iterator->peptide_constraint) != ANY_TRYPTIC){
     peptide_type = get_peptide_constraint_peptide_type(protein_peptide_iterator->peptide_constraint);
   }
 
-  //when constraints ANY_TRYPTIC, need to examine peptide
-  //possible to skip this step and leave it as ANY_TRYPTIC
+  // when constraints ANY_TRYPTIC, need to examine peptide
+  // possible to skip this step and leave it as ANY_TRYPTIC
   else{
       peptide_type = 
         examine_peptide_type(protein_peptide_iterator,
@@ -1277,7 +1277,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
   }
   
 
-  //create new peptide
+  // create new peptide
   PEPTIDE_T* peptide = 
     new_peptide
     (protein_peptide_iterator->cur_length, 
@@ -1287,16 +1287,16 @@ PEPTIDE_T* protein_peptide_iterator_next(
      peptide_type
      );
   
-  //FIXME Not sure what the use delete this field if needed
+  // FIXME Not sure what the use delete this field if needed
   ++protein_peptide_iterator->peptide_idx;
 
-  //update poisiton of iterator
+  // update poisiton of iterator
   ++protein_peptide_iterator->cur_start;
   protein_peptide_iterator->has_next = set_iterator_state(protein_peptide_iterator);
 
   
-  //increment the database count of peptides produced
-  //add_database_peptide_count(get_protein_database(protein_peptide_iterator->protein));
+  // increment the database count of peptides produced
+  // add_database_peptide_count(get_protein_database(protein_peptide_iterator->protein));
   
   return peptide;
 }

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -66,7 +66,7 @@ PEPTIDE_SRC_T* new_peptide_src_array(
   int array_idx = 0;
   PEPTIDE_SRC_T* src_array = (PEPTIDE_SRC_T*)mycalloc(size, sizeof(PEPTIDE_SRC_T));
   
-  //set all next peptide src pointers
+  // set all next peptide src pointers
   for(;array_idx < size - 1; ++array_idx){
     ((PEPTIDE_SRC_T*)(&(src_array[array_idx])))->next_association = &src_array[array_idx + 1];
   }
@@ -86,7 +86,7 @@ PEPTIDE_SRC_T* new_peptide_src_linklist(
   PEPTIDE_SRC_T* src_list = (PEPTIDE_SRC_T*)mycalloc(1, sizeof(PEPTIDE_SRC_T));
   PEPTIDE_SRC_T* curr_src = src_list;
 
-  //set all next peptide src pointers
+  // set all next peptide src pointers
   for(;src_idx < size - 1; ++src_idx){
     curr_src->next_association = (PEPTIDE_SRC_T*)mycalloc(1, sizeof(PEPTIDE_SRC_T));
     curr_src = curr_src->next_association;
@@ -108,7 +108,7 @@ void set_peptide_src_array(
   int start_idx ///< start index of the peptide in the protein sequence -in
   )
 {
-  //set all valuse
+  // set all valuse
   PEPTIDE_SRC_T* peptide_src = &src_array[array_idx];
   peptide_src->peptide_type = peptide_type;
   peptide_src->parent_protein = parent_protein;
@@ -127,10 +127,10 @@ void free_peptide_src(
   PEPTIDE_SRC_T* to_free = peptide_src;
   PEPTIDE_SRC_T* next = peptide_src->next_association;
 
-  //free first peptide_src
+  // free first peptide_src
   free(to_free);
   
-  //iterate over all peptide_srcs
+  // iterate over all peptide_srcs
   while(next != NULL){
     to_free = next;
     next = next->next_association;
@@ -156,7 +156,7 @@ void free_one_peptide_src(
   free(peptide_src);
 }
 
-//FIXME might need to change how this is printed
+// FIXME might need to change how this is printed
 /**
  * Prints a peptide object to file.
  */
@@ -205,7 +205,7 @@ void copy_peptide_src(
   set_peptide_src_peptide_type(dest, src->peptide_type);
   set_peptide_src_parent_protein(dest, src->parent_protein);
   set_peptide_src_start_idx(dest, src->start_idx);
-  //check if end of the linklist
+  // check if end of the linklist
   if(get_peptide_src_next_association(src) != NULL){
     next_association = allocate_peptide_src();
     dest->next_association = next_association;
@@ -332,13 +332,13 @@ void serialize_peptide_src(
   FILE* file  ///< output file -in   
   )
 {
-  //write protein index in database
+  // write protein index in database
   int protein_idx = get_protein_protein_idx(peptide_src->parent_protein);
   fwrite(&protein_idx, sizeof(int), 1, file);
     
-  //write peptide src type(tryptic, all, ...)
+  // write peptide src type(tryptic, all, ...)
   fwrite(&(peptide_src->peptide_type), sizeof(PEPTIDE_TYPE_T), 1, file);
-  //write start index in protein of peptide in this peptide src
+  // write start index in protein of peptide in this peptide src
   fwrite(&(peptide_src->start_idx), sizeof(int), 1, file);
   
 }

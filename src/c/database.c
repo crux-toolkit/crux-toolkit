@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.41 $
+ * $Revision: 1.42 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -113,13 +113,13 @@ void free_database(
   DATABASE_T* database ///< An allocated database -in
   )
 {
-  //DEBUG show the databse pointer count
-  //printf( "the database pointer count: %d\n", database->pointer_count);
+  // DEBUG show the databse pointer count
+  // printf( "the database pointer count: %d\n", database->pointer_count);
   
-  //increment database pointer counter
+  // increment database pointer counter
   sub_database_pointer_count(database);
 
-  //only free up memory when pointer count is zero
+  // only free up memory when pointer count is zero
   if(database->pointer_count > 0){
     return;
   }
@@ -128,23 +128,23 @@ void free_database(
   
   free(database->filename);
   
-  //only free proteins if been parsed and file has been opened
+  // only free proteins if been parsed and file has been opened
   if(database->is_parsed){
     
-    //free each protein in the array
+    // free each protein in the array
     for(; protein_idx < database->num_proteins; ++protein_idx){
       free_protein(database->proteins[protein_idx]);
     }
     
-    //free memory mapped binary file from memory
+    // free memory mapped binary file from memory
     if(database->is_memmap){
-      //un map the memory!!
+      // un map the memory!!
       if(munmap(database->data_address, database->file_size) != 0){
         carp(CARP_ERROR, "failed to unmap the memory of binary fasta file");
       }
     }
-    else{//not memory mapped
-      //close file handler
+    else{// not memory mapped
+      // close file handler
       carp(CARP_INFO, "Closing database filehandle");
       fclose(database->file);
     }
@@ -165,19 +165,19 @@ void print_database(
   fprintf(file, "filename:%s\n", database->filename);
   fprintf(file, "is_parsed:");
   
-  //has the database been parsed?
+  // has the database been parsed?
   if(database->is_parsed){
     fprintf(file, "TRUE\n");
     DATABASE_PROTEIN_ITERATOR_T* iterator = new_database_protein_iterator(database);
  
     while(database_protein_iterator_has_next(iterator)){
       protein = database_protein_iterator_next(iterator);
-      //if the database uses light/heavy functionality
+      // if the database uses light/heavy functionality
       if(database->use_light_protein){
         protein_to_heavy(protein);
       }
       print_protein(protein, stdout);
-      //if the database uses light/heavy functionality
+      // if the database uses light/heavy functionality
       /** 
        * uncomment this code if you want to restore a protein to 
        * light after converted to heavy
@@ -213,32 +213,32 @@ BOOLEAN_T parse_database_text_fasta(
   PROTEIN_T* new_protein;
   unsigned int protein_idx = 0;
 
-  //check if already parsed
+  // check if already parsed
   if(database->is_parsed){
     return TRUE;
   }
   
-  //open file and 
+  // open file and 
   file = fopen(database->filename, "r");
   
-  //check if succesfully opened file
+  // check if succesfully opened file
   if(file == NULL){
     carp(CARP_FATAL, "failed to open file to parse database");
     return FALSE;
   }
   
-  //check if use light protein and parse thos light proteins fomr protein index
+  // check if use light protein and parse thos light proteins fomr protein index
   if(database->use_light_protein && protein_index_on_disk(database->filename, FALSE)){
-    //let the user know that protein index file is being used
+    // let the user know that protein index file is being used
     carp(CARP_INFO, "using protein index file");
 
-    //create a protein index iterator
+    // create a protein index iterator
     PROTEIN_INDEX_ITERATOR_T* protein_index_iterator =
       new_protein_index_iterator(database->filename);
 
-    //iterate over all proteins in protein index
+    // iterate over all proteins in protein index
     while(protein_index_iterator_has_next(protein_index_iterator)){
-      //check if there's space for more proteins
+      // check if there's space for more proteins
       if(database->num_proteins == MAX_PROTEINS){
         free_protein_index_iterator(protein_index_iterator);
         carp(CARP_ERROR, "exceeds protein index array size");
@@ -248,16 +248,16 @@ BOOLEAN_T parse_database_text_fasta(
       new_protein = protein_index_iterator_next(protein_index_iterator);
       set_protein_database(new_protein, database);
       
-      //add protein to database
+      // add protein to database
       database->proteins[database->num_proteins] = new_protein;
       ++database->num_proteins;
     }
-    //job well done..free iterator
+    // job well done..free iterator
     free_protein_index_iterator(protein_index_iterator);
   }
   else{  
     working_index = ftell(file);
-    //check each line until reach '>' line
+    // check each line until reach '>' line
     while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
       if(new_line[0] == '>'){
         if(database->num_proteins == MAX_PROTEINS){
@@ -266,12 +266,12 @@ BOOLEAN_T parse_database_text_fasta(
           carp(CARP_ERROR, "exceeds protein index array size");
           return FALSE;
         }
-        //the new protein to be added
+        // the new protein to be added
         new_protein = allocate_protein();
         
-        //do not parse the protein sequence if using light/heavy functionality
+        // do not parse the protein sequence if using light/heavy functionality
         if(database->use_light_protein){
-          //set light and offset
+          // set light and offset
           set_protein_offset(new_protein, working_index);
           set_protein_is_light(new_protein, TRUE);
         }
@@ -294,10 +294,10 @@ BOOLEAN_T parse_database_text_fasta(
           set_protein_is_light(new_protein, FALSE);
         }
         
-        //add protein to database
+        // add protein to database
         database->proteins[database->num_proteins] = new_protein;
         ++database->num_proteins;
-        //set protein index, database
+        // set protein index, database
         set_protein_protein_idx(new_protein, database->num_proteins);
         set_protein_database(new_protein, database);
       }
@@ -306,7 +306,7 @@ BOOLEAN_T parse_database_text_fasta(
     free(new_line);
   }
   
-  //yes the database is paresed now..!!
+  // yes the database is paresed now..!!
   database->is_parsed = TRUE;
   database->file = file;
   return TRUE;
@@ -323,20 +323,20 @@ BOOLEAN_T memory_map_database(
 {
   struct stat file_info;
   
-  //get information of the binary fasta file
+  // get information of the binary fasta file
   if (stat(database->filename, &file_info) == -1) {
     carp(CARP_ERROR, "failed to retrieve information of binary fasta file: %s", database->filename);
     return FALSE;
   }
   
-  //set size of the binary fasta file in database
+  // set size of the binary fasta file in database
   // this is used later to know how much to unmap
   database->file_size = file_info.st_size;
   
-  //memory map the entire binary fasta file!
+  // memory map the entire binary fasta file!
   database->data_address = mmap((caddr_t)0, file_info.st_size, PROT_READ, MAP_PRIVATE /*MAP_SHARED*/, file_d, 0);
 
-  //check if memory mapping has succeeded
+  // check if memory mapping has succeeded
   if ((caddr_t)(database->data_address) == (caddr_t)(-1)){
     carp(CARP_ERROR, "failed to use mmap function for binary fasta file: %s", database->filename);
     return FALSE;
@@ -357,12 +357,12 @@ BOOLEAN_T populate_proteins_from_memmap(
   unsigned int protein_idx = 0;
   char* data = database->data_address;
   
-  //parse proteins until the end of list
+  // parse proteins until the end of list
   while(data[0] != '*'){
-    //check if anymore space for protein
+    // check if anymore space for protein
     if(database->num_proteins == MAX_PROTEINS){
       carp(CARP_ERROR, "exceeds protein index array size");
-      //free all proteins before return
+      // free all proteins before return
       for(protein_idx = 0; protein_idx < database->num_proteins; ++protein_idx){
         free_protein(database->proteins[protein_idx]);
       }
@@ -370,13 +370,13 @@ BOOLEAN_T populate_proteins_from_memmap(
       return FALSE;
     }
     
-    //the new protein to be added
+    // the new protein to be added
     new_protein = allocate_protein();
     
-    //parse protein from memory map
+    // parse protein from memory map
     if(!parse_protein_binary_memmap(new_protein, (void**)&data)){
-      //failed to parse the protein from memmap
-      //free all proteins, and return FALSE
+      // failed to parse the protein from memmap
+      // free all proteins, and return FALSE
       free_protein(new_protein);
       for(; protein_idx < database->num_proteins; ++protein_idx){
         free_protein(database->proteins[protein_idx]);
@@ -387,10 +387,10 @@ BOOLEAN_T populate_proteins_from_memmap(
     }
     set_protein_is_light(new_protein, FALSE);
     
-    //add protein to database
+    // add protein to database
     database->proteins[database->num_proteins] = new_protein;
     ++database->num_proteins;
-    //set protein index, database
+    // set protein index, database
     set_protein_protein_idx(new_protein, database->num_proteins);
     set_protein_database(new_protein, database);
   }
@@ -410,22 +410,22 @@ BOOLEAN_T parse_database_memmap_binary(
 {
   int file_d = -1;
  
-  //check if already parsed
+  // check if already parsed
   if(database->is_parsed){
     return TRUE;
   }
   
-  //open file and 
+  // open file and 
   file_d = open(database->filename, O_RDONLY);
   
-  //check if succesfully opened file
+  // check if succesfully opened file
   if(file_d == -1){
     carp(CARP_FATAL, "failed to open file to parse database");
     return FALSE;
   }
 
-  //FIXME, if what to use some light protein for binary file change here...
-  //check if user request light protein
+  // FIXME, if what to use some light protein for binary file change here...
+  // check if user request light protein
   // When using a binary file in memory map, cannot use light protein
   // change to FALSE on light protein useage
   if(database->use_light_protein){
@@ -433,19 +433,19 @@ BOOLEAN_T parse_database_memmap_binary(
     database->use_light_protein = FALSE;;
   }
 
-  //memory map the binary fasta file into memory
+  // memory map the binary fasta file into memory
   if(!memory_map_database(database, file_d)){
     carp(CARP_FATAL, "failed to memory map binary fasta file into memory");
     return FALSE;
   }
 
-  //populate the proteins from the memory mapped fasta file
+  // populate the proteins from the memory mapped fasta file
   if(!populate_proteins_from_memmap(database)){
     carp(CARP_FATAL, "failed to populate the proteins from memory mapped fasta file");
     return FALSE;
   }
    
-  //yes the database is paresed now..!!
+  // yes the database is paresed now..!!
   database->is_parsed = TRUE;
   return TRUE;
 }
@@ -474,14 +474,14 @@ BOOLEAN_T parse_database(
   DATABASE_T* database ///< An allocated database -in
   )
 {
-  //should we parse the database using memory mapped binary fasta file?
+  // should we parse the database using memory mapped binary fasta file?
   if(database->is_memmap){
     if(!parse_database_memmap_binary(database)){
       carp(CARP_ERROR, "failed to parse database for memory mapped binary fasta file");
       return FALSE;
     }    
   }
-  else{ //parse database from normal text fasta file, no memory mapping!
+  else{ // parse database from normal text fasta file, no memory mapping!
     if(!parse_database_text_fasta(database)){
       carp(CARP_ERROR, "failed to parse database for text fasta file");
       return FALSE;
@@ -641,9 +641,9 @@ void sub_database_pointer_count(
 
   --database->pointer_count;
   /*
-  //free database if no more pointers to the database
+  // free database if no more pointers to the database
   if(--database->pointer_count == 0){
-    //free_database(database);
+    // free_database(database);
   }
   */
 }
@@ -662,22 +662,22 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
   DATABASE_T* database ///< the database to create a protein iterator -in
   )
 {
-  //if database is parsed, if not do so..
+  // if database is parsed, if not do so..
   if(!database->is_parsed){
-    //failed to parse database
+    // failed to parse database
     if(!parse_database(database)){
       carp(CARP_FATAL, "failed to parse database, cannot create iterator");
       exit(1);
     }
   }
   
-  //create new protein iterator
+  // create new protein iterator
   DATABASE_PROTEIN_ITERATOR_T* iterator = 
     (DATABASE_PROTEIN_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_PROTEIN_ITERATOR_T));
   iterator->database = database;
   iterator->cur_protein = 0;
 
-  //increment database pointer counter
+  // increment database pointer counter
   add_database_pointer_count(database);
   
   return iterator;
@@ -691,7 +691,7 @@ void free_database_protein_iterator(
   DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator to free -in
   )
 {
-  //subtract pointer count
+  // subtract pointer count
   free_database(database_protein_iterator->database);
 
   free(database_protein_iterator);
@@ -722,7 +722,7 @@ PROTEIN_T* database_protein_iterator_next(
 {
   ++database_protein_iterator->cur_protein;
 
-  //print number of protein generated to STDERR for every 500 protein reached
+  // print number of protein generated to STDERR for every 500 protein reached
   if(database_protein_iterator->cur_protein % 500 == 0){
     carp(CARP_INFO, "reached protein %d out of %d", 
          database_protein_iterator->cur_protein,
@@ -744,7 +744,7 @@ PROTEIN_T* database_protein_iterator_protein_idx(
   if(!database_protein_iterator_has_next(database_protein_iterator)){
     die("no proteins to return in protein iterator");
   }
-  else if(protein_idx < 1 || //might have to be 1 
+  else if(protein_idx < 1 || // might have to be 1 
           protein_idx > database_protein_iterator->database->num_proteins){
     die("protein_idx index out of bounds");
   }
@@ -765,8 +765,8 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
   )
 {
-  //set peptide implementation to linklist peptide_src
-  //this determines which peptide free method to use
+  // set peptide implementation to linklist peptide_src
+  // this determines which peptide free method to use
   set_peptide_src_implementation(TRUE);
 
   PROTEIN_T* next_protein = NULL;
@@ -774,19 +774,19 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator =
     (DATABASE_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_PEPTIDE_ITERATOR_T));
   
-  //set a new protein iterator
+  // set a new protein iterator
   database_peptide_iterator->database_protein_iterator =
     new_database_protein_iterator(database);
 
-  //set peptide constraint
+  // set peptide constraint
   database_peptide_iterator->peptide_constraint = peptide_constraint;
   
-  //check if there's any proteins to create peptides from
+  // check if there's any proteins to create peptides from
   if(database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
     next_protein =
       database_protein_iterator_next(database_peptide_iterator->database_protein_iterator);
 
-    //if using light/heavy functionality parse the light protein
+    // if using light/heavy functionality parse the light protein
     if(database->use_light_protein && get_protein_is_light(next_protein)){
       if(!protein_to_heavy(next_protein)){
         carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
@@ -796,11 +796,11 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
       }
     }
 
-    //set new protein peptide iterator
+    // set new protein peptide iterator
     database_peptide_iterator->cur_protein_peptide_iterator =
       new_protein_peptide_iterator(next_protein, database_peptide_iterator->peptide_constraint);
  
-    //if first protein does not contain a match peptide, reinitailize
+    // if first protein does not contain a match peptide, reinitailize
     while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
       // covert the heavy back to light
       /** 
@@ -811,19 +811,19 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
       }
       */
 
-      //end of list of peptides for database_peptide_iterator
+      // end of list of peptides for database_peptide_iterator
       if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
         break;
       }
-      else{ //create new protein_peptide_iterator for next protein
-        //free old iterator
+      else{ // create new protein_peptide_iterator for next protein
+        // free old iterator
         free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
         
-        //get next protein
+        // get next protein
         next_protein = 
           database_protein_iterator_next(database_peptide_iterator->database_protein_iterator);
 
-         //if using light/heavy functionality parse the light protein
+         // if using light/heavy functionality parse the light protein
         if(database->use_light_protein && get_protein_is_light(next_protein)){
           if(!protein_to_heavy(next_protein)){
             carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
@@ -832,20 +832,20 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
             exit(1);
           }
         }
-        //creat new protein_peptide_iterator
+        // creat new protein_peptide_iterator
         database_peptide_iterator->cur_protein_peptide_iterator =
           new_protein_peptide_iterator(next_protein, 
                                        database_peptide_iterator->peptide_constraint);
       }
     }
   }
-  else{ //no proteins to create peptides from
+  else{ // no proteins to create peptides from
     carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
     free_database_protein_iterator(database_peptide_iterator->database_protein_iterator);
     free(database_peptide_iterator);
     exit(1);
   }
-  //set the current working protein
+  // set the current working protein
   database_peptide_iterator->prior_protein = next_protein;
   
   return database_peptide_iterator;
@@ -885,16 +885,16 @@ PEPTIDE_T* database_peptide_iterator_next(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
   )
 {
-   //did you reset working protein?
+   // did you reset working protein?
   BOOLEAN_T reset = FALSE;
   
-  //the ppeptide to return
+  // the ppeptide to return
   PEPTIDE_T* next_peptide =
     protein_peptide_iterator_next(database_peptide_iterator->cur_protein_peptide_iterator);
   
   DATABASE_T* database = database_peptide_iterator->database_protein_iterator->database;
   
-  //reset database_peptide_iterator if needed
+  // reset database_peptide_iterator if needed
   while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
     reset = TRUE;
     PROTEIN_T* next_protein = NULL; 
@@ -908,19 +908,19 @@ PEPTIDE_T* database_peptide_iterator_next(
     }
     */
 
-    //end of list of peptides for database_peptide_iterator
+    // end of list of peptides for database_peptide_iterator
     if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
       break;
     }
-    else{ //create new protein_peptide_iterator for next protein
-      //free old iterator
+    else{ // create new protein_peptide_iterator for next protein
+      // free old iterator
       free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
       
-      //get next protein
+      // get next protein
       next_protein = 
         database_protein_iterator_next(database_peptide_iterator->database_protein_iterator);
       
-      //if using light/heavy functionality parse the light protein
+      // if using light/heavy functionality parse the light protein
       if(database->use_light_protein && get_protein_is_light(next_protein)){
         if(!protein_to_heavy(next_protein)){
           carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
@@ -929,22 +929,22 @@ PEPTIDE_T* database_peptide_iterator_next(
           exit(1);
         }
       }
-      //creat new protein_peptide_iterator
+      // creat new protein_peptide_iterator
       database_peptide_iterator->cur_protein_peptide_iterator =
         new_protein_peptide_iterator(next_protein, 
                                      database_peptide_iterator->peptide_constraint);
     }        
   }
 
-  //are we using the light functionality?
+  // are we using the light functionality?
   if(database->use_light_protein){
-    //get the current working protein
+    // get the current working protein
     PROTEIN_T* protein_bye = get_protein_peptide_iterator_portein(database_peptide_iterator->cur_protein_peptide_iterator);
-    //set first passed, shows that we extraced at least one protein since we moved on to the next protein
+    // set first passed, shows that we extraced at least one protein since we moved on to the next protein
     if(!reset && !database_peptide_iterator->first_passed){
       database_peptide_iterator->first_passed = TRUE;
     }
-    //convert prior_protein to light
+    // convert prior_protein to light
     else if(!reset && database_peptide_iterator->first_passed && (protein_bye != database_peptide_iterator->prior_protein)){
       /** 
        * uncomment this code if you want to restore a protein to 
@@ -974,22 +974,22 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   BOOLEAN_T unique ///< only return unique peptides? -in
   )
 {
-  //create database sorted peptide iterator
+  // create database sorted peptide iterator
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* database_sorted_peptide_iterator =
     (DATABASE_SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_SORTED_PEPTIDE_ITERATOR_T));
 
-  //create the database peptide iterator
+  // create the database peptide iterator
   DATABASE_PEPTIDE_ITERATOR_T* db_peptide_iterator =
     new_database_peptide_iterator(database, peptide_constraint);
 
-  //create a sorted peptide iterator that will sort all the peptides from db peptide iterator
+  // create a sorted peptide iterator that will sort all the peptides from db peptide iterator
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =
     new_sorted_peptide_iterator_database(db_peptide_iterator, sort_type, unique);
 
-  //set sorted_peptide_iterator
+  // set sorted_peptide_iterator
   database_sorted_peptide_iterator->sorted_peptide_iterator = sorted_peptide_iterator;
   
-  free_database_peptide_iterator(db_peptide_iterator); //CHECK ME might wanna check this...
+  free_database_peptide_iterator(db_peptide_iterator); // CHECK ME might wanna check this...
 
   return database_sorted_peptide_iterator;
 }

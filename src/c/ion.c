@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -58,18 +58,18 @@ void initialize_modification_masses(
    MASS_TYPE_T mass_type ///< mass type (average, mono) -in
 )
 {
-  //set modification mass
+  // set modification mass
   if(mass_type == MONO){
     modification_masses[NH3] = MASS_NH3_MONO;
     modification_masses[H2O] = MASS_H2O_MONO ;
-    modification_masses[ISOTOPE] = 1; //FIXME check this!!!
-    modification_masses[FLANK] = 1; //FIXME check this!!!
+    modification_masses[ISOTOPE] = 1; // FIXME check this!!!
+    modification_masses[FLANK] = 1; // FIXME check this!!!
   }
   else if(mass_type == AVERAGE){
     modification_masses[NH3] = MASS_NH3_AVERAGE;
     modification_masses[H2O] = MASS_H2O_AVERAGE;
-    modification_masses[ISOTOPE] = 1; //FIXME check this!!!
-    modification_masses[FLANK] = 1; //FIXME check this!!!
+    modification_masses[ISOTOPE] = 1; // FIXME check this!!!
+    modification_masses[FLANK] = 1; // FIXME check this!!!
   }
 
   initialized_modification_masses = TRUE;
@@ -98,7 +98,7 @@ ION_T* new_basic_ion (
   char* peptide ///< location for the new ion -in
   )
 {
-  //allocate new ion
+  // allocate new ion
   ION_T* ion = (ION_T*)mycalloc(1, sizeof(ION_T));
   ion->type = type;
   ion->cleavage_idx = cleavage_idx;
@@ -124,10 +124,10 @@ ION_T* new_ion (
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
   )
 {
-  //get new basic ion
+  // get new basic ion
   ION_T* ion = new_basic_ion(type, cleavage_idx, charge, peptide);
   
-  //calculate and set ion mass/z
+  // calculate and set ion mass/z
   if(!calc_ion_mass_z(ion, mass_type, FALSE)){
     carp(CARP_ERROR, "failed to calculate ion mass/z");
     exit(1);
@@ -150,16 +150,16 @@ ION_T* new_modified_ion(
   int* modification_counts ///< an array of modification counts for each modification -in
   )
 {
-  //get new basic ion
+  // get new basic ion
   ION_T* ion = new_basic_ion(type, cleavage_idx, charge, peptide);
   
-  //set all modification counts in the ion
+  // set all modification counts in the ion
   int modification_idx = 0;
   for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
     ion->modification_counts[modification_idx] = modification_counts[modification_idx];
   }
   
-  //calculate and set ion mass/z
+  // calculate and set ion mass/z
   if(!calc_ion_mass_z(ion, mass_type, TRUE)){
     carp(CARP_ERROR, "failed to calculate ion mass/z");
     exit(1);
@@ -184,16 +184,16 @@ ION_T* new_modified_ion_with_mass(
   int* modification_counts ///< an array of modification counts for each modification -in
   )
 {
-  //get new basic ion
+  // get new basic ion
   ION_T* ion = new_basic_ion(type, cleavage_idx, charge, peptide);
   
-  //set all modification counts in the ion
+  // set all modification counts in the ion
   int modification_idx = 0;
   for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
     ion->modification_counts[modification_idx] = modification_counts[modification_idx];
   }
   
-  //calculate and set ion mass/z
+  // calculate and set ion mass/z
   if(!calc_ion_mass_z_with_mass(ion, mass_type, base_mass, TRUE)){
     carp(CARP_ERROR, "failed to calculate ion mass/z");
     exit(1);
@@ -215,16 +215,16 @@ ION_T* new_ion_with_mass(
   float base_mass ///< the base mass of the ion -in
   )
 {
-  //get new basic ion
+  // get new basic ion
   ION_T* ion = new_basic_ion(type, cleavage_idx, charge, peptide);
   
-  //set all modification counts in the ion
+  // set all modification counts in the ion
   int modification_idx = 0;
   for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
     ion->modification_counts[modification_idx] = 0;
   }
   
-  //calculate and set ion mass/z
+  // calculate and set ion mass/z
   if(!calc_ion_mass_z_with_mass(ion, mass_type, base_mass, TRUE)){
     carp(CARP_ERROR, "failed to calculate ion mass/z");
     exit(1);
@@ -267,11 +267,11 @@ void print_ion(
   FILE* file ///< to this file -in
   )
 {
-  //print all fields of ion
+  // print all fields of ion
   fprintf(file, "%.2f\t%.2f\t%d\t%d\t%d", ion->ion_mass_z, (ion->ion_mass_z)*ion->charge, ion->charge, 
           (int)ion->type, ion->cleavage_idx);
 
-  //iterate over all modification counts
+  // iterate over all modification counts
   int modification_idx;
   for(modification_idx=0; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
     fprintf(file,"\t%d", ion->modification_counts[modification_idx]);
@@ -488,7 +488,7 @@ float modify_ion_mass_z(
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
   )
 {
-  //initalize the modified masses(average|mono);
+  // initalize the modified masses(average|mono);
   if(!initialized_modification_masses){
     initialize_modification_masses(mass_type);
   }
@@ -507,9 +507,9 @@ void add_modification(
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
   )
 {
-  //update modification count
+  // update modification count
   ion->modification_counts[(int)modification] += modification_count;  
-  //reset ion mass_z
+  // reset ion mass_z
   ion->ion_mass_z =  modify_ion_mass_z(ion->ion_mass_z, modification_count, modification, 
                                        ion->charge, mass_type);
 }
@@ -539,15 +539,15 @@ float get_ion_mass(
   float mass = 0;
   BOOLEAN_T reverse = FALSE;
 
-  //get sequence for x,y,z ion
+  // get sequence for x,y,z ion
   if(ion_type == X_ION ||ion_type == Y_ION || ion_type == Z_ION){
-    //convert the cleavage index into the actually index that start from the left.
+    // convert the cleavage index into the actually index that start from the left.
     int real_cleavage_idx = strlen(ion->peptide_sequence) - ion->cleavage_idx;
     ion_sequence = &(ion->peptide_sequence[real_cleavage_idx]);
     ion_length = strlen(ion_sequence);
     reverse = TRUE;
   }
-  //get sequence for a,b,c ion
+  // get sequence for a,b,c ion
   else{
     ion_length = ion->cleavage_idx;
     ion_sequence = mycalloc(ion_length+1, sizeof(char));
@@ -555,18 +555,18 @@ float get_ion_mass(
     memory_used = TRUE;
   }
 
-  //add up all AA mass
+  // add up all AA mass
   int ion_idx = 0;
   for(; ion_idx < ion_length; ++ion_idx){
     mass += get_mass_amino_acid(ion_sequence[ion_idx], mass_type);
   }
   
-  //free ion sequence, only if memory allocated (a,b,c ions);
+  // free ion sequence, only if memory allocated (a,b,c ions);
   if(memory_used){
     free(ion_sequence);
   }
 
-  //if X,Y,Z ion add H2O
+  // if X,Y,Z ion add H2O
   if(reverse){
     if(mass_type == AVERAGE){
       return mass + MASS_H2O_AVERAGE;
@@ -587,7 +587,7 @@ float modify_ion_mass(
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
   )
 {
-  //initalize the modified masses(average|mono);
+  // initalize the modified masses(average|mono);
   if(!initialized_modification_masses){
     initialize_modification_masses(mass_type);
   }
@@ -609,12 +609,12 @@ BOOLEAN_T calc_ion_mass_z_with_mass(
 {
   float h_mass = MASS_H_MONO;
 
-  //alter mass according to the modification
+  // alter mass according to the modification
   if(is_modified){
-    //iterate over all type of modifications for ion
+    // iterate over all type of modifications for ion
     int modification_idx = 0;
     for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
-      //update ion mass if modification is needed
+      // update ion mass if modification is needed
       if(ion->modification_counts[modification_idx] != 0){
         mass = modify_ion_mass(mass, ion->modification_counts[modification_idx], 
                                (ION_MODIFICATION_T)modification_idx, mass_type);
@@ -622,12 +622,12 @@ BOOLEAN_T calc_ion_mass_z_with_mass(
     }
   }
   
-  //reset h mass if needed
+  // reset h mass if needed
   if(mass_type == AVERAGE){
     h_mass = MASS_H_AVERAGE;
   }
 
-  //convert mass to m/z and assigned to ion
+  // convert mass to m/z and assigned to ion
   ion->ion_mass_z = (mass + (h_mass*(float)ion->charge))/(float)ion->charge;
 
   return TRUE;
@@ -664,7 +664,7 @@ void copy_ion(
   dest->cleavage_idx = src->cleavage_idx;
   dest->charge = src->charge;
   
-  //set all modification counts in the ion
+  // set all modification counts in the ion
   int modification_idx = 0;
   for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
     dest->modification_counts[modification_idx] = src->modification_counts[modification_idx];
@@ -683,7 +683,7 @@ BOOLEAN_T is_forward_ion_type(
   ION_T* ion ///< the ion to check if can lose nh3 -in                         
   )
 {
-  //is ion forward type?
+  // is ion forward type?
   if(ion->type == B_ION ||
      ion->type == A_ION ||
      ion->type == C_ION)
@@ -691,7 +691,7 @@ BOOLEAN_T is_forward_ion_type(
       return TRUE;
     }
 
-  //reverse type ion
+  // reverse type ion
   return FALSE;
 }
 
@@ -704,7 +704,7 @@ BOOLEAN_T ion_is_modified(
 {
   int by_modification = 0;
 
-  //only add ions with no modifications
+  // only add ions with no modifications
   for(; by_modification < MAX_MODIFICATIONS; ++by_modification){
     if(ion->modification_counts[by_modification] != 0){
       return TRUE;

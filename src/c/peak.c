@@ -2,7 +2,7 @@
  * \file peak.c
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.12 $
+ * VERSION: $Revision: 1.13 $
  * DESCRIPTION: Object for representing one peak in a spectrum.
  *****************************************************************************/
 #include "peak.h"
@@ -182,7 +182,7 @@ int compare_peaks_by_intensity(
   else if(peak_one->intensity < peak_two->intensity){
     return 1;
   }
-  //peak_one == peak_two
+  // peak_one == peak_two
   return 0;
 }
 
@@ -206,7 +206,7 @@ int compare_peaks_by_mz(
   else if(peak_one->location < peak_two->location){
     return -1;
   }
-  //peak_one == peak_two
+  // peak_one == peak_two
   return 0;
 }
 
@@ -222,11 +222,11 @@ void sort_peaks(
   )
 {
   if(sort_type == _PEAK_INTENSITY){
-    //sort the peaks by intensity
+    // sort the peaks by intensity
     qsort((void*)peak_array, num_peaks, sizeof(PEAK_T), compare_peaks_by_intensity);
   }
   else if(sort_type == _PEAK_LOCATION){
-    //sort the peaks by location
+    // sort the peaks by location
     qsort((void*)peak_array, num_peaks, sizeof(PEAK_T), compare_peaks_by_mz);
   }
   else{

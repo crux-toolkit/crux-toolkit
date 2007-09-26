@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_constraint.c
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief: Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
@@ -60,7 +60,7 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
-  //max length must be less or equal than 255 becuase of the unsigned char limit of 255
+  // max length must be less or equal than 255 becuase of the unsigned char limit of 255
   if(max_length > 255){
     die("ERROR: cannot set max length higer than 255");
   }
@@ -79,7 +79,7 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
 }
 
 
-//FIXME check the association..as long as there is one tryptic parent then true
+// FIXME check the association..as long as there is one tryptic parent then true
 // num_miss_cleavage is not implemented..add if needed
 /** 
  * Determines if a peptide satisfies a peptide_constraint.
@@ -207,7 +207,7 @@ void set_peptide_constraint_max_length(
   int max_length  ///< the max length of the peptide constraint - in
   )
 {
-  //check if maximum length is with in range <= 255
+  // check if maximum length is with in range <= 255
   if(max_length > 255){
     carp(CARP_FATAL, "maximum length:%d over limit 255.", max_length);
     exit(1);

@@ -30,13 +30,13 @@ void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("search_spectrum");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
-  //print comment if given
+  // print comment if given
   if(comment != NULL){
     carp(CARP_FATAL, "%s", comment);
   }
 
-  //FIXME uncomment this print if want to print usage whenever error message is printed
-  //fprintf(stderr, "%s", usage);
+  // FIXME uncomment this print if want to print usage whenever error message is printed
+  // fprintf(stderr, "%s", usage);
   free(usage);
   exit(1);
 }
@@ -44,14 +44,14 @@ void wrong_command(char* arg, char* comment){
 int main(int argc, char** argv){
   /* Set default values for any options here */
 
-  //optional
+  // optional
   int charge = 2;
   char* prelim_score_type = "sp";
   char* score_type = "xcorr";
   char* parameter_file = "crux.params";
   int verbosity = CARP_ERROR;
   
-  //required
+  // required
   char* ms2_file = NULL;
   int scan_num = 0;
   char* fasta_file = NULL;
@@ -60,7 +60,7 @@ int main(int argc, char** argv){
 	int number_peptides_to_subset = 0;
 	double fraction_top_scores_to_fit = -1.0;
 
-  //parsing variables
+  // parsing variables
   int result = 0;
   char * error_message;
 
@@ -143,7 +143,7 @@ int main(int argc, char** argv){
   
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
-    //parse arguments
+    // parse arguments
     SCORER_TYPE_T main_score = LOGP_EXP_SP; 
     SCORER_TYPE_T prelim_score = SP; 
     
@@ -156,7 +156,7 @@ int main(int argc, char** argv){
     long int max_rank_result = 500;
     float mass_offset = 0;
 
-    //set verbosity
+    // set verbosity
     if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
     }
@@ -164,27 +164,27 @@ int main(int argc, char** argv){
       wrong_command("verbosity", "verbosity level must be between 0-100");
     }
 
-    //set verbosity
+    // set verbosity
     set_verbosity_level(verbosity);
 
-    //parse and update parameters
+    // parse and update parameters
     parse_update_parameters(parameter_file);
 
-    //check charge 
+    // check charge 
     if( charge < 1 || charge > 3){
-      wrong_command(NULL, "The peptide charge. 1|2|3"); ///FIXME
+      wrong_command(NULL, "The peptide charge. 1|2|3"); /// FIXME
     }
     
-    //always use index when search spectrum!
+    // always use index when search spectrum!
     set_string_parameter("use-index", "T");
     
-    //parameters are now confirmed, can't be changed
+    // parameters are now confirmed, can't be changed
     parameters_confirmed();
 
     /***** All parameters must be taken through get_*_parameter() method ******/
 
-    //main score type
-    //score type
+    // main score type
+    // score type
     char* score_type = get_string_parameter_pointer("score-type");
     if(strcmp(score_type, "logp_exp_sp")== 0){
       main_score = LOGP_EXP_SP;
@@ -221,8 +221,8 @@ int main(int argc, char** argv){
           "logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr");
     }
 
-    //preliminary score type
-    //score type
+    // preliminary score type
+    // score type
     if(strcmp(get_string_parameter_pointer("prelim-score-type"), "sp")== 0){
       prelim_score = SP;
     }
@@ -230,38 +230,38 @@ int main(int argc, char** argv){
       wrong_command(prelim_score_type, "The type of preliminary scoring function to use. sp");
     }
     
-    //get mass offset from precursor mass to search for candidate peptides
+    // get mass offset from precursor mass to search for candidate peptides
     mass_offset = get_double_parameter("mass-offset");
     
-    //set max number of preliminary scored peptides to use for final scoring
+    // set max number of preliminary scored peptides to use for final scoring
     max_rank_preliminary = get_int_parameter("max-rank-preliminary");
 
-    //set max number of final scoring matches to print as output
+    // set max number of final scoring matches to print as output
     max_rank_result = get_int_parameter("max-rank-result");
     
-    //print header 1/2
+    // print header 1/2
     fprintf(stdout, "# SPECTRUM FILE: %s\n", ms2_file);
     fprintf(stdout, "# PROTEIN DATABASE: %s\n", fasta_file);
     fprintf(stdout, "# SPECTRUM SCAN NUMBER: %d\n", scan_num);
 
-    //read ms2 file
+    // read ms2 file
     collection = new_spectrum_collection(ms2_file);
     spectrum = allocate_spectrum();
 
-    //search for spectrum with correct scan number
+    // search for spectrum with correct scan number
     if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
       carp(CARP_ERROR, "no matching scan number: %d, in ms2 file: %s", scan_num, ms2_file);
-      //free, exit
+      // free, exit
       exit(1);
     }
 
-    //print header 2/2
+    // print header 2/2
     fprintf(stdout, "# SPECTRUM ID NUMBER: %d\n", get_spectrum_id(spectrum));
     fprintf(stdout, "# SPECTRUM PRECURSOR m/z: %.2f\n", get_spectrum_precursor_mz(spectrum));
     fprintf(stdout, "# SPECTRUM CHARGE: %d\n", charge);
     fprintf(stdout, "# MASS OFFSET: %.2f\n", mass_offset);
 
-    //get match collection with prelim match collection
+    // get match collection with prelim match collection
     match_collection = new_match_collection_spectrum(
         spectrum, charge, max_rank_preliminary, prelim_score, 
         main_score, mass_offset, FALSE);
@@ -271,7 +271,7 @@ int main(int argc, char** argv){
       exit(1);
     }
     
-    //create match iterator, TRUE: return match in sorted order of main_score type
+    // create match iterator, TRUE: return match in sorted order of main_score type
     if (number_peptides_to_subset != 0){
       carp(CARP_INFO, "Subsetting %i peptides.", number_peptides_to_subset);
       match_collection = random_sample_match_collection(
@@ -281,12 +281,12 @@ int main(int argc, char** argv){
 
     match_iterator = new_match_iterator(match_collection, main_score, TRUE);
 
-    //print additional header
+    // print additional header
     fprintf(stdout, "# PEPTIDES SEARCHED: %d\n", get_match_collection_experimental_size(match_collection));
     fprintf(stdout, "# TOTAL MATCHES (AFTER SUBSET): %d\n", get_match_collection_match_total(match_collection));
     fprintf(stdout, "# PEPTIDES SAMPLED FOR LOGP_SP: %d\n",get_match_collection_top_fit_sp(match_collection) );
     
-    //print header
+    // print header
     if(main_score == LOGP_EXP_SP){
       fprintf(stdout, "# %s\t%s\t%s\t%s\t%s\t%s\n", "logp_exp_sp_rank", "sp_rank", "mass", "logp_exp_sp", "sp", "sequence");  
     }
@@ -316,20 +316,20 @@ int main(int argc, char** argv){
     }
     
 
-    //iterate over matches
+    // iterate over matches
     int match_count = 0;
     while(match_iterator_has_next(match_iterator)){
       ++match_count;
       match = match_iterator_next(match_iterator);
       print_match(match, stdout, TRUE, main_score);
       
-      //print only up to max_rank_result of the matches
+      // print only up to max_rank_result of the matches
       if(match_count >= max_rank_result){
         break;
       }
     }
 
-    //free match iterator
+    // free match iterator
     free_match_iterator(match_iterator);
     free_match_collection(match_collection);
     free_spectrum_collection(collection);

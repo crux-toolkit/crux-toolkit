@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #include <math.h>
@@ -25,13 +25,13 @@ float amino_masses[('Z' - 'A')*2 + 2];
  */
 BOOLEAN_T initialized_amino_masses = FALSE;
 
-//FIXME need to find the monoisotopic mass for some AA -chris
+// FIXME need to find the monoisotopic mass for some AA -chris
 /**
  * initializes the mass array
  */
 void initialize_amino_masses (void)
 {
-  //average mass
+  // average mass
   amino_masses['A' - 'A'] = 71.0788;
   amino_masses['B' - 'A'] = 114.5962;
   amino_masses['C' - 'A'] = 103.1388 + 57.000;
@@ -58,7 +58,7 @@ void initialize_amino_masses (void)
   amino_masses['Y' - 'A'] = 163.1760;
   amino_masses['Z' - 'A'] = 128.6231;
   
-  //monoisotopic mass
+  // monoisotopic mass
   amino_masses['A' - 'A' + 26] = 71.03711;
   amino_masses['B' - 'A' + 26] = 114.53494;
   amino_masses['C' - 'A' + 26] = 103.00919 + 57.000;
@@ -103,7 +103,7 @@ float get_mass_amino_acid(
   }
   else{
     die("ERROR: mass type does not exist\n");
-    //avoid compiler warning
+    // avoid compiler warning
     return 1;
   }
 }
@@ -152,7 +152,7 @@ void increase_amino_acid_mass(
     initialized_amino_masses = TRUE;
   }
 
-  //check if amino acid
+  // check if amino acid
   if((short int)amino_acid < 'A' || (short int)amino_acid > 'Z'){
     carp(CARP_ERROR, "cannot update mass, char: %c not part of amino acid");
   }

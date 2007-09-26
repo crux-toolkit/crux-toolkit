@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.30 $
+ * REVISION: $Revision: 1.31 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -86,10 +86,10 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
     free(spectrum_collection);
     free(absolute_path_file);
     exit(1);
-  } //FIXME check if file is empty
+  } // FIXME check if file is empty
   
   set_spectrum_collection_filename(spectrum_collection, absolute_path_file);
-  //CYGWIN 
+  // CYGWIN 
   free(absolute_path_file);
   
   return spectrum_collection;
@@ -123,7 +123,7 @@ void print_spectrum_collection(
   fprintf(file,"comment:\n%s", spectrum_collection->comment);
   fprintf(file,".ms2 Filename: %s\n", spectrum_collection->filename);
   
-  //print each spectrum
+  // print each spectrum
   spectrum_iterator = new_spectrum_iterator(spectrum_collection);
   while(spectrum_iterator_has_next(spectrum_iterator)){
     print_spectrum(spectrum_iterator_next(spectrum_iterator), file);
@@ -141,13 +141,13 @@ void copy_spectrum_collection(
   )
 {
   SPECTRUM_T* new_spectrum;
-  //copy each varible
+  // copy each varible
   set_spectrum_collection_filename(dest,src->filename);
   set_spectrum_collection_comment(dest,src->comment);
   dest->num_charged_spectra = src->num_charged_spectra;
   dest->is_parsed = src->is_parsed;
   
-  //copy spectrum
+  // copy spectrum
   SPECTRUM_ITERATOR_T* spectrum_iterator = new_spectrum_iterator(src);
   while(spectrum_iterator_has_next(spectrum_iterator)){
     new_spectrum = allocate_spectrum();
@@ -158,13 +158,13 @@ void copy_spectrum_collection(
 }
 
 
-//TESTME might have to check for bad format
+// TESTME might have to check for bad format
 /**
  * parses 'H' line into the spectrum_collection comments
  * all reminding comments are ignored if max length of comments are reached
  */
 void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection, FILE* file){
-  long file_index = ftell(file); //stores the location of the current working line in the file
+  long file_index = ftell(file); // stores the location of the current working line in the file
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0; // TODO maybe should be more sensible length?
@@ -176,16 +176,16 @@ void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection, FILE* file){
       new_line_length = strlen(new_line);
       comment_field_length = strlen(spectrum_collection->comment);
       
-      //check if max capacifty is too full for new comment
+      // check if max capacifty is too full for new comment
       if(new_line_length + comment_field_length + 1 < MAX_COMMENT){
         strcat(spectrum_collection->comment, new_line);
       }
       else{
-        break; //exceed max comments
+        break; // exceed max comments
       }
     }
     else if(new_line[0] == 'S'){
-      break; //end of 'H' lines
+      break; // end of 'H' lines
     }
     file_index = ftell(file);
   }
@@ -202,7 +202,7 @@ BOOLEAN_T parse_spectrum_collection(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< empty spectrum to parse into -out
 )
 {
-  //spectrum_collection has already been parsed
+  // spectrum_collection has already been parsed
   if(spectrum_collection->is_parsed){
     return FALSE;
   }
@@ -210,18 +210,18 @@ BOOLEAN_T parse_spectrum_collection(
   FILE* file;
   SPECTRUM_T* parsed_spectrum;
 
-  //check if file is still avaliable
+  // check if file is still avaliable
   if ((file = fopen(spectrum_collection->filename,"r")) == NULL) {
     fprintf(stderr,"File %s could not be opened",spectrum_collection->filename);
     return (FALSE);
   }
-  //parse header lines 'H' into spectrum_collection comment 
+  // parse header lines 'H' into spectrum_collection comment 
   parse_header_line(spectrum_collection, file);
 
   parsed_spectrum = allocate_spectrum();
-  //parse one spectrum at a time
+  // parse one spectrum at a time
   while(parse_spectrum_file(parsed_spectrum, file, spectrum_collection->filename)){
-    //is spectrum capacity not full?
+    // is spectrum capacity not full?
     if(!add_spectrum_to_end(spectrum_collection, parsed_spectrum)){
       free_spectrum(parsed_spectrum);
       fclose(file);
@@ -230,16 +230,16 @@ BOOLEAN_T parse_spectrum_collection(
     parsed_spectrum = allocate_spectrum();
   }
   
-  free_spectrum(parsed_spectrum); //CHECKME why free_spectrum??
+  free_spectrum(parsed_spectrum); // CHECKME why free_spectrum??
   fclose(file);
 
   spectrum_collection->is_parsed = TRUE;
   
-  //good job!
+  // good job!
   return TRUE;
 }
 
-//CHECKME test if capacity is correct might be off by one
+// CHECKME test if capacity is correct might be off by one
 /**
  * Adds a spectrum to the spectrum_collection.
  * adds the spectrum to the end of the spectra array
@@ -252,13 +252,13 @@ BOOLEAN_T add_spectrum_to_end(
   SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
   )
 {
-  //FIXME eventually might want it to grow dynamically
-  //check if spectrum capacity is full
+  // FIXME eventually might want it to grow dynamically
+  // check if spectrum capacity is full
   if(get_spectrum_collection_num_spectra(spectrum_collection) == MAX_SPECTRA){
     fprintf(stderr,"ERROR: cannot add spectrum, capacity full\n"); 
     return FALSE;
   }
-  //set spectrum
+  // set spectrum
   spectrum_collection->spectra[spectrum_collection->num_spectra] = spectrum;
   ++spectrum_collection->num_spectra;
   spectrum_collection->num_charged_spectra += get_spectrum_num_possible_z(spectrum);
@@ -275,33 +275,33 @@ BOOLEAN_T add_spectrum(
   SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
   )
 {
-  //FIXME eventually might want it to grow dynamically
+  // FIXME eventually might want it to grow dynamically
   int add_index = 0;
   int spectrum_index;
   
-  //check if spectrum capacity is full
+  // check if spectrum capacity is full
   if(get_spectrum_collection_num_spectra(spectrum_collection) == MAX_SPECTRA){
     fprintf(stderr,"ERROR: cannot add spectrum, capacity full\n"); 
     return FALSE;
   }
-  //find correct location
+  // find correct location
   for(; add_index < spectrum_collection->num_spectra; ++add_index){
     if(get_spectrum_first_scan(spectrum_collection->spectra[add_index])>
        get_spectrum_first_scan(spectrum)){
       break;
     }
   }
-  //do we add to end?
+  // do we add to end?
   if(add_index != spectrum_collection->num_spectra +1){
     spectrum_index = spectrum_collection->num_spectra;
-    //shift all spectrum that have greater or equal index to add_index to right  
+    // shift all spectrum that have greater or equal index to add_index to right  
     for(; spectrum_index >= add_index; --spectrum_index){
       spectrum_collection->spectra[spectrum_index+1] = 
         spectrum_collection->spectra[spectrum_index];
     }
   }
   
-  //set spectrum
+  // set spectrum
   spectrum_collection->spectra[add_index] = spectrum;
   ++spectrum_collection->num_spectra;
   spectrum_collection->num_charged_spectra += get_spectrum_num_possible_z(spectrum);
@@ -309,7 +309,7 @@ BOOLEAN_T add_spectrum(
 }
 
 
-//FIXME maybe a faster way? can't perform binary search since we must know the array index
+// FIXME maybe a faster way? can't perform binary search since we must know the array index
 /**
  * Removes a spectrum from the spectrum_collection.
  */
@@ -321,7 +321,7 @@ void remove_spectrum(
   int scan_num = get_spectrum_first_scan(spectrum);
   int spectrum_index = 0;
   
-  //find where the spectrum is located in the spectrum array
+  // find where the spectrum is located in the spectrum array
   for(; spectrum_index < spectrum_collection->num_spectra; ++spectrum_index){
     if(scan_num ==
        get_spectrum_first_scan(spectrum_collection->spectra[spectrum_index])){
@@ -331,7 +331,7 @@ void remove_spectrum(
   
   free_spectrum(spectrum_collection->spectra[spectrum_index]);
   
-  //shift all the spectra to the left to fill in the gap
+  // shift all the spectra to the left to fill in the gap
   for(; spectrum_index < spectrum_collection->num_spectra; ++spectrum_index){
     spectrum_collection->spectra[spectrum_index] =
       spectrum_collection->spectra[spectrum_index+1];
@@ -355,7 +355,7 @@ BOOLEAN_T get_spectrum_collection_spectrum(
 {
   FILE* file;
   long target_index;
-  //check if file is still avaliable
+  // check if file is still avaliable
   if ((file = fopen(spectrum_collection->filename,"r")) == NULL) {
     fprintf(stderr,"File %s could not be opened",spectrum_collection->filename);
     return (FALSE);
@@ -368,7 +368,7 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     return FALSE;
   }
   fseek(file, target_index, SEEK_SET);
-  //parse spectrum, check if failed to parse spectrum return false
+  // parse spectrum, check if failed to parse spectrum return false
   if(!parse_spectrum_file(spectrum, file, spectrum_collection->filename)){
     fclose(file);
     return FALSE;
@@ -398,7 +398,7 @@ long binary_search_spectrum(
   int line_length;
   size_t buf_length = 0;
   
-  //set initial high and low position
+  // set initial high and low position
   if(fseek(file, 1,SEEK_END) != -1){
     high_index = ftell(file);
     end_of_file_index = high_index;
@@ -414,7 +414,7 @@ long binary_search_spectrum(
     if(fseek(file, mid_index,SEEK_SET) != -1){
       
       working_index = ftell(file);
-      //check each line until reach 'S' line
+      // check each line until reach 'S' line
       while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
 
         if(new_line[0] == 'S'){
@@ -422,13 +422,13 @@ long binary_search_spectrum(
             match_first_scan_line(new_line, buf_length, first_scan);
           if(compare == 0){
             free(new_line);
-            return working_index; //found the query match
+            return working_index; // found the query match
           }
           else if(compare == 1){
             high_index = mid_index-1;
             break;
           }
-          else{ //compare == -1
+          else{ // compare == -1
             low_index = mid_index+1;
             break;
           }
@@ -436,7 +436,7 @@ long binary_search_spectrum(
         // store the next working line
         working_index = ftell(file);
         
-        //if the High is at EOF or working_index starts looking bellow high
+        // if the High is at EOF or working_index starts looking bellow high
         if(working_index > high_index || 
            working_index == end_of_file_index-1 ){ 
           high_index = mid_index-1;
@@ -450,7 +450,7 @@ long binary_search_spectrum(
     }
   }
   free(new_line);
-  return -1; //failed to find the query spectrum
+  return -1; // failed to find the query spectrum
 }
 
 
@@ -477,7 +477,7 @@ int match_first_scan_line(
   float test_float;
   char test_char;
 
-  //deletes empty space & 0
+  // deletes empty space & 0
   while((line[line_index] !='\0') && 
         (line[line_index] == 'S' || 
          line[line_index] == '\t'||
@@ -496,7 +496,7 @@ int match_first_scan_line(
   spliced_line[spliced_line_index] =  line[line_index];
   ++spliced_line_index;
   ++line_index;
-  //deletes empty space & zeros
+  // deletes empty space & zeros
   while((line[line_index] !='\0') && 
         (line[line_index] == '\t' || 
          line[line_index] == ' ' || 
@@ -512,15 +512,15 @@ int match_first_scan_line(
   spliced_line[spliced_line_index] = '\0';
   
   // check if S line is in correct format
-  if ( (sscanf(spliced_line,"%f %f %f %f",//test format:S line has more than 3 fields
+  if ( (sscanf(spliced_line,"%f %f %f %f",// test format:S line has more than 3 fields
                &test_float, &test_float, &test_float, &test_float) > 3) ||
-       (sscanf(spliced_line,"%f %f %f %c",//test format:S line has more than 3 fields 
+       (sscanf(spliced_line,"%f %f %f %c",// test format:S line has more than 3 fields 
                &test_float, &test_float, &test_float, &test_char) > 3) ||
        (sscanf(spliced_line,"%i %i %f", // S line is parsed here
               &first_scan, &last_scan, &precursor_mz) != 3)) {
     fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
     fprintf(stderr,"Incorrect file format\n");
-    exit(1); //FIXME check if this is corrrect 
+    exit(1); // FIXME check if this is corrrect 
   }
   if(first_scan == query_first_scan){
     return 0;
@@ -528,12 +528,12 @@ int match_first_scan_line(
   else if(first_scan >  query_first_scan){
     return 1;
   }
-  return -1; //first_scan <  query_first_scan
+  return -1; // first_scan <  query_first_scan
 }
 
 /******************************************************************************/
 
-/**  //////TESTME////
+/**  ////// TESTME////
  * sets the filename of the ms2 file the spectra were parsed
  * this function should be used only the first time the filename is set
  * to change existing filename use set_spectrum_collection_filename
@@ -544,7 +544,7 @@ void set_spectrum_collection_new_filename(
   char* filename ///< filename -in
   )
 {
-  int filename_length = strlen(filename) +1; //+\0
+  int filename_length = strlen(filename) +1; // +\0
   char * copy_filename = 
     (char *)mymalloc(sizeof(char)*filename_length);
 
@@ -575,7 +575,7 @@ char* get_spectrum_collection_filename(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum collection's filename -in 
   )
 {  
-  int filename_length = strlen(spectrum_collection->filename) +1; //+\0
+  int filename_length = strlen(spectrum_collection->filename) +1; // +\0
   char * copy_filename = 
     (char *)mymalloc(sizeof(char)*filename_length);
   return strncpy(copy_filename, spectrum_collection->filename, filename_length);  
@@ -626,7 +626,7 @@ void set_spectrum_collection_comment(
   char* new_comment ///< the new comments to be copied
   )
 {
-  //is there enough memory for new comments?
+  // is there enough memory for new comments?
   if(strlen(new_comment) + strlen(spectrum_collection->comment) +1 < MAX_COMMENT){
     strncat(spectrum_collection->comment, new_comment, MAX_COMMENT); 
   }
@@ -669,46 +669,46 @@ FILE** get_spectrum_collection_psm_result_filename(
   int file_descriptor = -1;
   int file_idx = 0;
   char suffix[25];
-  //total number of files to create, target plus how many decoys needed
+  // total number of files to create, target plus how many decoys needed
   int total_files = number_decoy_set + 1; 
 
-  //check if psm_result_folder exist?
+  // check if psm_result_folder exist?
   if(access(psm_result_folder_name, F_OK)){
-    //create PSM result folder
+    // create PSM result folder
     if(mkdir(psm_result_folder_name, S_IRWXU+S_IRWXG+S_IRWXO) != 0){
       carp(CARP_ERROR, "failed to create psm result folder: %s", psm_result_folder_name);
     }
   }
   
-  //create FILE* array
+  // create FILE* array
   FILE** file_handle_array = (FILE**)mycalloc(total_files, sizeof(FILE*));
   char** filename_array = (char**)mycalloc(total_files, sizeof(char*));
   
-  //extract filename from absolute path
+  // extract filename from absolute path
   char** spectrum_file_path = parse_filename_path(spectrum_collection->filename);
   
-  //create a filename template that has psm_result_folder_name/spectrum_filename
+  // create a filename template that has psm_result_folder_name/spectrum_filename
   char* filename_template = get_full_filename(psm_result_folder_name, spectrum_file_path[0]); 
   
-  //now create files for first target file and then for decoys
+  // now create files for first target file and then for decoys
   for(; file_idx < total_files; ++file_idx){
-    //is it target?
+    // is it target?
     if(file_idx == 0){
-      //generate psm_result filename as psm_result_folder_name/spectrum_filename_XXXXXX
+      // generate psm_result filename as psm_result_folder_name/spectrum_filename_XXXXXX
       filename_array[file_idx] = generate_name(filename_template, "_XXXXXX", file_extension, "crux_match_target_");
     }
-    //for decoys
+    // for decoys
     else{
       sprintf(suffix, "crux_match_decoy_%d_", file_idx);
       filename_array[file_idx] = generate_name(filename_template, "_XXXXXX", file_extension, suffix);
     }
 
-    //now open file handle
+    // now open file handle
     if((file_descriptor = mkstemp(filename_array[file_idx])) == -1 ||
-       //FIXME might want to change to w+ instead of a+(append)
+       // FIXME might want to change to w+ instead of a+(append)
        (file_handle_array[file_idx] = fdopen(file_descriptor, "w+")) == NULL){
       
-      //did we successfully create a file?
+      // did we successfully create a file?
       if(file_descriptor != -1){
         unlink(filename_array[file_idx]);
         close(file_descriptor);
@@ -720,7 +720,7 @@ FILE** get_spectrum_collection_psm_result_filename(
       carp(CARP_ERROR, "failed to create PSM output file");
       return NULL;
     }
-    //set permission for the file
+    // set permission for the file
     chmod(filename_array[file_idx], 0664);
   }
   
@@ -729,7 +729,7 @@ FILE** get_spectrum_collection_psm_result_filename(
   free(spectrum_file_path);
   free(filename_template);
   
-  //set output for result filenames
+  // set output for result filenames
   *psm_result_filenames = filename_array;
   return file_handle_array;
 }
@@ -740,8 +740,8 @@ FILE** get_spectrum_collection_psm_result_filename(
  * <int: number of top ranked peptides serialized per spectra>
  *
  * 
- * //FIXME <int: ms2 file length><char*: ms2 filename>
- * //FIXME <int: fasta file length><char*: fasta filename>
+ * // FIXME <int: ms2 file length><char*: ms2 filename>
+ * // FIXME <int: fasta file length><char*: fasta filename>
  *
  * Serializes the header information for the binary PSM serialized files
  * Must run in pair with serialize_total_number_of_spectra.
@@ -757,31 +757,31 @@ BOOLEAN_T serialize_header(
   )
 {
   int num_spectrum_features = 0;
-  //set max number of matches to be serialized per spectrum
+  // set max number of matches to be serialized per spectrum
   int number_top_rank_peptide = get_int_parameter("top-match");
   char* file_fasta = parse_filename(fasta_file);
-  //int file_fasta_length = strlen(file_fasta);
+  // int file_fasta_length = strlen(file_fasta);
   char* file_ms2 = parse_filename(spectrum_collection->filename);
-  //int file_ms2_length = strlen(file_ms2);
+  // int file_ms2_length = strlen(file_ms2);
   
-  //FIXME later if you want to be selective on charge to run
+  // FIXME later if you want to be selective on charge to run
   // must refine the current serialize methods
   
-  //num_charged_spectra will be over written by serialize_total_number_of_spectra method
+  // num_charged_spectra will be over written by serialize_total_number_of_spectra method
   fwrite(&(spectrum_collection->num_charged_spectra), sizeof(int), 1, psm_file);
   fwrite(&(num_spectrum_features), sizeof(int), 1, psm_file);
   fwrite(&(number_top_rank_peptide), sizeof(int), 1, psm_file);
   
   /*
-  //serialize ms2 file name
+  // serialize ms2 file name
   fwrite(&(file_ms2_length), sizeof(int), 1, psm_file);
   fwrite(file_ms2, sizeof(char), file_ms2_length, psm_file);
   
-  //serialize fasta file name
+  // serialize fasta file name
   fwrite(&(file_fasta_length), sizeof(int), 1, psm_file);
   fwrite(file_fasta, sizeof(char), file_fasta_length, psm_file);
   
-  //parameter file
+  // parameter file
   set_double_parameter("min-mass", 200);
   set_double_parameter("max-mass", 7200);
   set_int_parameter("min-length", 6);
@@ -808,7 +808,7 @@ BOOLEAN_T serialize_header(
   set_int_parameter("top-match", 1);
   */
 
-  //free up files
+  // free up files
   free(file_ms2);
   free(file_fasta);
   
@@ -831,10 +831,10 @@ BOOLEAN_T serialize_total_number_of_spectra(
   FILE* psm_file ///< the file to serialize the header information -out
   )
 {
-  //set to begining of file
+  // set to begining of file
   rewind(psm_file);
 
-  //serialize the total number of spectra seerialized in the file
+  // serialize the total number of spectra seerialized in the file
   fwrite(&(spectra_idx), sizeof(int), 1, psm_file);
 
   return TRUE;
