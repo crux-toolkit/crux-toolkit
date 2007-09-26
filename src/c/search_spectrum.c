@@ -262,8 +262,14 @@ int main(int argc, char** argv){
     fprintf(stdout, "# MASS OFFSET: %.2f\n", mass_offset);
 
     //get match collection with prelim match collection
-    match_collection = new_match_collection_spectrum(spectrum, charge, max_rank_preliminary, 
-                                                     prelim_score, main_score, mass_offset, FALSE);
+    match_collection = new_match_collection_spectrum(
+        spectrum, charge, max_rank_preliminary, prelim_score, 
+        main_score, mass_offset, FALSE);
+
+    if (match_collection == NULL){
+      carp(CARP_FATAL, "Returned empty match collection!");
+      exit(1);
+    }
     
     //create match iterator, TRUE: return match in sorted order of main_score type
     if (number_peptides_to_subset != 0){

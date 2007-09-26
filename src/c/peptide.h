@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.42 $
+ * $Revision: 1.43 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -29,6 +29,13 @@ float calc_sequence_mass(
 float calc_peptide_mass(
   PEPTIDE_T* peptide, ///< the query peptide -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+  );
+
+/**
+ * \returns The hydrophobicity of the given peptide, as in Krokhin (2004).
+ */
+float calc_krokhin_hydrophobicity(
+  PEPTIDE_T* peptide ///< the query peptide -in
   );
 
 /**

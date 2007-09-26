@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.57 $
+ * $Revision: 1.58 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -106,6 +106,30 @@ float calc_peptide_mass(
   }
   return peptide_mass + MASS_H2O_MONO;
 }
+
+static float krokhin_index['Z'-'A'] = {
+  0.8, 0.0, -0.8, -0.5, 0.0, 10.5, -0.9, -1.3, 8.4, 0.0, 
+  -1.9, 9.6, 5.8, -1.2, 0.0, 0.2, -0.9, -1.3, -0.8, 0.4,
+  0.0, 5.0, 11.0, 0.0, 4.0};
+
+/*
+ * Calculates the peptide hydrophobicity, as in Krokhin (2004).
+ */
+float calc_krokhin_hydrophobicity(
+  PEPTIDE_T* peptide ///< the query peptide -in
+)
+{
+  float krokhin = 0.0;
+  RESIDUE_ITERATOR_T * residue_iterator = new_residue_iterator(peptide);
+  while(residue_iterator_has_next(residue_iterator)){
+    char c = residue_iterator_next(residue_iterator)-'A';
+    krokhin += krokhin_index[(int)c];
+  }
+  free_residue_iterator(residue_iterator);
+
+  return krokhin;
+}
+
 
 //FIXME association part might be need to change
 /**
@@ -1270,7 +1294,7 @@ char* generate_shuffled_sequence(
     sequence[switch_idx] = temp_char;
     ++start_idx;
   }
-  
+
   return sequence;
 }
 

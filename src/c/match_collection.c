@@ -304,6 +304,9 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
     if(!score_match_collection_sp(match_collection, spectrum, charge, peptide_iterator)){
       carp(CARP_ERROR, "failed to score match collection for SP");
     }
+    if (match_collection->match_total == 0){
+      return NULL;
+    }
   }
 
   /*********** Estimate parameters *****************************/

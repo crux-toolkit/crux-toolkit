@@ -17,4 +17,4 @@ ln -fs $FASTA; ln -fs $FASTA_INDEX; ln -fs $MS2;
 /mnt/local/bin/python generate-mass-range.py > $MASS_RANGE_FILE
 /mnt/local/bin/python create-search-commands.py $MASS_RANGE_FILE $MS2 $FASTA --parameter-file $PARAM_FILE > $COMMAND_FILE
 chmod +x $COMMAND_FILE
-$COMMAND_FILE
+./$COMMAND_FILE
