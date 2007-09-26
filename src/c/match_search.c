@@ -53,7 +53,8 @@ int main(int argc, char** argv){
   int verbosity = CARP_ERROR;
   char* match_output_folder = "."; //FIXME if needed..
   char* output_mode = "binary";
-  char* sqt_output_file = "Prefix of <ms2 input filename>.psm";
+  char* sqt_output_file = "target.psm";
+  char* decoy_sqt_output_file = "decoy.psm";
   double spectrum_min_mass = 0;
   double spectrum_max_mass = BILLION;
   int number_decoy_set = 2;
@@ -91,6 +92,12 @@ int main(int argc, char** argv){
     "sqt-output-file",
     "Name of the sqt file to place matches.",
     (void *) &sqt_output_file,
+    STRING_ARG); 
+
+  parse_arguments_set_opt(
+    "decoy-sqt-output-file",
+    "Name of the sqt file to place matches.",
+    (void *) &decoy_sqt_output_file,
     STRING_ARG); 
   
   parse_arguments_set_opt(
@@ -196,6 +203,7 @@ int main(int argc, char** argv){
     //generate sqt ouput file if not set by user
     if(strcmp(get_string_parameter_pointer("sqt-output-file"), "Prefix of <ms2 input filename>.psm") ==0){
       sqt_output_file = generate_name(ms2_file, ".psm", ".ms2", NULL);
+      decoy_sqt_output_file = generate_name(ms2_file, ".decoypsm", ".ms2", NULL);
       set_string_parameter("sqt-output-file", sqt_output_file);
     }
     
@@ -309,6 +317,7 @@ int main(int argc, char** argv){
     char** psm_result_filenames = NULL;
     FILE** psm_result_file = NULL;
     FILE* psm_result_file_sqt = NULL;
+    FILE* decoy_result_file_sqt  = NULL;
     int total_files = number_decoy_set + 1; //plus one for target file
     int file_idx = 0;
     BOOLEAN_T is_decoy = FALSE;
@@ -340,6 +349,8 @@ int main(int argc, char** argv){
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
       psm_result_file_sqt = 
         create_file_in_path(sqt_output_file, match_output_folder);
+      decoy_result_file_sqt = 
+        create_file_in_path(decoy_sqt_output_file, match_output_folder);
     }
     
     //did we get the file handles?
@@ -348,8 +359,6 @@ int main(int argc, char** argv){
        ((output_type == SQT_OUTPUT || output_type == ALL_OUTPUT) &&
        psm_result_file_sqt == NULL)){
       carp(CARP_ERROR, "failed with output mode");
-      free(sqt_output_file);
-      free(psm_result_filenames);
       exit(1);
     }
 
@@ -424,11 +433,15 @@ int main(int argc, char** argv){
           //should I ouput the match_collection result as a SQT file?
           // Output only for the target set
           //FIXME ONLY one header
-          if(!is_decoy &&
-             (output_type == SQT_OUTPUT || output_type == ALL_OUTPUT)){
-            print_match_collection_sqt(psm_result_file_sqt, max_rank_result,
-                                       match_collection, spectrum, 
-                                       prelim_score, main_score);
+          if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
+            FILE* output = NULL;
+            if (file_idx == 0){
+              output = psm_result_file_sqt;
+            } else if (file_idx == 1){
+              output = decoy_result_file_sqt;
+            }
+            print_match_collection_sqt(output, max_rank_result,
+              match_collection, spectrum, prelim_score, main_score);
           }        
           
           //free up match_collection
@@ -446,7 +459,6 @@ int main(int argc, char** argv){
     //DEBUG
     carp(CARP_DEBUG, "total spectra runs: %d", spectra_idx);
 
-    free(sqt_output_file);
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
       fclose(psm_result_file_sqt);
     }

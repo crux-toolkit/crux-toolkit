@@ -16,9 +16,9 @@ ln -fs $FASTA; ln -fs $FASTA_INDEX; ln -fs $MS2;
 python generate-mass-range.py > $MASS_RANGE_FILE
 python create-search-commands.py $MASS_RANGE_FILE $MS2 $FASTA --parameter-file $PARAM_FILE > $COMMAND_FILE
 chmod +x $COMMAND_FILE
-# $COMMAND_FILE
-ls -1 *.sqt | grep -v decoy | xargs --replace cat "{}" | grep -v ^H >> all-target.tmp
-ls -1 *.sqt | grep decoy | xargs --replace cat "{}"  | grep -v ^H >> all-decoy.tmp
-mv all-decoy.tmp all-decoy.sqt
-mv all-target.tmp all-target.sqt
+./$COMMAND_FILE
+# ls -1 *.sqt | grep -v decoy | xargs --replace cat "{}" | grep -v ^H >> all-target.tmp
+# ls -1 *.sqt | grep decoy | xargs --replace cat "{}"  | grep -v ^H >> all-decoy.tmp
+# mv all-decoy.tmp all-decoy.sqt
+# mv all-target.tmp all-target.sqt
 #python plot.py

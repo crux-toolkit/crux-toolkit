@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.38 $
+ * REVISION: $Revision: 1.39 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -290,6 +290,9 @@ void qsort_match(
   qsort(match_array, match_total, sizeof(MATCH_T*), compare_method);
 }
 
+// START need to rewrite parse_match and serialize_match to include 
+// additional features
+
 /**
  * serializes the match in binary
  *
@@ -312,8 +315,8 @@ void serialize_match(
   serialize_peptide(match->peptide, file);
   
   //Serialize each score and rank
-  int score_type_idx = 0;
-  for(; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+  int score_type_idx;
+  for(score_type_idx = 0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
     fwrite(&(match->match_scores[score_type_idx]), sizeof(float), 1, file);
     fwrite(&(match->match_rank[score_type_idx]), sizeof(int), 1, file);
   }
@@ -406,32 +409,37 @@ double* get_match_percolator_features(
     feature_array[16] = TRUE;
   }
   
-  // run specific features
-  feature_array[17] 
-		= get_match_collection_hash(match_collection, match->peptide);
-  
-  src_iterator = new_peptide_src_iterator(match->peptide);
-  
-  // iterate overall parent proteins
-  // find largest numProt and pepSite among the parent proteins
-  while(peptide_src_iterator_has_next(src_iterator)){
-    peptide_src = peptide_src_iterator_next(src_iterator);
-    protein = get_peptide_src_parent_protein(peptide_src);
-    protein_idx = get_protein_protein_idx(protein);
+  //run specific features
+  if (strcmp(
+        get_string_parameter_pointer("percolator-intraset-features"), "T")==0){
+    carp(CARP_DETAILED_DEBUG, "Using intraset features!");
+    feature_array[17] 
+      = get_match_collection_hash(match_collection, match->peptide);
     
-    // numProt
-    if(feature_array[18] < get_match_collection_protein_counter(
-														match_collection, protein_idx)){
-      feature_array[18] = get_match_collection_protein_counter(
-														match_collection, protein_idx);
+    src_iterator = new_peptide_src_iterator(match->peptide);
+    //iterate overall parent proteins
+    //find largest numProt and pepSite among the parent proteins
+    while(peptide_src_iterator_has_next(src_iterator)){
+      peptide_src = peptide_src_iterator_next(src_iterator);
+      protein = get_peptide_src_parent_protein(peptide_src);
+      protein_idx = get_protein_protein_idx(protein);
+      
+      //numProt
+      if(feature_array[18] < get_match_collection_protein_counter(
+                              match_collection, protein_idx)){
+        feature_array[18] = get_match_collection_protein_counter(
+                              match_collection, protein_idx);
+      }
+      
+      //pepSite
+      if(feature_array[19] < get_match_collection_protein_peptide_counter(
+                              match_collection, protein_idx)){
+        feature_array[19] = get_match_collection_protein_peptide_counter(
+                              match_collection, protein_idx);      
+      }
     }
-    
-    // pepSite
-    if(feature_array[19] < get_match_collection_protein_peptide_counter(
-														match_collection, protein_idx)){
-      feature_array[19] = get_match_collection_protein_peptide_counter(
-														match_collection, protein_idx);      
-    }
+  } else {
+    feature_array[17] = feature_array[18] = feature_array[19] = 0.0;
   }
   
   // now check that no value is with in infinity
