@@ -355,27 +355,29 @@ int main(int argc, char** argv){
 
     /**
      * General order of serialization is, 
-     * serialize_header -> serialize_psm_features -> serialize_total_number_of_spectra
+     * - serialize_header
+     * - serialize_psm_features
+     * - serialize_total_number_of_spectra
      */
     
-    //serialize the header information for all files(target & decoy)
+    // serialize the header information for all files(target & decoy)
     for(; file_idx < total_files; ++file_idx){
       serialize_header(collection, fasta_file, psm_result_file[file_idx]);
     }
 
     int spectra_idx = 0;
-    //iterate over all spectrum in ms2 file and score
+    // iterate over all spectrum in ms2 file and score
     while(spectrum_iterator_has_next(spectrum_iterator)){
       
-      //check if total runs exceed limit user defined
+      // check if total runs exceed limit user defined
       if(number_runs <= spectra_idx){
         break;
       }
       
-      //get next spectrum
+      // get next spectrum
       spectrum = spectrum_iterator_next(spectrum_iterator);
 
-      //select spectra that are within m/z target interval
+      // select spectra that are within m/z target interval
       if(get_spectrum_precursor_mz(spectrum) < spectrum_min_mass ||
          get_spectrum_precursor_mz(spectrum) > spectrum_max_mass)
         {
@@ -389,7 +391,7 @@ int main(int argc, char** argv){
       //iterate over all possible charge states for each spectrum
       for(charge_index = 0; charge_index < possible_charge; ++charge_index){
 
-        //skip spectra that are not in the charge state to be run
+        // skip spectra that are not in the charge state to be run
         if(!run_all_charges && 
            spectrum_charge_to_run != possible_charge_array[charge_index]){
           continue;
@@ -397,9 +399,9 @@ int main(int argc, char** argv){
         
         ++spectra_idx;
         
-        //iterate over first for target next and for all decoy sets
+        // iterate over first for target next and for all decoy sets
         for(file_idx = 0; file_idx < total_files; ++file_idx){
-          //is it target ?
+          // is it target ?
           if(file_idx == 0){
             is_decoy = FALSE;
           }
@@ -407,7 +409,7 @@ int main(int argc, char** argv){
             is_decoy = TRUE;
           }
 
-          //get match collection with scored, ranked match collection
+          // get match collection with scored, ranked match collection
           match_collection =
             new_match_collection_spectrum(spectrum, 
                                           possible_charge_array[charge_index], 
@@ -416,7 +418,8 @@ int main(int argc, char** argv){
           
           //serialize the psm features to ouput file upto 'top_match' number of 
           //top peptides among the match_collection
-          serialize_psm_features(match_collection, psm_result_file[file_idx], top_match, prelim_score, main_score);
+          serialize_psm_features(match_collection, psm_result_file[file_idx], 
+              top_match, prelim_score, main_score);
           
           //should I ouput the match_collection result as a SQT file?
           // Output only for the target set
