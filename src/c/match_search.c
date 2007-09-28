@@ -101,13 +101,13 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "spectrum-min-mass", 
-    "The lowest spectrum m/z to search in the ms2 file.",
+    "Spectra with m/z less than this value will not be searched.",
     (void *) &spectrum_min_mass, 
     DOUBLE_ARG);
 
   parse_arguments_set_opt(
     "spectrum-max-mass", 
-    "The highest spectrum m/z to search in the ms2 file.",
+    "Spectra with m/z greater than or equal to this value will not be searched.",
     (void *) &spectrum_max_mass, 
     DOUBLE_ARG);
 
@@ -383,8 +383,8 @@ int main(int argc, char** argv){
       spectrum = spectrum_iterator_next(spectrum_iterator);
 
       // select spectra that are within m/z target interval
-      if(get_spectrum_precursor_mz(spectrum) < spectrum_min_mass ||
-         get_spectrum_precursor_mz(spectrum) > spectrum_max_mass)
+      if(get_spectrum_precursor_mz(spectrum) <  spectrum_min_mass ||
+         get_spectrum_precursor_mz(spectrum) >= spectrum_max_mass)
         {
           continue;
         }
