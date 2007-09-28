@@ -52,8 +52,8 @@ int main(int argc, char** argv){
   int verbosity = CARP_ERROR;
   char* match_output_folder = "."; 
   char* output_mode = "binary";
-  char* sqt_output_file = "target.psm";
-  char* decoy_sqt_output_file = "decoy.psm";
+  char* sqt_output_file = "target.sqt";
+  char* decoy_sqt_output_file = "decoy.sqt";
   double spectrum_min_mass = 0;
   double spectrum_max_mass = BILLION;
   int number_decoy_set = 2;
@@ -201,10 +201,11 @@ int main(int argc, char** argv){
 
     // generate sqt ouput file if not set by user
     if(strcmp(
-          get_string_parameter_pointer("sqt-output-file"), "default.sqt") ==0){
-      sqt_output_file = generate_name(ms2_file, ".psm", ".ms2", NULL);
-      decoy_sqt_output_file = generate_name(ms2_file, ".decoypsm", ".ms2", NULL);
+          get_string_parameter_pointer("sqt-output-file"), "target.sqt") ==0){
+      sqt_output_file = generate_name(ms2_file, "-target.sqt", ".ms2", NULL);
+      decoy_sqt_output_file = generate_name(ms2_file, "-decoy.sqt", ".ms2", NULL);
       set_string_parameter("sqt-output-file", sqt_output_file);
+      set_string_parameter("decoy-sqt-output-file", decoy_sqt_output_file);
     }
     
     // parameters are now confirmed, can't be changed
@@ -429,14 +430,14 @@ int main(int argc, char** argv){
           // Output only for the target set
           // FIXME ONLY one header
           if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-            FILE* output = NULL;
+            // only output the first and second decoy sets
             if (file_idx == 0){
-              output = psm_result_file_sqt;
+              print_match_collection_sqt(psm_result_file_sqt, max_rank_result,
+                match_collection, spectrum, prelim_score, main_score);
             } else if (file_idx == 1){
-              output = decoy_result_file_sqt;
-            }
-            print_match_collection_sqt(output, max_rank_result,
-              match_collection, spectrum, prelim_score, main_score);
+              print_match_collection_sqt(decoy_result_file_sqt, max_rank_result,
+                match_collection, spectrum, prelim_score, main_score);
+            } 
           }        
           
           // free up match_collection
@@ -456,6 +457,7 @@ int main(int argc, char** argv){
 
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
       fclose(psm_result_file_sqt);
+      fclose(decoy_result_file_sqt);
     }
 
     // ok, now close all psm_result_files and free filenames
