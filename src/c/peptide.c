@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.60 $
+ * $Revision: 1.61 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -538,17 +538,17 @@ char* get_peptide_sequence_from_peptide_src_sqt(
     get_protein_sequence_pointer(protein);
 
   // allocate peptide memory
-  // Template "*.peptide.*", where "*" are flanking amino acids
   copy_sequence = (char*)mycalloc(peptide->length+5, sizeof(char));
+
+  // Default template is "*.peptide.*", where "*" are flanking amino acids
   copy_sequence[0] = '*';
   copy_sequence[1] = '.';
   copy_sequence[peptide->length+2] = '.';
   copy_sequence[peptide->length+3] = '*';
   copy_sequence[peptide->length+4] = '\0';
 
-  // first copy over the peptide sequences
+  // copy over the peptide sequences
   strncpy(&copy_sequence[2], &parent_sequence[start_idx-1], peptide->length);
-  carp(CARP_DETAILED_DEBUG, "%s\n", copy_sequence);
   
   // is there a AA before?
   if(start_idx != 1){
@@ -558,7 +558,6 @@ char* get_peptide_sequence_from_peptide_src_sqt(
   if((start_idx + peptide->length - 1) < protein_length){
     copy_sequence[peptide->length+3] = parent_sequence[start_idx+peptide->length-1];
   }
-  carp(CARP_DETAILED_DEBUG, "%s\n", copy_sequence);
   
   // yeah return!!
   return copy_sequence; 
