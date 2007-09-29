@@ -919,7 +919,7 @@ BOOLEAN_T score_match_collection_sp(
     set_match_score(match, SP, score);
 
     // set b_y_ion_match field
-    set_match_b_y_ion_match(match, get_scorer_sp_b_y_ion_match(scorer));
+    set_match_b_y_ion_info(match, scorer);
     
     // check if enough space for peptide match
     if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
@@ -1763,8 +1763,8 @@ BOOLEAN_T print_match_collection_sqt(
             delta_cn,
             get_match_score(match, main_score),
             get_match_score(match, prelim_score),
-            0, // FIXME dummy <matched ions>
-            0, // FIXME dummy <expected ions>
+            get_match_b_y_ion_matched(match),
+            get_match_b_y_ion_possible(match),
             sequence
             );
     free(sequence);
