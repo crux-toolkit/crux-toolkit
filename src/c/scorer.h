@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
@@ -282,9 +282,25 @@ void set_scorer_sp_equalize_resolution(
 /**
  *\returns the fraction of b,y ions matched for scoring SP, the values is valid for the last ion series scored with this scorer object
  */
-float get_scorer_sp_b_y_ion_match(
-  SCORER_T* scorer ///< the scorer object -out
+float get_scorer_sp_b_y_ion_fraction_matched(
+  SCORER_T* scorer ///< the scorer object -in
   );
+
+/**
+ *\returns the number of possible matched b,y ions for scoring SP
+ */
+int get_scorer_sp_b_y_ion_matched(
+  SCORER_T* scorer ///< the scorer object -in
+  );
+
+/**
+ *\returns the number of matched b,y ions for scoring SP
+ */
+int get_scorer_sp_b_y_ion_possible(
+  SCORER_T* scorer ///< the scorer object -in
+  );
+
+
 
 /*
  * Local Variables:

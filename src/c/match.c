@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.40 $
+ * REVISION: $Revision: 1.41 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -64,7 +64,9 @@ struct match{
   float match_scores[_SCORE_TYPE_NUM]; ///< the scoring result array (use enum_type SCORER_TYPE_T to index)
   int match_rank[_SCORE_TYPE_NUM];  ///< the rank of scoring result (use enum_type SCORER_TYPE_T to index)
   int pointer_count; ///< the number of pointers to this match object (when reach 0, free memory)
-  float b_y_ion_match; ///< the fraction of the b, y ion matched while scoring for SP
+  float b_y_ion_fraction_matched; ///< the fraction of the b, y ion matched while scoring for SP
+  int b_y_ion_matched; ///< the number of the b, y ion matched while scoring for SP
+  int b_y_ion_possible; ///< the number of possible b, y ion while scoring for SP
   BOOLEAN_T null_peptide; ///< Is the match a null peptide match?
   char* peptide_sequence; ///< cached peptide sequence, if not called before set as NULL
   PEPTIDE_TYPE_T overall_type; ///< the overall peptide trypticity, this is set in set_match_peptide routine, go to README top
@@ -325,7 +327,7 @@ void serialize_match(
   serialize_spectrum(match->spectrum, file);
   
   // b/y ion matches ratio
-  fwrite(&(match->b_y_ion_match), sizeof(float), 1, file);
+  fwrite(&(match->b_y_ion_fraction_matched), sizeof(float), 1, file);
 
   // serialize match peptide overall trypticity
   fwrite(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, file);
@@ -374,7 +376,7 @@ double* get_match_percolator_features(
   // Mass
   feature_array[7] = get_spectrum_neutral_mass(match->spectrum, match->charge);
   // ionFrac
-  feature_array[8] = match->b_y_ion_match;
+  feature_array[8] = match->b_y_ion_fraction_matched;
   // lnSM
   feature_array[9] = match->ln_experiment_size;
   
@@ -494,7 +496,7 @@ MATCH_T* parse_match(
   }
   
   // spectrum specific features
-  fread(&(match->b_y_ion_match), sizeof(float), 1, result_file);
+  fread(&(match->b_y_ion_fraction_matched), sizeof(float), 1, result_file);
 
   // parse match peptide overall trypticity
   fread(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, result_file);
@@ -805,27 +807,50 @@ float get_match_ln_experiment_size(
 }
 
 /**
- * sets the match b_y_ion_match
+ * sets the match b_y_ion information
  */
-void set_match_b_y_ion_match(
+void set_match_b_y_ion_info(
   MATCH_T* match, ///< the match to work -out
-  float b_y_ion_match ///< the b_y_ion_match value of PSM -in
+  SCORER_T* scorer ///< the scorer from which to extract information -in
   )
 {
-  match->b_y_ion_match = b_y_ion_match; 
+  match->b_y_ion_fraction_matched = 
+    get_scorer_sp_b_y_ion_fraction_matched(scorer); 
+  match->b_y_ion_matched = 
+    get_scorer_sp_b_y_ion_matched(scorer); 
+  match->b_y_ion_possible = 
+    get_scorer_sp_b_y_ion_possible(scorer); 
 }
 
 /**
- * gets the match b_y_ion_match
+ * gets the match b_y_ion_fraction_matched
  */
-float get_match_b_y_ion_match(
+float get_match_b_y_ion_fraction_matched(
   MATCH_T* match ///< the match to work -out
   )
 {
-  return match->b_y_ion_match;
+  return match->b_y_ion_fraction_matched;
 }
 
+/**
+ * gets the match b_y_ion_matched
+ */
+int get_match_b_y_ion_matched(
+  MATCH_T* match ///< the match to work -out
+  )
+{
+  return match->b_y_ion_matched;
+}
 
+/**
+ * gets the match b_y_ion_possible
+ */
+int get_match_b_y_ion_possible(
+  MATCH_T* match ///< the match to work -out
+  )
+{
+  return match->b_y_ion_possible;
+}
 
 /**
  *Increments the pointer count to the match object

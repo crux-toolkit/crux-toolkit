@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.47 $
+ * REVISION: $Revision: 1.48 $
  ****************************************************************************/
 
 #include <math.h>
@@ -56,7 +56,10 @@ struct scorer {
   SCORER_TYPE_T type; ///< The type of scorer
   float sp_beta; ///< used for Sp: the beta variable 
   float sp_max_mz; ///< used for Sp: the max mz for the intensity array
-  float sp_b_y_ion_match; ///< The most recent ion_collection fraction of the b, y ion matched while scoring for SP
+  int sp_b_y_ion_matched; ///< The most recent ion_collection number of the b, y ion matched while scoring for SP
+  int sp_b_y_ion_possible; ///< The most recent ion_collection number of the b, y ion possible while scoring for SP
+  float sp_b_y_ion_fraction_matched; ///< The ratio of matched and possible.
+
   float* intensity_array; ///< used for Sp: the intensity array, which can be indexed using the m/z
   float max_intensity; ///< the max intensity in the intensity array
   BOOLEAN_T initialized; ///< has the scorer been initialized?
@@ -733,7 +736,9 @@ float gen_score_sp(
     calculate_ion_type_sp(scorer, ion_series, &intensity_sum, Y_ION, &repeat_count);
   
   // set the fraction of  b,y ions matched for this ion_series
-  scorer->sp_b_y_ion_match = (float)ion_match / get_ion_series_num_ions(ion_series);
+  scorer->sp_b_y_ion_matched  = ion_match;
+  scorer->sp_b_y_ion_possible = get_ion_series_num_ions(ion_series);
+  scorer->sp_b_y_ion_fraction_matched = (float)ion_match / get_ion_series_num_ions(ion_series);
 
   //// DEBUG!!!!
   /*
@@ -1618,11 +1623,31 @@ void add_intensity(
 /**
  *\returns the fraction of b,y ions matched for scoring SP, the values is valid for the last ion series scored with this scorer object
  */
-float get_scorer_sp_b_y_ion_match(
+float get_scorer_sp_b_y_ion_fraction_matched(
   SCORER_T* scorer ///< the scorer object -out
   )
 {
-  return scorer->sp_b_y_ion_match;
+  return scorer->sp_b_y_ion_fraction_matched;
+}
+
+/**
+ *\returns the number of b,y ions matched for scoring SP
+ */
+int get_scorer_sp_b_y_ion_matched(
+  SCORER_T* scorer ///< the scorer object -out
+  )
+{
+  return scorer->sp_b_y_ion_matched;
+}
+
+/**
+ *\returns the number of b,y ions possible to match for scoring SP
+ */
+int get_scorer_sp_b_y_ion_possible(
+  SCORER_T* scorer ///< the scorer object -out
+  )
+{
+  return scorer->sp_b_y_ion_possible;
 }
 
 /**
