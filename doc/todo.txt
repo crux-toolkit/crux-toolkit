@@ -1,8 +1,0 @@
-#------------
-# Pending modifications to crux
-#------------
-
-V- write out the c++/c incorporation plan
-V- write documentation on how to add modules to crux and compile
-- make crux_decoy1 2 etc all have same suffix  ".matches" and random string
-
