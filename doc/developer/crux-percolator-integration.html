@@ -1,0 +1,30 @@
+Crux and Percolator integration
+Author: Christopher Park
+7/24/07
+
+The Percolator/Crux integration is done under the same method described of 
+C/C++ integration written in "c_cpp_integration" under crux/doc. Crux is 
+written in C, while Percolator is written in C++ using modules from the 
+Standard C++ library, thus there is some extra measure required to merge 
+the two applications together. 
+
+First, the user must check out both Crux and Percolator projects from CVS 
+repository. There are not bundled together in CVS to allow independent 
+further development on both applications.
+
+Second, to compile the application, the makefile under crux/src controls
+all subsequent actions needed to compile both Percolator and Crux. Thus, 
+the user should only have to type make once with Crux's makefile. 
+
+In detail, the Crux's makefile calls Percolator's makefile to compile the 
+Percolator's C++ portion of the code into a library file called 
+"libpercolator.a". Once finished, the Crux C code is compiled linked with 
+the Percolator library "libpercolator.a" and the standard C++ library by 
+the "-lstdc++" flag. One complication, under the current setup is the 
+percolator C interface file location. All Crux routines that use Percolator 
+must call routines through the percolator C interface, thus must include 
+PercolatorCInterface.h file. However, the PercolatorCInterface.h file is 
+located in Percolator src directory and not in the Crux src directory. 
+The current solution is for the Crux makefile to copy over the 
+PercolatorCInterface.h  file from the Percolator src directory before 
+compilation.

@@ -1,0 +1,79 @@
+<html>
+<title>Crux - Application programmers interface</title>
+<body>
+
+<ul>
+
+<li>
+<b>amino_acid</b>: A single amino acid, with three properties: type,
+mass and a list of chemical modifications.
+
+<li>
+<b>chemical_modification</b>: A modification to an amino acid.  It has
+two properties: name (e.g., acetylation, water-loss, etc.) and mass
+offset.
+
+<li>
+<b><a href="./html/peptide_8h.html">peptide</a></b>: A string of amino acids, with properties such as
+length, charge (possibly "unknown"), mass, and mass-to-charge.  The
+function <code>get_proteins</code> returns a list of proteins in which
+the peptide occurs.
+
+<li>
+<b><a href="./html/protein_8h.html">protein</a></b>
+: A longer string of amino acids. 
+
+<li>
+<b>database</b>: An unordered set of peptides.  The primary function
+is <code>read_database</code>, which reads the database from a given
+input file.
+
+<li>
+<b><a href="./html/peptide__iterator_8h.html">peptide_iterator</a></b>: An object for traversing the
+peptides in a database.  This object may iterate over only the peptides
+within a specified mass-to-charge range.
+
+<li>
+<b><a href="./html/ion_8h.html">ion</a></b>
+A (fragment) ion of a peptide, with a pointer to the
+originating peptide. In addition to mass
+the ion has four properties: ion type (b or y), 
+cleavage location, charge, a list of chemical modifications (i.e.
+neutral loss). 
+
+<li>
+<b><a href="./html/ion__series_8h.html">ion-series</a></b>
+A series of fragment ions.
+
+<li>
+<b><a href="./html/peak_8h.html">peak</a></b>: A single peak in a mass spectrum, with two properties:
+mass-to-charge and intensity.  The peak also has a (possibly empty)
+list of associated ions.
+
+<li>
+<b><a href="./html/spectrum_8h.html">spectrum</a></b>: A collection of peaks and some other identifying spectrum
+information.
+
+<li>
+<b><a href="./html/spectrum_8h.html">peak_iterator</a></b>: An object for traversing the peaks in a spectrum.
+
+<li>
+<b><a href="./html/spectrum__collection_8h.html">spectrum_collection</a></b>: A collection of spectra.
+
+<li>
+<b><a href="./html/spectrum__collection_8h.html">spectrum_iterator</a></b>: 
+An object for traversing the spectra in a spectrum_collection.
+
+<li>
+<b>peptide_spectrum_match</b>: A spectrum and an associated peptide.
+
+<li>
+<b>psm_score_function</b>: A generic scoring routine for
+peptide_spectrum_matches.  Takes as input (1) a SCORE_FUNCTION_T
+object that specifies the type of score function to be applied, and
+(2) a single peptide_spectrum_match.  Returns a numeric score.
+
+</ul>
+
+</body>
+</html>
