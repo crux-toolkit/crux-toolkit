@@ -1,4 +1,4 @@
-"Date"	"Category"	"Status"	"Person"	"Priority"	"Difficulty"	"Description"
+"Date"	"Category (New Functionality, Documentation, Refactoring, Bug Fix, Testing Software)"	"Status (Open, Started, Implemented, Tested, Closed)"	"Person"	"Priority (1 = high)"	"Difficulty (1 =  easy)"	"Description"
 10/02/07	"New Functionality"	"Open"	" "	2	2	"Parallelization with MPI"
 10/02/07	"New Functionality"	"Open"	" "	1	2	"Search-for-matches should be able to take a fasta file rather than just an index as input"
 10/02/07	"Documentation"	"Open"	"BEF"	1	2	"User tutorials for obvious use cases: creating an index, searching a spectrum, searching multiple spectra"
@@ -46,26 +46,7 @@
 10/02/07	"Bug Fix"	"Open"		2	1	"Take out filename at top of get-ms2-spectrum output"
 10/02/07	"Bug Fix"	"Open"		1	1	"Allow absolute filenames to be passed to create-index"
 10/02/07	"Bug Fix"	"Open"		1	1	"Create-index has inconsistent behavior for naming index directories for files with and without fasta as a suffix"
-10/02/07	"Documentation"	"Open"		3	1	"crux/doc/c_cpp_integration.html should be reformatted"
+10/02/07	"Documentation"	"Open"		3	1	"crux/doc/c_cpp_integration.html and crux_percolator.html should be reformatted"
 10/02/07	"Bug Fix"	"Open"		2	1	"Crux_decoy1 2 etc should all have same suffix  "".matches"" and random string"
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-	"Documentation"	"Open"	"BEF"	"High = 1"	"Easy = 1"	
-	"New Functionality"	"Started"	"AAK"	"Medium = 2"	"Medium = 2"	
-	"Testing Software"	"Implemented"	"WSN"	"Low = 3"	"Hard = 3"	
-	"Bug Fix"	"Tested"				
-	"Refactoring"	"Closed"				
+10/02/07	"Refactoring"	"Open"		3	2	"Move public and private methods to different sections of .c file?"
+10/02/07	"Documentation"	"Open"		1	1	"Organize crux/doc"
