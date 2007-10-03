@@ -2,10 +2,12 @@
 # Pending modifications to crux
 #------------
 
+- search_spectra, search_spectrum, and match_search should all be able to not
+  use an index!
+
 V- make match_analysis doc
 V- all executable options (--option) should have dashes rather than underscores
-V- the crux index info file should have text (e.g. for peptide type) rather than numbers
-  in general, it should be human interpretable. if you'd like to have another separate file that is
+V- the crux index info file should have text (e.g. for peptide type) rather than    numbers in general, it should be human interpretable. if you'd like to have another separate file that is
   more machine interpretable, that's fine too.
 - executables that use an index should default to the parameter values in the index, 
   unless a parameter in the parameter file or on the command line contradicts the index parameters,
@@ -17,7 +19,7 @@ V- write documentation on how to add modules to crux and compile
 - search_spectrum output documentation shouldbe written again...
 - use CARP consistently throughout the code, including utils.h
 - 80 chars per line
-	utils.*
+-	utils.*
 - parameter file, white spaces cases errors
   for example, score-type=xcorr<white-space>
   the <white-space> will cause a matching error in string comparison
@@ -35,10 +37,10 @@ V- Update parameter file (1) read amino acid mass modification (2) use hash tabl
 - echo out parameter values to STDOUT
 - binary format option in parameter file
 
-- make sure copy routines copy new fields!!!
+- make sure copy routines copy all fields
 - take out filename at top of get_ms2_spectrum output
-- rename to crux-*
-- precision of output as parameter
+- rename executables to crux-*
+- precision of output should be a parameter
 - naming convention should be fixed with .fasta
 - default should be crux.params
 - allow absolute filenames being passed to create_index
@@ -54,13 +56,23 @@ V- Update parameter file (1) read amino acid mass modification (2) use hash tabl
 - should not rely on calloc to faithfully initialize values in structs to zero.
   this has caused problems at least once. explicitly initialize fields in
   new_* contructors.
-- search_spectra, search_spectrum, and match_search should all be able to not
-  use an index!
 - why is ion_constraint in ion_series. shouldn't it be in ion.c?
+- single line comments should be // followed by a space. I know this is anal
+  but comments like 
 
------
+  //this are hard to read.
+
+  // these are better
+
+- many of the scripts have default option settings that are independent of
+  the defaults set in the parameter.c file. this might not be a good idea.
+  also, many routines take as a parameter things that should rightly 
+  be accessed through the get_*_parameter routines
+
+
+#-----
 I think these may already be implemented:
------
+#-----
 
 Make usage more consistent
   - all options should have '--' not '-'
