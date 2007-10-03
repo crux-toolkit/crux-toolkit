@@ -1,0 +1,402 @@
+<html>
+<title>Crux: Coding standards</title>
+<body>
+<blockquote>
+
+<h1>Coding standards</h1>
+
+<h3>Object-oriented philosophy</h3>
+
+<p>
+Although Crux is written in C, we aim to produce modularized code,
+with each module acting like a C++ object.  In particular, a
+<code>struct</code> object should be encapsulated in a pair of
+<code>.c</code> and <code>.h</code> files.  The fields of the struct
+should only appear in the <code>.c</code> file, and the
+<code>.h</code> file should provide access routines of the form
+<code>get_&lt;object&gt;_&lt;field&gt;</code> and
+<code>set_&lt;object&gt;_&lt;field&gt;</code>.  Each module should
+also provide <code>new_&lt;object&gt;</code>,
+<code>free_&lt;object&gt;</code> and <code>print_&lt;object&gt;</code>
+functions.
+</p>
+
+
+<h3>Syntactic standards</h3>
+
+<ul>
+
+<li>
+Insert a space after every comma.
+
+<li>
+Use no more than eight parameters per function.
+
+<li>
+If a function call doesn't fit on one line, place each argument on a
+separate line.  For example:
+
+<pre>
+  foo(
+    parameter1,
+    parameter2,
+    parameter3,
+    parameter4,
+    parameter5
+  );
+</pre>
+
+<li>
+When an actual parameter list contains a constant, that constant
+should be followed by a comment that indicates the formal parameter
+name.
+
+<li>
+Use underscores, rather than internal capitalization, to separate
+multi-word variable and function names.
+
+<li>
+Indent two characters per level.  Note that, within emacs, this
+indentation can be automatically achieved by appending the following
+comment at the end of the file:
+
+<pre>
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+</pre>
+
+This comment should be included in every <code>.c</code> and
+<code>.h</code> file. 
+<P>
+In vim this is set by including the line 
+
+<pre>
+set tabstop=2
+</pre>
+
+in your .vimrc file.
+
+
+<li>
+Make each line at most 80 characters wide.
+
+<li>
+Configure your editor to use spaces rather then tabs for indentation.
+In emacs this is done by setting <code>indent-tabs-mode</code> to
+<code>nil</code>.  In vim this is set by including the line
+
+<pre>
+set expandtab
+</pre>
+
+in your .vimrc file.
+
+<li>
+Follow the keywords <code>for</code>, <code>while</code>, etc. by a
+brace on the same line.  Do not leave off the braces, even for a
+single-line block.
+
+<li>
+Place each end brace on a line of its own.
+
+<li>
+The keyword <code>else</code> may optionally "cuddle" between two
+braces:
+<pre>
+  } else {
+</pre>
+
+<li>
+Use parentheses to make expression precedence explicit.
+
+<li>
+When an expression continues over more then one line,
+begin the continuation line with an operator whenever possible.
+For example:
+
+<pre>
+  foo = param1 + param2 + param3
+    + param4 + param5;
+</pre>
+
+
+<li>
+When a fixed string assignment continues over more then one line,
+take advantage of ANSI C's implicit concatentation:
+
+<pre>
+  string = "this is a really long string"
+    " that runs over two lines";
+</pre>
+
+<li>
+Do not use single-letter variable names.
+
+<li>
+Name loop indices using <code>&lt;name&gt;_idx</code>.
+
+<li>
+Use only the following allowed abbreviations:
+<ul>
+
+<li>
+num  = number
+
+<li>
+cur  = current
+
+<li>
+src  = source (e.g. when copying)
+
+<li>
+dest = destination (e.g. when copying)
+
+<li>
+db   = database
+
+<li>
+min = minimum 
+
+<li>
+max = maximum
+
+<li>
+mz = mass-to-charge
+
+</ul>
+
+<li>
+Define variables anywhere within a block.
+
+<li>
+Use all lowercase characters.  The only exceptions are constants,
+enumerated types (see below) and macros, which are written in all
+uppercase.
+
+<li>
+Name files using hyphens rather than underscores.
+
+<li>
+Usage statements should conform to the following:
+  <ul>
+    <li> All options should have '--' not '-'
+    <li> Use periods consistently at the end of option descriptions.
+    <li> Put '(Default = XX)' or '(default = XX )' to indicate default behavior.
+  </ul>
+
+<li>
+Routines should with zero status to indicate success. Non-zero value indicates failure of some kind.
+
+<li>
+Use <code>/*  */</code> comment style only for multi-line comments.
+Use <code>// </code> comment style for single-line comments, with a space 
+after the <code>//</code>.
+
+<li>
+Enumerated types should be defined in all caps as
+<code>&lt;type&gt;_T</code>. Values of the type should also be in all
+caps, with names like <code>&lt;name&gt;_&lt;type&gt;</code>.  One
+value should be <code>INVALID_&lt;type&gt;</code>.  All
+<code>if</code> statements that handle the type should handle all
+possible values.
+
+<li>
+Known deviations from the coding standards and other bugs should be
+indicated with a one-line comment like this:
+<pre>
+// FIXME (WSN 19-Dec-05): Create access routines for this module.
+</pre>
+With either FIXME or TODO at the beginning. FIXME is for more serious
+violations, that should probably be fixed before a production release. TODO
+are nice to have.
+
+</ul>
+
+<h3>Structured comments</h3>
+
+<p>
+Crux uses <a
+href='http://www.stack.nl/~dimitri/doxygen/manual.html'>doxygen</a> to
+produce documentation directly from structured comments in the source
+code.  Unstructured comments are still allowed, and do not show up in
+the generated documentation.  Because Doxygen is able to parse 'C,'
+only a few additional markup tags are required to generate
+documentation from the structured comments.  Following is an
+abbreviated description of how to use doxygen-style structured
+comments.  See the <a
+href='http://www.stack.nl/~dimitri/doxygen/manual.html'> doxygen
+documentation</a> for a full description:</p>
+
+<p>
+A structured comment block begins with <code>/**</code> and 
+ends with <code>*/</code>. Note that a comment beginning with
+<code>/***</code> is <i>not</i> considered a structured comment.
+In-line structured comments are marked with <code>///</code>.
+Structured comments are assumed to refer to the code
+immediately following the comment.
+If you wish an in-line structured comment to refer to the code
+immediately preceding it, use <code>///&lt;</code>.
+Within a structured comment markup tags are identified
+by a leading '\'.
+You may embed HTML or Tex formatting in your structured comments.
+<p>
+The lines in a structured comment block up to the first '.'
+are assumed to be a brief description of the code that follows.
+Further text in the comment block is assumed to be a more detailed explanation.
+The structured comment describing a file is shown below:
+<pre>
+/**
+ * \file test.c
+ * A test module.
+ * This module demonstrates doxygen structured comments and tags.
+ * It might go on for several lines.
+ */
+</pre>
+The markup tag <code>file</code> tells doxygen that the comment
+refers to the file <code>test.c</code> as a whole. 
+The next line is brief description of the file, 
+and the following lines are a fuller description.
+<p>
+A function <code>foo</code> would be commented like this:
+<pre>
+/**
+ * foo operates on its parameters.
+ * This is a detailed description of foo.
+ * It might go on for several lines.
+ * \return The result of foo.
+ */
+int foo(
+  char a, ///< The user's first initial - in
+  int b, ///< user's age  - in
+  double c, ///< The distance to the nearest coffee stand - in
+  char* d ///< The functions guess for the users middle initial - out
+)
+</pre>
+Doxygen assumes that the comment refers to the function 
+<code>foo</code> immediately following it.
+It also will recognize the comments
+following the formal arguments to <code>foo</code> as
+parameter descriptions. 
+A markup tag, <code>\return</code>,
+is used to identify the text describing the return value of the function.
+<p>
+A simple C program following basic doxygen markup standards is
+<a href='./sample_doxygen/test.c'>here</a>, and the corresponding HTML
+output for that program is 
+<a href='./sample_doxygen/html/index.html'>here</a>.
+
+<p>
+Here are some coding standards related to structured comments:</p>
+
+<ul>
+
+<li>
+Begin each file with a header of the following form:
+<PRE>
+/**
+ * @file foo.c
+ *
+ * Insert brief description of file contents here.
+ *
+ * $Id: crux-coding-standards.html,v 1.1 2007-10-03 21:58:16 aklammer Exp $
+ * $Log: not supported by cvs2svn $
+ * Revision 1.1  2007/10/03 21:41:29  aklammer
+ * *** empty log message ***
+ *
+ * Revision 1.6  2007/10/03 19:29:28  aklammer
+ * *** empty log message ***
+ *
+ * Revision 1.5  2006/07/05 22:28:01  aklammer
+ * *** empty log message ***
+ *
+ * Revision 1.4  2006/06/29 21:51:20  aklammer
+ * *** empty log message ***
+ *
+ * Revision 1.2  2006/06/27 20:42:00  aklammer
+ * *** empty log message ***
+ *
+ * Revision 1.1  2006/03/10 00:53:29  noble
+ * *** empty log message ***
+ *
+ * Revision 1.8  2005/12/24 14:52:17  noble
+ * *** empty log message ***
+ *
+ * Revision 1.7  2005/12/23 21:20:52  cegrant
+ * Updated section on coding standards
+ *
+ * Revision 1.6  2005/12/22 19:26:32  noble
+ * *** empty log message ***
+ **/
+</PRE>
+
+<li>
+Precede each function definition with a block comment.  The comment
+should give a brief description of the function, as well as describing
+the input and output parameters and side effects.
+
+<li>
+Function parameters lists should begin with input parameters, followed
+by input/output parameters, followed by output parameters.  In the
+formal parameter list, each parameter should be followed by a one-line
+explanatory comment.
+
+</ul>
+
+
+<h3>Command line standards</h3>
+
+<ul>
+
+<li>
+All command lines should be of the following form:
+
+<pre>
+     command [options] arg1 arg2
+</pre>
+
+where <code>arg1 arg2</code> are required arguments.  Obviously, the
+number of required arguments will differ by program, but every program
+will have at least one required argument.
+
+<li>
+Every program should send its primary output to standard output, and
+should produce informative status messages on standard error.
+
+<li>
+Command line option names should be verbose, and should be preceded
+with a double hyphen.
+
+<li>
+Multi-word command line options should have internal hyphens.
+
+<li>
+Where it makes sense, a hyphen on the command line in place of a file
+name should be interpreted to mean "read from standard input."  Where
+this is possible, it should be documented.
+
+<li>
+Every program should provide a <code>--verbose [0|1|2|3|4]</code>
+option that controls the verbosity of messages to standard error.
+
+<li>
+The usage message should list the default value for every option.
+
+<li>
+If you find yourself making small changes in a file that doesn't meet these
+coding standards, write your changes in the existing style of the file.
+If you are making a substantial revision to the file, take the time
+to bring the entire file into conformance with these standards.
+
+</ul>
+
+<h3>Compilation and makefile standards</h3>
+
+Write code to the ANSI C standard. Default GNU extensions are allowed.
+Compile with <code>-Wall</code>.
+</blockquote>
+</body>
+</html>
