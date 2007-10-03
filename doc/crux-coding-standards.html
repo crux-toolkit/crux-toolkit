@@ -181,8 +181,20 @@ uppercase.
 Name files using hyphens rather than underscores.
 
 <li>
+Usage statements should conform to the following:
+  <ul>
+    <li> All options should have '--' not '-'
+    <li> Use periods consistently at the end of option descriptions.
+    <li> Put '(Default = XX)' or '(default = XX )' to indicate default behavior.
+  </ul>
+
+<li>
+Routines should with zero status to indicate success. Non-zero value indicates failure of some kind.
+
+<li>
 Use <code>/*  */</code> comment style only for multi-line comments.
-Use <code>//</code> comment style for single-line comments.
+Use <code>// </code> comment style for single-line comments, with a space 
+after the <code>//</code>.
 
 <li>
 Enumerated types should be defined in all caps as
@@ -195,10 +207,12 @@ possible values.
 <li>
 Known deviations from the coding standards and other bugs should be
 indicated with a one-line comment like this:
-
 <pre>
 // FIXME (WSN 19-Dec-05): Create access routines for this module.
 </pre>
+With either FIXME or TODO at the beginning. FIXME is for more serious
+violations, that should probably be fixed before a production release. TODO
+are nice to have.
 
 </ul>
 
@@ -288,8 +302,11 @@ Begin each file with a header of the following form:
  *
  * Insert brief description of file contents here.
  *
- * $Id: crux-coding-standards.html,v 1.5 2006-07-05 22:28:01 aklammer Exp $
+ * $Id: crux-coding-standards.html,v 1.6 2007-10-03 19:29:28 aklammer Exp $
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/07/05 22:28:01  aklammer
+ * *** empty log message ***
+ *
  * Revision 1.4  2006/06/29 21:51:20  aklammer
  * *** empty log message ***
  *
