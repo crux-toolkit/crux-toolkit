@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OOo-dev 2.0  (Linux)">
 	<META NAME="CREATED" CONTENT="20061103;11522100">
-	<META NAME="CHANGED" CONTENT="20061212;19214100">
+	<META NAME="CHANGED" CONTENT="20070501;16052100">
 	<STYLE>
 	<!--
 		@page { size: 8.27in 11.69in; margin: 0.79in }
@@ -75,7 +75,20 @@ scoring method</FONT></FONT></B></CODE></P>
 		</OL>
 		<LI><P STYLE="margin-bottom: 0in; font-style: normal">Keep the top
 		200 abundant peaks(by peak intensity) in spectrum array, remove
-		others.</P>
+		others. The current version Crux follows Sequest28 SP.</P>
+		<OL TYPE=a>
+			<P STYLE="margin-bottom: 0in; font-style: normal"><FONT FACE="courier new, monospace">In
+			Sequest27, the top 200 peaks are always selected.</FONT></P>
+			<P STYLE="margin-bottom: 0in; font-style: normal"><FONT FACE="courier new, monospace">However,
+			in Sequest28 the top peaks to select are determined by,</FONT></P>
+			<LI><P STYLE="margin-bottom: 0in; font-style: normal"><FONT FACE="courier new, monospace">If
+			experimental mass &gt; 3200, then select int(experimental mass /
+			14.0) number of top peaks.</FONT></P>
+			<LI><P STYLE="margin-bottom: 0in; font-style: normal"><FONT FACE="courier new, monospace">Else,
+			experimental mass &lt; 3200, then int(4*sqrt(experimental mass))
+			number of top peaks but should not exceed 200. </FONT>
+			</P>
+		</OL>
 		<LI><P STYLE="margin-bottom: 0in; font-style: normal">Normalize the
 		200 peaks, so that the max peak intensity equals 100. 
 		</P>
@@ -130,12 +143,12 @@ ion series, ex, if B2-B3-B4 Y3-Y4 match, than m=3</P>
 <HR>
 <P><CODE><B><FONT SIZE=4><FONT FACE="Courier, monospace">Comments</FONT></FONT></B></CODE></P>
 <P><SPAN ID="Frame1" DIR="LTR" STYLE="float: left; width: 4.88in; height: 3.38in; border: none; padding: 0in; background: #ffffff">
-	<P STYLE="margin-top: 0.08in; margin-bottom: 0.08in"><IMG SRC="images/Sequest-vs-CRUX-for-sprun-both.png" NAME="graphics2" ALIGN=LEFT WIDTH=99% BORDER=0><BR CLEAR=LEFT><FONT SIZE=2><I>figure
+	<P STYLE="margin-top: 0.08in"><IMG SRC="images/Sequest-vs-CRUX-for-sprun-both.png" NAME="graphics2" ALIGN=LEFT WIDTH=99% BORDER=0><BR CLEAR=LEFT><FONT SIZE=2><I>figure
 	1: CRUX vs Sequest on all top 500 matches</I></FONT></P>
 </SPAN><BR CLEAR=LEFT><BR><BR>
 </P>
 <P><SPAN ID="Frame2" DIR="LTR" STYLE="float: left; width: 4.98in; height: 3.52in; border: none; padding: 0in; background: #ffffff">
-	<P STYLE="margin-top: 0.08in; margin-bottom: 0.08in"><IMG SRC="images/Sequest-vs-CRUX-for-sp.png" NAME="graphics1" ALIGN=LEFT WIDTH=100% BORDER=0><BR CLEAR=LEFT><FONT SIZE=2><I>figure2:
+	<P STYLE="margin-top: 0.08in"><IMG SRC="images/Sequest-vs-CRUX-for-sp.png" NAME="graphics1" ALIGN=LEFT WIDTH=100% BORDER=0><BR CLEAR=LEFT><FONT SIZE=2><I>figure2:
 	CRUX vs Sequest on top 5 Xcorr ranked peptides</I></FONT></P>
 </SPAN><BR CLEAR=LEFT><BR><BR>
 </P>
@@ -147,14 +160,14 @@ ion series, ex, if B2-B3-B4 Y3-Y4 match, than m=3</P>
 	<LI><P>When iterating through the spectrum array, always iterate in
 	increasing m/z order. 
 	</P>
-	<LI><P>In step 7, when calculating  <SPAN STYLE="font-style: normal"><FONT FACE="courier new, monospace">&sigma;,&micro;,
-	</FONT></SPAN>
+	<LI><P>In step 7, when calculating <FONT FACE="courier new, monospace">&sigma;,&micro;,
+	</FONT>
 	</P>
 	<UL>
 		<LI><P STYLE="font-style: normal"><FONT FACE="courier new, monospace">&micro;
 		= total_intensity / (m/z window -1), in our case (m/z window) = 101</FONT></P>
 		<LI><P STYLE="font-style: normal"><FONT FACE="courier new, monospace">&sigma;
-		= sqrt(sum{(s[i] -  &micro;)^2}/ (m/z window))</FONT></P>
+		= sqrt(sum{(s[i] - &micro;)^2}/ (m/z window))</FONT></P>
 	</UL>
 </UL>
 <P><BR><BR><BR><BR><BR><BR>
