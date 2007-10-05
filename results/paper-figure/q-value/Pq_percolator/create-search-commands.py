@@ -15,9 +15,14 @@ cwd = os.getcwd()
 for line in fh:
   start, end = line.rstrip("\n").split()
   cmdFile = os.getcwd() + os.sep + "match_search_%s_%s" % (start, end)
+  sqtFile = "match_search_%s_%s_target.sqt" % (start, end)
+  decoySqtFile = "match_search_%s_%s_decoy.sqt" % (start, end)
   outFh = open(cmdFile, "w")
-  cmd = "cd %s; %s --spectrum-min-mass %.3f --spectrum-max-mass %.3f %s \n" \
-     % (os.getcwd(), MATCH_SEARCH_PATH, float(start), float(end), " ".join(match_search_args))
+  cmd = ("cd %s; %s --output-mode all --sqt-output-file %s " +    \
+        "--decoy-sqt-output-file %s --spectrum-min-mass %.3f " +   \
+        "--spectrum-max-mass %.3f %s \n")                         \
+        % (os.getcwd(), MATCH_SEARCH_PATH, sqtFile, decoySqtFile, \
+          float(start), float(end), " ".join(match_search_args))
   outFh.write(cmd)
   outFh.close()
   clusterCmd = "qsub -o %s -e %s %s" % (cwd, cwd, cmdFile)
