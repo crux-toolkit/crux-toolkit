@@ -49,4 +49,6 @@
 10/02/07		"Documentation"	"Open"		3	1	"crux/doc/c_cpp_integration.html and crux_percolator.html should be reformatted"
 10/02/07		"Bug Fix"	"Open"		2	1	"Crux_decoy1 2 etc should all have same suffix  "".matches"" and random string"
 10/02/07		"Refactoring"	"Open"		3	2	"Move public and private methods to different sections of .c file?"
-10/02/07		"Documentation"	"Implementation"		1	1	"Organize crux/doc, especially with regards to renaming of executables"
+10/02/07		"Documentation"	"Implementation"	"AAK"	1	1	"Organize crux/doc, especially with regards to renaming of executables"
+10/03/07		"Documentation"	"Implementation"	"BEF"	1	1	"Remove documentation for score-peptide-spectrum, search-spectrum, search-spectra.  Rename score-peptide-blahblah"
+10/03/07		"Refactoring"	"Open"		1	3	"Update executables to match documentation (i.e. removal of search-spectra, score-peptide-spectrum-etc)."
