@@ -51,4 +51,4 @@
 10/02/07		"Refactoring"	"Open"		"AAK"	3	2	"Move public and private methods to different sections of .c file?"
 10/02/07		"Documentation"	"Implementation"	"AAK"	"AAK"	1	1	"Organize crux/doc, especially with regards to renaming of executables"
 10/03/07		"Documentation"	"Implementation"	"BEF"	"AAK"	1	1	"Remove documentation for score-peptide-spectrum, search-spectrum, search-spectra.  Rename score-peptide-blahblah"
-10/03/07		"Refactoring"	"Open"		"AAK"	1	3	"Update executables to match documentation (i.e. removal of search-spectra, score-peptide-spectrum-etc)."
+10/08/07		"Bug Fix"	"Open"		"AAK"	1	1	"Make sure that you can't get the target peptide sequence from a null peptide or match"
