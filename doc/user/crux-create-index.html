@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
-	<TITLE>create-index</TITLE>
+	<TITLE>crux-create-index</TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20050830;17560800">
 	<META NAME="CHANGED" CONTENT="20050902;15510500">
@@ -10,11 +10,11 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: create-index
-REVISION: $Revision: 1.1 $
+REVISION: $Revision: 1.2 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
-<H1 ALIGN=CENTER>create-index</H1>
+<H1 ALIGN=CENTER>crux-create-index</H1>
 <B>Description:</B>
 <br>
 <br>
@@ -25,7 +25,7 @@ all of its peptides on disk.
 <B>Usage:</B>
 
 <blockquote>
-<code>create-index [options] 
+<code>crux-create-index [options] 
   &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
 </code>
 </blockquote>
@@ -53,42 +53,50 @@ all of its peptides on disk.
 <B>Options:</B>
 
 <UL>
-<!-- <LI>[--max-file-size int] &ndash; The maximum size of a file to create in the
+<!-- <LI>[--max-file-size &lt;int&gt;] &ndash; The maximum size of a file to create in the
 index.  Default=2GB (can be implemented later) -->
 	
-<LI>[--mass-range float] &ndash; The mass range contained in each index file.
-Default=1Da
+<LI>[--mass-range &lt;float&gt;] &ndash; 
+  The mass range contained in each index file.  Default=1Da
 	
-<LI>[--min-mass float] &ndash; The minimum neutral mass of the
-peptides to place in the index. Default=200
+<LI>[--min-mass &lt;float&gt;] &ndash; 
+  The minimum neutral mass of the peptides to place in the
+  index. Default=200 
 	
-<LI>[--max-mass float] &ndash; The maximum neutral mass of the
-peptides to place in index. Default=7200
+<LI>[--max-mass &lt;float&gt;] &ndash; 
+  The maximum neutral mass of the peptides to place in
+  index. Default=7200 
 	
-<LI>[--min-length int] &ndash; The minimum length of the peptides to
-place in the index. Default=6
+<LI>[--min-length &lt;int&gt;] &ndash; 
+  The minimum length of the peptides to place in the index. Default=6 
 	
-<LI>[--max-length int] &ndash; The maximum length of the peptides to
-place in the index. Default=50
+<LI>[--max-length &lt;int&gt;] &ndash; 
+  The maximum length of the peptides to place in the index. Default=50
 	
-<LI>[--cleavages tryptic|partial|all ] &ndash; Type of cleavages to allow.
+<LI>[--cleavages &lt;tryptic | partial | all&gt; ] &ndash; 
+  Type of cleavages to allow.
 The <code>tryptic</code> option outputs peptides that result from a
 complete in silico digestion of proteins after residues K or R except
 when followed by P, wherease <code>all</code> outputs all possible
 peptides.  Default=tryptic
 
-<LI>[--redundancy redundant|unique] &ndash; Specify whether peptides that
-come from different proteins yet with identical sequences should appear
-on separate lines (redundant) or on the same line (unique). Default=unique
+<LI>[--redundancy &lt;redundant | unique&gt;] &ndash; 
+  Specify whether peptides that come from different proteins yet with
+  identical sequences should appear on separate lines (redundant) or
+  on the same line (unique). Default=unique 
 
-<LI>[--missed-cleavages] &ndash; Allow missed cleavage sites with in a peptide.
-Default=TRUE 
+<LI>[--missed-cleavages] &ndash; 
+  Allow missed cleavage sites with in a peptide.  Default=TRUE 
 
-<LI>[--isotopic-mass|average|mono] &ndash; Specify the type of isotopic masses
-to use when calculating the peptide mass. Default=average 
+<LI>[--isotopic-mass &lt;average | mono&gt;] &ndash; 
+  Specify the type of isotopic masses to use when calculating the
+  peptide mass. Default=average  
 
-<LI>[--verbosity int] &ndash; Specify the verbosity of the current processes from 0-100.  
-Default=100 
+<LI>[--parameter-file &lt;string&gt;] 
+  The crux parameter file to parse parameter from. (default = crux.params)
+
+<LI>[--verbosity &lt;int&gt;] &ndash; 
+  Specify the verbosity of the current processes from 0-100.  Default=100 
 
 </UL>
 
@@ -106,7 +114,7 @@ messages:</B>
 <B>Info:</B> 
 
 <UL>
-	<LI>All floats are supported up to 2 decimal digits
+	<LI>All &lt;float&gt;s are supported up to 2 decimal digits
        	<LI>User must ensure that file handler limit is sufficient enough for 
 create-index. Use "ulimit -n [#file handlers]" on command line to increase 
 number of allowed filehandlers. A typical default is 1024, should reset to 

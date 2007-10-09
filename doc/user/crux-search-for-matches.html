@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
-	<TITLE>match-search</TITLE>
+	<TITLE>crux-search-for-matches</TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20050830;17560800">
 	<META NAME="CHANGED" CONTENT="20050902;15510500">
@@ -10,11 +10,11 @@
 AUTHOR: Chris Park
 CREATE DATE: 2007-06-19
 PROJECT: match-search
-REVISION: $Revision: 1.1 $
+REVISION: $Revision: 1.2 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
-<H1 ALIGN=CENTER>match-search</H1>
+<H1 ALIGN=CENTER>crux-search-for-matches</H1>
 <B>Description:</B>
 <br>
 <br>
@@ -27,7 +27,7 @@ binary output files or an SQT files.
 <B>Usage:</B>
 <br>
 <br>
-<code>match_search
+<code>crux-search-for-matches
   &nbsp;[options]
   &nbsp;&lt;ms2&nbsp;input&nbsp;filename&gt; 
   &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
@@ -49,7 +49,7 @@ binary output files or an SQT files.
 <UL>
   <br>
 
-  The program outputs to a user specified folder a binary file
+  The program outputs to a user-specified folder a binary file
   that contains the PSMs and additional features.
   <br>
   Optionally, the result can be output in a human readable
@@ -59,19 +59,23 @@ binary output files or an SQT files.
 </UL>
 <B>Options:</B>
 <UL>
-<LI>[--output-mode sqt|binary|all ] &ndash; The output format. Default = binary.
-<LI>[--match-output-folder string] &ndash; The output folder to store the serialized binary output files. Default = current directory.
-<LI>[--sqt-output-file] &ndash; Name of the sqt file to place matches.
+<LI>[--output-mode &lt;sqt | binary | all&gt; ] &ndash; The output format. Default = binary.
+<LI>[--match-output-folder &lt;string&gt;] &ndash; The output folder to store the serialized binary output files. Default = current directory.
+<LI>[--sqt-output-file &lt;string&gt;] &ndash; Name of the sqt file to place matches.
 Default = Prefix of <code>&lt;ms2 input filename&gt;</code>.psm.
-<LI>[--spectrum-min-mass float] &ndash; The lowest spectrum m/z to search in the ms2
+<LI>[--decoy-sqt-output-file &lt;string&gt;] &ndash; Name of the sqt file to place matches. (default = decoy.sqt)
+<LI>[--spectrum-min-mass &lt;float&gt;] &ndash; The lowest spectrum m/z to search in the ms2
 file. Default = 0.0
-<LI>[--spectrum-max-mass float] &ndash; The highest spectrum m/z to search in the ms2
+<LI>[--spectrum-max-mass &lt;float&gt;] &ndash; The highest spectrum m/z to search in the ms2
 file. Default = Positive Infinity.
-<LI>[--prelim-score-type sp] &ndash; The type of scoring function to use.  Default = sp.
-<LI>[--score-type logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr] &ndash; The type of scoring function to use.  Default = sp.
-<LI>[--parameter-file filename] &ndash; The crux parameter file to parse
+<LI>[--prelim-score-type &lt;sp&gt;] &ndash; The type of preliminary scoring function to use.  Default = sp.
+<LI>[--score-type &lt;logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr&gt;] &ndash; The type of scoring function to use.  Default = xcorr.
+<LI> [--number-decoy-set &lt;int&gt;] &ndash; Specify the number of decoy sets to generate for match_analysis. (default = 2)
+<LI> [--spectrum-charge &lt;string&gt;] &ndash; The spectrum charges to search. 1|2|3|all (default = all)
+<li> [--number-runs &lt;double&gt;] The number of spectrum search runs to perform. (default = 1e+09)
+<LI>[--parameter-file &lt;filename&gt;] &ndash; The crux parameter file to parse
 parameter from. Default = Default to crux_parameter.
-<LI>[--verbosity int] &ndash; Specify the verbosity of the current processes from 0-100. By default, verbosity is set to 100.
+<LI>[--verbosity &lt;int&gt;] &ndash; Specify the verbosity of the current processes from 0-100. By default, verbosity is set to 100.
 </UL>
 <B>Warning
 messages:</B> 
