@@ -220,7 +220,7 @@ int main(int argc, char** argv){
           if (get_match_null_peptide(match) == FALSE){
             fprintf(feature_fh, "1\t");
           } else { 
-            fprintf(feature_fh, "0\t");
+            fprintf(feature_fh, "-1\t");
           };
 
           unsigned int feature_idx;

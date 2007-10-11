@@ -518,6 +518,8 @@ void fit_three_parameter_weibull(
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
         cur_shift, &cur_eta, &cur_beta, &cur_correlation);
 
+    carp(CARP_INFO, "Mu, Corr = %.6f, %.6f\n", cur_shift, cur_correlation);
+
     if (cur_correlation > best_correlation){
       *eta = best_eta = cur_eta;
       *beta = best_beta = cur_beta;
