@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.41 $
+ * REVISION: $Revision: 1.42 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -449,7 +449,7 @@ double* get_match_percolator_features(
   for(check_idx=0; check_idx < 20; ++check_idx){
     float feature = feature_array[check_idx];
     if(feature <= -BILLION || feature  >= BILLION){
-      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f",
+      carp(CARP_ERROR, "Percolator feature out of bounds: %d, with value %.2f. Modifying.",
 				check_idx, feature);
       feature_array[check_idx] = feature <= - BILLION ? -BILLION : BILLION;
     }
@@ -530,9 +530,10 @@ char* get_match_sequence(
   MATCH_T* match ///< the match to work -in
   )
 {
-  // if the match is post_process_match and a null peptide you cannot get sequence
+  // if it is a post_process_match and has a null peptide you can't get sequence
   if(match->post_process_match && match->null_peptide){
-    carp(CARP_ERROR, "cannot retrieve null peptide sequence for post_process_match");
+    carp(CARP_ERROR, 
+        "cannot retrieve null peptide sequence for post_process_match");
     return NULL;
   }
   
@@ -550,6 +551,8 @@ char* get_match_sequence(
     // generate the shuffled peptide sequence
     match->peptide_sequence = 
       generate_shuffled_sequence(match->peptide, match->overall_type);    
+    carp(CARP_DETAILED_DEBUG, "Shuffling tranforms: %s -> %s", 
+        get_peptide_sequence(match->peptide), match->peptide_sequence);
   }
   else{
     // just go parse it out from protein, no need to shuffle
@@ -705,10 +708,10 @@ void set_match_peptide(
  */
 void set_match_null_peptide(
   MATCH_T* match, ///< the match to work -out
-  BOOLEAN_T is_null_peptid  ///< is the match a null peptide? -in
+  BOOLEAN_T is_null_peptide  ///< is the match a null peptide? -in
   )
 {
-  match->null_peptide = is_null_peptid;  
+  match->null_peptide = is_null_peptide;  
 }
 
 /**

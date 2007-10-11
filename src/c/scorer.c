@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.48 $
+ * REVISION: $Revision: 1.49 $
  ****************************************************************************/
 
 #include <math.h>
@@ -804,7 +804,7 @@ void normalize_each_region(
 /**
  * create the intensity arrays for observed spectrum
  * SCORER must have been created for XCORR type
- * \returns TRUE if successful, else FLASE
+ * \returns TRUE if successful, else FALSE
  */
 BOOLEAN_T create_intensity_array_observed(
   SCORER_T* scorer,        ///< the scorer object -in/out
@@ -908,6 +908,9 @@ BOOLEAN_T create_intensity_array_observed(
     carp(CARP_INFO, "Intensity array[%d]: %.2f", i, scorer->observed[i]);
   }
   */
+  // FAST manipulate the scorer->observed array so that you subtract the sum
+  // of all the peaks in a +/- 75 m/z window
+  // scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
 
   // free heap
   free(max_intensity_per_region);
@@ -1091,6 +1094,7 @@ float cross_correlation(
   float* observed = scorer->observed;
   
   // perform cross_correlation from -max_offset to +max_offset
+  // FAST remove delay
   for(; delay < max_offset; ++delay){
     // the score for this delay
     one_offset_score = 0;

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.61 $
+ * $Revision: 1.62 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -1276,7 +1276,13 @@ char* generate_shuffled_sequence(
   char temp_char = 0;
 
   // set shuffle bound
-  if(peptide_type == TRYPTIC){
+  // TODO consider changing bounds depending on trypticity
+  // But for now, leave the extreme N- and C-term AAs the same
+  if (peptide_type == peptide_type){
+    ++start_idx;
+    --end_idx;
+  }
+  /* if(peptide_type == TRYPTIC){
     ++start_idx;
     --end_idx;
   }
@@ -1285,7 +1291,7 @@ char* generate_shuffled_sequence(
   }
   else if(peptide_type == C_TRYPTIC){
     --end_idx;
-  }
+  }*/
   
   // shuffle from left ot right, using the Knuth algorithm for shuffling.
   while(start_idx < end_idx){

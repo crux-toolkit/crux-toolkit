@@ -1367,7 +1367,7 @@ BOOLEAN_T score_match_collection_xcorr(
   int match_idx;
   for(match_idx=0; match_idx < match_collection->match_total; ++match_idx){
     match = match_collection->match[match_idx];
-    peptide_sequence = get_peptide_sequence(get_match_peptide(match));
+    peptide_sequence = get_match_sequence(match);
     
     // update ion_series for the peptide instance    
     update_ion_series(ion_series, peptide_sequence);
@@ -1377,7 +1377,12 @@ BOOLEAN_T score_match_collection_xcorr(
     
     // calculates the Xcorr score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
-    
+    char* decoy = "target";
+    if (get_match_null_peptide(match)==TRUE){
+      decoy = "decoy";
+    }
+    carp(CARP_DETAILED_DEBUG, "Spectrum %i vs. %s peptide %s = %.6f", 
+      get_spectrum_first_scan(spectrum), decoy, peptide_sequence, score);
 
     // set all fields in match
     set_match_score(match, XCORR, score);
