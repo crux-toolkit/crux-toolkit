@@ -35,7 +35,7 @@ def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectra
 
   plot(mass_windows, crux_array, label="Crux")
   plot(mass_windows, sequest_array, label="SEQUEST")
-  legend()
+  legend(loc='right')
   
   savefig("indexing" + ".eps")
   savefig("indexing" + ".png")
