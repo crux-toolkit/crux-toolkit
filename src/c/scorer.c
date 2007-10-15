@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.49 $
+ * REVISION: $Revision: 1.50 $
  ****************************************************************************/
 
 #include <math.h>
@@ -804,7 +804,7 @@ void normalize_each_region(
 /**
  * create the intensity arrays for observed spectrum
  * SCORER must have been created for XCORR type
- * \returns TRUE if successful, else FALSE
+ * \returns TRUE if successful, else FLASE
  */
 BOOLEAN_T create_intensity_array_observed(
   SCORER_T* scorer,        ///< the scorer object -in/out
@@ -890,6 +890,7 @@ BOOLEAN_T create_intensity_array_observed(
     }    
   }
 
+  
   // DEBUG
   /*
   int i = 0;
@@ -908,9 +909,28 @@ BOOLEAN_T create_intensity_array_observed(
     carp(CARP_INFO, "Intensity array[%d]: %.2f", i, scorer->observed[i]);
   }
   */
-  // FAST manipulate the scorer->observed array so that you subtract the sum
-  // of all the peaks in a +/- 75 m/z window
-  // scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
+
+  // FAST
+  float* new_observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
+  int idx;
+  for (idx=0; idx < scorer->sp_max_mz; idx++){
+    new_observed[idx] = scorer->observed[idx];
+    int sub_idx;
+    for (sub_idx=idx - MAX_XCORR_OFFSET; sub_idx <= idx + MAX_XCORR_OFFSET;
+        sub_idx++){
+      if (sub_idx <= 0 || sub_idx >= scorer->sp_max_mz){
+        continue;
+      }
+      new_observed[idx] -= (scorer->observed[sub_idx] / (MAX_XCORR_OFFSET * 2.0) );
+    }
+  }
+  scorer->observed = new_observed;
+  int i = 0;
+  for(; i < scorer->sp_max_mz; i++){
+    carp(CARP_INFO, "Intensity array[%d]: %.2f", i, scorer->observed[i]);
+  }
+  // free(new_observed);
+
 
   // free heap
   free(max_intensity_per_region);
@@ -1023,7 +1043,8 @@ BOOLEAN_T create_intensity_array_theoretical(
       return FALSE;
     }
   }
-  
+
+    
   // free heap
   free_ion_iterator(ion_iterator);
 
@@ -1080,55 +1101,20 @@ BOOLEAN_T create_intensity_array_xcorr(
  */
 float cross_correlation(
   SCORER_T* scorer,  ///< the scorer object that contains observed spectrum -in
-  float* theoretical, ///< the theoretical spectrum to score against the observed spectrum -in
-  int max_offset     ///< the max_offset for cross correlation  -in
+  float* theoretical ///< the theoretical spectrum to score against the observed spectrum -in
   )
 {
   int size = (int)scorer->sp_max_mz;
-  float total_score = 0;
   float score_at_zero = 0;
-  float one_offset_score = 0;
-  int delay = -max_offset;
-  int observed_idx = 0;
-  int theoretical_idx = 0;
   float* observed = scorer->observed;
   
-  // perform cross_correlation from -max_offset to +max_offset
-  // FAST remove delay
-  for(; delay < max_offset; ++delay){
-    // the score for this delay
-    one_offset_score = 0;
-    
-    // compare each location in theoretical spectrum
-    for(theoretical_idx = 0; theoretical_idx < size; ++theoretical_idx){
-      // get observed_idx 
-      observed_idx = theoretical_idx + delay;
-
-      // check if inidex out of bounds for observed_idx
-      if (observed_idx < 0 || observed_idx >= size){
-        continue;
-      }
-      else{
-        // one_offset_score += ((observed[observed_idx] - mx) * (theoretical[theoretical_idx] - my));
-        one_offset_score += ((observed[observed_idx]) * (theoretical[theoretical_idx]));
-      }      
-    }
-
-    // one_offset_score /= denom;
-
-    // add to total score
-    total_score += one_offset_score;
-    
-    if(delay == 0){
-      score_at_zero = one_offset_score;
-    }    
+  // compare each location in theoretical spectrum
+  int idx;
+  for(idx = 0; idx < size; ++idx){
+    score_at_zero += observed[idx] * theoretical[idx];
   }
 
-  // debug
-  // carp(CARP_INFO, "score_at_zero: %.2f, total_score: %.2f", score_at_zero, total_score);
-
-
-  return (score_at_zero - (total_score / (2 * max_offset))) / 10000;
+  return score_at_zero / 10000.0;
 }
 
 /**
@@ -1168,7 +1154,7 @@ float gen_score_xcorr(
   
   // do cross correlation between observed spectrum(in scorer) and theoretical spectrum.
   // use the two intensity arrays that were created
-  final_score = cross_correlation(scorer, theoretical, MAX_XCORR_OFFSET);
+  final_score = cross_correlation(scorer, theoretical);
 
   // free theoretical spectrum
   free(theoretical);
