@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -20,7 +20,7 @@ MATCH_COLLECTION_T* allocate_match_collection(void);
  * return the top max_rank matches, first scored by prelim_score(SP), then by score_type(XCORR, LOGP_EXP_SP)
  *\returns a new match_collection object that is scored by score_type and contains the top max_rank matches
  */
-MATCH_COLLECTION_T* new_match_collection_spectrum(
+MATCH_COLLECTION_T* new_match_collection_from_spectrum(
  SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
  int charge,       ///< the charge of the spectrum -in
  int max_rank,     ///< max number of top rank matches to keep from SP -in

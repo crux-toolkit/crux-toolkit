@@ -415,11 +415,15 @@ int main(int argc, char** argv){
           }
 
           // get match collection with scored, ranked match collection
-          match_collection =
-            new_match_collection_spectrum(spectrum, 
+          match_collection = 
+            new_match_collection_from_spectrum(
+                                          spectrum, 
                                           possible_charge_array[charge_index], 
-                                          max_rank_preliminary, prelim_score, 
-                                          main_score, mass_offset, is_decoy);
+                                          max_rank_preliminary, 
+                                          prelim_score, 
+                                          main_score, 
+                                          mass_offset, 
+                                          is_decoy);
           
           // serialize the psm features to ouput file upto 'top_match' number of 
           // top peptides among the match_collection
