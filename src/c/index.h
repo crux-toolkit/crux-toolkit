@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -41,13 +41,23 @@ INDEX_T* new_index(
 
 /**
  * wrapper function, create index object for search purpose
- * If no crux_index files been created, returns null
+ * from disk. If no crux_index files have been created on disk, returns null
  * \returns A new index object ready for search.
  */
-INDEX_T* new_search_index(
+INDEX_T* new_index_from_disk(
   char* fasta_filename,  ///< The fasta file
   BOOLEAN_T is_unique ///< only unique peptides? -in
   );
+
+/**
+ * Merely increments the index ptr count
+ */
+INDEX_T* copy_index_ptr(
+    INDEX_T* index
+    );
+
+
+
 
 /**
  * Frees an allocated index object.

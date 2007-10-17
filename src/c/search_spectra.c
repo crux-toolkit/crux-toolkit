@@ -277,10 +277,14 @@ int main(int argc, char** argv){
 	
         // get match collection with scored, ranked match collection
         match_collection =
-          new_match_collection_spectrum(spectrum, 
-                                        possible_charge_array[charge_index], 
-                                        max_rank_preliminary, prelim_score, 
-                                        main_score, mass_offset, FALSE);
+          new_match_collection_from_spectrum(
+              spectrum, 
+              possible_charge_array[charge_index], 
+              max_rank_preliminary, 
+              prelim_score, 
+              main_score, 
+              mass_offset, 
+              FALSE);
         
         // print additional header
         fprintf(stdout, "# PEPTIDES SEARCHED: %d\n", get_match_collection_experimental_size(match_collection));

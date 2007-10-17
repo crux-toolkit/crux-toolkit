@@ -1,6 +1,6 @@
 /**
  * \file generate_peptides_iterator.h 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief object to return candidate peptides from database
  *****************************************************************************/
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
@@ -35,18 +35,10 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void);
 /**
  *\returns a new generate_peptide_iterator object
  */
-GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_sp(
-  float neutral_mass ///< the neutral_mass that which the peptides will be searched -in
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
+  float neutral_mass, ///< the neutral_mass that which the peptides will be searched -in
+  char* fasta_file
 );
-
-/**
- *\returns a new generate_peptides_iterator object, with fasta file input
- */
-GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_w_fileinput(
-  double min_mass,  ///< the min mass of peptides to generate -in
-  double max_mass,  ///< the maximum mas of peptide to generate -in
-  char* in_file     ///< the fasta file to use to generate peptides -in
-  );
 
 /**
  * Used for when need to resue genearte peptide iterator mutiple times

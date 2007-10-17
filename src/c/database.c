@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.42 $
+ * $Revision: 1.43 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -29,19 +29,18 @@
  * \brief A database of protein sequences
  */
 struct database{
-  char*        filename;      ///< Original database filename.
-  FILE*        file;          ///< Open filehandle for this database.
-                                ///  A database has only one
-                                ///  associated file.
-  unsigned int num_proteins;             ///< Number of proteins in this database.
-  BOOLEAN_T is_parsed;          ///< Has this database been parsed yet.
-  PROTEIN_T* proteins[MAX_PROTEINS];   ///< Proteins in this database 
+  char*        filename; ///< Original database filename.
+  FILE*        file;     ///< Open filehandle for this database.
+                         ///  A database has only one associated file.
+  unsigned int num_proteins; ///< Number of proteins in this database.
+  BOOLEAN_T is_parsed;  ///< Has this database been parsed yet.
+  PROTEIN_T* proteins[MAX_PROTEINS]; ///< Proteins in this database 
   unsigned long int size; ///< The size of the database in bytes (convenience)
   BOOLEAN_T use_light_protein; ///< should I use the light/heavy protein option
-  BOOLEAN_T is_memmap; ///< are we using a memory mapped fasta file, thus proteins are all memory mapped
-  void* data_address; ///< pointer to the begining of the memory mapped data, MUST not modify this pointer!!!
-  int pointer_count; ///< number of pointers referencing  this database, at 0 should be freed
-  long file_size; ///< the size of the binary fasta file, only populated when memory mapping
+  BOOLEAN_T is_memmap; ///< Are we using a memory mapped fasta file? 
+  void* data_address; ///< pointer to the beginning of the memory mapped data, 
+  int pointer_count; ///< number of pointers referencing this database. 
+  long file_size; ///< the size of the binary fasta file, when memory mapping
 };    
 
 /**
@@ -59,12 +58,17 @@ struct database_protein_iterator {
  * unspecified order.
  */
 struct database_peptide_iterator {
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; ///<The protein iterator. 
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; 
+    ///< The protein iterator. 
   PROTEIN_PEPTIDE_ITERATOR_T* 
-    cur_protein_peptide_iterator; ///< The peptide iterator for the current protein.
-  PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The constraints for the kind of peptide to iterate over.
-  PROTEIN_T* prior_protein; ///< the protein that was used before the current working protein
-  BOOLEAN_T first_passed; ///< is it ok to convert prior_protein to light?
+    cur_protein_peptide_iterator; 
+    ///< The peptide iterator for the current protein.
+  PEPTIDE_CONSTRAINT_T* peptide_constraint; 
+    ///< The constraints for the kind of peptide to iterate over.
+  PROTEIN_T* prior_protein; 
+    ///< the protein that was used before the current working protein
+  BOOLEAN_T first_passed; 
+    ///< is it ok to convert prior_protein to light?
 };
 
 /**
@@ -73,7 +77,8 @@ struct database_peptide_iterator {
  * specified sorted order.(mass, length, lexical)
  */
 struct database_sorted_peptide_iterator {
-  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator; ///< the peptide iterator that sorts the peptides
+  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator; 
+    ///< the peptide iterator that sorts the peptides
 };
 
 /**
@@ -81,7 +86,16 @@ struct database_sorted_peptide_iterator {
  */
 DATABASE_T* allocate_database(void){
   DATABASE_T* database = (DATABASE_T*)mycalloc(1,sizeof(DATABASE_T));
+  database->filename = NULL;
+  database->file = NULL;
+  database->num_proteins = 0; 
   database->is_parsed = FALSE;
+  database->size = 0; 
+  database->use_light_protein = FALSE; 
+  database->is_memmap = FALSE;
+  database->data_address = NULL;
+  database->pointer_count = 1;
+  database->file_size = 0;
   return database;
 }
 
@@ -89,9 +103,11 @@ DATABASE_T* allocate_database(void){
  * \returns A new database object.
  */
 DATABASE_T* new_database(
-  char*         filename, ///< The file from which to parse the database. either text fasta file or binary fasta file -in
-  BOOLEAN_T use_light_protein,///< do we use linght/heavy protein -in
-  BOOLEAN_T is_memmap ///< are we using a memory mapped binary fasta file, thus proteins are all memory mapped -in
+  char*         filename, ///< The file from which to parse the database. 
+  ///< either text fasta file or binary fasta file -in
+  BOOLEAN_T use_light_protein,///< do we use light/heavy protein -in
+  BOOLEAN_T is_memmap ///< are we using a memory mapped binary fasta file? 
+  ///< If so, all proteins are memory mapped -in
   )         
 {
   DATABASE_T* database = allocate_database();
@@ -100,9 +116,6 @@ DATABASE_T* new_database(
   database->is_memmap = is_memmap;
   database->num_proteins = 0;
 
-  // increment database pointer counter
-  add_database_pointer_count(database);
-  
   return database;
 }  
 
@@ -114,7 +127,7 @@ void free_database(
   )
 {
   // DEBUG show the databse pointer count
-  // printf( "the database pointer count: %d\n", database->pointer_count);
+  printf("Before free, database pointer count: %d\n", database->pointer_count);
   
   // increment database pointer counter
   sub_database_pointer_count(database);
@@ -123,8 +136,6 @@ void free_database(
   if(database->pointer_count > 0){
     return;
   }
-
-  unsigned int protein_idx = 0;
   
   free(database->filename);
   
@@ -132,7 +143,8 @@ void free_database(
   if(database->is_parsed){
     
     // free each protein in the array
-    for(; protein_idx < database->num_proteins; ++protein_idx){
+    unsigned int protein_idx;
+    for(protein_idx=0; protein_idx < database->num_proteins; ++protein_idx){
       free_protein(database->proteins[protein_idx]);
     }
     
@@ -143,8 +155,9 @@ void free_database(
         carp(CARP_ERROR, "failed to unmap the memory of binary fasta file");
       }
     }
-    else{// not memory mapped
-      // close file handler
+    // not memory mapped
+    else{
+      // close file handle
       carp(CARP_INFO, "Closing database filehandle");
       fclose(database->file);
     }
@@ -168,7 +181,8 @@ void print_database(
   // has the database been parsed?
   if(database->is_parsed){
     fprintf(file, "TRUE\n");
-    DATABASE_PROTEIN_ITERATOR_T* iterator = new_database_protein_iterator(database);
+    DATABASE_PROTEIN_ITERATOR_T* iterator 
+      = new_database_protein_iterator(database);
  
     while(database_protein_iterator_has_next(iterator)){
       protein = database_protein_iterator_next(iterator);
@@ -655,7 +669,8 @@ void sub_database_pointer_count(
 
 /**
  * Instantiates a new database_protein_iterator from a database.
- * DO NOT free the proteins, proteins are freed up together when free the database
+ * DO NOT free the proteins, proteins are freed up together when 
+ * free the database
  * \returns a DATABASE_PROTEIN_ITERATOR_T object.
  */
 DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
@@ -672,8 +687,8 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
   }
   
   // create new protein iterator
-  DATABASE_PROTEIN_ITERATOR_T* iterator = 
-    (DATABASE_PROTEIN_ITERATOR_T*)mycalloc(1, sizeof(DATABASE_PROTEIN_ITERATOR_T));
+  DATABASE_PROTEIN_ITERATOR_T* iterator = (DATABASE_PROTEIN_ITERATOR_T*)
+    mycalloc(1, sizeof(DATABASE_PROTEIN_ITERATOR_T));
   iterator->database = database;
   iterator->cur_protein = 0;
 
@@ -688,12 +703,12 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
  * Frees an allocated database_protein_iterator object.
  */
 void free_database_protein_iterator(
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator to free -in
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator 
+    ///< the iterator to free -in
   )
 {
   // subtract pointer count
   free_database(database_protein_iterator->database);
-
   free(database_protein_iterator);
 }
 
@@ -702,7 +717,8 @@ void free_database_protein_iterator(
  * \returns TRUE if there are additional proteins to iterate over, FALSE if not.
  */
 BOOLEAN_T database_protein_iterator_has_next(
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the query iterator -in
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator 
+    ///< the query iterator -in
   )
 {
   if(database_protein_iterator->cur_protein <
@@ -717,7 +733,8 @@ BOOLEAN_T database_protein_iterator_has_next(
  * \returns The next protein in the database.
  */
 PROTEIN_T* database_protein_iterator_next(
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator  ///< the query iterator -in
+  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator  
+    ///< the query iterator -in
   )
 {
   ++database_protein_iterator->cur_protein;
@@ -732,28 +749,9 @@ PROTEIN_T* database_protein_iterator_next(
   return database_protein_iterator->database->proteins[database_protein_iterator->cur_protein-1];
 }
 
-/**
- * \returns the protein to the corresponding protein_idx in the database.
- */
-/*
-PROTEIN_T* database_protein_iterator_protein_idx(
-  DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator, ///< the iterator of interest -in
-  unsigned int protein_idx ///< protein_idx to which protein to return -in
-  )
-{
-  if(!database_protein_iterator_has_next(database_protein_iterator)){
-    die("no proteins to return in protein iterator");
-  }
-  else if(protein_idx < 1 || // might have to be 1 
-          protein_idx > database_protein_iterator->database->num_proteins){
-    die("protein_idx index out of bounds");
-  }
-  return database_protein_iterator->database->proteins[protein_idx-1];
-}
-*/
-
 /***********************************************
- * database_peptide_Iterators - can use the light protein functionality to save space
+ * database_peptide_Iterators - can use the light protein functionality 
+ * to save space
  ***********************************************/
 
 /**
@@ -761,8 +759,10 @@ PROTEIN_T* database_protein_iterator_protein_idx(
  * \returns a DATABASE_PEPTIDE_ITERATOR_T object.
  */
 DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
-  DATABASE_T* database, ///< the database of interest -in
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
+  DATABASE_T* database, 
+    ///< the database of interest -in
+  PEPTIDE_CONSTRAINT_T* peptide_constraint 
+    ///< the peptide_constraint with which to filter peptides -in
   )
 {
   // set peptide implementation to linklist peptide_src

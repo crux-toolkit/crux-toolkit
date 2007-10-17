@@ -226,7 +226,7 @@ void free_match_collection(
   MATCH_COLLECTION_T* match_collection ///< the match collection to free -out
   )
 {
-  // free all matches, actually we are only decrementing the pointer count in each match object
+  // decrement the pointer count in each match object
   while(match_collection->match_total > 0){
     --match_collection->match_total;
     free_match(match_collection->match[match_collection->match_total]);
@@ -255,7 +255,7 @@ void free_match_collection(
  * \returns a new match_collection object that is scored by score_type 
  *    and contains the top max_rank matches
  */
-MATCH_COLLECTION_T* new_match_collection_spectrum(
+MATCH_COLLECTION_T* new_match_collection_from_spectrum(
  SPECTRUM_T* spectrum, 
     ///< the spectrum to match peptides -in
  int charge,       
@@ -293,7 +293,10 @@ MATCH_COLLECTION_T* new_match_collection_spectrum(
   
   // create a generate peptide iterator
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  // FIXME use neutral_mass, might chage to pick
-    new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge) + mass_offset);
+    new_generate_peptides_iterator_from_mass(
+        get_spectrum_neutral_mass(spectrum, charge) + mass_offset,
+        get_string_parameter_pointer("fasta-file")
+        );
   
   /***************Preliminary scoring**************************/
   // When creating match objects for first time, must set the
@@ -486,9 +489,10 @@ BOOLEAN_T populate_match_rank_match_collection(
   }
 
   // set match rank for all match objects
-  int match_index = 0;
-  for(; match_index < match_collection->match_total; ++match_index){
-    set_match_rank(match_collection->match[match_index], score_type, match_index+1);
+  int match_index;
+  for(match_index=0; match_index<match_collection->match_total; ++match_index){
+    set_match_rank(
+        match_collection->match[match_index], score_type, match_index+1);
   }
   
   return TRUE;

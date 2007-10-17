@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.50 $
+ * REVISION: $Revision: 1.51 $
  ****************************************************************************/
 
 #include <math.h>
@@ -907,10 +907,9 @@ BOOLEAN_T create_intensity_array_observed(
   i = 0;
   for(; i < scorer->sp_max_mz; i++){
     carp(CARP_INFO, "Intensity array[%d]: %.2f", i, scorer->observed[i]);
-  }
-  */
+  } */
 
-  // FAST
+  // TODO maybe replace with a faster implementation that uses cum distribution
   float* new_observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
   int idx;
   for (idx=0; idx < scorer->sp_max_mz; idx++){
@@ -924,13 +923,9 @@ BOOLEAN_T create_intensity_array_observed(
       new_observed[idx] -= (scorer->observed[sub_idx] / (MAX_XCORR_OFFSET * 2.0) );
     }
   }
-  scorer->observed = new_observed;
-  int i = 0;
-  for(; i < scorer->sp_max_mz; i++){
-    carp(CARP_INFO, "Intensity array[%d]: %.2f", i, scorer->observed[i]);
-  }
-  // free(new_observed);
 
+  free(scorer->observed);
+  scorer->observed = new_observed;
 
   // free heap
   free(max_intensity_per_region);
@@ -1077,13 +1072,13 @@ BOOLEAN_T create_intensity_array_xcorr(
   
   // if score type equals XCORR
   if(scorer->type != XCORR){
-    carp(CARP_ERROR, "incorrect scorer type, only use this method for XCORR scorers");
+    carp(CARP_ERROR, "Incorrect scorer type, only use this method for XCORR scorers");
     return FALSE;
   }
     
   // create intensity array for observed spectrum 
   if(!create_intensity_array_observed(scorer, spectrum, charge)){
-    carp(CARP_ERROR, "failed to preprocess observed spectrum for Xcorr");
+    carp(CARP_ERROR, "Failed to preprocess observed spectrum for Xcorr");
     return FALSE;
   }
   
