@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.53 $
+ * $Revision: 1.54 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -414,7 +414,7 @@ INDEX_T* new_index_from_disk(
   if(!get_database_is_parsed(database)){
     if(!parse_database(database)){
       carp(CARP_FATAL, "failed to parse database, cannot create new index");
-      free_database(database, "new index from disk");
+      free_database(database);
       free(search_index);
       free(binary_fasta);
       fcloseall();
@@ -452,7 +452,9 @@ void free_index(
   if (index->num_pointers > 1){
     index->num_pointers--;
   } else {
-    free_database(index->database, "free index");
+    carp(CARP_INFO, "Freeing index");
+    free_database(index->database);
+    free_peptide_constraint(index->constraint);
     free(index->directory);
     // MEMLEAK change peptide_constraint to have pointer count
     // free_peptide_constraint(index->constraint);
@@ -1497,14 +1499,14 @@ BOOLEAN_T parse_peptide_index_file(
       (INDEX_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
     file = peptide_iterator_db->index_file;
     database = peptide_iterator_db->index->database;
-    add_database_pointer_count(database, "parse_peptide_index_file");
+    add_database_pointer_count(database);
   }
   else if(index_type == BIN_INDEX){
     peptide_iterator_bin = 
       (BIN_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
     file = peptide_iterator_bin->index_file;
     database = peptide_iterator_bin->index->database;
-    add_database_pointer_count(database, "parse_peptide_index_file");
+    add_database_pointer_count(database);
   }
   
   // increment the database pointer count
@@ -1806,9 +1808,6 @@ INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
     // no peptides to return
     index_peptide_iterator->has_next = FALSE;
   }
-  
-  // MEMLEAK this should be a copy_ptr routine or something
-  // add_database_pointer_count(index_peptide_iterator->index->database);
 
   return index_peptide_iterator;
 }
@@ -2079,10 +2078,6 @@ BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
     carp(CARP_WARNING, "failed to initalize bin peptide iterator");
     bin_peptide_iterator->has_next = FALSE;
   }
-
-  // MEMLEAK
-  // increment the database pointer count
-  // add_database_pointer_count(bin_peptide_iterator->index->database);
     
   return bin_peptide_iterator;
 }
@@ -2138,7 +2133,7 @@ void free_bin_peptide_iterator(
   }
 
   // decrement the database pointer count
-  free_database(bin_peptide_iterator->index->database, "free bin peptide iterator");
+  free_database(bin_peptide_iterator->index->database);
   
   free(bin_peptide_iterator);
 }

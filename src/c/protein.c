@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.51 $
+ * $Revision: 1.52 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -1226,21 +1226,25 @@ void free_mass_matrix(
  * Frees an allocated peptide_iterator object.
  */
 void free_protein_peptide_iterator(
-  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator ///< the iterator to free -in
+  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator 
+    ///< the iterator to free -in
   )
 {
   free_mass_matrix(protein_peptide_iterator->mass_matrix, 
-                   get_peptide_constraint_max_length(protein_peptide_iterator->peptide_constraint));
+                   get_peptide_constraint_max_length(
+                     protein_peptide_iterator->peptide_constraint));
+  free_peptide_constraint(protein_peptide_iterator->peptide_constraint);
   free(protein_peptide_iterator->seq_marker);
   free(protein_peptide_iterator);
 }
 
 /**
  * The basic iterator functions.
- * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ * \returns TRUE if there are additional peptides, FALSE if not.
  */
 BOOLEAN_T protein_peptide_iterator_has_next(
-  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator ///< the iterator of interest -in
+  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator 
+    ///< the iterator of interest -in
   )
 {
   return protein_peptide_iterator->has_next;

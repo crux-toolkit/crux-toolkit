@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -27,7 +27,9 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
  SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
  SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP) -in
  float mass_offset,  ///< the mass offset from neutral_mass to search for candidate peptides -in
- BOOLEAN_T null_peptide_collection ///< is this match_collection a null peptide collection? -in
+ BOOLEAN_T null_peptide_collection, ///< is this match_collection a null peptide collection? -in
+ INDEX_T* index,
+ DATABASE_T* database
  );
 
 /**

@@ -5,7 +5,6 @@ generate_peptides_sort_lexical_unique = standard_generate_peptides_lexical.out =
 get_ms2_spectrum = standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; ../../../bin/get_ms2_spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out = file
 generate_peptides_use_index = standard_generate_peptides_use_index.out = ../../../bin/generate_peptides --parameter-file smoke_params2 --output-sequence --use-index T standard.fasta
 create_index = standard_generate_peptides_use_index.out = ../../../bin/create_index --mass-range 500 --parameter-file smoke_params2 test.fasta = index
-match_search_analysis = standard_match_search_analysis.out = ../../../bin/match_search --match-output-folder match_result --number-runs 6 --parameter-file smoke_params test.ms2 standard2.fasta = analysis
 search_spectrum = standard_search_spectrum.out =  ../../../bin/search_spectrum --parameter-file smoke_params test.ms2 6 standard2.fasta = file
 search_spectra = standard_search_spectra.out = ../../../bin/search_spectra --number-runs 7  --parameter-file smoke_params test.ms2 standard2.fasta = file
 match_search_analysis = standard_match_search_analysis.out = ../../../bin/match_search --match-output-folder match_result --number-runs 6 --parameter-file smoke_params test.ms2 standard2.fasta = analysis

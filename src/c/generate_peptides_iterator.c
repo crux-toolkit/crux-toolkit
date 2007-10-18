@@ -218,7 +218,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_w_index(
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   double min_mass,  ///< the min mass of peptides to generate -in
   double max_mass,  ///< the maximum mas of peptide to generate -in
-  char* in_file     ///< the fasta file to use to generate peptides -in
+  INDEX_T* index, ///< the index
+  DATABASE_T* database ///< the database
   )
 {
   // get parameters
@@ -309,13 +310,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     carp(CARP_ERROR, "incorrect argument %s, using default value", use_index);
   }
 
-  // check if input file exist
-  if(access(in_file, F_OK)){
-    carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, "
-        "or is empty).", in_file);
-    exit(1);
-  }
- 
   // allocate an empty iterator
   GENERATE_PEPTIDES_ITERATOR_T* gen_peptide_iterator 
     = allocate_generate_peptides_iterator();
@@ -327,7 +321,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   
   // asign to iterator
   // MEMLEAK copy_constraint_ptr
-  gen_peptide_iterator->constraint = constraint;
+  gen_peptide_iterator->constraint = copy_peptide_constraint_ptr(constraint); 
 
   /***********************
    * use index file
@@ -347,10 +341,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     }
     
     // create index and set to generate_peptides_iterator
-    INDEX_T* index = new_index_from_disk(in_file, is_unique);
-
-    // MEMLEAK copy_constraint_ptr
-    set_index_constraint(index, constraint);
+        // MEMLEAK copy_constraint_ptr
+    set_index_constraint(index, copy_peptide_constraint_ptr(constraint)); 
     
     if(index == NULL){
       carp(CARP_FATAL, "failed to create peptides from index");
@@ -401,8 +393,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     set_peptide_src_implementation(TRUE);
 
     // create a new database & set generate_peptides_iterator
-    // TODO FALSE, FALSE should really be parameters
-    DATABASE_T* database = new_database(in_file, FALSE, FALSE);         
     // MEMLEAK increase database pointer count
     gen_peptide_iterator->database = database;
     
@@ -410,7 +400,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     if(!is_unique && sort_type == NONE){ 
       // create peptide iterator  & set generate_peptides_iterator
       DATABASE_PEPTIDE_ITERATOR_T* iterator 
-        = new_database_peptide_iterator(database, constraint);
+        = new_database_peptide_iterator(
+            database, copy_peptide_constraint_ptr(constraint)); 
       gen_peptide_iterator->iterator = iterator;
       gen_peptide_iterator->has_next = &void_database_peptide_iterator_has_next;
       gen_peptide_iterator->next = &void_database_peptide_iterator_next;
@@ -424,12 +415,14 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
       if(sort_type == NONE){
         // create peptide iterator
         sorted_iterator = new_database_sorted_peptide_iterator(
-            database, constraint, MASS, TRUE);       
+            database, copy_peptide_constraint_ptr(constraint), 
+            MASS, TRUE);       
       }
       // create peptide iterator
       else{
         sorted_iterator = new_database_sorted_peptide_iterator(
-            database, constraint, sort_type, is_unique);
+            database, copy_peptide_constraint_ptr(constraint), 
+            sort_type, is_unique);
       }
       
       // set generate_peptides_iterator 
@@ -440,8 +433,9 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
       gen_peptide_iterator->free = &void_free_database_sorted_peptide_iterator;
     }
     // MEMLEAK try this. May be one too many
-    free_database(database, "mass range");
+    free_database(database);
   }
+  free_peptide_constraint(constraint);
   return gen_peptide_iterator;
 }
 
@@ -450,7 +444,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
   float neutral_mass, ///< the neutral_mass that which the peptides will be searched -in
-  char* fasta_file
+  INDEX_T* index,
+  DATABASE_T* database
   )
 {
   // get parameters
@@ -460,7 +455,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
 
   carp(CARP_DEBUG,"searching peptide in %.2f ~ %.2f", min_mass, max_mass); 
 
-  return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, fasta_file);
+  return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 
+      index, database);
 }
 
 /**
@@ -470,9 +466,11 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
   // get parameters from parameter.c
   double min_mass = get_double_parameter("min-mass");
   double max_mass = get_double_parameter("max-mass");
-  char*  fasta_file = get_string_parameter_pointer("fasta-file");
+  // char*  fasta_file = get_string_parameter_pointer("fasta-file");
 
-  return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, fasta_file);
+  // FIX!! MEMLEAK!! 
+  return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 
+      NULL, NULL);
 }
 
 

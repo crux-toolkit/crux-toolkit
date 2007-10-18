@@ -1,6 +1,6 @@
 /**
  * \file generate_peptides_iterator.h 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief object to return candidate peptides from database
  *****************************************************************************/
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
@@ -37,7 +37,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void);
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
   float neutral_mass, ///< the neutral_mass that which the peptides will be searched -in
-  char* fasta_file
+  INDEX_T* index,
+  DATABASE_T* database
 );
 
 /**
