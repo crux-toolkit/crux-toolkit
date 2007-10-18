@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.63 $
+ * $Revision: 1.64 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -150,7 +150,7 @@ PEPTIDE_T* new_peptide(
     new_peptide_src( peptide_type, parent_protein, start_idx );
   
   // increment the database pointer count
-  add_database_pointer_count(get_protein_database(parent_protein), "new database");
+  add_database_pointer_count(get_protein_database(parent_protein));
   
   return peptide;
 }
@@ -199,7 +199,7 @@ void free_peptide(
   )
 {
   // decrement the pointer count
-  free_database(get_peptide_first_src_database(peptide), "free_peptide");
+  free_database(get_peptide_first_src_database(peptide));
 
   // check which implementation peptide_src uses
   if(!PEPTIDE_SRC_USE_LINK_LIST){
@@ -430,7 +430,7 @@ void copy_peptide(
 
   // increment the database pointer count
   // since we are creating a new peptide
-  add_database_pointer_count(get_peptide_first_src_database(src), "copy peptide");
+  add_database_pointer_count(get_peptide_first_src_database(src));
 }
 
 /** 
@@ -1020,7 +1020,7 @@ BOOLEAN_T merge_peptides(
   }
 
   // decrement the database pointer count
-  free_database(get_peptide_first_src_database(peptide_bye), "merge peptides");
+  free_database(get_peptide_first_src_database(peptide_bye));
 
   // find the end of the peptide src link list..
   while(next_src != NULL){
@@ -1133,7 +1133,7 @@ PEPTIDE_T* parse_peptide(
   }
   
   // increment the database pointer count
-  add_database_pointer_count(database, "parse peptide");
+  add_database_pointer_count(database);
   
   return peptide;
 }

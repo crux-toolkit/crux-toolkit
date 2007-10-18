@@ -268,8 +268,10 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
     ///< the score type (XCORR, LOGP_EXP_SP, LOGP_BONF_EXP_SP) -in
  float mass_offset,  
     ///< the mass offset from neutral_mass to search for candidate peptides -in
- BOOLEAN_T null_peptide_collection 
+ BOOLEAN_T null_peptide_collection,
     ///< is this match_collection a null peptide collection? -in
+ INDEX_T* index,
+ DATABASE_T* database
  )
 {
   MATCH_COLLECTION_T* match_collection = allocate_match_collection();
@@ -296,7 +298,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  
     new_generate_peptides_iterator_from_mass(
         get_spectrum_neutral_mass(spectrum, charge) + mass_offset,
-        get_string_parameter_pointer("fasta-file")
+        index, database
         );
   
   /***************Preliminary scoring**************************/
@@ -2457,7 +2459,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   if(!get_database_is_parsed(database)){
     if(!parse_database(database)){
       carp(CARP_FATAL, "failed to parse database, cannot create new index");
-      free_database(database, "new match collection iterator");
+      free_database(database);
       exit(1);
     }
   }
@@ -2537,7 +2539,7 @@ void free_match_collection_iterator(
   
   // free up all match_collection_iterator 
   free(match_collection_iterator->directory_name);
-  free_database(match_collection_iterator->database, "free match collection iterator");
+  free_database(match_collection_iterator->database);
   closedir(match_collection_iterator->working_directory); 
   free(match_collection_iterator);
 }

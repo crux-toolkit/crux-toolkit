@@ -203,7 +203,8 @@ int main(int argc, char** argv){
     if(strcmp(
           get_string_parameter_pointer("sqt-output-file"), "target.sqt") ==0){
       sqt_output_file = generate_name(ms2_file, "-target.sqt", ".ms2", NULL);
-      decoy_sqt_output_file = generate_name(ms2_file, "-decoy.sqt", ".ms2", NULL);
+      decoy_sqt_output_file = 
+        generate_name(ms2_file, "-decoy.sqt", ".ms2", NULL);
       set_string_parameter("sqt-output-file", sqt_output_file);
       set_string_parameter("decoy-sqt-output-file", decoy_sqt_output_file);
     }
@@ -370,6 +371,21 @@ int main(int argc, char** argv){
       serialize_header(collection, fasta_file, psm_result_file[file_idx]);
     }
 
+    // INDEXDATABASE 
+    BOOLEAN_T use_index = TRUE;
+
+
+    INDEX_T* index = NULL;
+    DATABASE_T* database = NULL;
+    if (use_index == TRUE){
+      index = new_index_from_disk(in_file, is_unique);
+    } else {
+      carp(CARP_FATAL, "Database not yet supported!");
+      // TODO FALSE, FALSE should really be parameters
+      exit(1);
+      database = new_database(in_file, FALSE, FALSE);         
+    }
+
     int spectra_idx = 0;
     // iterate over all spectrum in ms2 file and score
     while(spectrum_iterator_has_next(spectrum_iterator)){
@@ -423,7 +439,11 @@ int main(int argc, char** argv){
                                           prelim_score, 
                                           main_score, 
                                           mass_offset, 
-                                          is_decoy);
+                                          is_decoy,
+                                          copy_index_ptr(index),
+                                          database
+                                          );
+          // MEMLEAK copy_index_ptr on database as well
           
           // serialize the psm features to ouput file upto 'top_match' number of 
           // top peptides among the match_collection
@@ -470,6 +490,7 @@ int main(int argc, char** argv){
       free(psm_result_filenames[file_idx]);
     }
 
+    free_index(index);
     free(psm_result_filenames);
     free(psm_result_file);
     free_spectrum_iterator(spectrum_iterator);

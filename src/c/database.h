@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -33,8 +33,7 @@ DATABASE_T* new_database(
  * Frees an allocated protein object.
  */
 void free_database(
-  DATABASE_T* database, ///< An allocated database -in
-  char* string
+  DATABASE_T* database ///< An allocated database -in
   );
 
 /**
@@ -169,8 +168,7 @@ void set_database_memmap(
  * used to keep track of when the database can be freed
  */
 void add_database_pointer_count(
-  DATABASE_T* database, ///< the query database -in/out
-  char* string
+  DATABASE_T* database ///< the query database -in/out
   );
 
 /**

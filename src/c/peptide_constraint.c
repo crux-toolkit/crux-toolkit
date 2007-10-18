@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_constraint.c
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief: Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
@@ -32,6 +32,7 @@ struct peptide_constraint {
   int max_length; ///< The maximum length of the peptide
   int num_mis_cleavage; ///< The maximum mis cleavage of the peptide
   MASS_TYPE_T mass_type; ///< isotopic mass type (AVERAGE, MONO)
+  int num_pointers; ///< Number of pointers to this constraint
 };
 
 
@@ -43,6 +44,8 @@ struct peptide_constraint {
 PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void){
   PEPTIDE_CONSTRAINT_T* peptide_constraint =
     (PEPTIDE_CONSTRAINT_T*)mycalloc(1, sizeof(PEPTIDE_CONSTRAINT_T));
+  peptide_constraint->num_pointers = 1;
+  carp(CARP_DEBUG, "Final free of peptide constraint");
   return peptide_constraint;
 }
 
@@ -78,6 +81,14 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   return peptide_constraint;
 }
 
+/**
+ * Copy peptide pointer and increment pointer count
+ */
+PEPTIDE_CONSTRAINT_T* copy_peptide_constraint_ptr(
+    PEPTIDE_CONSTRAINT_T* constraint){
+  constraint->num_pointers++;
+  return constraint;
+}
 
 // FIXME check the association..as long as there is one tryptic parent then true
 // num_miss_cleavage is not implemented..add if needed
@@ -109,7 +120,11 @@ void free_peptide_constraint(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< object to free -in 
   )
 {
-  free(peptide_constraint);
+  peptide_constraint->num_pointers--;
+  if (peptide_constraint->num_pointers == 0){
+    carp(CARP_DEBUG, "Final free of peptide constraint");
+    free(peptide_constraint);
+  }
 }
 
 

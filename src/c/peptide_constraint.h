@@ -1,6 +1,6 @@
 /**
  * \file peptide_constraint.h 
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * \brief Object for holding the peptide constraint information.
  */
 #ifndef PEPTIDE_CONSTRAINT_H 
@@ -47,6 +47,13 @@ BOOLEAN_T peptide_constraint_is_satisfied(
    PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraints to enforce -in
    PEPTIDE_T* peptide ///< the query peptide -in
    );
+
+/**
+ * Copies an allocated peptide_constraint object.
+ */
+PEPTIDE_CONSTRAINT_T* copy_peptide_constraint_ptr(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< object to copy -in 
+  );
 
 /**
  * Frees an allocated peptide_constraint object.
