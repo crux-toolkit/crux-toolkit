@@ -295,6 +295,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   
   // create a generate peptide iterator
   // FIXME use neutral_mass for now, but should allow option
+ 
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  
     new_generate_peptides_iterator_from_mass(
         get_spectrum_neutral_mass(spectrum, charge) + mass_offset,

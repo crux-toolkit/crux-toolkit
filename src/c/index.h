@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -53,6 +53,13 @@ INDEX_T* new_index_from_disk(
  * Merely increments the index ptr count
  */
 INDEX_T* copy_index_ptr(
+    INDEX_T* index
+    );
+
+/**
+ * Get index ptr count
+ */
+int get_index_pointer_count(
     INDEX_T* index
     );
 

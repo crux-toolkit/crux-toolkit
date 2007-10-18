@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.42 $
+ * REVISION: $Revision: 1.43 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -551,8 +551,8 @@ char* get_match_sequence(
     // generate the shuffled peptide sequence
     match->peptide_sequence = 
       generate_shuffled_sequence(match->peptide, match->overall_type);    
-    carp(CARP_DETAILED_DEBUG, "Shuffling tranforms: %s -> %s", 
-        get_peptide_sequence(match->peptide), match->peptide_sequence);
+    // carp(CARP_DETAILED_DEBUG, "Shuffling tranforms: %s -> %s", 
+    //   get_peptide_sequence(match->peptide), match->peptide_sequence);
   }
   else{
     // just go parse it out from protein, no need to shuffle

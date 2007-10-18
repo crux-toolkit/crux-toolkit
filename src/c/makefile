@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.84 $   #-Werror \
+# VERSION: $Revision: 1.85 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -70,8 +70,6 @@ LIBOBJS =\
 	${OBJDIR}/score_peptide_spectrum.o \
 	${OBJDIR}/match.o \
 	${OBJDIR}/match_collection.o \
-	${OBJDIR}/search_spectrum.o \
-	${OBJDIR}/search_spectra.o \
 	${OBJDIR}/hash.o \
 	${OBJDIR}/match_search.o \
 	${OBJDIR}/match_analysis.o
@@ -79,11 +77,9 @@ LIBOBJS =\
 
 # These are the names of the programs.
 PROGS = \
-	${BINDIR}/search_spectrum \
 	${BINDIR}/create_psm_files \
 	${BINDIR}/create_index  \
 	${BINDIR}/create_ion_files \
-	${BINDIR}/search_spectra  \
 	${BINDIR}/get_ms2_spectrum \
 	${BINDIR}/utils \
 	${BINDIR}/generate_peptides \
