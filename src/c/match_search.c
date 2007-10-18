@@ -371,17 +371,19 @@ int main(int argc, char** argv){
       serialize_header(collection, fasta_file, psm_result_file[file_idx]);
     }
 
-    // INDEXDATABASE 
+    // MEMLEAK get from parameters
     BOOLEAN_T use_index = TRUE;
 
+    char* in_file = get_string_parameter_pointer("fasta-file");
 
     INDEX_T* index = NULL;
     DATABASE_T* database = NULL;
+    BOOLEAN_T is_unique = TRUE; // MEMLEAK
     if (use_index == TRUE){
       index = new_index_from_disk(in_file, is_unique);
     } else {
       carp(CARP_FATAL, "Database not yet supported!");
-      // TODO FALSE, FALSE should really be parameters
+      // MEMLEAK FALSE, FALSE should really be parameters
       exit(1);
       database = new_database(in_file, FALSE, FALSE);         
     }
@@ -440,7 +442,7 @@ int main(int argc, char** argv){
                                           main_score, 
                                           mass_offset, 
                                           is_decoy,
-                                          copy_index_ptr(index),
+                                          index,
                                           database
                                           );
           // MEMLEAK copy_index_ptr on database as well
@@ -490,6 +492,7 @@ int main(int argc, char** argv){
       free(psm_result_filenames[file_idx]);
     }
 
+    carp(CARP_DEBUG, "Index ptr count %i", get_index_pointer_count(index));
     free_index(index);
     free(psm_result_filenames);
     free(psm_result_file);

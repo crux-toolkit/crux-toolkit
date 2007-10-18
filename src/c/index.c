@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.54 $
+ * $Revision: 1.55 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -429,6 +429,16 @@ INDEX_T* new_index_from_disk(
   free(binary_fasta);
   
   return search_index;
+}
+
+
+/**
+ * Frees an allocated index object.
+ */
+int get_index_pointer_count(
+  INDEX_T* index
+  ){
+  return index->num_pointers;
 }
 
 

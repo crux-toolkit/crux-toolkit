@@ -150,7 +150,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_w_index(
   }
 
   // allocate an empty iterator
-  GENERATE_PEPTIDES_ITERATOR_T* gen_peptide_iterator = allocate_generate_peptides_iterator();
+  GENERATE_PEPTIDES_ITERATOR_T* gen_peptide_iterator = 
+    allocate_generate_peptides_iterator();
   
   // peptide constraint
   PEPTIDE_CONSTRAINT_T* constraint = 
@@ -342,13 +343,14 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     
     // create index and set to generate_peptides_iterator
         // MEMLEAK copy_constraint_ptr
-    set_index_constraint(index, copy_peptide_constraint_ptr(constraint)); 
+    set_index_constraint(index, constraint); 
     
     if(index == NULL){
       carp(CARP_FATAL, "failed to create peptides from index");
       free(gen_peptide_iterator);
       exit(1);
     }
+
 
     gen_peptide_iterator->index = copy_index_ptr(index);
 
@@ -357,7 +359,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     if(peptide_type == ANY_TRYPTIC){
       // create index peptide interator & set generate_peptides_iterator
       INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator
-        = new_index_peptide_iterator(copy_index_ptr(index));        
+        = new_index_peptide_iterator(index);        
       gen_peptide_iterator->iterator = index_peptide_iterator;
       gen_peptide_iterator->has_next = &void_index_peptide_iterator_has_next;
       gen_peptide_iterator->next = &void_index_peptide_iterator_next;
@@ -367,16 +369,13 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     else{
       carp(CARP_INFO, "using filtered index peptide generation");
       INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator 
-        = new_index_filtered_peptide_iterator(copy_index_ptr(index));
+        = new_index_filtered_peptide_iterator(index);
       gen_peptide_iterator->iterator = index_filtered_peptide_iterator;
       gen_peptide_iterator->has_next 
         = &void_index_filtered_peptide_iterator_has_next;
       gen_peptide_iterator->next = &void_index_filtered_peptide_iterator_next;
       gen_peptide_iterator->free = &void_free_index_filtered_peptide_iterator;
     }
-
-    // free our local copy of the index ptr
-    free_index(index);
   }
 
   /*********************************************
@@ -400,8 +399,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     if(!is_unique && sort_type == NONE){ 
       // create peptide iterator  & set generate_peptides_iterator
       DATABASE_PEPTIDE_ITERATOR_T* iterator 
-        = new_database_peptide_iterator(
-            database, copy_peptide_constraint_ptr(constraint)); 
+        = new_database_peptide_iterator(database, constraint); 
       gen_peptide_iterator->iterator = iterator;
       gen_peptide_iterator->has_next = &void_database_peptide_iterator_has_next;
       gen_peptide_iterator->next = &void_database_peptide_iterator_next;
@@ -415,13 +413,13 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
       if(sort_type == NONE){
         // create peptide iterator
         sorted_iterator = new_database_sorted_peptide_iterator(
-            database, copy_peptide_constraint_ptr(constraint), 
+            database, constraint, 
             MASS, TRUE);       
       }
       // create peptide iterator
       else{
         sorted_iterator = new_database_sorted_peptide_iterator(
-            database, copy_peptide_constraint_ptr(constraint), 
+            database, constraint, 
             sort_type, is_unique);
       }
       
@@ -720,6 +718,7 @@ void free_generate_peptides_iterator(
   )
 {
   // free the nested iterator
+  free_index(generate_peptides_iterator->index);
   generate_peptides_iterator->free(generate_peptides_iterator->iterator);
   free(generate_peptides_iterator);
 }

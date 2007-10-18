@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.45 $
+ * $Revision: 1.46 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -802,8 +802,7 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
 
     // set new protein peptide iterator
     database_peptide_iterator->cur_protein_peptide_iterator =
-      new_protein_peptide_iterator(next_protein, 
-          copy_peptide_constraint_ptr(peptide_constraint));
+      new_protein_peptide_iterator(next_protein, peptide_constraint);
  
     // if first protein does not contain a match peptide, reinitailize
     while(!protein_peptide_iterator_has_next(
@@ -844,8 +843,7 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
         }
         // creat new protein_peptide_iterator
         database_peptide_iterator->cur_protein_peptide_iterator =
-          new_protein_peptide_iterator(next_protein, 
-                copy_peptide_constraint_ptr(peptide_constraint));
+          new_protein_peptide_iterator(next_protein, peptide_constraint);
       }
     }
   }
@@ -859,7 +857,6 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   }
   // set the current working protein
   database_peptide_iterator->prior_protein = next_protein;
-  free_peptide_constraint(peptide_constraint);
   
   return database_peptide_iterator;
 }
@@ -996,8 +993,7 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
 
   // create the database peptide iterator
   DATABASE_PEPTIDE_ITERATOR_T* db_peptide_iterator =
-    new_database_peptide_iterator(database, 
-        copy_peptide_constraint_ptr(peptide_constraint));
+    new_database_peptide_iterator(database, peptide_constraint);
 
   // create a sorted peptide iterator from db peptide iterator
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =
@@ -1009,7 +1005,6 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
     = sorted_peptide_iterator;
   
   free_database_peptide_iterator(db_peptide_iterator); // TODO check this...
-  free_peptide_constraint(peptide_constraint);
 
   return database_sorted_peptide_iterator;
 }

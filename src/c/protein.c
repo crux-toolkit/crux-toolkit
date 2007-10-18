@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.52 $
+ * $Revision: 1.53 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -1196,7 +1196,7 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   // initialize iterator
   iterator->protein = protein;
   iterator->peptide_idx = 0;
-  iterator->peptide_constraint = peptide_constraint;
+  iterator->peptide_constraint =copy_peptide_constraint_ptr(peptide_constraint);
   iterator->cur_start = 1; // must cur_start-1 for access mass_matrix
   iterator->cur_length = 1;  // must cur_length-1 for access mass_matrix
   iterator->num_mis_cleavage = get_peptide_constraint_num_mis_cleavage(iterator->peptide_constraint);
