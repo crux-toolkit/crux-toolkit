@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.52 $
+ * $Revision: 1.53 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -414,7 +414,7 @@ INDEX_T* new_index_from_disk(
   if(!get_database_is_parsed(database)){
     if(!parse_database(database)){
       carp(CARP_FATAL, "failed to parse database, cannot create new index");
-      free_database(database);
+      free_database(database, "new index from disk");
       free(search_index);
       free(binary_fasta);
       fcloseall();
@@ -452,7 +452,7 @@ void free_index(
   if (index->num_pointers > 1){
     index->num_pointers--;
   } else {
-    free_database(index->database);
+    free_database(index->database, "free index");
     free(index->directory);
     // MEMLEAK change peptide_constraint to have pointer count
     // free_peptide_constraint(index->constraint);
@@ -707,9 +707,10 @@ FILE* sort_bin(
   while(bin_sorted_peptide_iterator_has_next(peptide_iterator)){
     working_peptide = bin_sorted_peptide_iterator_next(peptide_iterator);
     serialize_peptide(working_peptide, file);
-    free_peptide(working_peptide);
   }
   
+  // MEMLEAK
+  free_peptide(working_peptide);
   free(filename);
   free_bin_sorted_peptide_iterator(peptide_iterator);
 
@@ -740,9 +741,11 @@ BOOLEAN_T dump_peptide(
     for(; peptide_idx < current_count; ++peptide_idx){
       serialize_peptide(peptide_array[peptide_idx] , file);
       free_peptide(peptide_array[peptide_idx]);
+      // FIXME this should not be allowed
     }
     serialize_peptide(working_peptide, file);
     free_peptide(working_peptide);
+    // FIXME this should not be allowed
     bin_count[file_idx] = 0;
   }
   // if the peptide count is bellow the limit
@@ -785,6 +788,7 @@ BOOLEAN_T dump_peptide_all(
     while(bin_idx > 0){
       serialize_peptide(working_array[peptide_idx] , file);
       free_peptide(working_array[peptide_idx]);
+      // FIXME this should not be allowed
       --bin_idx;
       ++peptide_idx;
     }
@@ -835,7 +839,6 @@ BOOLEAN_T transform_database_to_memmap_database(
   if(!get_database_is_parsed(index->database)){
     if(!parse_database(index->database)){
       carp(CARP_FATAL, "failed to parse database, cannot create new index");
-      free_database(index->database);
       free(index);
       free(fasta_file);
       free(binary_fasta);
@@ -1494,18 +1497,19 @@ BOOLEAN_T parse_peptide_index_file(
       (INDEX_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
     file = peptide_iterator_db->index_file;
     database = peptide_iterator_db->index->database;
+    add_database_pointer_count(database, "parse_peptide_index_file");
   }
   else if(index_type == BIN_INDEX){
     peptide_iterator_bin = 
       (BIN_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
     file = peptide_iterator_bin->index_file;
     database = peptide_iterator_bin->index->database;
+    add_database_pointer_count(database, "parse_peptide_index_file");
   }
   
   // increment the database pointer count
   // MEMLEAK change to copy_database_ptr, and free at end!
   // try this
-  add_database_pointer_count(database);
   
   // get total number of peptide_src for this peptide
   // peptide must have at least one peptide src
@@ -1600,8 +1604,6 @@ BOOLEAN_T parse_peptide_index_file(
     peptide_iterator_bin->peptide = peptide;
   }
   
-  // MEMLEAK try this
-  free_database(database);
   return TRUE;   
 }
 
@@ -1877,7 +1879,7 @@ void free_index_peptide_iterator(
  ***********************************************/
 
 /**
- * sets up the index_filered_peptide_iterator
+ * sets up the index_filtered_peptide_iterator
  * \returns TRUE if successfully sets up the iterator, else FALSE
  */
 BOOLEAN_T setup_index_filtered_peptide_iterator(
@@ -2136,7 +2138,7 @@ void free_bin_peptide_iterator(
   }
 
   // decrement the database pointer count
-  free_database(bin_peptide_iterator->index->database);
+  free_database(bin_peptide_iterator->index->database, "free bin peptide iterator");
   
   free(bin_peptide_iterator);
 }

@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.43 $
+ * $Revision: 1.44 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -83,18 +83,6 @@ float get_peptide_mz(
  * This decision is made by global variable PEPTIDE_SRC_USE_LINK_LIST
  */
 void free_peptide (
-  PEPTIDE_T* peptide ///< peptide to free -in
-  );
-
-/**
- *FIXME Don't need this any more, may delete
- *
- * Frees an allocated peptide object.
- * This one is used when the peptides is created throuh
- * parsing the index, the peptide_src is not a link list, but
- * an array, thus needs it's own free_peptide version
- */
-void free_peptide_for_array(
   PEPTIDE_T* peptide ///< peptide to free -in
   );
 

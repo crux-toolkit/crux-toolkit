@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.62 $
+ * $Revision: 1.63 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -150,7 +150,7 @@ PEPTIDE_T* new_peptide(
     new_peptide_src( peptide_type, parent_protein, start_idx );
   
   // increment the database pointer count
-  add_database_pointer_count(get_protein_database(parent_protein));
+  add_database_pointer_count(get_protein_database(parent_protein), "new database");
   
   return peptide;
 }
@@ -199,7 +199,7 @@ void free_peptide(
   )
 {
   // decrement the pointer count
-  free_database(get_peptide_first_src_database(peptide));
+  free_database(get_peptide_first_src_database(peptide), "free_peptide");
 
   // check which implementation peptide_src uses
   if(!PEPTIDE_SRC_USE_LINK_LIST){
@@ -211,26 +211,6 @@ void free_peptide(
     free_peptide_src(peptide->peptide_src);
   }
 
-  free(peptide);
-}
-
-/**
- * FIXME, don't need this anymore, may delete
- *
- * Frees an allocated peptide object.
- * This one is used when the peptides is created throuh
- * parsing the index, the peptide_src is not a link list, but
- * an array, thus needs it's own free_peptide version
- */
-void free_peptide_for_array(
-  PEPTIDE_T* peptide ///< peptide to free -in
-  )
-{
-  // decrement the pointer count
-  free_database(get_peptide_first_src_database(peptide));
-  
-  // array
-  free(peptide->peptide_src);
   free(peptide);
 }
 
@@ -450,7 +430,7 @@ void copy_peptide(
 
   // increment the database pointer count
   // since we are creating a new peptide
-  add_database_pointer_count(get_peptide_first_src_database(src));
+  add_database_pointer_count(get_peptide_first_src_database(src), "copy peptide");
 }
 
 /** 
@@ -1040,7 +1020,7 @@ BOOLEAN_T merge_peptides(
   }
 
   // decrement the database pointer count
-  free_database(get_peptide_first_src_database(peptide_bye));
+  free_database(get_peptide_first_src_database(peptide_bye), "merge peptides");
 
   // find the end of the peptide src link list..
   while(next_src != NULL){
@@ -1153,7 +1133,7 @@ PEPTIDE_T* parse_peptide(
   }
   
   // increment the database pointer count
-  add_database_pointer_count(database);
+  add_database_pointer_count(database, "parse peptide");
   
   return peptide;
 }

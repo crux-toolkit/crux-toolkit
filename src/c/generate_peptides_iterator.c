@@ -440,7 +440,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
       gen_peptide_iterator->free = &void_free_database_sorted_peptide_iterator;
     }
     // MEMLEAK try this. May be one too many
-    free_database(database);
+    free_database(database, "mass range");
   }
   return gen_peptide_iterator;
 }

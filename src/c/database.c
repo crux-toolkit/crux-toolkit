@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.43 $
+ * $Revision: 1.44 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -96,6 +96,7 @@ DATABASE_T* allocate_database(void){
   database->data_address = NULL;
   database->pointer_count = 1;
   database->file_size = 0;
+  fprintf(stderr, "Free: Allocation: %i\n", database->pointer_count);
   return database;
 }
 
@@ -123,14 +124,16 @@ DATABASE_T* new_database(
  * Frees an allocated protein object.
  */
 void free_database(
-  DATABASE_T* database ///< An allocated database -in
+  DATABASE_T* database, ///< An allocated database -in
+  char* string
   )
 {
-  // DEBUG show the databse pointer count
-  printf("Before free, database pointer count: %d\n", database->pointer_count);
   
   // increment database pointer counter
   sub_database_pointer_count(database);
+
+  // DEBUG show the databse pointer count
+  printf("Free: After free: %s: %d\n", string, database->pointer_count);
 
   // only free up memory when pointer count is zero
   if(database->pointer_count > 0){
@@ -636,10 +639,12 @@ PROTEIN_T* get_database_protein_at_idx(
  * used to keep track of when the database can be freed
  */
 void add_database_pointer_count(
-  DATABASE_T* database ///< the query database -in/out
+  DATABASE_T* database, ///< the query database -in/out
+  char* string
   )
 {
   ++database->pointer_count;
+  printf("Free: After increment: %s: %d\n", string, database->pointer_count);
 }
 
 
@@ -652,14 +657,7 @@ void sub_database_pointer_count(
   DATABASE_T* database ///< the query database -in/out
   )
 {
-
   --database->pointer_count;
-  /*
-  // free database if no more pointers to the database
-  if(--database->pointer_count == 0){
-    // free_database(database);
-  }
-  */
 }
 
 
@@ -693,7 +691,7 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
   iterator->cur_protein = 0;
 
   // increment database pointer counter
-  add_database_pointer_count(database);
+  add_database_pointer_count(database, "new_database_protein_iterator");
   
   return iterator;
 }        
@@ -708,7 +706,7 @@ void free_database_protein_iterator(
   )
 {
   // subtract pointer count
-  free_database(database_protein_iterator->database);
+  free_database(database_protein_iterator->database, "free database protein iterator");
   free(database_protein_iterator);
 }
 
