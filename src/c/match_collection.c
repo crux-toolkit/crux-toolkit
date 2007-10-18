@@ -292,7 +292,8 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   }
   
   // create a generate peptide iterator
-  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  // FIXME use neutral_mass, might chage to pick
+  // FIXME use neutral_mass for now, but should allow option
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  
     new_generate_peptides_iterator_from_mass(
         get_spectrum_neutral_mass(spectrum, charge) + mass_offset,
         get_string_parameter_pointer("fasta-file")
@@ -304,7 +305,11 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   
   // score SP match_collection
   if(prelim_score == SP){
-    if(!score_match_collection_sp(match_collection, spectrum, charge, peptide_iterator)){
+    if(!score_match_collection_sp(
+          match_collection, 
+          spectrum, 
+          charge, 
+          peptide_iterator)){
       carp(CARP_ERROR, "failed to score match collection for SP");
     }
     if (match_collection->match_total == 0){
@@ -313,12 +318,17 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   }
 
   /*********** Estimate parameters *****************************/
-  // if scoring for EVD xcorr, sample from the original distribution of peptides 
+  // if fitting an EVD xcorr, sample from the original distribution of peptides 
   // for evd parameter estimation
   // Sample before truncate match collection so that the sampling will be from 
   // the entire peptide distribution.
   if(score_type == LOGP_EVD_XCORR || score_type == LOGP_BONF_EVD_XCORR){
-    estimate_evd_parameters(match_collection, sample_count, XCORR, spectrum, charge);
+    estimate_evd_parameters(
+        match_collection, 
+        sample_count, 
+        XCORR, 
+        spectrum, 
+        charge);
   }
   // if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
   else if(score_type == LOGP_EXP_SP || score_type == LOGP_BONF_EXP_SP){
@@ -326,34 +336,41 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   }
   // if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
   else if(score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP){
-    estimate_weibull_parameters(match_collection, SP, sample_count, spectrum, charge);
+    estimate_weibull_parameters(
+        match_collection, SP, sample_count, spectrum, charge);
   }
-  else if(score_type == LOGP_WEIBULL_XCORR || score_type == LOGP_BONF_WEIBULL_XCORR){
-    estimate_weibull_parameters(match_collection, XCORR, sample_count, spectrum, charge);
+  else if(score_type == LOGP_WEIBULL_XCORR || 
+          score_type == LOGP_BONF_WEIBULL_XCORR){
+    estimate_weibull_parameters(
+        match_collection, XCORR, sample_count, spectrum, charge);
   }
 
-  // save only the top max_rank matches from prelim_scoring, sort and free the other matches
+  // save only the top max_rank matches from prelim_scoring
   truncate_match_collection(match_collection, max_rank, prelim_score);
   
   /***************Main scoring*******************************/
   if(score_type == LOGP_EXP_SP){
-    if(!score_match_collection_logp_exp_sp(match_collection, top_rank_for_p_value)){
+    if(!score_match_collection_logp_exp_sp(
+          match_collection, top_rank_for_p_value)){
       carp(CARP_ERROR, "failed to score match collection for LOGP_EXP_SP");
     }
   }
   else if(score_type == LOGP_BONF_EXP_SP){
-    if(!score_match_collection_logp_bonf_exp_sp(match_collection, top_rank_for_p_value)){
+    if(!score_match_collection_logp_bonf_exp_sp(
+          match_collection, top_rank_for_p_value)){
       carp(CARP_ERROR, "failed to score match collection for LOGP_BONF_EXP_SP");
     }
   }
   else if(score_type == LOGP_WEIBULL_SP){
     carp(CARP_DEBUG, "Scoring match collection for LOGP_WEIBULL_SP");
-    if(!score_match_collection_logp_weibull_sp(match_collection, top_rank_for_p_value)){
+    if(!score_match_collection_logp_weibull_sp(
+          match_collection, top_rank_for_p_value)){
       carp(CARP_ERROR, "failed to score match collection for LOGP_WEIBULL_SP");
     }
   }
   else if(score_type == LOGP_BONF_WEIBULL_SP){
-    if(!score_match_collection_logp_bonf_weibull_sp(match_collection, top_rank_for_p_value)){
+    if(!score_match_collection_logp_bonf_weibull_sp(
+          match_collection, top_rank_for_p_value)){
       carp(CARP_ERROR, "failed to score match collection for LOGP_BONF_WEIBULL_SP");
     }
   }
@@ -2440,7 +2457,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   if(!get_database_is_parsed(database)){
     if(!parse_database(database)){
       carp(CARP_FATAL, "failed to parse database, cannot create new index");
-      free_database(database);
+      free_database(database, "new match collection iterator");
       exit(1);
     }
   }
@@ -2520,7 +2537,7 @@ void free_match_collection_iterator(
   
   // free up all match_collection_iterator 
   free(match_collection_iterator->directory_name);
-  free_database(match_collection_iterator->database);
+  free_database(match_collection_iterator->database, "free match collection iterator");
   closedir(match_collection_iterator->working_directory); 
   free(match_collection_iterator);
 }
