@@ -30,10 +30,10 @@ fi
 echo "Comparing runtime"
 
 # first remove any pre existing *.dta files
-rm -rf *.dta
+# rm -rf *.dta
 
 # make .dta files for Sequest
-./ms22dta_right.pl $ms2
+# ./ms22dta_right.pl $ms2
 
 # now run Sequest and Crux compare and plot runtime
 python compare_runtime.py $ms2 $fasta
