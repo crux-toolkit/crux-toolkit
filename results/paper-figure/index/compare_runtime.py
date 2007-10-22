@@ -23,7 +23,7 @@ def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectra
   xlabel("mass window (Da)", size=15)
   ylabel("Runtime for " + `number_of_spectra` + " spectra (sec)", size=15)
   
-  fh = open("crux.xy", "w")
+  fh = open("crux-fast.xy", "w")
   for idx in range(len(mass_windows)):
     fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_array[idx]))
   fh.close()
