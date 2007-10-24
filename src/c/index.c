@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.55 $
+ * $Revision: 1.56 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -463,11 +463,13 @@ void free_index(
     index->num_pointers--;
   } else {
     carp(CARP_INFO, "Freeing index");
-    free_database(index->database);
-    free_peptide_constraint(index->constraint);
+    if (index->database != NULL){
+      free_database(index->database);
+    }
+    if (index->constraint != NULL){
+      free_peptide_constraint(index->constraint);
+    }
     free(index->directory);
-    // MEMLEAK change peptide_constraint to have pointer count
-    // free_peptide_constraint(index->constraint);
     free(index);
   }
 }
@@ -721,7 +723,6 @@ FILE* sort_bin(
     serialize_peptide(working_peptide, file);
   }
   
-  // MEMLEAK
   free_peptide(working_peptide);
   free(filename);
   free_bin_sorted_peptide_iterator(peptide_iterator);
@@ -1499,7 +1500,6 @@ BOOLEAN_T parse_peptide_index_file(
   PEPTIDE_SRC_T* current_peptide_src = NULL;
   int num_peptide_src = -1;
   int protein_idx = -1;
-  int src_index =  0;
   PEPTIDE_TYPE_T peptide_type = -1;
   int start_index = -1;
   
@@ -1509,19 +1509,13 @@ BOOLEAN_T parse_peptide_index_file(
       (INDEX_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
     file = peptide_iterator_db->index_file;
     database = peptide_iterator_db->index->database;
-    add_database_pointer_count(database);
   }
   else if(index_type == BIN_INDEX){
     peptide_iterator_bin = 
       (BIN_PEPTIDE_ITERATOR_T*)general_peptide_iterator;
     file = peptide_iterator_bin->index_file;
     database = peptide_iterator_bin->index->database;
-    add_database_pointer_count(database);
   }
-  
-  // increment the database pointer count
-  // MEMLEAK change to copy_database_ptr, and free at end!
-  // try this
   
   // get total number of peptide_src for this peptide
   // peptide must have at least one peptide src
@@ -1549,7 +1543,8 @@ BOOLEAN_T parse_peptide_index_file(
   current_peptide_src = peptide_src;
 
   // parse and fill all peptide src information into peptide
-  for(; src_index < num_peptide_src; ++src_index){
+  int src_index;
+  for(src_index=0; src_index < num_peptide_src; ++src_index){
     // read peptide src fields//
     
     // get protein index
@@ -1574,7 +1569,6 @@ BOOLEAN_T parse_peptide_index_file(
       free(peptide);
       return FALSE;
     }
-    
 
     // set all fields in peptide src that has been read //
 

@@ -223,16 +223,16 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   DATABASE_T* database ///< the database
   )
 {
+  // MEMLEAK put in parameter retrieval routines
   // get parameters
   int min_length = get_int_parameter("min-length");
   int max_length = get_int_parameter("max-length");
   char* cleavages = get_string_parameter_pointer("cleavages");
   char* isotopic_mass = get_string_parameter_pointer("isotopic-mass");
   char* redundancy = get_string_parameter_pointer("redundancy");
-  char* use_index = get_string_parameter_pointer("use-index");
   char* sort = get_string_parameter_pointer("sort");  // sort order
+  BOOLEAN_T use_index_boolean = get_boolean_parameter("use-index");
 
-  BOOLEAN_T use_index_boolean = FALSE;
   MASS_TYPE_T mass_type = AVERAGE;
   PEPTIDE_TYPE_T peptide_type = TRYPTIC;
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
@@ -242,6 +242,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
    
   // parse all the necessary parameters
   // FIXME may add additional types such as non-tryptic or partially-tryptic
+  
   if(strcmp(cleavages, "all")==0){
     peptide_type = ANY_TRYPTIC;
   }
@@ -300,17 +301,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     carp(CARP_ERROR, "incorrect argument %s, using default value", sort);
   }
     
-  // determine use index command
-  if(strcmp(use_index, "F")==0){
-    use_index_boolean = FALSE;
-  }
-  else if(strcmp(use_index, "T")==0){
-    use_index_boolean = TRUE;
-  }
-  else{
-    carp(CARP_ERROR, "incorrect argument %s, using default value", use_index);
-  }
-
   // allocate an empty iterator
   GENERATE_PEPTIDES_ITERATOR_T* gen_peptide_iterator 
     = allocate_generate_peptides_iterator();
@@ -320,8 +310,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     = new_peptide_constraint(peptide_type, min_mass, max_mass, 
         min_length, max_length, missed_cleavages, mass_type);
   
-  // asign to iterator
-  // MEMLEAK copy_constraint_ptr
+  // assign to iterator
   gen_peptide_iterator->constraint = copy_peptide_constraint_ptr(constraint); 
 
   /***********************
@@ -342,7 +331,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     }
     
     // create index and set to generate_peptides_iterator
-        // MEMLEAK copy_constraint_ptr
     set_index_constraint(index, constraint); 
     
     if(index == NULL){
@@ -379,21 +367,20 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   }
 
   /*********************************************
-   *read in from fasta file, don't use index file
+   * Read in from fasta file, don't use index
    ************************************************/
   else{
 
     // def used for each iterator
    
-    carp(CARP_INFO, "using fasta_file for peptide generation");
+    carp(CARP_INFO, "Using fasta file for peptide generation");
 
     // set for all peptide src use link list implementation
     // this routine sets the static global in peptide.c
     set_peptide_src_implementation(TRUE);
 
     // create a new database & set generate_peptides_iterator
-    // MEMLEAK increase database pointer count
-    gen_peptide_iterator->database = database;
+    gen_peptide_iterator->database = copy_database_ptr(database);
     
     // no sort, redundant
     if(!is_unique && sort_type == NONE){ 
@@ -430,8 +417,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
       gen_peptide_iterator->next = &void_database_sorted_peptide_iterator_next;
       gen_peptide_iterator->free = &void_free_database_sorted_peptide_iterator;
     }
-    // MEMLEAK try this. May be one too many
-    free_database(database);
   }
   free_peptide_constraint(constraint);
   return gen_peptide_iterator;
@@ -489,7 +474,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mutable()
   char* cleavages = get_string_parameter_pointer("cleavages");
   char* isotopic_mass = get_string_parameter_pointer("isotopic-mass");
   char* redundancy = get_string_parameter_pointer("redundancy");
-  // char* use_index = get_string_parameter_pointer("use-index");
   char* sort = get_string_parameter_pointer("sort");   // mass, length, lexical, none  
 
 
@@ -718,7 +702,6 @@ void free_generate_peptides_iterator(
   )
 {
   // free the nested iterator
-  free_index(generate_peptides_iterator->index);
   generate_peptides_iterator->free(generate_peptides_iterator->iterator);
   free(generate_peptides_iterator);
 }

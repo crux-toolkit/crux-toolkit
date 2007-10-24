@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.46 $
+ * $Revision: 1.47 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -128,8 +128,8 @@ void free_database(
   )
 {
   
-  // increment database pointer counter
-  sub_database_pointer_count(database);
+  // decrement database pointer counter
+  --database->pointer_count;
 
   // DEBUG show the databse pointer count
   // printf("Free: After free: %s: %d\n", database->pointer_count);
@@ -636,29 +636,18 @@ PROTEIN_T* get_database_protein_at_idx(
 }
 
 /**
- * increase the pointer_count produced by this database
- * used to keep track of when the database can be freed
+ * increase the pointer_count produced by this database.
+ * \returns database pointer
  */
-void add_database_pointer_count(
+DATABASE_T* copy_database_ptr(
   DATABASE_T* database ///< the query database -in/out
   )
 {
   ++database->pointer_count;
-  // printf("Free: After increment: %s: %d\n", string, database->pointer_count);
+  return database;
 }
 
 
-/**
- * subtract the pointer_count produced by this database
- * used to keep track of when the database can be freed
- * If refernce is 0, free database!
- */
-void sub_database_pointer_count(
-  DATABASE_T* database ///< the query database -in/out
-  )
-{
-  --database->pointer_count;
-}
 
 
 /***********************************************
@@ -667,8 +656,7 @@ void sub_database_pointer_count(
 
 /**
  * Instantiates a new database_protein_iterator from a database.
- * DO NOT free the proteins, proteins are freed up together when 
- * free the database
+ * 
  * \returns a DATABASE_PROTEIN_ITERATOR_T object.
  */
 DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
@@ -687,12 +675,9 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
   // create new protein iterator
   DATABASE_PROTEIN_ITERATOR_T* iterator = (DATABASE_PROTEIN_ITERATOR_T*)
     mycalloc(1, sizeof(DATABASE_PROTEIN_ITERATOR_T));
-  iterator->database = database;
+  iterator->database = copy_database_ptr(database);
   iterator->cur_protein = 0;
 
-  // increment database pointer counter
-  add_database_pointer_count(database);
-  
   return iterator;
 }        
 
@@ -1004,7 +989,7 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   database_sorted_peptide_iterator->sorted_peptide_iterator 
     = sorted_peptide_iterator;
   
-  free_database_peptide_iterator(db_peptide_iterator); // TODO check this...
+  free_database_peptide_iterator(db_peptide_iterator); 
 
   return database_sorted_peptide_iterator;
 }

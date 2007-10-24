@@ -196,9 +196,6 @@ int main(int argc, char** argv){
     // parse and update parameters
     parse_update_parameters(parameter_file);
     
-    // always use index for match search!
-    set_string_parameter("use-index", "T");
-
     // generate sqt ouput file if not set by user
     if(strcmp(
           get_string_parameter_pointer("sqt-output-file"), "target.sqt") ==0){
@@ -372,7 +369,7 @@ int main(int argc, char** argv){
     }
 
     // MEMLEAK get from parameters
-    BOOLEAN_T use_index = TRUE;
+    BOOLEAN_T use_index = get_boolean_parameter("use-index");
 
     char* in_file = get_string_parameter_pointer("fasta-file");
 
@@ -380,11 +377,12 @@ int main(int argc, char** argv){
     DATABASE_T* database = NULL;
     BOOLEAN_T is_unique = TRUE; // MEMLEAK
     if (use_index == TRUE){
-      index = new_index_from_disk(in_file, is_unique);
+      if ((index = new_index_from_disk(in_file, is_unique)) == NULL){
+        carp(CARP_FATAL, "Could not create index from disk for %s", in_file);
+        exit(1);
+      }
     } else {
-      carp(CARP_FATAL, "Database not yet supported!");
       // MEMLEAK FALSE, FALSE should really be parameters
-      exit(1);
       database = new_database(in_file, FALSE, FALSE);         
     }
 
@@ -445,10 +443,9 @@ int main(int argc, char** argv){
                                           index,
                                           database
                                           );
-          // MEMLEAK copy_index_ptr on database as well
           
-          // serialize the psm features to ouput file upto 'top_match' number of 
-          // top peptides among the match_collection
+          // serialize the psm features to output file for 'top_match' 
+          // peptides among the match_collection
           serialize_psm_features(match_collection, psm_result_file[file_idx], 
               top_match, prelim_score, main_score);
           
@@ -492,8 +489,11 @@ int main(int argc, char** argv){
       free(psm_result_filenames[file_idx]);
     }
 
-    carp(CARP_DEBUG, "Index ptr count %i", get_index_pointer_count(index));
-    free_index(index);
+    if (use_index == TRUE){
+      free_index(index);
+    } else {
+      free_database(database);
+    }
     free(psm_result_filenames);
     free(psm_result_file);
     free_spectrum_iterator(spectrum_iterator);

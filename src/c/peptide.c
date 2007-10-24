@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.64 $
+ * $Revision: 1.65 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -144,13 +144,10 @@ PEPTIDE_T* new_peptide(
   )
 {
   PEPTIDE_T* peptide = allocate_peptide();
-  set_peptide_length( peptide, length);
-  set_peptide_peptide_mass( peptide, peptide_mass);
-  peptide->peptide_src =
-    new_peptide_src( peptide_type, parent_protein, start_idx );
-  
-  // increment the database pointer count
-  add_database_pointer_count(get_protein_database(parent_protein));
+  set_peptide_length(peptide, length);
+  set_peptide_peptide_mass(peptide, peptide_mass);
+  peptide->peptide_src = 
+    new_peptide_src(peptide_type, parent_protein, start_idx );
   
   return peptide;
 }
@@ -198,9 +195,6 @@ void free_peptide(
   PEPTIDE_T* peptide ///< peptide to free -in
   )
 {
-  // decrement the pointer count
-  free_database(get_peptide_first_src_database(peptide));
-
   // check which implementation peptide_src uses
   if(!PEPTIDE_SRC_USE_LINK_LIST){
     // array implementation
@@ -427,10 +421,6 @@ void copy_peptide(
   new_association = allocate_peptide_src();
   copy_peptide_src(src->peptide_src, new_association);
   set_peptide_peptide_src(dest, new_association);
-
-  // increment the database pointer count
-  // since we are creating a new peptide
-  add_database_pointer_count(get_peptide_first_src_database(src));
 }
 
 /** 
@@ -1019,9 +1009,6 @@ BOOLEAN_T merge_peptides(
     return FALSE;
   }
 
-  // decrement the database pointer count
-  free_database(get_peptide_first_src_database(peptide_bye));
-
   // find the end of the peptide src link list..
   while(next_src != NULL){
     current_src = next_src;
@@ -1131,9 +1118,6 @@ PEPTIDE_T* parse_peptide(
     // set current_peptide_src to the next empty peptide src
     current_peptide_src = get_peptide_src_next_association(current_peptide_src);    
   }
-  
-  // increment the database pointer count
-  add_database_pointer_count(database);
   
   return peptide;
 }
