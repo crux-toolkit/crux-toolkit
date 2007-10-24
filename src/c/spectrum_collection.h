@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -194,7 +194,7 @@ BOOLEAN_T get_spectrum_collection_is_parsed(
  * The name array is heap allocated, thus user must free it. Size is number_decoy_set +1 (for target)
  *\returns file handler array to the newly created files(target& decoy) and sets psm_result_filename.
  */
-FILE** get_spectrum_collection_psm_result_filename(
+FILE** get_spectrum_collection_psm_result_filenames(
   SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection -in
   char* psm_result_folder_name, ///< the folder name for where the result file should be placed -in
   char*** psm_result_filenames, ///< pointer to be set to the array of filenames for both the target and decoy psm results -out

@@ -332,11 +332,11 @@ int main(int argc, char** argv){
     // get psm_result file handler array
     // this includes one for the target and for the decoys
     psm_result_file = 
-      get_spectrum_collection_psm_result_filename(collection,
-                                                  match_output_folder,
-                                                  &psm_result_filenames,
-                                                  number_decoy_set,
-                                                  ".ms2"
+      get_spectrum_collection_psm_result_filenames( collection,
+                                                    match_output_folder,
+                                                    &psm_result_filenames,
+                                                    number_decoy_set,
+                                                    ".ms2"
                                                   );
     
     // get psm_result sqt file handle if needed
@@ -443,9 +443,10 @@ int main(int argc, char** argv){
                                           index,
                                           database
                                           );
-          
-          // serialize the psm features to output file for 'top_match' 
-          // peptides among the match_collection
+          // serialize the psm features to ouput file upto 'top_match' number of 
+          // top peptides among the match_collection
+          carp(CARP_WARNING, "Outputting to %s\n", psm_result_file[file_idx]);
+
           serialize_psm_features(match_collection, psm_result_file[file_idx], 
               top_match, prelim_score, main_score);
           

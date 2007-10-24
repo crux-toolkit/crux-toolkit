@@ -291,7 +291,6 @@ char* generate_name(
   )
 {
   int len = strlen(fasta_filename);
-  int end_idx = len;
   int end_path = len;  // index of where the "." is located in the file
   char* name = NULL;
   char* after_suffix = NULL;
@@ -300,7 +299,8 @@ char* generate_name(
   int length = 0;
 
   // cut off the file extension if needed
-  for(; end_idx > 0; --end_idx){
+  int end_idx;
+  for(end_idx = len; end_idx > 0; --end_idx){
     if(strcmp(&fasta_filename[end_idx - 1], file_extension) == 0){
       end_path = end_idx - 1;
       break;
@@ -313,7 +313,8 @@ char* generate_name(
     file_n_path = parse_filename_path(fasta_filename);
   }
 
-  name = (char*)mycalloc(suffix_length + end_path + strlen(name_tag) + 1, sizeof(char));
+  name = (char*)mycalloc(
+      suffix_length + end_path + strlen(name_tag) + 1, sizeof(char));
   after_suffix = name;
   
   // if suffix exit add to top
