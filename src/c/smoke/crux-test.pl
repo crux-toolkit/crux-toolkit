@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.10  2007/08/28 20:03:38  aklammer
+#*** empty log message ***
+#
 #Revision 1.9  2007/08/07 22:59:14  cpark
 #smoke test added for match_analysis/search
 #
@@ -99,6 +102,10 @@ while ($line = <ARGV>) {
   if ($caught_interrupt) {
     die("Testing was interrupted.");
   }  
+
+  # Skip comments and blank lines
+  next if $line =~ /^\#/;
+  next if $line =~ /^\s*$/;
 
   # Parse the test parameters
   chomp $line;
