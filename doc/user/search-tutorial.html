@@ -1,0 +1,124 @@
+<!--
+FILE: search-tutorial.html 
+AUTHOR: Barbara Frewen
+DATE: Octobeer 15, 2007
+PROJECT: crux
+REVISION: $1.0 $
+-->
+
+<html>
+<head>
+<title>Crux: Search</title>
+
+<link rel="stylesheet" href="stylesheet.css" type="text/css">
+
+</head>
+
+<body>
+<div id="top">
+<h>crux: peptide spectrum analysis tools</h>
+</div>
+
+<div id="main">
+<div id="side">
+<h3>Table of Contents</h3>
+
+<dl>
+   <dt><a href="home-tutorial.html">Home</a>
+   <dt><a href="install-tutorial.html">Installation</a>
+   <dt><a href="start-tutorial.html">Getting Started</a>
+   <dt>Searching a Protein Database</a>
+   <dt><a href="customize-tutorial.html">Customizing a Search</a>
+   <dt><a href="examples-tutorial.html">Examples</a>
+   <dt><a href="crux.html">Man pages</a>
+   <dt><a href="sitemap-tutorial.html">Index</a>
+</dl>
+<hr>
+<!--
+<h3>On this Page</h3>
+<dl>
+   <dt><a href="#first">The first heading</a>
+   <dt><a href="#second">The second heading</a>
+</dl>
+-->
+</div><!--end side-->
+
+<h3>Running a Simple Search</h3>
+<p> Now that you have your environment set up and the two input files
+in your working directory, you can conduct the search with this command.
+</p>
+
+<div class=code>
+<code>$ crux-search-for-matches demo.ms2 small-yeast.sqt</code>
+</div>
+
+<p>While the search is running, you will see output like this
+</p>
+
+<pre>output here
+Currently, there is no output at the default level of verbosity.
+Perhaps that is a little low?
+</pre>
+
+<p>When the search has completed, it will say <span
+class=out>something</span>.  Looking at the contents of the directory,
+you will see three new files, <span
+class=file>crux_match_target_demo_gibberish,
+crux_match_decoy1_demo_gibberish,
+crux_match_decoy2_demo_gibberish</span>, containing the search
+results.  These files are in a binary format that can only be read 
+by <span class=prog>crux</span>.</p>
+
+<div class=note><em>Note: Search results may also be returned in a
+text format.  See the <a
+href="customize-tutorial.html">customization</a> page for details.</em>
+</div>
+
+<p>The final step is to analyze our search results.  We expect that
+some fraction of the spectra will not be identifiable as peptides (due
+to chemical noise, multiple peptides co-eluting, poor fragmentation,
+etc.).  This step filters out those spectra and returns only the
+high-quality peptide-spectrum matches.  Run this command.
+</p>
+
+<div class=code><code>
+$ crux-analyze-matches . small-yeast.fasta > search-results</code>
+</div>
+
+<p>While the analysis is running, you will see output like this
+</p>
+
+<pre>
+selecting cpos by cross validation
+selecting cneg by cross validation
+cross validation found 4 positives with q<0.01 for hyperparameters Cpos=10, Cneg=10, fdr=0.01
+
+</pre>
+
+<p>When the analysis is complete it will print <span
+class=out>something</span>.  Take a look at the file <span
+class=file>search-results</span>.  The beginning of the file should
+look like this.
+</p>
+
+<pre>
+P 1     1       2006.305420     8.412129        0.000000        SGVGICATCVLRPDLLFK
+P 2     2       862.888916      2.947676        0.000000        EEDELTK
+P 3     3       713.875305      2.797923        0.000000        LQNVLK
+P 4     4       862.888916      2.723677        0.000000        EEDELTK
+P 5     5       713.875305      1.928124        0.180000        LQNVLK
+P 6     6       901.983704      1.557361        0.276923        CYLQYR
+
+</pre>
+
+<p>Each line is one peptide-spectrum match.  The first column is...I'm
+not sure.  The spectra appear to have been re-numbered and I assume
+that the third column of floats is the q-value, but I'm not sure what
+the other two columns are.  I think we're changing this format, anyway.
+</p>
+
+
+</div><!--end main-->
+
+</body>
+</html>
