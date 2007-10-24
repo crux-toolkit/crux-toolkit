@@ -1,10 +1,39 @@
+# List of commands to be run by crux-test.pl
+# Format is these fields separated by '='
+#    test name             (printed to the output as a label for the command)
+#    standard filename     (path to file with the expected output)
+#    command               (command with options and args to be run)
+#    <index|analysis|file> (flag depending on type of command run)
+
+# TESTS WITH NO INDEX
+
+# Generate Peptides
 generate_peptides_default = standard_generate_peptides_default.out = ../../../bin/generate_peptides --parameter-file smoke_params2 --output-sequence  test.fasta = file 
+
 generate_peptides_sort_mass_unique = standard_generate_peptides_mass.out = ../../../bin/generate_peptides --parameter-file smoke_params2 --output-sequence --cleavages all --missed-cleavages --sort mass --redundancy unique test.fasta = file
+
 generate_peptides_sort_length_unique = standard_generate_peptides_length.out = ../../../bin/generate_peptides --parameter-file smoke_params2 --output-sequence --cleavages tryptic --missed-cleavages --sort length --redundancy unique test.fasta = file
+
 generate_peptides_sort_lexical_unique = standard_generate_peptides_lexical.out = ../../../bin/generate_peptides --parameter-file smoke_params2 --output-sequence --cleavages partial --missed-cleavages --sort lexical --redundancy unique test.fasta = file
+
+# Get spectrum
 get_ms2_spectrum = standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; ../../../bin/get_ms2_spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out = file
-generate_peptides_use_index = standard_generate_peptides_use_index.out = ../../../bin/generate_peptides --parameter-file smoke_params2 --output-sequence --use-index T standard.fasta
+
+# Search for matches
+
+# TESTS WITH INDEX
+
+# Create index
 create_index = standard_generate_peptides_use_index.out = ../../../bin/create_index --mass-range 500 --parameter-file smoke_params2 test.fasta = index
+
+# Generate peptides
+generate_peptides_use_index = standard_generate_peptides_use_index.out = ../../../bin/generate_peptides --parameter-file smoke_params2 --output-sequence --use-index T standard.fasta
+
+# Search for matches
+
 search_spectrum = standard_search_spectrum.out =  ../../../bin/search_spectrum --parameter-file smoke_params test.ms2 6 standard2.fasta = file
+
 search_spectra = standard_search_spectra.out = ../../../bin/search_spectra --number-runs 7  --parameter-file smoke_params test.ms2 standard2.fasta = file
+
+#Analyze searches
 match_search_analysis = standard_match_search_analysis.out = ../../../bin/match_search --match-output-folder match_result --number-runs 6 --parameter-file smoke_params test.ms2 standard2.fasta = analysis
