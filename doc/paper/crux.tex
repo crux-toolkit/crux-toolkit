@@ -49,13 +49,17 @@ database search program {\sc sequest}.  For speed, Crux uses a peptide
 indexing scheme to rapidly retrieve candidate peptides for a given
 spectrum.  For each peptide in the target database, Crux generates
 shuffled decoy peptides on the fly, providing a good null model and,
-hence, accurate false discovery rate estimates.  In a second analysis
-stage, Crux trains a machine learning model to discriminate between
-target and decoy peptides, thereby significantly improving the overall
-rate of peptide identification.
+hence, accurate false discovery rate estimates.  Crux also implements
+two recently described postprocessing methods: a $p$~value calculation
+based upon fitting a Weibull distribution to the observed scores, and
+a semi-supervised method that learns to discriminate between target
+and decoy matches.  Both methods significant improve the overall rate
+of peptide identification.
 
 \section{Availability:}
 \href{http://noble.gs.washington.edu/proj/crux}{http://noble.gs.washington.edu/proj/crux}
+Crux is freely available for academic use and can be licensed for
+commercial application.
 \section{Contact:} \href{noble@gs.washington.edu}{noble@gs.washington.edu}
 \end{abstract}
 
@@ -199,7 +203,7 @@ the cross-correlation score $XCorr$.
 For $Sp$ scoring, Crux applies several pre-processing steps to the
 observed spectrum.  First, Crux takes the square root of each peak's
 intensity and rounds each peak's m/z to the nearest integer.  Second,
-Crux normalize the peak intensities to sum to 100.  Third, Crux
+Crux normalizes the peak intensities to sum to 100.  Third, Crux
 extracts the top 200 highest intensity peaks.  Crux compares the
 resulting observed spectrum with the b and y fragment ions from the
 candidate peptide to compute $Sp$ as follows:
@@ -208,15 +212,15 @@ candidate peptide to compute $Sp$ as follows:
 \]
 
 $Xcorr$ scoring also requires some pre-processing of the observed
-spectrum.  As before, First, Crux takes the square root of each peak's
+spectrum.  As before, Crux first takes the square root of each peak's
 intensity and rounds each peak's m/z to the nearest integer.  Second,
 Crux divides the spectrum into 10 regions and normalizes the spectrum
-intensity in each region to maximum 50.0. To create the theoretical
+intensity in each region to maximum of 50.0. To create the theoretical
 spectrum from the candidate peptide, Crux constructs a spectrum with
-peak intensity 50.0 for b and y ions, 25.0 for the +/- 1 m/z flanking
+peak intensity 50.0 for b and y ions, 25.0 for the $\pm 1$ m/z flanking
 peaks of each b and y ion, and 10.0 for ions resulting from a neutral
-loss of ammonia from b or y ions or neutral loss of water
-from b ions.  Crux then computes $Xcorr$ as follows:
+loss of ammonia from b or y ions or neutral loss of water from b ions.
+Crux then computes $Xcorr$ as follows:
 \[
 \mbox{FIXME: Insert equation here}
 \]
