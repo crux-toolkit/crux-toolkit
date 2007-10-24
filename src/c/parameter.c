@@ -355,10 +355,11 @@ BOOLEAN_T get_boolean_parameter(
   strncpy(buffer,
           value,
           PARAMETER_LENGTH);
-  if (strcmp(buffer, "TRUE") == 0) {
+
+  if ((strcmp(buffer, "TRUE") == 0) || (strcmp(buffer, "T") == 0)){
     return(TRUE);
   } 
-  else if (strcmp(buffer, "FALSE") == 0) {
+  else if ((strcmp(buffer, "FALSE") == 0) || (strcmp(buffer, "F") == 0)){
     return(FALSE);
   } 
   else {

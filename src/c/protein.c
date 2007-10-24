@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.53 $
+ * $Revision: 1.54 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -1294,14 +1294,12 @@ PEPTIDE_T* protein_peptide_iterator_next(
   // FIXME Not sure what the use delete this field if needed
   ++protein_peptide_iterator->peptide_idx;
 
-  // update poisiton of iterator
+  // update position of iterator
   ++protein_peptide_iterator->cur_start;
   protein_peptide_iterator->has_next = set_iterator_state(protein_peptide_iterator);
 
   
   // increment the database count of peptides produced
-  // add_database_peptide_count(get_protein_database(protein_peptide_iterator->protein));
-  
   return peptide;
 }
 
