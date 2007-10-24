@@ -1651,28 +1651,27 @@ float get_match_collection_delta_cn(
 }
 
 /**
- * Serialize the psm features to ouput file upto 'top_match' number of 
+ * Serialize the PSM features to output file up to 'top_match' number of 
  * top peptides among the match_collection
  *
  *
  * spectrum specific features
- * first, serialize the spectrum info of the match collection    
- * Second, iterate over matches and serialize the structs
+ * first, serialize the spectrum info of the match collection
+ * second, iterate over matches and serialize the structs
  *
  *<int: charge state of the spectrum>
- *<int: The total match objects in the match_collection searched with the spectrum
+ *<int: Total match objects in the match_collection searched with the spectrum
  *<float: delta_cn>
- *<float: ln_dleta_cn>
+ *<float: ln_delta_cn>
  *<float: ln_experiment_size>
- *<BOOLEAN_T: did the score type been scored?>* <- for all score types
- *<MATCH: serialize match struct> *<--serialize match structs upto top-match # ranks
- *
+ *<BOOLEAN_T: did the score type been scored?>* - for all score types
+ *<MATCH: serialize match struct>* <--serialize top_match match structs 
  *
  *\returns TRUE, if sucessfully serializes the PSMs, else FALSE 
  */
 BOOLEAN_T serialize_psm_features(
   MATCH_COLLECTION_T* match_collection, ///< working match collection -in
-  FILE* output,  ///< ouput file handle -out
+  FILE* output,  ///< output file handle -out
   int top_match, ///< number of top match to serialize -in
   SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
   SCORER_TYPE_T main_score ///<  the main score to report -in
@@ -1699,9 +1698,10 @@ BOOLEAN_T serialize_psm_features(
   fwrite(&ln_experiment_size, sizeof(float), 1, output);
   
   // serialize each boolean for scored type 
-  int score_type_idx = 0;
-  for(; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
-    fwrite(&(match_collection->scored_type[score_type_idx]), sizeof(BOOLEAN_T), 1, output);
+  int score_type_idx;
+  for(score_type_idx=0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+    fwrite(&(match_collection->scored_type[score_type_idx]), 
+        sizeof(BOOLEAN_T), 1, output);
   }
   
   // second, iterate over matches and serialize them
@@ -1936,11 +1936,13 @@ void free_match_iterator(
 
 /**
  * create a new match collection from the serialized PSM output files
- *\returns a new match_collection object that is instantiated by the PSm output files
+ *\returns a new match_collection object instantiated from the PSM output files
  */
 MATCH_COLLECTION_T* new_match_collection_psm_output(
-  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator, ///< the working match_collection_iterator -in
-  SET_TYPE_T set_type  ///< what set of match collection are we creating? (TARGET, DECOY1~3) -in 
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator, 
+    ///< the working match_collection_iterator -in
+  SET_TYPE_T set_type  
+    ///< what set of match collection are we creating? (TARGET, DECOY1~3) -in 
   )
 { 
   struct dirent* directory_entry = NULL;
@@ -1956,14 +1958,17 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   match_collection->post_process_collection = TRUE;
   
   // the protein counter size, create protein counter
-  match_collection->post_protein_counter_size = get_database_num_proteins(database);
-  match_collection->post_protein_counter = (int*)mycalloc(match_collection->post_protein_counter_size,
-                                                          sizeof(int));
-  match_collection->post_protein_peptide_counter = (int*)mycalloc(match_collection->post_protein_counter_size,
-                                                                  sizeof(int));
+  match_collection->post_protein_counter_size 
+    = get_database_num_proteins(database);
+  match_collection->post_protein_counter 
+    = (int*)mycalloc(match_collection->post_protein_counter_size, sizeof(int));
+  match_collection->post_protein_peptide_counter 
+    = (int*)mycalloc(match_collection->post_protein_counter_size, sizeof(int));
+
   // create hash table for peptides
   // Set initial capacity to protein count.
-  match_collection->post_hash = new_hash(match_collection->post_protein_counter_size);
+  match_collection->post_hash 
+    = new_hash(match_collection->post_protein_counter_size);
   
   // set the suffix of the serialized files to parse
   // Also, set the if match_collection type is null_peptide_collection
@@ -1977,7 +1982,8 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   }
   
   // iterate over all PSM result files in directory
-  while((directory_entry = readdir(match_collection_iterator->working_directory))){
+  while((directory_entry 
+            = readdir(match_collection_iterator->working_directory))){
     if (strcmp(directory_entry->d_name, ".") == 0 ||
         strcmp(directory_entry->d_name, "..") == 0 ||
         !suffix_compare(directory_entry->d_name, suffix)
@@ -1986,6 +1992,8 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
     }
     file_in_dir = get_full_filename(match_collection_iterator->directory_name, 
                                     directory_entry->d_name);
+
+    carp(CARP_INFO, "Getting PSMs from %s", file_in_dir);
     result_file = fopen(file_in_dir, "r");
     // add all the match objects from result_file
     extend_match_collection(match_collection, database, result_file);
@@ -2369,30 +2377,34 @@ int get_match_collection_hash(
      
 /**
  * Parses the next match_collection from directory if avaliable
- *\returns TRUE, if successfully setsup the match_collection_iterator for next iteration
+ *\returns TRUE, if successfully sets up the match_collection_iterator 
+ *   for the next iteration
  */
 void setup_match_collection_iterator(
-  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the match_collection_iterator to set up -in/out
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator 
+    ///< the match_collection_iterator to set up -in/out
   )
 {
-  // is there any more match_collections to return?
-  if(match_collection_iterator->collection_idx < match_collection_iterator->number_collections){
-    // ok then go parse the match_collection
+  // are there any more match_collections to return?
+  if(match_collection_iterator->collection_idx 
+      < match_collection_iterator->number_collections){
+
+    // then go parse the match_collection
     match_collection_iterator->match_collection = 
       new_match_collection_psm_output(match_collection_iterator, 
-                                      (SET_TYPE_T)match_collection_iterator->collection_idx);
+         (SET_TYPE_T)match_collection_iterator->collection_idx);
 
-    // ok we have another match_collection to return
+    // we have another match_collection to return
     match_collection_iterator->is_another_collection = TRUE;
     
-    // let;s move on to the next one next time
+    // let's move on to the next one next time
     ++match_collection_iterator->collection_idx;
 
     // reset directory
     rewinddir(match_collection_iterator->working_directory);
   }
   else{
-    // ok we done, no more match_collection to return
+    // we're done, no more match_collections to return
     match_collection_iterator->is_another_collection = FALSE;
   }
 }
@@ -2493,7 +2505,8 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     total_sets = 2; // 1 decoys + 1 target
   }
   else{
-    carp(CARP_ERROR, "No decoy sets exist in directory: %s", output_file_directory);
+    carp(CARP_ERROR, "No decoy sets exist in directory: %s", 
+        output_file_directory);
   }
 
   free(binary_fasta);
@@ -2505,7 +2518,8 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   match_collection_iterator->working_directory = working_directory;
   match_collection_iterator->database = database;  
   match_collection_iterator->number_collections = total_sets;
-  match_collection_iterator->directory_name = my_copy_string(output_file_directory);
+  match_collection_iterator->directory_name = 
+    my_copy_string(output_file_directory);
   match_collection_iterator->is_another_collection = FALSE;
 
   // setup the match collection iterator for iteration
@@ -2550,7 +2564,8 @@ void free_match_collection_iterator(
  *\returns the next match collection object
  */
 MATCH_COLLECTION_T* match_collection_iterator_next(
-  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator 
+    ///< the working match_collection_iterator -in
   )
 {
   MATCH_COLLECTION_T* match_collection = NULL;

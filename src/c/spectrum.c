@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.60 $
+ * REVISION: $Revision: 1.61 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1215,7 +1215,7 @@ SPECTRUM_T* parse_spectrum_binary(
   
   // get spectrum struct
   if(fread(spectrum, (sizeof(SPECTRUM_T)), 1, file) != 1){
-    carp(CARP_ERROR, "serialize file corrupted, incorrect spectrum format");
+    carp(CARP_ERROR, "serialized file corrupted, incorrect spectrum format");
     free(spectrum);
     return NULL;
   }
