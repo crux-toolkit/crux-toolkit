@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.43 $
+ * REVISION: $Revision: 1.44 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -461,7 +461,6 @@ double* get_match_percolator_features(
 }
 
 /**
- *
  *\returns a match object that is parsed from the serialized result file
  */
 MATCH_T* parse_match(
@@ -492,7 +491,7 @@ MATCH_T* parse_match(
   
   // parse spectrum
   if((spectrum = parse_spectrum_binary(result_file))== NULL){
-    carp(CARP_ERROR, "failed to");
+    carp(CARP_ERROR, "Failed to parse binary spectrum.");
   }
   
   // spectrum specific features

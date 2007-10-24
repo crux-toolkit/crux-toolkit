@@ -449,11 +449,23 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
   // get parameters from parameter.c
   double min_mass = get_double_parameter("min-mass");
   double max_mass = get_double_parameter("max-mass");
-  // char*  fasta_file = get_string_parameter_pointer("fasta-file");
+  BOOLEAN_T use_index = get_boolean_parameter("use-index");
 
-  // FIX!! MEMLEAK!! 
+  // MEMLEAK get from parameter file
+  BOOLEAN_T is_unique = TRUE;
+  char*  fasta_file = get_string_parameter_pointer("fasta-file");
+
+  INDEX_T* index = NULL;
+  DATABASE_T* database = NULL;
+  if (use_index == TRUE){
+    index = new_index_from_disk(fasta_file, is_unique);
+  } else {
+  // MEMLEAK get from parameter file
+    database = new_database(fasta_file, FALSE, FALSE);
+  }
+
   return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 
-      NULL, NULL);
+      index, database);
 }
 
 

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.31 $
+ * REVISION: $Revision: 1.32 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -648,26 +648,32 @@ BOOLEAN_T get_spectrum_collection_is_parsed(
 
 /**
  * Takes the spectrum file name and creates a file with unique filenames.
- * The method will create one file for PSM result serializations for the target sequence
- * and #number_decoy_set number of files for decoy PSM result serialization.  
- * Thus, the FILE* array will contain,
- * at index 0, the target file and the fallowing indicies the decoy files.
+ * The method will create one file for PSM result serializations for the 
+ * target sequence and #number_decoy_set number of files for decoy PSM 
+ * result serialization.  Thus, the FILE* array will contain,
+ * at index 0, the target file and the allowed indices the decoy files.
  *
  * Template: "fileName_XXXXXX", where XXXXXX is random generated to be unique.
- * Also,sets psm_result_filenames pointer to the array of filenames for both the target and decoy psm results
- * The name array is heap allocated, thus user must free it. Size is number_decoy_set +1 (for target)
- *\returns file handler array to the newly created files(target& decoy) and sets psm_result_filename.
+ * Also, sets psm_result_filenames pointer to the array of filenames for 
+ * both the target and decoy psm results. The array is heap allocated, 
+ * thus user must free it. Size is number_decoy_set +1 (for target)
+ * \returns file handle array to the newly created files (target & decoy) 
+ * and sets psm_result_filename.
  */
-FILE** get_spectrum_collection_psm_result_filename(
-  SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection -in
-  char* psm_result_folder_name, ///< the folder name for where the result file should be placed -in
-  char*** psm_result_filenames, ///< pointer to be set to the array of filenames for both the target and decoy psm results -out
-  int number_decoy_set,  ///< the number of decoy sets to produce -in
-  char* file_extension ///< the file extension of the spectrum file(i.e. ".ms2") -in
+FILE** get_spectrum_collection_psm_result_filenames(
+  SPECTRUM_COLLECTION_T* spectrum_collection, 
+    ///< the spectrum_collection -in
+  char* psm_result_folder_name, 
+    ///< the folder name for where the result file should be placed -in
+  char*** psm_result_filenames, 
+    ///< pointer to be set to the array of filenames -out
+  int number_decoy_set,  
+    ///< the number of decoy sets to produce -in
+  char* file_extension 
+    ///< the file extension of the spectrum file (i.e. ".ms2") -in
   )
 {
   int file_descriptor = -1;
-  int file_idx = 0;
   char suffix[25];
   // total number of files to create, target plus how many decoys needed
   int total_files = number_decoy_set + 1; 
@@ -676,7 +682,8 @@ FILE** get_spectrum_collection_psm_result_filename(
   if(access(psm_result_folder_name, F_OK)){
     // create PSM result folder
     if(mkdir(psm_result_folder_name, S_IRWXU+S_IRWXG+S_IRWXO) != 0){
-      carp(CARP_ERROR, "failed to create psm result folder: %s", psm_result_folder_name);
+      carp(CARP_ERROR, "failed to create psm result folder: %s", 
+          psm_result_folder_name);
     }
   }
   
@@ -685,27 +692,35 @@ FILE** get_spectrum_collection_psm_result_filename(
   char** filename_array = (char**)mycalloc(total_files, sizeof(char*));
   
   // extract filename from absolute path
-  char** spectrum_file_path = parse_filename_path(spectrum_collection->filename);
+  char** spectrum_file_path = 
+    parse_filename_path(spectrum_collection->filename);
   
-  // create a filename template that has psm_result_folder_name/spectrum_filename
-  char* filename_template = get_full_filename(psm_result_folder_name, spectrum_file_path[0]); 
+  // create a filename template that has psm_result_folder_name/spectrum_fname
+  char* filename_template 
+    = get_full_filename(psm_result_folder_name, spectrum_file_path[0]); 
   
   // now create files for first target file and then for decoys
-  for(; file_idx < total_files; ++file_idx){
+  int file_idx;
+  for(file_idx = 0; file_idx < total_files; ++file_idx){
+
     // is it target?
     if(file_idx == 0){
-      // generate psm_result filename as psm_result_folder_name/spectrum_filename_XXXXXX
-      filename_array[file_idx] = generate_name(filename_template, "_XXXXXX", file_extension, "crux_match_target_");
+
+      // generate psm_result filename as 
+      // psm_result_folder_name/spectrum_filename_XXXXXX
+      filename_array[file_idx] = generate_name(filename_template, "_XXXXXX", 
+          file_extension, "crux_match_target_");
     }
+
     // for decoys
     else{
       sprintf(suffix, "crux_match_decoy_%d_", file_idx);
-      filename_array[file_idx] = generate_name(filename_template, "_XXXXXX", file_extension, suffix);
+      filename_array[file_idx] = generate_name(filename_template, "_XXXXXX", 
+          file_extension, suffix);
     }
 
     // now open file handle
     if((file_descriptor = mkstemp(filename_array[file_idx])) == -1 ||
-       // FIXME might want to change to w+ instead of a+(append)
        (file_handle_array[file_idx] = fdopen(file_descriptor, "w+")) == NULL){
       
       // did we successfully create a file?
