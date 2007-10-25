@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.58 $
+ * $Revision: 1.59 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -873,7 +873,8 @@ BOOLEAN_T transform_database_to_memmap_database(
  * a standard suffix (e.g. cruxidx), so that a given fasta file will have
  * an obvious index location.
  *
- * assumes that the current directory is the crux directory where the fasta file is located
+ * assumes that the current directory is the crux directory where the 
+ * fasta file is located
  *
  * Note: create an index .info file as to map masses to files and to store 
  * all information that was used to create this index.
@@ -883,7 +884,8 @@ BOOLEAN_T create_index(
   INDEX_T* index ///< An allocated index -in
   )
 {
-  FILE* info_out = NULL; // the file stream where the index creation infomation is sent
+  // the file stream where the index creation information is sent
+  FILE* info_out = NULL; 
   FILE* readme = NULL;
   // new stuff
   char* temp_dir_name = NULL;
@@ -933,10 +935,12 @@ BOOLEAN_T create_index(
   file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
 
   // peptide array to store the peptides before serializing them all together
-  PEPTIDE_T*** peptide_array = (PEPTIDE_T***)mycalloc(num_bins, sizeof(PEPTIDE_T**));
-  int sub_indx = 0;
-  for(; sub_indx < num_bins; ++sub_indx){
-    peptide_array[sub_indx] = (PEPTIDE_T**)mycalloc(MAX_PROTEIN_IN_BIN, sizeof(PEPTIDE_T*));
+  PEPTIDE_T*** peptide_array = (PEPTIDE_T***)
+    mycalloc(num_bins, sizeof(PEPTIDE_T**));
+  int sub_indx;
+  for(sub_indx = 0; sub_indx < num_bins; ++sub_indx){
+    peptide_array[sub_indx] = (PEPTIDE_T**)
+      mycalloc(MAX_PROTEIN_IN_BIN, sizeof(PEPTIDE_T*));
   }
   // int array that stores the peptide count for each peptide array branch
   // this is used to determine when to output all peptides in buffer
@@ -944,7 +948,7 @@ BOOLEAN_T create_index(
   // total count of peptide in bin is sotred in peptide_count_array
   int* bin_count = (int*)mycalloc(num_bins, sizeof(int));
 
-  // create peptide count array that stores the total count of peptides in each bin
+  // create peptide count array that stores total count of peptides in each bin
   peptide_count_array = (unsigned int*)mycalloc(num_bins, sizeof(unsigned int));
 
   // create README file, with parameter informations
@@ -963,7 +967,6 @@ BOOLEAN_T create_index(
   long int file_idx = 0;
   int low_mass = mass_limits[0];
   long int count_peptide = 0;
-
   
   // iterate through all peptides
   while(database_peptide_iterator_has_next(peptide_iterator)){    
@@ -989,31 +992,35 @@ BOOLEAN_T create_index(
     ++peptide_count_array[file_idx];
 
     // dump peptide in bin or temporary matrix
-    dump_peptide(file_array, file_idx, working_peptide, peptide_array[file_idx], bin_count); 
+    dump_peptide(file_array, file_idx, working_peptide, 
+        peptide_array[file_idx], bin_count); 
   }
 
   // dump all the left over peptides
   dump_peptide_all(file_array, peptide_array, bin_count, num_bins);
-  
 
-  long bin_idx = 0;
   // sort each bin  
-  for(; bin_idx < num_bins; ++bin_idx){
+  long bin_idx;
+  for(bin_idx = 0; bin_idx < num_bins; ++bin_idx){
     if(file_array[bin_idx] == NULL){
       continue;
     }
     // sort each bin
-    if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index, peptide_count_array[bin_idx])) == NULL){
-      carp(CARP_WARNING, "failed to sort each bin");
+    if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index, 
+            peptide_count_array[bin_idx])) == NULL){
+      carp(CARP_WARNING, "Failed to sort each bin");
       fcloseall();
       return FALSE;
     }
 
-    // ADD HERE IF NEEDED:split if file too big
+    // TODO add splitting of files if necessary
     // print to crux_map
-    filename = get_crux_filename(bin_idx, 0); // 0 can change if need split the file
-    fprintf(info_out, "%s\t%.2f\t", filename, mass_limits[0] + (bin_idx * index->mass_range));
+    filename = get_crux_filename(bin_idx, 0); 
+      ///< 0 can change if we need to split the file
+    fprintf(info_out, "%s\t%.2f\t", filename, 
+        mass_limits[0] + (bin_idx * index->mass_range));
     fprintf(info_out, "%.2f\n", index->mass_range);
+
     // free up heap
     free(filename);
     fclose(file_array[bin_idx]);
@@ -1033,6 +1040,7 @@ BOOLEAN_T create_index(
     carp(CARP_WARNING, "cannot rename directory");
     return FALSE;
   }
+
   free(temp_dir_name);
 
   // set permission for the directory
@@ -2139,9 +2147,6 @@ void free_bin_peptide_iterator(
     free_peptide(bin_peptide_iterator->peptide);
   }
 
-  // decrement the database pointer count
-  free_database(bin_peptide_iterator->index->database);
-  
   free(bin_peptide_iterator);
 }
 
@@ -2165,7 +2170,8 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
   
   // create database sorted peptide iterator
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator =
-    (BIN_SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(BIN_SORTED_PEPTIDE_ITERATOR_T));
+    (BIN_SORTED_PEPTIDE_ITERATOR_T*)
+    mycalloc(1, sizeof(BIN_SORTED_PEPTIDE_ITERATOR_T));
 
   // reset file to start
   rewind(file);
@@ -2175,24 +2181,29 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator =
     new_bin_peptide_iterator(index, file, FALSE);
 
-  // create a sorted peptide iterator that will sort all the peptides from bin peptide_iterator
-  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =
-    new_sorted_peptide_iterator_bin(bin_peptide_iterator, MASS, index->is_unique, peptide_count);
+  // create a sorted peptide iterator that will sort all the peptides 
+  // from bin peptide_iterator
+  SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator = 
+    new_sorted_peptide_iterator_bin(bin_peptide_iterator, MASS, 
+        index->is_unique, peptide_count);
 
   // set sorted_peptide_iterator
-  bin_sorted_peptide_iterator->sorted_peptide_iterator = sorted_peptide_iterator;
+  bin_sorted_peptide_iterator->sorted_peptide_iterator = 
+    sorted_peptide_iterator;
   
-  free_bin_peptide_iterator(bin_peptide_iterator); // CHECK ME might wanna check this...
+  free_bin_peptide_iterator(bin_peptide_iterator); 
+  // CHECK ME might wanna check this...
 
   return bin_sorted_peptide_iterator;
 }
 
 /**
- *  The basic iterator functions.
+ * The basic iterator functions.
  * \returns The next peptide in the index.
  */
 PEPTIDE_T* bin_sorted_peptide_iterator_next(
-  BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator ///< the bin_peptide_iterator to get peptide -in
+  BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator 
+    ///< the bin_peptide_iterator to get peptide -in
   )
 {
   PEPTIDE_T* peptide = sorted_peptide_iterator_next(bin_sorted_peptide_iterator->sorted_peptide_iterator);
