@@ -15,7 +15,7 @@ from optparse import OptionParser
 
 #-------------------
 
-def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectra, score_type="xcorr"):
+def plot_compare_data(crux_array, crux_no_index_array, sequest_array, mass_windows, number_of_spectra, score_type="xcorr"):
   """compares runtime for each scoring method """
 
   print "generating figures"
@@ -28,12 +28,18 @@ def plot_compare_data(crux_array, sequest_array, mass_windows, number_of_spectra
     fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_array[idx]))
   fh.close()
 
+  fh = open("crux-no-index.xy", "w")
+  for idx in range(len(mass_windows)):
+    fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_no_index_array[idx]))
+  fh.close()
+
   fh = open("sequest.xy", "w")
   for idx in range(len(mass_windows)):
     fh.write("%.8f\t%.8f\n" % (mass_windows[idx], sequest_array[idx]))
   fh.close()
 
-  plot(mass_windows, crux_array, label="Crux")
+  plot(mass_windows, crux_array, label="Crux (w/index)")
+  plot(mass_windows, crux_no_index_array, label="Crux (w/o index)")
   plot(mass_windows, sequest_array, label="SEQUEST")
   legend(loc='right')
   
@@ -66,6 +72,7 @@ mass_windows = ["0.1", "1", "3"]
 #runtime result arrays for each method
 sequest_results = []
 crux_results = []
+crux_no_index_results = []
 
 number_of_spectra = 0
 
@@ -126,6 +133,34 @@ for window in mass_windows:
         fields = line.rstrip('\n').split()
         crux_results.append(float(fields[1]))
 
+  # 3, now run Crux without an index
+  command = "time -p ./match_search \
+      --match-output-folder output_no_index \
+      --parameter-file crux_no_index.params_%s \
+      --number-decoy-set 0 \
+      %s %s" % (window, ms2_file, fasta_file)
+  print >>sys.stderr, "\nRunning %s\n" % command
+
+  (exit_code, result) = \
+        commands.getstatusoutput(command)
+  #debug
+  print result
+  #print exit_code
+  
+  if exit_code == "1":
+    print "%s %s" % ("failed to run Crux on mass window:", window)
+    sys.exit(1)
+  else:
+    #now parse the runtime from the result output
+    result = result.split('\n')
+    for line in result:
+      #get user time
+      if line.startswith('user '):
+        fields = line.rstrip('\n').split()
+        crux_no_index_results.append(float(fields[1]))
+
+
+
 #Debug
 #print crux_results, sequest_results, mass_windows
 
@@ -134,4 +169,4 @@ dtas = filter(lambda x: x.endswith("dta"), os.listdir(os.getcwd()))
 
 
 #now plot the results
-plot_compare_data(crux_results, sequest_results, [ float(i) for i in mass_windows], len(dtas))
+plot_compare_data(crux_results, crux_no_index_results, sequest_results, [ float(i) for i in mass_windows], len(dtas))
