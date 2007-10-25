@@ -9,8 +9,7 @@ export MASS_RANGE_FILE=`pwd`/mass.ranges
 
 #------------
 mkdir -p remove
-# mv -f crux_match_* remove/
-# mv -f match_search_* remove/
+mv -f crux_match_* match_search_* remove/
 ln -fs $FASTA; ln -fs $FASTA_INDEX; ln -fs $MS2;
 
 #------------
