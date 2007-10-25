@@ -4,6 +4,7 @@ all: crux.pdf
 REFS = $(HOME)/refs/refs.bib
 
 crux.bbl: crux.tex \
+	plos.bst \
 	$(REFS) \
 	schematic.eps \
 	./Images/indexing.eps \
