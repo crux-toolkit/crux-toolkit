@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.57 $
+ * $Revision: 1.58 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1378,13 +1378,14 @@ BOOLEAN_T check_index_db_boundary(
 }
 
 /**
- * parses the "crux_index_map" file that contains the mapping between
- * each crun_index_* file and mass range
- * Adds all crux_index_* files that are with in the peptide constraint mass range
+ * Parses the "crux_index_map" file that contains the mapping between
+ * each crux_index_* file and a mass range. Adds all crux_index_* files 
+ * that are within the peptide constraint mass range.
  * \returns TRUE if successfully parses crux_index_map
  */
 BOOLEAN_T parse_crux_index_map(
-  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator  ///< working index_peptide_iterator -in
+  INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator  
+    ///< working index_peptide_iterator -in
   )
 {
   FILE* file = NULL;
@@ -1411,18 +1412,17 @@ BOOLEAN_T parse_crux_index_map(
   // open crux_index_file
   file = fopen("crux_index_map", "r");
   if(file == NULL){
-    carp(CARP_WARNING, "cannot open crux_index_map file");
-    fclose(file);
+    carp(CARP_WARNING, "Cannot open crux_index_map file.");
     return FALSE;
   }
   
   while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
     // check header lines
     if(new_line[0] == '#'){
-      // check if crux_index_database was created in a condition which the current query is supported
+      // check if crux_index_database supports the current query 
       if(num_line < NUM_CHECK_LINES && 
          !check_index_db_boundary(new_line, index_peptide_iterator->index)){
-        carp(CARP_ERROR, "The current crux_index database does not support the query");
+        carp(CARP_ERROR, "The crux_index database does not support the query");
         fclose(file);
         free(new_line);
         return FALSE;
@@ -1436,7 +1436,7 @@ BOOLEAN_T parse_crux_index_map(
       if(sscanf(new_line,"%s %f %f", 
                 filename, &start_mass, &range) < 3){
         free(new_line);
-        carp(CARP_WARNING, "incorrect file format");
+        carp(CARP_WARNING, "Incorrect file format");
         fclose(file);
         return FALSE;
       }
@@ -1447,8 +1447,9 @@ BOOLEAN_T parse_crux_index_map(
         }
         else{
           start_file = TRUE;
-          if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
-            carp(CARP_WARNING, "failed to add index file");
+          if(!add_new_index_file(
+                index_peptide_iterator, filename, start_mass, range)){
+            carp(CARP_WARNING, "Failed to add index file");
             fclose(file);
             free(new_line);
             return FALSE;
@@ -1458,8 +1459,9 @@ BOOLEAN_T parse_crux_index_map(
       }
       // add all index_files that are with in peptide constraint mass interval
       else if(max_mass > (start_mass - 0.0001)){
-        if(!add_new_index_file(index_peptide_iterator, filename, start_mass, range)){
-          carp(CARP_WARNING, "failed to add index file");
+        if(!add_new_index_file(
+              index_peptide_iterator, filename, start_mass, range)){
+          carp(CARP_WARNING, "Failed to add index file");
           free(new_line);
           return FALSE;
         }
@@ -1799,10 +1801,11 @@ INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
   index_peptide_iterator->index = copy_index_ptr(index);
   
   // parse index_files that are with in peptide_constraint from crux_index_map
-  if(!parse_crux_index_map( index_peptide_iterator)){
+  if(!parse_crux_index_map(index_peptide_iterator)){
     // failed to parse crux_index_map
     free_index_peptide_iterator(index_peptide_iterator);
-    die("failed to parse crux_index_map file");
+    carp(CARP_FATAL, "Failed to parse crux_index_map file");
+    exit(1);
   }
 
   // if no index files to parse, then there's no peptides to return

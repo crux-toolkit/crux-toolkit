@@ -263,6 +263,7 @@ int main(int argc, char** argv){
                 FALSE
                 );
     
+    // MEMLEAK some kind of segfault around here
     // create crux_index files
     if(!create_index(crux_index)){
       die("failed to create index");

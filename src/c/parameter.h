@@ -1,11 +1,12 @@
 /**
  * \file parameter.h
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  *****************************************************************************/
 #ifndef PARAMETER_FILE_H
 #define PARAMETER_FILE_H
 #include "utils.h"
+#include "objects.h"
 
 #define PARAMETER_LENGTH 1024 ///< default length of parameter name and value in characters
 #define NUM_PARAMS 512 ///< initial number of parameters allowed
@@ -184,7 +185,7 @@ BOOLEAN_T add_parameter(
  * Parameter file must be parsed first!
  * Searches through the list of parameters, 
  * looking for one whose name matches the string.  
- * Returns a peptide type enumerated type (in objects.h)
+ * Returns a peptide_type enumerated type (in objects.h)
  */ 
 PEPTIDE_TYPE_T get_peptide_type_parameter(
   char* name
