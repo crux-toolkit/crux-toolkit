@@ -279,9 +279,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   // set charge of match_collection creation
   match_collection->charge = charge;
   match_collection->null_peptide_collection = null_peptide_collection;
-  
-  // top_rank_for_p_value is the amount of top ranked sp scored peptides to score for LOGP_EXP_SP
-  // This parameter can only be set from the crux.params file
+
   int top_rank_for_p_value = get_int_parameter("top-rank-p-value");
   int sample_count = get_int_parameter("sample-count");
   int top_fit_sp = get_int_parameter("top-fit-sp");
@@ -294,7 +292,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   }
   
   // create a generate peptide iterator
-  // FIXME use neutral_mass for now, but should allow option
+  // FIXME use neutral_mass for now, but should allow option to change
  
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  
     new_generate_peptides_iterator_from_mass(
@@ -304,7 +302,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   
   /***************Preliminary scoring**************************/
   // When creating match objects for first time, must set the
-  // null peptide boolean paramter
+  // null peptide boolean parameter
   
   // score SP match_collection
   if(prelim_score == SP){
@@ -314,8 +312,11 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
           charge, 
           peptide_iterator)){
       carp(CARP_ERROR, "failed to score match collection for SP");
+      return NULL;
     }
     if (match_collection->match_total == 0){
+      carp(CARP_WARNING, "No matches found for spectrum %i charge %i",
+          get_spectrum_first_scan(spectrum), charge);
       return NULL;
     }
   }
@@ -333,11 +334,11 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
         spectrum, 
         charge);
   }
-  // if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
+  // if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP estimate parameters
   else if(score_type == LOGP_EXP_SP || score_type == LOGP_BONF_EXP_SP){
     estimate_exp_sp_parameters(match_collection, top_fit_sp);
   }
-  // if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP esitmate parameters
+  // if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP estimate parameters
   else if(score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP){
     estimate_weibull_parameters(
         match_collection, SP, sample_count, spectrum, charge);
@@ -374,7 +375,8 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   else if(score_type == LOGP_BONF_WEIBULL_SP){
     if(!score_match_collection_logp_bonf_weibull_sp(
           match_collection, top_rank_for_p_value)){
-      carp(CARP_ERROR, "failed to score match collection for LOGP_BONF_WEIBULL_SP");
+      carp(CARP_ERROR, 
+          "failed to score match collection for LOGP_BONF_WEIBULL_SP");
     }
   }
   else if(score_type == XCORR || 
@@ -975,7 +977,6 @@ BOOLEAN_T score_match_collection_sp(
   // free ion_series now that we are done iterating over all peptides
   free_ion_series(ion_series);
   
-  
   // calculate the final sp score mean
   match_collection->sp_scores_mean /= match_collection->match_total;
   
@@ -983,8 +984,10 @@ BOOLEAN_T score_match_collection_sp(
   match_collection->experiment_size = match_collection->match_total;
 
   // print total peptides scored so far
-  carp(CARP_INFO, "total peptide scored for sp: %d", 
+  carp(CARP_INFO, "Total peptide scored for sp: %d", 
       match_collection->match_total);
+
+  if (match_collection->match_total)
   
   // free heap
   free_scorer(scorer);

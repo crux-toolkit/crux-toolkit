@@ -443,6 +443,9 @@ int main(int argc, char** argv){
                                           index,
                                           database
                                           );
+          if (match_collection == NULL){
+            continue;
+          }
           // serialize the psm features to ouput file upto 'top_match' number of 
           // top peptides among the match_collection
           // carp(CARP_WARNING, "Outputting to %s\n", psm_result_file[file_idx]);
