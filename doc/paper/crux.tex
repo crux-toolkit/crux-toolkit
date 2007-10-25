@@ -235,11 +235,19 @@ observed spectrum.  First, Crux takes the square root of each peak's
 intensity and rounds each peak's m/z to the nearest integer.  Second,
 Crux normalizes the peak intensities to sum to 100.  Third, Crux
 extracts the top 200 highest intensity peaks.  Crux compares the
-resulting observed spectrum with the b and y fragment ions from the
+resulting observed spectrum $v$ with the b and y fragment ions $u$ from the
 candidate peptide to compute $Sp$ as follows:
 \[
-\mbox{FIXME: Insert equation here}
+S_p(u, v) = \frac{
+\left(\sum_{i=1}^N u_i \right)
+\left(\sum_{i=1}^N \delta(u_i v_i)\right)
+\left(1 + \beta R(u) \right)
+}{\sum_{i=1}^N \delta(u_i)}
 \]
+where $N$ is the largest m/z value in the theoretical spectrum, $\beta
+= 0.075$, $R(u)$ is the maximum number of consecutive b- or y-ions
+from the theoretical spectrum that appear in the observed spectrum,
+and $\delta(x) = 0$ if $x=0$ and $\delta(x) = 1$ otherwise.
 
 $Xcorr$ scoring also requires some pre-processing of the observed
 spectrum.  As before, Crux first takes the square root of each peak's
