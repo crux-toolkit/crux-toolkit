@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.59 $
+ * $Revision: 1.60 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -31,6 +31,8 @@
 #define NUM_CHECK_LINES 8
 #define MAX_PROTEIN_IN_BIN 2500
 #define MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN 500000000
+#define MAX_PARSE_COUNT 3
+#define SLEEP_DURATION 5
 
 // global variable to store the temp directory
 // used for deleting directory when SIGINT
@@ -1809,11 +1811,18 @@ INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
   index_peptide_iterator->index = copy_index_ptr(index);
   
   // parse index_files that are with in peptide_constraint from crux_index_map
-  if(!parse_crux_index_map(index_peptide_iterator)){
+  int parse_count = 0;
+  while(!parse_crux_index_map(index_peptide_iterator)){
     // failed to parse crux_index_map
-    free_index_peptide_iterator(index_peptide_iterator);
-    carp(CARP_FATAL, "Failed to parse crux_index_map file");
-    exit(1);
+    if (parse_count++ > MAX_PARSE_COUNT){
+      free_index_peptide_iterator(index_peptide_iterator);
+      carp(CARP_FATAL, 
+        "Failed to parse crux_index_map file after %i tries", MAX_PARSE_COUNT);
+      exit(1);
+    } else {
+      carp(CARP_ERROR, "Failed to parse crux_index_map file. Sleeping.");
+      sleep(SLEEP_DURATION);
+    }
   }
 
   // if no index files to parse, then there's no peptides to return
