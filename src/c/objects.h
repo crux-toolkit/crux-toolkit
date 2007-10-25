@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.39 $
+ * $Revision: 1.40 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -90,6 +90,7 @@ typedef struct peptide_src_iterator PEPTIDE_SRC_ITERATOR_T;
  * Being PARTIALLY_TRYPTIC is N or C terminus tryptic
  * \brief The enum for peptide type, with regard to trypticity.
  */
+#define NUMBER_PEPTIDE_TYPES 6
 enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC}; 
 
 /**

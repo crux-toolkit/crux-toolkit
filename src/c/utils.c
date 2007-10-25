@@ -611,7 +611,8 @@ int convert_enum_type_str
       return(i_enum);
     }
   }
-  die("Illegal value (%s).", enum_type_str);
+  carp(CARP_FATAL, "Illegal value (%s).", enum_type_str);
+  exit(1);
   return(0); /* Unreachable. */
 }
 

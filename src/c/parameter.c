@@ -725,13 +725,13 @@ BOOLEAN_T set_options_command_line(
 {
   // check if parameters has been initlialized
   if(!parameter_initialized && !parameter_parsed){
-    carp(CARP_ERROR, "must inilialize parameters before copying");
+    carp(CARP_ERROR, "Must initialize parameters before copying");
     return FALSE;
   }
   
-  // check if parameters cah be changed
+  // check if parameters can be changed
   if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    carp(CARP_ERROR, "Can't change parameters once they are confirmed");
     return FALSE;
   }
   
@@ -746,6 +746,26 @@ BOOLEAN_T set_options_command_line(
   // if exist ovewrite it!
   return update_hash_value(parameters->hash, name, set_value);  
 } 
+
+/**
+ * Routines that return crux enumerated types. 
+ */
+static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = {
+  "tryptic", "partial", "n-tryptic", "c-tryptic", "not-tryptic", "all"
+}; 
+
+PEPTIDE_TYPE_T get_peptide_type_parameter(
+  char* name
+    ){
+  char* param = get_string_parameter_pointer(name);
+  int peptide_type = convert_enum_type_str(
+      param, 0, peptide_type_strings, NUMBER_PEPTIDE_TYPES);
+  return (PEPTIDE_TYPE_T)peptide_type;
+}
+
+
+
+
 
 /*
  * Local Variables:
