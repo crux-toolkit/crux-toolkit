@@ -445,7 +445,7 @@ int main(int argc, char** argv){
                                           );
           // serialize the psm features to ouput file upto 'top_match' number of 
           // top peptides among the match_collection
-          carp(CARP_WARNING, "Outputting to %s\n", psm_result_file[file_idx]);
+          // carp(CARP_WARNING, "Outputting to %s\n", psm_result_file[file_idx]);
 
           serialize_psm_features(match_collection, psm_result_file[file_idx], 
               top_match, prelim_score, main_score);

@@ -58,7 +58,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   DATABASE_T* database ///< the database
   )
 {
-  // MEMLEAK put in parameter retrieval routines
   // get parameters
   int min_length = get_int_parameter("min-length");
   int max_length = get_int_parameter("max-length");
@@ -66,9 +65,9 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   char* redundancy = get_string_parameter_pointer("redundancy");
   char* sort = get_string_parameter_pointer("sort");  // sort order
   BOOLEAN_T use_index_boolean = get_boolean_parameter("use-index");
-  // START make sure this works
   PEPTIDE_TYPE_T peptide_type = get_peptide_type_parameter("cleavages");
 
+  // MEMLEAK put in parameter retrieval routines
   MASS_TYPE_T mass_type = AVERAGE;
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
   BOOLEAN_T is_unique = FALSE;
