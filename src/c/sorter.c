@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file sorter.c
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -561,7 +561,8 @@ unsigned long total_number_peptide = 0;
  * \returns a SORTED_PEPTIDE_ITERATOR_T object.
  */
 SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
-  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator, ///< the peptide iterator to extend -in
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator, 
+    ///< the peptide iterator to extend -in
   SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
   BOOLEAN_T unique ///< only return unique peptides? -in
   )
@@ -583,7 +584,8 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
     // debug purpuse
     ++total_number_peptide;
     if(total_number_peptide % 1000000 == 0){
-      carp(CARP_INFO, "number of peptides(not unique): %u", total_number_peptide); 
+      carp(CARP_INFO, "Number of peptides (not unique): %u", 
+          total_number_peptide); 
     }
     
     if(start){
@@ -607,7 +609,8 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
 
   sorted_peptide_iterator->peptide_wrapper = master_list_wrapper;
   
-  carp(CARP_INFO, "total number of peptides(not unique): %u", total_number_peptide); 
+  carp(CARP_INFO, "total number of peptides(not unique): %u", 
+      total_number_peptide); 
   
   return sorted_peptide_iterator;
 }
