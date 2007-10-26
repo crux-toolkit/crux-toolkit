@@ -1,0 +1,10 @@
+import plotFuncs, pylab
+plotFuncs.plotLogLogFromFile("crux-no-index", style="k-o", label="Crux (w/o index)")
+plotFuncs.plotLogLogFromFile("sequest", style="m-o", label="Sequest")
+plotFuncs.plotLogLogFromFile("crux", style="g-o", label="Crux (w/ index)")
+pylab.legend(loc="lower right")
+pylab.xlabel("Mass window (Da)")
+pylab.xlim(0.05, 5)
+pylab.ylabel("Runtime for 1000 spectra (s)")
+pylab.savefig("indexing.eps")
+pylab.savefig("indexing.png")
