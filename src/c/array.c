@@ -3,7 +3,7 @@
  * AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University
- * VERSION: $Revision: 1.1 $
+ * VERSION: $Revision: 1.2 $
  * DESCRIPTION: Some simple array-handling routines.
  ********************************************************************/
 #include <stdio.h>
@@ -147,6 +147,26 @@ void incr_array_item
   array_bounds_check(index, array);
   array->items[index] += value;
 }
+
+/************************************************************************
+ * \returns the index of (the first) item within tolerance of value in array.
+ * -1 if no value within tolerance. 
+ ***********************************************************************/
+int get_array_index_of
+  (ATYPE value,
+   ARRAY_T* array,
+   ATYPE tolerance)
+{
+  int idx;
+  for (idx=0; idx < array->num_items; idx++){
+    ATYPE element = get_array_item(idx, array);
+    if ((element - tolerance <= value) &&
+        (element + tolerance >= value)){
+      return idx;
+    }
+  }
+  return -1;
+};
 
 /***********************************************************************
  * Give out the innards of the array.  This function is included only

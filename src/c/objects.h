@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -301,9 +301,9 @@ typedef struct scorer SCORER_T;
 /**
  * The enum for scorer type
  */
-enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE};
+enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE, LOGP_QVALUE_WEIBULL_XCORR };
 
-#define _SCORE_TYPE_NUM 13 ///< the number of different score types
+#define _SCORE_TYPE_NUM 14 ///< the number of different score types
 
 /**
  * \typedef SCORER_TYPE_T
@@ -355,7 +355,7 @@ typedef struct match_collection_iterator MATCH_COLLECTION_ITERATOR_T;
 /**
  * The enum for algorithm type (PERCOLATOR, CZAR, ALL)
  */
-enum _algorithm {PERCOLATOR, CZAR, ALL};
+enum _algorithm {PERCOLATOR, CZAR, QVALUE, ALL};
 
 /**
  * \typedef ALGORITHM_TYPE_T

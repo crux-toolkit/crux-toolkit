@@ -449,6 +449,7 @@ BOOLEAN_T sort_match_collection(
   case LOGP_BONF_EXP_SP: 
   case LOGP_WEIBULL_SP: 
   case LOGP_BONF_WEIBULL_SP: 
+  case LOGP_QVALUE_WEIBULL_XCORR: 
     // LOGP_EXP_SP and SP have same order, thus sort the match to decreasing SP order for the return
     carp(CARP_DEBUG, "Sorting match_collection %i", match_collection->match_total);
     qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_sp);

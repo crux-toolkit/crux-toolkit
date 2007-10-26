@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.44 $
+ * REVISION: $Revision: 1.45 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -244,6 +244,7 @@ void print_match(
     case LOGP_BONF_EVD_XCORR:
     case LOGP_WEIBULL_XCORR:
     case LOGP_BONF_WEIBULL_XCORR:
+    case LOGP_QVALUE_WEIBULL_XCORR:
       secondary_score = SP;
       break;
     case Q_VALUE:      
