@@ -6,7 +6,7 @@
 /* AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University
- * VERSION: $Revision: 1.3 $
+ * VERSION: $Revision: 1.4 $
  ********************************************************************/
 #ifndef ARRAY_H
 #define ARRAY_H
@@ -105,6 +105,15 @@ void incr_array_item
   (int      index,
    ATYPE    value,
    ARRAY_T* array);
+
+/************************************************************************
+ * \returns the index of (the first) item within tolerance of value in array.
+ * -1 if no value within tolerance
+ ***********************************************************************/
+int get_array_index_of
+  (ATYPE value,
+   ARRAY_T* array,
+   ATYPE tolerance);
 
 /***********************************************************************
  * Give out the innards of the array.  This function is included only
