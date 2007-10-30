@@ -286,20 +286,43 @@ MATCH_COLLECTION_T* run_qvalue(
 
   free_match_collection_iterator(match_collection_iterator);
 
-  // sort in descending order
+  // sort the - log p-values in descending order
   qsort(pvalues, num_psms, sizeof(double), compare_doubles_descending);
 
+  double* qvalues = (double*) malloc(sizeof(double) * length);
+
+  // work in negative log space, since that is where p- and qvalues end up
+  double log_num_psms = - log(num_psms);
+  double log_pi_0 = - log(get_double_parameter("pi0"));
+
+  // convert the p-values into FDRs using Benjamini-Hochberg
   int idx;
   for (idx=0; idx < num_psms; idx++){
-    carp(CARP_DETAILED_DEBUG, "array[%i] = %.6f", idx, pvalues[idx]);
+    carp(CARP_DETAILED_DEBUG, "pvalue[%i] = %.6f", idx, pvalues[idx]);
+    int pvalue_idx = idx + 1; // start counting pvalues at 1
+    double log_pvalue = pvalues[idx];
+
+    double log_qvalue = 
+      log_pvalue + log_num_psms - (-log(pvalue_idx)) + log_pi_0;
+    qvalues[idx] = log_qvalue;
+  }
+
+  // convert the FDRs into q-values
+  double max_log_qvalue = - BILLION;
+  for (idx=num_psms-1; idx >= 0; idx--){
+    if (qvalues[idx] > max_log_qvalue){
+      max_log_qvalue = qvalues[idx];
+    } else { // current q-value is <= max q-value
+      // set to max q-value so far
+      qvalues[idx] = max_log_qvalue; 
+    }
+    carp(CARP_DETAILED_DEBUG, "qvalue[%i] = %.6f", idx, qvalues[idx]);
   }
 
   // Iterate over the matches again
   match_collection_iterator = 
      new_match_collection_iterator(psm_result_folder, fasta_file);
 
-  // work in negative log space, since that is where p- and qvalues end up
-  double log_num_psms = - log(num_psms);
   while(match_collection_iterator_has_next(match_collection_iterator)){
 
     // get the next match_collection
@@ -316,21 +339,19 @@ MATCH_COLLECTION_T* run_qvalue(
       carp(CARP_DETAILED_DEBUG, "- log pvalue  = %.6f", log_pvalue);
       
       // get the index of the p-value in the sorted list
-      int pvalue_index = 0;
+      // FIXME slow, but it probably doesn't matter
       int idx;
+      int pvalue_idx;
       for (idx=0; idx < num_psms; idx++){
         double element = pvalues[idx];
         if ((element - EPSILON <= log_pvalue) &&
             (element + EPSILON >= log_pvalue)){
-          pvalue_index = idx + 1; // start counting pvalues at 1
+          pvalue_idx = idx; // start counting pvalues at 1
           break;
         }
       }
       
-      // convert the p-value into a qvalue using Benjamini-Hochberg
-      double log_qvalue = log_pvalue + log_num_psms - (-log(pvalue_index));
-      carp(CARP_DETAILED_DEBUG, "- log qvalue  = %.6f", log_qvalue);
-      set_match_score(match, LOGP_QVALUE_WEIBULL_XCORR, log_qvalue);
+      set_match_score(match, LOGP_QVALUE_WEIBULL_XCORR, qvalues[pvalue_idx]);
     }
 
     // ok free & update for net set
@@ -347,6 +368,7 @@ MATCH_COLLECTION_T* run_qvalue(
   // with the database, however, since it creates circular references
   free_match_collection_iterator(match_collection_iterator);
   free(pvalues);
+  free(qvalues);
 
   return match_collection;
 }

@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.46 $
+ * REVISION: $Revision: 1.47 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -116,16 +116,16 @@ void free_match(
   
   // only free match when pointer count reaches
   if(match->pointer_count == 0){
-    // free peptide
-    free_peptide(match->peptide);
-    
-    if(match->post_process_match){
-      // free spectrum
+
+    if (match->peptide != NULL){
+      free_peptide(match->peptide);
+    }
+    if(match->post_process_match && match->spectrum !=NULL){
       free_spectrum(match->spectrum);
     }
-
-    // free cached peptide sequence if not NULL
-    free(match->peptide_sequence);
+    if (match->peptide_sequence != NULL){
+      free(match->peptide_sequence);
+    }
 
     free(match);  
   }

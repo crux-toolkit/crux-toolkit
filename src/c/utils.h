@@ -156,6 +156,15 @@ void * myrealloc
   (void * ptr,
    size_t size);
 
+/********************************************************************
+ * fwrite with a check to make sure it was successful (useful for NFS problems)
+ ********************************************************************/
+BOOLEAN_T myfwrite
+  (const void *ptr, 
+   size_t size, 
+   size_t nitems, 
+   FILE *stream);
+
 /***************************************************************************
  * Dynamically create or grow an array; 
  * P = pointer, N = new size, T = type 
