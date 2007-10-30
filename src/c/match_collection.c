@@ -440,7 +440,8 @@ BOOLEAN_T sort_match_collection(
   case LOGP_BONF_EVD_XCORR:
   case LOGP_WEIBULL_XCORR: 
   case LOGP_BONF_WEIBULL_XCORR: 
-    // LOGP_BONF_EVD_XCORR and XCORR have same order, sort the match to decreasing XCORR order for the return
+    // LOGP_BONF_EVD_XCORR and XCORR have same order, 
+    // sort the match to decreasing XCORR order for the return
     qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_xcorr);
     match_collection->last_sorted = XCORR;
     return TRUE;
@@ -450,15 +451,20 @@ BOOLEAN_T sort_match_collection(
   case LOGP_WEIBULL_SP: 
   case LOGP_BONF_WEIBULL_SP: 
   case LOGP_QVALUE_WEIBULL_XCORR: 
-    // LOGP_EXP_SP and SP have same order, thus sort the match to decreasing SP order for the return
-    carp(CARP_DEBUG, "Sorting match_collection %i", match_collection->match_total);
-    qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_sp);
-    carp(CARP_DEBUG, "Sorting match_collection %i", match_collection->match_total);
+    // LOGP_EXP_SP and SP have same order, 
+    // thus sort the match to decreasing SP order for the return
+    carp(CARP_DEBUG, "Sorting match_collection %i", 
+        match_collection->match_total);
+    qsort_match(match_collection->match, 
+        match_collection->match_total, (void *)compare_match_sp);
+    carp(CARP_DEBUG, "Sorting match_collection %i", 
+        match_collection->match_total);
     match_collection->last_sorted = SP;
     return TRUE;
   case Q_VALUE:
   case PERCOLATOR_SCORE:
-    qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_percolator_score);
+    qsort_match(match_collection->match, match_collection->match_total, 
+        (void *)compare_match_percolator_score);
     match_collection->last_sorted = PERCOLATOR_SCORE;
     return TRUE;
   }
@@ -493,9 +499,9 @@ void truncate_match_collection(
 }
 
 /**
- * Must provide a match_collection that is already scored and ranked in the score_type
- * Rank 1, means hight score
- *\returns TRUE, if successfully popluates the match rank in the match collection
+ * Must provide a match_collection that is already scored, ranked for score_type
+ * Rank 1, means highest score
+ * \returns TRUE, if populates the match rank in the match collection
  */
 BOOLEAN_T populate_match_rank_match_collection(
  MATCH_COLLECTION_T* match_collection, ///< the match collection to populate match rank -out
@@ -1706,16 +1712,17 @@ BOOLEAN_T serialize_psm_features(
   // spectrum specific features
   // first, serialize the spectrum info of the match collection  
   // the charge of the spectrum
-  fwrite(&(match_collection->charge), sizeof(int), 1, output); 
-  fwrite(&(match_collection->match_total), sizeof(int), 1, output);
-  fwrite(&delta_cn, sizeof(float), 1, output);
-  fwrite(&ln_delta_cn, sizeof(float), 1, output);
-  fwrite(&ln_experiment_size, sizeof(float), 1, output);
+  
+  myfwrite(&(match_collection->charge), sizeof(int), 1, output); 
+  myfwrite(&(match_collection->match_total), sizeof(int), 1, output);
+  myfwrite(&delta_cn, sizeof(float), 1, output);
+  myfwrite(&ln_delta_cn, sizeof(float), 1, output);
+  myfwrite(&ln_experiment_size, sizeof(float), 1, output);
   
   // serialize each boolean for scored type 
   int score_type_idx;
   for(score_type_idx=0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
-    fwrite(&(match_collection->scored_type[score_type_idx]), 
+    myfwrite(&(match_collection->scored_type[score_type_idx]), 
         sizeof(BOOLEAN_T), 1, output);
   }
   
@@ -2085,19 +2092,20 @@ BOOLEAN_T extend_match_collection(
     
     // get charge of the spectrum
     if(fread(&charge, (sizeof(int)), 1, result_file) != 1){
-      carp(CARP_ERROR, "serialized file corrupted, incorrect match_total_of_serialized_collection value");  
+      carp(CARP_ERROR, "serialized file corrupted, incorrect charge value");  
       return FALSE;
     }
     
     // get serialized match_total
     if(fread(&match_total_of_serialized_collection, (sizeof(int)), 1, result_file) != 1){
-      carp(CARP_ERROR, "serialized file corrupted, incorrect match_total_of_serialized_collection value");  
+      carp(CARP_ERROR, "serialized file corrupted, "
+          "incorrect match_total_of_serialized_collection value");  
       return FALSE;
     }
     
     // get delta_cn value
     if(fread(&delta_cn, (sizeof(float)), 1, result_file) != 1){
-      carp(CARP_ERROR, "serialized file corrupted, incorrect dleta cn value for top match");  
+      carp(CARP_ERROR, "serialized file corrupted, incorrect delta cn value for top match");  
       return FALSE;
     }
     

@@ -370,8 +370,26 @@ void * myrealloc
   return(temp_ptr);
 }
 
+/********************************************************************
+ * fwrite with a check to make sure it was successful (useful for NFS problems)
+ ********************************************************************/
+BOOLEAN_T myfwrite
+  (const void *ptr, 
+   size_t size, 
+   size_t nitems, 
+   FILE *stream){
+
+  size_t ret = fwrite(ptr, size, nitems, stream);
+  if (nitems != ret){
+    carp(CARP_ERROR, "Problem writing %i items", nitems);
+    return FALSE;
+  }
+  return TRUE;
+}
+
 #ifdef MYRAND
 #define MY_RAND_MAX 4096
+
 
 /********************************************************************
  * Primary function for the built-in random number generator. 
@@ -746,7 +764,12 @@ int main (int argc, char *argv[])
   // double double_array[8] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0};
   // fwrite(double_array, sizeof(double), 8, outfile);
   int int_array[8] = {1,2,3,4,5,6,7,8};
-  fwrite(int_array, sizeof(int), 8, outfile);
+  BOOLEAN_T a = myfwrite(int_array, sizeof(int), 0, outfile);
+  if (a == TRUE){ 
+    printf("myfwrite succeeded\n");
+  } else {
+    printf("myfwrite failed\n");
+  }
   fclose(outfile);
 
   /* Test the random number generator. 
