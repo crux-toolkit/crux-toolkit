@@ -1585,6 +1585,17 @@ BOOLEAN_T get_match_collection_scored_type(
   return match_collection->scored_type[score_type];
 }
 
+/**
+ * sets the score_type to value
+ */
+void set_match_collection_scored_type(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -in
+  SCORER_TYPE_T score_type, ///< the score_type (MATCH_SP, MATCH_XCORR) -in
+  BOOLEAN_T value
+  )
+{
+  match_collection->scored_type[score_type] = value;
+}
 
 /**
  *\returns TRUE, if there is a  match_iterators instantiated by match collection 
@@ -1845,6 +1856,10 @@ MATCH_ITERATOR_T* new_match_iterator(
   BOOLEAN_T sort_match  ///< should I return the match in sorted order?
   )
 {
+  // 
+  if (match_collection == NULL){
+    die("Null match collection passed to match iterator");
+  }
   // is there any existing iterators?
   if(match_collection->iterator_lock){
     carp(CARP_ERROR, "can only have one match iterator instantiated at a time");
@@ -2260,10 +2275,14 @@ void update_protein_counters(
  *\returns TRUE, if successfully fills the scores into match object, else FALSE.
  */
 BOOLEAN_T fill_result_to_match_collection(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -out
-  double* results,  ///< The result score array to fill the match objects -in
-  SCORER_TYPE_T score_type,  ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
-  BOOLEAN_T preserve_order ///< preserve match order?
+  MATCH_COLLECTION_T* match_collection, 
+    ///< the match collection to iterate -out
+  double* results,  
+    ///< The result score array to fill the match objects -in
+  SCORER_TYPE_T score_type,  
+    ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
+  BOOLEAN_T preserve_order 
+    ///< preserve match order?
   )
 {
   int match_idx = 0;
@@ -2419,13 +2438,16 @@ void setup_match_collection_iterator(
  *\returns match_collection iterator instantiated from a result folder
  */
 MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
-  char* output_file_directory, ///< the directory path where the PSM output files are located -in
-  char* fasta_file ///< The name of the file (in fasta format) from which to retrieve proteins and peptides for match_collections. -in
+  char* output_file_directory, 
+    ///< the directory path where the PSM output files are located -in
+  char* fasta_file 
+    ///< The name of the fasta file for peptides for match_collections. -in
   )
 {
   // allocate match_collection
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
-    (MATCH_COLLECTION_ITERATOR_T*)mycalloc(1, sizeof(MATCH_COLLECTION_ITERATOR_T));
+    (MATCH_COLLECTION_ITERATOR_T*)
+      mycalloc(1, sizeof(MATCH_COLLECTION_ITERATOR_T));
 
   DIR* working_directory = NULL;
   struct dirent* directory_entry = NULL;
@@ -2444,7 +2466,8 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   working_directory = opendir(output_file_directory);
   
   if(working_directory == NULL){
-    carp(CARP_ERROR, "failed to open PSM result directory: %s", output_file_directory);
+    carp(CARP_ERROR, "failed to open PSM result directory: %s", 
+        output_file_directory);
     exit(1);
   }
   
@@ -2464,12 +2487,14 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   
   // check if input file exist
   if(access(binary_fasta, F_OK)){
-    carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty) for crux index.", binary_fasta);
+    carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, "
+        "or is empty) for crux index.", binary_fasta);
     free(binary_fasta);
     exit(1);
   }
   
-  // now create a database, using fasta file either binary_file(index) or fastafile
+  // now create a database, 
+  // using fasta file either binary_file(index) or fastafile
   database = new_database(binary_fasta, FALSE, use_index_boolean);
   
   // check if already parsed
@@ -2509,7 +2534,8 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     total_sets = 2; // 1 decoys + 1 target
   }
   else{
-    carp(CARP_ERROR, "No decoy sets exist in directory: %s", 
+    total_sets = 1;
+    carp(CARP_INFO, "No decoy sets exist in directory: %s", 
         output_file_directory);
   }
 

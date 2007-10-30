@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -58,6 +58,15 @@ BOOLEAN_T sort_match_collection(
 BOOLEAN_T get_match_collection_scored_type(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -in
   SCORER_TYPE_T score_type ///< the score_type (MATCH_SP, MATCH_XCORR) -in
+);
+
+/**
+ * sets the score_type to value
+ */
+void set_match_collection_scored_type(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -in
+  SCORER_TYPE_T score_type, ///< the score_type (MATCH_SP, MATCH_XCORR) -in
+  BOOLEAN_T value
 );
 
 /**

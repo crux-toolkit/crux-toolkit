@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.54 $
+ * $Revision: 1.55 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -115,7 +115,7 @@ PROTEIN_T* new_protein(
   set_protein_offset(protein, offset);
   set_protein_protein_idx(protein, protein_idx);
   set_protein_is_light(protein, FALSE);
-  protein->database = database;
+  protein->database = copy_database_ptr(database); // MEMLEAK
   protein->is_memmap = FALSE;
   return protein;
 }         
@@ -200,6 +200,7 @@ void free_protein(
     free(protein->id);
     free(protein->sequence);
     free(protein->annotation);
+    free_database(protein->database); // MEMLEAK
   }
   free(protein);
 }
@@ -839,7 +840,7 @@ void set_protein_database(
   DATABASE_T*  database ///< Which database is this protein part of -in
   )
 {
-  protein->database = database;
+  protein->database = copy_database_ptr(database);
 }
 
 /**

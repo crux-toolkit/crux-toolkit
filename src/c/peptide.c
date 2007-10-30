@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.66 $
+ * $Revision: 1.67 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -1102,7 +1102,7 @@ PEPTIDE_T* parse_peptide(
     
     /** set all fields in peptide src that has been read **/
 
-    // get the petide src parent protein
+    // get the peptide src parent protein
     parent_protein = 
       get_database_protein_at_idx(database, protein_idx);
     

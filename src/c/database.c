@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.47 $
+ * $Revision: 1.48 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -39,7 +39,7 @@ struct database{
   BOOLEAN_T use_light_protein; ///< should I use the light/heavy protein option
   BOOLEAN_T is_memmap; ///< Are we using a memory mapped fasta file? 
   void* data_address; ///< pointer to the beginning of the memory mapped data, 
-  int pointer_count; ///< number of pointers referencing this database. 
+  unsigned int pointer_count; ///< number of pointers referencing this database. 
   long file_size; ///< the size of the binary fasta file, when memory mapping
 };    
 
@@ -135,7 +135,9 @@ void free_database(
   // printf("Free: After free: %s: %d\n", database->pointer_count);
 
   // only free up memory when pointer count is zero
-  if(database->pointer_count > 0){
+  if(database->pointer_count > 0){ 
+    // MEMLEAK maybe change this to number of proteins? 
+    // since I we now have circular references
     return;
   }
   
@@ -195,6 +197,7 @@ void print_database(
         protein_to_heavy(protein);
       }
       print_protein(protein, stdout);
+  
       // if the database uses light/heavy functionality
       /** 
        * uncomment this code if you want to restore a protein to 
@@ -632,6 +635,7 @@ PROTEIN_T* get_database_protein_at_idx(
   unsigned int protein_idx ///< The index of the protein to retrieve -in
   )
 {
+  carp(CARP_DETAILED_DEBUG, "Protein idx = %i", protein_idx);
   return database->proteins[protein_idx-1];
 }
 
