@@ -25,7 +25,6 @@
 #include "match.h"
 #include "match_collection.h"
 #include "PercolatorCInterface.h"
-#include "array.h"
 
 #define MAX_PSMS 10000000
 #define EPSILON 0.000001
@@ -50,15 +49,49 @@ void wrong_command(char* arg, char* comment){
 /** 
  * Routines to run various match analyses. Explained in more detail below.
  */
-int run_percolator(
+MATCH_COLLECTION_T* run_percolator(
   char* psm_result_folder, 
   char* fasta_file, 
   char* feature_file); 
 
-int run_qvalue(
+MATCH_COLLECTION_T* run_qvalue(
   char* psm_result_folder, 
   char* fasta_file 
   ); 
+
+/*
+ * Outputs the matches in match_collection
+ */
+int output_matches(
+    MATCH_COLLECTION_T* match_collection,
+    SCORER_TYPE_T scorer_type
+    ){
+  // create match iterator, return match in sorted order of main_score type
+  // TODO what is TRUE below?
+  MATCH_ITERATOR_T* match_iterator = 
+    new_match_iterator(match_collection, scorer_type, TRUE);
+  
+  // print only up to max_rank_result of the matches
+  int max_rank_result = get_int_parameter("max-rank-result");
+
+  // iterate over matches
+  int match_count = 0;
+  MATCH_T* match = NULL;
+  while(match_iterator_has_next(match_iterator)){
+    ++match_count;
+
+    //// set max number of final scoring matches to print as output
+
+    if(match_count >= max_rank_result){
+      break;
+    }
+    
+    match = match_iterator_next(match_iterator);
+    // TODO what is TRUE below?
+    print_match(match, stdout, TRUE, scorer_type);
+  }
+  return 0;
+}
 
 /***********************************************************************/
 int main(int argc, char** argv){
@@ -85,7 +118,7 @@ int main(int argc, char** argv){
   
   parse_arguments_set_opt(
     "algorithm",
-    "The analysis algorithm to use. percolator|retention-czar|all",
+    "The analysis algorithm to use. percolator|retention-czar|qvalue|all",
     (void *) &psm_algorithm,
     STRING_ARG); 
 
@@ -148,7 +181,7 @@ int main(int argc, char** argv){
     else if(strcmp(algorithm_string, "retention-czar")== 0){
       algorithm = CZAR;
     }
-    else if(strcmp(algorithm_string, "q-value")== 0){
+    else if(strcmp(algorithm_string, "qvalue")== 0){
       algorithm = QVALUE;
     }
     else if(strcmp(algorithm_string, "all")== 0){
@@ -159,13 +192,21 @@ int main(int argc, char** argv){
         "The analysis algorithm to use. percolator|retention-czar|all");
     }
 
+    MATCH_COLLECTION_T* match_collection = NULL;
+    SCORER_TYPE_T scorer_type = 0;
     if (algorithm == PERCOLATOR){
-      run_percolator(psm_result_folder, fasta_file, feature_file); 
-    } /*else if (algorithm == QVALUE){
-      run_qvalue(psm_result_folder, fasta_file);
-    }*/
-
-  }
+      carp(CARP_INFO, "Running percolator");
+      match_collection = run_percolator(
+          psm_result_folder, fasta_file, feature_file); 
+      scorer_type = PERCOLATOR_SCORE;
+    } else if (algorithm == QVALUE){
+      carp(CARP_INFO, "Running q-value");
+      match_collection = run_qvalue(psm_result_folder, fasta_file);
+      scorer_type = LOGP_QVALUE_WEIBULL_XCORR;
+    }
+    output_matches(match_collection, scorer_type);
+    free_match_collection(match_collection);
+   }
   else{
     char* usage = parse_arguments_get_usage("match_analysis");
     result = parse_arguments_get_error(&error_message);
@@ -178,16 +219,32 @@ int main(int argc, char** argv){
 }
 
 /**
- * Perform Benjamini-Hochberg q-value calculations on p-values generated
+ * Compare doubles
+ */
+int compare_doubles_descending(
+    const void *a,
+    const void *b
+    ){
+  double temp = *((double *)a) - *((double *)b);
+  if (temp > 0){
+    return -1;
+  } else if (temp < 0){
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+/**
+ * Perform Benjamini-Hochberg qvalue calculations on p-values generated
  * as in Klammer et al. (In Press) for PSMs in psm_result_folder, searched
  * against the sequence database in fasta_file. Requires that the match 
  * collection objects in the psm_result_folder have been scored using 
  * the p-value method (for now, only LOGP_BONF_WEIBULL_XCORR). 
  * There should be no decoy data sets in the directory.
- * \returns 0 if successful
+ * \returns a MATCH_COLLECTION object
  */
-/*
-int run_qvalue(
+MATCH_COLLECTION_T* run_qvalue(
   char* psm_result_folder, 
   char* fasta_file 
   ){
@@ -198,7 +255,8 @@ int run_qvalue(
   MATCH_T* match = NULL;
 
   // array to store out pvalues
-  ARRAY_T* pvalues = allocate_array(MAX_PSMS);
+  const int length = MAX_PSMS;
+  double* pvalues = (double*) malloc(sizeof(double) * length);
   int num_psms = 0;
   
   // create MATCH_COLLECTION_ITERATOR_T object
@@ -216,11 +274,7 @@ int run_qvalue(
     
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
-      set_array_item(
-          num_psms++, 
-          get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
-          pvalues);
-
+      pvalues[num_psms++] =  get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
       if (num_psms >= MAX_PSMS){
         die("Too many psms in directory %s", psm_result_folder);
       }
@@ -233,18 +287,18 @@ int run_qvalue(
   free_match_collection_iterator(match_collection_iterator);
 
   // sort in descending order
-  sort_array(TRUE, pvalues);
+  qsort(pvalues, num_psms, sizeof(double), compare_doubles_descending);
 
   int idx;
   for (idx=0; idx < num_psms; idx++){
-    carp(CARP_DETAILED_DEBUG, "array[%i] = %.6f", get_array_item(array, idx));
+    carp(CARP_DETAILED_DEBUG, "array[%i] = %.6f", idx, pvalues[idx]);
   }
 
   // Iterate over the matches again
   match_collection_iterator = 
      new_match_collection_iterator(psm_result_folder, fasta_file);
 
-  // work in negative log space, since that is where p- and q-values end up
+  // work in negative log space, since that is where p- and qvalues end up
   double log_num_psms = - log(num_psms);
   while(match_collection_iterator_has_next(match_collection_iterator)){
 
@@ -262,9 +316,18 @@ int run_qvalue(
       carp(CARP_DETAILED_DEBUG, "- log pvalue  = %.6f", log_pvalue);
       
       // get the index of the p-value in the sorted list
-      int pvalue_index = get_array_index_of(log_pvalue, pvalues, EPSILON);
+      int pvalue_index = 0;
+      int idx;
+      for (idx=0; idx < num_psms; idx++){
+        double element = pvalues[idx];
+        if ((element - EPSILON <= log_pvalue) &&
+            (element + EPSILON >= log_pvalue)){
+          pvalue_index = idx + 1; // start counting pvalues at 1
+          break;
+        }
+      }
       
-      // convert the p-value into a q-value using Benjamini-Hochberg
+      // convert the p-value into a qvalue using Benjamini-Hochberg
       double log_qvalue = log_pvalue + log_num_psms - (-log(pvalue_index));
       carp(CARP_DETAILED_DEBUG, "- log qvalue  = %.6f", log_qvalue);
       set_match_score(match, LOGP_QVALUE_WEIBULL_XCORR, log_qvalue);
@@ -272,17 +335,21 @@ int run_qvalue(
 
     // ok free & update for net set
     free_match_iterator(match_iterator);
+    break; // just do the first match collection, which is the target matches
   }
 
-  // create match iterator, return match in sorted order of main_score type
+   set_match_collection_scored_type(match_collection, 
+       LOGP_QVALUE_WEIBULL_XCORR, TRUE);
+
+  // free the match iterator, return match in sorted order of main_score type
+  // MEMLEAK this is free'ing the database, however, we still have pointers
+  // to the db in the protein objects. Not sure this how we want to deal
+  // with the database, however, since it creates circular references
   free_match_collection_iterator(match_collection_iterator);
   free(pvalues);
 
-  // TODO put in a generic output routine, outside of the run_percolator
-  // run_qvalue routines
-  return 0;
+  return match_collection;
 }
-*/
 
 
 /**
@@ -290,9 +357,9 @@ int run_qvalue(
  * for a search against the sequence database fasta_file. Optionally 
  * puts the percolator PSM feature vectors into feature_file, if it is 
  * not NULL
- * \returns 0 if successful
+ * \returns a MATCH_COLLECTION object
  */
-int run_percolator(
+MATCH_COLLECTION_T* run_percolator(
   char* psm_result_folder, 
   char* fasta_file, 
   char* feature_file){ 
@@ -315,7 +382,7 @@ int run_percolator(
   if (feature_file != NULL){
     if((feature_fh = fopen(feature_file, "w")) == NULL){
       carp(CARP_FATAL, "Problem opening output file %s", feature_file);
-      return -1;
+      return NULL;
     }
   }
 
@@ -327,7 +394,10 @@ int run_percolator(
     new_match_collection_iterator(psm_result_folder, fasta_file);
 
   // iterate over each, TARGET, DECOY 1..3 match_collection sets
+  int iterations = 0;
   while(match_collection_iterator_has_next(match_collection_iterator)){
+    
+    carp(CARP_INFO, "Match collection iteration: %i" , iterations++);
 
     // get the next match_collection
     match_collection = 
@@ -419,7 +489,7 @@ int run_percolator(
   // Start processing
   pcExecute(); 
   
-  /** Retrieving target scores and q-values after 
+  /** Retrieving target scores and qvalues after 
    *  processing, the array should be numSpectra long and will be filled in 
    *  the same order as the features were inserted */
   pcGetScores(results_score, results_q); 
@@ -431,29 +501,7 @@ int run_percolator(
   // fill results for PERCOLATOR_SCORE
   fill_result_to_match_collection(
       target_match_collection, results_score, PERCOLATOR_SCORE, FALSE);
-  
-  // create match iterator, return match in sorted order of main_score type
-  match_iterator = new_match_iterator(
-      target_match_collection, PERCOLATOR_SCORE, TRUE);
-  
-  // print only up to max_rank_result of the matches
-  int max_rank_result = get_int_parameter("max-rank-result");
-
-  // iterate over matches
-  int match_count = 0;
-  while(match_iterator_has_next(match_iterator)){
-    ++match_count;
-
-    //// set max number of final scoring matches to print as output
-
-    if(match_count >= max_rank_result){
-      break;
-    }
-    
-    match = match_iterator_next(match_iterator);
-    print_match(match, stdout, TRUE, PERCOLATOR_SCORE);
-  }
-  
+   
   // Function that should be called after processing finished
   pcCleanUp();
   
@@ -470,12 +518,11 @@ int run_percolator(
   free(results_score);
   free_match_collection_iterator(match_collection_iterator);
   free_match_iterator(match_iterator);
-  free_match_collection(target_match_collection);
 
   // TODO put free back in. took out because glibc claimed it was corrupted
   // double linked list
   // free_parameters();
-  return 0;
+  return target_match_collection;
 }
 
 

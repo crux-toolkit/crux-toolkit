@@ -12,6 +12,7 @@
 #define ALPHABET_H
 
 #include "array.h"
+#include "objects.h"
 #include "utils.h"
 
 

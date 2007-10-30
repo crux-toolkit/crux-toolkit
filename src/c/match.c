@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.45 $
+ * REVISION: $Revision: 1.46 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -214,6 +214,7 @@ int compare_match_percolator_score(
 }
 
 /**
+ * FIXME this should be capable of returning with an error
  * print the information of the match
  */
 void print_match(
@@ -486,8 +487,10 @@ MATCH_T* parse_match(
   
   // parse each score and rank of match
   for(; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
-    fread(&(match->match_scores[score_type_idx]), sizeof(float), 1, result_file);
-    fread(&(match->match_rank[score_type_idx]), sizeof(int), 1, result_file);
+    fread(&(match->match_scores[score_type_idx]), 
+      sizeof(float), 1, result_file);
+    fread(&(match->match_rank[score_type_idx]), 
+      sizeof(int), 1, result_file);
   }
   
   // parse spectrum
