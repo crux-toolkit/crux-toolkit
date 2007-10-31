@@ -27,7 +27,9 @@
 #include "PercolatorCInterface.h"
 
 #define MAX_PSMS 10000000
-#define EPSILON 0.000001
+// 14th decimal place
+#define EPSILON 0.00000000000001 
+
 
 /**
  * when wrong command is seen carp, and exit
@@ -203,6 +205,9 @@ int main(int argc, char** argv){
       carp(CARP_INFO, "Running q-value");
       match_collection = run_qvalue(psm_result_folder, fasta_file);
       scorer_type = LOGP_QVALUE_WEIBULL_XCORR;
+    } else {
+      carp(CARP_INFO, "Using no algorithm.");
+      scorer_type = LOGP_BONF_WEIBULL_XCORR;
     }
     output_matches(match_collection, scorer_type);
     free_match_collection(match_collection);
@@ -298,13 +303,14 @@ MATCH_COLLECTION_T* run_qvalue(
   // convert the p-values into FDRs using Benjamini-Hochberg
   int idx;
   for (idx=0; idx < num_psms; idx++){
-    carp(CARP_DETAILED_DEBUG, "pvalue[%i] = %.6f", idx, pvalues[idx]);
+    carp(CARP_DETAILED_DEBUG, "pvalue[%i] = %.10f", idx, pvalues[idx]);
     int pvalue_idx = idx + 1; // start counting pvalues at 1
     double log_pvalue = pvalues[idx];
 
     double log_qvalue = 
       log_pvalue + log_num_psms - (-log(pvalue_idx)) + log_pi_0;
     qvalues[idx] = log_qvalue;
+    carp(CARP_DETAILED_DEBUG, "no max qvalue[%i] = %.10f", idx, qvalues[idx]);
   }
 
   // convert the FDRs into q-values
@@ -316,7 +322,7 @@ MATCH_COLLECTION_T* run_qvalue(
       // set to max q-value so far
       qvalues[idx] = max_log_qvalue; 
     }
-    carp(CARP_DETAILED_DEBUG, "qvalue[%i] = %.6f", idx, qvalues[idx]);
+    carp(CARP_DETAILED_DEBUG, "qvalue[%i] = %.10f", idx, qvalues[idx]);
   }
 
   // Iterate over the matches again
@@ -331,7 +337,6 @@ MATCH_COLLECTION_T* run_qvalue(
 
     // create iterator, to register each PSM feature to Percolator
     match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
-    
 
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
@@ -341,7 +346,7 @@ MATCH_COLLECTION_T* run_qvalue(
       // get the index of the p-value in the sorted list
       // FIXME slow, but it probably doesn't matter
       int idx;
-      int pvalue_idx;
+      int pvalue_idx = -1;
       for (idx=0; idx < num_psms; idx++){
         double element = pvalues[idx];
         if ((element - EPSILON <= log_pvalue) &&
