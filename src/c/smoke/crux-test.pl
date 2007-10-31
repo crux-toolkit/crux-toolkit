@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.11  2007/10/24 23:32:48  frewen
+#changed crux-test.pl to accept blank lines and comments in crux-test.cmds.  added comments to later and reordered slightly.
+#
 #Revision 1.10  2007/08/28 20:03:38  aklammer
 #*** empty log message ***
 #
@@ -94,7 +97,7 @@ $SIG{'INT'} = 'sigint_handler';
 
 # Read each test from the file and execute it.
 my ($line, @fields, $test_name, $standard_filename, $cmd, $result);
-my $is_index = "";
+my $ignore_string = "";
 my $num_tests = 0;
 my $num_successful_tests = 0;
 while ($line = <ARGV>) {
@@ -113,27 +116,20 @@ while ($line = <ARGV>) {
   $test_name = $fields[0];
   $standard_filename = $fields[1];
   $cmd = $fields[2];
-  $is_index =  $fields[3];
-  #chomp($is_index);
+  $ignore_string = $fields[3];
 
   # Execute the test
   print "\n----- Running test $test_name \n";
+  print STDERR "\n----- Running test $test_name \n";
   my ($output_fh, $output_filename) = tempfile();
   if (!$output_filename) {
       die("Unable to create output file.\n");
   }
-  # are we testing create_index?
-  if($is_index eq " index"){
-      $result = &test_cmd_index($cmd, $standard_filename, $output_filename);
-  }
-  elsif($is_index eq " analysis"){
-      $result = &test_cmd_analysis($cmd, $standard_filename, $output_filename);
-  }
-  else{
-      $result = &test_cmd($cmd, $standard_filename, $output_filename);
-  }
 
+  $result = &test_cmd($cmd, $standard_filename, 
+		      $output_filename, $ignore_string);
   $num_tests++;
+
   if ($result == 0) {
       print "----- SUCCESS - test $test_name\n";
       $num_successful_tests++;
@@ -171,6 +167,8 @@ $standard_filename  The name of a file containing the expected ouput
                     for the shell command.
 $output_filename    The name of the file used to store the output of the
                     command.
+$ignore_string      A string of regexes to be ignored by diff, each regex
+                    in single quotes separated by a space. eg 'H' 'Time ex' 
 
 The test_cmd function executes the command line passed in the $cmd variable
 storing the output in $output_filename. If the return status indicates the
@@ -184,7 +182,7 @@ the expected output, 1 otherwise.
 =cut
 
 sub test_cmd() {
-  my ($cmd, $standard_filename, $output_filename) = @_;
+  my ($cmd, $standard_filename, $output_filename, $ignore_string) = @_;
   my ($diff_fh, $diff_filename) = tempfile();
   if (!$diff_filename) {
     die("unable to create diff file.\n");
@@ -193,7 +191,14 @@ sub test_cmd() {
   my $result = system($cmd);
   if ($result == 0) {
     # The command was successful, now vet the output.
-    my $diff_cmd = "diff  -I '# PROTEIN DATABASE' $standard_filename $output_filename > $diff_filename";
+      if( $ignore_string ){
+	  $ignore_string =~ s/ \'/ -I \'/g; #add -I to each regex
+      }else{
+	  $ignore_string = " ";
+      }
+
+    my $diff_cmd = "diff $ignore_string $standard_filename $output_filename" .
+	                                                  "> $diff_filename";
     $result = system($diff_cmd);
     if ($result == 0) {
       # The output of the command matches the expected output.
@@ -219,79 +224,3 @@ sub sigint_handler {
   $caught_interrupt = 1;
 }
 
-sub test_cmd_index() {
-    system("rm -rf test_crux_index");
-    my ($cmd, $standard_filename, $output_filename) = @_;
-    my ($diff_fh, $diff_filename) = tempfile();
-    if (!$diff_filename) {
-        die("unable to create diff file.\n");
-    }
-    my $index_result = system($cmd);
-    if ($index_result == 0) {
-       # The command was successful, now vet the output.
-        
-        #now try parsing the peptides
-        my $parse_cmd = "../../../bin/generate_peptides --output-sequence --use-index T test.fasta > $output_filename";
-        system($parse_cmd);
-           
-        #compare if the peptides parsed match
-        my $diff_cmd = "diff -I '# PROTEIN DATABASE' $standard_filename $output_filename > $diff_filename";
-        $result = system($diff_cmd);
-        if ($result == 0) {
-            # The output of the command matches the expected output.
-        } else {
-            # The output of the command doesn't match the expected output.
-            # Print the diff ouput.
-            open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
-            my $diff_line;
-            while ($diff_line = <DIFF>) {
-                print $diff_line;
-            }
-            close DIFF;
-            unlink $diff_filename;
-        }
-    } else {
-        # The command was not succesful
-        die("Testing failed.");
-    }
-    system("rm -rf test_crux_index");
-    return $result;
-}
-
-sub test_cmd_analysis() {    
-    my ($cmd, $standard_filename, $output_filename) = @_;
-    my ($diff_fh, $diff_filename) = tempfile();
-    if (!$diff_filename) {
-        die("unable to create diff file.\n");
-    }
-    my $index_result = system($cmd);
-    if ($index_result == 0) {
-       # The command was successful, now vet the output.
-        
-        #now try analysis
-        my $analysis_cmd = "../../../bin/match_analysis --match-output-folder match_result --parameter-file smoke_params standard2.fasta > $output_filename";
-        system($analysis_cmd);
-        
-        #compare if the peptides parsed match
-        my $diff_cmd = "diff -I ITFSLEDVLL $standard_filename $output_filename > $diff_filename";
-        $result = system($diff_cmd);
-        if ($result == 0) {
-            # The output of the command matches the expected output.
-        } else {
-            # The output of the command doesn't match the expected output.
-            # Print the diff ouput.
-            open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
-            my $diff_line;
-            while ($diff_line = <DIFF>) {
-                print $diff_line;
-            }
-            close DIFF;
-            unlink $diff_filename;
-        }
-    } else {
-        # The command was not succesful
-        die("Testing failed.");
-    }
-    system("rm -rf match_result");
-    return $result;
-}

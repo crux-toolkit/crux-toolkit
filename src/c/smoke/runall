@@ -2,4 +2,11 @@
 # FIXME still need to resolve match_analysis results
 # once confirm value run "crux-test.pl -u crux-test.cmds"
 chmod 774 crux-test.pl
-crux-test.pl crux-test.cmds
+
+#BF: I was getting an error trying to run the second command from the smoke dir
+if [ -e crux-test.pl ]
+then
+	./crux-test.pl crux-test.cmds
+else
+	crux-test.pl crux-test.cmds
+fi
