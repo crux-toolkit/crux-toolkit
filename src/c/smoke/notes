@@ -70,6 +70,35 @@ get_ms2_spec, match_search, match_analysis all with and without index
 (except analyze matches which only works with an index)
 
 ---------------------------------------------------------------------
+November 1, 2007
+
+Before adding more tests, I would like to change the makefile (and
+then the smoke commands) to reflect the new executable names.  Since
+create_index is currently broken at the head of the revision tree, I
+will continue to work with the 10/26 version.  I should be able to
+merge the changes into the current version later.  
+
+This is done and checked into head as version 1.92.  Appears to work
+with clean checkout.
+
+Change the smoke tests to be able to test an index without having to
+build it.  Rename an existing fasta, make an index and be sure not to
+delete it in any of the test commands. Test generate_peptides and
+match-search with existing index.  Test match_analysis with existing
+index AND existing results
+
+The crux commands are checked in as version 1.19.  I haven't added the
+index or the results to the repository yet.  Full test works with code
+version 10/26.  In current version match_analysis seg faults on existing
+index and existing results.  Create_index segfaults before giving
+other output.
+
+Change the names of the executables in the smoke test.  This is done
+and checked in as version 1.20.  The test runs correctly (with 10/26
+code, recent makefile) even with the links to old names removed.
+
+
+---------------------------------------------------------------------
 New tests
 
 * Generate Peptides:  
