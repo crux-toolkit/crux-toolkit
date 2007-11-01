@@ -117,7 +117,7 @@ void initialize_parameters(void){
   set_int_parameter("sample-count", 500);
 
   // what charge state spectra to run among the ones in ms2 file
-  set_string_parameter("spectrum-change", "all");
+  set_string_parameter("spectrum-charge", "all");
   set_double_parameter("number-runs", BILLION);
   
   // match_search

@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.48 $
+ * REVISION: $Revision: 1.49 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -256,7 +256,9 @@ void print_match(
   }
 
   if(output_mode == Q_VALUE || output_mode == PERCOLATOR_SCORE){
-    fprintf(file, "P %d\t%d\t%.9f\t%.9f\t%.9f\t", 
+    fprintf(file, "P\t%i\t%i\t%d\t%d\t%.9f\t%.9f\t%.9f\t", 
+            get_spectrum_first_scan(match->spectrum),
+            match->charge,
             match->match_rank[primary_score], 
             match->match_rank[primary_score], 
             get_peptide_peptide_mass(match->peptide), 
@@ -264,7 +266,9 @@ void print_match(
             match->match_scores[secondary_score]);
   }
   else{
-    fprintf(file, "P %d\t%d\t%.9f\t%.9f\t%.9f\t", 
+    fprintf(file, "P\t%i\t%i\t%d\t%d\t%.9f\t%.9f\t%.9f\t", 
+            get_spectrum_first_scan(match->spectrum),
+            match->charge,
             match->match_rank[primary_score], 
             match->match_rank[secondary_score], 
             get_peptide_peptide_mass(match->peptide), 

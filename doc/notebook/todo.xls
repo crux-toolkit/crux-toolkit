@@ -38,7 +38,7 @@ Open Date	Close Date	"Category (New Functionality, Documentation, Refactoring, B
 10/2/2007		Bug Fix	Open		AAK	1	2	Fix double freeing problem in match_analysis (and I believe percolator)
 10/2/2007		Bug Fix	Open		AAK	1	2	"Run valgrind and fix any remaining (there should not be many) leaks and/or unfreed memory, for all executables (possibly put in a regression or smoke test?)"
 10/2/2007		Refactoring	Open		AAK	1	1	for(; should be replaced with initialization of variable in most cases
-10/2/2007		Bug Fix	Open		AAK	1	1	Analyze-matches does not output scan numbers
+10/2/2007		Bug Fix	Closed	AAK	AAK	1	1	Analyze-matches does not output scan numbers
 10/2/2007		Bug Fix	Open		AAK	2	2	"Search-for-matches should check peptide mass, not m/z. needs to split possible charge states for each spectrum out (ask Aaron if not clear)"
 10/2/2007		Bug Fix	Open		AAK	1	1	Code should not segfault when parameter file does not exist
 10/2/2007		Bug Fix	Open		AAK	1	2	Should not rely on calloc to faithfully initialize values in structs to zero. This has caused problems at least once. explicitly initialize fields in new_* contructors. 

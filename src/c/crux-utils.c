@@ -520,8 +520,6 @@ void fit_three_parameter_weibull(
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
         cur_shift, &cur_eta, &cur_beta, &cur_correlation);
 
-    carp(CARP_INFO, "Mu, Corr = %.6f, %.6f\n", cur_shift, cur_correlation);
-
     if (cur_correlation > best_correlation){
       *eta = best_eta = cur_eta;
       *beta = best_beta = cur_beta;
@@ -532,6 +530,9 @@ void fit_three_parameter_weibull(
       *beta = best_beta;
       *shift = best_shift;
       *correlation = best_correlation;
+      carp(CARP_INFO, "Stat: Mu, Corr = %.6f, %.6f\n", cur_shift, cur_correlation);
+      carp(CARP_INFO, "Stat: Eta, Beta, Shift = %.6f, %.6f, %.6f", 
+          best_eta, best_beta, best_shift);
       return;
     }
   }
@@ -565,7 +566,6 @@ void fit_two_parameter_weibull(
     carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
   }
 
-  carp(CARP_INFO, "Calc F, count: %d", fit_data_points);
   float* F_T = mymalloc(sizeof(float) * total_data_points);
   for(idx=0; idx < fit_data_points; idx++){
     int reverse_idx = total_data_points - idx;

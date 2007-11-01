@@ -215,18 +215,18 @@ int main(int argc, char** argv){
     number_runs = get_double_parameter("number-runs");
 
     // what charge state of spectra to search
-    if(strcmp(get_string_parameter_pointer("spectrum-change"), "all")== 0){
+    if(strcmp(get_string_parameter_pointer("spectrum-charge"), "all")== 0){
       run_all_charges = TRUE;      
     }
-    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "1")== 0){
+    else if(strcmp(get_string_parameter_pointer("spectrum-charge"), "1")== 0){
       run_all_charges = FALSE;
       spectrum_charge_to_run = 1;
     }
-    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "2")== 0){
+    else if(strcmp(get_string_parameter_pointer("spectrum-charge"), "2")== 0){
       run_all_charges = FALSE;
       spectrum_charge_to_run = 2;
     }
-    else if(strcmp(get_string_parameter_pointer("spectrum-change"), "3")== 0){
+    else if(strcmp(get_string_parameter_pointer("spectrum-charge"), "3")== 0){
       run_all_charges = FALSE;
       spectrum_charge_to_run = 3;
     }

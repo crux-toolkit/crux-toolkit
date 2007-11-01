@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
@@ -122,7 +122,7 @@ float score_logp_weibull(
  * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
  *\returns the -log(p_value)
  */
-float score_logp_bonf_weibull(
+double score_logp_bonf_weibull(
   float score, ///< The score for the scoring peptide -in
   float eta,  ///< The eta parameter of the Weibull
   float beta, ///< The beta parameter of the Weibull

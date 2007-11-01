@@ -752,11 +752,13 @@ BOOLEAN_T estimate_weibull_parameters(
   // how many things are we going to fit. We may want to just fit to the
   // tail, thus the distinction between total* and fit*
   int total_data_points = sample_collection->match_total;
+  carp(CARP_INFO, "Stat: Total matches: %i\n", total_data_points);
   int fit_data_points = total_data_points;
 
 	// less than 0.0 or 0 indicates use all peptides
   double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
 	int number_to_fit = get_int_parameter("number-top-scores-to-fit");
+  carp(CARP_INFO, "Stat: Number matches to fit: %i\n", number_to_fit);
 	if (fraction_to_fit > -0.5){
     assert(fraction_to_fit <= 1.0);
 		fit_data_points = (int)(total_data_points * fraction_to_fit);
@@ -974,7 +976,7 @@ BOOLEAN_T score_match_collection_sp(
     ++match_collection->match_total;
 
     // print total peptides scored so far
-    if(match_collection->match_total % 1000 == 0){
+    if(match_collection->match_total % 10000 == 0){
       carp(CARP_INFO, "scored peptide for sp: %d", 
           match_collection->match_total);
     }
@@ -1088,7 +1090,7 @@ BOOLEAN_T score_match_collection_logp_bonf_exp_sp(
   )
 {
   int match_idx = 0;
-  float score = 0;
+  double score = 0;
   MATCH_T* match = NULL;
   
   // has the score type been populated in match collection?
@@ -1255,7 +1257,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_xcorr(
   )
 {
   int match_idx = 0;
-  float score = 0;
+  double score = 0;
   MATCH_T* match = NULL;
   
   // has the score type been populated in match collection?

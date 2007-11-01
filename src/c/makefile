@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.92 $   #-Werror \
+# VERSION: $Revision: 1.93 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -73,6 +73,7 @@ LIBOBJS =\
 	${OBJDIR}/match_collection.o \
 	${OBJDIR}/hash.o \
 	${OBJDIR}/match_search.o \
+	${OBJDIR}/match_get.o \
 	${OBJDIR}/match_analysis.o
 #	${OBJDIR}/score_peptide_list_spectrum.o
 
