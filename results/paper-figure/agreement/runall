@@ -1,0 +1,1 @@
+cut -f2,8 match_analysis_full.txt  | sort -u > crux.scan2peptide
