@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.91 $   #-Werror \
+# VERSION: $Revision: 1.92 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -78,24 +78,32 @@ LIBOBJS =\
 
 # These are the names of the programs.
 PROGS = \
+	${BINDIR}/crux-get-ms2-spectrum \
+	${BINDIR}/crux-generate-peptides \
+	${BINDIR}/crux-create-index  \
+	${BINDIR}/crux-search-for-matches \
+	${BINDIR}/crux-analyze-matches \
+	${BINDIR}/crux-predict-peptide-ions \
+	${BINDIR}/crux-score-peptide-spectrum \
 	${BINDIR}/create_psm_files \
-	${BINDIR}/create_index  \
 	${BINDIR}/create_ion_files \
-	${BINDIR}/get_ms2_spectrum \
 	${BINDIR}/utils \
-	${BINDIR}/generate_peptides \
 	${BINDIR}/create_protein_index \
-	${BINDIR}/predict_peptide_ions \
-	${BINDIR}/score_peptide_spectrum \
-	${BINDIR}/match_search \
-	${BINDIR}/match_analysis \
 	${BINDIR}/transform_ms2_spectra
+#	${BINDIR}/get_ms2_spectrum \
+#	${BINDIR}/generate_peptides \
+#	${BINDIR}/create_index  \
+#	${BINDIR}/match_search \
+#	${BINDIR}/match_analysis \
+#	${BINDIR}/predict_peptide_ions \
+#	${BINDIR}/score_peptide_spectrum \
 #	${BINDIR}/score_peptide_list_spectrum
 #	${BINDIR}/charge-vector \
 #	${BINDIR}/charge-vector-ms2 \
 #	${BINDIR}/precursor
 
-all: Percolator libs bins TAGS 
+all: srclinks Percolator libs bins binlinks TAGS 
+most: srclinks Percolator libs bins binlinks 
 libs: ${LIBFILE}(${LIBOBJS})
 
 bins: ${PROGS} libs
@@ -175,3 +183,30 @@ ${OBJDIR}/%.o: %.cpp
 ${BINDIR}/%: ${OBJDIR}/%.o ${RANLIBFILE}
 	@mkdir -p ${BINDIR}
 	${CC} -DMAIN ${CFLAGS} ${OS_FLAGS} -o ${BINDIR}/$* $*.c ${LIBS} ${PERCOLATOR_LIB}  ${CPP_FLAGS}
+
+srclinks:
+	#make source links
+	@if [ ! -e crux-create-index.c ] ; then ln -s create_index.c crux-create-index.c; fi
+	@if [ ! -e crux-get-ms2-spectrum.c ] ; then ln -s get_ms2_spectrum.c crux-get-ms2-spectrum.c; fi
+	@if [ ! -e crux-generate-peptides.c ]; then ln -s generate_peptides.c crux-generate-peptides.c; fi
+	@if [ ! -e crux-search-for-matches.c ]; then ln -s match_search.c crux-search-for-matches.c; fi
+	@if [ ! -e crux-analyze-matches.c ]; then ln -s match_analysis.c crux-analyze-matches.c; fi
+	@if [ ! -e crux-predict-peptide-ions.c ]; then ln -s predict_peptide_ions.c crux-predict-peptide-ions.c; fi
+	@if [ ! -e crux-score-peptide-spectrum.c ]; then ln -s score_peptide_spectrum.c crux-score-peptide-spectrum.c; fi
+
+binlinks: 
+	# make links to old executable names
+	@rm -f ${BINDIR}/create_index
+	@ln -s crux-create-index ${BINDIR}/create_index
+	@rm -f ${BINDIR}/get_ms2_spectrum
+	@ln -s crux-get-ms2-spectrum ${BINDIR}/get_ms2_spectrum
+	@rm -f ${BINDIR}/generate_peptides
+	@ln -s crux-generate-peptides ${BINDIR}/generate_peptides
+	@rm -f ${BINDIR}/match_search
+	@ln -s crux-search-for-matches ${BINDIR}/match_search
+	@rm -f ${BINDIR}/match_analysis
+	@ln -s crux-analyze-matches ${BINDIR}/match_analysis
+	@rm -f ${BINDIR}/predict_peptide_ions
+	@ln -s crux-predict-peptide-ions ${BINDIR}/predict_peptide_ions
+	@rm -f ${BINDIR}/score_peptide_spectrum
+	@ln -s crux-score-peptide-spectrum ${BINDIR}/score_peptide_spectrum
