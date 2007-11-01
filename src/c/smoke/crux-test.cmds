@@ -27,6 +27,15 @@ search_for_matches_default = standard_search_default.target.sqt = rm -rf target.
 
 # TESTS WITH INDEX
 
+# See that generate_peptides works with an existing index
+generate_peptides_use_index_uniq = standard_generate_peptides_use_index_uniq.out = ../../../bin/generate_peptides --parameter-file smoke_params2 --output-sequence --use-index T --redundancy unique copy_test.fasta = '# PROTEIN DATABASE'
+
+# See that match_search works with existing index
+search_for_matches_default_existing_index = standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/match_search --output-mode all test.ms2 copy_test.fasta; cat target.sqt = 'Time'
+
+# See that match_analysis works with existing index
+analyze_matches_existing_index = standard_analyze_index.out =  ../../../bin/match_analysis . copy_test.fasta 
+
 # Create index use generate_peptides to test that it worked
 
 create_index_default = empty_file = rm -rf test_crux_index; ../../../bin/create_index --mass-range 500 test.fasta 
