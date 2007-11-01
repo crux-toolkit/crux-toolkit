@@ -246,12 +246,12 @@ resulting observed spectrum $v$ with the b and y fragment ions $u$ from the
 candidate peptide to compute $Sp$ as follows:
 \[
 S_p(u, v) = \frac{
-\left(\sum_{i=1}^N v_i \right)
+\left(\sum_{i=1}^N v_i \delta(u_i) \right)
 \left(\sum_{i=1}^N \delta(u_i v_i)\right)
-\left(1 + 0.075 R(u) \right)
-}{\sum_{i=1}^N \delta(v_i)}
+\left(1 + 0.075 R(u, v) \right)
+}{\sum_{i=1}^N \delta(u_i)}
 \]
-where $N$ is the maximal m/z value, $R(u)$ is the maximum number of
+where $N$ is the maximal m/z value, $R(u, v)$ is the maximum number of
 consecutive b- or y-ions from the theoretical spectrum that appear in
 the observed spectrum, and $\delta(x) = 0$ if $x=0$ and $\delta(x) =
 1$ otherwise.
