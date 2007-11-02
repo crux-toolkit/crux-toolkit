@@ -404,11 +404,13 @@ computed $p$~values.  Eliminating the decoys leads to an approximately
 \end{figure}
 
 To compare the performance of {\sc Sequest} and the various algorithms
-implemented in Crux, we used a collection of FIXME spectra derived
+implemented in Crux, we used a collection of 18149 spectra derived
 from a yeast whole-cell lysate (see Methods).  Each peptide
 identification method searches against the yeast proteome and produces
-a list of FIXME PSMs ranked by $q$~value, computed as described in
-Section~\ref{section:q-value}.  For SEQUEST and for Crux with a static
+a list of 35676 PSMs ranked by $q$~value, computed as described in
+Section~\ref{section:q-value} (the number of spectra differs from the number
+of PSMs because some spectra are searched multiple times, once for each
+possible charge state).  For SEQUEST and for Crux with a static
 decoy database, we use a decoy database of shuffled proteins.
 Figure~\ref{figure:pq-plot} plots, for each method, the number of
 accepted PSMs as a function of $q$~value threshold.
@@ -428,9 +430,9 @@ Finally, consistent with previously reported results
 \cite{klammer:not, kall:semi-supervised}, the $p$~value calculation
 yields a large improvement over simple ranking by $Xcorr$, and using
 Percolator yields an even more dramatic improvement.  At a $q$~value
-threshold of 0.01, $Xcorr$ ranking yields FIXME PSMs, ranking by
-$Xcorr$ $p$~values yields FIXME PSMs, and ranking by Percolator score
-yields FIXME PSMs.  It is not surprising that Percolator performs
+threshold of 0.01, $Xcorr$ ranking yields 1609 PSMs, ranking by
+$Xcorr$ $p$~values yields 4904 PSMs, and ranking by Percolator score
+yields 6294 PSMs.  It is not surprising that Percolator performs
 better than the $p$~value calculation, because Percolator exploits a
 wide variety of PSM features, whereas the $p$~value is based only on
 the observed $Xcorr$ distribution and the number of candidate
@@ -444,7 +446,7 @@ decoy database.
 The peptide index can be extended to allow for
 storage of additional useful pieces of pre-computed information: 
 e.g.  predicted peak intensities, predicted peptide retention time,
-or peptide proteotypicity.  % probably not a word!
+or peptide proteotypicity.  % probably not a word! % but is proteotypic? -AAK
 
 % N.B. We should make sure to mention the file-handle limit at some
 % point.
