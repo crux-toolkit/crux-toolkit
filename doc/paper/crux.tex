@@ -29,6 +29,11 @@ Department of Genome Sciences\\
 University of Washington\\
 Seattle, WA, USA
 \and
+Michael J. MacCoss\\
+Department of Genome Sciences\\
+University of Washington\\
+Seattle, WA, USA
+\and
 William S. Noble\footnote{To whom correspondence should
   be addressed}\\
 Department of Genome Sciences\\
@@ -212,8 +217,9 @@ but large databases are paged into and out of memory only as needed.
 \end{figure}
 
 To demonstrate the efficiency of Crux's candidate peptide retrieval
-strategy, we searched with a collection of 100 spectra against the
-NRDB, generating candidate peptides from a series of increasing wider
+strategy, we searched with a collection of 100 spectra against predicted 
+protein sequence from the {\em Saccharomyces cerevisiae} (yeast) and 
+{\em Homo sapiens} (human) predicted protein sequences, generating candidate peptides from a series of increasingly wider
 m/z windows.  Figure~\ref{figure:indexing} plots the search time as a
 function of m/z window width.  For this experiment, we use a modified
 version of {\sc Sequest} that only computes Sp (and not XCorr), and we
@@ -460,16 +466,23 @@ Future work:
 
 \section{Methods}
 
-All experiments were performed on a RedHat Linux machine with an
-Athlon MP 2000, 2 x 1.67 GHz processor and 2~GB of RAM.
+All experiments were performed on a 
+using a single CPU of a 2 x Intel Xeon 2.33GHz 4-core processor machine
+with 4MB cache and 16GB of RAM running RedHat Linux.
 
 Using Crux, we precomputed a peptide database for tryptic peptides of
-length 6--50 amino acids while allowing missed cleavage sites in the
-non-redundant protein database (06/02/2007, 3,292,818 proteins). This
-procedure required 19~hours and 14~GB of disk space.
+length 6--50 amino acids and mass 200.0--7200.0 Da 
+while allowing missed cleavage sites for two protein sequence databases:
+the predicted open reading 
+frames from yeast {\em Saccharomyces cerevisiae},
+(released 2004-04-02, 3.6MB, 6298 proteins) 
+and human (released 2004-04-21, 16.8MB, 27209 proteins).
+These indexing procedures required approximately four and two 
+minutes of real time and produced indices of 69 and 240 MB, respectively.
 
-We use the following publicly available tandem mass spectrometry data
-sets.  FIXME
+We use a publicly available tandem mass spectrometry data
+set from \citep{klammer:peptide2}, available as 60cm.ms2 at 
+{\url http://noble.gs.washington.edu/proj/retention/data/data.html}.
 
 \section{Results}
 
