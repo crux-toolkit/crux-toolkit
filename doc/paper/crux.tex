@@ -2,6 +2,7 @@
 
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
+\usepackage{url}
 
 % TODO Perform four experiments
 %      -  SQT / Perc
@@ -14,12 +15,13 @@
 \title{Rapid and accurate peptide identification from tandem mass
   spectra}
 
-\author{Christopher Y. Park \\
+\author{Christopher Y. Park\footnote{These authors contributed equally 
+to this work}\\
 Department of Genome Sciences\\
 University of Washington\\
 Seattle, WA, USA
 \and
-Aaron A. Klammer\\
+Aaron A. Klammer$^*$\\
 Department of Genome Sciences\\
 University of Washington\\
 Seattle, WA, USA
@@ -62,7 +64,7 @@ scheme to rapidly retrieve candidate peptides for a given spectrum.
 For each peptide in the target database, Crux generates shuffled decoy
 peptides on the fly, providing a good null model and, hence, accurate
 false discovery rate estimates.  Crux also implements two recently
-described postprocessing methods: a $p$~value calculation based upon
+described post-processing methods: a $p$~value calculation based upon
 fitting a Weibull distribution to the observed scores, and a
 semi-supervised method that learns to discriminate between target and
 decoy matches.  Both methods significantly improve the overall rate of
@@ -102,9 +104,7 @@ trees \cite{elias:intensity}.
 In this work, we describe a computational tool called Crux that solves
 the peptide identification problem efficiently and accurately.  
 Figure~\ref{figure:crux} is a schematic diagram of Crux's workflow.
-
-
-, Crux incorporates a rapid
+Crux incorporates a rapid
 peptide lookup scheme, a static scoring system for relative ranking of
 peptides with respect to each spectrum, on-the-fly generation of decoy
 peptides, two alternative post-processing methods to re-rank the PSMs,
@@ -124,6 +124,7 @@ primary contributions:
   reading the protein sequence database from disk for each new
   spectrum, the indexed database decreases search time by X\% on
   average.
+  FIXME
 
 \item {\bf On-the-fly generation of decoy peptides.}  In evaluating
   the statistical significance of a PSM, mass spectrometrists
@@ -171,7 +172,8 @@ primary contributions:
 Perhaps most significantly, from the perspective of the mass
 spectrometry research community, Crux provides all of the above in a
 single stand-alone C program which is distributed, with source code,
-free for academic use.  Below, we demonstrate that Crux is both
+free for academic use (\url{http://noble.gs.washington.edu/proj/crux/}).
+Below, we demonstrate that Crux is both
 efficient and accurate, yielding FIXME.
 
 \section{Results}
@@ -180,12 +182,12 @@ efficient and accurate, yielding FIXME.
 
 When presented with a new query spectrum and its associated precursor
 mass, Crux must first retrieve from the sequence database all of the
-candidate peptides, i.e., peptides whose masses lie within a specified
+candidate peptides, i.e., peptides with mass that lies within a specified
 range of the precursor mass.  A straightforward retrieval method is to
 read the entire database from disk for each query, evaluating
 candidate peptides as they are encountered.  This approach, which is
 used by {\sc Sequest}, is space-efficient but can be slow for large
-databases.
+databases or large numbers of query spectra.
 
 In addition to implementing the above approach, Crux offers an
 alternative strategy that allows for more efficient candidate peptide
@@ -208,21 +210,23 @@ but large databases are paged into and out of memory only as needed.
   \includegraphics[width=5in]{./Images/indexing.eps}
   \caption{{\bf Rapid database searching.}  The figure plots the total
   running time required to search 1,000 tandem mass spectra against
-  the yeast protein database, plotted as a function of the m/z
+  the yeast protein database, plotted as a function of the mass
   tolerance used to define candidate peptides.  The three series
   correspond to searching with {\sc Sequest} and searching with Crux
   with and without a peptide index.  For purposes of comparison,
-  Crux's decoy searching and post-processing are turned off.
+  both search algorithms' $Xcorr$ functions 
+  and Crux's decoy searching and post-processing are turned off.
   \label{figure:indexing}}
 \end{figure}
 
 To demonstrate the efficiency of Crux's candidate peptide retrieval
 strategy, we searched with a collection of 100 spectra against predicted 
-protein sequence from the {\em Saccharomyces cerevisiae} (yeast) and 
-{\em Homo sapiens} (human) predicted protein sequences, generating candidate peptides from a series of increasingly wider
-m/z windows.  Figure~\ref{figure:indexing} plots the search time as a
-function of m/z window width.  For this experiment, we use a modified
-version of {\sc Sequest} that only computes Sp (and not XCorr), and we
+protein sequence from the yeast ({\em Saccharomyces cerevisiae}) and 
+human predicted protein sequences, 
+generating candidate peptides from a series of increasingly wider
+mass windows.  Figure~\ref{figure:indexing} plots the search time as a
+function of mass window width.  For this experiment, we use a modified
+version of {\sc Sequest} that only computes $Sp$ (and not $XCorr$), and we
 compare its running time to that of Crux running in the same fashion.
 As expected, Crux runs more quickly than {\sc Sequest}, because Crux does
 not need to scan the entire database to retrieve a small collection of
@@ -231,7 +235,7 @@ tolerance window is small.  For example, with a mass tolerance window
 of 0.1, {\sc Sequest} requires 3.5~hrs clock time, whereas Crux requires
 0.1~hrs.  This represents a 35-fold improvement.  However, even when
 we use a mass tolerance of 3, Crux yields a six-fold speed improvement
-(0.6~hours versus 3.6~hours).
+(0.6~hours versus 3.6~hours).  % FIXME
 
 \subsection{Accurate reimplementations of $Sp$ and $Xcorr$}
 
@@ -285,9 +289,9 @@ X_c(u, v) = \frac{0.015\sum_{i=1}^N u_i v_i}
     \includegraphics[width=3in]{./Images/random-xcorr.eps} \\
   A & B \\
   \end{tabular}
-  \caption{{\bf Re-implementation of Sp and Xcorr scoring functions.}
+  \caption{{\bf Re-implementation of $Sp$ and $Xcorr$ scoring functions.}
   The figure plots, for a collection of peptide-spectrum matches, the
-  Sp (A) and XCorr (B) scores as computed by Crux as a function of the
+  $Sp$ (A) and $XCorr$ (B) scores as computed by Crux as a function of the
   same scores as computed by {\sc Sequest}.
   \label{figure:sp-xcorr}}
 \end{figure*}
@@ -334,6 +338,7 @@ only when trypticity is not enforced.  On-the-fly decoy generation has
 the further advantage that, unlike reversed decoys, multiple decoys
 can be generated for a single target.  These additional decoys can be
 useful if the user wants more accurate confidence estimates.
+% FIXME should we mention Gygi's pseudo-reversed database
 
 \subsection{Improved identification of peptides}
 
@@ -368,8 +373,8 @@ the Percolator algorithm are given in \cite{kall:semi-supervised}.
 \subsubsection{Empirical $p$~value calculation}
 
 The second post-processing method fits the observed distribution of
-candidate PSM Xcorr scores to a Weibull distribution.  To do this
-fitting in an unbiased way, Crux computes 500 additional Xcorr scores
+candidate PSM $Xcorr$ scores to a Weibull distribution.  To do this
+fitting in an unbiased way, Crux computes 500 additional $Xcorr$ scores
 at random from the candidate set, in addition to scoring the top 500
 candidates selected by $Sp$.  The resulting Weibull distribution is
 then used to compute a $p$~value for the observed maximum score, and
@@ -391,7 +396,8 @@ are used to train the classifier, and half are used to estimate the
 final $q$~values.  For the empirical $p$~value calculation, decoy PSMs
 are not necessary, because the FDR can be estimated directly from the
 computed $p$~values.  Eliminating the decoys leads to an approximately
-50\% decrease in running time for this search mode.
+50\% decrease in running time for this search mode versus the standard
+target-decoy search approach.
 
 \subsubsection{Experimental comparison of methods}
 \label{section:experimental}
@@ -402,7 +408,8 @@ computed $p$~values.  Eliminating the decoys leads to an approximately
 \caption{{\bf Improved peptide identification.}  The figure plots, for
   a variety of database search algorithms, the number of PSMs as a
   function of the estimated $q$~value.  The five series correspond to
-  {\sc Sequest}, Crux's implementation of {\sc Sequest} using a shuffled decoy
+  {\sc Sequest}, Crux's implementation of {\sc Sequest} using a static 
+  shuffled decoy
   database, Crux using decoys generated on-the-fly, Crux with the
   Percolator post-processor enabled, and Crux with Percolator,
   including retention time features.
@@ -416,7 +423,7 @@ identification method searches against the yeast proteome and produces
 a list of 35676 PSMs ranked by $q$~value, computed as described in
 Section~\ref{section:q-value} (the number of spectra differs from the number
 of PSMs because some spectra are searched multiple times, once for each
-possible charge state).  For SEQUEST and for Crux with a static
+possible charge state).  For {\sc Sequest} and for Crux with a static
 decoy database, we use a decoy database of shuffled proteins.
 Figure~\ref{figure:pq-plot} plots, for each method, the number of
 accepted PSMs as a function of $q$~value threshold.
@@ -452,9 +459,9 @@ decoy database.
 The peptide index can be extended to allow for
 storage of additional useful pieces of pre-computed information: 
 e.g.  predicted peak intensities, predicted peptide retention time,
-or peptide proteotypicity.  % probably not a word! % but is proteotypic? -AAK
-
-% N.B. We should make sure to mention the file-handle limit at some
+or peptide proteotypicity.  % probably not a word! % but is proteotypic?
+% FIXME more discussion
+% FIXME We should make sure to mention the file-handle limit at some
 % point.
 
 Future work:
@@ -470,21 +477,23 @@ All experiments were performed on a
 using a single CPU of a 2 x Intel Xeon 2.33GHz 4-core processor machine
 with 4MB cache and 16GB of RAM running RedHat Linux.
 
-Using Crux, we precomputed a peptide database for tryptic peptides of
-length 6--50 amino acids and mass 200.0--7200.0 Da 
-while allowing missed cleavage sites for two protein sequence databases:
-the predicted open reading 
+Using Crux, we precomputed a peptide database for two protein sequence databases: the predicted open reading 
 frames from yeast {\em Saccharomyces cerevisiae},
 (released 2004-04-02, 3.6MB, 6298 proteins) 
 and human (released 2004-04-21, 16.8MB, 27209 proteins).
-These indexing procedures required approximately four and two 
-minutes of real time and produced indices of 69 and 240 MB, respectively.
+The indexes contained tryptic peptides of
+length 6--50 amino acids and mass 200.0--7200.0 Da 
+while allowing missed cleavage sites.
+The indexing procedures required approximately four and two 
+minutes of real time and produced indices of 69 and 240 MB in size, 
+respectively.
 
 We use a publicly available tandem mass spectrometry data
-set from \citep{klammer:peptide2}, available as 60cm.ms2 at 
-{\url http://noble.gs.washington.edu/proj/retention/data/data.html}.
-
-\section{Results}
+set from \cite{klammer:peptide2}, available as $60cm$ at 
+\url{http://noble.gs.washington.edu/proj/retention/data/data.html}.
+The data set consists of a collection of 18149 spectra derived
+from a yeast whole-cell lysate as described previously in 
+\cite{klammer:peptide2}.
 
 \section*{Acknowledgments}
 
