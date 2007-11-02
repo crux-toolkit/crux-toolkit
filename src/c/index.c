@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.60 $
+ * $Revision: 1.61 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1532,7 +1532,7 @@ BOOLEAN_T parse_peptide_index_file(
   // get total number of peptide_src for this peptide
   // peptide must have at least one peptide src
   if(fread(&num_peptide_src, sizeof(int), 1, file) != 1 || num_peptide_src < 1){
-    carp(CARP_ERROR, "index file corrupted, peptide must have at least one peptide src");
+    carp(CARP_ERROR, "index file corrupted, peptide must have at least one peptide src = %i", num_peptide_src);
     free(peptide);
     return FALSE;
   }
