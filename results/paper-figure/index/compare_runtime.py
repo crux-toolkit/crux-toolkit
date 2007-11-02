@@ -2,6 +2,8 @@
 # FILE: compare_runtime.py
 # AUTHOR: CHRIS PARK
 # CREATE DATE: 7/30/2007
+SEQUEST="./sequest-one-xcorr"
+TIME_PREFIX="real "
 
 """
 This script compares the runtime between Crux and Sequest
@@ -9,42 +11,31 @@ This script compares the runtime between Crux and Sequest
 import os
 import sys
 import commands
-import scipy 
-from pylab import *
 from optparse import OptionParser
 
 #-------------------
 
-def plot_compare_data(crux_array, crux_no_index_array, sequest_array, mass_windows, number_of_spectra, score_type="xcorr"):
+def plot_compare_data(crux_array, crux_no_index_array, sequest_array,
+    mass_windows, number_of_spectra, fasta_file):
   """compares runtime for each scoring method """
 
+  fasta_file = os.path.basename(fasta_file)
   print "generating figures"
   
-  xlabel("mass window (Da)", size=15)
-  ylabel("Runtime for " + `number_of_spectra` + " spectra (sec)", size=15)
-  
-  fh = open("crux-fast.xy", "w")
+  fh = open("crux-fast-%s.xy" % fasta_file, "w")
   for idx in range(len(mass_windows)):
     fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_array[idx]))
   fh.close()
 
-  fh = open("crux-no-index.xy", "w")
+  fh = open("crux-no-index-%s.xy" % fasta_file, "w")
   for idx in range(len(mass_windows)):
     fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_no_index_array[idx]))
   fh.close()
 
-  fh = open("sequest.xy", "w")
+  fh = open("sequest-%s.xy" % fasta_file, "w")
   for idx in range(len(mass_windows)):
     fh.write("%.8f\t%.8f\n" % (mass_windows[idx], sequest_array[idx]))
   fh.close()
-
-  plot(mass_windows, crux_array, label="Crux (w/index)")
-  plot(mass_windows, crux_no_index_array, label="Crux (w/o index)")
-  plot(mass_windows, sequest_array, label="SEQUEST")
-  legend(loc='right')
-  
-  savefig("indexing" + ".eps")
-  savefig("indexing" + ".png")
 
 
 #-------------------------------------------
@@ -68,6 +59,7 @@ fasta_file = args[1]
 
 #mass windows to test runtime
 mass_windows = ["0.1", "1", "3"]
+# mass_windows = ["0.1"]
 
 #runtime result arrays for each method
 sequest_results = []
@@ -84,8 +76,8 @@ for window in mass_windows:
   # 1, run Sequest
   seq_time = 0.0
   for charge in charge_list:
-    command = "time -p ./sequest27 -D%s -Psequest.params_%s *.%i.dta" \
-        % (fasta_file, window, charge)
+    command = "time -p %s -D%s -Psequest.params_%s *.%i.dta" \
+        % (SEQUEST, fasta_file, window, charge)
     print >>sys.stderr, "\nRunning %s\n" % command
     (exit_code, result) = commands.getstatusoutput(command)
     #debug
@@ -101,7 +93,7 @@ for window in mass_windows:
       for line in result:
         #get user time
         #FIXME is it user or real?
-        if line.startswith('real '):
+        if line.startswith(TIME_PREFIX):
           fields = line. rstrip('\n').split()
           seq_time += float(fields[1])
   sequest_results.append(seq_time)
@@ -109,10 +101,11 @@ for window in mass_windows:
         
   # 2, now run Crux
   command = "time -p ./match_search \
-      --match-output-folder output \
+      --output-mode sqt \
+      --sqt-output-file %s.sqt \
       --parameter-file crux.params_%s \
       --number-decoy-set 0 \
-      %s %s" % (window, ms2_file, fasta_file)
+      %s %s" % (window, window, ms2_file, fasta_file)
   print >>sys.stderr, "\nRunning %s\n" % command
 
   (exit_code, result) = \
@@ -129,16 +122,17 @@ for window in mass_windows:
     result = result.split('\n')
     for line in result:
       #get user time
-      if line.startswith('user '):
+      if line.startswith(TIME_PREFIX):
         fields = line.rstrip('\n').split()
         crux_results.append(float(fields[1]))
 
   # 3, now run Crux without an index
   command = "time -p ./match_search \
-      --match-output-folder output_no_index \
+      --output-mode sqt \
+      --sqt-output-file %s.sqt \
       --parameter-file crux_no_index.params_%s \
       --number-decoy-set 0 \
-      %s %s" % (window, ms2_file, fasta_file)
+      %s %s" % (window, window, ms2_file, fasta_file)
   print >>sys.stderr, "\nRunning %s\n" % command
 
   (exit_code, result) = \
@@ -155,7 +149,7 @@ for window in mass_windows:
     result = result.split('\n')
     for line in result:
       #get user time
-      if line.startswith('user '):
+      if line.startswith(TIME_PREFIX):
         fields = line.rstrip('\n').split()
         crux_no_index_results.append(float(fields[1]))
 
@@ -169,4 +163,4 @@ dtas = filter(lambda x: x.endswith("dta"), os.listdir(os.getcwd()))
 
 
 #now plot the results
-plot_compare_data(crux_results, crux_no_index_results, sequest_results, [ float(i) for i in mass_windows], len(dtas))
+plot_compare_data(crux_results, crux_no_index_results, sequest_results, [ float(i) for i in mass_windows], len(dtas), fasta_file)
