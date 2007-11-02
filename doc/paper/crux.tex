@@ -207,10 +207,14 @@ but large databases are paged into and out of memory only as needed.
 
 \begin{figure}
   \centering
-  \includegraphics[width=5in]{./Images/indexing.eps}
+  \begin{tabular}{cc}
+  \includegraphics[width=3in]{./Images/indexing-yeast.eps} & 
+  \includegraphics[width=3in]{./Images/indexing-human.eps} \\
+\end{tabular}
   \caption{{\bf Rapid database searching.}  The figure plots the total
   running time required to search 1,000 tandem mass spectra against
-  the yeast protein database, plotted as a function of the mass
+  the yeast (A) and human (B) protein databases, 
+  plotted as a function of the mass
   tolerance used to define candidate peptides.  The three series
   correspond to searching with {\sc Sequest} and searching with Crux
   with and without a peptide index.  For purposes of comparison,
@@ -218,9 +222,10 @@ but large databases are paged into and out of memory only as needed.
   and Crux's decoy searching and post-processing are turned off.
   \label{figure:indexing}}
 \end{figure}
+% FIXME put in a sentence rationalizing flatness above
 
 To demonstrate the efficiency of Crux's candidate peptide retrieval
-strategy, we searched with a collection of 100 spectra against predicted 
+strategy, we searched with a collection of 1,000 spectra against predicted 
 protein sequence from the yeast ({\em Saccharomyces cerevisiae}) and 
 human predicted protein sequences, 
 generating candidate peptides from a series of increasingly wider
@@ -478,7 +483,7 @@ using a single CPU of a 2 x Intel Xeon 2.33GHz 4-core processor machine
 with 4MB cache and 16GB of RAM running RedHat Linux.
 
 Using Crux, we precomputed a peptide database for two protein sequence databases: the predicted open reading 
-frames from yeast {\em Saccharomyces cerevisiae},
+frames from yeast {\em Saccharomyces cerevisiae}
 (released 2004-04-02, 3.6MB, 6298 proteins) 
 and human (released 2004-04-21, 16.8MB, 27209 proteins).
 The indexes contained tryptic peptides of
@@ -489,7 +494,7 @@ minutes of real time and produced indices of 69 and 240 MB in size,
 respectively.
 
 We use a publicly available tandem mass spectrometry data
-set from \cite{klammer:peptide2}, available as $60cm$ at 
+set from \cite{klammer:peptide2}, available as the $60cm$ data set at 
 \url{http://noble.gs.washington.edu/proj/retention/data/data.html}.
 The data set consists of a collection of 18149 spectra derived
 from a yeast whole-cell lysate as described previously in 
