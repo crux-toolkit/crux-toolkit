@@ -368,9 +368,6 @@ MATCH_COLLECTION_T* run_qvalue(
        LOGP_QVALUE_WEIBULL_XCORR, TRUE);
 
   // free the match iterator, return match in sorted order of main_score type
-  // MEMLEAK this is free'ing the database, however, we still have pointers
-  // to the db in the protein objects. Not sure this how we want to deal
-  // with the database, however, since it creates circular references
   free_match_collection_iterator(match_collection_iterator);
   free(pvalues);
   free(qvalues);

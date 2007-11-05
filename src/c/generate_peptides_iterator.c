@@ -66,7 +66,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   BOOLEAN_T use_index_boolean = get_boolean_parameter("use-index");
   PEPTIDE_TYPE_T peptide_type = get_peptide_type_parameter("cleavages");
 
-  // MEMLEAK put in parameter retrieval routines
+  // TODO put in parameter retrieval routines
   MASS_TYPE_T mass_type = AVERAGE;
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
   SORT_TYPE_T sort_type = NONE;
@@ -253,8 +253,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
   double max_mass = get_double_parameter("max-mass");
   BOOLEAN_T use_index = get_boolean_parameter("use-index");
 
-  // MEMLEAK get from parameter file
-  BOOLEAN_T is_unique = TRUE;
+  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
   char*  fasta_file = get_string_parameter_pointer("fasta-file");
 
   INDEX_T* index = NULL;
