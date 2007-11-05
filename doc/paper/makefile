@@ -1,7 +1,8 @@
 all: crux.pdf
 
 # Check out the 'refs' CVS module and add this directory to your BIBTEX path.
-REFS = $(HOME)/refs/refs.bib
+REFDIR = $(subst ::,,$(BIBINPUTS))
+REFS = $(REFDIR)/refs.bib
 
 crux.bbl: crux.tex \
 	plos.bst \
