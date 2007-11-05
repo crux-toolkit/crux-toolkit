@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -34,9 +34,7 @@ INDEX_T* allocate_index(void);
 INDEX_T* new_index(
   char* fasta_filename,  ///< The fasta file
   PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
-  float mass_range,  ///< the range of mass that each index file should be partitioned into
-  BOOLEAN_T is_unique, ///< only unique peptides? -in
-  BOOLEAN_T use_light ///< should I use light/heavy functionality? -in
+  float mass_range  ///< the range of mass that each index file should be partitioned into
 );         
 
 /**

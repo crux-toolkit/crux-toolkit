@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -25,7 +25,6 @@ DATABASE_T* allocate_database(void);
  */
 DATABASE_T* new_database(
   char*         filename, ///< The file from which to parse the database. either text fasta file or binary fasta file -in
-  BOOLEAN_T use_light_protein,///< do we use linght/heavy protein -in
   BOOLEAN_T is_memmap ///< are we using a memory mapped binary fasta file, thus proteins are all memory mapped -in
   );         
 

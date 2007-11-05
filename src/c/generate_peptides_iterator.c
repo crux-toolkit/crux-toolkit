@@ -62,7 +62,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   int min_length = get_int_parameter("min-length");
   int max_length = get_int_parameter("max-length");
   char* isotopic_mass = get_string_parameter_pointer("isotopic-mass");
-  char* redundancy = get_string_parameter_pointer("redundancy");
   char* sort = get_string_parameter_pointer("sort");  // sort order
   BOOLEAN_T use_index_boolean = get_boolean_parameter("use-index");
   PEPTIDE_TYPE_T peptide_type = get_peptide_type_parameter("cleavages");
@@ -70,7 +69,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   // MEMLEAK put in parameter retrieval routines
   MASS_TYPE_T mass_type = AVERAGE;
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
-  BOOLEAN_T is_unique = FALSE;
   SORT_TYPE_T sort_type = NONE;
 
   // check if maximum length is with in range <= 255
@@ -90,16 +88,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     carp(CARP_ERROR, "Incorrect argument %s", isotopic_mass);
   }
    
-  // determine redundancy option
-  if(strcmp(redundancy, "redundant")==0){
-    is_unique = FALSE;    
-  }
-  else if(strcmp(redundancy, "unique")==0){
-    is_unique = TRUE;
-  }
-  else{
-    carp(CARP_ERROR, "incorrect argument %s, using default value", redundancy);
-  }
+  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
   
   // determine sort type option
   if(strcmp(sort, "mass")==0){
@@ -273,8 +262,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
   if (use_index == TRUE){
     index = new_index_from_disk(fasta_file, is_unique);
   } else {
-  // MEMLEAK get from parameter file
-    database = new_database(fasta_file, FALSE, FALSE);
+    // FALSE indicates that we are not using a binary fasta file
+    database = new_database(fasta_file, FALSE);
   }
 
   return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 

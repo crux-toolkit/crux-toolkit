@@ -2505,7 +2505,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   
   // now create a database, 
   // using fasta file either binary_file(index) or fastafile
-  database = new_database(binary_fasta, FALSE, use_index_boolean);
+  database = new_database(binary_fasta, use_index_boolean);
   
   // check if already parsed
   if(!get_database_is_parsed(database)){

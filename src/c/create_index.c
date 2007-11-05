@@ -79,7 +79,6 @@ int main(int argc, char** argv){
   char* cleavages = "tryptic"; 
   char* isotopic_mass = "average" ;
   int  verbosity = CARP_INFO;
-  char* redundancy = "redundant";
   char* binary_fasta_file = NULL;
   char* parameter_file = "crux.params";
   
@@ -89,7 +88,6 @@ int main(int argc, char** argv){
   char * in_file = NULL;
   /*const*/ char * error_message;
   int result = 0;
-  BOOLEAN_T is_unique = FALSE;
 
   /* Define optional command line arguments */ 
 
@@ -146,12 +144,6 @@ int main(int argc, char** argv){
     "Specify the verbosity of the current processes from 0-100.",
     (void *) &verbosity, 
     INT_ARG);
-
-  parse_arguments_set_opt(
-    "redundancy", 
-    "Specify whether peptides that come from different proteins yet with identical sequences should appear on separate lines or on the same line. redundant|unique.",
-    (void *) &redundancy, 
-    STRING_ARG);
 
   parse_arguments_set_opt(
     "parameter-file",
@@ -225,20 +217,10 @@ int main(int argc, char** argv){
       wrong_command(isotopic_mass);
     }
    
-    // determine redundancy option
-    if(strcmp(get_string_parameter_pointer("redundancy"), "redundant")==0){
-      is_unique = FALSE;
-    }
-    else if(strcmp(get_string_parameter_pointer("redundancy"), "unique")==0){
-      is_unique = TRUE;
-    }
-    else{
-      wrong_command(redundancy);
-    }
-    
     // check if input file exist
     if(access(in_file, F_OK)){
-      carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, or is empty).", in_file);
+      carp(CARP_FATAL, "The file \"%s\" does not exist " 
+          "(or is not readable, or is empty).", in_file);
       exit(1);
     }
     
@@ -250,20 +232,16 @@ int main(int argc, char** argv){
     missed_cleavages = get_boolean_parameter("missed-cleavages");
 
     // peptide constraint
-    constraint = 
-      new_peptide_constraint(peptide_type, min_mass, max_mass, min_length, max_length, missed_cleavages, mass_type);
- 
+    constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, 
+        min_length, max_length, missed_cleavages, mass_type);
     
     // create new index object
     crux_index = 
       new_index(in_file,
                 constraint,
-                mass_range,                
-                is_unique,
-                FALSE
+                mass_range
                 );
     
-    // MEMLEAK some kind of segfault around here
     // create crux_index files
     if(!create_index(crux_index)){
       die("Failed to create index");
