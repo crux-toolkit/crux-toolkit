@@ -122,9 +122,10 @@ primary contributions:
   sorted by peptide mass and is stored on disk, with mass indices
   stored in memory.  We show that, relative to {\sc Sequest}'s strategy of
   reading the protein sequence database from disk for each new
-  spectrum, the indexed database decreases search time by X\% on
+  spectrum, the indexed database decreases search time by 92.4\% on
   average.
-  FIXME
+  % This is calculated by averaging the fold-decrease across the six points.
+
 
 \item {\bf On-the-fly generation of decoy peptides.}  In evaluating
   the statistical significance of a PSM, mass spectrometrists
@@ -240,7 +241,8 @@ tolerance window is small.  For example, with a mass tolerance window
 of 0.1, {\sc Sequest} requires 3.5~hrs clock time, whereas Crux requires
 0.1~hrs.  This represents a 35-fold improvement.  However, even when
 we use a mass tolerance of 3, Crux yields a six-fold speed improvement
-(0.6~hours versus 3.6~hours).  % FIXME
+(0.6~hours versus 3.6~hours).  
+% FIXME include Ting Chen's metric indexing? \cite{dutta:speeding}
 
 \subsection{Accurate reimplementations of $Sp$ and $Xcorr$}
 
@@ -338,12 +340,12 @@ composition as the target.  When using a static decoy database,
 ensuring that the target and decoy peptide mass and amino acid
 composition stays the same is very difficult.  For example, shuffled
 and Markov chain-generated decoy databases will not retain these
-properties.  A reversed database will retain these properties, but
+properties. A reversed database will retain these properties, but
 only when trypticity is not enforced.  On-the-fly decoy generation has
 the further advantage that, unlike reversed decoys, multiple decoys
 can be generated for a single target.  These additional decoys can be
 useful if the user wants more accurate confidence estimates.
-% FIXME should we mention Gygi's pseudo-reversed database
+% FIXME include pseudo-reversal? \cite{elias:target}
 
 \subsection{Improved identification of peptides}
 
