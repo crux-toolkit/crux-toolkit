@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.53 $
+ * REVISION: $Revision: 1.54 $
  ****************************************************************************/
 
 #include <math.h>
@@ -762,7 +762,7 @@ float gen_score_sp(
 
 
 /*****************************************************
- * Xcorr related fuctions
+ * Xcorr related functions
  * 
  *****************************************************/
 

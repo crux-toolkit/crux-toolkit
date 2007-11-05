@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -336,7 +336,7 @@ PROTEIN_T* protein_index_iterator_next(
  * creates a binary fasta file on to the output_file
  * \returns TRUE if successfully creates a binary fasta file, else false
  */
-BOOLEAN_T create_binary_fasta_fuction(
+BOOLEAN_T create_binary_fasta_file(
   char* fasta_file,  ///< input fasta file -in
   FILE* output_file  ///< the output filestream -out
   )
@@ -418,7 +418,8 @@ BOOLEAN_T create_binary_fasta_fuction(
 }
 
 /**
- * creates a binary fasta file on to the output_file in the same directory as fasta file
+ * creates a binary fasta file in the output_file in the same directory as 
+ * the fasta file
  * \returns TRUE if successfully creates a binary fasta file, else false
  */
 BOOLEAN_T create_binary_fasta(
@@ -428,7 +429,7 @@ BOOLEAN_T create_binary_fasta(
   // get output file
   FILE* output_file = get_output_file(fasta_file, TRUE);
   
-  return create_binary_fasta_fuction(fasta_file, output_file);
+  return create_binary_fasta_file(fasta_file, output_file);
 }
 
 /**
@@ -448,7 +449,7 @@ BOOLEAN_T create_binary_fasta_in_cur(
   // open output file
   FILE* file = fopen(*output_file_name, "w");
   
-  return create_binary_fasta_fuction(fasta_file_w_path, file);
+  return create_binary_fasta_file(fasta_file_w_path, file);
 }
 
 
