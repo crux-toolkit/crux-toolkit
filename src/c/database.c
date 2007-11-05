@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.49 $
+ * $Revision: 1.50 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -134,8 +134,8 @@ void free_database(
 
   // only free up memory when pointer count is zero
   if(database->pointer_count > 0){ 
-    // MEMLEAK maybe change this to number of proteins? 
-    // since I we now have circular references
+    // TODO maybe change this to number of proteins? 
+    // since I think we now have circular references
     return;
   }
   
