@@ -1,4 +1,5 @@
-all: crux.pdf
+all: crux.pdf \
+	plos-cover.pdf
 
 # Check out the 'refs' CVS module and add this directory to your BIBTEX path.
 REFDIR = $(subst ::,,$(BIBINPUTS))
@@ -11,6 +12,9 @@ crux.bbl: crux.tex \
 	./Images/indexing.eps \
 	./Images/random-sp.eps \
 	./Images/random-xcorr.eps
+
+plos-cover.dvi: plos-cover.tex
+	latex plos-cover
 
 %.eps: %.fig
 	fig2dev -L eps schematic.fig > schematic.eps
