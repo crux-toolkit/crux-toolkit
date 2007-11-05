@@ -78,7 +78,7 @@ void initialize_parameters(void){
   set_int_parameter("min-length", 6);
   set_string_parameter("cleavages", "tryptic");
   set_string_parameter("isotopic-mass","average");
-  set_string_parameter("redundancy", "redundant");
+  set_boolean_parameter("unique-peptides", FALSE);
   set_string_parameter("use-index", "F");
   set_string_parameter("sort", "none");      // mass, length, lexical, none  
   set_boolean_parameter("output-sequence", FALSE);

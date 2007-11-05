@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.32 $
+ * REVISION: $Revision: 1.33 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -787,42 +787,6 @@ BOOLEAN_T serialize_header(
   fwrite(&(num_spectrum_features), sizeof(int), 1, psm_file);
   fwrite(&(number_top_rank_peptide), sizeof(int), 1, psm_file);
   
-  /*
-  // serialize ms2 file name
-  fwrite(&(file_ms2_length), sizeof(int), 1, psm_file);
-  fwrite(file_ms2, sizeof(char), file_ms2_length, psm_file);
-  
-  // serialize fasta file name
-  fwrite(&(file_fasta_length), sizeof(int), 1, psm_file);
-  fwrite(file_fasta, sizeof(char), file_fasta_length, psm_file);
-  
-  // parameter file
-  set_double_parameter("min-mass", 200);
-  set_double_parameter("max-mass", 7200);
-  set_int_parameter("min-length", 6);
-  set_int_parameter("max-length", 50);
-  set_string_parameter("cleavages", "tryptic");
-  set_string_parameter("isotopic-mass","average");
-  set_string_parameter("redundancy", "redundant");
-  set_string_parameter("use-index", "F");
-  set_string_parameter("sort", "none");
-  set_boolean_parameter("missed-cleavages", FALSE);
-  set_double_parameter("mass-offset", 0);
-  set_double_parameter("beta", 0.075);
-  set_double_parameter("max-mz", 4000);
-  set_string_parameter("score-type", "xcorr"); 
-  set_double_parameter("mass-window", 3.0);
-  set_string_parameter("prelim-score-type", "sp");
-  set_int_parameter("max-rank-preliminary", 500);
-  set_int_parameter("max-rank-result", 500);
-  set_int_parameter("top-fit-sp", 1000);
-  set_int_parameter("top-rank-p-value", 1);
-  set_int_parameter("sample-count", 500);
-  set_double_parameter("spectrum-min-mass", 0.0);
-  set_double_parameter("spectrum-max-mass", BILLION);
-  set_int_parameter("top-match", 1);
-  */
-
   // free up files
   free(file_ms2);
   free(file_fasta);

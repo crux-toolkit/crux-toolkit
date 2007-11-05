@@ -72,7 +72,6 @@ int main(int argc, char** argv){
   char* cleavages = "tryptic"; 
   char* isotopic_mass = "average" ;
   int  verbosity = CARP_INFO;
-  char* redundancy = "redundant";
   char* use_index = "F";
   char* parameter_file = "crux.params";
 
@@ -139,12 +138,6 @@ int main(int argc, char** argv){
     INT_ARG);
 
   parse_arguments_set_opt(
-    "redundancy", 
-    "Specify whether peptides that come from different proteins yet with identical sequences should appear on separate lines or on the same line. redundant|unique.",
-    (void *) &redundancy, 
-    STRING_ARG);
-  
-  parse_arguments_set_opt(
     "use-index", 
     "Specify whether a pre-computed on-disk index should be used for retrieving the peptides. T|F",
     (void *) &use_index, 
@@ -209,7 +202,6 @@ int main(int argc, char** argv){
     printf("#\tsort: %s\n",  get_string_parameter_pointer("sort"));
     printf("#\tisotopic mass type: %s\n", get_string_parameter_pointer("isotopic-mass"));
     printf("#\tverbosity: %d\n", verbosity);
-    printf("#\tredundancy: %s\n", get_string_parameter_pointer("redundancy"));
     printf("#\tuse index: %s\n", get_string_parameter_pointer("use-index"));
     
     
@@ -228,7 +220,6 @@ int main(int argc, char** argv){
       // free peptide
       free_peptide(peptide);
 
-      // debug purpose
       if(total_peptides% 10000 == 0){
         carp(CARP_INFO, "reached peptide: %d", total_peptides);
       }

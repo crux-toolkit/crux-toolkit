@@ -368,22 +368,19 @@ int main(int argc, char** argv){
       serialize_header(collection, fasta_file, psm_result_file[file_idx]);
     }
 
-    // MEMLEAK get from parameters
     BOOLEAN_T use_index = get_boolean_parameter("use-index");
-
     char* in_file = get_string_parameter_pointer("fasta-file");
 
     INDEX_T* index = NULL;
     DATABASE_T* database = NULL;
-    BOOLEAN_T is_unique = TRUE; // MEMLEAK
+    BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
     if (use_index == TRUE){
       if ((index = new_index_from_disk(in_file, is_unique)) == NULL){
         carp(CARP_FATAL, "Could not create index from disk for %s", in_file);
         exit(1);
       }
     } else {
-      // MEMLEAK FALSE, FALSE should really be parameters
-      database = new_database(in_file, FALSE, FALSE);         
+      database = new_database(in_file, FALSE);         
     }
 
     int spectra_idx = 0;

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.61 $
+ * $Revision: 1.62 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -348,21 +348,20 @@ void set_index_fields(
 INDEX_T* new_index(
   char* fasta_filename,  ///< The fasta file
   PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
-  float mass_range,  ///< the range of mass that each index file should be partitioned into
-  BOOLEAN_T is_unique, ///< only unique peptides? -in
-  BOOLEAN_T use_light ///< should i use light/heavy functionality? -in
+  float mass_range  ///< the range of mass that each index file should be partitioned into
   )
 {
   INDEX_T* index = allocate_index();
   DATABASE_T* database = NULL;
   
-  // now create a database
-  // First, create a database that does not use memory mapping
-  // once binary fasta file has been creaated this will change to memmapped database
-  database = new_database(fasta_filename, use_light, FALSE);
+  // Initially, create a database that does not use memory mapping (FALSE)
+  // Once binary fasta file has been creaated this will change to a
+  // memory mapped database
+  database = new_database(fasta_filename, FALSE);
 
   // set database, has not been parsed
   set_index_database(index, database);
+  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
   set_index_fields(index, fasta_filename, constraint, mass_range, is_unique);
 
   return index;
@@ -379,7 +378,6 @@ INDEX_T* new_index_from_disk(
   )
 {
   INDEX_T* search_index = NULL;
-  BOOLEAN_T use_light = FALSE;
   DATABASE_T* database = NULL;
 
   // allocate index
@@ -410,7 +408,7 @@ INDEX_T* new_index_from_disk(
   }
   
   // now create a database, using binary fasta file
-  database = new_database(binary_fasta, use_light, TRUE);
+  database = new_database(binary_fasta, TRUE);
   
   // check if already parsed
   if(!get_database_is_parsed(database)){
@@ -497,7 +495,7 @@ BOOLEAN_T write_header(
   fprintf(file, "#\tpeptide_type: %d\n", get_peptide_constraint_peptide_type(constraint));
   fprintf(file, "#\tmissed_cleavage: %d\n", get_peptide_constraint_num_mis_cleavage(constraint));
   fprintf(file, "#\tmass_type: %d\n", get_peptide_constraint_mass_type(constraint));
-  fprintf(file, "#\tredundancy: %d\n", get_index_is_unique(index));
+  fprintf(file, "#\tunique peptides: %d\n", get_index_is_unique(index));
   
   fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
   fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
@@ -534,7 +532,7 @@ BOOLEAN_T write_readme_file(
                                              "partial")))));
   fprintf(file, "#\tmissed_cleavage: %s\n", (get_peptide_constraint_num_mis_cleavage(constraint)? "true":"false"));
   fprintf(file, "#\tmass_type: %s\n", (get_peptide_constraint_mass_type(constraint)==AVERAGE? "average":"mono"));
-  fprintf(file, "#\tredundancy: %s\n", (get_index_is_unique(index)? "unique":"redundant"));
+  fprintf(file, "#\tunique peptides: %s\n", (get_index_is_unique(index)? "unique":"redundant"));
   fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
   fprintf(file, "#\ttarget mass range for index file: %.2f\n", index->mass_range);
   
@@ -1371,14 +1369,17 @@ BOOLEAN_T check_index_db_boundary(
       return FALSE;
     }
   }
-  // check redundancy
-  else if(strncmp("redundancy:", field, 11) == 0){
-    if(compare_float(check_value, (real_value = get_index_is_unique(index))) != 0){
+  // check peptide unique-ness
+  else if(strncmp("unique peptides:", field, 16) == 0){
+    if(compare_float(
+          check_value, (real_value = get_index_is_unique(index))) != 0){
       if((int)real_value == FALSE){
-        carp(CARP_ERROR, "peptide redundancy: REDUNDANT, does not match the database supported type UNIQUE");
+        carp(CARP_ERROR, "unique peptides: FALSE, does not match "
+            "the database supported type TRUE");
       }
       else{
-        carp(CARP_ERROR, "peptide redundancy: UNIQUE, does not match the database supported type REDUNDANT");
+        carp(CARP_ERROR, "unique peptides: TRUE, does not match "
+            "the database supported type FALSE");
       }
       return FALSE;
     }
