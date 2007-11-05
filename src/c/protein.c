@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.55 $
+ * $Revision: 1.56 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -196,11 +196,20 @@ void free_protein(
   PROTEIN_T* protein ///< object to free -in
   )
 {
-  if(!protein->is_memmap && !protein->is_light){
-    free(protein->id);
-    free(protein->sequence);
-    free(protein->annotation);
-    free_database(protein->database); // MEMLEAK
+  // FIXME what is the point of checking this?
+  if(!protein->is_memmap && !protein->is_light){ 
+    if (protein->id != NULL){
+      free(protein->id);
+    }
+    if (protein->sequence != NULL){
+      free(protein->sequence);
+    }
+    if (protein->annotation != NULL){
+      free(protein->annotation);
+    }
+    if (protein->database != NULL){
+      free_database(protein->database); 
+    }
   }
   free(protein);
 }
