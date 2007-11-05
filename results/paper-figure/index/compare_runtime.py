@@ -23,15 +23,15 @@ def plot_compare_data(crux_array, crux_no_index_array, sequest_array,
   fasta_file = os.path.basename(fasta_file)
   print "generating figures"
   
-#  fh = open("crux-fast-%s.xy" % fasta_file, "w")
-#  for idx in range(len(mass_windows)):
-#    fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_array[idx]))
-#  fh.close()
-#
-#  fh = open("crux-no-index-%s.xy" % fasta_file, "w")
-#  for idx in range(len(mass_windows)):
-#    fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_no_index_array[idx]))
-#  fh.close()
+  fh = open("crux-fast-%s.xy" % fasta_file, "w")
+  for idx in range(len(mass_windows)):
+    fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_array[idx]))
+  fh.close()
+
+  fh = open("crux-no-index-%s.xy" % fasta_file, "w")
+  for idx in range(len(mass_windows)):
+    fh.write("%.8f\t%.8f\n" % (mass_windows[idx], crux_no_index_array[idx]))
+  fh.close()
 
   fh = open("sequest-full-xcorr-%s.xy" % fasta_file, "w")
   for idx in range(len(mass_windows)):
@@ -101,58 +101,58 @@ for window in mass_windows:
 
         
   # 2, now run Crux
-#  command = "time -p ./match_search \
-#      --output-mode sqt \
-#      --sqt-output-file %s.sqt \
-#      --parameter-file crux.params_%s \
-#      --number-decoy-set 0 \
-#      %s %s" % (window, window, ms2_file, fasta_file)
-#  print >>sys.stderr, "\nRunning %s\n" % command
-#
-#  (exit_code, result) = \
-#        commands.getstatusoutput(command)
-#  #debug
-#  print result
-#  #print exit_code
-#  
-#  if exit_code == "1":
-#    print "%s %s" % ("failed to run Crux on mass window:", window)
-#    sys.exit(1)
-#  else:
-#    #now parse the runtime from the result output
-#    result = result.split('\n')
-#    for line in result:
-#      #get user time
-#      if line.startswith(TIME_PREFIX):
-#        fields = line.rstrip('\n').split()
-#        crux_results.append(float(fields[1]))
-#
-#  # 3, now run Crux without an index
-#  command = "time -p ./match_search \
-#      --output-mode sqt \
-#      --sqt-output-file %s.sqt \
-#      --parameter-file crux_no_index.params_%s \
-#      --number-decoy-set 0 \
-#      %s %s" % (window, window, ms2_file, fasta_file)
-#  print >>sys.stderr, "\nRunning %s\n" % command
-#
-#  (exit_code, result) = \
-#        commands.getstatusoutput(command)
-#  #debug
-#  print result
-#  #print exit_code
-#  
-#  if exit_code == "1":
-#    print "%s %s" % ("failed to run Crux on mass window:", window)
-#    sys.exit(1)
-#  else:
-#    #now parse the runtime from the result output
-#    result = result.split('\n')
-#    for line in result:
-#      #get user time
-#      if line.startswith(TIME_PREFIX):
-#        fields = line.rstrip('\n').split()
-#        crux_no_index_results.append(float(fields[1]))
+  command = "time -p ./match_search \
+      --output-mode sqt \
+      --sqt-output-file %s.sqt \
+      --parameter-file crux.params_%s \
+      --number-decoy-set 0 \
+      %s %s" % (window, window, ms2_file, fasta_file)
+  print >>sys.stderr, "\nRunning %s\n" % command
+
+  (exit_code, result) = \
+        commands.getstatusoutput(command)
+  #debug
+  print result
+  #print exit_code
+  
+  if exit_code == "1":
+    print "%s %s" % ("failed to run Crux on mass window:", window)
+    sys.exit(1)
+  else:
+    #now parse the runtime from the result output
+    result = result.split('\n')
+    for line in result:
+      #get user time
+      if line.startswith(TIME_PREFIX):
+        fields = line.rstrip('\n').split()
+        crux_results.append(float(fields[1]))
+
+  # 3, now run Crux without an index
+  command = "time -p ./match_search \
+      --output-mode sqt \
+      --sqt-output-file %s.sqt \
+      --parameter-file crux_no_index.params_%s \
+      --number-decoy-set 0 \
+      %s %s" % (window, window, ms2_file, fasta_file)
+  print >>sys.stderr, "\nRunning %s\n" % command
+
+  (exit_code, result) = \
+        commands.getstatusoutput(command)
+  #debug
+  print result
+  #print exit_code
+  
+  if exit_code == "1":
+    print "%s %s" % ("failed to run Crux on mass window:", window)
+    sys.exit(1)
+  else:
+    #now parse the runtime from the result output
+    result = result.split('\n')
+    for line in result:
+      #get user time
+      if line.startswith(TIME_PREFIX):
+        fields = line.rstrip('\n').split()
+        crux_no_index_results.append(float(fields[1]))
 
 
 
