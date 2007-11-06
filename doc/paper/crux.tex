@@ -120,16 +120,16 @@ state of the art, Crux makes the following primary contributions:
 
 \begin{itemize}
 \item {\bf Efficient retrieval of candidate peptides.}  Given a
-  spectrum with a specified precursor mass-to-charge ratio (m/z), Crux
-  uses a pre-computed peptide database to retrieve efficiently all
-  peptides whose m/z lies within a user-specified window around the
-  target m/z (called {\em candidate peptides}).  The database is
-  sorted by peptide mass and is stored on disk, with mass indices
-  stored in memory.  We show that, relative to {\sc Sequest}'s
-  strategy of reading the protein sequence database from disk for each
-  new spectrum, the indexed database decreases candidate peptide
-  retrieval time from the human protein database by 79.5\%--97.2\%,
-  depending upon the width of the selected mass window.
+  spectrum with a specified precursor mass-to-charge ratio (m/z) and
+  an assumed charge, Crux uses a precomputed peptide database to
+  retrieve efficiently all peptides whose mass lies within a
+  user-specified window around the target mass (called {\em candidate
+  peptides}).  The database is sorted by peptide mass and is stored on
+  disk, with mass indices stored in memory.  We show that, relative to
+  {\sc Sequest}'s strategy of reading the protein sequence database
+  from disk for each new spectrum, the indexed database decreases
+  candidate peptide retrieval time from the human protein database by
+  79.5\%--97.2\%, depending upon the width of the selected mass window.
 
 \item {\bf On-the-fly generation of decoy peptides.}  In evaluating
   the statistical significance of a PSM, mass spectrometrists
@@ -546,7 +546,7 @@ designed with the latter in mind: the parallelization will divide the
 database among processors, sending each observed spectrum to the
 processor that stores the appropriate mass range.  We also plan to
 extend the peptide index to allow for storage of additional pieces of
-pre-computed information, such as predicted peak intensities,
+precomputed information, such as predicted peak intensities,
 predicted peptide retention time, or predicted proteotypic peptides
 \cite{mallick:computational}.  Finally, we have plans for algorithmic
 improvements, including increasing the variety of features used by
