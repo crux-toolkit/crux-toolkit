@@ -104,7 +104,7 @@ trees \cite{elias:intensity}.
 \caption{{\bf The Crux algorithm.}  Crux takes as input a collection
   of fragmentation spectra and a target protein sequence database, and
   produces a list of peptide-spectrum matches, each with an associated
-  $q$~value.
+  $q$~value, a measure of false discovery rate. 
   \label{figure:crux}}
 \end{figure*}
 
@@ -119,10 +119,9 @@ the statistical significance of of each PSM.  Relative to the current
 state of the art, Crux makes the following primary contributions:
 
 \begin{itemize}
-
 \item {\bf Efficient retrieval of candidate peptides.}  Given a
   spectrum with a specified precursor mass-to-charge ratio (m/z), Crux
-  uses a precomputed peptide database to retrieve efficiently all
+  uses a pre-computed peptide database to retrieve efficiently all
   peptides whose m/z lies within a user-specified window around the
   target m/z (called {\em candidate peptides}).  The database is
   sorted by peptide mass and is stored on disk, with mass indices
@@ -130,7 +129,7 @@ state of the art, Crux makes the following primary contributions:
   strategy of reading the protein sequence database from disk for each
   new spectrum, the indexed database decreases candidate peptide
   retrieval time from the human protein database by 79.5\%--97.2\%,
-  depending upon the width of the selected m/z window.
+  depending upon the width of the selected mass window.
 
 \item {\bf On-the-fly generation of decoy peptides.}  In evaluating
   the statistical significance of a PSM, mass spectrometrists
@@ -348,7 +347,7 @@ versions of these scores.  The vast majority of the PSMs receive
 identical scores using either method.  Furthermore, as shown in
 Figure~\ref{figure:pq-plot} (described in
 Section~\ref{section:experimental}), the Crux and {\sc Sequest}
-perform very similarly in practice.
+algorithms perform very similarly in practice.
 
 \subsection{Null peptide generation}
 \label{section:on-the-fly}
@@ -463,10 +462,10 @@ target-decoy search approach.
 \end{figure}
 
 To compare the performance of {\sc Sequest} and the various algorithms
-implemented in Crux, we used a collection of 18149 spectra derived
+implemented in Crux, we used a collection of 18,149 spectra derived
 from a yeast whole-cell lysate (see Methods).  Each peptide
 identification method searches against the yeast proteome and produces
-a list of 35676 PSMs ranked by $q$~value, computed as described in
+a list of 35,676 PSMs ranked by $q$~value, computed as described in
 Section~\ref{section:q-value} (the number of spectra differs from the number
 of PSMs because some spectra are searched multiple times, once for each
 possible charge state).  For {\sc Sequest} and for Crux with a static
@@ -489,9 +488,9 @@ Finally, consistent with previously reported results
 \cite{klammer:not, kall:semi-supervised}, the $p$~value calculation
 yields a large improvement over simple ranking by $Xcorr$, and using
 Percolator yields an even more dramatic improvement.  At a $q$~value
-threshold of 0.01, $Xcorr$ ranking yields 1609 PSMs, ranking by
-$Xcorr$ $p$~values yields 4904 PSMs, and ranking by Percolator score
-yields 6294 PSMs.  It is not surprising that Percolator performs
+threshold of 0.01, $Xcorr$ ranking yields 1,609 PSMs, ranking by
+$Xcorr$ $p$~values yields 4,904 PSMs, and ranking by Percolator score
+yields 6,294 PSMs.  It is not surprising that Percolator performs
 better than the $p$~value calculation, because Percolator exploits a
 wide variety of PSM features, whereas the $p$~value is based only on
 the observed $Xcorr$ distribution and the number of candidate
@@ -507,7 +506,7 @@ identification algorithms is that source code for two of the most
 widely used algorithms---{\sc Sequest} and MASCOT---are not publicly
 available.  For non-commercial users, Crux remedies this situation,
 while also making available a fast candidate peptide retrieval
-algorithm and several state-of-the-art postprocessing algorithms.
+algorithm and several state-of-the-art post-processing algorithms.
 Although Crux is implemented in C, the code design is object oriented.
 Thus, although the core of the Crux search engine is currently $Sp$
 and $Xcorr$, the code modules for candidate retrieval or
@@ -574,7 +573,7 @@ For validation, we use a publicly available tandem mass spectrometry
 data set from \cite{klammer:peptide2}, available as the $60cm$ data
 set at
 \url{http://noble.gs.washington.edu/proj/retention/data/data.html}.
-The data set consists of a collection of 18149 spectra derived from a
+The data set consists of a collection of 18,149 spectra derived from a
 yeast whole-cell lysate as described previously
 \cite{klammer:peptide2}.
 
