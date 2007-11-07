@@ -28,13 +28,14 @@ REVISION: $1.0 $
    <dt><a href="install-tutorial.html">Installation</a>
    <dt><a href="start-tutorial.html">Getting Started</a>
    <dt>Searching a Protein Database</a>
+   <dt><a href="index-tutorial.html">Creating an Index</a>
    <dt><a href="customize-tutorial.html">Customizing a Search</a>
    <dt><a href="examples-tutorial.html">Examples</a>
    <dt><a href="crux.html">Man pages</a>
    <dt><a href="sitemap-tutorial.html">Index</a>
 </dl>
-<hr>
 <!--
+<hr>
 <h3>On this Page</h3>
 <dl>
    <dt><a href="#first">The first heading</a>
@@ -49,7 +50,7 @@ in your working directory, you can conduct the search with this command.
 </p>
 
 <div class=code>
-<code>$ crux-search-for-matches demo.ms2 small-yeast.sqt</code>
+<code>$ crux-search-for-matches demo.ms2 small-yeast.fasta</code>
 </div>
 
 <p>While the search is running, you will see output like this
@@ -66,8 +67,10 @@ you will see three new files, <span
 class=file>crux_match_target_demo_gibberish,
 crux_match_decoy1_demo_gibberish,
 crux_match_decoy2_demo_gibberish</span>, containing the search
-results.  These files are in a binary format that can only be read 
-by <span class=prog>crux</span>.</p>
+results.  The <span class="file">gibberish</span> will be replaced by
+some random sequence of letters and numbers.  It is used to ensure
+that each file gets a unique name.  These files are in a binary format
+that can only be read by <span class=prog>crux</span>.</p>
 
 <div class=note><em>Note: Search results may also be returned in a
 text format.  See the <a
@@ -77,7 +80,7 @@ href="customize-tutorial.html">customization</a> page for details.</em>
 <p>The final step is to analyze our search results.  We expect that
 some fraction of the spectra will not be identifiable as peptides (due
 to chemical noise, multiple peptides co-eluting, poor fragmentation,
-etc.).  This step filters out those spectra and returns only the
+etc.).  The analysis step filters out those spectra and returns only the
 high-quality peptide-spectrum matches.  Run this command.
 </p>
 
@@ -117,6 +120,7 @@ that the third column of floats is the q-value, but I'm not sure what
 the other two columns are.  I think we're changing this format, anyway.
 </p>
 
+<a href="index-tutorial.html"><h4>Next: Creating an Index</h4></a>
 
 </div><!--end main-->
 
