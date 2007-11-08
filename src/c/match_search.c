@@ -508,6 +508,7 @@ int main(int argc, char** argv){
     fprintf(stderr, "%s\n", error_message);
     fprintf(stderr, "%s", usage);
     free(usage);
+    exit(1);
   }
   exit(0);
 }

@@ -1,9 +1,10 @@
-/******************************************************************************
+/****************************************************************************
  * FILE: parameter.c
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * CREATE DATE: 2006 Oct 09
  * DESCRIPTION: General parameter handling utilities. MUST declare ALL optional command parameters here inside initalialize_parameters
- *****************************************************************************/
+ ****************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +55,7 @@ void initialize_parameters(void){
 
   // check if parameters been initialized
   if(parameter_initialized){
-    carp(CARP_ERROR, "parameters has already been initialized");
+    carp(CARP_ERROR, "parameters have already been initialized");
     return;
   }
   
@@ -200,7 +201,7 @@ BOOLEAN_T copy_parameter(
 /**
  * This method should be called only after parsed command line
  * first, parse paramter file
- * Next, updates the parameter files with command line options
+ * Next, update the parameter files with command line options
  * command line arguments have higher precedence 
  * parse the parameter file given the filename
  */
@@ -249,7 +250,7 @@ void parse_parameter_file(
     exit(1);
   }
 
-  // check if parameter file exist, if not exit use default parameters
+  // check if parameter file exists, if not exit use default parameters
   if(access(parameter_filename, F_OK)){
      carp(CARP_INFO, "no parameter_file, using default parameters");
      return;
@@ -260,6 +261,7 @@ void parse_parameter_file(
 
   f = fopen(parameter_filename, "r");
   if(f == NULL){
+    //change to stderr
     printf("couldn't open file: %s\n", parameter_filename);
     exit(1);
   }
@@ -274,7 +276,8 @@ void parse_parameter_file(
 
       // Change the newline to a '\0'
       for(idx = MAX_LINE_LENGTH - 1; idx > 0; idx--){
-	if(line[idx] == '\n' || line[idx] == '\r' || line[idx] == '\f')
+	//if(line[idx] == '\n' || line[idx] == '\r' || line[idx] == '\f')
+	if(line[idx] == '\n' || line[idx] == '\r' || line[idx] == '\f' || line[idx] == ' ' || line[idx] == '\t')
 	  line[idx] = '\0';
       }
       while(idx < (int)strlen(line) && line[idx] != '='){

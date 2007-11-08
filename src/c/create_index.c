@@ -220,7 +220,7 @@ int main(int argc, char** argv){
     // check if input file exist
     if(access(in_file, F_OK)){
       carp(CARP_FATAL, "The file \"%s\" does not exist " 
-          "(or is not readable, or is empty).", in_file);
+          "(or is not readable or is empty).", in_file);
       exit(1);
     }
     
@@ -260,6 +260,7 @@ int main(int argc, char** argv){
     fprintf(stderr, "%s\n", error_message);
     fprintf(stderr, "%s", usage);
     free(usage);
+    exit(1);
   }
   exit(0);
 }
