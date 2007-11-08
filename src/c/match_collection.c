@@ -291,6 +291,12 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
     is_first_spectrum = FALSE;
   }
   
+<<<<<<< match_collection.c
+  //create a generate peptide iterator
+  GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  
+		//FIXME use neutral_mass, might chage to pick
+    new_generate_peptides_iterator_sp(get_spectrum_neutral_mass(spectrum, charge) + mass_offset);
+=======
   // create a generate peptide iterator
   // FIXME use neutral_mass for now, but should allow option to change
  
@@ -299,6 +305,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
         get_spectrum_neutral_mass(spectrum, charge) + mass_offset,
         index, database
         );
+>>>>>>> 1.51
   
   /***************Preliminary scoring**************************/
   // When creating match objects for first time, must set the
@@ -741,7 +748,14 @@ BOOLEAN_T estimate_weibull_parameters(
   int charge
   )
 {
+<<<<<<< match_collection.c
+	// TODO should be a function that takes float array as input
+  // TODO why does xcorr need spectrum and charge but sp scoring function doesn't?
+  // TODO document routine
+  // TODO should not be fixed number
+=======
   carp(CARP_INFO, "Estimating weibull params");
+>>>>>>> 1.51
   MATCH_COLLECTION_T* sample_collection = match_collection;
 
   if (sample_count != 0){

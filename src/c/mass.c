@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #include <math.h>
@@ -154,7 +154,7 @@ void increase_amino_acid_mass(
 
   // check if amino acid
   if((short int)amino_acid < 'A' || (short int)amino_acid > 'Z'){
-    carp(CARP_ERROR, "cannot update mass, char: %c not part of amino acid");
+    carp(CARP_ERROR, "Cannot update mass, char: %c not an amino acid");
   }
   
   amino_masses[(short int)amino_acid - 'A' + 26 ] += update_mass;
