@@ -76,6 +76,7 @@ void initialize_parameters(void){
   set_double_parameter("min-mass", 200);
   set_double_parameter("max-mass", 7200);
   set_int_parameter("max-length", 50);
+  set_int_parameter("min-matches", 10);
   set_int_parameter("min-length", 6);
   set_string_parameter("cleavages", "tryptic");
   set_string_parameter("isotopic-mass","average");
