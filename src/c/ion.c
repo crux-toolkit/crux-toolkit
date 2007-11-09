@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -465,6 +465,38 @@ void print_ion_gmtk_single_binary(
 
 	fwrite(float_array, sizeof(float), 3, file);
 	fwrite(int_array, sizeof(int), 9, file);
+}
+
+/**
+ * A hack routine to print out a null ion if there are none in the series.
+ * For using neutral losses with GMTK.
+ * Come in both binary and ascii versions.
+ */
+void print_null_ion_gmtk_single_binary(
+  FILE* file,
+  int sentence_idx,
+  int frame_idx
+  ){
+
+	float float_array[3] = {0.0, 0.0, 0.0};
+	int int_array[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  fwrite(&sentence_idx, sizeof(int), 1, file);
+  fwrite(&frame_idx, sizeof(int), 1, file);
+	fwrite(float_array, sizeof(float), 3, file);
+	fwrite(int_array, sizeof(int), 9, file);
+}
+
+/**
+ * A hack routine to print out a null ion if there are none in the series.
+ * For using neutral losses with GMTK.
+ * Come in both binary and ascii versions.
+ */
+void print_null_ion_gmtk_single(
+  FILE* file
+  ){
+
+  char* string = "0.0\t0.0\t0.0\t0\t0\t0\t0\t0\t0\t0\t0\t0\n";
+  fprintf(file, string);
 }
 
 

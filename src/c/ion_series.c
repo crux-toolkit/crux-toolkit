@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.38 $
+ * REVISION: $Revision: 1.39 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -21,7 +21,8 @@
 #include "mass.h"
 #include "spectrum.h"
 
-#define BINARY_GMTK 1
+// #define BINARY_GMTK 0
+#define PRINT_NULL_IONS 1
 #define MAX_IONS 10000
 #define MAX_NUM_ION_TYPE 8 // number of different ion_types
 
@@ -267,8 +268,7 @@ void print_ion_series_single_gmtk(
 	ION_SERIES_T* ion_series,         ///< ion_series to print -in 
 	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
 	FILE* file,                       ///< file output
-  int sentence_idx
-								){
+  int sentence_idx){
 
 	// create the filtered iterator that will select among the ions
 	ION_FILTERED_ITERATOR_T* ion_iterator = 
@@ -277,12 +277,27 @@ void print_ion_series_single_gmtk(
   // foreach ion in ion iterator, add matched observed peak intensity
   ION_T* ion;
   int ion_idx = 0;
+
+  // print a null ion if there are none in this ion series
+#ifdef PRINT_NULL_IONS
+  if (!ion_filtered_iterator_has_next(ion_iterator)){
+#ifdef BINARY_GMTK
+		print_null_ion_gmtk_single_binary(file, sentence_idx, 0);
+#else
+		print_null_ion_gmtk_single(file);
+    sentence_idx++; // hack to avoid error for not using sentence_idx
+#endif
+  }
+#endif
+
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
+    
 #ifdef BINARY_GMTK
 		print_ion_gmtk_single_binary(ion, file, sentence_idx, ion_idx);
 #else
 		print_ion_gmtk_single(ion, file);
+    sentence_idx++; // hack to avoid error for not using sentence_idx
 #endif
     ion_idx++;
 	}
