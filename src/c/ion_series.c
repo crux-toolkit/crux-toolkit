@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.39 $
+ * REVISION: $Revision: 1.40 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1162,11 +1162,10 @@ ION_CONSTRAINT_T* new_ion_constraint_gmtk(
   constraint = new_ion_constraint(MONO, max_charge, ALL_ION, FALSE);
 
   // set all modifications count for gmtk
-  // FIX NEUTRAL losses
-  // constraint->use_neutral_losses = TRUE;
+  constraint->use_neutral_losses = TRUE;
   constraint->min_charge = 1;
-  // constraint->modifications[NH3] = -1;
-  // constraint->modifications[H2O] = -1;
+  constraint->modifications[NH3] = -1;
+  constraint->modifications[H2O] = -1;
   constraint->modifications[ISOTOPE] = 0;
   constraint->modifications[FLANK] = 0;
 
