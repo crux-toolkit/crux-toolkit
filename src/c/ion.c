@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -21,6 +21,8 @@
 #define LOG_INTENSITY 1
 #define MZ_INT_MAX 10
 #define MZ_INT_MIN 0
+#define PAIRED_ION_INTS 12
+#define PAIRED_ION_FLOATS 6
 
 // At one point I need to reverse the endianness for pfile_create to work
 // Apparently that is no longer true. Hence 0 below.
@@ -501,28 +503,153 @@ void print_null_ion_gmtk_single(
 
 
 /**
- * prints the location and fields of ION_T object to the file, in the
+ * prints the location and fields of the two ION_T objects to the file
  * following format for GMTK paired-ion models:
  *
- * m/z \t mass \t charge \t ion-series \t  ...
- *  peptide-bond-index \t modifications \n
+ * ints 
  *
- * Where:
+ * 1.  m/z ratio int (from N-term)
+ * 2.  m/z ratio int (from C-term)
+ * 3.  peptide idx (from N-term)
+ * 4.  peptide idx (from C-term)
+ * 5.  aa Id (N-term)
+ * 6.  aa Id (C-term)
+ * 7.  first possible
+ * 8.  first detectable
+ * 9.  first detected
+ * 10. second possible
+ * 11. second observable
+ * 12. second detected
  *
- * m/z - is the ion's mass-to-charge
- * mass - is the ion's (charged) mass
- * charge - is the ion's charge e.g. 1,2,3
- * ion-series - is one of (b,y,p)
- * bond-index - is in [1...n), where n is peptide length
- * modifications - is one of (none|nh3|h2o)
+ * floats
  *
- * if the ion has more than one modification, each will be printed on a
- * separate line, with the necessary number of tabs to right justify
+ * 1. m/z ratio float (from N-term)
+ * 2. m/z ratio float (from C-term)
+ * 3. first raw
+ * 4. second raw
+ * 5. first rank
+ * 6. second rank
+ *
  */
-void print_ion_gmtk_paired(
-  ION_T* ion, ///< print this ion -in
-  FILE* file ///< to this file -in
-  );
+void print_ion_gmtk_paired_binary(
+  ION_T* first_ion, ///< print this ion -in
+  ION_T* second_ion, ///< print this ion -in
+  FILE* file, ///< to this file -in
+  int sentence_idx, 
+  int frame_idx
+  ){
+  
+  float float_array[PAIRED_ION_FLOATS];
+	int int_array[PAIRED_ION_INTS];
+
+  // start with the floats
+  float n_mz_ratio = (first_ion->ion_mass_z)/(first_ion->peptide_mass);
+  float_array[0] = n_mz_ratio;                                    // 0
+  // TODO 
+  // subtract from 1.0?
+	float c_mz_ratio =  1.0 - n_mz_ratio;                           // 1
+	float_array[1] = c_mz_ratio;
+
+	int first_is_detected = 0; 																		
+  if (first_ion->peak != NULL){
+    // put in LOG_INTENSITY ?
+    float_array[2] = get_peak_intensity(first_ion->peak); 			// 2 
+    float_array[4] = get_peak_intensity_rank(first_ion->peak); 	// 4 
+    first_is_detected = 1; 								
+  }
+
+  int second_is_detected = 0; 																		
+  if (second_ion->peak != NULL){
+    // put in LOG_INTENSITY ?
+    float_array[3] = get_peak_intensity(second_ion->peak); 			// 3 
+    float_array[5] = get_peak_intensity_rank(second_ion->peak); // 5 
+    second_is_detected = 1; 								
+  }
+
+  // next do the ints
+  int n_mz_int = (int)(n_mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
+  int c_mz_int = (int)(c_mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
+	int cterm_idx = strlen(first_ion->peptide_sequence) - first_ion->cleavage_idx; 
+  int left_amino = amino_to_int(
+      first_ion->peptide_sequence[first_ion->cleavage_idx-1]);
+  int right_amino = amino_to_int(
+      first_ion->peptide_sequence[first_ion->cleavage_idx]);
+	int first_is_detectable = 0;
+  if ( 
+       ((first_ion->ion_mass_z >= DETECTABLE_MZ_MIN) 
+              &&
+        (first_ion->ion_mass_z <= DETECTABLE_MZ_MAX)) 
+
+         || 
+         
+       first_is_detected
+
+     ){
+    first_is_detectable = 1;                                    
+  }
+
+  int second_is_detectable = 0;
+  if ( 
+       ((second_ion->ion_mass_z >= DETECTABLE_MZ_MIN) 
+              &&
+        (second_ion->ion_mass_z <= DETECTABLE_MZ_MAX)) 
+
+         || 
+         
+       second_is_detected
+
+     ){
+    second_is_detectable = 1;                                    
+  }
+
+  int_array[0] = n_mz_int; 
+  int_array[1] = c_mz_int; 
+  int_array[2] = first_ion->cleavage_idx;
+  int_array[3] = cterm_idx;
+  int_array[4] = left_amino;
+  int_array[5] = right_amino;
+  int_array[6] = 1;  // TODO is possible always true?
+  int_array[7] = first_is_detectable; 
+  int_array[8] = first_is_detected; 
+  int_array[9] = 1;  // TODO is possible always true?
+  int_array[10] = second_is_detectable; 
+  int_array[11] = second_is_detected; 
+
+  // account for endian differences
+  if (REVERSE_ENDIAN){
+
+    int idx;
+    for (idx=0; idx < PAIRED_ION_INTS; idx++){
+      int_array[idx] = htonl(int_array[idx]);
+    }
+    for (idx=0; idx < PAIRED_ION_FLOATS; idx++){
+      // htonl does not seem to work on the floats (!!)
+      // so I will reverse the bytes by hand
+      float old_float;
+      float new_float;
+
+      old_float = float_array[idx];
+
+      char *forward_endian = (char*) &old_float;
+      char *reversed_endian = (char*) &new_float;
+
+      reversed_endian[0] = forward_endian[3];
+      reversed_endian[1] = forward_endian[2];
+      reversed_endian[2] = forward_endian[1];
+      reversed_endian[3] = forward_endian[0];
+      float_array[idx] = new_float;
+    }
+    
+    sentence_idx = htonl(sentence_idx);
+    frame_idx = htonl(frame_idx);
+  } 
+
+  // output to the file
+  fwrite(&sentence_idx, sizeof(int), 1, file);
+  fwrite(&frame_idx, sizeof(int), 1, file);
+	fwrite(float_array, sizeof(float), PAIRED_ION_FLOATS, file);
+	fwrite(int_array, sizeof(int), PAIRED_ION_INTS, file);
+};
 
 /**
  *\return the modified mass_z accodring to the modification type
