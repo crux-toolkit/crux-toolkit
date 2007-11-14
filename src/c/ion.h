@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -167,29 +167,41 @@ void print_null_ion_gmtk_single(
   FILE* file
   );
 
-
 /**
- * prints the location and fields of ION_T object to the file, in the
+ * prints the location and fields of the two ION_T objects to the file
  * following format for GMTK paired-ion models:
  *
- * m/z \\t mass \\t charge \\t ion-series \\t  ...
- *  peptide-bond-index \\t modifications \n
+ * ints 
  *
- * Where:
+ * 1.  m/z ratio int (from N-term)
+ * 2.  m/z ratio int (from C-term)
+ * 3.  peptide idx (from N-term)
+ * 4.  peptide idx (from C-term)
+ * 5.  aa Id (N-term)
+ * 6.  aa Id (C-term)
+ * 7.  first possible
+ * 8.  first detectable
+ * 9.  first detected
+ * 10. second possible
+ * 11. second observable
+ * 12. second detected
  *
- * m/z - is the ion's mass-to-charge
- * mass - is the ion's (charged) mass
- * charge - is the ion's charge e.g. 1,2,3
- * ion-series - is one of (b,y,p)
- * bond-index - is in [1...n), where n is peptide length
- * modifications - is one of (none|nh3|h2o)
+ * floats
  *
- * if the ion has more than one modification, each will be printed on a
- * separate line, with the necessary number of tabs to right justify
+ * 1. m/z ratio float (from N-term)
+ * 2. m/z ratio float (from C-term)
+ * 3. first raw
+ * 4. second raw
+ * 5. first rank
+ * 6. second rank
+ *
  */
-void print_ion_gmtk_paired(
-  ION_T* ion, ///< print this ion -in
-  FILE* file ///< to this file -in
+void print_ion_gmtk_paired_binary(
+  ION_T* first_ion, ///< print this ion -in
+  ION_T* second_ion, ///< print this ion -in
+  FILE* file, ///< to this file -in
+  int sentence_idx,
+  int frame_idx
   );
 
 /**
