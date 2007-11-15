@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.56 $
+ * REVISION: $Revision: 1.57 $
  ****************************************************************************/
 
 #include <math.h>
@@ -47,6 +47,8 @@
 #define GMTK_NUM_NEUTRAL_LOSS 2
 #define GMTK_NUM_ION_SERIES \
   GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
+
+#define GMTK_NUM_PAIRED_ION_SERIES 13
 
 /**
  * \struct scorer
@@ -1442,11 +1444,161 @@ void free_single_ion_constraints(
 }
 
 /**
+ * Creates the an array of ion constraints for GMTK models.
+ * TODO do we need one for paired and single? Do we want an iterator?
+ */
+ION_CONSTRAINT_T** paired_ion_constraints(
+  void
+){
+
+  carp(CARP_INFO, "Num ion series %i", GMTK_NUM_ION_SERIES);
+  ION_CONSTRAINT_T** ion_constraints = (ION_CONSTRAINT_T**) 
+    malloc(GMTK_NUM_ION_SERIES * sizeof(ION_CONSTRAINT_T*));
+
+	ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION, A_ION }; 
+  int charges[GMTK_NUM_CHARGES] = { 1, 2 }; 
+
+	MASS_TYPE_T mass_type = MONO; // TODO maybe change to parameter file
+
+  int ion_constraint_idx = 0;
+
+  int ion_type_idx;
+  // b and y. NOTE keep in synch with GMTKmodel.py writeIonFilesC
+  for (ion_type_idx=0; ion_type_idx < GMTK_NUM_BASE_IONS; ion_type_idx++){
+
+    int charge_idx;
+    for (charge_idx=0; charge_idx < GMTK_NUM_CHARGES; charge_idx++){
+
+      int neutral_idx;
+      for (neutral_idx=0; neutral_idx < GMTK_NUM_NEUTRAL_LOSS+1; neutral_idx++){
+        ION_CONSTRAINT_T* ion_constraint = new_ion_constraint(
+		      mass_type, charges[charge_idx], ion_types[ion_type_idx], FALSE);
+        set_ion_constraint_exactness(ion_constraint, TRUE);
+        if (neutral_idx == 0){
+          ;
+        }
+        else if (neutral_idx == 1){
+          set_ion_constraint_modification(ion_constraint, NH3, -1);
+        } else if (neutral_idx == 2){
+          set_ion_constraint_modification(ion_constraint, H2O, -1);
+        }
+        ion_constraints[ion_constraint_idx] = ion_constraint;
+        ion_constraint_idx++;
+      }
+    }
+  }
+  return ion_constraints;
+}
+
+/**
+ * Frees the single_ion_constraints array
+ */
+void free_paired_ion_constraints(
+    ION_CONSTRAINT_T** ion_constraints
+    ){
+  int constraint_idx;
+  for (constraint_idx=0; constraint_idx<GMTK_NUM_ION_SERIES; constraint_idx++){
+    free_ion_constraint(ion_constraints[constraint_idx]);
+  }
+  free(ion_constraints);
+}
+
+/**
+ * Create ion files (for paired-ion GMTK model) 
+ * in the output directory. 
+ * \returns TRUE for success 
+ */
+BOOLEAN_T output_psm_files_paired(
+  char* output_directory, ///< name of directory to place the ion files -in
+  SPECTRUM_T* spectrum,     ///< input spectrum -in
+  char** peptides, ///< peptide sequences -in 
+  int num_peptides, ///< number of peptide sequences -in
+  int charge, ///< the peptide charge -in
+  int starting_sentence_idx ///< used to append to existing pfile -in
+){
+    
+  char* peptide_sequence = NULL;
+  carp(CARP_INFO, "Creating and outputting paired ions");
+
+  // create the output directory, if not already
+  int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
+  if(access(output_directory, F_OK)){
+    if (mkdir(output_directory, dir_access) != 0){
+      carp(CARP_FATAL, "Trouble creating dir %s!", output_directory); 
+      exit(1);
+    }
+  }
+
+  // create and open (for appending) pfiles for each ion constraint
+  carp(CARP_INFO, "Creating output file handles");
+  FILE* ion_series_files[GMTK_NUM_ION_SERIES];
+  int ion_series_idx;
+  for ( ion_series_idx=0;ion_series_idx<GMTK_NUM_PAIRED_ION_SERIES;
+        ion_series_idx++){
+    char full_path[FILENAME_LENGTH];
+    sprintf(full_path, "%s/%i.prepfile", output_directory, ion_series_idx);
+    if (open_file(full_path, "a", FALSE, "append", "", 
+          &ion_series_files[ion_series_idx])==FALSE){
+      carp(CARP_FATAL, "Trouble opening output file %s!", full_path); 
+      exit(1);
+    }
+  }
+
+  // iterate through each peptide
+  carp(CARP_INFO, "Iterating through each peptide.");
+  ION_SERIES_T* ion_series;
+  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(charge); 
+  ION_CONSTRAINT_T** ion_constraints = paired_ion_constraints();
+
+  int peptide_idx;
+  for(peptide_idx=0; peptide_idx < num_peptides; peptide_idx++){ 
+    if ((peptide_idx + 1)% 100 == 0){
+      carp(CARP_INFO, "At peptide %i of %i", peptide_idx + 1, num_peptides);
+    }
+    peptide_sequence = peptides[peptide_idx];
+    carp(CARP_DETAILED_DEBUG, "%s", peptide_sequence);
+
+    // check peptide sequence
+    if(!valid_peptide_sequence(peptide_sequence)){
+      carp(CARP_FATAL, "not a valid peptide sequence: %s", peptide_sequence);
+    }
+
+    // create new ion series
+    ion_series = new_ion_series(peptide_sequence, charge, ion_constraint);
+
+    // now predict ions and assign them to their closest peaks
+    predict_ions(ion_series);
+
+    ion_series_assign_nearest_peaks(ion_series, spectrum);
+
+    // create our ion constraints
+
+    // iterate through each ion_constraint
+    int constraint_idx;
+    for (constraint_idx=0;constraint_idx<GMTK_NUM_ION_SERIES;
+         constraint_idx++){
+      // output the ions that obey this constraint
+      print_ion_series_single_gmtk(ion_series, 
+          ion_constraints[constraint_idx], 
+          ion_series_files[constraint_idx],
+          peptide_idx + starting_sentence_idx);
+    }
+    carp(CARP_INFO, "Appended to ion files for: %s", peptide_sequence);
+
+    free_ion_series(ion_series);
+  } 
+
+  free_single_ion_constraints(ion_constraints);
+  free_ion_constraint(ion_constraint);
+  return TRUE;
+}
+
+/**
  * Create ion files (for GMTK) in the output directory. 
  * \returns TRUE for success 
  */
 // PAIRED write an output_psm_files_paired
-BOOLEAN_T output_psm_files(
+BOOLEAN_T output_psm_files_single(
   char* output_directory, ///< name of directory to place the ion files -in
   SPECTRUM_T* spectrum,     ///< input spectrum -in
   char** peptides, ///< peptide sequences -in 
