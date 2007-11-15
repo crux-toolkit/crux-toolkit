@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.55 $
+ * REVISION: $Revision: 1.56 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1445,6 +1445,7 @@ void free_single_ion_constraints(
  * Create ion files (for GMTK) in the output directory. 
  * \returns TRUE for success 
  */
+// PAIRED write an output_psm_files_paired
 BOOLEAN_T output_psm_files(
   char* output_directory, ///< name of directory to place the ion files -in
   SPECTRUM_T* spectrum,     ///< input spectrum -in
