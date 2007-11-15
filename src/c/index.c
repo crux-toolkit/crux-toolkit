@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.62 $
+ * $Revision: 1.63 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -26,7 +26,6 @@
 
 // maximum proteins the index can handle
 #define MAX_PROTEIN 30000
-#define MAX_INDEX_FILES 30000
 #define MAX_FILE_NAME_LENGTH 30
 #define NUM_CHECK_LINES 8
 #define MAX_PROTEIN_IN_BIN 2500
@@ -346,9 +345,12 @@ void set_index_fields(
  * \returns A new index object.
  */
 INDEX_T* new_index(
-  char* fasta_filename,  ///< The fasta file
-  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
-  float mass_range  ///< the range of mass that each index file should be partitioned into
+  char* fasta_filename,  
+    ///< The fasta file
+  PEPTIDE_CONSTRAINT_T* constraint,  
+    ///< Constraint which these peptides satisfy
+  float mass_range  
+    ///< the range of mass that each index file should be partitioned into
   )
 {
   INDEX_T* index = allocate_index();
@@ -611,6 +613,9 @@ long get_num_bins_needed(
 
   num_bins = ((max_mass_limit - min_mass_limit) / index->mass_range) + 1;  // check..
 
+  if (num_bins > MAX_INDEX_FILES){
+    num_bins = MAX_INDEX_FILES;
+  }
   return num_bins;
 }                         
 
@@ -737,9 +742,9 @@ FILE* sort_bin(
  */
 BOOLEAN_T dump_peptide(
   FILE** file_array,  ///< the working file handler array to the bins -in/out
-  long int file_idx, ///< the index of the file array that the peptide belongs to -in
+  long int file_idx, ///< the index of the file that the peptide belongs to -in
   PEPTIDE_T* working_peptide, ///< the peptide to be stored -in
-  PEPTIDE_T** peptide_array, ///< the peptide array that stores the peptides before they get serialized -out
+  PEPTIDE_T** peptide_array, ///< stores peptides before they're serialized -out
   int* bin_count ///< the count array of peptides in each bin -in
   )
 {  

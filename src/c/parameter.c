@@ -72,7 +72,7 @@ void initialize_parameters(void){
   set_string_parameter("parameter-file", "crux.params");
     
   // generate_peptide, create_index parameters  
-  set_double_parameter("mass-range", 1);
+  // set_double_parameter("mass-range", 1);
   set_double_parameter("min-mass", 200);
   set_double_parameter("max-mass", 7200);
   set_int_parameter("max-length", 50);

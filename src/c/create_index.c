@@ -91,11 +91,11 @@ int main(int argc, char** argv){
 
   /* Define optional command line arguments */ 
 
-  parse_arguments_set_opt(
+  /*parse_arguments_set_opt(
     "mass-range", 
     "The mass range contained in each index file.",
     (void *) &mass_range, 
-    DOUBLE_ARG);
+    DOUBLE_ARG);*/
 
   parse_arguments_set_opt(
     "min-mass", 
@@ -200,11 +200,11 @@ int main(int argc, char** argv){
       exit(1);
     }
     
-    mass_range = get_double_parameter("mass-range");
-    if(compare_float(mass_range, 0) == 0){
+    // mass_range = get_double_parameter("mass-range");
+    /*if(compare_float(mass_range, 0) == 0){
       carp(CARP_FATAL, "mass_range:%d must be greater than 0.", mass_range);
       exit(1);
-    }
+    }*/
     
     // determine isotopic mass option
     if(strcmp(get_string_parameter_pointer("isotopic-mass"), "average")==0){
@@ -230,6 +230,7 @@ int main(int argc, char** argv){
     min_length = get_int_parameter("min-length");
     max_length = get_int_parameter("max-length");
     missed_cleavages = get_boolean_parameter("missed-cleavages");
+    mass_range = (max_mass - min_mass)/MAX_INDEX_FILES;
 
     // peptide constraint
     constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, 

@@ -12,7 +12,7 @@
 11	10/02/07		"Bug Fix"	"Open"	"AAK"	"AAK"	1	2	"Run valgrind and fix any remaining (there should not be many) leaks and/or unfreed memory, for all executables (possibly put in a regression or smoke test?)"
 12	10/02/07	11/05/07	"Testing Software"	"Closed"	"BEF"	"AAK"	1	2	"Write smoke tests (regression tests) for new executables (especially search-for-matches and analyze-matches)"
 13	10/02/07		"Bug Fix"	"Open"	"AAK"	"AAK"	1	1	"Create-index has inconsistent behavior for naming index directories for files with and without fasta as a suffix"
-14	10/08/07		"Bug Fix"	"Open"	"AAK"	"AAK"	1	2	"Resolve file handle limit error for create-index"
+14	10/08/07		"Bug Fix"	"Testing"	"AAK"	"AAK"	1	2	"Resolve file handle limit error for create-index"
 15	10/02/07	11/07/07	"New Functionality"	"Closed"	"BEF"	"AAK"	1	1	"White space should not cause errors in the parameter file, e.g. score-type=xcorr<white-space>"
 16	10/08/07		"Bug Fix"	"Open"	"LK"	"AAK"	1	2	"Fix compilation errors with percolator crux interface on gcc 3 and greater, and/or proteome, and/or the new Linux machine"
 17	10/02/07	11/13/07	"Bug Fix"	"Closed"	"BEF"	"AAK"	1	1	"Code should not segfault when parameter file does not exist.  BF: I can't get this error.  Uses default params if given file name doesn't exist"
