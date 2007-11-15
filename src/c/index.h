@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -16,6 +16,7 @@
 #include "peptide_constraint.h"
 #include "database.h"
 
+#define MAX_INDEX_FILES 1024
 
 /**
  * clean_up
