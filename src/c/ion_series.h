@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -121,6 +121,15 @@ void copy_ion_series(
 /*************************************
  * ION_SERIES_T: get and set methods
  ************************************/
+
+/**
+ * \returns the ion that meets the constraint or NULL
+ */
+ION_T* get_ion_series_ion(
+  ION_SERIES_T* ion_series, ///< the ion_series -in                          
+  ION_CONSTRAINT_T* ion_constraint,
+  int cleavage_idx
+  );
 
 /**
  * User should not free the peptide sequence seperate from the ion_series

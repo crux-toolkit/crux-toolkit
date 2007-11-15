@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.40 $
+ * REVISION: $Revision: 1.41 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -40,9 +40,13 @@ struct ion_series {
   ION_T* ions[MAX_IONS]; ///< The ions in this series
   int num_ions; ///< the number of ions in this series
   BOOLEAN_T is_predicted; ///< has this ion_series been predicted ions already?
-  int num_specific_ions[MAX_NUM_ION_TYPE]; ///< the number of ions of a specific ion_type
-  ION_T* specific_ions[MAX_NUM_ION_TYPE][MAX_IONS]; ///< specific ions in the series, reference to master array of ions
-  LOSS_LIMIT_T* loss_limit; ///< nh3, h2o loss limit for a given cleavage index, before using this array should always sheck if not NULL
+  int num_specific_ions[MAX_NUM_ION_TYPE]; 
+    ///< the number of ions of a specific ion_type
+  ION_T* specific_ions[MAX_NUM_ION_TYPE][MAX_IONS]; 
+    ///< specific ions in the series, reference to master array of ions
+  LOSS_LIMIT_T* loss_limit; 
+    ///< nh3, h2o loss limit for a given cleavage index, 
+    ///< before using this array should always sheck if not NULL
   int peptide_length;   ///< the length of the peptide
 };
 
@@ -71,7 +75,7 @@ struct ion_constraint {
   MASS_TYPE_T mass_type; ///< the mass_type to use MONO|AVERAGE
   int max_charge; ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
   ION_TYPE_T ion_type; ///< the ion types the peptide series should include
-  BOOLEAN_T precursor_ion; ///< include precursor-ion in ion_series?
+  BOOLEAN_T precursor_ion; ///< does a precursor-ion satisfy this constraint
   int min_charge; 
   BOOLEAN_T exact_modifications; 
     ///< TRUE  = ints in modfications array indicate exact number of mods
@@ -420,7 +424,8 @@ void add_ion_to_ion_series(
   ion_series->ions[ion_series->num_ions++] = ion;   
   
   // add a pointer of ion to the specific ion_type array
-  ion_series->specific_ions[get_ion_type(ion)][ion_series->num_specific_ions[get_ion_type(ion)]++] = ion;
+  ion_series->specific_ions[get_ion_type(ion)]
+    [ion_series->num_specific_ions[get_ion_type(ion)]++] = ion;
 }
 
 /**
@@ -999,6 +1004,29 @@ void copy_ion_series(
 /*************************************
  * ION_SERIES_T: get and set methods
  ************************************/
+
+/**
+ * \returns the ion that meets the criteria or NULL
+ * TODO possibly reimplement if linear scan is too slow
+ */
+ION_T* get_ion_series_ion(
+    ION_SERIES_T* ion_series,
+    ION_CONSTRAINT_T* ion_constraint,
+    int cleavage_idx
+    ){
+
+  ION_FILTERED_ITERATOR_T* ion_iterator = 
+    new_ion_filtered_iterator(ion_series, ion_constraint);
+  ION_T* ion = NULL;
+
+  while(ion_filtered_iterator_has_next(ion_iterator) == TRUE){
+    ion = ion_filtered_iterator_next(ion_iterator);
+    if(get_ion_cleavage_idx(ion) == cleavage_idx){
+      return ion;
+    }
+  }
+  return NULL;
+}
 
 /**
  *\returns the peptide length of which the ions are made
