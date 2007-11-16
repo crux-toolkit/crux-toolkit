@@ -135,39 +135,49 @@ void initialize_parameters(void){
 
 
   // set verbosity
-  temp_set_int_parameter("verbosity", CARP_ERROR, "usage");
+  temp_set_int_parameter("verbosity", CARP_ERROR, 
+	"Set level of output to stderr (0-100).  Default 50.");
 
   // set parameter file name (no default)
   //set_string_parameter("parameter-file", "crux.params");
-  temp_set_string_parameter("parameter-file", NULL, "usage");
+  temp_set_string_parameter("parameter-file", NULL, 
+	"Set additional options with values in the given file.");
     
   // generate_peptide arguments
   temp_set_string_parameter("protein input", NULL, 
-  "file containing protein sequences either in fasta format or binary index.");
+  "File containing protein sequences either in fasta format or binary index.");
   // create_index arguments
   temp_set_string_parameter("protein fasta file", NULL,
-		    "file containing protein sequences in fasta format");
+		    "File containing protein sequences in fasta format.");
   temp_set_string_parameter("index name", NULL,
-		    "name to give the new directory containing index files");
+		    "Name to give the new directory containing index files.");
 
   // generate_peptide, create_index parameters  
-  temp_set_double_parameter("min-mass", 200, "usage");
-  temp_set_double_parameter("max-mass", 7200, "usage");
-  temp_set_int_parameter("max-length", 50, "usage");
-  temp_set_int_parameter("min-length", 6, "usage");
-  temp_set_string_parameter("cleavages", "tryptic", "usage");
-  temp_set_string_parameter("isotopic-mass","average", "usage");
-  temp_set_boolean_parameter("unique-peptides", FALSE, "usage");
-  temp_set_boolean_parameter("missed-cleavages", FALSE, "usage");
+  temp_set_double_parameter("min-mass", 200, 
+	"The minimum mass of peptides to consider. Default 200.");
+  temp_set_double_parameter("max-mass", 7200, 
+	"The maximum mass of peptides to consider. Default 7200.");
+  temp_set_int_parameter("min-length", 6, 
+	"The minimum length of peptides to consider. Default 6.");
+  temp_set_int_parameter("max-length", 50, 
+	"The maximum length of peptides to consider. Default 50.");
+  temp_set_boolean_parameter("missed-cleavages", FALSE, 
+	"Include peptides with missed cleavage sites. Default FALSE.");
+  temp_set_string_parameter("cleavages", "tryptic", 
+	"The type of cleavage sites to consider (tryptic, partial, all)");
+  temp_set_string_parameter("isotopic-mass","average", 
+	"Which isotopes to use in calcuating mass (average or mono). " \
+	"Default average");
   
   // more generate_peptide parameters
   temp_set_boolean_parameter("output-sequence", FALSE, "usage");
   temp_set_boolean_parameter("output-trypticity", FALSE, "usage");
   temp_set_string_parameter("use-index", "F", "usage");
   temp_set_string_parameter("sort", "none", "usage");//mass,length,lexical,none  
+  temp_set_boolean_parameter("unique-peptides", FALSE, "usage");
 
   // more create_index parameters
-  temp_set_double_parameter("mass-range", 10, "usage");
+  //temp_set_double_parameter("mass-range", 10, "usage");
 
     // searching peptides
   temp_set_double_parameter("mass-offset", 0.0, "usage");
