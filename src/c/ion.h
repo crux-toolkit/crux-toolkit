@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -148,11 +148,17 @@ void print_ion_gmtk_single_binary(
   );
 
 /**
- * A hack routine to print out a null ion if there are none in the series.
+ * Some hack routines to print out a null ion if there are none in the series.
  * For using neutral losses with GMTK.
  * Come in both binary and ascii versions.
  */
 void print_null_ion_gmtk_single_binary(
+  FILE* file,
+  int sentence_idx,
+  int frame_idx
+  );
+
+void print_null_ion_gmtk_paired_binary(
   FILE* file,
   int sentence_idx,
   int frame_idx

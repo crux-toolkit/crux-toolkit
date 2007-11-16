@@ -192,7 +192,8 @@ void initialize_parameters(void){
   temp_set_double_parameter("mass-window", 3.0, "usage");
 
   // create_psm_files
-  temp_set_int_parameter("starting-sentence-idx", 0, "usage");
+  set_int_parameter("starting-sentence-idx", 0);
+  set_string_parameter("model-type", "single");
 
   // score_spectrum
   temp_set_string_parameter("prelim-score-type", "sp", "usage");

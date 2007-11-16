@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -18,11 +18,13 @@
 #include <netinet/in.h>
 #include <inttypes.h>
 
-#define LOG_INTENSITY 1
+//#define LOG_INTENSITY 1
 #define MZ_INT_MAX 10
 #define MZ_INT_MIN 0
 #define PAIRED_ION_INTS 12
 #define PAIRED_ION_FLOATS 6
+#define SINGLE_ION_FLOATS 3
+#define SINGLE_ION_INTS 9
 
 // At one point I need to reverse the endianness for pfile_create to work
 // Apparently that is no longer true. Hence 0 below.
@@ -275,13 +277,14 @@ void print_ion(
   )
 {
   // print all fields of ion
-  fprintf(file, "%.2f\t%.2f\t%d\t%d\t%d", ion->ion_mass_z, (ion->ion_mass_z)*ion->charge, ion->charge, 
-          (int)ion->type, ion->cleavage_idx);
+  fprintf(file, "%.2f\t%.2f\t%d\t%d\t%d", 
+      ion->ion_mass_z, (ion->ion_mass_z)*ion->charge, ion->charge, 
+      (int)ion->type, ion->cleavage_idx);
 
   // iterate over all modification counts
-  int modification_idx;
-  for(modification_idx=0; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
-    fprintf(file,"\t%d", ion->modification_counts[modification_idx]);
+  int mod_idx;
+  for(mod_idx=0; mod_idx < MAX_MODIFICATIONS; ++mod_idx){
+    fprintf(file,"\t%d", ion->modification_counts[mod_idx]);
   }
   
   fprintf(file,"\n");
@@ -377,8 +380,9 @@ void print_ion_gmtk_single_binary(
   int frame_idx
   ){
 
-	float float_array[3];
-	int int_array[9];
+  float* float_array = (float*)mycalloc(sizeof(float), SINGLE_ION_FLOATS);
+	int* int_array = (int*)mycalloc(sizeof(int), SINGLE_ION_INTS);
+
   float mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
   float_array[0] = mz_ratio;                              // 0
 	float_array[1] = 0.0; 																	// 1
@@ -394,7 +398,7 @@ void print_ion_gmtk_single_binary(
     // START
     // replace the rank intensity with the negative log of the 
     // TIC normalized intensity. A hack, I know
-    float_array[2] = 10 + log(float_array[1]);
+    float_array[2] = 10.0 + log(float_array[1]);
 #endif
 
   }
@@ -467,6 +471,8 @@ void print_ion_gmtk_single_binary(
 
 	fwrite(float_array, sizeof(float), 3, file);
 	fwrite(int_array, sizeof(int), 9, file);
+  free(float_array);
+  free(int_array);
 }
 
 /**
@@ -487,6 +493,26 @@ void print_null_ion_gmtk_single_binary(
 	fwrite(float_array, sizeof(float), 3, file);
 	fwrite(int_array, sizeof(int), 9, file);
 }
+
+/**
+ * A hack routine to print out a null ion if there are none in the series.
+ * For using neutral losses with GMTK.
+ */
+void print_null_ion_gmtk_paired_binary(
+  FILE* file,
+  int sentence_idx,
+  int frame_idx
+  ){
+
+  // FIX get rid of magic numbers
+	float float_array[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+	int int_array[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  fwrite(&sentence_idx, sizeof(int), 1, file);
+  fwrite(&frame_idx, sizeof(int), 1, file);
+	fwrite(float_array, sizeof(float), 6, file);
+	fwrite(int_array, sizeof(int), 12, file);
+}
+
 
 /**
  * A hack routine to print out a null ion if there are none in the series.
@@ -532,15 +558,15 @@ void print_null_ion_gmtk_single(
  *
  */
 void print_ion_gmtk_paired_binary(
-  ION_T* first_ion, ///< print this ion -in
-  ION_T* second_ion, ///< print this ion -in
-  FILE* file, ///< to this file -in
+  ION_T* first_ion,   ///< print this ion -in
+  ION_T* second_ion,  ///< print this ion -in
+  FILE* file,         ///< to this file -in
   int sentence_idx, 
   int frame_idx
   ){
   
-  float float_array[PAIRED_ION_FLOATS];
-	int int_array[PAIRED_ION_INTS];
+  float* float_array = (float*)mycalloc(sizeof(float), PAIRED_ION_FLOATS);
+	int* int_array = (int*)mycalloc(sizeof(int), PAIRED_ION_INTS);
 
   // start with the floats
   float n_mz_ratio = (first_ion->ion_mass_z)/(first_ion->peptide_mass);
@@ -569,7 +595,8 @@ void print_ion_gmtk_paired_binary(
   // next do the ints
   int n_mz_int = (int)(n_mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
   int c_mz_int = (int)(c_mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
-	int cterm_idx = strlen(first_ion->peptide_sequence) - first_ion->cleavage_idx; 
+	int cterm_idx = strlen(first_ion->peptide_sequence) 
+    - first_ion->cleavage_idx; 
   int left_amino = amino_to_int(
       first_ion->peptide_sequence[first_ion->cleavage_idx-1]);
   int right_amino = amino_to_int(
@@ -649,6 +676,8 @@ void print_ion_gmtk_paired_binary(
   fwrite(&frame_idx, sizeof(int), 1, file);
 	fwrite(float_array, sizeof(float), PAIRED_ION_FLOATS, file);
 	fwrite(int_array, sizeof(int), PAIRED_ION_INTS, file);
+  free(float_array);
+  free(int_array);
 };
 
 /**

@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -87,8 +87,10 @@ void print_ion_series_single_gmtk(
  */
 void print_ion_series_paired_gmtk(
 	ION_SERIES_T* ion_series, ///< ion_series to print -in 
-	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
-	FILE* file ///< file output
+	ION_CONSTRAINT_T* first_ion_constraint, ///< ion_constraint to obey -in 
+	ION_CONSTRAINT_T* second_ion_constraint, ///< ion_constraint to obey -in 
+	FILE* file, ///< file output
+  int sentence_idx
 	);
 
 /**
@@ -266,6 +268,13 @@ ION_CONSTRAINT_T* new_ion_constraint_sequest_xcorr(
  */
 void free_ion_constraint(
   ION_CONSTRAINT_T* ion_constraint///< the ion constraints to enforce -in
+  );
+
+/**
+ * copies the ion_constraint pointer
+ */
+ION_CONSTRAINT_T* copy_ion_constraint_ptr(
+  ION_CONSTRAINT_T* ion_constraint
   );
 
 /**
