@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.59 $
+ * REVISION: $Revision: 1.60 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1565,7 +1565,7 @@ BOOLEAN_T output_psm_files_paired(
   for ( ion_series_idx=0;ion_series_idx<GMTK_NUM_PAIRED_ION_SERIES;
         ion_series_idx++){
     char full_path[FILENAME_LENGTH];
-    sprintf(full_path, "%s/%i.prepfile", output_directory, ion_series_idx);
+    sprintf(full_path, "%s/%i-paired.prepfile", output_directory, ion_series_idx);
     if (open_file(full_path, "a", FALSE, "append", "", 
           &ion_series_files[ion_series_idx])==FALSE){
       carp(CARP_FATAL, "Trouble opening output file %s!", full_path); 
@@ -1655,7 +1655,7 @@ BOOLEAN_T output_psm_files_single(
   int ion_series_idx;
   for (ion_series_idx=0;ion_series_idx<GMTK_NUM_ION_SERIES;ion_series_idx++){
     char full_path[FILENAME_LENGTH];
-    sprintf(full_path, "%s/%i.prepfile", output_directory, ion_series_idx);
+    sprintf(full_path, "%s/%i-single.prepfile", output_directory, ion_series_idx);
     if (open_file(full_path, "a", FALSE, "append", "", 
           &ion_series_files[ion_series_idx])==FALSE){
       carp(CARP_FATAL, "Trouble opening output file %s!", full_path); 
