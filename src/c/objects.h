@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.42 $
+ * $Revision: 1.43 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
