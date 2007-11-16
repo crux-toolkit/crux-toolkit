@@ -1,6 +1,6 @@
 /**
  * \file hash.h 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for hashing.
  */
 #include "crux-utils.h"
@@ -49,10 +49,27 @@ BOOLEAN_T update_hash_value(
   );
 
 /**
+ * Updates the value for the key
+ * Must already have a existing value for the key
+ * Copies the value, thus no need to pass in a heap allocated value
+ *\returns TRUE if successfully updates hash value, else FALSE
+ */
+BOOLEAN_T add_or_update_hash(
+  HASH_T* h, ///< Hash object to add to -in/out
+  char *key, ///< key of the record to add or update -in
+  void *value ///< value to associate with the key -in
+  );
+
+/**
  * Get the value of the record for the hash key
  *\return the value for the hash record, returns NULL if can't find key
  */
 void* get_hash_value(
+  HASH_T* h, ///< working hash object -in
+  char *key  ///< the key of the record to retrieve -in
+  );
+
+void** get_hash_value_ref(
   HASH_T* h, ///< working hash object -in
   char *key  ///< the key of the record to retrieve -in
   );
