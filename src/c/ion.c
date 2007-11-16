@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file ion.c
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -880,7 +880,8 @@ void copy_ion(
 
 
 /**
- *\returns TRUE if forward ion_type(A,B,C), else reverse ion_type(X,Y,Z) FALSE
+ * \returns TRUE if forward ion_type(A,B,C), 
+ * else reverse ion_type(X,Y,Z) FALSE
  */
 BOOLEAN_T is_forward_ion_type(
   ION_T* ion ///< the ion to check if can lose nh3 -in                         
