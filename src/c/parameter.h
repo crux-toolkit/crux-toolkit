@@ -1,8 +1,8 @@
 /**
  * \file parameter.h
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
- *****************************************************************************/
+ ****************************************************************************/
 #ifndef PARAMETER_FILE_H
 #define PARAMETER_FILE_H
 #include "utils.h"
@@ -13,10 +13,50 @@
 #define MAX_LINE_LENGTH 4096 ///< maximum length of a line on the parameter file
 #define BILLION 1000000000.0
 
+
+//TODO:  all sets should become private
+//           wait until all progs have switched over
+//       add parse_command_line(int argc, char** argv)
+//       add get_command_line_error(&error_message)
+
+
+/**
+ * initialize parameters
+ * ONLY add optional parameters here!!!
+ * MUST declare ALL optional parameters in array to be used
+ * Every option and its default value for every executable 
+ * must be declared here
+ */
+void initialize_parameters(void);
+
 /**
  * free heap allocated parameters hash table
  */
 void free_parameters(void);
+
+/**
+ * Identify which of the parameters can be changed 
+ * on the command line.  Provide a list of the parameter names
+ * and the number of parameters in that list.
+ * Requires that initialize_parameters() has been run.
+ */
+BOOLEAN_T select_cmd_line_options(char**, int);
+
+/**
+ * Identify what are the required arguments
+ * on the command line.  Provide a list of the argument names
+ * and the number of arguments in that list.
+ * Requires that initialize_parameters() has been run.
+ */
+BOOLEAN_T select_cmd_line_arguments(char**, int);
+
+/**
+ * Take the command line string from main, find the parameter fil
+ * option (if present), parse it's values into the hash, and parse
+ * the command line options and arguments into the hash
+ * main then retrieves the values through get_value
+ */
+BOOLEAN_T parse_cmd_line_into_params_hash(int, char**);
 
 /**
  * Each of the following functions searches through the hash table of
@@ -146,6 +186,8 @@ void check_unused_parameters(void);
  */
 void parameters_confirmed(void);
 
+
+//I think this is being replaced
 /**
  * Parameter file must be parsed first!
  * searches through the hash table of parameters, 
@@ -160,6 +202,7 @@ BOOLEAN_T set_options_command_line(
   BOOLEAN_T required ///< is this a required option -in
   );
 
+//This is being replaced
 /**
  * This method should be called only after parsed command line
  * first, parse paramter file
@@ -181,6 +224,7 @@ BOOLEAN_T add_parameter(
   char* set_value  ///< the value to be added -in                  
   );
 
+//put this with the other gets
 /**
  * Parameter file must be parsed first!
  * Searches through the list of parameters, 

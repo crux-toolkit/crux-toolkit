@@ -21,6 +21,10 @@
 #include "parse_arguments.h"
 #include "hash.h"
 
+//TODO:  why are includes here and not in .h?
+//       change all temp_add to use add_or_update and no strcpy
+//       in all temp_set, change result=add_... to result= result && add_...
+
 /**
  *\struct parameter_hash
  *\brief the hash table that holds all the different parameters
@@ -33,25 +37,85 @@ struct parameter_hash{
 /**
  * Global variables
  */
-
-struct parameter_hash parameters_hash_table;
+//one hash for parameter values, one for usage statements, one for types
+struct parameter_hash  parameters_hash_table;
 struct parameter_hash* parameters = &parameters_hash_table;
+struct parameter_hash  usage_hash_table;
+struct parameter_hash* usages = &usage_hash_table;
+struct parameter_hash  type_hash_table;
+struct parameter_hash* types = & type_hash_table;
+
 BOOLEAN_T parameter_initialized = FALSE; // have the parameters been initialized?
+BOOLEAN_T usage_initialized = FALSE; // have the usages been initialized?
+BOOLEAN_T type_initialized = FALSE; // have the types been initialized?
+
+//remove this?
 BOOLEAN_T parameter_parsed = FALSE; // have I parsed the parameter file?
 BOOLEAN_T parameter_plasticity = TRUE; // can the parameters be changed?
 
+/************************************
+ * Private function declarations
+ ************************************ 
+ */
 
 // parse the parameter file given the filename
+// called by parse command line
 void parse_parameter_file(
   char* parameter_filename ///< the parameter file to be parsed -in
   );
 
 /**
+ * temporary replacement for function, return name once all exe's are fixed
+ * \returns TRUE if paramater value is set, else FALSE
+ */ 
+BOOLEAN_T temp_set_boolean_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ BOOLEAN_T set_value,  ///< the value to be set -in
+ char* usage
+ );
+
+BOOLEAN_T temp_set_int_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ int set_value,  ///< the value to be set -in
+ char* usage
+ );
+
+BOOLEAN_T temp_set_double_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ double set_value,  ///< the value to be set -in
+ char* usage
+  );
+
+BOOLEAN_T temp_set_string_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ char* set_value,  ///< the value to be set -in
+ char* usage
+  );
+
+BOOLEAN_T select_cmd_line(  
+  char** option_names, ///< list of options to be allowed for main -in
+  int    num_options,  ///< number of optons in that list -in
+  int (*parse_argument_set)(char*, char*, void*, enum argument_type) ///< function point to choose arguments or options 
+  );
+
+
+
+/************************************
+ * Function definitions
+ ************************************
+ */
+
+
+/**
  * initialize parameters
  * ONLY add optional parameters here!!!
  * MUST declare ALL optional parameters in array to be used
+ * Every option and its default value for every executable 
+ * must be declared here
  */
 void initialize_parameters(void){
+
+  carp(CARP_DETAILED_DEBUG, "Initializing parameters in parameter.c");
 
   // check if parameters been initialized
   if(parameter_initialized){
@@ -59,89 +123,307 @@ void initialize_parameters(void){
     return;
   }
   
-  // allocate the hash table
+  // allocate the hash tables
   parameters->hash = new_hash(NUM_PARAMS);
+  usages->hash = new_hash(NUM_PARAMS);
+  types->hash = new_hash(NUM_PARAMS);
   
   // set number of parameters to zero
   parameters->num_parameters = 0;
+  usages->num_parameters = 0;
+  types->num_parameters = 0;
+
 
   // set verbosity
-  set_int_parameter("verbosity", CARP_ERROR);
+  temp_set_int_parameter("verbosity", CARP_ERROR, "usage");
 
-  // set parameters
-  set_string_parameter("parameter-file", "crux.params");
+  // set parameter file name (no default)
+  //set_string_parameter("parameter-file", "crux.params");
+  temp_set_string_parameter("parameter-file", NULL, "usage");
     
+  // generate_peptide arguments
+  temp_set_string_parameter("protein input", NULL, 
+  "file containing protein sequences either in fasta format or binary index.");
+  // create_index arguments
+  temp_set_string_parameter("protein fasta file", NULL,
+		    "file containing protein sequences in fasta format");
+  temp_set_string_parameter("index name", NULL,
+		    "name to give the new directory containing index files");
+
   // generate_peptide, create_index parameters  
-  // set_double_parameter("mass-range", 1);
-  set_double_parameter("min-mass", 200);
-  set_double_parameter("max-mass", 7200);
-  set_int_parameter("max-length", 50);
-  set_int_parameter("min-matches", 10);
-  set_int_parameter("min-length", 6);
-  set_string_parameter("cleavages", "tryptic");
-  set_string_parameter("isotopic-mass","average");
-  set_boolean_parameter("unique-peptides", FALSE);
-  set_string_parameter("use-index", "F");
-  set_string_parameter("sort", "none");      // mass, length, lexical, none  
-  set_boolean_parameter("output-sequence", FALSE);
-  set_boolean_parameter("output-trypticity", FALSE);
-  set_boolean_parameter("missed-cleavages", FALSE);
+  temp_set_double_parameter("min-mass", 200, "usage");
+  temp_set_double_parameter("max-mass", 7200, "usage");
+  temp_set_int_parameter("max-length", 50, "usage");
+  temp_set_int_parameter("min-length", 6, "usage");
+  temp_set_string_parameter("cleavages", "tryptic", "usage");
+  temp_set_string_parameter("isotopic-mass","average", "usage");
+  temp_set_boolean_parameter("unique-peptides", FALSE, "usage");
+  temp_set_boolean_parameter("missed-cleavages", FALSE, "usage");
   
-  // searching peptides
-  set_double_parameter("mass-offset", 0.0);
+  // more generate_peptide parameters
+  temp_set_boolean_parameter("output-sequence", FALSE, "usage");
+  temp_set_boolean_parameter("output-trypticity", FALSE, "usage");
+  temp_set_string_parameter("use-index", "F", "usage");
+  temp_set_string_parameter("sort", "none", "usage");//mass,length,lexical,none  
+
+  // more create_index parameters
+  temp_set_double_parameter("mass-range", 10, "usage");
+
+    // searching peptides
+  temp_set_double_parameter("mass-offset", 0.0, "usage");
 
   // score_peptide_spectrum parameters
-  set_double_parameter("beta", 0.075);
-  set_double_parameter("max-mz", 4000);
-  set_int_parameter("charge", 2);
-  set_string_parameter("score-type", "xcorr"); 
+  temp_set_double_parameter("beta", 0.075, "usage");
+  temp_set_double_parameter("max-mz", 4000, "usage");
+  temp_set_int_parameter("charge", 2, "usage");
+  temp_set_string_parameter("score-type", "xcorr", "usage"); 
 
   // match_collection parameters
-  set_double_parameter("mass-window", 3.0);
+  temp_set_double_parameter("mass-window", 3.0, "usage");
 
   // create_psm_files
-  set_int_parameter("starting-sentence-idx", 0);
+  temp_set_int_parameter("starting-sentence-idx", 0, "usage");
 
   // score_spectrum
-  set_string_parameter("prelim-score-type", "sp");
-  set_int_parameter("max-rank-preliminary", 500);
-  set_int_parameter("max-rank-result", 500);
-  set_int_parameter("top-fit-sp", 1000);
-  set_int_parameter("number-top-scores-to-fit", -1);
-  set_int_parameter("number-peptides-to-subset", 0);
-  set_double_parameter("fraction-top-scores-to-fit", -1.0);
-  set_int_parameter("skip-first-score", 0);
+  temp_set_string_parameter("prelim-score-type", "sp", "usage");
+  temp_set_int_parameter("max-rank-preliminary", 500, "usage");
+  temp_set_int_parameter("max-rank-result", 500, "usage");
+  temp_set_int_parameter("top-fit-sp", 1000, "usage");
+  temp_set_int_parameter("number-top-scores-to-fit", -1, "usage");
+  temp_set_int_parameter("number-peptides-to-subset", 0, "usage");
+  temp_set_double_parameter("fraction-top-scores-to-fit", -1.0, "usage");
+  temp_set_int_parameter("skip-first-score", 0, "usage");
   
   // set the top ranking peptides to score for LOGP_*
-  set_int_parameter("top-rank-p-value", 1);
+  temp_set_int_parameter("top-rank-p-value", 1, "usage");
   
   // how many peptides to sample for EVD parameter estimation
-  set_int_parameter("sample-count", 500);
+  temp_set_int_parameter("sample-count", 500, "usage");
 
   // what charge state spectra to run among the ones in ms2 file
-  set_string_parameter("spectrum-charge", "all");
-  set_double_parameter("number-runs", BILLION);
+  temp_set_string_parameter("spectrum-charge", "all", "usage");
+  temp_set_double_parameter("number-runs", BILLION, "usage");
   
   // match_search
-  set_string_parameter("match-output-folder", ".");
-  set_string_parameter("output-mode", "binary");
-  set_string_parameter("seed", "time");
-  set_string_parameter("sqt-output-file", "decoy.psm");
-  set_string_parameter("decoy-sqt-output-file", "decoy.psm");
-  set_double_parameter("spectrum-min-mass", 0.0);
-  set_double_parameter("spectrum-max-mass", BILLION);
-  set_int_parameter("top-match", 1);
-  set_int_parameter("number-decoy-set", 2);
+  temp_set_string_parameter("match-output-folder", ".", "usage");
+  temp_set_string_parameter("output-mode", "binary", "usage"); //binary, sqt, all
+  temp_set_string_parameter("seed", "time", "usage");
+  temp_set_string_parameter("sqt-output-file", "target.psm", "usage");
+  temp_set_string_parameter("decoy-sqt-output-file", "decoy.psm", "usage");
+  temp_set_double_parameter("spectrum-min-mass", 0.0, "usage");
+  temp_set_double_parameter("spectrum-max-mass", BILLION, "usage");
+  temp_set_int_parameter("top-match", 1, "usage");
+  temp_set_int_parameter("number-decoy-set", 2, "usage");
   
   // match_analysis
-  set_string_parameter("algorithm", "percolator");
-  set_string_parameter("feature-file", "match_analysis.features");
-  set_double_parameter("pi0", 0.9);
-  set_string_parameter("percolator-intraset-features", "F"); // for false
+  temp_set_string_parameter("algorithm", "percolator", "usage");
+  temp_set_string_parameter("feature-file", "match_analysis.features", "usage");
+  temp_set_double_parameter("pi0", 0.9, "usage");
+  temp_set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
+
+  //static mods
+  temp_set_double_parameter("A", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("B", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("C", 57.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("D", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("E", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("F", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("G", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("H", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("I", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("J", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("K", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("L", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("M", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("N", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("O", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("P", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("Q", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("R", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("S", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("T", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("U", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("V", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("W", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("X", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("Y", 0.0, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("Z", 0.0, "NOT FOR COMMAND LINE");
 
   // now we have initialized the parameters
   parameter_initialized = TRUE;
+  usage_initialized = TRUE;
+  type_initialized = TRUE;
+
+
 }
+
+
+/*
+ * Main calls this to determine which required arguments
+ * must be used.  Must be called after initialize_parameters
+ * This is the interface for parse_argument_set_req()
+ */
+BOOLEAN_T select_cmd_line_arguments(  //remove options from name
+  char** option_names,
+  int    num_options //, int (*parse_argument_set)(char, char, void, enum argument_type) 
+  ){
+  select_cmd_line( option_names, num_options, 
+		   &parse_arguments_set_req);
+  return TRUE;
+}
+
+/*
+ * Main calls this to determine which options
+ * can be used.  Must be called after initialize_parameters
+ * This is the interface for parse_argument_set_opt()
+ */
+BOOLEAN_T select_cmd_line_options(  //remove options from name
+  char** option_names,
+  int    num_options //, int (*parse_argument_set)(char, char, void, enum argument_type) 
+  ){
+  select_cmd_line( option_names, num_options, 
+		   &parse_arguments_set_opt);
+  return TRUE;
+}
+/*
+ * Private function for doing the work of select_cmd_line_options
+ * and select_cmd_line_arguments which is all the same except for
+ * the last function call which is now set with a function pointer
+ * 
+ */
+BOOLEAN_T select_cmd_line(  //remove options from name
+  char** option_names,
+  int    num_options, 
+  int (*parse_arguments_set_ptr)(char*, char*, void*, enum argument_type) 
+  ){
+
+  carp(CARP_DETAILED_DEBUG, "Selecting options");
+  BOOLEAN_T success = TRUE;
+
+  if( (num_options < 1) || (option_names == NULL) ){
+    success = FALSE; //?
+    return success;
+  }
+
+  //for each name in list
+  int i;
+  for( i=0; i< num_options; i++){
+    carp(CARP_DETAILED_DEBUG, "Option is: %s", option_names[i]);
+    //get value, usage, types
+    void* value_ptr = get_hash_value(parameters->hash, option_names[i]);
+    void* usage_ptr = get_hash_value(usages->hash, option_names[i]);
+    void* type_ptr =  get_hash_value(types->hash, option_names[i]);
+    carp(CARP_DETAILED_DEBUG, "Found value: %s, usage: %s, type: %s", (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
+
+    // check that it is in the params hash
+    // since default value can be null, don't check value
+    if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
+      carp(CARP_FATAL, 
+	   "Cannot select parameter '%s'. Value, usage or type not found.\nFound value: %s, usage: %s, type: %s", 
+	   option_names[i],
+	   value_ptr,
+	   usage_ptr,
+	   type_ptr);
+      
+      exit(1);  // or  set success to F?
+    }
+    // add the option via parse_arguments    
+    success = parse_arguments_set_ptr(option_names[i],
+				      usage_ptr,
+				      value_ptr, 
+				      string_to_argument_type(type_ptr)); 
+  }
+
+  carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
+  return success;
+}
+/**
+ * helper used below.  look for param file name, die if error
+ * return null if not found
+ */
+BOOLEAN_T find_param_filename(int argc, 
+			      char** argv, 
+			      char* filename_buffer, 
+			      int buffer_size){
+  BOOLEAN_T success = TRUE;
+  int i;
+  int param_file_index = -1;
+  for( i=0; i< argc; i++){
+    if( strcmp(argv[i], "--parameter-file") == 0){
+      param_file_index = i+1;
+      break;
+    }
+  }
+  // check for error
+  if( param_file_index >= argc ){
+    carp(CARP_FATAL, "Option '--parameter-file' requires argument");
+    exit(1);
+  }
+  //return the filename
+  else if( param_file_index > 0 ){  
+    char* param_filename = argv[param_file_index];
+    carp(CARP_DETAILED_DEBUG, "Parameter file name is %s", param_filename);
+
+    if( strlen(param_filename) < (unsigned)buffer_size ){
+      strcpy(filename_buffer, param_filename);
+      success = TRUE;
+    }
+    else{
+      carp(CARP_FATAL, "Parameter filename is too long");
+      exit(1);
+    }
+  }
+  else{ //parameter_file_index < 0, i.e. no paramter file option
+    success = FALSE;
+  }
+
+  return success;
+}
+/**
+ * Take the command line string from main, find the parameter fil
+ * option (if present), parse it's values into the hash, and parse
+ * the command line options and arguments into the hash
+ * main then retrieves the values through get_value
+ */
+BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
+  carp(CARP_DETAILED_DEBUG, "Parameter.c is parsing the command line");
+  BOOLEAN_T success = TRUE;
+
+  //first look for parameter-file option and parse those values before
+  //    command line values
+
+  // search argv for parameter file
+  // TODO find appropriate const for 256
+  char param_filename[256];
+  if(find_param_filename(argc, argv, param_filename, 256)){
+    parse_parameter_file(param_filename);
+  }
+  else{ 
+    carp(CARP_INFO, "No parameter file specified.  Using defaults and command line values");
+  }
+
+  // now parse the command line and put those values in hash
+  //  overwriting file parameters
+
+  success = parse_arguments_into_hash(argc, argv, parameters->hash, 0); 
+  if( success ){
+    //  check_types_and_bounds();
+    return success;  //delete
+  }
+  else{
+    char* error_message = NULL;
+    char* usage = parse_arguments_get_usage("create_index");
+    int error_code = parse_arguments_get_error(&error_message);
+    fprintf(stderr, "Error in command line. Error # %d\n", error_code);
+    fprintf(stderr, "%s\n", error_message);
+    fprintf(stderr, "%s", usage);
+    free(usage);
+    exit(1);
+  }
+  
+  return success;
+}
+
 
 /**
  * free heap allocated parameters
@@ -195,7 +477,7 @@ BOOLEAN_T copy_parameter(
    carp(CARP_ERROR, "can't change parameters once they are confirmed");
    return FALSE;
   }
-
+  //how does memory work for update? allocate new?
   return update_hash_value(parameters->hash, name, set_value);
 }
 
@@ -221,7 +503,7 @@ void parse_update_parameters(
   }
   else{
     // parse parameter file
-    parse_parameter_file(get_string_parameter_pointer("parameter-file"));
+    //parse_parameter_file(get_string_parameter_pointer("parameter-file"));
   }
   
   // update the parameters if any comman line arguments exist
@@ -239,60 +521,80 @@ void parse_parameter_file(
   char* parameter_filename ///< the parameter file to be parsed -in
   )
 {
-  FILE *f;
+  FILE *file;
   char *line;
   int idx;
-  char *endptr;
-  float update_mass;
+  //  char *endptr;
+  //  float update_mass;
 
-  // check if parameters cah be changed
+  carp(CARP_DETAILED_DEBUG, "Parsing parameter file '%s'",parameter_filename);
+
+  // check if parameters can be changed
   if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    carp(CARP_FATAL, "Can't change parameters once they are confirmed");
     exit(1);
   }
 
-  // check if parameter file exists, if not exit use default parameters
+  // check if parameter file exists, if not die 
   if(access(parameter_filename, F_OK)){
-     carp(CARP_INFO, "no parameter_file, using default parameters");
-     return;
+    carp(CARP_FATAL, "Could not open parameter file.");
+    exit(1);
+  }
+
+  file = fopen(parameter_filename, "r");
+  if(file == NULL){
+    //change to stderr
+    carp(CARP_FATAL, "Couldn't open parameter file '%s'", parameter_filename);
+    exit(1);
   }
 
   line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));
 
+  while(fgets(line, MAX_LINE_LENGTH, file)==line){
+    //    printf("read line '%s'.\n", line);
 
-  f = fopen(parameter_filename, "r");
-  if(f == NULL){
-    //change to stderr
-    printf("couldn't open file: %s\n", parameter_filename);
-    exit(1);
-  }
+    idx = 0;
+    
+    // Change the newline to a '\0' ignoring trailing whitespace
+    for(idx = MAX_LINE_LENGTH - 1; idx >= 0; idx--){
+      if(line[idx] == '\n' || line[idx] == '\r' || 
+	 line[idx] == '\f' || line[idx] == ' ' || line[idx] == '\t')
+	line[idx] = '\0';
+    }
+    /* why does this segfault?  only with break, not without
+    if(line[0] == '#' || line[0] == '\0'){
+      printf("comment or blank line");
+      break;
+    }
+    */
+    // empty lines and those beginning with '#' are ignored
+    if(line[0] != '#' && line[0] != '\0'){
 
-  while(fgets(line, MAX_LINE_LENGTH, f)==line){
-    // if a line begins with "#", it is ignored as a comment 
-    // FIXME Also empty lines are ignored, probably amore robust check of new line is required
-    if(line[0] != '#' && line[0] != '\n'){
-    /* find the '=' in the line.  Exit with error if the line 
-       has no equals sign. */
-      idx = 0;
-
-      // Change the newline to a '\0'
-      for(idx = MAX_LINE_LENGTH - 1; idx > 0; idx--){
-	//if(line[idx] == '\n' || line[idx] == '\r' || line[idx] == '\f')
-	if(line[idx] == '\n' || line[idx] == '\r' || line[idx] == '\f' || line[idx] == ' ' || line[idx] == '\t')
-	  line[idx] = '\0';
-      }
+      /* find the '=' in the line.  Exit with error if the line 
+	 has no equals sign. */
       while(idx < (int)strlen(line) && line[idx] != '='){
 	idx++;
       }
       if(idx == 0 || idx >= (int)(strlen(line)-1)){
+	//these should be FATALs
 	carp(CARP_ERROR, "Lines in a parameter file must have the form:\n");
 	carp(CARP_ERROR, "\n\tname=value\n\n");
-	carp(CARP_ERROR, "In file %s, the line:\n%s\ndoes not have this format\n",
-	       parameter_filename, line);
+	carp(CARP_ERROR, 
+	     "In file %s, the line\n%s\ndoes not have this format\n",
+	     parameter_filename, line);
 	exit(1);
       }
       line[idx] = '\0';
-      
+      char* option_name = line;
+      char* option_value = &(line[idx+1]);
+      carp(CARP_DETAILED_DEBUG, "Found option '%s' and value '%s'", option_name, option_value);
+
+      if(! update_hash_value(parameters->hash, option_name, option_value) ){
+	carp(CARP_ERROR, "Unexpected parameter file option '%s'", option_name);
+	exit(1);
+      }
+
+      /*
       // check if it is amino acid mass update
       if(strlen(line) == 1 && 
          (short int)line[0] >= 'A' && 
@@ -306,22 +608,21 @@ void parse_parameter_file(
       else if(!copy_parameter(line, &(line[idx+1]))){
         exit(1);
       }
+      */
     }
   }
 
-  // Tell the user what we found.
-  /*
-  if(get_verbosity_level() >= CARP_INFO) {
-    print_parameters("Using parameters:", parameter_filename, "  ", stderr);
-  }
-  */
-
-  fclose(f);
+  fclose(file);
   myfree(line);
 
   // now we have parsed the parameter file
   parameter_parsed = TRUE;
 }
+
+/**************************************************
+ *   GETTERS (public)
+ **************************************************
+ */
 
 /**
  * Each of the following functions searches through the hash table of
@@ -375,48 +676,6 @@ BOOLEAN_T get_boolean_parameter(
 }
 
 /**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-BOOLEAN_T set_boolean_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- BOOLEAN_T set_value  ///< the value to be set -in
- )
-{
-  BOOLEAN_T result;
-    
-  // check if parameters cah be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-
-  // only check if parameter file has already been parsed
-  if(parameter_parsed || parameter_initialized){
-    if(set_value){
-      return update_hash_value(parameters->hash, name, "TRUE");
-    }
-    else{
-      return update_hash_value(parameters->hash, name, "FALSE");
-    }
-  }
-
-  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
-  if(set_value){
-    result = add_parameter(name, "TRUE");
-  }
-  else{
-    result = add_parameter(name, "FALSE");
-  }
-  
-  return result;
-}
-
-/**
  * Searches through the list of parameters, looking for one whose
  * name matches the string.  This function returns the parameter value if the
  * parameter is in the parameter hash table.  This
@@ -458,6 +717,269 @@ int get_int_parameter(
   return((int)value);
 }
 
+
+/**
+ * Searches through the list of parameters, looking for one whose
+ * name matches the string.  This function returns the parameter value if the
+ * parameter is in the parameter hash table.  This
+ * function exits if there is a conversion error. 
+ *\returns the double value of the parameter
+ */
+double get_double_parameter(
+  char* name   ///< the name of the parameter looking for -in
+  )
+{
+  char *endptr;
+  double value;
+  
+  // check if parameter file has been parsed
+  if(!parameter_initialized){
+    carp(CARP_FATAL, "parameters have not been set yet");
+    exit(1);
+  }
+
+  char* double_value = get_hash_value(parameters->hash, name);
+ 
+  // can't find parameter
+  if(double_value == NULL){
+    carp(CARP_FATAL, "parameter name '%s', doesn't exit", name);
+    exit(1);
+  }
+ 
+  /* there is a parameter with the right name.  Now 
+     try to convert it to a double*/
+  value = strtod(double_value, &endptr);
+  /*if((value == HUGE_VALF) ||  // AAK removed //BF: why?
+    (value == -HUGE_VALF) || 
+    (endptr == double_value)) {
+    die("Conversion error when trying to convert parameter %s with value %s to an double\n",
+    name,
+    double_value);*/
+  // } else {  
+  return(value);
+  // }
+  
+  carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
+  exit(1);
+}
+
+/**
+ * Searches through the list of parameters, looking for one whose
+ * parameter_name matches the string. 
+ * The return value is allocated here and must be freed by the caller.
+ * If the value is not found, abort.
+ * \returns the string value to which matches the parameter name, else aborts
+ */
+char* get_string_parameter(
+  char* name  ///< the name of the parameter looking for -in
+  )
+{
+  
+  // check if parameter file has been parsed
+  if(!parameter_parsed && !parameter_initialized){
+    carp(CARP_WARNING, "parameters has not been set yet");
+    exit(1);
+    return(NULL);
+  }
+  
+  char* string_value = get_hash_value(parameters->hash, name);
+  
+  // can't find parameter
+  if(string_value == NULL){
+    carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
+    exit(1);
+  }
+  
+  return my_copy_string(string_value);
+}
+/**
+ * Searches through the list of parameters, looking for one whose
+ * parameter_name matches the string. 
+ * The return value is a pointer to the original string
+ * Thus, user should not free, good for printing
+ * \returns the string value to which matches the parameter name, else aborts
+ */
+char* get_string_parameter_pointer(
+  char* name  ///< the name of the parameter looking for -in
+  )
+{
+  // check if parameter file has been parsed
+  if(!parameter_parsed && !parameter_initialized){
+    carp(CARP_FATAL, "parameters has not been set yet");
+    exit(1);
+  }
+  
+  char* string_value = get_hash_value(parameters->hash, name);
+
+  // can't find parameter
+  if(string_value == NULL){
+    carp(CARP_FATAL, "parameter name: %s, doesn't exit", name);
+    exit(1);
+  }
+  else{
+    return string_value;
+  }
+}
+
+/**************************************************
+ *   SETTERS (private)
+ **************************************************
+ */
+
+//these could all use add instead of add_or_update
+BOOLEAN_T temp_set_boolean_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ BOOLEAN_T set_value,  ///< the value to be set -in
+ char* usage
+  )
+{
+  BOOLEAN_T result;
+    
+  // check if parameters cah be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+
+  char* bool_str;
+  if(set_value){
+    bool_str = "TRUE";
+  }
+  else{
+    bool_str = "FALSE";
+  }
+  result = add_or_update_hash(parameters->hash, name, bool_str);
+  result = add_or_update_hash(usages->hash, name, usage);
+  result = add_or_update_hash(types->hash, name, "BOOL_ARG");
+
+  return result;
+}
+
+//temporary, replace name with set_int_parameter
+BOOLEAN_T temp_set_int_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ int set_value,  ///< the value to be set -in
+ char* usage
+  )
+{
+  BOOLEAN_T result;
+  char buffer[PARAMETER_LENGTH];
+  
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  snprintf(buffer, PARAMETER_LENGTH, "%d", set_value);
+  result = add_or_update_hash(parameters->hash, name, buffer);
+  result = add_or_update_hash(usages->hash, name, usage);
+  result = add_or_update_hash(types->hash, name, "INT_ARG");
+  
+  return result;
+}
+
+
+//change name when all exe's are fixed
+BOOLEAN_T temp_set_double_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ double set_value,  ///< the value to be set -in
+ char* usage
+  )
+{
+  BOOLEAN_T result;
+  char buffer[PARAMETER_LENGTH];
+  
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  // convert to string
+  sprintf(buffer, "%f", set_value);
+
+  result = add_or_update_hash(parameters->hash, name, buffer);    
+  result = add_or_update_hash(usages->hash, name, usage);    
+  result = add_or_update_hash(types->hash, name, "DOUBLE_ARG");    
+
+  return result;
+}
+/**
+ * temporary replacement for function, return name once all exe's are fixed
+ * \returns TRUE if paramater value is set, else FALSE
+ */ 
+BOOLEAN_T temp_set_string_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ char* set_value,  ///< the value to be set -in
+ char* usage
+  )
+{
+  BOOLEAN_T result;
+  
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  if( set_value == NULL ){
+    set_value = "__NULL_STR";
+  }
+  result = add_or_update_hash(parameters->hash, name, set_value);
+  result = add_or_update_hash(usages->hash, name, usage);
+  result = add_or_update_hash(types->hash, name, "STRING_ARG");
+    
+  return result;
+}
+
+/**************************************************
+ *   OLD SETTERS (public)
+ **************************************************
+ */
+
+
+/**
+ * Parameter file must be parsed first!
+ * searches through the list of parameters, 
+ * looking for one whose name matches the string.  
+ * The function sets the corresponding value,
+ * if the parameter is not found or parameters has already been confirmed don't change
+ * \returns TRUE if paramater value is set, else FALSE
+ */ 
+BOOLEAN_T set_boolean_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ BOOLEAN_T set_value  ///< the value to be set -in
+ )
+{
+  BOOLEAN_T result;
+    
+  // check if parameters cah be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+
+  // only check if parameter file has already been parsed
+  if(parameter_parsed || parameter_initialized){
+    if(set_value){
+      return update_hash_value(parameters->hash, name, "TRUE");
+    }
+    else{
+      return update_hash_value(parameters->hash, name, "FALSE");
+    }
+  }
+
+  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
+  if(set_value){
+    result = add_parameter(name, "TRUE");
+  }
+  else{
+    result = add_parameter(name, "FALSE");
+  }
+  
+  return result;
+}
 /**
  * Parameter file must be parsed first!
  * searches through the list of parameters, 
@@ -492,52 +1014,6 @@ BOOLEAN_T set_int_parameter(
   
   return result;
 }
-
-/**
- * Searches through the list of parameters, looking for one whose
- * name matches the string.  This function returns the parameter value if the
- * parameter is in the parameter hash table.  This
- * function exits if there is a conversion error. 
- *\returns the double value of the parameter
- */
-double get_double_parameter(
-  char* name   ///< the name of the parameter looking for -in
-  )
-{
-  char *endptr;
-  double value;
-  
-  // check if parameter file has been parsed
-  if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_ERROR, "parameters has not been set yet");
-    exit(1);
-  }
-
-  char* double_value = get_hash_value(parameters->hash, name);
- 
-  // can't find parameter
-  if(double_value == NULL){
-    carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
-    exit(1);
-  }
- 
-  /* there is a parameter with the right name.  Now 
-     try to convert it to a double*/
-  value = strtod(double_value, &endptr);
-  /*if((value == HUGE_VALF) ||  // AAK removed
-    (value == -HUGE_VALF) || 
-    (endptr == double_value)) {
-    die("Conversion error when trying to convert parameter %s with value %s to an double\n",
-    name,
-    double_value);*/
-  // } else {  
-  return(value);
-  // }
-  
-  carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
-  exit(1);
-}
-
 /**
  * Parameter file must be parsed first!
  * searches through the list of parameters, 
@@ -573,67 +1049,6 @@ BOOLEAN_T set_double_parameter(
     
   return result;
 }
-
-/**
- * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string. 
- * The return value is allocated here and must be freed by the caller.
- * If the value is not found, abort.
- * \returns the string value to which matches the parameter name, else aborts
- */
-char* get_string_parameter(
-  char* name  ///< the name of the parameter looking for -in
-  )
-{
-  
-  // check if parameter file has been parsed
-  if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_WARNING, "parameters has not been set yet");
-    exit(1);
-    return(NULL);
-  }
-  
-  char* string_value = get_hash_value(parameters->hash, name);
-  
-  // can't find parameter
-  if(string_value == NULL){
-    carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
-    exit(1);
-  }
-  
-  return my_copy_string(string_value);
-}
-
-/**
- * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string. 
- * The return value is a pointer to the original string
- * Thus, user should not free, good for printing
- * \returns the string value to which matches the parameter name, else aborts
- */
-char* get_string_parameter_pointer(
-  char* name  ///< the name of the parameter looking for -in
-  )
-{
-  // check if parameter file has been parsed
-  if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_WARNING, "parameters has not been set yet");
-    exit(1);
-    return(NULL);
-  }
-  
-  char* string_value = get_hash_value(parameters->hash, name);
-
-  // can't find parameter
-  if(string_value == NULL){
-    carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
-    exit(1);
-  }
-  else{
-    return string_value;
-  }
-}
-
 /**
  * Parameter file must be parsed first!
  * searches through the list of parameters, 
@@ -751,6 +1166,7 @@ BOOLEAN_T set_options_command_line(
   return update_hash_value(parameters->hash, name, set_value);  
 } 
 
+//move to getters section
 /**
  * Routines that return crux enumerated types. 
  */

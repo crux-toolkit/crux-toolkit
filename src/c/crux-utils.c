@@ -19,6 +19,9 @@
  * returns a heap allocated copy of the src string
  */
 char* my_copy_string(char* src){
+  if( src == NULL ){
+    return NULL;
+  }
   int length = strlen(src) +1; // +\0
   char* copy = 
     (char *)mymalloc(sizeof(char)*length);

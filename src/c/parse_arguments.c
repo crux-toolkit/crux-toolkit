@@ -54,6 +54,11 @@ char * usage = NULL;
 
 int assign_value_from_required(/*const*/ argument * req,  /*const*/ char * value);
 int assign_value_from_option(/*const*/ argument * option,  int *index);
+int assign_value_from_required_to_hash(/*const*/ argument * req,  
+				       /*const*/ char * value, HASH_T* h);
+int assign_value_from_option_to_hash(/*const*/ argument * option,  
+				     int *index, 
+				     HASH_T* h);
 /*const*/ argument * get_next_req_argument();
 /*const*/ argument * find_option(char * name);
 /*const*/ char * base_name(/*const*/ char *s);
@@ -226,6 +231,96 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
   return result;
 }
 
+
+/***********************************************************************
+ * Function:      parse_arguments_into_hash
+ * 
+ * Description:   Run through the command line arguments interpreting them
+ *                using the definitions established by parse_arguments_set_opt
+ *                and parse_arguments_set_req.  Ignore the container 
+ *                variable and instead store parameter values by insterting
+ *                them into the given hash table, using the agument name as
+ *                the key.
+ * 
+ * Parameters:
+ *   argc         The number of command line arguments
+ *  
+ *   argv         The array of command line arguments
+ *
+ *   HASH_T       The hash table where values are stored
+ *
+ *   die_on_error If non-zero, an error while parsing will cause a usage
+ *                message to be printed and the programe to exit. Otherwise
+ *                an error message will be recorded and the function will
+ *                return 0.
+ *
+ * 
+ * Returns      1 if parse succeded
+ *              0 if parse encountered an error
+ ***********************************************************************/
+int parse_arguments_into_hash(int argc, char * argv[], 
+			      HASH_T* hash, int die_on_error) {
+
+  carp(CARP_DETAILED_DEBUG, "Parsing arguments, insterting values into hash");
+  int i;
+  int n;
+  int result = 0;
+  /*const*/ argument * option;
+  /*const*/ argument * req;
+
+  argument_count = argc;
+  arguments = argv;
+
+  option = NULL;
+  req = NULL;
+  for (i = 1; i < argc; i++) {
+    n = strlen(argv[i]);
+    if (argv[i][0] == '-' && argv[i][1] == '-' && n > 1) {
+      if ((option = find_option(&(argv[i][1]))) != NULL) {
+	// error = assign_value_from_option(option, &i);
+	error = assign_value_from_option_to_hash(option, &i, hash);
+        if (error != NO_ERROR) {
+          /* Missing or incorrect value */
+          build_message(argv[i]);
+          break;
+        }
+      } else {
+        /* Invalid option */
+        error = UNKNOWN_OPTION;
+        build_message(argv[i]);
+        break;
+      }
+    } else {
+      if ((req = get_next_req_argument()) != NULL) {
+        //error = assign_value_from_required(req, argv[i]);
+	error = assign_value_from_required_to_hash(req, argv[i], hash);
+        if (error != NO_ERROR) {
+          /* Should never reach here */
+          break;
+        }
+      } else {
+        /* Too many command line arguments */
+        error = UNKNOWN_REQ_ARG;
+        build_message(argv[i]);
+        break;
+      }
+    }
+  }
+  if (error == NO_ERROR && required_index != required_count) {
+    error = MISSING_REQ_ARG;
+    build_message(required[required_index].name);
+  } else if (error == NO_ERROR) {
+    result = 1;
+  }
+  
+  if (result != 1 && die_on_error) {
+    fprintf(stderr, "%s: %s\n", base_name(argv[0]), message);
+    fprintf(stderr, "%s", parse_arguments_get_usage(base_name(argv[0])));
+    exit(1);
+  }
+  return result;
+}
+
 /***********************************************************************
  * Function:    get_next_req_argument
  * 
@@ -312,9 +407,58 @@ int assign_value_from_required(/*const*/ argument * req,  /*const*/ char * value
       *((double *) req->container) = atof(value);
       break;
     case STRING_ARG:
+      //if container free container?
       *((/*const*/ char **) req->container) = value;
       break;
+    case BOOLEAN_ARG:
+      *((BOOLEAN_T*) req->container) = atoi(value);
+      break;
   }
+  
+  // yes this required value came from the command line
+  req->command_line = TRUE;
+
+  return NO_ERROR;
+}
+
+/***********************************************************************
+ * Function:    assign_value_from_required_to_hash
+ * 
+ * Description:  Assign the value from the provided required argument to the 
+ *               container assigned to it.
+ * 
+ * Parameters:
+ *   req         A pointer to the argument struct describing this optional
+ *               argument.
+ *
+ *   index       An integer giving the current index into the array of
+ *               arguments.
+ *
+ *   hash        A pointer to a hash table into which values should be entered
+ * 
+ * Returns:      An integer should always be NO_ERROR
+ ***********************************************************************/
+int assign_value_from_required_to_hash(/*const*/ argument * req,  
+				       /*const*/ char * value,
+				       HASH_T* hash) {
+
+  carp(CARP_DETAILED_DEBUG, 
+       "Assigning required '%s' to value '%s'", req->name, value);
+  switch (req->type) {
+    case FLAG_ARG:
+      //      *((int *) req->container) = 1;
+      update_hash_value(hash, req->name, "1");
+      break;
+    case INT_ARG:
+    case LONG_ARG:
+    case DOUBLE_ARG:
+    case STRING_ARG:
+    case BOOLEAN_ARG:
+      //      *((int *) req->container) = atoi(value);
+      add_or_update_hash(hash, req->name, value);
+      break;
+  }
+  /* BF: there was no type checking unlike option.  why? */
   
   // yes this required value came from the command line
   req->command_line = TRUE;
@@ -423,6 +567,158 @@ int assign_value_from_option(/*const*/ argument * option,  int *index) {
         result = MISSING_VALUE;
       }
       break;
+    case BOOLEAN_ARG:
+      if (more_args && next_arg_is_not_option) {
+        /* Next argument should be value (T or F) */
+        (*index)++;
+        value = arguments[*index];
+        *((/*const*/ char **) option->container) = value;
+	if (value[0] != 'T' || value[0] != 'F'){
+	  result = INVALID_VALUE;
+	}else{
+	  result = NO_ERROR;
+	}
+      } else {
+        /* Missing value */
+        result = MISSING_VALUE;
+      }
+      break;
+  }
+  
+  // yes this optional value came from the command line
+  option->command_line = TRUE;
+
+  return result;
+}
+
+/***********************************************************************
+ * Function:    assign_value_from_option_to_hash
+ * 
+ * Description:  Assign the value from the provided option to the 
+ *               container assigned to it.
+ * 
+ * Parameters:
+ *   option      A pointer to the argument struct describing this optional
+ *               argument.
+ *
+ *   index       A pointer to an integer giving the current index into the 
+ *               array of arguments.
+ *
+ *   hash        A pointer to a hash into which values will be inserted.
+ * 
+ * Returns:      An integer from the argument_error enumeration
+ ***********************************************************************/
+int assign_value_from_option_to_hash(/*const*/ argument * option,  
+				     int *index, 
+				     HASH_T* hash) {
+  carp(CARP_DETAILED_DEBUG, "Assigning option '%s' to value '%s'", 
+       option->name, arguments[(*index)+1]);
+  int more_args = 0;
+  int next_arg_is_not_option = 1;
+  enum argument_error result = NO_ERROR;
+  /*const*/ char * value = NULL;
+
+  if (*index < argument_count -1) {
+     more_args = 1;
+     if (arguments[(*index) + 1][1] == '-') {
+       next_arg_is_not_option = 0;
+     }
+  }
+
+  switch (option->type) {
+    case FLAG_ARG:
+      /* No value for this argument */
+      //      *((int *) option->container) = 1;
+      update_hash_value(hash, option->name , "1");
+      result = NO_ERROR;
+      break;
+    case INT_ARG:
+      if (more_args && next_arg_is_not_option) {
+        /* Next argument should be value */
+        (*index)++;
+        value = arguments[*index];
+        if (is_numeric(value)) {
+	  //          *((int *) option->container) = atoi(value);
+	  update_hash_value(hash, option->name, value);
+          result = NO_ERROR;
+        } else {
+          /* Value not numeric */
+          (*index)--;
+          result = INVALID_VALUE;
+        }
+      } else {
+        /* Missing value */
+        result = MISSING_VALUE;
+      }
+      break;
+    case LONG_ARG:
+      if (more_args && next_arg_is_not_option) {
+        /* Next argument should be value */
+        (*index)++;
+        value = arguments[*index];
+        if (is_numeric(value)) {
+	  //          *((long *) option->container) = atol(value);
+	  update_hash_value(hash, option->name, value);
+          result = NO_ERROR;
+        } else {
+          /* Value not numeric */
+          (*index)--;
+          result = INVALID_VALUE;
+        }
+      } else {
+        /* Missing value */
+        result = MISSING_VALUE;
+      }
+      break;
+    case DOUBLE_ARG:
+      if (more_args && next_arg_is_not_option) {
+        /* Next argument should be value */
+        (*index)++;
+        value = arguments[*index];
+        if (is_numeric(value)) {
+	  //          *((double *) option->container) = atof(value);
+	  update_hash_value(hash, option->name, value);
+          result = NO_ERROR;
+        } else {
+          /* Value not numeric */
+          (*index)--;
+          result = INVALID_VALUE;
+        }
+      } else {
+        /* Missing value */
+        result = MISSING_VALUE;
+      }
+      break;
+    case STRING_ARG:
+      if (more_args && next_arg_is_not_option) {
+        /* Next argument should be value */
+        (*index)++;
+        value = arguments[*index];
+	//        *((/*const*/ char **) option->container) = value;
+	update_hash_value(hash, option->name, value);
+        result = NO_ERROR;
+      } else {
+        /* Missing value */
+        result = MISSING_VALUE;
+      }
+      break;
+      /* BF added, should remove and use string for these */
+    case BOOLEAN_ARG:
+      if (more_args && next_arg_is_not_option) {
+        /* Next argument should be value (T or F) */
+        (*index)++;
+        value = arguments[*index];
+        *((/*const*/ char **) option->container) = value;
+	if (value[0] != 'T' || value[0] != 'F'){
+	  result = INVALID_VALUE;
+	}else{
+	  result = NO_ERROR;
+	}
+      } else {
+        /* Missing value */
+        result = MISSING_VALUE;
+      }
+      break;
   }
   
   // yes this optional value came from the command line
@@ -513,6 +809,9 @@ char * get_option_value_type(argument * o) {
       case STRING_ARG:
         v = "string";
         break;
+      case BOOLEAN_ARG:
+        v = "boolean";
+        break;
     }
   }
 
@@ -566,6 +865,14 @@ int sprintf_option_default_value(argument * o) {
           result = snprintf(destination, MAX_VALUE_STRLEN, "(default = none)");
         }
         break;
+      case BOOLEAN_ARG:
+        if (*((char **)o->container) != NULL) {
+          result = snprintf(destination, MAX_VALUE_STRLEN, "(default = %s)", 
+                          *((char **) o->container));
+        } else {
+          result = snprintf(destination, MAX_VALUE_STRLEN, "(default = none)");
+        }
+        break;
     }
   }
 
@@ -585,6 +892,10 @@ int sprintf_option_default_value(argument * o) {
  *               avoid having to parse the command line before building
  *               the usage string and to avoid issuess with links and aliases
  *               disguising the real name of the program.
+ *
+ *
+ * Note:         Assumes default value is in the usage string, does not
+ *               look in container for value.
  *
  * Caveats:      Caller is responsible for freeing the memory associated with
  *               the usage string.
@@ -638,7 +949,7 @@ char * parse_arguments_get_usage(/*const*/ char * name) {
       strcat(usage, "] ");
       strcat(usage, optional[i].usage);
       strcat(usage, " ");
-      sprintf_option_default_value(&optional[i]);
+      //sprintf_option_default_value(&optional[i]);
       strcat(usage, "\n");
     }
 
@@ -829,6 +1140,10 @@ BOOLEAN_T update_parameter(){
         result = snprintf(dest, PARAMETER_LENGTH, "%s", 
                           *((char **) optional_arg->container));
         break;
+      case BOOLEAN_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%s", 
+                          *((char **) optional_arg->container));
+        break;
     }
 
     // update value in paramters
@@ -870,7 +1185,11 @@ BOOLEAN_T update_parameter(){
         result = snprintf(dest, PARAMETER_LENGTH, "%s", 
                           *((char **) required_arg->container));
         break;
-    }
+          case BOOLEAN_ARG:
+        result = snprintf(dest, PARAMETER_LENGTH, "%s", 
+                          *((char **) required_arg->container));
+        break;
+}
 
     // update value in paramters
     if(!set_options_command_line(required_arg->name, dest, TRUE) || result < 1){
@@ -879,4 +1198,30 @@ BOOLEAN_T update_parameter(){
     } 
   }
   return TRUE;
+}
+
+enum argument_type string_to_argument_type(char* arg_type_string){
+
+  enum argument_type type;
+    
+  if( strcmp(arg_type_string, "FLAG_ARG") == 0){
+    type = FLAG_ARG;
+  }
+  else if( strcmp(arg_type_string, "INT_ARG") == 0){
+    type = INT_ARG;
+  }
+  else if( strcmp(arg_type_string, "LONG_ARG") == 0){
+    type = LONG_ARG;
+  }
+  else if( strcmp(arg_type_string, "DOUBLE_ARG") == 0){
+    type = DOUBLE_ARG;
+  }
+  else if( strcmp(arg_type_string, "STRING_ARG") == 0){
+    type = STRING_ARG;
+  }
+  else if( strcmp(arg_type_string, "BOOLEAN_ARG") == 0){
+    type = BOOLEAN_ARG;
+  }
+
+  return type;
 }
