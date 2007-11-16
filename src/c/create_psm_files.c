@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.6 $
+ * REVISION: $Revision: 1.7 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -54,6 +54,7 @@ int main(int argc, char** argv){
   int charge = 2;
   int starting_sentence_idx = 0;
   char* parameter_file = NULL;
+  char* model_type = NULL;
   int  verbosity = CARP_ERROR;
 
   // parsing variables
@@ -109,7 +110,12 @@ int main(int argc, char** argv){
     (void *) &output_directory,
     STRING_ARG);
 
-  
+  parse_arguments_set_req(
+    "model-type", 
+    "The kind of model to output files for (paired|single)",
+    (void *) &model_type,
+    STRING_ARG);
+
   /* Parse the command line */
   if (parse_arguments(argc, argv, 0)) {
 
@@ -162,11 +168,20 @@ int main(int argc, char** argv){
     // output GMTK peptide ion files
     // PAIRED add output_psm_files_paired and change this to 
     // output_psm_files_single
-    if (output_psm_files_single(output_directory, spectrum, peptides, num_lines, 
-          charge, starting_sentence_idx) 
-        == FALSE){
-       carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
-          ms2_file, scan_num, peptide_file_name);
+    BOOLEAN_T return_status = FALSE;
+    if (strcmp(model_type, "single") == 0){
+      return_status = output_psm_files_single(
+          output_directory, spectrum, peptides, num_lines, 
+          charge, starting_sentence_idx);
+    } else if (strcmp(model_type, "paired") == 0){
+      return_status = output_psm_files_paired(
+          output_directory, spectrum, peptides, num_lines, 
+          charge, starting_sentence_idx);
+    }
+
+    if (return_status == FALSE){
+      carp(CARP_FATAL, "Failed to create ion files for: %s %i %s.", 
+         ms2_file, scan_num, peptide_file_name);
     } else {
       carp(CARP_INFO, "Done outputting files.");
     }

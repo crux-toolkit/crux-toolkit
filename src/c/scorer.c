@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.58 $
+ * REVISION: $Revision: 1.59 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1385,7 +1385,24 @@ float score_spectrum_v_spectrum(
 
 /**
  * Creates the an array of ion constraints for GMTK models.
- * TODO do we need one for paired and single? Do we want an iterator?
+ * 0  - b
+ * 1  - b-nh3
+ * 2  - b-h2o
+ * 3  - b+2
+ * 4  - b-nh3+2
+ * 5  - b-h2o+2
+ * 6  - y
+ * 7  - y-nh3
+ * 8  - y-h2o
+ * 9  - y+2
+ * 10 - y-nh3+2
+ * 11 - y-h2o+2
+ * 12 - a
+ * 13 - a-nh3
+ * 14 - a-h2o
+ * 15 - a+2
+ * 16 - a-nh3+2
+ * 17 - a-h2o+2
  */
 ION_CONSTRAINT_T** single_ion_constraints(
   void
@@ -1445,16 +1462,60 @@ void free_single_ion_constraints(
 
 /**
  * Creates the an array of ion constraints for GMTK models.
+
  * TODO do we need one for paired and single? Do we want an iterator?
  */
 ION_CONSTRAINT_T** paired_ion_constraints(
   void
-){
+  ){
 
   carp(CARP_INFO, "Num ion series %i", GMTK_NUM_PAIRED_ION_SERIES);
-  /*ION_CONSTRAINT_T** ion_constraints = (ION_CONSTRAINT_T**) 
-    malloc(2 * GMTK_NUM_PAIRED_ION_SERIES * sizeof(ION_CONSTRAINT_T*));*/
-  return single_ion_constraints(); // FIX
+  ION_CONSTRAINT_T** base_ion_constraints = single_ion_constraints(); 
+  ION_CONSTRAINT_T** ion_constraints = (ION_CONSTRAINT_T**) 
+    malloc(2 * GMTK_NUM_PAIRED_ION_SERIES * sizeof(ION_CONSTRAINT_T*));
+
+  // FIX magic numbers
+  /* 0  - b
+   * 1  - b-nh3
+   * 2  - b-h2o
+   * 3  - b+2
+   * 4  - b-nh3+2
+   * 5  - b-h2o+2
+   * 6  - y
+   * 7  - y-nh3
+   * 8  - y-h2o
+   * 9  - y+2
+   * 10 - y-nh3+2
+   * 11 - y-h2o+2
+   * 12 - a
+   * 13 - a-nh3
+   * 14 - a-h2o
+   * 15 - a+2
+   * 16 - a-nh3+2
+   * 17 - a-h2o+2*/
+ 
+  int indices[GMTK_NUM_PAIRED_ION_SERIES * 2] = { 
+    0, 6, // b,y
+    0, 12,// b,a
+    0, 2, // b,b-h2o
+    0, 1, // b,b-nh3
+    0, 3, // b,b+2
+    2, 5, // b-h2o,b-h2o+2
+    1, 4, // b-nh3,b-nh3+2
+    6, 8, // y,y-h2o
+    6, 7, // y,y-nh3
+    6, 9, // y,y+2
+    8, 11,// y-h2o,y-h2o+2
+    7, 10,// y-nh3,y-nh3+2
+    12,15 // a,a+2
+  };
+
+  int idx;
+  for (idx = 0; idx < GMTK_NUM_PAIRED_ION_SERIES * 2; idx++){
+    ion_constraints[idx] = copy_ion_constraint_ptr(
+        base_ion_constraints[indices[idx]]);
+  }
+  return ion_constraints;
 }
 
 /**
@@ -1464,7 +1525,8 @@ void free_paired_ion_constraints(
     ION_CONSTRAINT_T** ion_constraints
     ){
   int constraint_idx;
-  for (constraint_idx=0; constraint_idx<GMTK_NUM_ION_SERIES; constraint_idx++){
+  for (constraint_idx=0; constraint_idx<GMTK_NUM_PAIRED_ION_SERIES; 
+       constraint_idx++){
     free_ion_constraint(ion_constraints[constraint_idx]);
   }
   free(ion_constraints);
@@ -1541,30 +1603,18 @@ BOOLEAN_T output_psm_files_paired(
     // create our ion constraints
 
     // FIX
-    // This should output the first and second b-ions to the file for each
-    // peptide
-    ION_T* first_ion  = get_ion_series_ion(ion_series, ion_constraints[0], 0);
-    ION_T* second_ion = get_ion_series_ion(ion_series, ion_constraints[0], 1);
-    print_ion_gmtk_paired_binary(
-        first_ion, 
-        second_ion, 
-        ion_series_files[0],
-        peptide_idx + starting_sentence_idx,
-        0);
+    int constraint_idx;
+    int ion_series_file_idx = 0;
+    for (constraint_idx=0;constraint_idx<GMTK_NUM_PAIRED_ION_SERIES*2;
+         constraint_idx+=2){
 
-    // iterate through each ion_constraint
-    /*int constraint_idx;
-    for (constraint_idx=0;constraint_idx<GMTK_NUM_ION_SERIES;
-         constraint_idx++){
-      // output the ions that obey this constraint
-      print_ion_series_single_gmtk(ion_series, 
-          ion_constraints[constraint_idx], 
-          ion_series_files[constraint_idx],
-          peptide_idx + starting_sentence_idx);
+      print_ion_series_paired_gmtk(
+        ion_series,
+        ion_constraints[constraint_idx],
+        ion_constraints[constraint_idx+1],
+        ion_series_files[ion_series_file_idx++],
+        peptide_idx + starting_sentence_idx);
     }
-    carp(CARP_INFO, "Appended to ion files for: %s", peptide_sequence);
-    */
-
     free_ion_series(ion_series);
   } 
 

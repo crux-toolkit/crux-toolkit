@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.41 $
+ * REVISION: $Revision: 1.42 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -21,8 +21,9 @@
 #include "mass.h"
 #include "spectrum.h"
 
-// #define BINARY_GMTK 0
+#define BINARY_GMTK 1
 #define PRINT_NULL_IONS 1
+#define MIN_FRAMES 3
 #define MAX_IONS 10000
 #define MAX_NUM_ION_TYPE 8 // number of different ion_types
 
@@ -66,20 +67,24 @@ struct loss_limit{
  * \struct ion_constraint
  * \brief An object to represent the contraints which the ions in this
  * series obey.
- * CHRIS you can add BOOLEANS and other things as needed for implementation
- * of the predict-peptide-ions executable
  */
 struct ion_constraint {
   BOOLEAN_T use_neutral_losses; ///< A boolean to determine if the ions                                            ///< series should include neutral losses
-  int modifications[MAX_MODIFICATIONS]; ///< an array to indicate which modifications to perform
-  MASS_TYPE_T mass_type; ///< the mass_type to use MONO|AVERAGE
-  int max_charge; ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
-  ION_TYPE_T ion_type; ///< the ion types the peptide series should include
-  BOOLEAN_T precursor_ion; ///< does a precursor-ion satisfy this constraint
+  int modifications[MAX_MODIFICATIONS]; 
+    ///< an array to indicate which modifications to perform
+  MASS_TYPE_T mass_type; 
+    ///< the mass_type to use MONO|AVERAGE
+  int max_charge; 
+    ///< maximum charge of the ions, cannot exceed the parent peptide's charge
+  ION_TYPE_T ion_type; 
+    ///< the ion types the peptide series should include
+  BOOLEAN_T precursor_ion; 
+    ///< does a precursor-ion satisfy this constraint
   int min_charge; 
   BOOLEAN_T exact_modifications; 
     ///< TRUE  = ints in modfications array indicate exact number of mods
     ///< FALSE = ints in modfications array indicate maximum number of mods
+  unsigned int pointer_count; ///< Number of pointers referencing me 
 };
 
 /**
@@ -280,31 +285,31 @@ void print_ion_series_single_gmtk(
   
   // foreach ion in ion iterator, add matched observed peak intensity
   ION_T* ion;
-  int ion_idx = 0;
-
-  // print a null ion if there are none in this ion series
-#ifdef PRINT_NULL_IONS
-  if (!ion_filtered_iterator_has_next(ion_iterator)){
-#ifdef BINARY_GMTK
-		print_null_ion_gmtk_single_binary(file, sentence_idx, 0);
-#else
-		print_null_ion_gmtk_single(file);
-    sentence_idx++; // hack to avoid error for not using sentence_idx
-#endif
-  }
-#endif
-
+  int frame_idx = 0;
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
     
 #ifdef BINARY_GMTK
-		print_ion_gmtk_single_binary(ion, file, sentence_idx, ion_idx);
+		print_ion_gmtk_single_binary(ion, file, sentence_idx, frame_idx);
 #else
 		print_ion_gmtk_single(ion, file);
     sentence_idx++; // hack to avoid error for not using sentence_idx
 #endif
-    ion_idx++;
+    frame_idx++;
 	}
+
+  // print a null ion if there are none in this ion series
+#ifdef PRINT_NULL_IONS
+    for (; frame_idx < MIN_FRAMES; frame_idx++){
+#ifdef BINARY_GMTK
+		  print_null_ion_gmtk_single_binary(file, sentence_idx, frame_idx);
+#else
+		  print_null_ion_gmtk_single(file);
+      sentence_idx++; // hack to avoid error for not using sentence_idx
+#endif
+    }
+#endif
+
   free_ion_filtered_iterator(ion_iterator);
 }
 
@@ -313,27 +318,40 @@ void print_ion_series_single_gmtk(
  */
 void print_ion_series_paired_gmtk(
 	ION_SERIES_T* ion_series, ///< ion_series to print -in 
-	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
-	FILE* file ///< file output
-								){
-
+	ION_CONSTRAINT_T* first_ion_constraint, ///< ion_constraint to obey -in 
+	ION_CONSTRAINT_T* second_ion_constraint, ///< ion_constraint to obey -in 
+	FILE* file, ///< file output
+  int sentence_idx
+){
+    
 	// create the filtered iterator that will select among the ions
 	ION_FILTERED_ITERATOR_T* ion_iterator = 
-		new_ion_filtered_iterator(ion_series, ion_constraint);
+		new_ion_filtered_iterator(ion_series, first_ion_constraint);
   
   // foreach ion in ion iterator, add matched observed peak intensity
-  ION_T* ion;
+  int frame_idx = 0;
   while(ion_filtered_iterator_has_next(ion_iterator)){
-    ion = ion_filtered_iterator_next(ion_iterator);
-		print_ion(ion, file);
-    /*float mz = get_ion_mass_z(ion);
-    float charge = get_ion_charge(ion);
-		float cleavage_idx = get_ion_cleavage_idx(ion);
-		float intensity = get_nearest_intensity(spectrum, mz, tol);
-		fprintf(stderr, "%.3f - %f - %f - %i - %f - %s \n", 
-		mz, charge, cleavage_idx, ion_type_idx, intensity, output_directory);
-		*/
+    ION_T* first_ion = ion_filtered_iterator_next(ion_iterator);
+    int cleavage_idx = get_ion_cleavage_idx(first_ion);
+    ION_T* second_ion = get_ion_series_ion(
+        ion_series, second_ion_constraint, cleavage_idx);
+    if ( (first_ion == NULL) || (second_ion == NULL) ){
+      continue;
+    }
+    print_ion_gmtk_paired_binary(
+        first_ion, 
+        second_ion, 
+        file,
+        sentence_idx,
+        frame_idx++);
 	}
+
+#ifdef PRINT_NULL_IONS
+  for (; frame_idx < MIN_FRAMES; frame_idx++){
+    print_null_ion_gmtk_paired_binary(file, sentence_idx, frame_idx);
+  }
+#endif
+ 
   free_ion_filtered_iterator(ion_iterator);
 }
 
@@ -1155,7 +1173,7 @@ ION_CONSTRAINT_T* allocate_ion_constraint(void){
  */
 ION_CONSTRAINT_T* new_ion_constraint(
   MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
-  int max_charge, ///< the maximum charge of the ions, cannot exceed the parent peptide's charge
+  int max_charge, ///< max charge of the ions <= the parent peptide's charge
   ION_TYPE_T ion_type, ///< the ion types the peptide series should include
   BOOLEAN_T precursor_ion  ///< should include precursor ion?
   )
@@ -1170,9 +1188,11 @@ ION_CONSTRAINT_T* new_ion_constraint(
   constraint->exact_modifications = FALSE;
   constraint->ion_type = ion_type;
   constraint->precursor_ion = precursor_ion;
+  constraint->pointer_count = 1;
 
   return constraint;
 }
+
 /**
  * modification, sets all fields for gmtk settings
  *\returns a new heap allocated ion_constraint
@@ -1297,8 +1317,23 @@ void free_ion_constraint(
   ION_CONSTRAINT_T* ion_constraint///< the ion constraints to enforce -in
   )
 {
-  free(ion_constraint);
+  ion_constraint->pointer_count--;
+  if (ion_constraint->pointer_count == 0){
+    free(ion_constraint);
+  }
 }
+
+
+/**
+ * copies ion_constraint pointer
+ */
+ION_CONSTRAINT_T* copy_ion_constraint_ptr(
+    ION_CONSTRAINT_T* ion_constraint
+    ){
+  ion_constraint->pointer_count++;
+  return ion_constraint;
+}
+
 
 /**
  * copies ion_constraint object from src to dest
