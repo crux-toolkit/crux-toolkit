@@ -1,7 +1,7 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.20 $
- * $Author: aklammer $
+ * $Revision: 1.21 $
+ * $Author: frewen $
  * \brief Utilities for the crux project
  */
 #ifndef CRUX_UTILS_H
@@ -210,5 +210,7 @@ void fit_two_parameter_weibull(
     float* correlation ///< the best correlation -out
     );
 
-
+BOOLEAN_T string_to_mass_type(char*, MASS_TYPE_T*);
+BOOLEAN_T mass_type_to_string(MASS_TYPE_T, char**);
+BOOLEAN_T string_to_peptide_type(char*, PEPTIDE_TYPE_T*);
 #endif

@@ -15,6 +15,52 @@
  */
 #define MAX_ULPS 2
 
+
+/**
+ * The string version of isotopic mass type (average, mono)
+ */
+static char* mass_type_strings[NUMBER_MASS_TYPES] = {"average", "mono"};
+
+BOOLEAN_T string_to_mass_type(char* name, MASS_TYPE_T* result){
+  BOOLEAN_T success = TRUE;
+  //this is copied from parameter.c::get_peptide_mass_type
+  int mass_type = convert_enum_type_str(
+		name, -10, mass_type_strings, NUMBER_MASS_TYPES);
+
+  (*result) = (MASS_TYPE_T)mass_type;
+
+  if( mass_type < 0 ){
+    success = FALSE;
+  }
+  return success;
+}
+
+BOOLEAN_T mass_type_to_string(MASS_TYPE_T type, char** type_str){
+  BOOLEAN_T success = TRUE;
+  if( (int)type > NUMBER_MASS_TYPES ){
+    success = FALSE;
+    *type_str = NULL;
+  }
+
+  return success;
+}
+
+static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = {"tryptic", "partial", "N_TRYPTIC", "C_TRYPTIC", "NOT_TRYPTIC", "all"};
+
+BOOLEAN_T string_to_peptide_type(char* name, PEPTIDE_TYPE_T* result){
+
+  BOOLEAN_T success = TRUE;
+  //this is copied from parameter.c::get_peptide_mass_type
+  int pep_type = convert_enum_type_str(
+		name, -10, peptide_type_strings, NUMBER_PEPTIDE_TYPES);
+  (*result) = (PEPTIDE_TYPE_T)pep_type;
+
+  if( pep_type < 0 ){
+    success = FALSE;
+  }
+  return success;
+}
+
 /**
  * returns a heap allocated copy of the src string
  */
@@ -159,6 +205,11 @@ char* signed_int_to_char(int i){
   sprintf(int_string, "%d", i);
   return int_string;
 }
+/**
+ * Gives the peptide type as defined by the string
+ * Returns FALSE if the string is not a valid type
+ */
+//BOOLEAN_T string_to_peptide_type
 
 /**
  *prints the peptide type given it's enum value
