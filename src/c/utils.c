@@ -612,7 +612,7 @@ char * convert_enum_type
     
 int convert_enum_type_str
   (char *  enum_type_str, /* String to be converted. */
-   int     default_value, /* Value to return if first arg is null. */
+   int     default_value, /* Value to return if string not found. */
    char ** enum_strs,     /* String values associated with this type. */
    int     num_enums)     /* Number of values of the type. */
 {
@@ -629,9 +629,9 @@ int convert_enum_type_str
       return(i_enum);
     }
   }
-  carp(CARP_FATAL, "Illegal value (%s).", enum_type_str);
-  exit(1);
-  return(0); /* Unreachable. */
+  //  carp(CARP_FATAL, "Illegal value (%s).", enum_type_str);
+  //  exit(1);
+  return( default_value ); 
 }
 
 /****************************************************************************

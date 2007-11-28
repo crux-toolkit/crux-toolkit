@@ -91,7 +91,7 @@ int main(int argc, char** argv){
   char* binary_fasta_file = NULL;
 
   //to be deleted
-  char* mass_type_str;
+  //char* mass_type_str;
 
   /* Define optional command line arguments */ 
 
@@ -117,7 +117,7 @@ int main(int argc, char** argv){
 
   /* For debugging of parameter processing */
   /* TODO make this dependant on a compile flag */
-  set_verbosity_level(CARP_DETAILED_DEBUG);  
+  //  set_verbosity_level(CARP_DETAILED_DEBUG);  
   carp(CARP_DETAILED_DEBUG, "Starting create_index");
 
   // connect various signals to our clean-up function
@@ -157,37 +157,19 @@ int main(int argc, char** argv){
   //       parameter uses string_to_type functions (but they are also available to others)
   min_mass = get_double_parameter("min-mass");
   max_mass = get_double_parameter("max-mass");
-  //check that min > 0 and min < max and max < 255
+  //check that min < max
+  mass_range = (max_mass - min_mass)/MAX_INDEX_FILES;
+
   min_length = get_int_parameter("min-length");
   max_length = get_int_parameter("max-length");
-  //check that min > 0 and min < max and max < 255
-  //mass_range = get_double_parameter("mass-range"); //int?
-  //check that range > 0
-  //change input to take int 0-max-length
+  //check that min < max
+
   missed_cleavages = get_boolean_parameter("missed-cleavages");
-  
-  
-  // FIXME may add additional types such as non-tryptic or partially-tryptic
   peptide_type = get_peptide_type_parameter("cleavages");
   
-  //again, move bounds checking
-  // check if maximum length is with in range <= 255
-  //put above
-  if(max_length > 255){
-    carp(CARP_FATAL, "Maximum length:%d over limit of 255.", max_length);
-    exit(1);
-  }
-  
-  // mass_range = get_double_parameter("mass-range");
-  /*if(compare_float(mass_range, 0) == 0){
-    carp(CARP_FATAL, "mass_range:%d must be greater than 0.", mass_range);
-    exit(1);
-    }*/
-  
-  // determine isotopic mass option
-  // write a BOOLEAN_T string_to_mass_type(char*, MASS_TYPE_T*) function
-  mass_type_str = get_string_parameter("isotopic-mass");
-  //MASS_TYPE_T mass_type;
+  mass_type = get_mass_type_parameter("isotopic-mass");
+
+  /*  //MASS_TYPE_T mass_type;
   if(strcmp(mass_type_str, "average")==0){
     mass_type = AVERAGE;
   }
@@ -198,7 +180,7 @@ int main(int argc, char** argv){
     //      wrong_command(isotopic_mass);
     //wrong_command(mass_type_str);
   }
-  
+  */
   // peptide constraint
   constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, 
 				      min_length, max_length, 
@@ -214,7 +196,6 @@ int main(int argc, char** argv){
   }
   
   
-  mass_range = (max_mass - min_mass)/MAX_INDEX_FILES;
   
   //FINALLY! the computation begins
   

@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.43 $
+ * $Revision: 1.44 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -99,6 +99,15 @@ enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPT
  */
 typedef enum _peptide_type PEPTIDE_TYPE_T;
 
+/**
+ * \brief The string version of the peptide types
+ *
+ */
+//static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = {
+//  "tryptic", "partial", "n-tryptic", "c-tryptic", "not-tryptic", "all"
+//};
+
+#define NUMBER_MASS_TYPES 2
 /**
  * The enum for isotopic mass type (average, mono)
  */

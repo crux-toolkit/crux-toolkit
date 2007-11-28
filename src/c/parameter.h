@@ -1,12 +1,14 @@
 /**
  * \file parameter.h
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
 #define PARAMETER_FILE_H
 #include "utils.h"
 #include "objects.h"
+#include "crux-utils.h"
+#include "peptide.h"
 
 #define PARAMETER_LENGTH 1024 ///< default length of parameter name and value in characters
 #define NUM_PARAMS 512 ///< initial number of parameters allowed
@@ -19,6 +21,9 @@
 //       add parse_command_line(int argc, char** argv)
 //       add get_command_line_error(&error_message)
 
+#define NUMBER_PARAMETER_TYPES 5
+enum parameter_type {INT_P, DOUBLE_P, STRING_P, MASS_TYPE_P, PEPTIDE_TYPE_P};
+typedef enum parameter_type PARAMETER_TYPE_T;
 
 /**
  * initialize parameters
@@ -162,6 +167,10 @@ char* get_string_parameter_pointer(
 BOOLEAN_T set_string_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  char* set_value  ///< the value to be set -in
+ );
+
+MASS_TYPE_T get_mass_type_parameter(
+ char* name
  );
 
 /**

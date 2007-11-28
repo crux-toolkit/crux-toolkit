@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.44 $
+ * $Revision: 1.45 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -14,6 +14,9 @@
 #include "objects.h"
 #include "carp.h"
 #include "peptide_constraint.h"
+
+//this may be elsewhere
+#define MAX_PEPTIDE_LENGTH 255
 
 /**
  * \returns The mass of the given peptide.
