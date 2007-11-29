@@ -268,35 +268,34 @@ void initialize_parameters(void){
   temp_set_double_parameter("pi0", 0.9, 0, 1, "usage");
   temp_set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
 
-  //static mods
-  /*  The are commented out only because I am too lazy to give min and max
-  temp_set_double_parameter("A", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("B", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("C", 57.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("D", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("E", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("F", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("G", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("H", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("I", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("J", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("K", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("L", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("M", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("N", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("O", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("P", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("Q", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("R", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("S", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("T", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("U", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("V", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("W", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("X", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("Y", 0.0, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("Z", 0.0, "NOT FOR COMMAND LINE");
-  */
+  /* static mods */
+  temp_set_double_parameter("A", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("B", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("C", 57.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("D", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("E", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("F", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("G", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("H", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("I", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("J", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("K", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("L", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("M", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("N", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("O", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("P", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("Q", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("R", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("S", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("T", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("U", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("V", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("W", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("X", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("Y", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("Z", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+
 
   // now we have initialized the parameters
   parameter_initialized = TRUE;
