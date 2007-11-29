@@ -45,16 +45,14 @@ struct parameter_hash  usage_hash_table;
 struct parameter_hash* usages = &usage_hash_table;
 struct parameter_hash  type_hash_table;
 struct parameter_hash* types = & type_hash_table;
-/* MINMAX
-struct parameter_hash  min_values_hash_table;
-struct parameter_hash* min_values = & type_hash_table;
-struct parameter_hash  max_values_hash_table;
-struct parameter_hash* max_values = & type_hash_table;
-*/
-char* parameters_set[MAX_SET_PARAMS]; // list of option names set on cmd line or in param file
-int num_params_set = 0;
 
-BOOLEAN_T parameter_initialized = FALSE; // have the parameters been initialized?
+struct parameter_hash  min_values_hash_table;
+struct parameter_hash* min_values = & min_values_hash_table;
+struct parameter_hash  max_values_hash_table;
+struct parameter_hash* max_values = & max_values_hash_table;
+
+
+BOOLEAN_T parameter_initialized = FALSE; //have the parameters been initialized
 BOOLEAN_T usage_initialized = FALSE; // have the usages been initialized?
 BOOLEAN_T type_initialized = FALSE; // have the types been initialized?
 
@@ -136,11 +134,6 @@ BOOLEAN_T select_cmd_line(
   int (*parse_argument_set)(char*, char*, void*, enum argument_type) ///< function point to choose arguments or options 
   );
 
-  //double get_option_min(char*);
-  //double get_option_max(char*);
-//are there string parameters that have a limited number
-// of accepted strings that are not also a defined type?
-//BOOLEAN_T get_option_accepted_list(char* name, char** put_list_here, int& num);
 
 /************************************
  * Function definitions
@@ -168,19 +161,16 @@ void initialize_parameters(void){
   parameters->hash = new_hash(NUM_PARAMS);
   usages->hash = new_hash(NUM_PARAMS);
   types->hash = new_hash(NUM_PARAMS);
-  /* MINMAX
   min_values->hash = new_hash(NUM_PARAMS);
   max_values->hash = new_hash(NUM_PARAMS);
-  */  
 
   // set number of parameters to zero
   parameters->num_parameters = 0;
   usages->num_parameters = 0;
   types->num_parameters = 0;
-  /* MINMAX
   min_values->num_parameters = 0;
   max_values->num_parameters = 0;
-  */
+
 
   // set verbosity
   temp_set_int_parameter("verbosity", CARP_ERROR, CARP_FATAL, CARP_MAX,
@@ -201,7 +191,7 @@ void initialize_parameters(void){
 		    "Name to give the new directory containing index files.");
 
   // generate_peptide, create_index parameters  
-  temp_set_double_parameter("min-mass", 200, 0, 7200,
+  temp_set_double_parameter("min-mass", 200, 0, BILLION,
 	"The minimum mass of peptides to consider. Default 200.");
   temp_set_double_parameter("max-mass", 7200, 1, BILLION, 
 	"The maximum mass of peptides to consider. Default 7200.");
@@ -223,9 +213,6 @@ void initialize_parameters(void){
   temp_set_string_parameter("use-index", "F", "usage");
   temp_set_string_parameter("sort", "none", "usage");//mass,length,lexical,none  
   temp_set_boolean_parameter("unique-peptides", FALSE, "usage");
-
-  // more create_index parameters
-  //temp_set_double_parameter("mass-range", 10, "usage");
 
     // searching peptides
   temp_set_double_parameter("mass-offset", 0.0, 0, 0, "usage");
@@ -316,7 +303,6 @@ void initialize_parameters(void){
   usage_initialized = TRUE;
   type_initialized = TRUE;
 
-
 }
 
 
@@ -327,7 +313,7 @@ void initialize_parameters(void){
  */
 BOOLEAN_T select_cmd_line_arguments(  //remove options from name
   char** option_names,
-  int    num_options //, int (*parse_argument_set)(char, char, void, enum argument_type) 
+  int    num_options 
   ){
   select_cmd_line( option_names, num_options, 
 		   &parse_arguments_set_req);
@@ -341,7 +327,7 @@ BOOLEAN_T select_cmd_line_arguments(  //remove options from name
  */
 BOOLEAN_T select_cmd_line_options(  //remove options from name
   char** option_names,
-  int    num_options //, int (*parse_argument_set)(char, char, void, enum argument_type) 
+  int    num_options 
   ){
   select_cmd_line( option_names, num_options, 
 		   &parse_arguments_set_opt);
@@ -367,11 +353,12 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     return success;
   }
 
-  //for each name in list
+  /* for each option name in list */
   int i;
   for( i=0; i< num_options; i++){
     carp(CARP_DETAILED_DEBUG, "Option is: %s", option_names[i]);
-    //get value, usage, types
+
+    /* get value, usage, types */
     void* value_ptr = get_hash_value(parameters->hash, option_names[i]);
     void* usage_ptr = get_hash_value(usages->hash, option_names[i]);
     void* type_ptr =  get_hash_value(types->hash, option_names[i]);
@@ -382,8 +369,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     carp(CARP_DETAILED_DEBUG, "Found value: %s, usage: %s, type: %s", (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
 
 
-    // check that it is in the params hash
-    // since default value can be null, don't check value
+    /* check that the option is in the params hash */
     if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
       carp(CARP_FATAL, 
 	   "Cannot select parameter '%s'. Value, usage or type not found.\nFound value: %s, usage: %s, type: %s", 
@@ -392,16 +378,17 @@ BOOLEAN_T select_cmd_line(  //remove options from name
 	   usage_ptr,
 	   type_ptr);
       
-      exit(1);  // or  set success to F?
+      exit(1);  // or  set success to F?  or die()?
     }
-    // add the option via parse_arguments    
+
+    /* add the option via parse_arguments.c. pointer decides opt or req */
     success = parse_arguments_set_ptr(option_names[i],
 				      usage_ptr,
 				      value_ptr, 
 				      string_to_argument_type(type_ptr)); 
   }
 
-  carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
+  carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %s", success);
   return success;
 }
 /**
@@ -456,33 +443,33 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
   carp(CARP_DETAILED_DEBUG, "Parameter.c is parsing the command line");
   BOOLEAN_T success = TRUE;
   int i;
-  //first look for parameter-file option and parse those values before
-  //    command line values
+  /* first look for parameter-file option and parse values in file before
+     command line values.  Checks types and bounds, exiting if invalid */
 
-  // search argv for parameter file
   // TODO find appropriate const for 256
   char param_filename[256];
   if(find_param_filename(argc, argv, param_filename, 256)){
-    parse_parameter_file(param_filename);  //this checks types and bounds
+    parse_parameter_file(param_filename);  
   }
   else{ 
-    carp(CARP_INFO, "No parameter file specified.  Using defaults and command line values");
+    carp(CARP_INFO, 
+       "No parameter file specified.  Using defaults and command line values");
   }
 
-  // now parse the command line and put those values in hash
-  //  overwriting file parameters
+  /* now parse the command line using parse_arguments.c, 
+     check options for legal values, and put values in hash 
+     overwriting file parameters */ 
 
   success = parse_arguments_into_hash(argc, argv, parameters->hash, 0); 
   if( success ){
     // check each option value
     for(i=1; i<argc; i++){
       char* word = argv[i];
-      if( word[0] == '-' ){   //if word starts with --
+      if( word[0] == '-' && word[1] == '-' ){   //if word starts with --
 	word = word + 2;      //ignore the --
 	check_option_type_and_bounds(word);
       }//else skip this word
     }
-
   }
   else{  // parse_arguments encountered an error
     char* error_message = NULL;
@@ -499,26 +486,19 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
 }
 
 /*
- * this will mimic initialize_parameters, having knowledge of all
- * option names, types and allowed bounds
- * or maybe it will be generalized and there will be yet another
- * hash with min and max values.
+ * Checks the current value of the named option
+ *   as stored in the parameters hash and checks 
+ *   that it is a legal value (within min/max for
+ *   numeric, correct word for specialized type 
  */
 BOOLEAN_T check_option_type_and_bounds(char* name){
 
   BOOLEAN_T success = TRUE;
-  char* die_str;
+  char die_str[256];
   char* type_str = get_hash_value(types->hash, name);
   char* value_str = get_hash_value(parameters->hash, name);
-  /* MINMAX
   char* min_str = get_hash_value(min_values->hash, name);
   char* max_str = get_hash_value(max_values->hash, name);
-  int min_int;
-  int max_int;
-  double value_double;
-  double min_double;
-  double max_double;
-  */
 
   MASS_TYPE_T mass_type;
   PEPTIDE_TYPE_T pep_type;
@@ -532,26 +512,14 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 
   switch( param_type ){
   case INT_P:
-    carp(CARP_DETAILED_DEBUG, "found int opt with value %i\n", 
-	 atoi(value_str));
-    //atoi, check min/max
-    /* MINMAX
-    value_int = atoi(value_str);
-    min_int = atoi(min_str);
-    max_int = atoi(max_str);
-    printf("found int opt with value %d, min %d, max %d\n", value_int, min_int, max_int);
-    */
-    break;
   case DOUBLE_P:
-     carp(CARP_DETAILED_DEBUG, "found double opt with value %f\n", 
-	  atof(value_str));
-    //atof, check min/max
-    /* MINMAX
-    value_double = atof(value_str);
-    min_double = atof(min_str);
-    max_double = atof(max_str);
-    printf("found double opt with value %f, min %f, max %f\n", value_double, min_double, max_double);
-    */
+    if( atof(value_str) < atof(min_str) || 
+	atof(value_str) > atof(max_str) ){
+      success = FALSE;
+      sprintf(die_str, 
+	     "The option '%s' must be between %s and %s.  %s is out of bounds",
+	      name, min_str, max_str, value_str);
+    }
     break;
   case STRING_P:
     carp(CARP_DETAILED_DEBUG, "found string opt with value %s\n", value_str);
@@ -562,7 +530,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 	 value_str);
     if( ! string_to_mass_type( value_str, &mass_type )){
       success = FALSE;
-      die_str = "Illegal mass-type.  Must be 'mono' or 'average'";
+      sprintf(die_str, "Illegal mass-type.  Must be 'mono' or 'average'");
     }
     break;
   case PEPTIDE_TYPE_P:
@@ -570,7 +538,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 	   value_str);
     if( ! string_to_peptide_type( value_str, &pep_type )){
       success = FALSE;
-      die_str = "Illegal peptide cleavages.  Must be...something";
+      sprintf(die_str, "Illegal peptide cleavages.  Must be...something");
     }
     break;
   default:
@@ -591,6 +559,10 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 void free_parameters(void){
   if(parameter_initialized){
     free_hash(parameters->hash);
+    free_hash(usages->hash);
+    free_hash(types->hash);
+    free_hash(min_values->hash);
+    free_hash(max_values->hash);
   }
 }
 
@@ -600,7 +572,7 @@ void free_parameters(void){
  * separated by an equals sign.
  *
  *******************************************************************/
-
+//TODO delete this
 /**
  * add parameters to parameter list
  */
@@ -616,6 +588,7 @@ BOOLEAN_T add_parameter(
                   my_copy_string(set_value));
 }
 
+//TODO delete this
 /**
  * copy parameters to parameter hash table
  * there must be a matching name in the parameter hash table
@@ -641,6 +614,7 @@ BOOLEAN_T copy_parameter(
   return update_hash_value(parameters->hash, name, set_value);
 }
 
+//TODO delete this
 /**
  * This method should be called only after parsed command line
  * first, parse paramter file
@@ -684,18 +658,18 @@ void parse_parameter_file(
   FILE *file;
   char *line;
   int idx;
-  //  char *endptr;
-  //  float update_mass;
+  char* endptr;
+  float update_mass;
 
   carp(CARP_DETAILED_DEBUG, "Parsing parameter file '%s'",parameter_filename);
 
-  // check if parameters can be changed
+  /* check if parameters can be changed */
   if(!parameter_plasticity){
     carp(CARP_FATAL, "Can't change parameters once they are confirmed");
     exit(1);
   }
 
-  // check if parameter file exists, if not die 
+  /* check if parameter file exists, if not die */
   if(access(parameter_filename, F_OK)){
     carp(CARP_FATAL, "Could not open parameter file.");
     exit(1);
@@ -703,7 +677,6 @@ void parse_parameter_file(
 
   file = fopen(parameter_filename, "r");
   if(file == NULL){
-    //change to stderr
     carp(CARP_FATAL, "Couldn't open parameter file '%s'", parameter_filename);
     exit(1);
   }
@@ -711,11 +684,10 @@ void parse_parameter_file(
   line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));
 
   while(fgets(line, MAX_LINE_LENGTH, file)==line){
-    //    printf("read line '%s'.\n", line);
 
     idx = 0;
     
-    // Change the newline to a '\0' ignoring trailing whitespace
+    /* Change the newline to a '\0' ignoring trailing whitespace */
     for(idx = MAX_LINE_LENGTH - 1; idx >= 0; idx--){
       if(line[idx] == '\n' || line[idx] == '\r' || 
 	 line[idx] == '\f' || line[idx] == ' ' || line[idx] == '\t')
@@ -727,7 +699,7 @@ void parse_parameter_file(
       break;
     }
     */
-    // empty lines and those beginning with '#' are ignored
+    /* empty lines and those beginning with '#' are ignored */
     if(line[0] != '#' && line[0] != '\0'){
 
       /* find the '=' in the line.  Exit with error if the line 
@@ -736,10 +708,9 @@ void parse_parameter_file(
 	idx++;
       }
       if(idx == 0 || idx >= (int)(strlen(line)-1)){
-	//these should be FATALs
-	carp(CARP_ERROR, "Lines in a parameter file must have the form:\n");
-	carp(CARP_ERROR, "\n\tname=value\n\n");
-	carp(CARP_ERROR, 
+	carp(CARP_FATAL, "Lines in a parameter file must have the form:\n");
+	carp(CARP_FATAL, "\n\tname=value\n\n");
+	carp(CARP_FATAL, 
 	     "In file %s, the line\n%s\ndoes not have this format\n",
 	     parameter_filename, line);
 	exit(1);
@@ -748,18 +719,17 @@ void parse_parameter_file(
       line[idx] = '\0';
       char* option_name = line;
       char* option_value = &(line[idx+1]);
-      carp(CARP_DETAILED_DEBUG, "Found option '%s' and value '%s'", option_name, option_value);
+      carp(CARP_DETAILED_DEBUG, "Found option '%s' and value '%s'", 
+	   option_name, option_value);
 
       if(! update_hash_value(parameters->hash, option_name, option_value) ){
 	carp(CARP_ERROR, "Unexpected parameter file option '%s'", option_name);
 	exit(1);
       }
 
-      //      parameters_set[num_params_set++] = my_copy_string(option_name);
       check_option_type_and_bounds(option_name);
 
-      /*
-      // check if it is amino acid mass update
+      /* check if it is amino acid mass update */
       if(strlen(line) == 1 && 
          (short int)line[0] >= 'A' && 
          (short int)line[0] <= 'Z'){
@@ -767,12 +737,6 @@ void parse_parameter_file(
         update_mass = strtod(&(line[idx+1]), &endptr);
         increase_amino_acid_mass(line[0], update_mass);
       }
-      // else, its a parameter value setting
-      // copy the name/value pairs to the right parameter
-      else if(!copy_parameter(line, &(line[idx+1]))){
-        exit(1);
-      }
-      */
     }
   }
 
@@ -780,6 +744,7 @@ void parse_parameter_file(
   myfree(line);
 
   // now we have parsed the parameter file
+  // TODO delete this?
   parameter_parsed = TRUE;
 }
 
@@ -1023,7 +988,6 @@ MASS_TYPE_T get_mass_type_parameter(
  **************************************************
  */
 
-//these could all use add instead of add_or_update
 BOOLEAN_T temp_set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
@@ -1056,8 +1020,8 @@ BOOLEAN_T temp_set_boolean_parameter(
 BOOLEAN_T temp_set_int_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  int set_value,  ///< the value to be set -in
- int min_value,  ///< the value to be set -in
- int max_value,  ///< the value to be set -in
+ int min_value,  ///< the minimum accepted value -in
+ int max_value,  ///< the maximum accepted value -in
  char* usage
   )
 {
@@ -1076,13 +1040,12 @@ BOOLEAN_T temp_set_int_parameter(
 
    carp(CARP_DETAILED_DEBUG, "not setting min %i or max %i\n", 
 	min_value, max_value);
-  /* MINMAX
+
   snprintf(buffer, PARAMETER_LENGTH, "%i", min_value);
   result = add_or_update_hash(min_values->hash, name, buffer);
 
   snprintf(buffer, PARAMETER_LENGTH, "%i", max_value);
   result = add_or_update_hash(max_values->hash, name, buffer);
-  */
 
   result = add_or_update_hash(usages->hash, name, usage);
   result = add_or_update_hash(types->hash, name, "INT_ARG");
@@ -1113,25 +1076,15 @@ BOOLEAN_T temp_set_double_parameter(
   snprintf(buffer, PARAMETER_LENGTH, "%f", set_value);
   result = add_or_update_hash(parameters->hash, name, buffer);    
 
-   carp(CARP_DETAILED_DEBUG, "not setting min %f max %f\n", 
-	min_value, max_value);
-  /* MINMAX
   snprintf(buffer, PARAMETER_LENGTH, "%f", min_value);
   result = add_or_update_hash(min_values->hash, name, buffer);    
-  printf("\tsetting double min %s", buffer);
 
-  snprintf(buffer_max, PARAMETER_LENGTH, "%f", max_value);
-  result = add_or_update_hash(max_values->hash, name, buffer_max);    
-  printf("\tsetting double max %s\n", buffer_max);
-
-  temp = get_hash_value(max_values->hash, name);
-  printf("Got back out max of %s\n", temp);
-  */
+  snprintf(buffer, PARAMETER_LENGTH, "%f", max_value);
+  result = add_or_update_hash(max_values->hash, name, buffer);    
 
   result = add_or_update_hash(usages->hash, name, usage);    
   result = add_or_update_hash(types->hash, name, "DOUBLE_ARG");    
 
-  //  printf("Got back out max of %s\n", temp);  //MINMAX
   return result;
 }
 /**
@@ -1219,7 +1172,7 @@ BOOLEAN_T temp_set_peptide_type_parameter(
  *   OLD SETTERS (public)
  **************************************************
  */
-
+// TODO delete these
 
 /**
  * Parameter file must be parsed first!
@@ -1364,52 +1317,13 @@ BOOLEAN_T set_string_parameter(
 }
 
 /**
- * Prints the parameters.  If lead_string is not null, preprends it to
- * each line.
- */
-/*
-void print_parameters(
-  char* first_line,  ///< the first line to be printed before the parameter list -in
-  char* parameter_filename,  ///< the parameter file name -in
-  char* lead_string,  ///< the lead string to be printed before each line -in
-  FILE* outstream  ///< the output stream -out
-  )
-{
-  int idx;
-
-  if (lead_string != NULL){
-    fprintf(outstream, "%s ",lead_string);
-  }
-  fprintf(outstream, "%s\n", first_line);
-
-  if (lead_string != NULL){
-    fprintf(outstream, "%s ",lead_string);
-  }
-  fprintf(outstream, "parameter filename: %s\n", parameter_filename);
-
-  if (lead_string != NULL){
-    fprintf(outstream, "%s ",lead_string);
-  }
-  fprintf(outstream, "host=%s date=%s\n", hostname(), date_and_time());
-  
-  for(idx = 0; idx < parameters.num_parameters; idx++){
-    if(lead_string != NULL){
-      fprintf(outstream, "%s",lead_string);
-    }
-    fprintf(outstream, "%s=%s\n",
-	    parameters.parameters[idx].parameter_name,
-	    parameters.parameters[idx].parameter_value);
-  }
-}
-*/
-/**
  * set the parameters to confirmed, thus blocks any additional changes to the parameters
  */
 void parameters_confirmed(){
   parameter_plasticity = FALSE;
 }
 
-
+// TODO to be deleted
 /**
  * Parameter file must be parsed first!
  * searches through the hash table of parameters, 
@@ -1448,15 +1362,10 @@ BOOLEAN_T set_options_command_line(
   return update_hash_value(parameters->hash, name, set_value);  
 } 
 
-//move to getters section
 /**
  * Routines that return crux enumerated types. 
  */
-/*
-static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = {
-  "tryptic", "partial", "n-tryptic", "c-tryptic", "not-tryptic", "all"
-}; 
-*/
+
 BOOLEAN_T string_to_param_type(char* name, PARAMETER_TYPE_T* result ){
   BOOLEAN_T success = TRUE;
   int param_type = convert_enum_type_str(

@@ -1,7 +1,7 @@
 /*****************************************************************************
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -176,7 +176,7 @@ BOOLEAN_T add_or_update_hash(
   RECORD_T* recs;  
   int rc;
   unsigned int off, ind, size, code;
-  
+
   if (key == NULL || *key == '\0') return FALSE;
   
   code = strhash(key);
@@ -211,7 +211,7 @@ BOOLEAN_T add_or_update_hash(
     if (rc) return FALSE;
   }
 
-  
+
   recs[ind].hash = code;
   recs[ind].key = my_copy_string(key);
   recs[ind].value = my_copy_string(value);
