@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -21,8 +21,8 @@
 //       add parse_command_line(int argc, char** argv)
 //       add get_command_line_error(&error_message)
 
-#define NUMBER_PARAMETER_TYPES 5
-enum parameter_type {INT_P, DOUBLE_P, STRING_P, MASS_TYPE_P, PEPTIDE_TYPE_P};
+#define NUMBER_PARAMETER_TYPES 6
+enum parameter_type {INT_P, DOUBLE_P, STRING_P, MASS_TYPE_P, PEPTIDE_TYPE_P, BOOLEAN_P};
 typedef enum parameter_type PARAMETER_TYPE_T;
 
 /**

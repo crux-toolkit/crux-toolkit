@@ -36,7 +36,7 @@ struct parameter_hash{
 /**
  * Global variables
  */
-static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T"};
+static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T", "BOOLEAN_T"};
 
 //one hash for parameter values, one for usage statements, one for types
 struct parameter_hash  parameters_hash_table;
@@ -203,6 +203,9 @@ void initialize_parameters(void){
 	"Include peptides with missed cleavage sites. Default FALSE.");
   temp_set_peptide_type_parameter("cleavages", TRYPTIC, 
 	"The type of cleavage sites to consider (tryptic, partial, all)");
+  temp_set_boolean_parameter("unique-peptides", FALSE,
+        "Generate peptides only once, even if they appear in more " \
+	"than one protein.  Default F.");
   temp_set_mass_type_parameter("isotopic-mass", AVERAGE, 
 	"Which isotopes to use in calcuating mass (average or mono). " \
 	"Default average");
@@ -212,7 +215,6 @@ void initialize_parameters(void){
   temp_set_boolean_parameter("output-trypticity", FALSE, "usage");
   temp_set_string_parameter("use-index", "F", "usage");
   temp_set_string_parameter("sort", "none", "usage");//mass,length,lexical,none  
-  temp_set_boolean_parameter("unique-peptides", FALSE, "usage");
 
     // searching peptides
   temp_set_double_parameter("mass-offset", 0.0, 0, 0, "usage");
@@ -362,10 +364,11 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     void* usage_ptr = get_hash_value(usages->hash, option_names[i]);
     void* type_ptr =  get_hash_value(types->hash, option_names[i]);
     if( strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
-	strcmp(type_ptr, "MASS_TYPE_T") == 0){
+	strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
+	strcmp(type_ptr, "BOOLEAN_T") == 0){
       type_ptr = "STRING_ARG";
     }
-    carp(CARP_DETAILED_DEBUG, "Found value: %s, usage: %s, type: %s", (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
+    carp(CARP_DETAILED_DEBUG, "Found value: %s, usage: %s, type(to be passed to parse_args): %s", (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
 
 
     /* check that the option is in the params hash */
@@ -387,7 +390,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
 				      string_to_argument_type(type_ptr)); 
   }
 
-  carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %s", success);
+  carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
   return success;
 }
 /**
@@ -540,8 +543,18 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
       sprintf(die_str, "Illegal peptide cleavages.  Must be...something");
     }
     break;
+  case BOOLEAN_P:
+    carp(CARP_DETAILED_DEBUG, "found boolean_type param, value '%s'", 
+	 value_str);
+    if( value_str[0] != 'T' && value_str[0] != 'F'){
+      success =  FALSE;
+      sprintf(die_str, 
+	      "Illegal boolean value '%s' for option '%s'.  Must be T or F",
+	      value_str, name);
+    }
+    break;
   default:
-    carp(CARP_FATAL, "Your param type wasn't found");
+    carp(CARP_FATAL, "Your param type '%s' wasn't found (code %i)", type_str, (int)param_type);
     exit(1);
   }
 
@@ -1010,7 +1023,7 @@ BOOLEAN_T temp_set_boolean_parameter(
   }
   result = add_or_update_hash(parameters->hash, name, bool_str);
   result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "BOOL_ARG");
+  result = add_or_update_hash(types->hash, name, "BOOLEAN_T");
 
   return result;
 }
@@ -1036,9 +1049,6 @@ BOOLEAN_T temp_set_int_parameter(
   //stringify default, min, and max values and set
   snprintf(buffer, PARAMETER_LENGTH, "%i", set_value);
   result = add_or_update_hash(parameters->hash, name, buffer);
-
-   carp(CARP_DETAILED_DEBUG, "not setting min %i or max %i\n", 
-	min_value, max_value);
 
   snprintf(buffer, PARAMETER_LENGTH, "%i", min_value);
   result = add_or_update_hash(min_values->hash, name, buffer);
