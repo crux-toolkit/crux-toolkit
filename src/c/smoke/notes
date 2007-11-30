@@ -184,12 +184,12 @@ different masses than original test file
 different ordering than original test file (function of diff masses?)
 redundant sequences does not seem to be functional (should be default,
 option does not seem to change it)
+if option not found, does not exit non-zero
 
-CREATE INDEX
-with current version, create index seg faults before doing anything 
 
 ANALYZE MATCHES
 fix output 
+doesn't work with only fasta
 
 
 
