@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -211,6 +211,7 @@ void fit_two_parameter_weibull(
     );
 
 BOOLEAN_T string_to_mass_type(char*, MASS_TYPE_T*);
-BOOLEAN_T mass_type_to_string(MASS_TYPE_T, char**);
+BOOLEAN_T mass_type_to_string(MASS_TYPE_T, char*);
 BOOLEAN_T string_to_peptide_type(char*, PEPTIDE_TYPE_T*);
+BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str);
 #endif

@@ -1131,7 +1131,7 @@ BOOLEAN_T temp_set_mass_type_parameter(
  )
 {
   BOOLEAN_T result;
-  char* value_str;
+  char value_str[265] ;
 
   // check if parameters can be changed
   if(!parameter_plasticity){
@@ -1140,7 +1140,7 @@ BOOLEAN_T temp_set_mass_type_parameter(
   }
   
   /* stringify the value */
-  mass_type_to_string(set_value, &value_str);
+  mass_type_to_string(set_value, value_str);
   
   result = add_or_update_hash(parameters->hash, name, value_str);
   result = add_or_update_hash(usages->hash, name, usage);
@@ -1157,7 +1157,7 @@ BOOLEAN_T temp_set_peptide_type_parameter(
   )
 {
   BOOLEAN_T result;
-  char* value_str;
+  char value_str[256];
   
   // check if parameters can be changed
   if(!parameter_plasticity){
@@ -1166,7 +1166,7 @@ BOOLEAN_T temp_set_peptide_type_parameter(
   }
   
   /* stringify the value */
-  mass_type_to_string(set_value, &value_str);
+  peptide_type_to_string(set_value, value_str);
 
   result = add_or_update_hash(parameters->hash, name, value_str);
   result = add_or_update_hash(usages->hash, name, usage);
