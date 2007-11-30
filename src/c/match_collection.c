@@ -1951,11 +1951,13 @@ void free_match_iterator(
   MATCH_ITERATOR_T* match_iterator ///< the match iterator to free
   )
 {
-  // iterator lock now set to FALSE
-  match_iterator->match_collection->iterator_lock = FALSE;
-
   // free iterator
-  free(match_iterator);
+  if (match_iterator != NULL){
+    if (match_iterator->match_collection != NULL){
+      match_iterator->match_collection->iterator_lock = FALSE;
+    }
+    free(match_iterator);
+  }
 }
 
 /*******************************************
