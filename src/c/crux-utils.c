@@ -35,12 +35,15 @@ BOOLEAN_T string_to_mass_type(char* name, MASS_TYPE_T* result){
   return success;
 }
 
-BOOLEAN_T mass_type_to_string(MASS_TYPE_T type, char** type_str){
+BOOLEAN_T mass_type_to_string(MASS_TYPE_T type, char* type_str){
   BOOLEAN_T success = TRUE;
   if( (int)type > NUMBER_MASS_TYPES ){
     success = FALSE;
-    *type_str = NULL;
+    type_str = NULL;
   }
+
+  //  type_str = mass_type_strings[type];
+  strcpy(type_str, mass_type_strings[type]);
 
   return success;
 }
@@ -61,6 +64,18 @@ BOOLEAN_T string_to_peptide_type(char* name, PEPTIDE_TYPE_T* result){
   return success;
 }
 
+BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str){
+  BOOLEAN_T success = TRUE;
+  if( (int)type > NUMBER_PEPTIDE_TYPES){
+    success = FALSE;
+    type_str = NULL;
+  }
+
+  //type_str = peptide_type_strings[type];
+  strcpy(type_str, peptide_type_strings[type]);
+
+  return success;
+}
 /**
  * returns a heap allocated copy of the src string
  */
