@@ -210,7 +210,8 @@ int main(int argc, char** argv){
       scorer_type = LOGP_BONF_WEIBULL_XCORR;
     }
     output_matches(match_collection, scorer_type);
-    free_match_collection(match_collection);
+    // MEMLEAK below causes seg fault
+    // free_match_collection(match_collection);
    }
   else{
     char* usage = parse_arguments_get_usage("match_analysis");
@@ -471,6 +472,9 @@ MATCH_COLLECTION_T* run_percolator(
 
       if (feature_fh != NULL){
         
+        fprintf(feature_fh, "%i\t",
+            get_spectrum_first_scan(get_match_spectrum(match))
+            );
         if (get_match_null_peptide(match) == FALSE){
           fprintf(feature_fh, "1\t");
         } else { 
@@ -495,6 +499,7 @@ MATCH_COLLECTION_T* run_percolator(
     }
 
     // ok free & update for net set
+    // MEMLEAK 
     free_match_iterator(match_iterator);
 
     // don't free the target_match_collection
@@ -542,7 +547,6 @@ MATCH_COLLECTION_T* run_percolator(
   free(results_q);
   free(results_score);
   free_match_collection_iterator(match_collection_iterator);
-  free_match_iterator(match_iterator);
 
   // TODO put free back in. took out because glibc claimed it was corrupted
   // double linked list
