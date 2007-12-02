@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.63 $
+ * $Revision: 1.64 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1300,6 +1300,7 @@ BOOLEAN_T check_index_db_boundary(
   // parse the # ..... line
   if(sscanf(new_line,"%s %s %f", 
             temp_string, field, &check_value) < 3){
+    carp(CARP_ERROR, "failed to parse line %s", new_line);
     return FALSE;
   }
   // check peptide min mass
@@ -1375,15 +1376,15 @@ BOOLEAN_T check_index_db_boundary(
     }
   }
   // check peptide unique-ness
-  else if(strncmp("unique peptides:", field, 16) == 0){
+  else if(strncmp("unique_peptides:", field, 16) == 0){
     if(compare_float(
           check_value, (real_value = get_index_is_unique(index))) != 0){
       if((int)real_value == FALSE){
-        carp(CARP_ERROR, "unique peptides: FALSE, does not match "
+        carp(CARP_ERROR, "unique_peptides: FALSE, does not match "
             "the database supported type TRUE");
       }
       else{
-        carp(CARP_ERROR, "unique peptides: TRUE, does not match "
+        carp(CARP_ERROR, "unique_peptides: TRUE, does not match "
             "the database supported type FALSE");
       }
       return FALSE;
