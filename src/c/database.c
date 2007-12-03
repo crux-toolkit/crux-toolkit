@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.50 $
+ * $Revision: 1.51 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -128,6 +128,8 @@ void free_database(
   
   // decrement database pointer counter
   --database->pointer_count;
+  carp(CARP_DETAILED_DEBUG, "Database pointer count %i",  
+      database->pointer_count);
 
   // DEBUG show the databse pointer count
   // printf("Free: After free: %s: %d\n", database->pointer_count);
