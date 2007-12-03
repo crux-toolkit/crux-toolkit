@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.64 $
+ * $Revision: 1.65 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -466,9 +466,11 @@ void free_index(
   } else {
     carp(CARP_INFO, "Freeing index");
     if (index->database != NULL){
+      carp(CARP_INFO, "Freeing index database");
       free_database(index->database);
     }
     if (index->constraint != NULL){
+      carp(CARP_INFO, "Freeing index peptide constraint");
       free_peptide_constraint(index->constraint);
     }
     free(index->directory);
@@ -726,9 +728,9 @@ FILE* sort_bin(
   while(bin_sorted_peptide_iterator_has_next(peptide_iterator)){
     working_peptide = bin_sorted_peptide_iterator_next(peptide_iterator);
     serialize_peptide(working_peptide, file);
+    free_peptide(working_peptide);
   }
   
-  free_peptide(working_peptide);
   free(filename);
   free_bin_sorted_peptide_iterator(peptide_iterator);
 
@@ -2065,7 +2067,11 @@ BOOLEAN_T initialize_bin_peptide_iterator(
   bin_peptide_iterator->index_file = file;
         
   // parse the peptide, adds it to the iterator to return
-  if(!parse_peptide_index_file(bin_peptide_iterator, peptide, BIN_INDEX, bin_peptide_iterator->use_array)){
+  if(!parse_peptide_index_file(
+        bin_peptide_iterator, 
+        peptide, 
+        BIN_INDEX, 
+        bin_peptide_iterator->use_array)){
     carp(CARP_WARNING, "failed to parse peptide, mass: %.2f, length: %d", 
          get_peptide_peptide_mass(peptide), get_peptide_length(peptide));
     return FALSE;
