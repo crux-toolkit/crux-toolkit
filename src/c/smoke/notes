@@ -99,6 +99,26 @@ code, recent makefile) even with the links to old names removed.
 
 
 ---------------------------------------------------------------------
+December 5, 2007
+
+Current version of code works with the current commands in
+crux-test.cmds (there are some legacy discrepencies in output).
+Create-index has had it's parameter/option handling updated but no
+other apps have.  As a result, some of the default tests require a
+parameter file because of a bug that will be fixed with the parameter
+handling updates.
+
+TODO: 
+* have create-index check the map file instead of empty-file
+* exapand tests to involve more options
+(after code supports these)
+* remove param file from default runs
+* organize inputs into sub dirs
+* organize outputs (including indexes) into sub dirs
+
+
+
+---------------------------------------------------------------------
 New tests
 
 * Generate Peptides:  
