@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.66 $
+ * $Revision: 1.67 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -853,7 +853,6 @@ BOOLEAN_T transform_database_to_memmap_database(
   // set_database_filename(index->database, binary_fasta);
   // set_database_memmap(index->database, TRUE);
   set_database_filename(index->database, fasta_file);
-
 
   // check if already parsed
   if(!get_database_is_parsed(index->database)){

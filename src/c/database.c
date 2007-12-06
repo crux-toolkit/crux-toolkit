@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.51 $
+ * $Revision: 1.52 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -562,6 +562,7 @@ void set_database_filename(
   )
 {
   free(database->filename);
+  // MEMLEAK below
   database->filename = my_copy_string(filename);
 }
 
