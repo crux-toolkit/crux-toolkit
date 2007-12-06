@@ -1202,7 +1202,7 @@ BOOLEAN_T update_parameter(){
 
 enum argument_type string_to_argument_type(char* arg_type_string){
 
-  enum argument_type type;
+  enum argument_type type = STRING_ARG;
     
   if( strcmp(arg_type_string, "FLAG_ARG") == 0){
     type = FLAG_ARG;

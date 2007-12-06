@@ -958,8 +958,8 @@ BOOLEAN_T score_match_collection_sp(
     
     // check if enough space for peptide match
     if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
-      carp(CARP_ERROR, "peptide count exceed max match limit: %d", 
-          _MAX_NUMBER_PEPTIDES);
+      carp(CARP_ERROR, "peptide count of %i exceeds max match limit: %d", 
+          match_collection->match_total, _MAX_NUMBER_PEPTIDES);
       // free heap
       free(peptide_sequence);
       free_ion_series(ion_series);
@@ -2197,7 +2197,7 @@ BOOLEAN_T add_match_to_match_collection(
   
   // check if enough space for peptide match
   if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
-    carp(CARP_ERROR, "rich match count exceed max match limit: %d", _MAX_NUMBER_PEPTIDES);
+    carp(CARP_ERROR, "rich match count exceeds max match limit: %d", _MAX_NUMBER_PEPTIDES);
     return FALSE;
   }
   
