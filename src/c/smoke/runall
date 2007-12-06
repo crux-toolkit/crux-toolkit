@@ -1,6 +1,7 @@
 #!/bin/bash
 
 chmod 774 crux-test.pl
+ln -is test.fasta existing.fasta
 
 ./crux-test.pl crux-test.cmds 1>out 2>error
 echo "  Test output in the file 'out'.  Error messages in 'error'."
