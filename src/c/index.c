@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.65 $
+ * $Revision: 1.66 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -499,7 +499,7 @@ BOOLEAN_T write_header(
   fprintf(file, "#\tpeptide_type: %d\n", get_peptide_constraint_peptide_type(constraint));
   fprintf(file, "#\tmissed_cleavage: %d\n", get_peptide_constraint_num_mis_cleavage(constraint));
   fprintf(file, "#\tmass_type: %d\n", get_peptide_constraint_mass_type(constraint));
-  fprintf(file, "#\tunique peptides: %d\n", get_index_is_unique(index));
+  fprintf(file, "#\tunique_peptides: %d\n", get_index_is_unique(index));
   
   fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
   fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
