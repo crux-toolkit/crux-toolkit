@@ -8,7 +8,7 @@
 # TESTS WITH NO INDEX
 
 # Generate Peptides
-generate_peptides_default = good_results/standard_generate_peptides_default.out = ../../../bin/crux-generate-peptides --parameter-file params/smoke_params2 --output-sequence  test.fasta 
+generate_peptides_default = good_results/standard_generate_peptides_default.out = ../../../bin/crux-generate-peptides --parameter-file params/no_changes --output-sequence  test.fasta 
 
 generate_peptides_sort_mass_unique = good_results/standard_generate_peptides_mass.out = ../../../bin/crux-generate-peptides --parameter-file params/params_uniq --output-sequence --cleavages all --missed-cleavages --sort mass  test.fasta 
 
