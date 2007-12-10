@@ -50,7 +50,9 @@ that version in the analysis presented in Figure 2 and then making
 claims of x-fold increase in speed is completely irresponsible of the
 authors. \ereview
 
-FIXME
+We obtained a copy of TurboSEQUEST, and we have included a timing
+comparison in the revised version of the manuscript. {\em
+FIXME[Aaron]: Summarize results here.}
 
 \breview Regarding the reimplementation of Sp and Xcorr, the authors
 show scatter plots in Figure 3 where Sp is very close to the ideal
@@ -60,20 +62,30 @@ does having access to the SEQUEST source code manifest itself in what
 appears to be a very good reimplementation of Sp but a less than ideal
 reimplementation of Xcorr? \ereview
 
-FIXME
+We do have access to the SEQUEST source code; however, to avoid risks
+of copyright infringement, none of the individuals working directly
+with the source code of Crux has read permission on those files.
+Instead, to generate the Sp and Xcorr functions in Crux, I added print
+statements to SEQUEST.  The Crux programmers then used the detailed
+output from this modified version of the program to reverse engineer
+the underlying functions.  This is a lengthy process.  Once we
+achieved the level of agreement shown in the manuscript, we stopped.
+
+In the revised manuscript, we have removed the comparison to a
+modified form of SEQUEST, in response to a comment from Reviewer \#2.
 
 \breview The rest of the manuscript touches on other components of the
 software that are either not novel or are previously published.  This
 is evidence by the lack of details in the rest of the Results section
 (2.3 and 2.4).  \ereview
 
-FIXME
+FIXME[Bill]
 
 \breview On-the-fly decoy database generation is a nice feature to
 have but is not a feature that can be considered novel or cutting
 edge. \ereview
 
-FIXME
+FIXME[Bill]
 
 \breview The last paragraph in the Discussion mentions that Crux is
 still under development.  Specifically ``improved support for searches
@@ -83,7 +95,7 @@ support that feature at all now.  If the latter is the case, it is
 practically useless in its current form and this manuscript is
 premature. \ereview
 
-FIXME
+FIXME[Aaron]
 
 \breview One major selling point of this manuscript is to describe the
 availability of a freely available (to academics) reimplementation of
@@ -93,7 +105,9 @@ that promise.  Given this context in order to properly review this
 manuscript, the Crux program (source files) needs to be made available
 to the reviewers. \ereview
 
-FIXME
+We are attaching the Crux source code with this version of the
+manuscript.  Please note that in our initial letter to the editor, we
+did offer to make the source code available to the reviewers.
 
 \breview The format of the manuscript does not conform to those
 typically published in JPR.  For example, the authors list is not
@@ -103,8 +117,9 @@ subsection have numerical designations that are not used in
 JPR. \ereview
 
 The manuscript was formatted using the LaTeX style file provided by
-{\em Journal of Proteome Research} at \url{FIXME}.  We have inserted a
-list of keywords on the title page.
+{\em Journal of Proteome Research} at \url{FIXME}.  We submitted
+keywords via the {\em JPR} website, but have also inserted them on the
+title page of the revised manuscript.
 
 \breview And finally significant portions of this manuscript lack
 substance as evidenced by short paragraphs quickly describing
@@ -112,7 +127,7 @@ previously published or submitted tools.  The manuscript needs to be
 reorganized and rewritten to highlight the truly novel aspects of
 research that the authors want to convey. \ereview
 
-FIXME
+FIXME[Bill]
 
 \section*{Reviewer \#2}
 
@@ -132,7 +147,7 @@ single package is certainly a strong point, but it's not clear that
 integration itself changes the state of the art. The rhetoric could be
 toned down or better supported. \ereview
 
-FIXME
+FIXME[Bill]
 
 \breview The most clear and important contribution of the Crux paper
 is that it promises a SEQUEST implementation ``free for academic
@@ -152,7 +167,19 @@ access, to both source and binary, need to be spelled out. If
 non-commercial access is to be in any way at the institution's
 discretion, this needs to be explicitly stated. \ereview
 
-FIXME
+We have submitted a copy of the Crux source code along with our
+revised manuscript.  Crux will be made available as compiled binaries
+and source code.  It will be free for academic use and will be
+available for licensing via UW tech transfer.  The licensing mechanism
+will be identical to that currently in place for Percolator, involving
+a click-through license for non-academic use.  This has been approved
+by our tech transfer office.
+
+Please note that, in the letter to the editor that accompanied our
+initial submission, we did offer to make the source code available to
+the reviewers and to provide a letter from our tech transfer office
+indicating their approval of our plans to make Crux available as
+source code free for non-commercial use.
 
 \breview The authors claim, on page 4, that ``Crux is both efficient
 and accurate.'' But it is hard to gauge the performance of Crux from
@@ -165,7 +192,9 @@ indexing were added to SEQUEST (as in the TurboSEQUEST implementation
 that the authors exclude from consideration!) would it be 10X faster
 than the optimized Crux? \ereview
 
-FIXME
+To address this concern, and the concern of Reviewer \#1, we obtained
+a copy of TurboSEQUEST and included it in the comparison. {\em
+FIXME[Aaron]: Summarize results in one sentence here.}
 
 \breview It's a little bizarre to do timing comparisons on versions of
 the code with Xcorr removed. One rationale for this might be that the
@@ -176,7 +205,12 @@ slower than that in SEQUEST. There are a number of ways to compute
 Xcorr (FFTs, naive brute-force convolution) and any defense of
 efficiency should address this and provide some metrics. \ereview
 
-FIXME
+Our motivation for removing the XCorr component of SEQUEST was indeed
+to isolate the effect of indexing on speed.  However, we agree with
+the reviewer that comparing unmodified code is more convincing.
+Therefore, in the revised version of the manuscript, the comparisons
+are done using Xcorr. {\em FIXME[Aaron]: Summarize results in one
+sentence here.}
 
 \breview As to accuracy, it would be interesting to know why, if Crux
 reimplements SEQUEST faithfully, there is variation in Xcorr as
@@ -186,19 +220,23 @@ LTQ?). It would be interesting to know what happens to the Xcorr
 comparison when considering data from, say, a QTOF or
 MALDI-TOF/TOF. \ereview
 
-FIXME
+{\em FIXME[Aaron]: Can we do this easily?}
 
 \breview Some more information on the methods is needed. What kind of
 instrument was used to gather the yeast data? It's impossible to tell
 from the referenced URL for the 60cm data since the files don't seem
 to be available. \ereview
 
-FIXME
+We apologize---we inadvertently unzipped the files on the website,
+which caused the URLs to break.  This has been fixed.  We have added a
+few more details about the data set to the manuscript: FIXME[Aaron].
+Additional details are available in the referenced manuscript, where
+this data was first used.
 
 \breview In Figure 2, the text talks about searching a collection of
 1000 spectra but the legend indicates ``runtime for 100
 spectra''. \ereview
 
-FIXME
+This was a typo, which has been fixed.  The figure legend was correct.
 
 \end{document}
