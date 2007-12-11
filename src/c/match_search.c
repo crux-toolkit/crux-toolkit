@@ -246,9 +246,11 @@ int main(int argc, char** argv){
       main_score = LOGP_BONF_WEIBULL_XCORR;
     } else if(strcmp(score_type, "sp_logp")== 0){
       main_score = LOGP_BONF_WEIBULL_SP;
+    } else if(strcmp(score_type, "sp")== 0){
+      main_score = SP;
     } else {
       wrong_command(score_type, "The main scoring function must be one of"
-          " the following: xcorr | xcorr_logp | sp_logp ");
+          " the following: xcorr | xcorr_logp | sp_logp | sp");
     }
     
     // preliminary score type
@@ -341,10 +343,18 @@ int main(int argc, char** argv){
     
     // get psm_result sqt file handle if needed
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-      psm_result_file_sqt = 
-        create_file_in_path(sqt_output_file, match_output_folder);
-      decoy_result_file_sqt = 
-        create_file_in_path(decoy_sqt_output_file, match_output_folder);
+      if (strcmp(sqt_output_file, "STDOUT") == 0){
+        psm_result_file_sqt = stdout;
+      } else {
+        psm_result_file_sqt = 
+          create_file_in_path(sqt_output_file, match_output_folder);
+      }
+      if (strcmp(decoy_sqt_output_file, "STDOUT") == 0){
+        decoy_result_file_sqt = stdout;
+      } else {
+        decoy_result_file_sqt = 
+          create_file_in_path(decoy_sqt_output_file, match_output_folder);
+      }
     }
     
     // did we get the file handles?
