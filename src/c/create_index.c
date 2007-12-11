@@ -31,15 +31,14 @@
 int main(int argc, char** argv){
 
   /* Declarations */
-  //TODO put these in the decided order
   int verbosity;
-  double min_mass;
-  double max_mass;
   int min_length;
   int max_length;
-  int missed_cleavages; 
-  PEPTIDE_TYPE_T peptide_type;
+  double min_mass;
+  double max_mass;
   MASS_TYPE_T mass_type;
+  PEPTIDE_TYPE_T peptide_type;
+  int missed_cleavages; 
   //where is the unique vs redundant variable?
 
   double mass_range;
@@ -53,14 +52,14 @@ int main(int argc, char** argv){
   char* option_list[NUM_INDEX_OPTIONS] = { 
     "verbosity",
     "parameter-file", 
-    "min-mass", 
-    "max-mass", 
     "min-length", 
     "max-length", 
-    "cleavages", 
+    "min-mass", 
+    "max-mass", 
     "isotopic-mass",
-    "unique-peptides",
-    "missed-cleavages"
+    "cleavages", 
+    "missed-cleavages",
+    "unique-peptides"
   };
 
   /* Define required command line arguments */ 
@@ -71,7 +70,7 @@ int main(int argc, char** argv){
 
   /* For debugging of parameter processing */
   // TODO make this dependant on a compile flag 
-  //set_verbosity_level(CARP_DETAILED_DEBUG);  
+  set_verbosity_level(CARP_DETAILED_DEBUG);  
   carp(CARP_DETAILED_DEBUG, "Starting create_index");
 
   /* connect various signals to our clean-up function */

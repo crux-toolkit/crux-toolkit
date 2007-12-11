@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file sorter.c
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -93,6 +93,15 @@ int compareTo(
   else if(sort_type == MASS){
     return compare_float(get_peptide_peptide_mass(peptide_one), 
                          get_peptide_peptide_mass(peptide_two));
+    
+    /*  This should break ties, sorting by seq 
+    int mass_compared = compare_float(get_peptide_peptide_mass(peptide_one),
+				      get_peptide_peptide_mass(peptide_two));
+    if( mass_compared == 0 ){
+      mass_compared = compareTo(peptide_one, peptide_two, LEXICAL);
+    }
+    return mass_compared;
+    */
   }
   // lexicographic order
   else if(sort_type == LEXICAL){
@@ -237,7 +246,7 @@ PEPTIDE_WRAPPER_T* merge(
   PEPTIDE_WRAPPER_T* wrapper_one, ///< fist peptide wrapper list -in
   PEPTIDE_WRAPPER_T* wrapper_two, ///< second peptide wrapper list -in
   SORT_TYPE_T sort_type, ///< the sort type of the new merged list -in
-  BOOLEAN_T unique ///< do you merge two lists into a uniqe list? -in
+  BOOLEAN_T unique ///< do you merge two lists into a unique list? -in
   )
 {
   PEPTIDE_WRAPPER_T* wrapper_final = NULL;

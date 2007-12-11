@@ -254,7 +254,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
   BOOLEAN_T use_index = get_boolean_parameter("use-index");
 
   BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
-  char*  fasta_file = get_string_parameter_pointer("fasta-file");
+  //  char*  fasta_file = get_string_parameter_pointer("fasta-file");
+  char*  fasta_file = get_string_parameter_pointer("protein input");
 
   INDEX_T* index = NULL;
   DATABASE_T* database = NULL;

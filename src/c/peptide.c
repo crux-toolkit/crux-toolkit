@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.67 $
+ * $Revision: 1.68 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -254,6 +254,7 @@ void print_peptide_in_format(
   char* sequence = NULL;
 
   // print mass of the peptide
+  //fprintf(file, "%.2f", peptide->peptide_mass);
   fprintf(file, "%.2f", peptide->peptide_mass);
 
   // obtain peptide sequence

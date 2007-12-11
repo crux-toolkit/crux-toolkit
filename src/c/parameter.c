@@ -173,8 +173,8 @@ void initialize_parameters(void){
 
 
   // set verbosity
-  temp_set_int_parameter("verbosity", CARP_ERROR, CARP_FATAL, CARP_MAX,
-	"Set level of output to stderr (0-100).  Default 50.");
+  temp_set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
+	"Set level of output to stderr (0-100).  Default 10.");
 
   // set parameter file name (no default)
   //set_string_parameter("parameter-file", "crux.params");
@@ -191,24 +191,24 @@ void initialize_parameters(void){
 		    "Name to give the new directory containing index files.");
 
   // generate_peptide, create_index parameters  
-  temp_set_double_parameter("min-mass", 200, 0, BILLION,
-	"The minimum mass of peptides to consider. Default 200.");
-  temp_set_double_parameter("max-mass", 7200, 1, BILLION, 
-	"The maximum mass of peptides to consider. Default 7200.");
   temp_set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
 	"The minimum length of peptides to consider. Default 6.");
   temp_set_int_parameter("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
 	"The maximum length of peptides to consider. Default 50.");
-  temp_set_boolean_parameter("missed-cleavages", FALSE, 
-	"Include peptides with missed cleavage sites. Default FALSE.");
-  temp_set_peptide_type_parameter("cleavages", TRYPTIC, 
-	"The type of cleavage sites to consider (tryptic, partial, all)");
-  temp_set_boolean_parameter("unique-peptides", FALSE,
-        "Generate peptides only once, even if they appear in more " \
-	"than one protein.  Default F.");
+  temp_set_double_parameter("min-mass", 200, 0, BILLION,
+	"The minimum mass of peptides to consider. Default 200.");
+  temp_set_double_parameter("max-mass", 7200, 1, BILLION, 
+	"The maximum mass of peptides to consider. Default 7200.");
   temp_set_mass_type_parameter("isotopic-mass", AVERAGE, 
 	"Which isotopes to use in calcuating mass (average or mono). " \
 	"Default average");
+  temp_set_peptide_type_parameter("cleavages", TRYPTIC, 
+	"The type of cleavage sites to consider (tryptic, partial, all)");
+  temp_set_boolean_parameter("missed-cleavages", FALSE, 
+	"Include peptides with missed cleavage sites. Default FALSE.");
+  temp_set_boolean_parameter("unique-peptides", FALSE,
+        "Generate peptides only once, even if they appear in more " \
+	"than one protein.  Default F.");
   
   // more generate_peptide parameters
   temp_set_boolean_parameter("output-sequence", FALSE, "usage");
@@ -827,8 +827,11 @@ int get_int_parameter(
   char* name  ///< the name of the parameter looking for -in
   )
 {
-  char *endptr;
-  long int value;
+  //char *endptr;
+  //long int value;
+  int value;
+
+  //  carp(CARP_DETAILED_DEBUG, "Getting int parameter: %s", name);
 
   // check if parameter file has been parsed
   if(!parameter_parsed && !parameter_initialized){
@@ -838,6 +841,8 @@ int get_int_parameter(
 
   char* int_value = get_hash_value(parameters->hash, name);
 
+  //  carp(CARP_DETAILED_DEBUG, "int value string is %s", int_value);
+
   // can't find parameter
   if(int_value == NULL){
     carp(CARP_FATAL, "parameter name: %s, doesn't exit", name);
@@ -846,7 +851,8 @@ int get_int_parameter(
   
   /* there is a parameter with the right name.  Now 
      try to convert it to a base 10 integer*/
-  value = strtol(int_value, &endptr, 10);
+  value = atoi(int_value);
+  /*  value = strtol(int_value, &endptr, 10);
   if ((value == LONG_MIN) || 
       (value == LONG_MAX) || 
       (endptr == int_value)) {
@@ -854,8 +860,9 @@ int get_int_parameter(
         name, 
         int_value);
   } 
-  
   return((int)value);
+  */
+  return value;
 }
 
 
