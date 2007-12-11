@@ -465,6 +465,7 @@ char** generate_feature_name_array(
     case CZAR:
     case QVALUE:
     case ALL:
+    case NO_ALGORITHM:
       name_array = (char**)mycalloc(20, sizeof(char *));
       name_array[0] =  my_copy_string("XCorr");
       name_array[1] =  my_copy_string("DeltCN");

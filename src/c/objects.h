@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.44 $
+ * $Revision: 1.45 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -365,7 +365,7 @@ typedef struct match_collection_iterator MATCH_COLLECTION_ITERATOR_T;
 /**
  * The enum for algorithm type (PERCOLATOR, CZAR, ALL)
  */
-enum _algorithm {PERCOLATOR, CZAR, QVALUE, ALL};
+enum _algorithm {PERCOLATOR, CZAR, QVALUE, ALL, NO_ALGORITHM};
 
 /**
  * \typedef ALGORITHM_TYPE_T

@@ -61,6 +61,12 @@ MATCH_COLLECTION_T* run_qvalue(
   char* fasta_file 
   ); 
 
+MATCH_COLLECTION_T* run_nothing(
+  char* psm_result_folder, 
+  char* fasta_file,
+  char* feature_file 
+  ); 
+
 /*
  * Outputs the matches in match_collection
  */
@@ -189,6 +195,9 @@ int main(int argc, char** argv){
     else if(strcmp(algorithm_string, "all")== 0){
       algorithm = ALL;
     }
+    else if(strcmp(algorithm_string, "none")== 0){
+      algorithm = NO_ALGORITHM;
+    }
     else{
       wrong_command(psm_algorithm, 
         "The analysis algorithm to use. percolator|retention-czar|all");
@@ -205,9 +214,12 @@ int main(int argc, char** argv){
       carp(CARP_INFO, "Running q-value");
       match_collection = run_qvalue(psm_result_folder, fasta_file);
       scorer_type = LOGP_QVALUE_WEIBULL_XCORR;
-    } else {
+    } else if (algorithm == NO_ALGORITHM){
       carp(CARP_INFO, "Using no algorithm.");
-      scorer_type = LOGP_BONF_WEIBULL_XCORR;
+      match_collection = run_nothing(
+          psm_result_folder, fasta_file, feature_file);
+      scorer_type = XCORR; 
+      // FIXME should call a method on score-type. Use Xcorr for now
     }
     output_matches(match_collection, scorer_type);
     // MEMLEAK below causes seg fault
@@ -240,6 +252,87 @@ int compare_doubles_descending(
   } else {
     return 0;
   }
+}
+
+/**
+ * Perform Benjamini-Hochberg qvalue calculations on p-values generated
+ * as in Klammer et al. (In Press) for PSMs in psm_result_folder, searched
+ * against the sequence database in fasta_file. Requires that the match 
+ * collection objects in the psm_result_folder have been scored using 
+ * the p-value method (for now, only LOGP_BONF_WEIBULL_XCORR). 
+ * There should be no decoy data sets in the directory.
+ * \returns a MATCH_COLLECTION object
+ */
+MATCH_COLLECTION_T* run_nothing(
+  char* psm_result_folder, 
+  char* fasta_file,
+  char* feature_file
+  ){
+
+  
+  // create MATCH_COLLECTION_ITERATOR_T object
+  MATCH_COLLECTION_T* match_collection = NULL;
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
+    new_match_collection_iterator(psm_result_folder, fasta_file);
+  MATCH_ITERATOR_T* match_iterator = NULL;
+  MATCH_T* match = NULL;
+  unsigned int number_features = 20;
+  double* features = NULL;    
+
+  FILE* feature_fh = NULL;
+  
+  // optional feature_file
+  if (feature_file != NULL){
+    if((feature_fh = fopen(feature_file, "w")) == NULL){
+      carp(CARP_FATAL, "Problem opening output file %s", feature_file);
+      return NULL;
+    }
+  }
+
+  while(match_collection_iterator_has_next(match_collection_iterator)){
+
+    // get the next match_collection
+    match_collection = 
+      match_collection_iterator_next(match_collection_iterator);
+
+    if (feature_fh == NULL){
+      // Don't extract the features. Just return the match_collection
+      return match_collection;
+    }
+
+    // create iterator, to register each PSM feature to Percolator
+    match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
+    
+    while(match_iterator_has_next(match_iterator)){
+      match = match_iterator_next(match_iterator);
+
+      // get the percolator features
+      features = get_match_percolator_features(match, match_collection);
+        
+      fprintf(feature_fh, "%i\t",
+          get_spectrum_first_scan(get_match_spectrum(match))
+          );
+      if (get_match_null_peptide(match) == FALSE){
+        fprintf(feature_fh, "1\t");
+      } else { 
+        fprintf(feature_fh, "-1\t");
+      };
+
+      unsigned int feature_idx;
+      for (feature_idx = 0; feature_idx < number_features; feature_idx++){
+        if (feature_idx < number_features - 1){
+          fprintf(feature_fh, "%.4f\t", features[feature_idx]);
+        } else {
+          fprintf(feature_fh, "%.4f\n", features[feature_idx]);
+        }
+      }
+    }
+    free_match_iterator(match_iterator);
+  }
+  fclose(feature_fh);
+
+  free_match_collection_iterator(match_collection_iterator);
+  return match_collection;
 }
 
 /**
@@ -392,11 +485,11 @@ MATCH_COLLECTION_T* run_percolator(
 
   ALGORITHM_TYPE_T algorithm = PERCOLATOR;
   unsigned int number_features = 20;
+  double* features = NULL;    
   double* results_q = NULL;
   double* results_score = NULL;
   double pi0 = get_double_parameter("pi0");
   char** feature_names = generate_feature_name_array(algorithm);
-  double* features = NULL;    
   MATCH_ITERATOR_T* match_iterator = NULL;
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_COLLECTION_T* target_match_collection = NULL;
