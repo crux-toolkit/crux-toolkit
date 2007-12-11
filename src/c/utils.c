@@ -546,9 +546,9 @@ char* boolean_to_string
   }
 
   if (the_boolean) {
-    strcpy(true_or_false, "true");
+    strcpy(true_or_false, "TRUE");
   } else {
-    strcpy(true_or_false, "false");
+    strcpy(true_or_false, "FALSE");
   }
   return(true_or_false);
 }
