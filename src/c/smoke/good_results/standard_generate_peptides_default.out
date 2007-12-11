@@ -9,7 +9,7 @@
 #	sort: none
 #	isotopic mass type: average
 #	verbosity: 30
-#	use index: F
+#	use index: FALSE
 1722.91	gi|16127995|ref|NP_414542.1|	4	18	ISTTITTTITITTGNGAG
 684.75	gi|16127996|ref|NP_414543.1|	239	6	QVPDAR
 780.94	gi|16127996|ref|NP_414543.1|	335	7	VFAAMSR
