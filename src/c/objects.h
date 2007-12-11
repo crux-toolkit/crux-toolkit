@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.45 $
+ * $Revision: 1.46 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -100,18 +100,10 @@ enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPT
 typedef enum _peptide_type PEPTIDE_TYPE_T;
 
 /**
- * \brief The string version of the peptide types
- *
- */
-//static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = {
-//  "tryptic", "partial", "n-tryptic", "c-tryptic", "not-tryptic", "all"
-//};
-
-#define NUMBER_MASS_TYPES 2
-/**
  * The enum for isotopic mass type (average, mono)
  */
 enum _mass_type {AVERAGE, MONO };
+#define NUMBER_MASS_TYPES 2
 
 /**
  * \typedef MASS_TYPE_T
@@ -160,7 +152,8 @@ typedef struct database_peptide_iterator DATABASE_PEPTIDE_ITERATOR_T;
 /**
  * The enum for sort type (mass, length, lexical, none)
  */
-enum _sort_type {MASS, LENGTH, LEXICAL, NONE};
+enum _sort_type {NONE, MASS, LENGTH, LEXICAL};
+#define NUMBER_SORT_TYPES 4
 
 /**
  * \typedef SORT_TYPE_T

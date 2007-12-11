@@ -36,7 +36,7 @@ struct parameter_hash{
 /**
  * Global variables
  */
-static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T", "BOOLEAN_T"};
+static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T", "BOOLEAN_T", "SORT_TYPE_T"};
 
 //one hash for parameter values, one for usage statements, one for types
 struct parameter_hash  parameters_hash_table;
@@ -128,6 +128,11 @@ BOOLEAN_T temp_set_peptide_type_parameter(
  char* usage
   );
 
+BOOLEAN_T temp_set_sort_type_parameter(
+ char* name,
+ SORT_TYPE_T set_value,
+ char* usage);
+
 BOOLEAN_T select_cmd_line(  
   char** option_names, ///< list of options to be allowed for main -in
   int    num_options,  ///< number of optons in that list -in
@@ -203,18 +208,30 @@ void initialize_parameters(void){
 	"Which isotopes to use in calcuating mass (average or mono). " \
 	"Default average");
   temp_set_peptide_type_parameter("cleavages", TRYPTIC, 
-	"The type of cleavage sites to consider (tryptic, partial, all)");
+	"The type of cleavage sites to consider (tryptic, partial, all)" \
+        "Default tryptic.");
   temp_set_boolean_parameter("missed-cleavages", FALSE, 
-	"Include peptides with missed cleavage sites. Default FALSE.");
+	"Include peptides with missed cleavage sites (T,F). Default FALSE.");
   temp_set_boolean_parameter("unique-peptides", FALSE,
         "Generate peptides only once, even if they appear in more " \
-	"than one protein.  Default F.");
+	"than one protein (T,F).  Default FALSE.");
   
   // more generate_peptide parameters
-  temp_set_boolean_parameter("output-sequence", FALSE, "usage");
-  temp_set_boolean_parameter("output-trypticity", FALSE, "usage");
+  temp_set_boolean_parameter("output-sequence", FALSE, 
+	"Print peptide sequence (T,F). Default FALSE.");
+  temp_set_boolean_parameter("output-trypticity", FALSE, 
+	"Print trypticity of peptide (T,F). Default FALSE.");
+  /*
+  temp_set_boolean_paramter("use-indexB", FALSE, 
+        "Use an index that has already been created (T,F). " \
+        "Default FALSE (use fasta file)");
+  */
   temp_set_string_parameter("use-index", "F", "usage");
-  temp_set_string_parameter("sort", "none", "usage");//mass,length,lexical,none  
+
+  temp_set_sort_type_parameter("sort", NONE, 
+        "Sort peptides according to which property " \
+        "(mass, length, lexical, none).  Default none.");
+  //  temp_set_string_parameter("sort", "none", "usage");//mass,length,lexical,none  
 
     // searching peptides
   temp_set_double_parameter("mass-offset", 0.0, 0, 0, "usage");
@@ -365,7 +382,8 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     void* type_ptr =  get_hash_value(types->hash, option_names[i]);
     if( strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
 	strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
-	strcmp(type_ptr, "BOOLEAN_T") == 0){
+	strcmp(type_ptr, "BOOLEAN_T") == 0 ||
+	strcmp(type_ptr, "SORT_TYPE_T")){
       type_ptr = "STRING_ARG";
     }
     carp(CARP_DETAILED_DEBUG, "Found value: %s, usage: %s, type(to be passed to parse_args): %s", (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
@@ -504,6 +522,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 
   MASS_TYPE_T mass_type;
   PEPTIDE_TYPE_T pep_type;
+  SORT_TYPE_T sort_type;
 
   PARAMETER_TYPE_T param_type;
   string_to_param_type( type_str, &param_type ); 
@@ -550,6 +569,16 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
       success =  FALSE;
       sprintf(die_str, 
 	      "Illegal boolean value '%s' for option '%s'.  Must be T or F",
+	      value_str, name);
+    }
+    break;
+  case SORT_TYPE_P:
+    carp(CARP_DETAILED_DEBUG, "found sort_type param, value '%s'",
+	 value_str);
+    if( ! string_to_sort_type( value_str, &sort_type)){
+      success = FALSE;
+      sprintf(die_str, 
+"Illegal sort value '%s' for option '%s'. Must be mass, length, lexical, or none.", 
 	      value_str, name);
     }
     break;
@@ -1002,11 +1031,24 @@ MASS_TYPE_T get_mass_type_parameter(
   return param_value;
 }
 
+SORT_TYPE_T get_sort_type_parameter(char* name){
+  char* param_value_str = get_hash_value(parameters->hash, name);
+  SORT_TYPE_T param_value;
+  BOOLEAN_T success = string_to_sort_type(param_value_str, &param_value);
+
+  if( ! success){
+    carp(CARP_FATAL, "Sort_type parameter %s has the value %s which is not of the correct type", name, param_value_str);
+    exit(1);
+  }
+  return param_value;
+}
+
+
 /**************************************************
  *   SETTERS (private)
  **************************************************
  */
-
+//TODO change all result = add_or... to result = result && add_or_...
 BOOLEAN_T temp_set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
@@ -1163,7 +1205,7 @@ BOOLEAN_T temp_set_peptide_type_parameter(
  char* usage
   )
 {
-  BOOLEAN_T result;
+  BOOLEAN_T result = TRUE;
   char value_str[256];
   
   // check if parameters can be changed
@@ -1183,7 +1225,27 @@ BOOLEAN_T temp_set_peptide_type_parameter(
 
 }
 
+BOOLEAN_T temp_set_sort_type_parameter(
+				       char* name,
+				       SORT_TYPE_T set_value,
+				       char* usage)
+{
+  BOOLEAN_T result = TRUE;
+  char value_str[256];
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  /* stringify value */
+  sort_type_to_string(set_value, value_str);
+  
+  result = add_or_update_hash(parameters->hash, name, value_str);
+  result = add_or_update_hash(usages->hash, name, usage);
+  result = add_or_update_hash(types->hash, name, "SORT_TYPE_T");
 
+  return result;
+}
 /**************************************************
  *   OLD SETTERS (public)
  **************************************************
