@@ -48,7 +48,11 @@ BOOLEAN_T mass_type_to_string(MASS_TYPE_T type, char* type_str){
   return success;
 }
 
-static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = {"tryptic", "partial", "N_TRYPTIC", "C_TRYPTIC", "NOT_TRYPTIC", "all"};
+/**
+ * The string version of peptide cleavage type
+ */
+static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = 
+{"tryptic", "partial", "N_TRYPTIC", "C_TRYPTIC", "NOT_TRYPTIC", "all"};
 
 BOOLEAN_T string_to_peptide_type(char* name, PEPTIDE_TYPE_T* result){
 
@@ -76,6 +80,40 @@ BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str){
 
   return success;
 }
+
+/**
+ * The string version of peptide sort types
+ */
+static char* sort_type_strings[NUMBER_SORT_TYPES] =
+  { "none", "mass", "length", "lexical" };
+
+BOOLEAN_T string_to_sort_type(char* name, SORT_TYPE_T* result){
+  BOOLEAN_T success = TRUE;
+
+  int sort_type = convert_enum_type_str(
+	name, -10, sort_type_strings, NUMBER_SORT_TYPES);
+  (*result) = (SORT_TYPE_T)sort_type;
+
+  if( sort_type < 0){
+    success = FALSE;
+  }
+  return success;
+}
+
+BOOLEAN_T sort_type_to_string(SORT_TYPE_T type, 
+			      char* type_str){
+  BOOLEAN_T success = TRUE;
+  if( (int)type > NUMBER_SORT_TYPES ){
+    success = FALSE;
+    type_str = NULL;
+  }
+  strcpy(type_str, sort_type_strings[type]);
+  return success;
+}
+
+
+
+
 /**
  * returns a heap allocated copy of the src string
  */

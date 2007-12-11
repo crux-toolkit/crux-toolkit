@@ -33,10 +33,7 @@ int main(int argc, char** argv){
 
   /* Declarations */
   int verbosity;
-
-  //TODO change ints to bools
   BOOLEAN_T output_sequence;
-  //  int trypticity_opt;  //change to print_trypticity
   BOOLEAN_T print_trypticity;
   
   long total_peptides = 0;
@@ -87,8 +84,6 @@ int main(int argc, char** argv){
 
   /* Get parameter values */
   print_trypticity = get_boolean_parameter("output-trypticity");
-  //replace with above
-  //  trypticity_opt = (int)print_trypticity;
   output_sequence = get_boolean_parameter("output-sequence");
 
   // create peptide iterator
@@ -101,7 +96,6 @@ int main(int argc, char** argv){
     ++total_peptides;
     peptide = generate_peptides_iterator_next(peptide_iterator);
     print_peptide_in_format(peptide, output_sequence, 
-			    //trypticity_opt, stdout);
 			    print_trypticity, stdout);
     
     // free peptide
@@ -136,15 +130,15 @@ void print_header(){
   printf("#\tcleavages: %s\n", get_string_parameter_pointer("cleavages"));
   
   bool_val = get_boolean_parameter("missed-cleavages");
-  printf("#\tallow missed-cleavages: %s\n", 
-	 //       get_string_parameter_pointer("missed-cleavages"));
-       boolean_to_string(bool_val));
-
+  printf("#\tallow missed-cleavages: %s\n", boolean_to_string(bool_val));
   printf("#\tsort: %s\n",  get_string_parameter_pointer("sort"));
   printf("#\tisotopic mass type: %s\n", 
 	          get_string_parameter_pointer("isotopic-mass"));
   printf("#\tverbosity: %d\n", get_verbosity_level());
-  printf("#\tuse index: %s\n", get_string_parameter_pointer("use-index"));
+
+  bool_val = get_boolean_parameter("use-index");
+  printf("#\tuse index: %s\n", boolean_to_string(bool_val));
+	 //get_string_parameter_pointer("use-index"));
   
 }
 /*
