@@ -35,13 +35,9 @@ int main(int argc, char** argv){
   int verbosity;
 
   //TODO change ints to bools
-  //int use_index;
   BOOLEAN_T output_sequence;
-  int trypticity_opt;  //change to print_trypticity
+  //  int trypticity_opt;  //change to print_trypticity
   BOOLEAN_T print_trypticity;
-  //char* sort = NULL;   //change to SORT_TYPE_T
-  //char* in_file = NULL;
-  //create outfile name
   
   long total_peptides = 0;
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator = NULL; 
@@ -87,28 +83,26 @@ int main(int argc, char** argv){
 
   /* Set verbosity */
   verbosity = get_int_parameter("verbosity");
-  //why is this segfaulting????
   set_verbosity_level(verbosity);
 
   /* Get parameter values */
   print_trypticity = get_boolean_parameter("output-trypticity");
   //replace with above
-  trypticity_opt = (int)print_trypticity;
+  //  trypticity_opt = (int)print_trypticity;
   output_sequence = get_boolean_parameter("output-sequence");
 
-  print_header();
-
-  // create peptide interator
+  // create peptide iterator
   peptide_iterator = new_generate_peptides_iterator();
   
-  carp(CARP_DETAILED_DEBUG, "Got to here");
-  
+  print_header();
+
   // iterate over all peptides
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     ++total_peptides;
     peptide = generate_peptides_iterator_next(peptide_iterator);
     print_peptide_in_format(peptide, output_sequence, 
-			    trypticity_opt, stdout);
+			    //trypticity_opt, stdout);
+			    print_trypticity, stdout);
     
     // free peptide
     free_peptide(peptide);
@@ -130,22 +124,28 @@ int main(int argc, char** argv){
 }
 
 void print_header(){
-    printf("# PROTEIN DATABASE: %s\n", 
-	               get_string_parameter_pointer("protein input"));
-    printf("# OPTIONS:\n");
-    printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass"));
-    printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass"));
-    printf("#\tmin-length: %d\n", get_int_parameter("min-length"));
-    printf("#\tmax-length: %d\n", get_int_parameter("max-length"));
-    printf("#\tcleavages: %s\n", get_string_parameter_pointer("cleavages"));
-    printf("#\tallow missed-cleavages: %s\n", 
-                          get_string_parameter_pointer("missed-cleavages"));
-    printf("#\tsort: %s\n",  get_string_parameter_pointer("sort"));
-    printf("#\tisotopic mass type: %s\n", 
-                             get_string_parameter_pointer("isotopic-mass"));
-    printf("#\tverbosity: %d\n", get_verbosity_level());
-    printf("#\tuse index: %s\n", get_string_parameter_pointer("use-index"));
-    
+  BOOLEAN_T bool_val;
+
+  printf("# PROTEIN DATABASE: %s\n", 
+	           get_string_parameter_pointer("protein input"));
+  printf("# OPTIONS:\n");
+  printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass"));
+  printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass"));
+  printf("#\tmin-length: %d\n", get_int_parameter("min-length"));
+  printf("#\tmax-length: %d\n", get_int_parameter("max-length"));
+  printf("#\tcleavages: %s\n", get_string_parameter_pointer("cleavages"));
+  
+  bool_val = get_boolean_parameter("missed-cleavages");
+  printf("#\tallow missed-cleavages: %s\n", 
+	 //       get_string_parameter_pointer("missed-cleavages"));
+       boolean_to_string(bool_val));
+
+  printf("#\tsort: %s\n",  get_string_parameter_pointer("sort"));
+  printf("#\tisotopic mass type: %s\n", 
+	          get_string_parameter_pointer("isotopic-mass"));
+  printf("#\tverbosity: %d\n", get_verbosity_level());
+  printf("#\tuse index: %s\n", get_string_parameter_pointer("use-index"));
+  
 }
 /*
  * Local Variables:
