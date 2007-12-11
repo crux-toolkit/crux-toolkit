@@ -108,8 +108,47 @@ other apps have.  As a result, some of the default tests require a
 parameter file because of a bug that will be fixed with the parameter
 handling updates.
 
+---------------------------------------------------------------------
+December 6, 2007
+
+There are inconsistencies between ranunculus and methionine with
+precision and sorting.
+
+Generate-peptides rounds the value of masses differently between the
+two comptuters.  If the precision is extended out to more than 2
+places, it is clear that all of the discrepencies are x.xx48 to
+x.xx50.  I don't know a good way to deal with this.  Aaron thinks that
+peptides on the cusp shouldn't be in the smoke tests.  I don't see an
+easy way to eliminate them.  One possibility would be to post-process
+the output files and take off the final digit in the masses.  
+
+When generate-peptides sorts by mass, the order within a mass is not
+consistent.  Aaron thinks that there should be secondary sort
+(lexical).  This should also be applied to sort by length (maybe it
+already is?)
+
+Also, generate_peptides could not use the existing index (one created
+on ranunculus) but search-for-matches could.  I thought the existing
+index worked for Aaron on methianine, as well.
+
+ON INSPECTION:
+Some of the problems with sorting may  not be clear from the output
+files because the differences in mass are smaller than what is
+printed.  However, when printed to 6 places it is perplexing that two
+peptides with the same aa composition can have different masses.  Two
+peptides on ranunculus will have exactly the same mass (to 6 digits)
+and not have the same mass on methonine.  So even if mass ties are
+broken by lexical order, there are different peptides that tie on the
+two machines.  For now, comment out the tie-breaking code in
+sorter.c::compareTo(). 
+
+The thing to do is figure out how to deal with the small differences
+in masses. 
+
+
+
+
 TODO: 
-* have create-index check the map file instead of empty-file
 * exapand tests to involve more options
 (after code supports these)
 * remove param file from default runs
