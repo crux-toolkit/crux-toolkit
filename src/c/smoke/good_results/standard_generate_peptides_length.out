@@ -9,7 +9,7 @@
 #	sort: length
 #	isotopic mass type: average
 #	verbosity: 30
-#	use index: F
+#	use index: FALSE
 587.72	gi|6381999|ref|NP_009311.2|	247	6	TGGILK
 659.78	gi|6381999|ref|NP_009311.2|	140	6	ELTAVK
 672.79	gi|16127996|ref|NP_414543.1|	173	6	RIAASR
