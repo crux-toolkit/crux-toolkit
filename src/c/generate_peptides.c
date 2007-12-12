@@ -64,7 +64,7 @@ int main(int argc, char** argv){
   char* argument_list[NUM_GEN_PEP_ARGS] = { "protein input" };
 
   //TODO make this a debug flag
-  set_verbosity_level(CARP_DETAILED_DEBUG);
+  //set_verbosity_level(CARP_DETAILED_DEBUG);
 
   /* Prepare parameter.c to read command line, set default option values */
   initialize_parameters();
@@ -112,7 +112,7 @@ int main(int argc, char** argv){
   free_parameters();
 
   /* successfull exit message */
-  carp(CARP_INFO, "crux-create-index finished.");
+  carp(CARP_INFO, "crux-generate-peptides finished.");
 
   exit(0);
 }

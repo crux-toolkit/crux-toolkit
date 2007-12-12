@@ -139,6 +139,7 @@ BOOLEAN_T select_cmd_line(
   int (*parse_argument_set)(char*, char*, void*, enum argument_type) ///< function point to choose arguments or options 
   );
 
+BOOLEAN_T update_aa_masses();
 
 /************************************
  * Function definitions
@@ -290,7 +291,8 @@ void initialize_parameters(void){
   /* static mods */
   temp_set_double_parameter("A", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("B", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("C", 57.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  //  temp_set_double_parameter("C", 57.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("C", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("D", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("E", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("F", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
@@ -502,6 +504,9 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
     exit(1);
   }
   
+  /* Finally, apply any amino acid mass changes */
+  update_aa_masses();
+
   return success;
 }
 
@@ -699,8 +704,8 @@ void parse_parameter_file(
   FILE *file;
   char *line;
   int idx;
-  char* endptr;
-  float update_mass;
+  //  char* endptr;
+  //  float update_mass;
 
   carp(CARP_DETAILED_DEBUG, "Parsing parameter file '%s'",parameter_filename);
 
@@ -771,6 +776,7 @@ void parse_parameter_file(
       check_option_type_and_bounds(option_name);
 
       /* check if it is amino acid mass update */
+      /*  This is now done in parse_command_line_...
       if(strlen(line) == 1 && 
          (short int)line[0] >= 'A' && 
          (short int)line[0] <= 'Z'){
@@ -778,6 +784,7 @@ void parse_parameter_file(
         update_mass = strtod(&(line[idx+1]), &endptr);
         increase_amino_acid_mass(line[0], update_mass);
       }
+      */
     }
   }
 
@@ -1456,7 +1463,27 @@ BOOLEAN_T string_to_param_type(char* name, PARAMETER_TYPE_T* result ){
   return success;
 }
 
+/*
+ * Applies any static mods to the aa masses
+ */
+BOOLEAN_T update_aa_masses(){
+  BOOLEAN_T success = TRUE;
+  int aa;
+  char aa_str[2];
+  aa_str[1] = '\0';
+  int alphabet_size = (int)'A' + ((int)'Z'-(int)'A'); //get_alpha_size(ALL_SIZE);
+  carp(CARP_DETAILED_DEBUG, "updating masses, last is %d", alphabet_size);
 
+  for(aa=(int)'A'; aa< alphabet_size -1; aa++){
+    aa_str[0] = (char)aa;
+    //aa_to_string(aa, aa_str);
+    double delta_mass = get_double_parameter(aa_str);
+    carp(CARP_DETAILED_DEBUG, "aa: %i, aa_str: %s, mass: %f", aa, aa_str, delta_mass);
+    increase_amino_acid_mass((char)aa, delta_mass);
+  }
+  
+  return success;
+}
 
 /*
  * Local Variables:

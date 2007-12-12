@@ -274,8 +274,6 @@ int parse_arguments_into_hash(int argc, char * argv[],
   option = NULL;
   req = NULL;
   for (i = 1; i < argc; i++) {
-    carp(CARP_DETAILED_DEBUG, "i is %i argc is %d", i, argc);
-
     n = strlen(argv[i]);
     if (argv[i][0] == '-' && argv[i][1] == '-' && n > 1) {
       if ((option = find_option(&(argv[i][1]))) != NULL) {
@@ -338,15 +336,10 @@ int parse_arguments_into_hash(int argc, char * argv[],
 
   /*const*/ argument *result = NULL;
 
-  carp(CARP_DETAILED_DEBUG, "get_next_req has r index: %i, r count %i", 
-       required_index, required_count);
-
   if (required_index < required_count) {
-    carp(CARP_DETAILED_DEBUG, "required is %s", required[required_index].name);
     result = &(required[required_index]);
     required_index++;
   }
-  carp(CARP_DETAILED_DEBUG, "result name is '%s' and head is %s", result->name, result);
 
   return result;
 }
@@ -470,8 +463,6 @@ int assign_value_from_required_to_hash(/*const*/ argument * req,
   
   // yes this required value came from the command line
   req->command_line = TRUE;
-
-  carp(CARP_DETAILED_DEBUG, "updated hash" );
 
   return NO_ERROR;
 }

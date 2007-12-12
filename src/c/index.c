@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.67 $
+ * $Revision: 1.68 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -464,13 +464,13 @@ void free_index(
   if (index->num_pointers > 1){
     index->num_pointers--;
   } else {
-    carp(CARP_INFO, "Freeing index");
+    carp(CARP_DEBUG, "Freeing index");
     if (index->database != NULL){
-      carp(CARP_INFO, "Freeing index database");
+      carp(CARP_DEBUG, "Freeing index database");
       free_database(index->database);
     }
     if (index->constraint != NULL){
-      carp(CARP_INFO, "Freeing index peptide constraint");
+      carp(CARP_DEBUG, "Freeing index peptide constraint");
       free_peptide_constraint(index->constraint);
     }
     free(index->directory);
