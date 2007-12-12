@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file sorter.c
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -671,8 +671,8 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
   // set peptide count of the array
   sorted_peptide_iterator->peptide_count = unique_peptide_count;
 
-  carp(CARP_INFO, "number of unique peptides in bin: %d", unique_peptide_count); 
-  carp(CARP_INFO, "total number of peptides(not unique): %u", total_number_peptide); 
+  carp(CARP_DEBUG, "Number of peptides in bin: unique %d, total %d", unique_peptide_count, total_number_peptide); 
+  //  carp(CARP_DEBUG, "total number of peptides(not unique): %u", total_number_peptide); 
 
   return sorted_peptide_iterator;
 }

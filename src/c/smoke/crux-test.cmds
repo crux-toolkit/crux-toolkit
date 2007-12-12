@@ -10,7 +10,7 @@
 # Generate Peptides
 generate_peptides_no_ops = good_results/standard_generate_peptides_no_ops.out = ../../../bin/crux-generate-peptides test.fasta 
 
-generate_peptides_default = good_results/standard_generate_peptides_default.out = ../../../bin/crux-generate-peptides --parameter-file params/no_changes --output-sequence T test.fasta 
+generate_peptides_default = good_results/standard_generate_peptides_default.out = ../../../bin/crux-generate-peptides  --output-sequence T test.fasta 
 
 generate_peptides_sort_mass_unique = good_results/standard_generate_peptides_mass.out = ../../../bin/crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --cleavages all --missed-cleavages T --sort mass  test.fasta 
 
