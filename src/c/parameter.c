@@ -291,8 +291,8 @@ void initialize_parameters(void){
   /* static mods */
   temp_set_double_parameter("A", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("B", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  //  temp_set_double_parameter("C", 57.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("C", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  temp_set_double_parameter("C", 57.0, -100, BILLION, "NOT FOR COMMAND LINE");
+ //temp_set_double_parameter("C", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("D", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("E", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("F", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");

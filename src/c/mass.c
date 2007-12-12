@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #include <math.h>
@@ -34,7 +34,8 @@ void initialize_amino_masses (void)
   // average mass
   amino_masses['A' - 'A'] = 71.0788;
   amino_masses['B' - 'A'] = 114.5962;
-  amino_masses['C' - 'A'] = 103.1388 + 57.000;
+  //amino_masses['C' - 'A'] = 103.1388 + 57.000;
+  amino_masses['C' - 'A'] = 103.1388;
   amino_masses['D' - 'A'] = 115.0886;
   amino_masses['E' - 'A'] = 129.1155;
   amino_masses['F' - 'A'] = 147.1766;
@@ -61,7 +62,8 @@ void initialize_amino_masses (void)
   // monoisotopic mass
   amino_masses['A' - 'A' + 26] = 71.03711;
   amino_masses['B' - 'A' + 26] = 114.53494;
-  amino_masses['C' - 'A' + 26] = 103.00919 + 57.000;
+  //amino_masses['C' - 'A' + 26] = 103.00919 + 57.000;
+  amino_masses['C' - 'A' + 26] = 103.00919;
   amino_masses['D' - 'A' + 26] = 115.02694;
   amino_masses['E' - 'A' + 26] = 129.04259;
   amino_masses['F' - 'A' + 26] = 147.06841;
