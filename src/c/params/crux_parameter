@@ -43,9 +43,9 @@ cleavages=all
 #Default: average
 isotopic-mass=average
 
-#unique the peptides?
-#Default: FALSE
-unique-peptides=TRUE
+#allow redudnat peptides? (redundant|unique)
+#Default: redundant
+redundancy=unique
 
 #use index to create peptides or use index? (T|F)
 #Default: F
