@@ -86,7 +86,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
    **********************/
   if(use_index_boolean){
     
-    carp(CARP_INFO, "Using index for peptide generation");
+    //this gets called for every spectrum in search.  move to other location?
+    //carp(CARP_INFO, "Using index for peptide generation");
 
     if((sort_type != MASS && sort_type != NONE)){
       carp(CARP_FATAL, "Cannot sort other than by mass when using index.");
@@ -118,7 +119,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     }
     // if need to select among peptides by peptide_type and etc.
     else{
-      carp(CARP_INFO, "using filtered index peptide generation");
+      //this gets called for every spectrum in search, move ?
+      //carp(CARP_INFO, "using filtered index peptide generation");
       INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator 
         = new_index_filtered_peptide_iterator(index);
       gen_peptide_iterator->iterator = index_filtered_peptide_iterator;
@@ -135,8 +137,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   else{
 
     // def used for each iterator
-   
-    carp(CARP_INFO, "Using fasta file for peptide generation");
+    //this gets called for every spectrum in search, move?
+    //carp(CARP_INFO, "Using fasta file for peptide generation");
 
     // set for all peptide src use link list implementation
     // this routine sets the static global in peptide.c
