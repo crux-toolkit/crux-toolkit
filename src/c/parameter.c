@@ -241,24 +241,38 @@ void initialize_parameters(void){
         "(mass, length, lexical, none).  Default none.");
 
   /* search-for-matches command line options */
-  temp_set_string_parameter("prelim-score-type", "sp", "usage");
-  temp_set_string_parameter("score-type", "xcorr", "usage"); 
-  temp_set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, "usage");
-  temp_set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, "usage");
-  temp_set_string_parameter("spectrum-charge", "all", "usage");
-  temp_set_double_parameter("number-runs", BILLION, 1, BILLION, "usage");
-  temp_set_string_parameter("match-output-folder", ".", "usage");
-  temp_set_string_parameter("output-mode", "binary", "usage"); //binary, sqt, all
-  temp_set_string_parameter("sqt-output-file", "target.sqt", "usage");
-  temp_set_string_parameter("decoy-sqt-output-file", "decoy.sqt", "usage");
-  temp_set_int_parameter("number-decoy-set", 2, 0, 10, "usage");
+  temp_set_string_parameter("prelim-score-type", "sp", 
+			    "Initial scoring (sp, xcorr). Default sp");
+  temp_set_string_parameter("score-type", "xcorr", 
+   "The scoring method to use (xcorr, xcorr_logp, sp_logp). Default xcorr."); 
+  temp_set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
+         "Minimum mass of spectra to be searched.  Default 0.");
+  temp_set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, 
+         "Maximum mass of spectra to search.  Default, none.");
+  temp_set_string_parameter("spectrum-charge", "all", 
+         "Spectrum charge states to search (1,2,3,all). Default all.");
+  temp_set_double_parameter("number-runs", BILLION, 1, BILLION, 
+         "REMOVE ME");
+  temp_set_string_parameter("match-output-folder", ".", 
+   "Folder to which search results will be written.  Default '.' (current dir).");
+  temp_set_string_parameter("output-mode", "binary", 
+         "Types of output to produce (binary, sqt, all). Default binary");
+  temp_set_string_parameter("sqt-output-file", "target.sqt", 
+         "SQT output file name. Default 'target.sqt'");
+  temp_set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
+         "SQT output file name for decoys.  Default 'decoy.sqt'");
+  temp_set_int_parameter("number-decoy-set", 2, 0, 10, 
+         "The number of decoy databases to search.  Default 2.");
 
   /* search-for-matches parameter file options */
-  temp_set_int_parameter("max-rank-preliminary", 500, 1, BILLION, "usage");
-  temp_set_int_parameter("max-rank-result", 500, 1, BILLION, "usage");
-  temp_set_int_parameter("top-match", 1, 1, 111, "usage");
-  temp_set_double_parameter("mass-offset", 0.0, 0, 0, "usage");
-  temp_set_string_parameter("seed", "time", "usage");
+  temp_set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
+         "NOT FOR COMMAND LINE. Number of spectra to score after preliminary scoring.  Default 500.");
+  temp_set_int_parameter("max-rank-result", 500, 1, BILLION, 
+    "NOT FOR COMMAND LINE. Number of search results to report. Default 500.");
+  temp_set_int_parameter("top-match", 1, 1, 111, 
+         "NOT FOR COMMAND LINE. Umm...");
+  temp_set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
+  temp_set_string_parameter("seed", "time", "HIDE ME FROM USER");
 
     // searching peptides
 
