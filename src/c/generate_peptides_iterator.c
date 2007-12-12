@@ -61,57 +61,13 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   // get parameters
   int min_length = get_int_parameter("min-length");
   int max_length = get_int_parameter("max-length");
-  //char* isotopic_mass = get_string_parameter_pointer("isotopic-mass");
-  //char* sort = get_string_parameter_pointer("sort");  // sort order
   BOOLEAN_T use_index_boolean = get_boolean_parameter("use-index");
   PEPTIDE_TYPE_T peptide_type = get_peptide_type_parameter("cleavages");
-
-  // TODO put in parameter retrieval routines
   MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
-  //SORT_TYPE_T sort_type = NONE;
-  //string_to_sort_type(sort, &sort_type);
   SORT_TYPE_T sort_type = get_sort_type_parameter("sort");
   BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
 
-  // check if maximum length is with in range <= 255
-  /*  This is already checked
-  if(max_length > 255){
-    carp(CARP_FATAL, "maximum length:%d over limit 255.", max_length);
-    exit(1);
-  }
-  */
-  /*
-  // determine isotopic mass option
-  if(strcmp(isotopic_mass, "average")==0){
-    mass_type = AVERAGE;
-  }
-  else if(strcmp(isotopic_mass, "mono")==0){
-    mass_type = MONO;
-  }
-  else{
-    carp(CARP_ERROR, "Incorrect argument %s", isotopic_mass);
-  }
-  */
-  
-  // determine sort type option
-  /*
-  if(strcmp(sort, "mass")==0){
-    sort_type = MASS;
-  }
-  else if(strcmp(sort, "length")==0){
-    sort_type = LENGTH;
-  }
-  else if(strcmp(sort, "lexical")==0){
-    sort_type = LEXICAL;
-  }
-  else if(strcmp(sort, "none")==0){
-    sort_type = NONE;
-  }
-  else{
-    carp(CARP_ERROR, "Incorrect argument %s, using default value", sort);
-  }
-  */
     
   // allocate an empty iterator
   GENERATE_PEPTIDES_ITERATOR_T* gen_peptide_iterator 
@@ -151,7 +107,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     gen_peptide_iterator->index = copy_index_ptr(index);
     
     // only resrict peptide by mass and length, default iterator
-    if(peptide_type == ANY_TRYPTIC){
+    if(peptide_type == ANY_TRYPTIC){ //BF: == ALL? 
       // create index peptide interator & set generate_peptides_iterator
       INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator
         = new_index_peptide_iterator(index);        
