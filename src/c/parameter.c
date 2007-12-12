@@ -163,14 +163,14 @@ void initialize_parameters(void){
     return;
   }
   
-  // allocate the hash tables
+  /* allocate the hash tables */
   parameters->hash = new_hash(NUM_PARAMS);
   usages->hash = new_hash(NUM_PARAMS);
   types->hash = new_hash(NUM_PARAMS);
   min_values->hash = new_hash(NUM_PARAMS);
   max_values->hash = new_hash(NUM_PARAMS);
 
-  // set number of parameters to zero
+  /* set number of parameters to zero */
   parameters->num_parameters = 0;
   usages->num_parameters = 0;
   types->num_parameters = 0;
@@ -178,25 +178,35 @@ void initialize_parameters(void){
   max_values->num_parameters = 0;
 
 
-  // set verbosity
-  temp_set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
-	"Set level of output to stderr (0-100).  Default 10.");
+  /* *** Initialize Arguments *** */
 
-  // set parameter file name (no default)
-  //set_string_parameter("parameter-file", "crux.params");
-  temp_set_string_parameter("parameter-file", NULL, 
-	"Set additional options with values in the given file.");
-    
-  // generate_peptide arguments
+  /* generate_peptide arguments */
   temp_set_string_parameter("protein input", NULL, 
   "File containing protein sequences either in fasta format or binary index.");
-  // create_index arguments
+  /* create_index arguments */
   temp_set_string_parameter("protein fasta file", NULL,
 		    "File containing protein sequences in fasta format.");
   temp_set_string_parameter("index name", NULL,
 		    "Name to give the new directory containing index files.");
 
-  // generate_peptide, create_index parameters  
+  /* search-for-matches arguments */
+  temp_set_string_parameter("ms2 file", NULL,
+			    "File containing spectra to be searched.");
+  //and uses 'protein input'
+
+  /* analyze-matches arguments */
+
+
+  /* *** Initialize Options (command line and param file) *** */
+
+  /* options for all executables */
+  temp_set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
+	"Set level of output to stderr (0-100).  Default 10.");
+
+  temp_set_string_parameter("parameter-file", NULL, 
+	"Set additional options with values in the given file.");
+    
+  /* generate_peptide, create_index parameters  */
   temp_set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
 	"The minimum length of peptides to consider. Default 6.");
   temp_set_int_parameter("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
@@ -217,31 +227,45 @@ void initialize_parameters(void){
         "Generate peptides only once, even if they appear in more " \
 	"than one protein (T,F).  Default FALSE.");
   
-  // more generate_peptide parameters
+  /* more generate_peptide parameters */
   temp_set_boolean_parameter("output-sequence", FALSE, 
 	"Print peptide sequence (T,F). Default FALSE.");
   temp_set_boolean_parameter("output-trypticity", FALSE, 
 	"Print trypticity of peptide (T,F). Default FALSE.");
-  /*
-  temp_set_boolean_paramter("use-indexB", FALSE, 
+  temp_set_boolean_parameter("use-index", FALSE, 
         "Use an index that has already been created (T,F). " \
         "Default FALSE (use fasta file)");
-  */
-  temp_set_string_parameter("use-index", "F", "usage");
-
+  //  temp_set_string_parameter("use-index", "F", "usage");
   temp_set_sort_type_parameter("sort", NONE, 
         "Sort peptides according to which property " \
         "(mass, length, lexical, none).  Default none.");
-  //  temp_set_string_parameter("sort", "none", "usage");//mass,length,lexical,none  
+
+  /* search-for-matches command line options */
+  temp_set_string_parameter("prelim-score-type", "sp", "usage");
+  temp_set_string_parameter("score-type", "xcorr", "usage"); 
+  temp_set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, "usage");
+  temp_set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, "usage");
+  temp_set_string_parameter("spectrum-charge", "all", "usage");
+  temp_set_double_parameter("number-runs", BILLION, 1, BILLION, "usage");
+  temp_set_string_parameter("match-output-folder", ".", "usage");
+  temp_set_string_parameter("output-mode", "binary", "usage"); //binary, sqt, all
+  temp_set_string_parameter("sqt-output-file", "target.sqt", "usage");
+  temp_set_string_parameter("decoy-sqt-output-file", "decoy.sqt", "usage");
+  temp_set_int_parameter("number-decoy-set", 2, 0, 10, "usage");
+
+  /* search-for-matches parameter file options */
+  temp_set_int_parameter("max-rank-preliminary", 500, 1, BILLION, "usage");
+  temp_set_int_parameter("max-rank-result", 500, 1, BILLION, "usage");
+  temp_set_int_parameter("top-match", 1, 1, 111, "usage");
+  temp_set_double_parameter("mass-offset", 0.0, 0, 0, "usage");
+  temp_set_string_parameter("seed", "time", "usage");
 
     // searching peptides
-  temp_set_double_parameter("mass-offset", 0.0, 0, 0, "usage");
 
   // score_peptide_spectrum parameters
   temp_set_double_parameter("beta", 0.075, 0, 1, "usage");
   temp_set_double_parameter("max-mz", 4000, 0, BILLION, "usage");
   temp_set_int_parameter("charge", 2, 1, 4, "usage");
-  temp_set_string_parameter("score-type", "xcorr", "usage"); 
 
   // match_collection parameters
   temp_set_double_parameter("mass-window", 3.0, 0, 100, "usage");
@@ -252,9 +276,6 @@ void initialize_parameters(void){
   temp_set_string_parameter("model-type", "single", "usage");
 
   // score_spectrum
-  temp_set_string_parameter("prelim-score-type", "sp", "usage");
-  temp_set_int_parameter("max-rank-preliminary", 500, 1, BILLION, "usage");
-  temp_set_int_parameter("max-rank-result", 500, 1, BILLION, "usage");
   temp_set_int_parameter("top-fit-sp", 1000, 1, BILLION, "usage");
   temp_set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, "usage");
   temp_set_int_parameter("number-peptides-to-subset", 0, 0, 0, "usage");
@@ -267,20 +288,7 @@ void initialize_parameters(void){
   // how many peptides to sample for EVD parameter estimation
   temp_set_int_parameter("sample-count", 500, 0, BILLION, "usage");
 
-  // what charge state spectra to run among the ones in ms2 file
-  temp_set_string_parameter("spectrum-charge", "all", "usage");
-  temp_set_double_parameter("number-runs", BILLION, 1, BILLION, "usage");
-  
   // match_search
-  temp_set_string_parameter("match-output-folder", ".", "usage");
-  temp_set_string_parameter("output-mode", "binary", "usage"); //binary, sqt, all
-  temp_set_string_parameter("seed", "time", "usage");
-  temp_set_string_parameter("sqt-output-file", "target.psm", "usage");
-  temp_set_string_parameter("decoy-sqt-output-file", "decoy.psm", "usage");
-  temp_set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, "usage");
-  temp_set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, "usage");
-  temp_set_int_parameter("top-match", 1, 1, 111, "usage");
-  temp_set_int_parameter("number-decoy-set", 2, 0, 10, "usage");
   
   // match_analysis
   temp_set_string_parameter("algorithm", "percolator", "usage");
@@ -823,7 +831,7 @@ BOOLEAN_T get_boolean_parameter(
 
   // can't find parameter
   if(value == NULL){
-    carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
+    carp(CARP_ERROR, "parameter name: %s, doesn't exist", name);
     exit(1);
   }
   
@@ -848,7 +856,7 @@ BOOLEAN_T get_boolean_parameter(
     die("Invalid Boolean parameter %s.\n", buffer);
   }
   
-  carp(CARP_FATAL, "parameter name: %s, doesn't exit", name);
+  carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
   exit(1);
 }
 
@@ -881,7 +889,7 @@ int get_int_parameter(
 
   // can't find parameter
   if(int_value == NULL){
-    carp(CARP_FATAL, "parameter name: %s, doesn't exit", name);
+    carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
     exit(1);
   }
   
@@ -943,7 +951,7 @@ double get_double_parameter(
   return(value);
   // }
   
-  carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
+  carp(CARP_ERROR, "parameter name: %s, doesn't exist", name);
   exit(1);
 }
 
@@ -970,7 +978,7 @@ char* get_string_parameter(
   
   // can't find parameter
   if(string_value == NULL){
-    carp(CARP_ERROR, "parameter name: %s, doesn't exit", name);
+    carp(CARP_ERROR, "parameter name: %s, doesn't exist", name);
     exit(1);
   }
   
@@ -997,7 +1005,7 @@ char* get_string_parameter_pointer(
 
   // can't find parameter
   if(string_value == NULL){
-    carp(CARP_FATAL, "parameter name: %s, doesn't exit", name);
+    carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
     exit(1);
   }
   else{
