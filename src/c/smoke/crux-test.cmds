@@ -35,7 +35,7 @@ search_for_matches_default = good_results/standard_search_default.target.sqt = r
 generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_index.out = ../../../bin/crux-generate-peptides --parameter-file params/smoke_params2 --output-sequence T --use-index T --cleavages tryptic existing.fasta = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
-search_for_matches_default_existing_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode sqt test.ms2 existing.fasta; cat target.sqt = 'Time'
+search_for_matches_default_existing_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode sqt --use-index T test.ms2 existing.fasta; cat target.sqt = 'Time'
 
 # See that match_analysis works with an existing index and existing results
 # SEGFAULT

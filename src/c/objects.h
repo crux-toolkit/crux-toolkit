@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.46 $
+ * $Revision: 1.47 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -304,6 +304,7 @@ typedef struct scorer SCORER_T;
 /**
  * The enum for scorer type
  */
+#define NUMBER_SCORER_TYPES 14 //BF added for consistant naming
 enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE, LOGP_QVALUE_WEIBULL_XCORR };
 
 #define _SCORE_TYPE_NUM 14 ///< the number of different score types
@@ -342,12 +343,14 @@ typedef struct match_iterator MATCH_ITERATOR_T;
  * The enum for match_search_ouput_mode (binary, sqt, all)
  */
 enum _match_search_ouput_mode {BINARY_OUTPUT, SQT_OUTPUT, ALL_OUTPUT};
+#define NUMBER_SEARCH_OUTPUT_MODES 3
+#define NUMBER_OUTPUT_MODES 3
 
 /**
  * \typedef MATCH_SEARCH_OUPUT_MODE_T
  * \brief The typedef for match_search_ouput_mode (binary, sqt, all)
  */
-typedef enum _match_search_ouput_mode MATCH_SEARCH_OUPUT_MODE_T; 
+typedef enum _match_search_ouput_mode MATCH_SEARCH_OUTPUT_MODE_T; 
 
 /**
  *\typedef MATCH_COLLECTION_ITERATOR_T
