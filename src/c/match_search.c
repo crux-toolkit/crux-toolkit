@@ -48,14 +48,14 @@ int main(int argc, char** argv){
 
   /* Declarations */
   int verbosity;
-  char* prelim_score_type = NULL;
+  //  char* prelim_score_type = NULL;
   //  char* score_type = NULL;
   double spectrum_min_mass; 
   double spectrum_max_mass; 
-  char* spectrum_charge = NULL;
+  char* spectrum_charge_str = NULL;
   double number_runs;
   char* match_output_folder = NULL; 
-  char* output_mode = NULL;
+  //char* output_mode = NULL;
   char* sqt_output_file = NULL;
   char* decoy_sqt_output_file = NULL;
   int number_decoy_set;
@@ -110,7 +110,7 @@ int main(int argc, char** argv){
 
   /* for debugging of parameter processing */
   // change to a make flag
-  //set_verbosity_level(CARP_DETAILED_DEBUG);
+  set_verbosity_level(CARP_DETAILED_DEBUG);
 
   /* Initialize parameter.c and set default values*/
   initialize_parameters();
@@ -216,13 +216,14 @@ int main(int argc, char** argv){
      Includes syntax, type, and bounds checking, dies on error */
   parse_cmd_line_into_params_hash(argc, argv);
 
+  carp(CARP_DETAILED_DEBUG, "finished parsing params");
   // Parse the command line
   
   //  if (parse_arguments(argc, argv, 0)) {
 
     // parse arguments
-    SCORER_TYPE_T main_score = XCORR; 
-    SCORER_TYPE_T prelim_score = SP; 
+    //SCORER_TYPE_T main_score = XCORR; 
+    //SCORER_TYPE_T prelim_score = SP; 
     
     SPECTRUM_T* spectrum = NULL;
     SPECTRUM_COLLECTION_T* collection = NULL; ///<spectrum collection
@@ -234,16 +235,15 @@ int main(int argc, char** argv){
     long int max_rank_preliminary = 500;
     long int max_rank_result = 500;
     int top_match = 1;
-    MATCH_SEARCH_OUPUT_MODE_T output_type = BINARY_OUTPUT;
+    //MATCH_SEARCH_OUTPUT_MODE_T output_type = BINARY_OUTPUT;
     float mass_offset = 0;
     BOOLEAN_T run_all_charges = TRUE;
     int spectrum_charge_to_run = 0;
-    
+
     /* Set verbosity */
     verbosity = get_int_parameter("verbosity");
-    //is this segfaulting or is it something after?
     set_verbosity_level(verbosity);
-    carp(CARP_DETAILED_DEBUG, "Got to here");
+
     /*    if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
       set_verbosity_level(verbosity);
     }
@@ -287,7 +287,21 @@ int main(int argc, char** argv){
     number_runs = get_double_parameter("number-runs");
 
     // what charge state of spectra to search
+    spectrum_charge_str = get_string_parameter_pointer("spectrum-charge");
+    spectrum_charge_to_run = atoi(spectrum_charge_str);
+
+    if( spectrum_charge_to_run < 1 ){
+      //assert that it was 'all' and not other string
+      run_all_charges = TRUE;
+    }else if( spectrum_charge_to_run > 3 ){
+      carp(CARP_FATAL, "spectrum-charge option must be 1,2,3, or 'all'.  " \
+	  "%s is not valid", spectrum_charge_str);
+      exit(1);
+    }
+    /*
     if(strcmp(get_string_parameter_pointer("spectrum-charge"), "all")== 0){
+      int charge = atoi(get_string_parameter_pointer("spectrum-charge"));
+      carp(CARP_DETAILED_DEBUG, "atoi for 'all' gives %i", charge);
       run_all_charges = TRUE;      
     }
     else if(strcmp(get_string_parameter_pointer("spectrum-charge"), "1")== 0){
@@ -306,13 +320,16 @@ int main(int argc, char** argv){
       wrong_command(spectrum_charge, "The spectrum charges to search must "
           "be one of the following: 1|2|3|all");
     }
-    
+    */
+
     // number_decoy_set
     number_decoy_set = get_int_parameter("number-decoy-set");
 
     // main score type
-    //TODO string_to_score_type()
+    SCORER_TYPE_T main_score;//get_scorer_type_parameter("score-type");
     char* score_type = get_string_parameter_pointer("score-type");
+    string_to_scorer_type(score_type, &main_score);
+    /*
     if(strcmp(score_type, "xcorr")== 0){
       main_score = XCORR;
     } else if(strcmp(score_type, "xcorr_logp")== 0){
@@ -325,16 +342,27 @@ int main(int argc, char** argv){
       wrong_command(score_type, "The main scoring function must be one of"
           " the following: xcorr | xcorr_logp | sp_logp | sp");
     }
-    
+    */
     // preliminary score type
+    SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
+
+    //    string_to_scorer_type( get_string_parameter_pointer("prelim-score-type"),
+    //			   &prelim_score);
+
+    /*
     if(strcmp(get_string_parameter_pointer("prelim-score-type"), "sp")== 0){
       prelim_score = SP;
     } else {
       wrong_command(prelim_score_type, 
           "The preliminary scoring function must be one of the following: sp");
     }
-        
+    */  
     // get output-mode
+    MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
+                                             "output-mode");
+    //    string_to_output_type( get_string_parameter_pointer("output-mode"),
+    //			   &output_type);
+    /*
     if(strcmp(get_string_parameter_pointer("output-mode"), "binary")== 0){
       output_type = BINARY_OUTPUT;
     }
@@ -348,7 +376,8 @@ int main(int argc, char** argv){
       wrong_command(output_mode, "The output mode must be one of the following:"
           " binary|sqt|all");
     }
-    
+    */
+
     spectrum_min_mass = get_double_parameter("spectrum-min-mass");
     spectrum_max_mass =  get_double_parameter("spectrum-max-mass");
     // set max number of preliminary scored peptides to use for final scoring
@@ -367,21 +396,12 @@ int main(int argc, char** argv){
     // seed for random rnumber generation
     //hide this from user?
     if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
-
-      // use current time to seed
-      time_t seconds;
-
-      // Get value from system clock and
-      // place in seconds variable.
-      time(&seconds);
-      
-      // Convert seconds to a unsigned
-      // integer.
-      srand((unsigned int) seconds);
+      time_t seconds; // use current time to seed
+      time(&seconds); // Get value from sys clock and set seconds variable.
+      srand((unsigned int) seconds); // Convert seconds to a unsigned int
     }
     else{
       srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
-      // TODO add more ways to seed the random generator
     }
 
 
@@ -427,6 +447,7 @@ int main(int argc, char** argv){
     }
 
     // get psm_result sqt file handle if needed
+    //do we really need sqts to stdout???
     carp(CARP_DETAILED_DEBUG, "sqt output file is %s", sqt_output_file);
     if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
       if (strcmp(sqt_output_file, "STDOUT") == 0){
@@ -444,7 +465,7 @@ int main(int argc, char** argv){
     }
     
     // did we get the file handles?
-    // check for at least there's one for result
+    // check that there's at least one for result
     if(psm_result_file[0] == NULL ||
        ((output_type == SQT_OUTPUT || output_type == ALL_OUTPUT) &&
        psm_result_file_sqt == NULL)){

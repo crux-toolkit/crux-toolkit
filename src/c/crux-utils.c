@@ -15,6 +15,7 @@
  */
 #define MAX_ULPS 2
 
+/* Functions for converting custom types to and from strings */
 
 /**
  * The string version of isotopic mass type (average, mono)
@@ -111,6 +112,68 @@ BOOLEAN_T sort_type_to_string(SORT_TYPE_T type,
   return success;
 }
 
+/*
+ * The string version of SCORER_TYPE_T
+ */
+static char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
+  {"sp", "xcorr", "dotp", "logp_exp_sp", "logp_bonf_exp_sp", 
+   "logp_evd_xcorr", "logp_bonf_evd_xcorr", "logp_weibull_sp", 
+   "logp_bonf_weibull_sp", "logp_weibull_xcorr", 
+   "logp_bonf_weibull_xcorr", "q_value", "percolator_score", 
+   "logp_qvalue_weibull_xcorr" };
+
+BOOLEAN_T string_to_scorer_type(char* name, SCORER_TYPE_T* result){
+  BOOLEAN_T success = TRUE;
+
+  int scorer_type = convert_enum_type_str(name, -10, scorer_type_strings,
+					  NUMBER_SCORER_TYPES);
+  (*result) = (SCORER_TYPE_T)scorer_type;
+
+  if( scorer_type < 0){
+    success = FALSE;
+  }
+  return success;
+}
+
+BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T type, char* type_str){
+  BOOLEAN_T success = TRUE;
+  if( (int)type > NUMBER_SCORER_TYPES){
+    success = FALSE;
+    type_str = NULL;
+  }
+  strcpy(type_str, scorer_type_strings[type]);
+  return success;
+}
+/*
+ * the string version of MATCH_SEARCH_OUPUT_MODE_T 
+ */
+static char* output_type_strings[NUMBER_OUTPUT_MODES] = 
+  { "binary", "sqt", "all" };
+
+BOOLEAN_T string_to_output_type(char* name, 
+				MATCH_SEARCH_OUTPUT_MODE_T* result){
+  BOOLEAN_T success = TRUE;
+
+  int output_type = convert_enum_type_str(name, -10, output_type_strings,
+					  NUMBER_OUTPUT_MODES);
+  (*result) = (MATCH_SEARCH_OUTPUT_MODE_T)output_type;
+
+  if( output_type < 0){
+    success = FALSE;
+  }
+  return success;
+}
+
+BOOLEAN_T output_type_to_string(MATCH_SEARCH_OUTPUT_MODE_T type, 
+				char* type_str){
+  BOOLEAN_T success = TRUE;
+  if( (int)type > NUMBER_OUTPUT_MODES){
+    success = FALSE;
+    type_str = NULL;
+  }
+  strcpy(type_str, sort_type_strings[type]);
+  return success;
+}
 
 
 
