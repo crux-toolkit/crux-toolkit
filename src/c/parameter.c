@@ -268,8 +268,8 @@ void initialize_parameters(void){
          "Maximum mass of spectra to search.  Default, none.");
   temp_set_string_parameter("spectrum-charge", "all", 
          "Spectrum charge states to search (1,2,3,all). Default all.");
-  temp_set_double_parameter("number-runs", BILLION, 1, BILLION, 
-         "REMOVE ME");
+  //temp_set_double_parameter("number-runs", BILLION, 1, BILLION, 
+  //       "REMOVE ME");
   temp_set_string_parameter("match-output-folder", ".", 
    "Folder to which search results will be written.  Default '.' (current dir).");
   //  temp_set_string_parameter("output-mode", "binary", 
