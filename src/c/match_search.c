@@ -39,8 +39,6 @@ int main(int argc, char** argv){
   BOOLEAN_T use_index;
   double spectrum_min_mass; 
   double spectrum_max_mass; 
-  //char* spectrum_charge_str = NULL;
-  //  double number_runs;
   char* match_output_folder = NULL; 
   char* sqt_output_file = NULL;
   char* decoy_sqt_output_file = NULL;
@@ -82,7 +80,7 @@ int main(int argc, char** argv){
   int top_match = 1;
   BOOLEAN_T run_all_charges = TRUE;
   int spectrum_charge_to_run = 0;
-  float mass_offset = 0;
+  float mass_offset = 0; //delete me?
 
 
   /* for debugging of parameter processing */
@@ -137,11 +135,11 @@ int main(int argc, char** argv){
 
   //results
   max_rank_result = get_int_parameter("max-rank-result");//print to sqt
-  // set max number of matches to be serialized per spectrum ??
+  // set max number of matches to be serialized per spectrum 
   top_match = get_int_parameter("top-match");
   
   // get mass offset from precursor mass to search for candidate peptides
-  //get rid of this?
+  //delete me?
   mass_offset = get_double_parameter("mass-offset");    
   
   // seed for random rnumber generation
@@ -205,6 +203,7 @@ int main(int argc, char** argv){
   
   // get psm_result sqt file handle if needed
   //do we really need sqts to stdout???
+  //TODO turn this into a function
   carp(CARP_DETAILED_DEBUG, "sqt output file is %s", sqt_output_file);
   if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
     if (strcmp(sqt_output_file, "STDOUT") == 0){
@@ -281,13 +280,6 @@ int main(int argc, char** argv){
 	 "Searching spectrum number %i, search number %i", 
 	 bf_spectrum_i, spectra_idx+1);
     
-    // check if total runs exceed limit user defined
-    //TODO disable this
-    /*    if(number_runs <= spectra_idx){
-      break;
-    }
-    */
-
     // get next spectrum
     spectrum = spectrum_iterator_next(spectrum_iterator);
     
@@ -299,6 +291,7 @@ int main(int argc, char** argv){
       }
     
     // get possible charge state
+    //TODO pass charge_to_run this function and eliminate first if()
     possible_charge = get_spectrum_num_possible_z(spectrum);
     possible_charge_array = get_spectrum_possible_z_pointer(spectrum);
     
@@ -315,8 +308,7 @@ int main(int argc, char** argv){
       
       // iterate over first for target next and for all decoy sets
       for(file_idx = 0; file_idx < total_files; ++file_idx){
-	// is it target ?
-	if(file_idx == 0){
+	if(file_idx == 0){ 	// is it target ?
 	  is_decoy = FALSE;
 	}
 	else{
