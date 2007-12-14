@@ -511,9 +511,8 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
   /* first look for parameter-file option and parse values in file before
      command line values.  Checks types and bounds, exiting if invalid */
 
-  // TODO find appropriate const for 256
-  char param_filename[256];
-  if(find_param_filename(argc, argv, param_filename, 256)){
+  char param_filename[SMALL_BUFFER];
+  if(find_param_filename(argc, argv, param_filename, SMALL_BUFFER)){
     parse_parameter_file(param_filename);  
   }
   else{ 
@@ -562,7 +561,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
 BOOLEAN_T check_option_type_and_bounds(char* name){
 
   BOOLEAN_T success = TRUE;
-  char die_str[256];
+  char die_str[SMALL_BUFFER];
   char* type_str = get_hash_value(types->hash, name);
   char* value_str = get_hash_value(parameters->hash, name);
   char* min_str = get_hash_value(min_values->hash, name);
@@ -1301,7 +1300,7 @@ BOOLEAN_T temp_set_peptide_type_parameter(
   )
 {
   BOOLEAN_T result = TRUE;
-  char value_str[256];
+  char value_str[SMALL_BUFFER];
   
   // check if parameters can be changed
   if(!parameter_plasticity){
@@ -1326,7 +1325,7 @@ BOOLEAN_T temp_set_sort_type_parameter(
 				       char* usage)
 {
   BOOLEAN_T result = TRUE;
-  char value_str[256];
+  char value_str[SMALL_BUFFER];
   // check if parameters can be changed
   if(!parameter_plasticity){
     carp(CARP_ERROR, "can't change parameters once they are confirmed");
@@ -1348,7 +1347,7 @@ BOOLEAN_T temp_set_scorer_type_parameter(
 					 char* usage)
 {
   BOOLEAN_T result = TRUE;
-  char value_str[256];
+  char value_str[SMALL_BUFFER];
   
   // check if parameters can be changed
   if(!parameter_plasticity){
@@ -1373,7 +1372,7 @@ BOOLEAN_T temp_set_output_type_parameter(
 {
 
   BOOLEAN_T result = TRUE;
-  char value_str[256];
+  char value_str[SMALL_BUFFER];
   
   // check if parameters can be changed
   if(!parameter_plasticity){

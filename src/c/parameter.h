@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -14,7 +14,7 @@
 #define NUM_PARAMS 512 ///< initial number of parameters allowed
 #define MAX_LINE_LENGTH 4096 ///< maximum length of a line on the parameter file
 #define BILLION 1000000000.0
-
+#define SMALL_BUFFER 256
 
 //TODO:  all sets should become private
 //           wait until all progs have switched over
