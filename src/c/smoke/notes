@@ -162,27 +162,25 @@ New tests
 
 * Generate Peptides:  
 WE DO test
- with parameter file
- with sequence
- with cleavages tryptic and all
+ with and without parameter file
+ with and without sequence
+ with cleavages tryptic, partial, and all
  with and without missed cleavages
  sorted none, mass, length, lexical
- redundant and uniq 
+ uniq 
  with and without index
-
-WE COULD test
- no parameter-file
- without sequence
  change min/max mass
  change min/max length
- with cleavages partial
- mono-isotopic masses
+ with average and mono-isotopic masses
  output trypticity
+ command line override params file
+
+WE COULD test
+ redundant
 
 * Create index
 WE DO test
  with parameter file
- mass range of 500
  cleavages all
  average isotopic masses
  redundant and uniq peptides per prot
@@ -190,7 +188,6 @@ WE DO test
 
 WE COULD test
  without parameter file
- larger/smaller mass ranges
  change min/max mass/length
  cleavages partial/tryptic
  missed cleavages 
@@ -206,6 +203,7 @@ WE DO test
  xcorr scoring
  two decoy's
  searching all charge states
+ no ops/no param file
 
 WE COULD test
  output into different directory
@@ -216,7 +214,6 @@ WE COULD test
  xcorr_logp/sp_logp scoring
  no or >2 decoys
  searching only one charge state
- ?what is number of spectrum search runs?
 
 * Analyze Matches
 WE DO test

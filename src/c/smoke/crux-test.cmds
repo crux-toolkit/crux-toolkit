@@ -18,14 +18,22 @@ generate_peptides_sort_length_unique = good_results/standard_generate_peptides_l
 
 generate_peptides_sort_lexical_unique = good_results/standard_generate_peptides_lexical.out = ../../../bin/crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --cleavages partial --missed-cleavages T --sort lexical test.fasta 
 
+generate_peptides_change_minmax = good_results/standard_generate_peptides_change_minmax = ../../../bin/crux-generate-peptides --parameter-file params/many_changes --output-sequence T --max-length 20 test.fasta
+
 # Get spectrum
 get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; ../../../bin/crux-get-ms2-spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out 
 
-# Search for matches and test sqt file 
+# Search for matches and test sqt file
 search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* test_crux_index/; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time'
 
 # Analyze matches
 #  Currently, analyze_matches does not work without an index
+
+# Search for matches with all defaults, no sqt file to test so use analyze
+search_for_matches_noops = good_results/empty_file = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test*; ../../../bin/crux-search-for-matches test.ms2 test.fasta; = 'Time'
+
+# Analyze matches to test default search, use no ops
+#analyze_matches_no_ops_test_search = good_results/<insert file name> = ...
 
 # TESTS WITH INDEX
 
