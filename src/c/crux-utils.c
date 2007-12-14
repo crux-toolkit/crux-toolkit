@@ -171,7 +171,7 @@ BOOLEAN_T output_type_to_string(MATCH_SEARCH_OUTPUT_MODE_T type,
     success = FALSE;
     type_str = NULL;
   }
-  strcpy(type_str, sort_type_strings[type]);
+  strcpy(type_str, output_type_strings[type]);
   return success;
 }
 

@@ -85,7 +85,7 @@ int main(int argc, char** argv){
 
   /* for debugging of parameter processing */
   // TODO change to a make flag
-  set_verbosity_level(CARP_DETAILED_DEBUG);
+  //set_verbosity_level(CARP_DETAILED_DEBUG);
 
   /* Initialize parameter.c and set default values*/
   initialize_parameters();
