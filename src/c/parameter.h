@@ -1,20 +1,34 @@
 /**
  * \file parameter.h
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
 #define PARAMETER_FILE_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <limits.h>
 #include "utils.h"
-#include "objects.h"
 #include "crux-utils.h"
+#include "carp.h"
+#include "hash.h"
+#include "objects.h"
 #include "peptide.h"
+#include "spectrum.h"
+#include "peak.h"
+#include "mass.h"
+#include "scorer.h"
+#include "parse_arguments.h"
 
 #define PARAMETER_LENGTH 1024 ///< default length of parameter name and value in characters
 #define NUM_PARAMS 512 ///< initial number of parameters allowed
 #define MAX_LINE_LENGTH 4096 ///< maximum length of a line on the parameter file
 #define BILLION 1000000000.0
 #define SMALL_BUFFER 256
+#define MAX_SET_PARAMS 256
 
 //TODO:  all sets should become private
 //           wait until all progs have switched over
