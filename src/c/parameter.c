@@ -5,21 +5,8 @@
  * DESCRIPTION: General parameter handling utilities. MUST declare ALL optional command parameters here inside initalialize_parameters
  ****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <limits.h>
-#include "spectrum.h"
-#include "peak.h"
-#include "carp.h"
-#include "mass.h"
-#include "scorer.h"
-#include "utils.h"
 #include "parameter.h"
-#include "parse_arguments.h"
-#include "hash.h"
-#define MAX_SET_PARAMS 256
+
 //TODO:  why are #includes here and not in .h?
 //       change all temp_add to use add_or_update and no strcpy
 //       in all temp_set, change result=add_... to result= result && add_...
@@ -208,6 +195,13 @@ void initialize_parameters(void){
 
   /* analyze-matches arguments */
 
+  /* get-ms2-spectrum */
+  temp_set_int_parameter("scan number", 0, 1, BILLION, 
+			 "Scan number identifying the spectrum");
+  //uses ms2 file
+  temp_set_string_parameter("output file", NULL, 
+			    "File where spectrum will be written.");
+
 
   /* *** Initialize Options (command line and param file) *** */
 
@@ -358,6 +352,10 @@ void initialize_parameters(void){
   temp_set_double_parameter("Y", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("Z", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
 
+  /* get-ms2-spectrum options */
+  temp_set_boolean_parameter("stats", FALSE, 
+	"Print to stdout additional information about the spectrum");
+  //temp_set_output_mode_parameter("out-file", FILE_NOCLOBBER, "Choose how to handle existing output files (replace, append, ???");
 
   // now we have initialized the parameters
   parameter_initialized = TRUE;
