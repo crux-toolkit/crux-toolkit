@@ -225,6 +225,14 @@ WE COULD test
  with parameter file
  printing a feature file (what is this?)
 
+* Get ms2 spectrum
+WE DO test
+ one spec that exists
+ outputing stats
+
+WE COULD test
+ appending to/replacing output file
+
 
 ALSO
  inputs from different sources full and rel paths
