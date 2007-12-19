@@ -205,6 +205,11 @@ void initialize_parameters(void){
   temp_set_string_parameter("output file", NULL, 
 			    "File where spectrum will be written.");
 
+  /* predict-peptide-ions */
+  temp_set_string_parameter("peptide sequence", NULL, 
+       "The sequence of the peptide.");
+  temp_set_int_parameter("charge state", 0, 0, 3, 
+       "The charge state of the peptide.");
 
   /* *** Initialize Options (command line and param file) *** */
 
@@ -331,6 +336,25 @@ void initialize_parameters(void){
   /* analyze-matches parameter options */
   temp_set_double_parameter("pi0", 0.9, 0, 1, "usage");
   temp_set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
+
+  /* predict-peptide-ions */
+  temp_set_string_parameter("primary-ions","by",
+      "The ion series to predict (b,y,by). Default 'by' (both b and y ions)");
+  temp_set_boolean_parameter("precursor-ions", FALSE,
+      "Predict the precursor ions, and all associated ions (neutral-losses, multiple charge states) consistent with the other specified options. (T,F) Default F");
+  temp_set_string_parameter("neutral-losses", "all", 
+      "Predict neutral loss ions (none, h20, nh3, all). Default 'all'");
+  temp_set_int_parameter("isotope", 0, 0, 2,
+      "Predict the given number of isotope peaks.0|1|2");
+  temp_set_boolean_parameter("flanking", FALSE, 
+      "Predict flanking peaks for b and y ions (T,F). Default F.");
+  temp_set_string_parameter("max-ion-charge", "peptide",
+      "Predict ions up to this charge state (1,2,3) or to the charge state " \
+      "of the peptide (peptide).  Default 'peptide'.");
+  temp_set_int_parameter("nh3",0, 0, BILLION, 
+      "Predict peaks with the following max nh3 modification.");
+  temp_set_int_parameter("h2o",0, 0, BILLION,
+      "Predict peaks with the following max h2o modification.");
 
   /* static mods */
   temp_set_double_parameter("A", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
@@ -1452,7 +1476,7 @@ BOOLEAN_T set_boolean_parameter(
  * if the parameter is not found or parameters has already been confirmed don't change
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_int_parameter(
+/*BOOLEAN_T set_int_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  int set_value  ///< the value to be set -in
  )
@@ -1477,7 +1501,7 @@ BOOLEAN_T set_int_parameter(
   result = add_parameter(name, buffer);
   
   return result;
-}
+}*/
 /**
  * Parameter file must be parsed first!
  * searches through the list of parameters, 
