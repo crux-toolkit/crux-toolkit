@@ -28,11 +28,11 @@ get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = rm -
 # Predict ion series
 predict_ions_no_ops = good_results/standard_predict_ions_no_ops.out = ../../../bin/crux-predict-peptide-ions IAMASEQ 2
 
-predict_ions_b_h2o = good_results/standard_predict_ions_b_h2o.out = ../../../bin/crux-predict-peptide-ions --primary_ions b --precursor_ions T --h2o 1 IAMASEQ 2 
+predict_ions_b_h2o = good_results/standard_predict_ions_b_h2o.out = ../../../bin/crux-predict-peptide-ions --primary-ions b --precursor-ions T --h2o 1 IAMASEQ 2 
 
-predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = ../../../bin/crux-predict-peptide-ions --primary_ions y  --nh3 1 IAMASEQ 2
+predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = ../../../bin/crux-predict-peptide-ions --primary-ions y  --nh3 1 IAMASEQ 2
 
-predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = ../../../bin/crux-predict-peptide-ions --primary_ions by --max-ion-charge 1 --flanking T IAMASEQ 3
+predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = ../../../bin/crux-predict-peptide-ions --primary-ions by --max-ion-charge 1 --flanking T IAMASEQ 3
 
 # Search for matches and test sqt file
 search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* test_crux_index/; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time'

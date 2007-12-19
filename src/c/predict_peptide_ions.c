@@ -14,11 +14,15 @@
 #include <ctype.h>
 #include <unistd.h>
 #include "carp.h"
-#include "parse_arguments.h"
-#include "ion.h"
-#include "ion_series.h"
 #include "crux-utils.h"
 #include "objects.h"
+//#include "parse_arguments.h"
+#include "parameter.h"
+#include "ion.h"
+#include "ion_series.h"
+
+#define NUM_PREDICT_OPTIONS 8
+#define NUM_PREDICT_ARGUMENTS 2
 
 /**
  * when wrong command is seen carp, and exit
@@ -40,6 +44,61 @@ void wrong_command(char* arg, char* comment){
 
 int main(int argc, char** argv){
 
+  /* Define optional and required command line arguments */
+  int num_options = NUM_PREDICT_OPTIONS;
+  char* option_list[NUM_PREDICT_OPTIONS] = {
+    "primary-ions",
+    "precursor-ions",
+    "neutral-losses",
+    "isotope",
+    "flanking",
+    "max-ion-charge",
+    "nh3",
+    "h2o"
+  };
+
+  int num_arguments = NUM_PREDICT_ARGUMENTS;
+  char* argument_list[NUM_PREDICT_ARGUMENTS] = {
+    "peptide sequence",
+    "charge state"
+  };
+
+  /* for debugging of parameter processing */
+  set_verbosity_level( CARP_DETAILED_DEBUG );
+
+  /* Set default values for parameters in parameter.c */
+  initialize_parameters();
+
+  /* Define optional and required command line arguments */
+  select_cmd_line_options( option_list, num_options );
+  select_cmd_line_arguments( argument_list, num_arguments);
+
+  /* Parse the command line, including the optional params file */
+  /* does sytnax, type, bounds checking and dies if neccessessary */
+  parse_cmd_line_into_params_hash(argc, argv);
+
+  /* Set verbosity */
+  set_verbosity_level(get_int_parameter("verbosity"));
+
+  /* Get Arguments */
+  char* peptide_sequence = get_string_parameter_pointer("peptide sequence");
+  int charge_state = get_int_parameter("charge state");
+
+  /* Get Options */
+  //change to ION_TYPE_T
+  char* primary_ions = get_string_parameter_pointer("primary-ions");
+  BOOLEAN_T use_precursor_ions = get_boolean_parameter("precursor-ions");
+  //char* precursor_ions = boolean_to_string(prec_io);
+  
+  //char* neutral_losses = get_string_parameter_pointer("neutral-losses");
+  int isotope_count = get_int_parameter("isotope");
+  BOOLEAN_T is_flanking = get_boolean_parameter("flanking");
+  //char* flanking = boolean_to_string(flank);
+  char* max_ion_charge = get_string_parameter_pointer("max-ion-charge");
+  int nh3_count = get_int_parameter("nh3");
+  int h2o_count = get_int_parameter("h2o");
+
+  /*
   char* primary_ions = "by";
   char* precursor_ions = "F";
   char* neutral_losses = "all";
@@ -54,8 +113,9 @@ int main(int argc, char** argv){
   // parsing variables
   int result = 0;
   char * error_message;
-
+  */
  /* Define optional command line arguments */ 
+  /*
  parse_arguments_set_opt(
     "primary_ions", 
     "Predict the specified primary ion series. 'b' indicates b-ions only, 'y' indicates y-ions only, 'by' indicates both. b|y|by", 
@@ -103,8 +163,9 @@ int main(int argc, char** argv){
     (void *) &h2o_count,
     INT_ARG);
 
-
+  */
  /* Define required command line arguments */
+  /*
  parse_arguments_set_req(
     "peptide sequence", 
     "The literal peptide sequence (e.g. EAMAPK) that is used to predict the ions.",
@@ -115,13 +176,14 @@ int main(int argc, char** argv){
     "The charge state of the peptide used to predict the ions.",
     (void *) &charge_state, INT_ARG);
   
-
+  */
  /* Parse the command line */
- if (parse_arguments(argc, argv, 0)) {
+  
+ //if (parse_arguments(argc, argv, 0)) {
    ION_TYPE_T ion_type = BY_ION;
-   BOOLEAN_T use_precursor_ions = FALSE;
+   //BOOLEAN_T use_precursor_ions = FALSE;
    int neutral_loss_count[MAX_MODIFICATIONS];
-   BOOLEAN_T is_modification = TRUE;
+   BOOLEAN_T is_modification = FALSE;
    BOOLEAN_T is_modification_h2o = TRUE;
    BOOLEAN_T is_modification_nh3 = TRUE;
    int max_charge = charge_state;
@@ -151,6 +213,7 @@ int main(int argc, char** argv){
    }
 
    // precursor_ions
+   /*
    if(strcmp(precursor_ions, "F")== 0){
      use_precursor_ions = FALSE;
    }
@@ -159,7 +222,7 @@ int main(int argc, char** argv){
    }
    else{
      wrong_command(precursor_ions, "must pick between T|F");
-   }
+     }*/
 
    // neutral_losses
    // initialize
@@ -168,6 +231,7 @@ int main(int argc, char** argv){
      neutral_loss_count[modification_idx] = 0;
    }
 
+   /*  BF: phase out neutral-losses option
    if(strcmp(neutral_losses, "none")== 0){
      is_modification = FALSE;
      is_modification_h2o = FALSE;
@@ -186,8 +250,19 @@ int main(int argc, char** argv){
    else if(strcmp(neutral_losses, "all")!= 0){
      wrong_command(neutral_losses, "neutral loss can be none|h2o|nh3|all");
    }
-   
+   */
+   if( h2o_count == 0 ){
+     is_modification_h2o = FALSE;
+   } 
+   if( nh3_count == 0 ){
+     is_modification_nh3 = FALSE;
+   }
+   is_modification = (is_modification_nh3 || 
+		      is_modification_h2o || 
+		      is_flanking);
+
    // isotope
+   /*
    if(isotope_count < 0 || isotope_count > 3){
      // out of bounds...error
      wrong_command("isotope not an integer between 0 and 3", NULL);
@@ -195,9 +270,10 @@ int main(int argc, char** argv){
    else{
      neutral_loss_count[ISOTOPE] = isotope_count;
    }
+   */
 
    // flanking
-   if(strcmp(flanking, "T")== 0){
+   /*   if(strcmp(flanking, "T")== 0){
      is_modification = TRUE;
      neutral_loss_count[FLANK] = 1;
    }
@@ -206,7 +282,7 @@ int main(int argc, char** argv){
    }
    else{
      wrong_command(flanking, "must pick between T|F");
-   }
+     }*/
 
    // max_ion_charge
    if(strcmp(max_ion_charge, "1")== 0){
@@ -226,12 +302,14 @@ int main(int argc, char** argv){
    }
    
    // set nh3, h2o
-   if(is_modification_nh3){
+   //if(is_modification_nh3){
      neutral_loss_count[NH3] = nh3_count;
-   }
-   if(is_modification_h2o){
+     //}
+     //if(is_modification_h2o){
      neutral_loss_count[H2O] = h2o_count;
-   }
+     //}
+     neutral_loss_count[FLANK] = (int)is_flanking;
+     neutral_loss_count[ISOTOPE] = isotope_count;
 
    // creat ion_constraint
    ION_CONSTRAINT_T* ion_constraint = 
@@ -240,14 +318,19 @@ int main(int argc, char** argv){
    
    // set ion_constraint3 modification counts, if modifications should occur
    if(is_modification){
-     set_ion_constraint_modification( ion_constraint, NH3, neutral_loss_count[NH3]);
-     set_ion_constraint_modification( ion_constraint, H2O, neutral_loss_count[H2O]);
-     set_ion_constraint_modification( ion_constraint, ISOTOPE, neutral_loss_count[ISOTOPE]);
-     set_ion_constraint_modification( ion_constraint, FLANK, neutral_loss_count[FLANK]);
+     set_ion_constraint_modification( ion_constraint, NH3, 
+				      neutral_loss_count[NH3]);
+     set_ion_constraint_modification( ion_constraint, H2O, 
+				      neutral_loss_count[H2O]);
+     set_ion_constraint_modification( ion_constraint, ISOTOPE, 
+				      neutral_loss_count[ISOTOPE]);
+     set_ion_constraint_modification( ion_constraint, FLANK, 
+				      neutral_loss_count[FLANK]);
    }
 
    // create ion_series
-   ION_SERIES_T* ion_series = new_ion_series(peptide_sequence, charge_state, ion_constraint);
+   ION_SERIES_T* ion_series = new_ion_series(peptide_sequence, 
+					     charge_state, ion_constraint);
    
    // now predict ions
    predict_ions(ion_series);
@@ -268,7 +351,7 @@ int main(int argc, char** argv){
    // free
    free_ion_constraint(ion_constraint);
    free_ion_series(ion_series);
- }
+/* }
  else {
    char* usage = parse_arguments_get_usage("predict_peptide_ions");
    result = parse_arguments_get_error(&error_message);
@@ -278,5 +361,7 @@ int main(int argc, char** argv){
    free(usage);
    exit(1);
  }
+*/
+   carp(CARP_INFO, "crux-predict-peptide-ions finished");
  exit(0);
 }
