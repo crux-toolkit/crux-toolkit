@@ -25,7 +25,7 @@ struct parameter_hash{
  */
 static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { 
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T", 
-  "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T"};
+  "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T"};
 
 //one hash for parameter values, one for usage statements, one for types
 struct parameter_hash  parameters_hash_table;
@@ -130,6 +130,11 @@ BOOLEAN_T temp_set_scorer_type_parameter(
 BOOLEAN_T temp_set_output_type_parameter(
  char* name,
  MATCH_SEARCH_OUTPUT_MODE_T set_value,
+ char* usage);
+
+BOOLEAN_T temp_set_ion_type_parameter(
+ char* name,
+ ION_TYPE_T set_value,
  char* usage);
 
 BOOLEAN_T select_cmd_line(  
@@ -338,7 +343,8 @@ void initialize_parameters(void){
   temp_set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
 
   /* predict-peptide-ions */
-  temp_set_string_parameter("primary-ions","by",
+  //temp_set_string_parameter("primary-ions","by",
+  temp_set_ion_type_parameter("primary-ions", BY_ION,
       "The ion series to predict (b,y,by). Default 'by' (both b and y ions)");
   temp_set_boolean_parameter("precursor-ions", FALSE,
       "Predict the precursor ions, and all associated ions (neutral-losses, multiple charge states) consistent with the other specified options. (T,F) Default F");
@@ -603,6 +609,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
   SORT_TYPE_T sort_type;
   SCORER_TYPE_T scorer_type;
   MATCH_SEARCH_OUTPUT_MODE_T output_type;
+  ION_TYPE_T ion_type;
 
   PARAMETER_TYPE_T param_type;
   string_to_param_type( type_str, &param_type ); 
@@ -678,6 +685,15 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
       success = FALSE;
       sprintf(die_str, "Illegal output type '%s' for options '%s'.  " \
 	      "Must be binary, sqt, or all.", value_str, name);
+    }
+    break;
+  case ION_TYPE_P:
+    carp(CARP_DETAILED_DEBUG, "found ion_type param, value '%s'",
+	 value_str);
+    if( !string_to_ion_type(value_str, &ion_type)){
+      success = FALSE;
+      sprintf(die_str, "Illegal ion type '%s' for option '%s'.  " \
+	      "Must be b,y,by.", value_str, name);
     }
     break;
   default:
@@ -1149,7 +1165,7 @@ SCORER_TYPE_T get_scorer_type_parameter(char* name){
   BOOLEAN_T success = string_to_scorer_type(param_value_str, &param_value);
 
   if(!success){
-    carp(CARP_FATAL, "Scorer_type parameter %s has the value &s which is not of the correct type.", name, param_value_str);
+    carp(CARP_FATAL, "Scorer_type parameter %s has the value %s which is not of the correct type.", name, param_value_str);
     exit(1);
   }
   return param_value;
@@ -1167,6 +1183,19 @@ MATCH_SEARCH_OUTPUT_MODE_T get_output_type_parameter(char* name){
   return param_value;
 }
 
+ION_TYPE_T get_ion_type_parameter(char* name){
+  char* param_value_str = get_hash_value(parameters->hash, name);
+  ION_TYPE_T param_value;
+  BOOLEAN_T success = string_to_ion_type(param_value_str, &param_value);
+
+  if(!success){
+    carp(CARP_FATAL, 
+   "Ion_type parameter %s ahs the value %s which is not of the correct type.",
+	 name, param_value_str);
+    exit(1);
+  }
+  return param_value;
+}
 /**************************************************
  *   SETTERS (private)
  **************************************************
@@ -1420,7 +1449,28 @@ BOOLEAN_T temp_set_output_type_parameter(
   return result;
 }
 
+BOOLEAN_T temp_set_ion_type_parameter(char* name,
+				      ION_TYPE_T set_value,
+				      char* usage)
+{
+  BOOLEAN_T result = TRUE;
+  char value_str[SMALL_BUFFER];
 
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  /* stringify value */
+  ion_type_to_string(set_value, value_str);
+
+  result = add_or_update_hash(parameters->hash, name, value_str);
+  result = add_or_update_hash(usages->hash, name, usage);
+  result = add_or_update_hash(types->hash, name, "ION_TYPE_T");
+
+  return result;
+}
 /**************************************************
  *   OLD SETTERS (public)
  **************************************************
