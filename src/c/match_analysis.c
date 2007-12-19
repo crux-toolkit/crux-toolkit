@@ -6,7 +6,7 @@
  *              optional parameter file, search all the spectrum against 
  *              the peptides in the sequence database, and return the high 
  *              scoring peptides. 
- * REVISION: 
+ * REVISION: $ $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,23 +31,6 @@
 #define NUM_ANALYSIS_OPTIONS 5
 #define NUM_ANALYSIS_ARGUMENTS 2
 
-/**
- * when wrong command is seen carp, and exit
- */
-/*void wrong_command(char* arg, char* comment){
-  char* usage = parse_arguments_get_usage("search_spectra");
-  carp(CARP_FATAL, "incorrect argument: %s", arg);
-
-  // print comment if given
-  if(comment != NULL){
-    carp(CARP_FATAL, "%s", comment);
-  }
-
-  fprintf(stderr, "%s", usage);
-  free(usage);
-  exit(1);
-}
-*/
 /** 
  * Routines to run various match analyses. Explained in more detail below.
  */
@@ -67,39 +50,10 @@ MATCH_COLLECTION_T* run_nothing(
   char* feature_file 
   ); 
 
-/*
- * Outputs the matches in match_collection
- */
 int output_matches(
     MATCH_COLLECTION_T* match_collection,
     SCORER_TYPE_T scorer_type
-    ){
-  // create match iterator, return match in sorted order of main_score type
-  // TODO what is TRUE below?
-  MATCH_ITERATOR_T* match_iterator = 
-    new_match_iterator(match_collection, scorer_type, TRUE);
-  
-  // print only up to max_rank_result of the matches
-  int max_rank_result = get_int_parameter("max-rank-result");
-
-  // iterate over matches
-  int match_count = 0;
-  MATCH_T* match = NULL;
-  while(match_iterator_has_next(match_iterator)){
-    ++match_count;
-
-    //// set max number of final scoring matches to print as output
-
-    if(match_count >= max_rank_result){
-      break;
-    }
-    
-    match = match_iterator_next(match_iterator);
-    // TODO what is TRUE below?
-    print_match(match, stdout, TRUE, scorer_type);
-  }
-  return 0;
-}
+    );
 
 /***********************************************************************/
 int main(int argc, char** argv){
@@ -179,6 +133,42 @@ int main(int argc, char** argv){
 
   carp(CARP_INFO, "crux-analyze-matches finished.");
   exit(0);
+}
+
+/*  ****************** Subroutines ****************/
+
+/*
+ * Outputs the matches in match_collection
+ */
+int output_matches(
+    MATCH_COLLECTION_T* match_collection,
+    SCORER_TYPE_T scorer_type
+    ){
+  // create match iterator, return match in sorted order of main_score type
+  // TODO what is TRUE below?
+  MATCH_ITERATOR_T* match_iterator = 
+    new_match_iterator(match_collection, scorer_type, TRUE);
+  
+  // print only up to max_rank_result of the matches
+  int max_rank_result = get_int_parameter("max-rank-result");
+
+  // iterate over matches
+  int match_count = 0;
+  MATCH_T* match = NULL;
+  while(match_iterator_has_next(match_iterator)){
+    ++match_count;
+
+    //// set max number of final scoring matches to print as output
+
+    if(match_count >= max_rank_result){
+      break;
+    }
+    
+    match = match_iterator_next(match_iterator);
+    // TODO what is TRUE below?
+    print_match(match, stdout, TRUE, scorer_type);
+  }
+  return 0;
 }
 
 /**
