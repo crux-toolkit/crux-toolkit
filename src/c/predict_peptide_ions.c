@@ -27,6 +27,7 @@
 /**
  * when wrong command is seen carp, and exit
  */
+/*
 void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("predict_peptide_ions");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
@@ -41,6 +42,7 @@ void wrong_command(char* arg, char* comment){
   free(usage);
   exit(1);
 }
+*/
 
 int main(int argc, char** argv){
 
@@ -86,7 +88,8 @@ int main(int argc, char** argv){
 
   /* Get Options */
   //change to ION_TYPE_T
-  char* primary_ions = get_string_parameter_pointer("primary-ions");
+  //  char* primary_ions = get_string_parameter_pointer("primary-ions");
+  ION_TYPE_T ion_type = get_ion_type_parameter("primary-ions");
   BOOLEAN_T use_precursor_ions = get_boolean_parameter("precursor-ions");
   //char* precursor_ions = boolean_to_string(prec_io);
   
@@ -180,7 +183,7 @@ int main(int argc, char** argv){
  /* Parse the command line */
   
  //if (parse_arguments(argc, argv, 0)) {
-   ION_TYPE_T ion_type = BY_ION;
+  //ION_TYPE_T ion_type = BY_ION;
    //BOOLEAN_T use_precursor_ions = FALSE;
    int neutral_loss_count[MAX_MODIFICATIONS];
    BOOLEAN_T is_modification = FALSE;
@@ -189,16 +192,21 @@ int main(int argc, char** argv){
    int max_charge = charge_state;
 
    // check if charge >= 0
-   if(charge_state < 0){
+   /*  if(charge_state < 0){
      wrong_command("peptide charge cannot be bellow 0", NULL);
-   }
+     }*/
 
    // check peptide sequence
    if(!valid_peptide_sequence(peptide_sequence)){
-     wrong_command(peptide_sequence, "not a valid peptide sequence");
+     //wrong_command(peptide_sequence, "not a valid peptide sequence");
+
+     carp(CARP_FATAL, "The peptide sequence '%s' is not valid", 
+	  peptide_sequence);
+     exit(1);
    }
 
    // primary_ions
+   /*
    if(strcmp(primary_ions, "b") == 0){
      ion_type = B_ION;
    }
@@ -209,9 +217,13 @@ int main(int argc, char** argv){
      ion_type = BY_ION;
    }
    else{
-     wrong_command(primary_ions, "primary_ions are b|y|by");
+     //wrong_command(primary_ions, "primary_ions are b|y|by");
+     carp(CARP_FATAL, 
+	  "Primary-ions option must be b, y, or by.  '%s' is not valid", 
+	  ion_type);
+     exit(1);
    }
-
+   */
    // precursor_ions
    /*
    if(strcmp(precursor_ions, "F")== 0){
@@ -298,7 +310,11 @@ int main(int argc, char** argv){
      max_charge = charge_state;
    }
    else{
-     wrong_command(max_ion_charge, "max_ion_charge must be 1|2|3|peptide");
+     //wrong_command(max_ion_charge, "max_ion_charge must be 1|2|3|peptide");
+     carp(CARP_FATAL, 
+	  "max-ion-charge option must be 1,2,3 or peptide. '%s' is not legal",
+	  max_charge);
+     exit(1);
    }
    
    // set nh3, h2o

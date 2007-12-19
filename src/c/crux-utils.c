@@ -113,6 +113,36 @@ BOOLEAN_T sort_type_to_string(SORT_TYPE_T type,
 }
 
 /*
+ * The string version of ion types
+ */
+static char* ion_type_strings[NUMBER_ION_TYPES] = {
+  "a", "b", "c", "x", "y", "z", "p", "by", "bya", "all" };
+
+BOOLEAN_T string_to_ion_type(char* name, ION_TYPE_T* result){
+  BOOLEAN_T success = TRUE;
+
+  int ion_type = convert_enum_type_str(
+	name, -10, ion_type_strings, NUMBER_ION_TYPES);
+  (*result) = (ION_TYPE_T)ion_type;
+
+  if( ion_type < 0){
+    success = FALSE;
+  }
+  return success;
+}
+
+BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
+			     char* type_str){
+  BOOLEAN_T success = TRUE;
+  if( (int)type > NUMBER_ION_TYPES ){
+    success = FALSE;
+    type_str = NULL;
+  }
+  strcpy(type_str, ion_type_strings[type]);
+  return success;
+}
+
+/*
  * The string version of SCORER_TYPE_T
  */
 static char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
