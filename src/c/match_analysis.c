@@ -34,7 +34,7 @@
 /**
  * when wrong command is seen carp, and exit
  */
-void wrong_command(char* arg, char* comment){
+/*void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("search_spectra");
   carp(CARP_FATAL, "incorrect argument: %s", arg);
 
@@ -47,7 +47,7 @@ void wrong_command(char* arg, char* comment){
   free(usage);
   exit(1);
 }
-
+*/
 /** 
  * Routines to run various match analyses. Explained in more detail below.
  */
@@ -105,9 +105,7 @@ int output_matches(
 int main(int argc, char** argv){
 
   /* Declarations */
-  //int verbosity;
   char* psm_result_folder = NULL;
-  //  char* protein_file = NULL;
   char* fasta_file = NULL; //rename
   char* feature_file = NULL;
 
@@ -138,64 +136,6 @@ int main(int argc, char** argv){
   select_cmd_line_arguments( argument_list, num_arguments);
 
 
-  /* Define required command line arguments */
-  /*  // optional
-  int verbosity = CARP_ERROR;
-  char* parameter_file = "crux.params";
-  char* psm_algorithm = "percolator";
-  char* psm_result_folder = NULL;
-  
-  // required
-  char* fasta_file   = NULL;
-  char* feature_file = NULL;
-  // parsing variables
-  int result = 0;
-  char* error_message;
-  */
-  
-  /* Define optional command line arguments */   
-  /*
-    parse_arguments_set_opt(
-    "verbosity", 
-    "Specify the verbosity of the current processes from 0-100.",
-    (void *) &verbosity, 
-    INT_ARG);
-  
-  parse_arguments_set_opt(
-    "algorithm",
-    "The analysis algorithm to use. percolator|retention-czar|qvalue|all",
-    (void *) &psm_algorithm,
-    STRING_ARG); 
-
-  parse_arguments_set_opt(
-    "parameter-file",
-    "The crux parameter file to parse parameter from.",
-    (void *) &parameter_file,
-    STRING_ARG); 
-  
-  parse_arguments_set_req(
-    "match-output-folder", 
-    "The name of folder in which all the psm result files are located.",
-    (void *) &psm_result_folder, 
-    STRING_ARG);
-  
-  */
-  /* Define required command line arguments */
-  /*
-  parse_arguments_set_req(
-    "fasta-file", 
-    "The name of the file (in fasta format) from which to retrieve proteins "
-    "and peptides.",
-    (void *) &fasta_file, 
-    STRING_ARG);
-  
-  parse_arguments_set_opt(
-    "feature-file",
-    "Optional file in which to write the features",
-    (void *) &feature_file,
-    STRING_ARG); 
-*/
-
   /* Parse the command line and optional paramter file
      does sytnax, type, and bounds checking and dies on error */
   parse_cmd_line_into_params_hash(argc, argv);
@@ -203,119 +143,41 @@ int main(int argc, char** argv){
   /* Set verbosity */
   set_verbosity_level( get_int_parameter("verbosity"));
 
-  /* Parse the command line */
-  /*
-  if (parse_arguments(argc, argv, 0)) {
-        
-    // set verbosity
-    if(CARP_FATAL <= verbosity && verbosity <= CARP_MAX){
-      set_verbosity_level(verbosity);
-    }
-    else{
-      wrong_command("verbosity", "verbosity level must be between 0-100");
-    }
-
-    // set verbosity
-    set_verbosity_level(verbosity);
-
-    // parse and update parameters
-    parse_update_parameters(parameter_file);
-
-    // always use index for match_analysis!
-    set_string_parameter("use-index", "T");
-    
-    // parameters are now confirmed, can't be changed
-    parameters_confirmed();
-  */     
   /* Get arguments */
   psm_result_folder = get_string_parameter("psm-folder");
   fasta_file = get_string_parameter("protein input");
 
   /* Get options */
   SCORER_TYPE_T scorer_type = get_scorer_type_parameter("algorithm");
+  MATCH_COLLECTION_T* match_collection = NULL;
 
-  /*  
-  ALGORITHM_TYPE_T algorithm = PERCOLATOR;
-
-    // select algorithm TODO put this in a routine in parameter.c
-    char* algorithm_string = get_string_parameter_pointer("algorithm");
-    if(strcmp(algorithm_string, "percolator")== 0){
-      algorithm = PERCOLATOR;
-    }
-    else if(strcmp(algorithm_string, "retention-czar")== 0){
-      algorithm = CZAR;
-    }
-    else if(strcmp(algorithm_string, "qvalue")== 0){
-      algorithm = QVALUE;
-    }
-    else if(strcmp(algorithm_string, "all")== 0){
-      algorithm = ALL;
-    }
-    else if(strcmp(algorithm_string, "none")== 0){
-      algorithm = NO_ALGORITHM;
-    }
-    else{
-      wrong_command(psm_algorithm, 
-        "The analysis algorithm to use. percolator|retention-czar|all");
-    }
-
-    MATCH_COLLECTION_T* match_collection = NULL;
-    SCORER_TYPE_T scorer_type = 0;
-
-    if (algorithm == PERCOLATOR){
-      carp(CARP_INFO, "Running percolator");
-      match_collection = run_percolator(
-          psm_result_folder, fasta_file, feature_file); 
-      scorer_type = PERCOLATOR_SCORE;
-    } else if (algorithm == QVALUE){
-      carp(CARP_INFO, "Running q-value");
-      match_collection = run_qvalue(psm_result_folder, fasta_file);
-      scorer_type = LOGP_QVALUE_WEIBULL_XCORR;
-    } else if (algorithm == NO_ALGORITHM){
-      carp(CARP_INFO, "Using no algorithm.");
-      match_collection = run_nothing(
-          psm_result_folder, fasta_file, feature_file);
-      scorer_type = XCORR; 
-      // FIXME should call a method on score-type. Use Xcorr for now
-    }
-  */
-  //TODO change this to one function that takes the alg type as arg
-    MATCH_COLLECTION_T* match_collection = NULL;
-    switch( scorer_type ){
-    case PERCOLATOR_SCORE:
-      carp(CARP_INFO, "Running percolator");
-      match_collection = run_percolator(psm_result_folder,
-					fasta_file,
-					feature_file);
-      break;
-
-    case LOGP_QVALUE_WEIBULL_XCORR:
-      carp(CARP_INFO, "Running qvalue");
-      match_collection = run_qvalue(psm_result_folder, fasta_file);
-      break;
-
-    default:
-      carp(CARP_INFO, "No analysis algorithm chosen.");
-      match_collection = run_nothing(psm_result_folder,
-				     fasta_file,
-				     feature_file);
-      break;
-    }  
-
+  /* Perform the analysis */
+  switch( scorer_type ){
+  case PERCOLATOR_SCORE:
+    carp(CARP_INFO, "Running percolator");
+    match_collection = run_percolator(psm_result_folder,
+				      fasta_file,
+				      feature_file);
+    break;
+    
+  case LOGP_QVALUE_WEIBULL_XCORR:
+    carp(CARP_INFO, "Running qvalue");
+    match_collection = run_qvalue(psm_result_folder, fasta_file);
+    break;
+    
+  default:
+    carp(CARP_INFO, "No analysis algorithm chosen.");
+    match_collection = run_nothing(psm_result_folder,
+				   fasta_file,
+				   feature_file);
+    break;
+  }  
+  
   output_matches(match_collection, scorer_type);
-    // MEMLEAK below causes seg fault
-    // free_match_collection(match_collection);
-    /*   }
-  else{
-    char* usage = parse_arguments_get_usage("match_analysis");
-    result = parse_arguments_get_error(&error_message);
-    fprintf(stderr, "Error in command line. Error # %d\n", result);
-    fprintf(stderr, "%s\n", error_message);
-    fprintf(stderr, "%s", usage);
-    free(usage);
-    exit(1);
-  }
-  */
+  // MEMLEAK below causes seg fault
+  // free_match_collection(match_collection);
+
+  carp(CARP_INFO, "crux-analyze-matches finished.");
   exit(0);
 }
 
