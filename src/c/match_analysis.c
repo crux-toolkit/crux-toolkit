@@ -11,17 +11,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "carp.h"
-#include "peptide.h"
-#include "protein.h"
-#include "parse_arguments.h"
-#include "parameter.h"
-#include "spectrum.h"
-#include "spectrum_collection.h"
-#include "generate_peptides_iterator.h"
 #include "crux-utils.h"
-#include "scorer.h"
 #include "objects.h"
 #include "parameter.h"
+#include "protein.h"
+#include "peptide.h"
+#include "spectrum.h"
+#include "parse_arguments.h" //delete
+#include "spectrum_collection.h"
+#include "generate_peptides_iterator.h"
+#include "scorer.h"
 #include "match.h"
 #include "match_collection.h"
 #include "PercolatorCInterface.h"
@@ -29,7 +28,8 @@
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-
+#define NUM_ANALYSIS_OPTIONS 5
+#define NUM_ANALYSIS_ARGUMENTS 2
 
 /**
  * when wrong command is seen carp, and exit
@@ -103,7 +103,43 @@ int output_matches(
 
 /***********************************************************************/
 int main(int argc, char** argv){
-  // optional
+
+  /* Declarations */
+  //int verbosity;
+  char* psm_result_folder = NULL;
+  //  char* protein_file = NULL;
+  char* fasta_file = NULL; //rename
+  char* feature_file = NULL;
+
+  /* Define command line arguments */
+  int num_options = NUM_ANALYSIS_OPTIONS;
+  char* option_list[NUM_ANALYSIS_OPTIONS] = {
+    "verbosity",
+    "parameter-file",
+    "algorithm",
+    "feature-file",
+    "use-index" //not yet implemented, below set to true
+  };
+
+  int num_arguments = NUM_ANALYSIS_ARGUMENTS;
+  char* argument_list[NUM_ANALYSIS_ARGUMENTS] = {
+    "psm-folder",
+    "protein input",
+  };
+
+  /* for debugging handling of parameters*/
+  set_verbosity_level(CARP_DETAILED_DEBUG);
+
+  /* Set up parameters and set defaults in parameter.c */
+  initialize_parameters();
+
+  /* Define optional and required arguments in parameter.c */
+  select_cmd_line_options( option_list, num_options );
+  select_cmd_line_arguments( argument_list, num_arguments);
+
+
+  /* Define required command line arguments */
+  /*  // optional
   int verbosity = CARP_ERROR;
   char* parameter_file = "crux.params";
   char* psm_algorithm = "percolator";
@@ -112,13 +148,14 @@ int main(int argc, char** argv){
   // required
   char* fasta_file   = NULL;
   char* feature_file = NULL;
-
   // parsing variables
   int result = 0;
   char* error_message;
+  */
   
   /* Define optional command line arguments */   
-  parse_arguments_set_opt(
+  /*
+    parse_arguments_set_opt(
     "verbosity", 
     "Specify the verbosity of the current processes from 0-100.",
     (void *) &verbosity, 
@@ -142,7 +179,9 @@ int main(int argc, char** argv){
     (void *) &psm_result_folder, 
     STRING_ARG);
   
+  */
   /* Define required command line arguments */
+  /*
   parse_arguments_set_req(
     "fasta-file", 
     "The name of the file (in fasta format) from which to retrieve proteins "
@@ -155,8 +194,17 @@ int main(int argc, char** argv){
     "Optional file in which to write the features",
     (void *) &feature_file,
     STRING_ARG); 
+*/
+
+  /* Parse the command line and optional paramter file
+     does sytnax, type, and bounds checking and dies on error */
+  parse_cmd_line_into_params_hash(argc, argv);
+
+  /* Set verbosity */
+  set_verbosity_level( get_int_parameter("verbosity"));
 
   /* Parse the command line */
+  /*
   if (parse_arguments(argc, argv, 0)) {
         
     // set verbosity
@@ -166,20 +214,28 @@ int main(int argc, char** argv){
     else{
       wrong_command("verbosity", "verbosity level must be between 0-100");
     }
-    
+
     // set verbosity
     set_verbosity_level(verbosity);
 
     // parse and update parameters
     parse_update_parameters(parameter_file);
-    
+
     // always use index for match_analysis!
     set_string_parameter("use-index", "T");
     
     // parameters are now confirmed, can't be changed
     parameters_confirmed();
-    
-    ALGORITHM_TYPE_T algorithm = PERCOLATOR;
+  */     
+  /* Get arguments */
+  psm_result_folder = get_string_parameter("psm-folder");
+  fasta_file = get_string_parameter("protein input");
+
+  /* Get options */
+  SCORER_TYPE_T scorer_type = get_scorer_type_parameter("algorithm");
+
+  /*  
+  ALGORITHM_TYPE_T algorithm = PERCOLATOR;
 
     // select algorithm TODO put this in a routine in parameter.c
     char* algorithm_string = get_string_parameter_pointer("algorithm");
@@ -205,6 +261,7 @@ int main(int argc, char** argv){
 
     MATCH_COLLECTION_T* match_collection = NULL;
     SCORER_TYPE_T scorer_type = 0;
+
     if (algorithm == PERCOLATOR){
       carp(CARP_INFO, "Running percolator");
       match_collection = run_percolator(
@@ -221,10 +278,34 @@ int main(int argc, char** argv){
       scorer_type = XCORR; 
       // FIXME should call a method on score-type. Use Xcorr for now
     }
-    output_matches(match_collection, scorer_type);
+  */
+  //TODO change this to one function that takes the alg type as arg
+    MATCH_COLLECTION_T* match_collection = NULL;
+    switch( scorer_type ){
+    case PERCOLATOR_SCORE:
+      carp(CARP_INFO, "Running percolator");
+      match_collection = run_percolator(psm_result_folder,
+					fasta_file,
+					feature_file);
+      break;
+
+    case LOGP_QVALUE_WEIBULL_XCORR:
+      carp(CARP_INFO, "Running qvalue");
+      match_collection = run_qvalue(psm_result_folder, fasta_file);
+      break;
+
+    default:
+      carp(CARP_INFO, "No analysis algorithm chosen.");
+      match_collection = run_nothing(psm_result_folder,
+				     fasta_file,
+				     feature_file);
+      break;
+    }  
+
+  output_matches(match_collection, scorer_type);
     // MEMLEAK below causes seg fault
     // free_match_collection(match_collection);
-   }
+    /*   }
   else{
     char* usage = parse_arguments_get_usage("match_analysis");
     result = parse_arguments_get_error(&error_message);
@@ -234,6 +315,7 @@ int main(int argc, char** argv){
     free(usage);
     exit(1);
   }
+  */
   exit(0);
 }
 
@@ -505,12 +587,16 @@ MATCH_COLLECTION_T* run_percolator(
     }
   }
 
+  carp(CARP_DETAILED_DEBUG, "Created feature file");
+
   // create MATCH_COLLECTION_ITERATOR_T object
   // which will read in the serialized output PSM results and return
   // first the match_collection of TARGET followed by 
   // the DECOY* match_collections.
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
     new_match_collection_iterator(psm_result_folder, fasta_file);
+
+  carp(CARP_DETAILED_DEBUG, "Created the match collection iterator");
 
   // iterate over each, TARGET, DECOY 1..3 match_collection sets
   int iterations = 0;

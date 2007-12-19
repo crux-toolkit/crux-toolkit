@@ -2020,15 +2020,21 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
         ) {
       continue;
     }
-    file_in_dir = get_full_filename(match_collection_iterator->directory_name, 
-                                    directory_entry->d_name);
+    file_in_dir =get_full_filename(match_collection_iterator->directory_name, 
+				   directory_entry->d_name);
 
     carp(CARP_INFO, "Getting PSMs from %s", file_in_dir);
     result_file = fopen(file_in_dir, "r");
+    if( access(file_in_dir, R_OK)){
+      carp(CARP_FATAL, "Cannot read from psm file '%s'", file_in_dir);
+      exit(1);
+    }
     // add all the match objects from result_file
     extend_match_collection(match_collection, database, result_file);
+    carp(CARP_INFO, "extended match collection " );
     fclose(result_file);
     free(file_in_dir);
+    carp(CARP_DETAILED_DEBUG, "Finished file.");
   }
   
   return match_collection;
@@ -2464,7 +2470,11 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   DIR* working_directory = NULL;
   struct dirent* directory_entry = NULL;
   DATABASE_T* database = NULL;
-  char* use_index = get_string_parameter_pointer("use-index");
+  //BF: this is a temporary change because parameters can
+  //    no longer be set from outside parameter.c
+  //    eventually, analyze-matches will be implemented w/o index
+  //  char* use_index = get_string_parameter_pointer("use-index");
+  char* use_index = "T";
   BOOLEAN_T use_index_boolean = FALSE;  
   int total_sets = 0;
 

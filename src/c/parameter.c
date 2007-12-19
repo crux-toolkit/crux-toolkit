@@ -194,6 +194,9 @@ void initialize_parameters(void){
   //and uses 'protein input'
 
   /* analyze-matches arguments */
+  temp_set_string_parameter("psm-folder", NULL, 
+   "File containing the binary psm files created by crux-search-for-matches");
+  //and uses protein input
 
   /* get-ms2-spectrum */
   temp_set_int_parameter("scan number", 0, 1, BILLION, 
@@ -287,7 +290,7 @@ void initialize_parameters(void){
   temp_set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
   temp_set_string_parameter("seed", "time", "HIDE ME FROM USER");
 
-    // searching peptides
+  /* THESE REMAIN.  Where are they used??? */
 
   // score_peptide_spectrum parameters
   temp_set_double_parameter("beta", 0.075, 0, 1, "usage");
@@ -315,11 +318,17 @@ void initialize_parameters(void){
   // how many peptides to sample for EVD parameter estimation
   temp_set_int_parameter("sample-count", 500, 0, BILLION, "usage");
 
-  // match_search
+  // end match_search mystery options
   
-  // match_analysis
-  temp_set_string_parameter("algorithm", "percolator", "usage");
-  temp_set_string_parameter("feature-file", "match_analysis.features", "usage");
+  /* analyze-matches options */
+  //  temp_set_string_parameter("algorithm", "percolator", 
+  temp_set_scorer_type_parameter("algorithm", PERCOLATOR_SCORE, 
+  "The analysis algorithm to use (percolator, retention-czar, qvalue)." \
+  "  Default percolator");
+  temp_set_string_parameter("feature-file", "match_analysis.features", 
+     "Optional file into which psm features are printed.");
+
+  /* analyze-matches parameter options */
   temp_set_double_parameter("pi0", 0.9, 0, 1, "usage");
   temp_set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
 

@@ -120,7 +120,9 @@ static char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "logp_evd_xcorr", "logp_bonf_evd_xcorr", "logp_weibull_sp", 
    "logp_bonf_weibull_sp", "logp_weibull_xcorr", 
    "logp_bonf_weibull_xcorr", "q_value", "percolator_score", 
-   "logp_qvalue_weibull_xcorr" };
+   "qvalue"};//"logp_qvalue_weibull_xcorr" };
+//TODO: this should probably be changed, these strings are the option args
+//Instead could have an if block in string_to_type
 
 BOOLEAN_T string_to_scorer_type(char* name, SCORER_TYPE_T* result){
   BOOLEAN_T success = TRUE;
