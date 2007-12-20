@@ -7,7 +7,7 @@
 
 #include "parameter.h"
 
-//TODO:  in all temp_set, change result=add_... to result= result && add_...
+//TODO:  in all set, change result=add_... to result= result && add_...
 
 /**
  *\struct parameter_hash
@@ -72,13 +72,13 @@ BOOLEAN_T string_to_param_type(char*, PARAMETER_TYPE_T* );
  * temporary replacement for function, return name once all exe's are fixed
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T temp_set_boolean_parameter(
+BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
  char* usage
  );
 
-BOOLEAN_T temp_set_int_parameter(
+BOOLEAN_T set_int_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  int set_value,  ///< the value to be set -in
  int min_value,  ///< the value to be set -in
@@ -86,7 +86,7 @@ BOOLEAN_T temp_set_int_parameter(
  char* usage
  );
 
-BOOLEAN_T temp_set_double_parameter(
+BOOLEAN_T set_double_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  double set_value,  ///< the value to be set -in
  double min_value,  ///< the value to be set -in
@@ -94,40 +94,40 @@ BOOLEAN_T temp_set_double_parameter(
  char* usage
   );
 
-BOOLEAN_T temp_set_string_parameter(
+BOOLEAN_T set_string_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  char* set_value,  ///< the value to be set -in
  char* usage
   );
 
-BOOLEAN_T temp_set_mass_type_parameter(
+BOOLEAN_T set_mass_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  MASS_TYPE_T set_value,  ///< the value to be set -in
  char* usage
   );
 
-BOOLEAN_T temp_set_peptide_type_parameter(
+BOOLEAN_T set_peptide_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  PEPTIDE_TYPE_T set_value,  ///< the value to be set -in
  char* usage
   );
 
-BOOLEAN_T temp_set_sort_type_parameter(
+BOOLEAN_T set_sort_type_parameter(
  char* name,
  SORT_TYPE_T set_value,
  char* usage);
 
-BOOLEAN_T temp_set_scorer_type_parameter(
+BOOLEAN_T set_scorer_type_parameter(
  char* name,
  SCORER_TYPE_T set_value,
  char* usage);
 
-BOOLEAN_T temp_set_output_type_parameter(
+BOOLEAN_T set_output_type_parameter(
  char* name,
  MATCH_SEARCH_OUTPUT_MODE_T set_value,
  char* usage);
 
-BOOLEAN_T temp_set_ion_type_parameter(
+BOOLEAN_T set_ion_type_parameter(
  char* name,
  ION_TYPE_T set_value,
  char* usage);
@@ -180,207 +180,207 @@ void initialize_parameters(void){
   /* *** Initialize Arguments *** */
 
   /* generate_peptide arguments */
-  temp_set_string_parameter("protein input", NULL, 
+  set_string_parameter("protein input", NULL, 
   "File containing protein sequences either in fasta format or binary index.");
   /* create_index arguments */
-  temp_set_string_parameter("protein fasta file", NULL,
+  set_string_parameter("protein fasta file", NULL,
 		    "File containing protein sequences in fasta format.");
-  temp_set_string_parameter("index name", NULL,
+  set_string_parameter("index name", NULL,
 		    "Name to give the new directory containing index files.");
 
   /* search-for-matches arguments */
-  temp_set_string_parameter("ms2 file", NULL,
+  set_string_parameter("ms2 file", NULL,
 			    "File containing spectra to be searched.");
   //and uses 'protein input'
 
   /* analyze-matches arguments */
-  temp_set_string_parameter("psm-folder", NULL, 
+  set_string_parameter("psm-folder", NULL, 
    "File containing the binary psm files created by crux-search-for-matches");
   //and uses protein input
 
   /* get-ms2-spectrum */
-  temp_set_int_parameter("scan number", 0, 1, BILLION, 
+  set_int_parameter("scan number", 0, 1, BILLION, 
 			 "Scan number identifying the spectrum");
   //uses ms2 file
-  temp_set_string_parameter("output file", NULL, 
+  set_string_parameter("output file", NULL, 
 			    "File where spectrum will be written.");
 
   /* predict-peptide-ions */
-  temp_set_string_parameter("peptide sequence", NULL, 
+  set_string_parameter("peptide sequence", NULL, 
        "The sequence of the peptide.");
-  temp_set_int_parameter("charge state", 0, 0, 3, 
+  set_int_parameter("charge state", 0, 0, 3, 
        "The charge state of the peptide.");
 
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
-  temp_set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
+  set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
 	"Set level of output to stderr (0-100).  Default 10.");
 
-  temp_set_string_parameter("parameter-file", NULL, 
+  set_string_parameter("parameter-file", NULL, 
 	"Set additional options with values in the given file.");
     
   /* generate_peptide, create_index parameters  */
-  temp_set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
+  set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
 	"The minimum length of peptides to consider. Default 6.");
-  temp_set_int_parameter("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
+  set_int_parameter("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
 	"The maximum length of peptides to consider. Default 50.");
-  temp_set_double_parameter("min-mass", 200, 0, BILLION,
+  set_double_parameter("min-mass", 200, 0, BILLION,
 	"The minimum mass of peptides to consider. Default 200.");
-  temp_set_double_parameter("max-mass", 7200, 1, BILLION, 
+  set_double_parameter("max-mass", 7200, 1, BILLION, 
 	"The maximum mass of peptides to consider. Default 7200.");
-  temp_set_mass_type_parameter("isotopic-mass", AVERAGE, 
+  set_mass_type_parameter("isotopic-mass", AVERAGE, 
 	"Which isotopes to use in calcuating mass (average or mono). " \
 	"Default average");
-  temp_set_peptide_type_parameter("cleavages", TRYPTIC, 
+  set_peptide_type_parameter("cleavages", TRYPTIC, 
 	"The type of cleavage sites to consider (tryptic, partial, all)" \
         "Default tryptic.");
-  temp_set_boolean_parameter("missed-cleavages", FALSE, 
+  set_boolean_parameter("missed-cleavages", FALSE, 
 	"Include peptides with missed cleavage sites (T,F). Default FALSE.");
-  temp_set_boolean_parameter("unique-peptides", FALSE,
+  set_boolean_parameter("unique-peptides", FALSE,
         "Generate peptides only once, even if they appear in more " \
 	"than one protein (T,F).  Default FALSE.");
   
   /* more generate_peptide parameters */
-  temp_set_boolean_parameter("output-sequence", FALSE, 
+  set_boolean_parameter("output-sequence", FALSE, 
 	"Print peptide sequence (T,F). Default FALSE.");
-  temp_set_boolean_parameter("output-trypticity", FALSE, 
+  set_boolean_parameter("output-trypticity", FALSE, 
 	"Print trypticity of peptide (T,F). Default FALSE.");
-  temp_set_boolean_parameter("use-index", FALSE, 
+  set_boolean_parameter("use-index", FALSE, 
         "Use an index that has already been created (T,F). " \
         "Default FALSE (use fasta file)");
-  //  temp_set_string_parameter("use-index", "F", "usage");
-  temp_set_sort_type_parameter("sort", NONE, 
+  //  set_string_parameter("use-index", "F", "usage");
+  set_sort_type_parameter("sort", NONE, 
         "Sort peptides according to which property " \
         "(mass, length, lexical, none).  Default none.");
 
   /* search-for-matches command line options */
-  temp_set_scorer_type_parameter("prelim-score-type", SP, 
+  set_scorer_type_parameter("prelim-score-type", SP, 
   			    "Initial scoring (sp, xcorr). Default sp");
-  temp_set_scorer_type_parameter("score-type", XCORR, 
+  set_scorer_type_parameter("score-type", XCORR, 
    "The scoring method to use (xcorr, xcorr_logp, sp_logp). Default xcorr."); 
 
-  temp_set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
+  set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
          "Minimum mass of spectra to be searched.  Default 0.");
-  temp_set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, 
+  set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, 
          "Maximum mass of spectra to search.  Default, none.");
-  temp_set_string_parameter("spectrum-charge", "all", 
+  set_string_parameter("spectrum-charge", "all", 
          "Spectrum charge states to search (1,2,3,all). Default all.");
-  temp_set_string_parameter("match-output-folder", ".", 
+  set_string_parameter("match-output-folder", ".", 
 "Folder to which search results will be written.  Default '.' (current dir)");
-  temp_set_output_type_parameter("output-mode", BINARY_OUTPUT, 
+  set_output_type_parameter("output-mode", BINARY_OUTPUT, 
          "Types of output to produce (binary, sqt, all). Default binary");
-  temp_set_string_parameter("sqt-output-file", "target.sqt", 
+  set_string_parameter("sqt-output-file", "target.sqt", 
          "SQT output file name. Default 'target.sqt'");
-  temp_set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
+  set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
          "SQT output file name for decoys.  Default 'decoy.sqt'");
-  temp_set_int_parameter("number-decoy-set", 2, 0, 10, 
+  set_int_parameter("number-decoy-set", 2, 0, 10, 
          "The number of decoy databases to search.  Default 2.");
 
   /* search-for-matches parameter file options */
-  temp_set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
+  set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
          "NOT FOR COMMAND LINE. Number of spectra to score after preliminary scoring.  Default 500.");
-  temp_set_int_parameter("max-rank-result", 500, 1, BILLION, 
+  set_int_parameter("max-rank-result", 500, 1, BILLION, 
     "NOT FOR COMMAND LINE. Number of search results to report. Default 500.");
-  temp_set_int_parameter("top-match", 1, 1, 111, 
+  set_int_parameter("top-match", 1, 1, 111, 
          "NOT FOR COMMAND LINE. Umm...");
-  temp_set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
-  temp_set_string_parameter("seed", "time", "HIDE ME FROM USER");
+  set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
+  set_string_parameter("seed", "time", "HIDE ME FROM USER");
 
   /* THESE REMAIN.  Where are they used??? */
 
   // score_peptide_spectrum parameters
-  temp_set_double_parameter("beta", 0.075, 0, 1, "usage");
-  temp_set_double_parameter("max-mz", 4000, 0, BILLION, "usage");
-  temp_set_int_parameter("charge", 2, 1, 4, "usage");
+  set_double_parameter("beta", 0.075, 0, 1, "usage");
+  set_double_parameter("max-mz", 4000, 0, BILLION, "usage");
+  set_int_parameter("charge", 2, 1, 4, "usage");
 
   // match_collection parameters
-  temp_set_double_parameter("mass-window", 3.0, 0, 100, "usage");
+  set_double_parameter("mass-window", 3.0, 0, 100, "usage");
 
   // create_psm_files
-  temp_set_int_parameter("starting-sentence-idx", 0, 0, 0, "usage");
+  set_int_parameter("starting-sentence-idx", 0, 0, 0, "usage");
   //set_string_parameter("model-type", "single");
-  temp_set_string_parameter("model-type", "single", "usage");
+  set_string_parameter("model-type", "single", "usage");
 
   // score_spectrum
-  temp_set_int_parameter("top-fit-sp", 1000, 1, BILLION, "usage");
-  temp_set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, "usage");
-  temp_set_int_parameter("number-peptides-to-subset", 0, 0, 0, "usage");
-  temp_set_double_parameter("fraction-top-scores-to-fit", -1.0, -10, 10, "usage");
-  temp_set_int_parameter("skip-first-score", 0, 0, 1, "usage");
+  set_int_parameter("top-fit-sp", 1000, 1, BILLION, "usage");
+  set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, "usage");
+  set_int_parameter("number-peptides-to-subset", 0, 0, 0, "usage");
+  set_double_parameter("fraction-top-scores-to-fit", -1.0, -10, 10, "usage");
+  set_int_parameter("skip-first-score", 0, 0, 1, "usage");
   
   // set the top ranking peptides to score for LOGP_*
-  temp_set_int_parameter("top-rank-p-value", 1, 1, BILLION, "usage");
+  set_int_parameter("top-rank-p-value", 1, 1, BILLION, "usage");
   
   // how many peptides to sample for EVD parameter estimation
-  temp_set_int_parameter("sample-count", 500, 0, BILLION, "usage");
+  set_int_parameter("sample-count", 500, 0, BILLION, "usage");
 
   // end match_search mystery options
   
   /* analyze-matches options */
-  //  temp_set_string_parameter("algorithm", "percolator", 
-  temp_set_scorer_type_parameter("algorithm", PERCOLATOR_SCORE, 
+  //  set_string_parameter("algorithm", "percolator", 
+  set_scorer_type_parameter("algorithm", PERCOLATOR_SCORE, 
   "The analysis algorithm to use (percolator, retention-czar, qvalue)." \
   "  Default percolator");
-  temp_set_string_parameter("feature-file", "match_analysis.features", 
+  set_string_parameter("feature-file", "match_analysis.features", 
      "Optional file into which psm features are printed.");
 
   /* analyze-matches parameter options */
-  temp_set_double_parameter("pi0", 0.9, 0, 1, "usage");
-  temp_set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
+  set_double_parameter("pi0", 0.9, 0, 1, "usage");
+  set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
 
   /* predict-peptide-ions */
-  //temp_set_string_parameter("primary-ions","by",
-  temp_set_ion_type_parameter("primary-ions", BY_ION,
+  //set_string_parameter("primary-ions","by",
+  set_ion_type_parameter("primary-ions", BY_ION,
       "The ion series to predict (b,y,by). Default 'by' (both b and y ions)");
-  temp_set_boolean_parameter("precursor-ions", FALSE,
+  set_boolean_parameter("precursor-ions", FALSE,
       "Predict the precursor ions, and all associated ions (neutral-losses, multiple charge states) consistent with the other specified options. (T,F) Default F");
-  temp_set_string_parameter("neutral-losses", "all", 
+  set_string_parameter("neutral-losses", "all", 
       "Predict neutral loss ions (none, h20, nh3, all). Default 'all'");
-  temp_set_int_parameter("isotope", 0, 0, 2,
+  set_int_parameter("isotope", 0, 0, 2,
       "Predict the given number of isotope peaks.0|1|2");
-  temp_set_boolean_parameter("flanking", FALSE, 
+  set_boolean_parameter("flanking", FALSE, 
       "Predict flanking peaks for b and y ions (T,F). Default F.");
-  temp_set_string_parameter("max-ion-charge", "peptide",
+  set_string_parameter("max-ion-charge", "peptide",
       "Predict ions up to this charge state (1,2,3) or to the charge state " \
       "of the peptide (peptide).  Default 'peptide'.");
-  temp_set_int_parameter("nh3",0, 0, BILLION, 
+  set_int_parameter("nh3",0, 0, BILLION, 
       "Predict peaks with the following max nh3 modification.");
-  temp_set_int_parameter("h2o",0, 0, BILLION,
+  set_int_parameter("h2o",0, 0, BILLION,
       "Predict peaks with the following max h2o modification.");
 
   /* static mods */
-  temp_set_double_parameter("A", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("B", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("C", 57.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("D", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("E", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("F", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("G", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("H", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("I", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("J", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("K", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("L", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("M", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("N", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("O", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("P", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("Q", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("R", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("S", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("T", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("U", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("V", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("W", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("X", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("Y", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
-  temp_set_double_parameter("Z", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("A", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("B", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("C", 57.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("D", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("E", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("F", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("G", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("H", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("I", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("J", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("K", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("L", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("M", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("N", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("O", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("P", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("Q", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("R", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("S", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("T", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("U", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("V", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("W", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("X", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("Y", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
+  set_double_parameter("Z", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
 
   /* get-ms2-spectrum options */
-  temp_set_boolean_parameter("stats", FALSE, 
+  set_boolean_parameter("stats", FALSE, 
 	"Print to stdout additional information about the spectrum");
-  //temp_set_output_mode_parameter("out-file", FILE_NOCLOBBER, "Choose how to handle existing output files (replace, append, ???");
+  //set_output_mode_parameter("out-file", FILE_NOCLOBBER, "Choose how to handle existing output files (replace, append, ???");
 
   // now we have initialized the parameters
   parameter_initialized = TRUE;
@@ -1073,7 +1073,7 @@ ION_TYPE_T get_ion_type_parameter(char* name){
  **************************************************
  */
 //TODO change all result = add_or... to result = result && add_or_...
-BOOLEAN_T temp_set_boolean_parameter(
+BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
  char* usage
@@ -1102,7 +1102,7 @@ BOOLEAN_T temp_set_boolean_parameter(
 }
 
 //temporary, replace name with set_int_parameter
-BOOLEAN_T temp_set_int_parameter(
+BOOLEAN_T set_int_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  int set_value,  ///< the value to be set -in
  int min_value,  ///< the minimum accepted value -in
@@ -1137,7 +1137,7 @@ BOOLEAN_T temp_set_int_parameter(
 
 
 //change name when all exe's are fixed
-BOOLEAN_T temp_set_double_parameter(
+BOOLEAN_T set_double_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  double set_value,  ///< the value to be set -in
  double min_value,  ///< the value to be set -in
@@ -1173,7 +1173,7 @@ BOOLEAN_T temp_set_double_parameter(
  * temporary replacement for function, return name once all exe's are fixed
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T temp_set_string_parameter(
+BOOLEAN_T set_string_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  char* set_value,  ///< the value to be set -in
  char* usage
@@ -1199,7 +1199,7 @@ BOOLEAN_T temp_set_string_parameter(
   return result;
 }
 
-BOOLEAN_T temp_set_mass_type_parameter(
+BOOLEAN_T set_mass_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  MASS_TYPE_T set_value,  ///< the value to be set -in
  char* usage
@@ -1225,7 +1225,7 @@ BOOLEAN_T temp_set_mass_type_parameter(
 
 }
 
-BOOLEAN_T temp_set_peptide_type_parameter(
+BOOLEAN_T set_peptide_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  PEPTIDE_TYPE_T set_value,  ///< the value to be set -in
  char* usage
@@ -1251,7 +1251,7 @@ BOOLEAN_T temp_set_peptide_type_parameter(
 
 }
 
-BOOLEAN_T temp_set_sort_type_parameter(
+BOOLEAN_T set_sort_type_parameter(
 				       char* name,
 				       SORT_TYPE_T set_value,
 				       char* usage)
@@ -1273,7 +1273,7 @@ BOOLEAN_T temp_set_sort_type_parameter(
   return result;
 }
 
-BOOLEAN_T temp_set_scorer_type_parameter(
+BOOLEAN_T set_scorer_type_parameter(
 					 char* name,
 					 SCORER_TYPE_T set_value,
 					 char* usage)
@@ -1297,7 +1297,7 @@ BOOLEAN_T temp_set_scorer_type_parameter(
   return result;
 }
 
-BOOLEAN_T temp_set_output_type_parameter(
+BOOLEAN_T set_output_type_parameter(
 					 char* name,
 					 MATCH_SEARCH_OUTPUT_MODE_T set_value,
 					 char* usage)
@@ -1321,7 +1321,7 @@ BOOLEAN_T temp_set_output_type_parameter(
   return result;
 }
 
-BOOLEAN_T temp_set_ion_type_parameter(char* name,
+BOOLEAN_T set_ion_type_parameter(char* name,
 				      ION_TYPE_T set_value,
 				      char* usage)
 {
