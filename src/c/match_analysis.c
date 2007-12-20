@@ -80,7 +80,7 @@ int main(int argc, char** argv){
   };
 
   /* for debugging handling of parameters*/
-  set_verbosity_level(CARP_DETAILED_DEBUG);
+  //set_verbosity_level(CARP_DETAILED_DEBUG);
 
   /* Set up parameters and set defaults in parameter.c */
   initialize_parameters();
