@@ -249,7 +249,6 @@ void initialize_parameters(void){
   set_boolean_parameter("use-index", FALSE, 
         "Use an index that has already been created (T,F). " \
         "Default FALSE (use fasta file)");
-  //  set_string_parameter("use-index", "F", "usage");
   set_sort_type_parameter("sort", NONE, 
         "Sort peptides according to which property " \
         "(mass, length, lexical, none).  Default none.");
@@ -279,46 +278,33 @@ void initialize_parameters(void){
 
   /* search-for-matches parameter file options */
   set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
-         "NOT FOR COMMAND LINE. Number of spectra to score after preliminary scoring.  Default 500.");
+         "NOT FOR COMMAND LINE. Number of spectra to score after " \
+		    "preliminary scoring.  Default 500.");
   set_int_parameter("max-rank-result", 500, 1, BILLION, 
     "NOT FOR COMMAND LINE. Number of search results to report. Default 500.");
   set_int_parameter("top-match", 1, 1, 111, 
          "NOT FOR COMMAND LINE. Umm...");
   set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
   set_string_parameter("seed", "time", "HIDE ME FROM USER");
+  set_double_parameter("mass-window", 3.0, 0, 100, 
+        "Search peptides within +/- 'mass-window' of the " \
+        "spectrum mass.  Default 3.0");
 
-  /* THESE REMAIN.  Where are they used??? */
-
-  // score_peptide_spectrum parameters
+  // Sp scoring params
   set_double_parameter("beta", 0.075, 0, 1, "usage");
   set_double_parameter("max-mz", 4000, 0, BILLION, "usage");
-  set_int_parameter("charge", 2, 1, 4, "usage");
-
-  // match_collection parameters
-  set_double_parameter("mass-window", 3.0, 0, 100, "usage");
-
-  // create_psm_files
-  set_int_parameter("starting-sentence-idx", 0, 0, 0, "usage");
-  //set_string_parameter("model-type", "single");
-  set_string_parameter("model-type", "single", "usage");
-
-  // score_spectrum
-  set_int_parameter("top-fit-sp", 1000, 1, BILLION, "usage");
-  set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, "usage");
-  set_int_parameter("number-peptides-to-subset", 0, 0, 0, "usage");
-  set_double_parameter("fraction-top-scores-to-fit", -1.0, -10, 10, "usage");
-  set_int_parameter("skip-first-score", 0, 0, 1, "usage");
-  
-  // set the top ranking peptides to score for LOGP_*
-  set_int_parameter("top-rank-p-value", 1, 1, BILLION, "usage");
-  
+  set_int_parameter("top-fit-sp", 1000, 1, BILLION, 
+         "used in new_match_collection_from_spectrum, but not sure for what");
   // how many peptides to sample for EVD parameter estimation
   set_int_parameter("sample-count", 500, 0, BILLION, "usage");
+  // set the top ranking peptides to score for LOGP_*
+  set_int_parameter("top-rank-p-value", 1, 1, BILLION, "usage");
 
-  // end match_search mystery options
-  
+  //in estimate_weibull_parameters
+  set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, "usage");
+  set_double_parameter("fraction-top-scores-to-fit", -1.0, -10, 10, "usage");
+
   /* analyze-matches options */
-  //  set_string_parameter("algorithm", "percolator", 
   set_scorer_type_parameter("algorithm", PERCOLATOR_SCORE, 
   "The analysis algorithm to use (percolator, retention-czar, qvalue)." \
   "  Default percolator");
@@ -330,7 +316,6 @@ void initialize_parameters(void){
   set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
 
   /* predict-peptide-ions */
-  //set_string_parameter("primary-ions","by",
   set_ion_type_parameter("primary-ions", BY_ION,
       "The ion series to predict (b,y,by). Default 'by' (both b and y ions)");
   set_boolean_parameter("precursor-ions", FALSE,
