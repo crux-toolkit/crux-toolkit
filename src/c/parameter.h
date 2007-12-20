@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -38,9 +38,8 @@ typedef enum parameter_type PARAMETER_TYPE_T;
 
 /**
  * initialize parameters
- * ONLY add optional parameters here!!!
- * MUST declare ALL optional parameters in array to be used
- * Every option and its default value for every executable 
+ * Every required argument for every executable 
+ * and every option and its default value
  * must be declared here
  */
 void initialize_parameters(void);
@@ -85,19 +84,6 @@ BOOLEAN_T get_boolean_parameter(
  );
 
 /**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_boolean_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- BOOLEAN_T set_value  ///< the value to be set -in
- );
-*/
-/**
  * Searches through the list of parameters, looking for one whose
  * name matches the string.  This function returns the parameter value if the
  * parameter is in the parameter hash table.  This
@@ -109,19 +95,6 @@ int get_int_parameter(
   );
 
 /**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_int_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- int set_value  ///< the value to be set -in
- );
-*/
-/**
  * Searches through the list of parameters, looking for one whose
  * name matches the string.  This function returns the parameter value if the
  * parameter is in the parameter hash table.  This
@@ -132,19 +105,6 @@ double get_double_parameter(
   char* name   ///< the name of the parameter looking for -in
   );
 
-/**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_double_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- double set_value  ///< the value to be set -in
- );
-*/
 /**
  * Searches through the list of parameters, looking for one whose
  * parameter_name matches the string. 
@@ -167,19 +127,6 @@ char* get_string_parameter_pointer(
   char* name  ///< the name of the parameter looking for -in
   );
 
-/**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_string_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- char* set_value  ///< the value to be set -in
- );
-*/
 MASS_TYPE_T get_mass_type_parameter(
  char* name
  );
@@ -201,6 +148,15 @@ ION_TYPE_T get_ion_type_parameter(
  );
 
 /**
+ * Searches through the list of parameters, 
+ * looking for one whose name matches the string.  
+ * Returns a peptide_type enumerated type (in objects.h)
+ */ 
+PEPTIDE_TYPE_T get_peptide_type_parameter(
+  char* name
+  );
+
+/**
  * Prints the parameters.  If lead_string is not null, preprends it to
  * each line.
  */
@@ -211,64 +167,5 @@ void print_parameters(
   FILE* outstream  ///< the output stream -out
   );
 
-/**
- * Check to see if any parameters were not used.  Issue a warning.
- */
-/*void check_unused_parameters(void);
- */
-
-/**
- * set the parameters to confirmed, thus blocks any additional changes to the parameters
- */
-/*void parameters_confirmed(void);
- */
-
-//I think this is being replaced
-/**
- * Parameter file must be parsed first!
- * searches through the hash table of parameters, 
- * looking for one whose name matches the string.  
- * then the function sets the corresponding value.
- * if the parameter is not found, return FALSE
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_options_command_line(
-  char*     name,  ///< the name of the parameter looking for -in
-  char* set_value, ///< the value to be set -in
-  BOOLEAN_T required ///< is this a required option -in
-  );
-*/
-//This is being replaced
-/**
- * This method should be called only after parsed command line
- * first, parse paramter file
- * Next, updates the parameter files with command line options
- * command line arguments have higher precedence 
- * parse the parameter file given the filename
- */
-/*void parse_update_parameters(
-  char* parameter_file ///< the parameter file to be parsed -in
-  );
-*/
-/**
- * add parameters to parameter list
- * Should use this only for testing cases.
- * Otherwiase use normal parameter system.
- */
-/*BOOLEAN_T add_parameter(
-  char*     name,  ///< the name of the parameter to add -in
-  char* set_value  ///< the value to be added -in                  
-  );
-*/
-//put this with the other gets
-/**
- * Parameter file must be parsed first!
- * Searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * Returns a peptide_type enumerated type (in objects.h)
- */ 
-PEPTIDE_TYPE_T get_peptide_type_parameter(
-  char* name
-  );
 
 #endif
