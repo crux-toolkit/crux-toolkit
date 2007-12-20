@@ -61,7 +61,7 @@ enum argument_type string_to_argument_type(char* arg_type_str);
  * higher precedence command line parameters
  * returns TRUE is sucessful, else FALSE
  */
-BOOLEAN_T update_parameter(void);
+//BOOLEAN_T update_parameter(void);
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #endif /* PARSE_ARGUMENTS_H */

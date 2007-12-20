@@ -7,9 +7,7 @@
 
 #include "parameter.h"
 
-//TODO:  why are #includes here and not in .h?
-//       change all temp_add to use add_or_update and no strcpy
-//       in all temp_set, change result=add_... to result= result && add_...
+//TODO:  in all temp_set, change result=add_... to result= result && add_...
 
 /**
  *\struct parameter_hash
@@ -40,13 +38,12 @@ struct parameter_hash* min_values = & min_values_hash_table;
 struct parameter_hash  max_values_hash_table;
 struct parameter_hash* max_values = & max_values_hash_table;
 
-
-BOOLEAN_T parameter_initialized = FALSE; //have parame values been initialized
+BOOLEAN_T parameter_initialized = FALSE; //have param values been initialized
 BOOLEAN_T usage_initialized = FALSE; // have the usages been initialized?
 BOOLEAN_T type_initialized = FALSE; // have the types been initialized?
 
 //remove this?
-BOOLEAN_T parameter_parsed = FALSE; // have I parsed the parameter file?
+//BOOLEAN_T parameter_parsed = FALSE; // have I parsed the parameter file?
 BOOLEAN_T parameter_plasticity = TRUE; // can the parameters be changed?
 
 /************************************
@@ -260,12 +257,8 @@ void initialize_parameters(void){
         "(mass, length, lexical, none).  Default none.");
 
   /* search-for-matches command line options */
-  //  temp_set_string_parameter("prelim-score-type", "sp", 
-  //  			    "Initial scoring (sp, xcorr). Default sp");
   temp_set_scorer_type_parameter("prelim-score-type", SP, 
   			    "Initial scoring (sp, xcorr). Default sp");
-  //  temp_set_string_parameter("score-type", "xcorr", 
- //"The scoring method to use (xcorr, xcorr_logp, sp_logp). Default xcorr."); 
   temp_set_scorer_type_parameter("score-type", XCORR, 
    "The scoring method to use (xcorr, xcorr_logp, sp_logp). Default xcorr."); 
 
@@ -275,12 +268,8 @@ void initialize_parameters(void){
          "Maximum mass of spectra to search.  Default, none.");
   temp_set_string_parameter("spectrum-charge", "all", 
          "Spectrum charge states to search (1,2,3,all). Default all.");
-  //temp_set_double_parameter("number-runs", BILLION, 1, BILLION, 
-  //       "REMOVE ME");
   temp_set_string_parameter("match-output-folder", ".", 
-   "Folder to which search results will be written.  Default '.' (current dir).");
-  //  temp_set_string_parameter("output-mode", "binary", 
-  //         "Types of output to produce (binary, sqt, all). Default binary");
+"Folder to which search results will be written.  Default '.' (current dir)");
   temp_set_output_type_parameter("output-mode", BINARY_OUTPUT, 
          "Types of output to produce (binary, sqt, all). Default binary");
   temp_set_string_parameter("sqt-output-file", "target.sqt", 
@@ -366,7 +355,6 @@ void initialize_parameters(void){
   temp_set_double_parameter("A", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("B", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("C", 57.0, -100, BILLION, "NOT FOR COMMAND LINE");
- //temp_set_double_parameter("C", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("D", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("E", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
   temp_set_double_parameter("F", 0.0, -100, BILLION, "NOT FOR COMMAND LINE");
@@ -468,13 +456,16 @@ BOOLEAN_T select_cmd_line(  //remove options from name
 	strcmp(type_ptr, "OUTPUT_TYPE_T") == 0 ){
       type_ptr = "STRING_ARG";
     }
-    carp(CARP_DETAILED_DEBUG, "Found value: %s, usage: %s, type(to be passed to parse_args): %s", (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
-
+    carp(CARP_DETAILED_DEBUG, 
+	 "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
+	 (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
+    
 
     /* check that the option is in the params hash */
     if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
       carp(CARP_FATAL, 
-	   "Cannot select parameter '%s'. Value, usage or type not found.\nFound value: %s, usage: %s, type: %s", 
+	   "Cannot select parameter '%s'. Value, usage or type not found.\n" \
+	   "Found value: %s, usage: %s, type: %s", 
 	   option_names[i],
 	   value_ptr,
 	   usage_ptr,
@@ -541,7 +532,9 @@ BOOLEAN_T find_param_filename(int argc,
  * the command line options and arguments into the hash
  * main then retrieves the values through get_value
  */
-BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
+BOOLEAN_T parse_cmd_line_into_params_hash(int argc, 
+					  char** argv, 
+					  char* exe_name){
   carp(CARP_DETAILED_DEBUG, "Parameter.c is parsing the command line");
   BOOLEAN_T success = TRUE;
   int i;
@@ -554,7 +547,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
   }
   else{ 
     carp(CARP_INFO, 
-       "No parameter file specified.  Using defaults and command line values");
+      "No parameter file specified.  Using defaults and command line values");
   }
 
   /* now parse the command line using parse_arguments.c, 
@@ -574,7 +567,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
   }
   else{  // parse_arguments encountered an error
     char* error_message = NULL;
-    char* usage = parse_arguments_get_usage("create_index");
+    char* usage = parse_arguments_get_usage(exe_name);
     int error_code = parse_arguments_get_error(&error_message);
     fprintf(stderr, "Error in command line. Error # %d\n", error_code);
     fprintf(stderr, "%s\n", error_message);
@@ -586,6 +579,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc, char** argv){
   /* Finally, apply any amino acid mass changes */
   update_aa_masses();
 
+  parameter_plasticity = FALSE;
   return success;
 }
 
@@ -731,7 +725,7 @@ void free_parameters(void){
 /**
  * add parameters to parameter list
  */
-BOOLEAN_T add_parameter(
+/*BOOLEAN_T add_parameter(
   char*     name,  ///< the name of the parameter to add -in
   char* set_value  ///< the value to be added -in                  
   )
@@ -742,13 +736,13 @@ BOOLEAN_T add_parameter(
                   my_copy_string(name), 
                   my_copy_string(set_value));
 }
-
+*/
 //TODO delete this
 /**
  * copy parameters to parameter hash table
  * there must be a matching name in the parameter hash table
  */
-BOOLEAN_T copy_parameter(
+/*BOOLEAN_T copy_parameter(
   char*     name,  ///< the name of the parameter to add -in
   char* set_value  ///< the value to be added -in                  
   )
@@ -768,7 +762,7 @@ BOOLEAN_T copy_parameter(
   //how does memory work for update? allocate new?
   return update_hash_value(parameters->hash, name, set_value);
 }
-
+*/
 //TODO delete this
 /**
  * This method should be called only after parsed command line
@@ -777,7 +771,7 @@ BOOLEAN_T copy_parameter(
  * command line arguments have higher precedence 
  * parse the parameter file given the filename
  */
-void parse_update_parameters(
+/*void parse_update_parameters(
   char* parameter_file ///< the parameter file to be parsed -in
   )
 {
@@ -801,7 +795,7 @@ void parse_update_parameters(
     exit(1);
   }
 }
-
+*/
 /**
  *
  * parse the parameter file given the filename
@@ -902,7 +896,7 @@ void parse_parameter_file(
 
   // now we have parsed the parameter file
   // TODO delete this?
-  parameter_parsed = TRUE;
+  //parameter_parsed = TRUE;
 }
 
 /**************************************************
@@ -923,10 +917,10 @@ BOOLEAN_T get_boolean_parameter(
   static char buffer[PARAMETER_LENGTH];
   
   // check if parameter file has been parsed
-  if(!parameter_parsed && !parameter_initialized){
+  /*if(!parameter_parsed && !parameter_initialized){
     carp(CARP_ERROR, "parameters has not been set yet");
     exit(1);
-  }
+    }*/
 
   char* value = get_hash_value(parameters->hash, name);
 
@@ -979,10 +973,10 @@ int get_int_parameter(
   //  carp(CARP_DETAILED_DEBUG, "Getting int parameter: %s", name);
 
   // check if parameter file has been parsed
-  if(!parameter_parsed && !parameter_initialized){
+  /*if(!parameter_parsed && !parameter_initialized){
     carp(CARP_ERROR, "parameters has not been set yet");
     exit(1);
-  }
+    }*/
 
   char* int_value = get_hash_value(parameters->hash, name);
 
@@ -1069,11 +1063,11 @@ char* get_string_parameter(
 {
   
   // check if parameter file has been parsed
-  if(!parameter_parsed && !parameter_initialized){
+  /*if(!parameter_parsed && !parameter_initialized){
     carp(CARP_WARNING, "parameters has not been set yet");
     exit(1);
     return(NULL);
-  }
+    }*/
   
   char* string_value = get_hash_value(parameters->hash, name);
   
@@ -1097,10 +1091,10 @@ char* get_string_parameter_pointer(
   )
 {
   // check if parameter file has been parsed
-  if(!parameter_parsed && !parameter_initialized){
+  /*if(!parameter_parsed && !parameter_initialized){
     carp(CARP_FATAL, "parameters has not been set yet");
     exit(1);
-  }
+    }*/
   
   char* string_value = get_hash_value(parameters->hash, name);
 
@@ -1485,7 +1479,7 @@ BOOLEAN_T temp_set_ion_type_parameter(char* name,
  * if the parameter is not found or parameters has already been confirmed don't change
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_boolean_parameter(
+/*BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value  ///< the value to be set -in
  )
@@ -1517,7 +1511,7 @@ BOOLEAN_T set_boolean_parameter(
   }
   
   return result;
-}
+}*/
 /**
  * Parameter file must be parsed first!
  * searches through the list of parameters, 
@@ -1560,7 +1554,7 @@ BOOLEAN_T set_boolean_parameter(
  * if the parameter is not found or parameters has already been confirmed don't change
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_double_parameter(
+/*BOOLEAN_T set_double_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  double set_value  ///< the value to be set -in
  )
@@ -1586,7 +1580,7 @@ BOOLEAN_T set_double_parameter(
   result = add_parameter(name, buffer);
     
   return result;
-}
+}*/
 /**
  * Parameter file must be parsed first!
  * searches through the list of parameters, 
@@ -1595,7 +1589,7 @@ BOOLEAN_T set_double_parameter(
  * if the parameter is not found or parameters has already been confirmed don't change
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_string_parameter(
+/*BOOLEAN_T set_string_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  char* set_value  ///< the value to be set -in
  )
@@ -1618,14 +1612,14 @@ BOOLEAN_T set_string_parameter(
     
   return result;
 }
-
+*/
 /**
  * set the parameters to confirmed, thus blocks any additional changes to the parameters
  */
-void parameters_confirmed(){
+/*void parameters_confirmed(){
   parameter_plasticity = FALSE;
 }
-
+*/
 // TODO to be deleted
 /**
  * Parameter file must be parsed first!
@@ -1635,7 +1629,7 @@ void parameters_confirmed(){
  * if the parameter is not found, return FALSE
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_options_command_line(
+/*BOOLEAN_T set_options_command_line(
   char*     name,  ///< the name of the parameter looking for -in
   char* set_value,  ///< the value to be set -in
   BOOLEAN_T required ///< is this a required option -in
@@ -1664,7 +1658,7 @@ BOOLEAN_T set_options_command_line(
   // if exist ovewrite it!
   return update_hash_value(parameters->hash, name, set_value);  
 } 
-
+*/
 /**
  * Routines that return crux enumerated types. 
  */

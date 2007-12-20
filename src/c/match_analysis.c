@@ -92,7 +92,7 @@ int main(int argc, char** argv){
 
   /* Parse the command line and optional paramter file
      does sytnax, type, and bounds checking and dies on error */
-  parse_cmd_line_into_params_hash(argc, argv);
+  parse_cmd_line_into_params_hash(argc, argv, "crux-analyze-matches");
 
   /* Set verbosity */
   set_verbosity_level( get_int_parameter("verbosity"));

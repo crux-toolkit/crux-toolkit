@@ -1098,7 +1098,7 @@ int is_numeric(/*const*/ char * s) {
  * higher precedence command line parameters
  * returns TRUE is sucessful, else FALSE
  */
-BOOLEAN_T update_parameter(){
+/*BOOLEAN_T update_parameter(){
   int array_idx = 0;
   argument* optional_arg = NULL;
   argument* required_arg = NULL;
@@ -1200,6 +1200,7 @@ BOOLEAN_T update_parameter(){
   }
   return TRUE;
 }
+*/
 
 enum argument_type string_to_argument_type(char* arg_type_string){
 
