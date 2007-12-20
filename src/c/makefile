@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.99 $   #-Werror \
+# VERSION: $Revision: 1.100 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -68,12 +68,12 @@ LIBOBJS =\
 	${OBJDIR}/predict_peptide_ions.o \
 	${OBJDIR}/scorer.o \
 	${OBJDIR}/parameter.o \
-	${OBJDIR}/score_peptide_spectrum.o \
 	${OBJDIR}/match.o \
 	${OBJDIR}/match_collection.o \
 	${OBJDIR}/hash.o \
 	${OBJDIR}/match_search.o \
 	${OBJDIR}/match_analysis.o
+#	${OBJDIR}/score_peptide_spectrum.o \
 #	${OBJDIR}/score_peptide_list_spectrum.o
 
 # These are the names of the programs.
@@ -84,12 +84,12 @@ PROGS = \
 	${BINDIR}/crux-search-for-matches \
 	${BINDIR}/crux-analyze-matches \
 	${BINDIR}/crux-predict-peptide-ions \
-	${BINDIR}/crux-score-peptide-spectrum \
-	${BINDIR}/create_psm_files \
 	${BINDIR}/create_ion_files \
 	${BINDIR}/utils \
 	${BINDIR}/create_protein_index \
 	${BINDIR}/transform_ms2_spectra
+#	${BINDIR}/create_psm_files \
+#	${BINDIR}/crux-score-peptide-spectrum \
 #	${BINDIR}/get_ms2_spectrum \
 #	${BINDIR}/generate_peptides \
 #	${BINDIR}/create_index  \
@@ -192,7 +192,7 @@ srclinks:
 	@if [ ! -e crux-search-for-matches.c ]; then ln -s match_search.c crux-search-for-matches.c; fi
 	@if [ ! -e crux-analyze-matches.c ]; then ln -s match_analysis.c crux-analyze-matches.c; fi
 	@if [ ! -e crux-predict-peptide-ions.c ]; then ln -s predict_peptide_ions.c crux-predict-peptide-ions.c; fi
-	@if [ ! -e crux-score-peptide-spectrum.c ]; then ln -s score_peptide_spectrum.c crux-score-peptide-spectrum.c; fi
+#	@if [ ! -e crux-score-peptide-spectrum.c ]; then ln -s score_peptide_spectrum.c crux-score-peptide-spectrum.c; fi
 
 binlinks: 
 	# make links to old executable names
@@ -208,5 +208,5 @@ binlinks:
 	@ln -s crux-analyze-matches ${BINDIR}/match_analysis
 	@rm -f ${BINDIR}/predict_peptide_ions
 	@ln -s crux-predict-peptide-ions ${BINDIR}/predict_peptide_ions
-	@rm -f ${BINDIR}/score_peptide_spectrum
-	@ln -s crux-score-peptide-spectrum ${BINDIR}/score_peptide_spectrum
+#	@rm -f ${BINDIR}/score_peptide_spectrum
+#	@ln -s crux-score-peptide-spectrum ${BINDIR}/score_peptide_spectrum

@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -29,11 +29,6 @@
 #define BILLION 1000000000.0
 #define SMALL_BUFFER 256
 #define MAX_SET_PARAMS 256
-
-//TODO:  all sets should become private
-//           wait until all progs have switched over
-//       add parse_command_line(int argc, char** argv)
-//       add get_command_line_error(&error_message)
 
 #define NUMBER_PARAMETER_TYPES 10
 enum parameter_type {INT_P, DOUBLE_P, STRING_P, MASS_TYPE_P, 
@@ -77,7 +72,7 @@ BOOLEAN_T select_cmd_line_arguments(char**, int);
  * the command line options and arguments into the hash
  * main then retrieves the values through get_value
  */
-BOOLEAN_T parse_cmd_line_into_params_hash(int, char**);
+BOOLEAN_T parse_cmd_line_into_params_hash(int, char**, char*);
 
 /**
  * Each of the following functions searches through the hash table of
@@ -97,11 +92,11 @@ BOOLEAN_T get_boolean_parameter(
  * if the parameter is not found or parameters has already been confirmed don't change
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_boolean_parameter(
+/*BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value  ///< the value to be set -in
  );
-
+*/
 /**
  * Searches through the list of parameters, looking for one whose
  * name matches the string.  This function returns the parameter value if the
@@ -121,11 +116,11 @@ int get_int_parameter(
  * if the parameter is not found or parameters has already been confirmed don't change
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_int_parameter(
+/*BOOLEAN_T set_int_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  int set_value  ///< the value to be set -in
  );
-
+*/
 /**
  * Searches through the list of parameters, looking for one whose
  * name matches the string.  This function returns the parameter value if the
@@ -145,11 +140,11 @@ double get_double_parameter(
  * if the parameter is not found or parameters has already been confirmed don't change
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_double_parameter(
+/*BOOLEAN_T set_double_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  double set_value  ///< the value to be set -in
  );
-
+*/
 /**
  * Searches through the list of parameters, looking for one whose
  * parameter_name matches the string. 
@@ -180,11 +175,11 @@ char* get_string_parameter_pointer(
  * if the parameter is not found or parameters has already been confirmed don't change
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_string_parameter(
+/*BOOLEAN_T set_string_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  char* set_value  ///< the value to be set -in
  );
-
+*/
 MASS_TYPE_T get_mass_type_parameter(
  char* name
  );
@@ -219,14 +214,14 @@ void print_parameters(
 /**
  * Check to see if any parameters were not used.  Issue a warning.
  */
-void check_unused_parameters(void);
-
+/*void check_unused_parameters(void);
+ */
 
 /**
  * set the parameters to confirmed, thus blocks any additional changes to the parameters
  */
-void parameters_confirmed(void);
-
+/*void parameters_confirmed(void);
+ */
 
 //I think this is being replaced
 /**
@@ -237,12 +232,12 @@ void parameters_confirmed(void);
  * if the parameter is not found, return FALSE
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_options_command_line(
+/*BOOLEAN_T set_options_command_line(
   char*     name,  ///< the name of the parameter looking for -in
   char* set_value, ///< the value to be set -in
   BOOLEAN_T required ///< is this a required option -in
   );
-
+*/
 //This is being replaced
 /**
  * This method should be called only after parsed command line
@@ -251,20 +246,20 @@ BOOLEAN_T set_options_command_line(
  * command line arguments have higher precedence 
  * parse the parameter file given the filename
  */
-void parse_update_parameters(
+/*void parse_update_parameters(
   char* parameter_file ///< the parameter file to be parsed -in
   );
-
+*/
 /**
  * add parameters to parameter list
  * Should use this only for testing cases.
  * Otherwiase use normal parameter system.
  */
-BOOLEAN_T add_parameter(
+/*BOOLEAN_T add_parameter(
   char*     name,  ///< the name of the parameter to add -in
   char* set_value  ///< the value to be added -in                  
   );
-
+*/
 //put this with the other gets
 /**
  * Parameter file must be parsed first!

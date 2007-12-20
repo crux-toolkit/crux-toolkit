@@ -76,7 +76,7 @@ int main(int argc, char** argv){
 
   /* Parse the command line, including optional params file
      includes syntax, type, and bounds checks and dies on error */
-  parse_cmd_line_into_params_hash(argc, argv);
+  parse_cmd_line_into_params_hash(argc, argv, "crux-generate-peptides");
 
   /* Set verbosity */
   verbosity = get_int_parameter("verbosity");

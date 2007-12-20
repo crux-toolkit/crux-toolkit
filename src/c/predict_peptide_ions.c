@@ -56,7 +56,7 @@ int main(int argc, char** argv){
 
   /* Parse the command line, including the optional params file */
   /* does sytnax, type, bounds checking and dies if neccessessary */
-  parse_cmd_line_into_params_hash(argc, argv);
+  parse_cmd_line_into_params_hash(argc, argv, "crux-predict-peptide-ions");
 
   /* Set verbosity */
   set_verbosity_level(get_int_parameter("verbosity"));

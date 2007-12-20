@@ -55,7 +55,7 @@ int main(int argc, char** argv){
   select_cmd_line_arguments( argument_list, num_arguments );
 
   /* Parse the command line, for now param file not available */
-  parse_cmd_line_into_params_hash(argc, argv);
+  parse_cmd_line_into_params_hash(argc, argv, "crux-get-ms2-spectrum");
 
   /* Set verbosity */
   set_verbosity_level(get_int_parameter("verbosity"));

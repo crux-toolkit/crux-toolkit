@@ -97,7 +97,7 @@ int main(int argc, char** argv){
 
   /* Parse the command line, including optional params file
      Includes syntax, type, and bounds checking, dies on error */
-  parse_cmd_line_into_params_hash(argc, argv);
+  parse_cmd_line_into_params_hash(argc, argv, "crux-search-for-matches");
 
   /* Set verbosity */
   verbosity = get_int_parameter("verbosity");
