@@ -42,8 +42,6 @@ BOOLEAN_T parameter_initialized = FALSE; //have param values been initialized
 BOOLEAN_T usage_initialized = FALSE; // have the usages been initialized?
 BOOLEAN_T type_initialized = FALSE; // have the types been initialized?
 
-//remove this?
-//BOOLEAN_T parameter_parsed = FALSE; // have I parsed the parameter file?
 BOOLEAN_T parameter_plasticity = TRUE; // can the parameters be changed?
 
 /************************************
@@ -715,87 +713,6 @@ void free_parameters(void){
   }
 }
 
-/********************************************************************
- *
- * the parameter file is assumed to consist of name/value pairs,
- * separated by an equals sign.
- *
- *******************************************************************/
-//TODO delete this
-/**
- * add parameters to parameter list
- */
-/*BOOLEAN_T add_parameter(
-  char*     name,  ///< the name of the parameter to add -in
-  char* set_value  ///< the value to be added -in                  
-  )
-{  
-  // copy the name/value pairs to the right parameter
-  ++parameters->num_parameters;
-  return add_hash(parameters->hash, 
-                  my_copy_string(name), 
-                  my_copy_string(set_value));
-}
-*/
-//TODO delete this
-/**
- * copy parameters to parameter hash table
- * there must be a matching name in the parameter hash table
- */
-/*BOOLEAN_T copy_parameter(
-  char*     name,  ///< the name of the parameter to add -in
-  char* set_value  ///< the value to be added -in                  
-  )
-{
-  
-  // check if parameters has been initlialized
-  if(!parameter_initialized){
-    carp(CARP_ERROR, "must inilialize parameters before copying");
-    return FALSE;
-  }
-    
-  // check if parameters can be changed
-  if(!parameter_plasticity){
-   carp(CARP_ERROR, "can't change parameters once they are confirmed");
-   return FALSE;
-  }
-  //how does memory work for update? allocate new?
-  return update_hash_value(parameters->hash, name, set_value);
-}
-*/
-//TODO delete this
-/**
- * This method should be called only after parsed command line
- * first, parse paramter file
- * Next, update the parameter files with command line options
- * command line arguments have higher precedence 
- * parse the parameter file given the filename
- */
-/*void parse_update_parameters(
-  char* parameter_file ///< the parameter file to be parsed -in
-  )
-{
-  // initialize
-  initialize_parameters();
-  
-  // if no parameter file name has been specified in command line,
-  // use default parameter filename
-  if(parameter_file != NULL){
-    // parse parameter file
-    parse_parameter_file(parameter_file);
-  }
-  else{
-    // parse parameter file
-    //parse_parameter_file(get_string_parameter_pointer("parameter-file"));
-  }
-  
-  // update the parameters if any comman line arguments exist
-  if(!update_parameter()){
-    fprintf(stderr, "failed to combine command line arguemnts and parameter file\n");
-    exit(1);
-  }
-}
-*/
 /**
  *
  * parse the parameter file given the filename
@@ -878,25 +795,12 @@ void parse_parameter_file(
 
       check_option_type_and_bounds(option_name);
 
-      /* check if it is amino acid mass update */
-      /*  This is now done in parse_command_line_...
-      if(strlen(line) == 1 && 
-         (short int)line[0] >= 'A' && 
-         (short int)line[0] <= 'Z'){
-        
-        update_mass = strtod(&(line[idx+1]), &endptr);
-        increase_amino_acid_mass(line[0], update_mass);
-      }
-      */
     }
   }
 
   fclose(file);
   myfree(line);
 
-  // now we have parsed the parameter file
-  // TODO delete this?
-  //parameter_parsed = TRUE;
 }
 
 /**************************************************
@@ -916,12 +820,6 @@ BOOLEAN_T get_boolean_parameter(
 {
   static char buffer[PARAMETER_LENGTH];
   
-  // check if parameter file has been parsed
-  /*if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_ERROR, "parameters has not been set yet");
-    exit(1);
-    }*/
-
   char* value = get_hash_value(parameters->hash, name);
 
   // can't find parameter
@@ -969,14 +867,6 @@ int get_int_parameter(
   //char *endptr;
   //long int value;
   int value;
-
-  //  carp(CARP_DETAILED_DEBUG, "Getting int parameter: %s", name);
-
-  // check if parameter file has been parsed
-  /*if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_ERROR, "parameters has not been set yet");
-    exit(1);
-    }*/
 
   char* int_value = get_hash_value(parameters->hash, name);
 
@@ -1062,13 +952,6 @@ char* get_string_parameter(
   )
 {
   
-  // check if parameter file has been parsed
-  /*if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_WARNING, "parameters has not been set yet");
-    exit(1);
-    return(NULL);
-    }*/
-  
   char* string_value = get_hash_value(parameters->hash, name);
   
   // can't find parameter
@@ -1090,11 +973,6 @@ char* get_string_parameter_pointer(
   char* name  ///< the name of the parameter looking for -in
   )
 {
-  // check if parameter file has been parsed
-  /*if(!parameter_parsed && !parameter_initialized){
-    carp(CARP_FATAL, "parameters has not been set yet");
-    exit(1);
-    }*/
   
   char* string_value = get_hash_value(parameters->hash, name);
 
@@ -1465,200 +1343,6 @@ BOOLEAN_T temp_set_ion_type_parameter(char* name,
 
   return result;
 }
-/**************************************************
- *   OLD SETTERS (public)
- **************************************************
- */
-// TODO delete these
-
-/**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_boolean_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- BOOLEAN_T set_value  ///< the value to be set -in
- )
-{
-  BOOLEAN_T result;
-    
-  // check if parameters cah be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-
-  // only check if parameter file has already been parsed
-  if(parameter_parsed || parameter_initialized){
-    if(set_value){
-      return update_hash_value(parameters->hash, name, "TRUE");
-    }
-    else{
-      return update_hash_value(parameters->hash, name, "FALSE");
-    }
-  }
-
-  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
-  if(set_value){
-    result = add_parameter(name, "TRUE");
-  }
-  else{
-    result = add_parameter(name, "FALSE");
-  }
-  
-  return result;
-}*/
-/**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_int_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- int set_value  ///< the value to be set -in
- )
-{
-  BOOLEAN_T result;
-  char buffer[PARAMETER_LENGTH];
-  
-  // check if parameters cah be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-  
-  // only check if parameter file has already been parsed
-  if(parameter_parsed  || parameter_initialized){
-    snprintf(buffer, PARAMETER_LENGTH, "%d", set_value);
-    return update_hash_value(parameters->hash, name, buffer);
-  }
-  
-  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
-  snprintf(buffer, PARAMETER_LENGTH, "%d", set_value);  
-  result = add_parameter(name, buffer);
-  
-  return result;
-}*/
-/**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_double_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- double set_value  ///< the value to be set -in
- )
-{
-  BOOLEAN_T result;
-  char buffer[PARAMETER_LENGTH];
-  
-  // check if parameters cah be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-  
-  // convert to string
-  sprintf(buffer, "%f", set_value);
-
-  // only check if parameter file has already been parsed
-  if(parameter_parsed || parameter_initialized){
-    return update_hash_value(parameters->hash, name, buffer);    
-  }
-
-  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
-  result = add_parameter(name, buffer);
-    
-  return result;
-}*/
-/**
- * Parameter file must be parsed first!
- * searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * The function sets the corresponding value,
- * if the parameter is not found or parameters has already been confirmed don't change
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_string_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- char* set_value  ///< the value to be set -in
- )
-{
-  BOOLEAN_T result;
-  
-  // check if parameters cah be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-  
-  // only check if parameter file has already been parsed
-  if(parameter_parsed  || parameter_initialized){
-    return update_hash_value(parameters->hash, name, set_value);
-  }
-  
-  // if it doesn't already exist(wasn't in the parameter file), add to parameter list
-  result = add_parameter(name, set_value);
-    
-  return result;
-}
-*/
-/**
- * set the parameters to confirmed, thus blocks any additional changes to the parameters
- */
-/*void parameters_confirmed(){
-  parameter_plasticity = FALSE;
-}
-*/
-// TODO to be deleted
-/**
- * Parameter file must be parsed first!
- * searches through the hash table of parameters, 
- * looking for one whose name matches the string.  
- * then the function sets the corresponding value.
- * if the parameter is not found, return FALSE
- * \returns TRUE if paramater value is set, else FALSE
- */ 
-/*BOOLEAN_T set_options_command_line(
-  char*     name,  ///< the name of the parameter looking for -in
-  char* set_value,  ///< the value to be set -in
-  BOOLEAN_T required ///< is this a required option -in
-  )
-{
-  // check if parameters has been initlialized
-  if(!parameter_initialized && !parameter_parsed){
-    carp(CARP_ERROR, "Must initialize parameters before copying");
-    return FALSE;
-  }
-  
-  // check if parameters can be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "Can't change parameters once they are confirmed");
-    return FALSE;
-  }
-  
-  // for required options, there are not in the parameter list, thus must add
-  if(required){
-    if(add_parameter(name, set_value)){
-      return TRUE;
-    }
-    return FALSE;
-  }
-
-  // if exist ovewrite it!
-  return update_hash_value(parameters->hash, name, set_value);  
-} 
-*/
 /**
  * Routines that return crux enumerated types. 
  */
