@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -475,7 +475,7 @@ char* get_binary_fasta_name(
   }
   free(path_filename);
   
-  carp(CARP_INFO, "binary fasta name: %s", binary_fasta_name);
+  carp(CARP_DETAILED_DEBUG, "binary fasta name: %s", binary_fasta_name);
 
   return binary_fasta_name;
 }
