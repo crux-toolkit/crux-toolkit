@@ -57,7 +57,6 @@ generate_peptides_use_existing_index = good_results/standard_generate_peptides_u
 search_for_matches_default_existing_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode sqt --use-index T test.ms2 existing.fasta; cat target.sqt = 'Time'
 
 # See that match_analysis works with an existing index and existing results
-# SEGFAULT
 analyze_matches_existing_index = good_results/standard_match_search_analysis.out=  ../../../bin/crux-analyze-matches --parameter-file params/smoke_params2 good_results existing.fasta 
 
 # Create index use crux-generate-peptides to test that it worked
@@ -76,8 +75,7 @@ generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_
 search_for_matches_default_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time'
 
 # Analyze matches using above index
-# ERROR saying charge is corrupt in binary file (results or fasta?)
-#analyze_matches_index = good_results/standard_analyze_index.out =  ../../../bin/crux-analyze-matches --parameter-file params/smoke_params2 . test.fasta 
+analyze_matches_index = good_results/standard_analyze_index.out =  ../../../bin/crux-analyze-matches --parameter-file params/smoke_params2 . test.fasta 
 
 
 
