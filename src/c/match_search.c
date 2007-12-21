@@ -268,26 +268,27 @@ int main(int argc, char** argv){
   }
   
   /* Perform search: iterate over all spectra in ms2 file and score */
-  int spectra_idx = 0;
-  int bf_spectrum_i = 0;
+  int spectra_idx = 0; //superfluous
+  int spectrum_searches_counter = 0; //spec (z-specific) w/ psms
+  int bf_loop_i = 0;   //superfluous
   SPECTRUM_T* spectrum = NULL;
   int charge_index = 0;
   BOOLEAN_T is_decoy = FALSE;
 
   while(spectrum_iterator_has_next(spectrum_iterator)){
-    bf_spectrum_i++;
-    carp(CARP_DETAILED_DEBUG, 
-	 "Searching spectrum number %i, search number %i", 
-	 bf_spectrum_i, spectra_idx+1);
-    
+    bf_loop_i++;
     // get next spectrum
     spectrum = spectrum_iterator_next(spectrum_iterator);
+    
+    carp(CARP_DETAILED_DEBUG, 
+	 "Searching spectrum number %i, loop number %i, search number %i", 
+	 get_spectrum_first_scan(spectrum), bf_loop_i, spectra_idx+1);
     
     // select spectra that are within m/z target interval
     if(get_spectrum_precursor_mz(spectrum) <  spectrum_min_mass ||
        get_spectrum_precursor_mz(spectrum) >= spectrum_max_mass)
       {
-	continue; //get next spectrum
+	continue; //skip this spectrum, search next
       }
     
     // get possible charge state
@@ -305,6 +306,7 @@ int main(int argc, char** argv){
       }
       
       ++spectra_idx;
+      spectrum_searches_counter++;
       
       // iterate over first for target next and for all decoy sets
       for(file_idx = 0; file_idx < total_files; ++file_idx){
@@ -328,7 +330,11 @@ int main(int argc, char** argv){
 					     index,
 					     database
 					     );
-	if (match_collection == NULL){
+
+	if ((match_collection == NULL) && !is_decoy){
+	  //if no targets found, don't search decoys
+	  file_idx = total_files;
+	  spectrum_searches_counter--;
 	  continue;
 	}
 
@@ -350,7 +356,7 @@ int main(int argc, char** argv){
 				       match_collection, spectrum, 
 				       prelim_score, main_score);
 	  } 
-	}        
+	} //next target/decoy        
 	
 	// free up match_collection
 	free_match_collection(match_collection);          
@@ -362,10 +368,12 @@ int main(int argc, char** argv){
   // Set the total number of spectra serialized in the PSM result files
   for(file_idx=0; file_idx < total_files; ++file_idx){
     serialize_total_number_of_spectra(spectra_idx, psm_result_file[file_idx]);
+    serialize_total_number_of_spectra(spectrum_searches_counter, psm_result_file[file_idx]);
   }
   
   // DEBUG
-  carp(CARP_DEBUG, "Total spectrum searches: %d", spectra_idx);
+  carp(CARP_DEBUG, "Total spectrum searches: %d, total with psms: %i", 
+       spectra_idx, spectrum_searches_counter);
   
   if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
     fclose(psm_result_file_sqt);

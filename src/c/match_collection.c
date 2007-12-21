@@ -920,7 +920,7 @@ BOOLEAN_T score_match_collection_sp(
   ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);    
   
   // iterate over all peptides
-  carp(CARP_INFO, "Iterating over peptides");
+  carp(CARP_DEBUG, "Iterating over peptides");
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     peptide = generate_peptides_iterator_next(peptide_iterator);
     
@@ -993,7 +993,7 @@ BOOLEAN_T score_match_collection_sp(
   match_collection->experiment_size = match_collection->match_total;
 
   // print total peptides scored so far
-  carp(CARP_INFO, "Total peptide scored for sp: %d", 
+  carp(CARP_DEBUG, "Total peptide scored for sp: %d", 
       match_collection->match_total);
 
   if (match_collection->match_total)
@@ -1396,8 +1396,8 @@ BOOLEAN_T score_match_collection_xcorr(
   // create a generic ion_series, that will be reused for each peptide sequence
   ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);    
   
-  // we are string xcorr!
-  carp(CARP_INFO, "start scoring for XCORR");
+  // we are scoring xcorr!
+  carp(CARP_DEBUG, "start scoring for XCORR");
 
   // iterate over all matches to score for xcorr
   int match_idx;
@@ -1431,7 +1431,7 @@ BOOLEAN_T score_match_collection_xcorr(
   free_ion_series(ion_series);
   
   // we are starting xcorr!
-  carp(CARP_INFO, "total peptides scored for XCORR: %d", match_idx);
+  carp(CARP_DEBUG, "total peptides scored for XCORR: %d", match_idx);
 
   // free heap
   free_scorer(scorer);
@@ -1439,7 +1439,7 @@ BOOLEAN_T score_match_collection_xcorr(
 
   // sort match collection by score type
   if(!sort_match_collection(match_collection, XCORR)){
-    carp(CARP_ERROR, "failed to sort match collection");
+    carp(CARP_FATAL, "Failed to sort match collection");
     exit(1);
   }
   
@@ -2031,7 +2031,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
     }
     // add all the match objects from result_file
     extend_match_collection(match_collection, database, result_file);
-    carp(CARP_INFO, "extended match collection " );
+    carp(CARP_DETAILED_DEBUG, "extended match collection " );
     fclose(result_file);
     free(file_in_dir);
     carp(CARP_DETAILED_DEBUG, "Finished file.");
@@ -2078,6 +2078,8 @@ BOOLEAN_T extend_match_collection(
     carp(CARP_ERROR, "serialized file corrupted, incorrect number of spectra");  
     return FALSE;
   }
+  carp(CARP_DETAILED_DEBUG, "There are %i spectra in the result file", 
+       total_spectra);
 
   // FIXME unused feature, just set to 0
   // get number of spectra features serialized in the file
@@ -2086,26 +2088,35 @@ BOOLEAN_T extend_match_collection(
     return FALSE;
   }
   
+  carp(CARP_DETAILED_DEBUG, "There are %i spectrum features", 
+       num_spectrum_features);
+
   // get number top ranked peptides serialized
   if(fread(&num_top_match, (sizeof(int)), 1, result_file) != 1){
     carp(CARP_ERROR, "serialized file corrupted, incorrect number of top match");  
     return FALSE;
   }
+  carp(CARP_DETAILED_DEBUG, "There are %i top matches", num_top_match);
+
 
   // FIXME
   // could parse fasta file and ms2 file
   
   
   // now iterate over all spectra serialized
-  for(; spectrum_idx < total_spectra; ++spectrum_idx){
+  for(spectrum_idx = 0; spectrum_idx < total_spectra; ++spectrum_idx){
     /*** get all spectrum specific features ****/
     
     // get charge of the spectrum
-    if(fread(&charge, (sizeof(int)), 1, result_file) != 1){
-      carp(CARP_ERROR, "serialized file corrupted, incorrect charge value");  
+    /*    if(fread(&charge, (sizeof(int)), 1, result_file) != 1){
+      carp(CARP_ERROR, "Serialized file corrupted, charge value not read");  
       return FALSE;
     }
-    
+    */
+    carp(CARP_DETAILED_DEBUG, "Reading charge. Was %i", charge);
+    int chars_read = fread(&charge, (sizeof(int)), 1, result_file);
+    carp(CARP_DETAILED_DEBUG, "Read %i characters, charge is %i",chars_read, charge);
+
     // get serialized match_total
     if(fread(&match_total_of_serialized_collection, (sizeof(int)), 1, result_file) != 1){
       carp(CARP_ERROR, "serialized file corrupted, "

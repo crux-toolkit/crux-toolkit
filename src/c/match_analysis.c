@@ -454,7 +454,7 @@ MATCH_COLLECTION_T* run_percolator(
   int iterations = 0;
   while(match_collection_iterator_has_next(match_collection_iterator)){
     
-    carp(CARP_INFO, "Match collection iteration: %i" , iterations++);
+    carp(CARP_DEBUG, "Match collection iteration: %i" , iterations++);
 
     // get the next match_collection
     match_collection = 
