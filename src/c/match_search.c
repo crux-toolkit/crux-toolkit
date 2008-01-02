@@ -301,8 +301,8 @@ int main(int argc, char** argv){
       
       // skip spectra that are not in the charge state to be run
       if(!run_all_charges && 
-	 spectrum_charge_to_run != possible_charge_array[charge_index]){
-	continue;  //get next charge state
+	      spectrum_charge_to_run != possible_charge_array[charge_index]){
+	      continue;  //get next charge state
       }
       
       ++spectra_idx;
@@ -310,12 +310,12 @@ int main(int argc, char** argv){
       
       // iterate over first for target next and for all decoy sets
       for(file_idx = 0; file_idx < total_files; ++file_idx){
-	if(file_idx == 0){ 	// is it target ?
-	  is_decoy = FALSE;
-	}
-	else{
-	  is_decoy = TRUE;
-	}
+	      if(file_idx == 0){ 	// is it target ?
+	        is_decoy = FALSE;
+	      }
+	      else{
+	        is_decoy = TRUE;
+	      }
 	
 	// get match collection with scored, ranked match collection
 	match_collection = 
