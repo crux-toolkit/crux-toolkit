@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.53 $
+ * $Revision: 1.54 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -639,6 +639,7 @@ PROTEIN_T* get_database_protein_at_idx(
   carp(CARP_DETAILED_DEBUG, "Protein idx = %i, num proteins %i", protein_idx, database->num_proteins);
 
   return database->proteins[protein_idx-1];
+  // return database->proteins[protein_idx];
 }
 
 /**

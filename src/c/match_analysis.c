@@ -247,9 +247,9 @@ MATCH_COLLECTION_T* run_nothing(
           get_spectrum_first_scan(get_match_spectrum(match))
           );
       if (get_match_null_peptide(match) == FALSE){
-        fprintf(feature_fh, "1\t");
+        fprintf(feature_fh, "1\t%s\t", get_match_sequence(match));
       } else { 
-        fprintf(feature_fh, "-1\t");
+        fprintf(feature_fh, "-1\t\t");
       };
 
       unsigned int feature_idx;
