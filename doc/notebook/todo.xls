@@ -86,3 +86,5 @@
 86	12/06/07		"New Functionality"	"Open"	"BEF"	"BEF"	1	1	"generate-peptides should sort lexically after by mass or by length"
 87	12/11/07		"Refactoring"	"Open"	"BEF"	"BEF"	2	1	"change masses from floats to doubles and see if it fixes the discrepencies between machines"
 88	12/11/07		"Documentation"	"Open"	"BEF"	"BEF"	2	1	"make sure the doxygen comments are complete and up-to-date"
+89	1/02/08		"Bug Fix"	"Open"	"AAK"	"AAK"	1	1	"crux-get-ms2-spectrum no
+longer accepts absolute paths"
