@@ -231,6 +231,7 @@ void initialize_parameters(void){
   /* create-psm-files */
   set_int_parameter("starting-sentence-idx", 0, 0, BILLION, 
       "Starting sentence idx"); 
+  set_int_parameter("charge", 2, 1, 4, "Charge for peptide for which to predict ions."); 
 
   /* generate_peptide, create_index parameters  */
   set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
