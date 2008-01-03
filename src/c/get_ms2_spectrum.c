@@ -64,6 +64,8 @@ int main(int argc, char** argv){
   scan_number = get_int_parameter("scan number");
   char* ms2_filename = get_string_parameter_pointer("ms2 file");
   char* output_filename = get_string_parameter_pointer("output file");
+  carp(CARP_DETAILED_DEBUG, "ms2_filename: %s", ms2_filename);
+  carp(CARP_DETAILED_DEBUG, "output_filename: %s", output_filename);
 
   /* Get options */
   options = get_boolean_parameter("stats");
@@ -74,6 +76,7 @@ int main(int argc, char** argv){
     carp(CARP_FATAL, "Could not read from ms2 file '%s'", ms2_filename);
     exit(1);
   }
+  carp(CARP_DETAILED_DEBUG, "Creating spectrum collection.");
   collection = new_spectrum_collection(ms2_filename);
   spectrum = allocate_spectrum();
   
