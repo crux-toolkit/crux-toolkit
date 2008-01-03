@@ -46,6 +46,7 @@ int main(int argc, char** argv){
 
   /* for debugging of parameter processing */
   //set_verbosity_level( CARP_DETAILED_DEBUG );
+  set_verbosity_level( CARP_ERROR );
 
   /* Set default values for parameters in parameter.c */
   initialize_parameters();

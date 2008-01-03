@@ -1,10 +1,12 @@
 /**
  * \file carp.h 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Provides methods for logging error messages, and setting verbosity level.
  *****************************************************************************/
 #ifndef CARP_H 
 #define CARP_H
+
+#include "utils.h"
 
 /** 
  * Verbosity level for a fatal error (e.g., could not open an input file)

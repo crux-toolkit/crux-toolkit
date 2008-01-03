@@ -1773,8 +1773,8 @@ BOOLEAN_T print_match_collection_sqt(
   int charge = match_collection->charge; 
 
   // print header
-  fprintf(output, "H\tSQTGenerator CRUX\n");
-  fprintf(output, "H\tTime\t%s", ctime(&hold_time));
+  //  fprintf(output, "H\tSQTGenerator CRUX\n");
+  //  fprintf(output, "H\tTime\t%s", ctime(&hold_time));
   
   // print spectrum info
   //<first scan><last scan><charge><precursor m/z><# sequence match>

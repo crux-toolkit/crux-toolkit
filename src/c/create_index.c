@@ -71,6 +71,7 @@ int main(int argc, char** argv){
   /* For debugging of parameter processing */
   // TODO make this dependant on a compile flag 
   //set_verbosity_level(CARP_DETAILED_DEBUG);  
+  set_verbosity_level(CARP_ERROR);  
   carp(CARP_DETAILED_DEBUG, "Starting create_index");
 
   /* connect various signals to our clean-up function */
