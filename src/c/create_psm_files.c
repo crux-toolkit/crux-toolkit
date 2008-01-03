@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.8 $
+ * REVISION: $Revision: 1.9 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -63,7 +63,7 @@ int main(int argc, char** argv){
   char* option_list[PSM_NUM_OPTIONS] = { 
     "verbosity",
     "parameter-file", 
-    "spectrum-charge",
+    "charge",
     "starting-sentence-idx"
   };
 
@@ -93,7 +93,7 @@ int main(int argc, char** argv){
   peptide_file_name = get_string_parameter("peptide-file-name");
   output_directory = get_string_parameter("output-dir");
   model_type = get_string_parameter("model-type");
-  charge = get_int_parameter("spectrum-charge");
+  charge = get_int_parameter("charge");
   starting_sentence_idx = get_int_parameter("starting-sentence-idx");
 
   SPECTRUM_T* spectrum = NULL;
