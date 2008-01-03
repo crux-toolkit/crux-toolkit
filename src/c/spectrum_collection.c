@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.33 $
+ * REVISION: $Revision: 1.34 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -78,6 +78,9 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
 {
   SPECTRUM_COLLECTION_T* spectrum_collection =  allocate_spectrum_collection();
   char* absolute_path_file =  canonicalize_file_name(filename);
+  if (absolute_path_file == NULL){
+    die("Had trouble canonicalizing the file name '%s'. Too many levels of symbolic links?", filename); 
+  }
   // CYGWIN 
 	// char* absolute_path_file =  filename;
   
