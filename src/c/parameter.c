@@ -282,7 +282,7 @@ void initialize_parameters(void){
 		    "preliminary scoring.  Default 500.");
   set_int_parameter("max-rank-result", 500, 1, BILLION, 
     "NOT FOR COMMAND LINE. Number of search results to report. Default 500.");
-  set_int_parameter("top-match", 1, 1, 111, 
+  set_int_parameter("top-match", 1, 1, BILLION, 
          "NOT FOR COMMAND LINE. Umm...");
   set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
   set_string_parameter("seed", "time", "HIDE ME FROM USER");
@@ -303,6 +303,7 @@ void initialize_parameters(void){
   //in estimate_weibull_parameters
   set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, "usage");
   set_double_parameter("fraction-top-scores-to-fit", -1.0, -10, 10, "usage");
+  set_boolean_parameter("skip-first-score", FALSE,  "usage");
 
   /* analyze-matches options */
   set_scorer_type_parameter("algorithm", PERCOLATOR_SCORE, 

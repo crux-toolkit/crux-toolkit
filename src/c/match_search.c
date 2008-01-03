@@ -40,8 +40,10 @@ int main(int argc, char** argv){
   double spectrum_min_mass; 
   double spectrum_max_mass; 
   char* match_output_folder = NULL; 
-  char* sqt_output_file = NULL;
-  char* decoy_sqt_output_file = NULL;
+  //char* sqt_output_file = NULL;
+  char* sqt_filename = NULL;
+  //char* decoy_sqt_output_file = NULL;
+  char* decoy_sqt_filename = NULL;
   int number_decoy_set;
   SCORER_TYPE_T main_score;
   SCORER_TYPE_T prelim_score;
@@ -62,7 +64,6 @@ int main(int argc, char** argv){
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
-    //"number-runs",       //delete this
     "match-output-folder",
     "output-mode",
     "sqt-output-file",
@@ -85,7 +86,8 @@ int main(int argc, char** argv){
 
   /* for debugging of parameter processing */
   // TODO change to a make flag
-  //set_verbosity_level(CARP_DETAILED_DEBUG);
+  set_verbosity_level(CARP_DETAILED_DEBUG);
+  set_verbosity_level(CARP_ERROR);
 
   /* Initialize parameter.c and set default values*/
   initialize_parameters();
@@ -113,8 +115,8 @@ int main(int argc, char** argv){
   //outputs
   output_type = get_output_type_parameter("output-mode");
   match_output_folder = get_string_parameter_pointer("match-output-folder");
-  sqt_output_file = get_string_parameter_pointer("sqt-output-file");
-  decoy_sqt_output_file = get_string_parameter_pointer(
+  sqt_filename = get_string_parameter_pointer("sqt-output-file");
+  decoy_sqt_filename = get_string_parameter_pointer(
 						"decoy-sqt-output-file");
   //TODO generate ms2-target.sqt file names if default is set, but do
   // it when file names are used,  see notes at end of file
@@ -163,9 +165,12 @@ int main(int argc, char** argv){
   int* possible_charge_array = NULL;
 
   char** psm_result_filenames = NULL;
-  FILE** psm_result_file = NULL; //file handle array
-  FILE* psm_result_file_sqt = NULL;
-  FILE* decoy_result_file_sqt  = NULL;
+  //FILE** psm_result_file = NULL; //file handle array
+  FILE** psm_file_array = NULL; //file handle array
+  //FILE* psm_result_file_sqt = NULL;
+  FILE* sqt_file = NULL;
+  //  FILE* decoy_result_file_sqt  = NULL;
+  FILE* decoy_sqt_file  = NULL;
   int total_files = number_decoy_set + 1; // plus one for target file
   int file_idx = 0;
   
@@ -182,11 +187,12 @@ int main(int argc, char** argv){
   // create spectrum iterator
   spectrum_iterator = new_spectrum_iterator(collection);
   
-  carp(CARP_DETAILED_DEBUG, "There were %i spectra found in the ms2 file",
+  carp(CARP_DEBUG, "There were %i spectra found in the ms2 file",
        get_spectrum_collection_num_spectra(collection));
-  // get psm_result file handler array
-  // this includes one for the target and for the decoys
-  psm_result_file = 
+
+  // get psm result file handle array
+  // this includes ones for the target and for the decoys
+  psm_file_array = 
     get_spectrum_collection_psm_result_filenames( collection,
 						  match_output_folder,
 						  &psm_result_filenames,
@@ -202,28 +208,36 @@ int main(int argc, char** argv){
   }
   
   // get psm_result sqt file handle if needed
+  carp(CARP_DETAILED_DEBUG, "sqt output file is %s", sqt_filename);
+
+  if(output_type != BINARY_OUTPUT ){ //ie binary only
+    sqt_file= create_file_in_path(sqt_filename, match_output_folder);
+    decoy_sqt_file = 
+      create_file_in_path(decoy_sqt_filename, match_output_folder);
+  }
+
   //do we really need sqts to stdout???
   //TODO turn this into a function
-  carp(CARP_DETAILED_DEBUG, "sqt output file is %s", sqt_output_file);
-  if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-    if (strcmp(sqt_output_file, "STDOUT") == 0){
-      psm_result_file_sqt = stdout;
+  /*  if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
+    if (strcmp(sqt_filename, "STDOUT") == 0){
+      sqt_file= stdout;
     } else {
-      psm_result_file_sqt = 
-	create_file_in_path(sqt_output_file, match_output_folder);
+      sqt_file= 
+	create_file_in_path(sqt_filename, match_output_folder);
     }
-    if (strcmp(decoy_sqt_output_file, "STDOUT") == 0){
-      decoy_result_file_sqt = stdout;
+    if (strcmp(decoy_sqt_filename, "STDOUT") == 0){
+      decoy_sqt_file = stdout;
     } else {
-      decoy_result_file_sqt = 
-	create_file_in_path(decoy_sqt_output_file, match_output_folder);
+      decoy_sqt_file = 
+	create_file_in_path(decoy_sqt_filename, match_output_folder);
     }
   }
-  
+  */
+
   // check for at least one file handle for results
-  if(psm_result_file[0] == NULL ||
-     ((output_type == SQT_OUTPUT || output_type == ALL_OUTPUT) &&
-      psm_result_file_sqt == NULL)){
+  if(psm_file_array[0] == NULL ||
+     //((output_type == SQT_OUTPUT || output_type == ALL_OUTPUT) &&
+     ((output_type != BINARY_OUTPUT) && sqt_file== NULL)){
     carp(CARP_FATAL, "Failed to create file handles for results");
     exit(1);
   }
@@ -237,7 +251,35 @@ int main(int argc, char** argv){
   
   /* Write headers to files */
   for(file_idx=0; file_idx < total_files; ++file_idx){
-    serialize_header(collection, input_file, psm_result_file[file_idx]);
+    serialize_header(collection, input_file, psm_file_array[file_idx]);
+/********  TODO write this function
+    write_sqt_header(sqt_file, decoy_file);
+
+//Here's an eg header
+H       SQTGenerator SEQUEST
+H       SQTGeneratorVersion     2.7
+H       Comment SEQUEST was written by J Eng and JR Yates, III
+H       Comment SEQUEST ref. J. Am. Soc. Mass Spectrom., 1994, v. 4, p. 976
+H       Comment SEQUEST ref. Eng,J.K.; McCormack A.L.; Yates J.R.
+H       Comment SEQUEST is licensed to Finnigan Corp.
+H       Comment Paralellization Program is run_ms2
+H       Comment run_ms2 was written by Rovshan Sadygov
+H       StartTime 05/18/2007, 05:02 AM
+H       EndTime 05/18/2007, 10:47 AM
+H       Database        /home/maccoss/dbase/human-050906-contam.fasta
+H       DBSeqLength     16478009
+H       DBLocusCount    34224
+H       PrecursorMasses AVG
+H       FragmentMasses  MONO
+H       Alg-PreMassTol  3.000
+H       Alg-FragMassTol 0.0
+H       Alg-XCorrMode   0
+H       StaticMod       C=160.139
+H       Alg-DisplayTop  5
+H       Alg-IonSeries   0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
+H       EnzymeSpec      No_Enzyme
+
+*/
   }
   
   carp(CARP_DETAILED_DEBUG, "Headers written to output files");
@@ -339,20 +381,19 @@ int main(int argc, char** argv){
 	}
 
 	// serialize the psm features from rank 1 to 'top_match'
-	serialize_psm_features(match_collection, psm_result_file[file_idx], 
+	serialize_psm_features(match_collection, psm_file_array[file_idx], 
 			       top_match, prelim_score, main_score);
 	
 	// write to SQT files
-	// Output only for the target set (bf why??)
 	// FIXME ONLY one header
 	if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-	  // only output the first and second decoy sets
+
 	  if (file_idx == 0){
-	    print_match_collection_sqt(psm_result_file_sqt, max_rank_result,
+	    print_match_collection_sqt(sqt_file, max_rank_result,
 				       match_collection, spectrum, 
 				       prelim_score, main_score);
 	  } else if (file_idx == 1){
-	    print_match_collection_sqt(decoy_result_file_sqt, max_rank_result,
+	    print_match_collection_sqt(decoy_sqt_file, max_rank_result,
 				       match_collection, spectrum, 
 				       prelim_score, main_score);
 	  } 
@@ -367,8 +408,8 @@ int main(int argc, char** argv){
   // Modify the header serialized information for all files(target & decoy)
   // Set the total number of spectra serialized in the PSM result files
   for(file_idx=0; file_idx < total_files; ++file_idx){
-    serialize_total_number_of_spectra(spectra_idx, psm_result_file[file_idx]);
-    serialize_total_number_of_spectra(spectrum_searches_counter, psm_result_file[file_idx]);
+    serialize_total_number_of_spectra(spectra_idx, psm_file_array[file_idx]);
+    serialize_total_number_of_spectra(spectrum_searches_counter, psm_file_array[file_idx]);
   }
   
   // DEBUG
@@ -376,13 +417,13 @@ int main(int argc, char** argv){
        spectra_idx, spectrum_searches_counter);
   
   if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-    fclose(psm_result_file_sqt);
-    fclose(decoy_result_file_sqt);
+    fclose(sqt_file);
+    fclose(decoy_sqt_file);
   }
   
   // ok, now close all psm_result_files and free filenames
   for(file_idx = 0; file_idx < total_files; ++file_idx){
-    fclose(psm_result_file[file_idx]);
+    fclose(psm_file_array[file_idx]);
     free(psm_result_filenames[file_idx]);
   }
   
@@ -392,7 +433,7 @@ int main(int argc, char** argv){
     free_database(database);
   }
   free(psm_result_filenames);
-  free(psm_result_file);
+  free(psm_file_array);
   free_spectrum_iterator(spectrum_iterator);
   free_spectrum_collection(collection);
   free_parameters();

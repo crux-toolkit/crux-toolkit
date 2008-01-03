@@ -65,6 +65,7 @@ int main(int argc, char** argv){
 
   //TODO make this a debug flag
   //set_verbosity_level(CARP_DETAILED_DEBUG);
+  set_verbosity_level(CARP_ERROR);
 
   /* Prepare parameter.c to read command line, set default option values */
   initialize_parameters();
