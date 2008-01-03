@@ -211,15 +211,27 @@ void initialize_parameters(void){
   set_int_parameter("charge state", 0, 0, 3, 
        "The charge state of the peptide.");
 
+  /* create-psm-files */
+  set_string_parameter("peptide-file-name", NULL,
+      "A file containing peptides for which to create ion files"); 
+  set_string_parameter("output-dir", NULL,
+      "A directory in which to place the ion files");
+  set_string_parameter("model-type", NULL,
+      "The kind of model (paired or single)");
+
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
   set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
-	"Set level of output to stderr (0-100).  Default 10.");
+	  "Set level of output to stderr (0-100).  Default 10.");
 
   set_string_parameter("parameter-file", NULL, 
 	"Set additional options with values in the given file.");
     
+  /* create-psm-files */
+  set_int_parameter("starting-sentence-idx", 0, 0, BILLION, 
+      "Starting sentence idx"); 
+
   /* generate_peptide, create_index parameters  */
   set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
 	"The minimum length of peptides to consider. Default 6.");
@@ -290,7 +302,8 @@ void initialize_parameters(void){
         "Search peptides within +/- 'mass-window' of the " \
         "spectrum mass.  Default 3.0");
 
-  // Sp scoring params
+
+    // Sp scoring params
   set_double_parameter("beta", 0.075, 0, 1, "usage");
   set_double_parameter("max-mz", 4000, 0, BILLION, "usage");
   set_int_parameter("top-fit-sp", 1000, 1, BILLION, 
