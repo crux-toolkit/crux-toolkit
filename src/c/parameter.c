@@ -657,8 +657,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     }
     break;
   case OUTPUT_TYPE_P:
-    carp(CARP_DETAILED_DEBUG, "found output_mode param, value '%s'",
-	 value_str);
+    carp(CARP_DETAILED_DEBUG, "found output_mode param, value '%s'", value_str);
     if(! string_to_output_type(value_str, &output_type)){
       success = FALSE;
       sprintf(die_str, "Illegal output type '%s' for options '%s'.  " \

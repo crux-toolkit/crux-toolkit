@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.60 $
+ * REVISION: $Revision: 1.61 $
  ****************************************************************************/
 
 #include <math.h>
@@ -48,7 +48,7 @@
 #define GMTK_NUM_ION_SERIES \
   GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
 
-#define GMTK_NUM_PAIRED_ION_SERIES 13
+#define GMTK_NUM_PAIRED_ION_SERIES 12
 
 /**
  * \struct scorer
@@ -1497,6 +1497,7 @@ ION_CONSTRAINT_T** paired_ion_constraints(
   int indices[GMTK_NUM_PAIRED_ION_SERIES * 2] = { 
     0, 6, // b,y
     0, 12,// b,a
+    6, 12,// y,a
     0, 2, // b,b-h2o
     0, 1, // b,b-nh3
     0, 3, // b,b+2
@@ -1507,7 +1508,8 @@ ION_CONSTRAINT_T** paired_ion_constraints(
     6, 9, // y,y+2
     8, 11,// y-h2o,y-h2o+2
     7, 10,// y-nh3,y-nh3+2
-    12,15 // a,a+2
+    12,15,// a,a+2
+    3,9   // b+2,y+2
   };
 
   int idx;
