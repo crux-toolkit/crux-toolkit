@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum vs. ion_series
- * REVISION: $Revision: 1.61 $
+ * REVISION: $Revision: 1.62 $
  ****************************************************************************/
 
 #include <math.h>
@@ -48,7 +48,7 @@
 #define GMTK_NUM_ION_SERIES \
   GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
 
-#define GMTK_NUM_PAIRED_ION_SERIES 12
+#define GMTK_NUM_PAIRED_ION_SERIES 15
 
 /**
  * \struct scorer
