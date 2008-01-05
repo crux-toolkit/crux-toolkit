@@ -87,47 +87,54 @@ int main(int argc, char** argv){
   initialize_parameters();
 
   /* Define optional and required arguments in parameter.c */
-  select_cmd_line_options( option_list, num_options );
-  select_cmd_line_arguments( argument_list, num_arguments);
-
+  select_cmd_line_options(option_list, num_options );
+  select_cmd_line_arguments(argument_list, num_arguments);
 
   /* Parse the command line and optional paramter file
      does sytnax, type, and bounds checking and dies on error */
   parse_cmd_line_into_params_hash(argc, argv, "crux-analyze-matches");
 
   /* Set verbosity */
-  set_verbosity_level( get_int_parameter("verbosity"));
+  set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get arguments */
   psm_result_folder = get_string_parameter("psm-folder");
   fasta_file = get_string_parameter("protein input");
 
   /* Get options */
-  SCORER_TYPE_T scorer_type = get_scorer_type_parameter("algorithm");
+  ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
+  SCORER_TYPE_T scorer_type;
   MATCH_COLLECTION_T* match_collection = NULL;
 
   /* Perform the analysis */
-  switch( scorer_type ){
-  case PERCOLATOR_SCORE:
+  switch(algorithm_type){
+  case PERCOLATOR_ALGORITHM:
     carp(CARP_INFO, "Running percolator");
     match_collection = run_percolator(psm_result_folder,
 				      fasta_file,
 				      feature_file);
+    scorer_type = PERCOLATOR_SCORE;
     break;
     
-  case LOGP_QVALUE_WEIBULL_XCORR:
+  case QVALUE_ALGORITHM:
     carp(CARP_INFO, "Running qvalue");
     match_collection = run_qvalue(psm_result_folder, fasta_file);
+    scorer_type = Q_VALUE;
     break;
     
-  default:
+  case NO_ALGORITHM:
     carp(CARP_INFO, "No analysis algorithm chosen.");
     match_collection = run_nothing(psm_result_folder,
 				   fasta_file,
 				   feature_file);
+    scorer_type = XCORR; // TODO put in something to default to the primary
+    // score in the run
     break;
+  default:
+    ;
   }  
   
+  carp(CARP_INFO, "Outputting matches.");
   output_matches(match_collection, scorer_type);
   // MEMLEAK below causes seg fault
   // free_match_collection(match_collection);
@@ -203,7 +210,6 @@ MATCH_COLLECTION_T* run_nothing(
   char* fasta_file,
   char* feature_file
   ){
-
   
   // create MATCH_COLLECTION_ITERATOR_T object
   MATCH_COLLECTION_T* match_collection = NULL;
@@ -418,7 +424,7 @@ MATCH_COLLECTION_T* run_percolator(
   char* fasta_file, 
   char* feature_file){ 
 
-  ALGORITHM_TYPE_T algorithm = PERCOLATOR;
+  ALGORITHM_TYPE_T algorithm = PERCOLATOR_ALGORITHM;
   unsigned int number_features = 20;
   double* features = NULL;    
   double* results_q = NULL;

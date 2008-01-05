@@ -143,6 +143,35 @@ BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
 }
 
 /*
+ * The string version of ALGORITHM_TYPE_T
+ */
+static char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
+  {"percolator", "rczar", "q-value", "none", "all"};
+
+BOOLEAN_T string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result){
+  BOOLEAN_T success = TRUE;
+
+  int algorithm_type = convert_enum_type_str(name, -10, algorithm_type_strings,
+					  NUMBER_ALGORITHM_TYPES);
+  (*result) = (ALGORITHM_TYPE_T)algorithm_type;
+
+  if(algorithm_type < 0){
+    success = FALSE;
+  }
+  return success;
+}
+
+BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
+  BOOLEAN_T success = TRUE;
+  if( (int)type > NUMBER_ALGORITHM_TYPES){
+    success = FALSE;
+    type_str = NULL;
+  }
+  strcpy(type_str, algorithm_type_strings[type]);
+  return success;
+}
+
+/*
  * The string version of SCORER_TYPE_T
  */
 static char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
@@ -176,6 +205,7 @@ BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T type, char* type_str){
   strcpy(type_str, scorer_type_strings[type]);
   return success;
 }
+
 /*
  * the string version of MATCH_SEARCH_OUPUT_MODE_T 
  */
@@ -594,10 +624,10 @@ char** generate_feature_name_array(
   char** name_array = NULL;
 
   switch(algorithm){
-    case PERCOLATOR:
-    case CZAR:
-    case QVALUE:
-    case ALL:
+    case PERCOLATOR_ALGORITHM:
+    case RCZAR_ALGORITHM:
+    case QVALUE_ALGORITHM:
+    case ALL_ALGORITHM:
     case NO_ALGORITHM:
       name_array = (char**)mycalloc(20, sizeof(char *));
       name_array[0] =  my_copy_string("XCorr");

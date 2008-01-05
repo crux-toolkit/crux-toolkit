@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -61,7 +61,7 @@ BOOLEAN_T parse_database(
 /**
 BOOLEAN_T get_database_protein_at_idx(
     DATABASE_T* database, ///< A parsed database object -in
-    unsigned long int protein_idx, ///< The index of the protein to retrieve -in
+    unsigned int protein_idx, ///< The index of the protein to retrieve -in
     PROTEIN_T** protein   ///< A pointer to a pointer to a PROTEIN object -out
     );
 **/
@@ -209,7 +209,7 @@ PROTEIN_T* database_protein_iterator_next(
  */
 PROTEIN_T* database_protein_iterator_protein_idx(
     DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator, ///< the iterator of interest -in
-    int protein_idx ///< protein_idx to which protein to return -in
+    unsigned int protein_idx ///< protein_idx to which protein to return -in
     );
 
 

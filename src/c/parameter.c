@@ -117,6 +117,11 @@ BOOLEAN_T set_sort_type_parameter(
  SORT_TYPE_T set_value,
  char* usage);
 
+BOOLEAN_T set_algorithm_type_parameter(
+ char* name,
+ ALGORITHM_TYPE_T set_value,
+ char* usage);
+
 BOOLEAN_T set_scorer_type_parameter(
  char* name,
  SCORER_TYPE_T set_value,
@@ -320,8 +325,8 @@ void initialize_parameters(void){
   set_boolean_parameter("skip-first-score", FALSE,  "usage");
 
   /* analyze-matches options */
-  set_scorer_type_parameter("algorithm", PERCOLATOR_SCORE, 
-  "The analysis algorithm to use (percolator, retention-czar, qvalue)." \
+  set_algorithm_type_parameter("algorithm", PERCOLATOR_ALGORITHM, 
+  "The analysis algorithm to use (percolator, retention-czar, qvalue, none)." \
   "  Default percolator");
   set_string_parameter("feature-file", "match_analysis.features", 
      "Optional file into which psm features are printed.");
@@ -1030,6 +1035,19 @@ SORT_TYPE_T get_sort_type_parameter(char* name){
   return param_value;
 }
 
+ALGORITHM_TYPE_T get_algorithm_type_parameter(char* name){
+  char* param_value_str = get_hash_value(parameters->hash, name);
+  ALGORITHM_TYPE_T param_value;
+  BOOLEAN_T success = string_to_algorithm_type(param_value_str, &param_value);
+
+  if(!success){
+    carp(CARP_FATAL, "Algorithm_type parameter %s has the value %s which is not of the correct type.", name, param_value_str);
+    exit(1);
+  }
+  return param_value;
+}
+
+
 SCORER_TYPE_T get_scorer_type_parameter(char* name){
   char* param_value_str = get_hash_value(parameters->hash, name);
   SCORER_TYPE_T param_value;
@@ -1271,6 +1289,31 @@ BOOLEAN_T set_sort_type_parameter(
 
   return result;
 }
+
+BOOLEAN_T set_algorithm_type_parameter(
+					 char* name,
+					 ALGORITHM_TYPE_T set_value,
+					 char* usage)
+{
+  BOOLEAN_T result = TRUE;
+  char value_str[SMALL_BUFFER];
+  
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  /* stringify value */
+  algorithm_type_to_string(set_value, value_str);
+  carp(CARP_DETAILED_DEBUG, "setting algorithm type to %s", value_str);  
+
+  result = add_or_update_hash(parameters->hash, name, value_str);
+  result = add_or_update_hash(usages->hash, name, usage);
+  result = add_or_update_hash(types->hash, name, "ALGORITHM_TYPE_T");
+
+  return result;
+}
+
 
 BOOLEAN_T set_scorer_type_parameter(
 					 char* name,

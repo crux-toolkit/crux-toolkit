@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -243,7 +243,7 @@ void process_run_specific_features(
  */
 int get_match_collection_protein_counter(
   MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
-  int protein_idx ///< the protein index to return protein counter -in
+  unsigned int protein_idx ///< the protein index to return protein counter -in
   );
 
 /**
@@ -251,7 +251,7 @@ int get_match_collection_protein_counter(
  */
 int get_match_collection_protein_peptide_counter(
   MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
-  int protein_idx ///< the protein index to return protein peptiide counter -in
+  unsigned int protein_idx ///< the protein index to return protein peptiide counter -in
   );
 
 /**

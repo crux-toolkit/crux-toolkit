@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.68 $
+ * $Revision: 1.69 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -1035,7 +1035,7 @@ PEPTIDE_T* parse_peptide(
   PEPTIDE_SRC_T* peptide_src = NULL;
   PEPTIDE_SRC_T* current_peptide_src = NULL;
   int num_peptide_src = -1;
-  int protein_idx = -1;
+  unsigned int protein_idx = 0;
   int src_index =  0;
   PEPTIDE_TYPE_T peptide_type = -1;
   int start_index = -1;
@@ -1075,6 +1075,7 @@ PEPTIDE_T* parse_peptide(
   current_peptide_src = peptide_src;
 
   // parse and fill all peptide src information into peptide
+  // TODO this should be moved into a parse peptide_src routine
   for(; src_index < num_peptide_src; ++src_index){
     // **read peptide src fields**//
     
@@ -1196,7 +1197,7 @@ char* get_peptide_hash_value(
 {
   char* hash_value = NULL;
   int peptide_length_space = get_number_digits(peptide->length);
-  int protein_idx = get_protein_protein_idx(get_peptide_src_parent_protein(peptide->peptide_src));
+  unsigned int protein_idx = get_protein_protein_idx(get_peptide_src_parent_protein(peptide->peptide_src));
   int protein_idx_space = get_number_digits(protein_idx);
   int peptide_start_idx = get_peptide_src_start_idx(peptide->peptide_src);
   int peptide_start_idx_space = get_number_digits(peptide_start_idx);
