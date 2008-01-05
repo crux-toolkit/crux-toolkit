@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.102 $   #-Werror \
+# VERSION: $Revision: 1.103 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -102,8 +102,8 @@ PROGS = \
 #	${BINDIR}/charge-vector-ms2 \
 #	${BINDIR}/precursor
 
-all: srclinks Percolator libs bins binlinks TAGS 
-most: srclinks Percolator libs bins binlinks 
+all: srclinks Percolator libs bins TAGS 
+most: srclinks Percolator libs bins 
 libs: ${LIBFILE}(${LIBOBJS})
 
 bins: ${PROGS} libs
