@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.54 $
+ * $Revision: 1.55 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -305,7 +305,7 @@ BOOLEAN_T parse_database_text_fasta(
           if(!parse_protein_fasta_file(new_protein ,file)){
             fclose(file);
             free_protein(new_protein);
-            for(; protein_idx < database->num_proteins; ++protein_idx){
+            for(; protein_idx < database->num_proteins; protein_idx++){
               free_protein(database->proteins[protein_idx]);
             }
             database->num_proteins = 0;
@@ -317,10 +317,10 @@ BOOLEAN_T parse_database_text_fasta(
         
         // add protein to database
         database->proteins[database->num_proteins] = new_protein;
-        ++database->num_proteins;
         // set protein index, database
         set_protein_protein_idx(new_protein, database->num_proteins);
         set_protein_database(new_protein, database);
+        ++database->num_proteins;
       }
       working_index = ftell(file);
     }
@@ -638,8 +638,7 @@ PROTEIN_T* get_database_protein_at_idx(
 {
   carp(CARP_DETAILED_DEBUG, "Protein idx = %i, num proteins %i", protein_idx, database->num_proteins);
 
-  return database->proteins[protein_idx-1];
-  // return database->proteins[protein_idx];
+  return database->proteins[protein_idx];
 }
 
 /**

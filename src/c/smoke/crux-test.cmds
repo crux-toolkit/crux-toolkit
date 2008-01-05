@@ -51,13 +51,13 @@ search_for_matches_noops = good_results/empty_file = rm -rf target.sqt crux_matc
 # See that crux-generate-peptides works with an existing index
 #generate_peptides_use_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = ../../../bin/crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --use-index T --cleavages tryptic copy_test.fasta = '# PROTEIN DATABASE'
 
-generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_index.out = ../../../bin/crux-generate-peptides --parameter-file params/smoke_params2 --output-sequence T --use-index T --cleavages tryptic existing.fasta = '# PROTEIN DATABASE'
+# generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_index.out = ../../../bin/crux-generate-peptides --parameter-file params/smoke_params2 --output-sequence T --use-index T --cleavages tryptic existing.fasta = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
-search_for_matches_default_existing_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode sqt --use-index T test.ms2 existing.fasta; cat target.sqt = 'Time'
+# search_for_matches_default_existing_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode sqt --use-index T test.ms2 existing.fasta; cat target.sqt = 'Time'
 
 # See that match_analysis works with an existing index and existing results
-analyze_matches_existing_index = good_results/standard_match_search_analysis.out=  ../../../bin/crux-analyze-matches --parameter-file params/smoke_params2 good_results existing.fasta 
+# analyze_matches_existing_index = good_results/standard_match_search_analysis.out=  ../../../bin/crux-analyze-matches --parameter-file params/smoke_params2 good_results existing.fasta 
 
 # Create index use crux-generate-peptides to test that it worked
 

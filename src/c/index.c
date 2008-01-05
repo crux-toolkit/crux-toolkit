@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.68 $
+ * $Revision: 1.69 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1519,7 +1519,7 @@ BOOLEAN_T parse_peptide_index_file(
   PEPTIDE_SRC_T* peptide_src = NULL;
   PEPTIDE_SRC_T* current_peptide_src = NULL;
   int num_peptide_src = -1;
-  int protein_idx = -1;
+  unsigned int protein_idx = 0;
   PEPTIDE_TYPE_T peptide_type = -1;
   int start_index = -1;
   

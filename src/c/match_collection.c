@@ -2113,7 +2113,6 @@ BOOLEAN_T extend_match_collection(
       return FALSE;
     }
     */
-    carp(CARP_DETAILED_DEBUG, "Reading charge. Was %i", charge);
     int chars_read = fread(&charge, (sizeof(int)), 1, result_file);
     carp(CARP_DETAILED_DEBUG, "Read %i characters, charge is %i",chars_read, charge);
 
@@ -2236,8 +2235,8 @@ BOOLEAN_T add_match_to_match_collection(
   update_protein_counters(match_collection, peptide);
   
   // update hash table
-  char* hash_value = get_peptide_hash_value(peptide);
-  add_hash(match_collection->post_hash, hash_value, NULL);
+  char* hash_value = get_peptide_hash_value(peptide); 
+  add_hash(match_collection->post_hash, hash_value, NULL); 
   
   return TRUE;
 }
@@ -2284,11 +2283,11 @@ void update_protein_counters(
     protein_idx = get_protein_protein_idx(protein);
     
     // update the number of PSM this protein matches
-    ++match_collection->post_protein_counter[protein_idx-1];
+    ++match_collection->post_protein_counter[protein_idx];
     
     // number of peptides match this protein
     if(unique){
-      ++match_collection->post_protein_peptide_counter[protein_idx-1];
+      ++match_collection->post_protein_peptide_counter[protein_idx];
     }
   }  
   
@@ -2371,7 +2370,7 @@ void process_run_specific_features(
  */
 int get_match_collection_protein_counter(
   MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
-  int protein_idx ///< the protein index to return protein counter -in
+  unsigned int protein_idx ///< the protein index to return protein counter -in
   )
 {
   // only for post_process_collections
@@ -2381,7 +2380,7 @@ int get_match_collection_protein_counter(
   }
 
   // number of PSMs match this protein
-  return match_collection->post_protein_counter[protein_idx-1];
+  return match_collection->post_protein_counter[protein_idx];
 }
 
 /**
@@ -2389,7 +2388,7 @@ int get_match_collection_protein_counter(
  */
 int get_match_collection_protein_peptide_counter(
   MATCH_COLLECTION_T* match_collection, ///< the working match collection -in
-  int protein_idx ///< the protein index to return protein peptiide counter -in
+  unsigned int protein_idx ///< the protein index to return protein peptiide counter -in
   )
 {
   // only for post_process_collections
@@ -2399,7 +2398,7 @@ int get_match_collection_protein_peptide_counter(
   }
   
   // number of peptides match this protein
-  return match_collection->post_protein_peptide_counter[protein_idx-1];
+  return match_collection->post_protein_peptide_counter[protein_idx];
 }
 
 /**

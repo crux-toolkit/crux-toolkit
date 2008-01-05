@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -132,6 +132,10 @@ MASS_TYPE_T get_mass_type_parameter(
  );
 
 SORT_TYPE_T get_sort_type_parameter(
+ char* name
+ );
+
+ALGORITHM_TYPE_T get_algorithm_type_parameter(
  char* name
  );
 

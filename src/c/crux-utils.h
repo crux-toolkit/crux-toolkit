@@ -1,7 +1,7 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.25 $
- * $Author: frewen $
+ * $Revision: 1.26 $
+ * $Author: aklammer $
  * \brief Utilities for the crux project
  */
 #ifndef CRUX_UTILS_H
@@ -216,9 +216,11 @@ BOOLEAN_T string_to_peptide_type(char*, PEPTIDE_TYPE_T*);
 BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str);
 BOOLEAN_T string_to_sort_type(char*, SORT_TYPE_T*);
 BOOLEAN_T sort_type_to_string(SORT_TYPE_T, char*);
+BOOLEAN_T string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);
+BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T, char*);
 BOOLEAN_T string_to_scorer_type(char*, SCORER_TYPE_T*);
 BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T, char*);
-BOOLEAN_T string_to_output_type(char* , MATCH_SEARCH_OUTPUT_MODE_T*);
+BOOLEAN_T string_to_output_type(char*, MATCH_SEARCH_OUTPUT_MODE_T*);
 BOOLEAN_T output_type_to_string(MATCH_SEARCH_OUTPUT_MODE_T, char*);
 BOOLEAN_T string_to_ion_type(char* , ION_TYPE_T*);
 BOOLEAN_T ion_type_to_string(ION_TYPE_T, char*);

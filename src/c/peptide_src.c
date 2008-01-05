@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_src.c
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -333,7 +333,7 @@ void serialize_peptide_src(
   )
 {
   // write protein index in database
-  int protein_idx = get_protein_protein_idx(peptide_src->parent_protein);
+  unsigned int protein_idx = get_protein_protein_idx(peptide_src->parent_protein);
   fwrite(&protein_idx, sizeof(int), 1, file);
     
   // write peptide src type(tryptic, all, ...)
