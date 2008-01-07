@@ -100,6 +100,7 @@ int main(int argc, char** argv){
   /* Get arguments */
   psm_result_folder = get_string_parameter("psm-folder");
   fasta_file = get_string_parameter("protein input");
+  feature_file = get_string_parameter("feature-file");
 
   /* Get options */
   ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");

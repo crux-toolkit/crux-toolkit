@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
@@ -30,10 +30,10 @@
 #define SMALL_BUFFER 256
 #define MAX_SET_PARAMS 256
 
-#define NUMBER_PARAMETER_TYPES 10
+#define NUMBER_PARAMETER_TYPES 11
 enum parameter_type {INT_P, DOUBLE_P, STRING_P, MASS_TYPE_P, 
 		     PEPTIDE_TYPE_P, BOOLEAN_P, SORT_TYPE_P,
-		     SCORER_TYPE_P, OUTPUT_TYPE_P, ION_TYPE_P};
+		     SCORER_TYPE_P, OUTPUT_TYPE_P, ION_TYPE_P, ALGORITHM_TYPE_P};
 typedef enum parameter_type PARAMETER_TYPE_T;
 
 /**
