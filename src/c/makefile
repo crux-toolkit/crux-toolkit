@@ -1,7 +1,7 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.103 $   #-Werror \
+# VERSION: $Revision: 1.104 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
@@ -85,7 +85,6 @@ PROGS = \
 	${BINDIR}/crux-analyze-matches \
 	${BINDIR}/crux-predict-peptide-ions \
 	${BINDIR}/create_ion_files \
-	${BINDIR}/utils \
 	${BINDIR}/create_protein_index \
 	${BINDIR}/transform_ms2_spectra \
 	${BINDIR}/create_psm_files 

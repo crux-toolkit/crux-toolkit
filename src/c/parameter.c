@@ -23,7 +23,8 @@ struct parameter_hash{
  */
 static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { 
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T", 
-  "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T"};
+  "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T",
+  "ALGORITHM_TYPE_T"};
 
 //one hash for parameter values, one for usage statements, one for types
 struct parameter_hash  parameters_hash_table;
@@ -563,8 +564,8 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     for(i=1; i<argc; i++){
       char* word = argv[i];
       if( word[0] == '-' && word[1] == '-' ){   //if word starts with --
-	word = word + 2;      //ignore the --
-	check_option_type_and_bounds(word);
+	      word = word + 2;      //ignore the --
+	      check_option_type_and_bounds(word);
       }//else skip this word
     }
   }
@@ -605,6 +606,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
   PEPTIDE_TYPE_T pep_type;
   SORT_TYPE_T sort_type;
   SCORER_TYPE_T scorer_type;
+  ALGORITHM_TYPE_T algorithm_type;
   MATCH_SEARCH_OUTPUT_MODE_T output_type;
   ION_TYPE_T ion_type;
 
@@ -675,6 +677,16 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 	      "Must be sp, xcorr, dotp, logp_exp_sp, logp_bonf_exp_sp, logp_evd_xcorr, logp_bonf_evd_xcorr, logp_weibull_sp, logp_bonf_weibull_sp, logp_weibull_xcorr, logp_bonf_weibull_xcorr, q_value, percolator_score, OR logp_qvalue_weibull_xcorr", value_str, name);
     }
     break;
+  case ALGORITHM_TYPE_P:
+    carp(CARP_DETAILED_DEBUG, "found algorithm_type param, value '%s'",
+	    value_str);
+    if(! string_to_algorithm_type( value_str, &algorithm_type)){
+      success = FALSE;
+      sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
+	      "Must be percolator, rczar, q-value, none OR all.", value_str, name);
+    }
+    break;
+
   case OUTPUT_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found output_mode param, value '%s'", value_str);
     if(! string_to_output_type(value_str, &output_type)){
@@ -685,7 +697,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     break;
   case ION_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found ion_type param, value '%s'",
-	 value_str);
+	    value_str);
     if( !string_to_ion_type(value_str, &ion_type)){
       success = FALSE;
       sprintf(die_str, "Illegal ion type '%s' for option '%s'.  " \
@@ -693,7 +705,8 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     }
     break;
   default:
-    carp(CARP_FATAL, "Your param type '%s' wasn't found (code %i)", type_str, (int)param_type);
+    carp(CARP_FATAL, "Your param type '%s' wasn't found (code %i)", 
+        type_str, (int)param_type);
     exit(1);
   }
 

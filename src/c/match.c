@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
  * 							preliminary score(e.g., Sp)
  *
- * REVISION: $Revision: 1.49 $
+ * REVISION: $Revision: 1.50 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -486,7 +486,10 @@ MATCH_T* parse_match(
   // parse score, ranks of the match    
   if((peptide = parse_peptide(result_file, database, TRUE))== NULL){
     carp(CARP_ERROR, "failed to parse peptide");
-    exit(1);
+    // FIXME should this exit or return null. I think sometimes we can get
+    // no peptides, which is valid, in which case NULL makes sense.
+    // maybe this should be fixed at the serialize match level however.
+    return NULL;
   }
   
   // parse each score and rank of match
