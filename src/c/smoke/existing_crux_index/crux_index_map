@@ -7,7 +7,7 @@
 #	mass_type: 0
 #	unique_peptides: 0
 #	CRUX index directory: existing_crux_index
-#	time created: Wed Dec  5 15:44:05 2007
+#	time created: Mon Jan  7 16:03:48 2008
 #	target mass range for index file: 6.84
 crux_index_34	585.59	6.84
 crux_index_44	653.95	6.84
