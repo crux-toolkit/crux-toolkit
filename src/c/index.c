@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.69 $
+ * $Revision: 1.70 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -907,7 +907,7 @@ BOOLEAN_T create_index(
 
   // check if already created index
   if(index->on_disk){
-    carp(CARP_INFO, "index already been created on disk");
+    carp(CARP_WARNING, "index already been created on disk");
     return TRUE;
   }
   

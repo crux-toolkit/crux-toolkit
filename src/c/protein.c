@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.58 $
+ * $Revision: 1.59 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -553,7 +553,7 @@ static BOOLEAN_T read_raw_sequence
     // Skip non-alphabetic characters.
     if (!isalpha((int)a_char)) {
       if ((a_char != ' ') && (a_char != '\t') && (a_char != '\n') && (a_char != '\r')) {
-	carp(CARP_WARNING,"Skipping character %c in sequence %s.\n",
+	carp(CARP_WARNING,"Skipping character %c in sequence %s.",
 		a_char, name);
       }
 

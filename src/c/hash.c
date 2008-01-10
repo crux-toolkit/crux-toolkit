@@ -1,14 +1,14 @@
 /*****************************************************************************
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "hash.h"
-#include "carp.h"
+//#include "carp.h"
 #include "parse_arguments.h"
 #include "crux-utils.h"
 #include "objects.h"
@@ -364,7 +364,7 @@ BOOLEAN_T update_hash_value(
       ind = (code + (int)pow(++off,2)) % size;
     }
   }
-  carp(CARP_ERROR, "Failed to find key %s in hash table", key);
+  //carp(CARP_ERROR, "Failed to find key %s in hash table", key);
   return FALSE;
 }
 

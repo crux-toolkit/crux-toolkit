@@ -1,7 +1,7 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.26 $
- * $Author: aklammer $
+ * $Revision: 1.27 $
+ * $Author: frewen $
  * \brief Utilities for the crux project
  */
 #ifndef CRUX_UTILS_H
@@ -128,7 +128,8 @@ char* generate_name(
  */
 FILE* create_file_in_path(
   char* filename,  ///< the filename to create & open -in
-  char* directory  ///< the directory to open the file in -in
+  char* directory,  ///< the directory to open the file in -in
+  BOOLEAN_T overwrite  ///< replace the file (T) or die if exists (F)
   );
 
 /**

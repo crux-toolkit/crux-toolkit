@@ -25,7 +25,7 @@
 #include "match.h"
 #include "match_collection.h"
 
-#define NUM_SEARCH_OPTIONS 13
+#define NUM_SEARCH_OPTIONS 14
 #define NUM_SEARCH_ARGS 2
 
 /* Private functions */
@@ -40,9 +40,7 @@ int main(int argc, char** argv){
   double spectrum_min_mass; 
   double spectrum_max_mass; 
   char* match_output_folder = NULL; 
-  //char* sqt_output_file = NULL;
   char* sqt_filename = NULL;
-  //char* decoy_sqt_output_file = NULL;
   char* decoy_sqt_filename = NULL;
   int number_decoy_set;
   SCORER_TYPE_T main_score;
@@ -58,6 +56,7 @@ int main(int argc, char** argv){
   char* option_list[NUM_SEARCH_OPTIONS] = {
     "verbosity",
     "parameter-file",
+    "overwrite",
     "use-index",
     "prelim-score-type",
     "score-type",
@@ -76,11 +75,11 @@ int main(int argc, char** argv){
   char* argument_list[NUM_SEARCH_ARGS] = {"ms2 file", "protein input"};
 
   // parameter file options
-  long int max_rank_preliminary = 500;
-  long int max_rank_result = 500;
-  int top_match = 1;
-  BOOLEAN_T run_all_charges = TRUE;
-  int spectrum_charge_to_run = 0;
+  long int max_rank_preliminary;
+  long int max_rank_result;
+  int top_match;
+  BOOLEAN_T run_all_charges;
+  int spectrum_charge_to_run;
   float mass_offset = 0; //delete me?
 
 
@@ -165,19 +164,17 @@ int main(int argc, char** argv){
   int* possible_charge_array = NULL;
 
   char** psm_result_filenames = NULL;
-  //FILE** psm_result_file = NULL; //file handle array
   FILE** psm_file_array = NULL; //file handle array
-  //FILE* psm_result_file_sqt = NULL;
   FILE* sqt_file = NULL;
-  //  FILE* decoy_result_file_sqt  = NULL;
   FILE* decoy_sqt_file  = NULL;
   int total_files = number_decoy_set + 1; // plus one for target file
   int file_idx = 0;
   
-  // read ms2 file
+  // open ms2 file
   collection = new_spectrum_collection(ms2_file);
   
   // parse the ms2 file for spectra
+  carp(CARP_INFO, "Reading in ms2 file %s", ms2_file);
   if(!parse_spectrum_collection(collection)){
     carp(CARP_ERROR, "Failed to parse ms2 file: %s", ms2_file);
     free_spectrum_collection(collection);
@@ -192,6 +189,10 @@ int main(int argc, char** argv){
 
   // get psm result file handle array
   // this includes ones for the target and for the decoys
+  carp(CARP_DETAILED_DEBUG, "The output type is %d (binary,sqt, all)", 
+       (int)output_type);
+
+  carp(CARP_DETAILED_DEBUG, "Creating binary psm files"); 
   psm_file_array = 
     get_spectrum_collection_psm_result_filenames( collection,
 						  match_output_folder,
@@ -208,12 +209,17 @@ int main(int argc, char** argv){
   }
   
   // get psm_result sqt file handle if needed
-  carp(CARP_DETAILED_DEBUG, "sqt output file is %s", sqt_filename);
-
+  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
   if(output_type != BINARY_OUTPUT ){ //ie binary only
-    sqt_file= create_file_in_path(sqt_filename, match_output_folder);
+    carp(CARP_DETAILED_DEBUG, "sqt output file is %s", sqt_filename);
+
+    sqt_file= create_file_in_path(sqt_filename, match_output_folder, 
+				  overwrite);
+    print_sqt_header(sqt_file, "target");
+
     decoy_sqt_file = 
-      create_file_in_path(decoy_sqt_filename, match_output_folder);
+      create_file_in_path(decoy_sqt_filename, match_output_folder, overwrite);
+    print_sqt_header(decoy_sqt_file, "decoy");
   }
 
   //do we really need sqts to stdout???
@@ -236,11 +242,10 @@ int main(int argc, char** argv){
 
   // check for at least one file handle for results
   if(psm_file_array[0] == NULL ||
-     //((output_type == SQT_OUTPUT || output_type == ALL_OUTPUT) &&
      ((output_type != BINARY_OUTPUT) && sqt_file== NULL)){
     carp(CARP_FATAL, "Failed to create file handles for results");
     exit(1);
-  }
+    }
   
   /**
    * General order of serialization is, 
@@ -252,36 +257,8 @@ int main(int argc, char** argv){
   /* Write headers to files */
   for(file_idx=0; file_idx < total_files; ++file_idx){
     serialize_header(collection, input_file, psm_file_array[file_idx]);
-/********  TODO write this function
-    write_sqt_header(sqt_file, decoy_file);
-
-//Here's an eg header
-H       SQTGenerator SEQUEST
-H       SQTGeneratorVersion     2.7
-H       Comment SEQUEST was written by J Eng and JR Yates, III
-H       Comment SEQUEST ref. J. Am. Soc. Mass Spectrom., 1994, v. 4, p. 976
-H       Comment SEQUEST ref. Eng,J.K.; McCormack A.L.; Yates J.R.
-H       Comment SEQUEST is licensed to Finnigan Corp.
-H       Comment Paralellization Program is run_ms2
-H       Comment run_ms2 was written by Rovshan Sadygov
-H       StartTime 05/18/2007, 05:02 AM
-H       EndTime 05/18/2007, 10:47 AM
-H       Database        /home/maccoss/dbase/human-050906-contam.fasta
-H       DBSeqLength     16478009
-H       DBLocusCount    34224
-H       PrecursorMasses AVG
-H       FragmentMasses  MONO
-H       Alg-PreMassTol  3.000
-H       Alg-FragMassTol 0.0
-H       Alg-XCorrMode   0
-H       StaticMod       C=160.139
-H       Alg-DisplayTop  5
-H       Alg-IonSeries   0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
-H       EnzymeSpec      No_Enzyme
-
-*/
   }
-  
+
   carp(CARP_DETAILED_DEBUG, "Headers written to output files");
   
   /* Prepare input, fasta or index */
@@ -291,7 +268,7 @@ H       EnzymeSpec      No_Enzyme
   BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
   //todo make this a helper function
   if (use_index == TRUE){
-    carp(CARP_DETAILED_DEBUG, "Using existing index");
+    carp(CARP_INFO, "Preparing protein index %s", input_file);
     index = new_index_from_disk(input_file, is_unique);
 
     if (index == NULL){
@@ -299,7 +276,7 @@ H       EnzymeSpec      No_Enzyme
       exit(1);
     }
   } else {
-    carp(CARP_DETAILED_DEBUG, "Using non-indexed fasta file");
+    carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
     database = new_database(input_file, FALSE);         
     if( database == NULL ){
       carp(CARP_FATAL, "Could not read fasta file %s", input_file);
@@ -312,19 +289,20 @@ H       EnzymeSpec      No_Enzyme
   /* Perform search: iterate over all spectra in ms2 file and score */
   int spectra_idx = 0; //superfluous
   int spectrum_searches_counter = 0; //spec (z-specific) w/ psms
-  int bf_loop_i = 0;   //superfluous
+  int spectrum_counter = 0;   
   SPECTRUM_T* spectrum = NULL;
   int charge_index = 0;
   BOOLEAN_T is_decoy = FALSE;
 
+  carp(CARP_INFO, "Searching spectra");
   while(spectrum_iterator_has_next(spectrum_iterator)){
-    bf_loop_i++;
+    spectrum_counter++;
     // get next spectrum
     spectrum = spectrum_iterator_next(spectrum_iterator);
     
     carp(CARP_DETAILED_DEBUG, 
 	 "Searching spectrum number %i, loop number %i, search number %i", 
-	 get_spectrum_first_scan(spectrum), bf_loop_i, spectra_idx+1);
+	 get_spectrum_first_scan(spectrum), spectrum_counter, spectra_idx+1);
     
     // select spectra that are within m/z target interval
     if(get_spectrum_precursor_mz(spectrum) <  spectrum_min_mass ||
@@ -352,12 +330,12 @@ H       EnzymeSpec      No_Enzyme
       
       // iterate over first for target next and for all decoy sets
       for(file_idx = 0; file_idx < total_files; ++file_idx){
-	      if(file_idx == 0){ 	// is it target ?
-	        is_decoy = FALSE;
-	      }
-	      else{
-	        is_decoy = TRUE;
-	      }
+	if(file_idx == 0){ 	// is it target ?
+	  is_decoy = FALSE;
+	}
+	else{
+	  is_decoy = TRUE;
+	}
 	
 	// get match collection with scored, ranked match collection
 	match_collection = 
@@ -380,12 +358,12 @@ H       EnzymeSpec      No_Enzyme
 	  continue;
 	}
 
+	//is this working if output_mode == SQT
 	// serialize the psm features from rank 1 to 'top_match'
 	serialize_psm_features(match_collection, psm_file_array[file_idx], 
 			       top_match, prelim_score, main_score);
 	
 	// write to SQT files
-	// FIXME ONLY one header
 	if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
 
 	  if (file_idx == 0){
@@ -403,11 +381,15 @@ H       EnzymeSpec      No_Enzyme
 	free_match_collection(match_collection);          
       }
     }
+    if( spectrum_counter %1000 == 0 ){
+      carp(CARP_INFO, "Searched %d spectra", spectrum_counter);
+    }
   } //end while iterator has spectra
   
   // Modify the header serialized information for all files(target & decoy)
   // Set the total number of spectra serialized in the PSM result files
   for(file_idx=0; file_idx < total_files; ++file_idx){
+    //I think the first second line is supposed to replace the first
     serialize_total_number_of_spectra(spectra_idx, psm_file_array[file_idx]);
     serialize_total_number_of_spectra(spectrum_searches_counter, psm_file_array[file_idx]);
   }

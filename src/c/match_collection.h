@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -149,7 +149,7 @@ BOOLEAN_T serialize_psm_features(
   );
 
 /*
- * Print the SQT file header
+ * Print the SQT file header 
  */
 void print_sqt_header(FILE* outfile, char* type);
 

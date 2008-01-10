@@ -1,6 +1,6 @@
 /**
  * \file generate_peptides_iterator.h 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief object to return candidate peptides from database
  *****************************************************************************/
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
@@ -40,6 +40,16 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
   INDEX_T* index,
   DATABASE_T* database
 );
+
+/**
+ * \returns a new generate_peptides_iterator object, with fasta file input
+ */
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
+  double min_mass,  ///< the min mass of peptides to generate -in
+  double max_mass,  ///< the maximum mas of peptide to generate -in
+  INDEX_T* index, ///< the index
+  DATABASE_T* database ///< the database
+  );
 
 /***********************************************************/
 

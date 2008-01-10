@@ -229,10 +229,12 @@ void initialize_parameters(void){
 
   /* options for all executables */
   set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
-	  "Set level of output to stderr (0-100).  Default 10.");
-
+	  "Set level of output to stderr (0-100).  Default 30.");
   set_string_parameter("parameter-file", NULL, 
 	"Set additional options with values in the given file.");
+  set_boolean_parameter("overwrite", FALSE, 
+        "Replace existing files (T,F). Default F, die if a file " \
+        "of the same name as the output exists.");
     
   /* create-psm-files */
   set_int_parameter("starting-sentence-idx", 0, 0, BILLION, 
