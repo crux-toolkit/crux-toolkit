@@ -1751,6 +1751,64 @@ BOOLEAN_T serialize_psm_features(
   return TRUE;
 }
 
+void print_sqt_header(FILE* output, char* type){
+  time_t hold_time;
+  hold_time = time(0);
+  
+  BOOLEAN_T decoy = FALSE;
+  if( strcmp(type, "decoy") == 0 ){
+    decoy = TRUE;
+  }
+  
+  fprintf(output, "H\tSQTGenerator Crux\n");
+  fprintf(output, "H\tSQTGeneratorVersion 1.0\n");
+  fprintf(output, "H\tComment Crux was written by...\n");
+  fprintf(output, "H\tComment ref...\n");
+  fprintf(output, "H\tStartTime\t%s", ctime(&hold_time));
+  fprintf(output, "H\tEndTime                               \n");
+  
+  char* database = get_string_parameter("protein input");
+  fprintf(output, "H\tDatabase\t%s\n", database);
+  if(decoy){
+    fprintf(output, "H\tComment\tDatabase shuffled; these are decoy matches\n");
+  }
+  fprintf(output, "H\tDBSeqLength\t?\n");
+  fprintf(output, "H\tDBLocusCount\t?\n");
+  
+  MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
+  char temp_str[64];
+  mass_type_to_string(mass_type, temp_str);
+  fprintf(output, "H\tPrecursorMasses\t%s\n", temp_str);
+  fprintf(output, "H\tFragmentMasses\t?\n"); //?????????
+  
+  double tol = get_double_parameter("mass-window");
+  fprintf(output, "H\tAlg-PreMasTol\t%.1f\n",tol);
+  fprintf(output, "H\tAlg-FragMassTol\t?\n");
+  fprintf(output, "H\tAlg-XCorrMode\t0\n");
+  
+  SCORER_TYPE_T score = get_scorer_type_parameter("prelim-score-type");
+  scorer_type_to_string(score, temp_str);
+  fprintf(output, "H\tComment\tpreliminary algorithm %s\n", temp_str);
+  
+  score = get_scorer_type_parameter("score-type");
+  scorer_type_to_string(score, temp_str);
+  fprintf(output, "H\tComment\tfinal algorithm %s\n", temp_str);
+  
+  //for letters in alphabet
+  //  double mod = get_double_parameter(letter);
+  //  if mod != 0
+  //     double mass = mod + getmass(letter);
+  //     fprintf(output, "H\tStaticMod\t%s=%.3f\n", letter, mass);
+  fprintf(output, "H\tStaticMod\tC=160.139\n");
+  fprintf(output, "H\tAlg-DisplayTop\t%d\n",
+	  get_int_parameter("max-rank-result")); //??????
+  
+  PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
+  peptide_type_to_string(cleavages, temp_str);
+  fprintf(output, "H\tEnzymeSpec\t%s\n", temp_str);
+  //  fprintf(output, "H\t\n");
+}
+
 
 /**
  * Print the psm features to output file upto 'top_match' number of 
@@ -1829,9 +1887,9 @@ BOOLEAN_T print_match_collection_sqt(
       protein = get_peptide_src_parent_protein(peptide_src);
       protein_id = get_protein_id(protein);
       sequence = get_peptide_sequence_from_peptide_src_sqt(peptide, peptide_src);
-      // print match info
-      fprintf(output, "L\t%s\t%s\n", protein_id, sequence);
-      
+      // print match info (locus line)
+      //fprintf(output, "L\t%s\t%s\n", protein_id, sequence);
+      fprintf(output, "L\t%s\n", protein_id);      
       free(protein_id);
       free(sequence);
     }

@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -147,6 +147,11 @@ BOOLEAN_T serialize_psm_features(
   SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
   SCORER_TYPE_T main_score ///<  the main score to report -in
   );
+
+/*
+ * Print the SQT file header
+ */
+void print_sqt_header(FILE* outfile, char* type);
 
 /**
  * Print the psm features to output file upto 'top_match' number of 
