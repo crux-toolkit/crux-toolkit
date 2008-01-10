@@ -599,18 +599,35 @@ BOOLEAN_T valid_peptide_sequence( char* sequence){
  */
 FILE* create_file_in_path(
   char* filename,  ///< the filename to create & open -in
-  char* directory  ///< the directory to open the file in -in
+  char* directory,  ///< the directory to open the file in -in
+  BOOLEAN_T overwrite  ///< replace file (T) or die if exists (F)
   )
 {
   char* file_full_path = get_full_filename(directory, filename);
-  FILE* file = fopen(file_full_path, "a+");
+  FILE* file = fopen(file_full_path, "r"); //to test if it exists
+
+  if( ! overwrite ){
+
+    //file = fopen(file_full_path, "r"); //to test if it exists
+    if( file != NULL ){                  //it exists, die
+      fclose(file);
+      file = NULL;
+      carp(CARP_FATAL, "The file '%s' already exists.  " \
+       "Use --overwrite T to replace or choose a different output file name",
+	   file_full_path);
+      exit(1);
+    }//else, open the file
+  }
   
+  file = fopen(file_full_path, "w+"); //read and write, replace existing
+
   if(file == NULL){
-    carp(CARP_ERROR, "failed to create and open file: %s", file_full_path);
+    carp(CARP_FATAL, "Failed to create and open file: %s", file_full_path);
+    exit(1);
   }
   
   free(file_full_path);
-  
+
   return file;
 }
 
