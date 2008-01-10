@@ -35,7 +35,7 @@ predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = ../../../bin
 predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = ../../../bin/crux-predict-peptide-ions --primary-ions by --max-ion-charge 1 --flanking T IAMASEQ 3
 
 # Search for matches and test sqt file
-search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* test_crux_index/; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time'
+search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt decoy.sqt crux_match_target_test* crux_match_decoy*test* test_crux_index/; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time'
 
 # Analyze matches
 #  Currently, analyze_matches does not work without an index
@@ -54,7 +54,7 @@ search_for_matches_noops = good_results/empty_file = rm -rf target.sqt crux_matc
  generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_index.out = ../../../bin/crux-generate-peptides --parameter-file params/smoke_params2 --output-sequence T --use-index T --cleavages tryptic existing.fasta = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
- search_for_matches_default_existing_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode sqt --use-index T test.ms2 existing.fasta; cat target.sqt = 'Time'
+ search_for_matches_default_existing_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt decoy.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode sqt --use-index T test.ms2 existing.fasta; cat target.sqt = 'Time' 'Database'
 
 # See that match_analysis works with an existing index and existing results
  analyze_matches_existing_index = good_results/standard_match_search_analysis.out=  ../../../bin/crux-analyze-matches --parameter-file params/smoke_params2 good_results existing.fasta 
@@ -71,13 +71,16 @@ create_index_uniq = good_results/standard_create_index_uniq.out = rm -rf test_cr
 generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = ../../../bin/crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --use-index T test.fasta
 
 # Search for matches and test sqt file
-# ???is this using the index?
-search_for_matches_default_index = good_results/standard_search_default.target.sqt = rm -rf target.sqt crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --parameter-file params/smoke_params2 --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time'
+search_for_matches_default_index = good_results/standard_search_default.target.sqt = rm -rf crux_match_target_test* crux_match_decoy*test* ; ../../../bin/crux-search-for-matches --output-mode all --overwrite T test.ms2 test.fasta; cat target.sqt = 'Time'
 
 # Analyze matches using above index
 analyze_matches_index = good_results/standard_analyze_index.out =  ../../../bin/crux-analyze-matches --parameter-file params/smoke_params2 . test.fasta 
 
 
+# MORE TEST TODO
+
+# generate tryptic peptides from non-tryptic index
+# create unique index and search
 
 
 
@@ -86,12 +89,3 @@ analyze_matches_index = good_results/standard_analyze_index.out =  ../../../bin/
 
 
 
-
-
-
-# Obsolete?
-
-#search_spectrum = standard_search_spectrum.out =  ../../../bin/search_spectrum --parameter-file smoke_params test.ms2 6 standard2.fasta  
-#search_spectra = standard_search_spectra.out = ../../../bin/search_spectra --number-runs 7  --parameter-file smoke_params test.ms2 standard2.fasta  
-
-#match_search_analysis = standard_match_search_analysis.out = ../../../bin/match_search --match-output-folder match_result --number-runs 6 --parameter-file smoke_params test.ms2 standard2.fasta 
