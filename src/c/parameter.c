@@ -840,14 +840,24 @@ BOOLEAN_T get_boolean_parameter(
   static char buffer[PARAMETER_LENGTH];
   
   char* value = get_hash_value(parameters->hash, name);
-
+ 
   // can't find parameter
   if(value == NULL){
-    carp(CARP_ERROR, "parameter name: %s, doesn't exist", name);
+    carp(CARP_ERROR, "Parameter name '%s' doesn't exist", name);
     exit(1);
   }
   
-  // make sure that there is enough storage allocated in the string
+  //check type
+  char* type_str = get_hash_value(types->hash, name);
+  PARAMETER_TYPE_T type;
+  BOOLEAN_T found = string_to_param_type(type_str, &type);
+ 
+  if(found == FALSE || type != BOOLEAN_P){
+    carp(CARP_ERROR, "Request for boolean parameter '%s' which is of type %s",
+	 name, type_str);
+  }
+
+ // make sure that there is enough storage allocated in the string
   if((int)strlen(value) 
      > PARAMETER_LENGTH) {
     die("parameter %s with value %s was too long to copy to string\n",
@@ -896,7 +906,16 @@ int get_int_parameter(
     carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
     exit(1);
   }
-  
+  //check type
+  char* type_str = get_hash_value(types->hash, name);
+  PARAMETER_TYPE_T type;
+  BOOLEAN_T found = string_to_param_type(type_str, &type);
+
+  if(found==FALSE || type != INT_P){
+    carp(CARP_ERROR, "Request for int parameter '%s' which is of type %s",
+	 name, type_str);
+  }
+
   /* there is a parameter with the right name.  Now 
      try to convert it to a base 10 integer*/
   value = atoi(int_value);
@@ -942,6 +961,16 @@ double get_double_parameter(
     exit(1);
   }
  
+  //check type
+  char* type_str = get_hash_value(types->hash, name);
+  PARAMETER_TYPE_T type;
+  BOOLEAN_T found = string_to_param_type(type_str, &type);
+
+  if(found==FALSE || type != DOUBLE_P){
+    carp(CARP_ERROR, "Request for double parameter '%s' which is of type %s",
+	 name, type_str);
+  }
+  
   /* there is a parameter with the right name.  Now 
      try to convert it to a double*/
   value = strtod(double_value, &endptr);
@@ -978,7 +1007,17 @@ char* get_string_parameter(
     carp(CARP_ERROR, "parameter name: %s, doesn't exist", name);
     exit(1);
   }
-  
+  //check type
+  char* type_str = get_hash_value(types->hash, name);
+  PARAMETER_TYPE_T type;
+  BOOLEAN_T found = string_to_param_type(type_str, &type);
+
+  if(found==FALSE || type != STRING_P){
+    carp(CARP_ERROR, "Request for string parameter '%s' which is of type %s",
+	 name, type_str);
+  }
+
+
   return my_copy_string(string_value);
 }
 /**
@@ -1406,6 +1445,10 @@ BOOLEAN_T set_ion_type_parameter(char* name,
 
 BOOLEAN_T string_to_param_type(char* name, PARAMETER_TYPE_T* result ){
   BOOLEAN_T success = TRUE;
+  if( name == NULL ){
+    return FALSE;
+  }
+
   int param_type = convert_enum_type_str(
 	 name, -10, parameter_type_strings, NUMBER_PARAMETER_TYPES);
   (*result) = (PARAMETER_TYPE_T)param_type;

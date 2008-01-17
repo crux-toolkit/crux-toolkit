@@ -390,7 +390,7 @@ int main(int argc, char** argv){
   // Set the total number of spectra serialized in the PSM result files
   for(file_idx=0; file_idx < total_files; ++file_idx){
     //I think the first second line is supposed to replace the first
-    serialize_total_number_of_spectra(spectra_idx, psm_file_array[file_idx]);
+    //serialize_total_number_of_spectra(spectra_idx, psm_file_array[file_idx]);
     serialize_total_number_of_spectra(spectrum_searches_counter, psm_file_array[file_idx]);
   }
   

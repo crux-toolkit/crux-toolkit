@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.34 $
+ * REVISION: $Revision: 1.35 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -790,6 +790,8 @@ BOOLEAN_T serialize_header(
   fwrite(&(num_spectrum_features), sizeof(int), 1, psm_file);
   fwrite(&(number_top_rank_peptide), sizeof(int), 1, psm_file);
   
+  carp(CARP_DETAILED_DEBUG, "Serialize header wrote %i top matches", 
+       number_top_rank_peptide);
   // free up files
   free(file_ms2);
   free(file_fasta);
