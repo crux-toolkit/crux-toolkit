@@ -90,3 +90,8 @@
 90	01/02/08		"New Functionality"	"Open"	"AAK"	"BEF"	3	1	"Allow '--' and '-' for STDOUT and STDIN on command line."
 91	01/07/08		"Testing Software"	"Open"	"BEF"	"BEF"	1	1	"give tutorial and executables to charles to test, encorporate changes as per his comments"
 92	01/07/08		"New Functionality"	"Open"	"BEF"	"BEF"	2	3	"use automake and autoconf for installation"
+93	"1/17/08"		"New Functionality"	"Open"		"BEF"	1	1	"ouptut header line with crux-analyze-matches"
+94	"1/17/08"		"New Functionality"	"Open"		"BEF"	2	1	"add a fragment mass mono/average  option (could be param file only)"
+95	"1/17/08"		"New Functionality"	"Open"		"BEF"	1.1	2	"make crux-analyze-matches work without index"
+96	"1/17/08"		"Bug Fix"	"Open"		"BEF"	1.1	1	"crux-search-for-matches --output-mode sqt should not produce binary output files"
+97	"1/17/08"		"New Functionality"	"Open"		"BEF"	1.1	2	"add an sqt output option to  match-analysis (at least to work with percolator)"
