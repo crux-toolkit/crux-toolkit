@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.26 $
+ * $Revision: 1.27 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "objects.h"
 #include "spectrum.h"
+#include "carp.h"
 
 /**
  * \returns An (empty) spectrum_collection object.
