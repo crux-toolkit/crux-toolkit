@@ -30,6 +30,7 @@ REVISION: $1.0 $
    <dt><a href="search-tutorial.html">Searching a Protein Database</a>
    <dt><a href="index-tutorial.html">Creating an Index</a>
    <dt><a href="customize-tutorial.html">Customizing a Search</a>
+   <dt><a href="utilities-tutorial.html">Crux utilities</a>
    <dt><a href="examples-tutorial.html">Examples</a>
    <dt><a href="crux.html">Man pages</a>
    <dt><a href="sitemap-tutorial.html">Index</a>
@@ -45,13 +46,16 @@ REVISION: $1.0 $
 
 <h3>Getting Started</h3>
 <p> This page will talk about setting up your environment and choosing
-your input files.  
+your input files.  Be sure to have completed the software <a
+href="install-tutorial.html">installation</a> first.
 </p>
 
 <a name="env"></a>
 <h4>Your environment</h4>
-<p>For this tutorial, we'll assume you already know some basic
-commands for changing directories, listing files and other simple
+<p>For this tutorial, we'll assume you are working in a Linux/Unix
+type shell (<a href="http://www.cygwin.com/">cygwin</a> is a good
+choice for Windows users) and already know some basic 
+commands for changing directories, listing files, and other simple
 tasks.  To successfully run the sample commands, you'll need to work from 
 a directory for which you have write permission, for instance, anywhere
 in your home directory.  Create a new directory and navigate to it.</p>
@@ -60,7 +64,8 @@ $ mkdir crux-demo<br>
 $ cd crux-demo</code>
 </div>
 <p>
-We will refer to this directory as the <em>working directory</em>.</p>
+We will refer to this directory, <code>'crux-demo'</code>, as the
+<em>working directory</em>.</p> 
 <p>Next, make sure that the computer knows where to look for the
 <span class=prog>crux</span> programs.  Try this command. </p>
 <div class=code><code> 
@@ -69,21 +74,8 @@ $ which crux-search-for-matches</code>
 <p>
 If it returns a single line with a path ending in <span
 class=out>crux-search-for-matches</span>, then you are set.  If not,
-you will need to change your <span class=code>$PATH</span> environment
-variable.  <span class=code>$PATH</span> is a list of places that the
-computer looks for executable programs.  Add to it the location of
-your <span class=prog>crux</span> installation.  If crux is in <span
-class=file>~/bin/crux</span> change <span class=code>PATH</span> with
-this command.  (If crux is installed elsewhere, replace <span
-class=file>~/bin/crux/</span> with that location.)</p>
-
-<div class=code><code>
-$ PATH=$PATH:~/bin/crux</code>
-</div> 
-
-<p>Run the <span class=code>which</span> command (above) again to
-confirm that the change worked.
-
+review the <a href="install-tutorial.html#path">installation instructions</a> on setting your
+<span class=code>$PATH</span> environment variable.
 
 </p>
 
@@ -142,7 +134,7 @@ class=file>demo.ms2</span> contains 154 spectra.
 <p>The second input file you will need is a protein database which is
 a list of proteins you expect to find in your sample and their
 sequences.  A sample fasta file is also comes with the distribution.
-We will use <span class=file>yeast.fasta</span>.  Copy
+We will use <span class=file>small-yeast.fasta</span>.  Copy
 it to your current working directory.
 </p>
 
@@ -156,11 +148,11 @@ VYCDGAITTKNVTDIIGDANHSYSVGITEDSLWTLLTGYTKKESTIGNSAFELLLEVAKS
 GEKGINTMDLAQVTGQDPRSVTGRIKKINHLLTSSQLIYKGHVVKQLKLKKFSHDGVDSN
 </pre>
 
-<p>Lines beginning with <span class=file>&lt;</span> give the name of
+<p>Lines beginning with <span class=file>&gt;</span> give the name of
 a protein.  The first word is the protein name followed by an optional
 description of any length.  The following lines contain the protein
 sequence.  Proteins may or may not be separated by blank lines.
-<span class=file>yeast.fasta</span> contains 6830 proteins.
+<span class=file>small-yeast.fasta</span> contains ???<!--6830--> proteins.
 </p>
 
 <a href="search-tutorial.html"><h4>Next: Running a search</h4></a>
