@@ -25,8 +25,8 @@
 #include "scorer.h" 
 #include "index.h"
 #include "generate_peptides_iterator.h" 
-#include "match.h"
 #include "match_collection.h"
+#include "match.h"
 #include "hash.h"
 #include "peptide_src.h"
 #include "PercolatorCInterface.h"
@@ -1751,7 +1751,7 @@ BOOLEAN_T serialize_psm_features(
   return TRUE;
 }
 
-void print_sqt_header(FILE* output, char* type){
+void print_sqt_header(FILE* output, char* type, int num_proteins){
   time_t hold_time;
   hold_time = time(0);
 
@@ -1773,17 +1773,21 @@ void print_sqt_header(FILE* output, char* type){
   fprintf(output, "H\tComment\tDatabase shuffled; these are decoy matches\n");
   }
   fprintf(output, "H\tDBSeqLength\t?\n");
-  fprintf(output, "H\tDBLocusCount\t?\n");
+  fprintf(output, "H\tDBLocusCount\t%d\n", num_proteins);
 
   MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
   char temp_str[64];
   mass_type_to_string(mass_type, temp_str);
   fprintf(output, "H\tPrecursorMasses\t%s\n", temp_str);
-  fprintf(output, "H\tFragmentMasses\t?\n"); //?????????
+  
+  mass_type = get_mass_type_parameter("fragment-mass");
+  mass_type_to_string(mass_type, temp_str);
+  fprintf(output, "H\tFragmentMasses\t%s\n", temp_str); //?????????
 
   double tol = get_double_parameter("mass-window");
   fprintf(output, "H\tAlg-PreMasTol\t%.1f\n",tol);
-  fprintf(output, "H\tAlg-FragMassTol\t?\n");
+  fprintf(output, "H\tAlg-FragMassTol\t%.2f\n", 
+	  get_double_parameter("ion-tolerance"));
   fprintf(output, "H\tAlg-XCorrMode\t0\n");
 
   SCORER_TYPE_T score = get_scorer_type_parameter("prelim-score-type");
@@ -1794,12 +1798,32 @@ void print_sqt_header(FILE* output, char* type){
   scorer_type_to_string(score, temp_str);
   fprintf(output, "H\tComment\tfinal algorithm %s\n", temp_str);
 
+  /*
+  int alphabet_size = get_alphabet_size(PROTEIN_ALPH);
+  char* alphabet = get_alphabet(FALSE);
+  */
+
+  int aa = 0;
+  char aa_str[2];
+  aa_str[1] = '\0';
+  int alphabet_size = (int)'A' + ((int)'Z'-(int)'A');
+  MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
+
+  for(aa = (int)'A'; aa < alphabet_size -1; aa++){
+    aa_str[0] = (char)aa;
+    double mod = get_double_parameter(aa_str);
+    if( mod != 0 ){
+      //      double mass = mod + get_mass_amino_acid(aa, isotopic_type);
+      double mass = get_mass_amino_acid(aa, isotopic_type);
+      fprintf(output, "H\tStaticMod\t%s=%.3f\n", aa_str, mass);
+    }
+  }
   //for letters in alphabet
   //  double mod = get_double_parameter(letter);
   //  if mod != 0
   //     double mass = mod + getmass(letter);
   //     fprintf(output, "H\tStaticMod\t%s=%.3f\n", letter, mass);
-  fprintf(output, "H\tStaticMod\tC=160.139\n");
+  //  fprintf(output, "H\tStaticMod\tC=160.139\n");
   fprintf(output, "H\tAlg-DisplayTop\t%d\n", 
 	  get_int_parameter("max-rank-result")); //??????
 

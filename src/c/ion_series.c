@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.42 $
+ * REVISION: $Revision: 1.43 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -969,7 +969,8 @@ void ion_series_assign_nearest_peaks(
     ION_SERIES_T* ion_series, 
     SPECTRUM_T* spectrum){
 
-  float max = 0.5; // TODO set in param file 
+  //  float max = 0.5; // TODO set in param file 
+  float max = get_double_parameter("ion-tolerance"); 
   ION_T* ion = NULL;
   ION_ITERATOR_T* iterator = new_ion_iterator(ion_series);
   PEAK_T* peak = NULL;
