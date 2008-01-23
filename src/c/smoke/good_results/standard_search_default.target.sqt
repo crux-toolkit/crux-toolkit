@@ -2,13 +2,13 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Jan  9 14:16:42 2008
+H	StartTime	Wed Jan 23 12:53:46 2008
 H	EndTime                               
 H	Database	test.fasta
 H	DBSeqLength	?
-H	DBLocusCount	?
+H	DBLocusCount	4
 H	PrecursorMasses	average
-H	FragmentMasses	?
+H	FragmentMasses	mono
 H	Alg-PreMasTol	3.0
 H	Alg-FragMassTol	?
 H	Alg-XCorrMode	0
