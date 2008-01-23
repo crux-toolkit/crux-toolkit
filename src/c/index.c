@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.70 $
+ * $Revision: 1.71 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -796,7 +796,7 @@ BOOLEAN_T dump_peptide_all(
   int file_idx = 0;
   
   // print out all remaining peptides in the file_array
-  for(; file_idx < num_bins; ++file_idx){
+  for(file_idx = 0; file_idx < num_bins; ++file_idx){
     // no peptides in this bin
     if((file = file_array[file_idx]) == NULL){
       free(peptide_array[file_idx]);
@@ -973,12 +973,17 @@ BOOLEAN_T create_index(
   long int file_idx = 0;
   int low_mass = mass_limits[0];
   long int count_peptide = 0;
+  int mod_me = 1000;
   
   // iterate through all peptides
   while(database_peptide_iterator_has_next(peptide_iterator)){    
     ++count_peptide;
-    if(count_peptide % 1000 == 0){
-      carp(CARP_INFO, "reached peptide: %d", (int)count_peptide);
+    //    if(count_peptide % 1000 == 0){
+    if(count_peptide % mod_me == 0){
+      if( (count_peptide/10 ) == mod_me ){
+	mod_me = mod_me * 10;
+      }
+      carp(CARP_INFO, "reached peptide %d", (int)count_peptide);
     }
 
     working_peptide = database_peptide_iterator_next(peptide_iterator);
@@ -1002,10 +1007,12 @@ BOOLEAN_T create_index(
         peptide_array[file_idx], bin_count); 
   }
 
+  carp(CARP_INFO, "Printing index");
   // dump all the left over peptides
   dump_peptide_all(file_array, peptide_array, bin_count, num_bins);
 
   // sort each bin  
+  carp(CARP_INFO, "Sorting index");
   long bin_idx;
   for(bin_idx = 0; bin_idx < num_bins; ++bin_idx){
     if(file_array[bin_idx] == NULL){
