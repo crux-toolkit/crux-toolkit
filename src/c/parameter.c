@@ -64,6 +64,7 @@ void parse_parameter_file(
  */
 BOOLEAN_T check_option_type_and_bounds(char* name);
 
+void check_parameter_consistency();
 /**
  *
  */
@@ -582,12 +583,46 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     exit(1);
   }
   
-  /* Finally, apply any amino acid mass changes */
+  /* Finally, do global checks on parameters and
+     apply any amino acid mass changes */
+  check_parameter_consistency();
   update_aa_masses();
 
   parameter_plasticity = FALSE;
   return success;
 }
+void check_parameter_consistency(){
+
+  /* Min length/mass is less than max */
+  int min_length = get_int_parameter("min-length");
+  int max_length = get_int_parameter("max-length");
+
+  if( min_length > max_length){
+    carp(CARP_FATAL, "Parameter inconsistency.  Minimum peptide length (%i)" \
+	 " must be less than max (%i).", min_length, max_length);
+    exit(1);
+  }
+
+  double min_mass = get_double_parameter("min-mass");
+  double max_mass = get_double_parameter("max-mass");
+
+  if( min_mass > max_mass){
+    carp(CARP_FATAL, "Parameter inconsistency.  Minimum peptide mass (%.2f)" \
+	 " must be less than max (%.2f).", min_mass, max_mass);
+    exit(1);
+  }
+
+  double min_spec_mass = get_double_parameter("spectrum-min-mass");
+  double max_spec_mass = get_double_parameter("spectrum-max-mass");
+
+  if( min_spec_mass > max_spec_mass){
+    carp(CARP_FATAL, "Parameter inconsistency. Minimum spectrum mass (%.2f)" \
+	 " must be less than max (%.2f).", min_spec_mass, max_spec_mass);
+    exit(1);
+  }
+}
+
+
 
 /*
  * Checks the current value of the named option
