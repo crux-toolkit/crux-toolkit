@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -213,6 +213,8 @@ void set_index_is_unique(
   INDEX_T* index, ///< The index -in
   BOOLEAN_T is_unique ///< do you allow duplicate peptides? -in
   );
+
+int get_index_num_proteins( INDEX_T* index );
 
 /***********************************************
  * Iterators index

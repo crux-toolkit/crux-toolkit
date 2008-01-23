@@ -252,7 +252,7 @@ void initialize_parameters(void){
   set_double_parameter("max-mass", 7200, 1, BILLION, 
 	"The maximum mass of peptides to consider. Default 7200.");
   set_mass_type_parameter("isotopic-mass", AVERAGE, 
-	"Which isotopes to use in calcuating mass (average or mono). " \
+	"Which isotopes to use in calcuating peptide mass (average, mono)." \
 	"Default average");
   set_peptide_type_parameter("cleavages", TRYPTIC, 
 	"The type of cleavage sites to consider (tryptic, partial, all)" \
@@ -311,7 +311,12 @@ void initialize_parameters(void){
   set_double_parameter("mass-window", 3.0, 0, 100, 
         "Search peptides within +/- 'mass-window' of the " \
         "spectrum mass.  Default 3.0");
-
+  set_mass_type_parameter("fragment-mass", MONO, 
+	"Which isotopes to use in calcuating fragment ion mass " \
+        "(average, mono). Default average");
+  set_double_parameter("ion-tolerance", 0.5, 0, BILLION,
+        "Tolerance used for matching observed peaks to predicted " \
+        "fragment ions.  Default 0.5");
 
     // Sp scoring params
   set_double_parameter("beta", 0.075, 0, 1, "usage");

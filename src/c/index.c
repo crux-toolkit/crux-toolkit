@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.71 $
+ * $Revision: 1.72 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -433,6 +433,10 @@ INDEX_T* new_index_from_disk(
   return search_index;
 }
 
+int get_index_num_proteins(INDEX_T* index){
+
+  return get_database_num_proteins(index->database);
+}
 
 /**
  * Frees an allocated index object.

@@ -187,9 +187,38 @@ int main(int argc, char** argv){
   carp(CARP_DEBUG, "There were %i spectra found in the ms2 file",
        get_spectrum_collection_num_spectra(collection));
 
+  
+  /* Prepare input, fasta or index */
+  
+  INDEX_T* index = NULL;
+  DATABASE_T* database = NULL;
+  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
+  int num_proteins = 0;
+  //todo make this a helper function
+  if (use_index == TRUE){
+    carp(CARP_INFO, "Preparing protein index %s", input_file);
+    index = new_index_from_disk(input_file, is_unique);
+
+    if (index == NULL){
+      carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
+      exit(1);
+    }
+    num_proteins = get_index_num_proteins(index);
+  } else {
+    carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
+    database = new_database(input_file, FALSE);         
+    if( database == NULL ){
+      carp(CARP_FATAL, "Could not read fasta file %s", input_file);
+      exit(1);
+    } 
+    //BF added this, might not be correct
+    parse_database(database);
+    num_proteins = get_database_num_proteins(database);
+  }
+  
   // get psm result file handle array
   // this includes ones for the target and for the decoys
-  carp(CARP_DETAILED_DEBUG, "The output type is %d (binary,sqt, all)", 
+  carp(CARP_DETAILED_DEBUG, "The output type is %d (binary, sqt, all)", 
        (int)output_type);
 
   carp(CARP_DETAILED_DEBUG, "Creating binary psm files"); 
@@ -215,11 +244,11 @@ int main(int argc, char** argv){
 
     sqt_file= create_file_in_path(sqt_filename, match_output_folder, 
 				  overwrite);
-    print_sqt_header(sqt_file, "target");
+    print_sqt_header(sqt_file, "target", num_proteins);
 
     decoy_sqt_file = 
       create_file_in_path(decoy_sqt_filename, match_output_folder, overwrite);
-    print_sqt_header(decoy_sqt_file, "decoy");
+    print_sqt_header(decoy_sqt_file, "decoy", num_proteins);
   }
 
   //do we really need sqts to stdout???
@@ -260,32 +289,6 @@ int main(int argc, char** argv){
   }
 
   carp(CARP_DETAILED_DEBUG, "Headers written to output files");
-  
-  /* Prepare input, fasta or index */
-  
-  INDEX_T* index = NULL;
-  DATABASE_T* database = NULL;
-  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
-  //todo make this a helper function
-  if (use_index == TRUE){
-    carp(CARP_INFO, "Preparing protein index %s", input_file);
-    index = new_index_from_disk(input_file, is_unique);
-
-    if (index == NULL){
-      carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
-      exit(1);
-    }
-  } else {
-    carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
-    database = new_database(input_file, FALSE);         
-    if( database == NULL ){
-      carp(CARP_FATAL, "Could not read fasta file %s", input_file);
-      exit(1);
-    } 
-    //BF added this, might not be correct
-    parse_database(database);
-  }
-  
   /* Perform search: iterate over all spectra in ms2 file and score */
   int spectra_idx = 0; //superfluous
   int spectrum_searches_counter = 0; //spec (z-specific) w/ psms
