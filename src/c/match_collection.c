@@ -1825,7 +1825,7 @@ void print_sqt_header(FILE* output, char* type, int num_proteins){
   //     fprintf(output, "H\tStaticMod\t%s=%.3f\n", letter, mass);
   //  fprintf(output, "H\tStaticMod\tC=160.139\n");
   fprintf(output, "H\tAlg-DisplayTop\t%d\n", 
-	  get_int_parameter("max-rank-result")); //??????
+	  get_int_parameter("max-sqt-result")); 
 
   PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
   peptide_type_to_string(cleavages, temp_str);

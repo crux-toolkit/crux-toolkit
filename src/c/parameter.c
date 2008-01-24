@@ -279,7 +279,7 @@ void initialize_parameters(void){
   set_scorer_type_parameter("prelim-score-type", SP, 
   			    "Initial scoring (sp, xcorr). Default sp");
   set_scorer_type_parameter("score-type", XCORR, 
-   "The scoring method to use (xcorr, xcorr_logp, sp_logp). Default xcorr."); 
+   "The scoring method to use (xcorr, sp, dotp, xcorr_logp, sp_logp). Default xcorr."); 
 
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
          "Minimum mass of spectra to be searched.  Default 0.");
@@ -302,8 +302,9 @@ void initialize_parameters(void){
   set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
          "NOT FOR COMMAND LINE. Number of spectra to score after " \
 		    "preliminary scoring.  Default 500.");
-  set_int_parameter("max-rank-result", 500, 1, BILLION, 
-    "NOT FOR COMMAND LINE. Number of search results to report. Default 500.");
+  set_int_parameter("max-sqt-result", 5, 1, BILLION, 
+    "NOT FOR COMMAND LINE. Number of search results per spectrum " \
+    "to report in the sqt file. Default 5.");
   set_int_parameter("top-match", 1, 1, BILLION, 
          "NOT FOR COMMAND LINE. Umm...");
   set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
@@ -713,10 +714,19 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
   case SCORER_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found scorer_type param, value '%s'",
 	 value_str);
+    //check for legal type
     if(! string_to_scorer_type( value_str, &scorer_type)){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
-	      "Must be sp, xcorr, dotp, logp_exp_sp, logp_bonf_exp_sp, logp_evd_xcorr, logp_bonf_evd_xcorr, logp_weibull_sp, logp_bonf_weibull_sp, logp_weibull_xcorr, logp_bonf_weibull_xcorr, q_value, percolator_score, OR logp_qvalue_weibull_xcorr", value_str, name);
+      "Must be sp, xcorr, dotp, sp-logp, or xcorr-logp.", value_str, name);
+    }else if((scorer_type != SP ) &&   //check for one of the accepted types
+	     (scorer_type != XCORR ) &&
+	     (scorer_type != DOTP ) &&
+	     (scorer_type != LOGP_BONF_WEIBULL_SP ) &&
+	     (scorer_type != LOGP_BONF_WEIBULL_XCORR )){
+      success = FALSE;
+      sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
+      "Must be sp, xcorr, dotp, sp-logp, or xcorr-logp.", value_str, name);
     }
     break;
   case ALGORITHM_TYPE_P:

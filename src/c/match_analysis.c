@@ -159,7 +159,7 @@ int output_matches(
     new_match_iterator(match_collection, scorer_type, TRUE);
   
   // print only up to max_rank_result of the matches
-  int max_rank_result = get_int_parameter("max-rank-result");
+  int max_rank_result = get_int_parameter("max-sqt-result");
 
   // iterate over matches
   int match_count = 0;
