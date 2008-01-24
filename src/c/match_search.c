@@ -135,7 +135,7 @@ int main(int argc, char** argv){
   max_rank_preliminary = get_int_parameter("max-rank-preliminary");
 
   //results
-  max_rank_result = get_int_parameter("max-rank-result");//print to sqt
+  max_rank_result = get_int_parameter("max-sqt-result");//print to sqt
   // set max number of matches to be serialized per spectrum 
   top_match = get_int_parameter("top-match");
   

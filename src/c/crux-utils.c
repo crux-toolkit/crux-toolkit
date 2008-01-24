@@ -177,8 +177,8 @@ BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
 static char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
   {"sp", "xcorr", "dotp", "logp_exp_sp", "logp_bonf_exp_sp", 
    "logp_evd_xcorr", "logp_bonf_evd_xcorr", "logp_weibull_sp", 
-   "logp_bonf_weibull_sp", "logp_weibull_xcorr", 
-   "logp_bonf_weibull_xcorr", "q_value", "percolator_score", 
+   "sp-logp", "logp_weibull_xcorr", 
+   "xcorr-logp", "q_value", "percolator_score", 
    "qvalue"};//"logp_qvalue_weibull_xcorr" };
 //TODO: this should probably be changed, these strings are the option args
 //Instead could have an if block in string_to_type
