@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file index.c
- * $Revision: 1.72 $
+ * $Revision: 1.73 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -304,18 +304,22 @@ void set_index_fields_from_disk(
 void set_index_fields(
   INDEX_T* index,  ///< Index to set -out                       
   char* fasta_filename,  ///< The fasta file -in
-  PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy -in
-  float mass_range,  ///< the range of mass that each index file should be partitioned into -in
+  //  char* output_dir,      ///< The name of the new index
+  PEPTIDE_CONSTRAINT_T* constraint,  
+  ///< Constraint which these peptides satisfy -in
+  float mass_range,  
+  ///< the range of mass that each index file should be partitioned into -in
   BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
   char** filename_and_path = NULL;
   char* working_dir = NULL;
   filename_and_path = parse_filename_path(fasta_filename);
-  working_dir = generate_directory_name(fasta_filename); // filename_and_path[0]);
+  working_dir = generate_directory_name(fasta_filename);//filename_and_path[0]
   DIR* check_dir = NULL;
   
   if((check_dir = opendir(working_dir)) != NULL){
+  //if((check_dir = opendir(output_dir)) != NULL){
     set_index_on_disk(index, TRUE);
   }
   else{
@@ -324,6 +328,7 @@ void set_index_fields(
 
   // set each field
   set_index_directory(index, working_dir);
+  //set_index_directory(index, output_dir);
   set_index_constraint(index, constraint);
   set_index_mass_range(index, mass_range);  
   set_index_is_unique(index, is_unique);
@@ -345,10 +350,10 @@ void set_index_fields(
  * \returns A new index object.
  */
 INDEX_T* new_index(
-  char* fasta_filename,  
-    ///< The fasta file
+  char* fasta_filename, ///< The fasta file
+  //char* output_dir,     ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,  
-    ///< Constraint which these peptides satisfy
+    ///< Constraint which these peptides will satisfy
   float mass_range  
     ///< the range of mass that each index file should be partitioned into
   )
@@ -365,6 +370,7 @@ INDEX_T* new_index(
   set_index_database(index, database);
   BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
   set_index_fields(index, fasta_filename, constraint, mass_range, is_unique);
+  //add output dir
 
   return index;
 }         
@@ -834,6 +840,7 @@ BOOLEAN_T dump_peptide_all(
  */
 BOOLEAN_T transform_database_to_memmap_database(
   INDEX_T* index ///< An allocated index -in/out
+  //fasta_filename (no path information)
   )
 {
   char* binary_fasta = NULL;
@@ -911,8 +918,15 @@ BOOLEAN_T create_index(
 
   // check if already created index
   if(index->on_disk){
-    carp(CARP_WARNING, "index already been created on disk");
-    return TRUE;
+    carp(CARP_WARNING, "Trying to create index that already exists");
+    return TRUE;//?????BF
+    /*    if(get_boolean_parameter("overwrite")){
+      delete_dir(index->directory);
+    }else{
+      carp(CARP_FATAL, "Index '%s' already exists.  " \
+	   "Use --overwrite T to replace");
+      exit(1);
+      }*/
   }
   
   // create temporary directory

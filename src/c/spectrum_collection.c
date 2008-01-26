@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.35 $
+ * REVISION: $Revision: 1.36 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -815,6 +815,9 @@ BOOLEAN_T serialize_total_number_of_spectra(
   FILE* psm_file ///< the file to serialize the header information -out
   )
 {
+  if( psm_file == NULL ){
+    return FALSE;
+  }
   // set to begining of file
   rewind(psm_file);
 

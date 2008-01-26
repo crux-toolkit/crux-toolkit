@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.61 $
+ * REVISION: $Revision: 1.62 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1075,7 +1075,56 @@ int* get_spectrum_possible_z_pointer(
 {
   return spectrum->possible_z;
 }
- 
+
+/**
+ *  Considers all parameters and allocates an array of 
+ *  charges that should be searched.  Returns the number of charges
+ *  in that array.  Protects get_spectrum_possible_z_pointer, could make it
+ *  private.
+ */ 
+int get_charges_to_search(SPECTRUM_T* spectrum, int** select_charge_array){
+
+  int total_charges = spectrum->num_possible_z;
+  int* all_charge_array = spectrum->possible_z;
+
+  int param_charge = 0;
+  char* charge_str = get_string_parameter_pointer("spectrum-charge");
+  int i=0;
+
+  // Return full array of charges
+  if( strcmp( charge_str, "all") == 0){
+
+    *select_charge_array = mymalloc(sizeof(int) * total_charges);
+    for(i=0; i < total_charges; i++){
+      (*select_charge_array)[i] = all_charge_array[i];
+    }
+    return total_charges;
+  }
+  // else return one charge
+
+  param_charge = atoi(charge_str);
+
+  if( (param_charge < 1) || (param_charge > 3) ){
+    carp(CARP_FATAL, "spectrum-charge option must be 1,2,3, or 'all'.  " \
+	 "%s is not valid", charge_str);
+    exit(1);
+  }
+
+
+  for(i=0; i<total_charges; i++){
+     
+    if( all_charge_array[i] == param_charge ){ 
+      *select_charge_array = mymalloc(sizeof(int));
+      **select_charge_array = param_charge;
+      return 1;
+    }
+  }
+
+  // Else none to be searched
+  *select_charge_array = NULL;
+  return 0;
+
+}
 /**
  * sets the possible charge states of this spectrum
  * this function should only be used when possible_z is set to NULL

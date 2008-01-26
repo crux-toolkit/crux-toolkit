@@ -24,7 +24,8 @@
 #include "protein_index.h"
 #include "parameter.h"
 
-#define NUM_INDEX_OPTIONS 10
+#define NUM_INDEX_OPTIONS 11
+//#define NUM_INDEX_ARGS 2
 #define NUM_INDEX_ARGS 1
 
       
@@ -52,6 +53,7 @@ int main(int argc, char** argv){
   char* option_list[NUM_INDEX_OPTIONS] = { 
     "verbosity",
     "parameter-file", 
+    "overwrite",
     "min-length", 
     "max-length", 
     "min-mass", 
@@ -65,7 +67,8 @@ int main(int argc, char** argv){
   /* Define required command line arguments */ 
   // TODO add index name
   int num_arguments = NUM_INDEX_ARGS;
-  char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file" };
+  char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file" }; 
+					  //	  "index name"
 
 
   /* For debugging of parameter processing */
@@ -99,12 +102,10 @@ int main(int argc, char** argv){
   /* Get parameter values */
   min_mass = get_double_parameter("min-mass");
   max_mass = get_double_parameter("max-mass");
-  //check that min < max
   mass_range = (max_mass - min_mass)/MAX_INDEX_FILES;
 
   min_length = get_int_parameter("min-length");
   max_length = get_int_parameter("max-length");
-  //check that min < max
 
   missed_cleavages = get_boolean_parameter("missed-cleavages");
   peptide_type = get_peptide_type_parameter("cleavages");
@@ -124,15 +125,24 @@ int main(int argc, char** argv){
     exit(1);
   }
   
-  /* check if output name already exists */
-  // TODO when required name arg implemented
+  /* check if output name already exists
+     either delete contents or fail depending on --overwrite */
+  //TODO
+  /*
+  char* out_dir = get_string_parameter("index name");
+  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  if( (chdir(out_dir) == 0) && (!overwrite) ){
+      carp(CARP_FATAL, "Index %s already exists. Use " \
+           "--overwrite T to replace.", out_dir);
+      exit(1);
+  }*/
 
   /* create new index object */
-  crux_index = 
-    new_index(in_file,
-	      constraint,
-	      mass_range
-	      );
+  crux_index = new_index(in_file,
+			 //		 out_dir,
+			 constraint,
+			 mass_range
+			 );
   
   /* create crux_index files */
   if(!create_index(crux_index)){
