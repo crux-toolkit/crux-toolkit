@@ -84,10 +84,18 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   /***********************
    * use index file
    **********************/
+  if(use_index_boolean && index == NULL ){
+    carp(CARP_FATAL, "Cannot genrate peptides from NULL index");
+    exit(1);
+  }else if( !use_index_boolean && database==NULL){
+    carp(CARP_FATAL, "Cannot genrate peptides from NULL database (fasta)");
+    exit(1);
+
+  }
   if(use_index_boolean){
     
     //this gets called for every spectrum in search.  move to other location?
-    //carp(CARP_INFO, "Using index for peptide generation");
+    //carp(CARP_DETAILED_DEBUG, "Using index for peptide generation");
 
     if((sort_type != MASS && sort_type != NONE)){
       carp(CARP_FATAL, "Cannot sort other than by mass when using index.");
@@ -138,7 +146,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
 
     // def used for each iterator
     //this gets called for every spectrum in search, move?
-    //carp(CARP_INFO, "Using fasta file for peptide generation");
+    //carp(CARP_DETAILED_DEBUG, "Using fasta file for peptide generation");
 
     // set for all peptide src use link list implementation
     // this routine sets the static global in peptide.c
@@ -149,6 +157,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     
     // no sort, redundant
     if(!is_unique && sort_type == NONE){ 
+      carp(CARP_DETAILED_DEBUG, "Creating database peptide iterator");
       // create peptide iterator  & set generate_peptides_iterator
       DATABASE_PEPTIDE_ITERATOR_T* iterator 
         = new_database_peptide_iterator(database, constraint); 
@@ -160,6 +169,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     }      
     // sort or check for unique
     else{
+      carp(CARP_DETAILED_DEBUG, "Creating sorted database peptide iterator");
       // only sort, by default will be sorted by mass
       DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
       if(sort_type == NONE){
@@ -201,7 +211,8 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
   double min_mass = neutral_mass - mass_window;
   double max_mass = neutral_mass + mass_window;
 
-  carp(CARP_DEBUG,"searching peptide in %.2f ~ %.2f", min_mass, max_mass); 
+  carp(CARP_DETAILED_DEBUG,"Generating peptides in %.2f ~ %.2f", 
+       min_mass, max_mass); 
 
   return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 
       index, database);

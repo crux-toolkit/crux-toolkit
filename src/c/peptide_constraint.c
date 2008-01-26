@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide_constraint.c
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief: Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
@@ -45,7 +45,7 @@ PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void){
   PEPTIDE_CONSTRAINT_T* peptide_constraint =
     (PEPTIDE_CONSTRAINT_T*)mycalloc(1, sizeof(PEPTIDE_CONSTRAINT_T));
   peptide_constraint->num_pointers = 1;
-  carp(CARP_DEBUG, "Final free of peptide constraint");
+  carp(CARP_DETAILED_DEBUG, "Allocating peptide constraint");
   return peptide_constraint;
 }
 

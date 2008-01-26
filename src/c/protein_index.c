@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein_index.c
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -88,7 +88,7 @@ BOOLEAN_T create_protein_index(
 
   // check if succesfully opened file
   if(file == NULL){
-    carp(CARP_FATAL, "failed to open fasta file");
+    carp(CARP_FATAL, "Failed to open fasta file '%s'", fasta_file);
     return FALSE;
   }
 
@@ -97,7 +97,7 @@ BOOLEAN_T create_protein_index(
 
   // check if succesfully created file
   if(output_file == NULL){
-    carp(CARP_FATAL, "failed to create protein index file");
+    carp(CARP_ERROR, "Failed to create protein index file");
     fclose(file);
     return FALSE;
   }
@@ -354,7 +354,7 @@ BOOLEAN_T create_binary_fasta_file(
 
   // check if succesfully opened file
   if(file == NULL){
-    carp(CARP_FATAL, "failed to open fasta file");
+    carp(CARP_FATAL, "Failed to open fasta file '%s'", fasta_file);
     return FALSE;
   }
 
@@ -438,6 +438,7 @@ BOOLEAN_T create_binary_fasta(
  * sets the output file name to the pointer passed in as argument
  * \returns TRUE if successfully creates a binary fasta file, else false
  */
+
 BOOLEAN_T create_binary_fasta_in_cur(
   char* fasta_file_w_path, ///< input fasta file with full path -in
   char* fasta_filename, ///< input fasta a file, only filename -in

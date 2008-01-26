@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -34,6 +34,7 @@ INDEX_T* allocate_index(void);
  */
 INDEX_T* new_index(
   char* fasta_filename,  ///< The fasta file
+  //  char* output_dir,      ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,  ///< Constraint which these peptides satisfy
   float mass_range  ///< the range of mass that each index file should be partitioned into
 );         

@@ -293,7 +293,6 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   
   // create a generate peptide iterator
   // FIXME use neutral_mass for now, but should allow option to change
- 
   GENERATE_PEPTIDES_ITERATOR_T* peptide_iterator =  
     new_generate_peptides_iterator_from_mass(
         get_spectrum_neutral_mass(spectrum, charge) + mass_offset,
@@ -322,10 +321,10 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   }
 
   /*********** Estimate parameters *****************************/
-  // if fitting an EVD xcorr, sample from the original distribution of peptides 
+  //if fitting an EVD xcorr, sample from the original distribution of peptides
   // for evd parameter estimation
-  // Sample before truncate match collection so that the sampling will be from 
-  // the entire peptide distribution.
+  // Sample before truncate match collection so that the sampling will be
+  // from the entire peptide distribution.
   if(score_type == LOGP_EVD_XCORR || score_type == LOGP_BONF_EVD_XCORR){
     estimate_evd_parameters(
         match_collection, 
@@ -339,7 +338,8 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
     estimate_exp_sp_parameters(match_collection, top_fit_sp);
   }
   // if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP estimate parameters
-  else if(score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP){
+  else if(score_type == LOGP_WEIBULL_SP || 
+	  score_type == LOGP_BONF_WEIBULL_SP){
     estimate_weibull_parameters(
         match_collection, SP, sample_count, spectrum, charge);
   }
@@ -353,6 +353,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   truncate_match_collection(match_collection, max_rank, prelim_score);
   
   /***************Main scoring*******************************/
+  //replace with switch(score_type){ case():success = score...;} if !success 
   if(score_type == LOGP_EXP_SP){
     if(!score_match_collection_logp_exp_sp(
           match_collection, top_rank_for_p_value)){
@@ -412,7 +413,8 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   
   // free generate_peptides_iterator
   free_generate_peptides_iterator(peptide_iterator);
-  
+
+  carp(CARP_DETAILED_DEBUG, "finished creating match collection");  
   return match_collection;
 }
 
@@ -1369,7 +1371,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_sp(
  * \returns TRUE, if successfully scores matches for xcorr
  */
 BOOLEAN_T score_match_collection_xcorr(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
+  MATCH_COLLECTION_T* match_collection, ///<the match collection to score -out
   SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
   int charge       ///< the charge of the spectrum -in
   )
@@ -1393,8 +1395,8 @@ BOOLEAN_T score_match_collection_xcorr(
   // create new scorer
   SCORER_T* scorer = new_scorer(XCORR);  
 
-  // create a generic ion_series, that will be reused for each peptide sequence
-  ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);    
+  // create a generic ion_series that will be reused for each peptide sequence
+  ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);  
   
   // we are scoring xcorr!
   carp(CARP_DEBUG, "start scoring for XCORR");
@@ -1430,8 +1432,8 @@ BOOLEAN_T score_match_collection_xcorr(
   // free ion_series now that we are done iterating over all peptides
   free_ion_series(ion_series);
   
-  // we are starting xcorr!
-  carp(CARP_DEBUG, "total peptides scored for XCORR: %d", match_idx);
+  // we scored xcorr!
+  carp(CARP_DEBUG, "Total peptides scored for XCORR: %d", match_idx);
 
   // free heap
   free_scorer(scorer);
@@ -1674,6 +1676,83 @@ float get_match_collection_delta_cn(
 }
 
 /**
+ * Takes the values of match-output-folder, ms2 filename (soon to be
+ * named output file), overwrite, and number-decoy-set from parameter.c 
+ * and returns an array of filehandles to the newly opened files
+ * REPLACES: spectrum_collection::get_spectrum_collection_psm_result_filenames
+ */
+FILE** create_psm_files(){
+
+  int decoy_sets = get_int_parameter("number-decoy-set");
+  int total_files = decoy_sets +1;
+  // create FILE* array to return
+  FILE** file_handle_array = (FILE**)mycalloc(total_files, sizeof(FILE*));
+  int file_i = 0;
+
+  // Create null pointers if no binary output called for
+  if( SQT_OUTPUT == get_output_type_parameter("output-mode") ){
+    carp(CARP_DEBUG, "SQT mode: return empty array of file handles");
+    return file_handle_array;
+  }
+
+  carp(CARP_DETAILED_DEBUG, "Opening %d new psm files", total_files);
+
+  char* output_directory =get_string_parameter_pointer("match-output-folder");
+
+  // create the output folder if it doesn't exist
+  if(access(output_directory, F_OK)){
+    if(mkdir(output_directory, S_IRWXU+S_IRWXG+S_IRWXO) != 0){
+      carp(CARP_FATAL, "Failed to create output directory %s", 
+	   output_directory);
+      exit(1);
+    }
+  }
+
+  // get ms2 file for naming result file
+  //TODO change to output filename as argument, force .csm extension
+  //     add _decoy1.csm
+  char* base_filename = get_string_parameter_pointer("ms2 file");
+  char** filename_path_array = parse_filename_path(base_filename);
+
+  carp(CARP_DETAILED_DEBUG, "Base filename is %s and path is %s", 
+       filename_path_array[0], filename_path_array[1]);
+
+  char* filename_template = get_full_filename(output_directory, filename_path_array[0]);
+
+  //create target file
+  int temp_file_descriptor = -1;
+  char suffix[25];
+  //first file is target, remaining are decoys
+  char* psm_filename = generate_name(filename_template, "_XXXXXX", 
+				    ".ms2", "crux_match_target_");
+
+  for(file_i=0; file_i<total_files; file_i++){
+
+    //get file descriptor for uniq version of name //TODO remove this
+    temp_file_descriptor = mkstemp(psm_filename);
+    //open the file from the descriptor
+    file_handle_array[file_i] = fdopen(temp_file_descriptor, "w");
+
+    //check for error
+    if( file_handle_array[file_i] == NULL ||
+	temp_file_descriptor == -1 ){
+
+      carp(CARP_FATAL, "Could not create psm file %s", psm_filename);
+      exit(1);
+    }
+    chmod(psm_filename, 0664);
+
+    //get next decoy name
+    free(psm_filename);
+    sprintf(suffix, "crux_match_decoy_%d_", file_i+1);
+    psm_filename = generate_name(filename_template, "_XXXXXX",
+				 ".ms2", suffix);
+  }
+  return file_handle_array;
+
+}
+
+/**
  * Serialize the PSM features to output file up to 'top_match' number of 
  * top peptides among the match_collection
  *
@@ -1752,6 +1831,10 @@ BOOLEAN_T serialize_psm_features(
 }
 
 void print_sqt_header(FILE* output, char* type, int num_proteins){
+  if( output == NULL ){
+    return;
+  }
+
   time_t hold_time;
   hold_time = time(0);
 
@@ -2039,6 +2122,78 @@ void free_match_iterator(
       match_iterator->match_collection->iterator_lock = FALSE;
     }
     free(match_iterator);
+  }
+}
+
+/*
+ * Copied from spectrum_collection::serialize_header
+ * uses values from paramter.c rather than taking as arguments
+ */
+void serialize_headers(FILE** psm_file_array){
+
+  if( *psm_file_array == NULL ){
+    return;
+  }
+  int num_spectrum_features = 0; //obsolete?
+  int num_charged_spectra = 0;  //this is set later
+  int matches_per_spectrum = get_int_parameter("top-match");
+  char* filename = get_string_parameter_pointer("protein input");
+  char* protein_file = parse_filename(filename);
+  //  free(filename);
+  filename = get_string_parameter_pointer("ms2 file");
+  char* ms2_file = parse_filename(filename);
+  //  free(filename);
+           
+
+  //write values to files
+  int total_files = 1 + get_int_parameter("number-decoy-set");
+  int i=0;
+  for(i=0; i<total_files; i++){
+    fwrite(&(num_charged_spectra), sizeof(int), 1, psm_file_array[i]);
+    fwrite(&(num_spectrum_features), sizeof(int), 1, psm_file_array[i]);
+    fwrite(&(matches_per_spectrum), sizeof(int), 1, psm_file_array[i]);
+  }
+  
+  free(protein_file);
+  free(ms2_file);
+
+}
+
+void print_matches( MATCH_COLLECTION_T* match_collection, 
+		    SPECTRUM_T* spectrum, 
+		    BOOLEAN_T is_decoy,
+		    FILE* psm_file,
+		    FILE* sqt_file, 
+		    FILE* decoy_file){
+  carp(CARP_DETAILED_DEBUG, "Writing matches to file");
+  // get parameters
+  MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
+						"output-mode");
+  int max_sqt_matches = get_int_parameter("max-sqt-result");
+  int max_psm_matches = get_int_parameter("top-match");
+  SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
+  SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
+
+
+  // write binary files
+  if( output_type != SQT_OUTPUT ){ //i.e. binary or all
+    carp(CARP_DETAILED_DEBUG, "Serializing psms");
+    serialize_psm_features(match_collection, psm_file, max_psm_matches,
+			   prelim_score, main_score);
+  }
+
+  // write sqt files
+  if( output_type != BINARY_OUTPUT ){ //i.e. sqt or all
+    carp(CARP_DETAILED_DEBUG, "Writing sqt results");
+    if( ! is_decoy ){
+      print_match_collection_sqt(sqt_file, max_sqt_matches,
+				 match_collection, spectrum,
+				 prelim_score, main_score);
+    }else{
+      print_match_collection_sqt(decoy_file, max_sqt_matches,
+				 match_collection, spectrum,
+				 prelim_score, main_score);
+    }
   }
 }
 

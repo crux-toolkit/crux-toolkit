@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -214,6 +214,7 @@ int* get_spectrum_possible_z_pointer(
   SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
   );
  
+int get_charges_to_search(SPECTRUM_T*, int**);
 /**
  * \sets the possible charge states of this spectrum
  * the function copies the possible_z into a heap allocated memory

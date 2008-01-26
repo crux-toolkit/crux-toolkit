@@ -29,28 +29,16 @@
 #define NUM_SEARCH_ARGS 2
 
 /* Private functions */
-int get_selected_charge_states();
+//int get_selected_charge_states();
+int prepare_protein_input(char* input_file, 
+			  INDEX_T** index, 
+			  DATABASE_T** database);
+void open_output_files(FILE*** binary_filehandle_array, 
+		       FILE** sqt_filehandle,
+		       FILE** decoy_sqt_filehandle);
 
 int main(int argc, char** argv){
 
-  /* Declarations */
-  // command line options
-  int verbosity;
-  BOOLEAN_T use_index;
-  double spectrum_min_mass; 
-  double spectrum_max_mass; 
-  char* match_output_folder = NULL; 
-  char* sqt_filename = NULL;
-  char* decoy_sqt_filename = NULL;
-  int number_decoy_set;
-  SCORER_TYPE_T main_score;
-  SCORER_TYPE_T prelim_score;
-  MATCH_SEARCH_OUTPUT_MODE_T output_type;
-
-  // required arguments
-  char* ms2_file = NULL;
-  char* input_file = NULL;
-  
   /* Define optional command line arguments */
   int num_options = NUM_SEARCH_OPTIONS;
   char* option_list[NUM_SEARCH_OPTIONS] = {
@@ -74,18 +62,9 @@ int main(int argc, char** argv){
   int num_arguments = NUM_SEARCH_ARGS;
   char* argument_list[NUM_SEARCH_ARGS] = {"ms2 file", "protein input"};
 
-  // parameter file options
-  long int max_rank_preliminary;
-  long int max_rank_result;
-  int top_match;
-  BOOLEAN_T run_all_charges;
-  int spectrum_charge_to_run;
-  float mass_offset = 0; //delete me?
-
-
   /* for debugging of parameter processing */
   // TODO change to a make flag
-  set_verbosity_level(CARP_DETAILED_DEBUG);
+  //set_verbosity_level(CARP_DETAILED_DEBUG);
   set_verbosity_level(CARP_ERROR);
 
   /* Initialize parameter.c and set default values*/
@@ -104,44 +83,161 @@ int main(int argc, char** argv){
   verbosity = get_int_parameter("verbosity");
   set_verbosity_level(verbosity);
 
+  /* Get input: ms2 file */
+  char* ms2_file = get_string_parameter_pointer("ms2 file");
+
+  // open ms2 file
+  SPECTRUM_COLLECTION_T* collection = new_spectrum_collection(ms2_file);
   
-  /* Get parameter values */
-  // inputs
-  ms2_file = get_string_parameter_pointer("ms2 file");
-  input_file = get_string_parameter_pointer("protein input");
-  use_index = get_boolean_parameter("use-index");
-
-  //outputs
-  output_type = get_output_type_parameter("output-mode");
-  match_output_folder = get_string_parameter_pointer("match-output-folder");
-  sqt_filename = get_string_parameter_pointer("sqt-output-file");
-  decoy_sqt_filename = get_string_parameter_pointer(
-						"decoy-sqt-output-file");
-  //TODO generate ms2-target.sqt file names if default is set, but do
-  // it when file names are used,  see notes at end of file
-
-  //searching  
-  number_decoy_set = get_int_parameter("number-decoy-set");
-  spectrum_charge_to_run = get_selected_charge_states();
-  if( spectrum_charge_to_run > 0){
-    run_all_charges = FALSE;
+  // parse the ms2 file for spectra
+  carp(CARP_INFO, "Reading in ms2 file %s", ms2_file);
+  if(!parse_spectrum_collection(collection)){
+    carp(CARP_ERROR, "Failed to parse ms2 file: %s", ms2_file);
+    free_spectrum_collection(collection);
+    exit(1);
   }
-  spectrum_min_mass = get_double_parameter("spectrum-min-mass");
-  spectrum_max_mass =  get_double_parameter("spectrum-max-mass");
-
-  //scoring
-  main_score = get_scorer_type_parameter("score-type");
-  prelim_score = get_scorer_type_parameter("prelim-score-type");
-  max_rank_preliminary = get_int_parameter("max-rank-preliminary");
-
-  //results
-  max_rank_result = get_int_parameter("max-sqt-result");//print to sqt
-  // set max number of matches to be serialized per spectrum 
-  top_match = get_int_parameter("top-match");
   
-  // get mass offset from precursor mass to search for candidate peptides
-  //delete me?
-  mass_offset = get_double_parameter("mass-offset");    
+  carp(CARP_DEBUG, "There were %i spectra found in the ms2 file",
+       get_spectrum_collection_num_spectra(collection));
+
+  /* Get input: protein file */
+  char* input_file = get_string_parameter_pointer("protein input");
+
+  /* Prepare input, fasta or index */
+  INDEX_T* index = NULL;
+  DATABASE_T* database = NULL;
+  int num_proteins = prepare_protein_input(input_file, &index, &database); 
+
+  carp(CARP_DEBUG, "Found %i proteins", num_proteins);
+
+  /* Prepare output files */
+
+  FILE** psm_file_array = NULL; //file handle array
+  FILE* sqt_file = NULL;
+  FILE* decoy_sqt_file  = NULL;
+
+  open_output_files(&psm_file_array, &sqt_file, &decoy_sqt_file);
+
+  //print headers
+  serialize_headers(psm_file_array);
+  print_sqt_header(sqt_file, "target", num_proteins);
+  print_sqt_header(decoy_sqt_file, "decoy", num_proteins);
+
+  /* Perform search: loop over spectra*/
+
+  carp(CARP_INFO, "Searching spectra");
+
+  // create spectrum iterator
+  SPECTRUM_ITERATOR_T* spectrum_iterator = new_spectrum_iterator(collection);
+
+  // get search parameters (most could be done within new_match_collection)
+  long int max_rank_preliminary = get_int_parameter("max-rank-preliminary");
+  SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
+  SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
+  double spectrum_min_mass = get_double_parameter("spectrum-min-mass");
+  double spectrum_max_mass =  get_double_parameter("spectrum-max-mass");
+
+  // flags and counters for loop
+  int spectrum_counter = 0;
+  int spectrum_searches_counter = 0; //for psm file header, spec*charges
+  int z_i = 0;
+  int file_i = 0;
+  int total_files = get_int_parameter("number-decoy-set") + 1;
+
+  while(spectrum_iterator_has_next(spectrum_iterator)){
+
+    SPECTRUM_T* spectrum = spectrum_iterator_next(spectrum_iterator);
+
+    // select spectra that are within m/z target interval
+    if(get_spectrum_precursor_mz(spectrum) <  spectrum_min_mass ||
+       get_spectrum_precursor_mz(spectrum) >= spectrum_max_mass){
+	continue; //skip this spectrum, search next
+      }
+    
+    //for each charge, search spectrum
+    int* charge_array = NULL;
+    int num_charges = get_charges_to_search(spectrum, &charge_array);
+
+    for(z_i=0; z_i < num_charges; z_i++){
+      int charge = charge_array[z_i];
+      carp(CARP_DETAILED_DEBUG, 
+	   "Searching spectrum number %i, charge %i, search number %i",
+	   get_spectrum_first_scan(spectrum), charge,
+	   spectrum_searches_counter+1 );
+
+      // for each database (real/rand), search spectrum
+      BOOLEAN_T is_decoy = FALSE; //first target, then decoys
+
+      for(file_i=0; file_i < total_files; file_i++){
+
+	MATCH_COLLECTION_T* match_collection = 
+	  new_match_collection_from_spectrum( spectrum,
+					      charge,
+					      max_rank_preliminary,
+					      prelim_score,
+					      main_score,
+					      0,//mass_offset,
+					      is_decoy,
+					      index,
+					      database);
+	if( match_collection == NULL ){
+	  file_i = total_files; //don't search decoys
+	  continue;
+	}
+	carp(CARP_DETAILED_DEBUG, "about to print matches");
+	
+	print_matches(match_collection, spectrum, is_decoy,
+		      psm_file_array[file_i], sqt_file, decoy_sqt_file);
+
+
+	free_match_collection(match_collection);
+	is_decoy = TRUE;
+      }// next set (target, decoy, decoy...)
+
+      spectrum_searches_counter++;
+    }// next charge state, same spectrum
+    
+    spectrum_counter++;
+    if( spectrum_counter %1000 == 0 ){
+      carp(CARP_INFO, "Searched %d spectra", spectrum_counter);
+    }
+  }// next spectrum    
+  carp(CARP_DEBUG, "finished searching");
+
+  /* Post-search processing */
+
+  // update header with number of searches
+  int file_idx;
+  for(file_idx=0; file_idx < total_files; ++file_idx){
+    serialize_total_number_of_spectra(spectrum_searches_counter, 
+				      psm_file_array[file_idx]);
+  }
+  carp(CARP_DEBUG, "fixed headers");
+
+  // clean up files
+  for(file_idx = 0; file_idx < total_files; ++file_idx){
+    if( psm_file_array[file_idx] != NULL){
+      fclose(psm_file_array[file_idx]);
+    }
+  }
+  if( sqt_file != NULL ){
+    fclose(sqt_file);
+  }
+  if( decoy_sqt_file != NULL ){
+    fclose(decoy_sqt_file);
+  }
+
+  // clean up memory
+  free(psm_file_array);
+  free_spectrum_iterator(spectrum_iterator);
+  free_spectrum_collection(collection);
+  free_parameters();
+
+  carp(CARP_INFO, "crux-search-for-matches finished");
+  exit(0);
+
+
+  //where is this used?  Should it be put back?
   
   // seed for random rnumber generation
   //hide this from user?
@@ -154,277 +250,7 @@ int main(int argc, char** argv){
     srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
   }
   
-  
-  /************** Finished parameter setting **************/
-  
-  SPECTRUM_COLLECTION_T* collection = NULL; ///<spectrum collection
-  SPECTRUM_ITERATOR_T* spectrum_iterator = NULL;
-  MATCH_COLLECTION_T* match_collection = NULL;
-  int possible_charge = 0;
-  int* possible_charge_array = NULL;
-
-  char** psm_result_filenames = NULL;
-  FILE** psm_file_array = NULL; //file handle array
-  FILE* sqt_file = NULL;
-  FILE* decoy_sqt_file  = NULL;
-  int total_files = number_decoy_set + 1; // plus one for target file
-  int file_idx = 0;
-  
-  // open ms2 file
-  collection = new_spectrum_collection(ms2_file);
-  
-  // parse the ms2 file for spectra
-  carp(CARP_INFO, "Reading in ms2 file %s", ms2_file);
-  if(!parse_spectrum_collection(collection)){
-    carp(CARP_ERROR, "Failed to parse ms2 file: %s", ms2_file);
-    free_spectrum_collection(collection);
-    exit(1);
-  }
-  
-  // create spectrum iterator
-  spectrum_iterator = new_spectrum_iterator(collection);
-  
-  carp(CARP_DEBUG, "There were %i spectra found in the ms2 file",
-       get_spectrum_collection_num_spectra(collection));
-
-  
-  /* Prepare input, fasta or index */
-  
-  INDEX_T* index = NULL;
-  DATABASE_T* database = NULL;
-  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
-  int num_proteins = 0;
-  //todo make this a helper function
-  if (use_index == TRUE){
-    carp(CARP_INFO, "Preparing protein index %s", input_file);
-    index = new_index_from_disk(input_file, is_unique);
-
-    if (index == NULL){
-      carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
-      exit(1);
-    }
-    num_proteins = get_index_num_proteins(index);
-  } else {
-    carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
-    database = new_database(input_file, FALSE);         
-    if( database == NULL ){
-      carp(CARP_FATAL, "Could not read fasta file %s", input_file);
-      exit(1);
-    } 
-    //BF added this, might not be correct
-    parse_database(database);
-    num_proteins = get_database_num_proteins(database);
-  }
-  
-  // get psm result file handle array
-  // this includes ones for the target and for the decoys
-  carp(CARP_DETAILED_DEBUG, "The output type is %d (binary, sqt, all)", 
-       (int)output_type);
-
-  carp(CARP_DETAILED_DEBUG, "Creating binary psm files"); 
-  psm_file_array = 
-    get_spectrum_collection_psm_result_filenames( collection,
-						  match_output_folder,
-						  &psm_result_filenames,
-						  number_decoy_set,
-						  ".ms2"
-                                                  );
-  
-  /* for debugging */
-  int tempi = 0;
-  for(tempi=0; tempi<total_files; tempi++){
-    carp(CARP_DETAILED_DEBUG, "Result file name is %s", 
-	 psm_result_filenames[tempi]);
-  }
-  
-  // get psm_result sqt file handle if needed
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  if(output_type != BINARY_OUTPUT ){ //ie binary only
-    carp(CARP_DETAILED_DEBUG, "sqt output file is %s", sqt_filename);
-
-    sqt_file= create_file_in_path(sqt_filename, match_output_folder, 
-				  overwrite);
-    print_sqt_header(sqt_file, "target", num_proteins);
-
-    decoy_sqt_file = 
-      create_file_in_path(decoy_sqt_filename, match_output_folder, overwrite);
-    print_sqt_header(decoy_sqt_file, "decoy", num_proteins);
-  }
-
-  //do we really need sqts to stdout???
-  //TODO turn this into a function
-  /*  if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-    if (strcmp(sqt_filename, "STDOUT") == 0){
-      sqt_file= stdout;
-    } else {
-      sqt_file= 
-	create_file_in_path(sqt_filename, match_output_folder);
-    }
-    if (strcmp(decoy_sqt_filename, "STDOUT") == 0){
-      decoy_sqt_file = stdout;
-    } else {
-      decoy_sqt_file = 
-	create_file_in_path(decoy_sqt_filename, match_output_folder);
-    }
-  }
-  */
-
-  // check for at least one file handle for results
-  if(psm_file_array[0] == NULL ||
-     ((output_type != BINARY_OUTPUT) && sqt_file== NULL)){
-    carp(CARP_FATAL, "Failed to create file handles for results");
-    exit(1);
-    }
-  
-  /**
-   * General order of serialization is, 
-   * - serialize_header
-   * - serialize_psm_features
-   * - serialize_total_number_of_spectra
-   */
-  
-  /* Write headers to files */
-  for(file_idx=0; file_idx < total_files; ++file_idx){
-    serialize_header(collection, input_file, psm_file_array[file_idx]);
-  }
-
-  carp(CARP_DETAILED_DEBUG, "Headers written to output files");
-  /* Perform search: iterate over all spectra in ms2 file and score */
-  int spectra_idx = 0; //superfluous
-  int spectrum_searches_counter = 0; //spec (z-specific) w/ psms
-  int spectrum_counter = 0;   
-  SPECTRUM_T* spectrum = NULL;
-  int charge_index = 0;
-  BOOLEAN_T is_decoy = FALSE;
-
-  carp(CARP_INFO, "Searching spectra");
-  while(spectrum_iterator_has_next(spectrum_iterator)){
-    spectrum_counter++;
-    // get next spectrum
-    spectrum = spectrum_iterator_next(spectrum_iterator);
-    
-    carp(CARP_DETAILED_DEBUG, 
-	 "Searching spectrum number %i, loop number %i, search number %i", 
-	 get_spectrum_first_scan(spectrum), spectrum_counter, spectra_idx+1);
-    
-    // select spectra that are within m/z target interval
-    if(get_spectrum_precursor_mz(spectrum) <  spectrum_min_mass ||
-       get_spectrum_precursor_mz(spectrum) >= spectrum_max_mass)
-      {
-	continue; //skip this spectrum, search next
-      }
-    
-    // get possible charge state
-    //TODO pass charge_to_run this function and eliminate first if()
-    possible_charge = get_spectrum_num_possible_z(spectrum);
-    possible_charge_array = get_spectrum_possible_z_pointer(spectrum);
-    
-    // iterate over all possible charge states for each spectrum
-    for(charge_index = 0; charge_index < possible_charge; ++charge_index){
-      
-      // skip spectra that are not in the charge state to be run
-      if(!run_all_charges && 
-	      spectrum_charge_to_run != possible_charge_array[charge_index]){
-	      continue;  //get next charge state
-      }
-      
-      ++spectra_idx;
-      spectrum_searches_counter++;
-      
-      // iterate over first for target next and for all decoy sets
-      for(file_idx = 0; file_idx < total_files; ++file_idx){
-	if(file_idx == 0){ 	// is it target ?
-	  is_decoy = FALSE;
-	}
-	else{
-	  is_decoy = TRUE;
-	}
-	
-	// get match collection with scored, ranked match collection
-	match_collection = 
-	  new_match_collection_from_spectrum(
-					     spectrum, 
-					 possible_charge_array[charge_index], 
-					     max_rank_preliminary, 
-					     prelim_score, 
-					     main_score, 
-					     mass_offset, 
-					     is_decoy,
-					     index,
-					     database
-					     );
-
-	if ((match_collection == NULL) && !is_decoy){
-	  //if no targets found, don't search decoys
-	  file_idx = total_files;
-	  spectrum_searches_counter--;
-	  continue;
-	}
-
-	//is this working if output_mode == SQT
-	// serialize the psm features from rank 1 to 'top_match'
-	serialize_psm_features(match_collection, psm_file_array[file_idx], 
-			       top_match, prelim_score, main_score);
-	
-	// write to SQT files
-	if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-
-	  if (file_idx == 0){
-	    print_match_collection_sqt(sqt_file, max_rank_result,
-				       match_collection, spectrum, 
-				       prelim_score, main_score);
-	  } else if (file_idx == 1){
-	    print_match_collection_sqt(decoy_sqt_file, max_rank_result,
-				       match_collection, spectrum, 
-				       prelim_score, main_score);
-	  } 
-	} //next target/decoy        
-	
-	// free up match_collection
-	free_match_collection(match_collection);          
-      }
-    }
-    if( spectrum_counter %1000 == 0 ){
-      carp(CARP_INFO, "Searched %d spectra", spectrum_counter);
-    }
-  } //end while iterator has spectra
-  
-  // Modify the header serialized information for all files(target & decoy)
-  // Set the total number of spectra serialized in the PSM result files
-  for(file_idx=0; file_idx < total_files; ++file_idx){
-    //I think the first second line is supposed to replace the first
-    //serialize_total_number_of_spectra(spectra_idx, psm_file_array[file_idx]);
-    serialize_total_number_of_spectra(spectrum_searches_counter, psm_file_array[file_idx]);
-  }
-  
-  // DEBUG
-  carp(CARP_DEBUG, "Total spectrum searches: %d, total with psms: %i", 
-       spectra_idx, spectrum_searches_counter);
-  
-  if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-    fclose(sqt_file);
-    fclose(decoy_sqt_file);
-  }
-  
-  // ok, now close all psm_result_files and free filenames
-  for(file_idx = 0; file_idx < total_files; ++file_idx){
-    fclose(psm_file_array[file_idx]);
-    free(psm_result_filenames[file_idx]);
-  }
-  
-  if (use_index == TRUE){
-    free_index(index);
-  } else {
-    free_database(database);
-  }
-  free(psm_result_filenames);
-  free(psm_file_array);
-  free_spectrum_iterator(spectrum_iterator);
-  free_spectrum_collection(collection);
-  free_parameters();
-
-  carp(CARP_INFO, "crux-search-for-matches finished");
-  exit(0);
+ 
 }
 
 
@@ -434,7 +260,7 @@ int main(int argc, char** argv){
   an alternative is to create a type.  It could include things
   like 2or3
  */
-int get_selected_charge_states(){
+/*int get_selected_charge_states(){
   int charge_state = 0;
 
   char* charge_str = get_string_parameter_pointer("spectrum-charge");
@@ -452,6 +278,79 @@ int get_selected_charge_states(){
   }
   return charge_state;
 }
+*/
+
+int prepare_protein_input(char* input_file, 
+			  INDEX_T** index, 
+			  DATABASE_T** database){
+
+  int num_proteins = 0;
+  BOOLEAN_T use_index = get_boolean_parameter("use-index");
+  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
+
+  if (use_index == TRUE){
+    carp(CARP_INFO, "Preparing protein index %s", input_file);
+    *index = new_index_from_disk(input_file, is_unique);
+
+    if (index == NULL){
+      carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
+      exit(1);
+    }
+    num_proteins = get_index_num_proteins(*index);
+
+  } else {
+    carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
+    *database = new_database(input_file, FALSE);         
+    if( database == NULL ){
+      carp(CARP_FATAL, "Could not read fasta file %s", input_file);
+      exit(1);
+    } 
+    //BF added this, might not be correct
+    parse_database(*database);
+    num_proteins = get_database_num_proteins(*database);
+  }
+  return num_proteins;
+}
+
+void open_output_files(FILE*** psm_file_array, 
+		       FILE** sqt_file,
+		       FILE** decoy_sqt_file)
+{
+  char* match_output_folder = get_string_parameter_pointer(
+						"match-output-folder");
+  MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
+						"output-mode");
+  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  carp(CARP_DETAILED_DEBUG, "The output type is %d (binary, sqt, all)" \
+       " and overwrite is '%d'", (int)output_type, (int)overwrite);
+
+
+  // create binary psm files (allocate memory, even if not used)
+  *psm_file_array = create_psm_files();
+
+  if( output_type != BINARY_OUTPUT ){ //ie sqt or all
+
+    //create sqt file handles
+    carp(CARP_DEBUG, "Opening sqt files");
+    char* sqt_filename = get_string_parameter_pointer("sqt-output-file");
+    *sqt_file = create_file_in_path(sqt_filename, 
+				   match_output_folder, 
+				   overwrite);
+    char* decoy_sqt_filename = get_string_parameter_pointer(
+						"decoy-sqt-output-file");
+    *decoy_sqt_file = create_file_in_path(decoy_sqt_filename,
+					 match_output_folder,
+					 overwrite);
+
+    if(sqt_file == NULL || decoy_sqt_file == NULL){
+      carp(CARP_DETAILED_DEBUG, "sqt file or decoy is null");
+    }
+
+  }
+
+  carp(CARP_DETAILED_DEBUG, "Finished opening output files");
+}
+
 
 /* NOTES */
 // generate sqt ouput file if not set by user

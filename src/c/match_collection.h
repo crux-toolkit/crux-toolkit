@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.25 $
+ * $Revision: 1.26 $
  * \brief Object for given a database and a spectrum, generate all match objects
  */
 #ifndef MATCH_COLLECTION_H
@@ -120,6 +120,26 @@ float get_match_collection_delta_cn(
   MATCH_COLLECTION_T* match_collection ///< working match collection -in
 );
 
+/**
+ * Takes the values of match-output-folder, ms2 filename (soon to be
+ * named output file), overwrite, and number-decoy-set from parameter.c 
+ * and returns an array of filehandles to the newly opened files
+ */
+FILE** create_psm_files();
+
+/*
+ * Copied from spectrum_collection::serialize_header
+ * uses values from paramter.c rather than taking as arguments
+ */
+void serialize_headers(FILE** file_array);
+
+void print_matches
+(MATCH_COLLECTION_T* match_collection, 
+ SPECTRUM_T* spectrum, 
+ BOOLEAN_T is_decoy,
+ FILE* psm_file,
+ FILE* sqt_file, 
+ FILE* decoy_file);
 /**
  * Serialize the psm features to ouput file upto 'top_match' number of 
  * top peptides among the match_collection
