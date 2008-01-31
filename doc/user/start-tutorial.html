@@ -94,16 +94,11 @@ H       Extractor       MakeMS2
 H       ExtractorVersion        1.0
 H       Comments        MakeMS2 written by Michael J. MacCoss, 2004
 H       ExtractorOptions        MS2/MS1
-H       DAnalyzer       charge_czar
-S       10  10  468.80
-I       ID      93
-I       RTime   4.3822
-Z       2       936.59
-Z       3       1404.38
-136.3 1.6
-147.1 14.1
-148.3 2.9
-150.1 1.2
+S       10      10      636.34
+Z       2       1271.67
+187.4 12.5
+193.1 19.5
+194.3 13.7
 </pre>
 <div class=note><em>NOTE: There are two kinds of optional lines which
 may be included for each spectrum.  Lines beginning with </em><span
@@ -121,12 +116,12 @@ the file, the date it was created, and so on.  The line starting with
 spectrum.  Following the <span class=file>S</span> is the scan number
 (twice) and the m/z of the precursor ion.  The lines beginning with
 <span class=file>Z</span> list the possible charge states of the
-spectrum (in this case 2 or 3) and the mass of the peptide at that
+spectrum (in this case 2) and the mass of the peptide at that
 charge state.  Following the <span class=file>Z</span> lines is the
 list of peaks for the spectrum.  The subsequent spectra in the file
 repeat this pattern of <span class=file>S</span> line, <span
 class=file>Z</span> line(s), and peak list.  <span
-class=file>demo.ms2</span> contains 154 spectra.
+class=file>demo.ms2</span> contains 150 spectra.
 </p>
 
 <a name="fasta"></a>
@@ -142,17 +137,20 @@ it to your current working directory.
 </p>
 
 <pre>
->YAL001C TFC3 SGDID:S000000001, Chr I from 151168-151099,151008-147596, reverse complement, Verified ORF, "Largest of six subunits of the RNA polymerase III transcription initiation factor complex (TFIIIC); part of the TauB domain of TFIIIC that binds DNA at the BoxB promoter sites of tRNA and similar genes; cooperates with Tfc6p in DNA binding"
-MVLTIYPDELVQIVSDKIASNKGKITLNQLWDISGKYFDLSDKKVKQFVLSCVILKKDIE
-VYCDGAITTKNVTDIIGDANHSYSVGITEDSLWTLLTGYTKKESTIGNSAFELLLEVAKS
-GEKGINTMDLAQVTGQDPRSVTGRIKKINHLLTSSQLIYKGHVVKQLKLKKFSHDGVDSN
+>YBL030C PET9 SGDID:S000000126, Chr II from 164000-163044, reverse complement, Verified ORF, "Major ADP/ATP carrier of the mitochondrial inner membrane, exchanges cytosolic ADP for mitochondrially synthesized ATP; required for viability in many common lab strains carrying a mutation in the polymorphic SAL1 gene"
+MSSNAQVKTPLPPAPAPKKESNFLIDFLMGGVSAAVAKTAASPIERVKLLIQNQDEML
+KQGTLDRKYAGILDCFKRTATQEGVISFWRGNTANVIRYFPTQALNFAFKDKIKAMFG
+FKKEEGYAKWFAGNLASGGAAGALSLLFVYSLDYARTRLAADSKSSKKGGARQFNGLI
+DVYKKTLKSDGVAGLYRGFLPSVVGIVVYRGLYFGMYDSLKPLLLTGSLEGSFLASFL
+LGWVVTTGASTCSYPLDTVRRRMMMTSGQAVKYDGAFDCLRKIVAAEGVGSLFKGCGA
+NILRGVAGAGVISMYDQLQMILFGKKFK 
 </pre>
 
 <p>Lines beginning with <span class=file>&gt;</span> give the name of
 a protein.  The first word is the protein name followed by an optional
 description of any length.  The following lines contain the protein
 sequence.  Proteins may or may not be separated by blank lines.
-<span class=file>small-yeast.fasta</span> contains ???<!--6830--> proteins.
+<span class=file>small-yeast.fasta</span> contains 56 proteins.
 </p>
 
 <a href="search-tutorial.html"><h4>Next: Running a search</h4></a>

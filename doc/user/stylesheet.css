@@ -81,5 +81,5 @@ dt { font-size: large;
 a { color: #006600 }
 
 span.file { font: medium courier, monospace; }
-span.prog { font-family: Tahoma, Verdana, sans-serif; }
+span.prog { font: medium courier, monospace; }
 span.out  { font: medium courier, monospace; }
