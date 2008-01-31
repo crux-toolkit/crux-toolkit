@@ -1,0 +1,4 @@
+export PATH=../../../bin/:$PATH
+# crux-create-index.exe --verbosity 30 --parameter-file crux.params_3 yeast.fasta
+# makedb.exe
+crux-search-for-matches.exe

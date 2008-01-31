@@ -15,13 +15,13 @@ min-length=6
 max-length=50
 
 #cleavage type allowed (tryptic|partial|all)
-cleavages=all
+cleavages=tryptic
 
 #mass type to use (average|mono)
 isotopic-mass=average
 
 #allow redudnat peptides? (redundant|unique)
-redundancy=unique
+unique-peptides=T
 
 #use index to create peptides or use index? (T|F)
 use-index=T
@@ -65,7 +65,7 @@ sample-count=1
 max-rank-preliminary=1
 
 #max number of final scored peptides to be printed as output (use 1000000, to select all peptides, _MAX_NUMBER_PEPTIDES)
-max-rank-result=1
+# max-rank-result=1
 
 #set the number of top ranking peptides to score for LOGP_* 
 #(This is different compared to max-rank-preliminary, 

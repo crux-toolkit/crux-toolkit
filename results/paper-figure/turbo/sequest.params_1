@@ -11,7 +11,7 @@ show_fragment_ions = 1                 ; 0=no, 1=yes
 print_duplicate_references = 1         ; 0=no, 1=yes
 enzyme_number = 0                       
 
-xcorr_mode = 0                         ; 0 regular Xcorr(default), 1 - EE, 2 - ET, 3 - TT
+xcorr_mode = 1                         ; 0 regular Xcorr(default), 1 - EE, 2 - ET, 3 - TT
 
 #
 # Up to 3 differential searches can be performed.
