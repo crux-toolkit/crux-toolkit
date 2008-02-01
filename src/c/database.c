@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file database.c
- * $Revision: 1.56 $
+ * $Revision: 1.57 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -232,7 +232,7 @@ BOOLEAN_T parse_database_text_fasta(
   int line_length;
   size_t buf_length = 0;
   PROTEIN_T* new_protein;
-  unsigned int protein_idx = 0;
+  unsigned int protein_idx;
 
   // check if already parsed
   if(database->is_parsed){
@@ -305,7 +305,7 @@ BOOLEAN_T parse_database_text_fasta(
           if(!parse_protein_fasta_file(new_protein ,file)){
             fclose(file);
             free_protein(new_protein);
-            for(; protein_idx < database->num_proteins; protein_idx++){
+            for(protein_idx=0;protein_idx<database->num_proteins;protein_idx++){
               free_protein(database->proteins[protein_idx]);
             }
             database->num_proteins = 0;
@@ -410,10 +410,10 @@ BOOLEAN_T populate_proteins_from_memmap(
     
     // add protein to database
     database->proteins[database->num_proteins] = new_protein;
-    ++database->num_proteins;
     // set protein index, database
     set_protein_protein_idx(new_protein, database->num_proteins);
     set_protein_database(new_protein, database);
+    ++database->num_proteins;
   }
 
   return TRUE;
@@ -636,11 +636,12 @@ PROTEIN_T* get_database_protein_at_idx(
   unsigned int protein_idx ///< The index of the protein to retrieve -in
   )
 {
-  carp(CARP_DETAILED_DEBUG, "Protein idx = %i, num proteins %i", protein_idx, database->num_proteins);
-  if( protein_idx >= database->num_proteins ){
+  carp(CARP_DETAILED_DEBUG, "Protein idx = %i, num proteins %i", 
+    protein_idx, database->num_proteins);
+  if(protein_idx >= database->num_proteins ){
     carp(CARP_FATAL, 
-	 "Protein index %i out of bounds.  %i proteins in the database",
-	 protein_idx, database->num_proteins);
+	    "Protein index %i out of bounds.  %i proteins in the database",
+	    protein_idx, database->num_proteins);
     exit(1);
   }
 
