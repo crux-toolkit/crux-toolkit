@@ -1,4 +1,15 @@
 export PATH=../../../bin/:$PATH
-# crux-create-index.exe --verbosity 30 --parameter-file crux.params_3 yeast.fasta
+export FASTA=yeast.fasta
+# export MS2=spectra_random_1000.ms2
+export MS2=test.ms2
+
+# crux-create-index.exe --verbosity 30 --parameter-file crux.params_3 $FASTA
 # makedb.exe
-crux-search-for-matches.exe
+# (time crux-search-for-matches.exe --number-decoy-set 0 --parameter-file crux.params_0.1 --verbosity 30 $MS2 $FASTA )>& 0.1.time
+# (time crux-search-for-matches.exe --number-decoy-set 0 --parameter-file crux.params_1 --verbosity 30 $MS2 $FASTA )>& 1.time
+# (time crux-search-for-matches.exe --number-decoy-set 0 --parameter-file crux.params_3 --verbosity 30 $MS2 $FASTA )>& 3.time
+
+(time sequest.exe  -Dyeast.fasta -Psequest.params_0.1 *.dta) >& 0.1.sequest.time
+(time sequest.exe  -Dyeast.fasta -Psequest.params_1 *.dta)   >& 1.sequest.time
+(time sequest.exe  -Dyeast.fasta -Psequest.params_3 *.dta)   >& 3.sequest.time
+
