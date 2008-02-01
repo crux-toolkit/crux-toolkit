@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file peptide.c
- * $Revision: 1.69 $
+ * $Revision: 1.70 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -1085,6 +1085,7 @@ PEPTIDE_T* parse_peptide(
       free(peptide);
       return NULL;
     }
+    carp(CARP_DETAILED_DEBUG, "protein idx read is %i", protein_idx);
     
     // read peptide type of peptide src
     if(fread(&peptide_type, sizeof(PEPTIDE_TYPE_T), 1, file) != 1){

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * \file protein.c
- * $Revision: 1.59 $
+ * $Revision: 1.60 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -807,6 +807,7 @@ void set_protein_protein_idx(
   unsigned int protein_idx ///< The index of the protein in it's database. -in
   )
 {
+  // carp(CARP_DETAILED_DEBUG, "set protein idx = %i", protein_idx);
   protein->protein_idx = protein_idx;
 }
 
