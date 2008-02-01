@@ -1,45 +1,32 @@
+from pylab import *
 windows = ["0.1", "1", "3"]
-# names = ["crux", "crux.no", "sequest", "sequest.no"]
-names = ["crux"]
+names = ["crux", "crux.no", "sequest", "sequest.no"]
+# names = ["crux"]
+styles = ["k-o", "k--o", "m-^", "m--^"]
+labels = ["Crux (w/ index)", "Crux (w/o index)", "Sequest (w/ index)", "Sequest (w/o) index"]
 
+idx = 0
 for name in names:
-	for window in windows:
-		filename = "%s.%s.time" % (window, name)
-		fh = open(filename)
-		for line in fh:
-			if line.
+  ys = []
+  xs = []
+  for window in windows:
+    filename = "%s.%s.time" % (window, name)
+    fh = open(filename)
+    for line in fh:
+      if line.startswith("real"):
+        time = float(line.split("m")[1].split("s")[0])
+        ys.append(time)
+        xs.append(float(window))
+    fh.close()
 
+  loglog(xs, ys, styles[idx], label=labels[idx])
+  idx += 1
 
-
-
-import plotFuncs, pylab
-plotFuncs.plotLogLogFromFile("crux-no-index-human.fasta", style="k-o",
-    label="Crux (w/o index)")
-plotFuncs.plotLogLogFromFile("sequest-human.fasta", style="m-s",
-    label="Sequest")
-plotFuncs.plotLogLogFromFile("crux-fast-human.fasta", style="g-^",
-    label="Crux (w/ index)")
-pylab.legend(loc="lower right")
-pylab.xlabel("Mass window (Da)")
-pylab.xlim(0.05, 5)
-pylab.ylim(0.1, 50000)
-pylab.ylabel("Runtime for 100 spectra (s)")
-pylab.savefig("indexing-human.eps")
-pylab.savefig("indexing-human.png")
-pylab.clf()
- 
-plotFuncs.plotLogLogFromFile("crux-no-index-yeast.fasta", style="k-o",
-    label="Crux (w/o index)")
-plotFuncs.plotLogLogFromFile("sequest-yeast.fasta", style="m-s",
-    label="Sequest")
-plotFuncs.plotLogLogFromFile("crux-fast-yeast.fasta", style="g-^",
-    label="Crux (w/ index)")
-pylab.legend(loc="lower right")
-pylab.xlabel("Mass window (Da)")
-pylab.xlim(0.05, 5)
-pylab.ylim(0.1, 50000)
-pylab.ylabel("Runtime for 100 spectra (s)")
-pylab.savefig("indexing-yeast.eps")
-pylab.savefig("indexing-yeast.png")
-
-			
+legend(loc="lower right")
+xlabel("Mass window (Da)")
+xlim(0.05, 5)
+ylim(0.1, 50000)
+ylabel("Runtime for 425 spectra (s)")
+savefig("indexing-windows.eps")
+savefig("indexing-windows.png")
+      
