@@ -1,7 +1,7 @@
 # comment lines begin with a '#' in the first position
 [SEQUEST]
 # database_name = test.fasta
-peptide_mass_tolerance = 1
+peptide_mass_tolerance = 1.0
 create_output_files = 0                ; 0=no, 1=yes
 ion_series = 0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
 fragment_ion_tolerance = 0.0           ; leave at 0.0 unless you have real poor data
@@ -9,9 +9,9 @@ num_output_lines = 1                   ; # peptide results to show
 num_description_lines = 1              ; # full protein descriptions to show for top N peptides
 show_fragment_ions = 1                 ; 0=no, 1=yes
 print_duplicate_references = 1         ; 0=no, 1=yes
-enzyme_number = 0                       
+enzyme_number = 1                       
 
-xcorr_mode = 1                         ; 0 regular Xcorr(default), 1 - EE, 2 - ET, 3 - TT
+xcorr_mode = 0                         ; 0 regular Xcorr(default), 1 - EE, 2 - ET, 3 - TT
 
 #
 # Up to 3 differential searches can be performed.
