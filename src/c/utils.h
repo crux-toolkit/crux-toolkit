@@ -46,17 +46,6 @@ extern int verbosity;
 double NaN
   (void);
 
-/********************************************************************
- * double myclock
- *
- * Return number of CPU microseconds since first call to myclock().
- * This corrects the bug in the system version of clock that causes it
- * to loop after about 36 minutes.
- *
- * (Taken from Tim Bailey's MEME package.)
- ********************************************************************/
-double myclock(void);
-
 /***********************************************************************
  * Return elapsed time in microseconds since the last call.
  ***********************************************************************/

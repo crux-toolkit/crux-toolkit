@@ -104,7 +104,7 @@ int main(int argc, char** argv){
 
   /* Get options */
   ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
-  SCORER_TYPE_T scorer_type;
+  SCORER_TYPE_T scorer_type = PERCOLATOR_SCORE;
   MATCH_COLLECTION_T* match_collection = NULL;
 
   /* Perform the analysis */
