@@ -11,7 +11,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <sys/time.h>
-#include <sys/resource.h>
+// #include <sys/resource.h>
 #include <math.h>
 #include <assert.h>
 #include "utils.h"
@@ -26,44 +26,6 @@ double NaN
 {
   return atof("NaN");
 }
-
-/**********************************************************************
- * See .h file for description.
- **********************************************************************/
-#ifdef NOCLOCK
-double myclock() {return(0);}
-#else
-
-#ifdef crayc90
-/* No problem on the CRAY. */
-#include <time.h>
-double myclock() {return((double)clock());}
-
-#else
-int getrusage(int who, struct rusage *rusage);
-
-double myclock()
-{
-  static BOOLEAN_T first_time = TRUE;
-  static double    start_time;
-  double           elapsed;
-  struct rusage    ru;
-
-  if (first_time) {
-    getrusage(RUSAGE_SELF, &ru);
-    start_time = (ru.ru_utime.tv_sec * 1.0E6) + ru.ru_utime.tv_usec;
-    first_time = FALSE;
-    return 0;
-
-  } else {
-    getrusage(RUSAGE_SELF, &ru);
-    elapsed = (ru.ru_utime.tv_sec * 1.0E6) + ru.ru_utime.tv_usec -
-      start_time;
-    return elapsed;
-  }
-}
-#endif /* crayc90 */
-#endif /* NOCLOCK */
 
 /***********************************************************************
  * Return elapsed time in microseconds since the last call.
