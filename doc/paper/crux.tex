@@ -219,19 +219,28 @@ databases are paged into and out of memory only as needed.
 
 \begin{figure}
   \centering
-  \begin{tabular}{cc}
-  \includegraphics[width=3in]{./Images/indexing-yeast.eps} & 
-  \includegraphics[width=3in]{./Images/indexing-human.eps} \\
+  \begin{tabular}{ll}
+    {\sf A} & {\sf B} \\
+  \includegraphics[width=3in]{../../results/paper-figure/index/indexing-yeast.eps} & 
+  \includegraphics[width=3in]{../../results/paper-figure/index/indexing-human.eps} \\
+    {\sf C} & {\sf D} \\
+  
+  \includegraphics[width=3in]{../../results/paper-figure/turbo/indexing-yeast-windows.eps} & 
+  \includegraphics[width=3in]{../../results/paper-figure/turbo/indexing-yeast-windows.eps} \\
+
 \end{tabular}
   \caption{{\bf Rapid retrieval of candidate peptides.}  The figure
-  plots the total running time required to search 1,000 tandem mass
-  spectra against the yeast (A) and human (B) protein databases,
-  plotted as a function of the mass tolerance used to define candidate
-  peptides.  The three series correspond to searching with {\sc
-  Sequest} and searching with Crux with and without a peptide index.
-  For purposes of comparison, both search algorithms' $Xcorr$
-  functions and Crux's decoy searching and post-processing are turned
-  off.
+  plots the total running time required to search 100 tandem mass
+  spectra against the yeast (left, A and C) or human protein databases
+  (right, B and D) on computers running the Linux (top, A and B) 
+  or Windows (bottom, C and D) operating systems.
+  Run time is plotted 
+  as a function of the mass tolerance used to define candidate
+  peptides. The four series (three for Linux) 
+  correspond to searching with {\sc
+  Sequest} and Crux with and without a peptide index.
+  The Linux OS plots have three series
+  because indexed {\sc Sequest} searches with are only possible on Windows,
   \label{figure:indexing}}
 \end{figure}
 
