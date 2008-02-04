@@ -189,7 +189,8 @@ void initialize_parameters(void){
 
   /* generate_peptide arguments */
   set_string_parameter("protein input", NULL, 
-  "File containing protein sequences either in fasta format or binary index.");
+  "Fasta file of protein sequences or directory containing an index.");
+
   /* create_index arguments */
   set_string_parameter("protein fasta file", NULL,
 		    "File containing protein sequences in fasta format.");
@@ -204,6 +205,10 @@ void initialize_parameters(void){
   /* analyze-matches arguments */
   set_string_parameter("psm-folder", NULL, 
    "File containing the binary psm files created by crux-search-for-matches");
+  // for now, replaces above
+  set_string_parameter("psm file", NULL, 
+   "The binary psm file containing matches to the target database.  "
+   "Decoys named filename-decoy-#.csm are also analyzed.");
   //and uses protein input
 
   /* get-ms2-spectrum */
@@ -339,7 +344,7 @@ void initialize_parameters(void){
   set_algorithm_type_parameter("algorithm", PERCOLATOR_ALGORITHM, 
   "The analysis algorithm to use (percolator, retention-czar, qvalue, none)." \
   "  Default percolator");
-  set_string_parameter("feature-file", "match_analysis.features", 
+  set_string_parameter("feature-file", NULL,//"match_analysis.features"
      "Optional file into which psm features are printed.");
 
   /* analyze-matches parameter options */
@@ -1040,11 +1045,13 @@ double get_double_parameter(
 }
 
 /**
+ * \brief Get the value of a parameter whose type is char*
+ *
  * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string. 
+ * parameter_name matches the given name string. 
  * The return value is allocated here and must be freed by the caller.
  * If the value is not found, abort.
- * \returns the string value to which matches the parameter name, else aborts
+ * \returns The hash-alllocated string value of the given parameter name
  */
 char* get_string_parameter(
   char* name  ///< the name of the parameter looking for -in
@@ -1055,8 +1062,13 @@ char* get_string_parameter(
   
   // can't find parameter
   if(string_value == NULL){
-    carp(CARP_ERROR, "parameter name: %s, doesn't exist", name);
+    carp(CARP_FATAL, "Parameter name: %s, doesn't exist", name);
     exit(1);
+  }
+
+  //change "__NULL_STR" to NULL
+  if( (strcmp(string_value, "__NULL_STR"))==0){
+    string_value = NULL;
   }
   //check type
   char* type_str = get_hash_value(types->hash, name);
@@ -1071,9 +1083,14 @@ char* get_string_parameter(
 
   return my_copy_string(string_value);
 }
+
+// TODO (BF 04-Feb-08): Should we delete this since it allows caller
+//      to change the value of a parameter?
 /**
+ * \brief Get the value of a parameter whose type is char*
+ * 
  * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string. 
+ * parameter_name matches the given name string. 
  * The return value is a pointer to the original string
  * Thus, user should not free, good for printing
  * \returns the string value to which matches the parameter name, else aborts
@@ -1090,9 +1107,18 @@ char* get_string_parameter_pointer(
     carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
     exit(1);
   }
-  else{
-    return string_value;
+  //check type
+  char* type_str = get_hash_value(types->hash, name);
+  PARAMETER_TYPE_T type;
+  BOOLEAN_T found = string_to_param_type(type_str, &type);
+
+  if(found==FALSE || type != STRING_P){
+    carp(CARP_ERROR, "Request for string parameter '%s' which is of type %s",
+	 name, type_str);
   }
+
+  return string_value;
+
 }
 
 PEPTIDE_TYPE_T get_peptide_type_parameter(

@@ -343,6 +343,64 @@ char** parse_filename_path(char* file){
 }
 
 /**
+ * \brief Parses the filename, path, and file extension of given string.
+ *  
+ * The array returned, A, contains the filename (A[0]) striped of the
+ * given file extension and the path (A[1]).  Path is NULL if no / in
+ * given name.  Filename is unchanged if it does not include the
+ * extension. e.g. Given "../../filname.ext" and ".ext" returns
+ * A[0]="filename" A[1]="../../".  Given "filename" returns A[0] =
+ * NULL and A[1] = "filename". 
+ *
+ * \returns A heap allocated array of filename striped of extension and
+ * path.
+ */
+char** parse_filename_path_extension(
+       char* file, ///< filename and path to parse -in
+       char* extension ///< extension to look for (includes leading .) --in
+){
+
+  carp(CARP_DETAILED_DEBUG, "Given path/file %s and ext %s", file, extension);
+  char** file_path_array = parse_filename_path(file);
+  char* trimmed_filename = file_path_array[0];
+
+  // look for extension
+  if( extension != NULL ){
+
+    carp(CARP_DETAILED_DEBUG, "Trimmed file is %s", trimmed_filename);
+    int file_len = strlen(trimmed_filename);
+    int file_idx = file_len;
+    int ext_len = strlen(extension);
+    int ext_idx = ext_len;
+
+    if( ext_len > file_len ){
+      carp(CARP_ERROR, 
+           "Cannot parse file extension.  The file extension %s is longer "
+           "than the filename '%s'", extension, file);
+      return file_path_array;
+    }
+    carp(CARP_DETAILED_DEBUG, "Name len %d ext len %d", file_idx, ext_idx);
+
+    //compare name and ext from end of strings backwards
+    for(ext_idx = ext_idx; ext_idx > -1; ext_idx--){
+      carp(CARP_DETAILED_DEBUG, "Name[%d]='%d', ext[%d]='%d'", 
+           file_idx, trimmed_filename[file_idx], ext_idx, extension[ext_idx]);
+      // if they stop matching, don't change filename
+      if( extension[ext_idx] != trimmed_filename[file_idx--]){
+        return file_path_array;
+      }
+    }
+
+    // after comparing the whole extension, it matched
+    trimmed_filename[file_len - ext_len] = '\0';
+    carp(CARP_DETAILED_DEBUG, "Final trimmed filename %s", trimmed_filename);
+
+  }
+
+  return file_path_array;
+}
+
+/**
  * parses the filename
  * ex) ../../file_name => returns filename
  *\returns A heap allocated array of filename
@@ -433,6 +491,7 @@ char* cat_string(char* string_one, char* string_two){
   return result;
 }
 
+// TODO (BF 04-Feb-08): This should be prefix, not suffix
 /**
  * check if the string has the correct suffix
  * \returns TRUE, if the string starts with the suffix, else FALSE

@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -371,6 +371,14 @@ MATCH_COLLECTION_T* match_collection_iterator_next(
 int get_match_collection_iterator_number_collections(
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator ///< the working match_collection_iterator -in
   );
+
+/**
+ * \brief Get the name of the directory the match_collection_iterator
+ * is working in.
+ * \returns A heap allocated string (char*) of the directory name.
+ */
+char* get_match_collection_iterator_directory_name(
+  MATCH_COLLECTION_ITERATOR_T* iterator);
 
 /*
  * Local Variables:

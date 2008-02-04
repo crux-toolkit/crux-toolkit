@@ -2,12 +2,15 @@
  * \file match_analysis.c
  * AUTHOR: Chris Park
  * CREATE DATE: Jan 03 2007
- * \brief  Given as input an ms2 file, a sequence database, and an
- * optional parameter file, search all the spectrum against the
- * peptides in the sequence database, and return the high scoring
- * peptides. 
+ * \brief  Given as input a directory containing binary psm files,
+ * a protein database, and an optional parameter file analyze the
+ * matches (with percolator or q-value) and return scores indicating
+ * how good the matches are. 
+ *
+ * Handles at most x files (target and decoy).  Expects psm files to
+ * end with the extension '.csm' and decoys to end with '-decoy#.csm'
  * 
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -63,9 +66,9 @@ int output_matches(
 int main(int argc, char** argv){
 
   /* Declarations */
-  char* psm_result_folder = NULL;
-  char* fasta_file = NULL; //rename
-  char* feature_file = NULL;
+  //char* psm_result_folder = NULL;
+  //char* fasta_file = NULL; //rename
+  //char* feature_file = NULL;
 
   /* Define command line arguments */
   int num_options = NUM_ANALYSIS_OPTIONS;
@@ -79,7 +82,8 @@ int main(int argc, char** argv){
 
   int num_arguments = NUM_ANALYSIS_ARGUMENTS;
   char* argument_list[NUM_ANALYSIS_ARGUMENTS] = {
-    "psm-folder",
+    //"psm-folder",
+    "psm file",
     "protein input",
   };
 
@@ -102,9 +106,10 @@ int main(int argc, char** argv){
   set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get arguments */
-  psm_result_folder = get_string_parameter("psm-folder");
-  fasta_file = get_string_parameter("protein input");
-  feature_file = get_string_parameter("feature-file");
+  //  psm_result_folder = get_string_parameter("psm-folder");
+  char* psm_file = get_string_parameter("psm file");
+  char* fasta_file = get_string_parameter("protein input");//rename
+  char* feature_file = get_string_parameter("feature-file");
 
   /* Get options */
   ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
@@ -115,7 +120,8 @@ int main(int argc, char** argv){
   switch(algorithm_type){
   case PERCOLATOR_ALGORITHM:
     carp(CARP_INFO, "Running percolator");
-    match_collection = run_percolator(psm_result_folder,
+    match_collection = run_percolator(//psm_result_folder,
+                                      psm_file,
 				      fasta_file,
 				      feature_file);
     scorer_type = PERCOLATOR_SCORE;
@@ -123,14 +129,16 @@ int main(int argc, char** argv){
     
   case QVALUE_ALGORITHM:
     carp(CARP_INFO, "Running qvalue");
-    match_collection = run_qvalue(psm_result_folder, fasta_file);
+    //match_collection = run_qvalue(psm_result_folder, fasta_file);
+    match_collection = run_qvalue(psm_file, fasta_file);
     scorer_type = Q_VALUE;
     break;
     
   case NO_ALGORITHM:
     carp(CARP_INFO, "No analysis algorithm chosen.");
-    match_collection = run_nothing(psm_result_folder,
-				   fasta_file,
+    match_collection = run_nothing(//psm_result_folder,
+                                   psm_file,
+                                   fasta_file,
 				   feature_file);
     scorer_type = XCORR; // TODO put in something to default to the primary
     // score in the run
@@ -447,7 +455,7 @@ MATCH_COLLECTION_T* run_percolator(
   int set_idx = 0;
   
   // optional feature_file
-  if (feature_file != NULL){
+  if (feature_file != NULL){  
     if((feature_fh = fopen(feature_file, "w")) == NULL){
       carp(CARP_FATAL, "Problem opening output file %s", feature_file);
       return NULL;
