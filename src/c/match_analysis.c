@@ -1,12 +1,13 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file match_analysis.c
  * AUTHOR: Chris Park
  * CREATE DATE: Jan 03 2007
- * DESCRIPTION: Given as input an ms2 file, a sequence database, and an 
- *              optional parameter file, search all the spectrum against 
- *              the peptides in the sequence database, and return the high 
- *              scoring peptides. 
- * REVISION: $ $
+ * \brief  Given as input an ms2 file, a sequence database, and an
+ * optional parameter file, search all the spectrum against the
+ * peptides in the sequence database, and return the high scoring
+ * peptides. 
+ * 
+ * $Revision: 1.37 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,8 +32,8 @@
 #define NUM_ANALYSIS_OPTIONS 5
 #define NUM_ANALYSIS_ARGUMENTS 2
 
-/** 
- * Routines to run various match analyses. Explained in more detail below.
+/* 
+ * Private function declarations.  Details below
  */
 MATCH_COLLECTION_T* run_percolator(
   char* psm_result_folder, 
@@ -55,7 +56,10 @@ int output_matches(
     SCORER_TYPE_T scorer_type
     );
 
-/***********************************************************************/
+/**
+ * \brief crux-analyze-matches: takes in a directory containing binary
+ * psm files and a protein index and analyzes the psms.
+ */
 int main(int argc, char** argv){
 
   /* Declarations */
@@ -414,11 +418,14 @@ MATCH_COLLECTION_T* run_qvalue(
 
 
 /**
+ * \brief Analyze matches using the percolator algorithm
+ * 
  * Runs Lukas Kall's percolator on the PSMs in the psm_result_folder
  * for a search against the sequence database fasta_file. Optionally 
  * puts the percolator PSM feature vectors into feature_file, if it is 
- * not NULL
- * \returns a MATCH_COLLECTION object
+ * not NULL.
+ * \returns a pointer to a MATCH_COLLECTION_T object
+ * \callgraph
  */
 MATCH_COLLECTION_T* run_percolator(
   char* psm_result_folder, 
@@ -558,9 +565,9 @@ MATCH_COLLECTION_T* run_percolator(
   // Start processing
   pcExecute(); 
   
-  /** Retrieving target scores and qvalues after 
-   *  processing, the array should be numSpectra long and will be filled in 
-   *  the same order as the features were inserted */
+  /* Retrieving target scores and qvalues after 
+   * processing, the array should be numSpectra long and will be filled in 
+   * the same order as the features were inserted */
   pcGetScores(results_score, results_q); 
        
   // fill results for Q_VALUE

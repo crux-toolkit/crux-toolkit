@@ -1,9 +1,9 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file ion_series.c
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.43 $
+ * REVISION: $Revision: 1.44 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>

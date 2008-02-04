@@ -1,6 +1,6 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.70 $
+ * $Revision: 1.71 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -1125,16 +1125,20 @@ PEPTIDE_T* parse_peptide(
   return peptide;
 }
 
-/*
- * Serialize a peptide to a FILE in binary
- * \returns TRUE if serialization is successful, else FALSE
+/**
+ * Serialize a peptide in binary to a FILE 
  *
  * The peptide serialization format looks like this:
  *
- *<PEPTIDE_T: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>]+
- * the bracket peptide src information repeats for the number of peptide src listed before the bracket
- * the protein index is the index of the parent protein in the database DATABASE_T
+ * <PEPTIDE_T: peptide struct><int: number of peptide_src>[<int:
+ * protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start
+ * index>]+ 
+ * The peptide src information (in square brackets) repeats for the
+ * number times indicated by the number between the struct and the
+ * first peptide src entry.  The protein index is the index of the
+ * parent protein in the database DATABASE_T. 
  *
+ * \returns TRUE if serialization is successful, else FALSE
  */
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide, ///< the peptide to serialize -in
@@ -1149,6 +1153,8 @@ BOOLEAN_T serialize_peptide(
   long original_location;
   int num_src = 0;
   
+  carp(CARP_DETAILED_DEBUG, "Serializing peptide %s", 
+       get_peptide_sequence(peptide));
   // write the peptide struct
   fwrite(peptide, sizeof(PEPTIDE_T), 1, file);
   
@@ -1164,7 +1170,7 @@ BOOLEAN_T serialize_peptide(
     return FALSE;
   }
 
-  // interate through the peptide src for this peptide, serialize each peptide src
+  // for each peptide src, serialize
   while(peptide_src_iterator_has_next(iterator)){
     peptide_src = peptide_src_iterator_next(iterator);
 

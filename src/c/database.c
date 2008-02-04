@@ -1,6 +1,6 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file database.c
- * $Revision: 1.57 $
+ * $Revision: 1.58 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -215,7 +215,8 @@ void print_database(
 }
 
 /**
- * Parses a database from the text based fasta file in the filename member variable
+ * Parses a database from the text based fasta file in the filename
+ * member variable
  * reads in all proteins in the fasta file and creates a protein object
  * and adds them to the database protein array
  * total proteins in fasta file must not exceed MAX_PROTEIN constant
@@ -346,7 +347,9 @@ BOOLEAN_T memory_map_database(
   
   // get information of the binary fasta file
   if (stat(database->filename, &file_info) == -1) {
-    carp(CARP_ERROR, "failed to retrieve information of binary fasta file: %s", database->filename);
+    carp(CARP_ERROR,
+         "Failed to retrieve information of binary fasta file: %s",
+         database->filename);
     return FALSE;
   }
   
@@ -420,9 +423,12 @@ BOOLEAN_T populate_proteins_from_memmap(
 }
 
 /**
- * Parses a database from the binary fasta file in the filename member variable
- * Memory maps the binary fasta file into memory
- * The protein sequences are not copied, but just pointed to the memory mapped location
+ * \brief Parses a database from the binary fasta file in the filename
+ * member variable.
+ *
+ * Memory maps the binary fasta file into memory. The protein
+ * sequences are not copied, but just pointed to the memory mapped
+ * location. 
  * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T parse_database_memmap_binary(
@@ -441,7 +447,7 @@ BOOLEAN_T parse_database_memmap_binary(
   
   // check if succesfully opened file
   if(file_d == -1){
-    carp(CARP_FATAL, "failed to open file to parse database");
+    carp(CARP_FATAL, "Failed to open file to parse database");
     return FALSE;
   }
 
@@ -450,19 +456,20 @@ BOOLEAN_T parse_database_memmap_binary(
   // When using a binary file in memory map, cannot use light protein
   // change to FALSE on light protein useage
   if(database->use_light_protein){
-    carp(CARP_WARNING, "memory mapping does not support light protein,changing settings to use heavy protein");
+    carp(CARP_WARNING, 
+         "memory mapping does not support light protein,changing settings to use heavy protein");
     database->use_light_protein = FALSE;;
   }
 
   // memory map the binary fasta file into memory
   if(!memory_map_database(database, file_d)){
-    carp(CARP_FATAL, "failed to memory map binary fasta file into memory");
+    carp(CARP_ERROR, "Failed to memory map binary fasta file into memory");
     return FALSE;
   }
 
   // populate the proteins from the memory mapped fasta file
   if(!populate_proteins_from_memmap(database)){
-    carp(CARP_FATAL, "failed to populate the proteins from memory mapped fasta file");
+    carp(CARP_ERROR, "Failed to populate the proteins from memory mapped fasta file");
     return FALSE;
   }
    
@@ -498,13 +505,14 @@ BOOLEAN_T parse_database(
   // should we parse the database using memory mapped binary fasta file?
   if(database->is_memmap){
     if(!parse_database_memmap_binary(database)){
-      carp(CARP_ERROR, "failed to parse database for memory mapped binary fasta file");
+      carp(CARP_ERROR,
+           "Failed to parse database for memory mapped binary fasta file");
       return FALSE;
     }    
   }
   else{ // parse database from normal text fasta file, no memory mapping!
     if(!parse_database_text_fasta(database)){
-      carp(CARP_ERROR, "failed to parse database for text fasta file");
+      carp(CARP_ERROR, "Failed to parse database for text fasta file");
       return FALSE;
     }
   }
@@ -629,16 +637,17 @@ void set_database_file(
 }
 
 /**
- *\returns the nth protein of the database
+ * \returns the nth protein of the database
+ * 
  */
 PROTEIN_T* get_database_protein_at_idx(
-  DATABASE_T* database, ///< the query database -in 
+  DATABASE_T* database,    ///< the query database -in 
   unsigned int protein_idx ///< The index of the protein to retrieve -in
   )
 {
-  carp(CARP_DETAILED_DEBUG, "Protein idx = %i, num proteins %i", 
-    protein_idx, database->num_proteins);
-  if(protein_idx >= database->num_proteins ){
+  carp(CARP_DETAILED_DEBUG, "Getting db protein idx = %i, num proteins %i", 
+       protein_idx, database->num_proteins);
+  if( protein_idx >= database->num_proteins ){
     carp(CARP_FATAL, 
 	    "Protein index %i out of bounds.  %i proteins in the database",
 	    protein_idx, database->num_proteins);
@@ -891,7 +900,8 @@ BOOLEAN_T database_peptide_iterator_has_next(
  * \returns The next peptide in the database.
  */
 PEPTIDE_T* database_peptide_iterator_next(
-  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator of interest -in
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator
+  ///< the iterator of interest -in
   )
 {
    // did you reset working protein?
@@ -899,7 +909,8 @@ PEPTIDE_T* database_peptide_iterator_next(
   
   // the ppeptide to return
   PEPTIDE_T* next_peptide =
-    protein_peptide_iterator_next(database_peptide_iterator->cur_protein_peptide_iterator);
+    protein_peptide_iterator_next(
+                   database_peptide_iterator->cur_protein_peptide_iterator);
   
   DATABASE_T* database = database_peptide_iterator->database_protein_iterator->database;
   

@@ -1,3 +1,9 @@
+/**
+ * \file parse_arguments.c
+ * \brief A central storage location for parameter values, reading in
+ * from command line and parameter file.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>

@@ -1,9 +1,9 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file create_ion_files
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.9 $
+ * REVISION: $Revision: 1.10 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>

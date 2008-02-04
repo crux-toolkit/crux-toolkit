@@ -1,6 +1,6 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file protein_index.c
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -360,7 +360,7 @@ BOOLEAN_T create_binary_fasta_file(
 
   // check if succesfully created file
   if(output_file == NULL){
-    carp(CARP_FATAL, "failed to create protein index file");
+    carp(CARP_FATAL, "Failed to create protein index file");
     fclose(file);
     return FALSE;
   }
@@ -380,7 +380,7 @@ BOOLEAN_T create_binary_fasta_file(
       if(!parse_protein_fasta_file(new_protein ,file)){
         fclose(file);
         free_protein(new_protein);
-        carp(CARP_ERROR, "failed to parse fasta file");
+        carp(CARP_ERROR, "Failed to parse fasta file");
         return FALSE;
       }
       set_protein_is_light(new_protein, FALSE);

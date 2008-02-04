@@ -1,5 +1,5 @@
-/*****************************************************************************
- * \file generate_peptides_iterator
+/*************************************************************************//**
+ * \file generate_peptides_iterator.c
  * AUTHOR: Chris Park
  * CREATE DATE: Nov 8 2007
  * DESCRIPTION: object to return candidate peptides with a given restriction
@@ -198,7 +198,9 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
 }
 
 /**
- *\returns a new generate_peptide_iterator object with custom min, max mass for SP
+ * \returns a new generate_peptide_iterator object with custom min, max
+ * mass for SP 
+ * \callgraph
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
   float neutral_mass, ///< the neutral_mass that which the peptides will be searched -in

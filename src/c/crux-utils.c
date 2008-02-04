@@ -1,3 +1,9 @@
+/**
+ * \file crux-utils.c
+ * \brief General-use functions for crux
+ */
+
+
 #include "crux-utils.h"
 
 /**

@@ -1,10 +1,12 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file create_index
  * AUTHOR: Chris Park
  * CREATE DATE: August 10 2006
- * DESCRIPTION: Given a protein fasta sequence database as input, generate crux_index files
+ * DESCRIPTION: Given a protein fasta sequence database as input,
+ * generate crux_index files 
  *              that contain list of peptides in 
- *              the database that meet certain criteria (e.g. mass, length, trypticity) as output.
+ *              the database that meet certain criteria (e.g. mass,
+ *              length, trypticity) as output. 
  * REVISION: 
  ****************************************************************************/
 #include <math.h>

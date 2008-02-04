@@ -1,7 +1,17 @@
 /**
  * \file parameter.h
- * $Revision: 1.26 $
- * \brief General parameter handling utilities. MUST declare ALL optional command line parameters here inside initalialize_parameters
+ * $Revision: 1.27 $
+ * \brief General parameter handling utilities. All values stored here.
+
+ * \detail MUST declare ALL optional command line parameters and
+ * required command line arguments here in initalialize_parameters.
+ * Parameters can only be set via parse_cmd_line_into_params_hash()
+ * which takes values from the command line and from an optional
+ * parameter file (provided on the command line with the --parameter
+ * option). Options are checked for correct type and legal values.
+ * Exits with usage statement on error.  Parameter values can be
+ * retrieved with get_<type>_paramter functions.
+ * 
  ****************************************************************************/
 #ifndef PARAMETER_FILE_H
 #define PARAMETER_FILE_H
@@ -23,24 +33,42 @@
 #include "scorer.h"
 #include "parse_arguments.h"
 
-#define PARAMETER_LENGTH 1024 ///< default length of parameter name and value in characters
-#define NUM_PARAMS 512 ///< initial number of parameters allowed
-#define MAX_LINE_LENGTH 4096 ///< maximum length of a line on the parameter file
-#define BILLION 1000000000.0
+#define PARAMETER_LENGTH 1024 
+///< maximum length of parameter name and value in characters
+#define NUM_PARAMS 512 ///< maximum number of parameters allowed
+#define MAX_LINE_LENGTH 4096 ///< maximum line length in the parameter file
+#define BILLION 1000000000.0 
 #define SMALL_BUFFER 256
 #define MAX_SET_PARAMS 256
 
 #define NUMBER_PARAMETER_TYPES 11
-enum parameter_type {INT_P, DOUBLE_P, STRING_P, MASS_TYPE_P, 
-		     PEPTIDE_TYPE_P, BOOLEAN_P, SORT_TYPE_P,
-		     SCORER_TYPE_P, OUTPUT_TYPE_P, ION_TYPE_P, ALGORITHM_TYPE_P};
+///< number of elements in the parameter type enum
+
+// TODO (BF 1-28-08): these should be private. move to parameter.c
+/**
+ * Data types of parameters.  Used for checking valid parameter input
+ * from user.
+ */
+enum parameter_type {
+  INT_P,             ///< parameters of type int
+  DOUBLE_P,          ///< parameters of type double
+  STRING_P,          ///< parameters of type char*
+  MASS_TYPE_P,       ///< parameters of type MASS_TYPE_T
+  PEPTIDE_TYPE_P,    ///< parameters of type PEPTIDE_TYPE_T
+  BOOLEAN_P,         ///< parameters of type BOOLEAN_T
+  SORT_TYPE_P,       ///< parameters of type SORT_TYPE_T
+  SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
+  OUTPUT_TYPE_P,     ///< parameters of type MATCH_SEARCH_OUTPUT_MODE_T
+  ION_TYPE_P,        ///< parameters of type ION_TYPE_T
+  ALGORITHM_TYPE_P}; ///< parameters of type ALGORITHM_TYPE_T
 typedef enum parameter_type PARAMETER_TYPE_T;
 
 /**
- * initialize parameters
- * Every required argument for every executable 
- * and every option and its default value
- * must be declared here
+ * /brief Initialize parameters to default values.
+ *
+ * Every required argument for every executable and every option and
+ * its default value must be declared here.  Allocates hash tables for
+ * holding parameter values.
  */
 void initialize_parameters(void);
 
@@ -50,18 +78,21 @@ void initialize_parameters(void);
 void free_parameters(void);
 
 /**
- * Identify which of the parameters can be changed 
- * on the command line.  Provide a list of the parameter names
+ * /brief Identify which of the parameters can be changed 
+ * on the command line.  
+ * /detail Provide a list of the parameter names
  * and the number of parameters in that list.
  * Requires that initialize_parameters() has been run.
+ * /returns TRUE on success.
  */
 BOOLEAN_T select_cmd_line_options(char**, int);
 
 /**
- * Identify what are the required arguments
- * on the command line.  Provide a list of the argument names
+ * /brief Identify the required command line arguments.
+ * /detail  Provide a list of the argument names
  * and the number of arguments in that list.
  * Requires that initialize_parameters() has been run.
+ * /returns TRUE on success.
  */
 BOOLEAN_T select_cmd_line_arguments(char**, int);
 

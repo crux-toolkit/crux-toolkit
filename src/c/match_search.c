@@ -1,10 +1,11 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file match_search.c
  * AUTHOR: Chris Park
  * CREATE DATE: 6/18/2007
- * DESCRIPTION: Given as input an ms2 file, a sequence database, and an optional parameter file, 
- * search all the spectrum against the peptides in the sequence database, and return high scoring peptides. 
- * ouput as binary ouput and optional sqt file format
+ * DESCRIPTION: Given as input an ms2 file, a sequence database, and
+ * an optional parameter file, search all the spectrum against the
+ * peptides in the sequence database, and return high scoring
+ * peptides. ouput as binary ouput and optional sqt file format
  * REVISION: 
  ****************************************************************************/
 #include <stdlib.h>
@@ -29,7 +30,6 @@
 #define NUM_SEARCH_ARGS 2
 
 /* Private functions */
-//int get_selected_charge_states();
 int prepare_protein_input(char* input_file, 
 			  INDEX_T** index, 
 			  DATABASE_T** database);
@@ -92,7 +92,7 @@ int main(int argc, char** argv){
   // parse the ms2 file for spectra
   carp(CARP_INFO, "Reading in ms2 file %s", ms2_file);
   if(!parse_spectrum_collection(collection)){
-    carp(CARP_ERROR, "Failed to parse ms2 file: %s", ms2_file);
+    carp(CARP_FATAL, "Failed to parse ms2 file: %s", ms2_file);
     free_spectrum_collection(collection);
     exit(1);
   }
@@ -144,6 +144,7 @@ int main(int argc, char** argv){
   int file_i = 0;
   int total_files = get_int_parameter("number-decoy-set") + 1;
 
+  // find matches for each spectrum
   while(spectrum_iterator_has_next(spectrum_iterator)){
 
     SPECTRUM_T* spectrum = spectrum_iterator_next(spectrum_iterator);
@@ -212,7 +213,7 @@ int main(int argc, char** argv){
     serialize_total_number_of_spectra(spectrum_searches_counter, 
 				      psm_file_array[file_idx]);
   }
-  carp(CARP_DEBUG, "fixed headers");
+  carp(CARP_DEBUG, "Fixed headers");
 
   // clean up files
   for(file_idx = 0; file_idx < total_files; ++file_idx){

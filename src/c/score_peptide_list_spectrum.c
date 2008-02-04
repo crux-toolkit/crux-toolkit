@@ -1,8 +1,9 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file score_list_spectrum
  * AUTHOR: Chris Park
  * CREATE DATE: 10/13 2006
- * DESCRIPTION: Object for given a list and a spectrum, generate a perliminary scores with the given score function (ex, Sp)
+ * DESCRIPTION: Object for given a list and a spectrum, generate a
+ * perliminary scores with the given score function (ex, Sp) 
  *
  * REVISION: 
  ****************************************************************************/
