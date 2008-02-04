@@ -8,7 +8,7 @@ Params file = sequest.params_3
 Peptide tol = 3.0000, fragment tol = 0.0000, AVG/MONO
 Ion series = nABY ABCDVWXYZ: 0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
 Display top = 1/1, ion % = 10.0, CODE = 111010
-Protein database = yeast.fasta
+Protein database = human.fasta
 C=160.14373  Enzyme:Trypsin (0)
 
 Searched dta file spectra_random_100.000664.000664.1.dta
@@ -112,6 +112,6 @@ Searched dta file spectra_random_100.022558.022558.3.dta
 Searched dta file spectra_random_100.022635.022635.2.dta
 Searched dta file spectra_random_100.023522.023522.3.dta
 
-Total search time:   25 secs for 100 files
-Average search time: 0.25 secs
+Total search time:   115 secs for 100 files
+Average search time: 1.15 secs
 
