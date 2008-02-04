@@ -5,8 +5,8 @@ from Dataset import *
 import copy
 # import pdb
 
-forwardSequest = "forward/spectra_random_1000.sqt"
-randomSequest  = "random/spectra_random_1000.sqt"
+forwardSequest = "forward/60cm.sqt"
+randomSequest  = "random/60cm.sqt"
 
 #------- SEQUEST analysis -----------------------------------------
 forward = MatchCollection.SqtMatchCollection()

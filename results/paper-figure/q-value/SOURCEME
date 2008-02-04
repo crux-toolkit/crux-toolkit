@@ -1,6 +1,6 @@
 . ~/retention/SOURCEME
 export ROOT=~/crux/results/paper-figure/q-value/
-export PREFIX=$ROOT/data/spectra_random_1000
+export PREFIX=$ROOT/data/60cm
 export MS2=${PREFIX}.ms2
 export FASTA=$ROOT/data/yeast.fasta
 export FASTA_INDEX=$ROOT/data/yeast_crux_index
