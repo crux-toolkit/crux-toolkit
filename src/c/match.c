@@ -1,11 +1,11 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file match.c
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * DESCRIPTION: Object for matching a peptide and a spectrum, generate a 
- * 							preliminary score(e.g., Sp)
+ * DESCRIPTION: Object for matching a peptide and a spectrum, generate
+ * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.50 $
+ * REVISION: $Revision: 1.51 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>

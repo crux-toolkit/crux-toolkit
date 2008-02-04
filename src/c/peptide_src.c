@@ -1,6 +1,6 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file peptide_src.c
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -64,11 +64,13 @@ PEPTIDE_SRC_T* new_peptide_src_array(
   )
 {
   int array_idx = 0;
-  PEPTIDE_SRC_T* src_array = (PEPTIDE_SRC_T*)mycalloc(size, sizeof(PEPTIDE_SRC_T));
+  PEPTIDE_SRC_T* src_array = (PEPTIDE_SRC_T*)mycalloc(size,
+                                                      sizeof(PEPTIDE_SRC_T));
   
   // set all next peptide src pointers
-  for(;array_idx < size - 1; ++array_idx){
-    ((PEPTIDE_SRC_T*)(&(src_array[array_idx])))->next_association = &src_array[array_idx + 1];
+  for(array_idx = 0; array_idx < size - 1; ++array_idx){
+    ((PEPTIDE_SRC_T*)(&(src_array[array_idx])))->next_association =
+      &src_array[array_idx + 1];
   }
   ((PEPTIDE_SRC_T*)(&(src_array[array_idx])))->next_association = NULL;
   return src_array;
@@ -333,10 +335,14 @@ void serialize_peptide_src(
   )
 {
   // write protein index in database
-  unsigned int protein_idx = get_protein_protein_idx(peptide_src->parent_protein);
+  unsigned int protein_idx = 
+    get_protein_protein_idx(peptide_src->parent_protein);
   // carp(CARP_DETAILED_DEBUG, "protein idx to write is %i", protein_idx);
+
   fwrite(&protein_idx, sizeof(int), 1, file);
-    
+  carp(CARP_DETAILED_DEBUG, "Serializing protein src of index %d", 
+       protein_idx); 
+   
   // write peptide src type(tryptic, all, ...)
   fwrite(&(peptide_src->peptide_type), sizeof(PEPTIDE_TYPE_T), 1, file);
   // write start index in protein of peptide in this peptide src

@@ -1,8 +1,9 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file predict_peptide_ion
  * AUTHOR: Chris Park
  * CREATE DATE: 10/05 2006
- * DESCRIPTION: Object for given a peptide and a charge state, predict the ions
+ * DESCRIPTION: Object for given a peptide and a charge state, predict
+ * the ions 
  *
  * REVISION: $ $ 
  ****************************************************************************/

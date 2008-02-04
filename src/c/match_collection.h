@@ -1,13 +1,45 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.26 $
- * \brief Object for given a database and a spectrum, generate all match objects
+ * $Revision: 1.27 $
+ * \brief A set of peptide spectrum matches for one spectrum.
+ *
+ * Object for given a database and a spectrum, generate all match objects
+ * Creating a match collection generates all matches (searches a
+ * spectrum against a database.
  */
 #ifndef MATCH_COLLECTION_H
 #define MATCH_COLLECTION_H
 
-#define _MAX_NUMBER_PEPTIDES 10000000 ///< max number of peptides a single match collection can hold
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <time.h>
+#include "carp.h"
+#include "parse_arguments.h"
+#include "spectrum.h"
+#include "spectrum_collection.h"
+#include "ion.h"
+#include "ion_series.h"
+#include "crux-utils.h"
+#include "objects.h"
+#include "parameter.h"
+#include "scorer.h" 
+#include "index.h"
+#include "generate_peptides_iterator.h" 
+#include "match.h"
+#include "hash.h"
+#include "peptide_src.h"
+#include "PercolatorCInterface.h"
 
+
+#define _MAX_NUMBER_PEPTIDES 10000000
+///< max number of peptides a single match collection can hold
+
+// TODO (BF 1-28-08): should this be in m_c.h ?
 /**
  * \returns An (empty) match_collection object.
  */
@@ -15,19 +47,28 @@ MATCH_COLLECTION_T* allocate_match_collection(void);
 
 
 /**
- * create a new match collection from spectrum
- * creates a peptide iterator for given mass window
- * return the top max_rank matches, first scored by prelim_score(SP), then by score_type(XCORR, LOGP_EXP_SP)
- *\returns a new match_collection object that is scored by score_type and contains the top max_rank matches
+ * \brief Creates a new match collection by searching a database
+ * for matches to a spectrum. in .h
+ *
+ * \detail This is the main spectrum searching routine.  Allocates memory for
+ * the match collection. Creates a peptide iterator for given mass
+ * window. Performs preliminary scoring on all candidate
+ * peptides. Performs primary scoring on the <max_rank> best-scoring
+ * peptides. Estimates EVD parameters. in .h
+ *
+ * \returns A new match_collection object that is scored by score_type
+ * and contains the top max_rank matches in .h
  */
 MATCH_COLLECTION_T* new_match_collection_from_spectrum(
- SPECTRUM_T* spectrum, ///< the spectrum to match peptides -in
+ SPECTRUM_T* spectrum, ///< the spectrum to match peptides in .h -in
  int charge,       ///< the charge of the spectrum -in
  int max_rank,     ///< max number of top rank matches to keep from SP -in
  SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
  SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP) -in
- float mass_offset,  ///< the mass offset from neutral_mass to search for candidate peptides -in
- BOOLEAN_T null_peptide_collection, ///< is this match_collection a null peptide collection? -in
+ float mass_offset,
+ ///< the mass offset from neutral_mass to search for candidate peptides -in
+ BOOLEAN_T null_peptide_collection,
+ ///< is this match_collection a null peptide collection? -in
  INDEX_T* index,
  DATABASE_T* database
  );
@@ -44,7 +85,8 @@ void free_match_collection(
  *\returns TRUE, if successfully sorts the match_collection
  */
 BOOLEAN_T sort_match_collection(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to
+                                        ///sort -out
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
   );
 

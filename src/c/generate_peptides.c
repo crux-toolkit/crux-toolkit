@@ -1,9 +1,10 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file generate_peptides
  * AUTHOR: Chris Park
  * CREATE DATE: July 17 2006
- * DESCRIPTION: Given a protein fasta sequence database as input, generate a list of peptides in 
- *              the database that meet certain criteria (e.g. mass, length, trypticity) as output.
+ * DESCRIPTION: Given a protein fasta sequence database as input,
+ * generate a list of peptides in the database that meet certain
+ * criteria (e.g. mass, length, trypticity) as output. 
  * REVISION: 
  ****************************************************************************/
 #include <math.h>

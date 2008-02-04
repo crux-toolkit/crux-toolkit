@@ -1,9 +1,10 @@
-/********************************************************************
+/****************************************************************//**
+ * \file array.c
  * FILE: array.c
  * AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University
- * VERSION: $Revision: 1.3 $
+ * VERSION: $Revision: 1.4 $
  * DESCRIPTION: Some simple array-handling routines.
  ********************************************************************/
 #include <stdio.h>

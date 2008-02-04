@@ -1,8 +1,8 @@
 /**
  * \file mass.c 
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Provides constants and methods for calculating mass
- *****************************************************************************/
+ ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

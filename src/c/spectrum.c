@@ -1,9 +1,9 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file spectrum.c
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.62 $
+ * REVISION: $Revision: 1.63 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>

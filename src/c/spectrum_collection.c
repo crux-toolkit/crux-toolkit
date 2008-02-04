@@ -1,9 +1,9 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file spectrum_collection.c
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.37 $
+ * REVISION: $Revision: 1.38 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>

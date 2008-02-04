@@ -1,4 +1,5 @@
-/****************************************************************************
+/***********************************************************************//**
+ * \file parameter.c
  * FILE: parameter.c
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * CREATE DATE: 2006 Oct 09

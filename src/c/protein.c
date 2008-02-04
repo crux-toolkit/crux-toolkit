@@ -1,6 +1,6 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file protein.c
- * $Revision: 1.60 $
+ * $Revision: 1.61 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -323,8 +323,8 @@ void copy_protein(
 
 /**
  * Parses a protein from an memory mapped binary fasta file
- * the protein_idx field of the protein must be added before or after you parse the protein
- * \returns TRUE if success. FALSE is failure.
+ * the protein_idx field of the protein must be added before or after
+ * you parse the protein 
  * protein must be a heap allocated
  * 
  * Assume memmap pointer is set at beginning of protein
@@ -332,6 +332,7 @@ void copy_protein(
  * <int: id length><char: id><int: annotation length><char: annotation><int: sequence length><char: sequence>
  *
  * modifies the *memmap pointer!
+ * \returns TRUE if success. FALSE is failure.
  */
 BOOLEAN_T parse_protein_binary_memmap(
   PROTEIN_T* protein, ///< protein object to fill in -out
@@ -406,7 +407,8 @@ BOOLEAN_T parse_protein_binary_memmap(
 VERBOSE_T verbosity = NORMAL_VERBOSE;
 /**
  * Parses a protein from an open (FASTA) file.
- * the protein_idx field of the protein must be added before or after you parse the protein
+ * the protein_idx field of the protein must be added before or after
+ * you parse the protein  
  * \returns TRUE if success. FALSE is failure.
  * protein must be a heap allocated
  */
@@ -415,9 +417,9 @@ BOOLEAN_T parse_protein_fasta_file(
   FILE* file ///< fasta file -in
   )
 {
-  static char name[LONGEST_LINE];     // Just the sequence ID.
-  static char desc[LONGEST_LINE];     // Just the comment field.
-  static char buffer[PROTEIN_SEQUENCE_LENGTH];        // The sequence, as it's read in.
+  static char name[LONGEST_LINE];    ///< Just the sequence ID.
+  static char desc[LONGEST_LINE];    ///< Just the comment field.
+  static char buffer[PROTEIN_SEQUENCE_LENGTH];///> The sequence to read in.
   static unsigned int sequence_length; // the sequence length
 
   // Read the title line.

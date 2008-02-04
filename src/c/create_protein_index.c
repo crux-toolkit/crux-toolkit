@@ -1,9 +1,11 @@
-/*****************************************************************************
+/*************************************************************************//**
  * \file create_protein_index
  * AUTHOR: Chris Park
  * CREATE DATE: September 20 2006
- * DESCRIPTION: Given a protein fasta sequence database as input, generate a protein index file
- *              that contain list of proteins with their protein index and file offset from the
+ * DESCRIPTION: Given a protein fasta sequence database as input,
+ * generate a protein index file 
+ *              that contain list of proteins with their protein index
+ *              and file offset from the 
  *              the fasta file
  * REVISION: 
  ****************************************************************************/

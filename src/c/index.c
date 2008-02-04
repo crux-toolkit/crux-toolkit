@@ -1,6 +1,6 @@
-/*****************************************************************************
+/************************************************************************//**
  * \file index.c
- * $Revision: 1.73 $
+ * $Revision: 1.74 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -56,7 +56,7 @@ void clean_up( int dummy ) {
  *
  * - Creates a database object from a the fasta file member variable.
  *
- * - Depending on the size of the database, determines how many passes i
+ * - Depending on the size of the database, determines how many passes it
  *   will need to make over the database peptides (first implementation
  *   will only make one pass, later implementation can make multiple passes
  *   with multiple iterators)
@@ -83,8 +83,8 @@ void clean_up( int dummy ) {
  *        which is set at database creation. Note, that this won't have to 
  *        change when we move to light proteins.
  *
- * LATER At some point we will index each of the peptide files too (in a TOC), 
- * so that we can retrieve them rapidly later. 
+ * LATER At some point we will index each of the peptide files too (in
+ * a TOC), so that we can retrieve them rapidly later. 
  *
  * LATER We implement light proteins and possibly an 
  * LATER create_index for protein locations in the database allowing rapid
@@ -343,10 +343,18 @@ void set_index_fields(
 
 
 /**
- * Assumes that the fasta file is always in the directory where the crux_index_file directory is located
- * USE this constructor when creating index, does not parse database
- * database is later transformed into memory mapped database and parse in create index
- * For creating peptides from an index on disk, use new_index_from_disk routine
+ * \brief Create a new index for the given fasta file of peptides
+ * conforming to the given constraints.
+ *
+ * Allocates memory for the index.  Allocates memory for the database
+ * (object for reading the fasta file) and associates it with the
+ * index. Does not read in peptides from the fasta file.
+ * Assumes that the fasta file is always in the directory where the
+ * crux_index_file directory is located.
+ * USE this constructor when creating index, does not parse database 
+ * database is later transformed into memory mapped database and parse
+ * in create index.  For creating peptides from an index on disk, use
+ * new_index_from_disk routine 
  * \returns A new index object.
  */
 INDEX_T* new_index(
@@ -748,16 +756,17 @@ FILE* sort_bin(
 }
 
 /**
- * stores the peptide in the correct bin, if bin exceeds MAX_PROTEIN_IN_BIN, serialize all 
- * peptides in the bin.
- *\returns TRUE, if successful in storing the peptide or serializing peptides, else FALSE
+ * stores the peptide in the correct bin, if bin exceeds
+ * MAX_PROTEIN_IN_BIN, serialize all peptides in the bin.
+ * \returns TRUE if successful in storing the peptide or serializing
+ * peptides, else FALSE 
  */
 BOOLEAN_T dump_peptide(
   FILE** file_array,  ///< the working file handler array to the bins -in/out
-  long int file_idx, ///< the index of the file that the peptide belongs to -in
+  long int file_idx, ///< the index of the file the peptide belongs to -in
   PEPTIDE_T* working_peptide, ///< the peptide to be stored -in
-  PEPTIDE_T** peptide_array, ///< stores peptides before they're serialized -out
-  int* bin_count ///< the count array of peptides in each bin -in
+  PEPTIDE_T** peptide_array, ///< hold peptides before they're serialized -out
+  int* bin_count ///< an array of the counts of peptides in each bin -in
   )
 {  
   int peptide_idx = 0;
@@ -768,7 +777,7 @@ BOOLEAN_T dump_peptide(
   if((current_count = bin_count[file_idx]) > MAX_PROTEIN_IN_BIN){
     file = file_array[file_idx];
     // print out all peptides
-    for(; peptide_idx < current_count; ++peptide_idx){
+    for(peptide_idx = 0; peptide_idx < current_count; ++peptide_idx){
       serialize_peptide(peptide_array[peptide_idx] , file);
       free_peptide(peptide_array[peptide_idx]);
       // FIXME this should not be allowed
@@ -846,11 +855,14 @@ BOOLEAN_T transform_database_to_memmap_database(
   char* binary_fasta = NULL;
 
   // get the fasta file name with correct path
-  char* fasta_file = cat_string("../", get_database_filename_pointer(index->database));
+  char* fasta_file = cat_string("../", 
+                              get_database_filename_pointer(index->database));
 
   // create binary fasta file inside temp directory
-  if(!create_binary_fasta_in_cur(fasta_file, get_database_filename_pointer(index->database), &binary_fasta)){
-    carp(CARP_FATAL, "failed to create protein index on disk");
+  if(!create_binary_fasta_in_cur(fasta_file,
+                               get_database_filename_pointer(index->database),
+                               &binary_fasta)){
+    carp(CARP_FATAL, "Failed to create protein index on disk");
     // remove directory
     chdir("..");
     clean_up(1);
@@ -893,7 +905,7 @@ BOOLEAN_T transform_database_to_memmap_database(
  * assumes that the current directory is the crux directory where the 
  * fasta file is located
  *
- * Note: create an index .info file as to map masses to files and to store 
+ * Note: creates an index .info file as to map masses to files and to store 
  * all information that was used to create this index.
  * \returns TRUE if success. FALSE if failure.
  */
@@ -1001,7 +1013,7 @@ BOOLEAN_T create_index(
       if( (count_peptide/10 ) == mod_me ){
 	mod_me = mod_me * 10;
       }
-      carp(CARP_INFO, "reached peptide %d", (int)count_peptide);
+      carp(CARP_INFO, "Reached peptide %d", (int)count_peptide);
     }
 
     working_peptide = database_peptide_iterator_next(peptide_iterator);
@@ -1011,7 +1023,7 @@ BOOLEAN_T create_index(
     // check if first time using this bin, if so create new file handler
     if(file_array[file_idx] == NULL){
       if(!generate_one_file_handler(file_array, file_idx)){
-        carp(CARP_ERROR, "check filehandler limit on system");
+        carp(CARP_ERROR, "Check filehandler limit on system");
         fcloseall();
         return FALSE;
       }
@@ -1530,7 +1542,7 @@ BOOLEAN_T parse_crux_index_map(
 
 BOOLEAN_T parse_peptide_index_file(
   void* general_peptide_iterator,  ///< working peptide_iterator -in/out
-  PEPTIDE_T* peptide, ///< the peptide to finish parse -out
+  PEPTIDE_T* peptide, ///< the peptide to pull out of the file -out
   INDEX_TYPE_T index_type, ///< the calling peptide iterator  -out
   BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in
   )
@@ -1564,8 +1576,11 @@ BOOLEAN_T parse_peptide_index_file(
   
   // get total number of peptide_src for this peptide
   // peptide must have at least one peptide src
-  if(fread(&num_peptide_src, sizeof(int), 1, file) != 1 || num_peptide_src < 1){
-    carp(CARP_ERROR, "index file corrupted, peptide must have at least one peptide src = %i", num_peptide_src);
+  if(fread(&num_peptide_src, sizeof(int), 1, file) != 1
+     || num_peptide_src < 1){
+    carp(CARP_ERROR,
+      "Index file corrupted, peptide must have at least one peptide src = %i",
+         num_peptide_src);
     free(peptide);
     return FALSE;
   }
@@ -1594,14 +1609,16 @@ BOOLEAN_T parse_peptide_index_file(
     
     // get protein index
     if(fread(&protein_idx, (sizeof(int)), 1, file) != 1){
-      carp(CARP_ERROR, "index file corrupted, incorrect protein index");
+      carp(CARP_ERROR, "Index file corrupted, incorrect protein index");
       free(peptide);
       return FALSE;
     }
+    carp(CARP_DETAILED_DEBUG, "Peptide src is protein of index %d", 
+         protein_idx);
     
     // read peptide type of peptide src
     if(fread(&peptide_type, sizeof(PEPTIDE_TYPE_T), 1, file) != 1){
-      carp(CARP_ERROR, "index file corrupted, failed to read peptide src");
+      carp(CARP_ERROR, "Index file corrupted, failed to read peptide src");
       free(peptide_src);
       free(peptide);
       return FALSE;
