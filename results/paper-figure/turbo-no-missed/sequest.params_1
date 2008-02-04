@@ -32,7 +32,7 @@ ion_cutoff_percentage = 0.1            ; prelim. score cutoff % as a decimal num
 match_peak_count = 0                   ; number of auto-detected peaks to try matching (max 5)
 match_peak_allowed_error = 1           ; number of allowed errors in matching auto-detected peaks
 match_peak_tolerance = 1.0             ; mass tolerance for matching auto-detected peaks
-max_num_internal_cleavage_sites = 5    ; maximum value is 5; for enzyme search
+max_num_internal_cleavage_sites = 0    ; maximum value is 5; for enzyme search
 
 # partial sequence info ... overrides entries in .dta files
 #   up to 10 partial sequences ... each must appear in peptides

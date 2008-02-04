@@ -3,6 +3,7 @@ import math
 import os
  
 filename = "match_analysis.txt"
+# filename = "match_analysis_tryptic.txt"
 
 xs = []
 fh = open(filename)

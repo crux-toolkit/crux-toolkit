@@ -2,8 +2,8 @@ import plotFuncs, pylab
 plotFuncs.plotLogLogFromFile("crux-no-index-human.fasta", style="k-o",
     label="Crux (w/o index)")
 plotFuncs.plotLogLogFromFile("sequest-human.fasta", style="m-s",
-    label="Sequest")
-plotFuncs.plotLogLogFromFile("crux-fast-human.fasta", style="g-^", 
+    label="Sequest (w/o index)")
+plotFuncs.plotLogLogFromFile("crux-fast-human.fasta", style="k--o", 
     label="Crux (w/ index)")
 pylab.legend(loc="lower right")
 pylab.xlabel("Mass window (Da)")
@@ -17,8 +17,8 @@ pylab.clf()
 plotFuncs.plotLogLogFromFile("crux-no-index-yeast.fasta", style="k-o",
     label="Crux (w/o index)")
 plotFuncs.plotLogLogFromFile("sequest-yeast.fasta", style="m-s",
-    label="Sequest")
-plotFuncs.plotLogLogFromFile("crux-fast-yeast.fasta", style="g-^", 
+    label="Sequest (w/o index)")
+plotFuncs.plotLogLogFromFile("crux-fast-yeast.fasta", style="k--o", 
     label="Crux (w/ index)")
 pylab.legend(loc="lower right")
 pylab.xlabel("Mass window (Da)")

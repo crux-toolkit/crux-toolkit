@@ -9,7 +9,7 @@ min-mass=200.0
 max-mass=7200.0
 
 #min length for peptides
-min-length=6
+min-length=7
 
 #max length for peptides
 max-length=50
@@ -33,7 +33,7 @@ sort=none
 output-sequence=TRUE
 
 #Allow missed cleave sites by trypsin?(TRUE|FALSE)
-missed-cleavages=FALSE
+missed-cleavages=TRUE
 
 ##########parameters used for scoring peptide, spectrum match ############
 # mass offset to search candidate peptides from the precursor mass
@@ -59,7 +59,10 @@ score-type=xcorr
 prelim-score-type=sp
 
 #how many peptides to sample for EVD perameter estimation
-sample-count=500
+sample-count=2000
+
+#how many peptides to sample for EVD perameter estimation
+fraction-top-scores-to-fit=0.55
 
 #max number of preliminary scored peptides to be seleceted for main scoring  (use 1000000, to select all peptides, _MAX_NUMBER_PEPTIDES)
 max-rank-preliminary=500
