@@ -1,6 +1,5 @@
 # comment lines begin with a '#' in the first position
 [SEQUEST]
-# database_name = test.fasta
 peptide_mass_tolerance = 3.0
 create_output_files = 0                ; 0=no, 1=yes
 ion_series = 0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
@@ -11,7 +10,7 @@ show_fragment_ions = 1                 ; 0=no, 1=yes
 print_duplicate_references = 1         ; 0=no, 1=yes
 enzyme_number = 1                       
 
-xcorr_mode = 0                         ; 0 regular Xcorr(default), 1 - EE, 2 - ET, 3 - TT
+# xcorr_mode = 0                         ; 0 regular Xcorr(default), 1 - EE, 2 - ET, 3 - TT
 
 #
 # Up to 3 differential searches can be performed.
@@ -49,8 +48,8 @@ protein_mass_filter = 0 0
 # Example:  sequence_header_filter = human homo~sapien trypsin
 sequence_header_filter =
 
-add_C_terminus = 0.0000                ; added to C-terminus (peptide mass & all Y"-ions)
-add_N_terminus = 0.0000                ; added to N-terminus (B-ions)
+add_Cterm_peptide = 0.0000                ; added to C-terminus (peptide mass & all Y"-ions)
+add_Nterm_peptide = 0.0000                ; added to N-terminus (B-ions)
 add_G_Glycine = 0.0000                 ; added to G - avg.  57.0519, mono.  57.02146
 add_A_Alanine = 0.0000                 ; added to A - avg.  71.0788, mono.  71.03711
 add_S_Serine = 0.0000                  ; added to S - avg.  87.0782, mono.  87.02303
@@ -71,7 +70,7 @@ add_Z_avg_QandE = 0.0000               ; added to Z - avg. 128.6231, mono. 128.5
 add_E_Glutamic_Acid = 0.0000           ; added to E - avg. 129.1155, mono. 129.04259
 add_M_Methionine = 0.0000              ; added to M - avg. 131.1926, mono. 131.04049
 add_H_Histidine = 0.0000               ; added to H - avg. 137.1411, mono. 137.05891
-add_F_Phenyalanine = 0.0000            ; added to F - avg. 147.1766, mono. 147.06841
+add_F_Phenylalanine = 0.0000            ; added to F - avg. 147.1766, mono. 147.06841
 add_R_Arginine = 0.0000                ; added to R - avg. 156.1875, mono. 156.10111
 add_Y_Tyrosine = 0.0000                ; added to Y - avg. 163.1760, mono. 163.06333
 add_W_Tryptophan = 0.0000              ; added to W - avg. 186.2132, mono. 186.07931
