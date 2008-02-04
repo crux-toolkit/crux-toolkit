@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -45,14 +45,31 @@ char* copy_string_part(char*src, int length);
 int compare_float(float float_a, float float_b);
 
 /**
- * parses the filename and path  
- * returns an array A, with A[0] the filename and A[1] the path to the filename
- * returns A[1] NULL if only a filename was passed in
- * ex) ../../file_name => returns filename , ../../
- *     file_name => returns filename, NULL
+ * \brief Parses the filename and path of given string.
+ *  
+ * The array returned, A, contains the filename (A[0]) and the path
+ * (A[1]).  Path is NULL if no / in given name.  e.g. Given
+ * "../../filname" returns A[0]="filename" and A[1]="../../".  Given
+ * "filename" returns A[0] = "filename" and A[1] = NULL.
+ *
  *\returns A heap allocated array of both filename and path
  */
 char** parse_filename_path(char* file);
+
+/**
+ * \brief Parses the filename, path, and file extension of given string.
+ *  
+ * The array returned, A, contains the filename (A[0]) striped of the
+ * given file extension and the path (A[1]).  Path is NULL if no / in
+ * given name.  Filename is unchanged if it does not include the
+ * extension. e.g. Given "../../filname.ext" and ".ext" returns
+ * A[0]="filename" A[1]="../../".  Given "filename" returns A[0] =
+ * NULL and A[1] = "filename". 
+ *
+ * \returns A heap allocated array of filename striped of extension and
+ * path.
+ */
+char** parse_filename_path_extension(char* file, char* extension);
 
 /**
  * parses the filename
