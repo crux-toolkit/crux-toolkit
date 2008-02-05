@@ -41,19 +41,6 @@ Seattle, WA, USA
 
 \noindent Running title: {\sc Rapid, accurate peptide identification}
 
-%-- Experiments -------------
-% TODO put Xcorr into the benchmarking
-%      explain rationale, then say ironically we are doing better
-% TODO pfile without index
-% TODO add in TurboSequest
-%----------------------------
-
-%-- Response ----------------
-% TODO Tandem include reverse is not the same thing as on-the-fly decoy 
-% TODO use param file for differential mods
-%----------------------------
-
-
 \clearpage
 
 \begin{abstract}
@@ -79,6 +66,8 @@ method that learns to discriminate between target and decoy matches.
 Both methods significantly improve the overall rate of peptide
 identification.
 \end{abstract}
+% FIXME possibly include ``open source'' nature in abstract
+% FIXME possibly include turbosequest in abstract
 
 \clearpage
 
@@ -135,6 +124,7 @@ state of the art, Crux makes the following primary contributions:
   from disk for each new spectrum, the indexed database decreases
   candidate peptide retrieval time from the human protein database by
   79.5\%--97.2\%, depending upon the width of the selected mass window.
+  % FIXME mention turbosequest, but only on windows
 
 \item {\bf On-the-fly generation of decoy peptides.}  In evaluating
   the statistical significance of a PSM, mass spectrometrists
@@ -150,6 +140,8 @@ state of the art, Crux makes the following primary contributions:
   the corresponding target decoy.  To avoid the memory overhead
   associated with storing shuffled, non-overlapping decoy peptides in
   memory, Crux generates decoy peptides on the fly.
+  % FIXME mention tandem also has on the fly decoy generation 
+  % but only reversed sequences
 
 \item {\bf Two state-of-the-art PSM re-ranking algorithms} After
   scoring all peptides with respect to a given spectrum, the
@@ -268,7 +260,7 @@ Figure~\ref{figure:indexing} plots the search time as a function of
 mass window width. Analogous plots with similar trends for a search
 against the yeast {\em Saccharomyces cerevisiae} are shown in the
 supplement.
-% TODO put in url for supplement
+% FIXME put in url for supplement, but where?
 As expected, Crux runs more quickly than {\sc Sequest}, because Crux
 does not need to scan the entire database to retrieve a small
 collection of candidate peptides. The difference is most pronounced
@@ -279,11 +271,14 @@ running time. However, even when we use a mass tolerance of 3, Crux
 yields a 79.5\% speed improvement (4.0~min versus 19.6~min).
 % FIXME I'm not sure how we are going to present the new results
 We tested Crux and {\sc Sequest} on two operating systems: Red Hat Linux and
-Windows XP, a choice motivated primarily by a lack of Turbo Sequest indexing
-software on the Linux operating system. Execution of Crux on Windows was performed
-from within the UNIX emulator environment Cygwin, 
+Windows XP. The use of Windows was 
+motivated primarily by a lack of Turbo Sequest indexing
+software on the Linux operating system. Execution of 
+Crux on Windows was performed
+from within the UNIX-emulator Cygwin, 
 incurring a slight but neglible overhead for Crux vs. {\sc
 Sequest} on this OS.
+% FIXME put in turbosequest results
 
 A surprising property of Figure~\ref{figure:indexing} is the flatness
 of the two series corresponding to {\sc Sequest} and Crux without an
@@ -358,7 +353,9 @@ X_c(u, v) = \frac{0.015\sum_{i=1}^N u_i v_i}
 \end{figure*}
 Figure~\ref{figure:sp-xcorr} shows that the Crux-calculated versions
 of $Sp$ and $Xcorr$ closely match the {\sc Sequest}-calculated
-versions of these scores.  The vast majority of the PSMs receive
+versions of these scores. We also analyzed randomly generated spectra
+against the same database, in order to more fully sample the space of 
+possible PSMs, and again our Crux-calculated scores are similar to the {\sc Sequest} versions (see supplement). The vast majority of the PSMs receive
 identical scores using either method.  Furthermore, as shown in
 Figure~\ref{figure:pq-plot} (described in
 Section~\ref{section:experimental}), the Crux and {\sc Sequest}
