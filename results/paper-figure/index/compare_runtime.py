@@ -105,6 +105,7 @@ for window in mass_windows:
       --output-mode sqt \
       --sqt-output-file %s.sqt \
       --parameter-file crux.params_%s \
+      --overwrite T \
       --number-decoy-set 0 \
       %s %s" % (window, window, ms2_file, fasta_file)
   print >>sys.stderr, "\nRunning %s\n" % command
@@ -131,6 +132,7 @@ for window in mass_windows:
   command = "time -p ./crux-search-for-matches \
       --output-mode sqt \
       --sqt-output-file %s.sqt \
+      --overwrite T \
       --parameter-file crux_no_index.params_%s \
       --number-decoy-set 0 \
       %s %s" % (window, window, ms2_file, fasta_file)
