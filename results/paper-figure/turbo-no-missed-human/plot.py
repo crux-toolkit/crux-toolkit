@@ -14,8 +14,9 @@ for name in names:
     fh = open(filename)
     for line in fh:
       if line.startswith("real"):
-        time = float(line.split("m")[1].split("s")[0])
-        ys.append(time)
+        secondsTime = float(line.split("m")[1].split("s")[0])
+        minutesTime = float(line.split()[1].split("m")[0])
+        ys.append(secondsTime + 60.0 * minutesTime)
         xs.append(float(window))
     fh.close()
 
@@ -25,7 +26,7 @@ for name in names:
 legend(loc="lower right")
 xlabel("Mass window (Da)")
 xlim(0.05, 5)
-ylim(1.0, 100.0)
+ylim(0.1, 2000.0)
 ylabel("Runtime for 100 spectra (s)")
 savefig("indexing-yeast-windows.eps")
 savefig("indexing-yeast-windows.png")
