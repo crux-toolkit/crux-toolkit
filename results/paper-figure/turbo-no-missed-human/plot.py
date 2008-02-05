@@ -24,10 +24,12 @@ for name in names:
   idx += 1
 
 legend(loc="lower right")
-xlabel("Mass window (Da)")
+xlabel("Mass window (Da)", size=20)
 xlim(0.05, 5)
-ylim(0.1, 2000.0)
-ylabel("Runtime for 100 spectra (s)")
+ylim(0.1, 5000.0)
+xticks(size=20)
+yticks(size=20)
+ylabel("Runtime for 100 spectra (s)", size=20)
 savefig("indexing-yeast-windows.eps")
 savefig("indexing-yeast-windows.png")
       
