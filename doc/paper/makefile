@@ -1,7 +1,8 @@
 all: crux.pdf \
 	plos-cover.pdf \
 	jpr-cover.pdf \
-	response.pdf
+	response.pdf \
+	supp.pdf 
 
 # Check out the 'refs' CVS module and add this directory to your BIBTEX path.
 REFDIR = $(subst ::,,$(BIBINPUTS))
@@ -23,6 +24,9 @@ jpr-cover.dvi: jpr-cover.tex
 
 response.dvi: response.tex
 	latex response
+
+supp.dvi: supp.tex
+	latex supp
 
 %.eps: %.fig
 	fig2dev -L eps schematic.fig > schematic.eps
