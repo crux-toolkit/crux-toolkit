@@ -220,10 +220,14 @@ illustrated in Figure 3. The authors assert that the comparison is
 favorable, but this is a single dataset from a single instrument (an
 LTQ?). It would be interesting to know what happens to the Xcorr
 comparison when considering data from, say, a QTOF or
-MALDI-TOF/TOF. \ereview
-
-{\em FIXME[Aaron]: Can we do this easily?}
-
+MALDI-TOF/TOF. 
+\ereview
+To demonstrate that our Xcorr implementation is accurate across different
+kinds of spectra, we have added a figure to the supplement which shows Xcorr
+and Sp comparison for randomly generated spectra. These
+spectra should sample the full space of possible spectra, including spectra
+  generated from MALDI-TOF/TOF and QTOF, in addition to kinds of
+  fragmentation technology.
 \breview Some more information on the methods is needed. What kind of
 instrument was used to gather the yeast data? It's impossible to tell
 from the referenced URL for the 60cm data since the files don't seem

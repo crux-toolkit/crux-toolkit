@@ -1,21 +1,30 @@
 \documentclass{article}
+\include{graphicx}
 \begin{document}
-\title{Supplement to ``Unsupervised segmentation of continuous genomic
-  data''}
+\title{Supplement to ``Rapid, accurate peptide identification''}
 
-\author{Nathan Day, Andrew Hemmaplardh, Robert E. Thurman, \\ John
-A. Stamatoyannopoulos, and William S. Noble}
+\author{Chris Y. Park, Aaron A. Klammer, Lukas K\"{a}ll, Michael J. MacCoss
+and William S. Noble}
 
 \maketitle
 
-\section{Software example}
-
-The following lists the steps followed to generate the segmentation
-depicted in Fig. 2 of the paper.
-
-Raw data for the four datasets are publicly available at the UCSC
-Genome Browser, http://genome.ucsc.edu, under the ENCODE link.
-
+\section{Sp and Xcorr comparisoin}
+\begin{figure*}
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[width=2.5in]{../../results/paper-figure/second-score/fig-2-random-sp.eps} &
+    \includegraphics[width=2.5in]{../../results/paper-figure/second-score/fig-2-random-xcorr.eps} \\
+  A & B \\
+  \end{tabular}
+  \caption{{\bf Re-implementation of $Sp$ and $Xcorr$ scoring functions.}
+  The figure plots, for a collection of randomly generated spectra and
+  randomly associated peptides 
+  $Sp$ (A) and $XCorr$ (B) scores as computed by Crux as a function of the
+  same scores as computed by {\sc Sequest}. These spectra should cover
+  spectra from all possible fragmentation technologies, including
+  MALDI-TOF/TOF and QTOF.
+  \label{figure:sp-xcorr-random}}
+\end{figure*}
 
 
 \end{document}
