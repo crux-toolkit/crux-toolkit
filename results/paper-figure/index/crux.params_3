@@ -21,7 +21,7 @@ cleavages=tryptic
 isotopic-mass=average
 
 #allow redudnat peptides? (redundant|unique)
-redundancy=unique
+unique-peptides=TRUE
 
 #use index to create peptides or use index? (T|F)
 use-index=T
@@ -62,7 +62,7 @@ prelim-score-type=sp
 sample-count=500
 
 #max number of preliminary scored peptides to be seleceted for main scoring  (use 1000000, to select all peptides, _MAX_NUMBER_PEPTIDES)
-max-rank-preliminary=1
+max-rank-preliminary=500
 
 #max number of final scored peptides to be printed as output (use 1000000, to select all peptides, _MAX_NUMBER_PEPTIDES)
 max-rank-result=1
