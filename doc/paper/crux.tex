@@ -217,8 +217,6 @@ the decision about how much of the database to store in memory,
 ensuring that small databases are read fully into memory but large
 databases are paged into and out of memory only as needed.
 
-%   \includegraphics[width=3in]{../../results/paper-figure/index/indexing-yeast.eps} & 
-%  \includegraphics[width=3in]{../../results/paper-figure/turbo-no-missed/indexing-yeast-windows.eps} & 
 \begin{figure}
   \centering
   \begin{tabular}{ll}
@@ -230,8 +228,8 @@ databases are paged into and out of memory only as needed.
   \caption{{\bf Rapid retrieval of candidate peptides.}  The figure
   plots the total running time required to search 100 tandem mass
   spectra against the human protein databases
-  on computers running the Linux (A) 
-  or Windows (B) operating systems, using {\sc Sequest} and Crux with 
+  on computers running the Linux ({\sf A}) 
+  or Windows ({\sf B}) operating systems, using {\sc Sequest} and Crux with 
   and without indices.
   Run time is plotted 
   as a function of the mass tolerance used to define candidate
@@ -267,7 +265,10 @@ strategy, we searched with a collection of 100 spectra against
 predicted protein sequence from human predicted protein sequences, generating
 candidate peptides from a series of increasingly wider mass windows.
 Figure~\ref{figure:indexing} plots the search time as a function of
-mass window width.  
+mass window width. Analogous plots with similar trends for a search
+against the yeast {\em Saccharomyces cerevisiae} are shown in the
+supplement.
+% TODO put in url for supplement
 As expected, Crux runs more quickly than {\sc Sequest}, because Crux
 does not need to scan the entire database to retrieve a small
 collection of candidate peptides. The difference is most pronounced
@@ -344,18 +345,17 @@ X_c(u, v) = \frac{0.015\sum_{i=1}^N u_i v_i}
 
 \begin{figure*}
   \centering
-  \begin{tabular}{cc}
+  \begin{tabular}{ll}
+    {\sf A} & {\sf B}\\
     \includegraphics[width=3in]{./Images/random-sp.eps} &
     \includegraphics[width=3in]{./Images/random-xcorr.eps} \\
-  A & B \\
   \end{tabular}
   \caption{{\bf Re-implementation of $Sp$ and $Xcorr$ scoring functions.}
   The figure plots, for a collection of peptide-spectrum matches, the
-  $Sp$ (A) and $XCorr$ (B) scores as computed by Crux as a function of the
+  $Sp$ ({\sf A}) and $XCorr$ ({\sf B}) scores as computed by Crux as a function of the
   same scores as computed by {\sc Sequest}.
   \label{figure:sp-xcorr}}
 \end{figure*}
-% TODO put in randomly generated spectra into supplement
 Figure~\ref{figure:sp-xcorr} shows that the Crux-calculated versions
 of $Sp$ and $Xcorr$ closely match the {\sc Sequest}-calculated
 versions of these scores.  The vast majority of the PSMs receive
@@ -585,11 +585,11 @@ procedures required, respectively, approximately two and four minutes
 of real time and produced indices of 69 and 240 MB in size.
 
 For validation, we use a publicly available tandem mass spectrometry
-data set from \cite{klammer:peptide2}, available as the $60cm$ data
+data set from \cite{klammer:peptide3}, available as the $60cm$ data
 set at
 \url{http://noble.gs.washington.edu/proj/retention/data/data.html}.
 The data set consists of a collection of 18,149 spectra derived from a
-analysis of soluble yeast whole-cell lysate on an LTQ ion trap mass spectrometer as described previously \cite{klammer:peptide2}. 
+analysis of soluble yeast whole-cell lysate on an LTQ ion trap mass spectrometer as described previously \cite{klammer:peptide3}. 
 
 \section*{Acknowledgments}
 We thank Jimmy Eng for useful discussions.
