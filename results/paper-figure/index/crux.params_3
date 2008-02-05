@@ -65,7 +65,7 @@ sample-count=500
 max-rank-preliminary=500
 
 #max number of final scored peptides to be printed as output (use 1000000, to select all peptides, _MAX_NUMBER_PEPTIDES)
-max-rank-result=1
+# max-rank-result=1
 
 #set the number of top ranking peptides to score for LOGP_* 
 #(This is different compared to max-rank-preliminary, 
