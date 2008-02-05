@@ -101,7 +101,7 @@ for window in mass_windows:
 
         
   # 2, now run Crux
-  command = "time -p ./match_search \
+  command = "time -p ./crux-search-for-matches \
       --output-mode sqt \
       --sqt-output-file %s.sqt \
       --parameter-file crux.params_%s \
@@ -128,7 +128,7 @@ for window in mass_windows:
         crux_results.append(float(fields[1]))
 
   # 3, now run Crux without an index
-  command = "time -p ./match_search \
+  command = "time -p ./crux-search-for-matches \
       --output-mode sqt \
       --sqt-output-file %s.sqt \
       --parameter-file crux_no_index.params_%s \
