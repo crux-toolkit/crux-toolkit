@@ -264,21 +264,25 @@ databases are paged into and out of memory only as needed.
 
 To demonstrate the efficiency of Crux's candidate peptide retrieval
 strategy, we searched with a collection of 100 spectra against
-predicted protein sequence from the yeast ({\em Saccharomyces
-cerevisiae}) and human predicted protein sequences, generating
+predicted protein sequence from human predicted protein sequences, generating
 candidate peptides from a series of increasingly wider mass windows.
 Figure~\ref{figure:indexing} plots the search time as a function of
-mass window width.  For this experiment, we use a modified version of
-{\sc Sequest} that only computes $Sp$ (and not $XCorr$), and we
-compare its running time to that of Crux running in the same fashion.
+mass window width.  
 As expected, Crux runs more quickly than {\sc Sequest}, because Crux
 does not need to scan the entire database to retrieve a small
-collection of candidate peptides.  The difference is most pronounced
+collection of candidate peptides. The difference is most pronounced
 when the mass tolerance window is small.  For example, with a mass
 tolerance window of 0.1, {\sc Sequest} requires 19.3~min clock time,
 whereas Crux requires 32~s.  This represents a 97.2\% reduction in
 running time. However, even when we use a mass tolerance of 3, Crux
 yields a 79.5\% speed improvement (4.0~min versus 19.6~min).
+% FIXME I'm not sure how we are going to present the new results
+We tested Crux and {\sc Sequest} on two operating systems: Red Hat Linux and
+Windows XP, a choice motivated primarily by a lack of Turbo Sequest indexing
+software on the Linux operating system. Execution of Crux on Windows was performed
+from within the UNIX emulator environment Cygwin, 
+incurring a slight but neglible overhead for Crux vs. {\sc
+Sequest} on this OS.
 
 A surprising property of Figure~\ref{figure:indexing} is the flatness
 of the two series corresponding to {\sc Sequest} and Crux without an
@@ -291,6 +295,7 @@ running time for the retrieval from the human protein database only
 increases by approximately 200~s indicating that, for this search,
 {\sc Sequest} devotes approximately 85\% of its running time to
 candidate peptide retrieval.
+
 
 \subsection{Accurate reimplementations of $Sp$ and $Xcorr$}
 
