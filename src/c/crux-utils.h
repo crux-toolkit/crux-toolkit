@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -136,6 +136,17 @@ char* generate_name(
   char* file_extension,
   char* suffix
   );
+
+/**
+ * \brief Create the correct filename for a binary psm file, ending in
+ * .csm for target search and -decoy-#.csm for decoy searches.
+ *
+ * Strips any .csm from the end of the filename, adds the appropriate
+ * extension depending on the file index (0=target, 1=first decoy,
+ * 2=second decoy, etc).
+ * \returns A heap allocated char* with the new filename.
+ */
+char* generate_psm_filename(char* basename, int file_index);
 
 /**
  * Open and create a file handle of a file that is named 

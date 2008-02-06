@@ -368,7 +368,7 @@ char** parse_filename_path_extension(
   // look for extension
   if( extension != NULL ){
 
-    carp(CARP_DETAILED_DEBUG, "Trimmed file is %s", trimmed_filename);
+    carp(CARP_DETAILED_DEBUG, "File trimmed of path is %s", trimmed_filename);
     if( ! suffix_compare(trimmed_filename, extension) ){
         return file_path_array;
     }
@@ -703,6 +703,37 @@ char* generate_name(
 }
 
 /**
+ * \brief Create the correct filename for a binary psm file, ending in
+ * .csm for target search and -decoy-#.csm for decoy searches.
+ *
+ * Strips any .csm from the end of the filename, adds the appropriate
+ * extension depending on the file index (0=target, 1=first decoy,
+ * 2=second decoy, etc).
+ * \returns A heap allocated char* with the new filename.
+ */
+char* generate_psm_filename(char* basename, ///< beginning filename -in
+                            int file_index){///< target/decoy index -in
+  carp(CARP_DEBUG, "Given basename '%s' and index %d", basename, file_index);
+
+  // remove the .csm from basename, if it exists
+  char* last_dot = strrchr(basename, '.');
+  if( last_dot != NULL && strcmp(last_dot, ".csm")==0){
+    *last_dot = '\0';
+  }
+
+  char suffix[16];
+  if( file_index == 0 ){
+    sprintf(suffix, ".csm");
+  }else{
+    sprintf(suffix, "-decoy-%i.csm", file_index);
+  }
+
+  char* fullname = cat_string(basename, suffix);
+  return fullname;
+
+}
+
+/**
  * checks if each AA is an AA
  *\returns TRUE if sequence is valid else, FALSE
  */
@@ -721,7 +752,8 @@ BOOLEAN_T valid_peptide_sequence( char* sequence){
  * Open and create a file handle of a file that is named 
  * and located in user specified location
  * Assumes the directory exists
- *\returns a file handle of a file that is named and located in user specified location
+ * \returns a file handle of a file that is named and located in user
+ * specified location
  */
 FILE* create_file_in_path(
   char* filename,  ///< the filename to create & open -in
