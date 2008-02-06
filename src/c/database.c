@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.59 $
+ * $Revision: 1.60 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -649,8 +649,8 @@ PROTEIN_T* get_database_protein_at_idx(
   //     protein_idx, database->num_proteins);
   if( protein_idx >= database->num_proteins ){
     carp(CARP_FATAL, 
-	    "Protein index %i out of bounds.  %i proteins in the database",
-	    protein_idx, database->num_proteins);
+         "Protein index %i out of bounds.  %i proteins in the database",
+         protein_idx, database->num_proteins);
     exit(1);
   }
 

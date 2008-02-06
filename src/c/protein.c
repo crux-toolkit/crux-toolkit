@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.61 $
+ * $Revision: 1.62 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -555,8 +555,8 @@ static BOOLEAN_T read_raw_sequence
     // Skip non-alphabetic characters.
     if (!isalpha((int)a_char)) {
       if ((a_char != ' ') && (a_char != '\t') && (a_char != '\n') && (a_char != '\r')) {
-	carp(CARP_WARNING,"Skipping character %c in sequence %s.",
-		a_char, name);
+        carp(CARP_WARNING,"Skipping character %c in sequence %s.",
+             a_char, name);
       }
 
     } else {
@@ -569,10 +569,10 @@ static BOOLEAN_T read_raw_sequence
        * bill's code, char_in_string can be found in utils.c
        * very slow!!
       if (!char_in_string(get_alphabet(TRUE), a_char)) {
-	carp(CARP_WARNING, "Converting illegal character %c to X ",
-		a_char);
-	carp(CARP_WARNING, "in sequence %s.", name);
-	a_char = 'X';
+      carp(CARP_WARNING, "Converting illegal character %c to X ",
+      a_char);
+      carp(CARP_WARNING, "in sequence %s.", name);
+      a_char = 'X';
       }
       */
       
@@ -582,10 +582,10 @@ static BOOLEAN_T read_raw_sequence
        * converts the character to a 'X'
        */
       if ( (int)a_char < 65 || (int)a_char  > 90 ) {
-	carp(CARP_WARNING, "Converting illegal character %c to X ",
-		a_char);
-	carp(CARP_WARNING, "in sequence %s.", name);
-	a_char = 'X';
+        carp(CARP_WARNING, "Converting illegal character %c to X ",
+             a_char);
+        arp(CARP_WARNING, "in sequence %s.", name);
+        a_char = 'X';
       }
       
       raw_sequence[i_seq] = a_char;

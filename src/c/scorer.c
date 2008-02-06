@@ -4,7 +4,7 @@
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum
  * vs. ion_series 
- * REVISION: $Revision: 1.63 $
+ * REVISION: $Revision: 1.64 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1413,10 +1413,10 @@ ION_CONSTRAINT_T** single_ion_constraints(
   ION_CONSTRAINT_T** ion_constraints = (ION_CONSTRAINT_T**) 
     malloc(GMTK_NUM_ION_SERIES * sizeof(ION_CONSTRAINT_T*));
 
-	ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION, A_ION }; 
+  ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION, A_ION }; 
   int charges[GMTK_NUM_CHARGES] = { 1, 2 }; 
 
-	MASS_TYPE_T mass_type = MONO; // TODO maybe change to parameter file
+  MASS_TYPE_T mass_type = MONO; // TODO maybe change to parameter file
 
   int ion_constraint_idx = 0;
 
@@ -1428,9 +1428,10 @@ ION_CONSTRAINT_T** single_ion_constraints(
     for (charge_idx=0; charge_idx < GMTK_NUM_CHARGES; charge_idx++){
 
       int neutral_idx;
-      for (neutral_idx=0; neutral_idx < GMTK_NUM_NEUTRAL_LOSS+1; neutral_idx++){
-        ION_CONSTRAINT_T* ion_constraint = new_ion_constraint(
-		      mass_type, charges[charge_idx], ion_types[ion_type_idx], FALSE);
+      for(neutral_idx=0; neutral_idx< GMTK_NUM_NEUTRAL_LOSS+1; neutral_idx++){
+        ION_CONSTRAINT_T* ion_constraint =
+          new_ion_constraint( mass_type, charges[charge_idx],
+                              ion_types[ion_type_idx], FALSE);
         set_ion_constraint_exactness(ion_constraint, TRUE);
         if (neutral_idx == 0){
           ;

@@ -1,6 +1,6 @@
 /*********************************************************************//**
  * \file match_collection.c
- * $Revision: 1.71 $
+ * $Revision: 1.72 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Methods for creating and manipulating match_collections.   
@@ -353,7 +353,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   }
   // if scoring for LOGP_EXP_SP, LOGP_BONF_EXP_SP estimate parameters
   else if(score_type == LOGP_WEIBULL_SP || 
-	  score_type == LOGP_BONF_WEIBULL_SP){
+          score_type == LOGP_BONF_WEIBULL_SP){
     estimate_weibull_parameters(
         match_collection, SP, sample_count, spectrum, charge);
   }
@@ -775,17 +775,17 @@ BOOLEAN_T estimate_weibull_parameters(
   carp(CARP_INFO, "Stat: Total matches: %i\n", total_data_points);
   int fit_data_points = total_data_points;
 
-	// less than 0.0 or 0 indicates use all peptides
+  // less than 0.0 or 0 indicates use all peptides
   double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
-	int number_to_fit = get_int_parameter("number-top-scores-to-fit");
+  int number_to_fit = get_int_parameter("number-top-scores-to-fit");
   carp(CARP_INFO, "Stat: Number matches to fit: %i\n", number_to_fit);
-	if (fraction_to_fit > -0.5){
+  if (fraction_to_fit > -0.5){
     assert(fraction_to_fit <= 1.0);
-		fit_data_points = (int)(total_data_points * fraction_to_fit);
-	} else if (number_to_fit > -1 ){
-		fit_data_points = number_to_fit < total_data_points ? 
+    fit_data_points = (int)(total_data_points * fraction_to_fit);
+  } else if (number_to_fit > -1 ){
+    fit_data_points = number_to_fit < total_data_points ? 
         number_to_fit : total_data_points;
-	}
+  }
 
   carp(CARP_INFO, "Estimate Weibull parameters, count: %d", fit_data_points);
   
@@ -1704,10 +1704,13 @@ float get_match_collection_delta_cn(
 }
 
 /**
+ * \brief Names and opens the correct number of binary psm files.
+ *
  * Takes the values of match-output-folder, ms2 filename (soon to be
- * named output file), overwrite, and number-decoy-set from parameter.c 
- * and returns an array of filehandles to the newly opened files
+ * named output file), overwrite, and number-decoy-set from parameter.c.
  * REPLACES: spectrum_collection::get_spectrum_collection_psm_result_filenames
+ *
+ * \returns An array of filehandles to the newly opened files
  */
 FILE** create_psm_files(){
 
@@ -1731,7 +1734,7 @@ FILE** create_psm_files(){
   if(access(output_directory, F_OK)){
     if(mkdir(output_directory, S_IRWXU+S_IRWXG+S_IRWXO) != 0){
       carp(CARP_FATAL, "Failed to create output directory %s", 
-	   output_directory);
+           output_directory);
       exit(1);
     }
   }
@@ -1752,7 +1755,7 @@ FILE** create_psm_files(){
   char suffix[25];
   //first file is target, remaining are decoys
   char* psm_filename = generate_name(filename_template, "_XXXXXX", 
-				    ".ms2", "crux_match_target_");
+                                     ".ms2", "crux_match_target_");
 
   for(file_i=0; file_i<total_files; file_i++){
 
@@ -1763,7 +1766,7 @@ FILE** create_psm_files(){
 
     //check for error
     if( file_handle_array[file_i] == NULL ||
-	temp_file_descriptor == -1 ){
+        temp_file_descriptor == -1 ){
 
       carp(CARP_FATAL, "Could not create psm file %s", psm_filename);
       exit(1);
@@ -1774,7 +1777,7 @@ FILE** create_psm_files(){
     free(psm_filename);
     sprintf(suffix, "crux_match_decoy_%d_", file_i+1);
     psm_filename = generate_name(filename_template, "_XXXXXX",
-				 ".ms2", suffix);
+                                 ".ms2", suffix);
   }
   return file_handle_array;
 
@@ -1897,7 +1900,7 @@ void print_sqt_header(FILE* output, char* type, int num_proteins){
   double tol = get_double_parameter("mass-window");
   fprintf(output, "H\tAlg-PreMasTol\t%.1f\n",tol);
   fprintf(output, "H\tAlg-FragMassTol\t%.2f\n", 
-	  get_double_parameter("ion-tolerance"));
+          get_double_parameter("ion-tolerance"));
   fprintf(output, "H\tAlg-XCorrMode\t0\n");
 
   SCORER_TYPE_T score = get_scorer_type_parameter("prelim-score-type");
@@ -1935,7 +1938,7 @@ void print_sqt_header(FILE* output, char* type, int num_proteins){
   //     fprintf(output, "H\tStaticMod\t%s=%.3f\n", letter, mass);
   //  fprintf(output, "H\tStaticMod\tC=160.139\n");
   fprintf(output, "H\tAlg-DisplayTop\t%d\n", 
-	  get_int_parameter("max-sqt-result")); 
+          get_int_parameter("max-sqt-result")); 
 
   PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
   peptide_type_to_string(cleavages, temp_str);
@@ -2204,7 +2207,7 @@ void print_matches(
   carp(CARP_DETAILED_DEBUG, "Writing matches to file");
   // get parameters
   MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
-						"output-mode");
+                                                            "output-mode");
   int max_sqt_matches = get_int_parameter("max-sqt-result");
   int max_psm_matches = get_int_parameter("top-match");
   SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
@@ -2215,7 +2218,7 @@ void print_matches(
   if( output_type != SQT_OUTPUT ){ //i.e. binary or all
     carp(CARP_DETAILED_DEBUG, "Serializing psms");
     serialize_psm_features(match_collection, psm_file, max_psm_matches,
-			   prelim_score, main_score);
+                           prelim_score, main_score);
   }
 
   // write sqt files
@@ -2223,12 +2226,12 @@ void print_matches(
     carp(CARP_DETAILED_DEBUG, "Writing sqt results");
     if( ! is_decoy ){
       print_match_collection_sqt(sqt_file, max_sqt_matches,
-				 match_collection, spectrum,
-				 prelim_score, main_score);
+                                 match_collection, spectrum,
+                                 prelim_score, main_score);
     }else{
       print_match_collection_sqt(decoy_file, max_sqt_matches,
-				 match_collection, spectrum,
-				 prelim_score, main_score);
+                                 match_collection, spectrum,
+                                 prelim_score, main_score);
     }
   }
 }
@@ -2319,7 +2322,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
       continue;
     }
     file_in_dir =get_full_filename(match_collection_iterator->directory_name, 
-				   directory_entry->d_name);
+                                   directory_entry->d_name);
 
     carp(CARP_INFO, "Getting PSMs from %s", file_in_dir);
     result_file = fopen(file_in_dir, "r");

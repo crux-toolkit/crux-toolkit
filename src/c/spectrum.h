@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.39 $
+ * $Revision: 1.40 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -93,15 +93,15 @@ SPECTRUM_T* parse_spectrum_binary(
  * Normalize peak intensities so that they sum to unity.
  ***********************************************************************/
 void sum_normalize_spectrum(
-	SPECTRUM_T* spectrum
-	);
+  SPECTRUM_T* spectrum
+  );
 
 /***********************************************************************
  * Populate peaks with rank information.
  ***********************************************************************/
 void spectrum_rank_peaks(
-	SPECTRUM_T* spectrum
-	);
+  SPECTRUM_T* spectrum
+  );
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
@@ -420,15 +420,15 @@ void serialize_spectrum(
  * Normalize peak intensities so that they sum to unity.
  ***********************************************************************/
 void sum_normalize_spectrum(
-	SPECTRUM_T* spectrum
-	);
+  SPECTRUM_T* spectrum
+  );
 
 /***********************************************************************
  * Populate peaks with rank information.
  ***********************************************************************/
 void rank_peaks(
-	SPECTRUM_T* spectrum
-	);
+  SPECTRUM_T* spectrum
+  );
 
 /******************************************************************************/
 

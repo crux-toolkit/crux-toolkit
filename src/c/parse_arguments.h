@@ -39,10 +39,10 @@
 #include "hash.h"
 
 enum argument_type { FLAG_ARG, INT_ARG, LONG_ARG, DOUBLE_ARG, 
-		     STRING_ARG, BOOLEAN_ARG };
+                     STRING_ARG, BOOLEAN_ARG };
 enum argument_error { NO_ERROR, UNKNOWN_OPTION, MISSING_VALUE,
-                       INVALID_VALUE, UNKNOWN_REQ_ARG, MISSING_REQ_ARG,
-                        TOO_MANY_REQ_ARGS, TOO_MANY_OPT_ARGS};
+                      INVALID_VALUE, UNKNOWN_REQ_ARG, MISSING_REQ_ARG,
+                      TOO_MANY_REQ_ARGS, TOO_MANY_OPT_ARGS};
 
 
 int parse_arguments_set_opt(/*const*/ char * name, /*const*/ char * usage, 
@@ -51,7 +51,7 @@ int parse_arguments_set_req(/*const*/ char * name, /*const*/ char * usage,
                               void * container, enum argument_type type);
 int parse_arguments(int argc, char * argv[], int die_on_error);
 int parse_arguments_into_hash(int argc, char * argv[], HASH_T* h, 
-			      int die_on_error);
+                              int die_on_error);
 int parse_arguments_get_error(/*const*/ char ** s);
 char * parse_arguments_get_usage(/*const*/ char * name);
 enum argument_type string_to_argument_type(char* arg_type_str);

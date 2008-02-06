@@ -84,8 +84,8 @@ int main(int argc, char** argv){
   
   /* search for spectrum with correct scan number */
   spectrum_found = get_spectrum_collection_spectrum(collection, 
-							  scan_number, 
-							  spectrum);
+                                                    scan_number, 
+                                                    spectrum);
   if( !spectrum_found ){
     carp(CARP_FATAL, "Could not find scan number %i", scan_number);
     exit(1);
@@ -95,8 +95,8 @@ int main(int argc, char** argv){
 
   if( !access(output_filename, F_OK)){//&& file_flag != FILE_REPLACE
     carp(CARP_FATAL, "The output file '%s' already exists.  " \
-	 "Use the --out-file option to overwrite or replace.",
-	 output_filename);
+         "Use the --out-file option to overwrite or replace.",
+         output_filename);
     exit(1);
   }
 
@@ -104,8 +104,8 @@ int main(int argc, char** argv){
 
   if( access(output_filename, W_OK)){
     carp(CARP_FATAL, 
-	 "Could not write spectrum to '%s'.  Check file permissions", 
-	 output_filename);
+         "Could not write spectrum to '%s'.  Check file permissions", 
+         output_filename);
     exit(1);
   }
 
@@ -123,20 +123,20 @@ int main(int argc, char** argv){
     printf("Precursor m/z:%.2f\n", get_spectrum_precursor_mz(spectrum));
     printf("Total Ion Current:%.2f\n", get_spectrum_total_energy(spectrum));
     printf("Base Peak Intensity:%.1f\n", 
-	   get_spectrum_max_peak_intensity(spectrum)); // base is max
+           get_spectrum_max_peak_intensity(spectrum)); // base is max
     printf("Number of peaks:%d\n", get_spectrum_num_peaks(spectrum));
     printf("Minimum m/z:%.1f\n", get_spectrum_min_peak_mz(spectrum));
     printf("Maximum m/z:%.1f\n", get_spectrum_max_peak_mz(spectrum));
     
     for(charge_state_index=0; charge_state_index < charge_state_num; 
-	                                        ++charge_state_index){
+                                                   ++charge_state_index){
       possible_z = possible_z_array[charge_state_index];
       printf("Charge state:%d\n", possible_z);
       printf("Neutral mass:%.2f\n", 
-	     get_spectrum_neutral_mass(spectrum, possible_z));
+             get_spectrum_neutral_mass(spectrum, possible_z));
       printf("Charged mass:%.2f\n", get_spectrum_mass(spectrum, possible_z));
       printf("M+H+ mass:%.2f\n", 
-	     get_spectrum_singly_charged_mass(spectrum, possible_z));
+             get_spectrum_singly_charged_mass(spectrum, possible_z));
     }
   }
 

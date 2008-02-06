@@ -61,10 +61,10 @@ char * usage = NULL;
 int assign_value_from_required(/*const*/ argument * req,  /*const*/ char * value);
 int assign_value_from_option(/*const*/ argument * option,  int *index);
 int assign_value_from_required_to_hash(/*const*/ argument * req,  
-				       /*const*/ char * value, HASH_T* h);
+                                       /*const*/ char * value, HASH_T* h);
 int assign_value_from_option_to_hash(/*const*/ argument * option,  
-				     int *index, 
-				     HASH_T* h);
+                                     int *index, 
+                                     HASH_T* h);
 /*const*/ argument * get_next_req_argument();
 /*const*/ argument * find_option(char * name);
 /*const*/ char * base_name(/*const*/ char *s);
@@ -265,7 +265,7 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
  *              0 if parse encountered an error
  ***********************************************************************/
 int parse_arguments_into_hash(int argc, char * argv[], 
-			      HASH_T* hash, int die_on_error) {
+                              HASH_T* hash, int die_on_error) {
 
   carp(CARP_DETAILED_DEBUG, "Parsing arguments, insterting values into hash");
   int i;
@@ -283,8 +283,8 @@ int parse_arguments_into_hash(int argc, char * argv[],
     n = strlen(argv[i]);
     if (argv[i][0] == '-' && argv[i][1] == '-' && n > 1) {
       if ((option = find_option(&(argv[i][1]))) != NULL) {
-	// error = assign_value_from_option(option, &i);
-	error = assign_value_from_option_to_hash(option, &i, hash);
+        // error = assign_value_from_option(option, &i);
+        error = assign_value_from_option_to_hash(option, &i, hash);
         if (error != NO_ERROR) {
           /* Missing or incorrect value */
           build_message(argv[i]);
@@ -299,7 +299,7 @@ int parse_arguments_into_hash(int argc, char * argv[],
     } else {
       if ((req = get_next_req_argument()) != NULL) {
         //error = assign_value_from_required(req, argv[i]);
-	error = assign_value_from_required_to_hash(req, argv[i], hash);
+        error = assign_value_from_required_to_hash(req, argv[i], hash);
         if (error != NO_ERROR) {
           /* Should never reach here */
           break;
@@ -445,8 +445,8 @@ int assign_value_from_required(/*const*/ argument * req,  /*const*/ char * value
  * Returns:      An integer should always be NO_ERROR
  ***********************************************************************/
 int assign_value_from_required_to_hash(/*const*/ argument * req,  
-				       /*const*/ char * value,
-				       HASH_T* hash) {
+                                       /*const*/ char * value,
+                                       HASH_T* hash) {
 
   carp(CARP_DETAILED_DEBUG, 
        "Assigning required '%s' of type '%i' to value '%s'", 
@@ -580,11 +580,11 @@ int assign_value_from_option(/*const*/ argument * option,  int *index) {
         (*index)++;
         value = arguments[*index];
         *((/*const*/ char **) option->container) = value;
-	if (value[0] != 'T' || value[0] != 'F'){
-	  result = INVALID_VALUE;
-	}else{
-	  result = NO_ERROR;
-	}
+        if (value[0] != 'T' || value[0] != 'F'){
+          result = INVALID_VALUE;
+        }else{
+          result = NO_ERROR;
+        }
       } else {
         /* Missing value */
         result = MISSING_VALUE;
@@ -616,8 +616,8 @@ int assign_value_from_option(/*const*/ argument * option,  int *index) {
  * Returns:      An integer from the argument_error enumeration
  ***********************************************************************/
 int assign_value_from_option_to_hash(/*const*/ argument * option,  
-				     int *index, 
-				     HASH_T* hash) {
+                                     int *index, 
+                                     HASH_T* hash) {
   carp(CARP_DETAILED_DEBUG, "Assigning option '%s' to value '%s'", 
        option->name, arguments[(*index)+1]);
   int more_args = 0;
@@ -645,8 +645,8 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
         (*index)++;
         value = arguments[*index];
         if (is_numeric(value)) {
-	  //          *((int *) option->container) = atoi(value);
-	  update_hash_value(hash, option->name, value);
+          //          *((int *) option->container) = atoi(value);
+          update_hash_value(hash, option->name, value);
           result = NO_ERROR;
         } else {
           /* Value not numeric */
@@ -664,8 +664,8 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
         (*index)++;
         value = arguments[*index];
         if (is_numeric(value)) {
-	  //          *((long *) option->container) = atol(value);
-	  update_hash_value(hash, option->name, value);
+          //          *((long *) option->container) = atol(value);
+          update_hash_value(hash, option->name, value);
           result = NO_ERROR;
         } else {
           /* Value not numeric */
@@ -683,8 +683,8 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
         (*index)++;
         value = arguments[*index];
         if (is_numeric(value)) {
-	  //          *((double *) option->container) = atof(value);
-	  update_hash_value(hash, option->name, value);
+          //          *((double *) option->container) = atof(value);
+          update_hash_value(hash, option->name, value);
           result = NO_ERROR;
         } else {
           /* Value not numeric */
@@ -701,8 +701,8 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
         /* Next argument should be value */
         (*index)++;
         value = arguments[*index];
-	//        *((/*const*/ char **) option->container) = value;
-	update_hash_value(hash, option->name, value);
+        //        *((/*const*/ char **) option->container) = value;
+        update_hash_value(hash, option->name, value);
         result = NO_ERROR;
       } else {
         /* Missing value */
@@ -716,11 +716,11 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
         (*index)++;
         value = arguments[*index];
         *((/*const*/ char **) option->container) = value;
-	if (value[0] != 'T' || value[0] != 'F'){
-	  result = INVALID_VALUE;
-	}else{
-	  result = NO_ERROR;
-	}
+        if (value[0] != 'T' || value[0] != 'F'){
+          result = INVALID_VALUE;
+        }else{
+          result = NO_ERROR;
+        }
       } else {
         /* Missing value */
         result = MISSING_VALUE;

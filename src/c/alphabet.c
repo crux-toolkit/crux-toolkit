@@ -41,7 +41,7 @@ void set_alphabet
   if (which_alphabet() != INVALID_ALPH) {
     assert((unsigned)alph_size == strlen(given_alphabet));
   } else if (strlen(given_alphabet) == NUM_AMINOS ||
-	     strlen(given_alphabet) == NUM_AMINOS+1) {
+             strlen(given_alphabet) == NUM_AMINOS+1) {
     alph = PROTEIN_ALPH;
     alph_size = NUM_AMINOS;
     ambigs = NUM_AMINO_AMBIGS;
@@ -300,8 +300,8 @@ static void set_ambiguity
 void fill_in_ambiguous_chars
   (BOOLEAN_T log_space,
    ARRAY_T* freqs)  /* The emission distribution to be extended. 
-		       (Must be pre-mallocked large enough to accept
-		       ambiguous characters). */
+                       (Must be pre-mallocked large enough to accept
+                       ambiguous characters). */
 {
   switch (which_alphabet()) {
   case PROTEIN_ALPH :

@@ -39,12 +39,12 @@ double wall_clock(){
   gettimeofday(&tp, NULL);
   if(first_call == 1){
     first_time = (1E6*((double)tp.tv_sec)+
-		  ((double)tp.tv_usec));
+                 ((double)tp.tv_usec));
     t = first_time;
     first_call = 0;
   } else {
     t = (1E6*((double)tp.tv_sec)+
-		  ((double)tp.tv_usec));
+        ((double)tp.tv_usec));
     t = t - first_time;
   }
   return (double) t;
@@ -67,18 +67,18 @@ BOOLEAN_T open_file
     return(FALSE);
   } else if ((allow_stdin) && (strcmp(filename, "-") == 0)) {
     if (strchr(file_mode, 'r') != NULL) {
-    	carp(CARP_INFO, "Reading %s from stdin.\n", content_description);
+        carp(CARP_INFO, "Reading %s from stdin.\n", content_description);
       *afile = stdin;
     } else if (strchr(file_mode, 'w') != NULL) {
-			carp(CARP_INFO, "Writing %s to stdout.\n", content_description);
+        carp(CARP_INFO, "Writing %s to stdout.\n", content_description);
       *afile = stdout;
     } else {
-			carp(CARP_INFO, "Sorry, I can't figure out whether to use stdin ");
+      carp(CARP_INFO, "Sorry, I can't figure out whether to use stdin ");
       carp(CARP_INFO, "or stdout for %s.\n", content_description);
       return(FALSE);
     }
   } else if ((*afile = fopen(filename, file_mode)) == NULL) {
-		carp(CARP_INFO, "Error opening file %s.\n", filename);
+    carp(CARP_INFO, "Error opening file %s.\n", filename);
     return(FALSE);
   }
   return(TRUE);
@@ -99,8 +99,8 @@ static FILE* run_program
 
   // Allocate space for the command.
   command = (char*)mymalloc(sizeof(char) * (strlen(directory)
-					    + strlen(program) 
-					    + strlen(arguments) + 2));
+                                            + strlen(program) 
+                                            + strlen(arguments) + 2));
 
   // Formulate the command.  Deal with directories possibly ending
   // with a slash or not.
@@ -674,10 +674,10 @@ void copy_int_array
  * parses a file of length max_lines and returns an array of strings
  */
 char** parse_file(
-	char* file_name,
-	int max_lines,
-	int* num_lines
-	){
+  char* file_name,
+  int max_lines,
+  int* num_lines
+  ){
 
   FILE *infile;
   if (open_file(file_name, "r", 1, "input", "", &infile) == 0)
@@ -774,16 +774,16 @@ General Public License for more details.  */
 #endif
 
 #if defined(WIN32) || defined(macintosh)
-#	include <stdlib.h>
+#include <stdlib.h>
 #endif /* WIN32 || macintosh */
 
 #ifdef macintosh
-#	define EINVAL 9
-#	define ENOMEM 11
+#define EINVAL 9
+#define ENOMEM 11
 #endif
 
 #ifndef macintosh
-#	include <sys/types.h>
+#include <sys/types.h>
 #endif /* !macintosh */
 #include <stdio.h>
 #include <assert.h>
@@ -816,8 +816,8 @@ crux_getstr (
     char terminator, 
     int offset)
 {
-  int nchars_avail;		/* Allocated but unused chars in *LINEPTR.  */
-  char *read_pos;		/* Where we're reading into *LINEPTR. */
+  int nchars_avail;             /* Allocated but unused chars in *LINEPTR.  */
+  char *read_pos;               /* Where we're reading into *LINEPTR. */
   int ret;
 
   if (!lineptr || !n || !stream)
@@ -831,10 +831,10 @@ crux_getstr (
       *n = MIN_CHUNK;
       *lineptr = (char *)mymalloc (*n);
       if (!*lineptr)
-	{
-	  errno = ENOMEM;
-	  return -1;
-	}
+        {
+          errno = ENOMEM;
+          return -1;
+        }
     }
 
   nchars_avail = *n - offset;
@@ -848,52 +848,52 @@ crux_getstr (
       save_errno = errno;
 
       /* We always want at least one char left in the buffer, since we
-	 always (unless we get an error while reading the first char)
-	 NUL-terminate the line buffer.  */
+         always (unless we get an error while reading the first char)
+         NUL-terminate the line buffer.  */
 
       assert((*lineptr + *n) == (read_pos + nchars_avail));
       if (nchars_avail < 2)
-	{
-	  if (*n > MIN_CHUNK)
-	    *n *= 2;
-	  else
-	    *n += MIN_CHUNK;
+        {
+          if (*n > MIN_CHUNK)
+            *n *= 2;
+          else
+            *n += MIN_CHUNK;
 
-	  nchars_avail = *n + *lineptr - read_pos;
-	  *lineptr = (char *)realloc (*lineptr, *n);
-	  if (!*lineptr)
-	    {
-	      errno = ENOMEM;
-	      return -1;
-	    }
-	  read_pos = *n - nchars_avail + *lineptr;
-	  assert((*lineptr + *n) == (read_pos + nchars_avail));
-	}
+          nchars_avail = *n + *lineptr - read_pos;
+          *lineptr = (char *)realloc (*lineptr, *n);
+          if (!*lineptr)
+            {
+              errno = ENOMEM;
+              return -1;
+            }
+          read_pos = *n - nchars_avail + *lineptr;
+          assert((*lineptr + *n) == (read_pos + nchars_avail));
+        }
 
       if (ferror (stream))
-	{
-	  /* Might like to return partial line, but there is no
-	     place for us to store errno.  And we don't want to just
-	     lose errno.  */
-	  errno = save_errno;
-	  return -1;
-	}
+        {
+          /* Might like to return partial line, but there is no
+             place for us to store errno.  And we don't want to just
+             lose errno.  */
+          errno = save_errno;
+          return -1;
+        }
 
       if (c == EOF)
-	{
-	  /* Return partial line, if any.  */
-	  if (read_pos == *lineptr)
-	    return -1;
-	  else
-	    break;
-	}
+        {
+          /* Return partial line, if any.  */
+          if (read_pos == *lineptr)
+            return -1;
+          else
+            break;
+}
 
       *read_pos++ = c;
       nchars_avail--;
 
       if (c == terminator)
-	/* Return the line.  */
-	break;
+        /* Return the line.  */
+        break;
     }
 
   /* Done - NUL terminate and return the number of chars read.  */

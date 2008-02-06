@@ -349,10 +349,10 @@ void copy_int_array
  * parses a file of length max_lines and returns an array of strings
  ************************************************************************/
 char** parse_file(
-	char* file_name,
-	int max_lines, 
-	int* num_lines
-	);
+  char* file_name,
+  int max_lines, 
+  int* num_lines
+  );
 
 /* crux_getline.c -- Replacement for GNU C library function crux_getline
 
@@ -395,7 +395,7 @@ int
   crux_getline __PROTO ((char **_lineptr, size_t *_n, FILE *_stream));
 int
   getstr __PROTO ((char **_lineptr, size_t *_n, FILE *_stream,
-		   char _terminator, int _offset));
+                   char _terminator, int _offset));
 
 #ifdef __cplusplus
 }

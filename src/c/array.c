@@ -4,7 +4,7 @@
  * AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University
- * VERSION: $Revision: 1.4 $
+ * VERSION: $Revision: 1.5 $
  * DESCRIPTION: Some simple array-handling routines.
  ********************************************************************/
 #include <stdio.h>
@@ -78,7 +78,7 @@ static void array_bounds_check
     die("Invalid array index (%d).\n", index);
   } else if (index >= get_array_length(array)) {
     die("Array index out of bounds (%d >= %d).\n", 
-	index, get_array_length(array));
+        index, get_array_length(array));
   }
 #else
   /* Avoid compiler warning. */
@@ -99,7 +99,7 @@ static BOOLEAN_T check_array_dimensions
   if (get_array_length(array1) != get_array_length(array2)) {
     if (die_on_mismatch) {
       die("Arrays have differing lengths (%d != %d).\n", 
-	  get_array_length(array1), get_array_length(array2));
+          get_array_length(array1), get_array_length(array2));
     }
     return(FALSE);
   }
@@ -193,7 +193,7 @@ void remove_array_item
 
   // Reallocate.
   if ((array->items = (ATYPE*)myrealloc(array->items,
-					sizeof(ATYPE) * (num_items - 1)))
+                                        sizeof(ATYPE) * (num_items - 1)))
       == NULL) {
     die("Error re-allocating array.\n");
   }
@@ -259,7 +259,7 @@ BOOLEAN_T equal_arrays
   num_items = get_array_length(array1);
   for (i_item = 0; i_item < num_items; i_item++) {
     if (!almost_equal(get_array_item(i_item, array1)
-		     - get_array_item(i_item, array2), 0.0, close_enough)) {
+                      - get_array_item(i_item, array2), 0.0, close_enough)) {
       return(FALSE);
     }
   }
@@ -304,7 +304,7 @@ void element_product
   num_items = get_array_length(array1);
   for (i_item = 0; i_item < num_items; i_item++) {
     set_array_item(i_item, get_array_item(i_item, array1) *
-		   get_array_item(i_item, array2), array2);
+                   get_array_item(i_item, array2), array2);
   }
 }
 
@@ -641,7 +641,7 @@ void dot_divide
   num_items = get_array_length(array1);
   for (i_item = 0; i_item < num_items; i_item++) {
     set_array_item(i_item, get_array_item(i_item, array1) /
-		   get_array_item(i_item, array2), array2);
+                   get_array_item(i_item, array2), array2);
   }
 }
 
@@ -944,7 +944,7 @@ void mix_log_arrays
   for (i_item = 0; i_item < num_items; i_item++) {
     mixed_value
       = LOG_SUM(my_log2(1.0 - mixing) + get_array_item(i_item, array1),
-		my_log2(mixing) + get_array_item(i_item, array2));
+                my_log2(mixing) + get_array_item(i_item, array2));
     set_array_item(i_item, mixed_value, array2);
   }
 }

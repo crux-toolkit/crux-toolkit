@@ -70,7 +70,7 @@ int main(int argc, char** argv){
   // TODO add index name
   int num_arguments = NUM_INDEX_ARGS;
   char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file" }; 
-					  //	  "index name"
+                                        //"index name"
 
 
   /* For debugging of parameter processing */
@@ -115,15 +115,15 @@ int main(int argc, char** argv){
 
   /* create peptide constraint */
   constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, 
-				      min_length, max_length, 
-				      missed_cleavages, mass_type);
+                                      min_length, max_length, 
+                                      missed_cleavages, mass_type);
   
   /* check if input file exist */
   in_file = get_string_parameter("protein fasta file");
   carp(CARP_DETAILED_DEBUG,"Input file name is '%s'\n", in_file);
   if(access(in_file, F_OK)){
     carp(CARP_FATAL, "The file \"%s\" does not exist " 
-	 "(or is not readable or is empty).", in_file);
+         "(or is not readable or is empty).", in_file);
     exit(1);
   }
   
@@ -141,10 +141,10 @@ int main(int argc, char** argv){
 
   /* create new index object */
   crux_index = new_index(in_file,
-			 //		 out_dir,
-			 constraint,
-			 mass_range
-			 );
+                         // out_dir,
+                         constraint,
+                         mass_range
+                         );
   
   /* create crux_index files */
   if(!create_index(crux_index)){

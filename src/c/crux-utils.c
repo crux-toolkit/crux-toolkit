@@ -32,7 +32,7 @@ BOOLEAN_T string_to_mass_type(char* name, MASS_TYPE_T* result){
   BOOLEAN_T success = TRUE;
   //this is copied from parameter.c::get_peptide_mass_type
   int mass_type = convert_enum_type_str(
-		name, -10, mass_type_strings, NUMBER_MASS_TYPES);
+                          name, -10, mass_type_strings, NUMBER_MASS_TYPES);
 
   (*result) = (MASS_TYPE_T)mass_type;
 
@@ -66,7 +66,7 @@ BOOLEAN_T string_to_peptide_type(char* name, PEPTIDE_TYPE_T* result){
   BOOLEAN_T success = TRUE;
   //this is copied from parameter.c::get_peptide_mass_type
   int pep_type = convert_enum_type_str(
-		name, -10, peptide_type_strings, NUMBER_PEPTIDE_TYPES);
+                     name, -10, peptide_type_strings, NUMBER_PEPTIDE_TYPES);
   (*result) = (PEPTIDE_TYPE_T)pep_type;
 
   if( pep_type < 0 ){
@@ -98,7 +98,7 @@ BOOLEAN_T string_to_sort_type(char* name, SORT_TYPE_T* result){
   BOOLEAN_T success = TRUE;
 
   int sort_type = convert_enum_type_str(
-	name, -10, sort_type_strings, NUMBER_SORT_TYPES);
+                        name, -10, sort_type_strings, NUMBER_SORT_TYPES);
   (*result) = (SORT_TYPE_T)sort_type;
 
   if( sort_type < 0){
@@ -108,7 +108,7 @@ BOOLEAN_T string_to_sort_type(char* name, SORT_TYPE_T* result){
 }
 
 BOOLEAN_T sort_type_to_string(SORT_TYPE_T type, 
-			      char* type_str){
+                              char* type_str){
   BOOLEAN_T success = TRUE;
   if( (int)type > NUMBER_SORT_TYPES ){
     success = FALSE;
@@ -128,7 +128,7 @@ BOOLEAN_T string_to_ion_type(char* name, ION_TYPE_T* result){
   BOOLEAN_T success = TRUE;
 
   int ion_type = convert_enum_type_str(
-	name, -10, ion_type_strings, NUMBER_ION_TYPES);
+                       name, -10, ion_type_strings, NUMBER_ION_TYPES);
   (*result) = (ION_TYPE_T)ion_type;
 
   if( ion_type < 0){
@@ -138,7 +138,7 @@ BOOLEAN_T string_to_ion_type(char* name, ION_TYPE_T* result){
 }
 
 BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
-			     char* type_str){
+                             char* type_str){
   BOOLEAN_T success = TRUE;
   if( (int)type > NUMBER_ION_TYPES ){
     success = FALSE;
@@ -157,8 +157,9 @@ static char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] =
 BOOLEAN_T string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result){
   BOOLEAN_T success = TRUE;
 
-  int algorithm_type = convert_enum_type_str(name, -10, algorithm_type_strings,
-					  NUMBER_ALGORITHM_TYPES);
+  int algorithm_type = convert_enum_type_str(name, -10,
+                                             algorithm_type_strings,
+                                             NUMBER_ALGORITHM_TYPES);
   (*result) = (ALGORITHM_TYPE_T)algorithm_type;
 
   if(algorithm_type < 0){
@@ -193,7 +194,7 @@ BOOLEAN_T string_to_scorer_type(char* name, SCORER_TYPE_T* result){
   BOOLEAN_T success = TRUE;
 
   int scorer_type = convert_enum_type_str(name, -10, scorer_type_strings,
-					  NUMBER_SCORER_TYPES);
+                                          NUMBER_SCORER_TYPES);
   (*result) = (SCORER_TYPE_T)scorer_type;
 
   if( scorer_type < 0){
@@ -219,11 +220,11 @@ static char* output_type_strings[NUMBER_OUTPUT_MODES] =
   { "binary", "sqt", "all" };
 
 BOOLEAN_T string_to_output_type(char* name, 
-				MATCH_SEARCH_OUTPUT_MODE_T* result){
+                                MATCH_SEARCH_OUTPUT_MODE_T* result){
   BOOLEAN_T success = TRUE;
 
   int output_type = convert_enum_type_str(name, -10, output_type_strings,
-					  NUMBER_OUTPUT_MODES);
+                                          NUMBER_OUTPUT_MODES);
   (*result) = (MATCH_SEARCH_OUTPUT_MODE_T)output_type;
 
   if( output_type < 0){
@@ -233,7 +234,7 @@ BOOLEAN_T string_to_output_type(char* name,
 }
 
 BOOLEAN_T output_type_to_string(MATCH_SEARCH_OUTPUT_MODE_T type, 
-				char* type_str){
+                                char* type_str){
   BOOLEAN_T success = TRUE;
   if( (int)type > NUMBER_OUTPUT_MODES){
     success = FALSE;
@@ -739,7 +740,7 @@ FILE* create_file_in_path(
       file = NULL;
       carp(CARP_FATAL, "The file '%s' already exists.  " \
        "Use --overwrite T to replace or choose a different output file name",
-	   file_full_path);
+           file_full_path);
       exit(1);
     }//else, open the file
   }
