@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.62 $
+ * $Revision: 1.63 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -584,7 +584,7 @@ static BOOLEAN_T read_raw_sequence
       if ( (int)a_char < 65 || (int)a_char  > 90 ) {
         carp(CARP_WARNING, "Converting illegal character %c to X ",
              a_char);
-        arp(CARP_WARNING, "in sequence %s.", name);
+        carp(CARP_WARNING, "in sequence %s.", name);
         a_char = 'X';
       }
       
