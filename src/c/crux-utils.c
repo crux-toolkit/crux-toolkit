@@ -152,7 +152,7 @@ BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
  * The string version of ALGORITHM_TYPE_T
  */
 static char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
-  {"percolator", "rczar", "q-value", "none", "all"};
+  {"percolator", "rczar", "qvalue", "none", "all"};
 
 BOOLEAN_T string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result){
   BOOLEAN_T success = TRUE;
@@ -368,9 +368,14 @@ char** parse_filename_path_extension(
   if( extension != NULL ){
 
     carp(CARP_DETAILED_DEBUG, "Trimmed file is %s", trimmed_filename);
+    if( ! suffix_compare(trimmed_filename, extension) ){
+        return file_path_array;
+    }
     int file_len = strlen(trimmed_filename);
-    int file_idx = file_len;
     int ext_len = strlen(extension);
+
+    /* compare_suffix replaces the following
+    int file_idx = file_len;
     int ext_idx = ext_len;
 
     if( ext_len > file_len ){
@@ -390,7 +395,7 @@ char** parse_filename_path_extension(
         return file_path_array;
       }
     }
-
+    */
     // after comparing the whole extension, it matched
     trimmed_filename[file_len - ext_len] = '\0';
     carp(CARP_DETAILED_DEBUG, "Final trimmed filename %s", trimmed_filename);
@@ -491,28 +496,58 @@ char* cat_string(char* string_one, char* string_two){
   return result;
 }
 
-// TODO (BF 04-Feb-08): This should be prefix, not suffix
 /**
- * check if the string has the correct suffix
- * \returns TRUE, if the string starts with the suffix, else FALSE
+ * \brief Check if the string has the correct prefix
+ * \returns TRUE if the string starts with the given prefix, else FALSE
  */
-BOOLEAN_T suffix_compare(
-  char* string, ///< The string suffix to compare
-  char* suffix  ///< The suffix to compare
+BOOLEAN_T prefix_compare(
+  char* string, ///< The string to check
+  char* prefix  ///< The prefix to find in the string
   )
 {
   int len = strlen(string);
-  int len_suffix = strlen(suffix);
+  int len_prefix = strlen(prefix);
 
-  if(len_suffix > len){
+  if(len_prefix > len){
     return FALSE;
   }
   
-  if(strncmp(string, suffix, len_suffix) == 0){
+  if(strncmp(string, prefix, len_prefix) == 0){
     return TRUE;
   }
   
   return FALSE;
+}
+
+/**
+ * \brief Check if the string has the correct suffix
+ * \returns TRUE if the end of the string matches the given suffix, else FALSE
+ */
+BOOLEAN_T suffix_compare(
+  char* string, ///< The string to check
+  char* suffix  ///< The suffix to find in the string
+  )
+{
+    int string_len = strlen(string);
+    int suffix_len = strlen(suffix);
+    int string_idx = string_len;
+    int suffix_idx = suffix_len;
+
+    if( suffix_len > string_len ){
+      return FALSE;
+    }
+
+    //compare name and ext from end of strings backwards
+    for(suffix_idx = suffix_idx; suffix_idx > -1; suffix_idx--){
+      //carp(CARP_DETAILED_DEBUG, "Name[%d]='%d', ext[%d]='%d'", 
+      //   string_idx, string[string_idx], suffix_idx, suffix[suffix_idx]);
+      // if they stop matching, don't change filename
+      if( suffix[suffix_idx] != string[string_idx--]){
+        return FALSE;
+      }
+    }
+
+  return TRUE;
 }
 
 /**
@@ -527,6 +562,31 @@ char* get_full_filename(char* path, char* filename){
   return result;
 }
 
+/**
+ * \brief Decide if a file name is a decoy csm file
+ * \returns TRUE if name ends in -decoy-#.csm 
+ */
+BOOLEAN_T name_is_decoy(char* name){
+  char* name_end = strrchr(name, '\0');
+  char* last_d = strrchr(name, 'd');
+  int decoy_len = strlen("decoy-1.csm");
+
+  carp(CARP_DEBUG, "Name is %s", name);
+  // where is the last d in the name
+  if( last_d == NULL ){
+    carp(CARP_DEBUG, "Found no 'd'");
+    return FALSE;
+  }
+  if( (name_end - last_d) == decoy_len 
+      && *(last_d-1) == '-'
+      && strncmp(last_d, "decoy-", 6)==0 ){
+    carp(CARP_DEBUG, "Name is a decoy file");
+    return TRUE;
+  } 
+
+  carp(CARP_DEBUG, "Found a 'd' but name is not a decoy file");
+  return FALSE;
+}
 
 /**
  * returns the file size of the given filename

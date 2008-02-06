@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -153,10 +153,25 @@ FILE* create_file_in_path(
  * check if the string has the correct suffix
  * \returns TRUE, if the string starts with the suffix, else FALSE
  */
-BOOLEAN_T suffix_compare(
-  char* string, ///< The string suffix to compare
-  char* suffix  ///< The suffix to compare
+BOOLEAN_T prefix_compare(
+  char* string, ///< The string to compare -in
+  char* prefix  ///< The prefix to find in the string -in
   );
+
+/**
+ * check if the string has the correct suffix
+ * \returns TRUE, if the string starts with the suffix, else FALSE
+ */
+BOOLEAN_T suffix_compare(
+  char* string, ///< The string to compare -in
+  char* suffix  ///< The suffix to find in the string -in
+  );
+
+/**
+ * \brief Decide if a file name is a decoy csm file
+ * \returns TRUE if name ends in -decoy-#.csm, else false
+ */
+BOOLEAN_T name_is_decoy(char* name);
 
 /**
  * checks if each AA is an AA

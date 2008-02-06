@@ -1,6 +1,6 @@
 /*********************************************************************//**
  * \file match_collection.c
- * $Revision: 1.70 $
+ * $Revision: 1.71 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Methods for creating and manipulating match_collections.   
@@ -2254,6 +2254,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   char* file_in_dir = NULL;
   FILE* result_file = NULL;
   char suffix[25];
+  //  char prefix[25];
   DATABASE_T* database = match_collection_iterator->database;
   
   // allocate match_collection object
@@ -2275,37 +2276,49 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   match_collection->post_hash 
     = new_hash(match_collection->post_protein_counter_size);
   
-  // set the prefix of the serialized files to parse
+  // set the prefix of the serialized file to parse
   // Also, tag if match_collection type is null_peptide_collection
-  char* filepath = match_collection_iterator->directory_name;
-  char** file_path_array = parse_filename_path_extension(filepath, ".csm");//free me
+
+  /*char* filepath = match_collection_iterator->directory_name;
+  char** file_path_array = parse_filename_path_extension(filepath, ".csm");
   char* file_prefix = file_path_array[0];
   char* directory_name = file_path_array[1];
   if( directory_name == NULL ){
     directory_name = ".";
-  }
+    }*/
+
   if(set_type == TARGET){
     //    sprintf(suffix, "crux_match_target");
-    sprintf(suffix, "%s.csm", file_prefix);
+    //sprintf(prefix, "crux_match_target");
+    sprintf(suffix, ".csm");
     match_collection->null_peptide_collection = FALSE;
   }
   else{
     //    sprintf(suffix, "crux_match_decoy_%d", (int)set_type);
-    sprintf(suffix, "%s-decoy-%d", file_prefix, (int)set_type);
+    //sprintf(prefix, "crux_match_decoy_%d", (int)set_type);
+    sprintf(suffix, "-decoy-%d.csm", (int)set_type);
     match_collection->null_peptide_collection = TRUE;
   }
   
-  // iterate over all PSM result files in directory
+  carp(CARP_DEBUG, "Set type is %d and suffix is %s", (int)set_type, suffix);
+  // iterate over all PSM files in directory to find the one to read
   while((directory_entry 
             = readdir(match_collection_iterator->working_directory))){
+
+    //carp(CARP_DETAILED_DEBUG, "Next file is %s", directory_entry->d_name);
+
     if (strcmp(directory_entry->d_name, ".") == 0 ||
         strcmp(directory_entry->d_name, "..") == 0 ||
         !suffix_compare(directory_entry->d_name, suffix)
+        //!prefix_compare(directory_entry->d_name, prefix)
         ) {
       continue;
     }
-    //file_in_dir =get_full_filename(match_collection_iterator->directory_name, 
-    file_in_dir =get_full_filename(directory_name, 
+
+    if( set_type == TARGET && name_is_decoy(directory_entry->d_name) ){
+      continue;
+    }
+    file_in_dir =get_full_filename(match_collection_iterator->directory_name, 
 				   directory_entry->d_name);
 
     carp(CARP_INFO, "Getting PSMs from %s", file_in_dir);
@@ -2316,7 +2329,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
     }
     // add all the match objects from result_file
     extend_match_collection(match_collection, database, result_file);
-    carp(CARP_DETAILED_DEBUG, "extended match collection " );
+    carp(CARP_DETAILED_DEBUG, "Extended match collection " );
     fclose(result_file);
     free(file_in_dir);
     carp(CARP_DETAILED_DEBUG, "Finished file.");
@@ -2403,13 +2416,17 @@ BOOLEAN_T extend_match_collection(
          chars_read, charge);
 
     // get serialized match_total
-    if(fread(&match_total_of_serialized_collection, (sizeof(int)),
+    /*if(fread(&match_total_of_serialized_collection, (sizeof(int)),
              1, result_file) != 1){
       carp(CARP_ERROR, "Serialized file corrupted, "
           "incorrect match_total_of_serialized_collection value");  
       return FALSE;
-    }
-    
+      }*/
+    chars_read = fread(&match_total_of_serialized_collection, (sizeof(int)),
+                       1, result_file);
+    carp(CARP_DETAILED_DEBUG, "Read %i characters, match total is %i",
+         chars_read, match_total_of_serialized_collection);
+      
     // get delta_cn value
     if(fread(&delta_cn, (sizeof(float)), 1, result_file) != 1){
       carp(CARP_ERROR, "serialized file corrupted, incorrect delta cn value for top match");  
@@ -2714,9 +2731,12 @@ int get_match_collection_hash(
  ******************************/
      
 /**
- * Parses the next match_collection from directory if avaliable
- *\returns TRUE, if successfully sets up the match_collection_iterator 
- *   for the next iteration
+ * \brief Finds the next match_collection in directory and prepares
+ * the iterator to hand it off when 'next' called.
+ *
+ * When no more match_collections (i.e. psm files) are available, set
+ * match_collection_iterator->is_another_collection to FALSE
+ * \returns void
  */
 void setup_match_collection_iterator(
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator 
@@ -2760,7 +2780,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   )
 {
   carp(CARP_DEBUG, 
-       "Creating match collection iterator for dir %s and protein input $s",
+       "Creating match collection iterator for dir %s and protein input %s",
        output_file_directory, fasta_file);
 
   // allocate match_collection
@@ -2771,12 +2791,6 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   DIR* working_directory = NULL;
   struct dirent* directory_entry = NULL;
   DATABASE_T* database = NULL;
-  //BF: this is a temporary change because parameters can
-  //    no longer be set from outside parameter.c
-  //    eventually, analyze-matches will be implemented w/o index
-  //  char* use_index = get_string_parameter_pointer("use-index");
-  //char* use_index = "T";
-  //BOOLEAN_T use_index_boolean = FALSE;  
   BOOLEAN_T use_index_boolean = get_boolean_parameter("use-index");  
   if( use_index_boolean == FALSE ){
     carp(CARP_ERROR, 
@@ -2784,8 +2798,8 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     use_index_boolean = TRUE;
   }
 
-
   // get directory from path name and prefix from filename
+  /*
   char** file_path_array = parse_filename_path_extension(  // free me
                                      output_file_directory, ".csm");
   char* filename = parse_filename(output_file_directory);  // free me
@@ -2795,19 +2809,27 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   if( psm_dir_name == NULL ){
     psm_dir_name = ".";
   }
-  //TODO free file_path_array
+  */
 
-  int total_sets = 0;
+  /*
+    BF: I think that this step is to count how many decoys there are
+    per target file.  This is prone to errors as all it really does is
+    check for the presence of a file with *decoy_1*, and one with
+    *decoy_2* and *decoy_3*.  In fact, the three files could be from
+    different targets.  Nothing was being done with the check for a
+    target file.  There must be a better way to do this.
+   */
+
 
   // do we have these files in the directory
   BOOLEAN_T boolean_result = FALSE;
-  /*BOOLEAN_T decoy_1 = FALSE;
+  BOOLEAN_T decoy_1 = FALSE;
   BOOLEAN_T decoy_2 = FALSE;
-  BOOLEAN_T decoy_3 = FALSE;*/
+  BOOLEAN_T decoy_3 = FALSE;
 
   // open PSM file directory
-  //working_directory = opendir(output_file_directory);
-  working_directory = opendir(psm_dir_name);
+  working_directory = opendir(output_file_directory);
+  //working_directory = opendir(psm_dir_name);
   
   if(working_directory == NULL){
     carp(CARP_FATAL, "Failed to open PSM file directory: %s", 
@@ -2815,17 +2837,57 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     exit(1);
   }
   
-  // determine use index command
-  /*  if(strcmp(use_index, "F")==0){
-    use_index_boolean = FALSE;
+  // determine how many decoy sets we have
+  while((directory_entry = readdir(working_directory))){
+    //if(prefix_compare(directory_entry->d_name, "crux_match_target")){
+    /*if(suffix_compare(directory_entry->d_name, ".csm")){
+      carp(CARP_DEBUG, "Found target file %s", directory_entry->d_name);
+      boolean_result = TRUE;
+    }
+    //else if(prefix_compare(directory_entry->d_name, "crux_match_decoy_1")) {
+    else*/ if(suffix_compare(directory_entry->d_name, "decoy-1.csm")) {
+      carp(CARP_DEBUG, "Found decoy file %s", directory_entry->d_name);
+      decoy_1 = TRUE;
+      //num_decoys++;
+    }
+    //else if(prefix_compare(directory_entry->d_name, "crux_match_decoy_2")) {
+    else if(suffix_compare(directory_entry->d_name, "decoy-2.csm")) {
+      decoy_2 = TRUE;
+    }
+    //else if(prefix_compare(directory_entry->d_name, "crux_match_decoy_3")) {
+    else if(suffix_compare(directory_entry->d_name, "decoy-3.csm")) {
+      decoy_3 = TRUE;
+      break;
+    }    
+    else if(suffix_compare(directory_entry->d_name, ".csm")){
+      carp(CARP_DEBUG, "Found target file %s", directory_entry->d_name);
+      boolean_result = TRUE;
+    }
   }
-  else if(strcmp(use_index, "T")==0){
-    use_index_boolean = TRUE;
+  
+  // set total_sets count
+  int total_sets = 0;
+
+  if(decoy_3){
+    total_sets = 4; // 3 decoys + 1 target
+  }
+  else if(decoy_2){
+    total_sets = 3; // 2 decoys + 1 target
+  }
+  else if(decoy_1){
+    total_sets = 2; // 1 decoys + 1 target
   }
   else{
-    carp(CARP_ERROR, "incorrect argument %s, using default value", use_index);
-    }*/
-  
+    total_sets = 1;
+    carp(CARP_INFO, "No decoy sets exist in directory: %s", 
+        output_file_directory);
+  }
+  if(!boolean_result){
+    carp(CARP_FATAL, "No PSM files found in directory '%s'", 
+         output_file_directory);
+    exit(1);
+  }
+
   // get binary fasta file name with path to crux directory 
   char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_file);
   
@@ -2852,46 +2914,6 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     }
   }
   
-  // determine how many decoy sets we have
-  int num_decoys = 0;
-  while((directory_entry = readdir(working_directory))){
-    //    if(suffix_compare(directory_entry->d_name, "crux_match_target")){
-    if(strcmp(directory_entry->d_name, filename)==0){
-      carp(CARP_DEBUG, "Found target file %s", filename);
-      boolean_result = TRUE;
-    }
-    //else if(suffix_compare(directory_entry->d_name, "crux_match_decoy_1")) {
-    else if(suffix_compare(directory_entry->d_name, decoy_prefix)) {
-      carp(CARP_DEBUG, "Found decoy file %s", directory_entry->d_name);
-      //decoy_1 = TRUE;
-      num_decoys++;
-    }
-/*    else if(suffix_compare(directory_entry->d_name, "crux_match_decoy_2")) {
-      decoy_2 = TRUE;
-    }
-    else if(suffix_compare(directory_entry->d_name, "crux_match_decoy_3")) {
-      decoy_3 = TRUE;
-      break;
-      }    */
-  }
-  
-  // set total_sets count
-  /*  if(decoy_3){
-    total_sets = 4; // 3 decoys + 1 target
-  }
-  else if(decoy_2){
-    total_sets = 3; // 2 decoys + 1 target
-  }
-  else if(decoy_1){
-    total_sets = 2; // 1 decoys + 1 target
-  }
-  else{
-    total_sets = 1;
-    carp(CARP_INFO, "No decoy sets exist in directory: %s", 
-        output_file_directory);
-        }*/
-  total_sets = num_decoys +1;  // decoys + target
-
   free(binary_fasta);
 
   // reset directory
@@ -2910,9 +2932,9 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   setup_match_collection_iterator(match_collection_iterator);
 
   // clean up strings
-  free(file_path_array);
-  free(filename);
-  free(decoy_prefix);
+  //free(file_path_array);
+  //free(filename);
+  //free(decoy_prefix);
 
   return match_collection_iterator;
 }
@@ -2948,8 +2970,9 @@ void free_match_collection_iterator(
 }
 
 /**
- * returns the next match collection object and sets up fro the next iteration
- *\returns the next match collection object
+ * \brief Fetches the next match collection object and prepares for
+ * the next iteration 
+ *\returns The next match collection object
  */
 MATCH_COLLECTION_T* match_collection_iterator_next(
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator 

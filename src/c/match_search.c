@@ -183,6 +183,7 @@ int main(int argc, char** argv){
 					      database);
 	if( match_collection == NULL ){
 	  file_i = total_files; //don't search decoys
+          spectrum_searches_counter--;  //don't count this search
 	  continue;
 	}
 	carp(CARP_DETAILED_DEBUG, "about to print matches");
@@ -210,6 +211,8 @@ int main(int argc, char** argv){
   // update header with number of searches
   int file_idx;
   for(file_idx=0; file_idx < total_files; ++file_idx){
+    carp(CARP_DEBUG, "Updating header with %d searches", 
+         spectrum_searches_counter);
     serialize_total_number_of_spectra(spectrum_searches_counter, 
 				      psm_file_array[file_idx]);
   }
