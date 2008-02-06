@@ -10,7 +10,7 @@
  * Handles at most x files (target and decoy).  Expects psm files to
  * end with the extension '.csm' and decoys to end with '-decoy#.csm'
  * 
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -65,11 +65,6 @@ int output_matches(
  */
 int main(int argc, char** argv){
 
-  /* Declarations */
-  //char* psm_result_folder = NULL;
-  //char* fasta_file = NULL; //rename
-  //char* feature_file = NULL;
-
   /* Define command line arguments */
   int num_options = NUM_ANALYSIS_OPTIONS;
   char* option_list[NUM_ANALYSIS_OPTIONS] = {
@@ -82,7 +77,6 @@ int main(int argc, char** argv){
 
   int num_arguments = NUM_ANALYSIS_ARGUMENTS;
   char* argument_list[NUM_ANALYSIS_ARGUMENTS] = {
-    //"psm-folder",
     "psm file",
     "protein input",
   };
@@ -106,7 +100,6 @@ int main(int argc, char** argv){
   set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get arguments */
-  //  psm_result_folder = get_string_parameter("psm-folder");
   char* psm_file = get_string_parameter("psm file");
   char* fasta_file = get_string_parameter("protein input");//rename
   char* feature_file = get_string_parameter("feature-file");
@@ -120,8 +113,7 @@ int main(int argc, char** argv){
   switch(algorithm_type){
   case PERCOLATOR_ALGORITHM:
     carp(CARP_INFO, "Running percolator");
-    match_collection = run_percolator(//psm_result_folder,
-                                      psm_file,
+    match_collection = run_percolator(psm_file,
 				      fasta_file,
 				      feature_file);
     scorer_type = PERCOLATOR_SCORE;
@@ -129,15 +121,13 @@ int main(int argc, char** argv){
     
   case QVALUE_ALGORITHM:
     carp(CARP_INFO, "Running qvalue");
-    //match_collection = run_qvalue(psm_result_folder, fasta_file);
     match_collection = run_qvalue(psm_file, fasta_file);
     scorer_type = Q_VALUE;
     break;
     
   case NO_ALGORITHM:
     carp(CARP_INFO, "No analysis algorithm chosen.");
-    match_collection = run_nothing(//psm_result_folder,
-                                   psm_file,
+    match_collection = run_nothing(psm_file,
                                    fasta_file,
 				   feature_file);
     scorer_type = XCORR; // TODO put in something to default to the primary
@@ -316,7 +306,7 @@ MATCH_COLLECTION_T* run_qvalue(
   // create MATCH_COLLECTION_ITERATOR_T object
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
     new_match_collection_iterator(psm_result_folder, fasta_file);
-
+  
   while(match_collection_iterator_has_next(match_collection_iterator)){
 
     // get the next match_collection
@@ -330,11 +320,11 @@ MATCH_COLLECTION_T* run_qvalue(
       match = match_iterator_next(match_iterator);
       pvalues[num_psms++] =  get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
       if (num_psms >= MAX_PSMS){
-        die("Too many psms in directory %s", psm_result_folder);
+        carp(CARP_ERROR, "Too many psms in directory %s", psm_result_folder);
       }
     }
 
-    // ok free & update for net set
+    // ok free & update for next set
     free_match_iterator(match_iterator);
   }
 
@@ -376,7 +366,7 @@ MATCH_COLLECTION_T* run_qvalue(
 
   // Iterate over the matches again
   match_collection_iterator = 
-     new_match_collection_iterator(psm_result_folder, fasta_file);
+    new_match_collection_iterator(psm_result_folder, fasta_file);
 
   while(match_collection_iterator_has_next(match_collection_iterator)){
 

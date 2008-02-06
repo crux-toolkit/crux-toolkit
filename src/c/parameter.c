@@ -741,7 +741,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     if(! string_to_algorithm_type( value_str, &algorithm_type)){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
-	      "Must be percolator, rczar, q-value, none OR all.", value_str, name);
+	      "Must be percolator, rczar, qvalue, none OR all.", value_str, name);
     }
     break;
 
@@ -1125,7 +1125,8 @@ PEPTIDE_TYPE_T get_peptide_type_parameter(
   char* name
     ){
 
-  char* param = get_string_parameter_pointer(name);
+  //  char* param = get_string_parameter_pointer(name);
+  char* param = get_hash_value(parameters->hash, name);
   /*
   int peptide_type = convert_enum_type_str(
       param, 0, peptide_type_strings, NUMBER_PEPTIDE_TYPES);
@@ -1134,7 +1135,8 @@ PEPTIDE_TYPE_T get_peptide_type_parameter(
   int success = string_to_peptide_type(param, &peptide_type);
   //we should have already checked the type, but just in case
   if( success < 0 ){
-    carp(CARP_FATAL, "Peptide_type parameter %s has the value %s which is not of the correct type\n", name, param);
+    carp(CARP_FATAL, "Peptide_type parameter %s has the value %s " 
+         "which is not of the correct type\n", name, param);
     exit(1);
   }
   return peptide_type;
