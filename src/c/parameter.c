@@ -193,13 +193,13 @@ void initialize_parameters(void){
 
   /* create_index arguments */
   set_string_parameter("protein fasta file", NULL,
-		    "File containing protein sequences in fasta format.");
+                       "File containing protein sequences in fasta format.");
   set_string_parameter("index name", NULL,
-		    "Name to give the new directory containing index files.");
+                   "Name to give the new directory containing index files.");
 
   /* search-for-matches arguments */
   set_string_parameter("ms2 file", NULL,
-			    "File containing spectra to be searched.");
+                       "File containing spectra to be searched.");
   //and uses 'protein input'
 
   /* analyze-matches arguments */
@@ -213,10 +213,10 @@ void initialize_parameters(void){
 
   /* get-ms2-spectrum */
   set_int_parameter("scan number", 0, 1, BILLION, 
-			 "Scan number identifying the spectrum");
+                    "Scan number identifying the spectrum");
   //uses ms2 file
   set_string_parameter("output file", NULL, 
-			    "File where spectrum will be written.");
+                       "File where spectrum will be written.");
 
   /* predict-peptide-ions */
   set_string_parameter("peptide sequence", NULL, 
@@ -236,100 +236,102 @@ void initialize_parameters(void){
 
   /* options for all executables */
   set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
-	  "Set level of output to stderr (0-100).  Default 30.");
+      "Set level of output to stderr (0-100).  Default 30.");
   set_string_parameter("parameter-file", NULL, 
-	"Set additional options with values in the given file.");
+      "Set additional options with values in the given file.");
   set_boolean_parameter("overwrite", FALSE, 
-        "Replace existing files (T,F). Default F, die if a file " \
-        "of the same name as the output exists.");
+      "Replace existing files (T,F). Default F, die if a file " \
+      "of the same name as the output exists.");
     
   /* create-psm-files */
   set_int_parameter("starting-sentence-idx", 0, 0, BILLION, 
       "Starting sentence idx"); 
-  set_int_parameter("charge", 2, 1, 4, "Charge for peptide for which to predict ions."); 
+  set_int_parameter("charge", 2, 1, 4,
+      "Charge for peptide for which to predict ions."); 
 
   /* generate_peptide, create_index parameters  */
   set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
-	"The minimum length of peptides to consider. Default 6.");
+      "The minimum length of peptides to consider. Default 6.");
   set_int_parameter("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
-	"The maximum length of peptides to consider. Default 50.");
+      "The maximum length of peptides to consider. Default 50.");
   set_double_parameter("min-mass", 200, 0, BILLION,
-	"The minimum mass of peptides to consider. Default 200.");
+      "The minimum mass of peptides to consider. Default 200.");
   set_double_parameter("max-mass", 7200, 1, BILLION, 
-	"The maximum mass of peptides to consider. Default 7200.");
+      "The maximum mass of peptides to consider. Default 7200.");
   set_mass_type_parameter("isotopic-mass", AVERAGE, 
-	"Which isotopes to use in calcuating peptide mass (average, mono)." \
-	"Default average");
+      "Which isotopes to use in calcuating peptide mass (average, mono)." \
+      "Default average");
   set_peptide_type_parameter("cleavages", TRYPTIC, 
-	"The type of cleavage sites to consider (tryptic, partial, all)" \
-        "Default tryptic.");
+      "The type of cleavage sites to consider (tryptic, partial, all)" \
+      "Default tryptic.");
   set_boolean_parameter("missed-cleavages", FALSE, 
-	"Include peptides with missed cleavage sites (T,F). Default FALSE.");
+      "Include peptides with missed cleavage sites (T,F). Default FALSE.");
   set_boolean_parameter("unique-peptides", FALSE,
-        "Generate peptides only once, even if they appear in more " \
-	"than one protein (T,F).  Default FALSE.");
+      "Generate peptides only once, even if they appear in more " \
+      "than one protein (T,F).  Default FALSE.");
   
   /* more generate_peptide parameters */
   set_boolean_parameter("output-sequence", FALSE, 
-	"Print peptide sequence (T,F). Default FALSE.");
+      "Print peptide sequence (T,F). Default FALSE.");
   set_boolean_parameter("output-trypticity", FALSE, 
-	"Print trypticity of peptide (T,F). Default FALSE.");
+      "Print trypticity of peptide (T,F). Default FALSE.");
   set_boolean_parameter("use-index", FALSE, 
-        "Use an index that has already been created (T,F). " \
-        "Default FALSE (use fasta file)");
+      "Use an index that has already been created (T,F). " \
+      "Default FALSE (use fasta file)");
   set_sort_type_parameter("sort", NONE, 
-        "Sort peptides according to which property " \
-        "(mass, length, lexical, none).  Default none.");
+      "Sort peptides according to which property " \
+      "(mass, length, lexical, none).  Default none.");
 
   /* search-for-matches command line options */
   set_scorer_type_parameter("prelim-score-type", SP, 
-  			    "Initial scoring (sp, xcorr). Default sp");
+      "Initial scoring (sp, xcorr). Default sp");
   set_scorer_type_parameter("score-type", XCORR, 
-   "The scoring method to use (xcorr, sp, dotp, xcorr_logp, sp_logp). Default xcorr."); 
+      "The scoring method to use (xcorr, sp, dotp, xcorr_logp, sp_logp). "
+      "Default xcorr."); 
 
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
-         "Minimum mass of spectra to be searched.  Default 0.");
+      "Minimum mass of spectra to be searched.  Default 0.");
   set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, 
-         "Maximum mass of spectra to search.  Default, none.");
+      "Maximum mass of spectra to search.  Default, none.");
   set_string_parameter("spectrum-charge", "all", 
-         "Spectrum charge states to search (1,2,3,all). Default all.");
+      "Spectrum charge states to search (1,2,3,all). Default all.");
   set_string_parameter("match-output-folder", ".", 
 "Folder to which search results will be written.  Default '.' (current dir)");
   set_output_type_parameter("output-mode", BINARY_OUTPUT, 
-         "Types of output to produce (binary, sqt, all). Default binary");
+      "Types of output to produce (binary, sqt, all). Default binary");
   set_string_parameter("sqt-output-file", "target.sqt", 
-         "SQT output file name. Default 'target.sqt'");
+      "SQT output file name. Default 'target.sqt'");
   set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
-         "SQT output file name for decoys.  Default 'decoy.sqt'");
+      "SQT output file name for decoys.  Default 'decoy.sqt'");
   set_int_parameter("number-decoy-set", 2, 0, 10, 
-         "The number of decoy databases to search.  Default 2.");
+      "The number of decoy databases to search.  Default 2.");
 
   /* search-for-matches parameter file options */
   set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
-         "NOT FOR COMMAND LINE. Number of spectra to score after " \
-		    "preliminary scoring.  Default 500.");
+      "NOT FOR COMMAND LINE. Number of spectra to score after " \
+      "preliminary scoring.  Default 500.");
   set_int_parameter("max-sqt-result", 5, 1, BILLION, 
-    "NOT FOR COMMAND LINE. Number of search results per spectrum " \
-    "to report in the sqt file. Default 5.");
+      "NOT FOR COMMAND LINE. Number of search results per spectrum " \
+      "to report in the sqt file. Default 5.");
   set_int_parameter("top-match", 1, 1, BILLION, 
-         "NOT FOR COMMAND LINE. Umm...");
+      "NOT FOR COMMAND LINE. Umm...");
   set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
   set_string_parameter("seed", "time", "HIDE ME FROM USER");
   set_double_parameter("mass-window", 3.0, 0, 100, 
-        "Search peptides within +/- 'mass-window' of the " \
-        "spectrum mass.  Default 3.0");
+      "Search peptides within +/- 'mass-window' of the " \
+      "spectrum mass.  Default 3.0");
   set_mass_type_parameter("fragment-mass", MONO, 
-	"Which isotopes to use in calcuating fragment ion mass " \
-        "(average, mono). Default average");
+      "Which isotopes to use in calcuating fragment ion mass " \
+      "(average, mono). Default average");
   set_double_parameter("ion-tolerance", 0.5, 0, BILLION,
-        "Tolerance used for matching observed peaks to predicted " \
-        "fragment ions.  Default 0.5");
+      "Tolerance used for matching observed peaks to predicted " \
+      "fragment ions.  Default 0.5");
 
     // Sp scoring params
   set_double_parameter("beta", 0.075, 0, 1, "usage");
   set_double_parameter("max-mz", 4000, 0, BILLION, "usage");
   set_int_parameter("top-fit-sp", 1000, 1, BILLION, 
-         "used in new_match_collection_from_spectrum, but not sure for what");
+       "used in new_match_collection_from_spectrum, but not sure for what");
   // how many peptides to sample for EVD parameter estimation
   set_int_parameter("sample-count", 500, 0, BILLION, "usage");
   // set the top ranking peptides to score for LOGP_*
@@ -400,8 +402,7 @@ void initialize_parameters(void){
 
   /* get-ms2-spectrum options */
   set_boolean_parameter("stats", FALSE, 
-	"Print to stdout additional information about the spectrum");
-  //set_output_mode_parameter("out-file", FILE_NOCLOBBER, "Choose how to handle existing output files (replace, append, ???");
+      "Print to stdout additional information about the spectrum");
 
   // now we have initialized the parameters
   parameter_initialized = TRUE;
@@ -421,7 +422,7 @@ BOOLEAN_T select_cmd_line_arguments(  //remove options from name
   int    num_options 
   ){
   select_cmd_line( option_names, num_options, 
-		   &parse_arguments_set_req);
+                   &parse_arguments_set_req);
   return TRUE;
 }
 
@@ -435,7 +436,7 @@ BOOLEAN_T select_cmd_line_options(  //remove options from name
   int    num_options 
   ){
   select_cmd_line( option_names, num_options, 
-		   &parse_arguments_set_opt);
+                   &parse_arguments_set_opt);
   return TRUE;
 }
 /*
@@ -468,36 +469,36 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     void* usage_ptr = get_hash_value(usages->hash, option_names[i]);
     void* type_ptr =  get_hash_value(types->hash, option_names[i]);
     if( strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
-	strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
-	strcmp(type_ptr, "BOOLEAN_T") == 0 ||
-	strcmp(type_ptr, "SORT_TYPE_T") == 0 ||
-	strcmp(type_ptr, "SCORER_TYPE_T") == 0 ||
-	strcmp(type_ptr, "OUTPUT_TYPE_T") == 0 ){
+        strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
+        strcmp(type_ptr, "BOOLEAN_T") == 0 ||
+        strcmp(type_ptr, "SORT_TYPE_T") == 0 ||
+        strcmp(type_ptr, "SCORER_TYPE_T") == 0 ||
+        strcmp(type_ptr, "OUTPUT_TYPE_T") == 0 ){
       type_ptr = "STRING_ARG";
     }
     carp(CARP_DETAILED_DEBUG, 
-	 "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
-	 (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
+         "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
+         (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
     
 
     /* check that the option is in the params hash */
     if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
       carp(CARP_FATAL, 
-	   "Cannot select parameter '%s'. Value, usage or type not found.\n" \
-	   "Found value: %s, usage: %s, type: %s", 
-	   option_names[i],
-	   value_ptr,
-	   usage_ptr,
-	   type_ptr);
+           "Cannot select parameter '%s'. Value, usage or type not found.\n" \
+           "Found value: %s, usage: %s, type: %s", 
+           option_names[i],
+           value_ptr,
+           usage_ptr,
+           type_ptr);
       
       exit(1);  // or  set success to F?  or die()?
     }
 
     /* add the option via parse_arguments.c. pointer decides opt or req */
     success = parse_arguments_set_ptr(option_names[i],
-				      usage_ptr,
-				      value_ptr, 
-				      string_to_argument_type(type_ptr)); 
+                                      usage_ptr,
+                                      value_ptr, 
+                                      string_to_argument_type(type_ptr)); 
   }
 
   carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
@@ -508,9 +509,9 @@ BOOLEAN_T select_cmd_line(  //remove options from name
  * return null if not found
  */
 BOOLEAN_T find_param_filename(int argc, 
-			      char** argv, 
-			      char* filename_buffer, 
-			      int buffer_size){
+                              char** argv, 
+                              char* filename_buffer, 
+                              int buffer_size){
   BOOLEAN_T success = TRUE;
   int i;
   int param_file_index = -1;
@@ -552,8 +553,8 @@ BOOLEAN_T find_param_filename(int argc,
  * main then retrieves the values through get_value
  */
 BOOLEAN_T parse_cmd_line_into_params_hash(int argc, 
-					  char** argv, 
-					  char* exe_name){
+                                          char** argv, 
+                                          char* exe_name){
   carp(CARP_DETAILED_DEBUG, "Parameter.c is parsing the command line");
   BOOLEAN_T success = TRUE;
   int i;
@@ -579,8 +580,8 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     for(i=1; i<argc; i++){
       char* word = argv[i];
       if( word[0] == '-' && word[1] == '-' ){   //if word starts with --
-	      word = word + 2;      //ignore the --
-	      check_option_type_and_bounds(word);
+        word = word + 2;      //ignore the --
+        check_option_type_and_bounds(word);
       }//else skip this word
     }
   }
@@ -611,7 +612,7 @@ void check_parameter_consistency(){
 
   if( min_length > max_length){
     carp(CARP_FATAL, "Parameter inconsistency.  Minimum peptide length (%i)" \
-	 " must be less than max (%i).", min_length, max_length);
+         " must be less than max (%i).", min_length, max_length);
     exit(1);
   }
 
@@ -620,7 +621,7 @@ void check_parameter_consistency(){
 
   if( min_mass > max_mass){
     carp(CARP_FATAL, "Parameter inconsistency.  Minimum peptide mass (%.2f)" \
-	 " must be less than max (%.2f).", min_mass, max_mass);
+         " must be less than max (%.2f).", min_mass, max_mass);
     exit(1);
   }
 
@@ -629,7 +630,7 @@ void check_parameter_consistency(){
 
   if( min_spec_mass > max_spec_mass){
     carp(CARP_FATAL, "Parameter inconsistency. Minimum spectrum mass (%.2f)" \
-	 " must be less than max (%.2f).", min_spec_mass, max_spec_mass);
+         " must be less than max (%.2f).", min_spec_mass, max_spec_mass);
     exit(1);
   }
 }
@@ -670,11 +671,11 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
   case INT_P:
   case DOUBLE_P:
     if( atof(value_str) < atof(min_str) || 
-	atof(value_str) > atof(max_str) ){
+        atof(value_str) > atof(max_str) ){
       success = FALSE;
       sprintf(die_str, 
-	    "The option '%s' must be between %s and %s.  %s is out of bounds",
-	      name, min_str, max_str, value_str);
+              "The option '%s' must be between %s and %s.  %s is out of bounds",
+              name, min_str, max_str, value_str);
     }
     break;
   case STRING_P:
@@ -683,7 +684,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     break;
   case MASS_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found mass_type opt with value %s\n", 
-	 value_str);
+         value_str);
     if( ! string_to_mass_type( value_str, &mass_type )){
       success = FALSE;
       sprintf(die_str, "Illegal mass-type.  Must be 'mono' or 'average'");
@@ -691,7 +692,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     break;
   case PEPTIDE_TYPE_P:
       carp(CARP_DETAILED_DEBUG, "found peptide_type param, value '%s'\n", 
-	   value_str);
+           value_str);
     if( ! string_to_peptide_type( value_str, &pep_type )){
       success = FALSE;
       sprintf(die_str, "Illegal peptide cleavages.  Must be...something");
@@ -699,37 +700,37 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     break;
   case BOOLEAN_P:
     carp(CARP_DETAILED_DEBUG, "found boolean_type param, value '%s'", 
-	 value_str);
+         value_str);
     if( value_str[0] != 'T' && value_str[0] != 'F'){
       success =  FALSE;
       sprintf(die_str, 
-	      "Illegal boolean value '%s' for option '%s'.  Must be T or F",
-	      value_str, name);
+              "Illegal boolean value '%s' for option '%s'.  Must be T or F",
+              value_str, name);
     }
     break;
   case SORT_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found sort_type param, value '%s'",
-	 value_str);
+         value_str);
     if( ! string_to_sort_type( value_str, &sort_type)){
       success = FALSE;
       sprintf(die_str, "Illegal sort value '%s' for option '%s'. " \
-	      "Must be mass, length, lexical, or none.", 
-	      value_str, name);
+              "Must be mass, length, lexical, or none.", 
+              value_str, name);
     }
     break;
   case SCORER_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found scorer_type param, value '%s'",
-	 value_str);
+         value_str);
     //check for legal type
     if(! string_to_scorer_type( value_str, &scorer_type)){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
       "Must be sp, xcorr, dotp, sp-logp, or xcorr-logp.", value_str, name);
     }else if((scorer_type != SP ) &&   //check for one of the accepted types
-	     (scorer_type != XCORR ) &&
-	     (scorer_type != DOTP ) &&
-	     (scorer_type != LOGP_BONF_WEIBULL_SP ) &&
-	     (scorer_type != LOGP_BONF_WEIBULL_XCORR )){
+             (scorer_type != XCORR ) &&
+             (scorer_type != DOTP ) &&
+             (scorer_type != LOGP_BONF_WEIBULL_SP ) &&
+             (scorer_type != LOGP_BONF_WEIBULL_XCORR )){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
       "Must be sp, xcorr, dotp, sp-logp, or xcorr-logp.", value_str, name);
@@ -737,11 +738,11 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     break;
   case ALGORITHM_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found algorithm_type param, value '%s'",
-	    value_str);
+         value_str);
     if(! string_to_algorithm_type( value_str, &algorithm_type)){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
-	      "Must be percolator, rczar, qvalue, none OR all.", value_str, name);
+              "Must be percolator, rczar, qvalue, none OR all.", value_str, name);
     }
     break;
 
@@ -750,16 +751,16 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     if(! string_to_output_type(value_str, &output_type)){
       success = FALSE;
       sprintf(die_str, "Illegal output type '%s' for options '%s'.  " \
-	      "Must be binary, sqt, or all.", value_str, name);
+              "Must be binary, sqt, or all.", value_str, name);
     }
     break;
   case ION_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found ion_type param, value '%s'",
-	    value_str);
+         value_str);
     if( !string_to_ion_type(value_str, &ion_type)){
       success = FALSE;
       sprintf(die_str, "Illegal ion type '%s' for option '%s'.  " \
-	      "Must be b,y,by.", value_str, name);
+              "Must be b,y,by.", value_str, name);
     }
     break;
   default:
@@ -831,8 +832,8 @@ void parse_parameter_file(
     /* Change the newline to a '\0' ignoring trailing whitespace */
     for(idx = MAX_LINE_LENGTH - 1; idx >= 0; idx--){
       if(line[idx] == '\n' || line[idx] == '\r' || 
-	 line[idx] == '\f' || line[idx] == ' ' || line[idx] == '\t')
-	line[idx] = '\0';
+         line[idx] == '\f' || line[idx] == ' ' || line[idx] == '\t')
+        line[idx] = '\0';
     }
     /* why does this segfault?  only with break, not without
     if(line[0] == '#' || line[0] == '\0'){
@@ -844,28 +845,28 @@ void parse_parameter_file(
     if(line[0] != '#' && line[0] != '\0'){
 
       /* find the '=' in the line.  Exit with error if the line 
-	 has no equals sign. */
+         has no equals sign. */
       while(idx < (int)strlen(line) && line[idx] != '='){
-	idx++;
+        idx++;
       }
       if(idx == 0 || idx >= (int)(strlen(line)-1)){
-	carp(CARP_FATAL, "Lines in a parameter file must have the form:\n");
-	carp(CARP_FATAL, "\n\tname=value\n\n");
-	carp(CARP_FATAL, 
-	     "In file %s, the line\n%s\ndoes not have this format\n",
-	     parameter_filename, line);
-	exit(1);
+        carp(CARP_FATAL, "Lines in a parameter file must have the form:\n");
+        carp(CARP_FATAL, "\n\tname=value\n\n");
+        carp(CARP_FATAL, 
+             "In file %s, the line\n%s\ndoes not have this format\n",
+             parameter_filename, line);
+        exit(1);
       }
 
       line[idx] = '\0';
       char* option_name = line;
       char* option_value = &(line[idx+1]);
       carp(CARP_DETAILED_DEBUG, "Found option '%s' and value '%s'", 
-	   option_name, option_value);
+           option_name, option_value);
 
       if(! update_hash_value(parameters->hash, option_name, option_value) ){
-	carp(CARP_ERROR, "Unexpected parameter file option '%s'", option_name);
-	exit(1);
+        carp(CARP_ERROR, "Unexpected parameter file option '%s'", option_name);
+        exit(1);
       }
 
       check_option_type_and_bounds(option_name);
@@ -910,7 +911,7 @@ BOOLEAN_T get_boolean_parameter(
  
   if(found == FALSE || type != BOOLEAN_P){
     carp(CARP_ERROR, "Request for boolean parameter '%s' which is of type %s",
-	 name, type_str);
+         name, type_str);
   }
 
  // make sure that there is enough storage allocated in the string
@@ -969,7 +970,7 @@ int get_int_parameter(
 
   if(found==FALSE || type != INT_P){
     carp(CARP_ERROR, "Request for int parameter '%s' which is of type %s",
-	 name, type_str);
+         name, type_str);
   }
 
   /* there is a parameter with the right name.  Now 
@@ -1024,7 +1025,7 @@ double get_double_parameter(
 
   if(found==FALSE || type != DOUBLE_P){
     carp(CARP_ERROR, "Request for double parameter '%s' which is of type %s",
-	 name, type_str);
+         name, type_str);
   }
   
   /* there is a parameter with the right name.  Now 
@@ -1077,7 +1078,7 @@ char* get_string_parameter(
 
   if(found==FALSE || type != STRING_P){
     carp(CARP_ERROR, "Request for string parameter '%s' which is of type %s",
-	 name, type_str);
+         name, type_str);
   }
 
 
@@ -1114,7 +1115,7 @@ char* get_string_parameter_pointer(
 
   if(found==FALSE || type != STRING_P){
     carp(CARP_ERROR, "Request for string parameter '%s' which is of type %s",
-	 name, type_str);
+         name, type_str);
   }
 
   return string_value;
@@ -1213,7 +1214,7 @@ ION_TYPE_T get_ion_type_parameter(char* name){
   if(!success){
     carp(CARP_FATAL, 
    "Ion_type parameter %s ahs the value %s which is not of the correct type.",
-	 name, param_value_str);
+         name, param_value_str);
     exit(1);
   }
   return param_value;
@@ -1402,9 +1403,9 @@ BOOLEAN_T set_peptide_type_parameter(
 }
 
 BOOLEAN_T set_sort_type_parameter(
-				       char* name,
-				       SORT_TYPE_T set_value,
-				       char* usage)
+                                  char* name,
+                                  SORT_TYPE_T set_value,
+                                  char* usage)
 {
   BOOLEAN_T result = TRUE;
   char value_str[SMALL_BUFFER];
@@ -1424,9 +1425,9 @@ BOOLEAN_T set_sort_type_parameter(
 }
 
 BOOLEAN_T set_algorithm_type_parameter(
-					 char* name,
-					 ALGORITHM_TYPE_T set_value,
-					 char* usage)
+                                       char* name,
+                                       ALGORITHM_TYPE_T set_value,
+                                       char* usage)
 {
   BOOLEAN_T result = TRUE;
   char value_str[SMALL_BUFFER];
@@ -1449,9 +1450,9 @@ BOOLEAN_T set_algorithm_type_parameter(
 
 
 BOOLEAN_T set_scorer_type_parameter(
-					 char* name,
-					 SCORER_TYPE_T set_value,
-					 char* usage)
+                                    char* name,
+                                    SCORER_TYPE_T set_value,
+                                    char* usage)
 {
   BOOLEAN_T result = TRUE;
   char value_str[SMALL_BUFFER];
@@ -1473,9 +1474,9 @@ BOOLEAN_T set_scorer_type_parameter(
 }
 
 BOOLEAN_T set_output_type_parameter(
-					 char* name,
-					 MATCH_SEARCH_OUTPUT_MODE_T set_value,
-					 char* usage)
+                                    char* name,
+                                    MATCH_SEARCH_OUTPUT_MODE_T set_value,
+                                    char* usage)
 {
 
   BOOLEAN_T result = TRUE;
@@ -1497,8 +1498,8 @@ BOOLEAN_T set_output_type_parameter(
 }
 
 BOOLEAN_T set_ion_type_parameter(char* name,
-				      ION_TYPE_T set_value,
-				      char* usage)
+                                 ION_TYPE_T set_value,
+                                 char* usage)
 {
   BOOLEAN_T result = TRUE;
   char value_str[SMALL_BUFFER];
@@ -1529,7 +1530,7 @@ BOOLEAN_T string_to_param_type(char* name, PARAMETER_TYPE_T* result ){
   }
 
   int param_type = convert_enum_type_str(
-	 name, -10, parameter_type_strings, NUMBER_PARAMETER_TYPES);
+                   name, -10, parameter_type_strings, NUMBER_PARAMETER_TYPES);
   (*result) = (PARAMETER_TYPE_T)param_type;
 
   if( param_type == -10 ){

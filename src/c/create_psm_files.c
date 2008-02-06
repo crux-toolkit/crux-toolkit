@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 8/8 2007
  * DESCRIPTION: Creates files describing ion series, for input to GMTK.
- * REVISION: $Revision: 1.10 $
+ * REVISION: $Revision: 1.11 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -157,5 +157,5 @@ int main(int argc, char** argv){
   free_spectrum_collection(collection);
   free_spectrum(spectrum);
   free_parameters();
- 	exit(0);
+  exit(0);
 }

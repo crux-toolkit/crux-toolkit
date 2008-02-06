@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.74 $
+ * $Revision: 1.75 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -936,13 +936,13 @@ BOOLEAN_T create_index(
       delete_dir(index->directory);
     }else{
       carp(CARP_FATAL, "Index '%s' already exists.  " \
-	   "Use --overwrite T to replace");
+      "Use --overwrite T to replace");
       exit(1);
       }*/
   }
   
   // create temporary directory
-	// temp_dir_name = "foo"; // CYGWIN
+  // temp_dir_name = "foo"; // CYGWIN
   if(mkdir(temp_dir_name, S_IRWXO) != 0){
     if((temp_dir_name = mkdtemp(make_temp_dir_template()))== NULL){
       carp(CARP_WARNING, "cannot create temporary directory");
@@ -1011,7 +1011,7 @@ BOOLEAN_T create_index(
     //    if(count_peptide % 1000 == 0){
     if(count_peptide % mod_me == 0){
       if( (count_peptide/10 ) == mod_me ){
-	mod_me = mod_me * 10;
+        mod_me = mod_me * 10;
       }
       carp(CARP_INFO, "Reached peptide %d", (int)count_peptide);
     }

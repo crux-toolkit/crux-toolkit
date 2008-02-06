@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.38 $
+ * REVISION: $Revision: 1.39 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -82,7 +82,7 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
     die("Had trouble canonicalizing the file name '%s'. Too many levels of symbolic links?", filename); 
   }
   // CYGWIN 
-	// char* absolute_path_file =  filename;
+  // char* absolute_path_file =  filename;
   
   if(access(absolute_path_file, F_OK)){
     fprintf(stderr,"File %s could not be opened\n", absolute_path_file);

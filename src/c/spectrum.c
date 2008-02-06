@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.63 $
+ * REVISION: $Revision: 1.64 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -51,26 +51,27 @@
  * "max_peak_mz", and "total_energy".
  */
 struct spectrum{
-  int               first_scan;    ///< The number of the first scan
-  int               last_scan;     ///< The number of the last scan
-  int               id;            ///< A unique identifier FIXME, this field is not set when parsing..
-  SPECTRUM_TYPE_T   spectrum_type; ///< The type of spectrum. 
-  float             precursor_mz;  ///< The m/z of the precursor (for MS-MS spectra)
-  int*              possible_z;    ///< The possible charge states of this spectrum
-  int               num_possible_z;///< The number of possible charge states of this spectrum
-  PEAK_T*           peaks;         ///< The spectrum peaks
-  float             min_peak_mz;   ///< The minimum m/z of all peaks
-  float             max_peak_mz;   ///< The maximum m/z of all peaks
-  int               num_peaks;     ///< The number of peaks
-  double            total_energy;  ///< The sum of intensities in all peaks
-  char*             filename;      ///< Optional filename
-  char*             i_lines[MAX_I_LINES]; ///< store i lines, upto MAX_I_LINES
-  char*             d_lines[MAX_D_LINES]; ///< store d lines, upto MAX_D_LINES 
-  BOOLEAN_T         has_peaks;  ///< Does the spectrum contain peak information?
-	BOOLEAN_T 				sorted_by_mz; ///< Are the spectrum peaks sorted by m/z ...
-	BOOLEAN_T 				sorted_by_intensity; ///< ... or by intensity?
-	BOOLEAN_T 				has_mz_peak_array; ///< Is the mz_peak_array populated.
-	PEAK_T** 					mz_peak_array;  ///< Allows rapid peak retrieval by mz.
+  int              first_scan;    ///< The number of the first scan
+  int              last_scan;     ///< The number of the last scan
+  int              id;            ///< A unique identifier
+                                  // FIXME, this field is not set when parsing
+  SPECTRUM_TYPE_T  spectrum_type; ///< The type of spectrum. 
+  float            precursor_mz;  ///< The m/z of precursor (MS-MS spectra)
+  int*             possible_z;    ///< The possible charge states of this spectrum
+  int              num_possible_z;///< The number of possible charge states of this spectrum
+  PEAK_T*          peaks;         ///< The spectrum peaks
+  float            min_peak_mz;   ///< The minimum m/z of all peaks
+  float            max_peak_mz;   ///< The maximum m/z of all peaks
+  int              num_peaks;     ///< The number of peaks
+  double           total_energy;  ///< The sum of intensities in all peaks
+  char*            filename;      ///< Optional filename
+  char*            i_lines[MAX_I_LINES]; ///< store i lines, upto MAX_I_LINES
+  char*            d_lines[MAX_D_LINES]; ///< store d lines, upto MAX_D_LINES 
+  BOOLEAN_T        has_peaks;  ///< Does the spectrum contain peak information
+  BOOLEAN_T        sorted_by_mz; ///< Are the spectrum peaks sorted by m/z...
+  BOOLEAN_T        sorted_by_intensity; ///< ... or by intensity?
+  BOOLEAN_T        has_mz_peak_array; ///< Is the mz_peak_array populated.
+  PEAK_T**         mz_peak_array;  ///< Allows rapid peak retrieval by mz.
 };    
 
 /**
@@ -172,12 +173,12 @@ SPECTRUM_T* new_spectrum(
   fresh_spectrum->last_scan = last_scan;
   fresh_spectrum->spectrum_type = spectrum_type;
   fresh_spectrum->precursor_mz = precursor_mz;
-	fresh_spectrum->sorted_by_mz = FALSE;
-	fresh_spectrum->has_mz_peak_array = FALSE;
-	fresh_spectrum->sorted_by_intensity = FALSE;
-	fresh_spectrum->peaks = NULL;
-	fresh_spectrum->num_peaks = 0;
-	fresh_spectrum->mz_peak_array = NULL;
+  fresh_spectrum->sorted_by_mz = FALSE;
+  fresh_spectrum->has_mz_peak_array = FALSE;
+  fresh_spectrum->sorted_by_intensity = FALSE;
+  fresh_spectrum->peaks = NULL;
+  fresh_spectrum->num_peaks = 0;
+  fresh_spectrum->mz_peak_array = NULL;
   set_spectrum_new_possible_z(fresh_spectrum, possible_z, num_possible_z);
   set_spectrum_new_filename(fresh_spectrum, filename);
   return fresh_spectrum;
@@ -698,9 +699,11 @@ BOOLEAN_T add_peak_to_spectrum(
   float location_mz ///< the location of peak to add -in
   )
 {
-  if(spectrum->num_peaks < MAX_PEAKS){  // FIXME someday change it to be dynamic
-    set_peak_intensity(find_peak(spectrum->peaks, spectrum->num_peaks), intensity);
-    set_peak_location(find_peak(spectrum->peaks, spectrum->num_peaks), location_mz);
+  if(spectrum->num_peaks < MAX_PEAKS){  // FIXME change it to be dynamic
+    set_peak_intensity(find_peak(spectrum->peaks, spectrum->num_peaks),
+                       intensity);
+    set_peak_location(find_peak(spectrum->peaks, spectrum->num_peaks),
+                      location_mz);
     update_spectrum_fields(spectrum, intensity, location_mz);
     spectrum->has_peaks = TRUE;
     return TRUE;
@@ -710,37 +713,36 @@ BOOLEAN_T add_peak_to_spectrum(
 }
 
 void populate_mz_peak_array(
-	SPECTRUM_T* spectrum
-	){
-	
-	if (spectrum->has_mz_peak_array == TRUE){
-		return;
-	}
-
-	int array_length = MZ_TO_PEAK_ARRAY_RESOLUTION * MAX_PEAK_MZ;
-	PEAK_T** mz_peak_array = (PEAK_T**) 
-														mymalloc(array_length * sizeof(PEAK_T*));
-	int peak_idx;
-	for (peak_idx = 0; peak_idx < array_length; peak_idx++){
-		mz_peak_array[peak_idx] = NULL;
-	}
-	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
-	PEAK_T* peak = NULL;
-	while(peak_iterator_has_next(peak_iterator)){
-		peak = peak_iterator_next(peak_iterator);
-		float peak_mz = get_peak_location(peak);
-		int mz_idx = (int) (peak_mz * MZ_TO_PEAK_ARRAY_RESOLUTION);
-		if (mz_peak_array[mz_idx] != NULL){
-			carp(CARP_INFO, "Peak collision at mz %.3f = %i", peak_mz, mz_idx);
-      if (get_peak_intensity(mz_peak_array[mz_idx]) < get_peak_intensity(peak)){
+  SPECTRUM_T* spectrum
+  )
+{
+  if (spectrum->has_mz_peak_array == TRUE){
+    return;
+  }
+  
+  int array_length = MZ_TO_PEAK_ARRAY_RESOLUTION * MAX_PEAK_MZ;
+  PEAK_T** mz_peak_array = (PEAK_T**)mymalloc(array_length * sizeof(PEAK_T*));
+  int peak_idx;
+  for (peak_idx = 0; peak_idx < array_length; peak_idx++){
+    mz_peak_array[peak_idx] = NULL;
+  }
+  PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
+  PEAK_T* peak = NULL;
+  while(peak_iterator_has_next(peak_iterator)){
+    peak = peak_iterator_next(peak_iterator);
+    float peak_mz = get_peak_location(peak);
+    int mz_idx = (int) (peak_mz * MZ_TO_PEAK_ARRAY_RESOLUTION);
+    if (mz_peak_array[mz_idx] != NULL){
+      carp(CARP_INFO, "Peak collision at mz %.3f = %i", peak_mz, mz_idx);
+      if(get_peak_intensity(mz_peak_array[mz_idx])< get_peak_intensity(peak)){
         mz_peak_array[mz_idx] = peak;
       }
-		} else {
-			mz_peak_array[mz_idx] = peak; 
-		}
-	}
-	spectrum->mz_peak_array = mz_peak_array;
-	spectrum->has_mz_peak_array = TRUE;
+    } else {
+      mz_peak_array[mz_idx] = peak; 
+    }
+  }
+  spectrum->mz_peak_array = mz_peak_array;
+  spectrum->has_mz_peak_array = TRUE;
   free_peak_iterator(peak_iterator);
 }
 
@@ -755,35 +757,35 @@ PEAK_T* get_nearest_peak(
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
   float mz, ///< the mz of the peak around which to sum intensities -in
   float max ///< the maximum distance to get intensity -in
-  ){
+  )
+{
+  populate_mz_peak_array(spectrum); // for rapid peak lookup by mz
 
-	populate_mz_peak_array(spectrum); // for rapid peak lookup by mz
-
-	float min_distance = BILLION;
-	int min_mz_idx = (int)((mz - max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
-	min_mz_idx = min_mz_idx < 0 ? 0 : min_mz_idx;
-	int max_mz_idx = (int)((mz + max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
-	int absolute_max_mz_idx = MAX_PEAK_MZ * MZ_TO_PEAK_ARRAY_RESOLUTION - 1;
-	max_mz_idx = max_mz_idx > absolute_max_mz_idx 
-									? absolute_max_mz_idx : max_mz_idx;
-	PEAK_T* peak = NULL;
-	PEAK_T* nearest_peak = NULL;
-	int peak_idx;
-	for (peak_idx=min_mz_idx; peak_idx < max_mz_idx + 1; peak_idx++){
-		if ((peak = spectrum->mz_peak_array[peak_idx]) == NULL){
-			continue;
-		}
-		float peak_mz = get_peak_location(peak);
-		float distance = abs(mz - peak_mz);
-		if (distance > max){
-			continue;
-		}
-		if (distance < min_distance){
-			nearest_peak = peak;
+  float min_distance = BILLION;
+  int min_mz_idx = (int)((mz - max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
+  min_mz_idx = min_mz_idx < 0 ? 0 : min_mz_idx;
+  int max_mz_idx = (int)((mz + max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
+  int absolute_max_mz_idx = MAX_PEAK_MZ * MZ_TO_PEAK_ARRAY_RESOLUTION - 1;
+  max_mz_idx = max_mz_idx > absolute_max_mz_idx 
+    ? absolute_max_mz_idx : max_mz_idx;
+  PEAK_T* peak = NULL;
+  PEAK_T* nearest_peak = NULL;
+  int peak_idx;
+  for (peak_idx=min_mz_idx; peak_idx < max_mz_idx + 1; peak_idx++){
+    if ((peak = spectrum->mz_peak_array[peak_idx]) == NULL){
+      continue;
+    }
+    float peak_mz = get_peak_location(peak);
+    float distance = abs(mz - peak_mz);
+    if (distance > max){
+      continue;
+    }
+    if (distance < min_distance){
+      nearest_peak = peak;
       min_distance = distance;
-		}
-	}
-	return nearest_peak;
+    }
+  }
+  return nearest_peak;
 }
 
 /**
@@ -1106,7 +1108,7 @@ int get_charges_to_search(SPECTRUM_T* spectrum, int** select_charge_array){
 
   if( (param_charge < 1) || (param_charge > 3) ){
     carp(CARP_FATAL, "spectrum-charge option must be 1,2,3, or 'all'.  " \
-	 "%s is not valid", charge_str);
+         "%s is not valid", charge_str);
     exit(1);
   }
 
@@ -1278,15 +1280,16 @@ SPECTRUM_T* parse_spectrum_binary(
  * Normalize peak intensities so that they sum to unity.
  ***********************************************************************/
 void sum_normalize_spectrum(
-	SPECTRUM_T* spectrum
-	){
-	PEAK_T* peak = NULL;
-	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
-	while(peak_iterator_has_next(peak_iterator)){
-		peak = peak_iterator_next(peak_iterator);
-		float new_intensity = get_peak_intensity(peak) / spectrum->total_energy;
-		set_peak_intensity(peak, new_intensity);
-	}
+  SPECTRUM_T* spectrum
+  )
+{
+  PEAK_T* peak = NULL;
+  PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
+  while(peak_iterator_has_next(peak_iterator)){
+    peak = peak_iterator_next(peak_iterator);
+    float new_intensity = get_peak_intensity(peak) / spectrum->total_energy;
+    set_peak_intensity(peak, new_intensity);
+  }
   free_peak_iterator(peak_iterator);
 }
 
@@ -1294,20 +1297,21 @@ void sum_normalize_spectrum(
  * Populate peaks with rank information.
  ***********************************************************************/
 void spectrum_rank_peaks(
-	SPECTRUM_T* spectrum
-	){
-	PEAK_T* peak = NULL;
-	PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
-	sort_peaks(spectrum->peaks, spectrum->num_peaks, _PEAK_INTENSITY);
-	spectrum->sorted_by_intensity = TRUE;
-	spectrum->sorted_by_mz = FALSE;
-	int rank = spectrum->num_peaks;
-	while(peak_iterator_has_next(peak_iterator)){
-		peak = peak_iterator_next(peak_iterator);
+  SPECTRUM_T* spectrum
+  )
+{
+  PEAK_T* peak = NULL;
+  PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
+  sort_peaks(spectrum->peaks, spectrum->num_peaks, _PEAK_INTENSITY);
+  spectrum->sorted_by_intensity = TRUE;
+  spectrum->sorted_by_mz = FALSE;
+  int rank = spectrum->num_peaks;
+  while(peak_iterator_has_next(peak_iterator)){
+    peak = peak_iterator_next(peak_iterator);
     float new_rank = rank/(float)spectrum->num_peaks;
     rank--;
-		set_peak_intensity_rank(peak, new_rank); 
-	}
+    set_peak_intensity_rank(peak, new_rank); 
+  }
   free_peak_iterator(peak_iterator);
 }
 

@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file sorter.c
- * $Revision: 1.12 $
+ * $Revision: 1.13 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -96,7 +96,7 @@ int compareTo(
     
     /*  This should break ties, sorting by seq 
     int mass_compared = compare_float(get_peptide_peptide_mass(peptide_one),
-				      get_peptide_peptide_mass(peptide_two));
+                                      get_peptide_peptide_mass(peptide_two));
     if( mass_compared == 0 ){
       mass_compared = compareTo(peptide_one, peptide_two, LEXICAL);
     }

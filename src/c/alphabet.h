@@ -117,8 +117,8 @@ void get_nrdb_frequencies
 void fill_in_ambiguous_chars
   (BOOLEAN_T log_space,
    ARRAY_T*  freqs); /* The emission distribution to be extended. 
-		       (Must be pre-mallocked large enough to accept
-		       ambiguous characters). */
+                        (Must be pre-mallocked large enough to accept
+                        ambiguous characters). */
 
 /********************************************************************
  * Given an emission distribution containing log counts, distribute the

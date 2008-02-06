@@ -2,7 +2,7 @@
  * \file ion_series.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  * \brief Object for a series of ions.
  *****************************************************************************/
 #ifndef ION_SERIES_H
@@ -76,22 +76,22 @@ void print_ion_series(
  * Prints a ion_series object to file, in GMTK single-ion format.
  */
 void print_ion_series_single_gmtk(
-	ION_SERIES_T* ion_series, ///< ion_series to print -in 
-	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
-	FILE* file, ///< file -out
+  ION_SERIES_T* ion_series, ///< ion_series to print -in 
+  ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
+  FILE* file, ///< file -out
   int sentence_idx
-	);
+  );
 
 /**
  * Prints a ion_series object to file, in GMTK paired-ion format.
  */
 void print_ion_series_paired_gmtk(
-	ION_SERIES_T* ion_series, ///< ion_series to print -in 
-	ION_CONSTRAINT_T* first_ion_constraint, ///< ion_constraint to obey -in 
-	ION_CONSTRAINT_T* second_ion_constraint, ///< ion_constraint to obey -in 
-	FILE* file, ///< file output
+  ION_SERIES_T* ion_series, ///< ion_series to print -in 
+  ION_CONSTRAINT_T* first_ion_constraint, ///< ion_constraint to obey -in 
+  ION_CONSTRAINT_T* second_ion_constraint, ///< ion_constraint to obey -in 
+  FILE* file, ///< file output
   int sentence_idx
-	);
+  );
 
 /**
  * Predict ion series

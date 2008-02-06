@@ -83,7 +83,7 @@ int main(int argc, char** argv){
   // check peptide sequence
   if(!valid_peptide_sequence(peptide_sequence)){
     carp(CARP_FATAL, "The peptide sequence '%s' is not valid", 
-	 peptide_sequence);
+         peptide_sequence);
     exit(1);
   }
 
@@ -95,8 +95,8 @@ int main(int argc, char** argv){
    }
 
    is_modification = (nh3_count || 
-		      h2o_count || 
-		      is_flanking);
+                      h2o_count || 
+                      is_flanking);
 
    neutral_loss_count[NH3] = nh3_count;
    neutral_loss_count[H2O] = h2o_count;
@@ -118,8 +118,8 @@ int main(int argc, char** argv){
    }
    else{
      carp(CARP_FATAL, 
-	  "max-ion-charge option must be 1,2,3 or peptide. '%s' is not legal",
-	  max_charge);
+          "max-ion-charge option must be 1,2,3 or peptide. '%s' is not legal",
+          max_charge);
      exit(1);
    }
    
@@ -131,18 +131,18 @@ int main(int argc, char** argv){
    // set ion_constraint3 modification counts, if modifications should occur
    if(is_modification){
      set_ion_constraint_modification( ion_constraint, NH3, 
-				      neutral_loss_count[NH3]);
+                                      neutral_loss_count[NH3]);
      set_ion_constraint_modification( ion_constraint, H2O, 
-				      neutral_loss_count[H2O]);
+                                      neutral_loss_count[H2O]);
      set_ion_constraint_modification( ion_constraint, ISOTOPE, 
-				      neutral_loss_count[ISOTOPE]);
+                                      neutral_loss_count[ISOTOPE]);
      set_ion_constraint_modification( ion_constraint, FLANK, 
-				      neutral_loss_count[FLANK]);
+                                      neutral_loss_count[FLANK]);
    }
 
    // create ion_series
    ION_SERIES_T* ion_series = new_ion_series(peptide_sequence, 
-					     charge_state, ion_constraint);
+                                             charge_state, ion_constraint);
    
    // now predict ions
    predict_ions(ion_series);

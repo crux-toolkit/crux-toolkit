@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.44 $
+ * REVISION: $Revision: 1.45 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -274,14 +274,14 @@ void print_ion_series(
  * Prints a ion_series object to file, in GMTK single-ion format.
  */
 void print_ion_series_single_gmtk(
-	ION_SERIES_T* ion_series,         ///< ion_series to print -in 
-	ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
-	FILE* file,                       ///< file output
+  ION_SERIES_T* ion_series,         ///< ion_series to print -in 
+  ION_CONSTRAINT_T* ion_constraint, ///< ion_constraint to obey -in 
+  FILE* file,                       ///< file output
   int sentence_idx){
 
-	// create the filtered iterator that will select among the ions
-	ION_FILTERED_ITERATOR_T* ion_iterator = 
-		new_ion_filtered_iterator(ion_series, ion_constraint);
+  // create the filtered iterator that will select among the ions
+  ION_FILTERED_ITERATOR_T* ion_iterator = 
+    new_ion_filtered_iterator(ion_series, ion_constraint);
   
   // foreach ion in ion iterator, add matched observed peak intensity
   ION_T* ion;
@@ -290,26 +290,26 @@ void print_ion_series_single_gmtk(
     ion = ion_filtered_iterator_next(ion_iterator);
     
 #ifdef BINARY_GMTK
-		print_ion_gmtk_single_binary(ion, file, sentence_idx, frame_idx);
+    print_ion_gmtk_single_binary(ion, file, sentence_idx, frame_idx);
 #else
-		print_ion_gmtk_single(ion, file);
+    print_ion_gmtk_single(ion, file);
     sentence_idx++; // hack to avoid error for not using sentence_idx
 #endif
     frame_idx++;
-	}
-
+  }
+  
   // print a null ion if there are none in this ion series
 #ifdef PRINT_NULL_IONS
-    for (; frame_idx < MIN_FRAMES; frame_idx++){
+  for (; frame_idx < MIN_FRAMES; frame_idx++){
 #ifdef BINARY_GMTK
-		  print_null_ion_gmtk_single_binary(file, sentence_idx, frame_idx);
+    print_null_ion_gmtk_single_binary(file, sentence_idx, frame_idx);
 #else
-		  print_null_ion_gmtk_single(file);
-      sentence_idx++; // hack to avoid error for not using sentence_idx
+    print_null_ion_gmtk_single(file);
+    sentence_idx++; // hack to avoid error for not using sentence_idx
 #endif
-    }
+  }
 #endif
-
+  
   free_ion_filtered_iterator(ion_iterator);
 }
 
@@ -317,16 +317,17 @@ void print_ion_series_single_gmtk(
  * Prints a ion_series object to file, in GMTK paired-ion format.
  */
 void print_ion_series_paired_gmtk(
-	ION_SERIES_T* ion_series, ///< ion_series to print -in 
-	ION_CONSTRAINT_T* first_ion_constraint, ///< ion_constraint to obey -in 
-	ION_CONSTRAINT_T* second_ion_constraint, ///< ion_constraint to obey -in 
-	FILE* file, ///< file output
+  ION_SERIES_T* ion_series, ///< ion_series to print -in 
+  ION_CONSTRAINT_T* first_ion_constraint, ///< ion_constraint to obey -in 
+  ION_CONSTRAINT_T* second_ion_constraint, ///< ion_constraint to obey -in 
+  FILE* file, ///< file output
   int sentence_idx
-){
-    
-	// create the filtered iterator that will select among the ions
-	ION_FILTERED_ITERATOR_T* ion_iterator = 
-		new_ion_filtered_iterator(ion_series, first_ion_constraint);
+  )
+{
+  
+  // create the filtered iterator that will select among the ions
+  ION_FILTERED_ITERATOR_T* ion_iterator = 
+    new_ion_filtered_iterator(ion_series, first_ion_constraint);
   
   // foreach ion in ion iterator, add matched observed peak intensity
   int frame_idx = 0;
@@ -334,18 +335,18 @@ void print_ion_series_paired_gmtk(
     ION_T* first_ion = ion_filtered_iterator_next(ion_iterator);
     int cleavage_idx = get_ion_cleavage_idx(first_ion);
     ION_T* second_ion = get_ion_series_ion(
-        ion_series, second_ion_constraint, cleavage_idx);
+                            ion_series, second_ion_constraint, cleavage_idx);
     if ( (first_ion == NULL) || (second_ion == NULL) ){
       continue;
     }
     print_ion_gmtk_paired_binary(
-        first_ion, 
-        second_ion, 
-        file,
-        sentence_idx,
-        frame_idx++);
-	}
-
+                                 first_ion, 
+                                 second_ion, 
+                                 file,
+                                 sentence_idx,
+                                 frame_idx++);
+  }
+  
 #ifdef PRINT_NULL_IONS
   for (; frame_idx < MIN_FRAMES; frame_idx++){
     print_null_ion_gmtk_paired_binary(file, sentence_idx, frame_idx);
@@ -1206,7 +1207,7 @@ ION_CONSTRAINT_T* new_ion_constraint_gmtk(
 
   int max_charge = 1;
   if(charge > 1){
-		max_charge = charge;
+    max_charge = charge;
   }  
   constraint = new_ion_constraint(MONO, max_charge, ALL_ION, FALSE);
 

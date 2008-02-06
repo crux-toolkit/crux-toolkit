@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file ion.c
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -381,18 +381,17 @@ void print_ion_gmtk_single_binary(
   ){
 
   float* float_array = (float*)mycalloc(sizeof(float), SINGLE_ION_FLOATS);
-	int* int_array = (int*)mycalloc(sizeof(int), SINGLE_ION_INTS);
+  int* int_array = (int*)mycalloc(sizeof(int), SINGLE_ION_INTS);
 
   float mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
   float_array[0] = mz_ratio;                              // 0
-	float_array[1] = 0.0; 																	// 1
-	float_array[2] = 0.0; 																	// 2
-
-	int is_detected = 0; 																		
+  float_array[1] = 0.0;                                   // 1
+  float_array[2] = 0.0;                                   // 2
+  int is_detected = 0;
   if (ion->peak != NULL){
-    float_array[1] = get_peak_intensity(ion->peak); 			// 1 
-    float_array[2] = get_peak_intensity_rank(ion->peak); 	// 2 
-    is_detected = 1; 																			
+    float_array[1] = get_peak_intensity(ion->peak);       // 1 
+    float_array[2] = get_peak_intensity_rank(ion->peak);  // 2 
+    is_detected = 1; 
 
 #ifdef LOG_INTENSITY
     // START
@@ -403,11 +402,11 @@ void print_ion_gmtk_single_binary(
 
   }
 
-	int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
-	int cterm_idx = strlen(ion->peptide_sequence) - ion->cleavage_idx; 
+  int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
+  int cterm_idx = strlen(ion->peptide_sequence) - ion->cleavage_idx; 
   int left_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx-1]);
   int right_amino = amino_to_int(ion->peptide_sequence[ion->cleavage_idx]);
-	int is_detectable = 0;
+  int is_detectable = 0;
   if ( 
        ((ion->ion_mass_z >= DETECTABLE_MZ_MIN) 
               &&
@@ -422,15 +421,15 @@ void print_ion_gmtk_single_binary(
   }
 
 
-	int_array[0] = 1;																				// 0
-	int_array[1] = mz_int; 																	// 1
-	int_array[2] = ion->cleavage_idx;												// 2
-	int_array[3] = cterm_idx;																// 3
-	int_array[4] = left_amino;		 													// 4
-	int_array[5] = right_amino; 														// 5
-	int_array[6] = 1;							 													// 6
-	int_array[7] = is_detectable; 													// 7
-	int_array[8] = is_detected; 														// 8
+  int_array[0] = 1;                 // 0
+  int_array[1] = mz_int;            // 1
+  int_array[2] = ion->cleavage_idx; // 2
+  int_array[3] = cterm_idx;         // 3
+  int_array[4] = left_amino;        // 4
+  int_array[5] = right_amino;       // 5
+  int_array[6] = 1;                 // 6
+  int_array[7] = is_detectable;     // 7
+  int_array[8] = is_detected;       // 8
 
   if (REVERSE_ENDIAN){
 
@@ -469,8 +468,8 @@ void print_ion_gmtk_single_binary(
 
   }
 
-	fwrite(float_array, sizeof(float), 3, file);
-	fwrite(int_array, sizeof(int), 9, file);
+  fwrite(float_array, sizeof(float), 3, file);
+  fwrite(int_array, sizeof(int), 9, file);
   free(float_array);
   free(int_array);
 }
@@ -486,12 +485,12 @@ void print_null_ion_gmtk_single_binary(
   int frame_idx
   ){
 
-	float float_array[3] = {0.0, 0.0, 0.0};
-	int int_array[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  float float_array[3] = {0.0, 0.0, 0.0};
+  int int_array[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);
-	fwrite(float_array, sizeof(float), 3, file);
-	fwrite(int_array, sizeof(int), 9, file);
+  fwrite(float_array, sizeof(float), 3, file);
+  fwrite(int_array, sizeof(int), 9, file);
 }
 
 /**
@@ -505,12 +504,12 @@ void print_null_ion_gmtk_paired_binary(
   ){
 
   // FIX get rid of magic numbers
-	float float_array[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-	int int_array[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  float float_array[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  int int_array[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);
-	fwrite(float_array, sizeof(float), 6, file);
-	fwrite(int_array, sizeof(int), 12, file);
+  fwrite(float_array, sizeof(float), 6, file);
+  fwrite(int_array, sizeof(int), 12, file);
 }
 
 
@@ -566,42 +565,42 @@ void print_ion_gmtk_paired_binary(
   ){
   
   float* float_array = (float*)mycalloc(sizeof(float), PAIRED_ION_FLOATS);
-	int* int_array = (int*)mycalloc(sizeof(int), PAIRED_ION_INTS);
+  int* int_array = (int*)mycalloc(sizeof(int), PAIRED_ION_INTS);
 
   // start with the floats
   float n_mz_ratio = (first_ion->ion_mass_z)/(first_ion->peptide_mass);
   float_array[0] = n_mz_ratio;                                    // 0
   // TODO 
   // subtract from 1.0?
-	float c_mz_ratio =  1.0 - n_mz_ratio;                           // 1
-	float_array[1] = c_mz_ratio;
+  float c_mz_ratio =  1.0 - n_mz_ratio;                           // 1
+  float_array[1] = c_mz_ratio;
 
-	int first_is_detected = 0; 																		
+  int first_is_detected = 0;
   if (first_ion->peak != NULL){
     // put in LOG_INTENSITY ?
-    float_array[2] = get_peak_intensity(first_ion->peak); 			// 2 
-    float_array[4] = get_peak_intensity_rank(first_ion->peak); 	// 4 
-    first_is_detected = 1; 								
+    float_array[2] = get_peak_intensity(first_ion->peak);         // 2 
+    float_array[4] = get_peak_intensity_rank(first_ion->peak);    // 4 
+    first_is_detected = 1; 
   }
 
-  int second_is_detected = 0; 																		
+  int second_is_detected = 0;
   if (second_ion->peak != NULL){
     // put in LOG_INTENSITY ?
-    float_array[3] = get_peak_intensity(second_ion->peak); 			// 3 
-    float_array[5] = get_peak_intensity_rank(second_ion->peak); // 5 
-    second_is_detected = 1; 								
+    float_array[3] = get_peak_intensity(second_ion->peak);        // 3 
+    float_array[5] = get_peak_intensity_rank(second_ion->peak);   // 5 
+    second_is_detected = 1; 
   }
 
   // next do the ints
   int n_mz_int = (int)(n_mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
   int c_mz_int = (int)(c_mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
-	int cterm_idx = strlen(first_ion->peptide_sequence) 
+  int cterm_idx = strlen(first_ion->peptide_sequence) 
     - first_ion->cleavage_idx; 
   int left_amino = amino_to_int(
       first_ion->peptide_sequence[first_ion->cleavage_idx-1]);
   int right_amino = amino_to_int(
       first_ion->peptide_sequence[first_ion->cleavage_idx]);
-	int first_is_detectable = 0;
+  int first_is_detectable = 0;
   if ( 
        ((first_ion->ion_mass_z >= DETECTABLE_MZ_MIN) 
               &&
@@ -674,8 +673,8 @@ void print_ion_gmtk_paired_binary(
   // output to the file
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);
-	fwrite(float_array, sizeof(float), PAIRED_ION_FLOATS, file);
-	fwrite(int_array, sizeof(int), PAIRED_ION_INTS, file);
+  fwrite(float_array, sizeof(float), PAIRED_ION_FLOATS, file);
+  fwrite(int_array, sizeof(int), PAIRED_ION_INTS, file);
   free(float_array);
   free(int_array);
 };

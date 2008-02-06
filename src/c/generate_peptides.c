@@ -98,7 +98,7 @@ int main(int argc, char** argv){
     ++total_peptides;
     peptide = generate_peptides_iterator_next(peptide_iterator);
     print_peptide_in_format(peptide, output_sequence, 
-			    print_trypticity, stdout);
+                            print_trypticity, stdout);
     
     // free peptide
     free_peptide(peptide);
@@ -123,7 +123,7 @@ void print_header(){
   BOOLEAN_T bool_val;
 
   printf("# PROTEIN DATABASE: %s\n", 
-	           get_string_parameter_pointer("protein input"));
+         get_string_parameter_pointer("protein input"));
   printf("# OPTIONS:\n");
   printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass"));
   printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass"));
@@ -135,12 +135,12 @@ void print_header(){
   printf("#\tallow missed-cleavages: %s\n", boolean_to_string(bool_val));
   printf("#\tsort: %s\n",  get_string_parameter_pointer("sort"));
   printf("#\tisotopic mass type: %s\n", 
-	          get_string_parameter_pointer("isotopic-mass"));
+         get_string_parameter_pointer("isotopic-mass"));
   printf("#\tverbosity: %d\n", get_verbosity_level());
 
   bool_val = get_boolean_parameter("use-index");
   printf("#\tuse index: %s\n", boolean_to_string(bool_val));
-	 //get_string_parameter_pointer("use-index"));
+  //get_string_parameter_pointer("use-index"));
   
 }
 /*

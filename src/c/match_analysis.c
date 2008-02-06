@@ -10,7 +10,7 @@
  * Handles at most x files (target and decoy).  Expects psm files to
  * end with the extension '.csm' and decoys to end with '-decoy#.csm'
  * 
- * $Revision: 1.39 $
+ * $Revision: 1.40 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -114,8 +114,8 @@ int main(int argc, char** argv){
   case PERCOLATOR_ALGORITHM:
     carp(CARP_INFO, "Running percolator");
     match_collection = run_percolator(psm_file,
-				      fasta_file,
-				      feature_file);
+                                      fasta_file,
+                                      feature_file);
     scorer_type = PERCOLATOR_SCORE;
     break;
     
@@ -129,7 +129,7 @@ int main(int argc, char** argv){
     carp(CARP_INFO, "No analysis algorithm chosen.");
     match_collection = run_nothing(psm_file,
                                    fasta_file,
-				   feature_file);
+                                   feature_file);
     scorer_type = XCORR; // TODO put in something to default to the primary
     // score in the run
     break;
