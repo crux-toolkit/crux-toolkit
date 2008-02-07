@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.63 $
+ * $Revision: 1.64 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include "utils.h"
 #include "alphabet.h"
+#include "parameter.h"
 #include "objects.h"
 #include "peptide.h"
 #include "protein.h"
@@ -59,7 +60,7 @@ struct protein_peptide_iterator {
   unsigned short int cur_length; ///< The length of the current peptide.
   unsigned int peptide_idx; ///< The index of the current peptide.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The type of peptide to iterate over.
-  float** mass_matrix; ///< stores all the peptide's mass
+  float* mass_array; ///< stores all the peptide's mass
   BOOLEAN_T has_next; ///< is there a next? 
   int num_mis_cleavage; ///< The maximum mis cleavage of the peptide
   unsigned int* seq_marker; ///< The array that marks all the 'K | R | P'
@@ -966,10 +967,34 @@ PEPTIDE_TYPE_T examine_peptide_type(
   }
 }
 
+/*
+ * Takes a cumulative distribution of peptide masses (mass_array) and
+ * the start index and end index and return a peptide mass
+ */
+// OPTIMIZE
+float calculate_subsequence_mass (
+    float* mass_array,
+    int cur_start,
+    int cur_length
+  ){
+
+  float mass_h2o = MASS_H2O_AVERAGE;
+  if(get_mass_type_parameter("isotopic-mass") == MONO){
+    mass_h2o = MASS_H2O_MONO;
+  }
+
+  int start_idx = cur_start-1;
+  int end_idx = start_idx + cur_length;
+  float peptide_mass = mass_array[end_idx] - mass_array[start_idx] + mass_h2o;
+
+  return peptide_mass;
+}
+
 /**
  * Finds the next peptide that fits the constraints
  * \returns TRUE if there is a next peptide. FALSE if not.
  */
+// OPTIMIZE
 BOOLEAN_T iterator_state_help(
   PROTEIN_PEPTIDE_ITERATOR_T* iterator, 
   int max_length,  ///< constraints: max length -in
@@ -999,7 +1024,7 @@ BOOLEAN_T iterator_state_help(
     return FALSE;
   }
   
-  // check if out of mass_max idex size
+  // check if out of mass_max index size
   if(iterator->cur_length > max_length ||
      iterator->cur_length > iterator->protein->length){
     return FALSE;
@@ -1019,11 +1044,13 @@ BOOLEAN_T iterator_state_help(
   }
   
   // is mass with in range
-  if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] < min_mass ||
-        iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] > max_mass){
-    // does this length have any possibility of having a peptide within mass range?
-    if(iterator->mass_matrix[iterator->cur_length-1][iterator->cur_start-1] == 0 ||
-       iterator->cur_length * LARGEST_MASS + 19 < min_mass){
+  float peptide_mass = calculate_subsequence_mass(iterator->mass_array, 
+      iterator->cur_start, iterator->cur_length);
+
+  if(peptide_mass < min_mass || peptide_mass > max_mass){
+
+    // does this length have any possibility of having peptide within mass range?
+    if(peptide_mass == 0 || iterator->cur_length * LARGEST_MASS + 19 < min_mass){
       ++iterator->cur_length;
       iterator->cur_start = 1;
     }
@@ -1090,24 +1117,22 @@ BOOLEAN_T set_iterator_state(
 }
 
 
-// start_size: total sequence size 
+// sequence_length : total sequence size 
 // length_size: max_length from constraint;
-// float** mass_matrix = float[length_size][start_size];
+// float* mass_array = float[sequence_length];
 /**
- * Dynamically sets the mass of the mass_matrix
+ * Dynamically sets the mass of the mass_array
  * The mass matrix contains every peptide bellow max length
  * must pass in a heap allocated matrix
+ * OPTIMIZE
  */
-void set_mass_matrix(
-  float** mass_matrix,  ///< the mass matrix -out
-  unsigned int start_size,  ///< the y axis size -in
-  unsigned int length_size, ///< the x axis size -in
+void set_mass_array(
+  float* mass_array,  ///< the mass matrix -out
+  int sequence_length,  ///< the y axis size -in
   PROTEIN_T* protein, ///< the parent protein -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
-  unsigned int start_index = 0;
-  unsigned int length_index = 1;
   float mass_h2o = MASS_H2O_AVERAGE;
 
   // set correct H2O mass
@@ -1116,20 +1141,11 @@ void set_mass_matrix(
   }
   
   // initialize mass matrix
-  for(; start_index < start_size; ++start_index){
-    mass_matrix[0][start_index] = 
-      get_mass_amino_acid(protein->sequence[start_index], mass_type) + mass_h2o;
-  }
-  start_index = 0;
-  
-  // fill in the mass matrix
-  for(; start_index < start_size; ++start_index){
-    for(length_index = 1; length_index < length_size; ++length_index){
-      if(start_index + length_index < protein->length){
-        mass_matrix[length_index][start_index] = 
-          mass_matrix[length_index - 1][start_index] + mass_matrix[0][start_index + length_index] - mass_h2o; 
-      }
-    }
+  int start_idx = 0;
+  mass_array[start_idx] = 0.0;
+  for(start_idx = 1; start_idx < sequence_length; ++start_idx){
+    mass_array[start_idx] = mass_array[start_idx-1] + 
+      get_mass_amino_acid(protein->sequence[start_idx-1], mass_type);
   }
 }
 
@@ -1183,7 +1199,7 @@ void set_seq_marker(
 }
 
 /**
- * Instantiates a new peptide_iterator from a peptide.
+ * Instantiates a new peptide_iterator from a protein.
  * \returns a PROTEIN_PEPTIDE_ITERATOR_T object.
  * assumes that the protein is heavy
  */
@@ -1192,48 +1208,32 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraints -in
   )
 {
-  unsigned int matrix_index = 0;
-  unsigned int max_length = get_peptide_constraint_max_length(peptide_constraint);
+  // OPTIMIZE not sure if I can take this out?
+  /*unsigned int max_length 
+    = get_peptide_constraint_max_length(peptide_constraint);*/
   MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(peptide_constraint);
 
-  PROTEIN_PEPTIDE_ITERATOR_T* iterator = 
-    (PROTEIN_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(PROTEIN_PEPTIDE_ITERATOR_T));
+  PROTEIN_PEPTIDE_ITERATOR_T* iterator = (PROTEIN_PEPTIDE_ITERATOR_T*)
+    mycalloc(1, sizeof(PROTEIN_PEPTIDE_ITERATOR_T));
 
-  // create mass_matrix
-  iterator->mass_matrix = (float**)mycalloc(max_length, sizeof(float*));
-  for (; matrix_index < max_length ; ++matrix_index){
-    iterator->mass_matrix[matrix_index] = (float*)mycalloc(protein->length, sizeof(float));
-  }  
-  set_mass_matrix(iterator->mass_matrix, protein->length, max_length, protein, mass_type);
+  // create mass_array
+  iterator->mass_array = (float*)mycalloc(protein->length+1, sizeof(float));
+  set_mass_array(
+    iterator->mass_array, protein->length, protein, mass_type);
   
   // initialize iterator
   iterator->protein = protein;
   iterator->peptide_idx = 0;
   iterator->peptide_constraint =copy_peptide_constraint_ptr(peptide_constraint);
-  iterator->cur_start = 1; // must cur_start-1 for access mass_matrix
-  iterator->cur_length = 1;  // must cur_length-1 for access mass_matrix
-  iterator->num_mis_cleavage = get_peptide_constraint_num_mis_cleavage(iterator->peptide_constraint);
+  iterator->cur_start = 0; // must cur_start-1 for access mass_array
+  iterator->cur_length = 1;  // must cur_length-1 for access mass_array
+  iterator->num_mis_cleavage 
+    = get_peptide_constraint_num_mis_cleavage(iterator->peptide_constraint);
   set_seq_marker(iterator);
   iterator->has_next = set_iterator_state(iterator);
   return iterator;
 }
 
-
-/**
- * free the heap allocated mass_matrix
- */
-void free_mass_matrix(
-  float** mass_matrix,  ///< the mass matrix to free -in
-  unsigned int length_size ///< the x axis size -in
-  )
-{
-  unsigned int matrix_idx = 0;
-  for (; matrix_idx  < length_size; ++matrix_idx){
-    free(mass_matrix[matrix_idx]);
-  }
-
-  free(mass_matrix);
-}
 
 /**
  * Frees an allocated peptide_iterator object.
@@ -1243,9 +1243,7 @@ void free_protein_peptide_iterator(
     ///< the iterator to free -in
   )
 {
-  free_mass_matrix(protein_peptide_iterator->mass_matrix, 
-                   get_peptide_constraint_max_length(
-                     protein_peptide_iterator->peptide_constraint));
+  free(protein_peptide_iterator->mass_array); 
   free_peptide_constraint(protein_peptide_iterator->peptide_constraint);
   free(protein_peptide_iterator->seq_marker);
   free(protein_peptide_iterator);
@@ -1262,7 +1260,6 @@ BOOLEAN_T protein_peptide_iterator_has_next(
 {
   return protein_peptide_iterator->has_next;
 }
-
 
 /**
  * \returns The next peptide in the protein, in an unspecified order
@@ -1288,17 +1285,27 @@ PEPTIDE_T* protein_peptide_iterator_next(
   // possible to skip this step and leave it as ANY_TRYPTIC
   else{
       peptide_type = 
-        examine_peptide_type(protein_peptide_iterator,
-                             protein_peptide_iterator->cur_start,
-                             protein_peptide_iterator->cur_start + protein_peptide_iterator->cur_length -1);
+        examine_peptide_type(
+            protein_peptide_iterator,
+            protein_peptide_iterator->cur_start,
+            protein_peptide_iterator->cur_start 
+              + protein_peptide_iterator->cur_length -1);
   }
   
+  // TODO C-term and N-term mass modification
+  // calculate peptide mass
+  float peptide_mass = calculate_subsequence_mass(
+      protein_peptide_iterator->mass_array, 
+      protein_peptide_iterator->cur_start, 
+      protein_peptide_iterator->cur_length);
+
+    // OPTIMIZE
 
   // create new peptide
   PEPTIDE_T* peptide = 
     new_peptide
     (protein_peptide_iterator->cur_length, 
-     protein_peptide_iterator->mass_matrix[protein_peptide_iterator->cur_length-1][protein_peptide_iterator->cur_start-1],
+     peptide_mass,
      protein_peptide_iterator->protein,
      protein_peptide_iterator->cur_start,
      peptide_type
