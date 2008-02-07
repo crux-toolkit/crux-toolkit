@@ -194,7 +194,7 @@ int main(int argc, char** argv){
 
         free_match_collection(match_collection);
         is_decoy = TRUE;
-        exit(1); // to get gmon.out for a single spectrum uncomment this line
+        // exit(1); // to get gmon.out for a single spectrum uncomment this line
       }// next set (target, decoy, decoy...)
 
       spectrum_searches_counter++;
