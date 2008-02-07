@@ -1,6 +1,6 @@
 /*********************************************************************//**
  * \file match_collection.c
- * $Revision: 1.73 $
+ * $Revision: 1.74 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Methods for creating and manipulating match_collections.   
@@ -1965,8 +1965,12 @@ void print_sqt_header(FILE* output, char* type, int num_proteins){
 }
 
 /**
- * Print the psm features to output file upto 'top_match' number of 
- * top peptides among the match_collection in sqt file format
+ * \brief Print the psm features to file in sqt format.
+ *
+ * Prints one S line, 'top_match' M lines, and one locus line for each
+ * peptide source of each M line.
+ * Assumes one spectrum per match collection.  Could get top_match,
+ * score types from parameter.c.  Could get spectrum from first match.
  *\returns TRUE, if sucessfully print sqt format of the PSMs, else FALSE 
  */
 BOOLEAN_T print_match_collection_sqt(
@@ -1980,82 +1984,40 @@ BOOLEAN_T print_match_collection_sqt(
 {
   time_t hold_time;
   hold_time = time(0);
-  float delta_cn =  get_match_collection_delta_cn(match_collection);
-  /// the charge of the of spectrum used to score
+  //float delta_cn =  get_match_collection_delta_cn(match_collection);
+  // the charge of the of spectrum used to score
   int charge = match_collection->charge; 
+  int num_matches = match_collection->experiment_size;
 
-  // print header
-  //  fprintf(output, "H\tSQTGenerator CRUX\n");
-  //  fprintf(output, "H\tTime\t%s", ctime(&hold_time));
-  
   // print spectrum info
-  //<first scan><last scan><charge><precursor m/z><# sequence match>
-  fprintf(output, "S\t%d\t%d\t%d\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%d\n", 
-          get_spectrum_first_scan(spectrum), 
-          get_spectrum_last_scan(spectrum),
-          charge, 
-          0.0, // FIXME dummy <process time>
-          "server", // FIXME dummy <server>
-          get_spectrum_precursor_mz(spectrum), 
-          0.0, // FIXME dummy
-          0.0, // FIXME dummy <lowest sp>
-          match_collection->experiment_size);
+  print_spectrum_sqt(spectrum, output, num_matches, charge);
   
   MATCH_T* match = NULL;
-  PEPTIDE_T* peptide = NULL;
-  PROTEIN_T* protein = NULL;
-  char* sequence = NULL;
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = NULL;
-  PEPTIDE_SRC_T* peptide_src = NULL;
-  char* protein_id = NULL;
+  //PEPTIDE_T* peptide = NULL;
+  //PROTEIN_T* protein = NULL;
+  //char* sequence = NULL;
+  //PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = NULL;
+  //PEPTIDE_SRC_T* peptide_src = NULL;
+  //char* protein_id = NULL;
   
-  // create match iterator, TRUE: return match in sorted order of main_score type
-  MATCH_ITERATOR_T* match_iterator = new_match_iterator(match_collection, main_score, TRUE);
+  // create match iterator
+  // TRUE: return match in sorted order of main_score type
+  MATCH_ITERATOR_T* match_iterator = 
+    new_match_iterator(match_collection, main_score, TRUE);
   
   // Second, iterate over matches
   int match_count = 0;
   while(match_iterator_has_next(match_iterator)){
     ++match_count;
     match = match_iterator_next(match_iterator);    
-    peptide = get_match_peptide(match);
-    sequence = get_peptide_sequence_sqt(peptide);
-    
-    // print match info
-    fprintf(output, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\n",
-            get_match_rank(match, main_score),
-            get_match_rank(match, prelim_score),
-            get_peptide_peptide_mass(peptide),
-            delta_cn,
-            get_match_score(match, main_score),
-            get_match_score(match, prelim_score),
-            get_match_b_y_ion_matched(match),
-            get_match_b_y_ion_possible(match),
-            sequence
-            );
-    free(sequence);
 
-    peptide_src_iterator = new_peptide_src_iterator(peptide);
-
-    while(peptide_src_iterator_has_next(peptide_src_iterator)){
-      peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-      protein = get_peptide_src_parent_protein(peptide_src);
-      protein_id = get_protein_id(protein);
-      sequence = get_peptide_sequence_from_peptide_src_sqt(peptide, peptide_src);
-
-      // print match info (locus line)
-      //fprintf(output, "L\t%s\t%s\n", protein_id, sequence);
-      fprintf(output, "L\t%s\n", protein_id);      
-      free(protein_id);
-      free(sequence);
-    }
-
-    free_peptide_src_iterator(peptide_src_iterator);
+    print_match_sqt(match, output, main_score, prelim_score);
 
     // print only up to max_rank_result of the matches
     if(match_count >= top_match){
       break;
     }
-  }
+  }// next match
   
   free_match_iterator(match_iterator);
   
@@ -2261,7 +2223,11 @@ void print_matches(
 /**
  * \brief Creates a new match_collection from the PSM iterator.
  *
- * Used in the post_processing extension.
+ * Used in the post_processing extension.  Also used by
+ * setup_match_collection_iterator which is called by next to find,
+ * open, and parse the next psm file(s) to process.  If there are
+ * multiple target psm files, it reads in all of them when set_type is
+ * 0 and puts them all into one match_collection. 
  *\returns A heap allocated match_collection.
  */
 MATCH_COLLECTION_T* new_match_collection_psm_output(
@@ -2276,6 +2242,8 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   FILE* result_file = NULL;
   char suffix[25];
   //  char prefix[25];
+
+  carp(CARP_DEBUG, "Calling new_match_collection_psm_output");
   DATABASE_T* database = match_collection_iterator->database;
   
   // allocate match_collection object
@@ -2479,7 +2447,8 @@ BOOLEAN_T extend_match_collection(
       else{
         // if boolean values already been set compare if no conflicting scored types
         if(match_collection->scored_type[score_type_idx] != type_scored){
-          carp(CARP_ERROR, "Serialized match objects has not been scored as other match objects");
+          carp(CARP_ERROR, "Serialized match objects has not been scored "
+               "as other match objects");
         }
       }
       
@@ -2500,7 +2469,7 @@ BOOLEAN_T extend_match_collection(
       
       // parse match object
       if((match = parse_match(result_file, database))==NULL){
-        carp(CARP_ERROR, "failed to parse serialized PSM match");
+        carp(CARP_ERROR, "Failed to parse serialized PSM match");
         return FALSE;
       }
       
@@ -2521,7 +2490,8 @@ BOOLEAN_T extend_match_collection(
 /**
  * Adds the match object to match_collection
  * Must not exceed the _MAX_NUMBER_PEPTIDES to be match added
- *\returns TRUE if successfully adds the match to the match_collection, else FALSE
+ * \returns TRUE if successfully adds the match to the
+ * match_collection, else FALSE 
  */
 BOOLEAN_T add_match_to_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
@@ -2538,7 +2508,8 @@ BOOLEAN_T add_match_to_match_collection(
   
   // check if enough space for peptide match
   if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
-    carp(CARP_ERROR, "rich match count exceeds max match limit: %d", _MAX_NUMBER_PEPTIDES);
+    carp(CARP_ERROR, "Rich match count exceeds max match limit: %d", 
+         _MAX_NUMBER_PEPTIDES);
     return FALSE;
   }
   

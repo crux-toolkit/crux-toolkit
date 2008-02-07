@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.52 $
+ * REVISION: $Revision: 1.53 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -284,6 +284,63 @@ void print_match(
     fprintf(file, "%s\n", peptide_sequence);
     free(peptide_sequence);
   }
+}
+
+/**
+ * \brief Print the match information in sqt format to the given file
+ *
+ * The main score goes in the position usually holding the xcorr.  The other
+ * score goes in the position usually holding the preliminary Sp
+ * score.  For searches analyzed by percolator, main and other should
+ * be discriminant score and qvalue.
+ */
+void print_match_sqt(
+  MATCH_T* match,             ///< the match to print -in  
+  FILE* file,                 ///< output stream -out
+  SCORER_TYPE_T main_score,   ///< the main score to report -in
+  SCORER_TYPE_T other_score  ///< the score to report -in
+  ){
+
+  PEPTIDE_T* peptide = get_match_peptide(match);
+  char* sequence = get_peptide_sequence_sqt(peptide);
+
+  // print match info
+  fprintf(file, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\n",
+          get_match_rank(match, main_score),
+          get_match_rank(match, other_score),
+          get_peptide_peptide_mass(peptide),
+          get_match_delta_cn(match),
+          get_match_score(match, main_score),
+          get_match_score(match, other_score),
+          get_match_b_y_ion_matched(match),
+          get_match_b_y_ion_possible(match),
+          sequence
+          );
+  free(sequence);
+  
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
+    new_peptide_src_iterator(peptide);
+  PEPTIDE_SRC_T* peptide_src = NULL;
+  char* protein_id = NULL;
+  PROTEIN_T* protein = NULL;
+  
+  while(peptide_src_iterator_has_next(peptide_src_iterator)){
+    peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    protein = get_peptide_src_parent_protein(peptide_src);
+    protein_id = get_protein_id(protein);
+    sequence = get_peptide_sequence_from_peptide_src_sqt(peptide, 
+                                                         peptide_src);
+    
+    // print match info (locus line)
+    // TODO (BF 06-Feb-08): add protein description
+    fprintf(file, "L\t%s\n", protein_id);      
+    free(protein_id);
+    free(sequence);
+  }
+  
+  free_peptide_src_iterator(peptide_src_iterator);
+  // end print_match_sqt()
+  
 }
 
 /**

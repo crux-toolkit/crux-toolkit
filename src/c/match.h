@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.16 $ 
+ * $Revision: 1.17 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -89,6 +89,21 @@ void print_match(
   FILE* file, ///< output stream -out
   BOOLEAN_T output_sequence, ///< should I output peptide sequence -in
   SCORER_TYPE_T output_mode  ///< the output mode -in
+);
+
+/**
+ * \brief Print the match information in sqt format to the given file
+ *
+ * The main score goes in the position usually holding the xcorr.  The other
+ * score goes in the position usually holding the preliminary Sp
+ * score.  For searches analyzed by percolator, main and other should
+ * be discriminant score and qvalue.
+ */
+void print_match_sqt(
+  MATCH_T* match, ///< the match to print -in  
+  FILE* file, ///< output stream -out
+  SCORER_TYPE_T main_score,  ///< the main score to report -in
+  SCORER_TYPE_T other_score  ///< the score to report -in
 );
 
 /**

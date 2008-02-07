@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -41,6 +41,16 @@ void free_spectrum (
 void print_spectrum(
   SPECTRUM_T* spectrum, ///< spectrum to print -in
   FILE* file ///< output file to print at -out
+  );
+
+/**
+ * Prints a spectrum object to file in sqt format.
+ */
+void print_spectrum_sqt(
+  SPECTRUM_T* spectrum, ///< spectrum to print -in
+  FILE* file,           ///< output file to print at -out
+  int num_matches,      ///< number of peptides compared to this spec -in
+  int charge            ///< charge used for the search -in
   );
 
 /**
