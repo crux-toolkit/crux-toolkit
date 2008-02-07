@@ -10,7 +10,7 @@
  * Handles at most x files (target and decoy).  Expects psm files to
  * end with the extension '.csm' and decoys to end with '-decoy#.csm'
  * 
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -169,15 +169,15 @@ int output_matches(
   while(match_iterator_has_next(match_iterator)){
     ++match_count;
 
-    //// set max number of final scoring matches to print as output
+    // set max number of final scoring matches to print as output
 
     if(match_count >= max_rank_result){
       break;
     }
     
     match = match_iterator_next(match_iterator);
-    // TODO what is TRUE below?
-    print_match(match, stdout, TRUE, scorer_type);
+    print_match(match, stdout, TRUE, // TRUE==print sequence
+                scorer_type);
   }
   return 0;
 }
@@ -445,7 +445,7 @@ MATCH_COLLECTION_T* run_percolator(
   int set_idx = 0;
   
   // optional feature_file
-  if (feature_file != NULL){  
+  if(feature_file != NULL){  
     if((feature_fh = fopen(feature_file, "w")) == NULL){
       carp(CARP_FATAL, "Problem opening output file %s", feature_file);
       return NULL;

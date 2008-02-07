@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.64 $
+ * REVISION: $Revision: 1.65 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -279,6 +279,31 @@ void print_spectrum(
             get_peak_intensity(find_peak(spectrum->peaks, num_peak_index)));
   }
 }
+
+/**
+ * Prints a spectrum object to file in sqt format.
+ */
+void print_spectrum_sqt(
+  SPECTRUM_T* spectrum, ///< spectrum to print -in
+  FILE* file,           ///< output file to print at -out
+  int num_matches, ///< number of peptides compared to this spec -in
+  int charge            ///< charge used for the search -in
+  ){
+
+  //<first scan><last scan><charge><precursor m/z><# sequence match>
+  fprintf(file, "S\t%d\t%d\t%d\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%d\n", 
+          get_spectrum_first_scan(spectrum), 
+          get_spectrum_last_scan(spectrum),
+          charge, 
+          0.0, // FIXME dummy <process time>
+          "server", // FIXME dummy <server>
+          get_spectrum_precursor_mz(spectrum), // TODO this should be M+H+
+          0.0, // FIXME dummy <total intensity>
+          0.0, // FIXME dummy <lowest sp>
+          num_matches);
+
+}
+
 
 /**
  * Prints a spectrum object to STDOUT.
