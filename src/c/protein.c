@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.64 $
+ * $Revision: 1.65 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -979,9 +979,9 @@ float calculate_subsequence_mass (
   ){
 
   float mass_h2o = MASS_H2O_AVERAGE;
-  if(get_mass_type_parameter("isotopic-mass") == MONO){
+  /*if(get_mass_type_parameter("isotopic-mass") == MONO){
     mass_h2o = MASS_H2O_MONO;
-  }
+  }*/
 
   int start_idx = cur_start-1;
   int end_idx = start_idx + cur_length;
