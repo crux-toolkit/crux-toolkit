@@ -171,6 +171,7 @@ int main(int argc, char** argv){
 
       for(file_i=0; file_i < total_files; file_i++){
 
+        carp(CARP_DETAILED_DEBUG, "csm alloc");
         MATCH_COLLECTION_T* match_collection = 
           new_match_collection_from_spectrum( spectrum,
                                               charge,
@@ -181,7 +182,7 @@ int main(int argc, char** argv){
                                               is_decoy,
                                               index,
                                               database);
-        if( match_collection == NULL ){
+        if(match_collection == NULL){
           file_i = total_files; //don't search decoys
           spectrum_searches_counter--;  //don't count this search
           continue;
@@ -194,11 +195,13 @@ int main(int argc, char** argv){
 
         free_match_collection(match_collection);
         is_decoy = TRUE;
-        exit(1); // to get gmon.out for a single spectrum uncomment this line
+        //exit(1); // to get gmon.out for a single spectrum uncomment this line
       }// next set (target, decoy, decoy...)
 
       spectrum_searches_counter++;
     }// next charge state, same spectrum
+
+    free(charge_array);
     
     spectrum_counter++;
     if( spectrum_counter %1000 == 0 ){
