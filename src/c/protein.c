@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.65 $
+ * $Revision: 1.66 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -30,6 +30,7 @@
 #define FASTA_LINE 50
 #define SMALLEST_MASS 57
 #define LARGEST_MASS 190
+#define MAX_PEPTIDES_PER_PROTEIN 1000000
 
 /**
  * \struct protein 
@@ -59,24 +60,28 @@ struct protein_peptide_iterator {
   unsigned short int cur_start; ///< Start in protein of the current peptide.
   unsigned short int cur_length; ///< The length of the current peptide.
   unsigned int peptide_idx; ///< The index of the current peptide.
-  PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< The type of peptide to iterate over.
+  PEPTIDE_CONSTRAINT_T* peptide_constraint; 
+    ///< The type of peptide to iterate over.
   float* mass_array; ///< stores all the peptide's mass
+
+  int* nterm_cleavage_positions; 
+    ///< the nterm cleavages that satisfy constraint. 1st aa is 1.
+  int* peptide_lengths; ///< all the lengths of valid peptides
+  int current_cleavage_idx; /// where are we in the cleavage positions?
+  int num_cleavages; /// how many cleavage positions?
+
   BOOLEAN_T has_next; ///< is there a next? 
   int num_mis_cleavage; ///< The maximum mis cleavage of the peptide
-  unsigned int* seq_marker; ///< The array that marks all the 'K | R | P'
-  unsigned int kr_idx; ///<idx for the closest to cur_start K | R is located
-  unsigned int first_kr_idx; ///<idx for the first K | R is located
-  BOOLEAN_T is_kr; ///<is there a K|R found in this sequence
 };
 
-// def bellow
+// def below
 static BOOLEAN_T read_title_line
   (FILE* fasta_file,
    char* name,
    char* description,
    PROTEIN_T* protein);
 
-// def bellow
+// def below
 static BOOLEAN_T read_raw_sequence
   (FILE* fasta_file,   // Input Fasta file.
    char* name,         // Sequence ID (used in error messages).
@@ -84,7 +89,6 @@ static BOOLEAN_T read_raw_sequence
    char* raw_sequence, // Pre-allocated sequence.
    unsigned int* sequence_length // the sequence length -chris added
    );
-
 
 /**
  * \returns An (empty) protein object.
@@ -579,7 +583,7 @@ static BOOLEAN_T read_raw_sequence
       
       /**
        * To speed up the process, checks the ASCII code, 
-       * if the char is above or bellow the A(65)~Z(90)range,
+       * if the char is above or below the A(65)~Z(90)range,
        * converts the character to a 'X'
        */
       if ( (int)a_char < 65 || (int)a_char  > 90 ) {
@@ -871,102 +875,6 @@ DATABASE_T* get_protein_database(
  * iterates over the peptides given a partent protein and constraints
  */
 
-/**
- * find if there's a K or R in the middle of peptide, skips K|R with P after them
- * returns TRUE if no missed cleavage sites discovered
- */
-BOOLEAN_T find_krp(
-  unsigned int* seq_marker,
-  unsigned int kr_idx,
-  unsigned int start_idx, ///< the start index of peptide, 1 is the first residue -in 
-  unsigned int end_idx
-  ){
-  if(kr_idx < end_idx && 
-     kr_idx >= start_idx){
-    // is there a P after the K|R 
-    if(seq_marker[kr_idx] == 1){ // check boundary
-      return find_krp(seq_marker, seq_marker[kr_idx-1], start_idx, end_idx);
-    }
-    return FALSE;
-  }
-  
-  else if(kr_idx >= end_idx || seq_marker[kr_idx-1] >= end_idx){
-    return TRUE;
-  }
-  else if(seq_marker[kr_idx-1] < end_idx && 
-          seq_marker[kr_idx-1] >= start_idx){
-    // is there a P after the K|R 
-    if(seq_marker[seq_marker[kr_idx-1]] == 1){ // check boundary
-      return find_krp(seq_marker, seq_marker[kr_idx-1], start_idx, end_idx);
-    }
-    return FALSE;
-  }
-  return TRUE;
-}
-
-// FIXME only examines if there is a mis-cleavage or not
-// eventually would like to implement so that it will return the total number of mis-cleavage
-/**
- * examines the peptide if it contains miscleavage sites within it's sequence
- * \returns 0 if no miscleavage sites, 1 if there exist at least 1 mis cleavage sites
- */
-int examine_peptide_cleavage(
-  PROTEIN_PEPTIDE_ITERATOR_T* iterator, ///< working iterator -in
-  unsigned int start_idx, ///< the start index of peptide, 1 is the first residue -in 
-  unsigned int end_idx ///< the end index of peptide -in
-  )
-{
-  // the K|R|P index array
-  unsigned int* seq_marker = iterator->seq_marker; 
-  unsigned int kr_idx = iterator->kr_idx;
-  
-  if(kr_idx == iterator->protein->length + 1 || 
-     find_krp(seq_marker, kr_idx, start_idx, end_idx)){
-    return 0;
-  }
-  return 1;
-}
-
-/**
- * examines the peptide with context of it's parent protein to determine it's type
- * \returns the peptide type
- */
-PEPTIDE_TYPE_T examine_peptide_type(
-  PROTEIN_PEPTIDE_ITERATOR_T* iterator, ///< working iterator -in
-  unsigned int start_idx, ///< the start index of peptide, 1 is the first residue -in 
-  unsigned int end_idx ///< the end index of peptide -in
-  )
-{
-  // the K|R|P index array
-  unsigned int* seq_marker = iterator->seq_marker; 
-  BOOLEAN_T front = FALSE;
-  BOOLEAN_T back = FALSE;
-  
-  // examine front cleavage site
-  if(start_idx == 1 || ((seq_marker[start_idx-2] > 1) && seq_marker[start_idx-1] != 1)){
-    front = TRUE;
-  }
-  
-  // exaimine end cleavage site
-  if(end_idx == iterator->protein->length || 
-     ((seq_marker[end_idx-1] > 1) && seq_marker[end_idx] != 1)){
-    back = TRUE;
-  }
-
-  if(front && back){
-    return TRYPTIC;
-  }
-  else if(front){
-    return N_TRYPTIC;
-  }
-  else if(back){
-    return C_TRYPTIC;
-  }
-  else{
-    return NOT_TRYPTIC;
-  }
-}
-
 /*
  * Takes a cumulative distribution of peptide masses (mass_array) and
  * the start index and end index and return a peptide mass
@@ -990,149 +898,125 @@ float calculate_subsequence_mass (
   return peptide_mass;
 }
 
-/**
- * Finds the next peptide that fits the constraints
- * \returns TRUE if there is a next peptide. FALSE if not.
+/*
+ * OPTIMIZE Returns true if this is a valid cleavage position. 
+ * Eventually change to actually allow K or R differences.
  */
-// OPTIMIZE
-BOOLEAN_T iterator_state_help(
-  PROTEIN_PEPTIDE_ITERATOR_T* iterator, 
-  int max_length,  ///< constraints: max length -in
-  int min_length, ///< constraints: min length -in
-  float max_mass, ///< constraints: max mass -in
-  float min_mass, ///< constraints: min mass -in
-  PEPTIDE_TYPE_T peptide_type  ///< constraints: peptide type -in
-  )
-{
-  PEPTIDE_TYPE_T candidate_peptide_type;
+BOOLEAN_T valid_cleavage_position(
+    char* sequence
+    ){
 
-  LOOP:
-  
-  // set kr_idx position
-  if(iterator->is_kr){
-    if(iterator->seq_marker[iterator->kr_idx-1] < iterator->cur_start){
-      iterator->kr_idx = iterator->seq_marker[iterator->kr_idx-1];
-    }
-    else if(iterator->kr_idx != iterator->first_kr_idx &&
-            iterator->kr_idx > iterator->cur_start){
-      iterator->kr_idx = iterator->first_kr_idx;
-    }
-  }
-
-  // check if the smallest mass of a length is larger than max_mass
-  if(iterator->cur_length * SMALLEST_MASS > max_mass){
+  if ((*sequence == 'K' || *sequence == 'R') && (*sequence++ != 'P')){
+    return TRUE;
+  } else {
     return FALSE;
   }
-  
-  // check if out of mass_max index size
-  if(iterator->cur_length > max_length ||
-     iterator->cur_length > iterator->protein->length){
-    return FALSE;
-  }
-  
-  // check if less than min length
-  if(iterator->cur_length < min_length){
-    ++iterator->cur_length;
-    goto LOOP;
-  }
-  
-  // reached end of length column, check next length
-  if((unsigned int)(iterator->cur_start + iterator->cur_length - 1) > iterator->protein->length){
-    ++iterator->cur_length;
-    iterator->cur_start = 1;
-    goto LOOP;
-  }
-  
-  // is mass with in range
-  float peptide_mass = calculate_subsequence_mass(iterator->mass_array, 
-      iterator->cur_start, iterator->cur_length);
+}
 
-  if(peptide_mass < min_mass || peptide_mass > max_mass){
-
-    // does this length have any possibility of having peptide within mass range?
-    if(peptide_mass == 0 || iterator->cur_length * LARGEST_MASS + 19 < min_mass){
-      ++iterator->cur_length;
-      iterator->cur_start = 1;
-    }
-    else{
-      ++iterator->cur_start;
-    }
-    goto LOOP;
-  }
-  
-  // examin tryptic type and cleavage
-  if(peptide_type != ANY_TRYPTIC){
-
-    // get the peptide type for the examining candidate peptide
-    candidate_peptide_type = 
-      examine_peptide_type(iterator, 
-                           iterator->cur_start, 
-                           iterator->cur_length + 
-                           iterator->cur_start -1);
+/*
+ * Adds actual cleavages to the protein peptide iterator that obey the iterator constraint
+ * using the allowed cleavages arrays
+ * A small inconsistency. Allowed cleavages start at 0, while the output cleavages start at 1.
+ */
+void iterator_add_cleavages(
+    PROTEIN_PEPTIDE_ITERATOR_T* iterator, 
+    int* nterm_allowed_cleavages, 
+    int  nterm_num_cleavages, 
+    int* cterm_allowed_cleavages, 
+    int  cterm_num_cleavages, 
+    BOOLEAN_T skip_cleavage_locations){ 
 
 
-    // ok if peptide type is Partially_Tryptic
-    // allow candidates that're PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC peptides
-    // otherwise, skip candidate peptides that do not match peptide type
-    if( !((peptide_type == PARTIALLY_TRYPTIC && 
-           (candidate_peptide_type == N_TRYPTIC ||
-            candidate_peptide_type == C_TRYPTIC)) ||
-          (peptide_type == candidate_peptide_type)) ){
-      
-      ++iterator->cur_start;
-      goto LOOP;
-    }
-  }
+  int previous_cterm_cleavage_start= 0; // to avoid checking a lot of C-term cleavages
+                                        // before our current N-term cleavage
 
-  // examine cleavage
-  if(iterator->num_mis_cleavage == 0){
-    if(examine_peptide_cleavage(iterator, 
-                                iterator->cur_start, 
-                                iterator->cur_length + iterator->cur_start -1) != 0)
-      {
-        ++iterator->cur_start;
-        goto LOOP;
-      }
-  }
+  PEPTIDE_CONSTRAINT_T* constraint = iterator->peptide_constraint;
+  int nterm_idx, cterm_idx;
+
+  // iterate over possible nterm and cterm cleavage locations
+  for (nterm_idx=0; nterm_idx < nterm_num_cleavages; nterm_idx++){
     
-  return TRUE;
-  
+    int next_cterm_cleavage_start = previous_cterm_cleavage_start;
+    BOOLEAN_T no_new_cterm_cleavage_start = TRUE;
+    for (cterm_idx = previous_cterm_cleavage_start; 
+         cterm_idx < cterm_num_cleavages; cterm_idx++){
+
+      carp(CARP_DETAILED_DEBUG, "nterm = %i, cterm = %i", 
+          nterm_allowed_cleavages[nterm_idx], cterm_allowed_cleavages[cterm_idx]);
+      if (cterm_allowed_cleavages[cterm_idx] <= nterm_allowed_cleavages[nterm_idx]){
+        continue;
+      }
+
+      // check our length constraint
+      int length = cterm_allowed_cleavages[cterm_idx] - nterm_allowed_cleavages[nterm_idx];
+      if (length < get_peptide_constraint_min_length(constraint)){
+
+        // break out if we can't skip cleavage locations
+        if (skip_cleavage_locations == FALSE){
+          next_cterm_cleavage_start = cterm_idx;
+          break;
+
+        // otherwise keep going 
+        } else {
+          continue;
+        }
+      } else if (length > get_peptide_constraint_max_length(constraint)){
+        break;
+      } else if (no_new_cterm_cleavage_start){
+        next_cterm_cleavage_start = cterm_idx;
+        no_new_cterm_cleavage_start = FALSE;
+      }
+     
+      // check our mass constraint
+      float peptide_mass = calculate_subsequence_mass(iterator->mass_array, 
+          nterm_allowed_cleavages[nterm_idx], length);
+
+      if ((get_peptide_constraint_min_mass(constraint) <= peptide_mass) && 
+          (peptide_mass <= get_peptide_constraint_max_mass(constraint))){ 
+
+        // we have found a peptide
+        iterator->nterm_cleavage_positions[iterator->num_cleavages] = 
+          nterm_allowed_cleavages[nterm_idx] + 1;
+
+        iterator->peptide_lengths[iterator->num_cleavages] = length;
+
+        carp(CARP_DETAILED_DEBUG, "New pep: %i (%i)", nterm_allowed_cleavages[nterm_idx],
+            length);
+
+        iterator->num_cleavages++;
+        if (iterator->num_cleavages > MAX_PEPTIDES_PER_PROTEIN){
+          die("Too many peptides for a particular protein!");
+        }
+      }
+
+      // break out if we can't skip cleavage locations
+      if (skip_cleavage_locations == FALSE){
+        break;
+      }
+    }
+    previous_cterm_cleavage_start = next_cterm_cleavage_start;
+
+  }
 }
 
 /**
- * sets the iterator to the next peptide that fits the constraints
- * \returns TRUE if there is a next peptide. FALSE if not.
- */
-BOOLEAN_T set_iterator_state(
-  PROTEIN_PEPTIDE_ITERATOR_T* iterator  ///< set iterator to next peptide -in
-  )
-{
-  int max_length = get_peptide_constraint_max_length(iterator->peptide_constraint);
-  int min_length = get_peptide_constraint_min_length(iterator->peptide_constraint);
-  float max_mass = get_peptide_constraint_max_mass(iterator->peptide_constraint);
-  float min_mass = get_peptide_constraint_min_mass(iterator->peptide_constraint);
-  PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(iterator->peptide_constraint);
-  
-  return iterator_state_help(iterator, max_length, min_length, max_mass, min_mass, peptide_type);
-}
-
-
-// sequence_length : total sequence size 
-// length_size: max_length from constraint;
-// float* mass_array = float[sequence_length];
-/**
- * Dynamically sets the mass of the mass_array
- * The mass matrix contains every peptide bellow max length
- * must pass in a heap allocated matrix
+ * Creates the data structures in the protein_peptide_iterator object necessary
+ * for creating peptide objects.
+ * - mass_array - cumulative distribution of masses. used to determine the mass of any 
+ *   peptide subsequence
+ * - nterm_cleavage_positions - the nterm cleavage positions of the peptide that satisfy the
+ *   protein_peptide_iterator contraints
+ * - peptide_lengths - the lengths of the peptides that satisfy the constraints
  * OPTIMIZE
  */
-void set_mass_array(
-  float* mass_array,  ///< the mass matrix -out
-  int sequence_length,  ///< the y axis size -in
-  PROTEIN_T* protein, ///< the parent protein -in
-  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+void prepare_protein_peptide_iterator(
+    PROTEIN_PEPTIDE_ITERATOR_T* iterator
   )
 {
+  PROTEIN_T* protein = iterator->protein;
+  MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(iterator->peptide_constraint);
+  float* mass_array = (float*)mycalloc(protein->length+1, sizeof(float));
+
   float mass_h2o = MASS_H2O_AVERAGE;
 
   // set correct H2O mass
@@ -1140,62 +1024,93 @@ void set_mass_array(
     mass_h2o = MASS_H2O_MONO;
   }
   
-  // initialize mass matrix
-  int start_idx = 0;
+  // initialize mass matrix and enzyme cleavage positions
+  int* cleavage_positions = (int*) mycalloc(protein->length+1, sizeof(int));
+  int* all_positions = (int*) mycalloc(protein->length+1, sizeof(int));
+  unsigned int start_idx = 0;
   mass_array[start_idx] = 0.0;
-  for(start_idx = 1; start_idx < sequence_length; ++start_idx){
+  int cleavage_position_idx = 0;
+  cleavage_positions[cleavage_position_idx++] = 0;
+  for(start_idx = 1; start_idx < protein->length+1; start_idx++){
+    int sequence_idx = start_idx - 1; // OPTIMIZE signed vs. unsigned?
     mass_array[start_idx] = mass_array[start_idx-1] + 
-      get_mass_amino_acid(protein->sequence[start_idx-1], mass_type);
-  }
-}
+      get_mass_amino_acid(protein->sequence[sequence_idx], mass_type);
 
-/**
- * set seq_marker array in protein_peptide_iterator
- * creates an int array the length of the protein sequence.
- * 0 if not 'K | R | P', if 'P' 1, for 'K|R' you store the index of the next incident of 'K|R'  
- * thus, you can look at the index if it is K|R, and if it is you can tell where the next K|R is
- * sets the sequence idx(starts 1) where the first incident of K | R, returns protein_length+1 if no K|R exist
- */
-void set_seq_marker(
-  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator  ///< the iterator to set -out
-  )
-{
-  char* sequence = protein_peptide_iterator->protein->sequence;
-  unsigned int protein_length = protein_peptide_iterator->protein->length;
-  unsigned int sequence_idx = 0;
-  unsigned int previous_kr = 0;
-  unsigned int first_kr = protein_length+1;
-  BOOLEAN_T first = FALSE; // have we seen a K | R so far
+    if (valid_cleavage_position(protein->sequence + sequence_idx)){ 
+      // move forward with ptr arith
+      cleavage_positions[cleavage_position_idx++] = sequence_idx + 1;
+    }
+    all_positions[sequence_idx] = sequence_idx;
+  }
 
-  // create seq_marker
-  unsigned int* seq_marker = (unsigned int*)mycalloc(protein_length, sizeof(unsigned int));
-  
-  // iterate through the sequence
-  for(; sequence_idx < protein_length; ++sequence_idx){
-    if(sequence[sequence_idx] == 'K' || sequence[sequence_idx] == 'R'){
-      if(first){
-        seq_marker[previous_kr] = sequence_idx + 1;
-      }
-      else{
-        first = TRUE;
-        first_kr = sequence_idx+1;
-      }
-      previous_kr = sequence_idx;
-    }
-    else if(sequence[sequence_idx] == 'P'){
-      seq_marker[sequence_idx] = 1;
-    }
+  // put in the implicit cleavage at end of protein
+  if (cleavage_positions[cleavage_position_idx-1] != (int)protein->length){
+    cleavage_positions[cleavage_position_idx++] = protein->length; 
   }
-  if(first){
-    // last K|R is set to protein length
-    seq_marker[previous_kr] = sequence_idx + 1;
+
+  all_positions[protein->length] = (int)protein->length;
+
+  int num_cleavage_positions = cleavage_position_idx;
+  iterator->mass_array = mass_array;
+
+  // now determine the cleavage positions that actually match our constraints
+  BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
+  PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
+      iterator->peptide_constraint);
+
+  switch (peptide_type){
+
+    case TRYPTIC:
+      iterator_add_cleavages(iterator,
+        cleavage_positions, num_cleavage_positions-1,
+        cleavage_positions+1, num_cleavage_positions-1, missed_cleavages);
+      break;
+
+    case PARTIALLY_TRYPTIC:
+      iterator_add_cleavages(iterator,
+        cleavage_positions, num_cleavage_positions-1,
+        all_positions+1, protein->length, missed_cleavages);
+      iterator_add_cleavages(iterator,
+        all_positions, protein->length,
+        cleavage_positions, num_cleavage_positions-1, missed_cleavages);
+      break;
+
+    case N_TRYPTIC:
+      iterator_add_cleavages(iterator,
+        cleavage_positions, num_cleavage_positions-1,
+        all_positions+1, protein->length, missed_cleavages);
+      break;
+
+    case C_TRYPTIC:
+      iterator_add_cleavages(iterator,
+        all_positions, protein->length,
+        cleavage_positions, num_cleavage_positions-1, missed_cleavages);
+      break;
+
+    case ANY_TRYPTIC:
+      iterator_add_cleavages(iterator,
+        all_positions, protein->length,
+        all_positions+1, protein->length, TRUE);
+      break;
+
+    case NOT_TRYPTIC:
+    default: 
+      die("I'm not sure what this peptide type is: %i", peptide_type);
+
   }
-  
-  // set the complete seq_marker
-  protein_peptide_iterator->seq_marker = seq_marker;
-  protein_peptide_iterator->first_kr_idx = first_kr;
-  protein_peptide_iterator->kr_idx = first_kr;
-  protein_peptide_iterator->is_kr = first;
+
+  int idx;
+  for (idx=0; idx < iterator->num_cleavages; idx++){
+    carp(CARP_DETAILED_DEBUG, "%i->%i", iterator->nterm_cleavage_positions[idx], 
+        iterator->peptide_lengths[idx]);
+  }
+
+  if (iterator->num_cleavages > 0){
+    iterator->has_next = TRUE;
+  } else { 
+    iterator->has_next = FALSE;
+  }
+
 }
 
 /**
@@ -1211,26 +1126,26 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   // OPTIMIZE not sure if I can take this out?
   /*unsigned int max_length 
     = get_peptide_constraint_max_length(peptide_constraint);*/
-  MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(peptide_constraint);
-
+  
   PROTEIN_PEPTIDE_ITERATOR_T* iterator = (PROTEIN_PEPTIDE_ITERATOR_T*)
     mycalloc(1, sizeof(PROTEIN_PEPTIDE_ITERATOR_T));
 
-  // create mass_array
-  iterator->mass_array = (float*)mycalloc(protein->length+1, sizeof(float));
-  set_mass_array(
-    iterator->mass_array, protein->length, protein, mass_type);
-  
   // initialize iterator
-  iterator->protein = protein;
   iterator->peptide_idx = 0;
-  iterator->peptide_constraint =copy_peptide_constraint_ptr(peptide_constraint);
-  iterator->cur_start = 0; // must cur_start-1 for access mass_array
-  iterator->cur_length = 1;  // must cur_length-1 for access mass_array
+  iterator->peptide_constraint 
+    = copy_peptide_constraint_ptr(peptide_constraint);
+  iterator->cur_start = 0; 
+  iterator->cur_length = 1;  
   iterator->num_mis_cleavage 
     = get_peptide_constraint_num_mis_cleavage(iterator->peptide_constraint);
-  set_seq_marker(iterator);
-  iterator->has_next = set_iterator_state(iterator);
+  iterator->protein = protein;
+
+  iterator->nterm_cleavage_positions = (int*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(int));
+  iterator->peptide_lengths = (int*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(int));
+  iterator->num_cleavages = 0;
+
+  // prepare the iterator data structures
+  prepare_protein_peptide_iterator(iterator);
   return iterator;
 }
 
@@ -1244,8 +1159,9 @@ void free_protein_peptide_iterator(
   )
 {
   free(protein_peptide_iterator->mass_array); 
+  free(protein_peptide_iterator->nterm_cleavage_positions); 
+  free(protein_peptide_iterator->peptide_lengths); 
   free_peptide_constraint(protein_peptide_iterator->peptide_constraint);
-  free(protein_peptide_iterator->seq_marker);
   free(protein_peptide_iterator);
 }
 
@@ -1266,60 +1182,43 @@ BOOLEAN_T protein_peptide_iterator_has_next(
  * the Peptide is new heap allocated object, user must free it
  */
 PEPTIDE_T* protein_peptide_iterator_next(
-  PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator
+  PROTEIN_PEPTIDE_ITERATOR_T* iterator
   )
 {
-  PEPTIDE_TYPE_T peptide_type;
 
-  if(!protein_peptide_iterator->has_next){
-    free_protein_peptide_iterator(protein_peptide_iterator);
+  if(!iterator->has_next){
+    free_protein_peptide_iterator(iterator);
     die("ERROR: no more peptides\n");
   }
   
   // set peptide type
-  if(get_peptide_constraint_peptide_type(protein_peptide_iterator->peptide_constraint) != ANY_TRYPTIC){
-    peptide_type = get_peptide_constraint_peptide_type(protein_peptide_iterator->peptide_constraint);
-  }
+  PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
+      iterator->peptide_constraint);
 
-  // when constraints ANY_TRYPTIC, need to examine peptide
-  // possible to skip this step and leave it as ANY_TRYPTIC
-  else{
-      peptide_type = 
-        examine_peptide_type(
-            protein_peptide_iterator,
-            protein_peptide_iterator->cur_start,
-            protein_peptide_iterator->cur_start 
-              + protein_peptide_iterator->cur_length -1);
-  }
-  
-  // TODO C-term and N-term mass modification
+  int cleavage_idx = iterator->current_cleavage_idx;
+  int current_start = iterator->nterm_cleavage_positions[cleavage_idx];
+  int current_length = iterator->peptide_lengths[cleavage_idx];
+
   // calculate peptide mass
   float peptide_mass = calculate_subsequence_mass(
-      protein_peptide_iterator->mass_array, 
-      protein_peptide_iterator->cur_start, 
-      protein_peptide_iterator->cur_length);
+      iterator->mass_array, current_start, current_length);
 
-    // OPTIMIZE
+  // OPTIMIZE
 
   // create new peptide
-  PEPTIDE_T* peptide = 
-    new_peptide
-    (protein_peptide_iterator->cur_length, 
-     peptide_mass,
-     protein_peptide_iterator->protein,
-     protein_peptide_iterator->cur_start,
-     peptide_type
-     );
+  PEPTIDE_T* peptide = new_peptide(current_length, peptide_mass, 
+      iterator->protein, current_start, peptide_type);
   
-  // FIXME Not sure what the use delete this field if needed
-  ++protein_peptide_iterator->peptide_idx;
-
   // update position of iterator
-  ++protein_peptide_iterator->cur_start;
-  protein_peptide_iterator->has_next = set_iterator_state(protein_peptide_iterator);
+  ++iterator->current_cleavage_idx;
 
-  
-  // increment the database count of peptides produced
+  // update has_next field
+  if (iterator->current_cleavage_idx == iterator->num_cleavages){
+    iterator->has_next = FALSE;
+  } else {
+    iterator->has_next = TRUE;
+  }
+
   return peptide;
 }
 
