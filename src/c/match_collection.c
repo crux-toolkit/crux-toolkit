@@ -1,6 +1,6 @@
 /*********************************************************************//**
  * \file match_collection.c
- * $Revision: 1.74 $
+ * $Revision: 1.75 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Methods for creating and manipulating match_collections.   
@@ -944,13 +944,6 @@ BOOLEAN_T score_match_collection_sp(
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     peptide = generate_peptides_iterator_next(peptide_iterator);
 
-    //debugging
-    PEPTIDE_SRC_T* src = get_peptide_peptide_src(peptide);
-    PROTEIN_T* prot = get_peptide_src_parent_protein(src);
-    int idx = get_protein_protein_idx(prot);
-    carp(CARP_DETAILED_DEBUG, "Sp scoring peptide %s, prot_idx %d", 
-         get_peptide_sequence(peptide), idx);
-          
     // create a new match
     match = new_match();
 
