@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.50 $
+ * $Revision: 1.51 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -84,7 +84,6 @@ typedef struct residue_iterator RESIDUE_ITERATOR_T;
  * \brief An object to iterate over the protein peptide associations in a peptide
  */
 typedef struct peptide_src_iterator PEPTIDE_SRC_ITERATOR_T;
-
 
 /**
  * Being PARTIALLY_TRYPTIC is N or C terminus tryptic
