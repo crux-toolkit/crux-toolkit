@@ -1,17 +1,25 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.108 $   #-Werror \
+# VERSION: $Revision: 1.109 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
 CC	= gcc
+<<<<<<< makefile
+# DEBUG   = # -DNDEBUG -DBOUNDS_CHECK 
+# DEBUG   = # -DDEBUG -g
+DEBUG   = -pg
+OFLAGS  = # -O2 
+CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror \
+=======
 DEBUG   = # -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = # -DDEBUG -g
 OFLAGS  = -O2 
 DEBUG   = # -DDEBUG -pg
 NOCYGWIN = #  -mno-cygwin
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror $(NOCYGWIN) \
+>>>>>>> 1.108
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 CPP_FLAGS =  -lstdc++
 OS_FLAGS = -DCYGWIN -fno-strict-aliasing

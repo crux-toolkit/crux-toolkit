@@ -31,11 +31,22 @@
 
 /* Private functions */
 int prepare_protein_input(char* input_file, 
+<<<<<<< match_search.c
+        INDEX_T** index, 
+        DATABASE_T** database);
+
+=======
                           INDEX_T** index, 
                           DATABASE_T** database);
+>>>>>>> 1.53
 void open_output_files(FILE*** binary_filehandle_array, 
+<<<<<<< match_search.c
+           FILE** sqt_filehandle,
+           FILE** decoy_sqt_filehandle);
+=======
                        FILE** sqt_filehandle,
                        FILE** decoy_sqt_filehandle);
+>>>>>>> 1.53
 
 int main(int argc, char** argv){
 
@@ -144,7 +155,11 @@ int main(int argc, char** argv){
   int file_i = 0;
   int total_files = get_int_parameter("number-decoy-set") + 1;
 
+<<<<<<< match_search.c
+        exit(1);
+=======
   // find matches for each spectrum
+>>>>>>> 1.53
   while(spectrum_iterator_has_next(spectrum_iterator)){
 
     SPECTRUM_T* spectrum = spectrum_iterator_next(spectrum_iterator);
@@ -162,15 +177,46 @@ int main(int argc, char** argv){
     for(z_i=0; z_i < num_charges; z_i++){
       int charge = charge_array[z_i];
       carp(CARP_DETAILED_DEBUG, 
+<<<<<<< match_search.c
+     "Searching spectrum number %i, charge %i, search number %i",
+     get_spectrum_first_scan(spectrum), charge,
+     spectrum_searches_counter+1 );
+=======
            "Searching spectrum number %i, charge %i, search number %i",
            get_spectrum_first_scan(spectrum), charge,
            spectrum_searches_counter+1 );
+>>>>>>> 1.53
 
       // for each database (real/rand), search spectrum
       BOOLEAN_T is_decoy = FALSE; //first target, then decoys
 
       for(file_i=0; file_i < total_files; file_i++){
 
+<<<<<<< match_search.c
+        MATCH_COLLECTION_T* match_collection = 
+          new_match_collection_from_spectrum( spectrum,
+                charge,
+                max_rank_preliminary,
+                prelim_score,
+                main_score,
+                0,//mass_offset,
+                is_decoy,
+                index,
+                database);
+        if( match_collection == NULL ){
+          file_i = total_files; // don't search decoys
+          continue;
+        }
+        carp(CARP_DETAILED_DEBUG, "about to print matches");
+  
+        print_matches(match_collection, spectrum, is_decoy,
+          psm_file_array[file_i], sqt_file, decoy_sqt_file);
+
+
+        free_match_collection(match_collection);
+        is_decoy = TRUE;
+      } // next set (target, decoy, decoy...)
+=======
         MATCH_COLLECTION_T* match_collection = 
           new_match_collection_from_spectrum( spectrum,
                                               charge,
@@ -196,9 +242,10 @@ int main(int argc, char** argv){
         is_decoy = TRUE;
         // exit(1); // to get gmon.out for a single spectrum uncomment this line
       }// next set (target, decoy, decoy...)
+>>>>>>> 1.53
 
       spectrum_searches_counter++;
-    }// next charge state, same spectrum
+    } // next charge state, same spectrum
     
     spectrum_counter++;
     if( spectrum_counter %1000 == 0 ){
@@ -215,7 +262,11 @@ int main(int argc, char** argv){
     carp(CARP_DEBUG, "Updating header with %d searches", 
          spectrum_searches_counter);
     serialize_total_number_of_spectra(spectrum_searches_counter, 
+<<<<<<< match_search.c
+              psm_file_array[file_idx]);
+=======
                                       psm_file_array[file_idx]);
+>>>>>>> 1.53
   }
   carp(CARP_DEBUG, "Fixed headers");
 
@@ -254,8 +305,6 @@ int main(int argc, char** argv){
   else{
     srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
   }
-  
- 
 }
 
 
@@ -278,7 +327,11 @@ int main(int argc, char** argv){
 
   if( (charge_state < 1) || (charge_state > 3) ){
     carp(CARP_FATAL, "spectrum-charge option must be 1,2,3, or 'all'.  " \
+<<<<<<< match_search.c
+   "%s is not valid", charge_str);
+=======
     "%s is not valid", charge_str);
+>>>>>>> 1.53
     exit(1);
   }
   return charge_state;
@@ -286,8 +339,13 @@ int main(int argc, char** argv){
 */
 
 int prepare_protein_input(char* input_file, 
+<<<<<<< match_search.c
+        INDEX_T** index, 
+        DATABASE_T** database){
+=======
                           INDEX_T** index, 
                           DATABASE_T** database){
+>>>>>>> 1.53
 
   int num_proteins = 0;
   BOOLEAN_T use_index = get_boolean_parameter("use-index");
@@ -317,6 +375,11 @@ int prepare_protein_input(char* input_file,
   return num_proteins;
 }
 
+<<<<<<< match_search.c
+void open_output_files(FILE*** psm_file_array, 
+           FILE** sqt_file,
+           FILE** decoy_sqt_file)
+=======
 /**
  * \brief A private function for crux-search-for-matches to prepare
  * binary psm and text sqt files.
@@ -334,11 +397,20 @@ void open_output_files(
   FILE*** psm_file_array, ///< will put binary psm filehandles here -out
   FILE** sqt_file,        ///< will put text sqt filehandle here -out
   FILE** decoy_sqt_file)  ///< will put decoy sqt filehandle here -out
+>>>>>>> 1.53
 {
   char* match_output_folder = get_string_parameter_pointer(
+<<<<<<< match_search.c
+            "match-output-folder");
+=======
                                                     "match-output-folder");
+>>>>>>> 1.53
   MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
+<<<<<<< match_search.c
+            "output-mode");
+=======
                                                     "output-mode");
+>>>>>>> 1.53
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
   carp(CARP_DEBUG, "The output type is %d (binary, sqt, all)" \
        " and overwrite is '%d'", (int)output_type, (int)overwrite);
@@ -347,19 +419,33 @@ void open_output_files(
   // create binary psm files (allocate memory, even if not used)
   *psm_file_array = create_psm_files();
 
-  if( output_type != BINARY_OUTPUT ){ //ie sqt or all
+  if(output_type != BINARY_OUTPUT ){ //ie sqt or all
 
     //create sqt file handles
     carp(CARP_DEBUG, "Opening sqt files");
     char* sqt_filename = get_string_parameter_pointer("sqt-output-file");
     *sqt_file = create_file_in_path(sqt_filename, 
+<<<<<<< match_search.c
+           match_output_folder, 
+           overwrite);
+=======
                                     match_output_folder, 
                                     overwrite);
+>>>>>>> 1.53
     char* decoy_sqt_filename = get_string_parameter_pointer(
+<<<<<<< match_search.c
+            "decoy-sqt-output-file");
+=======
                                                     "decoy-sqt-output-file");
+>>>>>>> 1.53
     *decoy_sqt_file = create_file_in_path(decoy_sqt_filename,
+<<<<<<< match_search.c
+           match_output_folder,
+           overwrite);
+=======
                                           match_output_folder,
                                           overwrite);
+>>>>>>> 1.53
 
     if(sqt_file == NULL || decoy_sqt_file == NULL){
       carp(CARP_DEBUG, "sqt file or decoy is null");
