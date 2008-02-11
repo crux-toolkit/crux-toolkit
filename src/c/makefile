@@ -1,15 +1,15 @@
 #######################################################################
 # FILE: makefile
 # AUTHOR: William Stafford Noble
-# VERSION: $Revision: 1.111 $   #-Werror \
+# VERSION: $Revision: 1.112 $   #-Werror \
 #######################################################################
 
 # The GNU C compiler is preferred.
 CC	= gcc
 DEBUG   = # -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = # -DDEBUG -g
-OFLAGS  = # -O2 
-DEBUG   = -DDEBUG -pg
+OFLAGS  = -O2 
+DEBUG   = # -DDEBUG -pg
 NOCYGWIN = #  -mno-cygwin
 CFLAGS = $(OFLAGS) $(DEBUG) -Wall -W -Werror $(NOCYGWIN) \
          -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE

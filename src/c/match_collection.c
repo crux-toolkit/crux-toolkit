@@ -1,6 +1,6 @@
 /*********************************************************************//**
  * \file match_collection.c
- * $Revision: 1.75 $
+ * $Revision: 1.76 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Methods for creating and manipulating match_collections.   
@@ -221,6 +221,7 @@ MATCH_COLLECTION_T* allocate_match_collection()
   match_collection->iterator_lock = FALSE;
   match_collection->post_process_collection = FALSE;
   match_collection->null_peptide_collection = FALSE;
+  carp(CARP_DETAILED_DEBUG, "Allocate match coll"); // MEMLEAK
   
   return match_collection;
 }
@@ -232,10 +233,13 @@ void free_match_collection(
   MATCH_COLLECTION_T* match_collection ///< the match collection to free -out
   )
 {
+  carp(CARP_DETAILED_DEBUG, "Free match coll"); // MEMLEAK
   // decrement the pointer count in each match object
+  // MEMLEAK
   while(match_collection->match_total > 0){
     --match_collection->match_total;
     free_match(match_collection->match[match_collection->match_total]);
+    match_collection->match[match_collection->match_total] = NULL;
   }
   
   // free post_process_collection specific memory
@@ -325,11 +329,13 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
           charge, 
           peptide_iterator)){
       carp(CARP_ERROR, "Failed to score match collection for SP");
+      free_match_collection(match_collection);
       return NULL;
     }
     if (match_collection->match_total == 0){
       carp(CARP_WARNING, "No matches found for spectrum %i charge %i",
           get_spectrum_first_scan(spectrum), charge);
+      free_match_collection(match_collection);
       return NULL;
     }
   }
@@ -718,6 +724,7 @@ BOOLEAN_T estimate_evd_parameters(
     // failed to converge error..
     if(idx >= max_iterations){
       carp(CARP_ERROR, "Root finding failed to converge.");
+      free_match_collection(sample_collection);
       return FALSE;
     }
   }
