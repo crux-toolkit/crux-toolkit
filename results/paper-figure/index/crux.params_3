@@ -1,5 +1,5 @@
 #verbosity level for run 0~100
-verbosity=100
+verbosity=30
 
 ########generate_peptide perameters##########
 #min mass for peptides
