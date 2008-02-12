@@ -15,9 +15,9 @@ ms2='spectra_random_100.ms2'
 # fasta='E_coli_contam.fasta'
 # fasta='/home/aklammer/nr-NCBI-2006-02-16.fasta'
 # fasta='/home/aklammer/crux/results/paper-figure/index/human-NCBI-042404.fasta"
-fasta='/net/noble/vol1/home/aklammer/crux/data/yeast.fasta'
+fasta='/home/aklammer/crux/data/yeast.fasta'
 # fasta='/nfs/noble/data/protein_database/indexed/n001/human.fasta'
 python compare_runtime.py $ms2 $fasta
 
-fasta='/net/noble/vol1/home/aklammer/crux/data/human.fasta'
+fasta='/home/aklammer/crux/data/human.fasta'
 python compare_runtime.py $ms2 $fasta
