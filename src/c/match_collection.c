@@ -1,6 +1,5 @@
 /*********************************************************************//**
  * \file match_collection.c
- * $Revision: 1.76 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Methods for creating and manipulating match_collections.   
@@ -9,6 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
+ * $Revision: 1.77 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -447,13 +447,15 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
  *\returns TRUE, if successfully sorts the match_collection
  */
 BOOLEAN_T sort_match_collection(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to score -out
-  SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to sort -out
+  SCORER_TYPE_T score_type ///< the score type (SP, XCORR) to sort by -in
   )
 {
   // check if we are allowed to alter match_collection
   if(match_collection->iterator_lock){
-    carp(CARP_ERROR, "cannot alter match_collection when a match iterator is already been instantiated");
+    carp(CARP_ERROR, 
+         "Cannot alter match_collection when a match iterator is already"
+         " instantiated");
     return FALSE;
   }
 
@@ -468,7 +470,8 @@ BOOLEAN_T sort_match_collection(
   case LOGP_BONF_WEIBULL_XCORR: 
     // LOGP_BONF_EVD_XCORR and XCORR have same order, 
     // sort the match to decreasing XCORR order for the return
-    qsort_match(match_collection->match, match_collection->match_total, (void *)compare_match_xcorr);
+    qsort_match(match_collection->match, match_collection->match_total, 
+                (void *)compare_match_xcorr);
     match_collection->last_sorted = XCORR;
     return TRUE;
   case SP: 
@@ -496,6 +499,75 @@ BOOLEAN_T sort_match_collection(
   }
   return FALSE;
 }
+
+/**
+ * \brief Sort a match_collection by the given score type, grouping
+ * matches by spectrum (if multiple spectra present).
+ * \returns TRUE if sort is successful, else FALSE;
+ */
+BOOLEAN_T spectrum_sort_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< match collection to sort -out
+  SCORER_TYPE_T score_type ///< the score type to sort by -in
+  ){
+
+  BOOLEAN_T success = FALSE;
+
+  // check if we are allowed to alter match_collection
+  if(match_collection->iterator_lock){
+    carp(CARP_ERROR, 
+         "Cannot alter match_collection when a match iterator is already"
+         " instantiated");
+    return FALSE;
+  }
+
+  switch(score_type){
+  case DOTP:
+    success = FALSE;
+    break;
+
+  case XCORR:
+  case LOGP_EVD_XCORR:
+  case LOGP_BONF_EVD_XCORR:
+  case LOGP_WEIBULL_XCORR: 
+  case LOGP_BONF_WEIBULL_XCORR: 
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_spectrum_xcorr);
+    match_collection->last_sorted = XCORR;
+    success = TRUE;
+    break;
+
+  case SP: 
+  case LOGP_EXP_SP: 
+  case LOGP_BONF_EXP_SP: 
+  case LOGP_WEIBULL_SP: 
+  case LOGP_BONF_WEIBULL_SP: 
+  case LOGP_QVALUE_WEIBULL_XCORR: 
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_spectrum_sp);
+    match_collection->last_sorted = SP;
+    success = TRUE;
+    break;
+
+  case Q_VALUE:
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_spectrum_q_value);
+    match_collection->last_sorted = Q_VALUE;
+    success = TRUE;
+    break;
+
+  case PERCOLATOR_SCORE:
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_spectrum_percolator_score);
+    match_collection->last_sorted = PERCOLATOR_SCORE;
+    success = TRUE;
+    break;
+
+
+  }
+
+  return success;
+}
+
 
 /**
  * keeps the top max_rank number of matches and frees the rest
@@ -1957,6 +2029,7 @@ void print_sqt_header(FILE* output, char* type, int num_proteins){
   //  fprintf(output, "H\tStaticMod\tC=160.139\n");
   fprintf(output, "H\tAlg-DisplayTop\t%d\n", 
           get_int_parameter("max-sqt-result")); 
+  // this is not correct for an sqt from analzyed matches
 
   PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
   peptide_type_to_string(cleavages, temp_str);
@@ -1974,38 +2047,31 @@ void print_sqt_header(FILE* output, char* type, int num_proteins){
  *\returns TRUE, if sucessfully print sqt format of the PSMs, else FALSE 
  */
 BOOLEAN_T print_match_collection_sqt(
-  FILE* output, ///< the output file -out
-  int top_match, ///< the top matches to output -in
-  MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
-  SPECTRUM_T* spectrum, ///< the spectrum to print sqt -in
-  SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
-  SCORER_TYPE_T main_score  ///< the main score to report -in
+  FILE* output,                  ///< the output file -out
+  int top_match,                 ///< the top matches to output -in
+  MATCH_COLLECTION_T* match_collection,
+  ///< the match_collection to print sqt -in
+  SPECTRUM_T* spectrum,          ///< the spectrum to print sqt -in
+  SCORER_TYPE_T prelim_score,    ///< the preliminary score to report -in
+  SCORER_TYPE_T main_score       ///< the main score to report -in
   )
 {
   time_t hold_time;
   hold_time = time(0);
-  //float delta_cn =  get_match_collection_delta_cn(match_collection);
-  // the charge of the of spectrum used to score
   int charge = match_collection->charge; 
   int num_matches = match_collection->experiment_size;
 
-  // print spectrum info
+  // First, print spectrum info
   print_spectrum_sqt(spectrum, output, num_matches, charge);
   
   MATCH_T* match = NULL;
-  //PEPTIDE_T* peptide = NULL;
-  //PROTEIN_T* protein = NULL;
-  //char* sequence = NULL;
-  //PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = NULL;
-  //PEPTIDE_SRC_T* peptide_src = NULL;
-  //char* protein_id = NULL;
   
   // create match iterator
   // TRUE: return match in sorted order of main_score type
   MATCH_ITERATOR_T* match_iterator = 
     new_match_iterator(match_collection, main_score, TRUE);
   
-  // Second, iterate over matches
+  // Second, iterate over matches, prints M and L lines
   int match_count = 0;
   while(match_iterator_has_next(match_iterator)){
     ++match_count;
@@ -2030,34 +2096,40 @@ BOOLEAN_T print_match_collection_sqt(
  */
 
 /**
- * create a new memory allocated match iterator, which iterates over match iterator
- * only one iterator is allowed to be instantiated per match collection at a time
+ * create a new memory allocated match iterator, which iterates over
+ * match iterator only one iterator is allowed to be instantiated per
+ * match collection at a time 
  *\returns a new memory allocated match iterator
  */
 MATCH_ITERATOR_T* new_match_iterator(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -out
-  SCORER_TYPE_T score_type, ///< the score type to iterate (LOGP_EXP_SP, XCORR) -in
+  MATCH_COLLECTION_T* match_collection,
+  ///< the match collection to iterate -out
+  SCORER_TYPE_T score_type,
+  ///< the score type to iterate (LOGP_EXP_SP, XCORR) -in
   BOOLEAN_T sort_match  ///< should I return the match in sorted order?
   )
 {
-  // 
+  // TODO (BF 06-Feb-08): Could we pass back an iterator with has_next==False
   if (match_collection == NULL){
     die("Null match collection passed to match iterator");
   }
   // is there any existing iterators?
   if(match_collection->iterator_lock){
-    carp(CARP_ERROR, "can only have one match iterator instantiated at a time");
+    carp(CARP_FATAL, 
+         "Can only have one match iterator instantiated at a time");
     exit(1);
   }
   
   // has the score type been populated in match collection?
   if(!match_collection->scored_type[score_type]){
-    carp(CARP_ERROR, "the match collection has not been scored for request score type");
+    carp(CARP_FATAL, 
+         "The match collection has not been scored for request score type.");
     exit(1);
   }
   
   // allocate a new match iterator
-  MATCH_ITERATOR_T* match_iterator = (MATCH_ITERATOR_T*)mycalloc(1, sizeof(MATCH_ITERATOR_T));
+  MATCH_ITERATOR_T* match_iterator = 
+    (MATCH_ITERATOR_T*)mycalloc(1, sizeof(MATCH_ITERATOR_T));
   
   // set items
   match_iterator->match_collection = match_collection;
@@ -2066,25 +2138,27 @@ MATCH_ITERATOR_T* new_match_iterator(
   match_iterator->match_total = match_collection->match_total;
 
   // only sort if requested and match collection is not already sorted
-  if(sort_match && (match_collection->last_sorted != score_type /*|| (match_collection->last_sorted == SP && score_type == LOGP_EXP_SP)*/)){
+  if(sort_match && (match_collection->last_sorted != score_type 
+  /*|| (match_collection->last_sorted == SP && score_type == LOGP_EXP_SP)*/)){
 
     if((score_type == LOGP_EXP_SP || score_type == LOGP_BONF_EXP_SP ||
-        score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP)  &&
+        score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP)
+       &&
        match_collection->last_sorted == SP){
       // No need to sort, since the score_type has same rank as SP      
     }
     
-    else if((score_type == LOGP_EVD_XCORR || score_type == LOGP_BONF_EVD_XCORR) &&
-       match_collection->last_sorted == XCORR){
+    else if((score_type == LOGP_EVD_XCORR || score_type ==LOGP_BONF_EVD_XCORR)
+            && match_collection->last_sorted == XCORR){
       // No need to sort, since the score_type has same rank as XCORR
     }
     else if((score_type == Q_VALUE) &&
-       match_collection->last_sorted == PERCOLATOR_SCORE){
-      // No need to sort, since the score_type has same rank as PERCOLATOR_SCORE
+            match_collection->last_sorted == PERCOLATOR_SCORE){
+      // No need to sort, the score_type has same rank as PERCOLATOR_SCORE
     }
     // sort match collection by score type
     else if(!sort_match_collection(match_collection, score_type)){
-      carp(CARP_ERROR, "failed to sort match collection");
+      carp(CARP_FATAL, "failed to sort match collection");
       free_match_collection(match_collection);
       free(match_iterator);
       exit(1);
@@ -2094,6 +2168,33 @@ MATCH_ITERATOR_T* new_match_iterator(
   // ok lock up match collection
   match_collection->iterator_lock = TRUE;
   
+  return match_iterator;
+}
+
+/**
+ * \brief Create a match iterator to return matches from a collection
+ * grouped by spectrum and sorted by given score type.
+ *
+ * \returns A heap-allocated match iterator.
+ */
+MATCH_ITERATOR_T* new_match_iterator_spectrum_sorted(
+  MATCH_COLLECTION_T* match_collection,  ///< for iteration -in
+  SCORER_TYPE_T scorer ///< the score type to sort by -in
+){
+
+  MATCH_ITERATOR_T* match_iterator = 
+    (MATCH_ITERATOR_T*)mycalloc(1, sizeof(MATCH_ITERATOR_T));
+
+  // set up fields
+  match_iterator->match_collection = match_collection;
+  match_iterator->match_mode = scorer;
+  match_iterator->match_idx = 0;
+  match_iterator->match_total = match_collection->match_total;
+
+  spectrum_sort_match_collection(match_collection, scorer);
+
+  match_collection->iterator_lock = TRUE;
+
   return match_iterator;
 }
 
@@ -2333,8 +2434,8 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
  *\returns TRUE, if successfully parse all PSMs in result_file, else FALSE
  */
 BOOLEAN_T extend_match_collection(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
-  DATABASE_T* database, ///< the database to which the peptides are created -in
+  MATCH_COLLECTION_T* match_collection, ///< match collection to extend -out
+  DATABASE_T* database, ///< the database holding the peptides -in
   FILE* result_file   ///< the result file to parse PSMs -in
   )
 {
@@ -2362,7 +2463,7 @@ BOOLEAN_T extend_match_collection(
   
   // get number of spectra serialized in the file
   if(fread(&total_spectra, (sizeof(int)), 1, result_file) != 1){
-    carp(CARP_ERROR, "serialized file corrupted, incorrect number of spectra");  
+    carp(CARP_ERROR,"Serialized file corrupted, incorrect number of spectra");
     return FALSE;
   }
   carp(CARP_DETAILED_DEBUG, "There are %i spectra in the result file", 
@@ -2371,7 +2472,8 @@ BOOLEAN_T extend_match_collection(
   // FIXME unused feature, just set to 0
   // get number of spectra features serialized in the file
   if(fread(&num_spectrum_features, (sizeof(int)), 1, result_file) != 1){
-    carp(CARP_ERROR, "serialized file corrupted, incorrect number of spectrum features");
+    carp(CARP_ERROR, 
+         "Serialized file corrupted, incorrect number of spectrum features");
     return FALSE;
   }
   
@@ -2380,7 +2482,8 @@ BOOLEAN_T extend_match_collection(
 
   // get number top ranked peptides serialized
   if(fread(&num_top_match, (sizeof(int)), 1, result_file) != 1){
-    carp(CARP_ERROR, "serialized file corrupted, incorrect number of top match");  
+    carp(CARP_ERROR, 
+         "Serialized file corrupted, incorrect number of top match");  
     return FALSE;
   }
   carp(CARP_DETAILED_DEBUG, "There are %i top matches", num_top_match);
@@ -2418,19 +2521,22 @@ BOOLEAN_T extend_match_collection(
       
     // get delta_cn value
     if(fread(&delta_cn, (sizeof(float)), 1, result_file) != 1){
-      carp(CARP_ERROR, "serialized file corrupted, incorrect delta cn value for top match");  
+      carp(CARP_ERROR, 
+       "Serialized file corrupted, incorrect delta cn value for top match");  
       return FALSE;
     }
     
     // get ln_delta_cn value
     if(fread(&ln_delta_cn, (sizeof(float)), 1, result_file) != 1){
-      carp(CARP_ERROR, "serialized file corrupted, incorrect ln_delta cn value for top match");  
+      carp(CARP_ERROR, 
+    "Serialized file corrupted, incorrect ln_delta cn value for top match");  
       return FALSE;
     }
     
     // get ln_experiment_size
     if(fread(&ln_experiment_size, (sizeof(float)), 1, result_file) != 1){
-      carp(CARP_ERROR, "serialized file corrupted, incorrect ln_experiment_size cn value for top match");  
+      carp(CARP_ERROR, "Serialized file corrupted, incorrect "
+           "ln_experiment_size cn value for top match");  
       return FALSE;
     }
     
@@ -2445,7 +2551,8 @@ BOOLEAN_T extend_match_collection(
         match_collection->scored_type[score_type_idx] = type_scored;
       }
       else{
-        // if boolean values already been set compare if no conflicting scored types
+        // if boolean values already set compare if no
+        // conflicting scored types 
         if(match_collection->scored_type[score_type_idx] != type_scored){
           carp(CARP_ERROR, "Serialized match objects has not been scored "
                "as other match objects");
@@ -2463,10 +2570,12 @@ BOOLEAN_T extend_match_collection(
     // now iterate over all 
     for(match_idx = 0; match_idx < num_top_match; ++match_idx){
       // break if there are no match objects serialized
-      if(match_total_of_serialized_collection <= 0){
+      //      if(match_total_of_serialized_collection <= 0){
+      if(match_total_of_serialized_collection <= match_idx){
         break;
       }
       
+      carp(CARP_DETAILED_DEBUG, "Reading match %i", match_idx);
       // parse match object
       if((match = parse_match(result_file, database))==NULL){
         carp(CARP_ERROR, "Failed to parse serialized PSM match");
@@ -2481,8 +2590,9 @@ BOOLEAN_T extend_match_collection(
       
       // now add match to match collection
       add_match_to_match_collection(match_collection, match);
-    }
-  }
+    }// next match for this spectrum
+
+  }// next spectrum
   
   return TRUE;
 }
@@ -2717,6 +2827,18 @@ int get_match_collection_hash(
   
   return count;
 }
+
+/**
+ * \brief Get the number of proteins in the database associated with
+ * this match collection.
+ */
+int get_match_collection_num_proteins(
+  MATCH_COLLECTION_T* match_collection ///< the match collection of interest -
+  ){
+
+  return match_collection->post_protein_counter_size;
+}
+
 
 /******************************
  * match_collection_iterator

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.65 $
+ * REVISION: $Revision: 1.66 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -286,7 +286,7 @@ void print_spectrum(
 void print_spectrum_sqt(
   SPECTRUM_T* spectrum, ///< spectrum to print -in
   FILE* file,           ///< output file to print at -out
-  int num_matches, ///< number of peptides compared to this spec -in
+  int num_matches,      ///< number of peptides compared to this spec -in
   int charge            ///< charge used for the search -in
   ){
 
@@ -301,7 +301,7 @@ void print_spectrum_sqt(
           0.0, // FIXME dummy <total intensity>
           0.0, // FIXME dummy <lowest sp>
           num_matches);
-
+  
 }
 
 

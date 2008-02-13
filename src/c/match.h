@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.17 $ 
+ * $Revision: 1.18 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -77,6 +77,51 @@ int compare_match_q_value(
  * \returns the difference between PERCOLATOR_SCORE score in match_a and match_b
  */
 int compare_match_percolator_score(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * Compare two matches by spectrum scan number and sp score, used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if sp score of match a is less than
+ * match b.  1 if scan number and sp are equal, else 0.
+ */
+int compare_match_spectrum_sp(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * Compare two matches by spectrum scan number and xcorr, used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_xcorr(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * Compare two matches by spectrum scan number and q-value, used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_q_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * Compare two matches by spectrum scan number and percolator score,
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_percolator_score(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );
