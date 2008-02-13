@@ -65,6 +65,7 @@ pylab.xlabel("Mass window (Da)", size=20)
 pylab.legend()
 pylab.savefig("ratio.png")
 pylab.savefig("ratio.eps")
+pylab.legend(loc='lower right')
 pylab.show()
 
 

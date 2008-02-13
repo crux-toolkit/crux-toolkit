@@ -211,22 +211,24 @@ databases are paged into and out of memory only as needed.
 
 \begin{figure}
   \centering
-  \begin{tabular}{ll}
-    {\sf A} & {\sf B} \\
-  \includegraphics[width=3in]{../../results/paper-figure/index/indexing-human.eps} &
-  \includegraphics[width=3in]{../../results/paper-figure/turbo-no-missed-human/indexing-yeast-windows.eps} \\
-
+  \begin{tabular}{lll}
+    {\sf A} & {\sf B} & {\sf C} \\
+  \includegraphics[width=2.25in]{../../results/paper-figure/index/indexing-human.eps} &
+  \includegraphics[width=2.25in]{../../results/paper-figure/turbo-no-missed-human/indexing-yeast-windows.eps} & 
+  \includegraphics[width=2.25in]{../../results/paper-figure/comparison/ratio.eps} \\
 \end{tabular}
   \caption{{\bf Rapid retrieval of candidate peptides.}  The figure
   plots the total running time required to search 100 tandem mass
   spectra against the human protein databases
-  on computers running the Linux ({\sf A}) 
-  or Windows ({\sf B}) operating systems, using {\sc Sequest} and Crux with 
+  on computers running the ({\sf A}) Linux
+  or ({\sf B}) Windows operating systems, using {\sc Sequest} and Crux with 
   and without indices.
   Run time is plotted 
   as a function of the mass tolerance used to define candidate
   peptides. The Linux OS plots have three series
   because indexed {\sc Sequest} searches with TurboSequest only possible on Windows.
+  Also shown is the factor improvement for indexed vs. non-indexed searches
+  for Crux on Windows and Linux and Sequest on Windows ({\sf C}).
   \label{figure:indexing}}
 \end{figure}
 
