@@ -7,10 +7,13 @@
  * matches (with percolator or q-value) and return scores indicating
  * how good the matches are. 
  *
- * Handles at most x files (target and decoy).  Expects psm files to
- * end with the extension '.csm' and decoys to end with '-decoy#.csm'
+ * Handles at most 4 files (target and decoy).  Expects psm files to
+ * end with the extension '.csm' and decoys to end with
+ * '-decoy#.csm'.  Multiple target files in the given directory are
+ * concatinated together and presumed to be non-overlaping parts of
+ * the same ms2 file. 
  * 
- * $Revision: 1.41 $
+ * $Revision: 1.42 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,7 +35,7 @@
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_ANALYSIS_OPTIONS 5
+#define NUM_ANALYSIS_OPTIONS 7
 #define NUM_ANALYSIS_ARGUMENTS 2
 
 /* 
@@ -55,10 +58,17 @@ MATCH_COLLECTION_T* run_nothing(
   ); 
 
 int output_matches(
-    MATCH_COLLECTION_T* match_collection,
-    SCORER_TYPE_T scorer_type
-    );
+  MATCH_COLLECTION_T* match_collection,
+  SCORER_TYPE_T scorer_type
+  );
 
+void print_sqt_file(
+  MATCH_COLLECTION_T* match_collection,
+  SCORER_TYPE_T scorer_type,
+  SCORER_TYPE_T second_scorer_type
+  );
+
+  
 /**
  * \brief crux-analyze-matches: takes in a directory containing binary
  * psm files and a protein index and analyzes the psms.
@@ -72,7 +82,9 @@ int main(int argc, char** argv){
     "parameter-file",
     "algorithm",
     "feature-file",
-    "use-index" //not yet implemented, below set to true
+    "use-index", //not yet implemented, below set to true
+    "overwrite",
+    "sqt-output-file"
   };
 
   int num_arguments = NUM_ANALYSIS_ARGUMENTS;
@@ -107,6 +119,7 @@ int main(int argc, char** argv){
   /* Get options */
   ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
   SCORER_TYPE_T scorer_type = PERCOLATOR_SCORE;
+  SCORER_TYPE_T second_scorer_type = Q_VALUE;
   MATCH_COLLECTION_T* match_collection = NULL;
 
   /* Perform the analysis */
@@ -117,12 +130,14 @@ int main(int argc, char** argv){
                                       fasta_file,
                                       feature_file);
     scorer_type = PERCOLATOR_SCORE;
+    second_scorer_type = Q_VALUE;
     break;
     
   case QVALUE_ALGORITHM:
     carp(CARP_INFO, "Running qvalue");
     match_collection = run_qvalue(psm_file, fasta_file);
     scorer_type = Q_VALUE;
+    second_scorer_type = XCORR; // could it be other?
     break;
     
   case NO_ALGORITHM:
@@ -131,6 +146,7 @@ int main(int argc, char** argv){
                                    fasta_file,
                                    feature_file);
     scorer_type = XCORR; // TODO put in something to default to the primary
+    second_scorer_type = SP;
     // score in the run
     break;
   default:
@@ -138,7 +154,9 @@ int main(int argc, char** argv){
   }  
   
   carp(CARP_INFO, "Outputting matches.");
-  output_matches(match_collection, scorer_type);
+  //  output_matches(match_collection, scorer_type);
+  print_sqt_file(match_collection, scorer_type, second_scorer_type);
+
   // MEMLEAK below causes seg fault
   // free_match_collection(match_collection);
 
@@ -152,9 +170,9 @@ int main(int argc, char** argv){
  * Outputs the matches in match_collection
  */
 int output_matches(
-    MATCH_COLLECTION_T* match_collection,
-    SCORER_TYPE_T scorer_type
-    ){
+  MATCH_COLLECTION_T* match_collection,
+  SCORER_TYPE_T scorer_type
+  ){
   // create match iterator, return match in sorted order of main_score type
   // TODO what is TRUE below?
   MATCH_ITERATOR_T* match_iterator = 
@@ -181,6 +199,82 @@ int output_matches(
   }
   return 0;
 }
+
+/*
+ */
+void print_sqt_file(
+  MATCH_COLLECTION_T* match_collection,
+  SCORER_TYPE_T scorer,
+  SCORER_TYPE_T second_scorer
+  ){
+
+  // get filename and open file
+  char* sqt_filename = get_string_parameter("sqt-output-file");
+  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  FILE* sqt_file = create_file_in_path( sqt_filename, NULL, overwrite );
+
+  // print header
+  int num_proteins = get_match_collection_num_proteins(match_collection);
+  print_sqt_header( sqt_file, "target", num_proteins);
+
+  ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
+  char algorithm_str[64];
+  algorithm_type_to_string(algorithm_type, algorithm_str);
+
+  fprintf(sqt_file, "H\tComment\tmatches analyzed by %s\n", algorithm_str);
+
+  // get match iterator sorted by spectrum
+  MATCH_ITERATOR_T* match_iterator = 
+    new_match_iterator_spectrum_sorted(match_collection, scorer);
+
+  // print each spectrum only once, keep track of which was last printed
+  int cur_spectrum_num = -1;
+  int cur_charge = 0;
+  int match_counter = 0;
+  int max_matches = get_int_parameter("max-sqt-result");
+
+  // for all matches
+  while( match_iterator_has_next(match_iterator) ){
+
+    // get match and spectrum
+    MATCH_T* match = match_iterator_next(match_iterator);
+    SPECTRUM_T* spectrum = get_match_spectrum(match);
+    int this_spectrum_num = get_spectrum_first_scan(spectrum);
+    int charge = get_match_charge(match);
+
+    carp(CARP_DETAILED_DEBUG, 
+         "SQT printing scan %i (current %i), charge %i (current %i)", 
+         this_spectrum_num, cur_spectrum_num, charge, cur_charge);
+
+    // if this spectrum has not been printed...
+    if( cur_spectrum_num != this_spectrum_num
+        || cur_charge != charge){
+
+      carp(CARP_DETAILED_DEBUG, "Printing new S line");
+      // print S line to sqt file
+      cur_spectrum_num = this_spectrum_num;
+      cur_charge = charge;
+      int num_peptides = get_match_ln_experiment_size(match);
+      num_peptides = expf(num_peptides);
+
+      print_spectrum_sqt(spectrum, sqt_file, num_peptides, charge);
+
+      // print match to sqt file
+      print_match_sqt(match, sqt_file, scorer, second_scorer);
+      match_counter = 1;
+    }
+    // if this spectrum has been printed
+    else{  
+      if( match_counter < max_matches ){
+        print_match_sqt(match, sqt_file, scorer, second_scorer);
+        match_counter++;
+      }
+    }
+
+  }// next match
+}
+
+
 
 /**
  * Compare doubles
@@ -215,7 +309,7 @@ MATCH_COLLECTION_T* run_nothing(
   ){
   
   // create MATCH_COLLECTION_ITERATOR_T object
-  MATCH_COLLECTION_T* match_collection = NULL;
+  MATCH_COLLECTION_T* match_collection = NULL; // to return
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
     new_match_collection_iterator(psm_result_folder, fasta_file);
   MATCH_ITERATOR_T* match_iterator = NULL;
@@ -240,7 +334,7 @@ MATCH_COLLECTION_T* run_nothing(
       match_collection_iterator_next(match_collection_iterator);
 
     if (feature_fh == NULL){
-      // Don't extract the features. Just return the match_collection
+      // Don't extract the features. Just return the (first) match_collection
       return match_collection;
     }
 
@@ -270,13 +364,15 @@ MATCH_COLLECTION_T* run_nothing(
           fprintf(feature_fh, "%.4f\n", features[feature_idx]);
         }
       }
-    }
+    }// next match for this collection
     free_match_iterator(match_iterator);
-  }
+
+  }// next match collection (target, decoy, decoy...)
   fclose(feature_fh);
 
   free_match_collection_iterator(match_collection_iterator);
-  return match_collection;
+  return match_collection;  // this is the last returned by the
+                            // iterator, likely a decoy, yes?
 }
 
 /**
@@ -542,7 +638,7 @@ MATCH_COLLECTION_T* run_percolator(
       free(features);
     }
 
-    // ok free & update for net set
+    // ok free & update for next set
     // MEMLEAK 
     free_match_iterator(match_iterator);
 

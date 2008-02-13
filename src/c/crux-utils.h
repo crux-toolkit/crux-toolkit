@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -149,10 +149,12 @@ char* generate_name(
 char* generate_psm_filename(char* basename, int file_index);
 
 /**
- * Open and create a file handle of a file that is named 
- * and located in user specified location
- * Assumes the directory exists
- *\returns a file handle of a file that is named and located in user specified location
+ * \brief Open and create a file of the given name in the given
+ * directory.
+ *
+ * Assumes the directory exists.  Fails if file can't be opened or if
+ * file exists and overwrite is false.
+ *\returns A file handle to the newly created file.
  */
 FILE* create_file_in_path(
   char* filename,  ///< the filename to create & open -in

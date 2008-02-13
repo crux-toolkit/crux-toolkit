@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.53 $
+ * REVISION: $Revision: 1.54 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -131,9 +131,42 @@ void free_match(
   }
 }
 
+/* ************ SORTING FUNCTIONS ****************** */
+/**
+ * Compare two matches by spectrum scan number.
+ * \return 0 if scan numbers are equal, -1 if a is smaller, 1 if b is
+ * smaller.
+ */
+int compare_match_spectrum(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  ){
+
+  SPECTRUM_T* spec_a = get_match_spectrum((*match_a));
+  SPECTRUM_T* spec_b = get_match_spectrum((*match_b));
+  int scan_a = get_spectrum_first_scan(spec_a);
+  int scan_b = get_spectrum_first_scan(spec_b);
+  int charge_a = get_match_charge((*match_a));
+  int charge_b = get_match_charge((*match_b));
+
+  if( scan_a < scan_b ){
+    return -1;
+  }else if( scan_a > scan_b ){
+    return 1;
+  }else{// else scan numbers equal
+    if(charge_a < charge_b){
+      return -1;
+    }else if(charge_a > charge_b){
+      return 1;
+    }
+  }// else scan number and charge equal
+  return 0;
+}
+
 /**
  * compare two matches, used for qsort
- * \returns the difference between sp score in match_a and match_b
+ * \returns 0 if sp scores are equal, -1 if a is less than b, 1 if a
+ * is greather than b.
  */
 int compare_match_sp(
   MATCH_T** match_a, ///< the first match -in  
@@ -141,7 +174,7 @@ int compare_match_sp(
   )
 {
   // might have to worry about cases below 1 and -1
-  // return (int)((*match_b)->match_scores[SP] - (*match_a)->match_scores[SP]);
+  // return(int)((*match_b)->match_scores[SP] - (*match_a)->match_scores[SP]);
 
   if((*match_b)->match_scores[SP] > (*match_a)->match_scores[SP]){
     return 1;
@@ -154,8 +187,29 @@ int compare_match_sp(
 }
 
 /**
+ * Compare two matches by spectrum scan number and sp score, used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if sp score of match a is less than
+ * match b.  1 if scan number and sp are equal, else 0.
+ */
+int compare_match_spectrum_sp(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  ){
+
+  int return_me = compare_match_spectrum( match_a, match_b );
+
+  if( return_me == 0 ){
+    return_me = compare_match_sp(match_a, match_b);
+  }
+
+  return return_me;
+}
+
+/**
  * compare two matches, used for qsort
- * \returns the difference between xcorr score in match_a and match_b
+ * \returns 0 if xcorr scores are equal, -1 if a is less than b, 1 if a
+ * is greather than b.
  */
 int compare_match_xcorr(
   MATCH_T** match_a, ///< the first match -in  
@@ -173,11 +227,32 @@ int compare_match_xcorr(
 
 }
 
+/**
+ * Compare two matches by spectrum scan number and xcorr, used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_xcorr(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+){
+
+  int return_me = compare_match_spectrum( match_a, match_b );
+
+  if( return_me == 0 ){
+    return_me = compare_match_xcorr(match_a, match_b);
+  }
+
+  return return_me;
+}
+
 
 /**
  * compare two matches, used for qsort
  * The smaller the Q value the better!!!, this is opposite to other scores
- * \returns the difference between xcorr score in match_a and match_b
+ * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
+ * is greather than b.
  */
 int compare_match_q_value(
   MATCH_T** match_a, ///< the first match -in  
@@ -195,8 +270,30 @@ int compare_match_q_value(
 }
 
 /**
+ * Compare two matches by spectrum scan number and q-value, used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_q_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+){
+
+  int return_me = compare_match_spectrum( match_a, match_b );
+
+  if( return_me == 0 ){
+    return_me = compare_match_q_value(match_a, match_b);
+  }
+
+  return return_me;
+}
+
+
+/**
  * compare two matches, used for PERCOLATOR_SCORE
- * \returns the difference between PERCOLATOR_SCORE score in match_a and match_b
+ * \returns 0 if percolator scores are equal, -1 if a is less than b,
+ * 1 if a is greather than b.
  */
 int compare_match_percolator_score(
   MATCH_T** match_a, ///< the first match -in  
@@ -212,6 +309,29 @@ int compare_match_percolator_score(
   return 0;
 
 }
+
+/**
+ * Compare two matches by spectrum scan number and percolator score,
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_percolator_score(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  )
+{
+
+  int return_me = compare_match_spectrum( match_a, match_b );
+
+  if( return_me == 0 ){
+    return_me = compare_match_percolator_score(match_a, match_b);
+  }
+
+  return return_me;
+}
+/* ****** End of sorting functions ************/
 
 /**
  * FIXME this should be capable of returning with an error
@@ -304,16 +424,47 @@ void print_match_sqt(
   PEPTIDE_T* peptide = get_match_peptide(match);
   char* sequence = get_peptide_sequence_sqt(peptide);
 
+  // NOTE (BF 12-Feb-08) This is an ugly fix to give post-percolator
+  // sqt files the rank of the xcorr and sp.
+  SCORER_TYPE_T main_rank_type = main_score;
+  SCORER_TYPE_T other_rank_type = other_score;
+  if( main_score == PERCOLATOR_SCORE && other_score==Q_VALUE ){
+    main_rank_type = XCORR;
+    other_rank_type = SP;    
+  }
+
+  // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
+  // Only the fraction matched is serialized.  The number possible can
+  // be calculated from the length of the sequence and the charge, but
+  // the charge of the match is not serialized and I'm not sure when
+  // it is set.  But I know it exists by here, so recalculate it.
+  int b_y_total = get_match_b_y_ion_possible(match);
+  int b_y_matched = get_match_b_y_ion_matched(match);
+  
+  if( b_y_total == 0 ){
+    int factor = get_match_charge(match);
+    if( factor == 3 ){
+      factor = 2;  //there are +1 and +2 b/y ions for charge==3
+    }else{
+      factor = 1;
+    }
+    b_y_total = (get_peptide_length(peptide)-1) * 2 * factor;
+    b_y_matched = (get_match_b_y_ion_fraction_matched(match)) * b_y_total;
+  }
   // print match info
   fprintf(file, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\n",
-          get_match_rank(match, main_score),
-          get_match_rank(match, other_score),
+          //get_match_rank(match, main_score),
+          //get_match_rank(match, other_score),
+          get_match_rank(match, main_rank_type),
+          get_match_rank(match, other_rank_type),
           get_peptide_peptide_mass(peptide),
           get_match_delta_cn(match),
           get_match_score(match, main_score),
           get_match_score(match, other_score),
-          get_match_b_y_ion_matched(match),
-          get_match_b_y_ion_possible(match),
+          //get_match_b_y_ion_matched(match),
+          //get_match_b_y_ion_possible(match),
+          b_y_matched,
+          b_y_total,
           sequence
           );
   free(sequence);
@@ -534,6 +685,7 @@ MATCH_T* parse_match(
   )
 {
   MATCH_T* match = new_match();
+  carp(CARP_DETAILED_DEBUG, "New match charge is %d",get_match_charge(match));
   SPECTRUM_T* spectrum = NULL;
   PEPTIDE_T* peptide = NULL;
   
@@ -543,7 +695,7 @@ MATCH_T* parse_match(
   
   // parse score, ranks of the match    
   if((peptide = parse_peptide(result_file, database, TRUE))== NULL){
-    carp(CARP_ERROR, "failed to parse peptide");
+    carp(CARP_ERROR, "Failed to parse peptide");
     // FIXME should this exit or return null. I think sometimes we can get
     // no peptides, which is valid, in which case NULL makes sense.
     // maybe this should be fixed at the serialize match level however.
@@ -551,7 +703,7 @@ MATCH_T* parse_match(
   }
   
   // parse each score and rank of match
-  for(; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+  for(score_type_idx=0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
     fread(&(match->match_scores[score_type_idx]), 
       sizeof(float), 1, result_file);
     fread(&(match->match_rank[score_type_idx]), 
@@ -566,6 +718,18 @@ MATCH_T* parse_match(
   // spectrum specific features
   fread(&(match->b_y_ion_fraction_matched), sizeof(float), 1, result_file);
 
+  // calculate the total matched from the total possible and the
+  // fraction matched
+  // We could do this if we had the charge. It mysteriously appears
+  // later.  Calcualte this then???
+  /*int total_ions = (get_peptide_length(peptide) -1) * 2;
+  int matched_ions = match->b_y_ion_fraction_matched * total_ions ;
+  match->b_y_ion_matched = matched_ions;
+  match->b_y_ion_possible = total_ions;
+  int scan = get_spectrum_first_scan(spectrum);
+  carp(CARP_DETAILED_DEBUG, "For scan# %d, %d matched of %i = %.2f", 
+  scan, matched_ions, total_ions, match->b_y_ion_fraction_matched);*/
+
   // parse match peptide overall trypticity
   fread(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, result_file);
   
@@ -576,6 +740,8 @@ MATCH_T* parse_match(
   match->peptide_sequence = NULL;
   match->spectrum = spectrum;
   match->peptide = peptide;
+  carp(CARP_DETAILED_DEBUG, "End of parse match charge is %d",
+       get_match_charge(match));
   
   return match;  
 }

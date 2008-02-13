@@ -1074,13 +1074,15 @@ char* get_string_parameter(
   //check type
   char* type_str = get_hash_value(types->hash, name);
   PARAMETER_TYPE_T type;
-  BOOLEAN_T found = string_to_param_type(type_str, &type);
+  //BOOLEAN_T found = string_to_param_type(type_str, &type);
+  string_to_param_type(type_str, &type);
 
+  /*  Let any type be retrieved as string
   if(found==FALSE || type != STRING_P){
     carp(CARP_ERROR, "Request for string parameter '%s' which is of type %s",
          name, type_str);
   }
-
+  */
 
   return my_copy_string(string_value);
 }
@@ -1111,12 +1113,13 @@ char* get_string_parameter_pointer(
   //check type
   char* type_str = get_hash_value(types->hash, name);
   PARAMETER_TYPE_T type;
-  BOOLEAN_T found = string_to_param_type(type_str, &type);
+  //BOOLEAN_T found = string_to_param_type(type_str, &type);
+  string_to_param_type(type_str, &type);
 
-  if(found==FALSE || type != STRING_P){
+  /*if(found==FALSE || type != STRING_P){
     carp(CARP_ERROR, "Request for string parameter '%s' which is of type %s",
          name, type_str);
-  }
+         }*/
 
   return string_value;
 

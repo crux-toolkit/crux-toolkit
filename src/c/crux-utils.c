@@ -552,14 +552,21 @@ BOOLEAN_T suffix_compare(
 }
 
 /**
- * given the path and the filename return a file with path
- * "path/filename"
+ * Given the path and the filename return a file with path
+ * "path/filename".  Returns filename unchanged if path = NULL.
  * \returns a heap allocated string, "path/filename"
  */
 char* get_full_filename(char* path, char* filename){
-  char* ready_path = cat_string(path, "/");
-  char* result = cat_string(ready_path, filename);
-  free(ready_path);
+
+  char* result = NULL;
+  if( path == NULL ){
+    result = my_copy_string(filename);
+  }else{
+    char* ready_path = cat_string(path, "/");
+    result = cat_string(ready_path, filename);
+    free(ready_path);
+  }
+
   return result;
 }
 
@@ -749,11 +756,12 @@ BOOLEAN_T valid_peptide_sequence( char* sequence){
 }
 
 /**
- * Open and create a file handle of a file that is named 
- * and located in user specified location
- * Assumes the directory exists
- * \returns a file handle of a file that is named and located in user
- * specified location
+ * \brief Open and create a file of the given name in the given
+ * directory.
+ *
+ * Assumes the directory exists.  Fails if file can't be opened or if
+ * file exists and overwrite is false.
+ *\returns A file handle to the newly created file.
  */
 FILE* create_file_in_path(
   char* filename,  ///< the filename to create & open -in

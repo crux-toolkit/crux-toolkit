@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -85,9 +85,18 @@ void free_match_collection(
  *\returns TRUE, if successfully sorts the match_collection
  */
 BOOLEAN_T sort_match_collection(
-  MATCH_COLLECTION_T* match_collection, ///< the match collection to
-                                        ///sort -out
+  MATCH_COLLECTION_T* match_collection, ///< match collection to sort -out
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
+  );
+
+/**
+ * \brief Sort a match_collection by the given score type, grouping
+ * matches by spectrum (if multiple spectra present).
+ * \returns TRUE if sort is successful, else FALSE;
+ */
+BOOLEAN_T spectrum_sort_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< match collection to sort -out
+  SCORER_TYPE_T score_type ///< the score type to sort by -in
   );
 
 /**
@@ -161,6 +170,12 @@ int get_match_collection_charge(
 float get_match_collection_delta_cn(
   MATCH_COLLECTION_T* match_collection ///< working match collection -in
 );
+
+/**
+ * \brief Get the number of proteins in the database associated with
+ * this match collection.
+ */
+int get_match_collection_num_proteins(MATCH_COLLECTION_T* match_collection);
 
 /**
  * Takes the values of match-output-folder, ms2 filename (soon to be
@@ -243,6 +258,17 @@ MATCH_ITERATOR_T* new_match_iterator(
   SCORER_TYPE_T match_mode, ///< the mode to set (MATCH_SP, MATCH_XCORR) -in
   BOOLEAN_T sort_match  ///< should I return the match in sorted order?
   );
+
+/**
+ * \brief Create a match iterator to return matches from a collection
+ * grouped by spectrum and sorted by given score type.
+ *
+ * \returns A heap-allocated match iterator.
+ */
+MATCH_ITERATOR_T* new_match_iterator_spectrum_sorted(
+  MATCH_COLLECTION_T* match_collection, ///< match collection to iterate -in
+  SCORER_TYPE_T scorer ///< the score to sort by (MATCH_SP, MATCH_XCORR) -in
+);
 
 /**
  * Does the match_iterator have another match struct to return?
