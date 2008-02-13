@@ -53,8 +53,6 @@ authors. \ereview
 We obtained a copy of TurboSEQUEST, and we have included a timing
 comparison in the revised version of the manuscript.
 
-FIXME
-
 \breview Regarding the reimplementation of Sp and Xcorr, the authors
 show scatter plots in Figure 3 where Sp is very close to the ideal
 diagonal but Xcorr shows some spread.  The authors mention that they
@@ -81,13 +79,19 @@ software that are either not novel or are previously published.  This
 is evidence by the lack of details in the rest of the Results section
 (2.3 and 2.4).  \ereview
 
-FIXME[Bill]
+It is true that the manuscript describes several components that are
+not novel.  We have tried to make clear that these pieces are not
+novel, and we have consequently limited the amount of space devoted to
+them in the manuscript.
 
 \breview On-the-fly decoy database generation is a nice feature to
 have but is not a feature that can be considered novel or cutting
 edge. \ereview
 
-FIXME[Bill]
+What is novel is that a new shuffled decoy peptide is generated for
+every peptide-spectrum comparison.  Thus, if a particular peptide is
+selected as a candidate for 100 different spectra, it will be shuffled
+100 different times.  We have clarified this point in the text.
 
 \breview The last paragraph in the Discussion mentions that Crux is
 still under development.  Specifically ``improved support for searches
@@ -97,13 +101,12 @@ support that feature at all now.  If the latter is the case, it is
 practically useless in its current form and this manuscript is
 premature. \ereview
 
-Crux currently supports static modifications of amino acid masses at search
-time (that is, changing the 1-to-1 mapping of amino acid to mass) using a 
-parameter file. It does
-not currently support multiple masses for each amino acid (that is, a 1-to-N
-mapping of amino acid to mass), but this functionality is currently
-under development. We have tried to make this distinction 
-clearer in the Discussion Section.
+Crux currently supports static modifications of amino acid masses at
+search time (that is, changing the 1-to-1 mapping of amino acid to
+mass) using a parameter file. It does not currently support multiple
+masses for each amino acid (that is, a 1-to-N mapping of amino acid to
+mass), but this functionality is currently under development. We have
+clarified the relevant text in the Discussion section.
 
 \breview One major selling point of this manuscript is to describe the
 availability of a freely available (to academics) reimplementation of
@@ -124,10 +127,14 @@ Methods section appear after the Results and Discussion.  Sections and
 subsection have numerical designations that are not used in
 JPR. \ereview
 
-The manuscript was formatted using the LaTeX style file provided by
-{\em Journal of Proteome Research}.  We submitted keywords via the
-{\em JPR} website, but have also inserted them on the title page of
-the revised manuscript.
+The manuscript was formatted using LaTeX, following the instructions
+at \url{http://pubs.acs.org/paragonplus/submission/general/tex.html}.
+The generic formatting produced by LaTeX (e.g., the layout of the
+authors' names and affiliations) will be converted to {\em JPR}
+formatting during production.  In the revised version of the
+manuscript, we moved ``Materials and Methods'' before ``Results.''  We
+submitted keywords via the {\em JPR} website and have also inserted
+them on the title page of the revised manuscript.
 
 \breview And finally significant portions of this manuscript lack
 substance as evidenced by short paragraphs quickly describing
@@ -135,7 +142,14 @@ previously published or submitted tools.  The manuscript needs to be
 reorganized and rewritten to highlight the truly novel aspects of
 research that the authors want to convey. \ereview
 
-FIXME[Bill]
+We believe that the primary contributions are (1) making available
+source code that implements Xcorr and Sp, (2) describing and making
+available source code that implements an effective indexing strategy.
+The dynamic decoy generation, and the implementation of previously
+described post-processors is secondary.  This is why we described the
+first two points first and in more detail.  To further de-emphasize
+the post-processor implementations, we have removed the subheadings
+for each of these, resulting in a single block of 
 
 \section*{Reviewer \#2}
 
@@ -155,9 +169,20 @@ single package is certainly a strong point, but it's not clear that
 integration itself changes the state of the art. The rhetoric could be
 toned down or better supported. \ereview
 
-% TODO observe that reversed sequences are not the same as on-the-fly
-% generated decoy sequences (i.e. there is only one reversed sequence)
-FIXME[Bill]
+We have revised the manuscript to make weaker claims about novelty.
+For example, we removed from the abstract the statement that Crux
+``extends the state of the art in peptide identification in several
+significant respects,'' and we changed the introduction from saying,
+``Relative to the current state of the art, Crux makes the following
+primary contributions: \dots'' to ``Crux's key feature include the
+following: \dots''
+
+While X!Tandem does indeed allow the generation of a reverse database
+on the fly, this is fundamentally different from Crux's method for
+generating a decoy database.  Whereas X!Tandem uses a fixed decoy (the
+reversed version of the peptide) for every target peptide, Crux
+reshuffles the target peptide every time it is compared to a different
+spectrum.  We have clarified this point in the text.
 
 \breview The most clear and important contribution of the Crux paper
 is that it promises a SEQUEST implementation ``free for academic
@@ -182,9 +207,8 @@ revised manuscript.  Crux will be made available as compiled binaries
 and source code.  It will be free for academic use and will be
 available for licensing via UW tech transfer.  The licensing mechanism
 will be identical to that currently in place for Percolator, involving
-a click-through license for non-academic use.  This has been approved
-by our tech transfer office.  A letter to this effect is being
-submitted along with this manuscript.
+a click-through license for academic use.  This has been approved by
+our tech transfer office.
 
 \breview The authors claim, on page 4, that ``Crux is both efficient
 and accurate.'' But it is hard to gauge the performance of Crux from
@@ -197,9 +221,9 @@ indexing were added to SEQUEST (as in the TurboSEQUEST implementation
 that the authors exclude from consideration!) would it be 10X faster
 than the optimized Crux? \ereview
 
-To address this concern, and the concern of Reviewer \#1, we obtained
-a copy of TurboSEQUEST and included it in the comparison.
-FIXME
+To address this concern, and the similar concern expressed by Reviewer
+\#1, we obtained a copy of TurboSEQUEST and included it in the
+comparison.
 
 \breview It's a little bizarre to do timing comparisons on versions of
 the code with Xcorr removed. One rationale for this might be that the
@@ -214,10 +238,7 @@ Our motivation for removing the XCorr component of SEQUEST was indeed
 to isolate the effect of indexing on speed.  However, we agree with
 the reviewer that comparing unmodified code is more convincing.
 Therefore, in the revised version of the manuscript, the comparisons
-are done using Xcorr. The results show that searching against indexed 
-sequence database 
-provides roughly an
-order of magnitude speed increase when compared to unindexed databases.
+are done using Xcorr.
 
 \breview As to accuracy, it would be interesting to know why, if Crux
 reimplements SEQUEST faithfully, there is variation in Xcorr as
@@ -227,12 +248,15 @@ LTQ?). It would be interesting to know what happens to the Xcorr
 comparison when considering data from, say, a QTOF or
 MALDI-TOF/TOF. 
 \ereview
-To demonstrate that our Xcorr implementation is accurate across different
-kinds of spectra, we have added a figure to the supplement which shows Xcorr
-and Sp comparison for randomly generated spectra. These
-spectra should sample the full space of possible spectra, including spectra
-  generated from MALDI-TOF/TOF and QTOF, in addition to kinds of
-  fragmentation technology.
+
+To demonstrate that our Xcorr implementation is accurate across
+different kinds of spectra, we have computed Xcorr and Sp comparison
+for randomly generated spectra.  This comparison is described in the
+text and in a new supplementary figure.  These spectra sample from the
+full space of possible spectra, including spectra generated from
+MALDI-TOF/TOF and QTOf and spectra generating using different types of
+fragmentation technology.
+
 \breview Some more information on the methods is needed. What kind of
 instrument was used to gather the yeast data? It's impossible to tell
 from the referenced URL for the 60cm data since the files don't seem
@@ -242,8 +266,7 @@ We apologize---we inadvertently unzipped the files that were stored on
 our website, which caused the URLs to break.  This has been fixed.  We
 have added a few more details about the data set to the manuscript:
 ``analysis of soluble yeast whole-cell lysate on an LTQ ion trap mass
-spectrometer.''
-Additional details are available in the referenced
+spectrometer.''  Additional details are available in the referenced
 manuscript, where this data was first used.
 
 \breview In Figure 2, the text talks about searching a collection of
