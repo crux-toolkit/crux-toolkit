@@ -94,6 +94,7 @@ int main(int argc, char** argv){
   print_header();
 
   // iterate over all peptides
+  int mod_me = 1000;
   while(generate_peptides_iterator_has_next(peptide_iterator)){
     ++total_peptides;
     peptide = generate_peptides_iterator_next(peptide_iterator);
@@ -103,8 +104,12 @@ int main(int argc, char** argv){
     // free peptide
     free_peptide(peptide);
     
-    if(total_peptides% 10000 == 0){
-      carp(CARP_INFO, "reached peptide: %d", total_peptides);
+    //    if(total_peptides% 10000 == 0){
+    if(total_peptides % mod_me == 0){
+      if( (total_peptides)/10 == mod_me){
+        mod_me *= 10;
+      }
+      carp(CARP_INFO, "Reached peptide %d", total_peptides);
     }
   }
   free_generate_peptides_iterator(peptide_iterator);
