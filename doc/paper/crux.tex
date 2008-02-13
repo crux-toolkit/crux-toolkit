@@ -41,7 +41,8 @@ Seattle, WA, USA
 
 \noindent Running title: {\sc Rapid, accurate peptide identification}
 
-\noindent Keywords: FIXME
+\noindent Keywords: Mass spectrometry, peptide identification, proteomics,
+  bioinformatics
 
 \clearpage
 
@@ -175,10 +176,12 @@ identified spectra.
 
 \section{Materials and Methods}
 
-All experiments were performed on a using a single CPU of a 2 x Intel
+All Linux experiments were performed on a using a single CPU of a 2 x Intel
 Xeon 2.33GHz 4-core processor machine with 4MB cache and 16GB of RAM
-running RedHat Linux.
-%FIXME[Aaron]: Add Windows information.
+running RedHat Linux. All Windows experiments were performed using 
+a single CPU of a Dell OptiPlex 745 Windows XP box, 
+Intel Core 2 Duo E6400 (2.13 GHz, 2MB L2), 
+2GB RAM with OpenSSH/Cygwin installed.
 
 Using Crux, we precomputed a peptide database for two protein sequence
 databases: the predicted open reading frames from yeast {\em
@@ -236,7 +239,7 @@ databases are paged into and out of memory only as needed.
 {\sf (C)} \\
 \end{tabular}
 \caption{{\bf Rapid retrieval of candidate peptides.}  Panels (A) and
-  (B) plot the total running time required to search 100 tandem mass
+  (B) plot the average running time required to search 100 tandem mass
   spectra against the human protein databases on computers running the
   Linux ({\sf A}) or Windows ({\sf B}) operating systems, using {\sc
   Sequest} and Crux with and without indices.  Running time is plotted
@@ -247,11 +250,6 @@ databases are paged into and out of memory only as needed.
   searches for Crux on Windows and Linux and for Sequest on Windows.
   \label{figure:indexing}}
 \end{figure}
-
-% FIXME take 100 spectra from figures. Average runtime per spectrum.
-
-% FIXME I'm not sure this plot is the right one. The x-axis is almost
-% useless. Maybe it should be replaced with database size?
 
 %---------------------------------
 % Indexing numbers for human
@@ -279,7 +277,8 @@ To demonstrate the efficiency of Crux's candidate peptide retrieval
 strategy, we searched with a collection of 100 spectra against
 predicted human protein sequences from the human genome, generating
 candidate peptides from a series of increasingly wider mass windows.
-Figure~\ref{figure:indexing}A plots the search time running under
+Figure~\ref{figure:indexing}A plots the average search time per spectrum 
+running under
 Linux as a function of mass window width. Analogous plots with similar
 trends for a search against the yeast {\em Saccharomyces cerevisiae}
 are shown in the online supplement.  In general, Crux runs more
