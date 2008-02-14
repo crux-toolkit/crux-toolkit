@@ -40,27 +40,29 @@ def parseTime(filename):
   return times 
 
 
-cruxWindowsNone = parseTime('../turbo-no-missed-human/%s.crux.no.time')
-cruxWindowsIndexed = parseTime('../turbo-no-missed-human/%s.crux.time')
+sequestWindowsNone = parseTime('../turbo-no-missed-human/%s.sequest.no.time')
+sequestWindowsIndexed = parseTime('../turbo-no-missed-human/%s.sequest.time')
+plotRatio(sequestWindowsNone, sequestWindowsIndexed, style='m-x', label = "Sequest on Windows")
 
-plotRatio(cruxWindowsIndexed, cruxWindowsNone, style='k-o', label = "Crux on Windows")
 
 cruxLinuxNone    = parseXY('../index/crux-no-index-human.fasta.xy')
 cruxLinuxIndexed = parseXY('../index/crux-fast-human.fasta.xy')
 
-plotRatio(cruxLinuxIndexed, cruxLinuxNone, style='k--o', label="Crux on Linux")
+plotRatio(cruxLinuxNone, cruxLinuxIndexed, style='k--o', label="Crux on Linux")
 
-sequestWindowsNone = parseTime('../turbo-no-missed-human/%s.sequest.no.time')
-sequestWindowsIndexed = parseTime('../turbo-no-missed-human/%s.sequest.time')
-plotRatio(sequestWindowsIndexed, sequestWindowsNone, style='m-o', label = "Sequest on Windows")
+
+cruxWindowsNone = parseTime('../turbo-no-missed-human/%s.crux.no.time')
+cruxWindowsIndexed = parseTime('../turbo-no-missed-human/%s.crux.time')
+
+plotRatio(cruxWindowsNone, cruxWindowsIndexed, style='k-o', label = "Crux on Windows")
 
 
 
 pylab.xlim(0.05, 5)
-pylab.ylim(0.1, 5000.0)
+pylab.ylim(0.0001, 1.0)
 pylab.xticks(size=20)
 pylab.yticks(size=20)
-pylab.ylabel("Runtime (No index / index)", size=20)
+pylab.ylabel("Runtime (Index / No index)", size=20)
 pylab.xlabel("Mass window (Da)", size=20)
 pylab.legend()
 pylab.savefig("ratio.png")
