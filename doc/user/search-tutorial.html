@@ -30,10 +30,12 @@ REVISION: $1.0 $
    <dt>Searching a Protein Database</a>
    <dt><a href="index-tutorial.html">Creating an Index</a>
    <dt><a href="customize-tutorial.html">Customizing a Search</a>
+<!--
    <dt><a href="utilities-tutorial.html">Crux utilities</a>
    <dt><a href="examples-tutorial.html">Examples</a>
+-->
    <dt><a href="crux.html">Man pages</a>
-   <dt><a href="sitemap-tutorial.html">Index</a>
+<!--   <dt><a href="sitemap-tutorial.html">Index</a> -->
 </dl>
 <!--
 <hr>
@@ -65,28 +67,25 @@ INFO: Using amino acid alphabet (ACDEFGHIKLMNPQRSTVWYBUXZ).
 INFO: Searching spectra
 </pre>
 
-<p>When the search has completed, it will say</p>
+<p>When the search has completed, it will print</p>
 <pre>
 INFO: crux-search-for-matches finished
 </pre>
 
 <p>Looking at the contents of the directory, you will see three new
 files containing the search results: <span
-class=file>crux_match_target_demo_<em>gibberish</em>, 
-crux_match_decoy1_demo_<em>gibberish</em>, and
-crux_match_decoy2_demo_<em>gibberish</em></span>
-.  The <span class="file"><em>gibberish</em></span> will be replaced by
-some random sequence of letters and numbers.  It is used to ensure
-that each file gets a unique name.  These files are in a binary format
-that can only be read by <span class=prog>crux</span>.</p>
+class=file>demo.csm, demo-decoy-1.csm, demo-decoy-2.csm</span>
+These files are in a binary format that can only be read by <span
+class=prog>crux-analyze-matches</span>.</p> 
 
+<!--
 <p><b>NOTE: This is actually a problem because analyze-matches doesn't
 currently work without an index.  There are several solutions:
 1. create an index for the first search, 2. create an sqt file for the
 first search so the user can see some results, then create an index
 and redo the results, 3. change analzye-matches to work without an
 index.</b></p>
-
+-->
 
 <div class=note><em>Note: Search results may also be returned in a
 text format.  See the <a
@@ -101,7 +100,7 @@ high-quality peptide-spectrum matches.  Run this command.
 </p>
 
 <div class=code><code>
-$ crux-analyze-matches . small-yeast.fasta > search-results</code>
+$ crux-analyze-matches . small-yeast.fasta </code>
 </div>
 
 <p>While the analysis is running, you will see output like this
@@ -109,36 +108,96 @@ $ crux-analyze-matches . small-yeast.fasta > search-results</code>
 
 <pre>
 INFO: Running percolator
-INFO: Getting PSMs from ./crux_match_target_demo_IZc8ya
-INFO: Getting PSMs from ./crux_match_decoy_1_demo_4CkSbq
-INFO: Getting PSMs from ./crux_match_decoy_2_demo_SXFCOF
+INFO: Getting PSMs from ./demo.csm
+INFO: Getting PSMs from ./demo-decoy-1.csm
+INFO: Getting PSMs from ./demo-decoy-2.csm
 INFO: Outputting matches.
 </pre>
+
+<p>...unless you are getting the version that has not implemented
+crux-analyze-matches for use without an index.  In that case you will
+get an error and the program will terminate.  In that case, go on to
+the first step on the next page to create an index.  Then repeat the
+above.
+
 
 <p>When the analysis is complete it will print </p>
 <pre>
 INFO: crux-analyze-matches finished.
 </pre>
 
-<p>Take a look at the file <span class=file>search-results</span>.
-The beginning of the file should look like this.
-</p>
+<p>There is new file called <span class=file>target.sqt</span>
+containing the results.  The beginning of the file looks like this
 
 <pre>
-P       31      3       1       1       3095.236572266  20.535989761    0.000000000     ELESAAYDHAEPVQPEDAPQDIANDELK
-P       128     3       2       2       3095.236572266  19.932861328    0.000000000     ELESAAYDHAEPVQPEDAPQDIANDELK
-P       133     2       3       3       1301.416137695  17.555320740    0.000000000     LDVDELGDVAQK
-P       16      3       4       4       3095.236572266  15.313814163    0.000000000     ELESAAYDHAEPVQPEDAPQDIANDELK
-P       84      3       5       5       3095.236572266  14.052746773    0.000000000     ELESAAYDHAEPVQPEDAPQDIANDELK
-P       87      2       6       6       1301.416137695  13.424876213    0.000000000     LDVDELGDVAQK
-P       115     2       7       7       1301.416137695  13.256440163    0.000000000     LDVDELGDVAQK
+H       SQTGenerator Crux
+H       SQTGeneratorVersion 1.0
+H       Comment Crux was written by...
+H       Comment ref...
+H       StartTime       Wed Feb 13 17:18:21 2008
+H       EndTime
+H       Database        small-yeast.fasta
+H       DBSeqLength     ?
+H       DBLocusCount    56
+H       PrecursorMasses average
+H       FragmentMasses  mono
+H       Alg-PreMasTol   3.0
+H       Alg-FragMassTol 0.50
+H       Alg-XCorrMode   0
+H       Comment preliminary algorithm sp
+H       Comment final algorithm xcorr
+H       StaticMod       C=160.139
+H       Alg-DisplayTop  5
+H       EnzymeSpec      tryptic
+H       Comment matches analyzed by percolator
+S       10      10      2       0.00    server  636.34  0.00    0.00    2
+M       1       1       1270.49 0.31    -2.15   0.86    7       22      K.SGLIVEIQGVQK.E
+L       YDR093W
+S       11      11      2       0.00    server  745.27  0.00    0.00    2
+M       1       1       1489.73 3.89    4.69    0.00    21      24      R.NFLETVELQVGLK.N
+L       YGL135W
+S       12      12      3       0.00    server  472.56  0.00    0.00    7
+M       1       3       1414.62 0.16    -1.82   0.79    12      44      K.VLEFHPFDPVSK.K
+L       YGL008C
+
 </pre>
 
-<p>Each line is one peptide-spectrum match.  The first column is the
-identifier 'P' to indicate that percolator was the algorithm used.  The
-following columns are scan number, charge, rank (by?), rank (by?),
-mass, analysis score, q-value, and sequence matched.  The results are
-ranked by score with the best matches first.
+<p>This file follows the SQT file format described <a
+href="http://fields.scripps.edu/sequest/SQTFormat.html">here</a>, with
+a few modifications. Lines beginning with <span class=out>H</span> are
+header lines and contain general information about the run.  Lines
+beginning with <span class=out>S</span> contain information about a
+spectrum including scan number (for the first example <span
+class=out>10</span>), charge <span class=out>2</span>, two place-holders, the 
+measured m/z of the precursor ion (<span class=out>636.34</span>), two
+place holders, and the number of peptides in the database that were
+compared to this spectrum (<span class=out>2)</span>.
+<p>Lines beginning
+with <span class=out>M</span> give information about the
+peptide-spectrum match including the rank of the primary scoring
+function (<span class=out>1</span>), rank of the secondary scoring
+function (<span class=out>1</span>), calculated mass of the charged
+peptide (<span class=out>1270.49</span>), secondary score (here, the
+q-value calculated by percolator, <span class=out>0.31</span>), the
+primary score (here the percolator score, <span
+class=out>-2.15</span>), the proportion of ions matched, number of
+ions matched, total number of ions predicted, and the sequence of the
+peptide.
+<p>Lines beginning with <span class=out>L</span>  give the name
+of the protein locus for this peptide.  If a peptide is found in more
+than one protein, it can be followed by multiple lines.  
+
+<p>The pattern of <span class=out>S, M, L</span> lines repeats for
+every spectrum searched.  In this example, there is only one <span
+class=out>M</span> line reported for each spectrum, but it is possible to
+report more.  See the <a
+href="customize-tutorial.html#">customization</a> page for information
+about options. 
+
+<!-- we should say something about the default behavior of -->
+<!-- analyze-matches being percolator.  Also, the S lines should -->
+<!-- report a charged mass calculated from m/z and there should be a U -->
+<!-- at the end of the M lines.  L lines should have descriptions -->
 </p>
 
 <a href="index-tutorial.html"><h4>Next: Creating an Index</h4></a>
