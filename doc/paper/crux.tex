@@ -119,7 +119,7 @@ Crux's key features include the following:
   candidate peptide retrieval time from the human protein database by
   79.5\%--97.2\%, depending upon the width of the selected mass
   window.  Running under Windows, Crux's running time is comparable to
-  that of TurboSEQUEST.
+  that of Turbo{\sc Sequest}.
 
 \item {\bf On-the-fly generation of decoy peptides.}  In evaluating
   the statistical significance of a PSM, mass spectrometrists
@@ -179,9 +179,8 @@ identified spectra.
 All Linux experiments were performed on a using a single CPU of a 2 x Intel
 Xeon 2.33GHz 4-core processor machine with 4MB cache and 16GB of RAM
 running RedHat Linux. All Windows experiments were performed using 
-a single CPU of a Dell OptiPlex 745 Windows XP box, 
-Intel Core 2 Duo E6400 (2.13 GHz, 2MB L2), 
-2GB RAM with OpenSSH/Cygwin installed.
+a Dell OptiPlex 745 Windows XP machine with an Intel Core 2 Duo E6400
+processor (2.13 GHz, 2MB L2) and 2GB RAM with OpenSSH/Cygwin installed.
 
 Using Crux, we precomputed a peptide database for two protein sequence
 databases: the predicted open reading frames from yeast {\em
@@ -193,12 +192,12 @@ procedures required, respectively, approximately two and four minutes
 of real time and produced indices of 69 and 240 MB in size.
 
 For validation, we use a publicly available tandem mass spectrometry
-data set from \cite{klammer:peptide3}, available as the $60cm$ data
+data set from \cite{klammer:improving}, available as the $60cm$ data
 set at
 \url{http://noble.gs.washington.edu/proj/retention/data/data.html}.
 The data set consists of a collection of 18,149 spectra derived from a
 analysis of soluble yeast whole-cell lysate on an LTQ ion trap mass
-spectrometer as described previously \cite{klammer:peptide3}.
+spectrometer as described previously \cite{klammer:improving}.
 
 \section{Results}
 
@@ -245,9 +244,9 @@ databases are paged into and out of memory only as needed.
   Sequest} and Crux with and without indices.  Running time is plotted
   as a function of the mass tolerance used to define candidate
   peptides. The Linux plot includes only three series because we do
-  not have a Linux implementation of TurboSEQUEST.  {\sf (C)} The
+  not have a Linux implementation of Turbo{\sc Sequest}.  {\sf (C)} The
   figure plots ratio of running times for non-indexed versus indexed
-  searches for Crux on Windows and Linux and for Sequest on Windows.
+  searches for Crux on Windows and Linux and for {\sc Sequest} on Windows.
   \label{figure:indexing}}
 \end{figure}
 
@@ -287,23 +286,25 @@ uses a peptide index.  The difference in running time is most
 pronounced when the mass tolerance window is small, because Crux does
 not need to scan the entire database to retrieve a small collection of
 candidate peptides.  For example, with a mass tolerance window of 0.1,
-{\sc Sequest} requires 19.3~min clock time, whereas Crux requires
-32~s.  This represents a 97.2\% reduction in running time. However,
-even when we use a mass tolerance of 3, Crux yields a 79.5\% speed
-improvement (4.0~min versus 19.6~min).
+on Linux {\sc Sequest} 
+requires an average of 11.6~s clock time per spectrum, whereas Crux requires
+an average of 10~ms. 
+This represents a 99.9\% reduction in running time. However,
+even when we use a mass tolerance of 3, Crux yields a 99.5\% speed
+improvement (52~ms versus 11.7~s).
 
 Crux is not the first attempt to improve the speed of candidate
 peptide retrieval.  Thermo Scientific (Waltham, MA) markets a version
-of {\sc Sequest} called TurboSEQUEST as part of the Bioworks 3.1
+of {\sc Sequest} called Turbo{\sc Sequest} as part of the Bioworks 3.1
 software, which implements a peptide index using a proprietary scheme.
-In Figure~\ref{figure:indexing}B, we compare Crux to TurboSequest
+In Figure~\ref{figure:indexing}B, we compare Crux to Turbo{\sc Sequest}
 under Windows XP.  Execution of Crux on Windows was performed from
 within the Unix emulator Cygwin, which induces a slight overhead.
 This may explain, in part, the reversal between the non-indexed
 versions of Crux and {\sc Sequest} between panels A and B: under
 Windows in this mode, {\sc Sequest} runs significantly more quickly
 than Crux.  Nonetheless, with indexing Crux's speed is comparable to
-that of TurboSequest.  In Figure~\ref{figure:indexing}C we directly
+that of Turbo{\sc Sequest}.  In Figure~\ref{figure:indexing}C we directly
 assess the speedup due to indexing, plotting the ratio of the running
 time with and without indexing for Crux under Linux and Windows and
 for {\sc Sequest} under Windows.  For all three mass window sizes,
@@ -377,8 +378,9 @@ X_c(u, v) = \frac{0.015\sum_{i=1}^N u_i v_i}
 \end{figure*}
 Figure~\ref{figure:sp-xcorr} shows that the Crux-calculated versions
 of $Sp$ and $Xcorr$ closely match the {\sc Sequest}-calculated
-versions of these scores. We also analyzed randomly generated spectra
-against the same database, in order to more fully sample the space of
+versions of these scores. We also analyzed 
+MALDI-TOF/TOF and QTOF spectra from \citep{klimek:standard} against the
+same database, in order to more fully sample the space of
 possible PSMs, and again our Crux-calculated scores are similar to the
 {\sc Sequest} versions (see the online supplement). The vast majority
 of the PSMs receive identical scores using either method.
@@ -411,7 +413,7 @@ decoy database does not need to be stored.
 
 X!Tandem \cite{craig:tandem} will automatically generate a reversed
 decoy database from the given database, but by definition a reversed
-decoy database need only be generated once for a given database.
+decoy database can only be generated once for a given database.
 Crux, in contrast, generates a new shuffled decoy peptide for every
 peptide-spectrum comparison.  Thus, if a particular peptide is
 selected as a candidate for 100 different spectra, then it will be
@@ -547,8 +549,8 @@ available.  For non-commercial users, Crux remedies this situation,
 while also making available a fast candidate peptide retrieval
 algorithm and several state-of-the-art post-processing algorithms.
 Although Crux is implemented in C, the code design is object oriented.
-Thus, although the core of the Crux search engine is currently $Sp$
-and $Xcorr$, the code modules for candidate retrieval or
+The core of the Crux search engine is currently $Sp$
+and $Xcorr$, but the code modules for candidate retrieval or
 post-processing could be easily modified to work with alternative
 searching algorithms.
 
