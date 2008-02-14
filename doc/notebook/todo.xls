@@ -105,3 +105,5 @@
 107	"1/18/08"		"Documentation"	"Open"	"BEF"	"BEF"	2	1	"make the printed error more clear for the case where a spectrum has a calculated mass less/more than what is available in the index; difficult to change current message b/c can't know if requested mass came from spectrum or from parameter; get min/max when parsing ms2, then check for consistency."
 108	"1/23/08"			"Open"		"BEF"	2	1	"searching with non-xcorr gives deltaCn error for every spectrum.  Only print once or fix."
 109	"1/23/08"		"New Functionality"	"Testing"	"BEF"	"BEF"	1	1	"change ion tolerance (for deciding if a spectrum peak matches a predictec peak) to a parameter)"
+110	"2/14/08"		"New Functionality"	"Open"	"AAK"	"AAK"	1	2	"Remove peptide
+type from serialized peptide, to reduce index size?"
