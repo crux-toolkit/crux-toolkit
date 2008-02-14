@@ -230,12 +230,12 @@ databases are paged into and out of memory only as needed.
 \begin{figure}
 \centering
 \begin{tabular}{l}
-\includegraphics[width=2.5in]{../../results/paper-figure/index/indexing-human.eps} \\
 {\sf (A)} Linux \\
-\includegraphics[width=2.5in]{../../results/paper-figure/turbo-no-missed-human/indexing-yeast-windows.eps} \\
+\includegraphics[width=2.5in]{../../results/paper-figure/index/indexing-human.eps} \\
 {\sf (B)} Windows \\
-\includegraphics[width=2.5in]{../../results/paper-figure/comparison/ratio.eps} \\
+\includegraphics[width=2.5in]{../../results/paper-figure/turbo-no-missed-human/indexing-yeast-windows.eps} \\
 {\sf (C)} \\
+\includegraphics[width=2.5in]{../../results/paper-figure/comparison/ratio.eps} \\
 \end{tabular}
 \caption{{\bf Rapid retrieval of candidate peptides.}  Panels (A) and
   (B) plot the average running time required to search 100 tandem mass
@@ -245,7 +245,7 @@ databases are paged into and out of memory only as needed.
   as a function of the mass tolerance used to define candidate
   peptides. The Linux plot includes only three series because we do
   not have a Linux implementation of Turbo{\sc Sequest}.  {\sf (C)} The
-  figure plots ratio of running times for non-indexed versus indexed
+  figure plots ratio of running times for indexed versus non-indexed
   searches for Crux on Windows and Linux and for {\sc Sequest} on Windows.
   \label{figure:indexing}}
 \end{figure}
@@ -366,9 +366,9 @@ X_c(u, v) = \frac{0.015\sum_{i=1}^N u_i v_i}
 \begin{figure*}
   \centering
   \begin{tabular}{ll}
+    {\sf A} & {\sf B}\\
     \includegraphics[width=3in]{./Images/random-sp.eps} &
     \includegraphics[width=3in]{./Images/random-xcorr.eps} \\
-    {\sf A} & {\sf B}\\
   \end{tabular}
   \caption{{\bf Re-implementation of $Sp$ and $Xcorr$ scoring functions.}
   The figure plots, for a collection of peptide-spectrum matches, the
@@ -379,7 +379,7 @@ X_c(u, v) = \frac{0.015\sum_{i=1}^N u_i v_i}
 Figure~\ref{figure:sp-xcorr} shows that the Crux-calculated versions
 of $Sp$ and $Xcorr$ closely match the {\sc Sequest}-calculated
 versions of these scores. We also analyzed 
-MALDI-TOF/TOF and QTOF spectra from \citep{klimek:standard} against the
+MALDI-TOF/TOF and QTOF spectra from \cite{klimek:standard} against the
 same database, in order to more fully sample the space of
 possible PSMs, and again our Crux-calculated scores are similar to the
 {\sc Sequest} versions (see the online supplement). The vast majority

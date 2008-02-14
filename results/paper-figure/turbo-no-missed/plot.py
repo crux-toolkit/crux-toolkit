@@ -1,9 +1,9 @@
 from pylab import *
 windows = ["0.1", "1", "3"]
-names = ["crux", "crux.no", "sequest", "sequest.no"]
+names = ["crux.no", "crux", "sequest.no", "sequest"]
 # names = ["crux"]
-styles = ["k--o", "k-o", "m--s", "m-s"]
-labels = ["Crux (w/ index)", "Crux (w/o index)", "Sequest (w/ index)", "Sequest (w/o) index"]
+styles = ["k-o", "k--o", "m-x", "m--x"]
+labels = ["Crux (w/o index)", "Crux (w/ index)", "Sequest (w/o index)", "Sequest (w/ index)"]
 
 NUM_SPECTRA = 100.0
 idx = 0
@@ -17,7 +17,7 @@ for name in names:
       if line.startswith("real"):
         secondsTime = float(line.split("m")[1].split("s")[0])
         minutesTime = float(line.split()[1].split("m")[0])
-        ys.append( (secondsTime + 60.0 * minutesTime) / NUM_SPECTRA)
+        ys.append((secondsTime + 60.0 * minutesTime) / NUM_SPECTRA)
         xs.append(float(window))
     fh.close()
 

@@ -1,9 +1,9 @@
 from pylab import *
 windows = ["0.1", "1", "3"]
-names = ["crux", "crux.no", "sequest", "sequest.no"]
+names = ["crux.no", "crux", "sequest.no", "sequest"]
 # names = ["crux"]
-styles = ["k--o", "k-o", "m--s", "m-s"]
-labels = ["Crux (w/ index)", "Crux (w/o index)", "Sequest (w/ index)", "Sequest (w/o) index"]
+styles = ["k-o", "k--o", "m-x", "m--x"]
+labels = ["Crux (w/o index)", "Crux (w/ index)", "Sequest (w/o index)", "Sequest (w/ index)"]
 
 NUM_SPECTRA = 100.0
 idx = 0
