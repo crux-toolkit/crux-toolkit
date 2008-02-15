@@ -1,6 +1,6 @@
 distdir = $(PACKAGE)_$(VERSION)
-CFLAGS = -Wall -W -Werror  -fno-strict-aliasing \
-         -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
+AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing \
+            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
 noinst_LTLIBRARIES = libcrux.la
 
@@ -109,6 +109,11 @@ transform_ms2_spectra_LDADD = libcrux.la
 create_psm_files_SOURCES = create_psm_files.c
 create_psm_files_CFLAGS = $(AM_CFLAGS) -DMAIN 
 create_psm_files_LDADD = libcrux.la 
+
+paramdir = $(prefix)/doc
+param_DATA = default.params
+
+EXTRA_DIST = default.params
 
 doc:	*.h *.c
 	doxygen Doxyfile
