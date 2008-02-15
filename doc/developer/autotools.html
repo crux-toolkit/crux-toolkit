@@ -1,0 +1,573 @@
+<html>
+<head>
+<style type="text/css">
+ code { font-size: 150%;}
+ pre { margin: 5%;}
+ table { margin: 5% }
+ ol { margin: 5% }
+ ul { margin: 5% }
+</style>
+<title>Autotools Quick Guide</title>
+</head>
+<body>
+<h2>Autotools: the good, the bad, and the ugly</h1>
+<p>
+Writing Makefiles is a repetitive business.
+There are a handful of tasks that are always having to be re-implemented:
+dealing with platform idiosyncrasies,
+building libraries, 
+building executables, 
+installing the binaries in their final location, 
+cleaning up the detritus of the build process,
+and creating distribution tarballs.
+Surely there must be tools that handle these tasks at a higher 
+level of abstraction then the low-level <code>make</code> rules and dependencies?
+</p>
+<p>
+The good news is that a set of build tools 
+that provides these abstractions is almost universally available.
+These are the autotools:
+<code>autoconf</code>, <code>automake</code>, and <code>libtool</code>.
+<code>automake</code> automates the generation of cross-platform Makefiles,
+<code>autoconf</code> automates the generation of a configuration script,
+and <code>libtool</code> hides the platform dependencies involved in generating libraries.
+The bad news is that these tools are implemented as a hodgepodge
+of shell scripts, Perl scripts, and M4 macro packages.
+The ugly news is that learning the autotools means learning a few keywords, 
+a handful of text patterns, 
+and a memorizing a number of macros with a brittle syntax that
+is very different from that of traditional Makefiles.
+</p>
+<h2>Quick Summary</h2>
+<ul>
+<li>
+<code>automake</code> and <code>autoconf</code>
+use template files to generate complex Makefiles.
+</li>
+<li>
+The template file for <code>autoconf</code> is named <code>configure.ac</code>. 
+It is found in the root directory of project.
+</li>
+<li>
+The template files for <code>automake</code> are named <code>Makefile.am</code>.
+There will be a <code>Makefile.am</code> file in each directory of the project.
+</li>
+<li>
+<b>All changes to the build process must be made by editing the <code>configure.ac</code> file
+or one or more of the <code>Makefile.am</code> files.</b>
+</li>
+<li>
+If you add a new directory to the project,
+you must create a new <code>Makefile.am</code> for that directory,
+and you must add the path to that Makefile to the <code>AC_CONFIG_FILES</code>
+macro in <code>configure.ac</code>.
+</li>
+<li>
+If you add a new executable to the project,
+you must update the list of executables in the 
+<code>bin_PROGRAMS</code> target in <code>src/Makefile.am</code>
+</li>
+<li>
+If you add a new source file to an executable,
+you must update the list of source files in the 
+<code>&lt;executable&gt;_SOURCES</code> target in <code>src/Makefile.am</code>.
+This includes new header files.
+</li>
+<li>
+To build from scratch using the autotools:
+<ol>
+<li>
+Run <code>automake</code>, and <code>autoconf</code>.
+This is best done by running the shell script <code>bootstrap</code> in the
+root directory.
+</li>
+<li>
+Run the <code>configure</code> shell script in the root directory.
+</li>
+<li>
+Run <code>make</code>
+</li>
+<li>
+Re-run <code>configure</code> when you want to change the build configuration.
+</li>
+<li>
+Re-run <code>boostrap</code> when you have changed the
+<code>configure.ac</code> file.
+</li>
+</ol>
+</li>
+<li>
+Common <code>make</code> commands are:
+<dl>
+<dt><code>make all</code> (default)</dt>
+<dd>Make all targets, except those associated with testing.<dd>
+<dt><code>make check</code></dt>
+<dd>Perform tests of scripts and binaries.<dd>
+<dt><code>make install</code></dt>
+<dd>Install the application.</dd>
+<dt><code>make uninstall</code></dt>
+<dd>Uninstall the application.</dd>
+<dt><code>make dist</code></dt>
+<dd>Create tar ball for redistribution.</dd>
+<dt><code>make distcheck</code></dt>
+<dd>Check that distribution tar ball is complete and correct.</dd>
+<dt><code>make clean</code></dt>
+<dd>Remove object files and other temporary files marked for removal.</dd>
+<dt><code>make distclean</code></dt>
+<dd>Restore project directory to starting state.
+The <code>bootstrap</code> and <code>configure</code> scripts will have to be
+re-run after this.</dd>
+</dl>
+</li>
+</ul>
+<h2>How do the autotools work?</h2>
+<p>
+The actual build is still performed by the <code>make</code> program.
+The function of the autotools is to automate the generation of
+very complex Makefiles from simple templates by transforming
+(relatively) simple templates into large blocks of boilerplate code.
+The boilerplate code implements many of the repetitive tasks listed above.
+</p>
+<p>
+Additionally, 
+the autotools create a configuration script.
+The configuration script analyzes the working environment,
+any command line arguments provided by the user,
+and translates these settings into the final Makefiles.
+The configuration script allows users to easily set properties 
+like the location of the installation directories,
+and to override default attributes of the working environment,
+like the location of supporting libraries.
+</p>
+<p>
+A full description of <code>autoconf</code> can be found at
+<a href=" http://www.gnu.org/software/autoconf/manual/autoconf.html">GNU Autoconf</a>.
+A full description of <code>automake</code> can be found at
+<a href="http://www.gnu.org/software/automake/manual/automake.html">GNU Automake</a>.
+A full description of <code>libtool</code> can be found at
+<a href="http://www.gnu.org/software/libtool/manual.html">GNU Libtool</a>.
+A somewhat dated tutorial on the autotools can be found at
+<a href="http://sourceware.org/autobook/autobook/autobook_toc.html">Autoconf,
+Automake, and Libtool</a>.
+A more recent summary of the autotools in found in chapters 7 and 8 of
+<a href="http://www.apress.com/book/view/1590591097">The Definitive Guide to
+GCC</a>.
+</p>
+<h2>How do I use the autotools?</h2>
+<p>
+The steps for building a project with the autotools are:
+</p>
+<ol>
+<li>
+<p>
+<b>Write the template for the configuration script.</b>
+This is usually named <code>configure.ac</code>,
+and it resides in the root directory of the project.
+</p>
+</li>
+<li>
+<p>
+<b>Write the templates for the Makefiles.</b>
+These are usually named <code>Makefile.am</code>,
+and there is one in each directory of the project.
+</p>
+</li>
+<li>
+<p>
+<b>Run <code>automake</code> and <code>autoconf</code>.</b>
+This builds the <code>configure</code> script,
+and translates each of the <code>Makefile.am</code> files into an intermediate form, 
+named Makefile.in.
+</p>
+<p>
+This step will have to be repeated  each time you make
+a change to the <code>configure.ac</code> file.
+For this reason it is helpful to write a script automating this step.
+In the case of the crux project, this script is called bootstrap,
+and it is found in the root directory of crux.
+</p>
+</li>
+<li>
+<p>
+<b>Run configure.</b>
+The configuration script generated by <code>autoconf</code> will usually be called <code>configure</code>.
+It will be found in the root directory of the project. 
+This script analyzes the working environment and any command line options,
+and substitute this configuration information into the Makefile.in files,
+producing the final Makefiles.
+</p>
+</li>
+<li>
+<p>
+<b>Run make.</b>
+This will preform the build.
+Command line options can produce debugging and optimized versions.
+Libtools will be invoked by the Make process as needed to
+generate platform specific libraries.
+</p>
+</li>
+</ol>
+<p>
+If you are satisfied with your build process, 
+you won't need to repeat steps 1-4;
+you can just work in the familiar cycle of edit, make, test.
+</p>
+<p>
+<b>If you wish to change the <code>configure</code> script or the Makefiles
+you must always make your changes in the <code>configure.ac</code> or <code>Makefile.am</code> templates.
+If you make changes in the <code>configure</code> script or a Makefile,
+your changes will be lost the next time <code>autoconf</code> or autorun is invoked.</b>
+</p>
+<p>
+Changes to <code>configure.ac</code> or the <code>Makefile.am</code> files will be detected by Make, 
+and cause <code>automake</code>, <code>autoconf</code>, 
+and <code>configure</code> to be rerun, 
+regenerating the Makefiles.
+Sometimes after extensive changes you may need to manually run step 3.
+</p>
+<h2>How do I write a <code>Makefile.am</code> file?</h2>
+<p>
+A <code>Makefile.am</code> is a template that is used to generate a Makefile.
+It can contain traditional Make syntax elements
+or keywords that are recognized by <code>automake</code> and expanded into Make code.
+As in a ordinary Makefile, 
+we must specify the objects that should be built and their dependencies.
+However, the <code>automake</code> syntax for this differs significantly from that of make.
+</p>
+<p>
+Automake classifies targets into broad categories called primaries.
+Some of the common primaries are: 
+<table rules="groups" cellpadding="5">
+<thead>
+<tr><th align="left">Primary</th><th align="left">Purpose</th></tr>
+</thead>
+<tr><td>PROGRAMS</td><td>Binary applications</td></tr>
+<tr><td>LTLIBRARIES</td><td>Libraries constructed using <code>libtool</code></td></tr>
+<tr><td>SOURCES</td><td>Source files for a binary application or library</td></tr>
+<tr><td>DATA</td><td>Miscellaneous files that can be copied to their installation
+destination  without modification</td></tr>
+<tr><td>CFLAGS</td><td>Flags for the C compiler</td></tr>
+<tr><td>LDADD</td><td>Flags for the linker</td></tr>
+<tr><td>TEST</td><td>Programs to be run for testing the applications.</td></tr>
+<tfoot><tr><td></td></tr></tfoot>
+</table>
+</p>
+</p>
+Build targets are specified by combining a primary with a destination:
+<pre>
+destination_PRIMARY
+</pre>
+<p>
+The destination may be an installation directory or the name of a file.
+For example, in the crux project,
+the on of the build targets is:
+</p>
+<pre>
+bin_PROGRAMS = \
+  crux-get-ms2-spectrum \
+  crux-generate-peptides \
+  crux-create-index \
+  crux-search-for-matches \
+  crux-predict-peptide-ions \
+  create_protein_index \
+  transform_ms2_spectra \
+  create_psm_files
+</pre>
+<p>
+The primary PROGRAMS indicates these are binary applications
+that need to be compiled.
+The destination bin indicates that these should be installed in
+the bin directory for the installation.
+</p>
+<p>
+The specification on how to build crux-get-ms2-spectrum is then given by:
+</p>
+<pre>
+crux_get_ms2_spectrum_SOURCES = crux-get-ms2-spectrum.c
+crux_get_ms2_spectrum_CFLAGS = $(AM_CFLAGS) -DMAIN 
+crux_get_ms2_spectrum_LDADD = libcrux.la 
+</pre>
+<p>
+This primary SOURCES specifies that the source file crux-get-ms2-spectrum.c
+should be compiled into the destination binary crux_get_ms2_spectrum.
+The primaries CFLAGS and LDADD specify the C complier and linker flags
+for building the destination binary crux_get_ms2_spectrum.
+Annoyingly,
+the '-' character is not allowed in the destination specification.
+However, substituting '_' for '-' will usually do the right thing.
+Note that AM_CFLAGS is a Make variable,
+and can be used to set common compiler switches.
+</p>
+<p>
+The SOURCE primaries are not only used to decide which files
+need to be compiled, but which files will be included in
+the distribution.
+This means that header files should be listed in the SOURCE statement too.
+</p>
+<p>
+<b>As you add new programs to a project
+it is your responsibility to add the appropriate destination/primary directives.
+You must also keep the list of files in the SOURCE primaries up to date.</b>
+</p>
+<p>
+You can make sections of your <code>Makefile.am</code> conditional.
+For example:
+<pre>
+if PARALLEL
+PARALLEL_DIR = parallel
+endif
+</pre>
+Note that this is different from the native <code>if</code> statement of <code>make</code>.
+Statements between the <code>if</code> and <code>endif</code> blocks
+will be commented out in the final Makefile if the condition is not true.
+The variable used in the <code>automake</code> conditional must have 
+been defined
+in the <code>configure.ac</code> file using the <code>AM_CONDITIONAL</code> macro.
+For example:
+</p>
+<pre>
+AM_CONDITIONAL(PARALLEL, test ["$parallel" != no])
+</pre>
+<p>
+<code>Makefile.am</code> files may also contain statements in standard
+<code>make</code> syntax.
+</p>
+When the Makefiles have been created,
+the following <code>make</code> commands will automatically be available:
+</p>
+<dl>
+<dt><code>make all</code> (default)</dt>
+<dd>Make all targets, except those associated with testing.<dd>
+<dt><code>make install</code></dt>
+<dd>Install the application.</dd>
+<dt><code>make uninstall</code></dt>
+<dd>Uninnstall the application.</dd>
+<dt><code>make dist</code></dt>
+<dd>Create tar ball for redistribution.</dd>
+<dt><code>make distcheck</code></dt>
+<dd>Check that distribution tar ball is complete and correct.</dd>
+<dt><code>make clean</code></dt>
+<dd>Remove object files and other temporary files marked for removal.</dd>
+<dt><code>make distclean</code></dt>
+<dd>Restore project directory to starting state.
+The <code>bootstrap</code> and <code>configure</code> scripts will have to be
+re-run after this.</dd>
+</dl>
+<p>
+In addition,
+if targets have been created using the TEST primary,
+you can run <code>make check</code> to build and execute the tests.
+</p>
+<h2>How do I write a <code>configure.ac</code> file?</h2>
+<p>
+The <code>configure.ac</code> file is a template from which a configuration 
+shell script, configure, is created.
+The <code>configure</code> script analyzes the working environment and 
+command line options provided by the user and uses that
+information to create the final Makefiles.
+</p>
+The <code>configure</code> script 
+<ul>
+<li>
+determines the architecture of the build machine
+</li>
+<li>
+checks for the presence of required libraries, header files, 
+and supporting programs
+</li>
+<li>
+declares and initializes the make variables that control the build
+translates command line options into make variables and snippets of 
+shell script.
+</li>
+</ul>
+<p>
+An <code>configure.ac</code> file consists of a series of <code>autoconf</code>, and <code>automake</code> macros
+mixed with fragments of shell script.
+The <code>autoconf</code> and <code>automake</code> macros are just like the macros found in the 
+source of a typical C program:
+short strings that the M4 macro-preprocessor
+substitutes with other strings.
+Some macros provide parameters that modify the expansion.
+<code>automake</code> and <code>autoconf</code> macros expand into shell script
+rather then C code.
+</p>
+<p>
+A dictionary of <code>autoconf</code> and <code>automake</code> macros can be found at:
+<a
+href="http://www.gnu.org/software/automake/manual/automake.html#Indices">autoconf/automake
+macros</a>
+<p>
+The easiest way to write an <code>configure.ac</code> file is to copy one from
+another project, delete the parts you don't want, and add the new
+features you need. 
+We provide here an annotated version of the <code>configure.ac</code> file for crux.
+<p>
+<p>
+The first section is setup and overhead:
+</p>
+<pre>
+AC_INIT # autoconf startup stuff
+AC_CONFIG_SRCDIR(src/c/ion_series.c) # point autoconf at src directory
+                                     # could use any file in the src dir.
+AC_CONFIG_AUX_DIR(config) # location of some supporting files
+AM_INIT_AUTOMAKE(crux, 1.0.0) # building version 1.0 of crux
+AM_CONFIG_HEADER([config.h])  # header file for configuration definitions
+</pre>
+<p>
+The next section checks for required programs:
+</p>
+<pre>
+# Check for required programs.
+AC_PROG_CC # we need a C compiler
+AC_PROG_LIBTOOL # We need libtool for building libraries in
+                # a platform independent way
+AC_PATH_PROG(SED, sed) # we need sed
+AC_PATH_PROG(PYTHON, python) # we need python
+</pre>
+<p>
+The next section checks for required C system header files.
+</p>
+<pre>
+# Checks for required header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([ \
+    assert.h \
+    ctype.h \
+    dirent.h \
+    ieeefp.h \
+    limits.h \
+    stdio.h \
+    stdlib.h \
+    string.h \
+    sys/stat.h \
+    time.h \
+    unistd.h \
+])
+</pre>
+<p>
+The next section checks for functions we need to have 
+from the standard libraries:
+</p>
+<pre>
+# Check for required library functions.
+AC_FUNC_MALLOC   # These functions are needed so often
+AC_FUNC_REALLOC  # there are separate macros for them.
+
+# Checks for required math functions.
+# This is a more general macro to check functions
+# in any standard library.
+AC_CHECK_LIB( \
+  [m], \
+  [sqrt, log, exp, fabs, pow], \
+  [], \
+  [AC_MSG_WARN([Math library not found])] \
+)
+</pre>
+<p>
+The <code>configure.ac</code> file can also contain fragments of shell script, 
+as in this section which checks which platform we are on.
+The variables defined here can be used in the Makefiles to
+do platform specific things.
+</p>
+<pre>
+# Set platform-specific settings
+case $host in
+   *cygwin*)
+      AC_DEFINE(Cygwin, [], [Using cygwin])
+      MACHID="cygwin"
+      ;;
+   *darwin*)
+      AC_DEFINE(MACOSX, [], [Using MacOS X])
+      MACHID="darwin"
+      ;;
+   *linux*)
+      AC_DEFINE(Linux, [], [Using Linux])
+      MACHID="linux"
+      ;;
+esac
+</pre>
+<p>
+One of the most important functions of the <code>configure</code> script is
+to  process command line options. 
+In crux we need to know where the source directory for percolator is.
+The following macro defines the --with-percolator_dir option,
+and sets the default value to a sibling of the root directory.
+</p>
+<pre>
+# set percolator location
+AC_ARG_WITH(
+    percolator-dir,
+    [  --with-percolator-dir=DIR  Set path to percolator source. \
+      Default: ${top_srcdir}/percolator],
+    [PERCOLATOR_DIR=$withval],
+    [PERCOLATOR_DIR="\${top_srcdir}/../percolator"])
+</pre>
+<p>
+The <code>AC_SUBST</code> macro specifies a shell variable that should
+be made available for use in the project Makefiles.
+</p>
+<pre>
+# These variables will be available in the Makefiles.
+AC_SUBST(MACHID)
+AC_SUBST(VERSION)
+AC_SUBST(PERCOLATOR_DIR)
+</pre>
+<p>
+The <code>AM_CONDITIONAL</code> macro specifies a shell variable that should
+be made available as an <code>automake</code> if-block condition in the project Makefiles.
+</p>
+<pre>
+AM_CONDITIONAL(PARALLEL, test ["$parallel" != no])
+</pre>
+<p>
+The <code>configure</code> script needs to know the location of all
+the Makefiles in the project.
+</p>
+<pre>
+# List all the Makefiles for the project.
+AC_CONFIG_FILES([\
+    Makefile \
+    doc/Makefile \
+    doc/user/Makefile \
+    doc/developer/Makefile \
+    src/Makefile \
+    src/c/Makefile \
+])
+</pre>
+<p>
+The file ends with the <code>AC_OUPUT</code> macro,
+which emits some trailing shell script code,
+and a fragment of shell script which provides
+the user with a helpful summary of the configuration
+settings.
+</p>
+<pre>
+AC_OUTPUT
+
+echo \
+"
+        ========================
+        Configuration parameters
+        ========================
+
+  Install path:               ${prefix}
+  Version:                    ${VERSION}
+  C compiler:                 ${CC}
+  C compiler flags:           ${CFLAGS}
+  Python:                     ${PYTHON}
+  percolator directory:       ${PERCOLATOR_DIR}
+
+  Run the following commands to compile, test and install meme:
+        make   
+        make test
+        make install
+"
+</pre>
+<p>
+<b>Remember, the <code>configure</code> script and Makefiles are transitory.
+Never make changes in them directly.
+Always work with the <code>configure.ac</code> and <code>Makefile.am</code> files.</b>
+</p>
+</body>
+</html>
