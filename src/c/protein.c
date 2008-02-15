@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.68 $
+ * $Revision: 1.69 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -68,6 +68,7 @@ struct protein_peptide_iterator {
     ///< the nterm cleavages that satisfy constraint. 1st aa is 1.
   int* peptide_lengths; ///< all the lengths of valid peptides
   float* peptide_masses; ///< all the masses of valid peptides
+  int* cumulative_cleavages; ///< the cumulative number of cleavages so far
   int current_cleavage_idx; /// where are we in the cleavage positions?
   int num_cleavages; /// how many cleavage positions?
 
@@ -945,6 +946,16 @@ void iterator_add_cleavages(
     for (cterm_idx = previous_cterm_cleavage_start; 
          cterm_idx < cterm_num_cleavages; cterm_idx++){
 
+      if (
+          (skip_cleavage_locations == FALSE)
+          &&
+          (iterator->cumulative_cleavages[nterm_allowed_cleavages[nterm_idx]] 
+            < 
+           iterator->cumulative_cleavages[cterm_allowed_cleavages[cterm_idx]])
+      ){
+        break;
+      }
+
       carp(CARP_DETAILED_DEBUG, "nterm = %i, cterm = %i", 
           nterm_allowed_cleavages[nterm_idx], 
           cterm_allowed_cleavages[cterm_idx]);
@@ -958,16 +969,7 @@ void iterator_add_cleavages(
       int length = 
         cterm_allowed_cleavages[cterm_idx] - nterm_allowed_cleavages[nterm_idx];
       if (length < get_peptide_constraint_min_length(constraint)){
-
-        // break out if we can't skip cleavage locations
-        if (skip_cleavage_locations == FALSE){
-          next_cterm_cleavage_start = cterm_idx;
-          break;
-
-        // otherwise keep going 
-        } else {
-          continue;
-        }
+        continue;
       } else if (length > get_peptide_constraint_max_length(constraint)){
         break;
       } else if (no_new_cterm_cleavage_start){
@@ -1044,10 +1046,15 @@ void prepare_protein_peptide_iterator(
     mass_array[start_idx] = mass_array[start_idx-1] + 
       get_mass_amino_acid(protein->sequence[sequence_idx], mass_type);
 
+    // increment cumulative cleavages before we check if this is one
+    // because cleavages come *after* the amino acid
+    iterator->cumulative_cleavages[sequence_idx] = cleavage_position_idx;
+
     if (valid_cleavage_position(protein->sequence + sequence_idx)){ 
-      // move forward with ptr arith
       cleavage_positions[cleavage_position_idx++] = sequence_idx + 1;
-    }
+    } 
+
+
     all_positions[sequence_idx] = sequence_idx;
   }
 
@@ -1079,28 +1086,28 @@ void prepare_protein_peptide_iterator(
     case PARTIALLY_TRYPTIC:
       iterator_add_cleavages(iterator,
         cleavage_positions, num_cleavage_positions-1,
-        all_positions+1, protein->length, TRUE);
+        all_positions+1, protein->length, missed_cleavages);
       iterator_add_cleavages(iterator,
         all_positions, protein->length,
-        cleavage_positions+1, num_cleavage_positions-1, TRUE);
+        cleavage_positions+1, num_cleavage_positions-1, missed_cleavages);
       break;
 
     case N_TRYPTIC:
       iterator_add_cleavages(iterator,
         cleavage_positions, num_cleavage_positions-1,
-        all_positions+1, protein->length, TRUE);
+        all_positions+1, protein->length, missed_cleavages);
       break;
 
     case C_TRYPTIC:
       iterator_add_cleavages(iterator,
         all_positions, protein->length,
-        cleavage_positions, num_cleavage_positions-1, TRUE);
+        cleavage_positions, num_cleavage_positions-1, missed_cleavages);
       break;
 
     case ANY_TRYPTIC:
       iterator_add_cleavages(iterator,
         all_positions, protein->length,
-        all_positions+1, protein->length, TRUE);
+        all_positions+1, protein->length, missed_cleavages);
       break;
 
     case NOT_TRYPTIC:
@@ -1158,6 +1165,9 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
     = (int*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(int));
   iterator->peptide_masses
     = (float*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(float));
+  iterator->cumulative_cleavages
+    = (int*) mymalloc( (protein->length + 1) * sizeof(int));
+
   iterator->num_cleavages = 0;
 
   // prepare the iterator data structures
@@ -1178,6 +1188,7 @@ void free_protein_peptide_iterator(
   free(protein_peptide_iterator->nterm_cleavage_positions); 
   free(protein_peptide_iterator->peptide_lengths); 
   free(protein_peptide_iterator->peptide_masses); 
+  free(protein_peptide_iterator->cumulative_cleavages); 
   free_peptide_constraint(protein_peptide_iterator->peptide_constraint);
   free(protein_peptide_iterator);
 }
