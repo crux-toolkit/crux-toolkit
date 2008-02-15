@@ -86,7 +86,7 @@ crux_create_index_CFLAGS = $(AM_CFLAGS) -DMAIN
 crux_create_index_LDADD = libcrux.la 
 
 crux_search_for_matches_SOURCES = match_search.c
-crux_search_for_matches_CFLAGS = $(AM_CFLAGS) -DMAIN 
+crux_search_for_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/src
 crux_search_for_matches_LDADD = libcrux.la 
 
 crux_analyze_matches_SOURCES = match_analysis.c
