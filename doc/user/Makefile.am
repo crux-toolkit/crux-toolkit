@@ -1,5 +1,6 @@
-CRUXUSER_HTML  =  \
-  broken-link.html \
+htmldir = $(prefix)/doc
+
+dist_html_DATA  =  \
   crux-analyze-matches.html \
   crux-create-index.html \
   crux-generate-peptides.html \
@@ -9,15 +10,14 @@ CRUXUSER_HTML  =  \
   crux-score-peptides-spectrum.html \
   crux-search-for-matches.html \
   customize-tutorial.html \
-  examples-tutorial.html \
   home-tutorial.html \
   index-tutorial.html \
   install-tutorial.html \
+  parameter-file.html \
   search-tutorial.html \
-  sitemap-tutorial.html \
-  spectacle-eg-input.txt \
-  spectacle.html \
   start-tutorial.html \
   stylesheet.css \
-  template-tutorial.html \
-  utilities-tutorial.html
+  data/demo.ms2 \
+  data/small-yeast.fasta
+
+EXTRA_DIST = 
