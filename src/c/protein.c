@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.67 $
+ * $Revision: 1.68 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -908,7 +908,7 @@ BOOLEAN_T valid_cleavage_position(
     char* sequence
     ){
 
-  if ((*sequence == 'K' || *sequence == 'R') && (*sequence++ != 'P')){
+  if ((sequence[0] == 'K' || sequence[0] == 'R') && (sequence[1] != 'P')){
     return TRUE;
   } else {
     return FALSE;
@@ -916,9 +916,10 @@ BOOLEAN_T valid_cleavage_position(
 }
 
 /*
- * Adds actual cleavages to the protein peptide iterator that obey the iterator constraint
- * using the allowed cleavages arrays
- * A small inconsistency. Allowed cleavages start at 0, while the output cleavages start at 1.
+ * Adds cleavages to the protein peptide iterator that obey iterator constraint
+ * Uses the allowed cleavages arrays, and whether skipped cleavages are allowed.
+ * A small inconsistency: 
+ *  Allowed cleavages start at 0, while the output cleavages start at 1.
  */
 void iterator_add_cleavages(
     PROTEIN_PEPTIDE_ITERATOR_T* iterator, 
@@ -926,8 +927,9 @@ void iterator_add_cleavages(
     int  nterm_num_cleavages, 
     int* cterm_allowed_cleavages, 
     int  cterm_num_cleavages, 
-    BOOLEAN_T skip_cleavage_locations){ 
+    BOOLEAN_T skip_cleavage_locations){
 
+  carp(CARP_DETAILED_DEBUG, "Call to iterator_add_cleavages");
 
   // to avoid checking a lot of C-term before our current N-term cleavage
   int previous_cterm_cleavage_start= 0; 
@@ -946,6 +948,7 @@ void iterator_add_cleavages(
       carp(CARP_DETAILED_DEBUG, "nterm = %i, cterm = %i", 
           nterm_allowed_cleavages[nterm_idx], 
           cterm_allowed_cleavages[cterm_idx]);
+
       if (cterm_allowed_cleavages[cterm_idx] 
             <= nterm_allowed_cleavages[nterm_idx]){
         continue;
@@ -1008,12 +1011,11 @@ void iterator_add_cleavages(
 /**
  * Creates the data structures in the protein_peptide_iterator object necessary
  * for creating peptide objects.
- * - mass_array - cumulative distribution of masses. used to determine the mass of any 
- *   peptide subsequence
- * - nterm_cleavage_positions - the nterm cleavage positions of the peptide that satisfy the
- *   protein_peptide_iterator contraints
+ * - mass_array - cumulative distribution of masses. used to determine 
+ *     the mass of any peptide subsequence
+ * - nterm_cleavage_positions - the nterm cleavage positions of the 
+ *     peptide that satisfy the protein_peptide_iterator contraints
  * - peptide_lengths - the lengths of the peptides that satisfy the constraints
- * OPTIMIZE
  */
 void prepare_protein_peptide_iterator(
     PROTEIN_PEPTIDE_ITERATOR_T* iterator
@@ -1059,6 +1061,8 @@ void prepare_protein_peptide_iterator(
   int num_cleavage_positions = cleavage_position_idx;
   iterator->mass_array = mass_array;
 
+  carp(CARP_DETAILED_DEBUG, "num_cleavage_positions = %i", num_cleavage_positions);
+
   // now determine the cleavage positions that actually match our constraints
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
   PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
@@ -1075,22 +1079,22 @@ void prepare_protein_peptide_iterator(
     case PARTIALLY_TRYPTIC:
       iterator_add_cleavages(iterator,
         cleavage_positions, num_cleavage_positions-1,
-        all_positions+1, protein->length, missed_cleavages);
+        all_positions+1, protein->length, TRUE);
       iterator_add_cleavages(iterator,
         all_positions, protein->length,
-        cleavage_positions, num_cleavage_positions-1, missed_cleavages);
+        cleavage_positions+1, num_cleavage_positions-1, TRUE);
       break;
 
     case N_TRYPTIC:
       iterator_add_cleavages(iterator,
         cleavage_positions, num_cleavage_positions-1,
-        all_positions+1, protein->length, missed_cleavages);
+        all_positions+1, protein->length, TRUE);
       break;
 
     case C_TRYPTIC:
       iterator_add_cleavages(iterator,
         all_positions, protein->length,
-        cleavage_positions, num_cleavage_positions-1, missed_cleavages);
+        cleavage_positions, num_cleavage_positions-1, TRUE);
       break;
 
     case ANY_TRYPTIC:
@@ -1107,8 +1111,7 @@ void prepare_protein_peptide_iterator(
 
   int idx;
   for (idx=0; idx < iterator->num_cleavages; idx++){
-    carp(CARP_DETAILED_DEBUG, "%i->%i", iterator->nterm_cleavage_positions[idx], 
-        iterator->peptide_lengths[idx]);
+    carp(CARP_DETAILED_DEBUG, "%i->%i", iterator->nterm_cleavage_positions[idx], iterator->peptide_lengths[idx], iterator->peptide_lengths[idx], iterator->protein->sequence[iterator->nterm_cleavage_positions[idx]-1]);
   }
 
   if (iterator->num_cleavages > 0){
