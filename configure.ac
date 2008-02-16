@@ -114,6 +114,21 @@ AC_CONFIG_FILES([\
     src/c/Makefile \
 ])
 
+PERCOLATOR_HEADER_STATUS=""
+PERCOLATOR_LIB_STATUS=""
+if test ! -e "${PERCOLATOR_DIR}/src/PercolatorCInterface.h"
+then
+  PERCOLATOR_HEADER_STATUS="$PERCOLATOR_DIR/src/PercolatorCInterface.h not found!"
+fi
+if test ! -e "${PERCOLATOR_DIR}/src/Release/lib/libpercolator.a"
+then
+  PERCOLATOR_LIB_STATUS="$PERCOLATOR_DIR/src/Release/lib/libpercolator.a not found!"
+fi
+
+AM_CONDITIONAL(PERCOLATOR, \
+  test [ -z "$PERCOLATOR_HEADER_STATUS" -a -z "$PERCOLATOR_LIB_STATUS" ] \
+)
+
 AC_OUTPUT
 
 echo \
@@ -126,10 +141,32 @@ echo \
   Version:                    ${VERSION}
   C compiler:                 ${CC}
   C compiler flags:           ${CFLAGS}
-  percolator directory:       ${PERCOLATOR_DIR}
+  percolator directory:       ${PERCOLATOR_DIR} ${PERCOLATOR}
 
-  Run the following commands to compile and install meme:
+  Run the following commands to compile and install crux:
+
         make   
         make install
+
+  Run the following command to uninstall crux:
+
+        make uninstall
 "
 
+if test -n "${PERCOLATOR_HEADER_STATUS}"
+then
+  echo
+  echo "Warning: $PERCOLATOR_HEADER_STATUS"
+fi
+if test -n "${PERCOLATOR_LIB_STATUS}"
+then
+  echo
+  echo "Warning: $PERCOLATOR_LIB_STATUS"
+fi
+if test -n "${PERCOLATOR_LIB_STATUS}" -o -n "$PERCOLATOR_HEADER_STATUS"
+then
+  echo
+  echo "Have you downloaded and built Percolator?"
+  echo 
+  echo "Percolator support disabled!"
+fi

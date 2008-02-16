@@ -4,7 +4,7 @@ AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing \
 
 noinst_LTLIBRARIES = libcrux.la
 
-libcrux_la_SOURCES = \
+NON_PERCOLATOR_LIB_FILES= \
   alphabet.c \
   alphabet.h \
   array.c \
@@ -27,10 +27,6 @@ libcrux_la_SOURCES = \
   ion_series.h \
   mass.c \
   mass.h \
-  match.c \
-  match_collection.c \
-  match_collection.h \
-  match.h \
   objects.h \
   parameter.c \
   parameter.h \
@@ -59,19 +55,43 @@ libcrux_la_SOURCES = \
   utils.c \
   utils.h
 
-libcrux_la_CFLAGS = $(AM_CFLAGS) -I$(PERCOLATOR_DIR)/src
-libcrux_la_LIBADD = -lm $(PERCOLATOR_DIR)/src/Release/lib/libpercolator.a
+PERCOLATOR_LIB_FILES = \
+    match.c \
+    match.h \
+    match_collection.c \
+    match_collection.h
 
-bin_PROGRAMS = \
+if PERCOLATOR
+  LIBFILES=$(PERCOLATOR_LIB_FILES) $(NON_PERCOLATOR_LIB_FILES)
+  libcrux_la_CFLAGS = $(AM_CFLAGS) -I$(PERCOLATOR_DIR)/src
+else
+  LIBFILES=$(NON_PERCOLATOR_LIB_FILES)
+  libcrux_la_CFLAGS = $(AM_CFLAGS)
+endif
+
+libcrux_la_SOURCES = $(LIBFILES)
+libcrux_la_LIBADD = -lm
+
+PERCOLATOR_PROGRAM_FILES = \
+  crux-search-for-matches \
+  crux-analyze-matches
+
+NON_PERCOLATOR_PROGRAM_FILES = \
   crux-get-ms2-spectrum \
   crux-generate-peptides \
   crux-create-index \
-  crux-search-for-matches \
-  crux-analyze-matches \
   crux-predict-peptide-ions \
   create_protein_index \
   transform_ms2_spectra \
   create_psm_files
+
+if PERCOLATOR
+  PROGRAM_FILES=$(NON_PERCOLATOR_PROGRAM_FILES) $(PERCOLATOR_PROGRAM_FILES)
+else
+  PROGRAM_FILES=$(NON_PERCOLATOR_PROGRAM_FILES)
+endif
+
+bin_PROGRAMS = $(PROGRAM_FILES)
 
 crux_get_ms2_spectrum_SOURCES = get_ms2_spectrum.c
 crux_get_ms2_spectrum_CFLAGS = $(AM_CFLAGS) -DMAIN 
