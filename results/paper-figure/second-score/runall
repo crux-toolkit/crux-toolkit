@@ -1,31 +1,31 @@
 #!/bin/bash
 
 export PATH=../../../bin/:$PATH
-ms2="random.ms2"
-# ms2="test.ms2"
 
-if [[ ! -f "$ms2" ]]
-then 
-  echo "Error: file or directory does not match " 1>&2
-  exit 1
-fi
-
-if [[ ! -f "crux_parameter" ]]
-then
-    echo "There is no crux_parameter file, thus all runs will be done by \
-default settings"
-fi
-
-#first remove any pre existing *.dta files
+#---
+ms2="QTOF.ms2"
 rm -rf *.dta
-
-#make .dta files for Sequest
 ./ms22dta.pl $ms2
-
-#now run Sequest and Crux compare and plot runtime
 python compare_sequest_score_spectrum.py $ms2
+mkdir QTOF
+mv *eps *png QTOF
 
-#now that were are done, remove all *.dta files
-# rm -rf *.dta
+##---
+#ms2="4800.ms2"
+#rm -rf *.dta
+#./ms22dta.pl $ms2
+#python compare_sequest_score_spectrum.py $ms2
+#mkdir 4800
+#mv *eps *png 4800
+#
+##---
+#ms2="QSTAR.ms2"
+#rm -rf *.dta
+#./ms22dta.pl $ms2
+#python compare_sequest_score_spectrum.py $ms2
+#mkdir QSTAR
+#mv *eps *png QSTAR
+#
+#
 
 
