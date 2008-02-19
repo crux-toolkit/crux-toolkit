@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.70 $
+ * $Revision: 1.71 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -1003,11 +1003,6 @@ void iterator_add_cleavages(
         if (iterator->num_cleavages > MAX_PEPTIDES_PER_PROTEIN){
           die("Too many peptides for a particular protein!");
         }
-      }
-
-      // break out if we can't skip cleavage locations
-      if (skip_cleavage_locations == FALSE){
-        break;
       }
     }
     previous_cterm_cleavage_start = next_cterm_cleavage_start;
