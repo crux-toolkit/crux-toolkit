@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.69 $
+ * $Revision: 1.70 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -938,6 +938,11 @@ void iterator_add_cleavages(
   PEPTIDE_CONSTRAINT_T* constraint = iterator->peptide_constraint;
   int nterm_idx, cterm_idx;
 
+  unsigned int idx;
+  for (idx=0; idx < iterator->protein->length; idx++){
+    carp(CARP_DETAILED_DEBUG, "Cumulative %i = %i ", idx, iterator->cumulative_cleavages[idx]);
+  }
+
   // iterate over possible nterm and cterm cleavage locations
   for (nterm_idx=0; nterm_idx < nterm_num_cleavages; nterm_idx++){
     
@@ -951,7 +956,7 @@ void iterator_add_cleavages(
           &&
           (iterator->cumulative_cleavages[nterm_allowed_cleavages[nterm_idx]] 
             < 
-           iterator->cumulative_cleavages[cterm_allowed_cleavages[cterm_idx]])
+           iterator->cumulative_cleavages[cterm_allowed_cleavages[cterm_idx]-1])
       ){
         break;
       }
