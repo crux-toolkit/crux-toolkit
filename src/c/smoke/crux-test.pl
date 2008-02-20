@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
 #$Log: not supported by cvs2svn $
+#Revision 1.12  2007/10/31 23:00:15  frewen
+#new commands in crux-test.cmds. tested with code from 10/26. crux-test.pl no longer uses the file/index/analysis entry.  also now has an ignore string for diffing output
+#
 #Revision 1.11  2007/10/24 23:32:48  frewen
 #changed crux-test.pl to accept blank lines and comments in crux-test.cmds.  added comments to later and reordered slightly.
 #
@@ -38,7 +41,7 @@
 
 =head1 crux-test.pl
 
-Usage: crux-test.pl [-u] <test list file>
+Usage: crux-test.pl [-up] <test list file>
 
 The crux-test.pl script provides a framework for testing the overall 
 functionality of programs in the crux distribution. It read a list of
@@ -77,9 +80,9 @@ use Getopt::Std;
 use File::Temp qw/ tempfile tempdir /;
 
 # Handle the command line arguments.
-my $usage = "Usage: crux-test.pl [-u] <file name>\n";
+my $usage = "Usage: crux-test.pl [-up] <file name>\n";
 my (%options, $update);
-if (!getopts('u', \%options)) {
+if (!getopts('up:', \%options)) {
   die($usage);
 };
 if (scalar @ARGV != 1) {
@@ -89,6 +92,12 @@ if (defined $options{'u'}) {
   $update = 1;
 } else {
   $update = 0;
+}
+
+if( defined $options{'p'}){
+    my $path = $options{'p'};
+    $ENV{'PATH'} = $path . ":" . $ENV{'PATH'};
+    print "Prepended to PATH $path\n";
 }
 
 # Set an interrupt handler
@@ -116,6 +125,7 @@ while ($line = <ARGV>) {
   $test_name = $fields[0];
   $standard_filename = $fields[1];
   $cmd = $fields[2];
+  $cmd =~ s/^ //;
   $ignore_string = $fields[3];
 
   # Execute the test
