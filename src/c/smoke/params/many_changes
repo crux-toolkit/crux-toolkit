@@ -4,4 +4,4 @@ min-mass=404
 max-mass=4004
 cleavages=all
 isotopic-mass=mono
-output-trypticity=T
+#output-trypticity=T
