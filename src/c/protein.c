@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.71 $
+ * $Revision: 1.72 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -494,7 +494,7 @@ static BOOLEAN_T read_title_line
     int line_length;
     size_t buf_length = 0;
 
-    if((line_length =  crux_getline(&new_line, &buf_length, fasta_file)) == -1){
+    if((line_length =  getline(&new_line, &buf_length, fasta_file)) == -1){
       die("Error reading Fasta file.\n");
     }
     strncpy(id_line, new_line, LONGEST_LINE-1);

@@ -153,7 +153,7 @@ int main(int argc, char** argv){
    }
    
    // parse each line for peptides
-   while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
+   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
      if(line_length >= 3 && new_line[0] != ' '){ 
        if(sscanf(new_line,"%s %d",// test format:peak line has more than 2 fields
                  peptide_sequence, &peptide_charge) > 0){

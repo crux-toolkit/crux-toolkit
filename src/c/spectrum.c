@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.66 $
+ * REVISION: $Revision: 1.67 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -402,7 +402,7 @@ BOOLEAN_T parse_spectrum_file(
   float test_float;
   char test_char;
   
-  while( (line_length = crux_getline(&new_line, &buf_length, file)) != -1){
+  while( (line_length = getline(&new_line, &buf_length, file)) != -1){
     // skip header line
     // if(new_line[0] == 'H'){
     //  file_index = ftell(file);

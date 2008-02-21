@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.75 $
+ * $Revision: 1.76 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1471,7 +1471,7 @@ BOOLEAN_T parse_crux_index_map(
     return FALSE;
   }
   
-  while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
+  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
     // check header lines
     if(new_line[0] == '#'){
       // check if crux_index_database supports the current query 
