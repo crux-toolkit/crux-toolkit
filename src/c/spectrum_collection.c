@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.39 $
+ * REVISION: $Revision: 1.40 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -174,7 +174,7 @@ void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection, FILE* file){
   int new_line_length;
   int comment_field_length;
 
-  while( (line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
+  while( (line_length =  getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == 'H'){
       new_line_length = strlen(new_line);
       comment_field_length = strlen(spectrum_collection->comment);
@@ -418,7 +418,7 @@ long binary_search_spectrum(
       
       working_index = ftell(file);
       // check each line until reach 'S' line
-      while((line_length =  crux_getline(&new_line, &buf_length, file)) != -1){
+      while((line_length =  getline(&new_line, &buf_length, file)) != -1){
 
         if(new_line[0] == 'S'){
           int compare = 
