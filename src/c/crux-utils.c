@@ -562,6 +562,7 @@ char* get_full_filename(char* path, char* filename){
   if( path == NULL ){
     result = my_copy_string(filename);
   }else{
+    // TODO (BF 26-Feb-08) don't add second / if path already ends in /
     char* ready_path = cat_string(path, "/");
     result = cat_string(ready_path, filename);
     free(ready_path);
@@ -617,9 +618,11 @@ BOOLEAN_T delete_dir(char* dir) {
   struct dirent **namelist =NULL;
   int num_file =0;
   int result;
+  char* cwd = getcwd(NULL, 0); //gnu lib
 
   // does the directory to remove exist?, if so move into it..
   if(chdir(dir) == -1){
+    carp(CARP_DETAILED_DEBUG, "Could not find directory '%s' to remove", dir);
     return FALSE;
   }
 
@@ -633,7 +636,8 @@ BOOLEAN_T delete_dir(char* dir) {
   }
   free(namelist);
 
-  chdir("..");
+  //chdir(".."); // assumes the directory to delete is in cwd
+  chdir(cwd);
   result = rmdir(dir);
   if(result == FALSE){
     return FALSE;
@@ -642,6 +646,43 @@ BOOLEAN_T delete_dir(char* dir) {
   return TRUE;
 }
 
+/**
+ * \brief Take a filename, strip its leading path information (if
+ * any) and file extension (if any).  Add a new path (if given) and a
+ * new suffix (exension).
+ *
+ * If given ../dir/filename.ext, .new-ext, .ext, otherdir would return
+ * otherdir/filename.new-ext 
+ * \returns A heap allocated filename
+ */
+char* generate_name_path(
+  char* filename,
+  char* old_suffix,
+  char* new_suffix,
+  char* new_path
+  ){
+
+  carp(CARP_DEBUG, "Generate name given filename '%s', old suffix '%s', " \
+       "new suffix '%s', new path '%s'", 
+       filename, old_suffix, new_suffix, new_path);
+
+  // parse path, filename, extension
+  char** name_path = parse_filename_path_extension(filename, old_suffix);
+
+  // add the extension
+  char* new_name = cat_string(name_path[0], new_suffix);
+
+  // add path to new filename
+  char* full_new_name = get_full_filename(new_path, new_name);
+
+  // cleanup
+  free(name_path[0]);
+  free(name_path[1]);
+  free(new_name);
+
+  carp(CARP_DEBUG, "Final name is '%s'", full_new_name);
+  return full_new_name;
+}
 /**
  * given a fasta_file name it returns a name with the name_tag add to the end
  * Suffix may be NULL

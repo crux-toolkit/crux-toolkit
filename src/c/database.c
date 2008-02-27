@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.62 $
+ * $Revision: 1.63 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -110,6 +110,7 @@ DATABASE_T* new_database(
   ///< If so, all proteins are memory mapped -in
   )         
 {
+  carp(CARP_DEBUG, "Creating new database from '%s'", filename);
   DATABASE_T* database = allocate_database();
   set_database_filename(database, filename);
   database->is_memmap = is_memmap;
@@ -235,6 +236,7 @@ BOOLEAN_T parse_database_text_fasta(
   PROTEIN_T* new_protein;
   unsigned int protein_idx;
 
+  carp(CARP_DEBUG, "Parsing text fasta file '%s'", database->filename);
   // check if already parsed
   if(database->is_parsed){
     return TRUE;
@@ -436,6 +438,7 @@ BOOLEAN_T parse_database_memmap_binary(
   )
 {
   int file_d = -1;
+  carp(CARP_DEBUG, "Parsing binary fasta file '%s'", database->filename);
  
   // check if already parsed
   if(database->is_parsed){
@@ -487,9 +490,11 @@ BOOLEAN_T parse_database_memmap_binary(
  * IF is_memmap is true, memory maps the entire binary fasta file into memory
  * and then creates protein objects that point to the memory mapped binary file
  *
- * IF is_memmap is fasle, uses the traditional text fasta file which it prases out the various
- * for each protein. Only when using text fasta file can you use light/heavy protein, in which
- * if using light_protein functionality will not read in the sequence or id. Will parse sequence if protein 
+ * IF is_memmap is false, uses the traditional text fasta file which
+ * it parses out the various peptides for each protein. Only when
+ * using text fasta file can you use light/heavy protein, in which 
+ * if using light_protein functionality will not read in the sequence
+ * or id. Will parse sequence if protein  
  * is needed, lazy parsing.
  *
  * For Both cases, reads in all proteins in file and creates a protein object
@@ -520,6 +525,61 @@ BOOLEAN_T parse_database(
   // succeeded in parsing database
   return TRUE;
 }
+
+
+/**
+ * \brief Changes a database from one that reads from a fasta file to
+ * one that reads from a binary/memmory mapped protein file.
+ *
+ * If database already has binary source (i.e. is_memmap == TRUE), 
+ * returns TRUE.  
+ * Opens the fasta file pointed to by filename for reading.  Creates an
+ * output file with the name given.  Reads in each protein from the
+ * text file and serializes it to the output file.  Closes both files.
+ * Changes filename to point to new output file and sets is_memmap to
+ * true. Parses the database.
+ * \returns TRUE if all processes succeed, else FALSE.
+ */
+BOOLEAN_T transform_database_text_to_memmap(
+  DATABASE_T* database,
+  char* output_dir
+  ){
+
+  BOOLEAN_T success = FALSE;
+
+  // from output_dir name and database filename, get binary_filename
+  char* binary_filename = generate_name_path( database->filename, ".fasta",
+                                           "-binary-fasta", output_dir);
+
+
+  carp(CARP_DEBUG, "Transforming text file '%s' to binary file '%s'",
+       database->filename, binary_filename);
+
+  // create binary fasta
+  success = create_binary_fasta_here(database->filename, 
+                                     binary_filename);
+
+  if(! success ){
+    carp(CARP_ERROR, 
+         "Could not create binary fasta file '%s' from text fasta file '%s'", 
+         binary_filename, database->filename);
+    return FALSE;
+  }
+  // change database filename to new binary fasta
+  char* binary_filename_no_path = parse_filename(binary_filename);
+  set_database_filename(database, binary_filename);
+
+  // set is_memmap to true
+  set_database_memmap(database, TRUE);
+
+  // parse the binary fasta
+  success = parse_database(database);
+
+  free(binary_filename);
+  free(binary_filename_no_path);
+  return success;
+}
+
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 

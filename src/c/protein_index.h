@@ -1,6 +1,6 @@
 /**
  * \file protein_index.h
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for creating a protein index
  *****************************************************************************/
 #ifndef PROTEIN_INDEX_H
@@ -115,6 +115,16 @@ BOOLEAN_T create_binary_fasta_in_cur(
   char* fasta_filename, ///< input fasta a file, only filename -in
   char** output_file_name ///< get output filename -out
   );
+
+/**
+ * wrapper for create_binary_fasta_file so that two filenames are
+ * passed instead of a filename and a filestream.  Eventually should
+ * merge to one method
+ */
+BOOLEAN_T create_binary_fasta_here(
+  char* fasta_filename,
+  char* binary_filename
+);
 
 /**
  * Heap allocated char*, user must free
