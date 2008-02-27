@@ -1,6 +1,6 @@
 /**
  * \file database.h 
- * $Revision: 1.26 $
+ * $Revision: 1.27 $
  * \brief Object for representing a database of protein sequences.
  *****************************************************************************/
 #ifndef DATABASE_H
@@ -54,6 +54,23 @@ BOOLEAN_T parse_database(
   DATABASE_T* database ///< An allocated database to parse -in
   );
 
+/**
+ * \brief Changes a database from one that reads from a fasta file to
+ * one that reads from a binary/memmory mapped protein file.
+ *
+ * If database already has binary source (i.e. is_memmap == TRUE), 
+ * returns TRUE.  
+ * Opens the fasta file pointed to by filename for reading.  Creates a
+ * file with the name given.  Reads in each protein from the text file
+ * and serializes it to the output file.  Closes both files.  Changes
+ * filename to point to new output file and sets is_memmap to true.
+ * Parses the database.
+ * \returns TRUE if all processes succeed, else FALSE.
+ */
+BOOLEAN_T transform_database_text_to_memmap(
+  DATABASE_T* database,
+  char* binary_protein_filename
+  );
 
 /**
  * \returns FALSE if nth protein cannot be parsed or does not exist 

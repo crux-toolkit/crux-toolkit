@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein_index.c
- * $Revision: 1.18 $
+ * $Revision: 1.19 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -333,8 +333,17 @@ PROTEIN_T* protein_index_iterator_next(
  ***********************************************/
 
 /**
- * creates a binary fasta file on to the output_file
+ * \brief Writes serialized proteins from text fasta file to the
+ * output_file stream.
+ *
+ * Expects open filestream and closes the file before returning.
  * \returns TRUE if successfully creates a binary fasta file, else false
+ */
+/*
+ * TODO (BF 26-Feb-2008): I would prefer to see this either take two
+ * file streams (input and output) and close neither or take two file
+ * names (char*), open both files and close both files.  Is there a
+ * reason it is being done this way?
  */
 BOOLEAN_T create_binary_fasta_file(
   char* fasta_file,  ///< input fasta file -in
@@ -349,12 +358,13 @@ BOOLEAN_T create_binary_fasta_file(
   unsigned int protein_idx = 0;
   PROTEIN_T* new_protein = NULL;
 
+  carp(CARP_DEBUG, "Creating binary fasta");
   // open file and 
   file = fopen(fasta_file, "r");
 
   // check if succesfully opened file
   if(file == NULL){
-    carp(CARP_FATAL, "Failed to open fasta file '%s'", fasta_file);
+    carp(CARP_ERROR, "Failed to open fasta file '%s'", fasta_file);
     return FALSE;
   }
 
@@ -431,6 +441,22 @@ BOOLEAN_T create_binary_fasta(
   FILE* output_file = get_output_file(fasta_file, TRUE);
   
   return create_binary_fasta_file(fasta_file, output_file);
+}
+
+/**
+ * wrapper for create_binary_fasta_file so that two filenames are
+ * passed instead of a filename and a filestream.  Eventually should
+ * merge to one method.  This should be putting binary fasta's in temp
+ * dirs, so overwriting not an issue.  In the future, fix it (write a
+ * create_file_in_path method with read/write info)
+ */
+BOOLEAN_T create_binary_fasta_here(
+  char* fasta_filename,
+  char* binary_filename
+){
+
+  FILE* output_file = fopen(binary_filename, "w");
+  return create_binary_fasta_file(fasta_filename, output_file);
 }
 
 /**

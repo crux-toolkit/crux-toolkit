@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.76 $
+ * $Revision: 1.77 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -124,9 +124,9 @@ struct index{
   DATABASE_T* database; ///< The database that has been indexed.
   char* directory; ///< The directory containing the indexed files
   // char* filenames[INDEX_MAX_FILES]; ///< The files that contain the peptides
-  PEPTIDE_CONSTRAINT_T* constraint; ///< Constraint which these peptides satisfy
+  PEPTIDE_CONSTRAINT_T* constraint;///< Constraint which these peptides satisfy
   BOOLEAN_T on_disk; ///< Does this index exist on disk yet?
-  float mass_range;  ///< the range of mass that each index file should be partitioned into
+  float mass_range;  ///< the range of masses contained in each index file -in
   BOOLEAN_T is_unique; ///< only unique peptides? -in
 };    
 
@@ -204,6 +204,7 @@ INDEX_T* allocate_index(void){
 }
 
 /**
+ * THIS SHOULD BECOME OBSOLETE WITH EXPLICIT INDEX NAMING
  * given a fasta_file name it returns the index file directory name
  * format: myfasta_crux_index
  * \returns A heap allocated index file directory name of the given fasta file
@@ -233,6 +234,7 @@ char* generate_directory_name(
 }
 
 /**
+ * THIS MAY BECOME OBSOLETE WITH EXPLICIT INDEX NAMING
  * foo.fasta --> foo_crux_index/foo_binary_fasta
  * \returns the binary fasta file name with crux directory name
  */
@@ -264,7 +266,8 @@ char* get_binary_fasta_name_in_crux_dir(
 void set_index_fields_from_disk(
   INDEX_T* index,  ///< Index to set -out                       
   char* fasta_filename,  ///< The fasta file -in
-  float mass_range,  ///< the range of mass for each index file -in
+//char* output_dir,  ///< The name of the new directory to store the index -in
+  float mass_range,  ///< The range of mass for each index file -in
   BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
@@ -298,13 +301,18 @@ void set_index_fields_from_disk(
 
 
 /**
- * Assumes that the fasta file is always in the directory where the crux_index_file directory is located
+ * \brief The initialization step in creating an index after
+ * allocation and before parsing database.  Private function called
+ * only by new_index().  No assumptions about fasta
+ * or index filenames or locations relative to eachother.  Does not
+ * initialize the database to be associated with this index.
+ *
  * \returns void
  */
 void set_index_fields(
   INDEX_T* index,  ///< Index to set -out                       
-  char* fasta_filename,  ///< The fasta file -in
-  //  char* output_dir,      ///< The name of the new index
+  //char* fasta_filename,  ///< The fasta file -in OBSOLETE
+  char* output_dir,      ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,  
   ///< Constraint which these peptides satisfy -in
   float mass_range,  
@@ -312,33 +320,42 @@ void set_index_fields(
   BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
-  char** filename_and_path = NULL;
-  char* working_dir = NULL;
-  filename_and_path = parse_filename_path(fasta_filename);
-  working_dir = generate_directory_name(fasta_filename);//filename_and_path[0]
+  carp(CARP_DEBUG, "Setting index fields");
+  //carp(CARP_DETAILED_DEBUG, "fasta file is %s", fasta_filename);
+  //char** filename_and_path = NULL;
+  //  char* working_dir = NULL;
+  //filename_and_path = parse_filename_path(fasta_filename);
+  //working_dir =generate_directory_name(fasta_filename);//filename_and_path[0]
   DIR* check_dir = NULL;
   
-  if((check_dir = opendir(working_dir)) != NULL){
-  //if((check_dir = opendir(output_dir)) != NULL){
+  //  if((check_dir = opendir(working_dir)) != NULL){
+  if((check_dir = opendir(output_dir)) != NULL){
     set_index_on_disk(index, TRUE);
+    closedir(check_dir);
   }
   else{
     set_index_on_disk(index, FALSE);
   }
 
+  carp(CARP_DEBUG, "Index on disk is '%i' for dir '%s'", 
+       (int)index->on_disk, output_dir);
+
   // set each field
-  set_index_directory(index, working_dir);
-  //set_index_directory(index, output_dir);
+  //set_index_directory(index, working_dir);
+  set_index_directory(index, output_dir);
   set_index_constraint(index, constraint);
   set_index_mass_range(index, mass_range);  
   set_index_is_unique(index, is_unique);
 
   // free filename and path string array
-  free(check_dir);
-  free(working_dir);
-  free(filename_and_path[0]);
-  free(filename_and_path[1]);
-  free(filename_and_path);
+  //free(check_dir);
+  // this should probably still be freed, but is removing index->directory???
+
+
+  //free(working_dir);
+  //free(filename_and_path[0]);
+  //free(filename_and_path[1]);
+  //free(filename_and_path);
 }
 
 
@@ -359,13 +376,16 @@ void set_index_fields(
  */
 INDEX_T* new_index(
   char* fasta_filename, ///< The fasta file
-  //char* output_dir,     ///< The name of the new index
+  char* output_dir,     ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,  
     ///< Constraint which these peptides will satisfy
   float mass_range  
     ///< the range of mass that each index file should be partitioned into
   )
 {
+  //just so it will compile
+  carp(CARP_DETAILED_DEBUG, "Creating new index to be named %s", output_dir);
+
   INDEX_T* index = allocate_index();
   DATABASE_T* database = NULL;
   
@@ -377,8 +397,9 @@ INDEX_T* new_index(
   // set database, has not been parsed
   set_index_database(index, database);
   BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
-  set_index_fields(index, fasta_filename, constraint, mass_range, is_unique);
-  //add output dir
+  //set_index_fields(index, fasta_filename, constraint, mass_range, is_unique);
+  set_index_fields(index, output_dir,//fasta_filename, output_dir, 
+                   constraint, mass_range, is_unique);
 
   return index;
 }         
@@ -540,25 +561,51 @@ BOOLEAN_T write_readme_file(
   hold_time = time(0);
   PEPTIDE_CONSTRAINT_T* constraint = index->constraint;
   char* fasta_file = get_database_filename(index->database);
+  char* fasta_file_no_path = parse_filename(fasta_file);
   
   fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
-  fprintf(file, "#\tfasta file: %s\n",  fasta_file); 
-  fprintf(file, "#\tmin_mass: %.2f\n", get_peptide_constraint_min_mass(constraint));
-  fprintf(file, "#\tmax_mass: %.2f\n", get_peptide_constraint_max_mass(constraint));
-  fprintf(file, "#\tmin_length: %d\n", get_peptide_constraint_min_length(constraint));
-  fprintf(file, "#\tmax_length: %d\n", get_peptide_constraint_max_length(constraint));
-  fprintf(file, "#\tpeptide_type: %s\n", ((get_peptide_constraint_peptide_type(constraint)==TRYPTIC)? "tryptic":
-                                          ((get_peptide_constraint_peptide_type(constraint)==ANY_TRYPTIC)? "all":
-                                           ((get_peptide_constraint_peptide_type(constraint)==N_TRYPTIC)? "front tryptic":
-                                            ((get_peptide_constraint_peptide_type(constraint)==C_TRYPTIC)? "back tryptic":
-                                             "partial")))));
-  fprintf(file, "#\tmissed_cleavage: %s\n", (get_peptide_constraint_num_mis_cleavage(constraint)? "true":"false"));
-  fprintf(file, "#\tmass_type: %s\n", (get_peptide_constraint_mass_type(constraint)==AVERAGE? "average":"mono"));
-  fprintf(file, "#\tunique peptides: %s\n", (get_index_is_unique(index)? "unique":"redundant"));
+  //  fprintf(file, "#\tfasta file: %s\n",  fasta_file); 
+  fprintf(file, "#\tfasta file: %s\n",  fasta_file_no_path); 
+  fprintf(file, "#\tmin_mass: %.2f\n",
+          get_peptide_constraint_min_mass(constraint));
+  fprintf(file, "#\tmax_mass: %.2f\n",
+          get_peptide_constraint_max_mass(constraint));
+  fprintf(file, "#\tmin_length: %d\n",
+          get_peptide_constraint_min_length(constraint));
+  fprintf(file, "#\tmax_length: %d\n",
+          get_peptide_constraint_max_length(constraint));
+
+  PEPTIDE_TYPE_T type = get_peptide_constraint_peptide_type(constraint);
+  char type_str[64];
+  peptide_type_to_string(type, type_str);
+  fprintf(file, "#\tpeptide_type: %s\n", type_str);
+  /*
+  fprintf(file, "#\tpeptide_type: %s\n",
+          ((get_peptide_constraint_peptide_type(constraint)==TRYPTIC)?
+           "tryptic":
+           ((get_peptide_constraint_peptide_type(constraint)==ANY_TRYPTIC)?
+            "all":
+            ((get_peptide_constraint_peptide_type(constraint)==N_TRYPTIC)?
+             "front tryptic":
+             ((get_peptide_constraint_peptide_type(constraint)==C_TRYPTIC)? 
+             "back tryptic":
+             "partial")))));
+  */
+
+  fprintf(file, "#\tmissed_cleavage: %s\n", 
+        (get_peptide_constraint_num_mis_cleavage(constraint)? "true":"false"));
+  fprintf(file, "#\tmass_type: %s\n", 
+          (get_peptide_constraint_mass_type(constraint)==AVERAGE? 
+           "average":"mono"));
+  fprintf(file, "#\tunique peptides: %s\n", 
+          (get_index_is_unique(index)? "unique":"redundant"));
   fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
-  fprintf(file, "#\ttarget mass range for index file: %.2f\n", index->mass_range);
+  fprintf(file, "#\ttarget mass range for index file: %.2f\n", 
+          index->mass_range);
   
   free(fasta_file);
+  free(fasta_file_no_path);
+
   return TRUE;
 }
 
@@ -845,6 +892,9 @@ BOOLEAN_T dump_peptide_all(
  * 1. create binary fasta file in temporary directory
  * 2. transform database into memory mapped database from text base database
  * 3. then, parse database
+ * Called while the cwd is the temp directory in which the index is
+ * being made.
+ *
  *\returns TRUE, if all processes are successful, else FALSE
  */
 BOOLEAN_T transform_database_to_memmap_database(
@@ -852,7 +902,8 @@ BOOLEAN_T transform_database_to_memmap_database(
   //fasta_filename (no path information)
   )
 {
-  char* binary_fasta = NULL;
+  char* barbs_fasta_filename = get_database_filename(index->database);
+  char* binary_fasta = NULL; // BF not used after set
 
   // get the fasta file name with correct path
   char* fasta_file = cat_string("../", 
@@ -862,6 +913,7 @@ BOOLEAN_T transform_database_to_memmap_database(
   if(!create_binary_fasta_in_cur(fasta_file,
                                get_database_filename_pointer(index->database),
                                &binary_fasta)){
+    /*
     carp(CARP_FATAL, "Failed to create protein index on disk");
     // remove directory
     chdir("..");
@@ -870,6 +922,9 @@ BOOLEAN_T transform_database_to_memmap_database(
     free_index(index);
     free(fasta_file);
     exit(1);
+    */
+    carp(CARP_ERROR, "Failed to create protein index on disk");
+    return FALSE;
   }
   
   // change name of file to binary fasta
@@ -879,17 +934,25 @@ BOOLEAN_T transform_database_to_memmap_database(
 
   // check if already parsed
   if(!get_database_is_parsed(index->database)){
+    carp(CARP_DEBUG,
+       "Database was not parsed after creating the binary fasta, parsing now");
+
     if(!parse_database(index->database)){
+      /*
       carp(CARP_FATAL, "failed to parse database, cannot create new index");
       free(index);
       free(fasta_file);
       free(binary_fasta);
       fcloseall();
       exit(1);
+      */
+      carp(CARP_ERROR, "Failed to parse database, cannot create new index");
+      return FALSE;
     }
   }
   
   // free file name
+  free(barbs_fasta_filename);
   free(fasta_file);
   free(binary_fasta);
 
@@ -897,8 +960,16 @@ BOOLEAN_T transform_database_to_memmap_database(
 }
 
 /**
- * The main index method. Does all the heavy lifting, creating files
- * serializing peptides, etc. The index directory itself should have 
+ * \brief The main index method. Does all the heavy lifting, creating
+ * files serializing peptides, etc. 
+ *
+ * When this is called, the database should be allocated and
+ * initialized, but not parsed.  The peptide constraint, mass range,
+ * and unique fields have been set.  If --overwrite is true, the output
+ * dir may exist and still contain an index.
+ *
+The index directory itself should
+ * have  
  * a standard suffix (e.g. cruxidx), so that a given fasta file will have
  * an obvious index location.
  *
@@ -910,7 +981,7 @@ BOOLEAN_T transform_database_to_memmap_database(
  * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T create_index(
-  INDEX_T* index ///< An allocated index -in
+  INDEX_T* index ///< An allocated index -in/out
   )
 {
   // the file stream where the index creation information is sent
@@ -927,25 +998,30 @@ BOOLEAN_T create_index(
   char* filename = NULL;
   float mass_range = index->mass_range;
   unsigned int* peptide_count_array = NULL;
+  BOOLEAN_T replace_index = FALSE;
 
+  carp(CARP_DEBUG, "Creating index");
   // check if already created index
   if(index->on_disk){
-    carp(CARP_WARNING, "Trying to create index that already exists");
-    return TRUE;//?????BF
-    /*    if(get_boolean_parameter("overwrite")){
-      delete_dir(index->directory);
-    }else{
+    //carp(CARP_WARNING, "Trying to create index that already exists");
+    //return TRUE;//?????BF
+    if(get_boolean_parameter("overwrite")){
+      replace_index = TRUE;
+      carp(CARP_DEBUG, "Will be replacing existing index");
+      // wait to delete until index is successfully created
+    }else{ // this should have already been checked, but...
       carp(CARP_FATAL, "Index '%s' already exists.  " \
-      "Use --overwrite T to replace");
+      "Use --overwrite T to replace", index->directory);
       exit(1);
-      }*/
+    }
+    //change the ondisk status?
   }
   
   // create temporary directory
   // temp_dir_name = "foo"; // CYGWIN
   if(mkdir(temp_dir_name, S_IRWXO) != 0){
     if((temp_dir_name = mkdtemp(make_temp_dir_template()))== NULL){
-      carp(CARP_WARNING, "cannot create temporary directory");
+      carp(CARP_WARNING, "Cannot create temporary directory");
       return FALSE;
     }
   }
@@ -953,17 +1029,29 @@ BOOLEAN_T create_index(
   // copy temporary folder name for SIGINT cleanup purpose
   strncpy(temp_folder_name, temp_dir_name, 12); 
 
+  if(! transform_database_text_to_memmap(index->database, 
+                                         temp_dir_name) ){
+    carp(CARP_FATAL, "Failed to create binary database from text fasta file");
+    clean_up(1);
+    exit(1);
+  }
+
   // move into temporary directory
   if(chdir(temp_dir_name) != 0){
-    carp(CARP_WARNING, "cannot enter temporary directory");
+    carp(CARP_WARNING, "Cannot enter temporary directory");
     return FALSE;
   }
 
   // 1. create binary fasta file in temporary directory
   // 2. transform database into memory mapped database from text base database
   // 3. then, parse database
-  transform_database_to_memmap_database(index);
-  
+  /*
+  if(! transform_database_to_memmap_database(index)){
+    clean_up(1);
+    // free ??
+    exit(1);
+    } */
+ 
   // get number of bins needed
   num_bins = get_num_bins_needed(index, mass_limits);
   
@@ -1079,6 +1167,13 @@ BOOLEAN_T create_index(
   chdir("..");
   
   // rename temporary direcotry to final directory name
+  // if replacing an existing index, remove current files and delete
+  // dir
+  if( replace_index == TRUE ){
+    carp(CARP_DEBUG,"About to delete existing index directory, %s", 
+         index->directory);
+    delete_dir(index->directory);
+  }
   if(rename(temp_dir_name, index->directory) != 0){
     carp(CARP_WARNING, "cannot rename directory");
     return FALSE;

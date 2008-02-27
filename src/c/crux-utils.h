@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.31 $
+ * $Revision: 1.32 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -135,6 +135,22 @@ char* generate_name(
   char* name_tag,
   char* file_extension,
   char* suffix
+  );
+
+/**
+ * \brief Take a filename, strip its leading path information (if
+ * any) and file extension (if any).  Add a new path (if given) and a
+ * new suffix (exension).
+ *
+ * If given ../dir/filename.ext, .new-ext, .ext, otherdir would return
+ * otherdir/filename.new-ext 
+ * \returns A heap allocated filename
+ */
+char* generate_name_path(
+  char* filename,
+  char* old_suffix,
+  char* new_suffix,
+  char* new_path
   );
 
 /**

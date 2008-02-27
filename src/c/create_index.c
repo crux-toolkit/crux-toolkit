@@ -27,8 +27,8 @@
 #include "parameter.h"
 
 #define NUM_INDEX_OPTIONS 11
-//#define NUM_INDEX_ARGS 2
-#define NUM_INDEX_ARGS 1
+#define NUM_INDEX_ARGS 2
+//#define NUM_INDEX_ARGS 1
 
       
 int main(int argc, char** argv){
@@ -69,8 +69,8 @@ int main(int argc, char** argv){
   /* Define required command line arguments */ 
   // TODO add index name
   int num_arguments = NUM_INDEX_ARGS;
-  char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file" }; 
-                                        //"index name"
+  char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file", 
+                                          "index name"}; 
 
 
   /* For debugging of parameter processing */
@@ -120,28 +120,28 @@ int main(int argc, char** argv){
   
   /* check if input file exist */
   in_file = get_string_parameter("protein fasta file");
-  carp(CARP_DETAILED_DEBUG,"Input file name is '%s'\n", in_file);
   if(access(in_file, F_OK)){
     carp(CARP_FATAL, "The file \"%s\" does not exist " 
          "(or is not readable or is empty).", in_file);
     exit(1);
   }
+  carp(CARP_INFO,"Creating index from fasta file '%s'", in_file);
   
   /* check if output name already exists
-     either delete contents or fail depending on --overwrite */
+     fail if --overwrite is false */
   //TODO
-  /*
   char* out_dir = get_string_parameter("index name");
+  carp(CARP_DEBUG, "New index name is '%s'", out_dir);
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  if( (chdir(out_dir) == 0) && (!overwrite) ){
-      carp(CARP_FATAL, "Index %s already exists. Use " \
+  if( (!overwrite) && (chdir(out_dir) == 0)){
+      carp(CARP_FATAL, "Index '%s' already exists. Use " \
            "--overwrite T to replace.", out_dir);
       exit(1);
-  }*/
+  }
 
   /* create new index object */
   crux_index = new_index(in_file,
-                         // out_dir,
+                         out_dir,
                          constraint,
                          mass_range
                          );
