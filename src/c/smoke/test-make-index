@@ -1,0 +1,17 @@
+#!/bin/bash
+
+chmod 774 crux-test.pl
+ln -fs test.fasta existing.fasta
+ln -fs ../../../doc/user/data/small-yeast.fasta .
+ln -fs ../../doc/user/data/small-yeast.fasta ../
+head -n20 small-yeast.fasta > smaller.fasta
+ln -fs smoke/smaller.fasta ../
+
+./crux-test.pl -p ../ index-test.cmds 1>out 2>error
+if [ $? == 25 ]
+then echo "Test aborted"
+else
+	tail -n6 out
+fi
+
+echo "  Test output in the file 'out'.  Error messages in 'error'."

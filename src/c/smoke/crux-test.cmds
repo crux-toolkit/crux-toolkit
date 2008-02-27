@@ -58,11 +58,11 @@ search_for_matches_noops = good_results/empty_file = rm -rf target.sqt test*csm 
 
 # Create index. Use crux-generate-peptides to test that it worked
 
-create_index_default = good_results/standard_create_index_default.out = rm -rf test_crux_index; crux-create-index test.fasta; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
+create_index_default = good_results/standard_create_index_default.out = rm -rf test_crux_index; crux-create-index test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
 
 generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux-generate-peptides --output-sequence T --use-index T test.fasta = '# PROTEIN DATABASE'
 
-create_index_uniq = good_results/standard_create_index_uniq.out = rm -rf test_crux_index; crux-create-index --unique-peptides T test.fasta; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
+create_index_uniq = good_results/standard_create_index_uniq.out = rm -rf test_crux_index; crux-create-index --unique-peptides T test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
 
 # use crux-generate-peptides to test that it worked
 generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --use-index T test.fasta=
