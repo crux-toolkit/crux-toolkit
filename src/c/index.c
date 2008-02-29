@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.77 $
+ * $Revision: 1.78 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -234,6 +234,83 @@ char* generate_directory_name(
 }
 
 /**
+ * Helper function for scandir to find files with names ending in
+ * "-binary-fasta"
+ * \returns 1 if filename ends in -binary-fasta, else 0 
+ */
+int is_binary_fasta_name(const struct dirent *entry){
+
+  char* filename = entry->d_name;
+  char* suffix = "-binary-fasta";
+
+  int name_length = strlen(filename);
+  int suffix_length = strlen(suffix);
+
+  if( suffix_length > name_length){
+    return 0;
+  }
+
+  // point to the last bit of filename
+  filename += name_length - suffix_length;
+  int matches = strncmp(filename, suffix, suffix_length); // 0 if matches
+
+  if( matches == 0 ) {
+    return 1;
+  }//else
+
+  return 0;
+}
+
+
+// TODO (BF 27-Feb-08): find what I used to generate the name and put
+// the two functions near each other.
+/**
+ * \brief Looks in given directory for a file ending in
+ * "-binary-fasta" and returns a heap-allocated string of the full
+ * name including the index directory.
+ *
+ * Exits with error if index->directory does not exist, no file
+ * *-binary-fasta exists, or more than one *binary-fasta file exists.
+ * \returns A string with the name of the existing binary fasta file
+ * for this index. 
+ */
+//char* get_index_binary_fasta_name(INDEX_T* index){
+char* get_index_binary_fasta_name(char* index_name){
+  struct dirent** namelist = NULL;
+ //  int num_files = scandir(index->directory, &namelist, is_binary_fasta_name,
+  int num_files = scandir(index_name, &namelist, is_binary_fasta_name,
+                          alphasort);
+
+  if( num_files < 1 ){
+    carp(CARP_FATAL, "Binary fasta file missing from index '%s'", 
+         //         index->directory);
+         index_name);
+    exit(1);
+  }
+  if( num_files > 1 ){
+    carp(CARP_FATAL, "More than one binary fasta file found in index '%s'", 
+         //         index->directory);
+         index_name);
+    exit(1);
+  }
+
+  carp(CARP_DEBUG, "Found '%s' in index '%s'", namelist[0]->d_name, 
+       //       index->directory);
+       index_name);
+
+  char* fasta_name = my_copy_string(namelist[0]->d_name);
+  //  char* fasta_name_path = get_full_filename(index->directory, fasta_name);
+  char* fasta_name_path = get_full_filename(index_name, fasta_name);
+
+  free(namelist[0]);
+  free(namelist);
+  free(fasta_name);
+
+  return fasta_name_path;
+
+}
+
+/**
  * THIS MAY BECOME OBSOLETE WITH EXPLICIT INDEX NAMING
  * foo.fasta --> foo_crux_index/foo_binary_fasta
  * \returns the binary fasta file name with crux directory name
@@ -265,38 +342,45 @@ char* get_binary_fasta_name_in_crux_dir(
  */
 void set_index_fields_from_disk(
   INDEX_T* index,  ///< Index to set -out                       
-  char* fasta_filename,  ///< The fasta file -in
-//char* output_dir,  ///< The name of the new directory to store the index -in
+  //char* fasta_filename,  ///< The fasta file -in
+  char* index_name,  ///< The name of the directory containing the index -in
   float mass_range,  ///< The range of mass for each index file -in
   BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
   // TODO most of the parameters to this routine should be determined
   // from the index on disk, but are kept around for now
+  /*
   char** filename_and_path = NULL;
   char* working_dir = NULL;
   filename_and_path = parse_filename_path(fasta_filename);
   working_dir = generate_directory_name(fasta_filename); 
+  */  
   DIR* check_dir = NULL;
   
-  if((check_dir = opendir(working_dir)) != NULL){
+  //  if((check_dir = opendir(working_dir)) != NULL){
+  if((check_dir = opendir(index_name)) != NULL){
     set_index_on_disk(index, TRUE);
+    closedir(check_dir);
   }
   else{
     set_index_on_disk(index, FALSE);
-  }
+  } 
 
   // set each field
-  set_index_directory(index, working_dir);
+  //  set_index_directory(index, working_dir);
+  set_index_directory(index, index_name);
   set_index_mass_range(index, mass_range);  
   set_index_is_unique(index, is_unique);
 
   // free filename and path string array
+  /*
   free(check_dir);
   free(working_dir);
   free(filename_and_path[0]);
   free(filename_and_path[1]);
   free(filename_and_path);
+  */
 }
 
 
@@ -410,7 +494,8 @@ INDEX_T* new_index(
  * \returns A new index object ready for search.
  */
 INDEX_T* new_index_from_disk(
-  char* fasta_filename,  ///< The fasta file
+  //char* fasta_filename,  ///< The fasta file
+  char* index_name,  ///< The directory containing the index
   BOOLEAN_T is_unique ///< only unique peptides? -in
   )
 {
@@ -421,7 +506,8 @@ INDEX_T* new_index_from_disk(
   search_index = allocate_index();
   
   // sets mass_range, max_size to an arbitrary 0
-  set_index_fields_from_disk(search_index, fasta_filename, 0, is_unique);
+  //  set_index_fields_from_disk(search_index, fasta_filename, 0, is_unique);
+  set_index_fields_from_disk(search_index, index_name, 0, is_unique);
   
   // check if crux_index files have been made
   if(!get_index_on_disk(search_index)){
@@ -432,7 +518,9 @@ INDEX_T* new_index_from_disk(
   }
   
   // get binary fasta file name with path to crux directory 
-  char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_filename);
+  //char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_filename);
+  //  char* binary_fasta = get_index_binary_fasta_name(search_index);
+  char* binary_fasta = get_index_binary_fasta_name(index_name);
   
   // check if input file exist
   if(access(binary_fasta, F_OK)){
@@ -1164,7 +1252,7 @@ BOOLEAN_T create_index(
   free(peptide_count_array);
   free_database_peptide_iterator(peptide_iterator);
 
-  chdir("..");
+  chdir(".."); //move out of temp dir
   
   // rename temporary direcotry to final directory name
   // if replacing an existing index, remove current files and delete
@@ -1175,7 +1263,7 @@ BOOLEAN_T create_index(
     delete_dir(index->directory);
   }
   if(rename(temp_dir_name, index->directory) != 0){
-    carp(CARP_WARNING, "cannot rename directory");
+    carp(CARP_WARNING, "Cannot rename directory");
     return FALSE;
   }
 
@@ -1545,8 +1633,17 @@ BOOLEAN_T parse_crux_index_map(
   int line_length;
   size_t buf_length = 0;
   
-  // used to parse with in a line
-  char filename[MAX_FILE_NAME_LENGTH] = "";
+  // used to parse within a line
+  char full_filename[MAX_FILE_NAME_LENGTH] = "";
+  strcpy(full_filename, index_peptide_iterator->index->directory);
+  int dir_name_length = strlen(full_filename);
+
+  if( full_filename[dir_name_length-1] != '/' ){
+    full_filename[dir_name_length] = '/'; 
+    dir_name_length++;
+  }
+  char* filename = full_filename + dir_name_length; 
+
   float start_mass;
   float range;
   BOOLEAN_T start_file = FALSE;
@@ -1557,10 +1654,13 @@ BOOLEAN_T parse_crux_index_map(
   int num_line = 0;
 
   // move into the dir crux_files
-  chdir(index_peptide_iterator->index->directory);
+  //  chdir(index_peptide_iterator->index->directory));
   
+  strcpy(filename,"crux_index_map");
+  carp(CARP_DEBUG, "Opening map file '%s'", full_filename);
   // open crux_index_file
-  file = fopen("crux_index_map", "r");
+  //  file = fopen("crux_index_map", "r");
+  file = fopen(full_filename, "r");
   if(file == NULL){
     carp(CARP_WARNING, "Cannot open crux_index_map file.");
     return FALSE;
@@ -1598,7 +1698,8 @@ BOOLEAN_T parse_crux_index_map(
         else{
           start_file = TRUE;
           if(!add_new_index_file(
-                index_peptide_iterator, filename, start_mass, range)){
+//              index_peptide_iterator, filename, start_mass, range)){
+                index_peptide_iterator, full_filename, start_mass, range)){
             carp(CARP_WARNING, "Failed to add index file");
             fclose(file);
             free(new_line);
@@ -1610,7 +1711,8 @@ BOOLEAN_T parse_crux_index_map(
       // add all index_files that are with in peptide constraint mass interval
       else if(max_mass > (start_mass - 0.0001)){
         if(!add_new_index_file(
-              index_peptide_iterator, filename, start_mass, range)){
+//            index_peptide_iterator, filename, start_mass, range)){
+            index_peptide_iterator, full_filename, start_mass, range)){
           carp(CARP_WARNING, "Failed to add index file");
           free(new_line);
           return FALSE;

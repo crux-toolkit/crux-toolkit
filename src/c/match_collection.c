@@ -8,11 +8,11 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.77 $
+ * $Revision: 1.78 $
  ****************************************************************************/
 #include "match_collection.h"
 
-static BOOLEAN_T is_first_spectrum = TRUE;
+//static BOOLEAN_T is_first_spectrum = TRUE;
 
 /* Private data types (structs) */
 
@@ -303,11 +303,11 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   int top_fit_sp = get_int_parameter("top-fit-sp");
   
   // move out of crux index dir
-  if(!is_first_spectrum){
+  /*  if(!is_first_spectrum){
     chdir("..");
   }else{
     is_first_spectrum = FALSE;
-  }
+    }*/
   
   // create a generate peptide iterator
   // FIXME use neutral_mass for now, but should allow option to change
@@ -1971,7 +1971,15 @@ void print_sqt_header(FILE* output, char* type, int num_proteins){
   fprintf(output, "H\tEndTime                               \n");
 
   char* database = get_string_parameter("protein input");
+  //  fprintf(output, "H\tDatabase\t%s\n", database);
+
+  if( get_boolean_parameter("use-index") == TRUE ){
+    char* fasta_name  = get_index_binary_fasta_name(database);
+    free(database);
+    database = fasta_name;
+  }
   fprintf(output, "H\tDatabase\t%s\n", database);
+
   if(decoy){
   fprintf(output, "H\tComment\tDatabase shuffled; these are decoy matches\n");
   }
@@ -3003,7 +3011,8 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   }
 
   // get binary fasta file name with path to crux directory 
-  char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_file);
+  //  char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_file);
+  char* binary_fasta = get_index_binary_fasta_name(fasta_file);
   
   // check if input file exist
   if(access(binary_fasta, F_OK)){

@@ -127,8 +127,17 @@ int main(int argc, char** argv){
 void print_header(){
   BOOLEAN_T bool_val;
 
-  printf("# PROTEIN DATABASE: %s\n", 
-         get_string_parameter_pointer("protein input"));
+  //  printf("# PROTEIN DATABASE: %s\n", 
+  //         get_string_parameter_pointer("protein input"));
+
+  char* database_name = get_string_parameter_pointer("protein input");
+  if( get_boolean_parameter("use-index") == TRUE ){
+    char* fasta_name  = get_index_binary_fasta_name(database_name);
+    free(database_name);
+    database_name = fasta_name;
+  }
+  printf("# PROTEIN DATABASE: %s\n", database_name);
+
   printf("# OPTIONS:\n");
   printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass"));
   printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass"));

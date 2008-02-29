@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -109,6 +109,18 @@ BOOLEAN_T create_index_files(
   FILE* file ///< output stream to print
   );
 
+/**
+ * \brief Looks in given directory for a file ending in
+ * "-binary-fasta" and returns a heap-allocated string of the full
+ * name including the index directory.
+ *
+ * Exits with error if index_name does not exist, no file
+ * *-binary-fasta exists, or more than one *binary-fasta file exists.
+ * \returns A string with the name of the existing binary fasta file
+ * for this index.
+ */
+
+char* get_index_binary_fasta_name(char* index_name);
 /**
  * foo.fasta --> foo_crux_index/foo_binary_fasta
  * \returns the binary fasta file name with crux directory name
