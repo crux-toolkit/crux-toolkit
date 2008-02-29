@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Feb 28 16:37:18 2008
+H	StartTime	Thu Feb 28 17:25:00 2008
 H	EndTime                               
 H	Database	test_crux_index/test-binary-fasta
 H	DBSeqLength	?
@@ -28,5 +28,5 @@ S	15	15	2	0.00	server	488.82	0.00	0.00	1
 M	1	1	973.09	0.00	0.19	0.00	0	16	K.SGATAYIYK.A
 L	gi|6381999|ref|NP_009311.2|
 S	15	15	3	0.00	server	488.82	0.00	0.00	1
-M	1	1	1464.82	0.00	-0.90	0.90	5	44	K.QYLLLNIAYLLK.L
+M	1	1	1464.81	0.00	-0.90	0.90	5	44	K.QYLLLNIAYLLK.L
 L	gi|6381999|ref|NP_009311.2|
