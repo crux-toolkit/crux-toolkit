@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief General parameter handling utilities. All values stored here.
 
  * \detail MUST declare ALL optional command line parameters and
@@ -46,8 +46,19 @@
 
 // TODO (BF 1-28-08): these should be private. move to parameter.c
 /**
- * Data types of parameters.  Used for checking valid parameter input
+ * \enum Data types of parameters.  Used for checking valid parameter input
  * from user.
+ *
+ * To add a new parameter type:  
+ *  (for NEW types) 1.create enum, 
+ *                  2. create array of strings, 
+ *                  3. write string-to-type,
+ *                  4. write type-to-string
+ *  (for ALL types) 5. add to parameter-type enum and strings
+ *                  6. write get-type-parameter
+ *                  7. write set-type-parameter
+ *                  8. add to the check_type_and_bounds
+ *
  */
 enum parameter_type {
   INT_P,             ///< parameters of type int

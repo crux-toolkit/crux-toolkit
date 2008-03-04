@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.42 $
+ * $Revision: 1.43 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -89,7 +89,7 @@ int main(int argc, char** argv){
 
   int num_arguments = NUM_ANALYSIS_ARGUMENTS;
   char* argument_list[NUM_ANALYSIS_ARGUMENTS] = {
-    "psm file",
+    "psm-folder",
     "protein input",
   };
 
@@ -112,7 +112,8 @@ int main(int argc, char** argv){
   set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get arguments */
-  char* psm_file = get_string_parameter("psm file");
+  //  char* psm_file = get_string_parameter("psm file");
+  char* psm_file = get_string_parameter("psm-folder");
   char* fasta_file = get_string_parameter("protein input");//rename
   char* feature_file = get_string_parameter("feature-file");
 
