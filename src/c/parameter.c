@@ -204,8 +204,8 @@ void initialize_parameters(void){
 
   /* analyze-matches arguments */
   set_string_parameter("psm-folder", NULL, 
-   "File containing the binary psm files created by crux-search-for-matches");
-  // for now, replaces above
+  "Folder containing the binary psm files created by crux-search-for-matches");
+  // for now, replaces above; or not
   set_string_parameter("psm file", NULL, 
    "The binary psm file containing matches to the target database.  "
    "Decoys named filename-decoy-#.csm are also analyzed.");
@@ -314,7 +314,8 @@ void initialize_parameters(void){
       "NOT FOR COMMAND LINE. Number of search results per spectrum " \
       "to report in the sqt file. Default 5.");
   set_int_parameter("top-match", 1, 1, BILLION, 
-      "NOT FOR COMMAND LINE. Umm...");
+      "NOT FOR COMMAND LINE. The number of psms per spectrum writen " \
+      "to the binary output file");
   set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
   set_string_parameter("seed", "time", "HIDE ME FROM USER");
   set_double_parameter("mass-window", 3.0, 0, 100, 

@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.78 $
+ * $Revision: 1.79 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -18,10 +18,9 @@
 
 /**
  * \struct match_collection
- * \brief An object that contains a set of match objects for a given
- * spectrum and peptide database.
+ * \brief An object that contains a set of match objects.
  *
- * 
+ * May contain matches for one spectrum or many spectra. 
  * 
  * 
  */
@@ -2064,6 +2063,10 @@ BOOLEAN_T print_match_collection_sqt(
   SCORER_TYPE_T main_score       ///< the main score to report -in
   )
 {
+
+  if( output == NULL ){
+    return FALSE;
+  }
   time_t hold_time;
   hold_time = time(0);
   int charge = match_collection->charge; 

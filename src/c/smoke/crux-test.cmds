@@ -69,7 +69,7 @@ create_index_uniq = good_results/standard_create_index_uniq.out = rm -rf test_cr
 generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --use-index T test_crux_index=
 
 # Search for matches and test sqt file
-search_for_matches_default_index = good_results/standard_search_default.target.sqt = crux-search-for-matches --output-mode all --overwrite T --use-index T --parameter-file params/params_uniq test.ms2 test_crux_index; cat target.sqt = 'Time'
+search_for_matches_default_index = good_results/standard_search_default.target.sqt = crux-search-for-matches --output-mode all --overwrite T --use-index T --parameter-file params/params_uniq test.ms2 test_crux_index; cat target.sqt = 'Time' 'Database'
 
 # Analyze matches using above index
 analyze_matches_index = good_results/standard_test-perc.sqt =  rm -f target.sqt; crux-analyze-matches --sqt-output-file test-perc.sqt --overwrite T --use-index T . test_crux_index; cat test-perc.sqt = 'StartTime'

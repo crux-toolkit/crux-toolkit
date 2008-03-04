@@ -360,9 +360,11 @@ void open_output_files(
                                     overwrite);
     char* decoy_sqt_filename = get_string_parameter_pointer(
                                                     "decoy-sqt-output-file");
-    *decoy_sqt_file = create_file_in_path(decoy_sqt_filename,
-                                          match_output_folder,
-                                          overwrite);
+    if( get_int_parameter("number-decoy-set") > 0 ){
+      *decoy_sqt_file = create_file_in_path(decoy_sqt_filename,
+                                            match_output_folder,
+                                            overwrite);
+    }
 
     if(sqt_file == NULL || decoy_sqt_file == NULL){
       carp(CARP_DEBUG, "sqt file or decoy is null");

@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.54 $
+ * REVISION: $Revision: 1.55 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -418,19 +418,22 @@ void print_match_sqt(
   MATCH_T* match,             ///< the match to print -in  
   FILE* file,                 ///< output stream -out
   SCORER_TYPE_T main_score,   ///< the main score to report -in
-  SCORER_TYPE_T other_score  ///< the score to report -in
+  SCORER_TYPE_T other_score  ///< the other score to report -in
   ){
 
   PEPTIDE_T* peptide = get_match_peptide(match);
   char* sequence = get_peptide_sequence_sqt(peptide);
+  BOOLEAN_T adjust_delta_cn = FALSE;
 
   // NOTE (BF 12-Feb-08) This is an ugly fix to give post-percolator
   // sqt files the rank of the xcorr and sp.
+  // ALSO deltaCn not serialized, so set to 0 for post-process
   SCORER_TYPE_T main_rank_type = main_score;
   SCORER_TYPE_T other_rank_type = other_score;
   if( main_score == PERCOLATOR_SCORE && other_score==Q_VALUE ){
     main_rank_type = XCORR;
     other_rank_type = SP;    
+    adjust_delta_cn = TRUE;
   }
 
   // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
@@ -451,14 +454,20 @@ void print_match_sqt(
     b_y_total = (get_peptide_length(peptide)-1) * 2 * factor;
     b_y_matched = (get_match_b_y_ion_fraction_matched(match)) * b_y_total;
   }
+
+  float delta_cn = get_match_delta_cn(match);
+  if( adjust_delta_cn == TRUE ){
+    delta_cn = 0.0;
+  }
   // print match info
-  fprintf(file, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\n",
+  fprintf(file, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\tU\n",
           //get_match_rank(match, main_score),
           //get_match_rank(match, other_score),
           get_match_rank(match, main_rank_type),
           get_match_rank(match, other_rank_type),
           get_peptide_peptide_mass(peptide),
-          get_match_delta_cn(match),
+          //get_match_delta_cn(match),
+          delta_cn,
           get_match_score(match, main_score),
           get_match_score(match, other_score),
           //get_match_b_y_ion_matched(match),
@@ -474,6 +483,7 @@ void print_match_sqt(
   PEPTIDE_SRC_T* peptide_src = NULL;
   char* protein_id = NULL;
   PROTEIN_T* protein = NULL;
+  char* description = NULL;
   
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     peptide_src = peptide_src_iterator_next(peptide_src_iterator);
@@ -481,12 +491,15 @@ void print_match_sqt(
     protein_id = get_protein_id(protein);
     sequence = get_peptide_sequence_from_peptide_src_sqt(peptide, 
                                                          peptide_src);
+    description = get_protein_annotation(protein);
     
     // print match info (locus line)
     // TODO (BF 06-Feb-08): add protein description
-    fprintf(file, "L\t%s\n", protein_id);      
+    //    fprintf(file, "L\t%s\n", protein_id);      
+    fprintf(file, "L\t%s\t%s\n", protein_id, description);      
     free(protein_id);
     free(sequence);
+    free(description);
   }
   
   free_peptide_src_iterator(peptide_src_iterator);
