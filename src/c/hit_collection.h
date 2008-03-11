@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.1 $
+ * REVISION: $Revision: 1.2 $
  ****************************************************************************/*
 
 #ifndef HIT_COLLECTION_H
@@ -31,6 +31,12 @@
  */
 HIT_COLLECTION_T* allocate_hit_collection(void);
 
+/**
+ * free the memory allocated match collection
+ */
+void free_hit_collection(
+  HIT_COLLECTION_T* hit_collection ///< the match collection to free -out
+  );
 
 /**
  * \brief Creates a new hit collection from a scored match collection.
@@ -44,28 +50,11 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
  );
 
 /**
- * free the memory allocated match collection
- */
-void free_hit_collection(
-  HIT_COLLECTION_T* hit_collection ///< the match collection to free -out
-  );
-
-/**
  * Prints out the contents of the hit collection
  */
 void print_hit_collection(
  FILE* output,                    ///< the output file -out
  HIT_COLLECTION_T* hit_collection ///< hit collection -in
-);
-
-/**
- * Print the psm features to output file upto 'top_match' number of 
- * top peptides among the hit_collection in sqt file format
- *\returns TRUE, if sucessfully print sqt format of the PSMs, else FALSE 
- */
-BOOLEAN_T print_hit_collection_sqt(
-  FILE* output,                    ///< the output file -out
-  HIT_COLLECTION_T* hit_collection ///< hit collection -in
 );
 
 /**
