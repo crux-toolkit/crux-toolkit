@@ -19,9 +19,10 @@ struct parameter_hash{
   HASH_T* hash; ///< the hash table for parameters
 };
 
-/**
+/*
  * Global variables
  */
+
 static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { 
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T", 
   "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T",
