@@ -1,28 +1,25 @@
 <html>
 <body>
-<pre>
-Differential Mods
-Author: Aaron Klammer
-2008-Mar-14
-
+  Differential Mods<br>
+  Author: Aaron Klammer<br>
+  2008-Mar-14<br>
+  <br>
 Here is a list of requirements for the implementation of differential modifications in Crux: 
 <ul>
-<li> Differential modifications will be specified in the parameter file by triplets:
+<li> Differential modification types will be specified in the parameter file by triplets:
 <ul>
 <li> A mass offset (float)
 <li> A list of amino acids where the modification can occur (string)
-<li> A maximum number of modifications per peptide (int)
+<li> A maximum number of this type of modification per peptide (int)
 </ul>
 <li> A single amino acid may have multiple modifications of different types, but only one of the same type.
-<li> A single analysis may have at most 11 different kinds of modifications.
-<li> N-term and C-term modifications will be allowed.
+<li> A single analysis will allow at most 11 different types of modifications.
+<li> Peptide N-term and C-term modifications will be allowed.
+<li> Protein N-term and C-term modifications will be allowed.
 <li> Some N-term mods will only be allowed on peptides with an N-term
 within a parameter controlled distance of the protein N-term.
-<li> To avoid exponential explosion, there will be a maximum number of
-modified peptides generated from any particular unmodified peptide (e.g.
-1000).
+<li> To avoid exponential explosion, there will be a maximum number of modified peptides generated from any particular unmodified peptide (e.g.  1000).
 </ul>
 
-</pre>
 </body>
 </html>
