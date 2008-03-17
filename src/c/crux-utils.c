@@ -987,8 +987,8 @@ void fit_three_parameter_weibull(
       *beta = best_beta;
       *shift = best_shift;
       *correlation = best_correlation;
-      carp(CARP_INFO, "Stat: Mu, Corr = %.6f, %.6f\n", cur_shift, cur_correlation);
-      carp(CARP_INFO, "Stat: Eta, Beta, Shift = %.6f, %.6f, %.6f", 
+      carp(CARP_DETAILED_DEBUG, "Stat: Mu, Corr = %.6f, %.6f\n", cur_shift, cur_correlation);
+      carp(CARP_DETAILED_DEBUG, "Stat: Eta, Beta, Shift = %.6f, %.6f, %.6f", 
           best_eta, best_beta, best_shift);
       return;
     }

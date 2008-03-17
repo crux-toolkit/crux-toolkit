@@ -19,6 +19,10 @@ NON_PERCOLATOR_LIB_FILES= \
   generate_peptides_iterator.h \
   hash.c \
   hash.h \
+  hit.c \
+  hit.h \
+  hit_collection.c \
+  hit_collection.h \
   index.c \
   index.h \
   ion.c \

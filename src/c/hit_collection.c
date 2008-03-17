@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.2 $
+ * REVISION: $Revision: 1.3 $
  ****************************************************************************/
 #include "hit_collection.h"
 
@@ -11,10 +11,10 @@
  * \struct hit_collection
  * \brief An object that contains a set of hit objects.
  */
-struct hit_collection {
+ struct hit_collection {
   HIT_T* hits[_MAX_NUMBER_HITS]; ///< Array of hit objects
   int hit_total; ///< Total number of hits
-};
+ };
 
 /**
  *\struct hit_iterator
@@ -66,11 +66,49 @@ void free_hit_collection(
  * \returns A new hit_collection object.
  */
 HIT_COLLECTION_T* new_hit_collection_from_match_collection(
- HIT_COLLECTION_T* match_collection ///< the match collection -in
+ MATCH_COLLECTION_T* match_collection ///< the match collection -in
+ // PROTEIN_SCORER_TYPE_T protein_scorer_type  ///< the type of protein score -in
  )
 {
   HIT_COLLECTION_T* hit_collection = allocate_hit_collection();
-  carp(CARP_DETAILED_DEBUG, "Finished creating hit collection");
+  
+  // assert pvalue only
+
+  // three data structures, one for storing peptide2max_score, 
+  // peptide2number proteins, and protein2score
+  // an array of all peptides in results
+  HASH_T* peptide_to_max_score_hash  = new_hash(1000000); // TODO 
+  // HASH_T* peptide_to_num_proteins_hash = new_hash(100000000); // TODO 
+
+  SCORER_TYPE_T scorer_type = LOGP_BONF_WEIBULL_XCORR;
+
+  MATCH_ITERATOR_T* match_iterator = 
+    new_match_iterator(match_collection, scorer_type, FALSE);
+
+  MATCH_T* match = NULL;
+  // iterate through the matches
+  while(match_iterator_has_next(match_iterator)){
+    match = match_iterator_next(match_iterator);
+    char* peptide = get_match_sequence(match);
+    float* max_score = 
+      (float*) get_hash_value(peptide_to_max_score_hash, peptide);
+    float new_score = get_match_score(match, scorer_type);
+
+    // note the peptide max score in peptide2max_score hash
+    if (max_score == NULL || *max_score < new_score){
+      add_or_update_hash(peptide_to_max_score_hash, peptide, (void*)&new_score);
+    }
+  }
+  free_match_iterator(match_iterator);
+
+  // iterate through the peptides in all_peptides
+    // note the peptide nth root as our current score
+    // iterate through the proteins in the peptide
+    // add this protein to our hit collection
+    // increment the protein score with our current score
+
+  HIT_T* hit = new_hit();
+  hit_collection_add_hit(hit_collection, hit);
   return hit_collection;
 }
 
@@ -83,6 +121,24 @@ BOOLEAN_T print_hit_collection(
   HIT_COLLECTION_T* hit_collection
   ){
 
+  HIT_ITERATOR_T* hit_iterator = new_hit_iterator(hit_collection);
+  while (hit_iterator_has_next(hit_iterator)){
+    HIT_T* hit = hit_iterator_next(hit_iterator);
+    print_hit(output, hit);
+  }  
+
+  return TRUE;
+}
+
+/**
+ * \brief Add the hit to the hit collection.
+ */
+BOOLEAN_T hit_collection_add_hit(
+    HIT_COLLECTION_T* hit_collection,
+    HIT_T* hit
+    ){
+  hit_collection->hits[hit_collection->hit_total++] = hit;
+  return TRUE;
 }
 
 /**
@@ -123,13 +179,13 @@ BOOLEAN_T hit_iterator_has_next(
 }
 
 /**
- *\returns the next the hit struct
+ * \returns the next the hit struct
  */
 HIT_T* hit_iterator_next(
   HIT_ITERATOR_T* hit_iterator ///< the working hit iterator -in
   )
 {
-  return hit_iterator->hit_collection->hit[hit_iterator->hit_idx++];
+  return hit_iterator->hit_collection->hits[hit_iterator->hit_idx++];
 }
 
 /**

@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.79 $
+ * $Revision: 1.80 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -839,7 +839,7 @@ BOOLEAN_T estimate_weibull_parameters(
   int charge
   )
 {
-  carp(CARP_INFO, "Estimating weibull params");
+  carp(CARP_DEBUG, "Estimating weibull params");
   MATCH_COLLECTION_T* sample_collection = match_collection;
 
   if (sample_count != 0){
@@ -850,13 +850,13 @@ BOOLEAN_T estimate_weibull_parameters(
   // how many things are we going to fit. We may want to just fit to the
   // tail, thus the distinction between total* and fit*
   int total_data_points = sample_collection->match_total;
-  carp(CARP_INFO, "Stat: Total matches: %i\n", total_data_points);
+  carp(CARP_DETAILED_DEBUG, "Stat: Total matches: %i\n", total_data_points);
   int fit_data_points = total_data_points;
 
   // less than 0.0 or 0 indicates use all peptides
   double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
   int number_to_fit = get_int_parameter("number-top-scores-to-fit");
-  carp(CARP_INFO, "Stat: Number matches to fit: %i\n", number_to_fit);
+  carp(CARP_DETAILED_DEBUG, "Stat: Number matches to fit: %i\n", number_to_fit);
   if (fraction_to_fit > -0.5){
     assert(fraction_to_fit <= 1.0);
     fit_data_points = (int)(total_data_points * fraction_to_fit);
@@ -865,7 +865,7 @@ BOOLEAN_T estimate_weibull_parameters(
         number_to_fit : total_data_points;
   }
 
-  carp(CARP_INFO, "Estimate Weibull parameters, count: %d", fit_data_points);
+  carp(CARP_DEBUG, "Estimate Weibull parameters, count: %d", fit_data_points);
   
   // first score the sample match_collection
   if(score_type == XCORR){
@@ -908,7 +908,8 @@ BOOLEAN_T estimate_weibull_parameters(
       &(match_collection->eta), &(match_collection->beta), 
       &(match_collection->shift), &correlation);
   }
-  carp(CARP_INFO, "Correlation: %.6f\nEta: %.6f\nBeta: %.6f\nShift: %.6f\n", 
+  carp(CARP_DETAILED_DEBUG, 
+      "Correlation: %.6f\nEta: %.6f\nBeta: %.6f\nShift: %.6f\n", 
       correlation, match_collection->eta, match_collection->beta,
       match_collection->shift);
   
@@ -1153,7 +1154,7 @@ BOOLEAN_T score_match_collection_logp_exp_sp(
   }
   
   // we are string xcorr!
-  carp(CARP_INFO, "start scoring for LOGP_EXP_SP");
+  carp(CARP_DEBUG, "start scoring for LOGP_EXP_SP");
 
   // iterate over all matches to score for LOGP_EXP_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
@@ -1209,7 +1210,7 @@ BOOLEAN_T score_match_collection_logp_bonf_exp_sp(
   }
   
   // we are string xcorr!
-  carp(CARP_INFO, "start scoring for LOGP_BONF_EXP_SP");
+  carp(CARP_DEBUG, "start scoring for LOGP_BONF_EXP_SP");
 
   // iterate over all matches to score for LOGP_BONF_EXP_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
@@ -1223,7 +1224,7 @@ BOOLEAN_T score_match_collection_logp_bonf_exp_sp(
   }
   
   // we are done
-  carp(CARP_INFO, "total peptides scored for LOGP_BONF_EXP_SP: %d", match_idx);
+  carp(CARP_DEBUG, "total peptides scored for LOGP_BONF_EXP_SP: %d", match_idx);
     
   // match_collection is not populate with the rank of LOGP_BONF_EXP_SP, becuase the SP rank is  identical to the LOGP_EXP_SP rank
   
@@ -1264,7 +1265,7 @@ BOOLEAN_T score_match_collection_logp_weibull_sp(
   }
   
   // we are string xcorr!
-  carp(CARP_INFO, "start scoring for LOGP_WEIBULL_SP");
+  carp(CARP_DEBUG, "start scoring for LOGP_WEIBULL_SP");
 
   // iterate over all matches to score for LOGP_WEIBULL_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
@@ -1279,7 +1280,7 @@ BOOLEAN_T score_match_collection_logp_weibull_sp(
   }
   
   // we are done
-  carp(CARP_INFO, "total peptides scored for LOGP_WEIBULL_SP: %d", match_idx);
+  carp(CARP_DEBUG, "total peptides scored for LOGP_WEIBULL_SP: %d", match_idx);
 
   // match_collection is not populate with the rank of LOGP_WEIBULL_SP, becuase the SP rank is  identical to the LOGP_WEIBULL_SP rank
   
@@ -1320,7 +1321,7 @@ BOOLEAN_T score_match_collection_logp_weibull_xcorr(
   }
   
   // we are string xcorr!
-  carp(CARP_INFO, "start scoring for LOGP_WEIBULL_XCORR");
+  carp(CARP_DEBUG, "start scoring for LOGP_WEIBULL_XCORR");
 
   // iterate over all matches to score for LOGP_WEIBULL_XCORR
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
@@ -1334,7 +1335,7 @@ BOOLEAN_T score_match_collection_logp_weibull_xcorr(
   }
   
   // we are done
-  carp(CARP_INFO, "total peptides scored for LOGP_WEIBULL_XCORR: %d", match_idx);
+  carp(CARP_DEBUG, "total peptides scored for LOGP_WEIBULL_XCORR: %d", match_idx);
 
   // match_collection is not populate with the rank of LOGP_WEIBULL_XCORR, becuase the XCORR rank is  identical to the LOGP_WEIBULL_XCORR rank
   
@@ -1376,7 +1377,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_xcorr(
   }
   
   // we are string xcorr!
-  carp(CARP_INFO, "start scoring for LOGP_BONF_WEIBULL_XCORR");
+  carp(CARP_DEBUG, "start scoring for LOGP_BONF_WEIBULL_XCORR");
 
   // iterate over all matches to score for LOGP_BONF_WEIBULL_XCORR
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
@@ -1392,7 +1393,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_xcorr(
   }
   
   // we are done
-  carp(CARP_INFO, "total peptides scored for LOGP_BONF_WEIBULL_XCORR: %d", match_idx);
+  carp(CARP_DEBUG, "total peptides scored for LOGP_BONF_WEIBULL_XCORR: %d", match_idx);
     
   // match_collection is not populate with the rank of LOGP_BONF_WEIBULL_XCORR, becuase the XCORR rank is  identical to the LOGP_WEIBULL_XCORR rank
   
@@ -1435,7 +1436,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_sp(
   }
   
   // we are string xcorr!
-  carp(CARP_INFO, "start scoring for LOGP_BONF_WEIBULL_SP");
+  carp(CARP_DEBUG, "start scoring for LOGP_BONF_WEIBULL_SP");
 
   // iterate over all matches to score for LOGP_BONF_WEIBULL_SP
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
@@ -1451,7 +1452,7 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_sp(
   }
   
   // we are done
-  carp(CARP_INFO, "total peptides scored for LOGP_BONF_WEIBULL_SP: %d", match_idx);
+  carp(CARP_DEBUG, "total peptides scored for LOGP_BONF_WEIBULL_SP: %d", match_idx);
     
   // match_collection is not populate with the rank of LOGP_BONF_WEIBULL_SP, becuase the SP rank is  identical to the LOGP_WEIBULL_SP rank
   
@@ -1600,7 +1601,7 @@ BOOLEAN_T score_match_collection_logp_evd_xcorr(
   }
   
   // we are starting LOGP_EVD_XCORR!
-  carp(CARP_INFO, "start scoring for LOGP_EVD_XCORR");
+  carp(CARP_DEBUG, "start scoring for LOGP_EVD_XCORR");
 
   // iterate over all matches to score for LOGP_EVD_XCORR
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
@@ -1613,7 +1614,7 @@ BOOLEAN_T score_match_collection_logp_evd_xcorr(
   }
   
   // we are done
-  carp(CARP_INFO, "total peptides scored for LOGP_EVD_XCORR: %d", match_idx);
+  carp(CARP_DEBUG, "total peptides scored for LOGP_EVD_XCORR: %d", match_idx);
 
   // match_collection is not populate with the rank of LOGP_EVD_XCORR, 
   // becuase the XCORR rank is  identical to the LOGP_EVD_XCORR rank
@@ -1655,7 +1656,7 @@ BOOLEAN_T score_match_collection_logp_bonf_evd_xcorr(
   }
   
   // we are starting LOGP_BONF_EVD_XCORR!
-  carp(CARP_INFO, "start scoring for LOGP_BONF_EVD_XCORR");
+  carp(CARP_DEBUG, "start scoring for LOGP_BONF_EVD_XCORR");
 
   // iterate over all matches to score for LOGP_BONF_EVD_XCORR
   while(match_idx < match_collection->match_total && match_idx < peptide_to_score){
@@ -1668,7 +1669,7 @@ BOOLEAN_T score_match_collection_logp_bonf_evd_xcorr(
   }
   
   // we are done
-  carp(CARP_INFO, "total peptides scored for LOGP_BONF_EVD_XCORR: %d", match_idx);
+  carp(CARP_DEBUG, "total peptides scored for LOGP_BONF_EVD_XCORR: %d", match_idx);
 
   // match_collection is not populate with the rank of LOGP_BONF_EVD_XCORR, 
   // becuase the XCORR rank is  identical to the LOGP_BONF_EVD_XCORR rank

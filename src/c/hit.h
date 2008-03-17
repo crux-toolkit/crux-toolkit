@@ -4,7 +4,7 @@
  * CREATE DATE: 2008 March 11
  * DESCRIPTION: \brief Object for collecting the evidence for a particular 
  *                     protein hit.
- * REVISION: $Revision: 1.1 $
+ * REVISION: $Revision: 1.2 $
  ****************************************************************************/
 #ifndef HIT_H
 #define HIT_H
@@ -20,7 +20,6 @@
 #include "objects.h"
 #include "parameter.h"
 #include "spectrum_collection.h"
-// #include "hit_collection.h"
 #include "protein.h"
 
 /**
@@ -39,8 +38,8 @@ void free_hit(
  * print the information of the hit
  */
 void print_hit(
-  HIT_T* hit, ///< the hit to print -in  
-  FILE* file  ///< output stream -out
+  FILE* file,  ///< output stream -out
+  HIT_T* hit ///< the hit to print -in  
 );
 
 /**

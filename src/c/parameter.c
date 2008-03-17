@@ -287,7 +287,7 @@ void initialize_parameters(void){
   set_scorer_type_parameter("prelim-score-type", SP, 
       "Initial scoring (sp, xcorr). Default sp");
   set_scorer_type_parameter("score-type", XCORR, 
-      "The scoring method to use (xcorr, sp, dotp, xcorr_logp, sp_logp). "
+      "The scoring method to use (xcorr, sp, dotp, xcorr-logp, sp-logp). "
       "Default xcorr."); 
 
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 

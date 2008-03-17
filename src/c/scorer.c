@@ -4,7 +4,7 @@
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum
  * vs. ion_series 
- * REVISION: $Revision: 1.64 $
+ * REVISION: $Revision: 1.65 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1232,20 +1232,20 @@ double score_logp_bonf_weibull(
   float shift, ///< The shift parameter of the Weibull
   int num_peptide ///< The number of peptides
   ){
-  carp(CARP_INFO, "Stat: score = %.6f", score);
+  carp(CARP_DETAILED_DEBUG, "Stat: score = %.6f", score);
   double p_value = exp( - pow( (score+shift)/eta, beta));
-  carp(CARP_INFO, "Stat: pvalue before = %.15f", p_value);
+  carp(CARP_DETAILED_DEBUG, "Stat: pvalue before = %.15f", p_value);
   // The Bonferroni correction 
   // use original equation 1-(1-p_value)^n when p is not too small
   if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
     double corrected_pvalue = -log(1-pow((1-p_value), num_peptide));
-    carp(CARP_INFO, "Stat: pvalue after = %.6f", corrected_pvalue);
+    carp(CARP_DETAILED_DEBUG, "Stat: pvalue after = %.6f", corrected_pvalue);
     return corrected_pvalue;
   }
   // else, use the approximation
   else{
     double corrected_pvalue = -log(p_value*num_peptide);
-    carp(CARP_INFO, "Stat: pvalue after = %.6f", corrected_pvalue);
+    carp(CARP_DETAILED_DEBUG, "Stat: pvalue after = %.6f", corrected_pvalue);
     return corrected_pvalue;
   }
 
