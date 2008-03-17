@@ -3,13 +3,12 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.2 $
- ****************************************************************************/*
+ * REVISION: $Revision: 1.3 $
+ ****************************************************************************/
 
 #ifndef HIT_COLLECTION_H
 #define HIT_COLLECTION_H
 
-#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -23,8 +22,11 @@
 #include "parameter.h"
 #include "match_collection.h"
 #include "match.h"
+#include "hit.h"
 
-#define _MAX_NUMBER_HITS 10000000 // TODO make max number of proteins
+#define _MAX_NUMBER_HITS 100000 // TODO make max number of proteins
+#endif
+
 
 /**
  * \returns An (empty) hit_collection object.
@@ -36,7 +38,7 @@ HIT_COLLECTION_T* allocate_hit_collection(void);
  */
 void free_hit_collection(
   HIT_COLLECTION_T* hit_collection ///< the match collection to free -out
-  );
+);
 
 /**
  * \brief Creates a new hit collection from a scored match collection.
@@ -45,16 +47,25 @@ void free_hit_collection(
  * \returns A new hit_collection object.
  */
 HIT_COLLECTION_T* new_hit_collection_from_match_collection(
- MATCH_COLLECTION_T* match_collection, ///< the match collection to assemble
- PROTEIN_SCORER_TYPE_T protein_scorer_type
- );
+ MATCH_COLLECTION_T* match_collection ///< the match collection to assemble
+ // PROTEIN_SCORER_TYPE_T protein_scorer_type ///< the type of protein score
+);
 
 /**
  * Prints out the contents of the hit collection
+ * \returns if output successful
  */
-void print_hit_collection(
+BOOLEAN_T print_hit_collection(
  FILE* output,                    ///< the output file -out
  HIT_COLLECTION_T* hit_collection ///< hit collection -in
+);
+
+/**
+ * \brief Add the hit to the hit collection.
+ */
+BOOLEAN_T hit_collection_add_hit(
+  HIT_COLLECTION_T* hit_collection,
+  HIT_T* hit
 );
 
 /**
@@ -66,7 +77,7 @@ void print_hit_collection(
  */
 HIT_ITERATOR_T* new_hit_iterator(
   HIT_COLLECTION_T* hit_collection ///< the match collection to iterate -in
-  );
+);
 
 /**
  * Does the hit_iterator have another hit struct to return?
@@ -74,21 +85,21 @@ HIT_ITERATOR_T* new_hit_iterator(
  */
 BOOLEAN_T hit_iterator_has_next(
   HIT_ITERATOR_T* hit_iterator ///< the working  match iterator -in
-  );
+);
 
 /**
  * \returns the next hit object
  */
-MATCH_T* hit_iterator_next(
+HIT_T* hit_iterator_next(
   HIT_ITERATOR_T* hit_iterator ///< the working match iterator -in
-  );
+);
 
 /**
  * free the memory allocated iterator
  */
 void free_hit_iterator(
   HIT_ITERATOR_T* hit_iterator ///< the match iterator to free
-  );
+);
 
 /*
  * Local Variables:
@@ -96,4 +107,3 @@ void free_hit_iterator(
  * c-basic-offset: 2
  * End:
  */
-#endif

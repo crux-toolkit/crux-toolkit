@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 2008 March 11
  * DESCRIPTION: Object for collecting the evidence for a particular protein.
- * REVISION: $Revision: 1.1 $
+ * REVISION: $Revision: 1.2 $
  ****************************************************************************/
 #include "hit.h"
 
@@ -56,13 +56,11 @@ void free_hit(
  * print the information of the hit
  */
 void print_hit(
-  HIT_T* hit, ///< the hit to print -in  
-  FILE* file  ///< output stream -out
+  FILE* file,  ///< output stream -out
+  HIT_T* hit ///< the hit to print -in  
   )
 {
-  
   fprintf(file, "%.6f\n", hit->score);
-  
 }
 
 /**
