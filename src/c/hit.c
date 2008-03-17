@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * CREATE DATE: 2008 March 11
  * DESCRIPTION: Object for collecting the evidence for a particular protein.
- * REVISION: $Revision: 1.2 $
+ * REVISION: $Revision: 1.3 $
  ****************************************************************************/
 #include "hit.h"
 
@@ -53,6 +53,32 @@ void free_hit(
 }
 
 /**
+ * \returns Increments the hit score by score
+ */
+void hit_increment_score(
+    HIT_T* hit,
+    double score){
+  hit->score = hit->score + score;
+}
+
+/**
+ * \returns Gets the hit protein;
+ */
+PROTEIN_T* get_hit_protein(
+    HIT_T* hit){
+  return hit->protein;
+}
+
+/**
+ * \returns Sets the hit protein
+ */
+void set_hit_protein(
+    HIT_T* hit,
+    PROTEIN_T* protein){
+  hit->protein = protein;
+}
+
+/**
  * print the information of the hit
  */
 void print_hit(
@@ -60,7 +86,7 @@ void print_hit(
   HIT_T* hit ///< the hit to print -in  
   )
 {
-  fprintf(file, "%.6f\n", hit->score);
+  fprintf(file, "%s\t%.6f\n", get_protein_id(hit->protein), hit->score);
 }
 
 /**
