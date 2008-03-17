@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.5 $
+ * REVISION: $Revision: 1.6 $
  ****************************************************************************/
 #include "hit_collection.h"
 
@@ -105,7 +105,7 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
 
     // note the peptide max score in peptide2max_score hash
     if (max_score < new_score){
-      add_or_update_hash_no_copy(
+      add_or_update_hash(
           peptide_to_max_match, peptide_sequence, (void*)match);
     }
   }
@@ -209,7 +209,7 @@ BOOLEAN_T hit_collection_add_hit(
     HIT_COLLECTION_T* hit_collection,
     HIT_T* hit
     ){
-  add_or_update_hash_no_copy(
+  add_or_update_hash(
       hit_collection->id_to_hit, 
       get_protein_id(get_hit_protein(hit)), 
       (void *)get_hit_protein(hit));

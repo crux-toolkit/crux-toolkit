@@ -1,7 +1,7 @@
 /*************************************************************************//**
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -178,7 +178,7 @@ void free_hash(
  * Does not copy value (for use with void pointers).
  *\returns TRUE if successfully adds to new record, else FALSE
  */
-BOOLEAN_T add_or_update_hash_no_copy(
+BOOLEAN_T add_or_update_hash(
   HASH_T* h, ///< Hash object to add to -in/out
   char *key, ///< key of the record to add or update -in
   void *value ///< value to associate with the key -in
@@ -239,61 +239,17 @@ BOOLEAN_T add_or_update_hash_no_copy(
  * add key and value to hash table.
  * If key exists, free current value and allocate and set new one
  * If key not found, allocate key, and allocate and set value
+ * Copies the value
  *\returns TRUE if successfully adds to new record, else FALSE
  */
-BOOLEAN_T add_or_update_hash(
+BOOLEAN_T add_or_update_hash_copy(
   HASH_T* h, ///< Hash object to add to -in/out
   char *key, ///< key of the record to add or update -in
   void *value ///< value to associate with the key -in
   )
 {
-  RECORD_T* recs;  
-  int rc;
-  unsigned int off, ind, size, code;
-
-  if (key == NULL || *key == '\0') return FALSE;
-  
-  code = strhash(key);
-  recs = h->records;
-  size = sizes[h->size_index];
-  
-  ind = code % size;
-  off = 0;
-  
-  // probe down until reaching open slot
-  // Quadratic probing used
-  while (recs[ind].key){     
-    // if find duplicate key, thus identical item
-    if ((code == recs[ind].hash) && recs[ind].key &&
-        strcmp(key, recs[ind].key) == 0){
-      // free existing value
-       free(recs[ind].value); 
-      // set new value
-      recs[ind].value = my_copy_string(value);              
-      return TRUE;
-    }
-    else{
-      // continue to search
-      ind = (code + (int)pow(++off,2)) % size;
-    }
-  }
-
-  // key not found, add it
-  // first check size
-  if (h->records_count > sizes[h->size_index] * load_factor) {
-    rc = hash_grow(h);
-    if (rc) return FALSE;
-  }
-
-
-  recs[ind].hash = code;
-  recs[ind].key = my_copy_string(key);
-  recs[ind].value = my_copy_string(value);
-  recs[ind].count = 1;
-  
-  h->records_count++;
-  
-  return TRUE;
+  char* new_value = my_copy_string(value);
+  return add_or_update_hash(h, key, new_value);
 }
 
 
