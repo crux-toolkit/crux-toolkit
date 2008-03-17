@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.3 $
+ * REVISION: $Revision: 1.4 $
  ****************************************************************************/
 
 #ifndef HIT_COLLECTION_H
@@ -67,6 +67,23 @@ BOOLEAN_T hit_collection_add_hit(
   HIT_COLLECTION_T* hit_collection,
   HIT_T* hit
 );
+
+/**
+ * Does this hit collection have the hit associated with this protein id?
+ */
+BOOLEAN_T hit_collection_has_protein_id(
+  HIT_COLLECTION_T* hit_collection,
+  char* protein_id);
+
+/**
+ * Adds the current score to the appropriate hit for the protein id
+ * If protein id does not exist, add it to the collection
+ */
+BOOLEAN_T hit_collection_add_protein_score(
+    HIT_COLLECTION_T* hit_collection,
+    PROTEIN_T* protein,
+    float score
+    );
 
 /**
  * hit_iterator routines

@@ -4,7 +4,7 @@
  * CREATE DATE: 2008 March 11
  * DESCRIPTION: \brief Object for collecting the evidence for a particular 
  *                     protein hit.
- * REVISION: $Revision: 1.2 $
+ * REVISION: $Revision: 1.3 $
  ****************************************************************************/
 #ifndef HIT_H
 #define HIT_H
@@ -33,6 +33,26 @@ HIT_T* new_hit(void);
 void free_hit(
   HIT_T* hit ///< the hit to free -in
   );
+
+/**
+ * \returns Increments the hit score by score
+ */
+void hit_increment_score(
+    HIT_T* hit,
+    double score);
+
+/**
+ * \returns Gets the hit protein;
+ */
+PROTEIN_T* get_hit_protein(
+    HIT_T* hit);
+
+/**
+ * \returns Sets the hit protein
+ */
+void set_hit_protein(
+    HIT_T* hit,
+    PROTEIN_T* protein);
 
 /**
  * print the information of the hit
