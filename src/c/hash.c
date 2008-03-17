@@ -1,7 +1,7 @@
 /*************************************************************************//**
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -14,7 +14,7 @@
 #include "objects.h"
 #include "parameter.h"
 
-//why does hash include parameter and not the other way around?
+// TODO why does hash include parameter and not the other way around?
 
 // Table is sized by primes to minimise clustering.
 static const unsigned int sizes[] = {
@@ -47,6 +47,15 @@ struct hash {
   unsigned int size_index; ///< index into the size array, thus can get the size of the hash table
 };
 
+/**
+ *\struct hash_iterator
+ *\brief An object that iterates over the keys in a hash 
+ */
+struct hash_iterator {
+  HASH_T* hash; ///< the hash to iterate over
+  int hash_idx;   ///< current hash key to return
+  int hash_total; ///< total number of hash keys
+};
 
 // Function definition, description found below 
 BOOLEAN_T add_hash_when_grow(
@@ -509,6 +518,73 @@ unsigned int hash_size(
 {
   return h->records_count;
 }
+
+
+/**
+ * hash_iterator routines!
+ */
+
+/**
+ *\returns a new memory allocated hash iterator
+ */
+HASH_ITERATOR_T* new_hash_iterator(
+  HASH_T* hash ///< the hash collection to iterate -out
+  ){
+  if (hash == NULL){
+    die("Null hash collection passed to hash iterator");
+  }
+  
+  // allocate a new hash iterator
+  HASH_ITERATOR_T* hash_iterator = 
+    (HASH_ITERATOR_T*)mycalloc(1, sizeof(HASH_ITERATOR_T));
+  
+  // set items
+  hash_iterator->hash = hash;
+  hash_iterator->hash_idx = 0;
+  hash_iterator->hash_total = sizes[hash->size_index];
+
+  return hash_iterator;
+}
+
+/**
+ * Does the hash_iterator have another hash object to return?
+ * \returns TRUE, if hash iterator has a next hash, else FALSE
+ */
+BOOLEAN_T hash_iterator_has_next(
+  HASH_ITERATOR_T* hash_iterator ///< the working  hash iterator -in
+  )
+{
+  HASH_T* hash = hash_iterator->hash;
+  while (hash_iterator->hash_idx < hash_iterator->hash_total && 
+         hash->records[hash_iterator->hash_idx].key == NULL){
+    hash_iterator->hash_idx++;
+  }
+  return (hash_iterator->hash_idx < hash_iterator->hash_total);
+}
+
+/**
+ * \returns the next the hash struct
+ */
+char* hash_iterator_next(
+  HASH_ITERATOR_T* hash_iterator ///< the working hash iterator -in
+  )
+{
+  HASH_T* hash = hash_iterator->hash;
+  return hash->records[hash_iterator->hash_idx++].key;
+}
+
+/**
+ * free the memory allocated iterator
+ */
+void free_hash_iterator(
+  HASH_ITERATOR_T* hash_iterator ///< the hash iterator to free
+  )
+{
+  if (hash_iterator != NULL){
+    free(hash_iterator);
+  }
+}
+
 
 
 /*

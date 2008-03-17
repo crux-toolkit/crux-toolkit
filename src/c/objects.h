@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.52 $
+ * $Revision: 1.53 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -417,6 +417,14 @@ typedef struct record RECORD_T;
  * \brief HASH_T hash table, contains the records
  */
 typedef struct hash HASH_T;
+
+/**
+ * \typedef HASH_ITERATOR_T
+ * \brief HASH_ITERATOR_T iterator for keys in a hash
+ */
+typedef struct hash_iterator HASH_ITERATOR_T;
+
+
 
 /**
  * Identifying which set the PSM belongs to

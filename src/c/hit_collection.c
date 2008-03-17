@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.3 $
+ * REVISION: $Revision: 1.4 $
  ****************************************************************************/
 #include "hit_collection.h"
 
@@ -78,7 +78,7 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
   // peptide2number proteins, and protein2score
   // an array of all peptides in results
   HASH_T* peptide_to_max_score_hash  = new_hash(1000000); // TODO 
-  // HASH_T* peptide_to_num_proteins_hash = new_hash(100000000); // TODO 
+  // HASH_T* peptide_to_num_proteins_hash = new_hash(1000000); // TODO 
 
   SCORER_TYPE_T scorer_type = LOGP_BONF_WEIBULL_XCORR;
 
@@ -93,6 +93,7 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
     float* max_score = 
       (float*) get_hash_value(peptide_to_max_score_hash, peptide);
     float new_score = get_match_score(match, scorer_type);
+    // new_score = 
 
     // note the peptide max score in peptide2max_score hash
     if (max_score == NULL || *max_score < new_score){
@@ -101,11 +102,19 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
   }
   free_match_iterator(match_iterator);
 
+  HASH_ITERATOR_T* hash_iterator = new_hash_iterator(peptide_to_max_score_hash);
+
+  while(hash_iterator_has_next(hash_iterator)){
+    char* key = hash_iterator_next(hash_iterator);
+    printf("%s\n", key);
+  }
+  free_hash_iterator(hash_iterator);
+
   // iterate through the peptides in all_peptides
-    // note the peptide nth root as our current score
-    // iterate through the proteins in the peptide
-    // add this protein to our hit collection
-    // increment the protein score with our current score
+  // note the peptide nth root as our current score
+  // iterate through the proteins in the peptide
+  // add this protein to our hit collection
+  // increment the protein score with our current score
 
   HIT_T* hit = new_hit();
   hit_collection_add_hit(hit_collection, hit);
