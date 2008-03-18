@@ -44,6 +44,7 @@ REVISION: $1.0 $
    <dt><a href="#file">Parameter files</a>
    <dt><a href="#out">Controlling the output</a>
    <dt><a href="#pep">Change the peptide parameters</a>
+   <dt><a href="#mod">Specify dynamic modifications</a>
    <dt><a href="#search">Change the search parameters</a>
    <dt><a href="#anal">Change the analysis parameters</a>
 </dl>
@@ -189,7 +190,7 @@ class="code">mono</span> or <span class="code">average</span>.</p>
 <!--from the file?  Are they considered if searching a fasta file? -->
 <!--Are the settings for an index used and do they override given options? -->
 
-<div class="note"><em>NOTE: Options for enzyme specificity and peptide
+<div class="note"><em>NOTE: Options for enzyme specificity, peptide
 length and mass limits must correspond with those used with
 crux-create-index, if an index is being used with the search.</em>
 </div>
@@ -202,6 +203,61 @@ least one tryptic site, <span class="code">all</span> to use no enzyme
 specificity.  Use the <span class="code">--missed-cleavages T</span> 
 option to allow tryptic cleavage sites within the peptide sequence (F
 to require complete digestion).
+</p>
+
+<a name="mod"></a>
+<h4>Specifying peptide modifications</h4>
+<p><span class="prog">Crux-search-for-matches</span> will consider
+peptides with variable numbers of modifications.  These are specified
+with the <span class="code">mod, nmod,</span> and <span
+class="code">cmod</span> parameters in the parameter file (not on the
+command line).  The general form is the parameter name followed by a
+colon-separated list of three values as in <span
+class="code">mod=&lt;mass change&gt;:&lt;aa list&gt;:&lt;max per
+peptide&gt;</span> Mass change is how much this modification changes
+the mass of the peptide and can be a positive or negative number.  The
+aa list contains all of the amino acids that may experience this
+modification.  The max per peptide is the maximum number of times this
+peptide may appear in one peptide.  As an example, up to three
+phsphorylations per peptide (addition of 79.9 da on residues S, T, or
+Y) would look like this.</p> 
+
+<div class=code><code>
+mod=79.9:STY:3
+</code>
+</div>
+
+<p>Modifications may also be specified by position in the peptide as
+opposed to by amino acid.  The <span class="code">cmod</span> and
+<span class="code">nmod</span> place modifications on the C- and
+N-terminus of a peptide, respectively.  You can also specify a maximum
+distance from the <i>protein</i> C- or N-terminus.  The general form
+is <span class="code">cmod=&lt;mass change&gt;:&lt;max
+distance&gt;</span> To consider modifications, for example, on only
+the C-terminus of the protein, set the maximum to 0.  To consider
+modifications on the C-terminus of peptides no more than 15 residues
+away from the C-terminus of the protein, set the max to 15.  To
+consider modifications on the C-terminus of any peptide, set the max
+to -1.  The following examples consider the addition of 54.6 da to the
+N-terminus of the <i>protein</i> and the addition of 88.0 to the
+C-terminus of any peptide.
+</p>
+
+<div class=code><code>
+nmod=54.6:0<br>
+cmod=88.0:-1
+</code>
+</div>
+
+<p>Up to eleven different modifications may be considered in one
+search.  Any combination of <span class="code">mod, cmod,<span
+class="code">and</span>, nmod</span> may be considered as long as the
+total number does not exceed eleven.  The maximum number of
+modifications per peptide is controlled with the parameter <span
+class="code">--max-mod-per-pep</span>.  The default is to set no
+limit.  The search will consider peptides with more than one
+modification per amino acid, but not more than one of the same kind of
+modification per amino acid.
 </p>
 
 <a name="search"></a>
