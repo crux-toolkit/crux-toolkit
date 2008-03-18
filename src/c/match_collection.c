@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.80 $
+ * $Revision: 1.81 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -890,7 +890,7 @@ BOOLEAN_T estimate_weibull_parameters(
   // http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
   
   int idx;
-  float* data   = calloc(sizeof(float) , total_data_points);
+  float* data   = mycalloc(sizeof(float), total_data_points);
   for(idx=0; idx < total_data_points; idx++){
     float score = get_match_score(sample_collection->match[idx], score_type);
     data[idx] = score;
@@ -913,6 +913,7 @@ BOOLEAN_T estimate_weibull_parameters(
       correlation, match_collection->eta, match_collection->beta,
       match_collection->shift);
   
+  free(data);
   return TRUE;
 }
 

@@ -302,6 +302,8 @@ void initialize_parameters(void){
       "Types of output to produce (binary, sqt, all). Default binary");
   set_string_parameter("sqt-output-file", "target.sqt", 
       "SQT output file name. Default 'target.sqt'");
+  set_string_parameter("protein-output-file", "target.prot", 
+      "Protein output file name. Default 'target.prot'");
   set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
       "SQT output file name for decoys.  Default 'decoy.sqt'");
   set_int_parameter("number-decoy-set", 2, 0, 10, 
