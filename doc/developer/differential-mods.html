@@ -14,11 +14,22 @@ Here is a list of requirements for the implementation of differential modificati
 </ul>
 <li> A single amino acid may have multiple modifications of different types, but only one of the same type.
 <li> A single analysis will allow at most 11 different types of modifications.
-<li> Peptide N-term and C-term modifications will be allowed.
-<li> Protein N-term and C-term modifications will be allowed.
+<li> Peptide N-term and C-term modifications will be allowed. The
+constraints will be the same as for internal amino acids, i.e. multiple
+modifications of different types will be allowed, but only one modification
+of the same type.
+<li> Protein N-term and C-term modifications will be allowed. Again, constraints
+on number and type of modification will be the same as for internal amino
+acids.
 <li> Some N-term mods will only be allowed on peptides with an N-term
 within a parameter controlled distance of the protein N-term.
-<li> To avoid exponential explosion, there will be a maximum number of modified peptides generated from any particular unmodified peptide (e.g.  1000).
+<li> To avoid exponential explosion, there will be a maximum number of modified peptides generated from any unmodified peptide (e.g.  1000).
+Modifications will be enumerated from lowest number of total modifications
+per peptide to highest. The enumeration of modified peptides for 
+an unmodified peptide will stop if the next largest number
+of modifications will push the total number of modified peptides
+above the maximum value.
+
 </ul>
 
 </body>
