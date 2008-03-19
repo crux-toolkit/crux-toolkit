@@ -50,7 +50,7 @@ unittests_LDADD =  -lcheck -lm
 
 # Set up the Meta-MEME testing script.
 TESTS = unittests
-# none of these?
+# BF: no scripts for now
 #check_SCRIPTS = metatest
 TESTS_ENVIRONMENT = testdir=$(top_srcdir)/src/c/test
 
@@ -63,4 +63,4 @@ TESTS_ENVIRONMENT = testdir=$(top_srcdir)/src/c/test
 CLEANFILES = $(check_PROGRAMS) $(check_SCRIPTS)
 
 # These files should be included with the distribution.
-#EXTRA_DIST = <insert data files here?>
+#EXTRA_DIST = BF: <insert data files here?>
