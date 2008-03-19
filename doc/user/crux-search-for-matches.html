@@ -10,7 +10,7 @@
 AUTHOR: Chris Park
 CREATE DATE: 2007-06-19
 PROJECT: match-search
-REVISION: $Revision: 1.2 $
+REVISION: $Revision: 1.2.4.1 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -21,7 +21,7 @@ REVISION: $Revision: 1.2 $
 Given as input an ms2 file, a sequence database, and an optional parameter
 file, search each spectrum against the peptides in the sequence database,
 and return the resulting PSMs with some additional features in serialized
-binary output files or an SQT files.
+binary output files and/or SQT files.
 <br>
 <br>
 <B>Usage:</B>
@@ -40,9 +40,9 @@ binary output files or an SQT files.
 <UL>
   <LI>&lt;ms2 &gt; &ndash; 
   The name of the file (in MS2 format) from which to parse the spectra.
-  <LI>&lt;protein input filename&gt; &ndash; 
-  The name of the file (in fasta format) from which to retrieve proteins and
-  peptides.
+  <LI>&lt;protein input &gt; &ndash; 
+  The name of the file (in fasta format) or the index from which to
+  retrieve proteins and peptides.
 </UL>
 <B>Output:</B>
 
@@ -59,26 +59,63 @@ binary output files or an SQT files.
 </UL>
 <B>Options:</B>
 <UL>
-<LI>[--output-mode &lt;sqt | binary | all&gt; ] &ndash; The output format. Default = binary.
-<LI>[--match-output-folder &lt;string&gt;] &ndash; The output folder to store the serialized binary output files. Default = current directory.
-<LI>[--sqt-output-file &lt;string&gt;] &ndash; Name of the sqt file to place matches.
-Default = Prefix of <code>&lt;ms2 input filename&gt;</code>.psm.
-<LI>[--decoy-sqt-output-file &lt;string&gt;] &ndash; Name of the sqt file to place matches. (default = decoy.sqt)
-<LI>[--spectrum-min-mass &lt;float&gt;] &ndash; The lowest spectrum m/z to search in the ms2
-file. Default = 0.0
-<LI>[--spectrum-max-mass &lt;float&gt;] &ndash; The highest spectrum m/z to search in the ms2
-file. Default = Positive Infinity.
-<LI>[--prelim-score-type &lt;sp&gt;] &ndash; The type of preliminary scoring function to use.  Default = sp.
-<LI>[--score-type &lt;logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr&gt;] &ndash; The type of scoring function to use.  Default = xcorr.
-<LI> [--number-decoy-set &lt;int&gt;] &ndash; Specify the number of decoy sets to generate for match_analysis. (default = 2)
-<LI> [--spectrum-charge &lt;string&gt;] &ndash; The spectrum charges to search. 1|2|3|all (default = all)
-<li> [--number-runs &lt;double&gt;] The number of spectrum search runs to perform. (default = 1e+09)
-<LI>[--parameter-file &lt;filename&gt;] &ndash; The crux parameter file to parse
-parameter from. Default = Default to crux_parameter.
-<LI>[--verbosity &lt;int&gt;] &ndash; Specify the verbosity of the current processes from 0-100. By default, verbosity is set to 100.
+<LI>[--output-mode &lt;sqt | binary | all&gt; ] &ndash; The output
+     format. Default = binary. 
+<LI>[--match-output-folder &lt;string&gt;] &ndash; The output folder
+     to store the serialized binary output files. Default = current
+     directory. 
+<LI>[--sqt-output-file &lt;string&gt;] &ndash; Name of the sqt file to
+     place matches. Default = target.sqt
+<LI>[--decoy-sqt-output-file &lt;string&gt;] &ndash; Name of the sqt
+     file to place matches. Default = decoy.sqt 
+<LI>[--spectrum-min-mass &lt;float&gt;] &ndash; The lowest spectrum
+     m/z to search in the ms2 file. Default = 0.0
+<LI>[--spectrum-max-mass &lt;float&gt;] &ndash; The highest spectrum
+     m/z to search in the ms2 file. Default = Positive Infinity.
+<LI>[--prelim-score-type &lt;sp&gt;] &ndash; The type of preliminary
+     scoring function to use.  Default = sp. 
+<LI>[--score-type &lt;logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr
+     | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp |
+     xcorr&gt;] &ndash; The type of scoring function to use.
+     Default = xcorr. 
+<LI> [--number-decoy-set &lt;int&gt;] &ndash; Specify the number of
+      decoy sets to generate for match_analysis. Default = 2
+<LI> [--spectrum-charge &lt;string&gt;] &ndash; The spectrum charges
+      to search. 1|2|3|all. Default = all
+<LI>[--parameter-file &lt;filename&gt;] &ndash; The crux parameter
+     file to parse parameter from. Default = Default to
+     crux_parameter. 
+<LI>[--verbosity &lt;int&gt;] &ndash; Specify the verbosity of the
+    current processes from 0-100. Default = 40. 
 </UL>
-<B>Warning
-messages:</B> 
+
+<b>Options &ndash; parameter file only:</b>
+<ul>
+<li>mod=&lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;
+   &ndash; Consider modifications on any amino acid in aa list with at
+   most max-per-peptide in one peptide.  This parameter may be
+   included with different values multiple times so long as the total
+   number of mod, cmod, and nmod parameters does not exceed 11.
+
+<li>cmod=&lt;mass change&gt;:&lt;max distance from protein C-terminus&gt;
+   &ndash; Consider modifications on the C-terminus of any peptide
+   whose C-terminus is no more than max-distance residues from the
+   protein C-terminus.  Use -1 to consider the C-terminus all peptides
+   regardless of position in the protein.  This parameter may be
+   included with different values multiple times so long as the total
+   number of mod, cmod, and nmod parameters does not exceed 11.
+
+<li>nmod=&lt;mass change&gt;:&lt;max distance from protein N-terminus&gt;
+   &ndash; Consider modifications on the N-terminus of any peptide
+   whose N-terminus is no more than max-distance residues from the
+   protein N-terminus.  Use -1 to consider the N-terminus all peptides
+   regardless of position in the protein. This parameter may be
+   included with different values multiple times so long as the total
+   number of mod, cmod, and nmod parameters does not exceed 11.
+<li>
+</ul>
+
+<B>Warning messages:</B> 
 
 <UL>
   <LI><I>Fatal: The file "spectra input filename" does
