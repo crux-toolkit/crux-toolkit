@@ -161,7 +161,7 @@ int main(int argc, char** argv){
 
     for(z_i=0; z_i < num_charges; z_i++){
       int charge = charge_array[z_i];
-      carp(CARP_DETAILED_DEBUG, 
+      carp(CARP_DETAILED_INFO, 
            "Searching spectrum number %i, charge %i, search number %i",
            get_spectrum_first_scan(spectrum), charge,
            spectrum_searches_counter+1 );

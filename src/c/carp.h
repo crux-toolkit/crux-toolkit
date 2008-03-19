@@ -1,6 +1,6 @@
 /**
  * \file carp.h 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Provides methods for logging error messages, and setting verbosity level.
  *****************************************************************************/
 #ifndef CARP_H 
@@ -12,27 +12,38 @@
  * Verbosity level for a fatal error (e.g., could not open an input file)
  */
 #define CARP_FATAL 0    
+
 /** 
  * Verbosity level for a serious, not fatal, error
  * (e.g., could not close a file handle)
  */
 #define CARP_ERROR 10   
+
 /**
  * Verbosity level for a warning (e.g., a spectrum has no peaks)
  */
 #define CARP_WARNING 20 
+
 /**
  * Verbosity level for informational message (e.g., processed X lines of file)
  */
 #define CARP_INFO 30    
+
+/**
+ * Verbosity level for detailed informational message (e.g, on spectrum 1000 )
+ */
+#define CARP_DETAILED_INFO 40    
+
 /** 
  * Verbosity level for a debugging message
  */
-#define CARP_DEBUG 40   
+#define CARP_DEBUG 50   
+
 /** 
  * Verbosity level for very detailed debugging message
  */
-#define CARP_DETAILED_DEBUG 50  
+#define CARP_DETAILED_DEBUG 60  
+
 /** 
  * The maximum verbosity level
  */
