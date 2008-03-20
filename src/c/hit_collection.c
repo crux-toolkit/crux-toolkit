@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.6 $
+ * REVISION: $Revision: 1.7 $
  ****************************************************************************/
 #include "hit_collection.h"
 
@@ -144,6 +144,13 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
     free_peptide_src_iterator(peptide_src_iterator);
   }
   free_hash_iterator(hash_iterator);
+  
+  HIT_ITERATOR_T* hit_iterator = new_hit_iterator(hit_collection);
+  while(hit_iterator_has_next(hit_iterator)){
+    HIT_T* hit = hit_iterator_next(hit_iterator);
+    hit_recalibrate_score(hit);
+  }
+  free_hit_iterator(hit_iterator);
 
   return hit_collection;
 }
