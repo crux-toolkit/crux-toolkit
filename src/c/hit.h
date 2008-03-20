@@ -4,7 +4,7 @@
  * CREATE DATE: 2008 March 11
  * DESCRIPTION: \brief Object for collecting the evidence for a particular 
  *                     protein hit.
- * REVISION: $Revision: 1.3 $
+ * REVISION: $Revision: 1.4 $
  ****************************************************************************/
 #ifndef HIT_H
 #define HIT_H
@@ -53,6 +53,14 @@ PROTEIN_T* get_hit_protein(
 void set_hit_protein(
     HIT_T* hit,
     PROTEIN_T* protein);
+
+/**
+ * performs protein level normalization of hit score
+ */
+void hit_recalibrate_score(
+   HIT_T* hit
+);
+
 
 /**
  * print the information of the hit
