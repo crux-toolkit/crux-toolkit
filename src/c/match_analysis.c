@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.44 $
+ * $Revision: 1.45 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -160,16 +160,25 @@ int main(int argc, char** argv){
   //  output_matches(match_collection, scorer_type);
   print_sqt_file(match_collection, scorer_type, second_scorer_type);
 
-  // MEMLEAK below causes seg fault
+  // MEMLEAK below causes seg fault (or used to)
   // free_match_collection(match_collection);
 
-  // TODO maybe make this optional?
-  carp(CARP_INFO, "Assembling matches into protein hits");
+  /*
+   The method new_hit_collection_from_match_collection below is an
+   example of how one might assemble peptide identifications (matches)
+   into protein identifications (hits). 
+   Unfortunately it doesn't work that well, so it's commented out. But
+   some of the functionality you need is hopefully there. 
+   */
+
+  /* 
+   * carp(CARP_INFO, "Assembling matches into protein hits");
   HIT_COLLECTION_T* hit_collection 
     = new_hit_collection_from_match_collection(match_collection);
   carp(CARP_INFO, "Outputting protein hits");
   print_hit_collection(stdout, hit_collection);
   free_hit_collection(hit_collection);
+  */
 
   carp(CARP_INFO, "crux-analyze-matches finished.");
   exit(0);
