@@ -144,6 +144,17 @@ int main(int argc, char** argv){
   int file_i = 0;
   int total_files = get_int_parameter("number-decoy-set") + 1;
 
+  // seed for random number generation
+  if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
+    time_t seconds; // use current time to seed
+    time(&seconds); // Get value from sys clock and set seconds variable.
+    srand((unsigned int) seconds); // Convert seconds to a unsigned int
+  }
+  else{
+    srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
+  }
+  
+
   // find matches for each spectrum
   while(spectrum_iterator_has_next(spectrum_iterator)){
 
@@ -245,20 +256,7 @@ int main(int argc, char** argv){
   exit(0);
 
 
-  //where is this used?  Should it be put back?
-  
-  // seed for random rnumber generation
-  //hide this from user?
-  if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
-    time_t seconds; // use current time to seed
-    time(&seconds); // Get value from sys clock and set seconds variable.
-    srand((unsigned int) seconds); // Convert seconds to a unsigned int
-  }
-  else{
-    srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
-  }
-  
- 
+   
 }
 
 
