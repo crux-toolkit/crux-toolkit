@@ -100,8 +100,8 @@ START_TEST (test_create){
   fail_unless(get_ion_series_num_ions_one_type(ion_series, P_ION) == get_ion_series_num_ions_one_type(ion_series2, P_ION), "the P ion number of ions not predicted correctly");
  
   //try print ion series, should be the same
-  print_ion_series(ion_series, stdout);
-  print_ion_series(ion_series2, stdout);
+  //print_ion_series(ion_series, stdout);
+  //print_ion_series(ion_series2, stdout);
   
   
   //test iterators

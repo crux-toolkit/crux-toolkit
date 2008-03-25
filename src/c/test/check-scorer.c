@@ -23,14 +23,15 @@ START_TEST (test_create){
   float score = 0;
 
   //parse paramter file
-  parse_update_parameters(parameter_file);
+  //  parse_update_parameters(parameter_file);
   
   //set parameter for fasta_file, although not used here...
   //set_string_parameter("fasta-file", "fasta_file");
   
   //parameters has been confirmed
-  parameters_confirmed();
+  //parameters_confirmed();
   
+  initialize_parameters();
   int peptide_charge = get_int_parameter("charge");
 
   //set ion constraint to sequest settings

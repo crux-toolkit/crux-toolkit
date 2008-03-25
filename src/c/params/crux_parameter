@@ -212,3 +212,22 @@ Y=0.0000
 
 #added to W_Tryptophan - avg. 186.2132, mono. 186.07931
 W=0.0000
+
+# dynamic modifications are of the form 
+# mod=<mass change>:<aa list>:<max per peptide>
+#mod=7.7:ACDF:2
+
+# positional dynamic modifications are of the form
+# nmod=<mass change>:<max distance from protein n-terminus>
+# cmod=<mass change>:<max distance from protein c-terminus>
+
+# e.g. mass change of 34.5 applied only to the n-terminus of the PROTEIN
+#nmod=34.5:0
+
+# e.g. mass change of 44.4 applied to the n-terminus of a peptide 
+# no more than 10 residues away from the n-terminus
+#nmod=44.4:10
+
+# e.g. mass change of 33.3 applied to the n-terminus of any peptide
+# regardless of its position in the protein
+#nmod=33.3:-1

@@ -38,7 +38,7 @@ START_TEST (test_create){
   char* name = NULL;
 
   //try create a new database
-  db = new_database("fasta_file_binary_fasta", FALSE, TRUE);
+  db = new_database("fasta_file_binary_fasta", FALSE);
   fail_unless(parse_database(db), "failed to parse database");
   fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
   free(name);
@@ -117,7 +117,7 @@ START_TEST (test_create){
   /************ Test using binary fasta file *************/
 
   //try create a new database
-  db = new_database("fasta_file", FALSE, FALSE);
+  db = new_database("fasta_file", TRUE);
   fail_unless(parse_database(db), "failed to parse database");
   fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
   free(name);

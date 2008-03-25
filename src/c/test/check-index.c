@@ -38,10 +38,9 @@ START_TEST (test_create){
   //create index
   _index = 
     new_index("fasta_file",
+              ".",
               constraint,
-              mass_range,
-              TRUE,
-              FALSE);
+              mass_range);
   
   
   fail_unless(compare_float(get_index_mass_range(_index),mass_range)==0, "failed to set mass_range, index");  
@@ -68,8 +67,9 @@ START_TEST (test_create){
                            TRUE, AVERAGE);
   
   _index = 
-    new_search_index("fasta_file",
-                     constraint, TRUE);
+    new_index_from_disk("fasta_file", TRUE);
+  /*    new_search_index("fasta_file",
+        constraint, TRUE);*/
   fail_unless(_index != NULL, " failed to re create index");
   
   /**** test index peptide interator ***/

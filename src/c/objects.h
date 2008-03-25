@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.51 $
+ * $Revision: 1.51.2.1 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -399,4 +399,11 @@ enum  _set_type {SET_TARGET=0,SET_DECOY1,SET_DECOY2,SET_DECOY3};
  */
 typedef enum _set_type SET_TYPE_T;
 
+/**
+ * \typedef AA_MOD_T
+ * \brief The struct _aa_mod is typdefed as AA_MOD_T
+ */
+typedef struct _aa_mod AA_MOD_T;
+
 #endif
+

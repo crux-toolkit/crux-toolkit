@@ -324,6 +324,9 @@ int parse_arguments_into_hash(int argc, char * argv[],
     fprintf(stderr, "%s", parse_arguments_get_usage(base_name(argv[0])));
     exit(1);
   }
+
+  // For testing so that cmd line can be parsed more than once
+  required_index = 0;
   return result;
 }
 

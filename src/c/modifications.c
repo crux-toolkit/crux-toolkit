@@ -17,10 +17,13 @@
 
 /**
  * \brief Generate a list of all PEPTIDE_MODs that can be considered
- * given the list of AA_MODs provided by the user.
+ * given the list of AA_MODs and POSITION_MODs provided by the user
+ * via the parameter file.
  *
  * This only needs to be called once for a search.  The list of
- * PEPTIDE_MODs can be reused for each spectrum.
+ * PEPTIDE_MODs can be reused for each spectrum.  Allows at most one
+ * n-term and one c-term mod and at most mod->max_per_peptide
+ * modifications of one type per peptide.
  *
  * \returns The number of peptide_mods listed in the
  * peptide_mod_list argument.
@@ -47,8 +50,10 @@ int generate_peptide_mod_list(
       end i==max
       add the temp_list to the final_list
     last mod
+
+    sort by num-mods, fewest to most
    */
-{
+}
 
 /**
  * \brief Check a peptide sequence to see if the aa_mods in
@@ -200,10 +205,10 @@ BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
  *
  * \returns The number of modifications made to this amino acid.
  */
-int aa_modified_by(MODIFIED_AA_T aa, 
-                   int num_possible,
-                   AA_MOD_T* possible_mods, 
-                   AA_MOD_T*** mod_list){
+int get_aa_mods(MODIFIED_AA_T aa, 
+                int num_possible,
+                AA_MOD_T* possible_mods, 
+                AA_MOD_T*** mod_list){
 
   /*
     int count = 0;
@@ -253,4 +258,12 @@ create branch, add these files to branch
 find cvs branching tutorial, send to AK
  */
 
+/**
+ * print all fields in mod.  For debugging
+ */
+void print_mod(AA_MOD* mod){
+  printf("MOD: mass %.2f, max per %d, max dist %d, symb %c, aa list %s",
+         mod->mass_change, mod->max_per_peptide, mod->max_distance,
+         mod->symbol, mod->aa_list);
+}
 

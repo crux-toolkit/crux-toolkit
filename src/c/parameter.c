@@ -3,7 +3,8 @@
  * FILE: parameter.c
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * CREATE DATE: 2006 Oct 09
- * DESCRIPTION: General parameter handling utilities. MUST declare ALL optional command parameters here inside initalialize_parameters
+ * DESCRIPTION: General parameter handling utilities. MUST declare ALL
+ * optional command parameters here inside initalialize_parameters 
  ****************************************************************************/
 
 #include "parameter.h"
@@ -22,11 +23,11 @@ struct parameter_hash{
 /*
  * Global variables
  */
-
 static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { 
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T", 
   "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T",
   "ALGORITHM_TYPE_T"};
+
 
 //one hash for parameter values, one for usage statements, one for types
 struct parameter_hash  parameters_hash_table;
@@ -35,6 +36,20 @@ struct parameter_hash  usage_hash_table;
 struct parameter_hash* usages = &usage_hash_table;
 struct parameter_hash  type_hash_table;
 struct parameter_hash* types = & type_hash_table;
+
+enum {MAX_AA_MODS = 11}; // instead of #define
+enum {AA_LIST_LENGTH = 26}; // A-Z
+char mod_sqt_symbols[MAX_AA_MODS] = {'*', '@', '#', '^', '~', '%', 
+                                     '$', '&', '!', '?', '+'};
+// FIXME: these need to be changed to bitmasks
+int mod_id_masks[MAX_AA_MODS] = {1,2,3,4,5,6,7,8,9,10,11};
+
+AA_MOD_T list_of_mods[MAX_AA_MODS]; //list containing all aa mods, pos at end
+AA_MOD_T* list_of_c_mods = NULL; //pointer to first c_term mod in list
+AA_MOD_T* list_of_n_mods = NULL; //pointer to first n_term mod in list
+int num_mods = 0;
+int num_c_mods = 0;
+int num_n_mods = 0;//require num_mods + num_c_mods + num_n_mods <= MAX_AA_MODS
 
 struct parameter_hash  min_values_hash_table;
 struct parameter_hash* min_values = & min_values_hash_table;
@@ -148,6 +163,7 @@ BOOLEAN_T select_cmd_line(
   );
 
 BOOLEAN_T update_aa_masses();
+void read_mods_from_file(char* param_file);
 
 /************************************
  * Function definitions
@@ -185,6 +201,28 @@ void initialize_parameters(void){
   min_values->num_parameters = 0;
   max_values->num_parameters = 0;
 
+  /* initialize the list of mods */
+  int mod_idx = 0;
+  for(mod_idx = 0; mod_idx < MAX_AA_MODS; mod_idx++){
+    AA_MOD_T* cur_mod_ptr = &list_of_mods[mod_idx];
+
+    cur_mod_ptr->mass_change = 0;
+    cur_mod_ptr->max_per_peptide = 0;
+    cur_mod_ptr->position = ANY_POSITION;
+    cur_mod_ptr->max_distance = MAX_PROTEIN_SEQ_LENGTH;
+    cur_mod_ptr->symbol = mod_sqt_symbols[mod_idx];
+    cur_mod_ptr->identifier = mod_id_masks[mod_idx];
+
+    // allocate the aa lists for mods 
+    cur_mod_ptr->aa_list =                        // all 0's?
+      (BOOLEAN_T*)mycalloc(AA_LIST_LENGTH, sizeof(AA_MOD_T)); 
+                                                             
+    // initialize to FALSE
+    int aa_idx = 0;
+    for(aa_idx=0; aa_idx < AA_LIST_LENGTH; aa_idx++){
+          cur_mod_ptr->aa_list[aa_idx] = FALSE;
+    }
+  }
 
   /* *** Initialize Arguments *** */
 
@@ -328,6 +366,15 @@ void initialize_parameters(void){
   set_double_parameter("ion-tolerance", 0.5, 0, BILLION,
       "Tolerance used for matching observed peaks to predicted " \
       "fragment ions.  Default 0.5");
+  set_string_parameter("mod", "NO MODS", 
+      "Specify a variable modification to apply to peptides.  " \
+      "<mass change>:<aa list>:<max per peptide>");
+  set_string_parameter("cmod", "NO MODS", 
+      "Specify a variable modification to apply to C-terminus of peptides. " \
+      "<mass change>:<max distance from protein c-term (-1 for no max)>");
+  set_string_parameter("nmod", "NO MODS", 
+      "Specify a variable modification to apply to N-terminus of peptides.  " \
+      "<mass change>:<max distance from protein n-term (-1 for no max)>");
 
     // Sp scoring params
   set_double_parameter("beta", 0.075, 0, 1, "usage");
@@ -566,6 +613,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   char param_filename[SMALL_BUFFER];
   if(find_param_filename(argc, argv, param_filename, SMALL_BUFFER)){
     parse_parameter_file(param_filename);  
+    read_mods_from_file(param_filename);
   }
   else{ 
     carp(CARP_INFO, 
@@ -789,6 +837,14 @@ void free_parameters(void){
     free_hash(min_values->hash);
     free_hash(max_values->hash);
   }
+  // this is mostly so I can test repeatedly
+  num_mods = 0;
+  num_c_mods = 0;
+  num_n_mods = 0;
+  list_of_c_mods = NULL;
+  list_of_n_mods = NULL;
+  parameter_initialized = FALSE;
+  parameter_plasticity = TRUE;
 }
 
 /**
@@ -1565,6 +1621,292 @@ BOOLEAN_T update_aa_masses(){
   
   return success;
 }
+
+/**
+ * \brief Get the pointer to the list of AA_MODs requested by the
+ * user.  Does NOT include the c- and n-term mods
+ * \returns The number of items pointed to by mods
+ */
+int get_aa_mod_list(AA_MOD_T** mods){
+  carp(CARP_DEBUG, "getting aa mods, all %d of them", num_mods);
+  *mods = list_of_mods;
+  return num_mods;
+
+}
+
+/**
+ * \brief Get the pointer to the list of AA_MODs for the peptide
+ * c-terminus.  Return 0 and set mods==NULL if there are no c-term
+ * mods.
+ *
+ * \returns The number of items pointed to by mods
+ */
+int get_c_mod_list(AA_MOD_T** mods){
+  carp(CARP_DEBUG, "getting c mods, all %d of them", num_c_mods);
+  *mods = list_of_c_mods;
+  return num_c_mods;
+}
+
+/**
+ * \brief Get the pointer to the list of AA_MODs for the peptide
+ * n-terminus.  Return 0 and set mods==NULL if there are no n-term
+ * mods.
+ *
+ * \returns The number of items pointed to by mods
+ */
+int get_n_mod_list(AA_MOD_T** mods){
+  carp(CARP_DEBUG, "getting n mods, all %d of them", num_n_mods);
+  *mods = list_of_n_mods;
+  return num_n_mods;
+}
+
+/**
+ * \brief Get the pointer to the list of AA_MODs requested by the
+ * user.  Includes aa_mods, c- and n-term mods.
+ * \returns The number of items pointed to by mods
+ */
+int get_all_aa_mod_list(AA_MOD_T** mods){
+  *mods = list_of_mods;
+  return num_mods + num_c_mods + num_n_mods;
+}
+
+/* Helper functions for read_mods_from_file */
+/* TODO: these reads could be made more general as in
+   read_double(&double, char*, char)   */
+
+/**
+ * \brief Set the mass_change field in an AA_MOD based on a line from
+ * a parameter file. 
+ *
+ * Assumes that the line points to a float followed by separator.
+ * Converts the number and sets the appropriate field in the mod.
+ * Dies with error if line does not point to a number.  Returns a
+ * pointer to the character after the first instance of separator or
+ * to the end of the line if separator does not appear.
+ *
+ * \returns A pointer to the next token in the line.
+ */
+char* read_mass_change(AA_MOD_T* mod, char* line, char separator){
+  //carp(CARP_DEBUG, "token points to %s", line);
+  
+  mod->mass_change = atof(line);
+  if( mod->mass_change == 0){
+    carp(CARP_FATAL, "The mass change is not valid for mod %s", line);
+    exit(1);
+  }
+  char* next = line;
+  while(*next != separator){
+    next++;
+  }
+  next++;  // point past the separator
+
+  return next;
+}
+
+/**
+ * \brief Read the line from the parameter file and set the bool vaues
+ * in the mod's aa_list appropriately.
+ *
+ * Assumes that line points to a list of letters, a-Z, followed by
+ * separator.  Fails if characters before separator are not a-Z.
+ * Returns a pointer to the character after separator, or to the end
+ * of the line if separator is not found.
+ *
+ * \returns A pointer to the next token in the line.
+ */
+char* set_aa_list(AA_MOD_T* mod, char* line, char separator){
+  carp(CARP_DETAILED_DEBUG, "token points to %s", line);
+
+  while( *line != '\0' && *line != ':'){
+    char aa = toupper( *line );
+    carp(CARP_DETAILED_DEBUG, "aa is %c", aa);
+
+    if( aa < 'A' || aa > 'Z' ){
+      carp(CARP_FATAL, "The letter '%c' in the aa list is invalid.", aa);
+      exit(1);
+    }
+    carp(CARP_DETAILED_DEBUG, "aa index is %d", aa - 'A');
+    mod->aa_list[aa - 'A'] = TRUE;
+    carp(CARP_DETAILED_DEBUG, "Set %c to true index %d", aa, (int)(aa-'A'));
+    line++;
+  }
+
+  if( *line == separator ){
+    line++;
+  }
+  return line;
+}
+
+/**
+ * \brief Set the max_per_peptide field in the mod with the value
+ * pointed to by line.
+ *
+ * Fails if line does not point to a valid integer.
+ * \returns void
+ */
+void read_max_per_peptide(AA_MOD_T* mod, char* line){
+  //carp(CARP_DETAILED_DEBUG, "token points to %s", line);
+  if( *line == '\0' ){
+    carp(CARP_FATAL, "Missing maximum mods per peptide for mod %s", line);
+    exit(1);
+  }
+  
+  mod->max_per_peptide = atoi(line);
+  if( mod->max_per_peptide == 0 ){
+    carp(CARP_FATAL, "Maximum mods per peptide is invalid for mod %s", line);
+    exit(1);
+  }
+
+}
+
+/**
+ * \brief Set the max_distance field in the mod with the value
+ * pointed to by line.
+ *
+ * Fails if line does not point to a valid integer.
+ * \returns void
+ */
+void read_max_distance(AA_MOD_T* mod, char* line){
+  //carp(CARP_DEBUG, "token points to %s", line);
+  if( *line == '\0' ){
+    carp(CARP_FATAL, 
+         "Missing maximum distance from protein terminus for mod %s", line);
+    exit(1);
+  }
+  
+  mod->max_distance = atoi(line);
+  // 0 is a valid distance, would have to check some other way
+  //    carp(CARP_FATAL, "Maximum mods per peptide is invalid for mod %s", line);
+
+}
+/**
+ *
+ */
+AA_MOD_T* read_mods(FILE* param_file, 
+                    int* counter, 
+                    AA_MOD_T* cur_mod, 
+                    char* line_tag,
+                    MOD_POSITION_T position){
+
+  carp(CARP_DEBUG, "reading mods for %d position", (int)position);
+  char* line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));
+
+  // read the whole file for standard mods
+  while(fgets(line, MAX_LINE_LENGTH, param_file)==line){
+    // read line until one starts with 'm' 'o' 'd'
+    //if( line[0] != 'm' && line[1] != 'o' && line[2] != 'd' &&
+    //line[3] != '='){
+    if( 0 != strncmp(line, line_tag, strlen(line_tag)) ){
+      continue;
+    }
+    carp(CARP_DEBUG, "mod line: %s", line);
+    char* token = line + strlen(line_tag);//"mod=");
+
+    // get the float and check for okness
+    token = read_mass_change(cur_mod, token, ':');
+
+    if( position == ANY_POSITION ){
+      // read the aa list and set the values in mod
+      token = set_aa_list(cur_mod, token, ':');
+
+      // get max per peptide
+      read_max_per_peptide(cur_mod, token);
+    }else{ // c- or n-mod
+      // get the max
+      read_max_distance(cur_mod, token);
+      
+      // set all bools to true
+      int i = 0;
+      for(i=0; i<AA_LIST_LENGTH; i++){
+        cur_mod->aa_list[i] = TRUE;
+      }
+      // set type to c-term and max to 1
+      cur_mod->position = position;
+      cur_mod->max_per_peptide = 1;
+    }
+
+    //  increment counter and get next mod
+    (*counter)++;
+    //print_mod(cur_mod);
+    cur_mod++;
+    //cur_mod = &list_of_mods[num_mods];
+  }// repeat until end of file
+
+  free(line);
+  return cur_mod;
+}
+/**
+ * \brief Read the paramter file and populate the static parameter
+ * list of AA_MODS, inlcuding the list of position mods.
+ *
+ * Also updates the array of amino_masses.  Dies with an error if the
+ * number of mods in the parameter file is greater than MAX_AA_MODS.
+ * \returns void
+ */
+void read_mods_from_file(char* param_filename){
+  carp(CARP_DEBUG, "Reading mods from parameter file '%s'", param_filename);
+
+  // open file
+  FILE* param_file = fopen(param_filename, "r");
+  if( param_file == NULL ){
+    carp(CARP_FATAL, "Could not open parameter file '%s'", param_filename);
+    exit(1);
+  }
+
+  // get first mod 
+  AA_MOD_T* cur_mod = &list_of_mods[num_mods]; // num_mods == 0
+
+  cur_mod = read_mods(param_file, &num_mods, cur_mod, "mod=", ANY_POSITION);
+
+  // Read the file again to get the cmods
+  rewind( param_file );
+
+  // set cmod pointer to next in array
+  list_of_c_mods = cur_mod;
+
+  cur_mod = read_mods(param_file, &num_c_mods, cur_mod, "cmod=", C_TERM);
+
+  // if no cmods present, don't point to the list of mods
+  if( num_c_mods == 0){
+    list_of_c_mods = NULL;
+  }
+
+  // Read the file again to get the nmods
+  rewind( param_file );
+
+  // set nmod pointer to next in array
+  list_of_n_mods = cur_mod;
+
+  read_mods(param_file, &num_n_mods, cur_mod, "nmod=", N_TERM);
+
+  // if no nmods present, don't point to the list of mods
+  if( num_n_mods == 0){
+    list_of_n_mods = NULL;
+  }
+
+  // close file
+  fclose(param_file);
+  carp(CARP_DEBUG, "Finished reading mods file");
+}
+
+/**
+ * print all fields in mod.  For debugging
+ */
+void print_mod(AA_MOD_T* mod){
+  printf("MOD: mass %.2f, max per %d, max dist %d, symb %c, aa list ",
+         mod->mass_change, mod->max_per_peptide, mod->max_distance,
+         mod->symbol);
+
+  int i = 0;
+  for(i=0; i<AA_LIST_LENGTH; i++){
+    if( mod->aa_list[i] == TRUE ){
+      printf("%c", (i + 'A'));
+    }
+  }
+  printf("\n");
+}
+
+
 
 /*
  * Local Variables:

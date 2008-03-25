@@ -14,7 +14,32 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
+ * $Revision: 1.1.2.2 $
  */
+#ifndef MODIFICATION_FILE_H
+#define MODIFICATION_FILE_H
+
+#include "utils.h"
+#include "objects.h"
+
+/**
+ * \enum _mod_position (typedefed as MOD_POSITION_T)
+ * \brief An indication of where an AA_MOD may occur within a peptide.
+ * Default is ANY_POSITION.
+ */
+enum _mod_position{ 
+  ANY_POSITION, ///< at any position in any peptide
+  C_TERM, ///< only c-terminus of peptide, seq[0]
+  N_TERM  ///< only n-terminus of peptide, seq[len]
+};
+
+enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
+/**
+ * \typedef MOD_POSITION_T
+ * \brief The typedef of the indicator for where an amino acid
+ * modification can occur within a peptide and/or protein.
+ */
+typedef enum _mod_position MOD_POSITION_T;
 
 /**
  * \struct _aa_mod
@@ -28,31 +53,15 @@
 struct _aa_mod{ 
   double mass_change;  ///< the amount by which the mass of the residue changes
   BOOLEAN_T* aa_list;  ///< an array indexed by AA, true if can be modified
-  MOD_POSITION_T position; ///< where the mod can occur, pep or prot position
   int max_per_peptide; ///< the maximum number of mods per peptide
+  MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
+  int max_distance;        ///< the max distance from the protein terminus
   char symbol;         ///< the character to represent the mod in sqt files
   int identifier;      ///< the offset/bitmask assigned to this mod for unique
                        //identification, used with MODIFIED_AA
 };
-typedef struct _aa_mod AA_MOD_T;
-
-/**
- * \enum _mod_position (typedefed as MOD_POSITION_T)
- * \brief An indication of where an AA_MOD may occur within a peptide.
- * Default is ANY_POSITION.
- */
-enum _mod_position{ 
-  ANY_POSITION,   ///< occur anywhere in any peptide
-  PEPTIDE_C_TERM, ///< only c-terminus of peptide, seq[0]
-  PEPTIDE_N_TERM, ///< only n-terminus of peptide, seq[len]
-  PROTEIN_C_TERM, ///< only the c-term of the first peptide of a protein
-  PROTEIN_N_TERM}; ///< only the n-term of the last peptide of a protein
-/**
- * \typedef MOD_POSITION_T
- * \brief The typedef of the indicator for where an amino acid
- * modification can occur within a peptide and/or protein.
- */
-typedef enum _mod_position MOD_POSITION_T;
+// in object.h
+//typedef struct _aa_mod AA_MOD_T;
 
 // Can you think of a better name for this?
 typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
@@ -82,10 +91,10 @@ typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
  */
 struct _peptide_mod{
   double mass_change;      ///< the net mass change for the peptide
-  int num_uniq_mods;       ///< the number of items in the list_of_mods
+  int num_mods;       ///< the number of items in the list_of_mods
   AA_MOD_T* list_of_mods;  ///< the list of aa_mods in this peptide
 };
-typedef struct _peptide_mod PEPTIDE_MOD_T*;
+typedef struct _peptide_mod PEPTIDE_MOD_T;
 
 
 /**
@@ -112,7 +121,7 @@ int generate_peptide_mod_list(
  * but not more than once by a single aa_mod as defined in modifiable().
  * \returns TRUE if the sequence can be modified, else FALSE
  */
-bool is_peptide_modifiable( PEPTIDE_T* peptide,
+BOOLEAN_T is_peptide_modifiable( PEPTIDE_T* peptide,
                             PEPTIDE_MOD_T* peptide_mod);
 
 
@@ -170,30 +179,28 @@ MODIFIED_AA_T char_aa_to_modified(char aa);
 
 // in parameter.c
 //global
-AA_MOD_T* list_of_mods;
-int num_mods;
-{MAX_AA_MODS = 11};// instead of #define; forces typechecking and obeys scope
-AA_MOD_T position_mods[NUM_POSITIONS]; // if one of each 
-// OR
-AA_MOD_T* position_mods;
-int num_position_mods;
+//enum {MAX_AA_MODS = 11};//instead of #define forces typechecking, obeys scope
+//AA_MOD_T* list_of_mods;
+//int num_mods;
+//AA_MOD_T* position_mods;
+//int num_position_mods;
 
 /**
  * \brief Read the paramter file and populate the static parameter
- * list of AA_MODS.
+ * list of AA_MODS, inlcuding the list of position mods.
  *
  * Also updates the array of amino_masses.  Dies with an error if the
  * number of mods in the parameter file is greater than MAX_AA_MODS.
- * \returns The number of mods requested.
+ * \returns void
  */
-int read_mods_from_file(char* param_file, AA_MODS_T**);
+void read_mods_from_file(char* param_file);
 
 /**
  * \brief Get the pointer to the list of AA_MODs requested by the
  * user.
  * \returns The number of mods pointed to by mods
  */
-int get_aa_mods(AA_MOD_T*** mods);
+//int get_aa_mod_list(AA_MOD_T*** mods);
 
 /**
  * \brief Check that the list of peptide_modifications from the file of
@@ -216,7 +223,7 @@ BOOLEAN_T compare_mods(AA_MOD_T* psm_file_mod_list, int num_mods);
  */
 BOOLEAN_T compare_two_mods(AA_MOD_T* mod1, AA_MOD_T* mod2);
 
-// in mass.c
+// in mass.c;
 /**
  * \brief Extends the amino_masses table to include all possible
  * modifications.  
@@ -226,7 +233,11 @@ BOOLEAN_T compare_two_mods(AA_MOD_T* mod1, AA_MOD_T* mod2);
  */
 void extend_amino_masses(void);
 
+/**
+ * print all fields in mod.  For debugging
+ */
+void print_mod(AA_MOD_T* mod);
 
 
-
+#endif //MODIFICATION_FILE_H
 

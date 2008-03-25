@@ -33,7 +33,7 @@ PEPTIDE_SRC_T* association3;
 DATABASE_T* database;
 
 START_TEST (test_create){
-  database = new_database("test", FALSE, TRUE);
+  database = new_database("test", FALSE);
   
   //test on link_list implementaion of peptide_src
   set_peptide_src_implementation(TRUE);
@@ -58,19 +58,24 @@ START_TEST (test_create){
   
   
   //check peptide
-  fail_unless( strncmp((seq = get_peptide_sequence(peptide1)), "QVPDAR", 6) == 0, "peptide sequence no set");
+  fail_unless(strncmp((seq= get_peptide_sequence(peptide1)), "QVPDAR", 6) == 0,
+              "peptide sequence no set");
   free(seq);
-  //test
-  printf("peptide mass %.2f\n", get_peptide_peptide_mass(peptide1));
-  fail_unless( compare_float(get_peptide_peptide_mass(peptide1), 684.75) ==0, "failed mass #1");
-  //debug
-  printf("The peptide1 mass: %.2f\n", calc_peptide_mass(peptide1, AVERAGE));
 
-  fail_unless(684.74 < calc_peptide_mass(peptide1, AVERAGE) &&  calc_peptide_mass(peptide1, AVERAGE) < 684.76, "failed mass #2");
+  //test
+  //printf("peptide mass %.2f\n", get_peptide_peptide_mass(peptide1));
+  fail_unless( compare_float(get_peptide_peptide_mass(peptide1), 684.75) ==0,
+               "failed mass #1");
+  //debug
+  //printf("The peptide1 mass: %.2f\n", calc_peptide_mass(peptide1, AVERAGE));
+
+  fail_unless(684.74 < calc_peptide_mass(peptide1, AVERAGE) &&
+              calc_peptide_mass(peptide1, AVERAGE) < 684.76, "failed mass #2");
   
-  fail_unless( compare_float(get_peptide_neutral_mass(peptide1), 684.75) == 0, "failed mass #3");
-  printf("peptide charged mass(charge2): %f\n", get_peptide_charged_mass(peptide1, 2));
-  printf("peptide mz(charge2): %f\n", get_peptide_mz(peptide1, 2));
+  fail_unless( compare_float(get_peptide_neutral_mass(peptide1), 684.75) == 0,
+               "failed mass #3");
+  //printf("peptide charged mass(charge2): %f\n", get_peptide_charged_mass(peptide1, 2));
+  //printf("peptide mz(charge2): %f\n", get_peptide_mz(peptide1, 2));
 
 
   /*************peptide constraint**************/
@@ -111,12 +116,12 @@ START_TEST (test_create){
   set_peptide_peptide_mass(peptide1, 546.5958*2 );
   fail_unless( compare_float(get_peptide_peptide_mass(peptide1), 546.5958*2) == 0 , "peptide mass not set correctly");
 
-  print_peptide(peptide1, stdout);
+  //print_peptide(peptide1, stdout);
   
 
   //check copy peptide ADD for association
   copy_peptide(peptide1, peptide4);
-  print_peptide(peptide4, stdout);
+  //print_peptide(peptide4, stdout);
 
 
   //check peptide_src
@@ -135,9 +140,9 @@ START_TEST (test_create){
   fail_unless(get_peptide_src_start_idx(association3) == 4, "failed to copy | set start idx");
  
   //try printing peptide in various forms..to ensure nothing blows up
-  print_peptide(peptide4, stdout);
-  print_peptide_in_format(peptide4, TRUE, TRUE, stdout);
-  serialize_peptide(peptide4, stdout);
+  //print_peptide(peptide4, stdout);
+  //print_peptide_in_format(peptide4, TRUE, TRUE, stdout);
+  //serialize_peptide(peptide4, stdout);
  
   free_database(database);
   free_peptide_constraint(constraint);
@@ -151,7 +156,7 @@ START_TEST (test_create){
 END_TEST
 
 Suite* peptide_suite(void){
-  Suite *s = suite_create("peptide");
+  Suite *s = suite_create("Peptide");
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);
