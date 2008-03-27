@@ -3,6 +3,8 @@
 #include "../carp.h"
 #include "../modifications.h"
 
+// TODO write setup and teardown
+// break up into different tests
 START_TEST(test_create){
   // set up
   initialize_parameters();
@@ -38,16 +40,19 @@ START_TEST(test_create){
               "Failed to parse param file %s with mods", "1mod");
 
   // get standard mods
-  AA_MOD_T* mod_list = NULL;
+  AA_MOD_T** mod_list = NULL;
   fail_unless( get_aa_mod_list(&mod_list) == 2,
-               "Got the incorrect number of mods, %d", get_aa_mod_list(&mod_list));
+         "Got the incorrect number of mods, %d", get_aa_mod_list(&mod_list));
   // check that each field is correct
-  fail_unless( mod_list[0].mass_change == 79.9,
+  double mass_change = aa_mod_get_mass_change(mod_list[0]);
+  fail_unless( mass_change == 79.9,
                "Mod mass change should be 79.9 but is %.2f",
-               mod_list[0].mass_change);
-  fail_unless( mod_list[1].mass_change == 22.9,
+               mass_change);
+  mass_change = aa_mod_get_mass_change(mod_list[1]);
+  fail_unless( mass_change == 22.9,
                "Mod mass change should be 22.9 but is %.2f",
-               mod_list[1].mass_change);
+               mass_change);
+
   //clean up
   //  free(mod_list);
   free_parameters();
@@ -67,10 +72,11 @@ START_TEST(test_create){
             "Got an incorrect number of mods, %d", get_aa_mod_list(&mod_list));
   fail_unless( get_c_mod_list(&mod_list) == 1,
             "Got an incorrect number of cmods, %d", get_c_mod_list(&mod_list));
-  fail_unless( mod_list[0].mass_change == 33.3,
+  mass_change = aa_mod_get_mass_change(mod_list[0]);
+  fail_unless( mass_change == 33.3,
                "Mod mass change should be 33.3 but is %.2f",
-               mod_list[0].mass_change);
-
+               mass_change);
+  
   //clean up
   //  free(mod_list);
   free_parameters();
@@ -91,10 +97,11 @@ START_TEST(test_create){
             "Got an incorrect number of mods, %d", get_aa_mod_list(&mod_list));
   fail_unless( get_n_mod_list(&mod_list) == 3,
             "Got an incorrect number of nmods, %d", get_n_mod_list(&mod_list));
-  fail_unless( mod_list[0].mass_change == 11.1,
+  mass_change = aa_mod_get_mass_change(mod_list[0]);
+  fail_unless( mass_change == 11.1,
                "Mod mass change should be 11.1 but is %.2f",
-               mod_list[0].mass_change);
-
+               mass_change);
+  
 
 
 

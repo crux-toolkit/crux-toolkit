@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.28.2.1 $
+ * $Revision: 1.28.2.2 $
  * \brief General parameter handling utilities. All values stored here.
 
  * \detail MUST declare ALL optional command line parameters and
@@ -217,35 +217,41 @@ void print_parameters(
 
 /**
  * \brief Get the pointer to the list of AA_MODs requested by the
- * user.  Does not include the c- and n-term mods
+ * user.  Does not include the c- and n-term mods.  Argument is a
+ * reference to an array of pointers.  Return 0 and set mods == NULL
+ * if there are no aa_mods.
  * \returns The number of items pointed to by mods
  */
-int get_aa_mod_list(AA_MOD_T** mods);
+int get_aa_mod_list(AA_MOD_T*** mods);
 
 /**
  * \brief Get the pointer to the list of AA_MODs for the peptide
- * c-terminus.  Return 0 and set mods==NULL if there are no c-term
+ * c-terminus.  Argument is a reference to an array of
+ * pointers. Return 0 and set mods==NULL if there are no c-term 
  * mods.
  *
  * \returns The number of items pointed to by mods
  */
-int get_c_mod_list(AA_MOD_T** mods);
+int get_c_mod_list(AA_MOD_T*** mods);
 
 /**
  * \brief Get the pointer to the list of AA_MODs for the peptide
- * n-terminus.  Return 0 and set mods==NULL if there are no n-term
+ * n-terminus.  Argument is a reference to an array of
+ * pointers. Return 0 and set mods==NULL if there are no n-term 
  * mods.
  *
  * \returns The number of items pointed to by mods
  */
-int get_n_mod_list(AA_MOD_T** mods);
+int get_n_mod_list(AA_MOD_T*** mods);
 
 /**
  * \brief Get the pointer to the list of AA_MODs requested by the
- * user.  Includes aa_mods, c- and n-term mods.
+ * user.  Includes aa_mods, c- and n-term mods.  Argument is a
+ * reference to an array of pointers.  Returns 0 and sets mods == NULL
+ * if there are no aa_mods.
  * \returns The number of items pointed to by mods
  */
-int get_all_aa_mod_list(AA_MOD_T** mods);
+int get_all_aa_mod_list(AA_MOD_T*** mods);
 
 
 #endif

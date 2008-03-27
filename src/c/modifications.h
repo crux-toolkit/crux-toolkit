@@ -14,56 +14,21 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.2 $
+ * $Revision: 1.1.2.3 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
 
+#include <assert.h>
 #include "utils.h"
 #include "objects.h"
+#include "parameter.h"
 
-/**
- * \enum _mod_position (typedefed as MOD_POSITION_T)
- * \brief An indication of where an AA_MOD may occur within a peptide.
- * Default is ANY_POSITION.
- */
-enum _mod_position{ 
-  ANY_POSITION, ///< at any position in any peptide
-  C_TERM, ///< only c-terminus of peptide, seq[0]
-  N_TERM  ///< only n-terminus of peptide, seq[len]
-};
+/* Public constants */
+enum {MAX_AA_MODS = 11};
 
-enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
-/**
- * \typedef MOD_POSITION_T
- * \brief The typedef of the indicator for where an amino acid
- * modification can occur within a peptide and/or protein.
- */
-typedef enum _mod_position MOD_POSITION_T;
+enum {AA_LIST_LENGTH = 26}; // A-Z
 
-/**
- * \struct _aa_mod
- * 
- *  Modification at the amino acid level.  A single mass change that can
- *  occur on any of the residues listed.  This information is given by
- *  the user in the parameter file.  Also stores a character symbol
- *  assigned at runtime to be used in the sqt result file and an
- *  integer bitmask to be used to give each aa_mod a unique identifier.
- */
-struct _aa_mod{ 
-  double mass_change;  ///< the amount by which the mass of the residue changes
-  BOOLEAN_T* aa_list;  ///< an array indexed by AA, true if can be modified
-  int max_per_peptide; ///< the maximum number of mods per peptide
-  MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
-  int max_distance;        ///< the max distance from the protein terminus
-  char symbol;         ///< the character to represent the mod in sqt files
-  int identifier;      ///< the offset/bitmask assigned to this mod for unique
-                       //identification, used with MODIFIED_AA
-};
-// in object.h
-//typedef struct _aa_mod AA_MOD_T;
-
-// Can you think of a better name for this?
 typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
                              ///alphabet, bits for mod1 mod2...aa
 /*
@@ -82,24 +47,16 @@ typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
  */
 
 /**
- * \struct _peptide_mod
- *  A collection of aa modifications that can occur on a single
- *  peptide.  Includes the list of aa_mods and the net mass
- *  change of all mods.  Each aa_mod is included in the list as many
- *  times at it appears in the collection. There is no information about
- *  which residues in a peptide are modified.
+ * \brief Allocate an AA_MOD, including the aa_list and initialize all
+ * fields to default values.  Symbol and unique identifier are set
+ * according to index.  
+ * \returns A heap allocated AA_MOD with default values.
  */
-struct _peptide_mod{
-  double mass_change;      ///< the net mass change for the peptide
-  int num_mods;       ///< the number of items in the list_of_mods
-  AA_MOD_T* list_of_mods;  ///< the list of aa_mods in this peptide
-};
-typedef struct _peptide_mod PEPTIDE_MOD_T;
-
+AA_MOD_T* new_aa_mod(int mod_idx);
 
 /**
  * \brief Generate a list of all PEPTIDE_MODs that can be considered
- * given the list of AA_MODs provided by the user.
+ * given the list of AA_MODs provided by the user and found in parameter.c.
  *
  * This only needs to be called once for a search.  The list of
  * PEPTIDE_MODs can be reused for each spectrum.
@@ -108,8 +65,6 @@ typedef struct _peptide_mod PEPTIDE_MOD_T;
  * peptide_mod_list argument.
  */
 int generate_peptide_mod_list(
- AA_MOD_T* aa_mod_list,           ///< list of aa_mods to permute
- int num_aa_mods,                 ///< number of itmes in above list
  PEPTIDE_MOD_T** peptide_mod_list ///< return here the list of peptide_mods
 );
 
@@ -170,9 +125,9 @@ BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod);
  *
  * \returns The number of modifications made to this amino acid.
  */
-int aa_modified_by(MODIFIED_AA_T aa, 
-                   AA_MOD_T* possible_mods, 
-                   AA_MOD_T** mod_list);
+int get_aa_mods(MODIFIED_AA_T aa, 
+                AA_MOD_T* possible_mods, 
+                AA_MOD_T** mod_list);
 
 char modified_aa_to_char(MODIFIED_AA_T aa);
 MODIFIED_AA_T char_aa_to_modified(char aa);
@@ -237,6 +192,74 @@ void extend_amino_masses(void);
  * print all fields in mod.  For debugging
  */
 void print_mod(AA_MOD_T* mod);
+
+/* Setters and Getters */
+
+/**
+ * \brief Set the mass change caused by this modification.
+ * \returns void
+ */
+void aa_mod_set_mass_change(AA_MOD_T* mod, double mass_change);
+/**
+ * \brief Get the mass change caused by this modification.
+ * \returns The mass change caused by this modification.
+ */
+double aa_mod_get_mass_change(AA_MOD_T* mod);
+
+/**
+ * \brief Access to the aa_list of the AA_MOD_T struct.  This pointer
+ * can be used to get or set the list of residues on which this mod
+ * can be placed.
+ * \returns A pointer to the list of amino acids on which this mod can
+ * be placed.
+ */
+BOOLEAN_T* aa_mod_get_aa_list(AA_MOD_T* mod);
+
+/**
+ * \brief Set the maximum number of times this modification can be
+ * placed on one peptide.
+ * \returns void
+ */
+void aa_mod_set_max_per_peptide(AA_MOD_T* mod, int max);
+/**
+ * \brief Get the maximum number of times this modification can be
+ * placed on one peptide.  
+ * \returns The max times per peptide this mod can be placed.
+ */
+int aa_mod_get_max_per_peptide(AA_MOD_T* mod);
+
+/**
+ * \brief Set the maximum distance from the protein terminus that the
+ * modification can be placed.  Which terminus (C or N) is determined
+ * by the position type.  To indicate no position restriction, set to
+ * MAX_PROTEIN_SEQ_LENGTH. 
+ * \returns void
+ */
+void aa_mod_set_max_distance(AA_MOD_T* mod, int distance);
+/**
+ * \brief Get the maximum distance from the protein end that the
+ * modification can be placed.  Will be MAX_PROTEIN_SEQ_LENGTH if
+ * position type is ANY_POSITION.
+ * \returns Maximum distance from protein terminus at which mod can be
+ * placed. 
+ */
+int aa_mod_get_max_distance(AA_MOD_T* mod);
+
+/**
+ * \brief Set the position type of an aa_mod.
+ * \returns void
+ */
+void aa_mod_set_position(AA_MOD_T* mod, MOD_POSITION_T position);
+/**
+ * \brief Where in the peptide can the modification be placed.
+ * \returns ANY_POSITION for standard mods; C_TERM or N_TERM for those
+ * that can only be placed at the ends of the peptide.
+ */
+MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod);
+
+
+
+
 
 
 #endif //MODIFICATION_FILE_H

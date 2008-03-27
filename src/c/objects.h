@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.51.2.1 $
+ * $Revision: 1.51.2.2 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -404,6 +404,30 @@ typedef enum _set_type SET_TYPE_T;
  * \brief The struct _aa_mod is typdefed as AA_MOD_T
  */
 typedef struct _aa_mod AA_MOD_T;
+
+/**
+ * \typedef PEPTIDE_MOD_T
+ * \brief The struct _peptide_mod is typdefed as PEPTIDE_MOD_T
+ */
+typedef struct _peptide_mod PEPTIDE_MOD_T;
+
+/**
+ * \enum _mod_position (typedefed as MOD_POSITION_T)
+ * \brief An indication of where an AA_MOD may occur within a peptide.
+ * Default is ANY_POSITION.
+ */
+enum _mod_position{ 
+  ANY_POSITION, ///< at any position in any peptide
+  C_TERM, ///< only c-terminus of peptide, seq[0]
+  N_TERM  ///< only n-terminus of peptide, seq[len]
+};
+
+/**
+ * \typedef MOD_POSITION_T
+ * \brief The typedef of the indicator for where an amino acid
+ * modification can occur within a peptide and/or protein.
+ */
+typedef enum _mod_position MOD_POSITION_T;
 
 #endif
 

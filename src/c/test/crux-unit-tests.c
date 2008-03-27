@@ -12,6 +12,7 @@
 #include "check-scorer.h"
 #include "check-match.h"
 #include "check-parameter.h"
+#include "check-modifications.h"
 
 //must set bash export CK_FORK=no
 int main(void){
@@ -33,6 +34,7 @@ int main(void){
   Suite* suite_ion_series = ion_series_suite(); 
   // new
   Suite* suite_parameter = parameter_suite();
+  //  Suite* suite_modifications = modifications_suite();
 
 
   //add each suite to Runner
@@ -54,6 +56,7 @@ int main(void){
   srunner_add_suite(sr,suite_ion_series);
   // new
   srunner_add_suite(sr, suite_parameter);
+  //  srunner_add_suite(sr, suite_modifications);
 
   //run each check suite
   srunner_run_all(sr, CK_NORMAL);

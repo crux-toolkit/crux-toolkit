@@ -137,6 +137,13 @@ int main(int argc, char** argv){
   double spectrum_min_mass = get_double_parameter("spectrum-min-mass");
   double spectrum_max_mass =  get_double_parameter("spectrum-max-mass");
 
+  // get list of mods
+  PEPTIDE_MOD_T* peptide_mods = NULL;
+  // uses aa_mods in parameter.c
+  int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
+  // so it will compile
+  carp(CARP_DEBUG, "Got %d peptide mods", num_peptide_mods);
+
   // flags and counters for loop
   int spectrum_counter = 0;
   int spectrum_searches_counter = 0; //for psm file header, spec*charges
