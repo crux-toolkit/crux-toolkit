@@ -14,7 +14,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.3 $
+ * $Revision: 1.1.2.4 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
@@ -250,12 +250,25 @@ int aa_mod_get_max_distance(AA_MOD_T* mod);
  * \returns void
  */
 void aa_mod_set_position(AA_MOD_T* mod, MOD_POSITION_T position);
+
 /**
  * \brief Where in the peptide can the modification be placed.
  * \returns ANY_POSITION for standard mods; C_TERM or N_TERM for those
  * that can only be placed at the ends of the peptide.
  */
 MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod);
+
+/**
+ * \brief The character used to uniquely identify the mod in the sqt file.
+ * \returns The character identifier.
+ */
+char aa_mod_get_symbol(AA_MOD_T* mod);
+
+/**
+ * \brief The bitmask used to uniquely identify the mod.
+ * \returns The short int bitmask used to identify the mod.
+ */
+int aa_mod_get_identifier(AA_MOD_T* mod);
 
 
 

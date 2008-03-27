@@ -1767,7 +1767,6 @@ void read_max_distance(AA_MOD_T* mod, char* line){
   }
   
   aa_mod_set_max_distance(mod, atoi(line));
-  //mod->max_distance = atoi(line);
   // 0 is a valid distance, would have to check some other way
   //    carp(CARP_FATAL, "Maximum mods per peptide is invalid for mod %s", line);
 

@@ -69,7 +69,7 @@ struct _peptide_mod{
  */
 AA_MOD_T* new_aa_mod(int mod_idx){
 
-  assert(mod_idx > 0 && mod_idx < MAX_AA_MODS );
+  assert(mod_idx > -1 && mod_idx < MAX_AA_MODS );
 
   AA_MOD_T* mod = (AA_MOD_T*)mymalloc(sizeof(AA_MOD_T));
 
@@ -433,8 +433,10 @@ int aa_mod_get_max_per_peptide(AA_MOD_T* mod){
  * \returns void
  */
 void aa_mod_set_max_distance(AA_MOD_T* mod, int distance){
-  mod->max_distance = distance;
+  mod->max_distance = (distance == -1) ? MAX_PROTEIN_SEQ_LENGTH : 
+                                         distance;
 }
+
 /**
  * \brief Get the maximum distance from the protein end that the
  * modification can be placed.  Will be MAX_PROTEIN_SEQ_LENGTH if
@@ -463,4 +465,19 @@ MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod){
   return mod->position;
 }
 
+/**
+ * \brief The character used to uniquely identify the mod in the sqt file.
+ * \returns The character identifier.
+ */
+char aa_mod_get_symbol(AA_MOD_T* mod){
+  return mod->symbol;
+}
+
+/**
+ * \brief The bitmask used to uniquely identify the mod.
+ * \returns The short int bitmask used to identify the mod.
+ */
+int aa_mod_get_identifier(AA_MOD_T* mod){
+  return mod->identifier;
+}
 
