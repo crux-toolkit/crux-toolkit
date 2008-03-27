@@ -19,6 +19,7 @@ TESTS = \
 	check-database.c \
 	check-match.c \
 	check-parameter.c \
+	check-modifications.c \
 	crux-unit-tests.c
 
 CRUX_LIBS = \
