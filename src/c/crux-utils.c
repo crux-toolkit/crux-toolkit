@@ -972,6 +972,13 @@ void fit_three_parameter_weibull(
   float cur_beta = 0.0;
   float cur_correlation = 0.0;
   float cur_shift;
+
+  // FIXME remove below
+  int idx;
+  for (idx=0; idx<fit_data_points; idx++){
+    carp(CARP_DETAILED_DEBUG, "X[%i]=%.6f", idx, data[idx]);
+  }
+
   for (cur_shift = max_shift; cur_shift > min_shift ; cur_shift -= step){
 
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
@@ -1020,7 +1027,7 @@ void fit_two_parameter_weibull(
       break;
     } 
     X[idx] = log(score);
-    carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
+    // carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
   }
 
   float* F_T = mymalloc(sizeof(float) * total_data_points);
@@ -1028,13 +1035,13 @@ void fit_two_parameter_weibull(
     int reverse_idx = total_data_points - idx;
     // magic numbers 0.3 and 0.4 are never changed
     F_T[idx] = (reverse_idx - 0.3) / (total_data_points + 0.4);
-    carp(CARP_DEBUG, "F[%i]=%.6f", idx, F_T[idx]);
+    //carp(CARP_DEBUG, "F[%i]=%.6f", idx, F_T[idx]);
   }
 
   float* Y   = mymalloc(sizeof(float) * total_data_points);
   for(idx=0; idx < fit_data_points; idx++){
     Y[idx] = log( -log(1.0 - F_T[idx]) );
-    carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
+    //carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
   }
 
   int N = fit_data_points; // rename for formula's sake
