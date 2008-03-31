@@ -215,7 +215,8 @@ databases or large numbers of query spectra.
 In addition to implementing the above approach, Crux offers an
 alternative strategy that allows for more efficient candidate peptide
 retrieval.  In this approach, the user must pre-process a given
-protein database to produce a binary protein database and a binary
+protein database for each proteolytic enzyme used 
+to produce a binary protein database and a binary
 peptide index.  The pre-processing step sorts all of the peptides in
 the database by mass and stores pointers to their locations in the
 protein database (sequence index, start position, and peptide length).
