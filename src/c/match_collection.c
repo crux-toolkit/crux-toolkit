@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.82 $
+ * $Revision: 1.83 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -2943,11 +2943,6 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   struct dirent* directory_entry = NULL;
   DATABASE_T* database = NULL;
   BOOLEAN_T use_index_boolean = get_boolean_parameter("use-index");  
-  if( use_index_boolean == FALSE ){
-    carp(CARP_ERROR, 
-         "Analyzing matches without index not implemented.  Using index.");
-    use_index_boolean = TRUE;
-  }
 
   // get directory from path name and prefix from filename
   /*
@@ -3041,7 +3036,19 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
 
   // get binary fasta file name with path to crux directory 
   //  char* binary_fasta = get_binary_fasta_name_in_crux_dir(fasta_file);
-  char* binary_fasta = get_index_binary_fasta_name(fasta_file);
+  char* binary_fasta  = NULL;
+  if (use_index_boolean == TRUE){ 
+    binary_fasta = get_index_binary_fasta_name(fasta_file);
+  } else {
+    binary_fasta = get_binary_fasta_name(fasta_file);
+    carp(CARP_DEBUG, "Looking for binary fasta %s", binary_fasta);
+    if (access(binary_fasta, F_OK)){
+      carp(CARP_DEBUG, "Could not find binary fasta %s", binary_fasta);
+      if (!create_binary_fasta_here(fasta_file, binary_fasta)){
+       die("Could not create binary fasta file %s", binary_fasta);
+      };
+    }
+  }
   
   // check if input file exist
   if(access(binary_fasta, F_OK)){
@@ -3054,7 +3061,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   carp(CARP_DEBUG, "Creating a new database");
   // now create a database, 
   // using fasta file either binary_file(index) or fastafile
-  database = new_database(binary_fasta, use_index_boolean);
+  database = new_database(binary_fasta, TRUE);
   
   // check if already parsed
   if(!get_database_is_parsed(database)){

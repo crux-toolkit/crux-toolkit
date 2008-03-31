@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.45 $
+ * $Revision: 1.46 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -168,11 +168,9 @@ int main(int argc, char** argv){
    example of how one might assemble peptide identifications (matches)
    into protein identifications (hits). 
    Unfortunately it doesn't work that well, so it's commented out. But
-   some of the functionality you need is hopefully there. 
+   some of the functionality one would need is hopefully there. 
    */
-
-  /* 
-   * carp(CARP_INFO, "Assembling matches into protein hits");
+  /* carp(CARP_INFO, "Assembling matches into protein hits");
   HIT_COLLECTION_T* hit_collection 
     = new_hit_collection_from_match_collection(match_collection);
   carp(CARP_INFO, "Outputting protein hits");
