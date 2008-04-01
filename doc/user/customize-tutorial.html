@@ -66,7 +66,7 @@ class="prog">crux-search-for-matches</span> command as an example.
 Here is the general form.</p>
 
 <div class="code"><code>
-$ crux-search-for-matches [options] &lt;ms2 filename&gt; &lt;protein
+crux-search-for-matches [options] &lt;ms2 filename&gt; &lt;protein
 filename&gt;
 </code>
 </div>
@@ -86,7 +86,7 @@ no arguments.
 </p>
 
 <div class="code"><code>
-$ crux-search-for-matches</code>
+crux-search-for-matches</code>
 </div>
 <p>You should see output that looks like this.</p>
 <pre>
@@ -122,7 +122,7 @@ appropriate argument.  This example increases the verbosity to 40
 </p>
 
 <div class="code"><code>
-$ crux-search-for-matches --verbosity 40 sample.ms2 yeast.fasta</code>
+crux-search-for-matches --verbosity 40 sample.ms2 yeast.fasta</code>
 </div>
 
 <a name="file"></a>
@@ -132,7 +132,7 @@ class="out">--parameter-file</span>, is available for all <span
 class="prog">crux</span> programs.  It allows options to be specified in
 a file.  All of the command line options as well as some extras can be
 put in a parameter file.  The format is slightly different.  The two
-dashes are removed from the option name and the name and value are
+dashes are removed from the file name and the name and value are
 separated by an equal sign instead of a space. 
 </p>
 <div class=code><code>
@@ -142,12 +142,10 @@ separated by an equal sign instead of a space.
 <p>
 The parameter file also requires only one option per line and allows
 comments on lines beginning with '#'.  More information and a sample
-parameter file can be found <a href="parameter-file.html">here</a>.
-Command line and parameter file options may be used separately or
-together.  If an option is specified in both, the value on the command
-line will be used.
+parameter file can be found <a href="parameter-file.html">here</a>
 </p>
 
+add note about cmd line overriding the file
 <p>Now that we've covered the general form of options, let's discuss
 some specific options for <span class="prog">crux-search-for-matches</span>
 programs, beginning with output.
@@ -214,23 +212,13 @@ with <span class="code">--score-type</span>.</p>
 <p>
 In addition to searching the provided protein database, 
 <span class="prog">crux-search-for-matches</span> will search up to
-3 shuffled versions of the database with the option 
+??? shuffled versions of the database with the option 
 <span class="code">--number-decoy-set</span>.  The default number is 2.
 </p>
 
 <a name="anal"></a>
 <h4>Changing the analysis parameters</h4>
-<p>The key option for <span class="prog">crux-analyze-matches</span>
-is <span class="code">--algorithm</span> which controls how the
-analysis is performed.  The default value is <span
-class="code">percolator</span> which will use the <a
-href="http://noble.gs.washington.edu/proj/percolator/">Percolator</a>
-algorithm to look at target and decoy
-matches and calculate a q-value for each spectrum's best match.
-Another possibility, <span class="code">qvalue</span>, is to calculate
-a q-value by estimating the parameters of the score distribution (see
-<a href="http://www.pnas.org/cgi/content/full/100/16/9440">this
-paper</a> as an example).
+<p>
 </p>
 
 <span class="code"></span>

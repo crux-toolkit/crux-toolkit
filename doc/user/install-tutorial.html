@@ -63,8 +63,8 @@ or you can use the fully qualified path to your home directory which
 may be something like <code>/home/yourname/</code>.  
 
 <div class=note><em>Note</em>You can find out the location of your
-home directory by logging in and typing <code>pwd</code> or <code>echo
-$HOME</code>
+home directory by logging in and typing <code>$ pwd</code> or with the
+command <code>$ echo $HOME</code>
 </div> 
 
 
@@ -74,7 +74,7 @@ $HOME</code>
 <ol>
 <li><b>Unpack the files</b>  The <span class=prog>crux</span> source
 files and documentation are distributed as a tarball which is
-available for download. <!-- where --> The file is named <span
+available for download. <!-- where --> The file should be named <span
 class=file>crux_1.0.0.tar.gz</span>.  Move it to a convenient location
 and unpack the file with this command.</li>
 
@@ -107,16 +107,16 @@ programs, lets call it <code>install-dir</code>.  If you want <span
 class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
 then <code>install-dir</code> would be <span class=file>$HOME</span>.
 Configure will automatically put the programs in a directory called
-<span class=file>bin</span>.  Run this command.
+<span class=file>bin</code>.  Run this command.
 
-<div class=code><code>
+<div class=code></code>
 $ ./configure --prefix install-dir
               --with-percolator-dir=PERCOLATOR_ROOT
 </code></div>
 
 <li><b>Make</b> To complete the process, run these two commands.</li>
 <div class=code><code>
-$ make<br>
+$ make
 $ make install
 </code>
 </div>
