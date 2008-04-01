@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Apr  1 13:35:53 2008
+H	StartTime	Tue Apr  1 14:50:08 2008
 H	EndTime                               
 H	Database	test.fasta
 H	DBSeqLength	?
@@ -19,14 +19,14 @@ H	Alg-DisplayTop	5
 H	EnzymeSpec	tryptic
 H	Comment	matches analyzed by percolator
 S	14	14	2	0.00	server	500.41	0.00	0.00	1
-M	1	1	1001.15	0.00	1.98	0.00	6	14	K.FHLELSQK.D	U
+M	1	1	1001.15	0.00	3.93	0.60	6	14	K.FHLELSQK.D	U
 L	gi|6381999|ref|NP_009311.2|	intron of mitochondrial COX1, aI5-beta; Ai5_betap
 S	14	14	3	0.00	server	500.41	0.00	0.00	1
-M	1	1	1495.81	0.00	0.80	0.30	8	44	R.VMFTTFYMITNK.Y	U
+M	1	1	1495.81	0.00	0.98	0.60	8	44	R.VMFTTFYMITNK.Y	U
 L	gi|6382000|ref|NP_009314.2|	Q0092p
 S	15	15	2	0.00	server	488.82	0.00	0.00	1
-M	1	1	973.09	0.00	-5.71	0.90	0	16	K.SGATAYIYK.A	U
+M	1	1	973.09	0.00	-3.27	0.90	0	16	K.SGATAYIYK.A	U
 L	gi|6381999|ref|NP_009311.2|	intron of mitochondrial COX1, aI5-beta; Ai5_betap
 S	15	15	3	0.00	server	488.82	0.00	0.00	1
-M	1	1	1464.81	0.00	1.14	0.30	5	44	K.QYLLLNIAYLLK.L	U
+M	1	1	1464.81	0.00	0.77	0.60	5	44	K.QYLLLNIAYLLK.L	U
 L	gi|6381999|ref|NP_009311.2|	intron of mitochondrial COX1, aI5-beta; Ai5_betap
