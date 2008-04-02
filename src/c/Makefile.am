@@ -42,6 +42,8 @@ NON_PERCOLATOR_LIB_FILES= \
   peptide_constraint.c \
   peptide_constraint.h \
   peptide.h \
+  peptide_modifications.c \
+  peptide_modifications.h \
   peptide_src.c \
   peptide_src.h \
   protein.c \

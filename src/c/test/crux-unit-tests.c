@@ -13,6 +13,7 @@
 #include "check-match.h"
 #include "check-parameter.h"
 #include "check-modifications.h"
+#include "check-peptide-modifications.h"
 #include "check-linked-list.h"
 
 //must set bash export CK_FORK=no
@@ -37,6 +38,7 @@ int main(void){
   Suite* suite_parameter = parameter_suite();
   Suite* suite_modifications = modifications_suite();
   Suite* suite_list = list_suite();
+  Suite* suite_peptide_modifications = peptide_modifications_suite();
 
 
   //add each suite to Runner
@@ -60,6 +62,7 @@ int main(void){
   srunner_add_suite(sr, suite_parameter);
   srunner_add_suite(sr, suite_modifications);
   srunner_add_suite(sr, suite_list);
+  srunner_add_suite(sr, suite_peptide_modifications);
 
   //run each check suite
   srunner_run_all(sr, CK_NORMAL);

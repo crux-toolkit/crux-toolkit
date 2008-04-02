@@ -25,6 +25,7 @@
 #include "objects.h"
 #include "match.h"
 #include "match_collection.h"
+#include "peptide_modifications.h"
 
 #define NUM_SEARCH_OPTIONS 14
 #define NUM_SEARCH_ARGS 2
