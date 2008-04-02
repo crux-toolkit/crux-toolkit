@@ -5,3 +5,5 @@ or at http://noble.gs.washington.edu/proj/crux/.
 For installation instructions, see the install-tutorial.html 
 linked from the Crux home pages listed above, or the INSTALL
 file in this directory.
+
+Crux source code can be found in the src/c sub-directory.
