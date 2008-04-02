@@ -14,13 +14,14 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.4 $
+ * $Revision: 1.1.2.5 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
 
 #include <assert.h>
 #include "utils.h"
+#include "linked_list.h"
 #include "objects.h"
 #include "parameter.h"
 
@@ -55,6 +56,31 @@ typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
 AA_MOD_T* new_aa_mod(int mod_idx);
 
 /**
+ * \brief Free the memory for an AA_MOD including the aa_list.
+ */
+void free_aa_mod(AA_MOD_T*);
+
+/**
+ * \brief Allocate a PEPTIDE_MOD and set all fields to default values
+ * (i.e. no modifications).
+ * \returns A heap allocated PEPTIDE_MOD with default values.
+ */
+PEPTIDE_MOD_T* new_peptide_mod();
+
+/**
+ * \brief Allocate a new peptide mod and copy contents of given mod
+ * into it.
+ * \returns A pointer to a new peptide mod which is a copy of the
+ * given one.
+ */
+PEPTIDE_MOD_T* copy_peptide_mod(PEPTIDE_MOD_T* original);
+
+/**
+ * \brief Free the memory for a PEPTIDE_MOD including the aa_list.
+ */
+void free_peptide_mod(PEPTIDE_MOD_T* mod);
+
+/**
  * \brief Generate a list of all PEPTIDE_MODs that can be considered
  * given the list of AA_MODs provided by the user and found in parameter.c.
  *
@@ -65,7 +91,7 @@ AA_MOD_T* new_aa_mod(int mod_idx);
  * peptide_mod_list argument.
  */
 int generate_peptide_mod_list(
- PEPTIDE_MOD_T** peptide_mod_list ///< return here the list of peptide_mods
+ PEPTIDE_MOD_T*** peptide_mod_list ///< return here the list of peptide_mods
 );
 
 /**
@@ -191,7 +217,12 @@ void extend_amino_masses(void);
 /**
  * print all fields in mod.  For debugging
  */
-void print_mod(AA_MOD_T* mod);
+void print_a_mod(AA_MOD_T* mod);
+
+/**
+ * print all fields in peptide mod. For debugging
+ */
+void print_p_mod(PEPTIDE_MOD_T* mod);
 
 /* Setters and Getters */
 
@@ -270,10 +301,47 @@ char aa_mod_get_symbol(AA_MOD_T* mod);
  */
 int aa_mod_get_identifier(AA_MOD_T* mod);
 
+/**
+ * \brief Add a new aa_mod to the peptide mod.  Updates mass_change,
+ * num_mods and list_of_aa_mods.  Does not enforce the copy number of
+ * an aa_mod to be less than max_per_peptide.
+ * \returns void
+ */
+void peptide_mod_add_aa_mod(PEPTIDE_MOD_T* pep_mod,
+                            AA_MOD_T* aa_mod,
+                            int copies );
 
+/**
+ * \brief Get the value of the net mass change for this peptide_mod.
+ * \returns The mass change for the peptide mod.
+ */
+double peptide_mod_get_mass_change(PEPTIDE_MOD_T* mod);
 
+/**
+ * \brief Get the number of aa_mods in this peptide_mod.
+ * \returns The number of aa_mods in this peptide_mod.
+ */
+int peptide_mod_get_num_aa_mods(PEPTIDE_MOD_T* mod);
 
+/**
+ * \brief Get a pointer to the list of aa_mods in this peptide_mod.
+ * The number of elements in the list is given by
+ * peptide_mod_get_num_aa_mods. A unique aa_mod may be listed more
+ * than once.  There is no particular order to the aa_mods in the
+ * list.
+ * \returns A pointer to a list of AA_MOD_T pointers.
+ */
+LINKED_LIST_T* peptide_mod_get_aa_mod_list(PEPTIDE_MOD_T* mod);
 
+/**
+ * \brief Compares the number of aa mods in two peptide mods for
+ * sorting.
+ * \returns Negative int, 0, or positive int if the number of aa_mods
+ * in pmod 1 is less than, equal to or greater than the number of
+ * aa_mods in pmod2, respectively.
+ */
+int compare_peptide_mod_num_aa_mods(const void* pmod1, 
+                                    const void* pmod2);
 
 #endif //MODIFICATION_FILE_H
 

@@ -138,7 +138,7 @@ int main(int argc, char** argv){
   double spectrum_max_mass =  get_double_parameter("spectrum-max-mass");
 
   // get list of mods
-  PEPTIDE_MOD_T* peptide_mods = NULL;
+  PEPTIDE_MOD_T** peptide_mods = NULL;
   // uses aa_mods in parameter.c
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
   // so it will compile

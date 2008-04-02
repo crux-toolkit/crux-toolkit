@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.51.2.2 $
+ * $Revision: 1.51.2.3 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -428,6 +428,12 @@ enum _mod_position{
  * modification can occur within a peptide and/or protein.
  */
 typedef enum _mod_position MOD_POSITION_T;
+
+/**
+ * \typedef _linked_list_node is typdefed as LINKED_LIST_T*
+ */
+typedef struct _linked_list_node LINKED_LIST_T;
+
 
 #endif
 

@@ -27,6 +27,7 @@ char mod_sqt_symbols[MAX_AA_MODS] = {'*', '@', '#', '^', '~', '%',
 int mod_id_masks[MAX_AA_MODS] = {1,2,3,4,5,6,7,8,9,10,11};
 
 /* Private data types, typedefed in objects.h */
+
 /**
  * \struct _aa_mod
  * 
@@ -56,10 +57,12 @@ struct _aa_mod{
  *  which residues in a peptide are modified.
  */
 struct _peptide_mod{
-  double mass_change;      ///< the net mass change for the peptide
-  int num_mods;       ///< the number of items in the list_of_mods
-  AA_MOD_T* list_of_mods;  ///< the list of aa_mods in this peptide
+  double mass_change;     ///< the net mass change for the peptide
+  int num_mods;           ///< the number of items in the list_of_mods
+  LINKED_LIST_T* list_of_mods; ///< the list of aa_mods in this peptide
 };
+
+/* Definitions of public methods */
 
 /**
  * \brief Allocate an AA_MOD, including the aa_list and initialize all
@@ -92,7 +95,60 @@ AA_MOD_T* new_aa_mod(int mod_idx){
   return mod;
 }
 
+/**
+ * \brief Free the memory for an AA_MOD including the aa_list.
+ */
+void free_aa_mod(AA_MOD_T* mod){
+  if( mod ){
+    if( mod->aa_list ){free(mod->aa_list);}
+    free(mod);
+  }
+}
 
+
+/**
+ * \brief Allocate a PEPTIDE_MOD and set all fields to default values
+ * (i.e. no modifications).
+ * \returns A heap allocated PEPTIDE_MOD with default values.
+ */
+PEPTIDE_MOD_T* new_peptide_mod(){
+  PEPTIDE_MOD_T* new_mod = (PEPTIDE_MOD_T*)mymalloc(sizeof(PEPTIDE_MOD_T));
+  new_mod->mass_change = 0;
+  new_mod->num_mods = 0;
+  new_mod->list_of_mods = NULL;
+  return new_mod;
+}
+
+/**
+ * \brief Allocate a new peptide mod and copy contents of given mod
+ * into it.
+ * \returns A pointer to a new peptide mod which is a copy of the
+ * given one.
+ */
+PEPTIDE_MOD_T* copy_peptide_mod(PEPTIDE_MOD_T* original){
+  PEPTIDE_MOD_T* copy = new_peptide_mod();
+  copy->mass_change = original->mass_change;
+  copy->num_mods = original->num_mods;
+  copy->list_of_mods = copy_list(original->list_of_mods);
+
+  return copy;
+}
+
+/**
+ * \brief Free the memory for a PEPTIDE_MOD including the aa_list.
+ */
+void free_peptide_mod(PEPTIDE_MOD_T* mod){
+  if(mod){
+    if( mod->list_of_mods ){free(mod->list_of_mods);}
+    free(mod);
+  }
+}
+
+/* see below */
+int generate_peptide_mod_list_TESTER(
+ PEPTIDE_MOD_T*** peptide_mod_list,
+ AA_MOD_T** aa_mod_list,
+ int num_aa_mods);
 
 /**
  * \brief Generate a list of all PEPTIDE_MODs that can be considered
@@ -104,45 +160,119 @@ AA_MOD_T* new_aa_mod(int mod_idx){
  * n-term and one c-term mod and at most mod->max_per_peptide
  * modifications of one type per peptide.
  *
+ * The actual work is done in generate_peptide_mod_list_TESTER() so
+ * that it can be tested without going through parameter.c.
+ *
  * \returns The number of peptide_mods listed in the
  * peptide_mod_list argument.
  */
 int generate_peptide_mod_list(
- PEPTIDE_MOD_T** peptide_mod_list ///< return here the list of peptide_mods
+ PEPTIDE_MOD_T*** peptide_mod_list ///< return here the list of peptide_mods
  ){
-  // so it compiles
-  peptide_mod_list = NULL;
-
   AA_MOD_T** aa_mod_list = NULL;
-  AA_MOD_T** c_mod_list = NULL;
-  AA_MOD_T** n_mod_list = NULL;
-  int num_aa_mods = get_aa_mod_list(&aa_mod_list);
-  int num_c_mods = get_c_mod_list(&c_mod_list);
-  int num_n_mods = get_n_mod_list(&n_mod_list);
+  int num_aa_mods = get_all_aa_mod_list(&aa_mod_list);
 
-  int final_counter = 0;
-  int temp_counter = 0;
+  // continued below
+  int count = generate_peptide_mod_list_TESTER( peptide_mod_list, 
+                                                aa_mod_list, num_aa_mods);
+  return count; 
+}
 
-  // so it compiles
-  carp(CARP_DETAILED_DEBUG, "%d %d %d %d", num_c_mods, num_n_mods, 
-                                           final_counter, temp_counter);
-  AA_MOD_T* cur_mod = NULL;
+int generate_peptide_mod_list_TESTER(
+ PEPTIDE_MOD_T*** peptide_mod_list,
+ AA_MOD_T** aa_mod_list,
+ int num_aa_mods)
+{
+
+  // initialize list of peptide mods with one unmodified peptide
+  LINKED_LIST_T* final_list = new_list( new_peptide_mod() );
+  int final_counter = 1;
+
+  // for each aa_mod
+  //AA_MOD_T* cur_aa_mod = NULL;
   int mod_list_idx = 0;
   for(mod_list_idx=0; mod_list_idx < num_aa_mods; mod_list_idx++){
-    cur_mod = aa_mod_list[mod_list_idx];
-    int cur_mod_max = cur_mod->max_per_peptide;
-    carp(CARP_DETAILED_DEBUG, "cur max %d", cur_mod_max);
+
+    AA_MOD_T* cur_aa_mod = aa_mod_list[mod_list_idx];
+    int cur_mod_max = cur_aa_mod->max_per_peptide;
+    char cur_mod_id = cur_aa_mod->symbol;
+    carp(CARP_DETAILED_DEBUG, "cur max %d, id %c", cur_mod_max, cur_mod_id);
+
+    // initialize temp list and pointer to end (to speed up adds)
+    LINKED_LIST_T* temp_list = NULL;
+    LINKED_LIST_T* temp_list_end = NULL;
+    int temp_counter = 0;
+    //PEPTIDE_MOD_T* cur_pep_mod = NULL;
+
+    int copies = 1;
+    for(copies = 1; copies < cur_mod_max + 1; copies++){
+
+      // for each pep_mod in final list
+      LINKED_LIST_T* final_ptr = final_list;
+      while( final_ptr != NULL ){
+        // get the current peptide mod
+        PEPTIDE_MOD_T* cur_pep_mod = 
+          (PEPTIDE_MOD_T*)get_data_linked_list(final_ptr);
+        carp(CARP_DETAILED_DEBUG, "cur pep_mod has %d mods", 
+             peptide_mod_get_num_aa_mods(cur_pep_mod)); 
+
+        // copy the peptide_mod and add to it i copies of cur_mod
+        PEPTIDE_MOD_T* mod_cpy = copy_peptide_mod(cur_pep_mod);
+        peptide_mod_add_aa_mod(mod_cpy, cur_aa_mod, copies);
+        carp(CARP_DETAILED_DEBUG, "adding %d %c's to temp", 
+             copies, cur_mod_id);
+        //print_p_mod(mod_cpy);
+
+        // add to temp list
+        temp_list_end = add_linked_list(temp_list_end, mod_cpy);
+        // if this is the first added, set the head of temp list
+        temp_list = (temp_list==NULL) ? temp_list_end : temp_list;
+        temp_counter++;
+        final_ptr = get_next_linked_list(final_ptr);
+      }// last in final list
+
+    }// max copies
+
+    // append temp list to final list
+    carp(CARP_DETAILED_DEBUG, "adding temp list (%d) to final (%d)",
+         temp_counter, final_counter);
+    combine_lists(final_list, temp_list);
+    final_counter += temp_counter;
+  }// last aa_mod
+  carp(CARP_INFO, "Created %d peptide mods", final_counter);
+
+  // allocate an array of PEPTIDE_MOD_T* to return
+  PEPTIDE_MOD_T** final_array = (PEPTIDE_MOD_T**)mycalloc(final_counter, 
+                                                   sizeof(PEPTIDE_MOD_T*));
+  //fill in the array and delete the list
+  LINKED_LIST_T* final_list_ptr = final_list;
+  int pep_idx = 0;
+  while(final_list != NULL){
+    assert(pep_idx < final_counter);
+
+    final_array[pep_idx] = (PEPTIDE_MOD_T*)get_data_linked_list(final_list);  
+    final_list = get_next_linked_list(final_list);
+    pep_idx++;
   }
+
+  delete_linked_list(final_list_ptr);
+
+  // sort list
+  qsort(final_array, final_counter, sizeof(PEPTIDE_MOD_T*),
+        (void*)compare_peptide_mod_num_aa_mods);
+
+  // set return value
+  //peptide_mod_list = &final_array;
+  *peptide_mod_list = final_array;
+  return final_counter;
   /*
     get the number of items in final list
 
-    init final_list
-    init temp_list
+    init final_list to have one unmodified pep
+    init temp_list to empty
 
     for each mod in aa_mod_list
       for i 1 to mod_max
-        create a new peptide_mod with i mods
-        add to the temp_list
         for each pep_mod in final_list
           copy the pep_mod and add i aa_mods
           add to the temp_list
@@ -153,7 +283,6 @@ int generate_peptide_mod_list(
 
     sort by num-mods, fewest to most
    */
-  return -1;
 }
 
 /**
@@ -362,10 +491,10 @@ find cvs branching tutorial, send to AK
  */
 
 /**
- * print all fields in mod.  For debugging
+ * print all fields in aa mod.  For debugging
  */
-void print_mod(AA_MOD_T* mod){
-  printf("MOD: mass %.2f, max per %d, max dist %d, symb %c, aa list ",
+void print_a_mod(AA_MOD_T* mod){
+  printf("AMOD: mass %.2f, max per %d, max dist %d, symb %c, aa list ",
          mod->mass_change, mod->max_per_peptide, mod->max_distance,
          mod->symbol);
 
@@ -374,6 +503,22 @@ void print_mod(AA_MOD_T* mod){
     if( mod->aa_list[i] == TRUE ){
       printf("%c", (i + 'A'));
     }
+  }
+  printf("\n");
+}
+
+/**
+ * print all fields in peptide mod. For debugging
+ */
+void print_p_mod(PEPTIDE_MOD_T* mod){
+  printf("PMOD: mass %.2f, num %d, aa mods\n  ", 
+         mod->mass_change, mod->num_mods);
+
+  LINKED_LIST_T* traverse_list = mod->list_of_mods;
+  while( traverse_list != NULL ){
+    print_a_mod( (AA_MOD_T*)get_data_linked_list(traverse_list) );
+    printf("  ");
+    traverse_list = get_next_linked_list(traverse_list);
   }
   printf("\n");
 }
@@ -479,5 +624,72 @@ char aa_mod_get_symbol(AA_MOD_T* mod){
  */
 int aa_mod_get_identifier(AA_MOD_T* mod){
   return mod->identifier;
+}
+
+/**
+ * \brief Add a new aa_mod to the peptide mod.  Updates mass_change,
+ * num_mods and list_of_aa_mods.  Does not enforce the copy number of
+ * an aa_mod to be less than max_per_peptide.
+ * \returns void
+ */
+void peptide_mod_add_aa_mod(
+  PEPTIDE_MOD_T* pep_mod, ///< The peptide mod being added to
+  AA_MOD_T* aa_mod,       ///< The aa_mod to add
+  int copies ){           ///< How many of the aa_mod to add
+  pep_mod->mass_change += aa_mod->mass_change * copies;
+  pep_mod->num_mods += copies;
+
+  if( pep_mod->list_of_mods == NULL ){
+    pep_mod->list_of_mods = new_list(aa_mod);
+  }else{
+    add_linked_list(pep_mod->list_of_mods, aa_mod);
+  }
+
+  // could speed this up by keeping a pointer to the end
+  int added = 0;
+  for(added = 1; added < copies; added++){
+    add_linked_list(pep_mod->list_of_mods, aa_mod);
+  }
+}
+
+/**
+ * \brief Get the value of the net mass change for this peptide_mod.
+ * \returns The mass change for the peptide mod.
+ */
+double peptide_mod_get_mass_change(PEPTIDE_MOD_T* mod){
+  return mod->mass_change;
+}
+
+/**
+ * \brief Get the number of aa_mods in this peptide_mod.
+ * \returns The number of aa_mods in this peptide_mod.
+ */
+int peptide_mod_get_num_aa_mods(PEPTIDE_MOD_T* mod){
+  return mod->num_mods;
+}
+
+/**
+ * \brief Get a pointer to the linked list of aa_mods for this peptide_mod.
+ * The number of elements in the list is given by
+ * peptide_mod_get_num_aa_mods. A unique aa_mod may be listed more
+ * than once.  There is no particular order to the aa_mods in the
+ * list.
+ * \returns A pointer to a linked list pointing to AA_MOD_T's.
+ */
+LINKED_LIST_T* peptide_mod_get_aa_mod_list(PEPTIDE_MOD_T* mod){
+  return mod->list_of_mods;
+}
+
+/**
+ * \brief Compares the number of aa mods in two peptide mods for
+ * sorting.
+ * \returns Negative int, 0, or positive int if the number of aa_mods
+ * in pmod 1 is less than, equal to or greater than the number of
+ * aa_mods in pmod2, respectively.
+ */
+int compare_peptide_mod_num_aa_mods(const void* pmod1, 
+                                    const void* pmod2){
+  return (*(PEPTIDE_MOD_T**)pmod1)->num_mods 
+            - (*(PEPTIDE_MOD_T**)pmod2)->num_mods;
 }
 

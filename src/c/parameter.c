@@ -479,6 +479,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
   ){
 
   carp(CARP_DETAILED_DEBUG, "Selecting options");
+  assert(parameter_initialized && usage_initialized && type_initialized);
   BOOLEAN_T success = TRUE;
 
   if( (num_options < 1) || (option_names == NULL) ){
@@ -583,6 +584,8 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
                                           char** argv, 
                                           char* exe_name){
   carp(CARP_DETAILED_DEBUG, "Parameter.c is parsing the command line");
+  assert(parameter_initialized && usage_initialized && type_initialized);
+
   BOOLEAN_T success = TRUE;
   int i;
   /* first look for parameter-file option and parse values in file before

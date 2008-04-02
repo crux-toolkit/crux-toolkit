@@ -25,6 +25,8 @@ NON_PERCOLATOR_LIB_FILES= \
   ion.h \
   ion_series.c \
   ion_series.h \
+  linked_list.h \
+  linked_list.c \
   mass.c \
   mass.h \
   modifications.c \
