@@ -20,6 +20,7 @@ TESTS = \
 	check-match.c \
 	check-parameter.c \
 	check-modifications.c \
+	check-peptide-modifications.c \
 	check-linked-list.c \
 	crux-unit-tests.c
 
