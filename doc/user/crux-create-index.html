@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: create-index
-REVISION: $Revision: 1.3 $
+REVISION: $Revision: 1.3.8.1 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -26,7 +26,8 @@ all of its peptides on disk.
 
 <blockquote>
 <code>crux-create-index [options] 
-  &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
+  &nbsp;&lt;protein&nbsp;input&nbsp;file&gt; 
+  &nbsp;&lt;index&nbsp;name&gt; 
 </code>
 </blockquote>
 
@@ -34,8 +35,10 @@ all of its peptides on disk.
 <B>Input:</B>
 
 <UL>
-  <LI>&lt;protein input filename&gt; &ndash; 
+  <LI>&lt;protein input file&gt; &ndash; 
   The name of the file (in fasta format) from which to parse proteins.
+  <LI>&lt;index name&gt; &ndash; 
+  The name of the directory where the newly created index will be placed.
 	
     </UL>
 <B>Output:</B>
@@ -44,7 +47,7 @@ all of its peptides on disk.
   <br>
 
   The main output of the program is an index for the fasta file 
-  &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; on disk. Hence, there is 
+  &nbsp;&lt;protein&nbsp;input&nbsp;file&gt; on disk. Hence, there is 
   no STDOUT. The 
   program prints to STDERR diagnostic messages informing the user of it's
   progress, depending on verbosity.

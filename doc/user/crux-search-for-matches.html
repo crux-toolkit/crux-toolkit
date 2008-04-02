@@ -10,7 +10,7 @@
 AUTHOR: Chris Park
 CREATE DATE: 2007-06-19
 PROJECT: match-search
-REVISION: $Revision: 1.2 $
+REVISION: $Revision: 1.2.8.1 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -30,7 +30,7 @@ binary output files or an SQT files.
 <code>crux-search-for-matches
   &nbsp;[options]
   &nbsp;&lt;ms2&nbsp;input&nbsp;filename&gt; 
-  &nbsp;&lt;protein&nbsp;input&nbsp;filename&gt; 
+  &nbsp;&lt;protein&nbsp;input&gt; 
 
 </code>
 
@@ -40,20 +40,20 @@ binary output files or an SQT files.
 <UL>
   <LI>&lt;ms2 &gt; &ndash; 
   The name of the file (in MS2 format) from which to parse the spectra.
-  <LI>&lt;protein input filename&gt; &ndash; 
-  The name of the file (in fasta format) from which to retrieve proteins and
-  peptides.
+  <LI>&lt;protein input&gt; &ndash; 
+  The name of the file in fasta format or the directory containing a
+  protein index from which to retrieve proteins and peptides.
 </UL>
 <B>Output:</B>
 
 <UL>
   <br>
 
-  The program outputs to a user-specified folder a binary file
+  The program writes to a user-specified folder a binary file
   that contains the PSMs and additional features.
   <br>
   Optionally, the result can be output in a human readable
-  Sqt format file, or both binary and Sqt formats.
+  SQT format file instead of or in addition to the binary file.
   <br>
 
 </UL>
