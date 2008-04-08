@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.6 $
+ * $Revision: 1.1.2.7 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
@@ -29,7 +29,7 @@
 
 /* Public constants */
 enum {MAX_AA_MODS = 11};
-
+enum {MAX_PROTEIN_SEQ_LENGTH = 40000};
 enum {AA_LIST_LENGTH = 26}; // A-Z
 
 typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
@@ -62,22 +62,12 @@ AA_MOD_T* new_aa_mod(int mod_idx);
  */
 void free_aa_mod(AA_MOD_T*);
 
-/**
- * \brief Check a peptide sequence to see if the aa_mods in
- * peptide_mod can be applied. 
- *
- * Assumes that an amino acid can be modified by more than one aa_mod,
- * but not more than once by a single aa_mod as defined in modifiable().
- * \returns TRUE if the sequence can be modified, else FALSE
- */
-BOOLEAN_T is_peptide_modifiable( PEPTIDE_T* peptide,
-                            PEPTIDE_MOD_T* peptide_mod);
-
 
 /**
  * The new definition of a PEPTIDE_T object.
  * 
  */
+/*
 struct peptide{
   unsigned char length; ///< The length of the peptide
   float peptide_mass;   ///< The peptide's mass with any modifications
@@ -85,6 +75,7 @@ struct peptide{
   BOOLEAN_T is_modified;   ///< if true sequence != NULL
   MODIFIED_AA_T* sequence; ///< sequence with modifications
 };
+*/
 
 /**
  * \brief checks to see if an amino acid is modified by a given mod
@@ -92,6 +83,16 @@ struct peptide{
  */
 BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod);
 
+/**
+ * \brief Determine if this modified amino acid can be modified by
+ * this modification.
+ *
+ * Checks the mod list of modifiable residues to see if aa is in the
+ * list.  Also checks to see if aa has already been modified by this
+ * mod.  
+ * \returns TRUE if it can be modified, else FALSE
+ */
+BOOLEAN_T is_aa_modifiable(MODIFIED_AA_T aa, AA_MOD_T* mod);
 
 /**
  * \brief Finds the list of modifications made to an amino acid.
@@ -107,7 +108,17 @@ int get_aa_mods(MODIFIED_AA_T aa,
                 AA_MOD_T* possible_mods, 
                 AA_MOD_T** mod_list);
 
+/**
+ * \brief Converts a MODIFIED_AA into a char, effectively unmodifying it.
+ * \returns The unmodified char representation of an aa.
+ */
 char modified_aa_to_char(MODIFIED_AA_T aa);
+
+/**
+ * \brief Converts a char representation of an aa to an unmodified aa
+ * of type MODIFIED_AA_T.  Requires 'A' <= char <= 'Z'. 
+ * \returns The MODIFIED_AA_T represnetation of an aa.
+ */
 MODIFIED_AA_T char_aa_to_modified(char aa);
 
 // in parameter.c

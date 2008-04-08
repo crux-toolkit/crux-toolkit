@@ -1909,6 +1909,25 @@ void read_mods_from_file(char* param_filename){
   carp(CARP_DEBUG, "Finished reading mods file");
 }
 
+// Secret functions used in testing
+
+void force_set_aa_mod_list(AA_MOD_T** amod_list, int new_num_mods){
+  int i=0;
+  for(i=0; i<new_num_mods; i++){
+    list_of_mods[i] = amod_list[i];
+  }
+  num_mods = new_num_mods;
+}
+
+void force_set_c_mod_list(AA_MOD_T** cmod_list, int new_num_mods){
+  list_of_c_mods = cmod_list;
+  num_c_mods = new_num_mods;
+}
+
+void force_set_n_mod_list(AA_MOD_T** nmod_list, int new_num_mods){
+  list_of_n_mods = nmod_list;
+  num_n_mods = new_num_mods;
+}
 
 
 

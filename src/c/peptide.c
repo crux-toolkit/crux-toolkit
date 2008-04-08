@@ -1,21 +1,21 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.72 $
+ * $Revision: 1.72.2.1 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "utils.h"
-#include "hash.h"
-#include "crux-utils.h"
-#include "objects.h"
-#include "mass.h"
+//#include <math.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include "utils.h"
+//#include "hash.h"
+//#include "crux-utils.h"
+//#include "objects.h"
+//#include "mass.h"
 #include "peptide.h"
-#include "protein.h"
-#include "database.h"
-#include "carp.h"
+//#include "protein.h"
+//#include "database.h"
+//#include "carp.h"
 
 /**
  * static global variable
@@ -1288,6 +1288,58 @@ BOOLEAN_T load_peptide(
   PEPTIDE_T* peptide, ///< An allocated peptide
   FILE* file ///< The file pointing to the location of the peptide
   );
+
+/**
+ * \brief Find the distance from the n-terminus of the source protein
+ * to the n-terminus of the peptide.  
+ * In the case of multiple source proteins, return the smallest
+ * distance.
+ * \returns The distance from the protein n-terminus.
+ */
+int get_peptide_n_distance(PEPTIDE_T* peptide){
+
+  int min_index = MAX_PROTEIN_SEQ_LENGTH;
+  PEPTIDE_SRC_T* cur_src = peptide->peptide_src;
+  while( cur_src != NULL ){
+    int index = get_peptide_src_start_idx(cur_src);
+    if( index < min_index ){
+      min_index = index;
+    }
+    cur_src = get_peptide_src_next_association(cur_src);
+  }
+  return min_index - 1;
+}
+
+/**
+ * \brief Find the distance from the c-terminus of the source protein
+ * to the c-terminus of the peptide.
+ * In the case of multiple source proteins, return the smallest
+ * distance.
+ * \returns The distance from the protein c-terminus.
+ */
+int get_peptide_c_distance(PEPTIDE_T* peptide){
+
+  int min_index = MAX_PROTEIN_SEQ_LENGTH;
+  int peptide_length = get_peptide_length(peptide);
+  PEPTIDE_SRC_T* cur_src = peptide->peptide_src;
+
+  while( cur_src != NULL ){
+    // get protein length
+    int protein_length = get_protein_length( 
+                           get_peptide_src_parent_protein(cur_src));
+    // get index of end
+    int start_index = get_peptide_src_start_idx(cur_src);
+
+    int cidx = protein_length - (start_index + peptide_length - 1);
+    if( cidx < min_index){
+      min_index = cidx;
+    }
+    cur_src = get_peptide_src_next_association(cur_src);
+  }
+  return min_index;
+
+
+}
 
 /*
  * Local Variables:

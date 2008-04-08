@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.63 $
+ * $Revision: 1.63.2.1 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -725,6 +725,9 @@ DATABASE_T* copy_database_ptr(
   DATABASE_T* database ///< the query database -in/out
   )
 {
+  if( database == NULL ){
+    return NULL;
+  }
   ++database->pointer_count;
   return database;
 }

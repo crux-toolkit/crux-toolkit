@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file ion.c
- * $Revision: 1.28 $
+ * $Revision: 1.28.2.1 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -9,11 +9,11 @@
 #include <string.h>
 #include "objects.h"
 #include "ion.h"
+#include "alphabet.h"
 #include "peptide.h"
 #include "peak.h"
 #include "mass.h"
 #include "utils.h"
-#include "alphabet.h"
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <inttypes.h>

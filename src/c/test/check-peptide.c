@@ -18,38 +18,29 @@
  ********************************************/
 
 
-PEPTIDE_T* peptide1;
-PEPTIDE_T* peptide2;
-PEPTIDE_T* peptide3;
-PEPTIDE_T* peptide4;
-PROTEIN_T* protein;
-PROTEIN_T* protein1;
-PROTEIN_T* protein2;
-PROTEIN_T* protein3;
+PEPTIDE_T *peptide1, *peptide2, *peptide3, *peptide4;
+PROTEIN_T *protein, *protein1, *protein2, *protein3; 
 PEPTIDE_CONSTRAINT_T* constraint;
-PEPTIDE_SRC_T* association1;
-PEPTIDE_SRC_T* association2;
-PEPTIDE_SRC_T* association3;
+PEPTIDE_SRC_T *association1, *association2, *association3;
 DATABASE_T* database;
+
+char* protseq1 = "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW";
+
 
 START_TEST (test_create){
   database = new_database("test", FALSE);
-  
+
   //test on link_list implementaion of peptide_src
   set_peptide_src_implementation(TRUE);
   
   peptide4 = allocate_peptide();
   char* seq = NULL;
   
-  protein = new_protein("test protein",
-
-"MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW"
-                        , 490, "this is a my test protein", 44, 4, database); //offset and protein_idx are random
+  protein = new_protein("test protein", protseq1, 490,
+                        "this is a my test protein", 44, 4, database); //offset and protein_idx are random
   
-  protein2 = new_protein("test protein",
-
-"MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW"
-                        , 490, "this is a my test protein", 44, 4, database);
+  protein2 = new_protein("test protein", protseq1, 490,
+                         "this is a my test protein", 44, 4, database);
 
   //create peptides
   peptide1 = new_peptide( 6, 684.75, protein, 239, TRYPTIC); //QVPDAR
@@ -155,11 +146,102 @@ START_TEST (test_create){
 }
 END_TEST
 
+void pep_setup(){
+  protein1 = new_protein( "Protein1", protseq1, strlen(protseq1), 
+                          NULL, 0, 0, NULL);//description, offset, idx, dbase
+  peptide1 = new_peptide( 10, 1087.20, protein1, 20, TRYPTIC);//VADILESNAR
+  peptide2 = new_peptide( 16, 1736.02, protein1, 1, TRYPTIC);//MRVLKFGGTSVANAER
+  peptide3 = new_peptide( 4, 547.57, protein1, 487, TRYPTIC);//QQSW
+
+}
+
+void pep_teardown(){
+  free_peptide(peptide1);
+  free_peptide(peptide2);
+  free_peptide(peptide3);
+  free_protein(protein1);
+}
+
+START_TEST (test_ndist){// start index
+  // get_peptide_n_distance at 0, mid, near end
+  int ndist = get_peptide_n_distance(peptide1); 
+  fail_unless( ndist == 19, 
+               "Incorrect distance from peptide n-terminus to " \
+               "protein n-ternimus.  Got %d, should be 19", ndist);
+  ndist = get_peptide_n_distance(peptide2); 
+  fail_unless( ndist == 0, 
+               "Incorrect distance from peptide n-terminus to " \
+               "protein n-ternimus.  Got %d, should be 0", ndist);
+
+  ndist =  get_peptide_src_start_idx(get_peptide_peptide_src(peptide3));
+  fail_unless( ndist == 487, 
+               "Incorrect start index of peptide3" \
+               ".  Got %d, should be 487", ndist);
+  ndist = get_peptide_n_distance(peptide3); 
+  fail_unless( ndist == 486, 
+               "Incorrect distance from peptide n-terminus to " \
+               "protein n-ternimus.  Got %d, should be 486", ndist);
+
+  // test for multiple protein sources, first is least, first not least
+  add_peptide_peptide_src( peptide1,
+                           new_peptide_src(NOT_TRYPTIC, protein1, 25) );
+  ndist = get_peptide_n_distance(peptide1); 
+  fail_unless( ndist == 19, 
+               "Incorrect distance from peptide n-terminus to " \
+               "protein n-ternimus.  Got %d, should be 19", ndist);
+  add_peptide_peptide_src( peptide1,
+                           new_peptide_src(NOT_TRYPTIC, protein1, 10) );
+
+  ndist = get_peptide_n_distance(peptide1); 
+  fail_unless( ndist == 9, 
+               "Incorrect distance from peptide n-terminus to " \
+               "protein n-ternimus.  Got %d, should be 9", ndist);
+}
+END_TEST
+
+START_TEST (test_cdist){// protein_len - start_idx + length -1
+  // get peptide_cdist at 0, mid, near end
+  int cdist = get_peptide_c_distance(peptide1); 
+  fail_unless( cdist == 461, 
+               "Incorrect distance from peptide c-terminus to " \
+               "protein c-ternimus.  Got %d, should be 461", cdist);
+  cdist = get_peptide_c_distance(peptide2); 
+  fail_unless( cdist == 474, 
+               "Incorrect distance from peptide c-terminus to " \
+               "protein c-ternimus.  Got %d, should be 475", cdist);
+  cdist = get_peptide_c_distance(peptide3); 
+  fail_unless( cdist == 0, 
+               "Incorrect distance from peptide c-terminus to " \
+               "protein c-ternimus.  Got %d, should be 0", cdist);
+
+  // test for multiple protein sources, first is least, first not least
+  add_peptide_peptide_src( peptide1,
+                           new_peptide_src(NOT_TRYPTIC, protein1, 5) );
+  cdist = get_peptide_c_distance(peptide1); 
+  fail_unless( cdist == 461, 
+               "Incorrect distance from peptide c-terminus to " \
+               "protein c-ternimus.  Got %d, should be 461", cdist);
+  add_peptide_peptide_src( peptide1,
+                           new_peptide_src(NOT_TRYPTIC, protein1, 30) );
+  cdist = get_peptide_c_distance(peptide1); 
+  fail_unless( cdist == 451, 
+               "Incorrect distance from peptide c-terminus to " \
+               "protein c-ternimus.  Got %d, should be 451", cdist);
+}
+END_TEST
+
 Suite* peptide_suite(void){
   Suite *s = suite_create("Peptide");
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);
   //tcase_add_checked_fixture(tc_core, setup, teardown);
+
+  TCase *tc_with_setup = tcase_create("With startup");
+  suite_add_tcase(s, tc_with_setup);
+  tcase_add_test(tc_with_setup, test_ndist);
+  tcase_add_test(tc_with_setup, test_cdist);
+  tcase_add_checked_fixture(tc_with_setup, pep_setup, pep_teardown);
+
   return s;
 }

@@ -16,13 +16,13 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.6 $
+ * $Revision: 1.1.2.7 $
  */
 
 #include "modifications.h"
 
 /* Private constants */
-enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
+//enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
 
 /* Private global variables */
 char mod_sqt_symbols[MAX_AA_MODS] = {'*', '@', '#', '^', '~', '%', 
@@ -95,6 +95,39 @@ void free_aa_mod(AA_MOD_T* mod){
   }
 }
 
+//FIXME: implment these
+/**
+ * \brief Converts a MODIFIED_AA into a char, effectively unmodifying it.
+ * \returns The unmodified char representation of an aa.
+ */
+char modified_aa_to_char(MODIFIED_AA_T aa){
+  return (char)aa;
+}
+
+/**
+ * \brief Converts a char representation of an aa to an unmodified aa
+ * of type MODIFIED_AA_T.  Requires 'A' <= char <= 'Z'. 
+ * \returns The MODIFIED_AA_T represnetation of an aa.
+ */
+MODIFIED_AA_T char_aa_to_modified(char aa){
+  assert( aa >= 'A' && aa <= 'Z' );
+  return (MODIFIED_AA_T)aa;
+}
+
+
+// FIXME: implement this
+BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
+  /*
+  int id = mod->identifier;
+  if( (aa && id) != 0 ){
+    return TRUE;
+  } 
+  */
+  // so it compiles
+  carp(110, "%d %d", (int)aa, mod->max_per_peptide);
+  // dummy for now
+  return FALSE;
+ }
 
 /**
  * \brief Determine if this modified amino acid can be modified by
@@ -105,21 +138,19 @@ void free_aa_mod(AA_MOD_T* mod){
  * mod.  
  * \returns TRUE if it can be modified, else FALSE
  */
-//bool modifiable(MODIFIED_AA_T* aa, AA_MOD_T* mod){
-  // if the residue is in the list of residues that can be modified
-  // AND if the residue is not already modified by the same mod
-  //    return true
-  // else 
-  //    return false
-//}
+BOOLEAN_T is_aa_modifiable
+ (MODIFIED_AA_T aa, ///< The sequence amino acid to be modified
+  AA_MOD_T* mod){   ///< The aa_mod to modify it with
 
-BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
-  int id = mod->identifier;
-  if( (aa && id) != 0 ){
+  if( is_aa_modified(aa, mod) == TRUE ){
+    return FALSE;
+  }
+  if( mod->aa_list[ modified_aa_to_char(aa) - 'A' ] == TRUE ){
     return TRUE;
-  } 
+  }
+  // else not in list
   return FALSE;
- }
+}
 
 /**
  * \brief Finds the list of modifications made to an amino acid.

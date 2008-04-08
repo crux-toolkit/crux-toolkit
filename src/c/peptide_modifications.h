@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.1 $
+ * $Revision: 1.1.2.2 $
  */
 #ifndef PEPTIDE_MODIFICATIONS_H
 #define PEPTIDE_MODIFICATIONS_H
@@ -61,6 +61,17 @@ int generate_peptide_mod_list(
  PEPTIDE_MOD_T*** peptide_mod_list ///< return here the list of peptide_mods
 );
 
+/**
+ * \brief Check a peptide sequence to see if the aa_mods in
+ * peptide_mod can be applied. 
+ *
+ * Assumes that an amino acid can be modified by more than one aa_mod,
+ * but not more than once by a single aa_mod as defined in modifiable().
+ * \returns TRUE if the sequence can be modified, else FALSE
+ */
+BOOLEAN_T is_peptide_modifiable( PEPTIDE_T* peptide,
+                            PEPTIDE_MOD_T* peptide_mod);
+
 
 /**
  * \brief Take a peptide and a peptide_mod and return a list of
@@ -86,7 +97,8 @@ int modify_peptide(PEPTIDE_T* peptide,
  * \returns void
  */
 void peptide_mod_add_aa_mod(PEPTIDE_MOD_T* pep_mod,
-                            AA_MOD_T* aa_mod,
+                            //AA_MOD_T* aa_mod,
+                            int aa_mod_idx,
                             int copies );
 
 /**

@@ -1,17 +1,25 @@
 #include <stdlib.h>
 #include "check-peptide-modifications.h"
 #include "../peptide_modifications.h"
+#include "../peptide.h"
+#include "../protein.h"
 
 // also from modifications
 int generate_peptide_mod_list_TESTER(
  PEPTIDE_MOD_T*** peptide_mod_list,
  AA_MOD_T** aa_mod_list,
  int num_aa_mods);
+// also from parameter.c
+void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 // declare things to set up
 PEPTIDE_MOD_T *pmod1, *pmod2;
 AA_MOD_T *amod1, *amod2, *amod3;
 AA_MOD_T* amod_list[3];
+PEPTIDE_T* pep1;
+PROTEIN_T* prot1;
+char* seq = "MRVLKFGGTSVANAERFLRVADILESNARQGQVAOOTVLSAPAKITNHLVA" \
+"MIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQC";
 
 void pmod_setup(){
   pmod1 = new_peptide_mod();
@@ -24,6 +32,12 @@ void pmod_setup(){
   amod_list[0] = amod1;
   amod_list[1] = amod2;
   amod_list[2] = amod3;
+
+  // initialize mods in parameter.c
+  force_set_aa_mod_list(amod_list, 3);
+
+  prot1 = new_protein( "Protein1", seq, strlen(seq), NULL, 0, 0, NULL);
+  pep1 = new_peptide( 11, 1108.18, prot1, 6, TRYPTIC);// seq: FGGTSVANAER
 }
 
 
@@ -48,20 +62,20 @@ END_TEST
 START_TEST(test_set){
   // try adding aa_mods
   double aa_mass = aa_mod_get_mass_change(amod1);
-  peptide_mod_add_aa_mod(pmod1, amod1, 1);
+  peptide_mod_add_aa_mod(pmod1, 0, 1);
   fail_unless( peptide_mod_get_num_aa_mods(pmod1) == 1,
                "Adding an aa mod did not change num mods" );
   fail_unless( peptide_mod_get_mass_change(pmod1) == aa_mass,
                "Adding an aa mod did not correctly set the mass change" );
 
-  peptide_mod_add_aa_mod(pmod1, amod1, 1);
+  peptide_mod_add_aa_mod(pmod1, 0, 1);
   fail_unless( peptide_mod_get_num_aa_mods(pmod1) == 2,
                "Adding an aa mod did not change num mods" );
   fail_unless( peptide_mod_get_mass_change(pmod1) == aa_mass*2,
                "Adding an aa mod did not correctly set the mass change" );
 
   // try adding multiple copies
-  peptide_mod_add_aa_mod(pmod1, amod1, 10);
+  peptide_mod_add_aa_mod(pmod1, 0, 10);
   fail_unless( peptide_mod_get_num_aa_mods(pmod1) == 12,
                "Adding an aa mod did not change num mods" );
 }
@@ -69,8 +83,8 @@ END_TEST
 
 START_TEST(test_compare){
   // compare m1 < m2
-  peptide_mod_add_aa_mod( pmod1, amod1, 1 );
-  peptide_mod_add_aa_mod( pmod2, amod1, 2 );
+  peptide_mod_add_aa_mod( pmod1, 0, 1 );
+  peptide_mod_add_aa_mod( pmod2, 0, 2 );
   fail_unless( compare_peptide_mod_num_aa_mods( &pmod1, &pmod2 ) == -1,
                "Incorrectly compared two mods, first fewer aa than second");
   // compare m2 < m1
@@ -98,13 +112,13 @@ START_TEST(test_sort){
   // create an array of peptide_mods with differen numbers of mods
   PEPTIDE_MOD_T* array[4];
   array[0] = new_peptide_mod();
-  peptide_mod_add_aa_mod( array[0], amod1, 3);
+  peptide_mod_add_aa_mod( array[0], 0, 3);
   array[1] = new_peptide_mod();
-  peptide_mod_add_aa_mod( array[1], amod1, 0);
+  peptide_mod_add_aa_mod( array[1], 0, 0);
   array[2] = new_peptide_mod();
-  peptide_mod_add_aa_mod( array[2], amod1, 8);
+  peptide_mod_add_aa_mod( array[2], 0, 8);
   array[3] = new_peptide_mod();
-  peptide_mod_add_aa_mod( array[3], amod1, 1);
+  peptide_mod_add_aa_mod( array[3], 0, 1);
 
   // sort the array
   qsort( array, 4, sizeof(PEPTIDE_MOD_T*),
@@ -153,6 +167,70 @@ START_TEST(test_pep_list){
 }
 END_TEST
 
+START_TEST(test_modifiable){
+  // test an empty mod and any peptide
+  fail_unless( is_peptide_modifiable( pep1, pmod1 ) == TRUE,
+               "Pep mod with no aa mods failed to modify a peptide");
+
+  // mod with one aa mod, no aa's in pep
+  aa_mod_set_max_per_peptide(amod1, 1);
+  aa_mod_set_mass_change(amod1, 80);
+  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['C'-'A'] = TRUE;
+  mod_us['Y'-'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 0, 1);
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == FALSE, 
+               "Should NOT be able to modifiy pep1 (%s) with CY",
+               get_peptide_sequence(pep1));
+
+  // pmod with one aa mod, one aa listed in pep
+  mod_us['S'-'A'] = TRUE;
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == TRUE, 
+               "Should be able to modify pep1 (%s) with CYS",
+               get_peptide_sequence(pep1));
+
+  // pmod with two aa mods, one listed one not
+  aa_mod_set_mass_change(amod2, 44);
+  mod_us = aa_mod_get_aa_list(amod2);
+  mod_us['D'-'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 1, 1);
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == FALSE, 
+               "Should NOT be able to modify pep1 (%s) with CYS,D",
+               get_peptide_sequence(pep1));
+
+  // pmod with two aa mods, both listed
+  mod_us['V'-'A'] = TRUE;
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == TRUE, 
+               "Should be able to modify pep1 (%s) with CYS,DF",
+               get_peptide_sequence(pep1));
+
+  // pmod with aa mod and not enough locations
+  peptide_mod_add_aa_mod(pmod1, 1, 1);
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == FALSE, 
+               "Should NOT be able to modify pep1 (%s) with CYS,DF,DF",
+               get_peptide_sequence(pep1));
+
+  // try n and c mods
+  aa_mod_set_position( amod3, N_TERM );
+  mod_us = aa_mod_get_aa_list( amod3 );
+  mod_us['F'-'A'] = TRUE; // should be true for all, but this is n-term
+  force_set_aa_mod_list(amod_list+2, 1);
+
+  // pmod with one aa nmod, distance ok
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == TRUE, 
+           "Should be able to modify the n-term with no distance restriction");
+
+  // pmod with one aa nmod, distance too far
+  aa_mod_set_max_distance( amod3, 0);
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == FALSE, 
+               "Should NOT be able to modify the n-term not first in prot");
+  
+  // pmod with one aa cmod, distance ok
+  // pmod with one aa cmod, distance too far
+  
+}
+END_TEST
+
 /* Boundry conditions test suite */
 // test_p_null
 
@@ -165,6 +243,7 @@ Suite* peptide_modifications_suite(){
   tcase_add_test(tc_core, test_compare);
   tcase_add_test(tc_core, test_sort);
   tcase_add_test(tc_core, test_pep_list);
+  tcase_add_test(tc_core, test_modifiable);
   tcase_add_checked_fixture(tc_core, pmod_setup, pmod_teardown);
   suite_add_tcase(s, tc_core);
 

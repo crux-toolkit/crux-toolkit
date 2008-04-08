@@ -1,21 +1,27 @@
 /**
  * \file peptide.h 
- * $Revision: 1.45 $
+ * $Revision: 1.45.4.1 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
 #define PEPTIDE_H
 
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "utils.h"
 #include "crux-utils.h"
+#include "hash.h"
 #include "mass.h"
 #include "protein.h"
 #include "objects.h"
 #include "carp.h"
 #include "peptide_constraint.h"
+#include "database.h"
+#include "modifications.h"
 
-//this may be elsewhere
+//these may be elsewhere
 #define MAX_PEPTIDE_LENGTH 255
 
 /**
@@ -306,6 +312,24 @@ void set_peptide_src_implementation(
 int get_peptide_missed_cleavage_sites(
   PEPTIDE_T* peptide  ///< the peptide to query -in
 );
+
+/**
+ * \brief Find the distance from the n-terminus of the source protein
+ * to the n-terminus of the peptide.  
+ * In the case of multiple source proteins, return the smallest
+ * distance.
+ * \returns The distance from the protein n-terminus.
+ */
+int get_peptide_n_distance(PEPTIDE_T* peptide);
+
+/**
+ * \brief Find the distance from the c-terminus of the source protein
+ * to the c-terminus of the peptide.
+ * In the case of multiple source proteins, return the smallest
+ * distance.
+ * \returns The distance from the protein c-terminus.
+ */
+int get_peptide_c_distance(PEPTIDE_T* peptide);
 
 /**
  * Residue Iterator

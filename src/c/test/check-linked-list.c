@@ -29,6 +29,8 @@ START_TEST(test_create){
   fail_unless( list1 != NULL, "Failed to create a new list." );
   fail_unless( get_data_linked_list(list1) == data1, 
                "List head does not point to correct data." );
+  fail_unless( get_next_linked_list(list1) == NULL,
+               "Next of newly created list is not NULL");
 }
 END_TEST
 
@@ -75,6 +77,8 @@ START_TEST(test_combine){
   // check that the end of list1 points to list2
   fail_unless( get_next_linked_list(end) == list2,
                "Failed to combine lists." );
+  // now set list2 to NULL so we don't try to free it
+  list2 = NULL;
 }
 END_TEST
 
@@ -89,6 +93,8 @@ START_TEST(test_copy){
   add_linked_list(list1, data2);
   add_linked_list(list1, data3);
   copy = copy_list(list1);
+  fail_unless( copy != list1, 
+               "Copy should not point to list1 after creating a copy");
   fail_unless( get_data_linked_list(copy) == data1,
                "Failed to copy first element of 3 element list");
   LINKED_LIST_T* next = get_next_linked_list(copy);

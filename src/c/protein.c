@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.73 $
+ * $Revision: 1.73.2.1 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -774,6 +774,10 @@ void set_protein_annotation(
   char* annotation ///< the sequence to add -in
   )
 {
+  if( annotation == NULL ){
+    return;
+  }
+
   if(!protein->is_light){
     free(protein->annotation);
   }
