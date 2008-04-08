@@ -31,6 +31,10 @@ NON_PERCOLATOR_LIB_FILES= \
   ion_series.h \
   mass.c \
   mass.h \
+	match.c \
+	match.h \
+	match_collection.c \
+	match_collection.h \
   objects.h \
   parameter.c \
   parameter.h \
@@ -59,11 +63,7 @@ NON_PERCOLATOR_LIB_FILES= \
   utils.c \
   utils.h
 
-PERCOLATOR_LIB_FILES = \
-    match.c \
-    match.h \
-    match_collection.c \
-    match_collection.h
+PERCOLATOR_LIB_FILES = 
 
 if PERCOLATOR
   LIBFILES=$(PERCOLATOR_LIB_FILES) $(NON_PERCOLATOR_LIB_FILES)
@@ -77,10 +77,10 @@ libcrux_la_SOURCES = $(LIBFILES)
 libcrux_la_LIBADD = -lm
 
 PERCOLATOR_PROGRAM_FILES = \
-  crux-search-for-matches \
   crux-analyze-matches
 
 NON_PERCOLATOR_PROGRAM_FILES = \
+  crux-search-for-matches \
   crux-get-ms2-spectrum \
   crux-generate-peptides \
   crux-create-index \

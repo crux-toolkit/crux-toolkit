@@ -74,7 +74,7 @@ spectrum-min-mass=0
 spectrum-max-mass=1000000000.0
 
 # The spectrum charges to search  1|2|3|all
-spectrum-change=all
+spectrum-charge=all
 
 # Store match results in this folder.  Current directory indicated as '.'
 match-output-folder=.
