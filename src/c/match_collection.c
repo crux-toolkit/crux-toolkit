@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.83 $
+ * $Revision: 1.83.4.1 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -2414,7 +2414,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
     directory_name = ".";
     }*/
 
-  if(set_type == TARGET){
+  if(set_type == SET_TARGET){
     //    sprintf(suffix, "crux_match_target");
     //sprintf(prefix, "crux_match_target");
     sprintf(suffix, ".csm");
@@ -2442,7 +2442,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
       continue;
     }
 
-    if( set_type == TARGET && name_is_decoy(directory_entry->d_name) ){
+    if( set_type == SET_TARGET && name_is_decoy(directory_entry->d_name) ){
       continue;
     }
     file_in_dir =get_full_filename(match_collection_iterator->directory_name, 
