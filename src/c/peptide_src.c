@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide_src.c
- * $Revision: 1.17 $
+ * $Revision: 1.17.2.1 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  * \brief object for mapping a peptide to it's parent protein.
  */
 struct peptide_src{
-  PEPTIDE_TYPE_T peptide_type; ///< the peptide type for the corresponding protein
+  PEPTIDE_TYPE_T peptide_type;///< the peptide type for the corresponding protein
   PROTEIN_T* parent_protein; ///< the parent of this preptide
   int start_idx; ///< start index of the peptide in the protein sequence, first residue is 1 
   PEPTIDE_SRC_T* next_association; ///< a linklist of peptide_src     

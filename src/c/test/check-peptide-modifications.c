@@ -11,6 +11,8 @@ int generate_peptide_mod_list_TESTER(
  int num_aa_mods);
 // also from parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
+void force_set_n_mod_list(AA_MOD_T** amod_list, int num_mods);
+void force_set_c_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 // declare things to set up
 PEPTIDE_MOD_T *pmod1, *pmod2;
@@ -169,6 +171,7 @@ END_TEST
 
 START_TEST(test_modifiable){
   // test an empty mod and any peptide
+  set_verbosity_level(CARP_INFO);
   fail_unless( is_peptide_modifiable( pep1, pmod1 ) == TRUE,
                "Pep mod with no aa mods failed to modify a peptide");
 
@@ -214,19 +217,30 @@ START_TEST(test_modifiable){
   aa_mod_set_position( amod3, N_TERM );
   mod_us = aa_mod_get_aa_list( amod3 );
   mod_us['F'-'A'] = TRUE; // should be true for all, but this is n-term
-  force_set_aa_mod_list(amod_list+2, 1);
+  peptide_mod_add_aa_mod(pmod2, 2, 1);
+  force_set_n_mod_list( amod_list+2, 1);
 
   // pmod with one aa nmod, distance ok
-  fail_unless( is_peptide_modifiable(pep1, pmod1) == TRUE, 
+  fail_unless( is_peptide_modifiable(pep1, pmod2) == TRUE, 
            "Should be able to modify the n-term with no distance restriction");
 
   // pmod with one aa nmod, distance too far
   aa_mod_set_max_distance( amod3, 0);
-  fail_unless( is_peptide_modifiable(pep1, pmod1) == FALSE, 
+  fail_unless( is_peptide_modifiable(pep1, pmod2) == FALSE, 
                "Should NOT be able to modify the n-term not first in prot");
   
   // pmod with one aa cmod, distance ok
+  aa_mod_set_max_distance( amod3, MAX_PROTEIN_SEQ_LENGTH );
+  aa_mod_set_position( amod2, C_TERM);
+  peptide_mod_add_aa_mod( pmod2, 1, 1 );
+  force_set_c_mod_list( amod_list+1, 1 );
+  fail_unless( is_peptide_modifiable(pep1, pmod2) == TRUE,
+               "Should be able to modify c-term with no dist restriction");
+
   // pmod with one aa cmod, distance too far
+  aa_mod_set_max_distance( amod2, 0);
+  fail_unless( is_peptide_modifiable(pep1, pmod2) == FALSE,
+               "Should NOT be able to modify c-term not at protein end");
   
 }
 END_TEST

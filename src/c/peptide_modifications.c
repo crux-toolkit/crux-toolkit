@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.2 $
+ * $Revision: 1.1.2.3 $
  */
 
 #include "peptide_modifications.h"
@@ -256,12 +256,7 @@ BOOLEAN_T is_peptide_modifiable
   int amod_idx = 0;
   for(amod_idx = 0; amod_idx < num_aa_mods; amod_idx++){
 
-    //  LINKED_LIST_T* list_ptr = peptide_mod->list_of_mods;
-    //while( list_ptr != NULL ){
-
-    //AA_MOD_T* cur_aa_mod = (AA_MOD_T*)get_data_linked_list( list_ptr );
     AA_MOD_T* cur_aa_mod = all_mods[amod_idx];
-    //BOOLEAN_T location_found = FALSE;
     int locations_count = 0;
     char* cur_seq_aa = sequence;
 
@@ -269,28 +264,24 @@ BOOLEAN_T is_peptide_modifiable
     while( *cur_seq_aa != '\0' ){
       if( is_aa_modifiable( char_aa_to_modified(*cur_seq_aa), cur_aa_mod)
           == TRUE ){
-        //location_found = TRUE;
         locations_count++;
       }// else keep looking
       cur_seq_aa++;
     }// end of sequence
 
-    //if( location_found == FALSE ){
     if( locations_count < peptide_mod->aa_mod_counts[amod_idx] ){
       return FALSE;
     }
-    // next in aa_mod list
-    //list_ptr = get_next_linked_list( list_ptr );
   }// next in aa_mod list
 
   // now check position-specific modifications
   AA_MOD_T** c_mods = NULL;
   int num_c_mods = get_c_mod_list(&c_mods);
   for(amod_idx = 0; amod_idx < num_c_mods; amod_idx++){
-    AA_MOD_T* cur_aa_mod = all_mods[amod_idx];
+    AA_MOD_T* cur_aa_mod = c_mods[amod_idx];
     int max_distance = aa_mod_get_max_distance(cur_aa_mod);
     
-    if( max_distance > get_peptide_c_distance( peptide ) ){
+    if( get_peptide_c_distance( peptide ) > max_distance ){
       return FALSE;
     }
   }// next aa mod in list
@@ -298,10 +289,10 @@ BOOLEAN_T is_peptide_modifiable
   AA_MOD_T** n_mods = NULL;
   int num_n_mods = get_n_mod_list(&n_mods);
   for(amod_idx = 0; amod_idx < num_n_mods; amod_idx++){
-    AA_MOD_T* cur_aa_mod = all_mods[amod_idx];
+    AA_MOD_T* cur_aa_mod = n_mods[amod_idx];
     int max_distance = aa_mod_get_max_distance(cur_aa_mod);
     
-    if( max_distance > get_peptide_n_distance( peptide ) ){
+    if( get_peptide_n_distance( peptide ) > max_distance ){
       return FALSE;
     }
   }// next aa mod in list
