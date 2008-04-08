@@ -20,4 +20,14 @@ dist_html_DATA  =  \
   data/demo.ms2 \
   data/small-yeast.fasta
 
+WEBDIR=/noble/www/htdocs/proj/crux
+noble-webpage:
+	cp crux.html $(WEBDIR)/index.html
+	cp -f *.html $(WEBDIR)/
+	cp *.css $(WEBDIR)/
+	rm -fr $(WEBDIR)/data/
+	cp -R data/ $(WEBDIR)/
+	cp -R download/ $(WEBDIR)/
+	rm -fr $(WEBDIR)/*/CVS
+
 EXTRA_DIST = 

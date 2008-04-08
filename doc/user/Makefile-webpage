@@ -1,7 +1,0 @@
-WEBDIR=/noble/www/htdocs/proj/crux
-all:
-	cp crux.html $(WEBDIR)/index.html
-	cp -f *.html $(WEBDIR)/
-	cp *.css $(WEBDIR)/
-	rm -fr $(WEBDIR)/data/
-	cp -R data/ $(WEBDIR)/
