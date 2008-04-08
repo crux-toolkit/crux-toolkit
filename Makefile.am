@@ -28,6 +28,7 @@ bdist:
 			src/c/crux-create-index  \
 			bdist/bin/
 	zip -r bdist bdist
+	rm -fr bdist/
 	
 
 
