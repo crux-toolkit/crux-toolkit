@@ -10,7 +10,7 @@
 AUTHOR: Chris Park
 CREATE DATE: 2007-06-19
 PROJECT: match-search
-REVISION: $Revision: 1.2.8.1 $
+REVISION: $Revision: 1.2.8.2 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -21,7 +21,7 @@ REVISION: $Revision: 1.2.8.1 $
 Given as input an ms2 file, a sequence database, and an optional parameter
 file, search each spectrum against the peptides in the sequence database,
 and return the resulting PSMs with some additional features in serialized
-binary output files or an SQT files.
+binary output files or SQT files.
 <br>
 <br>
 <B>Usage:</B>
@@ -62,20 +62,19 @@ binary output files or an SQT files.
 <LI>[--output-mode &lt;sqt | binary | all&gt; ] &ndash; The output format. Default = binary.
 <LI>[--match-output-folder &lt;string&gt;] &ndash; The output folder to store the serialized binary output files. Default = current directory.
 <LI>[--sqt-output-file &lt;string&gt;] &ndash; Name of the sqt file to place matches.
-Default = Prefix of <code>&lt;ms2 input filename&gt;</code>.psm.
-<LI>[--decoy-sqt-output-file &lt;string&gt;] &ndash; Name of the sqt file to place matches. (default = decoy.sqt)
+<!-- Default = Prefix of <code>&lt;ms2 input filename&gt;</code>.psm. -->
+Default = target.sqt.
+<LI>[--decoy-sqt-output-file &lt;string&gt;] &ndash; Name of the sqt file to place matches. Default = decoy.sqt.
 <LI>[--spectrum-min-mass &lt;float&gt;] &ndash; The lowest spectrum m/z to search in the ms2
 file. Default = 0.0
 <LI>[--spectrum-max-mass &lt;float&gt;] &ndash; The highest spectrum m/z to search in the ms2
 file. Default = Positive Infinity.
 <LI>[--prelim-score-type &lt;sp&gt;] &ndash; The type of preliminary scoring function to use.  Default = sp.
-<LI>[--score-type &lt;logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorrlogp_exp_sp | logp_bonf_exp_sp | xcorr&gt;] &ndash; The type of scoring function to use.  Default = xcorr.
-<LI> [--number-decoy-set &lt;int&gt;] &ndash; Specify the number of decoy sets to generate for match_analysis. (default = 2)
-<LI> [--spectrum-charge &lt;string&gt;] &ndash; The spectrum charges to search. 1|2|3|all (default = all)
-<li> [--number-runs &lt;double&gt;] The number of spectrum search runs to perform. (default = 1e+09)
-<LI>[--parameter-file &lt;filename&gt;] &ndash; The crux parameter file to parse
-parameter from. Default = Default to crux_parameter.
-<LI>[--verbosity &lt;int&gt;] &ndash; Specify the verbosity of the current processes from 0-100. By default, verbosity is set to 100.
+<LI>[--score-type &lt;xcorr | sp | dotp| xcor_logp | sp_logp&gt;] &ndash; The type of scoring function to use.  Default = xcorr.
+<LI> [--number-decoy-set &lt;int&gt;] &ndash; Specify the number of decoy sets to generate for match_analysis. Default = 2.
+<LI> [--spectrum-charge &lt;1 | 2 | 3 | all&gt;] &ndash; The spectrum charges to search. Default = all.
+<LI>[--parameter-file &lt;filename&gt;] &ndash; A file containing command-line or additional parameters.  See the <a href=parameter-file.html>parameter documentation</a> page for details.
+<LI>[--verbosity &lt;int&gt;] &ndash; Specify the verbosity of the current processes from 0-100. Default = 40.
 </UL>
 <B>Warning
 messages:</B> 

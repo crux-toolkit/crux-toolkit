@@ -109,8 +109,9 @@ href="path">Changing $PATH</a> for notes on how to run the executables.
 <li><b>Option 2: source files.</b> 
 
 The file you downloaded should be named something like <span
-class=file>crux_1.0.tar.gz</span>. Move it to a convenient location
-and unpack the file with this command.</li>
+class=file>crux_1.0.tar.gz</span>, where <span class=file>1.0</span>
+may be replaced with the most current release version. Move it to a
+convenient location and unpack the file with this command.</li>
 
 <div class=code><code>
 $ tar -zxvf crux_1.0.tar.gz
@@ -121,7 +122,11 @@ created and a long list of files will stream by as they are being put
 into the new directory.
 </ol>
 
-<li><b>Set up Percolator</b> If you do not have <span
+<li><b>Set up Percolator (optional)</b> <span
+class=prog>Percolator</span> can be used with <span
+class=prog>crux-analyze-matches</span> but it is not required for any
+of the other programs.  
+If you do not have <span
 class=file>percolator</span> installed, download it from <a
 href="http://depts.washington.edu/ventures/UW_Technology/Express_Licenses/percolator.php">here</a>
 and follow the installation instructions.  For the next step, you will
@@ -131,22 +136,29 @@ call <span class=file>$HOME/software/percolator</span> the
 <code>PERCOLATOR_ROOT</code>.  
 </li>
 
-<div class=note><em>NOTE: <code>configure</code> will not accept relative paths, such as <span class=file>../../install-dir</span>.  Use fully qualified paths beginning with <span class=file>/</span>.</em>
+<div class=note><em>NOTE: <code>configure</code> will not accept
+relative paths, such as <span class=file>../../install-dir</span>.
+Use fully qualified paths beginning with <span
+class=file>/</span>.</em> 
 </div>
+
 <li><b>Configure</b>  Move into the <span class=file>crux_1.0</span>
 directory from step 1 and confirm that there is a file called <span
 class=file>configure</span>.  This is a script you will run with two
-additional pieces of information, PERCOLATOR_ROOT from step 2 and the
+additional pieces of information, PERCOLATOR_ROOT from step 2 (if you
+choose to install it) and the
 location where you wish to install the <span class=prog>crux</span>
 programs, lets call it <code>install-dir</code>.  If you want <span
 class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
 then <code>install-dir</code> would be <span class=file>$HOME</span>.
 Configure will automatically put the programs in a directory called
-<span class=file>bin</span>.  Run this command.
+<span class=file>bin</span>.  Run one of these two commands.
 
 <div class=code><code>
 $ ./configure --prefix install-dir
-              --with-percolator-dir=PERCOLATOR_ROOT
+              --with-percolator-dir=PERCOLATOR_ROOT <br>
+OR<br>
+$ ./configure --prefix install-dir
 </code></div>
 
 <li><b>Make</b> To complete the process, run these two commands.</li>
@@ -187,8 +199,10 @@ $ echo $PATH</code><br>
 <p>The first directory in this colon-separated list, <span
 class=out>/usr/local/bin</span>, is the first place the computer looks
 for a program.  If it doesn't find the program there it tries <span
-class=out>/usr/bin</span> and so on down the list.  We will add <span
-class=code><em>install-dir</em></span> to the list with this
+class=out>/usr/bin</span> and so on down the list.  You can either
+move the crux executable files into one of these directories already
+in your PATH, or you can add <span
+class=code><em>install-dir</em></span> to PATH with this
 command.  (Remember to replace the word <em>install-dir</em> with the
 actual location of your installation)</p> 
 
