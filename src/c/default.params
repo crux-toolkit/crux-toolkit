@@ -97,9 +97,6 @@ number-decoy-set=2
 # (use 1000000, to select all peptides)
 max-rank-preliminary=500
 
-# The number of search results per spectrum to return
-max-rank-result=500
-
 # Search peptides within +/- 'mass-window' of spectrum precursor mass
 mass-window=3
 
