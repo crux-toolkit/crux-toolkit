@@ -10,7 +10,7 @@
 AUTHOR: Chris Park
 CREATE DATE: 2007-06-19
 PROJECT: match-search
-REVISION: $Revision: 1.2.8.2 $
+REVISION: $Revision: 1.2.8.3 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -73,6 +73,8 @@ file. Default = Positive Infinity.
 <LI>[--score-type &lt;xcorr | sp | dotp| xcor_logp | sp_logp&gt;] &ndash; The type of scoring function to use.  Default = xcorr.
 <LI> [--number-decoy-set &lt;int&gt;] &ndash; Specify the number of decoy sets to generate for match_analysis. Default = 2.
 <LI> [--spectrum-charge &lt;1 | 2 | 3 | all&gt;] &ndash; The spectrum charges to search. Default = all.
+<li>[--overwrite &lt;T|F&gt;] Replace existing files if true (T) or fail when trying to overwrite a file if false (F). Default =  F.
+<li>[--use-index &lt;T|F&gt;] Use an index that has already been created if true (T) or use a fasta file if false (F). Default = F.
 <LI>[--parameter-file &lt;filename&gt;] &ndash; A file containing command-line or additional parameters.  See the <a href=parameter-file.html>parameter documentation</a> page for details.
 <LI>[--verbosity &lt;int&gt;] &ndash; Specify the verbosity of the current processes from 0-100. Default = 40.
 </UL>

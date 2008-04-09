@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: create-index
-REVISION: $Revision: 1.3.8.1 $
+REVISION: $Revision: 1.3.8.2 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -19,7 +19,7 @@ REVISION: $Revision: 1.3.8.1 $
 <br>
 <br>
 Given a protein fasta sequence database as input, generate an index of 
-all of its peptides on disk.
+all of its peptides and save it to disk.
 <br>
 <br>
 <B>Usage:</B>
@@ -58,8 +58,7 @@ all of its peptides on disk.
 <UL>
 <!-- <LI>[-max-file-size int] &ndash; The maximum size of a file to create in the index.  Default=2GB (can be implemented later) -->
 	
-<LI>[--mass-range &lt;float&gt;] &ndash; 
-  The mass range contained in each index file.  Default=1Da
+<!--<LI>[--mass-range &lt;float&gt;] &ndash; The mass range contained in each index file.  Default=1Da-->
 	
 <LI>[--min-mass &lt;float&gt;] &ndash; 
   The minimum neutral mass of the peptides to place in the
@@ -78,26 +77,36 @@ all of its peptides on disk.
 <LI>[--cleavages &lt;tryptic | partial | all&gt; ] &ndash; 
   Type of cleavages to allow.
 The <code>tryptic</code> option outputs peptides that result from a
-complete in silico digestion of proteins after residues K or R except
-when followed by P, wherease <code>all</code> outputs all possible
+complete <i>in silico</i> digestion of proteins after residues K or R except
+when followed by P, whereas <code>all</code> outputs all possible
 peptides.  Default=tryptic
 
 <!--<LI>[-redundancy redundant|unique] &ndash; Specify whether peptides that
 come from different proteins yet with identical sequences should appear
 on separate lines (redundant) or on the same line (unique). Default=unique -->
 
-<LI>[--missed-cleavages] &ndash; 
-  Allow missed cleavage sites with in a peptide.  Default=TRUE 
+<li>[--unique-peptides &lt;T|F&gt;] &ndash; Generate peptides only once, even
+     if they appear in more than one protein if true (T).  Default = F.
+
+<LI>[--missed-cleavages &lt;T|F&gt;] &ndash; 
+  Allow missed cleavage sites with in a peptide.  Default=T
 
 <LI>[--isotopic-mass &lt;average | mono&gt;] &ndash; 
   Specify the type of isotopic masses to use when calculating the
   peptide mass. Default=average  
 
+<li>[--overwrite &lt;T|F&gt;] Replace existing files if true (T) or
+     fail when trying to overwrite a file if false (F). Default=F.  
+
 <LI>[--parameter-file &lt;string&gt;] 
-  The crux parameter file to parse parameter from. (default = crux.params)
+A file containing command-line or additional parameters.  See the <a
+href=parameter-file.html>parameter documentation</a> page for
+details. 
+
 
 <LI>[--verbosity &lt;int&gt;] &ndash; 
-  Specify the verbosity of the current processes from 0-100.  Default=100 
+  Specify the verbosity of the current processes from 0-100.  Default=40.
+
 
 </UL>
 
@@ -116,10 +125,7 @@ messages:</B>
 
 <UL>
 	<LI>All &lt;float&gt;s are supported up to 2 decimal digits
-       	<LI>User must ensure that file handler limit is sufficient enough for 
-create-index. Use "ulimit -n [#file handlers]" on command line to increase 
-number of allowed filehandlers. A typical default is 1024, should reset to 
-~20,000. 
+<!-- <LI>User must ensure that file handler limit is sufficient enough for create-index. Use "ulimit -n [#file handlers]" on command line to increase number of allowed filehandlers. A typical default is 1024, should reset to ~20,000. -->
 	
 </UL>
 <B>Bugs:</B> 
