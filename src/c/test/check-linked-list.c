@@ -121,6 +121,26 @@ START_TEST(test_delete){
 }
 END_TEST
 
+START_TEST(test_eat){
+  // try deleting a single node from a list
+
+  // next is null
+  fail_unless( get_next_free_this_linked_list(list1) == NULL,
+               "List1 should have no next item.");
+  fail_unless( *data1 == 7, "Data was corrupted after deleting list node.");
+
+  // next is not null
+  add_linked_list(list2, data1);
+  LINKED_LIST_T* list2_next = get_next_linked_list( list2 );
+  list1 = get_next_free_this_linked_list(list2);
+  fail_unless( list1 == list2_next,
+               "Deleting single node of list2 didn't give correct next");
+  // set to null for teardown
+  list2 = NULL;
+
+}
+END_TEST
+
 /* Test Case for boundry conditions */
 START_TEST(test_null){
   LINKED_LIST_T* null_list = NULL;
@@ -142,6 +162,9 @@ START_TEST(test_null){
   // combine to empty list, get second
   // combine list with empty, end points to NULL
   // delete null list
+  // delete one node of empty list
+  fail_unless( get_next_free_this_linked_list( null_list ) == NULL,
+               "Failed to delete single node of null linked list.");
 }
 END_TEST
 
@@ -155,6 +178,7 @@ Suite* list_suite(){
   tcase_add_test(tc_core, test_combine);
   tcase_add_test(tc_core, test_copy);
   tcase_add_test(tc_core, test_delete);
+  tcase_add_test(tc_core, test_eat);
   tcase_add_checked_fixture(tc_core, list_setup, list_teardown);
 
   // Test boundry conditions

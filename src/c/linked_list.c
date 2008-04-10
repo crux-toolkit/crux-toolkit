@@ -128,3 +128,20 @@ void delete_linked_list(LINKED_LIST_T* list){
   return;
 }
 
+/**
+ * \brief Deletes the given list node leaving the data intact and
+ * returns a pointer to the next item in the list, NULL if this node
+ * is the last.
+ */
+LINKED_LIST_T* get_next_free_this_linked_list(LINKED_LIST_T* list){
+
+  if( list == NULL ){
+    return NULL;
+  }
+
+  LINKED_LIST_T* next_node = list->next;
+
+  free(list);
+  return next_node;
+}
+

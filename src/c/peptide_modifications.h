@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.2 $
+ * $Revision: 1.1.2.3 $
  */
 #ifndef PEPTIDE_MODIFICATIONS_H
 #define PEPTIDE_MODIFICATIONS_H
@@ -74,8 +74,8 @@ BOOLEAN_T is_peptide_modifiable( PEPTIDE_T* peptide,
 
 
 /**
- * \brief Take a peptide and a peptide_mod and return a list of
- * modified peptides.
+ * \brief Take a peptide and a peptide_mod and return via parameters a
+ * list of modified peptides.
  *
  * The peptide_mod should be guaranteed to be able to be applied to
  * the peptide at least once.  A single amino acid can be modified
@@ -87,7 +87,7 @@ BOOLEAN_T is_peptide_modifiable( PEPTIDE_T* peptide,
  */
 int modify_peptide(PEPTIDE_T* peptide,
                    PEPTIDE_MOD_T* peptide_mod,
-                   PEPTIDE_T** modified_peptides);
+                   LINKED_LIST_T** modified_peptides);
 
 /* Setters and Getters */
 /**

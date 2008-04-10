@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.3 $
+ * $Revision: 1.1.2.4 $
  */
 
 #include "peptide_modifications.h"
@@ -33,7 +33,6 @@
 struct _peptide_mod{
   double mass_change;     ///< the net mass change for the peptide
   int num_mods;           ///< the number of items in the list_of_mods
-  //LINKED_LIST_T* list_of_mods; ///< the list of aa_mods in this peptide
   int aa_mod_counts[MAX_AA_MODS]; ///< the number of each kind of aa mod
                                   ///as listed in parameter.c
 };
@@ -49,7 +48,6 @@ PEPTIDE_MOD_T* new_peptide_mod(){
   PEPTIDE_MOD_T* new_mod = (PEPTIDE_MOD_T*)mymalloc(sizeof(PEPTIDE_MOD_T));
   new_mod->mass_change = 0;
   new_mod->num_mods = 0;
-  //new_mod->list_of_mods = NULL;
   int i=0;
   for(i=0; i<MAX_AA_MODS;i++){
     new_mod->aa_mod_counts[i] = 0;
@@ -68,7 +66,6 @@ PEPTIDE_MOD_T* copy_peptide_mod(PEPTIDE_MOD_T* original){
   PEPTIDE_MOD_T* copy = new_peptide_mod();
   copy->mass_change = original->mass_change;
   copy->num_mods = original->num_mods;
-  //copy->list_of_mods = copy_list(original->list_of_mods);
   int i=0;
   for(i=0; i<MAX_AA_MODS;i++){
     copy->aa_mod_counts[i] = original->aa_mod_counts[i];
@@ -82,8 +79,6 @@ PEPTIDE_MOD_T* copy_peptide_mod(PEPTIDE_MOD_T* original){
  */
 void free_peptide_mod(PEPTIDE_MOD_T* mod){
   if(mod){
-    //not needed
-    //if( mod->list_of_mods ){free(mod->list_of_mods);}
     free(mod);
   }
 }
@@ -145,7 +140,6 @@ int generate_peptide_mod_list_TESTER(
     LINKED_LIST_T* temp_list = NULL;
     LINKED_LIST_T* temp_list_end = NULL;
     int temp_counter = 0;
-    //PEPTIDE_MOD_T* cur_pep_mod = NULL;
 
     int copies = 1;
     for(copies = 1; copies < cur_mod_max + 1; copies++){
@@ -187,7 +181,7 @@ int generate_peptide_mod_list_TESTER(
   // allocate an array of PEPTIDE_MOD_T* to return
   PEPTIDE_MOD_T** final_array = (PEPTIDE_MOD_T**)mycalloc(final_counter, 
                                                    sizeof(PEPTIDE_MOD_T*));
-  //fill in the array and delete the list
+  // fill in the array and delete the list
   LINKED_LIST_T* final_list_ptr = final_list;
   int pep_idx = 0;
   while(final_list != NULL){
@@ -205,7 +199,6 @@ int generate_peptide_mod_list_TESTER(
         (void*)compare_peptide_mod_num_aa_mods);
 
   // set return value
-  //peptide_mod_list = &final_array;
   *peptide_mod_list = final_array;
   return final_counter;
   /*
@@ -240,8 +233,13 @@ BOOLEAN_T is_peptide_modifiable
  (PEPTIDE_T* peptide,          ///< The peptide to apply mods to
   PEPTIDE_MOD_T* peptide_mod){ ///< The mods to apply
 
+  // a NULL peptide cannot be modified
+  if( peptide == NULL ){
+    return FALSE;
+  }
   // peptide mods with no aa mods can be applied to any peptide
-  if( peptide_mod_get_num_aa_mods( peptide_mod ) == 0 ){
+  if( peptide_mod == NULL || 
+      peptide_mod_get_num_aa_mods( peptide_mod ) == 0 ){
     return TRUE;
   }
 
@@ -273,6 +271,9 @@ BOOLEAN_T is_peptide_modifiable
       return FALSE;
     }
   }// next in aa_mod list
+
+  // since c and n mods are next to each other in the array, could do this as
+  // one loop with an if( type == C_TERM) dist = get_p_c_dist; else get_n_dist
 
   // now check position-specific modifications
   AA_MOD_T** c_mods = NULL;
@@ -313,12 +314,22 @@ BOOLEAN_T is_peptide_modifiable
  * \returns The number of modified peptides in the array pointed to by
  * modified_peptides. 
  */
-/*
+
 int modify_peptide(
   PEPTIDE_T* peptide,             ///< the peptide to modify
   PEPTIDE_MOD_T* peptide_mod,     ///< the set of aa_mods to apply
-  PEPTIDE_T** modified_peptides){ ///< the returned modified peptides
-*/
+  LINKED_LIST_T** modified_peptides){ ///< the returned modified peptides
+
+  if( peptide == NULL || peptide_mod == NULL ){
+    *modified_peptides = NULL;
+    return 0;
+  }
+
+  // dummy function to always return the peptide as is
+  *modified_peptides = new_list(peptide);
+  return 1;
+
+
   /*
   MODIFIED_AA_T** modified_seqs = NULL
   initialize array to hold the peptide seq with the first aa_mod applied
@@ -336,7 +347,7 @@ int modify_peptide(
 
   return count
    */
-//}
+}
 
 
 /**
