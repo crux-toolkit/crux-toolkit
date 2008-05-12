@@ -16,6 +16,7 @@
 #include "check-peptide-modifications.h"
 #include "check-linked-list.h"
 #include "check-generate-peptides-iterator.h"
+#include "check-modified-peptides-iterator.h"
 
 //must set bash export CK_FORK=no
 int main(void){
@@ -41,6 +42,7 @@ int main(void){
   Suite* suite_list = list_suite();
   Suite* suite_peptide_modifications = peptide_modifications_suite();
   Suite* suite_generate_peptides_iterator = generate_peptides_iterator_suite();
+  Suite* suite_modified_peptides_iterator = modified_peptides_iterator_suite();
 
 
   //add each suite to Runner
@@ -66,6 +68,7 @@ int main(void){
   srunner_add_suite(sr, suite_list);
   srunner_add_suite(sr, suite_peptide_modifications);
   srunner_add_suite(sr, suite_generate_peptides_iterator);
+  srunner_add_suite(sr, suite_modified_peptides_iterator);
 
   //run each check suite
   srunner_run_all(sr, CK_NORMAL);

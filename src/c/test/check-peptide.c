@@ -33,7 +33,7 @@ START_TEST (test_create){
   //test on link_list implementaion of peptide_src
   set_peptide_src_implementation(TRUE);
   
-  peptide4 = allocate_peptide();
+  //peptide4 = allocate_peptide();
   char* seq = NULL;
   
   protein = new_protein("test protein", protseq1, 490,
@@ -111,7 +111,8 @@ START_TEST (test_create){
   
 
   //check copy peptide ADD for association
-  copy_peptide(peptide1, peptide4);
+  //copy_peptide(peptide1, peptide4);
+  peptide4 = copy_peptide(peptide1);
   //print_peptide(peptide4, stdout);
 
 

@@ -245,6 +245,42 @@ START_TEST(test_modifiable){
 }
 END_TEST
 
+START_TEST(test_modify_null){
+  // modify with a null pmod
+  LINKED_LIST_T* returned_list = NULL;
+  fail_unless( 1 == modify_peptide(pep1, NULL, &returned_list),
+               "Modifying a peptide with a null pmod should return 1 peptide");
+}
+END_TEST
+
+START_TEST(test_modify_1){
+  // create a pmod that creates one modified version
+  aa_mod_set_max_per_peptide(amod1, 1);
+  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['V'-'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one copy
+
+  LINKED_LIST_T* returned_list = NULL;
+  fail_unless( 1 == modify_peptide(pep1, pmod1, &returned_list),
+               "Modify should return one version of FGGTSVANAER" );
+  // test mod that is first in list
+  // test mod that is mid in list
+
+}
+END_TEST
+
+START_TEST(test_modify_2){
+  // create a pmod that creates two modified versions
+  aa_mod_set_max_per_peptide(amod1, 1);
+  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['G'-'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one copy
+
+  LINKED_LIST_T* returned_list = NULL;
+  fail_unless( 2 == modify_peptide(pep1, pmod1, &returned_list),
+               "Modify should return two versions of FGGTSVANAER" );
+}
+END_TEST
 /* Boundry conditions test suite */
 // test_p_null
 
@@ -258,6 +294,9 @@ Suite* peptide_modifications_suite(){
   tcase_add_test(tc_core, test_sort);
   tcase_add_test(tc_core, test_pep_list);
   tcase_add_test(tc_core, test_modifiable);
+  tcase_add_test(tc_core, test_modify_null);
+  tcase_add_test(tc_core, test_modify_1);
+  tcase_add_test(tc_core, test_modify_2);
   tcase_add_checked_fixture(tc_core, pmod_setup, pmod_teardown);
   suite_add_tcase(s, tc_core);
 

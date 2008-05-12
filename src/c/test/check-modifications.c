@@ -96,6 +96,36 @@ START_TEST(test_set){
 }
 END_TEST
 
+START_TEST(test_char_to_mod){
+  char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  MODIFIED_AA_T* converted = convert_to_mod_aa_seq(seq);
+
+  int i = 0;
+  for(i = 0; i < strlen(seq); i++){ 
+    fail_unless( converted[i] == i, 
+                 "AA %c should have been converted to %d, instead is %d",
+                 seq[i], i, converted[i]);
+  }
+  free(converted);
+}
+END_TEST
+
+START_TEST(test_copy_mod_seq){
+  char* seq = "GBBKATRM"; 
+  MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(seq);
+
+  MODIFIED_AA_T* copied_seq = copy_mod_aa_seq( mod_seq );
+  int i = 0;
+  for(i = 0; i<strlen(seq); i++){
+    fail_unless( copied_seq[i] == mod_seq[i],
+                 "Copied seq %s letter %d should be %d and is %d", 
+                 seq, i, mod_seq[i], copied_seq[i]);
+  }
+  free(mod_seq);
+  free(copied_seq);
+}
+END_TEST
+
 /* Boundry conditions test suite */
 START_TEST(test_too_many_mods){
   /* This fails as it should, but doesn't get caught nicely
@@ -117,6 +147,8 @@ Suite* modifications_suite(){
   TCase *tc_core = tcase_create("Core");
   tcase_add_test(tc_core, test_create);
   tcase_add_test(tc_core, test_set);
+  tcase_add_test(tc_core, test_char_to_mod);
+  tcase_add_test(tc_core, test_copy_mod_seq);
   tcase_add_checked_fixture(tc_core, mod_setup, mod_teardown);
   suite_add_tcase(s, tc_core);
 
