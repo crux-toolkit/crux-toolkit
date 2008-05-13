@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.4 $
+ * $Revision: 1.1.2.5 $
  */
 
 #include "peptide_modifications.h"
@@ -36,6 +36,18 @@ struct _peptide_mod{
   int aa_mod_counts[MAX_AA_MODS]; ///< the number of each kind of aa mod
                                   ///as listed in parameter.c
 };
+
+/* Private functions */
+int apply_mods_to_list(
+  LINKED_LIST_T** mod_seqs, ///< a pointer to a list of seqs
+  AA_MOD_T* mod_to_apply,   ///< the specific mod to apply
+  int num_mods);            ///< how many of this mod to apply
+
+int apply_mod_to_seq(
+  MODIFIED_AA_T* seq, ///< the seq to modify
+  AA_MOD_T* mod,      ///< the mod to apply
+  LINKED_LIST_T** return_list); ///< the newly modified versions of
+
 
 /* Definitions of public methods */
 
@@ -137,15 +149,16 @@ int generate_peptide_mod_list_TESTER(
     carp(CARP_DETAILED_DEBUG, "cur max %d, id %c", cur_mod_max, cur_mod_id);
 
     // initialize temp list and pointer to end (to speed up adds)
-    LINKED_LIST_T* temp_list = NULL;
-    LINKED_LIST_T* temp_list_end = NULL;
+    //    LINKED_LIST_T* temp_list = NULL;
+    LINKED_LIST_T* temp_list = new_empty_list();
+    //    LINKED_LIST_T* temp_list_end = NULL;
     int temp_counter = 0;
 
     int copies = 1;
     for(copies = 1; copies < cur_mod_max + 1; copies++){
 
       // for each pep_mod in final list
-      LINKED_LIST_T* final_ptr = final_list;
+      LIST_POINTER_T* final_ptr = get_first_linked_list(final_list);
       while( final_ptr != NULL ){
         // get the current peptide mod
         PEPTIDE_MOD_T* cur_pep_mod = 
@@ -154,16 +167,18 @@ int generate_peptide_mod_list_TESTER(
              peptide_mod_get_num_aa_mods(cur_pep_mod)); 
 
         // copy the peptide_mod and add to it i copies of cur_mod
-        PEPTIDE_MOD_T* mod_cpy = copy_peptide_mod(cur_pep_mod);
+        PEPTIDE_MOD_T* mod_copy = copy_peptide_mod(cur_pep_mod);
         //peptide_mod_add_aa_mod(mod_cpy, cur_aa_mod, copies);
-        peptide_mod_add_aa_mod(mod_cpy, mod_list_idx, copies);
+        peptide_mod_add_aa_mod(mod_copy, mod_list_idx, copies);
         carp(CARP_DETAILED_DEBUG, "adding %d %c's to temp", 
              copies, cur_mod_id);
 
         // add to temp list
-        temp_list_end = add_linked_list(temp_list_end, mod_cpy);
+        //temp_list_end = add_linked_list(temp_list_end, mod_cpy);
+        push_back_linked_list(temp_list, mod_copy);
+
         // if this is the first added, set the head of temp list
-        temp_list = (temp_list==NULL) ? temp_list_end : temp_list;
+        //temp_list = (temp_list==NULL) ? temp_list_end : temp_list;
         temp_counter++;
         final_ptr = get_next_linked_list(final_ptr);
       }// last in final list
@@ -174,6 +189,7 @@ int generate_peptide_mod_list_TESTER(
     carp(CARP_DETAILED_DEBUG, "adding temp list (%d) to final (%d)",
          temp_counter, final_counter);
     combine_lists(final_list, temp_list);
+    // free(temp_list);
     final_counter += temp_counter;
   }// last aa_mod
   carp(CARP_INFO, "Created %d peptide mods", final_counter);
@@ -182,17 +198,17 @@ int generate_peptide_mod_list_TESTER(
   PEPTIDE_MOD_T** final_array = (PEPTIDE_MOD_T**)mycalloc(final_counter, 
                                                    sizeof(PEPTIDE_MOD_T*));
   // fill in the array and delete the list
-  LINKED_LIST_T* final_list_ptr = final_list;
+  LIST_POINTER_T* final_list_ptr = get_first_linked_list(final_list);
   int pep_idx = 0;
-  while(final_list != NULL){
+  while(final_list_ptr != NULL){
     assert(pep_idx < final_counter);
 
-    final_array[pep_idx] = (PEPTIDE_MOD_T*)get_data_linked_list(final_list);  
-    final_list = get_next_linked_list(final_list);
+    final_array[pep_idx] =(PEPTIDE_MOD_T*)get_data_linked_list(final_list_ptr);
+    final_list_ptr = get_next_linked_list(final_list_ptr);
     pep_idx++;
   }
 
-  delete_linked_list(final_list_ptr);
+  delete_linked_list(final_list);
 
   // sort list
   qsort(final_array, final_counter, sizeof(PEPTIDE_MOD_T*),
@@ -302,16 +318,24 @@ BOOLEAN_T is_peptide_modifiable
   return TRUE;
 }
 
+void add_peptide_mod_seq(PEPTIDE_T* peptide, MODIFIED_AA_T* cur_mod_seq){
+  if( peptide == NULL || cur_mod_seq == NULL ){
+    carp(CARP_ERROR, "Cannot add NULL modified sequence to null peptide");
+  }
+}
+
 /**
- * \brief Take a peptide and a peptide_mod and return a list of
- * modified peptides.
+ * \brief Take a peptide and a peptide_mod and return via the third
+ * arguement a list of modified peptides.
  *
  * The peptide_mod should be guaranteed to be applicable to
- * the peptide at least once.  A single amino acid can be modified
- * multiple times by different aa_mods, but only once for a given
- * aa_mod (as in defined by modifiable()).  
+ * the peptide at least once.  For the peptide_mod to be successfully
+ * applied, every aa_mod in its list must be applied to the sequence
+ * as many times as its value in the aa_mods_counts array.  A single
+ * amino acid can be modified multiple times by different aa_mods, but
+ * only once for a given aa_mod (as in defined by modifiable()).  
  * 
- * \returns The number of modified peptides in the array pointed to by
+ * \returns The number of modified peptides in the list pointed to by
  * modified_peptides. 
  */
 
@@ -320,26 +344,71 @@ int modify_peptide(
   PEPTIDE_MOD_T* peptide_mod,     ///< the set of aa_mods to apply
   LINKED_LIST_T** modified_peptides){ ///< the returned modified peptides
 
-  if( peptide == NULL || peptide_mod == NULL ){
+  if( peptide == NULL ){
+    carp(CARP_ERROR, "Cannot modify NULL peptide or use NULL peptide mod");
     *modified_peptides = NULL;
     return 0;
   }
+  if( peptide_mod == NULL || 
+      peptide_mod_get_num_aa_mods(peptide_mod) == 0 ){
+    printf("No mods to apply, pmod is empty, return peptide copy\n");
+    PEPTIDE_T* peptide_copy = copy_peptide(peptide); 
+    *modified_peptides = new_list(peptide_copy);
+    return 1;
 
-  // dummy function to always return the peptide as is
-  *modified_peptides = new_list(peptide);
-  return 1;
+  }
 
+  // get the peptide sequence and convert to MODIFIED_AA_T*
+  char* sequence = get_peptide_sequence(peptide);
+  MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
+
+  // get the aa_mod info
+  int* aa_mod_counts = peptide_mod->aa_mod_counts;
+  AA_MOD_T** aa_mod_list = NULL;
+  int num_aa_mods = get_all_aa_mod_list(&aa_mod_list);
+
+  LINKED_LIST_T* modified_seqs = NULL;
+  int aa_mod_idx = 0;
+  int total_count = 0;
+
+  // try applying each aa_mod to the sequence
+  for(aa_mod_idx = 0; aa_mod_idx < num_aa_mods; aa_mod_idx++){
+
+    //printf("aaidx is %d and count is %d\n", aa_mod_idx, aa_mod_counts[aa_mod_idx]);
+    int mod_count = aa_mod_counts[aa_mod_idx];
+    if( mod_count == 0 ){ // do not apply this aa mod
+      continue;
+    }
+
+    // to initialize the list use the first copy of mod
+    if( modified_seqs == NULL ){
+      printf("initializing list ");
+      total_count = apply_mod_to_seq(pre_modified_seq, 
+                                     aa_mod_list[aa_mod_idx],
+                                     &modified_seqs);
+      printf("with %d modified seqs\n", total_count);
+      mod_count--;
+
+    }
+
+    while( mod_count > 0 ){
+      printf("applying to list, mod count is %d\n", mod_count);
+      total_count = apply_mods_to_list(&modified_seqs, 
+                                       aa_mod_list[aa_mod_idx],
+                                       aa_mod_counts[aa_mod_idx]);
+    }
+
+    // the count should be > 0, but check for error case
+    if( total_count == 0 || modified_seqs == NULL ){
+      carp(CARP_ERROR, 
+           "Peptide modification could not be applied to sequence %s",
+           sequence);
+      *modified_peptides = NULL;
+      //return total_count;
+    }
+  } // next aa_mod
 
   /*
-  MODIFIED_AA_T** modified_seqs = NULL
-  initialize array to hold the peptide seq with the first aa_mod applied
-  and set count to the size of the array
-  (ie int count = apply_mods_to_seq(peptide_seq, aa_mod[1], &modified_seqs)
-
-  for each aa_mod in peptide_mod
-    count = apply_mods_to_list(&mod_pep_seqs, count, aa_mod)
-  last aa_mod
-
   for each seq in mod_pep_seq
     copy peptide and give it the modified seq
     add to the return array
@@ -347,6 +416,33 @@ int modify_peptide(
 
   return count
    */
+
+  //LINKED_LIST_T* final_pep_list = NULL;
+  LINKED_LIST_T* final_pep_list = new_empty_list();
+  //while( modified_seqs != NULL ){
+  while( ! is_empty_linked_list( modified_seqs ) ){
+    printf("Adding mod seq to peptide\n");
+    PEPTIDE_T* cur_peptide = copy_peptide(peptide);
+    //    MODIFIED_AA_T* cur_mod_seq = get_data_linked_list(modified_seqs);
+    MODIFIED_AA_T* cur_mod_seq = pop_front_linked_list(modified_seqs);
+    add_peptide_mod_seq(cur_peptide, cur_mod_seq);
+    //add_linked_list(final_pep_list, cur_peptide );
+    push_back_linked_list(final_pep_list, cur_peptide );
+    //modified_seqs = get_next_free_this_linked_list(modified_seqs);
+  }
+  // free pre_modified_seq
+
+  printf("Return count of %d\n", total_count);
+
+  *modified_peptides = final_pep_list;
+  return total_count;
+  /*
+  // dummy function to always return just a copy of the peptide
+  PEPTIDE_T* peptide_copy = copy_peptide(peptide); 
+  *modified_peptides = new_list(peptide_copy);
+  return 1;
+  */
+
 }
 
 
@@ -354,12 +450,14 @@ int modify_peptide(
  * take a list of modified_peptide_seqs, add to it the given
  * modification in all possible permutations
  */
-/*
 int apply_mods_to_list(
-  MODIFIED_AA_T*** mod_seqs, ///< a pointer to an array of arrays
-  int count, ///< the number of arrays pointed to by mod_seqs*
-  AA_MOD_T* mod_to_apply){  ///< the specific mod to apply
-*/
+  LINKED_LIST_T** mod_seqs, ///< a pointer to a list of seqs
+  AA_MOD_T* mod_to_apply,   ///< the specific mod to apply
+  int num_mods){            ///< how many of this mod to apply
+
+  if( *mod_seqs == NULL || mod_to_apply == NULL || num_mods == 0 ){
+    return 0;
+  }
   /*
     init final list
     for each mod_seq
@@ -371,30 +469,56 @@ int apply_mods_to_list(
     replace mod_seqs with final_list
     return count
    */
-//}
-/*
-int apply_mods_to_seq(
+  return 0;
+}
+
+/**
+ * \brief Beginning with a peptide sequence and an aa_mod, return via
+ * 'return_list' parameter a list of modified versions of the peptide
+ * sequence.
+ *
+ * The initial seq is left untouched.  If the seq cannot be modified
+ * by the aa_mod, return_list is set to null.  If the mod is NULL 
+ * the return list is given one item, an unchanged copy of the seq. 
+ *
+ * \returns The number of ways in which the sequence could be
+ * modified, i.e. the number of items in return_list.
+ */
+int apply_mod_to_seq(
   MODIFIED_AA_T* seq, ///< the seq to modify
   AA_MOD_T* mod,      ///< the mod to apply
-  MODIFIED_AA_T*** return_list){ ///< the newly modified versions of
-*/                               ///seq
+  LINKED_LIST_T** return_list){ ///< the newly modified versions of
 
-  /*
-    init return_list
-    for each aa in seq
-      if modifiable(aa, mod)
-      then 
-         copy seq
-         modify the aa in seq
-         add to list
-         increment count
-      end if
-    last aa
+  if( seq == NULL ){
+    return_list = NULL;
+    return 0;
+  }
+  if( mod == NULL ){
+    *return_list = new_list( copy_mod_aa_seq(seq) );
+    return 1;
+  }
 
-    return count
-   */
-  
-//}
+  //  LINKED_LIST_T* modified_seqs = NULL;
+  LINKED_LIST_T* modified_seqs = new_empty_list();
+  int count = 0;
+  int seq_idx = 0;
+  while( seq[seq_idx] != MOD_SEQ_NULL ){
+    //printf("seq[%d] is %d\n", seq_idx, seq[seq_idx]);
+    if( is_aa_modifiable( seq[seq_idx], mod )){
+      MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
+      modify_aa( &seq_copy[seq_idx], mod );
+
+      //add_linked_list(modified_seqs, seq_copy);
+      push_back_linked_list(modified_seqs, seq_copy);
+      count++;
+    }
+    seq_idx++;
+  }
+
+  *return_list = modified_seqs;
+  return count;  
+}
+
 /**
  * print all fields in peptide mod. For debugging
  */
@@ -402,8 +526,6 @@ void print_p_mod(PEPTIDE_MOD_T* mod){
   printf("PMOD: mass %.2f, num %d, aa mods\n  ", 
          mod->mass_change, mod->num_mods);
 
-  //LINKED_LIST_T* traverse_list = mod->list_of_mods;
-  //while( traverse_list != NULL ){
   int i=0;
   AA_MOD_T** all_mods = NULL;
   int num_aa_mods = get_aa_mod_list( &all_mods );
@@ -411,10 +533,7 @@ void print_p_mod(PEPTIDE_MOD_T* mod){
 
   for(i = 0; i < num_aa_mods; i++){
     print_a_mod( all_mods[i] );
-
-    //print_a_mod( (AA_MOD_T*)get_data_linked_list(traverse_list) );
     printf("  ");
-    //traverse_list = get_next_linked_list(traverse_list);
   }
   printf("\n");
 }

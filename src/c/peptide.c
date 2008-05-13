@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.72.2.1 $
+ * $Revision: 1.72.2.2 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 //#include <math.h>
@@ -402,26 +402,32 @@ void print_filtered_peptide_in_format(
 }
 
 
-// TESTME
 /**
- * Copies peptide object src to dest.
- * dest must be a heap allocated peptide
+ * \brief Allocates a new peptide giving it the values of the source
+ * peptide.
+ * \returns A newly allocated peptide identical to the source.
  */
-void copy_peptide(
-  PEPTIDE_T* src, ///< source peptide -in
-  PEPTIDE_T* dest ///< destination peptide -out
-  )
-{
+PEPTIDE_T* copy_peptide(
+  PEPTIDE_T* src ///< source peptide -in
+){
  
-  PEPTIDE_SRC_T* new_association;
+  PEPTIDE_T* new_peptide = allocate_peptide();
+  new_peptide->length = src->length;
+  new_peptide->peptide_mass = src->peptide_mass;
+  new_peptide->peptide_src = allocate_peptide_src();
+  copy_peptide_src(src->peptide_src, new_peptide->peptide_src);
 
-  set_peptide_length(dest, get_peptide_length(src));
-  set_peptide_peptide_mass(dest, get_peptide_peptide_mass(src));
+  //PEPTIDE_SRC_T* new_association;
+
+  //  set_peptide_length(dest, get_peptide_length(src));
+  //  set_peptide_peptide_mass(dest, get_peptide_peptide_mass(src));
 
   // copy all of the peptide_src in the peptide
-  new_association = allocate_peptide_src();
-  copy_peptide_src(src->peptide_src, new_association);
-  set_peptide_peptide_src(dest, new_association);
+  //  new_association = allocate_peptide_src();
+  //  copy_peptide_src(src->peptide_src, new_association);
+  //  set_peptide_peptide_src(dest, new_association);
+
+  return new_peptide;
 }
 
 /** 

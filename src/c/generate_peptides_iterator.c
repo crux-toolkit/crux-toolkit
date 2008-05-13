@@ -292,19 +292,19 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mods(
   INDEX_T* index,             ///< index from which to draw peptides OR
   DATABASE_T* dbase){         ///< database from which to draw peptides
   
-  // so it compiles
-  if( mass > 0 ){
-    pmod = NULL;
-    index = NULL;
-    dbase = NULL;
-  }
   // allocate a new iterator
   GENERATE_PEPTIDES_ITERATOR_T* new_iterator =
-    //new_generate_peptides_iterator_from_mass(mass, index, dbase);
     allocate_generate_peptides_iterator();
 
   // create a mod_pept-iter and point to it (mass, pmod, index, dbase)
+  MODIFIED_PEPTIDES_ITERATOR_T* mod_peptide_iterator = 
+    new_modified_peptides_iterator( mass, pmod, index, dbase );
+  new_iterator->iterator = mod_peptide_iterator;
+
   // set has_next, get_next, free
+  new_iterator->has_next = &void_modified_peptides_iterator_has_next;
+  new_iterator->next     = &void_modified_peptides_iterator_next;
+  new_iterator->free     = &void_modified_peptides_iterator_free;
 
   return new_iterator;
 }

@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.7 $
+ * $Revision: 1.1.2.8 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
@@ -34,6 +34,12 @@ enum {AA_LIST_LENGTH = 26}; // A-Z
 
 typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
                              ///alphabet, bits for mod1 mod2...aa
+#define MOD_SEQ_NULL (MODIFIED_AA_T)('Z' - 'A' + 1) 
+
+//enum {MOD_SEQ_NULL = 'Z' - 'A' + 1}; 
+
+///< null terminating character of array
+
 /*
    e.g. There are three aa_mods specified in this run and they are
    given the masks mod1  1000_0000_0000_0000
@@ -62,6 +68,40 @@ AA_MOD_T* new_aa_mod(int mod_idx);
  */
 void free_aa_mod(AA_MOD_T*);
 
+/**
+ * \brief Converts a MODIFIED_AA into a char, effectively unmodifying it.
+ * \returns The unmodified char representation of an aa.
+ */
+char modified_aa_to_char(MODIFIED_AA_T aa);
+
+/**
+ * \brief Converts a char representation of an aa to an unmodified aa
+ * of type MODIFIED_AA_T.  Requires 'A' <= char <= 'Z'. 
+ * \returns The MODIFIED_AA_T represnetation of an aa.
+ */
+MODIFIED_AA_T char_aa_to_modified(char aa);
+
+/**
+ * \brief Allocates an array of MODIFIED_AA_T's the same length as
+ * sequence and populates it with the MODIFIED_AA_T value that
+ * corresponds to each sequence char value.  No modifications are
+ * applied to the new array.
+ *
+ * \returns A newly allocated copy of the sequnce converted to type
+ * MODIFIED_AA_T. 
+ */
+MODIFIED_AA_T* convert_to_mod_aa_seq(char* sequence);
+
+/**
+ * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
+ */
+MODIFIED_AA_T* copy_mod_aa_seq( MODIFIED_AA_T* source );
+
+/**
+ * \brief Frees memory for an array of MODIFIED_AA_Ts.  Assumes is
+ * terminated with the MOD_SEQ_NULL value
+ */
+void free_mod_aa_seq( MODIFIED_AA_T* seq );
 
 /**
  * The new definition of a PEPTIDE_T object.
@@ -95,6 +135,14 @@ BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod);
 BOOLEAN_T is_aa_modifiable(MODIFIED_AA_T aa, AA_MOD_T* mod);
 
 /**
+ * \brief Adds a modification to a MODIFIED_AA_T.
+ *
+ * Assumes that the aa is modifiable, no explicit check.  If the aa is
+ * already modified for the mod, no change to aa.
+ */
+void modify_aa(MODIFIED_AA_T* aa, AA_MOD_T* mod);
+
+/**
  * \brief Finds the list of modifications made to an amino acid.
  *
  * Allocates a list of length(possible_mods) and fills it with pointers
@@ -108,18 +156,6 @@ int get_aa_mods(MODIFIED_AA_T aa,
                 AA_MOD_T* possible_mods, 
                 AA_MOD_T** mod_list);
 
-/**
- * \brief Converts a MODIFIED_AA into a char, effectively unmodifying it.
- * \returns The unmodified char representation of an aa.
- */
-char modified_aa_to_char(MODIFIED_AA_T aa);
-
-/**
- * \brief Converts a char representation of an aa to an unmodified aa
- * of type MODIFIED_AA_T.  Requires 'A' <= char <= 'Z'. 
- * \returns The MODIFIED_AA_T represnetation of an aa.
- */
-MODIFIED_AA_T char_aa_to_modified(char aa);
 
 // in parameter.c
 //global

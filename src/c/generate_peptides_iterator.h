@@ -1,6 +1,6 @@
 /**
  * \file generate_peptides_iterator.h 
- * $Revision: 1.12.4.1 $
+ * $Revision: 1.12.4.2 $
  * \brief object to return candidate peptides from database
  *****************************************************************************/
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
@@ -22,6 +22,7 @@
 #include "peptide_modifications.h"
 #include "database.h"
 #include "linked_list.h"
+#include "modified_peptides_iterator.h"
 
 // TODO (BF 10-Apr-08) should this be private?
 /**

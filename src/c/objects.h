@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.51.2.3 $
+ * $Revision: 1.51.2.4 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -430,10 +430,22 @@ enum _mod_position{
 typedef enum _mod_position MOD_POSITION_T;
 
 /**
- * \typedef _linked_list_node is typdefed as LINKED_LIST_T*
+ * \typedef _linked_list_head is typdefed as LINKED_LIST_T*
+ * All list actions can be performed with an object of this type.
  */
-typedef struct _linked_list_node LINKED_LIST_T;
+typedef struct _linked_list_head LINKED_LIST_T;
 
+/**
+ * \typedef _linked_list_node is typdefed as LINKED_LIST_T*
+ * This is an element of a list.  Can be used for adding to the end of
+ * list or walking through a list.  Cannot allocate a new one.
+ */
+typedef struct _linked_list_node LIST_POINTER_T;
 
+/**
+ * \typedef modified_peptides_iterator_t is typedefed as
+ * MODIFIED_PEPTIDES_ITERATOR_T 
+ */
+typedef struct modified_peptides_iterator_t MODIFIED_PEPTIDES_ITERATOR_T;
 #endif
 

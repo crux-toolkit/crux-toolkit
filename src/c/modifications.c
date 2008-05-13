@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.7 $
+ * $Revision: 1.1.2.8 $
  */
 
 #include "modifications.h"
@@ -29,6 +29,7 @@ char mod_sqt_symbols[MAX_AA_MODS] = {'*', '@', '#', '^', '~', '%',
                                      '$', '&', '!', '?', '+'};
 // FIXME: these need to be changed to bitmasks
 int mod_id_masks[MAX_AA_MODS] = {1,2,3,4,5,6,7,8,9,10,11};
+//MOD_SEQ_NULL = (MODIFIED_AA_T)('Z' - 'A' + 1); 
 
 /* Private data types, typedefed in objects.h */
 
@@ -111,9 +112,61 @@ char modified_aa_to_char(MODIFIED_AA_T aa){
  */
 MODIFIED_AA_T char_aa_to_modified(char aa){
   assert( aa >= 'A' && aa <= 'Z' );
-  return (MODIFIED_AA_T)aa;
+  return (MODIFIED_AA_T)(aa - 'A');
 }
 
+/**
+ * \brief Allocates an array of MODIFIED_AA_T's the same length as
+ * sequence and populates it with the MODIFIED_AA_T value that
+ * corresponds to each sequence char value.  No modifications are
+ * applied to the new array.
+ *
+ * \returns A newly allocated copy of the sequnce converted to type
+ * MODIFIED_AA_T. 
+ */
+MODIFIED_AA_T* convert_to_mod_aa_seq(char* sequence){
+
+  if( sequence == NULL ){
+    carp(CARP_ERROR, "Cannot convert NULL sequence to modifiable characters"); 
+    return NULL;
+  }
+
+  int seq_len = strlen(sequence);
+  MODIFIED_AA_T* new_string = mycalloc( seq_len+1, sizeof(MODIFIED_AA_T) );
+
+  unsigned int seq_idx = 0;
+  //  while( sequence[seq_idx] != '\0' ){
+  for(seq_idx = 0; seq_idx < strlen(sequence); seq_idx++){
+    new_string[seq_idx] = char_aa_to_modified( sequence[seq_idx] );
+  }
+
+  // null terminate
+  // might need to terminate with something else
+  new_string[seq_idx] = MOD_SEQ_NULL;
+
+  return new_string;
+}
+
+/**
+ * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
+ */
+MODIFIED_AA_T* copy_mod_aa_seq( MODIFIED_AA_T* source){
+  if( source == NULL ){
+    carp(CARP_ERROR, "Cannot copy NULL sequence of modified_aa's.");
+    return NULL;
+  }
+
+  // get the length of the source seq
+  int i=0;
+  while( source[i] != MOD_SEQ_NULL ){
+    i++;
+  }
+
+  MODIFIED_AA_T* new_seq = mycalloc( i, sizeof(MODIFIED_AA_T) );
+  memcpy( new_seq, source, i * sizeof(MODIFIED_AA_T));
+
+  return new_seq;
+}
 
 // FIXME: implement this
 BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
@@ -145,11 +198,26 @@ BOOLEAN_T is_aa_modifiable
   if( is_aa_modified(aa, mod) == TRUE ){
     return FALSE;
   }
-  if( mod->aa_list[ modified_aa_to_char(aa) - 'A' ] == TRUE ){
+  //  if( mod->aa_list[ modified_aa_to_char(aa) - 'A' ] == TRUE ){
+  if( mod->aa_list[ (int)modified_aa_to_char(aa) ] == TRUE 
+      && ! is_aa_modified(aa, mod)){
     return TRUE;
   }
-  // else not in list
+  // else not in list or already modified by this mod
   return FALSE;
+}
+
+/**
+ * \brief Adds a modification to a MODIFIED_AA_T.
+ *
+ * Assumes that the aa is modifiable, no explicit check.  If the aa is
+ * already modified for the mod, no change to aa.
+ */
+void modify_aa(MODIFIED_AA_T* aa, AA_MOD_T* mod){
+  if( aa == NULL || mod == NULL ){
+    carp(CARP_ERROR, "Cannot modify aa.  Either aa or mod NULL.");
+    return;
+  }
 }
 
 /**
@@ -334,4 +402,5 @@ char aa_mod_get_symbol(AA_MOD_T* mod){
 int aa_mod_get_identifier(AA_MOD_T* mod){
   return mod->identifier;
 }
+
 

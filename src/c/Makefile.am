@@ -31,6 +31,8 @@ NON_PERCOLATOR_LIB_FILES= \
   mass.h \
   modifications.c \
   modifications.h \
+  modified_peptides_iterator.c \
+  modified_peptides_iterator.h \
   objects.h \
   parameter.c \
   parameter.h \

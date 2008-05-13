@@ -3,8 +3,16 @@
  * Header file for a linked list class.
  */
 
+#include <assert.h>
 #include "utils.h"
 #include "objects.h"
+#include "carp.h"
+
+/**
+ * \brief Allocate the first element of a new list.
+ * \returns A pointer to the new list.
+ */
+LINKED_LIST_T* new_empty_list();
 
 /**
  * \brief Allocate the first element of a new list.
@@ -17,25 +25,67 @@ LINKED_LIST_T* new_list(void* first_item);
  * of the list, creates a new list node, and adds it to the end of the list.
  * \returns A pointer to the last (newly created) element in the list.
  */
-LINKED_LIST_T* add_linked_list(LINKED_LIST_T* list, void* add_me);
+LIST_POINTER_T* push_back_linked_list(LINKED_LIST_T* list_head, void* add_me);
+
+/**
+ * \brief Add an item to the beginning of this list.  Creates a new
+ * list node, and insersts it between the head and the first node.
+ * \returns A pointer to the first (newly created) element in the list.
+ */
+LIST_POINTER_T* push_front_linked_list(LINKED_LIST_T* list_head, void* add_me);
+
+/**
+ * \brief Remove the element from the end of the list (farthest from
+ * the head) and return a pointer to its data. 
+ * Deletes the last list node leaving the data and the rest of the
+ * list intact. 
+ * \returns A pointer to the data in the last item in the list, NULL
+ * if list is empty.
+ */
+void* pop_back_linked_list(LINKED_LIST_T* list);
+
+/**
+ * \brief Remove the first element from the list, returning a pointer
+ * to the data.
+ * Deletes the first list node leaving the data and the
+ * head of the list intact. Head now points to what was the second
+ * element, if any.
+ * \returns A pointer to the data in the first item in the list, NULL
+ * if list is empty.
+ */
+void* pop_front_linked_list(LINKED_LIST_T* list);
+
+/**
+ * \brief Get a pointer to the first element in the list.  Can be used
+ * to start a traverse of the list.
+ * \returns A pointer to the first list node.  NULL if empty list.
+ */
+LIST_POINTER_T* get_first_linked_list(LINKED_LIST_T* head);
+
+/**
+ * \brief Get the next element in the list.  Can be used for
+ * traversing a list.
+ * \returns A pointer to the next list node.  NULL if at end of list.
+ */
+LIST_POINTER_T* get_next_linked_list(LIST_POINTER_T* node);
 
 /**
  * \brief Get the item pointed to by this node in the list.
  * \returns Returns a void pointer to the item held at this node.
  */
-void* get_data_linked_list(LINKED_LIST_T* list);
+void* get_data_linked_list(LIST_POINTER_T* list);
 
 /**
- * \brief Get the next element in the list.
- * \returns A pointer to the next list node.  NULL if at end of list.
+ * \brief Is this list empty?
+ * \returns TRUE if node->next is NULL, else FALSE
  */
-LINKED_LIST_T* get_next_linked_list(LINKED_LIST_T* node);
+BOOLEAN_T is_empty_linked_list(LINKED_LIST_T* head);
 
 /**
  * \brief Is this list element at the end of the list?
  * \returns FALSE if node->next is NULL, else TRUE
  */
-BOOLEAN_T has_next_linked_list(LINKED_LIST_T* node);
+BOOLEAN_T has_next_linked_list(LIST_POINTER_T* node);
 
 /**
  * \brief Combines two lists by having the end of the first list point
@@ -60,13 +110,11 @@ LINKED_LIST_T* copy_list(LINKED_LIST_T* original);
 void delete_linked_list(LINKED_LIST_T* list);
 
 /**
- * \brief Deletes the given list node leaving the data intact and
- * returns a pointer to the next item in the list, NULL if this node
- * is the last.
+ * \brief Deletes the given list node and all list nodes after this
+ * one WITHOUT deleting the data pointed to.
+ * \returns void
  */
-LINKED_LIST_T* get_next_free_this_linked_list(LINKED_LIST_T* list);
-
-
+void delete_list_node(LIST_POINTER_T* list);
 
 
 

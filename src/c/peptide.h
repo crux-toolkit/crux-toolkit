@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.45.4.1 $
+ * $Revision: 1.45.4.2 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -133,12 +133,13 @@ void print_filtered_peptide_in_format(
   );
 
 /**
- * Copies peptide object src to dest.
+ * \brief Allocates a new peptide giving it the values of the source
+ * peptide.
+ * \returns A newly allocated peptide identical to the source.
  */
-void copy_peptide(
-  PEPTIDE_T* src, ///< source peptide -in
-  PEPTIDE_T* dest ///< destination peptide -out
-  );
+PEPTIDE_T* copy_peptide(
+  PEPTIDE_T* src ///< source peptide -in
+);
 
 /**
  * Parses a peptide from file.

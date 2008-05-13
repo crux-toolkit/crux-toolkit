@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.73.2.1 $
+ * $Revision: 1.73.2.2 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -38,7 +38,7 @@
  */
 struct protein{
   DATABASE_T*  database; ///< Which database is this protein part of
-  unsigned long int offset; ///< The file location in the source file in the database
+  unsigned long int offset; ///< The file location in the database source file
   unsigned int protein_idx; ///< The index of the protein in it's database.
   BOOLEAN_T    is_light; ///< is the protein a light protein?
   BOOLEAN_T    is_memmap; ///< is the protein produced from memory mapped file
@@ -60,8 +60,8 @@ struct protein_peptide_iterator {
   unsigned short int cur_length; ///< The length of the current peptide.
   unsigned int peptide_idx; ///< The index of the current peptide.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< peptide type to iterate over.
-  double* mass_array; ///< stores all the peptide's mass
-  int* nterm_cleavage_positions; ///< nterm cleavages that satisfy constraint.  
+  double* mass_array; ///< stores all the peptides' masses
+  int* nterm_cleavage_positions; ///< nterm cleavages that satisfy constraint. 
                                  ///< 1st aa is 1.
   int* peptide_lengths; ///< all the lengths of valid peptides
   float* peptide_masses; ///< all the masses of valid peptides
@@ -918,8 +918,11 @@ BOOLEAN_T valid_cleavage_position(
 }
 
 /*
- * Adds cleavages to the protein peptide iterator that obey iterator constraint
- * Uses the allowed cleavages arrays, and whether skipped cleavages are allowed.
+ * \brief Adds cleavages to the protein peptide iterator that obey iterator
+ * constraint.
+ *
+ * Uses the allowed cleavages arrays, and whether skipped cleavages
+ * are allowed. 
  * A small inconsistency: 
  *  Allowed cleavages start at 0, while the output cleavages start at 1.
  */
@@ -1235,12 +1238,18 @@ PEPTIDE_T* protein_peptide_iterator_next(
   PROTEIN_PEPTIDE_ITERATOR_T* iterator
   )
 {
-
+  /*
   if(!iterator->has_next){
     free_protein_peptide_iterator(iterator);
     die("ERROR: no more peptides\n");
   }
+  */
   
+  // a slightly more gentle alternative
+  if( !iterator->has_next){
+    return NULL;
+  }
+
   // set peptide type
   PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
       iterator->peptide_constraint);
