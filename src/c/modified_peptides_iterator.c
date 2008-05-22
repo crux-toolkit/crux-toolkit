@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.1.2.2 $
+ * $Revision: 1.1.2.3 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -77,7 +77,7 @@ void queue_next_peptide(
   iterator->next_peptide = 
     generate_peptides_iterator_next( iterator->peptide_generator);
 
-  printf("Next peptide from pep_gen is %s\n", get_peptide_sequence(iterator->next_peptide));
+  //printf("Next peptide from pep_gen is %s\n", get_peptide_sequence(iterator->next_peptide));
 
   // apply modifications, discarding peptides that can't be modified
 
@@ -85,7 +85,7 @@ void queue_next_peptide(
   while( iterator->next_peptide != NULL &&
          ! is_peptide_modifiable(iterator->next_peptide, 
                                  iterator->peptide_mod) ){ 
-    printf("Skipping peptide from the generator\n");
+    //printf("Skipping peptide from the generator\n");
     free_peptide( iterator->next_peptide );
     iterator->next_peptide = 
       generate_peptides_iterator_next( iterator->peptide_generator);
@@ -97,10 +97,11 @@ void queue_next_peptide(
     return;
   }
 
-  printf("Modifying peptide\n");
+  //printf("Modifying peptide\n");
   modify_peptide( iterator->next_peptide, 
                   iterator->peptide_mod, 
-                  &(iterator->temp_peptide_list) );
+                  //&(iterator->temp_peptide_list) );
+                  iterator->temp_peptide_list );
 
   if( iterator->temp_peptide_list == NULL ){
     printf("Modifier didn't return any peptides\n");
@@ -161,7 +162,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
     new_generate_peptides_iterator_from_mass(mass + delta_mass, index, dbase);
 
   // queue first peptide
-  printf("Queuing first peptide\n");
+  //printf("Queuing first peptide\n");
   queue_next_peptide( new_iterator );
 
   return new_iterator;

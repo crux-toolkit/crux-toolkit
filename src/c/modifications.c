@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.8 $
+ * $Revision: 1.1.2.9 $
  */
 
 #include "modifications.h"
@@ -25,11 +25,49 @@
 //enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
 
 /* Private global variables */
+/*
+   Modified sequences need both a textual representation as well as a
+   way to be encoded.  A peptide sequence is typically an array of
+   char.  A modified sequence will now be an array of MODIFIED_AA_T,
+   which are shorts.  Each MODIFIED_AA_T is made up of two parts: the
+   5 least-significant bits are used to encode the amino acid, and the
+   remaining are used to encode the modifications made to the aa.
+
+   Values 0-26 are used to represent amino acids A-Z.  There is a
+   function that will take an MODIFIED_AA_T and return the text
+   representation of the amino acid.
+
+   The value of the most significant bit is used to represent
+   modification by the first AA_MOD_T in the parameter.c list.  The
+   second most significant bit represents the second MOD_AA_T in the
+   list and so on.  Note that each AA_MOD_T can be applied only once
+   to an amino acid.  A MODIFED_AA_T can have between 0 and 11
+   modifications applied to it.  There is a function that will take a
+   MODIFIED_AA_T* and the index of an AA_MOD_T and return TRUE if the
+   MODIFIED_AA_T has had the AA_MOD_T applied to it.
+
+   For a textual representation of a modiciation, there are 11
+   non-alpha-numeric characters chosen.  There is a function that will
+   take an MODIFIED_AA_T* and return a pointer to an array of
+   characters that begins with the letter of the amino acid and is
+   followed by all of the symbols corresponding to all of the
+   modifications that have been applied to the amino acid.
+ */
 char mod_sqt_symbols[MAX_AA_MODS] = {'*', '@', '#', '^', '~', '%', 
                                      '$', '&', '!', '?', '+'};
-// FIXME: these need to be changed to bitmasks
-int mod_id_masks[MAX_AA_MODS] = {1,2,3,4,5,6,7,8,9,10,11};
-//MOD_SEQ_NULL = (MODIFIED_AA_T)('Z' - 'A' + 1); 
+
+unsigned short mod_id_masks[MAX_AA_MODS] = 
+  {0x8000,   // 1000 0000 0000 0000
+   0x4000,   // 0100 0000 0000 0000
+   0x2000,   // 0010 0000 0000 0000
+   0x1000,   // 0001 0000 0000 0000
+   0x0800,   // 0000 1000 0000 0000
+   0x0400,   // 0000 0100 0000 0000
+   0x0200,   // 0000 0010 0000 0000
+   0x0100,   // 0000 0001 0000 0000
+   0x0080,   // 0000 0000 1000 0000
+   0x0040,   // 0000 0000 0100 0000
+   0x0020 }; // 0000 0000 0010 0000
 
 /* Private data types, typedefed in objects.h */
 
@@ -49,8 +87,7 @@ struct _aa_mod{
   MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
   int max_distance;        ///< the max distance from the protein terminus
   char symbol;         ///< the character to represent the mod in sqt files
-  int identifier;      ///< the offset/bitmask assigned to this mod for unique
-                       //identification, used with MODIFIED_AA
+  MODIFIED_AA_T identifier; ///< the bitmask assigned for unique ID
 };
 
 /* Definitions of public methods */
@@ -96,13 +133,13 @@ void free_aa_mod(AA_MOD_T* mod){
   }
 }
 
-//FIXME: implment these
 /**
  * \brief Converts a MODIFIED_AA into a char, effectively unmodifying it.
  * \returns The unmodified char representation of an aa.
  */
 char modified_aa_to_char(MODIFIED_AA_T aa){
-  return (char)aa;
+  aa = aa & 0x001F;         // 0000 0000 0001 1111
+  return (char)aa + 'A';
 }
 
 /**
@@ -113,6 +150,89 @@ char modified_aa_to_char(MODIFIED_AA_T aa){
 MODIFIED_AA_T char_aa_to_modified(char aa){
   assert( aa >= 'A' && aa <= 'Z' );
   return (MODIFIED_AA_T)(aa - 'A');
+}
+
+/**
+ * \brief Converts a MODIFIED_AA_T* to it's textual representation,
+ * i.e. a letter followed by between 0 and 11 symbols for the
+ * modifications made to the amino acid.
+ * \returns A newly allocated char* with amino acid and modifciation
+ * symbols. 
+ */
+char* modified_aa_to_string(MODIFIED_AA_T aa){
+
+  int modified_by = 0;
+  int mod_idx = 0;
+  AA_MOD_T** mod_list = NULL;
+  int total_mods = get_aa_mod_list(&mod_list);
+  for(mod_idx = 0; mod_idx< total_mods; mod_idx++){
+    if( is_aa_modified(aa, mod_list[mod_idx])){
+      modified_by++;
+    }
+  }
+  char* return_string = (char*)mymalloc((modified_by+2)*sizeof(char));
+                                                  // 2 = aa + null term
+  int return_idx = 0;
+  return_string[return_idx] = modified_aa_to_char(aa);
+  return_idx++;
+  for(mod_idx = 0; mod_idx < total_mods; mod_idx++){
+    if( is_aa_modified(aa, mod_list[mod_idx])){
+      return_string[return_idx] = aa_mod_get_symbol(mod_list[mod_idx]);
+      return_idx++;
+    }
+  }
+  return_string[return_idx] = '\0';
+  return return_string;
+}
+
+/**
+ * \brief Take an array of MODIFIED_AA_T's and return an array of
+ * char's that includes the letter of each aa and the symbol for all
+ * applied modifications.
+ *
+ * Assumes that the array is terminated with MOD_SEQ_NULL.
+ * \returns A newly allocated array of characters, a text
+ * representation of the modified sequence.
+ */
+char* modified_aa_string_to_string(MODIFIED_AA_T* aa_string){
+
+  if( aa_string == NULL ){
+    carp(CARP_ERROR, "Cannot print a NULL modified sequence");
+    return NULL;
+  }
+
+  AA_MOD_T** global_mod_list = NULL;
+  int mod_list_length = get_aa_mod_list(&global_mod_list);
+  int global_idx = 0;
+
+  // count up amino acids and modifications
+  int count = 0;
+  int mod_str_idx = 0;
+  while( aa_string[mod_str_idx] != MOD_SEQ_NULL ){
+    count++;      // count the aas
+    for(global_idx = 0; global_idx < mod_list_length; global_idx++){
+      if( is_aa_modified(aa_string[mod_str_idx], 
+                         global_mod_list[global_idx]) ){
+        count++;  // count all mods
+      }
+    }
+    mod_str_idx++;
+  }
+  int mod_str_len = mod_str_idx;  // keep track of aa_string length
+
+  // create a buffer to hold all aas and mod symbols
+  char* return_string = (char*)mymalloc((count+1)*sizeof(char));
+  char* return_str_ptr = return_string;
+
+  // for each mod_aa, get the string representation, copy to return str
+  for(mod_str_idx = 0; mod_str_idx<mod_str_len; mod_str_idx++){
+
+    char* cur_mod = modified_aa_to_string( aa_string[mod_str_idx] );
+    strcpy( return_str_ptr, cur_mod );
+    return_str_ptr += strlen(cur_mod);
+  }
+
+  return return_string;
 }
 
 /**
@@ -141,7 +261,6 @@ MODIFIED_AA_T* convert_to_mod_aa_seq(char* sequence){
   }
 
   // null terminate
-  // might need to terminate with something else
   new_string[seq_idx] = MOD_SEQ_NULL;
 
   return new_string;
@@ -161,6 +280,7 @@ MODIFIED_AA_T* copy_mod_aa_seq( MODIFIED_AA_T* source){
   while( source[i] != MOD_SEQ_NULL ){
     i++;
   }
+  i++;
 
   MODIFIED_AA_T* new_seq = mycalloc( i, sizeof(MODIFIED_AA_T) );
   memcpy( new_seq, source, i * sizeof(MODIFIED_AA_T));
@@ -170,17 +290,14 @@ MODIFIED_AA_T* copy_mod_aa_seq( MODIFIED_AA_T* source){
 
 // FIXME: implement this
 BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
-  /*
-  int id = mod->identifier;
-  if( (aa && id) != 0 ){
+
+  MODIFIED_AA_T id = mod->identifier;
+  if( (aa & id) != 0 ){  // should == id
     return TRUE;
   } 
-  */
-  // so it compiles
-  carp(110, "%d %d", (int)aa, mod->max_per_peptide);
-  // dummy for now
+
   return FALSE;
- }
+}
 
 /**
  * \brief Determine if this modified amino acid can be modified by
@@ -198,9 +315,9 @@ BOOLEAN_T is_aa_modifiable
   if( is_aa_modified(aa, mod) == TRUE ){
     return FALSE;
   }
-  //  if( mod->aa_list[ modified_aa_to_char(aa) - 'A' ] == TRUE ){
-  if( mod->aa_list[ (int)modified_aa_to_char(aa) ] == TRUE 
-      && ! is_aa_modified(aa, mod)){
+  if( mod->aa_list[ (int)modified_aa_to_char(aa) - 'A' ] == TRUE ){
+  //if( mod->aa_list[ (int)modified_aa_to_char(aa) ] == TRUE 
+    //      && ! is_aa_modified(aa, mod)){
     return TRUE;
   }
   // else not in list or already modified by this mod
@@ -218,6 +335,7 @@ void modify_aa(MODIFIED_AA_T* aa, AA_MOD_T* mod){
     carp(CARP_ERROR, "Cannot modify aa.  Either aa or mod NULL.");
     return;
   }
+  *aa = *aa | mod->identifier;
 }
 
 /**

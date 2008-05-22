@@ -64,8 +64,8 @@ int main(void){
   srunner_add_suite(sr,suite_ion_series);
   // new
   srunner_add_suite(sr, suite_parameter);
-  srunner_add_suite(sr, suite_modifications);
   srunner_add_suite(sr, suite_list);
+  srunner_add_suite(sr, suite_modifications);
   srunner_add_suite(sr, suite_peptide_modifications);
   srunner_add_suite(sr, suite_generate_peptides_iterator);
   srunner_add_suite(sr, suite_modified_peptides_iterator);

@@ -1,12 +1,17 @@
 #include <stdlib.h>
 #include "check-modifications.h"
 #include "../modifications.h"
+#include "../parameter.h"
+// also in parameter.c
+void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 // declare things to set up
 AA_MOD_T *amod1, *amod2, *amod3;
 AA_MOD_T* amod_list[3];
+MODIFIED_AA_T mod_aa_D, id_3, id_max;
 
 void mod_setup(){
+  // assigns identifiers and symbols to each aamod
   amod1 = new_aa_mod(0);
   amod2 = new_aa_mod(1);
   amod3 = new_aa_mod(2);
@@ -14,6 +19,10 @@ void mod_setup(){
   amod_list[0] = amod1;
   amod_list[1] = amod2;
   amod_list[2] = amod3;
+
+  mod_aa_D = 3; // D
+  id_3   = 0x2000;  // bitmask for 3rd
+  id_max = 0x0020;  // bitmask for 11th mod
 }
 
 
@@ -45,30 +54,30 @@ START_TEST(test_create){
   fail_unless( aa_mod_get_symbol(amod1) == '*', 
                "amod1 should have had symbol * but had %c",
                aa_mod_get_symbol(amod1));
-  // FIXME: when these actually get used
-  fail_unless( aa_mod_get_identifier(amod1) == 1, 
-               "amod1 should have had identifier 1 but had %d",
+
+  fail_unless( aa_mod_get_identifier(amod1) == 0x8000, 
+               "amod1 should have had identifier 0x8000 but had %d",
                aa_mod_get_identifier(amod1));
 
   fail_unless( aa_mod_get_symbol(amod2) == '@', 
                "amod2 should have had symbol @ but had %c",
                aa_mod_get_symbol(amod2));
-  // FIXME: when these actually get used
-  fail_unless( aa_mod_get_identifier(amod2) == 2, 
-               "amod2 should have had identifier 2 but had %d",
+
+  fail_unless( aa_mod_get_identifier(amod2) == 0x4000, 
+               "amod2 should have had identifier 0x4000 but had 0x%x",
                aa_mod_get_identifier(amod2));
   fail_unless( aa_mod_get_symbol(amod3) == '#', 
                "amod3 should have had symbol # but had %c",
                aa_mod_get_symbol(amod3));
-  // FIXME: when these actually get used
-  fail_unless( aa_mod_get_identifier(amod3) == 3, 
-               "amod3 should have had identifier 3 but had %d",
+
+  fail_unless( aa_mod_get_identifier(amod3) == 0x2000, 
+               "amod3 should have had identifier 0x2000 but had 0x%x",
                aa_mod_get_identifier(amod3));
 }
 END_TEST
 
 START_TEST(test_set){
-  // check default values
+  // set values and check 
   aa_mod_set_mass_change(amod1, 45.6);
   fail_unless( aa_mod_get_mass_change(amod1) == 45.6, 
                "amod1 should have had mass change 45.6 but had %.2f",
@@ -96,7 +105,30 @@ START_TEST(test_set){
 }
 END_TEST
 
+START_TEST(test_is_modified){
+  mod_aa_D = mod_aa_D | id_3;
+
+  fail_unless( is_aa_modified(mod_aa_D, amod3),
+               "AA should be modified by mod3.");
+
+  AA_MOD_T* amod11 = new_aa_mod(MAX_AA_MODS-1);
+  mod_aa_D = mod_aa_D | id_max;
+  fail_unless( is_aa_modified(mod_aa_D, amod11),
+               "AA should be modified by mod11.");
+
+  fail_unless( ! is_aa_modified(mod_aa_D, amod1),
+               "AA should NOT be modified by mod1.");
+
+  free_aa_mod(amod11);
+}
+END_TEST
+
+
 START_TEST(test_char_to_mod){
+  MODIFIED_AA_T mod_aa = char_aa_to_modified('C');
+  fail_unless( mod_aa == 2,  
+               "C should have been converted to 2, but was %d", mod_aa);
+
   char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   MODIFIED_AA_T* converted = convert_to_mod_aa_seq(seq);
 
@@ -106,7 +138,100 @@ START_TEST(test_char_to_mod){
                  "AA %c should have been converted to %d, instead is %d",
                  seq[i], i, converted[i]);
   }
+
   free(converted);
+}
+END_TEST
+
+START_TEST(test_mod_to_char){
+  fail_unless( modified_aa_to_char(mod_aa_D) == 'D',
+               "mod aa D should convert to D, but it is %c",
+               modified_aa_to_char(mod_aa_D));
+
+  char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  MODIFIED_AA_T* converted = convert_to_mod_aa_seq(seq);
+
+  // now modify some of the aas and check that it still is converted correctly
+  // test modify function later
+  converted[3] = converted[3] | 0x8000; // first aa mod in param list
+  converted[4] = converted[4] | 0x4000; // second aa mod in param list
+  converted[5] = converted[5] | 0x2000; // third aa mod in param list
+  converted[6] = converted[6] | 0x0400; // fifth aa mod in param list
+  converted[7] = converted[7] | 0x0020; // last aa mod in param list
+
+  int i = 0;
+  for(i = 0; i < strlen(seq); i++){ 
+    fail_unless( modified_aa_to_char(converted[i]) == seq[i], 
+                 "AA %c returned char %c",
+                 seq[i], i, modified_aa_to_char(converted[i]));
+  }
+}
+END_TEST
+
+START_TEST(test_mod_to_string){
+  // init params including mods
+  initialize_parameters();
+  force_set_aa_mod_list(amod_list, 3);
+
+  // add test for mod to string (eg D*)
+  // unmodified
+  char* mod_as_text = modified_aa_to_string( mod_aa_D );
+  fail_unless( strcmp(mod_as_text, "D") == 0,
+               "mod as string should be 'D' but is '%s'", mod_as_text);
+  free(mod_as_text);
+
+  // modify with one
+  mod_aa_D = mod_aa_D | 0x4000; // second aa mod in param list
+  mod_as_text = modified_aa_to_string( mod_aa_D );
+  fail_unless( strcmp(mod_as_text, "D@") == 0,
+               "mod as string should be 'D@' but is '%s'", mod_as_text);
+  free(mod_as_text);
+
+  mod_aa_D = mod_aa_D | 0x8000; // first aa mod in param list
+  mod_aa_D = mod_aa_D | 0x2000; // third aa mod in param list
+  mod_as_text = modified_aa_to_string( mod_aa_D );
+  fail_unless( strcmp(mod_as_text, "D*@#") == 0,
+               "mod as string should be 'D*@#' but is '%s'", mod_as_text);
+  free(mod_as_text);
+}
+END_TEST
+
+START_TEST(test_mod_str_to_string){
+  // init params including mods
+  initialize_parameters();
+  force_set_aa_mod_list(amod_list, 3);
+
+  char* seq = "GBBKATRM"; 
+  MODIFIED_AA_T* modaa_seq = convert_to_mod_aa_seq(seq);
+
+  char* modchar_seq = modified_aa_string_to_string( modaa_seq );
+  fail_unless( strcmp(modchar_seq, seq) == 0,
+               "Seq %s should equal %s", seq, modchar_seq);
+
+  fail_unless( aa_mod_get_symbol(amod1) == '*', 
+               "amod1 should have had symbol * but had %c",
+               aa_mod_get_symbol(amod1));
+
+  fail_unless( aa_mod_get_symbol(amod2) == '@', 
+               "amod1 should have had symbol @ but had %c",
+               aa_mod_get_symbol(amod2));
+
+  fail_unless( aa_mod_get_symbol(amod3) == '#', 
+               "amod1 should have had symbol # but had %c",
+               aa_mod_get_symbol(amod3));
+
+  // now modify a couple of aas
+  modify_aa( &modaa_seq[1], amod2 );
+  modify_aa( &modaa_seq[4], amod1 );
+  modify_aa( &modaa_seq[4], amod3 );
+  modify_aa( &modaa_seq[7], amod2 );
+  modify_aa( &modaa_seq[7], amod3 );
+  modchar_seq = modified_aa_string_to_string( modaa_seq );
+
+  fail_unless( strcmp(modchar_seq, "GB@BKA*#TRM@#") == 0,
+               "Seq %s should equal %s", seq, modchar_seq);
+
+  free(modchar_seq);
 }
 END_TEST
 
@@ -126,6 +251,32 @@ START_TEST(test_copy_mod_seq){
 }
 END_TEST
 
+START_TEST(test_is_modifiable){
+  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod3);
+  mod_us['D' - 'A'] = TRUE;
+  fail_unless( is_aa_modifiable(mod_aa_D, amod3),
+               "aa_D should be modifiable by amod3.");
+
+  mod_aa_D = mod_aa_D | id_3;
+  fail_unless( !is_aa_modifiable(mod_aa_D, amod3),
+               "aa_D should not be modifiable AGAIN by amod3.");
+}
+END_TEST
+
+START_TEST(test_modify){
+  // it starts out unmodified
+  fail_unless( !is_aa_modified(mod_aa_D, amod3),
+               "mod_aa_D should not be modified.");
+  modify_aa(&mod_aa_D, amod3);
+  fail_unless( is_aa_modified(mod_aa_D, amod3),
+               "mod_aa_D should be modified.");
+
+  // and it should no longer be modifiable by amod3
+  fail_unless( !is_aa_modifiable(mod_aa_D, amod3),
+               "mod_aa_D should no longer be modifiable by amod3");
+}
+END_TEST
+
 /* Boundry conditions test suite */
 START_TEST(test_too_many_mods){
   /* This fails as it should, but doesn't get caught nicely
@@ -142,13 +293,20 @@ END_TEST
   // test_aa_null
 
 Suite* modifications_suite(){
-  Suite* s = suite_create("Modifications");
+  Suite* s = suite_create("Modifications\n");
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   tcase_add_test(tc_core, test_create);
   tcase_add_test(tc_core, test_set);
+  tcase_add_test(tc_core, test_is_modified);
   tcase_add_test(tc_core, test_char_to_mod);
+  tcase_add_test(tc_core, test_mod_to_char);
+  tcase_add_test(tc_core, test_mod_to_string);
+  tcase_add_test(tc_core, test_mod_str_to_string);
   tcase_add_test(tc_core, test_copy_mod_seq);
+  tcase_add_test(tc_core, test_is_modifiable);
+  tcase_add_test(tc_core, test_modify);
+
   tcase_add_checked_fixture(tc_core, mod_setup, mod_teardown);
   suite_add_tcase(s, tc_core);
 

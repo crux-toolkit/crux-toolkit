@@ -247,12 +247,17 @@ END_TEST
 
 START_TEST(test_modify_null){
   // modify with a null pmod
-  LINKED_LIST_T* returned_list = NULL;
-  fail_unless( 1 == modify_peptide(pep1, NULL, &returned_list),
+  LINKED_LIST_T* returned_list = new_empty_list();
+  fail_unless( 1 == modify_peptide(pep1, NULL, returned_list),
                "Modifying a peptide with a null pmod should return 1 peptide");
+  PEPTIDE_T* moded_peptide = pop_front_linked_list(returned_list);
+  fail_unless( strcmp( get_peptide_sequence(moded_peptide), 
+                       get_peptide_sequence(pep1) ) == 0,
+               "Unmodified peptide sequence should be the same as original.");
 }
 END_TEST
 
+// one aa_mod returning only 1 modified version
 START_TEST(test_modify_1){
   // create a pmod that creates one modified version
   aa_mod_set_max_per_peptide(amod1, 1);
@@ -260,15 +265,26 @@ START_TEST(test_modify_1){
   mod_us['V'-'A'] = TRUE;
   peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one copy
 
-  LINKED_LIST_T* returned_list = NULL;
-  fail_unless( 1 == modify_peptide(pep1, pmod1, &returned_list),
-               "Modify should return one version of FGGTSVANAER" );
   // test mod that is first in list
+  LINKED_LIST_T* returned_list = new_empty_list();
+  fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list),
+               "Modify should return one version of FGGTSV*ANAER" );
+  // test that it is modified correctly
+
   // test mod that is mid in list
+  aa_mod_set_max_per_peptide(amod3, 1);
+  mod_us = aa_mod_get_aa_list(amod3);
+  mod_us['F'-'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod2, 2, 1); //third in list, one copy
+  delete_linked_list(returned_list);
+  returned_list = new_empty_list();
+  fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list),
+               "Modify should return one version of F*GGTSVANAER" );
 
 }
 END_TEST
 
+// one or two aa_mods that return > 1 modified versions
 START_TEST(test_modify_2){
   // create a pmod that creates two modified versions
   aa_mod_set_max_per_peptide(amod1, 1);
@@ -276,13 +292,58 @@ START_TEST(test_modify_2){
   mod_us['G'-'A'] = TRUE;
   peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one copy
 
-  LINKED_LIST_T* returned_list = NULL;
-  fail_unless( 2 == modify_peptide(pep1, pmod1, &returned_list),
+  LINKED_LIST_T* returned_list = new_empty_list();
+  fail_unless( 2 == modify_peptide(pep1, pmod1, returned_list),
                "Modify should return two versions of FGGTSVANAER" );
+  // test that they are modified correctly
+
+  // clean up
+  delete_linked_list( returned_list);
+  returned_list = new_empty_list();
+
+  // create mod of one G and one A-> four versions of seq
+  aa_mod_set_max_per_peptide(amod2, 1);
+  mod_us = aa_mod_get_aa_list(amod2);
+  mod_us['A'-'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 1, 1); //second mod in list, one copy
+  fail_unless( peptide_mod_get_num_aa_mods(pmod1) == 2,
+               "pmod1 should have two aa mods");
+  int num_returned = modify_peptide(pep1, pmod1, returned_list);
+  fail_unless( 4 == num_returned,
+               "Modify should give 4 of FGGTSVANAER(G*,A@), but gave %d",
+               num_returned);
+  // test that they are modified correctly
+  while( ! is_empty_linked_list(returned_list) ){
+    PEPTIDE_T* pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
+    //printf("seq: %s\n", get_peptide_sequence(pep));
+    free_peptide(pep);
+  }
+
+  //printf("LOOK HERE\n");
+  // create mod of one G/A* and one A@ -> 6 versions
+  mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['A'-'A'] = TRUE;
+  num_returned = modify_peptide(pep1, pmod1, returned_list);
+  fail_unless( 4 == num_returned,
+               "Modify should give 6 of FGGTSVANAER(GA*,A@), but gave %d",
+               num_returned);
+
+  /*
+  // allow more mods per peptide
+  aa_mod_set_max_per_peptide(amod1, 2);
+  peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one more copy
+  int num_returned = modify_peptide(pep1, pmod1, returned_list);
+  fail_unless( 1 == num_returned,
+               "Modify should return 1 of FG*G*TSVANAER but gave %d",
+               num_returned);
+  // test that they are modified correctly
+  */
 }
 END_TEST
+
 /* Boundry conditions test suite */
 // test_p_null
+// test modify with null peptide, with null list
 
 Suite* peptide_modifications_suite(){
   Suite* s = suite_create("Peptide-modifications\n");

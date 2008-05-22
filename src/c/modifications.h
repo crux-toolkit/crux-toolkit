@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.8 $
+ * $Revision: 1.1.2.9 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
@@ -32,12 +32,10 @@ enum {MAX_AA_MODS = 11};
 enum {MAX_PROTEIN_SEQ_LENGTH = 40000};
 enum {AA_LIST_LENGTH = 26}; // A-Z
 
-typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
-                             ///alphabet, bits for mod1 mod2...aa
+typedef unsigned short MODIFIED_AA_T; ///< letters in the expanded peptide
+                                      ///alphabet, bits for mod1 mod2...aa
 #define MOD_SEQ_NULL (MODIFIED_AA_T)('Z' - 'A' + 1) 
-
 //enum {MOD_SEQ_NULL = 'Z' - 'A' + 1}; 
-
 ///< null terminating character of array
 
 /*
@@ -56,9 +54,9 @@ typedef short MODIFIED_AA_T; ///< letters in the expanded peptide
  */
 
 /**
- * \brief Allocate an AA_MOD, including the aa_list and initialize all
- * fields to default values.  Symbol and unique identifier are set
- * according to index.  
+ * \brief Allocate an AA_MOD, including space for the aa_list and
+ * initialize all fields to default values.  Symbol and unique
+ * identifier are set according to index.  
  * \returns A heap allocated AA_MOD with default values.
  */
 AA_MOD_T* new_aa_mod(int mod_idx);
@@ -80,6 +78,26 @@ char modified_aa_to_char(MODIFIED_AA_T aa);
  * \returns The MODIFIED_AA_T represnetation of an aa.
  */
 MODIFIED_AA_T char_aa_to_modified(char aa);
+
+/**
+ * \brief Converts a MODIFIED_AA_T* to it's textual representation,
+ * i.e. a letter followed by between 0 and 11 symbols for the
+ * modifications made to the amino acid.
+ * \returns A newly allocated char* with amino acid and modifciation
+ * symbols. 
+ */
+char* modified_aa_to_string(MODIFIED_AA_T aa);
+
+/**
+ * \brief Take an array of MODIFIED_AA_T's and return an array of
+ * char's that includes the letter of each aa and the symbol for all
+ * applied modifications.
+ *
+ * Assumes that the array is terminated with MOD_SEQ_NULL.
+ * \returns A newly allocated array of characters, a text
+ * representation of the modified sequence.
+ */
+char* modified_aa_string_to_string(MODIFIED_AA_T* aa_string);
 
 /**
  * \brief Allocates an array of MODIFIED_AA_T's the same length as
