@@ -259,6 +259,7 @@ END_TEST
 
 // one aa_mod returning only 1 modified version
 START_TEST(test_modify_1){
+  printf("modify 1\n");
   // create a pmod that creates one modified version
   aa_mod_set_max_per_peptide(amod1, 1);
   BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
@@ -270,6 +271,7 @@ START_TEST(test_modify_1){
   fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list),
                "Modify should return one version of FGGTSV*ANAER" );
   // test that it is modified correctly
+  //FGGTSV*ANAER
 
   // test mod that is mid in list
   aa_mod_set_max_per_peptide(amod3, 1);
@@ -280,12 +282,14 @@ START_TEST(test_modify_1){
   returned_list = new_empty_list();
   fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list),
                "Modify should return one version of F*GGTSVANAER" );
-
+  // test that it was modified correctly
+  //F#GGTSVANAER
 }
 END_TEST
 
 // one or two aa_mods that return > 1 modified versions
 START_TEST(test_modify_2){
+  printf("modify 2\n");
   // create a pmod that creates two modified versions
   aa_mod_set_max_per_peptide(amod1, 1);
   BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
@@ -296,6 +300,7 @@ START_TEST(test_modify_2){
   fail_unless( 2 == modify_peptide(pep1, pmod1, returned_list),
                "Modify should return two versions of FGGTSVANAER" );
   // test that they are modified correctly
+  //FG*GTSVANAER, FGG*TSVANAER
 
   // clean up
   delete_linked_list( returned_list);
@@ -313,30 +318,53 @@ START_TEST(test_modify_2){
                "Modify should give 4 of FGGTSVANAER(G*,A@), but gave %d",
                num_returned);
   // test that they are modified correctly
+  //FG*GTSVA@NAER, FG*GTSVANA@ER, FGG*TSVA@NAER, FGG*TSVANA@ER
+
   while( ! is_empty_linked_list(returned_list) ){
     PEPTIDE_T* pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
     //printf("seq: %s\n", get_peptide_sequence(pep));
     free_peptide(pep);
   }
 
-  //printf("LOOK HERE\n");
-  // create mod of one G/A* and one A@ -> 6 versions
+  // create mod of one G/A* and one A@ -> 8 versions
   mod_us = aa_mod_get_aa_list(amod1);
   mod_us['A'-'A'] = TRUE;
   num_returned = modify_peptide(pep1, pmod1, returned_list);
-  fail_unless( 4 == num_returned,
-               "Modify should give 6 of FGGTSVANAER(GA*,A@), but gave %d",
-               num_returned);
-
-  /*
-  // allow more mods per peptide
-  aa_mod_set_max_per_peptide(amod1, 2);
-  peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one more copy
-  int num_returned = modify_peptide(pep1, pmod1, returned_list);
-  fail_unless( 1 == num_returned,
-               "Modify should return 1 of FG*G*TSVANAER but gave %d",
+  fail_unless( 8 == num_returned,
+               "Modify should give 8 of FGGTSVANAER(GA*,A@), but gave %d",
                num_returned);
   // test that they are modified correctly
+  //FG*GTSVA@NAER FG*GTSVANA@ER FGG*TSVA@NAER FGG*TSVANA@ER 
+  //FGGTSVA*@NAER FGGTSVA*NA@ER FGGTSVA@NA*ER FGGTSVANA*@ER
+
+}
+END_TEST
+
+// list starts out big and is limited by subsiquent mods
+START_TEST(test_modify_3){
+  printf("modify 3\n");
+
+  printf("LOOK HERE\n");
+  aa_mod_set_max_per_peptide(amod1, 10);
+  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['G'-'A'] = TRUE;
+  mod_us['A'-'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 0, 3); //first in list, three copies
+
+  LINKED_LIST_T* returned_list = new_empty_list();
+  int num_returned = modify_peptide(pep1, pmod1, returned_list); 
+  fail_unless( 4 == num_returned,
+               "Modify should return 4 of FGGTSVANAER, but returned %d",
+               num_returned);
+  // test that they are modified correctly
+  //FG*G*TSVA*NAER FG*G*TSVANA*ER FG*GTSVA*NA*ER FGG*TSVA*NA*ER
+
+  /*
+  while( ! is_empty_linked_list(returned_list) ){
+    PEPTIDE_T* pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
+    char* printme = get_peptide_modified_seq_string(pep);
+    printf("SEQ: %s", printme);
+  }
   */
 }
 END_TEST
@@ -358,6 +386,7 @@ Suite* peptide_modifications_suite(){
   tcase_add_test(tc_core, test_modify_null);
   tcase_add_test(tc_core, test_modify_1);
   tcase_add_test(tc_core, test_modify_2);
+  tcase_add_test(tc_core, test_modify_3);
   tcase_add_checked_fixture(tc_core, pmod_setup, pmod_teardown);
   suite_add_tcase(s, tc_core);
 
