@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.51.2.4 $
+ * $Revision: 1.51.2.5 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -395,9 +395,19 @@ enum  _set_type {SET_TARGET=0,SET_DECOY1,SET_DECOY2,SET_DECOY3};
 
 /**
  * \typedef SET_TYPE_T
- * \brief the typedef for set types for match type TARGET, DECOY1, DECOY2, DECOY3
+ * \brief the typedef for set types for match type TARGET, DECOY1,
+ * DECOY2, DECOY3 
  */
 typedef enum _set_type SET_TYPE_T;
+
+/**
+ * \typedef MODIFIED_AA_T
+ * \brief The alternate type for encoding a peptide sequence (instead
+ * of char).  Allows modifications to be added to each AA.  See
+ * modifications.h for more details.
+ */
+// why doesn't this work when I put it in modifications.h????
+typedef unsigned short MODIFIED_AA_T; ///< letters in the expanded peptide
 
 /**
  * \typedef AA_MOD_T
@@ -447,5 +457,6 @@ typedef struct _linked_list_node LIST_POINTER_T;
  * MODIFIED_PEPTIDES_ITERATOR_T 
  */
 typedef struct modified_peptides_iterator_t MODIFIED_PEPTIDES_ITERATOR_T;
+
 #endif
 

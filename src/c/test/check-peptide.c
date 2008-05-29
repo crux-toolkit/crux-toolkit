@@ -11,6 +11,8 @@
 #include "../peptide_constraint.h"
 #include "../protein.h"
 #include "../database.h"
+// also from parameter.c
+void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 /********************************************
  * to check peptide.c & peptide_constraint.c
@@ -231,8 +233,63 @@ START_TEST (test_cdist){// protein_len - start_idx + length -1
 }
 END_TEST
 
+START_TEST(test_mod_on_unmodified){
+  // check is_modified
+  // get modified seq from peptide w/out modificationso
+  MODIFIED_AA_T* mod_seq = get_peptide_modified_sequence(peptide1);
+  
+  fail_unless( mod_seq != NULL,
+               "An unmodified peptide should not return NULL mod seq");
+  char* seq = get_peptide_sequence(peptide1);
+  char* converted = modified_aa_string_to_string(mod_seq);
+  fail_unless( strcmp(seq, converted) == 0,
+               "The modified seq returned should be the same as seq.");
+
+}
+END_TEST
+
+START_TEST(test_with_mod){
+  double initial_mass = get_peptide_neutral_mass(peptide3);
+  // set up the mod
+  AA_MOD_T* amod = new_aa_mod(0);
+  aa_mod_set_mass_change(amod, 100);
+  AA_MOD_T* amod_list[1];
+  amod_list[0] = amod;
+  // initialize mods in parameter.c
+  force_set_aa_mod_list(amod_list, 1);
+
+  PEPTIDE_MOD_T* pep_mod = new_peptide_mod();
+  peptide_mod_add_aa_mod(pep_mod, 0, 1);
+
+  // set up the mod seq
+  char* pep_seq = get_peptide_sequence(peptide3);
+  MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(pep_seq);
+  modify_aa(&mod_seq[2], amod);
+  fail_unless( mod_seq[2] > pep_seq[2] - 'A',
+               "Third aa should no longer be unmodified.");
+  char* a = modified_aa_to_string(mod_seq[1]);
+  a = modified_aa_to_string(mod_seq[2]);
+  fail_unless( strcmp(a, "S*") == 0,  "aa should be S* but is %s", a);
+
+  char* mod_seq_str = modified_aa_string_to_string(mod_seq);
+
+  // set the modification
+  set_peptide_mod(peptide3, mod_seq, pep_mod);
+  // check is_modified
+  // get modified seq
+  MODIFIED_AA_T* returned_seq = get_peptide_modified_sequence(peptide3);
+  char* returned_str = modified_aa_string_to_string(returned_seq);
+  fail_unless( strcmp(returned_str, mod_seq_str) == 0,
+   "Peptide3 should have returned modified seq %s, but instead returned %s",
+               mod_seq_str, returned_str);
+  // check the mass
+  fail_unless( initial_mass = get_peptide_neutral_mass(peptide3),
+               "Modified peptide should have initial mass + 100.");
+}
+END_TEST
+
 Suite* peptide_suite(void){
-  Suite *s = suite_create("Peptide");
+  Suite *s = suite_create("Peptide\n");
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);
@@ -242,6 +299,8 @@ Suite* peptide_suite(void){
   suite_add_tcase(s, tc_with_setup);
   tcase_add_test(tc_with_setup, test_ndist);
   tcase_add_test(tc_with_setup, test_cdist);
+  tcase_add_test(tc_with_setup, test_mod_on_unmodified);
+  tcase_add_test(tc_with_setup, test_with_mod);
   tcase_add_checked_fixture(tc_with_setup, pep_setup, pep_teardown);
 
   return s;

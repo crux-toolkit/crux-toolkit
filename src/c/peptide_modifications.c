@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.7 $
+ * $Revision: 1.1.2.8 $
  */
 
 #include "peptide_modifications.h"
@@ -321,11 +321,12 @@ BOOLEAN_T is_peptide_modifiable
 }
 
 // move this to peptide.c
+/*
 void add_peptide_mod_seq(PEPTIDE_T* peptide, MODIFIED_AA_T* cur_mod_seq){
   if( peptide == NULL || cur_mod_seq == NULL ){
     carp(CARP_ERROR, "Cannot add NULL modified sequence to null peptide");
   }
-  /*
+
   // test out that the mod seq is valid
   int i = 0;
   while( cur_mod_seq[i] != MOD_SEQ_NULL){
@@ -333,8 +334,9 @@ void add_peptide_mod_seq(PEPTIDE_T* peptide, MODIFIED_AA_T* cur_mod_seq){
     i++;
   }
   printf("\n");
-  */
 }
+  */
+
 
 /**
  * \brief Take a peptide and a peptide_mod and return via the third
@@ -420,17 +422,18 @@ int modify_peptide(
   return count
    */
 
-  printf("Returning these modified seqs:\n");
+  //printf("Returning these modified seqs:\n");
   while( ! is_empty_linked_list( modified_seqs ) ){
     PEPTIDE_T* cur_peptide = copy_peptide(peptide);
 
     MODIFIED_AA_T* cur_mod_seq = 
       (MODIFIED_AA_T*)pop_front_linked_list(modified_seqs);
     char* seq = modified_aa_string_to_string(cur_mod_seq);
-    printf("%s\n", seq);
+    //printf("%s\n", seq);
     free(seq);
 
-    add_peptide_mod_seq(cur_peptide, cur_mod_seq);
+    //add_peptide_mod_seq(cur_peptide, cur_mod_seq);
+    set_peptide_mod(cur_peptide, cur_mod_seq, peptide_mod);
 
     push_back_linked_list(modified_peptides, cur_peptide );
   }
@@ -473,8 +476,8 @@ int apply_mod_to_list(
     return num_seqs;
   }
 
-  printf("iterating over seqs in list, applying %d of mod %c\n", 
-         num_to_apply, aa_mod_get_symbol(mod_to_apply));
+  //printf("iterating over seqs in list, applying %d of mod %c\n", 
+  //       num_to_apply, aa_mod_get_symbol(mod_to_apply));
 
   // initialize a temp list of seqs to return
   LINKED_LIST_T* completed_seqs = new_empty_list();

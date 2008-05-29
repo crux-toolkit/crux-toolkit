@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.45.4.2 $
+ * $Revision: 1.45.4.3 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -20,32 +20,13 @@
 #include "peptide_constraint.h"
 #include "database.h"
 #include "modifications.h"
+#include "peptide_modifications.h"
 
 //these may be elsewhere
 #define MAX_PEPTIDE_LENGTH 255
 
-/**
- * \returns The mass of the given peptide.
- */
-float calc_sequence_mass(
-  char* peptide, ///< the query peptide -in
-  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
-  );
 
-/**
- * \returns The mass of the given peptide.
- */
-float calc_peptide_mass(
-  PEPTIDE_T* peptide, ///< the query peptide -in
-  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
-  );
-
-/**
- * \returns The hydrophobicity of the given peptide, as in Krokhin (2004).
- */
-float calc_krokhin_hydrophobicity(
-  PEPTIDE_T* peptide ///< the query peptide -in
-  );
+/*  Allocators/deallocators  */
 
 /**
  * \returns An (empty) peptide object.
@@ -53,14 +34,76 @@ float calc_krokhin_hydrophobicity(
 PEPTIDE_T* allocate_peptide(void);
 
 /**
- * \returns A new peptide object, populated with the user specified parameters.
+ *\returns the protein struct size, value of sizeof function
+ */
+int get_peptide_sizeof(void);
+
+/**
+ * \returns A new peptide object, populated with the user specified
+ * parameters.
  */
 PEPTIDE_T* new_peptide(
   unsigned char length,     ///< The length of the peptide -in
   float peptide_mass,       ///< The neutral mass of the peptide -in
-  PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
-  int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
+  PROTEIN_T* parent_protein, ///< The parent_protein of this peptide -in
+  int start_idx, ///< Start index of peptide in the protein sequence -in
+  PEPTIDE_TYPE_T peptide_type ///<  The type of cleavage(TRYPTIC, etc)
+  );
+
+/**
+ * \brief Allocates a new peptide giving it the values of the source
+ * peptide.
+ * \returns A newly allocated peptide identical to the source.
+ */
+PEPTIDE_T* copy_peptide(
+  PEPTIDE_T* src ///< source peptide -in
+);
+
+/**
+ * Merge to identical peptides, copy all peptide_src into one of the peptide
+ * peptide_dest, peptide_bye must have at least one peptide src
+ * frees the peptide_bye, once the peptide_src are re-linked to the peptide_dest
+ * Assumes that both peptides use linklist implemenation for peptide_src
+ * \returns TRUE if merge is successful else FALSE
+ */
+BOOLEAN_T merge_peptides(
+  PEPTIDE_T* peptide_dest,
+  PEPTIDE_T* peptide_bye
+  );
+                           
+/**
+ * Frees an allocated peptide object.
+ * Depending on peptide_src implementation determines how to free srcs
+ * This decision is made by global variable PEPTIDE_SRC_USE_LINK_LIST
+ */
+void free_peptide (
+  PEPTIDE_T* peptide ///< peptide to free -in
+  );
+
+/*  Getters and Setters  */
+
+/*  Get-set:  mass */
+/**
+ * sets the peptide src implementation in the peptide object
+ * This should be set only once and not be altered
+ */
+void set_peptide_src_implementation(
+  BOOLEAN_T use_link_list ///< does the peptide use link list peptide src
+  );
+
+/**
+ * sets the peptide mass
+ */
+void set_peptide_peptide_mass( 
+  PEPTIDE_T* peptide,  ///< the peptide to set -out
+  float peptide_mass  ///< the mass of the peptide - in
+  );
+
+/**
+ * \returns the peptide mass
+ */
+inline float get_peptide_peptide_mass( 
+  PEPTIDE_T* peptide  ///< the peptide to query the mass -in
   );
 
 /** 
@@ -86,165 +129,7 @@ float get_peptide_mz(
     int charge ///< the charge of peptide -in
     );
 
-/**
- * Frees an allocated peptide object.
- * Depending on peptide_src implementation determines how to free srcs
- * This decision is made by global variable PEPTIDE_SRC_USE_LINK_LIST
- */
-void free_peptide (
-  PEPTIDE_T* peptide ///< peptide to free -in
-  );
-
-/**
- * Prints a peptide object to file.
- * mass \t peptide-length \t peptide-sequence \n
- */
-void print_peptide(
-  PEPTIDE_T* peptide,  ///< the query peptide -in
-  FILE* file  ///< the out put stream -out
-  );
-
-/**
- * Prints a peptide object to file.
- * prints all peptide_src object it's associated 
- * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
- *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
- * prints in correct format for generate_peptide
- */
-void print_peptide_in_format(
-  PEPTIDE_T* peptide,  ///< the query peptide -in
-  BOOLEAN_T flag_out, ///< print peptide sequence? -in
-  BOOLEAN_T trypticity_opt, ///< print trypticity of peptide? -in
-  FILE* file  ///< the out put stream -out
-  );
-
-/**
- * Prints a peptide object to file.
- * ONLY prints peptide_src that match the peptide_src
- * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
- *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
- * prints in correct format for generate_peptide
- */
-void print_filtered_peptide_in_format(
-  PEPTIDE_T* peptide,  ///< the query peptide -in
-  BOOLEAN_T flag_out, ///< print peptide sequence? -in
-  FILE* file,  ///< the out put stream -out
-  PEPTIDE_TYPE_T peptide_type ///< the peptide_type of src to print -in
-  );
-
-/**
- * \brief Allocates a new peptide giving it the values of the source
- * peptide.
- * \returns A newly allocated peptide identical to the source.
- */
-PEPTIDE_T* copy_peptide(
-  PEPTIDE_T* src ///< source peptide -in
-);
-
-/**
- * Parses a peptide from file.
- * \returns TRUE if success. FALSE if failure.
- */
-BOOLEAN_T parse_peptide_file(
-  PEPTIDE_T* peptide,
-  FILE* file);
-
-/** 
- * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
- * FIXME Chris, could you create the get and set methods for the object fields?
- */
-
-/**
- * Additional get and set methods
- */
-
-/**
- * get the peptide->first peptide_src->parent protein->database
- */
-DATABASE_T* get_peptide_first_src_database(
-  PEPTIDE_T* peptide ///< working peptide -in
-);
-
-/**
- * set the correct free method for free peptide
- */
-void set_peptide_free_peptide(
-  PEPTIDE_T* peptide, ///< working peptide -in                              
-  void* free_peptide ///< functional pointer to the correctf free peptide method -in
-  );
-
-/**
- * \returns the sequence of peptide
- * goes to the first peptide_src to gain sequence, thus must have at least one peptide src
- * returns a char* to a heap allocated copy of the sequence
- * user must free the memory
- */
-char* get_peptide_sequence(
- PEPTIDE_T* peptide ///< peptide to query sequence -in
- );
-
-/**
- * \returns a pointer to the start of peptide sequence with in it's protein parent sequence, thus does not have terminating signe until end of parent protein
- * goes to the first peptide_src to find the location of start, thus must have at least one peptide src
- * should not print, will result in printing the entire protein sequence
- */
-char* get_peptide_sequence_pointer(
-  PEPTIDE_T* peptide ///< peptide to query sequence -in
-  );
-
-/**
- * \returns the sequence of peptide with each flanking AA
- *  template "*.peptide_sequence.*", where "*" are flanking amino acids
- * "*", left empty if no flanking sequence
- * goes to the first peptide_src to gain sequence, thus must have at least one peptide src
- * returns a char* to a heap allocated copy of the sequence
- * user must free the memory
- */
-char* get_peptide_sequence_sqt(
- PEPTIDE_T* peptide ///< peptide to query sequence -in
- );
-
-/**
- * \returns the sequence of peptide with each flanking AA from the specified peptide_src(protein)
- *  template "*.peptide_sequence.*", where "*" are flanking amino acids
- * "*", left empty if no flanking sequence
- * returns a char* to a heap allocated copy of the sequence
- * user must free the memory
- */
-char* get_peptide_sequence_from_peptide_src_sqt(
- PEPTIDE_T* peptide, ///< peptide to query sequence -in
- PEPTIDE_SRC_T* peptide_src ///< peptide_src -in 
- );
-
-/**
- * sets the sequence length of the peptide
- */
-void set_peptide_length( 
-  PEPTIDE_T* peptide,  ///< the peptide to set the length -out
-  unsigned char length  ///< the length of sequence -in
-  );
-
-/**
- *\returns the sequence length of the peptide
- */
-unsigned char get_peptide_length( 
-  PEPTIDE_T* peptide  ///< the peptide to query the length -in
-  );
-
-/**
- * sets the peptide mass
- */
-void set_peptide_peptide_mass( 
-  PEPTIDE_T* peptide,  ///< the peptide to set -out
-  float peptide_mass  ///< the mass of the peptide - in
-  );
-
-/**
- * \returns the peptide mass
- */
-inline float get_peptide_peptide_mass( 
-  PEPTIDE_T* peptide  ///< the peptide to query the mass -in
-  );
+/*  Get-set:  source */
 
 /**
  * sets the peptide_src field in the peptide
@@ -252,7 +137,7 @@ inline float get_peptide_peptide_mass(
  * does not copy in the object, just the pointer to the object.
  */
 void set_peptide_peptide_src(
-  PEPTIDE_T* peptide,  ///< the peptide to set -out                                             
+  PEPTIDE_T* peptide,  ///< the peptide to set -out 
   PEPTIDE_SRC_T* new_association ///< new peptide_src -in
 );
 
@@ -285,24 +170,132 @@ PEPTIDE_SRC_T* get_peptide_peptide_src(
 );
 
 /**
+ * get the peptide->first peptide_src->parent protein->database
+ */
+DATABASE_T* get_peptide_first_src_database(
+  PEPTIDE_T* peptide ///< working peptide -in
+);
+
+/**
  * returns a pointer to the peptide's first parent protein field of the peptide
  */
 PROTEIN_T* get_peptide_parent_protein(
   PEPTIDE_T* peptide  ///< the peptide to query the parent_protein -in
   );
 
-/**
- *\returns the protein struct size, value of sizeof function
- */
-int get_peptide_sizeof(void);
-
+/*  Get-set:  sequence */
 
 /**
- * sets the peptide src implementation in the peptide object
- * This should be set only once and not be altered
+ * sets the sequence length of the peptide
  */
-void set_peptide_src_implementation(
-  BOOLEAN_T use_link_list ///< does the peptide use link list peptide src
+void set_peptide_length( 
+  PEPTIDE_T* peptide,  ///< the peptide to set the length -out
+  unsigned char length  ///< the length of sequence -in
+  );
+
+/**
+ *\returns the sequence length of the peptide
+ */
+unsigned char get_peptide_length( 
+  PEPTIDE_T* peptide  ///< the peptide to query the length -in
+  );
+
+/**
+ * \brief Get the sequence of a peptide.
+ * Goes to the first peptide_src to gain sequence, thus must have at
+ * least one peptide src 
+ * \returns A newly allocated copy of the sequence.
+ */
+char* get_peptide_sequence(
+ PEPTIDE_T* peptide ///< peptide to query sequence -in
+ );
+
+/**
+ * \returns a pointer to the start of peptide sequence with in it's protein parent sequence, thus does not have terminating signe until end of parent protein
+ * goes to the first peptide_src to find the location of start, thus must have at least one peptide src
+ * should not print, will result in printing the entire protein sequence
+ */
+char* get_peptide_sequence_pointer(
+  PEPTIDE_T* peptide ///< peptide to query sequence -in
+  );
+
+/**
+ * \brief Formats the sequence of the peptide with each flanking AA.
+ * 
+ * Format is "X.peptide_sequence.X", where "X" is a flanking amino acid.
+ * "X", is printed as "-" if there is no flanking sequence.
+ * Goes to the first peptide_src to gain sequence, thus must have at
+ * least one peptide src 
+ * \returns A newly allocated string with the sqt-formated peptide sequence.
+ */
+char* get_peptide_sequence_sqt(
+ PEPTIDE_T* peptide ///< peptide to query sequence -in
+ );
+
+/**
+ * \brief Formats the sequence of the peptide from a particular
+ * peptide_src.
+ *
+ * Is called by get_peptide_sequence_sqt()
+ * Format is "X.peptide_sequence.X", where "X" is a flanking amino acid.
+ * "X", is printed as "-" if there is no flanking sequence.
+ * Goes to the first peptide_src to gain sequence, thus must have at
+ * least one peptide src 
+ *
+ * \returns A newly allocated string with the sqt-formated peptide sequence.
+ */
+char* get_peptide_sequence_from_peptide_src_sqt(
+ PEPTIDE_T* peptide, ///< peptide to query sequence -in
+ PEPTIDE_SRC_T* peptide_src ///< peptide_src -in 
+ );
+
+/**
+ * \brief Add a modification to a peptide.
+ *
+ * Adds the modified sequence to the peptide and changes the peptide
+ * mass based on the mass change in the peptide_mod.
+ * \returns void
+ */
+void set_peptide_mod(PEPTIDE_T* peptide,     ///< peptide to be modified
+                     MODIFIED_AA_T* mod_seq, ///< modified seq to add
+                     PEPTIDE_MOD_T* pep_mod  ///< mod that made the seq
+);
+
+/**
+ * \brief Get the modified peptide sequence
+ *
+ * If the peptide has no modifications, create a sequence of
+ * MODIFIED_AA_T's in which none of them are actually modified.
+ * \returns A newly allocated copy of the sequence of MODIFIED_AA_Ts.
+ */
+//MODIFIED_AA_T* get_peptide_modified_sequence( // why is this not working??!!
+unsigned short* get_peptide_modified_sequence(
+ PEPTIDE_T* peptide
+ );
+
+/*  Getters requiring calculation */
+
+/**
+ * \returns The mass of the given peptide.
+ */
+float calc_sequence_mass(
+  char* peptide, ///< the query peptide -in
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+  );
+
+/**
+ * \returns The mass of the given peptide.
+ */
+float calc_peptide_mass(
+  PEPTIDE_T* peptide, ///< the query peptide -in
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+  );
+
+/**
+ * \returns The hydrophobicity of the given peptide, as in Krokhin (2004).
+ */
+float calc_krokhin_hydrophobicity(
+  PEPTIDE_T* peptide ///< the query peptide -in
   );
 
 /**
@@ -333,8 +326,134 @@ int get_peptide_n_distance(PEPTIDE_T* peptide);
 int get_peptide_c_distance(PEPTIDE_T* peptide);
 
 /**
- * Residue Iterator
+ * Creates a heap allocated hash_value for the peptide that should
+ * uniquely identify the peptide
+ *\returns the string of "<first src protein idx><start idx><length>"
  */
+char* get_peptide_hash_value( 
+  PEPTIDE_T*  peptide ///< The peptide whose residues to iterate over.
+  );
+
+/**
+ * 
+ *\returns a randomly shuffled sequence but preserves the tryptic property
+ */
+char* generate_shuffled_sequence(
+  PEPTIDE_T* peptide, ///< The peptide sequence to shuffle -in                                
+  PEPTIDE_TYPE_T peptide_type ///< The peptide type to enfore on the shuffled sequence
+  );
+
+/*  Comparisons for sorting  */
+
+/**
+ * Compare peptide sequence
+ * \returns TRUE if peptide sequence is identical else FALSE
+ */
+BOOLEAN_T compare_peptide_sequence(
+  PEPTIDE_T* peptide_one,
+  PEPTIDE_T* peptide_two
+  );
+
+/**
+ * compares two peptides with the lexical sort type
+ * for qsort
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_lexical_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
+  );
+
+
+/**
+ * compares two peptides with the mass sort type
+ * if peptide mass is identical sort by lexicographical order
+ * used for qsort function
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_mass_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
+  );
+
+
+/**
+ * compares two peptides with the length sort type
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ */
+int compare_peptide_length_qsort(
+  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
+  PEPTIDE_T** peptide_two ///< peptide to compare two -in
+  );
+
+/**
+ * Compare peptide mass
+ * \returns 0 if peptide mass is identical else 1 if peptide_one is larger, -1 if peptide_two is larger
+ */
+int compare_peptide_mass(
+  PEPTIDE_T* peptide_one,
+  PEPTIDE_T* peptide_two
+  );
+
+/*  Printing / parsing       */
+
+/**
+ * Prints a peptide object to file.
+ * prints all peptide_src object it's associated 
+ * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
+ *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
+ * prints in correct format for generate_peptide
+ */
+void print_peptide_in_format(
+  PEPTIDE_T* peptide,  ///< the query peptide -in
+  BOOLEAN_T flag_out, ///< print peptide sequence? -in
+  BOOLEAN_T trypticity_opt, ///< print trypticity of peptide? -in
+  FILE* file  ///< the out put stream -out
+  );
+
+/**
+ * Prints a peptide object to file.
+ * ONLY prints peptide_src that match the peptide_src
+ * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
+ *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
+ * prints in correct format for generate_peptide
+ */
+void print_filtered_peptide_in_format(
+  PEPTIDE_T* peptide,  ///< the query peptide -in
+  BOOLEAN_T flag_out, ///< print peptide sequence? -in
+  FILE* file,  ///< the out put stream -out
+  PEPTIDE_TYPE_T peptide_type ///< the peptide_type of src to print -in
+  );
+
+/**
+ * Serialize a peptide to a FILE in binary
+ * \returns TRUE if serialization is successful, else FALSE
+ *
+ * The peptide serialization format looks like this:
+ *
+ *<PEPTIDE_T: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>]+
+ * the bracket peptide src information repeats for the number of peptide src listed before the bracket
+ * the protein index is the index of the parent protein in the database DATABASE_T
+ *
+ */
+BOOLEAN_T serialize_peptide(
+  PEPTIDE_T* peptide,
+  FILE* file
+  );
+ 
+/**
+ * Parse the binary serialized peptide use for match_analysis
+ * Assumes that the file* is set at the start of the peptide_src count field
+ *\returns the Peptide if successful parse the peptide form the serialized file, else NULL
+ */
+PEPTIDE_T* parse_peptide(
+  FILE* file, ///< the serialized peptide file -in
+  DATABASE_T* database, ///< the database to which the peptides are created -in
+  BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
+  );
+
+
+/*  Iterators */
 
 /**
  * Instantiates a new residue_iterator from a peptide.
@@ -400,123 +519,48 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
 
-/////
-
+// THESE ARE NOT USED
+      
 /**
- * Compare peptide sequence
- * \returns TRUE if peptide sequence is identical else FALSE
+ * Prints a peptide object to file.
+ * mass \t peptide-length \t peptide-sequence \n
  */
-BOOLEAN_T compare_peptide_sequence(
-  PEPTIDE_T* peptide_one,
-  PEPTIDE_T* peptide_two
-  );
-
-/**
- * Compare peptide mass
- * \returns 0 if peptide mass is identical else 1 if peptide_one is larger, -1 if peptide_two is larger
- */
-int compare_peptide_mass(
-  PEPTIDE_T* peptide_one,
-  PEPTIDE_T* peptide_two
-  );
-
-
-/**
- * compares two peptides with the mass sort type
- * if peptide mass is identical sort by lexicographical order
- * used for qsort function
- * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
- */
-int compare_peptide_mass_qsort(
-  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
-  PEPTIDE_T** peptide_two ///< peptide to compare two -in
-  );
-
-/**
- * compares two peptides with the lexical sort type
- * for qsort
- * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
- */
-int compare_peptide_lexical_qsort(
-  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
-  PEPTIDE_T** peptide_two ///< peptide to compare two -in
-  );
-
-/**
- * compares two peptides with the length sort type
- * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
- */
-int compare_peptide_length_qsort(
-  PEPTIDE_T** peptide_one, ///< peptide to compare one -in
-  PEPTIDE_T** peptide_two ///< peptide to compare two -in
-  );
-
-/**
- * Merge to identical peptides, copy all peptide_src into one of the peptide
- * peptide_dest, peptide_bye must have at least one peptide src
- * frees the peptide_bye, once the peptide_src are re-linked to the peptide_dest
- * Assumes that both peptides use linklist implemenation for peptide_src
- * \returns TRUE if merge is successful else FALSE
- */
-BOOLEAN_T merge_peptides(
-  PEPTIDE_T* peptide_dest,
-  PEPTIDE_T* peptide_bye
-  );
-                           
 /*
- * Serialize a peptide to a FILE in binary
- * \returns TRUE if serialization is successful, else FALSE
- *
- * The peptide serialization format looks like this:
- *
- *<PEPTIDE_T: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>]+
- * the bracket peptide src information repeats for the number of peptide src listed before the bracket
- * the protein index is the index of the parent protein in the database DATABASE_T
- *
- */
-BOOLEAN_T serialize_peptide(
-  PEPTIDE_T* peptide,
-  FILE* file
+void print_peptide(
+  PEPTIDE_T* peptide,  ///< the query peptide -in
+  FILE* file  ///< the out put stream -out
   );
- 
-/**
- * Parse the binary serialized peptide use for match_analysis
- * Assumes that the file* is set at the start of the peptide_src count field
- *\returns the Peptide if successful parse the peptide form the serialized file, else NULL
- */
-PEPTIDE_T* parse_peptide(
-  FILE* file, ///< the serialized peptide file -in
-  DATABASE_T* database, ///< the database to which the peptides are created -in
-  BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
-  );
+*/
 
 /**
- * Creates a heap allocated hash_value for the peptide that should
- * uniquely identify the peptide
- *\returns the string of "<first src protein idx><start idx><length>"
+ * set the correct free method for free peptide
  */
-char* get_peptide_hash_value( 
-  PEPTIDE_T*  peptide ///< The peptide whose residues to iterate over.
+/*
+void set_peptide_free_peptide(
+  PEPTIDE_T* peptide, ///< working peptide -in                              
+  void* free_peptide ///< functional pointer to the correctf free peptide method -in
   );
-
-/**
- * 
- *\returns a randomly shuffled sequence but preserves the tryptic property
- */
-char* generate_shuffled_sequence(
-  PEPTIDE_T* peptide, ///< The peptide sequence to shuffle -in                                
-  PEPTIDE_TYPE_T peptide_type ///< The peptide type to enfore on the shuffled sequence
-  );
+*/
 
 /**
  * Load a peptide from the FILE
  * \returns TRUE if load is successful, else FALSE
  */
+/*
 BOOLEAN_T load_peptide(
   PEPTIDE_T* peptide, ///< An allocated peptide
   FILE* file ///< The file pointing to the location of the peptide
   );
- 
+*/
+/**
+ * Parses a peptide from file.
+ * \returns TRUE if success. FALSE if failure.
+ */
+/*
+BOOLEAN_T parse_peptide_file(
+  PEPTIDE_T* peptide,
+  FILE* file);
+*/
 
 #endif
 

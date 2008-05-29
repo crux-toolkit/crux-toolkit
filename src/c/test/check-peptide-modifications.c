@@ -259,7 +259,7 @@ END_TEST
 
 // one aa_mod returning only 1 modified version
 START_TEST(test_modify_1){
-  printf("modify 1\n");
+  //printf("modify 1\n");
   // create a pmod that creates one modified version
   aa_mod_set_max_per_peptide(amod1, 1);
   BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
@@ -289,7 +289,7 @@ END_TEST
 
 // one or two aa_mods that return > 1 modified versions
 START_TEST(test_modify_2){
-  printf("modify 2\n");
+  //printf("modify 2\n");
   // create a pmod that creates two modified versions
   aa_mod_set_max_per_peptide(amod1, 1);
   BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
@@ -342,9 +342,9 @@ END_TEST
 
 // list starts out big and is limited by subsiquent mods
 START_TEST(test_modify_3){
-  printf("modify 3\n");
+  //printf("modify 3\n");
 
-  printf("LOOK HERE\n");
+  //printf("LOOK HERE\n");
   aa_mod_set_max_per_peptide(amod1, 10);
   BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
   mod_us['G'-'A'] = TRUE;
