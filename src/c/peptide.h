@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.45.4.3 $
+ * $Revision: 1.45.4.4 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -519,48 +519,6 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
 
-// THESE ARE NOT USED
-      
-/**
- * Prints a peptide object to file.
- * mass \t peptide-length \t peptide-sequence \n
- */
-/*
-void print_peptide(
-  PEPTIDE_T* peptide,  ///< the query peptide -in
-  FILE* file  ///< the out put stream -out
-  );
-*/
-
-/**
- * set the correct free method for free peptide
- */
-/*
-void set_peptide_free_peptide(
-  PEPTIDE_T* peptide, ///< working peptide -in                              
-  void* free_peptide ///< functional pointer to the correctf free peptide method -in
-  );
-*/
-
-/**
- * Load a peptide from the FILE
- * \returns TRUE if load is successful, else FALSE
- */
-/*
-BOOLEAN_T load_peptide(
-  PEPTIDE_T* peptide, ///< An allocated peptide
-  FILE* file ///< The file pointing to the location of the peptide
-  );
-*/
-/**
- * Parses a peptide from file.
- * \returns TRUE if success. FALSE if failure.
- */
-/*
-BOOLEAN_T parse_peptide_file(
-  PEPTIDE_T* peptide,
-  FILE* file);
-*/
 
 #endif
 

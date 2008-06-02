@@ -248,6 +248,35 @@ START_TEST(test_copy){
 }
 END_TEST
 
+START_TEST(test_clear){
+
+  // clear one-element list
+  clear_list(list1);
+  fail_unless( is_empty_linked_list(list1) == TRUE,
+               "List should be empty after being cleared.");
+  fail_unless( *data1 == 7, "Data was corrupted after clear");
+
+  // clear empty list
+  clear_list(list1);
+  fail_unless( is_empty_linked_list(list1) == TRUE,
+               "Empty list should be empty after being cleared.");
+
+  // add to cleared list
+  int i = 0;
+  for(i=0; i< 5; i++){
+    push_back_linked_list(list1, data1);
+  }
+  fail_unless( !is_empty_linked_list(list1) == TRUE,
+               "List should not be empty.");
+
+  // clear multi-element list
+  clear_list(list1);
+  fail_unless( is_empty_linked_list(list1) == TRUE,
+               "List should be empty after being cleared.");
+  fail_unless( *data1 == 7, "Data was corrupted after multi-element clear");
+}
+END_TEST
+
 START_TEST(test_delete){
   // create a list where each element points to same data
   LINKED_LIST_T* head = new_list(data1);
@@ -426,6 +455,7 @@ Suite* list_suite(){
   tcase_add_test(tc_core, test_push_back);
   tcase_add_test(tc_core, test_combine);
   tcase_add_test(tc_core, test_copy);
+  tcase_add_test(tc_core, test_clear);
   tcase_add_test(tc_core, test_delete);
   tcase_add_test(tc_core, test_pop);
   tcase_add_checked_fixture(tc_core, list_setup, list_teardown);

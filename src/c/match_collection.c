@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.79 $
+ * $Revision: 1.79.2.1 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -2251,21 +2251,34 @@ void free_match_iterator(
  * Copied from spectrum_collection::serialize_header
  * uses values from paramter.c rather than taking as arguments
  */
+/**
+ * \brief Write header information to each file in the given array of
+ * filehandles. Writes the number of matches per spectra and a place
+ * holder is written for the total number of spectra.  The array of
+ * modifications kept by parameter.c and the number of modications in
+ * that array is also written.
+ */
 void serialize_headers(FILE** psm_file_array){
 
   if( *psm_file_array == NULL ){
     return;
   }
+  // remove this
   int num_spectrum_features = 0; //obsolete?
+
+  // get values from parameter.c
   int num_charged_spectra = 0;  //this is set later
   int matches_per_spectrum = get_int_parameter("top-match");
   char* filename = get_string_parameter_pointer("protein input");
   char* protein_file = parse_filename(filename);
-  //  free(filename);
   filename = get_string_parameter_pointer("ms2 file");
   char* ms2_file = parse_filename(filename);
   //  free(filename);
            
+  /*
+    AA_MOD_T* list_of_mods = NULL;
+    int num_mods = get_all_aa_mod_list(&list_of_mods);
+   */
 
   //write values to files
   int total_files = 1 + get_int_parameter("number-decoy-set");
@@ -2274,6 +2287,10 @@ void serialize_headers(FILE** psm_file_array){
     fwrite(&(num_charged_spectra), sizeof(int), 1, psm_file_array[i]);
     fwrite(&(num_spectrum_features), sizeof(int), 1, psm_file_array[i]);
     fwrite(&(matches_per_spectrum), sizeof(int), 1, psm_file_array[i]);
+    /*
+      fwrite(&num_mods, sizeof(int), 1, psm_file_array[i]);
+      fwrite(&list_of_mods, sizeof(AA_MOD_T)*MAX_AA_MODS, 1, psm_file_array[i]);
+     */
   }
   
   free(protein_file);
@@ -2499,6 +2516,19 @@ BOOLEAN_T extend_match_collection(
   }
   carp(CARP_DETAILED_DEBUG, "There are %i top matches", num_top_match);
 
+  /* modification specific information
+     int num_mods = -1;
+     fread(&num_mods, sizeof(int), 1, result_file);
+     AA_MOD_T* file_list_of_mods = NULL;
+fread(&file_list_of_mods, sizeof(AA_MOD_T)*MAX_AA_MODS, 1,result_file);
+
+if(! compare_mods(AA_MOD_T* psm_file_mod_list, int num_mods) ){
+       carp(CARP_FATAL, "Modification parameters do not match those in
+     the csm file.");
+         exit(1);
+     }
+
+   */
 
   // FIXME
   // could parse fasta file and ms2 file

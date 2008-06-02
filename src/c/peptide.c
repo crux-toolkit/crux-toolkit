@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.72.2.3 $
+ * $Revision: 1.72.2.4 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -48,7 +48,8 @@ struct peptide {
   unsigned char length; ///< The length of the peptide
   float peptide_mass;   ///< The peptide's mass.
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
-  //  MODIFIED_AA_T* modified_seq; ///< peptide sequence with modifications
+  // comment me to fix files
+  MODIFIED_AA_T* modified_seq; ///< peptide sequence with modifications
 };
 
 
@@ -109,7 +110,8 @@ PEPTIDE_T* new_peptide(
   set_peptide_peptide_mass(peptide, peptide_mass);
   peptide->peptide_src = 
     new_peptide_src(peptide_type, parent_protein, start_idx );
-  //  peptide->modified_seq = NULL;
+  // comment me to fix files
+  peptide->modified_seq = NULL;
   
   return peptide;
 }
@@ -527,15 +529,16 @@ void set_peptide_mod(PEPTIDE_T* peptide,     ///< peptide to be modified
                      PEPTIDE_MOD_T* pep_mod  ///< mod that made the seq
 ){
   if( peptide == NULL || mod_seq == NULL || pep_mod == NULL ){
-    carp(CARP_ERROR, "Cannot modify peptide.  Peptide or mod or seq is NULL.");
+    carp(CARP_ERROR, "Cannot modify peptide.  Peptide, mod, or seq is NULL.");
     return;
   }
-/*
+
+  // comment me to fix files
   // check that peptide doesn't already have a mod?
   peptide->modified_seq = mod_seq;// should this be a copy instead??
   // change mass
   peptide->peptide_mass += peptide_mod_get_mass_change(pep_mod);
-*/
+
 }
 
 /**
@@ -552,7 +555,8 @@ MODIFIED_AA_T* get_peptide_modified_sequence(PEPTIDE_T* peptide){
   }
 
   MODIFIED_AA_T* seq_copy = NULL;
-  /*
+  
+  // comment me to fix files
   if( peptide->modified_seq != NULL ){
     seq_copy = copy_mod_aa_seq(peptide->modified_seq);
   }else{// create one from char seq
@@ -560,7 +564,7 @@ MODIFIED_AA_T* get_peptide_modified_sequence(PEPTIDE_T* peptide){
     seq_copy = convert_to_mod_aa_seq(seq);
     free(seq);
   }
-  */
+  
   return seq_copy;
 }
 
@@ -1405,56 +1409,6 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
   return previous;
 }
  
-///////////////////////////////////////////////////////////
-
-
-
-
-
- 
-
-// THESE ARE NOT USED
-/*
- * Load a peptide from the FILE
- * \returns TRUE if load is successful, else FALSE
- *
- * See serialize_peptide above for the serialization format
- */
-/*
-BOOLEAN_T load_peptide(
-  PEPTIDE_T* peptide, ///< An allocated peptide
-  FILE* file ///< The file pointing to the location of the peptide
-  );
-*/
-/**
- USED ONLY IN TESTING
- * \brief Prints a peptide object to file.
- * prints all information.
- */
-/*
-void print_peptide(
-  PEPTIDE_T* peptide,  ///< the query peptide -in
-  FILE* file  ///< the out put stream -out
-  )
-{
-  char* sequence = get_peptide_sequence(peptide);
-  
-  PEPTIDE_SRC_ITERATOR_T* iterator = 
-    new_peptide_src_iterator(peptide);
-  fprintf(file,"%s\n","Peptide");
-  fprintf(file,"%.2f\t",peptide->peptide_mass);
-  fprintf(file,"%d\t",peptide->length);
-  fprintf(file,"%s\n",sequence);
-  // interate through the linklist of possible parent proteins
-  while(peptide_src_iterator_has_next(iterator)){
-    print_peptide_src(peptide_src_iterator_next(iterator), file);
-  }
-  free_peptide_src_iterator(iterator);
-  free(sequence);
-}
-*/
-
-
 
 /*
  * Local Variables:

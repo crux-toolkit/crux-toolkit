@@ -314,6 +314,20 @@ void delete_list_node(LIST_POINTER_T* list){
 }
 
 /**
+ * \brief Removes all nodes from a list while leaving the data intact.
+ */
+void clear_list(LINKED_LIST_T* list){
+  if( list == NULL ){
+    return;
+  }
+  LIST_POINTER_T* first = list->next;
+  delete_list_node(first);
+  list->next = NULL;
+}
+
+
+
+/**
  * \brief Deletes the given list WITHOUT deleting the data pointed to.
  * \returns void
  */

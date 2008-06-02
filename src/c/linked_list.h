@@ -103,6 +103,11 @@ LINKED_LIST_T* combine_lists(LINKED_LIST_T* beginning, LINKED_LIST_T* add_me);
 LINKED_LIST_T* copy_list(LINKED_LIST_T* original);
 
 /**
+ * \brief Removes all nodes from a list while leaving the data intact.
+ */
+void clear_list(LINKED_LIST_T* list);
+
+/**
  * \brief Deletes the given list node and all list nodes after this
  * one WITHOUT deleting the data pointed to.
  * \returns void

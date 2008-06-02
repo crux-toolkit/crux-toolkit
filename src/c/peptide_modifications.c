@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.8 $
+ * $Revision: 1.1.2.9 $
  */
 
 #include "peptide_modifications.h"
@@ -513,6 +513,7 @@ int apply_mod_to_list(
     // make the collected results the input to the next application
     combine_lists(apply_mod_to_these, completed_seqs); 
     //delete_linked_list(completed_seqs);
+    //free(completed_seqs);
     completed_seqs = new_empty_list();
 
   }// apply next time
