@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.9 $
+ * $Revision: 1.1.2.10 $
  */
 
 #include "peptide_modifications.h"
@@ -380,6 +380,8 @@ int modify_peptide(
   char* sequence = get_peptide_sequence(peptide);
   MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
 
+  //printf("Modifying peptide %s\n", sequence);
+
   // get the aa_mod info
   int* aa_mod_counts = peptide_mod->aa_mod_counts;
   AA_MOD_T** aa_mod_list = NULL;
@@ -392,18 +394,19 @@ int modify_peptide(
   // try applying each aa_mod to the sequence
   for(aa_mod_idx = 0; aa_mod_idx < num_aa_mods; aa_mod_idx++){
 
-    //printf("aaidx is %d and count is %d\n", aa_mod_idx, aa_mod_counts[aa_mod_idx]);
+    //printf("aaidx is %d and mod count is %d\n", aa_mod_idx, aa_mod_counts[aa_mod_idx]);
     int mod_count = aa_mod_counts[aa_mod_idx];
     if( mod_count == 0 ){ // do not apply this aa mod
       continue;
     }
 
-    //printf("applying to list, mod count is %d\n", mod_count);
+    //printf("applying to list, total count is %d\n", total_count);
     total_count = apply_mod_to_list(modified_seqs, 
                                     aa_mod_list[aa_mod_idx],
                                     mod_count);
 
 
+    //printf("after applying count is %d\n", total_count);
     // the count should be > 0, but check for error case
     if( total_count == 0 || is_empty_linked_list(modified_seqs) ){
       carp(CARP_ERROR, 
@@ -428,11 +431,11 @@ int modify_peptide(
 
     MODIFIED_AA_T* cur_mod_seq = 
       (MODIFIED_AA_T*)pop_front_linked_list(modified_seqs);
+    /*
     char* seq = modified_aa_string_to_string(cur_mod_seq);
-    //printf("%s\n", seq);
+    printf("%s\n", seq);
     free(seq);
-
-    //add_peptide_mod_seq(cur_peptide, cur_mod_seq);
+    */
     set_peptide_mod(cur_peptide, cur_mod_seq, peptide_mod);
 
     push_back_linked_list(modified_peptides, cur_peptide );
@@ -497,10 +500,11 @@ int apply_mod_to_list(
       MODIFIED_AA_T* cur_seq = 
         (MODIFIED_AA_T*)pop_front_linked_list(apply_mod_to_these);
       
+      /*
       char* print_me = modified_aa_string_to_string(cur_seq);
-      //printf("Original: %s\n", print_me);
+      printf("Original: %s\n", print_me);
       free(print_me);
-
+      */
       return_seq_count += apply_mod_to_seq(cur_seq,
                                            mod_to_apply,
                                            times_idx, // skip n modified aas
@@ -624,22 +628,12 @@ void peptide_mod_add_aa_mod(
   int num_aa_mods = get_aa_mod_list( &all_mods );
   assert( num_aa_mods < MAX_AA_MODS );
 
+  //printf("mass change for amod of index %d is %.2f\n", aa_mod_idx, aa_mod_get_mass_change(all_mods[aa_mod_idx]));
   pep_mod->mass_change += aa_mod_get_mass_change(all_mods[aa_mod_idx])
                             * copies;
+  //printf("pep mod mass change is now %.2f\n", pep_mod->mass_change );
   pep_mod->num_mods += copies;
 
-  /*
-  if( pep_mod->list_of_mods == NULL ){
-    pep_mod->list_of_mods = new_list(aa_mod);
-  }else{
-    add_linked_list(pep_mod->list_of_mods, aa_mod);
-  }
-  
-  // could speed this up by keeping a pointer to the end
-  int added = 0;
-  for(added = 1; added < copies; added++){
-    add_linked_list(pep_mod->list_of_mods, aa_mod);
-    }*/
   pep_mod->aa_mod_counts[aa_mod_idx] += copies;
 }
 

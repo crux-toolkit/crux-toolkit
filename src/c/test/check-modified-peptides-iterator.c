@@ -8,7 +8,7 @@ void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 
 // declare things to set up
-MODIFIED_PEPTIDES_ITERATOR_T *iter1, *iter2, *inter3;
+MODIFIED_PEPTIDES_ITERATOR_T *iter1, *iter2, *iter3;
 PEPTIDE_MOD_T* pmod1;
 AA_MOD_T *amod1, *amod2, *amod3;
 AA_MOD_T* amod_list[3];
@@ -59,26 +59,16 @@ START_TEST(test_has_next_unmod){
   fail_unless( strcmp(get_peptide_sequence(next_p), "QGQVATVLSAPAK") == 0,
                "First peptide should be QGQVATVLSAPAK");
 
-  //free_peptide(next_p);
   fail_unless( modified_peptides_iterator_has_next(iter1) == TRUE, 
                "Iterator should have a second peptide");
-  fail_unless( next_p != NULL, "Next returned a null second peptide");
 
-  // !!!!!!  Fix this !!!!!!!!!!
-  //next_p = modified_peptides_iterator_next(iter1);
-  //  fail_unless( strcmp(get_peptide_sequence(next_p), "ITNHLVAMIEK") == 0,
-  //           "Second peptide should be ITNHLVAMIEK");
   free_peptide(next_p);
-
-  // count the number of unmodified peptides
-  /*
-  int counter = 0;
-  while( modified_peptides_iterator_has_next(iter1) ){
-     modified_peptides_iterator_next(iter1);
-    counter++;
-  }
-  fail_unless( counter == 2, 
-               "Iterator of unmodified peptides should return 2 peptides.");
+  // This creates segfault here but not in a stand-alone. why???
+  /*next_p = modified_peptides_iterator_next(iter1);
+    fail_unless( next_p != NULL, "Next returned a null second peptide");
+    fail_unless( strcmp(get_peptide_sequence(next_p), "ITNHLVAMIEK") == 0,
+               "Second peptide should be ITNHLVAMIEK");
+    free_peptide(next_p);
   */
 }
 END_TEST
@@ -92,26 +82,42 @@ START_TEST(test_has_next_one_mod){
   aas['Q' - 'A'] = TRUE;
   //aamod1 should have max 1 +10 on Q
   peptide_mod_add_aa_mod(pmod1, 0, 1); // aamod is index 0, 1 copy
-  free_modified_peptides_iterator( iter1 );
-  //printf("LOOK HERE\n");
-  iter1 = new_modified_peptides_iterator(1268-10, pmod1, NULL, dbase);
+  iter3 = new_modified_peptides_iterator(1268-10, pmod1, NULL, dbase);
 
   // test if the iterator has two modified peptides
-  fail_unless( modified_peptides_iterator_has_next(iter1) == TRUE,
+  fail_unless( modified_peptides_iterator_has_next(iter3) == TRUE,
                "Iterator with one Q mod should have first peptide");
-  PEPTIDE_T* pep = modified_peptides_iterator_next(iter1);
+  PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
   fail_unless( pep != NULL, "Iterator returned a NULL peptide");
+  // check unmodified sequence
   fail_unless( strcmp(get_peptide_sequence(pep), "QGQVATVLSAPAK") == 0,
                "First peptide should be QGQVATVLSAPAK");
+  // check modified sequence
+  char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
+  fail_unless( strcmp(mod_seq, "Q*GQVATVLSAPAK") == 0,
+               "First peptide should be Q*GQVATVLSAPAK but is %s", mod_seq);
 
-  fail_unless( modified_peptides_iterator_has_next(iter1) == TRUE,
+  // test for second peptide
+  fail_unless( modified_peptides_iterator_has_next(iter3) == TRUE,
                "Iterator with one Q mod should have second peptide");
-  pep = modified_peptides_iterator_next(iter1);
+  free_peptide(pep);
+  pep = NULL;
+  pep = modified_peptides_iterator_next(iter3);
   fail_unless( pep != NULL, "Iterator returned a NULL peptide");
+  // check unmodified sequence
   fail_unless( strcmp(get_peptide_sequence(pep), "QGQVATVLSAPAK") == 0,
                "Second peptide should be QGQVATVLSAPAK");
+  // check modified sequence
+  mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
+  fail_unless( strcmp(mod_seq, "QGQ*VATVLSAPAK") == 0,
+               "Second peptide should be QGQ*VATVLSAPAK but is %s", mod_seq);
 
-  printf("End one mod test\n");
+  // check that there are no more modified peptides
+  free_peptide(pep);
+  fail_unless( ! modified_peptides_iterator_has_next(iter3),
+               "Iterator should have no more peptides");
+  fail_unless( NULL == modified_peptides_iterator_next(iter3),
+               "Empty iterator should return NULL.");
 }
 END_TEST
 // test has next with one mod on first
@@ -119,6 +125,42 @@ END_TEST
 // with multi mods on first, none on second
 // with multi mods on second, none on firs
 // with multi mods on both
+
+START_TEST(test_looksee){
+  // try a number of combinations just to see what is being produced
+
+  // basic steps: select AAs changed by AA_MOD, add AA_MOD(s) to P_MOD
+  //              create iterator, iterate over all peptides
+
+  /*
+  // one change per peptide on one of three aas
+  BOOLEAN_T* aas = aa_mod_get_aa_list(amod2);
+  aas['Q' - 'A'] = TRUE;
+  aas['V' - 'A'] = TRUE;
+  aas['L' - 'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 1, 1); // aamod is index 1, 1 copy
+  printf("One copy of @ on Q,V,L\n");
+  iter3 = new_modified_peptides_iterator(1268, pmod1, NULL, dbase);
+
+  while( modified_peptides_iterator_has_next(iter3)){
+    PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
+    char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
+    printf("%s\n", mod_seq);
+  }
+
+  printf("One copy of @ on Q,V,L and two copies of * on T\n");
+  aas = aa_mod_get_aa_list(amod1);
+  aas['T' - 'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 0, 2); // aamod is index 1, 1 copy
+  iter3 = new_modified_peptides_iterator(1268, pmod1, NULL, dbase);
+  while( modified_peptides_iterator_has_next(iter3)){
+    PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
+    char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
+    printf("%s\n", mod_seq);
+  }
+  */
+}
+END_TEST
 
 START_TEST(test_null){
   MODIFIED_PEPTIDES_ITERATOR_T* null_iter = NULL;
@@ -136,6 +178,7 @@ Suite* modified_peptides_iterator_suite(){
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_has_next_unmod);
   tcase_add_test(tc_core, test_has_next_one_mod);
+  tcase_add_test(tc_core, test_looksee);
   tcase_add_checked_fixture(tc_core, mpi_setup, mpi_teardown);
 
   // Test boundry conditions

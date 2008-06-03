@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.72.2.4 $
+ * $Revision: 1.72.2.5 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -125,11 +125,16 @@ PEPTIDE_T* copy_peptide(
   PEPTIDE_T* src ///< source peptide -in
 ){
  
+  if( src == NULL ){
+    return NULL;
+  }
   PEPTIDE_T* new_peptide = allocate_peptide();
   new_peptide->length = src->length;
   new_peptide->peptide_mass = src->peptide_mass;
   new_peptide->peptide_src = allocate_peptide_src();
   copy_peptide_src(src->peptide_src, new_peptide->peptide_src);
+
+  new_peptide->modified_seq = copy_mod_aa_seq(src->modified_seq);
 
   //PEPTIDE_SRC_T* new_association;
 

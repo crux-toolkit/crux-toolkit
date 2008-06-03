@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.1.2.3 $
+ * $Revision: 1.1.2.4 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -53,15 +53,8 @@ void queue_next_peptide(
   }
 
   // first, try getting next from the temp list
-  //if( iterator->temp_peptide_list != NULL ){
   if( ! is_empty_linked_list( iterator->temp_peptide_list) ){
     //printf("Getting next peptide from temp list\n");
-    /*
-    iterator->next_peptide = 
-      (PEPTIDE_T*)get_data_linked_list( iterator->temp_peptide_list );
-    iterator->temp_peptide_list = 
-      get_next_free_this_linked_list( iterator->temp_peptide_list );
-    */
     iterator->next_peptide =pop_front_linked_list(iterator->temp_peptide_list);
     return;
   }
@@ -74,54 +67,56 @@ void queue_next_peptide(
   }
 
   // else, get the unmodified peptide
-  iterator->next_peptide = 
+  //iterator->next_peptide = 
+  PEPTIDE_T* unmod_peptide = 
     generate_peptides_iterator_next( iterator->peptide_generator);
 
-  //printf("Next peptide from pep_gen is %s\n", get_peptide_sequence(iterator->next_peptide));
+  //printf("Next peptide from pep_gen is %s\n", get_peptide_sequence(unmod_peptide));
 
   // apply modifications, discarding peptides that can't be modified
 
   // keep looking until a peptide can be modified or we run out of peptides
-  while( iterator->next_peptide != NULL &&
-         ! is_peptide_modifiable(iterator->next_peptide, 
+  //  while( iterator->next_peptide != NULL &&
+  //printf("looking for modifyable peptide\n");
+  while( unmod_peptide != NULL &&
+         ! is_peptide_modifiable(//iterator->next_peptide, 
+                                 unmod_peptide, 
                                  iterator->peptide_mod) ){ 
     //printf("Skipping peptide from the generator\n");
-    free_peptide( iterator->next_peptide );
-    iterator->next_peptide = 
+    //free_peptide( iterator->next_peptide );
+    free_peptide( unmod_peptide );
+    //iterator->next_peptide = 
+    unmod_peptide = 
       generate_peptides_iterator_next( iterator->peptide_generator);
   }
 
-  if( iterator->next_peptide == NULL ){ 
+  //if( iterator->next_peptide == NULL ){ 
+  if( unmod_peptide == NULL ){ 
     // none of the remaining peptides were modifiable
     //printf("Skipped all remaining peptides in generator\n");
+    iterator->next_peptide = NULL;
     return;
   }
 
   //printf("Modifying peptide\n");
-  modify_peptide( iterator->next_peptide, 
-                  iterator->peptide_mod, 
-                  //&(iterator->temp_peptide_list) );
-                  iterator->temp_peptide_list );
+  modify_peptide( //iterator->next_peptide, 
+                 unmod_peptide, 
+                 iterator->peptide_mod, 
+                 iterator->temp_peptide_list );
 
-  if( iterator->temp_peptide_list == NULL ){
+  // error case b/c already tested for modifyability
+  if( is_empty_linked_list(iterator->temp_peptide_list) ){
     printf("Modifier didn't return any peptides\n");
   }
 
   // now set next_peptide to the first in the list and move list forward
-  free_peptide(iterator->next_peptide); //we have a copy in the temp_list
-  /*
-  iterator->next_peptide = 
-    get_data_linked_list( iterator->temp_peptide_list );
-  iterator->temp_peptide_list = 
-    get_next_free_this_linked_list( iterator->temp_peptide_list );
-  */
+  //  free_peptide(iterator->next_peptide); //we have a copy in the temp_list
+  free_peptide(unmod_peptide);
   iterator->next_peptide = pop_front_linked_list(iterator->temp_peptide_list);
   if( iterator->next_peptide == NULL ){
     printf("Iterator's next peptide was lost\n");
   }
   //printf("Next peptide is %s\n", get_peptide_sequence(iterator->next_peptide));
-
-
 }
 
 /* Public functions */
@@ -140,7 +135,7 @@ void queue_next_peptide(
  * \returns A newly allocated modified_peptides_iterator.
  */
 MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
-  double mass,         ///< Target mass of peptides
+  double mass,         ///< Target mass of peptides BEFORE modification
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   INDEX_T* index,      ///< Index from which to draw peptides OR
   DATABASE_T* dbase    ///< Database from which to draw peptides
@@ -157,6 +152,8 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
   // get the mass difference
   double delta_mass = peptide_mod_get_mass_change(pmod);
 
+  //printf("given mass is %.2f, delta is %.2f and final is %.2f\n", 
+  //       mass, delta_mass, mass + delta_mass);
   // create peptide_generator
   new_iterator->peptide_generator = 
     new_generate_peptides_iterator_from_mass(mass + delta_mass, index, dbase);
@@ -195,8 +192,10 @@ PEPTIDE_T* modified_peptides_iterator_next(
     return NULL;
   }
 
-  PEPTIDE_T* returnme = iterator->next_peptide;
+  PEPTIDE_T* returnme = copy_peptide(iterator->next_peptide);
+  //printf("Will return peptide %s\n", get_peptide_sequence(returnme));
   queue_next_peptide(iterator);
+  //printf("Still will return peptide %s\n", get_peptide_sequence(returnme));
 
   return returnme;
 }
@@ -209,6 +208,7 @@ void free_modified_peptides_iterator(
   if( iterator ){
     delete_linked_list( iterator->temp_peptide_list );
     free_peptide( iterator->next_peptide );
+    // maybe don't??
     free_peptide_mod( iterator->peptide_mod );
     free_generate_peptides_iterator( iterator->peptide_generator);
     free( iterator );
