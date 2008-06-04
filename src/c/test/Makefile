@@ -19,11 +19,11 @@ TESTS = \
 	check-database.c \
 	check-match.c \
 	check-parameter.c \
-	check-linked-list.c \
 	check-modifications.c \
 	check-peptide-modifications.c \
-	check-modified-peptides-iterator.c \
+	check-linked-list.c \
 	check-generate-peptides-iterator.c \
+	check-modified-peptides-iterator.c \
 	crux-unit-tests.c
 
 CRUX_LIBS = \

@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.43 $
+ * $Revision: 1.43.2.1 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,12 +24,14 @@
 #include "protein.h"
 #include "peptide.h"
 #include "spectrum.h"
-#include "parse_arguments.h" //delete
+#include "parse_arguments.h" 
 #include "spectrum_collection.h"
 #include "generate_peptides_iterator.h"
 #include "scorer.h"
 #include "match.h"
 #include "match_collection.h"
+#include "hit.h"
+#include "hit_collection.h"
 #include "PercolatorCInterface.h"
 
 #define MAX_PSMS 10000000
@@ -158,8 +160,23 @@ int main(int argc, char** argv){
   //  output_matches(match_collection, scorer_type);
   print_sqt_file(match_collection, scorer_type, second_scorer_type);
 
-  // MEMLEAK below causes seg fault
+  // MEMLEAK below causes seg fault (or used to)
   // free_match_collection(match_collection);
+
+  /*
+   The method new_hit_collection_from_match_collection below is an
+   example of how one might assemble peptide identifications (matches)
+   into protein identifications (hits). 
+   Unfortunately it doesn't work that well, so it's commented out. But
+   some of the functionality one would need is hopefully there. 
+   */
+  /* carp(CARP_INFO, "Assembling matches into protein hits");
+  HIT_COLLECTION_T* hit_collection 
+    = new_hit_collection_from_match_collection(match_collection);
+  carp(CARP_INFO, "Outputting protein hits");
+  print_hit_collection(stdout, hit_collection);
+  free_hit_collection(hit_collection);
+  */
 
   carp(CARP_INFO, "crux-analyze-matches finished.");
   exit(0);
@@ -198,6 +215,7 @@ int output_matches(
     print_match(match, stdout, TRUE, // TRUE==print sequence
                 scorer_type);
   }
+  free_match_iterator(match_iterator);
   return 0;
 }
 
@@ -273,6 +291,7 @@ void print_sqt_file(
     }
 
   }// next match
+  free_match_iterator(match_iterator);
 }
 
 

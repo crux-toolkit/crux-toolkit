@@ -303,7 +303,7 @@ void initialize_parameters(void){
   set_scorer_type_parameter("prelim-score-type", SP, 
       "Initial scoring (sp, xcorr). Default sp");
   set_scorer_type_parameter("score-type", XCORR, 
-      "The scoring method to use (xcorr, sp, dotp, xcorr_logp, sp_logp). "
+      "The scoring method to use (xcorr, sp, dotp, xcorr-logp, sp-logp). "
       "Default xcorr."); 
 
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
@@ -318,6 +318,8 @@ void initialize_parameters(void){
       "Types of output to produce (binary, sqt, all). Default binary");
   set_string_parameter("sqt-output-file", "target.sqt", 
       "SQT output file name. Default 'target.sqt'");
+  set_string_parameter("protein-output-file", "target.prot", 
+      "Protein output file name. Default 'target.prot'");
   set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
       "SQT output file name for decoys.  Default 'decoy.sqt'");
   set_int_parameter("number-decoy-set", 2, 0, 10, 
@@ -1287,9 +1289,9 @@ BOOLEAN_T set_boolean_parameter(
   else{
     bool_str = "FALSE";
   }
-  result = add_or_update_hash(parameters->hash, name, bool_str);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "BOOLEAN_T");
+  result = add_or_update_hash_copy(parameters->hash, name, bool_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "BOOLEAN_T");
 
   return result;
 }
@@ -1314,16 +1316,16 @@ BOOLEAN_T set_int_parameter(
   
   //stringify default, min, and max values and set
   snprintf(buffer, PARAMETER_LENGTH, "%i", set_value);
-  result = add_or_update_hash(parameters->hash, name, buffer);
+  result = add_or_update_hash_copy(parameters->hash, name, buffer);
 
   snprintf(buffer, PARAMETER_LENGTH, "%i", min_value);
-  result = add_or_update_hash(min_values->hash, name, buffer);
+  result = add_or_update_hash_copy(min_values->hash, name, buffer);
 
   snprintf(buffer, PARAMETER_LENGTH, "%i", max_value);
-  result = add_or_update_hash(max_values->hash, name, buffer);
+  result = add_or_update_hash_copy(max_values->hash, name, buffer);
 
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "INT_ARG");
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "INT_ARG");
   
   return result;
 }
@@ -1349,16 +1351,16 @@ BOOLEAN_T set_double_parameter(
   
   // convert to string
   snprintf(buffer, PARAMETER_LENGTH, "%f", set_value);
-  result = add_or_update_hash(parameters->hash, name, buffer);    
+  result = add_or_update_hash_copy(parameters->hash, name, buffer);    
 
   snprintf(buffer, PARAMETER_LENGTH, "%f", min_value);
-  result = add_or_update_hash(min_values->hash, name, buffer);    
+  result = add_or_update_hash_copy(min_values->hash, name, buffer);    
 
   snprintf(buffer, PARAMETER_LENGTH, "%f", max_value);
-  result = add_or_update_hash(max_values->hash, name, buffer);    
+  result = add_or_update_hash_copy(max_values->hash, name, buffer);    
 
-  result = add_or_update_hash(usages->hash, name, usage);    
-  result = add_or_update_hash(types->hash, name, "DOUBLE_ARG");    
+  result = add_or_update_hash_copy(usages->hash, name, usage);    
+  result = add_or_update_hash_copy(types->hash, name, "DOUBLE_ARG");    
 
   return result;
 }
@@ -1385,9 +1387,9 @@ BOOLEAN_T set_string_parameter(
   }
 
 
-  result = add_or_update_hash(parameters->hash, name, set_value);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "STRING_ARG");
+  result = add_or_update_hash_copy(parameters->hash, name, set_value);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "STRING_ARG");
 
   return result;
 }
@@ -1410,9 +1412,9 @@ BOOLEAN_T set_mass_type_parameter(
   /* stringify the value */
   mass_type_to_string(set_value, value_str);
   
-  result = add_or_update_hash(parameters->hash, name, value_str);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "MASS_TYPE_T");
+  result = add_or_update_hash_copy(parameters->hash, name, value_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "MASS_TYPE_T");
     
   return result;
 
@@ -1436,9 +1438,9 @@ BOOLEAN_T set_peptide_type_parameter(
   /* stringify the value */
   peptide_type_to_string(set_value, value_str);
 
-  result = add_or_update_hash(parameters->hash, name, value_str);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "PEPTIDE_TYPE_T");
+  result = add_or_update_hash_copy(parameters->hash, name, value_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "PEPTIDE_TYPE_T");
     
   return result;
 
@@ -1459,9 +1461,9 @@ BOOLEAN_T set_sort_type_parameter(
   /* stringify value */
   sort_type_to_string(set_value, value_str);
   
-  result = add_or_update_hash(parameters->hash, name, value_str);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "SORT_TYPE_T");
+  result = add_or_update_hash_copy(parameters->hash, name, value_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "SORT_TYPE_T");
 
   return result;
 }
@@ -1483,9 +1485,9 @@ BOOLEAN_T set_algorithm_type_parameter(
   algorithm_type_to_string(set_value, value_str);
   carp(CARP_DETAILED_DEBUG, "setting algorithm type to %s", value_str);  
 
-  result = add_or_update_hash(parameters->hash, name, value_str);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "ALGORITHM_TYPE_T");
+  result = add_or_update_hash_copy(parameters->hash, name, value_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "ALGORITHM_TYPE_T");
 
   return result;
 }
@@ -1508,9 +1510,9 @@ BOOLEAN_T set_scorer_type_parameter(
   scorer_type_to_string(set_value, value_str);
   carp(CARP_DETAILED_DEBUG, "setting score type to %s", value_str);  
 
-  result = add_or_update_hash(parameters->hash, name, value_str);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "SCORER_TYPE_T");
+  result = add_or_update_hash_copy(parameters->hash, name, value_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "SCORER_TYPE_T");
 
   return result;
 }
@@ -1532,9 +1534,9 @@ BOOLEAN_T set_output_type_parameter(
   /* stringify value */
   output_type_to_string(set_value, value_str);
   
-  result = add_or_update_hash(parameters->hash, name, value_str);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "OUTPUT_TYPE_T");
+  result = add_or_update_hash_copy(parameters->hash, name, value_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "OUTPUT_TYPE_T");
 
   return result;
 }
@@ -1555,9 +1557,9 @@ BOOLEAN_T set_ion_type_parameter(char* name,
   /* stringify value */
   ion_type_to_string(set_value, value_str);
 
-  result = add_or_update_hash(parameters->hash, name, value_str);
-  result = add_or_update_hash(usages->hash, name, usage);
-  result = add_or_update_hash(types->hash, name, "ION_TYPE_T");
+  result = add_or_update_hash_copy(parameters->hash, name, value_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "ION_TYPE_T");
 
   return result;
 }

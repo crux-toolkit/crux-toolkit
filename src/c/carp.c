@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file carp.c
- * $Revision: 1.5 $
+ * $Revision: 1.5.2.1 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -40,6 +40,9 @@ BOOLEAN_T carp(
     }
     else if (verbosity == CARP_INFO){
       fprintf(stderr, "INFO: ");
+    }
+    else if (verbosity == CARP_DETAILED_INFO){
+      fprintf(stderr, "DETAILED INFO: ");
     }
     else if (verbosity == CARP_DEBUG){
       fprintf(stderr, "DEBUG: ");

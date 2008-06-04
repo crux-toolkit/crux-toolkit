@@ -465,7 +465,7 @@ int assign_value_from_required_to_hash(/*const*/ argument * req,
     case STRING_ARG:
     case BOOLEAN_ARG:
       //      *((int *) req->container) = atoi(value);
-      add_or_update_hash(hash, req->name, value);
+      add_or_update_hash_copy(hash, req->name, value);
       break;
   }
   /* BF: there was no type checking unlike option.  why? */

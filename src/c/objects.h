@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.51.2.5 $
+ * $Revision: 1.51.2.6 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -328,6 +328,36 @@ typedef enum _scorer_type SCORER_TYPE_T;
 typedef struct generate_peptides_iterator_t GENERATE_PEPTIDES_ITERATOR_T;
 
 /**
+ *\typedef HIT_T
+ *\brief An object that contains the a protein and its score. 
+ */
+typedef struct hit HIT_T;
+
+/**
+ *\typedef HIT_COLLECTION_T
+ *\brief An object that contains multiple hit objects
+ */
+typedef struct hit_collection HIT_COLLECTION_T;
+
+/**
+ *\typedef HIT_ITERATOR_T
+ *\brief An object that navigates the hits in a hit collection
+ */
+typedef struct hit_iterator HIT_ITERATOR_T;
+
+/**
+ * The enum for protein scorer type
+ */
+#define NUMBER_PROTEIN_SCORER_TYPES 2
+enum _protein_scorer_type { PROTEIN_SCORER_PVALUE, PROTEIN_SCORER_OLIVER };
+
+/**
+ * \typedef PROTEIN_SCORER_TYPE_T
+ * \brief The typedef for protein scorer type
+ */
+typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
+
+/**
  *\typedef MATCH_T
  *\brief An object that contains the information of a peptide and the scoring of multiple types
  */
@@ -387,6 +417,14 @@ typedef struct record RECORD_T;
  * \brief HASH_T hash table, contains the records
  */
 typedef struct hash HASH_T;
+
+/**
+ * \typedef HASH_ITERATOR_T
+ * \brief HASH_ITERATOR_T iterator for keys in a hash
+ */
+typedef struct hash_iterator HASH_ITERATOR_T;
+
+
 
 /**
  * Identifying which set the PSM belongs to

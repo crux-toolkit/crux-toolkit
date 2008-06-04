@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.55 $
+ * REVISION: $Revision: 1.55.2.1 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -806,7 +806,8 @@ char* get_match_sequence(
     match->peptide_sequence = get_peptide_sequence(match->peptide);
   }
   
-  return my_copy_string(match->peptide_sequence);
+  return my_copy_string(match->peptide_sequence); 
+  // return match->peptide_sequence;
 }
 
 

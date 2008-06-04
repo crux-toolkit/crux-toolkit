@@ -1,6 +1,6 @@
 /**
  * \file hash.h 
- * $Revision: 1.3 $
+ * $Revision: 1.3.4.1 $
  * \brief Object for hashing.
  */
 #include "crux-utils.h"
@@ -54,6 +54,18 @@ BOOLEAN_T update_hash_value(
  * Copies the value, thus no need to pass in a heap allocated value
  *\returns TRUE if successfully updates hash value, else FALSE
  */
+BOOLEAN_T add_or_update_hash_copy(
+  HASH_T* h, ///< Hash object to add to -in/out
+  char *key, ///< key of the record to add or update -in
+  void *value ///< value to associate with the key -in
+  );
+
+/**
+ * Updates the value for the key
+ * Must already have a existing value for the key
+ * Does not copy the value.
+ *\returns TRUE if successfully updates hash value, else FALSE
+ */
 BOOLEAN_T add_or_update_hash(
   HASH_T* h, ///< Hash object to add to -in/out
   char *key, ///< key of the record to add or update -in
@@ -97,6 +109,36 @@ void* remove_hash(
  */  
 unsigned int hash_size(
   HASH_T* h ///< working hash object -in
+  );
+
+/**
+ *\returns a new memory allocated hash iterator
+ */
+HASH_ITERATOR_T* new_hash_iterator(
+  HASH_T* hash ///< the hash collection to iterate -out
+  );
+
+/**
+ * Does the hash_iterator have another hash object to return?
+ * This is implemented inefficiently, visiting each possible RECORD once.
+ * \returns TRUE, if hash iterator has a next hash, else FALSE
+ */
+BOOLEAN_T hash_iterator_has_next(
+  HASH_ITERATOR_T* hash_iterator ///< the working  hash iterator -in
+  );
+
+/**
+ * \returns the next the hash key 
+ */
+char* hash_iterator_next(
+  HASH_ITERATOR_T* hash_iterator ///< the working hash iterator -in
+  );
+
+/**
+ * free the memory allocated iterator
+ */
+void free_hash_iterator(
+  HASH_ITERATOR_T* hash_iterator ///< the hash iterator to free
   );
 
 #endif

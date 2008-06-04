@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.73.2.2 $
+ * $Revision: 1.73.2.3 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -893,9 +893,9 @@ float calculate_subsequence_mass (
     mass_h2o = MASS_H2O_MONO;
   }
 
-  carp(CARP_DETAILED_DEBUG, "mass start = %i", start_idx);
+  // carp(CARP_DETAILED_DEBUG, "mass start = %i", start_idx);
   int end_idx = start_idx + cur_length;
-  carp(CARP_DETAILED_DEBUG, "mass end = %i", end_idx);
+  // carp(CARP_DETAILED_DEBUG, "mass end = %i", end_idx);
   float peptide_mass = mass_array[end_idx] - mass_array[start_idx] + mass_h2o;
 
   return peptide_mass;
