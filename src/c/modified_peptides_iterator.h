@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: Header file for peptide iterator that includes
  * modified peptides.
- * $Revision: 1.1.2.2 $
+ * $Revision: 1.1.2.3 $
  */
 #include "utils.h"
 #include "objects.h"
@@ -12,7 +12,7 @@
 #include "generate_peptides_iterator.h"
 
 /**
- * \brief Create a new modified_PEPTIDES_iterator.
+ * \brief Create a new modified_PEPTIDES_iterator for a specific mass.
  *
  * The returned iterator is initialized with the first peptide queued
  * up and ready to return.  Also creates a generate_peptides_iterator
@@ -24,8 +24,29 @@
  * 
  * \returns A newly allocated modified_peptides_iterator.
  */
-MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
+MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   double mass,         ///< Target mass of peptides
+  PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  INDEX_T* index,      ///< Index from which to draw peptides OR
+  DATABASE_T* dbase    ///< Database from which to draw peptides
+  );
+
+/**
+ * \brief Create a new modified_PEPTIDES_iterator for all peptides in
+ * the database or index.
+ *
+ * The returned iterator is initialized with the first peptide queued
+ * up and ready to return.  Also creates a generate_peptides_iterator
+ * from which it gets the peptides to modify. Peptides range from mass
+ * 'min mass' + pmod->delta_mass to 'max mass' + pmod->delta_mass (min
+ * and max taken from parameter.c).  All other peptide
+ * specifications are taken from parameter.c.  If no peptides meet the
+ * specifications, an iterator is still returned and when passed to
+ * has_next() will always return FALSE.
+ * 
+ * \returns A newly allocated modified_peptides_iterator.
+ */
+MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   INDEX_T* index,      ///< Index from which to draw peptides OR
   DATABASE_T* dbase    ///< Database from which to draw peptides

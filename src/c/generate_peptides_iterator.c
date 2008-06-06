@@ -34,9 +34,6 @@ struct generate_peptides_iterator_t{
   INDEX_T* index;               ///< the index object needed
   DATABASE_T* database;         ///< the database object needed
   PEPTIDE_CONSTRAINT_T* constraint; ///< peptide constraint
-  //  PEPTIDE_MOD_T* peptide_mod; ///< the modification(s) to apply
-  //  PEPTIDE_T* next_peptide;      ///< the queued up peptide to return
-  //  LINKED_LIST_T* temp_peptide_list;///< storage for modified peptides
 };
 //do index,database, and constraint need to be members since they are
 //not used in has_next, get_next, or free?
@@ -298,7 +295,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mods(
 
   // create a mod_pept-iter and point to it (mass, pmod, index, dbase)
   MODIFIED_PEPTIDES_ITERATOR_T* mod_peptide_iterator = 
-    new_modified_peptides_iterator( mass, pmod, index, dbase );
+    new_modified_peptides_iterator_from_mass( mass, pmod, index, dbase );
   new_iterator->iterator = mod_peptide_iterator;
 
   // set has_next, get_next, free
@@ -348,6 +345,7 @@ void free_generate_peptides_iterator(
 {
   // free the nested iterator
   generate_peptides_iterator->free(generate_peptides_iterator->iterator);
+  free_peptide_constraint(generate_peptides_iterator->constraint);
   free(generate_peptides_iterator);
 }
 /*

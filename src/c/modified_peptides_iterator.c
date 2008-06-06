@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.1.2.4 $
+ * $Revision: 1.1.2.5 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -54,14 +54,14 @@ void queue_next_peptide(
 
   // first, try getting next from the temp list
   if( ! is_empty_linked_list( iterator->temp_peptide_list) ){
-    //printf("Getting next peptide from temp list\n");
+    carp(CARP_DETAILED_DEBUG,"Queue is getting next peptide from temp list");
     iterator->next_peptide =pop_front_linked_list(iterator->temp_peptide_list);
     return;
   }
 
   // second, try getting next from iterator
   if( ! generate_peptides_iterator_has_next( iterator->peptide_generator ) ){
-    //printf("No more peptides in the generator\n");
+    carp(CARP_DETAILED_DEBUG, "Queue has no more peptides in the generator");
     iterator->next_peptide = NULL;
     return;   // no more peptides for this iterator
   }
@@ -71,18 +71,18 @@ void queue_next_peptide(
   PEPTIDE_T* unmod_peptide = 
     generate_peptides_iterator_next( iterator->peptide_generator);
 
-  //printf("Next peptide from pep_gen is %s\n", get_peptide_sequence(unmod_peptide));
+  carp(CARP_DETAILED_DEBUG, "Next peptide in pep_gen is %s", get_peptide_sequence(unmod_peptide));
 
   // apply modifications, discarding peptides that can't be modified
 
   // keep looking until a peptide can be modified or we run out of peptides
-  //  while( iterator->next_peptide != NULL &&
-  //printf("looking for modifyable peptide\n");
+  carp(CARP_DETAILED_DEBUG, "Queue is looking for modifyable peptide");
   while( unmod_peptide != NULL &&
          ! is_peptide_modifiable(//iterator->next_peptide, 
                                  unmod_peptide, 
                                  iterator->peptide_mod) ){ 
-    //printf("Skipping peptide from the generator\n");
+    carp(CARP_DETAILED_DEBUG, "Skipping peptide %s from the generator",
+         get_peptide_sequence(unmod_peptide));
     //free_peptide( iterator->next_peptide );
     free_peptide( unmod_peptide );
     //iterator->next_peptide = 
@@ -93,12 +93,14 @@ void queue_next_peptide(
   //if( iterator->next_peptide == NULL ){ 
   if( unmod_peptide == NULL ){ 
     // none of the remaining peptides were modifiable
-    //printf("Skipped all remaining peptides in generator\n");
+    carp(CARP_DETAILED_DEBUG, "Skipped all remaining peptides in generator");
     iterator->next_peptide = NULL;
     return;
   }
 
-  //printf("Modifying peptide\n");
+  carp(CARP_DETAILED_DEBUG, "Modifying peptide %s",
+       get_peptide_sequence(unmod_peptide));
+
   modify_peptide( //iterator->next_peptide, 
                  unmod_peptide, 
                  iterator->peptide_mod, 
@@ -106,23 +108,82 @@ void queue_next_peptide(
 
   // error case b/c already tested for modifyability
   if( is_empty_linked_list(iterator->temp_peptide_list) ){
-    printf("Modifier didn't return any peptides\n");
+    carp(CARP_ERROR, "Modifier didn't return any peptides");
   }
 
   // now set next_peptide to the first in the list and move list forward
-  //  free_peptide(iterator->next_peptide); //we have a copy in the temp_list
   free_peptide(unmod_peptide);
   iterator->next_peptide = pop_front_linked_list(iterator->temp_peptide_list);
   if( iterator->next_peptide == NULL ){
     printf("Iterator's next peptide was lost\n");
   }
-  //printf("Next peptide is %s\n", get_peptide_sequence(iterator->next_peptide));
+
+  MODIFIED_AA_T* mod_seq = get_peptide_modified_sequence(iterator->next_peptide);
+  char* seq = modified_aa_string_to_string(mod_seq);
+  carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq);
+  free(mod_seq);
+  free(seq);
 }
 
 /* Public functions */
+/**
+ * \brief Create a new modified_peptides_iterator for all peptides in
+ * database or index.
+ *
+ * The returned iterator is initialized with the first peptide queued
+ * up and ready to return.  Also creates a generate_peptides_iterator
+ * from which it gets the peptides to modify. Peptides are from mass
+ * 'min mass' + pmod->delta_mass to 'max mass' + pmod->delta_mass with
+ * min and max mass taken from parameter.c.  All other peptide
+ * specifications are taken from parameter.c.  If no peptides meet the
+ * specifications, an iterator is still returned and when given to
+ * has_next will always return FALSE.
+ * 
+ * \returns A newly allocated modified_peptides_iterator.
+ */
+MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
+  PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  INDEX_T* index,      ///< Index from which to draw peptides OR
+  DATABASE_T* dbase    ///< Database from which to draw peptides
+){
+  if( index == NULL && dbase == NULL ){
+    carp(CARP_FATAL, 
+         "Cannot create modified peptides iterator from NULL protein source");
+    exit(1);
+  }
+
+  carp(CARP_DETAILED_DEBUG, "Creating modified peptides iterator for all pep");
+  MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
+    allocate_modified_peptides_iterator();
+
+  // init the peptide list
+  new_iterator->temp_peptide_list = new_empty_list();
+
+  // get min and max masses
+  double min_mass = get_double_parameter("min-mass");
+  double max_mass = get_double_parameter("max-mass");
+
+  carp(CARP_DETAILED_DEBUG, "min mass is %.2f, max is %.2f", 
+       min_mass, max_mass);
+  // get the mass difference for the mod
+  double delta_mass = peptide_mod_get_mass_change(pmod);
+  min_mass += delta_mass;
+  max_mass += delta_mass;
+
+  new_iterator->peptide_generator = 
+    new_generate_peptides_iterator_from_mass_range(min_mass,
+                                                   max_mass,
+                                                   index, dbase);
+
+  // queue first peptide
+  carp(CARP_DETAILED_DEBUG, "Queueing first peptide.");
+  queue_next_peptide( new_iterator );
+
+  return new_iterator;
+}
 
 /**
- * \brief Create a new modified_peptides_iterator.
+ * \brief Create a new modified_peptides_iterator for a specified mass.
  *
  * The returned iterator is initialized with the first peptide queued
  * up and ready to return.  Also creates a generate_peptides_iterator
@@ -134,7 +195,7 @@ void queue_next_peptide(
  * 
  * \returns A newly allocated modified_peptides_iterator.
  */
-MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
+MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   double mass,         ///< Target mass of peptides BEFORE modification
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   INDEX_T* index,      ///< Index from which to draw peptides OR
@@ -167,7 +228,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
 
 /**
  * \brief Check to see if the iterator has more peptides to return,
- * i.e. a call to has_next will return non-NULL.
+ * i.e. a call to next() will return non-NULL.
  * \returns TRUE if the iterator has more peptides to return.
  */
 BOOLEAN_T modified_peptides_iterator_has_next(
@@ -209,8 +270,8 @@ void free_modified_peptides_iterator(
     delete_linked_list( iterator->temp_peptide_list );
     free_peptide( iterator->next_peptide );
     // maybe don't??
-    free_peptide_mod( iterator->peptide_mod );
-    free_generate_peptides_iterator( iterator->peptide_generator);
+    //free_peptide_mod( iterator->peptide_mod );
+    //free_generate_peptides_iterator( iterator->peptide_generator);
     free( iterator );
   }
 }

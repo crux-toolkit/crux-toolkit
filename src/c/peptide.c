@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.72.2.5 $
+ * $Revision: 1.72.2.6 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -134,8 +134,15 @@ PEPTIDE_T* copy_peptide(
   new_peptide->peptide_src = allocate_peptide_src();
   copy_peptide_src(src->peptide_src, new_peptide->peptide_src);
 
-  new_peptide->modified_seq = copy_mod_aa_seq(src->modified_seq);
-
+  if( src->modified_seq == NULL ){
+    // get the peptide sequence and convert to MODIFIED_AA_T*
+    char* sequence = get_peptide_sequence(src);
+    MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(sequence);
+    new_peptide->modified_seq = mod_seq;
+    free(sequence);
+  }else{
+    new_peptide->modified_seq = copy_mod_aa_seq(src->modified_seq);
+  }
   //PEPTIDE_SRC_T* new_association;
 
   //  set_peptide_length(dest, get_peptide_length(src));
@@ -189,6 +196,10 @@ void free_peptide(
   PEPTIDE_T* peptide ///< peptide to free -in
   )
 {
+
+  if( peptide == NULL ){
+    return;
+  }
   // check which implementation peptide_src uses
   if(!PEPTIDE_SRC_USE_LINK_LIST){
     // array implementation
@@ -980,7 +991,11 @@ void print_peptide_in_format(
   // obtain peptide sequence
   if(flag_out){
     parent = get_peptide_src_parent_protein(next_src);        
-    sequence = get_peptide_sequence(peptide);
+    if( peptide->modified_seq== NULL ){
+      sequence = get_peptide_sequence(peptide);
+    }else{
+      sequence = modified_aa_string_to_string(peptide->modified_seq);
+    }
   }
 
   // iterate over all peptide src

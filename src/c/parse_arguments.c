@@ -244,7 +244,7 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
  * Description:   Run through the command line arguments interpreting them
  *                using the definitions established by parse_arguments_set_opt
  *                and parse_arguments_set_req.  Ignore the container 
- *                variable and instead store parameter values by insterting
+ *                variable and instead store parameter values by inserting
  *                them into the given hash table, using the agument name as
  *                the key.
  * 
@@ -267,7 +267,7 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
 int parse_arguments_into_hash(int argc, char * argv[], 
                               HASH_T* hash, int die_on_error) {
 
-  carp(CARP_DETAILED_DEBUG, "Parsing arguments, insterting values into hash");
+  carp(CARP_DETAILED_DEBUG, "Parsing arguments, inserting values into hash");
   int i;
   int n;
   int result = 0;

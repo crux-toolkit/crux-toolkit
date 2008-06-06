@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.10 $
+ * $Revision: 1.1.2.11 $
  */
 
 #include "peptide_modifications.h"
@@ -370,7 +370,7 @@ int modify_peptide(
 
   if( peptide_mod == NULL || 
       peptide_mod_get_num_aa_mods(peptide_mod) == 0 ){
-    //printf("No mods to apply, pmod is empty, return peptide copy\n");
+    carp(CARP_DETAILED_DEBUG, "Modifying peptide with no aa_mods, return peptide copy");
     PEPTIDE_T* peptide_copy = copy_peptide(peptide); 
     push_back_linked_list(modified_peptides, peptide_copy);
     return 1;
@@ -380,7 +380,7 @@ int modify_peptide(
   char* sequence = get_peptide_sequence(peptide);
   MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
 
-  //printf("Modifying peptide %s\n", sequence);
+  carp(CARP_DETAILED_DEBUG, "Modifying peptide %s\n", sequence);
 
   // get the aa_mod info
   int* aa_mod_counts = peptide_mod->aa_mod_counts;

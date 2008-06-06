@@ -177,7 +177,7 @@ void initialize_parameters(void){
 
   // check if parameters been initialized
   if(parameter_initialized){
-    carp(CARP_ERROR, "parameters have already been initialized");
+    carp(CARP_FATAL, "Parameters have already been initialized");
     return;
   }
   
@@ -1793,7 +1793,7 @@ int read_mods(FILE* param_file, ///< file from which to read mod info
               char* line_tag,   ///< text at beginning of mod line (eg mod=)
               MOD_POSITION_T position){///< type of mod (any, c-, n-term)
 
-  carp(CARP_DEBUG, "reading mods for %d position", (int)position);
+  carp(CARP_DEBUG, "Reading mods for %d position", (int)position);
   char* line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));
 
 

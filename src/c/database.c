@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.63.2.1 $
+ * $Revision: 1.63.2.2 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -752,7 +752,7 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
   if(!database->is_parsed){
     // failed to parse database
     if(!parse_database(database)){
-      carp(CARP_FATAL, "failed to parse database, cannot create iterator");
+      carp(CARP_FATAL, "Failed to parse database, cannot create iterator");
       exit(1);
     }
   }
@@ -851,7 +851,7 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   database_peptide_iterator->peptide_constraint 
     = copy_peptide_constraint_ptr(peptide_constraint);
   
-  // check if there's any proteins to create peptides from
+  // check if there are any proteins to create peptides from
   if(database_protein_iterator_has_next(
         database_peptide_iterator->database_protein_iterator)){
 
@@ -967,55 +967,65 @@ PEPTIDE_T* database_peptide_iterator_next(
   ///< the iterator of interest -in
   )
 {
+  /*BF: Could this be simplified?  if next peptide, return it
+        if not, look for next protein, if not return NULL
+   */
    // did you reset working protein?
   BOOLEAN_T reset = FALSE;
   
-  // the ppeptide to return
+  // the peptide to return
   PEPTIDE_T* next_peptide =
     protein_peptide_iterator_next(
                    database_peptide_iterator->cur_protein_peptide_iterator);
   
-  DATABASE_T* database = database_peptide_iterator->database_protein_iterator->database;
+  DATABASE_T* database = 
+    database_peptide_iterator->database_protein_iterator->database;
   
   // reset database_peptide_iterator if needed
-  while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+  while(!protein_peptide_iterator_has_next(
+           database_peptide_iterator->cur_protein_peptide_iterator)){
     reset = TRUE;
     PROTEIN_T* next_protein = NULL; 
     
-    /** 
+    /*
      * uncomment this code if you want to restore a protein to 
      * light after converted to heavy
     // covert the heavy back to light
-    if(database->use_light_protein && next_protein != NULL && !get_protein_is_light(next_protein)){
+    if(database->use_light_protein && next_protein != NULL 
+        && !get_protein_is_light(next_protein)){
       protein_to_light(next_protein);
     }
     */
 
     // end of list of peptides for database_peptide_iterator
-    if(!database_protein_iterator_has_next(database_peptide_iterator->database_protein_iterator)){
+    if(!database_protein_iterator_has_next(
+          database_peptide_iterator->database_protein_iterator)){
       break;
     }
     else{ // create new protein_peptide_iterator for next protein
       // free old iterator
-      free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
+      free_protein_peptide_iterator(
+         database_peptide_iterator->cur_protein_peptide_iterator);
       
       // get next protein
-      next_protein = 
-        database_protein_iterator_next(database_peptide_iterator->database_protein_iterator);
+      next_protein = database_protein_iterator_next(
+                       database_peptide_iterator->database_protein_iterator);
       
       // if using light/heavy functionality parse the light protein
       if(database->use_light_protein && get_protein_is_light(next_protein)){
         if(!protein_to_heavy(next_protein)){
-          carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
-          free_database_protein_iterator(database_peptide_iterator->database_protein_iterator);
+          carp(CARP_FATAL, 
+        "failed to create database_peptide_iterator, no proteins in database");
+          free_database_protein_iterator(
+             database_peptide_iterator->database_protein_iterator);
           free(database_peptide_iterator);
           exit(1);
         }
       }
-      // creat new protein_peptide_iterator
+      // create new protein_peptide_iterator
       database_peptide_iterator->cur_protein_peptide_iterator =
         new_protein_peptide_iterator(next_protein, 
-                                     database_peptide_iterator->peptide_constraint);
+                               database_peptide_iterator->peptide_constraint);
     }        
   }
 

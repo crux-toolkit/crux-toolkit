@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.73.2.3 $
+ * $Revision: 1.73.2.4 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -161,7 +161,8 @@ BOOLEAN_T protein_to_heavy(
   // failed to parse the protein from fasta file
   // protein offset is set in the parse_protein_fasta_file method
   if(!parse_protein_fasta_file(protein ,file)){
-    carp(CARP_ERROR, "failed convert protein to heavy, cannot parse fasta file");
+    carp(CARP_ERROR, 
+         "failed convert protein to heavy, cannot parse fasta file");
     return FALSE;
   }
       
@@ -633,7 +634,7 @@ char* get_protein_id(
 {
   
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get ID from light protein.");
   }
   
   int id_length = strlen(protein->id) +1; // +\0
@@ -654,7 +655,7 @@ char* get_protein_id_pointer(
   )
 {
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get ID pointer from light protein.");
   }
   return protein->id; 
 }
@@ -686,7 +687,7 @@ char* get_protein_sequence(
   )
 {
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get sequence from light protein.");
   }
   unsigned int sequence_length = strlen(protein->sequence) +1; // +\0
   char * copy_sequence = 
@@ -703,7 +704,7 @@ char* get_protein_sequence_pointer(
   )
 {
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get sequence pointer from light protein.");
   }
   return protein->sequence;
 }
@@ -758,7 +759,7 @@ char* get_protein_annotation(
   )
 {
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get annotation from light protein.");
   }
   int annotation_length = strlen(protein->annotation) +1; // +\0
   char * copy_annotation = 
@@ -1215,6 +1216,7 @@ void free_protein_peptide_iterator(
   free(protein_peptide_iterator->peptide_masses); 
   free(protein_peptide_iterator->cumulative_cleavages); 
   free_peptide_constraint(protein_peptide_iterator->peptide_constraint);
+  //free_protein(protein_peptide_iterator->protein);
   free(protein_peptide_iterator);
 }
 

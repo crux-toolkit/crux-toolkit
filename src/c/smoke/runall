@@ -3,7 +3,8 @@
 chmod 774 crux-test.pl
 ln -fs test.fasta existing.fasta
 
-./crux-test.pl -p ../ crux-test.cmds 1>out 2>error
+#./crux-test.pl -p ../ crux-test.cmds 1>out 2>error
+./crux-test.pl -p ../ crux-test-no-existing.cmds 1>out 2>error
 if [ $? == 25 ]
 then echo "Test aborted"
 else

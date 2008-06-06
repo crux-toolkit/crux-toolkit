@@ -33,11 +33,11 @@ void mpi_setup(){
   pmod1 = new_peptide_mod();
   dbase = new_database("input-data/test.fasta", FALSE);
 
-  //iter1 = new_modified_peptides_iterator(1566, pmod1, NULL, dbase);
+  //iter1 = new_modified_peptides_iterator_from_mass(1566, pmod1, NULL, dbase);
   //there seems to be a bug so that the two peptides in this window aren't being returned
-  iter1 = new_modified_peptides_iterator(1268, pmod1, NULL, dbase);
+  iter1 = new_modified_peptides_iterator_from_mass(1268, pmod1, NULL, dbase);
 
-  //iter2 = new_modified_peptides_iterator(1566, pmod1, index);
+  //iter2 = new_modified_peptides_iterator_from_mass(1566, pmod1, index);
 }
 
 void mpi_teardown(){
@@ -82,7 +82,7 @@ START_TEST(test_has_next_one_mod){
   aas['Q' - 'A'] = TRUE;
   //aamod1 should have max 1 +10 on Q
   peptide_mod_add_aa_mod(pmod1, 0, 1); // aamod is index 0, 1 copy
-  iter3 = new_modified_peptides_iterator(1268-10, pmod1, NULL, dbase);
+  iter3 = new_modified_peptides_iterator_from_mass(1268-10, pmod1,NULL, dbase);
 
   // test if the iterator has two modified peptides
   fail_unless( modified_peptides_iterator_has_next(iter3) == TRUE,
@@ -120,6 +120,26 @@ START_TEST(test_has_next_one_mod){
                "Empty iterator should return NULL.");
 }
 END_TEST
+
+START_TEST(test_all_pep){
+  aa_mod_set_mass_change(amod1, -89);
+  aa_mod_set_max_per_peptide(amod1, 1);
+  BOOLEAN_T* aas = aa_mod_get_aa_list(amod1);
+  aas['Q' - 'A'] = TRUE;
+  peptide_mod_add_aa_mod(pmod1, 0, 1); // aamod is index 0, 1 copy
+
+  iter3 = new_modified_peptides_iterator(pmod1, NULL, dbase);
+
+  while( modified_peptides_iterator_has_next(iter3) ){
+    PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
+    char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
+    printf("%s\n", mod_seq);
+    
+  }
+}
+END_TEST
+
+
 // test has next with one mod on first
 // with one mod on second
 // with multi mods on first, none on second
@@ -140,7 +160,7 @@ START_TEST(test_looksee){
   aas['L' - 'A'] = TRUE;
   peptide_mod_add_aa_mod(pmod1, 1, 1); // aamod is index 1, 1 copy
   printf("One copy of @ on Q,V,L\n");
-  iter3 = new_modified_peptides_iterator(1268, pmod1, NULL, dbase);
+  iter3 = new_modified_peptides_iterator_from_mass(1268, pmod1, NULL, dbase);
 
   while( modified_peptides_iterator_has_next(iter3)){
     PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
@@ -152,7 +172,7 @@ START_TEST(test_looksee){
   aas = aa_mod_get_aa_list(amod1);
   aas['T' - 'A'] = TRUE;
   peptide_mod_add_aa_mod(pmod1, 0, 2); // aamod is index 1, 1 copy
-  iter3 = new_modified_peptides_iterator(1268, pmod1, NULL, dbase);
+  iter3 = new_modified_peptides_iterator_from_mass(1268, pmod1, NULL, dbase);
   while( modified_peptides_iterator_has_next(iter3)){
     PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
     char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
@@ -172,12 +192,13 @@ START_TEST(test_null){
 END_TEST
 
 Suite* modified_peptides_iterator_suite(){
-  Suite* s = suite_create("Modifed-peptides-iterator\n");
+  Suite* s = suite_create("Modified-peptides-iterator\n");
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_has_next_unmod);
   tcase_add_test(tc_core, test_has_next_one_mod);
+  tcase_add_test(tc_core, test_all_pep);
   tcase_add_test(tc_core, test_looksee);
   tcase_add_checked_fixture(tc_core, mpi_setup, mpi_teardown);
 
