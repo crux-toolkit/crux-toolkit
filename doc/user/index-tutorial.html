@@ -57,7 +57,7 @@ href="search-tutorial.html">search example</a>, run this command.
 </p>
 
 <div class=code><code>
-crux-create-index yeast-small.fasta</code>
+crux-create-index small-yeast.fasta yeast-index</code>
 </div>
 
 <p>The output should look like this</p>
@@ -71,11 +71,11 @@ INFO: crux-create-index finished.
 </pre>
 
 <p>Once the index is created, you will see that there is a new
-directory called <span class="file">yeast-small_crux_index</span>.  In this
+directory called <span class="file">yeast-index</span>.  In this
 directory are many files with names beginning with <span
 class="file">crux_index_</span> followed by a number.  Each of these
 binary files contains one portion of the index.  The remaining binary
-file, <span class="file">yeast-small_binary_fasta</span>, contains the
+file, <span class="file">small-yeast_binary_fasta</span>, contains the
 peptides that the index is referencing.
 </p>
 
@@ -103,7 +103,7 @@ like this.</p>
 #       missed_cleavage: false
 #       mass_type: average
 #       unique peptides: redundant
-#       CRUX index directory: small-yeast_crux_index
+#       CRUX index directory: yeast-index
 #       target mass range for index file: 6.84
 </pre>
 
@@ -111,13 +111,13 @@ like this.</p>
 
 <p>The index you have created can be used when searching for
 peptide-spectrum matches and in the subsequent analysis of matches.
-Try a search with <span class="file">demo2.ms2</span> (also found in
+Try a search with <span class="file">demo.ms2</span> (also found in
 the test data) with the indexed protein database.  Run these
 commands.</p> 
 
 <div class="code"><code>
-$ crux-search-for-matches --use-index T demo2.ms2 small-yeast.fasta<br>
-$ crux-analyze-matches --use-index T demo2.ms2 small-yeast.fasta
+$ crux-search-for-matches --use-index T demo.ms2 yeast-index<br>
+$ crux-analyze-matches --use-index T . yeast-index
 </code>
 </div>
 <!-- Use a different ms2 so analysis won't break w/each spec twice-->
