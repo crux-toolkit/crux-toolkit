@@ -1,0 +1,3 @@
+07-07-2008 A bug in index.c limiting the length of the name of an index file was fixed.
+07-08-2008 The src/c/Makefile.am was modified to use verions 1-05 of Percolator.
+07-08-2008 The expected location of the PercolatorCInterface.h file and libraries was changed in configure.ac
