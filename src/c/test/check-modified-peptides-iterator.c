@@ -130,12 +130,13 @@ START_TEST(test_all_pep){
 
   iter3 = new_modified_peptides_iterator(pmod1, NULL, dbase);
 
+  /*
   while( modified_peptides_iterator_has_next(iter3) ){
     PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
     char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
     printf("%s\n", mod_seq);
-    
   }
+  */
 }
 END_TEST
 
@@ -192,7 +193,8 @@ START_TEST(test_null){
 END_TEST
 
 Suite* modified_peptides_iterator_suite(){
-  Suite* s = suite_create("Modified-peptides-iterator\n");
+  //Suite* s = suite_create("Modified-peptides-iterator\n");
+  Suite* s = suite_create("Modified-peptides-iterator");
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);

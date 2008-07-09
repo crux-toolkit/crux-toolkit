@@ -1613,7 +1613,7 @@ BOOLEAN_T update_aa_masses(){
 int get_aa_mod_list
   (AA_MOD_T*** mods) ///< the address of an array of pointers 
 {
-  carp(CARP_DEBUG, "getting aa mods, all %d of them", num_mods);
+  //carp(CARP_DEBUG, "getting aa mods, all %d of them", num_mods);
   *mods = list_of_mods;
   return num_mods;
 

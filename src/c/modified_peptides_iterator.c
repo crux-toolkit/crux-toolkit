@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.1.2.5 $
+ * $Revision: 1.1.2.6 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -152,12 +152,15 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
     exit(1);
   }
 
-  carp(CARP_DETAILED_DEBUG, "Creating modified peptides iterator for all pep");
+  carp(CARP_DETAILED_DEBUG, 
+       "Creating modified peptides iterator with %d aamods",
+       peptide_mod_get_num_aa_mods(pmod));
   MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
     allocate_modified_peptides_iterator();
 
-  // init the peptide list
+  // init the peptide list and peptide_mod
   new_iterator->temp_peptide_list = new_empty_list();
+  new_iterator->peptide_mod = pmod;
 
   // get min and max masses
   double min_mass = get_double_parameter("min-mass");

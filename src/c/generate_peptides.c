@@ -108,17 +108,20 @@ int main(int argc, char** argv){
 
   /* Generate peptides and print to stdout */
 
+  print_header(); // TODO: add mods info
+
   // one iterator for each peptide mod
   int mod_idx = 0;
   for(mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++){
-    carp(CARP_DETAILED_DEBUG, "Using peptide mod %d", mod_idx);
+    carp(CARP_DETAILED_DEBUG, "Using peptide mod %d with %d aa mods", 
+	 mod_idx, peptide_mod_get_num_aa_mods(peptide_mods[mod_idx]));
     // create peptide iterator
     //peptide_iterator = new_generate_peptides_iterator();
     peptide_iterator = new_modified_peptides_iterator(peptide_mods[mod_idx],
                                                       index,
                                                       database);
   
-    print_header(); // TODO: add mods info
+    //print_header(); // TODO: add mods info
 
     // iterate over all peptides
     int orders_of_magnitude = 1000; // for counting when to print
@@ -187,7 +190,17 @@ void print_header(){
   printf("#\tuse index: %s\n", boolean_to_string(bool_val));
   //get_string_parameter_pointer("use-index"));
   
+  AA_MOD_T** aa_mod_list = NULL;
+  int num_aa_mods = get_all_aa_mod_list(&aa_mod_list);
+  int mod_idx = 0;
+  for(mod_idx=0; mod_idx < num_aa_mods; mod_idx++){
+    printf("#\tmodification: ");
+    char* mod_str = aa_mod_to_string(aa_mod_list[mod_idx]);
+    printf("%s\n", mod_str);
+    free(mod_str);
+  }
 }
+
 /*
  * Local Variables:
  * mode: c

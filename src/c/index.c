@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.78 $
+ * $Revision: 1.78.2.1 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -240,7 +240,7 @@ char* generate_directory_name(
  */
 int is_binary_fasta_name(const struct dirent *entry){
 
-  char* filename = entry->d_name;
+  const char* filename = entry->d_name; //w/o const gcc warning
   char* suffix = "-binary-fasta";
 
   int name_length = strlen(filename);
@@ -260,7 +260,6 @@ int is_binary_fasta_name(const struct dirent *entry){
 
   return 0;
 }
-
 
 // TODO (BF 27-Feb-08): find what I used to generate the name and put
 // the two functions near each other.

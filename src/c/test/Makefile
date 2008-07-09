@@ -2,7 +2,7 @@ BINDIR  =../../../bin/
 SRCDIR  =../
 PERCOLATOR_DIR=../../../../percolator/src
 CC	= gcc	
-CFLAGS  = -g -Wall -I$(PERCOLATOR_DIR)
+CFLAGS  = -g -Wall -I$(PERCOLATOR_DIR) -I/net/maccoss/vol2/home/frewen/local/include -L/net/maccoss/vol2/home/frewen/local/lib
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
 

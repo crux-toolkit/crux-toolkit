@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.9 $
+ * $Revision: 1.1.2.10 $
  */
 
 #include "modifications.h"
@@ -416,6 +416,44 @@ void print_a_mod(AA_MOD_T* mod){
     }
   }
   printf("\n");
+}
+
+/**
+ * \brief Generates a string representation of an aa_mod and returns a
+ * pointer to that newly allocated string.
+ */
+char* aa_mod_to_string(AA_MOD_T* mod){
+  char* format_str = 
+    "mass change=%.2f, symbol=%c, max=%d, position=%s, apply to ";
+  char* return_str = (char*)mycalloc( strlen(format_str) + 50, sizeof(char));
+  // add 26 for letters and some more for good measure
+
+  // get position info
+  char* pos_format = "%c-term most %d from end";
+  char* pos_buffer = (char*)mycalloc(strlen(pos_format), sizeof(char));
+  switch(mod->position){
+  case ANY_POSITION:
+    strcpy(pos_buffer, "any");
+    break;
+  case C_TERM:
+    sprintf(pos_buffer, pos_format, 'C', mod->max_distance);
+    break;
+  case N_TERM:
+    sprintf(pos_buffer, pos_format, 'N', mod->max_distance);
+    break;
+  }
+  int length = sprintf(return_str, format_str, mod->mass_change, 
+		       mod->symbol, mod->max_per_peptide, pos_buffer);
+
+  char* str_ptr = return_str + length;
+  int i = 0;
+  for(i=0; i<AA_LIST_LENGTH; i++){
+    if( mod->aa_list[i] == TRUE ){
+      sprintf(str_ptr, "%c", (i + 'A'));
+      str_ptr++;
+    }
+  }
+  return return_str;
 }
 
 /* Setters and Getters */

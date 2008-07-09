@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.10 $
+ * $Revision: 1.1.2.11 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
@@ -313,6 +313,12 @@ char aa_mod_get_symbol(AA_MOD_T* mod);
  * \returns The short int bitmask used to identify the mod.
  */
 int aa_mod_get_identifier(AA_MOD_T* mod);
+
+/**
+ * \brief Generates a string representation of an aa_mod and returns a
+ * pointer to that newly allocated string.
+ */
+char* aa_mod_to_string(AA_MOD_T* mod);
 
 #endif //MODIFICATION_FILE_H
 

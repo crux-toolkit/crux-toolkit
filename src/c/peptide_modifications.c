@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.11 $
+ * $Revision: 1.1.2.12 $
  */
 
 #include "peptide_modifications.h"
@@ -366,6 +366,10 @@ int modify_peptide(
   if( modified_peptides == NULL ){
     carp(CARP_ERROR, "Cannot return modified peptides to NULL list.");
     return 0;
+  }
+
+  if( peptide_mod == NULL ){
+    carp(CARP_DETAILED_DEBUG, "Modify peptide given a NULL peptide mod");
   }
 
   if( peptide_mod == NULL || 
