@@ -122,19 +122,24 @@ created and a long list of files will stream by as they are being put
 into the new directory.
 </ol>
 
+<div class=note><i>NOTE: crux v1.1 is compatible with percolator
+v1.05</i></div>
+
 <li><b>Set up Percolator (optional)</b> <span
 class=prog>Percolator</span> can be used with <span
 class=prog>crux-analyze-matches</span> but it is not required for any
-of the other programs.  
-If you do not have <span
+of the other programs.  If you do not have <span
 class=file>percolator</span> installed, download it from <a
 href="http://depts.washington.edu/ventures/UW_Technology/Express_Licenses/percolator.php">here</a>
 and follow the installation instructions.  For the next step, you will
-need to know the location of percolator.  If the source code is in
-<span class=file>$HOME/software/percolator/src/c</span>, then we'll
-call <span class=file>$HOME/software/percolator</span> the
-<code>PERCOLATOR_ROOT</code>.  
+need to know the location of the percolator file <span
+class=file>PercolatorCInterface.h</span>, most likily in the <span
+class=file>src/c</span> directory.  If you installed in, for example,
+<span class=file>/home/me/software/percolator</span>, then we'll
+call <span class=file>/home/me/software/percolator/src/c/</span> the
+<code>PERCOLATOR_SRC</code>.  
 </li>
+
 
 <div class=note><em>NOTE: <code>configure</code> will not accept
 relative paths, such as <span class=file>../../install-dir</span>.
@@ -145,8 +150,8 @@ class=file>/</span>.</em>
 <li><b>Configure</b>  Move into the <span class=file>crux_1.0</span>
 directory from step 1 and confirm that there is a file called <span
 class=file>configure</span>.  This is a script you will run with two
-additional pieces of information, PERCOLATOR_ROOT from step 2 (if you
-choose to install it) and the
+additional pieces of information, <code>PERCOLATOR_SRC</code> from
+step 2 (if you choose to install it) and the
 location where you wish to install the <span class=prog>crux</span>
 programs, lets call it <code>install-dir</code>.  If you want <span
 class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
@@ -156,7 +161,7 @@ Configure will automatically put the programs in a directory called
 
 <div class=code><code>
 $ ./configure --prefix install-dir
-              --with-percolator-dir=PERCOLATOR_ROOT <br>
+              --with-percolator-dir=PERCOLATOR_SRC <br>
 OR<br>
 $ ./configure --prefix install-dir
 </code></div>
