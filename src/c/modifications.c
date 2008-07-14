@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.10 $
+ * $Revision: 1.1.2.11 $
  */
 
 #include "modifications.h"
@@ -164,7 +164,8 @@ char* modified_aa_to_string(MODIFIED_AA_T aa){
   int modified_by = 0;
   int mod_idx = 0;
   AA_MOD_T** mod_list = NULL;
-  int total_mods = get_aa_mod_list(&mod_list);
+  //int total_mods = get_aa_mod_list(&mod_list);
+  int total_mods = get_all_aa_mod_list(&mod_list);
   for(mod_idx = 0; mod_idx< total_mods; mod_idx++){
     if( is_aa_modified(aa, mod_list[mod_idx])){
       modified_by++;
@@ -202,7 +203,8 @@ char* modified_aa_string_to_string(MODIFIED_AA_T* aa_string){
   }
 
   AA_MOD_T** global_mod_list = NULL;
-  int mod_list_length = get_aa_mod_list(&global_mod_list);
+  //int mod_list_length = get_aa_mod_list(&global_mod_list);
+  int mod_list_length = get_all_aa_mod_list(&global_mod_list);
   int global_idx = 0;
 
   // count up amino acids and modifications
@@ -218,6 +220,7 @@ char* modified_aa_string_to_string(MODIFIED_AA_T* aa_string){
     }
     mod_str_idx++;
   }
+  carp(CARP_DETAILED_DEBUG, "found %d modified aas", count - mod_str_idx);
   int mod_str_len = mod_str_idx;  // keep track of aa_string length
 
   // create a buffer to hold all aas and mod symbols
@@ -332,7 +335,7 @@ BOOLEAN_T is_aa_modifiable
  */
 void modify_aa(MODIFIED_AA_T* aa, AA_MOD_T* mod){
   if( aa == NULL || mod == NULL ){
-    carp(CARP_ERROR, "Cannot modify aa.  Either aa or mod NULL.");
+    carp(CARP_ERROR, "Cannot modify aa.  Either aa or mod is NULL.");
     return;
   }
   *aa = *aa | mod->identifier;

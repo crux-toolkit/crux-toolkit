@@ -217,7 +217,7 @@ START_TEST(test_modifiable){
   aa_mod_set_position( amod3, N_TERM );
   mod_us = aa_mod_get_aa_list( amod3 );
   mod_us['F'-'A'] = TRUE; // should be true for all, but this is n-term
-  peptide_mod_add_aa_mod(pmod2, 2, 1);
+  peptide_mod_add_aa_mod(pmod2, 2, 1); //amod3 is index 2, add one of them
   force_set_n_mod_list( amod_list+2, 1);
 
   // pmod with one aa nmod, distance ok
@@ -227,12 +227,12 @@ START_TEST(test_modifiable){
   // pmod with one aa nmod, distance too far
   aa_mod_set_max_distance( amod3, 0);
   fail_unless( is_peptide_modifiable(pep1, pmod2) == FALSE, 
-               "Should NOT be able to modify the n-term not first in prot");
+               "Should NOT be able to modify n-term of pep in mid prot");
   
   // pmod with one aa cmod, distance ok
   aa_mod_set_max_distance( amod3, MAX_PROTEIN_SEQ_LENGTH );
   aa_mod_set_position( amod2, C_TERM);
-  peptide_mod_add_aa_mod( pmod2, 1, 1 );
+  peptide_mod_add_aa_mod( pmod2, 1, 1 );  //amod2 is index 1, add one of them
   force_set_c_mod_list( amod_list+1, 1 );
   fail_unless( is_peptide_modifiable(pep1, pmod2) == TRUE,
                "Should be able to modify c-term with no dist restriction");
@@ -271,7 +271,14 @@ START_TEST(test_modify_1){
   fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list),
                "Modify should return one version of FGGTSV*ANAER" );
   // test that it is modified correctly
-  //FGGTSV*ANAER
+  PEPTIDE_T* pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
+  MODIFIED_AA_T* mods = get_peptide_modified_sequence(pep);
+  char* mod_str =  modified_aa_string_to_string(mods);
+  fail_unless( strcmp(mod_str, "FGGTSV*ANAER") == 0,
+	       "Modified seq is %s but should be FGGTSV*ANAER", mod_str);
+  free(pep);
+  free(mods);
+  free(mod_str);
 
   // test mod that is mid in list
   aa_mod_set_max_per_peptide(amod3, 1);
@@ -283,7 +290,42 @@ START_TEST(test_modify_1){
   fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list),
                "Modify should return one version of F*GGTSVANAER" );
   // test that it was modified correctly
-  //F#GGTSVANAER
+  pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
+  mods = get_peptide_modified_sequence(pep);
+  mod_str =  modified_aa_string_to_string(mods);
+  fail_unless( strcmp(mod_str, "F#GGTSVANAER") == 0,
+	       "Modified seq is %s but should be F#GGTSVANAER", mod_str);
+  free(pep);
+  free(mods);
+  free(mod_str);
+
+  // test an n-term mod
+  aa_mod_set_position(amod3, N_TERM);
+  fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list),
+               "Modify should return one version of FGGTSVANAER*" );
+  // test that it was modified correctly
+  pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
+  mods = get_peptide_modified_sequence(pep);
+  mod_str =  modified_aa_string_to_string(mods);
+  fail_unless( strcmp(mod_str, "FGGTSVANAER#") == 0,
+	       "Modified seq is %s but should be FGGTSVANAER#", mod_str);
+  free(pep);
+  free(mods);
+  free(mod_str);
+
+  // test an c-term mod
+  aa_mod_set_position(amod1, C_TERM);
+  fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list),
+               "Modify should return one version of F*GGTSVANAER" );
+  // test that it was modified correctly
+  pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
+  mods = get_peptide_modified_sequence(pep);
+  mod_str =  modified_aa_string_to_string(mods);
+  fail_unless( strcmp(mod_str, "F*GGTSVANAER") == 0,
+	       "Modified seq is %s but should be F*GGTSVANAER", mod_str);
+  free(pep);
+  free(mods);
+  free(mod_str);
 }
 END_TEST
 
@@ -374,7 +416,7 @@ END_TEST
 // test modify with null peptide, with null list
 
 Suite* peptide_modifications_suite(){
-  Suite* s = suite_create("Peptide-modifications\n");
+  Suite* s = suite_create("Peptide-modifications");
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   tcase_add_test(tc_core, test_create);

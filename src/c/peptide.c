@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.72.2.6 $
+ * $Revision: 1.72.2.7 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -685,13 +685,13 @@ int get_peptide_missed_cleavage_sites(
 }
 
 /**
- * \brief Find the distance from the n-terminus of the source protein
- * to the n-terminus of the peptide.  
+ * \brief Find the distance from the c-terminus of the source protein
+ * to the c-terminus of the peptide (seq[0]).  
  * In the case of multiple source proteins, return the smallest
  * distance.
- * \returns The distance from the protein n-terminus.
+ * \returns The distance from the protein c-terminus.
  */
-int get_peptide_n_distance(PEPTIDE_T* peptide){
+int get_peptide_c_distance(PEPTIDE_T* peptide){
 
   int min_index = MAX_PROTEIN_SEQ_LENGTH;
   PEPTIDE_SRC_T* cur_src = peptide->peptide_src;
@@ -706,13 +706,13 @@ int get_peptide_n_distance(PEPTIDE_T* peptide){
 }
 
 /**
- * \brief Find the distance from the c-terminus of the source protein
- * to the c-terminus of the peptide.
+ * \brief Find the distance from the n-terminus of the source protein
+ * to the n-terminus of the peptide.
  * In the case of multiple source proteins, return the smallest
  * distance.
  * \returns The distance from the protein c-terminus.
  */
-int get_peptide_c_distance(PEPTIDE_T* peptide){
+int get_peptide_n_distance(PEPTIDE_T* peptide){
 
   int min_index = MAX_PROTEIN_SEQ_LENGTH;
   int peptide_length = get_peptide_length(peptide);

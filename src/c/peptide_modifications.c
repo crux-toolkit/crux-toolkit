@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.12 $
+ * $Revision: 1.1.2.13 $
  */
 
 #include "peptide_modifications.h"
@@ -263,59 +263,98 @@ BOOLEAN_T is_peptide_modifiable
 
   char* sequence = get_peptide_sequence( peptide );
 
-  // for each aa_mod in peptide_mod
+  // for each aa_mod (skip those not in peptide_mod)
   
   AA_MOD_T** all_mods = NULL;
-  int num_aa_mods = get_aa_mod_list(&all_mods);
+  //  int num_aa_mods = get_aa_mod_list(&all_mods);
+  int num_aa_mods = get_all_aa_mod_list(&all_mods);
   assert( num_aa_mods < MAX_AA_MODS );
 
   int amod_idx = 0;
   for(amod_idx = 0; amod_idx < num_aa_mods; amod_idx++){
 
+    // FIRST: check to see if it is included in this pmod
+    if( peptide_mod->aa_mod_counts[amod_idx] == 0 ){
+      continue;
+    }
+
+    // SECOND: check modifyability based on type
     AA_MOD_T* cur_aa_mod = all_mods[amod_idx];
+    // for position-based mods, check distance from protein end
+    int max_distance = aa_mod_get_max_distance(cur_aa_mod);
     int locations_count = 0;
     char* cur_seq_aa = sequence;
-
-    // look for an aa in the seq where this mod can be placed
-    while( *cur_seq_aa != '\0' ){
-      if( is_aa_modifiable( char_aa_to_modified(*cur_seq_aa), cur_aa_mod)
-          == TRUE ){
-        locations_count++;
-      }// else keep looking
-      cur_seq_aa++;
-    }// end of sequence
-
-    if( locations_count < peptide_mod->aa_mod_counts[amod_idx] ){
-      return FALSE;
+      
+    switch( aa_mod_get_position(cur_aa_mod) ){
+    case C_TERM: 
+      if( max_distance < get_peptide_c_distance(peptide)){ 
+	return FALSE; 
+      }
+      break;
+    case N_TERM:
+      if( max_distance < get_peptide_n_distance(peptide)){ 
+	return FALSE; 
+      }
+      break;
+      // count leagal locations for this aa mod, compare with counts
+    case ANY_POSITION:
+      // look for an aa in the seq where this mod can be placed
+      while( *cur_seq_aa != '\0' ){
+	if( is_aa_modifiable( char_aa_to_modified(*cur_seq_aa), cur_aa_mod)
+	    == TRUE ){
+	  locations_count++;
+	}// else keep looking
+	cur_seq_aa++;
+      }// end of sequence
+      
+      if( locations_count < peptide_mod->aa_mod_counts[amod_idx] ){
+	return FALSE;
+      }
+      break;
     }
   }// next in aa_mod list
-
-  // since c and n mods are next to each other in the array, could do this as
-  // one loop with an if( type == C_TERM) dist = get_p_c_dist; else get_n_dist
-
+  /*
   // now check position-specific modifications
   AA_MOD_T** c_mods = NULL;
   int num_c_mods = get_c_mod_list(&c_mods);
+  int last_mod = amod_idx;
   for(amod_idx = 0; amod_idx < num_c_mods; amod_idx++){
+    // first see if it is included in this pmod
+    if( peptide_mod->aa_mod_counts[amod_idx+last_mod] == 0 ){
+      continue;
+    }
+    
     AA_MOD_T* cur_aa_mod = c_mods[amod_idx];
     int max_distance = aa_mod_get_max_distance(cur_aa_mod);
     
+    carp(CARP_DETAILED_DEBUG, "c mod max distance %d, this distance %d",
+	 max_distance, get_peptide_c_distance( peptide ));
     if( get_peptide_c_distance( peptide ) > max_distance ){
       return FALSE;
     }
   }// next aa mod in list
 
+  printf("checking n-mods for modifyability\n");
   AA_MOD_T** n_mods = NULL;
   int num_n_mods = get_n_mod_list(&n_mods);
+  last_mod += amod_idx;
   for(amod_idx = 0; amod_idx < num_n_mods; amod_idx++){
+    printf("for index (%d+%d, count is %d\n", last_mod, amod_idx, peptide_mod->aa_mod_counts[amod_idx+last_mod]);
+    // first see if it is included in this pmod
+    if( peptide_mod->aa_mod_counts[amod_idx+last_mod] == 0 ){
+      continue;
+    }
+    
     AA_MOD_T* cur_aa_mod = n_mods[amod_idx];
     int max_distance = aa_mod_get_max_distance(cur_aa_mod);
     
+    carp(CARP_DETAILED_DEBUG, "n mod max distance %d, this distance %d",
+	 max_distance, get_peptide_n_distance( peptide ));
     if( get_peptide_n_distance( peptide ) > max_distance ){
       return FALSE;
     }
   }// next aa mod in list
-
+  */
   // found locations for all aa_mods in the seq
   return TRUE;
 }
@@ -368,10 +407,11 @@ int modify_peptide(
     return 0;
   }
 
+  /*
   if( peptide_mod == NULL ){
     carp(CARP_DETAILED_DEBUG, "Modify peptide given a NULL peptide mod");
   }
-
+  */
   if( peptide_mod == NULL || 
       peptide_mod_get_num_aa_mods(peptide_mod) == 0 ){
     carp(CARP_DETAILED_DEBUG, "Modifying peptide with no aa_mods, return peptide copy");
@@ -384,7 +424,7 @@ int modify_peptide(
   char* sequence = get_peptide_sequence(peptide);
   MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
 
-  carp(CARP_DETAILED_DEBUG, "Modifying peptide %s\n", sequence);
+  carp(CARP_DETAILED_DEBUG, "Modifying peptide %s", sequence);
 
   // get the aa_mod info
   int* aa_mod_counts = peptide_mod->aa_mod_counts;
@@ -435,16 +475,15 @@ int modify_peptide(
 
     MODIFIED_AA_T* cur_mod_seq = 
       (MODIFIED_AA_T*)pop_front_linked_list(modified_seqs);
-    /*
+
     char* seq = modified_aa_string_to_string(cur_mod_seq);
-    printf("%s\n", seq);
+    //printf("  %s\n", seq);
     free(seq);
-    */
+
     set_peptide_mod(cur_peptide, cur_mod_seq, peptide_mod);
 
     push_back_linked_list(modified_peptides, cur_peptide );
   }
-
   return total_count;
 }
 
@@ -514,14 +553,17 @@ int apply_mod_to_list(
                                            times_idx, // skip n modified aas
                                            completed_seqs);
 
-      //printf("No there are %d seqs to return\n", return_seq_count);
+      //printf("Now there are %d seqs to return\n", return_seq_count);
 
     }// apply to next seq until list is empty
 
+    //LIST_POINTER_T* head = get_first_linked_list(completed_seqs);
+    //MODIFIED_AA_T* return_seq = (MODIFIED_AA_T*)get_data_linked_list(head);
+    //char* seq = modified_aa_string_to_string(return_seq);
+    //printf("first seq from completed seqs is %s\n", seq);
+
     // make the collected results the input to the next application
     combine_lists(apply_mod_to_these, completed_seqs); 
-    //delete_linked_list(completed_seqs);
-    //free(completed_seqs);
     completed_seqs = new_empty_list();
 
   }// apply next time
@@ -564,6 +606,35 @@ int apply_mod_to_seq(
   if( mod == NULL ){
     push_back_linked_list( return_list, copy_mod_aa_seq(seq) );
     return 1;
+  }
+
+  // special case: positional mods
+  if( C_TERM == aa_mod_get_position(mod) ){
+    MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
+    modify_aa( &seq_copy[0], mod );
+    //    printf("mod_aa to char was %s and is now %s", modified_aa_to_string(seq[0]), modified_aa_to_string(seq_copy[0]));
+    push_back_linked_list(return_list, seq_copy);
+    return 1;  // one added to list
+  }
+  if( N_TERM == aa_mod_get_position(mod)){
+    MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
+    // find last index
+    int seq_idx = 0;
+    while( seq[seq_idx] != MOD_SEQ_NULL ){
+      seq_idx++;
+    }
+    //char* seq_str = modified_aa_string_to_string(seq_copy);
+    //carp(CARP_DETAILED_DEBUG, "applying n-term mod to %s at idx %d", seq_str, seq_idx-1);
+    //    printf("applying n-term mod to %s at idx %d\n", seq_str, seq_idx-1);
+    modify_aa( &seq_copy[seq_idx-1], mod );
+    //    printf("aa was %hu and is now %hu\n", seq[seq_idx-1], seq_copy[seq_idx-1]);
+    //    printf("mod_aa to char was %s and is now %s", modified_aa_to_string(seq[seq_idx-1]), modified_aa_to_string(seq_copy[seq_idx-1]));
+    //    seq_str = modified_aa_string_to_string(seq_copy);
+    //carp(CARP_DETAILED_DEBUG, "seq is now %s", seq_str);
+    //    printf("seq is now %s\n", seq_str);
+    //    printf("before adding seq, return list is empty? %d", is_empty_linked_list(return_list));
+    push_back_linked_list(return_list, seq_copy);
+    return 1;  // one added to list
   }
 
   // first loop, skip over n modified aas

@@ -1629,7 +1629,7 @@ int get_aa_mod_list
 int get_c_mod_list
   (AA_MOD_T*** mods) ///< the address of an array of pointers 
 {
-  carp(CARP_DEBUG, "getting c mods, all %d of them", num_c_mods);
+  //carp(CARP_DEBUG, "getting c mods, all %d of them", num_c_mods);
   *mods = list_of_c_mods;
   return num_c_mods;
 }
@@ -1644,7 +1644,7 @@ int get_c_mod_list
 int get_n_mod_list
   (AA_MOD_T*** mods) ///< the address of an array of pointers 
 {
-  carp(CARP_DEBUG, "getting n mods, all %d of them", num_n_mods);
+  //carp(CARP_DEBUG, "getting n mods, all %d of them", num_n_mods);
   *mods = list_of_n_mods;
   return num_n_mods;
 }

@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.1.2.6 $
+ * $Revision: 1.1.2.7 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -98,7 +98,7 @@ void queue_next_peptide(
     return;
   }
 
-  carp(CARP_DETAILED_DEBUG, "Modifying peptide %s",
+  carp(CARP_DETAILED_DEBUG, "Iterator is modifying peptide %s",
        get_peptide_sequence(unmod_peptide));
 
   modify_peptide( //iterator->next_peptide, 

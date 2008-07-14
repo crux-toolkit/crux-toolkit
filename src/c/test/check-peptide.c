@@ -28,6 +28,7 @@ DATABASE_T* database;
 
 char* protseq1 = "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW";
 
+// set setup!!
 
 START_TEST (test_create){
   database = new_database("test", FALSE);
@@ -168,68 +169,67 @@ void pep_teardown(){
 START_TEST (test_ndist){// start index
   // get_peptide_n_distance at 0, mid, near end
   int ndist = get_peptide_n_distance(peptide1); 
-  fail_unless( ndist == 19, 
+  fail_unless( ndist == 461, 
                "Incorrect distance from peptide n-terminus to " \
-               "protein n-ternimus.  Got %d, should be 19", ndist);
+               "protein n-ternimus.  Got %d, should be 461", ndist);
+
   ndist = get_peptide_n_distance(peptide2); 
+  fail_unless( ndist == 474, 
+               "Incorrect distance from peptide n-terminus to " \
+               "protein n-ternimus.  Got %d, should be 474", ndist);
+
+
+  ndist = get_peptide_n_distance(peptide3); 
   fail_unless( ndist == 0, 
                "Incorrect distance from peptide n-terminus to " \
                "protein n-ternimus.  Got %d, should be 0", ndist);
-
-  ndist =  get_peptide_src_start_idx(get_peptide_peptide_src(peptide3));
-  fail_unless( ndist == 487, 
-               "Incorrect start index of peptide3" \
-               ".  Got %d, should be 487", ndist);
-  ndist = get_peptide_n_distance(peptide3); 
-  fail_unless( ndist == 486, 
-               "Incorrect distance from peptide n-terminus to " \
-               "protein n-ternimus.  Got %d, should be 486", ndist);
 
   // test for multiple protein sources, first is least, first not least
   add_peptide_peptide_src( peptide1,
                            new_peptide_src(NOT_TRYPTIC, protein1, 25) );
   ndist = get_peptide_n_distance(peptide1); 
-  fail_unless( ndist == 19, 
+  fail_unless( ndist == 456, 
                "Incorrect distance from peptide n-terminus to " \
-               "protein n-ternimus.  Got %d, should be 19", ndist);
+               "protein n-ternimus.  Got %d, should be 456", ndist);
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NOT_TRYPTIC, protein1, 10) );
+                           new_peptide_src(NOT_TRYPTIC, protein1, 100) );
 
   ndist = get_peptide_n_distance(peptide1); 
-  fail_unless( ndist == 9, 
+  fail_unless( ndist == 381, 
                "Incorrect distance from peptide n-terminus to " \
-               "protein n-ternimus.  Got %d, should be 9", ndist);
+               "protein n-ternimus.  Got %d, should be 381", ndist);
 }
 END_TEST
 
-START_TEST (test_cdist){// protein_len - start_idx + length -1
+START_TEST (test_cdist){// start index
   // get peptide_cdist at 0, mid, near end
   int cdist = get_peptide_c_distance(peptide1); 
-  fail_unless( cdist == 461, 
+  //fail_unless( cdist == 461, 
+  fail_unless( cdist == 19, 
                "Incorrect distance from peptide c-terminus to " \
-               "protein c-ternimus.  Got %d, should be 461", cdist);
+               "protein c-ternimus.  Got %d, should be 19", cdist);
   cdist = get_peptide_c_distance(peptide2); 
-  fail_unless( cdist == 474, 
-               "Incorrect distance from peptide c-terminus to " \
-               "protein c-ternimus.  Got %d, should be 475", cdist);
-  cdist = get_peptide_c_distance(peptide3); 
   fail_unless( cdist == 0, 
                "Incorrect distance from peptide c-terminus to " \
                "protein c-ternimus.  Got %d, should be 0", cdist);
+  cdist = get_peptide_c_distance(peptide3); 
+  fail_unless( cdist == 486, 
+               "Incorrect distance from peptide c-terminus to " \
+               "protein c-ternimus.  Got %d, should be 486", cdist);
 
   // test for multiple protein sources, first is least, first not least
   add_peptide_peptide_src( peptide1,
                            new_peptide_src(NOT_TRYPTIC, protein1, 5) );
   cdist = get_peptide_c_distance(peptide1); 
-  fail_unless( cdist == 461, 
+  fail_unless( cdist == 4, 
                "Incorrect distance from peptide c-terminus to " \
-               "protein c-ternimus.  Got %d, should be 461", cdist);
+               "protein c-ternimus.  Got %d, should be 4", cdist);
   add_peptide_peptide_src( peptide1,
                            new_peptide_src(NOT_TRYPTIC, protein1, 30) );
   cdist = get_peptide_c_distance(peptide1); 
-  fail_unless( cdist == 451, 
+  fail_unless( cdist == 4, 
                "Incorrect distance from peptide c-terminus to " \
-               "protein c-ternimus.  Got %d, should be 451", cdist);
+               "protein c-ternimus.  Got %d, should be 4", cdist);
 }
 END_TEST
 
