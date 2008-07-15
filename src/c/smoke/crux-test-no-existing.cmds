@@ -20,6 +20,8 @@ generate_peptides_sort_lexical_unique = good_results/standard_generate_peptides_
 
 generate_peptides_change_minmax = good_results/standard_generate_peptides_change_minmax = crux-generate-peptides --parameter-file params/many_changes --output-sequence T --max-length 20 test.fasta=
 
+generate_peptides_mods = good_results/standard_generate_peptides_mods = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20 test.fasta =
+
 # Get spectrum
 get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out =
 
@@ -67,6 +69,9 @@ analyze_matches_no_ops_test_search =good_results/standard_analyze_default=crux-a
 create_index_default = good_results/standard_create_index_default.out = rm -rf test_crux_index; crux-create-index test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
 
 generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux-generate-peptides --output-sequence T --use-index T test_crux_index = '# PROTEIN DATABASE'
+
+# test that mods work with the index
+generate_peptides_mods = good_results/standard_generate_peptides_mods_index = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20  --use-index T test_crux_index =
 
 create_index_uniq = good_results/standard_create_index_uniq.out = rm -rf test_crux_index; crux-create-index --unique-peptides T test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
 

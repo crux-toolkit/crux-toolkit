@@ -293,7 +293,7 @@ END_TEST
   // test_aa_null
 
 Suite* modifications_suite(){
-  Suite* s = suite_create("Modifications\n");
+  Suite* s = suite_create("Modifications");
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   tcase_add_test(tc_core, test_create);

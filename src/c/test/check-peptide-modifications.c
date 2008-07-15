@@ -272,7 +272,7 @@ START_TEST(test_modify_1){
                "Modify should return one version of FGGTSV*ANAER" );
   // test that it is modified correctly
   PEPTIDE_T* pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
-  MODIFIED_AA_T* mods = get_peptide_modified_sequence(pep);
+  MODIFIED_AA_T* mods = get_peptide_modified_aa_sequence(pep);
   char* mod_str =  modified_aa_string_to_string(mods);
   fail_unless( strcmp(mod_str, "FGGTSV*ANAER") == 0,
 	       "Modified seq is %s but should be FGGTSV*ANAER", mod_str);
@@ -291,7 +291,7 @@ START_TEST(test_modify_1){
                "Modify should return one version of F*GGTSVANAER" );
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
-  mods = get_peptide_modified_sequence(pep);
+  mods = get_peptide_modified_aa_sequence(pep);
   mod_str =  modified_aa_string_to_string(mods);
   fail_unless( strcmp(mod_str, "F#GGTSVANAER") == 0,
 	       "Modified seq is %s but should be F#GGTSVANAER", mod_str);
@@ -305,7 +305,7 @@ START_TEST(test_modify_1){
                "Modify should return one version of FGGTSVANAER*" );
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
-  mods = get_peptide_modified_sequence(pep);
+  mods = get_peptide_modified_aa_sequence(pep);
   mod_str =  modified_aa_string_to_string(mods);
   fail_unless( strcmp(mod_str, "FGGTSVANAER#") == 0,
 	       "Modified seq is %s but should be FGGTSVANAER#", mod_str);
@@ -319,7 +319,7 @@ START_TEST(test_modify_1){
                "Modify should return one version of F*GGTSVANAER" );
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
-  mods = get_peptide_modified_sequence(pep);
+  mods = get_peptide_modified_aa_sequence(pep);
   mod_str =  modified_aa_string_to_string(mods);
   fail_unless( strcmp(mod_str, "F*GGTSVANAER") == 0,
 	       "Modified seq is %s but should be F*GGTSVANAER", mod_str);

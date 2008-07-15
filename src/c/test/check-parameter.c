@@ -111,7 +111,7 @@ START_TEST(test_create){
 END_TEST
 
 Suite* parameter_suite(){
-  Suite* s = suite_create("Parameter\n");
+  Suite* s = suite_create("Parameter");
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);

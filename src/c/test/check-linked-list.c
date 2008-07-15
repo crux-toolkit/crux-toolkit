@@ -446,7 +446,7 @@ START_TEST(test_do_null){
 END_TEST
 
 Suite* list_suite(){
-  Suite* s = suite_create("Linked-list\n");
+  Suite* s = suite_create("Linked-list");
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);

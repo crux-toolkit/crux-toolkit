@@ -300,11 +300,12 @@ int prepare_protein_input(char* input_file,
 
   int num_proteins = 0;
   BOOLEAN_T use_index = get_boolean_parameter("use-index");
-  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
+  //BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
 
   if (use_index == TRUE){
     carp(CARP_INFO, "Preparing protein index %s", input_file);
-    *index = new_index_from_disk(input_file, is_unique);
+    //    *index = new_index_from_disk(input_file, is_unique);
+    *index = new_index_from_disk(input_file);
 
     if (index == NULL){
       carp(CARP_FATAL, "Could not create index from disk for %s", input_file);

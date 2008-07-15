@@ -93,7 +93,7 @@ START_TEST(test_has_next_one_mod){
   fail_unless( strcmp(get_peptide_sequence(pep), "QGQVATVLSAPAK") == 0,
                "First peptide should be QGQVATVLSAPAK");
   // check modified sequence
-  char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
+  char* mod_seq = get_peptide_modified_sequence(pep);
   fail_unless( strcmp(mod_seq, "Q*GQVATVLSAPAK") == 0,
                "First peptide should be Q*GQVATVLSAPAK but is %s", mod_seq);
 
@@ -108,7 +108,7 @@ START_TEST(test_has_next_one_mod){
   fail_unless( strcmp(get_peptide_sequence(pep), "QGQVATVLSAPAK") == 0,
                "Second peptide should be QGQVATVLSAPAK");
   // check modified sequence
-  mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
+  mod_seq = get_peptide_modified_sequence(pep);
   fail_unless( strcmp(mod_seq, "QGQ*VATVLSAPAK") == 0,
                "Second peptide should be QGQ*VATVLSAPAK but is %s", mod_seq);
 

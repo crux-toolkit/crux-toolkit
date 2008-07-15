@@ -236,7 +236,7 @@ END_TEST
 START_TEST(test_mod_on_unmodified){
   // check is_modified
   // get modified seq from peptide w/out modificationso
-  MODIFIED_AA_T* mod_seq = get_peptide_modified_sequence(peptide1);
+  MODIFIED_AA_T* mod_seq = get_peptide_modified_aa_sequence(peptide1);
   
   fail_unless( mod_seq != NULL,
                "An unmodified peptide should not return NULL mod seq");
@@ -277,7 +277,7 @@ START_TEST(test_with_mod){
   set_peptide_mod(peptide3, mod_seq, pep_mod);
   // check is_modified
   // get modified seq
-  MODIFIED_AA_T* returned_seq = get_peptide_modified_sequence(peptide3);
+  MODIFIED_AA_T* returned_seq = get_peptide_modified_aa_sequence(peptide3);
   char* returned_str = modified_aa_string_to_string(returned_seq);
   fail_unless( strcmp(returned_str, mod_seq_str) == 0,
    "Peptide3 should have returned modified seq %s, but instead returned %s",
@@ -289,7 +289,7 @@ START_TEST(test_with_mod){
 END_TEST
 
 Suite* peptide_suite(void){
-  Suite *s = suite_create("Peptide\n");
+  Suite *s = suite_create("Peptide");
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);

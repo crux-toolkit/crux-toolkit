@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.72.2.7 $
+ * $Revision: 1.72.2.8 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -564,7 +564,7 @@ void set_peptide_mod(PEPTIDE_T* peptide,     ///< peptide to be modified
  * MODIFIED_AA_T's in which none of them are actually modified.
  * \returns A newly allocated copy of the sequence of MODIFIED_AA_Ts.
  */
-MODIFIED_AA_T* get_peptide_modified_sequence(PEPTIDE_T* peptide){
+MODIFIED_AA_T* get_peptide_modified_aa_sequence(PEPTIDE_T* peptide){
   if( peptide == NULL ){
     carp(CARP_ERROR, "Cannot get modified sequence from NULL peptide.");
     return NULL;
@@ -583,6 +583,28 @@ MODIFIED_AA_T* get_peptide_modified_sequence(PEPTIDE_T* peptide){
   
   return seq_copy;
 }
+
+/**
+ * \brief Get the modified aa sequence in string form.
+ *
+ * If the peptide has no modifications, returns same string as
+ * get_peptide_sequence.  If modified, adds the mod symbols to the string.
+ * \returns A newly allocated string of the peptide sequence including
+ * any modifications.
+ */
+char* get_peptide_modified_sequence(
+ PEPTIDE_T* peptide
+ ){
+  char* seq_string = NULL;
+  if( peptide->modified_seq == NULL ){
+    seq_string = get_peptide_sequence(peptide);
+  }else{
+    seq_string = modified_aa_string_to_string(peptide->modified_seq);
+  }
+  
+  return seq_string;
+}
+
 
 /* getters requiring calculation */
 

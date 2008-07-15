@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.45.4.4 $
+ * $Revision: 1.45.4.5 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -262,14 +262,26 @@ void set_peptide_mod(PEPTIDE_T* peptide,     ///< peptide to be modified
 );
 
 /**
- * \brief Get the modified peptide sequence
+ * \brief Get the modified aa sequence
  *
  * If the peptide has no modifications, create a sequence of
  * MODIFIED_AA_T's in which none of them are actually modified.
  * \returns A newly allocated copy of the sequence of MODIFIED_AA_Ts.
  */
 //MODIFIED_AA_T* get_peptide_modified_sequence( // why is this not working??!!
-unsigned short* get_peptide_modified_sequence(
+unsigned short* get_peptide_modified_aa_sequence(
+ PEPTIDE_T* peptide
+ );
+
+/**
+ * \brief Get the modified aa sequence in string form.
+ *
+ * If the peptide has no modifications, returns same string as
+ * get_peptide_sequence.  If modified, adds the mod symbols to the string.
+ * \returns A newly allocated string of the peptide sequence including
+ * any modifications.
+ */
+char* get_peptide_modified_sequence(
  PEPTIDE_T* peptide
  );
 

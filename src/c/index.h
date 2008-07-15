@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.23 $
+ * $Revision: 1.23.2.1 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -45,8 +45,8 @@ INDEX_T* new_index(
  * \returns A new index object ready for search.
  */
 INDEX_T* new_index_from_disk(
-  char* fasta_filename,  ///< The fasta file
-  BOOLEAN_T is_unique ///< only unique peptides? -in
+  char* fasta_filename  ///< The fasta file
+  //  BOOLEAN_T is_unique ///< only unique peptides? -in
   );
 
 /**

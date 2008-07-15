@@ -48,7 +48,7 @@ START_TEST(test_somethingelse){
 END_TEST
 
 Suite* generate_peptides_iterator_suite(){
-  Suite* s = suite_create("Generate-peptides-iterator\n");
+  Suite* s = suite_create("Generate-peptides-iterator");
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);

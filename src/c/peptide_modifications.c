@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.1.2.13 $
+ * $Revision: 1.1.2.14 $
  */
 
 #include "peptide_modifications.h"
@@ -536,7 +536,6 @@ int apply_mod_to_list(
     // reset count
     return_seq_count = 0;
 
-    //printf("For time %d...\n", times_idx);
     // for each seq
     while( ! is_empty_linked_list(apply_mod_to_these) ){
       // get modified seq
@@ -556,11 +555,6 @@ int apply_mod_to_list(
       //printf("Now there are %d seqs to return\n", return_seq_count);
 
     }// apply to next seq until list is empty
-
-    //LIST_POINTER_T* head = get_first_linked_list(completed_seqs);
-    //MODIFIED_AA_T* return_seq = (MODIFIED_AA_T*)get_data_linked_list(head);
-    //char* seq = modified_aa_string_to_string(return_seq);
-    //printf("first seq from completed seqs is %s\n", seq);
 
     // make the collected results the input to the next application
     combine_lists(apply_mod_to_these, completed_seqs); 
@@ -612,7 +606,6 @@ int apply_mod_to_seq(
   if( C_TERM == aa_mod_get_position(mod) ){
     MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
     modify_aa( &seq_copy[0], mod );
-    //    printf("mod_aa to char was %s and is now %s", modified_aa_to_string(seq[0]), modified_aa_to_string(seq_copy[0]));
     push_back_linked_list(return_list, seq_copy);
     return 1;  // one added to list
   }
@@ -623,16 +616,7 @@ int apply_mod_to_seq(
     while( seq[seq_idx] != MOD_SEQ_NULL ){
       seq_idx++;
     }
-    //char* seq_str = modified_aa_string_to_string(seq_copy);
-    //carp(CARP_DETAILED_DEBUG, "applying n-term mod to %s at idx %d", seq_str, seq_idx-1);
-    //    printf("applying n-term mod to %s at idx %d\n", seq_str, seq_idx-1);
     modify_aa( &seq_copy[seq_idx-1], mod );
-    //    printf("aa was %hu and is now %hu\n", seq[seq_idx-1], seq_copy[seq_idx-1]);
-    //    printf("mod_aa to char was %s and is now %s", modified_aa_to_string(seq[seq_idx-1]), modified_aa_to_string(seq_copy[seq_idx-1]));
-    //    seq_str = modified_aa_string_to_string(seq_copy);
-    //carp(CARP_DETAILED_DEBUG, "seq is now %s", seq_str);
-    //    printf("seq is now %s\n", seq_str);
-    //    printf("before adding seq, return list is empty? %d", is_empty_linked_list(return_list));
     push_back_linked_list(return_list, seq_copy);
     return 1;  // one added to list
   }
@@ -640,20 +624,17 @@ int apply_mod_to_seq(
   // first loop, skip over n modified aas
   int seq_idx = 0;
   while( seq[seq_idx] != MOD_SEQ_NULL  && skip_n != 0){
-    //    printf("skip_n is %d, idx is %d, and aa is %s\n", skip_n, seq_idx, modified_aa_to_string(seq[seq_idx]));
     if( is_aa_modified( seq[seq_idx], mod ) ){
       skip_n--;
     }
     seq_idx++;
   }
-  //printf("after first loop, idx is %d\n", seq_idx);
   // second loop, end after reached end check for modifiability, copy and add
 
   // check each aa
   // copy seq when modifiable and add to list
   int count = 0;
   while( seq[seq_idx] != MOD_SEQ_NULL ){
-    //printf("seq[%d] is %c\n", seq_idx, modified_aa_to_char(seq[seq_idx]));
 
     if( is_aa_modifiable( seq[seq_idx], mod )){
       MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
@@ -677,7 +658,8 @@ void print_p_mod(PEPTIDE_MOD_T* mod){
 
   int i=0;
   AA_MOD_T** all_mods = NULL;
-  int num_aa_mods = get_aa_mod_list( &all_mods );
+  //int num_aa_mods = get_aa_mod_list( &all_mods );
+  int num_aa_mods = get_all_aa_mod_list( &all_mods );
   assert( num_aa_mods < MAX_AA_MODS );
 
   for(i = 0; i < num_aa_mods; i++){
@@ -700,7 +682,8 @@ void peptide_mod_add_aa_mod(
   int copies ){           ///< How many of the aa_mod to add
 
   AA_MOD_T** all_mods = NULL;
-  int num_aa_mods = get_aa_mod_list( &all_mods );
+  //  int num_aa_mods = get_aa_mod_list( &all_mods );
+  int num_aa_mods = get_all_aa_mod_list( &all_mods );
   assert( num_aa_mods < MAX_AA_MODS );
 
   //printf("mass change for amod of index %d is %.2f\n", aa_mod_idx, aa_mod_get_mass_change(all_mods[aa_mod_idx]));
@@ -728,19 +711,6 @@ int peptide_mod_get_num_aa_mods(PEPTIDE_MOD_T* mod){
   return mod->num_mods;
 }
 
-/**
- * \brief Get a pointer to the linked list of aa_mods for this peptide_mod.
- * The number of elements in the list is given by
- * peptide_mod_get_num_aa_mods. A unique aa_mod may be listed more
- * than once.  There is no particular order to the aa_mods in the
- * list.
- * \returns A pointer to a linked list pointing to AA_MOD_T's.
- */
-/*
-LINKED_LIST_T* peptide_mod_get_aa_mod_list(PEPTIDE_MOD_T* mod){
-  return mod->list_of_mods;
-}// not needed?
-*/
 
 /**
  * \brief Compares the number of aa mods in two peptide mods for

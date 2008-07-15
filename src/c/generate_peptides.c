@@ -95,8 +95,8 @@ int main(int argc, char** argv){
   use_index = get_boolean_parameter("use-index");
   filename = get_string_parameter("protein input");
   if( use_index == TRUE ){
-    index = new_index_from_disk(filename, 
-                                get_boolean_parameter("unique-peptides"));
+    index = new_index_from_disk(filename);//, 
+//                                get_boolean_parameter("unique-peptides"));
   }else{
     database = new_database(filename, FALSE); // not memmapped
   }

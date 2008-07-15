@@ -68,14 +68,15 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
   double max_mass = get_double_parameter("max-mass");
   BOOLEAN_T use_index = get_boolean_parameter("use-index");
 
-  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
+  //  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
   char*  protein_input_name = get_string_parameter_pointer("protein input");
 
   INDEX_T* index = NULL;
   DATABASE_T* database = NULL;
   // TODO (BF 27-Feb-08): set use_index according to the input, true if dir
   if (use_index == TRUE){
-    index = new_index_from_disk(protein_input_name, is_unique);
+    //index = new_index_from_disk(protein_input_name, is_unique);
+    index = new_index_from_disk(protein_input_name);
   } else {
     // FALSE indicates that we are not using a binary fasta file
     database = new_database(protein_input_name, FALSE);

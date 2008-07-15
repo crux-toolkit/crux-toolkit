@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.1.2.7 $
+ * $Revision: 1.1.2.8 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -118,10 +118,8 @@ void queue_next_peptide(
     printf("Iterator's next peptide was lost\n");
   }
 
-  MODIFIED_AA_T* mod_seq = get_peptide_modified_sequence(iterator->next_peptide);
-  char* seq = modified_aa_string_to_string(mod_seq);
+  char* seq = get_peptide_modified_sequence(iterator->next_peptide);
   carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq);
-  free(mod_seq);
   free(seq);
 }
 
