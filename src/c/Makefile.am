@@ -118,7 +118,6 @@ crux_analyze_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/src
 crux_analyze_matches_LDADD = \
   -lstdc++ \
   $(PERCOLATOR_DIR)/src/libpercolator.la \
-  $(PERCOLATOR_DIR)/src/libmstoolkit.la \
   $(PERCOLATOR_DIR)/src/libqvality.la \
   $(PERCOLATOR_DIR)/src/libArrayLibrary.la \
   libcrux.la
