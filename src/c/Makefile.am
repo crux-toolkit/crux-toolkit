@@ -116,7 +116,12 @@ crux_search_for_matches_LDADD = libcrux.la
 crux_analyze_matches_SOURCES = match_analysis.c
 crux_analyze_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/src
 crux_analyze_matches_LDADD = \
-  -lstdc++ $(PERCOLATOR_DIR)/src/Release/lib/libpercolator.a libcrux.la
+  -lstdc++ \
+  $(PERCOLATOR_DIR)/src/libpercolator.la \
+  $(PERCOLATOR_DIR)/src/libmstoolkit.la \
+  $(PERCOLATOR_DIR)/src/libqvality.la \
+  $(PERCOLATOR_DIR)/src/libArrayLibrary.la \
+  libcrux.la
 
 crux_predict_peptide_ions_SOURCES = predict_peptide_ions.c
 crux_predict_peptide_ions_CFLAGS = $(AM_CFLAGS) -DMAIN 
