@@ -120,9 +120,9 @@ if test ! -e "${PERCOLATOR_DIR}/src/PercolatorCInterface.h"
 then
   PERCOLATOR_HEADER_STATUS="$PERCOLATOR_DIR/src/PercolatorCInterface.h not found!"
 fi
-if test ! -e "${PERCOLATOR_DIR}/src/Release/lib/libpercolator.a"
+if test ! -e "${PERCOLATOR_DIR}/src/libpercolator.la"
 then
-  PERCOLATOR_LIB_STATUS="$PERCOLATOR_DIR/src/Release/lib/libpercolator.a not found!"
+  PERCOLATOR_LIB_STATUS="$PERCOLATOR_DIR/src/libpercolator.la not found!"
 fi
 
 AM_CONDITIONAL(PERCOLATOR, \
