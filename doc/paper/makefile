@@ -2,7 +2,8 @@ all: crux.pdf \
 	plos-cover.pdf \
 	jpr-cover.pdf \
 	response.pdf \
-	supp.pdf 
+	supp.pdf \
+	crux.rtf
 
 # Check out the 'refs' CVS module and add this directory to your BIBTEX path.
 REFDIR = $(subst ::,,$(BIBINPUTS))
@@ -43,6 +44,10 @@ supp.dvi: supp.tex
 
 %.pdf: %.dvi
 	dvipdf $*.dvi
+
+%.rtf: %.tex
+	latex2rtf $*
+	latex2rtf $*
 
 # Clean up.
 clean:
