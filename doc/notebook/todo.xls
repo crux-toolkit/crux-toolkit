@@ -106,3 +106,4 @@
 109	"1/23/08"		"New Functionality"	"Testing"	"BEF"	"BEF"	1	1	"change ion tolerance (for deciding if a spectrum peak matches a predictec peak) to a parameter)"
 110	"2/14/08"		"New Functionality"	"Open"	"AAK"	"AAK"	1	2	"Remove peptide type from serialized peptide, to reduce index size?"
 111	03/03/08		"Bug Fix"	"Open"	"BEF"	"BEF"	2	2	"for analyze-matches, compare the number of psms per spectrum in binary file to number of psms requested to print to sqt file; if num in binary < num requested, print warning and change the value in the sqt header"
+112	09/10/08		"New Functionality"	"Open"		"BEF"	2	3	"change search-for-matches and analyze-matches to be on executable"
