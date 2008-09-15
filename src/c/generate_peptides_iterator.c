@@ -282,6 +282,7 @@ void free_generate_peptides_iterator(
 {
   // free the nested iterator
   generate_peptides_iterator->free(generate_peptides_iterator->iterator);
+  free_peptide_constraint(generate_peptides_iterator->constraint);
   free(generate_peptides_iterator);
 }
 /*

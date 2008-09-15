@@ -143,6 +143,7 @@ int main(int argc, char** argv){
   int z_i = 0;
   int file_i = 0;
   int total_files = get_int_parameter("number-decoy-set") + 1;
+  int mod_me = 100;  // the order of magintude for printing progress
 
   // seed for random number generation
   if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
@@ -215,8 +216,13 @@ int main(int argc, char** argv){
     free(charge_array);
     
     spectrum_counter++;
-    if( spectrum_counter %1000 == 0 ){
-      carp(CARP_INFO, "Searched %d spectra", spectrum_counter);
+    //  if( spectrum_counter %1000 == 0 ){
+    if( spectrum_counter % mod_me == 0 ){
+      if(spectrum_counter/10 == mod_me){
+        mod_me = mod_me * 10;
+      }
+      carp(CARP_INFO, "Searched %d spectra of %d", spectrum_counter,
+           get_spectrum_collection_num_spectra(collection));
     }
   }// next spectrum    
   carp(CARP_DEBUG, "finished searching");

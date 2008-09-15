@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.72 $
+ * $Revision: 1.72.6.1 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include <math.h>
@@ -1153,8 +1153,10 @@ BOOLEAN_T serialize_peptide(
   long original_location;
   int num_src = 0;
   
+  char* seq = get_peptide_sequence(peptide);
   carp(CARP_DETAILED_DEBUG, "Serializing peptide %s", 
-       get_peptide_sequence(peptide));
+       seq);
+  free(seq);
   // write the peptide struct
   fwrite(peptide, sizeof(PEPTIDE_T), 1, file);
   

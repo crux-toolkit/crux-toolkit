@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.83.4.1 $
+ * $Revision: 1.83.4.2 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -231,7 +231,7 @@ void free_match_collection(
   MATCH_COLLECTION_T* match_collection ///< the match collection to free -out
   )
 {
-  // decrement the pointer count in each match object
+  // delete all matches (decrement the pointer count to each match object)
   while(match_collection->match_total > 0){
     --match_collection->match_total;
     free_match(match_collection->match[match_collection->match_total]);
@@ -331,6 +331,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
     if (match_collection->match_total == 0){
       carp(CARP_WARNING, "No matches found for spectrum %i charge %i",
           get_spectrum_first_scan(spectrum), charge);
+      free_generate_peptides_iterator(peptide_iterator);
       free_match_collection(match_collection);
       return NULL;
     }
@@ -1100,7 +1101,7 @@ BOOLEAN_T score_match_collection_sp(
 
     // print total peptides scored so far
     if(match_collection->match_total % 10000 == 0){
-      carp(CARP_INFO, "scored peptide for sp: %d", 
+      carp(CARP_DEBUG, "scored peptide for sp: %d", 
           match_collection->match_total);
     }
     
@@ -1119,7 +1120,7 @@ BOOLEAN_T score_match_collection_sp(
   carp(CARP_DEBUG, "Total peptide scored for sp: %d", 
       match_collection->match_total);
 
-  if (match_collection->match_total)
+  //if (match_collection->match_total)
   
   // free heap
   free_scorer(scorer);
@@ -1884,6 +1885,7 @@ FILE** create_psm_files(){
       exit(1);
     }
     //rename this, just for a quick fix
+    free(filename_template);
     filename_template = get_full_filename(output_directory, psm_filename);
     //chmod(psm_filename, 0664);
     chmod(filename_template, 0664);
@@ -1894,6 +1896,15 @@ FILE** create_psm_files(){
     //psm_filename = generate_name(filename_template, "_XXXXXX",
     //                             ".ms2", suffix);
   }
+
+  // clean up 
+  free(filename_path_array[0]);
+  if( *filename_path_array[1] != '.' ){
+    free(filename_path_array[1]);
+  }
+  free(filename_path_array);
+  free(filename_template);
+
   return file_handle_array;
 
 }
