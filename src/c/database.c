@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.63.6.1 $
+ * $Revision: 1.63.6.2 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -842,12 +842,17 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   // set a new protein iterator
   database_peptide_iterator->database_protein_iterator =
     new_database_protein_iterator(database);
+  if( database_peptide_iterator->database_protein_iterator == NULL){
+    carp(CARP_ERROR, 
+         "Could not create protein iterator for database peptide iterator.");
+    return NULL;
+  }
 
   // set peptide constraint
   database_peptide_iterator->peptide_constraint 
     = copy_peptide_constraint_ptr(peptide_constraint);
   
-  // check if there's any proteins to create peptides from
+  // check if there are any proteins to create peptides from
   if(database_protein_iterator_has_next(
         database_peptide_iterator->database_protein_iterator)){
 

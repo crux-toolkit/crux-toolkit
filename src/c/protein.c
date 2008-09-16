@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.74.4.1 $
+ * $Revision: 1.74.4.2 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -1092,6 +1092,7 @@ void prepare_protein_peptide_iterator(
         cleavage_positions, num_cleavage_positions-1,
         cleavage_positions+1, num_cleavage_positions-1, 
         missed_cleavages);
+
       break;
 
     case PARTIALLY_TRYPTIC:

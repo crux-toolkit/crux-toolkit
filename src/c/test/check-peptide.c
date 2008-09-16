@@ -33,7 +33,8 @@ PEPTIDE_SRC_T* association3;
 DATABASE_T* database;
 
 START_TEST (test_create){
-  database = new_database("test", FALSE, TRUE);
+  //  database = new_database("test", FALSE, TRUE);
+  database = new_database("test", FALSE); // not on disk
   
   //test on link_list implementaion of peptide_src
   set_peptide_src_implementation(TRUE);

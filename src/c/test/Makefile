@@ -18,9 +18,9 @@ TESTS = \
 	check-protein.c \
 	check-database.c \
 	check-match.c \
-	check-parameter.c \
-	check-modifications.c \
 	crux-unit-tests.c
+	#check-parameter.c \
+	#check-modifications.c \
 
 CRUX_LIBS = \
   ../.libs/libcrux.a \

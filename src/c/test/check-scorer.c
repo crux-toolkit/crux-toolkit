@@ -12,7 +12,8 @@
 #include "../ion_series.h"
 
 #define scan_num 16
-#define ms2_file "test.ms2"
+//#define ms2_file "test.ms2"
+#define ms2_file "test2.ms2"
 #define parameter_file "test_parameter_file"
 
 START_TEST (test_create){
@@ -23,13 +24,27 @@ START_TEST (test_create){
   float score = 0;
 
   //parse paramter file
-  parse_update_parameters(parameter_file);
+  //parse_update_parameters(parameter_file);
+
+  initialize_parameters();
+  char* ops[1] = {"parameter-file"};
+  fail_unless( select_cmd_line_options(ops, 1) == TRUE,
+               "Failed to select command line options");
+  char* args[1] = {"protein input"};
+  fail_unless( select_cmd_line_arguments(args, 1) == TRUE,
+    "Failed to select command line arguments");
+
+  char* fake_argv[4] = {"app", "--parameter-file", parameter_file, "prot"};
+  // parse command line and param file
+  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "app")==TRUE,
+              "Failed to parse param file %s with mods", "1mod");
   
+
   //set parameter for fasta_file, although not used here...
   //set_string_parameter("fasta-file", "fasta_file");
   
   //parameters has been confirmed
-  parameters_confirmed();
+  //parameters_confirmed();
   
   int peptide_charge = get_int_parameter("charge");
 
