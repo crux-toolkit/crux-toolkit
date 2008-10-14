@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.56 $
+ * REVISION: $Revision: 1.56.4.1 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -495,8 +495,8 @@ void print_match_sqt(
     
     // print match info (locus line)
     // TODO (BF 06-Feb-08): add protein description
-    //    fprintf(file, "L\t%s\n", protein_id);      
-    fprintf(file, "L\t%s\t%s\n", protein_id, description);      
+    fprintf(file, "L\t%s\n", protein_id);      
+    //fprintf(file, "L\t%s\t%s\n", protein_id, description);      
     free(protein_id);
     free(sequence);
     free(description);
