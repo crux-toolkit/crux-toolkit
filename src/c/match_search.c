@@ -26,7 +26,7 @@
 #include "match.h"
 #include "match_collection.h"
 
-#define NUM_SEARCH_OPTIONS 14
+#define NUM_SEARCH_OPTIONS 15
 #define NUM_SEARCH_ARGS 2
 
 /* Private functions */
@@ -42,6 +42,7 @@ int main(int argc, char** argv){
   /* Define optional command line arguments */
   int num_options = NUM_SEARCH_OPTIONS;
   char* option_list[NUM_SEARCH_OPTIONS] = {
+    "version",
     "verbosity",
     "parameter-file",
     "overwrite",

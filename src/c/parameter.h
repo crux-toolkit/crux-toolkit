@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.28 $
+ * $Revision: 1.28.6.1 $
  * \brief General parameter handling utilities. All values stored here.
 
  * \detail MUST declare ALL optional command line parameters and
@@ -24,6 +24,7 @@
 #include "utils.h"
 #include "crux-utils.h"
 #include "carp.h"
+#include "version.h"
 #include "hash.h"
 #include "objects.h"
 #include "peptide.h"

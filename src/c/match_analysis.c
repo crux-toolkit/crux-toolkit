@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.46.4.1 $
+ * $Revision: 1.46.4.2 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_ANALYSIS_OPTIONS 7
+#define NUM_ANALYSIS_OPTIONS 8
 #define NUM_ANALYSIS_ARGUMENTS 2
 
 /* 
@@ -80,6 +80,7 @@ int main(int argc, char** argv){
   /* Define command line arguments */
   int num_options = NUM_ANALYSIS_OPTIONS;
   char* option_list[NUM_ANALYSIS_OPTIONS] = {
+    "version",
     "verbosity",
     "parameter-file",
     "algorithm",

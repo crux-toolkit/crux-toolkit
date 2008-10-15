@@ -61,7 +61,8 @@ NON_PERCOLATOR_LIB_FILES= \
   spectrum_collection.h \
   spectrum.h \
   utils.c \
-  utils.h
+  utils.h \
+  version.h
 
 PERCOLATOR_LIB_FILES = 
 
@@ -141,3 +142,6 @@ EXTRA_DIST = default.params
 
 doc:	*.h *.c
 	doxygen Doxyfile
+
+dist-hook:
+	grep '#define VERSION' ../../config.h > version.h

@@ -19,7 +19,7 @@
 #include "spectrum_collection.h"
 #include "unistd.h"
 
-#define NUM_MS2_OPTIONS 2
+#define NUM_MS2_OPTIONS 3
 #define NUM_MS2_ARGUMENTS 3
 
 int main(int argc, char** argv){
@@ -35,7 +35,10 @@ int main(int argc, char** argv){
 
   /* Define optional command line arguments */
   int num_options = NUM_MS2_OPTIONS;
-  char* option_list[NUM_MS2_OPTIONS] = { "stats", "verbosity" }; //out-file
+  char* option_list[NUM_MS2_OPTIONS] = { 
+    "version", 
+    "stats", 
+    "verbosity" }; //out-file
 
   int num_arguments = NUM_MS2_ARGUMENTS;
   char* argument_list[NUM_MS2_ARGUMENTS] = {

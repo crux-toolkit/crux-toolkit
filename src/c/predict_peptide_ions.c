@@ -21,7 +21,7 @@
 #include "ion.h"
 #include "ion_series.h"
 
-#define NUM_PREDICT_OPTIONS 8
+#define NUM_PREDICT_OPTIONS 9
 #define NUM_PREDICT_ARGUMENTS 2
 
 int main(int argc, char** argv){
@@ -29,6 +29,7 @@ int main(int argc, char** argv){
   /* Define optional and required command line arguments */
   int num_options = NUM_PREDICT_OPTIONS;
   char* option_list[NUM_PREDICT_OPTIONS] = {
+    "version",
     "primary-ions",
     "precursor-ions",
     "neutral-losses",
