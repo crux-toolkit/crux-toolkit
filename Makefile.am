@@ -9,6 +9,8 @@ clean-ac:
 
 # makes a binary only distribution, using zip.
 # make sure to 'make' before you make a 'bdist'
+ar=`arch`
+name=`uname`
 bdist:
 	rm -fr bdist
 	mkdir bdist
@@ -27,8 +29,8 @@ bdist:
 			src/c/crux-generate-peptides \
 			src/c/crux-create-index  \
 			bdist/bin/
-	zip -r bdist bdist
+	zip -r $(distdir)-$(ar)-$(name).zip bdist
 	rm -fr bdist/
-	
+
 
 
