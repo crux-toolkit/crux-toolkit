@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.28.6.1 $
+ * $Revision: 1.28.6.2 $
  * \brief General parameter handling utilities. All values stored here.
 
  * \detail MUST declare ALL optional command line parameters and
@@ -28,10 +28,10 @@
 #include "hash.h"
 #include "objects.h"
 #include "peptide.h"
-#include "spectrum.h"
-#include "peak.h"
-#include "mass.h"
-#include "scorer.h"
+//#include "spectrum.h"
+//#include "peak.h"
+//#include "mass.h"
+//#include "scorer.h"
 #include "parse_arguments.h"
 
 #define PARAMETER_LENGTH 1024 
