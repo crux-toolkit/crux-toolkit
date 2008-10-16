@@ -27,6 +27,7 @@ webpage:
 	cp crux.html $(WEBDIR)/index.html
 	cp -f *.html $(WEBDIR)/
 	cp *.css $(WEBDIR)/
+	cp default.params $(WEBDIR)/
 	rm -fr $(WEBDIR)/data/
 	cp -R data/ $(WEBDIR)/
 	cp -R download/ $(WEBDIR)/
