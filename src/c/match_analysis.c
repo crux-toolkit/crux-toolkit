@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.46 $
+ * $Revision: 1.47 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_ANALYSIS_OPTIONS 7
+#define NUM_ANALYSIS_OPTIONS 8
 #define NUM_ANALYSIS_ARGUMENTS 2
 
 /* 
@@ -80,6 +80,7 @@ int main(int argc, char** argv){
   /* Define command line arguments */
   int num_options = NUM_ANALYSIS_OPTIONS;
   char* option_list[NUM_ANALYSIS_OPTIONS] = {
+    "version",
     "verbosity",
     "parameter-file",
     "algorithm",
@@ -577,6 +578,10 @@ MATCH_COLLECTION_T* run_percolator(
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
     new_match_collection_iterator(psm_result_folder, fasta_file);
 
+  if( match_collection_iterator == NULL ){
+    carp(CARP_FATAL, "Failed to create a match collection iterator");
+    exit(1);
+  }
   carp(CARP_DETAILED_DEBUG, "Created the match collection iterator");
 
   // iterate over each, TARGET, DECOY 1..3 match_collection sets
@@ -676,6 +681,7 @@ MATCH_COLLECTION_T* run_percolator(
   
   /***** PERCOLATOR run *********/
 
+    carp(CARP_DETAILED_DEBUG, "got to here");
   // Start processing
   pcExecute(); 
   

@@ -26,7 +26,7 @@
 #include "protein_index.h"
 #include "parameter.h"
 
-#define NUM_INDEX_OPTIONS 11
+#define NUM_INDEX_OPTIONS 12
 #define NUM_INDEX_ARGS 2
 //#define NUM_INDEX_ARGS 1
 
@@ -53,6 +53,7 @@ int main(int argc, char** argv){
   /* Define optional command line arguments */ 
   int num_options = NUM_INDEX_OPTIONS;
   char* option_list[NUM_INDEX_OPTIONS] = { 
+    "version",
     "verbosity",
     "parameter-file", 
     "overwrite",

@@ -31,6 +31,10 @@ NON_PERCOLATOR_LIB_FILES= \
   ion_series.h \
   mass.c \
   mass.h \
+	match.c \
+	match.h \
+	match_collection.c \
+	match_collection.h \
   objects.h \
   parameter.c \
   parameter.h \
@@ -57,13 +61,10 @@ NON_PERCOLATOR_LIB_FILES= \
   spectrum_collection.h \
   spectrum.h \
   utils.c \
-  utils.h
+  utils.h \
+  version.h
 
-PERCOLATOR_LIB_FILES = \
-    match.c \
-    match.h \
-    match_collection.c \
-    match_collection.h
+PERCOLATOR_LIB_FILES = 
 
 if PERCOLATOR
   LIBFILES=$(PERCOLATOR_LIB_FILES) $(NON_PERCOLATOR_LIB_FILES)
@@ -77,10 +78,10 @@ libcrux_la_SOURCES = $(LIBFILES)
 libcrux_la_LIBADD = -lm
 
 PERCOLATOR_PROGRAM_FILES = \
-  crux-search-for-matches \
   crux-analyze-matches
 
 NON_PERCOLATOR_PROGRAM_FILES = \
+  crux-search-for-matches \
   crux-get-ms2-spectrum \
   crux-generate-peptides \
   crux-create-index \
@@ -110,17 +111,13 @@ crux_create_index_CFLAGS = $(AM_CFLAGS) -DMAIN
 crux_create_index_LDADD = libcrux.la 
 
 crux_search_for_matches_SOURCES = match_search.c
-crux_search_for_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/src
+crux_search_for_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/
 crux_search_for_matches_LDADD = libcrux.la 
 
 crux_analyze_matches_SOURCES = match_analysis.c
-crux_analyze_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/src
+crux_analyze_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)
 crux_analyze_matches_LDADD = \
-  -lstdc++ \
-  $(PERCOLATOR_DIR)/src/libpercolator.la \
-  $(PERCOLATOR_DIR)/src/libqvality.la \
-  $(PERCOLATOR_DIR)/src/libArrayLibrary.la \
-  libcrux.la
+  -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary -lcrux 
 
 crux_predict_peptide_ions_SOURCES = predict_peptide_ions.c
 crux_predict_peptide_ions_CFLAGS = $(AM_CFLAGS) -DMAIN 
@@ -145,3 +142,6 @@ EXTRA_DIST = default.params
 
 doc:	*.h *.c
 	doxygen Doxyfile
+
+dist-hook:
+	grep '#define VERSION' ../../config.h > version.h

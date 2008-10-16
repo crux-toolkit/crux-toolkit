@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.74 $
+ * $Revision: 1.75 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -61,7 +61,7 @@ struct protein_peptide_iterator {
   unsigned int peptide_idx; ///< The index of the current peptide.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< peptide type to iterate over.
   double* mass_array; ///< stores all the peptide's mass
-  int* nterm_cleavage_positions; ///< nterm cleavages that satisfy constraint.  
+  int* nterm_cleavage_positions; ///< nterm cleavages that satisfy constraint.
                                  ///< 1st aa is 1.
   int* peptide_lengths; ///< all the lengths of valid peptides
   float* peptide_masses; ///< all the masses of valid peptides
@@ -1092,6 +1092,7 @@ void prepare_protein_peptide_iterator(
         cleavage_positions, num_cleavage_positions-1,
         cleavage_positions+1, num_cleavage_positions-1, 
         missed_cleavages);
+
       break;
 
     case PARTIALLY_TRYPTIC:
@@ -1150,6 +1151,7 @@ void prepare_protein_peptide_iterator(
   }
 
   free(cleavage_positions);
+  free(non_cleavage_positions);
   free(all_positions);
 
 }
@@ -1202,12 +1204,12 @@ void free_protein_peptide_iterator(
     ///< the iterator to free -in
   )
 {
+  free_peptide_constraint(protein_peptide_iterator->peptide_constraint);
   free(protein_peptide_iterator->mass_array); 
   free(protein_peptide_iterator->nterm_cleavage_positions); 
   free(protein_peptide_iterator->peptide_lengths); 
   free(protein_peptide_iterator->peptide_masses); 
   free(protein_peptide_iterator->cumulative_cleavages); 
-  free_peptide_constraint(protein_peptide_iterator->peptide_constraint);
   free(protein_peptide_iterator);
 }
 

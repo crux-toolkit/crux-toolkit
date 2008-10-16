@@ -13,6 +13,7 @@
 #include "../carp.h"
 #include "../crux-utils.h"
 #include "../database.h"
+#include "../parameter.h"
 
 
 PEPTIDE_T* peptide2;
@@ -35,11 +36,14 @@ DATABASE_T* db;
 
 
 START_TEST (test_create){
+  initialize_parameters();
   char* name = NULL;
   char* name2 = NULL;
   
   //try create a new database
-  db = new_database("fasta_file_binary_fasta", FALSE, TRUE);
+  //  db = new_database("fasta_file_binary_fasta", FALSE, TRUE);
+  db = new_database("fasta_file", FALSE);
+
   fail_unless(parse_database(db), "failed to parse database");
   fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
   free(name);
@@ -76,11 +80,16 @@ START_TEST (test_create){
   
   //peptide constraint
   constraint = new_peptide_constraint(TRYPTIC, 0, 1200, 1, 10, 1, AVERAGE);
-  
+  fail_unless( constraint != NULL, "New peptide constraint returned NULL.");
+  fail_unless( get_peptide_constraint_num_mis_cleavage(constraint) == 1,
+               "Peptide constraint num missed cleavages is %d, should be %d",
+               get_peptide_constraint_num_mis_cleavage(constraint), 1);  
+
   /** test, protein_peptide_iterator **/
   
   //create iterator
   iterator = new_protein_peptide_iterator(protein3, constraint);
+  fail_unless( iterator != NULL, "New iterator returned NULL.");
   
   //iterate over all possible peptides
   while(protein_peptide_iterator_has_next(iterator)){

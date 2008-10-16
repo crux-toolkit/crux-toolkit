@@ -17,7 +17,8 @@ START_TEST (test_create){
   //check if ion mass
   fail_unless( compare_float(get_ion_mass_z(ion), 327.919342) == 0, "Ion mass/z not set correctly: ion");
   fail_unless( compare_float(get_ion_mass_z(ion2), 288.500122) == 0, "Ion mass/z not set correctly: ion2");
-  fail_unless( compare_float(get_ion_mass_z(ion3), 219.143295) == 0, "Ion mass/z not set correctly: ion3");
+  fail_unless( compare_float(get_ion_mass_z(ion3), 219.143311) == 0, 
+               "Ion3 mass/z is %f, should be %f", get_ion_mass_z(ion3), 555 );
 
   //try print ion
   print_ion(ion, stdout);
