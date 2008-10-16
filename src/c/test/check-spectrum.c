@@ -24,8 +24,9 @@ START_TEST (test_create){
   free_spectrum(spectrum);
   spectrum = allocate_spectrum();
 
-  file = fopen("test.ms2", "r" );
-  fail_unless(parse_spectrum_file(spectrum, file, "test.ms2"), "failed to open and create new spectrum from ms2 file");
+  //file = fopen("test.ms2", "r" );
+  file = fopen("test4.ms2", "r" );
+  fail_unless(parse_spectrum_file(spectrum, file, "test4.ms2"), "failed to open and create new spectrum from ms2 file");
   
   fail_unless(get_spectrum_first_scan(spectrum) == 15, "first_scan field incorrect");
   fail_unless(get_spectrum_last_scan(spectrum) == 15, "last_scan field incorrect");
@@ -37,7 +38,7 @@ START_TEST (test_create){
   fail_unless(compare_float(get_spectrum_num_peaks(spectrum), 17)==0, "num_peaks field incorrect");
   fail_unless(compare_float(get_spectrum_total_energy(spectrum),64.4  ) ==0 , "total_energy field incorrect");
   file_name = get_spectrum_filename(spectrum);
-  fail_unless((strcmp("test.ms2", file_name) == 0),"file name incorrect" );
+  fail_unless((strcmp("test4.ms2", file_name) == 0),"file name incorrect" );
   free(file_name);
 
   //this test copy and set_fields(copy uses set methods)
@@ -52,7 +53,7 @@ START_TEST (test_create){
   fail_unless(compare_float(get_spectrum_num_peaks(second_spectrum), 17)==0, "num_peaks field incorrect");
   fail_unless(compare_float(get_spectrum_total_energy(second_spectrum),64.4) ==0 , "total_energy field incorrect");
   file_name = get_spectrum_filename(second_spectrum);
-  fail_unless((strcmp("test.ms2", file_name) == 0),"file name incorrect" );
+  fail_unless((strcmp("test4.ms2", file_name) == 0),"file name incorrect" );
   free(file_name);
   
   //free

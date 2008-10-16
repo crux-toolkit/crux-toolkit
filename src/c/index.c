@@ -1,6 +1,7 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.79 $
+ * $Revision: 1.80 $
+ * $Revision: 1.80 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -26,7 +27,8 @@
 
 // maximum proteins the index can handle
 #define MAX_PROTEIN 30000
-#define MAX_FILE_NAME_LENGTH 30
+//#define MAX_FILE_NAME_LENGTH 30
+#define MAX_FILE_NAME_LENGTH 300
 #define NUM_CHECK_LINES 8
 #define MAX_PROTEIN_IN_BIN 2500
 #define MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN 500000000
@@ -1634,6 +1636,7 @@ BOOLEAN_T parse_crux_index_map(
   size_t buf_length = 0;
   
   // used to parse within a line
+// TODO: can this be changed to char* full_filename = my_cpystr(...  ?? so we don't have size issues?
   char full_filename[MAX_FILE_NAME_LENGTH] = "";
   strcpy(full_filename, index_peptide_iterator->index->directory);
   int dir_name_length = strlen(full_filename);

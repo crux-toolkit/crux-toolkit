@@ -3,7 +3,7 @@ AC_PREREQ(2.57)
 AC_INIT(crux, 1.0, aklammer@u.washington.edu)
 AC_CONFIG_SRCDIR(src/c/ion_series.c)
 AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(crux, 1.0.0)
+AM_INIT_AUTOMAKE(crux, 1.01)
 AM_CONFIG_HEADER([config.h])
 
 # Check for required programs.
@@ -116,13 +116,13 @@ AC_CONFIG_FILES([\
 
 PERCOLATOR_HEADER_STATUS=""
 PERCOLATOR_LIB_STATUS=""
-if test ! -e "${PERCOLATOR_DIR}/src/PercolatorCInterface.h"
+if test ! -e "${PERCOLATOR_DIR}/PercolatorCInterface.h"
 then
-  PERCOLATOR_HEADER_STATUS="$PERCOLATOR_DIR/src/PercolatorCInterface.h not found!"
+  PERCOLATOR_HEADER_STATUS="$PERCOLATOR_DIR/PercolatorCInterface.h not found!"
 fi
-if test ! -e "${PERCOLATOR_DIR}/src/libpercolator.la"
+if test ! -e "${PERCOLATOR_DIR}/libpercolator.la"
 then
-  PERCOLATOR_LIB_STATUS="$PERCOLATOR_DIR/src/libpercolator.la not found!"
+  PERCOLATOR_LIB_STATUS="$PERCOLATOR_DIR/libpercolator.la not found!"
 fi
 
 AM_CONDITIONAL(PERCOLATOR, \

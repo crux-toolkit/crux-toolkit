@@ -76,6 +76,12 @@ BOOLEAN_T string_to_param_type(char*, PARAMETER_TYPE_T* );
  * temporary replacement for function, return name once all exe's are fixed
  * \returns TRUE if paramater value is set, else FALSE
  */ 
+BOOLEAN_T set_flag_parameter(
+ char* name,
+ BOOLEAN_T set_value,
+ char* usage
+ );
+
 BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
@@ -236,6 +242,8 @@ void initialize_parameters(void){
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
+  set_boolean_parameter("version", FALSE,
+                       "Print version number and quit.");
   set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
       "Set level of output to stderr (0-100).  Default 30.");
   set_string_parameter("parameter-file", NULL, 
@@ -579,6 +587,11 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
      overwriting file parameters */ 
 
   success = parse_arguments_into_hash(argc, argv, parameters->hash, 0); 
+  if( get_boolean_parameter("version") ){
+    printf("Crux version %s\n", VERSION);
+    exit(0);
+  }
+
   if( success ){
     // check each option value
     for(i=1; i<argc; i++){
@@ -606,6 +619,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   update_aa_masses();
 
   parameter_plasticity = FALSE;
+
   return success;
 }
 void check_parameter_consistency(){
@@ -1231,6 +1245,37 @@ ION_TYPE_T get_ion_type_parameter(char* name){
  **************************************************
  */
 //TODO change all result = add_or... to result = result && add_or_...
+BOOLEAN_T set_flag_parameter(
+ char* name,
+ BOOLEAN_T set_value,
+ char* usage
+ ){
+  BOOLEAN_T result = TRUE;
+
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+
+  // assume that presence of the flag means true
+  char* bool_str;
+  if(set_value){
+    bool_str = "TRUE";
+  }
+  else{
+    bool_str = "FALSE";
+  }
+
+  result = add_or_update_hash_copy(parameters->hash, name, bool_str);
+  result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(types->hash, name, "FLAG_T");
+
+  return result;
+
+}
+
+
 BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in

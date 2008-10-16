@@ -19,13 +19,13 @@ H	Alg-DisplayTop	5
 H	EnzymeSpec	tryptic
 S	14	14	2	0.00	server	500.41	0.00	0.00	1
 M	1	1	1001.15	0.00	0.29	98.43	6	14	K.FHLELSQK.D	U
-L	gi|6381999|ref|NP_009311.2|	intron of mitochondrial COX1, aI5-beta; Ai5_betap
+L	gi|6381999|ref|NP_009311.2|
 S	14	14	3	0.00	server	500.41	0.00	0.00	1
 M	1	1	1495.81	0.00	-0.09	55.08	8	44	R.VMFTTFYMITNK.Y	U
-L	gi|6382000|ref|NP_009314.2|	Q0092p
+L	gi|6382000|ref|NP_009314.2|
 S	15	15	2	0.00	server	488.82	0.00	0.00	1
 M	1	1	973.09	0.00	-0.10	0.00	0	16	K.SGATAYIYK.A	U
-L	gi|6381999|ref|NP_009311.2|	intron of mitochondrial COX1, aI5-beta; Ai5_betap
+L	gi|6381999|ref|NP_009311.2|
 S	15	15	3	0.00	server	488.82	0.00	0.00	1
 M	1	1	1464.82	0.00	0.13	15.58	5	44	K.QYLLLNIAYLLK.L	U
-L	gi|6381999|ref|NP_009311.2|	intron of mitochondrial COX1, aI5-beta; Ai5_betap
+L	gi|6381999|ref|NP_009311.2|

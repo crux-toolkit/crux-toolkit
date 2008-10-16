@@ -16,7 +16,8 @@
 #include "../match_collection.h"
 
 #define scan_num 16
-#define ms2_file "test.ms2"
+//#define ms2_file "test.ms2"
+#define ms2_file "test2.ms2"
 #define parameter_file "test_parameter_file"
 
 //THE parameter system will not work if set CK_FORK=no
@@ -35,25 +36,43 @@ START_TEST (test_create){
   set_verbosity_level(verbosity);
 
   //parse paramter file
-  parse_update_parameters(parameter_file);
+  //  parse_update_parameters(parameter_file);
+  initialize_parameters();
+  set_verbosity_level(CARP_WARNING);
 
   //add fasta file parameter_file fasta-file
-  add_parameter("fasta-file", "fasta_file");
+  //  add_parameter("fasta-file", "fasta_file");
   
   //parameters has been confirmed
-  parameters_confirmed();
+  //  parameters_confirmed();
   /***************************************************/
 
   //read ms2 file
   collection = new_spectrum_collection(ms2_file);
   spectrum = allocate_spectrum();
+
+  //create database
+  DATABASE_T* db = new_database("fasta_file", FALSE);
   
   //search for spectrum with correct scan number
-  fail_unless(get_spectrum_collection_spectrum(collection, scan_num, spectrum), "failed to find scan_num in ms3 file");
+  fail_unless(get_spectrum_collection_spectrum(collection, scan_num, spectrum),
+              "failed to find scan_num in ms3 file");
+  fail_unless( get_spectrum_first_scan(spectrum) == scan_num,
+               "Spectrum should be scan num %d but is %d", scan_num,
+               get_spectrum_first_scan(spectrum));
   
   //get match collection with perliminary score of SP, and main score of XCORR
-  match_collection = new_match_collection_spectrum(spectrum, 1, 500, SP, XCORR, 0, FALSE);
+  match_collection = new_match_collection_from_spectrum(spectrum, 
+                                                        1, // charge
+                                                        500, // max_rank
+                                                        SP, // prelim score
+                                                        XCORR, // main score
+                                                        0, //offset
+                                                        FALSE, // null (decoy)
+                                                        NULL,
+                                                        db);
   
+  fail_unless( match_collection != NULL, "Returned null match collection");
   fail_unless(get_match_collection_scored_type(match_collection, SP), "failed to set match_collection scored type, SP");
   fail_unless(get_match_collection_scored_type(match_collection, XCORR), "failed to set match_collection scored type, SP");
 

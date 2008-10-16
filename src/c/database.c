@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.63 $
+ * $Revision: 1.64 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -60,8 +60,7 @@ struct database_protein_iterator {
 struct database_peptide_iterator {
   DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; 
     ///< The protein iterator. 
-  PROTEIN_PEPTIDE_ITERATOR_T* 
-    cur_protein_peptide_iterator; 
+  PROTEIN_PEPTIDE_ITERATOR_T* cur_protein_peptide_iterator; 
     ///< The peptide iterator for the current protein.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; 
     ///< The constraint for the kind of peptide to iterate over.
@@ -806,7 +805,7 @@ PROTEIN_T* database_protein_iterator_next(
 
   // print number of protein generated to STDERR for every 500 protein reached
   if(database_protein_iterator->cur_protein % 500 == 0){
-    carp(CARP_INFO, "Reached protein %d out of %d", 
+    carp(CARP_DEBUG, "Reached protein %d out of %d", 
          database_protein_iterator->cur_protein,
          database_protein_iterator->database->num_proteins);
   }
@@ -843,12 +842,17 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   // set a new protein iterator
   database_peptide_iterator->database_protein_iterator =
     new_database_protein_iterator(database);
+  if( database_peptide_iterator->database_protein_iterator == NULL){
+    carp(CARP_ERROR, 
+         "Could not create protein iterator for database peptide iterator.");
+    return NULL;
+  }
 
   // set peptide constraint
   database_peptide_iterator->peptide_constraint 
     = copy_peptide_constraint_ptr(peptide_constraint);
   
-  // check if there's any proteins to create peptides from
+  // check if there are any proteins to create peptides from
   if(database_protein_iterator_has_next(
         database_peptide_iterator->database_protein_iterator)){
 
@@ -908,7 +912,7 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
             exit(1);
           }
         }
-        // creat new protein_peptide_iterator
+        // create new protein_peptide_iterator
         database_peptide_iterator->cur_protein_peptide_iterator =
           new_protein_peptide_iterator(next_protein, peptide_constraint);
       }
@@ -933,11 +937,14 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
  * Frees an allocated database_peptide_iterator object.
  */
 void free_database_peptide_iterator(
-  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator ///< the iterator to free -in
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator 
+  ///< the iterator to free -in
   )
 {
-  free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
-  free_database_protein_iterator(database_peptide_iterator->database_protein_iterator);
+  free_protein_peptide_iterator(
+                     database_peptide_iterator->cur_protein_peptide_iterator);
+  free_database_protein_iterator(
+                     database_peptide_iterator->database_protein_iterator);
   free_peptide_constraint(database_peptide_iterator->peptide_constraint);
   free(database_peptide_iterator);
 }

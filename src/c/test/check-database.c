@@ -13,6 +13,7 @@
 #include "../carp.h"
 #include "../crux-utils.h"
 #include "../database.h"
+#include "../parameter.h"
 
 
 
@@ -35,10 +36,13 @@ PEPTIDE_SRC_T* association3;
 DATABASE_T* db;
 
 START_TEST (test_create){
+  initialize_parameters();
   char* name = NULL;
 
   //try create a new database
-  db = new_database("fasta_file_binary_fasta", FALSE, TRUE);
+  //  db = new_database("fasta_file_binary_fasta", FALSE, TRUE);
+  db = new_database("fasta_file", FALSE);
+  fail_unless( db != NULL, "New database returned NULL");
   fail_unless(parse_database(db), "failed to parse database");
   fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
   free(name);
@@ -51,10 +55,12 @@ START_TEST (test_create){
   
   //peptide constraint
   constraint = new_peptide_constraint(TRYPTIC, 0, 1200, 1, 10, 1, AVERAGE);
+  fail_unless( constraint != NULL, "New peptide constraint returned NULL");
   
   /* test database peptide iterator */
   DATABASE_PEPTIDE_ITERATOR_T* iterator3 =
     new_database_peptide_iterator(db, constraint);
+  fail_unless( iterator3 != NULL, "New iterator returned NULL");
 
   int n = 0;
   while(database_peptide_iterator_has_next(iterator3)){
@@ -67,7 +73,7 @@ START_TEST (test_create){
     free_peptide(peptide4);
     ++n;
   }
-  
+
   fail_unless(merge_peptides(peptide5, peptide6), "failed to merge");
   //print_peptide(peptide5, stdout);
   //print_peptide_in_format(peptide5, TRUE,  stdout);
@@ -109,7 +115,7 @@ START_TEST (test_create){
   
   //free
   free_database_protein_iterator(iterator2);
-  free_database_peptide_iterator(iterator3);
+  //free_database_peptide_iterator(iterator3);
   free_database_sorted_peptide_iterator(iterator4);
   free_peptide_constraint(constraint);
 
@@ -117,7 +123,8 @@ START_TEST (test_create){
   /************ Test using binary fasta file *************/
 
   //try create a new database
-  db = new_database("fasta_file", FALSE, FALSE);
+  //  db = new_database("fasta_file", FALSE, FALSE);
+  db = new_database("fasta_file", FALSE);
   fail_unless(parse_database(db), "failed to parse database");
   fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
   free(name);

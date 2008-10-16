@@ -11,7 +11,16 @@ that are expressed in cells under different conditions.  Mass
 spectrometry is a widely used method for protein identification;
 however, a detailed spectrum analysis is required to match the
 spectrum to the source protein. Crux contains software for tandem mass
-spectrometry analysis, with a focus on peptide identification.</p>
+spectrometry analysis, with a focus on peptide identification.
+It can be downloaded <a href="download/index.html">here</a> once you agree to the
+license agreement and obtain a password <a href="http://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php">here</a>.
+Crux source code is freely available for academic use and can be
+licensed for commercial use. Crux optionally 
+makes use of the Percolator algorithm (v. 1.05), 
+which can be downloaded separately <a
+  href="http://noble.gs.washington.edu/proj/percolator/">here</a>.</li>
+
+</p> 
 
 <p>
 The core programs in the Crux toolkit are</p>
@@ -19,18 +28,17 @@ The core programs in the Crux toolkit are</p>
 <ul>
 
 <li>
-<a href="crux-search-for-matches.html">crux-search-for-matches</a>:
+<a href="crux-search-for-matches.html">crux-search-for-matches</a>
 Search a collection of spectra against a sequence database, returning
 a collection of peptide-spectrum matches (PSMs).</li>
 
 <li>
-<a href="crux-analyze-matches.html">crux-analyze-matches</a>: Analyze
-a collection of PSMs using Percolator.</li>
-
-<li>
 <a href="crux-create-index.html">crux-create-index</a> Create an index
 for all peptides in a fasta file.</li>
-</ul>
+
+<li>
+<a href="crux-analyze-matches.html">crux-analyze-matches</a> Analyze
+a collection of PSMs using one the Crux supported post-processing algorithms.</ul>
 
 <p>
 In addition, Crux contains the following utilities:</p>
@@ -48,10 +56,6 @@ Given protein sequencs in a fasta file return a list of peptides
 fitting the specified criteria.
 
 <li>
-<a href="crux-score-peptides-spectrum.html">crux-score-peptide-spectrum</a>
-Score a single spectrum for matches to a list of peptides.</li>
-
-<li>
 <a href="crux-get-ms2-spectrum.html">crux-get-ms2-spectrum</a> Extract
 an MS-MS spectrum with a specified scan number from a
 <code>.ms2</code> file.</li>
@@ -62,26 +66,13 @@ annotated spectrum.</li>
 
 </ul>
 
-<p>The current version of Crux is 1.0</p>
+<p>A tutorial for installing and using the above programs can be found <a href="home-tutorial.html">here</a>.</p>
 
-<p>Crux is written in ANSI C.</p>
-
-<p>The Crux software was written by Chris Park and Aaron Klammer under
+<p>Crux is written in C by Chris Park and Aaron Klammer under
 the supervision of <a
 href="http://noble.gs.washington.edu/~noble">Prof. William Stafford
 Noble</a> in the Department of Genome Sciences at the University of
-Washington, Seattle.</p>
-
-<p>
-Crux source code is freely available for academic use and can be
-licensed for commercial use.  To obtain a copy of Crux, please contact
-Alan Yen at <a href="http://depts.washington.edu/ventures">University
-  of Washington Digital Ventures</a>.
-You can find a tutorial of Crux <a href="home-tutorial.html">here</a>.</p> 
-
-<p>
-Crux is supported by National Institutes of Health award R01
-EB007057.</p>
+Washington, Seattle. Development of Crux is supported by National Institutes of Health award R01 EB007057.</p>
 
 </blockquote>
 </body>

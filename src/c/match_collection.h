@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -34,7 +34,6 @@
 #include "hash.h"
 #include "peptide_src.h"
 #include "protein_index.h"
-#include "PercolatorCInterface.h"
 
 
 #define _MAX_NUMBER_PEPTIDES 10000000
