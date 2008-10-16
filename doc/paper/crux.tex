@@ -151,7 +151,7 @@ Crux's key features include the following:
   dynamically trained model incorporates specific characteristics of
   the given data set.  The second method fits the observed $Xcorr$
   scores to a Weibull distribution and uses the resulting distribution
-  to compute accurate $p$~values \cite{klammer:not}.
+  to compute accurate $p$~values \cite{klammer:statistical}.
 
 \item {\bf Accurate false discovery rate estimates.}  Crux uses
   well-established statistical methods to estimate false discovery
@@ -470,7 +470,7 @@ candidates selected by $Sp$.  The resulting Weibull distribution is
 then used to compute a $p$~value for the observed maximum score, and
 the score is further corrected to account for the total number of
 candidates that were considered.  Details of this $p$~value estimation
-procedure are given in \cite{klammer:not}.
+procedure are given in \cite{klammer:statistical}.
 
 Crux produces as output a ranked list of target PSMs, one per spectrum
 in the given data set.  Along with each PSM, Crux reports a $q$~value,
@@ -527,7 +527,7 @@ reasons given in Section~\ref{section:on-the-fly}.  We therefore use
 this null model by default in Crux.
 
 Finally, consistent with previously reported results
-\cite{klammer:not, kall:semi-supervised}, the $p$~value calculation
+\cite{klammer:statistical, kall:semi-supervised}, the $p$~value calculation
 yields a large improvement over simple ranking by $Xcorr$, and using
 Percolator yields an even more dramatic improvement.  At a $q$~value
 threshold of 0.01, $Xcorr$ ranking yields 1,609 PSMs, ranking by
