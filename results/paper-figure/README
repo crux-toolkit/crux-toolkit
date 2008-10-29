@@ -1,8 +1,0 @@
-Figure generation for crux paper
-
-All the index in 
-/var/noble/data/protein_database
-were generated with the old create_index serialization scheme.
-
-q-value figure still needs to worked out once Percolator bugs get fixed.
-

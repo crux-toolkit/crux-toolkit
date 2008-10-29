@@ -1,7 +1,0 @@
-07-07-2008 A bug in index.c limiting the length of the name of an index file was fixed.
-07-08-2008 The src/c/Makefile.am was modified to use versions 1-05 of Percolator.
-07-08-2008 The expected location of the PercolatorCInterface.h file and libraries was changed in configure.ac.
-09-15-2008 Memleaks in crux-search-for-matches patched.
-09-22-2008 The library libmstoolkit.a was added to crux-analyze-matches in src/c/Makefile.am to make it compatible with percolator versions 1.06 and 1.07
-10-02-2008 The libmstoolkit.a dependency was removed because it was decided that crux 1.* would only support percolator 1.05 and not the later versions.
-	
