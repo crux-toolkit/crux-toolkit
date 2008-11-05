@@ -14,19 +14,19 @@ use FileHandle;
 #TODO not printing the last peak?
 #TODO mark the precursor m/z
 
-my $usage = " Usage: spectacle [options] <annotations>
+my $usage = "Usage: spectacle [options] <annotations>
 
- Options: -format eps|fig|png - format of output file. Default is eps. 
-      -html <file>    - write an html file with all of the figures. 
-      -names <file>     - specifiy names of output files
-                Only enabled with png format.
-      -pre-mz       - mark the precursor m/z on the x-axis.
-      -title        - create a title above the figure of the form 
-                <identifier> m/z=<m/z> <comment>.    
-      -labeltop       - labels at the top of figure
-      -nobox        - do not draw a border at top and left of plot
-      -script <file>    - print commands to file instead of running
-                gnuplot directly\n";
+Options: 
+  -format <eps|fig|png> - format of output file. Default is eps. 
+  -html <file>    - write an html file with all of the figures. 
+  -names <file>   - specifiy names of output files. Only enabled for png.
+  -pre-mz         - mark the precursor m/z on the x-axis.
+  -title          - create a title above the figure of the form 
+                     <identifier> m/z=<m/z> <comment>.    
+  -labeltop       - labels at the top of figure
+  -nobox          - do not draw a border at top and left of plot
+  -script <file>  - print commands to file instead of running
+                    gnuplot directly\n";
 
 
 #read the command line
@@ -62,7 +62,8 @@ my $terminal;
 if($format eq "eps"){
   $terminal = "set terminal postscript eps color solid 24\n";
 }elsif($format eq "png"){
-  $terminal = "set terminal png medium color\n";
+  #$terminal = "set terminal png medium color\n";
+  $terminal = "set terminal png medium\n";
 }elsif($format eq "fig"){
   $terminal = "set terminal fig color small 24\n";
 }else{
@@ -145,8 +146,9 @@ while( $line =~ /^>/){  #each loop is one spectrum
   my $max_y = 0;
   while( ($peak_line = <ANNOT>) !~ /^>/ and (not eof ANNOT)){  
     chomp $peak_line;
-    my($mz, $in, $label, $color) = split /\t/, $peak_line;
+    my($mz, $in, $label, $color) = split /\s+/, $peak_line;
     
+    #print "mz: $mz int: $in label: $label color: $color\n";
     #keep track of largest intensity for adjusting y-range
     $max_y = $in if ($in > $max_y);
 
