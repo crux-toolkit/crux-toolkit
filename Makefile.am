@@ -24,12 +24,12 @@ bdist:
 		doc/user/*.css \
 		bdist/doc/
 	cp 	src/c/crux-search-for-matches \
-			src/c/crux-analyze-matches \
-			src/c/crux-predict-peptide-ions \
-                        src/c/crux-get-ms2-spectrum \
-			src/c/crux-generate-peptides \
-			src/c/crux-create-index  \
-			bdist/bin/
+		src/c/crux-analyze-matches \
+		src/c/crux-predict-peptide-ions \
+		src/c/crux-generate-peptides \
+		src/c/crux-create-index  \
+		bin/spectacle.pl \
+		bdist/bin/
 	zip -r $(distdir)-$(ar)-$(name).zip bdist
 	rm -fr bdist/
 
