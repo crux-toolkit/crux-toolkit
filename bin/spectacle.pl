@@ -40,12 +40,12 @@ my $gnuplot_file;
 my $annot_file;
 my $no_box;
 GetOptions("names=s"=>\$names_file,
-       "format=s"=>\$format,
-     "html=s"=>\$html,
-     "pre-mz"=>\$premz,
-     "labeltop"=>\$label_up,
-       "script=s"=>\$gnuplot_file,
-     "title"=>\$title);   
+           "format=s"=>\$format,
+           "html=s"=>\$html,
+           "pre-mz"=>\$premz,
+           "labeltop"=>\$label_up,
+           "script=s"=>\$gnuplot_file,
+           "title"=>\$title);   
 #TODO add verbosity?
 if(@ARGV != 1){
   print "Missing annotation file or option arguments\n";
@@ -71,6 +71,11 @@ if($format eq "eps"){
   exit;
 }
 #print "Format is $format\n";
+
+#check for gnuplot and exit if not present
+if( `which gnuplot` eq "" ){
+    die "Could not find required gnuplot.\n";
+}
 
 #html: change to false and write warning if format!=png
 if($html && $format ne "png" ){
