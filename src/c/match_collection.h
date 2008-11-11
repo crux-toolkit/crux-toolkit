@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.30.4.1 $
+ * $Revision: 1.30.4.2 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -98,6 +98,17 @@ BOOLEAN_T spectrum_sort_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< match collection to sort -out
   SCORER_TYPE_T score_type ///< the score type to sort by -in
   );
+
+/**
+ * Rank matches in a collection based on the given score type.  
+ * Requires that match_collection was already scored for that score type.
+ * Rank 1, means highest score
+ * \returns TRUE, if populates the match rank in the match collection
+ */
+BOOLEAN_T populate_match_rank_match_collection(
+ MATCH_COLLECTION_T* match_collection, ///< the match collection to populate match rank -out
+ SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
+ );
 
 /**
  * match_collection get, set method

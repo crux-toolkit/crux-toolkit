@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.46.4.2 $
+ * $Revision: 1.46.4.3 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -140,7 +140,8 @@ int main(int argc, char** argv){
   case QVALUE_ALGORITHM:
     carp(CARP_INFO, "Running qvalue");
     match_collection = run_qvalue(psm_file, fasta_file);
-    scorer_type = Q_VALUE;
+    //scorer_type = Q_VALUE;
+    scorer_type =  LOGP_QVALUE_WEIBULL_XCORR; //this might be correct
     second_scorer_type = XCORR; // could it be other?
     break;
     
@@ -430,9 +431,10 @@ MATCH_COLLECTION_T* run_qvalue(
     match_collection = 
       match_collection_iterator_next(match_collection_iterator);
 
-    // create iterator, to register each PSM feature to Percolator
+    // create iterator
     match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
-    
+
+    // for each match, get p-value    
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
       pvalues[num_psms++] =  get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
@@ -443,7 +445,7 @@ MATCH_COLLECTION_T* run_qvalue(
 
     // ok free & update for next set
     free_match_iterator(match_iterator);
-  }
+  }// next match collection
 
   free_match_collection_iterator(match_collection_iterator);
 
@@ -491,9 +493,10 @@ MATCH_COLLECTION_T* run_qvalue(
     match_collection = 
       match_collection_iterator_next(match_collection_iterator);
 
-    // create iterator, to register each PSM feature to Percolator
+    // create iterator
     match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
 
+    // for each match, convert p-value to q-value
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
       double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);

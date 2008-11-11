@@ -326,18 +326,18 @@ void initialize_parameters(void){
       "to report in the sqt file. Default 5.");
   set_int_parameter("top-match", 1, 1, BILLION, 
       "NOT FOR COMMAND LINE. The number of psms per spectrum writen " \
-      "to the binary output file");
+      "to the binary output file.");
   set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
   set_string_parameter("seed", "time", "HIDE ME FROM USER");
   set_double_parameter("mass-window", 3.0, 0, 100, 
       "Search peptides within +/- 'mass-window' of the " \
-      "spectrum mass.  Default 3.0");
+      "spectrum mass.  Default 3.0.");
   set_mass_type_parameter("fragment-mass", MONO, 
       "Which isotopes to use in calcuating fragment ion mass " \
       "(average, mono). Default average");
   set_double_parameter("ion-tolerance", 0.5, 0, BILLION,
       "Tolerance used for matching observed peaks to predicted " \
-      "fragment ions.  Default 0.5");
+      "fragment ions.  Default 0.5.");
 
     // Sp scoring params
   set_double_parameter("beta", 0.075, 0, 1, "usage");
@@ -350,8 +350,15 @@ void initialize_parameters(void){
   set_int_parameter("top-rank-p-value", 1, 1, BILLION, "usage");
 
   //in estimate_weibull_parameters
-  set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, "usage");
-  set_double_parameter("fraction-top-scores-to-fit", -1.0, -10, 10, "usage");
+  set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, 
+       "The number of psms per spectrum to use for estimating the " \
+       "score distribution for calculating p-values. 0 to use all. " \
+       "Not compatible with 'fraction-top-scores-to-fit'. Default 0 (all).");
+  //set_double_parameter("fraction-top-scores-to-fit", -1.0, -10, 10, "usage");
+  set_double_parameter("fraction-top-scores-to-fit", 0.55, 0, 1, 
+       "The fraction of psms per spectrum to use for estimating the " \
+       "score distribution for calculating p-values.  0 to use all. " \
+       "Not compatible with 'number-top-scores-to-fig'. Default 0.55.");
   set_boolean_parameter("skip-first-score", FALSE,  "usage");
 
   /* analyze-matches options */

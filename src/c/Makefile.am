@@ -138,7 +138,7 @@ create_psm_files_LDADD = libcrux.la
 paramdir = $(prefix)/doc
 param_DATA = default.params
 
-EXTRA_DIST = default.params
+EXTRA_DIST = default.params ../../bin/spectacle.pl
 
 doc:	*.h *.c
 	doxygen Doxyfile

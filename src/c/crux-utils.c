@@ -945,6 +945,8 @@ void quicksort(float a[], int array_size){
 
 /**
  * Fits a three-parameter Weibull distribution to the input data. 
+ * Implementation of Weibull distribution parameter estimation from 
+ * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
  * \returns eta, beta, c (which in this case is the amount the data should
  * be shifted by) and the best correlation coefficient
  */
@@ -1004,7 +1006,12 @@ void fit_three_parameter_weibull(
 
 /**
  * Fits a two-parameter Weibull distribution to the input data. 
- * \returns eta, beta and the correlation coefficient
+ *
+ * Called by the three parameter weibull fitting function to see if
+ * the proposed shift gives the best correlation.  If there are too
+ * few data points, sets correlation to 0 (minimum value).
+ * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
+ * \returns eta, beta and the correlation coefficient.
  */
 void fit_two_parameter_weibull(
     float* data, ///< the data to be fit. should be in descending order -in
@@ -1016,8 +1023,10 @@ void fit_two_parameter_weibull(
     float* correlation ///< the best correlation -out
     ){
 
-  float* X   = calloc(sizeof(float) , total_data_points);
+  float* X = calloc(sizeof(float) , total_data_points); //hold data here
 
+  // transform data into an array of values for fitting
+  // shift (including only non-neg data values) and take log
   int idx;
   for(idx=0; idx < fit_data_points; idx++){
     float score = data[idx] + shift; // move right by shift
@@ -1055,15 +1064,15 @@ void fit_two_parameter_weibull(
     sum_XX += X[idx] * X[idx];
     sum_XY += X[idx] * Y[idx];
   }
-  carp(CARP_DEBUG, "sum_X=%.6f", sum_X);
-  carp(CARP_DEBUG, "sum_Y=%.6f", sum_Y);
-  carp(CARP_DEBUG, "sum_XX=%.6f", sum_XX);
-  carp(CARP_DEBUG, "sum_XY=%.6f", sum_XY);
+  carp(CARP_DETAILED_DEBUG, "sum_X=%.6f", sum_X);
+  carp(CARP_DETAILED_DEBUG, "sum_Y=%.6f", sum_Y);
+  carp(CARP_DETAILED_DEBUG, "sum_XX=%.6f", sum_XX);
+  carp(CARP_DETAILED_DEBUG, "sum_XY=%.6f", sum_XY);
 
   float b_num    = sum_XY - (sum_X * sum_Y / N);
-  carp(CARP_DEBUG, "b_num=%.6f", b_num);
+  carp(CARP_DETAILED_DEBUG, "b_num=%.6f", b_num);
   float b_denom  = sum_XX - sum_X * sum_X / N;
-  carp(CARP_DEBUG, "b_denom=%.6f", b_denom);
+  carp(CARP_DETAILED_DEBUG, "b_denom=%.6f", b_denom);
   float b_hat    = b_num / b_denom;
 
   float a_hat    = (sum_Y - b_hat * sum_X) / N;
@@ -1084,13 +1093,17 @@ void fit_two_parameter_weibull(
   }
   float c_denom = sqrt(c_denom_X * c_denom_Y);
   if (c_denom == 0.0){
-    carp(CARP_FATAL, "Zero denominator in correlation calculation!");
+    //carp(CARP_FATAL, "Zero denominator in correlation calculation!");
+    carp(CARP_DETAILED_DEBUG, "Zero denominator in correlation calculation!");
+    *correlation = 0.0; // min value
+    *eta = 0;
+    *beta = 0;
   }
   *correlation = c_num / c_denom;
 
-  carp(CARP_DEBUG, "eta=%.6f", *eta);
-  carp(CARP_DEBUG, "beta=%.6f", *beta);
-  carp(CARP_DEBUG, "correlation=%.6f", *correlation);
+  carp(CARP_DETAILED_DEBUG, "eta=%.6f", *eta);
+  carp(CARP_DETAILED_DEBUG, "beta=%.6f", *beta);
+  carp(CARP_DETAILED_DEBUG, "correlation=%.6f", *correlation);
 
   free(F_T);
   free(Y);
