@@ -35,6 +35,7 @@ struct parameter_hash  usage_hash_table;
 struct parameter_hash* usages = &usage_hash_table;
 struct parameter_hash  type_hash_table;
 struct parameter_hash* types = & type_hash_table;
+HASH_T* file_notes;
 
 struct parameter_hash  min_values_hash_table;
 struct parameter_hash* min_values = & min_values_hash_table;
@@ -67,6 +68,9 @@ void parse_parameter_file(
 BOOLEAN_T check_option_type_and_bounds(char* name);
 
 void check_parameter_consistency();
+
+void print_parameter_file(char* input_param_filename);
+
 /**
  *
  */
@@ -107,7 +111,8 @@ BOOLEAN_T set_double_parameter(
 BOOLEAN_T set_string_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  char* set_value,  ///< the value to be set -in
- char* usage
+ char* usage,      ///< string to print in usage statement
+ char* filenotes   ///< additional info for param file
   );
 
 BOOLEAN_T set_mass_type_parameter(
@@ -180,6 +185,7 @@ void initialize_parameters(void){
   /* allocate the hash tables */
   parameters->hash = new_hash(NUM_PARAMS);
   usages->hash = new_hash(NUM_PARAMS);
+  file_notes = new_hash(NUM_PARAMS);
   types->hash = new_hash(NUM_PARAMS);
   min_values->hash = new_hash(NUM_PARAMS);
   max_values->hash = new_hash(NUM_PARAMS);
@@ -196,26 +202,32 @@ void initialize_parameters(void){
 
   /* generate_peptide arguments */
   set_string_parameter("protein input", NULL, 
-  "Fasta file of protein sequences or directory containing an index.");
+  "Fasta file of protein sequences or directory containing an index.",
+                       "file notes");
 
   /* create_index arguments */
   set_string_parameter("protein fasta file", NULL,
-                       "File containing protein sequences in fasta format.");
+                       "File containing protein sequences in fasta format.",
+                       "file notes");
   set_string_parameter("index name", NULL,
-                   "Name to give the new directory containing index files.");
+                   "Name to give the new directory containing index files.",
+                       "file notes");
 
   /* search-for-matches arguments */
   set_string_parameter("ms2 file", NULL,
-                       "File containing spectra to be searched.");
+                       "File containing spectra to be searched.",
+                       "file notes");
   //and uses 'protein input'
 
   /* analyze-matches arguments */
   set_string_parameter("psm-folder", NULL, 
-  "Folder containing the binary psm files created by crux-search-for-matches");
+  "Folder containing the binary psm files created by crux-search-for-matches",
+                       "file notes");
   // for now, replaces above; or not
   set_string_parameter("psm file", NULL, 
    "The binary psm file containing matches to the target database.  "
-   "Decoys named filename-decoy-#.csm are also analyzed.");
+   "Decoys named filename-decoy-#.csm are also analyzed.",
+                       "file notes");
   //and uses protein input
 
   /* get-ms2-spectrum */
@@ -223,21 +235,26 @@ void initialize_parameters(void){
                     "Scan number identifying the spectrum");
   //uses ms2 file
   set_string_parameter("output file", NULL, 
-                       "File where spectrum will be written.");
+                       "File where spectrum will be written.",
+                       "file notes");
 
   /* predict-peptide-ions */
   set_string_parameter("peptide sequence", NULL, 
-       "The sequence of the peptide.");
+       "The sequence of the peptide.",
+                       "file notes");
   set_int_parameter("charge state", 0, 0, 3, 
        "The charge state of the peptide.");
 
   /* create-psm-files */
   set_string_parameter("peptide-file-name", NULL,
-      "A file containing peptides for which to create ion files"); 
+      "A file containing peptides for which to create ion files",
+                       "file notes"); 
   set_string_parameter("output-dir", NULL,
-      "A directory in which to place the ion files");
+      "A directory in which to place the ion files",
+                       "file notes");
   set_string_parameter("model-type", NULL,
-      "The kind of model (paired or single)");
+      "The kind of model (paired or single)",
+                       "file notes");
 
   /* *** Initialize Options (command line and param file) *** */
 
@@ -247,7 +264,12 @@ void initialize_parameters(void){
   set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
       "Set level of output to stderr (0-100).  Default 30.");
   set_string_parameter("parameter-file", NULL, 
-      "Set additional options with values in the given file.");
+      "Set additional options with values in the given file.",
+                       "file notes");
+  set_string_parameter("write-parameter-file", NULL,
+      "Create a parameter file with the values of all parameters " \
+      "in this run.",
+      "Not all parameters may be used by all crux programs.");
   set_boolean_parameter("overwrite", FALSE, 
       "Replace existing files (T,F). Default F, die if a file " \
       "of the same name as the output exists.");
@@ -303,17 +325,22 @@ void initialize_parameters(void){
   set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, 
       "Maximum mass of spectra to search.  Default, none.");
   set_string_parameter("spectrum-charge", "all", 
-      "Spectrum charge states to search (1,2,3,all). Default all.");
+      "Spectrum charge states to search (1,2,3,all). Default all.",
+                       "file notes");
   set_string_parameter("match-output-folder", ".", 
-"Folder to which search results will be written.  Default '.' (current dir)");
+"Folder to which search results will be written.  Default '.' (current dir)",
+                       "file notes");
   set_output_type_parameter("output-mode", BINARY_OUTPUT, 
       "Types of output to produce (binary, sqt, all). Default binary");
   set_string_parameter("sqt-output-file", "target.sqt", 
-      "SQT output file name. Default 'target.sqt'");
+      "SQT output file name. Default 'target.sqt'",
+                       "file notes");
   set_string_parameter("protein-output-file", "target.prot", 
-      "Protein output file name. Default 'target.prot'");
+      "Protein output file name. Default 'target.prot'",
+                       "file notes");
   set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
-      "SQT output file name for decoys.  Default 'decoy.sqt'");
+      "SQT output file name for decoys.  Default 'decoy.sqt'",
+                       "file notes");
   set_int_parameter("number-decoy-set", 2, 0, 10, 
       "The number of decoy databases to search.  Default 2.");
 
@@ -328,7 +355,8 @@ void initialize_parameters(void){
       "NOT FOR COMMAND LINE. The number of psms per spectrum writen " \
       "to the binary output file.");
   set_double_parameter("mass-offset", 0.0, 0, 0, "DELETE ME");
-  set_string_parameter("seed", "time", "HIDE ME FROM USER");
+  set_string_parameter("seed", "time", "HIDE ME FROM USER",
+                       "file notes");
   set_double_parameter("mass-window", 3.0, 0, 100, 
       "Search peptides within +/- 'mass-window' of the " \
       "spectrum mass.  Default 3.0.");
@@ -366,11 +394,13 @@ void initialize_parameters(void){
   "The analysis algorithm to use (percolator, retention-czar, qvalue, none)." \
   "  Default percolator");
   set_string_parameter("feature-file", NULL,//"match_analysis.features"
-     "Optional file into which psm features are printed.");
+     "Optional file into which psm features are printed.",
+                       "file notes");
 
   /* analyze-matches parameter options */
   set_double_parameter("pi0", 0.9, 0, 1, "usage");
-  set_string_parameter("percolator-intraset-features", "F", "usage"); // for false
+  set_string_parameter("percolator-intraset-features", "F", "usage",
+                       "file notes"); // for false
 
   /* predict-peptide-ions */
   set_ion_type_parameter("primary-ions", BY_ION,
@@ -378,14 +408,16 @@ void initialize_parameters(void){
   set_boolean_parameter("precursor-ions", FALSE,
       "Predict the precursor ions, and all associated ions (neutral-losses, multiple charge states) consistent with the other specified options. (T,F) Default F");
   set_string_parameter("neutral-losses", "all", 
-      "Predict neutral loss ions (none, h20, nh3, all). Default 'all'");
+      "Predict neutral loss ions (none, h20, nh3, all). Default 'all'",
+                       "file notes");
   set_int_parameter("isotope", 0, 0, 2,
       "Predict the given number of isotope peaks.0|1|2");
   set_boolean_parameter("flanking", FALSE, 
       "Predict flanking peaks for b and y ions (T,F). Default F.");
   set_string_parameter("max-ion-charge", "peptide",
       "Predict ions up to this charge state (1,2,3) or to the charge state " \
-      "of the peptide (peptide).  Default 'peptide'.");
+      "of the peptide (peptide).  Default 'peptide'.",
+                       "file notes");
   set_int_parameter("nh3",0, 0, BILLION, 
       "Predict peaks with the following max nh3 modification.");
   set_int_parameter("h2o",0, 0, BILLION,
@@ -566,10 +598,11 @@ BOOLEAN_T find_param_filename(int argc,
   return success;
 }
 /**
- * Take the command line string from main, find the parameter fil
+ * Take the command line string from main, find the parameter file 
  * option (if present), parse it's values into the hash, and parse
- * the command line options and arguments into the hash
- * main then retrieves the values through get_value
+ * the command line options and arguments into the hash.
+ * Main then retrieves the values through get_<type>_parameter.
+ * \returns TRUE is command line is successfully parsed.
  */
 BOOLEAN_T parse_cmd_line_into_params_hash(int argc, 
                                           char** argv, 
@@ -594,6 +627,8 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
      overwriting file parameters */ 
 
   success = parse_arguments_into_hash(argc, argv, parameters->hash, 0); 
+
+  // For version option, print version and quit
   if( get_boolean_parameter("version") ){
     printf("Crux version %s\n", VERSION);
     exit(0);
@@ -620,15 +655,20 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     exit(1);
   }
   
-  /* Finally, do global checks on parameters and
-     apply any amino acid mass changes */
+  // do global checks on parameters
   check_parameter_consistency();
+
+  // do global parameter-specific tasks: set static aa modifications
+  //   set verbosity, print param file (if requested)
   update_aa_masses();
+  set_verbosity_level(get_int_parameter("verbosity"));
+  print_parameter_file(param_filename);
 
   parameter_plasticity = FALSE;
 
   return success;
 }
+
 void check_parameter_consistency(){
 
   /* Min length/mass is less than max */
@@ -659,7 +699,6 @@ void check_parameter_consistency(){
     exit(1);
   }
 }
-
 
 
 /*
@@ -802,6 +841,58 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 }
 
 /**
+ * \brief Creates a file containing all parameters and their current
+ * values in the parameter file format.  Default location is cwd,
+ * fully-qualified or relative paths can be included in filename.
+ * Does not allow input parameter file to be overwritten.
+ */
+void print_parameter_file(char* input_param_filename){
+
+  char* filename = get_string_parameter("write-parameter-file");
+
+  if(filename == NULL ){
+    return;
+  }
+  carp(CARP_DEBUG, "Printing parameter file");
+
+  // do not allow param file to be overwritten, even with -overwrite=T
+  if( strcmp(filename, input_param_filename) == 0 ){
+    carp(CARP_FATAL, "Cannot overwrite input paramter file.");
+    exit(1);
+  }
+  // do allow a different file to be overwritten
+  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+
+  // strip off any path
+  char** name_path_array = parse_filename_path(filename);
+  // if no path (returned NULL) replace with "."
+  if( name_path_array[1] == NULL ){
+    name_path_array[1] = ".";
+  }
+
+  // now open the file
+  FILE* param_file = create_file_in_path(name_path_array[0], 
+                                         name_path_array[1], 
+                                         overwrite);
+
+  // TODO (BF Nov-12-08): could add header to file
+
+  // iterate over all parameters and print to file
+  HASH_ITERATOR_T* iterator = new_hash_iterator(parameters->hash);
+  while(hash_iterator_has_next(iterator)){
+    char* key = hash_iterator_next(iterator);
+    fprintf(param_file, "# %s\n# %s\n%s=%s\n\n",
+            (char*)get_hash_value(usages->hash, key),
+            (char*)get_hash_value(file_notes, key),
+            key,
+            (char*)get_hash_value(parameters->hash, key));
+  }
+
+  fclose(param_file);
+  free(filename);
+}
+
+/**
  * free heap allocated parameters
  */
 void free_parameters(void){
@@ -875,10 +966,9 @@ void parse_parameter_file(
         idx++;
       }
       if(idx == 0 || idx >= (int)(strlen(line)-1)){
-        carp(CARP_FATAL, "Lines in a parameter file must have the form:\n");
-        carp(CARP_FATAL, "\n\tname=value\n\n");
-        carp(CARP_FATAL, 
-             "In file %s, the line\n%s\ndoes not have this format\n",
+        carp(CARP_FATAL, "Lines in a parameter file must have the form:\n" \
+             "\n\tname=value\n\n" \
+             "In file %s, the line '%s' does not have this format",
              parameter_filename, line);
         exit(1);
       }
@@ -1386,7 +1476,8 @@ BOOLEAN_T set_double_parameter(
 BOOLEAN_T set_string_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  char* set_value,  ///< the value to be set -in
- char* usage
+ char* usage,
+ char* filenotes   ///< additional comments for parameter file
   )
 {
   BOOLEAN_T result;
@@ -1404,6 +1495,7 @@ BOOLEAN_T set_string_parameter(
 
   result = add_or_update_hash_copy(parameters->hash, name, set_value);
   result = add_or_update_hash_copy(usages->hash, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(types->hash, name, "STRING_ARG");
 
   return result;

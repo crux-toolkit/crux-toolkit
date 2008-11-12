@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.46.4.3 $
+ * $Revision: 1.46.4.4 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_ANALYSIS_OPTIONS 8
+#define NUM_ANALYSIS_OPTIONS 9
 #define NUM_ANALYSIS_ARGUMENTS 2
 
 /* 
@@ -83,6 +83,7 @@ int main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file",
+    "write-parameter-file",
     "algorithm",
     "feature-file",
     "use-index", //not yet implemented, below set to true
@@ -112,7 +113,7 @@ int main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux-analyze-matches");
 
   /* Set verbosity */
-  set_verbosity_level(get_int_parameter("verbosity"));
+  //set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get arguments */
   //  char* psm_file = get_string_parameter("psm file");

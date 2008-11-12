@@ -26,7 +26,7 @@
 #include "match.h"
 #include "match_collection.h"
 
-#define NUM_SEARCH_OPTIONS 15
+#define NUM_SEARCH_OPTIONS 16
 #define NUM_SEARCH_ARGS 2
 
 /* Private functions */
@@ -45,6 +45,7 @@ int main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file",
+    "write-parameter-file",
     "overwrite",
     "use-index",
     "prelim-score-type",
@@ -81,8 +82,8 @@ int main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux-search-for-matches");
 
   /* Set verbosity */
-  verbosity = get_int_parameter("verbosity");
-  set_verbosity_level(verbosity);
+  //verbosity = get_int_parameter("verbosity");
+  //set_verbosity_level(verbosity);
 
   /* Get input: ms2 file */
   char* ms2_file = get_string_parameter_pointer("ms2 file");

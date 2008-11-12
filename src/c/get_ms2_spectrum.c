@@ -63,7 +63,7 @@ int main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux-get-ms2-spectrum");
 
   /* Set verbosity */
-  set_verbosity_level(get_int_parameter("verbosity"));
+  //set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get arguments */
   scan_number = get_int_parameter("scan number");
