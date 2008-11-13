@@ -10,17 +10,6 @@
 
 //TODO:  in all set, change result=add_... to result= result && add_...
 
-/**
- *\struct parameter_hash
- *\brief the hash table that holds all the different parameters
- */
-/*
-struct parameter_hash{
-  int num_parameters;   ///< number of the total number of parameters
-  HASH_T* hash; ///< the hash table for parameters
-};
-*/
-
 /*
  * Global variables
  */
@@ -31,14 +20,6 @@ static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = {
   "ALGORITHM_TYPE_T"};
 
 //one hash for parameter values, one for usage statements, one for types
-/*
-struct parameter_hash  parameters_hash_table;
-struct parameter_hash* parameters = &parameters_hash_table;
-struct parameter_hash  usage_hash_table;
-struct parameter_hash* usages = &usage_hash_table;
-struct parameter_hash  type_hash_table;
-struct parameter_hash* types = & type_hash_table;
-*/
 // all hashes keyed on parameter/option name
 HASH_T* parameters; // values of parameters
 HASH_T* usages;     // usage statments
@@ -50,12 +31,6 @@ HASH_T* min_values; // for numeric parameters
 HASH_T* max_values; // for numeric parameters
 
 
-/*
-struct parameter_hash  min_values_hash_table;
-struct parameter_hash* min_values = & min_values_hash_table;
-struct parameter_hash  max_values_hash_table;
-struct parameter_hash* max_values = & max_values_hash_table;
-*/
 BOOLEAN_T parameter_initialized = FALSE; //have param values been initialized
 BOOLEAN_T usage_initialized = FALSE; // have the usages been initialized?
 BOOLEAN_T type_initialized = FALSE; // have the types been initialized?
@@ -94,12 +69,6 @@ BOOLEAN_T string_to_param_type(char*, PARAMETER_TYPE_T* );
  * temporary replacement for function, return name once all exe's are fixed
  * \returns TRUE if paramater value is set, else FALSE
  */ 
-BOOLEAN_T set_flag_parameter(
- char* name,
- BOOLEAN_T set_value,
- char* usage
- );
-
 BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
@@ -218,27 +187,15 @@ void initialize_parameters(void){
   }
   
   /* allocate the hash tables */
-  //parameters->hash = new_hash(NUM_PARAMS);
   parameters = new_hash(NUM_PARAMS);
-  //  usages->hash = new_hash(NUM_PARAMS);
   usages = new_hash(NUM_PARAMS);
   file_notes = new_hash(NUM_PARAMS);
   for_users = new_hash(NUM_PARAMS);
-  //  types->hash = new_hash(NUM_PARAMS);
   types = new_hash(NUM_PARAMS);
-  //  min_values->hash = new_hash(NUM_PARAMS);
   min_values = new_hash(NUM_PARAMS);
-  //  max_values->hash = new_hash(NUM_PARAMS);
   max_values = new_hash(NUM_PARAMS);
 
   /* set number of parameters to zero */
-  /*
-  parameters->num_parameters = 0;
-  usages->num_parameters = 0;
-  types->num_parameters = 0;
-  min_values->num_parameters = 0;
-  max_values->num_parameters = 0;
-  */
 
   /* *** Initialize Arguments *** */
 
@@ -267,7 +224,7 @@ void initialize_parameters(void){
 
   /* analyze-matches arguments */
   set_string_parameter("psm-folder", NULL, 
-     "Directory containing the binary psm files created by " \
+     "Directory containing the binary psm files created by "
      "crux-search-for-matches.",
      "Argument for analyze-matches.", "false");
   //and uses protein input
@@ -308,26 +265,26 @@ void initialize_parameters(void){
       "true");
   set_int_parameter("verbosity", CARP_INFO, CARP_FATAL, CARP_MAX,
       "Set level of output to stderr (0-100).  Default 30.",
-      "Available for all crux programs.  Each level prints the following " \
-      "messages, including all those at lower verbosity levels: 0-fatal " \
-      "errors, 10-non-fatal errors, 20-warnings, 30-information on the " \
-      "progress of execution, 40-more progress information, 50-debug info, " \
+      "Available for all crux programs.  Each level prints the following "
+      "messages, including all those at lower verbosity levels: 0-fatal "
+      "errors, 10-non-fatal errors, 20-warnings, 30-information on the "
+      "progress of execution, 40-more progress information, 50-debug info, "
       "60-detailed debug info.", "true");
   set_string_parameter("parameter-file", NULL, 
-      "Set additional options with values in the given file. Default " \
+      "Set additional options with values in the given file. Default "
       "to use only command line options and default values.",
-      "Available for all crux programs. Any options specified on the " \
+      "Available for all crux programs. Any options specified on the "
       "command line will override values in the parameter file.", "true");
   set_string_parameter("write-parameter-file", NULL,
-      "Create a parameter file with the values of all parameters " \
+      "Create a parameter file with the values of all parameters "
       "in this run.",
-      "Writes all crux parameters, even those not used in the current " \
+      "Writes all crux parameters, even those not used in the current "
       "execution. Resulting file can be used with --parameter-file.",
       "true");
   set_boolean_parameter("overwrite", FALSE, 
-      "Replace existing files (T) or exit if attempting to overwrite " \
+      "Replace existing files (T) or exit if attempting to overwrite "
       "(F). Default F.",
-      "Available for all crux programs.  Applies to --write-parameter-file " \
+      "Available for all crux programs.  Applies to --write-parameter-file "
       "as well as index, search, and analysis output files.", "true");
     
   /* create-psm-files */
@@ -342,55 +299,55 @@ void initialize_parameters(void){
   /* generate_peptide, create_index parameters  */
   set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
       "The minimum length of peptides to consider. Default 6.",
-      "Used from the command line or parameter file by " \
-      "crux-create-index and crux-generate-peptides.  Parameter file " \
+      "Used from the command line or parameter file by "
+      "crux-create-index and crux-generate-peptides.  Parameter file "
       "only for crux-search-for-matches.", "true");
   set_int_parameter("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
       "The maximum length of peptides to consider. Default 50.",
-      "Available from command line or parameter file for crux-create-index " \
-      " and crux-generate-peptides. Parameter file only for crux-search-"\
+      "Available from command line or parameter file for crux-create-index "
+      " and crux-generate-peptides. Parameter file only for crux-search-"
       "for-matches.", "true");
   set_double_parameter("min-mass", 200, 0, BILLION,
       "The minimum mass of peptides to consider. Default 200.",
-      "Available from command line or parameter file for crux-create-index " \
-      "and crux-generate-peptides. Parameter file only for crux-search-" \
+      "Available from command line or parameter file for crux-create-index "
+      "and crux-generate-peptides. Parameter file only for crux-search-"
       "for-matches.", "true");
   set_double_parameter("max-mass", 7200, 1, BILLION, 
       "The maximum mass of peptides to consider. Default 7200.",
-      "Available from command line or parameter file for crux-create-index " \
-      "and crux-generate-peptides. Parameter file only for crux-search-" \
+      "Available from command line or parameter file for crux-create-index "
+      "and crux-generate-peptides. Parameter file only for crux-search-"
       "for-matches.", "true");
   set_mass_type_parameter("isotopic-mass", AVERAGE, 
-      "Which isotopes to use in calcuating peptide mass (average, mono). " \
+      "Which isotopes to use in calcuating peptide mass (average, mono). "
       "Default average.", 
-      "Used from command line or parameter file by crux-create-index and " \
-      "crux-generate-peptides.  Parameter file only for " \
+      "Used from command line or parameter file by crux-create-index and "
+      "crux-generate-peptides.  Parameter file only for "
       "crux-search-for-matches.", "true");
   set_peptide_type_parameter("cleavages", TRYPTIC, 
-      "The type of cleavage sites to consider (tryptic, partial, all). " \
+      "The type of cleavage sites to consider (tryptic, partial, all). "
       "Default tryptic.",
-      "Used from the command line or paramter file by crux-create-index and " \
-      "crux-generate-peptides. Parameter file only for " \
-      "crux-search-for-matches.  Tryptic cleavage sites are after R or K " \
-      "but not before P.  The value 'tryptic' produces peptides with " \
-      "tryptic sites at both termini, 'partial' with a tryptic cleavage " \
-      "site at at least one terminus, and 'all' produces peptides with no " \
+      "Used from the command line or paramter file by crux-create-index and "
+      "crux-generate-peptides. Parameter file only for "
+      "crux-search-for-matches.  Tryptic cleavage sites are after R or K "
+      "but not before P.  The value 'tryptic' produces peptides with "
+      "tryptic sites at both termini, 'partial' with a tryptic cleavage "
+      "site at at least one terminus, and 'all' produces peptides with no "
       "dependence on adjacent amino acids.",
       "true");
   set_boolean_parameter("missed-cleavages", FALSE, 
       "Include peptides with missed cleavage sites (T,F). Default FALSE.",
-      "Available from command line or parameter file for crux-create-index " \
-      "and crux-generate-peptides.  Parameter file only for crux-search-" \
-      "for-matches.  When used with cleavages=<tryptic|partial> includes " \
+      "Available from command line or parameter file for crux-create-index "
+      "and crux-generate-peptides.  Parameter file only for crux-search-"
+      "for-matches.  When used with cleavages=<tryptic|partial> includes "
       "peptides containing one or more potential cleavage sites.", "true");
   set_boolean_parameter("unique-peptides", FALSE,
-      "Generate peptides only once, even if they appear in more " \
+      "Generate peptides only once, even if they appear in more "
       "than one protein (T,F).  Default FALSE.",
-      "Available from command line or parameter file for crux-create-index " \
-      "and crux-genereate-peptides. Parameter file only for crux-search-for-" \
-      "matches.  For crux-generate-peptides, returns one line per peptide " \
-      "when true or one line per peptide per protein occurence when false.  " \
-      "For index and search, stores and reports only one protein in which " \
+      "Available from command line or parameter file for crux-create-index "
+      "and crux-genereate-peptides. Parameter file only for crux-search-for-"
+      "matches.  For crux-generate-peptides, returns one line per peptide "
+      "when true or one line per peptide per protein occurence when false.  "
+      "For index and search, stores and reports only one protein in which "
       "the peptide occurs.", "true");
   
   /* more generate_peptide parameters */
@@ -402,31 +359,31 @@ void initialize_parameters(void){
       "Available only for crux-generate-peptides. When cleavages=partial "
       "all peptides are labeled PARTIAL even if fully tryptic.", "true");
   set_boolean_parameter("use-index", FALSE, 
-      "Use an index that has already been created (T,F). " \
+      "Use an index that has already been created (T,F). "
       "Default FALSE (use fasta file).",
-      "Used by crux-generate-peptides, crux-search-for-matches, and " \
-      "crux-analyze-matches.  With use-index=F, 'protein source' argument " \
-      "is the name of a fasta file.  With use-index=T, the name of the " \
+      "Used by crux-generate-peptides, crux-search-for-matches, and "
+      "crux-analyze-matches.  With use-index=F, 'protein source' argument "
+      "is the name of a fasta file.  With use-index=T, the name of the "
       "directory containing an index.", "true");
   set_sort_type_parameter("sort", NONE, 
-      "Sort peptides according to which property " \
+      "Sort peptides according to which property "
       "(mass, length, lexical, none).  Default none.",
       "Only available for crux-generate-peptides.", "true");
 
   /* search-for-matches command line options */
   set_scorer_type_parameter("prelim-score-type", SP, 
       "Initial scoring (sp, xcorr). Default sp,", 
-      "Available for crux-search-for-matches.  The score applied to all " \
-      "possible psms for a given spectrum.  Typically used to filter out " \
-      "the most plausible for further scoring. See max-rank-preliminary and " \
+      "Available for crux-search-for-matches.  The score applied to all "
+      "possible psms for a given spectrum.  Typically used to filter out "
+      "the most plausible for further scoring. See max-rank-preliminary and "
       "score-type.", "true");
   set_scorer_type_parameter("score-type", XCORR, 
       "The primary scoring method to use (xcorr, sp, xcorr-pvalue, sp-pvalue)."
       " Default xcorr.", 
-      "Only available for crux-search-for-matches.  Primary scoring is " \
-      "typically done on a subset (see max-rank-preliminary) of all " \
-      "possible psms for each spectrum. Default is the SEQUEST-style xcorr." \
-      " Crux also offers a p-value calculation for each psm based on xcorr " \
+      "Only available for crux-search-for-matches.  Primary scoring is "
+      "typically done on a subset (see max-rank-preliminary) of all "
+      "possible psms for each spectrum. Default is the SEQUEST-style xcorr."
+      " Crux also offers a p-value calculation for each psm based on xcorr "
       "or sp (xcorr-pvalue, sp-pvalue).", "true"); 
 
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
@@ -437,47 +394,47 @@ void initialize_parameters(void){
       "Available for crux-search-for-matches.", "true");
   set_string_parameter("spectrum-charge", "all", 
       "Spectrum charge states to search (1,2,3,all). Default all.",
-      "Used by crux-search-for-matches to limit the charge states " \
-      "considered in the search.  With 'all' every spectrum will be " \
-      "searched and spectra with multiple charge states will be searched " \
-      "once at each charge state.  With 1, 2 ,or 3 only spectra with that " \
+      "Used by crux-search-for-matches to limit the charge states "
+      "considered in the search.  With 'all' every spectrum will be "
+      "searched and spectra with multiple charge states will be searched "
+      "once at each charge state.  With 1, 2 ,or 3 only spectra with that "
       "that charge will be searched.", "true");
   set_string_parameter("match-output-folder", ".", 
-      "Folder to which search results will be written. Default '.'. " \
+      "Folder to which search results will be written. Default '.'. "
       "(current directory).",
-      "Used by crux-search-for-matches.  All result files (binary .csm " \
+      "Used by crux-search-for-matches.  All result files (binary .csm "
       "and/or sqt) put in this directory.", "true");
   set_output_type_parameter("output-mode", BINARY_OUTPUT, 
       "Types of output to produce (binary, sqt, all). Default binary.",
-      "Available for crux-search-for-matches.  Produce binary and/or text " \
-      "(sqt) output files.  Binary files named automatically.  See " \
-      "sqt-output-file for naming text file.  See match-output-folder for " \
+      "Available for crux-search-for-matches.  Produce binary and/or text "
+      "(sqt) output files.  Binary files named automatically.  See "
+      "sqt-output-file for naming text file.  See match-output-folder for "
       "file location.", "true");
   set_string_parameter("sqt-output-file", "target.sqt", 
       "SQT output file name. Default 'target.sqt'",
-      "Only available for crux-search-for-matches with output-mode=" \
-      "<all|sqt>.  The location of this file is controlled by " \
+      "Only available for crux-search-for-matches with output-mode="
+      "<all|sqt>.  The location of this file is controlled by "
       "match-output-folder.", "true");
   set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
       "SQT output file name for decoys.  Default 'decoy.sqt'.",
-      "Used by crux-search-for-matches with output-mode=<all|sqt> and " \
-      "number-decoy-sets > 0.  File is put in the directory set by " \
+      "Used by crux-search-for-matches with output-mode=<all|sqt> and "
+      "number-decoy-sets > 0.  File is put in the directory set by "
       "--match-output-folder (defaults to working directory).", "true");
   set_int_parameter("number-decoy-set", 2, 0, 10, 
       "The number of decoy databases to search.  Default 2.",
-      "Used by crux-search-for-matches.  Decoy search results can be used " \
+      "Used by crux-search-for-matches.  Decoy search results can be used "
       "by crux-analzye-matches with the percolator algorithm", "true");
 
   /* search-for-matches parameter file options */
   set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
-      "Number of psms per spectrum to score after " \
+      "Number of psms per spectrum to score after "
       "preliminary scoring.  Default 500.",
-      "Used by crux-search-for-matches.  For each spectrum, keep the (500) " \
+      "Used by crux-search-for-matches.  For each spectrum, keep the (500) "
       "top ranking psms for scoring with the main score.", "true");
   set_int_parameter("max-sqt-result", 5, 1, BILLION, 
-      "Number of search results per spectrum to report in the sqt file. " \
+      "Number of search results per spectrum to report in the sqt file. "
       "Default 5.",
-      "Available from parameter file for crux-search-for-matches with " \
+      "Available from parameter file for crux-search-for-matches with "
       "output-mode=<all|sqt>.  Does not affect output to binary files.", 
       "true");
   set_int_parameter("top-match", 1, 1, BILLION, 
@@ -492,18 +449,18 @@ void initialize_parameters(void){
       "Given a real-number value, will always produce the same decoy seqs",
       "false");
   set_double_parameter("mass-window", 3.0, 0, 100, 
-      "Search peptides within +/- 'mass-window' of the " \
+      "Search peptides within +/- 'mass-window' of the "
       "spectrum mass.  Default 3.0.",
-      "Available from the parameter file only for crux-search-for-matches " \
+      "Available from the parameter file only for crux-search-for-matches "
       "and crux-generate-peptides.", "true");
   set_mass_type_parameter("fragment-mass", MONO, 
-      "Which isotopes to use in calcuating fragment ion mass " \
+      "Which isotopes to use in calcuating fragment ion mass "
       "(average, mono). Default mono.", 
-      "Parameter file only.  "\
+      "Parameter file only.  "
       "Used by crux-search-for-matches and crux-predict-peptide-ions.",
                           "true");
   set_double_parameter("ion-tolerance", 0.5, 0, BILLION,
-      "Tolerance used for matching observed peaks to predicted " \
+      "Tolerance used for matching observed peaks to predicted "
       "fragment ions.  Default 0.5.",
       "Available from parameter-file for crux-search-for-matches.", "true");
 
@@ -528,35 +485,35 @@ void initialize_parameters(void){
   //in estimate_weibull_parameters
   set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, 
       "Not for general users", 
-      "The number of psms per spectrum to use for estimating the " \
-      "score distribution for calculating p-values. 0 to use all. " \
+      "The number of psms per spectrum to use for estimating the "
+      "score distribution for calculating p-values. 0 to use all. "
       "Not compatible with 'fraction-top-scores-to-fit'. Default 0 (all).",
       "false");
   set_double_parameter("fraction-top-scores-to-fit", -1, -1, 1, 
-      "The fraction of psms per spectrum to use for estimating the " \
-      "score distribution for calculating p-values.  0 to use all. " \
+      "The fraction of psms per spectrum to use for estimating the "
+      "score distribution for calculating p-values.  0 to use all. "
       "Not compatible with 'number-top-scores-to-fig'. Default 0 (all).",
       "For developers/research only.", "false");
 
   /* analyze-matches options */
   set_algorithm_type_parameter("algorithm", PERCOLATOR_ALGORITHM, 
-      "The analysis algorithm to use (percolator, qvalue, none)." \
+      "The analysis algorithm to use (percolator, qvalue, none)."
       " Default percolator.",
-      "Available only for crux-analyze-matches.  Using 'percolator' will " \
-      "assign a q-value to the top-ranking psm for each spectrum based on " \
-      "the decoy searches.  Using 'q-value' will assign a q-value to same " \
-      "using the p-values calculated with score-type=<xcorr-pvalue|" \
-      "sq-pvalue>.  Incorrect combinations of score-type and algorithm cause" \
-      " undefined behavior. Using 'none' will turn the binary .csm files " \
+      "Available only for crux-analyze-matches.  Using 'percolator' will "
+      "assign a q-value to the top-ranking psm for each spectrum based on "
+      "the decoy searches.  Using 'q-value' will assign a q-value to same "
+      "using the p-values calculated with score-type=<xcorr-pvalue|"
+      "sq-pvalue>.  Incorrect combinations of score-type and algorithm cause"
+      " undefined behavior. Using 'none' will turn the binary .csm files "
       "into text.", "true");
   set_string_parameter("feature-file", NULL,//"match_analysis.features"
      "Optional file into which psm features are printed.",
-     "Available only for crux-analyze-matches.  File will contain features " \
+     "Available only for crux-analyze-matches.  File will contain features "
      "used by percolator.", "true");
 
   /* analyze-matches parameter options */
   set_double_parameter("pi0", 0.9, 0, 1, "Hide from user",
-      "Used in curve fitting for assigning q-values from p-values and " \
+      "Used in curve fitting for assigning q-values from p-values and "
       "used by percolator", "false");
   set_string_parameter("percolator-intraset-features", "F",
       "Set a feature for percolator that in later versions is not an option.",
@@ -565,35 +522,35 @@ void initialize_parameters(void){
   /* predict-peptide-ions */
   set_ion_type_parameter("primary-ions", BY_ION,
       "The ion series to predict (b,y,by). Default 'by' (both b and y ions).",
-      "Only available for crux-predict-peptide-ions.  Set automatically to " \
+      "Only available for crux-predict-peptide-ions.  Set automatically to "
                          "'by' for searching.", "true");
   set_boolean_parameter("precursor-ions", FALSE,
-      "Predict the precursor ions, and all associated ions " \
-      "(neutral-losses, multiple charge states) consistent with the " \
+      "Predict the precursor ions, and all associated ions "
+      "(neutral-losses, multiple charge states) consistent with the "
       "other specified options. (T,F) Default F.",
       "Only available for crux-predict-peptide-ions.", "true");
   set_string_parameter("neutral-losses", "all", 
       "Predict neutral loss ions (none, h20, nh3, all). Default 'all'.",
-      "Only available for crux-predict-peptide-ions. Set to 'all' for " \
+      "Only available for crux-predict-peptide-ions. Set to 'all' for "
       "sp and xcorr scoring.", "true");
   set_int_parameter("isotope", 0, 0, 2,
       "Predict the given number of isotope peaks (0|1|2). Default 0.",
-      "Only available for crux-predict-peptide-ion.  Automatically set to " \
+      "Only available for crux-predict-peptide-ion.  Automatically set to "
       "0 for Sp scoring and 1 for xcorr scoring.", "true");
   set_boolean_parameter("flanking", FALSE, 
       "Predict flanking peaks for b and y ions (T,F). Default F.",
       "Only available for crux-predict-peptide-ion.", "true");
   set_string_parameter("max-ion-charge", "peptide",
-      "Predict ions up to this charge state (1,2,3) or to the charge state " \
+      "Predict ions up to this charge state (1,2,3) or to the charge state "
       "of the peptide (peptide).  Default 'peptide'.",
       "Available only for predict-peptide-ions.  Set to 'peptide' for search.",
       "true");
   set_int_parameter("nh3",0, 0, BILLION, 
-      "Predict peaks with the given maximum number of nh3 neutral loss " \
+      "Predict peaks with the given maximum number of nh3 neutral loss "
       "modifications. Default 0.",
       "Only available for crux-predict-peptide-ions.", "true");
   set_int_parameter("h2o",0, 0, BILLION,
-      "Predict peaks with the given maximum number of h2o neutral loss " \
+      "Predict peaks with the given maximum number of h2o neutral loss "
       "modifications. Default 0.",
       "Only available for crux-predict-peptide-ions.", "true");
 
@@ -681,7 +638,7 @@ void initialize_parameters(void){
   /* get-ms2-spectrum options */
   set_boolean_parameter("stats", FALSE, 
       "Print to stdout additional information about the spectrum.",
-      "Avaliable only for crux-get-ms2-spectrum.  Does not affect contents " \
+      "Avaliable only for crux-get-ms2-spectrum.  Does not affect contents "
       "of the output file.", "true");
 
   // now we have initialized the parameters
@@ -745,9 +702,6 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     carp(CARP_DETAILED_DEBUG, "Option is: %s", option_names[i]);
 
     /* get value, usage, types */
-    //void* value_ptr = get_hash_value(parameters->hash, option_names[i]);
-    //void* usage_ptr = get_hash_value(usages->hash, option_names[i]);
-    //void* type_ptr =  get_hash_value(types->hash, option_names[i]);
     void* value_ptr = get_hash_value(parameters, option_names[i]);
     void* usage_ptr = get_hash_value(usages, option_names[i]);
     void* type_ptr =  get_hash_value(types, option_names[i]);
@@ -767,7 +721,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     /* check that the option is in the params hash */
     if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
       carp(CARP_FATAL, 
-           "Cannot select parameter '%s'. Value, usage or type not found.\n" \
+           "Cannot select parameter '%s'. Value, usage or type not found.\n"
            "Found value: %s, usage: %s, type: %s", 
            option_names[i],
            value_ptr,
@@ -787,6 +741,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
   carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
   return success;
 }
+
 /**
  * helper used below.  look for param file name, die if error
  * return null if not found
@@ -858,7 +813,6 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
      check options for legal values, and put values in hash 
      overwriting file parameters */ 
 
-  //  success = parse_arguments_into_hash(argc, argv, parameters->hash, 0); 
   success = parse_arguments_into_hash(argc, argv, parameters, 0); 
 
   // For version option, print version and quit
@@ -909,7 +863,7 @@ void check_parameter_consistency(){
   int max_length = get_int_parameter("max-length");
 
   if( min_length > max_length){
-    carp(CARP_FATAL, "Parameter inconsistency.  Minimum peptide length (%i)" \
+    carp(CARP_FATAL, "Parameter inconsistency.  Minimum peptide length (%i)"
          " must be less than max (%i).", min_length, max_length);
     exit(1);
   }
@@ -918,7 +872,7 @@ void check_parameter_consistency(){
   double max_mass = get_double_parameter("max-mass");
 
   if( min_mass > max_mass){
-    carp(CARP_FATAL, "Parameter inconsistency.  Minimum peptide mass (%.2f)" \
+    carp(CARP_FATAL, "Parameter inconsistency.  Minimum peptide mass (%.2f)"
          " must be less than max (%.2f).", min_mass, max_mass);
     exit(1);
   }
@@ -927,7 +881,7 @@ void check_parameter_consistency(){
   double max_spec_mass = get_double_parameter("spectrum-max-mass");
 
   if( min_spec_mass > max_spec_mass){
-    carp(CARP_FATAL, "Parameter inconsistency. Minimum spectrum mass (%.2f)" \
+    carp(CARP_FATAL, "Parameter inconsistency. Minimum spectrum mass (%.2f)"
          " must be less than max (%.2f).", min_spec_mass, max_spec_mass);
     exit(1);
   }
@@ -944,12 +898,6 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 
   BOOLEAN_T success = TRUE;
   char die_str[SMALL_BUFFER];
-  /*
-  char* type_str = get_hash_value(types->hash, name);
-  char* value_str = get_hash_value(parameters->hash, name);
-  char* min_str = get_hash_value(min_values->hash, name);
-  char* max_str = get_hash_value(max_values->hash, name);
-  */
   char* type_str = get_hash_value(types, name);
   char* value_str = get_hash_value(parameters, name);
   char* min_str = get_hash_value(min_values, name);
@@ -1016,7 +964,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
          value_str);
     if( ! string_to_sort_type( value_str, &sort_type)){
       success = FALSE;
-      sprintf(die_str, "Illegal sort value '%s' for option '%s'. " \
+      sprintf(die_str, "Illegal sort value '%s' for option '%s'. "
               "Must be mass, length, lexical, or none.", 
               value_str, name);
     }
@@ -1027,7 +975,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     //check for legal type
     if(! string_to_scorer_type( value_str, &scorer_type)){
       success = FALSE;
-      sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
+      sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
       "Must be sp, xcorr, dotp, sp-logp, or xcorr-logp.", value_str, name);
     }else if((scorer_type != SP ) &&   //check for one of the accepted types
              (scorer_type != XCORR ) &&
@@ -1035,7 +983,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
              (scorer_type != LOGP_BONF_WEIBULL_SP ) &&
              (scorer_type != LOGP_BONF_WEIBULL_XCORR )){
       success = FALSE;
-      sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
+      sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
       "Must be sp, xcorr, dotp, sp-logp, or xcorr-logp.", value_str, name);
     }
     break;
@@ -1044,7 +992,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
          value_str);
     if(! string_to_algorithm_type( value_str, &algorithm_type)){
       success = FALSE;
-      sprintf(die_str, "Illegal score value '%s' for option '%s'.  " \
+      sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
               "Must be percolator, rczar, qvalue, none OR all.", value_str, name);
     }
     break;
@@ -1053,7 +1001,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     carp(CARP_DETAILED_DEBUG, "found output_mode param, value '%s'", value_str);
     if(! string_to_output_type(value_str, &output_type)){
       success = FALSE;
-      sprintf(die_str, "Illegal output type '%s' for options '%s'.  " \
+      sprintf(die_str, "Illegal output type '%s' for options '%s'.  "
               "Must be binary, sqt, or all.", value_str, name);
     }
     break;
@@ -1062,7 +1010,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
          value_str);
     if( !string_to_ion_type(value_str, &ion_type)){
       success = FALSE;
-      sprintf(die_str, "Illegal ion type '%s' for option '%s'.  " \
+      sprintf(die_str, "Illegal ion type '%s' for option '%s'.  "
               "Must be b,y,by.", value_str, name);
     }
     break;
@@ -1117,18 +1065,15 @@ void print_parameter_file(char* input_param_filename){
   // TODO (BF Nov-12-08): could add header to file
 
   // iterate over all parameters and print to file
-  //  HASH_ITERATOR_T* iterator = new_hash_iterator(parameters->hash);
   HASH_ITERATOR_T* iterator = new_hash_iterator(parameters);
   while(hash_iterator_has_next(iterator)){
     char* key = hash_iterator_next(iterator);
     char* show_users = get_hash_value(for_users, key);
     if( strcmp(show_users, "true") == 0 ){
       fprintf(param_file, "# %s\n# %s\n%s=%s\n\n",
-              //(char*)get_hash_value(usages->hash, key),
               (char*)get_hash_value(usages, key),
               (char*)get_hash_value(file_notes, key),
               key,
-              //(char*)get_hash_value(parameters->hash, key));
               (char*)get_hash_value(parameters, key));
     }
   }
@@ -1142,13 +1087,6 @@ void print_parameter_file(char* input_param_filename){
  */
 void free_parameters(void){
   if(parameter_initialized){
-    /*
-    free_hash(parameters->hash);
-    free_hash(usages->hash);
-    free_hash(types->hash);
-    free_hash(min_values->hash);
-    free_hash(max_values->hash);
-    */
     free_hash(parameters);
     free_hash(usages);
     free_hash(file_notes);
@@ -1170,8 +1108,6 @@ void parse_parameter_file(
   FILE *file;
   char *line;
   int idx;
-  //  char* endptr;
-  //  float update_mass;
 
   carp(CARP_DETAILED_DEBUG, "Parsing parameter file '%s'",parameter_filename);
 
@@ -1220,8 +1156,8 @@ void parse_parameter_file(
         idx++;
       }
       if(idx == 0 || idx >= (int)(strlen(line)-1)){
-        carp(CARP_FATAL, "Lines in a parameter file must have the form:\n" \
-             "\n\tname=value\n\n" \
+        carp(CARP_FATAL, "Lines in a parameter file must have the form:\n"
+             "\n\tname=value\n\n"
              "In file %s, the line '%s' does not have this format",
              parameter_filename, line);
         exit(1);
@@ -1233,7 +1169,6 @@ void parse_parameter_file(
       carp(CARP_DETAILED_DEBUG, "Found option '%s' and value '%s'", 
            option_name, option_value);
 
-//      if(! update_hash_value(parameters->hash, option_name, option_value) ){
       if(! update_hash_value(parameters, option_name, option_value) ){
         carp(CARP_ERROR, "Unexpected parameter file option '%s'", option_name);
         exit(1);
@@ -1266,7 +1201,6 @@ BOOLEAN_T get_boolean_parameter(
 {
   static char buffer[PARAMETER_LENGTH];
   
-  //  char* value = get_hash_value(parameters->hash, name);
   char* value = get_hash_value(parameters, name);
  
   // can't find parameter
@@ -1276,7 +1210,6 @@ BOOLEAN_T get_boolean_parameter(
   }
   
   //check type
-  //  char* type_str = get_hash_value(types->hash, name);
   char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
@@ -1326,7 +1259,6 @@ int get_int_parameter(
   //long int value;
   int value;
 
-  //  char* int_value = get_hash_value(parameters->hash, name);
   char* int_value = get_hash_value(parameters, name);
 
   //  carp(CARP_DETAILED_DEBUG, "int value string is %s", int_value);
@@ -1337,7 +1269,6 @@ int get_int_parameter(
     exit(1);
   }
   //check type
-  //  char* type_str = get_hash_value(types->hash, name);
   char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
@@ -1384,7 +1315,6 @@ double get_double_parameter(
     exit(1);
   }
 
-  //  char* double_value = get_hash_value(parameters->hash, name);
   char* double_value = get_hash_value(parameters, name);
  
   // can't find parameter
@@ -1394,7 +1324,6 @@ double get_double_parameter(
   }
  
   //check type
-  //  char* type_str = get_hash_value(types->hash, name);
   char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
@@ -1449,10 +1378,8 @@ char* get_string_parameter(
     string_value = NULL;
   }
   //check type
-  // char* type_str = get_hash_value(types->hash, name);
   char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
-  //BOOLEAN_T found = string_to_param_type(type_str, &type);
   string_to_param_type(type_str, &type);
 
   /*  Let any type be retrieved as string
@@ -1481,7 +1408,6 @@ char* get_string_parameter_pointer(
   )
 {
   
-  //  char* string_value = get_hash_value(parameters->hash, name);
   char* string_value = get_hash_value(parameters, name);
 
   // can't find parameter
@@ -1490,10 +1416,8 @@ char* get_string_parameter_pointer(
     exit(1);
   }
   //check type
-  //  char* type_str = get_hash_value(types->hash, name);
   char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
-  //BOOLEAN_T found = string_to_param_type(type_str, &type);
   string_to_param_type(type_str, &type);
 
   /*if(found==FALSE || type != STRING_P){
@@ -1509,7 +1433,6 @@ PEPTIDE_TYPE_T get_peptide_type_parameter(
   char* name
     ){
 
-  //  char* param = get_hash_value(parameters->hash, name);
   char* param = get_hash_value(parameters, name);
 
   PEPTIDE_TYPE_T peptide_type;
@@ -1526,39 +1449,40 @@ PEPTIDE_TYPE_T get_peptide_type_parameter(
 MASS_TYPE_T get_mass_type_parameter(
    char* name
    ){
-  //  char* param_value_str = get_hash_value(parameters->hash, name);
   char* param_value_str = get_hash_value(parameters, name);
   MASS_TYPE_T param_value;
   BOOLEAN_T success = string_to_mass_type(param_value_str, &param_value);
 
   if( ! success ){
-    carp(CARP_FATAL, "Mass_type parameter %s has the value %s which is not of the correct type", name, param_value_str);
+    carp(CARP_FATAL, 
+         "Mass_type parameter %s has the value %s which is not of "
+          "the correct type", name, param_value_str);
     exit(1);
   }
   return param_value;
 }
 
 SORT_TYPE_T get_sort_type_parameter(char* name){
-  //  char* param_value_str = get_hash_value(parameters->hash, name);
   char* param_value_str = get_hash_value(parameters, name);
   SORT_TYPE_T param_value;
   BOOLEAN_T success = string_to_sort_type(param_value_str, &param_value);
 
   if( ! success){
-    carp(CARP_FATAL, "Sort_type parameter %s has the value %s which is not of the correct type", name, param_value_str);
+    carp(CARP_FATAL, "Sort_type parameter %s has the value %s which " 
+         "is not of the correct type", name, param_value_str);
     exit(1);
   }
   return param_value;
 }
 
 ALGORITHM_TYPE_T get_algorithm_type_parameter(char* name){
-  //  char* param_value_str = get_hash_value(parameters->hash, name);
   char* param_value_str = get_hash_value(parameters, name);
   ALGORITHM_TYPE_T param_value;
   BOOLEAN_T success = string_to_algorithm_type(param_value_str, &param_value);
 
   if(!success){
-    carp(CARP_FATAL, "Algorithm_type parameter %s has the value %s which is not of the correct type.", name, param_value_str);
+    carp(CARP_FATAL, "Algorithm_type parameter %s has the value %s "
+         "which is not of the correct type.", name, param_value_str);
     exit(1);
   }
   return param_value;
@@ -1566,33 +1490,32 @@ ALGORITHM_TYPE_T get_algorithm_type_parameter(char* name){
 
 
 SCORER_TYPE_T get_scorer_type_parameter(char* name){
-  //  char* param_value_str = get_hash_value(parameters->hash, name);
   char* param_value_str = get_hash_value(parameters, name);
   SCORER_TYPE_T param_value;
   BOOLEAN_T success = string_to_scorer_type(param_value_str, &param_value);
 
   if(!success){
-    carp(CARP_FATAL, "Scorer_type parameter %s has the value %s which is not of the correct type.", name, param_value_str);
+    carp(CARP_FATAL, "Scorer_type parameter %s has the value %s " 
+         "which is not of the correct type.", name, param_value_str);
     exit(1);
   }
   return param_value;
 }
 
 MATCH_SEARCH_OUTPUT_MODE_T get_output_type_parameter(char* name){
-  //  char* param_value_str = get_hash_value(parameters->hash, name);
   char* param_value_str = get_hash_value(parameters, name);
   MATCH_SEARCH_OUTPUT_MODE_T param_value;
   BOOLEAN_T success = string_to_output_type(param_value_str, &param_value);
 
   if(!success){
-    carp(CARP_FATAL, "Scorer_type parameter %s has the value %s which is not of the correct type.", name, param_value_str);
+    carp(CARP_FATAL, "Scorer_type parameter %s has the value %s which"
+         " is not of the correct type.", name, param_value_str);
     exit(1);
   }
   return param_value;
 }
 
 ION_TYPE_T get_ion_type_parameter(char* name){
-  //  char* param_value_str = get_hash_value(parameters->hash, name);
   char* param_value_str = get_hash_value(parameters, name);
   ION_TYPE_T param_value;
   BOOLEAN_T success = string_to_ion_type(param_value_str, &param_value);
@@ -1609,39 +1532,6 @@ ION_TYPE_T get_ion_type_parameter(char* name){
  *   SETTERS (private)
  **************************************************
  */
-//TODO change all result = add_or... to result = result && add_or_...
-// obsolete
-/*
-BOOLEAN_T set_flag_parameter(
- char* name,
- BOOLEAN_T set_value,
- char* usage
- ){
-  BOOLEAN_T result = TRUE;
-
-  // check if parameters can be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-
-  // assume that presence of the flag means true
-  char* bool_str;
-  if(set_value){
-    bool_str = "TRUE";
-  }
-  else{
-    bool_str = "FALSE";
-  }
-
-  result = add_or_update_hash_copy(parameters->hash, name, bool_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(types->hash, name, "FLAG_T");
-
-  return result;
-
-}
-*/
 
 BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
@@ -1666,13 +1556,6 @@ BOOLEAN_T set_boolean_parameter(
   else{
     bool_str = "FALSE";
   }
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, bool_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "BOOLEAN_T");
-  */
   result = add_or_update_hash_copy(parameters, name, bool_str);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
@@ -1681,7 +1564,6 @@ BOOLEAN_T set_boolean_parameter(
   return result;
 }
 
-//temporary, replace name with set_int_parameter
 BOOLEAN_T set_int_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  int set_value,  ///< the value to be set -in
@@ -1703,23 +1585,14 @@ BOOLEAN_T set_int_parameter(
   
   //stringify default, min, and max values and set
   snprintf(buffer, PARAMETER_LENGTH, "%i", set_value);
-  //  result = add_or_update_hash_copy(parameters->hash, name, buffer);
   result = add_or_update_hash_copy(parameters, name, buffer);
 
   snprintf(buffer, PARAMETER_LENGTH, "%i", min_value);
-  //  result = add_or_update_hash_copy(min_values->hash, name, buffer);
   result = add_or_update_hash_copy(min_values, name, buffer);
 
   snprintf(buffer, PARAMETER_LENGTH, "%i", max_value);
-  //  result = add_or_update_hash_copy(max_values->hash, name, buffer);
   result = add_or_update_hash_copy(max_values, name, buffer);
 
-  /*
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "INT_ARG");
-  */
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
@@ -1727,8 +1600,6 @@ BOOLEAN_T set_int_parameter(
   return result;
 }
 
-
-//change name when all exe's are fixed
 BOOLEAN_T set_double_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  double set_value,  ///< the value to be set -in
@@ -1750,29 +1621,21 @@ BOOLEAN_T set_double_parameter(
   
   // convert to string
   snprintf(buffer, PARAMETER_LENGTH, "%f", set_value);
-  //  result = add_or_update_hash_copy(parameters->hash, name, buffer);    
   result = add_or_update_hash_copy(parameters, name, buffer);    
 
   snprintf(buffer, PARAMETER_LENGTH, "%f", min_value);
-  //  result = add_or_update_hash_copy(min_values->hash, name, buffer);    
   result = add_or_update_hash_copy(min_values, name, buffer);    
 
   snprintf(buffer, PARAMETER_LENGTH, "%f", max_value);
-  //  result = add_or_update_hash_copy(max_values->hash, name, buffer);    
   result = add_or_update_hash_copy(max_values, name, buffer);    
 
-  /*
-  result = add_or_update_hash_copy(usages->hash, name, usage);    
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "DOUBLE_ARG");    
-  */
   result = add_or_update_hash_copy(usages, name, usage);    
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types, name, "DOUBLE_ARG");    
   return result;
 }
+
 /**
  * temporary replacement for function, return name once all exe's are fixed
  * \returns TRUE if paramater value is set, else FALSE
@@ -1797,13 +1660,6 @@ BOOLEAN_T set_string_parameter(
     set_value = "__NULL_STR";
   }
 
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, set_value);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "STRING_ARG");
-  */
   result = add_or_update_hash_copy(parameters, name, set_value);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
@@ -1833,13 +1689,6 @@ BOOLEAN_T set_mass_type_parameter(
   /* stringify the value */
   mass_type_to_string(set_value, value_str);
   
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, value_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "MASS_TYPE_T");
-  */
   result = add_or_update_hash_copy(parameters, name, value_str);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
@@ -1869,13 +1718,6 @@ BOOLEAN_T set_peptide_type_parameter(
   /* stringify the value */
   peptide_type_to_string(set_value, value_str);
 
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, value_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "PEPTIDE_TYPE_T");
-  */
   result = add_or_update_hash_copy(parameters, name, value_str);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
@@ -1902,13 +1744,6 @@ BOOLEAN_T set_sort_type_parameter(
   /* stringify value */
   sort_type_to_string(set_value, value_str);
   
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, value_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "SORT_TYPE_T");
-  */
   result = add_or_update_hash_copy(parameters, name, value_str);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
@@ -1936,13 +1771,6 @@ BOOLEAN_T set_algorithm_type_parameter(
   algorithm_type_to_string(set_value, value_str);
   carp(CARP_DETAILED_DEBUG, "setting algorithm type to %s", value_str);  
 
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, value_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "ALGORITHM_TYPE_T");
-  */
   result = add_or_update_hash_copy(parameters, name, value_str);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
@@ -1971,13 +1799,6 @@ BOOLEAN_T set_scorer_type_parameter(
   scorer_type_to_string(set_value, value_str);
   carp(CARP_DETAILED_DEBUG, "setting score type to %s", value_str);  
 
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, value_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "SCORER_TYPE_T");
-  */
   result = add_or_update_hash_copy(parameters, name, value_str);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
@@ -2007,13 +1828,6 @@ BOOLEAN_T set_output_type_parameter(
   /* stringify value */
   output_type_to_string(set_value, value_str);
   
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, value_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "OUTPUT_TYPE_T");
-  */
   result = add_or_update_hash_copy(parameters, name, value_str);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
@@ -2041,13 +1855,6 @@ BOOLEAN_T set_ion_type_parameter(char* name,
   /* stringify value */
   ion_type_to_string(set_value, value_str);
 
-  /*
-  result = add_or_update_hash_copy(parameters->hash, name, value_str);
-  result = add_or_update_hash_copy(usages->hash, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types->hash, name, "ION_TYPE_T");
-  */
   result = add_or_update_hash_copy(parameters, name, value_str);
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
