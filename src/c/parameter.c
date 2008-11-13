@@ -14,10 +14,12 @@
  *\struct parameter_hash
  *\brief the hash table that holds all the different parameters
  */
+/*
 struct parameter_hash{
   int num_parameters;   ///< number of the total number of parameters
   HASH_T* hash; ///< the hash table for parameters
 };
+*/
 
 /*
  * Global variables
@@ -29,20 +31,31 @@ static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = {
   "ALGORITHM_TYPE_T"};
 
 //one hash for parameter values, one for usage statements, one for types
+/*
 struct parameter_hash  parameters_hash_table;
 struct parameter_hash* parameters = &parameters_hash_table;
 struct parameter_hash  usage_hash_table;
 struct parameter_hash* usages = &usage_hash_table;
 struct parameter_hash  type_hash_table;
 struct parameter_hash* types = & type_hash_table;
-HASH_T* file_notes;
-HASH_T* for_users; //true for most params, false if for dev/research only
+*/
+// all hashes keyed on parameter/option name
+HASH_T* parameters; // values of parameters
+HASH_T* usages;     // usage statments
+HASH_T* types;      // PARAMETER_TYPE_T
+HASH_T* file_notes; // additional notes for param file
+HASH_T* for_users;  // false to hide from param file (args and ops for
+                    // dev/research only)
+HASH_T* min_values; // for numeric parameters
+HASH_T* max_values; // for numeric parameters
 
+
+/*
 struct parameter_hash  min_values_hash_table;
 struct parameter_hash* min_values = & min_values_hash_table;
 struct parameter_hash  max_values_hash_table;
 struct parameter_hash* max_values = & max_values_hash_table;
-
+*/
 BOOLEAN_T parameter_initialized = FALSE; //have param values been initialized
 BOOLEAN_T usage_initialized = FALSE; // have the usages been initialized?
 BOOLEAN_T type_initialized = FALSE; // have the types been initialized?
@@ -205,21 +218,27 @@ void initialize_parameters(void){
   }
   
   /* allocate the hash tables */
-  parameters->hash = new_hash(NUM_PARAMS);
-  usages->hash = new_hash(NUM_PARAMS);
+  //parameters->hash = new_hash(NUM_PARAMS);
+  parameters = new_hash(NUM_PARAMS);
+  //  usages->hash = new_hash(NUM_PARAMS);
+  usages = new_hash(NUM_PARAMS);
   file_notes = new_hash(NUM_PARAMS);
   for_users = new_hash(NUM_PARAMS);
-  types->hash = new_hash(NUM_PARAMS);
-  min_values->hash = new_hash(NUM_PARAMS);
-  max_values->hash = new_hash(NUM_PARAMS);
+  //  types->hash = new_hash(NUM_PARAMS);
+  types = new_hash(NUM_PARAMS);
+  //  min_values->hash = new_hash(NUM_PARAMS);
+  min_values = new_hash(NUM_PARAMS);
+  //  max_values->hash = new_hash(NUM_PARAMS);
+  max_values = new_hash(NUM_PARAMS);
 
   /* set number of parameters to zero */
+  /*
   parameters->num_parameters = 0;
   usages->num_parameters = 0;
   types->num_parameters = 0;
   min_values->num_parameters = 0;
   max_values->num_parameters = 0;
-
+  */
 
   /* *** Initialize Arguments *** */
 
@@ -251,11 +270,6 @@ void initialize_parameters(void){
      "Directory containing the binary psm files created by " \
      "crux-search-for-matches.",
      "Argument for analyze-matches.", "false");
-  /*  // for now, replaces above; or not
-  set_string_parameter("psm file", NULL, 
-   "The binary psm file containing matches to the target database.  "
-   "Decoys named filename-decoy-#.csm are also analyzed.",
-   "file notes", "true");*/
   //and uses protein input
 
   /* get-ms2-spectrum */
@@ -444,11 +458,6 @@ void initialize_parameters(void){
       "Only available for crux-search-for-matches with output-mode=" \
       "<all|sqt>.  The location of this file is controlled by " \
       "match-output-folder.", "true");
-  /*
-  set_string_parameter("protein-output-file", "target.prot", 
-      "Protein output file name. Default 'target.prot'",
-                       "file notes", "true");
-  */
   set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
       "SQT output file name for decoys.  Default 'decoy.sqt'.",
       "Used by crux-search-for-matches with output-mode=<all|sqt> and " \
@@ -523,16 +532,11 @@ void initialize_parameters(void){
       "score distribution for calculating p-values. 0 to use all. " \
       "Not compatible with 'fraction-top-scores-to-fit'. Default 0 (all).",
       "false");
-  //set_double_parameter("fraction-top-scores-to-fit", -1.0, -10, 10, "usage");
-  set_double_parameter("fraction-top-scores-to-fit", 0.55, 0, 1, 
+  set_double_parameter("fraction-top-scores-to-fit", -1, -1, 1, 
       "The fraction of psms per spectrum to use for estimating the " \
       "score distribution for calculating p-values.  0 to use all. " \
-      "Not compatible with 'number-top-scores-to-fig'. Default 0.55.",
+      "Not compatible with 'number-top-scores-to-fig'. Default 0 (all).",
       "For developers/research only.", "false");
-  /*
-  set_boolean_parameter("skip-first-score", FALSE,  "usage",
-        "filenotes", "true");
-  */
 
   /* analyze-matches options */
   set_algorithm_type_parameter("algorithm", PERCOLATOR_ALGORITHM, 
@@ -741,9 +745,12 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     carp(CARP_DETAILED_DEBUG, "Option is: %s", option_names[i]);
 
     /* get value, usage, types */
-    void* value_ptr = get_hash_value(parameters->hash, option_names[i]);
-    void* usage_ptr = get_hash_value(usages->hash, option_names[i]);
-    void* type_ptr =  get_hash_value(types->hash, option_names[i]);
+    //void* value_ptr = get_hash_value(parameters->hash, option_names[i]);
+    //void* usage_ptr = get_hash_value(usages->hash, option_names[i]);
+    //void* type_ptr =  get_hash_value(types->hash, option_names[i]);
+    void* value_ptr = get_hash_value(parameters, option_names[i]);
+    void* usage_ptr = get_hash_value(usages, option_names[i]);
+    void* type_ptr =  get_hash_value(types, option_names[i]);
     if( strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
         strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
         strcmp(type_ptr, "BOOLEAN_T") == 0 ||
@@ -851,7 +858,8 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
      check options for legal values, and put values in hash 
      overwriting file parameters */ 
 
-  success = parse_arguments_into_hash(argc, argv, parameters->hash, 0); 
+  //  success = parse_arguments_into_hash(argc, argv, parameters->hash, 0); 
+  success = parse_arguments_into_hash(argc, argv, parameters, 0); 
 
   // For version option, print version and quit
   if( get_boolean_parameter("version") ){
@@ -936,10 +944,16 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 
   BOOLEAN_T success = TRUE;
   char die_str[SMALL_BUFFER];
+  /*
   char* type_str = get_hash_value(types->hash, name);
   char* value_str = get_hash_value(parameters->hash, name);
   char* min_str = get_hash_value(min_values->hash, name);
   char* max_str = get_hash_value(max_values->hash, name);
+  */
+  char* type_str = get_hash_value(types, name);
+  char* value_str = get_hash_value(parameters, name);
+  char* min_str = get_hash_value(min_values, name);
+  char* max_str = get_hash_value(max_values, name);
 
   MASS_TYPE_T mass_type;
   PEPTIDE_TYPE_T pep_type;
@@ -1103,16 +1117,19 @@ void print_parameter_file(char* input_param_filename){
   // TODO (BF Nov-12-08): could add header to file
 
   // iterate over all parameters and print to file
-  HASH_ITERATOR_T* iterator = new_hash_iterator(parameters->hash);
+  //  HASH_ITERATOR_T* iterator = new_hash_iterator(parameters->hash);
+  HASH_ITERATOR_T* iterator = new_hash_iterator(parameters);
   while(hash_iterator_has_next(iterator)){
     char* key = hash_iterator_next(iterator);
     char* show_users = get_hash_value(for_users, key);
     if( strcmp(show_users, "true") == 0 ){
       fprintf(param_file, "# %s\n# %s\n%s=%s\n\n",
-              (char*)get_hash_value(usages->hash, key),
+              //(char*)get_hash_value(usages->hash, key),
+              (char*)get_hash_value(usages, key),
               (char*)get_hash_value(file_notes, key),
               key,
-              (char*)get_hash_value(parameters->hash, key));
+              //(char*)get_hash_value(parameters->hash, key));
+              (char*)get_hash_value(parameters, key));
     }
   }
 
@@ -1125,11 +1142,20 @@ void print_parameter_file(char* input_param_filename){
  */
 void free_parameters(void){
   if(parameter_initialized){
+    /*
     free_hash(parameters->hash);
     free_hash(usages->hash);
     free_hash(types->hash);
     free_hash(min_values->hash);
     free_hash(max_values->hash);
+    */
+    free_hash(parameters);
+    free_hash(usages);
+    free_hash(file_notes);
+    free_hash(for_users);
+    free_hash(types);
+    free_hash(min_values);
+    free_hash(max_values);
   }
 }
 
@@ -1207,7 +1233,8 @@ void parse_parameter_file(
       carp(CARP_DETAILED_DEBUG, "Found option '%s' and value '%s'", 
            option_name, option_value);
 
-      if(! update_hash_value(parameters->hash, option_name, option_value) ){
+//      if(! update_hash_value(parameters->hash, option_name, option_value) ){
+      if(! update_hash_value(parameters, option_name, option_value) ){
         carp(CARP_ERROR, "Unexpected parameter file option '%s'", option_name);
         exit(1);
       }
@@ -1239,7 +1266,8 @@ BOOLEAN_T get_boolean_parameter(
 {
   static char buffer[PARAMETER_LENGTH];
   
-  char* value = get_hash_value(parameters->hash, name);
+  //  char* value = get_hash_value(parameters->hash, name);
+  char* value = get_hash_value(parameters, name);
  
   // can't find parameter
   if(value == NULL){
@@ -1248,7 +1276,8 @@ BOOLEAN_T get_boolean_parameter(
   }
   
   //check type
-  char* type_str = get_hash_value(types->hash, name);
+  //  char* type_str = get_hash_value(types->hash, name);
+  char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
  
@@ -1297,7 +1326,8 @@ int get_int_parameter(
   //long int value;
   int value;
 
-  char* int_value = get_hash_value(parameters->hash, name);
+  //  char* int_value = get_hash_value(parameters->hash, name);
+  char* int_value = get_hash_value(parameters, name);
 
   //  carp(CARP_DETAILED_DEBUG, "int value string is %s", int_value);
 
@@ -1307,7 +1337,8 @@ int get_int_parameter(
     exit(1);
   }
   //check type
-  char* type_str = get_hash_value(types->hash, name);
+  //  char* type_str = get_hash_value(types->hash, name);
+  char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
 
@@ -1353,7 +1384,8 @@ double get_double_parameter(
     exit(1);
   }
 
-  char* double_value = get_hash_value(parameters->hash, name);
+  //  char* double_value = get_hash_value(parameters->hash, name);
+  char* double_value = get_hash_value(parameters, name);
  
   // can't find parameter
   if(double_value == NULL){
@@ -1362,7 +1394,8 @@ double get_double_parameter(
   }
  
   //check type
-  char* type_str = get_hash_value(types->hash, name);
+  //  char* type_str = get_hash_value(types->hash, name);
+  char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
 
@@ -1402,7 +1435,8 @@ char* get_string_parameter(
   )
 {
   
-  char* string_value = get_hash_value(parameters->hash, name);
+  //  char* string_value = get_hash_value(parameters->hash, name);
+  char* string_value = get_hash_value(parameters, name);
   
   // can't find parameter
   if(string_value == NULL){
@@ -1415,7 +1449,8 @@ char* get_string_parameter(
     string_value = NULL;
   }
   //check type
-  char* type_str = get_hash_value(types->hash, name);
+  // char* type_str = get_hash_value(types->hash, name);
+  char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   //BOOLEAN_T found = string_to_param_type(type_str, &type);
   string_to_param_type(type_str, &type);
@@ -1446,7 +1481,8 @@ char* get_string_parameter_pointer(
   )
 {
   
-  char* string_value = get_hash_value(parameters->hash, name);
+  //  char* string_value = get_hash_value(parameters->hash, name);
+  char* string_value = get_hash_value(parameters, name);
 
   // can't find parameter
   if(string_value == NULL){
@@ -1454,7 +1490,8 @@ char* get_string_parameter_pointer(
     exit(1);
   }
   //check type
-  char* type_str = get_hash_value(types->hash, name);
+  //  char* type_str = get_hash_value(types->hash, name);
+  char* type_str = get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   //BOOLEAN_T found = string_to_param_type(type_str, &type);
   string_to_param_type(type_str, &type);
@@ -1472,12 +1509,9 @@ PEPTIDE_TYPE_T get_peptide_type_parameter(
   char* name
     ){
 
-  //  char* param = get_string_parameter_pointer(name);
-  char* param = get_hash_value(parameters->hash, name);
-  /*
-  int peptide_type = convert_enum_type_str(
-      param, 0, peptide_type_strings, NUMBER_PEPTIDE_TYPES);
-  */
+  //  char* param = get_hash_value(parameters->hash, name);
+  char* param = get_hash_value(parameters, name);
+
   PEPTIDE_TYPE_T peptide_type;
   int success = string_to_peptide_type(param, &peptide_type);
   //we should have already checked the type, but just in case
@@ -1492,7 +1526,8 @@ PEPTIDE_TYPE_T get_peptide_type_parameter(
 MASS_TYPE_T get_mass_type_parameter(
    char* name
    ){
-  char* param_value_str = get_hash_value(parameters->hash, name);
+  //  char* param_value_str = get_hash_value(parameters->hash, name);
+  char* param_value_str = get_hash_value(parameters, name);
   MASS_TYPE_T param_value;
   BOOLEAN_T success = string_to_mass_type(param_value_str, &param_value);
 
@@ -1504,7 +1539,8 @@ MASS_TYPE_T get_mass_type_parameter(
 }
 
 SORT_TYPE_T get_sort_type_parameter(char* name){
-  char* param_value_str = get_hash_value(parameters->hash, name);
+  //  char* param_value_str = get_hash_value(parameters->hash, name);
+  char* param_value_str = get_hash_value(parameters, name);
   SORT_TYPE_T param_value;
   BOOLEAN_T success = string_to_sort_type(param_value_str, &param_value);
 
@@ -1516,7 +1552,8 @@ SORT_TYPE_T get_sort_type_parameter(char* name){
 }
 
 ALGORITHM_TYPE_T get_algorithm_type_parameter(char* name){
-  char* param_value_str = get_hash_value(parameters->hash, name);
+  //  char* param_value_str = get_hash_value(parameters->hash, name);
+  char* param_value_str = get_hash_value(parameters, name);
   ALGORITHM_TYPE_T param_value;
   BOOLEAN_T success = string_to_algorithm_type(param_value_str, &param_value);
 
@@ -1529,7 +1566,8 @@ ALGORITHM_TYPE_T get_algorithm_type_parameter(char* name){
 
 
 SCORER_TYPE_T get_scorer_type_parameter(char* name){
-  char* param_value_str = get_hash_value(parameters->hash, name);
+  //  char* param_value_str = get_hash_value(parameters->hash, name);
+  char* param_value_str = get_hash_value(parameters, name);
   SCORER_TYPE_T param_value;
   BOOLEAN_T success = string_to_scorer_type(param_value_str, &param_value);
 
@@ -1541,7 +1579,8 @@ SCORER_TYPE_T get_scorer_type_parameter(char* name){
 }
 
 MATCH_SEARCH_OUTPUT_MODE_T get_output_type_parameter(char* name){
-  char* param_value_str = get_hash_value(parameters->hash, name);
+  //  char* param_value_str = get_hash_value(parameters->hash, name);
+  char* param_value_str = get_hash_value(parameters, name);
   MATCH_SEARCH_OUTPUT_MODE_T param_value;
   BOOLEAN_T success = string_to_output_type(param_value_str, &param_value);
 
@@ -1553,7 +1592,8 @@ MATCH_SEARCH_OUTPUT_MODE_T get_output_type_parameter(char* name){
 }
 
 ION_TYPE_T get_ion_type_parameter(char* name){
-  char* param_value_str = get_hash_value(parameters->hash, name);
+  //  char* param_value_str = get_hash_value(parameters->hash, name);
+  char* param_value_str = get_hash_value(parameters, name);
   ION_TYPE_T param_value;
   BOOLEAN_T success = string_to_ion_type(param_value_str, &param_value);
 
@@ -1570,6 +1610,8 @@ ION_TYPE_T get_ion_type_parameter(char* name){
  **************************************************
  */
 //TODO change all result = add_or... to result = result && add_or_...
+// obsolete
+/*
 BOOLEAN_T set_flag_parameter(
  char* name,
  BOOLEAN_T set_value,
@@ -1599,7 +1641,7 @@ BOOLEAN_T set_flag_parameter(
   return result;
 
 }
-
+*/
 
 BOOLEAN_T set_boolean_parameter(
  char*     name,  ///< the name of the parameter looking for -in
@@ -1624,12 +1666,18 @@ BOOLEAN_T set_boolean_parameter(
   else{
     bool_str = "FALSE";
   }
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, bool_str);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "BOOLEAN_T");
-
+  */
+  result = add_or_update_hash_copy(parameters, name, bool_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "BOOLEAN_T");
   return result;
 }
 
@@ -1655,19 +1703,27 @@ BOOLEAN_T set_int_parameter(
   
   //stringify default, min, and max values and set
   snprintf(buffer, PARAMETER_LENGTH, "%i", set_value);
-  result = add_or_update_hash_copy(parameters->hash, name, buffer);
+  //  result = add_or_update_hash_copy(parameters->hash, name, buffer);
+  result = add_or_update_hash_copy(parameters, name, buffer);
 
   snprintf(buffer, PARAMETER_LENGTH, "%i", min_value);
-  result = add_or_update_hash_copy(min_values->hash, name, buffer);
+  //  result = add_or_update_hash_copy(min_values->hash, name, buffer);
+  result = add_or_update_hash_copy(min_values, name, buffer);
 
   snprintf(buffer, PARAMETER_LENGTH, "%i", max_value);
-  result = add_or_update_hash_copy(max_values->hash, name, buffer);
+  //  result = add_or_update_hash_copy(max_values->hash, name, buffer);
+  result = add_or_update_hash_copy(max_values, name, buffer);
 
+  /*
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "INT_ARG");
-  
+  */
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "INT_ARG");
   return result;
 }
 
@@ -1694,19 +1750,27 @@ BOOLEAN_T set_double_parameter(
   
   // convert to string
   snprintf(buffer, PARAMETER_LENGTH, "%f", set_value);
-  result = add_or_update_hash_copy(parameters->hash, name, buffer);    
+  //  result = add_or_update_hash_copy(parameters->hash, name, buffer);    
+  result = add_or_update_hash_copy(parameters, name, buffer);    
 
   snprintf(buffer, PARAMETER_LENGTH, "%f", min_value);
-  result = add_or_update_hash_copy(min_values->hash, name, buffer);    
+  //  result = add_or_update_hash_copy(min_values->hash, name, buffer);    
+  result = add_or_update_hash_copy(min_values, name, buffer);    
 
   snprintf(buffer, PARAMETER_LENGTH, "%f", max_value);
-  result = add_or_update_hash_copy(max_values->hash, name, buffer);    
+  //  result = add_or_update_hash_copy(max_values->hash, name, buffer);    
+  result = add_or_update_hash_copy(max_values, name, buffer);    
 
+  /*
   result = add_or_update_hash_copy(usages->hash, name, usage);    
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "DOUBLE_ARG");    
-
+  */
+  result = add_or_update_hash_copy(usages, name, usage);    
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "DOUBLE_ARG");    
   return result;
 }
 /**
@@ -1733,12 +1797,18 @@ BOOLEAN_T set_string_parameter(
     set_value = "__NULL_STR";
   }
 
-
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, set_value);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "STRING_ARG");
+  */
+  result = add_or_update_hash_copy(parameters, name, set_value);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "STRING_ARG");
 
   return result;
 }
@@ -1763,12 +1833,18 @@ BOOLEAN_T set_mass_type_parameter(
   /* stringify the value */
   mass_type_to_string(set_value, value_str);
   
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, value_str);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "MASS_TYPE_T");
-    
+  */
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "MASS_TYPE_T");
   return result;
 
 }
@@ -1793,12 +1869,18 @@ BOOLEAN_T set_peptide_type_parameter(
   /* stringify the value */
   peptide_type_to_string(set_value, value_str);
 
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, value_str);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "PEPTIDE_TYPE_T");
-    
+  */
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "PEPTIDE_TYPE_T");
   return result;
 
 }
@@ -1820,12 +1902,18 @@ BOOLEAN_T set_sort_type_parameter(
   /* stringify value */
   sort_type_to_string(set_value, value_str);
   
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, value_str);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "SORT_TYPE_T");
-
+  */
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "SORT_TYPE_T");
   return result;
 }
 
@@ -1848,12 +1936,18 @@ BOOLEAN_T set_algorithm_type_parameter(
   algorithm_type_to_string(set_value, value_str);
   carp(CARP_DETAILED_DEBUG, "setting algorithm type to %s", value_str);  
 
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, value_str);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "ALGORITHM_TYPE_T");
-
+  */
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "ALGORITHM_TYPE_T");
   return result;
 }
 
@@ -1877,11 +1971,19 @@ BOOLEAN_T set_scorer_type_parameter(
   scorer_type_to_string(set_value, value_str);
   carp(CARP_DETAILED_DEBUG, "setting score type to %s", value_str);  
 
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, value_str);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "SCORER_TYPE_T");
+  */
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "SCORER_TYPE_T");
+
 
   return result;
 }
@@ -1905,11 +2007,18 @@ BOOLEAN_T set_output_type_parameter(
   /* stringify value */
   output_type_to_string(set_value, value_str);
   
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, value_str);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "OUTPUT_TYPE_T");
+  */
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "OUTPUT_TYPE_T");
 
   return result;
 }
@@ -1932,12 +2041,18 @@ BOOLEAN_T set_ion_type_parameter(char* name,
   /* stringify value */
   ion_type_to_string(set_value, value_str);
 
+  /*
   result = add_or_update_hash_copy(parameters->hash, name, value_str);
   result = add_or_update_hash_copy(usages->hash, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types->hash, name, "ION_TYPE_T");
-
+  */
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "ION_TYPE_T");
   return result;
 }
 /**
