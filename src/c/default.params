@@ -45,7 +45,7 @@ isotopic-mass=average
 fragment-mass=mono
 
 # Search peptides within +/- 'mass-window' of the spectrum mass.  Default 3.0.
-# Available from the parameter file only for crux-search-for-matches and crux-generate-peptides.
+# Available from the parameter file only for crux-search-for-matches, crux-create-index, and crux-generate-peptides.
 mass-window=3.000000
  
 # Tolerance used for matching observed peaks to predicted fragment ions.  Default 0.5.

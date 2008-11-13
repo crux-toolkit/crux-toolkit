@@ -452,7 +452,7 @@ void initialize_parameters(void){
       "Search peptides within +/- 'mass-window' of the "
       "spectrum mass.  Default 3.0.",
       "Available from the parameter file only for crux-search-for-matches "
-      "and crux-generate-peptides.", "true");
+      "crux-create-index, and crux-generate-peptides.", "true");
   set_mass_type_parameter("fragment-mass", MONO, 
       "Which isotopes to use in calcuating fragment ion mass "
       "(average, mono). Default mono.", 
