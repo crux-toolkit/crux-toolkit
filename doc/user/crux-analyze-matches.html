@@ -1,54 +1,82 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
-  <TITLE>crux-analyze-matches</TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
-	<META NAME="CREATED" CONTENT="20050830;17560800">
-	<META NAME="CHANGED" CONTENT="20050902;15510500">
-<!-- FILE: match-analysis.html
+<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>crux-analyze-matches</TITLE>
+<!-- FILE: crux-analyze-matches.html
 AUTHOR: Chris Park
 CREATE DATE: 2007-06-19
-PROJECT: match-analysis
-REVISION: $Revision: 1.3.8.3 $
+PROJECT: CRUX
+REVISION: $Revision: 1.3.8.4 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
+<blockquote>
+
 <H1 ALIGN=CENTER>crux-analyze-matches</H1>
 <B>Description:</B>
-<br>
-<br>
-Given as input a sequence database and PSMs generate additional run-specific
-features and analyze with user-specified algorithm (e.g. Percolator).
-<br>
-<br>
-<B>Usage:</B>
-<br>
-<br>
-<code>crux-analyze-matches
-  &nbsp;[options]
-  &nbsp;&lt;psm folder&gt;
-  &nbsp;&lt;protein&nbsp;input&gt; 
-
-</code>
 
 <p>
-<B>Input:</B>
+Analyze a sequence database and a collection of peptide-spectrum
+matches with a user-specified algorithm.  Currently, two algorithms
+are implemented.  The default algorithm is Percolator, which is a
+semi-supervised learning algorithm described in this article:</p>
+
+<blockquote>
+Lukas K&auml;ll, Jesse Canterbury, Jason Weston, William Stafford
+Noble and Michael
+J. MacCoss.  <a href="http://noble.gs.washington.edu/papers/kall2007semi-supervised.html">"Semi-supervised
+learning for peptide identification from shotgun proteomics
+datasets."</a>
+<i>Nature Methods</i>.  4(11):923-925, 2007.
+</blockquote>
+
+<p>
+The second algorithm, which uses a Weibull curve fitting procedure to
+compute a statistical confidence estimate for each observed XCorr, is
+described in the following article:</p>
+
+<blockquote>
+Aaron A. Klammer, Christopher Y. Park and William Stafford Noble.
+<a href="http://noble.gs.washington.edu/papers/klammer2008statistical.html">"Statistical
+calibration of peptide-spectrum score functions."</a>  Submitted.
+</blockquote>
+
+<p>
+<B>Usage:</B></p>
+
+<blockquote>
+<code>crux-analyze-matches&nbsp;[options]&nbsp;&lt;psm folder&gt;&nbsp;&lt;protein&nbsp;input&gt; 
+</code>
+</blockquote>
+
+<p>
+<B>Input:</B></p>
 
 <UL>
-  <LI>&lt;psm folder&gt; &ndash;
-   The name of folder in which all the psm result files are located.
-  <LI>&lt;protein input &gt; &ndash; 
-  The name of the file in fasta format or the directory containing the
-   protein index from which to retrieve proteins and
-  peptides.
+
+<LI>
+&lt;psm folder&gt; &ndash; The name of the folder in which all the PSM
+result files are located.  The program looks for files ending in
+<code>.csm</code>, which are produced by
+<code>crux-search-for-matches</code>.  All such files in the given
+directory are analyzed jointly.</li>
+
+<LI>
+&lt;protein input &gt; &ndash; The name of the file in fasta format or
+the directory containing the protein index from which to retrieve
+proteins and peptides.</li>
+
 </UL>
 <B>Output:</B>
 
 <UL>
-  <br>
-  Returns a reranked peptide list with q-values in sqt file format.
-  <br>
+
+<p>
+Returns a reranked peptide list with q-values in sqt file format.  All
+results are put into one sqt file which is named 'target.sqt' by
+default or can be named with the <code>--sqt-output-file</code>
+option.</p>
 
 </UL>
 <B>Options:</B>
@@ -60,30 +88,31 @@ A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.
 
 <LI> [--feature-file &lt;string&gt;] &ndash; 
-  Optional file in which to write the features. Default = none.
+  Optional file in which to write the features. Default = none.</li>
 <LI>[--verbosity &lt;int&gt;] &ndash; 
   Specify the verbosity of the current processes from 0-100. Default =
   40. 
 </UL>
-<B>Warning
-messages:</B> 
+
+<p>
+<B>Warning messages:</B></p>
 
 <UL>
-  <LI><I>Fatal: The file "folder path name" does
-  not exist (or is not readable, or is empty).</I>
-  <LI><I>Fatal: The file "protein input filename" does
-  not exist (or is not readable, or is empty).</I>
-</UL>
-<!-- 
-<B>Bugs:</B> 
 
-<UL>
-	<LI>match-analysis does not have bugs, it has features.
-	
+<LI>
+<I>Fatal: The file "folder path name" does not exist (or is not
+readable, or is empty).</I></li>
+
+<LI>
+<I>Fatal: The file "protein input filename" does not exist (or is not
+readable, or is empty).</I></li>
+
 </UL>
--->
 <HR>
-<P><A HREF="crux.html">Crux</A> 
-</P>
+
+<P>
+<A HREF="crux.html">Crux</A></P>
+
+</blockquote>
 </BODY>
 </HTML>
