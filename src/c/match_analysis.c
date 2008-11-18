@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.46.4.4 $
+ * $Revision: 1.46.4.5 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -237,7 +237,7 @@ void print_sqt_file(
 
   // print header
   int num_proteins = get_match_collection_num_proteins(match_collection);
-  print_sqt_header( sqt_file, "target", num_proteins);
+  print_sqt_header( sqt_file, "target", num_proteins, TRUE);
 
   ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
   char algorithm_str[64];

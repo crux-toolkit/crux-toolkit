@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.83.4.4 $
+ * $Revision: 1.83.4.5 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -2046,7 +2046,11 @@ BOOLEAN_T serialize_psm_features(
   return TRUE;
 }
 
-void print_sqt_header(FILE* output, char* type, int num_proteins){
+void print_sqt_header(
+ FILE* output, 
+ char* type, 
+ int num_proteins, 
+ BOOLEAN_T is_analysis){  // for analyze-matches look at algorithm param
   if( output == NULL ){
     return;
   }
@@ -2138,7 +2142,44 @@ void print_sqt_header(FILE* output, char* type, int num_proteins){
   PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
   peptide_type_to_string(cleavages, temp_str);
   fprintf(output, "H\tEnzymeSpec\t%s\n", temp_str);
-  //  fprintf(output, "H\t\n");
+
+  // write a comment that says what the scores are
+  fprintf(output, "H\tLine fields: S, scan number, scan number,"
+          "charge, 0, precursor m/z, 0, 0, number of matches\n");
+
+  // fancy logic for printing the scores. see match.c:print_match_sqt
+
+  SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
+  SCORER_TYPE_T other_score = get_scorer_type_parameter("prelim-score-type");
+  ALGORITHM_TYPE_T analysis_score = get_algorithm_type_parameter("algorithm");
+  if( is_analysis == TRUE && analysis_score == PERCOLATOR_ALGORITHM){
+    main_score = PERCOLATOR_SCORE; 
+    other_score = Q_VALUE;
+  }else if( is_analysis == TRUE && analysis_score == QVALUE_ALGORITHM ){
+    main_score = LOGP_QVALUE_WEIBULL_XCORR;
+  }
+
+  char main_score_str[64];
+  scorer_type_to_string(main_score, main_score_str);
+  char other_score_str[64];
+  scorer_type_to_string(other_score, other_score_str);
+
+  // ranks are always xcorr and sp
+  // main/other scores from search are...xcorr/sp (OK as is)
+  // ...p-val/xcorr
+  if( main_score == LOGP_BONF_WEIBULL_XCORR ){
+    strcpy(main_score_str, "p-value");
+    strcpy(other_score_str, "xcorr");
+  }// main/other scores from analyze are perc/q-val (OK as is)
+   // q-val/xcorr
+  if( main_score == LOGP_QVALUE_WEIBULL_XCORR ){
+    strcpy(main_score_str, "q-value");  // to be changed to curve-fit-q-value
+    strcpy(other_score_str, "xcorr");
+  }
+
+  fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
+          "peptide mass, deltaCn, %s score, %s score, number ions matched, "
+          "total ions compared, sequence\n", main_score_str, other_score_str);
 }
 
 /**

@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.30.4.2 $
+ * $Revision: 1.30.4.3 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -239,7 +239,10 @@ BOOLEAN_T serialize_psm_features(
 /*
  * Print the SQT file header 
  */
-void print_sqt_header(FILE* outfile, char* type, int proteins);
+void print_sqt_header(FILE* outfile, 
+                      char* type, 
+                      int proteins, 
+                      BOOLEAN_T is_for_match_analysis);
 
 /**
  * Print the psm features to output file upto 'top_match' number of 

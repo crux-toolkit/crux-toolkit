@@ -122,8 +122,8 @@ int main(int argc, char** argv){
 
   //print headers
   serialize_headers(psm_file_array);
-  print_sqt_header(sqt_file, "target", num_proteins);
-  print_sqt_header(decoy_sqt_file, "decoy", num_proteins);
+  print_sqt_header(sqt_file, "target", num_proteins, FALSE);// !analyze-matches
+  print_sqt_header(decoy_sqt_file, "decoy", num_proteins, FALSE);
 
   /* Perform search: loop over spectra*/
 

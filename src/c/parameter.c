@@ -1508,7 +1508,7 @@ MATCH_SEARCH_OUTPUT_MODE_T get_output_type_parameter(char* name){
   BOOLEAN_T success = string_to_output_type(param_value_str, &param_value);
 
   if(!success){
-    carp(CARP_FATAL, "Scorer_type parameter %s has the value %s which"
+    carp(CARP_FATAL, "Output_type parameter %s has the value %s which"
          " is not of the correct type.", name, param_value_str);
     exit(1);
   }
