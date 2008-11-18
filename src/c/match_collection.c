@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.83.4.3 $
+ * $Revision: 1.83.4.4 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -341,7 +341,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   /******* Scoring and estimating score distribution parameters ***/
   // The only supported distribution is the weibull with bonf correction 
 
-  carp(CARP_DETAILED_INFO,"Number matches = %i",match_collection->match_total);
+  carp(CARP_DETAILED_INFO,"Number matches after preliminary scoring = %i",match_collection->match_total);
 
   BOOLEAN_T success = TRUE;
   if(score_type == LOGP_WEIBULL_XCORR || 
@@ -377,10 +377,12 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
     return NULL;
   }
 
-  carp(CARP_DETAILED_INFO,"Number matches = %i",match_collection->match_total);
+  carp(CARP_DETAILED_INFO,"Number matches after parameter estimation = %i",match_collection->match_total);
 
   // save only the top max_rank matches from prelim_scoring
   truncate_match_collection(match_collection, max_rank, prelim_score);
+  
+  carp(CARP_DETAILED_INFO,"Number matches after truncation = %i",match_collection->match_total);
   
   /***************Main scoring*******************************/
   // The only supported types of primary score are xcorr,
@@ -393,6 +395,9 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
            get_spectrum_first_scan(spectrum), charge);
     }
   }else if(score_type == LOGP_BONF_WEIBULL_XCORR){
+    // we have to score for xcorr b/c in estimating params, we only scored
+    // a subset of matches
+    score_match_collection_xcorr(match_collection, spectrum, charge);
     if(!score_match_collection_logp_bonf_weibull_xcorr(match_collection, 
                                                        top_rank_for_p_value)){
       carp(CARP_ERROR, 
@@ -918,6 +923,7 @@ BOOLEAN_T estimate_weibull_parameters(
     if(!score_match_collection_xcorr(sample_collection, spectrum, charge)){
       carp(CARP_ERROR, "Failed to score match collection for XCORR");
     }
+    carp(CARP_DETAILED_DEBUG, "After scoring for xcorr collection is marked as scored? %i", sample_collection->scored_type[XCORR]);
   } else if (score_type == SP){
     // FIXME assumes scored by SP already
     ;
