@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.46.4.5 $
+ * $Revision: 1.46.4.6 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -141,8 +141,7 @@ int main(int argc, char** argv){
   case QVALUE_ALGORITHM:
     carp(CARP_INFO, "Running qvalue");
     match_collection = run_qvalue(psm_file, fasta_file);
-    //scorer_type = Q_VALUE;
-    scorer_type =  LOGP_QVALUE_WEIBULL_XCORR; //this might be correct
+    scorer_type =  LOGP_QVALUE_WEIBULL_XCORR; 
     second_scorer_type = XCORR; // could it be other?
     break;
     
@@ -180,6 +179,12 @@ int main(int argc, char** argv){
   print_hit_collection(stdout, hit_collection);
   free_hit_collection(hit_collection);
   */
+
+  // clean up
+  free(psm_file);
+  free(fasta_file);//rename
+  free(feature_file);
+
 
   carp(CARP_INFO, "crux-analyze-matches finished.");
   exit(0);
@@ -295,6 +300,8 @@ void print_sqt_file(
 
   }// next match
   free_match_iterator(match_iterator);
+  free(sqt_filename);
+
 }
 
 
@@ -707,12 +714,12 @@ MATCH_COLLECTION_T* run_percolator(
   
   // TODO put free back in. took out because claimed it was double free
   // free names
-  /*unsigned int name_idx;
+  unsigned int name_idx;
   for(name_idx=0; name_idx < number_features; ++name_idx){
     free(feature_names[name_idx]);
   }
   free(feature_names);
-  */
+  
 
   free(results_q);
   free(results_score);

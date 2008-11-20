@@ -125,9 +125,10 @@ int main(int argc, char** argv){
    }
    
    // create ion_constraint
-   //MASS_TYPE_T frag_masses = get_mass_type_parameter("fratment-mass");
+   MASS_TYPE_T frag_masses = get_mass_type_parameter("fragment-mass");
    ION_CONSTRAINT_T* ion_constraint = 
-     new_ion_constraint(MONO, max_charge, ion_type, use_precursor_ions);
+     //  new_ion_constraint(MONO, max_charge, ion_type, use_precursor_ions);
+     new_ion_constraint(frag_masses, max_charge, ion_type, use_precursor_ions);
 
    
    // set ion_constraint3 modification counts, if modifications should occur

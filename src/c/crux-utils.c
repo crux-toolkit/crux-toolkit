@@ -152,7 +152,9 @@ BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
  * The string version of ALGORITHM_TYPE_T
  */
 static char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
-  {"percolator", "rczar", "qvalue", "none", "all"};
+  {"percolator", "rczar", "curve-fit",
+   //"qvalue",
+   "none", "all"};
 
 BOOLEAN_T string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result){
   BOOLEAN_T success = TRUE;
@@ -184,8 +186,10 @@ BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
 static char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
   {"sp", "xcorr", "dotp", "logp_exp_sp", "logp_bonf_exp_sp", 
    "logp_evd_xcorr", "logp_bonf_evd_xcorr", "logp_weibull_sp", 
-   "sp-logp", "logp_weibull_xcorr", 
-   "xcorr-logp", "q_value", "percolator_score", 
+   "sp-pvalue",  //"sp-logp", 
+   "logp_weibull_xcorr", 
+   "xcorr-pvalue", //"xcorr-logp", 
+   "q_value", "percolator_score", 
    "qvalue"};//"logp_qvalue_weibull_xcorr" };
 //TODO: this should probably be changed, these strings are the option args
 //Instead could have an if block in string_to_type

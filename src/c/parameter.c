@@ -451,8 +451,8 @@ void initialize_parameters(void){
   set_double_parameter("mass-window", 3.0, 0, 100, 
       "Search peptides within +/- 'mass-window' of the "
       "spectrum mass.  Default 3.0.",
-      "Available from the parameter file only for crux-search-for-matches "
-      "crux-create-index, and crux-generate-peptides.", "true");
+      "Available from the parameter file only for crux-search-for-matches.",
+      "true");
   set_mass_type_parameter("fragment-mass", MONO, 
       "Which isotopes to use in calcuating fragment ion mass "
       "(average, mono). Default mono.", 
@@ -478,9 +478,11 @@ void initialize_parameters(void){
   set_int_parameter("sample-count", 500, 0, BILLION, "NOT FOR USER",
        "Number of psms to use for weibul estimation.", "false");
   // set the top ranking peptides to score for LOGP_*
+  /*
   set_int_parameter("top-rank-p-value", 1, 1, BILLION, "obsolete",
         "was used to set how many pvalues to calculate per spectrum",
                     "false");
+  */
 
   //in estimate_weibull_parameters
   set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, 
@@ -497,11 +499,11 @@ void initialize_parameters(void){
 
   /* analyze-matches options */
   set_algorithm_type_parameter("algorithm", PERCOLATOR_ALGORITHM, 
-      "The analysis algorithm to use (percolator, qvalue, none)."
+      "The analysis algorithm to use (percolator, curve-fit, none)."
       " Default percolator.",
       "Available only for crux-analyze-matches.  Using 'percolator' will "
       "assign a q-value to the top-ranking psm for each spectrum based on "
-      "the decoy searches.  Using 'q-value' will assign a q-value to same "
+      "the decoy searches.  Using 'curve-fit' will assign a q-value to same "
       "using the p-values calculated with score-type=<xcorr-pvalue|"
       "sq-pvalue>.  Incorrect combinations of score-type and algorithm cause"
       " undefined behavior. Using 'none' will turn the binary .csm files "
@@ -976,7 +978,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     if(! string_to_scorer_type( value_str, &scorer_type)){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
-      "Must be sp, xcorr, dotp, sp-logp, or xcorr-logp.", value_str, name);
+      "Must be sp, xcorr, sp-pvalue, or xcorr-pvalue.", value_str, name);
     }else if((scorer_type != SP ) &&   //check for one of the accepted types
              (scorer_type != XCORR ) &&
              (scorer_type != DOTP ) &&
@@ -984,7 +986,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
              (scorer_type != LOGP_BONF_WEIBULL_XCORR )){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
-      "Must be sp, xcorr, dotp, sp-logp, or xcorr-logp.", value_str, name);
+      "Must be sp, xcorr, sp-pvalue, or xcorr-pvalue.", value_str, name);
     }
     break;
   case ALGORITHM_TYPE_P:
@@ -993,7 +995,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     if(! string_to_algorithm_type( value_str, &algorithm_type)){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
-              "Must be percolator, rczar, qvalue, none OR all.", value_str, name);
+              "Must be percolator, curve-fit, or none.", value_str, name);
     }
     break;
 

@@ -128,8 +128,8 @@ top-match=1
 # Available from parameter file for crux-search-for-matches with output-mode=<all|sqt>.  Does not affect output to binary files.
 max-sqt-result=5
 
-# The analysis algorithm to use (percolator, qvalue, none). Default percolator.
-# Available only for crux-analyze-matches.  Using 'percolator' will assign a q-value to the top-ranking psm for each spectrum based on the decoy searches.  Using 'q-value' will assign a q-value to same using the p-values calculated with score-type=<xcorr-pvalue|sq-pvalue>.  Incorrect combinations of score-type and algorithm cause undefined behavior. Using 'none' will turn the binary .csm files into text.
+# The analysis algorithm to use (percolator, curve-fit, none). Default percolator.
+# Available only for crux-analyze-matches.  Using 'percolator' will assign a q-value to the top-ranking psm for each spectrum based on the decoy searches.  Using 'curve-fit' will assign a q-value to same using the p-values calculated with score-type=<xcorr-pvalue|sq-pvalue>.  Incorrect combinations of score-type and algorithm cause undefined behavior. Using 'none' will turn the binary .csm files into text.
 algorithm=percolator
 
 # Optional file into which psm features are printed.

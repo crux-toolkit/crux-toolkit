@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.83.4.6 $
+ * $Revision: 1.83.4.7 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -49,7 +49,7 @@ struct match_collection{
   ///< The top ranked sp scored peptides to use as EXP_SP parameter estimation
   float base_score_sp; 
  ///< The lowest sp score within top_fit_sp, used as the base to rescale sp
-  float eta;  ///< The eta parameter for the Weibull distribution.i
+  float eta;  ///< The eta parameter for the Weibull distribution.
   float beta; ///< The beta parameter for the Weibull distribution.
   float shift; ///< The location parameter for the Weibull distribution.
 
@@ -294,7 +294,11 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   match_collection->charge = charge;
   match_collection->null_peptide_collection = null_peptide_collection;
 
-  int top_rank_for_p_value = get_int_parameter("top-rank-p-value");
+  //int top_rank_for_p_value = get_int_parameter("top-rank-p-value");
+  int top_rank_for_p_value = get_int_parameter("top-match");
+  if( get_int_parameter("max-sqt-result") > top_rank_for_p_value ){
+    top_rank_for_p_value = get_int_parameter("max-sqt-result");
+  }
   int sample_count = get_int_parameter("sample-count");
   int top_fit_sp = get_int_parameter("top-fit-sp");
   
@@ -2079,6 +2083,7 @@ void print_sqt_header(
     database = fasta_name;
   }
   fprintf(output, "H\tDatabase\t%s\n", database);
+  free(database);
 
   if(decoy){
   fprintf(output, "H\tComment\tDatabase shuffled; these are decoy matches\n");
@@ -2637,7 +2642,6 @@ BOOLEAN_T extend_match_collection(
     return FALSE;
   }
   carp(CARP_DETAILED_DEBUG, "There are %i top matches", num_top_match);
-
 
   // FIXME
   // could parse fasta file and ms2 file
