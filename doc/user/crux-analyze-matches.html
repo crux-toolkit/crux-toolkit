@@ -7,7 +7,7 @@
 AUTHOR: Chris Park
 CREATE DATE: 2007-06-19
 PROJECT: CRUX
-REVISION: $Revision: 1.3.8.4 $
+REVISION: $Revision: 1.3.8.5 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -81,17 +81,58 @@ option.</p>
 </UL>
 <B>Options:</B>
 <UL>
-<LI>[--algorithm &lt;percolator | qvalue | none&gt; ] &ndash; 
-  The analysis algorithm to use. Default = percolator
-<LI>[--parameter-file &lt;filename&gt;] &ndash; 
-A file containing command-line or additional parameters.  See the <a
-href=parameter-file.html>parameter documentation</a> page for details.
+<LI>
+[--algorithm &lt;percolator | qvalue | none&gt; ] &ndash; 
+The analysis algorithm to use. Using 'percolator' will assign a
+q-value to the top-ranking psm for each spectrum based on the decoy
+searches.  Using 'q-value' will assign a q-value to same using the
+p-values calculated with score-type=&lt;xcorr-pvalue | sp-pvalue&gt;
+in crux-search-for-matches. The combination of crux-search-for-matches
+wtih score-type=xcorr followed by crux-analyze-matches with
+algorithm=qvalue will cause undefined behavior. Using 'none' will turn
+the binary .csm files into text. Default = percolator. 
 
-<LI> [--feature-file &lt;string&gt;] &ndash; 
-  Optional file in which to write the features. Default = none.</li>
-<LI>[--verbosity &lt;int&gt;] &ndash; 
-  Specify the verbosity of the current processes from 0-100. Default =
-  40. 
+<LI>
+[--use-index &lt;T | F&gt;] Use an index that has already been 
+created if true (T) or use a fasta file if false (F). When using
+an index the 'protein input' argument will be the name of the
+directory containing the index files (the same as the 'index name'
+argument for crux-create-index).  Default = F.
+
+<li>
+[--overwrite &lt;T | F&gt;] Replace existing files if true (T) or 
+fail when trying to overwrite a file if false (F). Default =  F.
+
+<LI>
+[--parameter-file &lt;filename&gt;] &ndash; 
+A file containing command-line or additional parameters.  See the <a
+href="parameter-file.html">parameter documentation</a> page for details.
+
+<LI>
+[--write-parameter-file &lt;filename&gt;] &ndash; Create a file
+with the name and value of all parameters/options for the current
+search.  Not all parameters in the file may have been used in the
+search.  The resulting file can be used with the --parameter-file
+option for other crux programs. 
+
+<LI> 
+[--feature-file &lt;string&gt;] &ndash; 
+Optional file in which to write the features used by
+percolator. Default = none (do not write feature file).</li> 
+
+<LI>
+[--verbosity &lt;0-100&gt;] &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.
+
+<li>
+[--version T] &ndash;
+Print the version number and quit.  Please note that you must include
+the 'T' after --version.
+
 </UL>
 
 <p>

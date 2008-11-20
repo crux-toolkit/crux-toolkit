@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: get-ms2-spectrum
-REVISION: $Revision: 1.2.8.1 $
+REVISION: $Revision: 1.2.8.2 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -20,42 +20,52 @@ REVISION: $Revision: 1.2.8.1 $
 Using a binary search, extract an MS-MS spectrum with a particular scan
 number from a .ms2 file, and output
 the spectrum. Optionally output some summary statistics for the MS-MS spectrum.
-<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in">
+
 <B>Usage:</B>
-<pre>crux-get-ms2-spectrum [options] 
+
+<blockquote>
+<code>crux-get-ms2-spectrum [options] 
   &nbsp;&lt;scan number&gt; 
   &nbsp;&lt;input&nbsp;filename&gt; 
-  &nbsp;&lt;output&nbsp;filename&gt; 
-</BLOCKQUOTE>
-<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Input:</B>
-</BLOCKQUOTE>
+  &nbsp;&lt;output&nbsp;filename&gt; </code>
+</blockquote>
+
+<B>Input:</B>
 <UL>
-  <LI><BLOCKQUOTE>&lt;scan number&gt; &ndash; The scan number for the MS-MS spectrum
-  to extract from the ms2 file. This is an integer in the range [1, 100000], 
-  and uniquely identifies a particular MS-MS spectrum within a <a
-  href="http://etd.caltech.edu/etd/available/etd-05262006-095948/unrestricted/Graumann_PhD-Thesis_Chapter_4,_Appendix_B,_McDonald_2004.pdf">.ms2</a> file.
-	</BLOCKQUOTE>
-  <LI><BLOCKQUOTE>&lt;input filename&gt; &ndash; A file containing multiple MS-MS  
-  spectra in .ms2 format.
-	</BLOCKQUOTE>
-  </UL>
-<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Output:</B>
-</BLOCKQUOTE>
-<UL>
-	<LI><BLOCKQUOTE STYLE="margin-bottom: 0in">&lt;output filename&gt; &ndash; 
-  The name of the file in which to place the extracted MS-MS spectrum. 
-	</BLOCKQUOTE>
+
+<LI>
+&lt;scan number&gt; &ndash; 
+The scan number for the MS-MS spectrum
+to extract from the ms2 file. This is an integer in the range [1, 100000], 
+and uniquely identifies a particular MS-MS spectrum within a <a
+href="http://etd.caltech.edu/etd/available/etd-05262006-095948/unrestricted/Graumann_PhD-Thesis_Chapter_4,_Appendix_B,_McDonald_2004.pdf">.ms2</a> file.
+	
+<LI>
+&lt;input filename&gt; &ndash; A file containing multiple MS-MS  
+spectra in .ms2 format.
+
 </UL>
-<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Options:</B>
-</BLOCKQUOTE>
+
+<B>Output:</B>
+
 <UL>
-  <LI><BLOCKQUOTE>--stats &ndash; Output some summary statistics for the
-  particular spectrum to STDOUT (not to the --ms2-out output file). 
-  Each stat is be placed on a separate line, preceded by it's name, 
-  followed by a colon, followed by the appropriate value (e.g.
-  "TIC:1000.0\n"). <!--The stats to output roughly correspond to all of the
-  fields in a <a href="broken-link.html">spectrum</a> object, 
-  and are the following:-->
+  &lt;output filename&gt; &ndash; 
+  The name of the file in which to place the extracted MS-MS spectrum.
+  The ouptput spectrum will also be in ms2 format. 
+
+</UL>
+
+<B>Options:</B>
+
+<UL>
+
+<LI>
+[--stats &lt;T | F&gt;] &ndash; 
+Output some summary statistics for the
+particular spectrum to STDOUT (not to the --ms2-out output file). 
+Each stat is be placed on a separate line, preceded by it's name, 
+followed by a colon, followed by the appropriate value (e.g.
+"TIC:1000.0\n").
   The following stats are reported:
   <UL>
   <LI><BLOCKQUOTE>Precursor m/z</BLOCKQUOTE>
@@ -72,13 +82,24 @@ the spectrum. Optionally output some summary statistics for the MS-MS spectrum.
   <LI><BLOCKQUOTE>Charged mass</BLOCKQUOTE>
   <LI><BLOCKQUOTE>M+H+ mass</BLOCKQUOTE>
 	</BLOCKQUOTE>
-</UL>
-</UL>
+  </UL>
+
+<LI>
+[--verbosity &lt;0-100&gt;] &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.
+
+<li>
+[--version T] &ndash;
+Print the version number and quit.  Please note that you must include
+the 'T' after --version.
 
 </UL>
-<BLOCKQUOTE STYLE="margin-left: 0in; margin-right: 0in"><B>Warning
-messages:</B> 
-</BLOCKQUOTE>
+
+<B>Warning messages:</B> 
 <UL>
   <LI><BLOCKQUOTE><I>Warning: The ms2 file "ms2 input filename" does not 
   contain the spectrum with scan number "scan number".

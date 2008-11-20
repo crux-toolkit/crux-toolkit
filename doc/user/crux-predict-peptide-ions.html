@@ -10,7 +10,7 @@
 AUTHOR: Aaron Klammer
 CREATE DATE: 2005-08-23
 PROJECT: predict-peptide-ions
-REVISION: $Revision: 1.2.8.1 $
+REVISION: $Revision: 1.2.8.2 $
 -->
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
@@ -56,58 +56,84 @@ predict the ions.
   # CHARGE: &lt;peptide charge&gt;</pre>
   And then the predicted ions, in the following format:
   <pre>
-  &lt;m/z&gt; \t &lt;mass&gt; \t &lt;charge&gt; \t &lt;ion-type&gt; \t &lt;bond-index&gt; \t &lt;modifications&gt; \n</pre>
+  &lt;m/z&gt; &lt;mass&gt; &lt;charge&gt; &lt;ion-series&gt; &lt;bond-index&gt; &lt;NH3&gt; &lt;H2O&gt; &lt;ISOTOPE&gt; &lt;FLANK&gt;</pre>
   Where
   <pre>
   &lt;m/z&gt; is the ion's mass-to-charge
   &lt;mass&gt; is the ion's (charged) mass
   &lt;charge&gt; is the ion's charge e.g. 1,2,3
-  &lt;ion-type&gt; is one of (b,y,p)
+  &lt;ion-type&gt; is an integer representing the series where 0=a, 1=b, 2=c, 3=x, 4=y, 5=z, 6=p
   &lt;bond-index&gt; is in [1...n), where n is peptide length. Consistent with standard mass spec terminology, where a y-1 and b-1 ions result from cleavage of
   completely different bonds
-  &lt;modifications&gt; is a string made up of multiple strings, concatenated by commas, from ('nh3'|'h2o') or 'none' if no modifications
-  </pre>
+  &lt;NH3&gt; is the number of NH3 modifications (lost neutral molecules)
+  &lt;H2O&gt; is the number of H2O modifications (lost neutral molecules)
+  &lt;ISOTOPE&gt;  is the number of adjacent isotopic peaks
+  &lt;FLANK&gt; is number of SEQEUST-style flanking ions
+</pre>
+
 
 
 </UL>
 <B>Options:</B>
 
 <UL>
-<LI>[--primary-ions &lt;b | y | by&gt;] &ndash; Predict the
-specified primary ion series. 'b' indicates b-ions only, 'y' indicates
-y-ions only, 'by' indicates both. (Possibly add additional ions-series
-later ('a', 'c', etc.)? (Default=by)
+<LI>
+[--primary-ions &lt;b | y | by&gt;] &ndash; 
+Predict the specified primary ion series. 'b' indicates b-ions only, 'y' indicates y-ions only, 'by' indicates both. Default by.
 
-<LI>[--precursor-ion &lt;T|F&gt;] &ndash; Predict the 
-precursor ions, and all associated ions (neutral-losses, multiple charge
-states) consistent with the other specified options.(Default=F) 
+<LI>
+[--precursor-ion &lt;T | F&gt;] &ndash; 
+Predict the precursor ions, and all associated ions (neutral-losses,
+multiple charge states) consistent with the other specified
+options.  Default F.  
 
-<LI>[--neutral-losses &lt;none | h2o | nh3 | all&gt;] &ndash; Predict the
-the specified neutral loss peaks ('none' indicates no
-neutral losses, 'h2o' indicates water loss only, 'co' indicates a-ions
-only, 'nh3' indicates ammonia losses only, 'all' indicates all three kinds
-of losses). (Default=all)
+<LI>
+[--neutral-losses &lt;none | h2o | nh3 | all&gt;] &ndash; 
+Predict the the specified neutral loss peaks. 'none' indicates no
+neutral losses, 'h2o' indicates water loss only, 'nh3' indicates
+ammonia losses only, 'all' indicates all three kinds of
+losses. Default all. 
 
-<LI>[--isotope &lt;0|1|2&gt;] &ndash; Predict the given number of
-    isotope peaks. (Default=none)
+<LI>
+[--isotope &lt;0 | 1 | 2&gt;] &ndash;
+Predict the given number of isotope peaks. Default 0.
 
+<LI>
+[--flanking &lt;T | F&gt;] &ndash; 
+Predict flanking peaks for b- and y-ions. Default F.
 
-<LI>[--flanking &lt;T|F&gt;] &ndash; Predict flanking peaks for b- and y-ions.  (Default=F)
+<LI>
+[--max-ion-charge &lt;1 | 2 | 3 | peptide&gt;] &ndash; 
+Predict ions up to this charge-state. The integer options ('1', '2' and
+'3') specify a fixed maximum charge-state. The 'peptide' option
+indicates that the ions should range up to the maximum charge-state of
+the peptide itself (thus, a +2 charge state peptide would have ions of
++1 and +2). Default peptide.
 
-<LI>[--max-ion-charge &lt;1|2|3|peptide&gt;] &ndash; Predict 
-ions up to this charge-state. The integer options ('1','2' and '3') specify a
-fixed maximum charge-state. The 'peptide' option 
-indicates that the ions should range
-up to the maximum charge-state of the peptide itself (thus, a +2 charge
-state peptide would have ions of +1 and +2). (Default=peptide)
+<LI>
+[--nh3 &lt;int&gt;] &ndash; 
+Predict peaks with the following max nh3 modification.  Default 1.
 
-<LI>[--nh3 &lt;int&gt;] &ndash; 
-Predict peaks with the following max nh3 modification.  (Default=1)
+<LI>
+[--h2o &lt;int&gt;] &ndash; 
+Predict peaks with the following max h2o modification.  Default 0.
 
-<LI>[--h2o &lt;int&gt;] &ndash; 
-Predict peaks with the following max h2o modification.  (Default=1)
+<LI>
+[--fragment-mass &lt;average | mono&gt;]
+Which isotopes to use in calculating the fragment ion masses.  Default mono.
 
+<LI>
+[--verbosity &lt;0-100&gt;] &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.
 
+<li>
+[--version T] &ndash;
+Print the version number and quit.  Please note that you must include
+the 'T' after --version.
 
 </UL>
 <B>Warning
