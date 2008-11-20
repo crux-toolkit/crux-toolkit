@@ -17,6 +17,8 @@ H	Comment	final algorithm xcorr
 H	StaticMod	C=160.139
 H	Alg-DisplayTop	5
 H	EnzymeSpec	tryptic
+H	Line fields: S, scan number, scan number,charge, 0, precursor m/z, 0, 0, number of matches
+H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, percolator_score score, q_value score, number ions matched, total ions compared, sequence
 H	Comment	matches analyzed by percolator
 S	14	14	2	0.00	server	500.41	0.00	0.00	1
 M	1	1	1001.15	0.00	-1.13	0.90	6	14	K.FHLELSQK.D	U
