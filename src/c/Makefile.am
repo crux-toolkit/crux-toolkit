@@ -11,6 +11,8 @@ NON_PERCOLATOR_LIB_FILES= \
   array.h \
   carp.c \
   carp.h \
+  create_index.c \
+  create_index.h \
   crux-utils.c \
   crux-utils.h \
   database.c \
@@ -31,10 +33,12 @@ NON_PERCOLATOR_LIB_FILES= \
   ion_series.h \
   mass.c \
   mass.h \
-	match.c \
-	match.h \
-	match_collection.c \
-	match_collection.h \
+  match.c \
+  match.h \
+  match_collection.c \
+  match_collection.h \
+  match_search.c \
+  search.h \
   objects.h \
   parameter.c \
   parameter.h \
@@ -52,6 +56,8 @@ NON_PERCOLATOR_LIB_FILES= \
   protein.h \
   protein_index.c \
   protein_index.h \
+  q-value.c \
+  q-value.h \
   scorer.c \
   scorer.h \
   sorter.c \
@@ -78,17 +84,18 @@ libcrux_la_SOURCES = $(LIBFILES)
 libcrux_la_LIBADD = -lm
 
 PERCOLATOR_PROGRAM_FILES = \
-  crux-analyze-matches
+   crux
+#  crux-analyze-matches
 
 NON_PERCOLATOR_PROGRAM_FILES = \
-  crux-search-for-matches \
   crux-get-ms2-spectrum \
   crux-generate-peptides \
-  crux-create-index \
-  crux-predict-peptide-ions \
-  create_protein_index \
-  transform_ms2_spectra \
-  create_psm_files
+  crux-predict-peptide-ions 
+#  crux-search-for-matches \
+#  crux-create-index \
+#  create_protein_index \
+#  transform_ms2_spectra \
+#  create_psm_files
 
 if PERCOLATOR
   PROGRAM_FILES=$(NON_PERCOLATOR_PROGRAM_FILES) $(PERCOLATOR_PROGRAM_FILES)
@@ -106,34 +113,40 @@ crux_generate_peptides_SOURCES = generate_peptides.c
 crux_generate_peptides_CFLAGS = $(AM_CFLAGS) -DMAIN 
 crux_generate_peptides_LDADD = libcrux.la 
 
-crux_create_index_SOURCES = create_index.c
-crux_create_index_CFLAGS = $(AM_CFLAGS) -DMAIN 
-crux_create_index_LDADD = libcrux.la 
+#crux_create_index_SOURCES = create_index.c
+#crux_create_index_CFLAGS = $(AM_CFLAGS) -DMAIN 
+#crux_create_index_LDADD = libcrux.la 
 
-crux_search_for_matches_SOURCES = match_search.c
-crux_search_for_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/
-crux_search_for_matches_LDADD = libcrux.la 
+#crux_search_for_matches_SOURCES = match_search.c
+#crux_search_for_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/
+#crux_search_for_matches_LDADD = libcrux.la 
 
-crux_analyze_matches_SOURCES = match_analysis.c
-crux_analyze_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)
-crux_analyze_matches_LDADD = \
-  -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary -lcrux 
+#crux_analyze_matches_SOURCES = match_analysis.c
+#crux_analyze_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)
+#crux_analyze_matches_LDADD = \
+#  -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary -lcrux 
 
 crux_predict_peptide_ions_SOURCES = predict_peptide_ions.c
 crux_predict_peptide_ions_CFLAGS = $(AM_CFLAGS) -DMAIN 
 crux_predict_peptide_ions_LDADD = libcrux.la 
 
-create_protein_index_SOURCES = create_protein_index.c
-create_protein_index_CFLAGS = $(AM_CFLAGS) -DMAIN 
-create_protein_index_LDADD = libcrux.la 
+#create_protein_index_SOURCES = create_protein_index.c
+#create_protein_index_CFLAGS = $(AM_CFLAGS) -DMAIN 
+#create_protein_index_LDADD = libcrux.la 
 
-transform_ms2_spectra_SOURCES = transform_ms2_spectra.c
-transform_ms2_spectra_CFLAGS = $(AM_CFLAGS) -DMAIN 
-transform_ms2_spectra_LDADD = libcrux.la 
+#transform_ms2_spectra_SOURCES = transform_ms2_spectra.c
+#transform_ms2_spectra_CFLAGS = $(AM_CFLAGS) -DMAIN 
+#transform_ms2_spectra_LDADD = libcrux.la 
 
-create_psm_files_SOURCES = create_psm_files.c
-create_psm_files_CFLAGS = $(AM_CFLAGS) -DMAIN 
-create_psm_files_LDADD = libcrux.la 
+#create_psm_files_SOURCES = create_psm_files.c
+#create_psm_files_CFLAGS = $(AM_CFLAGS) -DMAIN 
+#create_psm_files_LDADD = libcrux.la 
+
+crux_SOURCES = crux-main.c  percolator.c 
+
+crux_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)
+crux_LDADD = \
+  -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary -lcrux 
 
 paramdir = $(prefix)/doc
 param_DATA = default.params

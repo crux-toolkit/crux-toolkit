@@ -37,8 +37,9 @@ void open_output_files(FILE*** binary_filehandle_array,
                        FILE** sqt_filehandle,
                        FILE** decoy_sqt_filehandle);
 
-int main(int argc, char** argv){
-
+//int main(int argc, char** argv){
+int search_main(int argc, char** argv){
+  
   /* Define optional command line arguments */
   int num_options = NUM_SEARCH_OPTIONS;
   char* option_list[NUM_SEARCH_OPTIONS] = {
@@ -79,7 +80,7 @@ int main(int argc, char** argv){
 
   /* Parse the command line, including optional params file
      Includes syntax, type, and bounds checking, dies on error */
-  parse_cmd_line_into_params_hash(argc, argv, "crux-search-for-matches");
+  parse_cmd_line_into_params_hash(argc, argv, "crux search-for-matches");
 
   /* Set verbosity */
   //verbosity = get_int_parameter("verbosity");
