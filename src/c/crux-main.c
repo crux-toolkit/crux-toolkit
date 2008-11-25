@@ -10,7 +10,7 @@
             crux <operation> <options> <arguments>
          where operation is create-index, search, compute-q-values, or
          q-ranker.     
- REVISION: $Revision: 1.1.2.1 $
+ REVISION: $Revision: 1.1.2.2 $
 */
 
 #include "crux-main.h"
@@ -30,8 +30,12 @@ char* usage_str = "Usage: crux <command> [options] <argument>\n"
 "  compute-q-values    Assign a q-value, which is a statistical confidence\n"
 "                      measure that accounts for multiple testing, to each\n"
 "                      PSM in a given set.\n" 
+"  percolator          Analyze a collection of PSMs to target and decoy\n"
+"                      sequences using the percolator algorithm.\n"
+/*
 "  q-ranker            Analyze a collection of PSMs using the Q-ranker\n"
 "                      algorithm.\n"
+*/
 "Options and arguments:\n"
 "  Specific to each command. Type 'crux <command>' to get details.\n"
 ;
