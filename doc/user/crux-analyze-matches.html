@@ -77,25 +77,25 @@ option.</p>
 <B>Options:</B>
 <UL>
 <LI>
-<code>--algorithm &lt;percolator | curve-fit | none&gt; </code> &ndash; 
+<code>--algorithm &lt;percolator|curve-fit|none&gt; </code> &ndash; 
 The analysis algorithm to use. Using 'percolator' will assign a
 q-value to the top-ranking psm for each spectrum based on the decoy
 searches.  Using 'curve-fit' will assign a q-value to same using the
-p-values calculated with score-type=&lt;xcorr-pvalue | sp-pvalue&gt;
+p-values calculated with score-type=&lt;xcorr-pvalue|sp-pvalue&gt;
 in crux-search-for-matches. The combination of crux-search-for-matches
 wtih score-type=xcorr followed by crux-analyze-matches with
 algorithm=qvalue will cause undefined behavior. Using 'none' will turn
 the binary .csm files into text. Default = percolator. 
 
 <LI>
-<code>--use-index &lt;T | F&gt;</code> Use an index that has already been 
+<code>--use-index &lt;T|F&gt;</code> Use an index that has already been 
 created if true (T) or use a fasta file if false (F). When using
 an index the 'protein input' argument will be the name of the
 directory containing the index files (the same as the 'index name'
 argument for crux-create-index).  Default = F.
 
 <li>
-<code>--overwrite &lt;T | F&gt;</code> Replace existing files if true (T) or 
+<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or 
 fail when trying to overwrite a file if false (F). Default =  F.
 
 <LI>
