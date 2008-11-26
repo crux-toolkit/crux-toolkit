@@ -1,78 +1,204 @@
 <html>
+<head>
 <title>Crux tandem mass spectrometry analysis software</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
 <body>
 <blockquote>
 
 <H1 ALIGN=CENTER>Crux tandem mass spectrometry analysis software</H1>
 
 <p>
-One of the major challenges in proteomics is to identify the proteins
-that are expressed in cells under different conditions.  Mass
-spectrometry is a widely used method for protein identification;
-however, a detailed spectrum analysis is required to match the
-spectrum to the source protein. Crux contains software for tandem mass
-spectrometry analysis, with a focus on peptide identification.
-It can be downloaded <a href="download/index.html">here</a> once you agree to the
-license agreement and obtain a password <a href="http://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php">here</a>.
-Crux source code is freely available for academic use and can be
-licensed for commercial use. Crux optionally 
-makes use of the Percolator algorithm (v. 1.05), 
-which can be downloaded separately <a
-  href="http://noble.gs.washington.edu/proj/percolator/">here</a>.</li>
+Crux is a software toolkit for tandem mass spectrometry analysis, with
+a focus on peptide identification.  If you use Crux in your research,
+please cite</p>
 
-</p> 
+<blockquote>
+Christopher Y. Park, Aaron A. Klammer, Lukas K&auml;ll, Michael
+J. MacCoss and William Stafford
+Noble.  <a href="http://noble.gs.washington.edu/papers/park2008rapid.html">"Rapid
+and accurate peptide identification from tandem mass spectra."</a>
+<i>Journal of Proteome Research.</i> 7(7):3022--3027, 2008.</li>
+</blockquote>
+
+<center>
+<img src="schematic.png">
+</center>
 
 <p>
-The core programs in the Crux toolkit are</p>
+Crux is provided as a single executable that supports the following
+commands:</p>
 
-<ul>
+<table>
 
-<li>
-<a href="crux-search-for-matches.html">crux-search-for-matches</a>
+<tr>
+<td colspan="2"><b>Primary commands</b></td>
+</tr>
+
+<tr>
+<td>
+<a href="crux-create-index.html">create-index</a></td>
+<td>
+Create an index for all peptides in a fasta file.</td>
+</tr>
+
+<tr>
+<td>
+<a href="crux-search-for-matches.html">search-for-matches</a></td>
+<td>
 Search a collection of spectra against a sequence database, returning
-a collection of peptide-spectrum matches (PSMs).</li>
+a collection of peptide-spectrum matches (PSMs).</td>
+</tr>
 
-<li>
-<a href="crux-create-index.html">crux-create-index</a> Create an index
-for all peptides in a fasta file.</li>
+<tr>
+<td>
+<a href="compute-q-values.html">compute-q-values</a></td>
+<td>
+Assign a q-value, which is a statistical confidence measure that
+accounts for multiple testing, to each PSM in a given set.</td></tr>
 
-<li>
-<a href="crux-analyze-matches.html">crux-analyze-matches</a> Analyze
-a collection of PSMs using one the Crux supported post-processing algorithms.</ul>
+<tr>
+<td>
+<a href="q-ranker.html">q-ranker</a></td>
+<td>
+Analyze a collection of PSMs using the Q-ranker algorithm.</td></tr>
 
-<p>
-In addition, Crux contains the following utilities:</p>
+<tr>
+<td colspan="2"><b>Utilities</b></td>
+</tr>
+
+<tr>
+<td>
+<a href="crux-predict-peptide-ions.html">predict-peptide-ions</a></td>
+<td>
+Given a peptide and a charge state, predict the ions according to the
+provided options.</td>
+</tr>
+
+<tr>
+<td>
+<a href="crux-generate-peptides.html">generate-peptides</a></td>
+<td>
+Given protein sequencs in a fasta file return a list of peptides
+fitting the specified criteria.</td>
+</tr>
+
+<tr>
+<td>
+<a href="crux-get-ms2-spectrum.html">get-ms2-spectrum</a></td>
+<td>
+Extract an MS-MS spectrum with a specified scan number from a
+<code>.ms2</code> file.</td>
+</tr>
+
+<tr>
+<td>
+<a href="spectacle.html">spectacle</a></td>
+<td>
+Create an image file of an annotated spectrum.  Unlike the other
+commands, spectacle is a stand-alone program.</td>
+</tr>
+
+</table>
+
+<br></br>
+
+<b>File formats</b>
 
 <ul>
 
 <li>
-<a href="crux-predict-peptide-ions.html">crux-predict-peptide-ions</a>
-Given a peptide and a charge state, predict the ions according to the
-provided options. 
+<a href="broken-link.html">MS2 spectrum files</a> (<a href="broken-link.html">sample</a>)</li>
 
 <li>
-<a href="crux-generate-peptides.html">crux-generate-peptides</a>
-Given protein sequencs in a fasta file return a list of peptides
-fitting the specified criteria.
+<a href="fasta-format.html">FASTA sequence files</a>
+(<a href="sample.fasta">sample</a>)</li>
 
 <li>
-<a href="crux-get-ms2-spectrum.html">crux-get-ms2-spectrum</a> Extract
-an MS-MS spectrum with a specified scan number from a
-<code>.ms2</code> file.</li>
+<a href="broken-link.html">Peptide database index files (binary)</a></li>
 
 <li>
-<a href="spectacle.html">spectacle</a> Create an image file of an
-annotated spectrum.</li>
+<a href="broken-link.html">Binary CSM files for representing PSMs.</a></li>
+
+<li>
+<a href="broken-link.html">Text SQT files for representing PSMs.</a>
+(<a href="broken-link.html">sample</a>)</li>
+
+<li>
+<a href="broken-link.html">Text feature files for representing PSMs.</a>
+(<a href="broken-link.html">sample</a>)</li>
+
+<li>
+<a href="parameter-file.html">Crux parameter files</a>
+(<a href="default.params">sample</a>)</li>
 
 </ul>
 
-<p>A tutorial for installing and using the above programs can be found <a href="home-tutorial.html">here</a>.</p>
+<p>
+<b>Tutorials</b>
 
-<p>Crux is written in C by Chris Park and Aaron Klammer under
-the supervision of <a
-href="http://noble.gs.washington.edu/~noble">Prof. William Stafford
-Noble</a> in the Department of Genome Sciences at the University of
-Washington, Seattle. Development of Crux is supported by National Institutes of Health award R01 EB007057.</p>
+<ul>
+
+<li>
+<a href="install-tutorial.html">Installation</a></li>
+
+<li>
+<a href="start-tutorial.html">Getting started with Crux</a></li>
+
+<li>
+<a href="search-tutorial.html">Searching a protein database</a></li>
+
+<li>
+<a href="index-tutorial.html">Creating a peptide index</a></li>
+
+<li>
+<a href="customize-tutorial.html">Customizing a search</a></li>
+
+</ul>
+
+<p>
+Download crux <a href="download/index.html">here</a> once you agree to
+the license agreement and obtain a
+password <a href="http://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php">here</a>.
+Crux source code is freely available for academic use and can be
+licensed for commercial use.</p>
+
+<p>
+<a href="percolator.html">This page</a> describes how to use Crux with
+the Percolator algorithm.</p>
+
+<p>
+<a href="release-notes.html">Release notes.</a></p>
+
+<hr></hr>
+
+<center>
+<p>
+Crux is written in C by Chris Park, Aaron Klammer, Barbara Frewen and
+Charles Grant under the supervision
+of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+MacCoss</a>
+and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+Stafford Noble</a> in the Department of Genome Sciences at the
+University of Washington, Seattle.</p>
+
+<table>
+<tr>
+<td><img src="nibib.gif"></td>
+<td>
+<p>
+Maintenance and development of Crux is funded by the National
+Institute of Biomedical Imaging and Bioengineering grant NIH/NIBIB R01
+EB007057.</p></td>
+<td><img src="UWlogo150p.gif"></td>
+</tr>
+</table>
+</center>
+
+<hr></hr>
+
+<p>
+Please send comments and questions to cegrant@u.washington.edu.</p>
 
 </blockquote>
 </body>

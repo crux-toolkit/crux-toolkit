@@ -1,0 +1,104 @@
+h1 {
+        font-size: 22px;
+        font-family: Arial;
+        color: #000000;
+}
+h2 {
+        font-size: 18px;
+        font-family: Arial;
+        color: #000000;
+}
+h3 {
+	font-size: 16px; 
+	font-family: Arial; 
+	color: #000000;
+}
+h4 {
+        font-size: 14px;
+        font-family: Arial;
+        color: #000000;
+}
+font {
+	font-size: 14px; 
+	font-family: Arial; 
+	color: #000000;
+}
+p {
+	font-size: 12px; 
+	font-family: Arial; 
+	color: #000000;
+}
+blockquote {
+	font-size: 12px; 
+	font-family: Arial; 
+	color: #000000;
+}
+dt {
+	font-size: 12px; 
+	font-family: Arial; 
+	color: #000000;
+}
+dd {
+	font-size: 12px; 
+	font-family: Arial; 
+	color: #000000;
+}
+li {
+	font-size: 14px; 
+	font-family: Arial; 
+	color: #000000;
+}
+a {
+    text-decoration: none;
+    color: #02656A;
+}
+a:hover {
+    text-decoration: underline;
+    color: #AA2244;
+}
+table {
+    border-collapse: collapse;
+}
+th {
+    margin: 0px; 
+    padding: 5px;
+    font-family: Arial; 
+    font-size: 10pt;
+    color: #000000;     
+}
+td {
+    margin: 0px;
+    padding: 5px;
+    border: 0px;
+    font-family: Arial;
+    font-size: 12px;
+    color: #000000;
+}
+textarea {
+    background: #E4ECEC;	
+    font-size: 12px;
+    font-family: Arial;	
+    color: #000000;
+    border: #000000 solid 1px	
+}
+fieldset {
+    border: #000000 solid 1px;
+}
+legend{
+	border: #000000 solid 1px;
+	padding: 1px 10px;
+	font-size: 14px;
+        font-family: Arial;
+	font-weight: bold;
+}
+select {
+    background: #E4ECEC;
+    font-size: 12px;
+    color: #000000;
+    border: #000000 solid 1px
+}
+textcopyright { 
+    color: 220044; 
+    font-family: Helvetica; 
+    font-size: 11pt;
+}
