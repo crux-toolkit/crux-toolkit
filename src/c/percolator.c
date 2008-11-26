@@ -16,12 +16,12 @@
  *         directory are concatinated together and presumed to be
  *         non-overlaping parts of the same ms2 file. 
  * 
- * $Revision: 1.1.2.2 $
+ * $Revision: 1.1.2.3 $
  ****************************************************************************/
 #include "percolator.h"
 
 #ifdef PERCOLATOR
-#define NUM_PERCOLATOR_OPTIONS 9
+#define NUM_PERCOLATOR_OPTIONS 8
 #define NUM_PERCOLATOR_ARGUMENTS 2
 /* 
  * Private function declarations.  Details below
@@ -32,7 +32,6 @@ MATCH_COLLECTION_T* run_percolator(
   char* feature_file); 
 
 
-// why am I getting linking errors for multiple defs w/q-value. scope?
 void print_sqt_file_perc( 
   MATCH_COLLECTION_T* match_collection,
   SCORER_TYPE_T scorer_type,
@@ -55,7 +54,6 @@ int percolator_main(int argc, char** argv){
     "verbosity",
     "parameter-file",
     "write-parameter-file",
-    "algorithm",
     "feature-file",
     "use-index",
     "overwrite",
