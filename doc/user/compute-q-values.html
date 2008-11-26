@@ -39,8 +39,8 @@ target scores above the threshold.</p>
 <p>
 Alternatively, if the collection of PSMs has p-values assigned
 by <code>search-for-matches</code> by using
-a <code>--score-type</code> of <code>xcor_logp</code>
-or <code>sp_logp</code>, then the false discovery rate associated
+a <code>--score-type</code> of <code>xcorr-pvalue</code>
+or <code>sp-pvalue</code>, then the false discovery rate associated
 with a given score is computed 
 
 <p>
@@ -79,14 +79,42 @@ proteins and peptides.</li>
 <B>Options:</B>
 
 <UL>
-<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
+<LI>
+<li>
+<code>--use-index &lt;T|F&gt;</code> Use an index that has already been
+created if true (T) or use a fasta file if false (F). When using
+an index the 'protein input' argument will be the name of the
+directory containing the index files (the same as the 'index name'
+argument for crux-create-index).  Default = F.
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
+fail when trying to overwrite a file if false (F). Default =  F.
+
+<code>--parameter-file &lt;filename&gt;</code> &ndash; 
 A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
-<LI> <code>--feature-file &lt;string&gt;</code> &ndash; 
-Optional file in which to write the features. Default = none.</li>
-<LI><code>--verbosity &lt;int&gt;</code> &ndash; 
-Specify the verbosity of the current processes from 0-100. Default =
-40. </li>
+
+<LI>
+<code>--write-parameter-file &lt;filename&gt;</code> &ndash; Create a file
+with the name and value of all parameters/options for the current
+search.  Not all parameters in the file may have been used in the
+search.  The resulting file can be used with the --parameter-file
+option for other crux programs.
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.
+
+<li>
+<code>--version T</code> &ndash;
+Print the version number and quit.  Please note that you must include
+the 'T' after --version.
+
 </UL>
 
 <hr></hr>
