@@ -1,0 +1,80 @@
+<html>
+<head>
+<title>FASTA file format</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<H1 ALIGN=CENTER>FASTA file format</H1>
+
+<p>
+Crux searches protein sequence databases given in FASTA format.  The
+format is very simple. Every entry consists of a sequence identifier
+(ID), an optional comment (COMMENT), and a sequence (SEQUENCE). The
+format looks like this:
+</p>
+
+<pre>
+  &gt;ID COMMENT
+  SEQUENCE
+</pre>
+
+<p>
+The special character "&gt;" marks the beginning of a new sequence.
+The "&gt;" character is followed immediately by the sequence
+identifier. The rest of that line is occupied by the optional
+comment. Subsequent lines contain the sequence itself.
+</p>
+
+<p>Some rules about representing sequences:</p>
+
+<ul>
+
+<li>
+A single protein sequence can span multiple lines.  The &gt; character
+occurring at the beginning of the line indicates the end of the
+sequence.</li>
+
+<li>
+Case doesn't matter. Crux Suite converts everything to uppercase.</li>
+
+<li>
+White space (spaces and newlines) within the sequence are
+ignored.</li>
+
+<li>
+Characters should be from the amino acid alphabet, which contains
+twenty characters for amino acids ("ACDEFGHIKLMNPQRSTVWY") and is
+augmented by four more ambiguous characters ("BUXZ"):</li>
+
+<pre>
+    A  alanine                         P  proline
+    B  aspartate or asparagine         Q  glutamine
+    C  cystine                         R  arginine
+    D  aspartate                       S  serine
+    E  glutamate                       T  threonine
+    F  phenylalanine                   U  any
+    G  glycine                         V  valine
+    H  histidine                       W  tryptophan
+    I  isoleucine                      Y  tyrosine
+    K  lysine                          Z  glutamate or glutamine
+    L  leucine                         X  any
+    M  methionine                      
+    N  asparagine
+</pre>
+
+</ul>
+
+<p>
+<a href="sample.fasta">Here</a> is an example of three sequences in
+FASTA format.</p>
+
+<hr></hr>
+
+<p>
+<a href="crux.html">Crux home</a></p>
+
+</blockquote>
+</body>
+</html>

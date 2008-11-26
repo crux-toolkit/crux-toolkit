@@ -1,171 +1,265 @@
 ####################################################################
 # Sample parameter file 
 #
-# Only lines starting with '#' will be ignored
+# Lines starting with '#' will be ignored
 # Don't leave any space before or after a parameter setting
-# format: &lt;parameter-name&gt;=&lt;value&gt;
+# format: <parameter-name>=<value>
 #
 #####################################################################
 
-########  Options for all executables  ##############
 
-#verbosity level (quantity of output to STDERR). 0~100
-#  0     silent
-#  10    print fatal errors
-#  20    print all errors
-#  30    print warnings
-#  40    print information about progress
-#  50    print detailed information
-#  60    print basic debugging statements
-#  70    print detailed debugging statements
-#
+# Set level of output to stderr (0-100).  Default 30.
+# Available for all crux programs.  Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info.
 verbosity=30
 
-########    crux-generate-peptides, crux-create-index      ##########
+# Print version number and quit.
+# Available for all crux programs.  On command line use '--version T'.
+version=FALSE
 
-# minimum and maximum allowed length for peptides
+# Set additional options with values in the given file. Default to use only command line options and default values.
+# Available for all crux programs. Any options specified on the command line will override values in the parameter file.
+parameter-file=__NULL_STR
+
+# Create a parameter file with the values of all parameters in this run.
+# Writes all crux parameters, even those not used in the current execution. Resulting file can be used with --parameter-file.
+write-parameter-file=__NULL_STR
+
+# Replace existing files (T) or exit if attempting to overwrite (F). Default F.
+# Available for all crux programs.  Applies to --write-parameter-file as well as index, search, and analysis output files.
+overwrite=F
+
+# The minimum length of peptides to consider. Default 6.
+# Used from the command line or parameter file by crux-create-index and crux-generate-peptides.  Parameter file only for crux-search-for-matches.
 min-length=6
+
+# The maximum length of peptides to consider. Default 50.
+# Available from command line or parameter file for crux-create-index  and crux-generate-peptides. Parameter file only for crux-search-for-matches.
 max-length=50
 
-# minimum and maximum allowed masses for peptides
-min-mass=200.0
-max-mass=7200.0
-
-# use mono-isotopic or average-isotopic mass (mono|average)
+# Which isotopes to use in calcuating peptide mass (average, mono). Default average.
+# Used from command line or parameter file by crux-create-index and crux-generate-peptides.  Parameter file only for crux-search-for-matches.
 isotopic-mass=average
 
-# cleavage type allowed (tryptic|partial|all)
+# Which isotopes to use in calcuating fragment ion mass (average, mono). Default mono.
+# Parameter file only.  Used by crux-search-for-matches and crux-predict-peptide-ions.
+fragment-mass=mono
+
+# Search peptides within +/- 'mass-window' of the spectrum mass.  Default 3.0.
+# Available from the parameter file only for crux-search-for-matches, crux-create-index, and crux-generate-peptides.
+mass-window=3.000000
+ 
+# Tolerance used for matching observed peaks to predicted fragment ions.  Default 0.5.
+# Available from parameter-file for crux-search-for-matches.
+ion-tolerance=0.500000
+
+# The type of cleavage sites to consider (tryptic, partial, all). Default tryptic.
+# Used from the command line or paramter file by crux-create-index and crux-generate-peptides. Parameter file only for crux-search-for-matches.  Tryptic cleavage sites are after R or K but not before P.  The value 'tryptic' produces peptides with tryptic sites at both termini, 'partial' with a tryptic cleavage site at at least one terminus, and 'all' produces peptides with no dependence on adjacent amino acids.
 cleavages=tryptic
 
-# allow missed cleavage sites internal to the peptide (T|F)
-missed-cleavages=F
+# Include peptides with missed cleavage sites (T,F). Default FALSE.
+# Available from command line or parameter file for crux-create-index and crux-generate-peptides.  Parameter file only for crux-search-for-matches.  When used with cleavages=<tryptic|partial> includes peptides containing one or more potential cleavage sites.
+missed-cleavages=FALSE
 
-# generate/index each peptide sequence only once (unique) or once for each
-# protein occurrance?
-unique-peptides=F
+# Generate peptides only once, even if they appear in more than one protein (T,F).  Default FALSE.
+# Available from command line or parameter file for crux-create-index and crux-genereate-peptides. Parameter file only for crux-search-for-matches.  For crux-generate-peptides, returns one line per peptide when true or one line per peptide per protein occurence when false.  For index and search, stores and reports only one protein in which the peptide occurs.
+unique-peptides=FALSE
 
+# Use an index that has already been created (T,F). Default FALSE (use fasta file).
+# Used by crux-generate-peptides, crux-search-for-matches, and crux-analyze-matches.  With use-index=F, 'protein source' argument is the name of a fasta file.  With use-index=T, the name of the directory containing an index.
+use-index=FALSE
 
-######     more crux-generate-peptides options  #####################
-
-# output the sequence along with scores?(T|F)
-output-sequence=T
-
-# include the peptide trypticity in output.(TRUE|FALSE)
-output-trypticity=F
-
-# use index to create peptides (true) or use fasta file (false)? (T|F)
-use-index=F
-
-# which order to sort the peptides? (none|mass|length|lexical)
-sort=none
-
-
-#######      crux-search-for-matches options    #####################
-
-# preliminary score type (sp)
+# Initial scoring (sp, xcorr). Default sp,
+# Available for crux-search-for-matches.  The score applied to all possible psms for a given spectrum.  Typically used to filter out the most plausible for further scoring. See max-rank-preliminary and score-type.
 prelim-score-type=sp
 
-#the main scoring type (logp_exp_sp | logp_bonf_exp_sp | logp_evd_xcorr | logp_bonf_evd_xcorr | xcorr)
-score-type=xcorr 
+# The primary scoring method to use (xcorr, sp, xcorr-pvalue, sp-pvalue). Default xcorr.
+# Only available for crux-search-for-matches.  Primary scoring is typically done on a subset (see max-rank-preliminary) of all possible psms for each spectrum. Default is the SEQUEST-style xcorr. Crux also offers a p-value calculation for each psm based on xcorr or sp (xcorr-pvalue, sp-pvalue).
+score-type=xcorr
 
-# Limit the spectra searched to have precursor mass between the 
-# specified minimum and maximum
-spectrum-min-mass=0
-spectrum-max-mass=1000000000.0
-
-# The spectrum charges to search  1|2|3|all
-spectrum-change=all
-
-# Store match results in this folder.  Current directory indicated as '.'
-match-output-folder=.
-
-# Which file types are output (binary | sqt | all)
-output-mode=binary
-
-# The name of the sqt file to write results to.  Separate files for
-# matches to target proteins and decoy proteins.  File names ignored 
-# if output-mode is binary)
-sqt-output-file=target.sqt
-decoy-sqt-output-file=decoy.sqt
-
-# The number of decoy protein databases to search
-number-decoy-set=2
-
-## The following are options only for the parameter file ############
-
-# Score this many of the top ranking psms as found with preliminary scoring 
-# (use 1000000, to select all peptides)
+# Number of psms per spectrum to score after preliminary scoring.  Default 500.
+# Used by crux-search-for-matches.  For each spectrum, keep the (500) top ranking psms for scoring with the main score.
 max-rank-preliminary=500
 
-# The number of search results per spectrum to return
-max-rank-result=500
+# The minimum mass of peptides to consider. Default 200.
+# Available from command line or parameter file for crux-create-index and crux-generate-peptides. Parameter file only for crux-search-for-matches.
+min-mass=200.000000
 
-# Search peptides within +/- 'mass-window' of spectrum precursor mass
-mass-window=3
+# The maximum mass of peptides to consider. Default 7200.
+# Available from command line or parameter file for crux-create-index and crux-generate-peptides. Parameter file only for crux-search-for-matches.
+max-mass=7200.000000
 
-# What is this?
+# Minimum mass of spectra to be searched.  Default 0.
+# Available for crux-search-for-matches.
+spectrum-min-mass=0.000000
+
+# Maximum mass of spectra to search.  Default no maximum.
+# Available for crux-search-for-matches.
+spectrum-max-mass=1000000000.000000
+
+# Spectrum charge states to search (1,2,3,all). Default all.
+# Used by crux-search-for-matches to limit the charge states considered in the search.  With 'all' every spectrum will be searched and spectra with multiple charge states will be searched once at each charge state.  With 1, 2 ,or 3 only spectra with that that charge will be searched.
+spectrum-charge=all
+
+# Types of output to produce (binary, sqt, all). Default binary.
+# Available for crux-search-for-matches.  Produce binary and/or text (sqt) output files.  Binary files named automatically.  See sqt-output-file for naming text file.  See match-output-folder for file location.
+output-mode=binary
+
+# Folder to which search results will be written. Default '.'. (current directory).
+# Used by crux-search-for-matches.  All result files (binary .csm and/or sqt) put in this directory.
+match-output-folder=.
+
+# SQT output file name. Default 'target.sqt'
+# Only available for crux-search-for-matches with output-mode=<all|sqt>.  The location of this file is controlled by match-output-folder.
+sqt-output-file=target.sqt
+
+# SQT output file name for decoys.  Default 'decoy.sqt'.
+# Used by crux-search-for-matches with output-mode=<all|sqt> and number-decoy-sets > 0.  File is put in the directory set by --match-output-folder (defaults to working directory).
+decoy-sqt-output-file=decoy.sqt
+
+# The number of decoy databases to search.  Default 2.
+# Used by crux-search-for-matches.  Decoy search results can be used by crux-analzye-matches with the percolator algorithm
+number-decoy-set=2
+
+# The number of psms per spectrum writen to the binary output file.Default 1.
+# Available from parameter file for crux-search-for-matches.  If more than one psm is written to file, the matches for each spectrum will be re-ranked in crux-match-analysis.
 top-match=1
 
-# SP scoring related parameters
-beta=0.075
-max-mz=4000
-top-fit-sp=1000
+# Number of search results per spectrum to report in the sqt file. Default 5.
+# Available from parameter file for crux-search-for-matches with output-mode=<all|sqt>.  Does not affect output to binary files.
+max-sqt-result=5
 
-# how many peptides to sample for EVD parameter estimation
-sample-count=500
-# set the number of top ranking peptides to score for LOGP_* (This is different compared to max-rank-preliminary, because it does not limit the count of preliminary scored peptides, thus some peptides can be outputed without being scored by main)
-top-rank-p-value=1
-
-# in estimate_weibull_parameters
-number-top-scores-to-fit=-1
-fraction-top-scores-to-fit=-1.0
-skip-first-score=F
-
-
-########## crux-analyze-matches options ###########################
-
-#The analysis algorithm to use (percolator|retention-czar|qvalue|none)
+# The analysis algorithm to use (percolator, curve-fit, none). Default percolator.
+# Available only for crux-analyze-matches.  Using 'percolator' will assign a q-value to the top-ranking psm for each spectrum based on the decoy searches.  Using 'curve-fit' will assign a q-value to same using the p-values calculated with score-type=<xcorr-pvalue|sq-pvalue>.  Incorrect combinations of score-type and algorithm cause undefined behavior. Using 'none' will turn the binary .csm files into text.
 algorithm=percolator
 
-# Print psm features to this file
-feature-file=match_analysis.features
+# Optional file into which psm features are printed.
+# Available only for crux-analyze-matches.  File will contain features used by percolator.
+feature-file=__NULL_STR
 
-# for parameter file only
+# Print trypticity of peptide (T,F). Default FALSE.
+# Available only for crux-generate-peptides. When cleavages=partial all peptides are labeled PARTIAL even if fully tryptic.
+output-trypticity=FALSE
 
-# percolator parameters
-pi0=0.9
-percolator-intraset-features=F
+# Print peptide sequence (T,F). Default FALSE.
+# Available only for crux-generate-peptides.
+output-sequence=FALSE
 
-######### crux-predict-peptide-ions ###############################
+# Sort peptides according to which property (mass, length, lexical, none).  Default none.
+# Only available for crux-generate-peptides.
+sort=none
 
-#The ion series to predict (b,y,by). Default 'by' (both b and y ions)
-primary-ions=by
+# Print to stdout additional information about the spectrum.
+# Avaliable only for crux-get-ms2-spectrum.  Does not affect contents of the output file.
+stats=FALSE
 
-#Predict the precursor ions, and all associated ions (neutral-losses, multiple charge states) consistent with the other specified options. (T,F) Default F
-precursor-ions=F
-
-#Predict neutral loss ions (none, h20, nh3, all). Default 'all'
-neutral-losses=all
-
-#Predict the given number of isotope peaks.0|1|2
+# Predict the given number of isotope peaks (0|1|2). Default 0.
+# Only available for crux-predict-peptide-ion.  Automatically set to 0 for Sp scoring and 1 for xcorr scoring.
 isotope=0
 
-#Predict flanking peaks for b and y ions (T,F). Default F.
-flanking=F
+# The ion series to predict (b,y,by). Default 'by' (both b and y ions).
+# Only available for crux-predict-peptide-ions.  Set automatically to 'by' for searching.
+primary-ions=by
 
-#Predict ions up to this charge state (1,2,3) or to the charge state
-#of the peptide (peptide).  Default 'peptide'.
-max-ion-charge=peptide
+# Predict neutral loss ions (none, h20, nh3, all). Default 'all'.
+# Only available for crux-predict-peptide-ions. Set to 'all' for sp and xcorr scoring.
+neutral-losses=all
 
-#Predict peaks with the following max nh3 modification.
+# Predict flanking peaks for b and y ions (T,F). Default F.
+# Only available for crux-predict-peptide-ion.
+flanking=FALSE
+
+# Predict the precursor ions, and all associated ions (neutral-losses, multiple charge states) consistent with the other specified options. (T,F) Default F.
+# Only available for crux-predict-peptide-ions.
+precursor-ions=FALSE
+
+# Predict peaks with the given maximum number of nh3 neutral loss modifications. Default 0.
+# Only available for crux-predict-peptide-ions.
 nh3=0
 
-#Predict peaks with the following max h2o modification
+# Predict ions up to this charge state (1,2,3) or to the charge state of the peptide (peptide).  Default 'peptide'.
+# Available only for predict-peptide-ions.  Set to 'peptide' for search.
+max-ion-charge=peptide
+
+# Predict peaks with the given maximum number of h2o neutral loss modifications. Default 0.
+# Only available for crux-predict-peptide-ions.
 h2o=0
 
-########## Static modifications #######################
+# Change the mass of all amino acids 'A' by the given amount.
+# For parameter file only.  Default no mass change.
+A=0.000000
 
-# Specify an modifcation (mass addition) to be made for a given amino acid
-C=57.0
+# Change the mass of all amino acids 'C' by the given amount.
+# For parameter file only.  Default +57.0.
+C=57.000000
 
+# Change the mass of all amino acids 'D' by the given amount.
+# For parameter file only.  Default no mass change.
+D=0.000000
 
+# Change the mass of all amino acids 'E' by the given amount.
+# For parameter file only.  Default no mass change.
+E=0.000000
+
+# Change the mass of all amino acids 'F' by the given amount.
+# For parameter file only.  Default no mass change.
+F=0.000000
+
+# Change the mass of all amino acids 'G' by the given amount.
+# For parameter file only.  Default no mass change.
+G=0.000000
+
+# Change the mass of all amino acids 'H' by the given amount.
+# For parameter file only.  Default no mass change.
+H=0.000000
+
+# Change the mass of all amino acids 'I' by the given amount.
+# For parameter file only.  Default no mass change.
+I=0.000000
+
+# Change the mass of all amino acids 'K' by the given amount.
+# For parameter file only.  Default no mass change.
+K=0.000000
+
+# Change the mass of all amino acids 'L' by the given amount.
+# For parameter file only.  Default no mass change.
+L=0.000000
+
+# Change the mass of all amino acids 'M' by the given amount.
+# For parameter file only.  Default no mass change.
+M=0.000000
+
+# Change the mass of all amino acids 'N' by the given amount.
+# For parameter file only.  Default no mass change.
+N=0.000000
+
+# Change the mass of all amino acids 'P' by the given amount.
+# For parameter file only.  Default no mass change.
+P=0.000000
+
+# Change the mass of all amino acids 'Q' by the given amount.
+# For parameter file only.  Default no mass change.
+Q=0.000000
+
+# Change the mass of all amino acids 'R' by the given amount.
+# For parameter file only.  Default no mass change.
+R=0.000000
+
+# Change the mass of all amino acids 'S' by the given amount.
+# For parameter file only.  Default no mass change.
+S=0.000000
+
+# Change the mass of all amino acids 'T' by the given amount.
+# For parameter file only.  Default no mass change.
+T=0.000000
+
+# Change the mass of all amino acids 'V' by the given amount.
+# For parameter file only.  Default no mass change.
+V=0.000000
+
+# Change the mass of all amino acids 'W' by the given amount.
+# For parameter file only.  Default no mass change.
+W=0.000000
+
+# Change the mass of all amino acids 'Y' by the given amount.
+# For parameter file only.  Default no mass change.
+Y=0.000000

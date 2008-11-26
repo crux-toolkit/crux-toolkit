@@ -1,55 +1,18 @@
-<!--
-FILE: customize-tutorial.html 
-AUTHOR: Barbara Frewen
-DATE: Octobeer 15, 2007
-PROJECT: crux
-REVISION: $1.0 $
--->
-
 <html>
 <head>
 <title>Crux: Customization</title>
 
-<link rel="stylesheet" href="stylesheet.css" type="text/css">
+<link rel="stylesheet" href="crux.css" type="text/css">
 
 </head>
 
 <body>
-<div id="top">
-<h>crux: peptide spectrum analysis tools</h>
-</div>
+<blockquote>
 
 <div id="main">
-<div id="side">
-<h3>Table of Contents</h3>
 
-<dl>
-   <dt><a href="home-tutorial.html">Home</a>
-   <dt><a href="install-tutorial.html">Installation</a>
-   <dt><a href="start-tutorial.html">Getting Started</a>
-   <dt><a href="search-tutorial.html">Searching a Protein Database</a>
-   <dt><a href="index-tutorial.html">Creating an Index</a>
-   <dt>Customizing a Search
-<!--
-   <dt><a href="utilities-tutorial.html">Crux utilities</a>
-   <dt><a href="examples-tutorial.html">Examples</a>
--->
-   <dt><a href="crux.html">Man pages</a>
-<!--   <dt><a href="sitemap-tutorial.html">Index</a> -->
-</dl>
-<hr>
-<h3>On this Page</h3>
-<dl>
-   <dt><a href="#intro">Introduction to options</a>
-   <dt><a href="#file">Parameter files</a>
-   <dt><a href="#out">Controlling the output</a>
-   <dt><a href="#pep">Change the peptide parameters</a>
-   <dt><a href="#search">Change the search parameters</a>
-   <dt><a href="#anal">Change the analysis parameters</a>
-</dl>
-</div><!--end side-->
+<h1>Customization and Search Options</h1>
 
-<h3>Customization and Search Options</h3>
 <p><span class="prog">Crux</span> allows the user the flexibility to
 change many of the search and analysis parameters.  Attributes like
 the format of output and which peptides are selected from the protein
@@ -59,7 +22,7 @@ the use of some key <span class="prog">crux</span> options.
 </p>
 
 <a name="intro"></a>
-<h4>Introduction to options</h4>
+<h2>Introduction to options</h2>
 <p>A <span class="prog">crux</span> command is made up of three parts:
 executable name, required arguments, and options. Let's use a <span
 class="prog">crux-search-for-matches</span> command as an example.
@@ -122,11 +85,11 @@ appropriate argument.  This example increases the verbosity to 40
 </p>
 
 <div class="code"><code>
-$ crux-search-for-matches --verbosity 40 sample.ms2 small-yeast.fasta</code>
+$ crux-search-for-matches --verbosity 40 sample.ms2 yeast.fasta</code>
 </div>
 
 <a name="file"></a>
-<h4>Parameter files</h4>
+<h2>Parameter files</h2>
 <p>The second option listed above, <span
 class="out">--parameter-file</span>, is available for all <span
 class="prog">crux</span> programs.  It allows options to be specified in
@@ -154,7 +117,7 @@ programs, beginning with output.
 </p>
 
 <a name="out"></a>
-<h4>Controlling the output</h4>
+<h2>Controlling the output</h2>
 <p><span class="prog">Crux-search-for-matches</span> prints results in
 either a binary or text (sqt) format and is controlled with the option <span
 class="code">--output-mode</span> and values <span
@@ -171,7 +134,7 @@ for matches to the shuffled database.
 </p>
 
 <a name="pep"></a>
-<h4>Changing the peptide parameters</h4>
+<h2>Changing the peptide parameters</h2>
 <p>Several parameters control which peptides in the database are used
 in the search.  By setting, for example, <span
 class="code">--min-length 6</span>
@@ -205,7 +168,7 @@ to require complete digestion).
 </p>
 
 <a name="search"></a>
-<h4>Changing the search parameters</h4>
+<h2>Changing the search parameters</h2>
 <p>The database search involves two scoring steps, a preliminary score
 to find the 500 best candidates and a main scoring function.  Set the
 preliminary scoring function with <span
@@ -219,7 +182,7 @@ In addition to searching the provided protein database,
 </p>
 
 <a name="anal"></a>
-<h4>Changing the analysis parameters</h4>
+<h2>Changing the analysis parameters</h2>
 <p>The key option for <span class="prog">crux-analyze-matches</span>
 is <span class="code">--algorithm</span> which controls how the
 analysis is performed.  The default value is <span
@@ -243,5 +206,11 @@ paper</a> as an example).
 
 </div><!--end main-->
 
+
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
 </body>
 </html>

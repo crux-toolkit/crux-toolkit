@@ -1,0 +1,99 @@
+<html>
+<head>
+<title>crux compute-q-values</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<H1 ALIGN=CENTER>crux compute-q-values</H1>
+
+<p>
+<B>Usage:</B></p>
+
+<blockquote>
+<code>crux compute-qvalues [options] &lt;psm folder&gt; &lt;protein&nbsp;input&gt; 
+</code>
+</blockquote>
+
+<p>
+<B>Description:</B></p>
+
+<blockquote>
+
+<p>
+Given a collection of scored PSMs, estimate q-values.  The q-value is
+a statistical confidence measure that is analagous to a p-value but
+that incorporates multiple testing.  The q-value associated with a
+score threshold T is defined as the minimal false discovery rate at
+which a score of T is deemed significant.  In this setting, the
+q-value accounts for the fact that we are analyzing a large collection
+of spectra.</p>
+
+<p>
+If the collection of PSMs contains both targets and decoys, then the
+false discovery rate associated with a given score is estimated as the
+number of decoy scores above the threshold divided by the number of
+target scores above the threshold.</p>
+
+<p>
+Alternatively, if the collection of PSMs has p-values assigned
+by <code>search-for-matches</code> by using
+a <code>--score-type</code> of <code>xcor_logp</code>
+or <code>sp_logp</code>, then the false discovery rate associated
+with a given score is computed 
+
+<p>
+Additional background information on q-values and statistical
+confidence measures can be found in this article:</p>
+
+<blockquote>
+Lukas K&auml;ll, John D. Storey, Michael J. MacCoss and William
+Stafford
+Noble. <a href="http://noble.gs.washington.edu/papers/kall2008assigning.html">"Assigning
+significance to peptides identified by tandem mass spectrometry using
+decoy databases."</a> <i>Journal of Proteome Research</i>. 7(1):29-34,
+2008</blockquote>
+
+</blockquote>
+
+<p>
+<B>Input:</B></p>
+
+<UL>
+
+<LI>
+&lt;psm folder&gt; &ndash; The name of the folder in which all the PSM
+result files are located.  The program looks for files ending in
+<code>.csm</code>, which are produced by
+<code>crux&nbsp;search-for-matches</code>.  All such files in the
+given directory are analyzed jointly.</li>
+
+<LI>
+&lt;protein input &gt; &ndash; The name of the file in fasta format or
+the directory containing the protein index from which to retrieve
+proteins and peptides.</li>
+
+</UL>
+
+<B>Options:</B>
+
+<UL>
+<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command-line or additional parameters.  See the <a
+href=parameter-file.html>parameter documentation</a> page for details.</li>
+<LI> <code>--feature-file &lt;string&gt;</code> &ndash; 
+Optional file in which to write the features. Default = none.</li>
+<LI><code>--verbosity &lt;int&gt;</code> &ndash; 
+Specify the verbosity of the current processes from 0-100. Default =
+40. </li>
+</UL>
+
+<hr></hr>
+
+<P>
+<A HREF="crux.html">Crux home</A></P>
+
+</blockquote>
+</body>
+</html>

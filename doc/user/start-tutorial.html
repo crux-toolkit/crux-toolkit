@@ -1,59 +1,25 @@
-<!--
-FILE: 
-AUTHOR: Barbara Frewen
-DATE: Octobeer 15, 2007
-PROJECT: crux
-REVISION: $1.0 $
--->
-
 <html>
 <head>
-<title>Crux: Getting Started</title>
+<title>Getting started with Crux</title>
 
-<link rel="stylesheet" href="stylesheet.css" type="text/css">
+<link rel="stylesheet" href="crux.css" type="text/css">
 
 </head>
 
 <body>
-<div id="top">
-<h>crux: peptide spectrum analysis tools</h>
-</div>
+<blockquote>
 
 <div id="main">
-<div id="side">
-<h3>Table of Contents</h3>
 
-<dl>
-   <dt><a href="home-tutorial.html">Home</a>
-   <dt><a href="install-tutorial.html">Installation</a>
-   <dt>Getting Started
-   <dt><a href="search-tutorial.html">Searching a Protein Database</a>
-   <dt><a href="index-tutorial.html">Creating an Index</a>
-   <dt><a href="customize-tutorial.html">Customizing a Search</a>
-<!--
-   <dt><a href="utilities-tutorial.html">Crux utilities</a>
-   <dt><a href="examples-tutorial.html">Examples</a>
--->
-   <dt><a href="crux.html">Man pages</a>
-<!--   <dt><a href="sitemap-tutorial.html">Index</a> -->
-</dl>
-<hr>
-<h3>On this Page</h3>
-<dl>
-   <dt><a href="#env">Your environment</a>
-   <dt><a href="#ms2">Spectrum file</a>
-   <dt><a href="#fasta">Protein file</a>
-</dl>
-</div><!--end side-->
+<h1>Getting started with Crux</h1>
 
-<h3>Getting Started</h3>
 <p> This page will talk about setting up your environment and choosing
 your input files.  Be sure to have completed the software <a
 href="install-tutorial.html">installation</a> first.
 </p>
 
 <a name="env"></a>
-<h4>Your environment</h4>
+<h2>Your environment</h2>
 <p>For this tutorial, we'll assume you are working in a Linux/Unix
 type shell (<a href="http://www.cygwin.com/">cygwin</a> is a good
 choice for Windows users) and already know some basic 
@@ -83,7 +49,7 @@ review the <a href="install-tutorial.html#path">installation instructions</a> on
 </p>
 
 <a name=ms2></a>
-<h4>Input file: mass spectra</h4>
+<h2>Input file: mass spectra</h2>
 <p>Included in the <span class=prog>crux</span> distribution in the
 <span class=file>doc/data</span> directory are some 
 sample files containing mass spectra.  We will use the <a
@@ -129,7 +95,7 @@ class=file>demo.ms2</span> contains 150 spectra.
 </p>
 
 <a name="fasta"></a>
-<h4>Input file: protein database (fasta file)</h4>
+<h2>Input file: protein database (fasta file)</h2>
 <p>The second input file you will need, also in, is a protein database.  This file is in
 fasta format and contains
 a list of proteins you expect to find in your sample and their
@@ -159,17 +125,12 @@ sequence.  Proteins may or may not be separated by blank lines.
 <span class=file>small-yeast.fasta</span> contains 56 proteins.
 </p>
 
-<a href="search-tutorial.html"><h4>Next: Running a search</h4></a>
-
-
-
-
-
-
-
-
-
 </div><!--end main-->
 
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
 </body>
 </html>
