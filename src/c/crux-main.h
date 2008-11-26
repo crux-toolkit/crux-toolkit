@@ -6,7 +6,7 @@
  CREATE DATE: November 24, 2008
  DESCRIPTION: The starting point for what were previously three
  separate protgrams--create-index, search-for-matches, analyze-matches.
- REVISION: $Revision: 1.1.2.1 $
+ REVISION: $Revision: 1.1.2.2 $
 */
 
 #include "carp.h"
@@ -15,7 +15,6 @@
 #include "create_index.h"
 #include "search.h"
 #include "q-value.h"
-#include "q-ranker.h"
 #include "percolator.h"
 
 
