@@ -83,11 +83,8 @@ endif
 libcrux_la_SOURCES = $(LIBFILES)
 libcrux_la_LIBADD = -lm
 
-PERCOLATOR_PROGRAM_FILES = \
-   crux
-#  crux-analyze-matches
-
-NON_PERCOLATOR_PROGRAM_FILES = \
+PROGRAM_FILES = \
+  crux \
   crux-get-ms2-spectrum \
   crux-generate-peptides \
   crux-predict-peptide-ions 
@@ -96,12 +93,6 @@ NON_PERCOLATOR_PROGRAM_FILES = \
 #  create_protein_index \
 #  transform_ms2_spectra \
 #  create_psm_files
-
-if PERCOLATOR
-  PROGRAM_FILES=$(NON_PERCOLATOR_PROGRAM_FILES) $(PERCOLATOR_PROGRAM_FILES)
-else
-  PROGRAM_FILES=$(NON_PERCOLATOR_PROGRAM_FILES)
-endif
 
 bin_PROGRAMS = $(PROGRAM_FILES)
 
@@ -142,11 +133,19 @@ crux_predict_peptide_ions_LDADD = libcrux.la
 #create_psm_files_CFLAGS = $(AM_CFLAGS) -DMAIN 
 #create_psm_files_LDADD = libcrux.la 
 
-crux_SOURCES = crux-main.c  percolator.c 
+if PERCOLATOR
+crux_SOURCES = crux-main.c  crux-main.h percolator.c percolator.h
 
-crux_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)
+crux_CFLAGS = $(AM_CFLAGS) -DMAIN -DPERCOLATOR -I$(PERCOLATOR_DIR)
 crux_LDADD = \
   -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary -lcrux 
+else
+crux_SOURCES = crux-main.c  crux-main.h percolator.c percolator.h
+
+crux_CFLAGS = $(AM_CFLAGS) -DMAIN
+crux_LDADD = \
+   -lcrux 
+endif
 
 paramdir = $(prefix)/doc
 param_DATA = default.params

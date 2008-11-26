@@ -16,10 +16,11 @@
  *         directory are concatinated together and presumed to be
  *         non-overlaping parts of the same ms2 file. 
  * 
- * $Revision: 1.1.2.1 $
+ * $Revision: 1.1.2.2 $
  ****************************************************************************/
 #include "percolator.h"
 
+#ifdef PERCOLATOR
 #define NUM_PERCOLATOR_OPTIONS 9
 #define NUM_PERCOLATOR_ARGUMENTS 2
 /* 
@@ -38,6 +39,7 @@ void print_sqt_file_perc(
   SCORER_TYPE_T second_scorer_type
   );
 
+#endif
   
 /**
  * \brief crux-analyze-matches: takes in a directory containing binary
@@ -45,6 +47,7 @@ void print_sqt_file_perc(
  */
 int percolator_main(int argc, char** argv){
 
+#ifdef PERCOLATOR
   /* Define command line arguments */
   int num_options = NUM_PERCOLATOR_OPTIONS;
   char* option_list[NUM_PERCOLATOR_OPTIONS] = {
@@ -111,8 +114,19 @@ int percolator_main(int argc, char** argv){
 
   carp(CARP_INFO, "crux percolator finished.");
   exit(0);
+
+#else
+  // Silence warnings about unused variables
+  // We could use __attribute_unused__, but that is gcc specific
+  int dummy = argc;
+  dummy = strlen(argv[0]);
+  dummy = 0;
+  fprintf(stderr, "Percolator functionality not included.\n");
+  exit(1);
+#endif
 }
 
+#ifdef PERCOLATOR
 /*  ****************** Subroutines ****************/
 
 
@@ -377,6 +391,7 @@ MATCH_COLLECTION_T* run_percolator(
   return target_match_collection;
 }
 
+#endif
 
 /*
  * Local Variables:

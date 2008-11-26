@@ -9,10 +9,12 @@
  * DESCRIPTION: Header file for crux percolator command. To be made
  * obsolte by q-ranker
  *
- * $Revision: 1.1.2.1 $
+ * $Revision: 1.1.2.2 $
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#ifdef PERCOLATOR
 #include "carp.h"
 #include "crux-utils.h"
 #include "objects.h"
@@ -27,6 +29,7 @@
 #include "match.h"
 #include "match_collection.h"
 #include "PercolatorCInterface.h"
+#endif
 
 int percolator_main(int argc, char** argv);
 
