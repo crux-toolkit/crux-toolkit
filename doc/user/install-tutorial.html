@@ -1,53 +1,18 @@
-<!--
-FILE: 
-AUTHOR: Barbara Frewen
-DATE: Octobeer 15, 2007
-PROJECT: crux
-REVISION: $1.0 $
--->
-
 <html>
 <head>
-<title>Crux: Installation</title>
+<title>Crux installation instructions</title>
 
-<link rel="stylesheet" href="stylesheet.css" type="text/css">
+<link rel="stylesheet" href="crux.css" type="text/css">
 
 </head>
 
 <body>
-<div id="top">
-<h>crux: peptide spectrum analysis tools</h>
-</div>
+<blockquote>
 
 <div id="main">
-<div id="side">
-<h3>Table of Contents</h3>
 
-<dl>
-   <dt><a href="home-tutorial.html">Home</a>
-   <dt>Installation
-   <dt><a href="start-tutorial.html">Getting Started</a>
-   <dt><a href="search-tutorial.html">Searching a Protein Database</a>
-   <dt><a href="index-tutorial.html">Creating an Index</a>
-   <dt><a href="customize-tutorial.html">Customizing a Search</a>
-<!--
-   <dt><a href="utilities-tutorial.html">Crux utilities</a>
-   <dt><a href="examples-tutorial.html">Examples</a>
--->
-   <dt><a href="crux.html">Man pages</a>
-<!--   <dt><a href="sitemap-tutorial.html">Index</a> -->
-</dl>
-<hr>
+<h1>Crux Installation Instructions</h1>
 
-<h3>On this Page</h3>
-<dl>
-   <dt><a href="#install">Installation</a>
-   <dt><a href="#path">Changing $PATH</a>
-</dl>
-
-</div><!--end side-->
-
-<h3>Crux Installation Instructions</h3>
 <p>This page will walk you through the steps of installing <span
 class=prog>crux</span> on your computer.  It assumes you are working
 in a command-line shell (readily available for Linux and Mac systems,
@@ -69,7 +34,7 @@ $HOME</code>
 
 
 <a name=install></a>
-<h4>Installation</h4>
+<h2>Installation</h2>
 
 <ol>
 <li><b>Download the files</b>  <span class=prog>Crux</span> is freely
@@ -116,6 +81,14 @@ convenient location and unpack the file with this command.</li>
 <div class=code><code>
 $ tar -zxvf crux_1.0x.tar.gz
 </div>
+You should now have a new directory, <span class=file>bdist</span>,
+with two subdirectories <span class=file>bin</span>, and <span
+class=file>doc</span>.  The <span class=prog>crux</span> programs are
+in the <span class=file>bin</span> directory. You may want to move 
+these files somewhere
+more convenient for you, but otherwise, that completes the
+installation!  Skip ahead to <a
+href="path">Changing $PATH</a> for notes on how to run the executables.
 
 A new directory named <span class=file>crux_1.0x</span> will be
 created and a long list of files will stream by as they are being put
@@ -173,13 +146,16 @@ $ make install
 </code>
 </div>
 
+</ol>
+
 You should now see a number of executable files in <span
 class=file>install-dir/bin</span> beginning with <span
 class=prog>crux-</span>.  You will also find documentation and example
 files in <span class=file>install-dir/doc</span>.  
 
 <a name="path"></a>
-<h4>Changing $PATH</h4>
+
+<h2>Changing $PATH</h2>
 <p>You can always run any of the programs by specifying its full
 path.  For example,</p>
 
@@ -232,10 +208,12 @@ class=code>export PATH=$PATH:install-dir</span> to the file <span
 class=out>.bashrc</span> located in your home directory.  You will
 have to log on again for the change to take effect.
 
-
-<a href="start-tutorial.html"><h4>Next: Getting Started</h4></a>
-
 </div><!--end main-->
 
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
 </body>
 </html>

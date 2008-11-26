@@ -1,38 +1,27 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
-	<TITLE>crux-predict-peptide-ions</TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
-	<META NAME="CREATED" CONTENT="20050830;17560800">
-	<META NAME="CHANGED" CONTENT="20050902;15510500">
-<!-- FILE: predict-peptide-ions.html
-AUTHOR: Aaron Klammer
-CREATE DATE: 2005-08-23
-PROJECT: predict-peptide-ions
-REVISION: $Revision: 1.2.8.2 $
--->
+<TITLE>crux-predict-peptide-ions</TITLE>
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
-<H1 ALIGN=CENTER>crux-predict-peptide-ions</H1>
+<blockquote>
+<H1 ALIGN=CENTER>crux predict-peptide-ions</H1>
+
+>
+<B>Usage:</B>
+
+<blockquote>
+<code>crux predict-peptide-ions [options]
+  &lt;peptide&nbsp;sequence&gt; 
+  &lt;charge&nbsp;state&gt; 
+</code>
+</blockquote>
+
 <B>Description:</B>
-<br>
-<br>
+
+<p>
 Given a peptide and a charge state, predict the ions according to the 
 provided options.  These are the ions used in <a
-href="crux-search-for-matches.html">crux-search-for-matches</a>. 
-<!--The program will be used primarily for validating the
-ion prediction code, and it's main functionality will ultimately be wrapped in
-<a href='./search-spectrum.html'>search-spectrum</a>.-->
-<br>
-<br>
-<B>Usage:</B>
-<br>
-<br>
-<code>crux-predict-peptide-ions [options]
-  &nbsp;&lt;peptide&nbsp;sequence&gt; 
-  &nbsp;&lt;charge&nbsp;state&gt; 
-</code>
+href="crux-search-for-matches.html">crux-search-for-matches</a>.</p>
 
 <p>
 <B>Input:</B>
@@ -46,10 +35,10 @@ predict the ions.
 <B>Output:</B>
 
 <UL>
-  <br>
 
+  <p>
   The program prints to standard output a series of header lines,
-  describing how the ions were predicted.
+  describing how the ions were predicted.</p>
 
   <pre>
   # PEPTIDE: &lt;peptide sequence&gt;
@@ -57,7 +46,7 @@ predict the ions.
   And then the predicted ions, in the following format:
   <pre>
   &lt;m/z&gt; &lt;mass&gt; &lt;charge&gt; &lt;ion-series&gt; &lt;bond-index&gt; &lt;NH3&gt; &lt;H2O&gt; &lt;ISOTOPE&gt; &lt;FLANK&gt;</pre>
-  Where
+  where
   <pre>
   &lt;m/z&gt; is the ion's mass-to-charge
   &lt;mass&gt; is the ion's (charged) mass
@@ -78,32 +67,32 @@ predict the ions.
 
 <UL>
 <LI>
-[--primary-ions &lt;b | y | by&gt;] &ndash; 
+<code>--primary-ions &lt;b | y | by&gt;</code> &ndash; 
 Predict the specified primary ion series. 'b' indicates b-ions only, 'y' indicates y-ions only, 'by' indicates both. Default by.
 
 <LI>
-[--precursor-ion &lt;T | F&gt;] &ndash; 
+<code>--precursor-ion &lt;T | F&gt;</code> &ndash; 
 Predict the precursor ions, and all associated ions (neutral-losses,
 multiple charge states) consistent with the other specified
 options.  Default F.  
 
 <LI>
-[--neutral-losses &lt;none | h2o | nh3 | all&gt;] &ndash; 
+<code>--neutral-losses &lt;none | h2o | nh3 | all&gt;</code> &ndash; 
 Predict the the specified neutral loss peaks. 'none' indicates no
 neutral losses, 'h2o' indicates water loss only, 'nh3' indicates
 ammonia losses only, 'all' indicates all three kinds of
 losses. Default all. 
 
 <LI>
-[--isotope &lt;0 | 1 | 2&gt;] &ndash;
+<code>--isotope &lt;0 | 1 | 2&gt;</code> &ndash;
 Predict the given number of isotope peaks. Default 0.
 
 <LI>
-[--flanking &lt;T | F&gt;] &ndash; 
+<code>--flanking &lt;T | F&gt;</code> &ndash; 
 Predict flanking peaks for b- and y-ions. Default F.
 
 <LI>
-[--max-ion-charge &lt;1 | 2 | 3 | peptide&gt;] &ndash; 
+<code>--max-ion-charge &lt;1 | 2 | 3 | peptide&gt;</code> &ndash; 
 Predict ions up to this charge-state. The integer options ('1', '2' and
 '3') specify a fixed maximum charge-state. The 'peptide' option
 indicates that the ions should range up to the maximum charge-state of
@@ -111,19 +100,19 @@ the peptide itself (thus, a +2 charge state peptide would have ions of
 +1 and +2). Default peptide.
 
 <LI>
-[--nh3 &lt;int&gt;] &ndash; 
+<code>--nh3 &lt;int&gt;</code> &ndash; 
 Predict peaks with the following max nh3 modification.  Default 1.
 
 <LI>
-[--h2o &lt;int&gt;] &ndash; 
+<code>--h2o &lt;int&gt;</code> &ndash; 
 Predict peaks with the following max h2o modification.  Default 0.
 
 <LI>
-[--fragment-mass &lt;average | mono&gt;]
+<code>--fragment-mass &lt;average | mono&gt;</code>
 Which isotopes to use in calculating the fragment ion masses.  Default mono.
 
 <LI>
-[--verbosity &lt;0-100&gt;] &ndash; Specify the verbosity of the
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
 current processes. Each level prints the following messages, including
 all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
 errors, 20-warnings, 30-information on the progress of execution,
@@ -131,7 +120,7 @@ errors, 20-warnings, 30-information on the progress of execution,
 Default = 30.
 
 <li>
-[--version T] &ndash;
+<code>--version T</code> &ndash;
 Print the version number and quit.  Please note that you must include
 the 'T' after --version.
 
@@ -143,16 +132,11 @@ messages:</B>
   <LI><I>FATAL: The sequence "peptide" is not a valid peptide sequence.</I>
   <LI><I>FATAL: The value "charge" is not a valid charge state.</I>
 </UL>
-<!--
-<B>Bugs:</B> 
 
-<UL>
-	<LI>predict-peptide-ions does not have bugs, it has features.
-	
-</UL>
--->
-<HR>
+<hr></hr>
+
 <P><A HREF="crux.html">Crux</A> 
 </P>
+</blockquote>
 </BODY>
 </HTML>

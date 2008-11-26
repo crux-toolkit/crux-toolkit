@@ -1,4 +1,15 @@
+
+schematic.eps: schematic.fig
+	fig2dev -L eps schematic.fig schematic.eps
+
+schematic.png: schematic.eps
+	convert -density 144 -resize 40%x40% schematic.eps schematic.png
+
 htmldir = $(prefix)/doc
+cruximgdir = $(prefix)/doc
+
+cruximg_DATA = \
+  schematic.png
 
 dist_html_DATA  =  \
   crux-analyze-matches.html \
@@ -20,7 +31,7 @@ dist_html_DATA  =  \
   data/demo.ms2 \
   data/small-yeast.fasta
 
-EXTRA_DIST = 
+EXTRA_DIST = schematic.fig
 
 WEBDIR=/noble/www/htdocs/proj/crux
 webpage:
@@ -32,4 +43,3 @@ webpage:
 	cp -R data/ $(WEBDIR)/
 	cp -R download/ $(WEBDIR)/
 	rm -fr $(WEBDIR)/*/CVS
-

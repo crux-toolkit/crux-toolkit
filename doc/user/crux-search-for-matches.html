@@ -1,38 +1,33 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML>
-<HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
-	<TITLE>crux-search-for-matches</TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
-	<META NAME="CREATED" CONTENT="20050830;17560800">
-	<META NAME="CHANGED" CONTENT="20050902;15510500">
-<!-- FILE: match-search.html
-AUTHOR: Chris Park
-CREATE DATE: 2007-06-19
-PROJECT: match-search
-REVISION: $Revision: 1.2.8.6 $
--->
-</HEAD>
-<BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
-<H1 ALIGN=CENTER>crux-search-for-matches</H1>
-<B>Description:</B>
-<br>
-<br>
-Given as input an ms2 file, a sequence database, and an optional parameter
-file, search each spectrum against the peptides in the sequence database,
-and return the resulting PSMs with some additional features in serialized
-binary output files or SQT files.
-<br>
-<br>
-<B>Usage:</B>
-<br>
-<br>
-<code>crux-search-for-matches
-  &nbsp;[options]
-  &nbsp;&lt;ms2&nbsp;input&nbsp;filename&gt; 
-  &nbsp;&lt;protein&nbsp;input&gt; 
+<html>
+<head>
+<title>crux search-for-matches</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
 
+<H1 ALIGN=CENTER>crux search-for-matches</H1>
+
+<B>Usage:</B>
+
+<blockquote>
+<code>crux search-for-matches [options]
+&lt;ms2&nbsp;input&nbsp;filename&gt; &lt;protein&nbsp;input&gt;
 </code>
+</blockquote>
+
+<B>Description:</B>
+
+<blockquote>
+This command searches a protein database with a set of spectra.  For
+each spectrum, candidate peptides are identified whose inferred m/z
+lies within a specified range of the observed precursor m/z.  These
+candidate peptides are first ranked with the SEQUEST Sp score.  The
+top 500 matches are then re-scored using XCorr.  The top 5 peptides
+for each spectrum are output by the program.  The input protein
+database may either be in FASTA format or it may be a binary index
+created by <code>crux create-index</code>.
+</blockquote>
 
 <p>
 <B>Input:</B>
@@ -53,27 +48,25 @@ binary output files or SQT files.
 
 <UL>
 <p>
-  The program writes to a user-specified folder a binary file
-  that contains the PSMs and additional features.
-  </p>
-<p>
-  Optionally, the result can be output in a human readable
-  SQT format file instead of or in addition to the binary file.
-  </p>
-
+The program writes to a user-specified folder a binary file
+that contains the PSMs and additional features.
+Optionally, the result can be output in a human readable
+SQT format file instead of or in addition to the binary file.
+</p>
 </UL>
+
 <B>Options:</B>
 <UL>
 
 <li>
-[--use-index &lt;T | F&gt;] Use an index that has already been 
+<code>--use-index &lt;T | F&gt;</code> Use an index that has already been 
     created if true (T) or use a fasta file if false (F). When using
     an index the 'protein input' argument will be the name of the
     directory containing the index files (the same as the 'index name'
     argument for crux-create-index).  Default = F.
 
 <LI>
-[--output-mode &lt;sqt | binary | all&gt; ] &ndash; The output
+<code>--output-mode &lt;sqt | binary | all&gt; </code> &ndash; The output
 format. In 'binary' mode the output file is named after the input MS2
 file with extension .csm and the file(s) with search results from
 decoy sequences end in -decoy.csm.  The binary output files become the
@@ -83,32 +76,32 @@ produced.  It's name is controlled with the --sqt-output-file and
 files are produced. Default = binary.
 
 <LI>
-[--match-output-folder &lt;string&gt;] &ndash; The direcotry in
+<code>--match-output-folder &lt;string&gt;</code> &ndash; The direcotry in
 which to store the binary output files and/or text sqt files. Default
 = current directory.  
 
 <li>
-[--overwrite &lt;T | F&gt;] Replace existing files if true (T) or 
+<code>--overwrite &lt;T | F&gt;</code> Replace existing files if true (T) or 
 fail when trying to overwrite a file if false (F). Default =  F.
 
 <LI>
-[--sqt-output-file &lt;string&gt;] &ndash; Name of the output text
+<code>--sqt-output-file &lt;string&gt;</code> &ndash; Name of the output text
 file.  Only works with --output-mode&lt;sqt | all&gt; Default = target.sqt.
 
 <LI>
-[--decoy-sqt-output-file &lt;string&gt;] &ndash; Name of the output
+<code>--decoy-sqt-output-file &lt;string&gt;</code> &ndash; Name of the output
 sqt file for matches to decoy (shuffled) sequences.  Only
 relevant with --number-decoy-sets &lt;1 | 2&gt;.  With two decoy
 sets, only one is printed to an sqt file. Default = decoy.sqt.
 
 <LI>
-[--number-decoy-set &lt;0 | 1 | 2&gt;] &ndash; Specify the number
+<code>--number-decoy-set &lt;0 | 1 | 2&gt;</code> &ndash; Specify the number
 of decoy sets to generate for match_analysis. At least one decoy set
 is required to run the algorithm 'percolator' in a subsiquent
 crux-analyze-matches run.  Default = 2. 
 
 <LI>
-[--prelim-score-type &lt;sp | none&gt;] &ndash; The type of preliminary 
+<code>--prelim-score-type &lt;sp | none&gt;</code> &ndash; The type of preliminary 
 scoring function to use.  In the preliminary scoring step, all
 possible psms for a spectrum are scored and sorted by score.  Only the
 top ranking psms are retained for the second scoring step. The
@@ -116,7 +109,7 @@ parameter file option 'max-rank-preliminary' controls how many
 top-ranking psms are retained.  Default = sp.
 
 <LI>
-[--score-type &lt;xcorr | sp | xcorr-pvalue | sp-pvalue&gt;]&ndash; 
+<code>--score-type &lt;xcorr | sp | xcorr-pvalue | sp-pvalue&gt;</code>&ndash; 
 The type of scoring function to use in the second scoring step.  Xcorr
 is the SEQEUST-style score, sp is the SEQUEST-style preliminary
 scoring function.  A p-value for each psm can be calculated from
@@ -127,34 +120,34 @@ followed by the crux-analyze-matches algorithm curve-fit results in
 unspecified behavior.  Default = xcorr.
 
 <LI>
-[--spectrum-min-mass &lt;float&gt;] &ndash; The lowest spectrum 
+<code>--spectrum-min-mass &lt;float&gt;</code> &ndash; The lowest spectrum 
 m/z to search in the ms2 file. Default = 0.0
 
 <LI>
-[--spectrum-max-mass &lt;float&gt;] &ndash; The highest spectrum 
+<code>--spectrum-max-mass &lt;float&gt;</code> &ndash; The highest spectrum 
 m/z to search in the ms2 file. Default = no maximum.
 
 <LI> 
-[--spectrum-charge &lt;1 | 2 | 3 | all&gt;] &ndash; The spectrum 
+<code>--spectrum-charge &lt;1 | 2 | 3 | all&gt;</code> &ndash; The spectrum 
 charges to search. With 'all' every spectrum will be searched and
 spectra with multiple charge states will be searched once at each
 charge state.  With 1, 2, or 3 only spectra with that charge will be
 searched. Default = all. 
 
-<LI>[--parameter-file &lt;filename&gt;] &ndash; A file containing
+<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; A file containing
 command-line or additional parameters.  See the <a
 href="parameter-file.html">parameter documentation</a> page for
 details.
 
 <LI>
-[--write-parameter-file &lt;filename&gt;] &ndash; Create a file
+<code>--write-parameter-file &lt;filename&gt;</code> &ndash; Create a file
 with the name and value of all parameters/options for the current
 search.  Not all parameters in the file may have been used in the
 search.  The resulting file can be used with the --parameter-file
 option for other crux programs. 
 
 <LI>
-[--verbosity &lt;0-100&gt;] &ndash; Specify the verbosity of the
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
 current processes. Each level prints the following messages, including
 all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
 errors, 20-warnings, 30-information on the progress of execution,
@@ -162,7 +155,7 @@ errors, 20-warnings, 30-information on the progress of execution,
 Default = 30.
 
 <li>
-[--version T] &ndash;
+<code>--version T</code> &ndash;
 Print the version number and quit.  Please note that you must include
 the 'T' after --version.
 
@@ -170,26 +163,26 @@ the 'T' after --version.
 <B>Parameter file options:</B>
 <ul>
 <li>
-[fragment-mass &lt;average | mono&gt;] &ndash; Which isotopes to use
+<code>fragment-mass &lt;average | mono&gt;</code> &ndash; Which isotopes to use
 in calcuating fragment ion mass (average, mono). Default mono.
 
 <li>
-[ion-tolerance&lt;float&gt;] &ndash; Tolerance used for matching
+<code>ion-tolerance&lt;float&gt;</code> &ndash; Tolerance used for matching
 observed peaks to predicted fragment ions.  Default 0.5.
 
 <li>
-[max-rank-preliminary &lt;int&gt;] &ndash;  Number of psms per
+<code>max-rank-preliminary &lt;int&gt;</code> &ndash;  Number of psms per
 spectrum to score after preliminary scoring.  Default 500.
 
 <li>
-[top-match &lt;int&gt;] &ndash; The number of psms per spectrum writen
+<code>top-match &lt;int&gt;</code> &ndash; The number of psms per spectrum writen
 to the binary output file. Only relevant when
 output-mode=&lt;all|binary&gt;. Does not affect output to text files.
 If more than one psm is written to file, the matches for each spectrum
 will be re-ranked in crux-match-analysis. Default 1.
 
 <li>
-[max-sqt-result &lt;int&gt;] &ndash; Number of search results per
+<code>max-sqt-result &lt;int&gt;</code> &ndash; Number of search results per
 spectrum to report in the sqt file. Only relevant when
 output-mode=&lt;all|sqt&gt;.  Does not affect output to binary
 files. Default 5. 
@@ -211,20 +204,13 @@ messages:</B>
   not exist (or is not readable, or is empty).</I>
   <LI><I>Fatal: The following options are incompatible:</I>
   <ul>
-<!--    <li>--output-mode = sqt    and --match-output-folder -->
     <li>--output-mode = binary and --sqt-output-file
   </ul>
 </UL>
-<!--
-<B>Bugs:</B> 
-
-<UL>
-	<LI>match-search does not have bugs, it has features.
-	
-</UL>
--->
-<HR>
+<HR></hr>
 <P><A HREF="crux.html">Crux</A> 
 </P>
+
+</blockquote>
 </BODY>
 </HTML>
