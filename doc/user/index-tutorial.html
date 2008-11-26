@@ -1,53 +1,17 @@
-<!--
-FILE: 
-AUTHOR: Barbara Frewen
-DATE: Octobeer 15, 2007
-PROJECT: crux
-REVISION: $1.0 $
--->
-
 <html>
 <head>
-<title>Crux: Index</title>
+<title>Creating a peptide index</title>
 
-<link rel="stylesheet" href="stylesheet.css" type="text/css">
+<link rel="stylesheet" href="crux.css" type="text/css">
 
 </head>
 
 <body>
-<div id="top">
-<h>crux: peptide spectrum analysis tools</h>
-</div>
+<blockquote>
 
 <div id="main">
-<div id="side">
-<h3>Table of Contents</h3>
+<h1>Creating a peptide index</h1>
 
-<dl>
-   <dt><a href="home-tutorial.html">Home</a>
-   <dt><a href="install-tutorial.html">Installation</a>
-   <dt><a href="start-tutorial.html">Getting Started</a>
-   <dt><a href="search-tutorial.html">Searching a Protein Database</a>
-   <dt>Creating an Index</a>
-   <dt><a href="customize-tutorial.html">Customizing a Search</a>
-<!--
-   <dt><a href="utilities-tutorial.html">Crux utilities</a>
-   <dt><a href="examples-tutorial.html">Examples</a>
--->
-   <dt><a href="crux.html">Man pages</a>
-<!--   <dt><a href="sitemap-tutorial.html">Index</a> -->
-</dl>
-<!--
-<hr>
-<h3>On this Page</h3>
-<dl>
-   <dt>First
-   <dt>Second
-</dl>
--->
-</div><!--end side-->
-
-<h3>Creating an Index</h3>
 <p> The search for peptide-spectrum matches requires looking through
 all possible peptides in the protein database (fasta file).  A text
 file in fasta format is not well-suited for this task, so <span
@@ -94,7 +58,7 @@ like this.</p>
 
 <pre>
 #       time created: Mon Jan 28 14:02:29 2008
-#       fasta file: ../small-yeast.fasta
+#       fasta file: small-yeast-binary-fasta 
 #       min_mass: 200.00
 #       max_mass: 7200.00
 #       min_length: 6
@@ -107,7 +71,7 @@ like this.</p>
 #       target mass range for index file: 6.84
 </pre>
 
-<h4>Using an index</h4>
+<h2>Using an index</h2>
 
 <p>The index you have created can be used when searching for
 peptide-spectrum matches and in the subsequent analysis of matches.
@@ -122,15 +86,18 @@ $ crux-analyze-matches --use-index T . yeast-index
 </div>
 <!-- Use a different ms2 so analysis won't break w/each spec twice-->
 
-<p>You may get an error saying that the file <span
+<p>You should get an error saying that the file <span
 class=file>target.sqt</span> already exists.  You can delete the file
 and run the command again, or you can use the option <span class=code>
 --overwrite</span>.  The next section will discuss that and other <span
 class=prog>crux</span> options and how to set them.</p>
 
-<a href="customize-tutorial.html"><h4>Next: Customizing Searches</h4></a>
-
 </div><!--end main-->
 
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
 </body>
 </html>
