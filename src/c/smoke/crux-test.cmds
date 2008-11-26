@@ -38,11 +38,11 @@ predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z
 search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt decoy.sqt *.csm ; crux search-for-matches --parameter-file params/set_rand_seed --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time' 'atabase'
 
 # Analyze existing search results
-#analyze_matches_existing = good_results/standard_analyze_existing.target.sqt = rm -f target.sqt decoy.sqt test*.csm; crux-analyze-matches existing_search test.fasta; cat target.sqt = 'Time'
-percolator_existing = good_results/standard_analyze_existing.target.sqt = rm -f target.sqt decoy.sqt test*.csm; crux percolator existing_search test.fasta; cat target.sqt = 'Time'
+#analyze_matches_existing = good_results/standard_analyze_existing.target.sqt = rm -f target.sqt decoy.sqt *.csm; crux-analyze-matches existing_search test.fasta; cat target.sqt = 'Time'
+percolator_existing = good_results/standard_analyze_existing.target.sqt = rm -f target.sqt decoy.sqt *.csm; crux percolator existing_search test.fasta; cat target.sqt = 'Time'
 
 # Search for matches with all defaults (except for the rand seed), no sqt file to test so use analyze
-search_for_matches_noops = good_results/empty_file = rm -rf target.sqt test*csm ; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 test.fasta; = 'Time'
+search_for_matches_noops = good_results/empty_file = rm -rf target.sqt *csm ; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 test.fasta; = 'Time'
 
 # Analyze matches to test default search, use no ops
 analyze_matches_no_ops_test_search = good_results/standard_analyze_default = crux percolator . test.fasta; cat target.sqt = 'Time'
@@ -84,7 +84,7 @@ generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_
 search_for_matches_default_index = good_results/standard_search_default.target.sqt = crux search-for-matches --output-mode all --overwrite T --use-index T --parameter-file params/params_uniq test.ms2 test_crux_index; cat target.sqt = 'Time' 'Database'
 
 # Analyze matches using above index
-analyze_matches_index = good_results/standard_test-perc.sqt =  crux percolator --sqt-output-file test-perc.sqt --overwrite T --use-index T . test_crux_index; cat test-perc.sqt = 'StartTime'
+analyze_matches_index = good_results/standard_test-perc.sqt =  rm -f demo*csm; crux percolator --sqt-output-file test-perc.sqt --overwrite T --use-index T . test_crux_index; cat test-perc.sqt = 'StartTime'
 
 
 # MORE TESTS TODO

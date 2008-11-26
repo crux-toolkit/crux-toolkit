@@ -10,7 +10,7 @@
             crux <operation> <options> <arguments>
          where operation is create-index, search, compute-q-values, or
          q-ranker.     
- REVISION: $Revision: 1.1.2.2 $
+ REVISION: $Revision: 1.1.2.3 $
 */
 
 #include "crux-main.h"
@@ -49,7 +49,6 @@ int main(int argc, char** argv){
 
   // determine the operation
   char* op_string = argv[1];
-  printf("opstring is %s\n", op_string);
   COMMAND_T command = string_to_command_type(op_string);
 
   // call the appropriate function 
