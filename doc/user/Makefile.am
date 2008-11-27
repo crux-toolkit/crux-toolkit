@@ -12,24 +12,34 @@ cruximg_DATA = \
   schematic.png
 
 dist_html_DATA  =  \
-  crux-analyze-matches.html \
-  crux-create-index.html \
-  crux-generate-peptides.html \
-  crux-get-ms2-spectrum.html \
-  crux.html \
-  crux-predict-peptide-ions.html \
-  crux-score-peptides-spectrum.html \
-  crux-search-for-matches.html \
-  customize-tutorial.html \
-  home-tutorial.html \
-  index-tutorial.html \
-  install-tutorial.html \
-  parameter-file.html \
-  search-tutorial.html \
-  start-tutorial.html \
-  stylesheet.css \
-  data/demo.ms2 \
-  data/small-yeast.fasta
+	compute-q-values.html \
+	crux-analyze-matches.html \
+	crux-create-index.html \
+	crux-generate-peptides.html \
+	crux-get-ms2-spectrum.html \
+	crux.css \
+	crux.html \
+	crux-predict-peptide-ions.html \
+	crux-score-peptides-spectrum.html \
+	crux-search-for-matches.html \
+	default.params \
+	customize-tutorial.html \
+	fasta-format.html \
+	index-tutorial.html \
+	install-tutorial.html \
+	nibib.gif \
+	parameter-file.html \
+	percolator.html \
+	release-notes.html \
+	sample.fasta \
+	schematic.png \
+	search-tutorial.html \
+	spectacle.html \
+	spectacle-eg-input.txt \
+	start-tutorial.html \
+	UWlogo150p.gif \
+	data/demo.ms2 \
+	data/small-yeast.fasta
 
 EXTRA_DIST = schematic.fig
 
