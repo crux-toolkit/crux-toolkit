@@ -47,6 +47,7 @@ WEBDIR=/noble/www/htdocs/proj/crux
 webpage:
 	cp crux.html $(WEBDIR)/index.html
 	cp -f *.html $(WEBDIR)/
+	cp -f *.png $(WEBDIR)/
 	cp *.css $(WEBDIR)/
 	cp default.params $(WEBDIR)/
 	rm -fr $(WEBDIR)/data/
