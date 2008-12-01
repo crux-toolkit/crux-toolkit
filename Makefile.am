@@ -33,7 +33,7 @@ bdist:
 	rm -fr bdist/
 
 checksum:
-	md5sum $(distdir)-$(ar)-$(name).zip > $(distdir)-$(ar)-$(name).zip.md5sum
-	md5sum $(distdir).tar.gz > $(distdir).tar.gz.md5sum
+	md5sum $(distdir)-$(ar)-$(name).zip > $(distdir)-$(ar)-$(name).zip.md5sum.txt
+	md5sum $(distdir).tar.gz > $(distdir).tar.gz.md5sum.txt
 	
 
