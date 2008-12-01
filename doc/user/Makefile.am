@@ -48,6 +48,7 @@ webpage:
 	cp crux.html $(WEBDIR)/index.html
 	cp -f *.html $(WEBDIR)/
 	cp -f *.png $(WEBDIR)/
+	cp -f *.gif $(WEBDIR)/
 	cp *.css $(WEBDIR)/
 	cp default.params $(WEBDIR)/
 	rm -fr $(WEBDIR)/data/
