@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.57 $
+ * REVISION: $Revision: 1.58 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -412,7 +412,8 @@ void print_match(
  * The main score goes in the position usually holding the xcorr.  The other
  * score goes in the position usually holding the preliminary Sp
  * score.  For searches analyzed by percolator, main and other should
- * be discriminant score and qvalue.
+ * be discriminant score and qvalue.  For p-value estimation, main and
+ * other should be p-value and xcorr (or sp).
  */
 void print_match_sqt(
   MATCH_T* match,             ///< the match to print -in  
@@ -435,6 +436,19 @@ void print_match_sqt(
     other_rank_type = SP;    
     adjust_delta_cn = TRUE;
   }
+  // for p-values, also give rank of xcorr and sp?
+  else if( main_score == LOGP_BONF_WEIBULL_XCORR ){
+    //other_rank_type = XCORR;
+    other_score = XCORR;
+  }else if( main_score == LOGP_BONF_WEIBULL_SP ){
+    //other_rank_type = SP;
+    other_score = SP;
+  }
+  // for post-analysis of p-values, both ranks from xcorr
+  else if( main_score == LOGP_QVALUE_WEIBULL_XCORR ){
+    main_rank_type = XCORR;
+  }
+  // secondary rank could always be preliminary score
 
   // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
   // Only the fraction matched is serialized.  The number possible can

@@ -1,7 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.80 $
- * $Revision: 1.80 $
+ * $Revision: 1.81 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -1093,8 +1092,6 @@ BOOLEAN_T create_index(
   carp(CARP_DEBUG, "Creating index");
   // check if already created index
   if(index->on_disk){
-    //carp(CARP_WARNING, "Trying to create index that already exists");
-    //return TRUE;//?????BF
     if(get_boolean_parameter("overwrite")){
       replace_index = TRUE;
       carp(CARP_DEBUG, "Will be replacing existing index");
@@ -1163,7 +1160,8 @@ BOOLEAN_T create_index(
   int* bin_count = (int*)mycalloc(num_bins, sizeof(int));
 
   // create peptide count array that stores total count of peptides in each bin
-  peptide_count_array = (unsigned int*)mycalloc(num_bins, sizeof(unsigned int));
+  peptide_count_array = 
+    (unsigned int*)mycalloc(num_bins, sizeof(unsigned int));
 
   // create README file, with parameter informations
   readme = fopen("README", "w");
@@ -1186,7 +1184,6 @@ BOOLEAN_T create_index(
   // iterate through all peptides
   while(database_peptide_iterator_has_next(peptide_iterator)){    
     ++count_peptide;
-    //    if(count_peptide % 1000 == 0){
     if(count_peptide % mod_me == 0){
       if( (count_peptide/10 ) == mod_me ){
         mod_me = mod_me * 10;

@@ -8,7 +8,42 @@
 
 <h1>Release notes for Crux</h1>
 
+<h2>Version 1.02</h2> December 1, 2008
+
+<ul>
+
+<li>
+Three programs, <code>crux-create-index</code>,
+<code>crux-search-for-matches</code>,
+and <code>crux-analyze-matches</code>, were merged into one program
+named
+<code>crux</code>.</li>
+
+<li>
+Percolator is now truly optional as all Crux programs will build
+without it.</li>
+
+<li>
+Fragment masses can now be calculated as average or mono-isotopic.
+This is controlled by the <code>fragment-mass</code> option in the
+paramter file.</li>
+
+<li>
+The name of the score-type option that calculates p-values was changed
+from xcorr-logp to xcorr-pvalue.</li>
+
+<li>
+SQT files have two new lines in the header which describe the
+arrangement of values in the results.</li>
+
+<li>
+HTML documentation was updated to reflect the above changes.</li>
+
+</ul>
+
 <h2>Version 1.01</h2>
+
+<p>October 15, 2008</p>
 
 <ul>
 
@@ -16,7 +51,7 @@
 A bug limiting the length of the name of an index file was fixed.</li>
 
 <li>
-Modifications were made so that crux will build with version
+Modifications were made so that Crux will build with version
 1.05 of Percolator.  This is the only supported version of
 Percolator.</li>
 
@@ -29,6 +64,8 @@ The <code>--version</code> option was added.</li>
 </ul>
 
 <h2>Version 1.0</h2>
+
+<p>March 4, 2008</p>
 
 <blockquote>
 Initial release

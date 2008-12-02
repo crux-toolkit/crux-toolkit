@@ -19,12 +19,8 @@ TESTS = \
 	check-database.c \
 	check-match.c \
 	crux-unit-tests.c
-#	check-parameter.c \
-#	check-modifications.c \
-#	check-peptide-modifications.c \
-#	check-linked-list.c \
-#	check-generate-peptides-iterator.c \
-#	check-modified-peptides-iterator.c \
+	#check-parameter.c \
+	#check-modifications.c \
 
 CRUX_LIBS = \
   ../.libs/libcrux.a \

@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.47 $
+ * $Revision: 1.48 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_ANALYSIS_OPTIONS 8
+#define NUM_ANALYSIS_OPTIONS 9
 #define NUM_ANALYSIS_ARGUMENTS 2
 
 /* 
@@ -83,6 +83,7 @@ int main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file",
+    "write-parameter-file",
     "algorithm",
     "feature-file",
     "use-index", //not yet implemented, below set to true
@@ -112,7 +113,7 @@ int main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux-analyze-matches");
 
   /* Set verbosity */
-  set_verbosity_level(get_int_parameter("verbosity"));
+  //set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get arguments */
   //  char* psm_file = get_string_parameter("psm file");
@@ -140,7 +141,7 @@ int main(int argc, char** argv){
   case QVALUE_ALGORITHM:
     carp(CARP_INFO, "Running qvalue");
     match_collection = run_qvalue(psm_file, fasta_file);
-    scorer_type = Q_VALUE;
+    scorer_type =  LOGP_QVALUE_WEIBULL_XCORR; 
     second_scorer_type = XCORR; // could it be other?
     break;
     
@@ -178,6 +179,12 @@ int main(int argc, char** argv){
   print_hit_collection(stdout, hit_collection);
   free_hit_collection(hit_collection);
   */
+
+  // clean up
+  free(psm_file);
+  free(fasta_file);//rename
+  free(feature_file);
+
 
   carp(CARP_INFO, "crux-analyze-matches finished.");
   exit(0);
@@ -235,7 +242,7 @@ void print_sqt_file(
 
   // print header
   int num_proteins = get_match_collection_num_proteins(match_collection);
-  print_sqt_header( sqt_file, "target", num_proteins);
+  print_sqt_header( sqt_file, "target", num_proteins, TRUE);
 
   ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
   char algorithm_str[64];
@@ -293,6 +300,8 @@ void print_sqt_file(
 
   }// next match
   free_match_iterator(match_iterator);
+  free(sqt_filename);
+
 }
 
 
@@ -430,9 +439,10 @@ MATCH_COLLECTION_T* run_qvalue(
     match_collection = 
       match_collection_iterator_next(match_collection_iterator);
 
-    // create iterator, to register each PSM feature to Percolator
+    // create iterator
     match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
-    
+
+    // for each match, get p-value    
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
       pvalues[num_psms++] =  get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
@@ -443,7 +453,7 @@ MATCH_COLLECTION_T* run_qvalue(
 
     // ok free & update for next set
     free_match_iterator(match_iterator);
-  }
+  }// next match collection
 
   free_match_collection_iterator(match_collection_iterator);
 
@@ -491,9 +501,10 @@ MATCH_COLLECTION_T* run_qvalue(
     match_collection = 
       match_collection_iterator_next(match_collection_iterator);
 
-    // create iterator, to register each PSM feature to Percolator
+    // create iterator
     match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
 
+    // for each match, convert p-value to q-value
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
       double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
@@ -703,12 +714,12 @@ MATCH_COLLECTION_T* run_percolator(
   
   // TODO put free back in. took out because claimed it was double free
   // free names
-  /*unsigned int name_idx;
+  unsigned int name_idx;
   for(name_idx=0; name_idx < number_features; ++name_idx){
     free(feature_names[name_idx]);
   }
   free(feature_names);
-  */
+  
 
   free(results_q);
   free(results_score);

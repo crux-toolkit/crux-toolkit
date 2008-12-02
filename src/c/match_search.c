@@ -26,7 +26,7 @@
 #include "match.h"
 #include "match_collection.h"
 
-#define NUM_SEARCH_OPTIONS 15
+#define NUM_SEARCH_OPTIONS 16
 #define NUM_SEARCH_ARGS 2
 
 /* Private functions */
@@ -37,14 +37,16 @@ void open_output_files(FILE*** binary_filehandle_array,
                        FILE** sqt_filehandle,
                        FILE** decoy_sqt_filehandle);
 
-int main(int argc, char** argv){
-
+//int main(int argc, char** argv){
+int search_main(int argc, char** argv){
+  
   /* Define optional command line arguments */
   int num_options = NUM_SEARCH_OPTIONS;
   char* option_list[NUM_SEARCH_OPTIONS] = {
     "version",
     "verbosity",
     "parameter-file",
+    "write-parameter-file",
     "overwrite",
     "use-index",
     "prelim-score-type",
@@ -78,11 +80,11 @@ int main(int argc, char** argv){
 
   /* Parse the command line, including optional params file
      Includes syntax, type, and bounds checking, dies on error */
-  parse_cmd_line_into_params_hash(argc, argv, "crux-search-for-matches");
+  parse_cmd_line_into_params_hash(argc, argv, "crux search-for-matches");
 
   /* Set verbosity */
-  verbosity = get_int_parameter("verbosity");
-  set_verbosity_level(verbosity);
+  //verbosity = get_int_parameter("verbosity");
+  //set_verbosity_level(verbosity);
 
   /* Get input: ms2 file */
   char* ms2_file = get_string_parameter_pointer("ms2 file");
@@ -121,8 +123,8 @@ int main(int argc, char** argv){
 
   //print headers
   serialize_headers(psm_file_array);
-  print_sqt_header(sqt_file, "target", num_proteins);
-  print_sqt_header(decoy_sqt_file, "decoy", num_proteins);
+  print_sqt_header(sqt_file, "target", num_proteins, FALSE);// !analyze-matches
+  print_sqt_header(decoy_sqt_file, "decoy", num_proteins, FALSE);
 
   /* Perform search: loop over spectra*/
 

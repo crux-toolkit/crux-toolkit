@@ -4,7 +4,7 @@
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum
  * vs. ion_series 
- * REVISION: $Revision: 1.65 $
+ * REVISION: $Revision: 1.66 $
  ****************************************************************************/
 
 #include <math.h>
@@ -1235,9 +1235,12 @@ double score_logp_bonf_weibull(
   carp(CARP_DETAILED_DEBUG, "Stat: score = %.6f", score);
   double p_value = exp( - pow( (score+shift)/eta, beta));
   carp(CARP_DETAILED_DEBUG, "Stat: pvalue before = %.15f", p_value);
+
   // The Bonferroni correction 
   // use original equation 1-(1-p_value)^n when p is not too small
-  if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
+  if(p_value > BONFERRONI_CUT_OFF_P 
+     || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
+
     double corrected_pvalue = -log(1-pow((1-p_value), num_peptide));
     carp(CARP_DETAILED_DEBUG, "Stat: pvalue after = %.6f", corrected_pvalue);
     return corrected_pvalue;
@@ -1416,7 +1419,8 @@ ION_CONSTRAINT_T** single_ion_constraints(
   ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION, A_ION }; 
   int charges[GMTK_NUM_CHARGES] = { 1, 2 }; 
 
-  MASS_TYPE_T mass_type = MONO; // TODO maybe change to parameter file
+  //MASS_TYPE_T mass_type = MONO; // TODO maybe change to parameter file
+  MASS_TYPE_T mass_type = get_mass_type_parameter("fragment-mass");
 
   int ion_constraint_idx = 0;
 

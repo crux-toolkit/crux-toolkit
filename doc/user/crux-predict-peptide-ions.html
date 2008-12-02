@@ -10,7 +10,7 @@
 <B>Usage:</B>
 
 <blockquote>
-<code>crux predict-peptide-ions [options]
+<code>crux-predict-peptide-ions [options]
   &lt;peptide&nbsp;sequence&gt; 
   &lt;charge&nbsp;state&gt; 
 </code>
@@ -67,49 +67,49 @@ predict the ions.
 
 <UL>
 <LI>
-<code>--primary-ions &lt;b | y | by&gt;</code> &ndash; 
+<code>--primary-ions &lt;b|y|by&gt;</code> &ndash; 
 Predict the specified primary ion series. 'b' indicates b-ions only, 'y' indicates y-ions only, 'by' indicates both. Default by.
 
 <LI>
-<code>--precursor-ion &lt;T | F&gt;</code> &ndash; 
+<code>--precursor-ion &lt;T|F&gt;</code> &ndash; 
 Predict the precursor ions, and all associated ions (neutral-losses,
 multiple charge states) consistent with the other specified
-options.  Default F.  
+options.  Default = F.  
 
 <LI>
-<code>--neutral-losses &lt;none | h2o | nh3 | all&gt;</code> &ndash; 
+<code>--neutral-losses &lt;none|h2o|nh3|all&gt;</code> &ndash; 
 Predict the the specified neutral loss peaks. 'none' indicates no
 neutral losses, 'h2o' indicates water loss only, 'nh3' indicates
 ammonia losses only, 'all' indicates all three kinds of
-losses. Default all. 
+losses. Default = all. 
 
 <LI>
-<code>--isotope &lt;0 | 1 | 2&gt;</code> &ndash;
-Predict the given number of isotope peaks. Default 0.
+<code>--isotope &lt;0|1|2&gt;</code> &ndash;
+Predict the given number of isotope peaks. Default = 0.
 
 <LI>
-<code>--flanking &lt;T | F&gt;</code> &ndash; 
-Predict flanking peaks for b- and y-ions. Default F.
+<code>--flanking &lt;T|F&gt;</code> &ndash; 
+Predict flanking peaks for b- and y-ions. Default = F.
 
 <LI>
-<code>--max-ion-charge &lt;1 | 2 | 3 | peptide&gt;</code> &ndash; 
+<code>--max-ion-charge &lt;1|2|3|peptide&gt;</code> &ndash; 
 Predict ions up to this charge-state. The integer options ('1', '2' and
 '3') specify a fixed maximum charge-state. The 'peptide' option
 indicates that the ions should range up to the maximum charge-state of
 the peptide itself (thus, a +2 charge state peptide would have ions of
-+1 and +2). Default peptide.
++1 and +2). Default = peptide.
 
 <LI>
 <code>--nh3 &lt;int&gt;</code> &ndash; 
-Predict peaks with the following max nh3 modification.  Default 1.
+Predict peaks with the following max nh3 modification.  Default = 1.
 
 <LI>
 <code>--h2o &lt;int&gt;</code> &ndash; 
-Predict peaks with the following max h2o modification.  Default 0.
+Predict peaks with the following max h2o modification.  Default = 0.
 
 <LI>
-<code>--fragment-mass &lt;average | mono&gt;</code>
-Which isotopes to use in calculating the fragment ion masses.  Default mono.
+<code>--fragment-mass &lt;average|mono&gt;</code>
+Which isotopes to use in calculating the fragment ion masses.  Default = mono.
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
@@ -128,9 +128,8 @@ the 'T' after --version.
 
 <hr></hr>
 
-<P>
-<A HREF="crux.html">Crux home</a></p>
-
+<P><A HREF="crux.html">Crux home</A> 
+</P>
 </blockquote>
-</body>
-</html>
+</BODY>
+</HTML>

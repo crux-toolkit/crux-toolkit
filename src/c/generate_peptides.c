@@ -24,7 +24,7 @@
 #include "index.h"
 #include "generate_peptides_iterator.h"
 
-#define NUM_GEN_PEP_OPTIONS 15
+#define NUM_GEN_PEP_OPTIONS 16
 #define NUM_GEN_PEP_ARGS 1
 
 /* Private function declarations */
@@ -33,7 +33,7 @@ void print_header();
 int main(int argc, char** argv){
 
   /* Declarations */
-  int verbosity;
+  //int verbosity;
   BOOLEAN_T output_sequence;
   BOOLEAN_T print_trypticity;
   
@@ -47,6 +47,7 @@ int main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file",
+    "write-parameter-file",
     "min-length",
     "max-length",
     "min-mass",
@@ -82,8 +83,8 @@ int main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux-generate-peptides");
 
   /* Set verbosity */
-  verbosity = get_int_parameter("verbosity");
-  set_verbosity_level(verbosity);
+  //verbosity = get_int_parameter("verbosity");
+  //set_verbosity_level(verbosity);
 
   /* Get parameter values */
   print_trypticity = get_boolean_parameter("output-trypticity");

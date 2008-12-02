@@ -9,6 +9,7 @@
  *              length, trypticity) as output. 
  * REVISION: 
  ****************************************************************************/
+/*
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,12 +27,14 @@
 #include "protein_index.h"
 #include "parameter.h"
 
-#define NUM_INDEX_OPTIONS 12
+#define NUM_INDEX_OPTIONS 13
 #define NUM_INDEX_ARGS 2
-//#define NUM_INDEX_ARGS 1
+*/
 
+#include "create_index.h"
       
-int main(int argc, char** argv){
+//int main(int argc, char** argv){
+int create_index_main(int argc, char** argv){
 
   /* Declarations */
   int verbosity;
@@ -56,6 +59,7 @@ int main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file", 
+    "write-parameter-file",
     "overwrite",
     "min-length", 
     "max-length", 
@@ -95,7 +99,7 @@ int main(int argc, char** argv){
 
   /* Parse the command line, including the optional params file */
   /* does sytnax, type, bounds checking and dies if neccessessary */
-  parse_cmd_line_into_params_hash(argc, argv, "crux-create-index");
+  parse_cmd_line_into_params_hash(argc, argv, "crux create-index");
 
   /* Set verbosity */
   //TODO move this to parameter.c?
