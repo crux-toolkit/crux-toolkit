@@ -21,7 +21,7 @@ href="search-tutorial.html">search example</a>, run this command.
 </p>
 
 <div class=code><code>
-crux-create-index small-yeast.fasta yeast-index</code>
+crux create-index small-yeast.fasta yeast-index</code>
 </div>
 
 <p>The output should look like this</p>
@@ -80,8 +80,8 @@ the test data) with the indexed protein database.  Run these
 commands.</p> 
 
 <div class="code"><code>
-$ crux-search-for-matches --use-index T demo.ms2 yeast-index<br>
-$ crux-analyze-matches --use-index T . yeast-index
+$ crux search-for-matches --use-index T demo.ms2 yeast-index<br>
+$ crux percolator --use-index T . yeast-index
 </code>
 </div>
 <!-- Use a different ms2 so analysis won't break w/each spec twice-->
