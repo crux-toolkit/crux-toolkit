@@ -1,1 +1,1 @@
-2ee8b3e7fcb7bf387a72827bdb78d794  crux_1.02-x86_64-Linux.zip
+69d81f7949e3a04160e486114dc26e54  crux_1.02-x86_64-Linux.zip
