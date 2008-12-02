@@ -1,0 +1,107 @@
+<html>
+<title>crux q-ranker</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<H1 ALIGN=CENTER>crux q-ranker</H1>
+
+<p>
+<b>Usage:</b></p>
+
+<blockquote>
+<code>crux q-ranker [options] &lt;psm folder&gt; &lt;protein&nbsp;input&gt;
+</code>
+</blockquote>
+
+<p>
+<b>Description:</b></p>
+
+<p>
+Q-ranker is a semi-supervised learning algorithm that dynamically
+learns to separate target from decoy PSMs.  The algorithm is described
+in this article:</p>
+
+<blockquote>
+Marina Spivak, Jason Weston, Leon Bottou and William Stafford Noble.
+"Direct <i>q</i>&nbsp;value optimization methods for peptide
+identification from shotgun proteomics data sets."  <i>Submitted</i>.
+</blockquote>
+
+<p>
+FIXME: Insert description of algorithm here.</p>
+
+<p>
+<b>Input:</b></p>
+
+<ul>
+
+<li>
+&lt;psm folder&gt; &ndash; The name of the folder in which all the PSM
+result files are located.  The program looks for files ending in
+<code>.csm</code>, which are produced by
+<code>crux&nbsp;search-for-matches</code>.  All such files in the
+given directory are analyzed jointly.</li>
+
+<LI>
+&lt;protein input &gt; &ndash; The name of the file in fasta format or
+the directory containing the protein index from which to retrieve
+proteins and peptides.</li>
+
+</ul>
+
+<b>Options:</b>
+
+<ul>
+
+<LI>
+<code>--use-index &lt;T|F&gt;</code> Use an index that has already been
+created if true (T) or use a fasta file if false (F). When using
+an index the 'protein input' argument will be the name of the
+directory containing the index files (the same as the 'index name'
+argument for crux-create-index).  Default = F.
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
+fail when trying to overwrite a file if false (F). Default =  F.
+
+<LI>
+<code>--parameter-file &lt;filename&gt;</code> &ndash;
+A file containing command-line or additional parameters.  See the <a
+href=parameter-file.html>parameter documentation</a> page for details.</li>
+
+<LI>
+<code>--write-parameter-file &lt;filename&gt;</code> &ndash; Create a file
+with the name and value of all parameters/options for the current
+search.  Not all parameters in the file may have been used in the
+search.  The resulting file can be used with the --parameter-file
+option for other crux programs.
+
+<LI> 
+<code>--feature-file &lt;string&gt;</code> &ndash;
+Optional file in which to write the features. Default = none.</li>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.
+
+<li>
+<code>--version T</code> &ndash;
+Print the version number and quit.  Please note that you must include
+the 'T' after --version.
+
+</ul>
+
+
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
+</body>
+</html>
