@@ -20,6 +20,8 @@ bdist:
 		doc/user/data/demo.ms2 \
 		doc/user/data/small-yeast.fasta \
 		doc/user/*.html \
+		doc/user/*.png \
+		doc/user/*.gif \
 		doc/user/default.params \
 		doc/user/*.css \
 		bdist/doc/

@@ -26,7 +26,7 @@ similarity.  These scores are reported in the output.  To conduct the
 search, use this command. </p>
 
 <div class=code>
-<code>$ crux-search-for-matches demo.ms2 small-yeast.fasta</code>
+<code>$ crux search-for-matches demo.ms2 small-yeast.fasta</code>
 </div>
 
 <p>While the search is running, you will see output like this
@@ -65,7 +65,7 @@ high-quality peptide-spectrum matches.  Run this command.
 </p>
 
 <div class=code><code>
-$ crux-analyze-matches . small-yeast.fasta </code>
+$ crux percolator . small-yeast.fasta </code>
 </div>
 
 <p>While the analysis is running, you will see output like this
@@ -81,7 +81,7 @@ INFO: Outputting matches.
 
 <p>When the analysis is complete it will print </p>
 <pre>
-INFO: crux-analyze-matches finished.
+INFO: crux percolator finished.
 </pre>
 
 <p>There is new file called <span class=file>target.sqt</span>
