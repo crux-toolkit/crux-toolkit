@@ -27,15 +27,29 @@ in the root containing source code and documentation.  The command
 <code> make bdist </code> will create a zipped file in the root
 containing the compiled binaries for all of the crux tools and the
 documentation.  The binary package can only be built after the
-executables have been built.  The binary package file will include the
+executables have been built.  This implies that you must do a clean build
+and <code>make bdist </code> for each architecture supported. 
+The binary package file will include the
 computer architecture and operating system in the name so that builds
 on multiple computers can be easily distinguished.</p>
 
-<p>Each version that is released should be added to CVS in <code>
+<p>
+A file containing a checksum should be generated for each package.
+This helps to detect corruption and trojan horses. To generate the checksums
+use the command <code> make checksum </code> in the project root.
+The checksum file name will include the computer architecture and operating
+system in the name.
+</p>
+
+<p>Each version that is released and its checksum file should be added to CVS in <code>
 crux/doc/user/downloads</code>.  Detailed notes about changes made can be
 recorded in <code>crux/ChangeLog</code>.  A more general description of changes
 (aimed at the user) should be recorded in
-<code>crux/doc/user/download/release-notes.html</code></p> 
+<code>crux/doc/user/release-notes.html</code>.
+The index file <code>crux/doc/user/download/index.html</code> should be updated with links
+to the new packages and their checksums. Links to the previous package should be copied
+into the section for previous versions.
+</p> 
 
 <h3>Updating the website</h3>
 <p>The public crux website is at
