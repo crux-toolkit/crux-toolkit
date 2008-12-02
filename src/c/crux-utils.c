@@ -152,7 +152,9 @@ BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
  * The string version of ALGORITHM_TYPE_T
  */
 static char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
-  {"percolator", "rczar", "qvalue", "none", "all"};
+  {"percolator", "rczar", "curve-fit",
+   //"qvalue",
+   "none", "all"};
 
 BOOLEAN_T string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result){
   BOOLEAN_T success = TRUE;
@@ -184,8 +186,10 @@ BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
 static char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
   {"sp", "xcorr", "dotp", "logp_exp_sp", "logp_bonf_exp_sp", 
    "logp_evd_xcorr", "logp_bonf_evd_xcorr", "logp_weibull_sp", 
-   "sp-logp", "logp_weibull_xcorr", 
-   "xcorr-logp", "q_value", "percolator_score", 
+   "sp-pvalue",  //"sp-logp", 
+   "logp_weibull_xcorr", 
+   "xcorr-pvalue", //"xcorr-logp", 
+   "q_value", "percolator_score", 
    "qvalue"};//"logp_qvalue_weibull_xcorr" };
 //TODO: this should probably be changed, these strings are the option args
 //Instead could have an if block in string_to_type
@@ -945,6 +949,8 @@ void quicksort(float a[], int array_size){
 
 /**
  * Fits a three-parameter Weibull distribution to the input data. 
+ * Implementation of Weibull distribution parameter estimation from 
+ * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
  * \returns eta, beta, c (which in this case is the amount the data should
  * be shifted by) and the best correlation coefficient
  */
@@ -1004,7 +1010,12 @@ void fit_three_parameter_weibull(
 
 /**
  * Fits a two-parameter Weibull distribution to the input data. 
- * \returns eta, beta and the correlation coefficient
+ *
+ * Called by the three parameter weibull fitting function to see if
+ * the proposed shift gives the best correlation.  If there are too
+ * few data points, sets correlation to 0 (minimum value).
+ * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
+ * \returns eta, beta and the correlation coefficient.
  */
 void fit_two_parameter_weibull(
     float* data, ///< the data to be fit. should be in descending order -in
@@ -1016,8 +1027,10 @@ void fit_two_parameter_weibull(
     float* correlation ///< the best correlation -out
     ){
 
-  float* X   = calloc(sizeof(float) , total_data_points);
+  float* X = calloc(sizeof(float) , total_data_points); //hold data here
 
+  // transform data into an array of values for fitting
+  // shift (including only non-neg data values) and take log
   int idx;
   for(idx=0; idx < fit_data_points; idx++){
     float score = data[idx] + shift; // move right by shift
@@ -1055,15 +1068,15 @@ void fit_two_parameter_weibull(
     sum_XX += X[idx] * X[idx];
     sum_XY += X[idx] * Y[idx];
   }
-  carp(CARP_DEBUG, "sum_X=%.6f", sum_X);
-  carp(CARP_DEBUG, "sum_Y=%.6f", sum_Y);
-  carp(CARP_DEBUG, "sum_XX=%.6f", sum_XX);
-  carp(CARP_DEBUG, "sum_XY=%.6f", sum_XY);
+  carp(CARP_DETAILED_DEBUG, "sum_X=%.6f", sum_X);
+  carp(CARP_DETAILED_DEBUG, "sum_Y=%.6f", sum_Y);
+  carp(CARP_DETAILED_DEBUG, "sum_XX=%.6f", sum_XX);
+  carp(CARP_DETAILED_DEBUG, "sum_XY=%.6f", sum_XY);
 
   float b_num    = sum_XY - (sum_X * sum_Y / N);
-  carp(CARP_DEBUG, "b_num=%.6f", b_num);
+  carp(CARP_DETAILED_DEBUG, "b_num=%.6f", b_num);
   float b_denom  = sum_XX - sum_X * sum_X / N;
-  carp(CARP_DEBUG, "b_denom=%.6f", b_denom);
+  carp(CARP_DETAILED_DEBUG, "b_denom=%.6f", b_denom);
   float b_hat    = b_num / b_denom;
 
   float a_hat    = (sum_Y - b_hat * sum_X) / N;
@@ -1084,13 +1097,17 @@ void fit_two_parameter_weibull(
   }
   float c_denom = sqrt(c_denom_X * c_denom_Y);
   if (c_denom == 0.0){
-    carp(CARP_FATAL, "Zero denominator in correlation calculation!");
+    //carp(CARP_FATAL, "Zero denominator in correlation calculation!");
+    carp(CARP_DETAILED_DEBUG, "Zero denominator in correlation calculation!");
+    *correlation = 0.0; // min value
+    *eta = 0;
+    *beta = 0;
   }
   *correlation = c_num / c_denom;
 
-  carp(CARP_DEBUG, "eta=%.6f", *eta);
-  carp(CARP_DEBUG, "beta=%.6f", *beta);
-  carp(CARP_DEBUG, "correlation=%.6f", *correlation);
+  carp(CARP_DETAILED_DEBUG, "eta=%.6f", *eta);
+  carp(CARP_DETAILED_DEBUG, "beta=%.6f", *beta);
+  carp(CARP_DETAILED_DEBUG, "correlation=%.6f", *correlation);
 
   free(F_T);
   free(Y);
