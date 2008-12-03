@@ -19,13 +19,34 @@
 <B>Description:</B>
 
 <blockquote>
+<p>
 This command searches a protein database with a set of spectra.  For
 each spectrum, candidate peptides are identified whose inferred m/z
 lies within a specified range of the observed precursor m/z.  These
 candidate peptides are first ranked with the SEQUEST Sp score.  The
 top 500 matches are then re-scored using XCorr.  The input protein
 database may either be in FASTA format or it may be a binary index
-created by <code>crux create-index</code>.
+created by <code>crux create-index</code>.</p>
+
+<p>
+<b>Modifications:</b> Crux handles modifications as follows.  
+The user specifies an allowed set of modifications, using the options
+<code>FIXME</code>, <code>FIXME</code> and <code>FIXME</code>, which
+are described below.  Before any search is performed, Crux generates
+an exhaustive list of all possible modifications.  For example, if the
+user specifies FIXME, then the list will contain modifications
+corresponding to FIXME, FIXME, ...  Subsequently, for each spectrum,
+Crux performs one search for each possible modification.  For example,
+if the precursor m/z for a spectrum is FIXME, the charge state is +2,
+and Crux is considering a modification of FIXME, then Crux will
+retrieve from the database all candidate peptides whose total mass is
+close to FIXME.  These candidates are scored as usual, with a
+preliminary score and a final score, and the top <i>n</i> candidate
+peptides are added to a composite, sorted list of peptides.  Finally,
+after all modifications have been searched, Crux reports for the
+current spectrum the top <i>n</i> peptides from the composite
+list.</p>
+
 </blockquote>
 
 <p>
