@@ -5,7 +5,7 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.56.4.2 $
+ * REVISION: $Revision: 1.56.4.3 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -474,22 +474,17 @@ void print_match_sqt(
     delta_cn = 0.0;
   }
   // print match info
-  fprintf(file, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\tU\n",
-          //get_match_rank(match, main_score),
-          //get_match_rank(match, other_score),
-          get_match_rank(match, main_rank_type),
-          get_match_rank(match, other_rank_type),
-          get_peptide_peptide_mass(peptide),
-          //get_match_delta_cn(match),
-          delta_cn,
-          get_match_score(match, main_score),
-          get_match_score(match, other_score),
-          //get_match_b_y_ion_matched(match),
-          //get_match_b_y_ion_possible(match),
-          b_y_matched,
-          b_y_total,
-          sequence
-          );
+  fprintf(file, "M");
+  fprintf(file, "\t%d", get_match_rank(match, main_rank_type));
+  fprintf(file, "\t%d", get_match_rank(match, other_rank_type));
+  fprintf(file, "\t%.2f", get_peptide_peptide_mass(peptide));
+  fprintf(file, "\t%.2f", delta_cn);
+  fprintf(file, "\t%.2f", get_match_score(match, main_score));
+  fprintf(file, "\t%.2f", get_match_score(match, other_score));
+  fprintf(file, "\t%d", b_y_matched);
+  fprintf(file, "\t%d", b_y_total);
+  fprintf(file, "\t%s", sequence);
+  fprintf(file, "\tU\n");
   free(sequence);
   
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
