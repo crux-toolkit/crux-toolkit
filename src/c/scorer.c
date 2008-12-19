@@ -4,7 +4,7 @@
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum
  * vs. ion_series 
- * REVISION: $Revision: 1.65.4.3 $
+ * REVISION: $Revision: 1.65.4.3.2.1 $
  ****************************************************************************/
 
 #include <math.h>
@@ -951,6 +951,7 @@ BOOLEAN_T create_intensity_array_theoretical(
 {
   ION_T* ion = NULL;
   int intensity_array_idx = 0;
+  int ion_charge = 0;
   ION_TYPE_T ion_type;
   float bin_width = bin_width_mono;
   // int charge = get_ion_series_charge(ion_series);
@@ -962,6 +963,7 @@ BOOLEAN_T create_intensity_array_theoretical(
     ion = ion_iterator_next(ion_iterator);
     intensity_array_idx = (int)(get_ion_mass_z(ion) / bin_width + 0.5);
     ion_type = get_ion_type(ion);
+    ion_charge = get_ion_charge(ion);
 
     // skip ions that are located beyond max mz limit
     if(intensity_array_idx >= scorer->sp_max_mz){
@@ -1018,11 +1020,11 @@ BOOLEAN_T create_intensity_array_theoretical(
         // mass_z + (modification_masses[(int)ion_modification]/(float)charge) * modification_count;  
 
         if(ion_type == B_ION){
-          int h2o_array_idx = (int)((get_ion_mass_z(ion) - MASS_H2O_MONO /*charge*/) / bin_width + 0.5);
+          int h2o_array_idx = (int)((get_ion_mass_z(ion) - (MASS_H2O_MONO/ion_charge) ) / bin_width + 0.5);
           add_intensity(theoretical, h2o_array_idx, 10);
         }
 
-        int nh3_array_idx = (int)((get_ion_mass_z(ion) -  MASS_NH3_MONO/*charge*/) / bin_width + 0.5);
+        int nh3_array_idx = (int)((get_ion_mass_z(ion) -  (MASS_NH3_MONO/ion_charge)) / bin_width + 0.5);
         add_intensity(theoretical, nh3_array_idx, 10);        
       }
       
@@ -1798,6 +1800,7 @@ void add_intensity(
   float intensity         ///< the intensity to add -in
   )
 {
+  assert(add_idx >= 0);
   if(intensity_array[add_idx] < intensity){
     intensity_array[add_idx] = intensity;
   }
