@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.86 $
+ * $Revision: 1.87 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -3123,8 +3123,8 @@ void serialize_headers(FILE** psm_file_array){
   char* filename = get_string_parameter_pointer("protein input");
   char* protein_file = parse_filename(filename);
   //filename = get_string_parameter_pointer("ms2 file");
-  filename = get_string_parameter("ms2 file");
-  char* ms2_file = parse_filename(filename);
+  //filename = get_string_parameter("ms2 file");
+  //char* ms2_file = parse_filename(filename);
   free(filename);
            
   AA_MOD_T** list_of_mods = NULL;
@@ -3152,7 +3152,7 @@ void serialize_headers(FILE** psm_file_array){
   }
   
   free(protein_file);
-  free(ms2_file);
+  //free(ms2_file);
 
 }
 

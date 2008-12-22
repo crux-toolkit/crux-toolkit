@@ -482,18 +482,21 @@ void initialize_parameters(void){
   set_string_parameter("mod", "NO MODS",
       "Specify a variable modification to apply to peptides.  " 
       "<mass change>:<aa list>:<max per peptide>. Default no mods.",
-      "Available from parameter file for crux-search-for-matches and the "
+      "Available from parameter file for crux-generate-peptides and "
+      "crux-search-for-matches and the "
       "the same must be used for crux compute-q-value.", "true");
   set_string_parameter("cmod", "NO MODS",
       "Specify a variable modification to apply to C-terminus of peptides. " 
       "<mass change>:<max distance from protein c-term (-1 for no max)>. " 
       "Default no mods.",       
-      "Available from parameter file for crux-search-for-matches and the "
+      "Available from parameter file for crux-generate-peptides and "
+      "crux-search-for-matches and the "
       "the same must be used for crux compute-q-value.", "true");
   set_string_parameter("nmod", "NO MODS",
       "Specify a variable modification to apply to N-terminus of peptides.  " 
       "<mass change>:<max distance from protein n-term (-1 for no max)>",
-      "Available from parameter file for crux-search-for-matches and the "
+      "Available from parameter file for crux-generate-peptides and "
+      "crux-search-for-matches and the "
       "the same must be used for crux compute-q-value.", "true");
   set_int_parameter("max-mods", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
       "The maximum number of modifications that can be applied to a single " 
