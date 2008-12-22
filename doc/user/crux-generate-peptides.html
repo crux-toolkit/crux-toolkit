@@ -142,10 +142,54 @@ the 'T' after --version.
 
 </UL>
 
+<B>Parameter file options:</B>
+<ul>
 
-</UL>
+<li>
+<code>mod &lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;
+   &ndash; </code>
+Consider modifications on any amino acid in aa list with at most
+max-per-peptide in one peptide.  This parameter may be included
+with different values multiple times so long as the total number of
+<code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
+does not exceed 11. 
 
-</UL>
+<li>
+<code>cmod &lt;mass change&gt;:&lt;max distance from protein C-terminus&gt;
+&ndash;</code> 
+Consider modifications on the C-terminus of any peptide whose
+C-terminus is no more than max-distance residues from the protein
+C-terminus.  Use -1 to consider the C-terminus all peptides regardless
+of position in the protein.  This parameter may be included with
+different values multiple times so long as the total number of
+<code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
+does not exceed 11. The same modifications must be given for any
+post-search process (compute-q-values, q-ranker).
+
+<li>
+<code>nmod &lt;mass change&gt;:&lt;max distance from protein N-terminus&gt;
+&ndash;</code> 
+Consider modifications on the N-terminus of any peptide whose
+N-terminus is no more than max-distance residues from the protein
+N-terminus.  Use -1 to consider the N-terminus all peptides regardless
+of position in the protein. This parameter may be included with
+different values multiple times so long as the total number of
+<code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
+does not exceed 11. The same modifications must be given for any
+post-search process (compute-q-values, q-ranker).
+
+<li>
+<code>max-mods &lt;n&gt; &ndash;</code>
+The maximum number of modifications that can be applied to a single
+peptide. Default = no limit.
+
+<li>
+<code>max-aas-modified &lt;n&gt; &ndash;</code>
+The maximum number of modified amino acids that can appear in one
+peptide.  Each aa can be modified multiple times. Default = no limit.
+
+</ul>
+
 <HR></hr>
 
 <P>
