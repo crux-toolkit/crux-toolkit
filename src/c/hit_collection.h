@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.4 $
+ * REVISION: $Revision: 1.5 $
  ****************************************************************************/
 
 #ifndef HIT_COLLECTION_H

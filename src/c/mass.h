@@ -1,9 +1,10 @@
 #include "objects.h"
 #include "carp.h"
+//#include "modifications.h"
 
 /**
  * \file mass.h 
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -49,6 +50,15 @@ float get_mass_amino_acid(
   );
 
 /**
+ * \returns The mass of the given amino acid.
+ */
+float get_mass_mod_amino_acid(
+  MODIFIED_AA_T amino_acid, ///< the query amino acid -in
+  MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
+  );
+
+
+/**
  * \returns The average mass of the given amino acid.
  */
 float get_mass_amino_acid_average(
@@ -56,10 +66,24 @@ float get_mass_amino_acid_average(
   );
 
 /**
+ * \returns The average mass of the given amino acid.
+ */
+float get_mass_mod_amino_acid_average(
+  MODIFIED_AA_T amino_acid ///< the query amino acid -in
+  );
+
+/**
  * \returns The monoisotopic mass of the given amino acid.
  */
 float get_mass_amino_acid_monoisotopic(
   char amino_acid ///< the query amino acid -in
+  );
+
+/**
+ * \returns The monoisotopic mass of the given amino acid.
+ */
+float get_mass_mod_amino_acid_monoisotopic(
+  MODIFIED_AA_T amino_acid ///< the query amino acid -in
   );
 
 /**

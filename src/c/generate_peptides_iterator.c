@@ -27,15 +27,16 @@
  * peptide iterator to use 
  */
 struct generate_peptides_iterator_t{
-  void* iterator;     ///< the object iterator that will be selected
-  BOOLEAN_T (*has_next)(void*);     ///< the function pointer to *_has_next
-  PEPTIDE_T* (*next)(void*);         ///< the function pointer to *_next
-  void (*free)(void*);         ///< the function pointer to *_free
-  INDEX_T* index;  ///< the index object needed
-  DATABASE_T* database; ///< the database object needed
+  void* iterator;     ///< the index or database iterator we are wrapping 
+  BOOLEAN_T (*has_next)(void*); ///< the function pointer to *_has_next
+  PEPTIDE_T* (*next)(void*);    ///< the function pointer to *_next
+  void (*free)(void*);          ///< the function pointer to *_free
+  INDEX_T* index;               ///< the index object needed
+  DATABASE_T* database;         ///< the database object needed
   PEPTIDE_CONSTRAINT_T* constraint; ///< peptide constraint
 };
-
+//do index,database, and constraint need to be members since they are
+//not used in has_next, get_next, or free?
 
 /**
  * \returns a empty generate_peptides_iterator object
@@ -45,17 +46,94 @@ GENERATE_PEPTIDES_ITERATOR_T* allocate_generate_peptides_iterator(){
   GENERATE_PEPTIDES_ITERATOR_T* iterator = (GENERATE_PEPTIDES_ITERATOR_T*)
     mycalloc(1, sizeof(GENERATE_PEPTIDES_ITERATOR_T));
 
+  // TODO (BF 10-Apr-08): set member fields to NULL
   return iterator;
 }
 
 /**
- * \returns a new generate_peptides_iterator object, with fasta file input
+ * \brief Create a peptide iterator based entirely on parameter values
+ * (defaults and those given by user).
+ *
+ * The peptides are drawn from either a fasta file or an index based
+ * on the value of the use-index parameter.  With default values, mass
+ * range is wide so this effectively iterates over "all" peptides in
+ * the protein input.  If no peptides in the protein source meet the
+ * criteria, a peptide iterator is still returned, but when passed to
+ * *_has_next() it will always return FALSE.
+ *\returns A new generate_peptide_iterator object
+ */
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
+  // get parameters from parameter.c
+  double min_mass = get_double_parameter("min-mass");
+  double max_mass = get_double_parameter("max-mass");
+  BOOLEAN_T use_index = get_boolean_parameter("use-index");
+
+  //  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
+  char*  protein_input_name = get_string_parameter_pointer("protein input");
+
+  INDEX_T* index = NULL;
+  DATABASE_T* database = NULL;
+  // TODO (BF 27-Feb-08): set use_index according to the input, true if dir
+  if (use_index == TRUE){
+    //index = new_index_from_disk(protein_input_name, is_unique);
+    index = new_index_from_disk(protein_input_name);
+  } else {
+    // FALSE indicates that we are not using a binary fasta file
+    database = new_database(protein_input_name, FALSE);
+  }
+
+  return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 
+      index, database);
+}
+
+/**
+ * \brief Create a peptide iterator for peptides of a target mass.
+ *
+ * Peptides with mass between neutral_mass +/- "mass-window"
+ * (a user-defined parameter).  Peptides are drawn from either the
+ * given index or the given database, if the index is NULL. If no
+ * peptides in the protein source meet the criteria, a peptide
+ * iterator is still returned, but when passed to *_has_next() it will
+ * always return FALSE.  
+ *
+ *\returns A new generate_peptide_iterator object
+ */
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
+  float neutral_mass, ///< The target mass (uncharged) for peptides
+  INDEX_T* index,     ///< The index from which to draw peptides OR
+  DATABASE_T* database///< The database from which to draw peptides
+  )
+{
+  // get parameters
+  double mass_window = get_double_parameter("mass-window");
+  double min_mass = neutral_mass - mass_window;
+  double max_mass = neutral_mass + mass_window;
+
+  carp(CARP_DETAILED_DEBUG,"Generating peptides in %.2f ~ %.2f", 
+       min_mass, max_mass); 
+
+  return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 
+      index, database);
+}
+
+/**
+ * \brief Create a peptide iterator for peptides in a specific range
+ * of masses.
+ *
+ * This is the version of new_* that is called by the others and does
+ * all the work of setting the member variable fields.  Parameters
+ * other than min and max mass are taken from parameter.c.  If no
+ * peptides in the protein source meet the criteria, a peptide
+ * iterator is still returned, but when passed to *_has_next() it will
+ * always return FALSE.  
+ *
+ * \returns a new generate_peptides_iterator object
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
-  double min_mass,  ///< the min mass of peptides to generate -in
-  double max_mass,  ///< the maximum mas of peptide to generate -in
-  INDEX_T* index, ///< the index
-  DATABASE_T* database ///< the database
+  double min_mass,     ///< The min mass of peptides to generate -in
+  double max_mass,     ///< The maximum mas of peptide to generate -in
+  INDEX_T* index,      ///< The index
+  DATABASE_T* database ///< The database
   )
 {
   // get parameters
@@ -81,9 +159,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   // assign to iterator
   gen_peptide_iterator->constraint = copy_peptide_constraint_ptr(constraint); 
 
-  /***********************
-   * use index file
-   **********************/
+  // Check that index OR database exists
   if(use_index_boolean && index == NULL ){
     carp(CARP_FATAL, "Cannot genrate peptides from NULL index");
     exit(1);
@@ -92,27 +168,29 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     exit(1);
 
   }
+  /***********************
+   * use index file
+   **********************/
   if(use_index_boolean){
     
-    //this gets called for every spectrum in search.  move to other location?
-    //carp(CARP_DETAILED_DEBUG, "Using index for peptide generation");
-
     if((sort_type != MASS && sort_type != NONE)){
       carp(CARP_FATAL, "Cannot sort other than by mass when using index.");
       exit(1);
     }
    
+    // already tested for 
     if(index == NULL){
       carp(CARP_FATAL, "Failed to create peptides from index");
       free(gen_peptide_iterator);
       exit(1);
-    }
+    } 
 
     // use array implementation of peptide_src
     set_peptide_src_implementation(FALSE);
 
     // create index and set to generate_peptides_iterator
-    set_index_constraint(index, constraint); 
+    //    set_index_constraint(index, constraint); 
+    set_index_search_constraint(index, constraint); 
     gen_peptide_iterator->index = copy_index_ptr(index);
     
     // only resrict peptide by mass and length, default iterator
@@ -127,8 +205,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     }
     // if need to select among peptides by peptide_type and etc.
     else{
-      //this gets called for every spectrum in search, move ?
-      //carp(CARP_INFO, "using filtered index peptide generation");
+
       INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator 
         = new_index_filtered_peptide_iterator(index);
       gen_peptide_iterator->iterator = index_filtered_peptide_iterator;
@@ -145,8 +222,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   else{
 
     // def used for each iterator
-    //this gets called for every spectrum in search, move?
-    //carp(CARP_DETAILED_DEBUG, "Using fasta file for peptide generation");
 
     // set for all peptide src use link list implementation
     // this routine sets the static global in peptide.c
@@ -198,65 +273,56 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
 }
 
 /**
- * \returns a new generate_peptide_iterator object with custom min, max
- * mass for SP 
- * \callgraph
+ * \brief Create a new peptide iterator to return modified peptides.
+ *
+ * Peptides are generated based on values in parameter.c with the
+ * exception of the mass range.  Min and max mass are given by target
+ * mass +/- mass-window.  Only those peptides that can be modified by
+ * the peptide_mod are returned.  (A peptide_mod may contain no
+ * AA_MODS, in which case all peptides are returned.)  Peptides are
+ * taken either from an index or from a database (fasta file).  If no
+ * peptides pass the criteria, a new iterator is still returned, but
+ * when passed to has_next() it will always return FALSE.
+ *
+ * \returns A newly allocated peptide iterator.
  */
-GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
-  float neutral_mass, ///< the neutral_mass that which the peptides will be searched -in
-  INDEX_T* index,
-  DATABASE_T* database
-  )
-{
-  // get parameters
-  double mass_window = get_double_parameter("mass-window");
-  double min_mass = neutral_mass - mass_window;
-  double max_mass = neutral_mass + mass_window;
+GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mods(
+  double mass,                ///< target mass of peptides
+  PEPTIDE_MOD_T* pmod,        ///< the peptide mod to apply
+  INDEX_T* index,             ///< index from which to draw peptides OR
+  DATABASE_T* dbase){         ///< database from which to draw peptides
+  
+  // allocate a new iterator
+  GENERATE_PEPTIDES_ITERATOR_T* new_iterator =
+    allocate_generate_peptides_iterator();
 
-  carp(CARP_DETAILED_DEBUG,"Generating peptides in %.2f ~ %.2f", 
-       min_mass, max_mass); 
+  // create a mod_pept-iter and point to it (mass, pmod, index, dbase)
+  MODIFIED_PEPTIDES_ITERATOR_T* mod_peptide_iterator = 
+    new_modified_peptides_iterator_from_mass( mass, pmod, index, dbase );
+  new_iterator->iterator = mod_peptide_iterator;
 
-  return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 
-      index, database);
+  // set has_next, get_next, free
+  new_iterator->has_next = &void_modified_peptides_iterator_has_next;
+  new_iterator->next     = &void_modified_peptides_iterator_next;
+  new_iterator->free     = &void_modified_peptides_iterator_free;
+
+  return new_iterator;
 }
 
-/**
- * \returns a new generate_peptides_iterator object from all parameters 
- * from parameters.c hash structure
- */
-GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
-  // get parameters from parameter.c
-  double min_mass = get_double_parameter("min-mass");
-  double max_mass = get_double_parameter("max-mass");
-  BOOLEAN_T use_index = get_boolean_parameter("use-index");
 
-  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
-  //  char*  fasta_file = get_string_parameter_pointer("protein input");
-  char*  protein_input_name = get_string_parameter_pointer("protein input");
-
-  INDEX_T* index = NULL;
-  DATABASE_T* database = NULL;
-  // TODO (BF 27-Feb-08): set use_index according to the input, true if dir
-  if (use_index == TRUE){
-    //index = new_index_from_disk(fasta_file, is_unique);
-    index = new_index_from_disk(protein_input_name, is_unique);
-  } else {
-    // FALSE indicates that we are not using a binary fasta file
-    //database = new_database(fasta_file, FALSE);
-    database = new_database(protein_input_name, FALSE);
-  }
-
-  return new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, 
-      index, database);
-}
-
-/**********************************************************************************/
+/****************************************************************************/
 
 /**
- *\returns TRUE, if there is a next peptide, else FALSE
+ * \brief Establish if an iterator has more peptides to return.
+ *
+ * Typically, the iterator will have next_peptide queued up and ready
+ * to return.  But do not trust that the new_*_iterator function
+ * initialized it correctly.  If next_peptdide is NULL, first check
+ * that has_next is also FALSE.  Initialize next_peptide if necessary.
+ * \returns TRUE, if there is a next peptide, else FALSE
  */
 BOOLEAN_T generate_peptides_iterator_has_next(
-  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< working iterator
+ GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< working iterator
   )
 {
   return generate_peptides_iterator->has_next(generate_peptides_iterator->iterator);
@@ -266,7 +332,7 @@ BOOLEAN_T generate_peptides_iterator_has_next(
  *\returns the next peptide in the iterator
  */
 PEPTIDE_T* generate_peptides_iterator_next(
-  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< working iterator
+ GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< working iterator
   )
 {
   return generate_peptides_iterator->next(generate_peptides_iterator->iterator);
@@ -277,7 +343,7 @@ PEPTIDE_T* generate_peptides_iterator_next(
  * Frees an allocated generate_peptides_iterator object
  */
 void free_generate_peptides_iterator(
-  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< iterator to free
+  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///<iterator to free
   )
 {
   // free the nested iterator

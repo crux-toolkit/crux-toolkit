@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.32 $
+ * $Revision: 1.33 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -34,8 +34,10 @@
 #include "hash.h"
 #include "peptide_src.h"
 #include "protein_index.h"
+#include "modifications.h"
+#include "modified_peptides_iterator.h"
 
-
+#define _PSM_SAMPLE_SIZE 500
 #define _MAX_NUMBER_PEPTIDES 10000000
 ///< max number of peptides a single match collection can hold
 
@@ -74,11 +76,51 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
  );
 
 /**
+ * \brief Creates a new match collection with no matches in it.  Sets
+ * member variables from parameter.c.  The charge and null_collection
+ * variables are set with the method add_matches().  Search is
+ * conducted in add_matches().
+ *
+ * \returns A newly allocated match collection with member variables set.
+ */
+MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy);
+
+/**
  * free the memory allocated match collection
  */
 void free_match_collection(
   MATCH_COLLECTION_T* match_collection ///< the match collection to free -out
   );
+
+/**
+ * \brief The main search function.  All peptides in the peptide
+ * iterator are compared to the spectrum and the resulting score(s)
+ * are stored in a match.  All matches are stored in the
+ * match_collection.  Can be called on an empty match_collection or
+ * one already containing matches.  No checks to confirm that the same
+ * spectrum is being searched in subsiquent calls.
+ *
+ * First, the prelimiary score (as in parameter.c) is used to compare
+ * peptides and spectrum.  These results are then sorted and the final
+ * score (as in parameter.c) is calculated on the top-match
+ * (parameter.c) top matches as ranked by the preliminary score.  No
+ * matches are deleted after ranking.
+ *
+ * When called on a match collection already containing matches, the
+ * preliminary score is calculated for all new peptides.  All matches
+ * (from this peptide iterator and previous) are sorted by prelim
+ * score and only the top-match matches are scored for the final
+ * score.  Previously scored matches are not scored twice.
+ *
+ * \returns The number of matches added.
+ */
+int add_matches(
+  MATCH_COLLECTION_T* match_collection,///< add matches to this
+  SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
+  int charge,            ///< use this charge state for spectrum
+  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
+  int sample_size        ///< num matches to add to sampled_matches
+);
 
 /**
  * sort the match collection by score_type(SP, XCORR, ... )
@@ -200,6 +242,17 @@ FILE** create_psm_files();
  * uses values from paramter.c rather than taking as arguments
  */
 void serialize_headers(FILE** file_array);
+
+/**
+ * \brief Read in the header information from a cms file.  Return
+ * FALSE if file appears to be corrupted or if mod information does
+ * not mat parameter.c
+ * \returns TRUE if header was successfully parsed, else FALSE.
+ */
+BOOLEAN_T parse_csm_header
+ (FILE* file,
+  int* total_spectra,
+  int* num_top_match);
 
 void print_matches
 (MATCH_COLLECTION_T* match_collection, 
@@ -419,6 +472,29 @@ int get_match_collection_iterator_number_collections(
  */
 char* get_match_collection_iterator_directory_name(
   MATCH_COLLECTION_ITERATOR_T* iterator);
+
+
+BOOLEAN_T estimate_weibull_parameters(
+  MATCH_COLLECTION_T* match_collection, 
+  SCORER_TYPE_T score_type,
+  int sample_count, 
+  SPECTRUM_T* spectrum,
+  int charge
+  );
+
+/**
+ * \brief Use the matches in match_collection->sample_matches to
+ * estimate the weibull parameters to be used for computing p-values.
+ */
+BOOLEAN_T estimate_weibull_parameters_from_sample_matches(
+  MATCH_COLLECTION_T* match_collection, 
+  SPECTRUM_T* spectrum,
+  int charge
+  );
+
+BOOLEAN_T compute_p_values(MATCH_COLLECTION_T* match_collection);
+
+BOOLEAN_T set_p_values_as_unscored(MATCH_COLLECTION_T* match_collection);
 
 /*
  * Local Variables:

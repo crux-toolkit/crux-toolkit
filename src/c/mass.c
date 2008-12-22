@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief Provides constants and methods for calculating mass
  ****************************************************************************/
 #include <math.h>
@@ -14,16 +14,25 @@
 #include "peptide.h"
 #include "carp.h"
 #include "ion.h"
+#include "modifications.h"
+
+/* Private Variables */
 
 /**
  * Array to store the amino acid masses
  */
 float amino_masses[('Z' - 'A')*2 + 2];
+enum {NUM_MOD_MASSES = 2048}; // 2 ^ MAX_AA_MODS = 2^11 = 2048
+float aa_mod_masses[(int)NUM_MOD_MASSES];
+
 
 /**
  * Have we initialized the amino acid masses?
  */
 BOOLEAN_T initialized_amino_masses = FALSE;
+
+/* Private functions */
+void initialize_aa_mod_combinations_array();
 
 // FIXME need to find the monoisotopic mass for some AA -chris
 /**
@@ -34,7 +43,6 @@ void initialize_amino_masses (void)
   // average mass
   amino_masses['A' - 'A'] = 71.0788;
   amino_masses['B' - 'A'] = 114.5962;
-  //amino_masses['C' - 'A'] = 103.1388 + 57.000;
   amino_masses['C' - 'A'] = 103.1388;
   amino_masses['D' - 'A'] = 115.0886;
   amino_masses['E' - 'A'] = 129.1155;
@@ -62,7 +70,6 @@ void initialize_amino_masses (void)
   // monoisotopic mass
   amino_masses['A' - 'A' + 26] = 71.03711;
   amino_masses['B' - 'A' + 26] = 114.53494;
-  //amino_masses['C' - 'A' + 26] = 103.00919 + 57.000;
   amino_masses['C' - 'A' + 26] = 103.00919;
   amino_masses['D' - 'A' + 26] = 115.02694;
   amino_masses['E' - 'A' + 26] = 129.04259;
@@ -87,6 +94,55 @@ void initialize_amino_masses (void)
   amino_masses['Y' - 'A' + 26] = 163.06333;
   amino_masses['Z' - 'A' + 26] = 128.55059;
   
+  // modifications
+  initialize_aa_mod_combinations_array();
+
+  initialized_amino_masses = TRUE;
+}
+
+/**
+ * \brief Populates the array aa_mod_masses with the mass change of
+ * all possible combinations of aa_mods.  Gets the list of aa_mods
+ * from parameter.c.  For example, if mod1 and a mass change of 50 and
+ * mod5 has a mass change of 10, then the entry at index 
+ * (binary 00010001 =) 17 is (50 + 10=) 60.
+ */
+void initialize_aa_mod_combinations_array(){
+  // set all to 0
+  int i = 0;
+  for(i = 0; i < NUM_MOD_MASSES; i++){
+    aa_mod_masses[i] = 0;
+  }
+
+  // get aa mod list
+  AA_MOD_T** amod_list = NULL;
+  int num_mods = get_all_aa_mod_list(&amod_list);
+  int mod_idx = 0;
+
+  // for each aa mod
+  for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
+    //printf("\nmod#: %i\n", mod_idx);
+    int entry_idx = 0;
+
+    while( entry_idx < NUM_MOD_MASSES ){
+      //printf("skip from %i", entry_idx);
+      // skip 2^i entries for mod_i (first mod is 1)
+      entry_idx += pow(2, mod_idx);
+      //printf(" to %i\n", entry_idx);
+
+      // write i entries for mod_i
+      int write_num = mod_idx+1;
+      while(write_num > 0 && entry_idx < NUM_MOD_MASSES){
+        //printf("write at %i from %.3f", entry_idx, aa_mod_masses[entry_idx]);
+
+        aa_mod_masses[entry_idx] += aa_mod_get_mass_change(amod_list[mod_idx]);
+        //printf(" to  %.3f\n", aa_mod_masses[entry_idx]);
+        entry_idx++;
+        write_num--;
+      }// next write
+    }// next skip
+  }// next mod
+
 }
 
 /**
@@ -111,6 +167,23 @@ float get_mass_amino_acid(
 }
 
 /**
+ * \returns The mass of the given amino acid.
+ */
+float get_mass_mod_amino_acid(
+  MODIFIED_AA_T amino_acid, ///< the query amino acid -in
+  MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
+  ){
+
+  switch( mass_type ){
+  case AVERAGE:
+    return get_mass_mod_amino_acid_average(amino_acid);
+  case MONO:
+    return get_mass_mod_amino_acid_monoisotopic(amino_acid);
+  }
+  return 0;
+}
+
+/**
  * \returns The average mass of the given amino acid.
  */
 float get_mass_amino_acid_average(
@@ -123,6 +196,25 @@ float get_mass_amino_acid_average(
     initialized_amino_masses = TRUE;
   }
   return(amino_masses[(short int)amino_acid - 'A']);
+}
+
+/**
+ * \returns The average mass of the given amino acid.
+ */
+float get_mass_mod_amino_acid_average(
+  MODIFIED_AA_T amino_acid ///< the query amino acid -in
+  ){
+  if(!initialized_amino_masses){
+    initialize_amino_masses();
+  }
+  //printf("aa is %hu, char %c\n", (unsigned short)amino_acid, modified_aa_to_char(amino_acid));
+
+  short int aa = amino_acid & GET_AA_MASK;
+  unsigned short int mod = amino_acid & GET_MOD_MASK;
+  mod = mod >> 5;
+  //printf("aa idx %hi mass %.3f + mod idx %hu mass %.3f\n", aa,  amino_masses[aa], mod, aa_mod_masses[mod]);
+  return amino_masses[aa] + aa_mod_masses[mod];
+
 }
 
 /**
@@ -139,6 +231,25 @@ float get_mass_amino_acid_monoisotopic(
   }
   return(amino_masses[(short int)amino_acid - 'A' + 26 ]);
 }
+
+/**
+ * \returns The monoisotopic mass of the given amino acid.
+ */
+float get_mass_mod_amino_acid_monoisotopic(
+  MODIFIED_AA_T amino_acid ///< the query amino acid -in
+  ){
+  if(!initialized_amino_masses){
+    initialize_amino_masses();
+  }
+
+  short int aa = amino_acid & GET_AA_MASK;
+  unsigned short int mod = amino_acid & GET_MOD_MASK;
+  mod = mod >> 5;
+  //printf("mod aa idx %hi mass %.3f + mod idx %hu mass %.3f\n", aa,  amino_masses[aa+26], mod, aa_mod_masses[mod]);
+  return amino_masses[aa + 26] + aa_mod_masses[mod];
+
+}
+
 
 /**
  * increase the amino acid mass for both mono and average

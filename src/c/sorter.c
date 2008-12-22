@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file sorter.c
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief: Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
@@ -618,7 +618,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
 
   sorted_peptide_iterator->peptide_wrapper = master_list_wrapper;
   
-  carp(CARP_INFO, "total number of peptides(not unique): %u", 
+  carp(CARP_DETAILED_DEBUG, "total number of peptides(not unique): %u", 
       total_number_peptide); 
   
   return sorted_peptide_iterator;

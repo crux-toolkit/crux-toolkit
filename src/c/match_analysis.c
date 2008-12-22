@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.48 $
+ * $Revision: 1.49 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -445,7 +445,14 @@ MATCH_COLLECTION_T* run_qvalue(
     // for each match, get p-value    
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
-      pvalues[num_psms++] =  get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
+
+      float score = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
+      carp(CARP_DETAILED_DEBUG, "p-value is %f", score);
+      if( score == P_VALUE_NA ){// ignore unscored psms
+        continue;
+      }
+      //pvalues[num_psms++] =  get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
+      pvalues[num_psms++] =  score;
       if (num_psms >= MAX_PSMS){
         carp(CARP_ERROR, "Too many psms in directory %s", psm_result_folder);
       }
@@ -454,6 +461,7 @@ MATCH_COLLECTION_T* run_qvalue(
     // ok free & update for next set
     free_match_iterator(match_iterator);
   }// next match collection
+  carp(CARP_DEBUG, "Read in %i p-values", num_psms);
 
   free_match_collection_iterator(match_collection_iterator);
 
@@ -509,6 +517,12 @@ MATCH_COLLECTION_T* run_qvalue(
       match = match_iterator_next(match_iterator);
       double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
       carp(CARP_DETAILED_DEBUG, "- log pvalue  = %.6f", log_pvalue);
+
+      // if p-value wasn't calculated, set q-value as nan
+      if( log_pvalue == P_VALUE_NA ){
+        set_match_score(match, LOGP_QVALUE_WEIBULL_XCORR, sqrt(-1) );
+        continue;
+      }
       
       // get the index of the p-value in the sorted list
       // FIXME slow, but it probably doesn't matter
@@ -526,7 +540,7 @@ MATCH_COLLECTION_T* run_qvalue(
       set_match_score(match, LOGP_QVALUE_WEIBULL_XCORR, qvalues[pvalue_idx]);
     }
 
-    // ok free & update for net set
+    // ok free & update for next set
     free_match_iterator(match_iterator);
     break; // just do the first match collection, which is the target matches
   }
@@ -692,7 +706,6 @@ MATCH_COLLECTION_T* run_percolator(
   
   /***** PERCOLATOR run *********/
 
-    carp(CARP_DETAILED_DEBUG, "got to here");
   // Start processing
   pcExecute(); 
   

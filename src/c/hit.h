@@ -4,7 +4,7 @@
  * CREATE DATE: 2008 March 11
  * DESCRIPTION: \brief Object for collecting the evidence for a particular 
  *                     protein hit.
- * REVISION: $Revision: 1.4 $
+ * REVISION: $Revision: 1.5 $
  ****************************************************************************/
 #ifndef HIT_H
 #define HIT_H

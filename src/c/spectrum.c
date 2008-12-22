@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.67 $
+ * REVISION: $Revision: 1.68 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -297,7 +297,8 @@ void print_spectrum_sqt(
           charge, 
           0.0, // FIXME dummy <process time>
           "server", // FIXME dummy <server>
-          get_spectrum_precursor_mz(spectrum), // TODO this should be M+H+
+          // get_spectrum_precursor_mz(spectrum), // TODO this should be M+H+
+          get_spectrum_neutral_mass(spectrum, charge), //this is used in search
           0.0, // FIXME dummy <total intensity>
           0.0, // FIXME dummy <lowest sp>
           num_matches);

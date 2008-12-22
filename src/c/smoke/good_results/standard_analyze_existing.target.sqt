@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Dec 19 15:28:22 2008
+H	StartTime	Tue Apr  1 11:35:14 2008
 H	EndTime                               
 H	Database	test.fasta
 H	DBSeqLength	?
@@ -17,7 +17,7 @@ H	Comment	final algorithm xcorr
 H	StaticMod	C=160.139
 H	Alg-DisplayTop	5
 H	EnzymeSpec	tryptic
-H	Line fields: S, scan number, scan number,charge, 0, precursor m/z, 0, 0, number of matches
+H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, percolator_score score, q_value score, number ions matched, total ions compared, sequence
 H	Comment	matches analyzed by percolator
 S	14	14	2	0.00	server	500.41	0.00	0.00	1

@@ -1,6 +1,6 @@
 /**
  * \file peptide_constraint.h 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * \brief Object for holding the peptide constraint information.
  */
 #ifndef PEPTIDE_CONSTRAINT_H 
@@ -38,6 +38,13 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   int num_mis_cleavage, ///< The maximum mis cleavage of the peptide -in
   MASS_TYPE_T mass_type  ///< isotopic mass type (AVERAGE, MONO) -in
   );
+
+/**
+ * \brief Create a new peptide constraint and populate its values
+ * based on those in parameter.c 
+ * \returns A newly allocated peptide constraint.
+ */
+PEPTIDE_CONSTRAINT_T* new_peptide_constraint_from_parameters();
 
 /** 
  * Determines if a peptide satisfies a peptide_constraint.

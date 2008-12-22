@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.18 $ 
+ * $Revision: 1.19 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -12,6 +12,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <float.h>
 #include <unistd.h>
 #include "carp.h"
 #include "parse_arguments.h"
@@ -24,6 +25,10 @@
 #include "parameter.h"
 #include "scorer.h"
 
+/* Global variables */
+#define NOT_SCORED FLT_MIN
+#define P_VALUE_NA -1.0
+
 /**
  * \returns a new memory allocated match
  */
@@ -34,6 +39,15 @@ MATCH_T* new_match(void);
  */
 void free_match(
   MATCH_T* match ///< the match to free -in
+  );
+
+/**
+ * shuffle the matches in the array between index start and end-1
+ */
+void shuffle_matches(
+  MATCH_T** match_array, ///< the match array to shuffle  
+  int start_idx,         ///< index of first element to shuffle
+  int end_index          ///< index AFTER the last element to shuffle
   );
 
 /**
@@ -197,11 +211,36 @@ MATCH_T* parse_match(
  ***************************/
 
 /**
- * Returns a heap allocaated peptide sequence of the PSM
+ * Returns a heap allocated peptide sequence of the PSM
+ * Sequence may not be the same as for the peptide if this is for a
+ * decoy database.
  * User must free the sequence.
  *\returns the match peptide sequence
  */
 char* get_match_sequence(
+  MATCH_T* match ///< the match to work -in
+  );
+
+/**
+ * Returns a heap allocated peptide sequence of the PSM formatted with
+ * the flanking amino acids and modifiation symbols.
+ *
+ * Sequence is in the form of X.SEQ.X where X is the flanking amino
+ * acid or - if peptide is at the end of the protein.
+ * Sequence may not be the same as for the peptide if this is for a
+ * decoy database.
+ *\returns The sqt-formatted peptide sequence for this match.
+ */
+char* get_match_sequence_sqt(
+  MATCH_T* match ///< the match to work -in
+  );
+
+/**
+ * \brief Returns a newly allocated modified_aa sequence of the PSM
+ * User must free the sequence.
+ *\returns the match peptide sequence
+ */
+MODIFIED_AA_T* get_match_mod_sequence(
   MATCH_T* match ///< the match to work -in
   );
 
