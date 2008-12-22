@@ -56,11 +56,17 @@ $ crux search-for-matches</code>
 Error in command line. Error # 5
 the required argument &lt;ms2 file&gt; is missing.
 Usage: crux search-for-matches [options] <ms2 file> <protein input>
+  [--verbosity <int>] Set level of output to stderr (0-100).  Default 30.
+  [--parameter-file <string>] Set additional options with values in the given file. Default to use only command line options and default values.
+  [--overwrite <string>] Replace existing files (T) or exit if attempting to overwrite (F). Default F.
+  [--use-index <string>] Use an index that has already been created (T,F). Default FALSE (use fasta file).
+...
 </pre>
 
 <p>The first three lines are telling you that you forgot the required
 arguments and are reminding you what they are.  The following lines
-list all the options.  <span class="prog">Crux</span> options all
+list all the options (only four of which are shown above).  <span
+class="prog">Crux</span> options all 
 begin with two dashes, <span class="out">--</span>, followed by the
 name (with no space in between).  The name is followed by a space and the
 appropriate argument.  This example increases the verbosity to 40
@@ -85,7 +91,15 @@ separated by an equal sign instead of a space.
 </div>
 
 <p>
-The parameter file also requires only one option per line and allows
+The above example where we changed the verbosity would look like this
+in a parameter file</p>
+
+<div class="code"><code>
+verbosity=40
+</div>
+
+<p>
+The parameter file requires only one option per line and allows
 comments on lines beginning with '#'.  More information and a sample
 parameter file can be found <a href="parameter-file.html">here</a>.
 Command line and parameter file options may be used separately or
@@ -94,8 +108,8 @@ line will be used.
 </p>
 
 <p>Now that we've covered the general form of options, let's discuss
-some specific options for <span class="prog">search-for-matches</span>
-programs, beginning with output.
+some specific options for <span class="prog">crux</span>
+, beginning with output.
 </p>
 
 <a name="out"></a>
@@ -152,21 +166,35 @@ to require complete digestion).
 <a name="search"></a>
 <h2>Changing the search parameters</h2>
 <p>The database search involves two scoring steps, a preliminary score
-to find the 500 best candidates and a main scoring function.  Set the
+to find the best candidates and a main scoring function to further
+narrow those results. By default, the top-scoring 500 matches are
+scored by the main scoring function, but this number can be adjusted
+with the <span class="code">max-rank-preliminary</span> option.
+ <!--Set the
 preliminary scoring function with <span
 class="code">--prelim-score-type</span> and the main scoring function
-with <span class="code">--score-type</span>.</p>
+with <span class="code">--score-type</span>.-->
+</p>
+
 <p>
-In addition to searching the provided protein database, 
+There are two methods for estimating p-values for the search result.
+With the option <span class="code">--compute-p-values T</span>,
+they are calculted by estimating the parameters of the score
+distributions for each spectrum.  (see
+<a href="http://www.pnas.org/cgi/content/full/100/16/9440">this
+paper</a> as an example).  Or the statistical significance of the
+search scores can be calculated in a
+follow up step by using the scores from searches to a decoy database.  
 <span class="prog">search-for-matches</span> will search up to
-3 shuffled versions of the database with the option 
+2 shuffled versions of the database with the option 
 <span class="code">--number-decoy-set</span>.  The default number is 2.
 </p>
 
+<!-- These are no longer options, they have their own pages as sub-commands
 <a name="anal"></a>
 <h2>Estimating statistical significance</h2>
-<p>There are two sub-commands for estimating the statistical significance of the 
-matches discovered by your search:
+<p>There are two sub-commands for estimating the statistical
+significance of the matches discovered by your search:
 <span class="prog">percolator</span>
 and
 <span class="prog">compute-q-values</span>.
@@ -174,10 +202,12 @@ and
 href="http://noble.gs.washington.edu/proj/percolator/">Percolator</a>
 algorithm to look at target and decoy
 matches and calculate a q-value for each spectrum's best match.
-<span class="code">compute-q-values</span>, calculates
-a q-value by estimating the parameters of the score distribution (see
-<a href="http://www.pnas.org/cgi/content/full/100/16/9440">this
-paper</a> as an example).
+<span class="code">compute-q-values</span>, calculates a false
+discovery rate associated with the p-values estimated in the search
+(with the --compute-p-values option).
+-->
+
+
 </p>
 
 <span class="code"></span>

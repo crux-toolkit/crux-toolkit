@@ -1,12 +1,11 @@
 ####################################################################
-# Sample parameter file 
+# Sample parameter file
 #
 # Lines starting with '#' will be ignored
 # Don't leave any space before or after a parameter setting
 # format: <parameter-name>=<value>
 #
 #####################################################################
-
 
 # Set level of output to stderr (0-100).  Default 30.
 # Available for all crux programs.  Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info.
@@ -26,7 +25,11 @@ write-parameter-file=__NULL_STR
 
 # Replace existing files (T) or exit if attempting to overwrite (F). Default F.
 # Available for all crux programs.  Applies to --write-parameter-file as well as index, search, and analysis output files.
-overwrite=F
+overwrite=FALSE
+
+# Use an index that has already been created (T,F). Default FALSE (use fasta file).
+# Used by crux-generate-peptides, crux-search-for-matches, and crux-analyze-matches.  With use-index=F, 'protein source' argument is the name of a fasta file.  With use-index=T, the name of the directory containing an index.
+use-index=FALSE
 
 # The minimum length of peptides to consider. Default 6.
 # Used from the command line or parameter file by crux-create-index and crux-generate-peptides.  Parameter file only for crux-search-for-matches.
@@ -47,7 +50,7 @@ fragment-mass=mono
 # Search peptides within +/- 'mass-window' of the spectrum mass.  Default 3.0.
 # Available from the parameter file only for crux-search-for-matches, crux-create-index, and crux-generate-peptides.
 mass-window=3.000000
- 
+
 # Tolerance used for matching observed peaks to predicted fragment ions.  Default 0.5.
 # Available from parameter-file for crux-search-for-matches.
 ion-tolerance=0.500000
@@ -64,17 +67,25 @@ missed-cleavages=FALSE
 # Available from command line or parameter file for crux-create-index and crux-genereate-peptides. Parameter file only for crux-search-for-matches.  For crux-generate-peptides, returns one line per peptide when true or one line per peptide per protein occurence when false.  For index and search, stores and reports only one protein in which the peptide occurs.
 unique-peptides=FALSE
 
-# Use an index that has already been created (T,F). Default FALSE (use fasta file).
-# Used by crux-generate-peptides, crux-search-for-matches, and crux-analyze-matches.  With use-index=F, 'protein source' argument is the name of a fasta file.  With use-index=T, the name of the directory containing an index.
-use-index=FALSE
+# Specify a variable modification to apply to peptides.  <mass change>:<aa list>:<max per peptide>. Default no mods.
+# Available from parameter file for crux-search-for-matches and the the same must be used for crux compute-q-value.
+mod=NO MODS
 
-# Initial scoring (sp, xcorr). Default sp,
-# Available for crux-search-for-matches.  The score applied to all possible psms for a given spectrum.  Typically used to filter out the most plausible for further scoring. See max-rank-preliminary and score-type.
-prelim-score-type=sp
+# Specify a variable modification to apply to C-terminus of peptides. <mass change>:<max distance from protein c-term (-1 for no max)>. Default no mods.
+# Available from parameter file for crux-search-for-matches and the the same must be used for crux compute-q-value.
+cmod=NO MODS
 
-# The primary scoring method to use (xcorr, sp, xcorr-pvalue, sp-pvalue). Default xcorr.
-# Only available for crux-search-for-matches.  Primary scoring is typically done on a subset (see max-rank-preliminary) of all possible psms for each spectrum. Default is the SEQUEST-style xcorr. Crux also offers a p-value calculation for each psm based on xcorr or sp (xcorr-pvalue, sp-pvalue).
-score-type=xcorr
+# Specify a variable modification to apply to N-terminus of peptides.  <mass change>:<max distance from protein n-term (-1 for no max)>
+# Available from parameter file for crux-search-for-matches and the the same must be used for crux compute-q-value.
+nmod=NO MODS
+
+# The maximum number of modifications that can be applied to a single peptide.  Default no limit.
+# Available from parameter file for crux-search-for-matches.
+max-mods=255
+
+# The maximum number of modified amino acids that can appear in one peptide.  Each aa can be modified multiple times.  Default no limit.
+# Available from parameter file for search-for-matches.
+max-aas-modified=255
 
 # Number of psms per spectrum to score after preliminary scoring.  Default 500.
 # Used by crux-search-for-matches.  For each spectrum, keep the (500) top ranking psms for scoring with the main score.
@@ -263,3 +274,4 @@ W=0.000000
 # Change the mass of all amino acids 'Y' by the given amount.
 # For parameter file only.  Default no mass change.
 Y=0.000000
+
