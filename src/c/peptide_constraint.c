@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide_constraint.c
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * \brief: Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
@@ -82,6 +82,25 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
 }
 
 /**
+ * \brief Create a new peptide constraint and populate its values
+ * based on those in parameter.c 
+ * \returns A newly allocated peptide constraint.
+ */
+PEPTIDE_CONSTRAINT_T* new_peptide_constraint_from_parameters(){
+  PEPTIDE_CONSTRAINT_T* new_constraint = allocate_peptide_constraint();
+  new_constraint->peptide_type = get_peptide_type_parameter("cleavages");
+  new_constraint->min_mass = get_double_parameter("min-mass");
+  new_constraint->max_mass = get_double_parameter("mas-mass");
+  new_constraint->min_length = get_int_parameter("min-length");
+  new_constraint->max_length = get_int_parameter("max-length");
+  new_constraint->num_mis_cleavage = get_int_parameter("missed-cleavages");
+  new_constraint->mass_type = get_mass_type_parameter("isotopic-mass");
+
+  return new_constraint;
+}
+
+
+/**
  * Copy peptide pointer and increment pointer count
  */
 PEPTIDE_CONSTRAINT_T* copy_peptide_constraint_ptr(
@@ -122,7 +141,7 @@ void free_peptide_constraint(
 {
   peptide_constraint->num_pointers--;
   if (peptide_constraint->num_pointers == 0){
-    carp(CARP_DEBUG, "Final free of peptide constraint");
+    carp(CARP_DETAILED_DEBUG, "Final free of peptide constraint");
     free(peptide_constraint);
   }
 }

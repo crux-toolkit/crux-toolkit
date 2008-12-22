@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -19,12 +19,14 @@
 PEPTIDE_SRC_T* allocate_peptide_src(void);
 
 /**
- *\returns a PROTEIN_PEPTIDE_ASSOCIATION object, populated with user specified parameters
+ * \returns a PROTEIN_PEPTIDE_ASSOCIATION object, populated with user
+ * specified parameters 
  */
 PEPTIDE_SRC_T* new_peptide_src(
-  PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
+  PEPTIDE_TYPE_T peptide_type, 
+    ///< the peptide type for the corresponding protein -in
   PROTEIN_T* parent_protein, ///< the parent of this preptide -in
-  int start_idx ///< start index of the peptide in the protein sequence, first residue is 1 -in
+  int start_idx ///< peptide start index in protein sequence, first is 1 -in
   );
 
 /**
@@ -79,6 +81,26 @@ void print_peptide_src(
   PEPTIDE_SRC_T* peptide_src, ///< object to print -in 
   FILE* file  ///< the out put stream -out
   );
+
+/**
+ * \brief Read in the peptide_src objects from the given file and
+ * assosiated them with the given peptide.  
+ *
+ * Proteins for the pepitde_src are found in the given database.  If
+ * database is NULL, does not set proteins.  (This option used for
+ * sorting index files while creating index.) Either array or linked
+ * list implementation of multiple peptide_src is used based on the
+ * value of use_array. 
+ *
+ * \returns TRUE if peptide_src's were successfully parsed, else
+ * returns FALSE and sets peptide's peptide_src member variable to
+ * NULL. 
+ */
+BOOLEAN_T parse_peptide_src(
+  PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
+  FILE* file,           ///< file to read from
+  DATABASE_T* database, ///< database containing proteins
+  BOOLEAN_T use_array);///< use array implementation vs. linked list
 
 /**
  * Copies the entire linklist of peptide_src object src to dest.
@@ -171,6 +193,13 @@ void serialize_peptide_src(
   PEPTIDE_SRC_T* peptide_src, ///< peptide_src to serialize -in   
   FILE* file  ///< output file -in   
   );
+
+/**
+ * Return the number of bytes taken up by one peptide_src when
+ * serialized to file.  Used for skipping past peptide_src in an index
+ * file. 
+ */
+int size_of_serialized_peptide_src();
 
 /*
  * Local Variables:

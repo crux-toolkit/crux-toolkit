@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide_src.c
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  * \brief object for mapping a peptide to it's parent protein.
  */
 struct peptide_src{
-  PEPTIDE_TYPE_T peptide_type; ///< the peptide type for the corresponding protein
+  PEPTIDE_TYPE_T peptide_type;///< the peptide type for the corresponding protein
   PROTEIN_T* parent_protein; ///< the parent of this preptide
   int start_idx; ///< start index of the peptide in the protein sequence, first residue is 1 
   PEPTIDE_SRC_T* next_association; ///< a linklist of peptide_src     
@@ -326,7 +326,8 @@ int get_peptide_src_sizeof(){
  * The peptide serialization format looks like this:
  *
  *<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>
- * the protein index is the index of the parent protein in the database DATABASE_T
+ * the protein index is the index of the parent protein in the
+ *database DATABASE_T 
  *
  */
 void serialize_peptide_src(
@@ -349,6 +350,113 @@ void serialize_peptide_src(
   fwrite(&(peptide_src->start_idx), sizeof(int), 1, file);
   
 }
+
+/**
+ * Return the number of bytes taken up by one peptide_src when
+ * serialized to file.  Used for skipping past peptide_src in an index
+ * file. 
+ */
+int size_of_serialized_peptide_src(){
+  return (sizeof(int)*2 + sizeof(PEPTIDE_TYPE_T));
+}
+
+/**
+ * \brief Read in the peptide_src objects from the given file and
+ * assosiated them with the given peptide.  
+ * Proteins for the pepitde_src are found in the given database.  If
+ * database is NULL, does not set proteins.  (This option is used for
+ * sorting index files while creating index.)  Either array or 
+ * linked list implementation of multiple peptide_src is used based on
+ * the value of use_array.
+ *
+ * \returns TRUE if peptide_src's were successfully parsed, else
+ * returns FALSE.
+ */
+BOOLEAN_T parse_peptide_src(
+  PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
+  FILE* file,           ///< file to read from
+  DATABASE_T* database, ///< database containing proteins
+  BOOLEAN_T use_array) ///< use array implementation vs. linked list
+{
+  if( peptide == NULL || file == NULL ){
+    carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide or file.");
+    return FALSE;
+  }
+
+  // first field in file should be number of src's
+  int num_peptide_src = -1;
+  fread(&num_peptide_src, sizeof(int), 1, file);
+  if( num_peptide_src < 1){
+    carp(CARP_ERROR, 
+         "Index file corrupted, peptide must have at least one peptide src");
+    return FALSE;
+  }
+
+  PEPTIDE_SRC_T* peptide_src = NULL;
+  // allocate new src based on requested type
+  if(use_array){
+    peptide_src = new_peptide_src_array(num_peptide_src);
+  }else{
+    peptide_src = new_peptide_src_linklist(num_peptide_src);
+  }
+
+  // give it to the peptide
+  add_peptide_peptide_src_array(peptide, peptide_src);
+
+  // read in each peptide_src (prot index, peptide type, start index)
+  int src_idx = 0;
+  int protein_index = -1;
+  PROTEIN_T* parent_protein = NULL;
+  PEPTIDE_TYPE_T peptide_type;
+  int start_index = -1;
+  for(src_idx = 0; src_idx < num_peptide_src; src_idx++){
+    // get protein index
+    fread(&protein_index, (sizeof(int)), 1, file);
+    if( protein_index < 0){
+      carp(CARP_ERROR, "Index file corrupted could not read protein index");
+      free(peptide_src);
+      return FALSE;
+    }
+    carp(CARP_DETAILED_DEBUG, "Peptide src %d has protein idx %i", 
+         src_idx, protein_index);
+
+    // read peptide type of peptide src
+    if(fread(&peptide_type, sizeof(PEPTIDE_TYPE_T), 1, file) != 1){
+      carp(CARP_ERROR, "Index file corrupted, failed to read peptide type.");
+      free(peptide_src);
+      return FALSE;
+    }
+
+    // read start index of peptide in parent protein of thsi peptide src
+    if(fread(&start_index, sizeof(int), 1, file) != 1){
+      carp(CARP_ERROR, "Index file corrupted, failed to read start index.");
+      free(peptide_src);
+      return FALSE;
+    }
+
+    // set fields in new peptide src
+
+    parent_protein = 
+      get_database_protein_at_idx(database, protein_index);
+    
+    // set parent protein of the peptide src
+    set_peptide_src_parent_protein(peptide_src, parent_protein);
+
+    // set peptide type of peptide src
+    set_peptide_src_peptide_type(peptide_src, peptide_type);
+
+    // set start index of peptide src
+    set_peptide_src_start_idx(peptide_src, start_index);
+    
+    // set current_peptide_src to the next empty peptide src
+    peptide_src = get_peptide_src_next_association(peptide_src);
+  }// next peptide_src in file
+
+  carp(CARP_DETAILED_DEBUG, "Finished parsing peptide src.");
+  return TRUE;
+}
+
+
 
 /*
  * Local Variables:

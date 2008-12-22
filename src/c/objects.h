@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.53 $
+ * $Revision: 1.54 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -59,6 +59,12 @@ typedef struct spectrum_collection SPECTRUM_COLLECTION_T;
  * \brief An object to iterate over the spectra in a spectrum_collection
  */
 typedef struct spectrum_iterator SPECTRUM_ITERATOR_T;
+
+/**
+ * \typedef FILTERED_SPECTRUM_CHARGE_ITERATOR_T 
+ * \brief An object to iterate over the spectra in a spectrum_collection
+ */
+typedef struct filtered_spectrum_charge_iterator FILTERED_SPECTRUM_CHARGE_ITERATOR_T;
 
 /**
  * \typedef PEPTIDE_T
@@ -433,8 +439,68 @@ enum  _set_type {SET_TARGET=0,SET_DECOY1,SET_DECOY2,SET_DECOY3};
 
 /**
  * \typedef SET_TYPE_T
- * \brief the typedef for set types for match type TARGET, DECOY1, DECOY2, DECOY3
+ * \brief the typedef for set types for match type TARGET, DECOY1,
+ * DECOY2, DECOY3 
  */
 typedef enum _set_type SET_TYPE_T;
 
+/**
+ * \typedef MODIFIED_AA_T
+ * \brief The alternate type for encoding a peptide sequence (instead
+ * of char).  Allows modifications to be added to each AA.  See
+ * modifications.h for more details.
+ */
+// why doesn't this work when I put it in modifications.h????
+typedef unsigned short MODIFIED_AA_T; ///< letters in the expanded peptide
+
+/**
+ * \typedef AA_MOD_T
+ * \brief The struct _aa_mod is typdefed as AA_MOD_T
+ */
+typedef struct _aa_mod AA_MOD_T;
+
+/**
+ * \typedef PEPTIDE_MOD_T
+ * \brief The struct _peptide_mod is typdefed as PEPTIDE_MOD_T
+ */
+typedef struct _peptide_mod PEPTIDE_MOD_T;
+
+/**
+ * \enum _mod_position (typedefed as MOD_POSITION_T)
+ * \brief An indication of where an AA_MOD may occur within a peptide.
+ * Default is ANY_POSITION.
+ */
+enum _mod_position{ 
+  ANY_POSITION, ///< at any position in any peptide
+  C_TERM, ///< only c-terminus of peptide, seq[0]
+  N_TERM  ///< only n-terminus of peptide, seq[len]
+};
+
+/**
+ * \typedef MOD_POSITION_T
+ * \brief The typedef of the indicator for where an amino acid
+ * modification can occur within a peptide and/or protein.
+ */
+typedef enum _mod_position MOD_POSITION_T;
+
+/**
+ * \typedef _linked_list_head is typdefed as LINKED_LIST_T*
+ * All list actions can be performed with an object of this type.
+ */
+typedef struct _linked_list_head LINKED_LIST_T;
+
+/**
+ * \typedef _linked_list_node is typdefed as LINKED_LIST_T*
+ * This is an element of a list.  Can be used for adding to the end of
+ * list or walking through a list.  Cannot allocate a new one.
+ */
+typedef struct _linked_list_node LIST_POINTER_T;
+
+/**
+ * \typedef modified_peptides_iterator_t is typedefed as
+ * MODIFIED_PEPTIDES_ITERATOR_T 
+ */
+typedef struct modified_peptides_iterator_t MODIFIED_PEPTIDES_ITERATOR_T;
+
 #endif
+

@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  ****************************************************************************/
 #include "q-value.h"
 
@@ -310,6 +310,12 @@ MATCH_COLLECTION_T* run_qvalue(
       double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
       carp(CARP_DETAILED_DEBUG, "- log pvalue  = %.6f", log_pvalue);
       
+      // if p-value wasn't calculated, set q-value as nan
+      if( log_pvalue == P_VALUE_NA ){
+        set_match_score(match, LOGP_QVALUE_WEIBULL_XCORR, NaN() );
+        continue;
+      }
+
       // get the index of the p-value in the sorted list
       // FIXME slow, but it probably doesn't matter
       int idx;

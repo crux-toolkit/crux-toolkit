@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.40 $
+ * REVISION: $Revision: 1.41 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -24,6 +24,7 @@
 #define MAX_COMMENT 1000 ///< max length of comment
 
 
+/* Private functions */
 long binary_search_spectrum(FILE* file, int first_scan);
 
 int match_first_scan_line(
@@ -31,6 +32,8 @@ int match_first_scan_line(
   int buf_length, 
   int query_first_scan
   );
+
+void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* it);
 
 /**
  * \struct spectrum_collection 
@@ -52,6 +55,22 @@ struct spectrum_collection {
 struct spectrum_iterator {
   SPECTRUM_COLLECTION_T* spectrum_collection;///< The collection whose spectrum to iterate over. 
   int  spectrum_index; ///< The index of the current spectrum;
+};
+
+/**
+ * \struct filtered_spectrum_charge_iterator
+ * \brief An object to iterate over the spectra within a spectrum_collection.
+ */
+struct filtered_spectrum_charge_iterator {
+  SPECTRUM_COLLECTION_T* spectrum_collection;///< spectra to iterate over
+  BOOLEAN_T has_next;  ///< is there a spec that passes criteria
+  int  spectrum_index; ///< The index of the current spectrum
+  int* charges;        ///< Array of possible charges to search
+  int num_charges;     ///< how many charges does the cur spec have
+  int charge_index;    ///< The index of the charge of the current spectrum
+  double min_mz;       ///< return only spec above this mz
+  double max_mz;      ///< return only spec below this mz
+  int search_charge;   ///< which z to search, 0 for all
 };
 
 
@@ -843,6 +862,40 @@ SPECTRUM_ITERATOR_T* new_spectrum_iterator(
   return spectrum_iterator;
 }
         
+/**
+ * Instantiates a new spectrum_iterator object from
+ * spectrum_collection.  This iterator returns unique spectrum-charge
+ * pairs (e.g.a spectrum to be searched as +2 and +3 is returned once
+ * as +2 and once as +3).  The charge is returned by setting the int
+ * pointer in the argument list.  The iterator also filters spectra by
+ * mass so that none outside the spectrum-min-mass--spectrum-max-mass
+ * range (as defined in parameter.c).
+ * \returns a SPECTRUM_ITERATOR_T object.
+ */
+FILTERED_SPECTRUM_CHARGE_ITERATOR_T* new_filtered_spectrum_charge_iterator(
+  SPECTRUM_COLLECTION_T* spectrum_collection///< spectra to iterate over
+){        
+  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator =
+  (FILTERED_SPECTRUM_CHARGE_ITERATOR_T*)mycalloc(1, 
+                               sizeof(FILTERED_SPECTRUM_CHARGE_ITERATOR_T));
+  iterator->spectrum_collection = spectrum_collection;
+  iterator->has_next = FALSE;
+  iterator->spectrum_index = -1;
+  iterator->charges = NULL;
+  iterator->num_charges = 0;
+  iterator->charge_index = -1;
+  iterator->min_mz = get_double_parameter("spectrum-min-mass");
+  iterator->max_mz = get_double_parameter("spectrum-max-mass");
+  char* charge_str = get_string_parameter_pointer("spectrum-charge");
+  if( strcmp( charge_str, "all") == 0){
+    iterator->search_charge = 0;
+  }else{
+    iterator->search_charge = atoi(charge_str);
+  }
+  // queue next spectrum
+  queue_next_spectrum(iterator);
+  return iterator;
+}
 
 /**
  * Frees an allocated spectrum_iterator object.
@@ -855,6 +908,16 @@ void free_spectrum_iterator(
 }
 
 /**
+ * Frees an filtered_spectrum_charge_iterator object.
+ */
+void free_filtered_spectrum_charge_iterator(
+  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator///< free spectrum_iterator -in
+)
+{
+  free(iterator);
+}
+
+/**
  * The basic iterator function has_next.
  */
 BOOLEAN_T spectrum_iterator_has_next(
@@ -862,7 +925,21 @@ BOOLEAN_T spectrum_iterator_has_next(
 )
 {
   return (spectrum_iterator->spectrum_index 
-          < get_spectrum_collection_num_spectra(spectrum_iterator->spectrum_collection));
+          < get_spectrum_collection_num_spectra(
+                    spectrum_iterator->spectrum_collection));
+}
+
+/**
+ * The basic iterator function has_next.
+ */
+BOOLEAN_T filtered_spectrum_charge_iterator_has_next(
+  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
+
+  if( iterator == NULL ){
+    carp(CARP_ERROR, "Cannot find next for NULL iterator");
+    return FALSE;
+  }
+  return iterator->has_next;
 }
 
 /**
@@ -877,6 +954,75 @@ SPECTRUM_T* spectrum_iterator_next(
   ++spectrum_iterator->spectrum_index;
   return next_spectrum;
 }
+
+/**
+ * The basic iterator function next.  Also returns the charge state to
+ * use for this spectrum.
+ */
+SPECTRUM_T* filtered_spectrum_charge_iterator_next(
+  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator,
+  int* charge                            ///< put charge here -out
+)
+{
+  SPECTRUM_T* next_spectrum = 
+    iterator->spectrum_collection->spectra[iterator->spectrum_index];
+  *charge = iterator->charges[iterator->charge_index];
+
+  queue_next_spectrum(iterator);
+
+  return next_spectrum;
+}
+
+/**
+ * \brief Sets up an iterator with the next spectrum that complies
+ * with the constraints.  Sets has_next to FALSE when there are no
+ * more spectra in the collection that pass.  Increments
+ * spectrum_index and charge_index.
+ */
+void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
+  if( iterator == NULL ){
+    carp(CARP_ERROR, "Cannot queue spectrum for NULL iterator.");
+    return;
+  }
+
+  SPECTRUM_T* spec = NULL;
+
+  // Are there any more charge states for this spectrum?
+  if( iterator->charge_index < iterator->num_charges-1 ){
+    iterator->charge_index++;
+  }
+  // Are there any more spectra?
+  else if( iterator->spectrum_index < get_spectrum_collection_num_spectra(
+                                 iterator->spectrum_collection)-1 ){
+    iterator->spectrum_index++;
+    spec = iterator->spectrum_collection->spectra[iterator->spectrum_index];
+    // first free any existing charges in the iterator
+    if( iterator->charges ){
+      free(iterator->charges);
+    }
+    iterator->num_charges = get_charges_to_search(spec, &(iterator->charges));
+    iterator->charge_index = 0;
+  }else{ // none left
+    iterator->has_next = FALSE;
+    return;
+  }
+
+  // Does the current pass?
+  spec = iterator->spectrum_collection->spectra[iterator->spectrum_index];
+  int this_charge = iterator->charges[iterator->charge_index];
+  double mz = get_spectrum_precursor_mz(spec);
+
+  if( iterator->search_charge == 0 || iterator->search_charge == this_charge ){
+    if( mz >= iterator->min_mz && mz <= iterator->max_mz ){
+      // passes both tests
+      iterator->has_next = TRUE;
+      return;
+    }else{ // try the next spectrum
+      queue_next_spectrum(iterator);
+    }
+  }
+}
+
 
 /*
  * Local Variables:

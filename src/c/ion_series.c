@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.45 $
+ * REVISION: $Revision: 1.46 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -29,18 +29,21 @@
 
 /**
  * \struct ion_series
- * \brief An object to represent a series of ions, and organize them!
+ * \brief An object to represent a series of ions, and organize them.
  * For which additional data structures will be created as needed 
- * loss_limit can be equal to NULL, thus if need to use should always sheck that it is not NULL.
+ * loss_limit can be equal to NULL, thus if need to use should always
+ * check that it is not NULL.
  */
 struct ion_series {
-  char* peptide; ///< The peptide for this ion series
+  // TODO change name to unmodified_char_seq
+  char* peptide; ///< The peptide sequence for this ion series
+  MODIFIED_AA_T* modified_aa_seq; ///< sequence of the peptide
   float peptide_mass; ///< The peptide neutral mass. For efficiency. 
   int charge; ///< /<The charge state of the peptide for this ion series
-  ION_CONSTRAINT_T* constraint; ///< The constraints which the ions in this series obey
+  ION_CONSTRAINT_T* constraint; ///< The constraints which these ions obey
   ION_T* ions[MAX_IONS]; ///< The ions in this series
   int num_ions; ///< the number of ions in this series
-  BOOLEAN_T is_predicted; ///< has this ion_series been predicted ions already?
+  BOOLEAN_T is_predicted; ///< has this ion_series been predicted already?
   int num_specific_ions[MAX_NUM_ION_TYPE]; 
     ///< the number of ions of a specific ion_type
   ION_T* specific_ions[MAX_NUM_ION_TYPE][MAX_IONS]; 
@@ -50,11 +53,14 @@ struct ion_series {
     ///< before using this array should always sheck if not NULL
   int peptide_length;   ///< the length of the peptide
 };
+// ??? what is the difference between peptide_length and num_ions
 
 /**
- *\struct loss_limit
- *\brief An object that specifies the max amount of neutral loss possible at a given cleavage index
- * all numbers are for forward ions(A,B,C) subtract from total to get reverse limit
+ * \struct loss_limit
+ * \brief An object that specifies the max amount of neutral loss
+ * possible at a given cleavage index. 
+ * All numbers are for forward ions(A,B,C) subtract from total to get
+ * reverse limit.
  */
 struct loss_limit{
   int nh3; ///< the limit to how many NH3 may be lost
@@ -69,7 +75,7 @@ struct loss_limit{
  * series obey.
  */
 struct ion_constraint {
-  BOOLEAN_T use_neutral_losses; ///< A boolean to determine if the ions                                            ///< series should include neutral losses
+  BOOLEAN_T use_neutral_losses; ///< Should ions include neutral losses
   int modifications[MAX_MODIFICATIONS]; 
     ///< an array to indicate which modifications to perform
   MASS_TYPE_T mass_type; 
@@ -88,8 +94,8 @@ struct ion_constraint {
 };
 
 /**
- *\struct ion_iterator
- *\brief An object to iterate over all ion objects in the ion_series
+ * \struct ion_iterator
+ * \brief An object to iterate over all ion objects in the ion_series
  */
 struct ion_iterator {
   ION_SERIES_T* ion_series; ///< the ion series that the ion we are iterating
@@ -97,16 +103,18 @@ struct ion_iterator {
 };
 
 /**
- *\struct ion_filtered_iterator
- *\brief An object to iterate over ion objects that meet constraint in the ion_series
+ * \struct ion_filtered_iterator
+ * \brief An object to iterate over ion objects that meet constraint in
+ * the ion_series 
  */
 struct ion_filtered_iterator {
   ION_SERIES_T* ion_series; ///< the ion series that the ion we are iterating
-  ION_CONSTRAINT_T* constraint; ///< The constraints which the ions in this series obey
+  ION_CONSTRAINT_T* constraint; ///< constraints which the ions obey
   BOOLEAN_T has_next; ///< the boolean which the iterator has a next ion
   int ion_idx; ///< the current ion that is being returned 
   ION_T* ion; ///< the next ion to return when called upon
-  ION_T** ion_array; ///< the specfic ion array we are iterating over, could be B ion, Y ion or all..
+  ION_T** ion_array; 
+  ///< the specfic ion array we are iterating over, B ion, Y ion or all
   int array_size; ///< size of the ion_array
 };
 
@@ -120,7 +128,7 @@ ION_SERIES_T* allocate_ion_series(void){
   ion_series->is_predicted = FALSE;
   
   // initialize all num_specific_ion count to 0
-  for(; ion_type_idx < MAX_NUM_ION_TYPE; ++ion_type_idx){
+  for(ion_type_idx = 0; ion_type_idx < MAX_NUM_ION_TYPE; ++ion_type_idx){
     ion_series->num_specific_ions[ion_type_idx] = 0;
   }
 
@@ -128,70 +136,86 @@ ION_SERIES_T* allocate_ion_series(void){
 }
 
 /**
- * copies in the peptide sequence
- * Use this method to create ion_series only when few are needed,
- * because the memory allocation process is expensive.
- * If need a repeated new ion-series for different peptides, 
- * use "new_ion_series_generic" & "update_ion_series" combination, thus only allocate one 
- * ion_seires object.
- *\returns Instantiates a new ion_series object from the given peptide sequence and charge
+ * \brief Creates an ion series for a specific peptide, charge state,
+ * and constraint without acutally predicting the ions.
+ *
+ * Creates a copy of the peptide sequence and calcualtes the peptide
+ * mass.
+ * Use this method to create ion_series only when few are needed
+ * because the memory allocation process is expensive.  Alternatively,
+ * use "new_ion_series_generic" and "update_ion_series" in combination
+ * to reuse an ion_seires object.
+ * \returns A newly allocated ion_series object from the given
+ * peptide, charge, and constraint.
  */
 ION_SERIES_T* new_ion_series(
   char* peptide, ///< The peptide for this ion series. -in
   int charge, ///< The charge for this ion series -in
-  ION_CONSTRAINT_T* constraint ///< The constraints which the ions in this series obey.
+  ION_CONSTRAINT_T* constraint ///< constraints which these ions obey.
   )
 {
   ION_SERIES_T* ion_series = allocate_ion_series();
 
   // copy the peptide sequence
   ion_series->peptide = my_copy_string(peptide);
+  ion_series->modified_aa_seq = convert_to_mod_aa_seq(peptide);
   ion_series->peptide_mass = calc_sequence_mass(peptide, MONO);
   ion_series->charge = charge;
   ion_series->constraint = constraint;
   ion_series->peptide_length = strlen(peptide);
   
   // create the loss limit array
-  ion_series->loss_limit = (LOSS_LIMIT_T*)mycalloc(ion_series->peptide_length, sizeof(LOSS_LIMIT_T));
+  ion_series->loss_limit = 
+    (LOSS_LIMIT_T*)mycalloc(ion_series->peptide_length, sizeof(LOSS_LIMIT_T));
 
   return ion_series;
 }
 
 /**
- * Creates a heap allocated generic ion_series object that must be updated by "update_ion_series" method
- * to transform the object into a ion-series for a specific instance of a peptide sequence and charge.
- *\returns Instantiates a new generic ion_series object that must be updated for each peptide instance
+ * \brief Creates an ion_series object without a specific peptide.
+ * Peptide details are added with the "update_ion_series" method.
+ * \returns A newly allocated ion_series object that must be updated
+ * for each peptide instance.
  */
 ION_SERIES_T* new_ion_series_generic(
-  ION_CONSTRAINT_T* constraint, ///< The constraints which the ions in this series obey.
+  ION_CONSTRAINT_T* constraint, ///< constraints which these ions obey.
   int charge ///< The charge for this ion series -in
   )
 {
   ION_SERIES_T* ion_series = allocate_ion_series();
   ion_series->constraint = constraint;
   ion_series->charge = charge;
-  // create loss_limit array, that can be used for all peptides, thus set to max peptide length
-  ion_series->loss_limit = (LOSS_LIMIT_T*)mycalloc(get_int_parameter("max-length"), sizeof(LOSS_LIMIT_T));
+  // use max peptide len so loss_limit array can be used for any peptide
+  ion_series->loss_limit = 
+    (LOSS_LIMIT_T*)mycalloc(get_int_parameter("max-length"), 
+                            sizeof(LOSS_LIMIT_T));
   return ion_series;
 }
 
 /**
- * Updates an ion_series to a specific instance of a peptide sequence.
- * If the ion_series has been already generated its ions, will free ions up.
- * Copies in the peptide sequence.
- * and re-initialize for the new peptide sequence.
+ * \brief Updates an ion_series to a specific instance of a peptide
+ * sequence. If the ion_series has already generated ions, they will
+ * be free-ed. A copy of the peptide sequence is made and all other
+ * variables (except ion_constraint) are also updated for the new
+ * peptide sequence. 
  */
 void update_ion_series(
   ION_SERIES_T* ion_series, ///< the working ion_series -in
-  char* peptide ///< The peptide sequence for this ion series. -in
-  )
+  char* peptide, ///< The peptide sequence for this ion series. -in
+  MODIFIED_AA_T* mod_seq ///< modified version of char* sequence -in
+  ) 
 {
   int ion_type_idx = 0;
 
-  /** Initialize the ion_series object for the new peptide sequence **/
+  // Initialize the ion_series object for the new peptide sequence
   
   // free old peptide sequence
-  free(ion_series->peptide);
+  if(ion_series->peptide){
+    free(ion_series->peptide);
+  }
+  if(ion_series->modified_aa_seq){
+    free(ion_series->modified_aa_seq);
+  }
   
   // iterate over all ions, and free them
   while(ion_series->num_ions > 0){
@@ -208,14 +232,14 @@ void update_ion_series(
   ion_series->num_ions = 0;
   ion_series->is_predicted = FALSE;
   
-  /** set ion_series for new instance of peptide **/
+  // set ion_series for new instance of peptide
   
   // copy the peptide sequence
   ion_series->peptide = my_copy_string(peptide);
   ion_series->peptide_length = strlen(peptide);
-
-  
-  /** one more initialization, because need new peptide length, ion loss limit all back to 0 */
+  //  ion_series->modified_aa_seq = copy_mod_aa_seq(mod_seq);
+  ion_series->modified_aa_seq = copy_mod_aa_seq(mod_seq, 
+                                                ion_series->peptide_length);
   
   // Initialize the loss limit array for the new peptide
   for(ion_idx =0; ion_idx < ion_series->peptide_length; ++ion_idx){
@@ -233,8 +257,16 @@ void free_ion_series(
   ION_SERIES_T* ion_series ///< the ion collection to free - in
   )
 {
-  free(ion_series->peptide);
-  free(ion_series->loss_limit);
+  if(ion_series->peptide){
+    free(ion_series->peptide);
+  }
+  if(ion_series->modified_aa_seq){
+    free(ion_series->modified_aa_seq);
+  }
+  if(ion_series->loss_limit){
+    free(ion_series->loss_limit);
+  }
+  // free constraint?
 
   // iterate over all ions, and free them
   while(ion_series->num_ions > 0){
@@ -405,16 +437,23 @@ void scan_for_aa_for_neutral_loss(
 }
 
 /**
- * index starts at 1, the length of the peptide is stored at index 0.
- * heap allocated mass matrix must be freed by user
- *\returns a ion mass matrix of all possible length
+ * \brief Creates an array in which element i is the sum of the masses
+ * of amino acids 0 to (i-1).  At i=0 is stored the length of the
+ * peptide.  
+ * \returns an array of ion masses for all sub sequences
  */
 float* create_ion_mass_matrix(
-  char* peptide, ///< The peptide for this ion series. -in
+  //char* peptide, ///< The peptide for this ion series. -in
+  MODIFIED_AA_T* modified_seq, ///< the sequence
   MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
   int peptide_length ///< the length of the peptide
   )
 {
+  if( modified_seq == NULL ){
+  //if( peptide == NULL ){
+    carp(CARP_ERROR, "Cannot create mass matrix from NULL seqence");
+    return NULL;
+  }
   float* mass_matrix = (float*)mymalloc(sizeof(float)*(peptide_length+1));
   
   // at index 0, the length of the peptide is stored
@@ -422,11 +461,32 @@ float* create_ion_mass_matrix(
 
   // add up AA masses
   int ion_idx = 1;
-  mass_matrix[ion_idx] = get_mass_amino_acid(peptide[ion_idx-1], mass_type);
-  ++ion_idx;
-  for(; ion_idx <= peptide_length; ++ion_idx){
-    mass_matrix[ion_idx] = mass_matrix[ion_idx-1] + get_mass_amino_acid(peptide[ion_idx-1], mass_type);
+  // initialize first to be mass of c-term amino acid
+  // mass_matrix[ion_idx] = get_mass_amino_acid(peptide[ion_idx-1], mass_type);
+  mass_matrix[ion_idx] = get_mass_mod_amino_acid(modified_seq[ion_idx-1], mass_type);
+  //++ion_idx;
+  //for(; ion_idx <= peptide_length; ++ion_idx){
+  for(ion_idx = 2; ion_idx <= peptide_length; ++ion_idx){
+    mass_matrix[ion_idx] = mass_matrix[ion_idx-1] + 
+      get_mass_mod_amino_acid(modified_seq[ion_idx-1], mass_type);
+      //get_mass_amino_acid(peptide[ion_idx-1], mass_type);
   }
+  // DEBUGGING
+  /*
+  fprintf(stderr, "seq:");
+  for(ion_idx = 0; ion_idx < peptide_length; ++ion_idx){
+    fprintf(stderr, "\t%s", modified_aa_to_string(modified_seq[ion_idx]));
+  }
+  fprintf(stderr, "\nmas:");
+  for(ion_idx = 0; ion_idx < peptide_length; ++ion_idx){
+    fprintf(stderr, "\t%.2f", get_mass_mod_amino_acid(modified_seq[ion_idx], MONO));
+  }
+  fprintf(stderr, "\nsum:");
+  for(ion_idx = 0; ion_idx < peptide_length; ++ion_idx){
+    fprintf(stderr, "\t%.2f", mass_matrix[ion_idx+1]);
+  }
+  fprintf(stderr, "\n");
+  */
   return mass_matrix;
 }
 
@@ -501,6 +561,11 @@ BOOLEAN_T generate_ions_no_modification(
   float* mass_matrix ///< the mass matrix that stores the mass
   )
 {
+  if( ion_series == NULL || mass_matrix == NULL ){
+    carp(CARP_ERROR,
+         "Cannot generate ions from NULL ion series or mass matrix");
+    return FALSE;
+  }
   int cleavage_idx = 1;
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
   float mass = 0;
@@ -883,9 +948,9 @@ BOOLEAN_T generate_ions_flank(
 }
 
 /**
- * The engine of ion series, predicts all the ions from the parent peptide that
- * meet the ion constraint. All predicted ions are stored in the ion_series as ion objects.
- * Predict ion series
+ * \brief The engine of ion series. Predicts all the ions from the
+ * peptide that meet the ion constraint. All predicted ions are stored
+ * in the ion_series as ion objects. 
  */
 void predict_ions(
   ION_SERIES_T* ion_series ///< the ion series to predict ions for -in
@@ -900,7 +965,8 @@ void predict_ions(
   
   // create a mass matrix
   float* mass_matrix = 
-    create_ion_mass_matrix(ion_series->peptide, constraint->mass_type, ion_series->peptide_length);  
+    create_ion_mass_matrix(ion_series->modified_aa_seq, constraint->mass_type, ion_series->peptide_length);  
+  //create_ion_mass_matrix(ion_series->peptide, constraint->mass_type, ion_series->peptide_length);  
   
   // scan for the first and last  (S, T, E, D) and (R, K, Q, N), 
   // initialize to determine modification is ok.
@@ -1193,6 +1259,49 @@ ION_CONSTRAINT_T* new_ion_constraint(
   constraint->pointer_count = 1;
 
   return constraint;
+}
+
+/**
+ * \brief Create a new ion constraint based on the score type and the
+ * charge of the peptide to be modeled.  Uses other
+ * new_ion_constraint_ methods for some types.
+ *
+ * \returns A newly allocated ion constraint.
+ */
+ION_CONSTRAINT_T* new_ion_constraint_smart(
+  SCORER_TYPE_T score_type,
+  int charge
+){
+  ION_CONSTRAINT_T* new_constraint = NULL;
+
+  switch(score_type){
+  case SP:
+    new_constraint = new_ion_constraint_sequest_sp(charge);
+    break;
+  case XCORR:
+    new_constraint = new_ion_constraint_sequest_xcorr(charge);
+    break;
+  case DOTP:
+  case LOGP_EXP_SP:
+  case LOGP_BONF_EXP_SP:
+  case LOGP_EVD_XCORR:
+  case LOGP_BONF_EVD_XCORR:
+  case LOGP_WEIBULL_SP:
+  case LOGP_BONF_WEIBULL_SP:
+  case LOGP_WEIBULL_XCORR:
+  case LOGP_BONF_WEIBULL_XCORR:
+  case Q_VALUE:
+  case PERCOLATOR_SCORE:
+  case LOGP_QVALUE_WEIBULL_XCORR:
+    // use default type for others
+    new_constraint = 
+      new_ion_constraint(get_mass_type_parameter("fragment-mass"),
+                         charge,
+                         get_ion_type_parameter("primary-ions"),
+                         get_boolean_parameter("precursor-ions")); 
+    break;
+  }
+  return new_constraint;
 }
 
 /**

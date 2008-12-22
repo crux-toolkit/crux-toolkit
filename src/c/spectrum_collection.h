@@ -2,7 +2,7 @@
  * \file spectrum_collection.h 
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  * \brief Object for representing many spectra.
  *****************************************************************************/
 #ifndef SPECTRUM_COLLECTION_H
@@ -251,6 +251,20 @@ SPECTRUM_ITERATOR_T* new_spectrum_iterator(
 );        
 
 /**
+ * Instantiates a new spectrum_iterator object from
+ * spectrum_collection.  This iterator returns unique spectrum-charge
+ * pairs (e.g.a spectrum to be searched as +2 and +3 is returned once
+ * as +2 and once as +3).  The charge is returned by setting the int
+ * pointer in the argument list.  The iterator also filters spectra by
+ * mass so that none outside the spectrum-min-mass--spectrum-max-mass
+ * range (as defined in parameter.c).
+ * \returns a SPECTRUM_ITERATOR_T object.
+ */
+FILTERED_SPECTRUM_CHARGE_ITERATOR_T* new_filtered_spectrum_charge_iterator(
+  SPECTRUM_COLLECTION_T* spectrum_collection///< spectra to iterate over
+);        
+
+/**
  * Frees an allocated spectrum_iterator object.
  */
 void free_spectrum_iterator(
@@ -265,11 +279,25 @@ BOOLEAN_T spectrum_iterator_has_next(
 );
 
 /**
+ * The basic iterator function has_next.
+ */
+BOOLEAN_T filtered_spectrum_charge_iterator_has_next(
+  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator);
+
+/**
  * The basic iterator function next.
  */
 SPECTRUM_T* spectrum_iterator_next(
   SPECTRUM_ITERATOR_T* spectrum_iterator///< return the next spectrum -in
 );
+
+/**
+ * The basic iterator function next.  Also returns the charge state to
+ * use for this spectrum.
+ */
+SPECTRUM_T* filtered_spectrum_charge_iterator_next(
+  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator,///< return spec from here -in
+  int* charge);                 ///< put charge here -out
 
 /*
  * Local Variables:

@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.75 $
+ * $Revision: 1.76 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -38,7 +38,7 @@
  */
 struct protein{
   DATABASE_T*  database; ///< Which database is this protein part of
-  unsigned long int offset; ///< The file location in the source file in the database
+  unsigned long int offset; ///< The file location in the database source file
   unsigned int protein_idx; ///< The index of the protein in it's database.
   BOOLEAN_T    is_light; ///< is the protein a light protein?
   BOOLEAN_T    is_memmap; ///< is the protein produced from memory mapped file
@@ -60,8 +60,8 @@ struct protein_peptide_iterator {
   unsigned short int cur_length; ///< The length of the current peptide.
   unsigned int peptide_idx; ///< The index of the current peptide.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< peptide type to iterate over.
-  double* mass_array; ///< stores all the peptide's mass
-  int* nterm_cleavage_positions; ///< nterm cleavages that satisfy constraint.
+  double* mass_array; ///< stores all the peptides' masses
+  int* nterm_cleavage_positions; ///< nterm cleavages that satisfy constraint. 
                                  ///< 1st aa is 1.
   int* peptide_lengths; ///< all the lengths of valid peptides
   float* peptide_masses; ///< all the masses of valid peptides
@@ -161,7 +161,8 @@ BOOLEAN_T protein_to_heavy(
   // failed to parse the protein from fasta file
   // protein offset is set in the parse_protein_fasta_file method
   if(!parse_protein_fasta_file(protein ,file)){
-    carp(CARP_ERROR, "failed convert protein to heavy, cannot parse fasta file");
+    carp(CARP_ERROR, 
+         "failed convert protein to heavy, cannot parse fasta file");
     return FALSE;
   }
       
@@ -633,7 +634,7 @@ char* get_protein_id(
 {
   
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get ID from light protein.");
   }
   
   int id_length = strlen(protein->id) +1; // +\0
@@ -654,7 +655,7 @@ char* get_protein_id_pointer(
   )
 {
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get ID pointer from light protein.");
   }
   return protein->id; 
 }
@@ -686,7 +687,7 @@ char* get_protein_sequence(
   )
 {
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get sequence from light protein.");
   }
   unsigned int sequence_length = strlen(protein->sequence) +1; // +\0
   char * copy_sequence = 
@@ -703,7 +704,7 @@ char* get_protein_sequence_pointer(
   )
 {
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get sequence pointer from light protein.");
   }
   return protein->sequence;
 }
@@ -758,7 +759,7 @@ char* get_protein_annotation(
   )
 {
   if(protein->is_light){
-    die("protein is light, must be heavy");
+    die("Cannot get annotation from light protein.");
   }
   int annotation_length = strlen(protein->annotation) +1; // +\0
   char * copy_annotation = 
@@ -774,6 +775,10 @@ void set_protein_annotation(
   char* annotation ///< the sequence to add -in
   )
 {
+  if( annotation == NULL ){
+    return;
+  }
+
   if(!protein->is_light){
     free(protein->annotation);
   }
@@ -914,8 +919,11 @@ BOOLEAN_T valid_cleavage_position(
 }
 
 /*
- * Adds cleavages to the protein peptide iterator that obey iterator constraint
- * Uses the allowed cleavages arrays, and whether skipped cleavages are allowed.
+ * \brief Adds cleavages to the protein peptide iterator that obey iterator
+ * constraint.
+ *
+ * Uses the allowed cleavages arrays, and whether skipped cleavages
+ * are allowed. 
  * A small inconsistency: 
  *  Allowed cleavages start at 0, while the output cleavages start at 1.
  */
@@ -927,7 +935,7 @@ void iterator_add_cleavages(
     int  cterm_num_cleavages, 
     BOOLEAN_T skip_cleavage_locations){
 
-  carp(CARP_DETAILED_DEBUG, "Call to iterator_add_cleavages");
+  //carp(CARP_DETAILED_DEBUG, "Call to iterator_add_cleavages");
 
   // to avoid checking a lot of C-term before our current N-term cleavage
   int previous_cterm_cleavage_start= 0; 
@@ -1038,7 +1046,7 @@ void prepare_protein_peptide_iterator(
   
   // initialize mass matrix and enzyme cleavage positions
   int* cleavage_positions = (int*) mycalloc(protein->length+1, sizeof(int));
-  int* non_cleavage_positions = (int*) mycalloc(protein->length+1, sizeof(int));
+  int* non_cleavage_positions = (int*)mycalloc(protein->length+1, sizeof(int));
   int* all_positions = (int*) mycalloc(protein->length+1, sizeof(int));
 
   // initialize first value in all array except non_cleavage_positions
@@ -1078,7 +1086,7 @@ void prepare_protein_peptide_iterator(
   int num_non_cleavage_positions = non_cleavage_position_idx;
   iterator->mass_array = mass_array;
 
-  carp(CARP_DETAILED_DEBUG, "num_cleavage_positions = %i", num_cleavage_positions);
+  //carp(CARP_DETAILED_DEBUG, "num_cleavage_positions = %i", num_cleavage_positions);
 
   // now determine the cleavage positions that actually match our constraints
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
@@ -1210,6 +1218,7 @@ void free_protein_peptide_iterator(
   free(protein_peptide_iterator->peptide_lengths); 
   free(protein_peptide_iterator->peptide_masses); 
   free(protein_peptide_iterator->cumulative_cleavages); 
+  //free_protein(protein_peptide_iterator->protein);
   free(protein_peptide_iterator);
 }
 
@@ -1233,12 +1242,18 @@ PEPTIDE_T* protein_peptide_iterator_next(
   PROTEIN_PEPTIDE_ITERATOR_T* iterator
   )
 {
-
+  /*
   if(!iterator->has_next){
     free_protein_peptide_iterator(iterator);
     die("ERROR: no more peptides\n");
   }
+  */
   
+  // a slightly more gentle alternative
+  if( !iterator->has_next){
+    return NULL;
+  }
+
   // set peptide type
   PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
       iterator->peptide_constraint);

@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.64 $
+ * $Revision: 1.65 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -246,7 +246,7 @@ BOOLEAN_T parse_database_text_fasta(
   
   // check if succesfully opened file
   if(file == NULL){
-    carp(CARP_FATAL, "failed to open file to parse database");
+    carp(CARP_ERROR, "Failed to open fasta file %s", database->filename);
     return FALSE;
   }
   
@@ -508,17 +508,23 @@ BOOLEAN_T parse_database(
 {
   // should we parse the database using memory mapped binary fasta file?
   if(database->is_memmap){
+    /*
     if(!parse_database_memmap_binary(database)){
       carp(CARP_ERROR,
            "Failed to parse database for memory mapped binary fasta file");
       return FALSE;
-    }    
+    } 
+    */
+    return parse_database_memmap_binary(database);   
   }
   else{ // parse database from normal text fasta file, no memory mapping!
+    /*
     if(!parse_database_text_fasta(database)){
       carp(CARP_ERROR, "Failed to parse database for text fasta file");
       return FALSE;
     }
+    */
+    return parse_database_text_fasta(database);
   }
   
   // succeeded in parsing database
@@ -724,6 +730,9 @@ DATABASE_T* copy_database_ptr(
   DATABASE_T* database ///< the query database -in/out
   )
 {
+  if( database == NULL ){
+    return NULL;
+  }
   ++database->pointer_count;
   return database;
 }
@@ -748,7 +757,7 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
   if(!database->is_parsed){
     // failed to parse database
     if(!parse_database(database)){
-      carp(CARP_FATAL, "failed to parse database, cannot create iterator");
+      carp(CARP_FATAL, "Failed to parse database, cannot create iterator");
       exit(1);
     }
   }
@@ -805,7 +814,7 @@ PROTEIN_T* database_protein_iterator_next(
 
   // print number of protein generated to STDERR for every 500 protein reached
   if(database_protein_iterator->cur_protein % 500 == 0){
-    carp(CARP_DEBUG, "Reached protein %d out of %d", 
+    carp(CARP_DETAILED_DEBUG, "Reached protein %d out of %d", 
          database_protein_iterator->cur_protein,
          database_protein_iterator->database->num_proteins);
   }
@@ -951,10 +960,12 @@ void free_database_peptide_iterator(
 
 /**
  * The basic iterator functions.
- * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ * \returns TRUE if there are additional peptides to iterate over,
+ * FALSE if not. 
  */
 BOOLEAN_T database_peptide_iterator_has_next(
-  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator  ///< the iterator of interest -in
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator  
+  ///< the iterator of interest -in
   )
 {
   if(protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){ 
@@ -971,18 +982,24 @@ PEPTIDE_T* database_peptide_iterator_next(
   ///< the iterator of interest -in
   )
 {
+  /*BF: Could this be simplified?  if next peptide, return it
+    if not, look for next protein, if not return NULL
+  */
+
    // did you reset working protein?
   BOOLEAN_T reset = FALSE;
   
-  // the ppeptide to return
+  // the peptide to return
   PEPTIDE_T* next_peptide =
     protein_peptide_iterator_next(
                    database_peptide_iterator->cur_protein_peptide_iterator);
   
-  DATABASE_T* database = database_peptide_iterator->database_protein_iterator->database;
+  DATABASE_T* database = 
+    database_peptide_iterator->database_protein_iterator->database;
   
   // reset database_peptide_iterator if needed
-  while(!protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){
+  while(!protein_peptide_iterator_has_next(
+               database_peptide_iterator->cur_protein_peptide_iterator)){
     reset = TRUE;
     PROTEIN_T* next_protein = NULL; 
     
@@ -1010,13 +1027,15 @@ PEPTIDE_T* database_peptide_iterator_next(
       // if using light/heavy functionality parse the light protein
       if(database->use_light_protein && get_protein_is_light(next_protein)){
         if(!protein_to_heavy(next_protein)){
-          carp(CARP_FATAL, "failed to create a database_peptide_iterator, no proteins in database");
-          free_database_protein_iterator(database_peptide_iterator->database_protein_iterator);
+          carp(CARP_FATAL, "Failed to create a database_peptide_iterator, " 
+                            "no proteins in database");
+          free_database_protein_iterator(
+                 database_peptide_iterator->database_protein_iterator);
           free(database_peptide_iterator);
           exit(1);
         }
       }
-      // creat new protein_peptide_iterator
+      // create new protein_peptide_iterator
       database_peptide_iterator->cur_protein_peptide_iterator =
         new_protein_peptide_iterator(next_protein, 
                                      database_peptide_iterator->peptide_constraint);

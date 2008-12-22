@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * \brief General parameter handling utilities. All values stored here.
 
  * \detail MUST declare ALL optional command line parameters and
@@ -28,11 +28,8 @@
 #include "hash.h"
 #include "objects.h"
 #include "peptide.h"
-//#include "spectrum.h"
-//#include "peak.h"
-//#include "mass.h"
-//#include "scorer.h"
 #include "parse_arguments.h"
+#include "modifications.h"
 
 #define PARAMETER_LENGTH 1024 
 ///< maximum length of parameter name and value in characters
@@ -213,6 +210,45 @@ void print_parameters(
   char* lead_string,  ///< the lead string to be printed before each line -in
   FILE* outstream  ///< the output stream -out
   );
+
+
+/**
+ * \brief Get the pointer to the list of AA_MODs requested by the
+ * user.  Does not include the c- and n-term mods.  Argument is a
+ * reference to an array of pointers.  Return 0 and set mods == NULL
+ * if there are no aa_mods.
+ * \returns The number of items pointed to by mods
+ */
+int get_aa_mod_list(AA_MOD_T*** mods);
+
+/**
+ * \brief Get the pointer to the list of AA_MODs for the peptide
+ * c-terminus.  Argument is a reference to an array of
+ * pointers. Return 0 and set mods==NULL if there are no c-term 
+ * mods.
+ *
+ * \returns The number of items pointed to by mods
+ */
+int get_c_mod_list(AA_MOD_T*** mods);
+
+/**
+ * \brief Get the pointer to the list of AA_MODs for the peptide
+ * n-terminus.  Argument is a reference to an array of
+ * pointers. Return 0 and set mods==NULL if there are no n-term 
+ * mods.
+ *
+ * \returns The number of items pointed to by mods
+ */
+int get_n_mod_list(AA_MOD_T*** mods);
+
+/**
+ * \brief Get the pointer to the list of AA_MODs requested by the
+ * user.  Includes aa_mods, c- and n-term mods.  Argument is a
+ * reference to an array of pointers.  Returns 0 and sets mods == NULL
+ * if there are no aa_mods.
+ * \returns The number of items pointed to by mods
+ */
+int get_all_aa_mod_list(AA_MOD_T*** mods);
 
 
 #endif

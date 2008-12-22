@@ -31,6 +31,8 @@ NON_PERCOLATOR_LIB_FILES= \
   ion.h \
   ion_series.c \
   ion_series.h \
+  linked_list.c \
+  linked_list.h \
   mass.c \
   mass.h \
   match.c \
@@ -38,6 +40,10 @@ NON_PERCOLATOR_LIB_FILES= \
   match_collection.c \
   match_collection.h \
   match_search.c \
+  modifications.c \
+  modifications.h \
+  modified_peptides_iterator.c \
+  modified_peptides_iterator.h \
   search.h \
   objects.h \
   parameter.c \
@@ -50,6 +56,8 @@ NON_PERCOLATOR_LIB_FILES= \
   peptide_constraint.c \
   peptide_constraint.h \
   peptide.h \
+  peptide_modifications.c \
+  peptide_modifications.h \
   peptide_src.c \
   peptide_src.h \
   protein.c \

@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.23 $
+ * $Revision: 1.24 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -45,8 +45,8 @@ INDEX_T* new_index(
  * \returns A new index object ready for search.
  */
 INDEX_T* new_index_from_disk(
-  char* fasta_filename,  ///< The fasta file
-  BOOLEAN_T is_unique ///< only unique peptides? -in
+  char* fasta_filename  ///< The fasta file
+  //  BOOLEAN_T is_unique ///< only unique peptides? -in
   );
 
 /**
@@ -176,9 +176,21 @@ PEPTIDE_CONSTRAINT_T* get_index_constraint(
 /**
  * sets the peptides constraint
  */
+/*
 void set_index_constraint(
   INDEX_T* index, ///< The index -in
   PEPTIDE_CONSTRAINT_T* constraint ///< Constraint which these peptides satisfy -in
+  );
+*/
+
+/**
+ * \brief Sets the peptide search constraint to be used by the
+ * generate_peptides_iterator.  Makes a copy of the constraint pointer.
+ * Deletes any existing search constraint. 
+ */
+void set_index_search_constraint(
+  INDEX_T* index, ///< The index -in
+  PEPTIDE_CONSTRAINT_T* constraint ///< Constraint for the next iterator
   );
 
 /**
