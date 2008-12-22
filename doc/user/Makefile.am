@@ -20,7 +20,6 @@ dist_html_DATA  =  \
 	crux.css \
 	crux.html \
 	crux-predict-peptide-ions.html \
-	crux-score-peptides-spectrum.html \
 	crux-search-for-matches.html \
 	default.params \
 	customize-tutorial.html \
