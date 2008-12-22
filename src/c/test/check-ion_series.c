@@ -5,8 +5,351 @@
 #include "../ion_series.h"
 #include "../crux-utils.h"
 #include "../objects.h"
+// "included" from parameter.c
+void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
+
+// helper functions
+int is_same(float a, float b){
+  float delta = .0005;
+  if( b > (a + delta) ){
+    return 0;
+  }else if( b < (a - delta) ){
+    return 0;
+  }
+  return 1;
+}
+
+// declare things to set up
+ION_SERIES_T *is1, *is2, *is3;
+char *seq, *seq2;
+MODIFIED_AA_T *mod_seq, *mod_seq2;
+int charge;
+ION_CONSTRAINT_T *constraint, *bcnst, *ycnst;
+AA_MOD_T *amod1, *amod2, *amod3;
+AA_MOD_T* amod_list[3];
+
+void ion_series_setup(){
+  // init modifications
+  // assigns identifiers and symbols to each aamod
+  amod1 = new_aa_mod(0);
+  amod2 = new_aa_mod(1);
+  amod3 = new_aa_mod(2);
+
+  aa_mod_set_mass_change(amod1, 100);
+  aa_mod_set_mass_change(amod2, 30);
+  aa_mod_set_mass_change(amod3, 8);
+
+  amod_list[0] = amod1;
+  amod_list[1] = amod2;
+  amod_list[2] = amod3;
+
+  initialize_parameters();
+  force_set_aa_mod_list(amod_list, 3);
+
+  // init ion series and constraints
+  charge = 2;
+  is1 = allocate_ion_series();
+
+  constraint = new_ion_constraint(MONO, charge-1, BY_ION, FALSE);// no prec ion
+  bcnst = new_ion_constraint(MONO, 1, B_ION, FALSE); 
+  ycnst = new_ion_constraint(MONO, 1, Y_ION, FALSE); 
+  seq = "ASEQ";
+  seq2 = "ANOTHERSEQ";
+  mod_seq = convert_to_mod_aa_seq( seq );
+  mod_seq2 = convert_to_mod_aa_seq( seq2 );
+  is2 = new_ion_series(seq, charge, constraint);
+  is3 = new_ion_series_generic(constraint, charge);
+}
+
+void ion_series_teardown(){
+  free_ion_series( is1 );
+  free_ion_series( is2 );
+  free_ion_series( is3 );
+  free_ion_constraint( constraint );
+
+}
+
+START_TEST (test_new){
+  fail_unless( is1 != NULL, "Failed to allocate ion series" );
+  fail_unless( is2 != NULL, "Failed to create ion series" );
+  char* gotten_seq = get_ion_series_peptide(is2);
+  fail_unless( strcmp(gotten_seq, seq) == 0,
+               "Seq of ion series is %s and should be %s", gotten_seq, seq);
+  int len = get_ion_series_peptide_length(is2);
+  fail_unless( len == strlen(seq), 
+               "Ion series seq len is %i, should be %i", len, strlen(seq));
+  int ch = get_ion_series_charge(is2);
+  fail_unless( ch == charge, 
+               "Ion series charge is %i, should be %i", ch, charge);
+  fail_unless( get_ion_series_ion_constraint(is2) == constraint,
+               "Ion series constraint is not correct");
+  fail_unless( get_ion_series_num_ions(is2) == 0,
+               "Ion series not yet predicted should have 0 ions.");
+}
+END_TEST
+
+START_TEST (test_update){
+  // update generic ion series with specific seq
+  update_ion_series(is3, seq, mod_seq);
+
+  char* gotten_seq = get_ion_series_peptide(is3);
+  fail_unless( strcmp(gotten_seq, seq) == 0,
+               "Seq of ion series is %s and should be %s", gotten_seq, seq);
+  /*
+  MODIFIED_AA_T* mod_seq = get_ion_series_mod_seq(is3);
+  gotten_seq = modified_aa_string_to_string(mod_seq);
+  fail_unless( strcmp(gotten_seq, seq) == 0,
+  "Seq of ion series is %s and should be %s", gotten_seq, seq);
+  */
+  int len = get_ion_series_peptide_length(is3);
+  fail_unless( len == strlen(seq), 
+               "Ion series seq len is %i, should be %i", len, strlen(seq));
+}
+END_TEST
+
+START_TEST (test_predict){
+  // predict ions for an updated series
+  update_ion_series(is3, seq, mod_seq);
+  fail_unless( get_ion_series_num_ions(is2) == 0,
+               "Ion series pre-prediction should have 0 ions.");
+
+  predict_ions(is3);
+
+  // test by getting num ions and getting ions
+  int num_ions = get_ion_series_num_ions(is3);
+  fail_unless( num_ions == 6,
+               "Num predicted ions is %i, should be %i.", num_ions, 6);
+
+  // look at all ions and confirm that the masses are correct
+  // reuse these
+  ION_T* ion = NULL;
+  int i=0;
+
+  // check b-ions
+  ION_FILTERED_ITERATOR_T* iter = new_ion_filtered_iterator(is3, bcnst);
+  float running_total = MASS_H_MONO;
+  while( ion_filtered_iterator_has_next(iter) ){
+    running_total += get_mass_amino_acid(seq[i], MONO);
+    ion = ion_filtered_iterator_next(iter);
+    float mz = get_ion_mass_z(ion);
+    //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
+    fail_unless( is_same(mz, running_total),
+                 "y-ion %i of seq has mz %f, should have mz %f",
+                 i, mz, running_total);
+    i++;
+  }
+  // check y-ions
+  free_ion_filtered_iterator(iter);
+  iter = new_ion_filtered_iterator(is3, ycnst);
+  i = strlen(seq) - 1;
+  running_total = MASS_H_MONO + MASS_H2O_MONO;
+  while( ion_filtered_iterator_has_next(iter) ){
+    running_total += get_mass_amino_acid(seq[i], MONO);
+    ion = ion_filtered_iterator_next(iter);
+    float mz = get_ion_mass_z(ion);
+    //printf("\nion mz: %f, type: %i, calc: %f",mz,get_ion_type(ion),running_total);
+    fail_unless( is_same(mz, running_total),
+               "y-ion %i of seq has mz %f, should have mz %f",
+                 i, mz, running_total);
+    i--;
+  }
+  free_ion_filtered_iterator(iter);
+}
+END_TEST
+
+START_TEST (test_predict2){
+
+  // same as test_predict, but different sequence
+  update_ion_series(is3, seq2, mod_seq2);
+  int num_ions = get_ion_series_num_ions(is3);
+  fail_unless( get_ion_series_num_ions(is2) == 0,
+               "Ion series after update, pre-prediction should have 0 ions.");
+
+  predict_ions(is3);
+  num_ions = get_ion_series_num_ions(is3);
+  fail_unless( num_ions == 18,
+               "Num predicted ions is %i, should be %i.", num_ions, 18);
+
+  // check b-ions
+  ION_FILTERED_ITERATOR_T* iter = new_ion_filtered_iterator(is3, bcnst);
+  float running_total = MASS_H_MONO;
+  int i = 0;
+  while( ion_filtered_iterator_has_next(iter) ){
+    running_total += get_mass_amino_acid(seq2[i], MONO);
+    ION_T* ion = ion_filtered_iterator_next(iter);
+    float mz = get_ion_mass_z(ion);
+    //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
+    fail_unless( is_same(mz, running_total),
+                 "b-ion %i of seq 2 has mz %f, should have mz %f", 
+                 i, mz, running_total);
+    i++;
+  }
+  // check y-ions
+  free_ion_filtered_iterator(iter);
+  iter = new_ion_filtered_iterator(is3, ycnst);
+  i = strlen(seq2) - 1;
+  running_total = MASS_H_MONO + MASS_H2O_MONO;
+  while( ion_filtered_iterator_has_next(iter) ){
+    running_total += get_mass_amino_acid(seq2[i], MONO);
+    ION_T* ion = ion_filtered_iterator_next(iter);
+    float mz = get_ion_mass_z(ion);
+//print("\nion mz: %f, type: %i, calc: %f",mz,get_ion_type(ion),running_total);
+    fail_unless( is_same(mz, running_total),
+                 "y-ion %i of seq2 has mz %f, should have mz %f",
+                 i, mz, running_total);
+    i--;
+  }
+
+  // modify the seq and predict again to see that masses change
+}
+END_TEST
+
+START_TEST (test_predict_mod){
+  // modifiy seq
+  modify_aa(&mod_seq[1], amod1);
+  // predict ions for an updated series
+  update_ion_series(is3, seq, mod_seq);
+  fail_unless( get_ion_series_num_ions(is2) == 0,
+               "Ion series pre-prediction should have 0 ions.");
+
+  predict_ions(is3);
+
+  // test by getting num ions and getting ions
+  int num_ions = get_ion_series_num_ions(is3);
+  fail_unless( num_ions == 6,
+               "Num predicted ions is %i, should be %i.", num_ions, 6);
+
+  // look at all ions and confirm that the masses are correct
+  // create a b- and a y-ion constraint
+  ION_CONSTRAINT_T* bcnst = new_ion_constraint(MONO, 1, B_ION, FALSE); 
+  ION_CONSTRAINT_T* ycnst = new_ion_constraint(MONO, 1, Y_ION, FALSE); 
+  // reuse these
+  ION_T* ion = NULL;
+  int i=0;
+
+  // check b-ions
+  ION_FILTERED_ITERATOR_T* iter = new_ion_filtered_iterator(is3, bcnst);
+  float running_total = MASS_H_MONO;
+  while( ion_filtered_iterator_has_next(iter) ){
+    running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
+    ion = ion_filtered_iterator_next(iter);
+    float mz = get_ion_mass_z(ion);
+    //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
+    fail_unless( is_same(mz, running_total),
+                 "b-ion %i of mod seq has mz %f, should have mz %f",
+                 i, mz, running_total);
+    i++;
+  }
+  // check y-ions
+  free_ion_filtered_iterator(iter);
+  iter = new_ion_filtered_iterator(is3, ycnst);
+  i = strlen(seq) - 1;
+  running_total = MASS_H_MONO + MASS_H2O_MONO;
+  while( ion_filtered_iterator_has_next(iter) ){
+    running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
+    ion = ion_filtered_iterator_next(iter);
+    float mz = get_ion_mass_z(ion);
+//print("\nion mz: %f, type: %i, calc: %f",mz,get_ion_type(ion),running_total);
+    fail_unless( is_same(mz, running_total),
+               "y-ion %i of mod_seq has mz %f, should have mz %f",
+                 i, mz, running_total);
+    i--;
+  }
+
+}
+END_TEST
+
+START_TEST (test_predict_mod2){
+  // modifiy seq
+  modify_aa(&mod_seq[1], amod1);
+  modify_aa(&mod_seq[1], amod2);
+  modify_aa(&mod_seq[strlen(seq)-1], amod3);
+
+  // predict ions for an updated series
+  update_ion_series(is3, seq, mod_seq);
+  fail_unless( get_ion_series_num_ions(is2) == 0,
+               "Ion series pre-prediction should have 0 ions.");
+
+  predict_ions(is3);
+
+  // test by getting num ions and getting ions
+  int num_ions = get_ion_series_num_ions(is3);
+  fail_unless( num_ions == 6,
+               "Num predicted ions is %i, should be %i.", num_ions, 6);
+
+  // look at all ions and confirm that the masses are correct
+  // create a b- and a y-ion constraint
+  ION_CONSTRAINT_T* bcnst = new_ion_constraint(MONO, 1, B_ION, FALSE); 
+  ION_CONSTRAINT_T* ycnst = new_ion_constraint(MONO, 1, Y_ION, FALSE); 
+  // reuse these
+  ION_T* ion = NULL;
+  int i=0;
+
+  // check b-ions
+  ION_FILTERED_ITERATOR_T* iter = new_ion_filtered_iterator(is3, bcnst);
+  float running_total = MASS_H_MONO;
+  while( ion_filtered_iterator_has_next(iter) ){
+    running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
+    ion = ion_filtered_iterator_next(iter);
+    float mz = get_ion_mass_z(ion);
+    //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
+    fail_unless( is_same(mz, running_total),
+                 "b-ion %i of mod seq has mz %f, should have mz %f",
+                 i, mz, running_total);
+    i++;
+  }
+  // check y-ions
+  free_ion_filtered_iterator(iter);
+  iter = new_ion_filtered_iterator(is3, ycnst);
+  i = strlen(seq) - 1;
+  running_total = MASS_H_MONO + MASS_H2O_MONO;
+  while( ion_filtered_iterator_has_next(iter) ){
+    running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
+    ion = ion_filtered_iterator_next(iter);
+    float mz = get_ion_mass_z(ion);
+//print("\nion mz: %f, type: %i, calc: %f",mz,get_ion_type(ion),running_total);
+    fail_unless( is_same(mz, running_total),
+               "y-ion %i of mod_seq has mz %f, should have mz %f",
+                 i, mz, running_total);
+    i--;
+  }
+
+}
+END_TEST
+
+Suite *ion_series_suite_2(void){
+  Suite *s = suite_create("Ion series");
+  TCase *tc_main = tcase_create("main");
+  tcase_add_test(tc_main, test_new);
+  tcase_add_test(tc_main, test_update);
+  tcase_add_test(tc_main, test_predict);
+  tcase_add_test(tc_main, test_predict2);
+  tcase_add_test(tc_main, test_predict_mod);
+  tcase_add_test(tc_main, test_predict_mod2);
+
+  tcase_add_checked_fixture(tc_main, ion_series_setup, ion_series_teardown);
+  suite_add_tcase(s, tc_main);
+
+  return s;
+}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//chris's test
 START_TEST (test_create){
   
   /****************************
@@ -100,8 +443,8 @@ START_TEST (test_create){
   fail_unless(get_ion_series_num_ions_one_type(ion_series, P_ION) == get_ion_series_num_ions_one_type(ion_series2, P_ION), "the P ion number of ions not predicted correctly");
  
   //try print ion series, should be the same
-  print_ion_series(ion_series, stdout);
-  print_ion_series(ion_series2, stdout);
+  //print_ion_series(ion_series, stdout);
+  //print_ion_series(ion_series2, stdout);
   
   
   //test iterators
@@ -152,7 +495,8 @@ END_TEST
 Suite *ion_series_suite(void){
   Suite *s = suite_create("ion_series");
   TCase *tc_core = tcase_create("Core");
-  suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);
+  suite_add_tcase(s, tc_core);
+
   return s;
 }
