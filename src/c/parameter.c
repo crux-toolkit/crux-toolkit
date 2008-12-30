@@ -1422,7 +1422,6 @@ char* get_string_parameter(
   )
 {
   
-  //  char* string_value = get_hash_value(parameters->hash, name);
   char* string_value = get_hash_value(parameters, name);
   
   // can't find parameter

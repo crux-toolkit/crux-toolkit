@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.87 $
+ * $Revision: 1.88 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -3120,7 +3120,7 @@ void serialize_headers(FILE** psm_file_array){
   // get values from parameter.c
   int num_charged_spectra = -1;  //this is set later
   int matches_per_spectrum = get_int_parameter("top-match");
-  char* filename = get_string_parameter_pointer("protein input");
+  char* filename = get_string_parameter("protein input");
   char* protein_file = parse_filename(filename);
   //filename = get_string_parameter_pointer("ms2 file");
   //filename = get_string_parameter("ms2 file");
