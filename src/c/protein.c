@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.76 $
+ * $Revision: 1.77 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -935,7 +935,7 @@ void iterator_add_cleavages(
     int  cterm_num_cleavages, 
     BOOLEAN_T skip_cleavage_locations){
 
-  //carp(CARP_DETAILED_DEBUG, "Call to iterator_add_cleavages");
+  //  carp(CARP_DETAILED_DEBUG, "Call to iterator_add_cleavages with %i c-term sites, %i nterm sites and skipped locations? %i", cterm_num_cleavages, nterm_num_cleavages, skip_cleavage_locations);
 
   // to avoid checking a lot of C-term before our current N-term cleavage
   int previous_cterm_cleavage_start= 0; 
@@ -979,7 +979,12 @@ void iterator_add_cleavages(
 
       // check our length constraint
       int length = 
-        cterm_allowed_cleavages[cterm_idx] - nterm_allowed_cleavages[nterm_idx];
+       cterm_allowed_cleavages[cterm_idx] - nterm_allowed_cleavages[nterm_idx];
+
+      /* carp(CARP_DETAILED_DEBUG, "This peptide length %i, min: %i, max: %i",
+           length, get_peptide_constraint_min_length(constraint),
+           get_peptide_constraint_max_length(constraint) ); */
+
       if (length < get_peptide_constraint_min_length(constraint)){
         continue;
       } else if (length > get_peptide_constraint_max_length(constraint)){
@@ -992,6 +997,11 @@ void iterator_add_cleavages(
       // check our mass constraint
       float peptide_mass = calculate_subsequence_mass(iterator->mass_array, 
           nterm_allowed_cleavages[nterm_idx], length);
+
+      /* 
+      carp(CARP_DETAILED_DEBUG, "This peptide mass %.4f, min: %.4f, max: %.4f",
+           peptide_mass, get_peptide_constraint_min_mass(constraint),
+           get_peptide_constraint_max_mass(constraint) ); */
 
       if ((get_peptide_constraint_min_mass(constraint) <= peptide_mass) && 
           (peptide_mass <= get_peptide_constraint_max_mass(constraint))){ 
@@ -1137,8 +1147,9 @@ void prepare_protein_peptide_iterator(
     case ANY_TRYPTIC:
       iterator_add_cleavages(iterator,
         all_positions, protein->length,
-        all_positions+1, protein->length, 
-        missed_cleavages);
+        all_positions+1, protein->length, // len-1?
+        //missed_cleavages);
+        TRUE); // for unspecific ends, allow internal cleavage sites
       break;
 
     case NOT_TRYPTIC:

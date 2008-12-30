@@ -122,12 +122,14 @@ int search_main(int argc, char** argv){
        get_spectrum_collection_num_spectra(spectra));
 
   /* Get input: protein file */
-  char* input_file = get_string_parameter_pointer("protein input");
+  //char* input_file = get_string_parameter_pointer("protein input");
+  char* input_file = get_string_parameter("protein input");
 
   /* Prepare input, fasta or index */
   INDEX_T* index = NULL;
   DATABASE_T* database = NULL;
   int num_proteins = prepare_protein_input(input_file, &index, &database); 
+  free(input_file);
 
   carp(CARP_DEBUG, "Found %i proteins", num_proteins);
   if( num_proteins == 0 ){
@@ -408,8 +410,7 @@ void open_output_files(
   FILE** sqt_file,        ///< put text sqt filehandle here -out
   FILE** decoy_sqt_file)  ///< put decoy sqt filehandle here -out
 {
-  char* match_output_folder = get_string_parameter_pointer(
-                                                    "match-output-folder");
+  char* match_output_folder = get_string_parameter("match-output-folder");
   MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
                                                     "output-mode");
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
@@ -442,6 +443,7 @@ void open_output_files(
 
   }
 
+  free(match_output_folder);
   carp(CARP_DEBUG, "Finished opening output files");
 }
 

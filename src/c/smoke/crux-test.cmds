@@ -46,10 +46,10 @@ analyze_matches_existing = good_results/standard_existing-perc.sqt = rm -f targe
 search_for_matches_noops = good_results/empty_file = rm -rf target.sqt test*csm ; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 test.fasta; = 'Time'
 
 # Analyze matches to test default search, use no ops
-analyze_matches_no_ops_test_search = good_results/standard_analyze_default = rm -f demo.csm; crux percolator . test.fasta --parameter-file params/set_rand_seed; cat target.sqt = 'Time'
+analyze_matches_no_ops_test_search = good_results/standard_analyze_default = rm -f demo*.csm; crux percolator . test.fasta --parameter-file params/set_rand_seed; cat target.sqt = 'Time'
 
 # Search and estimate p-values
-search_pvalues = good_results/pvalues.sqt = crux search-for-matches --parameter-file params/set_rand_seed --overwrite T --compute-p-values T --output-mode all --sqt-output-file pvalues.sqt --number-decoy-set 0 demo.ms2 small-yeast.fasta; cat pvalues.sqt = 'Time'
+search_pvalues = good_results/pvalues.sqt = crux search-for-matches --parameter-file params/pval demo.ms2 small-yeast.fasta; cat pvalues.sqt = 'Time'
 
 # Get q-values from above search
 compute-q-values = good_results/qvalues.sqt = rm -f test*csm; crux compute-q-values --overwrite T --sqt-output-file qvalues.sqt . small-yeast.fasta ; cat qvalues.sqt = 'Time'
@@ -59,6 +59,9 @@ search_mods_fasta = good_results/standard_search_mods = rm *csm; crux search-for
 
 # Analyze matches with modifications
 analyze_mods_fasta = good_results/standard_analyze_mods = crux percolator --parameter-file params/mods . test.fasta; cat mods.sqt = 'Time' 'Database'
+
+# Search for matches and estimate p-values with modifications
+# TODO
 
 # TESTS WITH INDEX
 
