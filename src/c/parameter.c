@@ -344,7 +344,7 @@ void initialize_parameters(void){
       "but not before P.  The value 'tryptic' produces peptides with "
       "tryptic sites at both termini, 'partial' with a tryptic cleavage "
       "site at at least one terminus, and 'all' produces peptides with no "
-      "dependence on adjacent amino acids.",
+      "dependence on adjacent amino acids or internal cleavage sites.",
       "true");
   set_boolean_parameter("missed-cleavages", FALSE, 
       "Include peptides with missed cleavage sites (T,F). Default FALSE.",
