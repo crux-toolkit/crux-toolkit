@@ -2,6 +2,9 @@
 
 chmod 774 crux-test.pl
 ln -fs test.fasta existing.fasta
+if [ ! -e index-for-sequest-comparison ]
+then ../crux create-index  --parameter-file params/mods-sequest --verbosity 0 for-sequest-comparison.fasta index-for-sequest-comparison
+fi
 
 ./crux-test.pl -p ../ crux-test.cmds 1>out 2>error
 if [ $? == 25 ]
