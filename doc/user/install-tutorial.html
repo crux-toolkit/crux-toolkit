@@ -40,17 +40,25 @@ $HOME</code>
 <li><b>Download the files</b>  <span class=prog>Crux</span> is freely
 available for download under an academic use license.  Once you have
 submitted a license request, you will be sent a web address and login
-information.  On the download page you will be offered two choices.
-One is a set of compiled binaries (programs that are ready to run) and
+information.  On the download page you will be offered two types of files.
+One is a set of compiled binaries (programs that are ready to run) and 
 documentation zipped together and the other is a tarball containing
 the source code and documentation.  If you are working on a Linux i686
-system, the compiled binaries offer the easiest installation option.
-Click on the link "Linux i686 Build (zipped)" to download them to your
-computer.  If a window pops up, select the "Save" button.
+or x86_64 system, the compiled binaries offer the easiest installation option.
+Click on the link "Linux [architecture] Build (zipped)" to download
+them to your computer.  If a window pops up, select the "Save" button.
 If you are on any other system or if the binaries do not work on your
 computer, you will need to download the source files.  Click on the
 link "Source (tarred, gzipped)", again choosing to save to disk if
-prompted. 
+prompted. To check that the files were transfered correctly, run this
+command
+
+<div class=code><code>
+$ md5sum <i>[downloaded file]</i></code>
+</div>
+
+and compare the output to the "MD5 checksum" link next to the file you
+downloaded.  
 
 <li><b>Unpack the files</b>
 <ol>

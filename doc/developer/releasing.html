@@ -31,6 +31,11 @@ executables have been built.  The binary package file will include the
 computer architecture and operating system in the name so that builds
 on multiple computers can be easily distinguished.</p>
 
+<p>After building the packages, run <code>make checksum</code>.  Do
+this for each bdist package built.  A new file with the output of the
+checksum is created for each package and will be included on the
+download page.</p>
+
 <p>Each version that is released should be added to CVS in <code>
 crux/doc/user/downloads</code>.  Detailed notes about changes made can be
 recorded in <code>crux/ChangeLog</code>.  A more general description of changes
