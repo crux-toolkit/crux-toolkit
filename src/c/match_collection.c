@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.88 $
+ * $Revision: 1.89 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -841,7 +841,7 @@ void truncate_match_collection(
 {
   carp(CARP_DETAILED_DEBUG, "Truncating match collection.");
   if (match_collection == NULL || match_collection->match_total == 0){
-    carp(CARP_DETAILED_INFO, "No matches in collection, so not truncating");
+    carp(CARP_DETAILED_DEBUG, "No matches in collection, so not truncating");
     return;
   }
 
