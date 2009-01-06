@@ -103,6 +103,8 @@ search_mods_index = good_results/standard_search_mods = crux search-for-matches 
 # Analyze matches with modifications from index
 analyze_mods_index = good_results/standard_analyze_mods = crux percolator --parameter-file params/mods --use-index T . test_crux_index; cat mods.sqt = 'Time' 'Database'
 
+# Do mod search with spec that match sequest results exactly
+sequest_matching_search = good_results/seq_test.sqt = crux search-for-matches --parameter-file params/mods-sequest --use-index T select-spectra.ms2 index-for-sequest-comparison; cat seq_test.sqt = 'Time' 
 
 # MORE TESTS TODO
 
