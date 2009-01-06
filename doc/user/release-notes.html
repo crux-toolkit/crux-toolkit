@@ -9,15 +9,53 @@
 <h1>Release notes for Crux</h1>
 
 
-<h2>Version 1.??</h2> January ?, 2009
+<h2>Version 1.20</h2> January 6, 2009
 
 <ul>
+
+<li>
+Generating peptides and searching with up to eleven different dynamic
+modifications is now possible.  New options associated with this
+feature are mod, cmod, nmod, max-mods, max-aas-modified.
+
+<li>
+The format of the .csm files has changed and files written by older
+versions of crux are not readable with crux version 1.2.
 
 <li>
 When the option <code>cleavages</code> is set to <code>all</code>,
 peptide generation ignores all tryptic cleavage sites, effectively setting
 the <code>missed-cleavages</code> option to <code>TRUE</code>
 regardless of user settings.
+
+<li>
+When one spectrum has identical xcorr scores for different sequences,
+the rank of all those matches will be the same.  Maches with the next
+highes score will rank one below.
+
+<li>
+The options for setting the preliminary and primary score type have
+been removed and are fixed as Sp and xcorr, respectively.  A new
+option, <code>compute-p-values=&lt;T | F&gt;</code>, was added to
+control p-value computation.
+
+<li>
+The sqt file contains the spectrum calculated mass instead of observed
+mass/charge on the S line.
+
+<li>
+There is now a test for confirming that the file downloaded from the
+crux website was not corrupted.  See installation instructions for
+details. 
+
+<li>
+Calculating a p-value requires a minimum of 40 matches.  Spectra with
+fewer than 40 matches will have p-value scores returned as NaN and a
+warning will be printed at teh DETAILED_INFO level (40) of verbosity.
+
+<li>
+Fixed error in generating neutral-loss peaks created as part of the
+theoretical spectrum. 
 
 </ul>
 

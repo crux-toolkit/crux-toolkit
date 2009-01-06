@@ -1,33 +1,33 @@
 # comment lines begin with a '#' in the first position
 [SEQUEST]
-database_name = yeast.aa
-peptide_mass_tolerance = 1
+database_name = test.fasta
+peptide_mass_tolerance = 3
 create_output_files = 0                ; 0=no, 1=yes
 ion_series = 0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
 fragment_ion_tolerance = 0.0           ; leave at 0.0 unless you have real poor data
 num_output_lines = 500                   ; # peptide results to show
 num_description_lines = 1              ; # full protein descriptions to show for top N peptides
 show_fragment_ions = 1                 ; 0=no, 1=yes
-print_duplicate_references = 1         ; 0=no, 1=yes
+print_duplicate_references = 0         ; 0=no, 1=yes
 enzyme_number = 0                       
 
-xcorr_mode = 0                         ; 0 regular Xcorr(default), 1 - EE, 2 - ET, 3 - TT
+#xcorr_mode = 0                         ; 0 regular Xcorr(default), 1 - EE, 2 - ET, 3 - TT
 
 #
 # Up to 3 differential searches can be performed.
 # Amino acids can not appear in more than one differential search parameter
 #
-diff_search_options = 0.0 X 0.0 X 0.0 X
+diff_search_options = 79.9 S 0.0 X 0.0 X
 
 #
 # new parameters
 #
-max_num_differential_AA_per_mod = 0    ; max # of modified AA per diff. mod in a peptide
+max_num_differential_AA_per_mod = 3    ; max # of modified AA per diff. mod in a peptide
 nucleotide_reading_frame = 0           ; 0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six
 mass_type_parent = 0                   ; 0=average masses, 1=monoisotopic masses
 remove_precursor_peak = 1              ; 0=no, 1=yes
 mass_type_fragment = 1                 ; 0=average masses, 1=monoisotopic masses
-ion_cutoff_percentage = 0.1            ; prelim. score cutoff % as a decimal number i.e. 0.30 for 30%
+ion_cutoff_percentage = 0.0            ; prelim. score cutoff % as a decimal number i.e. 0.30 for 30%
 
 match_peak_count = 0                   ; number of auto-detected peaks to try matching (max 5)
 match_peak_allowed_error = 1           ; number of allowed errors in matching auto-detected peaks
@@ -57,7 +57,7 @@ add_S_Serine = 0.0000                  ; added to S - avg.  87.0782, mono.  87.0
 add_P_Proline = 0.0000                 ; added to P - avg.  97.1167, mono.  97.05276
 add_V_Valine = 0.0000                  ; added to V - avg.  99.1326, mono.  99.06841
 add_T_Threonine = 0.0000               ; added to T - avg. 101.1051, mono. 101.04768
-add_C_Cysteine = 0.0000               ; added to C - avg. 103.1388, mono. 103.00919
+add_C_Cysteine = 57.0000               ; added to C - avg. 103.1388, mono. 103.00919
 add_L_Leucine = 0.0000                 ; added to L - avg. 113.1594, mono. 113.08406
 add_I_Isoleucine = 0.0000              ; added to I - avg. 113.1594, mono. 113.08406
 add_X_LorI = 0.0000                    ; added to X - avg. 113.1594, mono. 113.08406
