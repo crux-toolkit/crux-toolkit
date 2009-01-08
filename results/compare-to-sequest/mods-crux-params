@@ -1,0 +1,5 @@
+cleavages=all
+output-mode=sqt
+match-output-folder=crux-results
+number-decoy-set=0
+mod=79.9:S:2
