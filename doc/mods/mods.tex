@@ -12,7 +12,8 @@
   sequences each containing a mass and an ordered list of amino acids,
   (3) a set M of peptide modifications, (4) the number N of PSMs to
   output per spectrum. Outputs: a set R of PSMs.  Each PSM contains a
-  peptide sequence (q) and two scores (x, sp).}
+  peptide sequence (q) and two scores (x, sp).
+  \label{algorithm:search}}
 
 \begin{algorithmic}[1]
 \Procedure{SearchOneSpectrum}{S, Q, M, N}
@@ -22,6 +23,7 @@
 
 \For{i $\gets$ 1 ... $|$M$|$}
    \State Qs $\gets$ selectPeptidesInMassRange(S.mass, M[i], Q)
+   \Comment Algorithm~\ref{algorithm:select}
    
    \For{j $\gets$ 1 ... $|$Qs$|$}
      \State r $\gets$ newPsm(Qs[j])
@@ -54,7 +56,8 @@
 \begin{algorithm}
 \caption{ Inputs: the target mass (m), a peptide modification (Mx),
   and a set of possible sequences (Q).  Output: a set of modified
-  peptides in the specified mass range.}
+  peptides in the specified mass range.
+  \label{algorithm:select}}
 
 \begin{algorithmic}[1]
 \Procedure{selectPeptidesInMassRange}{m, Mx, Q}
@@ -66,6 +69,7 @@
   \For{i $\gets$ 1 ... n}
     \If{isModifiable(Qu[i], Mx)}
       \State Qm += generateAllModifiedForms(Qu[i], Mx)
+      \Comment Algorithm~\ref{algorithm:generate}
     \EndIf
   \EndFor
 
@@ -81,22 +85,23 @@
   amino acid modifications.  Each amino acid modification, a\_i for i
   in 1 to 11 has a count associated with it, count\_a\_i.  Outputs: a
   set of sequences in which the residues have had modifications added
-  to them.}
+  to them. 
+  \label{algorithm:generate}}
 
 \begin{algorithmic}[1]
 \Procedure{generateAllModifiedForms}{q, m}
 
-  \State Q $\gets$ q
+  \State Q $\gets$ [q]
   \Comment Initialize list with the unmodified sequence.
 
   \For{i $\gets$ 1 ... 11}
-  \Comment Apply each aamod to the list of sequences.
+  \Comment Apply each modification to the list of sequences.
     \For{i $\gets$ 1 ... count\_a\_i}
     \Comment Apply a\_i count\_a\_i times 
       \For{j $\gets$ 1 ... $|$Q$|$ }
       \Comment Apply to each sequence
         \State Q += applyModToSequence(a\_i, Q[j], j)
-        \Comment See caption of applyModToSequence.
+        \Comment Algorithm~\ref{algorithm:apply}
       \EndFor
     \EndFor
   \EndFor
@@ -109,16 +114,17 @@
 
 \begin{algorithm}
 \caption{{\bf Modifying one Residue of a Peptide Sequence} Inputs: (1)
-  a peptide sequence which is an ordered list of amino acids each of which
-  may be modified (q), (2) an amino acid modification (a), (3) the number
+  a peptide sequence q, which is an ordered list of amino acids, each of which
+  may be modified, (2) an amino acid modification a,  (3) the number
   of residues already modified by a to skip before applying a
   (n). Outputs: a set of sequences in which one residue has been
-  modified by a.} 
+  modified by a.
+  \label{algorithm:apply}} 
 \begin{algorithmic}[1]
 \Procedure{applyModToSequence}{q, a, n}
 
   \State Q $\gets$ []
-  \Comment Initialize empty list of modified sequences
+  \Comment Initialize list of modified sequences
 
   \For{i $\gets$ 1 ... $|$q$|$}
   \Comment Skip over the first n residues modified by a
