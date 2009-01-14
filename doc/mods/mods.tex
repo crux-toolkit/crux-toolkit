@@ -10,48 +10,38 @@
 \caption{{\bf Searching with Modifications} Inputs: (1) a charged
   spectrum S containing a mass and a list of peaks, (2) a set Q of
   sequences each containing a mass and an ordered list of amino acids,
-  (3) a set A of amino acid modifications, each containing a mass
-  shift m, list a of modifiable amino acids, and max occurrences x per
-  peptide, and (4) a set M of peptide modifications.  Each peptide
-  modification A[i] contains a set of amino acid modifications,
-  represented as count\_a\_i for i in 0 to 10.  The peptide
-  modification also contains the number of amino acid modifications
-  (sum over i of count\_a\_i), and the total mass shift (sum over i of
-  count\_a\_i * a\_i.mass). Outputs: a set R of PSMs.  Each PSM
-  contains a peptide sequence (q), two scores (x, sp) and two ranks
-  (rx, rsp).}
+  and (3) a set M of peptide modifications. Outputs: a set R of PSMs.
+  Each PSM contains a peptide sequence (q) and two scores (x, sp).} 
 
 \begin{algorithmic}[1]
-\Procedure{SearchOneSpectrum}{S, Q, A, M}
+\Procedure{SearchOneSpectrum}{S, Q, M}
 
 \State R $\gets$ []
 \Comment Initialize an empty set of results.
 
 \For{i $\gets$ 1...$|$M$|$}
    \State Qs $\gets$ selectPeptidesInMassRange(S.mass, M$_i$, Q)
-
-   \State Rt $\gets$ []
-   \Comment Temporary results, this peptide modification only.
-   \For{j $\gets$ 1...m}
-     \State Rt[j].q $\gets$ newPsm(Qs[j])
-     \State Rt[j].sp $\gets$ scorePeptideSp(Rt[j].q, S.peaks)
+   
+   \For{j $\gets$ 1...$|$Qs$|$}
+     \State r.q $\gets$ newPsm(Qs[j])
+     \Comment Create new psm and set sequence.
+     \State r.sp $\gets$ scorePeptideSp(r.q, S.peaks)
+     \Comment Set Sp score for psm.
+     \State R += r
+     \Comment Add psm to set of results.
    \EndFor
 
-   \State R += Rt
    \State R $\gets$ sortBySp(R)
-   \For{j $\gets$ 1...m}
-     \State R[j].rsp $\gets$ j
-   \EndFor
    \State R $\gets$ truncateTop500(R)
+   \Comment Keep only best-scoring psms for xcorr scoring.
 
    \For{j $\gets$ 1...500}
      \State R[j].x $\gets$ scorePeptideXcorr(R[j].q, S.peaks)
    \EndFor
 
    \State R $\gets$ sortByXcorr(R)
-   \For{j $\gets$ 1...m}
-     \State R[j].rx $\gets$ j
-   \EndFor
+   \State R $\gets$ truncateTopN(R)
+   \Comment Keep only N of the best psms.
 
 \EndFor
 
