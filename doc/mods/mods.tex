@@ -8,32 +8,33 @@
 
 \begin{algorithm}
 \caption{{\bf Searching with Modifications} Inputs: (1) a charged
-  spectrum s containing a mass and a list of peaks, (2) a set Q of
-  sequences each containing a mass and an ordered list of aas, (3) a
-  set A of amino acid modifications, each containing a mass shift m,
-  list a of modifiable aas, and max occurrences x per peptide, and (4)
-  a set M of peptide modifications.  Each peptide modification
-  contains a set of amino acid modifications, represented as
-  count\_a\_i for i in 0 to 10. It also has the number of amino acid
-  modifications (sum over i count\_a\_i), and the total mass shift
-  (sum over $i$ count\_a\_i * a\_i.mass). Outputs: a set of PSMs R.
-  Each psm contains a peptide sequence (q), two scores (x, sp) and
-  two ranks (rx, rsp).}
+  spectrum S containing a mass and a list of peaks, (2) a set Q of
+  sequences each containing a mass and an ordered list of amino acids,
+  (3) a set A of amino acid modifications, each containing a mass
+  shift m, list a of modifiable amino acids, and max occurrences x per
+  peptide, and (4) a set M of peptide modifications.  Each peptide
+  modification A\_i contains a set of amino acid modifications,
+  represented as count\_a\_i for i in 0 to 10.  The peptide
+  modification also contains the number of amino acid modifications
+  (sum over i of count\_a\_i), and the total mass shift (sum over i of
+  count\_a\_i * a\_i.mass). Outputs: a set R of PSMs.  Each PSM
+  contains a peptide sequence (q), two scores (x, sp) and two ranks
+  (rx, rsp).}
 
 \begin{algorithmic}[1]
-\Procedure{SearchOneSpectrum}{s, Q, A, M}
+\Procedure{SearchOneSpectrum}{S, Q, A, M}
 
 \State R $\gets$ []
 \Comment Initialize an empty set of results.
 
-\For{$i \gets 1 \dots |M|$}
-   \State Qs $\gets$ selectPeptidesInMassRange(s.mass, M\_i, Q)
+\For{i $\gets$ 1...|M|}
+   \State Qs $\gets$ selectPeptidesInMassRange(S.mass, M$_i$, Q)
 
    \State Rt $\gets$ []
    \Comment Temporary results, this spectrum only.
    \For{j $\gets$ 1...m}
      \State Rt\_j.q $\gets$ newPsm(Qs\_j)
-     \State Rt\_j.sp $\gets$ scorePeptideSp(Rt\_j.q, s.peaks)
+     \State Rt\_j.sp $\gets$ scorePeptideSp(Rt\_j.q, S.peaks)
    \EndFor
 
    \State R += Rt
@@ -44,7 +45,7 @@
    \State R $\gets$ truncateTop500(R)
 
    \For{j $\gets$ 1...500}
-     \State R\_j.x $\gets$ scorePeptideXcorr(R\_j.q, s.peaks)
+     \State R\_j.x $\gets$ scorePeptideXcorr(R\_j.q, S.peaks)
    \EndFor
 
    \State R $\gets$ sortByXcorr(R)
