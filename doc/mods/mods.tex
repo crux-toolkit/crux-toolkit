@@ -13,7 +13,7 @@
   (3) a set A of amino acid modifications, each containing a mass
   shift m, list a of modifiable amino acids, and max occurrences x per
   peptide, and (4) a set M of peptide modifications.  Each peptide
-  modification A\_i contains a set of amino acid modifications,
+  modification A[i] contains a set of amino acid modifications,
   represented as count\_a\_i for i in 0 to 10.  The peptide
   modification also contains the number of amino acid modifications
   (sum over i of count\_a\_i), and the total mass shift (sum over i of
@@ -27,30 +27,30 @@
 \State R $\gets$ []
 \Comment Initialize an empty set of results.
 
-\For{i $\gets$ 1...|M|}
+\For{i $\gets$ 1...$|$M$|$}
    \State Qs $\gets$ selectPeptidesInMassRange(S.mass, M$_i$, Q)
 
    \State Rt $\gets$ []
    \Comment Temporary results, this peptide modification only.
    \For{j $\gets$ 1...m}
-     \State Rt\_j.q $\gets$ newPsm(Qs\_j)
-     \State Rt\_j.sp $\gets$ scorePeptideSp(Rt\_j.q, S.peaks)
+     \State Rt[j].q $\gets$ newPsm(Qs[j])
+     \State Rt[j].sp $\gets$ scorePeptideSp(Rt[j].q, S.peaks)
    \EndFor
 
    \State R += Rt
    \State R $\gets$ sortBySp(R)
    \For{j $\gets$ 1...m}
-     \State R\_j.rsp $\gets$ j
+     \State R[j].rsp $\gets$ j
    \EndFor
    \State R $\gets$ truncateTop500(R)
 
    \For{j $\gets$ 1...500}
-     \State R\_j.x $\gets$ scorePeptideXcorr(R\_j.q, S.peaks)
+     \State R[j].x $\gets$ scorePeptideXcorr(R[j].q, S.peaks)
    \EndFor
 
    \State R $\gets$ sortByXcorr(R)
    \For{j $\gets$ 1...m}
-     \State R\_j.rx $\gets$ j
+     \State R[j].rx $\gets$ j
    \EndFor
 
 \EndFor
@@ -72,8 +72,8 @@
   \State Qm $\gets$ empty set of modified peptides
 
   \For{i $\gets$ 1...n}
-    \If{isModifyable(Qu\_i, Mx)}
-      \State Qm += generateAllModifiedForms(Qu\_i, Mx)
+    \If{isModifyable(Qu[i], Mx)}
+      \State Qm += generateAllModifiedForms(Qu[i], Mx)
     \EndIf
   \EndFor
 
