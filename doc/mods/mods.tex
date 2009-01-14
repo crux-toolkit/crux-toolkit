@@ -74,4 +74,76 @@
 \end{algorithmic}
 \end{algorithm}
 
+\begin{algorithm}
+\caption{{\bf Modifying a Peptide Sequence} Inputs: (1) a sequence
+  containing an ordered list of amino acids (q), (2) a peptide
+  modification (m).  The peptide modification contains a collection of 
+  amino acid modifications.  Each amino acid modification, a\_i for i
+  in 1 to 11 has a count associated with it, count\_a\_i.  Outputs: a
+  set of sequences in which the residues have had modifications added
+  to them.}
+
+\begin{algorithmic}[1]
+\Procedure{generateAllModifiedForms}{q, m}
+
+  \State Q $\gets$ q
+  \Comment Initialize list with the unmodified sequence.
+
+  \For{i $\gets$ 1 ... 11}
+  \Comment Apply each aamod to the list of sequences.
+    \For{i $\gets$ 1 ... count\_a\_i}
+    \Comment Apply a\_i count\_a\_i times 
+      \For{j $\gets$ 1 ... $|$Q$|$ }
+      \Comment Apply to each sequence
+        \State Q += applyModToSequence(a\_i, Q[j], j)
+        \Comment See caption of applyModToSequence.
+      \EndFor
+    \EndFor
+  \EndFor
+
+  \State \Return{Q}
+
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{{\bf Modifying one Residue of a Peptide Sequence} Inputs: (1)
+  a peptide sequence which is an ordered list of amino acids each of which
+  may be modified (q), (2) an amino acid modification (a), (3) the number
+  of residues already modified by a to skip before applying a
+  (n). Outputs: a set of sequences in which one residue has been
+  modified by a.} 
+\begin{algorithmic}[1]
+\Procedure{applyModToSequence}{q, a, n}
+
+  \State Q $\gets$ []
+  \Comment Initialize empty list of modified sequences
+
+  \For{i $\gets$ 1 ... $|$q$|$}
+  \Comment Skip over the first n residues modified by a
+    \If{ isModified(q[i], a) }
+      \State n $\gets$ n - 1
+    \EndIf
+    \If{ n == 0 }
+      \State startIdx $\gets$ i
+    \EndIf
+  \EndFor
+
+  \For{j $\gets$ startIdx ... $|$q$|$}
+  \Comment Try to modify each of the remaining residues
+    \If{ isAaModifiable( q[j], a) }
+      \State Q += createModifiedCopy(q, j, a)
+      \Comment Create a copy of q and modify q[j]
+    \EndIf
+  \EndFor
+
+  \State \Return {Q}
+
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
 \end{document}
