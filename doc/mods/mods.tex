@@ -31,7 +31,7 @@
    \State Qs $\gets$ selectPeptidesInMassRange(S.mass, M$_i$, Q)
 
    \State Rt $\gets$ []
-   \Comment Temporary results, this spectrum only.
+   \Comment Temporary results, this peptide modification only.
    \For{j $\gets$ 1...m}
      \State Rt\_j.q $\gets$ newPsm(Qs\_j)
      \State Rt\_j.sp $\gets$ scorePeptideSp(Rt\_j.q, S.peaks)
