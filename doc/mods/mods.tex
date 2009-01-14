@@ -66,7 +66,7 @@
   \State Qm $\gets$ []
   \Comment Initialize set of modified peptides.
 
-  \For{i $\gets$ 1 ... n}
+  \For{i $\gets$ 1 ... $|$Qu$|$}
     \If{isModifiable(Qu[i], Mx)}
       \State Qm += generateAllModifiedForms(Qu[i], Mx)
       \Comment Algorithm~\ref{algorithm:generate}
@@ -81,26 +81,31 @@
 \begin{algorithm}
 \caption{{\bf Modifying a Peptide Sequence} Inputs: (1) a sequence
   containing an ordered list of amino acids (q), (2) a peptide
-  modification (m).  The peptide modification contains a collection of 
-  amino acid modifications.  Each amino acid modification, a\_i for i
-  in 1 to 11 has a count associated with it, count\_a\_i.  Outputs: a
-  set of sequences in which the residues have had modifications added
-  to them. 
+  modification (M).  The peptide modification is a list of tuples, each
+  with three parts: a unique mass shift (M[i].deltaMass), a count of
+  how many of those shifts will be applied to the sequence
+  (M[i].count), and a set of amino acids to which this mass shift can
+  be applied (M[i].aas).  For example, a peptide mod with 
+  M[0].count = 2 will apply a mass shift of M[0].deltaMass to two
+  different amino acids in the sequence, those amino acids belonging
+  to the set M[i].aas.  Outputs: a set of sequences in which the
+  residues have had modifications added to them. 
   \label{algorithm:generate}}
 
 \begin{algorithmic}[1]
-\Procedure{generateAllModifiedForms}{q, m}
+\Procedure{generateAllModifiedForms}{q, M}
 
   \State Q $\gets$ [q]
   \Comment Initialize list with the unmodified sequence.
 
-  \For{i $\gets$ 1 ... 11}
+  \For{i $\gets$ 1 ... $|$M$|$}
   \Comment Apply each modification to the list of sequences.
-    \For{i $\gets$ 1 ... count\_a\_i}
-    \Comment Apply a\_i count\_a\_i times 
+    \For{i $\gets$ 1 ... M[i].count}
+    \Comment Apply M[i].delta mass M.[i]count times 
       \For{j $\gets$ 1 ... $|$Q$|$ }
       \Comment Apply to each sequence
-        \State Q += applyModToSequence(a\_i, Q[j], j)
+        \State Q += applyModToSequence(M[i].deltaMass, M[i].aas, Q[j],
+        j-1)
         \Comment Algorithm~\ref{algorithm:apply}
       \EndFor
     \EndFor
@@ -114,21 +119,21 @@
 
 \begin{algorithm}
 \caption{{\bf Modifying one Residue of a Peptide Sequence} Inputs: (1)
-  a peptide sequence q, which is an ordered list of amino acids, each of which
-  may be modified, (2) an amino acid modification a,  (3) the number
-  of residues already modified by a to skip before applying a
-  (n). Outputs: a set of sequences in which one residue has been
-  modified by a.
+  the mass shift to apply (m), (2) the set of amino acids to which
+  the shift can be applied (A), (3) a peptide sequence q, which is an
+  ordered list of amino acids, (4) the number of residues in the
+  sequence already modified by the mass shift to skip (n). Outputs: a
+  set of sequences in which one residue has been modified. 
   \label{algorithm:apply}} 
 \begin{algorithmic}[1]
-\Procedure{applyModToSequence}{q, a, n}
+\Procedure{applyModToSequence}{m, A, q, n}
 
   \State Q $\gets$ []
-  \Comment Initialize list of modified sequences
+  \Comment Initialize list of modified sequences.
 
   \For{i $\gets$ 1 ... $|$q$|$}
-  \Comment Skip over the first n residues modified by a
-    \If{ isModified(q[i], a) }
+  \Comment Skip over the first n residues already modified.
+    \If{ isModified(q[i], m) }
       \State n $\gets$ n - 1
     \EndIf
     \If{ n == 0 }
@@ -138,9 +143,10 @@
 
   \For{j $\gets$ startIdx ... $|$q$|$}
   \Comment Try to modify each of the remaining residues
-    \If{ isAaModifiable( q[j], a) }
-      \State Q += createModifiedCopy(q, j, a)
-      \Comment Create a copy of q and modify q[j]
+    \If{ q[j] is a member of set A }
+    \Comment If the residue can be modified.
+      \State Q += createModifiedCopy(q, j, m)
+      \Comment Create a copy of q and modify q[j].
     \EndIf
   \EndFor
 
