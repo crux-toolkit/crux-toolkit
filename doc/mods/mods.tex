@@ -103,7 +103,8 @@
   \Comment Apply each modification to the list of sequences.
     \For{i $\gets$ 1 ... M[i].count}
     \Comment Apply modification specified number of times 
-      \For{j $\gets$ 1 ... $|$Q$|$ }
+      \State n $\gets |$Q$|$
+      \For{j $\gets$ 1 ... n}
       \Comment Apply to each sequence
         \State Q += applyModToSequence(M[i].delta, M[i].aas, Q[j],
         j-1)
@@ -123,7 +124,7 @@
   the mass shift m to apply, (2) the set A of amino acids to which the
   shift can be applied, (3) a peptide sequence q, which is an ordered
   list of amino acids, (4) the number n of residues in the sequence to
-  which this modification has already been applied..  Outputs: a set
+  which this modification has already been applied.  Outputs: a set
   of sequences in which one residue has been modified.
   \label{algorithm:apply}} 
 \begin{algorithmic}[1]
