@@ -54,21 +54,22 @@
 \end{algorithm}
 
 \begin{algorithm}
-\caption{ Inputs: the target mass (m), a peptide modification (Mx),
-  and a set Q of possible sequence.  Output: a set of modified
-  peptides in the specified mass range.
+\caption{ Inputs: (1) the target mass (m), (2) a peptide modification (M)
+  containing a mass shift (mass) and a list of amino acid
+  modifications to be applied (aas), and (3) a set Q of possible sequence.
+  Output: a set of modified peptides in the specified mass range.
   \label{algorithm:select}}
 
 \begin{algorithmic}[1]
-\Procedure{selectPeptidesInMassRange}{m, Mx, Q}
-  \State Qu $\gets$ selectUnmodifiedPeptides(m - Mx.mass, Q)
+\Procedure{selectPeptidesInMassRange}{m, M, Q}
+  \State Qu $\gets$ selectUnmodifiedPeptides(m - M.mass, Q)
    
   \State Qm $\gets$ []
   \Comment Initialize set of modified peptides.
 
   \For{i $\gets$ 1 ... $|$Qu$|$}
-    \If{isModifiable(Qu[i], Mx)}
-      \State Qm += generateAllModifiedForms(Qu[i], Mx)
+    \If{isModifiable(Qu[i], M.aas)}
+      \State Qm += generateAllModifiedForms(Qu[i], M.aas)
       \Comment Algorithm~\ref{algorithm:generate}
     \EndIf
   \EndFor
@@ -80,7 +81,7 @@
 
 \begin{algorithm}
 \caption{{\bf Modifying a Peptide Sequence} Inputs: (1) a sequence q
-  containing an ordered list of amino acids, (2) a list M of peptide
+  containing an ordered list of amino acids, (2) a list M of amino acid
   modifications.  Each modification M[i] consists three parts: a
   unique mass shift (M[i].delta), the maximum number of times that
   shift will be applied to the sequence (M[i].count), and a set of
@@ -137,6 +138,7 @@
     \EndIf
     \If{ n == 0 }
       \State startIdx $\gets$ i
+      \State break
     \EndIf
   \EndFor
 
