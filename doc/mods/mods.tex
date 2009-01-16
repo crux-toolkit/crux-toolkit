@@ -118,10 +118,11 @@
 \begin{algorithm}
 \caption{{\bf Modifying one Residue of a Peptide Sequence} Inputs: (1)
   the mass shift m to apply, (2) the set A of amino acids to which the
-  shift can be applied, (3) a peptide sequence q, which is an ordered
-  list of amino acids, (4) the number n of residues in the sequence to
-  which this modification has already been applied.  Outputs: a set
-  of sequences in which one residue has been modified.
+  shift can be applied, (3) a peptide sequence q and (4) the number n
+  of residues in the sequence to which this modification has already
+  been applied.  Output: a set contraining copies of the given
+  peptide, corresponding to all ways that the given modification can
+  be applied to a single residue of the peptide.
   \label{algorithm:apply}} 
 \begin{algorithmic}[1]
 \Procedure{applyModToSequence}{m, A, q, n}
