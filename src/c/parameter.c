@@ -16,7 +16,8 @@
  */
 
 static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { 
-  "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "PEPTIDE_TYPE_T", 
+  "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "DIGEST_T", 
+  "ENZYME_T", "PEPTIDE_TYPE_T", 
   "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T",
   "ALGORITHM_TYPE_T"};
 
@@ -120,6 +121,22 @@ BOOLEAN_T set_mass_type_parameter(
 BOOLEAN_T set_peptide_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  PEPTIDE_TYPE_T set_value,  ///< the value to be set -in
+ char* usage,      ///< string to print in usage statement
+ char* filenotes,   ///< additional info for param file
+ char* foruser
+  );
+
+BOOLEAN_T set_digest_type_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ DIGEST_T set_value,  ///< the value to be set -in
+ char* usage,      ///< string to print in usage statement
+ char* filenotes,   ///< additional info for param file
+ char* foruser
+  );
+
+BOOLEAN_T set_enzyme_type_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ ENZYME_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
  char* foruser
@@ -335,6 +352,24 @@ void initialize_parameters(void){
       "Used from command line or parameter file by crux-create-index and "
       "crux-generate-peptides.  Parameter file only for "
       "crux-search-for-matches.", "true");
+  set_digest_type_parameter("digestion", FULL_DIGEST,
+      "Degree of digestion used to generate peptides (full-digest, "
+      "partial-digest). Either both ends or one end of a peptide "
+      "must conform to enzyme specificity rules. Default full-digest.",
+      "Used in conjunction with enzyme option when enzyme is not set to "
+      "to 'no-enzyme'.  Available from command line or parameter file for "
+      "crux-generate-peptides and crux create-index.  Available from parameter"
+      " file for crux search-for-matches.",
+      "true");
+  set_enzyme_type_parameter("enzyme", TRYPSIN,
+      "Enzyme to use for in silico digestion of protein sequences "
+      "(trypsin, chymotrypsin, elastase, no-enzyme).  Default trypsin.",
+      "Used in conjunction with the options cleavages and missed-cleavages. "
+      "Use 'no-enzyme' for non-specific digestion.  Available "
+      "from command line or parameter file for crux-generate-peptides "
+      "and crux create-index.  Available from parameter file for crux "
+      "search-for-matches.",
+      "true");
   set_peptide_type_parameter("cleavages", TRYPTIC, 
       "The type of cleavage sites to consider (tryptic, partial, all). "
       "Default tryptic.",
@@ -934,6 +969,13 @@ void check_parameter_consistency(){
          " must be less than max (%.2f).", min_spec_mass, max_spec_mass);
     exit(1);
   }
+
+  /* If no-enzyme, set digestion to non-specific */
+  if( get_enzyme_type_parameter("enzyme") == NO_ENZYME ){
+    char* val_str = digest_type_to_string(NON_SPECIFIC_DIGEST);
+    fprintf(stderr, "val str is %s\n", val_str);
+    update_hash_value(parameters, "digestion", val_str);
+  }
 }
 
 
@@ -988,6 +1030,24 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     if( ! string_to_mass_type( value_str, &mass_type )){
       success = FALSE;
       sprintf(die_str, "Illegal mass-type.  Must be 'mono' or 'average'");
+    }
+    break;
+  case DIGEST_TYPE_P:
+      carp(CARP_DETAILED_DEBUG, "found digest_type param, value '%s'\n", 
+           value_str);
+    if( string_to_digest_type(value_str) == INVALID_DIGEST){
+      success = FALSE;
+      sprintf(die_str, "Illegal digest value. "
+              "Must be full-digest or partial-digest");
+    }
+    break;
+  case ENZYME_TYPE_P:
+      carp(CARP_DETAILED_DEBUG, "found enzyme_type param, value '%s'\n", 
+           value_str);
+    if( string_to_enzyme_type(value_str) == INVALID_ENZYME){
+      success = FALSE;
+      sprintf(die_str, "Illegal enzyme. Must be trypsin, chymotrypsin, "
+              "or elastase.");
     }
     break;
   case PEPTIDE_TYPE_P:
@@ -1486,6 +1546,32 @@ char* get_string_parameter_pointer(
 
 }
 
+DIGEST_T get_digest_type_parameter( char* name ){
+
+  char* param = get_hash_value(parameters, name);
+
+  DIGEST_T digest_type = string_to_digest_type(param);
+  if( digest_type == INVALID_DIGEST ){
+    carp(CARP_FATAL, "Digest_type parameter %s has the value %s " 
+         "which is not of the correct type\n", name, param);
+    exit(1);
+  }
+  return digest_type;
+}
+
+ENZYME_T get_enzyme_type_parameter( char* name ){
+
+  char* param = get_hash_value(parameters, name);
+
+  ENZYME_T enzyme_type = string_to_enzyme_type(param);
+  if( enzyme_type == INVALID_ENZYME ){
+    carp(CARP_FATAL, "Enzyme_type parameter %s has the value %s " 
+         "which is not of the correct type\n", name, param);
+    exit(1);
+  }
+  return enzyme_type;
+}
+
 PEPTIDE_TYPE_T get_peptide_type_parameter(
   char* name
     ){
@@ -1780,6 +1866,62 @@ BOOLEAN_T set_peptide_type_parameter(
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types, name, "PEPTIDE_TYPE_T");
+  return result;
+
+}
+
+BOOLEAN_T set_digest_type_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ DIGEST_T set_value,  ///< the value to be set -in
+ char* usage,      ///< string to print in usage statement
+ char* filenotes,   ///< additional info for param file
+ char* foruser
+  )
+{
+  BOOLEAN_T result = TRUE;
+  
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  /* stringify the value */
+  char* value_str = digest_type_to_string(set_value);
+
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "DIGEST_T");
+  return result;
+
+}
+
+BOOLEAN_T set_enzyme_type_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ ENZYME_T set_value,  ///< the value to be set -in
+ char* usage,      ///< string to print in usage statement
+ char* filenotes,   ///< additional info for param file
+ char* foruser
+  )
+{
+  BOOLEAN_T result = TRUE;
+  
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return FALSE;
+  }
+  
+  /* stringify the value */
+  char* value_str = enzyme_type_to_string(set_value);
+
+  result = add_or_update_hash_copy(parameters, name, value_str);
+  result = add_or_update_hash_copy(usages, name, usage);
+  result = add_or_update_hash_copy(file_notes, name, filenotes);
+  result = add_or_update_hash_copy(for_users, name, foruser);
+  result = add_or_update_hash_copy(types, name, "ENZYME_T");
   return result;
 
 }

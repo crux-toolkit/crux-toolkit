@@ -9,27 +9,6 @@
  *              length, trypticity) as output. 
  * REVISION: 
  ****************************************************************************/
-/*
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <signal.h>
-#include "carp.h"
-#include "peptide.h"
-#include "peptide_src.h"
-#include "protein.h"
-#include "database.h"
-#include "index.h"
-#include "protein_index.h"
-#include "parameter.h"
-
-#define NUM_INDEX_OPTIONS 13
-#define NUM_INDEX_ARGS 2
-*/
 
 #include "create_index.h"
       
@@ -66,6 +45,8 @@ int create_index_main(int argc, char** argv){
     "min-mass", 
     "max-mass", 
     "isotopic-mass",
+    "enzyme", 
+    "digestion", 
     "cleavages", 
     "missed-cleavages",
     "unique-peptides"

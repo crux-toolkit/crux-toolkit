@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.54 $
+ * $Revision: 1.55 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -90,6 +90,44 @@ typedef struct residue_iterator RESIDUE_ITERATOR_T;
  * \brief An object to iterate over the protein peptide associations in a peptide
  */
 typedef struct peptide_src_iterator PEPTIDE_SRC_ITERATOR_T;
+
+// REPLACE PEPTIDE_TYPE_T with DIGEST_T and ENZYME_T
+/**
+ * \enum _digest_type
+ * The rule governing how a peptide was cleaved from its source
+ * protein sequence. 
+ */
+enum _digest_type {
+  INVALID_DIGEST,      ///< required invalid value for the enum
+  FULL_DIGEST,         ///< c- AND n-term specific to ENZYME_T
+  PARTIAL_DIGEST,      ///< c- OR n-term specific to ENZYME_T
+  NON_SPECIFIC_DIGEST, ///< not specific to any enzyme cleavage rules
+};
+#define NUMBER_DIGEST_TYPES 4
+/**
+ * \typedef DIGEST_T
+ * \brief The rule governing how a peptide was digested.  Used in
+ * conjunction with ENZYME_T to define how peptides are generated.
+ */
+typedef enum _digest_type DIGEST_T;
+
+/**
+ * \enum _enzyme_type
+ */
+enum _enzyme_type {
+  INVALID_ENZYME, ///< required invalid value for the enum
+  NO_ENZYME,      ///< cleave anywhere
+  TRYPSIN,        ///< cleave after K or R, not before P
+  CHYMOTRYPSIN,   ///< cleave after FWY, not before P
+  ELASTASE        ///< cleave after ALIV, not before P
+};
+#define NUMBER_ENZYME_TYPES 5
+/**
+ * \typedef ENZYME_T
+ * \brief The enzyme with which a peptide was digested.  Used in
+ * conjunction with DIGEST_T to define how peptides are generated.
+ */
+typedef enum _enzyme_type ENZYME_T;
 
 /**
  * Being PARTIALLY_TRYPTIC is N or C terminus tryptic
