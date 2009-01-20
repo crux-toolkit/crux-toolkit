@@ -55,6 +55,62 @@ BOOLEAN_T mass_type_to_string(MASS_TYPE_T type, char* type_str){
   return success;
 }
 
+// replace peptide type
+/**
+ * The string versions of digest types
+ */
+static char* digest_type_strings[NUMBER_DIGEST_TYPES] =
+  {"invalid", "full-digest", "partial-digest", "non-specific-digest"};
+
+DIGEST_T string_to_digest_type(char* name){
+  int clev_int = convert_enum_type_str(name, -10, 
+                                       digest_type_strings, 
+                                       NUMBER_DIGEST_TYPES);
+  if( clev_int < 0 ){
+    clev_int = 0;
+  }
+
+  return (DIGEST_T)clev_int;
+}
+
+char* digest_type_to_string(DIGEST_T type){
+  if( (int)type > NUMBER_DIGEST_TYPES){
+    return NULL;
+  }
+
+  char* type_str = my_copy_string(digest_type_strings[type]);
+
+  return type_str;
+}
+
+/**
+ * The string version of enzyme types
+ */
+static char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = 
+  {"invalid", "no-enzyme", "trypsin", "chymotrypsin", "elastase"};
+
+ENZYME_T string_to_enzyme_type(char* name){
+  int enz_int = convert_enum_type_str(name, -10, 
+                                      enzyme_type_strings, 
+                                      NUMBER_ENZYME_TYPES);
+  if( enz_int < 0 ){
+    enz_int = 0;
+  }
+
+  return (ENZYME_T)enz_int;
+}
+
+char* enzyme_type_to_string(ENZYME_T type){
+  if( (int)type > NUMBER_ENZYME_TYPES){
+    return NULL;
+  }
+
+  char* type_str = my_copy_string(enzyme_type_strings[type]);
+
+  return type_str;
+}
+
+
 /**
  * The string version of peptide cleavage type
  */

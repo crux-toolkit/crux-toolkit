@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.32 $
+ * $Revision: 1.33 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -286,5 +286,12 @@ BOOLEAN_T string_to_output_type(char*, MATCH_SEARCH_OUTPUT_MODE_T*);
 BOOLEAN_T output_type_to_string(MATCH_SEARCH_OUTPUT_MODE_T, char*);
 BOOLEAN_T string_to_ion_type(char* , ION_TYPE_T*);
 BOOLEAN_T ion_type_to_string(ION_TYPE_T, char*);
+
+// new style of type_to_string and string_to_type functions
+// requires an invalid value for each enum
+DIGEST_T string_to_digest_type(char*);
+char* digest_type_to_string(DIGEST_T);
+ENZYME_T string_to_enzyme_type(char*);
+char* enzyme_type_to_string(ENZYME_T);
 
 #endif

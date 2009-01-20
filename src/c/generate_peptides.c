@@ -24,7 +24,7 @@
 #include "index.h"
 #include "generate_peptides_iterator.h"
 
-#define NUM_GEN_PEP_OPTIONS 16
+#define NUM_GEN_PEP_OPTIONS 18
 #define NUM_GEN_PEP_ARGS 1
 
 /* Private function declarations */
@@ -58,6 +58,8 @@ int main(int argc, char** argv){
     "min-mass",
     "max-mass",
     "isotopic-mass",
+    "enzyme", 
+    "digestion", 
     "cleavages",
     "missed-cleavages",
     "unique-peptides",
