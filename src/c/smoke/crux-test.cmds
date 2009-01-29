@@ -70,7 +70,6 @@ search_elastase = good_results/standard_search_elastase.sqt = crux search-for-ma
 # TESTS WITH INDEX
 
 # See that crux-generate-peptides works with an existing index
-#generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --cleavages tryptic existing_crux_index = '# PROTEIN DATABASE'
 generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
