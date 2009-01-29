@@ -1,5 +1,6 @@
 compute-p-values=T
-cleavages=partial
+enzyme=trypsin
+digestion=partial-digest
 output-mode=all
 overwrite=T
 sqt-output-file=pvalues.sqt

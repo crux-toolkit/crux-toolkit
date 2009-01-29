@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.55 $
+ * $Revision: 1.56 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -133,14 +133,15 @@ typedef enum _enzyme_type ENZYME_T;
  * Being PARTIALLY_TRYPTIC is N or C terminus tryptic
  * \brief The enum for peptide type, with regard to trypticity.
  */
+/*
 #define NUMBER_PEPTIDE_TYPES 6
 enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC}; 
-
+*/
 /**
  * \typedef PEPTIDE_TYPE_T 
  * \brief The typedef for peptide type, with regard to trypticity.
  */
-typedef enum _peptide_type PEPTIDE_TYPE_T;
+//typedef enum _peptide_type PEPTIDE_TYPE_T;
 
 /**
  * The enum for isotopic mass type (average, mono)

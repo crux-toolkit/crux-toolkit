@@ -2,6 +2,8 @@
  * \file linked_list.h
  * Header file for a linked list class.
  */
+#ifndef LINKED_LIST_H
+#define LINKED_LIST_H
 
 #include <assert.h>
 #include "utils.h"
@@ -136,4 +138,4 @@ void delete_list_node(LIST_POINTER_T* list);
 
 
 
-
+#endif // LINKED_LIST_H

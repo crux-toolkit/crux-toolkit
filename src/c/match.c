@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.59 $
- * REVISION: $Revision: 1.59 $
+ * REVISION: $Revision: 1.60 $
+ * REVISION: $Revision: 1.60 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -75,7 +75,8 @@ struct match{
   BOOLEAN_T null_peptide; ///< Is the match a null (decoy) peptide match?
   char* peptide_sequence; ///< peptide sequence is that of peptide or shuffled
   MODIFIED_AA_T* mod_sequence; ///< seq of peptide or shuffled if null peptide
-  PEPTIDE_TYPE_T overall_type; 
+  DIGEST_T digest;
+  //  PEPTIDE_TYPE_T overall_type; 
     ///< overall peptide trypticity, set in set_match_peptide, see README above
   int charge; ///< the charge state of the match 
   // post_process match object features
@@ -107,7 +108,7 @@ MATCH_T* new_match(void){
 
   // set default as not tryptic
   // a full evaluation is done when set peptide
-  match->overall_type = NOT_TRYPTIC;
+  //  match->overall_type = NOT_TRYPTIC;
 
   return match;
 }
@@ -617,7 +618,8 @@ void serialize_match(
   fwrite(&(match->b_y_ion_fraction_matched), sizeof(float), 1, file);
 
   // serialize match peptide overall trypticity
-  fwrite(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, file);
+  //fwrite(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, file);
+  fwrite(&(match->digest), sizeof(DIGEST_T), 1, file);
   
   // serialize match is it null_peptide?
   fwrite(&(match->null_peptide), sizeof(BOOLEAN_T), 1, file);
@@ -671,6 +673,7 @@ double* get_match_percolator_features(
   // peptide cleavage info.
   // START figure out the right way to set these features for on the fly
   // peptide generation
+/*
   if(match->overall_type == TRYPTIC){
     feature_array[10] = TRUE;
     feature_array[11] = TRUE;
@@ -681,7 +684,9 @@ double* get_match_percolator_features(
   else if(match->overall_type == C_TRYPTIC){
     feature_array[11] = TRUE;
   }
-  
+  */
+feature_array[10] = TRUE; // TODO(if perc support continues, figure out what these should be
+feature_array[11] = TRUE;
   // get the missed cleave sites
   feature_array[12] = get_peptide_missed_cleavage_sites(match->peptide);
   
@@ -805,7 +810,8 @@ MATCH_T* parse_match(
   scan, matched_ions, total_ions, match->b_y_ion_fraction_matched);*/
 
   // parse match peptide overall trypticity
-  fread(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, result_file);
+  //fread(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, result_file);
+  fread(&(match->digest), sizeof(DIGEST_T), 1, result_file);
   
   // parse if match is it null_peptide?
   fread(&(match->null_peptide), sizeof(BOOLEAN_T), 1, result_file);
@@ -858,7 +864,7 @@ char* get_match_sequence(
   if(match->null_peptide){
     // generate the shuffled peptide sequence
     match->peptide_sequence = 
-      generate_shuffled_sequence(match->peptide, match->overall_type);    
+      generate_shuffled_sequence(match->peptide);//, match->overall_type);    
     char* seq = get_peptide_sequence(match->peptide);
     carp(CARP_DETAILED_DEBUG, "Shuffling transforms: %s -> %s", 
       seq, match->peptide_sequence);
@@ -954,7 +960,7 @@ MODIFIED_AA_T* get_match_mod_sequence(
   if(match->null_peptide){
     // generate the shuffled peptide sequence
     match->mod_sequence =
-      generate_shuffled_mod_sequence(match->peptide, match->overall_type);
+      generate_shuffled_mod_sequence(match->peptide);//, match->overall_type);
     char* seq = get_peptide_sequence(match->peptide);
     char* modseq = modified_aa_string_to_string(match->mod_sequence, length);
     carp(CARP_DETAILED_DEBUG, "Shuffling transforms: %s -> %s",
@@ -1061,7 +1067,11 @@ void set_match_peptide(
 {
   // first set peptide
   match->peptide = peptide;
-  
+
+// overall trypticity already set in peptide
+//match->digest = get_peptide_digest(peptide);
+  match->digest = NON_SPECIFIC_DIGEST;  // FIXME
+/*
   // now set peptide overall trypticity
   PEPTIDE_SRC_ITERATOR_T* src_iterator = 
     new_peptide_src_iterator(peptide);
@@ -1107,7 +1117,7 @@ void set_match_peptide(
   }
   
   free_peptide_src_iterator(src_iterator);
-  
+  */
 }
 
 /**

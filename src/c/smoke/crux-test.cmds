@@ -12,16 +12,17 @@ generate_peptides_no_ops = good_results/standard_generate_peptides_no_ops.out = 
 
 generate_peptides_default = good_results/standard_generate_peptides_default.out = crux-generate-peptides  --output-sequence T test.fasta =
 
-generate_peptides_sort_mass_unique = good_results/standard_generate_peptides_mass.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --cleavages all --missed-cleavages T --sort mass  test.fasta =
+generate_peptides_sort_mass_unique = good_results/standard_generate_peptides_mass.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme no-enzyme --sort mass  test.fasta =
 
-generate_peptides_sort_length_unique = good_results/standard_generate_peptides_length.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --cleavages tryptic --missed-cleavages T --sort length test.fasta =
+generate_peptides_sort_length_unique = good_results/standard_generate_peptides_length.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --missed-cleavages T --sort length test.fasta =
 
-generate_peptides_sort_lexical_unique = good_results/standard_generate_peptides_lexical.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --cleavages partial --missed-cleavages T --sort lexical test.fasta =
+generate_peptides_sort_lexical_unique = good_results/standard_generate_peptides_lexical.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --digestion partial-digest --missed-cleavages T --sort lexical test.fasta =
 
 generate_peptides_change_minmax = good_results/standard_generate_peptides_change_minmax = crux-generate-peptides --parameter-file params/many_changes --output-sequence T --max-length 20 test.fasta=
 
 generate_peptides_mods = good_results/standard_generate_peptides_mods = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20 test.fasta =
 
+generate_peptides_chymo = good_results/standard_generate_peptides_chymo = crux-generate-peptides --parameter-file params/chymo --output-sequence T test.fasta = 
 # Get spectrum
 get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out =
 
@@ -63,10 +64,14 @@ analyze_mods_fasta = good_results/standard_analyze_mods = crux percolator --para
 # Search for matches and estimate p-values with modifications
 # TODO
 
+# Search with elastase
+search_elastase = good_results/standard_search_elastase.sqt = crux search-for-matches --parameter-file params/elastase  test.ms2 test.fasta; cat target.sqt = 'Time'
+
 # TESTS WITH INDEX
 
 # See that crux-generate-peptides works with an existing index
-generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --cleavages tryptic existing_crux_index = '# PROTEIN DATABASE'
+#generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --cleavages tryptic existing_crux_index = '# PROTEIN DATABASE'
+generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
 search_for_matches_default_existing_index = good_results/standard_search_default_existing_index.target.sqt = rm -rf target.sqt decoy.sqt test*csm ; crux search-for-matches --output-mode all --use-index T --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat target.sqt = 'Time' 'Database'

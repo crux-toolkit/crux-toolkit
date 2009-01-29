@@ -1,5 +1,5 @@
 overwrite=T
-cleavages=all
+enzyme=no-enzyme
 output-mode=sqt
 sqt-output-file=seq_test.sqt
 number-decoy-set=0

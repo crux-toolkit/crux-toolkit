@@ -16,13 +16,15 @@
 int create_index_main(int argc, char** argv){
 
   /* Declarations */
-  int verbosity;
+  //int verbosity;
   int min_length;
   int max_length;
   double min_mass;
   double max_mass;
   MASS_TYPE_T mass_type;
-  PEPTIDE_TYPE_T peptide_type;
+  ENZYME_T enzyme;
+  DIGEST_T digest;
+  //PEPTIDE_TYPE_T peptide_type;
   int missed_cleavages; 
   //where is the unique vs redundant variable?
 
@@ -47,7 +49,7 @@ int create_index_main(int argc, char** argv){
     "isotopic-mass",
     "enzyme", 
     "digestion", 
-    "cleavages", 
+    //    "cleavages", 
     "missed-cleavages",
     "unique-peptides"
   };
@@ -84,8 +86,8 @@ int create_index_main(int argc, char** argv){
 
   /* Set verbosity */
   //TODO move this to parameter.c?
-  verbosity = get_int_parameter("verbosity");
-  set_verbosity_level(verbosity);
+  //verbosity = get_int_parameter("verbosity");
+  //set_verbosity_level(verbosity);
     
   /* Get parameter values */
   min_mass = get_double_parameter("min-mass");
@@ -96,11 +98,14 @@ int create_index_main(int argc, char** argv){
   max_length = get_int_parameter("max-length");
 
   missed_cleavages = get_boolean_parameter("missed-cleavages");
-  peptide_type = get_peptide_type_parameter("cleavages");
+  enzyme = get_enzyme_type_parameter("enzyme");
+  digest = get_digest_type_parameter("digestion");
+//  peptide_type = get_peptide_type_parameter("cleavages");
   mass_type = get_mass_type_parameter("isotopic-mass");
 
   /* create peptide constraint */
-  constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, 
+  //constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, 
+  constraint = new_peptide_constraint(enzyme, digest, min_mass, max_mass, 
                                       min_length, max_length, 
                                       missed_cleavages, mass_type);
   

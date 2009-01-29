@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.31 $
+ * $Revision: 1.32 $
  * \brief General parameter handling utilities. All values stored here.
 
  * \detail MUST declare ALL optional command line parameters and
@@ -39,7 +39,7 @@
 #define SMALL_BUFFER 256
 #define MAX_SET_PARAMS 256
 
-#define NUMBER_PARAMETER_TYPES 13
+#define NUMBER_PARAMETER_TYPES 12
 ///< number of elements in the parameter type enum
 
 // TODO (BF 1-28-08): these should be private. move to parameter.c
@@ -65,7 +65,7 @@ enum parameter_type {
   MASS_TYPE_P,       ///< parameters of type MASS_TYPE_T
   DIGEST_TYPE_P,   ///< parameters of type DIGEST_T
   ENZYME_TYPE_P,     ///< parameters of type ENZUME_T
-  PEPTIDE_TYPE_P,    ///< parameters of type PEPTIDE_TYPE_T
+  //PEPTIDE_TYPE_P,    ///< parameters of type PEPTIDE_TYPE_T
   BOOLEAN_P,         ///< parameters of type BOOLEAN_T
   SORT_TYPE_P,       ///< parameters of type SORT_TYPE_T
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
@@ -198,7 +198,16 @@ ION_TYPE_T get_ion_type_parameter(
  * looking for one whose name matches the string.  
  * Returns a peptide_type enumerated type (in objects.h)
  */ 
+/*
 PEPTIDE_TYPE_T get_peptide_type_parameter(
+  char* name
+  );
+*/
+DIGEST_T get_digest_type_parameter(
+  char* name
+  );
+
+ENZYME_T get_enzyme_type_parameter(
   char* name
   );
 

@@ -17,7 +17,7 @@
 
 static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { 
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "DIGEST_T", 
-  "ENZYME_T", "PEPTIDE_TYPE_T", 
+  "ENZYME_T", //"PEPTIDE_TYPE_T", 
   "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T",
   "ALGORITHM_TYPE_T"};
 
@@ -118,9 +118,26 @@ BOOLEAN_T set_mass_type_parameter(
  char* foruser
   );
 
+/*
 BOOLEAN_T set_peptide_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  PEPTIDE_TYPE_T set_value,  ///< the value to be set -in
+ char* usage,      ///< string to print in usage statement
+ char* filenotes,   ///< additional info for param file
+ char* foruser
+  );
+*/
+BOOLEAN_T set_digest_type_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ DIGEST_T set_value,  ///< the value to be set -in
+ char* usage,      ///< string to print in usage statement
+ char* filenotes,   ///< additional info for param file
+ char* foruser
+  );
+
+BOOLEAN_T set_enzyme_type_parameter(
+ char*     name,  ///< the name of the parameter looking for -in
+ ENZYME_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
  char* foruser
@@ -370,6 +387,7 @@ void initialize_parameters(void){
       "and crux create-index.  Available from parameter file for crux "
       "search-for-matches.",
       "true");
+  /*
   set_peptide_type_parameter("cleavages", TRYPTIC, 
       "The type of cleavage sites to consider (tryptic, partial, all). "
       "Default tryptic.",
@@ -381,6 +399,7 @@ void initialize_parameters(void){
       "site at at least one terminus, and 'all' produces peptides with no "
       "dependence on adjacent amino acids or internal cleavage sites.",
       "true");
+  */
   set_boolean_parameter("missed-cleavages", FALSE, 
       "Include peptides with missed cleavage sites (T,F). Default FALSE.",
       "Available from command line or parameter file for crux-create-index "
@@ -787,7 +806,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     void* value_ptr = get_hash_value(parameters, option_names[i]);
     void* usage_ptr = get_hash_value(usages, option_names[i]);
     void* type_ptr =  get_hash_value(types, option_names[i]);
-    if( strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
+    if( //strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
         strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
         strcmp(type_ptr, "BOOLEAN_T") == 0 ||
         strcmp(type_ptr, "SORT_TYPE_T") == 0 ||
@@ -970,11 +989,13 @@ void check_parameter_consistency(){
     exit(1);
   }
 
-  /* If no-enzyme, set digestion to non-specific */
+  /* If no-enzyme, set digestion to non-specific and missed to true */
   if( get_enzyme_type_parameter("enzyme") == NO_ENZYME ){
     char* val_str = digest_type_to_string(NON_SPECIFIC_DIGEST);
-    fprintf(stderr, "val str is %s\n", val_str);
+    //fprintf(stderr, "val str is %s\n", val_str);
     update_hash_value(parameters, "digestion", val_str);
+    free(val_str);
+    update_hash_value(parameters, "missed-cleavages", "TRUE");
   }
 }
 
@@ -995,7 +1016,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
   char* max_str = get_hash_value(max_values, name);
 
   MASS_TYPE_T mass_type;
-  PEPTIDE_TYPE_T pep_type;
+  //PEPTIDE_TYPE_T pep_type;
   SORT_TYPE_T sort_type;
   SCORER_TYPE_T scorer_type;
   ALGORITHM_TYPE_T algorithm_type;
@@ -1038,7 +1059,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     if( string_to_digest_type(value_str) == INVALID_DIGEST){
       success = FALSE;
       sprintf(die_str, "Illegal digest value. "
-              "Must be full-digest or partial-digest");
+              "Must be full-digest or partial-digest.");
     }
     break;
   case ENZYME_TYPE_P:
@@ -1047,9 +1068,10 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     if( string_to_enzyme_type(value_str) == INVALID_ENZYME){
       success = FALSE;
       sprintf(die_str, "Illegal enzyme. Must be trypsin, chymotrypsin, "
-              "or elastase.");
+              ", elastase, or no-enzyme.");
     }
     break;
+    /*
   case PEPTIDE_TYPE_P:
       carp(CARP_DETAILED_DEBUG, "found peptide_type param, value '%s'\n", 
            value_str);
@@ -1058,6 +1080,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
       sprintf(die_str, "Illegal peptide cleavages.  Must be...something");
     }
     break;
+    */
   case BOOLEAN_P:
     carp(CARP_DETAILED_DEBUG, "found boolean_type param, value '%s'", 
          value_str);
@@ -1550,6 +1573,7 @@ DIGEST_T get_digest_type_parameter( char* name ){
 
   char* param = get_hash_value(parameters, name);
 
+  carp(CARP_DETAILED_DEBUG, "getting digest param '%s' with val '%s'", name, param);
   DIGEST_T digest_type = string_to_digest_type(param);
   if( digest_type == INVALID_DIGEST ){
     carp(CARP_FATAL, "Digest_type parameter %s has the value %s " 
@@ -1572,6 +1596,7 @@ ENZYME_T get_enzyme_type_parameter( char* name ){
   return enzyme_type;
 }
 
+/*
 PEPTIDE_TYPE_T get_peptide_type_parameter(
   char* name
     ){
@@ -1588,7 +1613,7 @@ PEPTIDE_TYPE_T get_peptide_type_parameter(
   }
   return peptide_type;
 }
-
+*/
 MASS_TYPE_T get_mass_type_parameter(
    char* name
    ){
@@ -1840,7 +1865,7 @@ BOOLEAN_T set_mass_type_parameter(
   return result;
 
 }
-
+/*
 BOOLEAN_T set_peptide_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  PEPTIDE_TYPE_T set_value,  ///< the value to be set -in
@@ -1858,7 +1883,7 @@ BOOLEAN_T set_peptide_type_parameter(
     return FALSE;
   }
   
-  /* stringify the value */
+  // stringify the value 
   peptide_type_to_string(set_value, value_str);
 
   result = add_or_update_hash_copy(parameters, name, value_str);
@@ -1869,7 +1894,7 @@ BOOLEAN_T set_peptide_type_parameter(
   return result;
 
 }
-
+*/
 BOOLEAN_T set_digest_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
@@ -1888,6 +1913,7 @@ BOOLEAN_T set_digest_type_parameter(
   
   /* stringify the value */
   char* value_str = digest_type_to_string(set_value);
+  carp(CARP_DETAILED_DEBUG, "Setting digest param '%s' to value '%s'.", name, value_str);
 
   result = add_or_update_hash_copy(parameters, name, value_str);
   result = add_or_update_hash_copy(usages, name, usage);

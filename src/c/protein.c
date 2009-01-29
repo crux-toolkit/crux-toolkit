@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.78 $
+ * $Revision: 1.79 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -1089,7 +1089,7 @@ void prepare_protein_peptide_iterator(
   double* mass_array = (double*)mycalloc(protein->length+1, sizeof(double));
 
   //  PEPTIDE_TYPE_T pep_type = get_peptide_type_parameter("cleavages");
-  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+  ENZYME_T enzyme = get_peptide_constraint_enzyme(iterator->peptide_constraint);
   float mass_h2o = MASS_H2O_AVERAGE;
 
   // set correct H2O mass
@@ -1144,11 +1144,11 @@ void prepare_protein_peptide_iterator(
 
   // now determine the cleavage positions that actually match our constraints
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
+
   //  PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
   //    iterator->peptide_constraint);
-  // TODO: (BF Jan-16-09) is the type different in the peptide
-  //    constraint?
-  DIGEST_T digestion = get_digest_type_parameter("digestion");
+  DIGEST_T digestion = 
+    get_peptide_constraint_digest(iterator->peptide_constraint);
 
   switch (digestion){
   //  switch (peptide_type){
@@ -1326,9 +1326,9 @@ PEPTIDE_T* protein_peptide_iterator_next(
     return NULL;
   }
 
-  // set peptide type
-  PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
-      iterator->peptide_constraint);
+  // get peptide type
+  //PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
+  //iterator->peptide_constraint);
 
   int cleavage_idx = iterator->current_cleavage_idx;
   int current_start = iterator->nterm_cleavage_positions[cleavage_idx];
@@ -1337,7 +1337,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
 
   // create new peptide
   PEPTIDE_T* peptide = new_peptide(current_length, peptide_mass, 
-      iterator->protein, current_start, peptide_type);
+                                   iterator->protein, current_start);//, peptide_type);
   
   // update position of iterator
   ++iterator->current_cleavage_idx;

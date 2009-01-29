@@ -4,7 +4,8 @@
 #	max-mass: 7200.00
 #	min-length: 6
 #	max-length: 50
-#	cleavages: tryptic
+#	enzyme: trypsin
+#	digestion: full-digest
 #	allow missed-cleavages: FALSE
 #	sort: none
 #	isotopic mass type: average

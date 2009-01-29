@@ -1,8 +1,11 @@
 /**
  * \file sorter.h
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Object to sort objects
  ****************************************************************************/
+#ifndef SORTER_H
+#define SORTER_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -71,3 +74,4 @@ PEPTIDE_T* sorted_peptide_iterator_next(
   SORTED_PEPTIDE_ITERATOR_T* peptide_iterator ///< the iterator of interest -in
   );
 
+#endif // SORTER_H

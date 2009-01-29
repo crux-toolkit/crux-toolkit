@@ -1,6 +1,6 @@
 /**
  * \file peptide_constraint.h 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * \brief Object for holding the peptide constraint information.
  */
 #ifndef PEPTIDE_CONSTRAINT_H 
@@ -30,7 +30,9 @@ PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void);
  * \returns An allocated PEPTIDE_CONSTRAINT_T object.
  */
 PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
-  PEPTIDE_TYPE_T peptide_type, ///< the peptide_type -in
+  ENZYME_T enzyme, ///< the enzyme to use for digestion
+  DIGEST_T digest, ///< the degree of digestion
+//  PEPTIDE_TYPE_T peptide_type, ///< the peptide_type -in
   float min_mass, ///< the minimum mass -in
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
@@ -75,17 +77,37 @@ void free_peptide_constraint(
 /**
  * sets the peptide type of the peptide_constraint
  */
+/*
 void set_peptide_constraint_peptide_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
   PEPTIDE_TYPE_T peptide_type ///< the type of the peptide constraint - in
   );
-
+*/
 /**
  * \returns the peptide type of the peptide_constraint
  */
+/*
 PEPTIDE_TYPE_T get_peptide_constraint_peptide_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
+*/
+void set_peptide_constraint_enzyme(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
+  ENZYME_T enzyme
+);
+
+ENZYME_T get_peptide_constraint_enzyme(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint///< the peptide constraint to set -out
+);
+
+void set_peptide_constraint_digest(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
+  DIGEST_T digest
+);
+
+DIGEST_T get_peptide_constraint_digest(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint///< the peptide constraint to set -out
+);
 
 /**
  * sets the min mass of the peptide_constraint

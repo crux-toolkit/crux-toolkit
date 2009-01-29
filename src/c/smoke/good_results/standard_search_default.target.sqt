@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Dec 30 08:49:33 2008
+H	StartTime	Thu Jan 29 10:43:01 2009
 H	EndTime                               
 H	Database	test.fasta
 H	DBSeqLength	?
@@ -16,18 +16,18 @@ H	Comment	preliminary algorithm sp
 H	Comment	final algorithm xcorr
 H	StaticMod	C=160.139
 H	Alg-DisplayTop	5
-H	EnzymeSpec	tryptic
+H	EnzymeSpec	trypsin-full-digest
 H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, xcorr score, sp score, number ions matched, total ions compared, sequence
 S	14	14	2	0.00	server	998.80	0.00	0.00	1
 M	1	1	1001.15	0.00	0.29	98.43	6	14	K.FHLELSQK.D	U
 L	gi|6381999|ref|NP_009311.2|
 S	14	14	3	0.00	server	1498.21	0.00	0.00	1
-M	1	1	1495.81	0.00	-0.09	55.08	8	44	R.VMFTTFYMITNK.Y	U
+M	1	1	1495.81	0.00	-0.17	55.08	8	44	R.VMFTTFYMITNK.Y	U
 L	gi|6382000|ref|NP_009314.2|
 S	15	15	2	0.00	server	975.62	0.00	0.00	1
 M	1	1	973.09	0.00	-0.10	0.00	0	16	K.SGATAYIYK.A	U
 L	gi|6381999|ref|NP_009311.2|
 S	15	15	3	0.00	server	1463.44	0.00	0.00	1
-M	1	1	1464.81	0.00	0.13	15.58	5	44	K.QYLLLNIAYLLK.L	U
+M	1	1	1464.81	0.00	-0.01	15.58	5	44	K.QYLLLNIAYLLK.L	U
 L	gi|6381999|ref|NP_009311.2|

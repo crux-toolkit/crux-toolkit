@@ -114,6 +114,7 @@ char* enzyme_type_to_string(ENZYME_T type){
 /**
  * The string version of peptide cleavage type
  */
+/*
 static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = 
 {"tryptic", "partial", "N_TRYPTIC", "C_TRYPTIC", "NOT_TRYPTIC", "all"};
 
@@ -143,7 +144,7 @@ BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str){
 
   return success;
 }
-
+*/
 /**
  * The string version of peptide sort types
  */
@@ -522,6 +523,7 @@ char* signed_int_to_char(int i){
 /**
  *prints the peptide type given it's enum value
  */
+/*
 void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file){
   if(peptide_type == TRYPTIC){
     fprintf(file, "%s", "TRYPTIC");
@@ -542,7 +544,7 @@ void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file){
     fprintf(file, "%s", "ANY_TRYPTIC");
   }
 }
-
+*/
 /**
  * given two strings return a concatenated third string
  * \returns a heap allocated string that concatenates the two inputs

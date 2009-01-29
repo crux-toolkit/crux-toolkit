@@ -4,7 +4,8 @@
 #	max-mass: 7200.00
 #	min-length: 6
 #	max-length: 50
-#	cleavages: all
+#	enzyme: no-enzyme
+#	digestion: non-specific-digest
 #	allow missed-cleavages: TRUE
 #	sort: mass
 #	isotopic mass type: average
