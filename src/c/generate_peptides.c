@@ -24,7 +24,7 @@
 #include "index.h"
 #include "generate_peptides_iterator.h"
 
-#define NUM_GEN_PEP_OPTIONS 17
+#define NUM_GEN_PEP_OPTIONS 16
 #define NUM_GEN_PEP_ARGS 1
 
 /* Private function declarations */
@@ -35,7 +35,7 @@ int main(int argc, char** argv){
   /* Declarations */
   //int verbosity;
   BOOLEAN_T output_sequence;
-  BOOLEAN_T print_trypticity;
+  //  BOOLEAN_T print_trypticity = FALSE;
   BOOLEAN_T use_index;
   char* filename;
   
@@ -65,7 +65,7 @@ int main(int argc, char** argv){
     "unique-peptides",
     "use-index",
     "output-sequence",
-    "output-trypticity",
+    //"output-trypticity",
     "sort"
   };
 
@@ -94,7 +94,7 @@ int main(int argc, char** argv){
   //set_verbosity_level(verbosity);
 
   /* Get parameter values */
-  print_trypticity = get_boolean_parameter("output-trypticity");
+  //  print_trypticity = get_boolean_parameter("output-trypticity");
   output_sequence = get_boolean_parameter("output-sequence");
   use_index = get_boolean_parameter("use-index");
   filename = get_string_parameter("protein input");

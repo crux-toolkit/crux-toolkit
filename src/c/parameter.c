@@ -381,7 +381,7 @@ void initialize_parameters(void){
   set_enzyme_type_parameter("enzyme", TRYPSIN,
       "Enzyme to use for in silico digestion of protein sequences "
       "(trypsin, chymotrypsin, elastase, no-enzyme).  Default trypsin.",
-      "Used in conjunction with the options cleavages and missed-cleavages. "
+      "Used in conjunction with the options digestion and missed-cleavages. "
       "Use 'no-enzyme' for non-specific digestion.  Available "
       "from command line or parameter file for crux-generate-peptides "
       "and crux create-index.  Available from parameter file for crux "
@@ -404,8 +404,9 @@ void initialize_parameters(void){
       "Include peptides with missed cleavage sites (T,F). Default FALSE.",
       "Available from command line or parameter file for crux-create-index "
       "and crux-generate-peptides.  Parameter file only for crux-search-"
-      "for-matches.  When used with cleavages=<tryptic|partial> includes "
-      "peptides containing one or more potential cleavage sites.", "true");
+      "for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin> "
+      " includes peptides containing one or more potential cleavage sites.",
+      "true");
   set_boolean_parameter("unique-peptides", FALSE,
       "Generate peptides only once, even if they appear in more "
       "than one protein (T,F).  Default FALSE.",
@@ -420,10 +421,12 @@ void initialize_parameters(void){
   set_boolean_parameter("output-sequence", FALSE, 
       "Print peptide sequence (T,F). Default FALSE.",
       "Available only for crux-generate-peptides.", "true");
+  /*
   set_boolean_parameter("output-trypticity", FALSE, 
       "Print trypticity of peptide (T,F). Default FALSE.",
       "Available only for crux-generate-peptides. When cleavages=partial "
       "all peptides are labeled PARTIAL even if fully tryptic.", "true");
+  */
   set_boolean_parameter("use-index", FALSE, 
       "Use an index that has already been created (T,F). "
       "Default FALSE (use fasta file).",
