@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.89 $
+ * $Revision: 1.90 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -2831,9 +2831,15 @@ void print_sqt_header(
           get_int_parameter("max-sqt-result")); 
   // this is not correct for an sqt from analzyed matches
 
-  PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
-  peptide_type_to_string(cleavages, temp_str);
-  fprintf(output, "H\tEnzymeSpec\t%s\n", temp_str);
+  //PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
+  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+  DIGEST_T digestion = get_digest_type_parameter("digestion");
+  //peptide_type_to_string(cleavages, temp_str);
+  char* enz_str = enzyme_type_to_string(enzyme);
+  char* dig_str = digest_type_to_string(digestion);
+  fprintf(output, "H\tEnzymeSpec\t%s-%s\n", enz_str, dig_str);
+  free(enz_str);
+  free(dig_str);
 
   // write a comment that says what the scores are
   fprintf(output, "H\tLine fields: S, scan number, scan number,"

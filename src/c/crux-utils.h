@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.33 $
+ * $Revision: 1.34 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -93,7 +93,7 @@ char* signed_int_to_char(int i);
 /**
  *prints the peptide type given it's enum value
  */
-void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file);
+//void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file);
 
 /**
  * given two strings return a concatenated third string
@@ -274,8 +274,8 @@ void fit_two_parameter_weibull(
 
 BOOLEAN_T string_to_mass_type(char*, MASS_TYPE_T*);
 BOOLEAN_T mass_type_to_string(MASS_TYPE_T, char*);
-BOOLEAN_T string_to_peptide_type(char*, PEPTIDE_TYPE_T*);
-BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str);
+//BOOLEAN_T string_to_peptide_type(char*, PEPTIDE_TYPE_T*);
+//BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str);
 BOOLEAN_T string_to_sort_type(char*, SORT_TYPE_T*);
 BOOLEAN_T sort_type_to_string(SORT_TYPE_T, char*);
 BOOLEAN_T string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);

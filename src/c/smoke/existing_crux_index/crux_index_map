@@ -2,12 +2,13 @@
 #	max_mass: 7200.00
 #	min_length: 6
 #	max_length: 50
-#	peptide_type: 0
-#	missed_cleavage: 0
+#	enzyme_type: 2
+#	digest_type: 1
+#	missed_cleavages: 0
 #	mass_type: 0
 #	unique_peptides: 0
-#	CRUX index directory: existing_crux_index
-#	time created: Mon Aug 18 17:09:32 2008
+#	CRUX index directory: replace_existing_index
+#	time created: Thu Jan 29 12:31:50 2009
 #	target_mass_range_for_index_file: 6.84
 crux_index_34	585.59	6.84
 crux_index_44	653.95	6.84

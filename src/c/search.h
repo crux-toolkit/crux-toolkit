@@ -4,8 +4,11 @@
 /* AUTHOR: Barbara Frewen
  * CREATE DATE: November 24, 2008
  * DESCRIPTION: Header file for the search-for-matches crux command
- * REVISION: $Revision: 1.2 $
+ * REVISION: $Revision: 1.3 $
  */
+#ifndef SEARCH_H
+#define SEARCH_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -36,3 +39,6 @@ void open_output_files(FILE*** binary_filehandle_array,
                        FILE** decoy_sqt_filehandle);
 
 int search_main(int argc, char** argv);
+
+
+#endif // SEARCH_H

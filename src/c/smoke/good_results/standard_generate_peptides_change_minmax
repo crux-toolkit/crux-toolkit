@@ -4,8 +4,9 @@
 #	max-mass: 4004.00
 #	min-length: 8
 #	max-length: 20
-#	cleavages: all
-#	allow missed-cleavages: FALSE
+#	enzyme: no-enzyme
+#	digestion: non-specific-digest
+#	allow missed-cleavages: TRUE
 #	sort: none
 #	isotopic mass type: mono
 #	verbosity: 30

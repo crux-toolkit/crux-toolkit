@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.82 $
+ * $Revision: 1.83 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -373,26 +373,49 @@ void set_index_field_from_map(INDEX_T* index, char* line){
   if(strcmp("min_mass:", trait_name) == 0){
     set_peptide_constraint_min_mass(index->disk_constraint, value);
   }
-  if(strcmp("max_mass:", trait_name) == 0){
+  else if(strcmp("max_mass:", trait_name) == 0){
     set_peptide_constraint_max_mass(index->disk_constraint, value);
   }
-  if(strcmp("min_length:", trait_name) == 0){
+  else if(strcmp("min_length:", trait_name) == 0){
     set_peptide_constraint_min_length(index->disk_constraint, value);
   }
-  if(strcmp("max_length:", trait_name) == 0){
+  else if(strcmp("max_length:", trait_name) == 0){
     set_peptide_constraint_max_length(index->disk_constraint, value);
   }
-  if(strcmp("peptide_type:", trait_name) == 0){
-    set_peptide_constraint_peptide_type(index->disk_constraint, value);
+  else if(strcmp("peptide_type:", trait_name) == 0){
+    //    set_peptide_constraint_peptide_type(index->disk_constraint, value);
+    carp(CARP_FATAL, "This index uses the obsolete 'peptide_type'. "
+         "Rebuild with current version of crux to use 'enzyme_type'.");
+    exit(1);
   }
-  if(strcmp("missed_cleavages:", trait_name) == 0){
+  else if(strcmp("enzyme_type:", trait_name) == 0){
+    set_peptide_constraint_enzyme(index->disk_constraint, value);
+  }
+  else if(strcmp("digest_type:", trait_name) == 0){
+    set_peptide_constraint_digest(index->disk_constraint, value);
+  }
+  else if(strcmp("missed_cleavages:", trait_name) == 0){
    set_peptide_constraint_num_mis_cleavage(index->disk_constraint, (int)value);
   }
-  if(strcmp("unique_peptides:", trait_name) == 0){
+  else if(strcmp("mass_type:", trait_name) == 0){
+   set_peptide_constraint_mass_type(index->disk_constraint, (int)value);
+  }
+  else if(strcmp("unique_peptides:", trait_name) == 0){
     index->is_unique = (BOOLEAN_T)value;
   }
-  if(strcmp("target_mass_range_for_index_file:", trait_name) == 0){
+  else if(strcmp("target_mass_range_for_index_file:", trait_name) == 0){
     index->mass_range = value;
+  }
+  else if(strcmp("CRUX", trait_name) == 0){
+    return;
+  }
+  else if(strcmp("time", trait_name) == 0){
+    return;
+  }
+  else{
+    carp(CARP_FATAL, "Unknown index map entry: %s (%s, %d)", 
+         line, trait_name, value);
+    exit(1);
   }
 }
 
@@ -415,8 +438,10 @@ BOOLEAN_T check_index_constraints(INDEX_T* index){
   double max_len = get_peptide_constraint_max_length(index->disk_constraint);
   int missed_cleavages = 
     get_peptide_constraint_num_mis_cleavage(index->disk_constraint);
-  PEPTIDE_TYPE_T cleavage_type = 
-    get_peptide_constraint_peptide_type(index->disk_constraint);
+  //  PEPTIDE_TYPE_T cleavage_type = 
+  //    get_peptide_constraint_peptide_type(index->disk_constraint);
+  ENZYME_T enzyme = get_peptide_constraint_enzyme(index->disk_constraint);
+  DIGEST_T digestion = get_peptide_constraint_digest(index->disk_constraint);
   MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(index->disk_constraint);
   BOOLEAN_T unique = index->is_unique;
 
@@ -446,10 +471,21 @@ BOOLEAN_T check_index_constraints(INDEX_T* index){
     // only if index is unique(1) and requesting not-unique (0) is a problem
     success = FALSE;
     param = "unique-peptides";
+    /*
   }else if(cleavage_type < get_peptide_type_parameter("cleavages")){
     // tryptic < partial < any  BUG for N- or C-tryptic)
     success = FALSE;
     param = "cleavages";
+  }
+    */
+  }else if(enzyme != get_enzyme_type_parameter("enzyme")){
+    printf("constraint e: %i, param e: %i.", (int)enzyme, (int)get_enzyme_type_parameter("enzyme"));
+    success = FALSE;
+    param = "enzyme";
+  }else if(digestion < get_digest_type_parameter("digestion")){
+    // full < partial < non-specific
+    success = FALSE;
+    param = "digestion";
   }
 
   if(success == FALSE){
@@ -678,8 +714,10 @@ BOOLEAN_T write_header(
   fprintf(file, "#\tmax_mass: %.2f\n", get_peptide_constraint_max_mass(constraint));
   fprintf(file, "#\tmin_length: %d\n", get_peptide_constraint_min_length(constraint));
   fprintf(file, "#\tmax_length: %d\n", get_peptide_constraint_max_length(constraint));
-  fprintf(file, "#\tpeptide_type: %d\n", get_peptide_constraint_peptide_type(constraint));
-  fprintf(file, "#\tmissed_cleavage: %d\n", get_peptide_constraint_num_mis_cleavage(constraint));
+  //fprintf(file, "#\tpeptide_type: %d\n", get_peptide_constraint_peptide_type(constraint));
+  fprintf(file, "#\tenzyme_type: %d\n", get_peptide_constraint_enzyme(constraint));
+  fprintf(file, "#\tdigest_type: %d\n", get_peptide_constraint_digest(constraint));
+  fprintf(file, "#\tmissed_cleavages: %d\n", get_peptide_constraint_num_mis_cleavage(constraint));
   fprintf(file, "#\tmass_type: %d\n", get_peptide_constraint_mass_type(constraint));
   fprintf(file, "#\tunique_peptides: %d\n", get_index_is_unique(index));
   
@@ -717,10 +755,19 @@ BOOLEAN_T write_readme_file(
   fprintf(file, "#\tmax_length: %d\n",
           get_peptide_constraint_max_length(constraint));
 
+  /*
   PEPTIDE_TYPE_T type = get_peptide_constraint_peptide_type(constraint);
   char type_str[64];
   peptide_type_to_string(type, type_str);
   fprintf(file, "#\tpeptide_type: %s\n", type_str);
+  */
+  char* value_str = 
+    enzyme_type_to_string(get_peptide_constraint_enzyme(constraint));
+  fprintf(file, "#\tenzyme_type: %s\n", value_str);
+  free(value_str);
+  value_str = 
+    digest_type_to_string(get_peptide_constraint_digest(constraint));
+  free(value_str);
 
   fprintf(file, "#\tmissed_cleavage: %s\n", 
         (get_peptide_constraint_num_mis_cleavage(constraint)? "true":"false"));
@@ -2087,8 +2134,11 @@ BOOLEAN_T setup_index_filtered_peptide_iterator(
 {
   PEPTIDE_T* peptide = NULL;
   PEPTIDE_SRC_T* src = NULL;
+  /*
   PEPTIDE_TYPE_T peptide_type = 
     get_peptide_constraint_peptide_type(iterator->index_peptide_iterator->index->search_constraint);
+  */
+  DIGEST_T required_digestion = get_peptide_constraint_digest(iterator->index_peptide_iterator->index->search_constraint);
   BOOLEAN_T match = FALSE;
 
   // initialize index_filered
@@ -2099,6 +2149,7 @@ BOOLEAN_T setup_index_filtered_peptide_iterator(
     // check if peptide type matches the constraint
     // find at least one peptide_src for which cleavage is correct
     while(src != NULL){
+      /*
       char this_type_str[16];
       char request_type_str[16];
       peptide_type_to_string(peptide_type, request_type_str);
@@ -2109,6 +2160,8 @@ BOOLEAN_T setup_index_filtered_peptide_iterator(
           (get_peptide_src_peptide_type(src) == N_TRYPTIC ||
            get_peptide_src_peptide_type(src) == C_TRYPTIC))
          ){
+      */
+      if(get_peptide_src_digest(src) >= required_digestion){
         match = TRUE;
         break;
       }

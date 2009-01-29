@@ -24,7 +24,7 @@
 #include "index.h"
 #include "generate_peptides_iterator.h"
 
-#define NUM_GEN_PEP_OPTIONS 18
+#define NUM_GEN_PEP_OPTIONS 17
 #define NUM_GEN_PEP_ARGS 1
 
 /* Private function declarations */
@@ -60,7 +60,7 @@ int main(int argc, char** argv){
     "isotopic-mass",
     "enzyme", 
     "digestion", 
-    "cleavages",
+    //    "cleavages",
     "missed-cleavages",
     "unique-peptides",
     "use-index",
@@ -136,7 +136,8 @@ int main(int argc, char** argv){
       //peptide = generate_peptides_iterator_next(peptide_iterator);
       peptide = modified_peptides_iterator_next(peptide_iterator);
       print_peptide_in_format(peptide, output_sequence, 
-                              print_trypticity, stdout);
+                              //print_trypticity, stdout);
+                               stdout);
     
       // free peptide
       free_peptide(peptide);
@@ -182,7 +183,9 @@ void print_header(){
   printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass"));
   printf("#\tmin-length: %d\n", get_int_parameter("min-length"));
   printf("#\tmax-length: %d\n", get_int_parameter("max-length"));
-  printf("#\tcleavages: %s\n", get_string_parameter_pointer("cleavages"));
+  printf("#\tenzyme: %s\n", get_string_parameter_pointer("enzyme"));
+  printf("#\tdigestion: %s\n", get_string_parameter_pointer("digestion"));
+  //printf("#\tcleavages: %s\n", get_string_parameter_pointer("cleavages"));
   
   bool_val = get_boolean_parameter("missed-cleavages");
   printf("#\tallow missed-cleavages: %s\n", boolean_to_string(bool_val));

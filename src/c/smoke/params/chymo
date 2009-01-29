@@ -1,0 +1,5 @@
+enzyme=chymotrypsin
+digestion=full-digest
+overwrite=T
+output-mode=sqt
+number-decoy-set=0

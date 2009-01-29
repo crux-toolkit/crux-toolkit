@@ -4,8 +4,11 @@
  * DATE: April 15, 2008
  * DESCRIPTION: Header file for peptide iterator that includes
  * modified peptides.
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  */
+#ifndef MODIFIED_PEPTIDES_ITERATOR_H
+#define MODIFIED_PEPTIDES_ITERATOR_H
+
 #include "utils.h"
 #include "objects.h"
 #include "linked_list.h"
@@ -93,3 +96,6 @@ PEPTIDE_T* void_modified_peptides_iterator_next(
  */
 void void_modified_peptides_iterator_free(
   void* modified_PEPTIDES_iterator);
+
+
+#endif // MODIFIED_PEPTIDES_ITERATOR_H

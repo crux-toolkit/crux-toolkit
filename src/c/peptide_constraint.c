@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide_constraint.c
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * \brief: Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
@@ -25,7 +25,9 @@
  *              any other K and R in the sequence must be followed by a P
  */
 struct peptide_constraint {
-  PEPTIDE_TYPE_T peptide_type;///< The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC)
+//  PEPTIDE_TYPE_T peptide_type;///< The type of peptides(TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC)
+  ENZYME_T enzyme;
+  DIGEST_T digestion;
   float min_mass; ///< The minimum mass of the peptide
   float max_mass; ///< The maximum mass of the peptide
   int min_length; ///< The minimum length of the peptide
@@ -54,7 +56,9 @@ PEPTIDE_CONSTRAINT_T* allocate_peptide_constraint(void){
  * \returns An allocated PEPTIDE_CONSTRAINT_T object.
  */
 PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
-  PEPTIDE_TYPE_T peptide_type, ///< The type of peptides, is it TRYPTIC -in
+//  PEPTIDE_TYPE_T peptide_type, ///< The type of peptides, is it TRYPTIC -in
+  ENZYME_T enzyme, 
+  DIGEST_T digest,
   float min_mass, ///< the minimum mass -in
   float max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
@@ -71,7 +75,9 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   PEPTIDE_CONSTRAINT_T* peptide_constraint =
     allocate_peptide_constraint();
 
-  set_peptide_constraint_peptide_type(peptide_constraint, peptide_type);
+//  set_peptide_constraint_peptide_type(peptide_constraint, peptide_type);
+  set_peptide_constraint_enzyme(peptide_constraint, enzyme);
+  set_peptide_constraint_digest(peptide_constraint, digest);
   set_peptide_constraint_min_mass(peptide_constraint, min_mass);
   set_peptide_constraint_max_mass(peptide_constraint, max_mass);
   set_peptide_constraint_min_length(peptide_constraint, min_length);
@@ -88,7 +94,9 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
  */
 PEPTIDE_CONSTRAINT_T* new_peptide_constraint_from_parameters(){
   PEPTIDE_CONSTRAINT_T* new_constraint = allocate_peptide_constraint();
-  new_constraint->peptide_type = get_peptide_type_parameter("cleavages");
+  //new_constraint->peptide_type = get_peptide_type_parameter("cleavages");
+  new_constraint->enzyme = get_enzyme_type_parameter("enzyme");
+  new_constraint->digestion = get_digest_type_parameter("digestion");
   new_constraint->min_mass = get_double_parameter("min-mass");
   new_constraint->max_mass = get_double_parameter("mas-mass");
   new_constraint->min_length = get_int_parameter("min-length");
@@ -150,6 +158,7 @@ void free_peptide_constraint(
 /**
  * sets the peptide type of the peptide_constraint
  */
+/*
 void set_peptide_constraint_peptide_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
   PEPTIDE_TYPE_T peptide_type ///< the peptide_type for the constraint -in
@@ -157,16 +166,57 @@ void set_peptide_constraint_peptide_type(
 {
   peptide_constraint->peptide_type = peptide_type;
 }
-
+*/
 /**
  * \returns the peptide type of the peptide_constraint
  */
+/*
 PEPTIDE_TYPE_T get_peptide_constraint_peptide_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   )
 {
   return peptide_constraint->peptide_type;
 }
+*/
+/**
+ * Sets the enzyme used for the in silicos digestion
+ * of the protein sequence into peptides.
+ */
+void set_peptide_constraint_enzyme(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
+  ENZYME_T enzyme
+){
+  peptide_constraint->enzyme = enzyme;
+}
+
+/**'
+ * \returns The enzyme for this peptide constraint.
+ */
+ENZYME_T get_peptide_constraint_enzyme(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint///< the peptide constraint to set -out
+){
+  return peptide_constraint->enzyme;
+}
+
+/**
+ * Sets the level of digestion for the peptide constraint.
+ */
+void set_peptide_constraint_digest(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
+  DIGEST_T digest
+){
+peptide_constraint->digestion = digest;
+}
+
+/**
+ * \returns The level of digestion for the peptide constraint.
+ */
+DIGEST_T get_peptide_constraint_digest(
+  PEPTIDE_CONSTRAINT_T* peptide_constraint///< the peptide constraint to set -out
+){
+return peptide_constraint->digestion;
+}
+
 
 /**
  * sets the min mass of the peptide_constraint
@@ -287,7 +337,7 @@ int get_peptide_constraint_num_mis_cleavage(
  */
 void set_peptide_constraint_mass_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out
-  MASS_TYPE_T mass_type ///< the peptide_type for the constraint -in
+  MASS_TYPE_T mass_type ///< the mass_type for the constraint -in
   )
 {
   peptide_constraint->mass_type = mass_type;

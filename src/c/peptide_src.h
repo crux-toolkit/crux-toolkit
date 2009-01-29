@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -23,8 +23,9 @@ PEPTIDE_SRC_T* allocate_peptide_src(void);
  * specified parameters 
  */
 PEPTIDE_SRC_T* new_peptide_src(
-  PEPTIDE_TYPE_T peptide_type, 
+                               //  PEPTIDE_TYPE_T peptide_type, 
     ///< the peptide type for the corresponding protein -in
+DIGEST_T digest,
   PROTEIN_T* parent_protein, ///< the parent of this preptide -in
   int start_idx ///< peptide start index in protein sequence, first is 1 -in
   );
@@ -53,7 +54,8 @@ PEPTIDE_SRC_T* new_peptide_src_linklist(
 void set_peptide_src_array(
   PEPTIDE_SRC_T* src_array , ///< the working peptide src_arry -out
   int array_idx, ///< array index of the peptide_src to set
-  PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
+  //PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
+DIGEST_T digest,
   PROTEIN_T* parent_protein, ///< the parent of this preptide -in
   int start_idx ///< start index of the peptide in the protein sequence -in
   );
@@ -115,16 +117,34 @@ void copy_peptide_src(
  * sets the peptide type
  * peptide type: TRYPTIC, PARTIALLY_TRYPTIC, NON_TRYPTIC
  */
+/*
 void set_peptide_src_peptide_type( 
   PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
   PEPTIDE_TYPE_T peptide_type ///< the type of the peptide -in
   );
-
+*/
 /**
  * \returns the peptide type with association to the parent protein
  * peptide type: TRYPTIC, N_TRYPTIC, C_TRYPTIC, NON_TRYPTIC
  */
+/*
 PEPTIDE_TYPE_T get_peptide_src_peptide_type( 
+  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
+  );
+*/
+
+/**
+ * sets the level of digestion
+ */
+void set_peptide_src_digest( 
+  PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
+  DIGEST_T digest ///< the type of the peptide -in
+  );
+
+/**
+ * \returns the level of digestion
+ */
+DIGEST_T get_peptide_src_digest( 
   PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
   );
 

@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.74 $
+ * $Revision: 1.75 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -102,16 +102,17 @@ PEPTIDE_T* new_peptide(
   unsigned char length,     ///< The length of the peptide -in
   float peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
-  int start_idx, ///< the start index of this peptide in the protein sequence -in
-  PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, C_TRYPTIC, N_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
+  int start_idx ///< the start index of this peptide in the protein sequence -in
+  //PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, C_TRYPTIC, N_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
   )
 {
   PEPTIDE_T* peptide = allocate_peptide();
   set_peptide_length(peptide, length);
   set_peptide_peptide_mass(peptide, peptide_mass);
+// FIXME: find the level of digest for this specific protein
   peptide->peptide_src = 
-    new_peptide_src(peptide_type, parent_protein, start_idx );
-  // comment me to fix files
+    //    new_peptide_src(peptide_type, parent_protein, start_idx );
+    new_peptide_src(NON_SPECIFIC_DIGEST, parent_protein, start_idx );
   peptide->modified_seq = NULL;
   
   return peptide;
@@ -924,8 +925,8 @@ char* get_peptide_hash_value(
  * \returns A newly-allcoated char array with the shuffled sequence.
  */
 char* generate_shuffled_sequence(
-  PEPTIDE_T* peptide, ///< The peptide to shuffle -in 
-  PEPTIDE_TYPE_T peptide_type 
+  PEPTIDE_T* peptide ///< The peptide to shuffle -in 
+  //PEPTIDE_TYPE_T peptide_type 
     ///< tryptic status to enforce on the shuffled sequence
   )
 {
@@ -939,10 +940,12 @@ char* generate_shuffled_sequence(
   // set shuffle bound
   // TODO consider changing bounds depending on trypticity
   // But for now, leave the extreme N- and C-term AAs the same
+  /*
   if (peptide_type == peptide_type){
     ++start_idx;
     --end_idx;
   }
+  */
   /* if(peptide_type == TRYPTIC){
     ++start_idx;
     --end_idx;
@@ -974,8 +977,8 @@ char* generate_shuffled_sequence(
  *\returns A newly-allcoated MODIFIED_AA_T array of the shuffled sequence.
  */
 MODIFIED_AA_T* generate_shuffled_mod_sequence(
-  PEPTIDE_T* peptide,  ///< The peptide sequence to shuffle -in
-  PEPTIDE_TYPE_T peptide_type
+  PEPTIDE_T* peptide  ///< The peptide sequence to shuffle -in
+  //PEPTIDE_TYPE_T peptide_type
   ///< tryptic status to enforce on the shuffled sequence
   // not currently used
   )
@@ -990,10 +993,12 @@ MODIFIED_AA_T* generate_shuffled_mod_sequence(
   // TODO (BF 9-Sep-08): Shouldn't the c-term be shuffled regardless?
   // TODO consider changing bounds depending on trypticity
   // But for now, leave the extreme N- and C-term AAs the same
+  /*
   if (peptide_type == peptide_type){
     ++start_idx;
     --end_idx;
   }
+  */
   /* if(peptide_type == TRYPTIC){
     ++start_idx;
     --end_idx;
@@ -1174,7 +1179,7 @@ int compare_peptide_mass(
 void print_peptide_in_format(
   PEPTIDE_T* peptide,  ///< the query peptide -in
   BOOLEAN_T flag_out, ///< print peptide sequence? -in
-  BOOLEAN_T trypticity_opt, ///< print trypticity of peptide? -in
+  //BOOLEAN_T trypticity_opt, ///< print trypticity of peptide? -in
   FILE* file  ///< the out put stream -out
   )
 {
@@ -1208,6 +1213,7 @@ void print_peptide_in_format(
     fprintf(file, "\t%s\t%d\t%d", id, start_idx, peptide->length);
   
     // print trypticity of peptide??
+/*
     if(trypticity_opt){
       // TODO: change this to switch statement with only one get() call
       if(get_peptide_src_peptide_type(next_src) == TRYPTIC){
@@ -1229,7 +1235,7 @@ void print_peptide_in_format(
         fprintf(file, "\t%s", "ANY_TRYPTIC");
       }
     }
-
+*/
     // print peptide sequence?
     if(flag_out){
       fprintf(file, "\t%s\n", sequence);
@@ -1259,14 +1265,14 @@ void print_peptide_in_format(
 void print_filtered_peptide_in_format(
   PEPTIDE_T* peptide,  ///< the query peptide -in
   BOOLEAN_T flag_out, ///< print peptide sequence? -in
-  FILE* file,  ///< the out put stream -out
-  PEPTIDE_TYPE_T peptide_type ///< the peptide_type of src to print -in
+  FILE* file  ///< the out put stream -out
+  //PEPTIDE_TYPE_T peptide_type ///< the peptide_type of src to print -in
   )
 {
   PROTEIN_T* parent = NULL;
   PEPTIDE_SRC_T* next_src = peptide->peptide_src;
-  char* id = NULL;
-  int start_idx = 0;
+  //char* id = NULL;
+  //int start_idx = 0;
   char* sequence = NULL;
   // BOOLEAN_T light = FALSE;
 
@@ -1278,17 +1284,18 @@ void print_filtered_peptide_in_format(
     parent = get_peptide_src_parent_protein(next_src);
     
     // covnert to heavy protein
-    /*
+/*    
     FIXME, IF use light heavy put back
     if(get_protein_is_light(parent)){
       protein_to_heavy(parent);
       light = TRUE;
     }
-    */
+*/
     sequence = get_peptide_sequence(peptide);
   }
 
   // iterate over all peptide src
+/*
   while(next_src != NULL){
     if(peptide_type == ANY_TRYPTIC ||
        peptide_type == get_peptide_src_peptide_type(next_src) ||
@@ -1300,13 +1307,11 @@ void print_filtered_peptide_in_format(
       parent = get_peptide_src_parent_protein(next_src);
         
       // covnert to heavy protein
-      /*
       FIXME, IF use light heavy put back
       if(get_protein_is_light(parent)){
         protein_to_heavy(parent);
         light = TRUE;
       }
-      */
         // }
       
       id = get_protein_id_pointer(parent);
@@ -1322,7 +1327,6 @@ void print_filtered_peptide_in_format(
         fprintf(file, "\n");
       }
     
-      /** 
        * uncomment this code if you want to restore a protein to 
        * light after converted to heavy
       // convert back to light
@@ -1330,10 +1334,10 @@ void print_filtered_peptide_in_format(
         protein_to_light(parent);
         light = FALSE;
       }
-      */
     }
     next_src = get_peptide_src_next_association(next_src);
   }
+*/
 
   // free sequence if allocated
   if(flag_out){
@@ -1350,7 +1354,8 @@ void print_filtered_peptide_in_format(
  * The peptide serialization format looks like this:
  *
  * <PEPTIDE_T: peptide struct><int: number of peptide_src>[<int:
- * protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start
+ * protein index><DITEST_T: degree of digestion (replaced
+ * peptide_type)><int: peptide start 
  * index>]+<int: modified_seq length>[<MODIFIED_AA_T>]+ 
  * The peptide src information (in square brackets) repeats for the
  * number times indicated by the number between the struct and the
