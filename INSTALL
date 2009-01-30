@@ -1,4 +1,14 @@
+Full directions for installing Crux can be found in doc/users/install-tutorial.html.
+
+To build Crux from a distribution archive:
+
+1. Run 'configure'. This generates all the final 'Makefile' from the 'Makefile.in'.
+   See text below for a description of generic 'configure' options.
+2. Run 'make'. This will build Crux.
+3. Run 'make install'.
+
 To build Crux from a copy checked out from CVS repository:
+
 1. The root of the crux CVS module contains a file named 'bootstrap'. 
    chmod that file so it is executable.
 2. Run 'bootstrap'. This will install all the bits and bobs needed 
@@ -6,12 +16,9 @@ To build Crux from a copy checked out from CVS repository:
    the 'configure' script from 'configure.ac'. It will then run automake, 
    which will generate 'Makefile.in' files from all the Makfeile.am files.
 3. Run 'configure'. This generates all the final 'Makefile' from the 'Makefile.in'.
-4. Run 'Make'. This will then do the build of crux.
-
-To build Crux from a distribution tarball, only steps 4 and 5 are needed.
-
-Further directions for installing Crux can be found in doc/users/install-tutorial.html.
-The following text describes generic features of the configure script.
+   See text below for a description of generic 'configure' options.
+4. Run 'make'. This will build Crux.
+5. Run 'make install'.
 
 =================
 
