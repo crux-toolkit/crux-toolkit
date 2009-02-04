@@ -55,12 +55,9 @@ mass-window=3.000000
 # Available from parameter-file for crux-search-for-matches.
 ion-tolerance=0.500000
 
-# The type of cleavage sites to consider (tryptic, partial, all). Default tryptic.
-# Used from the command line or paramter file by crux-create-index and crux-generate-peptides. Parameter file only for crux-search-for-matches.  Tryptic cleavage sites are after R or K but not before P.  The value 'tryptic' produces peptides with tryptic sites at both termini, 'partial' with a tryptic cleavage site at at least one terminus, and 'all' produces peptides with no dependence on adjacent amino acids.
-cleavages=tryptic
 
 # Include peptides with missed cleavage sites (T,F). Default FALSE.
-# Available from command line or parameter file for crux-create-index and crux-generate-peptides.  Parameter file only for crux-search-for-matches.  When used with cleavages=<tryptic|partial> includes peptides containing one or more potential cleavage sites.
+# Available from command line or parameter file for crux-create-index and crux-generate-peptides.  Parameter file only for crux-search-for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin>  includes peptides containing one or more potential cleavage sites.
 missed-cleavages=FALSE
 
 # Generate peptides only once, even if they appear in more than one protein (T,F).  Default FALSE.
@@ -68,15 +65,15 @@ missed-cleavages=FALSE
 unique-peptides=FALSE
 
 # Specify a variable modification to apply to peptides.  <mass change>:<aa list>:<max per peptide>. Default no mods.
-# Available from parameter file for crux-search-for-matches and the the same must be used for crux compute-q-value.
+# Available from parameter file for crux-generate-peptides and crux-search-for-matches and the the same must be used for crux compute-q-value.
 mod=NO MODS
 
 # Specify a variable modification to apply to C-terminus of peptides. <mass change>:<max distance from protein c-term (-1 for no max)>. Default no mods.
-# Available from parameter file for crux-search-for-matches and the the same must be used for crux compute-q-value.
+# Available from parameter file for crux-generate-peptides and crux-search-for-matches and the the same must be used for crux compute-q-value.
 cmod=NO MODS
 
 # Specify a variable modification to apply to N-terminus of peptides.  <mass change>:<max distance from protein n-term (-1 for no max)>
-# Available from parameter file for crux-search-for-matches and the the same must be used for crux compute-q-value.
+# Available from parameter file for crux-generate-peptides and crux-search-for-matches and the the same must be used for crux compute-q-value.
 nmod=NO MODS
 
 # The maximum number of modifications that can be applied to a single peptide.  Default no limit.
@@ -132,12 +129,12 @@ decoy-sqt-output-file=decoy.sqt
 number-decoy-set=2
 
 # The number of psms per spectrum writen to the binary output file.Default 1.
-# Available from parameter file for crux-search-for-matches.  If more than one psm is written to file, the matches for each spectrum will be re-ranked in crux-match-analysis.
+# Available from parameter file for crux-search-for-matche with output-mode=<all|binary>.  Does not affect output to sqt file. 
 top-match=1
 
-# Number of search results per spectrum to report in the sqt file. Default 5.
+# The number of psms per spectrum written to the sqt file.Default 5.
 # Available from parameter file for crux-search-for-matches with output-mode=<all|sqt>.  Does not affect output to binary files.
-max-sqt-result=5
+top-match-sqt=5
 
 # The analysis algorithm to use (percolator, curve-fit, none). Default percolator.
 # Available only for crux-analyze-matches.  Using 'percolator' will assign a q-value to the top-ranking psm for each spectrum based on the decoy searches.  Using 'curve-fit' will assign a q-value to same using the p-values calculated with score-type=<xcorr-pvalue|sq-pvalue>.  Incorrect combinations of score-type and algorithm cause undefined behavior. Using 'none' will turn the binary .csm files into text.
@@ -147,9 +144,6 @@ algorithm=percolator
 # Available only for crux-analyze-matches.  File will contain features used by percolator.
 feature-file=__NULL_STR
 
-# Print trypticity of peptide (T,F). Default FALSE.
-# Available only for crux-generate-peptides. When cleavages=partial all peptides are labeled PARTIAL even if fully tryptic.
-output-trypticity=FALSE
 
 # Print peptide sequence (T,F). Default FALSE.
 # Available only for crux-generate-peptides.

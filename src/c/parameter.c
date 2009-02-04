@@ -503,8 +503,10 @@ void initialize_parameters(void){
       "preliminary scoring.  Default 500.",
       "Used by crux-search-for-matches.  For each spectrum, keep the (500) "
       "top ranking psms for scoring with the main score.", "true");
-  set_int_parameter("max-sqt-result", 5, 1, BILLION, 
-      "Number of search results per spectrum to report in the sqt file. "
+  //  set_int_parameter("max-sqt-result", 5, 1, BILLION, 
+  set_int_parameter("top-match-sqt", 5, 1, BILLION, 
+     //"Number of search results per spectrum to report in the sqt file. "
+      "The number of psms per spectrum written to the sqt file. "
       "Default 5.",
       "Available from parameter file for crux-search-for-matches with "
       "output-mode=<all|sqt>.  Does not affect output to binary files.", 
@@ -512,9 +514,9 @@ void initialize_parameters(void){
   set_int_parameter("top-match", 1, 1, BILLION, 
       "The number of psms per spectrum writen to the binary output file." 
       "Default 1.",
-      "Available from parameter file for crux-search-for-matches.  If more "
-      "than one psm is written to file, the matches for each spectrum will "
-      "be re-ranked in crux-match-analysis.", "true");
+      "Available from parameter file for crux-search-for-matche with "
+      "output-mode=<all|binary>.  Does not affect output to sqt file. ", 
+      "true");
   set_double_parameter("mass-offset", 0.0, 0, 0, "obsolete",
       "Was used in search.", "false");
   set_string_parameter("seed", "time", "HIDE ME FROM USER",

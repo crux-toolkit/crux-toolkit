@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.90 $
+ * $Revision: 1.91 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -342,8 +342,10 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
 
   //int top_rank_for_p_value = get_int_parameter("top-rank-p-value");
   int top_rank_for_p_value = get_int_parameter("top-match");
-  if( get_int_parameter("max-sqt-result") > top_rank_for_p_value ){
-    top_rank_for_p_value = get_int_parameter("max-sqt-result");
+  //  if( get_int_parameter("max-sqt-result") > top_rank_for_p_value ){
+  //  top_rank_for_p_value = get_int_parameter("max-sqt-result");
+  if( get_int_parameter("top-match-sqt") > top_rank_for_p_value ){
+    top_rank_for_p_value = get_int_parameter("top-match-sqt");
   }
   int sample_count = get_int_parameter("sample-count");
   int top_fit_sp = get_int_parameter("top-fit-sp");
@@ -1990,7 +1992,8 @@ BOOLEAN_T score_match_collection_logp_bonf_weibull_xcorr(
   double score = 0;
   MATCH_T* match = NULL;
   // score as many psms as will be printed to file
-  int for_sqt = get_int_parameter("max-sqt-result");
+  //  int for_sqt = get_int_parameter("max-sqt-result");
+  int for_sqt = get_int_parameter("top-match-sqt");
   int for_csm =  get_int_parameter("top-match");
   peptide_to_score = (for_sqt > for_csm) ? for_sqt : for_csm;
   
@@ -2828,7 +2831,8 @@ void print_sqt_header(
   //     fprintf(output, "H\tStaticMod\t%s=%.3f\n", letter, mass);
   //  fprintf(output, "H\tStaticMod\tC=160.139\n");
   fprintf(output, "H\tAlg-DisplayTop\t%d\n", 
-          get_int_parameter("max-sqt-result")); 
+          //          get_int_parameter("max-sqt-result")); 
+          get_int_parameter("top-match-sqt")); 
   // this is not correct for an sqt from analzyed matches
 
   //PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
@@ -3251,7 +3255,8 @@ void print_matches(
   // get parameters
   MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
                                                             "output-mode");
-  int max_sqt_matches = get_int_parameter("max-sqt-result");
+  //  int max_sqt_matches = get_int_parameter("max-sqt-result");
+  int max_sqt_matches = get_int_parameter("top-match-sqt");
   int max_psm_matches = get_int_parameter("top-match");
   //BOOLEAN_T pvalues = get_boolean_parameter("compute-p-values");
   SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
