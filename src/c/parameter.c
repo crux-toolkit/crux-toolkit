@@ -477,9 +477,9 @@ void initialize_parameters(void){
       "Used by crux-search-for-matches.  All result files (binary .csm "
       "and/or sqt) put in this directory.", "true");
   set_output_type_parameter("output-mode", BINARY_OUTPUT, 
-      "Types of output to produce (binary, sqt, all). Default binary.",
-      "Available for crux-search-for-matches.  Produce binary and/or text "
-      "(sqt) output files.  Binary files named automatically.  See "
+      "Types of output to produce (binary, sqt, tab, all). Default binary.",
+      "Available for crux search-for-matches.  Produce binary, sqt "
+      "and/or tab delimited output files.  Binary files named automatically.  See "
       "sqt-output-file for naming text file.  See match-output-folder for "
       "file location.", "true");
   set_string_parameter("sqt-output-file", "target.sqt", 
@@ -490,6 +490,16 @@ void initialize_parameters(void){
   set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
       "SQT output file name for decoys.  Default 'decoy.sqt'.",
       "Used by crux-search-for-matches with output-mode=<all|sqt> and "
+      "number-decoy-sets > 0.  File is put in the directory set by "
+      "--match-output-folder (defaults to working directory).", "true");
+  set_string_parameter("tab-output-file", "target.txt", 
+      "Tab delimited output file name. Default 'target.txt'",
+      "Only available for crux search-for-matches with output-mode="
+      "<all|tab>.  The location of this file is controlled by "
+      "match-output-folder.", "true");
+  set_string_parameter("decoy-tab-output-file", "decoy.txt", 
+      "Tab delimited output file name for decoys.  Default 'decoy.txt'.",
+      "Used by crux search-for-matches with output-mode=<all|tab> and "
       "number-decoy-sets > 0.  File is put in the directory set by "
       "--match-output-folder (defaults to working directory).", "true");
   set_int_parameter("number-decoy-set", 2, 0, 10, 
@@ -1139,7 +1149,7 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
     if(! string_to_output_type(value_str, &output_type)){
       success = FALSE;
       sprintf(die_str, "Illegal output type '%s' for options '%s'.  "
-              "Must be binary, sqt, or all.", value_str, name);
+              "Must be binary, sqt, tab, or all.", value_str, name);
     }
     break;
   case ION_TYPE_P:

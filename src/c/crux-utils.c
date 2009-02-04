@@ -278,7 +278,7 @@ BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T type, char* type_str){
  * the string version of MATCH_SEARCH_OUPUT_MODE_T 
  */
 static char* output_type_strings[NUMBER_OUTPUT_MODES] = 
-  { "binary", "sqt", "all" };
+  { "binary", "sqt", "tab", "all" };
 
 BOOLEAN_T string_to_output_type(char* name, 
                                 MATCH_SEARCH_OUTPUT_MODE_T* result){

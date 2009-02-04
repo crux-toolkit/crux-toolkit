@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.91 $
+ * $Revision: 1.92 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -2543,8 +2543,9 @@ FILE** create_psm_files(){
   int file_idx = 0;
 
   // Create null pointers if no binary output called for
-  if( SQT_OUTPUT == get_output_type_parameter("output-mode") ){
-    carp(CARP_DEBUG, "SQT mode: return empty array of file handles");
+  MATCH_SEARCH_OUTPUT_MODE_T mode = get_output_type_parameter("output-mode");
+  if( mode == SQT_OUTPUT || mode == TAB_OUTPUT){
+    carp(CARP_DEBUG, "SQT or TAB mode: return empty array of file handles");
     return file_handle_array;
   }
 
@@ -2887,6 +2888,22 @@ void print_sqt_header(
           "total ions compared, sequence\n", main_score_str, other_score_str);
 }
 
+void print_tab_header(FILE* output){
+  if( output == NULL ){
+    return;
+  }
+
+  time_t hold_time;
+  hold_time = time(0);
+
+  fprintf(
+    output, 
+    "first scan\tlast scan\tspectrum neutral mass\tcharge\tprotein id\t"
+    "main rank\tother rank\tpeptide mass\tdeta cn\tmain score\tother score"
+    "by matched\tby total\tsequence\n"
+  );
+}
+
 /**
  * \brief Print the psm features to file in sqt format.
  *
@@ -2950,6 +2967,74 @@ BOOLEAN_T print_match_collection_sqt(
 
     //    print_match_sqt(match, output, main_score, prelim_score);
     print_match_sqt(match, output, 
+                    score_to_print_first, score_to_print_second);
+
+  }// next match
+  
+  free_match_iterator(match_iterator);
+  
+  return TRUE;
+}
+
+/**
+ * \brief Print the psm features to file in tab delimited format.
+ *
+ *\returns TRUE, if sucessfully print tab-delimited format of the PSMs, else FALSE 
+ */
+BOOLEAN_T print_match_collection_tab_delimited(
+  FILE* output,                  ///< the output file -out
+  int top_match,                 ///< the top matches to output -in
+  MATCH_COLLECTION_T* match_collection,
+  ///< the match_collection to print sqt -in
+  SPECTRUM_T* spectrum,          ///< the spectrum to print sqt -in
+  SCORER_TYPE_T prelim_score,    ///< the preliminary score to report -in
+  SCORER_TYPE_T main_score       ///< the main score to report -in
+  )
+{
+
+  if( output == NULL || match_collection == NULL || spectrum == NULL ){
+    return FALSE;
+  }
+  time_t hold_time;
+  hold_time = time(0);
+  int charge = match_collection->charge; 
+  int first_scan = get_spectrum_first_scan(spectrum);
+  int last_scan = get_spectrum_last_scan(spectrum);
+  float spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
+
+  // If we calculated p-values, change which scores get printed
+  // since this is really only valid for xcorr...
+  assert( main_score == XCORR );
+  BOOLEAN_T pvalues = get_boolean_parameter("compute-p-values");
+  SCORER_TYPE_T score_to_print_first = main_score;
+  SCORER_TYPE_T score_to_print_second = prelim_score;
+  if( pvalues ){
+    score_to_print_second = score_to_print_first;
+    score_to_print_first = LOGP_BONF_WEIBULL_XCORR; // soon to be P_VALUES
+  }
+
+  // calculate delta_cn and populate fields in the matches
+  calculate_delta_cn(match_collection);
+
+  MATCH_T* match = NULL;
+  
+  // create match iterator
+  // TRUE: return match in sorted order of main_score type
+  MATCH_ITERATOR_T* match_iterator = 
+    new_match_iterator(match_collection, main_score, TRUE);
+  
+  // Second, iterate over matches, prints M and L lines
+  while(match_iterator_has_next(match_iterator)){
+    match = match_iterator_next(match_iterator);    
+
+    // print only up to max_rank_result of the matches
+    if( get_match_rank(match, main_score) > top_match ){
+      break;
+    }// else
+
+    //    print_match_sqt(match, output, main_score, prelim_score);
+    print_match_tab(match, output, first_scan, last_scan, 
+                    spectrum_neutral_mass, charge,
                     score_to_print_first, score_to_print_second);
 
   }// next match
@@ -3249,7 +3334,10 @@ void print_matches(
                    BOOLEAN_T is_decoy,   ///< peptides from target/decoy
                    FILE* psm_file,       ///< binary file -out
                    FILE* sqt_file,       ///< text file, target -out
-                   FILE* decoy_file){    ///< text file, decoy -out
+                   FILE* decoy_file,
+                   FILE* tab_file,       ///< tab delimited file, target -out
+                   FILE* decoy_tab_file  ///< tab delimited file, decoy -out
+){  
 
   carp(CARP_DETAILED_DEBUG, "Writing matches to file");
   // get parameters
@@ -3269,7 +3357,7 @@ void print_matches(
   }
   */
   // write binary files
-  if( output_type != SQT_OUTPUT ){ //i.e. binary or all
+  if(output_type == BINARY_OUTPUT  || output_type == ALL_OUTPUT) {
     carp(CARP_DETAILED_DEBUG, "Serializing psms");
     carp(CARP_DETAILED_DEBUG, 
          "About to serialize psm features for collection starting with "
@@ -3290,7 +3378,7 @@ void print_matches(
   }
 
   // write sqt files
-  if( output_type != BINARY_OUTPUT ){ //i.e. sqt or all
+  if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
     carp(CARP_DETAILED_DEBUG, "Writing sqt results");
     if( ! is_decoy ){
       print_match_collection_sqt(sqt_file, max_sqt_matches,
@@ -3298,6 +3386,20 @@ void print_matches(
                                  prelim_score, main_score);
     }else{
       print_match_collection_sqt(decoy_file, max_sqt_matches,
+                                 match_collection, spectrum,
+                                 prelim_score, main_score);
+    }
+  }
+
+  // write tab delimited files
+  if(output_type == TAB_OUTPUT || output_type == ALL_OUTPUT){
+    carp(CARP_DETAILED_DEBUG, "Writing tab delimited results");
+    if( ! is_decoy ){
+      print_match_collection_tab_delimited(tab_file, max_sqt_matches,
+                                 match_collection, spectrum,
+                                 prelim_score, main_score);
+    }else{
+      print_match_collection_tab_delimited(decoy_tab_file, max_sqt_matches,
                                  match_collection, spectrum,
                                  prelim_score, main_score);
     }

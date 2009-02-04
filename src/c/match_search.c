@@ -39,7 +39,9 @@ int prepare_protein_input(char* input_file,
                           DATABASE_T** database);
 void open_output_files(FILE*** binary_filehandle_array, 
                        FILE** sqt_filehandle,
-                       FILE** decoy_sqt_filehandle);
+                       FILE** decoy_sqt_filehandle,
+                       FILE** tab_file,
+                       FILE** decoy_tab_file);
 BOOLEAN_T is_search_complete(MATCH_COLLECTION_T* matches, 
                              int mods_per_peptide);
 
@@ -142,14 +144,23 @@ int search_main(int argc, char** argv){
   FILE** psm_file_array = NULL; //file handle array
   FILE* sqt_file = NULL;
   FILE* decoy_sqt_file  = NULL;
+  FILE* tab_file = NULL;
+  FILE* decoy_tab_file  = NULL;
 
-  open_output_files(&psm_file_array, &sqt_file, &decoy_sqt_file);
+  open_output_files(
+    &psm_file_array, 
+    &sqt_file, 
+    &decoy_sqt_file, 
+    &tab_file,
+    &decoy_tab_file
+  );
 
   //print headers
   serialize_headers(psm_file_array);
   print_sqt_header(sqt_file, "target", num_proteins, FALSE);// !analyze-matches
   print_sqt_header(decoy_sqt_file, "decoy", num_proteins, FALSE);
-
+  print_tab_header(tab_file);
+  print_tab_header(decoy_tab_file);
   /* Perform search: loop over spectra*/
 
   // create spectrum iterator
@@ -273,8 +284,16 @@ int search_main(int argc, char** argv){
 
     // print matches
     carp(CARP_DEBUG, "About to print target matches");
-    print_matches(match_collection, spectrum, FALSE,// is decoy
-                  psm_file_array[0], sqt_file, decoy_sqt_file);
+    print_matches(
+      match_collection, 
+      spectrum, 
+      FALSE,// is decoy
+      psm_file_array[0], 
+      sqt_file, 
+      decoy_sqt_file, 
+      tab_file,
+      decoy_tab_file
+    );
 
     // ?? does this free all the matches, all the spectra and all the peptides?
     free_match_collection(match_collection);
@@ -320,10 +339,22 @@ int search_main(int argc, char** argv){
       // print matches
       // only print first decoy to sqt
       FILE* tmp_decoy_sqt_file = decoy_sqt_file;
-      if( decoy_idx > 0 ){ tmp_decoy_sqt_file = NULL; }
+      FILE* tmp_decoy_tab_file = decoy_tab_file;
+      if( decoy_idx > 0 ){ 
+        tmp_decoy_sqt_file = NULL; 
+        tmp_decoy_tab_file = NULL; 
+      }
       carp(CARP_DEBUG, "About to print decoy matches");
-      print_matches(match_collection, spectrum, TRUE,// is decoy
-                    psm_file_array[1+decoy_idx], sqt_file, tmp_decoy_sqt_file);
+      print_matches(
+        match_collection, 
+        spectrum, 
+        TRUE,// is decoy
+        psm_file_array[1+decoy_idx], 
+        sqt_file, 
+        tmp_decoy_sqt_file,
+        tab_file, 
+        tmp_decoy_tab_file
+      );
 
       free_match_collection(match_collection);
 
@@ -408,20 +439,22 @@ int prepare_protein_input(char* input_file,
 void open_output_files(
   FILE*** psm_file_array, ///< put binary psm filehandles here -out
   FILE** sqt_file,        ///< put text sqt filehandle here -out
-  FILE** decoy_sqt_file)  ///< put decoy sqt filehandle here -out
+  FILE** decoy_sqt_file,  ///< put decoy sqt filehandle here -out
+  FILE** tab_file,        ///< put text sqt filehandle here -out
+  FILE** decoy_tab_file)  ///< put decoy sqt filehandle here -out
 {
   char* match_output_folder = get_string_parameter("match-output-folder");
   MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
                                                     "output-mode");
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  carp(CARP_DEBUG, "The output type is %d (binary, sqt, all)" \
+  carp(CARP_DEBUG, "The output type is %d (binary, sqt, tab, all)" \
        " and overwrite is '%d'", (int)output_type, (int)overwrite);
 
 
   // create binary psm files (allocate memory, even if not used)
   *psm_file_array = create_psm_files();
 
-  if( output_type != BINARY_OUTPUT ){ //ie sqt or all
+  if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
 
     //create sqt file handles
     carp(CARP_DEBUG, "Opening sqt files");
@@ -439,6 +472,27 @@ void open_output_files(
 
     if(sqt_file == NULL || decoy_sqt_file == NULL){
       carp(CARP_DEBUG, "sqt file or decoy is null");
+    }
+  }
+
+  if(output_type == TAB_OUTPUT || output_type == ALL_OUTPUT){
+
+    //create sqt file handles
+    carp(CARP_DEBUG, "Opening tab delimited files");
+    char* tab_filename = get_string_parameter_pointer("tab-output-file");
+    *tab_file = create_file_in_path(tab_filename, 
+                                    match_output_folder, 
+                                    overwrite);
+    char* decoy_tab_filename = get_string_parameter_pointer(
+                                                    "decoy-tab-output-file");
+    if( get_int_parameter("number-decoy-set") > 0 ){
+      *decoy_tab_file = create_file_in_path(decoy_tab_filename,
+                                            match_output_folder,
+                                            overwrite);
+    }
+
+    if(tab_file == NULL || decoy_tab_file == NULL){
+      carp(CARP_DEBUG, "tab file or decoy tab file is null");
     }
 
   }
