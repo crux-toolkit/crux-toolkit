@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.56 $
+ * $Revision: 1.57 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -423,9 +423,9 @@ typedef struct match_iterator MATCH_ITERATOR_T;
 /**
  * The enum for match_search_ouput_mode (binary, sqt, all)
  */
-enum _match_search_ouput_mode {BINARY_OUTPUT, SQT_OUTPUT, ALL_OUTPUT};
-#define NUMBER_SEARCH_OUTPUT_MODES 3
-#define NUMBER_OUTPUT_MODES 3
+enum _match_search_ouput_mode {BINARY_OUTPUT, SQT_OUTPUT, TAB_OUTPUT, ALL_OUTPUT};
+#define NUMBER_SEARCH_OUTPUT_MODES 4
+#define NUMBER_OUTPUT_MODES 4
 
 /**
  * \typedef MATCH_SEARCH_OUPUT_MODE_T

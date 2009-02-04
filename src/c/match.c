@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.60 $
- * REVISION: $Revision: 1.60 $
+ * REVISION: $Revision: 1.61 $
+ * REVISION: $Revision: 1.61 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -536,6 +536,129 @@ void print_match_sqt(
     free(protein_id);
   }
   
+  free_peptide_src_iterator(peptide_src_iterator);
+  
+  return;
+}
+
+/**
+ * \brief Print the match information in tab delimited format to the given file
+ *
+ */
+void print_match_tab(
+  MATCH_T* match,             ///< the match to print -in  
+  FILE* file,                 ///< output stream -out
+  int first_scan,             ///< starting scan number -in
+  int last_scan,             ///< starting scan number -in
+  float spectrum_mass,       ///< spectrum neutral mass -in
+  int charge,                 ///< charge -in
+  SCORER_TYPE_T main_score,   ///< the main score to report -in
+  SCORER_TYPE_T other_score  ///< the other score to report -in
+  ){
+
+  if( match == NULL || file == NULL ){
+    carp(CARP_ERROR, "Cannot print match to tab delimited file from null inputs");
+    return;
+  }
+  PEPTIDE_T* peptide = get_match_peptide(match);
+  // this should get the sequence from the match, not the peptide
+  char* sequence = get_match_sequence_sqt(match);
+  BOOLEAN_T adjust_delta_cn = FALSE;
+
+  // NOTE (BF 12-Feb-08) This is an ugly fix to give post-percolator
+  // sqt files the rank of the xcorr and sp.
+  // ALSO deltaCn not serialized, so set to 0 for post-process
+  SCORER_TYPE_T main_rank_type = main_score;
+  SCORER_TYPE_T other_rank_type = other_score;
+  if( main_score == PERCOLATOR_SCORE && other_score==Q_VALUE ){
+    main_rank_type = XCORR;
+    other_rank_type = SP;    
+    adjust_delta_cn = TRUE;
+  }
+
+  // for p-values, also give rank of xcorr and sp?
+  else if( main_score == LOGP_BONF_WEIBULL_XCORR ){
+    //other_rank_type = XCORR;
+    main_rank_type = XCORR;
+    other_score = XCORR;
+  }else if( main_score == LOGP_BONF_WEIBULL_SP ){
+    //other_rank_type = SP;
+    other_score = SP;
+  }
+  // for post-analysis of p-values, both ranks from xcorr
+  else if( main_score == LOGP_QVALUE_WEIBULL_XCORR ){
+    main_rank_type = XCORR;
+  }
+  // secondary rank could always be preliminary score
+
+  // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
+  // Only the fraction matched is serialized.  The number possible can
+  // be calculated from the length of the sequence and the charge, but
+  // the charge of the match is not serialized and I'm not sure when
+  // it is set.  But I know it exists by here, so recalculate it.
+  int b_y_total = get_match_b_y_ion_possible(match);
+  int b_y_matched = get_match_b_y_ion_matched(match);
+  
+  if( b_y_total == 0 ){
+    int factor = get_match_charge(match);
+    if( factor == 3 ){
+      factor = 2;  //there are +1 and +2 b/y ions for charge==3
+    }else{
+      factor = 1;
+    }
+    b_y_total = (get_peptide_length(peptide)-1) * 2 * factor;
+    b_y_matched = (get_match_b_y_ion_fraction_matched(match)) * b_y_total;
+  }
+
+  float delta_cn = get_match_delta_cn(match);
+  if( adjust_delta_cn == TRUE ){
+    delta_cn = 0.0;
+  }
+  if( delta_cn == 0 ){// I hate -0, this prevents it
+    delta_cn = 0.0;
+  }
+
+  // If a p-value couldn't be calculated, print as NaN
+  float score_main = get_match_score(match, main_score);
+  if( main_score == LOGP_BONF_WEIBULL_XCORR&& score_main == P_VALUE_NA ){
+    score_main = sqrt(-1); // evaluates to nan
+  } 
+
+  
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
+    new_peptide_src_iterator(peptide);
+  PEPTIDE_SRC_T* peptide_src = NULL;
+  char* protein_id = NULL;
+  PROTEIN_T* protein = NULL;
+  //char* description = NULL;
+  
+  while(peptide_src_iterator_has_next(peptide_src_iterator)){
+    peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    protein = get_peptide_src_parent_protein(peptide_src);
+    protein_id = get_protein_id(protein);
+    
+    // print match info
+    fprintf(file, "%d\t%d\t%.2f\t%d\t%s\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\n",
+            first_scan,
+            last_scan,
+            spectrum_mass,
+            charge,
+            protein_id,
+            get_match_rank(match, main_rank_type),
+            get_match_rank(match, other_rank_type),
+            get_peptide_peptide_mass(peptide),
+            delta_cn,
+            //get_match_score(match, main_score),
+            score_main,
+            get_match_score(match, other_score),
+            b_y_matched,
+            b_y_total,
+            sequence
+            );
+    free(protein_id);
+  }
+  
+  free(sequence);
   free_peptide_src_iterator(peptide_src_iterator);
   
   return;
