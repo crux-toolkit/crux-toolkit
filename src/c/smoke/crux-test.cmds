@@ -38,7 +38,7 @@ predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = crux-predict
 predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = crux-predict-peptide-ions --primary-ions by --max-ion-charge 1 --flanking T IAMASEQ 3=
 
 # Search for matches and test sqt file
-search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt decoy.sqt test*.csm ; crux search-for-matches --parameter-file params/set_rand_seed --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time' 'atabase'
+search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt decoy.sqt test*.csm target.txt decoy.txt; crux search-for-matches --parameter-file params/set_rand_seed --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time' 'atabase'
 
 # Analyze existing search results
 analyze_matches_existing = good_results/standard_existing-perc.sqt = rm -f target.sqt decoy.sqt test*.csm; crux percolator existing_search test.fasta; cat target.sqt = 'Time' 'Database'
@@ -73,7 +73,7 @@ search_elastase = good_results/standard_search_elastase.sqt = crux search-for-ma
 generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
-search_for_matches_default_existing_index = good_results/standard_search_default_existing_index.target.sqt = rm -rf target.sqt decoy.sqt test*csm ; crux search-for-matches --output-mode all --use-index T --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat target.sqt = 'Time' 'Database'
+search_for_matches_default_existing_index = good_results/standard_search_default_existing_index.target.sqt = rm -rf target.sqt decoy.sqt test*csm target.txt decoy.txt; crux search-for-matches --output-mode all --use-index T --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat target.sqt = 'Time' 'Database'
 
 # See that match_analysis works with an existing index and existing results
  analyze_matches_existing_index_and_results = good_results/standard_existing-perc.sqt =  rm -f existing-perc.sqt demo.csm; crux percolator --sqt-output-file existing-perc.sqt --use-index T good_results existing_crux_index; cat existing-perc.sqt = 'StartTime' 'Database'

@@ -508,6 +508,12 @@ void initialize_parameters(void){
       "by crux-analzye-matches with the percolator algorithm", "true");
 
   /* search-for-matches parameter file options */
+  set_int_parameter("num-decoys-per-target", 1, 1, BILLION,
+      "Number of decoy peptides to search for every target peptide searched. "
+      "Default 1.",
+      "Multiple decoys are put in the same collection, sorted together, and "
+      "written to the same file.  Does not affect --number-decoy-sets.",
+      "true");
   set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
       "Number of psms per spectrum to score after "
       "preliminary scoring.  Default 500.",

@@ -167,12 +167,7 @@ int search_main(int argc, char** argv){
   FILTERED_SPECTRUM_CHARGE_ITERATOR_T* spectrum_iterator = 
     new_filtered_spectrum_charge_iterator(spectra);
 
-  /*
   // get search parameters for match_collection
-  int max_rank_preliminary = get_int_parameter("max-rank-preliminary");
-  SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
-  SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
-  */
   BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
   int sample_count = (compute_pvalues) ? PARAM_ESTIMATION_SAMPLE_COUNT : 0;
 
@@ -196,7 +191,6 @@ int search_main(int argc, char** argv){
     SPECTRUM_T* spectrum = 
       filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
     double mass = get_spectrum_neutral_mass(spectrum, charge);
-    //double mass = get_spectrum_singly_charged_mass(spectrum, charge);
 
     carp(CARP_DETAILED_INFO, 
          "Searching spectrum number %i, charge %i, search number %i",
@@ -206,7 +200,7 @@ int search_main(int argc, char** argv){
     // with just the target database decide how many peptide mods to use
     // create an empty match collection 
     MATCH_COLLECTION_T* match_collection = 
-      new_empty_match_collection( FALSE ); // is decoy
+      new_empty_match_collection( FALSE ); // is decoy = false
 
     // assess scores after all pmods with x amods have been searched
     int cur_aa_mods = 0;
@@ -260,21 +254,9 @@ int search_main(int argc, char** argv){
     // calculate p-values
     if( compute_pvalues == TRUE ){
       carp(CARP_DEBUG, "Estimating Weibull parameters.");
-      /*
-      int estimate_sample_size = 500;  // get this from ??
-      estimate_weibull_parameters(match_collection, 
-                                  XCORR, // should be parameter "score-type"
-                                  estimate_sample_size, 
-                                  spectrum, 
-                                  charge);
-
-      carp(CARP_DEBUG, "Calculating p-values.");
-      compute_p_values(match_collection);
-      */
       if( estimate_weibull_parameters_from_sample_matches(match_collection,
                                                           spectrum,
                                                           charge) ){
-
         carp(CARP_DEBUG, "Calculating p-values.");
         compute_p_values(match_collection);
       }else{
@@ -301,8 +283,11 @@ int search_main(int argc, char** argv){
     // now score same number of mods for decoys
     int max_mods = mod_idx;
 
-    // for num_decoys
+    // for num_decoys  and num_decoy_repeats
     int decoy_idx = 0;
+    int repeat_idx = 0;
+    int num_decoy_repeats = get_int_parameter("num-decoys-per-target");
+
     for(decoy_idx = 0; decoy_idx < num_decoys; decoy_idx++ ){
       carp(CARP_DETAILED_DEBUG, "Searching decoy %i", decoy_idx+1);
 
@@ -311,28 +296,26 @@ int search_main(int argc, char** argv){
         new_empty_match_collection( TRUE ); // is decoy
 
       for(mod_idx = 0; mod_idx < max_mods; mod_idx++){
-        /*
-        // create an empty match collection 
-          MATCH_COLLECTION_T* match_collection = 
-          new_empty_match_collection( TRUE ); // is decoy
-        */
 
         // get peptide mod
         PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
 
-        // get peptide iterator
-        MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator = 
-          new_modified_peptides_iterator_from_mass(mass,
-                                                   peptide_mod,
-                                                   index,
-                                                   database);
-        // score peptides
-        int added = add_matches(match_collection, spectrum, 
-                                charge, peptide_iterator,
-                                0);// no sampling for param estimation
-        carp(CARP_DEBUG, "Added %i matches", added);
-        
-        free_modified_peptides_iterator(peptide_iterator);
+        // for multiple decoy searches written to one file, repeat here
+        for(repeat_idx=0; repeat_idx < num_decoy_repeats; repeat_idx++){
+          // get peptide iterator
+          MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator = 
+            new_modified_peptides_iterator_from_mass(mass,
+                                                     peptide_mod,
+                                                     index,
+                                                     database);
+          // score peptides
+          int added = add_matches(match_collection, spectrum, 
+                                  charge, peptide_iterator,
+                                  0);// no sampling for param estimation
+          carp(CARP_DEBUG, "Added %i matches", added);
+          
+          free_modified_peptides_iterator(peptide_iterator);
+        }// next repeat
         
       }// last mod
 
