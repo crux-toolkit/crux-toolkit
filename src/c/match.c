@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.61 $
- * REVISION: $Revision: 1.61 $
+ * REVISION: $Revision: 1.62 $
+ * REVISION: $Revision: 1.62 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -524,15 +524,19 @@ void print_match_sqt(
   PEPTIDE_SRC_T* peptide_src = NULL;
   char* protein_id = NULL;
   PROTEIN_T* protein = NULL;
-  //char* description = NULL;
+  char* rand = "";
+  if( match->null_peptide ){
+    rand = "rand_";
+    printf("null peptide, add the '%s'\n", rand);
+  }
   
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     peptide_src = peptide_src_iterator_next(peptide_src_iterator);
     protein = get_peptide_src_parent_protein(peptide_src);
     protein_id = get_protein_id(protein);
     
-    // print match info (locus line)
-    fprintf(file, "L\t%s\n", protein_id);      
+    // print match info (locus line), add rand_ to locus name for decoys
+    fprintf(file, "L\t%s%s\n", rand, protein_id);      
     free(protein_id);
   }
   
