@@ -40,7 +40,8 @@ dist_html_DATA  =  \
 	data/demo.ms2 \
 	data/small-yeast.fasta
 
-EXTRA_DIST = schematic.fig
+#EXTRA_DIST = schematic.fig
+EXTRA_DIST = schematic.eps
 
 WEBDIR=/noble/www/htdocs/proj/crux
 webpage:
