@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.34 $
+ * $Revision: 1.35 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -119,7 +119,8 @@ int add_matches(
   SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
-  int sample_size        ///< num matches to add to sampled_matches
+  int sample_size,        ///< num matches to add to sampled_matches
+  BOOLEAN_T is_decoy     ///< do we shuffle the peptides
 );
 
 /**

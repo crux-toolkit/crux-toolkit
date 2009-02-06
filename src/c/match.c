@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.62 $
- * REVISION: $Revision: 1.62 $
+ * REVISION: $Revision: 1.63 $
+ * REVISION: $Revision: 1.63 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -527,7 +527,6 @@ void print_match_sqt(
   char* rand = "";
   if( match->null_peptide ){
     rand = "rand_";
-    printf("null peptide, add the '%s'\n", rand);
   }
   
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
