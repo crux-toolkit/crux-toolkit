@@ -976,12 +976,24 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   check_parameter_consistency();
 
   // do global parameter-specific tasks: set static aa modifications
-  //   set verbosity, print param file (if requested)
+  //   set verbosity, make adjustments for tdc, print param file (if requested)
   update_aa_masses();
+
   if( get_boolean_parameter("tdc") == TRUE ){
     // change num-decoys so that no decoy.sqt file written
     update_hash_value(parameters, "number-decoy-set", "0");
+
+    // keep more psms to score with xcorr
+    // e.g. top_match=500, num_decoys_per=2, keep 500 + 1000 for xcorr
+    int top_match = get_int_parameter("max-rank-preliminary");
+    int num_decoys_per = get_int_parameter("num-decoys-per-target");
+    top_match *= (1 + num_decoys_per);
+    // stringify value
+    char buffer[PARAMETER_LENGTH];
+    snprintf(buffer, PARAMETER_LENGTH, "%i", top_match);
+    update_hash_value(parameters, "max-rank-preliminary", buffer);
   }
+
   set_verbosity_level(get_int_parameter("verbosity"));
   print_parameter_file(param_filename);
 
