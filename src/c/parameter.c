@@ -508,6 +508,12 @@ void initialize_parameters(void){
       "by crux-analzye-matches with the percolator algorithm", "true");
 
   /* search-for-matches parameter file options */
+  set_boolean_parameter("tdc", FALSE,
+      "Target-decoy competition.  Combine target and decoy searches in "
+      "one file.  Default FALSE, separate files.",
+      "After searching target and decoy peptides, all psms for one spectrum "
+      "are sorted together and the mix list is returned in the target.sqt "
+      "file. Set number of decoys with num-decoys-per-target.", "true");
   set_int_parameter("num-decoys-per-target", 1, 1, BILLION,
       "Number of decoy peptides to search for every target peptide searched. "
       "Default 1.",
@@ -972,6 +978,10 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   // do global parameter-specific tasks: set static aa modifications
   //   set verbosity, print param file (if requested)
   update_aa_masses();
+  if( get_boolean_parameter("tdc") == TRUE ){
+    // change num-decoys so that no decoy.sqt file written
+    update_hash_value(parameters, "number-decoy-set", "0");
+  }
   set_verbosity_level(get_int_parameter("verbosity"));
   print_parameter_file(param_filename);
 

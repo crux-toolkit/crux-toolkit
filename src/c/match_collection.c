@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.92 $
+ * $Revision: 1.93 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -112,7 +112,9 @@ BOOLEAN_T score_peptides(
   MATCH_COLLECTION_T* match_collection, 
   SPECTRUM_T* spectrum, 
   int charge, 
-  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator);
+  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
+  BOOLEAN_T is_decoy
+);
 
 BOOLEAN_T score_matches_one_spectrum(
   SCORER_TYPE_T score_type, 
@@ -576,7 +578,9 @@ int add_matches(
   SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
-  int sample_size        ///< num matches to add to sampled_matches
+  int sample_size,       ///< num matches to add to sampled_matches
+  BOOLEAN_T is_decoy     ///< are peptides to be shuffled
+  //BF: this was added so that a m_c could be mixed target/decoy
 ){
   if( match_collection == NULL || peptide_iterator == NULL
       || spectrum == NULL ){
@@ -594,8 +598,8 @@ int add_matches(
 
   // preliminary scoring
   SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
-  score_peptides(prelim_score, match_collection, 
-                 spectrum, charge, peptide_iterator);
+  score_peptides(prelim_score, match_collection, spectrum, 
+                 charge, peptide_iterator, is_decoy);
 
   num_matches_added = match_collection->match_total - start_index;
 
@@ -1392,6 +1396,7 @@ BOOLEAN_T estimate_exp_sp_parameters(
  * 5. Finally get peptide sequence through get_match_sequence method
  */
 
+// obsolete?
 /**
  * Preliminary scoring method: 
  * creates new match objects, and sets them as to which they are null 
@@ -1546,7 +1551,10 @@ BOOLEAN_T score_peptides(
   MATCH_COLLECTION_T* match_collection, ///< put results here
   SPECTRUM_T* spectrum,     ///< spectrum to compare
   int charge,               ///< charge of spectrum
-  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator){///< source of peptides
+  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< source of peptides
+  BOOLEAN_T is_decoy        ///< do we shuffle the peptides
+  //BF: this was added so that m_c can be mixed target/decoy
+){
 
   if( match_collection == NULL || spectrum == NULL 
       || peptide_iterator == NULL ){
@@ -1567,7 +1575,7 @@ BOOLEAN_T score_peptides(
   MATCH_T* match = NULL;
   float score = 0;
   PEPTIDE_T* peptide = NULL;
-  BOOLEAN_T is_decoy = match_collection->null_peptide_collection;
+  //BOOLEAN_T is_decoy = match_collection->null_peptide_collection;
   carp(CARP_DETAILED_DEBUG, "New match_collection is null? %i", is_decoy);
 
   // create a generic ion_series that will be reused for each peptide sequence

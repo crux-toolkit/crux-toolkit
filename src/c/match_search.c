@@ -170,6 +170,7 @@ int search_main(int argc, char** argv){
   // get search parameters for match_collection
   BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
   int sample_count = (compute_pvalues) ? PARAM_ESTIMATION_SAMPLE_COUNT : 0;
+  BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
 
   // flags and counters for loop
   int spectrum_searches_counter = 0; //for psm file header, spec*charges
@@ -230,9 +231,13 @@ int search_main(int argc, char** argv){
                                                  index,
                                                  database);
       // score peptides
-      int added = add_matches(match_collection, spectrum, 
-                              charge, peptide_iterator,
-                              sample_per_pep_mod );
+      int added = add_matches(match_collection, 
+                              spectrum, 
+                              charge, 
+                              peptide_iterator,
+                              sample_per_pep_mod,
+                              FALSE // is decoy
+                              );
 
       carp(CARP_DEBUG, "Added %i matches", added);
 
@@ -264,22 +269,24 @@ int search_main(int argc, char** argv){
       }
     }
 
-    // print matches
-    carp(CARP_DEBUG, "About to print target matches");
-    print_matches(
-      match_collection, 
-      spectrum, 
-      FALSE,// is decoy
-      psm_file_array[0], 
-      sqt_file, 
-      decoy_sqt_file, 
-      tab_file,
-      decoy_tab_file
-    );
-
-    // ?? does this free all the matches, all the spectra and all the peptides?
-    free_match_collection(match_collection);
-
+    if( combine_target_decoy == FALSE ){
+      // print matches
+      carp(CARP_DEBUG, "About to print target matches");
+      print_matches(
+                    match_collection, 
+                    spectrum, 
+                    FALSE,// is decoy
+                    psm_file_array[0], 
+                    sqt_file, 
+                    decoy_sqt_file, 
+                    tab_file,
+                    decoy_tab_file
+                    );
+      
+      //does this free all the matches, all the spectra and all the peptides?
+      free_match_collection(match_collection);
+      match_collection = NULL;
+    }
     // now score same number of mods for decoys
     int max_mods = mod_idx;
 
@@ -287,19 +294,21 @@ int search_main(int argc, char** argv){
     int decoy_idx = 0;
     int repeat_idx = 0;
     int num_decoy_repeats = get_int_parameter("num-decoys-per-target");
+    // decoy files is 0 but we want to do at least one decoy searc for tdc
+    num_decoys = (combine_target_decoy) ? 1 : num_decoys;
 
     for(decoy_idx = 0; decoy_idx < num_decoys; decoy_idx++ ){
       carp(CARP_DETAILED_DEBUG, "Searching decoy %i", decoy_idx+1);
 
-      // create an empty match collection 
-      MATCH_COLLECTION_T* match_collection = 
-        new_empty_match_collection( TRUE ); // is decoy
+      if( combine_target_decoy == FALSE ){// create an empty match collection 
+        match_collection = new_empty_match_collection( TRUE ); // is decoy
+      }// else add to match_collection from above
 
       for(mod_idx = 0; mod_idx < max_mods; mod_idx++){
-
+          
         // get peptide mod
         PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
-
+        
         // for multiple decoy searches written to one file, repeat here
         for(repeat_idx=0; repeat_idx < num_decoy_repeats; repeat_idx++){
           // get peptide iterator
@@ -309,9 +318,12 @@ int search_main(int argc, char** argv){
                                                      index,
                                                      database);
           // score peptides
-          int added = add_matches(match_collection, spectrum, 
-                                  charge, peptide_iterator,
-                                  0);// no sampling for param estimation
+          int added = add_matches(match_collection, 
+                                  spectrum, 
+                                  charge, 
+                                  peptide_iterator,
+                                  0, // no sampling for param estimation
+                                  TRUE);// is decoy
           carp(CARP_DEBUG, "Added %i matches", added);
           
           free_modified_peptides_iterator(peptide_iterator);
@@ -327,19 +339,36 @@ int search_main(int argc, char** argv){
         tmp_decoy_sqt_file = NULL; 
         tmp_decoy_tab_file = NULL; 
       }
-      carp(CARP_DEBUG, "About to print decoy matches");
+      
+      if( combine_target_decoy == FALSE ){ // print to decoy file
+        carp(CARP_DEBUG, "About to print decoy matches");
+        print_matches(
+                      match_collection, 
+                      spectrum, 
+                      TRUE,// is decoy
+                      psm_file_array[1+decoy_idx], 
+                      sqt_file, 
+                      tmp_decoy_sqt_file,
+                      tab_file, 
+                      tmp_decoy_tab_file
+                      );
+        
+        free_match_collection(match_collection);
+      }else{ // print all to target file
+      carp(CARP_DEBUG, "About to print target and decoy matches");
       print_matches(
-        match_collection, 
-        spectrum, 
-        TRUE,// is decoy
-        psm_file_array[1+decoy_idx], 
-        sqt_file, 
-        tmp_decoy_sqt_file,
-        tab_file, 
-        tmp_decoy_tab_file
-      );
+                    match_collection, 
+                    spectrum, 
+                    FALSE,// is decoy
+                    psm_file_array[0], 
+                    sqt_file, 
+                    decoy_sqt_file, 
+                    tab_file,
+                    decoy_tab_file
+                    );
+      }
 
-      free_match_collection(match_collection);
+
 
     }// last decoy
 
