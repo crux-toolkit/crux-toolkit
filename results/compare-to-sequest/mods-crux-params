@@ -1,5 +1,7 @@
-cleavages=all
+use-index=T
+#cleavages=all
+enzyme=no-enzyme
 output-mode=sqt
-match-output-folder=crux-results
+match-output-folder=results-crux
 number-decoy-set=0
 mod=79.9:S:2
