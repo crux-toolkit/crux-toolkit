@@ -227,14 +227,16 @@ relevant when output-mode=&lt;all|sqt&gt;.  Does not affect output to
 binary files. Default = 5. 
 
 <li>
-<code>dtc &lt;T|F&gt;</code> &ndash;
+<code>tdc &lt;T|F&gt;</code> &ndash;
 Target-decoy competition.  Combine target and decoy searches in one
 file.  Default FALSE, separate files. After searching target and decoy
 peptides, all psms for one spectrum are sorted together and the mixed
 list is returned in the target.sqt file. Set number of decoys with
-num-decoys-per-target.
+num-decoys-per-target.  The number of psms retained after preliminary
+searching (max-rank-preliminary) is increased to reflect the number of
+decoys searched so that (1+num-decoys)*max-rank-preliminary are kept.  
 
-<li>
+<Li>
 <code>num-decoys-per-target &lt;int&gt;</code> &ndash;
 Number of decoy peptides to search for every target peptide
 searched. Default 1. Multiple decoys are put in the same collection,

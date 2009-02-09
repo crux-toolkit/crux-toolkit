@@ -513,7 +513,10 @@ void initialize_parameters(void){
       "one file.  Default FALSE, separate files.",
       "After searching target and decoy peptides, all psms for one spectrum "
       "are sorted together and the mix list is returned in the target.sqt "
-      "file. Set number of decoys with num-decoys-per-target.", "true");
+      "file. Set number of decoys with num-decoys-per-target.   The number "
+      "of psms retained after preliminary searching (max-rank-preliminary) "
+      "is increased to reflect the number of decoys searched so that "
+      "(1+num-decoys)*max-rank-preliminary are kept.", "true");
   set_int_parameter("num-decoys-per-target", 1, 1, BILLION,
       "Number of decoy peptides to search for every target peptide searched. "
       "Default 1.",
