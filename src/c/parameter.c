@@ -407,15 +407,16 @@ void initialize_parameters(void){
       "for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin> "
       " includes peptides containing one or more potential cleavage sites.",
       "true");
-  set_boolean_parameter("unique-peptides", FALSE,
+  //  set_boolean_parameter("unique-peptides", FALSE,
+  set_boolean_parameter("unique-peptides", TRUE,
       "Generate peptides only once, even if they appear in more "
       "than one protein (T,F).  Default FALSE.",
-      "Available from command line or parameter file for crux-create-index "
-      "and crux-genereate-peptides. Parameter file only for crux-search-for-"
-      "matches.  For crux-generate-peptides, returns one line per peptide "
-      "when true or one line per peptide per protein occurence when false.  "
-      "For index and search, stores and reports only one protein in which "
-      "the peptide occurs.", "true");
+      "Available from command line or parameter file for "
+      "crux-genereate-peptides. Returns one line per peptide "
+      "when true or one line per peptide per protein occurence when false.  ",
+     //"For index and search, stores and reports only one protein in which "
+     //"the peptide occurs.", 
+      "true");
   
   /* more generate_peptide parameters */
   set_boolean_parameter("output-sequence", FALSE, 

@@ -51,7 +51,7 @@ int create_index_main(int argc, char** argv){
     "digestion", 
     //    "cleavages", 
     "missed-cleavages",
-    "unique-peptides"
+    //    "unique-peptides"
   };
 
   /* Define required command line arguments */ 
