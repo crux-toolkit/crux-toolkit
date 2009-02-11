@@ -92,6 +92,12 @@ or <code>crux&nbsp;percolator</code>.
 
 <li>
 <b>target.txt</b>: a tab-delimited text file containing the PSMs.
+Each line contains the following 14 columns: (1) first scan, (2) last
+scan, (3) spectrum neutral mass, (4) charge, (5) protein id, (6) main
+rank, (7) other rank, (8) peptide mass, (9) delta cn, (10) main score,
+(11) other score, (12) b/y matched, (13) b/y total, (14) peptide
+sequence</li>
+
 
 <li>
 <b>log.txt</b>: a log file containing a copy of all messages that were
@@ -285,7 +291,7 @@ and must be compatible with any index used.</i></p>
 <code>min-mass &lt;float&gt;</code> &ndash; 
 The minimum neutral mass of the peptides to place in the
 index. Default = 200.
-	
+
 <LI>
 <code>max-mass &lt;float&gt;</code> &ndash; 
 The maximum neutral mass of the peptides to place in
