@@ -1,0 +1,6 @@
+use-index=T
+enzyme=no-enzyme
+output-mode=binary
+overwrite=T
+number-decoy-set=0
+verbosity=0

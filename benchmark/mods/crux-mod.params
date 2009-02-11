@@ -1,0 +1,7 @@
+mod=79.9:STY:3
+enzyme=no-enzyme
+use-index=T
+output-mode=binary
+overwrite=T
+number-decoy-set=0
+verbosity=0
