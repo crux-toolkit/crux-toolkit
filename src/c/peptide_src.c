@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide_src.c
- * $Revision: 1.19 $
+ * $Revision: 1.20 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -77,6 +77,21 @@ PEPTIDE_SRC_T* new_peptide_src_array(
   }
   ((PEPTIDE_SRC_T*)(&(src_array[array_idx])))->next_association = NULL;
   return src_array;
+}
+
+/**
+ * \brief Fill in the values from the original array into the new array.
+ * Assumes that the new array has been allocated by new_peptide_src_array().
+ */
+void copy_peptide_src_array(PEPTIDE_SRC_T* original_array, 
+                            PEPTIDE_SRC_T* new_array, 
+                            int array_size){
+  int src_idx = 0;
+  for(src_idx =0; src_idx < array_size; src_idx++){
+    new_array[src_idx].digestion = original_array[src_idx].digestion;
+    new_array[src_idx].parent_protein = original_array[src_idx].parent_protein;
+    new_array[src_idx].start_idx = original_array[src_idx].start_idx;
+  }
 }
 
 /**

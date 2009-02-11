@@ -1967,6 +1967,7 @@ BOOLEAN_T set_digest_type_parameter(
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types, name, "DIGEST_T");
+  free(value_str);
   return result;
 
 }
@@ -1995,6 +1996,7 @@ BOOLEAN_T set_enzyme_type_parameter(
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types, name, "ENZYME_T");
+  free(value_str);
   return result;
 
 }

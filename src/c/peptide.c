@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.75 $
+ * $Revision: 1.76 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -48,7 +48,6 @@ struct peptide {
   unsigned char length; ///< The length of the peptide
   float peptide_mass;   ///< The peptide's mass.
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
-  // comment me to fix files
   MODIFIED_AA_T* modified_seq; ///< peptide sequence with modifications
 };
 
@@ -133,9 +132,24 @@ PEPTIDE_T* copy_peptide(
   PEPTIDE_T* new_peptide = allocate_peptide();
   new_peptide->length = src->length;
   new_peptide->peptide_mass = src->peptide_mass;
-  new_peptide->peptide_src = allocate_peptide_src();
-  copy_peptide_src(src->peptide_src, new_peptide->peptide_src);
 
+  if( PEPTIDE_SRC_USE_LINK_LIST ){
+    new_peptide->peptide_src = allocate_peptide_src();
+    copy_peptide_src(src->peptide_src, new_peptide->peptide_src);
+  }else{ // use array
+    // if you don't allocate this correctly, it doesn't get freed correctly
+    // first count the number of peptide srcs
+    PEPTIDE_SRC_T* cur_src = src->peptide_src;
+    int src_count = 0;
+    while(cur_src != NULL){
+      src_count++;
+      cur_src = get_peptide_src_next_association(cur_src);
+    }
+    new_peptide->peptide_src = new_peptide_src_array(src_count); //alloc mem
+    copy_peptide_src_array(src->peptide_src, 
+                           new_peptide->peptide_src,
+                           src_count);
+  }
   if( src->modified_seq == NULL ){
     // get the peptide sequence and convert to MODIFIED_AA_T*
     /*    

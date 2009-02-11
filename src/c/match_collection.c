@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.93 $
+ * $Revision: 1.94 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -210,6 +210,7 @@ BOOLEAN_T estimate_weibull_parameters(
   int charge
   );
 */
+//int collapes_redundant_matches(MATCH_COLLECTION* match_collection);
 
 void truncate_match_collection(
   MATCH_COLLECTION_T* match_collection, 
@@ -615,6 +616,9 @@ int add_matches(
   // rank by prelim score
   populate_match_rank_match_collection(match_collection, prelim_score);
 
+  // collapse any redundant peptides into one
+  //  collapse_redundant_matches(match_collection);
+
   // trim matches to only the top n as ranked by prelim score
   int max_rank = get_int_parameter("max-rank-preliminary");
   truncate_match_collection( match_collection, max_rank, prelim_score);
@@ -827,7 +831,23 @@ BOOLEAN_T spectrum_sort_match_collection(
   return success;
 }
 
-
+/**
+ * \brief Combines any matches with the same peptide found in
+ * different proteins. 
+ *
+ * Requires that the match_collection is for matches of one spectrum
+ * and is sorted by a score for which all matches have been scored.
+ * When two matches with the same peptide sequence are found, the
+ * protein src of the second is added to the first and the second
+ * match is deleted.  Gaps in the array of matches are filled in on a
+ * second pass over the array.
+ * \returns The number of matches deleted.
+ */
+/*
+int collapes_redundant_matches(MATCH_COLLECTION* match_collection){
+  return 0;
+}
+*/
 /**
  * \brief Reduces the number of matches in the match_collection so
  * that only the <max_rank> highest scoring (by score_type) remain.
