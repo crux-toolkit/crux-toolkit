@@ -17,6 +17,9 @@ crux.bbl: crux.tex \
 	./Images/random-sp.eps \
 	./Images/random-xcorr.eps
 
+corrected-xcorr.dvi: corrected-xcorr.tex
+	latex corrected-xcorr
+
 plos-cover.dvi: plos-cover.tex
 	latex plos-cover
 
