@@ -8,7 +8,9 @@
 ln -sf ../../doc/user/data/demo.ms2 .
 ln -sf ../../src/c/crux .
 ln -sf ../../results/paper-figure/score/sequest27 .
+chmod +x ../../results/paper-figure/score/sequest27
 ln -sf ../../results/paper-figure/score/ms22dta.pl .
+chmod +x ../../results/paper-figure/score/ms22dta.pl
 ln -sf ../../doc/user/data/small-yeast.fasta .
 
 ### For SEQUEST ###
