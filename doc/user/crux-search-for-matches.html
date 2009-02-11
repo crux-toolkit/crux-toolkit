@@ -13,6 +13,7 @@
 <blockquote>
 <code>crux search-for-matches [options]
 &lt;ms2&nbsp;input&nbsp;filename&gt; &lt;protein&nbsp;input&gt;
+&lt;output&nbsp;directory&gt;
 </code>
 </blockquote>
 
@@ -60,22 +61,53 @@ the composite list.</p>
 
 <LI>
 &lt;ms2 &gt; &ndash; The name of the file (in MS2 format) from which
-  to parse the spectra. 
+  to parse the spectra. </li>
 
 <LI>
 &lt;protein input&gt; &ndash; 
   The name of the file in fasta format or the directory containing a
-  protein index from which to retrieve proteins and peptides.
+  protein index from which to retrieve proteins and peptides.</li>
+
+<li>
+&lt;output&nbsp;directory&gt; &ndash; The name of the directory to
+place the output files.</li>
 
 </UL>
+
 <B>Output:</B>
 
 <UL>
 <p>
-The program writes to a user-specified folder a binary file
-that contains the PSMs and additional features.
-Optionally, the result can be output in a human readable
-SQT format file instead of or in addition to the binary file.
+The program writes to the user-specified folder the following files:</p>
+<ul>
+
+<li>
+<b>target.csm</b>: a binary file that contains the PSMs and additional
+features.  This file can be used as input
+to <code>crux&nbsp;compute-q-values</code>
+or <code>crux&nbsp;percolator</code>.
+
+<li>
+<b>target.sqt</b>: an SQT file containing the PSMs
+
+<li>
+<b>target.txt</b>: a tab-delimited text file containing the PSMs.
+
+<li>
+<b>log.txt</b>: a log file containing a copy of all messages that were
+printed to stderr.
+
+</ul>
+
+<p>
+If decoys are enabled using <code>--number-decoy-set</code>, then
+three files called binary.csm, binary.sqt and binary.txt are also
+produced.</p>
+
+<p>
+Optionally, you may prepend each of the above filenames with a
+specified string, using the <code>--fileroot</code> option.
+
 </p>
 </UL>
 
@@ -83,74 +115,31 @@ SQT format file instead of or in addition to the binary file.
 <UL>
 
 <li>
-<code>--use-index &lt;T|F&gt;</code> Use an index that has already been 
-    created if true (T) or use a fasta file if false (F). When using
-    an index the 'protein input' argument will be the name of the
-    directory containing the index files (the same as the 'index name'
-    argument for crux-create-index).  Default = F.
+<code>--fileroot &lt;string&gt;</code> &ndash; Prepend each file in 
+the output directory with the specified string.</li>
 
-<LI>
-<code>--output-mode &lt;sqt|binary|all&gt; </code> &ndash; The output
-format. In 'binary' mode the output file is named after the input MS2
-file with extension .csm and the file(s) with search results from
-decoy sequences end in -decoy.csm.  The binary output files become the
-input for crux-analyze-matches.  In 'sqt' mode only a text file is
-produced.  It's name is controlled with the --sqt-output-file and 
---decoy-sqt-out-ut-file options.  With 'all' both binary and text 
-files are produced. Default = binary.
-
-<LI>
-<code>--match-output-folder &lt;string&gt;</code> &ndash; The directory in
-which to store the binary output files and/or text sqt files. Default
-= current directory.  
+<li>
+<code>--use-index &lt;T|F&gt;</code> Use an index that has already
+been created if true (T) or use a fasta file if false (F). When using
+an index the 'protein input' argument will be the name of the
+directory containing the index files (the same as the 'index name'
+argument for crux-create-index).  Default = F.</li>
 
 <li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or 
-fail when trying to overwrite a file if false (F). Default =  F.
-
-<LI>
-<code>--sqt-output-file &lt;string&gt;</code> &ndash; Name of the output text
-file.  Only works with --output-mode&lt;sqt|all&gt; Default = target.sqt.
-
-<LI>
-<code>--decoy-sqt-output-file &lt;string&gt;</code> &ndash; Name of the output
-sqt file for matches to decoy (shuffled) sequences.  Only
-relevant with --number-decoy-sets &lt;1|2&gt;.  With two decoy
-sets, only one is printed to an sqt file. Default = decoy.sqt.
+fail when trying to overwrite a file if false (F). Default =  F.</li>
 
 <LI>
 <code>--number-decoy-set &lt;0|1|2&gt;</code> &ndash; Specify the number
 of decoy sets to generate for match_analysis. At least one decoy set
 is required to run the algorithm 'percolator' in a subsiquent
-crux-analyze-matches run.  Default = 2. 
-
-<!--
-<LI>
-<code>--prelim-score-type &lt;sp|none&gt;</code> &ndash; 
-The type of preliminary 
-scoring function to use.  In the preliminary scoring step, all
-possible psms for a spectrum are scored and sorted by score.  Only the
-top ranking psms are retained for the second scoring step. The
-parameter file option 'max-rank-preliminary' controls how many
-top-ranking psms are retained.  Default = sp.
-
-<LI>
-<code>--score-type &lt;xcorr|sp|xcorr-pvalue|sp-pvalue&gt;</code>&ndash; 
-The type of scoring function to use in the second scoring step.  Xcorr
-is the SEQEUST-style score, sp is the SEQUEST-style preliminary
-scoring function.  A p-value for each psm can be calculated from
-either the xcorr score or the sp score with 'xcorr-pvalue' and
-'sp-pvalue', respectively. Either one may be used with the
-crux-analyze-matches 'curve-fit' algorithm.  Using xcorr or sp
-followed by the crux-analyze-matches algorithm curve-fit results in
-unspecified behavior.  Default = xcorr.
--->
+crux-analyze-matches run.  Default = 2. </li>
 
 <li>
 <code>--compute-p-values &lt;T | F&gt; &ndash</code>
 Estimate the paramters of the score distribution for each spectrum and
 compute a p-value for each PSM.  This option must be used in order to
-run <code>crux compute-q-values</code> on the results.
+run <code>crux compute-q-values</code> on the results.</li>
 
 <LI>
 <code>--spectrum-min-mass &lt;float&gt;</code> &ndash; The lowest spectrum 
@@ -173,11 +162,12 @@ href="parameter-file.html">parameter documentation</a> page for
 details.
 
 <LI>
-<code>--write-parameter-file &lt;filename&gt;</code> &ndash; Create a file
-with the name and value of all parameters/options for the current
+<code>--write-parameter-file</code> &ndash; Create a file in the
+output directory named <code>params.txt</code>.  This file contains
+the name and value of all parameters/options for the current
 search.  Not all parameters in the file may have been used in the
-search.  The resulting file can be used with the --parameter-file
-option for other crux programs. 
+search.  The resulting file can be used with the <code>--parameter-file
+option for other crux programs. </code>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
