@@ -1,6 +1,6 @@
 /**
  * \file peptide_src.h
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  * \brief Object for mapping a peptide to it's parent protein.
  */
 #ifndef PEPTIDE_SRC_H
@@ -37,6 +37,14 @@ DIGEST_T digest,
 PEPTIDE_SRC_T* new_peptide_src_array(
   int size ///< the size of the peptide_src array -in
   );
+
+/**
+ * \brief Fill in the values from the original array into the new array.
+ * Assumes that the new array has been allocated by new_peptide_src_array().
+ */
+void copy_peptide_src_array(PEPTIDE_SRC_T* original_array, 
+                            PEPTIDE_SRC_T* new_array, 
+                            int array_size);
 
 /**
  *\returns a linklist of PROTEIN_PEPTIDE_SRC object
