@@ -1,7 +1,10 @@
 #!/bin/sh
 ##
-## $Id: bootstrap,v 1.2 2008-02-15 00:27:48 cegrant Exp $
+## $Id: bootstrap,v 1.3 2009-02-12 23:16:06 cegrant Exp $
 ## $Log: not supported by cvs2svn $
+## Revision 1.2  2008/02/15 00:27:48  cegrant
+## Adding support for autotools.
+##
 ## Revision 1.1.2.1  2008/01/30 18:37:55  cegrant
 ## Adding support for autotools.
 ##
@@ -66,4 +69,5 @@ cp /usr/share/libtool/ltmain.sh config
 autoheader
 automake -a -c 
 autoconf
+
 
