@@ -1,7 +1,0 @@
-cut -f2,3,9 match_analysis.txt  | sort -u > crux.scan2peptide
-cut -f2,3 sequest.psm | sed 's#,forward/60cm.sqt,#	#'  | sort -u > sequest.scan2peptide
-echo "Number scan-charges in common"
-cut -f1,2 crux.scan2peptide sequest.scan2peptide | sort | uniq -d | wc
-echo "Number top-peptides in common"
-cut -f1,2,3 crux.scan2peptide sequest.scan2peptide | sort | uniq -d | wc
-
