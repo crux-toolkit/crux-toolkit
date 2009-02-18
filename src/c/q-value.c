@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  ****************************************************************************/
 #include "q-value.h"
 
@@ -87,7 +87,7 @@ int qvalue_main(int argc, char** argv){
   MATCH_COLLECTION_T* match_collection = NULL;
 
   /* Perform the analysis */
-  carp(CARP_INFO, "Running comupute q-values");
+  carp(CARP_INFO, "Running compute q-values");
   match_collection = run_qvalue(psm_file, protein_input_name);
   SCORER_TYPE_T scorer_type =  LOGP_QVALUE_WEIBULL_XCORR; 
   SCORER_TYPE_T second_scorer_type = XCORR; // could it be other?
@@ -125,15 +125,20 @@ void print_sqt_file(
   int num_proteins = get_match_collection_num_proteins(match_collection);
   print_sqt_header( sqt_file, "target", num_proteins, TRUE);
 
+  /*
   ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
   char algorithm_str[64];
   algorithm_type_to_string(algorithm_type, algorithm_str);
 
   fprintf(sqt_file, "H\tComment\tmatches analyzed by %s\n", algorithm_str);
+  */
+
+  fprintf(sqt_file, "H\tComment\tmatches analyzed for q-values\n");
 
   // get match iterator sorted by spectrum
   MATCH_ITERATOR_T* match_iterator = 
-    new_match_iterator_spectrum_sorted(match_collection, scorer);
+    //new_match_iterator_spectrum_sorted(match_collection, scorer);
+    new_match_iterator_spectrum_sorted(match_collection, XCORR);
 
   // print each spectrum only once, keep track of which was last printed
   int cur_spectrum_num = -1;

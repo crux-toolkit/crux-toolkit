@@ -637,7 +637,7 @@ void initialize_parameters(void){
       "using the p-values calculated with score-type=<xcorr-pvalue|"
       "sq-pvalue>.  Incorrect combinations of score-type and algorithm cause"
       " undefined behavior. Using 'none' will turn the binary .csm files "
-      "into text.", "true");
+      "into text.", "false");
   set_string_parameter("feature-file", NULL,//"match_analysis.features"
      "Optional file into which psm features are printed.",
      "Available only for crux-analyze-matches.  File will contain features "
@@ -996,6 +996,13 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     char buffer[PARAMETER_LENGTH];
     snprintf(buffer, PARAMETER_LENGTH, "%i", top_match);
     update_hash_value(parameters, "max-rank-preliminary", buffer);
+  }
+
+  // for compute-q-values, set algorithm to q-value (perc by default)
+  if( strcmp(argv[0], "compute-q-values") == 0 ){
+    char value_str[SMALL_BUFFER];
+    algorithm_type_to_string(QVALUE_ALGORITHM, value_str);
+    update_hash_value(parameters, "algorithm", value_str);
   }
 
   set_verbosity_level(get_int_parameter("verbosity"));
