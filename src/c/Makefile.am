@@ -146,13 +146,13 @@ crux_SOURCES = crux-main.c  crux-main.h percolator.c percolator.h
 
 crux_CFLAGS = $(AM_CFLAGS) -DMAIN -DPERCOLATOR -I$(PERCOLATOR_DIR)
 crux_LDADD = \
-  -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary -lcrux 
+  libcrux.la -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary
 else
 crux_SOURCES = crux-main.c  crux-main.h percolator.c percolator.h
 
 crux_CFLAGS = $(AM_CFLAGS) -DMAIN
 crux_LDADD = \
-   -lcrux 
+  libcrux.la
 endif
 
 paramdir = $(prefix)/doc
