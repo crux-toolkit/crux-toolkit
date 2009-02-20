@@ -16,7 +16,6 @@
 int create_index_main(int argc, char** argv){
 
   /* Declarations */
-  //int verbosity;
   int min_length;
   int max_length;
   double min_mass;
@@ -24,9 +23,7 @@ int create_index_main(int argc, char** argv){
   MASS_TYPE_T mass_type;
   ENZYME_T enzyme;
   DIGEST_T digest;
-  //PEPTIDE_TYPE_T peptide_type;
   int missed_cleavages; 
-  //where is the unique vs redundant variable?
 
   double mass_range;
   PEPTIDE_CONSTRAINT_T* constraint;
@@ -55,7 +52,6 @@ int create_index_main(int argc, char** argv){
   };
 
   /* Define required command line arguments */ 
-  // TODO add index name
   int num_arguments = NUM_INDEX_ARGS;
   char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file", 
                                           "index name"}; 
@@ -84,11 +80,6 @@ int create_index_main(int argc, char** argv){
   /* does sytnax, type, bounds checking and dies if neccessessary */
   parse_cmd_line_into_params_hash(argc, argv, "crux create-index");
 
-  /* Set verbosity */
-  //TODO move this to parameter.c?
-  //verbosity = get_int_parameter("verbosity");
-  //set_verbosity_level(verbosity);
-    
   /* Get parameter values */
   min_mass = get_double_parameter("min-mass");
   max_mass = get_double_parameter("max-mass");
@@ -100,11 +91,9 @@ int create_index_main(int argc, char** argv){
   missed_cleavages = get_boolean_parameter("missed-cleavages");
   enzyme = get_enzyme_type_parameter("enzyme");
   digest = get_digest_type_parameter("digestion");
-//  peptide_type = get_peptide_type_parameter("cleavages");
   mass_type = get_mass_type_parameter("isotopic-mass");
 
   /* create peptide constraint */
-  //constraint = new_peptide_constraint(peptide_type, min_mass, max_mass, 
   constraint = new_peptide_constraint(enzyme, digest, min_mass, max_mass, 
                                       min_length, max_length, 
                                       missed_cleavages, mass_type);
@@ -120,7 +109,6 @@ int create_index_main(int argc, char** argv){
   
   /* check if output name already exists
      fail if --overwrite is false */
-  //TODO
   char* out_dir = get_string_parameter("index name");
   carp(CARP_DEBUG, "New index name is '%s'", out_dir);
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");

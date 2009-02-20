@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.76 $
+ * $Revision: 1.77 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -204,6 +204,39 @@ BOOLEAN_T merge_peptides(
   }
   set_peptide_src_next_association(current_src, peptide_bye->peptide_src);
   free(peptide_bye);
+  return TRUE;
+}
+
+/**
+ * Merges two identical peptides by adding the peptide_src of the
+ * second to the first.  The second peptide remains unchanged.
+ * Does not comfirm identity of peptides.
+ * \returns TRUE if merge is successfull.
+ */
+BOOLEAN_T merge_peptides_copy_src(PEPTIDE_T* peptide_dest,
+                                  PEPTIDE_T* peptide_giver){
+
+  if( peptide_dest == NULL || peptide_giver == NULL ){
+    carp(CARP_FATAL, "Cannot merge NULL peptides.");
+    exit(1);
+  }
+
+  // find the last peptide src for destination
+  PEPTIDE_SRC_T* dest_src = peptide_dest->peptide_src;
+  PEPTIDE_SRC_T* dest_next = get_peptide_src_next_association(dest_src);
+
+  while( dest_next != NULL ){
+    dest_src = dest_next;
+    dest_next = get_peptide_src_next_association(dest_src);
+  }
+
+  // copy the giver peptide_src's to the dest (allocate first src)
+  PEPTIDE_SRC_T* temp_src = allocate_peptide_src();
+  PEPTIDE_SRC_T* giver_src = peptide_giver->peptide_src;
+
+  copy_peptide_src(giver_src, temp_src);
+  set_peptide_src_next_association(dest_src, temp_src);
+
   return TRUE;
 }
 

@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.94 $
+ * $Revision: 1.95 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -211,6 +211,9 @@ BOOLEAN_T estimate_weibull_parameters(
   );
 */
 //int collapes_redundant_matches(MATCH_COLLECTION* match_collection);
+
+void collapse_redundant_matches(MATCH_COLLECTION_T* matches);
+void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx);
 
 void truncate_match_collection(
   MATCH_COLLECTION_T* match_collection, 
@@ -613,11 +616,25 @@ int add_matches(
                                      start_index);
   }
 
+  // DEBUG: check that all added matches are non-negative
+  int i=0;
+  for(i=0; i<match_collection->match_total; i++){
+    if( match_collection->match[i] == NULL ){
+      fprintf(stderr, "match %i is null\n", i);
+    }
+  }
+
   // rank by prelim score
   populate_match_rank_match_collection(match_collection, prelim_score);
 
+  for(i=0; i<match_collection->match_total; i++){
+    if( match_collection->match[i] == NULL ){
+      fprintf(stderr, "match %i is null\n", i);
+    }
+  }
+
   // collapse any redundant peptides into one
-  //  collapse_redundant_matches(match_collection);
+  collapse_redundant_matches(match_collection);
 
   // trim matches to only the top n as ranked by prelim score
   int max_rank = get_int_parameter("max-rank-preliminary");
@@ -636,6 +653,139 @@ int add_matches(
 
   //  num_matches_added = match_collection->match_total - start_index;
   return num_matches_added;
+}
+
+/**
+ * \brief After psms have been added to a match collection but before
+ * the collection has been truncated, go through the list of matches
+ * and combine those that are for the same peptide sequence.
+ *
+ * Requires that the match_collection was sorted by Sp so that
+ * matches with identical peptides will be listed together.
+ */
+void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
+  if( match_collection == NULL ){
+    carp(CARP_FATAL, "Cannot collapse matches from null collection.");
+    exit(1);
+  }
+
+  // must not be empty
+  int match_total = match_collection->match_total;
+  if( match_total == 0 ){
+    return;
+  }  
+
+  carp(CARP_DETAILED_DEBUG, "Collapsing %i redundant matches.", match_total);
+
+  int i=0;
+  for(i=0; i<match_collection->match_total; i++){
+    if( match_collection->match[i] == NULL ){
+      fprintf(stderr, "match %i is null\n", i);
+    }
+  }
+
+  // must be sorted by Sp
+  assert( match_collection->last_sorted == SP );
+
+  MATCH_T** matches = match_collection->match;
+  int match_idx = 0;
+  float cur_score = get_match_score(matches[match_idx], SP);
+
+  // for entire list of matches
+  while(match_idx < match_total-1){
+    float next_score = get_match_score(matches[match_idx+1], SP);
+
+    // find the index of the last match with the same score
+    int cur_score_last_index = match_idx;
+    carp(CARP_DETAILED_INFO, "Cur score %.2f next score %.2f.", cur_score, next_score);
+    while(next_score == cur_score && cur_score_last_index < match_total-2){
+      cur_score_last_index++;
+      next_score = get_match_score(matches[cur_score_last_index+1], SP);
+    }
+
+    if( cur_score_last_index > match_idx ){
+      consolidate_matches(matches, match_idx, cur_score_last_index);
+    }
+
+    match_idx = cur_score_last_index+1;
+    cur_score = next_score;
+  }// next match
+
+  // shift contents of the match array to fill in deleted matches
+  int opening_idx = 0;
+  while( matches[opening_idx] != NULL && opening_idx < match_total){
+    opening_idx++;
+  }
+
+  for(match_idx=opening_idx; match_idx<match_total; match_idx++){
+    if( matches[match_idx] != NULL ){ // then move to opening
+      matches[opening_idx] = matches[match_idx];
+      opening_idx++;
+    }
+  }
+
+  // reset total number of matches in the collection
+  match_collection->match_total = opening_idx;
+  // remove duplicate peptides from the overall count
+  int diff = match_total - opening_idx;
+  match_collection->experiment_size -= diff;
+}
+
+/**
+ * \brief For a list of matches with the same scores, combine those
+ * that are the same peptide and delete redundant matches.
+ *
+ * Since there may be different peptide sequences with the same score,
+ * compare each match to the remaining matches.
+ */
+void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
+
+  carp(CARP_DETAILED_DEBUG, "Consolidating index %i to %i.", start_idx, end_idx);
+  int cur_match_idx = 0;
+  for(cur_match_idx=start_idx; cur_match_idx < end_idx; cur_match_idx++){
+    carp(CARP_DETAILED_DEBUG, "Try consolidating with match[%i].", cur_match_idx);
+
+    if(matches[cur_match_idx] == NULL){
+      carp(CARP_DETAILED_DEBUG, "Can't consolodate with %i, it's null.", cur_match_idx);
+      continue;
+    }    
+
+    //char* cur_seq = get_match_sequence(matches[cur_match_idx]);
+    char* cur_seq = get_match_mod_sequence_str(matches[cur_match_idx]);
+    carp(CARP_DETAILED_DEBUG, "cur seq is %s.", cur_seq);
+    int next_match_idx = cur_match_idx+1;
+    for(next_match_idx=cur_match_idx+1; next_match_idx<end_idx+1; 
+        next_match_idx++){
+      carp(CARP_DETAILED_DEBUG, "Can match[%i] be added to cur.", next_match_idx);
+
+      if(matches[next_match_idx] == NULL){
+        continue;
+      }    
+
+      //char* next_seq = get_match_sequence(matches[next_match_idx]);
+      char* next_seq = get_match_mod_sequence_str(matches[next_match_idx]);
+      carp(CARP_DETAILED_DEBUG, "next seq is %s.", next_seq);
+      if( strcmp(cur_seq, next_seq) == 0){
+        carp(CARP_DETAILED_DEBUG, "Seqs %s and %s match.  Consolidate match[%i] into match[%i].", cur_seq, next_seq, next_match_idx, cur_match_idx);
+
+        // add peptide src of next to cur
+        merge_peptides_copy_src( get_match_peptide(matches[cur_match_idx]),
+                        get_match_peptide(matches[next_match_idx]));
+        // this frees the second peptide, so set what pointed to it to NULL
+        //set_match_peptide(matches[next_match_idx], NULL);
+
+        // delete match
+        free_match(matches[next_match_idx]);
+        matches[next_match_idx] = NULL;
+      }
+
+      free(next_seq);
+    }// next match to delete
+
+    free(cur_seq);
+  }// next match to consolidate to
+
+
 }
 
 /**
@@ -1716,11 +1866,11 @@ BOOLEAN_T score_matches_one_spectrum(
   carp(CARP_DETAILED_DEBUG, "Scoring matches for %s", type_str);
 
   //if( match_collection == NULL ){
-  if( matches == NULL ){
-    carp(CARP_ERROR, "Cannot score matches in a NULL match collection");
+  if( matches == NULL || spectrum == NULL ){
+    carp(CARP_ERROR, "Cannot score matches in a NULL match collection.");
     return FALSE;
   }
-
+  
   // create ion constraint
   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_smart(score_type, 
                                                               charge);
@@ -1738,13 +1888,15 @@ BOOLEAN_T score_matches_one_spectrum(
 
   //for(match_idx = 0; match_idx < match_collection->match_total; match_idx++){
   for(match_idx = 0; match_idx < num_matches; match_idx++){
+
     //match = match_collection->match[match_idx];
     match = matches[match_idx];
-
+    assert( match != NULL );
     // skip it if it's already been scored
     if( NOT_SCORED != get_match_score(match, score_type)){
       continue;
     }
+
     // make sure it's the same spec and charge
     assert( spectrum == get_match_spectrum(match));
     assert( charge == get_match_charge(match));

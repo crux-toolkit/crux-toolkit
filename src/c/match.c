@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.63 $
- * REVISION: $Revision: 1.63 $
+ * REVISION: $Revision: 1.64 $
+ * REVISION: $Revision: 1.64 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -898,7 +898,7 @@ MATCH_T* parse_match(
   match->post_process_match = TRUE;
   int score_type_idx = 0;
   
-  // parse score, ranks of the match    
+  // parse peptide
   if((peptide = parse_peptide(result_file, database, TRUE))== NULL){
     carp(CARP_ERROR, "Failed to parse peptide");
     // FIXME should this exit or return null. I think sometimes we can get
@@ -1065,6 +1065,10 @@ MODIFIED_AA_T* get_match_mod_sequence(
   MATCH_T* match ///< the match from which to get the sequence -in
   )
 {
+  if( match == NULL ){
+    carp(CARP_ERROR, "Cannot get mod sequence from null match.");
+    exit(1);
+  }
   // if post_process_match and has a null peptide you can't get sequence
   if(match->post_process_match && match->null_peptide){
     carp(CARP_ERROR,
@@ -1103,6 +1107,50 @@ MODIFIED_AA_T* get_match_mod_sequence(
 }
 
 /**
+ * \brief Returns a newly allocated string of sequence including any
+ * modification characters. 
+ * \returns The peptide sequence of the match including modification
+ * characters. 
+ */
+char* get_match_mod_sequence_str( MATCH_T* match ){
+
+  // if post_process_match and has a null peptide you can't get sequence
+  if(match->post_process_match && match->null_peptide){
+    carp(CARP_ERROR,
+        "Cannot retrieve null peptide sequence for post_process_match");
+    return NULL;
+  }
+
+  int length = get_peptide_length(get_match_peptide(match));
+  
+  // if sequence is cached return copy of cached peptide sequence
+  if(match->mod_sequence != NULL){
+    return modified_aa_string_to_string(match->mod_sequence, length);
+  }
+
+  // if not cached generate the sequence
+
+  // Is this a null peptide? Then shuffle the sequence
+  if(match->null_peptide){
+    // generate the shuffled peptide sequence
+    match->mod_sequence =
+      generate_shuffled_mod_sequence(match->peptide);//, match->overall_type);
+    char* seq = get_peptide_sequence(match->peptide);
+    char* modseq = modified_aa_string_to_string(match->mod_sequence, length);
+    carp(CARP_DETAILED_DEBUG, "Shuffling transforms: %s -> %s",
+         seq, modseq );
+    free(modseq);
+    free(seq);
+  }
+  else{
+    // just get it from the peptide, no need to shuffle
+    match->mod_sequence = get_peptide_modified_aa_sequence(match->peptide);
+  }
+
+  return modified_aa_string_to_string(match->mod_sequence, length);
+}
+
+/**
  * Must ask for score that has been computed
  *\returns the match_mode score in the match object
  */
@@ -1111,6 +1159,7 @@ float get_match_score(
   SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
   )
 {
+  assert(match != NULL );
   return match->match_scores[match_mode];
 }
 
