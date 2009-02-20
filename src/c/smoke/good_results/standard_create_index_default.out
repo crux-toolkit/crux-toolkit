@@ -7,7 +7,7 @@
 #	enzyme_type: trypsin
 #	missed_cleavage: false
 #	mass_type: average
-#	unique peptides: redundant
+#	unique peptides: unique
 #	CRUX index directory: test_crux_index
 #	target mass range for index file: 6.84
 #	min_mass: 200.00
@@ -18,7 +18,7 @@
 #	digest_type: 1
 #	missed_cleavages: 0
 #	mass_type: 0
-#	unique_peptides: 0
+#	unique_peptides: 1
 #	CRUX index directory: test_crux_index
 #	time created: Thu Jan 29 14:15:25 2009
 #	target_mass_range_for_index_file: 6.84

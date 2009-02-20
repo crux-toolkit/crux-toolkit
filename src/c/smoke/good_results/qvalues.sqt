@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Feb  5 13:03:39 2009
+H	StartTime	Thu Feb 19 10:40:18 2009
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
@@ -18,8 +18,8 @@ H	StaticMod	C=160.139
 H	Alg-DisplayTop	5
 H	EnzymeSpec	trypsin-full-digest
 H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
-H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, percolator_score score, q_value score, number ions matched, total ions compared, sequence
-H	Comment	matches analyzed by percolator
+H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, q-value score, xcorr score, number ions matched, total ions compared, sequence
+H	Comment	matches analyzed for q-values
 S	10	10	2	0.00	server	1270.66	0.00	0.00	54
 M	1	1	1272.40	0.00	0.17	1.11	7	22	I.GAVYSGMGPDYR.V	U
 L	YML092C

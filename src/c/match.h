@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.20 $ 
+ * $Revision: 1.21 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -257,6 +257,16 @@ char* get_match_sequence_sqt(
  */
 MODIFIED_AA_T* get_match_mod_sequence(
   MATCH_T* match ///< the match to work -in
+  );
+
+/**
+ * \brief Returns a newly allocated string of sequence including any
+ * modification characters. 
+ * \returns The peptide sequence of the match including modification
+ * characters. 
+ */
+char* get_match_mod_sequence_str(
+  MATCH_T* match
   );
 
 /**

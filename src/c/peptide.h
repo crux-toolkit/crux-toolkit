@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.47 $
+ * $Revision: 1.48 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -71,6 +71,15 @@ BOOLEAN_T merge_peptides(
   PEPTIDE_T* peptide_bye
   );
                            
+/**
+ * Merges two identical peptides by adding the peptide_src of the
+ * second to the first.  The second peptide remains unchanged.
+ * Does not comfirm identity of peptides.
+ * \returns TRUE if merge is successfull.
+ */
+BOOLEAN_T merge_peptides_copy_src(PEPTIDE_T* peptide_dest,
+                                  PEPTIDE_T* peptide_giver);
+
 /**
  * Frees an allocated peptide object.
  * Depending on peptide_src implementation determines how to free srcs

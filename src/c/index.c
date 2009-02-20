@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.83 $
+ * $Revision: 1.84 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -443,7 +443,7 @@ BOOLEAN_T check_index_constraints(INDEX_T* index){
   ENZYME_T enzyme = get_peptide_constraint_enzyme(index->disk_constraint);
   DIGEST_T digestion = get_peptide_constraint_digest(index->disk_constraint);
   MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(index->disk_constraint);
-  BOOLEAN_T unique = index->is_unique;
+  //  BOOLEAN_T unique = index->is_unique;
 
   BOOLEAN_T success = TRUE;
   char* param;
@@ -465,12 +465,14 @@ BOOLEAN_T check_index_constraints(INDEX_T* index){
   }else if(mass_type != get_mass_type_parameter("isotopic-mass")){
     success = FALSE;
     param = "isotopic-mass";
+    /*
   }else if(unique != get_boolean_parameter("unique-peptides")){
     // TODO (BF 07-24-08): would like to change so that non-unique
     // index could return unique peptides in generate-peptides
     // only if index is unique(1) and requesting not-unique (0) is a problem
     success = FALSE;
     param = "unique-peptides";
+    */
     /*
   }else if(cleavage_type < get_peptide_type_parameter("cleavages")){
     // tryptic < partial < any  BUG for N- or C-tryptic)
@@ -575,7 +577,8 @@ INDEX_T* new_index(
 
   // set database, has not been parsed
   set_index_database(index, database);
-  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
+  //BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
+  BOOLEAN_T is_unique = TRUE;
   set_index_fields(index, output_dir,
                    constraint, mass_range, is_unique);
 
