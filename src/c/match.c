@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.64 $
- * REVISION: $Revision: 1.64 $
+ * REVISION: $Revision: 1.65 $
+ * REVISION: $Revision: 1.65 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -551,12 +551,12 @@ void print_match_sqt(
 void print_match_tab(
   MATCH_T* match,             ///< the match to print -in  
   FILE* file,                 ///< output stream -out
-  int first_scan,             ///< starting scan number -in
-  int last_scan,             ///< starting scan number -in
+  int scan_num,             ///< starting scan number -in
+  float spectrum_precursor_mz, ///< m/z of spectrum precursor -in
   float spectrum_mass,       ///< spectrum neutral mass -in
+  int num_matches,            ///< num matches in spectrum -in
   int charge,                 ///< charge -in
-  SCORER_TYPE_T main_score,   ///< the main score to report -in
-  SCORER_TYPE_T other_score  ///< the other score to report -in
+  SCORER_TYPE_T main_score   ///< the main score to report -in
   ){
 
   if( match == NULL || file == NULL ){
@@ -564,35 +564,11 @@ void print_match_tab(
     return;
   }
   PEPTIDE_T* peptide = get_match_peptide(match);
+  double peptide_mass = get_peptide_peptide_mass(peptide);
   // this should get the sequence from the match, not the peptide
   char* sequence = get_match_sequence_sqt(match);
+  int seq_length = strlen(sequence);
   BOOLEAN_T adjust_delta_cn = FALSE;
-
-  // NOTE (BF 12-Feb-08) This is an ugly fix to give post-percolator
-  // sqt files the rank of the xcorr and sp.
-  // ALSO deltaCn not serialized, so set to 0 for post-process
-  SCORER_TYPE_T main_rank_type = main_score;
-  SCORER_TYPE_T other_rank_type = other_score;
-  if( main_score == PERCOLATOR_SCORE && other_score==Q_VALUE ){
-    main_rank_type = XCORR;
-    other_rank_type = SP;    
-    adjust_delta_cn = TRUE;
-  }
-
-  // for p-values, also give rank of xcorr and sp?
-  else if( main_score == LOGP_BONF_WEIBULL_XCORR ){
-    //other_rank_type = XCORR;
-    main_rank_type = XCORR;
-    other_score = XCORR;
-  }else if( main_score == LOGP_BONF_WEIBULL_SP ){
-    //other_rank_type = SP;
-    other_score = SP;
-  }
-  // for post-analysis of p-values, both ranks from xcorr
-  else if( main_score == LOGP_QVALUE_WEIBULL_XCORR ){
-    main_rank_type = XCORR;
-  }
-  // secondary rank could always be preliminary score
 
   // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
   // Only the fraction matched is serialized.  The number possible can
@@ -621,47 +597,90 @@ void print_match_tab(
     delta_cn = 0.0;
   }
 
-  // If a p-value couldn't be calculated, print as NaN
-  float score_main = get_match_score(match, main_score);
-  if( main_score == LOGP_BONF_WEIBULL_XCORR&& score_main == P_VALUE_NA ){
-    score_main = sqrt(-1); // evaluates to nan
-  } 
-
-  
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
     new_peptide_src_iterator(peptide);
   PEPTIDE_SRC_T* peptide_src = NULL;
   char* protein_id = NULL;
   PROTEIN_T* protein = NULL;
-  //char* description = NULL;
   
+  double sp_score = get_match_score(match, SP);
+  int  sp_rank = get_match_rank(match, SP);
+  double xcorr_score = get_match_score(match, XCORR);
+  int xcorr_rank = get_match_rank(match, XCORR);
+  double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
+  double weibull_qvalue = get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR);
+  double percolator_score = get_match_score(match, PERCOLATOR_SCORE);
+  double percolator_rank = get_match_rank(match, Q_VALUE);
+  double percolator_qvalue = get_match_score(match, Q_VALUE);
+  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+  DIGEST_T digestion = get_digest_type_parameter("digestion");
+  char* enz_str = enzyme_type_to_string(enzyme);
+  char* dig_str = digest_type_to_string(digestion);
+
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     peptide_src = peptide_src_iterator_next(peptide_src_iterator);
     protein = get_peptide_src_parent_protein(peptide_src);
     protein_id = get_protein_id(protein);
     
-    // print match info
-    fprintf(file, "%d\t%d\t%.2f\t%d\t%s\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\n",
-            first_scan,
-            last_scan,
-            spectrum_mass,
-            charge,
-            protein_id,
-            get_match_rank(match, main_rank_type),
-            get_match_rank(match, other_rank_type),
-            get_peptide_peptide_mass(peptide),
-            delta_cn,
-            //get_match_score(match, main_score),
-            score_main,
-            get_match_score(match, other_score),
-            b_y_matched,
-            b_y_total,
-            sequence
-            );
+    fprintf(file, "%d\t", scan_num);
+    fprintf(file, "%d\t", charge);
+    fprintf(file, "%.2f\t", spectrum_precursor_mz);
+    fprintf(file, "%.2f\t", spectrum_mass);
+    fprintf(file, "%.2f\t", peptide_mass);
+    fprintf(file, "%.2f\t", delta_cn);
+    fprintf(file, "%.2f\t", sp_score);
+    fprintf(file, "%d\t", sp_rank);
+    fprintf(file, "%.2f\t", xcorr_score);
+    fprintf(file, "%d\t", xcorr_rank);
+    if (LOGP_BONF_WEIBULL_XCORR == main_score) {
+      // print p-value
+      if (P_VALUE_NA == log_pvalue) {
+        fprintf(file, "NaN\t");
+      }
+      else {
+        fprintf(file, "%.2f\t", log_pvalue);
+      }
+    }
+    else {
+      // no p-value
+      fprintf(file, "\t");
+    }
+    if (LOGP_QVALUE_WEIBULL_XCORR == main_score) {
+      // print q-value (Weibull est.)
+      fprintf(file, "%.2f\t", weibull_qvalue);
+    }
+    else {
+      fprintf(file, "\t");
+    }
+    if (PERCOLATOR_SCORE == main_score)  {
+      // print percolator score
+      fprintf(file, "%.2f\t", percolator_score);
+      // print percolator rank
+      fprintf(file, "%.2f\t", percolator_rank);
+      // print q-value
+      fprintf(file, "%.2f\t", percolator_qvalue);
+    }
+    else {
+      // no percolator score, score, or p-value
+      fprintf(file, "\t\t\t");
+    }
+    // Output of q-ranker score and q-value will be handled here where available.
+    // For now always print an empty column. 
+    fprintf(file, "\t\t");
+    fprintf(file, "%d\t", b_y_matched);
+    fprintf(file, "%d\t", b_y_total);
+    fprintf(file, "%d\t", num_matches); // Matches per spectrum
+    fprintf(file, "%c\t", sequence[0]);
+    fprintf(file, "%.*s\t", seq_length - 4, sequence+2);
+    fprintf(file, "%c\t", sequence[seq_length - 1]);
+    fprintf(file, "%s-%s\t", enz_str, dig_str);
+    fprintf(file, "%s\n", protein_id);
     free(protein_id);
   }
   
   free(sequence);
+  free(enz_str);
+  free(dig_str);
   free_peptide_src_iterator(peptide_src_iterator);
   
   return;

@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.21 $ 
+ * $Revision: 1.22 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -172,12 +172,12 @@ void print_match_sqt(
 void print_match_tab(
   MATCH_T* match,             ///< the match to print -in  
   FILE* file,                 ///< output stream -out
-  int first_scan,             ///< starting scan number -in
-  int last_scan,             ///< starting scan number -in
+  int scan_num,             ///< starting scan number -in
+  float spectrum_precursor_mz, ///< m/z of spectrum precursor -in
   float spectrum_mass,       ///< spectrum neutral mass -in
+  int num_matches,            ///< num matches in spectrum -in
   int charge,                 ///< charge -in
-  SCORER_TYPE_T main_score,   ///< the main score to report -in
-  SCORER_TYPE_T other_score  ///< the other score to report -in
+  SCORER_TYPE_T main_score   ///< the main score to report -in
 );
 
 /**
