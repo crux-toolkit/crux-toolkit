@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.95 $
+ * $Revision: 1.96 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -3069,18 +3069,38 @@ void print_sqt_header(
 }
 
 void print_tab_header(FILE* output){
+
   if( output == NULL ){
     return;
   }
 
-  time_t hold_time;
-  hold_time = time(0);
-
   fprintf(
     output, 
-    "first scan\tlast scan\tspectrum neutral mass\tcharge\tprotein id\t"
-    "main rank\tother rank\tpeptide mass\tdeta cn\tmain score\tother score"
-    "by matched\tby total\tsequence\n"
+    "scan\t"
+    "charge\t"
+    "spectrum precursor m/z\t"
+    "spectrum neutral mass\t"
+    "peptide mass\t"
+    "deta_cn\t"
+    "sp score\t"
+    "sp rank\t"
+    "xcorr score\t"
+    "xcorr rank\t"
+    "log(p-value)\t"
+    "Weibull est. q-value\t"
+    "percolator score\t"
+    "percolator rank\t"
+    "percolator q-value\t"
+    "q-ranker score\t"
+    "q-ranker q-value\t"
+    "b/y ions matched\t"
+    "b/y ions total\t"
+    "matches/spectrum\t"
+    "N-flanking aa\t"
+    "sequence\t"
+    "C-flanking aa\t"
+    "cleavage type\t"
+    "protein id\n"
   );
 }
 
@@ -3178,9 +3198,10 @@ BOOLEAN_T print_match_collection_tab_delimited(
   time_t hold_time;
   hold_time = time(0);
   int charge = match_collection->charge; 
-  int first_scan = get_spectrum_first_scan(spectrum);
-  int last_scan = get_spectrum_last_scan(spectrum);
+  int num_matches = match_collection->experiment_size;
+  int scan_num = get_spectrum_first_scan(spectrum);
   float spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
+  float spectrum_precursor_mz = get_spectrum_precursor_mz(spectrum);
 
   // If we calculated p-values, change which scores get printed
   // since this is really only valid for xcorr...
@@ -3213,9 +3234,8 @@ BOOLEAN_T print_match_collection_tab_delimited(
     }// else
 
     //    print_match_sqt(match, output, main_score, prelim_score);
-    print_match_tab(match, output, first_scan, last_scan, 
-                    spectrum_neutral_mass, charge,
-                    score_to_print_first, score_to_print_second);
+    print_match_tab(match, output, scan_num, spectrum_precursor_mz, spectrum_neutral_mass, 
+                    num_matches, charge, score_to_print_first);
 
   }// next match
   

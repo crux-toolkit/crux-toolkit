@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  ****************************************************************************/
 #include "q-value.h"
 
@@ -32,7 +32,7 @@ MATCH_COLLECTION_T* run_qvalue(
   char* fasta_file 
   ); 
 
-void print_sqt_file(
+static void print_text_files(
   MATCH_COLLECTION_T* match_collection,
   SCORER_TYPE_T scorer_type,
   SCORER_TYPE_T second_scorer_type
@@ -93,7 +93,7 @@ int qvalue_main(int argc, char** argv){
   SCORER_TYPE_T second_scorer_type = XCORR; // could it be other?
 
   carp(CARP_INFO, "Outputting matches.");
-  print_sqt_file(match_collection, scorer_type, second_scorer_type);
+  print_text_files(match_collection, scorer_type, second_scorer_type);
 
   // MEMLEAK below causes seg fault (or used to)
   // free_match_collection(match_collection);
@@ -110,7 +110,7 @@ int qvalue_main(int argc, char** argv){
 
 /*
  */
-void print_sqt_file(
+static void print_text_files(
   MATCH_COLLECTION_T* match_collection,
   SCORER_TYPE_T scorer,
   SCORER_TYPE_T second_scorer
@@ -118,12 +118,15 @@ void print_sqt_file(
 
   // get filename and open file
   char* sqt_filename = get_string_parameter("sqt-output-file");
+  char* tab_filename = get_string_parameter("tab-output-file");
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
   FILE* sqt_file = create_file_in_path( sqt_filename, NULL, overwrite );
+  FILE* tab_file = create_file_in_path( tab_filename, NULL, overwrite );
 
   // print header
   int num_proteins = get_match_collection_num_proteins(match_collection);
-  print_sqt_header( sqt_file, "target", num_proteins, TRUE);
+  print_sqt_header(sqt_file, "target", num_proteins, TRUE);
+  print_tab_header(tab_file);
 
   /*
   ALGORITHM_TYPE_T algorithm_type = get_algorithm_type_parameter("algorithm");
@@ -155,6 +158,10 @@ void print_sqt_file(
     SPECTRUM_T* spectrum = get_match_spectrum(match);
     int this_spectrum_num = get_spectrum_first_scan(spectrum);
     int charge = get_match_charge(match);
+    float spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
+    float spectrum_precursor_mz = get_spectrum_precursor_mz(spectrum);
+    int num_peptides = get_match_ln_experiment_size(match);
+    num_peptides = expf(num_peptides);
 
     carp(CARP_DETAILED_DEBUG, 
          "SQT printing scan %i (current %i), charge %i (current %i)", 
@@ -168,19 +175,24 @@ void print_sqt_file(
       // print S line to sqt file
       cur_spectrum_num = this_spectrum_num;
       cur_charge = charge;
-      int num_peptides = get_match_ln_experiment_size(match);
-      num_peptides = expf(num_peptides);
 
       print_spectrum_sqt(spectrum, sqt_file, num_peptides, charge);
 
       // print match to sqt file
       print_match_sqt(match, sqt_file, scorer, second_scorer);
+      // print match to tab file
+      print_match_tab(match, tab_file, this_spectrum_num, spectrum_precursor_mz,
+                      spectrum_neutral_mass, num_peptides, charge, scorer);
       match_counter = 1;
     }
     // if this spectrum has been printed
     else{  
       if( match_counter < max_matches ){
+        // print match to sqt file
         print_match_sqt(match, sqt_file, scorer, second_scorer);
+        // print match to tab file
+        print_match_tab(match, tab_file, this_spectrum_num, spectrum_precursor_mz,
+                        spectrum_neutral_mass, num_peptides, charge, scorer);
         match_counter++;
       }
     }
@@ -188,6 +200,7 @@ void print_sqt_file(
   }// next match
   free_match_iterator(match_iterator);
   free(sqt_filename);
+  free(tab_filename);
 
 }
 
