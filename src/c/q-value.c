@@ -13,14 +13,14 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  ****************************************************************************/
 #include "q-value.h"
 
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_QVALUE_OPTIONS 7
+#define NUM_QVALUE_OPTIONS 8
 #define NUM_QVALUE_ARGUMENTS 2
 
 /* 
@@ -56,7 +56,8 @@ int qvalue_main(int argc, char** argv){
     "write-parameter-file",
     "use-index",
     "overwrite",
-    "sqt-output-file"
+    "sqt-output-file",
+    "tab-output-file"
   };
 
   int num_arguments = NUM_QVALUE_ARGUMENTS;
