@@ -29,7 +29,7 @@
 #include "spectrum_collection.h"
 #include "match_collection.h"
 
-#define NUM_SEARCH_OPTIONS 15
+#define NUM_SEARCH_OPTIONS 16
 #define NUM_SEARCH_ARGS 2
 #define PARAM_ESTIMATION_SAMPLE_COUNT 500
 
@@ -71,6 +71,7 @@ int search_main(int argc, char** argv){
     "match-output-folder",
     "output-mode",
     "sqt-output-file",
+    "tab-output-file",
     "decoy-sqt-output-file",
     "number-decoy-set"
   };
