@@ -16,12 +16,12 @@
  *         directory are concatinated together and presumed to be
  *         non-overlaping parts of the same ms2 file. 
  * 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  ****************************************************************************/
 #include "percolator.h"
 
 #ifdef PERCOLATOR
-#define NUM_PERCOLATOR_OPTIONS 8
+#define NUM_PERCOLATOR_OPTIONS 9
 #define NUM_PERCOLATOR_ARGUMENTS 2
 /* 
  * Private function declarations.  Details below
@@ -57,7 +57,8 @@ int percolator_main(int argc, char** argv){
     "feature-file",
     "use-index",
     "overwrite",
-    "sqt-output-file"
+    "sqt-output-file",
+    "tab-output-file"
   };
 
   int num_arguments = NUM_PERCOLATOR_ARGUMENTS;
