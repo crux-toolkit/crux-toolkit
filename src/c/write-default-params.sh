@@ -37,7 +37,7 @@ for op in verbosity version parameter-file write-parameter-file \
           missed-cleavages unique-peptides mod cmod nmod max-mods \
           max-aas-modified \
           max-rank-preliminary min-mass max-mass spectrum-min-mass \
-          spectrum-max-mass spectrum-charge output-mode \
+          spectrum-max-mass spectrum-charge output-mode print-search-progress \
           match-output-folder sqt-output-file decoy-sqt-output-file \
           number-decoy-set top-match top-match-sqt precision \
           feature-file output-trypticity output-sequence sort stats \
