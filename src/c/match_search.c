@@ -177,6 +177,10 @@ int search_main(int argc, char** argv){
   int spectrum_searches_counter = 0; //for psm file header, spec*charges
   int mod_idx = 0;
   int num_decoys = get_int_parameter("number-decoy-set");
+  int progress_increment = get_int_parameter("print-search-progress");
+  if( progress_increment == 0 ){
+    progress_increment = BILLION;
+  }
 
   // get list of mods
   PEPTIDE_MOD_T** peptide_mods = NULL;
@@ -194,10 +198,12 @@ int search_main(int argc, char** argv){
       filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
     double mass = get_spectrum_neutral_mass(spectrum, charge);
 
-    carp(CARP_DETAILED_INFO, 
-         "Searching spectrum number %i, charge %i, search number %i",
-         get_spectrum_first_scan(spectrum), charge,
-         spectrum_searches_counter+1 );
+    if( (spectrum_searches_counter % progress_increment) == 0 ){
+      carp(CARP_INFO, 
+           "Searching spectrum number %i, charge %i, search number %i",
+           get_spectrum_first_scan(spectrum), charge,
+           spectrum_searches_counter+1 );
+    }
 
     // with just the target database decide how many peptide mods to use
     // create an empty match collection 

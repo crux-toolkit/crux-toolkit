@@ -529,9 +529,7 @@ void initialize_parameters(void){
       "preliminary scoring.  Default 500.",
       "Used by crux-search-for-matches.  For each spectrum, keep the (500) "
       "top ranking psms for scoring with the main score.", "true");
-  //  set_int_parameter("max-sqt-result", 5, 1, BILLION, 
   set_int_parameter("top-match-sqt", 5, 1, BILLION, 
-     //"Number of search results per spectrum to report in the sqt file. "
       "The number of psms per spectrum written to the sqt file. "
       "Default 5.",
       "Available from parameter file for crux-search-for-matches with "
@@ -597,6 +595,10 @@ void initialize_parameters(void){
       "Default 6.",
       "Available from parameter file for crux search-for-matches, percolator, "
       "and compute-q-values.", "true");
+  set_int_parameter("print-search-progress", 100, 0, BILLION,
+      "Show search progress by printing every n spectra searched.  Default "
+      "100.", "Available for crux search-for-matches from parameter file.",
+      "true");
 
     // Sp scoring params
   set_double_parameter("beta", 0.075, 0, 1, "Not for general users.",
