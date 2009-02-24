@@ -595,9 +595,10 @@ void initialize_parameters(void){
       "Default 6.",
       "Available from parameter file for crux search-for-matches, percolator, "
       "and compute-q-values.", "true");
-  set_int_parameter("print-search-progress", 100, 0, BILLION,
+  set_int_parameter("print-search-progress", 10, 0, BILLION,
       "Show search progress by printing every n spectra searched.  Default "
-      "100.", "Available for crux search-for-matches from parameter file.",
+      "10.", "Set to 0 to show no search progress.  Available for crux "
+      "search-for-matches from parameter file.",
       "true");
 
     // Sp scoring params
