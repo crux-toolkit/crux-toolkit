@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.65 $
- * REVISION: $Revision: 1.65 $
+ * REVISION: $Revision: 1.66 $
+ * REVISION: $Revision: 1.66 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -504,8 +504,16 @@ void print_match_sqt(
     score_main = sqrt(-1); // evaluates to nan
   } 
 
+  // write format string with variable precision
+  int precision = get_int_parameter("precision");
+  char format[64];
+  sprintf(format,
+          "M\t%%d\t%%d\t%%.%if\t%%.%if\t%%.%if\t%%.%if\t%%d\t%%d\t%%s\tU\n",
+          precision, precision, precision, precision);
+
   // print match info
-  fprintf(file, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\tU\n",
+  //  fprintf(file, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\tU\n",
+  fprintf(file, format,
           get_match_rank(match, main_rank_type),
           get_match_rank(match, other_rank_type),
           get_peptide_peptide_mass(peptide),
@@ -617,6 +625,10 @@ void print_match_tab(
   char* enz_str = enzyme_type_to_string(enzyme);
   char* dig_str = digest_type_to_string(digestion);
 
+  int precision = get_int_parameter("precision");
+  char float_format[16];
+  sprintf(float_format, "%%.%if\t", precision);
+
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     peptide_src = peptide_src_iterator_next(peptide_src_iterator);
     protein = get_peptide_src_parent_protein(peptide_src);
@@ -624,13 +636,13 @@ void print_match_tab(
     
     fprintf(file, "%d\t", scan_num);
     fprintf(file, "%d\t", charge);
-    fprintf(file, "%.2f\t", spectrum_precursor_mz);
-    fprintf(file, "%.2f\t", spectrum_mass);
-    fprintf(file, "%.2f\t", peptide_mass);
-    fprintf(file, "%.2f\t", delta_cn);
-    fprintf(file, "%.2f\t", sp_score);
+    fprintf(file, float_format, spectrum_precursor_mz);
+    fprintf(file, float_format, spectrum_mass);
+    fprintf(file, float_format, peptide_mass);
+    fprintf(file, float_format, delta_cn);
+    fprintf(file, float_format, sp_score);
     fprintf(file, "%d\t", sp_rank);
-    fprintf(file, "%.2f\t", xcorr_score);
+    fprintf(file, float_format, xcorr_score);
     fprintf(file, "%d\t", xcorr_rank);
     if (LOGP_BONF_WEIBULL_XCORR == main_score) {
       // print p-value
@@ -638,7 +650,7 @@ void print_match_tab(
         fprintf(file, "NaN\t");
       }
       else {
-        fprintf(file, "%.2f\t", log_pvalue);
+        fprintf(file, float_format, log_pvalue);
       }
     }
     else {
@@ -647,18 +659,18 @@ void print_match_tab(
     }
     if (LOGP_QVALUE_WEIBULL_XCORR == main_score) {
       // print q-value (Weibull est.)
-      fprintf(file, "%.2f\t", weibull_qvalue);
+      fprintf(file, float_format, weibull_qvalue);
     }
     else {
       fprintf(file, "\t");
     }
     if (PERCOLATOR_SCORE == main_score)  {
       // print percolator score
-      fprintf(file, "%.2f\t", percolator_score);
+      fprintf(file, float_format, percolator_score);
       // print percolator rank
-      fprintf(file, "%.2f\t", percolator_rank);
+      fprintf(file, float_format, percolator_rank);
       // print q-value
-      fprintf(file, "%.2f\t", percolator_qvalue);
+      fprintf(file, float_format, percolator_qvalue);
     }
     else {
       // no percolator score, score, or p-value

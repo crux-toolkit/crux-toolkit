@@ -39,7 +39,7 @@ for op in verbosity version parameter-file write-parameter-file \
           max-rank-preliminary min-mass max-mass spectrum-min-mass \
           spectrum-max-mass spectrum-charge output-mode \
           match-output-folder sqt-output-file decoy-sqt-output-file \
-          number-decoy-set top-match top-match-sqt algorithm \
+          number-decoy-set top-match top-match-sqt precision \
           feature-file output-trypticity output-sequence sort stats \
           isotope primary-ions neutral-losses flanking \
           precursor-ions nh3 max-ion-charge h2o A C D E F G H I K L M \

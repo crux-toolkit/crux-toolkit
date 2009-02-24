@@ -6,3 +6,4 @@ overwrite=T
 sqt-output-file=pvalues.sqt
 number-decoy-set=0
 seed=7
+precision=2

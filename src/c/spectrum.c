@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.68 $
+ * REVISION: $Revision: 1.69 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -290,8 +290,14 @@ void print_spectrum_sqt(
   int charge            ///< charge used for the search -in
   ){
 
+  int precision = get_int_parameter("precision");
+  char format[64];
+  sprintf(format, 
+          "S\t%%d\t%%d\t%%d\t%%.%if\t%%s\t%%.%if\t%%.%if\t%%.%if\t%%d\n", 
+          precision, precision, precision, precision);
   //<first scan><last scan><charge><precursor m/z><# sequence match>
-  fprintf(file, "S\t%d\t%d\t%d\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%d\n", 
+  //fprintf(file, "S\t%d\t%d\t%d\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%d\n", 
+  fprintf(file, format,
           get_spectrum_first_scan(spectrum), 
           get_spectrum_last_scan(spectrum),
           charge, 
