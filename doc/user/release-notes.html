@@ -9,7 +9,7 @@
 <h1>Release notes for Crux</h1>
 
 
-<h2>Version 1.20</h2> January 6, 2009
+<h2>Version 1.?</h2> month 6, 2009
 
 <ul>
 
@@ -19,6 +19,36 @@ options, <code>enzyme</code> which specifies trypsin, elastase,
 chymotrypsin or no enzyme and <code>digestion</code> which indicates
 the degree of specificity, partial or full digest.
 
+<li>
+The option <code>max-sqt-result</code> which controls the number of
+matches per spectrum that are printed to the sqt file has been changed
+to <code>top-match-sqt</code>
+
+<li>
+There is a new option, <code>num-decoys-per-target</code>, which can
+be used to generate more than one shuffled peptide per spectrum.  All
+decoys are put into one file.
+
+<li>
+Protein names for decoy matches are now prepended with 'rand_' as in
+L rand_Y45678.
+
+<li>
+A new option, <code>tdc</code>, which stands for 'target decoy
+competition' has been introduced.  When this option is set to true,
+the target and decoy psms are sorted together and printed to one
+file.  The value for <code>max-rank-preliminary</code> is adjusted so
+that twice as many psms are retained after prelimnary scoring.
+
+<li>
+All indexes are created with unique-pepties=TRUE.  Searches with
+fasta files print each peptide only once.
+
+<li>
+The precision of the  masses and scores printed to the sqt and text
+files is now variable.  The default precision changed from 2 to 6.
+
+</ul>
 <h2>Version 1.20</h2> January 6, 2009
 
 <ul>

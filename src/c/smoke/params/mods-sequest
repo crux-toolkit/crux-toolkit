@@ -4,3 +4,4 @@ output-mode=sqt
 sqt-output-file=seq_test.sqt
 number-decoy-set=0
 mod=79.9:S:2
+precision=2

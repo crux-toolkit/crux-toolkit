@@ -3,3 +3,4 @@ digestion=full-digest
 overwrite=T
 output-mode=sqt
 number-decoy-set=0
+precision=2

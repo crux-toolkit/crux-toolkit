@@ -61,8 +61,8 @@ ion-tolerance=0.500000
 missed-cleavages=FALSE
 
 # Generate peptides only once, even if they appear in more than one protein (T,F).  Default FALSE.
-# Available from command line or parameter file for crux-create-index and crux-genereate-peptides. Parameter file only for crux-search-for-matches.  For crux-generate-peptides, returns one line per peptide when true or one line per peptide per protein occurence when false.  For index and search, stores and reports only one protein in which the peptide occurs.
-unique-peptides=FALSE
+# Available from command line or parameter file for crux-genereate-peptides. Returns one line per peptide when true or one line per peptide per protein occurence when false.  
+unique-peptides=TRUE
 
 # Specify a variable modification to apply to peptides.  <mass change>:<aa list>:<max per peptide>. Default no mods.
 # Available from parameter file for crux-generate-peptides and crux-search-for-matches and the the same must be used for crux compute-q-value.
@@ -136,9 +136,9 @@ top-match=1
 # Available from parameter file for crux-search-for-matches with output-mode=<all|sqt>.  Does not affect output to binary files.
 top-match-sqt=5
 
-# The analysis algorithm to use (percolator, curve-fit, none). Default percolator.
-# Available only for crux-analyze-matches.  Using 'percolator' will assign a q-value to the top-ranking psm for each spectrum based on the decoy searches.  Using 'curve-fit' will assign a q-value to same using the p-values calculated with score-type=<xcorr-pvalue|sq-pvalue>.  Incorrect combinations of score-type and algorithm cause undefined behavior. Using 'none' will turn the binary .csm files into text.
-algorithm=percolator
+# Set the precision for masses and scores written to sqt and text files. Default 6.
+# Available from parameter file for crux search-for-matches, percolator, and compute-q-values.
+precision=6
 
 # Optional file into which psm features are printed.
 # Available only for crux-analyze-matches.  File will contain features used by percolator.
