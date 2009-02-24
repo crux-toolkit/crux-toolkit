@@ -112,9 +112,9 @@ spectrum-charge=all
 # Available for crux search-for-matches.  Produce binary, sqt and/or tab delimited output files.  Binary files named automatically.  See sqt-output-file for naming text file.  See match-output-folder for file location.
 output-mode=binary
 
-# Show search progress by printing every n spectra searched.  Default 100.
+# Show search progress by printing every n spectra searched.  Default 10.
 # Available for crux search-for-matches from parameter file.
-print-search-progress=100
+print-search-progress=10
 
 # Folder to which search results will be written. Default '.'. (current directory).
 # Used by crux-search-for-matches.  All result files (binary .csm and/or sqt) put in this directory.
