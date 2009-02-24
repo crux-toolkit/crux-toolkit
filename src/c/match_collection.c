@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.96 $
+ * $Revision: 1.97 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -400,7 +400,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
   /******* Scoring and estimating score distribution parameters ***/
   // The only supported distribution is the weibull with bonf correction 
 
-  carp(CARP_DETAILED_INFO,"Number matches after preliminary scoring = %i",match_collection->match_total);
+  //carp(CARP_DETAILED_INFO,"Number matches after preliminary scoring = %i",match_collection->match_total);
 
   BOOLEAN_T success = TRUE;
   if(score_type == LOGP_WEIBULL_XCORR || 
@@ -436,12 +436,12 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
     return NULL;
   }
 
-  carp(CARP_DETAILED_INFO,"Number matches after parameter estimation = %i",match_collection->match_total);
+  //carp(CARP_DETAILED_INFO,"Number matches after parameter estimation = %i",match_collection->match_total);
 
   // save only the top max_rank matches from prelim_scoring
   truncate_match_collection(match_collection, max_rank, prelim_score);
   
-  carp(CARP_DETAILED_INFO,"Number matches after truncation = %i",match_collection->match_total);
+  //carp(CARP_DETAILED_INFO,"Number matches after truncation = %i",match_collection->match_total);
   
   /***************Main scoring*******************************/
   // The only supported types of primary score are xcorr,
@@ -697,7 +697,7 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
 
     // find the index of the last match with the same score
     int cur_score_last_index = match_idx;
-    carp(CARP_DETAILED_INFO, "Cur score %.2f next score %.2f.", cur_score, next_score);
+    
     while(next_score == cur_score && cur_score_last_index < match_total-2){
       cur_score_last_index++;
       next_score = get_match_score(matches[cur_score_last_index+1], SP);
