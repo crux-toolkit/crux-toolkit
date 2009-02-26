@@ -75,7 +75,8 @@ START_TEST (test_create){
   fail_unless(get_protein_is_light(protein1) == get_protein_is_light(protein2), "protein, protein is_light not correct");
   
   //peptide constraint
-  constraint = new_peptide_constraint(TRYPTIC, 0, 1200, 1, 10, 1, AVERAGE);
+  constraint = new_peptide_constraint(TRYPSIN, FULL_DIGEST, 0, 
+                                      1200, 1, 10, 1, AVERAGE);
   
   /** test, protein_peptide_iterator **/
   

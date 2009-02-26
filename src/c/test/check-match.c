@@ -19,8 +19,8 @@ void match_setup(){
   // create inputs
   prot = new_protein( "Protein1", protseq, strlen(protseq), 
                       NULL, 0, 0, NULL);//description, offset, idx, dbase
-  pep = new_peptide( 10, 1087.20, prot, 20, TRYPTIC);//VADILESNAR
-  pepmod = new_peptide( 10, 1087.20, prot, 20, TRYPTIC);//VADILESNAR
+  pep = new_peptide( 10, 1087.20, prot, 20);//VADILESNAR
+  pepmod = new_peptide( 10, 1087.20, prot, 20);//VADILESNAR
 
   // create match
   m1 = new_match();
