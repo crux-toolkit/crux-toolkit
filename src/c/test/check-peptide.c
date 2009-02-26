@@ -31,9 +31,9 @@ char* protseq1 = "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALP
 void pep_setup(){
   protein1 = new_protein( "Protein1", protseq1, strlen(protseq1), 
                           NULL, 0, 0, NULL);//description, offset, idx, dbase
-  peptide1 = new_peptide( 10, 1087.20, protein1, 20, TRYPTIC);//VADILESNAR
-  peptide2 = new_peptide( 16, 1736.02, protein1, 1, TRYPTIC);//MRVLKFGGTSVANAER
-  peptide3 = new_peptide( 4, 547.57, protein1, 487, TRYPTIC);//QQSW
+  peptide1 = new_peptide( 10, 1087.20, protein1, 20);//VADILESNAR
+  peptide2 = new_peptide( 16, 1736.02, protein1, 1);//MRVLKFGGTSVANAER
+  peptide3 = new_peptide( 4, 547.57, protein1, 487);//QQSW
 
 }
 
@@ -64,13 +64,13 @@ START_TEST (test_ndist){// start index
 
   // test for multiple protein sources, first is least, first not least
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NOT_TRYPTIC, protein1, 25) );
+                           new_peptide_src(NON_SPECIFIC_DIGEST, protein1, 25) );
   ndist = get_peptide_n_distance(peptide1); 
   fail_unless( ndist == 456, 
                "Incorrect distance from peptide n-terminus to " \
                "protein n-ternimus.  Got %d, should be 456", ndist);
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NOT_TRYPTIC, protein1, 100) );
+                           new_peptide_src(NON_SPECIFIC_DIGEST, protein1, 100));
 
   ndist = get_peptide_n_distance(peptide1); 
   fail_unless( ndist == 381, 
@@ -97,13 +97,13 @@ START_TEST (test_cdist){// start index
 
   // test for multiple protein sources, first is least, first not least
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NOT_TRYPTIC, protein1, 5) );
+                           new_peptide_src(NON_SPECIFIC_DIGEST, protein1, 5) );
   cdist = get_peptide_c_distance(peptide1); 
   fail_unless( cdist == 4, 
                "Incorrect distance from peptide c-terminus to " \
                "protein c-ternimus.  Got %d, should be 4", cdist);
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NOT_TRYPTIC, protein1, 30) );
+                           new_peptide_src(NON_SPECIFIC_DIGEST, protein1, 30) );
   cdist = get_peptide_c_distance(peptide1); 
   fail_unless( cdist == 4, 
                "Incorrect distance from peptide c-terminus to " \
@@ -174,7 +174,7 @@ START_TEST(test_shuffled_mod_seq){
   char* seq = modified_aa_string_to_string( aa_seq, len );
   fail_unless( strcmp(seq, "VADILESNAR") == 0,
                "Unshuffled seq is %s but should be %s", seq, "VADILESNAR"); 
-  MODIFIED_AA_T* shuf_aa_seq= generate_shuffled_mod_sequence(peptide1,TRYPTIC);
+  MODIFIED_AA_T* shuf_aa_seq= generate_shuffled_mod_sequence(peptide1);
   char* shuf_seq = modified_aa_string_to_string( shuf_aa_seq, len );
   fail_unless( strcmp(shuf_seq, seq) != 0,
                "Sequence was %s, shuffled is %s, should be different",

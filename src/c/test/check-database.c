@@ -50,7 +50,8 @@ START_TEST (test_create){
   fail_unless(!get_database_use_light_protein(db), "database use_light_protein not correctly set");
   
   //peptide constraint
-  constraint = new_peptide_constraint(TRYPTIC, 0, 1200, 1, 10, 1, AVERAGE);
+  constraint = new_peptide_constraint(TRYPSIN, FULL_DIGEST, 0, 
+                                      1200, 1, 10, 1, AVERAGE);
   
   /* test database peptide iterator */
   DATABASE_PEPTIDE_ITERATOR_T* iterator3 =
@@ -102,7 +103,7 @@ START_TEST (test_create){
     peptide5 = database_sorted_peptide_iterator_next(iterator4);
 
     //this print statement should still work eventhough we call "free_database(db)" before.
-    print_peptide_in_format(peptide5, TRUE, TRUE, stdout);
+    print_peptide_in_format(peptide5, TRUE, stdout);
     //print_peptide(peptide5, stdout);
     free_peptide(peptide5);
   }
@@ -130,7 +131,7 @@ START_TEST (test_create){
   
 
   //peptide constraint
-  constraint = new_peptide_constraint(TRYPTIC, 0, 1200, 1, 10, 1, AVERAGE);
+  constraint = new_peptide_constraint(TRYPSIN, FULL_DIGEST, 0, 1200, 1, 10, 1, AVERAGE);
   
   /* test database peptide iterator */
   iterator3 =  new_database_peptide_iterator(db, constraint);
@@ -179,7 +180,7 @@ START_TEST (test_create){
     peptide5 = database_sorted_peptide_iterator_next(iterator4);
 
     //this print statement should still work eventhough we call "free_database(db)" before.
-    print_peptide_in_format(peptide5, TRUE, TRUE, stdout);
+    print_peptide_in_format(peptide5, TRUE, stdout);
     //print_peptide(peptide5, stdout);
     free_peptide(peptide5);
   }

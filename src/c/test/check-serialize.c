@@ -24,9 +24,9 @@ void ser_setup(){
   parse_database(db);
 
   protein1 = get_database_protein_at_idx(db, 0);
-  pep1 = new_peptide( 10, 1087.20, protein1, 20, TRYPTIC);//VADILESNAR
-  pep2 = new_peptide( 16, 1736.02, protein1, 1, TRYPTIC);//MRVLKFGGTSVANAER
-  pep3 = new_peptide( 4, 547.57, protein1, 487, TRYPTIC);//QQSW
+  pep1 = new_peptide( 10, 1087.20, protein1, 20);//VADILESNAR
+  pep2 = new_peptide( 16, 1736.02, protein1, 1);//MRVLKFGGTSVANAER
+  pep3 = new_peptide( 4, 547.57, protein1, 487);//QQSW
 
   amod1 = new_aa_mod(0);
   amod2 = new_aa_mod(1);
@@ -202,23 +202,29 @@ START_TEST(test_serialize_mod){
 END_TEST
 
 START_TEST(test_header){
+
   // write header
   // set params to think there is one output file
   // include modes
-  int fake_argc = 5;
-  char* fake_argv[5];
+  int fake_argc = 6;
+  char* fake_argv[6];
   fake_argv[0] = "testing";
   fake_argv[1] = "--number-decoy-set";
   fake_argv[2] = "0";
   fake_argv[3] = "--parameter-file";
   fake_argv[4] = "params/1mod";
+  fake_argv[5] = "fasta_file";
   char* op[2] = {"number-decoy-set", "parameter-file"};
   select_cmd_line_options(op, 2 );
+  char* arg[1] = { "protein input" };
+  select_cmd_line_arguments(arg, 1);
   parse_cmd_line_into_params_hash(fake_argc, fake_argv, "testing");
 
-  //set_verbosity_level(CARP_DETAILED_DEBUG);
+  //  set_verbosity_level(CARP_DETAILED_DEBUG);
   FILE* file = fopen(pep_filename, "w");
+  fail_unless( file != NULL, "Could not open file for serializing.");
   serialize_headers(&file);
+/*
   serialize_total_number_of_spectra(1, file);
 
   fclose(file);
@@ -235,6 +241,7 @@ START_TEST(test_header){
                "Parsed header found %i top matches instead of 1", top_match);
   fclose(file);
   
+*/
 }
 END_TEST
 

@@ -40,7 +40,7 @@ void pmod_setup(){
   force_set_aa_mod_list(amod_list, 3);
 
   prot1 = new_protein( "Protein1", seq, strlen(seq), NULL, 0, 0, NULL);
-  pep1 = new_peptide( 11, 1108.18, prot1, 6, TRYPTIC);// seq: FGGTSVANAER
+  pep1 = new_peptide( 11, 1108.18, prot1, 6);// seq: FGGTSVANAER
 }
 
 
