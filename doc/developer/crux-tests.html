@@ -1,0 +1,87 @@
+<html>
+<title>Crux smoke tests and unit tests</title>
+<body>
+
+
+<p>
+Currently the smoke/regression tests are in the directory
+<code>crux/src/c/smoke</code>.  They are run with the
+command <code>./runall</code> which prints out how many tests failed
+and how many passed.  The output from the tests is captured in two
+files, <code>out</code> and <code>error</code>.</p>
+
+<p>
+These tests should be run before any update is commited to CVS.  
+Note that you do have to run them on a 64-bit machine using 64-bit versions
+of crux and percolator. This is because the existing index files were
+built on a 64-bit machine. You can also update the known good files to
+match the current output by using the command
+<code>./crux-tests.pl -up crux-tests.cmd</code> in
+the <code>src/c/smoke</code> directory. This will replace all of the
+known good files with the current output, so it should be used with
+caution.</p>
+
+<p>
+The testing is by no means complete, but there are some tests for each
+executable.  First are tests for <code>crux-generate-peptides</code>,
+<code>crux-get-ms2-spectrum</code>, and <code>crux-predict-ion
+series</code>.  Next are tests for <code>crux
+search-for-matches</code> with fasta files and searches with an
+existing index.  Percolator is also tested with existing files.
+Finally, the whole process is tested from creating an index,
+searching, and running percolator.  Another search is done to test the
+weibull p-values and q-values.  There are tests for modifications and
+enzymes other than trypsin.  At the end is a large-ish test on spectra
+that exactly matched SEQUEST results.</p>
+
+<p>
+The file structure of the smoke directory is as follows.  The test
+driver is a perl script called <code>crux-test.pl</code>.  The
+contents of the tests are in <code>crux-test.cmds</code>.  Each test
+consists of one line in the form</p>
+
+<pre>
+&lt;test name&gt; = &lt;compare file&gt; = &lt;command&gt; = [words to ignore in the diff]
+</pre>
+
+<p>
+For each test, the command is run and stdout is diffed with 'compare
+file'.  Any words in the last field are ignored in the diff with the
+option -I.  If diff finds no differences the test passes; otherwise,
+the test fails and the output from diff is put in the
+file <code>out</code>.  All stderr from the command is put in the file
+<code>error</code>.  The test name is used to in out and error to
+identify output from each test.</p>
+
+<p>
+Sometimes the output from &lt;command&gt; is really a file, in which case I
+just put <code>cat file</code> at the end of the command.  The compare
+files are all in <code>good_results/</code> and parameter files are in
+<code>params/</code>.  Input files (ms2s and fastas) are in the smoke
+directory.  There is also a script called <code>clean.sh</code> for
+removing intermediate files before a test.</p>
+
+<p>
+In order to add a test, add a line to <code>crux-test.cmds</code> as
+described above. To update a test when the output changes, change the
+file in good_results.</p>
+
+<p>
+Since we are talking about tests, let me add in my wish-list.  I would
+like to see smoke and regression tests separated into two.  The smoke
+tests could be a bare minimum of what is currently there, maybe one
+test per executable.  The regression tests could be more extensive and
+could have a more sophisticated comparison.
+Perhaps <code>crux-test.pl</code> could be updated to take a
+comparison script/command as one of the inputs.  Then, for example,
+you could create a test just for tryptic cleavages and it would pass
+even if the scores weren't exactly the same.  There would be separate
+tests for scores.</p>
+
+<p>
+Barbara Frewen<br>
+25 February 2008</p>
+
+</body>
+</html>
+
