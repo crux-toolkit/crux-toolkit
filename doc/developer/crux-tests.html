@@ -2,16 +2,19 @@
 <title>Crux smoke tests and unit tests</title>
 <body>
 
+<h3>Crux smoke tests and unit tests</h3>
+
+<b>Smoke tests</b><br>
 
 <p>
 Currently the smoke/regression tests are in the directory
-<code>crux/src/c/smoke</code>.  They are run with the
+<code>crux/src/c/smoke</code>.  They are run from that directory with the
 command <code>./runall</code> which prints out how many tests failed
 and how many passed.  The output from the tests is captured in two
 files, <code>out</code> and <code>error</code>.</p>
 
 <p>
-These tests should be run before any update is commited to CVS.  
+These tests should be run before any update is committed to CVS.  
 Note that you do have to run them on a 64-bit machine using 64-bit versions
 of crux and percolator. This is because the existing index files were
 built on a 64-bit machine. You can also update the known good files to
@@ -28,9 +31,9 @@ executable.  First are tests for <code>crux-generate-peptides</code>,
 series</code>.  Next are tests for <code>crux
 search-for-matches</code> with fasta files and searches with an
 existing index.  Percolator is also tested with existing files.
-Finally, the whole process is tested from creating an index,
+Finally, the whole process is tested from creating an index, to
 searching, and running percolator.  Another search is done to test the
-weibull p-values and q-values.  There are tests for modifications and
+Weibull p-values and q-values.  There are tests for modifications and
 enzymes other than trypsin.  At the end is a large-ish test on spectra
 that exactly matched SEQUEST results.</p>
 
@@ -50,12 +53,12 @@ file'.  Any words in the last field are ignored in the diff with the
 option -I.  If diff finds no differences the test passes; otherwise,
 the test fails and the output from diff is put in the
 file <code>out</code>.  All stderr from the command is put in the file
-<code>error</code>.  The test name is used to in out and error to
-identify output from each test.</p>
+<code>error</code>.  The test name is used in <code>out</code>
+and <code>error</code> to identify output from each test.</p>
 
 <p>
 Sometimes the output from &lt;command&gt; is really a file, in which case I
-just put <code>cat file</code> at the end of the command.  The compare
+put <code>cat file</code> at the end of the command.  The compare
 files are all in <code>good_results/</code> and parameter files are in
 <code>params/</code>.  Input files (ms2s and fastas) are in the smoke
 directory.  There is also a script called <code>clean.sh</code> for
@@ -66,17 +69,133 @@ In order to add a test, add a line to <code>crux-test.cmds</code> as
 described above. To update a test when the output changes, change the
 file in good_results.</p>
 
+<b>Unit Tests</b><br>
+
 <p>
-Since we are talking about tests, let me add in my wish-list.  I would
-like to see smoke and regression tests separated into two.  The smoke
-tests could be a bare minimum of what is currently there, maybe one
-test per executable.  The regression tests could be more extensive and
-could have a more sophisticated comparison.
-Perhaps <code>crux-test.pl</code> could be updated to take a
-comparison script/command as one of the inputs.  Then, for example,
-you could create a test just for tryptic cleavages and it would pass
-even if the scores weren't exactly the same.  There would be separate
-tests for scores.</p>
+Unit tests for individual components of <code>crux</code> are
+in <code>crux/src/c/test</code>.  These tests must be compiled any
+time there are changes made to the code.  Run <code>make</code> from
+the test directory and then <code>./unittests</code>.  As the tests
+run, the results will be printed to stdout.
+
+Tests are arranged by source file with
+<code>check-&lt;filename&gt;.c</code> containing tests for 
+methods in <code>crux/src/c/&lt;filename&gt;.c</code>.  The main
+driver is <code>crux-unit-tests.c</code>
+</p>
+
+<p>
+Information about the <code>check</code> package
+is <a href="http://check.sourceforge.net/">here</a> and a very basic
+tutorial starts
+<a href="http://check.sourceforge.net/doc/check.html/check_5.html#SEC5">here</a>.  
+</p>
+<p>
+The unit testing is not complete.  Chris set up many tests as he was
+starting out, but eventually abandoned them.  By the time I
+encountered
+the code, very few of the tests still worked.  Those I could fix
+quickly were kept and the rest were commented out
+of <code>crux-unit-tests.c</code>.  A number of new tests were added
+as the dynamic modifications were being implemented.
+<p>
+To see the basic structure of the <code>check-</code> files look
+at <code>check-template.c</code>.  There are a series of short tests,
+each with a name.  Before each test, a setup routine is run to create
+data structures.  A teardown routine is run after each test to clean up
+any memory allocated in the setup.  Tests can be performed on those
+objects created in setup or on locally created values.  The basic form
+of the test is to call a method and check the value it returned
+with <code>fail_unless(condition, message)</code>.  As soon as one of
+these statements fails, the message is printed, the test ends, the
+teardown routine is called, and the next test is started.  
+</p>
+
+
+<!--
+<pre>
+
+// declarations of data to use in tests
+DATA_T* d1;
+
+// a setup routine to run before each test
+void &lt;name&gt;_setup(){
+
+  // initialize values declared above
+  d1 = new_data();
+}
+
+// a teardown routine to run after each test
+void &lt;name&gt_teardown(){
+
+  // free memory allocated in setup
+  free_data(d1);
+}
+
+// a list of tests
+START_TEST(test_name){
+
+  // do things and test the results, usually with fail_unless(condition, message)
+  fail_unless( d1 != NULL,
+               "Failed to create DATA_T, d1."); 
+
+  // do more things
+}
+END_TEST
+
+START_TEST(test_name2){
+  ...
+}
+END_TEST
+
+// defining the test suite, this collection of tests
+Suite *&lt;name&gt;_suite(void){
+  // the suite is everything in the file
+  Suite *s = suite_create("&lt;name&gt;");
+
+  // the test case is one collection of tests (I usually only have one per file)
+  TCase *tc_core = tcase_create("Core");
+
+  // add all tests to the test case
+  tcase_add_test(tc_core, test_name);
+  tcase_add_test(tc_core, test_name2);
+
+  // attach the setup and teardown methods to the test case
+  tcase_add_checked_fixture(tc_core, &lt;name&gt;_setup(), &lt;name&gt;_teardown());
+
+  // add the test case to the suite
+  suite_add_Tcase(s, tc_core);
+}
+
+// End of Example
+</pre>
+-->
+<p>
+To add a new test to an existing file, insert a new <code>
+START_TEST(name){}END_TEST</code> block into the file and add the test to the
+test suite using <code>tcase_add_test()</code>.  To create a new test
+suite, make a copy of <code>check-template.c</code> and fill in the
+body of the tests, changing &lt;&lt;class&gt;&gt; to the name of
+crux/src/c/ file. Make a copy of <code>check-template.h</code> and
+change the names accordingly.  Look for &lt;&lt;class&gt;&gt;
+in <code>crux-unit-tests.c</code> and add a line of that form with the
+correct name.  Finally, add the name of the file to <code>Makefile</code>. 
+</p>
+
+<b>Still To Do</b>
+
+<p>
+Bill suggests arranging the tests so that they can all be run at
+once. I would like to see smoke and regression tests separated into
+two.  The smoke tests could be a bare minimum of what is currently
+there, maybe one test per executable.  The regression tests could be
+more extensive and could have a more sophisticated
+comparison. Perhaps <code>crux-test.pl</code> could be updated to take
+a comparison script/command as one of the inputs instead of just using
+diff.  Then, for example, you could create a test just for tryptic
+cleavages and it would pass even if the scores weren't exactly the
+same as in the comparison file.  The scores and other aspects of the
+results could be tested separately.</p>
 
 <p>
 Barbara Frewen<br>
