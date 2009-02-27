@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.78 $
+ * $Revision: 1.79 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -1022,25 +1022,9 @@ MODIFIED_AA_T* generate_shuffled_mod_sequence(
   int switch_idx = 0;
   MODIFIED_AA_T temp_aa = 0;
 
-  // TODO (BF 9-Sep-08): Shouldn't the c-term be shuffled regardless?
-  // TODO consider changing bounds depending on trypticity
-  // But for now, leave the extreme N- and C-term AAs the same
-  /*
-  if (peptide_type == peptide_type){
-    ++start_idx;
-    --end_idx;
-  }
-  */
-  /* if(peptide_type == TRYPTIC){
-    ++start_idx;
-    --end_idx;
-  }
-  else if(peptide_type == N_TRYPTIC){
-    ++start_idx;
-  }
-  else if(peptide_type == C_TRYPTIC){
-    --end_idx;
-  }*/
+  // Do not move the first and last residue, regardless of enzyme
+  ++start_idx;
+  --end_idx;
 
   // shuffle from left to right, using the Knuth algorithm for shuffling.
   while(start_idx < end_idx){

@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.97 $
+ * $Revision: 1.98 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -3409,6 +3409,7 @@ void serialize_headers(FILE** psm_file_array){
   if( *psm_file_array == NULL ){
     return;
   }
+
   // remove this
   int num_spectrum_features = 0; //obsolete?
 
