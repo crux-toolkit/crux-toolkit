@@ -319,14 +319,17 @@ The minimum length of the peptides to place in the index. Default = 6.
 The maximum length of the peptides to place in the index. Default = 50.
 
 <LI>
-<code>--enzyme &lt;trypsin|chymotrypsin|elastase|no-enzyme&gt; </code> &ndash; 
+<code>enzyme &lt;trypsin|chymotrypsin|elastase|no-enzyme&gt; </code> &ndash; 
 Enzyme to use for <i>in silico</i> digestion of protein sequences
 (trypsin, chymotrypsin, elastase, no-enzyme).  Default trypsin. Used
 in conjunction with the options digestion and missed-cleavages. Use
-'no-enzyme' for non-specific digestion.  
+'no-enzyme' for non-specific digestion.  Digestion rules are as
+follows: enzyme name [cuts after one of these residues][but not before
+one of these residues].  trypsin [RK][P], elastase [ALIV][P],
+chymotrypsin [FWY][P]. 
 
 <LI>
-<code>--digestion &lt;full-digest|partial-digest&gt;
+<code>digestion &lt;full-digest|partial-digest&gt;</code> &ndash;
 Degree of digestion used to generate peptides (full-digest,
 partial-digest). Either both ends or one end of a peptide must
 conform to enzyme specificity rules. Default full-digest., Used in
