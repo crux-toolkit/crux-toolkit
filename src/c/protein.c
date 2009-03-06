@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.79 $
+ * $Revision: 1.80 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -943,6 +943,96 @@ BOOLEAN_T valid_cleavage_position(
     } else {
       return FALSE;
     }
+    break;
+
+  case CLOSTRIPAIN:
+    if (sequence[0] == 'R'){
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+    break;
+
+  case CYANOGEN_BROMIDE:
+    if (sequence[0] == 'M'){
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+    break;
+
+  case IODOSOBENZOATE:
+    if (sequence[0] == 'W'){
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+    break;
+
+  case PROLINE_ENDOPEPTIDASE:
+    if (sequence[0] == 'P'){
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+    break;
+
+  case STAPH_PROTEASE:
+    if (sequence[0] == 'E'){
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+    break;
+
+  case ASPN:
+    if (sequence[1] == 'D'){
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+    break;
+
+  case MODIFIED_CHYMOTRYPSIN:
+    if ((sequence[0] == 'F' || sequence[0] == 'L' ||
+         sequence[0] == 'W' || sequence[0] == 'Y') 
+        && (sequence[1] != 'P')){
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+    break;
+
+  case ELASTASE_TRYPSIN_CHYMOTRYPSIN:
+    if ((sequence[0] == 'A' || sequence[0] == 'L' ||
+         sequence[0] == 'I' || sequence[0] == 'V' ||
+         sequence[0] == 'K' || sequence[0] == 'R' ||
+         sequence[0] == 'W' || sequence[0] == 'F' ||
+         sequence[0] == 'Y' ) 
+        && (sequence[1] != 'P')){
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+    break;
+
+  case CUSTOM_ENZYME:
+    carp(CARP_FATAL, "The custom enzyme is not yet implmented.");
+    exit(1);
+
+    /* 
+BOOLEAN_T passes = false
+// must equal one of these residues
+for(aa_idx=0; aa_idx < num_custom_residues; aa_idx++){
+if sequence[0] == custom_residues_?_term[aa_idx]{ passes = TRUE; }
+    }
+// must NOT equal one of these residues
+for(aa_idx=0; aa_idx < num_custom_residues_?_term; aa_idx++){
+if sequence[0] == custom_residues_?_term[aa_idx]{ passes = FALSE; }
+}
+return passes;
+     */
+
     break;
 
   case NO_ENZYME:

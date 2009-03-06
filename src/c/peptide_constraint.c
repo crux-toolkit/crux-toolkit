@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide_constraint.c
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  * \brief: Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
@@ -98,7 +98,7 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint_from_parameters(){
   new_constraint->enzyme = get_enzyme_type_parameter("enzyme");
   new_constraint->digestion = get_digest_type_parameter("digestion");
   new_constraint->min_mass = get_double_parameter("min-mass");
-  new_constraint->max_mass = get_double_parameter("mas-mass");
+  new_constraint->max_mass = get_double_parameter("max-mass");
   new_constraint->min_length = get_int_parameter("min-length");
   new_constraint->max_length = get_int_parameter("max-length");
   new_constraint->num_mis_cleavage = get_int_parameter("missed-cleavages");
