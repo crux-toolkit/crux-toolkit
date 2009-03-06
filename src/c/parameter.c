@@ -376,16 +376,27 @@ void initialize_parameters(void){
       "Used in conjunction with enzyme option when enzyme is not set to "
       "to 'no-enzyme'.  Available from command line or parameter file for "
       "crux-generate-peptides and crux create-index.  Available from parameter"
-      " file for crux search-for-matches.",
+      " file for crux search-for-matches.  Digestion rules are as "
+      "follows: enzyme name [cuts after one of these residues][but not before "
+      "one of these residues].  trypsin [RK][P], elastase [ALIV][P], "
+      "chymotrypsin [FWY][P].",
       "true");
   set_enzyme_type_parameter("enzyme", TRYPSIN,
       "Enzyme to use for in silico digestion of protein sequences "
-      "(trypsin, chymotrypsin, elastase, no-enzyme).  Default trypsin.",
+      "(trypsin, chymotrypsin, elastase, clostripain, cyanogen-bromide, "
+      "iodosobenzoate, proline-endopeptidase, staph-protease, aspn, "
+      "modified-chymotrypsin, no-enzyme).  Default trypsin.", 
       "Used in conjunction with the options digestion and missed-cleavages. "
       "Use 'no-enzyme' for non-specific digestion.  Available "
       "from command line or parameter file for crux-generate-peptides "
       "and crux create-index.  Available from parameter file for crux "
-      "search-for-matches.",
+      "search-for-matches.   Digestion rules: enzyme name [cuts after one "
+      "of these residues][but not before one of these residues].  "
+      "trypsin [RK][P], elastase [ALIV][P], chymotrypsin [FWY][P], "
+      "clostripain [R][], cyanogen-bromide [M][], "
+      "iodosobenzoate [W][], proline-endopeptidase [P][], staph-protease "
+      "[E][], modified-chymotrypsin [FWYL][P], elastase-trypsin-chymotrypsin "
+      "[ALIVKRWFY][P],aspn cuts before D.",
       "true");
   /*
   set_peptide_type_parameter("cleavages", TRYPTIC, 

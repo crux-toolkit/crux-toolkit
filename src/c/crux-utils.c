@@ -87,7 +87,11 @@ char* digest_type_to_string(DIGEST_T type){
  * The string version of enzyme types
  */
 static char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = 
-  {"invalid", "no-enzyme", "trypsin", "chymotrypsin", "elastase"};
+  {"invalid", "no-enzyme", "trypsin", "chymotrypsin", "elastase",
+   "clostripain", "cyanogen-bromide", "iodosobenzoate", 
+   "proline-endopeptidase", "staph-protease", "aspn", 
+   "modified-chymotrypsin", "elastase-trypsin-chymotrypsin",
+   "custom-enzyme"};
 
 ENZYME_T string_to_enzyme_type(char* name){
   int enz_int = convert_enum_type_str(name, -10, 

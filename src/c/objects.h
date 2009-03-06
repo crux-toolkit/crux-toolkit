@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.57 $
+ * $Revision: 1.58 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -115,13 +115,22 @@ typedef enum _digest_type DIGEST_T;
  * \enum _enzyme_type
  */
 enum _enzyme_type {
-  INVALID_ENZYME, ///< required invalid value for the enum
-  NO_ENZYME,      ///< cleave anywhere
-  TRYPSIN,        ///< cleave after K or R, not before P
-  CHYMOTRYPSIN,   ///< cleave after FWY, not before P
-  ELASTASE        ///< cleave after ALIV, not before P
+  INVALID_ENZYME,        ///< required invalid value for the enum
+  NO_ENZYME,             ///< cleave anywhere
+  TRYPSIN,               ///< cleave after K or R, not before P
+  CHYMOTRYPSIN,          ///< cleave after FWY, not before P
+  ELASTASE,              ///< cleave after ALIV, not before P
+  CLOSTRIPAIN,           ///< cleave after R
+  CYANOGEN_BROMIDE,      ///< cleave after M
+  IODOSOBENZOATE,        ///< cleave after W
+  PROLINE_ENDOPEPTIDASE, ///< cleave after P
+  STAPH_PROTEASE,        ///< cleave after E
+  ASPN,                  ///< cleave before D
+  MODIFIED_CHYMOTRYPSIN, ///< cleave after FWYL, not before P
+  ELASTASE_TRYPSIN_CHYMOTRYPSIN, ///< cleave after ALIVKRWFY, not before P
+  CUSTOM_ENZYME    ///< cleave after/before user-defined residues
 };
-#define NUMBER_ENZYME_TYPES 5
+#define NUMBER_ENZYME_TYPES 14
 /**
  * \typedef ENZYME_T
  * \brief The enzyme with which a peptide was digested.  Used in
