@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.98 $
+ * $Revision: 1.99 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -677,12 +677,14 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
 
   carp(CARP_DETAILED_DEBUG, "Collapsing %i redundant matches.", match_total);
 
+  /*
   int i=0;
-  for(i=0; i<match_collection->match_total; i++){
+  for(i=0; i<match_total; i++){
     if( match_collection->match[i] == NULL ){
       fprintf(stderr, "match %i is null\n", i);
     }
   }
+  */
 
   // must be sorted by Sp
   assert( match_collection->last_sorted == SP );
@@ -702,6 +704,8 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
       cur_score_last_index++;
       next_score = get_match_score(matches[cur_score_last_index+1], SP);
     }
+    // if the last two were equal, the last index was not incremented
+    if( next_score == cur_score ){ cur_score_last_index++; }
 
     if( cur_score_last_index > match_idx ){
       consolidate_matches(matches, match_idx, cur_score_last_index);
@@ -724,6 +728,8 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
     }
   }
 
+  carp(CARP_DETAILED_DEBUG, "Removing duplicates changed count from %i to %i",
+       match_collection->match_total, opening_idx);
   // reset total number of matches in the collection
   match_collection->match_total = opening_idx;
   // remove duplicate peptides from the overall count
