@@ -30,7 +30,13 @@ database may either be in FASTA format or it may be a binary index
 created by <code>crux create-index</code>.</p>
 
 <p>
-<b>Modifications:</b> Crux handles modifications as follows.  
+<b>Modifications:</b> Crux handles two types of modifications: static
+and variable.  Static modifications are a change of mass applied to
+a given amino acid in every peptide in which it occurs.  By default, a
+static modification of +57 da to cystine (C) is applied.
+Variable modifications allow peptides to be generated with and without
+a mass change to a given amino acid.  Crux handles variable 
+modifications as follows.   
 The user specifies an allowed set of amino acid modifications, using
 the options <code>mod</code>, <code>cmod</code> and <code>nmod</code>,
 which are described below.  Before any search is performed, Crux
@@ -38,7 +44,7 @@ generates an exhaustive list of all possible combinations of amino
 acid modifications that could be applied to a peptide.  For example,
 if the user specifies a modification of +79 which can be present twice
 on any peptide and a modification of +30 which can be present only
-once , then the list will contain modifications corresponding to +79
+once, then the list will contain modifications corresponding to +79
 on one residue, +79 on two different residues, +30 on one residue, +79
 on one and +30 on one, +79 on two and +30 on one.  Subsequently, for
 each spectrum, Crux performs one search for each possible combination of
@@ -376,6 +382,12 @@ one of those proteins.  Default = F.
 Specify the type of isotopic masses to use when calculating the
 peptide mass. Default = average.
    
+<li>
+<code>&lt;A-Z&gt &lt;float&gt;</code> &ndash;
+Specify static modifications.  This is a mass change applied to the
+given amino acid (in single-letter-code A thru Z) for every peptide in
+which it occurs.  Use the <code>mod</code> option for generating
+peptides both with and without the mass change.  Default C=57.
 </ul>
 
 <HR></hr>
