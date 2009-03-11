@@ -67,6 +67,9 @@ analyze_mods_fasta = good_results/standard_analyze_mods = crux percolator --para
 # Search with elastase
 search_elastase = good_results/standard_search_elastase.sqt = crux search-for-matches --parameter-file params/elastase  test.ms2 test.fasta; cat target.sqt = 'Time'
 
+# Search with custom enzyme set to elastase rules
+search_custom_like_elastase = good_results/standard_search_elastase.sqt = crux search-for-matches --parameter-file params/custom-enzyme  test.ms2 test.fasta; cat target.sqt = 'Time' 'EnzymeSpec'
+
 # TESTS WITH INDEX
 
 # See that crux-generate-peptides works with an existing index

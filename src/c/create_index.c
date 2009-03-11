@@ -45,6 +45,7 @@ int create_index_main(int argc, char** argv){
     "max-mass", 
     "isotopic-mass",
     "enzyme", 
+    "custom-enzyme", 
     "digestion", 
     //    "cleavages", 
     "missed-cleavages",

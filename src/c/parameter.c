@@ -66,6 +66,7 @@ void parse_parameter_file(
 BOOLEAN_T check_option_type_and_bounds(char* name);
 
 void check_parameter_consistency();
+void parse_custom_enzyme(char* rule_str);
 
 void print_parameter_file(char* input_param_filename);
 
@@ -243,6 +244,24 @@ void initialize_parameters(void){
     list_of_mods[mod_idx] = new_aa_mod(mod_idx);              
   }                                                           
 
+  /* initialize custom enzyme variables */
+  pre_list_size = 0;
+  post_list_size = 0;
+  pre_cleavage_list = NULL;
+  post_cleavage_list = NULL;
+  pre_for_inclusion = TRUE;
+  post_for_inclusion = FALSE;
+
+  // debug, before option implemented
+  /*
+  pre_list_size = 2;
+  post_list_size = 1;
+  pre_cleavage_list = mycalloc( pre_list_size, sizeof(char));
+  pre_cleavage_list[0] = 'R';
+  pre_cleavage_list[1] = 'K' ;
+  post_cleavage_list = mycalloc( post_list_size, sizeof(char));
+  post_cleavage_list[0] = 'P';
+  */
   /* *** Initialize Arguments *** */
 
   // set with name, default value, [max, min], usage, notes, for param file
@@ -391,13 +410,27 @@ void initialize_parameters(void){
       "from command line or parameter file for crux-generate-peptides "
       "and crux create-index.  Available from parameter file for crux "
       "search-for-matches.   Digestion rules: enzyme name [cuts after one "
-      "of these residues][but not before one of these residues].  "
-      "trypsin [RK][P], elastase [ALIV][P], chymotrypsin [FWY][P], "
-      "clostripain [R][], cyanogen-bromide [M][], "
-      "iodosobenzoate [W][], proline-endopeptidase [P][], staph-protease "
-      "[E][], modified-chymotrypsin [FWYL][P], elastase-trypsin-chymotrypsin "
-      "[ALIVKRWFY][P],aspn cuts before D.",
+      "of these residues]|{but not before one of these residues}.  "
+      "trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin [FWY]|{P}, "
+      "clostripain [R]|[], cyanogen-bromide [M]|[], "
+      "iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease "
+      "[E]|[], modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin "
+      "[ALIVKRWFY]|{P},aspn []|[D] (cuts before D).",
       "true");
+  set_string_parameter("custom-enzyme", NULL, 
+      "Specify rules for in silico digestion of protein sequences. See html "
+      "docs for syntax. Default to use pre-defined enzyme trypsin.",
+      "Overrides the enzyme option.  Two lists of residues are given enclosed "
+      "in square brackets or curly braces and separated by a |. The first list "
+      "contains residues required/prohibited before the cleavage site and the "
+      "second list is residues after the cleavage site.  If the residues are "
+      "required for digestion, they are in square brackets, '[' and ']'.  "
+      "If the residues prevent digestion, then they are enclosed in curly "
+      "braces, '{' and '}'.  Use X to indicate all residues.  For example, "
+      "trypsin cuts after R or K but not before P which is represented as "
+      "[RK]|{P}.  AspN cuts after any residue but only before D which is "
+      "represented as [X]|[D].",
+                       "true");
   /*
   set_peptide_type_parameter("cleavages", TRYPTIC, 
       "The type of cleavage sites to consider (tryptic, partial, all). "
@@ -512,12 +545,18 @@ void initialize_parameters(void){
   set_string_parameter("decoy-tab-output-file", "decoy.txt", 
       "Tab delimited output file name for decoys.  Default 'decoy.txt'.",
       "Used by crux search-for-matches with output-mode=<all|tab> and "
-      "number-decoy-sets > 0.  File is put in the directory set by "
+      "number-decoy-set > 0.  File is put in the directory set by "
       "--match-output-folder (defaults to working directory).", "true");
   set_int_parameter("number-decoy-set", 2, 0, 10, 
-      "The number of decoy databases to search.  Default 2.",
-      "Used by crux-search-for-matches.  Decoy search results can be used "
-      "by crux-analzye-matches with the percolator algorithm", "true");
+      "The number of decoy databases to search, generating one output file "
+      "per set.  Default 2.", 
+      "Each decoy set of psms will be printed to a separate file and not " 
+      "included with the target psms. To return decoys in the same file as "
+      "targets, use tdc=T in the parameter file and control the number of "
+      "decoys with num-decoys-per-target. At least one decoy set (in its own "
+      "file) is required to run the algorithm 'percolator' in a subsiquent "
+      "crux run. Used by crux-search-for-matches.  Decoy search results can "
+      "be used by crux percolator.", "true");
 
   /* search-for-matches parameter file options */
   set_boolean_parameter("tdc", FALSE,
@@ -533,7 +572,7 @@ void initialize_parameters(void){
       "Number of decoy peptides to search for every target peptide searched. "
       "Default 1.",
       "Multiple decoys are put in the same collection, sorted together, and "
-      "written to the same file.  Does not affect --number-decoy-sets.",
+      "written to the same file.  Does not affect --number-decoy-sets or tdc.",
       "true");
   set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
       "Number of psms per spectrum to score after "
@@ -999,7 +1038,9 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   check_parameter_consistency();
 
   // do global parameter-specific tasks: set static aa modifications
-  //   set verbosity, make adjustments for tdc, print param file (if requested)
+  //   set verbosity, make adjustments for tdc, print param file (if
+  //   requested), set custom enzyme rules
+
   update_aa_masses();
 
   if( get_boolean_parameter("tdc") == TRUE ){
@@ -1024,12 +1065,138 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     update_hash_value(parameters, "algorithm", value_str);
   }
 
+  // if custom-enzyme used, set values
+  char* enzyme_rule_str = get_string_parameter("custom-enzyme");
+  if( enzyme_rule_str != NULL ){
+    parse_custom_enzyme(enzyme_rule_str);
+    free(enzyme_rule_str);
+
+    char* value_str = enzyme_type_to_string(CUSTOM_ENZYME);
+    update_hash_value(parameters, "enzyme", value_str);
+    free(value_str);
+  }
+
   set_verbosity_level(get_int_parameter("verbosity"));
   print_parameter_file(param_filename);
 
   parameter_plasticity = FALSE;
 
   return success;
+}
+
+/**
+ * Read the value given for custom-enzyme and enter values into global
+ * params.   Correct syntax is <brace>A-Z<brace>|<brace>A-Z<brace> 
+ * where <brace> can be [] or {}.  An X indicates that any residue is
+ * legal. Sets pre/post_list size and allocates memory for
+ * pre/post_cleavage_list.  Sets pre/post_for_inclusion as true if []
+ * encloses list or false if {} encloses list. 
+ * For special case of [X], set p_cleavage_list as empty and inclusion
+ * as false.
+ */
+// NOTE (BF mar-11-09): for testing would be nice if this returned
+// error code instead of dying
+void parse_custom_enzyme(char* rule_str){
+
+  BOOLEAN_T success = TRUE;
+  int len = strlen(rule_str);
+  int idx = 0;
+  int pipe_idx = 0;
+
+  // 1. find the |
+  for(idx = 0; idx < len; idx++){
+    if( rule_str[idx] == '|' ){
+      pipe_idx = idx;
+      break;
+    }
+  }
+  // check that there isn't a second
+  for(idx = idx+1; idx < len; idx++){
+    if( rule_str[idx] == '|' ){
+      success = FALSE;      
+      break;
+    }
+  }
+
+
+  // 2. set beginning and end of strings relative to pipe, start, end
+  //    0 1    p-1 p p+1 p+2     len-1 len
+  //    [ X    ]   | [   X       ]     '0'
+  int pre_first_idx = 1;
+  int pre_end_idx = pipe_idx - 1;
+  int post_first_idx = pipe_idx + 2;
+  int post_end_idx = len -1;
+
+  // 3. check that braces match and set inclusion
+  // pre-list
+  if(pipe_idx < 1){
+    success = FALSE;
+  }else if(rule_str[pre_first_idx-1] == '[' && 
+           rule_str[pre_end_idx] == ']'){
+    pre_for_inclusion = TRUE;
+  }else if(rule_str[pre_first_idx-1] == '{' && 
+           rule_str[pre_end_idx] == '}'){
+    pre_for_inclusion = FALSE;
+  }else{
+    success = FALSE;
+  }
+
+  // post list
+  if(pipe_idx + 2 >= len ){
+    success = FALSE;
+  }else if(rule_str[post_first_idx-1] == '[' && 
+           rule_str[post_end_idx] == ']'){
+    post_for_inclusion = TRUE;
+  }else if(rule_str[post_first_idx-1] == '{' && 
+           rule_str[post_end_idx] == '}'){
+    post_for_inclusion = FALSE;
+  }else{
+    success = FALSE;
+  }
+
+  // check that braces aren't empty 
+  if(pre_first_idx >= pre_end_idx || post_first_idx >= post_end_idx ){
+    success = FALSE;
+  }
+
+  if( success == FALSE ){
+    carp(CARP_FATAL, "Custom enzyme syntax '%s' is incorrect.  "
+         "Must be of the form [AZ]|[AZ] or with [] replaced by {}. "
+         "AZ is a list of residues (letters A-Z) required [] or prohibited {}. "
+         "Use [X] to indicate any reside is legal.",
+         rule_str);
+    exit(1);
+  }
+
+  // 4. allocate lists and fill
+  pre_list_size = pre_end_idx - pre_first_idx;
+  pre_cleavage_list = mycalloc(pre_list_size, sizeof(char));
+  for(idx = 0; idx < pre_list_size; idx++){
+    pre_cleavage_list[idx] = rule_str[pre_first_idx+idx];
+  }
+
+  post_list_size = post_end_idx - post_first_idx;
+  post_cleavage_list = mycalloc(post_list_size, sizeof(char));
+  for(idx = 0; idx < post_list_size; idx++){
+    post_cleavage_list[idx] = rule_str[post_first_idx+idx];
+  }
+
+
+  // 5. check special case of [X]
+  if(strncmp( rule_str, "[X]", pre_list_size+2) == 0){
+    free(pre_cleavage_list);
+    pre_cleavage_list = NULL;
+    pre_list_size = 0;
+    pre_for_inclusion = FALSE;
+  }
+
+  if(strncmp( rule_str+post_first_idx-1, "[X]", post_list_size+2) == 0){
+    free(post_cleavage_list);
+    post_cleavage_list = NULL;
+    post_list_size = 0;
+    post_for_inclusion = FALSE;
+  }
+
 }
 
 void check_parameter_consistency(){

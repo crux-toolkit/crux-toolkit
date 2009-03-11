@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.99 $
+ * $Revision: 1.100 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -3028,7 +3028,14 @@ void print_sqt_header(
   //peptide_type_to_string(cleavages, temp_str);
   char* enz_str = enzyme_type_to_string(enzyme);
   char* dig_str = digest_type_to_string(digestion);
-  fprintf(output, "H\tEnzymeSpec\t%s-%s\n", enz_str, dig_str);
+  char custom_str[SMALL_BUFFER];
+  if( enzyme == CUSTOM_ENZYME){
+    char* rule = get_string_parameter("custom-enzyme");
+    sprintf(custom_str, ", custom pattern: %s", rule);
+  }else{
+    custom_str[0] = 0;
+  }
+  fprintf(output, "H\tEnzymeSpec\t%s-%s%s\n", enz_str, dig_str, custom_str);
   free(enz_str);
   free(dig_str);
 

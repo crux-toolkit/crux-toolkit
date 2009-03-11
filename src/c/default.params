@@ -112,8 +112,8 @@ spectrum-charge=all
 # Available for crux search-for-matches.  Produce binary, sqt and/or tab delimited output files.  Binary files named automatically.  See sqt-output-file for naming text file.  See match-output-folder for file location.
 output-mode=binary
 
-# Show search progress by printing every n spectra searched.  Default 100.
-# Available for crux search-for-matches from parameter file.
+# Show search progress by printing every n spectra searched.  Default 10.
+# Set to 0 to show no search progress.  Available for crux search-for-matches from parameter file.
 print-search-progress=10
 
 # Folder to which search results will be written. Default '.'. (current directory).
@@ -128,8 +128,8 @@ sqt-output-file=target.sqt
 # Used by crux-search-for-matches with output-mode=<all|sqt> and number-decoy-sets > 0.  File is put in the directory set by --match-output-folder (defaults to working directory).
 decoy-sqt-output-file=decoy.sqt
 
-# The number of decoy databases to search.  Default 2.
-# Used by crux-search-for-matches.  Decoy search results can be used by crux-analzye-matches with the percolator algorithm
+# The number of decoy databases to search, generating one output file per set.  Default 2.
+# Each decoy set of psms will be printed to a separate file and not included with the target psms. To return decoys in the same file as targets, use tdc=T in the parameter file and control the number of decoys with num-decoys-per-target. At least one decoy set (in its own file) is required to run the algorithm 'percolator' in a subsiquent crux run. Used by crux-search-for-matches.  Decoy search results can be used by crux percolator.
 number-decoy-set=2
 
 # The number of psms per spectrum writen to the binary output file.Default 1.

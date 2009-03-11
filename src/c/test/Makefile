@@ -33,7 +33,7 @@ CRUX_LIBS = \
   ../.libs/libcrux.a \
   $(PERCOLATOR_DIR)/Release/lib/libpercolator.a
 
-unittests:  $(SRC) $(TESTS)
+unittests:  $(SRC) $(TESTS) $(CRUX_LIBS)
 	$(CC) -o unittests $(CFLAGS) $(TESTS) $(CRUX_LIBS) -lcheck -lm -D_GNU_SOURCE
 .PHONY : check clean
 

@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.80 $
+ * $Revision: 1.81 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -903,6 +903,36 @@ float calculate_subsequence_mass (
 }
 
 /**
+ * \brief Decide if a residue is in an inclusion list or is not in an
+ * exclusion list. 
+ *
+ * For use with the user-specified enzyme digestion.  Takes an amino
+ * acid, a list of amino acids, and a flag for if it is an inclusion
+ * list or an exclusion list.  A cleavage can happen before/after the
+ * given residue if it is either in the inclusion list or is not in
+ * the exculsion list.
+ * \returns TRUE if the residue is in the inclusion list or not in the
+ * exclusion list.
+ */
+BOOLEAN_T is_residue_legal(char aa, 
+                           char* aa_list, 
+                           int list_size, 
+                           BOOLEAN_T for_inclusion){
+
+  // The logic for returning for_inclusion:
+  // For an inclusion list (TRUE), once we find the aa it passes (TRUE)
+  // For an exclusion list (FALSE), once we find the aa, it fails (FALSE)
+  int idx=0;
+  for(idx=0; idx < list_size; idx++){
+    if( aa == aa_list[idx] ){ return for_inclusion; }
+  }
+  // or if we got to the end of the list and didn't find a match
+  // for inclusion, it fails (!TRUE)
+  // for exclusion, it passes (!FALSE)
+  return ! for_inclusion;
+}
+
+/**
  * Compares the first and second amino acids in the given sequence to
  * see if they conform to the cleavage rules of the given enzyme.  For
  * NO_ENZYME, always returns TRUE.
@@ -1017,22 +1047,18 @@ BOOLEAN_T valid_cleavage_position(
     break;
 
   case CUSTOM_ENZYME:
-    carp(CARP_FATAL, "The custom enzyme is not yet implmented.");
-    exit(1);
+    //carp(CARP_FATAL, "The custom enzyme is not yet implmented.");
+    //exit(1);
 
-    /* 
-BOOLEAN_T passes = false
-// must equal one of these residues
-for(aa_idx=0; aa_idx < num_custom_residues; aa_idx++){
-if sequence[0] == custom_residues_?_term[aa_idx]{ passes = TRUE; }
-    }
-// must NOT equal one of these residues
-for(aa_idx=0; aa_idx < num_custom_residues_?_term; aa_idx++){
-if sequence[0] == custom_residues_?_term[aa_idx]{ passes = FALSE; }
-}
-return passes;
-     */
-
+    return ( is_residue_legal(sequence[0], 
+                              pre_cleavage_list,
+                              pre_list_size, 
+                              pre_for_inclusion)
+             && 
+             is_residue_legal(sequence[1], 
+                              post_cleavage_list,
+                              post_list_size, 
+                              post_for_inclusion) );
     break;
 
   case NO_ENZYME:

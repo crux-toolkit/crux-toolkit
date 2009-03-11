@@ -2,26 +2,39 @@
 #include "../parameter.h"
 #include "../carp.h"
 #include "../modifications.h"
+// also in parameter.c
+void parse_custom_enzyme(char* rule_str);
 
-// TODO write setup and teardown
-// break up into different tests
-START_TEST(test_create){
-  // set up
+// delcare things to set up
+char* ops[1];
+char* args[1];
+char* enzyme_rule;
+  
+// set up and teardown
+void param_setup(){
   initialize_parameters();
+  // select command line options and arguments
+  ops[0] = "parameter-file";
+  select_cmd_line_options(ops, 1);
+  args[0] = "protein input";
+  select_cmd_line_arguments(args, 1);
+}
 
+void param_teardown(){
+  // free all hashes?
+}
+
+START_TEST(test_create){
   // check getters for each type (TODO)
   fail_unless( get_boolean_parameter("overwrite") == FALSE, 
               "Does not return the bool parameter %s correctly", "overwrite");
 
-  // select command line options and arguments (try non-existant ones)
-  char* ops[1] = {"parameter-file"};
-  fail_unless( select_cmd_line_options(ops, 1) == TRUE,
-               "Failed to select command line options");
-  char* args[1] = {"protein input"};
-  fail_unless( select_cmd_line_arguments(args, 1) == TRUE, 
-    "Failed to select command line arguments");
-  // parse command line (with and without param file)
-  // look for correct option (cmd line overrides param)
+}
+END_TEST
+
+// TODO write setup and teardown
+// break up into different tests
+START_TEST(test_mod){
 
   // CHECK MODS SETUP
   // TODO: put this in setup
@@ -110,12 +123,169 @@ START_TEST(test_create){
 }
 END_TEST
 
+
+START_TEST(test_enzyme){
+
+  // confirm that initialize_parameters set globals correctly
+  fail_unless(pre_list_size == 0, 
+              "Custom enzyme pre-cleavage site list size should be "
+              "initialized to 0 but is %i", pre_list_size);
+  fail_unless(post_list_size == 0, 
+              "Custom enzyme post-cleavage site list size should be "
+              "initialized to 0 but is %i", post_list_size);
+  fail_unless(pre_for_inclusion == TRUE,
+              "Pre_for_inclusion should be initialized to TRUE but is not.");
+  fail_unless(post_for_inclusion == FALSE,
+              "Post_for_inclusion should be initialized to FALSE but is not.");
+
+  // try various strings and see that they work
+  // can't test error cases b/c parse_ dies on error
+  enzyme_rule = "[RK]|{P}";
+  parse_custom_enzyme(enzyme_rule);
+  fail_unless(pre_for_inclusion == TRUE,
+              "For rule %s, pre_for_inclusion should be TRUE but is not.",
+              enzyme_rule);
+  fail_unless(post_for_inclusion == FALSE,
+              "For rule %s, post_for_inclusion should be FALSE but is not.",
+              enzyme_rule);
+  fail_unless(pre_list_size == 2, 
+              "For rule %s pre-cleavage site list size should be "
+              "2 but is %i", enzyme_rule, pre_list_size);
+  fail_unless(post_list_size == 1, 
+              "For rule %s, post-cleavage site list size should be "
+              "1 but is %i", enzyme_rule, post_list_size);
+  fail_unless(pre_cleavage_list != NULL,
+              "For rule %s pre-cleavage list should not be NULL.",
+              enzyme_rule);
+  fail_unless(post_cleavage_list != NULL,
+              "For rule %s post-cleavage list should not be NULL.",
+              enzyme_rule);
+  fail_unless(pre_cleavage_list[0] == 'R',
+              "For rule %s, first aa in pre list should be R and is %c",
+              enzyme_rule, pre_cleavage_list[0]);
+  fail_unless(pre_cleavage_list[1] == 'K',
+              "For rule %s, second aa in pre list should be K and is %c",
+              enzyme_rule, pre_cleavage_list[0]);
+  fail_unless(post_cleavage_list[0] == 'P',
+              "For rule %s, first aa in post list should be P and is %c",
+              enzyme_rule, pre_cleavage_list[0]);
+  // clean up
+  free(pre_cleavage_list);
+  free(post_cleavage_list);
+  pre_cleavage_list = NULL;
+  post_cleavage_list = NULL;
+  pre_list_size = 0;
+  post_list_size = 0;
+
+
+  enzyme_rule = "[PML]|[D]";
+  parse_custom_enzyme(enzyme_rule);
+  fail_unless(pre_for_inclusion == TRUE,
+              "For rule %s, pre_for_inclusion should be TRUE but is not.",
+              enzyme_rule);
+  fail_unless(post_for_inclusion == TRUE,
+              "For rule %s, post_for_inclusion should be TRUE but is not.",
+              enzyme_rule);
+  fail_unless(pre_list_size == 3, 
+              "For rule %s pre-cleavage site list size should be "
+              "3 but is %i", enzyme_rule, pre_list_size);
+  fail_unless(post_list_size == 1, 
+              "For rule %s, post-cleavage site list size should be "
+              "1 but is %i", enzyme_rule, post_list_size);
+  fail_unless(pre_cleavage_list != NULL,
+              "For rule %s pre-cleavage list should not be NULL.",
+              enzyme_rule);
+  fail_unless(post_cleavage_list != NULL,
+              "For rule %s post-cleavage list should not be NULL.",
+              enzyme_rule);
+  fail_unless(pre_cleavage_list[0] == 'P',
+              "For rule %s, first aa in pre list should be P and is %c",
+              enzyme_rule, pre_cleavage_list[0]);
+  fail_unless(pre_cleavage_list[1] == 'M',
+              "For rule %s, second aa in pre list should be M and is %c",
+              enzyme_rule, pre_cleavage_list[0]);
+  fail_unless(pre_cleavage_list[2] == 'L',
+              "For rule %s, third aa in pre list should be L and is %c",
+              enzyme_rule, pre_cleavage_list[0]);
+  fail_unless(post_cleavage_list[0] == 'D',
+              "For rule %s, first aa in post list should be D and is %c",
+              enzyme_rule, pre_cleavage_list[0]);
+  // clean up
+  free(pre_cleavage_list);
+  free(post_cleavage_list);
+  pre_cleavage_list = NULL;
+  post_cleavage_list = NULL;
+  pre_list_size = 0;
+  post_list_size = 0;
+
+
+  enzyme_rule = "{ABCDEFG}|[HIGK]";
+  parse_custom_enzyme(enzyme_rule);
+  fail_unless(pre_for_inclusion == FALSE,
+              "For rule %s, pre_for_inclusion should be FALSE but is not.",
+              enzyme_rule);
+  fail_unless(post_for_inclusion == TRUE,
+              "For rule %s, post_for_inclusion should be TRUE but is not.",
+              enzyme_rule);
+  fail_unless(pre_list_size == 7, 
+              "For rule %s pre-cleavage site list size should be "
+              "7 but is %i", enzyme_rule, pre_list_size);
+  fail_unless(post_list_size == 4, 
+              "For rule %s, post-cleavage site list size should be "
+              "4 but is %i", enzyme_rule, post_list_size);
+  fail_unless(pre_cleavage_list != NULL,
+              "For rule %s pre-cleavage list should not be NULL.",
+              enzyme_rule);
+  fail_unless(post_cleavage_list != NULL,
+              "For rule %s post-cleavage list should not be NULL.",
+              enzyme_rule);
+  // clean up
+  free(pre_cleavage_list);
+  free(post_cleavage_list);
+  pre_cleavage_list = NULL;
+  post_cleavage_list = NULL;
+  pre_list_size = 0;
+  post_list_size = 0;
+
+  enzyme_rule = "[X]|[X]";
+  parse_custom_enzyme(enzyme_rule);
+  fail_unless(pre_for_inclusion == FALSE,
+              "For rule %s, pre_for_inclusion should be FALSE but is not.",
+              enzyme_rule);
+  fail_unless(post_for_inclusion == FALSE,
+              "For rule %s, post_for_inclusion should be FALSE but is not.",
+              enzyme_rule);
+  fail_unless(pre_list_size == 0, 
+              "For rule %s pre-cleavage site list size should be "
+              "7 but is %i", enzyme_rule, pre_list_size);
+  fail_unless(post_list_size == 0, 
+              "For rule %s, post-cleavage site list size should be "
+              "4 but is %i", enzyme_rule, post_list_size);
+  fail_unless(pre_cleavage_list == NULL,
+              "For rule %s pre-cleavage list should not be NULL.",
+              enzyme_rule);
+  fail_unless(post_cleavage_list == NULL,
+              "For rule %s post-cleavage list should not be NULL.",
+              enzyme_rule);
+  // clean up
+  free(pre_cleavage_list);
+  free(post_cleavage_list);
+  pre_cleavage_list = NULL;
+  post_cleavage_list = NULL;
+  pre_list_size = 0;
+  post_list_size = 0;
+
+}
+END_TEST
+
 Suite* parameter_suite(){
   Suite* s = suite_create("Parameter");
   TCase *tc_core = tcase_create("Core");
   suite_add_tcase(s, tc_core);
   tcase_add_test(tc_core, test_create);
-  //tcase_add_check_fixture(tc_core, setup, teardown);
+  tcase_add_test(tc_core, test_mod);
+  tcase_add_test(tc_core, test_enzyme);
+  tcase_add_checked_fixture(tc_core, param_setup, param_teardown);
   return s;
 }
 

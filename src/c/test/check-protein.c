@@ -14,6 +14,8 @@
 #include "../crux-utils.h"
 #include "../database.h"
 #include "../parameter.h"
+// also in parameter.c
+void parse_custom_enzyme(char* rule_str);
 
 // declare things to setup
 PEPTIDE_T *peptide1, *peptide2, *peptide3, *peptide4, *peptide5, *peptide6;
@@ -129,9 +131,7 @@ START_TEST (test_elastase){
   }
   // remove those for which length is too short
   for(idx=1; idx < s_idx; idx++){
-    //    printf("index %i - %i is length %i\n", starts[idx], starts[idx-1], starts[idx]-starts[idx-1]);
     if( starts[idx] - starts[idx-1] < 4){
-      //printf("removing index %i\n", starts[idx-1]);
       starts[idx-1] = -1;
     }
   }
@@ -561,7 +561,7 @@ START_TEST(test_other_enzymes){
    ENZYME_T enzyme = enzymes[idx];
    char* enzyme_name = enzyme_type_to_string(enzyme);
 
-   printf("enzyme: %s\n", enzyme_name);
+   //printf("enzyme: %s\n", enzyme_name);
    // create list of start indexes for protein
    int starts[128];
    starts[0] = 0;
@@ -575,9 +575,9 @@ START_TEST(test_other_enzymes){
    }
    // remove those for which length is too short
    for(idx=1; idx < s_idx; idx++){
-     printf("index %i - %i is length %i\n", starts[idx], starts[idx-1], starts[idx]-starts[idx-1]);
+     //printf("index %i - %i is length %i\n", starts[idx], starts[idx-1], starts[idx]-starts[idx-1]);
      if( starts[idx] - starts[idx-1] < 4){
-       printf("removing index %i\n", starts[idx-1]);
+       //printf("removing index %i\n", starts[idx-1]);
        starts[idx-1] = -1;
      }
    }
@@ -636,6 +636,175 @@ START_TEST(test_other_enzymes){
 }
 END_TEST
 
+START_TEST(test_custom_enzyme){
+  // define custom rule
+  char* rule = "[MLK]|{P}";
+  parse_custom_enzyme(rule);
+
+  // create list of start indexes
+  int starts[128];
+  starts[0] = 0;
+  int s_idx = 1;
+  int idx = 0;
+  for(idx=0; idx < strlen(prot1_sequence)-1; idx++){
+    //    printf("seq[%i] = %c\n", );
+   if((prot1_sequence[idx] == 'M' || 
+        prot1_sequence[idx] == 'L' ||
+        prot1_sequence[idx] == 'K') 
+       && prot1_sequence[idx+1] != 'P'){
+      starts[s_idx] = idx+1;
+      s_idx++;
+    }  
+  }
+
+  // remove those for which length is too short
+  for(idx=1; idx < s_idx; idx++){
+    if( starts[idx] - starts[idx-1] < 4){
+      starts[idx-1] = -1;
+    }
+  }
+
+  // create peptide constraint with elastase
+  set_peptide_constraint_enzyme(enzyme_constraint, 
+                                CUSTOM_ENZYME);
+
+  // create new iterator
+  free_protein_peptide_iterator(iterator);
+  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+
+  fail_unless( iterator != NULL, 
+               "Failed to create custom enzyme peptide iterator.");
+
+  idx=0;
+  // for each peptide 
+  while(protein_peptide_iterator_has_next(iterator)){
+    // get peptide
+    peptide2 = protein_peptide_iterator_next(iterator);
+    fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
+    char* seq = get_peptide_sequence(peptide2);
+
+    // get its source
+    src = get_peptide_peptide_src(peptide2);
+    fail_unless(src != NULL, "Failed to get peptide src from peptide.");
+
+    // get peptide indecies in sequence
+    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    start_idx--;
+    int len = get_peptide_length(peptide2);
+    while( starts[idx] == -1 ){ idx++;}
+    fail_unless( start_idx == starts[idx],
+                 "Peptide %s should start at %i but starts at %i",
+                 seq, starts[idx], start_idx );
+    idx++;
+
+    // if at start of protein, skip first end check
+    if( start_idx > 0 ){
+      fail_unless( (prot1_sequence[start_idx-1] == 'M' || 
+                    prot1_sequence[start_idx-1] == 'L' ||
+                    prot1_sequence[start_idx-1] == 'K') ,
+                   "Peptide %s is flanked by %c but should be MLK.",
+                   seq, prot1_sequence[start_idx-1]); 
+      fail_unless( prot1_sequence[start_idx] != 'P',
+                   "Peptide %s cleaved before P and should not have.",
+                   seq); 
+    }
+    // if at end of protein, skip second end check
+    if( start_idx+len < strlen(prot1_sequence) ){
+      fail_unless( (prot1_sequence[start_idx+len-1] == 'M' || 
+                    prot1_sequence[start_idx+len-1] == 'L' ||
+                    prot1_sequence[start_idx+len-1] == 'K') ,
+                   "Peptide %s ends in %c but should be MLK.",
+                   seq, prot1_sequence[start_idx+len-1]); 
+      fail_unless( prot1_sequence[start_idx+len] != 'P',
+                   "Peptide %s cleaved before P and should not have.",
+                   seq); 
+    }
+
+    free_peptide(peptide2);
+    free(seq);
+  }
+
+  // define custom rule
+  rule = "[X]|[Q]";
+  free(pre_cleavage_list);
+  free(post_cleavage_list);
+  pre_list_size = 0;
+  post_list_size = 0;
+  parse_custom_enzyme(rule);
+
+  // create list of start indexes
+  starts[0] = 0;
+  s_idx = 1;
+  idx = 0;
+  for(idx=0; idx < strlen(prot1_sequence)-1; idx++){
+   if( prot1_sequence[idx+1] == 'Q'){
+      starts[s_idx] = idx+1;
+      s_idx++;
+    }  
+  }
+
+  // remove those for which length is too short
+  for(idx=1; idx < s_idx; idx++){
+    //printf("index %i - %i is length %i\n", starts[idx], starts[idx-1], starts[idx]-starts[idx-1]);
+    if( starts[idx] - starts[idx-1] < 4){
+      //printf("removing index %i\n", starts[idx-1]);
+      starts[idx-1] = -1;
+    }
+  }
+
+  // create peptide constraint with elastase
+  set_peptide_constraint_enzyme(enzyme_constraint, 
+                                CUSTOM_ENZYME);
+
+  // create new iterator
+  free_protein_peptide_iterator(iterator);
+  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+
+  fail_unless( iterator != NULL, 
+               "Failed to create custom enzyme peptide iterator.");
+
+  idx=0;
+  // for each peptide 
+  while(protein_peptide_iterator_has_next(iterator)){
+    // get peptide
+    peptide2 = protein_peptide_iterator_next(iterator);
+    fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
+    char* seq = get_peptide_sequence(peptide2);
+
+    // get its source
+    src = get_peptide_peptide_src(peptide2);
+    fail_unless(src != NULL, "Failed to get peptide src from peptide.");
+
+    // get peptide indecies in sequence
+    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    start_idx--;
+    int len = get_peptide_length(peptide2);
+    while( starts[idx] == -1 ){ idx++;}
+    fail_unless( start_idx == starts[idx],
+                 "Peptide %s should start at %i but starts at %i",
+                 seq, starts[idx], start_idx );
+    idx++;
+
+    if( start_idx > 0 ){
+    // if at start of protein, skip first end check
+    fail_unless( prot1_sequence[start_idx] == 'Q',
+                   "Peptide %s should have cleaved before Q and did not.",
+                   seq);
+    } 
+
+    // if at end of protein, skip second end check
+    if( start_idx+len < strlen(prot1_sequence) ){
+      fail_unless( prot1_sequence[start_idx+len] == 'Q',
+                   "Peptide %s should have cleaved before Q and did not.",
+                   seq); 
+    }
+
+    free_peptide(peptide2);
+    free(seq);
+  }
+
+}
+END_TEST
 
 Suite* protein_suite(void){
   Suite *s = suite_create("Protein");
@@ -649,6 +818,7 @@ Suite* protein_suite(void){
   tcase_add_test(tc_core, test_el_tryp_chymo);
   tcase_add_test(tc_core, test_aspn);
   tcase_add_test(tc_core, test_other_enzymes);
+  tcase_add_test(tc_core, test_custom_enzyme);
 
   //  tcase_add_test(tc_core, test_create);
   tcase_add_checked_fixture(tc_core, protein_setup, protein_teardown);
