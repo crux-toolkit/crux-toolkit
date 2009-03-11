@@ -137,9 +137,13 @@ fail when trying to overwrite a file if false (F). Default =  F.</li>
 
 <LI>
 <code>--number-decoy-set &lt;0|1|2&gt;</code> &ndash; Specify the number
-of decoy sets to generate for match_analysis. At least one decoy set
-is required to run the algorithm 'percolator' in a subsiquent
-crux-analyze-matches run.  Default = 2. </li>
+of decoy sets to generate.  Each decoy set of psms will be printed to
+a separate file and not included with the target psms.  To return
+decoys in the same file as targets, use <code>tdc=T</code> in the
+parameter file and control the number of decoys
+with <code>num-decoys-per-target</code>. At least one decoy set (in
+its own file) is required to run the algorithm 'percolator' in a subsiquent
+crux run.  Default = 2. </li>
 
 <li>
 <code>--compute-p-values &lt;T | F&gt; &ndash</code>
@@ -227,17 +231,18 @@ binary files. Default = 5.
 Target-decoy competition.  Combine target and decoy searches in one
 file.  Default FALSE, separate files. After searching target and decoy
 peptides, all psms for one spectrum are sorted together and the mixed
-list is returned in the target.sqt file. Set number of decoys with
+list is returned in the target.[sqt|txt|csm] file. Set number of decoys with
 num-decoys-per-target.  The number of psms retained after preliminary
 searching (max-rank-preliminary) is increased to reflect the number of
-decoys searched so that (1+num-decoys)*max-rank-preliminary are kept.  
+decoys searched so that (1+num-decoys)*max-rank-preliminary are kept.
+Default = F.
 
 <Li>
 <code>num-decoys-per-target &lt;int&gt;</code> &ndash;
 Number of decoy peptides to search for every target peptide
-searched. Default 1. Multiple decoys are put in the same collection,
+searched. Multiple decoys are put in the same collection,
 sorted together, and written to the same file.  Does not affect
---number-decoy-sets. 
+--number-decoy-sets or tdc.  Default 1. 
 
 <li>
 <code>mod &lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;
@@ -319,14 +324,33 @@ The minimum length of the peptides to place in the index. Default = 6.
 The maximum length of the peptides to place in the index. Default = 50.
 
 <LI>
-<code>enzyme &lt;trypsin|chymotrypsin|elastase|no-enzyme&gt; </code> &ndash; 
-Enzyme to use for <i>in silico</i> digestion of protein sequences
-(trypsin, chymotrypsin, elastase, no-enzyme).  Default trypsin. Used
+<code>enzyme &lt;trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme&gt; 
+</code> &ndash; 
+Enzyme to use for <i>in silico</i> digestion of protein sequences. Used
 in conjunction with the options digestion and missed-cleavages. Use
 'no-enzyme' for non-specific digestion.  Digestion rules are as
-follows: enzyme name [cuts after one of these residues][but not before
-one of these residues].  trypsin [RK][P], elastase [ALIV][P],
-chymotrypsin [FWY][P]. 
+follows: enzyme name [cuts after one of these residues]|{but not before
+one of these residues}.  trypsin [RK]|{P}, elastase [ALIV]|{P},
+chymotrypsin [FWY]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[],
+iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease
+[E]|[], modified-chymotrypsin [FWYL]|{P},
+elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before
+D). Default = trypsin.
+
+<li>
+<code>custom-enzyme &lt;residues before cleavage | residues after cleavage
+&gt;</code> &ndash
+Specify rules for <i>in silico</i> digestion of protein sequences.
+Overrides the <code>enzyme</code> option.  Two lists of residues are
+given enclosed in square brackets or curly braces and separated by a
+|. The first list contains residues required/prohibited before the
+cleavage site and the second list is residues after the cleavage site.  
+If the residues are required for digestion, they are in square
+brackets, '[' and ']'.  If the residues prevent digestion, then they
+are enclosed in curly braces, '{' and '}'.  Use X to indicate all
+residues.  For example, trypsin cuts after R or K but not before P
+which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
+residue but only before D which is represented as <code>[X]|[D]</code>.
 
 <LI>
 <code>digestion &lt;full-digest|partial-digest&gt;</code> &ndash;

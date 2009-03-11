@@ -5,7 +5,7 @@
  * AUTHOR: Barbara Frewen
  * CREATE DATE: November 24, 2008
  * DESCRIPTION: Header file for the create-index command of crux
- * REVISION: $Revision: 1.5 $
+ * REVISION: $Revision: 1.6 $
  */
 
 #ifndef CREATE_INDEX_H
@@ -29,7 +29,7 @@
 #include "protein_index.h"
 #include "parameter.h"
 
-#define NUM_INDEX_OPTIONS 13
+#define NUM_INDEX_OPTIONS 14
 #define NUM_INDEX_ARGS 2
 
 int create_index_main(int argc, char** argv);
