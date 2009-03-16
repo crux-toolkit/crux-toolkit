@@ -45,7 +45,6 @@ void open_output_files(FILE*** binary_filehandle_array,
 BOOLEAN_T is_search_complete(MATCH_COLLECTION_T* matches, 
                              int mods_per_peptide);
 
-//int main(int argc, char** argv){
 int search_main(int argc, char** argv){
 
   /* Verbosity level for set-up/command line reading */
@@ -60,10 +59,6 @@ int search_main(int argc, char** argv){
     "write-parameter-file",
     "overwrite",
     "use-index",
-    /*
-    "prelim-score-type",
-    "score-type",
-    */
     "compute-p-values",
     "spectrum-min-mass",
     "spectrum-max-mass",
@@ -90,10 +85,6 @@ int search_main(int argc, char** argv){
   /* Parse the command line, including optional params file
      Includes syntax, type, and bounds checking, dies on error */
   parse_cmd_line_into_params_hash(argc, argv, "crux search-for-matches");
-
-  /* Set verbosity */
-  //verbosity = get_int_parameter("verbosity");
-  //set_verbosity_level(verbosity);
 
   /* Set seed for random number generation */
   if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
@@ -125,7 +116,6 @@ int search_main(int argc, char** argv){
        get_spectrum_collection_num_spectra(spectra));
 
   /* Get input: protein file */
-  //char* input_file = get_string_parameter_pointer("protein input");
   char* input_file = get_string_parameter("protein input");
 
   /* Prepare input, fasta or index */
@@ -170,11 +160,11 @@ int search_main(int argc, char** argv){
 
   // get search parameters for match_collection
   BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
-  int sample_count = (compute_pvalues) ? PARAM_ESTIMATION_SAMPLE_COUNT : 0;
+  //  int sample_count = (compute_pvalues) ? PARAM_ESTIMATION_SAMPLE_COUNT : 0;
   BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
 
   // flags and counters for loop
-  int spectrum_searches_counter = 0; //for psm file header, spec*charges
+  int spectrum_searches_counter = 0; //for psm file header, sum(spec*charges)
   int mod_idx = 0;
   int num_decoys = get_int_parameter("number-decoy-set");
   int progress_increment = get_int_parameter("print-search-progress");
@@ -185,11 +175,13 @@ int search_main(int argc, char** argv){
   // get list of mods
   PEPTIDE_MOD_T** peptide_mods = NULL;
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
+
+  // DELETE ME
   // for estimating params for p-values, randomly select a total of 
   //    sample_count matches, a constant fraction from each peptide mod
-  int sample_per_pep_mod =  sample_count / num_peptide_mods;
-  carp(CARP_DEBUG, "Got %d peptide mods, sample %i per", 
-       num_peptide_mods, sample_per_pep_mod);
+  //int sample_per_pep_mod =  sample_count / num_peptide_mods;
+  //carp(CARP_DEBUG, "Got %d peptide mods, sample %i per", 
+  //     num_peptide_mods, sample_per_pep_mod);
 
   // for each spectrum
   while(filtered_spectrum_charge_iterator_has_next(spectrum_iterator)){
@@ -242,7 +234,6 @@ int search_main(int argc, char** argv){
                               spectrum, 
                               charge, 
                               peptide_iterator,
-                              //sample_per_pep_mod,
                               FALSE // is decoy
                               );
 
