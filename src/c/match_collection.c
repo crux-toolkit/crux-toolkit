@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.103 $
+ * $Revision: 1.104 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1725,7 +1725,7 @@ void print_tab_header(FILE* output){
     "sp rank\t"
     "xcorr score\t"
     "xcorr rank\t"
-    "log(p-value)\t"
+    "-log(p-value)\t"
     "Weibull est. q-value\t"
     "percolator score\t"
     "percolator rank\t"
