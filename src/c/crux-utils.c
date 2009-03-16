@@ -1010,6 +1010,45 @@ void quicksort(float a[], int array_size){
 }
 
 /**
+ * \brief Shuffle an array of floats.  Uses the Knuth algorithm.  Uses
+ * get_random_number_interval() to generate random numbers. 
+ */
+void shuffle_floats(float* array, int size){
+  if( array == NULL ){
+    carp(CARP_ERROR, "Cannot shuffle NULL array.");
+    return;
+  }
+
+  int idx, switch_idx;
+  int last_element_idx = size - 1;
+  float temp_value;
+  for(idx=0; idx < size; idx++){
+    switch_idx = get_random_number_interval(idx, last_element_idx);
+    temp_value = array[idx];
+    array[idx] = array[switch_idx];
+    array[switch_idx] = temp_value;
+  }
+}
+
+/**
+ * \brief Comparison function for reverse sorting floats.
+ * \returns -1,0,1 if a is <,=,> b
+ */
+int compare_floats_descending(const void* a, const void* b){
+
+  float diff = ( *(float*)b - *(float*)a);
+  if( diff < 0 ){
+    return -1;
+  }else if( diff > 0 ){
+    return 1;
+  }else{
+    return 0;
+  }
+  
+}
+
+
+/**
  * Fits a three-parameter Weibull distribution to the input data. 
  * Implementation of Weibull distribution parameter estimation from 
  * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm

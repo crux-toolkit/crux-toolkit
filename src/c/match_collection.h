@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.35 $
+ * $Revision: 1.36 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -119,7 +119,7 @@ int add_matches(
   SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
-  int sample_size,        ///< num matches to add to sampled_matches
+  //  int sample_size,        ///< num matches to add to sampled_matches
   BOOLEAN_T is_decoy     ///< do we shuffle the peptides
 );
 
@@ -509,6 +509,21 @@ BOOLEAN_T estimate_weibull_parameters(
  * estimate the weibull parameters to be used for computing p-values.
  */
 BOOLEAN_T estimate_weibull_parameters_from_sample_matches(
+  MATCH_COLLECTION_T* match_collection, 
+  SPECTRUM_T* spectrum,
+  int charge
+  );
+
+/**
+ * \brief Use the xcorrs saved in the match_collection to estimate the
+ * weibull parameters to be used for computing p-values. 
+ *
+ * Requires that main score be XCORR, but with relativly few changes
+ * other scores could be accomodated.
+ * Implementation of Weibull distribution parameter estimation from 
+ * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
+ */
+BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
   MATCH_COLLECTION_T* match_collection, 
   SPECTRUM_T* spectrum,
   int charge

@@ -22,8 +22,9 @@
 <blockquote>
 <p>
 This command searches a protein database with a set of spectra.  For
-each spectrum, candidate peptides are identified whose inferred m/z
-lies within a specified range of the observed precursor m/z.  These
+each spectrum, the precursor mass is computed from the measured
+precursor m/z and an assumed charge.  Candidate peptides whose mass
+lies within a specified range of the precursor mass are identified.  These
 candidate peptides are first ranked with the SEQUEST Sp score.  The
 top 500 matches are then re-scored using XCorr.  The input protein
 database may either be in FASTA format or it may be a binary index

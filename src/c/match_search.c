@@ -242,7 +242,7 @@ int search_main(int argc, char** argv){
                               spectrum, 
                               charge, 
                               peptide_iterator,
-                              sample_per_pep_mod,
+                              //sample_per_pep_mod,
                               FALSE // is decoy
                               );
 
@@ -266,7 +266,8 @@ int search_main(int argc, char** argv){
     // calculate p-values
     if( compute_pvalues == TRUE ){
       carp(CARP_DEBUG, "Estimating Weibull parameters.");
-      if( estimate_weibull_parameters_from_sample_matches(match_collection,
+      //if( estimate_weibull_parameters_from_sample_matches(match_collection,
+      if( estimate_weibull_parameters_from_xcorrs(match_collection,
                                                           spectrum,
                                                           charge) ){
         carp(CARP_DEBUG, "Calculating p-values.");
@@ -329,7 +330,7 @@ int search_main(int argc, char** argv){
                                   spectrum, 
                                   charge, 
                                   peptide_iterator,
-                                  0, // no sampling for param estimation
+                                  //0, // no sampling for param estimation
                                   TRUE);// is decoy
           carp(CARP_DEBUG, "Added %i matches", added);
           

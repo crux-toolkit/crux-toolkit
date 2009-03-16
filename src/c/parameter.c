@@ -574,11 +574,14 @@ void initialize_parameters(void){
       "Multiple decoys are put in the same collection, sorted together, and "
       "written to the same file.  Does not affect --number-decoy-sets or tdc.",
       "true");
-  set_int_parameter("max-rank-preliminary", 500, 1, BILLION, 
-      "Number of psms per spectrum to score after "
-      "preliminary scoring.  Default 500.",
-      "Used by crux-search-for-matches.  For each spectrum, keep the (500) "
-      "top ranking psms for scoring with the main score.", "true");
+  set_int_parameter("max-rank-preliminary", 500, 0, BILLION, 
+      "Number of psms per spectrum to score with xcorr after preliminary "
+      "scoring with Sp. "
+      "Set to 0 to score all psms with xcorr. Default 500.",
+      "Used by crux-search-for-matches.  For positive values, the Sp "
+      "(preliminary) score acts as a filter; only high scoring psms go "
+      "on to be scored with xcorr.  This saves some time.  If set to 0, "
+      "all psms are scored with both scores. ", "true");
   set_int_parameter("top-match-sqt", 5, 1, BILLION, 
       "The number of psms per spectrum written to the sqt file. "
       "Default 5.",
@@ -591,6 +594,8 @@ void initialize_parameters(void){
       "Available from parameter file for crux-search-for-matche with "
       "output-mode=<all|binary>.  Does not affect output to sqt file. ", 
       "true");
+  set_int_parameter("psms-per-spectrum-reported", 0, 0, BILLION,
+                   "place holder", "this may be replaced by top-match","false");
   set_double_parameter("mass-offset", 0.0, 0, 0, "obsolete",
       "Was used in search.", "false");
   set_string_parameter("seed", "time", "HIDE ME FROM USER",
@@ -1039,7 +1044,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 
   // do global parameter-specific tasks: set static aa modifications
   //   set verbosity, make adjustments for tdc, print param file (if
-  //   requested), set custom enzyme rules
+  //   requested), set custom enzyme rules, set max psms per spec to file
 
   update_aa_masses();
 
@@ -1078,6 +1083,14 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 
   set_verbosity_level(get_int_parameter("verbosity"));
   print_parameter_file(param_filename);
+
+  // what is the max psms per spec to keep for printing
+  int sqt = get_int_parameter("top-match-sqt");
+  int bin = get_int_parameter("top-match");
+  int max = (sqt > bin) ? sqt : bin;
+  char value_str[SMALL_BUFFER];
+  sprintf(value_str, "%i", max);
+  update_hash_value(parameters, "psms-per-spectrum-reported", value_str);
 
   parameter_plasticity = FALSE;
 
