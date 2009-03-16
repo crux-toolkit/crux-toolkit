@@ -40,6 +40,9 @@ predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z
 # Search for matches and test sqt file
 search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt decoy.sqt test*.csm target.txt decoy.txt; crux search-for-matches --parameter-file params/set_rand_seed --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time' 'atabase'
 
+# Search for matches without Sp
+search_no_sp = good_results/no-sp.txt = crux search-for-matches --parameter-file params/no-sp test.ms2 test.fasta; cat target.txt
+
 # Analyze existing search results
 analyze_matches_existing = good_results/standard_existing-perc.sqt = rm -f target.sqt decoy.sqt target.txt decoy.txt test*.csm; crux percolator existing_search test.fasta; cat target.sqt = 'Time' 'Database'
 

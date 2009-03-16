@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.104 $
+ * $Revision: 1.105 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -114,6 +114,14 @@ struct match_collection_iterator{
 
 BOOLEAN_T score_peptides(
   SCORER_TYPE_T score_type, 
+  MATCH_COLLECTION_T* match_collection, 
+  SPECTRUM_T* spectrum, 
+  int charge, 
+  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
+  BOOLEAN_T is_decoy
+);
+
+BOOLEAN_T add_unscored_peptides(
   MATCH_COLLECTION_T* match_collection, 
   SPECTRUM_T* spectrum, 
   int charge, 
@@ -298,6 +306,7 @@ int add_matches(
     exit(1);
   }
 
+  // charge==0 if collection has no matches yet
   assert(match_collection->charge==0 || match_collection->charge==charge);
   match_collection->charge = charge;
   match_collection->last_sorted = -1;
@@ -305,11 +314,19 @@ int add_matches(
   int num_matches_added = 0;
   int start_index = match_collection->match_total;
 
-  // preliminary scoring
-  SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
-  score_peptides(prelim_score, match_collection, spectrum, 
-                 charge, peptide_iterator, is_decoy);
+  // TODO (BF 16-mar-09): change to add_unscored_peptides, 
+  // then score_matches_one_spectrum with one or both scores
 
+  // preliminary scoring
+  int sp_max_rank = get_int_parameter("max-rank-preliminary");
+  SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
+  if( sp_max_rank == 0 ){ 
+    add_unscored_peptides(match_collection, spectrum, charge, 
+                          peptide_iterator, is_decoy);
+  }else{
+    score_peptides(prelim_score, match_collection, spectrum, 
+                   charge, peptide_iterator, is_decoy);
+  }
   num_matches_added = match_collection->match_total - start_index;
 
   // score exitsting matches w/second function
@@ -320,15 +337,12 @@ int add_matches(
   match_collection->scored_type[final_score] = TRUE;
 
   // store xcorrs from newly-score psms
-  store_new_xcorrs(match_collection, start_index); // this replaces sample step
+  store_new_xcorrs(match_collection, start_index); // replaces the sample step
 
-  // rank by sp first 
-  populate_match_rank_match_collection(match_collection, prelim_score);
-  collapse_redundant_matches(match_collection);
-
-  // either truncate here or after xcorr ranking
-  int sp_max_rank = get_int_parameter("max-rank-preliminary");
-  if( sp_max_rank > 0 ){ // truncate based on sp score
+  if( sp_max_rank > 0 ){ 
+    // rank by sp first 
+    populate_match_rank_match_collection(match_collection, prelim_score);
+    collapse_redundant_matches(match_collection);
     truncate_match_collection( match_collection, sp_max_rank, prelim_score);
   }
 
@@ -336,6 +350,7 @@ int add_matches(
   populate_match_rank_match_collection(match_collection, final_score);
 
   if( sp_max_rank == 0 ){ // truncate here if not before
+    collapse_redundant_matches(match_collection);
     int xcorr_max_rank = get_int_parameter("psms-per-spectrum-reported");
     truncate_match_collection( match_collection, xcorr_max_rank, final_score);
   }
@@ -402,8 +417,9 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
 
   carp(CARP_DETAILED_DEBUG, "Collapsing %i redundant matches.", match_total);
 
-  // must be sorted by Sp
-  assert( match_collection->last_sorted == SP );
+  // must be sorted by Sp or xcorr
+  assert( (match_collection->last_sorted == SP) || 
+          (match_collection->last_sorted == XCORR) );
 
   MATCH_T** matches = match_collection->match;
   int match_idx = 0;
@@ -926,6 +942,62 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
       correlation, match_collection->eta, match_collection->beta,
       match_collection->shift);
   
+  return TRUE;
+}
+
+// TODO (BF 16-mar-09): use this instead of score_peptides
+/**
+ * \brief Add all peptides from iterator to match collection.
+ * Additional matches will not be scored for any type.
+ * \returns TRUE if successful.
+ */
+BOOLEAN_T add_unscored_peptides(
+  MATCH_COLLECTION_T* match_collection, 
+  SPECTRUM_T* spectrum, 
+  int charge, 
+  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
+  BOOLEAN_T is_decoy
+){
+
+  if( match_collection == NULL || spectrum == NULL 
+      || peptide_iterator == NULL ){
+    carp(CARP_FATAL, "Cannot score peptides with NULL inputs.");
+    exit(1);
+  }
+  carp(CARP_DETAILED_DEBUG, "Adding decoy peptides to match collection? %i", 
+       is_decoy);
+
+  int starting_number_of_psms = match_collection->match_total;
+
+  while( modified_peptides_iterator_has_next(peptide_iterator)){
+    // get peptide
+    PEPTIDE_T* peptide = modified_peptides_iterator_next(peptide_iterator);
+
+    // create a match
+    MATCH_T* match = new_match();
+
+    // set match fields
+    set_match_peptide(match, peptide);
+    set_match_spectrum(match, spectrum);
+    set_match_charge(match, charge);
+    set_match_null_peptide(match, is_decoy);
+
+    // add to match collection
+    if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
+      carp(CARP_ERROR, "peptide count of %i exceeds max match limit: %d", 
+          match_collection->match_total, _MAX_NUMBER_PEPTIDES);
+
+      return FALSE;
+    }
+
+    match_collection->match[match_collection->match_total] = match;
+    match_collection->match_total++;
+
+  }// next peptide
+
+  int matches_added = match_collection->match_total - starting_number_of_psms;
+  match_collection->experiment_size += matches_added;
+
   return TRUE;
 }
 

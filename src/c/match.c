@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.66 $
- * REVISION: $Revision: 1.66 $
+ * REVISION: $Revision: 1.67 $
+ * REVISION: $Revision: 1.67 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -611,6 +611,7 @@ void print_match_tab(
   char* protein_id = NULL;
   PROTEIN_T* protein = NULL;
   
+  int sp_scored = get_int_parameter("max-rank-preliminary");
   double sp_score = get_match_score(match, SP);
   int  sp_rank = get_match_rank(match, SP);
   double xcorr_score = get_match_score(match, XCORR);
@@ -640,8 +641,12 @@ void print_match_tab(
     fprintf(file, float_format, spectrum_mass);
     fprintf(file, float_format, peptide_mass);
     fprintf(file, float_format, delta_cn);
-    fprintf(file, float_format, sp_score);
-    fprintf(file, "%d\t", sp_rank);
+    if (sp_scored == 0 ){
+      fprintf(file, "\t\t"); //score and rank
+    }else{
+      fprintf(file, float_format, sp_score);
+      fprintf(file, "%d\t", sp_rank);
+    }
     fprintf(file, float_format, xcorr_score);
     fprintf(file, "%d\t", xcorr_rank);
     if (LOGP_BONF_WEIBULL_XCORR == main_score) {
@@ -679,7 +684,11 @@ void print_match_tab(
     // Output of q-ranker score and q-value will be handled here where available.
     // For now always print an empty column. 
     fprintf(file, "\t\t");
-    fprintf(file, "%d\t", b_y_matched);
+    if (sp_scored == 0 ){
+      fprintf(file, "\t");
+    }else{
+      fprintf(file, "%d\t", b_y_matched);
+    }
     fprintf(file, "%d\t", b_y_total);
     fprintf(file, "%d\t", num_matches); // Matches per spectrum
     fprintf(file, "%c\t", sequence[0]);
