@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.102 $
+ * $Revision: 1.103 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1693,7 +1693,7 @@ void print_sqt_header(
   // main/other scores from search are...xcorr/sp (OK as is)
   // ...p-val/xcorr
   if( main_score == LOGP_BONF_WEIBULL_XCORR ){
-    strcpy(main_score_str, "log(p-value)");
+    strcpy(main_score_str, "-log(p-value)");
     strcpy(other_score_str, "xcorr");
   }// main/other scores from analyze are perc/q-val (OK as is)
    // q-val/xcorr
