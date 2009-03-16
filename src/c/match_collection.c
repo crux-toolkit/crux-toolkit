@@ -8,10 +8,11 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.100 $
+ * $Revision: 1.101 $
  ****************************************************************************/
 #include "match_collection.h"
 
+#define PARAM_ESTIMATION_SAMPLE_COUNT 500
 //static BOOLEAN_T is_first_spectrum = TRUE;
 
 /* Private data types (structs) */
@@ -55,8 +56,12 @@ struct match_collection{
   float eta;  ///< The eta parameter for the Weibull distribution.
   float beta; ///< The beta parameter for the Weibull distribution.
   float shift; ///< The location parameter for the Weibull distribution.
+  // replace this ...
   MATCH_T* sample_matches[_PSM_SAMPLE_SIZE];
   int num_samples;  // the number of items in the above array
+  // ...with this
+  float xcorrs[_MAX_NUMBER_PEPTIDES]; ///< xcorrs to be used for weibull
+  int num_xcorrs;
 
   // The following features (post_*) are only valid when
   // post_process_collection boolean is TRUE 
@@ -201,6 +206,8 @@ BOOLEAN_T sample_psms_for_param_estimation(
   int sample_size,
   int tail_to_sample_from);
 
+void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index);
+
 /*
 BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, 
@@ -210,7 +217,6 @@ BOOLEAN_T estimate_weibull_parameters(
   int charge
   );
 */
-//int collapes_redundant_matches(MATCH_COLLECTION* match_collection);
 
 void collapse_redundant_matches(MATCH_COLLECTION_T* matches);
 void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx);
@@ -551,6 +557,7 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
   match_collection->last_sorted = -1;
   match_collection->iterator_lock = FALSE;
   match_collection->num_samples = 0;
+  match_collection->num_xcorrs = 0;
 
   return match_collection;
 }
@@ -582,7 +589,7 @@ int add_matches(
   SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
-  int sample_size,       ///< num matches to add to sampled_matches
+  //  int sample_size,       ///< num matches to add to sampled_matches
   BOOLEAN_T is_decoy     ///< are peptides to be shuffled
   //BF: this was added so that a m_c could be mixed target/decoy
 ){
@@ -607,53 +614,99 @@ int add_matches(
 
   num_matches_added = match_collection->match_total - start_index;
 
+  // TODO: remove sampling step
   // randomly select matches from those added
   // add sample matches for param estimation
+  /*
   if( sample_size > 0 ){
     carp(CARP_DETAILED_DEBUG, "Sampling %i psms from collection", sample_size);
     sample_psms_for_param_estimation(match_collection,
                                      sample_size,
                                      start_index);
   }
+  */
 
-  // DEBUG: check that all added matches are non-negative
-  int i=0;
-  for(i=0; i<match_collection->match_total; i++){
-    if( match_collection->match[i] == NULL ){
-      fprintf(stderr, "match %i is null\n", i);
-    }
-  }
-
+  // TODO hold off on ranking step so that xcorrs can be added from psms at end of list
   // rank by prelim score
-  populate_match_rank_match_collection(match_collection, prelim_score);
-
-  for(i=0; i<match_collection->match_total; i++){
-    if( match_collection->match[i] == NULL ){
-      fprintf(stderr, "match %i is null\n", i);
-    }
-  }
+  //populate_match_rank_match_collection(match_collection, prelim_score);
 
   // collapse any redundant peptides into one
-  collapse_redundant_matches(match_collection);
+  //collapse_redundant_matches(match_collection);
 
+  // TODO hold off on truncation step
   // trim matches to only the top n as ranked by prelim score
-  int max_rank = get_int_parameter("max-rank-preliminary");
-  truncate_match_collection( match_collection, max_rank, prelim_score);
+  //int max_rank = get_int_parameter("max-rank-preliminary");
+  //truncate_match_collection( match_collection, max_rank, prelim_score);
 
   // score exitsting matches w/second function
   SCORER_TYPE_T final_score = get_scorer_type_parameter("score-type");
- //score_matches_one_spectrum(final_score, match_collection, spectrum, charge);
   score_matches_one_spectrum(final_score, match_collection->match,
                              match_collection->match_total, spectrum, charge);
 
   match_collection->scored_type[final_score] = TRUE;
 
-  // rank by final score
+  // TODO store xcorrs from newly-score psms
+  store_new_xcorrs(match_collection, start_index); // this replaces sample step
+
+  // TODO rank by sp first (after ranking, can update lowest sp)
+  populate_match_rank_match_collection(match_collection, prelim_score);
+  collapse_redundant_matches(match_collection);
+  // either truncate here or after xcorr ranking
+  int sp_max_rank = get_int_parameter("max-rank-preliminary");
+  if( sp_max_rank > 0 ){ // truncate based on sp score
+    truncate_match_collection( match_collection, sp_max_rank, prelim_score);
+  }
+  // rank by xcorr
   populate_match_rank_match_collection(match_collection, final_score);
 
-  //  num_matches_added = match_collection->match_total - start_index;
+  if( sp_max_rank == 0 ){ // truncate here if not before
+    int xcorr_max_rank = get_int_parameter("psms-per-spectrum-reported");
+    truncate_match_collection( match_collection, xcorr_max_rank, final_score);
+  }
+
+  // rank by final score
+  //populate_match_rank_match_collection(match_collection, final_score);
+
+
   return num_matches_added;
 }
+
+/**
+ * \brief Store the xcorr for each psm that was added in this
+ * iteration.  The xcorrs will be sampled from for doing the weibull
+ * parameter estimations for p-values.  This replaces the psm sampling
+ * done before.
+ */
+void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
+
+  if( match_collection == NULL ){
+    carp(CARP_FATAL, "Cannot store scores of NULL match collection.");
+    exit(1);
+  }
+
+  int score_idx = match_collection->num_xcorrs;
+  int psm_idx = start_index;
+
+  carp(CARP_DETAILED_DEBUG, 
+       "Adding to xcors[%i] scores from psm index %i to %i", 
+       score_idx, psm_idx, match_collection->match_total);
+
+  if( score_idx+(match_collection->match_total-psm_idx) 
+      > _MAX_NUMBER_PEPTIDES ){
+    carp(CARP_FATAL, "Too many xcorrs to store.");
+    exit(1);
+  }
+
+  for(psm_idx=start_index; psm_idx < match_collection->match_total; psm_idx++){
+    float score = get_match_score( match_collection->match[psm_idx], XCORR);
+    match_collection->xcorrs[score_idx] = score;
+    score_idx++;
+  }
+
+  match_collection->num_xcorrs = score_idx;
+  carp(CARP_DETAILED_DEBUG, "There are now %i xcorrs.", score_idx);
+}
+
 
 /**
  * \brief After psms have been added to a match collection but before
@@ -676,15 +729,6 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
   }  
 
   carp(CARP_DETAILED_DEBUG, "Collapsing %i redundant matches.", match_total);
-
-  /*
-  int i=0;
-  for(i=0; i<match_total; i++){
-    if( match_collection->match[i] == NULL ){
-      fprintf(stderr, "match %i is null\n", i);
-    }
-  }
-  */
 
   // must be sorted by Sp
   assert( match_collection->last_sorted == SP );
@@ -734,6 +778,9 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
   match_collection->match_total = opening_idx;
   // remove duplicate peptides from the overall count
   int diff = match_total - opening_idx;
+  carp(CARP_DETAILED_DEBUG, "Removing %i from total count %i",
+       diff, match_collection->experiment_size);
+
   match_collection->experiment_size -= diff;
 }
 
@@ -987,23 +1034,6 @@ BOOLEAN_T spectrum_sort_match_collection(
   return success;
 }
 
-/**
- * \brief Combines any matches with the same peptide found in
- * different proteins. 
- *
- * Requires that the match_collection is for matches of one spectrum
- * and is sorted by a score for which all matches have been scored.
- * When two matches with the same peptide sequence are found, the
- * protein src of the second is added to the first and the second
- * match is deleted.  Gaps in the array of matches are filled in on a
- * second pass over the array.
- * \returns The number of matches deleted.
- */
-/*
-int collapes_redundant_matches(MATCH_COLLECTION* match_collection){
-  return 0;
-}
-*/
 /**
  * \brief Reduces the number of matches in the match_collection so
  * that only the <max_rank> highest scoring (by score_type) remain.
@@ -1436,6 +1466,7 @@ BOOLEAN_T estimate_weibull_parameters(
   return TRUE;
 }
 
+// TODO: remove this method all together
 /**
  * \brief Use the matches in match_collection->sample_matches to
  * estimate the weibull parameters to be used for computing p-values.
@@ -1487,10 +1518,12 @@ BOOLEAN_T estimate_weibull_parameters_from_sample_matches(
   // create an array of scores
   int data_idx;
   float* data = mycalloc(sizeof(float), num_samples);
-  for(data_idx=0; data_idx < num_samples; data_idx++){
+  //  for(data_idx=0; data_idx < num_samples; data_idx++){
+  for(data_idx=0; data_idx < num_tail_samples; data_idx++){
     data[data_idx] = get_match_score(sample_matches[data_idx], score);
   }
 
+  printf("first score %f, second score %f\n", data[0], data[1]);
   // do the estimation
   float correlation = 0.0;
   fit_three_parameter_weibull(data, num_tail_samples, num_samples,
@@ -1504,6 +1537,79 @@ BOOLEAN_T estimate_weibull_parameters_from_sample_matches(
       match_collection->shift);
   
   free(data);
+
+  return TRUE;
+}
+
+/**
+ * \brief Use the xcorrs saved in the match_collection to estimate the
+ * weibull parameters to be used for computing p-values. 
+ *
+ * Requires that main score be XCORR, but with relativly few changes
+ * other scores could be accomodated.
+ * Implementation of Weibull distribution parameter estimation from 
+ * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
+ */
+BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
+  MATCH_COLLECTION_T* match_collection, 
+  SPECTRUM_T* spectrum,
+  int charge
+  ){
+
+  if( match_collection == NULL || spectrum == NULL ){
+    carp(CARP_ERROR, "Cannot estimate parameters from null inputs.");
+    return FALSE;
+  }
+
+  // check that we have the minimum number of matches
+  float* scores = match_collection->xcorrs;
+  int num_scores = match_collection->num_xcorrs;
+  if( num_scores < MIN_WEIBULL_MATCHES ){
+    carp(CARP_DETAILED_INFO, "Too few psms (%i) to estimate "
+         "p-value parameters for spectrum %i, charge %i",
+         num_scores, get_spectrum_first_scan(spectrum), charge);
+    // set eta, beta, and shift to something???
+    return FALSE;
+  }
+
+  // randomly sample n from the list by shuffling and taking first n 
+  shuffle_floats(scores, num_scores);
+  int num_samples = PARAM_ESTIMATION_SAMPLE_COUNT;
+  if(num_samples > num_scores){ num_samples = num_scores; }
+
+  // reverse sort the first num_samples of them
+  qsort(scores, num_samples, sizeof(float), compare_floats_descending);
+
+  // use only a fraction of the samples, the high-scoring tail
+  // this parameter is hidden from the user
+  double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
+  assert( fraction_to_fit >= 0 && fraction_to_fit <= 1 );
+  int num_tail_samples = (int)(num_samples * fraction_to_fit);
+  carp(CARP_DEBUG, "Estimating Weibull params with %d psms (%.2f of %i)", 
+       num_tail_samples, fraction_to_fit, num_samples);
+
+  /*
+  // create an array of scores
+  int data_idx;
+  float* data = mycalloc(sizeof(float), num_samples);
+  for(data_idx=0; data_idx < num_samples; data_idx++){
+    data[data_idx] = get_match_score(sample_matches[data_idx], score);
+  }
+  */
+  // do the estimation
+  float correlation = 0.0;
+  //  fit_three_parameter_weibull(data, num_tail_samples, num_samples,
+  fit_three_parameter_weibull(scores, num_tail_samples, num_samples,
+      MIN_XCORR_SHIFT, MAX_XCORR_SHIFT, XCORR_SHIFT, 
+      &(match_collection->eta), &(match_collection->beta),
+      &(match_collection->shift), &correlation);
+
+  carp(CARP_DETAILED_DEBUG, 
+      "Correlation: %.6f\nEta: %.6f\nBeta: %.6f\nShift: %.6f\n", 
+      correlation, match_collection->eta, match_collection->beta,
+      match_collection->shift);
+  
+  //  free(data);
 
   return TRUE;
 }
@@ -1751,12 +1857,13 @@ BOOLEAN_T score_peptides(
   MATCH_T* match = NULL;
   float score = 0;
   PEPTIDE_T* peptide = NULL;
-  //BOOLEAN_T is_decoy = match_collection->null_peptide_collection;
+
   carp(CARP_DETAILED_DEBUG, "New match_collection is null? %i", is_decoy);
 
   // create a generic ion_series that will be reused for each peptide sequence
   ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);  
 
+  int starting_number_of_psms = match_collection->match_total;
   carp(CARP_DEBUG, "Scoring all peptides in iterator.");
   while( modified_peptides_iterator_has_next(peptide_iterator)){
     // get peptide, sequence, and ions
@@ -1815,10 +1922,13 @@ BOOLEAN_T score_peptides(
 
   }// next peptide
 
+  int matches_added = match_collection->match_total - starting_number_of_psms;
+
   // calculate current mean
   match_collection->sp_scores_mean = match_collection->sp_scores_sum
                                       / match_collection->match_total;
-  match_collection->experiment_size = match_collection->match_total;
+  //match_collection->experiment_size = match_collection->match_total;
+  match_collection->experiment_size += matches_added;
 
   // mark it as scored
   match_collection->scored_type[score_type] = TRUE;

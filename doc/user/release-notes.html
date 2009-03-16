@@ -64,6 +64,15 @@ Decoy (shuffled) sequences now keep the first and last residue the
 same as the target sequence that was shuffled to produce it.  This is
 a reversion to previous behavior.
 
+<li>
+It is now possible to score all PSMs with xcorr, regardless of the Sp
+score.  The default proceedure is still to score all peptides for one
+spectrum with Sp, rank by sp, and eliminate all but the best-ranking
+PSMs (by default, the top 500).  The remaining PSMs are scored by
+xcorr, re-ranked by xcorr and the top results returned.  By setting
+max-rank-prelimiary=0, no PSMs are eliminated after the Sp ranking
+step.
+
 </ul>
 <h2>Version 1.20</h2> January 6, 2009
 

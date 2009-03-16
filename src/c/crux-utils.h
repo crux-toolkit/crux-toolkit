@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.34 $
+ * $Revision: 1.35 $
  * $Author: frewen $
  * \brief Utilities for the crux project
  */
@@ -212,6 +212,18 @@ BOOLEAN_T valid_peptide_sequence( char* sequence);
  * quickSort for floats
  */
 void quicksort(float numbers[], int array_size);
+
+/**
+ * \brief Shuffle an array of floats.  Uses the Knuth algorithm.  Uses
+ * get_random_number_interval() to generate random numbers. 
+ */
+void shuffle_floats(float* array, int size);
+
+/**
+ * \brief Comparison function for reverse sorting floats.
+ * \returns -1,0,1 if a is <,=,> b
+ */
+int compare_floats_descending(const void* a, const void* b);
 
 /**
  *\returns a heap allocated feature name array for the algorithm type
