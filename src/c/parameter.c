@@ -740,11 +740,11 @@ void initialize_parameters(void){
       "of the peptide (peptide).  Default 'peptide'.",
       "Available only for predict-peptide-ions.  Set to 'peptide' for search.",
       "true");
-  set_int_parameter("nh3",0, 0, BILLION, 
+  set_int_parameter("nh3",0, -100, BILLION, 
       "Predict peaks with the given maximum number of nh3 neutral loss "
       "modifications. Default 0.",
       "Only available for crux-predict-peptide-ions.", "true");
-  set_int_parameter("h2o",0, 0, BILLION,
+  set_int_parameter("h2o",0, -100, BILLION,
       "Predict peaks with the given maximum number of h2o neutral loss "
       "modifications. Default 0.",
       "Only available for crux-predict-peptide-ions.", "true");
