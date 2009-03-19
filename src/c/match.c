@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.67 $
- * REVISION: $Revision: 1.67 $
+ * REVISION: $Revision: 1.68 $
+ * REVISION: $Revision: 1.68 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -630,74 +630,88 @@ void print_match_tab(
   char float_format[16];
   sprintf(float_format, "%%.%if\t", precision);
 
+  // Print tab delimited fields
+  fprintf(file, "%d\t", scan_num);
+  fprintf(file, "%d\t", charge);
+  fprintf(file, float_format, spectrum_precursor_mz);
+  fprintf(file, float_format, spectrum_mass);
+  fprintf(file, float_format, peptide_mass);
+  fprintf(file, float_format, delta_cn);
+  if (sp_scored == 0 ){
+    fprintf(file, "\t\t"); //score and rank
+  }else{
+    fprintf(file, float_format, sp_score);
+    fprintf(file, "%d\t", sp_rank);
+  }
+  fprintf(file, float_format, xcorr_score);
+  fprintf(file, "%d\t", xcorr_rank);
+  if (LOGP_BONF_WEIBULL_XCORR == main_score) {
+    // print p-value
+    if (P_VALUE_NA == log_pvalue) {
+      fprintf(file, "NaN\t");
+    }
+    else {
+      fprintf(file, float_format, log_pvalue);
+    }
+  }
+  else {
+    // no p-value
+    fprintf(file, "\t");
+  }
+  if (LOGP_QVALUE_WEIBULL_XCORR == main_score) {
+    // print q-value (Weibull est.)
+    fprintf(file, float_format, weibull_qvalue);
+  }
+  else {
+    fprintf(file, "\t");
+  }
+  if (PERCOLATOR_SCORE == main_score)  {
+    // print percolator score
+    fprintf(file, float_format, percolator_score);
+    // print percolator rank
+    fprintf(file, float_format, percolator_rank);
+    // print q-value
+    fprintf(file, float_format, percolator_qvalue);
+  }
+  else {
+    // no percolator score, score, or p-value
+    fprintf(file, "\t\t\t");
+  }
+  // Output of q-ranker score and q-value will be handled here where available.
+  // For now always print an empty column. 
+  fprintf(file, "\t\t");
+  if (sp_scored == 0 ){
+    fprintf(file, "\t");
+  }else{
+    fprintf(file, "%d\t", b_y_matched);
+  }
+  fprintf(file, "%d\t", b_y_total);
+  fprintf(file, "%d\t", num_matches); // Matches per spectrum
+  fprintf(file, "%c\t", sequence[0]);
+  fprintf(file, "%.*s\t", seq_length - 4, sequence+2);
+  fprintf(file, "%c\t", sequence[seq_length - 1]);
+  fprintf(file, "%s-%s\t", enz_str, dig_str);
+
+  // Last field is a comma delimited list of parent proteins
+  BOOLEAN_T is_first = TRUE;
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     peptide_src = peptide_src_iterator_next(peptide_src_iterator);
     protein = get_peptide_src_parent_protein(peptide_src);
     protein_id = get_protein_id(protein);
     
-    fprintf(file, "%d\t", scan_num);
-    fprintf(file, "%d\t", charge);
-    fprintf(file, float_format, spectrum_precursor_mz);
-    fprintf(file, float_format, spectrum_mass);
-    fprintf(file, float_format, peptide_mass);
-    fprintf(file, float_format, delta_cn);
-    if (sp_scored == 0 ){
-      fprintf(file, "\t\t"); //score and rank
-    }else{
-      fprintf(file, float_format, sp_score);
-      fprintf(file, "%d\t", sp_rank);
-    }
-    fprintf(file, float_format, xcorr_score);
-    fprintf(file, "%d\t", xcorr_rank);
-    if (LOGP_BONF_WEIBULL_XCORR == main_score) {
-      // print p-value
-      if (P_VALUE_NA == log_pvalue) {
-        fprintf(file, "NaN\t");
-      }
-      else {
-        fprintf(file, float_format, log_pvalue);
-      }
+    if (is_first == TRUE) {
+      // First protein doesn't have leading ','
+      fputs(protein_id, file);
+      is_first = FALSE;
     }
     else {
-      // no p-value
-      fprintf(file, "\t");
+      // Following proteins have leading ','
+      fprintf(file, ",%s", protein_id);
     }
-    if (LOGP_QVALUE_WEIBULL_XCORR == main_score) {
-      // print q-value (Weibull est.)
-      fprintf(file, float_format, weibull_qvalue);
-    }
-    else {
-      fprintf(file, "\t");
-    }
-    if (PERCOLATOR_SCORE == main_score)  {
-      // print percolator score
-      fprintf(file, float_format, percolator_score);
-      // print percolator rank
-      fprintf(file, float_format, percolator_rank);
-      // print q-value
-      fprintf(file, float_format, percolator_qvalue);
-    }
-    else {
-      // no percolator score, score, or p-value
-      fprintf(file, "\t\t\t");
-    }
-    // Output of q-ranker score and q-value will be handled here where available.
-    // For now always print an empty column. 
-    fprintf(file, "\t\t");
-    if (sp_scored == 0 ){
-      fprintf(file, "\t");
-    }else{
-      fprintf(file, "%d\t", b_y_matched);
-    }
-    fprintf(file, "%d\t", b_y_total);
-    fprintf(file, "%d\t", num_matches); // Matches per spectrum
-    fprintf(file, "%c\t", sequence[0]);
-    fprintf(file, "%.*s\t", seq_length - 4, sequence+2);
-    fprintf(file, "%c\t", sequence[seq_length - 1]);
-    fprintf(file, "%s-%s\t", enz_str, dig_str);
-    fprintf(file, "%s\n", protein_id);
     free(protein_id);
   }
+  // End record
+  fputc('\n', file);
   
   free(sequence);
   free(enz_str);
