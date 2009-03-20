@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.46 $
+ * REVISION: $Revision: 1.47 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -961,13 +961,23 @@ void predict_ions(
     return;
   }
 
+  char* seq = modified_aa_string_to_string(ion_series->modified_aa_seq, strlen(ion_series->peptide));
+  //printf("Predicting ions for %s\n", seq);
+  free(seq);
+
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
   
   // create a mass matrix
   float* mass_matrix = 
     create_ion_mass_matrix(ion_series->modified_aa_seq, constraint->mass_type, ion_series->peptide_length);  
   //create_ion_mass_matrix(ion_series->peptide, constraint->mass_type, ion_series->peptide_length);  
-  
+  /*
+  printf("cumulative mass sum is:\n");
+  int idx = 0;
+  for(idx = 0; idx < mass_matrix[0]; idx++){
+    printf("%i\t%f\n", idx, mass_matrix[idx]);
+  }
+  */
   // scan for the first and last  (S, T, E, D) and (R, K, Q, N), 
   // initialize to determine modification is ok.
   // the first, last of STED, RKQN are stored in ion_series.

@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.15 $
+ * $Revision: 1.16 $
  * \brief Provides constants and methods for calculating mass
  ****************************************************************************/
 #include <math.h>
@@ -131,7 +131,8 @@ void initialize_aa_mod_combinations_array(){
       //printf(" to %i\n", entry_idx);
 
       // write i entries for mod_i
-      int write_num = mod_idx+1;
+      //int write_num = mod_idx+1;
+      int write_num = pow(2, mod_idx);
       while(write_num > 0 && entry_idx < NUM_MOD_MASSES){
         //printf("write at %i from %.3f", entry_idx, aa_mod_masses[entry_idx]);
 
@@ -143,6 +144,10 @@ void initialize_aa_mod_combinations_array(){
     }// next skip
   }// next mod
 
+  //printf("Initialized mod combinations are:\n");
+  //for(i=0; i<36; i++){
+    //printf("index %i\tmass %.1f\n", i, aa_mod_masses[i]);
+  //}
 }
 
 /**
