@@ -582,17 +582,10 @@ void initialize_parameters(void){
       "(preliminary) score acts as a filter; only high scoring psms go "
       "on to be scored with xcorr.  This saves some time.  If set to 0, "
       "all psms are scored with both scores. ", "true");
-  set_int_parameter("top-match-sqt", 5, 1, BILLION, 
-      "The number of psms per spectrum written to the sqt file. "
+  set_int_parameter("top-match", 5, 1, BILLION, 
+      "The number of psms per spectrum writen to the output file(s)." 
       "Default 5.",
-      "Available from parameter file for crux-search-for-matches with "
-      "output-mode=<all|sqt>.  Does not affect output to binary files.", 
-      "true");
-  set_int_parameter("top-match", 1, 1, BILLION, 
-      "The number of psms per spectrum writen to the binary output file." 
-      "Default 1.",
-      "Available from parameter file for crux-search-for-matche with "
-      "output-mode=<all|binary>.  Does not affect output to sqt file. ", 
+      "Available from parameter file for crux-search-for-matches.",
       "true");
   set_int_parameter("psms-per-spectrum-reported", 0, 0, BILLION,
                    "place holder", "this may be replaced by top-match","false");
@@ -1085,9 +1078,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   print_parameter_file(param_filename);
 
   // what is the max psms per spec to keep for printing
-  int sqt = get_int_parameter("top-match-sqt");
-  int bin = get_int_parameter("top-match");
-  int max = (sqt > bin) ? sqt : bin;
+  int max = get_int_parameter("top-match");
   char value_str[SMALL_BUFFER];
   sprintf(value_str, "%i", max);
   update_hash_value(parameters, "psms-per-spectrum-reported", value_str);

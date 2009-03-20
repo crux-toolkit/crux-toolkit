@@ -132,13 +132,8 @@ decoy-sqt-output-file=decoy.sqt
 # Each decoy set of psms will be printed to a separate file and not included with the target psms. To return decoys in the same file as targets, use tdc=T in the parameter file and control the number of decoys with num-decoys-per-target. At least one decoy set (in its own file) is required to run the algorithm 'percolator' in a subsiquent crux run. Used by crux-search-for-matches.  Decoy search results can be used by crux percolator.
 number-decoy-set=2
 
-# The number of psms per spectrum writen to the binary output file.Default 1.
-# Available from parameter file for crux-search-for-matche with output-mode=<all|binary>.  Does not affect output to sqt file. 
-top-match=1
-
-# The number of psms per spectrum written to the sqt file. Default 5.
-# Available from parameter file for crux-search-for-matches with output-mode=<all|sqt>.  Does not affect output to binary files.
-top-match-sqt=5
+# The number of psms per spectrum writen to the output file.Default 5.
+top-match=5
 
 # Set the precision for masses and scores written to sqt and text files. Default 6.
 # Available from parameter file for crux search-for-matches, percolator, and compute-q-values.
