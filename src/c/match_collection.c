@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.105 $
+ * $Revision: 1.106 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1717,7 +1717,7 @@ void print_sqt_header(
   //  fprintf(output, "H\tStaticMod\tC=160.139\n");
   fprintf(output, "H\tAlg-DisplayTop\t%d\n", 
           //          get_int_parameter("max-sqt-result")); 
-          get_int_parameter("top-match-sqt")); 
+          get_int_parameter("top-match")); 
   // this is not correct for an sqt from analzyed matches
 
   //PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
@@ -2256,8 +2256,7 @@ void print_matches(
   MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
                                                             "output-mode");
   //  int max_sqt_matches = get_int_parameter("max-sqt-result");
-  int max_sqt_matches = get_int_parameter("top-match-sqt");
-  int max_psm_matches = get_int_parameter("top-match");
+  int max_matches = get_int_parameter("top-match");
   //BOOLEAN_T pvalues = get_boolean_parameter("compute-p-values");
   SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
   SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
@@ -2285,7 +2284,7 @@ void print_matches(
       match_collection->scored_type[LOGP_BONF_WEIBULL_XCORR] = TRUE;
     }
     */
-    serialize_psm_features(match_collection, psm_file, max_psm_matches,
+    serialize_psm_features(match_collection, psm_file, max_matches,
                            prelim_score, main_score);
   }
 
@@ -2293,11 +2292,11 @@ void print_matches(
   if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
     carp(CARP_DETAILED_DEBUG, "Writing sqt results");
     if( ! is_decoy ){
-      print_match_collection_sqt(sqt_file, max_sqt_matches,
+      print_match_collection_sqt(sqt_file, max_matches,
                                  match_collection, spectrum,
                                  prelim_score, main_score);
     }else{
-      print_match_collection_sqt(decoy_file, max_sqt_matches,
+      print_match_collection_sqt(decoy_file, max_matches,
                                  match_collection, spectrum,
                                  prelim_score, main_score);
     }
@@ -2307,11 +2306,11 @@ void print_matches(
   if(output_type == TAB_OUTPUT || output_type == ALL_OUTPUT){
     carp(CARP_DETAILED_DEBUG, "Writing tab delimited results");
     if( ! is_decoy ){
-      print_match_collection_tab_delimited(tab_file, max_sqt_matches,
+      print_match_collection_tab_delimited(tab_file, max_matches,
                                  match_collection, spectrum,
                                  prelim_score, main_score);
     }else{
-      print_match_collection_tab_delimited(decoy_tab_file, max_sqt_matches,
+      print_match_collection_tab_delimited(decoy_tab_file, max_matches,
                                  match_collection, spectrum,
                                  prelim_score, main_score);
     }

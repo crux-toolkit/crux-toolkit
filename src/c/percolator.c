@@ -16,7 +16,7 @@
  *         directory are concatinated together and presumed to be
  *         non-overlaping parts of the same ms2 file. 
  * 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  ****************************************************************************/
 #include "percolator.h"
 
@@ -160,7 +160,7 @@ static void print_text_files(
   int cur_charge = 0;
   int match_counter = 0;
   //  int max_matches = get_int_parameter("max-sqt-result");
-  int max_matches = get_int_parameter("top-match-sqt");
+  int max_matches = get_int_parameter("top-match");
 
   // for all matches
   while( match_iterator_has_next(match_iterator) ){
