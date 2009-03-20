@@ -190,7 +190,7 @@ int search_main(int argc, char** argv){
       filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
     double mass = get_spectrum_neutral_mass(spectrum, charge);
 
-    if( (spectrum_searches_counter % progress_increment) == 0 ){
+    if( ((spectrum_searches_counter+1) % progress_increment) == 0 ){
       carp(CARP_INFO, 
            "Searching spectrum number %i, charge %i, search number %i",
            get_spectrum_first_scan(spectrum), charge,
