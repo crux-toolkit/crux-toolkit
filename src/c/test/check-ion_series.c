@@ -37,7 +37,8 @@ void ion_series_setup(){
 
   aa_mod_set_mass_change(amod1, 100);
   aa_mod_set_mass_change(amod2, 30);
-  aa_mod_set_mass_change(amod3, 8);
+  //  aa_mod_set_mass_change(amod3, 8);
+  aa_mod_set_mass_change(amod3, 70);
 
   amod_list[0] = amod1;
   amod_list[1] = amod2;
@@ -204,6 +205,7 @@ START_TEST (test_predict2){
 }
 END_TEST
 
+
 START_TEST (test_predict_mod){
   // modifiy seq
   modify_aa(&mod_seq[1], amod1);
@@ -220,9 +222,6 @@ START_TEST (test_predict_mod){
                "Num predicted ions is %i, should be %i.", num_ions, 6);
 
   // look at all ions and confirm that the masses are correct
-  // create a b- and a y-ion constraint
-  ION_CONSTRAINT_T* bcnst = new_ion_constraint(MONO, 1, B_ION, FALSE); 
-  ION_CONSTRAINT_T* ycnst = new_ion_constraint(MONO, 1, Y_ION, FALSE); 
   // reuse these
   ION_T* ion = NULL;
   int i=0;
@@ -231,7 +230,9 @@ START_TEST (test_predict_mod){
   ION_FILTERED_ITERATOR_T* iter = new_ion_filtered_iterator(is3, bcnst);
   float running_total = MASS_H_MONO;
   while( ion_filtered_iterator_has_next(iter) ){
-    running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
+    //running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
+    running_total += get_mass_amino_acid(seq[i], MONO);
+    if( i == 1 ){ running_total += aa_mod_get_mass_change(amod1); }
     ion = ion_filtered_iterator_next(iter);
     float mz = get_ion_mass_z(ion);
     //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
@@ -317,6 +318,82 @@ START_TEST (test_predict_mod2){
 }
 END_TEST
 
+START_TEST(test_masses_mod){
+  // similar to the test above, but 
+  // compare two ion series to eachother, one with single mod of mass m
+  // and one with two mods on same aa that sum to m
+
+  // use mods with masses that sum
+  aa_mod_set_mass_change(amod1, 100);
+  aa_mod_set_mass_change(amod2, 130);
+  aa_mod_set_mass_change(amod3, 70);
+
+  // modifiy seq
+  modify_aa(&mod_seq[1], amod1);
+  // predict ions for an updated series
+  update_ion_series(is3, seq, mod_seq);
+  predict_ions(is3);
+
+  // get a copy of seq and modify differently
+  char* seq_copy = my_copy_string(seq);
+  MODIFIED_AA_T* mod_seq_copy =  convert_to_mod_aa_seq(seq_copy);
+  modify_aa(&mod_seq_copy[1], amod2);
+  modify_aa(&mod_seq_copy[1], amod3);
+
+  // confirm that the modified masses of aa[1] are now the same
+  float mass = get_mass_amino_acid(seq[1], MONO);
+  float mod_mass = get_mass_mod_amino_acid(mod_seq[1], MONO);
+  float mod_mass_copy = get_mass_mod_amino_acid(mod_seq_copy[1], MONO);
+  fail_unless( is_same(mod_mass, mod_mass_copy), 
+               "Modified masses of %c (%f and %f) should be %f+100=%f",
+               seq[1], mod_mass, mod_mass_copy, mass, mass + 100);
+
+  // compare is4 to is3
+  ION_SERIES_T* is4 = new_ion_series_generic(constraint, charge);
+  update_ion_series(is4, seq_copy, mod_seq_copy);
+  predict_ions(is4);
+
+  // test that num_ions same
+  int num_ions = get_ion_series_num_ions(is3);
+  int num_ions_copy = get_ion_series_num_ions(is4);
+  fail_unless( num_ions == num_ions_copy,
+   "The number of ions in the two series should be the same but are %i and %i",
+               num_ions, num_ions_copy);
+
+  // reuse these
+  ION_T* ion = NULL;
+  ION_T* ion_copy = NULL;
+  int i=0;
+
+  ION_FILTERED_ITERATOR_T* iter = new_ion_filtered_iterator(is3, bcnst);
+  ION_FILTERED_ITERATOR_T* iter_copy = new_ion_filtered_iterator(is4, bcnst);
+  float predicted_mass = MASS_H_MONO;
+
+  while( ion_filtered_iterator_has_next(iter) ){
+    predicted_mass += get_mass_amino_acid(seq[i], MONO);
+    if( i==1 ){ predicted_mass += 100; } // our modification
+    
+    ion = ion_filtered_iterator_next(iter);
+    ion_copy = ion_filtered_iterator_next(iter_copy);
+    // get cleavage index and ion type
+    int clev = get_ion_cleavage_idx(ion);
+    int clev_copy = get_ion_cleavage_idx(ion_copy);
+    fail_unless( clev == clev_copy, 
+                 "Ion %i has cleavage index %i and %i.",
+                 clev, clev_copy);
+    fail_unless( is_same(predicted_mass, get_ion_mass_z(ion)),
+                 "Predicted mass is %f and ion mass is %f.",
+                 predicted_mass, get_ion_mass_z(ion));
+    fail_unless( is_same(get_ion_mass_z(ion), get_ion_mass_z(ion_copy)),
+                 "Masses for ion %i, index %i, %f and %f should be %f.", i,
+                 get_ion_mass_z(ion), get_ion_mass_z(ion_copy), predicted_mass);
+    i++;
+  }// next ion
+
+
+}
+END_TEST
+
 Suite *ion_series_suite_2(void){
   Suite *s = suite_create("Ion series");
   TCase *tc_main = tcase_create("main");
@@ -326,6 +403,7 @@ Suite *ion_series_suite_2(void){
   tcase_add_test(tc_main, test_predict2);
   tcase_add_test(tc_main, test_predict_mod);
   tcase_add_test(tc_main, test_predict_mod2);
+  tcase_add_test(tc_main, test_masses_mod);
 
   tcase_add_checked_fixture(tc_main, ion_series_setup, ion_series_teardown);
   suite_add_tcase(s, tc_main);
