@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.106 $
+ * $Revision: 1.107 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1811,7 +1811,8 @@ void print_tab_header(FILE* output){
     "sequence\t"
     "C-flanking aa\t"
     "cleavage type\t"
-    "protein id\n"
+    "protein id\t"
+    "unshuffled sequence\n"
   );
 }
 
@@ -1890,7 +1891,8 @@ BOOLEAN_T print_match_collection_sqt(
 /**
  * \brief Print the psm features to file in tab delimited format.
  *
- *\returns TRUE, if sucessfully print tab-delimited format of the PSMs, else FALSE 
+ * \returns TRUE, if sucessfully print tab-delimited format of the
+ * PSMs, else FALSE
  */
 BOOLEAN_T print_match_collection_tab_delimited(
   FILE* output,                  ///< the output file -out
