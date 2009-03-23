@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  */
 
 #include "peptide_modifications.h"
@@ -420,7 +420,9 @@ void add_peptide_mod_seq(PEPTIDE_T* peptide, MODIFIED_AA_T* cur_mod_seq){
 int modify_peptide(
   PEPTIDE_T* peptide,             ///< the peptide to modify
   PEPTIDE_MOD_T* peptide_mod,     ///< the set of aa_mods to apply
-  LINKED_LIST_T* modified_peptides){ ///< the returned modified peptides
+  LINKED_LIST_T* modified_peptides,///< the returned modified peptides
+  BOOLEAN_T is_decoy              ///< shuffle the sequence before modifying
+){ 
 
   if( peptide == NULL ){
     carp(CARP_ERROR, "Cannot modify NULL peptide or use NULL peptide mod");
@@ -430,19 +432,32 @@ int modify_peptide(
     carp(CARP_ERROR, "Cannot return modified peptides to NULL list.");
     return 0;
   }
+
+  // get the sequence we are going to modify and convert to MODIFIED_AA_T*
+  char* sequence = NULL;
+  // shuffle sequence
+  if( is_decoy ){
+    sequence = generate_shuffled_sequence(peptide);
+  }else{
+    sequence = get_peptide_sequence(peptide);
+  }
+  MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
+
   // in case of no modifications
   if( peptide_mod == NULL || 
       peptide_mod_get_num_aa_mods(peptide_mod) == 0 ){
     carp(CARP_DETAILED_DEBUG, 
          "Modifying peptide with no aa_mods, return peptide copy");
+
     PEPTIDE_T* peptide_copy = copy_peptide(peptide); 
+    set_peptide_mod(peptide_copy, pre_modified_seq, peptide_mod);
     push_back_linked_list(modified_peptides, peptide_copy);
     return 1;
   }
 
   // get the peptide sequence and convert to MODIFIED_AA_T*
-  char* sequence = get_peptide_sequence(peptide);
-  MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
+  //char* sequence = get_peptide_sequence(peptide);
+  //MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
 
   carp(CARP_DETAILED_DEBUG, "Modifying peptide %s", sequence);
 

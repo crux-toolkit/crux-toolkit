@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.79 $
+ * $Revision: 1.80 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -672,23 +672,29 @@ char get_peptide_n_term_flanking_aa(
  * \brief Add a modification to a peptide.
  *
  * Adds the modified sequence to the peptide and changes the peptide
- * mass based on the mass change in the peptide_mod.
+ * mass based on the mass change in the peptide_mod.  It is OK to add
+ * a modied seq that has no modifications and to pass with it NULL for
+ * the peptide mod.  This allows a peptide to be assigned a shuffled,
+ * unmodified sequence.
  * \returns void
  */
 void set_peptide_mod(PEPTIDE_T* peptide,     ///< peptide to be modified
                      MODIFIED_AA_T* mod_seq, ///< modified seq to add
                      PEPTIDE_MOD_T* pep_mod  ///< mod that made the seq
 ){
-  if( peptide == NULL || mod_seq == NULL || pep_mod == NULL ){
-    carp(CARP_ERROR, "Cannot modify peptide.  Peptide, mod, or seq is NULL.");
+  //if( peptide == NULL || mod_seq == NULL || pep_mod == NULL ){
+  //carp(CARP_ERROR, "Cannot modify peptide.  Peptide, mod, or seq is NULL.");
+  if( peptide == NULL ){
+    carp(CARP_ERROR, "Cannot modify NULL peptide.");
     return;
   }
 
-  // comment me to fix files
   // check that peptide doesn't already have a mod?
   peptide->modified_seq = mod_seq;// should this be a copy instead??
   // change mass
-  peptide->peptide_mass += peptide_mod_get_mass_change(pep_mod);
+  if( pep_mod ){
+    peptide->peptide_mass += peptide_mod_get_mass_change(pep_mod);
+  }
 
 }
 

@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.69 $
- * REVISION: $Revision: 1.69 $
+ * REVISION: $Revision: 1.70 $
+ * REVISION: $Revision: 1.70 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -1041,6 +1041,13 @@ char* get_match_sequence(
     return NULL;
   }
   
+  // in the new paradigm, a match should always have a seq if it has a peptide
+  if(match->peptide_sequence == NULL){
+    carp(CARP_ERROR, "This match has no sequence to return.");
+    exit(1);
+  }
+  return my_copy_string(match->peptide_sequence);
+  /*
   // if peptide sequence is cached
   // return copy of cached peptide sequence
   if(match->peptide_sequence != NULL){
@@ -1067,6 +1074,7 @@ char* get_match_sequence(
   
   return my_copy_string(match->peptide_sequence); 
   // return match->peptide_sequence;
+  */
 }
 
 /**
@@ -1142,6 +1150,15 @@ MODIFIED_AA_T* get_match_mod_sequence(
 
   int length = get_peptide_length(get_match_peptide(match));
   
+  // in the new paradigm, match should have a mod_seq if it has a peptide
+  /*
+  if(match->mod_sequence == NULL){
+    carp(CARP_ERROR, "No modified sequence for this match");
+    exit(1);
+  }
+  return copy_mod_aa_seq(match->mod_sequence, length);
+  */
+
   // if peptide sequence is cached
   // return copy of cached peptide sequence
   if(match->mod_sequence != NULL){
@@ -1152,7 +1169,9 @@ MODIFIED_AA_T* get_match_mod_sequence(
 
   // Is this a null peptide? Then shuffle the sequence
   if(match->null_peptide){
-    // generate the shuffled peptide sequence
+    carp(CARP_ERROR, "Matches for decoys should have a modified seq.");
+    exit(1);
+    /*    // generate the shuffled peptide sequence
     match->mod_sequence =
       generate_shuffled_mod_sequence(match->peptide);//, match->overall_type);
     char* seq = get_peptide_sequence(match->peptide);
@@ -1161,6 +1180,7 @@ MODIFIED_AA_T* get_match_mod_sequence(
          seq, modseq );
     free(modseq);
     free(seq);
+    */
   }
   else{
     // just get it from the peptide, no need to shuffle
@@ -1168,6 +1188,7 @@ MODIFIED_AA_T* get_match_mod_sequence(
   }
 
   return copy_mod_aa_seq(match->mod_sequence, length);
+
 }
 
 /**
@@ -1306,6 +1327,20 @@ void set_match_peptide(
 {
   // first set peptide
   match->peptide = peptide;
+
+  // set sequences
+  match->mod_sequence = get_peptide_modified_aa_sequence(peptide);
+  //match->peptide_sequence = modified_aa_string_to_string(match->mod_sequence,
+  //                                              get_peptide_length(peptide));
+
+  // generate an array of the aa's with no mod characters
+  match->peptide_sequence = mycalloc(get_peptide_length(peptide)+1, 
+                                     sizeof(char));
+  int i=0;
+  for(i=0; i< get_peptide_length(peptide); i++){
+    match->peptide_sequence[i] = modified_aa_to_char(match->mod_sequence[i]);
+  }
+  match->peptide_sequence[i] = 0;
 
 // overall trypticity already set in peptide
 //match->digest = get_peptide_digest(peptide);

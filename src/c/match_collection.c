@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.107 $
+ * $Revision: 1.108 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1070,7 +1070,7 @@ BOOLEAN_T score_peptides(
     // calculate the score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
     // debugging
-    char* mod_seq = modified_aa_string_to_string(modified_sequence, strlen(sequence));
+    char* mod_seq = modified_aa_string_to_string(modified_sequence, get_peptide_length(get_match_peptide(match)));
     carp(CARP_DETAILED_DEBUG, "Score %f for %s (null:%i)", score, mod_seq, is_decoy);
     free(mod_seq);
 
@@ -1208,9 +1208,9 @@ BOOLEAN_T score_matches_one_spectrum(
     // set score in match
     set_match_score(match, score_type, score);
 
-    char* mod_seq = modified_aa_string_to_string(modified_sequence, strlen(sequence));
+    char* mod_seq = modified_aa_string_to_string(modified_sequence, get_peptide_length(get_match_peptide(match)));
     carp(CARP_DETAILED_DEBUG, "Second score %f for %s (null:%i)",
-         score, mod_seq,get_match_null_peptide(match));
+         score, mod_seq, get_match_null_peptide(match));
     free(mod_seq);
     free(sequence);
     free(modified_sequence);

@@ -291,6 +291,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
  *
  * \returns A newly allocated peptide iterator.
  */
+/*
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mods(
   double mass,                ///< target mass of peptides
   PEPTIDE_MOD_T* pmod,        ///< the peptide mod to apply
@@ -313,7 +314,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mods(
 
   return new_iterator;
 }
-
+*/
 
 /****************************************************************************/
 
