@@ -547,6 +547,34 @@ void initialize_parameters(void){
       "Used by crux search-for-matches with output-mode=<all|tab> and "
       "number-decoy-set > 0.  File is put in the directory set by "
       "--match-output-folder (defaults to working directory).", "true");
+  // user options regarding decoys
+  /*
+  set_int_parameter("num-decoys-per-target", 2, 0, 10,
+      "Number of decoy peptides to search for every target peptide searched."
+      "  Default 2.",
+      "Use --decoy-location to control where they are returned (which "
+      "file(s)).  Available only from the command line for search-for-matches.",
+      "true");
+  set_string_parameter("decoy-location", "separate-decoy-files",
+      "Where the decoy search results are returned.  (target-file|"
+      "one-decoy-file|separate-decoy-files'. Default separate-decoy-files.",
+      "Applies when num-decoys-per-target > 0.  Use 'target-file' to mix "
+      "target and decoy search results in one file. 'one-decoy-file' will "
+      "return target results in one file and all decoys in another. "
+      "'separate-decoy-files' will create as many decoy files as "
+      "num-decoys-per-target.",
+      "true");
+  // coder options regarding decoys
+  set_int_parameter("number-decoy-set", 2, 0, 10, 
+      "Now hidden from user controls how many decoy match_collections/files",
+                    "", "false");
+  set_boolean_parameter("tdc", FALSE,
+      "Target-decoy competition. puts decoy psms in target file. ",
+                        "Now hidden from the user", "false");
+  set_int_parameter("num-decoys-per-target", 1, 1, BILLION,
+      "set if multiple decoy searches are put in one match collection", 
+      "Now hidded from the user.", "false");
+  */
   set_int_parameter("number-decoy-set", 2, 0, 10, 
       "The number of decoy databases to search, generating one output file "
       "per set.  Default 2.", 
@@ -574,6 +602,7 @@ void initialize_parameters(void){
       "Multiple decoys are put in the same collection, sorted together, and "
       "written to the same file.  Does not affect --number-decoy-sets or tdc.",
       "true");
+
   set_int_parameter("max-rank-preliminary", 500, 0, BILLION, 
       "Number of psms per spectrum to score with xcorr after preliminary "
       "scoring with Sp. "
@@ -1041,6 +1070,60 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 
   update_aa_masses();
 
+  /*
+  // translate user decoy options into the old set of options
+  // get user values
+  int num_decoy_per_target = get_int_parameter("num-decoys-per-target");
+  char* location = get_string_parameter("decoy-location");
+  int max_rank_preliminary = get_int_parameter("max-rank-preliminary");
+  // store new values here
+  BOOLEAN_T tdc = FALSE;
+  int new_num_decoy_per_target = 0;
+  int new_num_decoy_set = 0;
+  int new_max_rank_preliminary = 0;
+
+  if( num_decoy_per_target == 0 ){
+    free(location);
+    location = "target-file";
+  }
+
+  // set new values
+  if( strcmp(location, "target-file") ){
+    tdc = TRUE;
+    new_num_decoy_set = 0;
+    new_num_decoy_per_target = num_decoy_per_target;
+    if( max_rank_preliminary > 0 ){
+      new_max_rank_preliminary = max_rank_preliminary * 
+                                (1 + new_num_decoy_per_target);
+    }
+  }else if( strcmp(location, "one-decoy-file") ){
+    tdc = FALSE;
+    new_num_decoy_set = 1;
+    new_num_decoy_per_target = num_decoy_per_target;
+  }else if( strcmp(location, "separate-decoy-files") ){
+    tdc = FALSE;
+    new_num_decoy_set = num_decoy_per_target;
+    new_num_decoy_per_target = 1;
+  }
+
+  // now update all values
+  char buffer[PARAMETER_LENGTH];
+  sprintf(buffer, "%i", new_num_decoy_set);
+  update_hash_value(parameters, "num-decoy-decoy-set", buffer);
+
+  sprintf(buffer, "%i", new_num_decoy_per_target);
+  update_hash_value(parameters, "num-decoy-per-target", buffer);
+
+  sprintf(buffer, "%i", new_max_rank_preliminary);
+  update_hash_value(parameters, "max-rank-preliminary", buffer);
+
+  if( tdc == TRUE ){
+    update_hash_value(parameters, "tdc", "TRUE");
+  }else{
+    update_hash_value(parameters, "tdc", "FALSE");
+  }
+  */
+
   if( get_boolean_parameter("tdc") == TRUE ){
     // change num-decoys so that no decoy.sqt file written
     update_hash_value(parameters, "number-decoy-set", "0");
@@ -1055,6 +1138,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     snprintf(buffer, PARAMETER_LENGTH, "%i", top_match);
     update_hash_value(parameters, "max-rank-preliminary", buffer);
   }
+
 
   // for compute-q-values, set algorithm to q-value (perc by default)
   if( strcmp(argv[0], "compute-q-values") == 0 ){
