@@ -228,7 +228,8 @@ int search_main(int argc, char** argv){
         new_modified_peptides_iterator_from_mass(mass,
                                                  peptide_mod,
                                                  index,
-                                                 database);
+                                                 database,
+                                                 FALSE); // is decoy
       // score peptides
       int added = add_matches(match_collection, 
                               spectrum, 
@@ -315,7 +316,8 @@ int search_main(int argc, char** argv){
             new_modified_peptides_iterator_from_mass(mass,
                                                      peptide_mod,
                                                      index,
-                                                     database);
+                                                     database,
+                                                     TRUE);// is decoy
           // score peptides
           int added = add_matches(match_collection, 
                                   spectrum, 

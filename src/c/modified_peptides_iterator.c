@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -19,6 +19,7 @@ struct modified_peptides_iterator_t{
   PEPTIDE_MOD_T* peptide_mod;///< the modification to apply to peptides
   PEPTIDE_T* next_peptide;///< peptide queued to return next
   LINKED_LIST_T* temp_peptide_list;///< storage for modified peptides
+  BOOLEAN_T is_decoy;     ///< are the peptides to be shuffled?
 };
 
 /* Private functions */
@@ -108,7 +109,8 @@ void queue_next_peptide(
 
   modify_peptide(unmod_peptide, 
                  iterator->peptide_mod, 
-                 iterator->temp_peptide_list );
+                 iterator->temp_peptide_list,
+                 iterator->is_decoy );
   // this put a copy in the list, get rid of the original
   free_peptide(unmod_peptide);
 
@@ -218,7 +220,8 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   double mass,         ///< Target mass of peptides BEFORE modification
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   INDEX_T* index,      ///< Index from which to draw peptides OR
-  DATABASE_T* dbase    ///< Database from which to draw peptides
+  DATABASE_T* dbase,   ///< Database from which to draw peptides
+  BOOLEAN_T is_decoy
   ){
   MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
     allocate_modified_peptides_iterator();
@@ -228,6 +231,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
 
   // set peptide_mod field
   new_iterator->peptide_mod = pmod;
+  new_iterator->is_decoy = is_decoy;
 
   // get the mass difference
   double delta_mass = peptide_mod_get_mass_change(pmod);
