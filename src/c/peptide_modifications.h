@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  */
 #ifndef PEPTIDE_MODIFICATIONS_H
 #define PEPTIDE_MODIFICATIONS_H
@@ -87,8 +87,7 @@ BOOLEAN_T is_peptide_modifiable( PEPTIDE_T* peptide,
  */
 int modify_peptide(PEPTIDE_T* peptide,
                    PEPTIDE_MOD_T* peptide_mod,
-                   LINKED_LIST_T* modified_peptides,
-                   BOOLEAN_T is_decoy);
+                   LINKED_LIST_T* modified_peptides);
 
 /* Setters and Getters */
 /**

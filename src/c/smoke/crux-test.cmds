@@ -105,7 +105,7 @@ generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_
 search_for_matches_default_index = good_results/standard_search_default.target.sqt = crux search-for-matches --output-mode all --overwrite T --use-index T --parameter-file params/params_uniq test.ms2 test_crux_index; cat target.sqt = 'Time' 'Database'
 
 # Analyze matches using above index
-analyze_matches_index = good_results/standard_test-perc.sqt =  crux percolator --sqt-output-file test-perc.sqt --overwrite T --use-index T --parameter-file params/set_rand_seed . test_crux_index; cat test-perc.sqt = 'StartTime' 'Database'
+analyze_matches_index = good_results/standard_test-perc.sqt =  crux percolator --sqt-output-file test-perc.sqt --overwrite T --use-index T --parameter-file params/set_rand_seed . test_crux_index; cat test-perc.sqt = 'StartTime'
 
 # Search for matches with modifications from index
 search_mods_index = good_results/standard_search_mods = crux search-for-matches --parameter-file params/mods --use-index T test.ms2 existing_crux_index; cat mods.sqt = 'Time' 'Database'

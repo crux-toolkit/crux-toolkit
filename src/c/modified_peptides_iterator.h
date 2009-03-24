@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: Header file for peptide iterator that includes
  * modified peptides.
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  */
 #ifndef MODIFIED_PEPTIDES_ITERATOR_H
 #define MODIFIED_PEPTIDES_ITERATOR_H
@@ -31,8 +31,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   double mass,         ///< Target mass of peptides
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   INDEX_T* index,      ///< Index from which to draw peptides OR
-  DATABASE_T* dbase,   ///< Database from which to draw peptides
-  BOOLEAN_T is_decoy   ///< generate shuffled peptides?
+  DATABASE_T* dbase    ///< Database from which to draw peptides
   );
 
 /**
