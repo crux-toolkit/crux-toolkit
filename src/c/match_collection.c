@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.109 $
+ * $Revision: 1.110 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1811,7 +1811,8 @@ void print_tab_header(FILE* output){
     "sequence\t"
     "C-flanking aa\t"
     "cleavage type\t"
-    "protein id\n"
+    "protein id\t"
+    "unshuffled sequence\n"
   );
 }
 
