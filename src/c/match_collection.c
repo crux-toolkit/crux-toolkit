@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.110 $
+ * $Revision: 1.111 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1807,11 +1807,10 @@ void print_tab_header(FILE* output){
     "b/y ions matched\t"
     "b/y ions total\t"
     "matches/spectrum\t"
-    "N-flanking aa\t"
     "sequence\t"
-    "C-flanking aa\t"
     "cleavage type\t"
     "protein id\t"
+    "flanking aa\t"
     "unshuffled sequence\n"
   );
 }

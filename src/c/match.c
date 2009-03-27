@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.73 $
- * REVISION: $Revision: 1.73 $
+ * REVISION: $Revision: 1.74 $
+ * REVISION: $Revision: 1.74 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -605,12 +605,6 @@ void print_match_tab(
     delta_cn = 0.0;
   }
 
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
-    new_peptide_src_iterator(peptide);
-  PEPTIDE_SRC_T* peptide_src = NULL;
-  char* protein_id = NULL;
-  PROTEIN_T* protein = NULL;
-  
   int sp_scored = get_int_parameter("max-rank-preliminary");
   double sp_score = get_match_score(match, SP);
   int  sp_rank = get_match_rank(match, SP);
@@ -625,6 +619,8 @@ void print_match_tab(
   DIGEST_T digestion = get_digest_type_parameter("digestion");
   char* enz_str = enzyme_type_to_string(enzyme);
   char* dig_str = digest_type_to_string(digestion);
+  char *protein_ids = get_protein_ids(peptide);
+  char *flanking_aas = get_flanking_aas(peptide);
 
   int precision = get_int_parameter("precision");
   char float_format[16];
@@ -687,29 +683,9 @@ void print_match_tab(
   }
   fprintf(file, "%d\t", b_y_total);
   fprintf(file, "%d\t", num_matches); // Matches per spectrum
-  fprintf(file, "%c\t", sequence[0]);
   fprintf(file, "%.*s\t", seq_length - 4, sequence+2);
-  fprintf(file, "%c\t", sequence[seq_length - 1]);
   fprintf(file, "%s-%s\t", enz_str, dig_str);
-
-  // Last field is a comma delimited list of parent proteins
-  BOOLEAN_T is_first = TRUE;
-  while(peptide_src_iterator_has_next(peptide_src_iterator)){
-    peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-    protein = get_peptide_src_parent_protein(peptide_src);
-    protein_id = get_protein_id(protein);
-    
-    if (is_first == TRUE) {
-      // First protein doesn't have leading ','
-      fputs(protein_id, file);
-      is_first = FALSE;
-    }
-    else {
-      // Following proteins have leading ','
-      fprintf(file, ",%s", protein_id);
-    }
-    free(protein_id);
-  }
+  fprintf(file, "%s\t%s", protein_ids, flanking_aas);
 
   // if the peptide is a decoy, print the unshuffled version of the peptide
   if(match->null_peptide == TRUE){
@@ -722,10 +698,11 @@ void print_match_tab(
   // End record
   fputc('\n', file);
   
+  free(flanking_aas);
+  free(protein_ids);
   free(sequence);
   free(enz_str);
   free(dig_str);
-  free_peptide_src_iterator(peptide_src_iterator);
   
   return;
 }

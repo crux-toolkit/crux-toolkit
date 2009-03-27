@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.81 $
+ * $Revision: 1.82 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -1804,6 +1804,167 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
   return previous;
 }
  
+/**
+ * \brief Builds a comma delimited string listing the protein ids
+ * for the sources of a peptide.
+ *
+ * \returns a pointer to the string. Caller is responsible for freeing memeory.
+ * If peptide has no sources returns NULL.
+ */
+char *get_protein_ids(PEPTIDE_T *peptide) {
+
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
+    new_peptide_src_iterator(peptide);
+  char *protein_field = NULL;
+
+  if (peptide_src_iterator_has_next(peptide_src_iterator)) {
+
+    // Peptide has at least one parent.
+    
+    PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
+
+    const int allocation_factor = 1;
+    char* protein_id = get_protein_id(protein);
+    size_t protein_id_len = strlen(protein_id);
+    size_t protein_field_len = allocation_factor * protein_id_len + 1; // Buffer size
+    protein_field = mymalloc(sizeof(char) * protein_field_len);
+    size_t protein_field_free = protein_field_len;  // Remaining free buffer space
+    char *protein_field_tail = protein_field;
+    *protein_field = 0;
+
+    // First protein id in list doesn't have leading ','
+
+    strncpy(protein_field_tail, protein_id, protein_field_free);
+    protein_field_tail += protein_id_len;
+    protein_field_free -= protein_id_len;
+    free(protein_id);
+
+    // Following proteins in list have leading ','
+
+    while(peptide_src_iterator_has_next(peptide_src_iterator)){
+      peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+      protein = get_peptide_src_parent_protein(peptide_src);
+      protein_id = get_protein_id(protein);
+      protein_id_len = strlen(protein_id);
+
+      // Allocate more memory if needed, allow space for comma and null
+      if (protein_field_free < (protein_id_len + 2)) {
+        size_t tail_offset = protein_field_tail - protein_field;
+        protein_field = myrealloc(
+          protein_field, 
+          sizeof(char) * ((allocation_factor * (protein_id_len + 1)) + protein_field_len)
+        );
+        protein_field_len += allocation_factor * (protein_id_len + 1);
+        protein_field_free += allocation_factor * (protein_id_len + 1);
+        protein_field_tail = protein_field + tail_offset;
+      }
+
+      *protein_field_tail = ',';
+      ++protein_field_tail;
+      --protein_field_free;
+      strncpy(protein_field_tail, protein_id, protein_field_free);
+      protein_field_tail += protein_id_len;
+      protein_field_free -= protein_id_len;
+      free(protein_id);
+    }
+  }
+
+  free(peptide_src_iterator);
+
+  return protein_field;
+}
+
+/**
+ * \brief Builds a comma delimited string listing the flanking amino acids
+ * for the sources of a peptide.
+ *
+ * \returns a pointer to the string. Caller is responsible for freeing memeory.
+ * If peptide has no sources returns NULL.
+ */
+char *get_flanking_aas(PEPTIDE_T *peptide) {
+
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
+    new_peptide_src_iterator(peptide);
+  char *flanking_field = NULL;
+
+  if (peptide_src_iterator_has_next(peptide_src_iterator)) {
+
+    // Peptide has at least one parent.
+    
+    PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
+
+    int protein_length = get_protein_length(protein);
+    int peptide_length = get_peptide_length(peptide);
+    int start_index = get_peptide_src_start_idx(peptide_src);
+    int end_index = start_index + peptide_length - 1;
+    char* protein_seq = get_protein_sequence_pointer(protein);
+    const int allocation_factor = 1;
+    size_t flanking_str_len = 2; // left and right flanking AA
+    size_t flanking_field_len = allocation_factor * flanking_str_len + 1;
+    flanking_field = mymalloc(sizeof(char) * flanking_field_len);
+    size_t flanking_field_free = flanking_field_len;
+    char *flanking_field_tail = flanking_field;
+
+    // First flanking AA in list doesn't have leading ','
+    
+    // Flanking C
+    *flanking_field_tail = (start_index > 1 ? protein_seq[start_index - 2] : '-');;
+    ++flanking_field_tail;
+    --flanking_field_free;
+    // Flanking N
+    *flanking_field_tail = (end_index < protein_length ? protein_seq[end_index] : '-');
+    ++flanking_field_tail;
+    --flanking_field_free;
+    // Terminating null
+    *flanking_field_tail = 0;
+
+    flanking_str_len = 3; // leadinng ',', left and right flanking AA
+    while(peptide_src_iterator_has_next(peptide_src_iterator)){
+
+      peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+      protein = get_peptide_src_parent_protein(peptide_src);
+      protein_length = get_protein_length(protein);
+      peptide_length = get_peptide_length(peptide);
+      start_index = get_peptide_src_start_idx(peptide_src);
+      end_index = start_index + peptide_length - 1;
+      protein_seq = get_protein_sequence_pointer(protein);
+
+      // Allocate more memory if needed
+      if (flanking_field_free < flanking_str_len + 1) {
+        size_t tail_offset = flanking_field_tail - flanking_field;
+        flanking_field = myrealloc(
+          flanking_field,
+          sizeof(char) * (allocation_factor * flanking_str_len + flanking_field_len)
+        ); 
+        flanking_field_len += (allocation_factor * flanking_str_len);
+        flanking_field_free += (allocation_factor * flanking_str_len);
+        flanking_field_tail = flanking_field + tail_offset;
+      } 
+      
+      // Following flanking AA in list have leading ','
+      *flanking_field_tail = ',';
+      ++flanking_field_tail;
+      --flanking_field_free;
+      // Flanking C
+      *flanking_field_tail = (start_index > 1 ? protein_seq[start_index - 2] : '-');
+      ++flanking_field_tail;
+      --flanking_field_free;
+      // Flanking N
+      *flanking_field_tail = (end_index < protein_length ? protein_seq[end_index] : '-');
+      ++flanking_field_tail;
+      --flanking_field_free;
+      // Terminating NULL
+      *flanking_field_tail = 0;
+    }
+
+  }
+
+  free(peptide_src_iterator);
+
+  return flanking_field;
+}
 
 /*
  * Local Variables:
