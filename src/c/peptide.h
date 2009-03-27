@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.48 $
+ * $Revision: 1.49 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -604,6 +604,24 @@ BOOLEAN_T peptide_src_iterator_has_next(
 PEPTIDE_SRC_T* peptide_src_iterator_next(
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
+
+/**
+ * \brief Builds a comma delimited string listing the protein ids
+ * for the sources of a peptide.
+ *
+ * \returns a pointer to the string. Caller is responsible for freeing memeory.
+ * If peptide has no sources returns NULL.
+ */
+char *get_protein_ids(PEPTIDE_T *peptide);
+
+/**
+ * \brief Builds a comma delimited string listing the flanking amino acids
+ * for the sources of a peptide.
+ *
+ * \returns a pointer to the string. Caller is responsible for freeing memeory.
+ * If peptide has no sources returns NULL.
+ */
+char *get_flanking_aas(PEPTIDE_T *peptide);
 
 
 #endif
