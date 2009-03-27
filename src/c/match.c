@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.72 $
- * REVISION: $Revision: 1.72 $
+ * REVISION: $Revision: 1.73 $
+ * REVISION: $Revision: 1.73 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -713,8 +713,8 @@ void print_match_tab(
 
   // if the peptide is a decoy, print the unshuffled version of the peptide
   if(match->null_peptide == TRUE){
-    char* seq = get_peptide_sequence_sqt(match->peptide);
-    fprintf(file, "\t%.*s\t", seq_length - 4, seq+2);
+    char* seq = get_peptide_modified_sequence(match->peptide);
+    fprintf(file, "\t%s", seq);
     free(seq);
   }else{
     fprintf(file, "\t");
