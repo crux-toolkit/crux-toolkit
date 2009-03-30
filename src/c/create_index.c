@@ -44,7 +44,6 @@ int create_index_main(int argc, char** argv){
     "min-mass", 
     "max-mass", 
     "isotopic-mass",
-    "fileroot",
     "enzyme", 
     "custom-enzyme", 
     "digestion", 
@@ -55,7 +54,8 @@ int create_index_main(int argc, char** argv){
 
   /* Define required command line arguments */ 
   int num_arguments = NUM_INDEX_ARGS;
-  char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file"}; 
+  char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file", 
+                                          "index name"}; 
 
 
   /* For debugging of parameter processing */
@@ -110,7 +110,7 @@ int create_index_main(int argc, char** argv){
   
   /* check if output name already exists
      fail if --overwrite is false */
-  char* out_dir = get_string_parameter("fileroot");
+  char* out_dir = get_string_parameter("index name");
   carp(CARP_DEBUG, "New index name is '%s'", out_dir);
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
   if( (!overwrite) && (chdir(out_dir) == 0)){
@@ -132,7 +132,6 @@ int create_index_main(int argc, char** argv){
   }
   
   /* free index(frees constraint together) */
-  free(out_dir);
   free_index(crux_index);     
   free(binary_fasta_file);
   free_parameters();
