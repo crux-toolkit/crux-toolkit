@@ -13,15 +13,15 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  ****************************************************************************/
 #include "q-value.h"
 
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_QVALUE_OPTIONS 8
-#define NUM_QVALUE_ARGUMENTS 2
+#define NUM_QVALUE_OPTIONS 9
+#define NUM_QVALUE_ARGUMENTS 1
 
 /* 
  * Private function declarations.  Details below
@@ -57,13 +57,13 @@ int qvalue_main(int argc, char** argv){
     "use-index",
     "overwrite",
     "sqt-output-file",
-    "tab-output-file"
+    "tab-output-file",
+    "fileroot"
   };
 
   int num_arguments = NUM_QVALUE_ARGUMENTS;
   char* argument_list[NUM_QVALUE_ARGUMENTS] = {
-    "psm-folder",
-    "protein input",
+    "protein input"
   };
 
   /* for debugging handling of parameters*/
@@ -81,7 +81,7 @@ int qvalue_main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux compute-q-values");
 
   /* Get arguments */
-  char* psm_file = get_string_parameter("psm-folder");
+  char* psm_file = get_string_parameter("fileroot");
   char* protein_input_name = get_string_parameter("protein input");
 
   /* Get options */
@@ -118,11 +118,12 @@ static void print_text_files(
   ){
 
   // get filename and open file
+  char* out_dir = get_string_parameter("fileroot");
   char* sqt_filename = get_string_parameter("sqt-output-file");
   char* tab_filename = get_string_parameter("tab-output-file");
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  FILE* sqt_file = create_file_in_path( sqt_filename, NULL, overwrite );
-  FILE* tab_file = create_file_in_path( tab_filename, NULL, overwrite );
+  FILE* sqt_file = create_file_in_path( sqt_filename, out_dir, overwrite );
+  FILE* tab_file = create_file_in_path( tab_filename, out_dir, overwrite );
 
   // print header
   int num_proteins = get_match_collection_num_proteins(match_collection);
@@ -202,6 +203,7 @@ static void print_text_files(
   free_match_iterator(match_iterator);
   free(sqt_filename);
   free(tab_filename);
+  free(out_dir);
 
 }
 

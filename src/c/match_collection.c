@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.111 $
+ * $Revision: 1.112 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1415,7 +1415,7 @@ float get_match_collection_delta_cn(
 /**
  * \brief Names and opens the correct number of binary psm files.
  *
- * Takes the values of match-output-folder, ms2 filename (soon to be
+ * Takes the values of fileroot parameter, ms2 filename (soon to be
  * named output file), overwrite, and number-decoy-set from parameter.c.
  * Exits with error if can't create new requested directory or if
  * can't create any of the psm files.
@@ -1431,16 +1431,9 @@ FILE** create_psm_files(){
   FILE** file_handle_array = (FILE**)mycalloc(total_files, sizeof(FILE*));
   int file_idx = 0;
 
-  // Create null pointers if no binary output called for
-  MATCH_SEARCH_OUTPUT_MODE_T mode = get_output_type_parameter("output-mode");
-  if( mode == SQT_OUTPUT || mode == TAB_OUTPUT){
-    carp(CARP_DEBUG, "SQT or TAB mode: return empty array of file handles");
-    return file_handle_array;
-  }
-
   carp(CARP_DEBUG, "Opening %d new psm files", total_files);
 
-  char* output_directory =get_string_parameter_pointer("match-output-folder");
+  char* output_directory =get_string_parameter_pointer("fileroot");
 
   // create the output folder if it doesn't exist
   if(access(output_directory, F_OK)){
@@ -2253,8 +2246,6 @@ void print_matches(
 
   carp(CARP_DETAILED_DEBUG, "Writing matches to file");
   // get parameters
-  MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
-                                                            "output-mode");
   //  int max_sqt_matches = get_int_parameter("max-sqt-result");
   int max_matches = get_int_parameter("top-match");
   //BOOLEAN_T pvalues = get_boolean_parameter("compute-p-values");
@@ -2268,52 +2259,46 @@ void print_matches(
   }
   */
   // write binary files
-  if(output_type == BINARY_OUTPUT  || output_type == ALL_OUTPUT) {
-    carp(CARP_DETAILED_DEBUG, "Serializing psms");
-    carp(CARP_DETAILED_DEBUG, 
-         "About to serialize psm features for collection starting with "
-         "match scan %d, z %d, null %d",
-       get_spectrum_first_scan(get_match_spectrum(match_collection->match[0])),
-         get_match_charge(match_collection->match[0]),
-         get_match_null_peptide(match_collection->match[0]));
+  carp(CARP_DETAILED_DEBUG, "Serializing psms");
+  carp(CARP_DETAILED_DEBUG, 
+       "About to serialize psm features for collection starting with "
+       "match scan %d, z %d, null %d",
+  get_spectrum_first_scan(get_match_spectrum(match_collection->match[0])),
+                          get_match_charge(match_collection->match[0]),
+                          get_match_null_peptide(match_collection->match[0]));
 
-    // BF: this is an ugly fix so that we don't have to estimate pvalues
-    // for decoy psms but can still serialize the matches
-    /*
-    if( is_decoy ){
-      match_collection->scored_type[LOGP_BONF_WEIBULL_XCORR] = TRUE;
-    }
-    */
-    serialize_psm_features(match_collection, psm_file, max_matches,
-                           prelim_score, main_score);
+  // BF: this is an ugly fix so that we don't have to estimate pvalues
+  // for decoy psms but can still serialize the matches
+  /*
+  if( is_decoy ){
+    match_collection->scored_type[LOGP_BONF_WEIBULL_XCORR] = TRUE;
   }
+  */
+  serialize_psm_features(match_collection, psm_file, max_matches,
+                         prelim_score, main_score);
 
   // write sqt files
-  if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-    carp(CARP_DETAILED_DEBUG, "Writing sqt results");
-    if( ! is_decoy ){
-      print_match_collection_sqt(sqt_file, max_matches,
-                                 match_collection, spectrum,
-                                 prelim_score, main_score);
-    }else{
-      print_match_collection_sqt(decoy_file, max_matches,
-                                 match_collection, spectrum,
-                                 prelim_score, main_score);
-    }
+  carp(CARP_DETAILED_DEBUG, "Writing sqt results");
+  if( ! is_decoy ){
+    print_match_collection_sqt(sqt_file, max_matches,
+                               match_collection, spectrum,
+                               prelim_score, main_score);
+  }else{
+    print_match_collection_sqt(decoy_file, max_matches,
+                               match_collection, spectrum,
+                               prelim_score, main_score);
   }
 
   // write tab delimited files
-  if(output_type == TAB_OUTPUT || output_type == ALL_OUTPUT){
-    carp(CARP_DETAILED_DEBUG, "Writing tab delimited results");
-    if( ! is_decoy ){
-      print_match_collection_tab_delimited(tab_file, max_matches,
-                                 match_collection, spectrum,
-                                 prelim_score, main_score);
-    }else{
-      print_match_collection_tab_delimited(decoy_tab_file, max_matches,
-                                 match_collection, spectrum,
-                                 prelim_score, main_score);
-    }
+  carp(CARP_DETAILED_DEBUG, "Writing tab delimited results");
+  if( ! is_decoy ){
+    print_match_collection_tab_delimited(tab_file, max_matches,
+                               match_collection, spectrum,
+                               prelim_score, main_score);
+  }else{
+    print_match_collection_tab_delimited(decoy_tab_file, max_matches,
+                               match_collection, spectrum,
+                               prelim_score, main_score);
   }
 }
 
