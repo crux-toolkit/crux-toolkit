@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.34 $
+ * $Revision: 1.35 $
  * \brief General parameter handling utilities. All values stored here.
 
  * \detail MUST declare ALL optional command line parameters and
@@ -39,7 +39,7 @@
 #define SMALL_BUFFER 256
 #define MAX_SET_PARAMS 256
 
-#define NUMBER_PARAMETER_TYPES 11
+#define NUMBER_PARAMETER_TYPES 12
 ///< number of elements in the parameter type enum
 
 // Global variables
@@ -79,6 +79,7 @@ enum parameter_type {
   BOOLEAN_P,         ///< parameters of type BOOLEAN_T
   SORT_TYPE_P,       ///< parameters of type SORT_TYPE_T
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
+  OUTPUT_TYPE_P,     ///< parameters of type MATCH_SEARCH_OUTPUT_MODE_T
   ION_TYPE_P,        ///< parameters of type ION_TYPE_T
   ALGORITHM_TYPE_P}; ///< parameters of type ALGORITHM_TYPE_T
 typedef enum parameter_type PARAMETER_TYPE_T;
@@ -191,6 +192,10 @@ ALGORITHM_TYPE_T get_algorithm_type_parameter(
  );
 
 SCORER_TYPE_T get_scorer_type_parameter(
+ char* name
+ );
+
+MATCH_SEARCH_OUTPUT_MODE_T get_output_type_parameter(
  char* name
  );
 

@@ -278,6 +278,38 @@ BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T type, char* type_str){
   return success;
 }
 
+/*
+ * the string version of MATCH_SEARCH_OUPUT_MODE_T 
+ */
+static char* output_type_strings[NUMBER_OUTPUT_MODES] = 
+  { "binary", "sqt", "tab", "all" };
+
+BOOLEAN_T string_to_output_type(char* name, 
+                                MATCH_SEARCH_OUTPUT_MODE_T* result){
+  BOOLEAN_T success = TRUE;
+
+  int output_type = convert_enum_type_str(name, -10, output_type_strings,
+                                          NUMBER_OUTPUT_MODES);
+  (*result) = (MATCH_SEARCH_OUTPUT_MODE_T)output_type;
+
+  if( output_type < 0){
+    success = FALSE;
+  }
+  return success;
+}
+
+BOOLEAN_T output_type_to_string(MATCH_SEARCH_OUTPUT_MODE_T type, 
+                                char* type_str){
+  BOOLEAN_T success = TRUE;
+  if( (int)type > NUMBER_OUTPUT_MODES){
+    success = FALSE;
+    type_str = NULL;
+  }
+  strcpy(type_str, output_type_strings[type]);
+  return success;
+}
+
+
 
 /**
  * returns a heap allocated copy of the src string
