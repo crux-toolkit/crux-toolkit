@@ -28,8 +28,9 @@
 #include "parameter.h"
 #include "spectrum_collection.h"
 #include "match_collection.h"
+#include <errno.h>
 
-#define NUM_SEARCH_OPTIONS 16
+#define NUM_SEARCH_OPTIONS 12
 #define NUM_SEARCH_ARGS 2
 #define PARAM_ESTIMATION_SAMPLE_COUNT 500
 
@@ -37,7 +38,9 @@
 int prepare_protein_input(char* input_file, 
                           INDEX_T** index, 
                           DATABASE_T** database);
-void open_output_files(FILE*** binary_filehandle_array, 
+void open_output_files(char *output_directory,
+                       BOOLEAN_T overwrite,
+                       FILE*** binary_filehandle_array, 
                        FILE** sqt_filehandle,
                        FILE** decoy_sqt_filehandle,
                        FILE** tab_file,
@@ -45,6 +48,13 @@ void open_output_files(FILE*** binary_filehandle_array,
 BOOLEAN_T is_search_complete(MATCH_COLLECTION_T* matches, 
                              int mods_per_peptide);
 
+int create_output_directory(
+  char *output_folder, // Name of output folder.
+  BOOLEAN_T overwrite,	// Whether or not to overwrite an existing dir 
+  BOOLEAN_T warn	// Print warning/informative messages to stderr? 
+); 
+
+//int main(int argc, char** argv){
 int search_main(int argc, char** argv){
 
   /* Verbosity level for set-up/command line reading */
@@ -63,11 +73,7 @@ int search_main(int argc, char** argv){
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
-    "match-output-folder",
-    "output-mode",
-    "sqt-output-file",
-    "tab-output-file",
-    "decoy-sqt-output-file",
+    "fileroot",
     "number-decoy-set"
   };
 
@@ -130,6 +136,19 @@ int search_main(int argc, char** argv){
     exit(1);
   }
   
+  /* Create output directory */ 
+  char* output_folder = get_string_parameter("fileroot");
+  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  int result = create_output_directory(
+    output_folder, 
+    TRUE, // Allow existing directory
+    TRUE // print warnging messages to stderr
+  );
+  if( result == -1 ){
+    carp(CARP_FATAL, "Unable to create output directory %s.", output_folder);
+    exit(1);
+  }
+
   /* Prepare output files */
 
   FILE** psm_file_array = NULL; //file handle array
@@ -139,12 +158,15 @@ int search_main(int argc, char** argv){
   FILE* decoy_tab_file  = NULL;
 
   open_output_files(
+    output_folder,
+    overwrite,
     &psm_file_array, 
     &sqt_file, 
     &decoy_sqt_file, 
     &tab_file,
     &decoy_tab_file
   );
+  free(output_folder);
 
   //print headers
   serialize_headers(psm_file_array);
@@ -435,10 +457,112 @@ int prepare_protein_input(char* input_file,
 }
 
 /**
+ * \brief A function for creating a directory to hold output files from crux.
+ * 
+ * Tries to create a directory named by the fileroot parameter.
+ * If the overwrite option is true, an existing directory wtih that
+ * name will not cause an error. 
+ * 
+ * \returns 0 if successful, -1 if an error occured.
+*/
+int create_output_directory(
+  char *output_folder, // Name of output folder.
+  BOOLEAN_T overwrite,	// Whether or not to overwrite an existing dir 
+  BOOLEAN_T warn	// Print warning/informative messages to stderr? 
+) 
+{
+
+  int result = -1;
+  BOOLEAN_T path_is_directory = FALSE;
+  BOOLEAN_T path_exists = FALSE;
+  struct stat stat_buffer;
+
+  // Does the output directory alredy exist?
+  if (stat(output_folder, &stat_buffer)) {
+    if (errno == ENOENT) {
+      // stat failed because the path doesn't exist.
+      path_exists = FALSE;
+      path_is_directory = FALSE;
+    }
+    else {
+      // stat failed for some other reason
+      fprintf(
+        stderr,
+        "Unable to check for status of output directory '%s': %s.\n",
+        output_folder,
+        strerror(errno)
+      );
+      result = -1;
+    }
+  }
+  else {
+    path_exists = TRUE;
+    path_is_directory = S_ISDIR(stat_buffer.st_mode);
+  }
+
+  if (path_exists) {
+    if (!path_is_directory) {
+      fprintf(
+        stderr,
+        "A non-directory file named '%s' already exists,\n"
+        "so that name can't be used for an output directory.\n",
+        output_folder
+      );
+      result = -1;
+    }
+    else {
+      if (!overwrite) {
+        fprintf(
+          stderr,
+          "The output directory '%s' already exists.\nIts contents will not"
+          " be overwritten.\n",
+          output_folder
+        );
+        result = -1;
+      }
+      else {
+        if (warn) fprintf(
+          stderr,
+          "The output directory '%s' already exists.\nIts contents will"
+          " be overwritten.\n",
+          output_folder
+        );
+        result = 0;
+      }
+    }
+  }
+  else {
+    // The directory doesn't exist, so we can create it.
+    // Does this accomodate the case where one or more of the
+    // parent directories doesn't exit?
+    int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
+    if (mkdir(output_folder, dir_access)) {
+      // mkdir failed
+      fprintf(
+        stderr,
+        "Unable to create output directory '%s': %s.\n",
+        output_folder,
+        strerror(errno)
+      );
+      result = -1;
+    }
+    else {
+      result = 0;
+      if (warn) fprintf(
+        stderr,
+        "Writing results to output directory '%s'.\n",
+        output_folder
+      );
+    }
+  }
+  return result;
+} 
+
+/**
  * \brief A private function for crux-search-for-matches to prepare
- * binary psm and text sqt files.
+ * binary psm, tab-delimited text, and sqt files.
  *
- * Reads the --overwrite and --output-mode values from
+ * Reads the --overwrite value from
  * parameter.c. Opens psm file(s) if requested, setting a given
  * pointer to the array of filehandles.  Opens sqt file(s) if
  * requested, setting the given pointers to each file handle.  If
@@ -448,67 +572,45 @@ int prepare_protein_input(char* input_file,
  * \returns void.  Sets given arguments to newly created filehandles.
  */
 void open_output_files(
+  char *output_directory, ///< name of output directory -in
+  BOOLEAN_T overwrite,     ///< overwrite existing files -in
   FILE*** psm_file_array, ///< put binary psm filehandles here -out
   FILE** sqt_file,        ///< put text sqt filehandle here -out
   FILE** decoy_sqt_file,  ///< put decoy sqt filehandle here -out
   FILE** tab_file,        ///< put text sqt filehandle here -out
   FILE** decoy_tab_file)  ///< put decoy sqt filehandle here -out
 {
-  char* match_output_folder = get_string_parameter("match-output-folder");
-  MATCH_SEARCH_OUTPUT_MODE_T output_type = get_output_type_parameter(
-                                                    "output-mode");
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  carp(CARP_DEBUG, "The output type is %d (binary, sqt, tab, all)" \
-       " and overwrite is '%d'", (int)output_type, (int)overwrite);
-
-
   // create binary psm files (allocate memory, even if not used)
   *psm_file_array = create_psm_files();
 
-  if(output_type == SQT_OUTPUT || output_type == ALL_OUTPUT){
-
-    //create sqt file handles
-    carp(CARP_DEBUG, "Opening sqt files");
-    char* sqt_filename = get_string_parameter_pointer("sqt-output-file");
-    *sqt_file = create_file_in_path(sqt_filename, 
-                                    match_output_folder, 
-                                    overwrite);
-    char* decoy_sqt_filename = get_string_parameter_pointer(
-                                                    "decoy-sqt-output-file");
-    if( get_int_parameter("number-decoy-set") > 0 ){
-      *decoy_sqt_file = create_file_in_path(decoy_sqt_filename,
-                                            match_output_folder,
-                                            overwrite);
-    }
-
-    if(sqt_file == NULL || decoy_sqt_file == NULL){
-      carp(CARP_DEBUG, "sqt file or decoy is null");
-    }
+  //create sqt file handles
+  carp(CARP_DEBUG, "Opening sqt files");
+  char* sqt_filename = get_string_parameter_pointer("sqt-output-file");
+  *sqt_file = create_file_in_path(sqt_filename, 
+                                  output_directory, 
+                                  overwrite);
+  char* decoy_sqt_filename = get_string_parameter_pointer(
+                                                  "decoy-sqt-output-file");
+  if( get_int_parameter("number-decoy-set") > 0 ){
+    *decoy_sqt_file = create_file_in_path(decoy_sqt_filename,
+                                          output_directory,
+                                          overwrite);
   }
 
-  if(output_type == TAB_OUTPUT || output_type == ALL_OUTPUT){
-
-    //create sqt file handles
-    carp(CARP_DEBUG, "Opening tab delimited files");
-    char* tab_filename = get_string_parameter_pointer("tab-output-file");
-    *tab_file = create_file_in_path(tab_filename, 
-                                    match_output_folder, 
-                                    overwrite);
-    char* decoy_tab_filename = get_string_parameter_pointer(
-                                                    "decoy-tab-output-file");
-    if( get_int_parameter("number-decoy-set") > 0 ){
-      *decoy_tab_file = create_file_in_path(decoy_tab_filename,
-                                            match_output_folder,
-                                            overwrite);
-    }
-
-    if(tab_file == NULL || decoy_tab_file == NULL){
-      carp(CARP_DEBUG, "tab file or decoy tab file is null");
-    }
-
+  //create tab-delimited file handles
+  carp(CARP_DEBUG, "Opening tab delimited files");
+  char* tab_filename = get_string_parameter_pointer("tab-output-file");
+  *tab_file = create_file_in_path(tab_filename, 
+                                  output_directory, 
+                                  overwrite);
+  char* decoy_tab_filename = get_string_parameter_pointer(
+                                                  "decoy-tab-output-file");
+  if( get_int_parameter("number-decoy-set") > 0 ){
+    *decoy_tab_file = create_file_in_path(decoy_tab_filename,
+                                          output_directory,
+                                          overwrite);
   }
 
-  free(match_output_folder);
   carp(CARP_DEBUG, "Finished opening output files");
 }
 

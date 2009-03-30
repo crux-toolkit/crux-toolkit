@@ -18,7 +18,7 @@
 static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { 
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "DIGEST_T", 
   "ENZYME_T", //"PEPTIDE_TYPE_T", 
-  "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T",
+  "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "ION_TYPE_T",
   "ALGORITHM_TYPE_T"};
 
 //one hash for parameter values, one for usage statements, one for types
@@ -177,13 +177,6 @@ BOOLEAN_T set_algorithm_type_parameter(
 BOOLEAN_T set_scorer_type_parameter(
  char* name,
  SCORER_TYPE_T set_value,
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser);
-
-BOOLEAN_T set_output_type_parameter(
- char* name,
- MATCH_SEARCH_OUTPUT_MODE_T set_value,
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
  char* foruser);
@@ -516,17 +509,10 @@ void initialize_parameters(void){
       "searched and spectra with multiple charge states will be searched "
       "once at each charge state.  With 1, 2 ,or 3 only spectra with that "
       "that charge will be searched.", "true");
-  set_string_parameter("match-output-folder", ".", 
-      "Folder to which search results will be written. Default '.'. "
-      "(current directory).",
-      "Used by crux-search-for-matches.  All result files (binary .csm "
-      "and/or sqt) put in this directory.", "true");
-  set_output_type_parameter("output-mode", BINARY_OUTPUT, 
-      "Types of output to produce (binary, sqt, tab, all). Default binary.",
-      "Available for crux search-for-matches.  Produce binary, sqt "
-      "and/or tab delimited output files.  Binary files named automatically.  See "
-      "sqt-output-file for naming text file.  See match-output-folder for "
-      "file location.", "true");
+  set_string_parameter("fileroot", "crux-output", 
+      "Folder to which results will be written. Default 'crux-output'. ",
+      "Used by crux create-index, crux search-for-matches, "
+      "crux compute-q-values, and crux percolator.", "true");
   set_string_parameter("sqt-output-file", "target.sqt", 
       "SQT output file name. Default 'target.sqt'",
       "Only available for crux-search-for-matches with output-mode="
@@ -926,8 +912,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
         strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
         strcmp(type_ptr, "BOOLEAN_T") == 0 ||
         strcmp(type_ptr, "SORT_TYPE_T") == 0 ||
-        strcmp(type_ptr, "SCORER_TYPE_T") == 0 ||
-        strcmp(type_ptr, "OUTPUT_TYPE_T") == 0 ){
+        strcmp(type_ptr, "SCORER_TYPE_T") == 0 ){
       type_ptr = "STRING_ARG";
     }
     carp(CARP_DETAILED_DEBUG, 
@@ -1348,7 +1333,6 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
   SORT_TYPE_T sort_type;
   SCORER_TYPE_T scorer_type;
   ALGORITHM_TYPE_T algorithm_type;
-  MATCH_SEARCH_OUTPUT_MODE_T output_type;
   ION_TYPE_T ion_type;
 
   PARAMETER_TYPE_T param_type;
@@ -1454,15 +1438,6 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
               "Must be percolator, curve-fit, or none.", value_str, name);
-    }
-    break;
-
-  case OUTPUT_TYPE_P:
-    carp(CARP_DETAILED_DEBUG, "found output_mode param, value '%s'", value_str);
-    if(! string_to_output_type(value_str, &output_type)){
-      success = FALSE;
-      sprintf(die_str, "Illegal output type '%s' for options '%s'.  "
-              "Must be binary, sqt, tab, or all.", value_str, name);
     }
     break;
   case ION_TYPE_P:
@@ -1998,19 +1973,6 @@ SCORER_TYPE_T get_scorer_type_parameter(char* name){
   return param_value;
 }
 
-MATCH_SEARCH_OUTPUT_MODE_T get_output_type_parameter(char* name){
-  char* param_value_str = get_hash_value(parameters, name);
-  MATCH_SEARCH_OUTPUT_MODE_T param_value;
-  BOOLEAN_T success = string_to_output_type(param_value_str, &param_value);
-
-  if(!success){
-    carp(CARP_FATAL, "Output_type parameter %s has the value %s which"
-         " is not of the correct type.", name, param_value_str);
-    exit(1);
-  }
-  return param_value;
-}
-
 ION_TYPE_T get_ion_type_parameter(char* name){
   char* param_value_str = get_hash_value(parameters, name);
   ION_TYPE_T param_value;
@@ -2360,34 +2322,6 @@ BOOLEAN_T set_scorer_type_parameter(
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types, name, "SCORER_TYPE_T");
 
-
-  return result;
-}
-
-BOOLEAN_T set_output_type_parameter(
-                                    char* name,
-                                    MATCH_SEARCH_OUTPUT_MODE_T set_value,
-                                    char* usage,
-                                    char* filenotes,   
-                                    char* foruser)
-{
-
-  BOOLEAN_T result = TRUE;
-  char value_str[SMALL_BUFFER];
-  
-  // check if parameters can be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-  /* stringify value */
-  output_type_to_string(set_value, value_str);
-  
-  result = add_or_update_hash_copy(parameters, name, value_str);
-  result = add_or_update_hash_copy(usages, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "OUTPUT_TYPE_T");
 
   return result;
 }
