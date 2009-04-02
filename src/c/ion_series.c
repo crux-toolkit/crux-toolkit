@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.47 $
+ * REVISION: $Revision: 1.48 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -201,7 +201,7 @@ ION_SERIES_T* new_ion_series_generic(
  */
 void update_ion_series(
   ION_SERIES_T* ion_series, ///< the working ion_series -in
-  char* peptide, ///< The peptide sequence for this ion series. -in
+  char* peptide, ///< The peptide sequence with no mod characters. -in
   MODIFIED_AA_T* mod_seq ///< modified version of char* sequence -in
   ) 
 {
@@ -390,17 +390,22 @@ void print_ion_series_paired_gmtk(
 
 
 /**
- * scan for instances of amino acid (S|T|E|D), (R|K|Q|N)
- * set the count of those aa that has been observed so far for each cleavage index
- * if no instance of amino acid, the count is assigned to 0
- * the information is used to determine if howm any nh3 or h2o neutral losses are possible.
+ * \brief Find instances of amino acid which can incur neutral
+ * losses: H2O (S|T|E|D), NH3(R|K|Q|N).  
+ * Set the count of those observed so far for each cleavage index.
+ * If no instance of amino acid, the count is assigned to 0
+ * The information is used to determine if how many nh3 or h2o neutral
+ * losses are possible. 
  */
 void scan_for_aa_for_neutral_loss(
   ION_SERIES_T* ion_series ///< ion_series to print -in/out
   )
 {
   int peptide_length = ion_series->peptide_length;
-  char* sequence = ion_series->peptide;
+  //char* sequence = ion_series->peptide;
+  char* sequence = modified_aa_to_unmodified_string(
+                                                ion_series->modified_aa_seq, 
+                                                peptide_length);
   int h2o_aa = 0;
   int nh3_aa = 0;
   LOSS_LIMIT_T* loss_limit_count = NULL; // debug
@@ -541,8 +546,12 @@ BOOLEAN_T add_ions_by_charge(
   // iterate over all different charge
   for(; charge_idx <= max_charge; ++charge_idx){
     // create ion
-    ion = new_ion_with_mass(ion_type, cleavage_idx, charge_idx, ion_series->peptide, 
-                            constraint->mass_type, mass); 
+    ion = new_ion_with_mass(ion_type, 
+                            cleavage_idx, 
+                            charge_idx, 
+                            ion_series->peptide, 
+                            constraint->mass_type, 
+                            mass); 
     // add ion to ion series
     add_ion_to_ion_series(ion_series, ion);
   }
@@ -552,12 +561,12 @@ BOOLEAN_T add_ions_by_charge(
 
 
 /**
- * creates all the ions with no modifications up to the max charge
+ * Creates all the ions with no modifications up to the max charge
  * Adds each ion to ion_series
  *\returns TRUE if successfully generates all the ions, else FALSE
  */
 BOOLEAN_T generate_ions_no_modification(
-  ION_SERIES_T* ion_series, ///< ion_series to print -in/out
+  ION_SERIES_T* ion_series, ///< ion_series to modify -in/out
   float* mass_matrix ///< the mass matrix that stores the mass
   )
 {
@@ -961,16 +970,11 @@ void predict_ions(
     return;
   }
 
-  char* seq = modified_aa_string_to_string(ion_series->modified_aa_seq, strlen(ion_series->peptide));
-  //printf("Predicting ions for %s\n", seq);
-  free(seq);
-
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
   
   // create a mass matrix
   float* mass_matrix = 
     create_ion_mass_matrix(ion_series->modified_aa_seq, constraint->mass_type, ion_series->peptide_length);  
-  //create_ion_mass_matrix(ion_series->peptide, constraint->mass_type, ion_series->peptide_length);  
   /*
   printf("cumulative mass sum is:\n");
   int idx = 0;

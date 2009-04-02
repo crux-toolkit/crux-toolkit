@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.81 $
+ * $Revision: 1.82 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -1261,16 +1261,12 @@ void prepare_protein_peptide_iterator(
   // now determine the cleavage positions that actually match our constraints
   BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
 
-  //  PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
-  //    iterator->peptide_constraint);
   DIGEST_T digestion = 
     get_peptide_constraint_digest(iterator->peptide_constraint);
 
   switch (digestion){
-  //  switch (peptide_type){
 
   case FULL_DIGEST:
-    //case TRYPTIC:
       iterator_add_cleavages(iterator,
         cleavage_positions, num_cleavage_positions-1,
         cleavage_positions+1, num_cleavage_positions-1, 
@@ -1279,7 +1275,6 @@ void prepare_protein_peptide_iterator(
       break;
 
   case PARTIAL_DIGEST:
-    //case PARTIALLY_TRYPTIC:
       // add the C-term tryptic cleavage positions.
       iterator_add_cleavages(iterator,
         all_positions, protein->length,
@@ -1295,39 +1290,17 @@ void prepare_protein_peptide_iterator(
         missed_cleavages);
 
       break;
-      /*
-    case N_TRYPTIC:
-      iterator_add_cleavages(iterator,
-        cleavage_positions, num_cleavage_positions-1,
-        all_positions+1, protein->length, 
-        missed_cleavages);
-      break;
-
-    case C_TRYPTIC:
-      iterator_add_cleavages(iterator,
-        all_positions, protein->length,
-        cleavage_positions+1, num_cleavage_positions-1, 
-        missed_cleavages);
-      break;
-      */
 
   case NON_SPECIFIC_DIGEST:
-      //case ANY_TRYPTIC:
       iterator_add_cleavages(iterator,
         all_positions, protein->length,
         all_positions+1, protein->length, // len-1?
-        //missed_cleavages);
         TRUE); // for unspecific ends, allow internal cleavage sites
       break;
 
   case INVALID_DIGEST:
     carp(CARP_FATAL, "Invalid digestion type in protein peptide iterator.");
     exit(1);
-      /*  
-  case NOT_TRYPTIC:
-    default: 
-      die("I'm not sure what this peptide type is: %i", peptide_type);
-      */
   }
 
 /*

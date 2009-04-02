@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file ion.c
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -712,8 +712,11 @@ void add_modification(
   // update modification count
   ion->modification_counts[(int)modification] += modification_count;  
   // reset ion mass_z
-  ion->ion_mass_z =  modify_ion_mass_z(ion->ion_mass_z, modification_count, modification, 
-                                       ion->charge, mass_type);
+  ion->ion_mass_z =  modify_ion_mass_z(ion->ion_mass_z, 
+                                       modification_count, 
+                                       modification, 
+                                       ion->charge, 
+                                       mass_type);
 }
 
 /**
@@ -771,9 +774,12 @@ float get_ion_mass(
   // if X,Y,Z ion add H2O
   if(reverse){
     if(mass_type == AVERAGE){
-      return mass + MASS_H2O_AVERAGE;
+      mass += MASS_H2O_AVERAGE;
+      //return mass + MASS_H2O_AVERAGE;
+    }else{
+      mass += MASS_H2O_MONO;
+      //return mass + MASS_H2O_MONO;
     }
-    return mass + MASS_H2O_MONO;
   }
   
   return mass;
