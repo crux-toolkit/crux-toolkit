@@ -7,6 +7,7 @@
  * optional command parameters here inside initalialize_parameters.
  ****************************************************************************/
 
+#include "crux-utils.h"
 #include "parameter.h"
 
 //TODO:  in all set, change result=add_... to result= result && add_...
@@ -18,7 +19,7 @@
 static char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = { 
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "DIGEST_T", 
   "ENZYME_T", //"PEPTIDE_TYPE_T", 
-  "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "OUTPUT_TYPE_T", "ION_TYPE_T",
+  "BOOLEAN_T", "SORT_TYPE_T", "SCORER_TYPE_T", "ION_TYPE_T",
   "ALGORITHM_TYPE_T"};
 
 //one hash for parameter values, one for usage statements, one for types
@@ -181,13 +182,6 @@ BOOLEAN_T set_scorer_type_parameter(
  char* filenotes,   ///< additional info for param file
  char* foruser);
 
-BOOLEAN_T set_output_type_parameter(
- char* name,
- MATCH_SEARCH_OUTPUT_MODE_T set_value,
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser);
-
 BOOLEAN_T set_ion_type_parameter(
  char* name,
  ION_TYPE_T set_value,
@@ -340,9 +334,12 @@ void initialize_parameters(void){
       "to use only command line options and default values.",
       "Available for all crux programs. Any options specified on the "
       "command line will override values in the parameter file.", "true");
-  set_string_parameter("write-parameter-file", NULL,
-      "Create a parameter file with the values of all parameters "
-      "in this run.",
+  set_string_parameter("parameter-file-name", "params.txt", 
+      "Set name for output parameter file.",
+      "Available for all crux programs.", "true");
+  set_boolean_parameter("write-parameter-file", FALSE,
+      "If T, create a parameter file, params.txt, with the values of all parameters "
+      "in this run. Default F.",
       "Writes all crux parameters, even those not used in the current "
       "execution. Resulting file can be used with --parameter-file.",
       "true");
@@ -516,37 +513,44 @@ void initialize_parameters(void){
       "searched and spectra with multiple charge states will be searched "
       "once at each charge state.  With 1, 2 ,or 3 only spectra with that "
       "that charge will be searched.", "true");
-  set_string_parameter("match-output-folder", ".", 
-      "Folder to which search results will be written. Default '.'. "
-      "(current directory).",
-      "Used by crux-search-for-matches.  All result files (binary .csm "
-      "and/or sqt) put in this directory.", "true");
-  set_output_type_parameter("output-mode", BINARY_OUTPUT, 
-      "Types of output to produce (binary, sqt, tab, all). Default binary.",
-      "Available for crux search-for-matches.  Produce binary, sqt "
-      "and/or tab delimited output files.  Binary files named automatically.  See "
-      "sqt-output-file for naming text file.  See match-output-folder for "
-      "file location.", "true");
-  set_string_parameter("sqt-output-file", "target.sqt", 
-      "SQT output file name. Default 'target.sqt'",
-      "Only available for crux-search-for-matches with output-mode="
-      "<all|sqt>.  The location of this file is controlled by "
-      "match-output-folder.", "true");
+  set_string_parameter("fileroot", "crux-output", 
+      "Folder to which results will be written. Default 'crux-output'. ",
+      "Used by crux create-index, crux search-for-matches, "
+      "crux compute-q-values, and crux percolator.", "true");
+  set_string_parameter("search-sqt-output-file", "search.target.sqt", 
+      "SQT output file name. Default 'search.target.sqt'",
+      "Only available for crux-search-for-matches. The location of this file is controlled by "
+      "--fileroot.", "true");
+  set_string_parameter("percolator-sqt-output-file", "percolator.target.sqt", 
+      "SQT output file name. Default 'percolator.target.sqt'",
+      "Only available for crux percolator. The location of this file is controlled by "
+      "--fileroot.", "true");
+  set_string_parameter("qvalues-sqt-output-file", "qvalues.target.sqt", 
+      "SQT output file name. Default 'qvalues.target.sqt'",
+      "Only available for crux compute-qvalues. The location of this file is controlled by "
+      "--fileroot.", "true");
   set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
       "SQT output file name for decoys.  Default 'decoy.sqt'.",
       "Used by crux-search-for-matches with output-mode=<all|sqt> and "
       "number-decoy-sets > 0.  File is put in the directory set by "
-      "--match-output-folder (defaults to working directory).", "true");
-  set_string_parameter("tab-output-file", "target.txt", 
-      "Tab delimited output file name. Default 'target.txt'",
-      "Only available for crux search-for-matches with output-mode="
-      "<all|tab>.  The location of this file is controlled by "
-      "match-output-folder.", "true");
+      "--fileroot (defaults to working directory).", "true");
+  set_string_parameter("search-tab-output-file", "search.target.txt", 
+      "Tab delimited output file name. Default 'search.target.txt'",
+      "Only available for crux search-for-matches. The location of this file is controlled by "
+      "--fileroot.", "true");
+  set_string_parameter("percolator-tab-output-file", "percolator.target.txt", 
+      "Tab delimited output file name. Default 'percolator.target.txt'",
+      "Only available for crux percolator. The location of this file is controlled by "
+      "--fileroot.", "true");
+  set_string_parameter("qvalues-tab-output-file", "qvalues.target.txt", 
+      "Tab delimited output file name. Default 'qvalues.target.txt'",
+      "Only available for crux compute-q-values. The location of this file is controlled by "
+      "--fileroot.", "true");
   set_string_parameter("decoy-tab-output-file", "decoy.txt", 
       "Tab delimited output file name for decoys.  Default 'decoy.txt'.",
       "Used by crux search-for-matches with output-mode=<all|tab> and "
       "number-decoy-set > 0.  File is put in the directory set by "
-      "--match-output-folder (defaults to working directory).", "true");
+      "--fileroot (defaults to working directory).", "true");
   // user options regarding decoys
   /*
   set_int_parameter("num-decoys-per-target", 2, 0, 10,
@@ -611,7 +615,7 @@ void initialize_parameters(void){
       "(preliminary) score acts as a filter; only high scoring psms go "
       "on to be scored with xcorr.  This saves some time.  If set to 0, "
       "all psms are scored with both scores. ", "true");
-  set_int_parameter("top-match", 5, 1, BILLION, 
+  set_int_parameter("top-match", 1, 1, BILLION, 
       "The number of psms per spectrum writen to the output file(s)." 
       "Default 5.",
       "Available from parameter file for crux-search-for-matches.",
@@ -926,8 +930,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
         strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
         strcmp(type_ptr, "BOOLEAN_T") == 0 ||
         strcmp(type_ptr, "SORT_TYPE_T") == 0 ||
-        strcmp(type_ptr, "SCORER_TYPE_T") == 0 ||
-        strcmp(type_ptr, "OUTPUT_TYPE_T") == 0 ){
+        strcmp(type_ptr, "SCORER_TYPE_T") == 0 ){
       type_ptr = "STRING_ARG";
     }
     carp(CARP_DETAILED_DEBUG, 
@@ -1348,7 +1351,6 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
   SORT_TYPE_T sort_type;
   SCORER_TYPE_T scorer_type;
   ALGORITHM_TYPE_T algorithm_type;
-  MATCH_SEARCH_OUTPUT_MODE_T output_type;
   ION_TYPE_T ion_type;
 
   PARAMETER_TYPE_T param_type;
@@ -1456,15 +1458,6 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
               "Must be percolator, curve-fit, or none.", value_str, name);
     }
     break;
-
-  case OUTPUT_TYPE_P:
-    carp(CARP_DETAILED_DEBUG, "found output_mode param, value '%s'", value_str);
-    if(! string_to_output_type(value_str, &output_type)){
-      success = FALSE;
-      sprintf(die_str, "Illegal output type '%s' for options '%s'.  "
-              "Must be binary, sqt, tab, or all.", value_str, name);
-    }
-    break;
   case ION_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found ion_type param, value '%s'",
          value_str);
@@ -1495,9 +1488,11 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
  */
 void print_parameter_file(char* input_param_filename){
 
-  char* filename = get_string_parameter("write-parameter-file");
+  char* fileroot = get_string_parameter("fileroot");
+  char* filename = get_string_parameter("parameter-file-name");
+  BOOLEAN_T get_parameter_file = get_boolean_parameter("write-parameter-file");
 
-  if(filename == NULL ){
+  if(get_parameter_file == FALSE ){
     return;
   }
   carp(CARP_DEBUG, "Printing parameter file");
@@ -1510,16 +1505,20 @@ void print_parameter_file(char* input_param_filename){
   // do allow a different file to be overwritten
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
 
-  // strip off any path
-  char** name_path_array = parse_filename_path(filename);
-  // if no path (returned NULL) replace with "."
-  if( name_path_array[1] == NULL ){
-    name_path_array[1] = ".";
+  // Create the output directory
+  int result = create_output_directory(
+    fileroot, 
+    TRUE, // Allow existing directory
+    TRUE // print warnging messages to stderr
+  );
+  if( result == -1 ){
+    carp(CARP_FATAL, "Unable to create output directory %s.", fileroot);
+    exit(1);
   }
 
   // now open the file
-  FILE* param_file = create_file_in_path(name_path_array[0], 
-                                         name_path_array[1], 
+  FILE* param_file = create_file_in_path(filename, 
+                                         fileroot, 
                                          overwrite);
 
   // TODO (BF Nov-12-08): could add header to file
@@ -1540,6 +1539,7 @@ void print_parameter_file(char* input_param_filename){
 
   fclose(param_file);
   free(filename);
+  free(fileroot);
 }
 
 /**
@@ -1998,19 +1998,6 @@ SCORER_TYPE_T get_scorer_type_parameter(char* name){
   return param_value;
 }
 
-MATCH_SEARCH_OUTPUT_MODE_T get_output_type_parameter(char* name){
-  char* param_value_str = get_hash_value(parameters, name);
-  MATCH_SEARCH_OUTPUT_MODE_T param_value;
-  BOOLEAN_T success = string_to_output_type(param_value_str, &param_value);
-
-  if(!success){
-    carp(CARP_FATAL, "Output_type parameter %s has the value %s which"
-         " is not of the correct type.", name, param_value_str);
-    exit(1);
-  }
-  return param_value;
-}
-
 ION_TYPE_T get_ion_type_parameter(char* name){
   char* param_value_str = get_hash_value(parameters, name);
   ION_TYPE_T param_value;
@@ -2360,34 +2347,6 @@ BOOLEAN_T set_scorer_type_parameter(
   result = add_or_update_hash_copy(for_users, name, foruser);
   result = add_or_update_hash_copy(types, name, "SCORER_TYPE_T");
 
-
-  return result;
-}
-
-BOOLEAN_T set_output_type_parameter(
-                                    char* name,
-                                    MATCH_SEARCH_OUTPUT_MODE_T set_value,
-                                    char* usage,
-                                    char* filenotes,   
-                                    char* foruser)
-{
-
-  BOOLEAN_T result = TRUE;
-  char value_str[SMALL_BUFFER];
-  
-  // check if parameters can be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-  /* stringify value */
-  output_type_to_string(set_value, value_str);
-  
-  result = add_or_update_hash_copy(parameters, name, value_str);
-  result = add_or_update_hash_copy(usages, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "OUTPUT_TYPE_T");
 
   return result;
 }

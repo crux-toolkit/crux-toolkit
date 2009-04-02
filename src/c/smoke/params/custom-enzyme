@@ -1,6 +1,6 @@
 custom-enzyme=[AVIL]|{P}
 digestion=partial-digest
 overwrite=T
-output-mode=sqt
 number-decoy-set=0
 precision=2
+top-match=5

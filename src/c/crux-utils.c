@@ -4,6 +4,9 @@
  */
 
 
+#include <errno.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "crux-utils.h"
 
 /**
@@ -277,38 +280,6 @@ BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T type, char* type_str){
   strcpy(type_str, scorer_type_strings[type]);
   return success;
 }
-
-/*
- * the string version of MATCH_SEARCH_OUPUT_MODE_T 
- */
-static char* output_type_strings[NUMBER_OUTPUT_MODES] = 
-  { "binary", "sqt", "tab", "all" };
-
-BOOLEAN_T string_to_output_type(char* name, 
-                                MATCH_SEARCH_OUTPUT_MODE_T* result){
-  BOOLEAN_T success = TRUE;
-
-  int output_type = convert_enum_type_str(name, -10, output_type_strings,
-                                          NUMBER_OUTPUT_MODES);
-  (*result) = (MATCH_SEARCH_OUTPUT_MODE_T)output_type;
-
-  if( output_type < 0){
-    success = FALSE;
-  }
-  return success;
-}
-
-BOOLEAN_T output_type_to_string(MATCH_SEARCH_OUTPUT_MODE_T type, 
-                                char* type_str){
-  BOOLEAN_T success = TRUE;
-  if( (int)type > NUMBER_OUTPUT_MODES){
-    success = FALSE;
-    type_str = NULL;
-  }
-  strcpy(type_str, output_type_strings[type]);
-  return success;
-}
-
 
 
 /**
@@ -673,6 +644,131 @@ long get_filesize(char *FileName){
       return file.st_size;
     }
     return 0;
+}
+
+/**
+ * \brief A function for creating a directory to hold output files from crux.
+ * 
+ * Tries to create a directory named by the fileroot parameter.
+ * If the overwrite option is true, an existing directory wtih that
+ * name will not cause an error. 
+ * 
+ * \returns 0 if successful, -1 if an error occured.
+*/
+int create_output_directory(
+  char *output_folder, // Name of output folder.
+  BOOLEAN_T overwrite,	// Whether or not to overwrite an existing dir 
+  BOOLEAN_T warn	// Print warning/informative messages to stderr? 
+) 
+{
+
+  int result = -1;
+  BOOLEAN_T path_is_directory = FALSE;
+  BOOLEAN_T path_exists = FALSE;
+  struct stat stat_buffer;
+
+  // Does the output directory alredy exist?
+  if (stat(output_folder, &stat_buffer)) {
+    if (errno == ENOENT) {
+      // stat failed because the path doesn't exist.
+      path_exists = FALSE;
+      path_is_directory = FALSE;
+    }
+    else {
+      // stat failed for some other reason
+      fprintf(
+        stderr,
+        "Unable to check for status of output directory '%s': %s.\n",
+        output_folder,
+        strerror(errno)
+      );
+      result = -1;
+    }
+  }
+  else {
+    path_exists = TRUE;
+    path_is_directory = S_ISDIR(stat_buffer.st_mode);
+  }
+
+  if (path_exists) {
+    if (!path_is_directory) {
+      fprintf(
+        stderr,
+        "A non-directory file named '%s' already exists,\n"
+        "so that name can't be used for an output directory.\n",
+        output_folder
+      );
+      result = -1;
+    }
+    else {
+      if (!overwrite) {
+        fprintf(
+          stderr,
+          "The output directory '%s' already exists.\nIts contents will not"
+          " be overwritten.\n",
+          output_folder
+        );
+        result = -1;
+      }
+      else {
+        if (warn) fprintf(
+          stderr,
+          "The output directory '%s' already exists.\nIts contents will"
+          " be overwritten.\n",
+          output_folder
+        );
+        result = 0;
+      }
+    }
+  }
+  else {
+    // The directory doesn't exist, so we can create it.
+    // Does this accomodate the case where one or more of the
+    // parent directories doesn't exit?
+    int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
+    if (mkdir(output_folder, dir_access)) {
+      // mkdir failed
+      fprintf(
+        stderr,
+        "Unable to create output directory '%s': %s.\n",
+        output_folder,
+        strerror(errno)
+      );
+      result = -1;
+    }
+    else {
+      result = 0;
+      if (warn) fprintf(
+        stderr,
+        "Writing results to output directory '%s'.\n",
+        output_folder
+      );
+    }
+  }
+  return result;
+} 
+
+/**
+ * returns whether the given filename is a directory.
+ * Returns TRUE if a directory, FALSE otherwise.
+ * Terminates program if unable to determine status of file.
+ */
+BOOLEAN_T is_directory(char *FileName){
+    struct stat file;
+    if(stat(FileName,&file) == 0){
+      // return directory status
+      return S_ISDIR(file.st_mode);
+    }
+    else {
+      char *error = strerror(errno);
+      carp(
+        CARP_FATAL, 
+        "stat failed. Unable to determine status of %s. Error: %s.", 
+        FileName,
+        error
+      );
+      exit(1);
+    }
 }
 
 /**

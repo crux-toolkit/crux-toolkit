@@ -1,7 +1,6 @@
 mod=79.9:STY:2
 cmod=33.3:10
 overwrite=T
-sqt-output-file=mods.sqt
-output-mode=all
 seed=7
 precision=2
+top-match=5
