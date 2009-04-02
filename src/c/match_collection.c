@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.113 $
+ * $Revision: 1.114 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1047,11 +1047,16 @@ BOOLEAN_T score_peptides(
   while( modified_peptides_iterator_has_next(peptide_iterator)){
     // get peptide, sequence, and ions
     peptide = modified_peptides_iterator_next(peptide_iterator);
-
-    char* seq = get_peptide_modified_sequence(peptide);
-    carp(CARP_DETAILED_DEBUG, "peptide %s has %i modified aas", seq, count_modified_aas(peptide)); 
-    free(seq);
-
+    
+    //SJM: Calling this multiple times for each peptide can get expensive.
+    //I defined this macro in carp.h that tests the verbosity level
+    //before calling the get_ function.  We could use this to compile out
+    //all debugging information in order to make a more optimized crux.
+    IF_CARP_DETAILED_DEBUG(
+      char* seq = get_peptide_modified_sequence(peptide);
+      carp(CARP_DETAILED_DEBUG, "peptide %s has %i modified aas", seq, count_modified_aas(peptide)); 
+      free(seq);
+    )
     // create a match
     match = new_match();
 
@@ -1070,9 +1075,11 @@ BOOLEAN_T score_peptides(
     // calculate the score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
     // debugging
-    char* mod_seq = modified_aa_string_to_string(modified_sequence, strlen(sequence));
-    carp(CARP_DETAILED_DEBUG, "Score %f for %s (null:%i)", score, mod_seq, is_decoy);
-    free(mod_seq);
+    IF_CARP_DETAILED_DEBUG(
+      char* mod_seq = modified_aa_string_to_string(modified_sequence, strlen(sequence));
+      carp(CARP_DETAILED_DEBUG, "Score %f for %s (null:%i)", score, mod_seq, is_decoy);
+      free(mod_seq);
+    )
 
     // set match fields
     set_match_score(match, score_type, score);
@@ -1207,11 +1214,13 @@ BOOLEAN_T score_matches_one_spectrum(
 
     // set score in match
     set_match_score(match, score_type, score);
-
-    char* mod_seq = modified_aa_string_to_string(modified_sequence, strlen(sequence));
-    carp(CARP_DETAILED_DEBUG, "Second score %f for %s (null:%i)",
-         score, mod_seq,get_match_null_peptide(match));
-    free(mod_seq);
+    
+    IF_CARP_DETAILED_DEBUG(
+      char* mod_seq = modified_aa_string_to_string(modified_sequence, strlen(sequence));
+      carp(CARP_DETAILED_DEBUG, "Second score %f for %s (null:%i)",
+	   score, mod_seq,get_match_null_peptide(match));
+      free(mod_seq);
+    )
     free(sequence);
     free(modified_sequence);
   }// next match
