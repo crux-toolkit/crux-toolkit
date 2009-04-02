@@ -80,16 +80,12 @@ the test data) with the indexed protein database.  Run these
 commands.</p> 
 
 <div class="code"><code>
-$ crux search-for-matches --use-index T demo.ms2 yeast-index<br>
-$ crux percolator --use-index T . yeast-index
+$ crux search-for-matches demo.ms2 yeast-index<br>
+$ crux percolator yeast-index
 </code>
 </div>
-<!-- Use a different ms2 so analysis won't break w/each spec twice-->
 
-<p>You should get an error saying that the file <span
-class=file>target.sqt</span> already exists.  You can delete the file
-and run the command again, or you can use the option <span class=code>
---overwrite</span>.  The next section will discuss that and other <span
+The next section will discuss other <span
 class=prog>crux</span> options and how to set them.</p>
 
 </div><!--end main-->

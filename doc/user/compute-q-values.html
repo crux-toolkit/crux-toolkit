@@ -12,7 +12,7 @@
 <B>Usage:</B></p>
 
 <blockquote>
-<code>crux compute-qvalues [options] &lt;psm folder&gt; &lt;protein&nbsp;input&gt; 
+<code>crux compute-qvalues [options] &lt;protein&nbsp;input&gt; 
 </code>
 </blockquote>
 
@@ -62,12 +62,15 @@ decoy databases."</a> <i>Journal of Proteome Research</i>. 7(1):29-34,
 
 <UL>
 
-<LI>
-&lt;psm folder&gt; &ndash; The name of the folder in which all the PSM
-result files are located.  The program looks for files ending in
+<li>
+&lt;psm folder&gt; &ndash; A the folder in which all the PSM
+result files are located.  This is assumed to be <code>crux-output</code>,
+but it can be set by the user using the <code>--fileroot</code> option.
+The program looks for files ending in
 <code>.csm</code>, which are produced by
 <code>crux&nbsp;search-for-matches</code>.  All such files in the
 given directory are analyzed jointly.</li>
+
 
 <LI>
 &lt;protein input &gt; &ndash; The name of the file in fasta format or
@@ -76,31 +79,43 @@ proteins and peptides.</li>
 
 </UL>
 
+<B>Output:</B>
+
+<UL>
+<p>
+The program writes files to the folder <code>crux-output</code> by default.
+The name of the output folder can be set by the user using the <code>--fileroot</code> option.
+The following files will be created:</p>
+
+<li>
+<b>qvalues.target.sqt</b>: an <a href="sqt-format.html">SQT</a> file containing the PSMs
+
+<li>
+<b>qvalues.target.txt</b>: a tab-delimited text file containing the PSMs.
+</li>
+See <a href="txt-format.html">txt file format</a> for a list of the fields.
+</ul>
+
 <B>Options:</B>
 
 <UL>
-<LI>
-<li>
-<code>--use-index &lt;T|F&gt;</code> Use an index that has already been
-created if true (T) or use a fasta file if false (F). When using
-an index the 'protein input' argument will be the name of the
-directory containing the index files (the same as the 'index name'
-argument for crux-create-index).  Default = F.
 
 <li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
 fail when trying to overwrite a file if false (F). Default =  F.
 
+<li>
 <code>--parameter-file &lt;filename&gt;</code> &ndash; 
 A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
 
 <LI>
-<code>--write-parameter-file &lt;filename&gt;</code> &ndash; Create a file
-with the name and value of all parameters/options for the current
-search.  Not all parameters in the file may have been used in the
-search.  The resulting file can be used with the --parameter-file
-option for other crux programs.
+<code>--write-parameter-file &lt;T|F&gt;</code> &ndash; Create a file in the
+output directory named <code>params.txt</code>.  This file contains
+the name and value of all parameters/options for the current
+operationi.  Not all parameters in the file may have been used in the
+operation.  The resulting file can be used with the <code>--parameter-file</code>
+option for other crux programs. Default = <code>F</code>.
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the

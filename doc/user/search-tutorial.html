@@ -44,16 +44,29 @@ INFO: Searching spectra
 INFO: crux-search-for-matches finished
 </pre>
 
-<p>Looking at the contents of the directory, you will see three new
-files containing the search results: <span
-class=file>demo.csm, demo-decoy-1.csm, demo-decoy-2.csm</span>
-These files are in a binary format that can only be read by <span
-class=prog>crux-analyze-matches</span>.</p> 
-
-<div class=note><em>Note: Search results may also be returned in a
-text format.  See the <a
-href="customize-tutorial.html">customization</a> page for details.</em>
-</div>
+<p>A new directory, <span class=file>crux-output</span>, will have been created. 
+Looking at the contents of the directory, you will see seven new files.
+ containing the search results: 
+The file
+<span class=file>demo.csm</span> containes the search results in a binary format that 
+can be read by 
+<span class=prog>crux percolator</span> 
+or 
+<span class=prog>crux compute-q-values</span>. 
+The files 
+<span class=file>search.target.sqt</span>
+and 
+<span class=file>search.target.txt</span>
+contain the search results in human readable plain text formats.
+<span class=file>search.target.sqt</span> uses the standard
+SQT format for spectrum-peptide matches,
+and
+<span class=file>search.target.txt</span>
+uses tab-delmited fields.
+The remaining files,
+<span class=file>decoy.sqt, decoy.txt, demo-decoy-1.csm, demo-decoy-2.csm</span>
+contain the results of searching a shuffled version of the protein database.
+</p>
 
 <p>The final step is to analyze our search results.  Each spectrum has
 been compared to many peptides and we would like to return only the
@@ -65,7 +78,7 @@ high-quality peptide-spectrum matches.  Run this command.
 </p>
 
 <div class=code><code>
-$ crux percolator . small-yeast.fasta </code>
+$ crux percolator small-yeast.fasta </code>
 </div>
 
 <p>While the analysis is running, you will see output like this
