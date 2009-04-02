@@ -237,6 +237,38 @@ START_TEST(test_mod_str_to_string){
 }
 END_TEST
 
+START_TEST(test_mod_str_to_unmod_string){
+  // init params including mods
+  initialize_parameters();
+  force_set_aa_mod_list(amod_list, 3);
+
+  char* seq = "GBBKATRM"; 
+  int len = strlen(seq);
+  MODIFIED_AA_T* modaa_seq = convert_to_mod_aa_seq(seq);
+
+  // change it back to a seq
+  char* unmod_seq = modified_aa_to_unmodified_string(modaa_seq, len);
+  fail_unless(strcmp(unmod_seq, seq) == 0,
+              "The unmodified version of the mod_aa* is %s but should be %s",
+              unmod_seq, seq);
+  free(unmod_seq);
+
+  // modify it and change back to a seq
+  modify_aa( &modaa_seq[1], amod2 );
+  modify_aa( &modaa_seq[4], amod1 );
+  modify_aa( &modaa_seq[4], amod3 );
+  modify_aa( &modaa_seq[7], amod2 );
+  modify_aa( &modaa_seq[7], amod3 );
+
+  unmod_seq = modified_aa_to_unmodified_string(modaa_seq, len);
+  fail_unless(strcmp(unmod_seq, seq) == 0,
+              "The unmodified version of the mod_aa* is %s but should be %s",
+              unmod_seq, seq);
+  free(unmod_seq);
+  
+}
+END_TEST
+
 START_TEST(test_copy_mod_seq){
   char* seq = "GBBKATRM"; 
   int len = strlen(seq);
@@ -331,6 +363,7 @@ Suite* modifications_suite(){
   tcase_add_test(tc_core, test_mod_to_char);
   tcase_add_test(tc_core, test_mod_to_string);
   tcase_add_test(tc_core, test_mod_str_to_string);
+  tcase_add_test(tc_core, test_mod_str_to_unmod_string);
   tcase_add_test(tc_core, test_copy_mod_seq);
   tcase_add_test(tc_core, test_is_modifiable);
   tcase_add_test(tc_core, test_modify);

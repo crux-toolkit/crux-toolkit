@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
@@ -97,11 +97,19 @@ char* modified_aa_to_string(MODIFIED_AA_T aa);
  * char's that includes the letter of each aa and the symbol for all
  * applied modifications.
  *
- * Assumes that the array is terminated with MOD_SEQ_NULL.
  * \returns A newly allocated array of characters, a text
  * representation of the modified sequence.
  */
 char* modified_aa_string_to_string(MODIFIED_AA_T* aa_string, int length);
+
+/**
+ * \brief Takes an array of MODIFIED_AA_T's and returns an array of
+ * char's, one for each amino acid in the sequence.  It DOES NOT
+ * include any modification symbols.  Use with caution.
+ * \returns A newly allocated char* with ONLY amino acids, all
+ * modifications are removed.
+ */
+char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length);
 
 /**
  * \brief Allocates an array of MODIFIED_AA_T's the same length as
