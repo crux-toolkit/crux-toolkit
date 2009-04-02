@@ -1,6 +1,6 @@
 /**
  * \file carp.h 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * \brief Provides methods for logging error messages, and setting verbosity level.
  *****************************************************************************/
 #ifndef CARP_H 
@@ -48,6 +48,22 @@
  * The maximum verbosity level
  */
 #define CARP_MAX 100 
+
+//SJM: Code to help with optimization of verbosity code.
+//Allow for compilation to remove carp commands
+//in the preprocessor.
+
+#define IF_CARP(x,y) if (get_verbosity_level() >= x) {y;}
+#define CRUX_DEBUG 
+
+#ifdef CRUX_DEBUG
+#define IF_CARP_DEBUG(y) IF_CARP(CARP_DEBUG,y)
+#define IF_CARP_DETAILED_DEBUG(y) IF_CARP(CARP_DETAILED_DEBUG,y)
+#else
+#define IF_CARP_DEBUG(y) y;
+#define IF_CARP_DETAILED_DEBUG(y) y;
+#endif
+
 
 #include <stdio.h>
 #include "utils.h"

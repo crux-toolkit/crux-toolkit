@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -75,11 +75,12 @@ void queue_next_peptide(
   // else, get the unmodified peptide
   PEPTIDE_T* unmod_peptide = 
     generate_peptides_iterator_next( iterator->peptide_generator);
-
-  char* debugseq = get_peptide_sequence(unmod_peptide);
-  carp(CARP_DETAILED_DEBUG, "Next peptide in pep_gen is %s", debugseq);
-  free(debugseq);
-
+  
+  IF_CARP_DETAILED_DEBUG(
+    char* debugseq = get_peptide_sequence(unmod_peptide);
+    carp(CARP_DETAILED_DEBUG, "Next peptide in pep_gen is %s", debugseq);
+    free(debugseq);
+  )
   // apply modifications, discarding peptides that can't be modified
 
   // keep looking until a peptide can be modified or we run out of peptides
@@ -100,12 +101,13 @@ void queue_next_peptide(
     iterator->next_peptide = NULL;
     return;
   }
-
-  char* umodseq = get_peptide_sequence(unmod_peptide);
-  carp(CARP_DETAILED_DEBUG, "Iterator is modifying peptide %s",
-       umodseq);
-  free(umodseq);
-
+  
+  IF_CARP_DETAILED_DEBUG(
+    char* umodseq = get_peptide_sequence(unmod_peptide);
+    carp(CARP_DETAILED_DEBUG, "Iterator is modifying peptide %s",
+	 umodseq);
+    free(umodseq);
+  )
   modify_peptide(unmod_peptide, 
                  iterator->peptide_mod, 
                  iterator->temp_peptide_list );
@@ -124,11 +126,12 @@ void queue_next_peptide(
   if( iterator->next_peptide == NULL ){
     printf("Iterator's next peptide was lost\n");
   }
-
-  char* seq = get_peptide_modified_sequence(iterator->next_peptide);
-  carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq);
-  free(seq);
-
+  
+  IF_CARP_DETAILED_DEBUG(
+    char* seq = get_peptide_modified_sequence(iterator->next_peptide);
+    carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq);
+    free(seq);
+  )
   // now check that it does not exceed the max number of modified aas
   int max_aas_moded = get_int_parameter("max-aas-modified");
   if( count_modified_aas(iterator->next_peptide) > max_aas_moded ){
