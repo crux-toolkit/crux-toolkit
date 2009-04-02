@@ -56,10 +56,11 @@ $ crux search-for-matches</code>
 Error in command line. Error # 5
 the required argument &lt;ms2 file&gt; is missing.
 Usage: crux search-for-matches [options] <ms2 file> <protein input>
-  [--verbosity <int>] Set level of output to stderr (0-100).  Default 30.
-  [--parameter-file <string>] Set additional options with values in the given file. Default to use only command line options and default values.
-  [--overwrite <string>] Replace existing files (T) or exit if attempting to overwrite (F). Default F.
-  [--use-index <string>] Use an index that has already been created (T,F). Default FALSE (use fasta file).
+  [--verbosity &lt;int&gt;] Set level of output to stderr (0-100).  Default 30.
+  [--version &lt;string&gt;] Print version number and quite
+  [--parameter-file &lt;string&gt;] Set additional options with values in the given file. Default to use only command line options and default values. 
+  [--write-parameter-file &lt;string&gt; Create a parameter file with the values of all parameters in this run.
+  [--overwrite &lt;string&gt; Replace existing files (T) or exit if attempting to overwrite (F). Default F.
 ...
 </pre>
 
@@ -114,19 +115,10 @@ some specific options for <span class="prog">crux</span>
 
 <a name="out"></a>
 <h2>Controlling the output</h2>
-<p><span class="prog">search-for-matches</span> prints results in
-either a binary or text (sqt) format and is controlled with the option <span
-class="code">--output-mode</span> and values <span
-class="code">binary, sqt,</span> or <span class="code">all</span> (for
-both binary and text outputs).
 The option <span class="code">--overwrite</span> decides if output
 files can be replaced if they already exist (value T) or if the
 program should not overwrite an existing file (value F).  In the later
 case, the search will fail if a file of the same name already exists.
-The text files can be named with  
-<span class="code">--sqt-output-file</span> for the matches to the
-target database and <span class="code">--decoy-sqt-output</span>
-for matches to the shuffled database.
 </p>
 
 <a name="pep"></a>
