@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.49 $
+ * $Revision: 1.50 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_ANALYSIS_OPTIONS 9
+#define NUM_ANALYSIS_OPTIONS 7
 #define NUM_ANALYSIS_ARGUMENTS 2
 
 /* 
@@ -86,9 +86,7 @@ int main(int argc, char** argv){
     "write-parameter-file",
     "algorithm",
     "feature-file",
-    "use-index", //not yet implemented, below set to true
-    "overwrite",
-    "sqt-output-file"
+    "overwrite"
   };
 
   int num_arguments = NUM_ANALYSIS_ARGUMENTS;

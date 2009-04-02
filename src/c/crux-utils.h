@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * $Author: cegrant $
  * \brief Utilities for the crux project
  */
@@ -117,6 +117,28 @@ inline BOOLEAN_T compare_float_three(float float_a, float min, float max);
  * returns the file size of the given filename
  */
 long get_filesize(char *FileName);
+
+/**
+ * \brief A function for creating a directory to hold output files from crux.
+ * 
+ * Tries to create a directory named by the fileroot parameter.
+ * If the overwrite option is true, an existing directory wtih that
+ * name will not cause an error. 
+ * 
+ * \returns 0 if successful, -1 if an error occured.
+*/
+int create_output_directory(
+  char *output_folder, // Name of output folder.
+  BOOLEAN_T overwrite,	// Whether or not to overwrite an existing dir 
+  BOOLEAN_T warn	// Print warning/informative messages to stderr? 
+); 
+
+/**
+ * returns whether the given filename is a directory.
+ * Returns TRUE if a directory, FALSE otherwise.
+ * Terminates program if unable to determine status of file.
+ */
+BOOLEAN_T is_directory(char *FileName);
 
 /**
  * deletes a given directory and it's files inside.
@@ -294,8 +316,6 @@ BOOLEAN_T string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);
 BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T, char*);
 BOOLEAN_T string_to_scorer_type(char*, SCORER_TYPE_T*);
 BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T, char*);
-BOOLEAN_T string_to_output_type(char*, MATCH_SEARCH_OUTPUT_MODE_T*);
-BOOLEAN_T output_type_to_string(MATCH_SEARCH_OUTPUT_MODE_T, char*);
 BOOLEAN_T string_to_ion_type(char* , ION_TYPE_T*);
 BOOLEAN_T ion_type_to_string(ION_TYPE_T, char*);
 

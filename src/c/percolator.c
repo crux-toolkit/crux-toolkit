@@ -16,13 +16,13 @@
  *         directory are concatinated together and presumed to be
  *         non-overlaping parts of the same ms2 file. 
  * 
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  ****************************************************************************/
 #include "percolator.h"
 
 #ifdef PERCOLATOR
-#define NUM_PERCOLATOR_OPTIONS 9
-#define NUM_PERCOLATOR_ARGUMENTS 2
+#define NUM_PERCOLATOR_OPTIONS 7
+#define NUM_PERCOLATOR_ARGUMENTS 1
 /* 
  * Private function declarations.  Details below
  */
@@ -55,16 +55,13 @@ int percolator_main(int argc, char** argv){
     "parameter-file",
     "write-parameter-file",
     "feature-file",
-    "use-index",
-    "overwrite",
-    "sqt-output-file",
-    "tab-output-file"
+    "fileroot",
+    "overwrite"
   };
 
   int num_arguments = NUM_PERCOLATOR_ARGUMENTS;
   char* argument_list[NUM_PERCOLATOR_ARGUMENTS] = {
-    "psm-folder",
-    "protein input",
+    "protein input"
   };
 
   /* for debugging handling of parameters*/
@@ -82,7 +79,7 @@ int percolator_main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux-analyze-matches");
 
   /* Get arguments */
-  char* psm_file = get_string_parameter("psm-folder");
+  char* psm_file = get_string_parameter("fileroot");
   char* protein_input_name = get_string_parameter("protein input");
   char* feature_file = get_string_parameter("feature-file");
 
@@ -138,11 +135,12 @@ static void print_text_files(
   ){
 
   // get filename and open file
-  char* sqt_filename = get_string_parameter("sqt-output-file");
-  char* tab_filename = get_string_parameter("tab-output-file");
+  char* out_dir = get_string_parameter("fileroot");
+  char* sqt_filename = get_string_parameter("percolator-sqt-output-file");
+  char* tab_filename = get_string_parameter("percolator-tab-output-file");
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  FILE* sqt_file = create_file_in_path( sqt_filename, NULL, overwrite );
-  FILE* tab_file = create_file_in_path( tab_filename, NULL, overwrite );
+  FILE* sqt_file = create_file_in_path( sqt_filename, out_dir, overwrite );
+  FILE* tab_file = create_file_in_path( tab_filename, out_dir, overwrite );
 
   // print header
   int num_proteins = get_match_collection_num_proteins(match_collection);

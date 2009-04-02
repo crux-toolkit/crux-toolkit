@@ -38,40 +38,40 @@ predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = crux-predict
 predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = crux-predict-peptide-ions --primary-ions by --max-ion-charge 1 --flanking T IAMASEQ 3=
 
 # Search for matches and test sqt file
-search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt decoy.sqt test*.csm target.txt decoy.txt; crux search-for-matches --parameter-file params/set_rand_seed --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time' 'atabase'
+search_for_matches_default = good_results/standard_search_default.target.sqt = crux search-for-matches --parameter-file params/set_rand_seed test.ms2 test.fasta; cat crux-output/search.target.sqt = 'Time' 'atabase'
 
 # Search for matches without Sp
-#search_no_sp = good_results/no-sp.txt = crux search-for-matches --parameter-file params/no-sp test.ms2 test.fasta; cat target.txt
+search_no_sp = good_results/no-sp.txt = crux search-for-matches --parameter-file params/no-sp test.ms2 test.fasta; cat crux-output/search.target.txt
 
 # Analyze existing search results
-analyze_matches_existing = good_results/standard_existing-perc.sqt = rm -f target.sqt decoy.sqt target.txt decoy.txt test*.csm; crux percolator existing_search test.fasta; cat target.sqt = 'Time' 'Database'
+analyze_matches_existing = good_results/standard_existing-perc.sqt = crux percolator --overwrite T --fileroot existing_search test.fasta; cat existing_search/percolator.target.sqt = 'Time' 'Database'
 
 # Search for matches with all defaults (except for the rand seed), no sqt file to test so use analyze
-search_for_matches_noops = good_results/empty_file = rm -rf target.sqt test*csm ; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 test.fasta; = 'Time'
+search_for_matches_noops = good_results/empty_file = rm -rf crux-output;crux search-for-matches --parameter-file params/set_rand_seed test.ms2 test.fasta; = 'Time'
 
 # Analyze matches to test default search, use no ops
-analyze_matches_no_ops_test_search = good_results/standard_analyze_default = rm -f target.txt decoy.txt demo*.csm; crux percolator . test.fasta --parameter-file params/set_rand_seed; cat target.sqt = 'Time'
+analyze_matches_no_ops_test_search = good_results/standard_analyze_default =  crux percolator --parameter-file params/set_rand_seed test.fasta ; cat crux-output/percolator.target.sqt = 'Time'
 
 # Search and estimate p-values
-search_pvalues = good_results/pvalues.sqt = crux search-for-matches --parameter-file params/pval demo.ms2 small-yeast.fasta; cat pvalues.sqt = 'Time'
+search_pvalues = good_results/pvalues.sqt = crux search-for-matches --parameter-file params/pval demo.ms2 small-yeast.fasta; cat crux-output/search.target.sqt = 'Time'
 
 # Get q-values from above search
-compute-q-values = good_results/qvalues.sqt = rm -f test*csm; crux compute-q-values --parameter-file params/pval --overwrite T --sqt-output-file qvalues.sqt . small-yeast.fasta ; cat qvalues.sqt = 'Time'
+compute-q-values = good_results/qvalues.sqt = crux compute-q-values --parameter-file params/pval small-yeast.fasta ; cat crux-output/qvalues.target.sqt = 'Time'
 
 # Search for matches with modifications
-search_mods_fasta = good_results/standard_search_mods = rm *csm; crux search-for-matches --parameter-file params/mods test.ms2 test.fasta; cat mods.sqt = 'Time' 'Database'
+search_mods_fasta = good_results/standard_search_mods = rm -rf crux-output; crux search-for-matches --parameter-file params/mods test.ms2 test.fasta; cat crux-output/search.target.sqt = 'Time' 'Database'
 
 # Analyze matches with modifications
-analyze_mods_fasta = good_results/standard_analyze_mods = crux percolator --parameter-file params/mods . test.fasta; cat mods.sqt = 'Time' 'Database'
+analyze_mods_fasta = good_results/standard_analyze_mods = crux percolator --parameter-file params/mods test.fasta; cat crux-output/percolator.target.sqt = 'Time' 'Database'
 
 # Search for matches and estimate p-values with modifications
 # TODO
 
 # Search with elastase
-search_elastase = good_results/standard_search_elastase.sqt = crux search-for-matches --parameter-file params/elastase  test.ms2 test.fasta; cat target.sqt = 'Time'
+search_elastase = good_results/standard_search_elastase.sqt = rm -rf crux-output;crux search-for-matches --parameter-file params/elastase  test.ms2 test.fasta; cat crux-output/search.target.sqt = 'Time'
 
 # Search with custom enzyme set to elastase rules
-search_custom_like_elastase = good_results/standard_search_elastase.sqt = crux search-for-matches --parameter-file params/custom-enzyme  test.ms2 test.fasta; cat target.sqt = 'Time' 'EnzymeSpec'
+search_custom_like_elastase = good_results/standard_search_elastase.sqt = rm -rf crux-output;crux search-for-matches --parameter-file params/custom-enzyme  test.ms2 test.fasta; cat crux-output/search.target.sqt = 'Time' 'EnzymeSpec'
 
 # TESTS WITH INDEX
 
@@ -79,13 +79,13 @@ search_custom_like_elastase = good_results/standard_search_elastase.sqt = crux s
 generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
-search_for_matches_default_existing_index = good_results/standard_search_default_existing_index.target.sqt = rm -rf target.sqt decoy.sqt test*csm target.txt decoy.txt; crux search-for-matches --output-mode all --use-index T --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat target.sqt = 'Time' 'Database'
+search_for_matches_default_existing_index = good_results/standard_search_default_existing_index.target.sqt = rm -rf crux-output; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat crux-output/search.target.sqt = 'Time' 'Database'
 
 # See that match_analysis works with an existing index and existing results
- analyze_matches_existing_index_and_results = good_results/standard_existing-perc.sqt =  rm -f existing-perc.sqt demo.csm target.txt decoy.txt; crux percolator --sqt-output-file existing-perc.sqt --use-index T good_results existing_crux_index; cat existing-perc.sqt = 'StartTime' 'Database'
+ analyze_matches_existing_index_and_results = good_results/standard_existing-perc.sqt =  crux percolator --overwrite T --fileroot good_results existing_crux_index; cat good_results/percolator.target.sqt = 'StartTime' 'Database'
 
 # See that match_analysis works with an existing index and new results
-analyze_matches_existing_index = good_results/standard_existing-index-new-results-perc.sqt =  rm -f existing-perc.sqt target.txt decoy.txt; crux percolator --sqt-output-file existing-perc.sqt --use-index T --parameter-file params/set_rand_seed . existing_crux_index; cat existing-perc.sqt = 'StartTime'
+analyze_matches_existing_index = good_results/standard_existing-index-new-results-perc.sqt =  crux percolator --parameter-file params/set_rand_seed existing_crux_index; cat crux-output/percolator.target.sqt = 'StartTime'
 
 # Create index. Use crux-generate-peptides to test that it worked
 
@@ -102,19 +102,19 @@ generate_peptides_mods = good_results/standard_generate_peptides_mods_index = cr
 generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --use-index T test_crux_index=
 
 # Search for matches and test sqt file
-search_for_matches_default_index = good_results/standard_search_default.target.sqt = crux search-for-matches --output-mode all --overwrite T --use-index T --parameter-file params/params_uniq test.ms2 test_crux_index; cat target.sqt = 'Time' 'Database'
+search_for_matches_default_index = good_results/standard_search_default.target.sqt = crux search-for-matches --overwrite T --parameter-file params/params_uniq test.ms2 test_crux_index; cat crux-output/search.target.sqt = 'Time' 'Database'
 
 # Analyze matches using above index
-analyze_matches_index = good_results/standard_test-perc.sqt =  crux percolator --sqt-output-file test-perc.sqt --overwrite T --use-index T --parameter-file params/set_rand_seed . test_crux_index; cat test-perc.sqt = 'StartTime'
+analyze_matches_index = good_results/standard_test-perc.sqt =  crux percolator --overwrite T --parameter-file params/set_rand_seed test_crux_index; cat crux-output/percolator.target.sqt = 'StartTime'
 
 # Search for matches with modifications from index
-search_mods_index = good_results/standard_search_mods = crux search-for-matches --parameter-file params/mods --use-index T test.ms2 existing_crux_index; cat mods.sqt = 'Time' 'Database'
+search_mods_index = good_results/standard_search_mods = crux search-for-matches --parameter-file params/mods test.ms2 existing_crux_index; cat crux-output/search.target.sqt = 'Time' 'Database'
 
 # Analyze matches with modifications from index
-analyze_mods_index = good_results/standard_analyze_mods = crux percolator --parameter-file params/mods --use-index T . test_crux_index; cat mods.sqt = 'Time' 'Database'
+analyze_mods_index = good_results/standard_analyze_mods = crux percolator --overwrite T --parameter-file params/mods test_crux_index; cat crux-output/percolator.target.sqt = 'Time' 'Database'
 
 # Do mod search with spec that match sequest results exactly
-sequest_matching_search = good_results/seq_test.sqt = crux search-for-matches --parameter-file params/mods-sequest --use-index T select-spectra.ms2 index-for-sequest-comparison; cat seq_test.sqt = 'Time' 
+sequest_matching_search = good_results/seq_test.sqt = crux search-for-matches --parameter-file params/mods-sequest select-spectra.ms2 index-for-sequest-comparison; cat crux-output/search.target.sqt = 'Time' 
 
 # MORE TESTS TODO
 
