@@ -24,7 +24,7 @@
 #include "index.h"
 #include "generate_peptides_iterator.h"
 
-#define NUM_GEN_PEP_OPTIONS 17
+#define NUM_GEN_PEP_OPTIONS 16
 #define NUM_GEN_PEP_ARGS 1
 
 /* Private function declarations */
@@ -64,7 +64,7 @@ int main(int argc, char** argv){
     //    "cleavages",
     "missed-cleavages",
     "unique-peptides",
-    "use-index",
+    //"use-index",
     "output-sequence",
     //"output-trypticity",
     "sort"
@@ -97,11 +97,11 @@ int main(int argc, char** argv){
   /* Get parameter values */
   //  print_trypticity = get_boolean_parameter("output-trypticity");
   output_sequence = get_boolean_parameter("output-sequence");
-  use_index = get_boolean_parameter("use-index");
   filename = get_string_parameter("protein input");
+  //use_index = get_boolean_parameter("use-index");
+  use_index = is_directory(filename);
   if( use_index == TRUE ){
     index = new_index_from_disk(filename);//, 
-//  get_boolean_parameter("unique-peptides"));
   }else{
     database = new_database(filename, FALSE); // not memmapped
   }
@@ -172,11 +172,13 @@ void print_header(){
   //         get_string_parameter_pointer("protein input"));
 
   char* database_name = get_string_parameter("protein input");
+  /*
   if( get_boolean_parameter("use-index") == TRUE ){
     char* fasta_name  = get_index_binary_fasta_name(database_name);
     free(database_name);
     database_name = fasta_name;
   }
+  */
   printf("# PROTEIN DATABASE: %s\n", database_name);
 
   printf("# OPTIONS:\n");
@@ -195,7 +197,8 @@ void print_header(){
          get_string_parameter_pointer("isotopic-mass"));
   printf("#\tverbosity: %d\n", get_verbosity_level());
 
-  bool_val = get_boolean_parameter("use-index");
+  //bool_val = get_boolean_parameter("use-index");
+  bool_val = is_directory(database_name);
   printf("#\tuse index: %s\n", boolean_to_string(bool_val));
   //get_string_parameter_pointer("use-index"));
   

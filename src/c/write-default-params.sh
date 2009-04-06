@@ -8,12 +8,12 @@
 # Assumes it is being run from crux/src/c
 
 # 1. Create param file
-rm -f unordered-default-params test*csm
+rm -rf crux-output 
 ./crux search-for-matches \
-  --write-parameter-file unordered-default-params \
+  --write-parameter-file T \
   smoke/test.ms2 smoke/test.fasta
 
-if [ ! -e unordered-default-params ]
+if [ ! -e crux-output/params.txt ]
 then
   echo "Failed to write the param file.";
   exit;
@@ -32,25 +32,29 @@ echo "####################################################################
 
 # 3. Reorder the options so they are grouped by function
 for op in verbosity version parameter-file write-parameter-file \
-          overwrite use-index min-length max-length isotopic-mass \
-          fragment-mass mass-window ion-tolerance cleavages \
-          missed-cleavages unique-peptides mod cmod nmod max-mods \
-          max-aas-modified \
-          max-rank-preliminary min-mass max-mass spectrum-min-mass \
-          spectrum-max-mass spectrum-charge output-mode print-search-progress \
-          match-output-folder sqt-output-file decoy-sqt-output-file \
-          number-decoy-set top-match top-match-sqt precision \
-          feature-file output-trypticity output-sequence sort stats \
+          parameter-file-name overwrite min-length max-length isotopic-mass \
+          fragment-mass mass-window ion-tolerance \
+          min-mass max-mass spectrum-min-mass spectrum-max-mass \
+          spectrum-charge max-rank-preliminary print-search-progress \
+          enzyme custom-enzyme digestion missed-cleavages \
+          mod cmod nmod max-mods max-aas-modified compute-p-values \
+          fileroot search-sqt-output-file decoy-sqt-output-file \
+          percolator-sqt-output-file qvalues-sqt-output-file \
+          search-tab-output-file percolator-tab-output-file \
+          qvalues-tab-output-file decoy-tab-output-file \
+          number-decoy-set num-decoy-per-target tdc reverse-sequence \
+          top-match precision feature-file \
+          output-sequence sort stats unique-peptides \
           isotope primary-ions neutral-losses flanking \
           precursor-ions nh3 max-ion-charge h2o A C D E F G H I K L M \
           N P Q R S T V W Y ; 
 do
-  grep -B2 "^$op=" unordered-default-params >> default.params
+  grep -B2 "^$op=" crux-output/params.txt >> default.params
   echo "" >> default.params
 done
 
 # 4. Rename the value for write-parameter-file
-sed -i 's/unordered-default-params/__NULL_STR/' default.params
+sed -i 's/parameter-file=T/parameter-file=F/' default.params
 
 # 5. Copy to crux/doc/user
 cp -f default.params ../../doc/user/default.params
