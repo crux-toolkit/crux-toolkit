@@ -23,6 +23,7 @@ generate_peptides_change_minmax = good_results/standard_generate_peptides_change
 generate_peptides_mods = good_results/standard_generate_peptides_mods = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20 test.fasta =
 
 generate_peptides_chymo = good_results/standard_generate_peptides_chymo = crux-generate-peptides --parameter-file params/chymo --output-sequence T test.fasta = 
+
 # Get spectrum
 get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out =
 
@@ -63,6 +64,9 @@ search_mods_fasta = good_results/standard_search_mods = rm -rf crux-output; crux
 
 # Analyze matches with modifications
 analyze_mods_fasta = good_results/standard_analyze_mods = crux percolator --parameter-file params/mods test.fasta; cat crux-output/percolator.target.sqt = 'Time' 'Database'
+
+# Search with modifications and reverse decoy sequences instead of shuffling
+reverse_sequence = good_results/reverse.decoy.txt = crux search-for-matches --parameter-file params/reverse test.ms2 test-plus-palindrome.fasta; cat reverse/decoy.txt
 
 # Search for matches and estimate p-values with modifications
 # TODO

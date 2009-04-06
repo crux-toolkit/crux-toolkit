@@ -19,12 +19,12 @@ void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
  *
  ********************************************/
 
-PEPTIDE_T *peptide1, *peptide2, *peptide3, *peptide4;
+PEPTIDE_T *peptide1, *peptide2, *peptide3, *peptide4, *palindrome_peptide;
 PROTEIN_T *protein, *protein1, *protein2, *protein3; 
 PEPTIDE_CONSTRAINT_T* constraint;
 PEPTIDE_SRC_T *association1, *association2, *association3;
 DATABASE_T* database;
-char* protseq1 = "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW";
+char* protseq1 = "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITIKAVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW";
 
 // old test commented out at botom of file
 
@@ -34,7 +34,7 @@ void pep_setup(){
   peptide1 = new_peptide( 10, 1087.20, protein1, 20);//VADILESNAR
   peptide2 = new_peptide( 16, 1736.02, protein1, 1);//MRVLKFGGTSVANAER
   peptide3 = new_peptide( 4, 547.57, protein1, 487);//QQSW
-
+  palindrome_peptide = new_peptide( 9, 547.57, protein1, 40);//PAKITIKAV
 }
 
 void pep_teardown(){
@@ -168,6 +168,23 @@ START_TEST(test_with_mod){
 }
 END_TEST
 
+START_TEST(test_reversed_seq){
+  //char* original_seq = get_peptide_sequence(peptide1);
+  // VADILESNAR
+  char* reversed_seq = generate_reversed_sequence(peptide1);
+  fail_unless(strcmp(reversed_seq, "VANSELIDAR")== 0,
+              "Reversed sequence should be 'VANSELIDAR' but is %s", 
+              reversed_seq);
+
+  char* original_seq = get_peptide_sequence(palindrome_peptide);
+  free(reversed_seq);
+  reversed_seq = generate_reversed_sequence(palindrome_peptide);
+  fail_unless(strcmp(reversed_seq, original_seq) != 0,
+              "Reversed palindrome sequence %s should have been shuffled",
+              reversed_seq);
+}
+END_TEST
+
 START_TEST(test_shuffled_mod_seq){
   MODIFIED_AA_T* aa_seq = get_peptide_modified_aa_sequence(peptide1);
   int len = get_peptide_length(peptide1);
@@ -198,6 +215,7 @@ Suite* peptide_suite(void){
   tcase_add_test(tc_with_setup, test_cdist);
   tcase_add_test(tc_with_setup, test_mod_on_unmodified);
   tcase_add_test(tc_with_setup, test_with_mod);
+  tcase_add_test(tc_with_setup, test_reversed_seq);
   tcase_add_test(tc_with_setup, test_shuffled_mod_seq);
   tcase_add_checked_fixture(tc_with_setup, pep_setup, pep_teardown);
 
