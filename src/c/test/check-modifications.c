@@ -286,6 +286,63 @@ START_TEST(test_copy_mod_seq){
 }
 END_TEST
 
+START_TEST(test_palindrome){
+  char* seq = "GBBKATRM"; 
+  int len = strlen(seq);
+  MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(seq);
+
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
+               "The seq %s should not be a palindrome.", seq);
+
+  // try a palindrome
+  seq = "MACDDCAR";
+  len = strlen(seq);
+  free(mod_seq);
+  mod_seq = convert_to_mod_aa_seq(seq);
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
+               "The seq %s should be a palindrome.", seq);
+
+  // try a palindrome of odd length
+  seq = "MACDVDCAR";
+  len = strlen(seq);
+  free(mod_seq);
+  mod_seq = convert_to_mod_aa_seq(seq);
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
+               "The seq %s should be a palindrome.", seq);
+
+  // modify half making it not a palindrome
+  force_set_aa_mod_list(amod_list, 3);  // in setup???
+  modify_aa(&mod_seq[2], amod1);
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
+               "The modified seq %s should not be a palindrome.", 
+               modified_aa_string_to_string(mod_seq, len));
+
+  // modify the other half returning it to a palindrome
+  modify_aa(&mod_seq[6], amod1);
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
+               "The modified seq %s should be a palindrome.", 
+               modified_aa_string_to_string(mod_seq, len));
+
+
+  // try an almost-palindrome
+  seq = "MACDVCAR";
+  len = strlen(seq);
+  free(mod_seq);
+  mod_seq = convert_to_mod_aa_seq(seq);
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
+               "The seq %s should not be a palindrome.", seq);
+
+  // try a short seq
+  seq = "MAR";
+  len = strlen(seq);
+  free(mod_seq);
+  mod_seq = convert_to_mod_aa_seq(seq);
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
+               "The seq %s should not be a palindrome.", seq);
+
+}
+END_TEST
+
 START_TEST(test_is_modifiable){
   BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod3);
   mod_us['D' - 'A'] = TRUE;
@@ -365,6 +422,7 @@ Suite* modifications_suite(){
   tcase_add_test(tc_core, test_mod_str_to_string);
   tcase_add_test(tc_core, test_mod_str_to_unmod_string);
   tcase_add_test(tc_core, test_copy_mod_seq);
+  tcase_add_test(tc_core, test_palindrome);
   tcase_add_test(tc_core, test_is_modifiable);
   tcase_add_test(tc_core, test_modify);
   tcase_add_test(tc_core, test_serialize);

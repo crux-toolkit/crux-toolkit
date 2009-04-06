@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
@@ -126,6 +126,16 @@ MODIFIED_AA_T* convert_to_mod_aa_seq(char* sequence);
  * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
  */
 MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length);
+
+/**
+ * \brief Determine if an array of MODIFIED_AA_T is a palindrome.  
+ * Used by reverse_sequence to avoid returning a reversed sequence
+ * that is the same as the target.  Ignores the first and last
+ * residues. 
+ * \returns TRUE if the reversed sequence would be the same as the
+ * forward, otherwise FALSE.
+ */
+BOOLEAN_T modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length);
 
 /**
  * \brief Frees memory for an array of MODIFIED_AA_Ts.  Assumes is

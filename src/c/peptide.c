@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.82 $
+ * $Revision: 1.83 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -1002,6 +1002,44 @@ char* generate_shuffled_sequence(
 }
 
 /**
+ * \brief Return a reversed version of the given peptide's sequence as
+ * an array of char (A-Z).  Leave the first and last residue
+ * unchanged.  If the reversed sequence is identical to the target,
+ * shuffle the sequence instead.
+ *
+ * \returns A newly-allocated char array of the reversed sequence.
+ */
+char* generate_reversed_sequence(
+  PEPTIDE_T* peptide ///< The peptide to shuffle -in 
+  ){
+
+  char* sequence = get_peptide_sequence(peptide);
+  int length = peptide->length;
+  int start_idx = 1;       // leave first ...
+  int end_idx = length -2; // ...and last residue in place
+  char temp_char = 0;
+
+  while(start_idx < end_idx){
+    temp_char = sequence[end_idx];
+    sequence[end_idx] = sequence[start_idx];
+    sequence[start_idx] = temp_char;
+    start_idx++;
+    end_idx--;
+  }
+
+  // check to see if the reversed sequence is the same as original
+  if( strncmp(sequence, get_peptide_sequence_pointer(peptide), length) == 0 ){
+    carp(CARP_DETAILED_INFO, 
+         "Peptide %s is a palindrome and will be shuffled instead of reversed.",
+         sequence);
+    free(sequence);
+    sequence = generate_shuffled_sequence(peptide);
+  }
+
+  return sequence;
+}
+
+/**
  * \brief Return a randomly shuffled version of the given peptide's 
  * sequence as an array of MODIIFIED_AA_T.  Based on the peptide type,
  * will leave the end(s) unchanged to preserve the tryptic property.
@@ -1015,6 +1053,7 @@ MODIFIED_AA_T* generate_shuffled_mod_sequence(
   // not currently used
   )
 {
+  //TODO (BF 6-Apr-09): should we warn if seq is len 3 and won't change?
   MODIFIED_AA_T* sequence = get_peptide_modified_aa_sequence(peptide);
   int length = peptide->length;
   int start_idx = 0;
@@ -1033,6 +1072,44 @@ MODIFIED_AA_T* generate_shuffled_mod_sequence(
     sequence[start_idx] = sequence[switch_idx];
     sequence[switch_idx] = temp_aa;
     ++start_idx;
+  }
+
+  return sequence;
+}
+
+/**
+ * \brief Return a reversed version of the given peptide's sequence as
+ * an array of MODIFIED_AA_T.  Leave the first and last residue
+ * unchanged.  If the reversed sequence is identical to the target,
+ * shuffle the sequence instead.
+ *
+ * \returns A newly-allocated MODIFIED_AA_T array of the reversed sequence.
+ */
+MODIFIED_AA_T* generate_reversed_mod_sequence(
+  PEPTIDE_T* peptide ///< The peptide to shuffle -in 
+  ){
+  MODIFIED_AA_T* sequence = get_peptide_modified_aa_sequence(peptide);
+  int length = peptide->length;
+  int start_idx = 0;
+  int end_idx = length - 1;
+  MODIFIED_AA_T temp_aa = 0;
+
+  // first check to see if it will yield a different seq when reversed
+  if( modified_aa_seq_is_palindrome(sequence, length) == TRUE){
+    return generate_shuffled_mod_sequence(peptide);
+  }
+
+  // Do not move the first and last residue, regardless of enzyme
+  ++start_idx;
+  --end_idx;
+
+  // reverse  
+  while(start_idx < end_idx){
+    temp_aa = sequence[start_idx];
+    sequence[start_idx] = sequence[end_idx];
+    sequence[end_idx] = temp_aa;
+    ++start_idx;
+    end_idx--;
   }
 
   return sequence;

@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.49 $
+ * $Revision: 1.50 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -390,6 +390,18 @@ char* generate_shuffled_sequence(
   );
 
 /**
+ * \brief Return a reversed version of the given peptide's sequence as
+ * an array of char (A-Z).  Leave the first and last residue
+ * unchanged.  If the reversed sequence is identical to the target,
+ * shuffle the sequence instead.
+ *
+ * \returns A newly-allocated char array of the reversed sequence.
+ */
+char* generate_reversed_sequence(
+  PEPTIDE_T* peptide ///< The peptide to shuffle -in 
+  );
+
+/**
  * \brief Return a randomly shuffled version of the given peptide's 
  * sequence as an array of MODIIFIED_AA_T.  Based on the peptide type,
  * will leave the end(s) unchanged to preserve the tryptic property.
@@ -402,6 +414,19 @@ MODIFIED_AA_T* generate_shuffled_mod_sequence(
   ///< tryptic status to enforce on the shuffled sequence
   // not currently used
   );
+
+/**
+ * \brief Return a reversed version of the given peptide's sequence as
+ * an array of MODIFIED_AA_T.  Leave the first and last residue
+ * unchanged.  If the reversed sequence is identical to the target,
+ * shuffle the sequence instead.
+ *
+ * \returns A newly-allocated MODIFIED_AA_T array of the reversed sequence.
+ */
+MODIFIED_AA_T* generate_reversed_mod_sequence(
+  PEPTIDE_T* peptide ///< The peptide to shuffle -in 
+  );
+
 
 /*  Comparisons for sorting  */
 
