@@ -80,7 +80,7 @@ search_custom_like_elastase = good_results/standard_search_elastase.sqt = rm -rf
 # TESTS WITH INDEX
 
 # See that crux-generate-peptides works with an existing index
-generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
+generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T  --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
 search_for_matches_default_existing_index = good_results/standard_search_default_existing_index.target.sqt = rm -rf crux-output; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat crux-output/search.target.sqt = 'Time' 'Database'
@@ -95,15 +95,15 @@ analyze_matches_existing_index = good_results/standard_existing-index-new-result
 
 create_index_default = good_results/standard_create_index_default.out = rm -rf test_crux_index; crux create-index test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
 
-generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux-generate-peptides --output-sequence T --use-index T test_crux_index = '# PROTEIN DATABASE'
+generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux-generate-peptides --output-sequence T test_crux_index = '# PROTEIN DATABASE'
 
 # test that mods work with the index
-generate_peptides_mods = good_results/standard_generate_peptides_mods_index = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20  --use-index T test_crux_index =
+generate_peptides_mods = good_results/standard_generate_peptides_mods_index = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20  test_crux_index =
 
 #create_index_uniq = good_results/standard_create_index_uniq.out = rm -rf test_crux_index; crux create-index --unique-peptides T test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
 
 # use crux-generate-peptides to test that it worked
-generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --use-index T test_crux_index=
+generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T  test_crux_index=
 
 # Search for matches and test sqt file
 search_for_matches_default_index = good_results/standard_search_default.target.sqt = crux search-for-matches --overwrite T --parameter-file params/params_uniq test.ms2 test_crux_index; cat crux-output/search.target.sqt = 'Time' 'Database'
