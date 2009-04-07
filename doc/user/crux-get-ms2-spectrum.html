@@ -55,10 +55,10 @@ spectra in .ms2 format.
 
 <LI>
 <code>--stats &lt;T|F&gt;</code> &ndash; Output some summary
-statistics for the particular spectrum to STDOUT (not to the --ms2-out
-output file).  Each stat is be placed on a separate line, in the
-format &lt;name&gt;:&lt;value&gt; (e.g.  "TIC:1000.0\n").  The
-following stats are reported:
+statistics for the particular spectrum to standard output.  Each
+statistic is placed on a separate line, in the format
+&lt;name&gt;:&lt;value&gt; (e.g.  "TIC:1000.0\n").  The following
+statistics are reported for the entire spectrum:
   <UL>
   <LI>Precursor m/z</li>
   <LI>Total Ion Current</li>
@@ -67,7 +67,7 @@ following stats are reported:
   <LI>Minimum m/z</li>
   <LI>Maximum m/z</li>
   </UL>
-And for each possible spectrum charge state, output:
+For each possible spectrum charge state, the statistics are as follows:
   <UL>
   <LI>Charge state</li>
   <LI>Neutral mass</li>
