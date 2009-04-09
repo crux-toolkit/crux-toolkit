@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.48 $
+ * REVISION: $Revision: 1.49 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -439,6 +439,7 @@ void scan_for_aa_for_neutral_loss(
       loss_limit_count->nh3 = nh3_aa;
     }
   }
+
 }
 
 /**

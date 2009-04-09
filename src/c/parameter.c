@@ -1455,6 +1455,8 @@ void print_parameter_file(char* input_param_filename){
   BOOLEAN_T get_parameter_file = get_boolean_parameter("write-parameter-file");
 
   if(get_parameter_file == FALSE ){
+    free(fileroot);
+    free(filename);
     return;
   }
   carp(CARP_DEBUG, "Printing parameter file");

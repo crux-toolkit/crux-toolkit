@@ -134,6 +134,8 @@ int create_index_main(int argc, char** argv){
   /* free index(frees constraint together) */
   free_index(crux_index);     
   free(binary_fasta_file);
+  free(out_dir);
+  free(in_file);
   free_parameters();
 
   /* successfull exit message */
