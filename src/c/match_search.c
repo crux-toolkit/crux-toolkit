@@ -176,7 +176,6 @@ int search_main(int argc, char** argv){
 
   // get search parameters for match_collection
   BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
-  //  int sample_count = (compute_pvalues) ? PARAM_ESTIMATION_SAMPLE_COUNT : 0;
   BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
 
   // flags and counters for loop
@@ -273,7 +272,6 @@ int search_main(int argc, char** argv){
     // calculate p-values
     if( compute_pvalues == TRUE ){
       carp(CARP_DEBUG, "Estimating Weibull parameters.");
-      //if( estimate_weibull_parameters_from_sample_matches(match_collection,
       if( estimate_weibull_parameters_from_xcorrs(match_collection,
                                                           spectrum,
                                                           charge) ){
@@ -346,6 +344,20 @@ int search_main(int argc, char** argv){
         
       }// last mod
 
+      // calculate p-values
+      if( compute_pvalues == TRUE ){
+        carp(CARP_DEBUG, "Estimating Weibull parameters for decoys.");
+        if( estimate_weibull_parameters_from_xcorrs(match_collection, 
+                                                    spectrum, 
+                                                    charge) ){
+          carp(CARP_DEBUG, "Calculating p-values for decoys.");
+          compute_p_values(match_collection);
+
+        }else{ // there were too few scores to do estimation
+          set_p_values_as_unscored(match_collection);
+        }
+      }
+
       // print matches
       // only print first decoy to sqt
       FILE* tmp_decoy_sqt_file = decoy_sqt_file;
@@ -390,7 +402,7 @@ int search_main(int argc, char** argv){
     spectrum_searches_counter++;
 
     // clean up
-    //    free_match_collection(match_collection);
+    //free_match_collection(match_collection); ?? why commented out??
   }// next spectrum
 
   // fix headers in csm files
