@@ -4,8 +4,7 @@
 <link href="./crux.css" rel="styleSheet" type="text/css">
 </head>
 <body>
-<blockquote>
-
+<blockquote> 
 <h1>Release notes for Crux</h1>
 
 
@@ -13,6 +12,38 @@
 
 <ul>
 
+<li>
+The output for <code>search-for-matches</code>, 
+<code>compute-q-values</code>, and <code>percolator</code>
+has been revised extensively.
+<code>crux</code> will now create a directory, and all output files
+will be created in that directory. 
+By default the directory will be named <code>crux-output</code>,
+but this can be changed using the new <code>output-dir</code> option.
+<br>
+The output files for <code>search-for-matches</code> will be:
+<ul>
+<li><code>search.target.csm</code></li>
+<li><code>search.decoy-?.csm</code></li>
+<li><code>search.target.sqt</code></li>
+<li><code>search.target.txt</code></li>
+</ul>
+The output files for <code>compute-q-values</code> will be:
+<ul>
+<li><code>qvalues.target.sqt</code></li>
+<li><code>qvalues.target.txt</code></li>
+</ul>
+The output files for <code>percolator</code> will be:
+<ul>
+<li><code>percolator.target.sqt</code></li>
+<li><code>percolator.target.txt</code></li>
+</ul>
+</li>
+<li>
+The <code>filebase</code> option has been added.
+This option is used to specify a string which will be added as a prefix
+to all output files.
+</li>
 <li>
 The option <code>cleavages</code> was replaced with two
 options, <code>enzyme</code> which specifies trypsin, elastase,
