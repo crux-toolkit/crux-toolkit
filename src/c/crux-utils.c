@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "crux-utils.h"
+#include "parameter.h"
 
 /**
  * PRECISION, determines the precision of the compare float, users
@@ -535,6 +536,25 @@ char* cat_string(char* string_one, char* string_two){
 }
 
 /**
+ * Adds the fileroot parameter to a string as a prefix.
+ * Given a pointer to pointer to a string, if the fileroot parameter is set
+ * the memory for the string is reallocated, and the fileroot string
+ * is added as a prefix.
+ */
+void prefix_fileroot_to_name(char** name) {
+  char* fileroot = get_string_parameter("fileroot");
+  if (fileroot != NULL) {
+    int len_name = strlen(*name);
+    int len_root = strlen(fileroot);
+    *name = myrealloc(*name, len_root + len_name + 2);
+    memmove(*name + len_root + 1, *name, len_name + 1);
+    strcpy(*name, fileroot);
+    (*name)[len_root] = '.';
+    free(fileroot);
+  };
+}
+
+/**
  * \brief Check if the string has the correct prefix
  * \returns TRUE if the string starts with the given prefix, else FALSE
  */
@@ -649,7 +669,7 @@ long get_filesize(char *FileName){
 /**
  * \brief A function for creating a directory to hold output files from crux.
  * 
- * Tries to create a directory named by the fileroot parameter.
+ * Tries to create a the named directory for use as the output directory for crux.
  * If the overwrite option is true, an existing directory wtih that
  * name will not cause an error. 
  * 
@@ -676,8 +696,8 @@ int create_output_directory(
     }
     else {
       // stat failed for some other reason
-      fprintf(
-        stderr,
+      carp(
+        CARP_ERROR,
         "Unable to check for status of output directory '%s': %s.\n",
         output_folder,
         strerror(errno)
@@ -939,6 +959,7 @@ char* generate_psm_filename(char* basename, ///< beginning filename -in
   }
 
   char* fullname = cat_string(basename, suffix);
+  prefix_fileroot_to_name(&fullname);
   return fullname;
 
 }

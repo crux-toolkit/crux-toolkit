@@ -13,14 +13,14 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.11 $
+ * $Revision: 1.12 $
  ****************************************************************************/
 #include "q-value.h"
 
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_QVALUE_OPTIONS 6
+#define NUM_QVALUE_OPTIONS 7
 #define NUM_QVALUE_ARGUMENTS 1
 
 /* 
@@ -55,6 +55,7 @@ int qvalue_main(int argc, char** argv){
     "parameter-file",
     "write-parameter-file",
     "overwrite",
+    "output-dir",
     "fileroot"
   };
 
@@ -78,7 +79,7 @@ int qvalue_main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux compute-q-values");
 
   /* Get arguments */
-  char* psm_file = get_string_parameter("fileroot");
+  char* psm_dir = get_string_parameter("output-dir");
   char* protein_input_name = get_string_parameter("protein input");
 
   /* Get options */
@@ -86,7 +87,7 @@ int qvalue_main(int argc, char** argv){
 
   /* Perform the analysis */
   carp(CARP_INFO, "Running compute q-values");
-  match_collection = run_qvalue(psm_file, protein_input_name);
+  match_collection = run_qvalue(psm_dir, protein_input_name);
   SCORER_TYPE_T scorer_type =  LOGP_QVALUE_WEIBULL_XCORR; 
   SCORER_TYPE_T second_scorer_type = XCORR; // could it be other?
 
@@ -97,7 +98,7 @@ int qvalue_main(int argc, char** argv){
   // free_match_collection(match_collection);
 
   // clean up
-  free(psm_file);
+  free(psm_dir);
   free(protein_input_name);
 
   carp(CARP_INFO, "crux calculate q-value finished.");
@@ -115,9 +116,11 @@ static void print_text_files(
   ){
 
   // get filename and open file
-  char* out_dir = get_string_parameter("fileroot");
+  char* out_dir = get_string_parameter("output-dir");
   char* sqt_filename = get_string_parameter("qvalues-sqt-output-file");
+  prefix_fileroot_to_name(&sqt_filename);
   char* tab_filename = get_string_parameter("qvalues-tab-output-file");
+  prefix_fileroot_to_name(&tab_filename);
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
   FILE* sqt_file = create_file_in_path( sqt_filename, out_dir, overwrite );
   FILE* tab_file = create_file_in_path( tab_filename, out_dir, overwrite );

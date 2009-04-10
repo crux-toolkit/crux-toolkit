@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.38 $
+ * $Revision: 1.39 $
  * $Author: cegrant $
  * \brief Utilities for the crux project
  */
@@ -102,6 +102,14 @@ char* signed_int_to_char(int i);
 char* cat_string(char* string_one, char* string_two);
 
 /**
+ * Adds the fileroot parameter to a string as a prefix.
+ * Given a pointr to pointer to a string, if fileroot parameter is set
+ * the memory for the string is reallocated, and the fileroot string
+ * is added as a suffix.
+ */
+void prefix_fileroot_to_name(char** name);
+
+/**
  * given the path and the filename return a file with path
  * "path/filename"
  * \returns a heap allocated string, "path/filename"
@@ -121,7 +129,7 @@ long get_filesize(char *FileName);
 /**
  * \brief A function for creating a directory to hold output files from crux.
  * 
- * Tries to create a directory named by the fileroot parameter.
+ * Tries to create a the named directory for use as the output directory for crux.
  * If the overwrite option is true, an existing directory wtih that
  * name will not cause an error. 
  * 

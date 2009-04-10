@@ -16,12 +16,12 @@
  *         directory are concatinated together and presumed to be
  *         non-overlaping parts of the same ms2 file. 
  * 
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  ****************************************************************************/
 #include "percolator.h"
 
 #ifdef PERCOLATOR
-#define NUM_PERCOLATOR_OPTIONS 7
+#define NUM_PERCOLATOR_OPTIONS 8
 #define NUM_PERCOLATOR_ARGUMENTS 1
 /* 
  * Private function declarations.  Details below
@@ -54,8 +54,9 @@ int percolator_main(int argc, char** argv){
     "verbosity",
     "parameter-file",
     "write-parameter-file",
-    "feature-file",
     "fileroot",
+    "feature-file",
+    "output-dir",
     "overwrite"
   };
 
@@ -79,9 +80,12 @@ int percolator_main(int argc, char** argv){
   parse_cmd_line_into_params_hash(argc, argv, "crux-analyze-matches");
 
   /* Get arguments */
-  char* psm_file = get_string_parameter("fileroot");
+  char* psm_dir = get_string_parameter("output-dir");
   char* protein_input_name = get_string_parameter("protein input");
   char* feature_file = get_string_parameter("feature-file");
+  if (feature_file != NULL) {
+    prefix_fileroot_to_name(&feature_file);
+  }
 
   /* Get options */
   SCORER_TYPE_T scorer_type = PERCOLATOR_SCORE;
@@ -90,7 +94,7 @@ int percolator_main(int argc, char** argv){
 
   /* Perform the analysis */
   carp(CARP_INFO, "Running percolator");
-  match_collection = run_percolator(psm_file,
+  match_collection = run_percolator(psm_dir,
                                     protein_input_name,
                                     feature_file);
   scorer_type = PERCOLATOR_SCORE;
@@ -103,7 +107,7 @@ int percolator_main(int argc, char** argv){
   // free_match_collection(match_collection);
 
   // clean up
-  free(psm_file);
+  free(psm_dir);
   free(protein_input_name);
   free(feature_file);
 
@@ -135,9 +139,11 @@ static void print_text_files(
   ){
 
   // get filename and open file
-  char* out_dir = get_string_parameter("fileroot");
+  char* out_dir = get_string_parameter("output-dir");
   char* sqt_filename = get_string_parameter("percolator-sqt-output-file");
+  prefix_fileroot_to_name(&sqt_filename);
   char* tab_filename = get_string_parameter("percolator-tab-output-file");
+  prefix_fileroot_to_name(&tab_filename);
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
   FILE* sqt_file = create_file_in_path( sqt_filename, out_dir, overwrite );
   FILE* tab_file = create_file_in_path( tab_filename, out_dir, overwrite );
@@ -245,7 +251,9 @@ MATCH_COLLECTION_T* run_percolator(
   
   // optional feature_file
   if(feature_file != NULL){  
-    if((feature_fh = fopen(feature_file, "w")) == NULL){
+    BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+    feature_fh = create_file_in_path(feature_file, psm_result_folder, overwrite);
+    if(feature_fh == NULL){
       carp(CARP_FATAL, "Problem opening output file %s", feature_file);
       return NULL;
     }

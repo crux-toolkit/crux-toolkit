@@ -65,7 +65,7 @@ decoy databases."</a> <i>Journal of Proteome Research</i>. 7(1):29-34,
 <li>
 &lt;psm folder&gt; &ndash; A the folder in which all the PSM
 result files are located.  This is assumed to be <code>crux-output</code>,
-but it can be set by the user using the <code>--fileroot</code> option.
+but it can be set by the user using the <code>--output-dir</code> option.
 The program looks for files ending in
 <code>.csm</code>, which are produced by
 <code>crux&nbsp;search-for-matches</code>.  All such files in the
@@ -84,7 +84,7 @@ proteins and peptides.</li>
 <UL>
 <p>
 The program writes files to the folder <code>crux-output</code> by default.
-The name of the output folder can be set by the user using the <code>--fileroot</code> option.
+The name of the output folder can be set by the user using the <code>--output-dir</code> option.
 The following files will be created:</p>
 
 <li>
@@ -99,6 +99,16 @@ See <a href="txt-format.html">txt file format</a> for a list of the fields.
 <B>Options:</B>
 
 <UL>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-out.</li>
 
 <li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or

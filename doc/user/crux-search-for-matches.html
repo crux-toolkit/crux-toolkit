@@ -80,7 +80,7 @@ the composite list.</p>
 
 <p>
 The program writes files to the folder <code>crux-output</code> by default.
-The name of the output folder can be set by the user using the <code>--fileroot</code> option.
+The name of the output folder can be set by the user using the <code>--output-dir</code> option.
 The following files will be created:</p>
 <ul>
 
@@ -114,9 +114,15 @@ produced.</p>
 <B>Options:</B>
 <UL>
 
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
 <li>
-<code>--fileroot &lt;string&gt;</code> &ndash; Sets the name of the
-the output directory to the specified string.</li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-out.</li>
+
 
 <li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or 

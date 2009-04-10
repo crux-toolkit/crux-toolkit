@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.115 $
+ * $Revision: 1.116 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1424,7 +1424,7 @@ float get_match_collection_delta_cn(
 /**
  * \brief Names and opens the correct number of binary psm files.
  *
- * Takes the values of fileroot parameter, ms2 filename (soon to be
+ * Takes the values of output-dir parameter, ms2 filename (soon to be
  * named output file), overwrite, and number-decoy-set from parameter.c.
  * Exits with error if can't create new requested directory or if
  * can't create any of the psm files.
@@ -1442,7 +1442,7 @@ FILE** create_psm_files(){
 
   carp(CARP_DEBUG, "Opening %d new psm files", total_files);
 
-  char* output_directory =get_string_parameter_pointer("fileroot");
+  char* output_directory =get_string_parameter_pointer("output-dir");
 
   // create the output folder if it doesn't exist
   if(access(output_directory, F_OK)){
