@@ -475,44 +475,48 @@ void initialize_parameters(void){
       "searched and spectra with multiple charge states will be searched "
       "once at each charge state.  With 1, 2 ,or 3 only spectra with that "
       "that charge will be searched.", "true");
-  set_string_parameter("fileroot", "crux-output", 
+  set_string_parameter("fileroot", NULL, 
+      "Prefix added to output file names. Default None. ",
+      "Used by crux create-index, crux search-for-matches, "
+      "crux compute-q-values, and crux percolator.", "true");
+  set_string_parameter("output-dir", "crux-output", 
       "Folder to which results will be written. Default 'crux-output'. ",
       "Used by crux create-index, crux search-for-matches, "
       "crux compute-q-values, and crux percolator.", "true");
   set_string_parameter("search-sqt-output-file", "search.target.sqt", 
       "SQT output file name. Default 'search.target.sqt'",
       "Only available for crux-search-for-matches. The location of this file is controlled by "
-      "--fileroot.", "true");
+      "--output-dir.", "true");
   set_string_parameter("percolator-sqt-output-file", "percolator.target.sqt", 
       "SQT output file name. Default 'percolator.target.sqt'",
       "Only available for crux percolator. The location of this file is controlled by "
-      "--fileroot.", "true");
+      "--output-dir.", "true");
   set_string_parameter("qvalues-sqt-output-file", "qvalues.target.sqt", 
       "SQT output file name. Default 'qvalues.target.sqt'",
       "Only available for crux compute-qvalues. The location of this file is controlled by "
-      "--fileroot.", "true");
-  set_string_parameter("decoy-sqt-output-file", "decoy.sqt", 
-      "SQT output file name for decoys.  Default 'decoy.sqt'.",
-      "Used by crux-search-for-matches with output-mode=<all|sqt> and "
-      "number-decoy-sets > 0.  File is put in the directory set by "
-      "--fileroot (defaults to working directory).", "true");
+      "--output-dir.", "true");
+  set_string_parameter("decoy-sqt-output-file", "search.decoy.sqt", 
+      "SQT output file name for decoys.  Default 'search.decoy.sqt'.",
+      "Used by crux search-for-matches with "
+      "number-decoy-sets > 0.  The location of this file is controlled by "
+      "--output-dir.", "true");
   set_string_parameter("search-tab-output-file", "search.target.txt", 
       "Tab delimited output file name. Default 'search.target.txt'",
       "Only available for crux search-for-matches. The location of this file is controlled by "
-      "--fileroot.", "true");
+      "--output-dir.", "true");
   set_string_parameter("percolator-tab-output-file", "percolator.target.txt", 
       "Tab delimited output file name. Default 'percolator.target.txt'",
       "Only available for crux percolator. The location of this file is controlled by "
-      "--fileroot.", "true");
+      "--output-dir.", "true");
   set_string_parameter("qvalues-tab-output-file", "qvalues.target.txt", 
       "Tab delimited output file name. Default 'qvalues.target.txt'",
       "Only available for crux compute-q-values. The location of this file is controlled by "
-      "--fileroot.", "true");
-  set_string_parameter("decoy-tab-output-file", "decoy.txt", 
-      "Tab delimited output file name for decoys.  Default 'decoy.txt'.",
-      "Used by crux search-for-matches with output-mode=<all|tab> and "
-      "number-decoy-set > 0.  File is put in the directory set by "
-      "--fileroot (defaults to working directory).", "true");
+      "--output-dir.", "true");
+  set_string_parameter("decoy-tab-output-file", "search.decoy.txt", 
+      "Tab delimited output file name for decoys.  Default 'search.decoy.txt'.",
+      "Used by crux search-for-matches with "
+      "number-decoy-set > 0.  The location of this file is controlled by "
+      "--output-dir.", "true");
   // user options regarding decoys
   /*
   set_int_parameter("num-decoys-per-target", 2, 0, 10,
@@ -1450,12 +1454,12 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
  */
 void print_parameter_file(char* input_param_filename){
 
-  char* fileroot = get_string_parameter("fileroot");
+  char* output_dir = get_string_parameter("output-dir");
   char* filename = get_string_parameter("parameter-file-name");
   BOOLEAN_T get_parameter_file = get_boolean_parameter("write-parameter-file");
 
   if(get_parameter_file == FALSE ){
-    free(fileroot);
+    free(output_dir);
     free(filename);
     return;
   }
@@ -1471,18 +1475,18 @@ void print_parameter_file(char* input_param_filename){
 
   // Create the output directory
   int result = create_output_directory(
-    fileroot, 
+    output_dir, 
     TRUE, // Allow existing directory
     TRUE // print warnging messages to stderr
   );
   if( result == -1 ){
-    carp(CARP_FATAL, "Unable to create output directory %s.", fileroot);
+    carp(CARP_FATAL, "Unable to create output directory %s.", output_dir);
     exit(1);
   }
 
   // now open the file
   FILE* param_file = create_file_in_path(filename, 
-                                         fileroot, 
+                                         output_dir, 
                                          overwrite);
 
   // TODO (BF Nov-12-08): could add header to file
@@ -1503,7 +1507,7 @@ void print_parameter_file(char* input_param_filename){
 
   fclose(param_file);
   free(filename);
-  free(fileroot);
+  free(output_dir);
 }
 
 /**
