@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.116 $
+ * $Revision: 1.117 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1476,8 +1476,7 @@ FILE** create_psm_files(){
 
   for(file_idx=0; file_idx<total_files; file_idx++){
 
-    char* psm_filename = generate_psm_filename(filename_path_array[0], 
-                                               file_idx);
+    char* psm_filename = generate_psm_filename(file_idx);
 
     file_handle_array[file_idx] = create_file_in_path(psm_filename,
                                                       output_directory,
@@ -2381,7 +2380,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   else{
     //    sprintf(suffix, "crux_match_decoy_%d", (int)set_type);
     //sprintf(prefix, "crux_match_decoy_%d", (int)set_type);
-    sprintf(suffix, "-decoy-%d.csm", (int)set_type);
+    sprintf(suffix, ".decoy-%d.csm", (int)set_type);
     match_collection->null_peptide_collection = TRUE;
   }
   
