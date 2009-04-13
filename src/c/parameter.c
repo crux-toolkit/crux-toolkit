@@ -587,7 +587,7 @@ void initialize_parameters(void){
       "(preliminary) score acts as a filter; only high scoring psms go "
       "on to be scored with xcorr.  This saves some time.  If set to 0, "
       "all psms are scored with both scores. ", "true");
-  set_int_parameter("top-match", 1, 1, BILLION, 
+  set_int_parameter("top-match", 5, 1, BILLION, 
       "The number of psms per spectrum writen to the output file(s)." 
       "Default 5.",
       "Available from parameter file for crux-search-for-matches.",
