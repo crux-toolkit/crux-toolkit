@@ -31,16 +31,20 @@ START_TEST(test_create){
 
   PEPTIDE_T* next_p = generate_peptides_iterator_next(gpiter1);
   fail_unless( next_p != NULL, "Next returned a null peptide");
-  fail_unless( strcmp(get_peptide_sequence(next_p), "QGQVATVLSAPAK") == 0,
-               "First peptide should be QGQVATVLSAPAK");
+  char* seq = get_peptide_sequence(next_p);
+  fail_unless( strcmp(seq, "ITNHLVAMIEK") == 0,
+               "First peptide should be ITNHLVAMIEK but is %s", seq);
   fail_unless( get_double_parameter("mass-window") == 3,
                "Default mass window should be 3.");
   fail_unless( generate_peptides_iterator_has_next(gpiter1) == TRUE,
                "Iterator should have second peptide");
 
   next_p = generate_peptides_iterator_next(gpiter1);
-  fail_unless( strcmp(get_peptide_sequence(next_p), "ITNHLVAMIEK") == 0,
-               "Second peptide should be ITNHLVAMIEK");
+  free(seq);
+  seq = get_peptide_sequence(next_p);
+  fail_unless( strcmp(seq, "QGQVATVLSAPAK") == 0,
+               "Second peptide should be QGQVATVLSAPAK but is %s", seq);
+  free(seq);
 }
 END_TEST
 

@@ -30,7 +30,7 @@ int main(void){
   // broken
   //Suite* suite_spectrum = spectrum_suite();
   Suite* suite_protein = protein_suite(); 
-  //Suite* suite_database = database_suite();
+  Suite* suite_database = database_suite();
   Suite* suite_index = index_suite(); 
   //Suite* suite_ion = ion_suite(); 
   //Suite* suite_scorer = scorer_suite();
@@ -60,7 +60,7 @@ int main(void){
   // broken
   //srunner_add_suite(sr,suite_spectrum);
   srunner_add_suite(sr,suite_protein);
-  //srunner_add_suite(sr,suite_database);
+  srunner_add_suite(sr,suite_database);
   //srunner_add_suite(sr,suite_index);
   //srunner_add_suite(sr,suite_ion);
   //srunner_add_suite(sr,suite_scorer);

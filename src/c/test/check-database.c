@@ -34,6 +34,31 @@ PEPTIDE_SRC_T* association3;
 
 DATABASE_T* db;
 
+void db_setup(){
+  db = new_database("input-data/protein2.fasta", FALSE);  // not memmapped
+}
+
+void db_teardown(){
+  free_database(db);
+}
+
+START_TEST(test_create){
+  fail_unless(db != NULL, "Newly allocated DB should not be null.");
+}
+END_TEST
+
+Suite* database_suite(void){
+  Suite *s = suite_create("Database");
+  TCase *tc_core = tcase_create("Core");
+  tcase_add_test(tc_core, test_create);
+
+  tcase_add_checked_fixture(tc_core, db_setup, db_teardown);
+  suite_add_tcase(s, tc_core);
+
+  return s;
+}
+
+/*  Chris's test
 START_TEST (test_create){
   char* name = NULL;
 
@@ -53,7 +78,7 @@ START_TEST (test_create){
   constraint = new_peptide_constraint(TRYPSIN, FULL_DIGEST, 0, 
                                       1200, 1, 10, 1, AVERAGE);
   
-  /* test database peptide iterator */
+  / * test database peptide iterator * /
   DATABASE_PEPTIDE_ITERATOR_T* iterator3 =
     new_database_peptide_iterator(db, constraint);
 
@@ -75,7 +100,7 @@ START_TEST (test_create){
   
   free_peptide(peptide5);
     
-  /* test database protein iterator */
+  / * test database protein iterator * /
   DATABASE_PROTEIN_ITERATOR_T* iterator2 =
     new_database_protein_iterator(db);
 
@@ -86,16 +111,16 @@ START_TEST (test_create){
   }
   fail_unless(n == 3, "failed to iterate over all proteins");
 
-  /* test database sorted peptide iterator */
+  / * test database sorted peptide iterator * /
   
   DATABASE_SORTED_PEPTIDE_ITERATOR_T* iterator4 =
     new_database_sorted_peptide_iterator(db, constraint, MASS, TRUE);
 
-  /**
+  / **
    * You shouldn't have to keep the database pointer around
    * The database pointer count system should be able to free database once
    * no longer any valid pointers are avaliable to the database
-   */
+   * /
   free_database(db);
 
 
@@ -115,7 +140,7 @@ START_TEST (test_create){
   free_peptide_constraint(constraint);
 
 
-  /************ Test using binary fasta file *************/
+  / ************ Test using binary fasta file ************* /
 
   //try create a new database
   db = new_database("fasta_file", TRUE);
@@ -133,7 +158,7 @@ START_TEST (test_create){
   //peptide constraint
   constraint = new_peptide_constraint(TRYPSIN, FULL_DIGEST, 0, 1200, 1, 10, 1, AVERAGE);
   
-  /* test database peptide iterator */
+  / * test database peptide iterator * /
   iterator3 =  new_database_peptide_iterator(db, constraint);
 
   n = 0;
@@ -154,7 +179,7 @@ START_TEST (test_create){
   
   free_peptide(peptide5);
     
-  /* test database protein iterator */
+  / * test database protein iterator * /
   iterator2 = new_database_protein_iterator(db);
 
   n = 0;
@@ -164,15 +189,15 @@ START_TEST (test_create){
   }
   fail_unless(n == 3, "failed to iterate over all proteins");
 
-  /* test database sorted peptide iterator */
+  / * test database sorted peptide iterator * /
   
   iterator4 = new_database_sorted_peptide_iterator(db, constraint, MASS, TRUE);
 
-  /**
+  / **
    * You shouldn't have to keep the database pointer around
    * The database pointer count system should be able to free database once
    * no longer any valid pointers are avaliable to the database
-   */
+   * /
   free_database(db);
   
 
@@ -192,12 +217,5 @@ START_TEST (test_create){
   free_peptide_constraint(constraint);
 }
 END_TEST
+*/
 
-Suite* database_suite(void){
-  Suite *s = suite_create("database");
-  TCase *tc_core = tcase_create("Core");
-  suite_add_tcase(s, tc_core);
-  tcase_add_test(tc_core, test_create);
-  //tcase_add_checked_fixture(tc_core, setup, teardown);
-  return s;
-}

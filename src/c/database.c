@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.65 $
+ * $Revision: 1.66 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -68,6 +68,9 @@ struct database_peptide_iterator {
     ///< the protein that was used before the current working protein
   BOOLEAN_T first_passed; 
     ///< is it ok to convert prior_protein to light?
+  PEPTIDE_T** peptide_list; ///< peptides to be returned by next()
+  int total_peptides;      ///< size of above array
+  int cur_peptide_idx;     ///< index of next to be returned
 };
 
 /**
@@ -79,6 +82,16 @@ struct database_sorted_peptide_iterator {
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator; 
     ///< the peptide iterator that sorts the peptides
 };
+
+/* Private Functions */
+PEPTIDE_T* database_peptide_iterator_next_from_file(
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator
+  );
+BOOLEAN_T database_peptide_iterator_has_next_from_file(
+  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator
+  );
+void generate_all_peptides(DATABASE_PEPTIDE_ITERATOR_T* iter);
+
 
 /**
  * \returns An (empty) database object.
@@ -938,9 +951,99 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   // set the current working protein
   database_peptide_iterator->prior_protein = next_protein;
   
+  // fill the peptide list with peptides ready to be returned
+  database_peptide_iterator->total_peptides = 0;
+  database_peptide_iterator->cur_peptide_idx = 0;
+  database_peptide_iterator->peptide_list = NULL;
+  generate_all_peptides(database_peptide_iterator);
+
   return database_peptide_iterator;
 }
 
+/**
+ * Private function to generate peptides for this iterator, sort them
+ * and remove duplicates before returning them to the caller.
+ * Peptides are stored in the iterators memeber variable peptide_list.
+ */
+void generate_all_peptides(DATABASE_PEPTIDE_ITERATOR_T* iter){
+  if( iter == NULL ){
+    carp(CARP_FATAL, "Cannot generate peptides for a null iterator.");
+    exit(1);
+  }
+  // create a dynamically sized list of all pepitdes for this iterator
+  LINKED_LIST_T* list = new_empty_list();
+  int duplicate_count = 0;
+  PEPTIDE_T* cur_peptide = NULL;
+  
+  while(database_peptide_iterator_has_next_from_file(iter)){
+    cur_peptide = database_peptide_iterator_next_from_file(iter);
+    push_back_linked_list(list, cur_peptide);
+    duplicate_count++;
+  }
+  // printf("Generated %i peptides\n", duplicate_count);
+  // Return now if no peptides in this iterator
+  if( duplicate_count == 0 ){
+    return;
+  }
+
+  // create an array for sorting and transfer peptides to array
+  PEPTIDE_T** duplicate_list = 
+    (PEPTIDE_T**)mycalloc(duplicate_count, sizeof(PEPTIDE_T*));
+  
+  int list_idx = 0;
+  while(! is_empty_linked_list(list)){
+    cur_peptide = pop_front_linked_list(list);
+    duplicate_list[list_idx] = cur_peptide;
+    list_idx++;
+    //printf("Unsorted seq: %s\n", get_peptide_sequence(cur_peptide));
+  }
+  delete_linked_list(list);
+
+  // temp to see if it will work
+  iter->peptide_list = duplicate_list;
+  iter->total_peptides = duplicate_count;
+  iter->cur_peptide_idx = 0;
+
+  qsort(duplicate_list, duplicate_count, sizeof(PEPTIDE_T*),
+        (void*)compare_peptide_lexical_qsort);
+
+  // compare each peptide to neighbor, consolidating identical peptides
+  cur_peptide = duplicate_list[0];
+  //printf("Sorted seq: %s\n", get_peptide_sequence(duplicate_list[0]));
+  int uniq_count = 1;
+  int dup_idx = 0;
+  for(dup_idx=1; dup_idx<duplicate_count; dup_idx++){
+    //printf("Sorted seq: %s\n", get_peptide_sequence(duplicate_list[dup_idx]));
+
+    if(compare_peptide_lexical_qsort(&cur_peptide, 
+                                     duplicate_list+dup_idx) == 0){
+      merge_peptides_copy_src(cur_peptide, duplicate_list[dup_idx]);
+      // this frees the second peptide
+      duplicate_list[dup_idx] = NULL;
+    }else{
+      cur_peptide = duplicate_list[dup_idx];
+      uniq_count++;
+    }
+  }// next peptide
+
+  //printf("Unique peptide count is %i\n", uniq_count );
+
+  // allocate uniq list and transfer from duplicate
+  iter->peptide_list = (PEPTIDE_T**)mycalloc(uniq_count, sizeof(PEPTIDE_T*));
+  iter->total_peptides = uniq_count;
+  
+  int uniq_idx = 0;
+  // go through all elements in duplcate list
+  for(dup_idx=0; dup_idx<duplicate_count; dup_idx++){
+    if( duplicate_list[dup_idx] != NULL ){
+      iter->peptide_list[uniq_idx] = duplicate_list[dup_idx];
+      uniq_idx++;
+    }
+  }
+  
+  // clean up
+  free(duplicate_list);
+}
 
 /**
  * Frees an allocated database_peptide_iterator object.
@@ -963,7 +1066,7 @@ void free_database_peptide_iterator(
  * \returns TRUE if there are additional peptides to iterate over,
  * FALSE if not. 
  */
-BOOLEAN_T database_peptide_iterator_has_next(
+BOOLEAN_T database_peptide_iterator_has_next_from_file(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator  
   ///< the iterator of interest -in
   )
@@ -975,9 +1078,40 @@ BOOLEAN_T database_peptide_iterator_has_next(
 }
 
 /**
+ * The basic iterator functions.
+ * \returns TRUE if there are additional peptides to iterate over,
+ * FALSE if not. 
+ */
+BOOLEAN_T database_peptide_iterator_has_next(
+  DATABASE_PEPTIDE_ITERATOR_T* iter ///< the iterator of interest -in
+  )
+{
+  if( iter == NULL ){
+    return FALSE;
+  }
+  if( iter->cur_peptide_idx < iter->total_peptides ){
+    return TRUE;
+  }
+  return FALSE;
+}
+
+PEPTIDE_T* database_peptide_iterator_next(
+  DATABASE_PEPTIDE_ITERATOR_T* iter){
+
+  if( iter == NULL || iter->cur_peptide_idx >= iter->total_peptides ){
+    return NULL;
+  }
+  
+  PEPTIDE_T* cur_peptide = iter->peptide_list[iter->cur_peptide_idx];
+  iter->cur_peptide_idx ++;
+  return cur_peptide;
+}
+
+/**
  * \returns The next peptide in the database.
  */
-PEPTIDE_T* database_peptide_iterator_next(
+PEPTIDE_T* database_peptide_iterator_next_from_file(
+//PEPTIDE_T* database_peptide_iterator_next(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator
   ///< the iterator of interest -in
   )
