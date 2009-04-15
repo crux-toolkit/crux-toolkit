@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.117 $
+ * $Revision: 1.118 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -342,7 +342,7 @@ int add_matches(
   if( sp_max_rank > 0 ){ 
     // rank by sp first 
     populate_match_rank_match_collection(match_collection, prelim_score);
-    collapse_redundant_matches(match_collection);
+    //collapse_redundant_matches(match_collection);
     truncate_match_collection( match_collection, sp_max_rank, prelim_score);
   }
 
@@ -350,7 +350,7 @@ int add_matches(
   populate_match_rank_match_collection(match_collection, final_score);
 
   if( sp_max_rank == 0 ){ // truncate here if not before
-    collapse_redundant_matches(match_collection);
+    //collapse_redundant_matches(match_collection);
     int xcorr_max_rank = get_int_parameter("psms-per-spectrum-reported");
     truncate_match_collection( match_collection, xcorr_max_rank, final_score);
   }

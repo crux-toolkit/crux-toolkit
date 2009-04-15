@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide_src.c
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  * \brief: Object for mapping a peptide to it's parent protein.
  ****************************************************************************/
 
@@ -92,6 +92,7 @@ void copy_peptide_src_array(PEPTIDE_SRC_T* original_array,
     new_array[src_idx].parent_protein = original_array[src_idx].parent_protein;
     new_array[src_idx].start_idx = original_array[src_idx].start_idx;
   }
+
 }
 
 /**
@@ -103,15 +104,18 @@ PEPTIDE_SRC_T* new_peptide_src_linklist(
   )
 {
   int src_idx = 1;
+  // create one peptide src
   PEPTIDE_SRC_T* src_list = (PEPTIDE_SRC_T*)mycalloc(1, sizeof(PEPTIDE_SRC_T));
   PEPTIDE_SRC_T* curr_src = src_list;
 
-  // set all next peptide src pointers
-  for(;src_idx < size - 1; ++src_idx){
+  // set all next peptide src pointers, if size is greater than 1
+  for(src_idx = 0; src_idx < size - 1; ++src_idx){
     curr_src->next_association = (PEPTIDE_SRC_T*)mycalloc(1, sizeof(PEPTIDE_SRC_T));
     curr_src = curr_src->next_association;
   }
 
+  // set last association to null
+  curr_src->next_association = NULL;
   return src_list;
 }
 
@@ -492,7 +496,6 @@ BOOLEAN_T parse_peptide_src(
     }
 
     // set fields in new peptide src
-
     parent_protein = 
       get_database_protein_at_idx(database, protein_index);
     

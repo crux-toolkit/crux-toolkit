@@ -56,13 +56,15 @@ START_TEST(test_has_next_unmod){
   // get the first peptide
   PEPTIDE_T* next_p = modified_peptides_iterator_next(iter1);
   fail_unless( next_p != NULL, "Next returned a null peptide");
-  fail_unless( strcmp(get_peptide_sequence(next_p), "QGQVATVLSAPAK") == 0,
-               "First peptide should be QGQVATVLSAPAK");
+  char* seq = get_peptide_sequence(next_p);
+  fail_unless( strcmp(seq, "ITNHLVAMIEK") == 0,
+               "First peptide should be ITNHLVAMIEK but is %s", seq);
 
   fail_unless( modified_peptides_iterator_has_next(iter1) == TRUE, 
                "Iterator should have a second peptide");
 
   free_peptide(next_p);
+  free(seq);
   // This creates segfault here but not in a stand-alone. why???
   /*next_p = modified_peptides_iterator_next(iter1);
     fail_unless( next_p != NULL, "Next returned a null second peptide");
