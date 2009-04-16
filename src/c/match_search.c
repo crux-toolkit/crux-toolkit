@@ -192,12 +192,6 @@ int search_main(int argc, char** argv){
   PEPTIDE_MOD_T** peptide_mods = NULL;
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
 
-  // DELETE ME
-  // for estimating params for p-values, randomly select a total of 
-  //    sample_count matches, a constant fraction from each peptide mod
-  //int sample_per_pep_mod =  sample_count / num_peptide_mods;
-  //carp(CARP_DEBUG, "Got %d peptide mods, sample %i per", 
-  //     num_peptide_mods, sample_per_pep_mod);
 
   // for each spectrum
   while(filtered_spectrum_charge_iterator_has_next(spectrum_iterator)){
@@ -228,6 +222,7 @@ int search_main(int argc, char** argv){
 
       // is it time to assess matches?
       int this_aa_mods = peptide_mod_get_num_aa_mods(peptide_mod);
+
       if( this_aa_mods > cur_aa_mods ){
         carp(CARP_DEBUG, "Finished searching %i mods", cur_aa_mods);
         BOOLEAN_T passes = is_search_complete(match_collection, cur_aa_mods);

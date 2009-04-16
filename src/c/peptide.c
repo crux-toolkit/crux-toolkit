@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.83 $
+ * $Revision: 1.84 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -757,7 +757,7 @@ char* get_peptide_modified_sequence(
  * \returns The number of amino acids in the peptide that have at
  * least one modification.
  */
-int count_modified_aas(PEPTIDE_T* peptide){
+int count_peptide_modified_aas(PEPTIDE_T* peptide){
   if( peptide == NULL ){
     return 0;
   }

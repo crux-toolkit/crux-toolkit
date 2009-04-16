@@ -4,7 +4,7 @@
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
  * generate_peptides_iterator to include modified peptides.
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  */
 #include "modified_peptides_iterator.h"
 
@@ -19,6 +19,8 @@ struct modified_peptides_iterator_t{
   PEPTIDE_MOD_T* peptide_mod;///< the modification to apply to peptides
   PEPTIDE_T* next_peptide;///< peptide queued to return next
   LINKED_LIST_T* temp_peptide_list;///< storage for modified peptides
+  int max_aas_modified; 
+  ///< return peptides with no more than this many aas modified
 };
 
 /* Private functions */
@@ -55,13 +57,14 @@ void queue_next_peptide(
     carp(CARP_DETAILED_DEBUG,"Queue is getting next peptide from temp list");
     iterator->next_peptide =pop_front_linked_list(iterator->temp_peptide_list);
 
+    /* this now done in modify peptide
     // now check that it does not exceed the max number of modified aas
     int max_aas_moded = get_int_parameter("max-aas-modified");
-    if( count_modified_aas(iterator->next_peptide) > max_aas_moded ){
+    if( count_peptide_modified_aas(iterator->next_peptide) > max_aas_moded ){
       free_peptide(iterator->next_peptide);
       queue_next_peptide(iterator);
     }
-
+    */
     return;
   }
 
@@ -110,7 +113,8 @@ void queue_next_peptide(
   )
   modify_peptide(unmod_peptide, 
                  iterator->peptide_mod, 
-                 iterator->temp_peptide_list );
+                 iterator->temp_peptide_list,
+                 iterator->max_aas_modified );
   // this put a copy in the list, get rid of the original
   free_peptide(unmod_peptide);
 
@@ -132,12 +136,14 @@ void queue_next_peptide(
     carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq);
     free(seq);
   )
+    /*
   // now check that it does not exceed the max number of modified aas
   int max_aas_moded = get_int_parameter("max-aas-modified");
-  if( count_modified_aas(iterator->next_peptide) > max_aas_moded ){
+  if( count_peptide_modified_aas(iterator->next_peptide) > max_aas_moded ){
     free_peptide(iterator->next_peptide);
     queue_next_peptide(iterator);
   }
+    */
 
 }
 
@@ -173,6 +179,9 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
        peptide_mod_get_num_aa_mods(pmod));
   MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
     allocate_modified_peptides_iterator();
+
+  // init the maximum number of aas that can be modified
+  new_iterator->max_aas_modified = get_int_parameter("max-aas-modified");
 
   // init the peptide list and peptide_mod
   new_iterator->temp_peptide_list = new_empty_list();
@@ -225,6 +234,9 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   ){
   MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
     allocate_modified_peptides_iterator();
+
+  // init max aas modified
+  new_iterator->max_aas_modified = get_int_parameter("max-aas-modified");
 
   // init the peptide list
   new_iterator->temp_peptide_list = new_empty_list();

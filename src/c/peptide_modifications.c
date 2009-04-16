@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  */
 
 #include "peptide_modifications.h"
@@ -406,7 +406,9 @@ void add_peptide_mod_seq(PEPTIDE_T* peptide, MODIFIED_AA_T* cur_mod_seq){
  * arguement a list of modified peptides.
  *
  * The peptide_mod should be guaranteed to be applicable to
- * the peptide at least once.  For the peptide_mod to be successfully
+ * the peptide at least once.  However, there may not be any modified
+ * forms that pass the max_aas_modified filter. For the peptide_mod to
+ * be successfully 
  * applied, every aa_mod in its list must be applied to the sequence
  * as many times as its value in the aa_mods_counts array.  A single
  * amino acid can be modified multiple times by different aa_mods, but
@@ -420,7 +422,9 @@ void add_peptide_mod_seq(PEPTIDE_T* peptide, MODIFIED_AA_T* cur_mod_seq){
 int modify_peptide(
   PEPTIDE_T* peptide,             ///< the peptide to modify
   PEPTIDE_MOD_T* peptide_mod,     ///< the set of aa_mods to apply
-  LINKED_LIST_T* modified_peptides){ ///< the returned modified peptides
+  LINKED_LIST_T* modified_peptides,///< the returned modified peptides
+  int max_aas_modified            ///< filter out peptides > m_a_m
+){ 
 
   if( peptide == NULL ){
     carp(CARP_ERROR, "Cannot modify NULL peptide or use NULL peptide mod");
@@ -443,6 +447,7 @@ int modify_peptide(
   // get the peptide sequence and convert to MODIFIED_AA_T*
   char* sequence = get_peptide_sequence(peptide);
   MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
+  int length = strlen(sequence);
 
   carp(CARP_DETAILED_DEBUG, "Modifying peptide %s", sequence);
 
@@ -478,23 +483,27 @@ int modify_peptide(
     }
   } // next aa_mod
 
+  carp(CARP_DETAILED_DEBUG, "Sequence %s has %i modified forms.", sequence, total_count);
   free(sequence);
 
   // create a peptide for each sequence and add it to the list   
+  // filter out those with more than max_aas_modified
+  total_count = 0;
   while( ! is_empty_linked_list( modified_seqs ) ){
-    PEPTIDE_T* cur_peptide = copy_peptide(peptide);
 
     MODIFIED_AA_T* cur_mod_seq = 
       (MODIFIED_AA_T*)pop_front_linked_list(modified_seqs);
+    if( count_modified_aas(cur_mod_seq, length) > max_aas_modified ){
+      continue;
+    }
 
-    //char* seq = modified_aa_string_to_string(cur_mod_seq);
-    //printf("  %s\n", seq);
-    //free(seq);
-
+    PEPTIDE_T* cur_peptide = copy_peptide(peptide);
     set_peptide_mod(cur_peptide, cur_mod_seq, peptide_mod);
 
     push_back_linked_list(modified_peptides, cur_peptide );
+    total_count++;
   }
+  carp(CARP_DETAILED_DEBUG, "There were %i modified seqs created", total_count);
   free(modified_seqs);
   return total_count;
 }

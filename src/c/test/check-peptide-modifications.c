@@ -23,6 +23,8 @@ PROTEIN_T* prot1;
 char* seq = "MRVLKFGGTSVANAERFLRVADILESNARQGQVAOOTVLSAPAKITNHLVA" \
 "MIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQC";
 
+int max_aas_modified = 255;
+
 void pmod_setup(){
   pmod1 = new_peptide_mod();
   pmod2 = new_peptide_mod();
@@ -250,7 +252,7 @@ END_TEST
 START_TEST(test_modify_null){
   // modify with a null pmod
   LINKED_LIST_T* returned_list = new_empty_list();
-  fail_unless( 1 == modify_peptide(pep1, NULL, returned_list),
+  fail_unless( 1 == modify_peptide(pep1, NULL, returned_list, max_aas_modified),
                "Modifying a peptide with a null pmod should return 1 peptide");
   PEPTIDE_T* moded_peptide = pop_front_linked_list(returned_list);
   fail_unless( strcmp( get_peptide_sequence(moded_peptide), 
@@ -270,7 +272,7 @@ START_TEST(test_modify_1){
 
   // test mod that is first in list
   LINKED_LIST_T* returned_list = new_empty_list();
-  fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list),
+  fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list, max_aas_modified),
                "Modify should return one version of FGGTSV*ANAER" );
   // test that it is modified correctly
   PEPTIDE_T* pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
@@ -290,7 +292,7 @@ START_TEST(test_modify_1){
   peptide_mod_add_aa_mod(pmod2, 2, 1); //third in list, one copy
   delete_linked_list(returned_list);
   returned_list = new_empty_list();
-  fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list),
+  fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list, max_aas_modified),
                "Modify should return one version of F*GGTSVANAER" );
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
@@ -304,7 +306,7 @@ START_TEST(test_modify_1){
 
   // test an n-term mod
   aa_mod_set_position(amod3, N_TERM);
-  fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list),
+  fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list, max_aas_modified),
                "Modify should return one version of FGGTSVANAER*" );
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
@@ -318,7 +320,7 @@ START_TEST(test_modify_1){
 
   // test an c-term mod
   aa_mod_set_position(amod1, C_TERM);
-  fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list),
+  fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list, max_aas_modified),
                "Modify should return one version of F*GGTSVANAER" );
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
@@ -342,7 +344,7 @@ START_TEST(test_modify_2){
   peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one copy
 
   LINKED_LIST_T* returned_list = new_empty_list();
-  fail_unless( 2 == modify_peptide(pep1, pmod1, returned_list),
+  fail_unless( 2 == modify_peptide(pep1, pmod1, returned_list, max_aas_modified),
                "Modify should return two versions of FGGTSVANAER" );
   // test that they are modified correctly
   //FG*GTSVANAER, FGG*TSVANAER
@@ -358,7 +360,7 @@ START_TEST(test_modify_2){
   peptide_mod_add_aa_mod(pmod1, 1, 1); //second mod in list, one copy
   fail_unless( peptide_mod_get_num_aa_mods(pmod1) == 2,
                "pmod1 should have two aa mods");
-  int num_returned = modify_peptide(pep1, pmod1, returned_list);
+  int num_returned = modify_peptide(pep1, pmod1, returned_list, max_aas_modified);
   fail_unless( 4 == num_returned,
                "Modify should give 4 of FGGTSVANAER(G*,A@), but gave %d",
                num_returned);
@@ -374,7 +376,7 @@ START_TEST(test_modify_2){
   // create mod of one G/A* and one A@ -> 8 versions
   mod_us = aa_mod_get_aa_list(amod1);
   mod_us['A'-'A'] = TRUE;
-  num_returned = modify_peptide(pep1, pmod1, returned_list);
+  num_returned = modify_peptide(pep1, pmod1, returned_list, max_aas_modified);
   fail_unless( 8 == num_returned,
                "Modify should give 8 of FGGTSVANAER(GA*,A@), but gave %d",
                num_returned);
@@ -397,7 +399,7 @@ START_TEST(test_modify_3){
   peptide_mod_add_aa_mod(pmod1, 0, 3); //first in list, three copies
 
   LINKED_LIST_T* returned_list = new_empty_list();
-  int num_returned = modify_peptide(pep1, pmod1, returned_list); 
+  int num_returned = modify_peptide(pep1, pmod1, returned_list, max_aas_modified); 
   fail_unless( 4 == num_returned,
                "Modify should return 4 of FGGTSVANAER, but returned %d",
                num_returned);
