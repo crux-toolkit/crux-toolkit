@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file database.c
- * $Revision: 1.66 $
+ * $Revision: 1.67 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
 #include <stdio.h>
@@ -1058,7 +1058,11 @@ void free_database_peptide_iterator(
   free_database_protein_iterator(
                      database_peptide_iterator->database_protein_iterator);
   free_peptide_constraint(database_peptide_iterator->peptide_constraint);
+  if(database_peptide_iterator->peptide_list){
+    free(database_peptide_iterator->peptide_list);
+  }
   free(database_peptide_iterator);
+
 }
 
 /**

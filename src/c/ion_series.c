@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.49 $
+ * REVISION: $Revision: 1.50 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -237,7 +237,6 @@ void update_ion_series(
   // copy the peptide sequence
   ion_series->peptide = my_copy_string(peptide);
   ion_series->peptide_length = strlen(peptide);
-  //  ion_series->modified_aa_seq = copy_mod_aa_seq(mod_seq);
   ion_series->modified_aa_seq = copy_mod_aa_seq(mod_seq, 
                                                 ion_series->peptide_length);
   
@@ -402,10 +401,8 @@ void scan_for_aa_for_neutral_loss(
   )
 {
   int peptide_length = ion_series->peptide_length;
-  //char* sequence = ion_series->peptide;
-  char* sequence = modified_aa_to_unmodified_string(
-                                                ion_series->modified_aa_seq, 
-                                                peptide_length);
+  char* sequence = ion_series->peptide;
+
   int h2o_aa = 0;
   int nh3_aa = 0;
   LOSS_LIMIT_T* loss_limit_count = NULL; // debug
@@ -1081,6 +1078,7 @@ void copy_ion_series(
   dest->peptide = my_copy_string(src->peptide);
   dest->charge = src->charge;
   dest->peptide_length = src->peptide_length;
+  //mod seq???
 
   // add copy of pointer ion constraint
   dest->constraint = src->constraint;

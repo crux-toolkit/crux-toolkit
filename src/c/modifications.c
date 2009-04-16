@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  */
 
 #include "modifications.h"
@@ -781,4 +781,23 @@ char* aa_mod_get_aa_list_string(AA_MOD_T* mod){
   return list_string;
 }
 
+/**
+ * Count the number of modified aas in the string.
+ */
+int count_modified_aas(MODIFIED_AA_T* seq, int length){
+  if( seq == NULL ){
+    return 0;
+  }
 
+  int count = 0;
+  int aa_idx = 0;
+  for(aa_idx=0; aa_idx < length; aa_idx++){
+
+    if( GET_MOD_MASK & seq[aa_idx] ){
+      count++;
+    }
+  }
+
+  return count;
+
+}

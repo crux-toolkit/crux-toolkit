@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.118 $
+ * $Revision: 1.119 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -1054,7 +1054,7 @@ BOOLEAN_T score_peptides(
     //all debugging information in order to make a more optimized crux.
     IF_CARP_DETAILED_DEBUG(
       char* seq = get_peptide_modified_sequence(peptide);
-      carp(CARP_DETAILED_DEBUG, "peptide %s has %i modified aas", seq, count_modified_aas(peptide)); 
+      carp(CARP_DETAILED_DEBUG, "peptide %s has %i modified aas", seq, count_peptide_modified_aas(peptide)); 
       free(seq);
     )
     // create a match
@@ -1120,10 +1120,6 @@ BOOLEAN_T score_peptides(
   match_collection->scored_type[score_type] = TRUE;
 
   // Let caller do sorting 
-  // sort by this score
-  //sort_match_collection(match_collection, score_type);
-  // populate ranks
-  //populate_match_rank_match_collection(match_collection, score_type);
 
   // clean up
   free_ion_series(ion_series);

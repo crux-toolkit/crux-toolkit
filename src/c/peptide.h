@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.50 $
+ * $Revision: 1.51 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -315,7 +315,7 @@ char* get_peptide_modified_sequence(
  );
 
 /*  Getters requiring calculation */
-int count_modified_aas(PEPTIDE_T* peptide);
+int count_peptide_modified_aas(PEPTIDE_T* peptide);
 
 /**
  * \returns The mass of the given peptide.
