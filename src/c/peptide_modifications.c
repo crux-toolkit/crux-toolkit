@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  */
 
 #include "peptide_modifications.h"
@@ -41,7 +41,8 @@ struct _peptide_mod{
 int apply_mod_to_list(
   LINKED_LIST_T* mod_seqs, ///< a pointer to a list of seqs
   AA_MOD_T* mod_to_apply,  ///< the specific mod to apply
-  int num_copies
+  int num_copies,
+  int max_aas_modified
 );
 
 int apply_mod_to_seq(
@@ -447,7 +448,6 @@ int modify_peptide(
   // get the peptide sequence and convert to MODIFIED_AA_T*
   char* sequence = get_peptide_sequence(peptide);
   MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
-  int length = strlen(sequence);
 
   carp(CARP_DETAILED_DEBUG, "Modifying peptide %s", sequence);
 
@@ -468,10 +468,11 @@ int modify_peptide(
     int mod_count = aa_mod_counts[aa_mod_idx];
     if( mod_count == 0 ){ continue; } // do not apply this aa mod
 
-    //printf("applying to list, total count is %d\n", total_count);
+    //fprintf(stderr, "applying to list, total count is %d\n", total_count);
     total_count = apply_mod_to_list(modified_seqs, 
                                     aa_mod_list[aa_mod_idx],
-                                    mod_count);
+                                    mod_count,
+                                    max_aas_modified);
 
     //printf("after applying count is %d\n", total_count);
     // the count should be > 0, but check for error case
@@ -493,7 +494,7 @@ int modify_peptide(
 
     MODIFIED_AA_T* cur_mod_seq = 
       (MODIFIED_AA_T*)pop_front_linked_list(modified_seqs);
-    if( count_modified_aas(cur_mod_seq, length) > max_aas_modified ){
+    if( count_modified_aas(cur_mod_seq) > max_aas_modified ){
       continue;
     }
 
@@ -525,7 +526,8 @@ int modify_peptide(
 int apply_mod_to_list(
   LINKED_LIST_T* apply_mod_to_these, ///< a pointer to a list of seqs
   AA_MOD_T* mod_to_apply,  ///< the specific mod to apply
-  int num_to_apply         ///< how many of this mod to apply
+  int num_to_apply,         ///< how many of this mod to apply
+  int max_aas_modified ///< don't return seqs with more than this many aas moded
 ){
 
   /* Null cases */
@@ -584,8 +586,33 @@ int apply_mod_to_list(
 
   }// apply next time
 
-  //  combine_lists( mod_seqs, completed_seqs );
   free( completed_seqs ); // just the head of the list
+
+  // Check all seqs in list and remove those with too many aas modified
+  // push a dummy onto the front for ease of deleting
+  // in a list nodeA->nodeB, we need nodeA to delete nodeB
+  // call A and B prev and cur
+  push_front_linked_list(apply_mod_to_these, NULL);
+  LIST_POINTER_T* prev_node = get_first_linked_list(apply_mod_to_these);
+  LIST_POINTER_T* cur_node = NULL;
+  MODIFIED_AA_T* cur_seq = NULL;
+
+  while( has_next_linked_list(prev_node) ){
+    cur_node = get_next_linked_list(prev_node);
+    cur_seq = (MODIFIED_AA_T*)get_data_linked_list(cur_node);
+
+    if( count_modified_aas(cur_seq) > max_aas_modified){
+      // delete cur, set cur to node after prev
+      cur_node = delete_next_list_node(prev_node);
+      free(cur_seq);  // list delete doesn't remove data
+
+    }else
+      prev_node = cur_node;
+      cur_node = get_next_linked_list(prev_node);
+      cur_seq = (MODIFIED_AA_T*)get_data_linked_list(cur_node);
+  }// next seq
+  // pop the dummy off the front
+  pop_front_linked_list(apply_mod_to_these);
 
   return return_seq_count;
 }

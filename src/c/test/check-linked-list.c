@@ -5,6 +5,7 @@
 // declare things to set up
 int *data1, *data2, *data3;
 LINKED_LIST_T *list1, *list2, *list3;
+LIST_POINTER_T *nodea, *nodeb;
 
 void list_setup(){
   data1 = (int*)malloc(sizeof(int));
@@ -16,6 +17,8 @@ void list_setup(){
   list1 = new_list(data1);
   list2 = new_list(data3);
   list3 = new_empty_list();
+  nodea = NULL;
+  nodeb = NULL;
 }
 
 void list_teardown(){
@@ -291,6 +294,50 @@ START_TEST(test_delete){
 }
 END_TEST
 
+START_TEST(test_delete_next){
+  // create a list 
+  LINKED_LIST_T* head = new_list(data1);// node 1
+  push_back_linked_list(head, data1); // node 2
+  push_back_linked_list(head, data2); // node 3
+  push_back_linked_list(head, data2); // node 4
+  push_back_linked_list(head, data3); // node 5
+
+  // to delete node 4, get a pointer to 3
+  nodea = get_first_linked_list(head); // 1
+  nodea = get_next_linked_list(nodea); // 2
+  nodea = get_next_linked_list(nodea); // 3
+  // also get node 4
+  nodeb = get_next_linked_list(nodea);
+
+  // confirm data
+  fail_unless(data2 == (int*)get_data_linked_list(nodea),
+              "Node 3 should point to %i but instead points to %i.",
+              *data2, *(int*)get_data_linked_list(nodea));
+  fail_unless(data2 == (int*)get_data_linked_list(nodeb),
+              "Node 4 should point to %i but instead points to %i.",
+              *data2, *(int*)get_data_linked_list(nodeb));
+
+  delete_next_list_node(nodea); // now 3 points to 5
+  // 3 still has data2
+  fail_unless(data2 == (int*)get_data_linked_list(nodea),
+              "Node 3 should point to %i but instead points to %i.",
+              *data2, *(int*)get_data_linked_list(nodea));
+
+  // 3 now points to node 5 which has data3
+  nodeb = get_next_linked_list(nodea);
+  fail_unless(data3 == (int*)get_data_linked_list(nodeb),
+              "Node after 3 should point to %i but instead points to %i.",
+              *data3, *(int*)get_data_linked_list(nodeb));
+
+  // if we delete the end, node 3 should point to null
+  delete_next_list_node(nodea); // now 3 points to null
+  nodeb = get_next_linked_list(nodea);
+  fail_unless(nodeb == NULL, 
+              "After deleting two nodes, node 3 should be at the end.");
+
+}
+END_TEST
+
 START_TEST(test_pop){
   // pop front/back emptylist
   fail_unless( pop_back_linked_list( list3 ) == NULL,
@@ -458,6 +505,7 @@ Suite* list_suite(){
   tcase_add_test(tc_core, test_clear);
   tcase_add_test(tc_core, test_delete);
   tcase_add_test(tc_core, test_pop);
+  tcase_add_test(tc_core, test_delete_next);
   tcase_add_checked_fixture(tc_core, list_setup, list_teardown);
 
   // Test boundry conditions
