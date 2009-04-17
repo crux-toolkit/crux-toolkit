@@ -342,6 +342,33 @@ void delete_linked_list(LINKED_LIST_T* list){
   return;
 }
 
+/**
+ * \brief Deletes only the node AFTER this one.  The given node then
+ * points to what the next node pointed to before. The data remains
+ * untouched. 
+ * \returns A pointer to the new list element that follows the given one.
+ */
+LIST_POINTER_T* delete_next_list_node(LIST_POINTER_T* pre_node){
+
+  if( pre_node == NULL ){
+    return NULL;
+  }
+  // before: head ....pre-> delete-> next...NULL
+  // after : head ....pre-> next...NULL
+
+  LIST_POINTER_T* delete_node = pre_node->next;
+  if( delete_node == NULL ){
+    return NULL;
+  }
+  LIST_POINTER_T* next_node = delete_node->next;
+
+  pre_node->next = next_node;
+  free(delete_node);
+
+  return next_node;
+}
+
+
 /*
 // add node after this but before what follows
 void insert_linked_list(LIST_POINTER_T* node){

@@ -123,6 +123,12 @@ void delete_linked_list(LINKED_LIST_T* list);
  */
 void delete_list_node(LIST_POINTER_T* list);
 
+/**
+ * \brief Deletes only the node AFTER this one.  The given node then
+ * points to what the next node pointed to before. 
+ * \returns A pointer to the new list element that follows the given one.
+ */
+LIST_POINTER_T* delete_next_list_node(LIST_POINTER_T* pre_node);
 
 
 
