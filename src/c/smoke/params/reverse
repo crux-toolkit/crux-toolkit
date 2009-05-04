@@ -1,0 +1,9 @@
+fileroot=reverse
+top-match=100
+overwrite=T
+number-decoy-set=1
+write-parameter-file=T
+precision=2
+reverse-sequence=T
+mod=0.5:ABCDEFGHIJKLMNOPQRSTUVWXYZ:1
+seed=7

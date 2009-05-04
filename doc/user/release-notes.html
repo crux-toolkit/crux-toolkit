@@ -71,11 +71,12 @@ Protein names for decoy matches are now prepended with 'rand_' as in
 L rand_Y45678.
 
 <li>
-A new option, <code>tdc</code>, which stands for 'target decoy
-competition' has been introduced.  When this option is set to true,
-the target and decoy psms are sorted together and printed to one
-file.  The value for <code>max-rank-preliminary</code> is adjusted so
-that twice as many psms are retained after prelimnary scoring.
+A new option, <code>decoy-location</code> has been introduced.  The
+three possible values are 'target-file' where all psms (target and
+decoys) are sorted together for each spectrum and returned in one
+file, 'one-decoy-file' where target psms are printed to one file and
+all decoys are printed to another, and 'separate-decoy-files' where
+there are as many decoy files as there are decoys per target.
 
 <li>
 All indexes are created with unique-pepties=TRUE.  Searches with

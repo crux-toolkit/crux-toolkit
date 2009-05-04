@@ -498,7 +498,7 @@ void initialize_parameters(void){
   set_string_parameter("decoy-sqt-output-file", "search.decoy.sqt", 
       "SQT output file name for decoys.  Default 'search.decoy.sqt'.",
       "Used by crux search-for-matches with "
-      "number-decoy-sets > 0.  The location of this file is controlled by "
+      "number-decoy-set > 0.  The location of this file is controlled by "
       "--output-dir.", "true");
   set_string_parameter("search-tab-output-file", "search.target.txt", 
       "Tab delimited output file name. Default 'search.target.txt'",
@@ -517,8 +517,8 @@ void initialize_parameters(void){
       "Used by crux search-for-matches with "
       "number-decoy-set > 0.  The location of this file is controlled by "
       "--output-dir.", "true");
+  
   // user options regarding decoys
-  /*
   set_int_parameter("num-decoys-per-target", 2, 0, 10,
       "Number of decoy peptides to search for every target peptide searched."
       "  Default 2.",
@@ -537,14 +537,12 @@ void initialize_parameters(void){
   // coder options regarding decoys
   set_int_parameter("number-decoy-set", 2, 0, 10, 
       "Now hidden from user controls how many decoy match_collections/files",
-                    "", "false");
+      "", "false");
   set_boolean_parameter("tdc", FALSE,
       "Target-decoy competition. puts decoy psms in target file. ",
-                        "Now hidden from the user", "false");
-  set_int_parameter("num-decoys-per-target", 1, 1, BILLION,
-      "set if multiple decoy searches are put in one match collection", 
-      "Now hidded from the user.", "false");
-  */
+      "Now hidden from the user", "false");
+
+  /*
   set_int_parameter("number-decoy-set", 2, 0, 10, 
       "The number of decoy databases to search, generating one output file "
       "per set.  Default 2.", 
@@ -555,8 +553,9 @@ void initialize_parameters(void){
       "file) is required to run the algorithm 'percolator' in a subsiquent "
       "crux run. Used by crux-search-for-matches.  Decoy search results can "
       "be used by crux percolator.", "true");
-
+  */
   /* search-for-matches parameter file options */
+  /*
   set_boolean_parameter("tdc", FALSE,
       "Target-decoy competition.  Combine target and decoy searches in "
       "one file.  Default FALSE, separate files.",
@@ -572,6 +571,7 @@ void initialize_parameters(void){
       "Multiple decoys are put in the same collection, sorted together, and "
       "written to the same file.  Does not affect --number-decoy-sets or tdc.",
       "true");
+  */
   set_boolean_parameter("reverse-sequence", FALSE,
       "Generate decoys by reversing the peptide string rather than shuffling."
       " Default F.",
@@ -1039,7 +1039,6 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 
   update_aa_masses();
 
-  /*
   // translate user decoy options into the old set of options
   // get user values
   int num_decoy_per_target = get_int_parameter("num-decoys-per-target");
@@ -1048,8 +1047,9 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   // store new values here
   BOOLEAN_T tdc = FALSE;
   int new_num_decoy_per_target = 0;
-  int new_num_decoy_set = 0;
-  int new_max_rank_preliminary = 0;
+  int new_num_decoy_set = 0;        // number of decoy files
+  //int new_max_rank_preliminary = 0; 
+  int new_max_rank_preliminary = max_rank_preliminary; 
 
   if( num_decoy_per_target == 0 ){
     free(location);
@@ -1057,19 +1057,19 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   }
 
   // set new values
-  if( strcmp(location, "target-file") ){
+  if( strcmp(location, "target-file") == 0 ){
     tdc = TRUE;
-    new_num_decoy_set = 0;
+    new_num_decoy_set = 0; // ie no decoy files
     new_num_decoy_per_target = num_decoy_per_target;
-    if( max_rank_preliminary > 0 ){
+    if( max_rank_preliminary > 0 ){  // scale to num decoys
       new_max_rank_preliminary = max_rank_preliminary * 
                                 (1 + new_num_decoy_per_target);
     }
-  }else if( strcmp(location, "one-decoy-file") ){
+  }else if( strcmp(location, "one-decoy-file") == 0 ){
     tdc = FALSE;
     new_num_decoy_set = 1;
     new_num_decoy_per_target = num_decoy_per_target;
-  }else if( strcmp(location, "separate-decoy-files") ){
+  }else if( strcmp(location, "separate-decoy-files") == 0 ){
     tdc = FALSE;
     new_num_decoy_set = num_decoy_per_target;
     new_num_decoy_per_target = 1;
@@ -1078,10 +1078,10 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   // now update all values
   char buffer[PARAMETER_LENGTH];
   sprintf(buffer, "%i", new_num_decoy_set);
-  update_hash_value(parameters, "num-decoy-decoy-set", buffer);
+  update_hash_value(parameters, "number-decoy-set", buffer);
 
   sprintf(buffer, "%i", new_num_decoy_per_target);
-  update_hash_value(parameters, "num-decoy-per-target", buffer);
+  update_hash_value(parameters, "num-decoys-per-target", buffer);
 
   sprintf(buffer, "%i", new_max_rank_preliminary);
   update_hash_value(parameters, "max-rank-preliminary", buffer);
@@ -1091,8 +1091,8 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   }else{
     update_hash_value(parameters, "tdc", "FALSE");
   }
-  */
 
+  /*
   if( get_boolean_parameter("tdc") == TRUE ){
     // change num-decoys so that no decoy.sqt file written
     update_hash_value(parameters, "number-decoy-set", "0");
@@ -1107,7 +1107,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     snprintf(buffer, PARAMETER_LENGTH, "%i", top_match);
     update_hash_value(parameters, "max-rank-preliminary", buffer);
   }
-
+  */
 
   // for compute-q-values, set algorithm to q-value (perc by default)
   if( strcmp(argv[0], "compute-q-values") == 0 ){
@@ -1289,7 +1289,6 @@ void check_parameter_consistency(){
   /* If no-enzyme, set digestion to non-specific and missed to true */
   if( get_enzyme_type_parameter("enzyme") == NO_ENZYME ){
     char* val_str = digest_type_to_string(NON_SPECIFIC_DIGEST);
-    //fprintf(stderr, "val str is %s\n", val_str);
     update_hash_value(parameters, "digestion", val_str);
     free(val_str);
     update_hash_value(parameters, "missed-cleavages", "TRUE");
