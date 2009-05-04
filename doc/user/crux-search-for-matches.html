@@ -114,6 +114,7 @@ search,decoy.txt are also produced.</p>
 <B>Options:</B>
 <UL>
 
+<li>
 <code>--fileroot &lt;string&gt;</code> &ndash; 
 The <code>fileroot</code> string will be added as a prefix to all
 output file names. Default = none.</li>
@@ -138,7 +139,14 @@ crux run.  Default = 2. </li>
 
 <li>
 <code>--decoy-location &lt;target-file | one-decoy-file | separate-decoy-files&gt;</code> &ndash;
-File(s) in which decoy results are returned.  Only applies when
+File(s) in which decoy results are returned.  Only applies
+when <code>num-decoys-per-target</code> is not zero.  Use
+'target-file' to mix target and decoy psms in one file.  Use
+'one-decoy-file' to print target psms to one file and all decoys to a
+separate file.  Use 'separate-decoy-files' to print one .csm file for
+each decoy set.  (<code>crux percolator</code> accepts up to two
+decoy.csm files.)  Note that at most one search.decoy.sqt and one
+search.decoy.txt file is produced.  Default = separate-decoy-files.
 
 <li>
 <code>--compute-p-values &lt;T | F&gt; &ndash</code>
