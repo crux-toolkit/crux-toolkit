@@ -106,9 +106,9 @@ printed to stderr.
 </ul>
 
 <p>
-If decoys are enabled using <code>--number-decoy-set</code>, then
-three files called binary.csm, binary.sqt and binary.txt are also
-produced.</p>
+If decoys are enabled using <code>--num-decoys-per-target</code>, then
+three files called search.decoy.csm, search.decoy.sqt and
+search,decoy.txt are also produced.</p>
 
 
 <B>Options:</B>
@@ -129,14 +129,16 @@ Default = crux-out.</li>
 fail when trying to overwrite a file if false (F). Default =  F.</li>
 
 <LI>
-<code>--number-decoy-set &lt;0|1|2&gt;</code> &ndash; Specify the number
-of decoy sets to generate.  Each decoy set of psms will be printed to
-a separate file and not included with the target psms.  To return
-decoys in the same file as targets, use <code>tdc=T</code> in the
-parameter file and control the number of decoys
-with <code>num-decoys-per-target</code>. At least one decoy set (in
+<code>--num-decoys-per-target &lt;n&gt;</code> &ndash; Specify the number
+of decoy peptides to search for every target peptide searched.
+Control where the decoys are returned (to what files) with 
+<code>--decoy-location</code>. At least one decoy set (in
 its own file) is required to run the algorithm 'percolator' in a subsiquent
 crux run.  Default = 2. </li>
+
+<li>
+<code>--decoy-location &lt;target-file | one-decoy-file | separate-decoy-files&gt;</code> &ndash;
+File(s) in which decoy results are returned.  Only applies when
 
 <li>
 <code>--compute-p-values &lt;T | F&gt; &ndash</code>
@@ -212,24 +214,6 @@ Default = 5.
 <p>
 <i>NOTE: <code>crux percolator</code> requires that <code>search-for-matches</code>
 be run with <code>top-match=1</code>.</i></p>
-
-<li>
-<code>tdc &lt;T|F&gt;</code> &ndash;
-Target-decoy competition.  Combine target and decoy searches in one
-file.  Default FALSE, separate files. After searching target and decoy
-peptides, all psms for one spectrum are sorted together and the mixed
-list is returned in the search.target.[sqt|txt|csm] file. Set number of decoys with
-num-decoys-per-target.  The number of psms retained after preliminary
-searching (max-rank-preliminary) is increased to reflect the number of
-decoys searched so that (1+num-decoys)*max-rank-preliminary are kept.
-Default = F.
-
-<Li>
-<code>num-decoys-per-target &lt;int&gt;</code> &ndash;
-Number of decoy peptides to search for every target peptide
-searched. Multiple decoys are put in the same collection,
-sorted together, and written to the same file.  Does not affect
---number-decoy-sets or tdc.  Default 1. 
 
 <li>
 <code>mod &lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;

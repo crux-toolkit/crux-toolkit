@@ -77,6 +77,15 @@ search_elastase = good_results/standard_search_elastase.sqt = rm -rf crux-output
 # Search with custom enzyme set to elastase rules
 search_custom_like_elastase = good_results/standard_search_elastase.sqt = rm -rf crux-output;crux search-for-matches --parameter-file params/custom-enzyme  test.ms2 test.fasta; cat crux-output/search.target.sqt = 'Time' 'EnzymeSpec'
 
+# Print decoys to target file (previously the --tdc option)
+search_tdc = good_results/tdc.target.sqt = rm -rf tdc; crux search-for-matches --parameter-file params/tdc test.ms2 test.fasta;  cat tdc/search.target.sqt = 'Time'
+
+# Search 3 decoys per target but print all decoys to one file
+decoys_one_file = good_results/one-decoy-file.decoy.sqt = rm -rf one-decoy-file; crux search-for-matches --parameter-file params/one-decoy-file test.ms2 test.fasta; cat one-decoy-file/search.decoy.sqt = 'Time'
+
+# Confirm that no decoy files were created for tdc and that only one decoy file created for one-decoy-file
+list_files = good_results/list-files-tdc-one-decoy-file = ls one-decoy-file tdc  
+
 # TESTS WITH INDEX
 
 # See that crux-generate-peptides works with an existing index

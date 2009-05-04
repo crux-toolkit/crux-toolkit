@@ -1,0 +1,50 @@
+H	SQTGenerator Crux
+H	SQTGeneratorVersion 1.0
+H	Comment Crux was written by...
+H	Comment ref...
+H	StartTime	Mon May  4 12:33:53 2009
+H	EndTime                               
+H	Database	test.fasta
+H	Comment	Database shuffled; these are decoy matches
+H	DBSeqLength	?
+H	DBLocusCount	4
+H	PrecursorMasses	average
+H	FragmentMasses	mono
+H	Alg-PreMasTol	3.0
+H	Alg-FragMassTol	0.50
+H	Alg-XCorrMode	0
+H	Comment	preliminary algorithm sp
+H	Comment	final algorithm xcorr
+H	StaticMod	C=160.139
+H	Alg-DisplayTop	5
+H	EnzymeSpec	trypsin-full-digest
+H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
+H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, xcorr score, sp score, number ions matched, total ions compared, sequence
+S	14	14	2	0.000000	server	998.804382	0.000000	0.000000	3
+M	1	1	1001.150330	0.000000	0.198721	79.873070	4	14	K.FLSHEQLK.D	U
+L	rand_gi|6381999|ref|NP_009311.2|
+M	2	2	1001.150330	0.461011	0.107108	11.236476	2	14	K.FEQSLHLK.D	U
+L	rand_gi|6381999|ref|NP_009311.2|
+M	3	3	1001.150330	1.387441	-0.076993	9.025441	2	14	K.FLLHSQEK.D	U
+L	rand_gi|6381999|ref|NP_009311.2|
+S	14	14	3	0.000000	server	1498.206543	0.000000	0.000000	3
+M	1	1	1495.814941	0.000000	0.535058	115.825935	9	44	R.VTTIMNFYTMFK.Y	U
+L	rand_gi|6382000|ref|NP_009314.2|
+M	2	2	1495.814941	0.836002	0.087749	80.092293	8	44	R.VTMFITTFYMNK.Y	U
+L	rand_gi|6382000|ref|NP_009314.2|
+M	3	3	1495.814941	0.945660	0.029075	67.845963	8	44	R.VTITMMFTNFYK.Y	U
+L	rand_gi|6382000|ref|NP_009314.2|
+S	15	15	2	0.000000	server	975.624390	0.000000	0.000000	3
+M	1	1	973.093567	0.000000	0.001284	23.166813	4	16	K.STIYGAYAK.A	U
+L	rand_gi|6381999|ref|NP_009311.2|
+M	2	2	973.093567	151.253189	-0.192993	2.358638	1	16	K.SYTIYGAAK.A	U
+L	rand_gi|6381999|ref|NP_009311.2|
+M	3	3	973.093567	184.522751	-0.235726	0.000000	0	16	K.SAIGYATYK.A	U
+L	rand_gi|6381999|ref|NP_009311.2|
+S	15	15	3	0.000000	server	1463.436523	0.000000	0.000000	3
+M	1	1	1464.811157	0.000000	0.102854	20.011152	6	44	K.QYLLLYNALLIK.L	U
+L	rand_gi|6381999|ref|NP_009311.2|
+M	2	3	1464.811157	0.578625	0.043340	14.222495	5	44	K.QYLNLLYALILK.L	U
+L	rand_gi|6381999|ref|NP_009311.2|
+M	3	2	1464.811157	1.390319	-0.040146	15.035056	5	44	K.QYLLILLYLANK.L	U
+L	rand_gi|6381999|ref|NP_009311.2|

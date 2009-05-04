@@ -31,7 +31,7 @@
 #include "match_collection.h"
 #include <errno.h>
 
-#define NUM_SEARCH_OPTIONS 12
+#define NUM_SEARCH_OPTIONS 13
 #define NUM_SEARCH_ARGS 2
 #define PARAM_ESTIMATION_SAMPLE_COUNT 500
 
@@ -69,7 +69,8 @@ int search_main(int argc, char** argv){
     "spectrum-charge",
     "output-dir",
     "fileroot",
-    "number-decoy-set"
+    "num-decoys-per-target",
+    "decoy-location"
   };
 
   /* Define required command line arguments */
@@ -306,6 +307,8 @@ int search_main(int argc, char** argv){
     // decoy files is 0 but we want to do at least one decoy searc for tdc
     num_decoys = (combine_target_decoy) ? 1 : num_decoys;
 
+    carp(CARP_DEBUG, "num_decoys (decoy set) %i, num_decoy_repeats (decoy per target) %i, max mods %i", num_decoys, num_decoy_repeats, max_mods);
+
     for(decoy_idx = 0; decoy_idx < num_decoys; decoy_idx++ ){
       carp(CARP_DETAILED_DEBUG, "Searching decoy %i", decoy_idx+1);
 
@@ -462,8 +465,7 @@ int prepare_protein_input(char* input_file,
  * \brief A private function for crux-search-for-matches to prepare
  * binary psm, tab-delimited text, and sqt files.
  *
- * Reads the --overwrite value from
- * parameter.c. Opens psm file(s) if requested, setting a given
+ * Opens psm file(s) if requested, setting a given
  * pointer to the array of filehandles.  Opens sqt file(s) if
  * requested, setting the given pointers to each file handle.  If
  * binary files not requested, creates an array of NULL pointers.  If
