@@ -15,7 +15,7 @@ H	Alg-XCorrMode	0
 H	Comment	preliminary algorithm sp
 H	Comment	final algorithm xcorr
 H	StaticMod	C=160.139
-H	Alg-DisplayTop	1
+H	Alg-DisplayTop	5
 H	EnzymeSpec	trypsin-full-digest
 H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, percolator_score score, q_value score, number ions matched, total ions compared, sequence

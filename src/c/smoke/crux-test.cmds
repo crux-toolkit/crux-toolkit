@@ -45,7 +45,7 @@ search_for_matches_default = good_results/standard_search_default.target.sqt = c
 search_no_sp = good_results/no-sp.txt = crux search-for-matches --parameter-file params/no-sp test.ms2 test.fasta; cat crux-output/search.target.txt
 
 # Analyze existing search results
-analyze_matches_existing = good_results/standard_existing-perc.sqt = crux percolator --overwrite T --fileroot existing_search test.fasta; cat existing_search/percolator.target.sqt = 'Time' 'Database'
+analyze_matches_existing = good_results/standard_existing-perc.sqt = crux percolator --overwrite T --output-dir existing_search test.fasta; cat existing_search/percolator.target.sqt = 'Time' 'Database'
 
 # Search for matches with all defaults (except for the rand seed), no sqt file to test so use analyze
 search_for_matches_noops = good_results/empty_file = rm -rf crux-output;crux search-for-matches --parameter-file params/set_rand_seed test.ms2 test.fasta; = 'Time'
