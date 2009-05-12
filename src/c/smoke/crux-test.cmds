@@ -66,7 +66,7 @@ search_mods_fasta = good_results/standard_search_mods = rm -rf crux-output; crux
 analyze_mods_fasta = good_results/standard_analyze_mods = crux percolator --parameter-file params/mods test.fasta; cat crux-output/percolator.target.sqt = 'Time' 'Database'
 
 # Search with modifications and reverse decoy sequences instead of shuffling
-reverse_sequence = good_results/reverse.decoy.txt = crux search-for-matches --parameter-file params/reverse test.ms2 test-plus-palindrome.fasta; cat crux-output/search.decoy.txt
+reverse_sequence = good_results/reverse.decoy.txt = crux search-for-matches --parameter-file params/reverse test.ms2 test-plus-palindrome.fasta; cat crux-output/reverse.search.decoy.txt
 
 # Search for matches and estimate p-values with modifications
 # TODO
