@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.41 $
+ * $Revision: 1.42 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -471,6 +471,13 @@ BOOLEAN_T peak_iterator_has_next(
 PEAK_T* peak_iterator_next(
   PEAK_ITERATOR_T* peak_iterator  ///< the interator for the peaks -in
   );
+
+/**
+ *  Resets the iterator to the first element
+ */
+void peak_iterator_reset(
+  PEAK_ITERATOR_T* peak_iterator  ///< the interator for the peaks -in
+);
 
 /**
  * Local Variables:
