@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.69 $
+ * REVISION: $Revision: 1.70 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1402,6 +1402,15 @@ PEAK_T* peak_iterator_next(
   return next_peak;
 }
 
+/**
+ *  Resets the iterator to the first element
+ */
+void peak_iterator_reset(
+  PEAK_ITERATOR_T* peak_iterator  ///< the interator for the peaks -in
+  )
+{
+  peak_iterator->peak_index = 0;
+}
 
 
 /*

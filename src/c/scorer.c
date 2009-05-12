@@ -4,7 +4,7 @@
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum
  * vs. ion_series 
- * REVISION: $Revision: 1.67 $
+ * REVISION: $Revision: 1.68 $
  ****************************************************************************/
 
 #include <math.h>
@@ -584,7 +584,6 @@ BOOLEAN_T create_intensity_array_sp(
   // Determine number of top peaks to select based on the experimental mass
   // In Sequest27, the top peaks were always selected as 200.
   // keep top ions of square-root(16*experimental mass) ranking, but not exceeding 200 ions
-  /*
   if(experimental_mass_cut_off-50 < 3200){
     // top bins are sqrt of 16* experimental mass
     top_bins = (int)(sqrt((experimental_mass_cut_off-50)*16) + 0.5);    
@@ -594,9 +593,8 @@ BOOLEAN_T create_intensity_array_sp(
     }
   }
   else{
-    top_bins = int((experimental_mass_cut_off-50)/14.00);
+    top_bins = (int)((experimental_mass_cut_off-50)/14.00);
   }
-  */
 
   // extrace the top ions
   extract_peaks(scorer, top_bins);
@@ -843,16 +841,29 @@ BOOLEAN_T create_intensity_array_observed(
   // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
   scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
   
+  // create a peak iterator
+  peak_iterator = new_peak_iterator(spectrum);
+
   // store the max intensity in each 10 regions to later normalize
   float* max_intensity_per_region = (float*)mycalloc(10, sizeof(float));
-  int region_selector = (int)(get_spectrum_max_peak_mz(spectrum) / 10);
+  int region_selector = 0;
+  // while there are more peaks to iterate over..
+  double max_peak = 0.0;
+  while(peak_iterator_has_next(peak_iterator)){
+    peak = peak_iterator_next(peak_iterator);
+    peak_location = get_peak_location(peak);
+    if (peak_location < experimental_mass_cut_off && peak_location > max_peak) {
+      max_peak = peak_location;
+    }
+  }
+  region_selector = max_peak / 10;
+  // reset peak iterator
+  peak_iterator_reset(peak_iterator);
 
   // DEBUG
   // carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
   
   int region = 0;
-  // create a peak iterator
-  peak_iterator = new_peak_iterator(spectrum);
   
   // while there are more peaks to iterate over..
   while(peak_iterator_has_next(peak_iterator)){
@@ -924,7 +935,7 @@ BOOLEAN_T create_intensity_array_observed(
       if (sub_idx <= 0 || sub_idx >= scorer->sp_max_mz){
         continue;
       }
-      new_observed[idx] -= (scorer->observed[sub_idx] / (MAX_XCORR_OFFSET * 2.0) );
+      new_observed[idx] -= (scorer->observed[sub_idx] / (MAX_XCORR_OFFSET * 2.0 + 1));
     }
   }
 
@@ -1007,14 +1018,16 @@ BOOLEAN_T create_intensity_array_theoretical(
       else{
         // Add peaks of intensity 50.0 for B, Y type ions. 
         // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
-        add_intensity(theoretical, intensity_array_idx, 50);
+        // Skip ions that are located beyond max mz limit
+        if((intensity_array_idx)< scorer->sp_max_mz){
+          add_intensity(theoretical, intensity_array_idx, 50);
+          add_intensity(theoretical, intensity_array_idx - 1, 25);
+        }
 
-        // skip ions that are located beyond max mz limit
         if((intensity_array_idx + 1)< scorer->sp_max_mz){
           add_intensity(theoretical, intensity_array_idx + 1, 25);
         }
         
-        add_intensity(theoretical, intensity_array_idx - 1, 25);
 
         // add neutral loss of water and NH3
         // mass_z + (modification_masses[(int)ion_modification]/(float)charge) * modification_count;  
