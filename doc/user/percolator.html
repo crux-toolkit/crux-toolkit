@@ -11,7 +11,9 @@
 <b>Usage:</b></p>
 
 <blockquote>
-<code>crux percolator [options] &lt;protein&nbsp;input&gt;
+<code>crux percolator [options]  &lt;protein&nbsp;input&gt; 
+   [--output-dir &lt;psm folder&gt;]
+
 </code>
 </blockquote>
 
@@ -41,7 +43,10 @@ Crux is only compatible with percolator version 1.05.</p>
 Percolator requires as input two collections of PSMs, one set derived
 from matching observed spectra against real ("target") peptides, and
 a second derived from matching against "decoy" peptides.  Crux generates
-these decoys on the fly.
+these decoys on the fly.  Percolator will also accept a second set of
+decoy PSMs and use one set in training and one in calculating
+q-values.  Producing two sets of decoy PSMs is the search-for-matches
+default behavior.
 
 <p>
 <i>NOTE: <code>percolator</code> requires that <code>crux search-for-matches</code>
@@ -52,19 +57,18 @@ be run with the parameter <code>top-match=1</code>.</i></p>
 
 <ul>
 
-<li>
-&lt;psm folder&gt; &ndash; A folder in which all the PSM
-result files are located.  This is assumed to be <code>crux-output</code>,
-but it can be set by the user using the <code>--output-dir</code> option.
-The program looks for files ending in
-<code>.csm</code>, which are produced by
-<code>crux&nbsp;search-for-matches</code>.  All such files in the
-given directory are analyzed jointly.</li>
-
 <LI>
 &lt;protein input &gt; &ndash; The name of the file in fasta format or
 the directory containing the protein index from which to retrieve
 proteins and peptides.</li>
+
+<li>
+&lt;psm folder&gt; &ndash; [optional] A folder in which all the PSM
+result files are located.  This is assumed to be <code>crux-output</code>,
+but it can be set by the user using the <code>--output-dir</code> option.
+The program looks for files ending in <code>.csm</code>, which are produced by
+<code>crux&nbsp;search-for-matches</code>.  All such files in the
+given directory are analyzed jointly.</li>
 
 </ul>
 
@@ -96,7 +100,7 @@ output file names. Default = none.</li>
 <li>
 <code>--output-dir &lt;filename&gt;</code> &ndash; 
 The name of the directory where output files will be created.
-Default = crux-out.</li>
+Default = crux-output.</li>
 
 <li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
