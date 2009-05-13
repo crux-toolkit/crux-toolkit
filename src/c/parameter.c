@@ -1127,6 +1127,19 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     free(value_str);
   }
 
+  // user may set --enzyme OR --digestion, update the other
+  // if no-enzyme is used, set digestion as non-specific
+  if( get_enzyme_type_parameter("enzyme") == NO_ENZYME ){
+    char* value_str = digest_type_to_string(NON_SPECIFIC_DIGEST);
+    update_hash_value(parameters, "digestion", value_str);
+    free (value_str);
+
+  }else if(get_digest_type_parameter("digestion") == NON_SPECIFIC_DIGEST ){
+    char* value_str = enzyme_type_to_string(NO_ENZYME);
+    update_hash_value(parameters, "enzyme", value_str);
+    free (value_str);
+  }
+
   set_verbosity_level(get_int_parameter("verbosity"));
   print_parameter_file(param_filename);
 
