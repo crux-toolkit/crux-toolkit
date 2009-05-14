@@ -3,6 +3,14 @@
 <body>
  <h2 align=center>Notes on releasing new versions of Crux</h2>
 
+<h3>Before you begin</h3>
+<p>Confirm that a clean check out builds correctly and passes all the
+  smoke tests.  Update the release notes
+  (crux/doc/user/release-notes.html).  At the very least, the date
+  will need to be added.  You can also make sure that the
+  default.params file is up-to-date by running write-default-params.sh
+  in crux/src/c
+
 <h3>Branching</h3>
 <p>The first release of crux, version 1.0, was given its own development
 branch named <code>rel-1-0</code> in the CVS repository.  Bugs
@@ -18,7 +26,9 @@ number should increment by 0.01. The version number is maintained in
 crux/configure.ac in the line <pre>AM_INIT_AUTOMAKE(crux, 1.01)</pre>
 
 This controls the numbering of packages and what is reported by the 
-<code>--version</code> option.</p>
+<code>--version</code> option.  You must run configure after changing
+configure.ac and make dist (see below) for the new version to take
+effect.</p>
 
 <h3>Building packages</h3>
 <p>There are two targets in the root for building packages.  The
