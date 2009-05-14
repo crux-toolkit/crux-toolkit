@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.120 $
+ * $Revision: 1.121 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -914,13 +914,12 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
     return FALSE;
   }
 
-  /*
   // randomly sample n from the list by shuffling and taking first n 
   shuffle_floats(scores, num_scores);
   int num_samples = PARAM_ESTIMATION_SAMPLE_COUNT;
   if(num_samples > num_scores){ num_samples = num_scores; }
-  */
-  int num_samples = num_scores;
+
+  //int num_samples = num_scores;
   // reverse sort the first num_samples of them
   qsort(scores, num_samples, sizeof(float), compare_floats_descending);
 
