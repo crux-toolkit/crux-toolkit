@@ -127,7 +127,7 @@ search_mods_index = good_results/standard_search_mods = crux search-for-matches 
 analyze_mods_index = good_results/standard_analyze_mods = crux percolator --overwrite T --parameter-file params/mods test_crux_index; cat crux-output/percolator.target.sqt = 'Time' 'Database'
 
 # Do mod search with spec that match sequest results exactly
-#sequest_matching_search = good_results/seq_test.sqt = crux search-for-matches --parameter-file params/mods-sequest select-spectra.ms2 index-for-sequest-comparison; cat crux-output/search.target.sqt = 'Time' 
+sequest_matching_search = good_results/seq_test.sqt = crux search-for-matches --parameter-file params/mods-sequest select-spectra.ms2 index-for-sequest-comparison; cat crux-output/search.target.sqt = 'Time' 
 
 # MORE TESTS TODO
 
