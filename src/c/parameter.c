@@ -120,15 +120,6 @@ BOOLEAN_T set_mass_type_parameter(
  char* foruser
   );
 
-/*
-BOOLEAN_T set_peptide_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- PEPTIDE_TYPE_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
-  );
-*/
 BOOLEAN_T set_digest_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
@@ -542,36 +533,6 @@ void initialize_parameters(void){
       "Target-decoy competition. puts decoy psms in target file. ",
       "Now hidden from the user", "false");
 
-  /*
-  set_int_parameter("number-decoy-set", 2, 0, 10, 
-      "The number of decoy databases to search, generating one output file "
-      "per set.  Default 2.", 
-      "Each decoy set of psms will be printed to a separate file and not " 
-      "included with the target psms. To return decoys in the same file as "
-      "targets, use tdc=T in the parameter file and control the number of "
-      "decoys with num-decoys-per-target. At least one decoy set (in its own "
-      "file) is required to run the algorithm 'percolator' in a subsiquent "
-      "crux run. Used by crux-search-for-matches.  Decoy search results can "
-      "be used by crux percolator.", "true");
-  */
-  /* search-for-matches parameter file options */
-  /*
-  set_boolean_parameter("tdc", FALSE,
-      "Target-decoy competition.  Combine target and decoy searches in "
-      "one file.  Default FALSE, separate files.",
-      "After searching target and decoy peptides, all psms for one spectrum "
-      "are sorted together and the mix list is returned in the target.sqt "
-      "file. Set number of decoys with num-decoys-per-target.   The number "
-      "of psms retained after preliminary searching (max-rank-preliminary) "
-      "is increased to reflect the number of decoys searched so that "
-      "(1+num-decoys)*max-rank-preliminary are kept.", "true");
-  set_int_parameter("num-decoys-per-target", 1, 1, BILLION,
-      "Number of decoy peptides to search for every target peptide searched. "
-      "Default 1.",
-      "Multiple decoys are put in the same collection, sorted together, and "
-      "written to the same file.  Does not affect --number-decoy-sets or tdc.",
-      "true");
-  */
   set_boolean_parameter("reverse-sequence", FALSE,
       "Generate decoys by reversing the peptide string rather than shuffling."
       " Default F.",
@@ -740,7 +701,6 @@ void initialize_parameters(void){
       "Predict peaks with the given maximum number of h2o neutral loss "
       "modifications. Default 0.",
       "Only available for crux-predict-peptide-ions.", "true");
-
 
   /* static mods */
   set_double_parameter("A", 0.0, -100, BILLION, 
@@ -1092,23 +1052,6 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     update_hash_value(parameters, "tdc", "FALSE");
   }
 
-  /*
-  if( get_boolean_parameter("tdc") == TRUE ){
-    // change num-decoys so that no decoy.sqt file written
-    update_hash_value(parameters, "number-decoy-set", "0");
-
-    // keep more psms to score with xcorr
-    // e.g. top_match=500, num_decoys_per=2, keep 500 + 1000 for xcorr
-    int top_match = get_int_parameter("max-rank-preliminary");
-    int num_decoys_per = get_int_parameter("num-decoys-per-target");
-    top_match *= (1 + num_decoys_per);
-    // stringify value
-    char buffer[PARAMETER_LENGTH];
-    snprintf(buffer, PARAMETER_LENGTH, "%i", top_match);
-    update_hash_value(parameters, "max-rank-preliminary", buffer);
-  }
-  */
-
   // for compute-q-values, set algorithm to q-value (perc by default)
   if( strcmp(argv[0], "compute-q-values") == 0 ){
     char value_str[SMALL_BUFFER];
@@ -1379,16 +1322,6 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
               ", elastase, or no-enzyme.");
     }
     break;
-    /*
-  case PEPTIDE_TYPE_P:
-      carp(CARP_DETAILED_DEBUG, "found peptide_type param, value '%s'\n", 
-           value_str);
-    if( ! string_to_peptide_type( value_str, &pep_type )){
-      success = FALSE;
-      sprintf(die_str, "Illegal peptide cleavages.  Must be...something");
-    }
-    break;
-    */
   case BOOLEAN_P:
     carp(CARP_DETAILED_DEBUG, "found boolean_type param, value '%s'", 
          value_str);
@@ -1904,24 +1837,6 @@ ENZYME_T get_enzyme_type_parameter( char* name ){
   return enzyme_type;
 }
 
-/*
-PEPTIDE_TYPE_T get_peptide_type_parameter(
-  char* name
-    ){
-
-  char* param = get_hash_value(parameters, name);
-
-  PEPTIDE_TYPE_T peptide_type;
-  int success = string_to_peptide_type(param, &peptide_type);
-  //we should have already checked the type, but just in case
-  if( success < 0 ){
-    carp(CARP_FATAL, "Peptide_type parameter %s has the value %s " 
-         "which is not of the correct type\n", name, param);
-    exit(1);
-  }
-  return peptide_type;
-}
-*/
 MASS_TYPE_T get_mass_type_parameter(
    char* name
    ){
@@ -2160,36 +2075,7 @@ BOOLEAN_T set_mass_type_parameter(
   return result;
 
 }
-/*
-BOOLEAN_T set_peptide_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
- PEPTIDE_TYPE_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
-  )
-{
-  BOOLEAN_T result = TRUE;
-  char value_str[SMALL_BUFFER];
-  
-  // check if parameters can be changed
-  if(!parameter_plasticity){
-    carp(CARP_ERROR, "can't change parameters once they are confirmed");
-    return FALSE;
-  }
-  
-  // stringify the value 
-  peptide_type_to_string(set_value, value_str);
 
-  result = add_or_update_hash_copy(parameters, name, value_str);
-  result = add_or_update_hash_copy(usages, name, usage);
-  result = add_or_update_hash_copy(file_notes, name, filenotes);
-  result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "PEPTIDE_TYPE_T");
-  return result;
-
-}
-*/
 BOOLEAN_T set_digest_type_parameter(
  char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
