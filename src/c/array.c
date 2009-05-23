@@ -4,7 +4,7 @@
  * AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University
- * VERSION: $Revision: 1.5 $
+ * VERSION: $Revision: 1.6 $
  * DESCRIPTION: Some simple array-handling routines.
  ********************************************************************/
 #include <stdio.h>
@@ -921,7 +921,7 @@ void convert_to_from_log_array
  * Mix two arrays in log space.
  ***********************************************************************/
 void mix_log_arrays
-  (float    mixing, /* Percent of array2 that will be retained. */
+  (FLOAT_T    mixing, /* Percent of array2 that will be retained. */
    ARRAY_T* array1,
    ARRAY_T* array2)
 {

@@ -1,6 +1,6 @@
 /**
  * \file index.h 
- * $Revision: 1.24 $
+ * $Revision: 1.25 $
  * \brief Object for representing an index of a index
  *****************************************************************************/
 #ifndef INDEX_H 
@@ -36,7 +36,7 @@ INDEX_T* new_index(
   char* fasta_filename,  ///< The fasta file
   char* output_dir,      ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,///< Constraint which these peptides satisfy
-  float mass_range  ///< the range of masses contained in each index file
+  FLOAT_T mass_range  ///< the range of masses contained in each index file
 );         
 
 /**
@@ -211,7 +211,7 @@ void set_index_on_disk(
 /**
  *\returns the range of mass that each index file should be partitioned into
  */
-float get_index_mass_range(
+FLOAT_T get_index_mass_range(
   INDEX_T* index ///< The index -in
   );
 
@@ -220,7 +220,7 @@ float get_index_mass_range(
  */
 void set_index_mass_range(
   INDEX_T* index, ///< The index -in
-  float mass_range  ///< the range of mass that each index file should be partitioned into -in
+  FLOAT_T mass_range  ///< the range of mass that each index file should be partitioned into -in
   );
 
 

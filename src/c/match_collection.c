@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.121 $
+ * $Revision: 1.122 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -41,26 +41,26 @@ struct match_collection{
 
   // values used for various scoring functions.
   // TODO this should be moved to match
-  float delta_cn; ///< the difference in top and second Xcorr scores
-  float sp_scores_sum; ///< for getting mean, backward compatible
-  float sp_scores_mean;  ///< the mean value of the scored peptides sp score
-  float mu;// obsolete 
+  FLOAT_T delta_cn; ///< the difference in top and second Xcorr scores
+  FLOAT_T sp_scores_sum; ///< for getting mean, backward compatible
+  FLOAT_T sp_scores_mean;  ///< the mean value of the scored peptides sp score
+  FLOAT_T mu;// obsolete 
   ///< EVD parameter Xcorr(characteristic value of extreme value distribution)
-  float l_value; // obsolete
+  FLOAT_T l_value; // obsolete
   ///< EVD parameter Xcorr(decay constant of extreme value distribution)
   int top_fit_sp; // obsolete
   ///< The top ranked sp scored peptides to use as EXP_SP parameter estimation
-  float base_score_sp; // obsolete
+  FLOAT_T base_score_sp; // obsolete
  ///< The lowest sp score within top_fit_sp, used as the base to rescale sp
   // Values for fitting the Weibull distribution
-  float eta;  ///< The eta parameter for the Weibull distribution.
-  float beta; ///< The beta parameter for the Weibull distribution.
-  float shift; ///< The location parameter for the Weibull distribution.
+  FLOAT_T eta;  ///< The eta parameter for the Weibull distribution.
+  FLOAT_T beta; ///< The beta parameter for the Weibull distribution.
+  FLOAT_T shift; ///< The location parameter for the Weibull distribution.
   // replace this ...
   MATCH_T* sample_matches[_PSM_SAMPLE_SIZE];
   int num_samples;  // the number of items in the above array
   // ...with this
-  float xcorrs[_MAX_NUMBER_PEPTIDES]; ///< xcorrs to be used for weibull
+  FLOAT_T xcorrs[_MAX_NUMBER_PEPTIDES]; ///< xcorrs to be used for weibull
   int num_xcorrs;
 
   // The following features (post_*) are only valid when
@@ -385,7 +385,7 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
   }
 
   for(psm_idx=start_index; psm_idx < match_collection->match_total; psm_idx++){
-    float score = get_match_score( match_collection->match[psm_idx], XCORR);
+    FLOAT_T score = get_match_score( match_collection->match[psm_idx], XCORR);
     match_collection->xcorrs[score_idx] = score;
     score_idx++;
   }
@@ -423,11 +423,11 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
 
   MATCH_T** matches = match_collection->match;
   int match_idx = 0;
-  float cur_score = get_match_score(matches[match_idx], SP);
+  FLOAT_T cur_score = get_match_score(matches[match_idx], SP);
 
   // for entire list of matches
   while(match_idx < match_total-1){
-    float next_score = get_match_score(matches[match_idx+1], SP);
+    FLOAT_T next_score = get_match_score(matches[match_idx+1], SP);
 
     // find the index of the last match with the same score
     int cur_score_last_index = match_idx;
@@ -732,10 +732,10 @@ BOOLEAN_T populate_match_rank_match_collection(
   // this type
   int match_index;
   int cur_rank = 0;
-  float cur_score = NOT_SCORED;
+  FLOAT_T cur_score = NOT_SCORED;
   for(match_index=0; match_index<match_collection->match_total; ++match_index){
     MATCH_T* cur_match = match_collection->match[match_index];
-    float this_score = get_match_score(cur_match, score_type);
+    FLOAT_T this_score = get_match_score(cur_match, score_type);
     
     if( NOT_SCORED == get_match_score(cur_match, score_type) ){
       carp(CARP_WARNING, 
@@ -830,19 +830,19 @@ MATCH_COLLECTION_T* random_sample_match_collection(
 void constraint_function(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to estimate evd parameters -in
   SCORER_TYPE_T score_type, ///< score_type to estimate EVD distribution -in
-  float l_value,  ///< L value -in
-  float* function,  ///< the output function value -out
-  float* derivative,  ///< the output derivative value -out
-  float* exponential_sum ///< the final exponential array sum -out
+  FLOAT_T l_value,  ///< L value -in
+  FLOAT_T* function,  ///< the output function value -out
+  FLOAT_T* derivative,  ///< the output derivative value -out
+  FLOAT_T* exponential_sum ///< the final exponential array sum -out
   )
 {
   int idx = 0;
-  float* exponential = (float*)mycalloc(match_collection->match_total, sizeof(float));
-  float numerator = 0;
-  float second_numerator = 0;
-  float score = 0;
-  float denominator = 0;
-  float score_sum = 0;
+  FLOAT_T* exponential = (FLOAT_T*)mycalloc(match_collection->match_total, sizeof(FLOAT_T));
+  FLOAT_T numerator = 0;
+  FLOAT_T second_numerator = 0;
+  FLOAT_T score = 0;
+  FLOAT_T denominator = 0;
+  FLOAT_T score_sum = 0;
   MATCH_T** matches = match_collection->match;
 
   // iterate over the matches to calculate numerator, exponential value, denominator
@@ -904,7 +904,7 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
   }
 
   // check that we have the minimum number of matches
-  float* scores = match_collection->xcorrs;
+  FLOAT_T* scores = match_collection->xcorrs;
   int num_scores = match_collection->num_xcorrs;
   if( num_scores < MIN_WEIBULL_MATCHES ){
     carp(CARP_DETAILED_INFO, "Too few psms (%i) to estimate "
@@ -932,7 +932,7 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
        num_tail_samples, fraction_to_fit, num_samples);
 
   // do the estimation
-  float correlation = 0.0;
+  FLOAT_T correlation = 0.0;
   fit_three_parameter_weibull(scores, num_tail_samples, num_samples,
       MIN_XCORR_SHIFT, MAX_XCORR_SHIFT, XCORR_SHIFT, 
       &(match_collection->eta), &(match_collection->beta),
@@ -1035,7 +1035,7 @@ BOOLEAN_T score_peptides(
   char* sequence = NULL;
   MODIFIED_AA_T* modified_sequence = NULL;
   MATCH_T* match = NULL;
-  float score = 0;
+  FLOAT_T score = 0;
   PEPTIDE_T* peptide = NULL;
 
   carp(CARP_DETAILED_DEBUG, "New match_collection is null? %i", is_decoy);
@@ -1207,7 +1207,7 @@ BOOLEAN_T score_matches_one_spectrum(
     predict_ions(ion_series);
 
     // get the score
-    float score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+    FLOAT_T score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
 
     // set score in match
     set_match_score(match, score_type, score);
@@ -1305,9 +1305,9 @@ BOOLEAN_T set_p_values_as_unscored(MATCH_COLLECTION_T* match_collection){
     return FALSE;
   }
 
-  float score = P_VALUE_NA;
-  //float score = -1;
-  //float score = NaN(); // could use this instead
+  FLOAT_T score = P_VALUE_NA;
+  //FLOAT_T score = -1;
+  //FLOAT_T score = NaN(); // could use this instead
 
   int match_idx = 0;
   for(match_idx=0; match_idx < match_collection->match_total; match_idx++){
@@ -1404,7 +1404,7 @@ int get_match_collection_charge(
  * Must have been scored by Xcorr, returns error if not scored by Xcorr
  *\returns the delta cn value(difference in top and second ranked Xcorr values)
  */
-float get_match_collection_delta_cn(
+FLOAT_T get_match_collection_delta_cn(
   MATCH_COLLECTION_T* match_collection ///< working match collection -in
   )
 {
@@ -1538,15 +1538,15 @@ BOOLEAN_T serialize_psm_features(
   MATCH_ITERATOR_T* match_iterator = 
     new_match_iterator(match_collection, main_score, TRUE);
   
-  float delta_cn =  get_match_collection_delta_cn(match_collection);
-  float ln_delta_cn = logf(delta_cn);
+  FLOAT_T delta_cn =  get_match_collection_delta_cn(match_collection);
+  FLOAT_T ln_delta_cn = logf(delta_cn);
   // FIXME (BF 16-Sep-08): log(delta_cn) isn't even a feature in percolator
   if( delta_cn == 0 ){
     // this value makes it the same as what is in the smoke test
     //ln_delta_cn = -13.8155;
     ln_delta_cn = 0;
   }
-  float ln_experiment_size = logf(match_collection->experiment_size);
+  FLOAT_T ln_experiment_size = logf(match_collection->experiment_size);
 
   // spectrum specific features
   // first, serialize the spectrum info of the match collection  
@@ -1910,8 +1910,8 @@ BOOLEAN_T print_match_collection_tab_delimited(
   int charge = match_collection->charge; 
   int num_matches = match_collection->experiment_size;
   int scan_num = get_spectrum_first_scan(spectrum);
-  float spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
-  float spectrum_precursor_mz = get_spectrum_precursor_mz(spectrum);
+  FLOAT_T spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
+  FLOAT_T spectrum_precursor_mz = get_spectrum_precursor_mz(spectrum);
 
   // If we calculated p-values, change which scores get printed
   // since this is really only valid for xcorr...
@@ -2437,9 +2437,9 @@ BOOLEAN_T extend_match_collection(
   MATCH_T* match = NULL;
   int num_top_match = 0;
   //  int num_spectrum_features = 0;
-  float delta_cn =  0;
-  float ln_delta_cn = 0;
-  float ln_experiment_size = 0;
+  FLOAT_T delta_cn =  0;
+  FLOAT_T ln_delta_cn = 0;
+  FLOAT_T ln_experiment_size = 0;
   int match_total_of_serialized_collection = 0;
   int score_type_idx = 0;
   BOOLEAN_T type_scored = FALSE;
@@ -2670,7 +2670,7 @@ void update_protein_counters(
 }
 
 /**
- * Fill the match objects score with the given the float array. 
+ * Fill the match objects score with the given the FLOAT_T array. 
  * The match object order must not have been altered since scoring.
  * The result array size must match the match_total count.
  * Match ranks are also populated to preserve the original order of the
@@ -2765,12 +2765,12 @@ BOOLEAN_T calculate_delta_cn( MATCH_COLLECTION_T* match_collection){
   }
 
   // get xcorr of first match
-  float max_xcorr = get_match_score(matches[0], XCORR);
+  FLOAT_T max_xcorr = get_match_score(matches[0], XCORR);
 
   // for each match, calculate deltacn
   int match_idx=0;
   for(match_idx=0; match_idx < num_matches; match_idx++){
-    float diff = max_xcorr - get_match_score(matches[match_idx], XCORR);
+    FLOAT_T diff = max_xcorr - get_match_score(matches[match_idx], XCORR);
     set_match_delta_cn(matches[match_idx], (diff / max_xcorr) );
   }
 

@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file ion.c
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
@@ -33,7 +33,7 @@
 /**
  * Array to store the modification masses
  */
-float modification_masses[MAX_MODIFICATIONS];
+FLOAT_T modification_masses[MAX_MODIFICATIONS];
 
 /**
  * Have we initialized the modification_masses?
@@ -54,9 +54,9 @@ struct ion {
   // from the N-term
   int charge; ///< the ion charge
   char* peptide_sequence; ///< the peptide sequence that fragments to form this ion
-  float peptide_mass; ///< the mass of the peptide. For efficiency
+  FLOAT_T peptide_mass; ///< the mass of the peptide. For efficiency
   int modification_counts[MAX_MODIFICATIONS]; ///< an array of the number of different ion modifications
-  float ion_mass_z;   ///< The mass/z of the ion. 
+  FLOAT_T ion_mass_z;   ///< The mass/z of the ion. 
   PEAK_T* peak;  ///< The assigned peak. NULL if no peak // TODO add ptr count?
 };
 
@@ -189,7 +189,7 @@ ION_T* new_modified_ion_with_mass(
   int charge, ///< charge of the ion
   char* peptide, ///< location for the new ion -in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
-  float base_mass, ///< the base mass of the ion -in
+  FLOAT_T base_mass, ///< the base mass of the ion -in
   int* modification_counts ///< an array of modification counts for each modification -in
   )
 {
@@ -221,7 +221,7 @@ ION_T* new_ion_with_mass(
   int charge, ///< charge of the ion
   char* peptide, ///< location for the new ion -in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
-  float base_mass ///< the base mass of the ion -in
+  FLOAT_T base_mass ///< the base mass of the ion -in
   )
 {
   // get new basic ion
@@ -318,8 +318,8 @@ void print_ion_gmtk_single(
   int is_detected = 0;
   int is_possible = 0;
 
-  float intensity = 0.0;
-  float intensity_rank = 0.0;
+  FLOAT_T intensity = 0.0;
+  FLOAT_T intensity_rank = 0.0;
   if (ion->peak != NULL){
     intensity = get_peak_intensity(ion->peak);
     intensity_rank = get_peak_intensity_rank(ion->peak);
@@ -331,7 +331,7 @@ void print_ion_gmtk_single(
     is_detectable = 1;
   }
 
-  float mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
+  FLOAT_T mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
   int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
 
   char* format = "%.6f\t%.6f\t%.6f\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n";
@@ -380,10 +380,10 @@ void print_ion_gmtk_single_binary(
   int frame_idx
   ){
 
-  float* float_array = (float*)mycalloc(sizeof(float), SINGLE_ION_FLOATS);
+  FLOAT_T* float_array = (FLOAT_T*)mycalloc(sizeof(FLOAT_T), SINGLE_ION_FLOATS);
   int* int_array = (int*)mycalloc(sizeof(int), SINGLE_ION_INTS);
 
-  float mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
+  FLOAT_T mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
   float_array[0] = mz_ratio;                              // 0
   float_array[1] = 0.0;                                   // 1
   float_array[2] = 0.0;                                   // 2
@@ -440,8 +440,8 @@ void print_ion_gmtk_single_binary(
     for (idx=0; idx < 3; idx++){
       // htonl does not seem to work on the floats (!!)
       // so I will reverse the bytes by hand
-      float old_float;
-      float new_float;
+      FLOAT_T old_float;
+      FLOAT_T new_float;
 
       old_float = float_array[idx];
 
@@ -485,7 +485,7 @@ void print_null_ion_gmtk_single_binary(
   int frame_idx
   ){
 
-  float float_array[3] = {0.0, 0.0, 0.0};
+  FLOAT_T float_array[3] = {0.0, 0.0, 0.0};
   int int_array[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);
@@ -504,7 +504,7 @@ void print_null_ion_gmtk_paired_binary(
   ){
 
   // FIX get rid of magic numbers
-  float float_array[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  FLOAT_T float_array[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   int int_array[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);
@@ -548,8 +548,8 @@ void print_null_ion_gmtk_single(
  *
  * floats
  *
- * 1. m/z ratio float (from N-term)
- * 2. m/z ratio float (from C-term)
+ * 1. m/z ratio FLOAT_T (from N-term)
+ * 2. m/z ratio FLOAT_T (from C-term)
  * 3. first raw
  * 4. second raw
  * 5. first rank
@@ -564,15 +564,15 @@ void print_ion_gmtk_paired_binary(
   int frame_idx
   ){
   
-  float* float_array = (float*)mycalloc(sizeof(float), PAIRED_ION_FLOATS);
+  FLOAT_T* float_array = (FLOAT_T*)mycalloc(sizeof(FLOAT_T), PAIRED_ION_FLOATS);
   int* int_array = (int*)mycalloc(sizeof(int), PAIRED_ION_INTS);
 
   // start with the floats
-  float n_mz_ratio = (first_ion->ion_mass_z)/(first_ion->peptide_mass);
+  FLOAT_T n_mz_ratio = (first_ion->ion_mass_z)/(first_ion->peptide_mass);
   float_array[0] = n_mz_ratio;                                    // 0
   // TODO 
   // subtract from 1.0?
-  float c_mz_ratio =  1.0 - n_mz_ratio;                           // 1
+  FLOAT_T c_mz_ratio =  1.0 - n_mz_ratio;                           // 1
   float_array[1] = c_mz_ratio;
 
   int first_is_detected = 0;
@@ -651,8 +651,8 @@ void print_ion_gmtk_paired_binary(
     for (idx=0; idx < PAIRED_ION_FLOATS; idx++){
       // htonl does not seem to work on the floats (!!)
       // so I will reverse the bytes by hand
-      float old_float;
-      float new_float;
+      FLOAT_T old_float;
+      FLOAT_T new_float;
 
       old_float = float_array[idx];
 
@@ -682,8 +682,8 @@ void print_ion_gmtk_paired_binary(
 /**
  *\return the modified mass_z accodring to the modification type
  */
-float modify_ion_mass_z(
-  float mass_z, ///< the pre-modified ion mass_z -in
+FLOAT_T modify_ion_mass_z(
+  FLOAT_T mass_z, ///< the pre-modified ion mass_z -in
   int modification_count, ///< number of times more the modification occurs -in
   ION_MODIFICATION_T ion_modification, ///< the type of modification -in
   int charge, ///< charge of the ion
@@ -732,7 +732,7 @@ void set_ion_peak(
 /**
  *\returns the ion's AA mass added all up
  */
-float get_ion_mass(
+FLOAT_T get_ion_mass(
   ION_T* ion, ///< the working ion -out/in
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
   )                   
@@ -741,7 +741,7 @@ float get_ion_mass(
   ION_TYPE_T ion_type = ion->type;
   int ion_length = 0;
   BOOLEAN_T memory_used = FALSE;
-  float mass = 0;
+  FLOAT_T mass = 0;
   BOOLEAN_T reverse = FALSE;
 
   // get sequence for x,y,z ion
@@ -788,8 +788,8 @@ float get_ion_mass(
 /**
  *\return the modified mass accodring to the modification type
  */
-float modify_ion_mass(
-  float mass, ///< the pre-modified ion mass -in
+FLOAT_T modify_ion_mass(
+  FLOAT_T mass, ///< the pre-modified ion mass -in
   int modification_count, ///< number of times more the modification occurs -in
   ION_MODIFICATION_T ion_modification, ///< the type of modification -in
   MASS_TYPE_T mass_type ///< mass type (average, mono) -in
@@ -811,11 +811,11 @@ float modify_ion_mass(
 BOOLEAN_T calc_ion_mass_z_with_mass(
   ION_T* ion, ///< the working ion -out/in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
-  float mass, ///< the basic mass of the ion -in
+  FLOAT_T mass, ///< the basic mass of the ion -in
   BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
   )
 {
-  float h_mass = MASS_H_MONO;
+  FLOAT_T h_mass = MASS_H_MONO;
 
   // alter mass according to the modification
   if(is_modified){
@@ -852,7 +852,7 @@ BOOLEAN_T calc_ion_mass_z(
   BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
   )
 {
-  float mass = get_ion_mass(ion, mass_type);
+  FLOAT_T mass = get_ion_mass(ion, mass_type);
   return calc_ion_mass_z_with_mass(ion, mass_type, mass, is_modified);
 }
 
@@ -930,7 +930,7 @@ BOOLEAN_T ion_is_modified(
 /**
  * \returns the location of ION_T object
  */
-float get_ion_mass_z(
+FLOAT_T get_ion_mass_z(
   ION_T* working_ion///< return the location of this ion -in 
   )
 {
@@ -950,7 +950,7 @@ float get_ion_mass_z(
  */
 void set_ion_mass_z(
   ION_T* working_ion, ///<set the m/z location of this ion -out
-  float mass_z ///< the m/z location -in
+  FLOAT_T mass_z ///< the m/z location -in
   )
 {
   working_ion->ion_mass_z = mass_z;

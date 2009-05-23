@@ -101,7 +101,7 @@ int main(int argc, char** argv){
    SPECTRUM_COLLECTION_T * collection = NULL;
    ION_SERIES_T* ion_series = NULL;
    SCORER_T* scorer = NULL;
-   float score = 0;
+   FLOAT_T score = 0;
    int  verbosity = CARP_INFO;
 
    // list file parsing

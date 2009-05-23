@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file peptide.c
- * $Revision: 1.84 $
+ * $Revision: 1.85 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
@@ -46,7 +46,7 @@ static BOOLEAN_T PEPTIDE_SRC_USE_LINK_LIST;
  */
 struct peptide {
   unsigned char length; ///< The length of the peptide
-  float peptide_mass;   ///< The peptide's mass.
+  FLOAT_T peptide_mass;   ///< The peptide's mass.
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
   MODIFIED_AA_T* modified_seq; ///< peptide sequence with modifications
 };
@@ -99,7 +99,7 @@ int get_peptide_sizeof(){
  */
 PEPTIDE_T* new_peptide(
   unsigned char length,     ///< The length of the peptide -in
-  float peptide_mass,       ///< The neutral mass of the peptide -in
+  FLOAT_T peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx ///< the start index of this peptide in the protein sequence -in
   //PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, C_TRYPTIC, N_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
@@ -291,7 +291,7 @@ void set_peptide_src_implementation(
  */
 void set_peptide_peptide_mass( 
   PEPTIDE_T* peptide,  ///< the peptide to set -out
-  float peptide_mass  ///< the mass of the peptide - in
+  FLOAT_T peptide_mass  ///< the mass of the peptide - in
   )
 {
   peptide->peptide_mass = peptide_mass;
@@ -301,7 +301,7 @@ void set_peptide_peptide_mass(
 /**
  * \returns the peptide mass
  */
-inline float get_peptide_peptide_mass( 
+inline FLOAT_T get_peptide_peptide_mass( 
   PEPTIDE_T* peptide  ///< the peptide to query the mass -in
   )
 {
@@ -312,7 +312,7 @@ inline float get_peptide_peptide_mass(
 /** 
  * \returns The neutral (uncharged) mass of the peptide.
  */
-float get_peptide_neutral_mass(
+FLOAT_T get_peptide_neutral_mass(
   PEPTIDE_T* peptide ///< the query peptide -in
   )
 {
@@ -322,7 +322,7 @@ float get_peptide_neutral_mass(
 /** 
  * \returns The mass of the peptide if it had charge "charge"
  */
-float get_peptide_charged_mass(
+FLOAT_T get_peptide_charged_mass(
  PEPTIDE_T* peptide, ///< the query peptide -in
  int charge ///< charge of peptide -in
  )
@@ -333,7 +333,7 @@ float get_peptide_charged_mass(
 /** 
  * \returns The m/z of the peptide if it had charge "charge"
  */
-float get_peptide_mz(
+FLOAT_T get_peptide_mz(
     PEPTIDE_T* peptide, ///< the query peptide -in
     int charge ///< the charge of peptide -in
     )
@@ -781,12 +781,12 @@ int count_peptide_modified_aas(PEPTIDE_T* peptide){
 /**
  * \returns The mass of the given peptide as determined by the aa sequence.
  */
-float calc_sequence_mass(
+FLOAT_T calc_sequence_mass(
   char* peptide, ///< the query peptide -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
-  float peptide_mass = 0;
+  FLOAT_T peptide_mass = 0;
   int idx = 0;
   char amino;
   while(peptide[idx] != '\0'){
@@ -803,12 +803,12 @@ float calc_sequence_mass(
  * This appears to be the same as calc_sequence_mass??
  * \returns The mass of the given peptide.
  */
-float calc_peptide_mass(
+FLOAT_T calc_peptide_mass(
   PEPTIDE_T* peptide, ///< the query peptide -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   )
 {
-  float peptide_mass = 0;
+  FLOAT_T peptide_mass = 0;
   RESIDUE_ITERATOR_T * residue_iterator = new_residue_iterator(peptide);
   
   while(residue_iterator_has_next(residue_iterator)){
@@ -822,7 +822,7 @@ float calc_peptide_mass(
   return peptide_mass + MASS_H2O_MONO;
 }
 
-static float krokhin_index['Z'-'A'] = {
+static FLOAT_T krokhin_index['Z'-'A'] = {
   0.8, 0.0, -0.8, -0.5, 0.0, 10.5, -0.9, -1.3, 8.4, 0.0, 
   -1.9, 9.6, 5.8, -1.2, 0.0, 0.2, -0.9, -1.3, -0.8, 0.4,
   0.0, 5.0, 11.0, 0.0, 4.0};
@@ -830,11 +830,11 @@ static float krokhin_index['Z'-'A'] = {
 /*
  * Calculates the peptide hydrophobicity, as in Krokhin (2004).
  */
-float calc_krokhin_hydrophobicity(
+FLOAT_T calc_krokhin_hydrophobicity(
   PEPTIDE_T* peptide ///< the query peptide -in
 )
 {
-  float krokhin = 0.0;
+  FLOAT_T krokhin = 0.0;
   RESIDUE_ITERATOR_T * residue_iterator = new_residue_iterator(peptide);
   while(residue_iterator_has_next(residue_iterator)){
     char c = residue_iterator_next(residue_iterator)-'A';

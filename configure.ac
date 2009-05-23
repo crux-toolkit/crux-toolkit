@@ -100,6 +100,14 @@ AC_ARG_WITH(
     [PERCOLATOR_DIR=$withval],
     [PERCOLATOR_DIR="\${top_srcdir}/../percolator"])
 
+# Use double precision floating point through out.
+doubles=false
+AC_ARG_ENABLE(
+    doubles,
+    [  --enable-doubles  Use double precision floating point througout. Default: disabled],
+    [doubles="true"])
+AM_CONDITIONAL(USEDOUBLES, test "x$doubles" = xtrue )
+
 # These variables will be available in the Makefiles.
 AC_SUBST(MACHID)
 AC_SUBST(VERSION)
@@ -141,6 +149,7 @@ echo \
   Version:                    ${VERSION}
   C compiler:                 ${CC}
   C compiler flags:           ${CFLAGS}
+  Use doubles:                ${doubles}
   percolator directory:       ${PERCOLATOR_DIR} ${PERCOLATOR}
 
   Run the following commands to compile and install crux:

@@ -16,6 +16,13 @@
 #include <ieeefp.h>
 #endif*/
 
+// Macro allowing us to build using floats or double
+#ifdef USE_DOUBLES
+typedef double FLOAT_T;
+#else
+typedef float FLOAT_T;
+#endif
+
 #define FALSE 0
 #define TRUE 1
 typedef short BOOLEAN_T;

@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.8 $
+ * REVISION: $Revision: 1.9 $
  ****************************************************************************/
 #include "hit_collection.h"
 
@@ -92,10 +92,10 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
   while(match_iterator_has_next(match_iterator)){
 
     match = match_iterator_next(match_iterator);
-    float new_score = get_match_score(match, scorer_type);
+    FLOAT_T new_score = get_match_score(match, scorer_type);
 
     char* peptide_sequence = get_match_sequence(match);
-    float max_score = 0.0;
+    FLOAT_T max_score = 0.0;
 
     MATCH_T* max_match = 
       (MATCH_T*) get_hash_value(peptide_to_max_match, peptide_sequence);
@@ -131,7 +131,7 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
 
     // take nth root of this peptide's max score. this has the effect of 
     // distribution the peptide score evenly across all its proteins
-    float nth_root_score = get_match_score(match, scorer_type) / protein_count;
+    FLOAT_T nth_root_score = get_match_score(match, scorer_type) / protein_count;
 
     // note the score in each of the protein hits in the hit collection
     peptide_src_iterator = new_peptide_src_iterator(peptide);
@@ -155,7 +155,7 @@ HIT_COLLECTION_T* new_hit_collection_from_match_collection(
 BOOLEAN_T hit_collection_add_protein_score(
     HIT_COLLECTION_T* hit_collection,
     PROTEIN_T* protein,
-    float score
+    FLOAT_T score
   ){
   char* protein_id = get_protein_id(protein);
   HIT_T* hit = NULL;

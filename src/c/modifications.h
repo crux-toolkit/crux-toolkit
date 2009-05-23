@@ -16,7 +16,7 @@
  * spectrum search.  One PEPTIDE_MOD corresponds to one mass window
  * that must be searched.
  * 
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  */
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
@@ -155,7 +155,7 @@ int get_aa_mod_sizeof();
 /*
 struct peptide{
   unsigned char length; ///< The length of the peptide
-  float peptide_mass;   ///< The peptide's mass with any modifications
+  FLOAT_T peptide_mass;   ///< The peptide's mass with any modifications
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src
   BOOLEAN_T is_modified;   ///< if true sequence != NULL
   MODIFIED_AA_T* sequence; ///< sequence with modifications

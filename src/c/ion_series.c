@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.50 $
+ * REVISION: $Revision: 1.51 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -38,7 +38,7 @@ struct ion_series {
   // TODO change name to unmodified_char_seq
   char* peptide; ///< The peptide sequence for this ion series
   MODIFIED_AA_T* modified_aa_seq; ///< sequence of the peptide
-  float peptide_mass; ///< The peptide neutral mass. For efficiency. 
+  FLOAT_T peptide_mass; ///< The peptide neutral mass. For efficiency. 
   int charge; ///< /<The charge state of the peptide for this ion series
   ION_CONSTRAINT_T* constraint; ///< The constraints which these ions obey
   ION_T* ions[MAX_IONS]; ///< The ions in this series
@@ -445,7 +445,7 @@ void scan_for_aa_for_neutral_loss(
  * peptide.  
  * \returns an array of ion masses for all sub sequences
  */
-float* create_ion_mass_matrix(
+FLOAT_T* create_ion_mass_matrix(
   //char* peptide, ///< The peptide for this ion series. -in
   MODIFIED_AA_T* modified_seq, ///< the sequence
   MASS_TYPE_T mass_type, ///< the mass_type to use MONO|AVERAGE
@@ -457,7 +457,7 @@ float* create_ion_mass_matrix(
     carp(CARP_ERROR, "Cannot create mass matrix from NULL seqence");
     return NULL;
   }
-  float* mass_matrix = (float*)mymalloc(sizeof(float)*(peptide_length+1));
+  FLOAT_T* mass_matrix = (FLOAT_T*)mymalloc(sizeof(FLOAT_T)*(peptide_length+1));
   
   // at index 0, the length of the peptide is stored
   mass_matrix[0] = peptide_length;
@@ -517,7 +517,7 @@ void add_ion_to_ion_series(
  */
 BOOLEAN_T add_ions_by_charge(
   ION_SERIES_T* ion_series, ///< the ion series to predict ions for -in
-  float mass, ///< the base mass of the ion to add
+  FLOAT_T mass, ///< the base mass of the ion to add
   int cleavage_idx, ///< the absolute cleavage index (A,B,C from left X,Y,Z from right)
   ION_TYPE_T ion_type ///< the ion type of the ions to be added
   )
@@ -565,7 +565,7 @@ BOOLEAN_T add_ions_by_charge(
  */
 BOOLEAN_T generate_ions_no_modification(
   ION_SERIES_T* ion_series, ///< ion_series to modify -in/out
-  float* mass_matrix ///< the mass matrix that stores the mass
+  FLOAT_T* mass_matrix ///< the mass matrix that stores the mass
   )
 {
   if( ion_series == NULL || mass_matrix == NULL ){
@@ -575,7 +575,7 @@ BOOLEAN_T generate_ions_no_modification(
   }
   int cleavage_idx = 1;
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
-  float mass = 0;
+  FLOAT_T mass = 0;
 
   // get peptide length
   int peptide_length = (int)mass_matrix[0];
@@ -971,7 +971,7 @@ void predict_ions(
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
   
   // create a mass matrix
-  float* mass_matrix = 
+  FLOAT_T* mass_matrix = 
     create_ion_mass_matrix(ion_series->modified_aa_seq, constraint->mass_type, ion_series->peptide_length);  
   /*
   printf("cumulative mass sum is:\n");
@@ -1048,14 +1048,14 @@ void ion_series_assign_nearest_peaks(
     ION_SERIES_T* ion_series, 
     SPECTRUM_T* spectrum){
 
-  //  float max = 0.5; // TODO set in param file 
-  float max = get_double_parameter("ion-tolerance"); 
+  //  FLOAT_T max = 0.5; // TODO set in param file 
+  FLOAT_T max = get_double_parameter("ion-tolerance"); 
   ION_T* ion = NULL;
   ION_ITERATOR_T* iterator = new_ion_iterator(ion_series);
   PEAK_T* peak = NULL;
   while(ion_iterator_has_next(iterator)){
     ion = ion_iterator_next(iterator);
-    float mz = get_ion_mass_z(ion); // TODO change to mz, not mass_z
+    FLOAT_T mz = get_ion_mass_z(ion); // TODO change to mz, not mass_z
     peak = get_nearest_peak(spectrum, mz, max);
     set_ion_peak(ion, peak);
   }

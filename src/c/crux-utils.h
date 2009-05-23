@@ -1,6 +1,6 @@
 /**
  * \file crux-utils.h
- * $Revision: 1.40 $
+ * $Revision: 1.41 $
  * $Author: cegrant $
  * \brief Utilities for the crux project
  */
@@ -42,7 +42,7 @@ char* copy_string_part(char*src, int length);
  * to the range of the numbers, allowing a single epsilon to be used for many, 
  * or perhaps all compares.
  */
-int compare_float(float float_a, float float_b);
+int compare_float(FLOAT_T float_a, FLOAT_T float_b);
 
 /**
  * \brief Parses the filename and path of given string.
@@ -119,7 +119,7 @@ char* get_full_filename(char* path, char* filename);
 /**
  *\returns TRUE if float_a is between the interaval of min and max, else FALSE
  */
-inline BOOLEAN_T compare_float_three(float float_a, float min, float max);
+inline BOOLEAN_T compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max);
 
 /**
  * returns the file size of the given filename
@@ -240,18 +240,18 @@ BOOLEAN_T name_is_decoy(char* name);
 BOOLEAN_T valid_peptide_sequence( char* sequence);
 
 /**
- * quickSort for floats
+ * quickSort for FLOAT_Ts
  */
-void quicksort(float numbers[], int array_size);
+void quicksort(FLOAT_T numbers[], int array_size);
 
 /**
- * \brief Shuffle an array of floats.  Uses the Knuth algorithm.  Uses
+ * \brief Shuffle an array of FLOAT_Ts.  Uses the Knuth algorithm.  Uses
  * get_random_number_interval() to generate random numbers. 
  */
-void shuffle_floats(float* array, int size);
+void shuffle_floats(FLOAT_T* array, int size);
 
 /**
- * \brief Comparison function for reverse sorting floats.
+ * \brief Comparison function for reverse sorting FLOAT_Ts.
  * \returns -1,0,1 if a is <,=,> b
  */
 int compare_floats_descending(const void* a, const void* b);
@@ -289,16 +289,16 @@ int get_random_number_interval(
  */
 
 void fit_three_parameter_weibull(
-    float* data, ///< the data to be fit. should be in descending order -in
+    FLOAT_T* data, ///< the data to be fit. should be in descending order -in
     int fit_data_points, ///< the number of data points to fit -in
     int total_data_points, ///< the total number of data points -in
-    float min_shift, ///< the minimum shift to allow -in
-    float max_shift, ///< the maximum shift to allow -in
-    float step, ///< the step for shift modification -in
-    float* eta,      ///< the eta parameter of the Weibull dist -out
-    float* beta,      ///< the beta parameter of the Weibull dist -out
-    float* shift,     ///< the best shift -out
-    float* correlation   ///< the best correlation -out
+    FLOAT_T min_shift, ///< the minimum shift to allow -in
+    FLOAT_T max_shift, ///< the maximum shift to allow -in
+    FLOAT_T step, ///< the step for shift modification -in
+    FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
+    FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
+    FLOAT_T* shift,     ///< the best shift -out
+    FLOAT_T* correlation   ///< the best correlation -out
     );
 
 /**
@@ -306,13 +306,13 @@ void fit_three_parameter_weibull(
  * \returns eta, beta and the correlation coefficient
  */
 void fit_two_parameter_weibull(
-    float* data, ///< the data to be fit -in
+    FLOAT_T* data, ///< the data to be fit -in
     int fit_data_points, ///< the number of data points to fit -in
     int total_data_points, ///< the total number of data points -in
-    float shift, ///< the amount by which to shift our data -in
-    float* eta,      ///< the eta parameter of the Weibull dist -out
-    float* beta,      ///< the beta parameter of the Weibull dist -out
-    float* correlation ///< the best correlation -out
+    FLOAT_T shift, ///< the amount by which to shift our data -in
+    FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
+    FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
+    FLOAT_T* correlation ///< the best correlation -out
     );
 
 BOOLEAN_T string_to_mass_type(char*, MASS_TYPE_T*);

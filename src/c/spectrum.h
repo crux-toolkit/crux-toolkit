@@ -1,6 +1,6 @@
 /**
  * \file spectrum.h 
- * $Revision: 1.42 $
+ * $Revision: 1.43 $
  * \brief Object for representing one spectrum.
  *****************************************************************************/
 #ifndef SPECTRUM_H
@@ -23,7 +23,7 @@ SPECTRUM_T* new_spectrum(
   int               first_scan,         ///< The number of the first scan -in
   int               last_scan,          ///< The number of the last scan -in
   SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum. -in
-  float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra) -in
+  FLOAT_T             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra) -in
   int*              possible_z,         ///< The possible charge states of this spectrum  -in
   int               num_possible_z,     ///< The number of possible charge states of this spectrum  -in  
   char*             filename);          ///< Optional filename  -in
@@ -184,7 +184,7 @@ void set_spectrum_spectrum_type(
 /**
  * \returns the m/z of the precursor
  */
-float get_spectrum_precursor_mz(
+FLOAT_T get_spectrum_precursor_mz(
   SPECTRUM_T* spectrum  ///< the spectrum to query the precursor_mz -in
   );
 
@@ -193,7 +193,7 @@ float get_spectrum_precursor_mz(
  */
 void set_spectrum_precursor_mz(
   SPECTRUM_T* spectrum,  ///< the spectrum to set the precursor_mz -out
-  float precursor_mz ///< the precursor_mz -in
+  FLOAT_T precursor_mz ///< the precursor_mz -in
   );
 
 /**
@@ -263,14 +263,14 @@ int get_spectrum_num_possible_z(
 /**
  * \returns the minimum m/z of all peaks
  */
-float get_spectrum_min_peak_mz(
+FLOAT_T get_spectrum_min_peak_mz(
   SPECTRUM_T* spectrum ///< the spectrum to query min_peak_mz -in
   );
 
 /**
  * \returns the maximum m/z of all peaks
  */
-float get_spectrum_max_peak_mz(
+FLOAT_T get_spectrum_max_peak_mz(
   SPECTRUM_T* spectrum  ///< the spectrum to query max_peak_mz -in
   );
 
@@ -322,7 +322,7 @@ void set_spectrum_new_filename(
 /**
  * \returns The intensity of the peak with the maximum intensity.
  */
-float get_spectrum_max_peak_intensity(
+FLOAT_T get_spectrum_max_peak_intensity(
   SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
   );
 
@@ -330,7 +330,7 @@ float get_spectrum_max_peak_intensity(
  * \returns The mass of the charged precursor ion, according to the formula 
  * mass = m/z * charge
  */
-float get_spectrum_mass(
+FLOAT_T get_spectrum_mass(
   SPECTRUM_T* spectrum,  ///< the spectrum to query spectrum mass -in
   int charge ///< the charge of precursor ion -in
   );
@@ -339,7 +339,7 @@ float get_spectrum_mass(
  * \returns The mass of the neutral precursor ion, according to the formula 
  * mass = m/z * charge - mass_H * charge
  */
-float get_spectrum_neutral_mass(
+FLOAT_T get_spectrum_neutral_mass(
   SPECTRUM_T* spectrum,  ///< the spectrum to query neutral_mass -in
   int charge ///< the charge of precursor ion -in
   );
@@ -348,7 +348,7 @@ float get_spectrum_neutral_mass(
  * \returns The mass of the singly charged precursor ion, according to the formula 
  * mass = m/z * charge - (mass_H * (charge - 1))
  */
-float get_spectrum_singly_charged_mass(
+FLOAT_T get_spectrum_singly_charged_mass(
   SPECTRUM_T* spectrum,  ///< the spectrum to query charged_mass -in
   int charge ///< the charge of the precursor ion -in
   );
@@ -358,8 +358,8 @@ float get_spectrum_singly_charged_mass(
  */
 void update_spectrum_fields(
   SPECTRUM_T* spectrum, ///< the spectrum fields to update -out
-  float intensity, ///< the intensity of the peak that has been added -in
-  float location ///< the location of the peak that has been added -in
+  FLOAT_T intensity, ///< the intensity of the peak that has been added -in
+  FLOAT_T location ///< the location of the peak that has been added -in
   );
 
 
@@ -378,8 +378,8 @@ BOOLEAN_T add_possible_z(
  */
 BOOLEAN_T add_peak_to_spectrum(
   SPECTRUM_T* spectrum,///< spectrum to add the peak to -out 
-  float intensity, ///< the intensity of peak to add -in
-  float location_mz ///< the location of peak to add -in
+  FLOAT_T intensity, ///< the intensity of peak to add -in
+  FLOAT_T location_mz ///< the location of peak to add -in
   );
 
 /**
@@ -390,8 +390,8 @@ BOOLEAN_T add_peak_to_spectrum(
  */
 PEAK_T* get_nearest_peak(
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
-  float mz, ///< the mz of the peak around which to sum intensities -in
-  float max ///< the maximum distance to get intensity -in
+  FLOAT_T mz, ///< the mz of the peak around which to sum intensities -in
+  FLOAT_T max ///< the maximum distance to get intensity -in
   );
 
 /**
@@ -400,10 +400,10 @@ PEAK_T* get_nearest_peak(
  * spectrum object that it needs.
  * NOTE: Not implemented!
  */
-float get_nearby_intensity_sum(
+FLOAT_T get_nearby_intensity_sum(
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
-  float mz,             ///< the mz of the peak around which to sum intensities
-  float tol             ///< the tolerance within which to sum intensities
+  FLOAT_T mz,             ///< the mz of the peak around which to sum intensities
+  FLOAT_T tol             ///< the tolerance within which to sum intensities
   );
 
 /**

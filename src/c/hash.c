@@ -1,7 +1,7 @@
 /*************************************************************************//**
  * \file hash.c
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief: Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
@@ -24,7 +24,7 @@ static const unsigned int sizes[] = {
 };
 
 static const unsigned int sizes_count = sizeof(sizes) / sizeof(sizes[0]);
-static const float load_factor = 0.65;
+static const FLOAT_T load_factor = 0.65;
 
 /**
  * \struct record

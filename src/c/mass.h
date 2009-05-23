@@ -4,7 +4,7 @@
 
 /**
  * \file mass.h 
- * $Revision: 1.17 $
+ * $Revision: 1.18 $
  * \brief Provides constants and methods for calculating mass
  *****************************************************************************/
 #ifndef _MASS_H
@@ -44,7 +44,7 @@
 /**
  * \returns The mass of the given amino acid.
  */
-float get_mass_amino_acid(
+FLOAT_T get_mass_amino_acid(
   char amino_acid, ///< the query amino acid -in
   MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
   );
@@ -52,7 +52,7 @@ float get_mass_amino_acid(
 /**
  * \returns The mass of the given amino acid.
  */
-float get_mass_mod_amino_acid(
+FLOAT_T get_mass_mod_amino_acid(
   MODIFIED_AA_T amino_acid, ///< the query amino acid -in
   MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
   );
@@ -61,28 +61,28 @@ float get_mass_mod_amino_acid(
 /**
  * \returns The average mass of the given amino acid.
  */
-float get_mass_amino_acid_average(
+FLOAT_T get_mass_amino_acid_average(
   char amino_acid ///< the query amino acid -in
   );
 
 /**
  * \returns The average mass of the given amino acid.
  */
-float get_mass_mod_amino_acid_average(
+FLOAT_T get_mass_mod_amino_acid_average(
   MODIFIED_AA_T amino_acid ///< the query amino acid -in
   );
 
 /**
  * \returns The monoisotopic mass of the given amino acid.
  */
-float get_mass_amino_acid_monoisotopic(
+FLOAT_T get_mass_amino_acid_monoisotopic(
   char amino_acid ///< the query amino acid -in
   );
 
 /**
  * \returns The monoisotopic mass of the given amino acid.
  */
-float get_mass_mod_amino_acid_monoisotopic(
+FLOAT_T get_mass_mod_amino_acid_monoisotopic(
   MODIFIED_AA_T amino_acid ///< the query amino acid -in
   );
 
@@ -91,7 +91,7 @@ float get_mass_mod_amino_acid_monoisotopic(
  */
 void increase_amino_acid_mass(
   char amino_acid, ///< the query amino acid -in
-  float update_mass ///< the mass amount to update for the amino acid -in
+  FLOAT_T update_mass ///< the mass amount to update for the amino acid -in
   );
 
 #endif

@@ -2,7 +2,7 @@
  * \file peak.c
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.14 $
+ * VERSION: $Revision: 1.15 $
  * DESCRIPTION: Object for representing one peak in a spectrum.
  ****************************************************************************/
 #include "peak.h"
@@ -18,9 +18,9 @@
  * \brief A spectrum peak.
  */
 struct peak {
-  float intensity;  ///< The intensity of the peak.
-  float intensity_rank;  ///< The rank intensity of the peak.
-  float location;   ///< The location of the peak.
+  FLOAT_T intensity;  ///< The intensity of the peak.
+  FLOAT_T intensity_rank;  ///< The rank intensity of the peak.
+  FLOAT_T location;   ///< The location of the peak.
 };    
 
 /**
@@ -28,8 +28,8 @@ struct peak {
  * heap allocated, must be freed using free_peak method
  */
 PEAK_T* new_peak (
-  float intensity, ///< intensity for the new peak -in 
-  float location ///< location for the new peak -in
+  FLOAT_T intensity, ///< intensity for the new peak -in 
+  FLOAT_T location ///< location for the new peak -in
   )
 {
   PEAK_T* fresh_peak =(PEAK_T*)mymalloc(sizeof(PEAK_T));
@@ -51,7 +51,7 @@ void free_peak (
 /**
  * \returns the intensity of PEAK_T object
  */
-float get_peak_intensity(
+FLOAT_T get_peak_intensity(
  PEAK_T* working_peak///< return the intensity of this peak -in
 ) {
   return working_peak->intensity;
@@ -60,7 +60,7 @@ float get_peak_intensity(
 /**
  * \returns the intensity of PEAK_T object
  */
-float get_peak_intensity_rank(
+FLOAT_T get_peak_intensity_rank(
   PEAK_T* working_peak///< return the intensity of this peak -in
 )
 {
@@ -70,7 +70,7 @@ float get_peak_intensity_rank(
 /**
  * \returns the location of PEAK_T object
  */
-float get_peak_location(
+FLOAT_T get_peak_location(
   PEAK_T* working_peak///< return the location of this peak -in 
   )
 {
@@ -83,7 +83,7 @@ float get_peak_location(
  */
 void set_peak_intensity(
   PEAK_T* working_peak, ///< set the intensity of this peak -out
-  float intensity///< the intensity -in
+  FLOAT_T intensity///< the intensity -in
  )
 {
   working_peak->intensity = intensity;
@@ -94,7 +94,7 @@ void set_peak_intensity(
  */
 void set_peak_intensity_rank(
   PEAK_T* working_peak, ///< set the intensity rank of this peak -out
-  float intensity_rank  ///< the intensity rank -in
+  FLOAT_T intensity_rank  ///< the intensity rank -in
  )
 {
   working_peak->intensity_rank = intensity_rank;
@@ -105,7 +105,7 @@ void set_peak_intensity_rank(
  */
 void set_peak_location(
   PEAK_T* working_peak, ///<set the location of this peak -out
-  float location ///< the location -in
+  FLOAT_T location ///< the location -in
   )
 {
   working_peak->location = location;

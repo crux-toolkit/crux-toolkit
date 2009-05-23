@@ -1,6 +1,6 @@
 /**
  * \file peak.h
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  * \brief Object for representing one peak in a spectrum.
  *
  * A peak is primarily identified via its intensity (height) and location
@@ -12,13 +12,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "objects.h"
+#include "utils.h"
 
 /**
  * \returns A PEAK_T object
  */
 PEAK_T* new_peak (
-  float intensity, ///< intensity for the new peak -in 
-  float location ///< location for the new peak -in
+  FLOAT_T intensity, ///< intensity for the new peak -in 
+  FLOAT_T location ///< location for the new peak -in
   );
 
 /**
@@ -31,21 +32,21 @@ void free_peak (
 /**
  * \returns the intensity of PEAK_T object
  */
-float get_peak_intensity(
+FLOAT_T get_peak_intensity(
   PEAK_T* working_peak ///< return the intensity of this peak -in
   );
 
 /**
  * sets the intensity rank of PEAK_T object
  */
-float get_peak_intensity_rank(
+FLOAT_T get_peak_intensity_rank(
   PEAK_T* working_peak ///< get the intensity rank of this peak -in
   );
 
 /**
  * \returns the location of PEAK_T object
  */
-float get_peak_location(
+FLOAT_T get_peak_location(
   PEAK_T* working_peak ///< return the location of this peak -in 
   );
 
@@ -54,7 +55,7 @@ float get_peak_location(
  */
 void set_peak_intensity(
   PEAK_T* working_peak, ///< set the intensity of this peak -mod
-  float intensity ///< the intensity -in
+  FLOAT_T intensity ///< the intensity -in
   );
 
 /**
@@ -62,7 +63,7 @@ void set_peak_intensity(
  */
 void set_peak_intensity_rank(
   PEAK_T* working_peak, ///< set the intensity of this peak -mod
-  float intensity_rank ///< the intensity -in
+  FLOAT_T intensity_rank ///< the intensity -in
   );
 
 /**
@@ -70,7 +71,7 @@ void set_peak_intensity_rank(
  */
 void set_peak_location(
   PEAK_T* working_peak, ///<set the location of this peak -out
-  float location ///< the location -in
+  FLOAT_T location ///< the location -in
   );
 
 /**

@@ -1,5 +1,12 @@
 distdir = $(PACKAGE)_$(VERSION)
-AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing \
+
+if USEDOUBLES
+  USEDOUBLES='-DUSE_DOUBLES'
+else
+  USEDOUBLES=
+endif
+
+AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing $(USEDOUBLES) \
             -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
 noinst_LTLIBRARIES = libcrux.la
