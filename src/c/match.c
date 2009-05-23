@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.76 $
- * REVISION: $Revision: 1.76 $
+ * REVISION: $Revision: 1.77 $
+ * REVISION: $Revision: 1.77 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -62,13 +62,13 @@
 struct match{
   SPECTRUM_T* spectrum; ///< the spectrum we are scoring with
   PEPTIDE_T* peptide;  ///< the peptide we are scoring
-  float match_scores[_SCORE_TYPE_NUM]; 
+  FLOAT_T match_scores[_SCORE_TYPE_NUM]; 
     ///< array of scores, one for each type (index with SCORER_TYPE_T) 
   int match_rank[_SCORE_TYPE_NUM];  
     ///< rank of this match for each type scored (index with SCORER_TYPE_T)
   int pointer_count; 
     ///< number of pointers to this match object (when reach 0, free memory)
-  float b_y_ion_fraction_matched; 
+  FLOAT_T b_y_ion_fraction_matched; 
     ///< the fraction of the b, y ion matched while scoring for SP
   int b_y_ion_matched; ///< number of b, y ion matched while scoring SP
   int b_y_ion_possible; ///< number of possible b, y ion while scoring SP
@@ -82,9 +82,9 @@ struct match{
   // post_process match object features
   // only valid when post_process_match is TRUE
   BOOLEAN_T post_process_match; ///< Is this a post process match object?
-  float delta_cn; ///< the difference in top and second Xcorr scores
-  float ln_delta_cn; ///< the natural log of delta_cn
-  float ln_experiment_size; 
+  FLOAT_T delta_cn; ///< the difference in top and second Xcorr scores
+  FLOAT_T ln_delta_cn; ///< the natural log of delta_cn
+  FLOAT_T ln_experiment_size; 
      ///< natural log of total number of candidate peptides evaluated
 };
 
@@ -490,7 +490,7 @@ void print_match_sqt(
     b_y_matched = (get_match_b_y_ion_fraction_matched(match)) * b_y_total;
   }
 
-  float delta_cn = get_match_delta_cn(match);
+  FLOAT_T delta_cn = get_match_delta_cn(match);
   if( adjust_delta_cn == TRUE ){
     delta_cn = 0.0;
   }
@@ -499,7 +499,7 @@ void print_match_sqt(
   }
 
   // If a p-value couldn't be calculated, print as NaN
-  float score_main = get_match_score(match, main_score);
+  FLOAT_T score_main = get_match_score(match, main_score);
   if( main_score == LOGP_BONF_WEIBULL_XCORR&& score_main == P_VALUE_NA ){
     score_main = sqrt(-1); // evaluates to nan
   } 
@@ -560,8 +560,8 @@ void print_match_tab(
   MATCH_T* match,             ///< the match to print -in  
   FILE* file,                 ///< output stream -out
   int scan_num,             ///< starting scan number -in
-  float spectrum_precursor_mz, ///< m/z of spectrum precursor -in
-  float spectrum_mass,       ///< spectrum neutral mass -in
+  FLOAT_T spectrum_precursor_mz, ///< m/z of spectrum precursor -in
+  FLOAT_T spectrum_mass,       ///< spectrum neutral mass -in
   int num_matches,            ///< num matches in spectrum -in
   int charge,                 ///< charge -in
   SCORER_TYPE_T main_score   ///< the main score to report -in
@@ -597,7 +597,7 @@ void print_match_tab(
     b_y_matched = (get_match_b_y_ion_fraction_matched(match)) * b_y_total;
   }
 
-  float delta_cn = get_match_delta_cn(match);
+  FLOAT_T delta_cn = get_match_delta_cn(match);
   if( adjust_delta_cn == TRUE ){
     delta_cn = 0.0;
   }
@@ -799,7 +799,7 @@ void serialize_match(
 /**
  * Constructs the 20 feature array that pass over to percolator registration
  * Go to top README for N,C terminus tryptic feature info.
- *\returns the feature float array
+ *\returns the feature FLOAT_T array
  */
 double* get_match_percolator_features(
   MATCH_T* match, ///< the match to work -in 
@@ -812,7 +812,7 @@ double* get_match_percolator_features(
   PROTEIN_T* protein = NULL;
   unsigned int protein_idx = 0;
   double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
-  float weight_diff = get_peptide_peptide_mass(match->peptide) -
+  FLOAT_T weight_diff = get_peptide_peptide_mass(match->peptide) -
     get_spectrum_neutral_mass(match->spectrum, match->charge);
 
   // Xcorr
@@ -906,7 +906,7 @@ feature_array[11] = TRUE;
   // now check that no value is with in infinity
   int check_idx;
   for(check_idx=0; check_idx < 20; ++check_idx){
-    float feature = feature_array[check_idx];
+    FLOAT_T feature = feature_array[check_idx];
     if(feature <= -BILLION || feature  >= BILLION){
       carp(CARP_ERROR,
           "Percolator feature out of bounds: %d, with value %.2f. Modifying.",
@@ -1208,7 +1208,7 @@ char* get_match_mod_sequence_str( MATCH_T* match ){
  * Must ask for score that has been computed
  *\returns the match_mode score in the match object
  */
-float get_match_score(
+FLOAT_T get_match_score(
   MATCH_T* match, ///< the match to work -in  
   SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
   )
@@ -1223,7 +1223,7 @@ float get_match_score(
 void set_match_score(
   MATCH_T* match, ///< the match to work -out
   SCORER_TYPE_T match_mode, ///< the working mode (SP, XCORR) -in
-  float match_score ///< the score of the match -in
+  FLOAT_T match_score ///< the score of the match -in
   )
 {
   match->match_scores[match_mode] = match_score;
@@ -1397,7 +1397,7 @@ int get_match_charge(
  */
 void set_match_delta_cn(
   MATCH_T* match, ///< the match to work -out
-  float delta_cn  ///< the delta cn value of PSM -in
+  FLOAT_T delta_cn  ///< the delta cn value of PSM -in
   )
 {
   match->delta_cn = delta_cn;
@@ -1406,7 +1406,7 @@ void set_match_delta_cn(
 /**
  * gets the match delta_cn
  */
-float get_match_delta_cn(
+FLOAT_T get_match_delta_cn(
   MATCH_T* match ///< the match to work -out
   )
 {
@@ -1418,7 +1418,7 @@ float get_match_delta_cn(
  */
 void set_match_ln_delta_cn(
   MATCH_T* match, ///< the match to work -out
-  float ln_delta_cn  ///< the ln delta cn value of PSM -in
+  FLOAT_T ln_delta_cn  ///< the ln delta cn value of PSM -in
   )
 {
   match->ln_delta_cn = ln_delta_cn;
@@ -1427,7 +1427,7 @@ void set_match_ln_delta_cn(
 /**
  * gets the match ln_delta_cn
  */
-float get_match_ln_delta_cn(
+FLOAT_T get_match_ln_delta_cn(
   MATCH_T* match ///< the match to work -out
   )
 {
@@ -1439,7 +1439,7 @@ float get_match_ln_delta_cn(
  */
 void set_match_ln_experiment_size(
   MATCH_T* match, ///< the match to work -out
-  float ln_experiment_size ///< the ln_experiment_size value of PSM -in
+  FLOAT_T ln_experiment_size ///< the ln_experiment_size value of PSM -in
   )
 {
   match->ln_experiment_size = ln_experiment_size;
@@ -1448,7 +1448,7 @@ void set_match_ln_experiment_size(
 /**
  * gets the match ln_experiment_size
  */
-float get_match_ln_experiment_size(
+FLOAT_T get_match_ln_experiment_size(
   MATCH_T* match ///< the match to work -out
   )
 {
@@ -1474,7 +1474,7 @@ void set_match_b_y_ion_info(
 /**
  * gets the match b_y_ion_fraction_matched
  */
-float get_match_b_y_ion_fraction_matched(
+FLOAT_T get_match_b_y_ion_fraction_matched(
   MATCH_T* match ///< the match to work -out
   )
 {

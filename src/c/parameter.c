@@ -2347,7 +2347,7 @@ int get_all_aa_mod_list
  * \brief Set the mass_change field in an AA_MOD based on a line from
  * a parameter file.
  *
- * Assumes that the line points to a float followed by separator.
+ * Assumes that the line points to a FLOAT_T followed by separator.
  * Converts the number and sets the appropriate field in the mod.
  * Dies with error if line does not point to a number.  Returns a
  * pointer to the character after the first instance of separator or
@@ -2499,7 +2499,7 @@ int read_mods(FILE* param_file, ///< file from which to read mod info
       return cur_index;
     }
 
-    // get the float and check for ok-ness
+    // get the FLOAT_T and check for ok-ness
     token = read_mass_change(cur_mod, token, ':');
 
     // fill in values for standard mods

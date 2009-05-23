@@ -4,7 +4,7 @@
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum
  * vs. ion_series 
- * REVISION: $Revision: 1.68 $
+ * REVISION: $Revision: 1.69 $
  ****************************************************************************/
 
 #include <math.h>
@@ -57,27 +57,27 @@
  */
 struct scorer {
   SCORER_TYPE_T type; ///< The type of scorer
-  float sp_beta; ///< used for Sp: the beta variable 
-  float sp_max_mz; ///< used for Sp: the max mz for the intensity array
+  FLOAT_T sp_beta; ///< used for Sp: the beta variable 
+  FLOAT_T sp_max_mz; ///< used for Sp: the max mz for the intensity array
   int sp_b_y_ion_matched; ///< The most recent ion_collection number of the b, y ion matched while scoring for SP
   int sp_b_y_ion_possible; ///< The most recent ion_collection number of the b, y ion possible while scoring for SP
-  float sp_b_y_ion_fraction_matched; ///< The ratio of matched and possible.
+  FLOAT_T sp_b_y_ion_fraction_matched; ///< The ratio of matched and possible.
 
-  float* intensity_array; ///< used for Sp: the intensity array, which can be indexed using the m/z
-  float max_intensity; ///< the max intensity in the intensity array
+  FLOAT_T* intensity_array; ///< used for Sp: the intensity array, which can be indexed using the m/z
+  FLOAT_T max_intensity; ///< the max intensity in the intensity array
   BOOLEAN_T initialized; ///< has the scorer been initialized?
   int last_idx; ///< the last index in the array, the data size of the array
 
   /// used for xcorr
-  float* observed; ///< used for Xcorr: observed spectrum intensity array
-  float* theoretical; ///< used for Xcorr: theoretical spectrum intensity array
+  FLOAT_T* observed; ///< used for Xcorr: observed spectrum intensity array
+  FLOAT_T* theoretical; ///< used for Xcorr: theoretical spectrum intensity array
 };
 
 // defined later
 void add_intensity(
-  float* intensity_array, ///< the intensity array to add intensity at index add_idx -out
+  FLOAT_T* intensity_array, ///< the intensity array to add intensity at index add_idx -out
   int add_idx,            ///< the idex to add the intensity -in
-  float intensity         ///< the intensity to add -in
+  FLOAT_T intensity         ///< the intensity to add -in
   );
 
 /**
@@ -108,7 +108,7 @@ SCORER_T* new_scorer(
     scorer->sp_beta = get_double_parameter("beta");
     scorer->sp_max_mz = get_double_parameter("max-mz");
     // allocate the intensity array
-    scorer->intensity_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
+    scorer->intensity_array = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
     scorer->max_intensity = 0;
     scorer->last_idx = 0;
     // the scorer as not been initialized yet.
@@ -116,7 +116,7 @@ SCORER_T* new_scorer(
   }
   else if(type == XCORR){
     // scorer->sp_max_mz = get_double_parameter("max-mz");
-    // scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
+    // scorer->observed = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
     scorer->last_idx = 0;
     // the scorer as not been initialized yet.
     scorer->initialized = FALSE;
@@ -156,10 +156,10 @@ void free_scorer(
  * normalize array so that maximum peak equals threshold
  */
 void nomalize_intensity_array(
-  float* intensity_array, ///< the array to normalize -in/out
+  FLOAT_T* intensity_array, ///< the array to normalize -in/out
   int array_size, ///< size of array -in
-  float max_intensity, ///< the maximum intensity in array -in
-  float threshold   ///< the threshold to which the peaks should be normalized -in
+  FLOAT_T max_intensity, ///< the maximum intensity in array -in
+  FLOAT_T threshold   ///< the threshold to which the peaks should be normalized -in
   )
 {
   int mz_idx = 0;
@@ -188,10 +188,10 @@ void smooth_peaks(
   )
 {
   int idx = 2;
-  float* array = scorer->intensity_array;
+  FLOAT_T* array = scorer->intensity_array;
 
   // create a new array, which will replace the original intensity array
-  float* new_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
+  FLOAT_T* new_array = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
 
   switch (scorer->type){
     case SP:
@@ -234,14 +234,14 @@ void smooth_peaks(
  * get the mean of intensity in array within +/- 50 mz of the working peak
  * \returns the mean +/- 50mz region
  */
-float get_mean_from_array(
-  float* original_array, ///< the array to normalize -in
+FLOAT_T get_mean_from_array(
+  FLOAT_T* original_array, ///< the array to normalize -in
   int array_size, ///< the size of array -in
   int peak_idx,  ///< the peak indx in array -in
   int* peak_count ///< pointer to peak count, store peak count here -out
   )
 {
-  float total_intensity = 0;
+  FLOAT_T total_intensity = 0;
   int start_idx = peak_idx - 50;
   int end_idx = peak_idx + 50;
 
@@ -270,18 +270,18 @@ float get_mean_from_array(
  * get the stdev of intensity in array within +/- 50 mz of the working peak
  * \returns the stdev +/- 50mz region
  */
-float get_stdev_from_array(
-  float* original_array, ///< the array to normalize -in
+FLOAT_T get_stdev_from_array(
+  FLOAT_T* original_array, ///< the array to normalize -in
   int array_size, ///< the size of array -in
   int peak_idx,  ///< the peak indx in array -ina
-  float mean,     ///< the mean in the +/- 50 interval -in
+  FLOAT_T mean,     ///< the mean in the +/- 50 interval -in
   int peak_count ///<  peak count -in
   )
 {
-  float variance = 0;
+  FLOAT_T variance = 0;
   int start_idx = peak_idx - 50;
   int end_idx = peak_idx + 50;
-  float dev = 0;
+  FLOAT_T dev = 0;
 
   // set upper bound
   if(peak_idx + 50 >= array_size){
@@ -311,16 +311,16 @@ float get_stdev_from_array(
  */
 void zero_peak_mean_stdev(
   SCORER_T* scorer,        ///< the scorer object -in/out
-  float* original_array, ///< the array to normalize -in/out
-  float* new_array, ///< the array to normalize -in/out                          
+  FLOAT_T* original_array, ///< the array to normalize -in/out
+  FLOAT_T* new_array, ///< the array to normalize -in/out                          
   int step                ///< is this 1 or 2 step -in
   )
 {
   int peak_count = 0;
   int idx = 0;
   int array_size = (int)scorer->sp_max_mz;
-  float mean = 0;
-  float stdev = 0;
+  FLOAT_T mean = 0;
+  FLOAT_T stdev = 0;
 
   // iterate over all peaks
   for(; idx < array_size; ++idx){
@@ -365,7 +365,7 @@ void zero_peaks(
   )
 {
   // create a new array, which will replace the original intensity array
-  float* new_array = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
+  FLOAT_T* new_array = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
   
   // step 1,
   zero_peak_mean_stdev(scorer, scorer->intensity_array, new_array, 1);
@@ -396,12 +396,12 @@ void extract_peaks(
   )
 {
   // create a new array, which will replace the original intensity array
-  float* temp_array = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
-  float* original_array = scorer->intensity_array;
+  FLOAT_T* temp_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
+  FLOAT_T* original_array = scorer->intensity_array;
   int idx = 0;
   int temp_idx = 0;
-  float cut_off = 0;
-  float max_intensity;
+  FLOAT_T cut_off = 0;
+  FLOAT_T max_intensity;
 
   // copy all peaks to temp_array
   for(; idx < (int)scorer->sp_max_mz; ++idx){
@@ -457,7 +457,7 @@ void equalize_peaks(
   int idx;
   // int array_size = (int)scorer->sp_max_mz-2;
   
-  float max_intensity = 0;
+  FLOAT_T max_intensity = 0;
   int end_idx = 0;
   int last_idx = scorer->last_idx;
 
@@ -502,14 +502,14 @@ BOOLEAN_T create_intensity_array_sp(
 {
   PEAK_T* peak = NULL;
   PEAK_ITERATOR_T* peak_iterator = NULL;
-  float peak_location = 0;
-  float max_intensity = 0;
+  FLOAT_T peak_location = 0;
+  FLOAT_T max_intensity = 0;
   int mz = 0;
-  float intensity = 0;
+  FLOAT_T intensity = 0;
   // FIXME, later be able pick between average and mono
-  float bin_width = bin_width_mono;
-  float precursor_mz = get_spectrum_precursor_mz(spectrum);
-  float experimental_mass_cut_off = precursor_mz*charge + 50;
+  FLOAT_T bin_width = bin_width_mono;
+  FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
+  FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
   int top_bins = 200;
 
   // DEBUG
@@ -631,14 +631,14 @@ BOOLEAN_T create_intensity_array_sp(
 int calculate_ion_type_sp(
   SCORER_T* scorer,        ///< the scorer object -in                          
   ION_SERIES_T* ion_series, ///< the ion series to score against the spectrum -in
-  float* intensity_sum,     ///< the total intensity sum of all matches so far -out
+  FLOAT_T* intensity_sum,     ///< the total intensity sum of all matches so far -out
   ION_TYPE_T ion_type,      ///< the ion type to check -in
   int* repeat_count         ///< the repeated count of ions (ex. consecutive b ions) -out
   )
 {
   int cleavage_idx = 0;
   ION_T* ion = NULL;
-  float one_intensity = 0;
+  FLOAT_T one_intensity = 0;
   int ion_match = 0;
   int ion_charge = 0;
   int intensity_array_idx = 0;
@@ -709,14 +709,14 @@ int calculate_ion_type_sp(
  * given a spectrum and ion series calculates the Sp score
  *\returns the sp score 
  */
-float gen_score_sp(
+FLOAT_T gen_score_sp(
   SCORER_T* scorer,        ///< the scorer object -in
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
   )
 {
-  float final_score = 0;
-  float intensity_sum = 0;
+  FLOAT_T final_score = 0;
+  FLOAT_T intensity_sum = 0;
   int ion_match = 0;
   int repeat_count = 0;
   
@@ -740,7 +740,7 @@ float gen_score_sp(
   // set the fraction of  b,y ions matched for this ion_series
   scorer->sp_b_y_ion_matched  = ion_match;
   scorer->sp_b_y_ion_possible = get_ion_series_num_ions(ion_series);
-  scorer->sp_b_y_ion_fraction_matched = (float)ion_match / get_ion_series_num_ions(ion_series);
+  scorer->sp_b_y_ion_fraction_matched = (FLOAT_T)ion_match / get_ion_series_num_ions(ion_series);
 
   //// DEBUG!!!!
   /*
@@ -772,13 +772,13 @@ float gen_score_sp(
  */
 void normalize_each_region(
   SCORER_T* scorer,        ///< the scorer object -in/out
-  float* max_intensity_per_region, ///< the max intensity in each 10 regions -in
+  FLOAT_T* max_intensity_per_region, ///< the max intensity in each 10 regions -in
   int region_selector ///< the size of each regions -in
   )
 {
   int bin_idx = 0;
   int region_idx = 0;
-  float max_intensity = max_intensity_per_region[region_idx];
+  FLOAT_T max_intensity = max_intensity_per_region[region_idx];
   
   // normazlie each region
   for(; bin_idx < scorer->sp_max_mz; ++bin_idx){
@@ -816,17 +816,17 @@ BOOLEAN_T create_intensity_array_observed(
 {  
   PEAK_T* peak = NULL;
   PEAK_ITERATOR_T* peak_iterator = NULL;
-  float peak_location = 0;
+  FLOAT_T peak_location = 0;
   int mz = 0;
-  float intensity = 0;
-  float bin_width = bin_width_mono;
-  float precursor_mz = get_spectrum_precursor_mz(spectrum);
-  float experimental_mass_cut_off = precursor_mz*charge + 50;
+  FLOAT_T intensity = 0;
+  FLOAT_T bin_width = bin_width_mono;
+  FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
+  FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
 
   // set max_mz and malloc space for the observed intensity array
   if(experimental_mass_cut_off > 512){
     int x = (int)experimental_mass_cut_off / 1024;
-    float y = experimental_mass_cut_off - (1024 * x);
+    FLOAT_T y = experimental_mass_cut_off - (1024 * x);
     scorer->sp_max_mz = x * 1024;
 
     if(y > 0){
@@ -839,13 +839,13 @@ BOOLEAN_T create_intensity_array_observed(
 
   // DEBUG
   // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
-  scorer->observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
+  scorer->observed = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
   
   // create a peak iterator
   peak_iterator = new_peak_iterator(spectrum);
 
   // store the max intensity in each 10 regions to later normalize
-  float* max_intensity_per_region = (float*)mycalloc(10, sizeof(float));
+  FLOAT_T* max_intensity_per_region = (FLOAT_T*)mycalloc(10, sizeof(FLOAT_T));
   int region_selector = 0;
   // while there are more peaks to iterate over..
   double max_peak = 0.0;
@@ -925,7 +925,7 @@ BOOLEAN_T create_intensity_array_observed(
   } */
 
   // TODO maybe replace with a faster implementation that uses cum distribution
-  float* new_observed = (float*)mycalloc((int)scorer->sp_max_mz, sizeof(float));
+  FLOAT_T* new_observed = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
   int idx;
   for (idx=0; idx < scorer->sp_max_mz; idx++){
     new_observed[idx] = scorer->observed[idx];
@@ -957,14 +957,14 @@ BOOLEAN_T create_intensity_array_observed(
 BOOLEAN_T create_intensity_array_theoretical(
   SCORER_T* scorer,        ///< the scorer object -in/out
   ION_SERIES_T* ion_series, ///< the ion series to score against the spectrum(theoretical) -in
-  float* theoretical       ///< the empty theoretical spectrum -out
+  FLOAT_T* theoretical       ///< the empty theoretical spectrum -out
   )
 {
   ION_T* ion = NULL;
   int intensity_array_idx = 0;
   int ion_charge = 0;
   ION_TYPE_T ion_type;
-  float bin_width = bin_width_mono;
+  FLOAT_T bin_width = bin_width_mono;
   // int charge = get_ion_series_charge(ion_series);
   // create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
@@ -1030,7 +1030,7 @@ BOOLEAN_T create_intensity_array_theoretical(
         
 
         // add neutral loss of water and NH3
-        // mass_z + (modification_masses[(int)ion_modification]/(float)charge) * modification_count;  
+        // mass_z + (modification_masses[(int)ion_modification]/(FLOAT_T)charge) * modification_count;  
 
         if(ion_type == B_ION){
           int h2o_array_idx = (int)((get_ion_mass_z(ion) - (MASS_H2O_MONO/ion_charge) ) / bin_width + 0.5);
@@ -1113,14 +1113,14 @@ BOOLEAN_T create_intensity_array_xcorr(
  *\return the final cross correlation score between the observed and the
  *theoretical spectra
  */
-float cross_correlation(
+FLOAT_T cross_correlation(
   SCORER_T* scorer,  ///< the scorer object that contains observed spectrum -in
-  float* theoretical ///< the theoretical spectrum to score against the observed spectrum -in
+  FLOAT_T* theoretical ///< the theoretical spectrum to score against the observed spectrum -in
   )
 {
   int size = (int)scorer->sp_max_mz;
-  float score_at_zero = 0;
-  float* observed = scorer->observed;
+  FLOAT_T score_at_zero = 0;
+  FLOAT_T* observed = scorer->observed;
   
   // compare each location in theoretical spectrum
   int idx;
@@ -1135,14 +1135,14 @@ float cross_correlation(
  * given a spectrum and ion series calculates the xcorr score
  *\returns the xcorr score 
  */
-float gen_score_xcorr(
+FLOAT_T gen_score_xcorr(
   SCORER_T* scorer,        ///< the scorer object -in
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
   )
 {
-  float final_score = 0;
-  float* theoretical = NULL;
+  FLOAT_T final_score = 0;
+  FLOAT_T* theoretical = NULL;
 
   // initialize the scorer before scoring if necessary
   // preprocess the observed spectrum in scorer
@@ -1158,7 +1158,7 @@ float gen_score_xcorr(
   }
   
   // create theoretical array
-  theoretical = (float*)mycalloc(scorer->sp_max_mz, sizeof(float));
+  theoretical = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
   
   // create intensity array for theoretical spectrum 
   if(!create_intensity_array_theoretical(scorer, ion_series, theoretical)){
@@ -1192,9 +1192,9 @@ float gen_score_xcorr(
  * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
  *\returns the -log(p_value) of the exponential distribution
  */
-float score_logp_exp_sp(
-  float sp_score, ///< The sp score for the scoring peptide -in
-  float mean      ///< The overall mean of the sp scored peptides -in
+FLOAT_T score_logp_exp_sp(
+  FLOAT_T sp_score, ///< The sp score for the scoring peptide -in
+  FLOAT_T mean      ///< The overall mean of the sp scored peptides -in
   )
 {
   return -log( exp(-(1/mean) * sp_score) );
@@ -1204,9 +1204,9 @@ float score_logp_exp_sp(
  * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
  *\returns the -log(p_value) of the exponential distribution with Bonferroni correction
  */
-float score_logp_bonf_exp_sp(
-  float sp_score, ///< The sp score for the scoring peptide -in
-  float mean,      ///< The overall mean of the sp scored peptides -in
+FLOAT_T score_logp_bonf_exp_sp(
+  FLOAT_T sp_score, ///< The sp score for the scoring peptide -in
+  FLOAT_T mean,      ///< The overall mean of the sp scored peptides -in
   int num_peptide  ///< The number of peptides scored for sp
   )
 {
@@ -1227,10 +1227,10 @@ float score_logp_bonf_exp_sp(
  * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
  *\returns the -log(p_value)
  */
-float score_logp_weibull(
-  float score, ///< The score for the scoring peptide -in
-  float eta,  ///< The eta parameter of the Weibull
-  float beta ///< The beta parameter of the Weibull
+FLOAT_T score_logp_weibull(
+  FLOAT_T score, ///< The score for the scoring peptide -in
+  FLOAT_T eta,  ///< The eta parameter of the Weibull
+  FLOAT_T beta ///< The beta parameter of the Weibull
   ){
   return pow(score/eta, beta);
 }
@@ -1241,10 +1241,10 @@ float score_logp_weibull(
  *\returns the -log(p_value)
  */
 double score_logp_bonf_weibull(
-  float score, ///< The score for the scoring peptide -in
-  float eta,  ///< The eta parameter of the Weibull
-  float beta, ///< The beta parameter of the Weibull
-  float shift, ///< The shift parameter of the Weibull
+  FLOAT_T score, ///< The score for the scoring peptide -in
+  FLOAT_T eta,  ///< The eta parameter of the Weibull
+  FLOAT_T beta, ///< The beta parameter of the Weibull
+  FLOAT_T shift, ///< The shift parameter of the Weibull
   int num_peptide ///< The number of peptides
   ){
   carp(CARP_DETAILED_DEBUG, "Stat: score = %.6f", score);
@@ -1289,9 +1289,9 @@ double score_logp_bonf_weibull(
  *\returns P(S>x)
  */
 double compute_evd_pvalue(
-  float score, ///< The xcorr score for the scoring peptide -in
-  float evd_mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
-  float evd_lambda ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+  FLOAT_T score, ///< The xcorr score for the scoring peptide -in
+  FLOAT_T evd_mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  FLOAT_T evd_lambda ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
   )
 {
   // These constants are hardware dependent.
@@ -1326,10 +1326,10 @@ double compute_evd_pvalue(
  * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
  *\returns the -log(p_value) of the EVD distribution 
  */
-float score_logp_evd_xcorr(
-  float xcorr_score, ///< The xcorr score for the scoring peptide -in
-  float mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
-  float l_value ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+FLOAT_T score_logp_evd_xcorr(
+  FLOAT_T xcorr_score, ///< The xcorr score for the scoring peptide -in
+  FLOAT_T mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  FLOAT_T l_value ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
   )
 {
   return -log(compute_evd_pvalue(xcorr_score, mu, l_value));
@@ -1339,10 +1339,10 @@ float score_logp_evd_xcorr(
  * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
  *\returns the -log(p_value) of the EVD distribution with Bonferroni correction
  */
-float score_logp_bonf_evd_xcorr(
-  float xcorr_score, ///< The xcorr score for the scoring peptide -in
-  float mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
-  float l_value, ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+FLOAT_T score_logp_bonf_evd_xcorr(
+  FLOAT_T xcorr_score, ///< The xcorr score for the scoring peptide -in
+  FLOAT_T mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  FLOAT_T l_value, ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
   int num_peptide  ///< The number of peptides scored for sp -in
   )
 {
@@ -1370,13 +1370,13 @@ float score_logp_bonf_evd_xcorr(
 /**
  * Score a spectrum vs. an ion series
  */
-float score_spectrum_v_ion_series(
+FLOAT_T score_spectrum_v_ion_series(
   SCORER_T* scorer,        ///< the scorer object -in
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
   )
 {
-  float final_score = 0;
+  FLOAT_T final_score = 0;
 
   // if score type equals SP
   if(scorer->type == SP){
@@ -1396,7 +1396,7 @@ float score_spectrum_v_ion_series(
 /**
  * Score a spectrum vs. another spectrum
  */
-float score_spectrum_v_spectrum(
+FLOAT_T score_spectrum_v_spectrum(
   SCORER_T* scorer,           ///< the scorer object
   SPECTRUM_T* first_spectrum, ///< the first spectrum to score 
   SPECTRUM_T* second_spectrum ///<  the second spectrum to score
@@ -1763,7 +1763,7 @@ void set_scorer_type(
 /**
  *\returns the beta value of the scorer
  */
-float get_scorer_sp_beta(
+FLOAT_T get_scorer_sp_beta(
   SCORER_T* scorer ///< the scorer object -in
   )
 {
@@ -1775,7 +1775,7 @@ float get_scorer_sp_beta(
  */
 void set_scorer_sp_beta(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_beta ///< used for Sp: the beta variable -in
+  FLOAT_T sp_beta ///< used for Sp: the beta variable -in
   )
 {
   scorer->sp_beta = sp_beta;
@@ -1784,7 +1784,7 @@ void set_scorer_sp_beta(
 /**
  *\returns the max_mz value of the scorer
  */
-float get_scorer_sp_max_mz(
+FLOAT_T get_scorer_sp_max_mz(
   SCORER_T* scorer ///< the scorer object -in
   )
 {
@@ -1796,7 +1796,7 @@ float get_scorer_sp_max_mz(
  */
 void set_scorer_sp_max_mz(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_max_mz ///< used for Sp: the max_mz variable -in
+  FLOAT_T sp_max_mz ///< used for Sp: the max_mz variable -in
   )
 {
   scorer->sp_max_mz = sp_max_mz;
@@ -1808,9 +1808,9 @@ void set_scorer_sp_max_mz(
  * intensity is larger than the existing peak.
  */
 void add_intensity(
-  float* intensity_array, ///< the intensity array to add intensity at index add_idx -out
+  FLOAT_T* intensity_array, ///< the intensity array to add intensity at index add_idx -out
   int add_idx,            ///< the idex to add the intensity -in
-  float intensity         ///< the intensity to add -in
+  FLOAT_T intensity         ///< the intensity to add -in
   )
 {
   assert(add_idx >= 0);
@@ -1822,7 +1822,7 @@ void add_intensity(
 /**
  *\returns the fraction of b,y ions matched for scoring SP, the values is valid for the last ion series scored with this scorer object
  */
-float get_scorer_sp_b_y_ion_fraction_matched(
+FLOAT_T get_scorer_sp_b_y_ion_fraction_matched(
   SCORER_T* scorer ///< the scorer object -out
   )
 {
@@ -1853,7 +1853,7 @@ int get_scorer_sp_b_y_ion_possible(
  *\returns the array_resolution value of the scorer
  */
 /*
-float get_scorer_sp_array_resolution(
+FLOAT_T get_scorer_sp_array_resolution(
   SCORER_T* scorer ///< the scorer object -in
   )
 {
@@ -1867,7 +1867,7 @@ float get_scorer_sp_array_resolution(
 /*
 void set_scorer_sp_array_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_array_resolution ///< used for Sp: the array_resolution variable -in
+  FLOAT_T sp_array_resolution ///< used for Sp: the array_resolution variable -in
   )
 {
   scorer->sp_array_resolution = sp_array_resolution;
@@ -1878,7 +1878,7 @@ void set_scorer_sp_array_resolution(
  *\returns the sum_resolution value of the scorer
  */
 /*
-float get_scorer_sp_sum_resolution(
+FLOAT_T get_scorer_sp_sum_resolution(
   SCORER_T* scorer ///< the scorer object -in
   )
 {
@@ -1892,7 +1892,7 @@ float get_scorer_sp_sum_resolution(
 /*
 void set_scorer_sp_sum_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_sum_resolution ///< used for Sp: the sum_resolution variable -in
+  FLOAT_T sp_sum_resolution ///< used for Sp: the sum_resolution variable -in
   )
 {
   scorer->sp_sum_resolution = sp_sum_resolution;
@@ -1903,7 +1903,7 @@ void set_scorer_sp_sum_resolution(
  *\returns the equalize_resolution value of the scorer
  */
 /*
-float get_scorer_sp_equalize_resolution(
+FLOAT_T get_scorer_sp_equalize_resolution(
   SCORER_T* scorer ///< the scorer object -in
   )
 {
@@ -1917,7 +1917,7 @@ float get_scorer_sp_equalize_resolution(
 /*
 void set_scorer_sp_equalize_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_equalize_resolution ///< used for Sp: the equalize_resolution variable -in
+  FLOAT_T sp_equalize_resolution ///< used for Sp: the equalize_resolution variable -in
   )
 {
   scorer->sp_equalize_resolution = sp_equalize_resolution;

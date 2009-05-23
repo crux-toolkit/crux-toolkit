@@ -1,6 +1,6 @@
 /**
  * \file mass.c 
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  * \brief Provides constants and methods for calculating mass
  ****************************************************************************/
 #include <math.h>
@@ -21,9 +21,9 @@
 /**
  * Array to store the amino acid masses
  */
-float amino_masses[('Z' - 'A')*2 + 2];
+FLOAT_T amino_masses[('Z' - 'A')*2 + 2];
 enum {NUM_MOD_MASSES = 2048}; // 2 ^ MAX_AA_MODS = 2^11 = 2048
-float aa_mod_masses[(int)NUM_MOD_MASSES];
+FLOAT_T aa_mod_masses[(int)NUM_MOD_MASSES];
 
 
 /**
@@ -153,7 +153,7 @@ void initialize_aa_mod_combinations_array(){
 /**
  * \returns The mass of the given amino acid.
  */
-float get_mass_amino_acid(
+FLOAT_T get_mass_amino_acid(
   char amino_acid, ///< the query amino acid -in
   MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
   )
@@ -174,7 +174,7 @@ float get_mass_amino_acid(
 /**
  * \returns The mass of the given amino acid.
  */
-float get_mass_mod_amino_acid(
+FLOAT_T get_mass_mod_amino_acid(
   MODIFIED_AA_T amino_acid, ///< the query amino acid -in
   MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
   ){
@@ -191,7 +191,7 @@ float get_mass_mod_amino_acid(
 /**
  * \returns The average mass of the given amino acid.
  */
-float get_mass_amino_acid_average(
+FLOAT_T get_mass_amino_acid_average(
   char amino_acid ///< the query amino acid -in
   )
 {
@@ -206,7 +206,7 @@ float get_mass_amino_acid_average(
 /**
  * \returns The average mass of the given amino acid.
  */
-float get_mass_mod_amino_acid_average(
+FLOAT_T get_mass_mod_amino_acid_average(
   MODIFIED_AA_T amino_acid ///< the query amino acid -in
   ){
   if(!initialized_amino_masses){
@@ -225,7 +225,7 @@ float get_mass_mod_amino_acid_average(
 /**
  * \returns The monoisotopic mass of the given amino acid.
  */
-float get_mass_amino_acid_monoisotopic(
+FLOAT_T get_mass_amino_acid_monoisotopic(
   char amino_acid ///< the query amino acid -in
   )
 {
@@ -240,7 +240,7 @@ float get_mass_amino_acid_monoisotopic(
 /**
  * \returns The monoisotopic mass of the given amino acid.
  */
-float get_mass_mod_amino_acid_monoisotopic(
+FLOAT_T get_mass_mod_amino_acid_monoisotopic(
   MODIFIED_AA_T amino_acid ///< the query amino acid -in
   ){
   if(!initialized_amino_masses){
@@ -261,7 +261,7 @@ float get_mass_mod_amino_acid_monoisotopic(
  */
 void increase_amino_acid_mass(
   char amino_acid, ///< the query amino acid -in
-  float update_mass ///< the mass amount to update for the amino acid -in
+  FLOAT_T update_mass ///< the mass amount to update for the amino acid -in
   )
 {
   // has the amino_masses array been initialized?

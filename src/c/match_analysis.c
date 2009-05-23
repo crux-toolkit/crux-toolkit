@@ -13,7 +13,7 @@
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  * 
- * $Revision: 1.50 $
+ * $Revision: 1.51 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -444,7 +444,7 @@ MATCH_COLLECTION_T* run_qvalue(
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
 
-      float score = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
+      FLOAT_T score = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
       carp(CARP_DETAILED_DEBUG, "p-value is %f", score);
       if( score == P_VALUE_NA ){// ignore unscored psms
         continue;

@@ -100,7 +100,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
  *\returns A new generate_peptide_iterator object
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
-  float neutral_mass, ///< The target mass (uncharged) for peptides
+  FLOAT_T neutral_mass, ///< The target mass (uncharged) for peptides
   INDEX_T* index,     ///< The index from which to draw peptides OR
   DATABASE_T* database///< The database from which to draw peptides
   )

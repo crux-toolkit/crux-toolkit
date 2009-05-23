@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.22 $ 
+ * $Revision: 1.23 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -173,8 +173,8 @@ void print_match_tab(
   MATCH_T* match,             ///< the match to print -in  
   FILE* file,                 ///< output stream -out
   int scan_num,             ///< starting scan number -in
-  float spectrum_precursor_mz, ///< m/z of spectrum precursor -in
-  float spectrum_mass,       ///< spectrum neutral mass -in
+  FLOAT_T spectrum_precursor_mz, ///< m/z of spectrum precursor -in
+  FLOAT_T spectrum_mass,       ///< spectrum neutral mass -in
   int num_matches,            ///< num matches in spectrum -in
   int charge,                 ///< charge -in
   SCORER_TYPE_T main_score   ///< the main score to report -in
@@ -204,7 +204,7 @@ void serialize_match(
  ******************************************/
 /**
  * Constructs the 20 feature array that pass over to percolator registration
- *\returns the feature float array
+ *\returns the feature FLOAT_T array
  */
 double* get_match_percolator_features(
   MATCH_T* match, ///< the match to work -in                                          
@@ -273,7 +273,7 @@ char* get_match_mod_sequence_str(
  * Must ask for score that has been computed
  *\returns the match_mode score in the match object
  */
-float get_match_score(
+FLOAT_T get_match_score(
   MATCH_T* match, ///< the match to work -in  
   SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
   );
@@ -284,7 +284,7 @@ float get_match_score(
 void set_match_score(
   MATCH_T* match, ///< the match to work -out
   SCORER_TYPE_T match_mode, ///< the working mode (SP, XCORR) -in
-  float match_score ///< the score of the match -in
+  FLOAT_T match_score ///< the score of the match -in
   );
 
 /**
@@ -355,13 +355,13 @@ int get_match_charge(
  */
 void set_match_delta_cn(
   MATCH_T* match, ///< the match to work -out
-  float delta_cn  ///< the delta cn value of PSM -in
+  FLOAT_T delta_cn  ///< the delta cn value of PSM -in
   );
 
 /**
  * gets the match delta_cn
  */
-float get_match_delta_cn(
+FLOAT_T get_match_delta_cn(
   MATCH_T* match ///< the match to work -out
   );
 
@@ -370,13 +370,13 @@ float get_match_delta_cn(
  */
 void set_match_ln_delta_cn(
   MATCH_T* match, ///< the match to work -out
-  float ln_delta_cn  ///< the ln delta cn value of PSM -in
+  FLOAT_T ln_delta_cn  ///< the ln delta cn value of PSM -in
   );
 
 /**
  * gets the match ln_delta_cn
  */
-float get_match_ln_delta_cn(
+FLOAT_T get_match_ln_delta_cn(
   MATCH_T* match ///< the match to work -out
   );
 
@@ -385,13 +385,13 @@ float get_match_ln_delta_cn(
  */
 void set_match_ln_experiment_size(
   MATCH_T* match, ///< the match to work -out
-  float ln_experiment_size ///< the ln_experiment_size value of PSM -in
+  FLOAT_T ln_experiment_size ///< the ln_experiment_size value of PSM -in
   );
 
 /**
  * gets the match ln_experiment_size
  */
-float get_match_ln_experiment_size(
+FLOAT_T get_match_ln_experiment_size(
   MATCH_T* match ///< the match to work -out
   );
 
@@ -429,7 +429,7 @@ void set_match_b_y_ion_info(
 /**
  * gets the match b_y_ion_match
  */
-float get_match_b_y_ion_fraction_matched(
+FLOAT_T get_match_b_y_ion_fraction_matched(
   MATCH_T* match ///< the match to work -out
   );
 

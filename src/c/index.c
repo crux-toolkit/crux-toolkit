@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.84 $
+ * $Revision: 1.85 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -151,7 +151,7 @@ struct index{
   PEPTIDE_CONSTRAINT_T* disk_constraint;///< Defines peptides on disk
   PEPTIDE_CONSTRAINT_T* search_constraint;///< Defines peptides being searched
   BOOLEAN_T on_disk; ///< Does this index exist on disk yet?
-  float mass_range;  ///< the range of masses contained in each index file -in
+  FLOAT_T mass_range;  ///< the range of masses contained in each index file -in
   BOOLEAN_T is_unique; ///< only unique peptides? -in
 };    
 
@@ -161,8 +161,8 @@ struct index{
  */
 struct index_file{
   char* filename;  ///< The file name that contain the peptides
-  float start_mass; ///< the start mass limit in this file
-  float interval;   ///< the interval of the peptides in this file
+  FLOAT_T start_mass; ///< the start mass limit in this file
+  FLOAT_T interval;   ///< the interval of the peptides in this file
 };
 typedef struct index_file INDEX_FILE_T;
 
@@ -366,8 +366,12 @@ void set_index_field_from_map(INDEX_T* index, char* line){
   // parse the line
   char sharp[2] = "";
   char trait_name[64] = "";
-  float value = 0;
+  FLOAT_T value = 0;
+  #ifdef USE_DOUBLES
+  sscanf(line, "%s %s %lf", sharp, trait_name, &value);
+  #else
   sscanf(line, "%s %s %f", sharp, trait_name, &value);
+  #endif
   carp(CARP_DEBUG, "Index map header found %s value %.2f", trait_name, value);
 
   if(strcmp("min_mass:", trait_name) == 0){
@@ -511,7 +515,7 @@ void set_index_fields(
   char* output_dir,      ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,  
   ///< Constraint which these peptides satisfy -in
-  float mass_range,  
+  FLOAT_T mass_range,  
   ///< the range of mass that each index file should be partitioned into -in
   BOOLEAN_T is_unique ///< only unique peptides? -in
   )
@@ -561,7 +565,7 @@ INDEX_T* new_index(
   char* output_dir,     ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,  
     ///< Constraint which these peptides will satisfy
-  float mass_range  
+  FLOAT_T mass_range  
     ///< the range of mass that each index file should be partitioned into
   )
 {
@@ -835,10 +839,10 @@ long get_num_bins_needed(
 {
   int min_length = get_peptide_constraint_min_length(index->disk_constraint);
   int max_length = get_peptide_constraint_max_length(index->disk_constraint);
-  float min_mass = get_peptide_constraint_min_mass(index->disk_constraint);
-  float max_mass = get_peptide_constraint_max_mass(index->disk_constraint);
-  float min_mass_limit = min_mass;
-  float max_mass_limit = max_mass;
+  FLOAT_T min_mass = get_peptide_constraint_min_mass(index->disk_constraint);
+  FLOAT_T max_mass = get_peptide_constraint_max_mass(index->disk_constraint);
+  FLOAT_T min_mass_limit = min_mass;
+  FLOAT_T max_mass_limit = max_mass;
   long num_bins = 0;
 
   // reset minimum mass limit
@@ -1175,9 +1179,9 @@ BOOLEAN_T create_index(
   long num_bins = 0;
   DATABASE_PEPTIDE_ITERATOR_T* peptide_iterator = NULL;
   PEPTIDE_T* working_peptide = NULL;
-  float working_mass;
+  FLOAT_T working_mass;
   char* filename = NULL;
-  float mass_range = index->mass_range;
+  FLOAT_T mass_range = index->mass_range;
   unsigned int* peptide_count_array = NULL;
   BOOLEAN_T replace_index = FALSE;
 
@@ -1502,7 +1506,7 @@ void set_index_on_disk(
 /**
  *\returns the range of mass that each index file should be partitioned into
  */
-float get_index_mass_range(
+FLOAT_T get_index_mass_range(
   INDEX_T* index ///< The index -in
   )
 {
@@ -1514,7 +1518,7 @@ float get_index_mass_range(
  */
 void set_index_mass_range(
   INDEX_T* index, ///< The index -in
-  float mass_range  ///< the range of mass that each index file should be partitioned into -in
+  FLOAT_T mass_range  ///< the range of mass that each index file should be partitioned into -in
   )
 {
   index->mass_range = mass_range;
@@ -1552,8 +1556,8 @@ void set_index_is_unique(
  */
 INDEX_FILE_T* new_index_file(
   char* filename,  ///< the filename to add -in
-  float start_mass,  ///< the start mass of the index file  -in
-  float range  ///< the mass range of the index file  -in
+  FLOAT_T start_mass,  ///< the start mass of the index file  -in
+  FLOAT_T range  ///< the mass range of the index file  -in
   )
 {
   INDEX_FILE_T* index_file =
@@ -1576,8 +1580,8 @@ BOOLEAN_T add_new_index_file(
   INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator,
   ///< the index_peptide_iterator to add file -out
   char* filename_parsed,  ///< the filename to add -in
-  float start_mass,  ///< the start mass of the index file  -in
-  float range  ///< the mass range of the index file  -in
+  FLOAT_T start_mass,  ///< the start mass of the index file  -in
+  FLOAT_T range  ///< the mass range of the index file  -in
   )
 {
   char* filename = my_copy_string(filename_parsed);
@@ -1632,13 +1636,13 @@ BOOLEAN_T parse_crux_index_map(
   
   // used to parse within a line
 
-  float start_mass;
-  float range;
+  FLOAT_T start_mass;
+  FLOAT_T range;
   BOOLEAN_T start_file = FALSE;
-  float min_mass = 
+  FLOAT_T min_mass = 
     get_peptide_constraint_min_mass(
           index_peptide_iterator->index->search_constraint);
-  float max_mass = 
+  FLOAT_T max_mass = 
     get_peptide_constraint_max_mass(
           index_peptide_iterator->index->search_constraint);
 
@@ -1674,8 +1678,13 @@ BOOLEAN_T parse_crux_index_map(
 
       //      if(sscanf(new_line,"%s %f %f", 
       //                filename, &start_mass, &range) < 3){
+      #ifdef USE_DOUBLES
+      int char_read = sscanf(new_line,"%s %lf %lf", 
+                             filename, &start_mass, &range);
+      #else
       int char_read = sscanf(new_line,"%s %f %f", 
                              filename, &start_mass, &range);
+      #endif
       if(char_read != 3){
         free(new_line);
         carp(CARP_WARNING, "Incorrect file format");
@@ -1895,7 +1904,7 @@ BOOLEAN_T find_peptide_in_current_index_file(
     }
 
     // check our peptide to see if it fits the constraint
-    float peptide_mass = get_peptide_peptide_mass(peptide);
+    FLOAT_T peptide_mass = get_peptide_peptide_mass(peptide);
     int peptide_length = get_peptide_length(peptide);
 
     // if peptide mass larger than constraint, no more peptides to return

@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file protein.c
- * $Revision: 1.82 $
+ * $Revision: 1.83 $
  * \brief: Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
@@ -64,7 +64,7 @@ struct protein_peptide_iterator {
   int* nterm_cleavage_positions; ///< nterm cleavages that satisfy constraint. 
                                  ///< 1st aa is 1.
   int* peptide_lengths; ///< all the lengths of valid peptides
-  float* peptide_masses; ///< all the masses of valid peptides
+  FLOAT_T* peptide_masses; ///< all the masses of valid peptides
   int* cumulative_cleavages; ///< the cumulative number of cleavages so far
   int current_cleavage_idx; /// where are we in the cleavage positions?
   int num_cleavages; /// how many cleavage positions?
@@ -883,13 +883,13 @@ DATABASE_T* get_protein_database(
  * Takes a cumulative distribution of peptide masses (the mass_array) and
  * the start index and end index and returns a peptide mass
  */
-float calculate_subsequence_mass (
+FLOAT_T calculate_subsequence_mass (
     double* mass_array,
     int start_idx,
     int cur_length
   ){
 
-  float mass_h2o = MASS_H2O_AVERAGE;
+  FLOAT_T mass_h2o = MASS_H2O_AVERAGE;
   if(get_mass_type_parameter("isotopic-mass") == MONO){
     mass_h2o = MASS_H2O_MONO;
   }
@@ -897,7 +897,7 @@ float calculate_subsequence_mass (
   // carp(CARP_DETAILED_DEBUG, "mass start = %i", start_idx);
   int end_idx = start_idx + cur_length;
   // carp(CARP_DETAILED_DEBUG, "mass end = %i", end_idx);
-  float peptide_mass = mass_array[end_idx] - mass_array[start_idx] + mass_h2o;
+  FLOAT_T peptide_mass = mass_array[end_idx] - mass_array[start_idx] + mass_h2o;
 
   return peptide_mass;
 }
@@ -1152,7 +1152,7 @@ void iterator_add_cleavages(
       }
      
       // check our mass constraint
-      float peptide_mass = calculate_subsequence_mass(iterator->mass_array, 
+      FLOAT_T peptide_mass = calculate_subsequence_mass(iterator->mass_array, 
           nterm_allowed_cleavages[nterm_idx], length);
 
       /* 
@@ -1206,7 +1206,7 @@ void prepare_protein_peptide_iterator(
 
   //  PEPTIDE_TYPE_T pep_type = get_peptide_type_parameter("cleavages");
   ENZYME_T enzyme = get_peptide_constraint_enzyme(iterator->peptide_constraint);
-  float mass_h2o = MASS_H2O_AVERAGE;
+  FLOAT_T mass_h2o = MASS_H2O_AVERAGE;
 
   // set correct H2O mass
   if(mass_type == MONO){
@@ -1353,7 +1353,7 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
   iterator->peptide_lengths 
     = (int*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(int));
   iterator->peptide_masses
-    = (float*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(float));
+    = (FLOAT_T*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(FLOAT_T));
   iterator->cumulative_cleavages
     = (int*) mymalloc( (protein->length + 1) * sizeof(int));
 
@@ -1422,7 +1422,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
   int cleavage_idx = iterator->current_cleavage_idx;
   int current_start = iterator->nterm_cleavage_positions[cleavage_idx];
   int current_length = iterator->peptide_lengths[cleavage_idx];
-  float peptide_mass = iterator->peptide_masses[cleavage_idx];
+  FLOAT_T peptide_mass = iterator->peptide_masses[cleavage_idx];
 
   // create new peptide
   PEPTIDE_T* peptide = new_peptide(current_length, peptide_mass, 

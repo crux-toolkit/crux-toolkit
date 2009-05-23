@@ -6,7 +6,7 @@
 /*
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * $Revision: 1.21 $
+ * $Revision: 1.22 $
  *****************************************************************************/
 #ifndef SCORER_H 
 #define SCORER_H
@@ -41,7 +41,7 @@ void free_scorer(
 /**
  * Score a spectrum vs. an ion series
  */
-float score_spectrum_v_ion_series(
+FLOAT_T score_spectrum_v_ion_series(
   SCORER_T* scorer,        ///< the scorer object -in
   SPECTRUM_T* spectrum,    ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
@@ -95,7 +95,7 @@ BOOLEAN_T output_psm_files_paired(
 /**
  * Score a spectrum vs. another spectrum
  */
-float score_spectrum_v_spectrum(
+FLOAT_T score_spectrum_v_spectrum(
   SCORER_T* scorer,           ///< the scorer object -in
   SPECTRUM_T* first_spectrum, ///< the first spectrum to score -in
   SPECTRUM_T* second_spectrum ///<  the second spectrum to score -in
@@ -109,18 +109,18 @@ float score_spectrum_v_spectrum(
  * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
  *\returns the -log(p_value) of the exponential distribution
  */
-float score_logp_exp_sp(
-  float sp_score, ///< The sp score for the scoring peptide -in
-  float mean      ///< The overall mean of the sp scored peptides -in
+FLOAT_T score_logp_exp_sp(
+  FLOAT_T sp_score, ///< The sp score for the scoring peptide -in
+  FLOAT_T mean      ///< The overall mean of the sp scored peptides -in
   );
 
 /**
  * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
  *\returns the -log(p_value) of the exponential distribution with Bonferroni correction
  */
-float score_logp_bonf_exp_sp(
-  float sp_score, ///< The sp score for the scoring peptide -in
-  float mean,      ///< The overall mean of the sp scored peptides -in
+FLOAT_T score_logp_bonf_exp_sp(
+  FLOAT_T sp_score, ///< The sp score for the scoring peptide -in
+  FLOAT_T mean,      ///< The overall mean of the sp scored peptides -in
   int num_peptide  ///< The number of peptides scored for sp
   );
 
@@ -128,10 +128,10 @@ float score_logp_bonf_exp_sp(
  * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
  *\returns the -log(p_value)
  */
-float score_logp_weibull(
-  float score, ///< The score for the scoring peptide -in
-  float eta,  ///< The eta parameter of the Weibull
-  float beta ///< The beta parameter of the Weibull
+FLOAT_T score_logp_weibull(
+  FLOAT_T score, ///< The score for the scoring peptide -in
+  FLOAT_T eta,  ///< The eta parameter of the Weibull
+  FLOAT_T beta ///< The beta parameter of the Weibull
   );
 
 /**
@@ -139,10 +139,10 @@ float score_logp_weibull(
  *\returns the -log(p_value)
  */
 double score_logp_bonf_weibull(
-  float score, ///< The score for the scoring peptide -in
-  float eta,  ///< The eta parameter of the Weibull
-  float beta, ///< The beta parameter of the Weibull
-  float shift, ///< The shift parameter of the Weibull
+  FLOAT_T score, ///< The score for the scoring peptide -in
+  FLOAT_T eta,  ///< The eta parameter of the Weibull
+  FLOAT_T beta, ///< The beta parameter of the Weibull
+  FLOAT_T shift, ///< The shift parameter of the Weibull
   int num_peptides ///< The number of peptides
   );
 
@@ -151,20 +151,20 @@ double score_logp_bonf_weibull(
  * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
  *\returns the -log(p_value) of the EVD distribution 
  */
-float score_logp_evd_xcorr(
-  float xcorr_score, ///< The xcorr score for the scoring peptide -in
-  float mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
-  float l_value ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+FLOAT_T score_logp_evd_xcorr(
+  FLOAT_T xcorr_score, ///< The xcorr score for the scoring peptide -in
+  FLOAT_T mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  FLOAT_T l_value ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
   );
 
 /**
  * Compute a p-value for a given score w.r.t. an EVD with the given parameters.
  *\returns the -log(p_value) of the EVD distribution with Bonferroni correction
  */
-float score_logp_bonf_evd_xcorr(
-  float xcorr_score, ///< The xcorr score for the scoring peptide -in
-  float mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
-  float l_value, ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
+FLOAT_T score_logp_bonf_evd_xcorr(
+  FLOAT_T xcorr_score, ///< The xcorr score for the scoring peptide -in
+  FLOAT_T mu, ///<  EVD parameter Xcorr(characteristic value of extreme value distribution) -in
+  FLOAT_T l_value, ///< EVD parameter Xcorr(decay constant of extreme value distribution) -in
   int num_peptide  ///< The number of peptides scored for sp -in
   );
 
@@ -190,7 +190,7 @@ void set_scorer_type(
 /**
  *\returns the beta value of the scorer
  */
-float get_scorer_sp_beta(
+FLOAT_T get_scorer_sp_beta(
   SCORER_T* scorer ///< the scorer object -in
   );
 
@@ -199,13 +199,13 @@ float get_scorer_sp_beta(
  */
 void set_scorer_sp_beta(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_beta ///< used for Sp: the beta variable -in
+  FLOAT_T sp_beta ///< used for Sp: the beta variable -in
   );
 
 /**
  *\returns the gamma value of the scorer
  */
-float get_scorer_sp_gamma(
+FLOAT_T get_scorer_sp_gamma(
   SCORER_T* scorer ///< the scorer object -in
   );
 
@@ -214,14 +214,14 @@ float get_scorer_sp_gamma(
  */
 void set_scorer_sp_gamma(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_gamma ///< used for Sp: the gamma variable -in
+  FLOAT_T sp_gamma ///< used for Sp: the gamma variable -in
   );
 
 
 /**
  *\returns the min_mz value of the scorer
  */
-float get_scorer_sp_min_mz(
+FLOAT_T get_scorer_sp_min_mz(
   SCORER_T* scorer ///< the scorer object -in
   );
 
@@ -230,14 +230,14 @@ float get_scorer_sp_min_mz(
  */
 void set_scorer_sp_min_mz(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_min_mz ///< used for Sp: the min_mz variable -in
+  FLOAT_T sp_min_mz ///< used for Sp: the min_mz variable -in
   );
 
 
 /**
  *\returns the max_mz value of the scorer
  */
-float get_scorer_sp_max_mz(
+FLOAT_T get_scorer_sp_max_mz(
   SCORER_T* scorer ///< the scorer object -in
   );
 
@@ -246,14 +246,14 @@ float get_scorer_sp_max_mz(
  */
 void set_scorer_sp_max_mz(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_max_mz ///< used for Sp: the max_mz variable -in
+  FLOAT_T sp_max_mz ///< used for Sp: the max_mz variable -in
   );
 
 
 /**
  *\returns the sp_array_resolution value of the scorer
  */
-float get_scorer_sp_array_resolution(
+FLOAT_T get_scorer_sp_array_resolution(
   SCORER_T* scorer ///< the scorer object -in
   );
 
@@ -262,13 +262,13 @@ float get_scorer_sp_array_resolution(
  */
 void set_scorer_sp_array_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_array_resolution ///< used for Sp: the sp_array_resolution variable -in
+  FLOAT_T sp_array_resolution ///< used for Sp: the sp_array_resolution variable -in
   );
 
 /**
  *\returns the sp_sum_resolution value of the scorer
  */
-float get_scorer_sp_sum_resolution(
+FLOAT_T get_scorer_sp_sum_resolution(
   SCORER_T* scorer ///< the scorer object -in
   );
 
@@ -277,13 +277,13 @@ float get_scorer_sp_sum_resolution(
  */
 void set_scorer_sp_sum_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_sum_resolution ///< used for Sp: the sp_sum_resolution variable -in
+  FLOAT_T sp_sum_resolution ///< used for Sp: the sp_sum_resolution variable -in
   );
 
 /**
  *\returns the equalize_resolution value of the scorer
  */
-float get_scorer_sp_equalize_resolution(
+FLOAT_T get_scorer_sp_equalize_resolution(
   SCORER_T* scorer ///< the scorer object -in
   );
 
@@ -292,13 +292,13 @@ float get_scorer_sp_equalize_resolution(
  */
 void set_scorer_sp_equalize_resolution(
   SCORER_T* scorer, ///< the scorer object -out                     
-  float sp_equalize_resolution ///< used for Sp: the equalize_resolution variable -in
+  FLOAT_T sp_equalize_resolution ///< used for Sp: the equalize_resolution variable -in
   );
 
 /**
  *\returns the fraction of b,y ions matched for scoring SP, the values is valid for the last ion series scored with this scorer object
  */
-float get_scorer_sp_b_y_ion_fraction_matched(
+FLOAT_T get_scorer_sp_b_y_ion_fraction_matched(
   SCORER_T* scorer ///< the scorer object -in
   );
 

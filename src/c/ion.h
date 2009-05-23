@@ -1,6 +1,6 @@
 /**
  * \file ion.h
- * $Revision: 1.14 $
+ * $Revision: 1.15 $
  * \brief Object for representing one ion in an ion_series.
  *
  */
@@ -64,7 +64,7 @@ ION_T* new_modified_ion_with_mass(
   int charge, ///< charge of the ion
   char* peptide, ///< location for the new ion -in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
-  float base_mass, ///< the base mass of the ion -in
+  FLOAT_T base_mass, ///< the base mass of the ion -in
   int* modification_counts ///< an array of modification counts for each modification -in
   );
 
@@ -79,7 +79,7 @@ ION_T* new_ion_with_mass(
   int charge, ///< charge of the ion
   char* peptide, ///< location for the new ion -in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
-  float base_mass ///< the base mass of the ion -in
+  FLOAT_T base_mass ///< the base mass of the ion -in
   );
 
 /**
@@ -194,8 +194,8 @@ void print_null_ion_gmtk_single(
  *
  * floats
  *
- * 1. m/z ratio float (from N-term)
- * 2. m/z ratio float (from C-term)
+ * 1. m/z ratio FLOAT_T (from N-term)
+ * 2. m/z ratio FLOAT_T (from C-term)
  * 3. first raw
  * 4. second raw
  * 5. first rank
@@ -260,7 +260,7 @@ BOOLEAN_T ion_is_modified(
 /**
  * \returns the location of ION_T object
  */
-float get_ion_mass_z(
+FLOAT_T get_ion_mass_z(
   ION_T* working_ion///< return the location of this ion -in 
   );
 
@@ -272,7 +272,7 @@ float get_ion_mass_z(
  */
 void set_ion_mass_z(
   ION_T* working_ion, ///<set the m/z location of this ion -out
-  float mass_z ///< the m/z location -in
+  FLOAT_T mass_z ///< the m/z location -in
   );
 
 
@@ -372,7 +372,7 @@ BOOLEAN_T calc_ion_mass_z(
 BOOLEAN_T calc_ion_mass_z_with_mass(
   ION_T* ion, ///< the working ion -out/in
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
-  float mass, ///< the basic mass of the ion -in
+  FLOAT_T mass, ///< the basic mass of the ion -in
   BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
   );
 

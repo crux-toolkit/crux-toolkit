@@ -3,7 +3,7 @@
  * AUTHOR: Aaron Klammer
  * DESCRIPTION: \brief A collection of hits.
  * CREATE DATE: 2008 March 11
- * REVISION: $Revision: 1.5 $
+ * REVISION: $Revision: 1.6 $
  ****************************************************************************/
 
 #ifndef HIT_COLLECTION_H
@@ -82,7 +82,7 @@ BOOLEAN_T hit_collection_has_protein_id(
 BOOLEAN_T hit_collection_add_protein_score(
     HIT_COLLECTION_T* hit_collection,
     PROTEIN_T* protein,
-    float score
+    FLOAT_T score
     );
 
 /**

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.70 $
+ * REVISION: $Revision: 1.71 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -56,12 +56,12 @@ struct spectrum{
   int              id;            ///< A unique identifier
                                   // FIXME, this field is not set when parsing
   SPECTRUM_TYPE_T  spectrum_type; ///< The type of spectrum. 
-  float            precursor_mz;  ///< The m/z of precursor (MS-MS spectra)
+  FLOAT_T            precursor_mz;  ///< The m/z of precursor (MS-MS spectra)
   int*             possible_z;    ///< The possible charge states of this spectrum
   int              num_possible_z;///< The number of possible charge states of this spectrum
   PEAK_T*          peaks;         ///< The spectrum peaks
-  float            min_peak_mz;   ///< The minimum m/z of all peaks
-  float            max_peak_mz;   ///< The maximum m/z of all peaks
+  FLOAT_T            min_peak_mz;   ///< The minimum m/z of all peaks
+  FLOAT_T            max_peak_mz;   ///< The maximum m/z of all peaks
   int              num_peaks;     ///< The number of peaks
   double           total_energy;  ///< The sum of intensities in all peaks
   char*            filename;      ///< Optional filename
@@ -163,7 +163,7 @@ SPECTRUM_T* new_spectrum(
   int               first_scan,         ///< The number of the first scan -in
   int               last_scan,          ///< The number of the last scan -in
   SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum. -in
-  float             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra) -in
+  FLOAT_T             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra) -in
   int*              possible_z,         ///< The possible charge states of this spectrum  -in
   int               num_possible_z,     ///< The number of possible charge states of this spectrum  -in
   char*             filename)           ///< Optional filename -in
@@ -399,14 +399,14 @@ BOOLEAN_T parse_spectrum_file(
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
-  float location_mz;
-  float intensity;
+  FLOAT_T location_mz;
+  FLOAT_T intensity;
   BOOLEAN_T record_S = FALSE; // check's if it read S line
   BOOLEAN_T record_Z = FALSE; // check's if it read Z line
   BOOLEAN_T start_add_peaks = FALSE; // check's if it started reading peaks
   BOOLEAN_T file_format = FALSE; // is the file format correct so far
   
-  float test_float;
+  FLOAT_T test_float;
   char test_char;
   
   while( (line_length = getline(&new_line, &buf_length, file)) != -1){
@@ -477,20 +477,34 @@ BOOLEAN_T parse_spectrum_file(
           break; // File format incorrect
         }
         // check for peak line format
+        #ifdef USE_DOUBLES
+        else if((sscanf(new_line,"%lf %lf %lf",// test format:peak line has more than 2 fields
+                        &test_float, &test_float, &test_float) > 2)||
+                (sscanf(new_line,"%lf %lf %c",// test format:peak line has more than 2 fields
+                        &test_float, &test_float, &test_char) > 2)||
+                (sscanf(new_line,"%lf %lf",// test format:peak line has less than 2 fields
+                        &test_float, &test_float) != 2)){
+        #else
         else if((sscanf(new_line,"%f %f %f",// test format:peak line has more than 2 fields
                         &test_float, &test_float, &test_float) > 2)||
                 (sscanf(new_line,"%f %f %c",// test format:peak line has more than 2 fields
                         &test_float, &test_float, &test_char) > 2)||
                 (sscanf(new_line,"%f %f",// test format:peak line has less than 2 fields
                         &test_float, &test_float) != 2)){
+        #endif
           file_format = FALSE;
           fprintf(stderr, "Incorrect peak line\n");
           fprintf(stderr, "At line: %s", new_line);
           break; // File format incorrect
         }
         // Reads the 'peak' lines, only if 'Z','S' line has been read
+        #ifdef USE_DOUBLES
+        else if(record_Z && record_S &&
+                (sscanf(new_line,"%lf %lf", &location_mz, &intensity) == 2)){
+        #else
         else if(record_Z && record_S &&
                 (sscanf(new_line,"%f %f", &location_mz, &intensity) == 2)){
+        #endif
           file_format = TRUE;
           start_add_peaks = TRUE;
           add_peak_to_spectrum(spectrum, intensity, location_mz);
@@ -539,8 +553,8 @@ BOOLEAN_T parse_spectrum_file(
    int spliced_line_index = 0;
    int first_scan;
    int last_scan;
-   float precursor_mz;
-   float test_float;
+   FLOAT_T precursor_mz;
+   FLOAT_T test_float;
    char test_char;
 
    // deletes empty space & 0
@@ -578,12 +592,21 @@ BOOLEAN_T parse_spectrum_file(
    spliced_line[spliced_line_index] = '\0';
 
    // check if S line is in correct format
+   #ifdef USE_DOUBLES
+   if ( (sscanf(spliced_line,"%lf %lf %lf %lf",// test format:S line has more than 3 fields
+                &test_float, &test_float, &test_float, &test_float) > 3) ||
+        (sscanf(spliced_line,"%lf %lf %lf %c",// test format:S line has more than 3 fields 
+                &test_float, &test_float, &test_float, &test_char) > 3) ||
+        (sscanf(spliced_line,"%i %i %lf", // S line is parsed here
+               &first_scan, &last_scan, &precursor_mz) != 3)) {
+   #else
    if ( (sscanf(spliced_line,"%f %f %f %f",// test format:S line has more than 3 fields
                 &test_float, &test_float, &test_float, &test_float) > 3) ||
         (sscanf(spliced_line,"%f %f %f %c",// test format:S line has more than 3 fields 
                 &test_float, &test_float, &test_float, &test_char) > 3) ||
         (sscanf(spliced_line,"%i %i %f", // S line is parsed here
                &first_scan, &last_scan, &precursor_mz) != 3)) {
+   #endif
      fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
      return FALSE;
    }
@@ -607,11 +630,21 @@ BOOLEAN_T parse_spectrum_file(
    int tokens;
    char line_name;
    int charge;
-   float m_h_plus;
-   float test_float;
+   FLOAT_T m_h_plus;
+   FLOAT_T test_float;
    char test_char;
 
    // check if Z line is in correct format
+   #ifdef USE_DOUBLES
+   if( ((tokens =  // test format: Z line has less than 3 fields
+         sscanf(line, "%c %lf %lf", &test_char, &test_float, &test_float)) < 3) ||
+       ((tokens =   // test format: Z line has more than 3 fields
+         sscanf(line, "%c %lf %lf %lf", &test_char, &test_float, &test_float, &test_float)) >  3) ||
+       ((tokens =  // test format: Z line has more than 3 fields
+         sscanf(line, "%c %lf %lf %c", &test_char, &test_float, &test_float, &test_char)) >  3) ||
+       (tokens = // Z line is parsed here
+        sscanf(line, "%c %d %lf", &line_name, &charge, &m_h_plus)) != 3){
+   #else
    if( ((tokens =  // test format: Z line has less than 3 fields
          sscanf(line, "%c %f %f", &test_char, &test_float, &test_float)) < 3) ||
        ((tokens =   // test format: Z line has more than 3 fields
@@ -620,6 +653,7 @@ BOOLEAN_T parse_spectrum_file(
          sscanf(line, "%c %f %f %c", &test_char, &test_float, &test_float, &test_char)) >  3) ||
        (tokens = // Z line is parsed here
         sscanf(line, "%c %d %f", &line_name, &charge, &m_h_plus)) != 3){
+   #endif
      fprintf(stderr,"Failed to parse 'Z' line:\n %s",line);
      return FALSE;
    }  
@@ -727,8 +761,8 @@ BOOLEAN_T parse_spectrum_file(
  */
 BOOLEAN_T add_peak_to_spectrum(
   SPECTRUM_T* spectrum,///< spectrum to add the peak to -out 
-  float intensity, ///< the intensity of peak to add -in
-  float location_mz ///< the location of peak to add -in
+  FLOAT_T intensity, ///< the intensity of peak to add -in
+  FLOAT_T location_mz ///< the location of peak to add -in
   )
 {
   if(spectrum->num_peaks < MAX_PEAKS){  // FIXME change it to be dynamic
@@ -762,7 +796,7 @@ void populate_mz_peak_array(
   PEAK_T* peak = NULL;
   while(peak_iterator_has_next(peak_iterator)){
     peak = peak_iterator_next(peak_iterator);
-    float peak_mz = get_peak_location(peak);
+    FLOAT_T peak_mz = get_peak_location(peak);
     int mz_idx = (int) (peak_mz * MZ_TO_PEAK_ARRAY_RESOLUTION);
     if (mz_peak_array[mz_idx] != NULL){
       carp(CARP_INFO, "Peak collision at mz %.3f = %i", peak_mz, mz_idx);
@@ -787,13 +821,13 @@ void populate_mz_peak_array(
  */
 PEAK_T* get_nearest_peak(
   SPECTRUM_T* spectrum, ///< the spectrum to query the intensity sum -in
-  float mz, ///< the mz of the peak around which to sum intensities -in
-  float max ///< the maximum distance to get intensity -in
+  FLOAT_T mz, ///< the mz of the peak around which to sum intensities -in
+  FLOAT_T max ///< the maximum distance to get intensity -in
   )
 {
   populate_mz_peak_array(spectrum); // for rapid peak lookup by mz
 
-  float min_distance = BILLION;
+  FLOAT_T min_distance = BILLION;
   int min_mz_idx = (int)((mz - max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
   min_mz_idx = min_mz_idx < 0 ? 0 : min_mz_idx;
   int max_mz_idx = (int)((mz + max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
@@ -807,8 +841,8 @@ PEAK_T* get_nearest_peak(
     if ((peak = spectrum->mz_peak_array[peak_idx]) == NULL){
       continue;
     }
-    float peak_mz = get_peak_location(peak);
-    float distance = abs(mz - peak_mz);
+    FLOAT_T peak_mz = get_peak_location(peak);
+    FLOAT_T distance = abs(mz - peak_mz);
     if (distance > max){
       continue;
     }
@@ -847,8 +881,8 @@ BOOLEAN_T parse_spectrum(
  */
 void update_spectrum_fields(
   SPECTRUM_T* spectrum, ///< the spectrum fields to update -out
-  float intensity, ///< the intensity of the peak that has been added -in
-  float location ///< the location of the peak that has been added -in
+  FLOAT_T intensity, ///< the intensity of the peak that has been added -in
+  FLOAT_T location ///< the location of the peak that has been added -in
   )
 {
   ++spectrum->num_peaks;
@@ -955,7 +989,7 @@ void set_spectrum_spectrum_type(
 /**
  * \returns the m/z of the precursor
  */
-float get_spectrum_precursor_mz(
+FLOAT_T get_spectrum_precursor_mz(
   SPECTRUM_T* spectrum  ///< the spectrum to query the precursor_mz -in
   )
 {
@@ -967,7 +1001,7 @@ float get_spectrum_precursor_mz(
  */
 void set_spectrum_precursor_mz(
   SPECTRUM_T* spectrum,  ///< the spectrum to set the precursor_mz -out
-  float precursor_mz ///< the precursor_mz -in
+  FLOAT_T precursor_mz ///< the precursor_mz -in
   )
 {
   spectrum->precursor_mz = precursor_mz;
@@ -976,7 +1010,7 @@ void set_spectrum_precursor_mz(
 /**
  * \returns the minimum m/z of all peaks
  */
-float get_spectrum_min_peak_mz(
+FLOAT_T get_spectrum_min_peak_mz(
   SPECTRUM_T* spectrum ///< the spectrum to query min_peak_mz -in
   )
 {
@@ -986,7 +1020,7 @@ float get_spectrum_min_peak_mz(
 /**
  * \returns the maximum m/z of all peaks
  */
-float get_spectrum_max_peak_mz(
+FLOAT_T get_spectrum_max_peak_mz(
   SPECTRUM_T* spectrum  ///< the spectrum to query max_peak_mz -in
   )
 {
@@ -1217,12 +1251,12 @@ int get_spectrum_num_possible_z(
 /**
  * \returns The intensity of the peak with the maximum intensity.
  */
-float get_spectrum_max_peak_intensity(
+FLOAT_T get_spectrum_max_peak_intensity(
   SPECTRUM_T* spectrum  ///< the spectrum to query maximum peak intensity -in
   )
 {
   int num_peak_index = 0;
-  float max_intensity = -1;
+  FLOAT_T max_intensity = -1;
 
   for(; num_peak_index < get_spectrum_num_peaks(spectrum); ++num_peak_index){
     if(max_intensity <= get_peak_intensity(find_peak(spectrum->peaks, num_peak_index))){
@@ -1237,7 +1271,7 @@ float get_spectrum_max_peak_intensity(
  * \returns The mass of the charged precursor ion, according to the formula 
  * mass = m/z * charge
  */
-float get_spectrum_mass(
+FLOAT_T get_spectrum_mass(
   SPECTRUM_T* spectrum,  ///< the spectrum to query spectrum mass -in
   int charge ///< the charge of precursor ion -in
   )
@@ -1249,7 +1283,7 @@ float get_spectrum_mass(
  * \returns The mass of the neutral precursor ion, according to the formula 
  * mass = m/z * charge - mass_H * charge
  */
-float get_spectrum_neutral_mass(
+FLOAT_T get_spectrum_neutral_mass(
   SPECTRUM_T* spectrum,  ///< the spectrum to query neutral_mass -in
   int charge ///< the charge of precursor ion -in
   )
@@ -1261,7 +1295,7 @@ float get_spectrum_neutral_mass(
  * \returns The mass of the singly charged precursor ion, according to the formula 
  * mass = m/z * charge - (mass_H * (charge - 1))
  */
-float get_spectrum_singly_charged_mass(
+FLOAT_T get_spectrum_singly_charged_mass(
   SPECTRUM_T* spectrum,  ///< the spectrum to query charged_mass -in
   int charge ///< the charge of the precursor ion -in
   )
@@ -1319,7 +1353,7 @@ void sum_normalize_spectrum(
   PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
   while(peak_iterator_has_next(peak_iterator)){
     peak = peak_iterator_next(peak_iterator);
-    float new_intensity = get_peak_intensity(peak) / spectrum->total_energy;
+    FLOAT_T new_intensity = get_peak_intensity(peak) / spectrum->total_energy;
     set_peak_intensity(peak, new_intensity);
   }
   free_peak_iterator(peak_iterator);
@@ -1340,7 +1374,7 @@ void spectrum_rank_peaks(
   int rank = spectrum->num_peaks;
   while(peak_iterator_has_next(peak_iterator)){
     peak = peak_iterator_next(peak_iterator);
-    float new_rank = rank/(float)spectrum->num_peaks;
+    FLOAT_T new_rank = rank/(float)spectrum->num_peaks;
     rank--;
     set_peak_intensity_rank(peak, new_rank); 
   }

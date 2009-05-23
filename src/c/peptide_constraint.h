@@ -1,6 +1,6 @@
 /**
  * \file peptide_constraint.h 
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * \brief Object for holding the peptide constraint information.
  */
 #ifndef PEPTIDE_CONSTRAINT_H 
@@ -33,8 +33,8 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
   ENZYME_T enzyme, ///< the enzyme to use for digestion
   DIGEST_T digest, ///< the degree of digestion
 //  PEPTIDE_TYPE_T peptide_type, ///< the peptide_type -in
-  float min_mass, ///< the minimum mass -in
-  float max_mass, ///< the maximum mass -in
+  FLOAT_T min_mass, ///< the minimum mass -in
+  FLOAT_T max_mass, ///< the maximum mass -in
   int min_length, ///< the minimum length of peptide -in
   int max_length, ///< the maximum lenth of peptide -in
   int num_mis_cleavage, ///< The maximum mis cleavage of the peptide -in
@@ -114,13 +114,13 @@ DIGEST_T get_peptide_constraint_digest(
  */
 void set_peptide_constraint_min_mass(
   PEPTIDE_CONSTRAINT_T* peptide_constraint, ///< the peptide constraint to set -out
-  float min_mass  ///< the min mass of the peptide constraint - in
+  FLOAT_T min_mass  ///< the min mass of the peptide constraint - in
   );
 
 /**
  * \returns the min mass of the peptide_constraint
  */
-float get_peptide_constraint_min_mass(
+FLOAT_T get_peptide_constraint_min_mass(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
 
@@ -129,13 +129,13 @@ float get_peptide_constraint_min_mass(
  */
 void set_peptide_constraint_max_mass(
   PEPTIDE_CONSTRAINT_T* peptide_constraint,///< the peptide constraint to set -out 
-  float max_mass  ///< the max mass of the peptide constraint - in
+  FLOAT_T max_mass  ///< the max mass of the peptide constraint - in
   );
 
 /**
  * \returns the max mass of the peptide_constraint
  */
-float get_peptide_constraint_max_mass(
+FLOAT_T get_peptide_constraint_max_mass(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
 

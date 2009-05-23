@@ -1,6 +1,6 @@
 /**
  * \file peptide.h 
- * $Revision: 1.51 $
+ * $Revision: 1.52 $
  * \brief Object for representing one peptide.
  */
 #ifndef PEPTIDE_H 
@@ -44,7 +44,7 @@ int get_peptide_sizeof(void);
  */
 PEPTIDE_T* new_peptide(
   unsigned char length,     ///< The length of the peptide -in
-  float peptide_mass,       ///< The neutral mass of the peptide -in
+  FLOAT_T peptide_mass,       ///< The neutral mass of the peptide -in
   PROTEIN_T* parent_protein, ///< The parent_protein of this peptide -in
   int start_idx ///< Start index of peptide in the protein sequence -in
   //PEPTIDE_TYPE_T peptide_type ///<  The type of cleavage(TRYPTIC, etc)
@@ -105,27 +105,27 @@ void set_peptide_src_implementation(
  */
 void set_peptide_peptide_mass( 
   PEPTIDE_T* peptide,  ///< the peptide to set -out
-  float peptide_mass  ///< the mass of the peptide - in
+  FLOAT_T peptide_mass  ///< the mass of the peptide - in
   );
 
 /**
  * \returns the peptide mass
  */
-inline float get_peptide_peptide_mass( 
+inline FLOAT_T get_peptide_peptide_mass( 
   PEPTIDE_T* peptide  ///< the peptide to query the mass -in
   );
 
 /** 
  * \returns the neutral mass of the peptide
  */
-float get_peptide_neutral_mass(
+FLOAT_T get_peptide_neutral_mass(
   PEPTIDE_T* peptide ///< the query peptide -in
   );
 
 /** 
  * \returns the mass of the peptide if it had charge "charge"
  */
-float get_peptide_charged_mass(
+FLOAT_T get_peptide_charged_mass(
     PEPTIDE_T* peptide, ///< the query peptide -in
     int charge ///< charge of peptide -in
     );
@@ -133,7 +133,7 @@ float get_peptide_charged_mass(
 /** 
  * \returns the m/z of the peptide if it had charge "charge"
  */
-float get_peptide_mz(
+FLOAT_T get_peptide_mz(
     PEPTIDE_T* peptide, ///< the query peptide -in
     int charge ///< the charge of peptide -in
     );
@@ -320,7 +320,7 @@ int count_peptide_modified_aas(PEPTIDE_T* peptide);
 /**
  * \returns The mass of the given peptide.
  */
-float calc_sequence_mass(
+FLOAT_T calc_sequence_mass(
   char* peptide, ///< the query peptide -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   );
@@ -328,7 +328,7 @@ float calc_sequence_mass(
 /**
  * \returns The mass of the given peptide.
  */
-float calc_peptide_mass(
+FLOAT_T calc_peptide_mass(
   PEPTIDE_T* peptide, ///< the query peptide -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   );
@@ -336,7 +336,7 @@ float calc_peptide_mass(
 /**
  * \returns The hydrophobicity of the given peptide, as in Krokhin (2004).
  */
-float calc_krokhin_hydrophobicity(
+FLOAT_T calc_krokhin_hydrophobicity(
   PEPTIDE_T* peptide ///< the query peptide -in
   );
 

@@ -6,7 +6,7 @@
 /* AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University
- * VERSION: $Revision: 1.5 $
+ * VERSION: $Revision: 1.6 $
  ********************************************************************/
 #ifndef ARRAY_H
 #define ARRAY_H
@@ -21,7 +21,7 @@
  * By default use double arrays.  Defining IARRAY, SARRAY, or LARRAY
  * changes their type.
  *
- * Note that there would be no sense in defining a float array, since
+ * Note that there would be no sense in defining a FLOAT_T array, since
  * all floats get converted to doubles when they are passed.
  ********************************************************************/
 #ifdef IARRAY
@@ -358,7 +358,7 @@ void convert_to_from_log_array
  * Mix two arrays in log space.
  ***********************************************************************/
 void mix_log_arrays
-  (float    mixing, /* Percent of array2 that will be retained. */
+  (FLOAT_T    mixing, /* Percent of array2 that will be retained. */
    ARRAY_T* array1,
    ARRAY_T* array2);
 

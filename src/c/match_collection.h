@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -67,7 +67,7 @@ MATCH_COLLECTION_T* new_match_collection_from_spectrum(
  int max_rank,     ///< max number of top rank matches to keep from SP -in
  SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
  SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP) -in
- float mass_offset,
+ FLOAT_T mass_offset,
  ///< the mass offset from neutral_mass to search for candidate peptides -in
  BOOLEAN_T null_peptide_collection,
  ///< is this match_collection a null peptide collection? -in
@@ -221,7 +221,7 @@ int get_match_collection_charge(
  * Must have been scored by Xcorr, returns error if not scored by Xcorr
  *\returns the delta cn value(difference in top and second ranked Xcorr values)
  */
-float get_match_collection_delta_cn(
+FLOAT_T get_match_collection_delta_cn(
   MATCH_COLLECTION_T* match_collection ///< working match collection -in
 );
 
@@ -399,7 +399,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
  );
 
 /**
- * Fill the match objects score with the given the float array. 
+ * Fill the match objects score with the given the FLOAT_T array. 
  * The match object order must not have been altered since scoring.
  * The result array size must match the match_total count.
  * Match ranks are also populated to preserve the original order of the

@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.41 $
+ * REVISION: $Revision: 1.42 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -495,8 +495,8 @@ int match_first_scan_line(
   int spliced_line_index = 0;
   int first_scan;
   int last_scan;
-  float precursor_mz;
-  float test_float;
+  FLOAT_T precursor_mz;
+  FLOAT_T test_float;
   char test_char;
 
   // deletes empty space & 0
@@ -534,12 +534,21 @@ int match_first_scan_line(
   spliced_line[spliced_line_index] = '\0';
   
   // check if S line is in correct format
+  #ifdef USE_DOUBLES
+  if ( (sscanf(spliced_line,"%lf %lf %lf %lf",// test format:S line has more than 3 fields
+               &test_float, &test_float, &test_float, &test_float) > 3) ||
+       (sscanf(spliced_line,"%lf %lf %lf %c",// test format:S line has more than 3 fields 
+               &test_float, &test_float, &test_float, &test_char) > 3) ||
+       (sscanf(spliced_line,"%i %i %lf", // S line is parsed here
+              &first_scan, &last_scan, &precursor_mz) != 3)) {
+  #else
   if ( (sscanf(spliced_line,"%f %f %f %f",// test format:S line has more than 3 fields
                &test_float, &test_float, &test_float, &test_float) > 3) ||
        (sscanf(spliced_line,"%f %f %f %c",// test format:S line has more than 3 fields 
                &test_float, &test_float, &test_float, &test_char) > 3) ||
        (sscanf(spliced_line,"%i %i %f", // S line is parsed here
               &first_scan, &last_scan, &precursor_mz) != 3)) {
+  #endif
     fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
     fprintf(stderr,"Incorrect file format\n");
     exit(1); // FIXME check if this is corrrect 

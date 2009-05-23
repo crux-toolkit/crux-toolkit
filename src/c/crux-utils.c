@@ -316,9 +316,9 @@ char* copy_string_part(char* src, int length){
  * to the range of the numbers, allowing a single epsilon to be used for many, 
  * or perhaps all compares.
  */
-inline int compare_float(float float_a, float float_b){
-  float EPSILON = PRECISION;
-  float sum = float_a + float_b;
+inline int compare_float(FLOAT_T float_a, FLOAT_T float_b){
+  FLOAT_T EPSILON = PRECISION;
+  FLOAT_T sum = float_a + float_b;
   // a == b
   if( fabsf(float_a - float_b) <= fabsf(sum)* EPSILON ){
     return 0;
@@ -336,7 +336,7 @@ inline int compare_float(float float_a, float float_b){
 /**
  *\returns TRUE if float_a is between the interaval of min and max, else FALSE
  */
-inline BOOLEAN_T compare_float_three(float float_a, float min, float max){
+inline BOOLEAN_T compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max){
   if(compare_float(float_a, min) == -1 ||
      compare_float(float_a, max) ==  1){
     return FALSE;
@@ -1086,12 +1086,12 @@ int get_number_digits(
 }
 
 void swap_quick(
-  float* a,
+  FLOAT_T* a,
   int idx,
   int jdx
   )
 {
-  float temp = 0;
+  FLOAT_T temp = 0;
   temp = a[idx];
   a[idx] = a[jdx];
   a[jdx] = temp;
@@ -1101,7 +1101,7 @@ int Random(int i, int j) {
   return i + rand() % (j-i+1);
 }
 
-void quick_sort(float a[], int left, int right) {
+void quick_sort(FLOAT_T a[], int left, int right) {
   int last = left, i;
 
   if (left >= right) return;
@@ -1115,7 +1115,7 @@ void quick_sort(float a[], int left, int right) {
   quick_sort(a,last+1,right);
 }
 
-void quicksort(float a[], int array_size){
+void quicksort(FLOAT_T a[], int array_size){
   quick_sort(a, 0, array_size-1);
 }
 
@@ -1123,7 +1123,7 @@ void quicksort(float a[], int array_size){
  * \brief Shuffle an array of floats.  Uses the Knuth algorithm.  Uses
  * get_random_number_interval() to generate random numbers. 
  */
-void shuffle_floats(float* array, int size){
+void shuffle_floats(FLOAT_T* array, int size){
   if( array == NULL ){
     carp(CARP_ERROR, "Cannot shuffle NULL array.");
     return;
@@ -1131,7 +1131,7 @@ void shuffle_floats(float* array, int size){
 
   int idx, switch_idx;
   int last_element_idx = size - 1;
-  float temp_value;
+  FLOAT_T temp_value;
   for(idx=0; idx < size; idx++){
     switch_idx = get_random_number_interval(idx, last_element_idx);
     temp_value = array[idx];
@@ -1146,7 +1146,7 @@ void shuffle_floats(float* array, int size){
  */
 int compare_floats_descending(const void* a, const void* b){
 
-  float diff = ( *(float*)b - *(float*)a);
+  FLOAT_T diff = ( *(float*)b - *(float*)a);
   if( diff < 0 ){
     return -1;
   }else if( diff > 0 ){
@@ -1166,29 +1166,29 @@ int compare_floats_descending(const void* a, const void* b){
  * be shifted by) and the best correlation coefficient
  */
 void fit_three_parameter_weibull(
-    float* data, ///< the data to be fit -in
+    FLOAT_T* data, ///< the data to be fit -in
     int fit_data_points, ///< the number of data points to fit -in
     int total_data_points, ///< the total number of data points to fit -in
-    float min_shift, ///< the minimum shift to allow -in
-    float max_shift, ///< the maximum shift to allow -in
-    float step,      ///< step for shift -in
-    float* eta,      ///< the eta parameter of the Weibull dist -out
-    float* beta,      ///< the beta parameter of the Weibull dist -out
-    float* shift,     ///< the best shift -out
-    float* correlation   ///< the best correlation -out
+    FLOAT_T min_shift, ///< the minimum shift to allow -in
+    FLOAT_T max_shift, ///< the maximum shift to allow -in
+    FLOAT_T step,      ///< step for shift -in
+    FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
+    FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
+    FLOAT_T* shift,     ///< the best shift -out
+    FLOAT_T* correlation   ///< the best correlation -out
     ){
   
-  float correlation_tolerance = 0.1;
+  FLOAT_T correlation_tolerance = 0.1;
   
-  float best_eta = 0.0;
-  float best_beta = 0.0;
-  float best_shift = 0.0;
-  float best_correlation = 0.0;
+  FLOAT_T best_eta = 0.0;
+  FLOAT_T best_beta = 0.0;
+  FLOAT_T best_shift = 0.0;
+  FLOAT_T best_correlation = 0.0;
 
-  float cur_eta = 0.0;
-  float cur_beta = 0.0;
-  float cur_correlation = 0.0;
-  float cur_shift;
+  FLOAT_T cur_eta = 0.0;
+  FLOAT_T cur_beta = 0.0;
+  FLOAT_T cur_correlation = 0.0;
+  FLOAT_T cur_shift;
 
   // FIXME remove below
   int idx;
@@ -1229,22 +1229,22 @@ void fit_three_parameter_weibull(
  * \returns eta, beta and the correlation coefficient.
  */
 void fit_two_parameter_weibull(
-    float* data, ///< the data to be fit. should be in descending order -in
+    FLOAT_T* data, ///< the data to be fit. should be in descending order -in
     int fit_data_points, ///< the number of data points to fit -in
     int total_data_points, ///< the total number of data points -in
-    float shift, ///< the amount by which to shift our data -in
-    float* eta,      ///< the eta parameter of the Weibull dist -out
-    float* beta,      ///< the beta parameter of the Weibull dist -out
-    float* correlation ///< the best correlation -out
+    FLOAT_T shift, ///< the amount by which to shift our data -in
+    FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
+    FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
+    FLOAT_T* correlation ///< the best correlation -out
     ){
 
-  float* X = calloc(sizeof(float) , total_data_points); //hold data here
+  FLOAT_T* X = calloc(sizeof(float) , total_data_points); //hold data here
 
   // transform data into an array of values for fitting
   // shift (including only non-neg data values) and take log
   int idx;
   for(idx=0; idx < fit_data_points; idx++){
-    float score = data[idx] + shift; // move right by shift
+    FLOAT_T score = data[idx] + shift; // move right by shift
     if (score <= 0.0){
       carp(CARP_DEBUG, "Reached negative score at idx %i", idx);
       fit_data_points = idx;
@@ -1254,7 +1254,7 @@ void fit_two_parameter_weibull(
     // carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
   }
 
-  float* F_T = mymalloc(sizeof(float) * total_data_points);
+  FLOAT_T* F_T = mymalloc(sizeof(float) * total_data_points);
   for(idx=0; idx < fit_data_points; idx++){
     int reverse_idx = total_data_points - idx;
     // magic numbers 0.3 and 0.4 are never changed
@@ -1262,17 +1262,17 @@ void fit_two_parameter_weibull(
     //carp(CARP_DEBUG, "F[%i]=%.6f", idx, F_T[idx]);
   }
 
-  float* Y   = mymalloc(sizeof(float) * total_data_points);
+  FLOAT_T* Y   = mymalloc(sizeof(float) * total_data_points);
   for(idx=0; idx < fit_data_points; idx++){
     Y[idx] = log( -log(1.0 - F_T[idx]) );
     //carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
   }
 
   int N = fit_data_points; // rename for formula's sake
-  float sum_Y  = 0.0;
-  float sum_X  = 0.0;
-  float sum_XY = 0.0;
-  float sum_XX = 0.0;
+  FLOAT_T sum_Y  = 0.0;
+  FLOAT_T sum_X  = 0.0;
+  FLOAT_T sum_XY = 0.0;
+  FLOAT_T sum_XX = 0.0;
   for(idx=0; idx < fit_data_points; idx++){
     sum_Y  += Y[idx];
     sum_X  += X[idx];
@@ -1284,29 +1284,29 @@ void fit_two_parameter_weibull(
   carp(CARP_DETAILED_DEBUG, "sum_XX=%.6f", sum_XX);
   carp(CARP_DETAILED_DEBUG, "sum_XY=%.6f", sum_XY);
 
-  float b_num    = sum_XY - (sum_X * sum_Y / N);
+  FLOAT_T b_num    = sum_XY - (sum_X * sum_Y / N);
   carp(CARP_DETAILED_DEBUG, "b_num=%.6f", b_num);
-  float b_denom  = sum_XX - sum_X * sum_X / N;
+  FLOAT_T b_denom  = sum_XX - sum_X * sum_X / N;
   carp(CARP_DETAILED_DEBUG, "b_denom=%.6f", b_denom);
-  float b_hat    = b_num / b_denom;
+  FLOAT_T b_hat    = b_num / b_denom;
 
-  float a_hat    = (sum_Y - b_hat * sum_X) / N;
+  FLOAT_T a_hat    = (sum_Y - b_hat * sum_X) / N;
   *beta = b_hat;
   *eta  = exp( - a_hat / *beta );
 
-  float c_num   = 0.0;
-  float c_denom_X = 0.0;
-  float c_denom_Y = 0.0;
-  float mean_X = sum_X / N;
-  float mean_Y = sum_Y / N;
+  FLOAT_T c_num   = 0.0;
+  FLOAT_T c_denom_X = 0.0;
+  FLOAT_T c_denom_Y = 0.0;
+  FLOAT_T mean_X = sum_X / N;
+  FLOAT_T mean_Y = sum_Y / N;
   for (idx=0; idx < N; idx++){
-    float X_delta = X[idx] - mean_X; 
-    float Y_delta = Y[idx] - mean_Y;
+    FLOAT_T X_delta = X[idx] - mean_X; 
+    FLOAT_T Y_delta = Y[idx] - mean_Y;
     c_num += X_delta * Y_delta;
     c_denom_X += X_delta * X_delta;
     c_denom_Y += Y_delta * Y_delta;
   }
-  float c_denom = sqrt(c_denom_X * c_denom_Y);
+  FLOAT_T c_denom = sqrt(c_denom_X * c_denom_Y);
   if (c_denom == 0.0){
     //carp(CARP_FATAL, "Zero denominator in correlation calculation!");
     carp(CARP_DETAILED_DEBUG, "Zero denominator in correlation calculation!");
