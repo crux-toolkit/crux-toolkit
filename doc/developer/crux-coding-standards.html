@@ -214,6 +214,10 @@ With either FIXME or TODO at the beginning. FIXME is for more serious
 violations, that should probably be fixed before a production release. TODO
 are nice to have.
 
+<li>
+Use <code>FLOAT_T</code> to declare floating point variables rather then
+<code>float</code>. This allows us to switch to double precision arithmetic
+throughout Crux by specifying the <code>--enable-doubles</code> configure option.
 </ul>
 
 <h3>Structured comments</h3>
@@ -302,8 +306,11 @@ Begin each file with a header of the following form:
  *
  * Insert brief description of file contents here.
  *
- * $Id: crux-coding-standards.html,v 1.1 2007-10-03 21:58:16 aklammer Exp $
+ * $Id: crux-coding-standards.html,v 1.2 2009-05-23 01:34:59 cegrant Exp $
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2007/10/03 21:58:16  aklammer
+ * *** empty log message ***
+ *
  * Revision 1.1  2007/10/03 21:41:29  aklammer
  * *** empty log message ***
  *
