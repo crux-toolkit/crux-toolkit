@@ -47,6 +47,15 @@ typedef int VERBOSE_T;
 #define LITTLE -BIG
 
 extern int verbosity;
+
+#ifdef DARWIN
+/*********************************************************
+ This function replaces the GNU extension of the same name.
+ Reads a line from the given stream.
+ *********************************************************/
+int getline(char **lineptr, size_t *n, FILE *stream);
+#endif
+
 /***********************************************************************
  * Return a not-a-number.
  ***********************************************************************/

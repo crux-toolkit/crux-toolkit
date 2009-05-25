@@ -6,7 +6,13 @@ else
   USEDOUBLES=
 endif
 
-AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing $(USEDOUBLES) \
+if DARWIN
+  USEDARWIN = '-DDARWIN'
+else
+  USEDARWIN = 
+endif
+
+AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing $(USEDOUBLES) $(USEDARWIN) \
             -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
 noinst_LTLIBRARIES = libcrux.la

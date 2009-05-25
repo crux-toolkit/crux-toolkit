@@ -47,6 +47,13 @@ BOOLEAN_T type_initialized = FALSE; // have the types been initialized?
 
 BOOLEAN_T parameter_plasticity = TRUE; // can the parameters be changed?
 
+char* pre_cleavage_list;
+char* post_cleavage_list;
+int pre_list_size;
+int post_list_size;
+BOOLEAN_T pre_for_inclusion;
+BOOLEAN_T post_for_inclusion;
+
 /************************************
  * Private function declarations
  ************************************ 
