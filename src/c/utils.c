@@ -14,9 +14,77 @@
 // #include <sys/resource.h>
 #include <math.h>
 #include <assert.h>
+#include <errno.h>
 #include "utils.h"
 #include "carp.h"
 
+#ifdef DARWIN
+
+/*********************************************************
+ This function replaces the GNU extension of the same name.
+ Reads a line from the given stream.
+ *********************************************************/
+int getline(char **lineptr, size_t *n, FILE *stream) {
+
+	const size_t BUFFSIZE = 100;
+	
+	// Check the input values.
+	if (lineptr == NULL || stream == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	// Read the first character from the stream.
+	size_t index = 0;
+	int c = fgetc(stream);
+	int e = ferror(stream);
+	if (c == EOF || e) {
+		return -1;
+	}
+
+	// Allocate an buffer if needed.
+	if (*lineptr == NULL) {
+		*lineptr = (char *) mymalloc((*n + BUFFSIZE) * sizeof(char));
+		*n += BUFFSIZE;
+	}
+
+    // Copy from the stream to the buffer until we find a line end.
+	while(c != '\n' && c != EOF && !e) {
+		(*lineptr)[index++] = c;
+		if (index > *n - 1) {
+			// Out of space, expand the buffer. 
+			*lineptr = (char *) myrealloc(*lineptr, *n + BUFFSIZE);
+			*n += BUFFSIZE;
+		}
+		c = fgetc(stream);
+		e = ferror(stream);
+	}
+
+	// Reached end of line, end of file, or read error.
+	if (!e) {
+		
+		if (c != EOF) {
+			(*lineptr)[index++] = c;
+			if (index > (*n - 1)) {
+				*lineptr = (char *) myrealloc(lineptr, *n + 1);
+				*n++;
+			}
+		}
+
+		// Terminate the string.	
+		(*lineptr)[index] = 0;
+
+		// Return the length of the string
+		// without the terminating null.
+		return index;
+	}
+	else {
+		// Some sort of read error
+		return -1;
+	}
+}
+
+#endif
 
 /***********************************************************************
  * Return the value to replace a missing value -- NaN.

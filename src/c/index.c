@@ -1,6 +1,6 @@
 /************************************************************************//**
  * \file index.c
- * $Revision: 1.85 $
+ * $Revision: 1.86 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
@@ -33,6 +33,14 @@
 #define MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN 500000000
 #define MAX_PARSE_COUNT 3
 #define SLEEP_DURATION 5
+
+#ifdef DARWIN
+// OS X doesn't support fcloseall()
+// Consider tracking open file handles
+// rather then simply relying on process
+// termination to close files.
+#define fcloseall()
+#endif
 
 // global variable to store the temp directory
 // used for deleting directory when SIGINT
@@ -237,7 +245,12 @@ INDEX_T* allocate_index(void){
  * "-binary-fasta"
  * \returns 1 if filename ends in -binary-fasta, else 0 
  */
+#ifdef DARWIN
+int is_binary_fasta_name(struct dirent *entry){
+#else
 int is_binary_fasta_name(const struct dirent *entry){
+#endif
+
 
   const char* filename = entry->d_name; //w/o const gcc warning
   char* suffix = "-binary-fasta";

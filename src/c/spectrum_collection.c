@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
  * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.42 $
+ * REVISION: $Revision: 1.43 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -96,7 +96,12 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   )
 {
   SPECTRUM_COLLECTION_T* spectrum_collection =  allocate_spectrum_collection();
+  #if DARWIN
+  char path_buffer[PATH_MAX];
+  char* absolute_path_file =  realpath(filename, path_buffer);
+  #else
   char* absolute_path_file =  realpath(filename, NULL);
+  #endif
   if (absolute_path_file == NULL){
     die("Had trouble canonicalizing the file name '%s'. Too many levels of symbolic links?", filename); 
   }
@@ -111,8 +116,9 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   } // FIXME check if file is empty
   
   set_spectrum_collection_filename(spectrum_collection, absolute_path_file);
-  // CYGWIN 
+  #ifndef DARWIN
   free(absolute_path_file);
+  #endif
   
   return spectrum_collection;
 }

@@ -1,6 +1,6 @@
 /**
  * \file parameter.h
- * $Revision: 1.36 $
+ * $Revision: 1.37 $
  * \brief General parameter handling utilities. All values stored here.
 
  * \detail MUST declare ALL optional command line parameters and
@@ -45,12 +45,12 @@
 // Global variables
 // NOTE (BF mar-10-09): Could be like mod lists, but will require a
 // get_parameter call for each...residue? protein?
-char* pre_cleavage_list;
-char* post_cleavage_list;
-int pre_list_size;
-int post_list_size;
-BOOLEAN_T pre_for_inclusion;
-BOOLEAN_T post_for_inclusion;
+extern char* pre_cleavage_list;
+extern char* post_cleavage_list;
+extern int pre_list_size;
+extern int post_list_size;
+extern BOOLEAN_T pre_for_inclusion;
+extern BOOLEAN_T post_for_inclusion;
 
 // TODO (BF 1-28-08): these should be private. move to parameter.c
 /**

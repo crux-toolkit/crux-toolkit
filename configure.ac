@@ -137,6 +137,10 @@ AM_CONDITIONAL(PERCOLATOR, \
   test [ -z "$PERCOLATOR_HEADER_STATUS" -a -z "$PERCOLATOR_LIB_STATUS" ] \
 )
 
+AM_CONDITIONAL(DARWIN, \
+  test [ "x$MACHID" = "xdarwin" ] \
+)
+
 AC_OUTPUT
 
 echo \
@@ -149,6 +153,7 @@ echo \
   Version:                    ${VERSION}
   C compiler:                 ${CC}
   C compiler flags:           ${CFLAGS}
+  System:                     ${MACHID}
   Use doubles:                ${doubles}
   percolator directory:       ${PERCOLATOR_DIR} ${PERCOLATOR}
 
