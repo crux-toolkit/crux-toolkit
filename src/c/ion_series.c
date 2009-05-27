@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
- * REVISION: $Revision: 1.51 $
+ * REVISION: $Revision: 1.52 $
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -1296,8 +1296,10 @@ ION_CONSTRAINT_T* new_ion_constraint_smart(
     break;
   case DOTP:
   case LOGP_EXP_SP:
-  case LOGP_BONF_EXP_SP:
-  case LOGP_EVD_XCORR:
+    //case LOGP_BONF_EXP_SP:
+    //case LOGP_EVD_XCORR:
+  case DECOY_XCORR_QVALUE:
+  case DECOY_PVALUE_QVALUE:
   case LOGP_BONF_EVD_XCORR:
   case LOGP_WEIBULL_SP:
   case LOGP_BONF_WEIBULL_SP:

@@ -1,6 +1,6 @@
 /**
  * \file objects.h 
- * $Revision: 1.61 $
+ * $Revision: 1.62 $
  * \brief The defined objects
  *****************************************************************************/
 #ifndef OBJECTS_H 
@@ -359,8 +359,29 @@ typedef struct scorer SCORER_T;
  * The enum for scorer type
  */
 #define NUMBER_SCORER_TYPES 14 //BF added for consistant naming
-enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE, LOGP_QVALUE_WEIBULL_XCORR};
+//enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE, LOGP_QVALUE_WEIBULL_XCORR};
+enum _scorer_type { 
+  SP,                  ///< SEQUEST preliminary score
+  XCORR,               ///< SEQUEST primary score
+  DOTP,                ///< not yet implemented
+  LOGP_EXP_SP,                     // this spot hijacked for zscore
+  //ZSCORE,            ///< z-score (mean-max)/stdev
+  //LOGP_BONF_EXP_SP,              // this spot hijacked for decoy-x-qval
+  DECOY_XCORR_QVALUE,  ///< Benjamini-Hochberg q-value from xcorrs
+  //LOGP_EVD_XCORR,               // this spot hijacked for decoy-p-qval
+  DECOY_PVALUE_QVALUE, ///< Benjamini-Hochberg q-value from Weibull p-vals
+  LOGP_BONF_EVD_XCORR,
+  LOGP_WEIBULL_SP,
+  LOGP_BONF_WEIBULL_SP,
+  LOGP_WEIBULL_XCORR,
+  LOGP_BONF_WEIBULL_XCORR,
+  Q_VALUE,
+  PERCOLATOR_SCORE,
+  LOGP_QVALUE_WEIBULL_XCORR
+};
+
 /*
+
 enum _scorer_type { SP, XCORR, DOTP, 
 LOGP_BONF_WEIBULL_SP, sp-logp
 

@@ -1,6 +1,6 @@
 /**
  * \file match.h
- * $Revision: 1.23 $ 
+ * $Revision: 1.24 $ 
  * \brief Object for given a peptide and a spectrum, generate a preliminary score(ex, Sp)
  ****************************************************************************/
 #ifndef MATCH_H
@@ -79,6 +79,16 @@ int compare_match_xcorr(
 
 /**
  * compare two matches, used for qsort
+ * \returns the difference between p_value (LOGP_BONF_WEIBULL_XCORR)
+ * score in match_a and match_b 
+ */
+int compare_match_p_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * compare two matches, used for qsort
  * \returns the difference between xcorr score in match_a and match_b
  */
 int compare_match_q_value(
@@ -139,6 +149,30 @@ int compare_match_spectrum_percolator_score(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );
+
+/**
+ * Compare two matches by spectrum scan number and q-value (from the decoys and xcorr score),
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_decoy_xcorr_qvalue(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+                                              );
+
+/**
+ * Compare two matches by spectrum scan number and q-value (from the decoys and weibull est p-values),
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_decoy_pvalue_qvalue(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+                                               );
 
 /**
  * print the information of the match

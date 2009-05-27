@@ -457,8 +457,14 @@ void initialize_parameters(void){
       " Crux also offers a p-value calculation for each psm based on xcorr "
       "or sp (xcorr-pvalue, sp-pvalue).", "false"); 
   set_boolean_parameter("compute-p-values", FALSE, 
-      "Compute p-values for the main score type. Default FALSE.",
+      "Compute p-values for the main score type. Default F.",
       "Currently only implemented for XCORR.", "true");
+  set_boolean_parameter("compute-q-values", FALSE, 
+      "Use the ranking of target and decoy PSMs to compute q-values for the "
+      "top-ranked match for each spectrum. Default F.",
+      "Computes two q-values (one ranked by xcorr and one ranked by p-value) "
+      "when used with --compute-p-values. Requires --num-decoys-per-target 1.",
+      "true");
 
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
       "Minimum mass of spectra to be searched.  Default 0.",
@@ -937,6 +943,64 @@ BOOLEAN_T find_param_filename(int argc,
 
   return success;
 }
+
+void translate_decoy_options(){
+
+  // translate user decoy options into the old set of options
+  // get user values
+  int num_decoy_per_target = get_int_parameter("num-decoys-per-target");
+  char* location = get_string_parameter("decoy-location");
+  int max_rank_preliminary = get_int_parameter("max-rank-preliminary");
+  // store new values here
+  BOOLEAN_T tdc = FALSE;
+  int new_num_decoy_per_target = 0;
+  int new_num_decoy_set = 0;        // number of decoy files
+  //int new_max_rank_preliminary = 0; 
+  int new_max_rank_preliminary = max_rank_preliminary; 
+
+  if( num_decoy_per_target == 0 ){
+    free(location);
+    location = "target-file";
+  }
+
+  // set new values
+  if( strcmp(location, "target-file") == 0 ){
+    tdc = TRUE;
+    new_num_decoy_set = 0; // ie no decoy files
+    new_num_decoy_per_target = num_decoy_per_target;
+    if( max_rank_preliminary > 0 ){  // scale to num decoys
+      new_max_rank_preliminary = max_rank_preliminary * 
+                                (1 + new_num_decoy_per_target);
+    }
+  }else if( strcmp(location, "one-decoy-file") == 0 ){
+    tdc = FALSE;
+    new_num_decoy_set = 1;
+    new_num_decoy_per_target = num_decoy_per_target;
+  }else if( strcmp(location, "separate-decoy-files") == 0 ){
+    tdc = FALSE;
+    new_num_decoy_set = num_decoy_per_target;
+    new_num_decoy_per_target = 1;
+  }
+
+  // now update all values
+  char buffer[PARAMETER_LENGTH];
+  sprintf(buffer, "%i", new_num_decoy_set);
+  update_hash_value(parameters, "number-decoy-set", buffer);
+
+  sprintf(buffer, "%i", new_num_decoy_per_target);
+  update_hash_value(parameters, "num-decoys-per-target", buffer);
+
+  sprintf(buffer, "%i", new_max_rank_preliminary);
+  update_hash_value(parameters, "max-rank-preliminary", buffer);
+
+  if( tdc == TRUE ){
+    update_hash_value(parameters, "tdc", "TRUE");
+  }else{
+    update_hash_value(parameters, "tdc", "FALSE");
+  }
+
+}
+
 /**
  * Take the command line string from main, find the parameter file 
  * option (if present), parse it's values into the hash, and parse
@@ -1006,58 +1070,8 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 
   update_aa_masses();
 
-  // translate user decoy options into the old set of options
-  // get user values
-  int num_decoy_per_target = get_int_parameter("num-decoys-per-target");
-  char* location = get_string_parameter("decoy-location");
-  int max_rank_preliminary = get_int_parameter("max-rank-preliminary");
-  // store new values here
-  BOOLEAN_T tdc = FALSE;
-  int new_num_decoy_per_target = 0;
-  int new_num_decoy_set = 0;        // number of decoy files
-  //int new_max_rank_preliminary = 0; 
-  int new_max_rank_preliminary = max_rank_preliminary; 
-
-  if( num_decoy_per_target == 0 ){
-    free(location);
-    location = "target-file";
-  }
-
-  // set new values
-  if( strcmp(location, "target-file") == 0 ){
-    tdc = TRUE;
-    new_num_decoy_set = 0; // ie no decoy files
-    new_num_decoy_per_target = num_decoy_per_target;
-    if( max_rank_preliminary > 0 ){  // scale to num decoys
-      new_max_rank_preliminary = max_rank_preliminary * 
-                                (1 + new_num_decoy_per_target);
-    }
-  }else if( strcmp(location, "one-decoy-file") == 0 ){
-    tdc = FALSE;
-    new_num_decoy_set = 1;
-    new_num_decoy_per_target = num_decoy_per_target;
-  }else if( strcmp(location, "separate-decoy-files") == 0 ){
-    tdc = FALSE;
-    new_num_decoy_set = num_decoy_per_target;
-    new_num_decoy_per_target = 1;
-  }
-
-  // now update all values
-  char buffer[PARAMETER_LENGTH];
-  sprintf(buffer, "%i", new_num_decoy_set);
-  update_hash_value(parameters, "number-decoy-set", buffer);
-
-  sprintf(buffer, "%i", new_num_decoy_per_target);
-  update_hash_value(parameters, "num-decoys-per-target", buffer);
-
-  sprintf(buffer, "%i", new_max_rank_preliminary);
-  update_hash_value(parameters, "max-rank-preliminary", buffer);
-
-  if( tdc == TRUE ){
-    update_hash_value(parameters, "tdc", "TRUE");
-  }else{
-    update_hash_value(parameters, "tdc", "FALSE");
-  }
+  translate_decoy_options();
+  
 
   // for compute-q-values, set algorithm to q-value (perc by default)
   if( strcmp(argv[0], "compute-q-values") == 0 ){
@@ -1088,6 +1102,18 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     char* value_str = enzyme_type_to_string(NO_ENZYME);
     update_hash_value(parameters, "enzyme", value_str);
     free (value_str);
+  }
+
+  // for decoy-q-values, make sure other parameters are OK
+  if( get_boolean_parameter("compute-q-values") ){
+    if( get_int_parameter("top-match") != 1 ){
+      carp(CARP_FATAL, "For compute-q-values top-match must be 1.");
+      exit(1);
+    }
+    if( get_int_parameter("num-decoys-per-target") != 1 ){
+      carp(CARP_FATAL, "For compute-q-values num-decoys-per-target must be 1.");
+      exit(1);
+    }
   }
 
   set_verbosity_level(get_int_parameter("verbosity"));
@@ -1821,7 +1847,6 @@ DIGEST_T get_digest_type_parameter( char* name ){
 
   char* param = get_hash_value(parameters, name);
 
-  carp(CARP_DETAILED_DEBUG, "getting digest param '%s' with val '%s'", name, param);
   DIGEST_T digest_type = string_to_digest_type(param);
   if( digest_type == INVALID_DIGEST ){
     carp(CARP_FATAL, "Digest_type parameter %s has the value %s " 

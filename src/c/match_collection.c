@@ -8,7 +8,7 @@
  *
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * $Revision: 1.122 $
+ * $Revision: 1.123 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -146,12 +146,6 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index);
 
 void collapse_redundant_matches(MATCH_COLLECTION_T* matches);
 void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx);
-
-void truncate_match_collection(
-  MATCH_COLLECTION_T* match_collection, 
-  int max_rank,     
-  SCORER_TYPE_T score_type 
-  );
 
 BOOLEAN_T extend_match_collection(
   MATCH_COLLECTION_T* match_collection, 
@@ -342,7 +336,6 @@ int add_matches(
   if( sp_max_rank > 0 ){ 
     // rank by sp first 
     populate_match_rank_match_collection(match_collection, prelim_score);
-    //collapse_redundant_matches(match_collection);
     truncate_match_collection( match_collection, sp_max_rank, prelim_score);
   }
 
@@ -357,6 +350,48 @@ int add_matches(
 
   return num_matches_added;
 }
+
+/**
+ * \brief Put all the matches from the source match collection in the
+ * destination. Only copies the pointers of the matches so use with
+ * caution. 
+ * \returns The number of matches added.
+ */
+int merge_match_collections(MATCH_COLLECTION_T* source,
+                            MATCH_COLLECTION_T* destination){
+  if( source == NULL || destination == NULL ){
+    carp(CARP_ERROR, "Cannot merge null match collections.");
+  }
+
+  // what is the index of the next insert position indestination
+  int dest_idx = destination->match_total;
+
+  // make sure destination has room for more matches
+  int src_num_matches = source->match_total;
+  if( dest_idx + src_num_matches > _MAX_NUMBER_PEPTIDES ){
+    carp(CARP_FATAL, "Cannot merge match collections, insufficient capacity "
+         "in destnation collection.");
+    exit(1);
+  }
+
+  int src_idx = 0;
+  // for each match in source
+  for(src_idx = 0; src_idx < src_num_matches; src_idx++){
+    MATCH_T* cur_match = source->match[src_idx];
+
+    // copy pointer and add to destination
+    increment_match_pointer_count(cur_match);
+    destination->match[dest_idx] = cur_match;
+
+    dest_idx++;
+  }
+
+  // update destination count
+  destination->match_total += src_num_matches;
+
+  return src_num_matches;
+}
+
 
 /**
  * \brief Store the xcorr for each psm that was added in this
@@ -555,21 +590,30 @@ BOOLEAN_T sort_match_collection(
   case DOTP:
     // implement later
     return FALSE;
+
   case XCORR:
-  case LOGP_EVD_XCORR:
+//case LOGP_EVD_XCORR:
   case LOGP_BONF_EVD_XCORR:
   case LOGP_WEIBULL_XCORR: 
-  case LOGP_BONF_WEIBULL_XCORR: 
     // LOGP_BONF_EVD_XCORR and XCORR have same order, 
     // sort the match to decreasing XCORR order for the return
     qsort_match(match_collection->match, match_collection->match_total, 
                 (void *)compare_match_xcorr);
     match_collection->last_sorted = XCORR;
     return TRUE;
+
+  case LOGP_BONF_WEIBULL_XCORR: 
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_p_value);
+    match_collection->last_sorted = LOGP_BONF_WEIBULL_XCORR;
+    return TRUE;
+
   case SP: 
   case LOGP_EXP_SP: 
-  case LOGP_BONF_EXP_SP: 
+    //case LOGP_BONF_EXP_SP: 
   case LOGP_WEIBULL_SP: 
+  case DECOY_XCORR_QVALUE:
+  case DECOY_PVALUE_QVALUE:
   case LOGP_BONF_WEIBULL_SP: 
   case LOGP_QVALUE_WEIBULL_XCORR: // should this be here?
     // LOGP_EXP_SP and SP have same order, 
@@ -580,6 +624,7 @@ BOOLEAN_T sort_match_collection(
                 match_collection->match_total, (void *)compare_match_sp);
     match_collection->last_sorted = SP;
     return TRUE;
+
   case Q_VALUE:
   case PERCOLATOR_SCORE:
     qsort_match(match_collection->match, match_collection->match_total, 
@@ -616,7 +661,7 @@ BOOLEAN_T spectrum_sort_match_collection(
     break;
 
   case XCORR:
-  case LOGP_EVD_XCORR:
+    //case LOGP_EVD_XCORR:
   case LOGP_BONF_EVD_XCORR:
   case LOGP_WEIBULL_XCORR: 
   case LOGP_BONF_WEIBULL_XCORR: 
@@ -628,7 +673,7 @@ BOOLEAN_T spectrum_sort_match_collection(
 
   case SP: 
   case LOGP_EXP_SP: 
-  case LOGP_BONF_EXP_SP: 
+    //case LOGP_BONF_EXP_SP: 
   case LOGP_WEIBULL_SP: 
   case LOGP_BONF_WEIBULL_SP: 
   case LOGP_QVALUE_WEIBULL_XCORR: 
@@ -649,6 +694,20 @@ BOOLEAN_T spectrum_sort_match_collection(
     qsort_match(match_collection->match, match_collection->match_total,
                 (void*)compare_match_spectrum_percolator_score);
     match_collection->last_sorted = PERCOLATOR_SCORE;
+    success = TRUE;
+    break;
+
+  case DECOY_XCORR_QVALUE:
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_spectrum_decoy_xcorr_qvalue);
+    match_collection->last_sorted = DECOY_XCORR_QVALUE;
+    success = TRUE;
+    break;
+
+  case DECOY_PVALUE_QVALUE:
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_spectrum_decoy_pvalue_qvalue);
+    match_collection->last_sorted = DECOY_PVALUE_QVALUE;
     success = TRUE;
     break;
 
@@ -1282,8 +1341,8 @@ BOOLEAN_T compute_p_values(MATCH_COLLECTION_T* match_collection){
   }// next match
 
   carp(CARP_DETAILED_DEBUG, "Computed p-values for %d psms.", match_idx);
-  populate_match_rank_match_collection(match_collection, 
-                                       LOGP_BONF_WEIBULL_XCORR);
+  populate_match_rank_match_collection(match_collection, XCORR);
+//                                       LOGP_BONF_WEIBULL_XCORR);
 
   // mark p-values as having been scored
   match_collection->scored_type[LOGP_BONF_WEIBULL_XCORR] = TRUE;
@@ -1322,6 +1381,70 @@ BOOLEAN_T set_p_values_as_unscored(MATCH_COLLECTION_T* match_collection){
 
 }
 
+/**
+ * \brief Use the matches collected from all spectra to compute FDR
+ * and q_values from the ranked list of target and decoy scores.
+ * Requires that matches have been scored for the given score type.
+ * \returns TRUE if q-values successfully computed, else FALSE.
+ */
+BOOLEAN_T compute_decoy_q_values(MATCH_COLLECTION_T* match_collection,
+                                 SCORER_TYPE_T score_type){
+
+  if( match_collection == NULL ){
+    carp(CARP_ERROR, "Cannot compute q-values for null match collection.");
+    return FALSE;
+  }
+
+  // sort by score
+  sort_match_collection(match_collection, score_type);
+
+  // which q_val type are we using
+  SCORER_TYPE_T qval_type;
+  if( score_type == XCORR ){
+    qval_type = DECOY_XCORR_QVALUE;
+  }else if( score_type == LOGP_BONF_WEIBULL_XCORR ){
+    qval_type = DECOY_PVALUE_QVALUE;
+  }else{
+    char buf[SMALL_BUFFER];
+    scorer_type_to_string(score_type, buf);
+    carp(CARP_ERROR, "Don't know where to store q-values for score type %s.",
+         buf);
+    return FALSE;
+  }
+
+  // compute FDR from a running total of number targets/decoys
+  // FDR = #decoys / #targets
+  FLOAT_T num_targets = 0;
+  FLOAT_T num_decoys = 0;
+  int match_idx = 0;
+  for(match_idx = 0; match_idx < match_collection->match_total; match_idx++){
+    MATCH_T* cur_match = match_collection->match[match_idx];
+    if( get_match_null_peptide(cur_match) == TRUE ){
+      num_decoys += 1;
+    }else{
+      num_targets += 1;
+    }
+    FLOAT_T score = num_decoys/num_targets;
+    if( num_targets == 0 ){ score = 0; }
+
+    set_match_score(cur_match, qval_type, score);
+  }
+
+  // compute q-value: go through list in reverse and use min FDR seen
+  FLOAT_T min_fdr = 1.0;
+  for(match_idx = match_collection->match_total-1; match_idx >= 0; match_idx--){
+    MATCH_T* cur_match = match_collection->match[match_idx];
+    FLOAT_T cur_fdr = get_match_score(cur_match, qval_type);
+    if( cur_fdr < min_fdr ){
+      min_fdr = cur_fdr;
+    }
+
+    set_match_score(cur_match, qval_type, min_fdr);
+  }
+
+
+  return TRUE;
+}
 
 /**
  * match_collection get, set method
@@ -1798,6 +1921,8 @@ void print_tab_header(FILE* output){
     "xcorr rank\t"
     "-log(p-value)\t"
     "Weibull est. q-value\t"
+    "decoy q-value (xcorr)\t"
+    "decoy q-value (p-value)\t"
     "percolator score\t"
     "percolator rank\t"
     "percolator q-value\t"
@@ -2008,14 +2133,16 @@ MATCH_ITERATOR_T* new_match_iterator(
   if(sort_match && (match_collection->last_sorted != score_type 
   /*|| (match_collection->last_sorted == SP && score_type == LOGP_EXP_SP)*/)){
 
-    if((score_type == LOGP_EXP_SP || score_type == LOGP_BONF_EXP_SP ||
-        score_type == LOGP_WEIBULL_SP || score_type == LOGP_BONF_WEIBULL_SP)
+    if((score_type == LOGP_EXP_SP //|| score_type == LOGP_BONF_EXP_SP ||
+        //        score_type == LOGP_WEIBULL_SP
+ || score_type == LOGP_BONF_WEIBULL_SP)
        &&
        match_collection->last_sorted == SP){
       // No need to sort, since the score_type has same rank as SP      
     }
     
-    else if((score_type == LOGP_EVD_XCORR || score_type ==LOGP_BONF_EVD_XCORR)
+    //else if((score_type == LOGP_EVD_XCORR || score_type ==LOGP_BONF_EVD_XCORR)
+    else if(score_type ==LOGP_BONF_EVD_XCORR
             && match_collection->last_sorted == XCORR){
       // No need to sort, since the score_type has same rank as XCORR
     }
@@ -2306,6 +2433,59 @@ void print_matches(
                                match_collection, spectrum,
                                prelim_score, main_score);
   }
+}
+
+/**
+ * \brief Print the given match collection for several spectra to
+ * tab-delimited files only.  Takes the spectrum information from the
+ * matches in the collection.  At least for now, prints all matches in
+ * the collection rather than limiting by top-match parameter.  Uses
+ * SP as preliminary score and XCORR as main score.
+ */
+void print_matches_multi_spectra
+(MATCH_COLLECTION_T* match_collection, 
+ FILE* tab_file, 
+ FILE* decoy_tab_file){
+
+
+  carp(CARP_DETAILED_DEBUG, "Writing matches to file");
+
+  // if file location is target (i.e. tdc=T), print all to target
+  FILE* decoy_file = decoy_tab_file;
+  if( get_boolean_parameter("tdc") == TRUE ){
+    decoy_file = tab_file;
+  }
+
+  // if p-values were computed, make sure they get printed
+  SCORER_TYPE_T score = XCORR;
+  if( get_boolean_parameter("compute-p-values") == TRUE ){
+    score = LOGP_BONF_WEIBULL_XCORR;
+  }
+
+  // for each match, get spectrum info, determine if decoy, print
+  int match_idx = 0;
+  int num_matches = match_collection->match_total;
+  for(match_idx = 0; match_idx < num_matches; match_idx++){
+    MATCH_T* cur_match = match_collection->match[match_idx];
+    BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
+    SPECTRUM_T* spectrum = get_match_spectrum(cur_match);
+    int scan_num = get_spectrum_first_scan(spectrum);
+    FLOAT_T mz = get_spectrum_precursor_mz(spectrum);
+    int charge = get_match_charge(cur_match);
+    FLOAT_T spec_mass = get_spectrum_neutral_mass(spectrum, charge);
+    int num_matches = 0; // lost b/c match_collection is for multi-spec
+
+    if( is_decoy ){
+      print_match_tab(cur_match, decoy_file, scan_num, mz, 
+                      spec_mass, num_matches, charge, score );
+    }
+    else{
+      print_match_tab(cur_match, tab_file, scan_num, mz,
+                      spec_mass, num_matches, charge, score );
+    }
+
+  }
+
 }
 
 /*******************************************

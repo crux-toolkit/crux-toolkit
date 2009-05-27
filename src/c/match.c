@@ -5,8 +5,8 @@
  * DESCRIPTION: Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
  *
- * REVISION: $Revision: 1.77 $
- * REVISION: $Revision: 1.77 $
+ * REVISION: $Revision: 1.78 $
+ * REVISION: $Revision: 1.78 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -261,6 +261,28 @@ int compare_match_spectrum_xcorr(
   return return_me;
 }
 
+/**
+ * compare two matches, used for qsort
+ * \returns the difference between p_value (LOGP_BONF_WEIBULL_XCORR)
+ * score in match_a and match_b 
+ */
+int compare_match_p_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  ){
+
+  if((*match_b)->match_scores[LOGP_BONF_WEIBULL_XCORR] 
+     > (*match_a)->match_scores[LOGP_BONF_WEIBULL_XCORR]){
+    return 1;
+  }
+  else if((*match_b)->match_scores[LOGP_BONF_WEIBULL_XCORR] 
+          < (*match_a)->match_scores[LOGP_BONF_WEIBULL_XCORR]){
+    return -1;
+  }
+  return 0;
+
+}
+
 
 /**
  * compare two matches, used for qsort
@@ -345,6 +367,47 @@ int compare_match_spectrum_percolator_score(
 
   return return_me;
 }
+
+/**
+ * Compare two matches by spectrum scan number and q-value (from the decoys and xcorr score),
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_decoy_xcorr_qvalue(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  )
+{
+  // delete this, just for the compiler
+  if( match_a == NULL || match_b == NULL ){
+    return 0;
+  }
+  carp(CARP_FATAL, "HEY, you haven't implemented sorting by decoy-qvalue yet!");
+  exit(1);
+}
+
+/**
+ * Compare two matches by spectrum scan number and q-value (from the decoys and weibull est p-values),
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_decoy_pvalue_qvalue(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  )
+{
+  // delete this, just for the compiler
+  if( match_a == NULL || match_b == NULL ){
+    return 0;
+  }
+  carp(CARP_FATAL, "HEY, you haven't implemented sorting by decoy-qvalue yet!");
+  exit(1);
+}
+
 /* ****** End of sorting functions ************/
 
 /**
@@ -372,10 +435,12 @@ void print_match(
     case SP:
     case XCORR:
     case LOGP_EXP_SP:
-    case LOGP_BONF_EXP_SP:
+      //case LOGP_BONF_EXP_SP:
     case LOGP_WEIBULL_SP:
     case LOGP_BONF_WEIBULL_SP:
-    case LOGP_EVD_XCORR:
+    case DECOY_XCORR_QVALUE:
+    case DECOY_PVALUE_QVALUE:
+      //case LOGP_EVD_XCORR:
     case LOGP_BONF_EVD_XCORR:
     case LOGP_WEIBULL_XCORR:
     case LOGP_BONF_WEIBULL_XCORR:
@@ -568,9 +633,11 @@ void print_match_tab(
   ){
 
   if( match == NULL || file == NULL ){
-    carp(CARP_ERROR, "Cannot print match to tab delimited file from null inputs");
+    carp(CARP_ERROR, 
+         "Cannot print match to tab delimited file from null inputs");
     return;
   }
+
   PEPTIDE_T* peptide = get_match_peptide(match);
   double peptide_mass = get_peptide_peptide_mass(peptide);
   // this should get the sequence from the match, not the peptide
@@ -612,6 +679,9 @@ void print_match_tab(
   int xcorr_rank = get_match_rank(match, XCORR);
   double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
   double weibull_qvalue = get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR);
+  BOOLEAN_T decoy_q_val_scored = get_boolean_parameter("compute-q-values");
+  double decoy_x_qvalue = get_match_score(match, DECOY_XCORR_QVALUE);
+  double decoy_p_qvalue = get_match_score(match, DECOY_PVALUE_QVALUE);
   double percolator_score = get_match_score(match, PERCOLATOR_SCORE);
   double percolator_rank = get_match_rank(match, Q_VALUE);
   double percolator_qvalue = get_match_score(match, Q_VALUE);
@@ -659,6 +729,18 @@ void print_match_tab(
     fprintf(file, float_format, weibull_qvalue);
   }
   else {
+    fprintf(file, "\t");
+  }
+  if( decoy_q_val_scored ){
+    fprintf(file, float_format, decoy_x_qvalue);
+  }
+  else {
+    fprintf(file, "\t");
+  }
+  if( decoy_q_val_scored 
+      && LOGP_BONF_WEIBULL_XCORR == main_score ){ 
+    fprintf(file, float_format, decoy_p_qvalue);
+  }else {
     fprintf(file, "\t");
   }
   if (PERCOLATOR_SCORE == main_score)  {
