@@ -37,7 +37,7 @@ for op in verbosity version parameter-file write-parameter-file \
           min-mass max-mass spectrum-min-mass spectrum-max-mass \
           spectrum-charge max-rank-preliminary print-search-progress \
           enzyme custom-enzyme digestion missed-cleavages \
-          mod cmod nmod max-mods max-aas-modified compute-p-values \
+          mod cmod nmod max-mods max-aas-modified compute-p-values compute-q-values \
           fileroot search-sqt-output-file decoy-sqt-output-file \
           percolator-sqt-output-file qvalues-sqt-output-file \
           search-tab-output-file percolator-tab-output-file \

@@ -126,6 +126,13 @@ search_mods_index = good_results/standard_search_mods = crux search-for-matches 
 # Analyze matches with modifications from index
 analyze_mods_index = good_results/standard_analyze_mods = crux percolator --overwrite T --parameter-file params/mods test_crux_index; cat crux-output/percolator.target.sqt = 'Time' 'Database'
 
+# Test the q-values generated from decoys
+decoy_qval = good_results/decoy-qval.txt = crux search-for-matches --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; cat decoy-qval-pval/search.target.txt decoy-qval-pval/search.decoy.txt 
+
+# Test q-values with tdc from decoys
+decoy_qval_tdc = good_results/decoy-qval-tdc.txt = crux search-for-matches --parameter-file params/decoy-qval-tdc demo.ms2 small-yeast.fasta; cat decoy-qval-tdc/search.target.txt
+
+
 # Do mod search with spec that match sequest results exactly
 sequest_matching_search = good_results/seq_test.sqt = crux search-for-matches --parameter-file params/mods-sequest select-spectra.ms2 index-for-sequest-comparison; cat crux-output/search.target.sqt = 'Time' 
 

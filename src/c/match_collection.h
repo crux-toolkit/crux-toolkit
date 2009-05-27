@@ -1,6 +1,6 @@
 /**
  * \file match_collection.h 
- * $Revision: 1.37 $
+ * $Revision: 1.38 $
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Object for given a database and a spectrum, generate all match objects
@@ -154,6 +154,15 @@ BOOLEAN_T populate_match_rank_match_collection(
  );
 
 /**
+ * \brief Use the matches collected from all spectra to compute FDR
+ * and q_values from the ranked list of target and decoy scores.
+ * Requires that matches have been scored for the given score type.
+ * \returns TRUE if q-values successfully computed, else FALSE.
+ */
+BOOLEAN_T compute_decoy_q_values(MATCH_COLLECTION_T* match_collection,
+                                 SCORER_TYPE_T score_type);
+
+/**
  * match_collection get, set method
  */
 
@@ -232,6 +241,25 @@ FLOAT_T get_match_collection_delta_cn(
 int get_match_collection_num_proteins(MATCH_COLLECTION_T* match_collection);
 
 /**
+ * \brief Remove matches from the collection so that only those of
+ * rank 'max_rank' and higher for the given score type remain.
+ */
+void truncate_match_collection(
+  MATCH_COLLECTION_T* match_collection, 
+  int max_rank,     
+  SCORER_TYPE_T score_type 
+  );
+
+/**
+ * \brief Put all the matches from the source match collection in the
+ * destination. Only copies the pointers of the matches so use with
+ * caution. 
+ * \returns The number of matches added.
+ */
+int merge_match_collections(MATCH_COLLECTION_T* source,
+                            MATCH_COLLECTION_T* destination);
+
+/**
  * Takes the values of match-output-folder, ms2 filename (soon to be
  * named output file), overwrite, and number-decoy-set from parameter.c 
  * and returns an array of filehandles to the newly opened files
@@ -255,6 +283,10 @@ BOOLEAN_T parse_csm_header
   int* total_spectra,
   int* num_top_match);
 
+/**
+ * \brief Print the given match collection for one spectrum to all
+ * appropriate files. 
+ */
 void print_matches
 (MATCH_COLLECTION_T* match_collection, 
  SPECTRUM_T* spectrum, 
@@ -264,6 +296,17 @@ void print_matches
  FILE* decoy_file,
  FILE* tab_file, 
  FILE* decoy_tab_file);
+
+/**
+ * \brief Print the given match collection for several spectra to all
+ * appropriate files.  Takes the spectrum information from the matches
+ * in the collection.
+ */
+void print_matches_multi_spectra
+(MATCH_COLLECTION_T* match_collection, 
+ FILE* tab_file, 
+ FILE* decoy_tab_file);
+
 /**
  * Serialize the psm features to ouput file upto 'top_match' number of 
  * top peptides among the match_collection

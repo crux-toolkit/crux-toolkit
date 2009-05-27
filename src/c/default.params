@@ -119,9 +119,13 @@ max-mods=255
 # Available from parameter file for search-for-matches.
 max-aas-modified=255
 
-# Compute p-values for the main score type. Default FALSE.
+# Compute p-values for the main score type. Default F.
 # Currently only implemented for XCORR.
 compute-p-values=FALSE
+
+# Use the ranking of target and decoy PSMs to compute q-values for the top-ranked match for each spectrum. Default F.
+# Computes two q-values (one ranked by xcorr and one ranked by p-value) when used with --compute-p-values. Requires --num-decoys-per-target 1.
+compute-q-values=FALSE
 
 # Prefix added to output file names. Default None. 
 # Used by crux create-index, crux search-for-matches, crux compute-q-values, and crux percolator.

@@ -31,7 +31,7 @@
 #include "match_collection.h"
 #include <errno.h>
 
-#define NUM_SEARCH_OPTIONS 13
+#define NUM_SEARCH_OPTIONS 14
 #define NUM_SEARCH_ARGS 2
 #define PARAM_ESTIMATION_SAMPLE_COUNT 500
 
@@ -64,6 +64,7 @@ int search_main(int argc, char** argv){
     "write-parameter-file",
     "overwrite",
     "compute-p-values",
+    "compute-q-values",
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
@@ -179,6 +180,13 @@ int search_main(int argc, char** argv){
   // get search parameters for match_collection
   BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
   BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
+  BOOLEAN_T compute_qvalues = get_boolean_parameter("compute-q-values");
+
+  // create list of matches to use for q-values
+  MATCH_COLLECTION_T* qval_matches = NULL;
+  if( compute_qvalues ){
+    qval_matches = new_empty_match_collection(FALSE);// not decoy
+  }
 
   // flags and counters for loop
   int spectrum_searches_counter = 0; //for psm file header, sum(spec*charges)
@@ -192,7 +200,6 @@ int search_main(int argc, char** argv){
   // get list of mods
   PEPTIDE_MOD_T** peptide_mods = NULL;
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
-
 
   // for each spectrum
   while(filtered_spectrum_charge_iterator_has_next(spectrum_iterator)){
@@ -279,7 +286,7 @@ int search_main(int argc, char** argv){
       }
     }
 
-    if( combine_target_decoy == FALSE ){
+    if( combine_target_decoy == FALSE && compute_qvalues == FALSE ){
       // print matches
       carp(CARP_DEBUG, "About to print target matches");
       print_matches(
@@ -297,6 +304,19 @@ int search_main(int argc, char** argv){
       free_match_collection(match_collection);
       match_collection = NULL;
     }
+
+    // save top-rank match if computing q-values
+    if( compute_qvalues ){
+      truncate_match_collection(match_collection, 1, XCORR);//max rank 1
+      merge_match_collections(match_collection, qval_matches);
+      free_match_collection(match_collection);
+      if( combine_target_decoy == TRUE ){
+        match_collection = new_empty_match_collection(TRUE);// will be decoy
+      }else{
+        match_collection = NULL;
+      }
+    }
+
     // now score same number of mods for decoys
     int max_mods = mod_idx;
 
@@ -357,7 +377,7 @@ int search_main(int argc, char** argv){
         }
       }
 
-      // print matches
+      // print matches (or save for q-values)
       // only print first decoy to sqt
       FILE* tmp_decoy_sqt_file = decoy_sqt_file;
       FILE* tmp_decoy_tab_file = decoy_tab_file;
@@ -366,7 +386,15 @@ int search_main(int argc, char** argv){
         tmp_decoy_tab_file = NULL; 
       }
       
-      if( combine_target_decoy == FALSE ){ // print to decoy file
+      
+      if( compute_qvalues ){
+        // save top-rank match if computing q-values
+        truncate_match_collection(match_collection, 1, XCORR);//max rank 1
+        merge_match_collections(match_collection, qval_matches);
+        free_match_collection(match_collection);
+        match_collection = NULL;
+      }
+      else if( combine_target_decoy == FALSE ){ // print to decoy file
         carp(CARP_DEBUG, "About to print decoy matches");
         print_matches(
                       match_collection, 
@@ -381,18 +409,20 @@ int search_main(int argc, char** argv){
         
         free_match_collection(match_collection);
       }else{ // print all to target file
-      carp(CARP_DEBUG, "About to print target and decoy matches");
-      print_matches(
-                    match_collection, 
-                    spectrum, 
-                    FALSE,// is decoy
-                    psm_file_array[0], 
-                    sqt_file, 
-                    decoy_sqt_file, 
-                    tab_file,
-                    decoy_tab_file
-                    );
+        carp(CARP_DEBUG, "About to print target and decoy matches");
+        print_matches(
+                      match_collection, 
+                      spectrum, 
+                      FALSE,// is decoy
+                      psm_file_array[0], 
+                      sqt_file, 
+                      decoy_sqt_file, 
+                      tab_file,
+                      decoy_tab_file
+                      );
+        // free_match_collection?
       }
+      
 
 
 
@@ -402,7 +432,25 @@ int search_main(int argc, char** argv){
 
     // clean up
     //free_match_collection(match_collection); ?? why commented out??
+    if( qval_matches ){ 
+      //      free_match_collection(qval_matches);  // valgrind error. why??
+    }
   }// next spectrum
+
+  // finished searching!
+
+  // compute q-values
+  if( compute_qvalues ){
+    // do the computation...
+    compute_decoy_q_values(qval_matches, XCORR);
+
+    if( compute_pvalues ){
+      compute_decoy_q_values(qval_matches, LOGP_BONF_WEIBULL_XCORR);
+    }
+
+    // print results
+    print_matches_multi_spectra(qval_matches, tab_file, decoy_tab_file);
+  }
 
   // fix headers in csm files
   int file_idx;
