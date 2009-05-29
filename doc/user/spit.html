@@ -12,8 +12,7 @@
 <B>Usage:</B></p>
 
 <blockquote>
-<code>crux spit [options] &lt;psm&nbsp;folder&gt; &lt;crux&nbsp;output&gt;
-</code>
+<code>crux spit [options] &lt;psm&nbsp;folder&gt;</code>
 </blockquote>
 
 <p>
@@ -40,12 +39,10 @@ database, if the latter is provided.</p>
 
 <li>
 &lt;psm folder&gt; &ndash; A folder in which all the PSM result files
-are located.  The program looks for files ending in
-<code>.csm</code>, which are produced by
+are located.  The program looks for files with names of the
+form <code>*.search.target.txt</code>, which are produced by
 <code>crux&nbsp;search-for-matches</code>.  All such files in the
-given directory are analyzed jointly.
-<i>FIXME: We need to think about how best to specify the inputs.</i>
-</li>
+given directory are analyzed jointly.</li>
 
 </UL>
 
