@@ -80,6 +80,20 @@ void set_verbosity_level(int verbosity);
 int get_verbosity_level(void);
 
 /**
+ * Open log file for carp messages.
+ *
+ * Parameters must have been processed before calling this function.
+ */
+void open_log_file(char **log_file_name);
+
+/**
+ * Print command line to log file.
+ *
+ * Parameters must have been processed before calling this function.
+ */
+void log_command_line(int argc, char *argv[]);
+
+/**
  * \returns True if error message has successfully been output. False if not.
  * The term 'carp' is used because 'log' is already used by the math library. 
  */

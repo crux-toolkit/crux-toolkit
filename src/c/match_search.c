@@ -99,6 +99,25 @@ int search_main(int argc, char** argv){
     srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
   }
   
+  /* Create output directory */ 
+  char* output_folder = get_string_parameter("output-dir");
+  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  int result = create_output_directory(
+    output_folder, 
+    TRUE, // Allow existing directory
+    TRUE // print warnging messages to stderr
+  );
+  if( result == -1 ){
+    carp(CARP_FATAL, "Unable to create output directory %s.", output_folder);
+    exit(1);
+  }
+
+  /* Open the log file to record carp messages */
+  char* log_file_name = get_string_parameter("search-log-file");
+  open_log_file(&log_file_name);
+  free(log_file_name);
+  log_command_line(argc, argv);
+
   carp(CARP_INFO, "Beginning crux search-for-matches");
 
   /* Get input: ms2 file */
@@ -133,19 +152,6 @@ int search_main(int argc, char** argv){
     exit(1);
   }
   
-  /* Create output directory */ 
-  char* output_folder = get_string_parameter("output-dir");
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  int result = create_output_directory(
-    output_folder, 
-    TRUE, // Allow existing directory
-    TRUE // print warnging messages to stderr
-  );
-  if( result == -1 ){
-    carp(CARP_FATAL, "Unable to create output directory %s.", output_folder);
-    exit(1);
-  }
-
   /* Prepare output files */
 
   FILE** psm_file_array = NULL; //file handle array
