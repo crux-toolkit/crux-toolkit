@@ -521,6 +521,23 @@ void initialize_parameters(void){
       "Used by crux search-for-matches with "
       "number-decoy-set > 0.  The location of this file is controlled by "
       "--output-dir.", "true");
+  set_string_parameter("percolator-log-file", "percolator.log.txt", 
+      "Log file name for percolator. Default 'percolator.log.txt'",
+      "Used by crux percolator. The location of this file is controlled by "
+      "--output-dir.", "true");
+  set_string_parameter("qvalues-log-file", "qvalues.log.txt", 
+      "Log file name for compute-q-values. Default 'qvalues.target.txt'",
+      "Used by crux compute-q-values. The location of this file is controlled by "
+      "--output-dir.", "true");
+  set_string_parameter("search-log-file", "search.log.txt", 
+      "Log file name for search.  Default 'search.log.txt'.",
+      "Used by crux search-for-matches. "
+      "The location of this file is controlled by "
+      "--output-dir.", "true");
+  set_string_parameter("index-log-file", "index.log.txt", 
+      "Log file name for index.  Default 'index.log.txt'.",
+      "Used by crux create-index. ",
+      "true");
   
   // user options regarding decoys
   set_int_parameter("num-decoys-per-target", 2, 0, 10,

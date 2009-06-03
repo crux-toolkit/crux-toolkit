@@ -92,6 +92,12 @@ int percolator_main(int argc, char** argv){
   SCORER_TYPE_T second_scorer_type = Q_VALUE;
   MATCH_COLLECTION_T* match_collection = NULL;
 
+  /* Open the log file to record carp messages */
+  char* log_file_name = get_string_parameter("percolator-log-file");
+  open_log_file(&log_file_name);
+  free(log_file_name);
+  log_command_line(argc, argv);
+
   /* Perform the analysis */
   carp(CARP_INFO, "Running percolator");
   match_collection = run_percolator(psm_dir,

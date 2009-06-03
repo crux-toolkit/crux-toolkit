@@ -85,6 +85,12 @@ int qvalue_main(int argc, char** argv){
   /* Get options */
   MATCH_COLLECTION_T* match_collection = NULL;
 
+  /* Open the log file to record carp messages */
+  char* log_file_name = get_string_parameter("qvalues-log-file");
+  open_log_file(&log_file_name);
+  free(log_file_name);
+  log_command_line(argc, argv);
+
   /* Perform the analysis */
   carp(CARP_INFO, "Running compute q-values");
   match_collection = run_qvalue(psm_dir, protein_input_name);
