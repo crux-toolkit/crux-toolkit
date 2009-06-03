@@ -98,6 +98,7 @@ BOOLEAN_T carp(
     va_start(argp, format);
     vfprintf(stderr, format, argp);
     if (log_file != NULL) { 
+      va_start(argp, format); //BF: added to fix segfault
       vfprintf(log_file, format, argp);
     }
     va_end(argp);
