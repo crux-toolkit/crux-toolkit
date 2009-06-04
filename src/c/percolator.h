@@ -1,5 +1,10 @@
 #ifndef PERCOLATOR_CMD_H
 #define PERCOLATOR_CMD_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \file match_analysis.c
  */
@@ -33,7 +38,9 @@
 
 int percolator_main(int argc, char** argv);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif //PERCOLATOR_CMD_H
 

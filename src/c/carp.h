@@ -6,6 +6,10 @@
 #ifndef CARP_H 
 #define CARP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "utils.h"
 
 /** 
@@ -108,4 +112,9 @@ BOOLEAN_T carp(
  * c-basic-offset: 2
  * End:
  */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

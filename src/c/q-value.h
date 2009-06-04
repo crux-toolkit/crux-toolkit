@@ -1,6 +1,10 @@
 #ifndef QVALUE_CMD_H
 #define QVALUE_CMD_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \file match_analysis.c
  */
@@ -28,6 +32,10 @@
 
 int qvalue_main(int argc, char** argv);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //QVALUE_CMD_H
 
