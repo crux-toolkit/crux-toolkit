@@ -9,6 +9,10 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -40,5 +44,8 @@ void open_output_files(FILE*** binary_filehandle_array,
 
 int search_main(int argc, char** argv);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SEARCH_H

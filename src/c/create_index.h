@@ -11,6 +11,10 @@
 #ifndef CREATE_INDEX_H
 #define CREATE_INDEX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,9 +38,9 @@
 
 int create_index_main(int argc, char** argv);
 
-
-
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif //CREATE_INDEX_H
 

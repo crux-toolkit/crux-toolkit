@@ -155,13 +155,13 @@ crux_predict_peptide_ions_LDADD = libcrux.la
 #create_psm_files_LDADD = libcrux.la 
 
 if PERCOLATOR
-crux_SOURCES = crux-main.c  crux-main.h percolator.c percolator.h
+crux_SOURCES = crux-main.cpp  crux-main.h percolator.c percolator.h
 
 crux_CFLAGS = $(AM_CFLAGS) -DMAIN -DPERCOLATOR -I$(PERCOLATOR_DIR)
 crux_LDADD = \
   libcrux.la -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary
 else
-crux_SOURCES = crux-main.c  crux-main.h percolator.c percolator.h
+crux_SOURCES = crux-main.cpp  crux-main.h percolator.c percolator.h
 
 crux_CFLAGS = $(AM_CFLAGS) -DMAIN
 crux_LDADD = \

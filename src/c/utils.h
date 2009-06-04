@@ -9,6 +9,11 @@
 
 #ifndef UTILS_H
 #define UTILS_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -369,6 +374,10 @@ char** parse_file(
   int max_lines, 
   int* num_lines
   );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

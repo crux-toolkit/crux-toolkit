@@ -7,6 +7,10 @@
 #ifndef CRUX_UTILS_H
 #define CRUX_UTILS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -334,5 +338,9 @@ DIGEST_T string_to_digest_type(char*);
 char* digest_type_to_string(DIGEST_T);
 ENZYME_T string_to_enzyme_type(char*);
 char* enzyme_type_to_string(ENZYME_T);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
