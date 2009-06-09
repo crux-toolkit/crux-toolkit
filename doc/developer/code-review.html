@@ -1,0 +1,138 @@
+<html>
+<title>Code Review Guidelines</title>
+<body>
+<blockquote>
+
+<h1>Code Review Guidelines for Crux</h1>
+
+<h2>What is a code review?  Why bother?</h2>
+<p>A code review is an opportunity for a programmer to ask a reviewer
+  to proofread his code and documentation.  A review can be done on
+  any new code and on changes of any size.  The reviewer provides
+  feedback and suggestions which the programmer incorporates to the
+  code before submitting it. 
+</p>
+<p>There are several benefits of code review.  Readability is improved
+  since the programmer is writing with the expectation of another
+  person reading it.  Code maintains simplicity since overly complex
+  code won't pass review.  Some errors will be caught.  The style
+  dictated in the <a href="crux-coding-standards.html">coding
+  standard</a>
+  will be maintained. 
+</p>
+
+<h2>Who reviews and when</h2>
+<p>Any member of the crux development team may review another
+  developer's code.  The developer should choose a reviewer who can
+  offer good suggestions, but the reviewer need not be a more
+  experienced programmer.  The reviewer may decline the request, but
+  once the review has been agreed on for a specific set of changes,
+  the developer cannot switch reviewers.
+</p>
+
+<p>Review early and often.  Often can mean around 100 lines of new
+  code.  Any changes that are ready to be submitted, even tiny ones,
+  are candidates for review.
+</p>
+
+<h2>The role of the reviewer</h2>
+<p>Offering a good review is a skill akin to writing good comments.
+  Remember to tread lightly. The reviewer should offer only
+  constructive suggestions, ignoring differences in opinion or style
+  not covered in the <a href="crux-coding-standards.html">coding
+  standards</a>.  A review of "Looks good" is perfectly
+  acceptable. A review should be neutral in tone; it is not a time to
+  berate someone. Think forest, not trees, whenever possible.
+</p>
+
+<p>There is also some skill involved in receiving a review
+  gracefully.  Remember that the reviewer is doing you a favor.  Code
+  should be commented, tested, and debugged before review.  Also
+  remember that reviewers' suggestions are given to improve the code,
+  not as a personal attack. 
+</p>
+
+<p>Constructive suggestions may cover any of these issues:
+</p>
+<ul>
+<li>Readability and Comprehensibility.  Code should read fluidly.
+  Flag any code that causes head-scratching.  Code should be only as complex
+  as the underlying ideas.  
+<li>Mismatches with design and deviations from the coding standard.
+<li>Need for additional comments and/or better identifying names.
+<li>Opportunities for simplification.
+<li>What goes in the interface vs. implementation.
+<li>A questionable programming choice that needs justification.
+</ul>
+
+<h2>Format of the review process</h2>
+<p>Reviews may be done in person or by email.  Longer reviews may be more
+  appropriately done in person with the programmer taking notes on the
+  reviewer's comments.  Short reviews can be done by email with all or
+  part of the process being automated (see below).
+</p>
+
+<h3>The outline of a review</h3>
+<ul>
+<li>Programmer finds a willing reviewer.
+<li>Programmer sends the reviewer a file showing the changes, i.e. the
+  output of a diff command.  
+
+<li><b>In-person reviews</b>
+<ul>
+  <li>Reviewer and programmer find a time to meet in front of a
+  computer.
+  <li>Programmer takes notes while reviewer reads code and makes
+  comments.
+  <li>Programmer listens quietly, not offering explanations.
+</ul>
+<li><b>Email reviews</b>
+<ul>
+  <li>Reviewer makes comments in-line in the diff file.
+  <li>Reviewer emails the comments to the programmer.
+  <li>Programmer reviews comments.
+</ul>
+<li><b>In both cases</b> the reviewer and programmer need to come to
+  an agreement regarding the changes. No changes should be submitted
+  to the repository trunk before they have been agreed upon.
+
+<li>Programmer makes requested changes and tests again.
+<li>If the changes are substantial, the reviewer can check them again.
+<li>Once all changes are agreed upon, the programmer merges changes
+  into the trunk.
+</ul>
+
+<h3>Alternate file sharing</h3>
+<p>The above is the preferred method for programmers and reviewers to
+  exchange files: reviewer is handed a diff file, comments on it, and
+  returns it.  There are two possible variations.  
+<ul>
+<li> The reviewer may request a "live" copy of the file(s) in
+  question.  Typically, they will reside on the programmers client or
+  can be emailed to the reviewer.  New files are often handled in this
+  way. 
+<li> If the programmer is working on a change substantial enough to
+  merit its own branch, the reviewer can choose to retrieve the files
+  from the repository.  If requested, the programmer should provide
+  the branch name and a cut-and-paste diff command the reviewer can
+  use to see the changes made since the diversion from the trunk.
+</ul>
+ 
+<h3>Updating the coding standard</h3>
+<p>Crux as it is implemented in C has a fairly complete coding
+  standard.  As we transition to C++, we will need to update the
+  standard.  This can be an on-going and collaborative process.  If
+  the programmer and reviewer find a style issue not covered in the
+  standard, they can propose one by sending an email to
+  crux-developers@u.wash... with the proposed change.  After any
+  ensuing discussion, the agreed upon change can be added to the
+  coding standard file in
+  crux/doc/developer/crux-coding-standards.html.  
+
+<hr>
+This document is based on <a href="http://noble.gs.washington.edu/internal/slides/2009/spring/2009-05-27/benjamin-code-reviews.htm">slides</a> presented by Benjamin Diament.
+
+
+</body>
+</blockquote>
+</html>
