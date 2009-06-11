@@ -477,7 +477,7 @@ int modify_peptide(
     //printf("after applying count is %d\n", total_count);
     // the count should be > 0, but check for error case
     if( total_count == 0 || is_empty_linked_list(modified_seqs) ){
-      carp(CARP_ERROR, 
+      carp(CARP_DETAILED_DEBUG,
            "Peptide modification could not be applied to sequence %s",
            sequence);
       return total_count;  // free things...
