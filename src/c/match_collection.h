@@ -47,34 +47,6 @@
  */
 MATCH_COLLECTION_T* allocate_match_collection(void);
 
-
-/**
- * \brief Creates a new match collection by searching a database
- * for matches to a spectrum. in .h
- *
- * \detail This is the main spectrum searching routine.  Allocates memory for
- * the match collection. Creates a peptide iterator for given mass
- * window. Performs preliminary scoring on all candidate
- * peptides. Performs primary scoring on the <max_rank> best-scoring
- * peptides. Estimates EVD parameters. in .h
- *
- * \returns A new match_collection object that is scored by score_type
- * and contains the top max_rank matches in .h
- */
-MATCH_COLLECTION_T* new_match_collection_from_spectrum(
- SPECTRUM_T* spectrum, ///< the spectrum to match peptides in .h -in
- int charge,       ///< the charge of the spectrum -in
- int max_rank,     ///< max number of top rank matches to keep from SP -in
- SCORER_TYPE_T prelim_score, ///< the preliminary score type (SP) -in
- SCORER_TYPE_T score_type, ///< the score type (XCORR, LOGP_EXP_SP) -in
- FLOAT_T mass_offset,
- ///< the mass offset from neutral_mass to search for candidate peptides -in
- BOOLEAN_T null_peptide_collection,
- ///< is this match_collection a null peptide collection? -in
- INDEX_T* index,
- DATABASE_T* database
- );
-
 /**
  * \brief Creates a new match collection with no matches in it.  Sets
  * member variables from parameter.c.  The charge and null_collection
