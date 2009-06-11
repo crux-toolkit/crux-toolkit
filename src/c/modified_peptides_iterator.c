@@ -118,9 +118,8 @@ void queue_next_peptide(
   // this put a copy in the list, get rid of the original
   free_peptide(unmod_peptide);
 
-  // error case b/c already tested for modifyability
   if( is_empty_linked_list(iterator->temp_peptide_list) ){
-    carp(CARP_ERROR, "Modifier didn't return any peptides");
+    carp(CARP_DETAILED_DEBUG, "Modifier didn't return any peptides");
     iterator->next_peptide = NULL;
     return;
   }
