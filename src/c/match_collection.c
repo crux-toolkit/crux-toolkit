@@ -407,18 +407,27 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
   }
 
   int score_idx = match_collection->num_xcorrs;
-  int psm_idx = start_index;
+  int num_new_scores = match_collection->match_total - start_index;
 
   carp(CARP_DETAILED_DEBUG, 
-       "Adding to xcors[%i] scores from psm index %i to %i", 
-       score_idx, psm_idx, match_collection->match_total);
+       "Adding %i new xcorrs to an array that currently contains %i xcorrs.",
+       num_new_scores,
+       match_collection->num_xcorrs);
 
-  if( score_idx+(match_collection->match_total-psm_idx) 
-      > _MAX_NUMBER_PEPTIDES ){
-    carp(CARP_FATAL, "Too many xcorrs to store.");
+  // Check for array out of bounds error.
+  if( score_idx + num_new_scores > _MAX_NUMBER_PEPTIDES ){
+    carp(CARP_ERROR,
+	 "Adding %i new xcorrs to an array that currently contains %i xcorrs.",
+	 num_new_scores,
+	 match_collection->num_xcorrs);
+    carp(CARP_FATAL, "Too many xcorrs to store (%i > %i) for spectrum %i.",
+	 score_idx + num_new_scores,
+	 _MAX_NUMBER_PEPTIDES,
+	 get_spectrum_first_scan(get_match_spectrum(match_collection->match[0])));
     exit(1);
   }
 
+  int psm_idx = start_index;
   for(psm_idx=start_index; psm_idx < match_collection->match_total; psm_idx++){
     FLOAT_T score = get_match_score( match_collection->match[psm_idx], XCORR);
     match_collection->xcorrs[score_idx] = score;
