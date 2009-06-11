@@ -11,6 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 #include "objects.h"
 #include "spectrum.h"
 #include "spectrum_collection.h" 
@@ -103,10 +104,12 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   char* absolute_path_file =  realpath(filename, NULL);
   #endif
   if (absolute_path_file == NULL){
-    die("Had trouble canonicalizing the file name '%s'. Too many levels of symbolic links?", filename); 
+    carp(CARP_FATAL,
+	 "Error from file '%s'. (%s)",
+	 filename,
+	 strerror(errno)); 
+    exit(1);
   }
-  // CYGWIN 
-  // char* absolute_path_file =  filename;
   
   if(access(absolute_path_file, F_OK)){
     fprintf(stderr,"File %s could not be opened\n", absolute_path_file);
