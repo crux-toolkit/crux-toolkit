@@ -76,8 +76,6 @@ BOOLEAN_T check_option_type_and_bounds(char* name);
 void check_parameter_consistency();
 void parse_custom_enzyme(char* rule_str);
 
-void print_parameter_file(char* input_param_filename);
-
 /**
  *
  */
@@ -325,16 +323,10 @@ void initialize_parameters(void){
   set_string_parameter("parameter-file-name", "params.txt", 
       "Set name for output parameter file.",
       "Available for all crux programs.", "true");
-  set_boolean_parameter("write-parameter-file", FALSE,
-      "If T, create a parameter file, params.txt, with the values of all parameters "
-      "in this run. Default F.",
-      "Writes all crux parameters, even those not used in the current "
-      "execution. Resulting file can be used with --parameter-file.",
-      "true");
   set_boolean_parameter("overwrite", FALSE, 
       "Replace existing files (T) or exit if attempting to overwrite "
       "(F). Default F.",
-      "Available for all crux programs.  Applies to --write-parameter-file "
+      "Available for all crux programs.  Applies to parameter file "
       "as well as index, search, and analysis output files.", "true");
     
   /* create-psm-files */
@@ -536,6 +528,23 @@ void initialize_parameters(void){
       "--output-dir.", "true");
   set_string_parameter("index-log-file", "index.log.txt", 
       "Log file name for index.  Default 'index.log.txt'.",
+      "Used by crux create-index. ",
+      "true");
+  set_string_parameter("percolator-param-file", "percolator.params.txt", 
+      "Parameter file name for percolator. Default 'percolator.params.txt'",
+      "Used by crux percolator. The location of this file is controlled by "
+      "--output-dir.", "true");
+  set_string_parameter("qvalues-param-file", "qvalues.params.txt", 
+      "Parameter file name for compute-q-values. Default 'qvalues.params.txt'",
+      "Used by crux compute-q-values. The location of this file is controlled by "
+      "--output-dir.", "true");
+  set_string_parameter("search-param-file", "search.params.txt", 
+      "Parameter file name for search.  Default 'search.params.txt'.",
+      "Used by crux search-for-matches. "
+      "The location of this file is controlled by "
+      "--output-dir.", "true");
+  set_string_parameter("index-param-file", "index.parames.txt", 
+      "Parameter file name for index.  Default 'index.params.txt'.",
       "Used by crux create-index. ",
       "true");
   
@@ -1134,7 +1143,6 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   }
 
   set_verbosity_level(get_int_parameter("verbosity"));
-  print_parameter_file(param_filename);
 
   // what is the max psms per spec to keep for printing
   int max = get_int_parameter("top-match");
@@ -1443,44 +1451,16 @@ BOOLEAN_T check_option_type_and_bounds(char* name){
 
 /**
  * \brief Creates a file containing all parameters and their current
- * values in the parameter file format.  Default location is cwd,
- * fully-qualified or relative paths can be included in filename.
- * Does not allow input parameter file to be overwritten.
+ * values in the parameter file format. Created in the output directory
+ * named by the parameter "output-dir".
  */
-void print_parameter_file(char* input_param_filename){
+void print_parameter_file(char** filename){
 
-  char* output_dir = get_string_parameter("output-dir");
-  char* filename = get_string_parameter("parameter-file-name");
-  BOOLEAN_T get_parameter_file = get_boolean_parameter("write-parameter-file");
-
-  if(get_parameter_file == FALSE ){
-    free(output_dir);
-    free(filename);
-    return;
-  }
   carp(CARP_DEBUG, "Printing parameter file");
-
-  // do not allow param file to be overwritten, even with -overwrite=T
-  if( strcmp(filename, input_param_filename) == 0 ){
-    carp(CARP_FATAL, "Cannot overwrite input paramter file.");
-    exit(1);
-  }
-  // do allow a different file to be overwritten
+  prefix_fileroot_to_name(filename);
+  char* output_dir = get_string_parameter("output-dir");
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-
-  // Create the output directory
-  int result = create_output_directory(
-    output_dir, 
-    TRUE, // Allow existing directory
-    TRUE // print warnging messages to stderr
-  );
-  if( result == -1 ){
-    carp(CARP_FATAL, "Unable to create output directory %s.", output_dir);
-    exit(1);
-  }
-
-  // now open the file
-  FILE* param_file = create_file_in_path(filename, 
+  FILE* param_file = create_file_in_path(*filename, 
                                          output_dir, 
                                          overwrite);
 
@@ -1501,7 +1481,6 @@ void print_parameter_file(char* input_param_filename){
   }
 
   fclose(param_file);
-  free(filename);
   free(output_dir);
 }
 

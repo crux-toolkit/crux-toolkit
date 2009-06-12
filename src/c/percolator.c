@@ -21,7 +21,7 @@
 #include "percolator.h"
 
 #ifdef PERCOLATOR
-#define NUM_PERCOLATOR_OPTIONS 8
+#define NUM_PERCOLATOR_OPTIONS 7
 #define NUM_PERCOLATOR_ARGUMENTS 1
 /* 
  * Private function declarations.  Details below
@@ -53,7 +53,6 @@ int percolator_main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file",
-    "write-parameter-file",
     "fileroot",
     "feature-file",
     "output-dir",
@@ -98,8 +97,13 @@ int percolator_main(int argc, char** argv){
   free(log_file_name);
   log_command_line(argc, argv);
 
-  /* Perform the analysis */
   carp(CARP_INFO, "Running percolator");
+
+  char* param_file_name = get_string_parameter("percolator-param-file");
+  print_parameter_file(&param_file_name);
+  free(param_file_name);
+
+  /* Perform the analysis */
   match_collection = run_percolator(psm_dir,
                                     protein_input_name,
                                     feature_file);

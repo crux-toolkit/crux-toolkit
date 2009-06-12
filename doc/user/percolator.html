@@ -81,6 +81,14 @@ The name of the output folder can be set by the user using the <code>--output-di
 The following files will be created:</p>
 
 <li>
+<b>percolator.params.txt</b>:
+a file containing the name and value of all parameters/options for the current operation.  
+Not all parameters in the file may have been used in the operation.  
+The resulting file can be used with the <code>--parameter-file</code>
+option for other crux programs.
+</li>
+
+<li>
 <b>percolator.target.sqt</b>: an <a href="sqt-format.html">SQT</a> file containing the PSMs
 
 <li>
@@ -114,15 +122,6 @@ fail when trying to overwrite a file if false (F). Default =  F.
 <code>--parameter-file &lt;filename&gt;</code> &ndash;
 A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
-
-<LI>
-<code>--write-parameter-file &lt;T|F&gt;</code> &ndash; Create a file in the
-output directory named <code>params.txt</code>.  This file contains
-the name and value of all parameters/options for the current
-operationi.  Not all parameters in the file may have been used in the
-operation.  The resulting file can be used with the <code>--parameter-file</code>
-option for other crux programs. Default = <code>F</code>.
-
 
 <LI> 
 <code>--feature-file &lt;string&gt;</code> &ndash;

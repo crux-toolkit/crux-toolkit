@@ -31,7 +31,7 @@
 #include "match_collection.h"
 #include <errno.h>
 
-#define NUM_SEARCH_OPTIONS 14
+#define NUM_SEARCH_OPTIONS 13
 #define NUM_SEARCH_ARGS 2
 #define PARAM_ESTIMATION_SAMPLE_COUNT 500
 
@@ -61,7 +61,6 @@ int search_main(int argc, char** argv){
     "verbosity",
     "version",
     "parameter-file",
-    "write-parameter-file",
     "overwrite",
     "compute-p-values",
     "compute-q-values",
@@ -119,6 +118,11 @@ int search_main(int argc, char** argv){
   log_command_line(argc, argv);
 
   carp(CARP_INFO, "Beginning crux search-for-matches");
+
+  // Write the parameter file
+  char* param_file_name = get_string_parameter("search-param-file");
+  print_parameter_file(&param_file_name);
+  free(param_file_name);
 
   /* Get input: ms2 file */
   char* ms2_file = get_string_parameter_pointer("ms2 file");

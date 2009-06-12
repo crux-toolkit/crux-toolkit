@@ -20,7 +20,7 @@
 #define MAX_PSMS 10000000
 // 14th decimal place
 #define EPSILON 0.00000000000001 
-#define NUM_QVALUE_OPTIONS 7
+#define NUM_QVALUE_OPTIONS 6
 #define NUM_QVALUE_ARGUMENTS 1
 
 /* 
@@ -53,7 +53,6 @@ int qvalue_main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file",
-    "write-parameter-file",
     "overwrite",
     "output-dir",
     "fileroot"
@@ -91,8 +90,13 @@ int qvalue_main(int argc, char** argv){
   free(log_file_name);
   log_command_line(argc, argv);
 
-  /* Perform the analysis */
   carp(CARP_INFO, "Running compute q-values");
+
+  char* param_file_name = get_string_parameter("qvalues-param-file");
+  print_parameter_file(&param_file_name);
+  free(param_file_name);
+
+  /* Perform the analysis */
   match_collection = run_qvalue(psm_dir, protein_input_name);
   SCORER_TYPE_T scorer_type =  LOGP_QVALUE_WEIBULL_XCORR; 
   SCORER_TYPE_T second_scorer_type = XCORR; // could it be other?
