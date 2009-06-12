@@ -24,7 +24,7 @@
 #include "index.h"
 #include "generate_peptides_iterator.h"
 
-#define NUM_GEN_PEP_OPTIONS 16
+#define NUM_GEN_PEP_OPTIONS 15
 #define NUM_GEN_PEP_ARGS 1
 
 /* Private function declarations */
@@ -52,7 +52,6 @@ int main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file",
-    "write-parameter-file",
     "min-length",
     "max-length",
     "min-mass",

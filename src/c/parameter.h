@@ -274,5 +274,11 @@ int get_n_mod_list(AA_MOD_T*** mods);
  */
 int get_all_aa_mod_list(AA_MOD_T*** mods);
 
+/**
+ * \brief Creates a file containing all parameters and their current
+ * values in the parameter file format. Created in the output directory
+ * named by the parameter "output-dir".
+ */
+void print_parameter_file(char** filename);
 
 #endif

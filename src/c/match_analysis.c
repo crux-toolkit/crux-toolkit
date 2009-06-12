@@ -83,7 +83,6 @@ int main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file",
-    "write-parameter-file",
     "algorithm",
     "feature-file",
     "overwrite"

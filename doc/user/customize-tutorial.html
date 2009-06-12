@@ -59,7 +59,6 @@ Usage: crux search-for-matches [options] <ms2 file> <protein input>
   [--verbosity &lt;int&gt;] Set level of output to stderr (0-100).  Default 30.
   [--version &lt;string&gt;] Print version number and quite
   [--parameter-file &lt;string&gt;] Set additional options with values in the given file. Default to use only command line options and default values. 
-  [--write-parameter-file &lt;string&gt; Create a parameter file with the values of all parameters in this run.
   [--overwrite &lt;string&gt; Replace existing files (T) or exit if attempting to overwrite (F). Default F.
 ...
 </pre>
@@ -106,6 +105,18 @@ parameter file can be found <a href="parameter-file.html">here</a>.
 Command line and parameter file options may be used separately or
 together.  If an option is specified in both, the value on the command
 line will be used.
+</p>
+
+<p>
+A file containing the name and value of all parameters/options for the
+current operation will automatically be saved in the output directory.
+Note that not all parameters in the file may have been used in the
+operation.  The parameter file will be named
+<code>&lt;tag&gt;.params.txt</code>, where <code>&lt;tag&gt;</code> is
+<code>search</code>, <code>qvalues</code> or <code>percolator</code>,
+depending on which Crux command was used.  The resulting file can be
+used with the <code>--parameter-file</code> option for other crux
+programs.
 </p>
 
 <p>Now that we've covered the general form of options, let's discuss

@@ -37,7 +37,6 @@ int create_index_main(int argc, char** argv){
     "version",
     "verbosity",
     "parameter-file", 
-    "write-parameter-file",
     "overwrite",
     "min-length", 
     "max-length", 

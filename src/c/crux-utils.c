@@ -987,19 +987,30 @@ FILE* create_file_in_path(
   )
 {
   char* file_full_path = get_full_filename(directory, filename);
-  FILE* file = fopen(file_full_path, "r"); //to test if it exists
-
-  if( ! overwrite ){
-
-    //file = fopen(file_full_path, "r"); //to test if it exists
-    if( file != NULL ){                  //it exists, die
-      fclose(file);
-      file = NULL;
-      carp(CARP_FATAL, "The file '%s' already exists.  " \
-       "Use --overwrite T to replace or choose a different output file name",
-           file_full_path);
-      exit(1);
-    }//else, open the file
+  // FIXME CEG consider using stat instead
+  FILE* file = fopen(file_full_path, "r"); //to test if file exists
+  if( file != NULL ){  
+    //The file exists, are we allowed to overwrite it?
+    fclose(file);
+    file = NULL;
+    if( ! overwrite ){
+        // Not allowed to overwrite, we must die.
+        carp(
+          CARP_FATAL, 
+          "The file '%s' already exists and cannot be overwritten. " \
+            "Use --overwrite T to replace or choose a different output file name",
+          file_full_path
+        );
+        exit(1);
+    }
+    else {
+      // Allowed to overwrite, send warning message.
+      carp(
+        CARP_WARNING, 
+        "The file '%s' already exists and will be overwriten.",
+        file_full_path
+      );
+    }
   }
   
   file = fopen(file_full_path, "w+"); //read and write, replace existing
