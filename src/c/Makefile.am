@@ -1,5 +1,7 @@
 distdir = $(PACKAGE)_$(VERSION)
 
+SUBDIRS = percolator .
+
 if USEDOUBLES
   USEDOUBLES='-DUSE_DOUBLES'
 else
@@ -91,15 +93,8 @@ NON_PERCOLATOR_LIB_FILES= \
   utils.h \
   version.h
 
-PERCOLATOR_LIB_FILES = 
-
-if PERCOLATOR
-  LIBFILES=$(PERCOLATOR_LIB_FILES) $(NON_PERCOLATOR_LIB_FILES)
-  libcrux_la_CFLAGS = $(AM_CFLAGS) -I$(PERCOLATOR_DIR)/src
-else
-  LIBFILES=$(NON_PERCOLATOR_LIB_FILES)
-  libcrux_la_CFLAGS = $(AM_CFLAGS)
-endif
+LIBFILES=$(PERCOLATOR_LIB_FILES) $(NON_PERCOLATOR_LIB_FILES)
+libcrux_la_CFLAGS = $(AM_CFLAGS)
 
 libcrux_la_SOURCES = $(LIBFILES)
 libcrux_la_LIBADD = -lm
@@ -154,19 +149,11 @@ crux_predict_peptide_ions_LDADD = libcrux.la
 #create_psm_files_CFLAGS = $(AM_CFLAGS) -DMAIN 
 #create_psm_files_LDADD = libcrux.la 
 
-if PERCOLATOR
 crux_SOURCES = crux-main.cpp  crux-main.h percolator.c percolator.h
-
-crux_CFLAGS = $(AM_CFLAGS) -DMAIN -DPERCOLATOR -I$(PERCOLATOR_DIR)
+crux_CFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
+crux_CPPFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
 crux_LDADD = \
-  libcrux.la -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary
-else
-crux_SOURCES = crux-main.cpp  crux-main.h percolator.c percolator.h
-
-crux_CFLAGS = $(AM_CFLAGS) -DMAIN
-crux_LDADD = \
-  libcrux.la
-endif
+  libcrux.la -lstdc++ -L./percolator -lpercolator -lqvality -lArrayLibrary
 
 paramdir = $(prefix)/doc
 param_DATA = default.params
