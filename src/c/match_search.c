@@ -198,8 +198,15 @@ int search_main(int argc, char** argv){
     qval_matches = new_empty_match_collection(FALSE);// not decoy
   }
 
+  // The total number of searches attempted.
+  // This is the value that gets reported to the user on stderr.
+  int spectrum_searches_counter = 0; 
+
+  // The number of searches that found at least one candidate.
+  // This is the value that goes into the .csm header.
+  int num_successful_searches = 0;
+
   // flags and counters for loop
-  int spectrum_searches_counter = 0; //for psm file header, sum(spec*charges)
   int mod_idx = 0;
   int num_decoys = get_int_parameter("number-decoy-set");
   int progress_increment = get_int_parameter("print-search-progress");
@@ -280,6 +287,7 @@ int search_main(int argc, char** argv){
       carp(CARP_WARNING, "No matches found for spectrum %i, charge %i",
            get_spectrum_first_scan(spectrum), charge);
       free_match_collection(match_collection);
+      spectrum_searches_counter++;
       continue; // next spectrum
     }
     
@@ -432,13 +440,11 @@ int search_main(int argc, char** argv){
                       );
         // free_match_collection?
       }
-      
-
-
 
     }// last decoy
 
     spectrum_searches_counter++;
+    num_successful_searches++;
 
     // clean up
     //free_match_collection(match_collection); ?? why commented out??
@@ -466,8 +472,8 @@ int search_main(int argc, char** argv){
   int file_idx;
   for(file_idx=0; file_idx < num_decoys + 1; file_idx++){
     carp(CARP_DEBUG, "Changing csm header to have %i spectrum searches",
-         spectrum_searches_counter);
-    serialize_total_number_of_spectra(spectrum_searches_counter,
+         num_successful_searches);
+    serialize_total_number_of_spectra(num_successful_searches,
                                       psm_file_array[file_idx]);
   }
   // clean up memory
