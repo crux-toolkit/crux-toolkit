@@ -19,7 +19,6 @@ extern "C" {
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef PERCOLATOR
 #include "carp.h"
 #include "crux-utils.h"
 #include "objects.h"
@@ -34,7 +33,6 @@ extern "C" {
 #include "match.h"
 #include "match_collection.h"
 #include "PercolatorCInterface.h"
-#endif
 
 int percolator_main(int argc, char** argv);
 

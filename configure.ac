@@ -92,14 +92,6 @@ esac
 # Check for configuration switches
 ####################################
 
-# set percolator location
-AC_ARG_WITH(
-    percolator-dir,
-    [  --with-percolator-dir=DIR  Set path to percolator source. \
-      Default: ${top_srcdir}/percolator],
-    [PERCOLATOR_DIR=$withval],
-    [PERCOLATOR_DIR="\${top_srcdir}/../percolator"])
-
 # Use double precision floating point through out.
 doubles=false
 AC_ARG_ENABLE(
@@ -111,7 +103,6 @@ AM_CONDITIONAL(USEDOUBLES, test "x$doubles" = xtrue )
 # These variables will be available in the Makefiles.
 AC_SUBST(MACHID)
 AC_SUBST(VERSION)
-AC_SUBST(PERCOLATOR_DIR)
 
 # List all the Makefiles for the project.
 AC_CONFIG_FILES([\
@@ -120,22 +111,8 @@ AC_CONFIG_FILES([\
     doc/user/Makefile \
     src/Makefile \
     src/c/Makefile \
+    src/c/percolator/Makefile \
 ])
-
-PERCOLATOR_HEADER_STATUS=""
-PERCOLATOR_LIB_STATUS=""
-if test ! -e "${PERCOLATOR_DIR}/PercolatorCInterface.h"
-then
-  PERCOLATOR_HEADER_STATUS="$PERCOLATOR_DIR/PercolatorCInterface.h not found!"
-fi
-if test ! -e "${PERCOLATOR_DIR}/libpercolator.la"
-then
-  PERCOLATOR_LIB_STATUS="$PERCOLATOR_DIR/libpercolator.la not found!"
-fi
-
-AM_CONDITIONAL(PERCOLATOR, \
-  test [ -z "$PERCOLATOR_HEADER_STATUS" -a -z "$PERCOLATOR_LIB_STATUS" ] \
-)
 
 AM_CONDITIONAL(DARWIN, \
   test [ "x$MACHID" = "xdarwin" ] \
@@ -155,7 +132,6 @@ echo \
   C compiler flags:           ${CFLAGS}
   System:                     ${MACHID}
   Use doubles:                ${doubles}
-  percolator directory:       ${PERCOLATOR_DIR} ${PERCOLATOR}
 
   Run the following commands to compile and install crux:
 
@@ -167,20 +143,3 @@ echo \
         make uninstall
 "
 
-if test -n "${PERCOLATOR_HEADER_STATUS}"
-then
-  echo
-  echo "Warning: $PERCOLATOR_HEADER_STATUS"
-fi
-if test -n "${PERCOLATOR_LIB_STATUS}"
-then
-  echo
-  echo "Warning: $PERCOLATOR_LIB_STATUS"
-fi
-if test -n "${PERCOLATOR_LIB_STATUS}" -o -n "$PERCOLATOR_HEADER_STATUS"
-then
-  echo
-  echo "Have you downloaded and built Percolator?"
-  echo 
-  echo "Percolator support disabled!"
-fi

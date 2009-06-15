@@ -20,7 +20,6 @@
  ****************************************************************************/
 #include "percolator.h"
 
-#ifdef PERCOLATOR
 #define NUM_PERCOLATOR_OPTIONS 7
 #define NUM_PERCOLATOR_ARGUMENTS 1
 /* 
@@ -38,7 +37,6 @@ static void print_text_files(
   SCORER_TYPE_T second_scorer_type
   );
 
-#endif
   
 /**
  * \brief crux-analyze-matches: takes in a directory containing binary
@@ -46,7 +44,6 @@ static void print_text_files(
  */
 int percolator_main(int argc, char** argv){
 
-#ifdef PERCOLATOR
   /* Define command line arguments */
   int num_options = NUM_PERCOLATOR_OPTIONS;
   char* option_list[NUM_PERCOLATOR_OPTIONS] = {
@@ -125,18 +122,8 @@ int percolator_main(int argc, char** argv){
   carp(CARP_INFO, "crux percolator finished.");
   exit(0);
 
-#else
-  // Silence warnings about unused variables
-  // We could use __attribute_unused__, but that is gcc specific
-  int dummy = argc;
-  dummy = strlen(argv[0]);
-  dummy = 0;
-  fprintf(stderr, "Percolator functionality not included.\n");
-  exit(1);
-#endif
 }
 
-#ifdef PERCOLATOR
 /*  ****************** Subroutines ****************/
 
 
@@ -420,7 +407,6 @@ MATCH_COLLECTION_T* run_percolator(
   return target_match_collection;
 }
 
-#endif
 
 /*
  * Local Variables:
