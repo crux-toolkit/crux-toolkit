@@ -293,7 +293,7 @@ int search_main(int argc, char** argv){
     
     // calculate p-values
     if( compute_pvalues == TRUE ){
-      carp(CARP_DEBUG, "Estimating Weibull parameters.");
+      carp(CARP_DEBUG, "Estimating Weibull parameters for target.");
       if( estimate_weibull_parameters_from_xcorrs(match_collection,
                                                           spectrum,
                                                           charge) ){
@@ -342,7 +342,7 @@ int search_main(int argc, char** argv){
     int decoy_idx = 0;
     int repeat_idx = 0;
     int num_decoy_repeats = get_int_parameter("num-decoys-per-target");
-    // decoy files is 0 but we want to do at least one decoy searc for tdc
+    // for tdc, the number of decoy files is 0 but we want to do at least one decoy search
     num_decoys = (combine_target_decoy) ? 1 : num_decoys;
 
     carp(CARP_DEBUG, "num_decoys (decoy set) %i, num_decoy_repeats (decoy per target) %i, max mods %i", num_decoys, num_decoy_repeats, max_mods);
