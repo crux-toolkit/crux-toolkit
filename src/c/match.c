@@ -731,15 +731,19 @@ void print_match_tab(
   else {
     fprintf(file, "\t");
   }
-  if( decoy_q_val_scored ){
+  if( decoy_q_val_scored  && match->null_peptide == FALSE ){
     fprintf(file, float_format, decoy_x_qvalue);
   }
   else {
     fprintf(file, "\t");
   }
-  if( decoy_q_val_scored 
+  if( decoy_q_val_scored && match->null_peptide == FALSE
       && LOGP_BONF_WEIBULL_XCORR == main_score ){ 
-    fprintf(file, float_format, decoy_p_qvalue);
+    if (P_VALUE_NA == decoy_p_qvalue) {
+      fprintf(file, "NaN\t");
+    }else{
+      fprintf(file, float_format, decoy_p_qvalue);
+    }
   }else {
     fprintf(file, "\t");
   }

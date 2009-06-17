@@ -1136,7 +1136,9 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
       carp(CARP_FATAL, "For compute-q-values top-match must be 1.");
       exit(1);
     }
-    if( get_int_parameter("num-decoys-per-target") != 1 ){
+
+    if( (get_int_parameter("num-decoys-per-target") * 
+         get_int_parameter("number-decoy-set")) > 1 ){
       carp(CARP_FATAL, "For compute-q-values num-decoys-per-target must be 1.");
       exit(1);
     }

@@ -291,7 +291,7 @@ int add_matches(
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy     ///< are peptides to be shuffled
-  //BF: this was added so that a m_c could be mixed target/decoy
+  //BF: this was added so that a match_collection could be mixed target/decoy
 ){
   if( match_collection == NULL || peptide_iterator == NULL
       || spectrum == NULL ){
@@ -407,27 +407,18 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
   }
 
   int score_idx = match_collection->num_xcorrs;
-  int num_new_scores = match_collection->match_total - start_index;
+  int psm_idx = start_index;
 
   carp(CARP_DETAILED_DEBUG, 
-       "Adding %i new xcorrs to an array that currently contains %i xcorrs.",
-       num_new_scores,
-       match_collection->num_xcorrs);
+       "Adding to xcors[%i] scores from psm index %i to %i", 
+       score_idx, psm_idx, match_collection->match_total);
 
-  // Check for array out of bounds error.
-  if( score_idx + num_new_scores > _MAX_NUMBER_PEPTIDES ){
-    carp(CARP_ERROR,
-	 "Adding %i new xcorrs to an array that currently contains %i xcorrs.",
-	 num_new_scores,
-	 match_collection->num_xcorrs);
-    carp(CARP_FATAL, "Too many xcorrs to store (%i > %i) for spectrum %i.",
-	 score_idx + num_new_scores,
-	 _MAX_NUMBER_PEPTIDES,
-	 get_spectrum_first_scan(get_match_spectrum(match_collection->match[0])));
+  if( score_idx+(match_collection->match_total-psm_idx) 
+      > _MAX_NUMBER_PEPTIDES ){
+    carp(CARP_FATAL, "Too many xcorrs to store.");
     exit(1);
   }
 
-  int psm_idx = start_index;
   for(psm_idx=start_index; psm_idx < match_collection->match_total; psm_idx++){
     FLOAT_T score = get_match_score( match_collection->match[psm_idx], XCORR);
     match_collection->xcorrs[score_idx] = score;
@@ -1083,7 +1074,7 @@ BOOLEAN_T score_peptides(
   int charge,               ///< charge of spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< source of peptides
   BOOLEAN_T is_decoy        ///< do we shuffle the peptides
-  //BF: this was added so that m_c can be mixed target/decoy
+  //BF: this was added so that match_collection can be mixed target/decoy
 ){
 
   if( match_collection == NULL || spectrum == NULL 
@@ -1394,10 +1385,15 @@ BOOLEAN_T set_p_values_as_unscored(MATCH_COLLECTION_T* match_collection){
  * \brief Use the matches collected from all spectra to compute FDR
  * and q_values from the ranked list of target and decoy scores.
  * Requires that matches have been scored for the given score type.
+ * Assumes the match_collection has an appropriate number of
+ * target/decoy matches per spectrum (e.g. one target and one decoy
+ * per spec).  If p-value is NaN for a psm, q-value will also be NaN.
  * \returns TRUE if q-values successfully computed, else FALSE.
  */
-BOOLEAN_T compute_decoy_q_values(MATCH_COLLECTION_T* match_collection,
-                                 SCORER_TYPE_T score_type){
+BOOLEAN_T compute_decoy_q_values(
+ MATCH_COLLECTION_T* match_collection,///< m_c with matches from many spec
+ SCORER_TYPE_T score_type) ///< type to sort by (xcorr or p-value)
+{
 
   if( match_collection == NULL ){
     carp(CARP_ERROR, "Cannot compute q-values for null match collection.");
@@ -1428,13 +1424,21 @@ BOOLEAN_T compute_decoy_q_values(MATCH_COLLECTION_T* match_collection,
   int match_idx = 0;
   for(match_idx = 0; match_idx < match_collection->match_total; match_idx++){
     MATCH_T* cur_match = match_collection->match[match_idx];
+
+    // skip if pvalue score is NaN
+    if( score_type == LOGP_BONF_WEIBULL_XCORR && 
+        get_match_score(cur_match, LOGP_BONF_WEIBULL_XCORR) == P_VALUE_NA){
+      set_match_score(cur_match, qval_type, P_VALUE_NA);
+      continue;
+    }
+
     if( get_match_null_peptide(cur_match) == TRUE ){
       num_decoys += 1;
     }else{
       num_targets += 1;
     }
     FLOAT_T score = num_decoys/num_targets;
-    if( num_targets == 0 ){ score = 0; }
+    if( num_targets == 0 ){ score = 1.0; }
 
     set_match_score(cur_match, qval_type, score);
   }
@@ -1444,6 +1448,8 @@ BOOLEAN_T compute_decoy_q_values(MATCH_COLLECTION_T* match_collection,
   for(match_idx = match_collection->match_total-1; match_idx >= 0; match_idx--){
     MATCH_T* cur_match = match_collection->match[match_idx];
     FLOAT_T cur_fdr = get_match_score(cur_match, qval_type);
+    if( cur_fdr == P_VALUE_NA ){ continue; }
+
     if( cur_fdr < min_fdr ){
       min_fdr = cur_fdr;
     }
