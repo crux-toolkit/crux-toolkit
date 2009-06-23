@@ -677,8 +677,7 @@ long get_filesize(char *FileName){
 */
 int create_output_directory(
   char *output_folder, // Name of output folder.
-  BOOLEAN_T overwrite,	// Whether or not to overwrite an existing dir 
-  BOOLEAN_T warn	// Print warning/informative messages to stderr? 
+  BOOLEAN_T overwrite  // Whether or not to overwrite an existing dir 
 ) 
 {
 
@@ -712,8 +711,8 @@ int create_output_directory(
 
   if (path_exists) {
     if (!path_is_directory) {
-      fprintf(
-        stderr,
+      carp(
+        CARP_ERROR,
         "A non-directory file named '%s' already exists,\n"
         "so that name can't be used for an output directory.\n",
         output_folder
@@ -722,8 +721,8 @@ int create_output_directory(
     }
     else {
       if (!overwrite) {
-        fprintf(
-          stderr,
+        carp(
+          CARP_WARNING,
           "The output directory '%s' already exists.\nExisting files will not"
           " be overwritten.\n",
           output_folder
@@ -731,8 +730,8 @@ int create_output_directory(
         result = -1;
       }
       else {
-        if (warn) fprintf(
-          stderr,
+        carp(
+          CARP_WARNING,
           "The output directory '%s' already exists.\nExisting files will"
           " be overwritten.\n",
           output_folder
@@ -748,8 +747,8 @@ int create_output_directory(
     int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
     if (mkdir(output_folder, dir_access)) {
       // mkdir failed
-      fprintf(
-        stderr,
+      carp(
+        CARP_ERROR,
         "Unable to create output directory '%s': %s.\n",
         output_folder,
         strerror(errno)
@@ -758,8 +757,8 @@ int create_output_directory(
     }
     else {
       result = 0;
-      if (warn) fprintf(
-        stderr,
+      carp(
+        CARP_WARNING,
         "Writing results to output directory '%s'.\n",
         output_folder
       );
@@ -787,7 +786,7 @@ BOOLEAN_T is_directory(char *FileName){
         FileName,
         error
       );
-      exit(1);
+      return FALSE; // Avoid compiler warning
     }
 }
 
@@ -1001,7 +1000,6 @@ FILE* create_file_in_path(
             "Use --overwrite T to replace or choose a different output file name",
           file_full_path
         );
-        exit(1);
     }
     else {
       // Allowed to overwrite, send warning message.
@@ -1017,7 +1015,6 @@ FILE* create_file_in_path(
 
   if(file == NULL){
     carp(CARP_FATAL, "Failed to create and open file: %s", file_full_path);
-    exit(1);
   }
   
   free(file_full_path);

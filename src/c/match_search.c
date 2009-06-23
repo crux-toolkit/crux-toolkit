@@ -103,12 +103,10 @@ int search_main(int argc, char** argv){
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
   int result = create_output_directory(
     output_folder, 
-    TRUE, // Allow existing directory
-    TRUE // print warnging messages to stderr
+    TRUE // Allow existing directory
   );
   if( result == -1 ){
     carp(CARP_FATAL, "Unable to create output directory %s.", output_folder);
-    exit(1);
   }
 
   /* Open the log file to record carp messages */
@@ -134,8 +132,6 @@ int search_main(int argc, char** argv){
   carp(CARP_INFO, "Reading in ms2 file %s", ms2_file);
   if(!parse_spectrum_collection(spectra)){
     carp(CARP_FATAL, "Failed to parse ms2 file: %s", ms2_file);
-    free_spectrum_collection(spectra);
-    exit(1);
   }
   
   carp(CARP_DEBUG, "There were %i spectra found in the ms2 file",
@@ -153,7 +149,6 @@ int search_main(int argc, char** argv){
   carp(CARP_DEBUG, "Found %i proteins", num_proteins);
   if( num_proteins == 0 ){
     carp(CARP_FATAL, "No proteins were found in the protein source.");
-    exit(1);
   }
   
   /* Prepare output files */
@@ -504,7 +499,6 @@ int prepare_protein_input(char* input_file,
 
     if (index == NULL){
       carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
-      exit(1);
     }
     num_proteins = get_index_num_proteins(*index);
 
@@ -513,12 +507,10 @@ int prepare_protein_input(char* input_file,
     *database = new_database(input_file, FALSE);         
     if( database == NULL ){
       carp(CARP_FATAL, "Could not create protein database");
-      exit(1);
     } 
 
     if(!parse_database(*database)){
       carp(CARP_FATAL, "Error with protein input");
-      exit(1);
     } 
     num_proteins = get_database_num_proteins(*database);
   }

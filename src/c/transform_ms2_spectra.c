@@ -27,19 +27,19 @@ int main(int argc, char** argv){
   
   // check command line argument count
   if (argc != 2) {
-    fprintf (stderr, "%s", USAGE);
-    exit(1);
+    carp(CARP_FATAL, "%s", USAGE);
   }
   
   // check if the input file exist
   if(access(argv[1], F_OK)){
-    fprintf(stderr,"input file:\"%s\" could not be opened\n", argv[1]);
-    exit(1);
+    carp(CARP_FATAL,"input file:\"%s\" could not be opened\n", argv[1]);
   }
   
   // read input file
   collection = new_spectrum_collection(argv[1]);
-  parse_spectrum_collection(collection);
+  if(!parse_spectrum_collection(collection)){
+    carp(CARP_FATAL, "Failed to parse ms2 file: %s", ms2_file);
+  }
   SPECTRUM_ITERATOR_T* iterator = new_spectrum_iterator(collection);
   
 

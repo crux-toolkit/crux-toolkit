@@ -155,7 +155,7 @@ int compareTo(
     return result;
   }
   
-  die("ERROR: no matching sort_type");
+  carp(CARP_FATAL, "ERROR: no matching sort_type");
   // quiet compiler
   return 0;
 }

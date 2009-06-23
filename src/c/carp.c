@@ -63,10 +63,18 @@ static void carp_print(char *string) {
   }
 }
 
-BOOLEAN_T carp(
-    int verbosity, 
-    char* format,
-    ...){
+/**
+ * Print message to log file.
+ *
+ * Print severity level and message to log file.
+ * The term 'carp' is used because 'log' is already used 
+ * by the math library. 
+ *
+ * Verbosity of CARP_FATAL will cause the 
+ * program to exit with status code 1.
+ *
+ */
+void carp( int verbosity, char* format, ...) {
   if (verbosity <= G_verbosity){
     va_list  argp;
 
@@ -97,18 +105,22 @@ BOOLEAN_T carp(
 
     va_start(argp, format);
     vfprintf(stderr, format, argp);
+    va_end(argp);
     if (log_file != NULL) { 
       va_start(argp, format); //BF: added to fix segfault
       vfprintf(log_file, format, argp);
+      va_end(argp);
     }
-    va_end(argp);
     carp_print("\n");
     fflush(stderr);
     if (log_file != NULL) {
       fflush(log_file);
     }
   } 
-  return TRUE;
+  if (verbosity == CARP_FATAL) {
+    // Fatal carps cause the program to exit
+    exit(1);
+  }
 }
 
 /*

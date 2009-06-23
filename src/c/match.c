@@ -385,7 +385,7 @@ int compare_match_spectrum_decoy_xcorr_qvalue(
     return 0;
   }
   carp(CARP_FATAL, "HEY, you haven't implemented sorting by decoy-qvalue yet!");
-  exit(1);
+  return 0; // Return value to avoid compiler warning.
 }
 
 /**
@@ -405,7 +405,7 @@ int compare_match_spectrum_decoy_pvalue_qvalue(
     return 0;
   }
   carp(CARP_FATAL, "HEY, you haven't implemented sorting by decoy-qvalue yet!");
-  exit(1);
+  return 0; // Return value to avoid compiler warning.
 }
 
 /* ****** End of sorting functions ************/
@@ -1199,7 +1199,6 @@ MODIFIED_AA_T* get_match_mod_sequence(
 {
   if( match == NULL ){
     carp(CARP_ERROR, "Cannot get mod sequence from null match.");
-    exit(1);
   }
   // if post_process_match and has a null peptide you can't get sequence
   if(match->post_process_match && match->null_peptide){

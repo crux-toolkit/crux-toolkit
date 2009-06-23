@@ -218,7 +218,6 @@ BOOLEAN_T merge_peptides_copy_src(PEPTIDE_T* peptide_dest,
 
   if( peptide_dest == NULL || peptide_giver == NULL ){
     carp(CARP_FATAL, "Cannot merge NULL peptides.");
-    exit(1);
   }
 
   // find the last peptide src for destination
@@ -507,7 +506,7 @@ char* get_peptide_sequence_pointer(
   )
 {
   if(peptide->peptide_src == NULL){
-    die("ERROR: no peptide_src to retrieve peptide sequence pointer\n");
+    carp(CARP_FATAL, "ERROR: no peptide_src to retrieve peptide sequence pointer\n");
   }
   char* parent_sequence = 
     get_protein_sequence_pointer(get_peptide_src_parent_protein(peptide->peptide_src));
@@ -536,7 +535,7 @@ char* get_peptide_sequence_sqt(
   if(peptide == NULL || peptide->peptide_src == NULL){
     carp(CARP_ERROR, "Cannot get sequence from NULL peptide or peptide src.");
     return NULL;
-    //    die("ERROR: no peptide_src to retrieve peptide sequence\n");
+    //    carp(CARP_FATAL, "ERROR: no peptide_src to retrieve peptide sequence\n");
   }
   
   char* seq = get_peptide_sequence_from_peptide_src_sqt(peptide, 
@@ -1875,8 +1874,7 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
       get_peptide_src_next_association(peptide_src_iterator->current);
   }
   else{
-    free(peptide_src_iterator);
-    die("ERROR: no more peptide_srcs to iterate\n");
+    carp(CARP_FATAL, "ERROR: no more peptide_srcs to iterate\n");
   }
   return previous;
 }

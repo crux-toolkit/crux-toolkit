@@ -139,7 +139,6 @@ ION_T* new_ion (
   // calculate and set ion mass/z
   if(!calc_ion_mass_z(ion, mass_type, FALSE)){
     carp(CARP_ERROR, "failed to calculate ion mass/z");
-    exit(1);
   }
   
   return ion;
@@ -171,7 +170,6 @@ ION_T* new_modified_ion(
   // calculate and set ion mass/z
   if(!calc_ion_mass_z(ion, mass_type, TRUE)){
     carp(CARP_ERROR, "failed to calculate ion mass/z");
-    exit(1);
   }
   
   return ion;
@@ -205,7 +203,6 @@ ION_T* new_modified_ion_with_mass(
   // calculate and set ion mass/z
   if(!calc_ion_mass_z_with_mass(ion, mass_type, base_mass, TRUE)){
     carp(CARP_ERROR, "failed to calculate ion mass/z");
-    exit(1);
   } 
   return ion;
 }
@@ -236,7 +233,6 @@ ION_T* new_ion_with_mass(
   // calculate and set ion mass/z
   if(!calc_ion_mass_z_with_mass(ion, mass_type, base_mass, TRUE)){
     carp(CARP_ERROR, "failed to calculate ion mass/z");
-    exit(1);
   } 
   return ion;
 }

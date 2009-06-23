@@ -257,7 +257,6 @@ PROTEIN_INDEX_ITERATOR_T* new_protein_index_iterator(
 
   if(file == NULL){
     carp(CARP_FATAL, "failed to open protein index file: %s", name);
-    exit(1);
   }
 
   free(name);
@@ -270,7 +269,6 @@ PROTEIN_INDEX_ITERATOR_T* new_protein_index_iterator(
   // set up the protein_index_iterator
   if(!setup_protein_index_iterator(iterator)){
     carp(CARP_FATAL, "failed to setup protein_index_iterator");
-    exit(1);
   }
   
   return iterator;
@@ -318,9 +316,7 @@ PROTEIN_T* protein_index_iterator_next(
 
   // set up the protein_index_iterator
   if(!setup_protein_index_iterator(protein_index_iterator)){
-    free_protein_index_iterator(protein_index_iterator);
     carp(CARP_FATAL, "failed to setup protein_index_iterator");
-    exit(1);
   }
   
   return protein;
@@ -371,8 +367,6 @@ BOOLEAN_T create_binary_fasta_file(
   // check if succesfully created file
   if(output_file == NULL){
     carp(CARP_FATAL, "Failed to create protein index file");
-    fclose(file);
-    return FALSE;
   }
   
   working_index = ftell(file);

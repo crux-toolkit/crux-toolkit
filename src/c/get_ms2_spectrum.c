@@ -79,7 +79,6 @@ int main(int argc, char** argv){
   /* read input file */
   if( access(ms2_filename, F_OK)){
     carp(CARP_FATAL, "Could not read from ms2 file '%s'", ms2_filename);
-    exit(1);
   }
   carp(CARP_DETAILED_DEBUG, "Creating spectrum collection.");
   collection = new_spectrum_collection(ms2_filename);
@@ -91,7 +90,6 @@ int main(int argc, char** argv){
                                                     spectrum);
   if( !spectrum_found ){
     carp(CARP_FATAL, "Could not find scan number %i", scan_number);
-    exit(1);
   }
 
   carp(CARP_INFO, "Found a spectrum with scan number %i", scan_number);
@@ -100,7 +98,6 @@ int main(int argc, char** argv){
     carp(CARP_FATAL, "The output file '%s' already exists.  " \
          "Use the --out-file option to overwrite or replace.",
          output_filename);
-    exit(1);
   }
 
   output_file = fopen(output_filename, "w");//output_mode_to_string(file_flag)
@@ -109,7 +106,6 @@ int main(int argc, char** argv){
     carp(CARP_FATAL, 
          "Could not write spectrum to '%s'.  Check file permissions", 
          output_filename);
-    exit(1);
   }
 
   print_spectrum(spectrum, output_file);

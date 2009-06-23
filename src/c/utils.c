@@ -152,185 +152,6 @@ BOOLEAN_T open_file
   return(TRUE);
 }
 
-/*************************************************************************
- * Run a program from a given directory with given arguments.  Return
- * the resulting pipe.
- *************************************************************************/
-static FILE* run_program
-  (char*      program,     // The program to run in the pipe.
-   char*      directory,   // Directory where program resides.
-   char*      arguments,   // Program arguments.
-   char*      type)        // Read ("r") or write ("w").
-{
-  char* command;
-  FILE* return_value;
-
-  // Allocate space for the command.
-  command = (char*)mymalloc(sizeof(char) * (strlen(directory)
-                                            + strlen(program) 
-                                            + strlen(arguments) + 2));
-
-  // Formulate the command.  Deal with directories possibly ending
-  // with a slash or not.
-  if (strlen(directory) == 0) {
-    sprintf(command, "%s %s", program, arguments);
-  } else if (directory[strlen(directory) - 1] == '/') {
-    sprintf(command, "%s%s %s", directory, program, arguments);
-  } else {
-    sprintf(command, "%s/%s %s", directory, program, arguments);
-  }
-
-  // Run the program.
-  return_value = popen(command, type);
-  myfree(command);
-  return(return_value);
-}
-
-
-/*************************************************************************
- * Attempt to run a given program in a given directory with the given
- * arguments, and check that it gives the expected one-line reply.
- *************************************************************************/
-static BOOLEAN_T try_to_run
-  (char*      program,          // The program to run in the pipe.
-   char*      directory,        // Directory to look in.
-   char*      test_arguments,   // Arguments used when searching for program.
-   char*      expected_reply)   // Expected reply from search.
-{
-  char* reply;
-  FILE* pipe;
-  BOOLEAN_T return_value;
-
-  // Allocate space for the reply.
-  reply = (char*)mymalloc(sizeof(char) * (strlen(expected_reply) + 1));
-
-  // Run the command.
-  pipe = run_program(program, directory, test_arguments, "r");
-
-  // Check the pipe.
-  if (pipe == NULL) {
-    return_value = FALSE;
-  } else {
-
-    // Read from the pipe.
-    if (fgets(reply, strlen(expected_reply) + 1, pipe) == NULL) {
-      return_value = FALSE;
-    } else {
-      return_value = (strcmp(reply, expected_reply) == 0);
-    }
-  }
-
-  // Close the pipe.
-  if (pclose(pipe) == -1) {
-    return_value = FALSE;
-  }
-
-  myfree(reply);
-  return(return_value);
-}
-
-
-/*************************************************************************
- * Open a read-only pipe using a given command line.
- *************************************************************************/
-FILE* open_command_pipe
-  (char*     program,          // The program to run in the pipe.
-   char*     directory,        // Directory to look in.
-   char*     test_arguments,   // Arguments used when searching for program.
-   char*     expected_reply,   // Expected reply from search.
-   char*     real_arguments,   // Arguments used when running the program.
-   BOOLEAN_T stdout_on_error,  // If command fails, return STDOUT?
-   char*     error_message)    // Error or warning if command fails.
-{
-  FILE* return_value;
-
-  // Try to run the command with no directory specified.
-  if (try_to_run(program, "", test_arguments, expected_reply)) {
-    return_value = run_program(program, "", real_arguments, "w");
-  }
-
-  // Try to run the program in the specified directory.
-  else if (try_to_run(program, directory, test_arguments, expected_reply)) {
-    return_value = run_program(program, directory, real_arguments, "w");
-
-  } else {
-
-    // If we failed, print the error message.
-    fprintf(stderr, error_message);
-    if (stdout_on_error) {
-      return_value = stdout;
-    } else {
-      exit(1);
-    }
-  }
-
-  return(return_value);
-}
-
-
-/********************************************************************
- * See .h file for description.
- ********************************************************************/
-void die
-  (char *format, 
-   ...)
-{
-  va_list  argp;
-
-  fprintf(stderr, "FATAL: ");
-  va_start(argp, format);
-  vfprintf(stderr, format, argp);
-  va_end(argp);
-  fprintf(stderr, "\n");
-  fflush(stderr);
-
-#ifdef DEBUG
-  abort();
-#else
-  exit(1);
-#endif
-}
-
-
-/**************************************************************************
- * See .h file for description.
- **************************************************************************/
-void myassert
-  (BOOLEAN_T die_on_error,
-   BOOLEAN_T test,
-   char * const    format,
-   ...)
-{
-  va_list  argp;
-
-  if (!test) {
-
-    if (die_on_error) {
-      fprintf(stderr, "FATAL: ");
-    } else {
-      fprintf(stderr, "WARNING: ");
-    }
-
-    /* Issue the error message. */
-    va_start(argp, format);
-    vfprintf(stderr, format, argp);
-    va_end(argp);
-    fprintf(stderr, "\n");
-    fflush(stderr);
-    
-    if (die_on_error) {
-#ifdef DEBUG
-      abort();
-#else
-      exit(1);
-#endif
-    }
-  }      
-}
-
-
-
-
 /********************************************************************
  * void mymalloc, mycalloc, myrealloc
  * 
@@ -347,7 +168,7 @@ void *mymalloc
   temp_ptr = malloc(size);
 
   if (temp_ptr == NULL) {
-    die("Memory exhausted.  Cannot allocate %d bytes.", (int)size);
+    carp(CARP_FATAL, "Memory exhausted.  Cannot allocate %d bytes.", (int)size);
   }
     
 
@@ -370,8 +191,9 @@ void *mycalloc
 
   temp_ptr = calloc(nelem, size);
 
-  if (temp_ptr == NULL)
-    die("Memory exhausted.  Cannot allocate %d bytes.", (int)size);
+  if (temp_ptr == NULL) {
+    carp(CARP_FATAL, "Memory exhausted.  Cannot allocate %d bytes.", (int)size);
+  }
 
   return(temp_ptr);
 }
@@ -394,8 +216,9 @@ void * myrealloc
     temp_ptr = realloc(ptr, size);
   }
 
-  if (temp_ptr == NULL)
-    die("Memory exhausted.  Cannot allocate %d bytes.", (int)size);
+  if (temp_ptr == NULL) {
+    carp(CARP_FATAL, "Memory exhausted.  Cannot allocate %d bytes.", (int)size);
+  }
 
   return(temp_ptr);
 }
@@ -484,7 +307,7 @@ PROB_T my_log
   if (x > 0.0) {
     return(LOG_VALUE(log(x)));
   } else if (x < 0.0) {
-    die("Tried to take the log of a negative value (%g).", x);
+    carp(CARP_FATAL, "Tried to take the log of a negative value (%g).", x);
   } /* else if (x == 0.0) */
   return(LOG_ZERO);
 }
@@ -591,7 +414,7 @@ BOOLEAN_T boolean_from_string
   } else if (strcmp(true_or_false, "false") == 0) {
     return(FALSE);
   } else {
-    die("Invalid input to boolean_from_string (%s)\n", true_or_false);
+    carp(CARP_FATAL, "Invalid input to boolean_from_string (%s)\n", true_or_false);
   }
   return(FALSE); /* Unreachable. */
 }
@@ -634,7 +457,7 @@ char * convert_enum_type
    int     num_enums) /* Number of values of the type. */
 {
   if ((enum_type <= 0) || (enum_type >= num_enums)) {
-    die("Illegal enumerated type value (%d).", enum_type);
+    carp(CARP_FATAL, "Illegal enumerated type value (%d).", enum_type);
   }
 
   return(enum_strs[enum_type]);
@@ -766,7 +589,6 @@ char** parse_file(
     if (line_idx >= max_lines){
       carp(CARP_FATAL, "Number of lines in %s exceeds maximum of %i!", 
           file_name, max_lines);
-      exit(1);
     }
   }
   free(lines[line_idx]);
@@ -785,7 +607,6 @@ int main (int argc, char *argv[])
 
   if (argc != 2) {
     carp(CARP_FATAL, "USAGE: utils <filename>");
-    exit(1);
   }
 
   if (open_file(argv[1], "w", 1, "output", "", &outfile) == 0)

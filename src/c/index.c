@@ -293,12 +293,10 @@ char* get_index_binary_fasta_name(char* index_name){
   if( num_files < 1 ){
     carp(CARP_FATAL, "Binary fasta file missing from index '%s'", 
          index_name);
-    exit(1);
   }
   if( num_files > 1 ){
     carp(CARP_FATAL, "More than one binary fasta file found in index '%s'", 
          index_name);
-    exit(1);
   }
 
   carp(CARP_DEBUG, "Found '%s' in index '%s'", namelist[0]->d_name, 
@@ -403,7 +401,6 @@ void set_index_field_from_map(INDEX_T* index, char* line){
     //    set_peptide_constraint_peptide_type(index->disk_constraint, value);
     carp(CARP_FATAL, "This index uses the obsolete 'peptide_type'. "
          "Rebuild with current version of crux to use 'enzyme_type'.");
-    exit(1);
   }
   else if(strcmp("enzyme_type:", trait_name) == 0){
     set_peptide_constraint_enzyme(index->disk_constraint, value);
@@ -432,7 +429,6 @@ void set_index_field_from_map(INDEX_T* index, char* line){
   else{
     carp(CARP_FATAL, "Unknown index map entry: %s (%s, %d)", 
          line, trait_name, value);
-    exit(1);
   }
 }
 
@@ -623,14 +619,12 @@ INDEX_T* new_index_from_disk(
   // this should find the map file and get constraint values
   if(!set_index_fields_from_disk(search_index)){
     carp(CARP_FATAL, "Could not create index %s from disk", index_name);
-    exit(1);
   }
 
   // check that the index constraints are OK for this run
   if(!check_index_constraints(search_index)){
     carp(CARP_FATAL, "Index cannot produce the requested peptides. " \
      "Change the search parameters to match the index or create new index.");
-    exit(1);
   }
 
   // get binary fasta file name with path to crux directory 
@@ -640,9 +634,6 @@ INDEX_T* new_index_from_disk(
   if(access(binary_fasta, F_OK)){
     carp(CARP_FATAL, "The file \"%s\" does not exist for crux index.", 
         binary_fasta);
-    free(search_index);
-    free(binary_fasta);
-    exit(1);
   }
   
   // now create a database, using binary fasta file
@@ -650,11 +641,6 @@ INDEX_T* new_index_from_disk(
   
   if(!parse_database(search_index->database)){
     carp(CARP_FATAL, "Failed to parse database, cannot create new index");
-    free_database(search_index->database);
-    free(search_index);
-    free(binary_fasta);
-    fcloseall();
-    exit(1);
   }
 
   // free string
@@ -1116,14 +1102,13 @@ BOOLEAN_T transform_database_to_memmap_database(
                                get_database_filename_pointer(index->database),
                                &binary_fasta)){
     /*
-    carp(CARP_FATAL, "Failed to create protein index on disk");
     // remove directory
     chdir("..");
     clean_up(1);
     // free index
     free_index(index);
     free(fasta_file);
-    exit(1);
+    carp(CARP_FATAL, "Failed to create protein index on disk");
     */
     carp(CARP_ERROR, "Failed to create protein index on disk");
     return FALSE;
@@ -1208,7 +1193,6 @@ BOOLEAN_T create_index(
     }else{ // this should have already been checked, but...
       carp(CARP_FATAL, "Index '%s' already exists.  " \
       "Use --overwrite T to replace", index->directory);
-      exit(1);
     }
     //change the ondisk status?
   }
@@ -1227,9 +1211,8 @@ BOOLEAN_T create_index(
 
   if(! transform_database_text_to_memmap(index->database, 
                                          temp_dir_name) ){
-    carp(CARP_FATAL, "Failed to create binary database from text fasta file");
     clean_up(1);
-    exit(1);
+    carp(CARP_FATAL, "Failed to create binary database from text fasta file");
   }
 
   // move into temporary directory
@@ -2072,10 +2055,8 @@ INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
   while(!parse_crux_index_map(index_peptide_iterator)){
     // failed to parse crux_index_map
     if (parse_count++ > MAX_PARSE_COUNT){
-      free_index_peptide_iterator(index_peptide_iterator);
       carp(CARP_FATAL, 
         "Failed to parse crux_index_map file after %i tries", MAX_PARSE_COUNT);
-      exit(1);
     } else {
       carp(CARP_ERROR, "Failed to parse crux_index_map file. Sleeping.");
       sleep(SLEEP_DURATION);
@@ -2231,7 +2212,6 @@ INDEX_FILTERED_PEPTIDE_ITERATOR_T* new_index_filtered_peptide_iterator(
   // setup index_filered_iterator
   if(!setup_index_filtered_peptide_iterator(index_filtered_iterator)){
     carp(CARP_ERROR, "Failed to setup index filtered peptide iterator");
-    exit(1);
   }
   
   return index_filtered_iterator;
@@ -2255,7 +2235,7 @@ PEPTIDE_T* index_filtered_peptide_iterator_next(
   
   // setup the interator for the next peptide, if avaliable
   if(!setup_index_filtered_peptide_iterator(index_filtered_peptide_iterator)){
-    die("failed to setup index_filtered_peptide_iterator for next iteration");
+    carp(CARP_FATAL, "failed to setup index_filtered_peptide_iterator for next iteration");
   }
   return peptide_to_return;
 }
@@ -2378,7 +2358,7 @@ PEPTIDE_T* bin_peptide_iterator_next(
   // check if there's actually a peptide to return
   if(!bin_peptide_iterator_has_next(bin_peptide_iterator) ||
      bin_peptide_iterator->peptide == NULL){
-    die("bin_peptide_iterator, no peptides to return");
+    carp(CARP_FATAL, "bin_peptide_iterator, no peptides to return");
   }
   
   // setup the interator for the next peptide, if avaliable

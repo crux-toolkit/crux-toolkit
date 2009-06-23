@@ -297,7 +297,6 @@ int add_matches(
       || spectrum == NULL ){
     carp(CARP_FATAL, "Cannot add matches to a collection when match " \
          "collection, spectrum and/or peptide iterator are NULL.");
-    exit(1);
   }
 
   // charge==0 if collection has no matches yet
@@ -371,7 +370,6 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
   if( dest_idx + src_num_matches > _MAX_NUMBER_PEPTIDES ){
     carp(CARP_FATAL, "Cannot merge match collections, insufficient capacity "
          "in destnation collection.");
-    exit(1);
   }
 
   int src_idx = 0;
@@ -403,7 +401,6 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
 
   if( match_collection == NULL ){
     carp(CARP_FATAL, "Cannot store scores of NULL match collection.");
-    exit(1);
   }
 
   int score_idx = match_collection->num_xcorrs;
@@ -416,7 +413,6 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
   if( score_idx+(match_collection->match_total-psm_idx) 
       > _MAX_NUMBER_PEPTIDES ){
     carp(CARP_FATAL, "Too many xcorrs to store.");
-    exit(1);
   }
 
   for(psm_idx=start_index; psm_idx < match_collection->match_total; psm_idx++){
@@ -441,7 +437,6 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
 void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
   if( match_collection == NULL ){
     carp(CARP_FATAL, "Cannot collapse matches from null collection.");
-    exit(1);
   }
 
   // must not be empty
@@ -745,7 +740,7 @@ void truncate_match_collection(
   if(match_collection->last_sorted != score_type){
     // sort match collection by score type
     if(!sort_match_collection(match_collection, score_type)){
-      die("Failed to sort match collection");
+      carp(CARP_FATAL, "Failed to sort match collection");
     }
   }
 
@@ -1022,7 +1017,6 @@ BOOLEAN_T add_unscored_peptides(
   if( match_collection == NULL || spectrum == NULL 
       || peptide_iterator == NULL ){
     carp(CARP_FATAL, "Cannot score peptides with NULL inputs.");
-    exit(1);
   }
   carp(CARP_DETAILED_DEBUG, "Adding decoy peptides to match collection? %i", 
        is_decoy);
@@ -1080,7 +1074,6 @@ BOOLEAN_T score_peptides(
   if( match_collection == NULL || spectrum == NULL 
       || peptide_iterator == NULL ){
     carp(CARP_FATAL, "Cannot score peptides with NULL inputs.");
-    exit(1);
   }
 
   // create ion constraint
@@ -1584,7 +1577,6 @@ FILE** create_psm_files(){
     if(mkdir(output_directory, S_IRWXU+S_IRWXG+S_IRWXO) != 0){
       carp(CARP_FATAL, "Failed to create output directory %s", 
            output_directory);
-      exit(1);
     }
   }
 
@@ -1619,7 +1611,6 @@ FILE** create_psm_files(){
     //check for error
     if( file_handle_array[file_idx] == NULL ){//||
       carp(CARP_FATAL, "Could not create psm file %s", psm_filename);
-      exit(1);
     }
     //rename this, just for a quick fix
     free(filename_template);
@@ -2115,13 +2106,12 @@ MATCH_ITERATOR_T* new_match_iterator(
 {
   // TODO (BF 06-Feb-08): Could we pass back an iterator with has_next==False
   if (match_collection == NULL){
-    die("Null match collection passed to match iterator");
+    carp(CARP_FATAL, "Null match collection passed to match iterator");
   }
   // is there an existing iterator?
   if(match_collection->iterator_lock){
     carp(CARP_FATAL, 
          "Can only have one match iterator instantiated at a time");
-    exit(1);
   }
   
   // has the score type been populated in match collection?
@@ -2131,7 +2121,6 @@ MATCH_ITERATOR_T* new_match_iterator(
     carp(CARP_ERROR, "New match iterator for score type %s.", score_str);
     carp(CARP_FATAL, 
          "The match collection has not been scored for request score type.");
-    exit(1);
   }
   
   // allocate a new match iterator
@@ -2168,9 +2157,6 @@ MATCH_ITERATOR_T* new_match_iterator(
     // sort match collection by score type
     else if(!sort_match_collection(match_collection, score_type)){
       carp(CARP_FATAL, "failed to sort match collection");
-      free_match_collection(match_collection);
-      free(match_iterator);
-      exit(1);
     }
   }
 
@@ -2601,7 +2587,6 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
     result_file = fopen(file_in_dir, "r");
     if( access(file_in_dir, R_OK)){
       carp(CARP_FATAL, "Cannot read from psm file '%s'", file_in_dir);
-      exit(1);
     }
     // add all the match objects from result_file
     extend_match_collection(match_collection, database, result_file);
@@ -2648,7 +2633,6 @@ BOOLEAN_T extend_match_collection(
   // read in file specific info
   if(!  parse_csm_header(result_file, &total_spectra, &num_top_match)){
     carp(CARP_FATAL, "Error reading csm header.");
-    exit(1);
   }
   carp(CARP_DETAILED_DEBUG, "There are %i top matches", num_top_match);
 
@@ -2829,8 +2813,7 @@ void update_protein_counters(
   
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_ERROR, "Must be a post process match collection");
-    exit(1);
+    carp(CARP_FATAL, "Must be a post process match collection");
   }
   
   // See if this peptide has been observed before?
@@ -2904,9 +2887,8 @@ BOOLEAN_T fill_result_to_match_collection(
 
   // populate the rank of match_collection
   if(!populate_match_rank_match_collection(match_collection, score_type)){
-    carp(CARP_ERROR, "failed to populate match rank in match_collection");
     free_match_collection(match_collection);
-    exit(1);
+    carp(CARP_FATAL, "failed to populate match rank in match_collection");
   }
   
   // restore match order if needed
@@ -2987,8 +2969,7 @@ int get_match_collection_protein_counter(
 {
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_ERROR, "Must be a post process match collection");
-    exit(1);
+    carp(CARP_FATAL, "Must be a post process match collection");
   }
 
   // number of PSMs match this protein
@@ -3005,8 +2986,7 @@ int get_match_collection_protein_peptide_counter(
 {
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_ERROR, "Must be a post process match collection");
-    exit(1);
+    carp(CARP_FATAL, "Must be a post process match collection");
   }
   
   // number of peptides match this protein
@@ -3023,8 +3003,7 @@ int get_match_collection_hash(
 {
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_ERROR, "Must be a post process match collection");
-    exit(1);
+    carp(CARP_FATAL, "Must be a post process match collection");
   }
   
   char* hash_value = get_peptide_hash_value(peptide);
@@ -3149,7 +3128,6 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   if(working_directory == NULL){
     carp(CARP_FATAL, "Failed to open PSM file directory: %s", 
         output_file_directory);
-    exit(1);
   }
   
   // determine how many decoy sets we have
@@ -3200,7 +3178,6 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   if(!boolean_result){
     carp(CARP_FATAL, "No PSM files found in directory '%s'", 
          output_file_directory);
-    exit(1);
   }
 
   // get binary fasta file name with path to crux directory 
@@ -3214,17 +3191,16 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     if (access(binary_fasta, F_OK)){
       carp(CARP_DEBUG, "Could not find binary fasta %s", binary_fasta);
       if (!create_binary_fasta_here(fasta_file, binary_fasta)){
-       die("Could not create binary fasta file %s", binary_fasta);
+       carp(CARP_FATAL, "Could not create binary fasta file %s", binary_fasta);
       };
     }
   }
   
   // check if input file exist
   if(access(binary_fasta, F_OK)){
+    free(binary_fasta);
     carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, "
         "or is empty) for crux index.", binary_fasta);
-    free(binary_fasta);
-    exit(1);
   }
   
   carp(CARP_DEBUG, "Creating a new database");
@@ -3237,8 +3213,6 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     carp(CARP_DETAILED_DEBUG,"Parsing database");
     if(!parse_database(database)){
       carp(CARP_FATAL, "Failed to parse database, cannot create new index");
-      free_database(database);
-      exit(1);
     }
   }
   

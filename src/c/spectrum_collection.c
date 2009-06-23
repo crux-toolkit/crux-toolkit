@@ -105,17 +105,15 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   #endif
   if (absolute_path_file == NULL){
     carp(CARP_FATAL,
-	 "Error from file '%s'. (%s)",
-	 filename,
-	 strerror(errno)); 
-    exit(1);
+	   "Error from file '%s'. (%s)",
+	   filename,
+	   strerror(errno)); 
   }
   
   if(access(absolute_path_file, F_OK)){
-    fprintf(stderr,"File %s could not be opened\n", absolute_path_file);
     free(spectrum_collection);
     free(absolute_path_file);
-    exit(1);
+    carp(CARP_FATAL,"File %s could not be opened\n", absolute_path_file);
   } // FIXME check if file is empty
   
   set_spectrum_collection_filename(spectrum_collection, absolute_path_file);
@@ -243,7 +241,7 @@ BOOLEAN_T parse_spectrum_collection(
 
   // check if file is still avaliable
   if ((file = fopen(spectrum_collection->filename,"r")) == NULL) {
-    fprintf(stderr,"File %s could not be opened",spectrum_collection->filename);
+    carp(CARP_ERROR, "File %s could not be opened",spectrum_collection->filename);
     return (FALSE);
   }
   // parse header lines 'H' into spectrum_collection comment 
@@ -286,7 +284,7 @@ BOOLEAN_T add_spectrum_to_end(
   // FIXME eventually might want it to grow dynamically
   // check if spectrum capacity is full
   if(get_spectrum_collection_num_spectra(spectrum_collection) == MAX_SPECTRA){
-    fprintf(stderr,"ERROR: cannot add spectrum, capacity full\n"); 
+    carp(CARP_ERROR,"ERROR: cannot add spectrum, capacity full\n"); 
     return FALSE;
   }
   // set spectrum
@@ -312,7 +310,7 @@ BOOLEAN_T add_spectrum(
   
   // check if spectrum capacity is full
   if(get_spectrum_collection_num_spectra(spectrum_collection) == MAX_SPECTRA){
-    fprintf(stderr,"ERROR: cannot add spectrum, capacity full\n"); 
+    carp(CARP_ERROR,"ERROR: cannot add spectrum, capacity full\n"); 
     return FALSE;
   }
   // find correct location
@@ -388,7 +386,7 @@ BOOLEAN_T get_spectrum_collection_spectrum(
   long target_index;
   // check if file is still avaliable
   if ((file = fopen(spectrum_collection->filename,"r")) == NULL) {
-    fprintf(stderr,"File %s could not be opened",spectrum_collection->filename);
+    carp(CARP_ERROR,"File %s could not be opened",spectrum_collection->filename);
     return (FALSE);
   }
 
@@ -435,7 +433,7 @@ long binary_search_spectrum(
     end_of_file_index = high_index;
   }
   else{
-    fprintf(stderr, "error: file corrupted");
+    carp(CARP_ERROR, "error: file corrupted");
     return -1;
   }  
   while(low_index <= high_index){
@@ -476,7 +474,7 @@ long binary_search_spectrum(
       }
     }
     else{
-      fprintf(stderr, "error: file corrupted");
+      carp(CARP_ERROR, "error: file corrupted");
       return -1;
     }
   }
@@ -558,9 +556,12 @@ int match_first_scan_line(
        (sscanf(spliced_line,"%i %i %f", // S line is parsed here
               &first_scan, &last_scan, &precursor_mz) != 3)) {
   #endif
-    fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
-    fprintf(stderr,"Incorrect file format\n");
-    exit(1); // FIXME check if this is corrrect 
+    carp(
+      CARP_FATAL,
+      "Failed to parse 'S' line:\n %s "
+      "Incorrect file format\n",
+      line
+    );
   }
   if(first_scan == query_first_scan){
     return 0;
@@ -671,7 +672,7 @@ void set_spectrum_collection_comment(
     strncat(spectrum_collection->comment, new_comment, MAX_COMMENT); 
   }
   else{
-    fprintf(stderr,"max comment exceeded\n");
+    carp(CARP_ERROR,"max comment exceeded\n");
   }
 }
 
