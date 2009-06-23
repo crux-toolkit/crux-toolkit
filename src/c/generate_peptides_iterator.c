@@ -164,7 +164,6 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   // Check that index OR database exists
   if (database == NULL && index == NULL ){
     carp(CARP_FATAL, "Cannot genrate peptides when index and database are both NULL.");
-    exit(1);
   }
 
   /***********************
@@ -174,14 +173,11 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     
     if((sort_type != MASS && sort_type != NONE)){
       carp(CARP_FATAL, "Cannot sort other than by mass when using index.");
-      exit(1);
     }
    
     // already tested for 
     if(index == NULL){
       carp(CARP_FATAL, "Failed to create peptides from index");
-      free(gen_peptide_iterator);
-      exit(1);
     } 
 
     // use array implementation of peptide_src

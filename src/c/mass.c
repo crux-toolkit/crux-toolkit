@@ -165,7 +165,7 @@ FLOAT_T get_mass_amino_acid(
     return get_mass_amino_acid_monoisotopic(amino_acid);
   }
   else{
-    die("ERROR: mass type does not exist\n");
+    carp(CARP_FATAL, "ERROR: mass type does not exist\n");
     // avoid compiler warning
     return 1;
   }

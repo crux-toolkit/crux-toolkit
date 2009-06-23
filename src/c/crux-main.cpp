@@ -41,10 +41,9 @@ char* usage_str = "Usage: crux <command> [options] <argument>\n"
 ;
 int main(int argc, char** argv){
 
-  // check the syntax for carp <operation>
+  // check the syntax for crux <operation>
   if( argc < 2 ){
-    fprintf(stderr, usage_str);
-    exit(1);
+    carp(CARP_FATAL, usage_str);
   }
 
   // determine the operation
@@ -75,9 +74,7 @@ int main(int argc, char** argv){
     break;
 
   case INVALID_CMD:
-    fprintf(stderr, "Invalid command '%s'\n", op_string);
-    fprintf(stderr, usage_str);
-    exit(1);
+    carp(CARP_FATAL, "Invalid command '%s'\n%s", op_string, usage_str);
     break;
 
   }

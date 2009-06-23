@@ -726,11 +726,7 @@ FLOAT_T gen_score_sp(
   if(!scorer->initialized){
     // create intensity array
     if(!create_intensity_array_sp(spectrum, scorer, get_ion_series_charge(ion_series))){
-      carp(CARP_ERROR, "failed to produce Sp");
-      free(spectrum);
-      free(ion_series);
-      free(scorer);
-      exit(1);
+      carp(CARP_FATAL, "failed to produce Sp");
     }
   }
 
@@ -1151,11 +1147,7 @@ FLOAT_T gen_score_xcorr(
   if(!scorer->initialized){
     // create intensity array for observed spectrum, if already not been done
     if(!create_intensity_array_xcorr(spectrum, scorer, get_ion_series_charge(ion_series))){
-      carp(CARP_ERROR, "failed to produce XCORR");
-      free(spectrum);
-      free(ion_series);
-      free(scorer);
-      exit(1);
+      carp(CARP_FATAL, "failed to produce XCORR");
     }
   }
   
@@ -1579,7 +1571,6 @@ BOOLEAN_T output_psm_files_paired(
   if(access(output_directory, F_OK)){
     if (mkdir(output_directory, dir_access) != 0){
       carp(CARP_FATAL, "Trouble creating dir %s!", output_directory); 
-      exit(1);
     }
   }
 
@@ -1594,7 +1585,6 @@ BOOLEAN_T output_psm_files_paired(
     if (open_file(full_path, "a", FALSE, "append", "", 
           &ion_series_files[ion_series_idx])==FALSE){
       carp(CARP_FATAL, "Trouble opening output file %s!", full_path); 
-      exit(1);
     }
   }
 
@@ -1670,7 +1660,6 @@ BOOLEAN_T output_psm_files_single(
   if(access(output_directory, F_OK)){
     if (mkdir(output_directory, dir_access) != 0){
       carp(CARP_FATAL, "Trouble creating dir %s!", output_directory); 
-      exit(1);
     }
   }
 
@@ -1684,7 +1673,6 @@ BOOLEAN_T output_psm_files_single(
     if (open_file(full_path, "a", FALSE, "append", "", 
           &ion_series_files[ion_series_idx])==FALSE){
       carp(CARP_FATAL, "Trouble opening output file %s!", full_path); 
-      exit(1);
     }
   }
 

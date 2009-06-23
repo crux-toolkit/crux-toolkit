@@ -421,8 +421,12 @@ BOOLEAN_T parse_spectrum_file(
              new_line[0] == 'I' ||
              new_line[0] == 'D' )){
       file_format = FALSE;
-      fprintf(stderr, "Incorrect order of line (S,Z, Peaks)\n");
-      fprintf(stderr, "At line: %s", new_line);
+      carp(
+        CARP_ERROR, 
+        "Incorrect order of line (S,Z, Peaks)\n"
+        "At line: %s", 
+        new_line
+      );
       break; // File format incorrect
     }
     // Reads the 'S' line
@@ -472,8 +476,12 @@ BOOLEAN_T parse_spectrum_file(
         // checks if the peaks are in correct order of lines
         if((!record_Z || !record_S)){
           file_format = FALSE;
-          fprintf(stderr, "Incorrect order of line (S,Z, Peaks)\n");
-          fprintf(stderr, "At line: %s", new_line);
+          carp(
+            CARP_ERROR,
+            "Incorrect order of line (S,Z, Peaks)\n"
+            "At line: %s", 
+            new_line
+          );
           break; // File format incorrect
         }
         // check for peak line format
@@ -493,8 +501,12 @@ BOOLEAN_T parse_spectrum_file(
                         &test_float, &test_float) != 2)){
         #endif
           file_format = FALSE;
-          fprintf(stderr, "Incorrect peak line\n");
-          fprintf(stderr, "At line: %s", new_line);
+          carp(
+            CARP_ERROR,
+            "Incorrect peak line\n"
+            "At line: %s", 
+            new_line
+          );
           break; // File format incorrect
         }
         // Reads the 'peak' lines, only if 'Z','S' line has been read
@@ -531,7 +543,7 @@ BOOLEAN_T parse_spectrum_file(
   
   // File format incorrect
   if(!file_format){ 
-    fprintf(stderr, "incorrect file format\n");
+    carp(CARP_ERROR, "incorrect file format\n");
     return FALSE;
    }
    return TRUE;
@@ -607,7 +619,7 @@ BOOLEAN_T parse_spectrum_file(
         (sscanf(spliced_line,"%i %i %f", // S line is parsed here
                &first_scan, &last_scan, &precursor_mz) != 3)) {
    #endif
-     fprintf(stderr,"Failed to parse 'S' line:\n %s",line);
+     carp(CARP_ERROR,"Failed to parse 'S' line:\n %s",line);
      return FALSE;
    }
    set_spectrum_first_scan( spectrum, first_scan);
@@ -654,7 +666,7 @@ BOOLEAN_T parse_spectrum_file(
        (tokens = // Z line is parsed here
         sscanf(line, "%c %d %f", &line_name, &charge, &m_h_plus)) != 3){
    #endif
-     fprintf(stderr,"Failed to parse 'Z' line:\n %s",line);
+     carp(CARP_ERROR,"Failed to parse 'Z' line:\n %s",line);
      return FALSE;
    }  
 
@@ -864,7 +876,7 @@ BOOLEAN_T parse_spectrum(
 {
   FILE* file;
   if ((file = fopen(filename,"r")) == NULL) {
-    fprintf(stderr,"File %s could not be opened",filename);
+    carp(CARP_FATAL,"File %s could not be opened",filename);
     return (FALSE);  // exit(1);
   }
   // might check if spectrum is NULL?? Close file??
@@ -1175,7 +1187,6 @@ int get_charges_to_search(SPECTRUM_T* spectrum, int** select_charge_array){
   if( (param_charge < 1) || (param_charge > 3) ){
     carp(CARP_FATAL, "spectrum-charge option must be 1,2,3, or 'all'.  " \
          "%s is not valid", charge_str);
-    exit(1);
   }
 
 
@@ -1394,8 +1405,7 @@ PEAK_ITERATOR_T* new_peak_iterator(
 {
   // now we have peak information
   if(!spectrum->has_peaks){
-    carp(CARP_ERROR, "Spectrum does not contain peak information");
-    exit(1);
+    carp(CARP_FATAL, "Spectrum does not contain peak information");
   }
 
   PEAK_ITERATOR_T* peak_iterator = (PEAK_ITERATOR_T*)mycalloc(1,sizeof(PEAK_ITERATOR_T));

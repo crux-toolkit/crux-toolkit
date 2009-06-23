@@ -218,6 +218,16 @@ are nice to have.
 Use <code>FLOAT_T</code> to declare floating point variables rather then
 <code>float</code>. This allows us to switch to double precision arithmetic
 throughout Crux by specifying the <code>--enable-doubles</code> configure option.
+
+<li>
+Do not write messages directly to <code>stderr</code>. 
+Always use the <code>carp()</code> function
+to report information, warnings, and errors.
+
+<li>
+Do not call <code>exit()</code> directly for fatal errors. 
+Use <code>carp(CARP_FATAL, ...)</code>.
+This will report a fatal error and call <code>exit(1)</code>.
 </ul>
 
 <h3>Structured comments</h3>

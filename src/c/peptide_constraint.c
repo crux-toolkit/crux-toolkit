@@ -69,7 +69,7 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
 {
   // max length must be less or equal than 255 becuase of the unsigned char limit of 255
   if(max_length > 255){
-    die("ERROR: cannot set max length higer than 255");
+    carp(CARP_FATAL, "ERROR: cannot set max length higer than 255");
   }
 
   PEPTIDE_CONSTRAINT_T* peptide_constraint =
@@ -294,7 +294,6 @@ void set_peptide_constraint_max_length(
   // check if maximum length is with in range <= 255
   if(max_length > 255){
     carp(CARP_FATAL, "maximum length:%d over limit 255.", max_length);
-    exit(1);
   }
   
   peptide_constraint->max_length = max_length;

@@ -231,7 +231,6 @@ void sort_peaks(
   }
   else{
     carp(CARP_ERROR, "no matching peak sort type");
-    exit(1);
   }
 }
 /*

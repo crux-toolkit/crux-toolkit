@@ -170,7 +170,6 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
   if( index == NULL && dbase == NULL ){
     carp(CARP_FATAL, 
          "Cannot create modified peptides iterator from NULL protein source");
-    exit(1);
   }
 
   carp(CARP_DETAILED_DEBUG, 

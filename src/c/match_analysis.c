@@ -350,7 +350,6 @@ MATCH_COLLECTION_T* run_nothing(
   if (feature_file != NULL){
     if((feature_fh = fopen(feature_file, "w")) == NULL){
       carp(CARP_FATAL, "Problem opening output file %s", feature_file);
-      return NULL;
     }
   }
 
@@ -587,7 +586,6 @@ MATCH_COLLECTION_T* run_percolator(
   if(feature_file != NULL){  
     if((feature_fh = fopen(feature_file, "w")) == NULL){
       carp(CARP_FATAL, "Problem opening output file %s", feature_file);
-      return NULL;
     }
   }
 
@@ -602,7 +600,6 @@ MATCH_COLLECTION_T* run_percolator(
 
   if( match_collection_iterator == NULL ){
     carp(CARP_FATAL, "Failed to create a match collection iterator");
-    exit(1);
   }
   carp(CARP_DETAILED_DEBUG, "Created the match collection iterator");
 

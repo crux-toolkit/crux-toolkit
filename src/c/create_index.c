@@ -103,7 +103,6 @@ int create_index_main(int argc, char** argv){
   if(access(in_file, F_OK)){
     carp(CARP_FATAL, "The file \"%s\" does not exist " 
          "(or is not readable or is empty).", in_file);
-    exit(1);
   }
   carp(CARP_INFO,"Creating index from fasta file '%s'", in_file);
   
@@ -115,7 +114,6 @@ int create_index_main(int argc, char** argv){
   if( (!overwrite) && (chdir(out_dir) == 0)){
       carp(CARP_FATAL, "Index '%s' already exists. Use " \
            "--overwrite T to replace.", out_dir);
-      exit(1);
   }
 
   /* create new index object */
@@ -127,7 +125,7 @@ int create_index_main(int argc, char** argv){
   
   /* create crux_index files */
   if(!create_index(crux_index)){
-    die("Failed to create index");
+    carp(CARP_FATAL, "Failed to create index");
   }
   
   /* free index(frees constraint together) */

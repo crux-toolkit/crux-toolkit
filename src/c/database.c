@@ -716,7 +716,6 @@ PROTEIN_T* get_database_protein_at_idx(
     carp(CARP_FATAL, 
          "Protein index %i out of bounds.  %i proteins in the database",
          protein_idx, database->num_proteins);
-    exit(1);
   }
 
   return database->proteins[protein_idx];
@@ -758,7 +757,6 @@ DATABASE_PROTEIN_ITERATOR_T* new_database_protein_iterator(
     // failed to parse database
     if(!parse_database(database)){
       carp(CARP_FATAL, "Failed to parse database, cannot create iterator");
-      exit(1);
     }
   }
   
@@ -873,10 +871,6 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
       if(!protein_to_heavy(next_protein)){
         carp(CARP_FATAL, "failed to create a database_peptide_iterator,"
                          "no proteins in database");
-        free_database_protein_iterator(
-            database_peptide_iterator->database_protein_iterator);
-        free(database_peptide_iterator);
-        exit(1);
       }
     }
 
@@ -915,10 +909,6 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
           if(!protein_to_heavy(next_protein)){
             carp(CARP_FATAL, "failed to create a database_peptide_iterator"
                               " no proteins in database");
-            free_database_protein_iterator(
-                database_peptide_iterator->database_protein_iterator);
-            free(database_peptide_iterator);
-            exit(1);
           }
         }
         // create new protein_peptide_iterator
@@ -930,10 +920,6 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   else{ // no proteins to create peptides from
     carp(CARP_FATAL, "failed to create a database_peptide_iterator,"
                      "no proteins in database");
-    free_database_protein_iterator(
-        database_peptide_iterator->database_protein_iterator);
-    free(database_peptide_iterator);
-    exit(1);
   }
   // set the current working protein
   database_peptide_iterator->prior_protein = next_protein;
@@ -955,7 +941,6 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
 void generate_all_peptides(DATABASE_PEPTIDE_ITERATOR_T* iter){
   if( iter == NULL ){
     carp(CARP_FATAL, "Cannot generate peptides for a null iterator.");
-    exit(1);
   }
   // create a dynamically sized list of all pepitdes for this iterator
   LINKED_LIST_T* list = new_empty_list();
@@ -1154,10 +1139,6 @@ PEPTIDE_T* database_peptide_iterator_next_from_file(
         if(!protein_to_heavy(next_protein)){
           carp(CARP_FATAL, "Failed to create a database_peptide_iterator, " 
                             "no proteins in database");
-          free_database_protein_iterator(
-                 database_peptide_iterator->database_protein_iterator);
-          free(database_peptide_iterator);
-          exit(1);
         }
       }
       // create new protein_peptide_iterator

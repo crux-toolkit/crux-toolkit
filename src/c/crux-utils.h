@@ -141,8 +141,7 @@ long get_filesize(char *FileName);
 */
 int create_output_directory(
   char *output_folder, // Name of output folder.
-  BOOLEAN_T overwrite,	// Whether or not to overwrite an existing dir 
-  BOOLEAN_T warn	// Print warning/informative messages to stderr? 
+  BOOLEAN_T overwrite  // Whether or not to overwrite an existing dir 
 ); 
 
 /**

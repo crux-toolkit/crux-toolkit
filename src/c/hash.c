@@ -552,7 +552,7 @@ HASH_ITERATOR_T* new_hash_iterator(
   HASH_T* hash ///< the hash collection to iterate -out
   ){
   if (hash == NULL){
-    die("Null hash collection passed to hash iterator");
+    carp(CARP_FATAL, "Null hash collection passed to hash iterator");
   }
   
   // allocate a new hash iterator

@@ -98,13 +98,21 @@ void open_log_file(char **log_file_name);
 void log_command_line(int argc, char *argv[]);
 
 /**
- * \returns True if error message has successfully been output. False if not.
- * The term 'carp' is used because 'log' is already used by the math library. 
+ * Print message to log file.
+ *
+ * Print severity level and message to log file.
+ * The term 'carp' is used because 'log' is already used 
+ * by the math library. 
+ *
+ * Verbosity of CARP_FATAL will cause the 
+ * program to exit with status code 1.
+ *
  */
-BOOLEAN_T carp(
-    int verbosity,
-    char* format, 
-    ...);
+void carp(
+  int verbosity, 
+  char* format,
+  ...
+);
 
 /*
  * Local Variables:

@@ -228,7 +228,7 @@ HIT_ITERATOR_T* new_hit_iterator(
   HIT_COLLECTION_T* hit_collection ///< the hit collection to iterate -out
   ){
   if (hit_collection == NULL){
-    die("Null hit collection passed to hit iterator");
+    carp(CARP_FATAL, "Null hit collection passed to hit iterator");
   }
   
   // allocate a new hit iterator

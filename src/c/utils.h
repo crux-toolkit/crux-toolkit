@@ -87,34 +87,6 @@ BOOLEAN_T open_file
  char*     content_description,
  FILE**    afile);              // Pointer to the open file.
 
-/*************************************************************************
- * Open a write-only pipe using a given command line.
- *
- * The program argument is the name of a target program to be
- * executed.  This function first searches for the target program in
- * the current working directory, then in the specified directory.  If
- * the target program is still not found, this function tries to
- * locate it via the operating system's PATH variable, by calling the
- * target program with the user-provided test arguments.  The results
- * of this call are compared to the user-provided "expected reply,"
- * and if they match, then a pipe is opened with the real arguments.
- *
- * If the program is not found, the function prints a message to
- * stderr and then either aborts or returns the stdout stream,
- * depending upon the value of stdout_on_error.
- *
- * The "expected reply" is assumed to be no more than one line long.
- *************************************************************************/
-FILE* open_command_pipe
-  (char*     program,          // The program to run in the pipe.
-   char*     directory,        // Directory to look in.
-   char*     test_arguments,   // Arguments used when searching for program.
-   char*     expected_reply,   // Expected reply from search.
-   char*     real_arguments,   // Arguments used when running the program.
-   BOOLEAN_T stdout_on_error,  // If command fails, return STDOUT?
-   char*     error_message);   // Error or warning if command fails.
-
-
 /********************************************************************
  * DEBUG_CODE (macro)
  *
@@ -127,32 +99,6 @@ FILE* open_command_pipe
 #else
 #define DEBUG_CODE( debug_value, code_fragment )
 #endif 
-
-/********************************************************************
- * void die()
- * 
- * Print an error message and die. The arguments are formatted exactly
- * like arguments to printf().
- *
- * (Taken from Sean Eddy's HMMER package.)
- ********************************************************************/
-void die
-  (char* format, 
-   ...);
-
-/**************************************************************************
- * Make an assertion, and print the given message if the assertion fails.
- *
- * If the first parameter is set to TRUE, then die if the assertion
- * doesn't go through.  Otherwise, just issue the warning.
- * 
- * On exit, dump core if DEBUG is defined.
- **************************************************************************/
-void myassert
-  (BOOLEAN_T die_on_error,
-   BOOLEAN_T test,
-   char*  const    format,
-   ...);
 
 /********************************************************************
  * Allocate dynamic memory. Die gracefully if memory is exhausted.

@@ -30,16 +30,14 @@
  */
 void wrong_command(char* arg, char* comment){
   char* usage = parse_arguments_get_usage("predict_peptide_ions");
-  carp(CARP_FATAL, "incorrect argument: %s", arg);
 
   // print comment if given
-  if(comment != NULL){
-    carp(CARP_FATAL, "%s", comment);
+  if(comment == NULL){
+    carp(CARP_FATAL, "incorrect argument: %s", arg);
   }
-
-  fprintf(stderr, "%s", usage);
-  free(usage);
-  exit(1);
+  else {
+    carp(CARP_FATAL, "incorrect argument: %s\n%s", arg, comment);
+  }
 }
 
 #define PSM_NUM_OPTIONS 4
@@ -107,10 +105,9 @@ int main(int argc, char** argv){
   // search for spectrum with correct scan number
   carp(CARP_INFO, "Retrieving spectrum %i", scan_num);
   if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
-    carp(CARP_ERROR, "Failed to find spectrum with scan_num: %d", scan_num);
     free_spectrum_collection(collection);
     free_spectrum(spectrum);
-    exit(1);
+    carp(CARP_ERROR, "Failed to find spectrum with scan_num: %d", scan_num);
   }
 
   // prepare the spectrum 

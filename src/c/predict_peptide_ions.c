@@ -85,7 +85,6 @@ int main(int argc, char** argv){
   if(!valid_peptide_sequence(peptide_sequence)){
     carp(CARP_FATAL, "The peptide sequence '%s' is not valid", 
          peptide_sequence);
-    exit(1);
   }
 
    // neutral_losses
@@ -121,7 +120,6 @@ int main(int argc, char** argv){
      carp(CARP_FATAL, 
           "max-ion-charge option must be 1,2,3 or peptide. '%s' is not legal",
           max_charge);
-     exit(1);
    }
    
    // create ion_constraint

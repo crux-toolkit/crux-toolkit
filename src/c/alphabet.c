@@ -64,10 +64,10 @@ void set_alphabet
     strcpy(alphabet, given_alphabet);
     strcat(alphabet, BASE_AMBIGS);
     if (verbose >= NORMAL_VERBOSE) {
-      fprintf(stderr, "Using nucleotide alphabet (%s).\n", alphabet);
+      carp(CARP_INFO, "Using nucleotide alphabet (%s).\n", alphabet);
     }
   } else {
-    die("Unrecognized alphabet (%s).\n", given_alphabet);
+    carp(CARP_FATAL, "Unrecognized alphabet (%s).\n", given_alphabet);
   }
 }
 
@@ -87,7 +87,7 @@ int get_alph_size
   (const ALPH_SIZE_T which_size)
 {
   if (alph == INVALID_ALPH) {
-    die("Alphabet uninitialized.\n");
+    carp(CARP_FATAL, "Alphabet uninitialized.\n");
   }
 
   switch (which_size) {
@@ -100,7 +100,7 @@ int get_alph_size
   case AMBIG_SIZE :
     return(ambigs);
   default :
-    die("Illegal alphabet size request.\n");
+    carp(CARP_FATAL, "Illegal alphabet size request.\n");
   }
   /* Unreachable. */
   return(alph_size);
@@ -116,7 +116,7 @@ char * get_alphabet
   static BOOLEAN_T first_time = TRUE;
 
   if (alph == INVALID_ALPH) {
-    die("Alphabet uninitialized.\n");
+    carp(CARP_FATAL, "Alphabet uninitialized.\n");
   }
 
   if (!include_ambigs) {
@@ -137,10 +137,10 @@ char get_alph_char
   (const int char_index)
 {
   if (alph == INVALID_ALPH) {
-    die("Alphabet uninitialized.\n");
+    carp(CARP_FATAL, "Alphabet uninitialized.\n");
   } 
   if ((char_index < 0) || (char_index > get_alph_size(TRUE))) {
-    die("Requested character outside of alphabet (%d).\n", char_index);
+    carp(CARP_FATAL, "Requested character outside of alphabet (%d).\n", char_index);
   }
   return(alphabet[char_index]);
 }
@@ -150,7 +150,7 @@ char get_any_char
 {
   switch(alph) {
   case INVALID_ALPH :
-    die("Alphabet uninitialized.\n");
+    carp(CARP_FATAL, "Alphabet uninitialized.\n");
     break;
   case PROTEIN_ALPH :
     return(ANY_AMINO);
@@ -208,7 +208,7 @@ int alphabet_index
 
   //  Die if the character is not a letter.
   if (return_value == -1) {
-    die("Non-alphabetic character (%c).\n", letter);
+    carp(CARP_FATAL, "Non-alphabetic character (%c).\n", letter);
   }
 
   return(return_value);
@@ -247,7 +247,7 @@ void get_nrdb_frequencies
     set_array_item( 2, 0.228876, freqs); /* G */
     set_array_item( 3, 0.267330, freqs); /* T */
   } else {
-    die("Illegal alphabet size (%d).\n", alph_size);
+    carp(CARP_FATAL, "Illegal alphabet size (%d).\n", alph_size);
   }
   fill_in_ambiguous_chars(FALSE, freqs);
 }
@@ -326,7 +326,7 @@ void fill_in_ambiguous_chars
     break;
 
   default :
-    die("Alphabet uninitialized.\n");
+    carp(CARP_FATAL, "Alphabet uninitialized.\n");
   }
   
   if (AMBIG_DEBUG) {
@@ -409,7 +409,7 @@ void distribute_ambiguous_counts
     break;
 
   default :
-    die("Alphabet uninitialized.\n");
+    carp(CARP_FATAL, "Alphabet uninitialized.\n");
   }
 }
     
@@ -437,7 +437,7 @@ void zero_ambigs
     break;
 
   default :
-    die("Alphabet uninitialized.\n");
+    carp(CARP_FATAL, "Alphabet uninitialized.\n");
   }
   
   for (i_ambig = 0; i_ambig < num_ambigs; i_ambig++) {

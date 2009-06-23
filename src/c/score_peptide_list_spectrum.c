@@ -29,18 +29,15 @@
  * when wrong command is seen carp, and exit
  */
 void wrong_command(char* arg, char* comment){
-  char* usage = parse_arguments_get_usage("predict_peptide_ions");
-  carp(CARP_FATAL, "incorrect argument: %s", arg);
 
-  // print comment if given
-  if(comment != NULL){
-    carp(CARP_FATAL, "%s", comment);
+  if(comment == NULL){
+    carp(CARP_FATAL, "incorrect argument: %s", arg);
+  }
+  else {
+    // print comment if given
+    carp(CARP_FATAL, "incorrect argument: %\n%s", arg, comment);
   }
 
-  // FIXME uncomment this print if want to print usage whenever error message is printed
-  // fprintf(stderr, "%s", usage);
-  free(usage);
-  exit(1);
 }
 
 int main(int argc, char** argv){
@@ -133,11 +130,7 @@ int main(int argc, char** argv){
    
    // search for spectrum with correct scan number
    if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
-     carp(CARP_WARNING, "failed to find spectrum with scan_num: %d", scan_num);
-     free_ion_constraint(ion_constraint);
-     free_spectrum_collection(collection);
-     free_spectrum(spectrum);
-     exit(1);
+     carp(CARP_FATAL, "failed to find spectrum with scan_num: %d", scan_num);
    }
    
    // create new scorer
@@ -149,7 +142,6 @@ int main(int argc, char** argv){
    // check if succesfully opened file
    if(file == NULL){
      carp(CARP_FATAL, "failed to open list file");
-     exit(1);
    }
    
    // parse each line for peptides
@@ -199,10 +191,13 @@ int main(int argc, char** argv){
  else{
    char* usage = parse_arguments_get_usage("score_peptide_list_spectrum");
    result = parse_arguments_get_error(&error_message);
-   fprintf(stderr, "Error in command line. Error # %d\n", result);
-   fprintf(stderr, "%s\n", error_message);
-   fprintf(stderr, "%s", usage);
-   free(usage);
+   carp(
+    CARP_FATAL,
+    "Error in command line. Error # %d\n%s\n%s", 
+    result,
+    error_message,
+    usage
+   );
  }
  exit(0);
 }

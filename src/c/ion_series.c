@@ -987,9 +987,7 @@ void predict_ions(
   
   // generate ions without any modifications
   if(!generate_ions_no_modification(ion_series, mass_matrix)){
-    carp(CARP_ERROR, "failed to generate ions, no modifications");
-    free(mass_matrix);
-    exit(1);
+    carp(CARP_FATAL, "failed to generate ions, no modifications");
   }
 
   // create modification ions?
@@ -998,36 +996,28 @@ void predict_ions(
     // generate ions with nh3 modification
     if(abs(constraint->modifications[NH3]) > 0){
       if(!generate_ions(ion_series, NH3)){
-        carp(CARP_ERROR, "failed to generate ions, NH3 modifications");
-        free(mass_matrix);
-        exit(1);
+        carp(CARP_FATAL, "failed to generate ions, NH3 modifications");
       }
     }
     
     // generate ions with h2o modification
     if(abs(constraint->modifications[H2O]) > 0){
       if(!generate_ions(ion_series, H2O)){
-        carp(CARP_ERROR, "failed to generate ions, H2O modifications");
-        free(mass_matrix);
-        exit(1);
+        carp(CARP_FATAL, "failed to generate ions, H2O modifications");
       }
     }
 
     // generate ions with isotope modification
     if(constraint->modifications[ISOTOPE] > 0){
       if(!generate_ions(ion_series, ISOTOPE)){
-        carp(CARP_ERROR, "failed to generate ions, ISOTOPE modifications");
-        free(mass_matrix);
-        exit(1);
+        carp(CARP_FATAL, "failed to generate ions, ISOTOPE modifications");
       }
     }
 
     // generate ions with flank modification
     if(constraint->modifications[FLANK] > 0){
       if(!generate_ions_flank(ion_series)){
-        carp(CARP_ERROR, "failed to generate ions, FLANK modifications");
-        free(mass_matrix);
-        exit(1);
+        carp(CARP_FATAL, "failed to generate ions, FLANK modifications");
       }
     }
     
@@ -1783,8 +1773,6 @@ ION_T* ion_filtered_iterator_next(
   // check if a ion is present to return
   if(!ion_iterator->has_next){
     carp(CARP_FATAL, "index out of bounds for ion_filtered_iterator");
-    free(ion_iterator);
-    exit(1);
   }
   
   next_ion = ion_iterator->ion;

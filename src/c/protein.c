@@ -438,7 +438,8 @@ BOOLEAN_T parse_protein_fasta_file(
 
   // Read the sequence.
   if (!read_raw_sequence(file, name, PROTEIN_SEQUENCE_LENGTH, buffer, &sequence_length)) {
-    die("Sequence %s is too long.\n", name);
+    carp(CARP_FATAL, "Sequence %s is too long.\n", name);
+    exit(1);
   }
     
   // update the protein object.
@@ -493,7 +494,7 @@ static BOOLEAN_T read_title_line
     size_t buf_length = 0;
 
     if((line_length =  getline(&new_line, &buf_length, fasta_file)) == -1){
-      die("Error reading Fasta file.\n");
+      carp(CARP_FATAL, "Error reading Fasta file.\n");
     }
     strncpy(id_line, new_line, LONGEST_LINE-1);
     free(new_line);
@@ -503,7 +504,7 @@ static BOOLEAN_T read_title_line
   /*
   // Read the ID and comment line.
   if (fgets(id_line, LONGEST_LINE-1, fasta_file) == NULL) {
-    die("Error reading Fasta file.\n");
+    carp(CARP_FATAL, "Error reading Fasta file.\n");
   }
   */
 
@@ -512,7 +513,7 @@ static BOOLEAN_T read_title_line
 
   // Extract the ID from the beginning of the line.
   if (sscanf(id_line, "%s", name) != 1) {
-    die("Error reading sequence ID.\n%s\n", id_line);
+    carp(CARP_FATAL, "Error reading sequence ID.\n%s\n", id_line);
   }
 
   // Store the rest of the line as the comment.
@@ -634,7 +635,7 @@ char* get_protein_id(
 {
   
   if(protein->is_light){
-    die("Cannot get ID from light protein.");
+    carp(CARP_FATAL, "Cannot get ID from light protein.");
   }
   
   int id_length = strlen(protein->id) +1; // +\0
@@ -655,7 +656,7 @@ char* get_protein_id_pointer(
   )
 {
   if(protein->is_light){
-    die("Cannot get ID pointer from light protein.");
+    carp(CARP_FATAL, "Cannot get ID pointer from light protein.");
   }
   return protein->id; 
 }
@@ -687,7 +688,7 @@ char* get_protein_sequence(
   )
 {
   if(protein->is_light){
-    die("Cannot get sequence from light protein.");
+    carp(CARP_FATAL, "Cannot get sequence from light protein.");
   }
   unsigned int sequence_length = strlen(protein->sequence) +1; // +\0
   char * copy_sequence = 
@@ -704,7 +705,7 @@ char* get_protein_sequence_pointer(
   )
 {
   if(protein->is_light){
-    die("Cannot get sequence pointer from light protein.");
+    carp(CARP_FATAL, "Cannot get sequence pointer from light protein.");
   }
   return protein->sequence;
 }
@@ -759,7 +760,7 @@ char* get_protein_annotation(
   )
 {
   if(protein->is_light){
-    die("Cannot get annotation from light protein.");
+    carp(CARP_FATAL, "Cannot get annotation from light protein.");
   }
   int annotation_length = strlen(protein->annotation) +1; // +\0
   char * copy_annotation = 
@@ -1048,7 +1049,6 @@ BOOLEAN_T valid_cleavage_position(
 
   case CUSTOM_ENZYME:
     //carp(CARP_FATAL, "The custom enzyme is not yet implmented.");
-    //exit(1);
 
     return ( is_residue_legal(sequence[0], 
                               pre_cleavage_list,
@@ -1067,7 +1067,6 @@ BOOLEAN_T valid_cleavage_position(
 
   case INVALID_ENZYME:
     carp(CARP_FATAL, "Cannot generate peptides with invalid enzyme.");
-    exit(1);
     break;
 
   }// end switch
@@ -1175,7 +1174,7 @@ void iterator_add_cleavages(
 
         iterator->num_cleavages++;
         if (iterator->num_cleavages > MAX_PEPTIDES_PER_PROTEIN){
-          die("Too many peptides for a particular protein!");
+          carp(CARP_FATAL, "Too many peptides for a particular protein!");
         }
       }
     }
@@ -1300,7 +1299,6 @@ void prepare_protein_peptide_iterator(
 
   case INVALID_DIGEST:
     carp(CARP_FATAL, "Invalid digestion type in protein peptide iterator.");
-    exit(1);
   }
 
 /*
@@ -1406,7 +1404,7 @@ PEPTIDE_T* protein_peptide_iterator_next(
   /*
   if(!iterator->has_next){
     free_protein_peptide_iterator(iterator);
-    die("ERROR: no more peptides\n");
+    carp(CARP_FATAL, "ERROR: no more peptides\n");
   }
   */
   

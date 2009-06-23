@@ -31,10 +31,7 @@
  */
 void wrong_command(char* arg){
   char* usage = parse_arguments_get_usage("create_peptide_index");
-  carp(CARP_FATAL, "incorrect argument %s", arg);
-  fprintf(stderr, "%s", usage);
-  free(usage);
-  exit(1);
+  carp(CARP_FATAL, "incorrect argument %s\n%s", arg, usage);
 }
 
 int main(int argc, char** argv){
@@ -83,13 +80,11 @@ int main(int argc, char** argv){
     if(is_binary){
       if(!create_binary_fasta(in_file)){
         carp(CARP_FATAL, "failed to create binary fasta file on disk");
-        exit(1);
       }
     }
     else{// create protein index file
       if(!create_protein_index(in_file)){
         carp(CARP_FATAL, "failed to create protein index on disk");
-        exit(1);
       }
     }    
     exit(0);
@@ -97,10 +92,13 @@ int main(int argc, char** argv){
   else {
     char* usage = parse_arguments_get_usage("create_protein_index");
     result = parse_arguments_get_error(&error_message);
-    fprintf(stderr, "Error in command line. Error # %d\n", result);
-    fprintf(stderr, "%s\n", error_message);
-    fprintf(stderr, "%s", usage);
-    free(usage);
+    carp(
+      CARP_FATAL, 
+      "Error in command line. Error # %d\nMessage %s\n%s", 
+      result,
+      error_message,
+      usage
+    );
   }
   exit(0);
 }

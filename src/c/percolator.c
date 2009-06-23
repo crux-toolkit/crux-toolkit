@@ -252,7 +252,6 @@ MATCH_COLLECTION_T* run_percolator(
     feature_fh = create_file_in_path(feature_file, psm_result_folder, overwrite);
     if(feature_fh == NULL){
       carp(CARP_FATAL, "Problem opening output file %s", feature_file);
-      return NULL;
     }
   }
 
@@ -267,7 +266,6 @@ MATCH_COLLECTION_T* run_percolator(
 
   if( match_collection_iterator == NULL ){
     carp(CARP_FATAL, "Failed to create a match collection iterator");
-    exit(1);
   }
   carp(CARP_DETAILED_DEBUG, "Created the match collection iterator");
 

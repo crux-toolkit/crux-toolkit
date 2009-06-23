@@ -13,6 +13,7 @@
 #include <string.h>
 #include <assert.h>
 #include "array.h"
+#include "carp.h"
 
 
 /***********************************************************************
@@ -57,7 +58,7 @@ static void check_null_array
 {
 #ifdef BOUNDS_CHECK
   if (array == NULL) {
-    die("Attempted to access a null array.\n");
+    carp(CARP_FATAL, "Attempted to access a null array.\n");
   }
 #else
   /* Avoid compiler warning. */
@@ -75,9 +76,9 @@ static void array_bounds_check
 
 #ifdef BOUNDS_CHECK
   if (index < 0) {
-    die("Invalid array index (%d).\n", index);
+    carp(CARP_FATAL, "Invalid array index (%d).\n", index);
   } else if (index >= get_array_length(array)) {
-    die("Array index out of bounds (%d >= %d).\n", 
+    carp(CARP_FATAL, "Array index out of bounds (%d >= %d).\n", 
         index, get_array_length(array));
   }
 #else
@@ -98,7 +99,7 @@ static BOOLEAN_T check_array_dimensions
   /* Check to see that the two arrays are of the same length. */
   if (get_array_length(array1) != get_array_length(array2)) {
     if (die_on_mismatch) {
-      die("Arrays have differing lengths (%d != %d).\n", 
+      carp(CARP_FATAL, "Arrays have differing lengths (%d != %d).\n", 
           get_array_length(array1), get_array_length(array2));
     }
     return(FALSE);
@@ -195,7 +196,7 @@ void remove_array_item
   if ((array->items = (ATYPE*)myrealloc(array->items,
                                         sizeof(ATYPE) * (num_items - 1)))
       == NULL) {
-    die("Error re-allocating array.\n");
+    carp(CARP_FATAL, "Error re-allocating array.\n");
   }
   (array->num_items)--;
 }
@@ -545,7 +546,7 @@ void read_array
   num_items = get_array_length(array);
   for (i_item = 0; i_item < num_items; i_item++) {
     if (fscanf((FILE *)infile, ASCAN, &value) != 1) {
-      die("Error reading array at position %d.\n", i_item);
+      carp(CARP_FATAL, "Error reading array at position %d.\n", i_item);
     }
     set_array_item(i_item, value, array);
   }
@@ -659,7 +660,7 @@ ATYPE ave_array
   /* Check for zero length. */
   num_items = get_array_length(array);
   if (num_items == 0) {
-    die("Attempting to average the elements of an empty array.\n");
+    carp(CARP_FATAL, "Attempting to average the elements of an empty array.\n");
   }
 
   /* Compute the average. */
@@ -722,7 +723,7 @@ void variance_one_array
   
   /* Avoid divide by zero. */
   if (variance == 0.0) {
-    fprintf(stderr, "Warning: variance of zero.\n");
+    carp(CARP_WARNING, "Warning: variance of zero.\n");
   } else {
     scalar_mult(1.0 / sqrt(array_variance(array)), array);
   }
@@ -778,7 +779,7 @@ ATYPE correlation
 
   length = (ATYPE)get_array_length(array1);
   if (length != (ATYPE)get_array_length(array2)) {
-    die("Computing correlation of vectors of different lengths.");
+    carp(CARP_FATAL, "Computing correlation of vectors of different lengths.");
   }
 
   sum1 = array_total(array1);
@@ -937,7 +938,7 @@ void mix_log_arrays
 
   /* Verify that we've got a reasonable mixing parameter. */
   if ((mixing > 1.0) || (mixing < 0.0)) {
-    die("Invalid mixing parameter (%g).\n", mixing);
+    carp(CARP_FATAL, "Invalid mixing parameter (%g).\n", mixing);
   }
 
   num_items = get_array_length(array1);

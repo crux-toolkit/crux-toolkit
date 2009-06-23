@@ -230,9 +230,13 @@ int parse_arguments(int argc, char * argv[], int die_on_error) {
   }
   
   if (result != 1 && die_on_error) {
-    fprintf(stderr, "%s: %s\n", base_name(argv[0]), message);
-    fprintf(stderr, "%s", parse_arguments_get_usage(base_name(argv[0])));
-    exit(1);
+    carp(
+      CARP_FATAL, 
+      "%s: %s\n%s", 
+      base_name(argv[0]), 
+      message,
+      parse_arguments_get_usage(base_name(argv[0]))
+    );
   }
   return result;
 }
@@ -320,9 +324,13 @@ int parse_arguments_into_hash(int argc, char * argv[],
   }
   
   if (result != 1 && die_on_error) {
-    fprintf(stderr, "%s: %s\n", base_name(argv[0]), message);
-    fprintf(stderr, "%s", parse_arguments_get_usage(base_name(argv[0])));
-    exit(1);
+    carp(
+      CARP_FATAL, 
+      "%s: %s\n%s", 
+      base_name(argv[0]), 
+      message,
+      parse_arguments_get_usage(base_name(argv[0]))
+    );
   }
   
   // For testing so that cmd line can be parsed more than once
