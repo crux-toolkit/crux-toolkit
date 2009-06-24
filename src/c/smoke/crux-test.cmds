@@ -95,7 +95,7 @@ generate_peptides_use_existing_index = good_results/standard_generate_peptides_u
 search_for_matches_default_existing_index = good_results/standard_search_default_existing_index.target.sqt = rm -rf crux-output; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat crux-output/search.target.sqt = 'Time' 'Database'
 
 # See that match_analysis works with an existing index and existing results
- analyze_matches_existing_index_and_results = good_results/standard_existing-perc.sqt =  rm -f existing_search/percolator*; crux percolator --output-dir existing_search existing_crux_index; cat existing_search/percolator.target.sqt = 'StartTime' 'Database'
+analyze_matches_existing_index_and_results = good_results/standard_existing-perc.sqt =  rm -f existing_search/percolator*; crux percolator --output-dir existing_search existing_crux_index; cat existing_search/percolator.target.sqt = 'StartTime' 'Database'
 
 # See that match_analysis works with an existing index and new results
 analyze_matches_existing_index = good_results/standard_existing-index-new-results-perc.sqt =  crux percolator --parameter-file params/set_rand_seed existing_crux_index; cat crux-output/percolator.target.sqt = 'StartTime'
