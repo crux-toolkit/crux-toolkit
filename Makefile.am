@@ -38,4 +38,6 @@ checksum:
 	md5sum $(distdir)-$(ar)-$(name).zip > $(distdir)-$(ar)-$(name).zip.md5sum.txt
 	md5sum $(distdir).tar.gz > $(distdir).tar.gz.md5sum.txt
 	
-
+ignore-files:
+	svn update .svnignore
+	svn propset svn:ignore -F .svnignore .

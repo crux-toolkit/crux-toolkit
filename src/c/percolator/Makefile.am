@@ -70,6 +70,10 @@ libpercolator_la_SOURCES = \
 
 noinst_LTLIBRARIES = libqvality.la libArrayLibrary.la libpercolator.la
 
+ignore-files:
+	svn update .svnignore
+	svn propset svn:ignore -F .svnignore .
+
 EXTRA_DIST = \
   ArrayLibrary/Array.cpp \
   ArrayLibrary/Arithmetic.cpp \
