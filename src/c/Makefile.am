@@ -163,5 +163,9 @@ EXTRA_DIST = default.params ../../bin/spectacle.pl
 doc:	*.h *.c
 	doxygen Doxyfile
 
+ignore-files:
+	svn update .svnignore
+	svn propset svn:ignore -F .svnignore .
+
 dist-hook:
 	grep '#define VERSION' ../../config.h > version.h

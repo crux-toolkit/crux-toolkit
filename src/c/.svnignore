@@ -1,0 +1,9 @@
+*.swp
+.deps
+.libs
+crux
+crux-generate-peptides
+crux-get-ms2-spectrum
+crux-predict-peptide-ions
+Makefile
+Makefile.in
