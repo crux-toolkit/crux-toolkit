@@ -384,7 +384,7 @@ BOOLEAN_T memory_map_database(
 }
 
 /**
- * Assumes that there is a "*" at the very end after all the proteins in binary file
+ * Assumes that there is a 1 at the very end after all the proteins in binary file
  *\return TRUE successfully populates the proteins from memory mapped binary fasta file, else FALSE
  */
 BOOLEAN_T populate_proteins_from_memmap(
@@ -396,7 +396,7 @@ BOOLEAN_T populate_proteins_from_memmap(
   char* data = database->data_address;
   
   // parse proteins until the end of list
-  while(data[0] != '*'){
+  while((int)data[0] != 1){
     // check if anymore space for protein
     if(database->num_proteins == MAX_PROTEINS){
       carp(CARP_ERROR, "exceeds protein index array size");
