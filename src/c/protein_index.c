@@ -408,7 +408,11 @@ BOOLEAN_T create_binary_fasta_file(
   }
 
   // write the end character to binary fasta file
-  fwrite("*", sizeof(char), 2, output_file);
+  char term_char = 1;  // use 1 and not '*' as the terminal
+                       // character for the file b/c id length is 
+                       // stored in same field and id len == 42
+                       // is the smae as '*'
+  fwrite(&term_char, sizeof(char), 1, output_file);
 
   // print final status
   //  carp(CARP_INFO, "Serialized total protein: %d", protein_idx);
