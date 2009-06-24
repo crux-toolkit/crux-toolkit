@@ -1,5 +1,5 @@
-#	time created: Thu Jan 29 12:31:50 2009
-#	fasta file: existing-binary-fasta
+#	time created: Wed Jun 24 15:37:29 2009
+#	fasta file: test-binary-fasta
 #	min_mass: 200.00
 #	max_mass: 7200.00
 #	min_length: 6
@@ -7,6 +7,6 @@
 #	enzyme_type: trypsin
 #	missed_cleavage: false
 #	mass_type: average
-#	unique peptides: redundant
-#	CRUX index directory: replace_existing_index
+#	unique peptides: unique
+#	CRUX index directory: new-existing-index
 #	target mass range for index file: 6.84
