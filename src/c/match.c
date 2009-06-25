@@ -629,7 +629,7 @@ void print_match_tab(
   FLOAT_T spectrum_mass,       ///< spectrum neutral mass -in
   int num_matches,            ///< num matches in spectrum -in
   int charge,                 ///< charge -in
-  SCORER_TYPE_T main_score   ///< the main score to report -in
+  const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
   ){
 
   if( match == NULL || file == NULL ){
@@ -672,14 +672,14 @@ void print_match_tab(
     delta_cn = 0.0;
   }
 
-  int sp_scored = get_int_parameter("max-rank-preliminary");
+  BOOLEAN_T sp_scored = scores_computed[SP];
   double sp_score = get_match_score(match, SP);
   int  sp_rank = get_match_rank(match, SP);
   double xcorr_score = get_match_score(match, XCORR);
   int xcorr_rank = get_match_rank(match, XCORR);
   double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
   double weibull_qvalue = get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR);
-  BOOLEAN_T decoy_q_val_scored = get_boolean_parameter("compute-q-values");
+  BOOLEAN_T decoy_q_val_scored = scores_computed[DECOY_XCORR_QVALUE];
   double decoy_x_qvalue = get_match_score(match, DECOY_XCORR_QVALUE);
   double decoy_p_qvalue = get_match_score(match, DECOY_PVALUE_QVALUE);
   double percolator_score = get_match_score(match, PERCOLATOR_SCORE);
@@ -703,7 +703,7 @@ void print_match_tab(
   fprintf(file, float_format, spectrum_mass);
   fprintf(file, float_format, peptide_mass);
   fprintf(file, float_format, delta_cn);
-  if (sp_scored == 0 ){
+  if (sp_scored == FALSE){
     fprintf(file, "\t\t"); //score and rank
   }else{
     fprintf(file, float_format, sp_score);
@@ -711,7 +711,7 @@ void print_match_tab(
   }
   fprintf(file, float_format, xcorr_score);
   fprintf(file, "%d\t", xcorr_rank);
-  if (LOGP_BONF_WEIBULL_XCORR == main_score) {
+  if( scores_computed[LOGP_BONF_WEIBULL_XCORR] == TRUE ){ 
     // print p-value
     if (P_VALUE_NA == log_pvalue) {
       fprintf(file, "NaN\t");
@@ -724,7 +724,7 @@ void print_match_tab(
     // no p-value
     fprintf(file, "\t");
   }
-  if (LOGP_QVALUE_WEIBULL_XCORR == main_score) {
+  if( scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == TRUE ){ 
     // print q-value (Weibull est.)
     fprintf(file, float_format, weibull_qvalue);
   }
@@ -738,7 +738,7 @@ void print_match_tab(
     fprintf(file, "\t");
   }
   if( decoy_q_val_scored && match->null_peptide == FALSE
-      && LOGP_BONF_WEIBULL_XCORR == main_score ){ 
+      && scores_computed[LOGP_BONF_WEIBULL_XCORR] == TRUE ){ 
     if (P_VALUE_NA == decoy_p_qvalue) {
       fprintf(file, "NaN\t");
     }else{
@@ -747,7 +747,7 @@ void print_match_tab(
   }else {
     fprintf(file, "\t");
   }
-  if (PERCOLATOR_SCORE == main_score)  {
+  if (scores_computed[PERCOLATOR_SCORE] == TRUE)  {
     // print percolator score
     fprintf(file, float_format, percolator_score);
     // print percolator rank
@@ -756,7 +756,7 @@ void print_match_tab(
     fprintf(file, float_format, percolator_qvalue);
   }
   else {
-    // no percolator score, score, or p-value
+    // no percolator score, rank, or p-value
     fprintf(file, "\t\t\t");
   }
   // Output of q-ranker score and q-value will be handled here where available.

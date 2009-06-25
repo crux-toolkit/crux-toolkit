@@ -2074,9 +2074,9 @@ BOOLEAN_T print_match_collection_tab_delimited(
       break;
     }// else
 
-    //    print_match_sqt(match, output, main_score, prelim_score);
-    print_match_tab(match, output, scan_num, spectrum_precursor_mz, spectrum_neutral_mass, 
-                    num_matches, charge, score_to_print_first);
+    print_match_tab(match, output, scan_num, spectrum_precursor_mz, 
+                    spectrum_neutral_mass, num_matches, charge, 
+                    match_collection->scored_type);
 
   }// next match
   
@@ -2453,7 +2453,7 @@ void print_matches_multi_spectra
 
   // if file location is target (i.e. tdc=T), print all to target
   FILE* decoy_file = decoy_tab_file;
-  if( get_boolean_parameter("tdc") == TRUE ){
+  if( get_boolean_parameter("tdc") == TRUE || decoy_tab_file == NULL ){
     decoy_file = tab_file;
   }
 
@@ -2474,15 +2474,16 @@ void print_matches_multi_spectra
     FLOAT_T mz = get_spectrum_precursor_mz(spectrum);
     int charge = get_match_charge(cur_match);
     FLOAT_T spec_mass = get_spectrum_neutral_mass(spectrum, charge);
-    int num_matches = 0; // lost b/c match_collection is for multi-spec
+    int num_matches = get_match_ln_experiment_size(cur_match);
+    num_matches = expf(num_matches);
 
     if( is_decoy ){
       print_match_tab(cur_match, decoy_file, scan_num, mz, 
-                      spec_mass, num_matches, charge, score );
+                      spec_mass, num_matches, charge, match_collection->scored_type );
     }
     else{
       print_match_tab(cur_match, tab_file, scan_num, mz,
-                      spec_mass, num_matches, charge, score );
+                      spec_mass, num_matches, charge, match_collection->scored_type );
     }
 
   }
