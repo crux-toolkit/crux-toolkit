@@ -57,7 +57,7 @@ analyze_matches_no_ops_test_search = good_results/standard_analyze_default =  cr
 search_pvalues = good_results/pvalues.sqt = crux search-for-matches --parameter-file params/pval demo.ms2 small-yeast.fasta; cat crux-output/search.target.sqt = 'Time'
 
 # Get q-values from above search
-compute-q-values = good_results/qvalues.sqt = crux compute-q-values --parameter-file params/pval small-yeast.fasta ; cat crux-output/qvalues.target.sqt = 'Time'
+compute-q-values = good_results/qvalues.txt = crux compute-q-values --parameter-file params/pval small-yeast.fasta ; cat crux-output/qvalues.target.txt 
 
 # Search for matches with modifications
 search_mods_fasta = good_results/standard_search_mods = rm -rf crux-output; crux search-for-matches --parameter-file params/mods test.ms2 test.fasta; cat crux-output/search.target.sqt = 'Time' 'Database'

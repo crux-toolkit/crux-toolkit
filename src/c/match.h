@@ -211,7 +211,7 @@ void print_match_tab(
   FLOAT_T spectrum_mass,       ///< spectrum neutral mass -in
   int num_matches,            ///< num matches in spectrum -in
   int charge,                 ///< charge -in
-  SCORER_TYPE_T main_score   ///< the main score to report -in
+  const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
 );
 
 /**
