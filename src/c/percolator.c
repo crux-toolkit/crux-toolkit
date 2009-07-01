@@ -257,8 +257,9 @@ MATCH_COLLECTION_T* run_percolator(
   // which will read in the serialized output PSM results and return
   // first the match_collection of TARGET followed by 
   // the DECOY* match_collections.
+  int num_decoys = 0;
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
-    new_match_collection_iterator(psm_result_folder, fasta_file);
+    new_match_collection_iterator(psm_result_folder, fasta_file, &num_decoys);
 
   if( match_collection_iterator == NULL ){
     carp(CARP_FATAL, "Failed to create a match collection iterator");

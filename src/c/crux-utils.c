@@ -758,8 +758,8 @@ int create_output_directory(
     else {
       result = 0;
       carp(
-        CARP_WARNING,
-        "Writing results to output directory '%s'.\n",
+        CARP_INFO,
+        "Writing results to output directory '%s'.",
         output_folder
       );
     }

@@ -185,6 +185,14 @@ int get_match_collection_experimental_size(
   );
 
 /**
+ * \returns TRUE if the match_collection only contains decoy matches,
+ * else (all target or mixed) returns FALSE.
+ */
+BOOLEAN_T get_match_collection_is_decoy(
+  MATCH_COLLECTION_T* match_collection
+);
+
+/**
  *\returns the top peptide count used in the logp_exp_sp in match_collection
  */
 int get_match_collection_top_fit_sp(
@@ -228,8 +236,20 @@ void truncate_match_collection(
  * caution. 
  * \returns The number of matches added.
  */
-int merge_match_collections(MATCH_COLLECTION_T* source,
-                            MATCH_COLLECTION_T* destination);
+int merge_match_collections(
+  MATCH_COLLECTION_T* source, ///< matches to be moved
+  MATCH_COLLECTION_T* destination ///< move matches to here
+);
+
+/**
+ * \brief Add a single match to a collection.
+ * Only puts a copy of the pointer to the match in the
+ * match_collection, does not allocate a new match.
+ */
+BOOLEAN_T add_match_to_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< add to here
+  MATCH_T* match                        ///< add this match
+);
 
 /**
  * Takes the values of match-output-folder, ms2 filename (soon to be
@@ -470,7 +490,8 @@ int get_match_collection_hash(
  */
 MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   char* output_file_directory, ///< the directory path where the PSM output files are located -in
-  char* fasta_file ///< The name of the file (in fasta format) from which to retrieve proteins and peptides for match_collections. -in
+  char* fasta_file, ///< The name of the file (in fasta format) from which to retrieve proteins and peptides for match_collections. -in
+  int* decoy_count
   );
 
 /**

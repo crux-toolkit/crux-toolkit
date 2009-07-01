@@ -632,17 +632,23 @@ void print_match_tab(
   const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
   ){
 
-  if( match == NULL || file == NULL ){
+  if( file == NULL ){ // usually b/c no decoy file to print to
+    return;
+  }
+
+  if( match == NULL  ){
     carp(CARP_ERROR, 
-         "Cannot print match to tab delimited file from null inputs");
+         "Cannot print NULL match to tab delimited file.");
     return;
   }
 
   PEPTIDE_T* peptide = get_match_peptide(match);
   double peptide_mass = get_peptide_peptide_mass(peptide);
   // this should get the sequence from the match, not the peptide
-  char* sequence = get_match_sequence_sqt(match);
-  int seq_length = strlen(sequence);
+  char* sequence = get_match_mod_sequence_str(match);
+  if( sequence == NULL ){
+    sequence = my_copy_string("");  // for post-search, no shuffled sequences
+  }
   BOOLEAN_T adjust_delta_cn = FALSE;
 
   // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
@@ -679,7 +685,6 @@ void print_match_tab(
   int xcorr_rank = get_match_rank(match, XCORR);
   double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
   double weibull_qvalue = get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR);
-  BOOLEAN_T decoy_q_val_scored = scores_computed[DECOY_XCORR_QVALUE];
   double decoy_x_qvalue = get_match_score(match, DECOY_XCORR_QVALUE);
   double decoy_p_qvalue = get_match_score(match, DECOY_PVALUE_QVALUE);
   double percolator_score = get_match_score(match, PERCOLATOR_SCORE);
@@ -731,14 +736,13 @@ void print_match_tab(
   else {
     fprintf(file, "\t");
   }
-  if( decoy_q_val_scored  && match->null_peptide == FALSE ){
+  if( scores_computed[DECOY_XCORR_QVALUE]  && match->null_peptide == FALSE ){
     fprintf(file, float_format, decoy_x_qvalue);
   }
   else {
     fprintf(file, "\t");
   }
-  if( decoy_q_val_scored && match->null_peptide == FALSE
-      && scores_computed[LOGP_BONF_WEIBULL_XCORR] == TRUE ){ 
+  if( scores_computed[DECOY_PVALUE_QVALUE] && match->null_peptide == FALSE){
     if (P_VALUE_NA == decoy_p_qvalue) {
       fprintf(file, "NaN\t");
     }else{
@@ -769,7 +773,7 @@ void print_match_tab(
   }
   fprintf(file, "%d\t", b_y_total);
   fprintf(file, "%d\t", num_matches); // Matches per spectrum
-  fprintf(file, "%.*s\t", seq_length - 4, sequence+2);
+  fprintf(file, "%s\t", sequence);
   fprintf(file, "%s-%s\t", enz_str, dig_str);
   fprintf(file, "%s\t%s", protein_ids, flanking_aas);
 
@@ -1099,7 +1103,7 @@ char* get_match_sequence(
   // if post_process_match and has a null peptide you can't get sequence
   if(match->post_process_match && match->null_peptide){
     carp(CARP_ERROR, 
-        "Cannot retrieve null peptide sequence for post_process_match");
+         "Cannot retrieve null peptide sequence for post_process_match");
     return NULL;
   }
   
@@ -1156,6 +1160,9 @@ char* get_match_sequence_sqt(
   }
   // get_match_mod_sequence (use method in case match->mod_seq == NULL) 
   MODIFIED_AA_T* mod_seq = get_match_mod_sequence(match);
+  if( mod_seq == NULL ){
+    return NULL;
+  }
   int length = get_peptide_length(get_match_peptide(match));
 
   // turn it into string
@@ -1202,8 +1209,6 @@ MODIFIED_AA_T* get_match_mod_sequence(
   }
   // if post_process_match and has a null peptide you can't get sequence
   if(match->post_process_match && match->null_peptide){
-    carp(CARP_ERROR,
-        "Cannot retrieve null peptide sequence for post_process_match");
     return NULL;
   }
 
@@ -1253,8 +1258,6 @@ char* get_match_mod_sequence_str( MATCH_T* match ){
 
   // if post_process_match and has a null peptide you can't get sequence
   if(match->post_process_match && match->null_peptide){
-    carp(CARP_ERROR,
-        "Cannot retrieve null peptide sequence for post_process_match");
     return NULL;
   }
 
