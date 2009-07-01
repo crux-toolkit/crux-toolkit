@@ -162,6 +162,7 @@ Estimate the paramters of the score distribution for each spectrum and
 compute a p-value for each PSM.  This option must be used in order to
 run <code>crux compute-q-values</code> on the results.</li>
 
+<!--
 <li>
 <code>--compute-q-values &lt;T | F&gt; &ndash</code>
 Use the ranking of target and decoy PSMs to compute q-values for the
@@ -169,7 +170,7 @@ top-ranked match for each spectrum.  Computes two q-values (one ranked
 by xcorr and one ranked by p-value) when used with 
 <code>--compute-p-values</code>.  Requires <code>--num-decoys-per-target 1
 </code>. Default = F.
-
+-->
 <LI>
 <code>--spectrum-min-mass &lt;float&gt;</code> &ndash; The lowest spectrum 
 m/z to search in the ms2 file. Default = 0.0

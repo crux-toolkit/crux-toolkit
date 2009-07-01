@@ -153,7 +153,7 @@ BOOLEAN_T extend_match_collection(
   FILE* result_file   
   );
 
-BOOLEAN_T add_match_to_match_collection(
+BOOLEAN_T add_match_to_post_match_collection(
   MATCH_COLLECTION_T* match_collection, 
   MATCH_T* match 
   );
@@ -260,6 +260,8 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
   match_collection->num_samples = 0;
   match_collection->num_xcorrs = 0;
 
+  match_collection->post_hash = NULL;
+
   return match_collection;
 }
 
@@ -365,12 +367,37 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
   // what is the index of the next insert position indestination
   int dest_idx = destination->match_total;
 
+  // if these are the first being added to the destination, set the
+  // scored_type
+  if( dest_idx == 0 ){
+    int type_idx = 0;
+    for(type_idx = 0; type_idx < _SCORE_TYPE_NUM; type_idx++){
+      destination->scored_type[type_idx] = source->scored_type[type_idx];
+    }
+  }else{ // check that same types are scored
+    int type_idx = 0;
+    for(type_idx = 0; type_idx < _SCORE_TYPE_NUM; type_idx++){
+      if( destination->scored_type[type_idx] != source->scored_type[type_idx]){
+        char type_str[SMALL_BUFFER];
+        char* dest_str = (destination->scored_type[type_idx]) ? "" : " not";
+        char* src_str = (source->scored_type[type_idx]) ? "" : " not";
+        scorer_type_to_string((SCORER_TYPE_T)type_idx, type_str);
+        carp(CARP_FATAL, "Cannot merge match collections scored for "
+             "different types.  Trying to add matches%s scored for %s "
+             "to matches%s scored for %s", 
+             src_str, type_str, dest_str, type_str);
+      }
+    }
+  }
+  
+
   // make sure destination has room for more matches
   int src_num_matches = source->match_total;
   if( dest_idx + src_num_matches > _MAX_NUMBER_PEPTIDES ){
     carp(CARP_FATAL, "Cannot merge match collections, insufficient capacity "
          "in destnation collection.");
   }
+
 
   int src_idx = 0;
   // for each match in source
@@ -1450,7 +1477,7 @@ BOOLEAN_T compute_decoy_q_values(
     set_match_score(cur_match, qval_type, min_fdr);
   }
 
-
+  match_collection->scored_type[qval_type] = TRUE;
   return TRUE;
 }
 
@@ -1686,7 +1713,7 @@ BOOLEAN_T serialize_psm_features(
   myfwrite(&delta_cn, sizeof(float), 1, output);
   myfwrite(&ln_delta_cn, sizeof(float), 1, output);
   myfwrite(&ln_experiment_size, sizeof(float), 1, output);
-  
+
   // serialize each boolean for scored type 
   int score_type_idx;
   for(score_type_idx=0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
@@ -2453,14 +2480,8 @@ void print_matches_multi_spectra
 
   // if file location is target (i.e. tdc=T), print all to target
   FILE* decoy_file = decoy_tab_file;
-  if( get_boolean_parameter("tdc") == TRUE || decoy_tab_file == NULL ){
+  if( get_boolean_parameter("tdc") == TRUE ){
     decoy_file = tab_file;
-  }
-
-  // if p-values were computed, make sure they get printed
-  SCORER_TYPE_T score = XCORR;
-  if( get_boolean_parameter("compute-p-values") == TRUE ){
-    score = LOGP_BONF_WEIBULL_XCORR;
   }
 
   // for each match, get spectrum info, determine if decoy, print
@@ -2474,16 +2495,16 @@ void print_matches_multi_spectra
     FLOAT_T mz = get_spectrum_precursor_mz(spectrum);
     int charge = get_match_charge(cur_match);
     FLOAT_T spec_mass = get_spectrum_neutral_mass(spectrum, charge);
-    int num_matches = get_match_ln_experiment_size(cur_match);
-    num_matches = expf(num_matches);
+    FLOAT_T num_psm_per_spec = get_match_ln_experiment_size(cur_match);
+    num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
 
     if( is_decoy ){
       print_match_tab(cur_match, decoy_file, scan_num, mz, 
-                      spec_mass, num_matches, charge, match_collection->scored_type );
+                      spec_mass, (int)num_psm_per_spec, charge, match_collection->scored_type );
     }
     else{
       print_match_tab(cur_match, tab_file, scan_num, mz,
-                      spec_mass, num_matches, charge, match_collection->scored_type );
+                      spec_mass, (int)num_psm_per_spec, charge, match_collection->scored_type );
     }
 
   }
@@ -2627,7 +2648,7 @@ BOOLEAN_T extend_match_collection(
 
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_ERROR, "Must be a post process match collection");
+    carp(CARP_ERROR, "Must be a post process match collection to extend.");
     return FALSE;
   }
   
@@ -2707,7 +2728,6 @@ BOOLEAN_T extend_match_collection(
         }
         */
       }
-      
       // now once we are done with setting scored type
       // set match collection status as set!
       if(!match_collection->post_scored_type_set &&
@@ -2738,7 +2758,7 @@ BOOLEAN_T extend_match_collection(
       set_match_ln_experiment_size(match, ln_experiment_size);
       
       // now add match to match collection
-      add_match_to_match_collection(match_collection, match);
+      add_match_to_post_match_collection(match_collection, match);
     }// next match for this spectrum
 
   }// next spectrum
@@ -2747,8 +2767,10 @@ BOOLEAN_T extend_match_collection(
 }
 
 /**
- * Adds the match object to match_collection
- * Must not exceed the _MAX_NUMBER_PEPTIDES to be match added
+ * \brief Adds the match to match_collection by copying the pointer.
+ * 
+ * No new match is allocated.  Match_collection total_matches must not
+ * exceed the _MAX_NUMBER_PEPTIDES. 
  * \returns TRUE if successfully adds the match to the
  * match_collection, else FALSE 
  */
@@ -2757,14 +2779,52 @@ BOOLEAN_T add_match_to_match_collection(
   MATCH_T* match ///< the match to add -in
   )
 {
+  if( match_collection == NULL || match == NULL ){
+    carp(CARP_FATAL, "Cannot add NULL match to NULL collection.");
+  }
+
+  // check if enough space for peptide match
+  if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
+    carp(CARP_FATAL, "Cannot add to match collection; count exceeds limit: %d", 
+         _MAX_NUMBER_PEPTIDES);
+  }
+
+  // add a new match to array
+  match_collection->match[match_collection->match_total] = match;
+  increment_match_pointer_count(match);
+  
+  // increment total rich match count
+  ++match_collection->match_total;
+
+  
+  return TRUE;
+}
+
+/**
+ * Adds the match object to match_collection
+ * Must not exceed the _MAX_NUMBER_PEPTIDES to be match added
+ * Only for post_process (i.e. post search) match_collections.  Keeps
+ * track of all peptides in a hash table.
+ * \returns TRUE if successfully adds the match to the
+ * match_collection, else FALSE 
+ */
+// this method renamed so that a more general add_match_to_match_collection could be implemented
+BOOLEAN_T add_match_to_post_match_collection(
+  MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
+  MATCH_T* match ///< the match to add -in
+  )
+{
+  if( match_collection == NULL || match == NULL ){
+    carp(CARP_FATAL, "Cannot add NULL match to NULL collection.");
+  }
   PEPTIDE_T* peptide = NULL;
 
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_ERROR, "Must be a post process match collection");
+    carp(CARP_ERROR, "Must be a post process match collection to add a match.");
     return FALSE;
   }
-  
+
   // check if enough space for peptide match
   if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
     carp(CARP_ERROR, "Rich match count exceeds max match limit: %d", 
@@ -2774,6 +2834,7 @@ BOOLEAN_T add_match_to_match_collection(
   
   // add a new match to array
   match_collection->match[match_collection->match_total] = match;
+  increment_match_pointer_count(match);
   
   // increment total rich match count
   ++match_collection->match_total;
@@ -2814,7 +2875,8 @@ void update_protein_counters(
   
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_FATAL, "Must be a post process match collection");
+    carp(CARP_FATAL, 
+         "Must be a post process match collection to update protein counter.");
   }
   
   // See if this peptide has been observed before?
@@ -2961,6 +3023,16 @@ BOOLEAN_T calculate_delta_cn( MATCH_COLLECTION_T* match_collection){
  **********************************/
 
 /**
+ * \returns TRUE if the match_collection only contains decoy matches,
+ * else (all target or mixed) returns FALSE.
+ */
+BOOLEAN_T get_match_collection_is_decoy(
+  MATCH_COLLECTION_T* match_collection
+){
+  return match_collection->null_peptide_collection;
+}
+
+/**
  *\returns the match_collection protein counter for the protein idx
  */
 int get_match_collection_protein_counter(
@@ -2970,7 +3042,7 @@ int get_match_collection_protein_counter(
 {
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_FATAL, "Must be a post process match collection");
+    carp(CARP_FATAL, "Must be a post process match collection to get protein counter.");
   }
 
   // number of PSMs match this protein
@@ -2987,7 +3059,7 @@ int get_match_collection_protein_peptide_counter(
 {
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_FATAL, "Must be a post process match collection");
+    carp(CARP_FATAL, "Must be a post process match collection to get peptide counter.");
   }
   
   // number of peptides match this protein
@@ -3004,7 +3076,7 @@ int get_match_collection_hash(
 {
   // only for post_process_collections
   if(!match_collection->post_process_collection){
-    carp(CARP_FATAL, "Must be a post process match collection");
+    carp(CARP_FATAL, "Must be a post process match collection, to get match_collection_hash");
   }
   
   char* hash_value = get_peptide_hash_value(peptide);
@@ -3075,8 +3147,9 @@ void setup_match_collection_iterator(
 MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   char* output_file_directory, 
     ///< the directory path where the PSM output files are located -in
-  char* fasta_file 
+  char* fasta_file, 
     ///< The name of the fasta file for peptides for match_collections. -in
+  int* decoy_count
   )
 {
   carp(CARP_DEBUG, 
@@ -3092,19 +3165,6 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   struct dirent* directory_entry = NULL;
   DATABASE_T* database = NULL;
   BOOLEAN_T use_index = is_directory(fasta_file);
-
-  // get directory from path name and prefix from filename
-  /*
-  char** file_path_array = parse_filename_path_extension(  // free me
-                                     output_file_directory, ".csm");
-  char* filename = parse_filename(output_file_directory);  // free me
-  char* filename_prefix = file_path_array[0];
-  char* decoy_prefix = cat_string(filename_prefix, "-decoy-");// free me
-  char* psm_dir_name = file_path_array[1];
-  if( psm_dir_name == NULL ){
-    psm_dir_name = ".";
-  }
-  */
 
   /*
     BF: I think that this step is to count how many decoys there are
@@ -3124,7 +3184,6 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
 
   // open PSM file directory
   working_directory = opendir(output_file_directory);
-  //working_directory = opendir(psm_dir_name);
   
   if(working_directory == NULL){
     carp(CARP_FATAL, "Failed to open PSM file directory: %s", 
@@ -3133,22 +3192,14 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   
   // determine how many decoy sets we have
   while((directory_entry = readdir(working_directory))){
-    //if(prefix_compare(directory_entry->d_name, "crux_match_target")){
-    /*if(suffix_compare(directory_entry->d_name, ".csm")){
-      carp(CARP_DEBUG, "Found target file %s", directory_entry->d_name);
-      boolean_result = TRUE;
-    }
-    //else if(prefix_compare(directory_entry->d_name, "crux_match_decoy_1")) {
-    else*/ if(suffix_compare(directory_entry->d_name, "decoy-1.csm")) {
+    
+    if(suffix_compare(directory_entry->d_name, "decoy-1.csm")) {
       carp(CARP_DEBUG, "Found decoy file %s", directory_entry->d_name);
       decoy_1 = TRUE;
-      //num_decoys++;
     }
-    //else if(prefix_compare(directory_entry->d_name, "crux_match_decoy_2")) {
     else if(suffix_compare(directory_entry->d_name, "decoy-2.csm")) {
       decoy_2 = TRUE;
     }
-    //else if(prefix_compare(directory_entry->d_name, "crux_match_decoy_3")) {
     else if(suffix_compare(directory_entry->d_name, "decoy-3.csm")) {
       decoy_3 = TRUE;
       break;
@@ -3164,15 +3215,19 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
 
   if(decoy_3){
     total_sets = 4; // 3 decoys + 1 target
+    *decoy_count = 3;
   }
   else if(decoy_2){
     total_sets = 3; // 2 decoys + 1 target
+    *decoy_count = 2;
   }
   else if(decoy_1){
     total_sets = 2; // 1 decoys + 1 target
+    *decoy_count = 1;
   }
   else{
     total_sets = 1;
+    *decoy_count = 0;
     carp(CARP_INFO, "No decoy sets exist in directory: %s", 
         output_file_directory);
   }
@@ -3265,6 +3320,15 @@ void free_match_collection_iterator(
     free_match_collection(match_collection_iterator->match_collection);
   }
   
+  // if no index, remove the temp binary fasta file
+  char* fasta_file = get_string_parameter("protein input");
+  if( is_directory(fasta_file) == FALSE ){
+    char* binary_fasta = get_binary_fasta_name(fasta_file);
+    carp(CARP_DEBUG, "Protein source %s is not an index.  "
+         "Removing temp binary fasta %s", fasta_file, binary_fasta);
+    remove(binary_fasta);
+  }
+
   // free up all match_collection_iterator 
   free(match_collection_iterator->directory_name);
   free_database(match_collection_iterator->database);

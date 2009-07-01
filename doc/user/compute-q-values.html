@@ -23,7 +23,7 @@
 
 <p>
 Given a collection of scored PSMs, estimate q-values.  The q-value is
-a statistical confidence measure that is analagous to a p-value but
+a statistical confidence measure that is analogous to a p-value but
 that incorporates multiple testing.  The q-value associated with a
 score threshold T is defined as the minimal false discovery rate at
 which a score of T is deemed significant.  In this setting, the
@@ -31,17 +31,34 @@ q-value accounts for the fact that we are analyzing a large collection
 of spectra.</p>
 
 <p>
-If the collection of PSMs contains both targets and decoys, then the
-false discovery rate associated with a given score is estimated as the
-number of decoy scores above the threshold divided by the number of
-target scores above the threshold.</p>
+<code>Compute-q-values</code> requires that 
+<code>search-for-matches</code> produced decoy PSMs and/or that it
+computed p-values.  Up to three different q-values may be computed
+depending on how <code>search-for-matches</code> was executed.  
 
-<p>
-Alternatively, if the collection of PSMs has p-values assigned
-by <code>search-for-matches</code> by using
-a <code>--score-type</code> of <code>xcorr-pvalue</code>
-or <code>sp-pvalue</code>, then the false discovery rate associated
-with a given score is computed 
+<ol>
+<li>
+If the collection of PSMs has p-values assigned
+by <code>search-for-matches</code> by using the  
+<code>--compute-p-values</code> option, then the false discovery
+rate associated with a given score is computed using the Benjamini
+Hochberg algorithm.  These scores are under the column heading
+'Weibull est. q-value'. 
+
+<li>
+If the collection of PSMs contains both targets and decoys, then the
+false discovery rate associated with a given xcorr score is estimated
+as the number of decoy scores above the threshold divided by the number of 
+target scores above the threshold. These scores are under the column
+heading 'decoy q-value (xcorr)'.</p>
+
+<li>
+If the collection has decoys and p-values, then the false discovery
+rate is computed as above but the ranking is based on the p-values
+instead of xcorr.  These scores are under the column heading 'decoy
+q-value (p-value)'. 
+</ol>
+
 
 <p>
 Additional background information on q-values and statistical
@@ -88,9 +105,6 @@ The name of the output folder can be set by the user using the <code>--output-di
 The following files will be created:</p>
 
 <li>
-<b>qvalues.target.sqt</b>: an <a href="sqt-format.html">SQT</a> file containing the PSMs
-
-<li>
 <b>qvalues.target.txt</b>: a tab-delimited text file containing the PSMs.
 </li>
 See <a href="txt-format.html">txt file format</a> for a list of the fields.
@@ -100,7 +114,8 @@ printed to stderr.
 </li>
 <li>
 <b>qvalues.params.txt</b>:
-a file containing the name and value of all parameters/options for the current operation.  
+a file containing the name and value of all parameters/options for the
+current operation. 
 Not all parameters in the file may have been used in the operation.  
 The resulting file can be used with the <code>--parameter-file</code>
 option for other crux programs.
