@@ -29,7 +29,7 @@ extern "C" {
 /**
  *\returns a heap copy of the given string
  */
-char* my_copy_string(char* src);
+char* my_copy_string(const char* src);
 
 /**
  * returns copy of the src string upto the specified length

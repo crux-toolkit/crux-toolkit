@@ -16,12 +16,12 @@
 #include "crux-main.h"
 
 #define NUMBER_COMMAND_TYPES 6
-static char* command_type_strings[NUMBER_COMMAND_TYPES] =
+static const char* command_type_strings[NUMBER_COMMAND_TYPES] =
   {"create-index", "search-for-matches", 
    "compute-q-values", "q-ranker", "percolator", "invalid"};
 
 
-char* usage_str = "Usage: crux <command> [options] <argument>\n"
+const char* usage_str = "Usage: crux <command> [options] <argument>\n"
 "Commands:\n"
 "  create-index        Create an index for all peptides in a fasta file.\n"
 "  search-for-matches  Search a collection of spectra against a sequence\n"
