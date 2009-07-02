@@ -770,6 +770,7 @@ FLOAT_T gen_score_sp(
  */
 void normalize_each_region(
   SCORER_T* scorer,        ///< the scorer object -in/out
+  FLOAT_T max_intensity_overall, /// the max intensity over entire spectrum
   FLOAT_T* max_intensity_per_region, ///< the max intensity in each 10 regions -in
   int region_selector ///< the size of each regions -in
   )
@@ -777,7 +778,7 @@ void normalize_each_region(
   int bin_idx = 0;
   int region_idx = 0;
   FLOAT_T max_intensity = max_intensity_per_region[region_idx];
-  
+
   // normazlie each region
   for(; bin_idx < scorer->sp_max_mz; ++bin_idx){
     if(bin_idx >= region_selector*(region_idx+1) && region_idx < 9){
@@ -785,8 +786,10 @@ void normalize_each_region(
       max_intensity = max_intensity_per_region[region_idx];;
     }
 
-    // don't normalize if no peaks in region
-    if(max_intensity != 0){
+    // Don't normalize if no peaks in region, and for compatibility 
+    // with SEQUEST drop peaks with intensity less then 1/20 of 
+    // the overall max intensity.
+    if(max_intensity != 0 &&  scorer->observed[bin_idx] > 0.05 * max_intensity_overall){
       // normalize intensity to max 50
       scorer->observed[bin_idx] = (scorer->observed[bin_idx] / max_intensity) * 50;
       
@@ -842,6 +845,8 @@ BOOLEAN_T create_intensity_array_observed(
   // create a peak iterator
   peak_iterator = new_peak_iterator(spectrum);
 
+  // Store the max intensity in entire spectrum
+  FLOAT_T max_intensity_overall = 0.0;
   // store the max intensity in each 10 regions to later normalize
   FLOAT_T* max_intensity_per_region = (FLOAT_T*)mycalloc(10, sizeof(FLOAT_T));
   int region_selector = 0;
@@ -891,7 +896,12 @@ BOOLEAN_T create_intensity_array_observed(
     // get intensity
     // sqrt the original intensity
     intensity = sqrt(get_peak_intensity(peak));
-           
+
+    // Record the max intensity in the full spectrum
+    if (intensity > max_intensity_overall) {
+      max_intensity_overall = intensity;
+    }
+
     // set intensity in array with correct mz, only if max peak in the bin
     if(scorer->observed[mz] < intensity){
       scorer->observed[mz] = intensity;
@@ -913,7 +923,7 @@ BOOLEAN_T create_intensity_array_observed(
   */
 
   // normalize each 10 regions to max intensity of 50
-  normalize_each_region(scorer, max_intensity_per_region, region_selector);
+  normalize_each_region(scorer, max_intensity_overall, max_intensity_per_region, region_selector);
   
   // DEBUG
   /*
