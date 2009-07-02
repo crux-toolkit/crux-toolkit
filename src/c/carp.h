@@ -110,7 +110,7 @@ void log_command_line(int argc, char *argv[]);
  */
 void carp(
   int verbosity, 
-  char* format,
+  const char* format,
   ...
 );
 

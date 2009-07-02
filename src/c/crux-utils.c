@@ -30,7 +30,7 @@
 /**
  * The string version of isotopic mass type (average, mono)
  */
-static char* mass_type_strings[NUMBER_MASS_TYPES] = {"average", "mono"};
+static const char* mass_type_strings[NUMBER_MASS_TYPES] = {"average", "mono"};
 
 BOOLEAN_T string_to_mass_type(char* name, MASS_TYPE_T* result){
   BOOLEAN_T success = TRUE;
@@ -63,7 +63,7 @@ BOOLEAN_T mass_type_to_string(MASS_TYPE_T type, char* type_str){
 /**
  * The string versions of digest types
  */
-static char* digest_type_strings[NUMBER_DIGEST_TYPES] =
+static const char* digest_type_strings[NUMBER_DIGEST_TYPES] =
   {"invalid", "full-digest", "partial-digest", "non-specific-digest"};
 
 DIGEST_T string_to_digest_type(char* name){
@@ -90,7 +90,7 @@ char* digest_type_to_string(DIGEST_T type){
 /**
  * The string version of enzyme types
  */
-static char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = 
+static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = 
   {"invalid", "no-enzyme", "trypsin", "chymotrypsin", "elastase",
    "clostripain", "cyanogen-bromide", "iodosobenzoate", 
    "proline-endopeptidase", "staph-protease", "aspn", 
@@ -156,7 +156,7 @@ BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str){
 /**
  * The string version of peptide sort types
  */
-static char* sort_type_strings[NUMBER_SORT_TYPES] =
+static const char* sort_type_strings[NUMBER_SORT_TYPES] =
   { "none", "mass", "length", "lexical" };
 
 BOOLEAN_T string_to_sort_type(char* name, SORT_TYPE_T* result){
@@ -186,7 +186,7 @@ BOOLEAN_T sort_type_to_string(SORT_TYPE_T type,
 /*
  * The string version of ion types
  */
-static char* ion_type_strings[NUMBER_ION_TYPES] = {
+static const char* ion_type_strings[NUMBER_ION_TYPES] = {
   "a", "b", "c", "x", "y", "z", "p", "by", "bya", "all" };
 
 BOOLEAN_T string_to_ion_type(char* name, ION_TYPE_T* result){
@@ -216,7 +216,7 @@ BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
 /*
  * The string version of ALGORITHM_TYPE_T
  */
-static char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
+static const char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
   {"percolator", "rczar", "curve-fit",
    //"qvalue",
    "none", "all"};
@@ -248,7 +248,7 @@ BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
 /*
  * The string version of SCORER_TYPE_T
  */
-static char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
+static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
   {"sp", "xcorr", "dotp", "logp_exp_sp", "logp_bonf_exp_sp", 
    "logp_evd_xcorr", "logp_bonf_evd_xcorr", "logp_weibull_sp", 
    "sp-pvalue",  //"sp-logp", 
@@ -286,7 +286,7 @@ BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T type, char* type_str){
 /**
  * returns a heap allocated copy of the src string
  */
-char* my_copy_string(char* src){
+char* my_copy_string(const char* src){
   if( src == NULL ){
     return NULL;
   }

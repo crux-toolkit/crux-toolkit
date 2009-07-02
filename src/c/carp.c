@@ -74,7 +74,7 @@ static void carp_print(char *string) {
  * program to exit with status code 1.
  *
  */
-void carp( int verbosity, char* format, ...) {
+void carp( int verbosity, const char* format, ...) {
   if (verbosity <= G_verbosity){
     va_list  argp;
 
