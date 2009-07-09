@@ -1947,7 +1947,7 @@ void print_tab_header(FILE* output){
     "spectrum precursor m/z\t"
     "spectrum neutral mass\t"
     "peptide mass\t"
-    "deta_cn\t"
+    "delta_cn\t"
     "sp score\t"
     "sp rank\t"
     "xcorr score\t"
