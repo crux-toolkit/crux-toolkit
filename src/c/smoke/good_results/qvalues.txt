@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	deta_cn	sp score	sp rank	xcorr score	xcorr rank	-log(p-value)	Weibull est. q-value	decoy q-value (xcorr)	decoy q-value (p-value)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	-log(p-value)	Weibull est. q-value	decoy q-value (xcorr)	decoy q-value (p-value)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence
 10	2	636.34	1270.66	1272.40	0.00	55.31	8	1.09	1	0.38	0.25								6	22	79	GAVYSGMGPDYR	trypsin-partial-digest	YML092C	IV	
 11	2	745.27	1488.52	1489.73	0.00	2799.70	1	4.97	1	2.43	0.28								21	24	67	NFLETVELQVGLK	trypsin-partial-digest	YGL135W	RN	
 12	3	472.56	1414.66	1412.48	0.00	69.12	9	1.09	1	0.20	0.24								11	44	75	NYPQHSHSISSR	trypsin-partial-digest	YLR371W	SS	
