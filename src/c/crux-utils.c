@@ -727,7 +727,7 @@ int create_output_directory(
           " be overwritten.\n",
           output_folder
         );
-        result = -1;
+        result = 0;
       }
       else {
         carp(

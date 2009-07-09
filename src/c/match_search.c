@@ -102,7 +102,7 @@ int search_main(int argc, char** argv){
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
   int result = create_output_directory(
     output_folder, 
-    TRUE // Allow existing directory
+    overwrite
   );
   if( result == -1 ){
     carp(CARP_FATAL, "Unable to create output directory %s.", output_folder);
