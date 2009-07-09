@@ -999,10 +999,12 @@ void translate_decoy_options(){
     tdc = FALSE;
     new_num_decoy_set = 1;
     new_num_decoy_per_target = num_decoy_per_target;
+    free(location);
   }else if( strcmp(location, "separate-decoy-files") == 0 ){
     tdc = FALSE;
     new_num_decoy_set = num_decoy_per_target;
     new_num_decoy_per_target = 1;
+    free(location);
   }
 
   // now update all values
@@ -1474,6 +1476,7 @@ void print_parameter_file(char** filename){
     }
   }
 
+  free_hash_iterator(iterator);
   fclose(param_file);
   free(output_dir);
 }
