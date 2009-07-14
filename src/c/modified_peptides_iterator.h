@@ -35,6 +35,27 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   );
 
 /**
+ * \brief Create a new modified_PEPTIDES_iterator for a specific mass/charge.
+ *
+ * The returned iterator is initialized with the first peptide queued
+ * up and ready to return.  Also creates a generate_peptides_iterator
+ * from which it gets the peptides to modify. Peptides are of mass +/-
+ * mass-window or mz +/- mass-window(mz) taken from parameter.c.  All other peptide
+ * specifications are taken from parameter.c.  If no peptides meet the
+ * specifications, an iterator is still returned and when given to
+ * has_next will always return FALSE.
+ * 
+ * \returns A newly allocated modified_peptides_iterator.
+ */
+MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
+  double mz,         ///< Target mz of peptides
+  int charge,        ///< Charge of peptides
+  PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  INDEX_T* index,      ///< Index from which to draw peptides OR
+  DATABASE_T* dbase    ///< Database from which to draw peptides
+  );
+
+/**
  * \brief Create a new modified_PEPTIDES_iterator for all peptides in
  * the database or index.
  *

@@ -217,6 +217,11 @@ Tolerance used for matching peptides to spectra.  Peptides must be
 within +/- 'mass-window' of the spectrum mass.  Default = 3.0.
 
 <li>
+<code>use-mz-window</code> &ndash;
+Use mass-to-charge instead of a mass-window. Peptides must be
+within +/- 'm/z-window' of the spectrum m/z. The m/z-window value is taken from <code>mass-window</code>. Default = F.
+
+<li>
 <code>ion-tolerance &lt;float&gt;</code> &ndash; Tolerance used for matching
 observed peaks to predicted fragment ions.  Default = 0.5.
 
