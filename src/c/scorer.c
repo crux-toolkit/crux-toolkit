@@ -1252,25 +1252,33 @@ double score_logp_bonf_weibull(
   int num_peptide ///< The number of peptides
   ){
   carp(CARP_DETAILED_DEBUG, "Stat: score = %.6f", score);
-  double p_value = exp( - pow( (score+shift)/eta, beta));
-  carp(CARP_DETAILED_DEBUG, "Stat: pvalue before = %.15f", p_value);
-
-  // The Bonferroni correction 
-  // use original equation 1-(1-p_value)^n when p is not too small
-  if(p_value > BONFERRONI_CUT_OFF_P 
-     || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
-
-    double corrected_pvalue = -log(1-pow((1-p_value), num_peptide));
-    carp(CARP_DETAILED_DEBUG, "Stat: pvalue after = %.6f", corrected_pvalue);
-    return corrected_pvalue;
+  
+  double temp = score + shift;
+  if (temp <=0) {
+    //undefined past shift, give lowest possible score (-log(1.0)).
+    carp(CARP_DETAILED_DEBUG,"undefined returning 0");
+    return 0.0;
   }
-  // else, use the approximation
-  else{
-    double corrected_pvalue = -log(p_value*num_peptide);
-    carp(CARP_DETAILED_DEBUG, "Stat: pvalue after = %.6f", corrected_pvalue);
-    return corrected_pvalue;
-  }
+  else {
+    double p_value = exp(-pow(temp/eta, beta));
+    carp(CARP_DETAILED_DEBUG, "Stat: pvalue before = %.15f", p_value);
 
+    // The Bonferroni correction 
+    // use original equation 1-(1-p_value)^n when p is not too small
+    if(p_value > BONFERRONI_CUT_OFF_P 
+       || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
+
+      double corrected_pvalue = -log(1-pow((1-p_value), num_peptide));
+      carp(CARP_DETAILED_DEBUG, "Stat: pvalue after = %.6f", corrected_pvalue);
+      return corrected_pvalue;
+    }
+    // else, use the approximation
+    else{
+      double corrected_pvalue = -log(p_value*num_peptide);
+      carp(CARP_DETAILED_DEBUG, "Stat: pvalue after = %.6f", corrected_pvalue);
+      return corrected_pvalue;
+    }
+  }
 }
 
 /**

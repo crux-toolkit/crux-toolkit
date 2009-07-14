@@ -1198,12 +1198,6 @@ void fit_three_parameter_weibull(
   FLOAT_T cur_correlation = 0.0;
   FLOAT_T cur_shift;
 
-  // FIXME remove below
-  int idx;
-  for (idx=0; idx<fit_data_points; idx++){
-    carp(CARP_DETAILED_DEBUG, "X[%i]=%.6f", idx, data[idx]);
-  }
-
   for (cur_shift = max_shift; cur_shift > min_shift ; cur_shift -= step){
 
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
@@ -1246,7 +1240,7 @@ void fit_two_parameter_weibull(
     FLOAT_T* correlation ///< the best correlation -out
     ){
 
-  FLOAT_T* X = calloc(sizeof(float) , total_data_points); //hold data here
+  FLOAT_T* X = calloc(sizeof(FLOAT_T) , total_data_points); //hold data here
 
   // transform data into an array of values for fitting
   // shift (including only non-neg data values) and take log
@@ -1262,7 +1256,7 @@ void fit_two_parameter_weibull(
     // carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
   }
 
-  FLOAT_T* F_T = mymalloc(sizeof(float) * total_data_points);
+  FLOAT_T* F_T = mymalloc(sizeof(FLOAT_T) * total_data_points);
   for(idx=0; idx < fit_data_points; idx++){
     int reverse_idx = total_data_points - idx;
     // magic numbers 0.3 and 0.4 are never changed
@@ -1270,7 +1264,7 @@ void fit_two_parameter_weibull(
     //carp(CARP_DEBUG, "F[%i]=%.6f", idx, F_T[idx]);
   }
 
-  FLOAT_T* Y   = mymalloc(sizeof(float) * total_data_points);
+  FLOAT_T* Y   = mymalloc(sizeof(FLOAT_T) * total_data_points);
   for(idx=0; idx < fit_data_points; idx++){
     Y[idx] = log( -log(1.0 - F_T[idx]) );
     //carp(CARP_DEBUG, "Y[%i]=%.6f", idx, Y[idx]);
@@ -1321,9 +1315,9 @@ void fit_two_parameter_weibull(
     *correlation = 0.0; // min value
     *eta = 0;
     *beta = 0;
+  } else {
+    *correlation = c_num / c_denom;
   }
-  *correlation = c_num / c_denom;
-
   carp(CARP_DETAILED_DEBUG, "eta=%.6f", *eta);
   carp(CARP_DETAILED_DEBUG, "beta=%.6f", *beta);
   carp(CARP_DETAILED_DEBUG, "correlation=%.6f", *correlation);
