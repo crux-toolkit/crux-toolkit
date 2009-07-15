@@ -245,6 +245,14 @@ int search_main(int argc, char** argv){
         }// else, search with more mods
         cur_aa_mods = this_aa_mods;
       }
+      
+      //TODO SJM:  Figure out why this code gives different results for the sequest 
+      //smoke test (this was changed in Rev. 2006).
+      //      20014c20014
+      //< S     21134   21134   3       0.00    server  2140.03 0.00    0.00    213
+      //---
+      //> S     21134   21134   3       0.00    server  2140.03 0.00    0.00    207
+
 
       // get peptide iterator
       MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator =
