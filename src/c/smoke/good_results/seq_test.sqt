@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Jul  1 18:17:03 2009
+H	StartTime	Wed Jul 15 10:51:25 2009
 H	EndTime                               
 H	Database	index-for-sequest-comparison/for-sequest-comparison-binary-fasta
 H	DBSeqLength	?
@@ -20011,7 +20011,7 @@ M	4	15	2910.17	0.26	1.03	128.52	15	100	V.DIAES*TRRIAASRIPADHMVLMAGFT.A	U
 L	gi|16127996|ref|NP_414543.1|
 M	5	46	2912.29	0.33	0.93	83.92	13	104	H.NVTVIDPVEKLLAVGHYLESTVDIAES.T	U
 L	gi|16127996|ref|NP_414543.1|
-S	21134	21134	3	0.00	server	2140.03	0.00	0.00	213
+S	21134	21134	3	0.00	server	2140.03	0.00	0.00	207
 M	1	8	2140.79	0.00	1.28	180.36	14	64	T.QSS*S*EYSISFCVPQSDC.V	U
 L	gi|16127996|ref|NP_414543.1|
 M	2	4	2140.79	0.01	1.27	216.77	15	64	T.QS*S*SEYSISFCVPQSDC.V	U
