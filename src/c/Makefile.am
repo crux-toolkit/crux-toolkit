@@ -1,6 +1,6 @@
 distdir = $(PACKAGE)_$(VERSION)
 
-SUBDIRS = percolator .
+SUBDIRS = MSToolkit percolator .
 
 if USEDOUBLES
   USEDOUBLES='-DUSE_DOUBLES'
@@ -153,7 +153,14 @@ crux_SOURCES = crux-main.cpp  crux-main.h percolator.c percolator.h
 crux_CFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
 crux_CPPFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
 crux_LDADD = \
-  libcrux.la -lstdc++ -L./percolator -lpercolator -lqvality -lArrayLibrary
+  libcrux.la \
+  -lstdc++ \
+  -L./MSToolkit \
+  -L./percolator \
+  -lmstoolkit \
+  -lpercolator \
+  -lqvality \
+  -lArrayLibrary
 
 paramdir = $(prefix)/doc
 param_DATA = default.params

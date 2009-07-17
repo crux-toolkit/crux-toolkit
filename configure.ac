@@ -111,6 +111,7 @@ AC_CONFIG_FILES([\
     doc/user/Makefile \
     src/Makefile \
     src/c/Makefile \
+    src/c/MSToolkit/Makefile \
     src/c/percolator/Makefile \
 ])
 
