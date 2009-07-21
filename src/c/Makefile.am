@@ -2,12 +2,14 @@ distdir = $(PACKAGE)_$(VERSION)
 
 SUBDIRS = MSToolkit percolator .
 
+# Crux can use either single or double precision floating poinnt.
 if USEDOUBLES
   USEDOUBLES='-DUSE_DOUBLES'
 else
   USEDOUBLES=
 endif
 
+# Compiling under OS X requires a preprocessor flag.
 if DARWIN
   USEDARWIN = '-DDARWIN'
 else
@@ -17,9 +19,7 @@ endif
 AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing $(USEDOUBLES) $(USEDARWIN) \
             -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
-noinst_LTLIBRARIES = libcrux.la
-
-NON_PERCOLATOR_LIB_FILES= \
+LIBFILES= \
   alphabet.c \
   alphabet.h \
   array.c \
@@ -93,9 +93,8 @@ NON_PERCOLATOR_LIB_FILES= \
   utils.h \
   version.h
 
-LIBFILES=$(PERCOLATOR_LIB_FILES) $(NON_PERCOLATOR_LIB_FILES)
+noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = $(AM_CFLAGS)
-
 libcrux_la_SOURCES = $(LIBFILES)
 libcrux_la_LIBADD = -lm
 
@@ -104,11 +103,6 @@ PROGRAM_FILES = \
   crux-get-ms2-spectrum \
   crux-generate-peptides \
   crux-predict-peptide-ions 
-#  crux-search-for-matches \
-#  crux-create-index \
-#  create_protein_index \
-#  transform_ms2_spectra \
-#  create_psm_files
 
 bin_PROGRAMS = $(PROGRAM_FILES)
 
@@ -120,38 +114,13 @@ crux_generate_peptides_SOURCES = generate_peptides.c
 crux_generate_peptides_CFLAGS = $(AM_CFLAGS) -DMAIN 
 crux_generate_peptides_LDADD = libcrux.la 
 
-#crux_create_index_SOURCES = create_index.c
-#crux_create_index_CFLAGS = $(AM_CFLAGS) -DMAIN 
-#crux_create_index_LDADD = libcrux.la 
-
-#crux_search_for_matches_SOURCES = match_search.c
-#crux_search_for_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)/
-#crux_search_for_matches_LDADD = libcrux.la 
-
-#crux_analyze_matches_SOURCES = match_analysis.c
-#crux_analyze_matches_CFLAGS = $(AM_CFLAGS) -DMAIN -I$(PERCOLATOR_DIR)
-#crux_analyze_matches_LDADD = \
-#  -lstdc++ -L$(PERCOLATOR_DIR)/ -lpercolator -lqvality -lArrayLibrary -lcrux 
-
 crux_predict_peptide_ions_SOURCES = predict_peptide_ions.c
 crux_predict_peptide_ions_CFLAGS = $(AM_CFLAGS) -DMAIN 
 crux_predict_peptide_ions_LDADD = libcrux.la 
 
-#create_protein_index_SOURCES = create_protein_index.c
-#create_protein_index_CFLAGS = $(AM_CFLAGS) -DMAIN 
-#create_protein_index_LDADD = libcrux.la 
-
-#transform_ms2_spectra_SOURCES = transform_ms2_spectra.c
-#transform_ms2_spectra_CFLAGS = $(AM_CFLAGS) -DMAIN 
-#transform_ms2_spectra_LDADD = libcrux.la 
-
-#create_psm_files_SOURCES = create_psm_files.c
-#create_psm_files_CFLAGS = $(AM_CFLAGS) -DMAIN 
-#create_psm_files_LDADD = libcrux.la 
-
 crux_SOURCES = crux-main.cpp  crux-main.h percolator.c percolator.h
 crux_CFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
-crux_CPPFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
+crux_CXXFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
 crux_LDADD = \
   libcrux.la \
   -lstdc++ \
