@@ -6,6 +6,7 @@
 #include <cstring>
 
 using namespace std;
+namespace MSToolkit {
 
 class Spectrum {
  public:
@@ -77,5 +78,7 @@ class Spectrum {
 
 };
 
+
+}
 #endif
 

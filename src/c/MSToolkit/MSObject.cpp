@@ -3,6 +3,8 @@
 
 using namespace std;
 
+namespace MSToolkit {
+
 MSObject::MSObject(){
   vSpectrum = new vector<Spectrum>;
   fileName="";
@@ -96,3 +98,4 @@ int MSObject::size(){
   return vSpectrum->size();
 };
 
+}

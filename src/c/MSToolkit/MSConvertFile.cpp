@@ -6,7 +6,7 @@
 #include "Spectrum.h"
 
 using namespace std;
-
+using namespace MSToolkit;
 int main(int argc, char *argv[]){
 
 	//Here are all the variable we are going to need

@@ -2,6 +2,8 @@
 #include <iostream>
 using namespace std;
 
+namespace MSToolkit {
+
 MSReader::MSReader(){
 	fileIn=NULL;
 	iIntensityPrecision=1;
@@ -1058,3 +1060,5 @@ MSFileFormat MSReader::checkFileFormat(char *fn){
   return dunno;
 
 };
+
+}

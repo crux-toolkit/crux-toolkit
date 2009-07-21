@@ -1,6 +1,7 @@
 #include "Spectrum.h"
 #include <iostream>
 #include <cstdlib>
+namespace MSToolkit {
 
 Spectrum::Spectrum(){
   rTime=0;
@@ -276,3 +277,6 @@ int Spectrum::compareMZRev(const void *p1, const void *p2){
   else if(d1.mz<d2.mz) return 1;
   else return 0;
 };
+
+}
+
