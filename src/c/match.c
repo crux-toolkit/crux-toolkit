@@ -722,7 +722,7 @@ void print_match_tab(
       fprintf(file, "NaN\t");
     }
     else {
-      fprintf(file, float_format, log_pvalue);
+      fprintf(file, float_format, exp(-1 * log_pvalue));
     }
   }
   else {
@@ -731,7 +731,7 @@ void print_match_tab(
   }
   if( scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == TRUE ){ 
     // print q-value (Weibull est.)
-    fprintf(file, float_format, weibull_qvalue);
+    fprintf(file, float_format, exp(-1 * weibull_qvalue));
   }
   else {
     fprintf(file, "\t");
