@@ -1466,14 +1466,17 @@ void set_index_search_constraint(
   double index_min = get_peptide_constraint_min_mass(index->disk_constraint);
   double index_max = get_peptide_constraint_max_mass(index->disk_constraint);
   
-  //  carp(CARP_DETAILED_DEBUG, "Setting index search constraint: %i-%i, %.2f-%.2f",get_peptide_constraint_min_length(constraint), get_peptide_constraint_max_length(constraint), search_min, search_max );
   if( search_min < index_min ){
-    carp(CARP_WARNING, 
-         "Some masses in the search range are below the index minimum.");
+    carp_once(CARP_WARNING, 
+	      "Minimum mass in the search range (%g) is below the index minimum (%g).",
+	      search_min, index_min);
+    carp_once(CARP_WARNING, "This warning will not be repeated.")
   }
   if( search_max > index_max ){
-    carp(CARP_WARNING, 
-         "Some masses in the search range are above the index maximum.");
+    carp_once(CARP_WARNING, 
+	      "Maximum mass in the search range (%g) is above the index maximum (%g).",
+	      search_max, index_max);
+    carp_once(CARP_WARNING, "This warning will not be repeated.")
   }
 }
 
