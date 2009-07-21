@@ -1,6 +1,8 @@
 #ifndef _MSTOOLKITTYPES_H
 #define _MSTOOLKITTYPES_H
 
+namespace MSToolkit {
+
 enum MSSpectrumType {
   MS1,
   MS2,
@@ -63,6 +65,8 @@ struct ZState {
   int z;
   double mz;
 };
+
+}
 
 #endif
 

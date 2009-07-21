@@ -4,6 +4,8 @@ libmstoolkit_la_SOURCES = \
   MSObject.h \
   MSReader.cpp \
   MSReader.h \
+  CMSReader.cpp \
+  CMSReader.h \
   MSSingleScan.cpp \
   MSTDemo.cpp \
   MSToolkitTypes.h \
@@ -13,6 +15,8 @@ libmstoolkit_la_SOURCES = \
   RAMP/ramp.h \
   Spectrum.cpp \
   Spectrum.h \
+  CSpectrum.cpp \
+  CSpectrum.h \
   zLib/adler32.c \
   zLib/compress.c \
   zLib/crc32.c \

@@ -30,6 +30,7 @@ typedef off_t f_off;
 
 using namespace std;
 
+namespace MSToolkit {
 class MSReader {
  public:
   //Constructors & Destructors
@@ -105,6 +106,7 @@ class MSReader {
 	void writeTextSpec(FILE* fileOut, Spectrum& s);
 	void writeSpecHeader(FILE* fileOut, bool text, Spectrum& s);
 };
+}
 
 #endif
 
