@@ -114,6 +114,20 @@ void carp(
   ...
 );
 
+/**
+ * \def carp_once( verbosity, msg, ...)
+ *
+ * \brief Print message to log file, just once.
+ *
+ * Similar to the carp function, below, but will only print the message once.
+ */
+#define carp_once( verbosity, msg, ... ) \
+{ \
+  static BOOLEAN_T _carp_; \
+  if (!_carp_) carp(verbosity, msg, ## __VA_ARGS__); \
+  _carp_ = 1;\
+}
+
 /*
  * Local Variables:
  * mode: c
