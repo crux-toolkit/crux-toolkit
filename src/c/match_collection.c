@@ -1952,7 +1952,7 @@ void print_tab_header(FILE* output){
     "sp rank\t"
     "xcorr score\t"
     "xcorr rank\t"
-    "-log(p-value)\t"
+    "p-value\t"
     "Weibull est. q-value\t"
     "decoy q-value (xcorr)\t"
     "decoy q-value (p-value)\t"

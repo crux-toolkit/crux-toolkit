@@ -1,7 +1,7 @@
 fileroot=reverse
 top-match=100
 overwrite=T
-number-decoy-set=1
+num-decoys-per-target=1
 precision=2
 reverse-sequence=T
 mod=0.5:ABCDEFGHIJKLMNOPQRSTUVWXYZ:1
