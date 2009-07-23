@@ -459,8 +459,12 @@ void initialize_parameters(void){
       "true");
 
   set_boolean_parameter("use-mz-window", FALSE,
-			"Use mass-to-charge rather than mass for finding the window of peptides. Default F.",
-			"Available for crux-search-for-matches", "true");
+      "Use mass-to-charge rather than mass for finding the window of peptides. Default F.",
+      "Available for crux-search-for-matches", "true");
+
+  set_boolean_parameter("use-mstoolkit", FALSE,
+      "Use MSToolkit to parse spectra. Default F.",
+      "Available for crux-search-for-matches", "true");
 
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
       "Minimum mass of spectra to be searched.  Default 0.",

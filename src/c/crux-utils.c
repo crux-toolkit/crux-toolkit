@@ -1216,9 +1216,10 @@ void fit_three_parameter_weibull(
       carp(CARP_DETAILED_DEBUG, "Stat: Mu, Corr = %.6f, %.6f\n", cur_shift, cur_correlation);
       carp(CARP_DETAILED_DEBUG, "Stat: Eta, Beta, Shift = %.6f, %.6f, %.6f", 
           best_eta, best_beta, best_shift);
-      return;
+      break;
     }
   }
+  carp(CARP_DETAILED_DEBUG,"Corr = %.6f",best_correlation);
 }
 
 /**

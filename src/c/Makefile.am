@@ -17,7 +17,7 @@ else
 endif
 
 AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing $(USEDOUBLES) $(USEDARWIN) \
-            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
+            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I./MSToolkit -I./MSToolkit/RAMP
 
 LIBFILES= \
   alphabet.c \
@@ -95,6 +95,8 @@ LIBFILES= \
 
 noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = $(AM_CFLAGS)
+libcrux_la_CXXFLAGS = -IMSToolkit -IMSToolkit/RAMP
+
 libcrux_la_SOURCES = $(LIBFILES)
 libcrux_la_LIBADD = -lm
 
@@ -106,17 +108,17 @@ PROGRAM_FILES = \
 
 bin_PROGRAMS = $(PROGRAM_FILES)
 
-crux_get_ms2_spectrum_SOURCES = get_ms2_spectrum.c
+crux_get_ms2_spectrum_SOURCES = get_ms2_spectrum.cpp
 crux_get_ms2_spectrum_CFLAGS = $(AM_CFLAGS) -DMAIN 
-crux_get_ms2_spectrum_LDADD = libcrux.la 
+crux_get_ms2_spectrum_LDADD = libcrux.la -L$(top_builddir)/src/c/MSToolkit -lmstoolkit
 
 crux_generate_peptides_SOURCES = generate_peptides.c
 crux_generate_peptides_CFLAGS = $(AM_CFLAGS) -DMAIN 
 crux_generate_peptides_LDADD = libcrux.la 
 
-crux_predict_peptide_ions_SOURCES = predict_peptide_ions.c
+crux_predict_peptide_ions_SOURCES = predict_peptide_ions.cpp
 crux_predict_peptide_ions_CFLAGS = $(AM_CFLAGS) -DMAIN 
-crux_predict_peptide_ions_LDADD = libcrux.la 
+crux_predict_peptide_ions_LDADD = libcrux.la -L$(top_builddir)/src/c/MSToolkit -lmstoolkit
 
 crux_SOURCES = crux-main.cpp  crux-main.h percolator.c percolator.h
 crux_CFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator

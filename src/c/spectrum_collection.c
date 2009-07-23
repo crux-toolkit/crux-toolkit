@@ -21,6 +21,9 @@
 #include "unistd.h"
 #include "parameter.h"
 
+#include "CMSReader.h"
+#include "CSpectrum.h"
+
 #define MAX_SPECTRA 40000 ///< max number of spectrums
 #define MAX_COMMENT 1000 ///< max length of comment
 
@@ -247,21 +250,50 @@ BOOLEAN_T parse_spectrum_collection(
   // parse header lines 'H' into spectrum_collection comment 
   parse_header_line(spectrum_collection, file);
 
-  parsed_spectrum = allocate_spectrum();
-  // parse one spectrum at a time
-  while(parse_spectrum_file(parsed_spectrum, file, spectrum_collection->filename)){
-    // is spectrum capacity not full?
-    if(!add_spectrum_to_end(spectrum_collection, parsed_spectrum)){
-      free_spectrum(parsed_spectrum);
-      fclose(file);
-      return FALSE;
-    }
-    parsed_spectrum = allocate_spectrum();
-  }
-  
-  free_spectrum(parsed_spectrum); // CHECKME why free_spectrum??
-  fclose(file);
+  //check to see if the mstoolkit is going to used.
+  if (get_boolean_parameter("use-mstoolkit")) {
+    //We now know that the file exists,
+    //MSToolkit doesn't check or doesn't report an
+    //error.  So we need this check about, but not
+    //the file, so close it. (SJM)
+    //also, I want to use parse_header_line for
+    //the collection.
+    fclose(file);
+    carp(CARP_INFO,"using mstoolkit to parse spectra");
+    MST_MSREADER_T* mst_reader = newMST_MSReader();
+    MST_SPECTRUM_T* mst_spectrum = newMST_Spectrum();
 
+    MST_MSReader_readFile(mst_reader, spectrum_collection->filename, mst_spectrum);
+
+    while(MST_Spectrum_getScanNumber(mst_spectrum) != 0) {
+      parsed_spectrum = allocate_spectrum();
+      parse_spectrum_spectrum(parsed_spectrum, 
+        mst_spectrum, 
+        spectrum_collection->filename);
+      if (!add_spectrum_to_end(spectrum_collection, parsed_spectrum)) {
+        free_spectrum(parsed_spectrum);
+        return FALSE;
+      }
+      MST_MSReader_readFile(mst_reader, NULL, mst_spectrum);
+    }
+    freeMST_Spectrum(mst_spectrum);
+    freeMST_MSReader(mst_reader);
+  } else {
+    parsed_spectrum = allocate_spectrum();
+    // parse one spectrum at a time
+    while(parse_spectrum_file(parsed_spectrum, file, spectrum_collection->filename)){
+      // is spectrum capacity not full?
+      if(!add_spectrum_to_end(spectrum_collection, parsed_spectrum)){
+        free_spectrum(parsed_spectrum);
+        fclose(file);
+        return FALSE;
+      }
+      parsed_spectrum = allocate_spectrum();
+    }
+    
+    free_spectrum(parsed_spectrum); // CHECKME why free_spectrum??
+    fclose(file);
+  }
   spectrum_collection->is_parsed = TRUE;
   
   // good job!
@@ -390,20 +422,53 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     return (FALSE);
   }
 
-  target_index = binary_search_spectrum(file, first_scan);
-  // first_scan not found
-  if(target_index == -1){
+  if (get_boolean_parameter("use-mstoolkit")) {
+    //We now know that the file exists,
+    //MSToolkit doesn't check or doesn't report an
+    //error.  So we need this check about, but not
+    //the file, so close it. (SJM)
     fclose(file);
-    return FALSE;
-  }
-  fseek(file, target_index, SEEK_SET);
-  // parse spectrum, check if failed to parse spectrum return false
-  if(!parse_spectrum_file(spectrum, file, spectrum_collection->filename)){
+    carp(CARP_INFO,"using mstoolkit to parse spectrum");
+    MST_MSREADER_T* mst_reader = newMST_MSReader();
+    MST_SPECTRUM_T* mst_spectrum = newMST_Spectrum();
+    BOOLEAN_T parsed = FALSE;
+
+
+    MST_MSReader_readFileScan(mst_reader, 
+      spectrum_collection->filename, 
+      mst_spectrum, first_scan);
+
+    if (MST_Spectrum_getScanNumber(mst_spectrum) != 0) {
+      parse_spectrum_spectrum(spectrum, 
+            mst_spectrum, 
+            spectrum_collection->filename);
+      parsed = TRUE;
+    }
+    else {
+      carp(CARP_ERROR,"Spectrum %d does not exist in file", first_scan);
+      parsed = FALSE;
+    }
+
+    freeMST_Spectrum(mst_spectrum);
+    freeMST_MSReader(mst_reader);
+    return parsed;
+  } else {
+
+    target_index = binary_search_spectrum(file, first_scan);
+    // first_scan not found
+    if(target_index == -1){
+      fclose(file);
+      return FALSE;
+    }
+    fseek(file, target_index, SEEK_SET);
+    // parse spectrum, check if failed to parse spectrum return false
+    if(!parse_spectrum_file(spectrum, file, spectrum_collection->filename)){
+      fclose(file);
+      return FALSE;
+    }
     fclose(file);
-    return FALSE;
+    return TRUE;
   }
-  fclose(file);
-  return TRUE;
 }
 
 /**

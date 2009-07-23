@@ -14,6 +14,10 @@
 #include "ion.h"
 #include "ion_series.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \returns An (empty) ion_series object.
  */
@@ -413,6 +417,10 @@ BOOLEAN_T ion_filtered_iterator_has_next(
 ION_T* ion_filtered_iterator_next(
   ION_FILTERED_ITERATOR_T* ion_iterator///< return the next ion -in
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * Local Variables:

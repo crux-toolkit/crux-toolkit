@@ -768,6 +768,49 @@ BOOLEAN_T parse_spectrum_file(
 }
 
 /**
+  * Parses a spectrum from a MSToolkit::Spectrum
+  * \returns TRUE if success. FALSE is failure.
+  */
+
+
+BOOLEAN_T parse_spectrum_spectrum(
+  SPECTRUM_T* spectrum, ///< spectrum to parse the information int -out
+  MST_SPECTRUM_T* mst_spectrum, ///< the input MSToolkit spectrum -in
+  char* filename ///< filename of the spectrum, should not free -in
+  ) {
+
+  //set first_scan, last_scan, and precursor_mz.
+  set_spectrum_first_scan( spectrum,  MST_Spectrum_getScanNumber(mst_spectrum));
+  set_spectrum_last_scan( spectrum, MST_Spectrum_getScanNumber(mst_spectrum));
+  set_spectrum_precursor_mz( spectrum, MST_Spectrum_getMZ(mst_spectrum));
+
+  // set filename of empty spectrum
+  set_spectrum_new_filename(spectrum, filename);
+
+  spectrum -> spectrum_type = MS2; //assume MS2
+  
+  int z_idx;
+
+  //add possible charge states.
+  for (z_idx=0;z_idx < MST_Spectrum_sizeZ(mst_spectrum);z_idx++) {
+    add_possible_z(spectrum, MST_Spectrum_atZ(mst_spectrum, z_idx));
+  }
+
+  //add all peaks.
+  
+  int peak_idx;
+  for (peak_idx=0;peak_idx < MST_Spectrum_size(mst_spectrum);peak_idx++) {
+    add_peak_to_spectrum(spectrum,
+      MST_Spectrum_intensity(mst_spectrum, peak_idx),
+      MST_Spectrum_mz(mst_spectrum, peak_idx));
+  }
+  
+  spectrum -> has_peaks = TRUE;
+
+  return TRUE;
+}
+
+/**
  * Adds a peak to the spectrum given a intensity and location
  * calls update_spectrum_fields to update num_peaks, min_peak ...
  */
@@ -854,7 +897,7 @@ PEAK_T* get_nearest_peak(
       continue;
     }
     FLOAT_T peak_mz = get_peak_location(peak);
-    FLOAT_T distance = abs(mz - peak_mz);
+    FLOAT_T distance = fabs(mz - peak_mz);
     if (distance > max){
       continue;
     }
@@ -1174,7 +1217,7 @@ int get_charges_to_search(SPECTRUM_T* spectrum, int** select_charge_array){
   // Return full array of charges
   if( strcmp( charge_str, "all") == 0){
 
-    *select_charge_array = mymalloc(sizeof(int) * total_charges);
+    *select_charge_array = (int*)mymalloc(sizeof(int) * total_charges);
     for(i=0; i < total_charges; i++){
       (*select_charge_array)[i] = all_charge_array[i];
     }
@@ -1193,7 +1236,7 @@ int get_charges_to_search(SPECTRUM_T* spectrum, int** select_charge_array){
   for(i=0; i<total_charges; i++){
      
     if( all_charge_array[i] == param_charge ){ 
-      *select_charge_array = mymalloc(sizeof(int));
+      *select_charge_array = (int*)mymalloc(sizeof(int));
       **select_charge_array = param_charge;
       return 1;
     }
