@@ -83,6 +83,10 @@ enum parameter_type {
   ALGORITHM_TYPE_P}; ///< parameters of type ALGORITHM_TYPE_T
 typedef enum parameter_type PARAMETER_TYPE_T;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * /brief Initialize parameters to default values.
  *
@@ -280,5 +284,9 @@ int get_all_aa_mod_list(AA_MOD_T*** mods);
  * named by the parameter "output-dir".
  */
 void print_parameter_file(char** filename);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -11,6 +11,14 @@
 #include "objects.h"
 #include "peak.h"
 
+#ifndef __cplusplus
+#include "CSpectrum.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \returns An (empty) spectrum object.
  */
@@ -83,6 +91,17 @@ BOOLEAN_T parse_spectrum_file(
   char* filename ///< filename of the spectrum, should not free -in
   );
 
+/**
+  * Parses a spectrum from a MSToolkit::Spectrum
+  * \returns TRUE if success. FALSE is failure.
+  */
+#ifndef __cplusplus
+BOOLEAN_T parse_spectrum_spectrum(
+  SPECTRUM_T* spectrum, ///< spectrum to parse the information int -out
+  MST_SPECTRUM_T* mst_spectrum, ///< the input MSToolkit spectrum -in
+  char* filename ///< filename of the spectrum, should not free -in
+);
+#endif
 /**
  * \returns TRUE if success. FALSE if failure.
  */
@@ -478,6 +497,10 @@ PEAK_T* peak_iterator_next(
 void peak_iterator_reset(
   PEAK_ITERATOR_T* peak_iterator  ///< the interator for the peaks -in
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * Local Variables:

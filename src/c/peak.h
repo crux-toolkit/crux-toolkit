@@ -14,6 +14,10 @@
 #include "objects.h"
 #include "utils.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \returns A PEAK_T object
  */
@@ -139,6 +143,11 @@ void sort_peaks(
   int num_peaks,  ///< number of total peaks -in
   PEAK_SORT_TYPE_T sort_type ///< the sort type(location or intensity)
   );
+
+#ifdef __cplusplus
+}
+#endif
+
 
 /*
  * Local Variables:
