@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue May 12 12:03:06 2009
+H	StartTime	Thu Jul 23 18:48:27 2009
 H	EndTime                               
 H	Database	test.fasta
 H	DBSeqLength	?
@@ -16,30 +16,30 @@ H	Comment	preliminary algorithm sp
 H	Comment	final algorithm xcorr
 H	StaticMod	C=160.139
 H	Alg-DisplayTop	5
-H	EnzymeSpec	elastase-partial-digest
+H	EnzymeSpec	custom-enzyme-partial-digest
 H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, xcorr score, sp score, number ions matched, total ions compared, sequence
 S	2	2	3	0.00	server	1726.60	0.00	0.00	1
-M	1	1	1725.98	0.00	-0.55	23.63	7	64	L.MSPFGVPVPGPAPETKD.I	U
+M	1	1	1.7e+03	0	-0.55	24	7	64	L.MSPFGVPVPGPAPETKD.I	U
 L	gi|6381999|ref|NP_009311.2|
 S	3	3	1	0.00	server	517.94	0.00	0.00	1
-M	1	1	519.51	0.00	0.10	13.44	3	10	I.TTGNGA.G	U
+M	1	1	5.2e+02	0	0.098	13	3	10	I.TTGNGA.G	U
 L	gi|16127995|ref|NP_414542.1|
 S	10	10	2	0.00	server	837.14	0.00	0.00	1
-M	1	1	839.90	0.00	-0.07	7.04	2	12	L.SQKDSYI.L	U
+M	1	1	8.4e+02	0	-0.072	7	2	12	L.SQKDSYI.L	U
 L	gi|6381999|ref|NP_009311.2|
 S	14	14	2	0.00	server	998.80	0.00	0.00	1
-M	1	1	1001.01	0.00	-0.10	1.83	1	16	I.TQSSSEYSI.S	U
+M	1	1	1e+03	0	-0.097	1.8	1	16	I.TQSSSEYSI.S	U
 L	gi|16127996|ref|NP_414543.1|
 S	15	15	2	0.00	server	975.62	0.00	0.00	2
-M	1	1	977.00	0.00	-0.08	5.72	2	12	I.EYFNNYQ.P	U
+M	1	1	9.8e+02	0	-0.076	5.7	2	12	I.EYFNNYQ.P	U
 L	gi|6381999|ref|NP_009311.2|
-M	2	2	973.05	-0.44	-0.11	0.00	0	12	L.TYKRYDQ.Y	U
+M	2	2	9.7e+02	-0.44	-0.11	0	0	12	L.TYKRYDQ.Y	U
 L	gi|6381999|ref|NP_009311.2|
 S	16	16	2	0.00	server	1039.96	0.00	0.00	3
-M	1	2	1040.19	0.00	0.04	0.00	0	14	Q.KHKNSQWL.K	U
+M	1	2	1e+03	0	0.04	0	0	14	Q.KHKNSQWL.K	U
 L	gi|6381999|ref|NP_009311.2|
-M	2	2	1041.26	3.65	-0.11	0.00	0	16	I.KKYFKTGGI.L	U
+M	2	2	1e+03	3.7	-0.11	0	0	16	I.KKYFKTGGI.L	U
 L	gi|6381999|ref|NP_009311.2|
-M	3	1	1038.09	3.96	-0.12	0.52	1	14	V.YTCDPRQV.P	U
+M	3	1	1e+03	4	-0.12	0.52	1	14	V.YTCDPRQV.P	U
 L	gi|16127996|ref|NP_414543.1|

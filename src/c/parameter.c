@@ -651,9 +651,9 @@ void initialize_parameters(void){
       "The maximum number of modified amino acids that can appear in one "
       "peptide.  Each aa can be modified multiple times.  Default no limit.",
       "Available from parameter file for search-for-matches.", "true");
-  set_int_parameter("precision", 6, 1, 100, //max is arbitrary
+  set_int_parameter("precision", 8, 1, 100, //max is arbitrary
       "Set the precision for masses and scores written to sqt and text files. "
-      "Default 6.",
+      "Default 8.",
       "Available from parameter file for crux search-for-matches, percolator, "
       "and compute-q-values.", "true");
   set_int_parameter("print-search-progress", 10, 0, BILLION,
