@@ -573,7 +573,7 @@ void print_match_sqt(
   int precision = get_int_parameter("precision");
   char format[64];
   sprintf(format,
-          "M\t%%d\t%%d\t%%.%if\t%%.%if\t%%.%if\t%%.%if\t%%d\t%%d\t%%s\tU\n",
+          "M\t%%d\t%%d\t%%.%ig\t%%.%ig\t%%.%ig\t%%.%ig\t%%d\t%%d\t%%s\tU\n",
           precision, precision, precision, precision);
 
   // print match info
@@ -699,7 +699,7 @@ void print_match_tab(
 
   int precision = get_int_parameter("precision");
   char float_format[16];
-  sprintf(float_format, "%%.%if\t", precision);
+  sprintf(float_format, "%%.%ig\t", precision);
 
   // Print tab delimited fields
   fprintf(file, "%d\t", scan_num);
