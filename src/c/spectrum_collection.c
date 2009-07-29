@@ -1093,7 +1093,10 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
 
   // Does the current pass?
   spec = iterator->spectrum_collection->spectra[iterator->spectrum_index];
-  int this_charge = iterator->charges[iterator->charge_index];
+  int this_charge = -1;
+  if (iterator->charge_index < iterator->num_charges) {
+    this_charge = iterator->charges[iterator->charge_index];
+  }
   double mz = get_spectrum_precursor_mz(spec);
 
   if( iterator->search_charge == 0 || iterator->search_charge == this_charge ){
@@ -1101,10 +1104,12 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
       // passes both tests
       iterator->has_next = TRUE;
       return;
-    }else{ // try the next spectrum
-      queue_next_spectrum(iterator);
     }
   }
+  
+  // try the next spectrum
+  queue_next_spectrum(iterator);
+
 }
 
 
