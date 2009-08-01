@@ -464,7 +464,7 @@ void print_ion_gmtk_single_binary(
 
   }
 
-  fwrite(float_array, sizeof(float), 3, file);
+  fwrite(float_array, sizeof(FLOAT_T), 3, file);
   fwrite(int_array, sizeof(int), 9, file);
   free(float_array);
   free(int_array);
@@ -485,7 +485,7 @@ void print_null_ion_gmtk_single_binary(
   int int_array[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);
-  fwrite(float_array, sizeof(float), 3, file);
+  fwrite(float_array, sizeof(FLOAT_T), 3, file);
   fwrite(int_array, sizeof(int), 9, file);
 }
 
@@ -504,7 +504,7 @@ void print_null_ion_gmtk_paired_binary(
   int int_array[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);
-  fwrite(float_array, sizeof(float), 6, file);
+  fwrite(float_array, sizeof(FLOAT_T), 6, file);
   fwrite(int_array, sizeof(int), 12, file);
 }
 
@@ -669,7 +669,7 @@ void print_ion_gmtk_paired_binary(
   // output to the file
   fwrite(&sentence_idx, sizeof(int), 1, file);
   fwrite(&frame_idx, sizeof(int), 1, file);
-  fwrite(float_array, sizeof(float), PAIRED_ION_FLOATS, file);
+  fwrite(float_array, sizeof(FLOAT_T), PAIRED_ION_FLOATS, file);
   fwrite(int_array, sizeof(int), PAIRED_ION_INTS, file);
   free(float_array);
   free(int_array);

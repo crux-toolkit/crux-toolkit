@@ -863,7 +863,7 @@ void serialize_match(
   // Serialize each score and rank
   int score_type_idx;
   for(score_type_idx = 0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
-    fwrite(&(match->match_scores[score_type_idx]), sizeof(float), 1, file);
+    fwrite(&(match->match_scores[score_type_idx]), sizeof(FLOAT_T), 1, file);
     fwrite(&(match->match_rank[score_type_idx]), sizeof(int), 1, file);
   }
   
@@ -871,7 +871,7 @@ void serialize_match(
   serialize_spectrum(match->spectrum, file);
   
   // b/y ion matches ratio
-  fwrite(&(match->b_y_ion_fraction_matched), sizeof(float), 1, file);
+  fwrite(&(match->b_y_ion_fraction_matched), sizeof(FLOAT_T), 1, file);
 
   // serialize match peptide overall trypticity
   //fwrite(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, file);
@@ -1040,7 +1040,7 @@ MATCH_T* parse_match(
   // parse each score and rank of match
   for(score_type_idx=0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
     fread(&(match->match_scores[score_type_idx]), 
-      sizeof(float), 1, result_file);
+      sizeof(FLOAT_T), 1, result_file);
     fread(&(match->match_rank[score_type_idx]), 
       sizeof(int), 1, result_file);
   }
@@ -1051,7 +1051,7 @@ MATCH_T* parse_match(
   }
   
   // spectrum specific features
-  fread(&(match->b_y_ion_fraction_matched), sizeof(float), 1, result_file);
+  fread(&(match->b_y_ion_fraction_matched), sizeof(FLOAT_T), 1, result_file);
 
   // calculate the total matched from the total possible and the
   // fraction matched
