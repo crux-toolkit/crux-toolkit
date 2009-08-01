@@ -1002,7 +1002,7 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
 
   //int num_samples = num_scores;
   // reverse sort the first num_samples of them
-  qsort(scores, num_samples, sizeof(float), compare_floats_descending);
+  qsort(scores, num_samples, sizeof(FLOAT_T), compare_floats_descending);
 
   // use only a fraction of the samples, the high-scoring tail
   // this parameter is hidden from the user
@@ -1710,9 +1710,9 @@ BOOLEAN_T serialize_psm_features(
   
   myfwrite(&(match_collection->charge), sizeof(int), 1, output); 
   myfwrite(&(match_collection->match_total), sizeof(int), 1, output);
-  myfwrite(&delta_cn, sizeof(float), 1, output);
-  myfwrite(&ln_delta_cn, sizeof(float), 1, output);
-  myfwrite(&ln_experiment_size, sizeof(float), 1, output);
+  myfwrite(&delta_cn, sizeof(FLOAT_T), 1, output);
+  myfwrite(&ln_delta_cn, sizeof(FLOAT_T), 1, output);
+  myfwrite(&ln_experiment_size, sizeof(FLOAT_T), 1, output);
 
   // serialize each boolean for scored type 
   int score_type_idx;
@@ -2688,21 +2688,21 @@ BOOLEAN_T extend_match_collection(
          chars_read, match_total_of_serialized_collection);
       
     // get delta_cn value
-    if(fread(&delta_cn, (sizeof(float)), 1, result_file) != 1){
+    if(fread(&delta_cn, (sizeof(FLOAT_T)), 1, result_file) != 1){
       carp(CARP_ERROR, 
        "Serialized file corrupted, incorrect delta cn value for top match");  
       return FALSE;
     }
     
     // get ln_delta_cn value
-    if(fread(&ln_delta_cn, (sizeof(float)), 1, result_file) != 1){
+    if(fread(&ln_delta_cn, (sizeof(FLOAT_T)), 1, result_file) != 1){
       carp(CARP_ERROR, 
     "Serialized file corrupted, incorrect ln_delta cn value for top match");  
       return FALSE;
     }
     
     // get ln_experiment_size
-    if(fread(&ln_experiment_size, (sizeof(float)), 1, result_file) != 1){
+    if(fread(&ln_experiment_size, (sizeof(FLOAT_T)), 1, result_file) != 1){
       carp(CARP_ERROR, "Serialized file corrupted, incorrect "
            "ln_experiment_size cn value for top match");  
       return FALSE;
