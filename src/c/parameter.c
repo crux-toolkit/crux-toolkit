@@ -501,8 +501,8 @@ void initialize_parameters(void){
       "--output-dir.", "true");
   set_string_parameter("decoy-sqt-output-file", "search.decoy.sqt", 
       "SQT output file name for decoys.  Default 'search.decoy.sqt'.",
-      "Used by crux search-for-matches with "
-      "number-decoy-set > 0.  The location of this file is controlled by "
+      "Used by crux search-for-matches when "
+      "num-decoys-per-taraget > 0.  The location of this file is controlled by "
       "--output-dir.", "true");
   set_string_parameter("search-tab-output-file", "search.target.txt", 
       "Tab delimited output file name. Default 'search.target.txt'",
@@ -518,8 +518,8 @@ void initialize_parameters(void){
       "--output-dir.", "true");
   set_string_parameter("decoy-tab-output-file", "search.decoy.txt", 
       "Tab delimited output file name for decoys.  Default 'search.decoy.txt'.",
-      "Used by crux search-for-matches with "
-      "number-decoy-set > 0.  The location of this file is controlled by "
+      "Used by crux search-for-matches when "
+      "num-decoys-per-targett > 0.  The location of this file is controlled by "
       "--output-dir.", "true");
   set_string_parameter("percolator-log-file", "percolator.log.txt", 
       "Log file name for percolator. Default 'percolator.log.txt'",
@@ -573,9 +573,10 @@ void initialize_parameters(void){
       "num-decoys-per-target.",
       "true");
   // coder options regarding decoys
-  set_int_parameter("number-decoy-set", 2, 0, 10, 
-      "Now hidden from user controls how many decoy match_collections/files",
-      "", "false");
+  set_int_parameter("num-decoy-files", 2, 0, 10,
+                    "Replaces number-decoy-set.  Determined by decoy-location"
+                    " and num-decoys-per-target",
+                    "", "false");
   set_boolean_parameter("tdc", FALSE,
       "Target-decoy competition. puts decoy psms in target file. ",
       "Now hidden from the user", "false");
@@ -975,53 +976,55 @@ BOOLEAN_T find_param_filename(int argc,
   return success;
 }
 
+/**
+ * \brief Take the user options related to decoys to set the number of
+ * decoy files and to adjust the number of top Sp-ranked PSMs to
+ * score with xcorr.  Number of decoy files is 0 if decoy location is
+ * "target", 1 if location is "one-decoy-file", or
+ * num-decoys-per-target.  Max rank prelimiary is adjusted if location
+ * is target and num-decoys-per-target > 1.
+ */
 void translate_decoy_options(){
 
-  // translate user decoy options into the old set of options
   // get user values
   int num_decoy_per_target = get_int_parameter("num-decoys-per-target");
   char* location = get_string_parameter("decoy-location");
   int max_rank_preliminary = get_int_parameter("max-rank-preliminary");
+
   // store new values here
-  BOOLEAN_T tdc = FALSE;
-  int new_num_decoy_per_target = 0;
-  int new_num_decoy_set = 0;        // number of decoy files
-  //int new_max_rank_preliminary = 0; 
+  BOOLEAN_T tdc = FALSE;  // target-decoy competitition
+  int new_num_decoy_files = -1;
   int new_max_rank_preliminary = max_rank_preliminary; 
 
+  // user may not have set target-location if no decoys requested
   if( num_decoy_per_target == 0 ){
     free(location);
-    location = "target-file";
+    location = my_copy_string("target-file");
   }
 
   // set new values
   if( strcmp(location, "target-file") == 0 ){
     tdc = TRUE;
-    new_num_decoy_set = 0; // ie no decoy files
-    new_num_decoy_per_target = num_decoy_per_target;
+    new_num_decoy_files = 0;
+
     if( max_rank_preliminary > 0 ){  // scale to num decoys
       new_max_rank_preliminary = max_rank_preliminary * 
-                                (1 + new_num_decoy_per_target);
+                                (1 + num_decoy_per_target);
     }
   }else if( strcmp(location, "one-decoy-file") == 0 ){
     tdc = FALSE;
-    new_num_decoy_set = 1;
-    new_num_decoy_per_target = num_decoy_per_target;
-    free(location);
+    new_num_decoy_files = 1;
   }else if( strcmp(location, "separate-decoy-files") == 0 ){
     tdc = FALSE;
-    new_num_decoy_set = num_decoy_per_target;
-    new_num_decoy_per_target = 1;
-    free(location);
+    new_num_decoy_files = num_decoy_per_target;
   }
+
+  free(location);
 
   // now update all values
   char buffer[PARAMETER_LENGTH];
-  sprintf(buffer, "%i", new_num_decoy_set);
-  update_hash_value(parameters, "number-decoy-set", buffer);
-
-  sprintf(buffer, "%i", new_num_decoy_per_target);
-  update_hash_value(parameters, "num-decoys-per-target", buffer);
+  sprintf(buffer, "%i", new_num_decoy_files);
+  update_hash_value(parameters, "num-decoy-files", buffer);
 
   sprintf(buffer, "%i", new_max_rank_preliminary);
   update_hash_value(parameters, "max-rank-preliminary", buffer);
@@ -1146,8 +1149,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
       carp(CARP_FATAL, "For compute-q-values top-match must be 1.");
     }
 
-    if( (get_int_parameter("num-decoys-per-target") * 
-         get_int_parameter("number-decoy-set")) > 1 ){
+    if( get_int_parameter("num-decoys-per-target") > 1 ){
       carp(CARP_FATAL, "For compute-q-values num-decoys-per-target must be 1.");
     }
   }

@@ -363,8 +363,9 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
   if( source == NULL || destination == NULL ){
     carp(CARP_ERROR, "Cannot merge null match collections.");
   }
+  carp(CARP_DETAILED_DEBUG, "Merging match collections.");
 
-  // what is the index of the next insert position indestination
+  // what is the index of the next insert position in destination
   int dest_idx = destination->match_total;
 
   // if these are the first being added to the destination, set the
@@ -397,7 +398,8 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
     carp(CARP_FATAL, "Cannot merge match collections, insufficient capacity "
          "in destnation collection.");
   }
-
+  carp(CARP_DETAILED_DEBUG, "Merging %d matches into a collection of %d",
+       src_num_matches, dest_idx );
 
   int src_idx = 0;
   // for each match in source
@@ -413,6 +415,8 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
 
   // update destination count
   destination->match_total += src_num_matches;
+  destination->experiment_size += source->experiment_size;
+  destination->last_sorted = -1;  // unset any last-sorted flag
 
   return src_num_matches;
 }
@@ -798,7 +802,8 @@ BOOLEAN_T populate_match_rank_match_collection(
  SCORER_TYPE_T score_type ///< score type (SP, XCORR) by which to rank -in
  )
 {
-  carp(CARP_DETAILED_DEBUG, "Ranking matches.");
+  carp(CARP_DETAILED_DEBUG, "Ranking matches by %i.", score_type);
+  carp(CARP_DETAILED_DEBUG, "Collection currently ranked by %d", match_collection->last_sorted);
   // check if the match collection is in the correct sorted order
   if(match_collection->last_sorted != score_type){
     // sort match collection by score type
@@ -819,11 +824,13 @@ BOOLEAN_T populate_match_rank_match_collection(
     FLOAT_T this_score = get_match_score(cur_match, score_type);
     
     if( NOT_SCORED == get_match_score(cur_match, score_type) ){
+      char* seq = get_match_mod_sequence_str(cur_match);
       carp(CARP_WARNING, 
            "PSM spectrum %i charge %i sequence %s was NOT scored for type %i",
            get_spectrum_first_scan(get_match_spectrum(cur_match)),
-           get_match_charge(cur_match),
-           score_type);
+           get_match_charge(cur_match), seq,
+           (int)score_type);
+      free(seq);
     }
 
     // does this match have a higher score?
@@ -1580,7 +1587,7 @@ FLOAT_T get_match_collection_delta_cn(
  * \brief Names and opens the correct number of binary psm files.
  *
  * Takes the values of output-dir parameter, ms2 filename (soon to be
- * named output file), overwrite, and number-decoy-set from parameter.c.
+ * named output file), overwrite, and num-decoy-files from parameter.c.
  * Exits with error if can't create new requested directory or if
  * can't create any of the psm files.
  * REPLACES: spectrum_collection::get_spectrum_collection_psm_result_filenames
@@ -1589,8 +1596,8 @@ FLOAT_T get_match_collection_delta_cn(
  */
 FILE** create_psm_files(){
 
-  int decoy_sets = get_int_parameter("number-decoy-set");
-  int total_files = decoy_sets +1;
+  int decoy_files = get_int_parameter("num-decoy-files");
+  int total_files = decoy_files +1;
   // create FILE* array to return
   FILE** file_handle_array = (FILE**)mycalloc(total_files, sizeof(FILE*));
   int file_idx = 0;
@@ -1687,6 +1694,9 @@ BOOLEAN_T serialize_psm_features(
   SCORER_TYPE_T main_score    ///<  the main score to report -in
   )
 {
+  if( match_collection == NULL || output == NULL ){
+    carp(CARP_FATAL, "Cannot serialize psm features with NULL match collection and/or output file.");
+  }
   MATCH_T* match = NULL;
   
   // create match iterator 
@@ -2033,7 +2043,6 @@ BOOLEAN_T print_match_collection_sqt(
       break;
     }// else
 
-    //    print_match_sqt(match, output, main_score, prelim_score);
     print_match_sqt(match, output, 
                     score_to_print_first, score_to_print_second);
 
@@ -2294,7 +2303,7 @@ void serialize_headers(FILE** psm_file_array){
   // TODO: should this also write the ms2 filename???
 
   //write values to files
-  int total_files = 1 + get_int_parameter("number-decoy-set");
+  int total_files = 1 + get_int_parameter("num-decoy-files");
   carp(CARP_DETAILED_DEBUG, "Serializing headers in %i files", total_files);
   carp(CARP_DETAILED_DEBUG, "%i matches per spec", matches_per_spectrum);
   int i=0;
@@ -2665,23 +2674,11 @@ BOOLEAN_T extend_match_collection(
   for(spectrum_idx = 0; spectrum_idx < total_spectra; ++spectrum_idx){
     /*** get all spectrum specific features ****/
     
-    // get charge of the spectrum
-    /*    if(fread(&charge, (sizeof(int)), 1, result_file) != 1){
-      carp(CARP_ERROR, "Serialized file corrupted, charge value not read");  
-      return FALSE;
-    }
-    */
     int chars_read = fread(&charge, (sizeof(int)), 1, result_file);
     carp(CARP_DETAILED_DEBUG, "Read %i characters, charge is %i",
          chars_read, charge);
 
     // get serialized match_total
-    /*if(fread(&match_total_of_serialized_collection, (sizeof(int)),
-             1, result_file) != 1){
-      carp(CARP_ERROR, "Serialized file corrupted, "
-          "incorrect match_total_of_serialized_collection value");  
-      return FALSE;
-      }*/
     chars_read = fread(&match_total_of_serialized_collection, (sizeof(int)),
                        1, result_file);
     carp(CARP_DETAILED_DEBUG, "Read %i characters, match total is %i",
