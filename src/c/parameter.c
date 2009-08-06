@@ -451,13 +451,6 @@ void initialize_parameters(void){
   set_boolean_parameter("compute-p-values", FALSE, 
       "Compute p-values for the main score type. Default F.",
       "Currently only implemented for XCORR.", "true");
-  set_boolean_parameter("compute-q-values", FALSE, 
-      "Use the ranking of target and decoy PSMs to compute q-values for the "
-      "top-ranked match for each spectrum. Default F.",
-      "Computes two q-values (one ranked by xcorr and one ranked by p-value) "
-      "when used with --compute-p-values. Requires --num-decoys-per-target 1.",
-      "true");
-
   set_boolean_parameter("use-mz-window", FALSE,
       "Use mass-to-charge rather than mass for finding the window of peptides. Default F.",
       "Available for crux-search-for-matches", "true");
@@ -1141,17 +1134,6 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     char* value_str = enzyme_type_to_string(NO_ENZYME);
     update_hash_value(parameters, "enzyme", value_str);
     free (value_str);
-  }
-
-  // for decoy-q-values, make sure other parameters are OK
-  if( get_boolean_parameter("compute-q-values") ){
-    if( get_int_parameter("top-match") != 1 ){
-      carp(CARP_FATAL, "For compute-q-values top-match must be 1.");
-    }
-
-    if( get_int_parameter("num-decoys-per-target") > 1 ){
-      carp(CARP_FATAL, "For compute-q-values num-decoys-per-target must be 1.");
-    }
   }
 
   set_verbosity_level(get_int_parameter("verbosity"));
