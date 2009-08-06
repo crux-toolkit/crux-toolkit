@@ -54,11 +54,12 @@ int search_pep_mods(
   SPECTRUM_T* spectrum, ///< spectrum to search
   int charge,           ///< seach spectrum at this charge state
   PEPTIDE_MOD_T** pep_mod_list, ///< list of peptide mods to apply
-  int num_peptide_mods); ///< how many p_mods to use from the list
+  int num_peptide_mods, ///< how many p_mods to use from the list
+  BOOLEAN_T keep_matches ///< FALSE means delete match after storing score
+                    );
 BOOLEAN_T is_search_complete(MATCH_COLLECTION_T* matches, 
                              int mods_per_peptide);
 
-//int main(int argc, char** argv){
 int search_main(int argc, char** argv){
 
   /* Verbosity level for set-up/command line reading */
@@ -237,7 +238,8 @@ int search_main(int argc, char** argv){
                                         spectrum, 
                                         charge,
                                         peptide_mods, 
-                                        num_peptide_mods);
+                                        num_peptide_mods,
+                                        TRUE); // keep the whole psm
  
     // are there any matches?
     if( get_match_collection_match_total(target_psms) == 0 ){
@@ -255,8 +257,8 @@ int search_main(int argc, char** argv){
     int num_decoy_collections = get_int_parameter("num-decoys-per-target"); 
     MATCH_COLLECTION_T** decoy_collection_list = 
       (MATCH_COLLECTION_T**)mycalloc(sizeof(MATCH_COLLECTION_T*), 
-                                     num_decoy_collections + 1);// leave last entry empty so we can safely point to it in p_values loop below
-    
+                                     num_decoy_collections);
+
     int decoy_idx = 0;
     for(decoy_idx = 0; decoy_idx < num_decoy_collections; decoy_idx++){
 
@@ -270,31 +272,47 @@ int search_main(int argc, char** argv){
                       spectrum, 
                       charge, 
                       peptide_mods, 
-                      max_pep_mods);
+                      max_pep_mods,
+                      TRUE); // keep the whole psm
     }
 
     // calculate p-values for each collection of PSMs separately
-    // do targets first, then decoy 0, decoy 1, etc.
+    // use targets to get Weibull parameters, use same params for decoys
     if( compute_pvalues == TRUE ){
-      int remaining_collections = num_decoy_collections + 1;
-      MATCH_COLLECTION_T* cur_collection = target_psms;
 
-      while( remaining_collections > 0 ){
+      carp(CARP_DEBUG, "Estimating Weibull parameters.");
+      while( ! has_enough_weibull_points(target_psms) ){
+        // generate more scores from new decoys if there are not enough
+        search_pep_mods(target_psms, 
+                        TRUE, // only generate decoys
+                        index, 
+                        database, 
+                        spectrum, 
+                        charge, 
+                        peptide_mods, 
+                        max_pep_mods,
+                        FALSE); // don't keep the psm, just the xcorr
+        
+      }
+      estimate_weibull_parameters_from_xcorrs(target_psms,
+                                              spectrum,
+                                              charge);
+      FLOAT_T eta = get_match_collection_eta(target_psms);
+      FLOAT_T beta = get_match_collection_beta(target_psms);
+      FLOAT_T shift = get_match_collection_shift(target_psms);
 
-        carp(CARP_DEBUG, "Estimating Weibull parameters.");
-        if( estimate_weibull_parameters_from_xcorrs(cur_collection,
-                                                    spectrum,
-                                                    charge) ){
-          carp(CARP_DEBUG, "Calculating p-values.");
-          compute_p_values(cur_collection);
-        }else{
-          set_p_values_as_unscored(cur_collection);
-        }
+      compute_p_values(target_psms);
 
-        remaining_collections--;
-        cur_collection = 
-          decoy_collection_list[num_decoy_collections - remaining_collections];
+      // use same params for each decoy set
+      int decoy_idx = 0;
+      for(decoy_idx = 0; decoy_idx < num_decoy_collections; decoy_idx++){
+        MATCH_COLLECTION_T* cur_collection = decoy_collection_list[decoy_idx];
 
+        set_match_collection_weibull_params(cur_collection, eta, beta, shift);
+
+        carp(CARP_DEBUG, "Calculating p-values.");
+        compute_p_values(cur_collection);
+      
       }// next collection
     }
 
@@ -562,8 +580,9 @@ int search_pep_mods(
   SPECTRUM_T* spectrum, ///< spectrum to search
   int charge,           ///< seach spectrum at this charge state
   PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to apply
-  int num_peptide_mods) ///< how many p_mods to use from the list
-{
+  int num_peptide_mods, ///< how many p_mods to use from the list
+  BOOLEAN_T keep_match  ///< TRUE=add whole match, FALSE=add only xcorr
+){
   int mod_idx = 0;
 
   // assess scores after all pmods with x amods have been searched
@@ -610,7 +629,8 @@ int search_pep_mods(
                             spectrum, 
                             charge, 
                             peptide_iterator,
-                            is_decoy
+                            is_decoy,
+                            keep_match
                             );
     
     carp(CARP_DEBUG, "Added %i matches", added);
