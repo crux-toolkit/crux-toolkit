@@ -1002,26 +1002,20 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
     return FALSE;
   }
 
-  // randomly sample n from the list by shuffling and taking first n 
-  shuffle_floats(scores, num_scores);
-  int num_samples = PARAM_ESTIMATION_SAMPLE_COUNT;
-  if(num_samples > num_scores){ num_samples = num_scores; }
-
-  //int num_samples = num_scores;
-  // reverse sort the first num_samples of them
-  qsort(scores, num_samples, sizeof(FLOAT_T), compare_floats_descending);
+  // reverse sort the scores
+  qsort(scores, num_scores, sizeof(FLOAT_T), compare_floats_descending);
 
   // use only a fraction of the samples, the high-scoring tail
   // this parameter is hidden from the user
   double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
   assert( fraction_to_fit >= 0 && fraction_to_fit <= 1 );
-  int num_tail_samples = (int)(num_samples * fraction_to_fit);
+  int num_tail_samples = (int)(num_scores * fraction_to_fit);
   carp(CARP_DEBUG, "Estimating Weibull params with %d psms (%.2f of %i)", 
-       num_tail_samples, fraction_to_fit, num_samples);
+       num_tail_samples, fraction_to_fit, num_scores);
 
   // do the estimation
   FLOAT_T correlation = 0.0;
-  fit_three_parameter_weibull(scores, num_tail_samples, num_samples,
+  fit_three_parameter_weibull(scores, num_tail_samples, num_scores,
       MIN_XCORR_SHIFT, MAX_XCORR_SHIFT, XCORR_SHIFT, 
       &(match_collection->eta), &(match_collection->beta),
       &(match_collection->shift), &correlation);
