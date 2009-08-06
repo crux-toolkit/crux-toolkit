@@ -142,7 +142,9 @@ BOOLEAN_T populate_match_rank_match_collection(
  SCORER_TYPE_T score_type 
  );
 
-void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index);
+void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, 
+                      int start_index,
+                      BOOLEAN_T keep_matches);
 
 void collapse_redundant_matches(MATCH_COLLECTION_T* matches);
 void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx);
@@ -292,8 +294,9 @@ int add_matches(
   SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
-  BOOLEAN_T is_decoy     ///< are peptides to be shuffled
+  BOOLEAN_T is_decoy,     ///< are peptides to be shuffled
   //BF: this was added so that a match_collection could be mixed target/decoy
+  BOOLEAN_T keep_matches  ///< FALSE=only save xcorr for p-val estimation
 ){
   if( match_collection == NULL || peptide_iterator == NULL
       || spectrum == NULL ){
@@ -332,7 +335,7 @@ int add_matches(
   match_collection->scored_type[final_score] = TRUE;
 
   // store xcorrs from newly-score psms
-  store_new_xcorrs(match_collection, start_index); // replaces the sample step
+  store_new_xcorrs(match_collection, start_index, keep_matches); // replaces the sample step
 
   if( sp_max_rank > 0 ){ 
     // rank by sp first 
@@ -424,11 +427,19 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
 
 /**
  * \brief Store the xcorr for each psm that was added in this
- * iteration.  The xcorrs will be sampled from for doing the weibull
- * parameter estimations for p-values.  This replaces the psm sampling
- * done before.
+ * iteration.  Assumes that the matches with scores needing storing
+ * are between indexes start_index and match_collection->match_total.
+ * The xcorrs will used for the weibull parameter estimations for
+ * p-values.  If keep_matches == FALSE, the matches between indexes
+ * start_index and match_collection->match_total will be deleted and
+ * match_total will be updated.
+ * 
  */
-void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
+void store_new_xcorrs(
+  MATCH_COLLECTION_T* match_collection, ///< source and destination of scores
+  int start_index, ///< get first score from match at this index
+  BOOLEAN_T keep_matches ///< FALSE=delete the matches after storing score
+){
 
   if( match_collection == NULL ){
     carp(CARP_FATAL, "Cannot store scores of NULL match collection.");
@@ -450,9 +461,20 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection, int start_index){
     FLOAT_T score = get_match_score( match_collection->match[psm_idx], XCORR);
     match_collection->xcorrs[score_idx] = score;
     score_idx++;
+
+    if( keep_matches == FALSE ){
+      free_match(match_collection->match[psm_idx]);
+      match_collection->match[psm_idx] = NULL;
+      match_collection->experiment_size -= 1;  // these should be decoys and 
+                                               // we are not counting them
+                                               
+    }
   }
 
   match_collection->num_xcorrs = score_idx;
+  if( keep_matches == FALSE ){
+    match_collection->match_total = start_index; // where we started deleting
+  }
   carp(CARP_DETAILED_DEBUG, "There are now %i xcorrs.", score_idx);
 }
 
@@ -972,6 +994,18 @@ void constraint_function(
 #define SP_SHIFT 5.0
 
 /**
+ * \brief Check that a match collection has a sufficient number of
+ * matches for estimating Weibull parameters.
+ * \returns TRUE if their are enough xcorrs for estimating Weibull
+ * parameters or FALSE if not.
+ */
+BOOLEAN_T has_enough_weibull_points(
+  MATCH_COLLECTION_T* match_collection
+){
+  return (match_collection->num_xcorrs >= MIN_WEIBULL_MATCHES );
+}
+
+/**
  * \brief Use the xcorrs saved in the match_collection to estimate the
  * weibull parameters to be used for computing p-values. 
  *
@@ -995,7 +1029,7 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
   FLOAT_T* scores = match_collection->xcorrs;
   int num_scores = match_collection->num_xcorrs;
   if( num_scores < MIN_WEIBULL_MATCHES ){
-    carp(CARP_DETAILED_INFO, "Too few psms (%i) to estimate "
+    carp(CARP_DETAILED_DEBUG, "Too few psms (%i) to estimate "
          "p-value parameters for spectrum %i, charge %i",
          num_scores, get_spectrum_first_scan(spectrum), charge);
     // set eta, beta, and shift to something???
@@ -1421,6 +1455,9 @@ BOOLEAN_T compute_decoy_q_values(
     return FALSE;
   }
 
+  carp(CARP_DEBUG, "Computing decoy q-values for score type %i.",
+       score_type);
+
   // sort by score
   sort_match_collection(match_collection, score_type);
 
@@ -1462,6 +1499,10 @@ BOOLEAN_T compute_decoy_q_values(
     if( num_targets == 0 ){ score = 1.0; }
 
     set_match_score(cur_match, qval_type, score);
+    carp(CARP_DETAILED_DEBUG, 
+         "match %i xcorr or pval %f num targets %i, num decoys %i, score %f",
+         match_idx, get_match_score(cur_match, score_type), 
+         (int)num_targets, (int)num_decoys, score);
   }
 
   // compute q-value: go through list in reverse and use min FDR seen
@@ -1476,6 +1517,9 @@ BOOLEAN_T compute_decoy_q_values(
     }
 
     set_match_score(cur_match, qval_type, min_fdr);
+    carp(CARP_DETAILED_DEBUG, 
+         "match %i cur fdr %f min fdr %f is decoy %i",
+         match_idx, cur_fdr, min_fdr, get_match_null_peptide(cur_match) );
   }
 
   match_collection->scored_type[qval_type] = TRUE;
@@ -1575,6 +1619,47 @@ FLOAT_T get_match_collection_delta_cn(
     carp(CARP_ERROR, "must score match_collection with XCORR to get delta cn value");
     return 0.0;
   }
+}
+
+/**
+ * \brief Get the eta parameter from the Weibull distribution.
+ * No check to see that it has been estimated.
+ */
+FLOAT_T get_match_collection_eta(MATCH_COLLECTION_T* match_collection){
+  return match_collection->eta;
+}
+
+/**
+ * \brief Get the beta parameter from the Weibull distribution
+ * No check to see that it has been estimated.
+ */
+FLOAT_T get_match_collection_beta(MATCH_COLLECTION_T* match_collection){
+  return match_collection->beta;
+}
+
+/**
+ * \brief Get the shift parameter from the Weibull distribution
+ * No check to see that it has been estimated.
+ */
+FLOAT_T get_match_collection_shift(MATCH_COLLECTION_T* match_collection){
+  return match_collection->shift;
+}
+
+/**
+ * \brief Set the three Weibull parameters.  Intended for
+ * match_collections of decoys, the parameters having been estimated
+ * from targets.
+ */
+void set_match_collection_weibull_params(
+  MATCH_COLLECTION_T* match_collection,
+  FLOAT_T eta,
+  FLOAT_T beta,
+  FLOAT_T shift
+){
+
+  match_collection->eta = eta;
+  match_collection->eta = beta;
+  match_collection->eta = shift;
 }
 
 /**

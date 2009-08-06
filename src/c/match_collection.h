@@ -91,8 +91,8 @@ int add_matches(
   SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
-  //  int sample_size,        ///< num matches to add to sampled_matches
-  BOOLEAN_T is_decoy     ///< do we shuffle the peptides
+  BOOLEAN_T is_decoy,     ///< do we shuffle the peptides
+  BOOLEAN_T keep_matches  ///< FALSE means delete matches after storing score
 );
 
 /**
@@ -219,6 +219,36 @@ FLOAT_T get_match_collection_delta_cn(
  * this match collection.
  */
 int get_match_collection_num_proteins(MATCH_COLLECTION_T* match_collection);
+
+/**
+ * \brief Get the eta parameter from the Weibull distribution
+ * No check to see that it has been estimated.
+ */
+FLOAT_T get_match_collection_eta(MATCH_COLLECTION_T* match_collection);
+
+/**
+ * \brief Get the beta parameter from the Weibull distribution
+ * No check to see that it has been estimated.
+ */
+FLOAT_T get_match_collection_beta(MATCH_COLLECTION_T* match_collection);
+
+/**
+ * \brief Get the shift parameter from the Weibull distribution
+ * No check to see that it has been estimated.
+ */
+FLOAT_T get_match_collection_shift(MATCH_COLLECTION_T* match_collection);
+
+/**
+ * \brief Set the three Weibull parameters.  Intended for
+ * match_collections of decoys, the parameters having been estimated
+ * from targets.
+ */
+void set_match_collection_weibull_params(
+  MATCH_COLLECTION_T* match_collection,
+  FLOAT_T eta,
+  FLOAT_T beta,
+  FLOAT_T shift
+  );
 
 /**
  * \brief Remove matches from the collection so that only those of
@@ -531,6 +561,15 @@ int get_match_collection_iterator_number_collections(
 char* get_match_collection_iterator_directory_name(
   MATCH_COLLECTION_ITERATOR_T* iterator);
 
+/**
+ * \brief Check that a match collection has a sufficient number of
+ * matches for estimating Weibull parameters.
+ * \returns TRUE if their are enough xcorrs for estimating Weibull
+ * parameters or FALSE if not.
+ */
+BOOLEAN_T has_enough_weibull_points(
+  MATCH_COLLECTION_T* match_collection
+);
 
 BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, 

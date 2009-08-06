@@ -69,6 +69,16 @@ The parameters estimated for the Weibull distribution (used for
 computing p-values) now use the xcorrs from all psms for a spectrum
 instead of a random selection of 500.
 
+<li>
+The estimation of Weibull distribution parameters requires a minimum
+number of scored PSMs.  In the previous version, spectra with fewer
+PSMs than the minimum were not given an p-value.  Now crux will now
+generate extra decoys until there are enough scores.  
+
+<li>
+The p-values for decoy PSMs are now generated from the same Weibull
+distribution parameters as are used for the targets of the same
+spectrum.
 
 </ul>
 <h2>Version 1.21</h2> May 14, 2009
