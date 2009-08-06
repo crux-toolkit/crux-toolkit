@@ -724,7 +724,7 @@ int create_output_directory(
         carp(
           CARP_WARNING,
           "The output directory '%s' already exists.\nExisting files will not"
-          " be overwritten.\n",
+          " be overwritten.",
           output_folder
         );
         result = 0;
@@ -733,7 +733,7 @@ int create_output_directory(
         carp(
           CARP_WARNING,
           "The output directory '%s' already exists.\nExisting files will"
-          " be overwritten.\n",
+          " be overwritten.",
           output_folder
         );
         result = 0;
