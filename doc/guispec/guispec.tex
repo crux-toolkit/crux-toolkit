@@ -80,7 +80,7 @@ they want, but they are free to start the analysis at any time.  At
 that point, the analysis will begin, and the user is directed to an
 output page.
 
-The final output of the analysis is an XML ``summary file ``containing
+The final output of the analysis is an XML ``summary file'' containing
 links to the various tool outputs.  Initially, the summary file is
 just a skeleton showing where the results will eventually appear, with
 each tool listed as a link.  Links become live as soon as a tool
@@ -126,7 +126,9 @@ indicated as ``not run yet,'' as will all downstream tools.
 Similarly, if the user moves the summary file without moving the
 corresponding tool-specific directories, then when Crux is run using
 that summary file, all of the analyses will be displayed as ``not run
-yet.''
+yet.''  Note that, since the parameters are all stored in the relevant
+subdirectories, deleting or moving a tool-specific subdirectory will
+result in re-setting all the parameters to their default values.
 
 In general, the name that the user provides will be the name of the
 summary file (with .xml appended).  Thus, re-running the same analysis
@@ -134,8 +136,8 @@ multiple times requires clobbering the corresponding output file and
 output directories.  The GUI maintains internal logic indicating the
 status of each job (not-run-yet, to-be-run, unselected).  Prior to any
 analysis, the GUI checks whether any of the to-be-run jobs already
-have output files associated with them.  In this case, the user is
-queried, as described above, whether to delete the problematic
+have output directories associated with them.  In this case, the user
+is queried, as described above, whether to delete the problematic
 directories or re-name the analysis.
 
 Power users might want to cobble together different analyses, by
@@ -143,5 +145,38 @@ selecting output directories from different tools and creating their
 own summary script.  They do so at their own risk.  In such a
 scenario, the settings from one directory may not be compatible with
 the settings in a downstream directory.
+
+\section{A common single-tool interface}
+
+The Crux summary page created by a single analysis contains links to
+output directories created by each tool.  Clicking on any of these
+links leads to a tool-specific summary page.  All tools create summary
+pages that share a common ``look and feel.''  Each such page contains
+a brief summary of the analysis, with links to a parameter file and a
+log file.
+
+Most tools create, as their primary output, a ranked list of
+objects---PSMs, peptides or proteins.  These ranked lists can be
+manipulated in the following ways:
+\begin{itemize}
+\item Features (columns) can be hidden or displayed, at the user's
+  discretion.
+\item The list can be sorted according to the values in one or more
+  columns, in either ascending or descending order.
+\item The list can be thresholded according to the values in one or
+  more columns, using either a maximum or minimum value.
+\item A protein-level ranking can be expanded (either globally or on a
+  per-protein basis) to list peptides, and peptides can in turn be
+  expanded to list individual spectra.
+\item Spectra can optionally be expanded to display clickable
+  thumbnail images, with various types of peaks (b- and y-ions)
+  annotated in color.
+\end{itemize}
+
+The indexing tool does not create a ranked list as output.  Instead,
+the summary page simply lists some basic statistics about the index:
+the total number of proteins in the index, the average protein length,
+the total number of peptides in the index, the average number of
+peptides per protein, the average peptide length.
 
 \end{document}
