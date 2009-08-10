@@ -152,12 +152,21 @@ The Crux summary page created by a single analysis contains links to
 output directories created by each tool.  Clicking on any of these
 links leads to a tool-specific summary page.  All tools create summary
 pages that share a common ``look and feel.''  Each such page contains
-a brief summary of the analysis, with links to a parameter file and a
-log file.
+a brief summary of the analysis, with links to a parameter file,
+a log file, the input files and each of the output files.
 
-Most tools create, as their primary output, a ranked list of
-objects---PSMs, peptides or proteins.  These ranked lists can be
-manipulated in the following ways:
+The indexing tool does not create user-level output files.  Instead,
+the summary page simply lists some basic statistics about the index:
+the total number of proteins in the index, the average protein length,
+the total number of peptides in the index, the average number of
+peptides per protein, the average peptide length.
+
+\section{Manipulating ranked lists}
+
+Most Crux tools create, as their primary output, a ranked list of
+objects---PSMs, peptides or proteins.  Eventually, we would like to
+create an interface that allows users to maniuplate these ranked lists
+in the following ways:
 \begin{itemize}
 \item Features (columns) can be hidden or displayed, at the user's
   discretion.
@@ -172,11 +181,7 @@ manipulated in the following ways:
   thumbnail images, with various types of peaks (b- and y-ions)
   annotated in color.
 \end{itemize}
-
-The indexing tool does not create a ranked list as output.  Instead,
-the summary page simply lists some basic statistics about the index:
-the total number of proteins in the index, the average protein length,
-the total number of peptides in the index, the average number of
-peptides per protein, the average peptide length.
+Because creating such an interface promises to be onerous, this
+activity will be shelved for the foreseeable future.
 
 \end{document}
