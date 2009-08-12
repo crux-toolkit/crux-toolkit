@@ -1,6 +1,6 @@
 distdir = $(PACKAGE)_$(VERSION)
 
-SUBDIRS = MSToolkit percolator .
+SUBDIRS = ArrayLibrary MSToolkit percolator q-ranker .
 
 # Crux can use either single or double precision floating poinnt.
 if USEDOUBLES
@@ -17,7 +17,9 @@ else
 endif
 
 AM_CFLAGS = -Wall -W -Werror  -fno-strict-aliasing $(USEDOUBLES) $(USEDARWIN) \
-            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I./MSToolkit -I./MSToolkit/RAMP
+            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE 
+AM_CXXFLAGS = -Wall -W -Werror  -fno-strict-aliasing $(USEDOUBLES) $(USEDARWIN) \
+            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
 LIBFILES= \
   alphabet.c \
@@ -75,10 +77,14 @@ LIBFILES= \
   peptide_modifications.h \
   peptide_src.c \
   peptide_src.h \
+  percolator.c \
+  percolator.h \
   protein.c \
   protein.h \
   protein_index.c \
   protein_index.h \
+  q-ranker.c \
+  q-ranker.h \
   q-value.c \
   q-value.h \
   scorer.c \
@@ -94,11 +100,12 @@ LIBFILES= \
   version.h
 
 noinst_LTLIBRARIES = libcrux.la
-libcrux_la_CFLAGS = $(AM_CFLAGS)
-libcrux_la_CXXFLAGS = -IMSToolkit -IMSToolkit/RAMP
+libcrux_la_CFLAGS = \
+  -I$(top_srcdir)/src/c/MSToolkit \
+  -I$(top_srcdir)/src/c/percolator/ \
+  -I$(top_srcdir)/src/c/q-ranker/
 
 libcrux_la_SOURCES = $(LIBFILES)
-libcrux_la_LIBADD = -lm
 
 PROGRAM_FILES = \
   crux \
@@ -109,28 +116,34 @@ PROGRAM_FILES = \
 bin_PROGRAMS = $(PROGRAM_FILES)
 
 crux_get_ms2_spectrum_SOURCES = get_ms2_spectrum.cpp
-crux_get_ms2_spectrum_CFLAGS = $(AM_CFLAGS) -DMAIN 
-crux_get_ms2_spectrum_LDADD = libcrux.la -L$(top_builddir)/src/c/MSToolkit -lmstoolkit
+crux_get_ms2_spectrum_CXXFLAGS = -DMAIN -I$(top_srcdir)/src/c//MSToolkit
+crux_get_ms2_spectrum_LDADD = libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
 
 crux_generate_peptides_SOURCES = generate_peptides.c
-crux_generate_peptides_CFLAGS = $(AM_CFLAGS) -DMAIN 
-crux_generate_peptides_LDADD = libcrux.la 
+crux_generate_peptides_CFLAGS = -DMAIN
+crux_generate_peptides_LDADD = libcrux.la -lm  
 
 crux_predict_peptide_ions_SOURCES = predict_peptide_ions.cpp
-crux_predict_peptide_ions_CFLAGS = $(AM_CFLAGS) -DMAIN 
-crux_predict_peptide_ions_LDADD = libcrux.la -L$(top_builddir)/src/c/MSToolkit -lmstoolkit
+crux_predict_peptide_ions_CXXFLAGS = -DMAIN
+crux_predict_peptide_ions_LDADD = libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
 
-crux_SOURCES = crux-main.cpp  crux-main.h percolator.c percolator.h
-crux_CFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
-crux_CXXFLAGS = $(AM_CFLAGS) -DMAIN -Ipercolator
+crux_SOURCES = crux-main.cpp crux-main.h
+crux_CXXFLAGS = \
+  -DMAIN \
+  -I$(top_srcdir)/src/c/MSToolkit \
+  -I$(top_srcdir)/src/c/percolator \
+  -I$(top_srcdir)/src/c/q-ranker
 crux_LDADD = \
   libcrux.la \
   -lstdc++ \
-  -L./MSToolkit \
-  -L./percolator \
+  -L$(top_builddir)/src/c/ArrayLibrary \
+  -L$(top_builddir)/src/c/MSToolkit \
+  -L$(top_builddir)/src/c/percolator \
+  -L$(top_builddir)/src/c/q-ranker \
+  -lm \
   -lmstoolkit \
   -lpercolator \
-  -lqvality \
+  -lqranker \
   -lArrayLibrary
 
 paramdir = $(prefix)/doc

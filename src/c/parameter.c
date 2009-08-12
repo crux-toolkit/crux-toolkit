@@ -492,6 +492,10 @@ void initialize_parameters(void){
       "SQT output file name. Default 'qvalues.target.sqt'",
       "Only available for crux compute-qvalues. The location of this file is controlled by "
       "--output-dir.", "true");
+  set_string_parameter("qranker-sqt-output-file", "qranker.target.sqt", 
+      "SQT output file name. Default 'qranker.target.sqt'",
+      "Only available for crux q-ranker. The location of this file is controlled by "
+      "--output-dir.", "true");
   set_string_parameter("decoy-sqt-output-file", "search.decoy.sqt", 
       "SQT output file name for decoys.  Default 'search.decoy.sqt'.",
       "Used by crux search-for-matches when "
@@ -504,6 +508,10 @@ void initialize_parameters(void){
   set_string_parameter("percolator-tab-output-file", "percolator.target.txt", 
       "Tab delimited output file name. Default 'percolator.target.txt'",
       "Only available for crux percolator. The location of this file is controlled by "
+      "--output-dir.", "true");
+  set_string_parameter("qranker-tab-output-file", "qranker.target.txt", 
+      "Tab delimited output file name. Default 'qranker.target.txt'",
+      "Only available for crux q-ranker. The location of this file is controlled by "
       "--output-dir.", "true");
   set_string_parameter("qvalues-tab-output-file", "qvalues.target.txt", 
       "Tab delimited output file name. Default 'qvalues.target.txt'",
@@ -534,6 +542,10 @@ void initialize_parameters(void){
   set_string_parameter("percolator-param-file", "percolator.params.txt", 
       "Parameter file name for percolator. Default 'percolator.params.txt'",
       "Used by crux percolator. The location of this file is controlled by "
+      "--output-dir.", "true");
+  set_string_parameter("qranker-param-file", "qranker.params.txt", 
+      "Parameter file name for q-ranker. Default 'qranker.params.txt'",
+      "Used by crux qranker. The location of this file is controlled by "
       "--output-dir.", "true");
   set_string_parameter("qvalues-param-file", "qvalues.params.txt", 
       "Parameter file name for compute-q-values. Default 'qvalues.params.txt'",

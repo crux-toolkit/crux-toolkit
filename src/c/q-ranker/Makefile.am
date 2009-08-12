@@ -1,26 +1,31 @@
-AM_CPPFLAGS=$(DEBUG_OPTIONS) -I$(top_srcdir)/src/c/ArrayLibrary
-
-libpercolator_la_SOURCES = \
+libqranker_la_SOURCES = \
   BaseSpline.cpp \
   BaseSpline.h \
   Caller.cpp \
   Caller.h \
   DataSet.cpp \
   DataSet.h \
-  Globals.cpp \
-  Globals.h \
+  DescriptionOfCorrect.cpp \
+  DescriptionOfCorrect.h \
   IntraSetRelation.cpp \
   IntraSetRelation.h \
+  FeatureNames.cpp \
+  FeatureNames.h \
+  Globals.cpp \
+  Globals.h \
   LogisticRegression.cpp \
   LogisticRegression.h \
   Normalizer.cpp \
   Normalizer.h \
   Option.cpp \
   Option.h \
-  PercolatorCInterface.cpp \
-  PercolatorCInterface.h \
+  PercolatorCommon.h \
   PosteriorEstimator.cpp \
   PosteriorEstimator.h \
+  PSMDescription.cpp \
+  PSMDescription.h \
+  QRankerCInterface.cpp \
+  QRankerCInterface.h \
   ResultHolder.cpp \
   ResultHolder.h \
   SanityCheck.h \
@@ -31,17 +36,23 @@ libpercolator_la_SOURCES = \
   SetHandler.h \
   SqtSanityCheck.h \
   SqtSanityCheck.cpp \
-  StdvNormalizer.cpp \
-  StdvNormalizer.h \
-  UniNormalizer.cpp \
-  UniNormalizer.h \
   ssl.cpp \
   ssl.h \
-  Transform.h 
+  StdvNormalizer.cpp \
+  StdvNormalizer.h \
+  Transform.h \
+  UniNormalizer.cpp \
+  UniNormalizer.h \
+  Net.cpp \
+  Net.h  \
+  TrainNet.cpp
 
-noinst_LTLIBRARIES = libpercolator.la
 
-ignore-files:
-	svn update .svnignore
-	svn propset svn:ignore -F .svnignore .
+libqranker_la_CPPFLAGS = $(AM_CPPFLAGS) \
+  -I$(top_srcdir)/src/c/ArrayLibrary \
+  -I$(top_srcdir)/src/c/MSToolkit \
+  -I$(top_srcdir)/src/c/MSToolkit/zLib \
+  -I$(top_srcdir)/src/c/MSToolkit/RAMP
+
+noinst_LTLIBRARIES = libqranker.la
 

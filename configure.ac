@@ -111,8 +111,10 @@ AC_CONFIG_FILES([\
     doc/user/Makefile \
     src/Makefile \
     src/c/Makefile \
+    src/c/ArrayLibrary/Makefile \
     src/c/MSToolkit/Makefile \
     src/c/percolator/Makefile \
+    src/c/q-ranker/Makefile \
 ])
 
 AM_CONDITIONAL(DARWIN, \
