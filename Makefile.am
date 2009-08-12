@@ -41,3 +41,8 @@ checksum:
 ignore-files:
 	svn update .svnignore
 	svn propset svn:ignore -F .svnignore .
+
+# This is needed to keep 'make distcheck' from complaining about
+# the file version.h, which doesn't get cleaned up (and doesn't
+# need to be  cleaned up) in 'make distclean'
+distcleancheck_listfiles = $(top_srcdir)/src/c/version.h

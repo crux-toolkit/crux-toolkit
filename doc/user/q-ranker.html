@@ -11,7 +11,7 @@
 <b>Usage:</b></p>
 
 <blockquote>
-<code>crux q-ranker [options] &lt;psm folder&gt; &lt;protein&nbsp;input&gt;
+<code>crux q-ranker [options] &lt;protein&nbsp;input&gt; [ --output-dir &lt;psm folder&gt; ] 
 </code>
 </blockquote>
 
@@ -29,25 +29,28 @@ Marina Spivak, Jason Weston, Leon Bottou and William Stafford Noble.
 identification from shotgun proteomics data sets."  <i>Submitted</i>.
 </blockquote>
 
+<!--
 <p>
 FIXME: Insert description of algorithm here.</p>
+-->
 
 <p>
 <b>Input:</b></p>
 
 <ul>
 
-<li>
-&lt;psm folder&gt; &ndash; The name of the folder in which all the PSM
-result files are located.  The program looks for files ending in
-<code>.csm</code>, which are produced by
-<code>crux&nbsp;search-for-matches</code>.  All such files in the
-given directory are analyzed jointly.</li>
-
 <LI>
 &lt;protein input &gt; &ndash; The name of the file in fasta format or
 the directory containing the protein index from which to retrieve
 proteins and peptides.</li>
+
+<li>
+&lt;psm folder&gt; &ndash; [optional] A folder in which all the PSM
+result files are located.  This is assumed to be <code>crux-output</code>,
+but it can be set by the user using the <code>--output-dir</code> option.
+The program looks for files ending in <code>.csm</code>, which are produced by
+<code>crux&nbsp;search-for-matches</code>.  All such files in the
+given directory are analyzed jointly.</li>
 
 </ul>
 
@@ -63,6 +66,16 @@ directory containing the index files (the same as the 'index name'
 argument for crux-create-index).  Default = F.
 
 <li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
 fail when trying to overwrite a file if false (F). Default =  F.
 
@@ -70,13 +83,6 @@ fail when trying to overwrite a file if false (F). Default =  F.
 <code>--parameter-file &lt;filename&gt;</code> &ndash;
 A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
-
-<LI>
-<code>--write-parameter-file &lt;filename&gt;</code> &ndash; Create a file
-with the name and value of all parameters/options for the current
-search.  Not all parameters in the file may have been used in the
-search.  The resulting file can be used with the --parameter-file
-option for other crux programs.
 
 <LI> 
 <code>--feature-file &lt;string&gt;</code> &ndash;

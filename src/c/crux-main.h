@@ -14,6 +14,7 @@
 #include "crux-utils.h"
 #include "create_index.h"
 #include "search.h"
+#include "q-ranker.h"
 #include "q-value.h"
 #include "percolator.h"
 
