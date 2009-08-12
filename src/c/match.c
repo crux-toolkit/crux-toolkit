@@ -571,20 +571,17 @@ void print_match_sqt(
 
   // write format string with variable precision
   int precision = get_int_parameter("precision");
-  char format[64];
-  sprintf(format,
-          "M\t%%d\t%%d\t%%.%ig\t%%.%ig\t%%.%ig\t%%.%ig\t%%d\t%%d\t%%s\tU\n",
-          precision, precision, precision, precision);
 
   // print match info
-  //  fprintf(file, "M\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%s\tU\n",
-  fprintf(file, format,
+  fprintf(file, "M\t%i\t%i\t%.4f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
+            //fprintf(file, format,
           get_match_rank(match, main_rank_type),
           get_match_rank(match, other_rank_type),
           get_peptide_peptide_mass(peptide),
           delta_cn,
-          //get_match_score(match, main_score),
+          precision,
           score_main,
+          precision,
           get_match_score(match, other_score),
           b_y_matched,
           b_y_total,
@@ -704,9 +701,9 @@ void print_match_tab(
   // Print tab delimited fields
   fprintf(file, "%d\t", scan_num);
   fprintf(file, "%d\t", charge);
-  fprintf(file, float_format, spectrum_precursor_mz);
-  fprintf(file, float_format, spectrum_mass);
-  fprintf(file, float_format, peptide_mass);
+  fprintf(file, "%.4f\t", spectrum_precursor_mz);
+  fprintf(file, "%.4f\t", spectrum_mass);
+  fprintf(file, "%.4f\t", peptide_mass);
   fprintf(file, float_format, delta_cn);
   if (sp_scored == FALSE){
     fprintf(file, "\t\t"); //score and rank
