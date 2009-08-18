@@ -52,8 +52,8 @@ within +/- 'm/z-window' of the spectrum m/z.  The m/z-window value is
 taken from <code>mass-window</code>.</li>
 
 <li>
-<code>compute-p-values</code> with Weibull calculated NaNs for 
-<code>search-for-matches</code> has been "fixed". </li>
+A numerical bug in the Weibull p-value calculation was fixed, which
+had previously caused occasional erroneous NaNs to be output.</li>
 
 <li>
 The Weibull estimated p-values generated
@@ -66,12 +66,6 @@ The <code>--precision</code> option has been changed to control the
 number of significant digits printed instead of the number of digits
 after the decimal point.  The default precision has changed from 6 to
 8.</li>
-
-<li>
-The <code>--use-mstoolkit</code> parameter is now available for
-<code>search-for-matches</code> and <code>crux-get-ms2-spectrum</code>.  
-When enabled, will use the MSToolkit suite to parse the ms2 or cms2 
-files for searching or extracting.</li>
 
 <li>
 The parameters estimated for the Weibull distribution (used for
