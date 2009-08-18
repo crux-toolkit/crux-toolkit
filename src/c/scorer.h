@@ -11,6 +11,10 @@
 #ifndef SCORER_H 
 #define SCORER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <dirent.h>
 #include "objects.h"
@@ -324,4 +328,7 @@ int get_scorer_sp_b_y_ion_possible(
  * c-basic-offset: 2
  * End:
  */
+#ifdef __cplusplus
+}
+#endif
 #endif

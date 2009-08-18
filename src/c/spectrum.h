@@ -6,6 +6,10 @@
 #ifndef SPECTRUM_H
 #define SPECTRUM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "utils.h"
 #include "objects.h"
@@ -509,6 +513,9 @@ void peak_iterator_reset(
  * End:
  */
 
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 /** \mainpage The crux API documentation page.

@@ -95,6 +95,8 @@ LIBFILES= \
   spectrum_collection.c \
   spectrum_collection.h \
   spectrum.h \
+  spit.cpp \
+  spit.h \
   utils.c \
   utils.h \
   version.h
@@ -106,6 +108,7 @@ libcrux_la_CFLAGS = \
   -I$(top_srcdir)/src/c/q-ranker/
 
 libcrux_la_SOURCES = $(LIBFILES)
+libcrux_la_LIBADD = -lm -lstdc++
 
 PROGRAM_FILES = \
   crux \

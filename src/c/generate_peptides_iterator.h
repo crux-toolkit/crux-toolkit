@@ -6,6 +6,10 @@
 #ifndef GENERATE_PEPTIDES_ITERATOR_H 
 #define GENERATE_PEPTIDES_ITERATOR_H 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -132,4 +136,7 @@ void free_generate_peptides_iterator(
  * c-basic-offset: 2
  * End:
  */
+#ifdef __cplusplus
+}
+#endif
 #endif

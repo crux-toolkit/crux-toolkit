@@ -5,6 +5,10 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <assert.h>
 #include "utils.h"
 #include "objects.h"
@@ -143,5 +147,9 @@ LIST_POINTER_T* delete_next_list_node(LIST_POINTER_T* pre_node);
 
 
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // LINKED_LIST_H
