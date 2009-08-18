@@ -6,10 +6,6 @@
 #ifndef SORTER_H
 #define SORTER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -77,9 +73,5 @@ BOOLEAN_T sorted_peptide_iterator_has_next(
 PEPTIDE_T* sorted_peptide_iterator_next(
   SORTED_PEPTIDE_ITERATOR_T* peptide_iterator ///< the iterator of interest -in
   );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // SORTER_H

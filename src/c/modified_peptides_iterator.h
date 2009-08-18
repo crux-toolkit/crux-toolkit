@@ -9,10 +9,6 @@
 #ifndef MODIFIED_PEPTIDES_ITERATOR_H
 #define MODIFIED_PEPTIDES_ITERATOR_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "utils.h"
 #include "objects.h"
 #include "linked_list.h"
@@ -123,7 +119,4 @@ void void_modified_peptides_iterator_free(
   void* modified_PEPTIDES_iterator);
 
 
-#ifdef __cplusplus
-}
-#endif
 #endif // MODIFIED_PEPTIDES_ITERATOR_H

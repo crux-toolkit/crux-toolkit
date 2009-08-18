@@ -8,10 +8,6 @@
 #ifndef ION_SERIES_H
 #define ION_SERIES_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include "objects.h"
 #include "peptide.h"
@@ -432,7 +428,4 @@ ION_T* ion_filtered_iterator_next(
  * c-basic-offset: 2
  * End:
  */
-#ifdef __cplusplus
-}
-#endif
 #endif

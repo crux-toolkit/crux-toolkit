@@ -21,10 +21,6 @@
 #ifndef MODIFICATION_FILE_H
 #define MODIFICATION_FILE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <assert.h>
 #include "utils.h"
 #include "linked_list.h"
@@ -386,8 +382,5 @@ char* aa_mod_get_aa_list_string(AA_MOD_T* mod);
  */
 int count_modified_aas(MODIFIED_AA_T* seq);
 
-#ifdef __cplusplus
-}
-#endif
 #endif //MODIFICATION_FILE_H
 

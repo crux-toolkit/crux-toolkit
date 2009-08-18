@@ -6,10 +6,6 @@
 #ifndef PEPTIDE_CONSTRAINT_H 
 #define PEPTIDE_CONSTRAINT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -203,10 +199,6 @@ void set_peptide_constraint_mass_type(
 MASS_TYPE_T get_peptide_constraint_mass_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 
