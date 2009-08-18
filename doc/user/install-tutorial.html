@@ -151,7 +151,7 @@ files in <span class=file>install-dir/doc</span>.
 path.  For example,</p>
 
 <div class=code><code>
-$ <em>install-dir</em>/crux-search-for-matches</code>
+$ <em>install-dir</em>/bin/crux search-for-matches</code>
 </div>
 
 <p>In this final step of the installation, we'll set things up so that
@@ -179,17 +179,17 @@ command.  (Remember to replace the word <em>install-dir</em> with the
 actual location of your installation)</p> 
 
 <div class=code><code>
-$ export PATH=$PATH:install-dir</code>
+$ export PATH=$PATH:install-dir/bin</code>
 </div>
 
 <p>Try '<span class=code>echo $PATH</span>' again to see that the
-change was made.  <em>install-dir</em> should be at the end of the
+change was made.  <em>install-dir/bin</em> should be at the end of the
 list.  Now you can 
 run the <span class=prog>crux</span> programs by just typing their
 names.  Try this.</p>
 
 <div class=code><code>
-$ crux-search-for-matches</code>
+$ crux search-for-matches</code>
 </div>
 
 <p>The change to <span class=code>$PATH</span> is only temporary.  As
