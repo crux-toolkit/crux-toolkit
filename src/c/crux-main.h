@@ -25,7 +25,6 @@ enum _command { INDEX_CMD,      // create-index
                 QVALUE_CMD,     // compute-q-values
                 QRANKER_CMD,    // q-rakner
                 PERCOLATOR_CMD, // percolator
-                SPIT_CMD,       // simple protein identification
                 INVALID_CMD };  // use for errors
 typedef enum _command COMMAND_T;
 

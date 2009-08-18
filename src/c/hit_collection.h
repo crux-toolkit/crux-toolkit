@@ -9,10 +9,6 @@
 #ifndef HIT_COLLECTION_H
 #define HIT_COLLECTION_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -121,10 +117,6 @@ HIT_T* hit_iterator_next(
 void free_hit_iterator(
   HIT_ITERATOR_T* hit_iterator ///< the match iterator to free
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 /*
  * Local Variables:

@@ -6,10 +6,6 @@
 #ifndef MATCH_H
 #define MATCH_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -491,7 +487,4 @@ int get_match_b_y_ion_possible(
  * c-basic-offset: 2
  * End:
  */
-#ifdef __cplusplus
-}
-#endif
 #endif

@@ -10,11 +10,6 @@
 #ifndef PEAK_H
 #define PEAK_H
 #include <stdio.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdlib.h>
 #include "objects.h"
 #include "utils.h"
@@ -160,7 +155,4 @@ void sort_peaks(
  * c-basic-offset: 2
  * End:
  */
-#ifdef __cplusplus
-}
-#endif
 #endif

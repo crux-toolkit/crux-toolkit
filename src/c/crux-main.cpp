@@ -5,7 +5,7 @@
  AUTHOR: Barbara Frewen
  CREATE DATE: November 24, 2008
  DESCRIPTION: The starting point for what were previously three
-         separate programs--create-index, search-for-matches,
+         separate protgrams--create-index, search-for-matches,
          analyze-matches.  Usage is
             crux <operation> <options> <arguments>
          where operation is create-index, search, compute-q-values, or
@@ -15,11 +15,10 @@
 
 #include "crux-main.h"
 
-extern int spit_main(int argc, char** argv);
-#define NUMBER_COMMAND_TYPES 7
+#define NUMBER_COMMAND_TYPES 6
 static const char* command_type_strings[NUMBER_COMMAND_TYPES] =
   {"create-index", "search-for-matches", 
-   "compute-q-values", "q-ranker", "percolator", "spit", "invalid"};
+   "compute-q-values", "q-ranker", "percolator", "invalid"};
 
 
 const char* usage_str = "Usage: crux <command> [options] <argument>\n"
@@ -71,11 +70,7 @@ int main(int argc, char** argv){
   case PERCOLATOR_CMD:
     percolator_main(argc-1, argv+1);
     break;
-  
-  case SPIT_CMD:
-    spit_main(argc-1, argv+1);
-    break;
-  
+
   case INVALID_CMD:
     carp(CARP_FATAL, "Invalid command '%s'\n%s", op_string, usage_str);
     break;

@@ -11,10 +11,6 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define DOXYGEN_SHOULD_SKIP_THIS
 
@@ -390,9 +386,6 @@ void all_positive
   (ARRAY_T* array);
 
 #endif
-#endif
-#ifdef __cplusplus
-}
 #endif
 #endif
 

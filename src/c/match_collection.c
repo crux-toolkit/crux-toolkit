@@ -3241,6 +3241,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   struct dirent* directory_entry = NULL;
   DATABASE_T* database = NULL;
   BOOLEAN_T use_index = is_directory(fasta_file);
+
   /*
     BF: I think that this step is to count how many decoys there are
     per target file.  This is prone to errors as all it really does is

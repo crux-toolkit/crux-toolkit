@@ -9,10 +9,6 @@
 #ifndef HIT_H
 #define HIT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -95,8 +91,4 @@ double get_hit_score(
  * c-basic-offset: 2
  * End:
  */
-#ifdef __cplusplus
-}
-#endif
-
 #endif

@@ -11,10 +11,6 @@
 #ifndef ALPHABET_H
 #define ALPHABET_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "array.h"
 #include "objects.h"
 #include "utils.h"
@@ -144,7 +140,4 @@ void zero_ambigs
 int amino_to_int
   (char amino);
 
-#ifdef __cplusplus
-}
-#endif
 #endif
