@@ -1,0 +1,4 @@
+#!/bin/csh -efx
+
+fig2dev -L eps schematic.fig schematic.eps
+convert -resize 80%x80% schematic.eps schematic.png
