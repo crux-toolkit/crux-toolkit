@@ -457,7 +457,7 @@ void initialize_parameters(void){
 
   set_boolean_parameter("use-mstoolkit", FALSE,
       "Use MSToolkit to parse spectra. Default F.",
-      "Available for crux-search-for-matches", "true");
+      "Available for crux-search-for-matches", "false");
 
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
       "Minimum mass of spectra to be searched.  Default 0.",
