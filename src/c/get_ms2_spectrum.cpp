@@ -19,7 +19,7 @@
 #include "spectrum_collection.h"
 #include "unistd.h"
 
-#define NUM_MS2_OPTIONS 4
+#define NUM_MS2_OPTIONS 3
 #define NUM_MS2_ARGUMENTS 3
 
 int main(int argc, char** argv){
@@ -38,8 +38,8 @@ int main(int argc, char** argv){
   char* option_list[NUM_MS2_OPTIONS] = { 
     "version", 
     "stats", 
-    "verbosity",
-    "use-mstoolkit"}; //out-file
+    "verbosity"/*,
+    "use-mstoolkit"*/}; //out-file
 
   int num_arguments = NUM_MS2_ARGUMENTS;
   char* argument_list[NUM_MS2_ARGUMENTS] = {
