@@ -8,6 +8,10 @@
 #ifndef SPECTRUM_COLLECTION_H
 #define SPECTRUM_COLLECTION_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "objects.h"
 #include "spectrum.h"
@@ -313,4 +317,7 @@ SPECTRUM_T* filtered_spectrum_charge_iterator_next(
  * c-basic-offset: 2
  * End:
  */
+#ifdef __cplusplus
+}
+#endif
 #endif

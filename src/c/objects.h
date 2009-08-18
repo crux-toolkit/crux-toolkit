@@ -6,6 +6,11 @@
 #ifndef OBJECTS_H 
 #define OBJECTS_H
 
+ 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 
 /**
@@ -558,5 +563,8 @@ typedef struct _linked_list_node LIST_POINTER_T;
  */
 typedef struct modified_peptides_iterator_t MODIFIED_PEPTIDES_ITERATOR_T;
 
+#ifdef __cplusplus
+}
+#endif
 #endif
 

@@ -21,6 +21,10 @@
 #ifndef PEPTIDE_MODIFICATIONS_H
 #define PEPTIDE_MODIFICATIONS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <assert.h>
 #include "utils.h"
 #include "linked_list.h"
@@ -140,6 +144,10 @@ int compare_peptide_mod_num_aa_mods(const void* pmod1,
  */
 void print_p_mod(PEPTIDE_MOD_T* mod);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // PEPTIDE_MODIFICATIONS_H
 

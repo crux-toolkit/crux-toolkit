@@ -6,6 +6,10 @@
 #ifndef INDEX_H 
 #define INDEX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "utils.h"
 #include "objects.h"
@@ -454,4 +458,7 @@ void free_bin_sorted_peptide_iterator(
  * c-basic-offset: 2
  * End:
  */
+#ifdef __cplusplus
+}
+#endif
 #endif

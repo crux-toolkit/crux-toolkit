@@ -6,6 +6,10 @@
 #ifndef PROTEIN_H 
 #define PROTEIN_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "utils.h"
 #include "objects.h"
@@ -318,4 +322,7 @@ PROTEIN_T* get_protein_peptide_iterator_portein(
  * c-basic-offset: 2
  * End:
  */
+#ifdef __cplusplus
+}
+#endif
 #endif

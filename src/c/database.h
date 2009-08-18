@@ -6,6 +6,10 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "utils.h"
 #include "objects.h"
@@ -364,4 +368,7 @@ PEPTIDE_T* void_database_sorted_peptide_iterator_next(
  * c-basic-offset: 2
  * End:
  */
+#ifdef __cplusplus
+}
+#endif
 #endif

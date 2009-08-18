@@ -6,6 +6,10 @@
 #ifndef PROTEIN_INDEX_H
 #define PROTEIN_INDEX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "utils.h"
 #include "objects.h"
@@ -140,4 +144,7 @@ char* get_binary_fasta_name(
  * c-basic-offset: 2
  * End:
  */
+#ifdef __cplusplus
+}
+#endif
 #endif

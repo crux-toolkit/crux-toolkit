@@ -6,6 +6,10 @@
 #ifndef PEPTIDE_SRC_H
 #define PEPTIDE_SRC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "utils.h"
 #include "mass.h"
 #include <stdio.h>
@@ -235,4 +239,7 @@ int size_of_serialized_peptide_src();
  * c-basic-offset: 2
  * End:
  */
+#ifdef __cplusplus
+}
+#endif
 #endif

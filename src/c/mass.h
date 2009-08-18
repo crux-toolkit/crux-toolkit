@@ -10,6 +10,10 @@
 #ifndef _MASS_H
 #define _MASS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Mass of ammonia
  */
@@ -93,5 +97,9 @@ void increase_amino_acid_mass(
   char amino_acid, ///< the query amino acid -in
   FLOAT_T update_mass ///< the mass amount to update for the amino acid -in
   );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

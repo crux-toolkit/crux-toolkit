@@ -9,6 +9,9 @@
 #ifndef __HASH__
 #define __HASH__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * Create new hashtable with capacity.
  *\returns the hash table
@@ -141,6 +144,9 @@ void free_hash_iterator(
   HASH_ITERATOR_T* hash_iterator ///< the hash iterator to free
   );
 
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 
