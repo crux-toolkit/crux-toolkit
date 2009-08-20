@@ -12,6 +12,7 @@ cruximg_DATA = \
   schematic.png
 
 dist_html_DATA  =  \
+	broken-link.html \
 	compute-q-values.html \
 	crux-analyze-matches.html \
 	crux-create-index.html \
@@ -26,22 +27,26 @@ dist_html_DATA  =  \
 	fasta-format.html \
 	index-tutorial.html \
 	install-tutorial.html \
+	ms2-format.html \
 	nibib.gif \
 	parameter-file.html \
 	percolator.html \
+	q-ranker.html \
 	release-notes.html \
 	sample.fasta \
 	schematic.png \
 	search-tutorial.html \
-	spectacle.html \
-	spectacle-eg-input.txt \
+	sqt-format.html \
 	start-tutorial.html \
+	txt-format.html \
 	UWlogo150p.gif \
 	data/demo.ms2 \
-	data/small-yeast.fasta
+	data/small-yeast.fasta \
+	data/search.target.txt \
+	data/target.sqt
 
 #EXTRA_DIST = schematic.fig
-EXTRA_DIST = schematic.eps
+EXTRA_DIST = schematic.eps schematic.png
 
 WEBDIR=/noble/www/htdocs/proj/crux
 webpage:
