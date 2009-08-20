@@ -5,5 +5,6 @@ crux
 crux-generate-peptides
 crux-get-ms2-spectrum
 crux-predict-peptide-ions
+cscope.out
 Makefile
 Makefile.in
