@@ -149,7 +149,7 @@ crux_LDADD = \
 paramdir = $(prefix)/doc
 param_DATA = default.params
 
-EXTRA_DIST = default.params ../../bin/spectacle.pl
+EXTRA_DIST = default.params
 
 doc:	*.h *.c
 	doxygen Doxyfile
