@@ -342,7 +342,7 @@ Array<R> map(R (*func)(T parL, S parR), T lhs, const Array<S> & rhs)
 
 // passed by const reference
 template <typename T, typename S>
-void modify(void (*func)(T & parL, const S & parL), Array<T> & lhs, const Array<S> & rhs)
+void modify(void (*func)(T & parL, const S & parR), Array<T> & lhs, const Array<S> & rhs)
 {
   // precondition: lhs and rhs have the same size
   // postcondition: modifies each element of lhs:
@@ -358,7 +358,7 @@ void modify(void (*func)(T & parL, const S & parL), Array<T> & lhs, const Array<
 }
 
 template <typename T, typename S>
-void modify(void (*func)(T & parL, const S & parL), Array<T> & lhs, const S & rhs)
+void modify(void (*func)(T & parL, const S & parR), Array<T> & lhs, const S & rhs)
 {
   // precondition: lhs and rhs have the same size
   // postcondition: modifies each element of lhs:
@@ -372,7 +372,7 @@ void modify(void (*func)(T & parL, const S & parL), Array<T> & lhs, const S & rh
 }
 
 template <typename T, typename S>
-void modify(void (*func)(T & parL, const S & parL), T & lhs, const Array<S> & rhs)
+void modify(void (*func)(T & parL, const S & parR), T & lhs, const Array<S> & rhs)
 {
   // precondition: lhs and rhs have the same size
   // postcondition: modifies each element of lhs:
@@ -387,7 +387,7 @@ void modify(void (*func)(T & parL, const S & parL), T & lhs, const Array<S> & rh
 
 // passed by value 
 template <typename T, typename S>
-void modify(void (*func)(T & parL, S parL), Array<T> & lhs, const Array<S> & rhs)
+void modify(void (*func)(T & parL, S parR), Array<T> & lhs, const Array<S> & rhs)
 {
   // precondition: lhs and rhs have the same size
   // postcondition: modifies each element of lhs:
@@ -403,7 +403,7 @@ void modify(void (*func)(T & parL, S parL), Array<T> & lhs, const Array<S> & rhs
 }
 
 template <typename T, typename S>
-void modify(void (*func)(T & parL, S parL), Array<T> & lhs, S rhs)
+void modify(void (*func)(T & parL, S parR), Array<T> & lhs, S rhs)
 {
   // precondition: lhs and rhs have the same size
   // postcondition: modifies each element of lhs:
@@ -417,7 +417,7 @@ void modify(void (*func)(T & parL, S parL), Array<T> & lhs, S rhs)
 }
 
 template <typename T, typename S>
-void modify(void (*func)(T & parL, S parL), T & lhs, const Array<S> & rhs)
+void modify(void (*func)(T & parL, S parR), T & lhs, const Array<S> & rhs)
 {
   // precondition: lhs and rhs have the same size
   // postcondition: modifies each element of lhs:
