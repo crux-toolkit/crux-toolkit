@@ -28,6 +28,7 @@
 #ifndef _Random_H
 #define _Random_H
 
+#include <cstdlib>
 #include <iostream>
 #include <math.h>
 

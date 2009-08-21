@@ -6,6 +6,7 @@
  *
  * $Id: SanityCheck.cpp,v 1.3.2.1 2008/05/27 20:29:31 lukall Exp $
  *******************************************************************************/
+#include <cstdlib>
 #include <string>
 #include <fstream>
 #include <iostream>

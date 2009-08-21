@@ -27,6 +27,8 @@
  *******************************************************************************/
 #ifndef OPTION_H_
 #define OPTION_H_
+
+#include <cstdlib>
 #include<string>
 #include<map>
 #include<vector>
