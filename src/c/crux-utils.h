@@ -7,10 +7,6 @@
 #ifndef CRUX_UTILS_H
 #define CRUX_UTILS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,6 +21,11 @@ extern "C" {
 #include "carp.h"
 #include "utils.h"
 #include "objects.h"
+
+#ifdef __cplusplus
+  extern "C" {
+#endif
+
 
 /**
  *\returns a heap copy of the given string

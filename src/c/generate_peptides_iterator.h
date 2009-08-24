@@ -24,6 +24,10 @@
 #include "linked_list.h"
 #include "modified_peptides_iterator.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // TODO (BF 10-Apr-08) should this be private?
 /**
  *\returns a empty generate_peptide_iterator object
@@ -126,6 +130,11 @@ PEPTIDE_T* generate_peptides_iterator_next(
 void free_generate_peptides_iterator(
   GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator ///< iterator to free
   );
+
+#ifdef __cplusplus
+}
+#endif
+
 /*
  * Local Variables:
  * mode: c

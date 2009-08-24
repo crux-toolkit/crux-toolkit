@@ -18,6 +18,10 @@
 
 #define MAX_INDEX_FILES 1024
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * clean_up
  *
@@ -447,6 +451,9 @@ void free_bin_sorted_peptide_iterator(
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator ///< the iterator to free -in
   );
 
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * Local Variables:

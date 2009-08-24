@@ -25,6 +25,10 @@
 //these may be elsewhere
 #define MAX_PEPTIDE_LENGTH 255
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /*  Allocators/deallocators  */
 
@@ -647,6 +651,10 @@ char *get_protein_ids(PEPTIDE_T *peptide);
  * If peptide has no sources returns NULL.
  */
 char *get_flanking_aas(PEPTIDE_T *peptide);
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

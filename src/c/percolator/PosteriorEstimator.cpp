@@ -30,6 +30,7 @@
 #include<vector>
 #include<utility>
 #include<cstdlib>
+#include<climits>
 #include<fstream>
 #include<sstream>
 #include<iterator>

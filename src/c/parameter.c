@@ -428,7 +428,7 @@ void initialize_parameters(void){
   set_boolean_parameter("output-sequence", FALSE, 
       "Print peptide sequence (T,F). Default FALSE.",
       "Available only for crux-generate-peptides.", "true");
-  set_sort_type_parameter("sort", NONE, 
+  set_sort_type_parameter("sort", SORT_NONE, 
       "Sort peptides according to which property "
       "(mass, length, lexical, none).  Default none.",
       "Only available for crux-generate-peptides.", "true");
@@ -905,17 +905,6 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     void* value_ptr = get_hash_value(parameters, option_names[i]);
     void* usage_ptr = get_hash_value(usages, option_names[i]);
     void* type_ptr =  get_hash_value(types, option_names[i]);
-    if( //strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
-        strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
-        strcmp(type_ptr, "BOOLEAN_T") == 0 ||
-        strcmp(type_ptr, "SORT_TYPE_T") == 0 ||
-        strcmp(type_ptr, "SCORER_TYPE_T") == 0 ){
-      type_ptr = "STRING_ARG";
-    }
-    carp(CARP_DETAILED_DEBUG, 
-         "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
-         (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
-    
 
     /* check that the option is in the params hash */
     if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
@@ -928,6 +917,20 @@ BOOLEAN_T select_cmd_line(  //remove options from name
            type_ptr);
       
     }
+
+    if( //strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
+        strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
+        strcmp(type_ptr, "BOOLEAN_T") == 0 ||
+        strcmp(type_ptr, "SORT_TYPE_T") == 0 ||
+        strcmp(type_ptr, "SCORER_TYPE_T") == 0 ){
+      type_ptr = "STRING_ARG";
+    }
+    carp(CARP_DETAILED_DEBUG, 
+         "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
+         (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
+    
+
+
 
     /* add the option via parse_arguments.c. pointer decides opt or req */
     success = parse_arguments_set_ptr(option_names[i],

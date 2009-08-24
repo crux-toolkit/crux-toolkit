@@ -2436,7 +2436,7 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
   // create a sorted peptide iterator that will sort all the peptides 
   // from bin peptide_iterator
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator = 
-    new_sorted_peptide_iterator_bin(bin_peptide_iterator, MASS, 
+    new_sorted_peptide_iterator_bin(bin_peptide_iterator, SORT_MASS, 
         index->is_unique, peptide_count);
 
   // set sorted_peptide_iterator

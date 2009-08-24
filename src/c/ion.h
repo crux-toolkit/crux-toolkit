@@ -19,6 +19,10 @@
 
 #define MAX_MODIFICATIONS 4 ///< maximum modifications allowed per ion
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \returns An (empty) ion object.
  */
@@ -375,6 +379,11 @@ BOOLEAN_T calc_ion_mass_z_with_mass(
   FLOAT_T mass, ///< the basic mass of the ion -in
   BOOLEAN_T is_modified ///< are there any modifications for this ion? -in
   );
+
+
+#ifdef __cplusplus
+}
+#endif
 
 /**
  *
