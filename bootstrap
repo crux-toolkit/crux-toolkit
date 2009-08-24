@@ -65,7 +65,13 @@ else
     aclocal
 fi
 
-cp /usr/share/libtool/ltmain.sh config
+ltpath=/usr/share/libtool/ltmain.sh
+if [ -f "$ltpath" ]; then
+    cp $ltpath config
+else
+    cp /usr/share/libtool/config/ltmain.sh config
+fi
+
 autoheader
 automake -a -c 
 autoconf

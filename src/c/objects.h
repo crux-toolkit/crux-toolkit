@@ -205,7 +205,7 @@ typedef struct database_peptide_iterator DATABASE_PEPTIDE_ITERATOR_T;
 /**
  * The enum for sort type (mass, length, lexical, none)
  */
-enum _sort_type {NONE, MASS, LENGTH, LEXICAL};
+enum _sort_type {SORT_NONE, SORT_MASS, SORT_LENGTH, SORT_LEXICAL};
 #define NUMBER_SORT_TYPES 4
 
 /**

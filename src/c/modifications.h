@@ -57,6 +57,10 @@ enum {AA_LIST_LENGTH = 26}; // A-Z
    If we ask again, answer == 0100_0000_0000_0000 
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Allocate an AA_MOD, including space for the aa_list and
  * initialize all fields to default values.  Symbol and unique
@@ -381,6 +385,10 @@ char* aa_mod_get_aa_list_string(AA_MOD_T* mod);
  * Count the number of modified aas in the string.
  */
 int count_modified_aas(MODIFIED_AA_T* seq);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //MODIFICATION_FILE_H
 

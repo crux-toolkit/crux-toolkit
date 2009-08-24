@@ -171,7 +171,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
    **********************/
   if(index != NULL){
     
-    if((sort_type != MASS && sort_type != NONE)){
+    if((sort_type != SORT_MASS && sort_type != SORT_NONE)){
       carp(CARP_FATAL, "Cannot sort other than by mass when using index.");
     }
    
@@ -229,7 +229,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     
     // no sort
     //if(!is_unique && sort_type == NONE){ 
-    if( sort_type == NONE ){ 
+    if( sort_type == SORT_NONE ){ 
       carp(CARP_DETAILED_DEBUG, "Creating database peptide iterator");
       // create peptide iterator  & set generate_peptides_iterator
       DATABASE_PEPTIDE_ITERATOR_T* iterator 
@@ -245,11 +245,11 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
       carp(CARP_DETAILED_DEBUG, "Creating sorted database peptide iterator");
       // only sort, by default will be sorted by mass
       DATABASE_SORTED_PEPTIDE_ITERATOR_T* sorted_iterator = NULL;
-      if(sort_type == NONE){
+      if(sort_type == SORT_NONE){
         // create peptide iterator
         sorted_iterator = new_database_sorted_peptide_iterator(
             database, constraint, 
-            MASS, TRUE);       
+            SORT_MASS, TRUE);       
       }
       // create peptide iterator
       else{

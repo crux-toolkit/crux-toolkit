@@ -15,6 +15,10 @@
 #include "peptide_constraint.h"
 #include "sorter.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \returns An (empty) database object.
  */
@@ -356,6 +360,10 @@ BOOLEAN_T void_database_sorted_peptide_iterator_has_next(
 PEPTIDE_T* void_database_sorted_peptide_iterator_next(
   void* database_peptide_iterator ///< the iterator of interest -in
   );
+
+#ifdef __cplusplus
+}
+#endif
 
 
 /*

@@ -76,7 +76,7 @@ int compareTo(
   )
 {
   // length order
-  if(sort_type == LENGTH){
+  if(sort_type == SORT_LENGTH){
     if(get_peptide_length(peptide_one) >
        get_peptide_length(peptide_two)){
       return 1;
@@ -90,7 +90,7 @@ int compareTo(
     }
   }
   // mass order
-  else if(sort_type == MASS){
+  else if(sort_type == SORT_MASS){
     return compare_float(get_peptide_peptide_mass(peptide_one), 
                          get_peptide_peptide_mass(peptide_two));
     
@@ -104,7 +104,7 @@ int compareTo(
     */
   }
   // lexicographic order
-  else if(sort_type == LEXICAL){
+  else if(sort_type == SORT_LEXICAL){
     
     // convert the protein to heavy if needed
     protein_to_heavy(get_peptide_parent_protein(peptide_one));
@@ -173,9 +173,9 @@ PEPTIDE_WRAPPER_T* merge_duplicates_same_list(
   PEPTIDE_WRAPPER_T* current = wrapper_list;
   // for all peptides that have equal mass
   while(current->next_wrapper != NULL &&
-        compareTo(wrapper_list->peptide, current->next_wrapper->peptide, MASS)==0){  
+        compareTo(wrapper_list->peptide, current->next_wrapper->peptide, SORT_MASS)==0){  
     // check identical peptide
-    if(compareTo(wrapper_list->peptide, current->next_wrapper->peptide, LEXICAL)==0){
+    if(compareTo(wrapper_list->peptide, current->next_wrapper->peptide, SORT_LEXICAL)==0){
       PEPTIDE_WRAPPER_T* wrapper_to_delete = current->next_wrapper;
       // merge peptides
       merge_peptides(wrapper_list->peptide, wrapper_to_delete->peptide);
@@ -206,9 +206,9 @@ PEPTIDE_WRAPPER_T* merge_duplicates_different_list(
   PEPTIDE_WRAPPER_T* previous = wrapper_list_second;
   
   while(current != NULL &&
-        compareTo(wrapper_list_first->peptide, current->peptide, MASS) == 0){
+        compareTo(wrapper_list_first->peptide, current->peptide, SORT_MASS) == 0){
     
-    if(compareTo(wrapper_list_first->peptide, current->peptide, LEXICAL) == 0){
+    if(compareTo(wrapper_list_first->peptide, current->peptide, SORT_LEXICAL) == 0){
       PEPTIDE_WRAPPER_T* wrapper_to_delete = current;
       // merge peptides
       merge_peptides(wrapper_list_first->peptide, wrapper_to_delete->peptide);
@@ -300,11 +300,11 @@ PEPTIDE_WRAPPER_T* merge(
       // if duplicate peptide, merge into one peptide only if unique is TRUE
       if(compared == 0 && unique){
         // only check if same peptide if mass is identical
-        if(sort_type == MASS ||
-           (compared_mass = compareTo(wrapper_one->peptide, wrapper_two->peptide, MASS))==0){
+        if(sort_type == SORT_MASS ||
+           (compared_mass = compareTo(wrapper_one->peptide, wrapper_two->peptide, SORT_MASS))==0){
           // must be identical peptide, since mass & lexicographically same
-          if(sort_type == LEXICAL ||
-             compareTo(wrapper_one->peptide, wrapper_two->peptide, LEXICAL)==0){            
+          if(sort_type == SORT_LEXICAL ||
+             compareTo(wrapper_one->peptide, wrapper_two->peptide, SORT_LEXICAL)==0){            
             PEPTIDE_WRAPPER_T* wrapper_to_delete = wrapper_two;
             // merge peptides
             merge_peptides(wrapper_one->peptide, wrapper_two->peptide);
@@ -313,7 +313,7 @@ PEPTIDE_WRAPPER_T* merge(
           }          
         }
         // merge all other instances of the same peptide in the list before adding to master list
-        if(sort_type == MASS || sort_type == LENGTH){
+        if(sort_type == SORT_MASS || sort_type == SORT_LENGTH){
           // wrapper_one = merge_duplicates_same_list(wrapper_one);
           wrapper_two = merge_duplicates_different_list(wrapper_one, wrapper_two);
         }
@@ -321,7 +321,7 @@ PEPTIDE_WRAPPER_T* merge(
 
       // when sorting by length and unique, sort also by mass to speed up the unique check
       // thus, when identical length add the peptide with smaller mass to the list first
-      if(unique && sort_type == LENGTH && compared == 0 && compared_mass == 1){
+      if(unique && sort_type == SORT_LENGTH && compared == 0 && compared_mass == 1){
         // there are wrappers on the current list
         if(wrapper_current != NULL){
           wrapper_current->next_wrapper = wrapper_two;        
@@ -537,16 +537,16 @@ PEPTIDE_T** sort_peptide_array(
 {
   // sort the peptide array by sort_type
   switch (sort_type){
-  case MASS:
+  case SORT_MASS:
     qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (void*)compare_peptide_mass_qsort);
     break;
-  case LEXICAL:
+  case SORT_LEXICAL:
     qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (void*)compare_peptide_lexical_qsort);
     break;
-  case LENGTH:
+  case SORT_LENGTH:
     qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (void*)compare_peptide_length_qsort);
     break;
-  case NONE:
+  case SORT_NONE:
     break;
   }
   
