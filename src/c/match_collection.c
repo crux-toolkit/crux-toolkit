@@ -1367,6 +1367,13 @@ BOOLEAN_T compute_p_values(MATCH_COLLECTION_T* match_collection){
     return FALSE;
   }
 
+  carp(CARP_DEBUG, "Computing p-values for %s spec %d charge %d "
+       "with eta %f beta %f shift %f",
+       (match_collection->null_peptide_collection) ? "decoy" : "target",
+       get_spectrum_first_scan(get_match_spectrum(match_collection->match[0])),
+       match_collection->charge,
+       match_collection->eta, match_collection->beta, match_collection->shift);
+
   SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
 
   // check that the matches have been scored
@@ -1658,8 +1665,8 @@ void set_match_collection_weibull_params(
 ){
 
   match_collection->eta = eta;
-  match_collection->eta = beta;
-  match_collection->eta = shift;
+  match_collection->beta = beta;
+  match_collection->shift = shift;
 }
 
 /**
