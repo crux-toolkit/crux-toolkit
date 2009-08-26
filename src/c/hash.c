@@ -109,7 +109,7 @@ static int hash_grow(
  * \returns the array slot
  */
 static unsigned int strhash(
-  char *str ///< string into the hash function -in
+  const char *str ///< string into the hash function -in
   )
 {
   int c;
@@ -180,7 +180,7 @@ void free_hash(
  */
 BOOLEAN_T add_or_update_hash(
   HASH_T* h, ///< Hash object to add to -in/out
-  char *key, ///< key of the record to add or update -in
+  const char *key, ///< key of the record to add or update -in
   void *value ///< value to associate with the key -in
   )
 {
@@ -244,7 +244,7 @@ BOOLEAN_T add_or_update_hash(
  */
 BOOLEAN_T add_or_update_hash_copy(
   HASH_T* h, ///< Hash object to add to -in/out
-  char *key, ///< key of the record to add or update -in
+  const char *key, ///< key of the record to add or update -in
   void *value ///< value to associate with the key -in
   )
 {
@@ -361,7 +361,7 @@ BOOLEAN_T add_hash_when_grow(
  */
 BOOLEAN_T update_hash_value(
   HASH_T* h, ///< Hash object to add -in/out
-  char *key, ///< key of the record to update -in
+  const char *key, ///< key of the record to update -in
   void *value ///< value to add to be hash -in
   )
 {
@@ -404,7 +404,7 @@ BOOLEAN_T update_hash_value(
  */
 void* get_hash_value(
   HASH_T* h, ///< working hash object -in
-  char *key  ///< the key of the record to retrieve -in
+  const char *key  ///< the key of the record to retrieve -in
   )
 {
   RECORD_T* recs;

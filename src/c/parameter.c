@@ -71,7 +71,7 @@ void parse_parameter_file(
  * Requires (or at least only makes sense after) 
  * parse_cmd_line_into_params_hash() has been run.
  */
-BOOLEAN_T check_option_type_and_bounds(char* name);
+BOOLEAN_T check_option_type_and_bounds(const char* name);
 
 void check_parameter_consistency();
 void parse_custom_enzyme(char* rule_str);
@@ -79,10 +79,10 @@ void parse_custom_enzyme(char* rule_str);
 /**
  *
  */
-BOOLEAN_T string_to_param_type(char*, PARAMETER_TYPE_T* );
+BOOLEAN_T string_to_param_type(const char*, PARAMETER_TYPE_T* );
 
 BOOLEAN_T set_boolean_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
  char* usage,          ///< message for the usage statement
  char* filenotes,      ///< additional information for the params file
@@ -90,7 +90,7 @@ BOOLEAN_T set_boolean_parameter(
  );
 
 BOOLEAN_T set_int_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  int set_value,  ///< the value to be set -in
  int min_value,  ///< the value to be set -in
  int max_value,  ///< the value to be set -in
@@ -100,7 +100,7 @@ BOOLEAN_T set_int_parameter(
  );
 
 BOOLEAN_T set_double_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  double set_value,  ///< the value to be set -in
  double min_value,  ///< the value to be set -in
  double max_value,  ///< the value to be set -in
@@ -110,7 +110,7 @@ BOOLEAN_T set_double_parameter(
   );
 
 BOOLEAN_T set_string_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  char* set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
@@ -118,7 +118,7 @@ BOOLEAN_T set_string_parameter(
   );
 
 BOOLEAN_T set_mass_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  MASS_TYPE_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
@@ -126,7 +126,7 @@ BOOLEAN_T set_mass_type_parameter(
   );
 
 BOOLEAN_T set_digest_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
@@ -134,7 +134,7 @@ BOOLEAN_T set_digest_type_parameter(
   );
 
 BOOLEAN_T set_enzyme_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  ENZYME_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
@@ -142,7 +142,7 @@ BOOLEAN_T set_enzyme_type_parameter(
   );
 
 BOOLEAN_T set_digest_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
@@ -150,7 +150,7 @@ BOOLEAN_T set_digest_type_parameter(
   );
 
 BOOLEAN_T set_enzyme_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  ENZYME_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
@@ -158,37 +158,37 @@ BOOLEAN_T set_enzyme_type_parameter(
   );
 
 BOOLEAN_T set_sort_type_parameter(
- char* name,
+ const char* name,
  SORT_TYPE_T set_value,
  char* usage,
  char* filenotes,
  char* foruser);
 
 BOOLEAN_T set_algorithm_type_parameter(
- char* name,
+ const char* name,
  ALGORITHM_TYPE_T set_value,
  char* usage,
  char* filenotes,
  char* foruser);
 
 BOOLEAN_T set_scorer_type_parameter(
- char* name,
+ const char* name,
  SCORER_TYPE_T set_value,
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
  char* foruser);
 
 BOOLEAN_T set_ion_type_parameter(
- char* name,
+ const char* name,
  ION_TYPE_T set_value,
  char* usage,
  char* filenotes,
  char* foruser);
 
 BOOLEAN_T select_cmd_line(  
-  char** option_names, ///< list of options to be allowed for main -in
+  const char** option_names, ///< list of options to be allowed for main -in
   int    num_options,  ///< number of optons in that list -in
-  int (*parse_argument_set)(char*, char*, void*, enum argument_type) ///< function point to choose arguments or options 
+  int (*parse_argument_set)(const char*, const char*, void*, enum argument_type) ///< function point to choose arguments or options 
   );
 
 BOOLEAN_T update_aa_masses();
@@ -855,7 +855,7 @@ void initialize_parameters(void){
  * This is the interface for parse_argument_set_req()
  */
 BOOLEAN_T select_cmd_line_arguments(  //remove options from name
-  char** option_names,
+  const char** option_names,
   int    num_options 
   ){
   select_cmd_line( option_names, num_options, 
@@ -869,7 +869,7 @@ BOOLEAN_T select_cmd_line_arguments(  //remove options from name
  * This is the interface for parse_argument_set_opt()
  */
 BOOLEAN_T select_cmd_line_options(  //remove options from name
-  char** option_names,
+  const char** option_names,
   int    num_options 
   ){
   select_cmd_line( option_names, num_options, 
@@ -883,9 +883,9 @@ BOOLEAN_T select_cmd_line_options(  //remove options from name
  * 
  */
 BOOLEAN_T select_cmd_line(  //remove options from name
-  char** option_names,
+  const char** option_names,
   int    num_options, 
-  int (*parse_arguments_set_ptr)(char*, char*, void*, enum argument_type) 
+  int (*parse_arguments_set_ptr)(const char*, const char*, void*, enum argument_type) 
   ){
 
   carp(CARP_DETAILED_DEBUG, "Selecting options");
@@ -929,9 +929,6 @@ BOOLEAN_T select_cmd_line(  //remove options from name
          "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
          (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
     
-
-
-
     /* add the option via parse_arguments.c. pointer decides opt or req */
     success = parse_arguments_set_ptr(option_names[i],
                                       usage_ptr,
@@ -1054,7 +1051,7 @@ void translate_decoy_options(){
  */
 BOOLEAN_T parse_cmd_line_into_params_hash(int argc, 
                                           char** argv, 
-                                          char* exe_name){
+                                          const char* exe_name){
   carp(CARP_DETAILED_DEBUG, "Parameter.c is parsing the command line");
   assert(parameter_initialized && usage_initialized && type_initialized);
   BOOLEAN_T success = TRUE;
@@ -1321,7 +1318,7 @@ void check_parameter_consistency(){
  *   that it is a legal value (within min/max for
  *   numeric, correct word for specialized type 
  */
-BOOLEAN_T check_option_type_and_bounds(char* name){
+BOOLEAN_T check_option_type_and_bounds(const char* name){
 
   BOOLEAN_T success = TRUE;
   char die_str[SMALL_BUFFER];
@@ -1606,7 +1603,7 @@ void parse_parameter_file(
  * \returns TRUE if paramater value is TRUE, else FALSE
  */ 
 BOOLEAN_T get_boolean_parameter(
- char*     name  ///< the name of the parameter looking for -in
+ const char*     name  ///< the name of the parameter looking for -in
  )
 {
   static char buffer[PARAMETER_LENGTH];
@@ -1661,7 +1658,7 @@ BOOLEAN_T get_boolean_parameter(
  *\returns the int value of the parameter
  */
 int get_int_parameter(
-  char* name  ///< the name of the parameter looking for -in
+  const char* name  ///< the name of the parameter looking for -in
   )
 {
   //char *endptr;
@@ -1712,7 +1709,7 @@ int get_int_parameter(
  *\returns the double value of the parameter
  */
 double get_double_parameter(
-  char* name   ///< the name of the parameter looking for -in
+  const char* name   ///< the name of the parameter looking for -in
   )
 {
   char *endptr;
@@ -1767,7 +1764,7 @@ double get_double_parameter(
  * \returns The hash-alllocated string value of the given parameter name
  */
 char* get_string_parameter(
-  char* name  ///< the name of the parameter looking for -in
+  const char* name  ///< the name of the parameter looking for -in
   )
 {
   
@@ -1809,7 +1806,7 @@ char* get_string_parameter(
  * \returns the string value to which matches the parameter name, else aborts
  */
 char* get_string_parameter_pointer(
-  char* name  ///< the name of the parameter looking for -in
+  const char* name  ///< the name of the parameter looking for -in
   )
 {
   
@@ -1833,7 +1830,7 @@ char* get_string_parameter_pointer(
 
 }
 
-DIGEST_T get_digest_type_parameter( char* name ){
+DIGEST_T get_digest_type_parameter( const char* name ){
 
   char* param = get_hash_value(parameters, name);
 
@@ -1845,7 +1842,7 @@ DIGEST_T get_digest_type_parameter( char* name ){
   return digest_type;
 }
 
-ENZYME_T get_enzyme_type_parameter( char* name ){
+ENZYME_T get_enzyme_type_parameter( const char* name ){
 
   char* param = get_hash_value(parameters, name);
 
@@ -1858,7 +1855,7 @@ ENZYME_T get_enzyme_type_parameter( char* name ){
 }
 
 MASS_TYPE_T get_mass_type_parameter(
-   char* name
+   const char* name
    ){
   char* param_value_str = get_hash_value(parameters, name);
   MASS_TYPE_T param_value;
@@ -1872,7 +1869,7 @@ MASS_TYPE_T get_mass_type_parameter(
   return param_value;
 }
 
-SORT_TYPE_T get_sort_type_parameter(char* name){
+SORT_TYPE_T get_sort_type_parameter(const char* name){
   char* param_value_str = get_hash_value(parameters, name);
   SORT_TYPE_T param_value;
   BOOLEAN_T success = string_to_sort_type(param_value_str, &param_value);
@@ -1884,7 +1881,7 @@ SORT_TYPE_T get_sort_type_parameter(char* name){
   return param_value;
 }
 
-ALGORITHM_TYPE_T get_algorithm_type_parameter(char* name){
+ALGORITHM_TYPE_T get_algorithm_type_parameter(const char* name){
   char* param_value_str = get_hash_value(parameters, name);
   ALGORITHM_TYPE_T param_value;
   BOOLEAN_T success = string_to_algorithm_type(param_value_str, &param_value);
@@ -1897,7 +1894,7 @@ ALGORITHM_TYPE_T get_algorithm_type_parameter(char* name){
 }
 
 
-SCORER_TYPE_T get_scorer_type_parameter(char* name){
+SCORER_TYPE_T get_scorer_type_parameter(const char* name){
   char* param_value_str = get_hash_value(parameters, name);
   SCORER_TYPE_T param_value;
   BOOLEAN_T success = string_to_scorer_type(param_value_str, &param_value);
@@ -1909,7 +1906,7 @@ SCORER_TYPE_T get_scorer_type_parameter(char* name){
   return param_value;
 }
 
-ION_TYPE_T get_ion_type_parameter(char* name){
+ION_TYPE_T get_ion_type_parameter(const char* name){
   char* param_value_str = get_hash_value(parameters, name);
   ION_TYPE_T param_value;
   BOOLEAN_T success = string_to_ion_type(param_value_str, &param_value);
@@ -1927,7 +1924,7 @@ ION_TYPE_T get_ion_type_parameter(char* name){
  */
 
 BOOLEAN_T set_boolean_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
  char* usage,          ///< message for the usage statement
  char* filenotes,      ///< additional informatino for the params file
@@ -1958,7 +1955,7 @@ BOOLEAN_T set_boolean_parameter(
 }
 
 BOOLEAN_T set_int_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  int set_value,  ///< the value to be set -in
  int min_value,  ///< the minimum accepted value -in
  int max_value,  ///< the maximum accepted value -in
@@ -1994,7 +1991,7 @@ BOOLEAN_T set_int_parameter(
 }
 
 BOOLEAN_T set_double_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  double set_value,  ///< the value to be set -in
  double min_value,  ///< the value to be set -in
  double max_value,  ///< the value to be set -in
@@ -2034,7 +2031,7 @@ BOOLEAN_T set_double_parameter(
  * \returns TRUE if paramater value is set, else FALSE
  */ 
 BOOLEAN_T set_string_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  char* set_value,  ///< the value to be set -in
  char* usage,
  char* filenotes,  ///< additional comments for parameter file
@@ -2063,7 +2060,7 @@ BOOLEAN_T set_string_parameter(
 }
 
 BOOLEAN_T set_mass_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  MASS_TYPE_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,  ///< additional info for param file
@@ -2092,7 +2089,7 @@ BOOLEAN_T set_mass_type_parameter(
 }
 
 BOOLEAN_T set_digest_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
@@ -2122,7 +2119,7 @@ BOOLEAN_T set_digest_type_parameter(
 }
 
 BOOLEAN_T set_enzyme_type_parameter(
- char*     name,  ///< the name of the parameter looking for -in
+ const char*     name,  ///< the name of the parameter looking for -in
  ENZYME_T set_value,  ///< the value to be set -in
  char* usage,      ///< string to print in usage statement
  char* filenotes,   ///< additional info for param file
@@ -2151,7 +2148,7 @@ BOOLEAN_T set_enzyme_type_parameter(
 }
 
 BOOLEAN_T set_sort_type_parameter(
-  char* name,
+  const char* name,
   SORT_TYPE_T set_value,
   char* usage,
   char* filenotes,
@@ -2176,7 +2173,7 @@ BOOLEAN_T set_sort_type_parameter(
 }
 
 BOOLEAN_T set_algorithm_type_parameter(
-                                       char* name,
+                                       const char* name,
                                        ALGORITHM_TYPE_T set_value,
                                        char* usage,
  char* filenotes,
@@ -2204,7 +2201,7 @@ BOOLEAN_T set_algorithm_type_parameter(
 
 
 BOOLEAN_T set_scorer_type_parameter(
- char* name,
+ const char* name,
  SCORER_TYPE_T set_value,
  char* usage, 
  char* filenotes,
@@ -2232,7 +2229,7 @@ BOOLEAN_T set_scorer_type_parameter(
   return result;
 }
 
-BOOLEAN_T set_ion_type_parameter(char* name,
+BOOLEAN_T set_ion_type_parameter(const char* name,
                                  ION_TYPE_T set_value,
                                  char* usage,
                                  char* filenotes,
@@ -2261,7 +2258,7 @@ BOOLEAN_T set_ion_type_parameter(char* name,
  * Routines that return crux enumerated types. 
  */
 
-BOOLEAN_T string_to_param_type(char* name, PARAMETER_TYPE_T* result ){
+BOOLEAN_T string_to_param_type(const char* name, PARAMETER_TYPE_T* result ){
   BOOLEAN_T success = TRUE;
   if( name == NULL ){
     return FALSE;

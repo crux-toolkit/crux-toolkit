@@ -35,14 +35,14 @@ int main(int argc, char** argv){
 
   /* Define optional command line arguments */
   int num_options = NUM_MS2_OPTIONS;
-  char* option_list[NUM_MS2_OPTIONS] = { 
+  const char* option_list[NUM_MS2_OPTIONS] = { 
     "version", 
     "stats", 
     "verbosity"/*,
     "use-mstoolkit"*/}; //out-file
 
   int num_arguments = NUM_MS2_ARGUMENTS;
-  char* argument_list[NUM_MS2_ARGUMENTS] = {
+  const char* argument_list[NUM_MS2_ARGUMENTS] = {
     "scan number",
     "ms2 file",
     "output file"

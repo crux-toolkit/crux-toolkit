@@ -1,0 +1,10 @@
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	p-value	Weibull est. q-value	decoy q-value (xcorr)	decoy q-value (p-value)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence
+2	3	576.5400	1726.5964	1725.9773	0	24	1	-0.55	1										7	64	1	MSPFGVPVPGPAPETKD	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	LI	
+3	1	518.9500	517.9422	519.5119	0	13	1	0.098	1										3	10	1	TTGNGA	custom-enzyme-partial-digest	gi|16127995|ref|NP_414542.1|	IG	
+10	2	419.5800	837.1443	839.9005	0	7	1	-0.072	1										2	12	1	SQKDSYI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	LL	
+14	2	500.4100	998.8044	1001.0148	0	1.8	1	-0.097	1										1	16	1	TQSSSEYSI	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|	IS	
+15	2	488.8200	975.6244	976.9977	0	5.7	1	-0.076	1										2	12	2	EYFNNYQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	IP	
+15	2	488.8200	975.6244	973.0533	-0.44	0	2	-0.11	2										0	12	2	TYKRYDQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	LY	
+16	2	520.9900	1039.9644	1040.1899	0	0	2	0.04	1										0	14	3	KHKNSQWL	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	QK	
+16	2	520.9900	1039.9644	1041.2585	3.7	0	2	-0.11	2										0	16	3	KKYFKTGGI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	IL	
+16	2	520.9900	1039.9644	1038.0913	4	0.52	1	-0.12	3										1	14	3	YTCDPRQV	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|	VP	

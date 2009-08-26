@@ -46,7 +46,7 @@ int percolator_main(int argc, char** argv){
 
   /* Define command line arguments */
   int num_options = NUM_PERCOLATOR_OPTIONS;
-  char* option_list[NUM_PERCOLATOR_OPTIONS] = {
+  const char* option_list[NUM_PERCOLATOR_OPTIONS] = {
     "version",
     "verbosity",
     "parameter-file",
@@ -57,7 +57,7 @@ int percolator_main(int argc, char** argv){
   };
 
   int num_arguments = NUM_PERCOLATOR_ARGUMENTS;
-  char* argument_list[NUM_PERCOLATOR_ARGUMENTS] = {
+  const char* argument_list[NUM_PERCOLATOR_ARGUMENTS] = {
     "protein input"
   };
 

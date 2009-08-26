@@ -48,7 +48,7 @@ int main(int argc, char** argv){
     
   /* Define optional command line arguments */ 
   int num_options = NUM_GEN_PEP_OPTIONS;
-  char* option_list[NUM_GEN_PEP_OPTIONS] = {
+  const char* option_list[NUM_GEN_PEP_OPTIONS] = {
     "version",
     "verbosity",
     "parameter-file",
@@ -71,7 +71,7 @@ int main(int argc, char** argv){
 
   /* Define required command-line arguments */
   int num_arguments = NUM_GEN_PEP_ARGS;
-  char* argument_list[NUM_GEN_PEP_ARGS] = { "protein input" };
+  const char* argument_list[NUM_GEN_PEP_ARGS] = { "protein input" };
 
   //TODO make this a debug flag
   //set_verbosity_level(CARP_DETAILED_DEBUG);

@@ -67,7 +67,7 @@ int search_main(int argc, char** argv){
 
   /* Define optional command line arguments */
   int num_options = NUM_SEARCH_OPTIONS;
-  char* option_list[NUM_SEARCH_OPTIONS] = {
+  const char* option_list[NUM_SEARCH_OPTIONS] = {
     "verbosity",
     "version",
     "parameter-file",
