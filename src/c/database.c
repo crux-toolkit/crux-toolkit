@@ -412,7 +412,7 @@ BOOLEAN_T populate_proteins_from_memmap(
     new_protein = allocate_protein();
     
     // parse protein from memory map
-    if(!parse_protein_binary_memmap(new_protein, (void**)&data)){
+    if(!parse_protein_binary_memmap(new_protein, &data)){
       // failed to parse the protein from memmap
       // free all proteins, and return FALSE
       free_protein(new_protein);

@@ -105,7 +105,7 @@ BOOLEAN_T parse_protein_fasta_file(
  */
 BOOLEAN_T parse_protein_binary_memmap(
   PROTEIN_T* protein, ///< protein object to fill in -out
-  void** memmap ///< a pointer to a pointer to the memory mapped binary fasta file -in
+  char** memmap ///< a pointer to a pointer to the memory mapped binary fasta file -in
   );
 
 /** 
