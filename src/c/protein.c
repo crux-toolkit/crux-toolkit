@@ -341,12 +341,9 @@ void copy_protein(
  */
 BOOLEAN_T parse_protein_binary_memmap(
   PROTEIN_T* protein, ///< protein object to fill in -out
-  void** memmap ///< a pointer to a pointer to the memory mapped binary fasta file -in
+  char** memmap ///< a pointer to a pointer to the memory mapped binary fasta file -in
   )
 {
-  int** memmap_as_int = (int**)memmap;
-  char** memmap_as_char = (char**)memmap;
-
   int id_length = 0;
   int annotation_length = 0;
   int sequence_length = 0;
@@ -360,47 +357,47 @@ BOOLEAN_T parse_protein_binary_memmap(
   /***set protein ID***/
 
   // read id length
-  id_length = (*memmap_as_int)[0];
+  id_length = *((int *) *memmap);
 
   // reset pointer to start of id
-  ++*memmap_as_int;
+  *memmap += sizeof(int);
 
   // set protein id to mem mapped id
-  protein->id = *memmap_as_char;
+  protein->id = *memmap;
 
   // reset pointer to move to annotation_length
-  *memmap_as_char += (id_length + 1);
+  *memmap += (id_length + 1);
 
 
   /***set protein annotation***/
 
   // read annotation length
-  annotation_length = (*memmap_as_int)[0];
+  annotation_length = *((int *) *memmap);
 
   // reset pointer to start of annotation
-  ++*memmap_as_int;
+  *memmap += sizeof(int);
 
   // set protein annotation to mem mapped annotation
-  protein->annotation = *memmap_as_char;
+  protein->annotation = *memmap;
 
   // reset pointer to move to sequence_length
-  *memmap_as_char += (annotation_length + 1);
+  *memmap += (annotation_length + 1);
 
 
   /***set protein sequence***/
   
   // read sequence length
-  sequence_length = (*memmap_as_int)[0];
+  sequence_length = *((int *) *memmap);
   protein->length = sequence_length;
 
   // reset pointer to start of sequence
-  ++*memmap_as_int;
+  *memmap += sizeof(int);
 
   // set protein annotation to mem mapped sequence
-  protein->sequence = *memmap_as_char;
+  protein->sequence = *memmap;
 
   // reset pointer to move to start of next protein
-  *memmap_as_char += (sequence_length + 1);
+  *memmap += (sequence_length + 1);
   
   // now this protein has been created from memory mapped!
   protein->is_memmap = TRUE;
