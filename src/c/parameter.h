@@ -109,7 +109,7 @@ void free_parameters(void);
  * Requires that initialize_parameters() has been run.
  * /returns TRUE on success.
  */
-BOOLEAN_T select_cmd_line_options(char**, int);
+BOOLEAN_T select_cmd_line_options(const char**, int);
 
 /**
  * /brief Identify the required command line arguments.
@@ -118,7 +118,7 @@ BOOLEAN_T select_cmd_line_options(char**, int);
  * Requires that initialize_parameters() has been run.
  * /returns TRUE on success.
  */
-BOOLEAN_T select_cmd_line_arguments(char**, int);
+BOOLEAN_T select_cmd_line_arguments(const char**, int);
 
 /**
  * Take the command line string from main, find the parameter fil
@@ -126,7 +126,7 @@ BOOLEAN_T select_cmd_line_arguments(char**, int);
  * the command line options and arguments into the hash
  * main then retrieves the values through get_value
  */
-BOOLEAN_T parse_cmd_line_into_params_hash(int, char**, char*);
+BOOLEAN_T parse_cmd_line_into_params_hash(int, char**, const char*);
 
 /**
  * Each of the following functions searches through the hash table of
@@ -135,7 +135,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int, char**, char*);
  * \returns TRUE if paramater value is TRUE, else FALSE
  */ 
 BOOLEAN_T get_boolean_parameter(
- char*     name  ///< the name of the parameter looking for -in
+ const char*     name  ///< the name of the parameter looking for -in
  );
 
 /**
@@ -146,7 +146,7 @@ BOOLEAN_T get_boolean_parameter(
  *\returns the int value of the parameter
  */
 int get_int_parameter(
-  char* name  ///< the name of the parameter looking for -in
+  const char* name  ///< the name of the parameter looking for -in
   );
 
 /**
@@ -157,7 +157,7 @@ int get_int_parameter(
  *\returns the double value of the parameter
  */
 double get_double_parameter(
-  char* name   ///< the name of the parameter looking for -in
+  const char* name   ///< the name of the parameter looking for -in
   );
 
 /**
@@ -168,7 +168,7 @@ double get_double_parameter(
  * \returns the string value to which matches the parameter name, else aborts
  */
 char* get_string_parameter(
-  char* name  ///< the name of the parameter looking for -in
+  const char* name  ///< the name of the parameter looking for -in
   );
 
 /**
@@ -179,27 +179,27 @@ char* get_string_parameter(
  * \returns the string value to which matches the parameter name, else aborts
  */
 char* get_string_parameter_pointer(
-  char* name  ///< the name of the parameter looking for -in
+  const char* name  ///< the name of the parameter looking for -in
   );
 
 MASS_TYPE_T get_mass_type_parameter(
- char* name
+ const char* name
  );
 
 SORT_TYPE_T get_sort_type_parameter(
- char* name
+ const char* name
  );
 
 ALGORITHM_TYPE_T get_algorithm_type_parameter(
- char* name
+ const char* name
  );
 
 SCORER_TYPE_T get_scorer_type_parameter(
- char* name
+ const char* name
  );
 
 ION_TYPE_T get_ion_type_parameter(
- char* name
+ const char* name
  );
 
 /**
@@ -209,23 +209,23 @@ ION_TYPE_T get_ion_type_parameter(
  */ 
 /*
 PEPTIDE_TYPE_T get_peptide_type_parameter(
-  char* name
+  const char* name
   );
 */
 DIGEST_T get_digest_type_parameter(
-  char* name
+  const char* name
   );
 
 ENZYME_T get_enzyme_type_parameter(
-  char* name
+  const char* name
   );
 
 DIGEST_T get_digest_type_parameter(
-  char* name
+  const char* name
   );
 
 ENZYME_T get_enzyme_type_parameter(
-  char* name
+  const char* name
   );
 
 /**

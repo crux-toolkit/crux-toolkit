@@ -36,8 +36,8 @@
  */
 typedef struct {
   BOOLEAN_T command_line; ///<  the value come from the command line
-  /*const*/ char *name;  ///< the name of arguemt
-  /*const*/ char *usage; ///< the type of argument
+  const char *name;  ///< the name of arguemt
+  const char *usage; ///< the type of argument
   void *container;  ///< A pointer to storage for the parsed value of the option. 
   enum argument_type type; ///< arguemnt type, (int, char ...?)
 } argument;
@@ -68,8 +68,8 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
 /*const*/ argument * get_next_req_argument();
 /*const*/ argument * find_option(char * name);
 /*const*/ char * base_name(/*const*/ char *s);
-void build_message(/*const*/ char * arg);
-size_t get_usage_size(/*const*/ char * name);
+void build_message(const char * arg);
+size_t get_usage_size(const char * name);
 int sprintf_option_default_value(argument * o);
 char * get_option_value_type(argument * o);
 int is_numeric(/*const*/ char * s);
@@ -94,7 +94,7 @@ int is_numeric(/*const*/ char * s);
  *              been exceeded.
  * 
  ***********************************************************************/
-int parse_arguments_set_opt(/*const*/ char * name, /*const*/ char * usage, void * container, 
+int parse_arguments_set_opt(const char * name, const char * usage, void * container, 
                 enum argument_type type) {
         
   int result = 0;
@@ -136,7 +136,7 @@ int parse_arguments_set_opt(/*const*/ char * name, /*const*/ char * usage, void 
  *              been exceeded.
  * 
  ***********************************************************************/
-int parse_arguments_set_req(/*const*/ char * name, /*const*/ char * usage, void * container, 
+int parse_arguments_set_req(const char * name, const char * usage, void * container, 
                 enum argument_type type) {
 
   int result = 0;
@@ -774,7 +774,7 @@ int parse_arguments_get_error(/*const*/ char ** s) {
  *
  * Returns:      the amount of memory needed for the usage string
  ***********************************************************************/
-size_t get_usage_size(/*const*/ char * name) {
+size_t get_usage_size(const char * name) {
   size_t memory_used = 0;
   int i = 0;
   memory_used += 100; /* Fixed text and slack */
@@ -923,7 +923,7 @@ int sprintf_option_default_value(argument * o) {
  *               failed. We must be out of memory and printing a usage
  *               statment is the least of our worries.
  ***********************************************************************/
-char * parse_arguments_get_usage(/*const*/ char * name) {
+char * parse_arguments_get_usage(const char * name) {
 
   int i = 0;
   /* Caclulate the size of the buffer we'll need                     */
@@ -1000,7 +1000,7 @@ char * parse_arguments_get_usage(/*const*/ char * name) {
  *              the size of the message buffer to accomodate your
  *              your changes without overflowing.
  ***********************************************************************/
-void build_message(/*const*/ char * arg) {
+void build_message(const char * arg) {
   
   /* Keep the error messages well below MAX_MESSAGE_BUFFER */
   /* in size, to make sure we don't truncate them          */

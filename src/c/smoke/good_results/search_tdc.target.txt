@@ -1,0 +1,13 @@
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	p-value	Weibull est. q-value	decoy q-value (xcorr)	decoy q-value (p-value)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence
+14	2	500.4100	998.8044	1001.1503	0	62.942192	1	0.29623461	1										5	14	3	FHLELSQK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KD	
+14	2	500.4100	998.8044	1001.1503	0.6290853	3.5109179	3	0.10987776	2										1	14	3	FEQSLHLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KD	FHLELSQK
+14	2	500.4100	998.8044	1001.1503	1.2504942	9.0254412	2	-0.074205071	3										2	14	3	FLLHSQEK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KD	FHLELSQK
+14	3	500.4100	1498.2065	1495.8149	0	88.907501	1	0.18611282	1										9	44	3	VTTFMIYTFMNK	trypsin-full-digest	gi|6382000|ref|NP_009314.2|	RY	VMFTTFYMITNK
+14	3	500.4100	1498.2065	1495.8149	1.8639801	48.81847	2	-0.16079776	2										8	44	3	VMFTTFYMITNK	trypsin-full-digest	gi|6382000|ref|NP_009314.2|	RY	
+14	3	500.4100	1498.2065	1495.8149	2.9570956	10.253456	3	-0.36424056	3										4	44	3	VTNTFTFIMMYK	trypsin-full-digest	gi|6382000|ref|NP_009314.2|	RY	VMFTTFYMITNK
+15	2	488.8200	975.6244	973.0936	0	0	2	-0.099448994	1										0	16	3	SGATAYIYK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KA	
+15	2	488.8200	975.6244	973.0936	-0.39688674	0.42638034	1	-0.13891898	2										1	16	3	SYAGYITAK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KA	SGATAYIYK
+15	2	488.8200	975.6244	973.0936	-1.0751544	0	2	-0.20637202	3										0	16	3	SGIYAYATK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KA	SGATAYIYK
+15	3	488.8200	1463.4365	1464.8112	0	13.065499	2	0.023137931	1										5	44	3	QLLNLALYILYK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KL	QYLLLNIAYLLK
+15	3	488.8200	1463.4365	1464.8112	1.4728268	15.582523	1	-0.010940233	2										5	44	3	QYLLLNIAYLLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KL	
+15	3	488.8200	1463.4365	1464.8112	7.2036471	6.2610106	3	-0.14353956	3										3	44	3	QLLYILLLNYAK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KL	QYLLLNIAYLLK

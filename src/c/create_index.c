@@ -33,7 +33,7 @@ int create_index_main(int argc, char** argv){
 
   /* Define optional command line arguments */ 
   int num_options = NUM_INDEX_OPTIONS;
-  char* option_list[NUM_INDEX_OPTIONS] = { 
+  const char* option_list[NUM_INDEX_OPTIONS] = { 
     "version",
     "verbosity",
     "parameter-file", 
@@ -53,7 +53,7 @@ int create_index_main(int argc, char** argv){
 
   /* Define required command line arguments */ 
   int num_arguments = NUM_INDEX_ARGS;
-  char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file", 
+  const char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file", 
                                           "index name"}; 
 
 

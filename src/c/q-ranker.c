@@ -67,7 +67,7 @@ int qranker_main(int argc, char** argv){
 
   /* Define command line arguments */
   int num_options = NUM_QRANKER_OPTIONS;
-  char* option_list[NUM_QRANKER_OPTIONS] = {
+  const char* option_list[NUM_QRANKER_OPTIONS] = {
     "version",
     "verbosity",
     "parameter-file",
@@ -79,7 +79,7 @@ int qranker_main(int argc, char** argv){
 
 
   int num_arguments = NUM_QRANKER_ARGUMENTS;
-  char* argument_list[NUM_QRANKER_ARGUMENTS] = {
+  const char* argument_list[NUM_QRANKER_ARGUMENTS] = {
     "protein input",
   };
 

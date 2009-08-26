@@ -52,7 +52,7 @@ int qvalue_main(int argc, char** argv){
 
   /* Define command line arguments */
   int num_options = NUM_QVALUE_OPTIONS;
-  char* option_list[NUM_QVALUE_OPTIONS] = {
+  const char* option_list[NUM_QVALUE_OPTIONS] = {
     "version",
     "verbosity",
     "parameter-file",
@@ -62,7 +62,7 @@ int qvalue_main(int argc, char** argv){
   };
 
   int num_arguments = NUM_QVALUE_ARGUMENTS;
-  char* argument_list[NUM_QVALUE_ARGUMENTS] = {
+  const char* argument_list[NUM_QVALUE_ARGUMENTS] = {
     "protein input"
   };
 

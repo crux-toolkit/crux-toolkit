@@ -273,11 +273,11 @@ BOOLEAN_T char_in_string
  **************************************************************************/
 char*  convert_enum_type
   (int     enum_type,  /* The enumerated type object to be converted. */
-   char*  enum_strs[],  /* String values associated with this type. */
+   const char*  enum_strs[],  /* String values associated with this type. */
    int     num_enums); /* Number of values of the type. */
 
 int convert_enum_type_str
-  (char*   enum_type_str, /* String to be converted. */
+  (const char*   enum_type_str, /* String to be converted. */
    int     default_value, /* Value to return if first arg is null. */
    const char**  enum_strs,     /* String values associated with this type. */
    int     num_enums);    /* Number of values of the type. */

@@ -1,0 +1,5 @@
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	p-value	Weibull est. q-value	decoy q-value (xcorr)	decoy q-value (p-value)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence
+14	2	500.4100	998.8044	1001.1503	0	63	1	0.3	1										5	14	1	FHLELSQK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KD	
+14	3	500.4100	1498.2065	1495.8149	0	49	1	-0.16	1										8	44	1	VMFTTFYMITNK	trypsin-full-digest	gi|6382000|ref|NP_009314.2|	RY	
+15	2	488.8200	975.6244	973.0936	0	0	1	-0.099	1										0	16	1	SGATAYIYK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KA	
+15	3	488.8200	1463.4365	1464.8112	0	16	1	-0.011	1										5	44	1	QYLLLNIAYLLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|	KL	

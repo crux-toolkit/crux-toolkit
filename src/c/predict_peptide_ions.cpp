@@ -28,7 +28,7 @@ int main(int argc, char** argv){
 
   /* Define optional and required command line arguments */
   int num_options = NUM_PREDICT_OPTIONS;
-  char* option_list[NUM_PREDICT_OPTIONS] = {
+  const char* option_list[NUM_PREDICT_OPTIONS] = {
     "version",
     "primary-ions",
     "precursor-ions",
@@ -41,7 +41,7 @@ int main(int argc, char** argv){
   };
 
   int num_arguments = NUM_PREDICT_ARGUMENTS;
-  char* argument_list[NUM_PREDICT_ARGUMENTS] = {
+  const char* argument_list[NUM_PREDICT_ARGUMENTS] = {
     "peptide sequence",
     "charge state"
   };
