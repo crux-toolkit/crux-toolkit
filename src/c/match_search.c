@@ -33,7 +33,6 @@
 
 #define NUM_SEARCH_OPTIONS 12
 #define NUM_SEARCH_ARGS 2
-#define PARAM_ESTIMATION_SAMPLE_COUNT 500
 
 /* Private functions */
 int prepare_protein_input(char* input_file, 
@@ -41,11 +40,14 @@ int prepare_protein_input(char* input_file,
                           DATABASE_T** database);
 void open_output_files(char *output_directory,
                        BOOLEAN_T overwrite,
+		       BOOLEAN_T store_decoy_pvalues,
                        FILE*** binary_filehandle_array, 
                        FILE** sqt_filehandle,
                        FILE** decoy_sqt_filehandle,
                        FILE** tab_file,
-                       FILE** decoy_tab_file);
+                       FILE** decoy_tab_file,
+		       FILE** decoy_pvalue_file);
+
 int search_pep_mods(
   MATCH_COLLECTION_T* match_collection, ///< store PSMs here
   BOOLEAN_T is_decoy,   ///< generate decoy peptides from index/db
@@ -123,7 +125,6 @@ int search_main(int argc, char** argv){
   open_log_file(&log_file_name);
   free(log_file_name);
   log_command_line(argc, argv);
-
   carp(CARP_INFO, "Beginning crux search-for-matches");
 
   // Write the parameter file
@@ -160,22 +161,24 @@ int search_main(int argc, char** argv){
     carp(CARP_FATAL, "No proteins were found in the protein source.");
   }
   
-  /* Prepare output files */
-
+  // Prepare output files
   FILE** psm_file_array = NULL; //file handle array
   FILE* sqt_file = NULL;
   FILE* decoy_sqt_file  = NULL;
   FILE* tab_file = NULL;
   FILE* decoy_tab_file  = NULL;
+  FILE* decoy_pvalue_file = NULL;
 
   open_output_files(
     output_folder,
     overwrite,
+    get_boolean_parameter("decoy-p-values"),
     &psm_file_array, 
     &sqt_file, 
     &decoy_sqt_file, 
     &tab_file,
-    &decoy_tab_file
+    &decoy_tab_file,
+    &decoy_pvalue_file
   );
   free(output_folder);
 
@@ -185,7 +188,8 @@ int search_main(int argc, char** argv){
   print_sqt_header(decoy_sqt_file, "decoy", num_proteins, FALSE);
   print_tab_header(tab_file);
   print_tab_header(decoy_tab_file);
-  /* Perform search: loop over spectra*/
+
+  /***** Perform search: loop over spectra *****/
 
   // create spectrum iterator
   FILTERED_SPECTRUM_CHARGE_ITERATOR_T* spectrum_iterator = 
@@ -301,7 +305,7 @@ int search_main(int argc, char** argv){
       FLOAT_T beta = get_match_collection_beta(target_psms);
       FLOAT_T shift = get_match_collection_shift(target_psms);
 
-      compute_p_values(target_psms);
+      compute_p_values(target_psms, NULL);
 
       // use same params for each decoy set
       int decoy_idx = 0;
@@ -311,7 +315,7 @@ int search_main(int argc, char** argv){
         set_match_collection_weibull_params(cur_collection, eta, beta, shift);
 
         carp(CARP_DEBUG, "Calculating p-values.");
-        compute_p_values(cur_collection);
+        compute_p_values(cur_collection, decoy_pvalue_file);
       
       }// next collection
     }
@@ -424,7 +428,12 @@ int search_main(int argc, char** argv){
     serialize_total_number_of_spectra(num_successful_searches,
                                       psm_file_array[file_idx]);
   }
-  // clean up memory
+
+  // clean up
+  // FIXME: None of the other output files is closed. WSN 8/26/09
+  if (decoy_pvalue_file) {
+    fclose(decoy_pvalue_file);
+  }
 
   carp(CARP_INFO, "Finished crux-search-for-matches");
   exit(0);
@@ -485,11 +494,14 @@ int prepare_protein_input(char* input_file,
 void open_output_files(
   char *output_directory, ///< name of output directory -in
   BOOLEAN_T overwrite,     ///< overwrite existing files -in
+  BOOLEAN_T store_decoy_pvalues, ///< create decoy p-value file? -in
   FILE*** psm_file_array, ///< put binary psm filehandles here -out
   FILE** sqt_file,        ///< put text sqt filehandle here -out
   FILE** decoy_sqt_file,  ///< put decoy sqt filehandle here -out
   FILE** tab_file,        ///< put text sqt filehandle here -out
-  FILE** decoy_tab_file)  ///< put decoy sqt filehandle here -out
+  FILE** decoy_tab_file,  ///< put decoy sqt filehandle here -out
+  FILE** decoy_pvalue_file ///< if requested, file for decoy p-values -out
+  )
 {
   // create binary psm files (allocate memory, even if not used)
   *psm_file_array = create_psm_files();
@@ -526,6 +538,18 @@ void open_output_files(
                                           output_directory,
                                           overwrite);
     free(decoy_tab_filename);
+  }
+
+  //create file handle for optional decoy p-values files
+  if (store_decoy_pvalues) {
+    carp(CARP_DEBUG, "Opening decoy p-value file.");
+    char* decoy_pvalue_filename 
+      = get_string_parameter("search-decoy-pvalue-file");
+    prefix_fileroot_to_name(&decoy_pvalue_filename);
+    *decoy_pvalue_file = create_file_in_path(decoy_pvalue_filename, 
+					     output_directory, 
+					     overwrite);
+    free(decoy_pvalue_filename);
   }
 
   carp(CARP_DEBUG, "Finished opening output files");

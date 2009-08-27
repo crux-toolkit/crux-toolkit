@@ -125,13 +125,23 @@ FLOAT_T score_logp_bonf_exp_sp(
   );
 
 /**
- * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
- *\returns the -log(p_value)
+ * Apply a Bonferroni correction to a given p-value.
+ * \returns the corrected -log(p_value)
  */
-FLOAT_T score_logp_weibull(
+FLOAT_T bonferroni_correction(
+  FLOAT_T p_value, ///< The uncorrected p-value.
+  int num_tests ///< The number of tests performed.
+  );
+
+/**
+ * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
+ *\returns the p_value
+ */
+FLOAT_T compute_weibull_pvalue(
   FLOAT_T score, ///< The score for the scoring peptide -in
-  FLOAT_T eta,  ///< The eta parameter of the Weibull
-  FLOAT_T beta ///< The beta parameter of the Weibull
+  FLOAT_T eta,   ///< The eta parameter of the Weibull -in
+  FLOAT_T beta,  ///< The beta parameter of the Weibull -in
+  FLOAT_T shift  ///< The shift parameter of the Weibull -in
   );
 
 /**

@@ -559,15 +559,15 @@ void print_match_sqt(
   if( adjust_delta_cn == TRUE ){
     delta_cn = 0.0;
   }
-  if( delta_cn == 0 ){// I hate -0, this prevents it
-    delta_cn = 0.0;
-  }
 
   // If a p-value couldn't be calculated, print as NaN
   FLOAT_T score_main = get_match_score(match, main_score);
   if( main_score == LOGP_BONF_WEIBULL_XCORR&& score_main == P_VALUE_NA ){
     score_main = sqrt(-1); // evaluates to nan
   } 
+  if (score_main == 0) { // Avoid -0
+    score_main = 0.0;
+  }
 
   // write format string with variable precision
   int precision = get_int_parameter("precision");

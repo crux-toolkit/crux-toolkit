@@ -1661,7 +1661,7 @@ BOOLEAN_T parse_crux_index_map(
   strcpy(filename, "crux_index_map");
 
   // open crux_index_file
-  carp(CARP_DEBUG, "Opening map file '%s'", full_filename);
+  carp(CARP_DETAILED_DEBUG, "Opening map file '%s'", full_filename);
   file = fopen(full_filename, "r");
   if(file == NULL){
     carp(CARP_WARNING, "Cannot open crux_index_map file.");
