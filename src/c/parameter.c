@@ -508,7 +508,7 @@ void initialize_parameters(void){
   set_string_parameter("search-decoy-pvalue-file", "search.decoy.p.txt", 
       "Output filename for complete list of decoy p-values.  Default 'search.decoy.p.txt'",
       "Only available for crux search-for-matches. The location of this file is controlled by "
-      "--output-dir.", "true");
+      "--output-dir.", "false");
 
   set_string_parameter("percolator-tab-output-file", "percolator.target.txt", 
       "Tab delimited output file name. Default 'percolator.target.txt'",
