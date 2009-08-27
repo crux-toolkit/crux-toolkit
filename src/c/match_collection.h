@@ -604,7 +604,10 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
   int charge
   );
 
-BOOLEAN_T compute_p_values(MATCH_COLLECTION_T* match_collection);
+BOOLEAN_T compute_p_values(
+  MATCH_COLLECTION_T* match_collection,
+  FILE* output_pvalue_file
+);
 
 BOOLEAN_T set_p_values_as_unscored(MATCH_COLLECTION_T* match_collection);
 

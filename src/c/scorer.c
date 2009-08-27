@@ -1193,8 +1193,9 @@ FLOAT_T gen_score_xcorr(
  ************************************/
 
 /**
- * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
- *\returns the -log(p_value) of the exponential distribution
+ * Compute a p-value for a given score w.r.t. an exponential with the
+ * given parameters.
+ * \returns the -log(p_value) of the exponential distribution
  */
 FLOAT_T score_logp_exp_sp(
   FLOAT_T sp_score, ///< The sp score for the scoring peptide -in
@@ -1205,8 +1206,10 @@ FLOAT_T score_logp_exp_sp(
 }
 
 /**
- * Compute a p-value for a given score w.r.t. an exponential with the given parameters.
- *\returns the -log(p_value) of the exponential distribution with Bonferroni correction
+ * Compute a p-value for a given score w.r.t. an exponential with the
+ * given parameters.
+ * \returns the -log(p_value) of the exponential distribution with
+ * Bonferroni correction
  */
 FLOAT_T score_logp_bonf_exp_sp(
   FLOAT_T sp_score, ///< The sp score for the scoring peptide -in
@@ -1218,7 +1221,8 @@ FLOAT_T score_logp_bonf_exp_sp(
   
   // The Bonferroni correction 
   // use original equation 1-(1-p_value)^n when p is not too small
-  if(p_value > BONFERRONI_CUT_OFF_P || p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
+  if(p_value > BONFERRONI_CUT_OFF_P || 
+     p_value*num_peptide > BONFERRONI_CUT_OFF_NP){
     return -log(1-pow((1-p_value), num_peptide));
   }
   // else, use the approximation
@@ -1228,17 +1232,56 @@ FLOAT_T score_logp_bonf_exp_sp(
 }
 
 /**
- * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
- *\returns the -log(p_value)
+ * Apply a Bonferroni correction to a given p-value.
+ * \returns the corrected p_value.
  */
-FLOAT_T score_logp_weibull(
-  FLOAT_T score, ///< The score for the scoring peptide -in
-  FLOAT_T eta,  ///< The eta parameter of the Weibull
-  FLOAT_T beta ///< The beta parameter of the Weibull
-  ){
-  return pow(score/eta, beta);
+FLOAT_T bonferroni_correction(
+  FLOAT_T p_value, ///< The uncorrected p-value.
+  int num_tests ///< The number of tests performed.
+  )
+{
+  FLOAT_T return_value;
+
+  // use original equation 1-(1-p_value)^n when p is not too small
+  if(p_value > BONFERRONI_CUT_OFF_P ||
+     p_value * num_tests > BONFERRONI_CUT_OFF_NP){
+
+    return_value = 1-pow((1-p_value), num_tests);
+  }
+  // else, use the approximation
+  else {
+    return_value = p_value * num_tests;
+  }
+
+  carp(CARP_DETAILED_DEBUG, "Stat: pvalue after = %.6f", return_value);
+  return return_value;
 }
 
+/**
+ * Compute a p-value for a given score w.r.t. a Weibull with given parameters.
+ *\returns the p_value
+ */
+FLOAT_T compute_weibull_pvalue(
+  FLOAT_T score, ///< The score for the scoring peptide -in
+  FLOAT_T eta,   ///< The eta parameter of the Weibull -in
+  FLOAT_T beta,  ///< The beta parameter of the Weibull -in
+  FLOAT_T shift  ///< The shift parameter of the Weibull -in
+  ){
+  carp(CARP_DETAILED_DEBUG, "Stat: score = %.6f", score);
+
+  FLOAT_T return_value;
+
+  //undefined past shift, give lowest possible score.
+  if (score + shift <= 0) {
+    carp(CARP_DETAILED_DEBUG,"Weibull undefined, returning p-value=1");
+    return_value = 1.0;
+  }
+  else {
+    return_value = exp(-pow((score + shift) / eta, beta));
+    carp(CARP_DETAILED_DEBUG, "Stat: pvalue before = %g", return_value);
+  }
+  return(return_value);
+}
 
 /**
  * Compute a p-value for a given score w.r.t. a Weibull with given parameters.

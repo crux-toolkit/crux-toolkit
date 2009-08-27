@@ -12,9 +12,6 @@
  ****************************************************************************/
 #include "match_collection.h"
 
-#define PARAM_ESTIMATION_SAMPLE_COUNT 500
-//static BOOLEAN_T is_first_spectrum = TRUE;
-
 /* Private data types (structs) */
 
 /**
@@ -1053,11 +1050,10 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
       MIN_XCORR_SHIFT, MAX_XCORR_SHIFT, XCORR_SHIFT, 
       &(match_collection->eta), &(match_collection->beta),
       &(match_collection->shift), &correlation);
-
-  carp(CARP_DETAILED_DEBUG, 
-      "Correlation: %.6f\nEta: %.6f\nBeta: %.6f\nShift: %.6f\n", 
-      correlation, match_collection->eta, match_collection->beta,
-      match_collection->shift);
+  carp(CARP_DEBUG, 
+      "Corr: %.6f  Eta: %.6f  Beta: %.6f  Shift: %.6f", 
+       correlation, match_collection->eta, match_collection->beta,
+       match_collection->shift);
   
   return TRUE;
 }
@@ -1345,8 +1341,6 @@ BOOLEAN_T score_matches_one_spectrum(
   return TRUE;
 }
 
-
-
 /**
  * \brief  Uses the Weibull parameters estimated by
  * estimate_weibull_parameters() to compute a p-value for each psm in
@@ -1361,16 +1355,22 @@ BOOLEAN_T score_matches_one_spectrum(
  * else FALSE.
  */
 // FIXME (BF 8-Dec-2008): create new score-type P_VALUE to replace LOG...XCORR
-BOOLEAN_T compute_p_values(MATCH_COLLECTION_T* match_collection){
+BOOLEAN_T compute_p_values(
+  MATCH_COLLECTION_T* match_collection,
+  FILE* output_pvalue_file ///< If non-NULL, file for storing p-values -in
+  ){
+
   if(match_collection == NULL){
     carp(CARP_ERROR, "Cannot compute p-values for NULL match collection.");
     return FALSE;
   }
 
+  int scan_number
+    = get_spectrum_first_scan(get_match_spectrum(match_collection->match[0]));
   carp(CARP_DEBUG, "Computing p-values for %s spec %d charge %d "
        "with eta %f beta %f shift %f",
        (match_collection->null_peptide_collection) ? "decoy" : "target",
-       get_spectrum_first_scan(get_match_spectrum(match_collection->match[0])),
+       scan_number,
        match_collection->charge,
        match_collection->eta, match_collection->beta, match_collection->shift);
 
@@ -1385,26 +1385,45 @@ BOOLEAN_T compute_p_values(MATCH_COLLECTION_T* match_collection){
          type_str);
   }
 
+  // Print separator in the decoy p-value file.
+  if (output_pvalue_file) {
+    fprintf(output_pvalue_file, "# scan: %d charge: %d candidates: %d\n", 
+	    scan_number, match_collection->charge,
+	    match_collection->experiment_size);
+    fprintf(output_pvalue_file, "# eta: %g beta: %g shift: %g\n",
+	    match_collection->eta, 
+	    match_collection->beta,
+	    match_collection->shift);
+  }
+
   // iterate over all matches 
   int match_idx =0;
-  double score = 0;
   for(match_idx=0; match_idx < match_collection->match_total; match_idx++){
     MATCH_T* cur_match = match_collection->match[match_idx];
 
-    // scale the score
-    score = score_logp_bonf_weibull(get_match_score(cur_match,main_score),
-                                    match_collection->eta, 
-                                    match_collection->beta,
-                                    match_collection->shift,
-                                    match_collection->experiment_size);
-    // set score in match
-    set_match_score(cur_match, LOGP_BONF_WEIBULL_XCORR, score);
+    // Get the Weibull p-value.
+    double pvalue = compute_weibull_pvalue(get_match_score(cur_match, 
+							   main_score),
+					   match_collection->eta, 
+					   match_collection->beta,
+					   match_collection->shift);
+
+    // Print the pvalue, if requested
+    if (output_pvalue_file) {
+      fprintf(output_pvalue_file, "%g\n", pvalue);
+    }
+
+    // Apply the Bonferroni correction.
+    pvalue = bonferroni_correction(pvalue, match_collection->experiment_size);
+
+    // set pvalue in match
+    set_match_score(cur_match, LOGP_BONF_WEIBULL_XCORR, -log(pvalue));
+    //#endif
 
   }// next match
 
-  carp(CARP_DETAILED_DEBUG, "Computed p-values for %d psms.", match_idx);
+  carp(CARP_DETAILED_DEBUG, "Computed p-values for %d PSMs.", match_idx);
   populate_match_rank_match_collection(match_collection, XCORR);
-//                                       LOGP_BONF_WEIBULL_XCORR);
 
   // mark p-values as having been scored
   match_collection->scored_type[LOGP_BONF_WEIBULL_XCORR] = TRUE;
@@ -3063,7 +3082,7 @@ void process_run_specific_features(
  * 
  * Delta_cn is the xcorr difference between match[i] and match[i+1]
  * divided by the xcorr of match[0].  This could be generalized to
- * which ever score is the main one.  Sorts by xcorr, if necessary.
+ * whichever score is the main one.  Sorts by xcorr, if necessary.
  * 
  */
 BOOLEAN_T calculate_delta_cn( MATCH_COLLECTION_T* match_collection){
@@ -3094,7 +3113,11 @@ BOOLEAN_T calculate_delta_cn( MATCH_COLLECTION_T* match_collection){
   int match_idx=0;
   for(match_idx=0; match_idx < num_matches; match_idx++){
     FLOAT_T diff = max_xcorr - get_match_score(matches[match_idx], XCORR);
-    set_match_delta_cn(matches[match_idx], (diff / max_xcorr) );
+    double delta_cn = diff / max_xcorr;
+    if( delta_cn == 0 ){ // I hate -0, this prevents it
+      delta_cn = 0.0;
+    }
+    set_match_delta_cn(matches[match_idx], delta_cn);
   }
 
   return TRUE;
