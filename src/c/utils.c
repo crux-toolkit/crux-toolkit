@@ -451,7 +451,7 @@ BOOLEAN_T char_in_string
  *
  * Assumes that the zeroth enumerated type element is invalid.
  **************************************************************************/
-char * convert_enum_type
+const char * convert_enum_type
   (int     enum_type, /* The enumerated type object to be converted. */
    const char *  enum_strs[], /* String values associated with this type. */
    int     num_enums) /* Number of values of the type. */

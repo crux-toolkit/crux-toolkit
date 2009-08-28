@@ -192,8 +192,6 @@ void print_sqt_file_q(
     SPECTRUM_T* spectrum = get_match_spectrum(match);
     int this_spectrum_num = get_spectrum_first_scan(spectrum);
     int charge = get_match_charge(match);
-    FLOAT_T spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
-    FLOAT_T spectrum_precursor_mz = get_spectrum_precursor_mz(spectrum);
     int num_peptides = get_match_ln_experiment_size(match);
     num_peptides = expf(num_peptides);
 

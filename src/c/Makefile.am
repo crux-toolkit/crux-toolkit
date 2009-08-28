@@ -101,6 +101,7 @@ LIBFILES= \
 
 noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = \
+  $(AM_CFLAGS) \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/q-ranker/
@@ -116,24 +117,30 @@ PROGRAM_FILES = \
 bin_PROGRAMS = $(PROGRAM_FILES)
 
 crux_get_ms2_spectrum_SOURCES = get_ms2_spectrum.cpp
-crux_get_ms2_spectrum_CXXFLAGS = -DMAIN -I$(top_srcdir)/src/c//MSToolkit
-crux_get_ms2_spectrum_LDADD = libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
+crux_get_ms2_spectrum_CXXFLAGS = $(AM_CFLAGS) -DMAIN -I$(top_srcdir)/src/c//MSToolkit
+crux_get_ms2_spectrum_LDADD = \
+  $(AM_LDFLAGS) \
+  libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
 
 crux_generate_peptides_SOURCES = generate_peptides.c
-crux_generate_peptides_CFLAGS = -DMAIN
-crux_generate_peptides_LDADD = libcrux.la -lm  
+crux_generate_peptides_CFLAGS = $(AM_CFLAGS) -DMAIN
+crux_generate_peptides_LDADD = $(AM_LDFLAGS) libcrux.la -lm  
 
 crux_predict_peptide_ions_SOURCES = predict_peptide_ions.cpp
-crux_predict_peptide_ions_CXXFLAGS = -DMAIN
-crux_predict_peptide_ions_LDADD = libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
+crux_predict_peptide_ions_CXXFLAGS = $(AM_CFLAGS) -DMAIN
+crux_predict_peptide_ions_LDADD = \
+  $(AM_LDFLAGS) \
+  libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
 
 crux_SOURCES = crux-main.cpp crux-main.h
 crux_CXXFLAGS = \
+  $(AM_CXXFLAGS) \
   -DMAIN \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/percolator \
   -I$(top_srcdir)/src/c/q-ranker
 crux_LDADD = \
+  $(AM_LDFLAGS) \
   libcrux.la \
   -lstdc++ \
   -L$(top_builddir)/src/c/ArrayLibrary \
