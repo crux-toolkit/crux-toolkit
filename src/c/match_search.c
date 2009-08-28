@@ -86,7 +86,7 @@ int search_main(int argc, char** argv){
 
   /* Define required command line arguments */
   int num_arguments = NUM_SEARCH_ARGS;
-  char* argument_list[NUM_SEARCH_ARGS] = {"ms2 file", "protein input"};
+  const char* argument_list[NUM_SEARCH_ARGS] = {"ms2 file", "protein input"};
 
   /* Initialize parameter.c and set default values*/
   initialize_parameters();
