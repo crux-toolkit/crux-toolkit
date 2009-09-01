@@ -221,33 +221,13 @@ FLOAT_T get_match_collection_delta_cn(
 int get_match_collection_num_proteins(MATCH_COLLECTION_T* match_collection);
 
 /**
- * \brief Get the eta parameter from the Weibull distribution
- * No check to see that it has been estimated.
+ * \brief Transfer the Weibull distribution parameters, including the
+ * correlation from one match_collection to another.  No check to see
+ * that the parameters have been estimated.
  */
-FLOAT_T get_match_collection_eta(MATCH_COLLECTION_T* match_collection);
-
-/**
- * \brief Get the beta parameter from the Weibull distribution
- * No check to see that it has been estimated.
- */
-FLOAT_T get_match_collection_beta(MATCH_COLLECTION_T* match_collection);
-
-/**
- * \brief Get the shift parameter from the Weibull distribution
- * No check to see that it has been estimated.
- */
-FLOAT_T get_match_collection_shift(MATCH_COLLECTION_T* match_collection);
-
-/**
- * \brief Set the three Weibull parameters.  Intended for
- * match_collections of decoys, the parameters having been estimated
- * from targets.
- */
-void set_match_collection_weibull_params(
-  MATCH_COLLECTION_T* match_collection,
-  FLOAT_T eta,
-  FLOAT_T beta,
-  FLOAT_T shift
+void transfer_match_collection_weibull(
+  MATCH_COLLECTION_T* from_collection,
+  MATCH_COLLECTION_T* to_collection
   );
 
 /**
@@ -608,8 +588,6 @@ BOOLEAN_T compute_p_values(
   MATCH_COLLECTION_T* match_collection,
   FILE* output_pvalue_file
 );
-
-BOOLEAN_T set_p_values_as_unscored(MATCH_COLLECTION_T* match_collection);
 
 /*
  * Local Variables:

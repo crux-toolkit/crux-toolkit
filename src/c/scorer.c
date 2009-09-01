@@ -1271,9 +1271,14 @@ FLOAT_T compute_weibull_pvalue(
 
   FLOAT_T return_value;
 
-  //undefined past shift, give lowest possible score.
-  if (score + shift <= 0) {
-    carp(CARP_DETAILED_DEBUG,"Weibull undefined, returning p-value=1");
+  // No Weibull parameter, return NaN.
+  if (eta == 0.0) {
+    carp(CARP_DETAILED_DEBUG, "Failed fit, returning p-value=NaN");
+    return_value = NaN();
+  }
+  // undefined past shift, give lowest possible score.
+  else if (score + shift <= 0) {
+    carp(CARP_DETAILED_DEBUG, "Bad shift, returning p-value=1");
     return_value = 1.0;
   }
   else {

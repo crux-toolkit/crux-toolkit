@@ -563,7 +563,7 @@ void print_match_sqt(
   // If a p-value couldn't be calculated, print as NaN
   FLOAT_T score_main = get_match_score(match, main_score);
   if( main_score == LOGP_BONF_WEIBULL_XCORR&& score_main == P_VALUE_NA ){
-    score_main = sqrt(-1); // evaluates to nan
+    score_main = NaN();
   } 
   if (score_main == 0) { // Avoid -0
     score_main = 0.0;
