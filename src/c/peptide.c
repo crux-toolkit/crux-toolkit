@@ -4,6 +4,7 @@
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
+#include <string.h>
 
 /*
   TABLE OF CONTENTS
@@ -461,6 +462,28 @@ unsigned char get_peptide_length(
 }
 
 /**
+ * \brief Check whether a given sequence is equal to a given peptide.
+ * \returns A Boolean indicating equality or not.
+ */
+static BOOLEAN_T equal_peptides(
+ char* peptide_sequence, ///< peptide sequence -in
+ PEPTIDE_T* peptide_object ///< peptide object -in
+ )
+{
+  char* parent_sequence = 
+    get_protein_sequence_pointer(get_peptide_src_parent_protein(peptide_object->peptide_src));
+  int start_idx = get_peptide_src_start_idx(peptide_object->peptide_src);
+
+  int result = strncmp(peptide_sequence, 
+		       &(parent_sequence[start_idx-1]), 
+		       peptide_object->length);
+
+  // Return TRUE if strncmp returns 0.
+  return((BOOLEAN_T)(!result));
+}
+
+
+/**
  * \brief Get a string representation of the peptide sequence
  * Sequence is taken from the first peptide_src to gain sequence, thus
  * must have at least one peptide src. 
@@ -475,15 +498,12 @@ char* get_peptide_sequence(
     return NULL;
   }
   if(peptide->peptide_src == NULL){
-    //    die("ERROR: no peptide_src to retrieve peptide sequence\n");
     carp(CARP_ERROR, "Cannot get sequence from peptide with no peptide src.");
     return NULL;
   }
 
-  //PROTEIN_T* protein = get_peptide_src_parent_protein(peptide->peptide_src));
   char* parent_sequence = 
     get_protein_sequence_pointer(get_peptide_src_parent_protein(peptide->peptide_src));
-  //get_protein_sequence_pointer(protein);
   int start_idx = get_peptide_src_start_idx(peptide->peptide_src);
 
   char* copy_sequence = copy_string_part(&parent_sequence[start_idx-1],
@@ -964,38 +984,41 @@ char* get_peptide_hash_value(
 }
 
 /**
- * \brief Return a randomly shuffled version of the given peptide's 
- * sequence.  Based on the peptide type, will leave the end(s)
- * unchanged to preserve the tryptic property.
+ * \brief Return a randomly shuffled version of the given peptide's
+ * sequence, leaving the terminal amino acids in place.  Ensures that
+ * the shuffled version is not the same as the given peptide.
  * 
- * \returns A newly-allcoated char array with the shuffled sequence.
+ * \returns A newly-allocated char array with the shuffled sequence.
  */
+#define MAX_SHUFFLES 5 // Don't bother trying to shuffle more than this.
 char* generate_shuffled_sequence(
   PEPTIDE_T* peptide ///< The peptide to shuffle -in 
-  //PEPTIDE_TYPE_T peptide_type 
-    ///< tryptic status to enforce on the shuffled sequence
   )
 {
+  // Allocate a copy of the peptide.
   char* sequence = get_peptide_sequence(peptide);
   int length = peptide->length;
-  int start_idx = 0;
-  int end_idx = length - 1;
-  int switch_idx = 0;
-  char temp_char = 0;
 
-  // set shuffle bound
-  // this had been removed an users did not like the results
-  ++start_idx;
-  --end_idx;
+  // Shuffle from left to right, using the Knuth algorithm for shuffling.
+  int num_shuffles = 0;
+  do {
+    if (num_shuffles > 0) {
+      carp(CARP_WARNING, "Re-shuffling %s %d.", sequence, num_shuffles);
+    }
 
-  // shuffle from left ot right, using the Knuth algorithm for shuffling.
-  while(start_idx < end_idx){
-    switch_idx = get_random_number_interval(start_idx, end_idx);
-    temp_char = sequence[start_idx];
-    sequence[start_idx] = sequence[switch_idx];
-    sequence[switch_idx] = temp_char;
-    ++start_idx;
-  }
+    // Don't move the n-term and c-term amino acids
+    int start_idx = 1;
+    int end_idx = length - 2;
+
+    while(start_idx < end_idx){
+      int switch_idx = get_random_number_interval(start_idx, end_idx);
+      char temp_char = sequence[start_idx];
+      sequence[start_idx] = sequence[switch_idx];
+      sequence[switch_idx] = temp_char;
+      ++start_idx;
+    }
+    num_shuffles++;
+  } while (equal_peptides(sequence, peptide) && (num_shuffles < MAX_SHUFFLES));
 
   return sequence;
 }
