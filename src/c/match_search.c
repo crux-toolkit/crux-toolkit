@@ -301,10 +301,6 @@ int search_main(int argc, char** argv){
       estimate_weibull_parameters_from_xcorrs(target_psms,
                                               spectrum,
                                               charge);
-      FLOAT_T eta = get_match_collection_eta(target_psms);
-      FLOAT_T beta = get_match_collection_beta(target_psms);
-      FLOAT_T shift = get_match_collection_shift(target_psms);
-
       compute_p_values(target_psms, NULL);
 
       // use same params for each decoy set
@@ -312,7 +308,7 @@ int search_main(int argc, char** argv){
       for(decoy_idx = 0; decoy_idx < num_decoy_collections; decoy_idx++){
         MATCH_COLLECTION_T* cur_collection = decoy_collection_list[decoy_idx];
 
-        set_match_collection_weibull_params(cur_collection, eta, beta, shift);
+        transfer_match_collection_weibull(target_psms, cur_collection);
 
         carp(CARP_DEBUG, "Calculating p-values.");
         compute_p_values(cur_collection, decoy_pvalue_file);

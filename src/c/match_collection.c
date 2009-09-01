@@ -53,6 +53,7 @@ struct match_collection{
   FLOAT_T eta;  ///< The eta parameter for the Weibull distribution.
   FLOAT_T beta; ///< The beta parameter for the Weibull distribution.
   FLOAT_T shift; ///< The location parameter for the Weibull distribution.
+  FLOAT_T correlation; ///< The correlation parameter for the Weibull distribution.
   // replace this ...
   MATCH_T* sample_matches[_PSM_SAMPLE_SIZE];
   int num_samples;  // the number of items in the above array
@@ -985,6 +986,8 @@ void constraint_function(
 #define MIN_WEIBULL_MATCHES 40
 #define MIN_XCORR_SHIFT -5.0
 #define MAX_XCORR_SHIFT  5.0
+//#define CORR_THRESHOLD 0.995   // Must achieve this correlation, else punt.
+#define CORR_THRESHOLD 0.0       // For now, turn off the threshold.
 #define XCORR_SHIFT 0.05
 #define MIN_SP_SHIFT -100.0
 #define MAX_SP_SHIFT 300.0
@@ -1006,7 +1009,7 @@ BOOLEAN_T has_enough_weibull_points(
  * \brief Use the xcorrs saved in the match_collection to estimate the
  * weibull parameters to be used for computing p-values. 
  *
- * Requires that main score be XCORR, but with relativly few changes
+ * Requires that main score be XCORR, but with relatively few changes
  * other scores could be accomodated.
  * Implementation of Weibull distribution parameter estimation from 
  * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
@@ -1045,15 +1048,14 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
        num_tail_samples, fraction_to_fit, num_scores);
 
   // do the estimation
-  FLOAT_T correlation = 0.0;
   fit_three_parameter_weibull(scores, num_tail_samples, num_scores,
-      MIN_XCORR_SHIFT, MAX_XCORR_SHIFT, XCORR_SHIFT, 
+      MIN_XCORR_SHIFT, MAX_XCORR_SHIFT, XCORR_SHIFT, CORR_THRESHOLD,
       &(match_collection->eta), &(match_collection->beta),
-      &(match_collection->shift), &correlation);
+      &(match_collection->shift), &(match_collection->correlation));
   carp(CARP_DEBUG, 
       "Corr: %.6f  Eta: %.6f  Beta: %.6f  Shift: %.6f", 
-       correlation, match_collection->eta, match_collection->beta,
-       match_collection->shift);
+       match_collection->correlation, match_collection->eta, 
+       match_collection->beta, match_collection->shift);
   
   return TRUE;
 }
@@ -1390,10 +1392,12 @@ BOOLEAN_T compute_p_values(
     fprintf(output_pvalue_file, "# scan: %d charge: %d candidates: %d\n", 
 	    scan_number, match_collection->charge,
 	    match_collection->experiment_size);
-    fprintf(output_pvalue_file, "# eta: %g beta: %g shift: %g\n",
+    fprintf(output_pvalue_file, 
+	    "# eta: %g beta: %g shift: %g correlation: %g\n",
 	    match_collection->eta, 
 	    match_collection->beta,
-	    match_collection->shift);
+	    match_collection->shift,
+	    match_collection->correlation);
   }
 
   // iterate over all matches 
@@ -1428,38 +1432,6 @@ BOOLEAN_T compute_p_values(
   // mark p-values as having been scored
   match_collection->scored_type[LOGP_BONF_WEIBULL_XCORR] = TRUE;
   return TRUE;
-}
-
-/**
- * \brief Indicate that p-values cannot be calculated for this match
- * collection.  
- *
- * Usually true when there were too few psms for
- * parameter estimation.  Since a p-value is between 0 and 1, but
- * these are really -log(pvalue) which are non-negative real numbers,
- * set an unscored p-value as P_VALUE_NA (-1).
- */
-BOOLEAN_T set_p_values_as_unscored(MATCH_COLLECTION_T* match_collection){
-  if(match_collection == NULL){
-    carp(CARP_ERROR, "Cannot set p-values for NULL match collection.");
-    return FALSE;
-  }
-
-  FLOAT_T score = P_VALUE_NA;
-  //FLOAT_T score = -1;
-  //FLOAT_T score = NaN(); // could use this instead
-
-  int match_idx = 0;
-  for(match_idx=0; match_idx < match_collection->match_total; match_idx++){
-    set_match_score(match_collection->match[match_idx],
-                    LOGP_BONF_WEIBULL_XCORR, score);  
-  }
-
-
-  // mark p-values as having been scored
-  match_collection->scored_type[LOGP_BONF_WEIBULL_XCORR] = TRUE;
-  return TRUE;
-
 }
 
 /**
@@ -1648,44 +1620,18 @@ FLOAT_T get_match_collection_delta_cn(
 }
 
 /**
- * \brief Get the eta parameter from the Weibull distribution.
- * No check to see that it has been estimated.
+ * \brief Transfer the Weibull distribution parameters, including the
+ * correlation from one match_collection to another.  No check to see
+ * that the parameters have been estimated.
  */
-FLOAT_T get_match_collection_eta(MATCH_COLLECTION_T* match_collection){
-  return match_collection->eta;
-}
-
-/**
- * \brief Get the beta parameter from the Weibull distribution
- * No check to see that it has been estimated.
- */
-FLOAT_T get_match_collection_beta(MATCH_COLLECTION_T* match_collection){
-  return match_collection->beta;
-}
-
-/**
- * \brief Get the shift parameter from the Weibull distribution
- * No check to see that it has been estimated.
- */
-FLOAT_T get_match_collection_shift(MATCH_COLLECTION_T* match_collection){
-  return match_collection->shift;
-}
-
-/**
- * \brief Set the three Weibull parameters.  Intended for
- * match_collections of decoys, the parameters having been estimated
- * from targets.
- */
-void set_match_collection_weibull_params(
-  MATCH_COLLECTION_T* match_collection,
-  FLOAT_T eta,
-  FLOAT_T beta,
-  FLOAT_T shift
-){
-
-  match_collection->eta = eta;
-  match_collection->beta = beta;
-  match_collection->shift = shift;
+void transfer_match_collection_weibull(
+  MATCH_COLLECTION_T* from_collection,
+  MATCH_COLLECTION_T* to_collection
+  ){
+  to_collection->eta = from_collection->eta;
+  to_collection->beta = from_collection->beta;
+  to_collection->shift = from_collection->shift;
+  to_collection->correlation = from_collection->correlation;
 }
 
 /**

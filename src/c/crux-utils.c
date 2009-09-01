@@ -1180,6 +1180,7 @@ void fit_three_parameter_weibull(
     FLOAT_T min_shift, ///< the minimum shift to allow -in
     FLOAT_T max_shift, ///< the maximum shift to allow -in
     FLOAT_T step,      ///< step for shift -in
+    FLOAT_T corr_threshold, ///< minimum correlation, else no fit -in
     FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
     FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
     FLOAT_T* shift,     ///< the best shift -out
@@ -1196,30 +1197,34 @@ void fit_three_parameter_weibull(
   FLOAT_T cur_eta = 0.0;
   FLOAT_T cur_beta = 0.0;
   FLOAT_T cur_correlation = 0.0;
-  FLOAT_T cur_shift;
+  FLOAT_T cur_shift = 0.0;
 
   for (cur_shift = max_shift; cur_shift > min_shift ; cur_shift -= step){
 
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
-        cur_shift, &cur_eta, &cur_beta, &cur_correlation);
+			      cur_shift, &cur_eta, &cur_beta, &cur_correlation);
 
     if (cur_correlation > best_correlation){
-      *eta = best_eta = cur_eta;
-      *beta = best_beta = cur_beta;
-      *shift = best_shift = cur_shift;
-      *correlation = best_correlation = cur_correlation;
+      best_eta = cur_eta;
+      best_beta = cur_beta;
+      best_shift = cur_shift;
+      best_correlation = cur_correlation;
     } else if (cur_correlation < best_correlation - correlation_tolerance){
-      *eta = best_eta;
-      *beta = best_beta;
-      *shift = best_shift;
-      *correlation = best_correlation;
-      carp(CARP_DETAILED_DEBUG, "Stat: Mu, Corr = %.6f, %.6f\n", cur_shift, cur_correlation);
-      carp(CARP_DETAILED_DEBUG, "Stat: Eta, Beta, Shift = %.6f, %.6f, %.6f", 
-          best_eta, best_beta, best_shift);
       break;
     }
   }
-  carp(CARP_DETAILED_DEBUG,"Corr = %.6f",best_correlation);
+
+  // Only store the parameters if the fit was good enough.
+  *correlation = best_correlation;
+  if (best_correlation >= corr_threshold) {
+    *eta = best_eta;
+    *beta = best_beta;
+    *shift = best_shift;
+  } else {
+    *eta = 0.0;
+    *beta = 0.0;
+    *shift = 0.0;
+  }
 }
 
 /**

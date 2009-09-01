@@ -299,6 +299,7 @@ void fit_three_parameter_weibull(
     FLOAT_T min_shift, ///< the minimum shift to allow -in
     FLOAT_T max_shift, ///< the maximum shift to allow -in
     FLOAT_T step, ///< the step for shift modification -in
+    FLOAT_T corr_threshold, ///< minimum correlation, else no fit -in
     FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
     FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
     FLOAT_T* shift,     ///< the best shift -out
