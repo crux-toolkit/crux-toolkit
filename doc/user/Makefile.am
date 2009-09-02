@@ -8,6 +8,12 @@ schematic.png: schematic.eps
 htmldir = $(prefix)/doc
 cruximgdir = $(prefix)/doc
 
+if SEARCH
+  SEARCH_ENABLED = true
+else
+  SEARCH_ENABLED =
+endif
+
 cruximg_DATA = \
   schematic.png
 
@@ -60,3 +66,22 @@ webpage:
 	cp -R data/ $(WEBDIR)/
 	cp -R download/ $(WEBDIR)/
 	rm -fr $(WEBDIR)/*/CVS
+
+# If SEARCH_ENABLED is not defined this is an open-source installation
+# and we replace the usual crux-search-for-matches.html file with
+# the version for the open source distribution.
+# Only needed when installing from SVN with search disabled.
+install-data-hook:
+	if test -z "$(SEARCH_ENABLED)"; \
+    then  sed -e '/<!-- open source warning/d' \
+              -e '/open source warning -->/d' \
+              < crux-search-for-matches.html \
+              > $(htmldir)/crux-search-for-matches.html; fi
+
+# Similarly, subsitute files for open-source distribution
+dist-hook:
+	if test -z "$(SEARCH_ENABLED)"; \
+    then  sed -e '/<!-- open source warning/d' \
+              -e '/open source warning -->/d' \
+              < crux-search-for-matches.html \
+              > $(distdir)/crux-search-for-matches.html; fi
