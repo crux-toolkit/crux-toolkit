@@ -32,6 +32,17 @@ This controls the numbering of packages and what is reported by the
 configure.ac and make dist (see below) for the new version to take
 effect.</p>
 
+<h3>Creating an open source distribution</h3>
+The process of searching a protein database for matches to observed MS/MS spectra
+is part of the SEQUEST intellectual property. To create an open source distribution
+of Crux this function must be disabled. The search function is disabled by 
+including the <code>--disable-search</code> option on the <code>configure</code> 
+command line before running <code>make dist</code>.
+This option will cause the <code>search_main()</code> function in the <code>match_search.c</code>
+module to be replaced with a stub. The stub simply prints a message that the function has been
+disabled and exits. A warning is added to the <code>crux-search-for-match.html</code>
+man page that searching has been disabled.
+
 <h3>Building packages</h3>
 <p>There are two targets in the root for building packages.  The
 command <code> make dist</code> will create a tarred and zipped file

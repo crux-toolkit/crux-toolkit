@@ -24,12 +24,26 @@
       if passes criteria, print results and move on
       else next peptide modification  
  */
+
+#include <errno.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
 #include "carp.h"
 #include "crux-utils.h"
-#include "parameter.h"
-#include "spectrum_collection.h"
+#include "generate_peptides_iterator.h"
+#include "match.h"
 #include "match_collection.h"
-#include <errno.h>
+#include "objects.h"
+#include "parse_arguments.h"
+#include "parameter.h"
+#include "peptide.h"
+#include "protein.h"
+#include "scorer.h"
+#include "search.h"
+#include "spectrum.h"
+#include "spectrum_collection.h"
 
 #define NUM_SEARCH_OPTIONS 12
 #define NUM_SEARCH_ARGS 2
@@ -62,6 +76,7 @@ int search_pep_mods(
 BOOLEAN_T is_search_complete(MATCH_COLLECTION_T* matches, 
                              int mods_per_peptide);
 
+#ifdef SEARCH_ENABLED // Discard this code in open source release
 int search_main(int argc, char** argv){
 
   /* Verbosity level for set-up/command line reading */
@@ -434,9 +449,21 @@ int search_main(int argc, char** argv){
   carp(CARP_INFO, "Finished crux-search-for-matches");
   exit(0);
 }// end main
-
-
-
+#else // SEARCH_ENABLED not defined
+int search_main(int argc, char **argv){
+  (void) argc;
+  (void) argv;
+  fputs(
+    "You are using the open source version of Crux. Due to intellectual\n"
+    "property issues, we are unable to provide database search functionality\n"
+    "in this version. To obtain a licence for the full functional version of\n"
+    "Crux that includes the database search tools, please visit the following URL:\n"
+    "\nhttp://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php\n",
+    stderr
+  );
+  return 1;
+}
+#endif // SEARCH_ENABLED
 
 /* Private function definitions */
 /**
@@ -661,4 +688,3 @@ int search_pep_mods(
 
   return mod_idx;
 }
-

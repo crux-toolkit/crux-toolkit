@@ -100,6 +100,16 @@ AC_ARG_ENABLE(
     [doubles="true"])
 AM_CONDITIONAL(USEDOUBLES, test "x$doubles" = xtrue )
 
+# The search-for-matches functionality depends on SEQUEST intellectual property.
+# By default we will include this in the build and distribution, but we allow 
+# for disabling it, and not including it in the distribution.
+search="true"
+AC_ARG_ENABLE(
+    search,
+    [  --disable-search  Disable search-for-matches functionality. Default: enabled],
+    [search="false"])
+AM_CONDITIONAL(SEARCH, test "x$search" = xtrue )
+
 # These variables will be available in the Makefiles.
 AC_SUBST(MACHID)
 AC_SUBST(VERSION)
@@ -145,4 +155,7 @@ echo \
 
         make uninstall
 "
-
+if test "$search" = "false"
+then
+echo "Peptide-spectrum database search is disabled."
+fi
