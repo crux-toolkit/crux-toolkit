@@ -3254,11 +3254,13 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     }
     else if(suffix_compare(directory_entry->d_name, "decoy-3.csm")) {
       decoy_3 = TRUE;
-      break;
     }    
     else if(suffix_compare(directory_entry->d_name, ".csm")){
       carp(CARP_DEBUG, "Found target file %s", directory_entry->d_name);
       boolean_result = TRUE;
+    }
+    if (boolean_result && decoy_1 && decoy_2 && decoy_3) {
+      break; // We've found all the files we can use.
     }
   }
   
