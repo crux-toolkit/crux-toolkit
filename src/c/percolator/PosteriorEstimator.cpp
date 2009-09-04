@@ -37,6 +37,7 @@
 #include<algorithm>
 #include<numeric>
 #include<functional>
+#include<climits>
 using namespace std;
 #include "Option.h"
 #include "ArrayLibrary.h"

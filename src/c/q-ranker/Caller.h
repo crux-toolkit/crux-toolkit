@@ -18,7 +18,7 @@ class Caller
 {
 public:
     enum XvType {NO_XV=0, EACH_STEP, WHOLE};
-    enum SetHandlerType {NORMAL=0,SHUFFLED,SHUFFLED_TEST,SHUFFLED_THRESHOLD};
+    enum SetHandlerType {NORMAL=0,SHUFFLED,SHUFFLED1,SHUFFLED2};
 public:
 	Caller();
 	virtual ~Caller();
@@ -35,7 +35,7 @@ public:
     void printWeights(ostream & weightStream, vector<double>& w);
     void readWeights(istream & weightStream, vector<double>& w);
     void readFiles(bool &doSingleFile);
-    void filelessSetup(const unsigned int numFeatures, const unsigned int numSpectra, char ** fetureNames, double pi0);
+    void filelessSetup(unsigned int nsets,const unsigned int numFeatures, const unsigned int numSpectra, char ** fetureNames, double pi0);
     void fillFeatureSets();    
     int preIterationSetup();
     Scores* getFullSet() {return &fullset;}    
@@ -44,8 +44,8 @@ public:
         switch(sh) {
            case NORMAL: return &normal;
            case SHUFFLED: return &shuffled;
-           case SHUFFLED_TEST: return NULL;
-           case SHUFFLED_THRESHOLD: return NULL;
+           case SHUFFLED1: return &shuffled1;
+           case SHUFFLED2: return &shuffled2;
            default: return NULL;
         }
     }

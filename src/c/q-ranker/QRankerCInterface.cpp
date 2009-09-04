@@ -13,6 +13,7 @@
 #include <map>
 #include <string>
 using namespace std;
+#include "PSMDescription.h"
 #include "DataSet.h"
 #include "Scores.h"
 #include "SetHandler.h"
@@ -44,11 +45,15 @@ void qcInitiate(NSet sets, unsigned int numFeat, unsigned int numSpectra, char *
     pCaller=new Caller();
     nset=sets;
     numFeatures = numFeat;
-    pCaller->filelessSetup(numFeatures, numSpectra, featureNames, pi0);
+    pCaller->filelessSetup((int)sets,numFeatures, numSpectra, featureNames, pi0);
     normal = new SetHandler::Iterator(pCaller->getSetHandler(Caller::NORMAL));
     decoy1 = new SetHandler::Iterator(pCaller->getSetHandler(Caller::SHUFFLED));
-    if (nset>2)
-      cerr << "This version of percolator only suport 1 decoy set. Pecolator was called with nset=" << nset << endl;
+    if ((int)sets > 2)
+      decoy2 = new SetHandler::Iterator(pCaller->getSetHandler(Caller::SHUFFLED1));
+    if ((int)sets > 3)
+      decoy3 = new SetHandler::Iterator(pCaller->getSetHandler(Caller::SHUFFLED2));
+    if (nset>4)
+      cerr << "This version of percolator only suports 3 decoy sets. Pecolator was called with nset=" << nset << endl;
 }
 
 /** Call that sets verbosity level
@@ -68,32 +73,42 @@ void qcRegisterPSM(SetType set, char * identifier, double * features) {
      cerr << "Tried to access undefined set" << endl;
      exit(-1);
   }
+  PSMDescription *pPSM;
   double * vec = NULL;
   switch(set) {
     case TARGET:
-      vec = normal->getNext()->features;
+      //vec = normal->getNext()->features;
+      pPSM = normal->getNext();
+      pPSM->peptide = identifier;
       break;
     case DECOY1:
-      vec = decoy1->getNext()->features;
+      //vec = decoy1->getNext()->features;
+      pPSM = decoy1->getNext();
       break;
     case DECOY2:
-      vec = decoy2->getNext()->features;
+      //vec = decoy2->getNext()->features;
+      pPSM = decoy2->getNext();
       break;
     case DECOY3:
-      vec = decoy3->getNext()->features;
+      //vec = decoy3->getNext()->features;
+      pPSM = decoy3->getNext();
       break;
   }
-  if (vec==NULL) {
+  if (pPSM==NULL) {
      cerr << "Pointer out of bound" << endl;
      exit(-1);
   }
+
+  vec = pPSM->features;
   for (unsigned int ix=0;ix<numFeatures;ix++) {
     vec[ix] = features[ix];
   }
+  
 }
 
 /** Function called when we want to start processing */
 void qcExecute() {
+  
   pCaller->fillFeatureSets();
   pCaller->preIterationSetup();
   pCaller->train();  

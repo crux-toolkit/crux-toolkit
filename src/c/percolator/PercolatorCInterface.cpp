@@ -4,6 +4,7 @@
 #include <set>
 #include <map>
 #include <string>
+#include <cstdlib>
 using namespace std;
 #include "DataSet.h"
 #include "Scores.h"
