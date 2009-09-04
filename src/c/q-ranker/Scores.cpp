@@ -424,26 +424,25 @@ void Scores::calcMultiOverFDR(vector<double> &fdr, vector<int> &overFDR) {
 
 
 
-/*
+
 void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHandler& shuff, const double ratio) {
   PSMDescription * pPSM;
   SetHandler::Iterator shuffIter(&shuff), normIter(&norm);
  
+  set<string> peptides_train;
+  set<string> peptides_test;
+
   assert(ratio>0 && ratio < 1);
-  //cerr << "fill features small\n";
   //shuffled
   int n = shuff.getSize();
   int k = (int)(shuff.getSize()*ratio);
   int l = shuff.getSize() - k;
   //normal
   int nz  = norm.getSize();
-  int kk = (int)(norm.getSize()*ratio);
-  int ll = norm.getSize() - kk;
-
+  
+ 
   ScoreHolder s;
-  train.scores.resize(kk+k,s);
-  test.scores.resize(ll+l,s);
-   
+  
   int i=0;
   //collect everybody positive
   vector<ScoreHolder> all_pos_examples;
@@ -454,7 +453,7 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
     ++i;
   }
   assert(i == nz);
-
+  
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
@@ -464,73 +463,478 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
     }
+      
 
+  //1 for trainset, 2 for testset
+  vector<int> pos_assignments(nz,0);
+  int num_pos_train = 0;
+  int num_pos_test = 0;
+  for (int count = 0; count < nz; count++)
+    {
+      if (num_pos_train < num_pos_test)
+	{
+	  //want to add to the trainset
+	  string pep = all_pos_examples[count].pPSM->peptide;
+	  //but make sure the pep is not already in the testset
+	  if (peptides_test.count(pep) == 0)
+	    {
+	      pos_assignments[count] = 1;
+	      peptides_train.insert(pep);
+	      num_pos_train++;
+	    }
+	  else
+	    {
+	      pos_assignments[count] = 2;
+	      num_pos_test++;
+	    }
+	}
+      else
+	{
+	  //want to add to the testset
+	  string pep = all_pos_examples[count].pPSM->peptide;
+	  //but make sure it's not already in the trainset
+	  if(peptides_train.count(pep) == 0)
+	    {
+	      pos_assignments[count] = 2;
+	      peptides_test.insert(pep);
+	      num_pos_test++;
+	    }
+	  else
+	    {
+	      pos_assignments[count] = 1;
+	      num_pos_train++;
+	    }
+	}
+    }
   
-  //distribute the normal set between train and test
-  int ix1=0;
-  int ix2=0;
-  int count = 0;
-  while (count < kk)
-    {
-      train.scores[ix1] = all_pos_examples[count];
-      ++ix1;
-      ++count;
-    }
-  while (count < nz)
-    {
-      test.scores[ix2] = all_pos_examples[count];
-      ++ix2;    
-      count++;
-    }
-  assert(ix1==kk);
-  assert(ix2==ll);
   
   //collect everybody negative
   i = 0;
   vector<ScoreHolder> all_neg_examples;
   all_neg_examples.resize(n,s);
-   while((pPSM=shuffIter.getNext())!=NULL) {
-     all_neg_examples[i].label=-1;
-     all_neg_examples[i].pPSM=pPSM;
-      ++i;
+  while((pPSM=shuffIter.getNext())!=NULL) {
+    all_neg_examples[i].label=-1;
+    all_neg_examples[i].pPSM=pPSM;
+    ++i;
    }
-   assert(i == n);
+  assert(i == n);
  
   //mix up the examples
-  for(i = 0; i < n; i++)
-    {
-      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
-      s = all_neg_examples[p1];
-      all_neg_examples[p1] = all_neg_examples[p2];
-      all_neg_examples[p2] = s;
-    }
-
+   for(i = 0; i < n; i++)
+     {
+       int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
+       int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+       s = all_neg_examples[p1];
+       all_neg_examples[p1] = all_neg_examples[p2];
+       all_neg_examples[p2] = s;
+     }
   
+  train.scores.resize(num_pos_train+k,s);
+  test.scores.resize(num_pos_test+l,s);
+  
+    
+  //distribute the normal set between train and test
+  int ix1=0;
+  int ix2=0;
+  for (int count = 0; count < nz; count++)
+    {
+      if (pos_assignments[count] == 1 )
+	{
+	  train.scores[ix1] = all_pos_examples[count];
+	  ++ix1;
+      }
+      else if (pos_assignments[count] == 2)
+	{
+	  test.scores[ix2] = all_pos_examples[count];
+	  ++ix2;
+	}
+      else
+	cerr << "invalid pos_assignments_value " << pos_assignments[count] << "\n";
+    }
+  
+
   //distribute the shuffled set between train and test
-  count = 0;
-  while(count < k){
-    train.scores[ix1] = all_neg_examples[count];
+  int count = 0;
+  while(count < k)
+    {
+      train.scores[ix1] = all_neg_examples[count];
       ++ix1;
       ++count;
-  }
+    }
   while (count < n)
     {
       test.scores[ix2] = all_neg_examples[count];
       ++ix2;    
       count++;
     }
-    
-  train.pos=kk;
-  test.pos=ll;
-  train.neg=ix1-kk;
-  test.neg=ix2-ll;
+  
+        
+  train.pos=num_pos_train;
+  test.pos=num_pos_test;
+  train.neg=ix1-num_pos_train;
+  test.neg=ix2-num_pos_test;
   train.factor = train.pos/(double)train.neg;
   test.factor = train.pos/(double)train.neg;
-
+  
 }
-*/
 
+
+
+void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHandler& shuff,SetHandler& shuff1, const double ratio) {
+  PSMDescription * pPSM;
+  SetHandler::Iterator shuffIter(&shuff),shuffIter1(&shuff1), normIter(&norm);
+ 
+  set<string> peptides_train;
+  set<string> peptides_test;
+
+  assert(ratio>0 && ratio < 1);
+  //shuffled
+  int n = shuff.getSize();
+  int k = (int)(shuff.getSize()*ratio);
+  int l = shuff.getSize() - k;
+  //shuffled1
+  int nt = shuff1.getSize();
+  int kkk = (int)(shuff1.getSize()*ratio);
+  int lll = shuff1.getSize() - kkk;
+  //normal
+  int nz  = norm.getSize();
+  
+  ScoreHolder s;
+  
+  int i=0;
+  //collect everybody positive
+  vector<ScoreHolder> all_pos_examples;
+  all_pos_examples.resize(nz,s);
+  while((pPSM=normIter.getNext())!=NULL) {
+    all_pos_examples[i].label=1;
+    all_pos_examples[i].pPSM=pPSM;
+    ++i;
+  }
+  assert(i == nz);
+  //mix up the examples
+  for(i = 0; i < nz; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      s = all_pos_examples[p1];
+      all_pos_examples[p1] = all_pos_examples[p2];
+      all_pos_examples[p2] = s;
+    }
+  //1 for trainset, 2 for testset
+  vector<int> pos_assignments(nz,0);
+  int num_pos_train = 0;
+  int num_pos_test = 0;
+  for (int count = 0; count < nz; count++)
+    {
+      if (num_pos_train < num_pos_test)
+	{
+	  //want to add to the trainset
+	  string pep = all_pos_examples[count].pPSM->peptide;
+	  //but make sure the pep is not already in the testset
+	  if (peptides_test.count(pep) == 0)
+	    {
+	      pos_assignments[count] = 1;
+	      peptides_train.insert(pep);
+	      num_pos_train++;
+	    }
+	  else
+	    {
+	      pos_assignments[count] = 2;
+	      num_pos_test++;
+	    }
+	}
+      else
+	{
+	  //want to add to the testset
+	  string pep = all_pos_examples[count].pPSM->peptide;
+	  //but make sure it's not already in the trainset
+	  if(peptides_train.count(pep) == 0)
+	    {
+	      pos_assignments[count] = 2;
+	      peptides_test.insert(pep);
+	      num_pos_test++;
+	    }
+	  else
+	    {
+	      pos_assignments[count] = 1;
+	      num_pos_train++;
+	    }
+	}
+    }
+  
+  
+  //collect everybody negative
+  i = 0;
+  vector<ScoreHolder> all_neg_examples;
+  all_neg_examples.resize(n+nt,s);
+  while((pPSM=shuffIter.getNext())!=NULL) {
+    all_neg_examples[i].label=-1;
+    all_neg_examples[i].pPSM=pPSM;
+    ++i;
+   }
+  while((pPSM=shuffIter1.getNext())!=NULL) {
+    all_neg_examples[i].label=-1;
+    all_neg_examples[i].pPSM=pPSM;
+    ++i;
+   }
+   assert(i == n+nt);
+  //mix up the examples
+   for(i = 0; i < n+nt; i++)
+     {
+       int p1 = (int)((double)rand()/RAND_MAX*(n+nt-1)); 
+       int p2 = (int)((double)rand()/RAND_MAX*(n+nt-1)); 
+       s = all_neg_examples[p1];
+       all_neg_examples[p1] = all_neg_examples[p2];
+       all_neg_examples[p2] = s;
+     }
+     
+
+  
+ 
+  train.scores.resize(num_pos_train+k+kkk,s);
+  test.scores.resize(num_pos_test+l+lll,s);
+  
+  
+  //distribute the normal set between train and test
+  int ix1=0;
+  int ix2=0;
+  for (int count = 0; count < nz; count++)
+    {
+      if (pos_assignments[count] == 1 )
+	{
+	  train.scores[ix1] = all_pos_examples[count];
+	  ++ix1;
+      }
+      else if (pos_assignments[count] == 2)
+	{
+	  test.scores[ix2] = all_pos_examples[count];
+	  ++ix2;
+	}
+      else
+	cerr << "invalid pos_assignments_value " << pos_assignments[count] << "\n";
+    }
+  
+
+  
+  //distribute the shuffled set between train and test
+  int count = 0;
+  while(count < k+kkk)
+    {
+      train.scores[ix1] = all_neg_examples[count];
+      ++ix1;
+      ++count;
+    }
+  while (count < n+nt)
+    {
+      test.scores[ix2] = all_neg_examples[count];
+      ++ix2;    
+      count++;
+    }
+  
+
+        
+  train.pos=num_pos_train;
+  test.pos=num_pos_test;
+  train.neg=ix1-num_pos_train;
+  test.neg=ix2-num_pos_test;
+  train.factor = train.pos/(double)train.neg;
+  test.factor = train.pos/(double)train.neg;
+  
+}
+
+
+
+
+void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHandler& shuff,SetHandler& shuff1,SetHandler& shuff2, const double ratio) {
+  PSMDescription * pPSM;
+  SetHandler::Iterator shuffIter(&shuff),shuffIter1(&shuff1),shuffIter2(&shuff2), normIter(&norm);
+ 
+  set<string> peptides_train;
+  set<string> peptides_test;
+
+  assert(ratio>0 && ratio < 1);
+  //shuffled
+  int n = shuff.getSize();
+  int k = (int)(shuff.getSize()*ratio);
+  int l = shuff.getSize() - k;
+  //shuffled1
+  int nt = shuff1.getSize();
+  int kkk = (int)(shuff1.getSize()*ratio);
+  int lll = shuff1.getSize() - kkk;
+  //shuffled2
+  int nt1 = shuff2.getSize();
+  int kkk1 = (int)(shuff2.getSize()*ratio);
+  int lll1 = shuff2.getSize() - kkk1;
+  //normal
+  int nz  = norm.getSize();
+  
+  ScoreHolder s;
+  
+  int i=0;
+  //collect everybody positive
+  vector<ScoreHolder> all_pos_examples;
+  all_pos_examples.resize(nz,s);
+  while((pPSM=normIter.getNext())!=NULL) {
+    all_pos_examples[i].label=1;
+    all_pos_examples[i].pPSM=pPSM;
+    ++i;
+  }
+  assert(i == nz);
+  
+  //mix up the examples
+  for(i = 0; i < nz; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      s = all_pos_examples[p1];
+      all_pos_examples[p1] = all_pos_examples[p2];
+      all_pos_examples[p2] = s;
+    }
+      
+
+  //1 for trainset, 2 for testset
+  vector<int> pos_assignments(nz,0);
+  int num_pos_train = 0;
+  int num_pos_test = 0;
+  for (int count = 0; count < nz; count++)
+    {
+      if (num_pos_train < num_pos_test)
+	{
+	  //want to add to the trainset
+	  string pep = all_pos_examples[count].pPSM->peptide;
+	  //but make sure the pep is not already in the testset
+	  if (peptides_test.count(pep) == 0)
+	    {
+	      pos_assignments[count] = 1;
+	      peptides_train.insert(pep);
+	      num_pos_train++;
+	    }
+	  else
+	    {
+	      pos_assignments[count] = 2;
+	      num_pos_test++;
+	    }
+	}
+      else
+	{
+	  //want to add to the testset
+	  string pep = all_pos_examples[count].pPSM->peptide;
+	  //but make sure it's not already in the trainset
+	  if(peptides_train.count(pep) == 0)
+	    {
+	      pos_assignments[count] = 2;
+	      peptides_test.insert(pep);
+	      num_pos_test++;
+	    }
+	  else
+	    {
+	      pos_assignments[count] = 1;
+	      num_pos_train++;
+	    }
+	}
+    }
+  
+   //collect everybody negative
+  i = 0;
+  vector<ScoreHolder> all_neg_examples;
+  all_neg_examples.resize(n+nt+nt1,s);
+  while((pPSM=shuffIter.getNext())!=NULL) {
+    all_neg_examples[i].label=-1;
+    all_neg_examples[i].pPSM=pPSM;
+    ++i;
+   }
+  while((pPSM=shuffIter1.getNext())!=NULL) {
+    all_neg_examples[i].label=-1;
+    all_neg_examples[i].pPSM=pPSM;
+    ++i;
+   }
+  while((pPSM=shuffIter2.getNext())!=NULL) {
+    all_neg_examples[i].label=-1;
+    all_neg_examples[i].pPSM=pPSM;
+    ++i;
+   }
+   assert(i == n+nt+nt1);
+ 
+  //mix up the examples
+   for(i = 0; i < n+nt+nt1; i++)
+     {
+       int p1 = (int)((double)rand()/RAND_MAX*(n+nt+nt1-1)); 
+       int p2 = (int)((double)rand()/RAND_MAX*(n+nt+nt1-1)); 
+       s = all_neg_examples[p1];
+       all_neg_examples[p1] = all_neg_examples[p2];
+       all_neg_examples[p2] = s;
+     }
+     
+
+  
+  train.scores.resize(num_pos_train+k+kkk+kkk1,s);
+  test.scores.resize(num_pos_test+l+lll+lll1,s);
+  
+  
+  //distribute the normal set between train and test
+  int ix1=0;
+  int ix2=0;
+  for (int count = 0; count < nz; count++)
+    {
+      if (pos_assignments[count] == 1 )
+	{
+	  train.scores[ix1] = all_pos_examples[count];
+	  ++ix1;
+      }
+      else if (pos_assignments[count] == 2)
+	{
+	  test.scores[ix2] = all_pos_examples[count];
+	  ++ix2;
+	}
+      else
+	cerr << "invalid pos_assignments_value " << pos_assignments[count] << "\n";
+    }
+  
+
+  //distribute the shuffled set between train and test
+  int count = 0;
+  while(count < k+kkk+kkk1)
+    {
+      train.scores[ix1] = all_neg_examples[count];
+      ++ix1;
+      ++count;
+    }
+  while (count < n+nt+nt1)
+    {
+      test.scores[ix2] = all_neg_examples[count];
+      ++ix2;    
+      count++;
+    }
+  
+  
+
+      
+  train.pos=num_pos_train;
+  test.pos=num_pos_test;
+  train.neg=ix1-num_pos_train;
+  test.neg=ix2-num_pos_test;
+  train.factor = train.pos/(double)train.neg;
+  test.factor = train.pos/(double)train.neg;
+  
+}
+
+
+
+
+
+
+
+} // qranker namspace
+
+
+/*********************************************************
+ *
+ * Old split functions taking into account peptide sequences
+ *
+ */
+
+
+/*
 void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHandler& shuff, const double ratio) {
   PSMDescription * pPSM;
   SetHandler::Iterator shuffIter(&shuff), normIter(&norm);
@@ -544,6 +948,7 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //normal
   int nz  = norm.getSize();
   
+ 
   ScoreHolder s;
   
   int i=0;
@@ -678,7 +1083,7 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   train.scores.resize(num_pos_train+num_neg_train,s);
   test.scores.resize(num_pos_test+num_neg_test,s);
   
-  
+    
   //distribute the normal set between train and test
   int ix1=0;
   int ix2=0;
@@ -1134,9 +1539,458 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   
 }
 
+*/
+
+
+/*************************************************************
+ *
+ *
+ *  Old split functions NOT taking into account the peptide sequences
+ *
+ */
+
+/*
+
+
+
+void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHandler& shuff, const double ratio) {
+  PSMDescription * pPSM;
+  SetHandler::Iterator shuffIter(&shuff), normIter(&norm);
+ 
+  assert(ratio>0 && ratio < 1);
+  //cerr << "fill features small\n";
+  //shuffled
+  int n = shuff.getSize();
+  int k = (int)(shuff.getSize()*ratio);
+  int l = shuff.getSize() - k;
+  //normal
+  int nz  = norm.getSize();
+  int kk = (int)(norm.getSize()*ratio);
+  int ll = norm.getSize() - kk;
+
+  ScoreHolder s;
+  train.scores.resize(kk+k,s);
+  test.scores.resize(ll+l,s);
+   
+  int i=0;
+  //collect everybody positive
+  vector<ScoreHolder> all_pos_examples;
+  all_pos_examples.resize(nz,s);
+  while((pPSM=normIter.getNext())!=NULL) {
+    all_pos_examples[i].label=1;
+    all_pos_examples[i].pPSM=pPSM;
+    ++i;
+  }
+  assert(i == nz);
+
+  //mix up the examples
+  for(i = 0; i < nz; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      s = all_pos_examples[p1];
+      all_pos_examples[p1] = all_pos_examples[p2];
+      all_pos_examples[p2] = s;
+    }
+
+  
+  //distribute the normal set between train and test
+  int ix1=0;
+  int ix2=0;
+  int count = 0;
+  while (count < kk)
+    {
+      train.scores[ix1] = all_pos_examples[count];
+      ++ix1;
+      ++count;
+    }
+  while (count < nz)
+    {
+      test.scores[ix2] = all_pos_examples[count];
+      ++ix2;    
+      count++;
+    }
+  assert(ix1==kk);
+  assert(ix2==ll);
+  
+  //collect everybody negative
+  i = 0;
+  vector<ScoreHolder> all_neg_examples;
+  all_neg_examples.resize(n,s);
+   while((pPSM=shuffIter.getNext())!=NULL) {
+     all_neg_examples[i].label=-1;
+     all_neg_examples[i].pPSM=pPSM;
+      ++i;
+   }
+   assert(i == n);
+ 
+  //mix up the examples
+  for(i = 0; i < n; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      s = all_neg_examples[p1];
+      all_neg_examples[p1] = all_neg_examples[p2];
+      all_neg_examples[p2] = s;
+    }
+
+  
+  //distribute the shuffled set between train and test
+  count = 0;
+  while(count < k){
+    train.scores[ix1] = all_neg_examples[count];
+      ++ix1;
+      ++count;
+  }
+  while (count < n)
+    {
+      test.scores[ix2] = all_neg_examples[count];
+      ++ix2;    
+      count++;
+    }
+    
+  train.pos=kk;
+  test.pos=ll;
+  train.neg=ix1-kk;
+  test.neg=ix2-ll;
+  train.factor = train.pos/(double)train.neg;
+  test.factor = train.pos/(double)train.neg;
+
+}
+
+
+
+void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHandler& shuff,SetHandler& shuff1, const double ratio) {
+  PSMDescription * pPSM;
+  SetHandler::Iterator shuffIter(&shuff),shuffIter1(&shuff1), normIter(&norm);
+ 
+  assert(ratio>0 && ratio < 1);
+  cerr << "fill features medium\n";
+  //shuffled
+  int n = shuff.getSize();
+  int k = (int)(shuff.getSize()*ratio);
+  int l = shuff.getSize() - k;
+  //shuffled1
+  int nt = shuff1.getSize();
+  int kkk = (int)(shuff1.getSize()*ratio);
+  int lll = shuff1.getSize() - kkk;
+  //normal
+  int nz  = norm.getSize();
+  int kk = (int)(norm.getSize()*ratio);
+  int ll = norm.getSize() - kk;
+
+  ScoreHolder s;
+  train.scores.resize(kk+k+kkk,s);
+  test.scores.resize(ll+l+lll,s);
+   
+  
+  //collect everybody positive
+  vector<ScoreHolder> all_pos_examples;
+  all_pos_examples.resize(nz,s);
+  while((pPSM=normIter.getNext())!=NULL) {
+    all_pos_examples[i].label=1;
+    all_pos_examples[i].pPSM=pPSM;
+    ++i;
+  }
+  assert(i == nz);
+
+  //mix up the examples
+  for(i = 0; i < nz; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      s = all_pos_examples[p1];
+      all_pos_examples[p1] = all_pos_examples[p2];
+      all_pos_examples[p2] = s;
+    }
+
+  
+  //distribute the normal set between train and test
+  int ix1=0;
+  int ix2=0;
+  int count = 0;
+  while (count < kk)
+    {
+      train.scores[ix1] = all_pos_examples[count];
+      ++ix1;
+      ++count;
+    }
+  while (count < nz)
+    {
+      test.scores[ix2] = all_pos_examples[count];
+      ++ix2;    
+      count++;
+    }
+  assert(ix1==kk);
+  assert(ix2==ll);
+
+  //collect everybody negative
+  i = 0;
+  vector<ScoreHolder> all_neg_examples;
+  all_neg_examples.resize(n,s);
+   while((pPSM=shuffIter.getNext())!=NULL) {
+     all_neg_examples[i].label=-1;
+     all_neg_examples[i].pPSM=pPSM;
+      ++i;
+   }
+   assert(i == n);
+ 
+  //mix up the examples
+  for(i = 0; i < n; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      s = all_neg_examples[p1];
+      all_neg_examples[p1] = all_neg_examples[p2];
+      all_neg_examples[p2] = s;
+    }
+
+  
+  //distribute the shuffled set between train and test
+  count = 0;
+  while(count < k){
+    train.scores[ix1] = all_neg_examples[count];
+      ++ix1;
+      ++count;
+  }
+  while (count < n)
+    {
+      test.scores[ix2] = all_neg_examples[count];
+      ++ix2;    
+      count++;
+    }
+
+  //collect everybody negative again
+  i = 0;
+  vector<ScoreHolder> all_neg_examples1;
+  all_neg_examples1.resize(nt,s);
+   while((pPSM=shuffIter1.getNext())!=NULL) {
+     all_neg_examples1[i].label=-1;
+     all_neg_examples1[i].pPSM=pPSM;
+      ++i;
+   }
+   assert(i == nt);
+ 
+  //mix up the examples
+  for(i = 0; i < nt; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(nt-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(nt-1)); 
+      s = all_neg_examples1[p1];
+      all_neg_examples1[p1] = all_neg_examples1[p2];
+      all_neg_examples1[p2] = s;
+    }
+
+  
+  //distribute the shuffled set between train and test
+  count = 0;
+  while(count < kkk){
+    train.scores[ix1] = all_neg_examples1[count];
+      ++ix1;
+      ++count;
+  }
+  while (count < nt)
+    {
+      test.scores[ix2] = all_neg_examples1[count];
+      ++ix2;    
+      count++;
+    }
+  
+  
+  train.pos=kk;
+  test.pos=ll;
+  train.neg=ix1-kk;
+  test.neg=ix2-ll;
+  train.factor = train.pos/(double)train.neg;
+  test.factor = train.pos/(double)train.neg;
+
+}
+
+
+void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHandler& shuff,SetHandler& shuff1,SetHandler& shuff2, const double ratio) {
+
+  PSMDescription * pPSM;
+  SetHandler::Iterator shuffIter(&shuff),shuffIter1(&shuff1),shuffIter2(&shuff2), normIter(&norm);
+ 
+  set<string> peptides_train;
+  set<string> peptides_test;
+
+  assert(ratio>0 && ratio < 1);
+  cerr << "fill features large\n";
+  //shuffled
+  int n = shuff.getSize();
+  int k = (int)(shuff.getSize()*ratio);
+  int l = shuff.getSize() - k;
+  //shuffled1
+  int nt = shuff1.getSize();
+  int kkk = (int)(shuff1.getSize()*ratio);
+  int lll = shuff1.getSize() - kkk;
+  //shuffled2
+  int ntt = shuff2.getSize();
+  int kkkk = (int)(shuff2.getSize()*ratio);
+  int llll = shuff2.getSize() - kkkk;
+  //normal
+  int nz  = norm.getSize();
+  int kk = (int)(norm.getSize()*ratio);
+  int ll = norm.getSize() - kk;
+
+  
+  ScoreHolder s;
+  train.scores.resize(kk+k+kkk+kkkk,s);
+  test.scores.resize(ll+l+lll+llll,s);
+
+  //collect everybody positive
+  vector<ScoreHolder> all_pos_examples;
+  all_pos_examples.resize(nz,s);
+  while((pPSM=normIter.getNext())!=NULL) {
+    all_pos_examples[i].label=1;
+    all_pos_examples[i].pPSM=pPSM;
+    ++i;
+  }
+  assert(i == nz);
+  //mix up the examples
+  for(i = 0; i < nz; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      s = all_pos_examples[p1];
+      all_pos_examples[p1] = all_pos_examples[p2];
+      all_pos_examples[p2] = s;
+    }
+  //distribute the normal set between train and test
+  int ix1=0;
+  int ix2=0;
+  int count = 0;
+  while (count < kk)
+    {
+      train.scores[ix1] = all_pos_examples[count];
+      ++ix1;
+      ++count;
+    }
+  while (count < nz)
+    {
+      test.scores[ix2] = all_pos_examples[count];
+      ++ix2;    
+      count++;
+    }
+  assert(ix1==kk);
+  assert(ix2==ll);
+
+
+  //collect everybody negative
+  i = 0;
+  vector<ScoreHolder> all_neg_examples;
+  all_neg_examples.resize(n,s);
+  while((pPSM=shuffIter.getNext())!=NULL) {
+    all_neg_examples[i].label=-1;
+    all_neg_examples[i].pPSM=pPSM;
+    ++i;
+  }
+  assert(i == n);
+  //mix up the examples
+  for(i = 0; i < n; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      s = all_neg_examples[p1];
+      all_neg_examples[p1] = all_neg_examples[p2];
+      all_neg_examples[p2] = s;
+    }
+  //distribute the shuffled set between train and test
+  count = 0;
+  while(count < k){
+    train.scores[ix1] = all_neg_examples[count];
+    ++ix1;
+    ++count;
+  }
+  while (count < n)
+    {
+      test.scores[ix2] = all_neg_examples[count];
+      ++ix2;    
+      count++;
+    }
+
+  //collect everybody negative again
+  i = 0;
+  vector<ScoreHolder> all_neg_examples1;
+  all_neg_examples1.resize(nt,s);
+  while((pPSM=shuffIter1.getNext())!=NULL) {
+    all_neg_examples1[i].label=-1;
+    all_neg_examples1[i].pPSM=pPSM;
+    ++i;
+  }
+  assert(i == nt);
+  //mix up the examples
+  for(i = 0; i < nt; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(nt-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(nt-1)); 
+      s = all_neg_examples1[p1];
+      all_neg_examples1[p1] = all_neg_examples1[p2];
+      all_neg_examples1[p2] = s;
+    }
+  //distribute the shuffled set between train and test
+  count = 0;
+  while(count < kkk){
+    train.scores[ix1] = all_neg_examples1[count];
+    ++ix1;
+    ++count;
+  }
+  while (count < nt)
+    {
+      test.scores[ix2] = all_neg_examples1[count];
+      ++ix2;    
+      count++;
+    }
+  
+  //collect everybody negative again
+  i = 0;
+  vector<ScoreHolder> all_neg_examples2;
+  all_neg_examples2.resize(ntt,s);
+  while((pPSM=shuffIter2.getNext())!=NULL) {
+     all_neg_examples2[i].label=-1;
+     all_neg_examples2[i].pPSM=pPSM;
+      ++i;
+   }
+   assert(i == ntt);
+   //mix up the examples
+   for(i = 0; i < ntt; i++)
+    {
+      int p1 = (int)((double)rand()/RAND_MAX*(ntt-1)); 
+      int p2 = (int)((double)rand()/RAND_MAX*(ntt-1)); 
+      s = all_neg_examples2[p1];
+      all_neg_examples2[p1] = all_neg_examples2[p2];
+      all_neg_examples2[p2] = s;
+    }
+  //distribute the shuffled set between train and test
+  count = 0;
+  while(count < kkkk){
+    train.scores[ix1] = all_neg_examples2[count];
+      ++ix1;
+      ++count;
+  }
+  while (count < ntt)
+    {
+      test.scores[ix2] = all_neg_examples2[count];
+      ++ix2;    
+      count++;
+    }
+
+
+  train.pos=kk;
+  test.pos=ll;
+  train.neg=ix1-kk;
+  test.neg=ix2-ll;
+  train.factor = train.pos/(double)train.neg;
+  test.factor = train.pos/(double)train.neg;
+
+
+}
 
 
 
 
-} // qranker namspace
+
+
+*/
 

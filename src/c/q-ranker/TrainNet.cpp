@@ -89,7 +89,7 @@ void Caller :: printNetResults(vector<int> &scores)
       fdr = scores[count];
       cerr << qv << ":" << fdr << " ";
     }
-  cerr << "loss " << loss << " ";
+  //cerr << "loss " << loss << " ";
   cerr << endl;
 }
 

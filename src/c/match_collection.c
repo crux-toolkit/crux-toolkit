@@ -316,6 +316,7 @@ int add_matches(
   // preliminary scoring
   int sp_max_rank = get_int_parameter("max-rank-preliminary");
   SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
+
   if( sp_max_rank == 0 ){ 
     add_unscored_peptides(match_collection, spectrum, charge, 
                           peptide_iterator, is_decoy);
@@ -1160,7 +1161,6 @@ BOOLEAN_T score_peptides(
   while( modified_peptides_iterator_has_next(peptide_iterator)){
     // get peptide, sequence, and ions
     peptide = modified_peptides_iterator_next(peptide_iterator);
-    
     //SJM: Calling this multiple times for each peptide can get expensive.
     //I defined this macro in carp.h that tests the verbosity level
     //before calling the get_ function.  We could use this to compile out
@@ -1184,6 +1184,7 @@ BOOLEAN_T score_peptides(
     modified_sequence = get_match_mod_sequence(match);
     update_ion_series(ion_series, sequence, modified_sequence);
     predict_ions(ion_series);
+
 
     // calculate the score
     score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);

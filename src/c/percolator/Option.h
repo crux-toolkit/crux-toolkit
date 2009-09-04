@@ -32,6 +32,7 @@
 #include<string>
 #include<map>
 #include<vector>
+#include<cstdlib>
 using namespace std;
 
 typedef enum {FALSE_IF_SET=0, TRUE_IF_SET, VALUE} OptionOption;

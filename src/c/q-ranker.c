@@ -284,6 +284,7 @@ MATCH_COLLECTION_T* run_q(
   }
   carp(CARP_DETAILED_DEBUG, "Created the match collection iterator");
 
+  
   // iterate over each, TARGET, DECOY 1..3 match_collection sets
   int iterations = 0;
   while(match_collection_iterator_has_next(match_collection_iterator)){
@@ -298,43 +299,39 @@ MATCH_COLLECTION_T* run_q(
     if(set_idx == 0){
       // the first match_collection is the target_match_collection
       target_match_collection = match_collection;
-
+      
       // result array that stores the algorithm scores
       results_q = (double*)mycalloc(
-          get_match_collection_match_total(match_collection), sizeof(double));
+				    get_match_collection_match_total(match_collection), sizeof(double));
       results_score = (double*)mycalloc(
-          get_match_collection_match_total(match_collection), sizeof(double));
-  
-     
+					get_match_collection_match_total(match_collection), sizeof(double));
+          
       // Call that initiates q-ranker
       qcInitiate(
-          (NSet)get_match_collection_iterator_number_collections(
-                  match_collection_iterator), 
-          number_features, 
-          get_match_collection_match_total(match_collection), 
-          feature_names, 
-          pi0);
-    
-   
-  
+		 (NSet)get_match_collection_iterator_number_collections(
+									match_collection_iterator), 
+		 number_features, 
+		 get_match_collection_match_total(match_collection), 
+		 feature_names, 
+		 pi0);
+      
+      
       // Call that sets verbosity level
       // 0 is quiet, 2 is default, 5 is more than you want
       if(verbosity < CARP_ERROR){
-        qcSetVerbosity(0);
-	}    
+	qcSetVerbosity(0);
+      }    
       else if(verbosity < CARP_INFO){
-        qcSetVerbosity(1);
+	qcSetVerbosity(1);
       }
       else{
-        qcSetVerbosity(5);
+	qcSetVerbosity(5);
       }
     }
 
     // create iterator, to register each PSM feature to q-ranker
     match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
-   
     
- 
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
       // Register PSM with features to q-ranker    
@@ -360,16 +357,12 @@ MATCH_COLLECTION_T* run_q(
           }
         }
       }
-    
-      qcRegisterPSM((SetType)set_idx, NULL /* no sequence used*/, features);
+      
+      //qcRegisterPSM((SetType)set_idx, NULL, features);
+      qcRegisterPSM((SetType)set_idx, get_match_sequence_sqt(match), features);
       
       free(features);
     }
-
-
-    
-      
-   
 
     // ok free & update for next set
     // MEMLEAK 
@@ -390,7 +383,8 @@ MATCH_COLLECTION_T* run_q(
   /***** Q-RANKER run *********/
 
     carp(CARP_DETAILED_DEBUG, "got to here");
-  // Start processing
+    
+    // Start processing
   qcExecute(); 
   
   /* Retrieving target scores and qvalues after 

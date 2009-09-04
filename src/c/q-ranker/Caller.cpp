@@ -364,10 +364,22 @@ void Caller::readRetentionTime(string filename) {
 }
 
 
-void Caller::filelessSetup(const unsigned int numFeatures, const unsigned int numSpectra, char ** featureNames, double pi0) {
+void Caller::filelessSetup(unsigned int nsets, const unsigned int numFeatures, const unsigned int numSpectra, char ** featureNames, double pi0) {
   pCheck = new SanityCheck();
   normal.filelessSetup(numFeatures, numSpectra,1);
   shuffled.filelessSetup(numFeatures, numSpectra,-1);
+  shuffled1_present=false;
+  shuffled2_present=false;
+  if (nsets > 2)
+    {
+      shuffled1.filelessSetup(numFeatures, numSpectra,-1);
+      shuffled1_present = true;
+    }
+  if (nsets > 3)
+    {
+      shuffled2.filelessSetup(numFeatures, numSpectra,-1);
+      shuffled2_present = true;
+    }
   Scores::pi0 = pi0;
   for (unsigned int ix=0;ix<numFeatures;ix++){
     string fn = featureNames[ix];
@@ -409,24 +421,22 @@ void Caller::train() {
 
 void Caller::fillFeatureSets() {
 
-
-  if(shuffled2_present)
-    Scores::fillFeaturesSplit(trainset,testset,normal,shuffled,shuffled1,shuffled2,trainRatio);
-  else if( shuffled1_present)
-    Scores::fillFeaturesSplit(trainset,testset,normal,shuffled,shuffled1,trainRatio);     
-  else
+    if(shuffled2_present)
+      Scores::fillFeaturesSplit(trainset,testset,normal,shuffled,shuffled1,shuffled2,trainRatio);
+    else if( shuffled1_present)
+      Scores::fillFeaturesSplit(trainset,testset,normal,shuffled,shuffled1,trainRatio);     
+    else
     Scores::fillFeaturesSplit(trainset,testset,normal,shuffled,trainRatio);     
   thresholdset=trainset;
   
   fullset.fillFeatures(normal,shuffled);
 
-
-  if (VERB>1) {
+  //if (VERB>0) {
     cerr << "Train set contains " << trainset.posSize() << " positives and " << trainset.negSize() << " negatives, size ratio="
          << trainset.factor << " and pi0=" << trainset.pi0 << endl;
     cerr << "Test set contains " << testset.posSize() << " positives and " << testset.negSize() << " negatives, size ratio="
          << testset.factor << " and pi0=" << testset.pi0 << endl;
-  }
+    //}
   
   set<DataSet *> all;
   all.insert(normal.getSubsets().begin(),normal.getSubsets().end());
