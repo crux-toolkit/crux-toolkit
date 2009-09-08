@@ -10,6 +10,45 @@
 
 <h2>Version 1.22</h2> month 35, 2009
 
+<h3>
+Major enhancements</h3>
+
+<ul>
+
+<li>
+Crux is now distributed in two versions, a full version that is
+covered by the same type of license as before (free to non-profit
+users, and via a licensing fee to commercial users), as well as a
+stripped-down version that is released under an open source license.
+We are unable to release the entire Crux package under an open source
+license due to intellectual property issues.  Both versions of Crux
+are available via the Crux web
+page: <a href="http://noble.gs.washington.edu/proj/crux/">http://noble.gs.washington.edu/proj/crux/</a>.</li>
+
+<li>
+A new tool, q-ranker, is available for estimating peptide-spectrum
+match q-values.  This tool was described in the following article:
+
+<blockquote>
+Marina Spivak, Jason Weston, Leon Bottou, Lukas K&auml;ll and William
+Stafford Noble.  "Improvements to the Percolator algorithm for peptide
+identification from shotgun proteomics data sets." <i>Journal of
+Proteome Research.</i></blockquote></li>
+
+<li>
+Version 1.05 of <code>percolator</code> has now been integrated into
+the Crux source tree.  A separate installation
+of <code>percolator</code> is no longer needed for basic
+<code>percolator</code> functionality. Note, however,
+that <code>percolator</code> remains under active development.  You
+may therefore wish to install the current, stand-alone version
+of <code>percolator</code> and run it separately to take advantage of
+new features.</li>
+
+</ul>
+
+<h3>Minor changes</h3>
+
 <ul>
 
 <li>
@@ -25,16 +64,6 @@ p-values using an analytical null model, (2) from decoys and xcorr
 using an empirical null model, or (3) from decoys and p-values using
 an empirical null model.  All three types of q-values are computed
 when p-values and decoys are present in the search results.</li>
-
-<li>
-Version 1.05 of <code>percolator</code> has now been integrated into
-the Crux source tree.  A separate installation
-of <code>percolator</code> is no longer needed for basic
-<code>percolator</code> functionality. Note, however,
-that <code>percolator</code> remains under active development.  You
-may therefore wish to install the current, stand-alone version
-of <code>percolator</code> and run it separately to take advantage of
-new features.</li>
 
 <li>
 A parameter file is now automatically written to the output directory
@@ -69,7 +98,7 @@ after the decimal point.  The default precision has changed from 6 to
 
 <li>
 The parameters estimated for the Weibull distribution (used for
-computing p-values) now use the xcorrs from all psms for a spectrum
+computing p-values) now use the xcorrs from all PSMs for a spectrum
 instead of a random selection of 500.</li>
 
 <li>
