@@ -1002,9 +1002,6 @@ char* generate_shuffled_sequence(
   // Shuffle from left to right, using the Knuth algorithm for shuffling.
   int num_shuffles = 0;
   do {
-    if (num_shuffles > 0) {
-      carp(CARP_WARNING, "Re-shuffling %s %d.", sequence, num_shuffles);
-    }
 
     // Don't move the n-term and c-term amino acids
     int start_idx = 1;

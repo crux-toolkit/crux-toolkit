@@ -25,9 +25,9 @@ generate_peptides_mods = good_results/standard_generate_peptides_mods = crux-gen
 generate_peptides_chymo = good_results/standard_generate_peptides_chymo = crux-generate-peptides --parameter-file params/chymo --output-sequence T test.fasta = 
 
 # Get spectrum
-get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out =
+get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum 2 test.ms2 =
 
-get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum --stats T 2 test.ms2 get_ms2_spectrum.out =
+get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum --stats T 2 test.ms2 =
 
 # Predict ion series
 predict_ions_no_ops = good_results/standard_predict_ions_no_ops.out = crux-predict-peptide-ions IAMASEQ 2=
