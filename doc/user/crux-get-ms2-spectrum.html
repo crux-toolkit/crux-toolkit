@@ -10,55 +10,51 @@
 <B>Usage:</B>
 
 <blockquote>
-<code>crux-get-ms2-spectrum [options] 
-  &nbsp;&lt;scan number&gt; 
-  &nbsp;&lt;input&nbsp;filename&gt; 
-  &nbsp;&lt;output&nbsp;filename&gt; </code>
+<code>crux-get-ms2-spectrum [options] &nbsp;&lt;scan number&gt; 
+  &nbsp;&lt;input&nbsp;filename&gt; </code>
 </blockquote>
 
 <B>Description:</B>
 
 <p>
-Using a binary search, extract an MS-MS spectrum with a particular
-scan number from a .ms2 file, and output the spectrum. Optionally
-output some summary statistics for the MS-MS spectrum.</p>
+Using a binary search, extract one or more MS-MS spectra from an MS2
+file by scan number. Optionally output some summary statistics for
+each spectrum.</p>
 
 <B>Input:</B>
 <UL>
 
-<LI>
-&lt;scan number&gt; &ndash; 
-The scan number for the MS-MS spectrum
-to extract from the ms2 file. This is an integer in the range [1, 100000], 
-and uniquely identifies a particular MS-MS spectrum within a <a
-href="ms2-format.html">.ms2</a> file.
+<li>
+&lt;scan number&gt; &ndash; The scan number for the MS-MS spectrum to
+extract from the MS2 file. This is an integer in the range [1,
+100000], and uniquely identifies a particular MS-MS spectrum within an
+MS2 file.  Optionally, this argument may be provided as a range of
+scan numbers of the form &lt;mix&gt;-&lt;max&gt;.  In this case, all
+scans within the specified range (inclusive) will be output.</li>
 	
-<LI>
-&lt;input filename&gt; &ndash; A file containing multiple MS-MS  
-spectra in .ms2 format.
+<li>
+&lt;input filename&gt; &ndash; A file containing multiple MS-MS
+spectra in <a href="ms2-format.html">MS2</a> format.</li>
 
 </UL>
 
 <B>Output:</B>
 
-<UL>
-<li>
-  &lt;output filename&gt; &ndash; 
-  The name of the file in which to place the extracted MS-MS spectrum.
-  The ouptput spectrum will also be in ms2 format. </li>
-
-</UL>
+<ul>
+The program prints the requested spectrum to standard output in MS2
+format.
+</ul>
 
 <B>Options:</B>
 
 <UL>
 
 <LI>
-<code>--stats &lt;T|F&gt;</code> &ndash; Output some summary
-statistics for the particular spectrum to standard output.  Each
-statistic is placed on a separate line, in the format
-&lt;name&gt;:&lt;value&gt; (e.g.  "TIC:1000.0\n").  The following
-statistics are reported for the entire spectrum:
+<code>--stats &lt;T|F&gt;</code> &ndash; Rather than the spectrum,
+output summary statistics to standard output.  Each statistic is
+placed on a separate line, in the format &lt;name&gt;:&lt;value&gt;
+(e.g.  "TIC:1000.0\n").  The following statistics are reported for the
+entire spectrum:
   <UL>
   <LI>Precursor m/z</li>
   <LI>Total Ion Current</li>
@@ -74,12 +70,8 @@ For each possible spectrum charge state, the statistics are as follows:
   <LI>Charged mass</li>
   <LI>M+H+ mass</li>
   </UL>
-
-<!--
-<li>
-<code>--use-mstoolkit</code> &ndash; Use MSToolkit to parse the spectrum. Default = F.
 </li>
--->
+
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
 current processes. Each level prints the following messages, including
