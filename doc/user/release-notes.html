@@ -20,7 +20,9 @@ Crux is now distributed in two versions, a full version that is
 covered by the same type of license as before (free to non-profit
 users, and via a licensing fee to commercial users), as well as a
 stripped-down version that is released under an open source license.
-We are unable to release the entire Crux package under an open source
+The stripped-down version does not include the database search
+functionality but does include all of the post-processing tools.  We
+are unable to release the entire Crux package under an open source
 license due to intellectual property issues.  Both versions of Crux
 are available via the Crux web
 page: <a href="http://noble.gs.washington.edu/proj/crux/">http://noble.gs.washington.edu/proj/crux/</a>.</li>
@@ -66,8 +68,8 @@ an empirical null model.  All three types of q-values are computed
 when p-values and decoys are present in the search results.</li>
 
 <li>
-A parameter file is now automatically written to the output directory
-for Crux tool.</li>
+A copy of the parameter file is now automatically written to the
+output directory.</li>
 
 <li>
 A log file recording messages sent to stderr has been added for
@@ -75,7 +77,7 @@ A log file recording messages sent to stderr has been added for
 and <code>percolator</code>.</li>
 
 <li>
-The <code>--use-mz-window option</code> parameter is now available for 
+The <code>--use-mz-window</code> parameter is now available for
 <code>search-for-matches</code>.  When enabled, peptides must be
 within +/- 'm/z-window' of the spectrum m/z.  The m/z-window value is
 taken from <code>mass-window</code>.</li>
@@ -86,15 +88,16 @@ had previously caused occasional erroneous NaNs to be output.</li>
 
 <li>
 The Weibull estimated p-values generated
-by <code>search-for-matches</code> are now returned as raw scores
+by <code>search-for-matches</code> are now returned as p-values
 instead of as -log(p-value).  The corresponding q-values returned from
-<code>compute-q-values</code> are also now returned as raw scores.</li>
+<code>compute-q-values</code> are also now returned without the -log
+transform.</li>
 
 <li>
 The <code>--precision</code> option has been changed to control the
-number of significant digits printed instead of the number of digits
-after the decimal point.  The default precision has changed from 6 to
-8.</li>
+total number of significant digits printed instead of the number of
+digits after the decimal point.  The default precision has changed
+from 6 to 8.</li>
 
 <li>
 The parameters estimated for the Weibull distribution (used for
