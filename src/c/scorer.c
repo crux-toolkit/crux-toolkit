@@ -193,40 +193,21 @@ void smooth_peaks(
   // create a new array, which will replace the original intensity array
   FLOAT_T* new_array = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
 
-  switch (scorer->type){
-    case SP:
-      // iterate over all peaks
-      for(; idx < (int)scorer->sp_max_mz-2; ++idx){
-        // smooooth
-        new_array[idx] = (array[idx-2]+4*array[idx-1]+6*array[idx]+4*array[idx+1]+array[idx+2])/16;
+  if (scorer->type == SP){
+    // iterate over all peaks
+    for(; idx < (int)scorer->sp_max_mz-2; ++idx){
+      // smooooth
+      new_array[idx] = (array[idx-2]+4*array[idx-1]+6*array[idx]+4*array[idx+1]+array[idx+2])/16;
 
-        // DEBUG
-        // carp(CARP_INFO, "smooth data[%d] = %f",idx, new_array[idx]); 
-        
-        // set last idx in the array
-        if(scorer->last_idx < idx && new_array[idx] == 0){
-          scorer->last_idx = idx -1;
-          break;
-        }
-      }
-      break;
+      // DEBUG
+      // carp(CARP_INFO, "smooth data[%d] = %f",idx, new_array[idx]); 
       
-    case XCORR:
-    case DOTP:
-    case LOGP_EXP_SP:
-      //case LOGP_BONF_EXP_SP:
-    case LOGP_WEIBULL_SP:
-    case LOGP_BONF_WEIBULL_SP:
-    case LOGP_WEIBULL_XCORR:
-    case LOGP_BONF_WEIBULL_XCORR:
-      //case LOGP_EVD_XCORR:
-    case LOGP_BONF_EVD_XCORR:
-    case Q_VALUE:
-    case PERCOLATOR_SCORE:  
-    case LOGP_QVALUE_WEIBULL_XCORR:  
-  case DECOY_XCORR_QVALUE:
-  case DECOY_PVALUE_QVALUE:
-      break;
+      // set last idx in the array
+      if(scorer->last_idx < idx && new_array[idx] == 0){
+        scorer->last_idx = idx -1;
+        break;
+      }
+    }
   }
   free(scorer->intensity_array);
   scorer->intensity_array = new_array;

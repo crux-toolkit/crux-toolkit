@@ -678,6 +678,13 @@ BOOLEAN_T sort_match_collection(
         (void *)compare_match_percolator_score);
     match_collection->last_sorted = PERCOLATOR_SCORE;
     return TRUE;
+
+  case QRANKER_Q_VALUE:
+  case QRANKER_SCORE:
+    qsort_match(match_collection->match, match_collection->match_total, 
+        (void *)compare_match_qranker_score);
+    match_collection->last_sorted = QRANKER_SCORE;
+    return TRUE;
   }
   return FALSE;
 }
@@ -737,10 +744,24 @@ BOOLEAN_T spectrum_sort_match_collection(
     success = TRUE;
     break;
 
+  case QRANKER_Q_VALUE:
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_spectrum_qranker_q_value);
+    match_collection->last_sorted = QRANKER_Q_VALUE;
+    success = TRUE;
+    break;
+
   case PERCOLATOR_SCORE:
     qsort_match(match_collection->match, match_collection->match_total,
                 (void*)compare_match_spectrum_percolator_score);
     match_collection->last_sorted = PERCOLATOR_SCORE;
+    success = TRUE;
+    break;
+
+  case QRANKER_SCORE:
+    qsort_match(match_collection->match, match_collection->match_total,
+                (void*)compare_match_spectrum_qranker_score);
+    match_collection->last_sorted = QRANKER_SCORE;
     success = TRUE;
     break;
 
@@ -1778,7 +1799,10 @@ BOOLEAN_T serialize_psm_features(
 
   // serialize each boolean for scored type 
   int score_type_idx;
-  for(score_type_idx=0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+  // We don't want to change the CSM files contents so we omit q-ranker scores
+  // which were added to Crux after the CSM file format had been established.
+  int score_type_max = _SCORE_TYPE_NUM - 2;
+  for(score_type_idx=0; score_type_idx < score_type_max; ++score_type_idx){
     myfwrite(&(match_collection->scored_type[score_type_idx]), 
         sizeof(BOOLEAN_T), 1, output);
   }
@@ -1967,6 +1991,9 @@ void print_sqt_header(
   if( is_analysis == TRUE && analysis_score == PERCOLATOR_ALGORITHM){
     main_score = PERCOLATOR_SCORE; 
     other_score = Q_VALUE;
+  }else if( is_analysis == TRUE && analysis_score == QRANKER_ALGORITHM ){
+    main_score = QRANKER_SCORE; 
+    other_score = QRANKER_Q_VALUE;
   }else if( is_analysis == TRUE && analysis_score == QVALUE_ALGORITHM ){
     main_score = LOGP_QVALUE_WEIBULL_XCORR;
   }else if( pvalues == TRUE ){
@@ -2241,6 +2268,10 @@ MATCH_ITERATOR_T* new_match_iterator(
     else if((score_type == Q_VALUE) &&
             match_collection->last_sorted == PERCOLATOR_SCORE){
       // No need to sort, the score_type has same rank as PERCOLATOR_SCORE
+    }
+    else if((score_type == QRANKER_Q_VALUE) &&
+            match_collection->last_sorted == QRANKER_SCORE){
+      // No need to sort, the score_type has same rank as QRANKER_SCORE
     }
     // sort match collection by score type
     else if(!sort_match_collection(match_collection, score_type)){
@@ -2759,7 +2790,10 @@ BOOLEAN_T extend_match_collection(
     
     // Read each boolean for scored type 
     // parse all boolean indicators for scored match object
-    for(score_type_idx=0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+    // We don't want to change the CSM files contents so we omit q-ranker scores
+    // which were added to Crux after the CSM file format had been established.
+    int score_type_max = _SCORE_TYPE_NUM - 2;
+    for(score_type_idx=0; score_type_idx < score_type_max; ++score_type_idx){
       fread(&(type_scored), sizeof(BOOLEAN_T), 1, result_file);
       
       // if this is the first time extending the match collection
@@ -2780,7 +2814,7 @@ BOOLEAN_T extend_match_collection(
       // now once we are done with setting scored type
       // set match collection status as set!
       if(!match_collection->post_scored_type_set &&
-         score_type_idx == (_SCORE_TYPE_NUM-1)){
+         score_type_idx == (score_type_max-1)){
         match_collection->post_scored_type_set = TRUE;
       }
     }

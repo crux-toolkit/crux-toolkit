@@ -51,7 +51,7 @@ MATCH_COLLECTION_T* run_q(
   char* feature_file); 
 
 
-void print_sqt_file_q( 
+void print_text_files( 
   MATCH_COLLECTION_T* match_collection,
   SCORER_TYPE_T scorer_type,
   SCORER_TYPE_T second_scorer_type
@@ -106,8 +106,8 @@ int qranker_main(int argc, char** argv){
   }
 
   /* Get options */
-  SCORER_TYPE_T scorer_type = PERCOLATOR_SCORE;
-  SCORER_TYPE_T second_scorer_type = Q_VALUE;
+  SCORER_TYPE_T scorer_type = QRANKER_SCORE;
+  SCORER_TYPE_T second_scorer_type = QRANKER_Q_VALUE;
   MATCH_COLLECTION_T* match_collection = NULL;
 
   /* Perform the analysis */
@@ -120,11 +120,11 @@ int qranker_main(int argc, char** argv){
   match_collection = run_q(psm_dir,
                                     protein_input_name,
                                     feature_file);
-  scorer_type = PERCOLATOR_SCORE;
-  second_scorer_type = Q_VALUE;
+  scorer_type = QRANKER_SCORE;
+  second_scorer_type = QRANKER_Q_VALUE;
     
   carp(CARP_INFO, "Outputting matches.");
-  print_sqt_file_q(match_collection, scorer_type, second_scorer_type);
+  print_text_files(match_collection, scorer_type, second_scorer_type);
 
   // MEMLEAK below causes seg fault (or used to)
   // free_match_collection(match_collection);
@@ -147,7 +147,7 @@ int qranker_main(int argc, char** argv){
 
 /*
  */
-void print_sqt_file_q(
+void print_text_files(
   MATCH_COLLECTION_T* match_collection,
   SCORER_TYPE_T scorer,
   SCORER_TYPE_T second_scorer
@@ -245,13 +245,12 @@ MATCH_COLLECTION_T* run_q(
   char* fasta_file, 
   char* feature_file){ 
 
-  ALGORITHM_TYPE_T algorithm = PERCOLATOR_ALGORITHM;
   unsigned int number_features = 20;
   double* features = NULL;    
   double* results_q = NULL;
   double* results_score = NULL;
   double pi0 = get_double_parameter("pi0");
-  char** feature_names = generate_feature_name_array(algorithm);
+  char** feature_names = generate_feature_name_array();
   MATCH_ITERATOR_T* match_iterator = NULL;
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_COLLECTION_T* target_match_collection = NULL;
@@ -392,13 +391,13 @@ MATCH_COLLECTION_T* run_q(
    * the same order as the features were inserted */
   qcGetScores(results_score, results_q); 
        
-  // fill results for Q_VALUE
+  // fill results for QRANKER_Q_VALUE
   fill_result_to_match_collection(
-      target_match_collection, results_q, Q_VALUE, TRUE);
+      target_match_collection, results_q, QRANKER_Q_VALUE, TRUE);
   
-  // fill results for PERCOLATOR_SCORE
+  // fill results for QRANKER_SCORE
   fill_result_to_match_collection(
-      target_match_collection, results_score, PERCOLATOR_SCORE, FALSE);
+      target_match_collection, results_score, QRANKER_SCORE, FALSE);
    
   // Function that should be called after processing finished
   qcCleanUp();

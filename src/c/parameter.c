@@ -1131,6 +1131,12 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
     algorithm_type_to_string(QVALUE_ALGORITHM, value_str);
     update_hash_value(parameters, "algorithm", value_str);
   }
+  // for q-ranker, set algorithm to qranker (perc by default)
+  else if( strcmp(argv[0], "q-ranker") == 0 ){
+    char value_str[SMALL_BUFFER];
+    algorithm_type_to_string(QRANKER_ALGORITHM, value_str);
+    update_hash_value(parameters, "algorithm", value_str);
+  }
 
   // if custom-enzyme used, set values
   char* enzyme_rule_str = get_string_parameter("custom-enzyme");

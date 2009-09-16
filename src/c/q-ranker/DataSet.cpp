@@ -672,7 +672,7 @@ void DataSet::readSQT(const string fname, IntraSetRelation * intraRel,const stri
   string seq;
   
   fileId = fname;
-  unsigned int spos = fileId.rfind('/');
+  size_t spos = fileId.rfind('/');
   if (spos!=string::npos)
     fileId.erase(0,spos+1);
   spos = fileId.find('.');
