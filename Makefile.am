@@ -1,5 +1,11 @@
 SUBDIRS = src doc
 
+if SEARCH
+  SEARCH_ENABLED = true
+else
+  SEARCH_ENABLED =
+endif
+
 distdir = $(PACKAGE)_$(VERSION)
 distclean-local: clean-local
 
@@ -69,3 +75,9 @@ ignore-files:
 # the file version.h, which doesn't get cleaned up (and doesn't
 # need to be  cleaned up) in 'make distclean'
 distcleancheck_listfiles = $(top_srcdir)/src/c/version.h
+
+# Copy the appropriate copyright statement, COPYING for 
+# limited license distribution, COPYRIGHT for open source distribution.
+dist-hook:
+	if test -z "$(SEARCH_ENABLED)"; \
+    then cp COPYRIGHT $(distdir)/COPYING; fi
