@@ -97,10 +97,28 @@ int compare_match_q_value(
   );
 
 /**
+ * compare two matches, used for qsort
+ * \returns the difference between qranker qvalue in match_a and match_b
+ */
+int compare_match_qranker_q_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
  * compare two matches, used for PERCOLATOR_SCORE
  * \returns the difference between PERCOLATOR_SCORE score in match_a and match_b
  */
 int compare_match_percolator_score(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * compare two matches, used for QRANKER_SCORE
+ * \returns the difference between QRANKER_SCORE score in match_a and match_b
+ */
+int compare_match_qranker_score(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );
@@ -139,6 +157,18 @@ int compare_match_spectrum_q_value(
   );
 
 /**
+ * Compare two matches by spectrum scan number and qranker q-value, 
+ * used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_qranker_q_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
  * Compare two matches by spectrum scan number and percolator score,
  * used for qsort. 
  * \returns -1 if match a spectrum number is less than that of match b
@@ -146,6 +176,18 @@ int compare_match_spectrum_q_value(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compare_match_spectrum_percolator_score(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  );
+
+/**
+ * Compare two matches by spectrum scan number and qranker score,
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_qranker_score(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );

@@ -263,9 +263,7 @@ int compare_floats_descending(const void* a, const void* b);
 /**
  *\returns a heap allocated feature name array for the algorithm type
  */
-char** generate_feature_name_array(
-  ALGORITHM_TYPE_T algorithm ///< the algorithm's feature name to produce -in
-  );
+char** generate_feature_name_array();
 
 /**
  *\returns the number of digits in the number

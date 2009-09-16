@@ -357,8 +357,12 @@ typedef struct scorer SCORER_T;
 
 /**
  * The enum for scorer type
+ * The QRANKER scores were added after Crux had been released for a while.
+ * We don't want to change the CSM file layout at this point, so when
+ * reading and writing scores from the CSM we omit the last two scores
+ * in the score type enum.
  */
-#define NUMBER_SCORER_TYPES 14 //BF added for consistant naming
+#define NUMBER_SCORER_TYPES 16 //BF added for consistant naming
 //enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE, LOGP_QVALUE_WEIBULL_XCORR};
 enum _scorer_type { 
   SP,                  ///< SEQUEST preliminary score
@@ -377,7 +381,9 @@ enum _scorer_type {
   LOGP_BONF_WEIBULL_XCORR,
   Q_VALUE,
   PERCOLATOR_SCORE,
-  LOGP_QVALUE_WEIBULL_XCORR
+  LOGP_QVALUE_WEIBULL_XCORR,
+  QRANKER_SCORE,
+  QRANKER_Q_VALUE
 };
 
 /*
@@ -388,7 +394,7 @@ LOGP_BONF_WEIBULL_SP, sp-logp
 LOGP_BONF_WEIBULL_XCORR, xcorr-logp
 };
 */
-#define _SCORE_TYPE_NUM 14 ///< the number of different score types
+#define _SCORE_TYPE_NUM 16 ///< the number of different score types
 
 /**
  * \typedef SCORER_TYPE_T
@@ -456,11 +462,11 @@ typedef struct match_iterator MATCH_ITERATOR_T;
  */
 typedef struct match_collection_iterator MATCH_COLLECTION_ITERATOR_T;
 
-#define NUMBER_ALGORITHM_TYPES 5 //BF added for consistant naming
+#define NUMBER_ALGORITHM_TYPES 6 //BF added for consistant naming
 /**
  * The enum for algorithm type (PERCOLATOR, CZAR, ALL)
  */
-enum _algorithm {PERCOLATOR_ALGORITHM, RCZAR_ALGORITHM, QVALUE_ALGORITHM, NO_ALGORITHM, ALL_ALGORITHM};
+enum _algorithm {PERCOLATOR_ALGORITHM, RCZAR_ALGORITHM, QVALUE_ALGORITHM, NO_ALGORITHM, ALL_ALGORITHM, QRANKER_ALGORITHM};
 
 /**
  * \typedef ALGORITHM_TYPE_T

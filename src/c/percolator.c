@@ -18,6 +18,7 @@
  * 
  * $Revision: 1.11 $
  ****************************************************************************/
+#include "parameter.h"
 #include "percolator.h"
 
 #define NUM_PERCOLATOR_OPTIONS 7
@@ -228,13 +229,12 @@ MATCH_COLLECTION_T* run_percolator(
   char* fasta_file, 
   char* feature_file){ 
 
-  ALGORITHM_TYPE_T algorithm = PERCOLATOR_ALGORITHM;
   unsigned int number_features = 20;
   double* features = NULL;    
   double* results_q = NULL;
   double* results_score = NULL;
   double pi0 = get_double_parameter("pi0");
-  char** feature_names = generate_feature_name_array(algorithm);
+  char** feature_names = generate_feature_name_array();
   MATCH_ITERATOR_T* match_iterator = NULL;
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_COLLECTION_T* target_match_collection = NULL;

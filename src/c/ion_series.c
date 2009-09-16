@@ -1284,20 +1284,7 @@ ION_CONSTRAINT_T* new_ion_constraint_smart(
   case XCORR:
     new_constraint = new_ion_constraint_sequest_xcorr(charge);
     break;
-  case DOTP:
-  case LOGP_EXP_SP:
-    //case LOGP_BONF_EXP_SP:
-    //case LOGP_EVD_XCORR:
-  case DECOY_XCORR_QVALUE:
-  case DECOY_PVALUE_QVALUE:
-  case LOGP_BONF_EVD_XCORR:
-  case LOGP_WEIBULL_SP:
-  case LOGP_BONF_WEIBULL_SP:
-  case LOGP_WEIBULL_XCORR:
-  case LOGP_BONF_WEIBULL_XCORR:
-  case Q_VALUE:
-  case PERCOLATOR_SCORE:
-  case LOGP_QVALUE_WEIBULL_XCORR:
+  default:
     // use default type for others
     new_constraint = 
       new_ion_constraint(get_mass_type_parameter("fragment-mass"),

@@ -306,12 +306,56 @@ int compare_match_q_value(
 }
 
 /**
+ * compare two matches, used for qsort
+ * The smaller the Q value the better!!!, this is opposite to other scores
+ * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
+ * is greather than b.
+ */
+int compare_match_qranker_q_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+)
+{
+
+  if((*match_b)->match_scores[QRANKER_Q_VALUE] < 
+      (*match_a)->match_scores[QRANKER_Q_VALUE]){
+    return 1;
+  }
+  else if((*match_b)->match_scores[QRANKER_Q_VALUE] > 
+          (*match_a)->match_scores[QRANKER_Q_VALUE]){
+    return -1;
+  }
+  return 0;
+}
+
+/**
  * Compare two matches by spectrum scan number and q-value, used for qsort.
  * \returns -1 if match a spectrum number is less than that of match b
  * or if scan number is same, if score of match a is less than
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compare_match_spectrum_q_value(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+){
+
+  int return_me = compare_match_spectrum( match_a, match_b );
+
+  if( return_me == 0 ){
+    return_me = compare_match_q_value(match_a, match_b);
+  }
+
+  return return_me;
+}
+
+/**
+ * Compare two matches by spectrum scan number and qranker q-value, 
+ * used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_qranker_q_value(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
 ){
@@ -363,6 +407,48 @@ int compare_match_spectrum_percolator_score(
 
   if( return_me == 0 ){
     return_me = compare_match_percolator_score(match_a, match_b);
+  }
+
+  return return_me;
+}
+
+/**
+ * compare two matches, used for QRANKER_SCORE
+ * \returns 0 if qranker scores are equal, -1 if a is less than b,
+ * 1 if a is greather than b.
+ */
+int compare_match_qranker_score(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+)
+{
+  if((*match_b)->match_scores[QRANKER_SCORE] > (*match_a)->match_scores[QRANKER_SCORE]){
+    return 1;
+  }
+  else if((*match_b)->match_scores[QRANKER_SCORE] < (*match_a)->match_scores[QRANKER_SCORE]){
+    return -1;
+  }
+  return 0;
+
+}
+
+/**
+ * Compare two matches by spectrum scan number and qranker score,
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compare_match_spectrum_qranker_score(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+  )
+{
+
+  int return_me = compare_match_spectrum( match_a, match_b );
+
+  if( return_me == 0 ){
+    return_me = compare_match_qranker_score(match_a, match_b);
   }
 
   return return_me;
@@ -452,6 +538,11 @@ void print_match(
       primary_score = PERCOLATOR_SCORE;
       secondary_score = Q_VALUE;      
       break;
+    case QRANKER_Q_VALUE:      
+    case QRANKER_SCORE:  
+      primary_score = QRANKER_SCORE;
+      secondary_score = QRANKER_Q_VALUE;      
+      break;
   }
 
   if(output_mode == Q_VALUE || output_mode == PERCOLATOR_SCORE){
@@ -515,12 +606,12 @@ void print_match_sqt(
   // ALSO deltaCn not serialized, so set to 0 for post-process
   SCORER_TYPE_T main_rank_type = main_score;
   SCORER_TYPE_T other_rank_type = other_score;
-  if( main_score == PERCOLATOR_SCORE && other_score==Q_VALUE ){
+  if( (main_score == PERCOLATOR_SCORE || main_score == QRANKER_SCORE) && 
+      (other_score == Q_VALUE || other_score == QRANKER_Q_VALUE )){
     main_rank_type = XCORR;
     other_rank_type = SP;    
     adjust_delta_cn = TRUE;
   }
-
   // for p-values, also give rank of xcorr and sp?
   else if( main_score == LOGP_BONF_WEIBULL_XCORR ){
     //other_rank_type = XCORR;
@@ -687,6 +778,8 @@ void print_match_tab(
   double percolator_score = get_match_score(match, PERCOLATOR_SCORE);
   double percolator_rank = get_match_rank(match, Q_VALUE);
   double percolator_qvalue = get_match_score(match, Q_VALUE);
+  double qranker_score = get_match_score(match, QRANKER_SCORE);
+  double qranker_qvalue = get_match_score(match, QRANKER_Q_VALUE);
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
   char* enz_str = enzyme_type_to_string(enzyme);
@@ -762,7 +855,15 @@ void print_match_tab(
   }
   // Output of q-ranker score and q-value will be handled here where available.
   // For now always print an empty column. 
-  fprintf(file, "\t\t");
+  if (scores_computed[QRANKER_SCORE] == TRUE) {
+    // print q-ranker score
+    fprintf(file, float_format, qranker_score);
+    // print q-value
+    fprintf(file, float_format, qranker_qvalue);
+  }
+  else {
+    fprintf(file, "\t\t");
+  }
   if (sp_scored == 0 ){
     fprintf(file, "\t");
   }else{
@@ -859,7 +960,10 @@ void serialize_match(
   
   // Serialize each score and rank
   int score_type_idx;
-  for(score_type_idx = 0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+  // We don't want to change the CSM files contents so we omit q-ranker scores
+  // which were added to Crux after the CSM file format had been established.
+  int score_type_max = _SCORE_TYPE_NUM - 2;
+  for(score_type_idx = 0; score_type_idx < score_type_max; ++score_type_idx){
     fwrite(&(match->match_scores[score_type_idx]), sizeof(FLOAT_T), 1, file);
     fwrite(&(match->match_rank[score_type_idx]), sizeof(int), 1, file);
   }
@@ -1035,7 +1139,10 @@ MATCH_T* parse_match(
   }
   carp(CARP_DETAILED_DEBUG, "Finished parsing match peptide.");
   // parse each score and rank of match
-  for(score_type_idx=0; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+  // We don't want to change the CSM files contents so we omit q-ranker scores
+  // which were added to Crux after the CSM file format had been established.
+  int score_type_max = _SCORE_TYPE_NUM - 2;
+  for(score_type_idx=0; score_type_idx < score_type_max; ++score_type_idx){
     fread(&(match->match_scores[score_type_idx]), 
       sizeof(FLOAT_T), 1, result_file);
     fread(&(match->match_rank[score_type_idx]), 

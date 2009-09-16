@@ -219,7 +219,7 @@ BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
 static const char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
   {"percolator", "rczar", "curve-fit",
    //"qvalue",
-   "none", "all"};
+   "none", "all", "q-ranker"};
 
 BOOLEAN_T string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result){
   BOOLEAN_T success = TRUE;
@@ -255,7 +255,7 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "logp_weibull_xcorr", 
    "xcorr-pvalue", //"xcorr-logp", 
    "q_value", "percolator_score", 
-   "qvalue"};//"logp_qvalue_weibull_xcorr" };
+   "qvalue", "qranker", "qranker_qvalue"};//"logp_qvalue_weibull_xcorr" };
 //TODO: this should probably be changed, these strings are the option args
 //Instead could have an if block in string_to_type
 
@@ -1023,42 +1023,33 @@ FILE* create_file_in_path(
 }
 
 /**
- *\returns a heap allocated feature name array for the algorithm type
+ *\returns a heap allocated feature name array
  */
-char** generate_feature_name_array(
-  ALGORITHM_TYPE_T algorithm ///< the algorithm's feature name to produce -in
-)
+char** generate_feature_name_array()
 {
   char** name_array = NULL;
 
-  switch(algorithm){
-    case PERCOLATOR_ALGORITHM:
-    case RCZAR_ALGORITHM:
-    case QVALUE_ALGORITHM:
-    case ALL_ALGORITHM:
-    case NO_ALGORITHM:
-      name_array = (char**)mycalloc(20, sizeof(char *));
-      name_array[0] =  my_copy_string("XCorr");
-      name_array[1] =  my_copy_string("DeltCN");
-      name_array[2] =  my_copy_string("DeltLCN");
-      name_array[3] =  my_copy_string("Sp");
-      name_array[4] =  my_copy_string("lnrSp");
-      name_array[5] =  my_copy_string("dM");
-      name_array[6] =  my_copy_string("absdM");
-      name_array[7] =  my_copy_string("Mass");
-      name_array[8] =  my_copy_string("ionFrac");
-      name_array[9] =  my_copy_string("lnSM");
-      name_array[10] =  my_copy_string("enzN");
-      name_array[11] =  my_copy_string("enzC");
-      name_array[12] =  my_copy_string("enzInt");
-      name_array[13] =  my_copy_string("pepLen");
-      name_array[14] =  my_copy_string("charge1");
-      name_array[15] =  my_copy_string("charge2");
-      name_array[16] =  my_copy_string("charge3");
-      name_array[17] =  my_copy_string("numPep");
-      name_array[18] =  my_copy_string("numProt");
-      name_array[19] =  my_copy_string("pepSite");
-  }
+  name_array = (char**)mycalloc(20, sizeof(char *));
+  name_array[0] =  my_copy_string("XCorr");
+  name_array[1] =  my_copy_string("DeltCN");
+  name_array[2] =  my_copy_string("DeltLCN");
+  name_array[3] =  my_copy_string("Sp");
+  name_array[4] =  my_copy_string("lnrSp");
+  name_array[5] =  my_copy_string("dM");
+  name_array[6] =  my_copy_string("absdM");
+  name_array[7] =  my_copy_string("Mass");
+  name_array[8] =  my_copy_string("ionFrac");
+  name_array[9] =  my_copy_string("lnSM");
+  name_array[10] =  my_copy_string("enzN");
+  name_array[11] =  my_copy_string("enzC");
+  name_array[12] =  my_copy_string("enzInt");
+  name_array[13] =  my_copy_string("pepLen");
+  name_array[14] =  my_copy_string("charge1");
+  name_array[15] =  my_copy_string("charge2");
+  name_array[16] =  my_copy_string("charge3");
+  name_array[17] =  my_copy_string("numPep");
+  name_array[18] =  my_copy_string("numProt");
+  name_array[19] =  my_copy_string("pepSite");
   
   return name_array;
 }
