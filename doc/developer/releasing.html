@@ -59,7 +59,18 @@ this for each bdist package built.  A new file with the output of the
 checksum is created for each package and will be included on the
 download page.</p>
 
-<p>Each version that is released should be added to CVS in <code>
+<p>The base name for the packages can be modified by specifying a value for
+the variable PACKAGE on the make command line. This is useful when creating
+the open source packages, so that the open source packages have a distinct name.
+For example:
+</p>
+<pre>
+    make dist PACKAGE="open_crux"
+    make bdist PACKAGE="open_crux"
+    make checksum PACKAGE="open_crux"
+</pre>
+
+<p>Each version that is released should be added to SVN in <code>
 crux/doc/user/downloads</code>.  Detailed notes about changes made can be
 recorded in <code>crux/ChangeLog</code>.  A more general description of changes
 (aimed at the user) should be recorded in
