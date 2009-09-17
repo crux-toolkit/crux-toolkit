@@ -64,9 +64,9 @@ webpage:
 	cp default.params $(WEBDIR)/
 	rm -fr $(WEBDIR)/data/
 	cp -R data/ $(WEBDIR)/
-	cp -R download/ $(WEBDIR)/
 	cp -R open_source_download/ $(WEBDIR)/
-	rm -fr $(WEBDIR)/*/CVS
+	cp -R download/ $(WEBDIR)/
+	rm -fr $(WEBDIR)/*/.svn
 
 # If SEARCH_ENABLED is not defined this is an open-source installation
 # and we replace the usual crux-search-for-matches.html file with
