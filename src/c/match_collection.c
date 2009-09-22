@@ -271,9 +271,9 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
  * are stored in a match.  All matches are stored in the
  * match_collection.  Can be called on an empty match_collection or
  * one already containing matches.  No checks to confirm that the same
- * spectrum is being searched in subsiquent calls.
+ * spectrum is being searched in subsequent calls.
  *
- * First, the prelimiary score (as in parameter.c) is used to compare
+ * First, the preliminary score (as in parameter.c) is used to compare
  * peptides and spectrum.  These results are then sorted and the final
  * score (as in parameter.c) is calculated on the top-match
  * (parameter.c) top matches as ranked by the preliminary score.  No
@@ -326,7 +326,7 @@ int add_matches(
   }
   num_matches_added = match_collection->match_total - start_index;
 
-  // score exitsting matches w/second function
+  // score existing matches w/second function
   SCORER_TYPE_T final_score = get_scorer_type_parameter("score-type");
   score_matches_one_spectrum(final_score, match_collection->match,
                              match_collection->match_total, spectrum, charge);
@@ -1287,7 +1287,6 @@ BOOLEAN_T score_peptides(
  */
 BOOLEAN_T score_matches_one_spectrum(
   SCORER_TYPE_T score_type, 
-  //MATCH_COLLECTION_T* match_collection,
   MATCH_T** matches,
   int num_matches,
   SPECTRUM_T* spectrum,
@@ -1298,7 +1297,6 @@ BOOLEAN_T score_matches_one_spectrum(
   scorer_type_to_string(score_type, type_str);
   carp(CARP_DETAILED_DEBUG, "Scoring matches for %s", type_str);
 
-  //if( match_collection == NULL ){
   if( matches == NULL || spectrum == NULL ){
     carp(CARP_ERROR, "Cannot score matches in a NULL match collection.");
     return FALSE;
@@ -1319,12 +1317,11 @@ BOOLEAN_T score_matches_one_spectrum(
   char* sequence = NULL;
   MODIFIED_AA_T* modified_sequence = NULL;
 
-  //for(match_idx = 0; match_idx < match_collection->match_total; match_idx++){
   for(match_idx = 0; match_idx < num_matches; match_idx++){
 
-    //match = match_collection->match[match_idx];
     match = matches[match_idx];
     assert( match != NULL );
+
     // skip it if it's already been scored
     if( NOT_SCORED != get_match_score(match, score_type)){
       continue;
@@ -1347,7 +1344,8 @@ BOOLEAN_T score_matches_one_spectrum(
     set_match_score(match, score_type, score);
     
     IF_CARP_DETAILED_DEBUG(
-      char* mod_seq = modified_aa_string_to_string(modified_sequence, strlen(sequence));
+      char* mod_seq = modified_aa_string_to_string(modified_sequence,
+						   strlen(sequence));
       carp(CARP_DETAILED_DEBUG, "Second score %f for %s (null:%i)",
 	   score, mod_seq,get_match_null_peptide(match));
       free(mod_seq);
@@ -1355,8 +1353,6 @@ BOOLEAN_T score_matches_one_spectrum(
     free(sequence);
     free(modified_sequence);
   }// next match
-
-  //  match_collection->scored_type[score_type] = TRUE;
 
   // clean up
   free_ion_constraint(ion_constraint);
