@@ -301,7 +301,7 @@ char* my_copy_string(const char* src){
  * includes a null terminating \\0 character
  * the string is heap allocated thus, user must free
  */
-char* copy_string_part(char* src, int length){
+char* copy_string_part(const char* src, int length){
   char* copy = (char*)mycalloc(length+1, sizeof(char));
   strncpy(copy, src, length);
   copy[length] = '\0';
@@ -352,7 +352,7 @@ inline BOOLEAN_T compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max){
  *     file_name => returns filename, NULL
  *\returns A heap allocated array of both filename and path
  */
-char** parse_filename_path(char* file){
+char** parse_filename_path(const char* file){
   int len = strlen(file);
   int end_idx = len;
   int end_path = -1;  // index of where the last "/" is located
@@ -394,8 +394,8 @@ char** parse_filename_path(char* file){
  * path.
  */
 char** parse_filename_path_extension(
-       char* file, ///< filename and path to parse -in
-       char* extension ///< extension to look for (includes leading .) --in
+       const char* file, ///< filename and path to parse -in
+       const char* extension ///< extension to look for (includes leading .) --in
 ){
 
   carp(CARP_DETAILED_DEBUG, "Given path/file %s and ext %s", file, extension);
@@ -525,7 +525,7 @@ void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file){
  * given two strings return a concatenated third string
  * \returns a heap allocated string that concatenates the two inputs
  */
-char* cat_string(char* string_one, char* string_two){
+char* cat_string(const char* string_one, const char* string_two){
   int len_one = strlen(string_one);
   int len_two = strlen(string_two);
   
@@ -582,8 +582,8 @@ BOOLEAN_T prefix_compare(
  * \returns TRUE if the end of the string matches the given suffix, else FALSE
  */
 BOOLEAN_T suffix_compare(
-  char* string, ///< The string to check
-  char* suffix  ///< The suffix to find in the string
+  const char* string, ///< The string to check
+  const char* suffix  ///< The suffix to find in the string
   )
 {
     int string_len = strlen(string);
@@ -613,7 +613,7 @@ BOOLEAN_T suffix_compare(
  * "path/filename".  Returns filename unchanged if path = NULL.
  * \returns a heap allocated string, "path/filename"
  */
-char* get_full_filename(char* path, char* filename){
+char* get_full_filename(const char* path, const char* filename){
 
   char* result = NULL;
   if( path == NULL ){
@@ -676,7 +676,7 @@ long get_filesize(char *FileName){
  * \returns 0 if successful, -1 if an error occured.
 */
 int create_output_directory(
-  char *output_folder, // Name of output folder.
+  const char *output_folder, // Name of output folder.
   BOOLEAN_T overwrite  // Whether or not to overwrite an existing dir 
 ) 
 {
@@ -772,7 +772,7 @@ int create_output_directory(
  * Returns TRUE if a directory, FALSE otherwise.
  * Terminates program if unable to determine status of file.
  */
-BOOLEAN_T is_directory(char *FileName){
+BOOLEAN_T is_directory(const char *FileName){
     struct stat file;
     if(stat(FileName,&file) == 0){
       // return directory status
@@ -981,7 +981,7 @@ BOOLEAN_T valid_peptide_sequence( char* sequence){
  */
 FILE* create_file_in_path(
   char* filename,  ///< the filename to create & open -in
-  char* directory,  ///< the directory to open the file in -in
+  const char* directory,  ///< the directory to open the file in -in
   BOOLEAN_T overwrite  ///< replace file (T) or die if exists (F)
   )
 {

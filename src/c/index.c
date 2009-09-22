@@ -285,7 +285,7 @@ int is_binary_fasta_name(const struct dirent *entry){
  * \returns A string with the name of the existing binary fasta file
  * for this index. 
  */
-char* get_index_binary_fasta_name(char* index_name){
+char* get_index_binary_fasta_name(const char* index_name){
   struct dirent** namelist = NULL;
   int num_files = scandir(index_name, &namelist, is_binary_fasta_name,
                           alphasort);
@@ -521,7 +521,7 @@ BOOLEAN_T check_index_constraints(INDEX_T* index){
  */
 void set_index_fields(
   INDEX_T* index,  ///< Index to set -out                       
-  char* output_dir,      ///< The name of the new index
+  const char* output_dir,      ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,  
   ///< Constraint which these peptides satisfy -in
   FLOAT_T mass_range,  
@@ -570,8 +570,8 @@ void set_index_fields(
  * \returns A new index object.
  */
 INDEX_T* new_index(
-  char* fasta_filename, ///< The fasta file
-  char* output_dir,     ///< The name of the new index
+  const char* fasta_filename, ///< The fasta file
+  const char* output_dir,     ///< The name of the new index
   PEPTIDE_CONSTRAINT_T* constraint,  
     ///< Constraint which these peptides will satisfy
   FLOAT_T mass_range  
@@ -606,7 +606,7 @@ INDEX_T* new_index(
  * \returns A new index object ready for search.
  */
 INDEX_T* new_index_from_disk(
-  char* index_name  ///< The directory containing the index
+  const char* index_name  ///< The directory containing the index
   )
 {
   // find the database file, open it and point to it
@@ -1417,7 +1417,7 @@ char* get_index_directory(
  */
 void set_index_directory(
   INDEX_T* index, ///< The index -in
-  char* directory ///< the directory to add -in
+  const char* directory ///< the directory to add -in
   )
 {
   free(index->directory);

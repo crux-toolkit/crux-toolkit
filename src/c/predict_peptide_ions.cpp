@@ -65,7 +65,7 @@ int main(int argc, char** argv){
   set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get Arguments */
-  char* peptide_sequence = get_string_parameter_pointer("peptide sequence");
+  char* peptide_sequence = get_string_parameter("peptide sequence");
   int charge_state = get_int_parameter("charge state");
 
   /* Get Options */
@@ -73,7 +73,7 @@ int main(int argc, char** argv){
   BOOLEAN_T use_precursor_ions = get_boolean_parameter("precursor-ions");
   int isotope_count = get_int_parameter("isotope");
   BOOLEAN_T is_flanking = get_boolean_parameter("flanking");
-  char* max_ion_charge = get_string_parameter_pointer("max-ion-charge");
+  const char* max_ion_charge = get_string_parameter_pointer("max-ion-charge");
   int nh3_count = get_int_parameter("nh3");
   int h2o_count = get_int_parameter("h2o");
 
@@ -163,6 +163,7 @@ int main(int argc, char** argv){
    // free
    free_ion_constraint(ion_constraint);
    free_ion_series(ion_series);
+   free(peptide_sequence);
 
    carp(CARP_INFO, "crux-predict-peptide-ions finished");
  exit(0);

@@ -326,6 +326,18 @@ int get_scorer_sp_b_y_ion_possible(
   SCORER_T* scorer ///< the scorer object -in
   );
 
+/**
+ * Generate the processed peaks for the spectrum and return via the
+ * intensities array.  It's implemented here so that
+ * create_intensity_array_observed() can remain private and so that
+ * the scorer->observed array can be accessed directly.
+ * .
+ */
+void get_processed_peaks(
+  SPECTRUM_T* spectrum, 
+  int charge,
+  FLOAT_T** intensities, ///< pointer to array of intensities
+  int* mz_bins);
 
 
 /*

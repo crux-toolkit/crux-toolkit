@@ -281,6 +281,64 @@ void print_spectrum(
 }
 
 /**
+ * Prints a spectrum with the given intensities instead of the
+ * observed peaks.  Assumes intensities are in m/z bins from 0 to
+ * max_mz_bin.  Only prints non-zero intensities.
+ */
+void print_spectrum_processed_peaks(
+  SPECTRUM_T* spectrum, ///< the spectrum to print 
+  int charge,       ///< print at this charge state
+  FLOAT_T* intensities, ///< intensities of new peaks
+  int max_mz_bin,       ///< num_bins in intensities
+  FILE* file){          ///< print to this file
+
+  int i_idx = 0;
+  int z_idx = 0;
+  int d_idx = 0;
+
+  // print S line
+  fprintf(file, "S\t%06d\t%06d\t%.2f\n", 
+         spectrum->first_scan,
+         spectrum->last_scan,
+         spectrum->precursor_mz);
+
+  // print I line(s)
+  for(i_idx = 0; i_idx < MAX_I_LINES; i_idx++){
+    if(spectrum->i_lines[i_idx] == NULL){
+      break;
+    }
+    fprintf(file, "%s", spectrum->i_lines[i_idx]);
+  }
+
+  // print 'Z', 'D' line
+  for(z_idx = 0; z_idx < spectrum->num_possible_z; ++z_idx){
+
+    // print 'Z' line
+    if( charge == 0  || charge == spectrum->possible_z[z_idx] ){
+      fprintf(file, "Z\t%d\t%.2f\n", spectrum->possible_z[z_idx],
+              get_spectrum_singly_charged_mass(spectrum,
+                                               spectrum->possible_z[z_idx]));
+    }
+    // are there any 'D' lines to print?
+    if(d_idx < MAX_D_LINES){
+      if(spectrum->d_lines[d_idx] != NULL){
+        fprintf(file, "%s", spectrum->d_lines[d_idx]);
+      }
+      ++d_idx;
+    }
+  }
+
+  // print peaks
+  int bin_idx = 0;
+  for(bin_idx = 0; bin_idx < max_mz_bin; bin_idx++){
+    if( intensities[bin_idx] != 0 ){
+      fprintf(file, "%d %.4f\n", bin_idx, intensities[bin_idx]); 
+    }
+  }
+  return;
+}
+
+/**
  * Prints a spectrum object to file in sqt format.
  */
 void print_spectrum_sqt(
@@ -1211,7 +1269,7 @@ int get_charges_to_search(SPECTRUM_T* spectrum, int** select_charge_array){
   int* all_charge_array = spectrum->possible_z;
 
   int param_charge = 0;
-  char* charge_str = get_string_parameter_pointer("spectrum-charge");
+  const char* charge_str = get_string_parameter_pointer("spectrum-charge");
   int i=0;
 
   // Return full array of charges
@@ -1498,7 +1556,6 @@ void peak_iterator_reset(
 {
   peak_iterator->peak_index = 0;
 }
-
 
 /*
  * Local Variables:

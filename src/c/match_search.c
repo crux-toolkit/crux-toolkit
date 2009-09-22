@@ -148,7 +148,7 @@ int search_main(int argc, char** argv){
   free(param_file_name);
 
   /* Get input: ms2 file */
-  char* ms2_file = get_string_parameter_pointer("ms2 file");
+  const char* ms2_file = get_string_parameter_pointer("ms2 file");
 
   // open ms2 file
   SPECTRUM_COLLECTION_T* spectra = new_spectrum_collection(ms2_file);
