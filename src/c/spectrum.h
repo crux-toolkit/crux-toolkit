@@ -498,6 +498,18 @@ void peak_iterator_reset(
   PEAK_ITERATOR_T* peak_iterator  ///< the interator for the peaks -in
 );
 
+/**
+ * Prints a spectrum with the given intensities instead of the
+ * observed peaks.  Assumes intensities are in m/z bins from 0 to
+ * max_mz_bin.  Only prints non-zero intensities.
+ */
+void print_spectrum_processed_peaks(
+  SPECTRUM_T* spectrum, ///< the spectrum to print 
+  int cur_charge,       ///< print at this charge state
+  FLOAT_T* intensities, ///< intensities of new peaks
+  int max_mz_bin,       ///< num_bins in intensities
+  FILE* file);          ///< print to this file
+
 #ifdef __cplusplus
 }
 #endif

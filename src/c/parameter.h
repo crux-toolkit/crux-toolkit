@@ -178,7 +178,7 @@ char* get_string_parameter(
  * Thus, user should not free, good for printing
  * \returns the string value to which matches the parameter name, else aborts
  */
-char* get_string_parameter_pointer(
+const char* get_string_parameter_pointer(
   const char* name  ///< the name of the parameter looking for -in
   );
 

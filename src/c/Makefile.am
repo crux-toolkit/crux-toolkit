@@ -85,6 +85,8 @@ LIBFILES= \
   peptide_src.h \
   percolator.c \
   percolator.h \
+  print-processed-spectra.cpp \
+  print-processed-spectra.h \
   protein.c \
   protein.h \
   protein_index.c \

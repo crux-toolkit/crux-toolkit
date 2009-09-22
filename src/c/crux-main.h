@@ -17,6 +17,7 @@
 #include "q-ranker.h"
 #include "q-value.h"
 #include "percolator.h"
+#include "print-processed-spectra.h"
 
 
 /* Private data types */
@@ -25,7 +26,10 @@ enum _command { INDEX_CMD,      // create-index
                 QVALUE_CMD,     // compute-q-values
                 QRANKER_CMD,    // q-rakner
                 PERCOLATOR_CMD, // percolator
-                INVALID_CMD };  // use for errors
+                PROCESS_SPEC_CMD,// print-processed-spectra
+                INVALID_CMD,    // use for errors
+
+                NUM_CMD_TYPES}; // always keep this last
 typedef enum _command COMMAND_T;
 
 /* Private functions */

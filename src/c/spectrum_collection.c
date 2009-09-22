@@ -96,7 +96,7 @@ SPECTRUM_COLLECTION_T * allocate_spectrum_collection(void){
  * \returns  SPECTRUM_COLLECTION_T
  */
 SPECTRUM_COLLECTION_T* new_spectrum_collection(
-  char* filename///< The spectrum collection filename. -in
+  const char* filename///< The spectrum collection filename. -in
   )
 {
   SPECTRUM_COLLECTION_T* spectrum_collection =  allocate_spectrum_collection();
@@ -970,7 +970,7 @@ FILTERED_SPECTRUM_CHARGE_ITERATOR_T* new_filtered_spectrum_charge_iterator(
   iterator->charge_index = -1;
   iterator->min_mz = get_double_parameter("spectrum-min-mass");
   iterator->max_mz = get_double_parameter("spectrum-max-mass");
-  char* charge_str = get_string_parameter_pointer("spectrum-charge");
+  const char* charge_str = get_string_parameter_pointer("spectrum-charge");
   if( strcmp( charge_str, "all") == 0){
     iterator->search_charge = 0;
   }else{

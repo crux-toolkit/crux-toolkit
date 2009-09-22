@@ -28,7 +28,7 @@ DATABASE_T* allocate_database(void);
  * \returns A new database object.
  */
 DATABASE_T* new_database(
-  char*         filename, ///< The file from which to parse the database. either text fasta file or binary fasta file -in
+  const char*         filename, ///< The file from which to parse the database. either text fasta file or binary fasta file -in
   BOOLEAN_T is_memmap ///< are we using a memory mapped binary fasta file, thus proteins are all memory mapped -in
   );         
 
@@ -119,7 +119,7 @@ char* get_database_filename_pointer(
  */
 void set_database_filename(
   DATABASE_T* database, ///< the database to set it's fields -out
-  char* filename ///< the filename to add -in
+  const char* filename ///< the filename to add -in
   );
 
 /**

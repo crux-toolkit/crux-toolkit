@@ -30,7 +30,7 @@ SPECTRUM_COLLECTION_T* allocate_spectrum_collection(void);
  * \returns  SPECTRUM_COLLECTION_T
  */
 SPECTRUM_COLLECTION_T* new_spectrum_collection(
-  char* filename///< The spectrum collection filename. -in
+  const char* filename///< The spectrum collection filename. -in
   );
 
 /**

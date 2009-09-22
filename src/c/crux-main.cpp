@@ -15,10 +15,12 @@
 
 #include "crux-main.h"
 
-#define NUMBER_COMMAND_TYPES 6
-static const char* command_type_strings[NUMBER_COMMAND_TYPES] =
+//#define NUMBER_COMMAND_TYPES 6
+//static const char* command_type_strings[NUMBER_COMMAND_TYPES] =
+static const char* command_type_strings[NUM_CMD_TYPES] =
   {"create-index", "search-for-matches", 
-   "compute-q-values", "q-ranker", "percolator", "invalid"};
+   "compute-q-values", "q-ranker", "percolator", 
+   "print-processed-spectra", "invalid"};
 
 
 const char* usage_str = "Usage: crux <command> [options] <argument>\n"
@@ -34,6 +36,9 @@ const char* usage_str = "Usage: crux <command> [options] <argument>\n"
 "                      sequences using the percolator algorithm.\n"
 "  q-ranker            Analyze a collection of PSMs using the Q-ranker\n"
 "                      algorithm.\n"
+"  print-processed-spectra\n"
+"                      Write a new ms2 file with all of the same spectra\n"
+"                      with only the peaks used for computing xcorr.\n"
 "Options and arguments:\n"
 "  Specific to each command. Type 'crux <command>' to get details.\n"
 ;
@@ -71,8 +76,15 @@ int main(int argc, char** argv){
     percolator_main(argc-1, argv+1);
     break;
 
+  case PROCESS_SPEC_CMD:
+    print_processed_spectra_main(argc-1, argv+1);
+    break;
   case INVALID_CMD:
     carp(CARP_FATAL, "Invalid command '%s'\n%s", op_string, usage_str);
+    break;
+
+  default:
+    carp(CARP_FATAL, "Unknown command type.");
     break;
 
   }
@@ -89,7 +101,7 @@ COMMAND_T string_to_command_type(char* name){
   int command = convert_enum_type_str( name, 
                                        (int)INVALID_CMD,
                                        command_type_strings, 
-                                       NUMBER_COMMAND_TYPES);
+                                       (int)NUM_CMD_TYPES);
 
   return (COMMAND_T)command;
 }

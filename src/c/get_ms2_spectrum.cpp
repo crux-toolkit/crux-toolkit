@@ -94,7 +94,7 @@ int main(int argc, char** argv){
   parse_scan_numbers(get_string_parameter("scan number"), &min_scan, &max_scan);
   fprintf(stderr, "Scanning from %d to %d.\n", min_scan, max_scan);
 				   
-  char* ms2_filename = get_string_parameter_pointer("ms2 file");
+  const char* ms2_filename = get_string_parameter_pointer("ms2 file");
   carp(CARP_DETAILED_DEBUG, "ms2_filename: %s", ms2_filename);
 
   /* Get options */

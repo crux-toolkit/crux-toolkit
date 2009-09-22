@@ -1677,7 +1677,7 @@ FILE** create_psm_files(){
 
   carp(CARP_DEBUG, "Opening %d new psm files", total_files);
 
-  char* output_directory =get_string_parameter_pointer("output-dir");
+  const char* output_directory = get_string_parameter_pointer("output-dir");
 
   // create the output folder if it doesn't exist
   if(access(output_directory, F_OK)){
@@ -1691,7 +1691,7 @@ FILE** create_psm_files(){
   //TODO change to output filename as argument, force .csm extension
   //     add _decoy1.csm
   //char* base_filename = get_string_parameter_pointer("ms2 file");
-  char* ms2_filename = get_string_parameter_pointer("ms2 file");
+  const char* ms2_filename = get_string_parameter_pointer("ms2 file");
   //char** filename_path_array = parse_filename_path(base_filename);
   char** filename_path_array = 
     parse_filename_path_extension(ms2_filename, ".ms2");
