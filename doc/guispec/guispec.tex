@@ -14,10 +14,11 @@ University of Washington}
 
 \maketitle
 
-\section{Introduction}
+\section{Requirements}
+\subsection{Introduction}
 
 Crux is a software toolkit for analyzing shotgun proteomics data.
-Currently, users apply these tools via a command line interace defined
+Currently, users apply these tools via a command line interface defined
 with respect to a single binary executable.  The toolkit includes
 tools for searching a sequence database, assigning statistical
 confidence estimates to the resulting peptide-spectrum matches, and
@@ -42,7 +43,7 @@ More philosophical goals include the following:
   information management system.
 \end{itemize}
 
-\section{A simple analysis}
+\subsection{A simple analysis}
 
 \begin{figure}
 \centering
@@ -91,7 +92,7 @@ file simply links to these directories.  The file can be accessed via
 a browser to view the results of the analysis, or the file can be
 provided as input to Crux to initialize a subsequent analysis.
 
-\section{Modifying a previous analysis}
+\subsection{Modifying a previous analysis}
 
 To re-run an analysis, the user starts Crux and provides as input the
 summary file produced by the previous analysis.  The Crux flow diagram
@@ -114,7 +115,7 @@ analysis steps are deleted prior to starting the analysis.  If the
 user says ``no,'' then the user is given the option of providing a new
 name for the experiment.
 
-\section{Robustness}
+\subsection{Robustness}
 
 Crux assumes that the user will not disrupt the directory structure
 that the toolkit creates.  The structure itself is quite simple: each
@@ -146,7 +147,7 @@ own summary script.  They do so at their own risk.  In such a
 scenario, the settings from one directory may not be compatible with
 the settings in a downstream directory.
 
-\section{A common single-tool interface}
+\subsection{A common single-tool interface}
 
 The Crux summary page created by a single analysis contains links to
 output directories created by each tool.  Clicking on any of these
@@ -161,11 +162,11 @@ the total number of proteins in the index, the average protein length,
 the total number of peptides in the index, the average number of
 peptides per protein, the average peptide length.
 
-\section{Manipulating ranked lists}
+\subsection{Manipulating ranked lists}
 
 Most Crux tools create, as their primary output, a ranked list of
 objects---PSMs, peptides or proteins.  Eventually, we would like to
-create an interface that allows users to maniuplate these ranked lists
+create an interface that allows users to manipulate these ranked lists
 in the following ways:
 \begin{itemize}
 \item Features (columns) can be hidden or displayed, at the user's
@@ -183,5 +184,121 @@ in the following ways:
 \end{itemize}
 Because creating such an interface promises to be onerous, this
 activity will be shelved for the foreseeable future.
+
+\section{Implementation}
+
+\subsection{Introduction}
+
+The Crux GUI will be implemented
+
+\begin{itemize}
+\item as a desktop app 
+\item based on the Model-View-Controller (MVC) pattern
+\item using Java SE 6 and the SWING framework
+\end{itemize}
+
+Implementation as a desktop application provides the user with the 
+most independence, and avoids the need for a dedicated Crux web server.
+MVC is the most common architecture for GUI applications.
+In the MVC pattern 
+\begin{itemize}
+\item The Model is the repository for the underlying data.
+\item The View is responsible for constructing the visual representation of the Model,
+and manages interaction with the user.
+\item The Controller acts as an intermediary between a View and a Model:
+the View notifies the Controller of user requests to modify the Model,
+the Controller carries out the modification of the model,
+and notifies the View(s) of the completed changes to the Model.
+\end{itemize}
+While the names are singular, multiple Models, Views, and Controllers
+may be in operation simultaneously.
+
+There are circumstances where the View doesn't need to modify the Model.
+In these cases the Controller and the View can be merged into a single component.
+This is referred to as a Model-Delegate pattern. The component combining 
+the controller and the View is called a UI-delegate.
+
+Java SE 6 was selected because it is ubiquitous on Linux, Mac OS X, and Windows.
+We investigated the possibility of implementing the Crux GUI using HTML-CSS 
+markup and Javascript,
+but the Javascript security model does not allow local libraries or executables to
+be invoked directly from Javascript.
+Java applications allow a very simple installation process.
+Installation may be as simple as expanding an archive containing 
+jar files and shell scripts and batch files for launching the JVM.
+Java Web start provides a particularly simple method of installing Java applications
+and the Java Runtime Environment (JRE) but because the Crux GUI needs access to the local file
+system we would need to sign the application, and supporting a signed application
+may require some infrastructure in setting up the certificates.
+If necessary, we can redistribute the JRE as part of the Crux package without affecting
+the Crux license.
+
+\subsection{Model}
+
+The following classes will encapsulate data:
+
+\begin{itemize}
+\item Analysis -- all parameters needed to perform an analysis
+\item Summary -- summary of analysis results
+\item Protein
+\item Peptide
+\item Spectrum
+\item PeptideSpectrumMatch
+\end{itemize}
+
+The Model classes can be aggregated using the Java container classes or subclasses
+inheriting from the container classes. The Java String class is the Model for
+plain text.
+
+\subsection{View}
+
+The following classes will implement Views:
+
+\begin{itemize}
+\item ParentView -- this View is the parent in the visual hierarchy for all the other viewers. 
+It contains the "always on" controls (minimize, maximize, help, exit for example).
+\item AnalysisView -- this Viewer presents the Crux analysis diagram and
+allows the user to specify the parameters of the analysis.
+\item SummaryView -- this Viewer presents any of the Summary Models
+and allows the user to select linked items for display.
+\end{itemize}
+
+\subsection{Controller}
+
+The following classes will implement Controllers:
+
+\begin{itemize}
+\item CruxMasterController -- contains the entry
+point for the program and manages the other Controllers, Viewers, and UI-Delegates.
+It executes Crux when requested and performs the actions requested from any of 
+the "always on" controls.
+\item AnalysisViewController -- this Controller mediates between
+the Analysis and the AnalysisView. It validates and executes the 
+requested actions from the Analysis viewer, modifying the Analysis Model
+as necessary.
+\item SummaryViewController -- this Controller mediates between
+Summary and SummaryView.
+\end{itemize}
+
+\subsection{UI Delegates}
+
+The following classes will implement UI Delegates. They correspond to Views
+that don't need to modify the underlying Model.
+
+\begin{itemize}
+\item TextView 
+\item RankedListView
+\item SpectrumView
+\end{itemize}
+
+\subsection{Class Interactions}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=6in]{crux-gui-sequence.eps}
+\caption{{\bf Sequence Diagram for Crux Analysis}  The figure shows the 
+object lifetime and messages for a Crux Analysis using the GUI.
+  \label{figure:sequence}}
+\end{figure}
 
 \end{document}
