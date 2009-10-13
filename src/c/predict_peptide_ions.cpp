@@ -65,7 +65,7 @@ int main(int argc, char** argv){
   set_verbosity_level(get_int_parameter("verbosity"));
 
   /* Get Arguments */
-  char* peptide_sequence = get_string_parameter("peptide sequence");
+  const char* peptide_sequence = get_string_parameter_pointer("peptide sequence");
   int charge_state = get_int_parameter("charge state");
 
   /* Get Options */
@@ -163,7 +163,6 @@ int main(int argc, char** argv){
    // free
    free_ion_constraint(ion_constraint);
    free_ion_series(ion_series);
-   free(peptide_sequence);
 
    carp(CARP_INFO, "crux-predict-peptide-ions finished");
  exit(0);

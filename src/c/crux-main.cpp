@@ -15,10 +15,8 @@
 
 #include "crux-main.h"
 
-//#define NUMBER_COMMAND_TYPES 6
-//static const char* command_type_strings[NUMBER_COMMAND_TYPES] =
 static const char* command_type_strings[NUM_CMD_TYPES] =
-  {"create-index", "search-for-matches", 
+  {"create-index", "search-for-matches", "sequest-search",
    "compute-q-values", "q-ranker", "percolator", 
    "print-processed-spectra", "invalid"};
 
@@ -28,7 +26,9 @@ const char* usage_str = "Usage: crux <command> [options] <argument>\n"
 "  create-index        Create an index for all peptides in a fasta file.\n"
 "  search-for-matches  Search a collection of spectra against a sequence\n"
 "                      database, returning a collection of peptide-spectrum\n"
-"                      matches (PSMs).\n"
+"                      matches (PSMs) scored by XCorr.\n"
+"  sequest-search      Similar to search-for-matches but use Sp as a \n"
+"                      preliminary score followed by XCorr.\n"
 "  compute-q-values    Assign a q-value, which is a statistical confidence\n"
 "                      measure that accounts for multiple testing, to each\n"
 "                      PSM in a given set.\n" 
@@ -62,6 +62,10 @@ int main(int argc, char** argv){
 
   case SEARCH_CMD:
     search_main(argc-1, argv+1);
+    break;
+
+  case SEQUEST_CMD:
+    carp(CARP_FATAL, "sequest-search not implemented yet.");
     break;
 
   case QVALUE_CMD:

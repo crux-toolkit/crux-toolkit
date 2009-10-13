@@ -33,7 +33,7 @@ ION_SERIES_T* allocate_ion_series(void);
  *\returns Instantiates a new ion_series object from the given peptide sequence and charge
  */
 ION_SERIES_T* new_ion_series(
-  char* peptide, ///< The peptide for this ion series. -in
+  const char* peptide, ///< The peptide for this ion series. -in
   int charge, ///< The charge for this ion series -in
   ION_CONSTRAINT_T* constraint ///< The constraints which the ions in this series obey.
   );

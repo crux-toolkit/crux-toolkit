@@ -1833,7 +1833,7 @@ BOOLEAN_T serialize_psm_features(
 
 void print_sqt_header(
  FILE* output, 
- char* type, 
+ const char* type, 
  int num_proteins, 
  BOOLEAN_T is_analysis){  // for analyze-matches look at algorithm param
   if( output == NULL ){
@@ -2131,7 +2131,11 @@ BOOLEAN_T print_match_collection_sqt(
 /**
  * \brief Print the psm features to file in tab delimited format.
  *
- *\returns TRUE, if sucessfully print tab-delimited format of the PSMs, else FALSE 
+ * Matches will be sorted by main_score and the ranks of those scores
+ * will be used to determine how many matches are printed for each
+ * spectrum.
+ * \returns TRUE, if sucessfully print tab-delimited format of the
+ * PSMs, else FALSE  
  */
 BOOLEAN_T print_match_collection_tab_delimited(
   FILE* output,                  ///< the output file -out
@@ -2139,7 +2143,6 @@ BOOLEAN_T print_match_collection_tab_delimited(
   MATCH_COLLECTION_T* match_collection,
   ///< the match_collection to print sqt -in
   SPECTRUM_T* spectrum,          ///< the spectrum to print sqt -in
-  SCORER_TYPE_T prelim_score,    ///< the preliminary score to report -in
   SCORER_TYPE_T main_score       ///< the main score to report -in
   )
 {
@@ -2155,17 +2158,6 @@ BOOLEAN_T print_match_collection_tab_delimited(
   FLOAT_T spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
   FLOAT_T spectrum_precursor_mz = get_spectrum_precursor_mz(spectrum);
 
-  // If we calculated p-values, change which scores get printed
-  // since this is really only valid for xcorr...
-  assert( main_score == XCORR );
-  BOOLEAN_T pvalues = get_boolean_parameter("compute-p-values");
-  SCORER_TYPE_T score_to_print_first = main_score;
-  SCORER_TYPE_T score_to_print_second = prelim_score;
-  if( pvalues ){
-    score_to_print_second = score_to_print_first;
-    score_to_print_first = LOGP_BONF_WEIBULL_XCORR; // soon to be P_VALUES
-  }
-
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection);
 
@@ -2176,7 +2168,7 @@ BOOLEAN_T print_match_collection_tab_delimited(
   MATCH_ITERATOR_T* match_iterator = 
     new_match_iterator(match_collection, main_score, TRUE);
   
-  // Second, iterate over matches, prints M and L lines
+  // iterate over matches
   while(match_iterator_has_next(match_iterator)){
     match = match_iterator_next(match_iterator);    
 
@@ -2474,83 +2466,6 @@ BOOLEAN_T parse_csm_header
   return TRUE;
 }
 
-
-/**
- * \brief Writes the contents of a match_collection to file(s)
- *
- * \details Takes information from parameter.c to decide which files
- * (binary, sqt) to write to, how many matches to write, etc.
- *
- */
-void print_matches( 
-                   MATCH_COLLECTION_T* match_collection, ///< results to write
-                   SPECTRUM_T* spectrum, ///< results for this spectrum
-                   BOOLEAN_T is_decoy,   ///< peptides from target/decoy
-                   FILE* psm_file,       ///< binary file -out
-                   FILE* sqt_file,       ///< text file, target -out
-                   FILE* decoy_file,
-                   FILE* tab_file,       ///< tab delimited file, target -out
-                   FILE* decoy_tab_file  ///< tab delimited file, decoy -out
-){  
-
-  carp(CARP_DETAILED_DEBUG, "Writing matches to file");
-  // get parameters
-  //  int max_sqt_matches = get_int_parameter("max-sqt-result");
-  int max_matches = get_int_parameter("top-match");
-  //BOOLEAN_T pvalues = get_boolean_parameter("compute-p-values");
-  SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
-  SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
-
-  /*
-  if( pvalues ){
-    prelim_score = main_score;
-    main_score = LOGP_BONF_WEIBULL_XCORR;
-  }
-  */
-  // write binary files
-  carp(CARP_DETAILED_DEBUG, "Serializing psms");
-  carp(CARP_DETAILED_DEBUG, 
-       "About to serialize psm features for collection starting with "
-       "match scan %d, z %d, null %d",
-  get_spectrum_first_scan(get_match_spectrum(match_collection->match[0])),
-                          get_match_charge(match_collection->match[0]),
-                          get_match_null_peptide(match_collection->match[0]));
-
-  // BF: this is an ugly fix so that we don't have to estimate pvalues
-  // for decoy psms but can still serialize the matches
-  /*
-  if( is_decoy ){
-    match_collection->scored_type[LOGP_BONF_WEIBULL_XCORR] = TRUE;
-  }
-  */
-  serialize_psm_features(match_collection, psm_file, max_matches,
-                         prelim_score, main_score);
-
-  // write sqt files
-  carp(CARP_DETAILED_DEBUG, "Writing sqt results");
-  if( ! is_decoy ){
-    print_match_collection_sqt(sqt_file, max_matches,
-                               match_collection, spectrum,
-                               prelim_score, main_score);
-  }else{
-    print_match_collection_sqt(decoy_file, max_matches,
-                               match_collection, spectrum,
-                               prelim_score, main_score);
-  }
-
-  // write tab delimited files
-  carp(CARP_DETAILED_DEBUG, "Writing tab delimited results");
-  if( ! is_decoy ){
-    print_match_collection_tab_delimited(tab_file, max_matches,
-                               match_collection, spectrum,
-                               prelim_score, main_score);
-  }else{
-    print_match_collection_tab_delimited(decoy_tab_file, max_matches,
-                               match_collection, spectrum,
-                               prelim_score, main_score);
-  }
-}
-
 /**
  * \brief Print the given match collection for several spectra to
  * tab-delimited files only.  Takes the spectrum information from the
@@ -2624,7 +2539,6 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   char* file_in_dir = NULL;
   FILE* result_file = NULL;
   char suffix[25];
-  //  char prefix[25];
 
   carp(CARP_DEBUG, "Calling new_match_collection_psm_output");
   DATABASE_T* database = match_collection_iterator->database;
@@ -2648,63 +2562,67 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   match_collection->post_hash 
     = new_hash(match_collection->post_protein_counter_size);
   
-  // set the prefix of the serialized file to parse
+  // set the suffix of the serialized file to parse
   // Also, tag if match_collection type is null_peptide_collection
 
-  /*char* filepath = match_collection_iterator->directory_name;
-  char** file_path_array = parse_filename_path_extension(filepath, ".csm");
-  char* file_prefix = file_path_array[0];
-  char* directory_name = file_path_array[1];
-  if( directory_name == NULL ){
-    directory_name = ".";
-    }*/
-
   if(set_type == SET_TARGET){
-    //    sprintf(suffix, "crux_match_target");
-    //sprintf(prefix, "crux_match_target");
-    sprintf(suffix, ".csm");
+    sprintf(suffix, ".target.csm");
     match_collection->null_peptide_collection = FALSE;
   }
   else{
-    //    sprintf(suffix, "crux_match_decoy_%d", (int)set_type);
-    //sprintf(prefix, "crux_match_decoy_%d", (int)set_type);
     sprintf(suffix, ".decoy-%d.csm", (int)set_type);
     match_collection->null_peptide_collection = TRUE;
   }
   
   carp(CARP_DEBUG, "Set type is %d and suffix is %s", (int)set_type, suffix);
+  BOOLEAN_T found_file = FALSE;
   // iterate over all PSM files in directory to find the one to read
   while((directory_entry 
             = readdir(match_collection_iterator->working_directory))){
 
     //carp(CARP_DETAILED_DEBUG, "Next file is %s", directory_entry->d_name);
 
-    if (strcmp(directory_entry->d_name, ".") == 0 ||
-        strcmp(directory_entry->d_name, "..") == 0 ||
-        !suffix_compare(directory_entry->d_name, suffix)
-        //!prefix_compare(directory_entry->d_name, prefix)
-        ) {
+    // skip over any file not ending in .csm
+    if( !suffix_compare(directory_entry->d_name, ".csm") ) {
       continue;
     }
 
-    if( set_type == SET_TARGET && name_is_decoy(directory_entry->d_name) ){
-      continue;
+    // it's the right file if ...
+    //      type is target and ends in "target.cms"
+    //      type is SET_DECOY1 and ends in "decoy.csm"
+    //       type is t and ends in "decoy-t.csm"
+    if( set_type == SET_TARGET && 
+        suffix_compare(directory_entry->d_name, "target.csm") ){
+      found_file = TRUE;
+      break;
+    } else if( set_type == SET_DECOY1 && 
+              suffix_compare(directory_entry->d_name, "decoy.csm") ){
+      found_file = TRUE;
+      break;
+    } else if( suffix_compare(directory_entry->d_name, suffix) ){
+      found_file = TRUE;
+      break;
     }
-    file_in_dir =get_full_filename(match_collection_iterator->directory_name, 
-                                   directory_entry->d_name);
-
-    carp(CARP_INFO, "Getting PSMs from %s", file_in_dir);
-    result_file = fopen(file_in_dir, "r");
-    if( access(file_in_dir, R_OK)){
-      carp(CARP_FATAL, "Cannot read from psm file '%s'", file_in_dir);
-    }
-    // add all the match objects from result_file
-    extend_match_collection(match_collection, database, result_file);
-    carp(CARP_DETAILED_DEBUG, "Extended match collection " );
-    fclose(result_file);
-    free(file_in_dir);
-    carp(CARP_DETAILED_DEBUG, "Finished file.");
   }
+
+  if( ! found_file ){
+    carp(CARP_ERROR, "Could not find file ending in '%s'.", suffix);
+  }
+
+  file_in_dir = get_full_filename(match_collection_iterator->directory_name, 
+                                  directory_entry->d_name);
+  
+  carp(CARP_INFO, "Getting PSMs from %s", file_in_dir);
+  result_file = fopen(file_in_dir, "r");
+  if( access(file_in_dir, R_OK)){
+    carp(CARP_FATAL, "Cannot read from psm file '%s'", file_in_dir);
+  }
+  // add all the match objects from result_file
+  extend_match_collection(match_collection, database, result_file);
+  carp(CARP_DETAILED_DEBUG, "Extended match collection " );
+  fclose(result_file);
+  free(file_in_dir);
+  carp(CARP_DETAILED_DEBUG, "Finished file.");
   
   return match_collection;
 }
@@ -3278,6 +3196,9 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     
     if(suffix_compare(directory_entry->d_name, "decoy-1.csm")) {
       carp(CARP_DEBUG, "Found decoy file %s", directory_entry->d_name);
+      decoy_1 = TRUE;
+    }
+    else if(suffix_compare(directory_entry->d_name, "decoy.csm")) {
       decoy_1 = TRUE;
     }
     else if(suffix_compare(directory_entry->d_name, "decoy-2.csm")) {

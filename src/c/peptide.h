@@ -325,7 +325,7 @@ int count_peptide_modified_aas(PEPTIDE_T* peptide);
  * \returns The mass of the given peptide.
  */
 FLOAT_T calc_sequence_mass(
-  char* peptide, ///< the query peptide -in
+  const char* peptide, ///< the query peptide -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   );
 

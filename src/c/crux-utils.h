@@ -81,7 +81,7 @@ char** parse_filename_path_extension(const char* file, const char* extension);
  * ex) ../../file_name => returns filename
  *\returns A heap allocated array of filename
  */
-char* parse_filename(char* file);
+char* parse_filename(const char* file);
 
 /**
  * convert the integer into a string
@@ -208,7 +208,7 @@ char* generate_psm_filename(int file_index);
  *\returns A file handle to the newly created file.
  */
 FILE* create_file_in_path(
-  char* filename,  ///< the filename to create & open -in
+  const char* filename,  ///< the filename to create & open -in
   const char* directory,  ///< the directory to open the file in -in
   BOOLEAN_T overwrite  ///< replace the file (T) or die if exists (F)
   );
@@ -232,16 +232,10 @@ BOOLEAN_T suffix_compare(
   );
 
 /**
- * \brief Decide if a file name is a decoy csm file
- * \returns TRUE if name ends in -decoy-#.csm, else false
- */
-BOOLEAN_T name_is_decoy(char* name);
-
-/**
  * checks if each AA is an AA
  *\returns TRUE if sequence is valid else, FALSE
  */
-BOOLEAN_T valid_peptide_sequence( char* sequence);
+BOOLEAN_T valid_peptide_sequence(const char* sequence);
 
 /**
  * quickSort for FLOAT_Ts
