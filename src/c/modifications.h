@@ -124,7 +124,7 @@ char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length);
  * \returns A newly allocated copy of the sequnce converted to type
  * MODIFIED_AA_T. 
  */
-MODIFIED_AA_T* convert_to_mod_aa_seq(char* sequence);
+MODIFIED_AA_T* convert_to_mod_aa_seq(const char* sequence);
 
 /**
  * \brief Allocate a new MODIFIED_AA_T array and copy values into it.

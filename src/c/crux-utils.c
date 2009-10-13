@@ -394,8 +394,8 @@ char** parse_filename_path(const char* file){
  * path.
  */
 char** parse_filename_path_extension(
-       const char* file, ///< filename and path to parse -in
-       const char* extension ///< extension to look for (includes leading .) --in
+  const char* file, ///< filename and path to parse -in
+  const char* extension ///< extension to look for (includes leading .) --in
 ){
 
   carp(CARP_DETAILED_DEBUG, "Given path/file %s and ext %s", file, extension);
@@ -448,7 +448,7 @@ char** parse_filename_path_extension(
  * ex) ../../file_name => returns filename
  *\returns A heap allocated array of filename
  */
-char* parse_filename(char* file){
+char* parse_filename(const char* file){
   int len = strlen(file);
   int end_idx = len;
   int end_path = -1;  // index of where the last "/" is located
@@ -626,32 +626,6 @@ char* get_full_filename(const char* path, const char* filename){
   }
 
   return result;
-}
-
-/**
- * \brief Decide if a file name is a decoy csm file
- * \returns TRUE if name ends in -decoy-#.csm 
- */
-BOOLEAN_T name_is_decoy(char* name){
-  char* name_end = strrchr(name, '\0');
-  char* last_d = strrchr(name, 'd');
-  int decoy_len = strlen("decoy-1.csm");
-
-  carp(CARP_DEBUG, "Name is %s", name);
-  // where is the last d in the name
-  if( last_d == NULL ){
-    carp(CARP_DEBUG, "Found no 'd'");
-    return FALSE;
-  }
-  if( (name_end - last_d) == decoy_len 
-      && *(last_d-1) == '.'
-      && strncmp(last_d, "decoy-", 6)==0 ){
-    carp(CARP_DEBUG, "Name is a decoy file");
-    return TRUE;
-  } 
-
-  carp(CARP_DEBUG, "Found a 'd' but name is not a decoy file");
-  return FALSE;
 }
 
 /**
@@ -960,7 +934,7 @@ char* generate_psm_filename(int file_index) {///< target/decoy index -in
  * checks if each AA is an AA
  *\returns TRUE if sequence is valid else, FALSE
  */
-BOOLEAN_T valid_peptide_sequence( char* sequence){
+BOOLEAN_T valid_peptide_sequence(const char* sequence){
   // iterate over all AA and check if with in range
   while(sequence[0] != '\0'){
     if(sequence[0] < 65 || sequence[0] > 90 ){
@@ -980,7 +954,7 @@ BOOLEAN_T valid_peptide_sequence( char* sequence){
  *\returns A file handle to the newly created file.
  */
 FILE* create_file_in_path(
-  char* filename,  ///< the filename to create & open -in
+  const char* filename,  ///< the filename to create & open -in
   const char* directory,  ///< the directory to open the file in -in
   BOOLEAN_T overwrite  ///< replace file (T) or die if exists (F)
   )

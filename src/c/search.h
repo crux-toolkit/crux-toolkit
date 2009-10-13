@@ -9,14 +9,6 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 int search_main(int argc, char** argv);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // SEARCH_H

@@ -62,13 +62,15 @@ LIBFILES= \
   match.h \
   match_collection.c \
   match_collection.h \
-  match_search.c \
+  match_search.cpp \
   modifications.c \
   modifications.h \
   modified_peptides_iterator.c \
   modified_peptides_iterator.h \
   search.h \
   objects.h \
+  output-files.cpp \
+  output-files.h \
   parameter.c \
   parameter.h \
   parse_arguments.c \
