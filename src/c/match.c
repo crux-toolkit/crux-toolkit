@@ -710,13 +710,14 @@ void print_match_sqt(
  *
  */
 void print_match_tab(
-  MATCH_T* match,             ///< the match to print -in  
-  FILE* file,                 ///< output stream -out
-  int scan_num,             ///< starting scan number -in
-  FLOAT_T spectrum_precursor_mz, ///< m/z of spectrum precursor -in
-  FLOAT_T spectrum_mass,       ///< spectrum neutral mass -in
-  int num_matches,            ///< num matches in spectrum -in
-  int charge,                 ///< charge -in
+  MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
+  MATCH_T* match,                  ///< the match to print -in  
+  FILE*    file,                   ///< output stream -out
+  int      scan_num,               ///< starting scan number -in
+  FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
+  FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
+  int      num_matches,            ///< num matches in spectrum -in
+  int      charge,                 ///< charge -in
   const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
   ){
 
@@ -787,6 +788,7 @@ void print_match_tab(
   char *protein_ids = get_protein_ids(peptide);
   char *flanking_aas = get_flanking_aas(peptide);
 
+  // Decide on formatting.
   int precision = get_int_parameter("precision");
   char float_format[16];
   sprintf(float_format, "%%.%ig\t", precision);
@@ -806,8 +808,9 @@ void print_match_tab(
   }
   fprintf(file, float_format, xcorr_score);
   fprintf(file, "%d\t", xcorr_rank);
+
+  // Print p-value, if available.
   if( scores_computed[LOGP_BONF_WEIBULL_XCORR] == TRUE ){ 
-    // print p-value
     if (P_VALUE_NA == log_pvalue) {
       fprintf(file, "NaN\t");
     }
@@ -816,22 +819,26 @@ void print_match_tab(
     }
   }
   else {
-    // no p-value
     fprintf(file, "\t");
   }
+
+  // Print Weibull estimated q-value, if available.
   if( scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == TRUE ){ 
-    // print q-value (Weibull est.)
     fprintf(file, float_format, exp(-1 * weibull_qvalue));
   }
   else {
     fprintf(file, "\t");
   }
+
+  // Print decoy estimated q-value (xcorr), if available.
   if( scores_computed[DECOY_XCORR_QVALUE]  && match->null_peptide == FALSE ){
     fprintf(file, float_format, decoy_x_qvalue);
   }
   else {
     fprintf(file, "\t");
   }
+
+  // Print decoy estimated q-value (Weibull), if available.
   if( scores_computed[DECOY_PVALUE_QVALUE] && match->null_peptide == FALSE){
     if (P_VALUE_NA == decoy_p_qvalue) {
       fprintf(file, "NaN\t");
@@ -841,18 +848,17 @@ void print_match_tab(
   }else {
     fprintf(file, "\t");
   }
+
+  // Print Percolator score, rank and p-value, if available.
   if (scores_computed[PERCOLATOR_SCORE] == TRUE)  {
-    // print percolator score
     fprintf(file, float_format, percolator_score);
-    // print percolator rank
     fprintf(file, float_format, percolator_rank);
-    // print q-value
     fprintf(file, float_format, percolator_qvalue);
   }
   else {
-    // no percolator score, rank, or p-value
     fprintf(file, "\t\t\t");
   }
+
   // Output of q-ranker score and q-value will be handled here where available.
   // For now always print an empty column. 
   if (scores_computed[QRANKER_SCORE] == TRUE) {
@@ -883,6 +889,14 @@ void print_match_tab(
   }else{
     fprintf(file, "\t");
   }
+
+  // Print the Weibull parameters, if available.
+  if (scores_computed[LOGP_BONF_WEIBULL_XCORR]) {
+    print_calibration_parameters(collection, file);
+  } else {
+    fprintf(file, "\t\t\t\t");
+  }
+
   // End record
   fputc('\n', file);
   

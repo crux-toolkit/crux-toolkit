@@ -2053,7 +2053,11 @@ void print_tab_header(FILE* output){
     "cleavage type\t"
     "protein id\t"
     "flanking aa\t"
-    "unshuffled sequence\n"
+    "unshuffled sequence\t"
+    "eta\t"
+    "beta\t"
+    "shift\t"
+    "corr\n"
   );
 }
 
@@ -2177,7 +2181,8 @@ BOOLEAN_T print_match_collection_tab_delimited(
       break;
     }// else
 
-    print_match_tab(match, output, scan_num, spectrum_precursor_mz, 
+    print_match_tab(match_collection, match, output, scan_num, 
+		    spectrum_precursor_mz, 
                     spectrum_neutral_mass, num_matches, charge, 
                     match_collection->scored_type);
 
@@ -2186,6 +2191,23 @@ BOOLEAN_T print_match_collection_tab_delimited(
   free_match_iterator(match_iterator);
   
   return TRUE;
+}
+
+/**
+ * Print the calibration parameters eta, beta, shift and correlation
+ * with tabs between.
+ */
+void print_calibration_parameters(
+  MATCH_COLLECTION_T* my_collection, ///< The collection -in
+  FILE* output ///< The output file -in
+  )
+{
+  fprintf(output,
+	  "\t%g\t%g\t%g\t%g",
+	  my_collection->eta,
+	  my_collection->beta,
+	  my_collection->shift,
+	  my_collection->correlation);
 }
 
 /**
@@ -2502,11 +2524,11 @@ void print_matches_multi_spectra
     num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
 
     if( is_decoy ){
-      print_match_tab(cur_match, decoy_file, scan_num, mz, 
+      print_match_tab(match_collection, cur_match, decoy_file, scan_num, mz, 
                       spec_mass, (int)num_psm_per_spec, charge, match_collection->scored_type );
     }
     else{
-      print_match_tab(cur_match, tab_file, scan_num, mz,
+      print_match_tab(match_collection, cur_match, tab_file, scan_num, mz,
                       spec_mass, (int)num_psm_per_spec, charge, match_collection->scored_type );
     }
 

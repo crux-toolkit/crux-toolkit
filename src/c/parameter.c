@@ -505,8 +505,8 @@ void initialize_parameters(void){
       "Tab delimited output file name. Default 'search.target.txt'",
       "Only available for crux search-for-matches. The location of this file is controlled by "
       "--output-dir.", "true");
-  set_string_parameter("search-decoy-pvalue-file", "search.decoy.p.txt", 
-      "Output filename for complete list of decoy p-values.  Default 'search.decoy.p.txt'",
+  set_string_parameter("search-decoy-pvalue-file", "search.decoy-p.txt", 
+      "Output filename for complete list of decoy p-values.  Default 'search.decoy-p.txt'",
       "Only available for crux search-for-matches. The location of this file is controlled by "
       "--output-dir.", "false");
 
@@ -542,7 +542,7 @@ void initialize_parameters(void){
       "--output-dir.", "true");
   set_string_parameter("index-log-file", "index.log.txt", 
       "Log file name for index.  Default 'index.log.txt'.",
-      "Used by crux create-index. ",
+      "Used by crux create-index.",
       "true");
   set_string_parameter("percolator-param-file", "percolator.params.txt", 
       "Parameter file name for percolator. Default 'percolator.params.txt'",
@@ -561,7 +561,7 @@ void initialize_parameters(void){
       "Used by crux search-for-matches. "
       "The location of this file is controlled by "
       "--output-dir.", "true");
-  set_string_parameter("index-param-file", "index.parames.txt", 
+  set_string_parameter("index-param-file", "index.params.txt", 
       "Parameter file name for index.  Default 'index.params.txt'.",
       "Used by crux create-index. ",
       "true");

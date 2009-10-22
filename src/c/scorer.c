@@ -760,26 +760,26 @@ void normalize_each_region(
   int bin_idx = 0;
   int region_idx = 0;
   FLOAT_T max_intensity = max_intensity_per_region[region_idx];
+  max_intensity_overall = 0.0; // Avoid compiler error.
 
-  // normazlie each region
+  // normalize each region
   for(; bin_idx < sp_max_mz; ++bin_idx){
     if(bin_idx >= region_selector*(region_idx+1) && region_idx < 9){
       ++region_idx;
-      max_intensity = max_intensity_per_region[region_idx];;
+      max_intensity = max_intensity_per_region[region_idx];
     }
 
     // Don't normalize if no peaks in region, and for compatibility 
-    // with SEQUEST drop peaks with intensity less then 1/20 of 
+    // with SEQUEST drop peaks with intensity less than 1/20 of 
     // the overall max intensity.
-    if(max_intensity != 0 && observed[bin_idx] > 0.05 * max_intensity_overall){
+    if((max_intensity != 0)
+       && (observed[bin_idx] > 0.05 * max_intensity_overall))
+      {
       // normalize intensity to max 50
       observed[bin_idx] = (observed[bin_idx] / max_intensity) * 50;
-      
-      // DEBUG
-      // carp(CARP_INFO, "bin: %d, region idx: %d, obsered_mz: %.2f", bin_idx, region_idx, scorer->observed[bin_idx]);
     }
 
-    // no more peaks beyong the 10 regions mark, exit out
+    // no more peaks beyond the 10 regions mark, exit
     if(bin_idx > 10*region_selector){
       return;
     }
