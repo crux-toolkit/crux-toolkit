@@ -246,15 +246,16 @@ void print_match_sqt(
  *
  */
 void print_match_tab(
-  MATCH_T* match,             ///< the match to print -in  
-  FILE* file,                 ///< output stream -out
-  int scan_num,             ///< starting scan number -in
-  FLOAT_T spectrum_precursor_mz, ///< m/z of spectrum precursor -in
-  FLOAT_T spectrum_mass,       ///< spectrum neutral mass -in
-  int num_matches,            ///< num matches in spectrum -in
-  int charge,                 ///< charge -in
+  MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
+  MATCH_T* match,                  ///< the match to print -in  
+  FILE*    file,                   ///< output stream -out
+  int      scan_num,               ///< starting scan number -in
+  FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
+  FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
+  int      num_matches,            ///< num matches in spectrum -in
+  int      charge,                 ///< charge -in
   const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
-);
+  );
 
 /**
  * serializes the match in binary

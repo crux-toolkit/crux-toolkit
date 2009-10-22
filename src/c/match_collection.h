@@ -325,7 +325,7 @@ void print_matches_multi_spectra
  *<int: charge state of the spectrum>
  *<int: The total match objects in the match_collection searched with the spectrum
  *<float: delta_cn>
- *<float: ln_dleta_cn>
+ *<float: ln_delta_cn>
  *<float: ln_experiment_size>
  *<BOOLEAN_T: did the score type been scored?>* <- for all score types
  *<MATCH: serialize match struct> *<--serialize match structs upto top-match # ranks
@@ -379,6 +379,15 @@ BOOLEAN_T print_match_collection_tab_delimited(
   MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
   SPECTRUM_T* spectrum, ///< the spectrum to print sqt -in
   SCORER_TYPE_T main_score  ///< the main score to report -in
+  );
+
+/**
+ * Print the calibration parameters eta, beta, shift and correlation
+ * with tabs between.
+ */
+void print_calibration_parameters(
+  MATCH_COLLECTION_T* my_collection, ///< The collection -in
+  FILE* output ///< The output file -in
   );
 
 /**

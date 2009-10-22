@@ -35,7 +35,7 @@
 ///< maximum length of parameter name and value in characters
 #define NUM_PARAMS 512 ///< maximum number of parameters allowed
 #define MAX_LINE_LENGTH 4096 ///< maximum line length in the parameter file
-#define BILLION 1000000000.0 
+#define BILLION 1000000000
 #define SMALL_BUFFER 256
 #define MAX_SET_PARAMS 256
 
