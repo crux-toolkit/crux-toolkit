@@ -51,6 +51,11 @@
 
 #define GMTK_NUM_PAIRED_ION_SERIES 15
 
+// Define relative peak heights.
+#define B_Y_HEIGHT 50
+#define FLANK_HEIGHT 25
+#define LOSS_HEIGHT 10
+
 /**
  * \struct scorer
  * \brief An object to score spectrum v. spectrum or spectrum v. ion_series
@@ -1045,12 +1050,12 @@ BOOLEAN_T create_intensity_array_theoretical(
         // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
         // Skip ions that are located beyond max mz limit
         if((intensity_array_idx)< scorer->sp_max_mz){
-          add_intensity(theoretical, intensity_array_idx, 50);
-          add_intensity(theoretical, intensity_array_idx - 1, 25);
+          add_intensity(theoretical, intensity_array_idx, B_Y_HEIGHT);
+          add_intensity(theoretical, intensity_array_idx - 1, FLANK_HEIGHT);
         }
 
         if((intensity_array_idx + 1)< scorer->sp_max_mz){
-          add_intensity(theoretical, intensity_array_idx + 1, 25);
+          add_intensity(theoretical, intensity_array_idx + 1, FLANK_HEIGHT);
         }
         
 
@@ -1059,11 +1064,11 @@ BOOLEAN_T create_intensity_array_theoretical(
 
         if(ion_type == B_ION){
           int h2o_array_idx = (int)((get_ion_mass_z(ion) - (MASS_H2O_MONO/ion_charge) ) / bin_width + 0.5);
-          add_intensity(theoretical, h2o_array_idx, 10);
+          add_intensity(theoretical, h2o_array_idx, LOSS_HEIGHT);
         }
 
         int nh3_array_idx = (int)((get_ion_mass_z(ion) -  (MASS_NH3_MONO/ion_charge)) / bin_width + 0.5);
-        add_intensity(theoretical, nh3_array_idx, 10);        
+        add_intensity(theoretical, nh3_array_idx, LOSS_HEIGHT);
       }
       
 
@@ -1071,23 +1076,17 @@ BOOLEAN_T create_intensity_array_theoretical(
     else if(ion_type == A_ION){
       // Add peaks of intensity 10.0 for A type ions. 
       // In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each A type ion.
-        add_intensity(theoretical, intensity_array_idx, 10);
-      /*
-      add_intensity(theoretical, intensity_array_idx + 1, 10);
-      add_intensity(theoretical, intensity_array_idx - 1, 10);
-      */
+        add_intensity(theoretical, intensity_array_idx, LOSS_HEIGHT);
     }
     else{// ERROR!, only should create B, Y, A type ions for xcorr theoreical 
       carp(CARP_ERROR, "only should create B, Y, A type ions for xcorr theoretical spectrum");
       return FALSE;
     }
   }
-
     
   // free heap
   free_ion_iterator(ion_iterator);
 
-  // DEBUG
   /*
   int i = 0;
   for(; i < scorer->sp_max_mz; i++){
