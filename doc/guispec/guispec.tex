@@ -301,7 +301,7 @@ that don't need to modify the underlying Model.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=6in]{crux-gui-sequence.eps}
+%\includegraphics[width=6in]{crux-gui-sequence.eps}
 \caption{{\bf Sequence Diagram for Crux Analysis}  The figure shows the 
 object lifetime and messages for a Crux Analysis using the GUI.
   \label{figure:sequence}}
@@ -312,8 +312,11 @@ object lifetime and messages for a Crux Analysis using the GUI.
 \subsection{Parameters}
 
 \begin{table}
-\caption{Required Parameters}
+\scriptsize
 \begin{tabular}{lllll}
+\hline
+\multicolumn{5}{c}{Basic Parameters} \\
+\hline
 \textbf{Index}&\textbf{Search}&\textbf{Compute q-values}&\textbf{Percolator} &\textbf{Q-Ranker} \\
 \hline \\
 digestion*            &decoy-location                    &output-dir (implicit psm folder) &fileroot                         &fileroot                         \\
@@ -331,19 +334,8 @@ protein fasta file   &parameter-file                    &                       
                      &search-param-file                 &                                 &                                 &                                 \\
                      &search-sqt-output-file            &                                 &                                 &                                 \\
                      &search-tab-output-file            &                                 &                                 &                                 \\
-                     &seed                              &                                 &                                 &                                 \\
-                     &spectrum-charge                   &                                 &                                 &                                 \\
-                     &spectrum-max-mass                 &                                 &                                 &                                 \\
-                     &spectrum-min-mass                 &                                 &                                 &                                 \\
-                     &tdc                               &                                 &                                 &                                 \\
-                     &verbosity                         &                                 &                                 &                                 \\
-                     &version                           &                                 &                                 &                                 
-\end{tabular}
-\end{table}
-\begin{table}
-\caption{Advanced Parameters}
-\begin{tabular}{lllll}
-\textbf{Index}&\textbf{Search}&\textbf{Compute q-values}&\textbf{Percolator} &\textbf{Q-Ranker} \\
+\hline
+\multicolumn{5}{c}{Advanced Parameters} \\
 \hline \\
 custom-enzyme        &compute-p-values                  &fileroot                         &feature-file                     &feature-file                     \\
 index name           &decoy-sqt-output-file             &parameter-file                   &overwrite                        &overwrite                        \\
@@ -361,10 +353,9 @@ version              &protein input                     &                       
                      &spectrum-charge                   &                                 &                                 &                                 \\
                      &spectrum-max-mass                 &                                 &                                 &                                 \\
                      &spectrum-min-mass                 &                                 &                                 &                                 \\
-                     &tdc                               &                                 &                                 &                                 \\
                      &verbosity                         &                                 &                                 &                                 \\
-                     &version                           &                                 &                                 &                                 
 \end{tabular}
+\caption{Basic and advanced parameters}
 \end{table}
-* indicates existance of default value
+
 \end{document}
