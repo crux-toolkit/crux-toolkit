@@ -307,4 +307,64 @@ object lifetime and messages for a Crux Analysis using the GUI.
   \label{figure:sequence}}
 \end{figure}
 
+\subsection{Class Specifications}
+
+\subsection{Parameters}
+
+\begin{table}
+\caption{Required Parameters}
+\begin{tabular}{lllll}
+\textbf{Index}&\textbf{Search}&\textbf{Compute q-values}&\textbf{Percolator} &\textbf{Q-Ranker} \\
+\hline \\
+digestion*            &decoy-location                    &output-dir (implicit psm folder) &fileroot                         &fileroot                         \\
+enzyme*               &decoy-p-values                    &overwrite                        &output-dir (implicit psm folder) &output-dir (implicit psm folder) \\
+isotopic-mass*        &decoy-tab-output-file             &pi0                              &parameter-file                   &parameter-file                   \\
+max-length*           &fileroot                          &protein input                    &percolator-log-file              &pi0                              \\
+max-mass*             &max-mods                          &qvalues-log-file                 &percolator-param-file            &protein input                    \\
+min-length*           &ms2 file                          &qvalues-param-file               &percolator-sqt-output-file       &qranker-param-file               \\
+min-mass*             &num-decoy-files                   &qvalues-tab-output-file          &percolator-tab-output-file       &qranker-sqt-output-file          \\
+missed-cleavages*     &num-decoys-per-target             &verbosity                        &pi0                              &qranker-tab-output-file          \\
+protein fasta file   &parameter-file                    &                                 &verbosity                        &version                          \\
+                     &search-decoy-pvalue-file          &                                 &                                 &                                 \\
+                     &search-decoy-pvalue-file          &                                 &                                 &                                 \\
+                     &search-log-file                   &                                 &                                 &                                 \\
+                     &search-param-file                 &                                 &                                 &                                 \\
+                     &search-sqt-output-file            &                                 &                                 &                                 \\
+                     &search-tab-output-file            &                                 &                                 &                                 \\
+                     &seed                              &                                 &                                 &                                 \\
+                     &spectrum-charge                   &                                 &                                 &                                 \\
+                     &spectrum-max-mass                 &                                 &                                 &                                 \\
+                     &spectrum-min-mass                 &                                 &                                 &                                 \\
+                     &tdc                               &                                 &                                 &                                 \\
+                     &verbosity                         &                                 &                                 &                                 \\
+                     &version                           &                                 &                                 &                                 
+\end{tabular}
+\end{table}
+\begin{table}
+\caption{Advanced Parameters}
+\begin{tabular}{lllll}
+\textbf{Index}&\textbf{Search}&\textbf{Compute q-values}&\textbf{Percolator} &\textbf{Q-Ranker} \\
+\hline \\
+custom-enzyme        &compute-p-values                  &fileroot                         &feature-file                     &feature-file                     \\
+index name           &decoy-sqt-output-file             &parameter-file                   &overwrite                        &overwrite                        \\
+overwrite            &output-dir (implicit psm folder)  &version                          &protein input                    &top-match                        \\
+parameter-file       &overwrite                         &                                 &top-match                        &verbosity                        \\
+verbosity            &print-search-progress             &                                 &version                          &                                 \\
+version              &protein input                     &                                 &                                 &                                 \\
+                     &search-decoy-pvalue-file          &                                 &                                 &                                 \\
+                     &search-decoy-pvalue-file          &                                 &                                 &                                 \\
+                     &search-log-file                   &                                 &                                 &                                 \\
+                     &search-param-file                 &                                 &                                 &                                 \\
+                     &search-sqt-output-file            &                                 &                                 &                                 \\
+                     &search-tab-output-file            &                                 &                                 &                                 \\
+                     &seed                              &                                 &                                 &                                 \\
+                     &spectrum-charge                   &                                 &                                 &                                 \\
+                     &spectrum-max-mass                 &                                 &                                 &                                 \\
+                     &spectrum-min-mass                 &                                 &                                 &                                 \\
+                     &tdc                               &                                 &                                 &                                 \\
+                     &verbosity                         &                                 &                                 &                                 \\
+                     &version                           &                                 &                                 &                                 
+\end{tabular}
+\end{table}
+* indicates existance of default value
 \end{document}
