@@ -265,10 +265,10 @@ The Analysis class will track the parameters in the Table~1.
 \hline
 \textbf{Index}&\textbf{Search}&\textbf{Compute q-values}&\textbf{Percolator} &\textbf{Q-Ranker} \\
 \hline \\
-digestion            &decoy-location                    &output-dir (implicit psm folder) &output-dir (implicit psm folder) &output-dir (implicit psm folder) \\
+digestion            &                                  &                                 &                                 &                                 \\
 enzyme               &decoy-p-values                    &protein input                    &protein input                    &protein input                    \\
-isotopic-mass        &decoy-tab-output-file             &                                 &                                 &                                 \\
-missed-cleavages     &max-mods                          &                                 &                                 &                                 \\
+isotopic-mass        &                                  &                                 &                                 &                                 \\
+missed-cleavages     &                                  &                                 &                                 &                                 \\
 protein fasta file   &ms2 file                          &                                 &                                 &                                 \\
                      &num-decoy-files                   &                                 &                                 &                                 \\
                      &num-decoys-per-target             &                                 &                                 &                                 \\
@@ -284,14 +284,14 @@ protein fasta file   &ms2 file                          &                       
 \multicolumn{5}{c}{Advanced Parameters} \\
 \hline \\
 custom-enzyme        &print-search-progress             &pi0                              &feature-file                     &feature-file                     \\
-max-length           &search-decoy-pvalue-file          &qvavlues-sqt-output-file         &percolator-sqt-output-file       &pi0                              \\
-max-mass             &search-sqt-output-file            &qvalues-tab-output-file          &percolator-tab-output-file       &qranker-sqt-output-file          \\
-min-length           &search-tab-output-file            &verbosity                        &pi0                              &qranker-tab-output-file          \\
+max-length           &                                  &                                 &                                 &pi0                              \\
+max-mass             &                                  &qvalues-tab-output-file          &                                 &                                 \\
+min-length           &                                  &                                 &pi0                              &                                 \\
 min-mass             &seed                              &                                 &top-match                        &top-match                        \\
-verbosity            &spectrum-charge                   &                                 &verbosity                        &verbosity                        \\
+                     &spectrum-charge                   &                                 &                                 &                                 \\
                      &spectrum-max-mass                 &                                 &                                 &                                 \\
                      &spectrum-min-mass                 &                                 &                                 &                                 \\
-                     &verbosity                         &                                 &                                 &                                 \\
+                     &max-mods                          &                                 &                                 &                                 \\
                      &                                  &                                 &                                 &                                 \\
                      &                                  &                                 &                                 &                                 \\
                      &                                  &                                 &                                 &                                 \\
@@ -349,15 +349,5 @@ that don't need to modify the underlying Model.
 \item RankedListView
 \item SpectrumView
 \end{itemize}
-
-\subsection{Class Interactions}
-
-\begin{figure}[ht]
-\centering
-%\includegraphics[width=6in]{crux-gui-sequence.eps}
-\caption{{\bf Sequence Diagram for Crux Analysis}  The figure shows the 
-object lifetime and messages for a Crux Analysis using the GUI.
-  \label{figure:sequence}}
-\end{figure}
 
 \end{document}
