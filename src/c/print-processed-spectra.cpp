@@ -66,7 +66,7 @@ int print_processed_spectra_main(int argc, char** argv){
 
   // write header to output file
   char* header = get_spectrum_collection_comment(spectra);
-  fprintf(output_ms2, header);
+  fprintf(output_ms2, "%s", header);
   fprintf(output_ms2, "H\tComment\tSpectra processed as for Xcorr\n");
 
   // create iterator for getting spectra
