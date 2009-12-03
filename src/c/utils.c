@@ -67,7 +67,7 @@ int getline(char **lineptr, size_t *n, FILE *stream) {
 			(*lineptr)[index++] = c;
 			if (index > (*n - 1)) {
 				*lineptr = (char *) myrealloc(lineptr, *n + 1);
-				*n++;
+				(*n)++;
 			}
 		}
 

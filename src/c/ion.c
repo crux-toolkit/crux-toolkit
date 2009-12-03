@@ -519,7 +519,7 @@ void print_null_ion_gmtk_single(
   ){
 
   char* string = "0.0\t0.0\t0.0\t0\t0\t0\t0\t0\t0\t0\t0\t0\n";
-  fprintf(file, string);
+  fprintf(file, "%s", string);
 }
 
 
