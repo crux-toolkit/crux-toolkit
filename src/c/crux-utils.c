@@ -833,6 +833,7 @@ char* generate_name_path(
   // cleanup
   free(name_path[0]);
   free(name_path[1]);
+  free(name_path);
   free(new_name);
 
   carp(CARP_DEBUG, "Final name is '%s'", full_new_name);

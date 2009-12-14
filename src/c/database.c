@@ -68,9 +68,7 @@ struct database_peptide_iterator {
     ///< the protein that was used before the current working protein
   BOOLEAN_T first_passed; 
     ///< is it ok to convert prior_protein to light?
-  PEPTIDE_T** peptide_list; ///< peptides to be returned by next()
-  int total_peptides;      ///< size of above array
-  int cur_peptide_idx;     ///< index of next to be returned
+  PEPTIDE_T* cur_peptide; ///< the peptide to return by next()
 };
 
 /**
@@ -924,97 +922,10 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   // set the current working protein
   database_peptide_iterator->prior_protein = next_protein;
   
-  // fill the peptide list with peptides ready to be returned
-  database_peptide_iterator->total_peptides = 0;
-  database_peptide_iterator->cur_peptide_idx = 0;
-  database_peptide_iterator->peptide_list = NULL;
-  generate_all_peptides(database_peptide_iterator);
+  database_peptide_iterator->cur_peptide = 
+      database_peptide_iterator_next_from_file(database_peptide_iterator);
 
   return database_peptide_iterator;
-}
-
-/**
- * Private function to generate peptides for this iterator, sort them
- * and remove duplicates before returning them to the caller.
- * Peptides are stored in the iterators memeber variable peptide_list.
- */
-void generate_all_peptides(DATABASE_PEPTIDE_ITERATOR_T* iter){
-  if( iter == NULL ){
-    carp(CARP_FATAL, "Cannot generate peptides for a null iterator.");
-  }
-  // create a dynamically sized list of all pepitdes for this iterator
-  LINKED_LIST_T* list = new_empty_list();
-  int duplicate_count = 0;
-  PEPTIDE_T* cur_peptide = NULL;
-  
-  while(database_peptide_iterator_has_next_from_file(iter)){
-    cur_peptide = database_peptide_iterator_next_from_file(iter);
-    push_back_linked_list(list, cur_peptide);
-    duplicate_count++;
-  }
-  // printf("Generated %i peptides\n", duplicate_count);
-  // Return now if no peptides in this iterator
-  if( duplicate_count == 0 ){
-    return;
-  }
-
-  // create an array for sorting and transfer peptides to array
-  PEPTIDE_T** duplicate_list = 
-    (PEPTIDE_T**)mycalloc(duplicate_count, sizeof(PEPTIDE_T*));
-  
-  int list_idx = 0;
-  while(! is_empty_linked_list(list)){
-    cur_peptide = pop_front_linked_list(list);
-    duplicate_list[list_idx] = cur_peptide;
-    list_idx++;
-    //printf("Unsorted seq: %s\n", get_peptide_sequence(cur_peptide));
-  }
-  delete_linked_list(list);
-
-  // temp to see if it will work
-  iter->peptide_list = duplicate_list;
-  iter->total_peptides = duplicate_count;
-  iter->cur_peptide_idx = 0;
-
-  qsort(duplicate_list, duplicate_count, sizeof(PEPTIDE_T*),
-        (void*)compare_peptide_lexical_qsort);
-
-  // compare each peptide to neighbor, consolidating identical peptides
-  cur_peptide = duplicate_list[0];
-  //printf("Sorted seq: %s\n", get_peptide_sequence(duplicate_list[0]));
-  int uniq_count = 1;
-  int dup_idx = 0;
-  for(dup_idx=1; dup_idx<duplicate_count; dup_idx++){
-    //printf("Sorted seq: %s\n", get_peptide_sequence(duplicate_list[dup_idx]));
-
-    if(compare_peptide_lexical_qsort(&cur_peptide, 
-                                     duplicate_list+dup_idx) == 0){
-      merge_peptides_copy_src(cur_peptide, duplicate_list[dup_idx]);
-      // this frees the second peptide
-      duplicate_list[dup_idx] = NULL;
-    }else{
-      cur_peptide = duplicate_list[dup_idx];
-      uniq_count++;
-    }
-  }// next peptide
-
-  //printf("Unique peptide count is %i\n", uniq_count );
-
-  // allocate uniq list and transfer from duplicate
-  iter->peptide_list = (PEPTIDE_T**)mycalloc(uniq_count, sizeof(PEPTIDE_T*));
-  iter->total_peptides = uniq_count;
-  
-  int uniq_idx = 0;
-  // go through all elements in duplcate list
-  for(dup_idx=0; dup_idx<duplicate_count; dup_idx++){
-    if( duplicate_list[dup_idx] != NULL ){
-      iter->peptide_list[uniq_idx] = duplicate_list[dup_idx];
-      uniq_idx++;
-    }
-  }
-  
-  // clean up
-  free(duplicate_list);
 }
 
 /**
@@ -1030,9 +941,6 @@ void free_database_peptide_iterator(
   free_database_protein_iterator(
                      database_peptide_iterator->database_protein_iterator);
   free_peptide_constraint(database_peptide_iterator->peptide_constraint);
-  if(database_peptide_iterator->peptide_list){
-    free(database_peptide_iterator->peptide_list);
-  }
   free(database_peptide_iterator);
 
 }
@@ -1065,22 +973,28 @@ BOOLEAN_T database_peptide_iterator_has_next(
   if( iter == NULL ){
     return FALSE;
   }
-  if( iter->cur_peptide_idx < iter->total_peptides ){
+
+  if( iter->cur_peptide == NULL ){
+    return FALSE;
+  } else {
     return TRUE;
   }
-  return FALSE;
 }
 
 PEPTIDE_T* database_peptide_iterator_next(
   DATABASE_PEPTIDE_ITERATOR_T* iter){
 
-  if( iter == NULL || iter->cur_peptide_idx >= iter->total_peptides ){
+  if( iter == NULL ){
     return NULL;
   }
   
-  PEPTIDE_T* cur_peptide = iter->peptide_list[iter->cur_peptide_idx];
-  iter->cur_peptide_idx ++;
-  return cur_peptide;
+  PEPTIDE_T* return_peptide = iter->cur_peptide;
+  if( database_peptide_iterator_has_next_from_file(iter) ){
+    iter->cur_peptide = database_peptide_iterator_next_from_file(iter);
+  } else {
+    iter->cur_peptide = NULL;
+  }
+  return return_peptide;
 }
 
 /**
