@@ -327,10 +327,43 @@ BOOLEAN_T ion_type_to_string(ION_TYPE_T, char*);
 
 // new style of type_to_string and string_to_type functions
 // requires an invalid value for each enum
+char* command_type_to_file_string(COMMAND_T type);
+const char* command_type_to_file_string_ptr(COMMAND_T type);
+char* command_type_to_command_line_string(COMMAND_T type);
+const char* command_type_to_command_line_string_ptr(COMMAND_T type);
+COMMAND_T string_to_command_type(char*);
 DIGEST_T string_to_digest_type(char*);
 char* digest_type_to_string(DIGEST_T);
 ENZYME_T string_to_enzyme_type(char*);
 char* enzyme_type_to_string(ENZYME_T);
+
+/**
+ * \brief Open either the index or fasta file and prepare it for
+ * searching.  Die if the input file cannot be found or read.
+ * \returns The number of proteins in the file or index
+ */
+int prepare_protein_input(
+  char* input_file,      ///< name of the fasta file or index directory
+  INDEX_T** index,       ///< return new index here OR
+  DATABASE_T** database);///< return new fasta database here
+
+/**
+ * \brief Perform the set-up steps common to all crux commands:
+ * initialize parameters, parse command line, set verbosity, open
+ * output directory, write params file. 
+ *
+ * Uses the given command name, arguments and options for parsing the
+ * command line.
+ */
+void initialize_run(
+  COMMAND_T cmd,              ///< the command we are initializing 
+  const char** argument_list, ///< list of required arguments
+  int num_arguments,          ///< number of elements in arguments_list
+  const char** option_list,   ///< list of optional flags
+  int num_options,            ///< number of elements in options_list
+  int argc,                   ///< number of tokens on cmd line
+  char** argv                 ///< array of command line tokens
+);
 
 #ifdef __cplusplus
 }

@@ -20,7 +20,7 @@ using namespace std;
  * and fileroot and on the name given (search, percolator, etc.).
  * Requires that the output directory already exist. 
  */
-OutputFiles::OutputFiles(const char* program_name)
+OutputFiles::OutputFiles(COMMAND_T program_name)
 : matches_per_spec_(get_int_parameter("top-match"))
 {
 
@@ -35,8 +35,14 @@ OutputFiles::OutputFiles(const char* program_name)
   if( strcmp(fileroot, "__NULL_STR") == 0 ){
     fileroot = NULL;
   }
+
   int num_decoy_files = get_int_parameter("num-decoy-files");
   num_files_ = num_decoy_files + 1; // plus target file
+
+  // TODO (BF oct-21-09): consider moving this logic to parameter.c
+  if( program_name != SEARCH_COMMAND && program_name != SEQUEST_COMMAND ){
+    num_files_ = 1;
+  }
 
   carp(CARP_DEBUG, 
        "OutputFiles is opening %d files (%d decoys) in '%s' with root '%s'."
@@ -53,21 +59,18 @@ OutputFiles::OutputFiles(const char* program_name)
 
 
   // search operations create .csm files
-  if( strcmp(program_name, "search") == 0 ||
-      strcmp(program_name, "sequest") == 0 ){
+  if( program_name == SEARCH_COMMAND ||
+      program_name == SEQUEST_COMMAND ){
     createFiles(&psm_file_array_, 
-                 output_directory, 
-                 fileroot, 
-                 program_name, 
-                 "csm", 
-                 overwrite);
+                output_directory, 
+                fileroot, 
+                program_name, 
+                "csm", 
+                overwrite);
   }
-
+  
   // only sequest creates sqt files
-  //if( strcmp(program_name, "sequest") == 0 ){
-  // TEMPORARY: also write sqt for search-for-matches so that smoke
-  //tests will pass
-  if( strcmp(program_name, "sequest") == 0 || strcmp(program_name, "search") == 0){
+  if( program_name == SEQUEST_COMMAND ){
     createFiles(&sqt_file_array_, 
                  output_directory, 
                  fileroot, 
@@ -78,9 +81,14 @@ OutputFiles::OutputFiles(const char* program_name)
 }
 
 OutputFiles::~OutputFiles(){
-  delete [] psm_file_array_;
-  delete [] tab_file_array_;
-  delete [] sqt_file_array_;
+  for(int file_idx = 0; file_idx < num_files_; file_idx ++){
+    if( psm_file_array_ ){ fclose(psm_file_array_[file_idx]); }
+    if( tab_file_array_ ){ fclose(tab_file_array_[file_idx]); }
+    if( sqt_file_array_ ){ fclose(sqt_file_array_[file_idx]); }
+  }
+  delete psm_file_array_;
+  delete tab_file_array_;
+  delete sqt_file_array_;
 }
 
 /**
@@ -98,7 +106,7 @@ OutputFiles::~OutputFiles(){
 BOOLEAN_T OutputFiles::createFiles(FILE*** file_array_ptr,
                                    const char* output_dir,
                                    const char* fileroot,
-                                   const char* command_name,
+                                   COMMAND_T command,
                                    const char* extension,
                                    BOOLEAN_T overwrite){
   if( num_files_ == 0 ){
@@ -107,20 +115,21 @@ BOOLEAN_T OutputFiles::createFiles(FILE*** file_array_ptr,
   
   // allocate array
   *file_array_ptr = (FILE**)mycalloc(num_files_, sizeof(FILE*));
+  const char* basename = command_type_to_file_string_ptr(command);
 
-  // determine the name for each of the files: target, decoy-1, etc.
-  string* target_decoy = new string[num_files_];
-  target_decoy[0] = "target";
+  // determine the target/decoy name component for each file
+  string* target_decoy_list = new string[num_files_];
+  target_decoy_list[0] = "target";
   if( num_files_ == 2 ){
-    target_decoy[1] = "decoy";
+    target_decoy_list[1] = "decoy";
   }else{
     for(int file_idx = 1; file_idx < num_files_; file_idx++){
       ostringstream name_builder;
       name_builder << "decoy-" << file_idx;
-      target_decoy[file_idx] = name_builder.str();
+      target_decoy_list[file_idx] = name_builder.str();
     }
   }
-  
+
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
     // concatinate the pieces of the name
@@ -128,22 +137,27 @@ BOOLEAN_T OutputFiles::createFiles(FILE*** file_array_ptr,
     if( fileroot ){
       name_builder << fileroot << "." ;
     }
-    name_builder << command_name << "."
-                 << target_decoy[file_idx] << "." 
-                 << extension;
+    name_builder << basename << ".";
+    if( !target_decoy_list[file_idx].empty() ){
+      name_builder << target_decoy_list[file_idx] << "." ;
+    }
+    name_builder << extension;
     string filename = name_builder.str();
-
+    
     // open the file (it checks for success)
     (*file_array_ptr)[file_idx] = create_file_in_path(filename.c_str(),
                                                       output_dir,
                                                       overwrite);
   }// next file
-
-  delete [] target_decoy;
-
+  
+  delete [] target_decoy_list;
+  
   return TRUE;
 }
 
+/**
+ *
+ */
 void OutputFiles::writeHeaders(int num_proteins){
 
   const char* tag = "target";
@@ -229,6 +243,7 @@ void OutputFiles::printMatchesTab(
                                            spectrum,
                                            rank_type);
 
+      carp(CARP_DETAILED_DEBUG, "done writing file index %d", file_idx);
       if( decoy_matches_array ){
         cur_matches = decoy_matches_array[file_idx];
       }// else if it is NULL, num_files_ == 1 and loop will exit here
@@ -288,8 +303,7 @@ void OutputFiles::printMatchesSqt(
     print_match_collection_sqt(sqt_file_array_[file_idx],
                                matches_per_spec_,
                                cur_matches,
-                               spectrum,
-                               SP, XCORR);
+                               spectrum);
 
     if( decoy_matches_array ){
       cur_matches = decoy_matches_array[file_idx];
@@ -312,8 +326,13 @@ void OutputFiles::updateHeaders(int spectrum_count){
 
 
 
-
-
+void OutputFiles::writeMatches(
+  MATCH_COLLECTION_T*  matches ///< from multiple spectra
+){
+  print_matches_multi_spectra(matches, 
+                              tab_file_array_[0], 
+                              NULL);// no decoy file
+}
 
 
 

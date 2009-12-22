@@ -121,13 +121,31 @@ analyze_matches_index = good_results/analyze_matches_index.percolator.target.txt
 search_mods_index = good_results/search_mods_index.target.txt = crux search-for-matches --parameter-file params/mods test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
 
 # Analyze matches with modifications from index
-analyze_mods_index = good_results/analyze_mods_index.percolator.target.txt = crux percolator --overwrite T --parameter-file params/mods test_crux_index; cat crux-output/percolator.target.txt = 'Time' 'Database'
+analyze_mods_index = good_results/analyze_mods_index.percolator.target.txt = crux percolator --overwrite T --parameter-file params/mods existing_crux_index; cat crux-output/percolator.target.txt = 'Time' 'Database'
 
 # Test the q-values generated from decoys
 decoy_qval = good_results/decoy-qval.txt = rm -rf decoy-qval-pval; crux search-for-matches --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; crux compute-q-values --parameter-file params/decoy-qval-pval small-yeast.fasta; cat decoy-qval-pval/qvalues.target.txt
 
 # Do mod search with spec that match sequest results exactly
-sequest_matching_search = good_results/seq_test.sqt = crux search-for-matches --parameter-file params/mods-sequest select-spectra.ms2 index-for-sequest-comparison; cat crux-output/search.target.sqt = 'Time' 
+sequest_matching_search = good_results/seq_test.sqt = crux sequest-search --parameter-file params/mods-sequest select-spectra.ms2 index-for-sequest-comparison; cat crux-output/sequest.target.sqt = 'Time' 
+
+# More tests for sequest-search
+# Decoys in separate files, 2 decoys per target
+separate-ss = good_results/separate-ss = rm -f ss/separate*; crux sequest-search --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta; cat ss/separate*t = 'StartTime'
+
+# Test that percolator works with the .csm files
+perc-ss = good_results/perc-ss = rm -f ss/one*csm ss/tdc*csm ss/no*csm ss/perc*; crux percolator --parameter-file params/separate-ss small-yeast.fasta; cat ss/percolator.target.txt  =
+
+# Decoys in one file, 2 decoys per target
+one-decoy-file-ss = good_results/one-decoy-file-ss = rm -f ss/one-decoy-file*; crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta; cat ss/one-decoy-file*t = 'StartTime'
+
+# Decoys with target, 1 decoy per target
+tdc-ss = good_results/tdc-ss = rm -f ss/tdc*; crux sequest-search --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta; cat ss/tdc*t = 'StartTime'
+
+# No decoys
+no-decoys-ss = good_results/no-decoys-ss = rm -f ss/no-decoys*; crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast.fasta; cat ss/no-decoys*t = 'StartTime'
+
+
 
 # MORE TESTS TODO
 

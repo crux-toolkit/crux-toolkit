@@ -1,5 +1,5 @@
 /**
- * \file crux-main.c
+ * \file crux-main.cpp
  */
 /*
  AUTHOR: Barbara Frewen
@@ -14,12 +14,6 @@
 */
 
 #include "crux-main.h"
-
-static const char* command_type_strings[NUM_CMD_TYPES] =
-  {"create-index", "search-for-matches", "sequest-search",
-   "compute-q-values", "q-ranker", "percolator", 
-   "print-processed-spectra", "invalid"};
-
 
 const char* usage_str = "Usage: crux <command> [options] <argument>\n"
 "Commands:\n"
@@ -56,34 +50,34 @@ int main(int argc, char** argv){
   // call the appropriate function 
   // passing the command line minus the first token ('crux')
   switch(command){
-  case INDEX_CMD:
+  case INDEX_COMMAND:
     create_index_main(argc-1, argv+1);
     break;
 
-  case SEARCH_CMD:
+  case SEARCH_COMMAND:
     search_main(argc-1, argv+1);
     break;
 
-  case SEQUEST_CMD:
-    carp(CARP_FATAL, "sequest-search not implemented yet.");
+  case SEQUEST_COMMAND:
+    sequest_search_main(argc-1, argv+1);
     break;
 
-  case QVALUE_CMD:
+  case QVALUE_COMMAND:
     qvalue_main(argc-1, argv+1);
     break;
 
-  case QRANKER_CMD:
+  case QRANKER_COMMAND:
     qranker_main(argc-1, argv+1);
     break;
 
-  case PERCOLATOR_CMD:
+  case PERCOLATOR_COMMAND:
     percolator_main(argc-1, argv+1);
     break;
 
-  case PROCESS_SPEC_CMD:
+  case PROCESS_SPEC_COMMAND:
     print_processed_spectra_main(argc-1, argv+1);
     break;
-  case INVALID_CMD:
+  case INVALID_COMMAND:
     carp(CARP_FATAL, "Invalid command '%s'\n%s", op_string, usage_str);
     break;
 
@@ -95,20 +89,6 @@ int main(int argc, char** argv){
 
   exit (0);
 }// end main
-
-/**
- * \brief Convert a text name of a COMMAND_T to its enumerated type
- * value.  Returns INVALID_CMD for any incorrect string.
- */
-COMMAND_T string_to_command_type(char* name){
-
-  int command = convert_enum_type_str( name, 
-                                       (int)INVALID_CMD,
-                                       command_type_strings, 
-                                       (int)NUM_CMD_TYPES);
-
-  return (COMMAND_T)command;
-}
 
 
 

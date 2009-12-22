@@ -1,16 +1,13 @@
 one-decoy-file:
 search.decoy.csm
-search.decoy.sqt
 search.decoy.txt
 search.log.txt
 search.params.txt
 search.target.csm
-search.target.sqt
 search.target.txt
 
 tdc:
 search.log.txt
 search.params.txt
 search.target.csm
-search.target.sqt
 search.target.txt

@@ -245,6 +245,90 @@ BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
   return success;
 }
 
+static const char* command_type_file_strings[NUMBER_COMMAND_TYPES] =
+  { "invalid", "index", "search", "sequest", "qvalues", "percolator", 
+    "qranker", "processed-spectra" 
+  };
+/**
+ * Conversion of COMMAND_T to the base filename used for that
+ * command's output files. 
+ * \returns A newly allocated char* of the base filename used for the
+ * given COMMAND_T.
+ */
+char* command_type_to_file_string(COMMAND_T type){
+  if( (int)type > NUMBER_COMMAND_TYPES){
+    return NULL;
+  }
+  char* return_string = my_copy_string(command_type_file_strings[type]);
+  return return_string;
+}
+/**
+ * Conversion of COMMAND_T to the base filename used for that
+ * command's output files. 
+ * \returns A conts pointer to the base filename used for the
+ * given COMMAND_T.
+ */
+const char* command_type_to_file_string_ptr(COMMAND_T type){
+  if( (int)type > NUMBER_COMMAND_TYPES){
+    return NULL;
+  }
+  return command_type_file_strings[type];
+}
+
+static const char* command_type_command_line_strings[NUMBER_COMMAND_TYPES] =
+  { "invalid", "create-index", "search-for-matches", "sequest-search",
+    "compute-q-values", "percolator", "q-ranker", "print-processed-spectra" 
+  };
+/**
+ * Conversion of COMMAND_T to the string used on the command line.
+ * \returns A newly allocated char* of the name used on the command
+ * line to invoke this COMMAND_T.
+ */
+char* command_type_to_command_line_string(COMMAND_T type){
+  if( (int)type > NUMBER_COMMAND_TYPES){
+    return NULL;
+  }
+  char* return_string = my_copy_string(command_type_command_line_strings[type]);
+  return return_string;
+}
+/**
+ * Conversion of COMMAND_T to the string used on the command line.
+ * \returns A const pointer to the name used on the command line to
+ * invoke this COMMAND_T.
+ */
+const char* command_type_to_command_line_string_ptr(COMMAND_T type){
+  if( (int)type > NUMBER_COMMAND_TYPES){
+    return NULL;
+  }
+  return command_type_command_line_strings[type];
+}
+
+/**
+ * Convert either the base filename or the command line string to the
+ * command type.
+ * \returns The COMMAND_T associated with this string.
+ */
+COMMAND_T string_to_command_type(char* str){
+  // first try the command line strings (e.g. search-for-matches)
+  int cmd_type = convert_enum_type_str(str, 
+                                       -10, // return value on error
+                                       command_type_command_line_strings, 
+                                       NUMBER_COMMAND_TYPES);
+  // next try file names
+  if( cmd_type < 0 ){
+    cmd_type = convert_enum_type_str(str, 
+                                     -10, // return value on err
+                                     command_type_file_strings, 
+                                     NUMBER_COMMAND_TYPES);
+  }
+
+  COMMAND_T result = (COMMAND_T)cmd_type;
+  if( cmd_type < 0 ){
+    result = INVALID_COMMAND;
+  }
+  return result;
+}
+
 /*
  * The string version of SCORER_TYPE_T
  */
@@ -980,7 +1064,7 @@ FILE* create_file_in_path(
       // Allowed to overwrite, send warning message.
       carp(
         CARP_WARNING, 
-        "The file '%s' already exists and will be overwriten.",
+        "The file '%s' already exists and will be overwritten.",
         file_full_path
       );
     }
@@ -1294,5 +1378,127 @@ void fit_two_parameter_weibull(
 }
 
 
+/**
+ * \brief Open either the index or fasta file and prepare it for
+ * searching.  Die if the input file cannot be found or read.
+ * \returns The number of proteins in the file or index
+ */
+int prepare_protein_input(
+  char* input_file,     ///< name of the fasta file or index directory
+  INDEX_T** index,      ///< return new index here OR
+  DATABASE_T** database)///< return new fasta database here
+{
 
+  int num_proteins = 0;
+  BOOLEAN_T use_index = is_directory(input_file);
+
+  if (use_index == TRUE){
+    carp(CARP_INFO, "Preparing protein index %s", input_file);
+    *index = new_index_from_disk(input_file);
+
+    if (index == NULL){
+      carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
+    }
+    num_proteins = get_index_num_proteins(*index);
+
+  } else {
+    carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
+    *database = new_database(input_file, FALSE);         
+    if( database == NULL ){
+      carp(CARP_FATAL, "Could not create protein database");
+    } 
+
+    if(!parse_database(*database)){
+      carp(CARP_FATAL, "Error with protein input");
+    } 
+    num_proteins = get_database_num_proteins(*database);
+  }
+  return num_proteins;
+}
+
+
+/**
+ * \brief Perform the set-up steps common to all crux commands:
+ * initialize parameters, parse command line, set verbosity, open
+ * output directory, write params file. 
+ *
+ * Uses the given command name, arguments and options for parsing the
+ * command line.
+ */
+void initialize_run(
+  COMMAND_T cmd,              ///< the command we are initializing 
+  const char** argument_list, ///< list of required arguments
+  int num_arguments,          ///< number of elements in arguments_list
+  const char** option_list,   ///< list of optional flags
+  int num_options,            ///< number of elements in options_list
+  int argc,                   ///< number of tokens on cmd line
+  char** argv                 ///< array of command line tokens
+){
+
+  // Verbosity level for set-up/command line reading 
+  set_verbosity_level(CARP_WARNING);
+
+  // Initialize parameter.c and set default values
+  initialize_parameters();
+
+  // Define optional and required arguments 
+  select_cmd_line_options(option_list, num_options);
+  select_cmd_line_arguments(argument_list, num_arguments);
+
+  // Parse the command line, including optional params file
+  // Includes syntax, type, and bounds checking, dies on error 
+  char* cmd_name = command_type_to_command_line_string(cmd);
+  char* full_cmd = cat_string("crux ", cmd_name);
+  parse_cmd_line_into_params_hash(argc, argv, cmd_name);
+  free(cmd_name);
+  free(full_cmd);
+
+  carp(CARP_INFO, "Beginning %s.", 
+       command_type_to_command_line_string_ptr(cmd));
+
+  // Set seed for random number generation 
+  if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
+    time_t seconds; // use current time to seed
+    time(&seconds); // Get value from sys clock and set seconds variable.
+    srand((unsigned int) seconds); // Convert seconds to a unsigned int
+  }
+  else{
+    srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
+  }
+  
+  // Create output directory 
+  char* output_folder = get_string_parameter("output-dir");
+  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  int result = create_output_directory(
+    output_folder, 
+    overwrite
+  );
+  if( result == -1 ){
+    carp(CARP_FATAL, "Unable to create output directory %s.", output_folder);
+  }
+
+  char* cmd_file_name = command_type_to_file_string(cmd);
+
+  // Open the log file to record carp messages 
+  char* log_file_name = cat_string(cmd_file_name, ".log.txt");
+  open_log_file(&log_file_name);
+  free(log_file_name);
+  log_command_line(argc, argv);
+
+  // Write the parameter file
+  char* param_file_name = cat_string(cmd_file_name, ".params.txt");
+  print_parameter_file(&param_file_name);
+  free(param_file_name);
+  free(cmd_file_name);
+}
+
+
+
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
 

@@ -85,7 +85,7 @@ LIBFILES= \
   peptide_modifications.h \
   peptide_src.c \
   peptide_src.h \
-  percolator.c \
+  percolator.cpp \
   percolator.h \
   print-processed-spectra.cpp \
   print-processed-spectra.h \
@@ -93,10 +93,12 @@ LIBFILES= \
   protein.h \
   protein_index.c \
   protein_index.h \
-  q-ranker.c \
+  q-ranker.cpp \
   q-ranker.h \
-  q-value.c \
+  q-value.cpp \
   q-value.h \
+  sequest-search.cpp \
+  sequest-search.h \
   scorer.c \
   scorer.h \
   sorter.c \
@@ -112,6 +114,12 @@ LIBFILES= \
 noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = \
   $(AM_CFLAGS) \
+  -I$(top_srcdir)/src/c/MSToolkit \
+  -I$(top_srcdir)/src/c/percolator/ \
+  -I$(top_srcdir)/src/c/q-ranker/
+
+libcrux_la_CXXFLAGS = \
+  $(AM_CXXFLAGS) \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/q-ranker/

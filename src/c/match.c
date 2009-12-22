@@ -579,101 +579,42 @@ void print_match(
 /**
  * \brief Print the match information in sqt format to the given file
  *
- * The main score goes in the position usually holding the xcorr.  The other
- * score goes in the position usually holding the preliminary Sp
- * score.  For searches analyzed by percolator, main and other should
- * be discriminant score and qvalue.  For p-value estimation, main and
- * other should be p-value and xcorr.
+ * Only crux sequest-search produces sqt files so the two scores
+ * printed are always Sp and xcorr.
  */
 void print_match_sqt(
   MATCH_T* match,             ///< the match to print -in  
-  FILE* file,                 ///< output stream -out
-  SCORER_TYPE_T main_score,   ///< the main score to report -in
-  SCORER_TYPE_T other_score  ///< the other score to report -in
+  FILE* file                  ///< output stream -out
   ){
 
   if( match == NULL || file == NULL ){
     carp(CARP_ERROR, "Cannot print match to sqt file from null inputs");
     return;
   }
+
   PEPTIDE_T* peptide = get_match_peptide(match);
   // this should get the sequence from the match, not the peptide
   char* sequence = get_match_sequence_sqt(match);
-  BOOLEAN_T adjust_delta_cn = FALSE;
 
-  // NOTE (BF 12-Feb-08) This is an ugly fix to give post-percolator
-  // sqt files the rank of the xcorr and sp.
-  // ALSO deltaCn not serialized, so set to 0 for post-process
-  SCORER_TYPE_T main_rank_type = main_score;
-  SCORER_TYPE_T other_rank_type = other_score;
-  if( (main_score == PERCOLATOR_SCORE || main_score == QRANKER_SCORE) && 
-      (other_score == Q_VALUE || other_score == QRANKER_Q_VALUE )){
-    main_rank_type = XCORR;
-    other_rank_type = SP;    
-    adjust_delta_cn = TRUE;
-  }
-  // for p-values, also give rank of xcorr and sp?
-  else if( main_score == LOGP_BONF_WEIBULL_XCORR ){
-    //other_rank_type = XCORR;
-    main_rank_type = XCORR;
-    other_score = XCORR;
-  }else if( main_score == LOGP_BONF_WEIBULL_SP ){
-    //other_rank_type = SP;
-    other_score = SP;
-  }
-  // for post-analysis of p-values, both ranks from xcorr
-  else if( main_score == LOGP_QVALUE_WEIBULL_XCORR ){
-    main_rank_type = XCORR;
-  }
-  // secondary rank could always be preliminary score
-
-  // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
-  // Only the fraction matched is serialized.  The number possible can
-  // be calculated from the length of the sequence and the charge, but
-  // the charge of the match is not serialized and I'm not sure when
-  // it is set.  But I know it exists by here, so recalculate it.
   int b_y_total = get_match_b_y_ion_possible(match);
   int b_y_matched = get_match_b_y_ion_matched(match);
   
-  if( b_y_total == 0 ){
-    int factor = get_match_charge(match);
-    if( factor == 3 ){
-      factor = 2;  //there are +1 and +2 b/y ions for charge==3
-    }else{
-      factor = 1;
-    }
-    b_y_total = (get_peptide_length(peptide)-1) * 2 * factor;
-    b_y_matched = (get_match_b_y_ion_fraction_matched(match)) * b_y_total;
-  }
-
   FLOAT_T delta_cn = get_match_delta_cn(match);
-  if( adjust_delta_cn == TRUE ){
-    delta_cn = 0.0;
-  }
-
-  // If a p-value couldn't be calculated, print as NaN
-  FLOAT_T score_main = get_match_score(match, main_score);
-  if( main_score == LOGP_BONF_WEIBULL_XCORR&& score_main == P_VALUE_NA ){
-    score_main = NaN();
-  } 
-  if (score_main == 0) { // Avoid -0
-    score_main = 0.0;
-  }
+  FLOAT_T score_main = get_match_score(match, XCORR);
 
   // write format string with variable precision
   int precision = get_int_parameter("precision");
 
   // print match info
   fprintf(file, "M\t%i\t%i\t%.4f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
-            //fprintf(file, format,
-          get_match_rank(match, main_rank_type),
-          get_match_rank(match, other_rank_type),
+          get_match_rank(match, XCORR),
+          get_match_rank(match, SP),
           get_peptide_peptide_mass(peptide),
           delta_cn,
           precision,
           score_main,
           precision,
-          get_match_score(match, other_score),
+          get_match_score(match, SP),
           b_y_matched,
           b_y_total,
           sequence
@@ -766,7 +707,6 @@ void print_match_tab(
   if( delta_cn == 0 ){// I hate -0, this prevents it
     delta_cn = 0.0;
   }
-
   BOOLEAN_T sp_scored = scores_computed[SP];
   double sp_score = get_match_score(match, SP);
   int  sp_rank = get_match_rank(match, SP);
@@ -1030,6 +970,11 @@ double* get_match_percolator_features(
   feature_array[3] = get_match_score(match, SP);
   // lnrSP
   feature_array[4] = logf(get_match_rank(match, SP));
+  // SP is no longer scored so we need place holder values
+  if( feature_array[3] == NOT_SCORED ){ 
+    feature_array[3] = 0;
+    feature_array[4] = 0;
+  }
   // dM
   feature_array[5] = weight_diff;
   // absdM

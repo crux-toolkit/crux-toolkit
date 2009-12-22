@@ -360,7 +360,7 @@ void Scores::generatePositiveTrainingSet(AlgIn& data,const double fdr,const doub
 
 int Scores::getInitDirection(const double fdr, double * direction, bool findDirection) {
   int bestPositives = -1;
-  int bestFeature =-1;
+  int bestFeature = 0; // xcorr has index 0, use as default
   bool lowBest = false;
   
   if (findDirection) { 

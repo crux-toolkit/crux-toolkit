@@ -1,12 +1,8 @@
 #ifndef PERCOLATOR_CMD_H
 #define PERCOLATOR_CMD_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
- * \file match_analysis.c
+ * \file percolator.h
  */
 /*
  * AUTHOR: Barbara Frewen
@@ -33,12 +29,9 @@ extern "C" {
 #include "match.h"
 #include "match_collection.h"
 #include "PercolatorCInterface.h"
+#include "output-files.h"
 
 int percolator_main(int argc, char** argv);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif //PERCOLATOR_CMD_H
 

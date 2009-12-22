@@ -25,22 +25,23 @@
 class OutputFiles{
 
  public:
-  OutputFiles(const char* program_name);///< name of the crux function
-                                      ///(e.g. search)
+  OutputFiles(COMMAND_T program_name);///< command printing files
+
   ~OutputFiles();
   void writeHeaders(int num_proteins = 0);
-  void writeMatches(/*const*/ MATCH_COLLECTION_T* matches,
-                    /*const*/ MATCH_COLLECTION_T** decoy_matches_array,
+  void writeMatches(MATCH_COLLECTION_T* matches,
+                    MATCH_COLLECTION_T** decoy_matches_array,
                     int num_decoys,
                     SCORER_TYPE_T rank_type = XCORR,
                     SPECTRUM_T* spectrum = NULL);
+  void writeMatches(MATCH_COLLECTION_T* matches);
   void updateHeaders(int spectrum_count);
 
  private:
   BOOLEAN_T createFiles(FILE*** file_array_ptr,
                         const char* output_dir,
                         const char* fileroot,
-                        const char* command_name,
+                        COMMAND_T command,
                         const char* extension,
                         BOOLEAN_T overwrite);
   void printMatchesTab(
@@ -65,7 +66,7 @@ class OutputFiles{
   FILE** psm_file_array_; ///< array of .csm files
   FILE** tab_file_array_; ///< array of .txt files
   FILE** sqt_file_array_; ///< array of .sqt files
-  int matches_per_spec_;   ///< print this many matches per spec
+  int matches_per_spec_;  ///< print this many matches per spec
 };
 
 
