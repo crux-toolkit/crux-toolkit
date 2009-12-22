@@ -31,24 +31,9 @@
 #include "spectrum_collection.h"
 #include <errno.h>
 #include "output-files.h"
-
-#define NUM_SEARCH_OPTIONS 12
-#define NUM_SEARCH_ARGS 2
+#include "search-progress.h"
 
 /* Private functions */
-int prepare_protein_input(char* input_file, 
-                          INDEX_T** index, 
-                          DATABASE_T** database);
-void open_output_files(char *output_directory,
-                       BOOLEAN_T overwrite,
-		       BOOLEAN_T store_decoy_pvalues,
-                       FILE*** binary_filehandle_array, 
-                       FILE** sqt_filehandle,
-                       FILE** decoy_sqt_filehandle,
-                       FILE** tab_file,
-                       FILE** decoy_tab_file,
-		       FILE** decoy_pvalue_file);
-
 int search_pep_mods(
   MATCH_COLLECTION_T* match_collection, ///< store PSMs here
   BOOLEAN_T is_decoy,   ///< generate decoy peptides from index/db
@@ -58,20 +43,34 @@ int search_pep_mods(
   int charge,           ///< seach spectrum at this charge state
   PEPTIDE_MOD_T** pep_mod_list, ///< list of peptide mods to apply
   int num_peptide_mods, ///< how many p_mods to use from the list
-  BOOLEAN_T keep_matches ///< FALSE means delete match after storing score
-                    );
+  BOOLEAN_T store_scores///< keep all scores for p-value estimation
+);
+void add_decoy_scores(
+  MATCH_COLLECTION_T* target_psms, ///< add scores to these matches
+  SPECTRUM_T* spectrum, ///<
+  int charge, ///< 
+  INDEX_T* index, ///< search this index if not null
+  DATABASE_T* database, ///< search this database if not null
+  PEPTIDE_MOD_T** peptitde_mods, ///< list of peptide mods to search
+  int num_peptide_mods ///< number of mods in the above array
+);
 BOOLEAN_T is_search_complete(MATCH_COLLECTION_T* matches, 
                              int mods_per_peptide);
+void print_spectrum_matches(
+  OutputFiles& output_files,       
+  MATCH_COLLECTION_T* target_psms, 
+  MATCH_COLLECTION_T** decoy_psms,
+  int num_decoy_collections,
+  SPECTRUM_T* spectrum,             
+  BOOLEAN_T combine_target_decoy,
+  int num_decoy_files
+                   );
 
 #ifdef SEARCH_ENABLED // Discard this code in open source release
 int search_main(int argc, char** argv){
 
-  /* Verbosity level for set-up/command line reading */
-  set_verbosity_level(CARP_ERROR);
-
   /* Define optional command line arguments */
-  int num_options = NUM_SEARCH_OPTIONS;
-  const char* option_list[NUM_SEARCH_OPTIONS] = {
+  const char* option_list[] = {
     "verbosity",
     "version",
     "parameter-file",
@@ -85,57 +84,16 @@ int search_main(int argc, char** argv){
     "num-decoys-per-target",
     "decoy-location"
   };
+  int num_options = sizeof(option_list) / sizeof(char*);
 
   /* Define required command line arguments */
-  int num_arguments = NUM_SEARCH_ARGS;
-  const char* argument_list[NUM_SEARCH_ARGS] = {"ms2 file", "protein input"};
+  const char* argument_list[] = {"ms2 file", "protein input"};
+  int num_arguments = sizeof(argument_list) / sizeof(char*);
 
-  /* Initialize parameter.c and set default values*/
-  initialize_parameters();
+  initialize_run(SEARCH_COMMAND, argument_list, num_arguments,
+                 option_list, num_options, argc, argv);
 
-  /* Define optional and required arguments */
-  select_cmd_line_options(option_list, num_options);
-  select_cmd_line_arguments(argument_list, num_arguments);
-
-  /* Parse the command line, including optional params file
-     Includes syntax, type, and bounds checking, dies on error */
-  parse_cmd_line_into_params_hash(argc, argv, "crux search-for-matches");
-
-  /* Set seed for random number generation */
-  if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
-    time_t seconds; // use current time to seed
-    time(&seconds); // Get value from sys clock and set seconds variable.
-    srand((unsigned int) seconds); // Convert seconds to a unsigned int
-  }
-  else{
-    srand((unsigned int)atoi(get_string_parameter_pointer("seed")));
-  }
-  
-  /* Create output directory */ 
-  char* output_directory = get_string_parameter("output-dir");
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  int result = create_output_directory(
-    output_directory, 
-    overwrite
-  );
-  if( result == -1 ){
-    carp(CARP_FATAL, "Unable to create output directory %s.", output_directory);
-  }
-
-  /* Open the log file to record carp messages */
-  char* log_file_name = get_string_parameter("search-log-file");
-  open_log_file(&log_file_name);
-  free(log_file_name);
-  log_command_line(argc, argv);
-
-  carp(CARP_INFO, "Beginning crux search-for-matches");
-
-  // Write the parameter file
-  char* param_file_name = get_string_parameter("search-param-file");
-  print_parameter_file(&param_file_name);
-  free(param_file_name);
-
-  /* Get input: ms2 file */
+  // Get input: ms2 file 
   const char* ms2_file = get_string_parameter_pointer("ms2 file");
 
   // open ms2 file
@@ -165,18 +123,21 @@ int search_main(int argc, char** argv){
   }
   
   /* Prepare output files */
-  OutputFiles output_files("search"); 
+  OutputFiles output_files(SEARCH_COMMAND); 
   output_files.writeHeaders(num_proteins);
+  // TODO (BF oct-21-09): consider adding pvalue file to OutputFiles
   FILE* decoy_pvalue_file = NULL;
   if( get_boolean_parameter("decoy-p-values") ){
     carp(CARP_DEBUG, "Opening decoy p-value file.");
     char* decoy_pvalue_filename 
       = get_string_parameter("search-decoy-pvalue-file");
     prefix_fileroot_to_name(&decoy_pvalue_filename);
+    char* output_directory = get_string_parameter("output-dir");
     decoy_pvalue_file = create_file_in_path(decoy_pvalue_filename, 
                                             output_directory, 
-                                            overwrite);
+                                            get_boolean_parameter("overwrite"));
     free(decoy_pvalue_filename);
+    free(output_directory);
   }
 
   /* Perform search: loop over spectra*/
@@ -188,22 +149,10 @@ int search_main(int argc, char** argv){
   // get search parameters for match_collection
   BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
   BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
-
-  // The total number of searches attempted.
-  // This is the value that gets reported to the user on stderr.
-  int spectrum_searches_counter = 0; 
-
-  // The number of searches that found at least one candidate.
-  // This is the value that goes into the .csm header.
-  int num_successful_searches = 0;
-
-  // flags and counters for loop
   int num_decoy_files = get_int_parameter("num-decoy-files");
 
-  int progress_increment = get_int_parameter("print-search-progress");
-  if( progress_increment == 0 ){
-    progress_increment = BILLION;
-  }
+  // For remembering and reporting number of searches
+  SearchProgress progress;
 
   // get list of mods
   PEPTIDE_MOD_T** peptide_mods = NULL;
@@ -216,12 +165,7 @@ int search_main(int argc, char** argv){
       filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
     BOOLEAN_T is_decoy = FALSE;
 
-    if( ((spectrum_searches_counter+1) % progress_increment) == 0 ){
-      carp(CARP_INFO, 
-           "Searching spectrum number %i, charge %i, search number %i",
-           get_spectrum_first_scan(spectrum), charge,
-           spectrum_searches_counter+1 );
-    }
+    progress.report(get_spectrum_first_scan(spectrum), charge);
 
     // with the target database decide how many peptide mods to use
     MATCH_COLLECTION_T* target_psms = new_empty_match_collection(is_decoy); 
@@ -233,7 +177,7 @@ int search_main(int argc, char** argv){
                                         charge,
                                         peptide_mods, 
                                         num_peptide_mods,
-                                        TRUE); // keep the whole psm
+                                        compute_pvalues); 
  
     // are there any matches?
     if( get_match_collection_match_total(target_psms) == 0 ){
@@ -241,7 +185,7 @@ int search_main(int argc, char** argv){
       carp(CARP_WARNING, "No matches found for spectrum %i, charge %i",
            get_spectrum_first_scan(spectrum), charge);
       free_match_collection(target_psms);
-      spectrum_searches_counter++;
+      progress.increment(FALSE);
       continue; // next spectrum
     }
     
@@ -267,7 +211,7 @@ int search_main(int argc, char** argv){
                       charge, 
                       peptide_mods, 
                       max_pep_mods,
-                      TRUE); // keep the whole psm
+                      compute_pvalues);
     }
 
     // calculate p-values for each collection of PSMs separately
@@ -277,15 +221,8 @@ int search_main(int argc, char** argv){
       carp(CARP_DEBUG, "Estimating Weibull parameters.");
       while( ! has_enough_weibull_points(target_psms) ){
         // generate more scores from new decoys if there are not enough
-        search_pep_mods(target_psms, 
-                        TRUE, // only generate decoys
-                        index, 
-                        database, 
-                        spectrum, 
-                        charge, 
-                        peptide_mods, 
-                        max_pep_mods,
-                        FALSE); // don't keep the psm, just the xcorr
+        add_decoy_scores(target_psms, spectrum, charge, index, 
+                         database, peptide_mods, max_pep_mods);
         
       }
       estimate_weibull_parameters_from_xcorrs(target_psms,
@@ -306,54 +243,15 @@ int search_main(int argc, char** argv){
       }// next collection
     }
 
-    // now print matches to one, two or several files
-    if( combine_target_decoy == TRUE ){
-      // merge all collections
-      MATCH_COLLECTION_T* all_psms = target_psms;
-      for(decoy_idx = 0; decoy_idx < num_decoy_collections; decoy_idx++){
-        merge_match_collections(decoy_collection_list[decoy_idx], all_psms);
-      }
+    print_spectrum_matches(output_files, 
+                           target_psms, 
+                           decoy_collection_list,
+                           num_decoy_collections,
+                           spectrum, 
+                           combine_target_decoy, 
+                           num_decoy_files);
 
-      // sort and rank
-      if( get_match_collection_scored_type(all_psms, SP) == TRUE ){
-        populate_match_rank_match_collection(all_psms, SP);
-      }
-      populate_match_rank_match_collection(all_psms, XCORR);
-    
-      output_files.writeMatches(all_psms, // target matches
-                                NULL,     // decoy matches
-                                0,        // num decoys
-                                XCORR, spectrum); 
-
-    }else{ // targets and decoys in separate files
-
-      // if decoys in one file
-      if( num_decoy_files == 1 ){
-        // merge decoys
-        MATCH_COLLECTION_T* merged_decoy_psms = decoy_collection_list[0];
-        for(decoy_idx = 1; decoy_idx < num_decoy_collections; decoy_idx++){
-          merge_match_collections(decoy_collection_list[decoy_idx],
-                                  merged_decoy_psms);
-        }
-
-        // sort and rank
-        if( get_match_collection_scored_type(merged_decoy_psms, SP) == TRUE ){
-          populate_match_rank_match_collection(merged_decoy_psms, SP);
-        }
-        populate_match_rank_match_collection(merged_decoy_psms, XCORR);
-
-        output_files.writeMatches(target_psms, &merged_decoy_psms, 
-                                  1, // num decoys
-                                  XCORR, spectrum);
-
-      }else{
-        // already sorted and ranked
-        output_files.writeMatches(target_psms, decoy_collection_list, 
-                                  num_decoy_collections, XCORR, spectrum);
-      }
-    }
-    spectrum_searches_counter++;
-    num_successful_searches++;
+    progress.increment(TRUE);
 
     // clean up
     free_match_collection(target_psms);
@@ -366,12 +264,11 @@ int search_main(int argc, char** argv){
   // finished searching!
 
   // fix headers in csm files
-  output_files.updateHeaders(num_successful_searches);
-
-  // clean up
-  // FIXME: None of the other output files is closed. WSN 8/26/09
-  if (decoy_pvalue_file) {
-    fclose(decoy_pvalue_file);
+  int file_idx;
+  for(file_idx=0; file_idx < num_decoy_files + 1; file_idx++){
+    carp(CARP_DEBUG, "Changing csm header to have %i spectrum searches",
+         progress.getNumSearchesWithMatches());
+    output_files.updateHeaders(progress.getNumSearchesWithMatches());
   }
 
   carp(CARP_INFO, "Finished crux-search-for-matches");
@@ -393,118 +290,9 @@ int search_main(int argc, char **argv){
 }
 #endif // SEARCH_ENABLED
 
+
+
 /* Private function definitions */
-/**
- * \brief Open either the index or fasta file and prepare it for
- * searching.  Die if the input file cannot be found or read.
- * \returns the number of proteins in the file/index
- */
-int prepare_protein_input(char* input_file, 
-                          INDEX_T** index, 
-                          DATABASE_T** database){
-
-  int num_proteins = 0;
-  BOOLEAN_T use_index = is_directory(input_file);
-
-  if (use_index == TRUE){
-    carp(CARP_INFO, "Preparing protein index %s", input_file);
-    *index = new_index_from_disk(input_file);
-
-    if (index == NULL){
-      carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
-    }
-    num_proteins = get_index_num_proteins(*index);
-
-  } else {
-    carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
-    *database = new_database(input_file, FALSE);         
-    if( database == NULL ){
-      carp(CARP_FATAL, "Could not create protein database");
-    } 
-
-    if(!parse_database(*database)){
-      carp(CARP_FATAL, "Error with protein input");
-    } 
-    num_proteins = get_database_num_proteins(*database);
-  }
-  return num_proteins;
-}
-
-/**
- * \brief A private function for crux-search-for-matches to prepare
- * binary psm, tab-delimited text, and sqt files.
- *
- * Opens psm file(s) if requested, setting a given
- * pointer to the array of filehandles.  Opens sqt file(s) if
- * requested, setting the given pointers to each file handle.  If
- * binary files not requested, creates an array of NULL pointers.  If
- * sqt files not requested, sets given pointers to NULL. 
- *
- * \returns void.  Sets given arguments to newly created filehandles.
- */
-void open_output_files(
-  char *output_directory, ///< name of output directory -in
-  BOOLEAN_T overwrite,     ///< overwrite existing files -in
-  BOOLEAN_T store_decoy_pvalues, ///< create decoy p-value file? -in
-  FILE*** psm_file_array, ///< put binary psm filehandles here -out
-  FILE** sqt_file,        ///< put text sqt filehandle here -out
-  FILE** decoy_sqt_file,  ///< put decoy sqt filehandle here -out
-  FILE** tab_file,        ///< put text sqt filehandle here -out
-  FILE** decoy_tab_file,  ///< put decoy sqt filehandle here -out
-  FILE** decoy_pvalue_file ///< if requested, file for decoy p-values -out
-  )
-{
-  // create binary psm files (allocate memory, even if not used)
-  *psm_file_array = create_psm_files();
-
-  //create sqt file handles
-  carp(CARP_DEBUG, "Opening sqt files");
-  char* sqt_filename = get_string_parameter("search-sqt-output-file");
-  prefix_fileroot_to_name(&sqt_filename);
-  *sqt_file = create_file_in_path(sqt_filename, 
-                                  output_directory, 
-                                  overwrite);
-  free(sqt_filename);
-  if( get_int_parameter("num-decoy-files") > 0 ){
-    char* decoy_sqt_filename = get_string_parameter("decoy-sqt-output-file");
-    prefix_fileroot_to_name(&decoy_sqt_filename);
-    *decoy_sqt_file = create_file_in_path(decoy_sqt_filename,
-                                          output_directory,
-                                          overwrite);
-    free(decoy_sqt_filename);
-  }
-
-  //create tab-delimited file handles
-  carp(CARP_DEBUG, "Opening tab delimited files");
-  char* tab_filename = get_string_parameter("search-tab-output-file");
-  prefix_fileroot_to_name(&tab_filename);
-  *tab_file = create_file_in_path(tab_filename, 
-                                  output_directory, 
-                                  overwrite);
-  free(tab_filename);
-  char* decoy_tab_filename = get_string_parameter("decoy-tab-output-file");
-  prefix_fileroot_to_name(&decoy_tab_filename);
-  if( get_int_parameter("num-decoy-files") > 0 ){
-    *decoy_tab_file = create_file_in_path(decoy_tab_filename,
-                                          output_directory,
-                                          overwrite);
-    free(decoy_tab_filename);
-  }
-
-  //create file handle for optional decoy p-values files
-  if (store_decoy_pvalues) {
-    carp(CARP_DEBUG, "Opening decoy p-value file.");
-    char* decoy_pvalue_filename 
-      = get_string_parameter("search-decoy-pvalue-file");
-    prefix_fileroot_to_name(&decoy_pvalue_filename);
-    *decoy_pvalue_file = create_file_in_path(decoy_pvalue_filename, 
-					     output_directory, 
-					     overwrite);
-    free(decoy_pvalue_filename);
-  }
-
-  carp(CARP_DEBUG, "Finished opening output files");
-}
 
 /**
  * \brief Look at matches and search parameters to determine if a
@@ -556,8 +344,12 @@ int search_pep_mods(
   int charge,           ///< seach spectrum at this charge state
   PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to apply
   int num_peptide_mods, ///< how many p_mods to use from the list
-  BOOLEAN_T keep_match  ///< TRUE=add whole match, FALSE=add only xcorr
+  BOOLEAN_T store_scores///< save all scores for p-value estimation
 ){
+
+  // set match_collection charge
+  set_match_collection_charge(match_collection, charge);
+
   int mod_idx = 0;
 
   // assess scores after all pmods with x amods have been searched
@@ -605,7 +397,8 @@ int search_pep_mods(
                             charge, 
                             peptide_iterator,
                             is_decoy,
-                            keep_match
+                            store_scores,
+                            FALSE // don't do prelim scoring
                             );
     
     carp(CARP_DEBUG, "Added %i matches", added);
@@ -615,5 +408,110 @@ int search_pep_mods(
   }//next peptide mod
 
   return mod_idx;
+}
+
+/**
+ * Print the target and decoy match collections to their respective
+ * target and decoy files.
+ *
+ * Three possibilities: 1. combine the target and all decoy
+ * collections and print to target file.  2. print targets to target
+ * file and combine all decoys and print to one decoy file.  3. print
+ * each collection to a separate file.
+ * Possible side effectos: Collections may be merged and re-ranked.
+ */
+void print_spectrum_matches(
+  OutputFiles& output_files,       
+  MATCH_COLLECTION_T* target_psms, 
+  MATCH_COLLECTION_T** decoy_psms,
+  int num_decoy_collections,
+  SPECTRUM_T* spectrum,             
+  BOOLEAN_T combine_target_decoy,
+  int num_decoy_files
+                   ){
+
+  // now print matches to one, two or several files
+  if( combine_target_decoy == TRUE ){
+    // merge all collections
+    MATCH_COLLECTION_T* all_psms = target_psms;
+    for(int decoy_idx = 0; decoy_idx < num_decoy_collections; decoy_idx++){
+      merge_match_collections(decoy_psms[decoy_idx], all_psms);
+    }
+    
+    // sort and rank
+    if( get_match_collection_scored_type(all_psms, SP) == TRUE ){
+      populate_match_rank_match_collection(all_psms, SP);
+    }
+    populate_match_rank_match_collection(all_psms, XCORR);
+    
+    output_files.writeMatches(all_psms, // target matches
+                              NULL,     // decoy matches
+                              0,        // num decoys
+                              XCORR, spectrum); 
+    
+  }else{ // targets and decoys in separate files
+    
+    // if decoys in one file
+    if( num_decoy_files == 1 ){
+      // merge decoys
+      MATCH_COLLECTION_T* merged_decoy_psms = decoy_psms[0];
+      for(int decoy_idx = 1; decoy_idx < num_decoy_collections; decoy_idx++){
+        merge_match_collections(decoy_psms[decoy_idx],
+                                merged_decoy_psms);
+      }
+      
+      // sort and rank
+      if( get_match_collection_scored_type(merged_decoy_psms, SP) == TRUE ){
+        populate_match_rank_match_collection(merged_decoy_psms, SP);
+      }
+      populate_match_rank_match_collection(merged_decoy_psms, XCORR);
+      
+      output_files.writeMatches(target_psms, &merged_decoy_psms, 
+                                1, // num decoys
+                                XCORR, spectrum);
+      
+    }else{
+      // already sorted and ranked
+      output_files.writeMatches(target_psms, decoy_psms, 
+                                num_decoy_collections, XCORR, spectrum);
+    }
+  }
+}
+
+// TODO this should be in match_collection
+/**
+ * Search the given database or index using shuffled peptides and the
+ * spectrum/charge in the target psm match collection.  Add those
+ * scores to the target psm match collection for use in weibull
+ * parameter estimation but do not save the matches.  Repeat the
+ * search with all peptide mods in the list.
+ */
+void add_decoy_scores(
+  MATCH_COLLECTION_T* target_psms, ///< add scores to these matches
+  SPECTRUM_T* spectrum, ///<
+  int charge, ///< 
+  INDEX_T* index, ///< search this index if not null
+  DATABASE_T* database, ///< search this database if not null
+  PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to search
+  int num_peptide_mods ///< number of mods in the above array
+){
+
+  int mod_idx = 0;
+  // for each peptide mod in the list
+  for(mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++){
+    MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator = 
+      new_modified_peptides_iterator_from_mz(
+                                          get_spectrum_precursor_mz(spectrum),
+                                          charge,
+                                          peptide_mods[mod_idx],
+                                          index,
+                                          database);
+    add_decoy_scores_match_collection(target_psms, 
+                                      spectrum, 
+                                      charge, 
+                                      peptide_iterator);  
+  }
+
+
 }
 

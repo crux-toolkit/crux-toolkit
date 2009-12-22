@@ -6,6 +6,10 @@
 #ifndef MATCH_H
 #define MATCH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -236,9 +240,7 @@ void print_match(
  */
 void print_match_sqt(
   MATCH_T* match, ///< the match to print -in  
-  FILE* file, ///< output stream -out
-  SCORER_TYPE_T main_score,  ///< the main score to report -in
-  SCORER_TYPE_T other_score  ///< the score to report -in
+  FILE* file      ///< output stream -out
 );
 
 /**
@@ -524,10 +526,15 @@ int get_match_b_y_ion_possible(
   MATCH_T* match ///< the match to work -out
   );
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif //MATCH_H
+
 /*
  * Local Variables:
  * mode: c
  * c-basic-offset: 2
  * End:
  */
-#endif

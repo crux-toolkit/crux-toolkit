@@ -9,11 +9,9 @@
 
 # 1. Create param file
 rm -rf crux-output 
-./crux search-for-matches \
-  --write-parameter-file T \
-  smoke/test.ms2 smoke/test.fasta
+./crux search-for-matches smoke/test.ms2 smoke/test.fasta 1>/dev/null 2>&1
 
-if [ ! -e crux-output/params.txt ]
+if [ ! -e crux-output/search.params.txt ]
 then
   echo "Failed to write the param file.";
   exit;
@@ -31,25 +29,25 @@ echo "####################################################################
 " > default.params
 
 # 3. Reorder the options so they are grouped by function
-for op in verbosity version parameter-file write-parameter-file \
-          parameter-file-name overwrite min-length max-length isotopic-mass \
-          fragment-mass mass-window ion-tolerance \
+for op in verbosity version parameter-file overwrite \
+          output-dir fileroot print-search-progress \
+          decoy-location num-decoys-per-target reverse-sequence \
+          top-match precision search-decoy-pvalue-file \
+          min-length max-length isotopic-mass fragment-mass \
+          mass-window use-mz-window ion-tolerance \
           min-mass max-mass spectrum-min-mass spectrum-max-mass \
-          spectrum-charge max-rank-preliminary print-search-progress \
+          spectrum-charge max-rank-preliminary \
           enzyme custom-enzyme digestion missed-cleavages \
-          mod cmod nmod max-mods max-aas-modified compute-p-values compute-q-values \
-          fileroot search-sqt-output-file decoy-sqt-output-file \
-          percolator-sqt-output-file qvalues-sqt-output-file \
-          search-tab-output-file percolator-tab-output-file \
-          qvalues-tab-output-file decoy-tab-output-file \
-          number-decoy-set num-decoy-per-target tdc reverse-sequence \
-          top-match precision feature-file \
-          output-sequence sort stats unique-peptides \
+          mod cmod nmod max-mods max-aas-modified compute-p-values \
+          feature-file output-sequence sort stats unique-peptides \
           isotope primary-ions neutral-losses flanking \
           precursor-ions nh3 max-ion-charge h2o A C D E F G H I K L M \
           N P Q R S T V W Y ; 
+
+
+
 do
-  grep -B2 "^$op=" crux-output/params.txt >> default.params
+  grep -B2 "^$op=" crux-output/search.params.txt >> default.params
   echo "" >> default.params
 done
 

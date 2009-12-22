@@ -1,10 +1,6 @@
 #ifndef QVALUE_CMD_H
 #define QVALUE_CMD_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * \file match_analysis.c
  */
@@ -29,13 +25,9 @@ extern "C" {
 #include "scorer.h"
 #include "match.h"
 #include "match_collection.h"
+#include "output-files.h"
 
 int qvalue_main(int argc, char** argv);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif //QVALUE_CMD_H
 

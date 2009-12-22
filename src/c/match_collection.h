@@ -96,7 +96,8 @@ int add_matches(
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy,     ///< do we shuffle the peptides
-  BOOLEAN_T keep_matches  ///< FALSE means delete matches after storing score
+  BOOLEAN_T store_scores, ///< TRUE means save scores in xcorrs[]
+  BOOLEAN_T do_prelim_score///< TRUE means do Sp before xcorr
 );
 
 /**
@@ -197,6 +198,12 @@ BOOLEAN_T get_match_collection_is_decoy(
 );
 
 /**
+ * Keeps track of the top scoring PSM by Sp.  To be run after
+ * re-ranking by Sp.
+ */
+void save_top_sp_match(MATCH_COLLECTION_T* matches);
+
+/**
  *\returns the top peptide count used in the logp_exp_sp in match_collection
  */
 int get_match_collection_top_fit_sp(
@@ -264,13 +271,6 @@ BOOLEAN_T add_match_to_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< add to here
   MATCH_T* match                        ///< add this match
 );
-
-/**
- * Takes the values of match-output-folder, ms2 filename (soon to be
- * named output file), overwrite, and number-decoy-set from parameter.c 
- * and returns an array of filehandles to the newly opened files
- */
-FILE** create_psm_files();
 
 /*
  * Copied from spectrum_collection::serialize_header
@@ -362,10 +362,8 @@ void print_tab_header(FILE* outfile);
 BOOLEAN_T print_match_collection_sqt(
   FILE* output, ///< the output file -out
   int top_match, ///< the top matches to output -in
-  MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
-  SPECTRUM_T* spectrum, ///< the spectrum to print sqt -in
-  SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
-  SCORER_TYPE_T main_score  ///< the main score to report -in
+  MATCH_COLLECTION_T* match_collection, ///< the match_collection to print -in
+  SPECTRUM_T* spectrum ///< the spectrum to print sqt -in
   );
 
 /**
@@ -599,6 +597,31 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
 BOOLEAN_T compute_p_values(
   MATCH_COLLECTION_T* match_collection,
   FILE* output_pvalue_file
+);
+
+/**
+ * Try setting the match collection's charge.  Successful if the
+ * current charge is 0 (i.e. hasn't yet been set) or if the current
+ * charge is the same as the given value.  Otherwise, returns false
+ *
+ * \returns TRUE if the match_collection's charge state was changed.
+ */
+BOOLEAN_T set_match_collection_charge(
+  MATCH_COLLECTION_T* match_collection,  ///< match collection to change
+  int charge ///< new charge state
+);
+
+/**
+ * Search the given database or index using shuffled peptides and the
+ * spectrum/charge in the target psm match collection.  Add those
+ * scores to the target psm match collection for use in weibull
+ * parameter estimation but do not save the matches
+ */
+void add_decoy_scores_match_collection(
+  MATCH_COLLECTION_T* target_matches, ///< add scores to this collection
+  SPECTRUM_T* spectrum, ///< search this spectrum
+  int charge, ///< search spectrum at this charge state
+  MODIFIED_PEPTIDES_ITERATOR_T* peptides ///< use these peptides to search
 );
 
 #ifdef __cplusplus

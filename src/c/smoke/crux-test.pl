@@ -221,7 +221,21 @@ sub test_cmd() {
         print $diff_line;
       }
       close DIFF;
+
+      # also check to see which columns changed
+      $diff_cmd = "./compare-by-field.pl $standard_filename $output_filename" .
+          "> $diff_filename" ;
+      system($diff_cmd);
+      print "Compare by field results\n";
+      open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
+      $diff_line;
+      while ($diff_line = <DIFF>) {
+        print $diff_line;
+      }
+      close DIFF;
+
       unlink $diff_filename;
+
     }
   } else {
     # The command was not succesful

@@ -1,5 +1,5 @@
 /**
- * \file percolator.c
+ * \file percolator.cpp
  */
 /*
  * AUTHOR: Barbara Frewen
@@ -7,7 +7,7 @@
  * DESCRIPTION: Copied from match_analysis.c with only the percolator
  *         functionality kept.
  *         Given as input a directory containing binary psm files and
- *         a protein database, run percolator and return an sqt file
+ *         a protein database, run percolator and return an txt file
  *         with results.
  *
  *         Handles at most 4 files (target and decoy).  Looks for .csm
@@ -21,8 +21,6 @@
 #include "parameter.h"
 #include "percolator.h"
 
-#define NUM_PERCOLATOR_OPTIONS 7
-#define NUM_PERCOLATOR_ARGUMENTS 1
 /* 
  * Private function declarations.  Details below
  */
@@ -31,14 +29,6 @@ MATCH_COLLECTION_T* run_percolator(
   char* fasta_file, 
   char* feature_file); 
 
-
-static void print_text_files( 
-  MATCH_COLLECTION_T* match_collection,
-  SCORER_TYPE_T scorer_type,
-  SCORER_TYPE_T second_scorer_type
-  );
-
-  
 /**
  * \brief crux-analyze-matches: takes in a directory containing binary
  * psm files and a protein index and analyzes the psms.
@@ -46,8 +36,7 @@ static void print_text_files(
 int percolator_main(int argc, char** argv){
 
   /* Define command line arguments */
-  int num_options = NUM_PERCOLATOR_OPTIONS;
-  const char* option_list[NUM_PERCOLATOR_OPTIONS] = {
+  const char* option_list[] = {
     "version",
     "verbosity",
     "parameter-file",
@@ -56,25 +45,15 @@ int percolator_main(int argc, char** argv){
     "output-dir",
     "overwrite"
   };
+  int num_options = sizeof(option_list) / sizeof(char*);
 
-  int num_arguments = NUM_PERCOLATOR_ARGUMENTS;
-  const char* argument_list[NUM_PERCOLATOR_ARGUMENTS] = {
+  const char* argument_list[] = {
     "protein input"
   };
+  int num_arguments = sizeof(argument_list) / sizeof(char*);
 
-  /* for debugging handling of parameters*/
-  set_verbosity_level(CARP_ERROR);
-
-  /* Set up parameters and set defaults in parameter.c */
-  initialize_parameters();
-
-  /* Define optional and required arguments in parameter.c */
-  select_cmd_line_options(option_list, num_options );
-  select_cmd_line_arguments(argument_list, num_arguments);
-
-  /* Parse the command line and optional paramter file
-     does sytnax, type, and bounds checking and dies on error */
-  parse_cmd_line_into_params_hash(argc, argv, "crux-analyze-matches");
+  initialize_run(PERCOLATOR_COMMAND, argument_list, num_arguments,
+                 option_list, num_options, argc, argv);
 
   /* Get arguments */
   char* psm_dir = get_string_parameter("output-dir");
@@ -84,32 +63,16 @@ int percolator_main(int argc, char** argv){
     prefix_fileroot_to_name(&feature_file);
   }
 
-  /* Get options */
-  SCORER_TYPE_T scorer_type = PERCOLATOR_SCORE;
-  SCORER_TYPE_T second_scorer_type = Q_VALUE;
-  MATCH_COLLECTION_T* match_collection = NULL;
-
-  /* Open the log file to record carp messages */
-  char* log_file_name = get_string_parameter("percolator-log-file");
-  open_log_file(&log_file_name);
-  free(log_file_name);
-  log_command_line(argc, argv);
-
-  carp(CARP_INFO, "Running percolator");
-
-  char* param_file_name = get_string_parameter("percolator-param-file");
-  print_parameter_file(&param_file_name);
-  free(param_file_name);
-
   /* Perform the analysis */
+  MATCH_COLLECTION_T* match_collection = NULL;
   match_collection = run_percolator(psm_dir,
                                     protein_input_name,
                                     feature_file);
-  scorer_type = PERCOLATOR_SCORE;
-  second_scorer_type = Q_VALUE;
     
   carp(CARP_INFO, "Outputting matches.");
-  print_text_files(match_collection, scorer_type, second_scorer_type);
+  OutputFiles output(PERCOLATOR_COMMAND);
+  output.writeHeaders();
+  output.writeMatches(match_collection);
 
   // MEMLEAK below causes seg fault (or used to)
   // free_match_collection(match_collection);
@@ -126,93 +89,6 @@ int percolator_main(int argc, char** argv){
 }
 
 /*  ****************** Subroutines ****************/
-
-
-/*
- */
-static void print_text_files(
-  MATCH_COLLECTION_T* match_collection,
-  SCORER_TYPE_T scorer,
-  SCORER_TYPE_T second_scorer
-  ){
-
-  // get filename and open file
-  char* out_dir = get_string_parameter("output-dir");
-  char* sqt_filename = get_string_parameter("percolator-sqt-output-file");
-  prefix_fileroot_to_name(&sqt_filename);
-  char* tab_filename = get_string_parameter("percolator-tab-output-file");
-  prefix_fileroot_to_name(&tab_filename);
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-  FILE* sqt_file = create_file_in_path( sqt_filename, out_dir, overwrite );
-  FILE* tab_file = create_file_in_path( tab_filename, out_dir, overwrite );
-
-  // print header
-  int num_proteins = get_match_collection_num_proteins(match_collection);
-  print_sqt_header(sqt_file, "target", num_proteins, TRUE);
-  print_tab_header(tab_file);
-
-  // print matches to tab file
-  print_matches_multi_spectra(match_collection, tab_file, NULL);
-
-  // print matches to sqt file
-  fprintf(sqt_file, "H\tComment\tmatches analyzed by percolator\n");
-
-  // get match iterator sorted by spectrum
-  MATCH_ITERATOR_T* match_iterator = 
-    new_match_iterator_spectrum_sorted(match_collection, scorer);
-
-  // print each spectrum only once, keep track of which was last printed
-  int cur_spectrum_num = -1;
-  int cur_charge = 0;
-  int match_counter = 0;
-  int max_matches = get_int_parameter("top-match");
-
-  // for all matches
-  while( match_iterator_has_next(match_iterator) ){
-
-    // get match and spectrum
-    MATCH_T* match = match_iterator_next(match_iterator);
-    SPECTRUM_T* spectrum = get_match_spectrum(match);
-    int this_spectrum_num = get_spectrum_first_scan(spectrum);
-    int charge = get_match_charge(match);
-    int num_peptides = get_match_ln_experiment_size(match);
-    num_peptides = expf(num_peptides);
-
-    carp(CARP_DETAILED_DEBUG, 
-         "SQT printing scan %i (current %i), charge %i (current %i)", 
-         this_spectrum_num, cur_spectrum_num, charge, cur_charge);
-
-    // if this spectrum has not been printed...
-    if( cur_spectrum_num != this_spectrum_num
-        || cur_charge != charge){
-
-      carp(CARP_DETAILED_DEBUG, "Printing new S line");
-      // print S line to sqt file
-      cur_spectrum_num = this_spectrum_num;
-      cur_charge = charge;
-
-      print_spectrum_sqt(spectrum, sqt_file, num_peptides, charge);
-
-      // print match to sqt file
-      print_match_sqt(match, sqt_file, scorer, second_scorer);
-
-      match_counter = 1;
-    }
-    // if this spectrum has been printed
-    else{  
-      if( match_counter < max_matches ){
-        // print match to sqt file
-        print_match_sqt(match, sqt_file, scorer, second_scorer);
-        match_counter++;
-      }
-    }
-
-  }// next match
-  free_match_iterator(match_iterator);
-  free(sqt_filename);
-  free(tab_filename);
-
-}
 
 /**
  * \brief Analyze matches using the percolator algorithm

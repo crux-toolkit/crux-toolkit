@@ -475,6 +475,25 @@ enum _algorithm {PERCOLATOR_ALGORITHM, RCZAR_ALGORITHM, QVALUE_ALGORITHM, NO_ALG
 typedef enum _algorithm ALGORITHM_TYPE_T;
 
 /**
+ * One value for each command that can be passed to crux
+ * (e.g. search-for-matches, sequest-search, percolator).
+ */
+enum _command {
+  INVALID_COMMAND,      ///< required by coding standards
+  INDEX_COMMAND,        ///< create-index
+  SEARCH_COMMAND,       ///< search-for-matches
+  SEQUEST_COMMAND,      ///< sequest-search
+  QVALUE_COMMAND,       ///< compute-q-values
+  PERCOLATOR_COMMAND,   ///< percolator
+  QRANKER_COMMAND,      ///< q-ranker
+  PROCESS_SPEC_COMMAND, ///< print-processed-spectra
+
+  NUMBER_COMMAND_TYPES  ///< always keep this last so the value
+                        /// changes as cmds are added
+};
+
+typedef enum _command COMMAND_T;
+/**
  * \typedef RECORD_T
  * \brief RECORD_T for each value/key pair
  */

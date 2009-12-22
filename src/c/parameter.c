@@ -320,9 +320,6 @@ void initialize_parameters(void){
       "to use only command line options and default values.",
       "Available for all crux programs. Any options specified on the "
       "command line will override values in the parameter file.", "true");
-  set_string_parameter("parameter-file-name", "params.txt", 
-      "Set name for output parameter file.",
-      "Available for all crux programs.", "true");
   set_boolean_parameter("overwrite", FALSE, 
       "Replace existing files (T) or exit if attempting to overwrite "
       "(F). Default F.",
@@ -480,92 +477,11 @@ void initialize_parameters(void){
       "Folder to which results will be written. Default 'crux-output'. ",
       "Used by crux create-index, crux search-for-matches, "
       "crux compute-q-values, and crux percolator.", "true");
-  set_string_parameter("search-sqt-output-file", "search.target.sqt", 
-      "SQT output file name. Default 'search.target.sqt'",
-      "Only available for crux-search-for-matches. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("percolator-sqt-output-file", "percolator.target.sqt", 
-      "SQT output file name. Default 'percolator.target.sqt'",
-      "Only available for crux percolator. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("qvalues-sqt-output-file", "qvalues.target.sqt", 
-      "SQT output file name. Default 'qvalues.target.sqt'",
-      "Only available for crux compute-qvalues. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("qranker-sqt-output-file", "qranker.target.sqt", 
-      "SQT output file name. Default 'qranker.target.sqt'",
-      "Only available for crux q-ranker. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("decoy-sqt-output-file", "search.decoy.sqt", 
-      "SQT output file name for decoys.  Default 'search.decoy.sqt'.",
-      "Used by crux search-for-matches when "
-      "num-decoys-per-taraget > 0.  The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("search-tab-output-file", "search.target.txt", 
-      "Tab delimited output file name. Default 'search.target.txt'",
-      "Only available for crux search-for-matches. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("search-decoy-pvalue-file", "search.decoy-p.txt", 
-      "Output filename for complete list of decoy p-values.  Default 'search.decoy-p.txt'",
-      "Only available for crux search-for-matches. The location of this file is controlled by "
-      "--output-dir.", "false");
-
-  set_string_parameter("percolator-tab-output-file", "percolator.target.txt", 
-      "Tab delimited output file name. Default 'percolator.target.txt'",
-      "Only available for crux percolator. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("qranker-tab-output-file", "qranker.target.txt", 
-      "Tab delimited output file name. Default 'qranker.target.txt'",
-      "Only available for crux q-ranker. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("qvalues-tab-output-file", "qvalues.target.txt", 
-      "Tab delimited output file name. Default 'qvalues.target.txt'",
-      "Only available for crux compute-q-values. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("decoy-tab-output-file", "search.decoy.txt", 
-      "Tab delimited output file name for decoys.  Default 'search.decoy.txt'.",
-      "Used by crux search-for-matches when "
-      "num-decoys-per-targett > 0.  The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("percolator-log-file", "percolator.log.txt", 
-      "Log file name for percolator. Default 'percolator.log.txt'",
-      "Used by crux percolator. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("qvalues-log-file", "qvalues.log.txt", 
-      "Log file name for compute-q-values. Default 'qvalues.target.txt'",
-      "Used by crux compute-q-values. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("search-log-file", "search.log.txt", 
-      "Log file name for search.  Default 'search.log.txt'.",
-      "Used by crux search-for-matches. "
-      "The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("index-log-file", "index.log.txt", 
-      "Log file name for index.  Default 'index.log.txt'.",
-      "Used by crux create-index.",
-      "true");
-  set_string_parameter("percolator-param-file", "percolator.params.txt", 
-      "Parameter file name for percolator. Default 'percolator.params.txt'",
-      "Used by crux percolator. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("qranker-param-file", "qranker.params.txt", 
-      "Parameter file name for q-ranker. Default 'qranker.params.txt'",
-      "Used by crux qranker. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("qvalues-param-file", "qvalues.params.txt", 
-      "Parameter file name for compute-q-values. Default 'qvalues.params.txt'",
-      "Used by crux compute-q-values. The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("search-param-file", "search.params.txt", 
-      "Parameter file name for search.  Default 'search.params.txt'.",
-      "Used by crux search-for-matches. "
-      "The location of this file is controlled by "
-      "--output-dir.", "true");
-  set_string_parameter("index-param-file", "index.params.txt", 
-      "Parameter file name for index.  Default 'index.params.txt'.",
-      "Used by crux create-index. ",
-      "true");
-  
+  set_string_parameter("search-decoy-pvalue-file", "search.decoy.p.txt", 
+      "Output filename for complete list of decoy p-values.  Default "
+      "'search.decoy.p.txt'",
+      "Only available for crux search-for-matches. The location of this "
+      "file is controlled by --output-dir.", "true");
   // user options regarding decoys
   set_int_parameter("num-decoys-per-target", 2, 0, 10,
       "Number of decoy peptides to search for every target peptide searched."

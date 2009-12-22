@@ -75,6 +75,7 @@ struct match_collection{
   BOOLEAN_T post_scored_type_set; 
   ///< has the scored type been confirmed for the match collection,
   // set after the first match collection is extended
+  MATCH_T* top_scoring_sp; ///< the match with Sp rank == 1 
 };
 
 /**
@@ -109,17 +110,7 @@ struct match_collection_iterator{
 };
 
 /******* Private function declarations, described in definintions below ***/
-
-BOOLEAN_T score_peptides(
-  SCORER_TYPE_T score_type, 
-  MATCH_COLLECTION_T* match_collection, 
-  SPECTRUM_T* spectrum, 
-  int charge, 
-  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
-  BOOLEAN_T is_decoy
-);
-
-BOOLEAN_T add_unscored_peptides(
+int add_unscored_peptides(
   MATCH_COLLECTION_T* match_collection, 
   SPECTRUM_T* spectrum, 
   int charge, 
@@ -129,10 +120,10 @@ BOOLEAN_T add_unscored_peptides(
 
 BOOLEAN_T score_matches_one_spectrum(
   SCORER_TYPE_T score_type, 
-  MATCH_T** matches,
-  int num_matches,
+  MATCH_COLLECTION_T* match_collection,
   SPECTRUM_T* spectrum,
-  int charge
+  int charge,
+  BOOLEAN_T store_scores
   );
 
 BOOLEAN_T populate_match_rank_match_collection(
@@ -227,6 +218,9 @@ void free_match_collection(
     free_hash(match_collection->post_hash);
   }
 
+  if(match_collection->top_scoring_sp){
+    free_match(match_collection->top_scoring_sp);
+  }
 
   free(match_collection);
 }
@@ -261,6 +255,7 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
   match_collection->num_xcorrs = 0;
 
   match_collection->post_hash = NULL;
+  match_collection->top_scoring_sp = NULL;
 
   return match_collection;
 }
@@ -271,85 +266,69 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
  * are stored in a match.  All matches are stored in the
  * match_collection.  Can be called on an empty match_collection or
  * one already containing matches.  No checks to confirm that the same
- * spectrum is being searched in subsequent calls.
+ * spectrum is being searched in subsequent calls.  Assumes that the
+ * charge has been set for the match_collection.
  *
- * First, the preliminary score (as in parameter.c) is used to compare
- * peptides and spectrum.  These results are then sorted and the final
- * score (as in parameter.c) is calculated on the top-match
- * (parameter.c) top matches as ranked by the preliminary score.  No
- * matches are deleted after ranking.
+ * First, a match with no scores is generated for each peptide.  If
+ * is_decoy is true, the peptides will be shuffled.  Then if
+ * do_prelim_scoring is true, the matches are all scored with SP, 
+ * ranked, and the collection truncated.
  *
- * When called on a match collection already containing matches, the
- * preliminary score is calculated for all new peptides.  All matches
- * (from this peptide iterator and previous) are sorted by prelim
- * score and only the top-match matches are scored for the final
- * score.  Previously scored matches are not scored twice.
+ * Next, all (remaining) matches are scored with XCORR, the matches
+ * are ranked, and the collection is truncated.
  *
+ * If store_scores is true, each XCORR will be kept by the match
+ * collection in a separate array so that it is retained even after
+ * matches are deleted with truncation.  The scores can later be used
+ * to estimate weibull parameters.
+ * 
  * \returns The number of matches added.
  */
 int add_matches(
-  MATCH_COLLECTION_T* match_collection,///< add matches to this
+  MATCH_COLLECTION_T* matches, ///< add matches to this
   SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy,     ///< are peptides to be shuffled
-  //BF: this was added so that a match_collection could be mixed target/decoy
-  BOOLEAN_T keep_matches  ///< FALSE=only save xcorr for p-val estimation
+  BOOLEAN_T store_scores, ///< save scores for p-val estimation
+  BOOLEAN_T do_prelim_scoring ///< start with SP scoring
 ){
-  if( match_collection == NULL || peptide_iterator == NULL
-      || spectrum == NULL ){
-    carp(CARP_FATAL, "Cannot add matches to a collection when match " \
+
+  if( matches == NULL || peptide_iterator == NULL || spectrum == NULL ){
+    carp(CARP_FATAL, "Cannot add matches to a collection when match " 
          "collection, spectrum and/or peptide iterator are NULL.");
   }
 
-  // charge==0 if collection has no matches yet
-  assert(match_collection->charge==0 || match_collection->charge==charge);
-  match_collection->charge = charge;
-  match_collection->last_sorted = -1;
+  assert(matches->charge == charge);
 
-  int num_matches_added = 0;
-  int start_index = match_collection->match_total;
+  // generate a match for each peptide in the iterator, storing them
+  // in the match collection
+  int num_matches_added = add_unscored_peptides(matches, spectrum, charge,
+                                                peptide_iterator, is_decoy);
 
-  // TODO (BF 16-mar-09): change to add_unscored_peptides, 
-  // then score_matches_one_spectrum with one or both scores
-
-  // preliminary scoring
-  int sp_max_rank = get_int_parameter("max-rank-preliminary");
-  SCORER_TYPE_T prelim_score = get_scorer_type_parameter("prelim-score-type");
-
-  if( sp_max_rank == 0 ){ 
-    add_unscored_peptides(match_collection, spectrum, charge, 
-                          peptide_iterator, is_decoy);
-  }else{
-    score_peptides(prelim_score, match_collection, spectrum, 
-                   charge, peptide_iterator, is_decoy);
-  }
-  num_matches_added = match_collection->match_total - start_index;
-
-  // score existing matches w/second function
-  SCORER_TYPE_T final_score = get_scorer_type_parameter("score-type");
-  score_matches_one_spectrum(final_score, match_collection->match,
-                             match_collection->match_total, spectrum, charge);
-
-  match_collection->scored_type[final_score] = TRUE;
-
-  // store xcorrs from newly-score psms
-  store_new_xcorrs(match_collection, start_index, keep_matches); // replaces the sample step
-
-  if( sp_max_rank > 0 ){ 
-    // rank by sp first 
-    populate_match_rank_match_collection(match_collection, prelim_score);
-    truncate_match_collection( match_collection, sp_max_rank, prelim_score);
+  if( num_matches_added == 0 ){
+    return num_matches_added;
   }
 
-  // rank by xcorr
-  populate_match_rank_match_collection(match_collection, final_score);
+  int xcorr_max_rank = get_int_parameter("psms-per-spectrum-reported");
 
-  if( sp_max_rank == 0 ){ // truncate here if not before
-    //collapse_redundant_matches(match_collection);
-    int xcorr_max_rank = get_int_parameter("psms-per-spectrum-reported");
-    truncate_match_collection( match_collection, xcorr_max_rank, final_score);
+  // two scoring steps for sequest-search
+  if( do_prelim_scoring ){
+    score_matches_one_spectrum(SP, matches, spectrum, charge,
+                               FALSE); // don't store scores
+    populate_match_rank_match_collection(matches, SP);
+    save_top_sp_match(matches);
+    int sp_max_rank = get_int_parameter("max-rank-preliminary");
+    truncate_match_collection(matches, sp_max_rank, SP);
+    xcorr_max_rank = sp_max_rank;
   }
+
+  // main scoring
+  score_matches_one_spectrum(XCORR, matches, spectrum, charge, 
+                             store_scores); 
+  populate_match_rank_match_collection(matches, XCORR);
+  truncate_match_collection(matches, xcorr_max_rank, 
+                            XCORR);
 
   return num_matches_added;
 }
@@ -802,7 +781,7 @@ void truncate_match_collection(
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
   )
 {
-  carp(CARP_DETAILED_DEBUG, "Truncating match collection.");
+  carp(CARP_DETAILED_DEBUG, "Truncating match collection to rank %d.", max_rank);
   if (match_collection == NULL || match_collection->match_total == 0){
     carp(CARP_DETAILED_DEBUG, "No matches in collection, so not truncating");
     return;
@@ -818,16 +797,20 @@ void truncate_match_collection(
   }
 
   // Free high ranking matches
-  int highest_index = match_collection->match_total -1;
-  int cur_last_rank = get_match_rank(match_collection->match[highest_index],
-                                     score_type);
-  while( cur_last_rank > max_rank ){
-    free_match(match_collection->match[highest_index]);
+  int highest_index = match_collection->match_total - 1;
+  MATCH_T** matches = match_collection->match;
+  int cur_rank = get_match_rank(matches[highest_index], score_type);
+
+  while( cur_rank > max_rank ){
+    free_match(matches[highest_index]);
     highest_index--;
-    cur_last_rank = get_match_rank(match_collection->match[highest_index],
-                                   score_type);
+    cur_rank = get_match_rank(matches[highest_index], score_type);
   }
-  match_collection->match_total = highest_index+1;
+  match_collection->match_total = highest_index + 1;
+
+  carp(CARP_DETAILED_DEBUG, "Truncated collection now has %d matches.", 
+       match_collection->match_total);
+
 }
 
 /**
@@ -887,8 +870,44 @@ BOOLEAN_T populate_match_rank_match_collection(
     carp(CARP_DETAILED_DEBUG, "Match rank %i, score %f", cur_rank, cur_score);
   }
   
-  //carp(CARP_DETAILED_DEBUG, "Max rank %i", match_index);
   return TRUE;
+}
+
+/**
+ * Keep track of the top-scoring Sp match.  It should be printed to
+ * the sqt file even if its XCORR rank is not high enough to be
+ * printed.  Requires that ranks have been set for Sp.
+ *
+ */
+void save_top_sp_match(MATCH_COLLECTION_T* match_collection){
+
+  if( match_collection == NULL ){
+    carp(CARP_FATAL, "Cannot set top Sp match for NULL match collection.");
+  }
+
+  assert(match_collection->match_total > 0);
+  MATCH_T* cur_rank_one_match = match_collection->match[0];
+
+  // confirm that matches are sorted and ranks are set
+  if( match_collection->last_sorted != SP || 
+      get_match_rank(cur_rank_one_match, SP) != 1 ){
+    populate_match_rank_match_collection(match_collection, SP);
+  }
+
+  // if no top sp yet, set it
+  if( match_collection->top_scoring_sp == NULL ){
+    match_collection->top_scoring_sp = cur_rank_one_match;
+    increment_match_pointer_count(cur_rank_one_match);
+    return;
+  }
+
+  // otherwise, see if the current top-ranked match has a higher score
+  // the rank of top_scoring_sp should have a new rank
+  if( get_match_rank(match_collection->top_scoring_sp, SP) > 1 ){
+    free_match(match_collection->top_scoring_sp);
+    match_collection->top_scoring_sp = cur_rank_one_match;
+    increment_match_pointer_count(cur_rank_one_match);
+  }
 }
 
 /**
@@ -1086,9 +1105,9 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
 /**
  * \brief Add all peptides from iterator to match collection.
  * Additional matches will not be scored for any type.
- * \returns TRUE if successful.
+ * \returns The number of peptides added.
  */
-BOOLEAN_T add_unscored_peptides(
+int add_unscored_peptides(
   MATCH_COLLECTION_T* match_collection, 
   SPECTRUM_T* spectrum, 
   int charge, 
@@ -1134,174 +1153,42 @@ BOOLEAN_T add_unscored_peptides(
   int matches_added = match_collection->match_total - starting_number_of_psms;
   match_collection->experiment_size += matches_added;
 
-  return TRUE;
+  // matches are no longer correctly sorted
+  match_collection->last_sorted = -1; // unsorted
+  return matches_added;
 }
-
-
-/**
- * \brief Compare all peptides in iterator to spectrum using score
- * type and store results in match collection.  
- * \return TRUE if successful.
- */
-BOOLEAN_T score_peptides(
-  SCORER_TYPE_T score_type, ///< use this score to compare spec/peptide
-  MATCH_COLLECTION_T* match_collection, ///< put results here
-  SPECTRUM_T* spectrum,     ///< spectrum to compare
-  int charge,               ///< charge of spectrum
-  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< source of peptides
-  BOOLEAN_T is_decoy        ///< do we shuffle the peptides
-  //BF: this was added so that match_collection can be mixed target/decoy
-){
-
-  if( match_collection == NULL || spectrum == NULL 
-      || peptide_iterator == NULL ){
-    carp(CARP_FATAL, "Cannot score peptides with NULL inputs.");
-  }
-
-  // create ion constraint
-  ION_CONSTRAINT_T* ion_constraint = 
-    new_ion_constraint_smart(score_type, charge);
-
-  // create scorer
-  SCORER_T* scorer = new_scorer(score_type);
-
-  // variables to re-use in the loop
-  char* sequence = NULL;
-  MODIFIED_AA_T* modified_sequence = NULL;
-  MATCH_T* match = NULL;
-  FLOAT_T score = 0;
-  PEPTIDE_T* peptide = NULL;
-
-  carp(CARP_DETAILED_DEBUG, "New match_collection is null? %i", is_decoy);
-
-  // create a generic ion_series that will be reused for each peptide sequence
-  ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);  
-
-  int starting_number_of_psms = match_collection->match_total;
-  carp(CARP_DEBUG, "Scoring all peptides in iterator.");
-  while( modified_peptides_iterator_has_next(peptide_iterator)){
-    // get peptide, sequence, and ions
-    peptide = modified_peptides_iterator_next(peptide_iterator);
-    //SJM: Calling this multiple times for each peptide can get expensive.
-    //I defined this macro in carp.h that tests the verbosity level
-    //before calling the get_ function.  We could use this to compile out
-    //all debugging information in order to make a more optimized crux.
-    IF_CARP_DETAILED_DEBUG(
-      char* seq = get_peptide_modified_sequence(peptide);
-      carp(CARP_DETAILED_DEBUG, "peptide %s has %i modified aas", seq, count_peptide_modified_aas(peptide)); 
-      free(seq);
-    )
-    // create a match
-    match = new_match();
-
-    // set match fields
-    set_match_peptide(match, peptide);
-    set_match_spectrum(match, spectrum);
-    set_match_charge(match, charge);
-    set_match_null_peptide(match, is_decoy);
-
-    // update ion series for peptide sequene
-    sequence = get_match_sequence(match);
-    modified_sequence = get_match_mod_sequence(match);
-    update_ion_series(ion_series, sequence, modified_sequence);
-    predict_ions(ion_series);
-
-
-    // calculate the score
-    score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
-    // debugging
-    IF_CARP_DETAILED_DEBUG(
-      char* mod_seq = modified_aa_string_to_string(modified_sequence, strlen(sequence));
-      carp(CARP_DETAILED_DEBUG, "Score %f for %s (null:%i)", score, mod_seq, is_decoy);
-      free(mod_seq);
-    )
-
-    // set match fields
-    set_match_score(match, score_type, score);
-    set_match_b_y_ion_info(match, scorer);
-
-    // add to match collection
-    if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
-      carp(CARP_ERROR, "peptide count of %i exceeds max match limit: %d", 
-          match_collection->match_total, _MAX_NUMBER_PEPTIDES);
-      // free heap
-      free(sequence);
-      free_ion_series(ion_series);
-      free_scorer(scorer);
-      free_ion_constraint(ion_constraint);
-      free(modified_sequence);
-
-      return FALSE;
-    }
-
-    match_collection->match[match_collection->match_total] = match;
-    match_collection->match_total++;
-    match_collection->sp_scores_sum += score;
-
-    free(modified_sequence);
-    free(sequence);
-
-  }// next peptide
-
-  int matches_added = match_collection->match_total - starting_number_of_psms;
-
-  // calculate current mean
-  match_collection->sp_scores_mean = match_collection->sp_scores_sum
-                                      / match_collection->match_total;
-  //match_collection->experiment_size = match_collection->match_total;
-  match_collection->experiment_size += matches_added;
-
-  // mark it as scored
-  match_collection->scored_type[score_type] = TRUE;
-
-  // Let caller do sorting 
-
-  // clean up
-  free_ion_series(ion_series);
-  free_scorer(scorer);
-  free_ion_constraint(ion_constraint);
-
-  return TRUE;
-}
-
-/**
- * Main scoring methods
- * 
- * Unlike preliminary scoring methods only updates existing match objects 
- * with new scores. In all cases should get peptide sequence only through 
- * get_match_sequence method.
- */
 
 /**
  * \brief Use the score type to compare the spectrum and peptide in
- * the matches in match collection.  Scores only the first n where n
- * is defined by the parameter.c param, max-rank-preliminary.
+ * the matches in match collection.  
  *
- * SPEED-VS-GENREALITY TRADEOFF: Requires that all of the matches
- * already hold the given spectrum.  This is mostly an issue of the
- * max charge for the ion constraint.  If a new ion constraint is
- * created each time, or if the charge on the constraint is updated
- * each time, do not have to pass the spectrum or charge.
+ * If the match has already been scored for this type, it is not
+ * scored at again.  Requires that the given spectrum  and charge
+ * state are the same as the spectrum and charge state in each of the
+ * matches.  
  *
  * \returns TRUE, if matches are successfully scored.
  */
 BOOLEAN_T score_matches_one_spectrum(
   SCORER_TYPE_T score_type, 
-  MATCH_T** matches,
-  int num_matches,
+  MATCH_COLLECTION_T* match_collection,
   SPECTRUM_T* spectrum,
-  int charge
+  int charge,
+  BOOLEAN_T store_scores
   ){
+
+  if( match_collection == NULL || spectrum == NULL ){
+    carp(CARP_ERROR, "Cannot score matches in a NULL match collection.");
+    return FALSE;
+  }
+  
+  MATCH_T** matches = match_collection->match;
+  int num_matches = match_collection->match_total;
 
   char type_str[64];
   scorer_type_to_string(score_type, type_str);
   carp(CARP_DETAILED_DEBUG, "Scoring matches for %s", type_str);
 
-  if( matches == NULL || spectrum == NULL ){
-    carp(CARP_ERROR, "Cannot score matches in a NULL match collection.");
-    return FALSE;
-  }
-  
   // create ion constraint
   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_smart(score_type, 
                                                               charge);
@@ -1313,13 +1200,10 @@ BOOLEAN_T score_matches_one_spectrum(
   
   // score all matches
   int match_idx;
-  MATCH_T* match = NULL;
-  char* sequence = NULL;
-  MODIFIED_AA_T* modified_sequence = NULL;
 
   for(match_idx = 0; match_idx < num_matches; match_idx++){
 
-    match = matches[match_idx];
+    MATCH_T* match = matches[match_idx];
     assert( match != NULL );
 
     // skip it if it's already been scored
@@ -1330,8 +1214,8 @@ BOOLEAN_T score_matches_one_spectrum(
     // make sure it's the same spec and charge
     assert( spectrum == get_match_spectrum(match));
     assert( charge == get_match_charge(match));
-    sequence = get_match_sequence(match);
-    modified_sequence = get_match_mod_sequence(match);
+    char* sequence = get_match_sequence(match);
+    MODIFIED_AA_T* modified_sequence = get_match_mod_sequence(match);
 
     // create ion series for this peptide
     update_ion_series(ion_series, sequence, modified_sequence);
@@ -1342,7 +1226,16 @@ BOOLEAN_T score_matches_one_spectrum(
 
     // set score in match
     set_match_score(match, score_type, score);
-    
+    if( score_type == SP ){
+      set_match_b_y_ion_info(match, scorer);
+    }
+
+    // save score in collection
+    if( store_scores ){
+      match_collection->xcorrs[match_collection->num_xcorrs] = score;
+      match_collection->num_xcorrs++; 
+    }
+
     IF_CARP_DETAILED_DEBUG(
       char* mod_seq = modified_aa_string_to_string(modified_sequence,
 						   strlen(sequence));
@@ -1353,6 +1246,9 @@ BOOLEAN_T score_matches_one_spectrum(
     free(sequence);
     free(modified_sequence);
   }// next match
+
+  // set the match_collection as having been scored
+  match_collection->scored_type[score_type] = TRUE;
 
   // clean up
   free_ion_constraint(ion_constraint);
@@ -1653,92 +1549,7 @@ void transfer_match_collection_weibull(
 }
 
 /**
- * \brief Names and opens the correct number of binary psm files.
- *
- * Takes the values of output-dir parameter, ms2 filename (soon to be
- * named output file), overwrite, and num-decoy-files from parameter.c.
- * Exits with error if can't create new requested directory or if
- * can't create any of the psm files.
- * REPLACES: spectrum_collection::get_spectrum_collection_psm_result_filenames
- *
- * \returns An array of filehandles to the newly opened files
- */
-FILE** create_psm_files(){
-
-  int decoy_files = get_int_parameter("num-decoy-files");
-  int total_files = decoy_files +1;
-  // create FILE* array to return
-  FILE** file_handle_array = (FILE**)mycalloc(total_files, sizeof(FILE*));
-  int file_idx = 0;
-
-  carp(CARP_DEBUG, "Opening %d new psm files", total_files);
-
-  const char* output_directory = get_string_parameter_pointer("output-dir");
-
-  // create the output folder if it doesn't exist
-  if(access(output_directory, F_OK)){
-    if(mkdir(output_directory, S_IRWXU+S_IRWXG+S_IRWXO) != 0){
-      carp(CARP_FATAL, "Failed to create output directory %s", 
-           output_directory);
-    }
-  }
-
-  // get ms2 file for naming result file
-  //TODO change to output filename as argument, force .csm extension
-  //     add _decoy1.csm
-  //char* base_filename = get_string_parameter_pointer("ms2 file");
-  const char* ms2_filename = get_string_parameter_pointer("ms2 file");
-  //char** filename_path_array = parse_filename_path(base_filename);
-  char** filename_path_array = 
-    parse_filename_path_extension(ms2_filename, ".ms2");
-  if( filename_path_array[1] == NULL ){
-    filename_path_array[1] = ".";
-  }
-
-  carp(CARP_DEBUG, "Base filename is %s and path is %s", 
-       filename_path_array[0], filename_path_array[1]);
-
-  char* filename_template = get_full_filename(output_directory, 
-                                              filename_path_array[0]);
-
-  //create target file
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
-
-  for(file_idx=0; file_idx<total_files; file_idx++){
-
-    char* psm_filename = generate_psm_filename(file_idx);
-
-    file_handle_array[file_idx] = create_file_in_path(psm_filename,
-                                                      output_directory,
-                                                      overwrite); 
-    //check for error
-    if( file_handle_array[file_idx] == NULL ){//||
-      carp(CARP_FATAL, "Could not create psm file %s", psm_filename);
-    }
-    //rename this, just for a quick fix
-    free(filename_template);
-    filename_template = get_full_filename(output_directory, psm_filename);
-    chmod(filename_template, 0664);
-
-    // clean up
-    free(psm_filename);
-    
-  }// next file
-
-  // clean up 
-  free(filename_path_array[0]);
-  if( *filename_path_array[1] != '.' ){
-    free(filename_path_array[1]);
-  }
-  free(filename_path_array);
-  free(filename_template);
-
-  return file_handle_array;
-
-}
-
-/**
- * \brief Serialize the PSM features to output file up to 'top_match'
+* \brief Serialize the PSM features to output file up to 'top_match'
  * number of top peptides from the match_collection.
  *
  * \details  First serialize the spectrum info of the match collection
@@ -2066,8 +1877,10 @@ void print_tab_header(FILE* output){
  *
  * Prints one S line, 'top_match' M lines, and one locus line for each
  * peptide source of each M line.
- * Assumes one spectrum per match collection.  Could get top_match,
- * score types from parameter.c.  Could get spectrum from first match.
+ * Assumes one spectrum per match collection.  Only crux
+ * sequset-search produces sqt files so the two scores are always Sp
+ * and xcorr.
+ * Possible side effects: Calculates delta_cn and stores in each match
  *\returns TRUE, if sucessfully print sqt format of the PSMs, else FALSE 
  */
 BOOLEAN_T print_match_collection_sqt(
@@ -2075,9 +1888,7 @@ BOOLEAN_T print_match_collection_sqt(
   int top_match,                 ///< the top matches to output -in
   MATCH_COLLECTION_T* match_collection,
   ///< the match_collection to print sqt -in
-  SPECTRUM_T* spectrum,          ///< the spectrum to print sqt -in
-  SCORER_TYPE_T prelim_score,    ///< the preliminary score to report -in
-  SCORER_TYPE_T main_score       ///< the main score to report -in
+  SPECTRUM_T* spectrum           ///< the spectrum to print sqt -in
   )
 {
 
@@ -2088,17 +1899,6 @@ BOOLEAN_T print_match_collection_sqt(
   hold_time = time(0);
   int charge = match_collection->charge; 
   int num_matches = match_collection->experiment_size;
-
-  // If we calculated p-values, change which scores get printed
-  // since this is really only valid for xcorr...
-  assert( main_score == XCORR );
-  BOOLEAN_T pvalues = get_boolean_parameter("compute-p-values");
-  SCORER_TYPE_T score_to_print_first = main_score;
-  SCORER_TYPE_T score_to_print_second = prelim_score;
-  if( pvalues ){
-    score_to_print_second = score_to_print_first;
-    score_to_print_first = LOGP_BONF_WEIBULL_XCORR; // soon to be P_VALUES
-  }
 
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection);
@@ -2111,22 +1911,26 @@ BOOLEAN_T print_match_collection_sqt(
   // create match iterator
   // TRUE: return match in sorted order of main_score type
   MATCH_ITERATOR_T* match_iterator = 
-    new_match_iterator(match_collection, main_score, TRUE);
+    new_match_iterator(match_collection, XCORR, TRUE);
   
   // Second, iterate over matches, prints M and L lines
   while(match_iterator_has_next(match_iterator)){
     match = match_iterator_next(match_iterator);    
 
     // print only up to max_rank_result of the matches
-    if( get_match_rank(match, main_score) > top_match ){
+    if( get_match_rank(match, XCORR) > top_match ){
       break;
     }// else
 
-    print_match_sqt(match, output, 
-                    score_to_print_first, score_to_print_second);
+    print_match_sqt(match, output);
 
   }// next match
   
+  // print the match with Sp rank==1 if its xcorr rank > top_match rank.  
+  if( get_match_rank(match_collection->top_scoring_sp, XCORR) > top_match ){
+    print_match_sqt(match_collection->top_scoring_sp, output);
+  }
+
   free_match_iterator(match_iterator);
   
   return TRUE;
@@ -2185,7 +1989,6 @@ BOOLEAN_T print_match_collection_tab_delimited(
 		    spectrum_precursor_mz, 
                     spectrum_neutral_mass, num_matches, charge, 
                     match_collection->scored_type);
-
   }// next match
   
   free_match_iterator(match_iterator);
@@ -3411,6 +3214,91 @@ char* get_match_collection_iterator_directory_name(
 
   return dir_name;
 }
+
+/**
+ * Try setting the match collection's charge.  Successful if the
+ * current charge is 0 (i.e. hasn't yet been set) or if the current
+ * charge is the same as the given value.  Otherwise, returns false
+ *
+ * \returns TRUE if the match_collection's charge state was changed.
+ */
+BOOLEAN_T set_match_collection_charge(
+  MATCH_COLLECTION_T* match_collection,  ///< match collection to change
+  int charge){///< new charge value
+
+  if( match_collection->charge == 0 ){
+    match_collection->charge = charge;
+    return TRUE;
+  }// else error
+
+  carp(CARP_WARNING, "Cannot change the charge state of a match collection "
+       "once it has been set.");
+  return FALSE;
+}
+
+
+/**
+ * Search the given database or index using shuffled peptides and the
+ * spectrum/charge in the target psm match collection.  Add those
+ * scores to the target psm match collection for use in weibull
+ * parameter estimation but do not save the matches.
+ */
+void add_decoy_scores_match_collection(
+  MATCH_COLLECTION_T* target_matches, ///< add scores to this collection
+  SPECTRUM_T* spectrum, ///< search this spectrum
+  int charge, ///< search spectrum at this charge state
+  MODIFIED_PEPTIDES_ITERATOR_T* peptides ///< use these peptides to search
+){
+
+  // reuse these for scoring all matches
+  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_smart(XCORR, charge); 
+  ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);  
+  SCORER_T* scorer = new_scorer(XCORR);
+  
+  // for each peptide in the iterator
+  while( modified_peptides_iterator_has_next(peptides)){
+
+    // get peptide and sequence
+    PEPTIDE_T* peptide = modified_peptides_iterator_next(peptides);
+    //char* sequence = get_peptide_sequence(peptide);
+    // shuffle (this step normally done by the match)
+    char* decoy_sequence = NULL;
+    if( get_boolean_parameter("reverse-sequence") == TRUE ){
+      decoy_sequence = generate_reversed_sequence(peptide);
+    }else{
+      decoy_sequence = generate_shuffled_sequence(peptide);
+    }
+    IF_CARP_DETAILED_DEBUG(
+      char* seq = get_peptide_sequence(peptide);
+      carp(CARP_DETAILED_DEBUG, "Shuffling transforms: %s -> %s", 
+           seq, decoy_sequence);
+      free(seq);
+    )
+    MODIFIED_AA_T* modified_seq = convert_to_mod_aa_seq(decoy_sequence);
+
+    // create the ion series for this peptide
+    update_ion_series(ion_series, decoy_sequence, modified_seq);
+    predict_ions(ion_series);
+
+    // get the score
+    FLOAT_T score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+
+    // add to collection's list of xcorrs
+    target_matches->xcorrs[target_matches->num_xcorrs] = score;
+    target_matches->num_xcorrs++;
+
+    // clean up
+    //    free(sequence);
+    free(decoy_sequence);
+    free(modified_seq);
+    free_peptide(peptide);
+  }
+}
+
+
+
+
+
 
 /*
  * Local Variables:
