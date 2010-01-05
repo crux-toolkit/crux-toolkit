@@ -53,6 +53,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
     "spectrum-max-mass",
     "spectrum-charge",
     "output-dir",
+    "scan-number",
     "fileroot",
     "num-decoys-per-target",
     "decoy-location"

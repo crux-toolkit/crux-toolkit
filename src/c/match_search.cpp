@@ -79,6 +79,7 @@ int search_main(int argc, char** argv){
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
+    "scan-number",
     "output-dir",
     "fileroot",
     "num-decoys-per-target",

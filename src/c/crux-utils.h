@@ -365,6 +365,17 @@ void initialize_run(
   char** argv                 ///< array of command line tokens
 );
 
+/**
+ *  Read the string of the form <first>-<last> and returns <first>
+ *  or -1 if the range is invalid.
+ */
+int get_first_in_range_string(const char* range_string);
+/**
+ *  Read the string of the form <first>-<last> and returns <last>
+ *  or -1 if the range is invalid.
+ */
+int get_last_in_range_string(const char* range_string);
+
 #ifdef __cplusplus
 }
 #endif
