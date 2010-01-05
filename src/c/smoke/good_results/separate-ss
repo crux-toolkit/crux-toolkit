@@ -4904,6 +4904,10 @@ mass-window=3.000000
 # Use --decoy-location to control where they are returned (which file(s)).  Available only from the command line for search-for-matches.
 num-decoys-per-target=2
 
+# Search only select spectra specified as a single scan number or as a range as in x-y.  Default search all.
+# The search range x-y is inclusive of x and y.
+scan-number=__NULL_STR
+
 # The maximum number of modified amino acids that can appear in one peptide.  Each aa can be modified multiple times.  Default no limit.
 # Available from parameter file for search-for-matches.
 max-aas-modified=255

@@ -93,6 +93,7 @@ SPECTRUM_COLLECTION_T * allocate_spectrum_collection(void){
  * Does *NOT* parse all spectra in the file. 
  * This will be done lazily depending on the subsequent method
  * calls (parse_spectrum_collection get_spectrum_collection_spectrum).
+ * Uses the scan-number option to determine which spectra to include.
  * \returns  SPECTRUM_COLLECTION_T
  */
 SPECTRUM_COLLECTION_T* new_spectrum_collection(
@@ -250,6 +251,15 @@ BOOLEAN_T parse_spectrum_collection(
   // parse header lines 'H' into spectrum_collection comment 
   parse_header_line(spectrum_collection, file);
 
+  // get a list of scans to include if requested
+  const char* range_string = get_string_parameter("scan-number");
+  int first_scan = get_first_in_range_string(range_string);
+  int last_scan = get_last_in_range_string(range_string);
+  if( first_scan == -1 || last_scan == -1 ){
+    carp(CARP_FATAL, "The scan number range '%s' is invalid. "
+         "Must be of the form <first>-<last>.", range_string);
+  }
+
   //check to see if the mstoolkit is going to used.
   if (get_boolean_parameter("use-mstoolkit")) {
     //We now know that the file exists,
@@ -266,6 +276,15 @@ BOOLEAN_T parse_spectrum_collection(
     MST_MSReader_readFile(mst_reader, spectrum_collection->filename, mst_spectrum);
 
     while(MST_Spectrum_getScanNumber(mst_spectrum) != 0) {
+      // is this a scan to include? if not skip it
+      if( MST_Spectrum_getScanNumber(mst_spectrum) < first_scan ){
+        MST_MSReader_readFile(mst_reader, NULL, mst_spectrum);
+        continue;
+      } 
+      // are we past the last scan?
+      if( MST_Spectrum_getScanNumber(mst_spectrum) > last_scan ){
+        break;
+      }
       parsed_spectrum = allocate_spectrum();
       parse_spectrum_spectrum(parsed_spectrum, 
         mst_spectrum, 
@@ -278,10 +297,20 @@ BOOLEAN_T parse_spectrum_collection(
     }
     freeMST_Spectrum(mst_spectrum);
     freeMST_MSReader(mst_reader);
-  } else {
+  } else { // not MSToolkit
     parsed_spectrum = allocate_spectrum();
     // parse one spectrum at a time
     while(parse_spectrum_file(parsed_spectrum, file, spectrum_collection->filename)){
+      // is this a scan to include? if not skip it
+      if( get_spectrum_first_scan(parsed_spectrum) < first_scan ){
+        free_spectrum(parsed_spectrum);
+        parsed_spectrum = allocate_spectrum();
+        continue;
+      } 
+      // are we past the last scan?
+      if( get_spectrum_first_scan(parsed_spectrum) > last_scan ){
+        break;
+      }
       // is spectrum capacity not full?
       if(!add_spectrum_to_end(spectrum_collection, parsed_spectrum)){
         free_spectrum(parsed_spectrum);

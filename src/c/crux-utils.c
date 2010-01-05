@@ -1492,6 +1492,67 @@ void initialize_run(
   free(cmd_file_name);
 }
 
+/**
+ *  Read the given string of the form <first>-<last> and return <first>
+ *  or -1 if the range is invalid.  In a valid range, <first> and <last> 
+ *  are non-negative integers and there is exactly one '-' separating
+ *  them.  No check that first < last.
+ */
+int get_first_in_range_string(const char* range_string){
+  int number = 0;
+  if( range_string == NULL ){
+    return number;
+  }
+  char* dash = strchr(range_string, '-');
+  if( dash == NULL ){ // a single number
+    number = atoi(range_string);
+  } else {
+    *dash = '\0';
+    number = atoi(range_string);
+    *dash = '-';
+  }
+  // if it wasn't a real number, return -1
+  if( number == 0 && range_string[0] != '0'){
+   number = -1;
+  }
+  // invalid if more than one dash
+  dash = strchr(dash + 1, '-');
+  if( dash != NULL ){
+    number = -1;
+  }
+  return number;
+}
+ 
+/**
+ *  Read the given string of the form <first>-<last> and return <last>
+ *  or -1 if the range is invalid.  In a valid range, <first> and <last> 
+ *  are non-negative integers and there is exactly one '-' separating
+ *  them.  No check that first < last.
+ */
+int get_last_in_range_string(const char* range_string){
+  int number = BILLION;
+  if( range_string == NULL ){
+    return number;
+  }
+  char* dash = strchr(range_string, '-');
+  if( dash == NULL ){ // a single number
+    number = atoi(range_string);
+  } else {
+    dash++;
+    number = atoi(dash);
+  }
+  // if it wasn't a real number or even if it was zero
+  if( number == 0 ){
+   number = -1;
+  }
+  // invalid if more than one dash
+  dash = strchr(dash + 1, '-');
+  if( dash != NULL ){
+    number = -1;
+  }
+   return number;
+}
+
 
 
 

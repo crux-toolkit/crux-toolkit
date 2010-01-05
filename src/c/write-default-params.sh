@@ -32,7 +32,7 @@ echo "####################################################################
 for op in verbosity version parameter-file overwrite \
           output-dir fileroot print-search-progress \
           decoy-location num-decoys-per-target reverse-sequence \
-          top-match precision search-decoy-pvalue-file \
+          scan-number top-match precision search-decoy-pvalue-file \
           min-length max-length isotopic-mass fragment-mass \
           mass-window use-mz-window ion-tolerance \
           min-mass max-mass spectrum-min-mass spectrum-max-mass \
@@ -56,3 +56,6 @@ sed -i 's/parameter-file=T/parameter-file=F/' default.params
 
 # 5. Copy to crux/doc/user
 cp -f default.params ../../doc/user/default.params
+
+# 6. Remove output files
+rm -rf crux-output
