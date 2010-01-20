@@ -717,7 +717,7 @@ void print_match_tab(
   double decoy_x_qvalue = get_match_score(match, DECOY_XCORR_QVALUE);
   double decoy_p_qvalue = get_match_score(match, DECOY_PVALUE_QVALUE);
   double percolator_score = get_match_score(match, PERCOLATOR_SCORE);
-  double percolator_rank = get_match_rank(match, Q_VALUE);
+  double percolator_rank = get_match_rank(match, PERCOLATOR_SCORE);
   double percolator_qvalue = get_match_score(match, Q_VALUE);
   double qranker_score = get_match_score(match, QRANKER_SCORE);
   double qranker_qvalue = get_match_score(match, QRANKER_Q_VALUE);
