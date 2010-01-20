@@ -54,7 +54,7 @@ bool DelimitedFile::from_string(
  * \returns a DelimitedFile object
  */  
 DelimitedFile::DelimitedFile() {
-
+  reset();
 }
 
 /**
@@ -180,6 +180,9 @@ void DelimitedFile::loadData(
   }
   
   file.close();
+
+  //reset the iterator.
+  reset();
 }
 
 /**
@@ -428,6 +431,35 @@ double DelimitedFile::getDouble(
   }
 }
 
+/** 
+ * gets a double type from cell, checks for infinity.
+ */
+double DelimitedFile::getDouble(
+  const char* column_name, ///<the column name
+  unsigned int row_idx ///<the row index
+) {
+
+  int col_idx = findColumn(column_name);
+  if (col_idx == -1) {
+    carp(CARP_FATAL, "Cannot find column %s", column_name);
+  }
+  return getDouble(col_idx, row_idx);
+}
+
+/**
+ * gets a double value from cell, checks for infinity
+ * uses the current_row_ as the row index
+ */
+double DelimitedFile::getDouble(
+  const char* column_name ///<the column name
+) {
+
+  if (current_row_ >= numRows()) {
+    carp(CARP_FATAL, "Iterated past maximum number of rows!");
+  }
+  return getDouble(column_name, current_row_);
+}
+
 /**
  * gets an integer type from cell. 
  */
@@ -435,7 +467,65 @@ int DelimitedFile::getInteger(
   unsigned int col_idx, ///< the column index 
   unsigned int row_idx ///< the row index
   ) {
-
+  //TODO : check the string for a valid integer.
   return getValue<int>(col_idx, row_idx);
 }
 
+/**
+ * get an integer type from cell, checks for infintiy.
+ */
+int DelimitedFile::getInteger(
+  const char* column_name, ///< the column name
+  unsigned int row_idx ///<the row index
+) {
+
+  int col_idx = findColumn(column_name);
+  if (col_idx == -1) {
+    carp(CARP_FATAL, "Cannot find column %s", column_name);
+  }
+
+  return getInteger(col_idx, row_idx);
+}
+
+
+/**
+ * get an integer type from cell, checks for infinity.
+ * uses the current_row_ as the row index.
+ */
+int DelimitedFile::getInteger(
+    const char* column_name ///< the column name
+  ) {
+
+  if (current_row_ >= numRows()) {
+    carp(CARP_FATAL, "Iterated past maximum number of rows!");
+  }
+
+  return getInteger(column_name, current_row_);
+}
+
+
+/*Iterator functions.*/
+/**
+ * resets the current_row_ index to 0.
+ */
+void DelimitedFile::reset() {
+
+  current_row_ = 0;
+}
+
+/**
+ * increments the current_row_, 
+ */
+void DelimitedFile::next() {
+  if (current_row_ < numRows())
+    current_row_++;
+}
+
+
+/**
+ * \returns whether there are more rows to 
+ * iterate through
+ */
+BOOLEAN_T DelimitedFile::hasNext() {
+  return current_row_ < numRows();
+}

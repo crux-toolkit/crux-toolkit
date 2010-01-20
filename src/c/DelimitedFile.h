@@ -29,6 +29,7 @@ class DelimitedFile {
    */
   std::vector<std::vector<std::string> > data_;
   std::vector<std::string> column_names_;
+  unsigned int current_row_; //used for iterating through the table.
 
   /**
    * tokenize a string by delimiter
@@ -238,6 +239,7 @@ class DelimitedFile {
       setString(col_idx, row_idx, svalue);
   }  
 
+
   /**
    * gets a double type from cell, checks for infinity. 
    */
@@ -246,6 +248,23 @@ class DelimitedFile {
     unsigned int row_idx ///< the row index
   );
 
+  /** 
+   * gets a double type from cell, checks for infinity.
+   */
+  double getDouble(
+    const char* column_name, ///<the column name
+    unsigned int row_idx ///<the row index
+  );
+
+  /**
+   * gets a double value from cell, checks for infinity
+   * uses the current_row_ as the row index
+   */
+  double getDouble(
+    const char* column_name ///<the column name
+  );
+
+
  /**
    * gets an integer type from cell, checks for infinity. 
    */
@@ -253,6 +272,43 @@ class DelimitedFile {
     unsigned int col_idx, ///< the column index 
     unsigned int row_idx ///< the row index
   );
+
+  /**
+   * get an integer type from cell, checks for infintiy.
+   */
+  int getInteger(
+    const char* column_name, ///< the column name
+    unsigned int row_idx ///<the row index
+  );
+
+  /**
+   * get an integer type from cell, checks for infinity.
+   * uses the current_row_ as the row index.
+   */
+  int getInteger(
+    const char* column_name ///< the column name
+  );
+
+
+  /*Iterator functions.*/
+  /**
+   * resets the current_row_ index to 0.
+   */
+  void reset();
+
+  /**
+   * increments the current_row_, 
+   */
+  void next();
+
+
+  /**
+   * \returns whether there are more rows to 
+   * iterate through
+   */
+  BOOLEAN_T hasNext();
+
+  
 
 };
 
