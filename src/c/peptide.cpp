@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file peptide.c
+ * \file peptide.cpp
  * $Revision: 1.85 $
  * \brief: Object for representing a single peptide.
  ****************************************************************************/
@@ -301,7 +301,8 @@ void set_peptide_peptide_mass(
 /**
  * \returns the peptide mass
  */
-inline FLOAT_T get_peptide_peptide_mass( 
+
+/*inline*/ FLOAT_T get_peptide_peptide_mass( 
   PEPTIDE_T* peptide  ///< the peptide to query the mass -in
   )
 {
@@ -1923,7 +1924,7 @@ char *get_protein_ids(PEPTIDE_T *peptide) {
     char* protein_id = get_protein_id(protein);
     size_t protein_id_len = strlen(protein_id);
     size_t protein_field_len = allocation_factor * protein_id_len + 1; // Buffer size
-    protein_field = mymalloc(sizeof(char) * protein_field_len);
+    protein_field = (char*)mymalloc(sizeof(char) * protein_field_len);
     size_t protein_field_free = protein_field_len;  // Remaining free buffer space
     char *protein_field_tail = protein_field;
     *protein_field = 0;
@@ -1946,7 +1947,7 @@ char *get_protein_ids(PEPTIDE_T *peptide) {
       // Allocate more memory if needed, allow space for comma and null
       if (protein_field_free < (protein_id_len + 2)) {
         size_t tail_offset = protein_field_tail - protein_field;
-        protein_field = myrealloc(
+        protein_field = (char*)myrealloc(
           protein_field, 
           sizeof(char) * ((allocation_factor * (protein_id_len + 1)) + protein_field_len)
         );
@@ -1998,7 +1999,7 @@ char *get_flanking_aas(PEPTIDE_T *peptide) {
     const int allocation_factor = 1;
     size_t flanking_str_len = 2; // left and right flanking AA
     size_t flanking_field_len = allocation_factor * flanking_str_len + 1;
-    flanking_field = mymalloc(sizeof(char) * flanking_field_len);
+    flanking_field = (char*)mymalloc(sizeof(char) * flanking_field_len);
     size_t flanking_field_free = flanking_field_len;
     char *flanking_field_tail = flanking_field;
 
@@ -2029,7 +2030,7 @@ char *get_flanking_aas(PEPTIDE_T *peptide) {
       // Allocate more memory if needed
       if (flanking_field_free < flanking_str_len + 1) {
         size_t tail_offset = flanking_field_tail - flanking_field;
-        flanking_field = myrealloc(
+        flanking_field = (char*)myrealloc(
           flanking_field,
           sizeof(char) * (allocation_factor * flanking_str_len + flanking_field_len)
         ); 

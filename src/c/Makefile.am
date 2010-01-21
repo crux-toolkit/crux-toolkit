@@ -77,7 +77,7 @@ LIBFILES= \
   parse_arguments.h \
   peak.c \
   peak.h \
-  peptide.c \
+  peptide.cpp \
   peptide_constraint.c \
   peptide_constraint.h \
   peptide.h \
@@ -140,8 +140,8 @@ crux_get_ms2_spectrum_LDADD = \
   $(AM_LDFLAGS) \
   libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
 
-crux_generate_peptides_SOURCES = generate_peptides.c
-crux_generate_peptides_CFLAGS = $(AM_CFLAGS) -DMAIN
+crux_generate_peptides_SOURCES = generate_peptides.cpp
+crux_generate_peptides_CXXFLAGS = $(AM_CFLAGS) -DMAIN
 crux_generate_peptides_LDADD = $(AM_LDFLAGS) libcrux.la -lm  
 
 crux_predict_peptide_ions_SOURCES = predict_peptide_ions.cpp

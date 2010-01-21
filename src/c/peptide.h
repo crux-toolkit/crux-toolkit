@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "utils.h"
 #include "crux-utils.h"
 #include "hash.h"
@@ -62,7 +63,7 @@ PEPTIDE_T* new_peptide(
 PEPTIDE_T* copy_peptide(
   PEPTIDE_T* src ///< source peptide -in
 );
-
+ 
 /**
  * Merge to identical peptides, copy all peptide_src into one of the peptide
  * peptide_dest, peptide_bye must have at least one peptide src
@@ -115,7 +116,7 @@ void set_peptide_peptide_mass(
 /**
  * \returns the peptide mass
  */
-inline FLOAT_T get_peptide_peptide_mass( 
+/*inline*/ FLOAT_T get_peptide_peptide_mass( 
   PEPTIDE_T* peptide  ///< the peptide to query the mass -in
   );
 

@@ -5,10 +5,15 @@
  */
 #ifndef PEPTIDE_SRC_H
 #define PEPTIDE_SRC_H
+#include <stdio.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "utils.h"
 #include "mass.h"
-#include <stdio.h>
+
 #include "objects.h"
 #include "carp.h"
 #include "peptide_constraint.h"
@@ -228,6 +233,10 @@ void serialize_peptide_src(
  * file. 
  */
 int size_of_serialized_peptide_src();
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * Local Variables:
