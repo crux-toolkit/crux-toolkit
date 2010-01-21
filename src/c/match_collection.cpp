@@ -175,7 +175,7 @@ MATCH_COLLECTION_T* allocate_match_collection()
   }
   
   // set last score to -1, thus nothing has been done yet
-  match_collection->last_sorted = -1;
+  match_collection->last_sorted = (SCORER_TYPE_T)-1;
   match_collection->iterator_lock = FALSE;
   match_collection->post_process_collection = FALSE;
   match_collection->null_peptide_collection = FALSE;
@@ -249,7 +249,7 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
   for(idx=0; idx<_SCORE_TYPE_NUM; idx++){
     match_collection->scored_type[idx] = FALSE;
   }
-  match_collection->last_sorted = -1;
+  match_collection->last_sorted = (SCORER_TYPE_T)-1;
   match_collection->iterator_lock = FALSE;
   match_collection->num_samples = 0;
   match_collection->num_xcorrs = 0;
@@ -361,8 +361,8 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
     for(type_idx = 0; type_idx < _SCORE_TYPE_NUM; type_idx++){
       if( destination->scored_type[type_idx] != source->scored_type[type_idx]){
         char type_str[SMALL_BUFFER];
-        char* dest_str = (destination->scored_type[type_idx]) ? "" : " not";
-        char* src_str = (source->scored_type[type_idx]) ? "" : " not";
+        const char* dest_str = (destination->scored_type[type_idx]) ? "" : " not";
+        const char* src_str = (source->scored_type[type_idx]) ? "" : " not";
         scorer_type_to_string((SCORER_TYPE_T)type_idx, type_str);
         carp(CARP_FATAL, "Cannot merge match collections scored for "
              "different types.  Trying to add matches%s scored for %s "
@@ -397,7 +397,7 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
   // update destination count
   destination->match_total += src_num_matches;
   destination->experiment_size += source->experiment_size;
-  destination->last_sorted = -1;  // unset any last-sorted flag
+  destination->last_sorted = (SCORER_TYPE_T)-1;  // unset any last-sorted flag
 
   return src_num_matches;
 }
@@ -624,13 +624,13 @@ BOOLEAN_T sort_match_collection(
     // LOGP_BONF_EVD_XCORR and XCORR have same order, 
     // sort the match to decreasing XCORR order for the return
     qsort_match(match_collection->match, match_collection->match_total, 
-                (void *)compare_match_xcorr);
+                (MATCH_COMPARE_METHOD)compare_match_xcorr);
     match_collection->last_sorted = XCORR;
     return TRUE;
 
   case LOGP_BONF_WEIBULL_XCORR: 
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_p_value);
+                (MATCH_COMPARE_METHOD)compare_match_p_value);
     match_collection->last_sorted = LOGP_BONF_WEIBULL_XCORR;
     return TRUE;
 
@@ -647,21 +647,21 @@ BOOLEAN_T sort_match_collection(
     carp(CARP_DETAILED_DEBUG, "Sorting match_collection of %i matches", 
          match_collection->match_total);
     qsort_match(match_collection->match, 
-                match_collection->match_total, (void *)compare_match_sp);
+                match_collection->match_total, (MATCH_COMPARE_METHOD)compare_match_sp);
     match_collection->last_sorted = SP;
     return TRUE;
 
   case Q_VALUE:
   case PERCOLATOR_SCORE:
     qsort_match(match_collection->match, match_collection->match_total, 
-        (void *)compare_match_percolator_score);
+        (MATCH_COMPARE_METHOD)compare_match_percolator_score);
     match_collection->last_sorted = PERCOLATOR_SCORE;
     return TRUE;
 
   case QRANKER_Q_VALUE:
   case QRANKER_SCORE:
     qsort_match(match_collection->match, match_collection->match_total, 
-        (void *)compare_match_qranker_score);
+        (MATCH_COMPARE_METHOD)compare_match_qranker_score);
     match_collection->last_sorted = QRANKER_SCORE;
     return TRUE;
   }
@@ -699,7 +699,7 @@ BOOLEAN_T spectrum_sort_match_collection(
   case LOGP_WEIBULL_XCORR: 
   case LOGP_BONF_WEIBULL_XCORR: 
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_spectrum_xcorr);
+                (MATCH_COMPARE_METHOD)compare_match_spectrum_xcorr);
     match_collection->last_sorted = XCORR;
     success = TRUE;
     break;
@@ -711,49 +711,49 @@ BOOLEAN_T spectrum_sort_match_collection(
   case LOGP_BONF_WEIBULL_SP: 
   case LOGP_QVALUE_WEIBULL_XCORR: 
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_spectrum_sp);
+                (MATCH_COMPARE_METHOD)compare_match_spectrum_sp);
     match_collection->last_sorted = SP;
     success = TRUE;
     break;
 
   case Q_VALUE:
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_spectrum_q_value);
+                (MATCH_COMPARE_METHOD)compare_match_spectrum_q_value);
     match_collection->last_sorted = Q_VALUE;
     success = TRUE;
     break;
 
   case QRANKER_Q_VALUE:
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_spectrum_qranker_q_value);
+                (MATCH_COMPARE_METHOD)compare_match_spectrum_qranker_q_value);
     match_collection->last_sorted = QRANKER_Q_VALUE;
     success = TRUE;
     break;
 
   case PERCOLATOR_SCORE:
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_spectrum_percolator_score);
+                (MATCH_COMPARE_METHOD)compare_match_spectrum_percolator_score);
     match_collection->last_sorted = PERCOLATOR_SCORE;
     success = TRUE;
     break;
 
   case QRANKER_SCORE:
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_spectrum_qranker_score);
+                (MATCH_COMPARE_METHOD)compare_match_spectrum_qranker_score);
     match_collection->last_sorted = QRANKER_SCORE;
     success = TRUE;
     break;
 
   case DECOY_XCORR_QVALUE:
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_spectrum_decoy_xcorr_qvalue);
+                (MATCH_COMPARE_METHOD)compare_match_spectrum_decoy_xcorr_qvalue);
     match_collection->last_sorted = DECOY_XCORR_QVALUE;
     success = TRUE;
     break;
 
   case DECOY_PVALUE_QVALUE:
     qsort_match(match_collection->match, match_collection->match_total,
-                (void*)compare_match_spectrum_decoy_pvalue_qvalue);
+                (MATCH_COMPARE_METHOD)compare_match_spectrum_decoy_pvalue_qvalue);
     match_collection->last_sorted = DECOY_PVALUE_QVALUE;
     success = TRUE;
     break;
@@ -935,7 +935,7 @@ MATCH_COLLECTION_T* random_sample_match_collection(
 
   // ranomly select matches upto count_max
   for(; count_idx < count_max; ++count_idx){
-    match_idx = ((double)rand()/((double)RAND_MAX + (double)1)) 
+    match_idx = (int)((double)rand()/((double)RAND_MAX + (double)1)) 
       * match_collection->match_total;
     
     // match_idx = rand() % match_collection->match_total;
@@ -1154,7 +1154,7 @@ int add_unscored_peptides(
   match_collection->experiment_size += matches_added;
 
   // matches are no longer correctly sorted
-  match_collection->last_sorted = -1; // unsorted
+  match_collection->last_sorted = (SCORER_TYPE_T)-1; // unsorted
   return matches_added;
 }
 
@@ -2822,7 +2822,7 @@ BOOLEAN_T calculate_delta_cn( MATCH_COLLECTION_T* match_collection){
   MATCH_T** matches = match_collection->match;
   int num_matches = match_collection->match_total;
   if( match_collection->last_sorted != XCORR ){
-    qsort_match(matches, num_matches, (void*)compare_match_xcorr);
+    qsort_match(matches, num_matches, (MATCH_COMPARE_METHOD)compare_match_xcorr);
     match_collection->last_sorted = XCORR;
   }
 

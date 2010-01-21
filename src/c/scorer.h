@@ -16,7 +16,10 @@
 #include "objects.h"
 #include "peptide.h"
 #include "ion.h"
-#include "scorer.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * \returns An (empty) scorer object.
@@ -338,6 +341,10 @@ void get_processed_peaks(
   int charge,
   FLOAT_T** intensities, ///< pointer to array of intensities
   int* mz_bins);
+
+#ifdef __cplusplus
+}
+#endif
 
 
 /*
