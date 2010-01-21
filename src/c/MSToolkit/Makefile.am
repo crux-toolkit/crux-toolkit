@@ -40,7 +40,7 @@ libmstoolkit_la_SOURCES = \
   zLib/zutil.c \
   zLib/zutil.h
 
-libmstoolkit_la_CPPFLAGS = $(AM_CPPFLAGS) \
+libmstoolkit_la_CXXFLAGS = $(AM_CPPFLAGS) \
   -I$(top_srcdir)/src/c/MSToolkit/zLib \
   -I$(top_srcdir)/src/c/MSToolkit/RAMP \
   -D_LARGEFILE_SOURCE \

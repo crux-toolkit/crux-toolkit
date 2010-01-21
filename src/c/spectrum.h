@@ -11,11 +11,17 @@
 #include "objects.h"
 #include "peak.h"
 
-#ifndef __cplusplus
-#include "CSpectrum.h"
-#endif
 
 #ifdef __cplusplus
+//I don't know why including Spectrum here causes a compilation error,
+//for now just pass it in as a void pointer.  Fix this after most of
+//the files get changed to C++.
+BOOLEAN_T parse_spectrum_spectrum(
+  SPECTRUM_T* spectrum, ///< spectrum to parse the information int -out
+  void* mst_spectrum, ///< the input MSToolkit spectrum -in
+  char* filename ///< filename of the spectrum, should not free -in
+);
+
 extern "C" {
 #endif
 
@@ -91,17 +97,6 @@ BOOLEAN_T parse_spectrum_file(
   char* filename ///< filename of the spectrum, should not free -in
   );
 
-/**
-  * Parses a spectrum from a MSToolkit::Spectrum
-  * \returns TRUE if success. FALSE is failure.
-  */
-#ifndef __cplusplus
-BOOLEAN_T parse_spectrum_spectrum(
-  SPECTRUM_T* spectrum, ///< spectrum to parse the information int -out
-  MST_SPECTRUM_T* mst_spectrum, ///< the input MSToolkit spectrum -in
-  char* filename ///< filename of the spectrum, should not free -in
-);
-#endif
 /**
  * \returns TRUE if success. FALSE if failure.
  */

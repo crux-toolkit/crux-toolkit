@@ -697,7 +697,7 @@ void print_match_tab(
       factor = 1;
     }
     b_y_total = (get_peptide_length(peptide)-1) * 2 * factor;
-    b_y_matched = (get_match_b_y_ion_fraction_matched(match)) * b_y_total;
+    b_y_matched = (int)((get_match_b_y_ion_fraction_matched(match)) * b_y_total);
   }
 
   FLOAT_T delta_cn = get_match_delta_cn(match);
@@ -884,7 +884,7 @@ void shuffle_matches(
 void qsort_match(
   MATCH_T** match_array, ///< the match array to sort -in  
   int match_total,  ///< the total number of match objects -in
-  void* compare_method ///< the compare method to use -in
+  int (*compare_method)(const void*, const void*) ///< the compare method to use -in
   )
 {
   qsort(match_array, match_total, sizeof(MATCH_T*), compare_method);

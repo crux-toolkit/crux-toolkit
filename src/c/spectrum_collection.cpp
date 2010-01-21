@@ -21,8 +21,9 @@
 #include "unistd.h"
 #include "parameter.h"
 
-#include "CMSReader.h"
-#include "CSpectrum.h"
+#include "Spectrum.h"
+#include "MSReader.h"
+using namespace MSToolkit;
 
 #define MAX_SPECTRA 40000 ///< max number of spectrums
 #define MAX_COMMENT 1000 ///< max length of comment
@@ -270,19 +271,20 @@ BOOLEAN_T parse_spectrum_collection(
     //the collection.
     fclose(file);
     carp(CARP_INFO,"using mstoolkit to parse spectra");
-    MST_MSREADER_T* mst_reader = newMST_MSReader();
-    MST_SPECTRUM_T* mst_spectrum = newMST_Spectrum();
 
-    MST_MSReader_readFile(mst_reader, spectrum_collection->filename, mst_spectrum);
+    MSReader* mst_reader = new MSReader();
+    Spectrum* mst_spectrum = new Spectrum();
 
-    while(MST_Spectrum_getScanNumber(mst_spectrum) != 0) {
+    mst_reader -> readFile(spectrum_collection -> filename, *mst_spectrum);
+
+    while(mst_spectrum -> getScanNumber() != 0) {
       // is this a scan to include? if not skip it
-      if( MST_Spectrum_getScanNumber(mst_spectrum) < first_scan ){
-        MST_MSReader_readFile(mst_reader, NULL, mst_spectrum);
+      if( mst_spectrum -> getScanNumber() < first_scan ){
+        mst_reader -> readFile(NULL, *mst_spectrum);
         continue;
       } 
       // are we past the last scan?
-      if( MST_Spectrum_getScanNumber(mst_spectrum) > last_scan ){
+      if( mst_spectrum ->  getScanNumber() > last_scan ){
         break;
       }
       parsed_spectrum = allocate_spectrum();
@@ -293,10 +295,10 @@ BOOLEAN_T parse_spectrum_collection(
         free_spectrum(parsed_spectrum);
         return FALSE;
       }
-      MST_MSReader_readFile(mst_reader, NULL, mst_spectrum);
+      mst_reader -> readFile(NULL, *mst_spectrum);
     }
-    freeMST_Spectrum(mst_spectrum);
-    freeMST_MSReader(mst_reader);
+    delete mst_spectrum;
+    delete mst_reader;
   } else { // not MSToolkit
     parsed_spectrum = allocate_spectrum();
     // parse one spectrum at a time
@@ -458,16 +460,16 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     //the file, so close it. (SJM)
     fclose(file);
     carp(CARP_INFO,"using mstoolkit to parse spectrum");
-    MST_MSREADER_T* mst_reader = newMST_MSReader();
-    MST_SPECTRUM_T* mst_spectrum = newMST_Spectrum();
+    MSReader* mst_reader = new MSReader();
+    Spectrum* mst_spectrum = new Spectrum();
     BOOLEAN_T parsed = FALSE;
 
+    mst_reader -> readFile(
+      spectrum_collection -> filename,
+      *mst_spectrum,
+      first_scan);
 
-    MST_MSReader_readFileScan(mst_reader, 
-      spectrum_collection->filename, 
-      mst_spectrum, first_scan);
-
-    if (MST_Spectrum_getScanNumber(mst_spectrum) != 0) {
+    if (mst_spectrum -> getScanNumber() != 0) {
       parse_spectrum_spectrum(spectrum, 
             mst_spectrum, 
             spectrum_collection->filename);
@@ -477,9 +479,8 @@ BOOLEAN_T get_spectrum_collection_spectrum(
       carp(CARP_ERROR,"Spectrum %d does not exist in file", first_scan);
       parsed = FALSE;
     }
-
-    freeMST_Spectrum(mst_spectrum);
-    freeMST_MSReader(mst_reader);
+    delete mst_spectrum;
+    delete mst_reader;
     return parsed;
   } else {
 

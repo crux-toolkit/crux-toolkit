@@ -10,9 +10,7 @@
 #ifndef MATCH_COLLECTION_H
 #define MATCH_COLLECTION_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 
 #include <math.h>
 #include <stdlib.h>
@@ -44,6 +42,11 @@ extern "C" {
 #define _PSM_SAMPLE_SIZE 500
 #define _MAX_NUMBER_PEPTIDES 10000000
 ///< max number of peptides a single match collection can hold
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // TODO (BF 1-28-08): should this be in m_c.h ?
 /**

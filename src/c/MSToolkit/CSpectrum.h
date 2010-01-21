@@ -14,13 +14,13 @@
 
 #ifdef __cplusplus
 #include "Spectrum.h"
-using namespace MSToolkit;
 #endif
 
 //Make Spectrum visible to C as an opaque struct.
 #ifdef __cplusplus
+typedef MSToolkit::Spectrum MST_SPECTRUM_T;
 extern "C" {
-  typedef Spectrum MST_SPECTRUM_T;
+
 #else
 typedef struct Spectrum_ MST_SPECTRUM_T;
 #endif

@@ -54,14 +54,18 @@ void shuffle_matches(
   int end_index          ///< index AFTER the last element to shuffle
   );
 
+#ifdef __cplusplus
+#define MATCH_COMPARE_METHOD int(*)(const void*, const void*)
+
 /**
  * sort the match array with the corresponding compare method
  */
 void qsort_match(
   MATCH_T** match_array, ///< the match array to sort -in  
   int match_total,  ///< the total number of match objects -in
-  void* compare_method ///< the compare method to use -in
+  int (*compare_method)(const void*, const void*) ///< the compare method to use -in
   );
+#endif
 
 /**
  * compare two matches, used for qsort

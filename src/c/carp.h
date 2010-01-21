@@ -6,11 +6,11 @@
 #ifndef CARP_H 
 #define CARP_H
 
+#include "utils.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "utils.h"
 
 /** 
  * Verbosity level for a fatal error (e.g., could not open an input file)

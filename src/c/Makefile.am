@@ -58,9 +58,9 @@ LIBFILES= \
   linked_list.h \
   mass.c \
   mass.h \
-  match.c \
+  match.cpp \
   match.h \
-  match_collection.c \
+  match_collection.cpp \
   match_collection.h \
   match_search.cpp \
   modifications.c \
@@ -103,8 +103,8 @@ LIBFILES= \
   scorer.h \
   sorter.c \
   sorter.h \
-  spectrum.c \
-  spectrum_collection.c \
+  spectrum.cpp \
+  spectrum_collection.cpp \
   spectrum_collection.h \
   spectrum.h \
   utils.c \
@@ -121,6 +121,7 @@ libcrux_la_CFLAGS = \
 libcrux_la_CXXFLAGS = \
   $(AM_CXXFLAGS) \
   -I$(top_srcdir)/src/c/MSToolkit \
+  -I$(top_srcdir)/src/c/MSToolkit/RAMP \
   -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/q-ranker/
 

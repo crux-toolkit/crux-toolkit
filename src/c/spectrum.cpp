@@ -1,10 +1,11 @@
 /*************************************************************************//**
- * \file spectrum.c
+ * \file spectrum.cpp
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
  * DESCRIPTION: code to support working with spectra
  * REVISION: $Revision: 1.71 $
  ****************************************************************************/
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +20,12 @@
 #include "parameter.h"
 #include "scorer.h"
 #include "carp.h"
+
+#include "Spectrum.h"
+
+//There is a name clash with MS2 in MSToolkit, so can't use the namespace decl here
+//using namespace MSToolkit;
+
 
 /**
  * \define constants
@@ -833,14 +840,17 @@ BOOLEAN_T parse_spectrum_file(
 
 BOOLEAN_T parse_spectrum_spectrum(
   SPECTRUM_T* spectrum, ///< spectrum to parse the information int -out
-  MST_SPECTRUM_T* mst_spectrum, ///< the input MSToolkit spectrum -in
+  void* mst_spectrum, ///< the input MSToolkit spectrum -in
   char* filename ///< filename of the spectrum, should not free -in
   ) {
 
+
+  MSToolkit::Spectrum* mst_real_spectrum = (MSToolkit::Spectrum*)mst_spectrum;
+
   //set first_scan, last_scan, and precursor_mz.
-  set_spectrum_first_scan( spectrum,  MST_Spectrum_getScanNumber(mst_spectrum));
-  set_spectrum_last_scan( spectrum, MST_Spectrum_getScanNumber(mst_spectrum));
-  set_spectrum_precursor_mz( spectrum, MST_Spectrum_getMZ(mst_spectrum));
+  set_spectrum_first_scan(spectrum, mst_real_spectrum -> getScanNumber());
+  set_spectrum_last_scan(spectrum, mst_real_spectrum -> getScanNumber());
+  set_spectrum_precursor_mz(spectrum, mst_real_spectrum -> getMZ());
 
   // set filename of empty spectrum
   set_spectrum_new_filename(spectrum, filename);
@@ -850,17 +860,17 @@ BOOLEAN_T parse_spectrum_spectrum(
   int z_idx;
 
   //add possible charge states.
-  for (z_idx=0;z_idx < MST_Spectrum_sizeZ(mst_spectrum);z_idx++) {
-    add_possible_z(spectrum, MST_Spectrum_atZ(mst_spectrum, z_idx));
+  for (z_idx=0;z_idx < mst_real_spectrum -> sizeZ();z_idx++) {
+    add_possible_z(spectrum, mst_real_spectrum -> atZ(z_idx).z);
   }
 
   //add all peaks.
   
   int peak_idx;
-  for (peak_idx=0;peak_idx < MST_Spectrum_size(mst_spectrum);peak_idx++) {
+  for (peak_idx=0;peak_idx < mst_real_spectrum -> size();peak_idx++) {
     add_peak_to_spectrum(spectrum,
-      MST_Spectrum_intensity(mst_spectrum, peak_idx),
-      MST_Spectrum_mz(mst_spectrum, peak_idx));
+      mst_real_spectrum -> at(peak_idx).intensity,
+      mst_real_spectrum -> at(peak_idx).mz);
   }
   
   spectrum -> has_peaks = TRUE;
