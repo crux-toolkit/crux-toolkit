@@ -7,6 +7,7 @@
 #define INDEX_H
 
 #include <stdio.h>
+
 #include "utils.h"
 #include "objects.h"
 #include "peptide.h"

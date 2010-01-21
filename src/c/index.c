@@ -11,8 +11,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
+
 #include "utils.h"
 #include "crux-utils.h"
+
 #include "peptide.h"
 #include "protein.h"
 #include "index.h"
@@ -2559,6 +2561,7 @@ PEPTIDE_T* void_index_peptide_iterator_next(
 
   return index_peptide_iterator_next((INDEX_PEPTIDE_ITERATOR_T*)index_peptide_iterator);
 }
+
 
 /*
  * Local Variables:
