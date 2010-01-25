@@ -17,6 +17,8 @@
 #include "peptide_src.h"
 #include "peptide_constraint.h"
 
+#include "DelimitedFile.h"
+
 /**
  * \struct peptide_src
  * \brief object for mapping a peptide to it's parent protein.
@@ -34,7 +36,7 @@ struct peptide_src{
  */
 PEPTIDE_SRC_T* allocate_peptide_src(void){
   PEPTIDE_SRC_T* peptide_src =
-    mymalloc(sizeof(PEPTIDE_SRC_T));
+    (PEPTIDE_SRC_T*)mymalloc(sizeof(PEPTIDE_SRC_T));
 
   peptide_src->next_association = NULL;
   return peptide_src;
@@ -410,6 +412,42 @@ int size_of_serialized_peptide_src(){
   //return (sizeof(int)*2 + sizeof(PEPTIDE_TYPE_T));
   return (sizeof(int)*2 + sizeof(DIGEST_T));
 }
+
+/**
+ * \brief Read in the peptide_src objects from the given file and
+ * assosiated them with the given peptide.  
+ * Proteins for the pepitde_src are found in the given database.  If
+ * database is NULL, does not set proteins.  (This option is used for
+ * sorting index files while creating index.)  Either array or 
+ * linked list implementation of multiple peptide_src is used based on
+ * the value of use_array.
+ *
+ * \returns TRUE if peptide_src's were successfully parsed, else
+ * returns FALSE.
+ */
+BOOLEAN_T parse_peptide_src_tab_delimited(
+  PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
+  DelimitedFile& file,           ///< file to read from
+  DATABASE_T* database, ///< database containing proteins
+  BOOLEAN_T use_array) ///< use array implementation vs. linked list
+{
+  //TODO - Implement
+
+  if( peptide == NULL ){
+    carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide.");
+    return FALSE;
+  }
+  return FALSE;
+
+  //touch parameters to reduce warnings.
+  file.getInteger("scan");
+  get_peptide_sequence(peptide);
+  get_database_filename(database);
+  if (use_array)
+    carp(CARP_INFO,"Dummy use of parameters");
+
+}
+
 
 /**
  * \brief Read in the peptide_src objects from the given file and

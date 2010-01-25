@@ -15,9 +15,9 @@
 #include <string>
 #include <vector>
 
-extern "C" {
+//extern "C" {
 #include "parameter.h"
-}
+//}
 
 
 class DelimitedFile {
@@ -31,14 +31,7 @@ class DelimitedFile {
   std::vector<std::string> column_names_;
   unsigned int current_row_; //used for iterating through the table.
 
-  /**
-   * tokenize a string by delimiter
-   */
-  void tokenize(
-    const std::string& str,
-    std::vector<std::string>& tokens,
-    char delimiter = '\t'
-  );
+
 
   /**
    * convert string to data type
@@ -196,6 +189,23 @@ class DelimitedFile {
     unsigned int row_idx  ///< the row index
   );
 
+  /** 
+   * gets a string value of the cell.
+   */
+  std::string& getString(
+    const char* column_name, ///<the column name
+    unsigned int row_idx ///< the row index
+  );
+
+  /**
+   * gets a string value of the cell
+   * uses the current_row_ as the row index
+   */
+  std::string& getString(
+    const char* column_name ///<the column name
+  );
+
+
   /**
    * sets the string value of the cell
    */
@@ -239,6 +249,29 @@ class DelimitedFile {
       setString(col_idx, row_idx, svalue);
   }  
 
+  /**
+   * gets a double type from cell, checks for infinity. 
+   */
+  FLOAT_T getFloat(
+    unsigned int col_idx, ///< the column index
+    unsigned int row_idx ///< the row index
+  );
+
+  /** 
+   * gets a double type from cell, checks for infinity.
+   */
+  FLOAT_T getFloat(
+    const char* column_name, ///<the column name
+    unsigned int row_idx ///< the row index
+  );
+
+  /**
+   * gets a double value from cell, checks for infinity
+   * uses the current_row_ as the row index
+   */
+  FLOAT_T getFloat(
+    const char* column_name ///<the column name
+  );
 
   /**
    * gets a double type from cell, checks for infinity. 
@@ -289,6 +322,17 @@ class DelimitedFile {
     const char* column_name ///< the column name
   );
 
+  /**
+   * gets an vector of integers from cell
+   * uses the current_row_ as the row index.
+   * clears the integer vector before 
+   * populating it.
+   */
+  void getIntegerVectorFromCell(
+    const char* column_name, ///< the column name
+    std::vector<int>& int_vector, ///<the vector of integers
+    char delimiter=',' ///<the delimiter to use
+  );
 
   /*Iterator functions.*/
   /**
@@ -307,6 +351,15 @@ class DelimitedFile {
    * iterate through
    */
   BOOLEAN_T hasNext();
+
+  /**
+   * tokenize a string by delimiter
+   */
+  static void tokenize(
+    const std::string& str,
+    std::vector<std::string>& tokens,
+    char delimiter = '\t'
+  );
 
   
 

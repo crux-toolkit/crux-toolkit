@@ -6,10 +6,6 @@
 #ifndef MATCH_H
 #define MATCH_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,6 +28,10 @@ extern "C" {
 /* Global variables */
 #define NOT_SCORED FLT_MIN
 #define P_VALUE_NA -1.0
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * \returns a new memory allocated match
@@ -293,6 +293,18 @@ double* get_match_percolator_features(
   MATCH_T* match, ///< the match to work -in                                          
   MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
   );
+
+#ifdef __cplusplus
+/**
+ *
+ *\returns a match object that is parsed from the tab-delimited result file
+ */
+MATCH_T* parse_match_tab_delimited(
+  DelimitedFile& result_file,  ///< the result file to parse PSMs -in
+  DATABASE_T* database ///< the database to which the peptides are created -in
+  );
+
+#endif
 
 /**
  *

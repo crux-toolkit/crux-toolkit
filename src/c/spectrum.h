@@ -105,6 +105,16 @@ BOOLEAN_T parse_spectrum(
   char*      filename ///< the file to parse -in
   );
 
+#ifdef __cplusplus
+/**
+ * Parse the spectrum from the tab-delimited result file
+ *\returns the parsed spectrum , else returns NULL for failed parse
+ */
+SPECTRUM_T* parse_spectrum_tab_delimited(
+  DelimitedFile& file ///< output stream -out
+  );
+#endif
+
 /**
  * Parse the spectrum from the serialized spectrum
  *\returns the parsed spectrum , else returns NULL for failed parse

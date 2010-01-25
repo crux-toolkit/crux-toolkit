@@ -12,6 +12,8 @@
  ****************************************************************************/
 #include "match_collection.h"
 
+#include "DelimitedFile.h"
+
 /* Private data types (structs) */
 
 /**
@@ -138,11 +140,18 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection,
 void collapse_redundant_matches(MATCH_COLLECTION_T* matches);
 void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx);
 
+BOOLEAN_T extend_match_collection_tab_delimited(
+  MATCH_COLLECTION_T* match_collection, ///< match collection to extend -out
+  DATABASE_T* database, ///< the database holding the peptides -in
+  DelimitedFile& result_file   ///< the result file to parse PSMs -in
+  );
+
 BOOLEAN_T extend_match_collection(
   MATCH_COLLECTION_T* match_collection, 
   DATABASE_T* database, 
   FILE* result_file   
   );
+
 
 BOOLEAN_T add_match_to_post_match_collection(
   MATCH_COLLECTION_T* match_collection, 
@@ -2451,6 +2460,42 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   
   return match_collection;
 }
+
+/**
+ * parse all the match objects and add to match collection
+ *\returns TRUE, if successfully parse all PSMs in result_file, else FALSE
+ */
+BOOLEAN_T extend_match_collection_tab_delimited(
+  MATCH_COLLECTION_T* match_collection, ///< match collection to extend -out
+  DATABASE_T* database, ///< the database holding the peptides -in
+  DelimitedFile& result_file   ///< the result file to parse PSMs -in
+  )
+{
+
+  MATCH_T* match = NULL;
+
+  // only for post_process_collections
+  if(!match_collection->post_process_collection){
+    carp(CARP_ERROR, "Must be a post process match collection to extend.");
+    return FALSE;
+  }
+
+  while (result_file.hasNext()) {
+    // parse match object
+    if((match = parse_match_tab_delimited(result_file, database))==NULL){
+      carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
+      return FALSE;
+    }
+    //add match to match collection.
+    add_match_to_post_match_collection(match_collection, match);
+    //increment pointer.
+
+    result_file.next();
+  }
+  
+  return TRUE;
+}
+
 
 
 /**
