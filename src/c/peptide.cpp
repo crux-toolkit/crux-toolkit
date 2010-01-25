@@ -6,6 +6,10 @@
 #include "peptide.h"
 #include <string.h>
 
+#include "DelimitedFile.h"
+
+using namespace std;
+
 /*
   TABLE OF CONTENTS
   Global variables
@@ -1570,6 +1574,47 @@ BOOLEAN_T serialize_peptide(
   return TRUE;
 }
 
+/**
+ * \brief Read in a peptide from a tab-delimited file and return it.
+ *
+ * Parses the information for a peptide match from the search
+ * file.  Allocates memory for the peptide and all of
+ * its peptide_src's.  Requires a database so that the protein can be
+ * set for each peptide_src.  Returns NULL if eof or if file format
+ * appears incorrect.
+ *
+ * \returns A newly allocated peptide or NULL
+ */
+PEPTIDE_T* parse_peptide_tab_delimited(
+  DelimitedFile& file, ///< the tab delimited peptide file -in
+  DATABASE_T* database,///< the database containing the peptides -in
+  BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
+  ) {
+
+  // the new peptide to be given values in file
+  PEPTIDE_T* peptide = allocate_peptide();
+
+  //populate peptide struct.
+  string string_sequence = file.getString("sequence");
+  peptide -> length = string_sequence.length();
+  peptide -> peptide_mass = file.getFloat("peptide mass");
+  
+  if(!parse_peptide_src_tab_delimited(peptide, file, database, use_array)){
+    carp(CARP_ERROR, "Failed to parse peptide src.");
+    free(peptide);
+    return NULL;
+  };
+
+  //TODO: write parse_peptide_modification()
+  //TODO: Output this Modified Sequence to the tab delimited file, 
+  //      so it can be parsed
+  peptide -> modified_seq = convert_to_mod_aa_seq(string_sequence.c_str());
+  
+  carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
+
+  return peptide;
+
+}
 
 /**
  * \brief Read in a peptide from a binary file and return it.

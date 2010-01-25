@@ -146,7 +146,7 @@ void DelimitedFile::loadData(
     return;
   }
 
-  std::string line;
+  string line;
   bool hasLine;
 
   vector<string>tokens;
@@ -189,7 +189,7 @@ void DelimitedFile::loadData(
  * loads a tab delimited file
  */
 void DelimitedFile::loadData(
-  const std::string& file, ///< the file path
+  const string& file, ///< the file path
   bool hasHeader ///< header indicator
   ) {
 
@@ -200,7 +200,7 @@ void DelimitedFile::loadData(
  * saves a tab delimited file
  */ 
 void DelimitedFile::saveData(
-  const std::string& file ///< the file path
+  const string& file ///< the file path
   ) {
 
   saveData(file.c_str());
@@ -234,7 +234,7 @@ void DelimitedFile::saveData(
   //size.
   for (unsigned int row_idx=0; row_idx<maxRow; row_idx++) {
     if (row_idx < numRows(0)) {
-      fout << getString(0, row_idx);
+      fout << getString((unsigned int)0, row_idx);
     } else {
       fout << "\t";
     }
@@ -254,10 +254,10 @@ void DelimitedFile::saveData(
  *\returns the column index.
  */
 unsigned int DelimitedFile::addColumn(
-  std::string& column_name ///< the column name
+  string& column_name ///< the column name
   ) {
 
-  std::vector<std::string> new_col;
+  vector<string> new_col;
   data_.push_back(new_col);
   column_names_.push_back(column_name);
   return data_.size()-1;
@@ -280,7 +280,7 @@ unsigned int DelimitedFile::addColumn(
  *\returns the new column index.
  */
 unsigned int DelimitedFile::addColumn() {
-  std::vector<std::string> new_col;
+  vector<string> new_col;
   data_.push_back(new_col);
   return numCols() - 1;
 }
@@ -290,7 +290,7 @@ unsigned int DelimitedFile::addColumn() {
  *\returns the column index, -1 if not found.
  */ 
 int DelimitedFile::findColumn(
-  std::string& column_name ///< the column name
+  string& column_name ///< the column name
   ) {
 
   for (unsigned int col_idx=0;col_idx<column_names_.size();col_idx++) {
@@ -315,17 +315,15 @@ int DelimitedFile::findColumn(
 /**
  *\returns the string vector corresponding to the column
  */
-std::vector<std::string>& DelimitedFile::getColumn(
-  std::string column ///< the column name 
+vector<string>& DelimitedFile::getColumn(
+  string column ///< the column name 
   ) {
 
   int col_idx = findColumn(column);
 
   if (col_idx != -1) {
     return data_[col_idx];
-  }
-
-  else {
+  } else {
     carp(CARP_ERROR,"column %s not found, returning column 0", column.c_str());
     return data_[0];
   }
@@ -334,7 +332,7 @@ std::vector<std::string>& DelimitedFile::getColumn(
 /**
  *\returns the string vector corresponding to the column
  */
-std::vector<std::string>& DelimitedFile::getColumn(
+vector<string>& DelimitedFile::getColumn(
   unsigned int col_idx ///< the column index
   ) {
   
@@ -344,7 +342,7 @@ std::vector<std::string>& DelimitedFile::getColumn(
 /**
  *\returns the name of the column
  */
-std::string& DelimitedFile::getColumnName(
+string& DelimitedFile::getColumnName(
   unsigned int col_idx ///< the column index
   ) {
   return column_names_.at(col_idx);
@@ -353,11 +351,39 @@ std::string& DelimitedFile::getColumnName(
 /**
  *\returns the string value of the cell
  */
-std::string& DelimitedFile::getString(
+string& DelimitedFile::getString(
   unsigned int col_idx, ///< the column index
   unsigned int row_idx  ///< the row index
   ) {
   return getColumn(col_idx)[row_idx];
+}
+
+/** 
+ * gets a string value of the cell.
+ */
+string& DelimitedFile::getString(
+  const char* column_name, ///<the column name
+  unsigned int row_idx ///< the row index
+  ) {
+  int col_idx = findColumn(column_name);
+  if (col_idx == -1) {
+    carp(CARP_FATAL, "Cannot find column %s", column_name);
+  }
+  return getColumn(col_idx)[row_idx];
+}
+
+/**
+ * gets a string value of the cell
+ * uses the current_row_ as the row index
+ */
+string& DelimitedFile::getString(
+  const char* column_name ///<the column name
+  ) {
+
+  if (current_row_ >= numRows()) {
+    carp(CARP_FATAL, "Iterated past maximum number of rows!");
+  }
+  return getString(column_name, current_row_);
 }
 
 /**
@@ -366,14 +392,14 @@ std::string& DelimitedFile::getString(
 void DelimitedFile::setString(
   unsigned int col_idx, ///< the column index
   unsigned int row_idx, ///< the row index
-  std::string& value ///< the new value
+  string& value ///< the new value
   ) {
 
   //ensure there are enough columns
   while (col_idx >= numCols()) {
     addColumn();
   }
-  std::vector<std::string>& col = getColumn(col_idx);
+  vector<string>& col = getColumn(col_idx);
 
   //ensure there are enough rows
   while (row_idx >= col.size()) {
@@ -408,6 +434,60 @@ TValue DelimitedFile::getValue(
   from_string<TValue>(type_ans, string_ans);
   return type_ans;
 }
+
+
+/**
+ * gets a double type from cell, checks for infinity. 
+ */
+FLOAT_T DelimitedFile::getFloat(
+    unsigned int col_idx, ///< the column index
+    unsigned int row_idx ///< the row index
+) {
+  
+  string& string_ans = getString(col_idx,row_idx);
+  if (string_ans == "Inf") {
+
+    return numeric_limits<FLOAT_T>::infinity();
+  } else if (string_ans == "-Inf") {
+
+    return -numeric_limits<FLOAT_T>::infinity();
+  }
+  else {
+
+    return getValue<FLOAT_T>(col_idx, row_idx);
+  }
+}
+
+/** 
+ * gets a double type from cell, checks for infinity.
+ */
+FLOAT_T DelimitedFile::getFloat(
+    const char* column_name, ///<the column name
+    unsigned int row_idx ///< the row index
+) {
+  
+  int col_idx = findColumn(column_name);
+  if (col_idx == -1) {
+    carp(CARP_FATAL, "Cannot find column %s", column_name);
+  }
+  return getFloat(col_idx, row_idx);
+}
+
+/**
+ * gets a double value from cell, checks for infinity
+ * uses the current_row_ as the row index
+ */
+FLOAT_T DelimitedFile::getFloat(
+  const char* column_name ///<the column name
+) {
+  
+  if (current_row_ >= numRows()) {
+    carp(CARP_FATAL, "Iterated past maximum number of rows!");
+  }
+  return getFloat(column_name, current_row_);
+}
+
+
 
 /**
  * gets a double type from cell, checks for infinity. 
@@ -501,6 +581,37 @@ int DelimitedFile::getInteger(
   }
 
   return getInteger(column_name, current_row_);
+}
+
+/**
+ * gets an vector of integers from cell
+ * uses the current_row_ as the row index.
+ * clears the integer vector before 
+ * populating it.
+ */
+void DelimitedFile::getIntegerVectorFromCell(
+    const char* column_name, ///< the column name
+    vector<int>& int_vector, ///<the vector of integers
+    char delimiter ///<the delimiter to use
+  ) {
+  
+  string& string_ans = getString(column_name);
+
+  //get the list of strings separated by delimiter
+  vector<string> string_vector_ans;
+  tokenize(string_ans, string_vector_ans, delimiter);
+
+  //convert each string into an integer.
+  int_vector.clear();
+
+  for (vector<string>::iterator string_iter = string_vector_ans.begin();
+    string_iter != string_vector_ans.end();
+    ++string_iter) {
+
+    int int_ans;
+    from_string<int>(int_ans, *string_iter);
+    int_vector.push_back(int_ans);
+  }
 }
 
 

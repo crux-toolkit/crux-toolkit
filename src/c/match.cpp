@@ -30,6 +30,8 @@
 #include "generate_peptides_iterator.h" 
 #include "peptide.h"
 
+#include "DelimitedFile.h"
+
 /**
  * README!
  * <Issues on the overall_type field in match struct>
@@ -1068,6 +1070,45 @@ feature_array[11] = TRUE;
   free_peptide_src_iterator(src_iterator);
   
   return feature_array;
+}
+
+
+/**
+ *
+ *\returns a match object that is parsed from the tab-delimited result file
+ */
+MATCH_T* parse_match_tab_delimited(
+  DelimitedFile& result_file,  ///< the result file to parse PSMs -in
+  DATABASE_T* database ///< the database to which the peptides are created -in
+  ) {
+
+  //TODO - FINISH and TEST
+  MATCH_T* match = new_match();
+
+  SPECTRUM_T* spectrum = NULL;
+  PEPTIDE_T* peptide = NULL;
+  
+  if((peptide = parse_peptide_tab_delimited(result_file, database, TRUE))== NULL){
+    carp(CARP_ERROR, "Failed to parse peptide (tab delimited)");
+    // FIXME should this exit or return null. I think sometimes we can get
+    // no peptides, which is valid, in which case NULL makes sense.
+    // maybe this should be fixed at the serialize match level however.
+    return NULL;
+  }
+  carp(CARP_DETAILED_DEBUG, "Finished parsing match peptide.");
+  
+  //TODO parse each score and rank of match
+
+   // parse spectrum
+  if((spectrum = parse_spectrum_tab_delimited(result_file))== NULL){
+    carp(CARP_ERROR, "Failed to parse spectrum (tab delimited).");
+  }
+  
+  //TODO spectrum specific features
+  //TODO parse match peptide overall trypticity
+  //TODO parse if match is it null_peptide?
+  //TODO set match fields
+  return match;
 }
 
 /**

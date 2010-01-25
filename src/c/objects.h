@@ -8,6 +8,11 @@
 
 #include <stdio.h>
 
+
+#ifdef __cplusplus
+class DelimitedFile;
+#endif
+
 /**
  * \typedef PEAK_T 
  * A peak in a spectrum

@@ -531,6 +531,28 @@ BOOLEAN_T serialize_peptide(
   FILE* file
   );
  
+#ifdef __cplusplus
+
+/**
+ * \brief Read in a peptide from a tab-delimited file and return it.
+ *
+ * Parses the information for a peptide match from the search
+ * file.  Allocates memory for the peptide and all of
+ * its peptide_src's.  Requires a database so that the protein can be
+ * set for each peptide_src.  Returns NULL if eof or if file format
+ * appears incorrect.
+ *
+ * \returns A newly allocated peptide or NULL
+ */
+PEPTIDE_T* parse_peptide_tab_delimited(
+  DelimitedFile& file, ///< the tab delimited peptide file -in
+  DATABASE_T* database,///< the database containing the peptides -in
+  BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
+  );
+
+#endif
+
+
 /**
  * \brief Read in a peptide from a binary file and return it.
  *

@@ -21,6 +21,7 @@
 #include "scorer.h"
 #include "carp.h"
 
+#include "DelimitedFile.h"
 #include "Spectrum.h"
 
 //There is a name clash with MS2 in MSToolkit, so can't use the namespace decl here
@@ -1441,6 +1442,37 @@ void serialize_spectrum(
   fwrite(spectrum, sizeof(SPECTRUM_T), 1, file);
 
 }
+
+/**
+ * Parse the spectrum from the tab-delimited result file
+ *\returns the parsed spectrum , else returns NULL for failed parse
+ */
+SPECTRUM_T* parse_spectrum_tab_delimited(
+  DelimitedFile& file ///< output stream -out
+  ) {
+
+  SPECTRUM_T* spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
+    spectrum -> first_scan = file.getInteger("scan");
+  spectrum -> last_scan = file.getInteger("scan");
+  spectrum -> spectrum_type = MS2; //assume MS2;
+  spectrum -> precursor_mz = file.getFloat("spectrum precursor m/z");
+  //Is it okay to assign an individual spectrum object for each charge?
+  add_possible_z(spectrum, file.getInteger("charge")); 
+
+  /*
+  TODO : Implement these in the tab delimited file?
+  spectrum -> min_peak_mz = file.getFloat("spectrum min peak mz");
+  spectrum -> max_peak_mz = file.getFloat("spectrum max peak mz");
+  spectrum -> num_peaks = file.getInteger("spectrum num peaks");
+  spectrum -> total_energy = file.getInteger("spectrum total energy");
+  */
+
+  spectrum -> has_peaks = FALSE;
+
+  return spectrum;
+
+}
+
 
 /**
  * Parse the spectrum from the serialized spectrum

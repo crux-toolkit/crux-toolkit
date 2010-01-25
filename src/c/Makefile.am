@@ -42,6 +42,8 @@ LIBFILES= \
   crux-utils.h \
   database.c \
   database.h \
+  DelimitedFile.cpp \
+  DelimitedFile.h \
   generate_peptides_iterator.c \
   generate_peptides_iterator.h \
   hash.c \
@@ -83,7 +85,7 @@ LIBFILES= \
   peptide.h \
   peptide_modifications.c \
   peptide_modifications.h \
-  peptide_src.c \
+  peptide_src.cpp \
   peptide_src.h \
   percolator.cpp \
   percolator.h \
