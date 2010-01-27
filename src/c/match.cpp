@@ -628,7 +628,7 @@ void print_match_sqt(
   PEPTIDE_SRC_T* peptide_src = NULL;
   char* protein_id = NULL;
   PROTEIN_T* protein = NULL;
-  char* rand = "";
+  const char* rand = "";
   if( match->null_peptide ){
     rand = "rand_";
   }
@@ -1143,10 +1143,14 @@ MATCH_T* parse_match(
   // which were added to Crux after the CSM file format had been established.
   int score_type_max = _SCORE_TYPE_NUM - 2;
   for(score_type_idx=0; score_type_idx < score_type_max; ++score_type_idx){
-    fread(&(match->match_scores[score_type_idx]), 
-      sizeof(FLOAT_T), 1, result_file);
-    fread(&(match->match_rank[score_type_idx]), 
-      sizeof(int), 1, result_file);
+    size_t num_read = fread(&(match->match_scores[score_type_idx]), 
+                            sizeof(FLOAT_T), 1, result_file);
+    num_read += fread(&(match->match_rank[score_type_idx]), 
+                      sizeof(int), 1, result_file);
+    if( num_read != 2 ){//sizeof(FLOAT_T) + sizeof(int) ){
+      carp(CARP_ERROR, "Failed to read score and rank at index %d",
+           score_type_idx);
+    }
   }
   
   // parse spectrum
@@ -1155,7 +1159,10 @@ MATCH_T* parse_match(
   }
   
   // spectrum specific features
-  fread(&(match->b_y_ion_fraction_matched), sizeof(FLOAT_T), 1, result_file);
+  if( fread(&(match->b_y_ion_fraction_matched), sizeof(FLOAT_T), 
+            1, result_file) != 1 ){
+    carp(CARP_ERROR, "Failed to parse b/y fraction.");
+  }
 
   // calculate the total matched from the total possible and the
   // fraction matched
@@ -1171,10 +1178,14 @@ MATCH_T* parse_match(
 
   // parse match peptide overall trypticity
   //fread(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, result_file);
-  fread(&(match->digest), sizeof(DIGEST_T), 1, result_file);
+  if( fread(&(match->digest), sizeof(DIGEST_T), 1, result_file) != 1 ){
+    carp(CARP_ERROR, "Failed to parse digestion type");
+  }
   
   // parse if match is it null_peptide?
-  fread(&(match->null_peptide), sizeof(BOOLEAN_T), 1, result_file);
+  if( fread(&(match->null_peptide), sizeof(BOOLEAN_T), 1, result_file) != 1 ){
+    carp(CARP_ERROR, "Failed to parse null peptide flag.");
+  }
 
   // assign fields
   match->peptide_sequence = NULL;

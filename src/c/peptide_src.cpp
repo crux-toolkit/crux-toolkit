@@ -474,8 +474,8 @@ BOOLEAN_T parse_peptide_src(
 
   // first field in file should be number of src's
   int num_peptide_src = -1;
-  fread(&num_peptide_src, sizeof(int), 1, file);
-  if( num_peptide_src < 1){
+  size_t num_read = fread(&num_peptide_src, sizeof(int), 1, file);
+  if( num_peptide_src < 1 || num_read != 1 ){
     carp(CARP_ERROR, 
          "Index file corrupted, peptide must have at least one peptide src");
     return FALSE;
@@ -501,8 +501,8 @@ BOOLEAN_T parse_peptide_src(
   int start_index = -1;
   for(src_idx = 0; src_idx < num_peptide_src; src_idx++){
     // get protein index
-    fread(&protein_index, (sizeof(int)), 1, file);
-    if( protein_index < 0){
+    size_t num_read = fread(&protein_index, (sizeof(int)), 1, file);
+    if( protein_index < 0 || num_read != 1){
       carp(CARP_ERROR, "Index file corrupted could not read protein index");
       free(peptide_src);
       return FALSE;

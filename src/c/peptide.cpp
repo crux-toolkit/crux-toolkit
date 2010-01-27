@@ -1742,8 +1742,8 @@ PEPTIDE_T* parse_peptide(
   // TODO: write parse_peptide_modification()
   // read the length of the modified aa sequence
   int mod_seq_len = -1;
-  fread(&mod_seq_len, sizeof(int), 1, file);
-  if( mod_seq_len < 0 ){
+  size_t num_read = fread(&mod_seq_len, sizeof(int), 1, file);
+  if( mod_seq_len < 0 || num_read != 1){
     carp(CARP_ERROR, "Did not read the correct length of modified sequence");
     peptide->modified_seq = NULL;
   }
@@ -1756,7 +1756,10 @@ PEPTIDE_T* parse_peptide(
     assert( mod_seq_len - 1 == peptide->length );
     peptide->modified_seq = 
       (MODIFIED_AA_T*)mycalloc(mod_seq_len, sizeof(MODIFIED_AA_T));
-    fread(peptide->modified_seq, sizeof(MODIFIED_AA_T), mod_seq_len, file); 
+    if( fread(peptide->modified_seq, sizeof(MODIFIED_AA_T), mod_seq_len, file)
+        != (size_t)mod_seq_len){
+      carp(CARP_ERROR, "Failed to read peptide modified sequence."); 
+    }
   }
   
   carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
@@ -1818,14 +1821,15 @@ BOOLEAN_T parse_peptide_no_src(
 
   // read in any peptide modifications, starting with length
   int mod_seq_len = -1;
-  fread(&mod_seq_len, sizeof(int), 1, file);
-  if( mod_seq_len < 0 ){
+  size_t num_read = fread(&mod_seq_len, sizeof(int), 1, file);
+  if( mod_seq_len < 0 || num_read != 1 ){
     carp(CARP_ERROR, "Did not read the correct length of modified sequence");
     peptide->modified_seq = NULL;
   }
 
   // read in modified sequence
-  fread(peptide->modified_seq, sizeof(MODIFIED_AA_T), mod_seq_len, file);
+  num_read = fread(peptide->modified_seq, sizeof(MODIFIED_AA_T), 
+                   mod_seq_len, file);
 
   // we didn't ad any peptide_src, make sure it's still NULL
   peptide->peptide_src = NULL;

@@ -876,7 +876,9 @@ BOOLEAN_T delete_dir(char* dir) {
   free(namelist);
 
   //chdir(".."); // assumes the directory to delete is in cwd
-  chdir(cwd);
+  if( chdir(cwd) == -1 ){ 
+    return FALSE;
+  }
   result = rmdir(dir);
   if(result == FALSE){
     return FALSE;
@@ -895,10 +897,10 @@ BOOLEAN_T delete_dir(char* dir) {
  * \returns A heap allocated filename
  */
 char* generate_name_path(
-  char* filename,
-  char* old_suffix,
-  char* new_suffix,
-  char* new_path
+  const char* filename,
+  const char* old_suffix,
+  const char* new_suffix,
+  const char* new_path
   ){
 
   carp(CARP_DEBUG, "Generate name given filename '%s', old suffix '%s', " \
@@ -930,10 +932,10 @@ char* generate_name_path(
  * \returns A heap allocated file name of the given fasta file
  */
 char* generate_name(
-  char* fasta_filename,
-  char* name_tag,
-  char* file_extension,
-  char* suffix
+  const char* fasta_filename,
+  const char* name_tag,
+  const char* file_extension,
+  const char* suffix
   )
 {
   int len = strlen(fasta_filename);
