@@ -165,10 +165,10 @@ BOOLEAN_T delete_dir(char* dir);
  * \returns A heap allocated file name of the given fasta file
  */
 char* generate_name(
-  char* fasta_filename,
-  char* name_tag,
-  char* file_extension,
-  char* suffix
+  const char* fasta_filename,
+  const char* name_tag,
+  const char* file_extension,
+  const char* suffix
   );
 
 /**
@@ -181,10 +181,10 @@ char* generate_name(
  * \returns A heap allocated filename
  */
 char* generate_name_path(
-  char* filename,
-  char* old_suffix,
-  char* new_suffix,
-  char* new_path
+  const char* filename,
+  const char* old_suffix,
+  const char* new_suffix,
+  const char* new_path
   );
 
 /**

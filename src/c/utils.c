@@ -521,7 +521,7 @@ const char* date_and_time
 
   if (first_time) {
     date_stream = (FILE *)popen("date", "r"); /* SGI needs cast. */
-    fgets(the_date, HOST_LENGTH, date_stream);
+    if( fgets(the_date, HOST_LENGTH, date_stream) == NULL ){ return NULL; }
     pclose(date_stream);
   }
 

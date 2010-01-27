@@ -4,7 +4,7 @@
 #include "Spectrum.h"
 #include "MSObject.h"
 #include <cstring>
-#include "zlib.h"
+#include "zLib/zlib.h"
 #include "ramp.h"
 #include "ramp_base64.h"
 

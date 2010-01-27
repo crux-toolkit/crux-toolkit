@@ -1347,8 +1347,10 @@ BOOLEAN_T create_index(
   free(peptide_count_array);
   free_database_peptide_iterator(peptide_iterator);
 
-  chdir(".."); //move out of temp dir
-  
+  if( chdir("..") == -1 ){ //move out of temp dir
+    return FALSE;
+  }
+
   // rename temporary direcotry to final directory name
   // if replacing an existing index, remove current files and delete
   // dir

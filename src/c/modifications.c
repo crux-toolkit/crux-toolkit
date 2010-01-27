@@ -398,7 +398,9 @@ BOOLEAN_T parse_aa_mod(AA_MOD_T* a_mod,
   }
 
   // read in struct
-  fread(a_mod, sizeof(AA_MOD_T), 1, file);
+  if( fread(a_mod, sizeof(AA_MOD_T), 1, file) != 1 ){
+    carp(CARP_ERROR, "Failed to read AA_MOD.");
+  };
 
   // then read in each modifiable aa (TRUE/FALSE)
   /*

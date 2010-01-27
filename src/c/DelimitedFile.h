@@ -8,6 +8,7 @@
 #ifndef DELIMITEDFILE_H
 #define DELIMITEDFILE_H
 
+#include <limits>
 #include <ios>
 #include <iomanip>
 #include <iostream>

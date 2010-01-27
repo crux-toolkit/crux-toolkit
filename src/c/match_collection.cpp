@@ -2278,7 +2278,9 @@ BOOLEAN_T parse_csm_header
 
   // modification specific information
   int num_mods = -1;
-  fread(&num_mods, sizeof(int), 1, file);
+  if( fread(&num_mods, sizeof(int), 1, file) != 1){
+    carp(CARP_ERROR, "Failed to read number of mods.");
+  }
   carp(CARP_DETAILED_DEBUG, "There are %i aa mods", num_mods);
 
   AA_MOD_T* file_mod_list[MAX_AA_MODS];
@@ -2578,7 +2580,10 @@ BOOLEAN_T extend_match_collection(
     // which were added to Crux after the CSM file format had been established.
     int score_type_max = _SCORE_TYPE_NUM - 2;
     for(score_type_idx=0; score_type_idx < score_type_max; ++score_type_idx){
-      fread(&(type_scored), sizeof(BOOLEAN_T), 1, result_file);
+      if( fread(&(type_scored), sizeof(BOOLEAN_T), 1, result_file) != 1){
+        carp(CARP_ERROR, "Failed to read type scored at index %d.", 
+             score_type_idx);
+      }
       
       // if this is the first time extending the match collection
       // set scored boolean values
