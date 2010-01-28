@@ -38,19 +38,6 @@ void DelimitedFile::tokenize(
 }
 
 /**
- * convert string to data type
- */
-template<typename TValue>  
-bool DelimitedFile::from_string(
-  TValue& value,
-  const string& s
-  ) {
-
-  istringstream iss(s);
-  return !(iss >> dec >> value).fail();
-} 
-
-/**
  * \returns a DelimitedFile object
  */  
 DelimitedFile::DelimitedFile() {
@@ -584,7 +571,32 @@ int DelimitedFile::getInteger(
 }
 
 /**
- * gets an vector of integers from cell
+ * gets an vector of strings from cell where the
+ * string in the cell has delimiters that are
+ * different than the column delimiter. The
+ * default delimiter is a comma
+ * uses the current_row_ as the row index.
+ * clears the integer vector before 
+ * populating it.
+ */
+void DelimitedFile::getStringVectorFromCell(
+  const char* column_name, ///< the column name
+  std::vector<std::string>& string_vector, ///<the vector of integers
+  char delimiter ///<the delimiter to use
+  ) {
+
+  string& string_ans = getString(column_name);
+
+  //get the list of strings separated by delimiter
+  string_vector.clear();
+  tokenize(string_ans, string_vector, delimiter);
+}
+
+/**
+ * gets an vector of integers from cell where the
+ * string in the cell are integers which are separated
+ * by a delimiter which is differnt than the column
+ * delimiter.  The default delimiter is a comma
  * uses the current_row_ as the row index.
  * clears the integer vector before 
  * populating it.
@@ -595,11 +607,10 @@ void DelimitedFile::getIntegerVectorFromCell(
     char delimiter ///<the delimiter to use
   ) {
   
-  string& string_ans = getString(column_name);
-
   //get the list of strings separated by delimiter
   vector<string> string_vector_ans;
-  tokenize(string_ans, string_vector_ans, delimiter);
+
+  getStringVectorFromCell(column_name, string_vector_ans, delimiter);
 
   //convert each string into an integer.
   int_vector.clear();

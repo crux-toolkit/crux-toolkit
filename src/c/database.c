@@ -720,6 +720,30 @@ PROTEIN_T* get_database_protein_at_idx(
 }
 
 /**
+ *\returns the protein designated by protein id of the database
+ */
+PROTEIN_T* get_database_protein_by_id_string(
+  DATABASE_T* database, ///< the query database -in
+  const char* protein_id ///< The id string for this protein -in
+  ) {
+  //TODO: we can speed this up using a map on string -> protein ids
+  PROTEIN_T* protein = NULL;
+  unsigned int protein_idx;
+  for (protein_idx = 0; 
+    protein_idx <= database -> num_proteins;
+    protein_idx++) {
+
+    PROTEIN_T* current_protein = database -> proteins[protein_idx];
+    if (strcmp(get_protein_id_pointer(current_protein), protein_id)==0) {
+      protein = current_protein;
+      carp(CARP_DETAILED_DEBUG, "found protein %s", protein_id);
+      break;
+    }
+  }
+  return protein;
+}
+
+/**
  * increase the pointer_count produced by this database.
  * \returns database pointer
  */

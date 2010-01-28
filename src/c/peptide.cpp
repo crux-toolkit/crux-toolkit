@@ -6,6 +6,8 @@
 #include "peptide.h"
 #include <string.h>
 
+#include <set>
+
 #include "DelimitedFile.h"
 
 using namespace std;
@@ -984,7 +986,6 @@ char* get_peptide_hash_value(
   if(status != (space-1)){
     carp(CARP_ERROR, "failed to create peptide hash value");
   }
-  
   return hash_value;
 }
 
@@ -1598,7 +1599,6 @@ PEPTIDE_T* parse_peptide_tab_delimited(
   string string_sequence = file.getString("sequence");
   peptide -> length = string_sequence.length();
   peptide -> peptide_mass = file.getFloat("peptide mass");
-  
   if(!parse_peptide_src_tab_delimited(peptide, file, database, use_array)){
     carp(CARP_ERROR, "Failed to parse peptide src.");
     free(peptide);
@@ -1609,9 +1609,6 @@ PEPTIDE_T* parse_peptide_tab_delimited(
   //TODO: Output this Modified Sequence to the tab delimited file, 
   //      so it can be parsed
   peptide -> modified_seq = convert_to_mod_aa_seq(string_sequence.c_str());
-  
-  carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
-
   return peptide;
 
 }
@@ -1948,6 +1945,47 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
   }
   return previous;
 }
+
+/**
+ * \brief Builds a comma delimited string listing the 
+ * protein id(peptide start index) for the sources of 
+ * a peptide
+ *
+ * \returns a string of the protein sources for this peptide
+ */
+string get_protein_ids_peptide_locations(PEPTIDE_T* peptide) {
+
+  set<string> protein_ids_locations;
+
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
+    new_peptide_src_iterator(peptide);
+
+  std::ostringstream protein_field_stream;
+
+  if (peptide_src_iterator_has_next(peptide_src_iterator)) {
+    while(peptide_src_iterator_has_next(peptide_src_iterator)){
+      PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+      PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
+      char* protein_id = get_protein_id(protein);
+      int peptide_loc = get_peptide_src_start_idx(peptide_src);
+      std::ostringstream protein_loc_stream;
+      protein_loc_stream << protein_id << "(" << peptide_loc << ")";
+      free(protein_id);
+      protein_ids_locations.insert(protein_loc_stream.str());
+    }
+  }
+  free(peptide_src_iterator);
+
+  set<string>::iterator result_iter = protein_ids_locations.begin();
+  string protein_field_string = *result_iter;
+
+  while(++result_iter != protein_ids_locations.end()) {
+    protein_field_string += "," + *result_iter;
+  }
+
+  return protein_field_string;
+}
+
  
 /**
  * \brief Builds a comma delimited string listing the protein ids

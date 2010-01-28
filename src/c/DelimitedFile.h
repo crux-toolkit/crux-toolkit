@@ -4,6 +4,11 @@
  * DATE: Jan 7, 2010
  * AUTHOR: Sean McIlwain
  * \brief Object for reading tab-delimited files.
+ * This class generates a table of values. The default delimiter is tab.
+ * This class is capable of reading string, integers, and floating point
+ * Types from each cell of the table.  This class also provides function
+ * for reading a list of integers or string from a cell using a delimiter
+ * that is different from the column delimited (default is comma ',').
  ****************************************************************************/
 #ifndef DELIMITEDFILE_H
 #define DELIMITEDFILE_H
@@ -31,17 +36,6 @@ class DelimitedFile {
   std::vector<std::vector<std::string> > data_;
   std::vector<std::string> column_names_;
   unsigned int current_row_; //used for iterating through the table.
-
-
-
-  /**
-   * convert string to data type
-   */
-  template<typename T>  
-  bool from_string(
-    T& value,
-    const std::string& s
-  );
 
  public:
   /**
@@ -324,7 +318,25 @@ class DelimitedFile {
   );
 
   /**
-   * gets an vector of integers from cell
+   * gets an vector of strings from cell where the
+   * string in the cell has delimiters that are
+   * different than the column delimiter. The
+   * default delimiter is a comma
+   * uses the current_row_ as the row index.
+   * clears the integer vector before 
+   * populating it.
+   */
+  void getStringVectorFromCell(
+    const char* column_name, ///< the column name
+    std::vector<std::string>& string_vector, ///<the vector of integers
+    char delimiter=',' ///<the delimiter to use
+  );
+
+  /**
+   * gets an vector of integers from cell where the
+   * string in the cell are integers which are separated
+   * by a delimiter which is differnt than the column
+   * delimiter.  The default delimiter is a comma
    * uses the current_row_ as the row index.
    * clears the integer vector before 
    * populating it.
@@ -334,6 +346,9 @@ class DelimitedFile {
     std::vector<int>& int_vector, ///<the vector of integers
     char delimiter=',' ///<the delimiter to use
   );
+
+  
+
 
   /*Iterator functions.*/
   /**
@@ -362,7 +377,18 @@ class DelimitedFile {
     char delimiter = '\t'
   );
 
-  
+  /**
+   * convert string to data type
+   */
+  template<typename TValue>  
+  static bool from_string(
+    TValue& value,
+    const std::string& s
+    ) {
+
+    std::istringstream iss(s);
+    return !(iss >> std::dec >> value).fail();
+  }   
 
 };
 
