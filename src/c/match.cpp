@@ -30,7 +30,11 @@
 #include "generate_peptides_iterator.h" 
 #include "peptide.h"
 
+#include <string>
+
 #include "DelimitedFile.h"
+
+using namespace std;
 
 /**
  * README!
@@ -727,7 +731,16 @@ void print_match_tab(
   DIGEST_T digestion = get_digest_type_parameter("digestion");
   char* enz_str = enzyme_type_to_string(enzyme);
   char* dig_str = digest_type_to_string(digestion);
-  char *protein_ids = get_protein_ids(peptide);
+
+  char* protein_ids = NULL;
+  string protein_ids_string;
+  if (get_boolean_parameter("parse-tab-files")) {
+     protein_ids_string = get_protein_ids_peptide_locations(peptide);
+  }
+  else {
+    protein_ids = get_protein_ids(peptide);
+  }
+
   char *flanking_aas = get_flanking_aas(peptide);
 
   // Decide on formatting.
@@ -812,7 +825,8 @@ void print_match_tab(
   else {
     fprintf(file, "\t\t");
   }
-  if (sp_scored == 0 ){
+  // SJM: always print this out? it is used by q-ranker
+  if (sp_scored == 0 && !get_boolean_parameter("parse-tab-files")){
     fprintf(file, "\t");
   }else{
     fprintf(file, "%d\t", b_y_matched);
@@ -821,8 +835,11 @@ void print_match_tab(
   fprintf(file, "%d\t", num_matches); // Matches per spectrum
   fprintf(file, "%s\t", sequence);
   fprintf(file, "%s-%s\t", enz_str, dig_str);
-  fprintf(file, "%s\t%s", protein_ids, flanking_aas);
-
+  if (get_boolean_parameter("parse-tab-files")) {
+    fprintf(file, "%s\t%s", protein_ids_string.c_str(), flanking_aas);
+  } else {
+    fprintf(file, "%s\t%s", protein_ids, flanking_aas);
+  }
   // if the peptide is a decoy, print the unshuffled version of the peptide
   if(match->null_peptide == TRUE){
     char* seq = get_peptide_modified_sequence(match->peptide);
@@ -843,7 +860,11 @@ void print_match_tab(
   fputc('\n', file);
   
   free(flanking_aas);
-  free(protein_ids);
+
+  if (!get_boolean_parameter("parse-tab-files")) {
+    free(protein_ids);
+  }
+
   free(sequence);
   free(enz_str);
   free(dig_str);
@@ -928,6 +949,7 @@ void serialize_match(
   serialize_spectrum(match->spectrum, file);
   
   // b/y ion matches ratio
+  carp(CARP_DETAILED_DEBUG,"match -> b_y_ion_fraction_matched:%f",match -> b_y_ion_fraction_matched);
   fwrite(&(match->b_y_ion_fraction_matched), sizeof(FLOAT_T), 1, file);
 
   // serialize match peptide overall trypticity
@@ -961,6 +983,10 @@ double* get_match_percolator_features(
   double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
   FLOAT_T weight_diff = get_peptide_peptide_mass(match->peptide) -
     get_spectrum_neutral_mass(match->spectrum, match->charge);
+
+  carp(CARP_DETAILED_DEBUG,"spec: %d, charge: %d", 
+    get_spectrum_first_scan(match -> spectrum),
+    match -> charge);
 
   // Xcorr
   feature_array[0] = get_match_score(match, XCORR);
@@ -1003,14 +1029,14 @@ double* get_match_percolator_features(
     feature_array[11] = TRUE;
   }
   */
-feature_array[10] = TRUE; // TODO(if perc support continues, figure out what these should be
-feature_array[11] = TRUE;
+  feature_array[10] = TRUE; // TODO(if perc support continues, figure out what these should be
+  feature_array[11] = TRUE;
   // get the missed cleave sites
   feature_array[12] = get_peptide_missed_cleavage_sites(match->peptide);
-  
+
+
   // pepLen
   feature_array[13] = get_peptide_length(match->peptide);
-  
   // set charge
   if(match->charge == 1){
     feature_array[14] = TRUE;
@@ -1058,7 +1084,9 @@ feature_array[11] = TRUE;
   // now check that no value is with in infinity
   int check_idx;
   for(check_idx=0; check_idx < 20; ++check_idx){
+    
     FLOAT_T feature = feature_array[check_idx];
+    carp(CARP_DETAILED_DEBUG,"feature[%d]=%f", check_idx, feature);
     if(feature <= -BILLION || feature  >= BILLION){
       carp(CARP_ERROR,
           "Percolator feature out of bounds: %d, with value %.2f. Modifying.",
@@ -1066,9 +1094,9 @@ feature_array[11] = TRUE;
       feature_array[check_idx] = feature <= - BILLION ? -BILLION : BILLION;
     }
   }
-    
+
   free_peptide_src_iterator(src_iterator);
-  
+
   return feature_array;
 }
 
@@ -1087,27 +1115,72 @@ MATCH_T* parse_match_tab_delimited(
 
   SPECTRUM_T* spectrum = NULL;
   PEPTIDE_T* peptide = NULL;
-  
+
   if((peptide = parse_peptide_tab_delimited(result_file, database, TRUE))== NULL){
     carp(CARP_ERROR, "Failed to parse peptide (tab delimited)");
     // FIXME should this exit or return null. I think sometimes we can get
     // no peptides, which is valid, in which case NULL makes sense.
-    // maybe this should be fixed at the serialize match level however.
+    // maybe this should be fixed at the output match level however.
     return NULL;
   }
-  carp(CARP_DETAILED_DEBUG, "Finished parsing match peptide.");
+
+  if ((result_file.getString("sp score") == "") || 
+    (result_file.getString("sp rank") == "")) {
+
+    match -> match_scores[SP] = NOT_SCORED;
+    match -> match_rank[SP] = 0;
+  } else {
+    match -> match_scores[SP] = result_file.getFloat("sp score");
+    match -> match_rank[SP] = result_file.getInteger("sp rank");
+  }
+
+  match -> match_scores[XCORR] = result_file.getFloat("xcorr score");
+  match -> match_rank[XCORR] = result_file.getInteger("xcorr rank");
+
+  match -> match_scores[DECOY_XCORR_QVALUE] = result_file.getFloat("decoy q-value (xcorr)");
+  match -> match_scores[DECOY_PVALUE_QVALUE] = result_file.getFloat("decoy q-value (p-value)");
+  /* TODO I personally would like access to the raw p-value as well as the bonferonni corrected one (SJM).
+  match -> match_scores[LOGP_WEIBULL_XCORR] = result_file.getFloat("logp weibull xcorr");
+  */
+  match -> match_scores[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat("p-value"));
   
-  //TODO parse each score and rank of match
+  match -> match_scores[Q_VALUE] = result_file.getFloat("percolator q-value");
+
+  match -> match_scores[PERCOLATOR_SCORE] = result_file.getFloat("percolator score");
+  match -> match_rank[PERCOLATOR_SCORE] = result_file.getInteger("percolator rank");
+
+  match -> match_scores[LOGP_QVALUE_WEIBULL_XCORR] = result_file.getFloat("Weibull est. q-value");
+  
+  match -> match_scores[QRANKER_SCORE] = result_file.getFloat("q-ranker score");
+  match -> match_scores[QRANKER_Q_VALUE] = result_file.getFloat("q-ranker q-value");
 
    // parse spectrum
   if((spectrum = parse_spectrum_tab_delimited(result_file))== NULL){
     carp(CARP_ERROR, "Failed to parse spectrum (tab delimited).");
   }
+
+  // spectrum specific features
+  match -> b_y_ion_matched = result_file.getInteger("b/y ions matched");
+  match -> b_y_ion_possible = result_file.getInteger("b/y ions total");
+
+
+  match -> b_y_ion_fraction_matched = 
+    (FLOAT_T)match -> b_y_ion_matched /
+    (FLOAT_T)match -> b_y_ion_possible;
+
+  //parse match overall digestion
+  match -> digest = string_to_digest_type((char*)result_file.getString("cleavage type").c_str()); 
+
+  //Parse if match is it null_peptide?
+  //We could check if unshuffled sequence is "", since that field is not
+  //set for not null peptides.
+  match -> null_peptide = result_file.getString("unshuffled sequence") != "";
   
-  //TODO spectrum specific features
-  //TODO parse match peptide overall trypticity
-  //TODO parse if match is it null_peptide?
-  //TODO set match fields
+  //assign fields
+  match -> peptide_sequence = NULL;
+  match -> spectrum = spectrum;
+  match -> peptide = peptide;
+  
   return match;
 }
 

@@ -8,12 +8,6 @@
  * REVISION: $Revision: 1.8 $
  */
 
-#ifndef CREATE_INDEX_H
-#define CREATE_INDEX_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <math.h>
 #include <stdlib.h>
@@ -32,6 +26,15 @@ extern "C" {
 #include "index.h"
 #include "protein_index.h"
 #include "parameter.h"
+
+#ifndef CREATE_INDEX_H
+#define CREATE_INDEX_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 
 #define NUM_INDEX_OPTIONS 13
 #define NUM_INDEX_ARGS 2

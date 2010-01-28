@@ -1,5 +1,5 @@
 /*********************************************************************//**
- * \file match_collection.c
+ * \file match_collection.cpp
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Methods for creating and manipulating match_collections.   
@@ -2402,11 +2402,19 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   // Also, tag if match_collection type is null_peptide_collection
 
   if(set_type == SET_TARGET){
-    sprintf(suffix, ".target.csm");
+    if (get_boolean_parameter("parse-tab-files")) {
+      sprintf(suffix, ".target.txt");
+    } else {
+      sprintf(suffix, ".target.csm");
+    }
     match_collection->null_peptide_collection = FALSE;
   }
   else{
-    sprintf(suffix, ".decoy-%d.csm", (int)set_type);
+    if (get_boolean_parameter("parse-tab-files")) {
+      sprintf(suffix, ".decoy-%d.txt", (int)set_type);
+    } else {
+      sprintf(suffix, ".decoy-%d.csm", (int)set_type);
+    }
     match_collection->null_peptide_collection = TRUE;
   }
   
@@ -2417,27 +2425,49 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
             = readdir(match_collection_iterator->working_directory))){
 
     //carp(CARP_DETAILED_DEBUG, "Next file is %s", directory_entry->d_name);
-
-    // skip over any file not ending in .csm
-    if( !suffix_compare(directory_entry->d_name, ".csm") ) {
-      continue;
+    if (get_boolean_parameter("parse-tab-files")) {
+          // skip over any file not ending in .csm
+      if( !suffix_compare(directory_entry->d_name, ".txt") ) {
+        continue;
+      }
+    } else {
+      // skip over any file not ending in .csm
+      if( !suffix_compare(directory_entry->d_name, ".csm") ) {
+        continue;
+      }
     }
 
     // it's the right file if ...
     //      type is target and ends in "target.cms"
     //      type is SET_DECOY1 and ends in "decoy.csm"
     //       type is t and ends in "decoy-t.csm"
-    if( set_type == SET_TARGET && 
-        suffix_compare(directory_entry->d_name, "target.csm") ){
-      found_file = TRUE;
-      break;
-    } else if( set_type == SET_DECOY1 && 
-              suffix_compare(directory_entry->d_name, "decoy.csm") ){
-      found_file = TRUE;
-      break;
-    } else if( suffix_compare(directory_entry->d_name, suffix) ){
-      found_file = TRUE;
-      break;
+
+    if (get_boolean_parameter("parse-tab-files")) {
+      if( set_type == SET_TARGET && 
+          suffix_compare(directory_entry->d_name, "target.txt") ){
+        found_file = TRUE;
+        break;
+      } else if( set_type == SET_DECOY1 && 
+                suffix_compare(directory_entry->d_name, "decoy.txt") ){
+        found_file = TRUE;
+        break;
+      } else if( suffix_compare(directory_entry->d_name, suffix) ){
+        found_file = TRUE;
+        break;
+      }
+    } else {
+      if( set_type == SET_TARGET && 
+          suffix_compare(directory_entry->d_name, "target.csm") ){
+        found_file = TRUE;
+        break;
+      } else if( set_type == SET_DECOY1 && 
+                suffix_compare(directory_entry->d_name, "decoy.csm") ){
+        found_file = TRUE;
+        break;
+      } else if( suffix_compare(directory_entry->d_name, suffix) ){
+        found_file = TRUE;
+        break;
+      }
     }
   }
 
@@ -2454,9 +2484,18 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
     carp(CARP_FATAL, "Cannot read from psm file '%s'", file_in_dir);
   }
   // add all the match objects from result_file
-  extend_match_collection(match_collection, database, result_file);
+  if (get_boolean_parameter("parse-tab-files")) {
+    carp(CARP_INFO,"Parsing tab delimited file");
+    fclose(result_file);
+    DelimitedFile delimited_result_file(file_in_dir);
+    extend_match_collection_tab_delimited(match_collection, 
+      database, 
+      delimited_result_file);
+  } else {
+    extend_match_collection(match_collection, database, result_file);
+    fclose(result_file);
+  }
   carp(CARP_DETAILED_DEBUG, "Extended match collection " );
-  fclose(result_file);
   free(file_in_dir);
   carp(CARP_DETAILED_DEBUG, "Finished file.");
   
@@ -2474,7 +2513,13 @@ BOOLEAN_T extend_match_collection_tab_delimited(
   )
 {
 
+
+  int charge = 0;
   MATCH_T* match = NULL;
+
+  FLOAT_T delta_cn = 0;
+  FLOAT_T ln_delta_cn = 0;
+  FLOAT_T ln_experiment_size = 0;
 
   // only for post_process_collections
   if(!match_collection->post_process_collection){
@@ -2483,18 +2528,83 @@ BOOLEAN_T extend_match_collection_tab_delimited(
   }
 
   while (result_file.hasNext()) {
+
+    /*** get spectrum specific features ***/
+    charge = result_file.getInteger("charge");
+    delta_cn = result_file.getFloat("delta_cn");
+    if (delta_cn == 0.0) {
+      ln_delta_cn = 0;
+    } else {
+      ln_delta_cn = logf(delta_cn);
+    }
+    ln_experiment_size = log(result_file.getFloat("matches/spectrum"));
+    
+
+    //TODO: Parse all boolean indicator for scores
+    match_collection -> 
+      scored_type[SP] = 
+      result_file.getString("sp score") != "";
+
+    match_collection -> 
+      scored_type[XCORR] = 
+      result_file.getString("xcorr score") != "";
+
+    match_collection -> 
+      scored_type[DECOY_XCORR_QVALUE] = 
+      result_file.getString("decoy q-value (xcorr)") != "";
+
+    match_collection -> 
+      scored_type[DECOY_PVALUE_QVALUE] = 
+      result_file.getString("decoy q-value (p-value)") != "";
+/* TODO
+    match_collection -> 
+      scored_type[LOGP_WEIBULL_XCORR] = 
+      result_file.getString("logp weibull xcorr") != "";
+*/
+    match_collection -> 
+      scored_type[LOGP_BONF_WEIBULL_XCORR] = 
+      result_file.getString("p-value") != "";
+
+    match_collection -> 
+      scored_type[Q_VALUE] = 
+      result_file.getString("percolator q-value") != "";
+
+    match_collection -> 
+      scored_type[PERCOLATOR_SCORE] = 
+      result_file.getString("percolator score") != "";
+
+    match_collection -> 
+      scored_type[LOGP_QVALUE_WEIBULL_XCORR] = 
+      result_file.getString("Weibull est. q-value") != "";
+  
+    match_collection -> 
+      scored_type[QRANKER_SCORE] = 
+      result_file.getString("q-ranker score") != "";
+    
+    match_collection -> 
+      scored_type[QRANKER_Q_VALUE] = 
+      result_file.getString("q-ranker q-value") != "";
+
+    match_collection -> post_scored_type_set = TRUE;
+
     // parse match object
     if((match = parse_match_tab_delimited(result_file, database))==NULL){
       carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
       return FALSE;
     }
+
+    //set all spectrum specific features to parsed match
+    set_match_charge(match, charge);
+    set_match_delta_cn(match, delta_cn);
+    set_match_ln_delta_cn(match, ln_delta_cn);
+    set_match_ln_experiment_size(match, ln_experiment_size);
+
     //add match to match collection.
     add_match_to_post_match_collection(match_collection, match);
     //increment pointer.
-
     result_file.next();
   }
-  
+
   return TRUE;
 }
 
@@ -2703,7 +2813,7 @@ BOOLEAN_T add_match_to_post_match_collection(
          _MAX_NUMBER_PEPTIDES);
     return FALSE;
   }
-  
+
   // add a new match to array
   match_collection->match[match_collection->match_total] = match;
   increment_match_pointer_count(match);
@@ -2715,7 +2825,7 @@ BOOLEAN_T add_match_to_post_match_collection(
   if(match_collection->match_total % 1000 == 0){
     carp(CARP_INFO, "parsed PSM: %d", match_collection->match_total);
   }
-  
+
   // match peptide
   peptide = get_match_peptide(match);
   
@@ -2760,7 +2870,6 @@ void update_protein_counters(
     // yes this peptide is first time observed
     unique = TRUE;
   }
-
   // first update protein counter
   src_iterator = new_peptide_src_iterator(peptide);
   
@@ -2778,7 +2887,6 @@ void update_protein_counters(
       ++match_collection->post_protein_peptide_counter[protein_idx];
     }
   }  
-  
   free_peptide_src_iterator(src_iterator);
 }
 

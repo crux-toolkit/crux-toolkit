@@ -17,7 +17,12 @@
 #include "peptide_src.h"
 #include "peptide_constraint.h"
 
+#include <vector>
+#include <string>
+
 #include "DelimitedFile.h"
+
+using namespace std;
 
 /**
  * \struct peptide_src
@@ -437,15 +442,66 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
     carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide.");
     return FALSE;
   }
-  return FALSE;
 
-  //touch parameters to reduce warnings.
-  file.getInteger("scan");
-  get_peptide_sequence(peptide);
-  get_database_filename(database);
-  if (use_array)
-    carp(CARP_INFO,"Dummy use of parameters");
+  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", file.getString("protein id").c_str());
 
+  vector<string> protein_ids;
+  file.getStringVectorFromCell("protein id", protein_ids);
+
+  int num_peptide_src = protein_ids.size();
+  
+  PEPTIDE_SRC_T* peptide_src = NULL;
+
+  // allocate new src based on requested type
+  if(use_array){
+    peptide_src = new_peptide_src_array(num_peptide_src);
+  } else {
+    peptide_src = new_peptide_src_linklist(num_peptide_src);
+  }
+
+  // give it to the peptide
+  add_peptide_peptide_src_array(peptide, peptide_src);
+
+  DIGEST_T digestion = 
+    string_to_digest_type((char*)file.getString("cleavage type").c_str()); 
+  
+  PROTEIN_T* parent_protein = NULL;
+  int start_index = 1;
+  for (vector<string>::iterator iter = protein_ids.begin();
+    iter != protein_ids.end();
+    ++iter) {
+    carp(CARP_DETAILED_DEBUG,"Parsing %s",iter -> c_str());
+    // get the protein and peptide index e.g. X(10)
+    size_t left_paren_index = iter -> find('(');
+    string protein_id_string = iter -> substr(0, left_paren_index);
+    string peptide_start_index_string = iter -> substr(left_paren_index+1, 
+      iter -> length() - 1);
+
+    //  set fields in new peptide src
+    parent_protein =
+      get_database_protein_by_id_string(database, protein_id_string.c_str());
+     
+    if (parent_protein == NULL) {
+      carp(CARP_FATAL, "Can't find protein %s", iter -> c_str());
+      continue;
+    }
+
+    DelimitedFile::from_string<int>(start_index, peptide_start_index_string); 
+
+    // set parent protein of the peptide src
+    set_peptide_src_parent_protein(peptide_src, parent_protein);
+
+    // set digest type of peptide src
+    set_peptide_src_digest(peptide_src, digestion);
+
+    // set start index of peptide src
+    set_peptide_src_start_idx(peptide_src, start_index);
+
+    // set current peptide_src to the next empty peptide src
+    peptide_src = get_peptide_src_next_association(peptide_src);
+  } // next peptide_src in file
+
+  return TRUE;
 }
 
 

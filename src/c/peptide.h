@@ -27,6 +27,7 @@
 #define MAX_PEPTIDE_LENGTH 255
 
 #ifdef __cplusplus
+#include <string>
 extern "C" {
 #endif
 
@@ -656,6 +657,17 @@ BOOLEAN_T peptide_src_iterator_has_next(
 PEPTIDE_SRC_T* peptide_src_iterator_next(
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
+
+#ifdef __cplusplus
+/**
+ * \brief Builds a comma delimited string listing the 
+ * protein id(peptide start index) for the sources of 
+ * a peptide
+ *
+ * \returns a string of the protein sources for this peptide
+ */
+std::string get_protein_ids_peptide_locations(PEPTIDE_T* peptide);
+#endif
 
 /**
  * \brief Builds a comma delimited string listing the protein ids

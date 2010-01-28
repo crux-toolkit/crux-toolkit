@@ -12,15 +12,17 @@
 #ifndef PRINT_PROCESSED_SPECTRA_H
 #define PRINT_PROCESSED_SPECTRA_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "crux-utils.h"
 #include "carp.h"
 #include "parameter.h"
 #include "spectrum_collection.h"
 #include "scorer.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 
 int print_processed_spectra_main(int argc, char** argv);
 

@@ -160,6 +160,15 @@ PROTEIN_T* get_database_protein_at_idx(
   );
 
 /**
+ *\returns the protein designated by protein id of the database
+ */
+PROTEIN_T* get_database_protein_by_id_string(
+  DATABASE_T* database, ///< the query database -in
+  const char* protein_id ///< The id string for this protein -in
+  );
+
+
+/**
  * sets the use_light_protein of the database
  */
 void set_database_use_light_protein(

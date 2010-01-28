@@ -8,13 +8,15 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+
 /*#ifndef linux
 #include <ieeefp.h>
 #endif*/

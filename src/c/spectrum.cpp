@@ -1452,12 +1452,14 @@ SPECTRUM_T* parse_spectrum_tab_delimited(
   ) {
 
   SPECTRUM_T* spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
-    spectrum -> first_scan = file.getInteger("scan");
+
+  spectrum -> first_scan = file.getInteger("scan");
   spectrum -> last_scan = file.getInteger("scan");
   spectrum -> spectrum_type = MS2; //assume MS2;
+
   spectrum -> precursor_mz = file.getFloat("spectrum precursor m/z");
   //Is it okay to assign an individual spectrum object for each charge?
-  add_possible_z(spectrum, file.getInteger("charge")); 
+  //add_possible_z(spectrum, file.getInteger("charge")); 
 
   /*
   TODO : Implement these in the tab delimited file?
@@ -1468,7 +1470,6 @@ SPECTRUM_T* parse_spectrum_tab_delimited(
   */
 
   spectrum -> has_peaks = FALSE;
-
   return spectrum;
 
 }
