@@ -8,7 +8,7 @@
  * This class is capable of reading string, integers, and floating point
  * Types from each cell of the table.  This class also provides function
  * for reading a list of integers or string from a cell using a delimiter
- * that is different from the column delimited (default is comma ',').
+ * that is different from the column delimiter (default is comma ',').
  ****************************************************************************/
 #ifndef DELIMITEDFILE_H
 #define DELIMITEDFILE_H

@@ -1609,6 +1609,7 @@ PEPTIDE_T* parse_peptide_tab_delimited(
   //TODO: Output this Modified Sequence to the tab delimited file, 
   //      so it can be parsed
   peptide -> modified_seq = convert_to_mod_aa_seq(string_sequence.c_str());
+
   return peptide;
 
 }
