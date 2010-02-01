@@ -36,7 +36,7 @@ LIBFILES= \
   array.h \
   carp.c \
   carp.h \
-  create_index.c \
+  create_index.cpp \
   create_index.h \
   crux-utils.c \
   crux-utils.h \
@@ -50,7 +50,7 @@ LIBFILES= \
   hash.h \
   hit.c \
   hit.h \
-  index.c \
+  index.cpp \
   index.h \
   ion.c \
   ion.h \

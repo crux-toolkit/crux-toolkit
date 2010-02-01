@@ -1,5 +1,5 @@
 /************************************************************************//**
- * \file index.c
+ * \file index.cpp
  * $Revision: 1.86 $
  * \brief: Object for representing an index of a database
  ****************************************************************************/
@@ -394,10 +394,10 @@ void set_index_field_from_map(INDEX_T* index, char* line){
     set_peptide_constraint_max_mass(index->disk_constraint, value);
   }
   else if(strcmp("min_length:", trait_name) == 0){
-    set_peptide_constraint_min_length(index->disk_constraint, value);
+    set_peptide_constraint_min_length(index->disk_constraint, (int)value);
   }
   else if(strcmp("max_length:", trait_name) == 0){
-    set_peptide_constraint_max_length(index->disk_constraint, value);
+    set_peptide_constraint_max_length(index->disk_constraint, (int)value);
   }
   else if(strcmp("peptide_type:", trait_name) == 0){
     //    set_peptide_constraint_peptide_type(index->disk_constraint, value);
@@ -405,16 +405,16 @@ void set_index_field_from_map(INDEX_T* index, char* line){
          "Rebuild with current version of crux to use 'enzyme_type'.");
   }
   else if(strcmp("enzyme_type:", trait_name) == 0){
-    set_peptide_constraint_enzyme(index->disk_constraint, value);
+    set_peptide_constraint_enzyme(index->disk_constraint, (ENZYME_T)value);
   }
   else if(strcmp("digest_type:", trait_name) == 0){
-    set_peptide_constraint_digest(index->disk_constraint, value);
+    set_peptide_constraint_digest(index->disk_constraint, (DIGEST_T)value);
   }
   else if(strcmp("missed_cleavages:", trait_name) == 0){
    set_peptide_constraint_num_mis_cleavage(index->disk_constraint, (int)value);
   }
   else if(strcmp("mass_type:", trait_name) == 0){
-   set_peptide_constraint_mass_type(index->disk_constraint, (int)value);
+   set_peptide_constraint_mass_type(index->disk_constraint, (MASS_TYPE_T)value);
   }
   else if(strcmp("unique_peptides:", trait_name) == 0){
     index->is_unique = (BOOLEAN_T)value;
@@ -800,9 +800,9 @@ BOOLEAN_T write_readme_file(
  * \returns a temporary directory name template
  */
 char* make_temp_dir_template(void){
-  char* template = (char*)mycalloc(12, sizeof(char));
-  strcpy(template, "crux_XXXXXX");
-  return template;
+  char* dir_template = (char*)mycalloc(12, sizeof(char));
+  strcpy(dir_template, "crux_XXXXXX");
+  return dir_template;
 }
 
 /**
@@ -860,10 +860,10 @@ long get_num_bins_needed(
   min_mass_limit = (int)min_mass_limit;
   max_mass_limit = (int)max_mass_limit + 1;
 
-  (mass_limits)[0] = min_mass_limit;
-  (mass_limits)[1] = max_mass_limit;
+  (mass_limits)[0] = (int)min_mass_limit;
+  (mass_limits)[1] = (int)max_mass_limit;
 
-  num_bins = ((max_mass_limit - min_mass_limit) / index->mass_range) + 1;  // check..
+  num_bins = (int)(((max_mass_limit - min_mass_limit) / index->mass_range) + 1);  // check..
 
   if (num_bins > MAX_INDEX_FILES){
     num_bins = MAX_INDEX_FILES;
@@ -1287,7 +1287,7 @@ BOOLEAN_T create_index(
 
     working_peptide = database_peptide_iterator_next(peptide_iterator);
     working_mass = get_peptide_peptide_mass(working_peptide);
-    file_idx = (working_mass - low_mass) / mass_range;
+    file_idx = (long int)((working_mass - low_mass) / mass_range);
 
     // check if first time using this bin, if so create new file handle
     if(file_array[file_idx] == NULL){
@@ -1763,7 +1763,7 @@ BOOLEAN_T fast_forward_index_file(
       return FALSE;
     }
     // get mass & length
-    int peptide_mass = get_peptide_peptide_mass(peptide);
+    int peptide_mass = (int)get_peptide_peptide_mass(peptide);
     int peptide_length = get_peptide_length(peptide);
     
     // if peptide mass larger than constraint, no more peptides to return
