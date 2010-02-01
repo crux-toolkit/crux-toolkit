@@ -687,6 +687,10 @@ void print_match_tab(
   }
   BOOLEAN_T adjust_delta_cn = FALSE;
 
+  if (get_boolean_parameter("parse-tab-files")) {
+    adjust_delta_cn = TRUE;
+  }
+
   // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
   // Only the fraction matched is serialized.  The number possible can
   // be calculated from the length of the sequence and the charge, but
@@ -753,7 +757,11 @@ void print_match_tab(
   fprintf(file, "%d\t", charge);
   fprintf(file, "%.4f\t", spectrum_precursor_mz);
   fprintf(file, "%.4f\t", spectrum_mass);
-  fprintf(file, "%.4f\t", peptide_mass);
+  if (get_boolean_parameter("parse-tab-files")) {
+    fprintf(file, "%.6f\t", peptide_mass);
+  } else {
+    fprintf(file, "%.4f\t", peptide_mass);
+  }
   fprintf(file, float_format, delta_cn);
   if (sp_scored == FALSE){
     fprintf(file, "\t\t"); //score and rank
@@ -825,8 +833,8 @@ void print_match_tab(
   else {
     fprintf(file, "\t\t");
   }
-  // SJM: always print this out? it is used by q-ranker
-  if (sp_scored == 0 && !get_boolean_parameter("parse-tab-files")){
+
+  if (sp_scored == 0){
     fprintf(file, "\t");
   }else{
     fprintf(file, "%d\t", b_y_matched);
@@ -984,9 +992,13 @@ double* get_match_percolator_features(
   FLOAT_T weight_diff = get_peptide_peptide_mass(match->peptide) -
     get_spectrum_neutral_mass(match->spectrum, match->charge);
 
-  carp(CARP_DETAILED_DEBUG,"spec: %d, charge: %d", 
+  
+  carp(CARP_DETAILED_DEBUG, "spec: %d, charge: %d", 
     get_spectrum_first_scan(match -> spectrum),
     match -> charge);
+
+  carp(CARP_DETAILED_DEBUG,"peptide mass:%f", get_peptide_peptide_mass(match -> peptide));
+  carp(CARP_DETAILED_DEBUG,"spectrum neutral mass:%f", get_spectrum_neutral_mass(match -> spectrum, match -> charge));
 
   // Xcorr
   feature_array[0] = get_match_score(match, XCORR);
@@ -1086,7 +1098,7 @@ double* get_match_percolator_features(
   for(check_idx=0; check_idx < 20; ++check_idx){
     
     FLOAT_T feature = feature_array[check_idx];
-    carp(CARP_DETAILED_DEBUG,"feature[%d]=%f", check_idx, feature);
+    carp(CARP_DETAILED_DEBUG, "feature[%d]=%f", check_idx, feature);
     if(feature <= -BILLION || feature  >= BILLION){
       carp(CARP_ERROR,
           "Percolator feature out of bounds: %d, with value %.2f. Modifying.",
@@ -1115,6 +1127,9 @@ MATCH_T* parse_match_tab_delimited(
 
   SPECTRUM_T* spectrum = NULL;
   PEPTIDE_T* peptide = NULL;
+
+  // this is a post_process match object
+  match->post_process_match = TRUE;
 
   if((peptide = parse_peptide_tab_delimited(result_file, database, TRUE))== NULL){
     carp(CARP_ERROR, "Failed to parse peptide (tab delimited)");
@@ -1160,14 +1175,18 @@ MATCH_T* parse_match_tab_delimited(
   }
 
   // spectrum specific features
-  match -> b_y_ion_matched = result_file.getInteger("b/y ions matched");
-  match -> b_y_ion_possible = result_file.getInteger("b/y ions total");
+  if (result_file.getString("b/y ions matched") == "") {
+    match -> b_y_ion_matched = 0;
+    match -> b_y_ion_possible = 0;
+    match -> b_y_ion_fraction_matched = 0.0;
+  } else {
+    match -> b_y_ion_matched = result_file.getInteger("b/y ions matched");
+    match -> b_y_ion_possible = result_file.getInteger("b/y ions total");
 
-
-  match -> b_y_ion_fraction_matched = 
-    (FLOAT_T)match -> b_y_ion_matched /
-    (FLOAT_T)match -> b_y_ion_possible;
-
+    match -> b_y_ion_fraction_matched = 
+      (FLOAT_T)match -> b_y_ion_matched /
+      (FLOAT_T)match -> b_y_ion_possible;
+  }
   //parse match overall digestion
   match -> digest = string_to_digest_type((char*)result_file.getString("cleavage type").c_str()); 
 
@@ -1175,7 +1194,7 @@ MATCH_T* parse_match_tab_delimited(
   //We could check if unshuffled sequence is "", since that field is not
   //set for not null peptides.
   match -> null_peptide = result_file.getString("unshuffled sequence") != "";
-  
+
   //assign fields
   match -> peptide_sequence = NULL;
   match -> spectrum = spectrum;

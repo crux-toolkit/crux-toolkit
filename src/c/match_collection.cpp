@@ -1645,7 +1645,7 @@ BOOLEAN_T serialize_psm_features(
       break;
     }
   }
-  
+  carp(CARP_DETAILED_DEBUG, "printed %d out of %d psm matches", match_count, match_collection -> experiment_size);
   free_match_iterator(match_iterator);
   
   return TRUE;
@@ -1984,10 +1984,18 @@ BOOLEAN_T print_match_collection_tab_delimited(
   // TRUE: return match in sorted order of main_score type
   MATCH_ITERATOR_T* match_iterator = 
     new_match_iterator(match_collection, main_score, TRUE);
-  
+  int count = 0;
   // iterate over matches
   while(match_iterator_has_next(match_iterator)){
     match = match_iterator_next(match_iterator);    
+    //TODO : we want to print out matches up to rank top-match,
+    //so ties get printed out
+
+    if (get_boolean_parameter("parse-tab-files")) {
+      if (count >= top_match) {
+        break;
+      }
+    }
 
     // print only up to max_rank_result of the matches
     if( get_match_rank(match, main_score) > top_match ){
@@ -1998,8 +2006,11 @@ BOOLEAN_T print_match_collection_tab_delimited(
 		    spectrum_precursor_mz, 
                     spectrum_neutral_mass, num_matches, charge, 
                     match_collection->scored_type);
+    count++;
   }// next match
   
+  carp(CARP_DETAILED_DEBUG, "printed %d out of %d tab matches", count, num_matches);
+
   free_match_iterator(match_iterator);
   
   return TRUE;

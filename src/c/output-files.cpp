@@ -272,7 +272,7 @@ void OutputFiles::printMatchesPsm(
   MATCH_COLLECTION_T* cur_matches = target_matches;
   
   for(int file_idx = 0; file_idx < num_files_; file_idx++){
-    
+
     serialize_psm_features(cur_matches,
                            psm_file_array_[file_idx],
                            matches_per_spec_,
