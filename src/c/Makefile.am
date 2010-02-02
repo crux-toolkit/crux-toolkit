@@ -54,7 +54,7 @@ LIBFILES= \
   index.h \
   ion.cpp \
   ion.h \
-  ion_series.c \
+  ion_series.cpp \
   ion_series.h \
   linked_list.c \
   linked_list.h \
@@ -77,7 +77,7 @@ LIBFILES= \
   parameter.h \
   parse_arguments.c \
   parse_arguments.h \
-  peak.c \
+  peak.cpp \
   peak.h \
   peptide.cpp \
   peptide_constraint.c \
@@ -91,7 +91,7 @@ LIBFILES= \
   percolator.h \
   print-processed-spectra.cpp \
   print-processed-spectra.h \
-  protein.c \
+  protein.cpp \
   protein.h \
   protein_index.c \
   protein_index.h \
@@ -101,7 +101,7 @@ LIBFILES= \
   q-value.h \
   sequest-search.cpp \
   sequest-search.h \
-  scorer.c \
+  scorer.cpp \
   scorer.h \
   sorter.c \
   sorter.h \
