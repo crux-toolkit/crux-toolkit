@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file ion.c
+ * \file ion.cpp
  * $Revision: 1.31 $
  * \brief: Object for representing a single ion.
  ****************************************************************************/
@@ -751,7 +751,7 @@ FLOAT_T get_ion_mass(
   // get sequence for a,b,c ion
   else{
     ion_length = ion->cleavage_idx;
-    ion_sequence = mycalloc(ion_length+1, sizeof(char));
+    ion_sequence = (char*)mycalloc(ion_length+1, sizeof(char));
     strncpy(ion_sequence, ion->peptide_sequence, ion_length);
     memory_used = TRUE;
   }
