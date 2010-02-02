@@ -29,7 +29,7 @@
 
 // FIXME, change in spectrum, peptide to be able to pick mono, average
 #define MASS_H 1.0078246 ///< mass of hydrogen
-
+#define MASS_PROTON  1.00727646677 ///< mass of proton
 /**
  * Mass of oxygen
  */

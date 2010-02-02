@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file peak.c
+ * \file peak.cpp
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
  * VERSION: $Revision: 1.15 $

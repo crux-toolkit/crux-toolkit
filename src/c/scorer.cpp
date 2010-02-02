@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file scorer.c
+ * \file scorer.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
  * DESCRIPTION: object to score spectrum vs. spectrum or spectrum
@@ -113,7 +113,7 @@ SCORER_T* new_scorer(
     scorer->sp_beta = get_double_parameter("beta");
     scorer->sp_max_mz = get_double_parameter("max-mz");
     // allocate the intensity array
-    scorer->intensity_array = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
+    scorer->intensity_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
     scorer->max_intensity = 0;
     scorer->last_idx = 0;
     // the scorer as not been initialized yet.
@@ -196,7 +196,7 @@ void smooth_peaks(
   FLOAT_T* array = scorer->intensity_array;
 
   // create a new array, which will replace the original intensity array
-  FLOAT_T* new_array = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
+  FLOAT_T* new_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
 
   if (scorer->type == SP){
     // iterate over all peaks
@@ -353,7 +353,7 @@ void zero_peaks(
   )
 {
   // create a new array, which will replace the original intensity array
-  FLOAT_T* new_array = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
+  FLOAT_T* new_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
   
   // step 1,
   zero_peak_mean_stdev(scorer, scorer->intensity_array, new_array, 1);
@@ -847,7 +847,7 @@ BOOLEAN_T create_intensity_array_observed(
       max_peak = peak_location;
     }
   }
-  region_selector = max_peak / 10;
+  region_selector = (int) (max_peak / 10);
 
   // reset peak iterator
   peak_iterator_reset(peak_iterator);
@@ -973,7 +973,7 @@ void get_processed_peaks(
 
   // return the observed array and the sp_max_mz
   *intensities = scorer->observed;
-  *max_mz_bin = scorer->sp_max_mz;
+  *max_mz_bin = (int)scorer->sp_max_mz;
 
   return;
 }
@@ -1178,7 +1178,7 @@ FLOAT_T gen_score_xcorr(
   }
   
   // create theoretical array
-  theoretical = (FLOAT_T*)mycalloc(scorer->sp_max_mz, sizeof(FLOAT_T));
+  theoretical = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
   
   // create intensity array for theoretical spectrum 
   if(!create_intensity_array_theoretical(scorer, ion_series, theoretical)){

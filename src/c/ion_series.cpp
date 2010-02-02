@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file ion_series.c
+ * \file ion_series.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: 21 Sep 2006
  * DESCRIPTION: code to support working with a series of ions
