@@ -59,6 +59,10 @@ typedef enum {INVALID_ALPH, PROTEIN_ALPH, DNA_ALPH} ALPH_T;
 #define AMINO_AMBIGS "BUXZ"
 #define ANY_AMINO 'X'
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Set the alphabet according to the size of a given string. */
 void set_alphabet
   (VERBOSE_T verbose,
@@ -139,5 +143,9 @@ void zero_ambigs
  */
 int amino_to_int
   (char amino);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

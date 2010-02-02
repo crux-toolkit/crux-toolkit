@@ -52,7 +52,7 @@ LIBFILES= \
   hit.h \
   index.cpp \
   index.h \
-  ion.c \
+  ion.cpp \
   ion.h \
   ion_series.c \
   ion_series.h \
