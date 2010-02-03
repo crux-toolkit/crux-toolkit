@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file generate_peptides_iterator.c
+ * \file generate_peptides_iterator.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: Nov 8 2007
  * DESCRIPTION: object to return candidate peptides with a given restriction

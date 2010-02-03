@@ -30,21 +30,21 @@ AM_CXXFLAGS = -Wall -W -Werror  $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
             -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
 LIBFILES= \
-  alphabet.c \
+  alphabet.cpp \
   alphabet.h \
-  array.c \
+  array.cpp \
   array.h \
-  carp.c \
+  carp.cpp \
   carp.h \
   create_index.cpp \
   create_index.h \
-  crux-utils.c \
+  crux-utils.cpp \
   crux-utils.h \
-  database.c \
+  database.cpp \
   database.h \
   DelimitedFile.cpp \
   DelimitedFile.h \
-  generate_peptides_iterator.c \
+  generate_peptides_iterator.cpp \
   generate_peptides_iterator.h \
   hash.c \
   hash.h \
