@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file database.c
+ * \file database.cpp
  * $Revision: 1.68 $
  * \brief: Object for representing a database of protein sequences.
  ****************************************************************************/
@@ -391,7 +391,7 @@ BOOLEAN_T populate_proteins_from_memmap(
 {
   PROTEIN_T* new_protein;
   unsigned int protein_idx = 0;
-  char* data = database->data_address;
+  char* data = (char*)database->data_address;
   
   // parse proteins until the end of list
   while((int)data[0] != 1){

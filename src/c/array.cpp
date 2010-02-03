@@ -1,6 +1,6 @@
 /****************************************************************//**
- * \file array.c
- * FILE: array.c
+ * \file array.cpp
+ * FILE: array.cpp
  * AUTHOR: William Stafford Noble
  * PROJECT: shared
  * COPYRIGHT: 1999-2001, Columbia University

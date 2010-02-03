@@ -1,5 +1,5 @@
 /**
- * \file crux-utils.c
+ * \file crux-utils.cpp
  * \brief General-use functions for crux
  */
 
@@ -400,7 +400,7 @@ char* copy_string_part(const char* src, int length){
  * to the range of the numbers, allowing a single epsilon to be used for many, 
  * or perhaps all compares.
  */
-inline int compare_float(FLOAT_T float_a, FLOAT_T float_b){
+/*inline*/ int compare_float(FLOAT_T float_a, FLOAT_T float_b){
   FLOAT_T EPSILON = PRECISION;
   FLOAT_T sum = float_a + float_b;
   // a == b
@@ -630,7 +630,7 @@ void prefix_fileroot_to_name(char** name) {
   if (fileroot != NULL) {
     int len_name = strlen(*name);
     int len_root = strlen(fileroot);
-    *name = myrealloc(*name, len_root + len_name + 2);
+    *name = (char*)myrealloc(*name, len_root + len_name + 2);
     memmove(*name + len_root + 1, *name, len_name + 1);
     strcpy(*name, fileroot);
     (*name)[len_root] = '.';
@@ -1005,7 +1005,7 @@ char* generate_name(
 char* generate_psm_filename(int file_index) {///< target/decoy index -in
   carp(CARP_DEBUG, "Given index %d", file_index);
 
-  char* fullname = mymalloc(sizeof(char) * 30);
+  char* fullname = (char*)mymalloc(sizeof(char) * 30);
   if( file_index == 0 ){
     sprintf(fullname, "search.target.csm");
   }else{
@@ -1298,7 +1298,7 @@ void fit_two_parameter_weibull(
     FLOAT_T* correlation ///< the best correlation -out
     ){
 
-  FLOAT_T* X = mymalloc(sizeof(FLOAT_T) * fit_data_points); //hold data here
+  FLOAT_T* X = (FLOAT_T*)mymalloc(sizeof(FLOAT_T) * fit_data_points); //hold data here
 
   // transform data into an array of values for fitting
   // shift (including only non-neg data values) and take log
@@ -1314,7 +1314,7 @@ void fit_two_parameter_weibull(
     // carp(CARP_DEBUG, "X[%i]=%.6f=ln(%.6f)", idx, X[idx], score);
   }
 
-  FLOAT_T* Y   = mymalloc(sizeof(FLOAT_T) * fit_data_points);
+  FLOAT_T* Y   = (FLOAT_T*)mymalloc(sizeof(FLOAT_T) * fit_data_points);
   for(idx=0; idx < fit_data_points; idx++){
     int reverse_idx = total_data_points - idx;
     FLOAT_T F_T_idx = (reverse_idx - 0.3) / (total_data_points + 0.4);

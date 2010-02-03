@@ -1,6 +1,6 @@
 /****************************************************************//**
- * \file alphabet.c
- * FILE: alphabet.c
+ * \file alphabet.cpp
+ * FILE: alphabet.cpp
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 4-17-97
  * PROJECT: MHMM
@@ -139,7 +139,7 @@ char get_alph_char
   if (alph == INVALID_ALPH) {
     carp(CARP_FATAL, "Alphabet uninitialized.\n");
   } 
-  if ((char_index < 0) || (char_index > get_alph_size(TRUE))) {
+  if ((char_index < 0) || (char_index > get_alph_size(ALPH_SIZE))) {
     carp(CARP_FATAL, "Requested character outside of alphabet (%d).\n", char_index);
   }
   return(alphabet[char_index]);
