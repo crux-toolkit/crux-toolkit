@@ -1,5 +1,5 @@
 /****************************************************************//**
- * \file utils.c
+ * \file utils.cpp
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 9-8-97
  * PROJECT: shared

@@ -1,5 +1,5 @@
 /**
- * \file modifications.c
+ * \file modifications.cpp
  * \brief Datatypes and methods for peptide modifications
  *
  * Two data structures define modifications.  The AA_MOD_T is the most
@@ -214,7 +214,7 @@ int generate_peptide_mod_list_TESTER(
 
   // sort list
   qsort(final_array, final_counter, sizeof(PEPTIDE_MOD_T*),
-        (void*)compare_peptide_mod_num_aa_mods);
+        (QSORT_COMPARE_METHOD)compare_peptide_mod_num_aa_mods);
 
   // find the index of the first peptide mod with too many aa mods
   int max = get_int_parameter("max-mods");
