@@ -71,7 +71,7 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
 void build_message(const char * arg);
 size_t get_usage_size(const char * name);
 int sprintf_option_default_value(argument * o);
-char * get_option_value_type(argument * o);
+const char * get_option_value_type(argument * o);
 int is_numeric(/*const*/ char * s);
 
 /***********************************************************************
@@ -808,9 +808,9 @@ size_t get_usage_size(const char * name) {
  *               describing the type of the option value
  *               "", "int", "long", "double", "string"
  ***********************************************************************/
-char * get_option_value_type(argument * o) {
+const char * get_option_value_type(argument * o) {
 
-  char *v = "";
+  const char *v = "";
   if (o) {
     switch (o->type){
       case FLAG_ARG:
@@ -1007,7 +1007,7 @@ void build_message(const char * arg) {
   /* The error message are in 1-1 correspondence with the  */
   /* argument_error enumeration                            */
 
-  /*const*/ char * error_messages[] = {
+  const char * error_messages[] = {
     "no error.",
     "%s is not a valid option.",
     "the option %s is missing its value.",
