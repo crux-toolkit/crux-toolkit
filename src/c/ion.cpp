@@ -330,7 +330,7 @@ void print_ion_gmtk_single(
   FLOAT_T mz_ratio = (ion->ion_mass_z)/(ion->peptide_mass);
   int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
 
-  char* format = "%.6f\t%.6f\t%.6f\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n";
+  const char* format = "%.6f\t%.6f\t%.6f\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n";
   fprintf(file, format,
       mz_ratio,                                                 // 1 
       intensity,                                                // 2 
@@ -518,7 +518,7 @@ void print_null_ion_gmtk_single(
   FILE* file
   ){
 
-  char* string = "0.0\t0.0\t0.0\t0\t0\t0\t0\t0\t0\t0\t0\t0\n";
+  const char* string = "0.0\t0.0\t0.0\t0\t0\t0\t0\t0\t0\t0\t0\t0\n";
   fprintf(file, "%s", string);
 }
 

@@ -1500,11 +1500,13 @@ void initialize_run(
  *  are non-negative integers and there is exactly one '-' separating
  *  them.  No check that first < last.
  */
-int get_first_in_range_string(const char* range_string){
+int get_first_in_range_string(const char* const_range_string){
   int number = 0;
-  if( range_string == NULL ){
+  if( const_range_string == NULL ){
     return number;
   }
+  char* range_string = my_copy_string(const_range_string);
+
   char* dash = strchr(range_string, '-');
   if( dash == NULL ){ // a single number
     number = atoi(range_string);
@@ -1522,6 +1524,7 @@ int get_first_in_range_string(const char* range_string){
   if( dash != NULL ){
     number = -1;
   }
+  free(range_string);
   return number;
 }
  
@@ -1536,7 +1539,7 @@ int get_last_in_range_string(const char* range_string){
   if( range_string == NULL ){
     return number;
   }
-  char* dash = strchr(range_string, '-');
+  const char* dash = strchr(range_string, '-');
   if( dash == NULL ){ // a single number
     number = atoi(range_string);
   } else {
