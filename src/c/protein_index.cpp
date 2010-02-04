@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file protein_index.c
+ * \file protein_index.cpp
  * $Revision: 1.19 $
  * \brief: Object for creating a protein index or binary fasta file
  ****************************************************************************/

@@ -73,15 +73,15 @@ LIBFILES= \
   output-files.h \
   parameter.cpp \
   parameter.h \
-  parse_arguments.c \
+  parse_arguments.cpp \
   parse_arguments.h \
   peak.cpp \
   peak.h \
   peptide.cpp \
-  peptide_constraint.c \
+  peptide_constraint.cpp \
   peptide_constraint.h \
   peptide.h \
-  peptide_modifications.c \
+  peptide_modifications.cpp \
   peptide_modifications.h \
   peptide_src.cpp \
   peptide_src.h \
@@ -91,7 +91,7 @@ LIBFILES= \
   print-processed-spectra.h \
   protein.cpp \
   protein.h \
-  protein_index.c \
+  protein_index.cpp \
   protein_index.h \
   q-ranker.cpp \
   q-ranker.h \
@@ -101,13 +101,13 @@ LIBFILES= \
   sequest-search.h \
   scorer.cpp \
   scorer.h \
-  sorter.c \
+  sorter.cpp \
   sorter.h \
   spectrum.cpp \
   spectrum_collection.cpp \
   spectrum_collection.h \
   spectrum.h \
-  utils.c \
+  utils.cpp \
   utils.h \
   version.h
 
@@ -177,7 +177,7 @@ param_DATA = default.params
 
 EXTRA_DIST = default.params
 
-doc:	*.h *.c
+doc:	*.h *.cpp
 	doxygen Doxyfile
 
 ignore-files:
@@ -193,4 +193,4 @@ dist-hook:
 	if test -z "$(SEARCH_ENABLED)"; then \
     sed -e '/#ifdef SEARCH_ENABLED/,/#else/d' \
         -e '/#endif \/\/ SEARCH_ENABLED/d' \
-        < match_search.c > $(distdir)/match_search.c; fi
+        < match_search.cpp > $(distdir)/match_search.cpp; fi

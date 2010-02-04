@@ -55,7 +55,6 @@ void shuffle_matches(
   );
 
 #ifdef __cplusplus
-#define MATCH_COMPARE_METHOD int(*)(const void*, const void*)
 
 /**
  * sort the match array with the corresponding compare method

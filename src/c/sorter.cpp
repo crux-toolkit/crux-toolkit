@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file sorter.c
+ * \file sorter.cpp
  * $Revision: 1.15 $
  * \brief: Object to sort objects
  ****************************************************************************/
@@ -538,13 +538,13 @@ PEPTIDE_T** sort_peptide_array(
   // sort the peptide array by sort_type
   switch (sort_type){
   case SORT_MASS:
-    qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (void*)compare_peptide_mass_qsort);
+    qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (QSORT_COMPARE_METHOD)compare_peptide_mass_qsort);
     break;
   case SORT_LEXICAL:
-    qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (void*)compare_peptide_lexical_qsort);
+    qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (QSORT_COMPARE_METHOD)compare_peptide_lexical_qsort);
     break;
   case SORT_LENGTH:
-    qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (void*)compare_peptide_length_qsort);
+    qsort(peptide_array, peptide_count, sizeof(PEPTIDE_T*), (QSORT_COMPARE_METHOD)compare_peptide_length_qsort);
     break;
   case SORT_NONE:
     break;
