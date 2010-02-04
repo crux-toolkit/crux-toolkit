@@ -46,34 +46,32 @@ LIBFILES= \
   DelimitedFile.h \
   generate_peptides_iterator.cpp \
   generate_peptides_iterator.h \
-  hash.c \
+  hash.cpp \
   hash.h \
-  hit.c \
-  hit.h \
   index.cpp \
   index.h \
   ion.cpp \
   ion.h \
   ion_series.cpp \
   ion_series.h \
-  linked_list.c \
+  linked_list.cpp \
   linked_list.h \
-  mass.c \
+  mass.cpp \
   mass.h \
   match.cpp \
   match.h \
   match_collection.cpp \
   match_collection.h \
   match_search.cpp \
-  modifications.c \
+  modifications.cpp \
   modifications.h \
-  modified_peptides_iterator.c \
+  modified_peptides_iterator.cpp \
   modified_peptides_iterator.h \
   search.h \
   objects.h \
   output-files.cpp \
   output-files.h \
-  parameter.c \
+  parameter.cpp \
   parameter.h \
   parse_arguments.c \
   parse_arguments.h \

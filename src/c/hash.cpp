@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file hash.c
+ * \file hash.cpp
  * AUTHOR: David Crawshaw, Chris Park
  * $Revision: 1.15 $
  * \brief: Object for hashing.
@@ -84,7 +84,7 @@ static int hash_grow(
     return FALSE;
   }
   // increase larger hash table
-  if ((h->records = mycalloc(sizes[++h->size_index],
+  if ((h->records = (RECORD_T*)mycalloc(sizes[++h->size_index],
                              sizeof(RECORD_T))) == NULL) {
     h->records = old_recs;
     return FALSE;
@@ -131,13 +131,13 @@ HASH_T* new_hash(
   HASH_T* h;
   unsigned int i, sind = 0;
   
-  capacity /= load_factor;
+  capacity = (unsigned int)((FLOAT_T)capacity / load_factor);
   
   for (i=0; i < sizes_count; i++) 
     if (sizes[i] > capacity) { sind = i; break; }
   
-  if ((h = malloc(sizeof(HASH_T))) == NULL) return NULL;
-  if ((h->records = mycalloc(sizes[sind], sizeof(RECORD_T))) == NULL) {
+  if ((h = (HASH_T*)malloc(sizeof(HASH_T))) == NULL) return NULL;
+  if ((h->records = (RECORD_T*)mycalloc(sizes[sind], sizeof(RECORD_T))) == NULL) {
     free(h);
     return NULL;
   }
@@ -248,7 +248,7 @@ BOOLEAN_T add_or_update_hash_copy(
   void *value ///< value to associate with the key -in
   )
 {
-  char* new_value = my_copy_string(value);
+  char* new_value = my_copy_string((char*)value);
   return add_or_update_hash(h, key, new_value);
 }
 
@@ -386,7 +386,7 @@ BOOLEAN_T update_hash_value(
       // free existing value
       free(recs[ind].value); 
       // set new value
-      recs[ind].value = my_copy_string(value); 
+      recs[ind].value = my_copy_string((char*)value); 
       return TRUE;
     }
     else{

@@ -1,5 +1,5 @@
 /**
- * \file mass.c 
+ * \file mass.cpp 
  * $Revision: 1.17 $
  * \brief Provides constants and methods for calculating mass
  ****************************************************************************/
@@ -127,12 +127,12 @@ void initialize_aa_mod_combinations_array(){
     while( entry_idx < NUM_MOD_MASSES ){
       //printf("skip from %i", entry_idx);
       // skip 2^i entries for mod_i (first mod is 1)
-      entry_idx += pow(2, mod_idx);
+      entry_idx += (int)pow(2, mod_idx);
       //printf(" to %i\n", entry_idx);
 
       // write i entries for mod_i
       //int write_num = mod_idx+1;
-      int write_num = pow(2, mod_idx);
+      int write_num = (int)pow(2, mod_idx);
       while(write_num > 0 && entry_idx < NUM_MOD_MASSES){
         //printf("write at %i from %.3f", entry_idx, aa_mod_masses[entry_idx]);
 
