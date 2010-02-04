@@ -56,7 +56,7 @@ void log_command_line(int argc, char *argv[]) {
   }
 }
 
-static void carp_print(char *string) {
+static void carp_print(const char *string) {
   fprintf(stderr, "%s", string);
   if (log_file != NULL) {
     fprintf(log_file, "%s", string);

@@ -255,7 +255,7 @@ int is_binary_fasta_name(const struct dirent *entry){
 
 
   const char* filename = entry->d_name; //w/o const gcc warning
-  char* suffix = "-binary-fasta";
+  const char* suffix = "-binary-fasta";
 
   int name_length = strlen(filename);
   int suffix_length = strlen(suffix);
@@ -461,7 +461,7 @@ BOOLEAN_T check_index_constraints(INDEX_T* index){
   //  BOOLEAN_T unique = index->is_unique;
 
   BOOLEAN_T success = TRUE;
-  char* param;
+  const char* param;
   if(min_mass > get_double_parameter("min-mass")){
     success = FALSE;
     param = "min-mass";
@@ -815,7 +815,7 @@ char* get_crux_filename(
   )
 {
   char* file_num = 0;
-  char* filename_tag = "crux_index_";
+  const char* filename_tag = "crux_index_";
   char* filename = NULL;
 
   // quiet compiler

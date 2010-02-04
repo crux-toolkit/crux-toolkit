@@ -123,12 +123,12 @@ double wall_clock(){
  * See .h file for description.
  ************************************************************************/
 BOOLEAN_T open_file
-  (char *    filename,            /* Name of the file to be opened. */
-   char *    file_mode,           /* Mode to be passed to fopen. */
+  (const char *    filename,      /* Name of the file to be opened. */
+   const char *    file_mode,     /* Mode to be passed to fopen. */
    BOOLEAN_T allow_stdin,         /* If true, filename "-" is stdin. */
-   char *    file_description,   
-   char *    content_description,
-   FILE **         afile)               /* Pointer to the open file. */
+   const char *    file_description,   
+   const char *    content_description,
+   FILE **         afile)         /* Pointer to the open file. */
 {
   if (filename == NULL) {
     carp(CARP_ERROR, "No %s filename specified.\n", file_description);

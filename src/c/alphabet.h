@@ -66,7 +66,7 @@ extern "C" {
 /* Set the alphabet according to the size of a given string. */
 void set_alphabet
   (VERBOSE_T verbose,
-   char*     given_alphabet);
+   const char*     given_alphabet);
 
 /* Find out which alphabet is in use. */
 ALPH_T which_alphabet

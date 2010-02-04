@@ -35,7 +35,7 @@ char any_char = '\0';
  ********************************************************************/
 void set_alphabet
   (VERBOSE_T verbose,
-   char*     given_alphabet)
+   const char*     given_alphabet)
 {
   /* Is the alphabet already initialized? */
   if (which_alphabet() != INVALID_ALPH) {
@@ -259,8 +259,8 @@ void get_nrdb_frequencies
  ********************************************************************/
 static void set_ambiguity
   (BOOLEAN_T log_space,
-   char      target,
-   char*     sources,
+   const char      target,
+   const char*     sources,
    ARRAY_T*  freqs)
 {
   int    i_source;
@@ -342,8 +342,8 @@ void fill_in_ambiguous_chars
  * This function operates in log space.
  ********************************************************************/
 void distribute_one_count
-  (char     ambig_char,
-   char*    concrete_chars,
+  (const char     ambig_char,
+   const char*    concrete_chars,
    ARRAY_T* freqs)
 {
   int    ambig_index;      /* Index of the ambiguous character. */
