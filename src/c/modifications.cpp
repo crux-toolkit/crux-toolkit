@@ -1,5 +1,5 @@
 /**
- * \file modifications.c
+ * \file modifications.cpp
  * \brief Datatypes and methods for amino acid modifications
  *
  * Two data structures define modifications.  The AA_MOD_T is the most
@@ -268,7 +268,7 @@ char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length){
     return NULL;
   }
 
-  char* new_string = mycalloc(length+1, sizeof(char));
+  char* new_string = (char*)mycalloc(length+1, sizeof(char));
   int aa_idx = 0;
   for(aa_idx = 0; aa_idx < length; aa_idx++){
     new_string[aa_idx] = modified_aa_to_char(aa_string[aa_idx]);
@@ -295,7 +295,7 @@ MODIFIED_AA_T* convert_to_mod_aa_seq(const char* sequence){
   }
 
   int seq_len = strlen(sequence);
-  MODIFIED_AA_T* new_string = mycalloc( seq_len+1, sizeof(MODIFIED_AA_T) );
+  MODIFIED_AA_T* new_string = (MODIFIED_AA_T*)mycalloc( seq_len+1, sizeof(MODIFIED_AA_T) );
 
   unsigned int seq_idx = 0;
   //  while( sequence[seq_idx] != '\0' ){
@@ -318,7 +318,7 @@ MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length){
     return NULL;
   }
 
-  MODIFIED_AA_T* new_seq = mycalloc( length + 1, sizeof(MODIFIED_AA_T) );
+  MODIFIED_AA_T* new_seq = (MODIFIED_AA_T*)mycalloc( length + 1, sizeof(MODIFIED_AA_T) );
   memcpy( new_seq, source, length * sizeof(MODIFIED_AA_T));
   new_seq[length] = MOD_SEQ_NULL;
 

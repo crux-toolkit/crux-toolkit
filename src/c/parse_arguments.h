@@ -45,6 +45,10 @@ enum argument_error { NO_ERROR, UNKNOWN_OPTION, MISSING_VALUE,
                       TOO_MANY_REQ_ARGS, TOO_MANY_OPT_ARGS};
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int parse_arguments_set_opt(const char * name, const char * usage, 
                                 void * container, enum argument_type type);
 int parse_arguments_set_req(const char * name, const char * usage, 
@@ -55,6 +59,10 @@ int parse_arguments_into_hash(int argc, char * argv[], HASH_T* h,
 int parse_arguments_get_error(/*const*/ char ** s);
 char * parse_arguments_get_usage(const char * name);
 enum argument_type string_to_argument_type(char* arg_type_str);
+
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * updates all the parameters in the parameter file with the 

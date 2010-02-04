@@ -1,5 +1,5 @@
 /**
- * \file modified_peptides_iterator.c
+ * \file modified_peptides_iterator.cpp
  * AUTHOR: Barbara Frewen
  * DATE: April 15, 2008
  * DESCRIPTION: An iterator that can be used by
@@ -55,7 +55,7 @@ void queue_next_peptide(
   // first, try getting next from the temp list
   if( ! is_empty_linked_list( iterator->temp_peptide_list) ){
     carp(CARP_DETAILED_DEBUG,"Queue is getting next peptide from temp list");
-    iterator->next_peptide =pop_front_linked_list(iterator->temp_peptide_list);
+    iterator->next_peptide = (PEPTIDE_T*)pop_front_linked_list(iterator->temp_peptide_list);
 
     /* this now done in modify peptide
     // now check that it does not exceed the max number of modified aas
@@ -125,7 +125,7 @@ void queue_next_peptide(
   }
 
   // now set next_peptide to the first in the list and move list forward
-  iterator->next_peptide = pop_front_linked_list(iterator->temp_peptide_list);
+  iterator->next_peptide = (PEPTIDE_T*)pop_front_linked_list(iterator->temp_peptide_list);
   if( iterator->next_peptide == NULL ){
     printf("Iterator's next peptide was lost\n");
   }

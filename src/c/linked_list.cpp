@@ -1,5 +1,5 @@
 /**
- * \file linked_list.c
+ * \file linked_list.cpp
  * Method definitions for a linked list class.
  */
 

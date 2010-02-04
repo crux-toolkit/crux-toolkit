@@ -1,6 +1,6 @@
 /***********************************************************************//**
- * \file parameter.c
- * FILE: parameter.c
+ * \file parameter.cpp
+ * FILE: parameter.cpp
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * CREATE DATE: 2006 Oct 09
  * DESCRIPTION: General parameter handling utilities. MUST declare ALL
@@ -857,11 +857,11 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     }
 
     if( //strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
-        strcmp(type_ptr, "MASS_TYPE_T") == 0 ||
-        strcmp(type_ptr, "BOOLEAN_T") == 0 ||
-        strcmp(type_ptr, "SORT_TYPE_T") == 0 ||
-        strcmp(type_ptr, "SCORER_TYPE_T") == 0 ){
-      type_ptr = "STRING_ARG";
+        strcmp((char*)type_ptr, "MASS_TYPE_T") == 0 ||
+        strcmp((char*)type_ptr, "BOOLEAN_T") == 0 ||
+        strcmp((char*)type_ptr, "SORT_TYPE_T") == 0 ||
+        strcmp((char*)type_ptr, "SCORER_TYPE_T") == 0 ){
+      type_ptr = (void*)"STRING_ARG";
     }
     carp(CARP_DETAILED_DEBUG, 
          "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
@@ -869,9 +869,9 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     
     /* add the option via parse_arguments.c. pointer decides opt or req */
     success = parse_arguments_set_ptr(option_names[i],
-                                      usage_ptr,
+                                      (const char*)usage_ptr,
                                       value_ptr, 
-                                      string_to_argument_type(type_ptr)); 
+                                      string_to_argument_type((char*)type_ptr)); 
   }
 
   carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
@@ -977,9 +977,9 @@ void translate_decoy_options(){
   update_hash_value(parameters, "max-rank-preliminary", buffer);
 
   if( tdc == TRUE ){
-    update_hash_value(parameters, "tdc", "TRUE");
+    update_hash_value(parameters, "tdc", (void*)"TRUE");
   }else{
-    update_hash_value(parameters, "tdc", "FALSE");
+    update_hash_value(parameters, "tdc", (void*)"FALSE");
   }
 }
 
@@ -1193,13 +1193,13 @@ void parse_custom_enzyme(char* rule_str){
 
   // 4. allocate lists and fill
   pre_list_size = pre_end_idx - pre_first_idx;
-  pre_cleavage_list = mycalloc(pre_list_size, sizeof(char));
+  pre_cleavage_list = (char*)mycalloc(pre_list_size, sizeof(char));
   for(idx = 0; idx < pre_list_size; idx++){
     pre_cleavage_list[idx] = rule_str[pre_first_idx+idx];
   }
 
   post_list_size = post_end_idx - post_first_idx;
-  post_cleavage_list = mycalloc(post_list_size, sizeof(char));
+  post_cleavage_list = (char*)mycalloc(post_list_size, sizeof(char));
   for(idx = 0; idx < post_list_size; idx++){
     post_cleavage_list[idx] = rule_str[post_first_idx+idx];
   }
@@ -1254,7 +1254,7 @@ void check_parameter_consistency(){
     char* val_str = digest_type_to_string(NON_SPECIFIC_DIGEST);
     update_hash_value(parameters, "digestion", val_str);
     free(val_str);
-    update_hash_value(parameters, "missed-cleavages", "TRUE");
+    update_hash_value(parameters, "missed-cleavages", (void*)"TRUE");
   }
 }
 
@@ -1269,10 +1269,10 @@ BOOLEAN_T check_option_type_and_bounds(const char* name){
 
   BOOLEAN_T success = TRUE;
   char die_str[SMALL_BUFFER];
-  char* type_str = get_hash_value(types, name);
-  char* value_str = get_hash_value(parameters, name);
-  char* min_str = get_hash_value(min_values, name);
-  char* max_str = get_hash_value(max_values, name);
+  char* type_str = (char*)get_hash_value(types, name);
+  char* value_str = (char*)get_hash_value(parameters, name);
+  char* min_str = (char*)get_hash_value(min_values, name);
+  char* max_str = (char*)get_hash_value(max_values, name);
 
   MASS_TYPE_T mass_type;
   //PEPTIDE_TYPE_T pep_type;
@@ -1417,7 +1417,7 @@ void print_parameter_file(char** filename){
   HASH_ITERATOR_T* iterator = new_hash_iterator(parameters);
   while(hash_iterator_has_next(iterator)){
     char* key = hash_iterator_next(iterator);
-    char* show_users = get_hash_value(for_users, key);
+    char* show_users = (char*)get_hash_value(for_users, key);
     if( strcmp(show_users, "true") == 0 ){
       fprintf(param_file, "# %s\n# %s\n%s=%s\n\n",
               (char*)get_hash_value(usages, key),
@@ -1555,7 +1555,7 @@ BOOLEAN_T get_boolean_parameter(
 {
   static char buffer[PARAMETER_LENGTH];
   
-  char* value = get_hash_value(parameters, name);
+  char* value = (char*)get_hash_value(parameters, name);
  
   // can't find parameter
   if(value == NULL){
@@ -1563,7 +1563,7 @@ BOOLEAN_T get_boolean_parameter(
   }
   
   //check type
-  char* type_str = get_hash_value(types, name);
+  char* type_str = (char*)get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
  
@@ -1612,7 +1612,7 @@ int get_int_parameter(
   //long int value;
   int value;
 
-  char* int_value = get_hash_value(parameters, name);
+  char* int_value = (char*)get_hash_value(parameters, name);
 
   //  carp(CARP_DETAILED_DEBUG, "int value string is %s", int_value);
 
@@ -1621,7 +1621,7 @@ int get_int_parameter(
     carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
   }
   //check type
-  char* type_str = get_hash_value(types, name);
+  char* type_str = (char*)get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
 
@@ -1667,7 +1667,7 @@ double get_double_parameter(
     carp(CARP_FATAL, "parameters have not been set yet");
   }
 
-  char* double_value = get_hash_value(parameters, name);
+  char* double_value = (char*)get_hash_value(parameters, name);
  
   // can't find parameter
   if(double_value == NULL){
@@ -1675,7 +1675,7 @@ double get_double_parameter(
   }
  
   //check type
-  char* type_str = get_hash_value(types, name);
+  char* type_str = (char*)get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   BOOLEAN_T found = string_to_param_type(type_str, &type);
 
@@ -1715,7 +1715,7 @@ char* get_string_parameter(
   )
 {
   
-  char* string_value = get_hash_value(parameters, name);
+  char* string_value = (char*)get_hash_value(parameters, name);
   
   // can't find parameter
   if(string_value == NULL){
@@ -1727,7 +1727,7 @@ char* get_string_parameter(
     string_value = NULL;
   }
   //check type
-  char* type_str = get_hash_value(types, name);
+  char* type_str = (char*)get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   string_to_param_type(type_str, &type);
 
@@ -1757,14 +1757,14 @@ const char* get_string_parameter_pointer(
   )
 {
   
-  char* string_value = get_hash_value(parameters, name);
+  char* string_value = (char*)get_hash_value(parameters, name);
 
   // can't find parameter
   if(string_value == NULL){
     carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
   }
   //check type
-  char* type_str = get_hash_value(types, name);
+  char* type_str = (char*)get_hash_value(types, name);
   PARAMETER_TYPE_T type;
   string_to_param_type(type_str, &type);
 
@@ -1779,7 +1779,7 @@ const char* get_string_parameter_pointer(
 
 DIGEST_T get_digest_type_parameter( const char* name ){
 
-  char* param = get_hash_value(parameters, name);
+  char* param = (char*)get_hash_value(parameters, name);
 
   DIGEST_T digest_type = string_to_digest_type(param);
   if( digest_type == INVALID_DIGEST ){
@@ -1791,7 +1791,7 @@ DIGEST_T get_digest_type_parameter( const char* name ){
 
 ENZYME_T get_enzyme_type_parameter( const char* name ){
 
-  char* param = get_hash_value(parameters, name);
+  char* param = (char*)get_hash_value(parameters, name);
 
   ENZYME_T enzyme_type = string_to_enzyme_type(param);
   if( enzyme_type == INVALID_ENZYME ){
@@ -1804,7 +1804,7 @@ ENZYME_T get_enzyme_type_parameter( const char* name ){
 MASS_TYPE_T get_mass_type_parameter(
    const char* name
    ){
-  char* param_value_str = get_hash_value(parameters, name);
+  char* param_value_str = (char*)get_hash_value(parameters, name);
   MASS_TYPE_T param_value;
   BOOLEAN_T success = string_to_mass_type(param_value_str, &param_value);
 
@@ -1817,7 +1817,7 @@ MASS_TYPE_T get_mass_type_parameter(
 }
 
 SORT_TYPE_T get_sort_type_parameter(const char* name){
-  char* param_value_str = get_hash_value(parameters, name);
+  char* param_value_str = (char*)get_hash_value(parameters, name);
   SORT_TYPE_T param_value;
   BOOLEAN_T success = string_to_sort_type(param_value_str, &param_value);
 
@@ -1829,7 +1829,7 @@ SORT_TYPE_T get_sort_type_parameter(const char* name){
 }
 
 ALGORITHM_TYPE_T get_algorithm_type_parameter(const char* name){
-  char* param_value_str = get_hash_value(parameters, name);
+  char* param_value_str = (char*)get_hash_value(parameters, name);
   ALGORITHM_TYPE_T param_value;
   BOOLEAN_T success = string_to_algorithm_type(param_value_str, &param_value);
 
@@ -1842,7 +1842,7 @@ ALGORITHM_TYPE_T get_algorithm_type_parameter(const char* name){
 
 
 SCORER_TYPE_T get_scorer_type_parameter(const char* name){
-  char* param_value_str = get_hash_value(parameters, name);
+  char* param_value_str = (char*)get_hash_value(parameters, name);
   SCORER_TYPE_T param_value;
   BOOLEAN_T success = string_to_scorer_type(param_value_str, &param_value);
 
@@ -1854,7 +1854,7 @@ SCORER_TYPE_T get_scorer_type_parameter(const char* name){
 }
 
 ION_TYPE_T get_ion_type_parameter(const char* name){
-  char* param_value_str = get_hash_value(parameters, name);
+  char* param_value_str = (char*)get_hash_value(parameters, name);
   ION_TYPE_T param_value;
   BOOLEAN_T success = string_to_ion_type(param_value_str, &param_value);
 
@@ -1897,7 +1897,7 @@ BOOLEAN_T set_boolean_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "BOOLEAN_T");
+  result = add_or_update_hash_copy(types, name, (void*)"BOOLEAN_T");
   return result;
 }
 
@@ -1933,7 +1933,7 @@ BOOLEAN_T set_int_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "INT_ARG");
+  result = add_or_update_hash_copy(types, name, (void*)"INT_ARG");
   return result;
 }
 
@@ -1969,7 +1969,7 @@ BOOLEAN_T set_double_parameter(
   result = add_or_update_hash_copy(usages, name, usage);    
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "DOUBLE_ARG");    
+  result = add_or_update_hash_copy(types, name, (void*)"DOUBLE_ARG");    
   return result;
 }
 
@@ -2001,7 +2001,7 @@ BOOLEAN_T set_string_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "STRING_ARG");
+  result = add_or_update_hash_copy(types, name, (void*)"STRING_ARG");
 
   return result;
 }
@@ -2030,7 +2030,7 @@ BOOLEAN_T set_mass_type_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "MASS_TYPE_T");
+  result = add_or_update_hash_copy(types, name, (void*)"MASS_TYPE_T");
   return result;
 
 }
@@ -2059,7 +2059,7 @@ BOOLEAN_T set_digest_type_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "DIGEST_T");
+  result = add_or_update_hash_copy(types, name, (void*)"DIGEST_T");
   free(value_str);
   return result;
 
@@ -2088,7 +2088,7 @@ BOOLEAN_T set_enzyme_type_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "ENZYME_T");
+  result = add_or_update_hash_copy(types, name, (void*)"ENZYME_T");
   free(value_str);
   return result;
 
@@ -2115,7 +2115,7 @@ BOOLEAN_T set_sort_type_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "SORT_TYPE_T");
+  result = add_or_update_hash_copy(types, name, (void*)"SORT_TYPE_T");
   return result;
 }
 
@@ -2142,7 +2142,7 @@ BOOLEAN_T set_algorithm_type_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "ALGORITHM_TYPE_T");
+  result = add_or_update_hash_copy(types, name, (void*)"ALGORITHM_TYPE_T");
   return result;
 }
 
@@ -2170,7 +2170,7 @@ BOOLEAN_T set_scorer_type_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "SCORER_TYPE_T");
+  result = add_or_update_hash_copy(types, name, (void*)"SCORER_TYPE_T");
 
 
   return result;
@@ -2198,7 +2198,7 @@ BOOLEAN_T set_ion_type_parameter(const char* name,
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "ION_TYPE_T");
+  result = add_or_update_hash_copy(types, name, (void*)"ION_TYPE_T");
   return result;
 }
 /**
