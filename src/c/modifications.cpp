@@ -625,13 +625,13 @@ void print_a_mod(AA_MOD_T* mod){
  * pointer to that newly allocated string.
  */
 char* aa_mod_to_string(AA_MOD_T* mod){
-  char* format_str = 
+  const char* format_str = 
     "mass change=%.2f, symbol=%c, max=%d, position=%s, apply to ";
   char* return_str = (char*)mycalloc( strlen(format_str) + 50, sizeof(char));
   // add 26 for letters and some more for good measure
 
   // get position info
-  char* pos_format = "%c-term most %d from end";
+  const char* pos_format = "%c-term most %d from end";
   char* pos_buffer = (char*)mycalloc(strlen(pos_format), sizeof(char));
   switch(mod->position){
   case ANY_POSITION:

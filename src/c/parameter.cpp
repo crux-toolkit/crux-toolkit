@@ -84,9 +84,9 @@ BOOLEAN_T string_to_param_type(const char*, PARAMETER_TYPE_T* );
 BOOLEAN_T set_boolean_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
- char* usage,          ///< message for the usage statement
- char* filenotes,      ///< additional information for the params file
- char* foruser         ///< "true" if should be revealed to user
+ const char* usage,          ///< message for the usage statement
+ const char* filenotes,      ///< additional information for the params file
+ const char* foruser         ///< "true" if should be revealed to user
  );
 
 BOOLEAN_T set_int_parameter(
@@ -94,9 +94,9 @@ BOOLEAN_T set_int_parameter(
  int set_value,  ///< the value to be set -in
  int min_value,  ///< the value to be set -in
  int max_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,  ///< additional info for param file
- char* foruser     ///< "true" if should be revealed to user
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,  ///< additional info for param file
+ const char* foruser     ///< "true" if should be revealed to user
  );
 
 BOOLEAN_T set_double_parameter(
@@ -104,86 +104,86 @@ BOOLEAN_T set_double_parameter(
  double set_value,  ///< the value to be set -in
  double min_value,  ///< the value to be set -in
  double max_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,  ///< additional info for param file
- char* foruser     ///< "true" if should be revealed to user
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,  ///< additional info for param file
+ const char* foruser     ///< "true" if should be revealed to user
   );
 
 BOOLEAN_T set_string_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
- char* set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
+ const char* set_value,  ///< the value to be set -in
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
   );
 
 BOOLEAN_T set_mass_type_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  MASS_TYPE_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
   );
 
 BOOLEAN_T set_digest_type_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
   );
 
 BOOLEAN_T set_enzyme_type_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  ENZYME_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
   );
 
 BOOLEAN_T set_digest_type_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
   );
 
 BOOLEAN_T set_enzyme_type_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  ENZYME_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
   );
 
 BOOLEAN_T set_sort_type_parameter(
  const char* name,
  SORT_TYPE_T set_value,
- char* usage,
- char* filenotes,
- char* foruser);
+ const char* usage,
+ const char* filenotes,
+ const char* foruser);
 
 BOOLEAN_T set_algorithm_type_parameter(
  const char* name,
  ALGORITHM_TYPE_T set_value,
- char* usage,
- char* filenotes,
- char* foruser);
+ const char* usage,
+ const char* filenotes,
+ const char* foruser);
 
 BOOLEAN_T set_scorer_type_parameter(
  const char* name,
  SCORER_TYPE_T set_value,
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser);
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser);
 
 BOOLEAN_T set_ion_type_parameter(
  const char* name,
  ION_TYPE_T set_value,
- char* usage,
- char* filenotes,
- char* foruser);
+ const char* usage,
+ const char* filenotes,
+ const char* foruser);
 
 BOOLEAN_T select_cmd_line(  
   const char** option_names, ///< list of options to be allowed for main -in
@@ -1873,9 +1873,9 @@ ION_TYPE_T get_ion_type_parameter(const char* name){
 BOOLEAN_T set_boolean_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  BOOLEAN_T set_value,  ///< the value to be set -in
- char* usage,          ///< message for the usage statement
- char* filenotes,      ///< additional informatino for the params file
- char* foruser
+ const char* usage,          ///< message for the usage statement
+ const char* filenotes,      ///< additional informatino for the params file
+ const char* foruser
   )
 {
   BOOLEAN_T result;
@@ -1886,7 +1886,7 @@ BOOLEAN_T set_boolean_parameter(
     return FALSE;
   }
 
-  char* bool_str;
+  const char* bool_str;
   if(set_value){
     bool_str = "TRUE";
   }
@@ -1906,9 +1906,9 @@ BOOLEAN_T set_int_parameter(
  int set_value,  ///< the value to be set -in
  int min_value,  ///< the minimum accepted value -in
  int max_value,  ///< the maximum accepted value -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,  ///< additional info for param file
- char* foruser     ///< true if should be revealed to user
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,  ///< additional info for param file
+ const char* foruser     ///< true if should be revealed to user
   )
 {
   BOOLEAN_T result;
@@ -1942,9 +1942,9 @@ BOOLEAN_T set_double_parameter(
  double set_value,  ///< the value to be set -in
  double min_value,  ///< the value to be set -in
  double max_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,  ///< additional info for param file
- char* foruser     ///< "true" if should be revealed to user
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,  ///< additional info for param file
+ const char* foruser     ///< "true" if should be revealed to user
   )
 {
   BOOLEAN_T result;
@@ -1979,10 +1979,10 @@ BOOLEAN_T set_double_parameter(
  */ 
 BOOLEAN_T set_string_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
- char* set_value,  ///< the value to be set -in
- char* usage,
- char* filenotes,  ///< additional comments for parameter file
- char* foruser
+ const char* set_value,  ///< the value to be set -in
+ const char* usage,
+ const char* filenotes,  ///< additional comments for parameter file
+ const char* foruser
   )
 {
   BOOLEAN_T result;
@@ -2009,9 +2009,9 @@ BOOLEAN_T set_string_parameter(
 BOOLEAN_T set_mass_type_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  MASS_TYPE_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,  ///< additional info for param file
- char* foruser
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,  ///< additional info for param file
+ const char* foruser
  )
 {
   BOOLEAN_T result;
@@ -2038,9 +2038,9 @@ BOOLEAN_T set_mass_type_parameter(
 BOOLEAN_T set_digest_type_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  DIGEST_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
   )
 {
   BOOLEAN_T result = TRUE;
@@ -2068,9 +2068,9 @@ BOOLEAN_T set_digest_type_parameter(
 BOOLEAN_T set_enzyme_type_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  ENZYME_T set_value,  ///< the value to be set -in
- char* usage,      ///< string to print in usage statement
- char* filenotes,   ///< additional info for param file
- char* foruser
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
   )
 {
   BOOLEAN_T result = TRUE;
@@ -2097,9 +2097,9 @@ BOOLEAN_T set_enzyme_type_parameter(
 BOOLEAN_T set_sort_type_parameter(
   const char* name,
   SORT_TYPE_T set_value,
-  char* usage,
-  char* filenotes,
-  char* foruser)
+  const char* usage,
+  const char* filenotes,
+  const char* foruser)
 {
   BOOLEAN_T result = TRUE;
   char value_str[SMALL_BUFFER];
@@ -2120,11 +2120,11 @@ BOOLEAN_T set_sort_type_parameter(
 }
 
 BOOLEAN_T set_algorithm_type_parameter(
-                                       const char* name,
-                                       ALGORITHM_TYPE_T set_value,
-                                       char* usage,
- char* filenotes,
- char* foruser)
+ const char* name,
+ ALGORITHM_TYPE_T set_value,
+ const char* usage,
+ const char* filenotes,
+ const char* foruser)
 {
   BOOLEAN_T result = TRUE;
   char value_str[SMALL_BUFFER];
@@ -2150,9 +2150,9 @@ BOOLEAN_T set_algorithm_type_parameter(
 BOOLEAN_T set_scorer_type_parameter(
  const char* name,
  SCORER_TYPE_T set_value,
- char* usage, 
- char* filenotes,
- char* foruser)
+ const char* usage, 
+ const char* filenotes,
+ const char* foruser)
 {
   BOOLEAN_T result = TRUE;
   char value_str[SMALL_BUFFER];
@@ -2176,11 +2176,12 @@ BOOLEAN_T set_scorer_type_parameter(
   return result;
 }
 
-BOOLEAN_T set_ion_type_parameter(const char* name,
-                                 ION_TYPE_T set_value,
-                                 char* usage,
-                                 char* filenotes,
-                                 char* foruser)
+BOOLEAN_T set_ion_type_parameter(
+ const char* name,
+ ION_TYPE_T set_value,
+ const char* usage,
+ const char* filenotes,
+ const char* foruser)
 {
   BOOLEAN_T result = TRUE;
   char value_str[SMALL_BUFFER];
@@ -2420,10 +2421,11 @@ void read_max_distance(AA_MOD_T* mod, char* line){
  * fills.
  * \returns Returns the index of the next mod in the list.
  */
-int read_mods(FILE* param_file, ///< file from which to read mod info
-              int cur_index,    ///< index of next mod to be entered
-              char* line_tag,   ///< text at beginning of mod line (eg mod=)
-              MOD_POSITION_T position){///< type of mod (any, c-, n-term)
+int read_mods(
+ FILE* param_file, ///< file from which to read mod info
+ int cur_index,    ///< index of next mod to be entered
+ const char* line_tag,///< text at beginning of mod line (eg mod=)
+ MOD_POSITION_T position){///< type of mod (any, c-, n-term)
 
   carp(CARP_DEBUG, "Reading mods for %d position", (int)position);
   char* line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));

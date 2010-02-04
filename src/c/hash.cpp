@@ -60,8 +60,8 @@ struct hash_iterator {
 // Function definition, description found below 
 BOOLEAN_T add_hash_when_grow(
   HASH_T* h, ///< Hash object to add -in/out
-  char *key, ///< key of the record to add -in
-  void *value, ///< value to add to be hashed if needed -in
+  const char *key, ///< key of the record to add -in
+  const void *value, ///< value to add to be hashed if needed -in
   int count  ///< the count of the record to grow -in
   );
 
@@ -181,7 +181,7 @@ void free_hash(
 BOOLEAN_T add_or_update_hash(
   HASH_T* h, ///< Hash object to add to -in/out
   const char *key, ///< key of the record to add or update -in
-  void *value ///< value to associate with the key -in
+  const void *value ///< value to associate with the key -in
   )
 {
   RECORD_T* recs;  
@@ -204,9 +204,9 @@ BOOLEAN_T add_or_update_hash(
     if ((code == recs[ind].hash) && recs[ind].key &&
         strcmp(key, recs[ind].key) == 0){
       // free existing value
-       free(recs[ind].value); 
+      free(recs[ind].value); 
       // set new value
-      recs[ind].value = value;
+      recs[ind].value = (void*)my_copy_string((char*)value);
       return TRUE;
     }
     else{
@@ -225,7 +225,7 @@ BOOLEAN_T add_or_update_hash(
 
   recs[ind].hash = code;
   recs[ind].key = my_copy_string(key);
-  recs[ind].value = value;
+  recs[ind].value = (void*)my_copy_string((char*)value);
   recs[ind].count = 1;
   
   h->records_count++;
@@ -245,7 +245,7 @@ BOOLEAN_T add_or_update_hash(
 BOOLEAN_T add_or_update_hash_copy(
   HASH_T* h, ///< Hash object to add to -in/out
   const char *key, ///< key of the record to add or update -in
-  void *value ///< value to associate with the key -in
+  const void *value ///< value to associate with the key -in
   )
 {
   char* new_value = my_copy_string((char*)value);
@@ -261,8 +261,8 @@ BOOLEAN_T add_or_update_hash_copy(
  */
 BOOLEAN_T add_hash(
   HASH_T* h, ///< Hash object to add -in/out
-  char *key, ///< key of the record to add -in
-  void *value ///< value to add to be hashed if needed -in
+  const char *key, ///< key of the record to add -in
+  const void *value ///< value to add to be hashed if needed -in
   )
 {
     RECORD_T* recs;
@@ -290,8 +290,6 @@ BOOLEAN_T add_hash(
           strcmp(key, recs[ind].key) == 0){
         // increment count
         ++recs[ind].count;        
-        free(key);
-        free(value);
         return TRUE;
       }
       else{
@@ -301,8 +299,8 @@ BOOLEAN_T add_hash(
     }
     
     recs[ind].hash = code;
-    recs[ind].key = key;
-    recs[ind].value = value;
+    recs[ind].key = my_copy_string(key);
+    recs[ind].value = (void*)my_copy_string((char*)value);
     recs[ind].count = 1;
 
     h->records_count++;
@@ -316,8 +314,8 @@ BOOLEAN_T add_hash(
  */
 BOOLEAN_T add_hash_when_grow(
   HASH_T* h, ///< Hash object to add -in/out
-  char *key, ///< key of the record to add -in
-  void *value, ///< value to add to be hashed if needed -in
+  const char *key, ///< key of the record to add -in
+  const void *value, ///< value to add to be hashed if needed -in
   int count  ///< the count of the record to grow -in
   )
 {
@@ -344,8 +342,8 @@ BOOLEAN_T add_hash_when_grow(
     }
     
     recs[ind].hash = code;
-    recs[ind].key = key;
-    recs[ind].value = value;
+    recs[ind].key = my_copy_string(key);
+    recs[ind].value = (void*)my_copy_string((char*)value);
     recs[ind].count = count;
     
     h->records_count++;
@@ -362,7 +360,7 @@ BOOLEAN_T add_hash_when_grow(
 BOOLEAN_T update_hash_value(
   HASH_T* h, ///< Hash object to add -in/out
   const char *key, ///< key of the record to update -in
-  void *value ///< value to add to be hash -in
+  const void *value ///< value to add to be hash -in
   )
 {
   RECORD_T* recs;  
@@ -469,7 +467,7 @@ void** get_hash_value_ref(
  */
 int get_hash_count(
   HASH_T* h, ///< working hash object -in
-  char *key  ///< the key of the record to retrieve -in
+  const char *key  ///< the key of the record to retrieve -in
   )
 {
   RECORD_T* recs;
