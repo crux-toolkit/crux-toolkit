@@ -21,6 +21,7 @@ struct modified_peptides_iterator_t{
   LINKED_LIST_T* temp_peptide_list;///< storage for modified peptides
   int max_aas_modified; 
   ///< return peptides with no more than this many aas modified
+  BOOLEAN_T is_decoy; ///< generate target or decoy peptides
 };
 
 /* Private functions */
@@ -57,14 +58,6 @@ void queue_next_peptide(
     carp(CARP_DETAILED_DEBUG,"Queue is getting next peptide from temp list");
     iterator->next_peptide = (PEPTIDE_T*)pop_front_linked_list(iterator->temp_peptide_list);
 
-    /* this now done in modify peptide
-    // now check that it does not exceed the max number of modified aas
-    int max_aas_moded = get_int_parameter("max-aas-modified");
-    if( count_peptide_modified_aas(iterator->next_peptide) > max_aas_moded ){
-      free_peptide(iterator->next_peptide);
-      queue_next_peptide(iterator);
-    }
-    */
     return;
   }
 
@@ -75,7 +68,7 @@ void queue_next_peptide(
     return;   // no more peptides for this iterator
   }
 
-  // else, get the unmodified peptide
+  // else, get the next unmodified peptide
   PEPTIDE_T* unmod_peptide = 
     generate_peptides_iterator_next( iterator->peptide_generator);
   
@@ -84,7 +77,13 @@ void queue_next_peptide(
     carp(CARP_DETAILED_DEBUG, "Next peptide in pep_gen is %s", debugseq);
     free(debugseq);
   )
-  // apply modifications, discarding peptides that can't be modified
+
+  // turn the peptide into a decoy, if required
+  if( iterator->is_decoy ){
+    transform_peptide_to_decoy(unmod_peptide);
+  }
+
+  // apply modifications, discard peptides that can't be modified
 
   // keep looking until a peptide can be modified or we run out of peptides
   carp(CARP_DETAILED_DEBUG, "Queue is looking for modifyable peptide");
@@ -220,13 +219,15 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
  * mass-window taken from parameter.c.  All other peptide
  * specifications are taken from parameter.c.  If no peptides meet the
  * specifications, an iterator is still returned and when given to
- * has_next will always return FALSE.
+ * has_next will always return FALSE.  Returns either target or decoy
+ * peptides depending on the is_decoy argument.
  * 
  * \returns A newly allocated modified_peptides_iterator.
  */
 MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   double mass,         ///< Target mass of peptides BEFORE modification
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  BOOLEAN_T is_decoy,  ///< generate decoy peptides
   INDEX_T* index,      ///< Index from which to draw peptides OR
   DATABASE_T* dbase    ///< Database from which to draw peptides
   ){
@@ -242,11 +243,12 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   // set peptide_mod field
   new_iterator->peptide_mod = pmod;
 
+  // set the decoy field
+  new_iterator->is_decoy = is_decoy;
+
   // get the mass difference
   double delta_mass = peptide_mod_get_mass_change(pmod);
 
-  //printf("given mass is %.2f, delta is %.2f and final is %.2f\n", 
-  //       mass, delta_mass, mass + delta_mass);
   // create peptide_generator
   new_iterator->peptide_generator = 
     new_generate_peptides_iterator_from_mass(mass - delta_mass, index, dbase);
@@ -275,6 +277,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
   double mz,         ///< Target mz of peptides
   int charge,        ///< Charge of peptides
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  BOOLEAN_T is_decoy,  ///< generate decoy peptides
   INDEX_T* index,      ///< Index from which to draw peptides OR
   DATABASE_T* dbase    ///< Database from which to draw peptides
   ) {
@@ -290,14 +293,14 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
     
     // set peptide_mod field
     new_iterator->peptide_mod = pmod;
+
+    // set is_decoy field
+    new_iterator->is_decoy = is_decoy;
     
     // get the mass difference
     double delta_mass = peptide_mod_get_mass_change(pmod);
     
-    //printf("given mass is %.2f, delta is %.2f and final is %.2f\n", 
-    //       mass, delta_mass, mass + delta_mass);
     // create peptide_generator
-
     double mz_window = get_double_parameter("mass-window");
     double min_mz = mz - mz_window;
     double max_mz = mz + mz_window;
@@ -313,7 +316,11 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
     return new_iterator;
 
   } else {
-    return new_modified_peptides_iterator_from_mass((mz - MASS_H) * charge, pmod, index, dbase);
+    return new_modified_peptides_iterator_from_mass((mz - MASS_H) * charge, 
+                                                    pmod, 
+                                                    is_decoy,
+                                                    index, 
+                                                    dbase);
   }
   
 

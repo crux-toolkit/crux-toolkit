@@ -503,86 +503,6 @@ int compare_match_spectrum_decoy_pvalue_qvalue(
 /* ****** End of sorting functions ************/
 
 /**
- * FIXME this should be capable of returning with an error
- * print the information of the match
- */
-void print_match(
-  MATCH_T* match, ///< the match to print -in  
-  FILE* file, ///< output stream -out
-  BOOLEAN_T output_sequence, ///< should I output peptide sequence -in
-  SCORER_TYPE_T output_mode  ///< the output mode -in
-  )
-{
-  char* peptide_sequence = NULL;
-  
-  // print according to the output mode
-  //
-
-  SCORER_TYPE_T primary_score = output_mode;
-  SCORER_TYPE_T secondary_score = SP;
-  switch (output_mode) {
-    case DOTP:
-      // FIXME fill in once implemented
-      break;
-    case SP:
-    case XCORR:
-    case LOGP_EXP_SP:
-      //case LOGP_BONF_EXP_SP:
-    case LOGP_WEIBULL_SP:
-    case LOGP_BONF_WEIBULL_SP:
-    case DECOY_XCORR_QVALUE:
-    case DECOY_PVALUE_QVALUE:
-      //case LOGP_EVD_XCORR:
-    case LOGP_BONF_EVD_XCORR:
-    case LOGP_WEIBULL_XCORR:
-    case LOGP_BONF_WEIBULL_XCORR:
-    case LOGP_QVALUE_WEIBULL_XCORR:
-      secondary_score = SP;
-      break;
-    case Q_VALUE:      
-    case PERCOLATOR_SCORE:  
-      primary_score = PERCOLATOR_SCORE;
-      secondary_score = Q_VALUE;      
-      break;
-    case QRANKER_Q_VALUE:      
-    case QRANKER_SCORE:  
-      primary_score = QRANKER_SCORE;
-      secondary_score = QRANKER_Q_VALUE;      
-      break;
-  }
-
-  if(output_mode == Q_VALUE || output_mode == PERCOLATOR_SCORE){
-    fprintf(file, "P\t%i\t%i\t%d\t%d\t%.9f\t%.9f\t%.9f\t", 
-            get_spectrum_first_scan(match->spectrum),
-            match->charge,
-            match->match_rank[primary_score], 
-            match->match_rank[primary_score], 
-            get_peptide_peptide_mass(match->peptide), 
-            match->match_scores[primary_score], 
-            match->match_scores[secondary_score]);
-  }
-  else{
-    fprintf(file, "P\t%i\t%i\t%d\t%d\t%.9f\t%.9f\t%.9f\t", 
-            get_spectrum_first_scan(match->spectrum),
-            match->charge,
-            match->match_rank[primary_score], 
-            match->match_rank[secondary_score], 
-            get_peptide_peptide_mass(match->peptide), 
-            match->match_scores[primary_score], 
-            match->match_scores[secondary_score]);
-  }
-  
-  // FIXME resolve spectrum_header output and above to not be coupled
- 
-  // should I print sequence?
-  if(output_sequence){        
-    peptide_sequence = get_match_sequence(match);
-    fprintf(file, "%s\n", peptide_sequence);
-    free(peptide_sequence);
-  }
-}
-
-/**
  * \brief Print the match information in sqt format to the given file
  *
  * Only crux sequest-search produces sqt files so the two scores
@@ -850,7 +770,7 @@ void print_match_tab(
   }
   // if the peptide is a decoy, print the unshuffled version of the peptide
   if(match->null_peptide == TRUE){
-    char* seq = get_peptide_modified_sequence(match->peptide);
+    char* seq = get_peptide_unshuffled_sequence(match->peptide);
     fprintf(file, "\t%s", seq);
     free(seq);
   }else{
@@ -1045,10 +965,10 @@ double* get_match_percolator_features(
   feature_array[11] = TRUE;
   // get the missed cleave sites
   feature_array[12] = get_peptide_missed_cleavage_sites(match->peptide);
-
-
+  
   // pepLen
   feature_array[13] = get_peptide_length(match->peptide);
+  
   // set charge
   if(match->charge == 1){
     feature_array[14] = TRUE;
@@ -1314,38 +1234,10 @@ char* get_match_sequence(
     return NULL;
   }
   
-  // if peptide sequence is cached
-  // return copy of cached peptide sequence
-  if(match->peptide_sequence != NULL){
-    return my_copy_string(match->peptide_sequence);
-  }
-  
-  // if not cached go generate the sequence
-
-  // First, is this a null peptide?
-  // Then must use the shuffled sequence
-  if(match->null_peptide){
-    // generate the shuffled peptide sequence
-    if( get_boolean_parameter("reverse-sequence") == TRUE ){
-      match->peptide_sequence = generate_reversed_sequence(match->peptide);
-    }else{
-      match->peptide_sequence = 
-        generate_shuffled_sequence(match->peptide);
-    }
-    IF_CARP_DETAILED_DEBUG(
-      char* seq = get_peptide_sequence(match->peptide);
-      carp(CARP_DETAILED_DEBUG, "Shuffling transforms: %s -> %s", 
-	   seq, match->peptide_sequence);
-      free(seq);
-    )
-  }
-  else{
-    // just go parse it out from protein, no need to shuffle
+  if(match->peptide_sequence == NULL){
     match->peptide_sequence = get_peptide_sequence(match->peptide);
   }
-  
   return my_copy_string(match->peptide_sequence); 
-  // return match->peptide_sequence;
 }
 
 /**
@@ -1419,40 +1311,11 @@ MODIFIED_AA_T* get_match_mod_sequence(
     return NULL;
   }
 
-  int length = get_peptide_length(get_match_peptide(match));
-  
-  // if peptide sequence is cached
-  // return copy of cached peptide sequence
-  if(match->mod_sequence != NULL){
-    return copy_mod_aa_seq(match->mod_sequence, length);
-  }
-
-  // if not cached generate the sequence
-
-  // Is this a null peptide? Then shuffle the sequence
-  if(match->null_peptide){
-    // generate the shuffled peptide sequence
-    if( get_boolean_parameter("reverse-sequence") == TRUE){
-      match->mod_sequence = generate_reversed_mod_sequence(match->peptide);
-    }else{
-      match->mod_sequence =
-        generate_shuffled_mod_sequence(match->peptide);
-    }
-    IF_CARP_DETAILED_DEBUG(
-      char* seq = get_peptide_sequence(match->peptide);
-      char* modseq = modified_aa_string_to_string(match->mod_sequence, length);
-      carp(CARP_DETAILED_DEBUG, "Shuffling transforms: %s -> %s",
-	   seq, modseq );
-      free(modseq);
-      free(seq);
-    )
-  }
-  else{
-    // just get it from the peptide, no need to shuffle
+  if(match->mod_sequence == NULL){
     match->mod_sequence = get_peptide_modified_aa_sequence(match->peptide);
   }
 
-  return copy_mod_aa_seq(match->mod_sequence, length);
+  return copy_mod_aa_seq(match->mod_sequence, get_peptide_length(match->peptide));
 }
 
 /**
@@ -1468,35 +1331,12 @@ char* get_match_mod_sequence_str( MATCH_T* match ){
     return NULL;
   }
 
-  int length = get_peptide_length(get_match_peptide(match));
-  
-  // if sequence is cached return copy of cached peptide sequence
-  if(match->mod_sequence != NULL){
-    return modified_aa_string_to_string(match->mod_sequence, length);
-  }
-
-  // if not cached generate the sequence
-
-  // Is this a null peptide? Then shuffle the sequence
-  if(match->null_peptide){
-    // generate the shuffled peptide sequence
-    match->mod_sequence =
-      generate_shuffled_mod_sequence(match->peptide);//, match->overall_type);
-    IF_CARP_DETAILED_DEBUG(
-      char* seq = get_peptide_sequence(match->peptide);
-      char* modseq = modified_aa_string_to_string(match->mod_sequence, length);
-      carp(CARP_DETAILED_DEBUG, "Shuffling transforms: %s -> %s",
-	   seq, modseq );
-      free(modseq);
-      free(seq);
-    )
-  }
-  else{
-    // just get it from the peptide, no need to shuffle
+  if(match->mod_sequence == NULL){
     match->mod_sequence = get_peptide_modified_aa_sequence(match->peptide);
   }
 
-  return modified_aa_string_to_string(match->mod_sequence, length);
+  return modified_aa_string_to_string(match->mod_sequence, 
+                                      get_peptide_length(match->peptide));
 }
 
 /**
@@ -1581,7 +1421,9 @@ PEPTIDE_T* get_match_peptide(
 }
 
 /**
- * sets the match peptide, and also determines the peptide trypticity 
+ * Sets the match's peptide field.  Only cache a copy of the peptide
+ * sequence after it has been requested.
+ *
  * Go to top README for N,C terminus tryptic feature info.
  */
 void set_match_peptide(
@@ -1589,59 +1431,10 @@ void set_match_peptide(
   PEPTIDE_T* peptide  ///< the working peptide -in
   )
 {
-  // first set peptide
+  // set peptide 
   match->peptide = peptide;
 
-// overall trypticity already set in peptide
-//match->digest = get_peptide_digest(peptide);
   match->digest = NON_SPECIFIC_DIGEST;  // FIXME
-/*
-  // now set peptide overall trypticity
-  PEPTIDE_SRC_ITERATOR_T* src_iterator = 
-    new_peptide_src_iterator(peptide);
-
-  PEPTIDE_SRC_T* peptide_src = NULL;
-
-  // iterate overall parent proteins
-  // determine the match overal trypticity
-  // for more detail look at README at top
-  while(peptide_src_iterator_has_next(src_iterator)){
-    peptide_src = peptide_src_iterator_next(src_iterator);
-
-    // now if its tryptic we are done
-    if(get_peptide_src_peptide_type(peptide_src) == TRYPTIC){
-      match->overall_type = TRYPTIC;
-      break;
-    }
-    else if(get_peptide_src_peptide_type(peptide_src) == N_TRYPTIC){
-      // now there're at least tryptic on both side
-      // thus now we set as Tryptic and are done
-      if(match->overall_type == C_TRYPTIC){
-        match->overall_type = TRYPTIC;
-        break;
-      }
-      else{
-        match->overall_type = N_TRYPTIC;
-      }
-    }
-    else if(get_peptide_src_peptide_type(peptide_src) == C_TRYPTIC){
-      // now there're at least tryptic on both side
-      // thus now we set as Tryptic and are done
-      if(match->overall_type == N_TRYPTIC){
-        match->overall_type = TRYPTIC;
-        break;
-      }
-      else{
-        match->overall_type = C_TRYPTIC;
-      }
-    } 
-    else{
-      match->overall_type = NOT_TRYPTIC;
-    }
-  }
-  
-  free_peptide_src_iterator(src_iterator);
-  */
 }
 
 /**

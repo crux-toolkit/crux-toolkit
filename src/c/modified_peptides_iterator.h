@@ -34,6 +34,7 @@ extern "C" {
 MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   double mass,         ///< Target mass of peptides
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  BOOLEAN_T is_decoy,  ///< generate decoy peptides
   INDEX_T* index,      ///< Index from which to draw peptides OR
   DATABASE_T* dbase    ///< Database from which to draw peptides
   );
@@ -55,6 +56,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
   double mz,         ///< Target mz of peptides
   int charge,        ///< Charge of peptides
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  BOOLEAN_T is_decoy,  ///< generate decoy peptides
   INDEX_T* index,      ///< Index from which to draw peptides OR
   DATABASE_T* dbase    ///< Database from which to draw peptides
   );

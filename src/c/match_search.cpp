@@ -388,6 +388,7 @@ int search_pep_mods(
       new_modified_peptides_iterator_from_mz(get_spectrum_precursor_mz(spectrum),
                                              charge,
                                              peptide_mod, 
+                                             is_decoy,
                                              index,
                                              database);
     
@@ -505,6 +506,7 @@ void add_decoy_scores(
                                           get_spectrum_precursor_mz(spectrum),
                                           charge,
                                           peptide_mods[mod_idx],
+                                          TRUE, // is decoy
                                           index,
                                           database);
     add_decoy_scores_match_collection(target_psms, 
