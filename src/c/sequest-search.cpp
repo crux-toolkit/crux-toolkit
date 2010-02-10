@@ -146,6 +146,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
         new_modified_peptides_iterator_from_mz(precursor_mz,
                                                charge,
                                                peptide_mod, 
+                                               FALSE, // not decoy
                                                index,
                                                database);
 
@@ -168,6 +169,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
           new_modified_peptides_iterator_from_mz(precursor_mz,
                                                  charge,
                                                  peptide_mod, 
+                                                 TRUE,  // is decoy
                                                  index,
                                                  database);
         // add matches

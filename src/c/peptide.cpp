@@ -56,6 +56,15 @@ struct peptide {
   FLOAT_T peptide_mass;   ///< The peptide's mass.
   PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
   MODIFIED_AA_T* modified_seq; ///< peptide sequence with modifications
+  MODIFIED_AA_T* decoy_modified_seq; ///< randomized peptide sequence
+};
+
+// the struct to be printed and read; possible fix for adding a field to the peptide
+struct PRINT_PEPTIDE_T {
+  unsigned char length; ///< The length of the peptide
+  FLOAT_T peptide_mass;   ///< The peptide's mass.
+  PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src   
+  MODIFIED_AA_T* modified_seq; ///< peptide sequence with modifications
 };
 
 
@@ -90,6 +99,7 @@ PEPTIDE_T* allocate_peptide(void){
   PEPTIDE_T* peptide = (PEPTIDE_T*)mycalloc(1, sizeof(PEPTIDE_T));
   peptide->peptide_src = NULL;
   peptide->modified_seq = NULL;
+  peptide->decoy_modified_seq = NULL;
   return peptide;
 }
 
@@ -120,6 +130,7 @@ PEPTIDE_T* new_peptide(
     //    new_peptide_src(peptide_type, parent_protein, start_idx );
     new_peptide_src(NON_SPECIFIC_DIGEST, parent_protein, start_idx );
   peptide->modified_seq = NULL;
+  peptide->decoy_modified_seq = NULL;
   
   return peptide;
 }
@@ -158,17 +169,15 @@ PEPTIDE_T* copy_peptide(
                            src_count);
   }
   if( src->modified_seq == NULL ){
-    // get the peptide sequence and convert to MODIFIED_AA_T*
-    /*    
-    char* sequence = get_peptide_sequence(src);
-    MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(sequence);
-    free(sequence);
-    new_peptide->modified_seq = mod_seq;
-    */
     new_peptide->modified_seq = NULL;
   }else{
-    //    new_peptide->modified_seq = copy_mod_aa_seq(src->modified_seq);
     new_peptide->modified_seq = copy_mod_aa_seq(src->modified_seq,src->length);
+  }
+  if( src->decoy_modified_seq == NULL ){
+    new_peptide->decoy_modified_seq = NULL;
+  }else{
+    new_peptide->decoy_modified_seq = copy_mod_aa_seq(src->decoy_modified_seq,
+                                                      src->length);
   }
   //PEPTIDE_SRC_T* new_association;
 
@@ -273,6 +282,9 @@ void free_peptide(
 
   if(peptide->modified_seq){
     free(peptide->modified_seq);;
+  }
+  if(peptide->decoy_modified_seq){
+    free(peptide->decoy_modified_seq);;
   }
   free(peptide);
 }
@@ -491,12 +503,43 @@ static BOOLEAN_T equal_peptides(
 
 
 /**
- * \brief Get a string representation of the peptide sequence
- * Sequence is taken from the first peptide_src to gain sequence, thus
- * must have at least one peptide src. 
+ * \brief Get a string representation of the peptide sequence with no
+ * added modification symbols.
+ * Returns decoy sequence for decoy peptides.
  * \returns The newly-allocated sequence of peptide
  */
 char* get_peptide_sequence(
+ PEPTIDE_T* peptide ///< peptide to query sequence -in
+ )
+{
+  if(peptide == NULL){
+    carp(CARP_ERROR, "Cannot get sequence from NULL peptide.");
+    return NULL;
+  }
+  if(peptide->peptide_src == NULL){
+    carp(CARP_ERROR, "Cannot get sequence from peptide with no peptide src.");
+    return NULL;
+  }
+
+  char* seq_copy = NULL;
+
+  if(peptide->decoy_modified_seq != NULL){
+    seq_copy = modified_aa_to_unmodified_string(peptide->decoy_modified_seq, 
+                                                peptide->length);
+  } else {
+    seq_copy = get_peptide_unshuffled_sequence(peptide);
+  }
+ 
+  return seq_copy; 
+}
+
+/**
+ * \brief Get a string representation of the target (unshuffled)
+ * peptide sequence with no added modification symbols.
+ * For target peptides, returns the same as get_peptide_sequence.
+ * \returns The newly-allocated sequence of peptide
+ */
+char* get_peptide_unshuffled_sequence(
  PEPTIDE_T* peptide ///< peptide to query sequence -in
  )
 {
@@ -761,10 +804,13 @@ char* get_peptide_modified_sequence(
  PEPTIDE_T* peptide
  ){
   char* seq_string = NULL;
-  if( peptide->modified_seq == NULL ){
+
+  if( peptide->decoy_modified_seq ){
+    seq_string = modified_aa_string_to_string(peptide->decoy_modified_seq, 
+                                              peptide->length); 
+  } else if( peptide->modified_seq == NULL ){
     seq_string = get_peptide_sequence(peptide);
   }else{
-    //    seq_string = modified_aa_string_to_string(peptide->modified_seq);
     seq_string = modified_aa_string_to_string(peptide->modified_seq,
                                               peptide->length);
   }
@@ -772,6 +818,30 @@ char* get_peptide_modified_sequence(
   return seq_string;
 }
 
+/**
+ * \brief Get the target sequence of the peptide encoded as char*
+ * including modification symbols (e.g. *,#).
+ *
+ * If the peptide is not a decoy, returns the same sequence as
+ * get_peptide_modified_sequence.  If the peptide has no
+ * modifications, returns same string as get_peptide_sequence.  If
+ * modified, adds the mod symbols to the string. 
+ * \returns A newly allocated string of the peptide's unshuffled
+ * (target) sequence including any modifications.
+ */
+char* get_peptide_unshuffled_modified_sequence(
+ PEPTIDE_T* peptide
+ ){
+  char* seq_string = NULL;
+  if( peptide->modified_seq == NULL ){
+    seq_string = get_peptide_sequence(peptide);
+  }else{
+    seq_string = modified_aa_string_to_string(peptide->modified_seq,
+                                              peptide->length);
+  }
+  
+  return seq_string;
+}
 
 /* getters requiring calculation */
 
@@ -987,6 +1057,47 @@ char* get_peptide_hash_value(
     carp(CARP_ERROR, "failed to create peptide hash value");
   }
   return hash_value;
+}
+
+/**
+ * Change the given target peptide into a decoy by randomizing its sequence.
+ * Uses settings in parameter.c to decide between shuffling and
+ * reversing the sequence.  Any modifications that exist will be
+ * maintained on the same amino acids whose position will move.  If
+ * the peptide is already a decoy, replaces the existing decoy
+ * sequence. 
+ */
+void transform_peptide_to_decoy(PEPTIDE_T* peptide){
+  if(peptide == NULL){
+    carp(CARP_ERROR, "Can't turn NULL peptide into decoy.");
+    return;
+  }
+
+  BOOLEAN_T reverse_seq = get_boolean_parameter("reverse-sequence");
+
+  // delete any existing decoy sequence
+  if(peptide->decoy_modified_seq){ 
+    free(peptide->decoy_modified_seq); 
+  }
+  // if the peptide is already modified, shuffle the modified sequence
+  if(peptide->modified_seq){
+    MODIFIED_AA_T* new_seq = NULL;
+    if( reverse_seq ){
+      new_seq = generate_reversed_mod_sequence(peptide);
+    } else {
+      new_seq = generate_shuffled_mod_sequence(peptide);
+    }
+    peptide->decoy_modified_seq = new_seq;
+
+  } else {// shuffle the unmodified sequence
+    char* new_seq = NULL;
+    if( reverse_seq ){
+      new_seq = generate_reversed_sequence(peptide);
+    } else {
+      new_seq = generate_shuffled_sequence(peptide);
+    }
+    peptide->decoy_modified_seq = convert_to_mod_aa_seq(new_seq);
+  }
 }
 
 /**
@@ -1492,10 +1603,7 @@ BOOLEAN_T serialize_peptide(
   PEPTIDE_SRC_ITERATOR_T* iterator = 
     new_peptide_src_iterator(peptide);
   PEPTIDE_SRC_T* peptide_src = NULL;
-  //  long num_src_location;
-  //  long original_location;
   int num_src = 0;
-  //int dummy_value = -10;
   
   char* seq = get_peptide_sequence(peptide);
   carp(CARP_DETAILED_DEBUG, "Serializing peptide %s, len %i, mass %.2f", 
@@ -1517,22 +1625,16 @@ BOOLEAN_T serialize_peptide(
   iterator = new_peptide_src_iterator(peptide);
 
   // write the peptide struct
-  fwrite(peptide, sizeof(PEPTIDE_T), 1, file);
-  
-  // store number of src location in file
-  //  num_src_location = ftell(file);
+  // for compatibility create an old-style struct to write in a block
+  PRINT_PEPTIDE_T p;
+  p.length = peptide->length;
+  p.peptide_mass = peptide->peptide_mass;
+  p.peptide_src = peptide->peptide_src;
+  p.modified_seq = peptide->modified_seq;
+  fwrite(&p, sizeof(PRINT_PEPTIDE_T), 1, file);
 
-  // write dummie peptide src count
+  // write peptide src count
   fwrite(&num_src, sizeof(int), 1, file);
-  //fwrite(&dummy_value, sizeof(int), 1, file);
-
-  /*
-  // there must be at least one peptide src
-  if(!peptide_src_iterator_has_next(iterator)){
-    carp(CARP_WARNING, "no peptide src");
-    return FALSE;
-  }
-  */
 
   // for each peptide src, serialize
   while(peptide_src_iterator_has_next(iterator)){
@@ -1545,21 +1647,6 @@ BOOLEAN_T serialize_peptide(
   }
   free_peptide_src_iterator(iterator);
   
-  /*
-  original_location = ftell(file);
-  fseek(file, num_src_location, SEEK_SET);
-  */
-
-  // over write the dummie peptide_src count with real value
-  /*
-  carp(CARP_DETAILED_DEBUG, "serializing peptide src count of %i for %s", 
-       num_src, seq);
-  fwrite(&num_src, sizeof(int), 1, file);
-  
-  // return to original poistion
-  fseek(file, original_location, SEEK_SET);
-  */
-
   // write the number of MODIFIED_AA_T's to serialize
   int mod_seq_length = peptide->length + 1;
   if( peptide->modified_seq == NULL ){
@@ -1599,6 +1686,7 @@ PEPTIDE_T* parse_peptide_tab_delimited(
   string string_sequence = file.getString("sequence");
   peptide -> length = string_sequence.length();
   peptide -> peptide_mass = file.getFloat("peptide mass");
+  
   if(!parse_peptide_src_tab_delimited(peptide, file, database, use_array)){
     carp(CARP_ERROR, "Failed to parse peptide src.");
     free(peptide);
@@ -1609,6 +1697,8 @@ PEPTIDE_T* parse_peptide_tab_delimited(
   //TODO: Output this Modified Sequence to the tab delimited file, 
   //      so it can be parsed
   peptide -> modified_seq = convert_to_mod_aa_seq(string_sequence.c_str());
+  
+  carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
 
   return peptide;
 
@@ -1632,25 +1722,25 @@ PEPTIDE_T* parse_peptide(
   )
 {  
   carp(CARP_DETAILED_DEBUG, "Parsing peptide");
-  //PROTEIN_T* parent_protein = NULL;
-  //PEPTIDE_SRC_T* peptide_src = NULL;
-  //PEPTIDE_SRC_T* current_peptide_src = NULL;
-  //int num_peptide_src = -1;
-  //unsigned int protein_idx = 0;
-  //  int src_index =  0;
-  //PEPTIDE_TYPE_T peptide_type = -1;
-  //int start_index = -1;
   
   // the new peptide to be given values in file
   PEPTIDE_T* peptide = allocate_peptide();
   
   // read peptide struct
-  if(fread(peptide, get_peptide_sizeof(), 1, file) != 1){
+  // for compatibility create an old-style struct to read in a block
+  PRINT_PEPTIDE_T p;
+  if(fread(&p, sizeof(PRINT_PEPTIDE_T), 1, file) != 1){
     carp(CARP_DETAILED_DEBUG, "Did not read peptide struct from file");
     // there is no peptide
     free(peptide);
     return NULL;
   }
+  // copy values to the peptide  
+  peptide->length = p.length;
+  peptide->peptide_mass = p.peptide_mass;
+  peptide->peptide_src = p.peptide_src ;
+  peptide->modified_seq = p.modified_seq ;
+
   
   if(!parse_peptide_src(peptide, file, database, use_array)){
     carp(CARP_ERROR, "Failed to parse peptide src.");
@@ -1658,85 +1748,6 @@ PEPTIDE_T* parse_peptide(
     return NULL;
   };
 
-  /*
-  // get total number of peptide_src for this peptide
-  // peptide must have at least one peptide src
-  fread(&num_peptide_src, sizeof(int), 1, file);
-  //  if(fread(&num_peptide_src, sizeof(int), 1, file) != 1 ||
-  //  num_peptide_src < 1){
-  if( num_peptide_src < 1){
-    carp(CARP_ERROR, 
-         "Index file corrupted, peptide must have at least one peptide src");
-    free(peptide);
-    return NULL;
-  }
-
-  
-  // which implemenation of peptide_src to use? Array or linklist?
-  if(use_array){
-    // allocate an array of empty peptide_src to be parsed information into
-    // we want to allocate the number of peptide src the current protein needs
-    peptide_src = new_peptide_src_array(num_peptide_src);
-  }
-  else{// link list
-    peptide_src = new_peptide_src_linklist(num_peptide_src);
-  }
-  
-  // set peptide src array to peptide
-  add_peptide_peptide_src_array(peptide, peptide_src);
-  
-  // set the current peptide src to parse information into
-  current_peptide_src = peptide_src;
-
-  // parse and fill all peptide src information into peptide
-  // TODO this should be moved into a parse peptide_src routine
-  for(; src_index < num_peptide_src; ++src_index){
-    // read peptide src fields
-    
-    // get protein index
-    if(fread(&protein_idx, (sizeof(int)), 1, file) != 1){
-      carp(CARP_ERROR, "index file corrupted, incorrect protein index");
-      free(peptide);
-      return NULL;
-    }
-    carp(CARP_DETAILED_DEBUG, "protein idx read is %i", protein_idx);
-    
-    // read peptide type of peptide src
-    if(fread(&peptide_type, sizeof(PEPTIDE_TYPE_T), 1, file) != 1){
-      carp(CARP_ERROR, "index file corrupted, failed to read peptide src");
-      free(peptide_src);
-      free(peptide);
-      return NULL;
-    }
-
-    // read start index of peptide in parent protein of thsi peptide src
-    if(fread(&start_index, sizeof(int), 1, file) != 1){
-      carp(CARP_ERROR, "index file corrupted, failed to read peptide src");
-      free(peptide_src);
-      free(peptide);
-      return NULL;
-    }
-    
-    /// set all fields in peptide src that have been read //
-
-    // get the peptide src parent protein
-    parent_protein = 
-      get_database_protein_at_idx(database, protein_idx);
-    
-    // set parent protein of the peptide src
-    set_peptide_src_parent_protein(current_peptide_src, parent_protein);
-
-    // set peptide type of peptide src
-    set_peptide_src_peptide_type(current_peptide_src, peptide_type);
-
-    // set start index of peptide src
-    set_peptide_src_start_idx(current_peptide_src, start_index);
-    
-    // set current_peptide_src to the next empty peptide src
-    current_peptide_src= get_peptide_src_next_association(current_peptide_src);
-  }
-  // end parse_peptide_src
-*/
   // TODO: write parse_peptide_modification()
   // read the length of the modified aa sequence
   int mod_seq_len = -1;
@@ -1792,14 +1803,19 @@ BOOLEAN_T parse_peptide_no_src(
   }
 
   // read peptide struct
-  //  if(fread(peptide, get_peptide_sizeof(), 1, file) != 1){
-  int read = fread(peptide, sizeof(PEPTIDE_T), 1, file);
-  //  if(fread(peptide, sizeof(PEPTIDE_T), 1, file) != 1){
+  //  int read = fread(peptide, sizeof(PEPTIDE_T), 1, file);
+  // for compatibility prior to storing modified seq
+  PRINT_PEPTIDE_T p;
+  int read = fread(&p, sizeof(PRINT_PEPTIDE_T), 1, file);
   if( read != 1 ){
     carp(CARP_DETAILED_DEBUG, "read did not find a peptide, returned %i", read);
-    // there is no peptide
     return FALSE;
   }
+  peptide->length = p.length;
+  peptide->peptide_mass = p.peptide_mass;
+  peptide->peptide_src = p.peptide_src ;
+  peptide->modified_seq = p.modified_seq ;
+
   carp(CARP_DETAILED_DEBUG, "read peptide len %i, mass %.2f", peptide->length, peptide->peptide_mass);
 
   // remember where the peptide_src begins

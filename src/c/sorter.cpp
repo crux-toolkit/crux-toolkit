@@ -66,8 +66,9 @@ PEPTIDE_WRAPPER_T* wrap_peptide(
 }
 
 /**
- * compares two peptides with the give sort type (length, mass, lexical)
- * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
+ * compares two peptides with the given sort type (length, mass, lexical)
+ * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if
+ * greater priority
  */
 int compareTo(
   PEPTIDE_T* peptide_one, ///< peptide to compare one -in
@@ -141,8 +142,8 @@ int compareTo(
     else{
       result = 0;
     }
-    
   EXIT:
+
     /** 
      * uncomment this code if you want to restore a protein to 
      * light after converted to heavy
@@ -152,6 +153,18 @@ int compareTo(
       protein_to_light(get_peptide_parent_protein(peptide_two));
     }
     */
+
+    // if the same, check for modifications
+    if( result == 0 ){
+      MODIFIED_AA_T* mod_seq_one = get_peptide_modified_aa_sequence(peptide_one);
+      MODIFIED_AA_T* mod_seq_two = get_peptide_modified_aa_sequence(peptide_two);
+      int mod_result = memcmp(mod_seq_one, mod_seq_two, 
+                              sizeof(MODIFIED_AA_T) * peptide_one_length);
+      if( mod_result != 0 ){
+        result = mod_result / abs(mod_result);
+      }
+    }
+
     return result;
   }
   
@@ -173,9 +186,11 @@ PEPTIDE_WRAPPER_T* merge_duplicates_same_list(
   PEPTIDE_WRAPPER_T* current = wrapper_list;
   // for all peptides that have equal mass
   while(current->next_wrapper != NULL &&
-        compareTo(wrapper_list->peptide, current->next_wrapper->peptide, SORT_MASS)==0){  
+        compareTo(wrapper_list->peptide, current->next_wrapper->peptide, 
+                  SORT_MASS)==0){  
     // check identical peptide
-    if(compareTo(wrapper_list->peptide, current->next_wrapper->peptide, SORT_LEXICAL)==0){
+    if(compareTo(wrapper_list->peptide, current->next_wrapper->peptide, 
+                 SORT_LEXICAL)==0){
       PEPTIDE_WRAPPER_T* wrapper_to_delete = current->next_wrapper;
       // merge peptides
       merge_peptides(wrapper_list->peptide, wrapper_to_delete->peptide);
@@ -241,7 +256,7 @@ PEPTIDE_WRAPPER_T* merge_duplicates_different_list(
  * merge wrapper list one and list two by sort type
  * assumes that each list one and two are sorted by the same sort type
  *\returns a sorted wrapper list result of merging list one and two
- */   
+ */
 PEPTIDE_WRAPPER_T* merge(
   PEPTIDE_WRAPPER_T* wrapper_one, ///< fist peptide wrapper list -in
   PEPTIDE_WRAPPER_T* wrapper_two, ///< second peptide wrapper list -in
@@ -353,7 +368,6 @@ PEPTIDE_WRAPPER_T* merge(
   }
   return wrapper_final;
 }
-
 
 /**
  * spilt a wrapper list into two equal or almost equal size lists
