@@ -65,12 +65,22 @@ else
     aclocal
 fi
 
-ltpath=/usr/share/libtool/ltmain.sh
-if [ -f "$ltpath" ]; then
-    cp $ltpath config
+AUTOMAKE_PATH=`which automake`
+echo "Using automake in $AUTOMAKE_PATH"
+AUTOMAKE_DIR=`dirname $AUTOMAKE_PATH`
+if [ -e $AUTOMAKE_DIR/../share/libtool/ltmain.sh ]
+then
+  LTMAIN_PATH="$AUTOMAKE_DIR/../share/libtool/ltmain.sh"
+  cp  $LTMAIN_PATH config
+elif [ -e $AUTOMAKE_DIR/../share/libtool/config/ltmain.sh ]
+then
+  LTMAIN_PATH="$AUTOMAKE_DIR/../share/libtool/config/ltmain.sh"
+  cp $LTMAIN_PATH config
 else
-    cp /usr/share/libtool/config/ltmain.sh config
+   echo "Error: Couldn't find ltmain.sh."
+   exit 1
 fi
+echo "ltmain.sh was copied from $LTMAIN_PATH"
 
 autoheader
 automake -a -c 
