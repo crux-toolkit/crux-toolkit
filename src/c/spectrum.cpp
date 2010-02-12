@@ -22,7 +22,7 @@
 #include "carp.h"
 
 #include "DelimitedFile.h"
-#include "Spectrum.h"
+#include "./MSToolkit/Spectrum.h"
 
 //There is a name clash with MS2 in MSToolkit, so can't use the namespace decl here
 //using namespace MSToolkit;
