@@ -192,6 +192,13 @@ BOOLEAN_T is_aa_modifiable(MODIFIED_AA_T aa, AA_MOD_T* mod);
 void modify_aa(MODIFIED_AA_T* aa, AA_MOD_T* mod);
 
 /**
+ * \brief Return the AA_MOD_T associated with the given symbol.  If
+ * the symbol does not represent a modification, returns null.
+ * Requires that parameters have been initialized.
+ */
+AA_MOD_T* get_aa_mod_from_symbol(const char symbol);
+
+/**
  * \brief Finds the list of modifications made to an amino acid.
  *
  * Allocates a list of length(possible_mods) and fills it with pointers

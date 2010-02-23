@@ -161,7 +161,6 @@ char modified_aa_to_char(MODIFIED_AA_T aa){
  */
 MODIFIED_AA_T char_aa_to_modified(char aa){
   assert( aa >= 'A' && aa <= 'Z' );
-  //  return (MODIFIED_AA_T)(aa - 'A');
   MODIFIED_AA_T mod_aa = (MODIFIED_AA_T)aa - (MODIFIED_AA_T)'A';
   return mod_aa;
 }
@@ -279,10 +278,9 @@ char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length){
 }
 
 /**
- * \brief Allocates an array of MODIFIED_AA_T's the same length as
- * sequence and populates it with the MODIFIED_AA_T value that
- * corresponds to each sequence char value.  No modifications are
- * applied to the new array.
+ * \brief Allocates an array of MODIFIED_AA_T's and populates it with
+ * the MODIFIED_AA_T value that corresponds to each sequence char
+ * value and trailing modification symbols.
  *
  * \returns A newly allocated copy of the sequnce converted to type
  * MODIFIED_AA_T. 
@@ -295,12 +293,28 @@ MODIFIED_AA_T* convert_to_mod_aa_seq(const char* sequence){
   }
 
   int seq_len = strlen(sequence);
-  MODIFIED_AA_T* new_string = (MODIFIED_AA_T*)mycalloc( seq_len+1, sizeof(MODIFIED_AA_T) );
+  MODIFIED_AA_T* new_string = 
+    (MODIFIED_AA_T*)mycalloc( seq_len+1, sizeof(MODIFIED_AA_T) );
 
   unsigned int seq_idx = 0;
-  //  while( sequence[seq_idx] != '\0' ){
+  unsigned int mod_idx = 0;
   for(seq_idx = 0; seq_idx < strlen(sequence); seq_idx++){
-    new_string[seq_idx] = char_aa_to_modified( sequence[seq_idx] );
+    // aa or mod?
+    if( sequence[seq_idx] >= 'A' && sequence[seq_idx] <= 'Z' ){ // aa
+      new_string[mod_idx] = char_aa_to_modified( sequence[seq_idx] );
+      mod_idx++;
+    } else { // mod
+      // translate character into aa_mod
+      AA_MOD_T* aa_mod = get_aa_mod_from_symbol(sequence[seq_idx]);
+      if( aa_mod == NULL ){
+        carp(CARP_ERROR, "The character %c in sequence %s is not a recognized "
+             "modification symbol.\n", sequence[seq_idx], sequence);
+        return NULL;
+      }
+      // apply modification to new_string[mod_idx-1]
+      modify_aa(&new_string[mod_idx-1], aa_mod);
+      // don't advance mod_idx
+    }
   }
 
   // null terminate
@@ -445,9 +459,7 @@ BOOLEAN_T compare_mods(AA_MOD_T** psm_file_mod_list, int file_num_mods){
   int mod_idx = 0;
   for(mod_idx=0; mod_idx<num_mods; mod_idx++){
     if( ! compare_two_mods(mod_list[mod_idx], psm_file_mod_list[mod_idx]) ){
-      printf("param mod %d is: ", mod_idx);
       print_a_mod(mod_list[mod_idx]);
-      printf("file mod %d is: ", mod_idx);
       print_a_mod(psm_file_mod_list[mod_idx]);
       return FALSE;
     }
@@ -538,6 +550,27 @@ void modify_aa(MODIFIED_AA_T* aa, AA_MOD_T* mod){
     return;
   }
   *aa = *aa | mod->identifier;
+}
+
+/**
+ * \brief Return the AA_MOD_T associated with the given symbol.  If
+ * the symbol does not represent a modification, returns null.
+ * Requires that parameters have been initialized.
+ */
+AA_MOD_T* get_aa_mod_from_symbol(const char symbol){
+
+  AA_MOD_T** mod_list = NULL;
+  int total_mods = get_all_aa_mod_list(&mod_list);
+  for(int mod_idx = 0; mod_idx < total_mods; mod_idx++){
+    AA_MOD_T* cur_mod = mod_list[mod_idx];
+    if( cur_mod->symbol == symbol ){
+      return cur_mod;
+    }
+  }
+
+  // none of the mods matched the symbol
+  carp(CARP_ERROR, "The modification symbol '%c' is not valid.", symbol);
+  return NULL;
 }
 
 /**
