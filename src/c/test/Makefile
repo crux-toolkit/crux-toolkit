@@ -1,8 +1,7 @@
 BINDIR  =../../../bin/
 SRCDIR  =../
-PERCOLATOR_DIR=../../../../percolator/src
-CC	= gcc	
-#CFLAGS  = -g -Wall -I$(PERCOLATOR_DIR) -I/net/maccoss/vol2/home/frewen/local/include -L/net/maccoss/vol2/home/frewen/local/lib
+PERCOLATOR_DIR=../../c/percolator
+CC	= g++	
 CFLAGS  = -g -Wall -I$(PERCOLATOR_DIR) -I$(HOME)/local/include -L$(HOME)/local/lib
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
@@ -31,7 +30,8 @@ TESTS = \
 
 CRUX_LIBS = \
   ../.libs/libcrux.a \
-  $(PERCOLATOR_DIR)/Release/lib/libpercolator.a
+  $(PERCOLATOR_DIR)/.libs/libpercolator.a \
+  ../MSToolkit/.libs/libmstoolkit.a
 
 unittests:  $(SRC) $(TESTS) $(CRUX_LIBS)
 	$(CC) -o unittests $(CFLAGS) $(TESTS) $(CRUX_LIBS) -lcheck -lm -D_GNU_SOURCE

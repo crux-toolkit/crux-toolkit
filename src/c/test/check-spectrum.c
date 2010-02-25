@@ -10,7 +10,7 @@
 SPECTRUM_T * spectrum;
 SPECTRUM_T * second_spectrum;
 char* file_name;
-FILE* file;
+static FILE* file;
 
 
 START_TEST (test_create){
@@ -18,15 +18,19 @@ START_TEST (test_create){
   spectrum = allocate_spectrum();
   second_spectrum = allocate_spectrum();
 
-
-  fail_unless(parse_spectrum(spectrum, "test.ms2"), "failed to open and create new spectrum from ms2 file");
+  file_name = my_copy_string("test.ms2"); // to avoid const warning
+  fail_unless(parse_spectrum(spectrum, file_name), 
+              "failed to open and create new spectrum from ms2 file");
 
   free_spectrum(spectrum);
   spectrum = allocate_spectrum();
 
-  file = fopen("test.ms2", "r" );
-  fail_unless(parse_spectrum_file(spectrum, file, "test.ms2"), "failed to open and create new spectrum from ms2 file");
+  file = fopen(file_name, "r" );
+  fail_unless(parse_spectrum_file(spectrum, file, file_name), 
+              "failed to open and create new spectrum from ms2 file");
   
+  free(file_name);
+
   fail_unless(get_spectrum_first_scan(spectrum) == 15, "first_scan field incorrect");
   fail_unless(get_spectrum_last_scan(spectrum) == 15, "last_scan field incorrect");
   //fail_unless(get_spectrum_id(spectrum) == 2, "id field is incorrect");

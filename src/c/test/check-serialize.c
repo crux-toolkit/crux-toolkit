@@ -11,13 +11,13 @@
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 // declare things to set up
-char* pep_filename = "test-peptides.bin";
-PEPTIDE_T *pep1, *pep2, *pep3, *pep4;
-PROTEIN_T *protein1;
-DATABASE_T* db;
-AA_MOD_T *amod1, *amod2;
-AA_MOD_T* amod_list[2];
-PEPTIDE_MOD_T *pmod1, *pmod2;
+static char pep_filename[128] = "test-peptides.bin";
+static PEPTIDE_T *pep1, *pep2, *pep3, *pep4;
+static PROTEIN_T *protein1;
+static DATABASE_T* db;
+static AA_MOD_T *amod1, *amod2;
+static AA_MOD_T* amod_list[2];
+static PEPTIDE_MOD_T *pmod1, *pmod2;
 
 void ser_setup(){
   db = new_database("input-data/protseq1.fasta", FALSE);
@@ -208,15 +208,15 @@ START_TEST(test_header){
   // include modes
   int fake_argc = 6;
   char* fake_argv[6];
-  fake_argv[0] = "testing";
-  fake_argv[1] = "--number-decoy-set";
-  fake_argv[2] = "0";
-  fake_argv[3] = "--parameter-file";
-  fake_argv[4] = "params/1mod";
-  fake_argv[5] = "fasta_file";
-  char* op[2] = {"number-decoy-set", "parameter-file"};
+  fake_argv[0] = my_copy_string("testing");
+  fake_argv[1] = my_copy_string("--num-decoys-per-target");
+  fake_argv[2] = my_copy_string("0");
+  fake_argv[3] = my_copy_string("--parameter-file");
+  fake_argv[4] = my_copy_string("params/1mod");
+  fake_argv[5] = my_copy_string("fasta_file");
+  const char* op[2] = {"num-decoys-per-target", "parameter-file"};
   select_cmd_line_options(op, 2 );
-  char* arg[1] = { "protein input" };
+  const char* arg[1] = { "protein input" };
   select_cmd_line_arguments(arg, 1);
   parse_cmd_line_into_params_hash(fake_argc, fake_argv, "testing");
 

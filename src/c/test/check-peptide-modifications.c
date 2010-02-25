@@ -15,15 +15,15 @@ void force_set_n_mod_list(AA_MOD_T** amod_list, int num_mods);
 void force_set_c_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 // declare things to set up
-PEPTIDE_MOD_T *pmod1, *pmod2;
-AA_MOD_T *amod1, *amod2, *amod3;
-AA_MOD_T* amod_list[3];
-PEPTIDE_T* pep1;
-PROTEIN_T* prot1;
-char* seq = "MRVLKFGGTSVANAERFLRVADILESNARQGQVAOOTVLSAPAKITNHLVA" \
+static PEPTIDE_MOD_T *pmod1, *pmod2;
+static AA_MOD_T *amod1, *amod2, *amod3;
+static AA_MOD_T* amod_list[3];
+static PEPTIDE_T* pep1;
+static PROTEIN_T* prot1;
+static char seq[265] = "MRVLKFGGTSVANAERFLRVADILESNARQGQVAOOTVLSAPAKITNHLVA" \
 "MIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQC";
 
-int max_aas_modified = 255;
+static int max_aas_modified = 255;
 
 void pmod_setup(){
   pmod1 = new_peptide_mod();
@@ -254,7 +254,7 @@ START_TEST(test_modify_null){
   LINKED_LIST_T* returned_list = new_empty_list();
   fail_unless( 1 == modify_peptide(pep1, NULL, returned_list, max_aas_modified),
                "Modifying a peptide with a null pmod should return 1 peptide");
-  PEPTIDE_T* moded_peptide = pop_front_linked_list(returned_list);
+  PEPTIDE_T* moded_peptide = (PEPTIDE_T*)pop_front_linked_list(returned_list);
   fail_unless( strcmp( get_peptide_sequence(moded_peptide), 
                        get_peptide_sequence(pep1) ) == 0,
                "Unmodified peptide sequence should be the same as original.");

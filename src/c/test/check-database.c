@@ -15,24 +15,7 @@
 #include "../database.h"
 
 
-
-PEPTIDE_T* peptide2;
-PEPTIDE_T* peptide3;
-PEPTIDE_T* peptide4;
-PEPTIDE_T* peptide5;
-PEPTIDE_T* peptide6;
-PEPTIDE_T* peptide1;
-PROTEIN_T* protein1;
-PROTEIN_T* protein2;
-PROTEIN_T* protein3;
-PROTEIN_PEPTIDE_ITERATOR_T* iterator;
-PEPTIDE_CONSTRAINT_T* constraint;
-
-PEPTIDE_SRC_T* association1;
-PEPTIDE_SRC_T* association2;
-PEPTIDE_SRC_T* association3;
-
-DATABASE_T* db;
+static DATABASE_T* db;
 
 void db_setup(){
   db = new_database("input-data/protein2.fasta", FALSE);  // not memmapped

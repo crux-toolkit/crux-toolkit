@@ -1,5 +1,94 @@
 <html>
 <body>
+<h3>Modifications in Crux</h3>
+
+<p>The following is an explaination of the code that handles
+  differential sequence modifications.  These are the changes to amino
+  acid masses that occur on some residues of some peptides.  At the
+  bottom of the page are the <a href="#original_reqs">original
+  requirements</a>.</p>
+
+<p>The user specifies in the parameter file what modifications should
+  be considered.  The three possible options are mod, amod, cmod.  The
+  'mod' option is for modifications that may occur anywhere on the
+  peptide.  The 'nmod' and 'cmod' options are for position-specific
+  modifications, i.e. they occur on either terminus of the peptide.
+  Each mod three values: the mass change, the residues on which the
+  modifcation may occur, and the maximum number of times that
+  modification may appear in one sequence.  For example, to consider
+  up to phosphorylations on residues S, T, or Y, the user would
+  include this line in the parameter file.
+mod=79.9:STY:2
+Positional mods have only two values: the mass change and the maximum
+  distance from the terminus.
+
+<p>Each 'mod' option given by the user is stored as an amino acid mod
+  or AA_MOD_T with the following definition:
+<pre>
+struct AA_MOD_T{ 
+  double mass_change;  ///< the amount by which the mass of the residue changes
+  BOOLEAN_T aa_list[AA_LIST_LENGTH];
+                       ///< an array indexed by AA, true if can be modified
+  int max_per_peptide; ///< the maximum number of mods per peptide
+  MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
+  int max_distance;        ///< the max distance from the protein terminus
+  char symbol;         ///< the character to represent the mod in sqt files
+  MODIFIED_AA_T identifier; ///< the bitmask assigned for unique ID
+};
+</pre>
+The first three values are those as given by the user.  'position'
+corresponds to the option name: mod is ANY_POSITION, nmod is N_TERM
+and cmod is C_TERM.  Max_distance is only relevant to positional
+N_TERM and C_TERM type mods.  Each amino acid mod is given a unique
+symbol for textual representation (e.g. '*', '#', '@') and a unique
+bitmask identifier.  More on that later.  In parameter.c there is a
+list of AA_MODs which is created as the parameter file is parsed and
+remains unchanged for the duration of execution.  
+
+<p>
+Peptide sequences were originally stored only as pointers into
+character arrays held by protein objects.  We choose to store
+modification information for each peptide in an array of unsigned
+ints, type deffed as MODIFIED_AA_T.  The unsigned int store the value
+of the amino acid 
+in the least significant bits.  The values 0-25 represent residues
+A-Z.  This leaves the remaining 11 bits to be used as flags for each
+possible AA_MOD.  For this reason, there is a maximum of 11
+modifications that can be given by the user.  The unique identifier
+for each AA_MOD can be used to set or check its assigned bit in the
+MODIFIED_AA_TNote that a single residue can have as many as 11
+different modifications but cannot have more than one instance of a
+given type of modification. 
+
+<p>
+A peptide can have more than one AA_MOD applied to it, either on one
+residue or on several residues.  In the simple example above, a
+peptide could have either 0, 1 or 2 phsporylations.  The combination
+of AA_MODs applied to a peptide is called a peptide modification or
+PEPTIDE_MOD_T.  It has the following definition.
+<pre>
+struct PEPTIDE_MOD_T{
+  double mass_change;     ///< the net mass change for the peptide
+  int num_mods;           ///< the number of items in the list_of_mods
+  int aa_mod_counts[MAX_AA_MODS]; ///< the number of each kind of aa mod
+                                  ///as listed in parameter.c
+};
+</pre>
+
+The num_mods field is the number of AA_MODs in this peptide mod.  It
+is the sum of aa_mod_counts[i] for i in (0,MAX_AA_MODS]. The index in
+aa_mod_counts is the same as that in the global list kept by
+parameter.c.  So if aa_mods_counts[0] == 2 it means this peptide mod
+has two of the first stored aa mod.  mass_change is the sum of the
+masses times the count.
+
+
+
+
+
+
+<hr>
+<a name="original_reqs">
   Differential Mods<br>
   Author: Aaron Klammer<br>
   2008-Mar-14<br>

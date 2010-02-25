@@ -74,7 +74,7 @@ void parse_parameter_file(
 BOOLEAN_T check_option_type_and_bounds(const char* name);
 
 void check_parameter_consistency();
-void parse_custom_enzyme(char* rule_str);
+void parse_custom_enzyme(const char* rule_str);
 
 /**
  *
@@ -1120,7 +1120,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
  */
 // NOTE (BF mar-11-09): for testing would be nice if this returned
 // error code instead of dying
-void parse_custom_enzyme(char* rule_str){
+void parse_custom_enzyme(const char* rule_str){
 
   BOOLEAN_T success = TRUE;
   int len = strlen(rule_str);

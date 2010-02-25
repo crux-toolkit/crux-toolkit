@@ -8,13 +8,11 @@ void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 
 // declare things to set up
-MODIFIED_PEPTIDES_ITERATOR_T *iter1, *iter2, *iter3;
-PEPTIDE_MOD_T* pmod1;
-AA_MOD_T *amod1, *amod2, *amod3;
-AA_MOD_T* amod_list[3];
-
-//INDEX_T* index;
-DATABASE_T* dbase;
+static MODIFIED_PEPTIDES_ITERATOR_T *iter1, *iter3;
+static PEPTIDE_MOD_T* pmod1;
+static AA_MOD_T *amod1, *amod2, *amod3;
+static AA_MOD_T* amod_list[3];
+static DATABASE_T* dbase;
 
 void mpi_setup(){
   initialize_parameters();
@@ -35,7 +33,10 @@ void mpi_setup(){
 
   //iter1 = new_modified_peptides_iterator_from_mass(1566, pmod1, NULL, dbase);
   //there seems to be a bug so that the two peptides in this window aren't being returned
-  iter1 = new_modified_peptides_iterator_from_mass(1268, pmod1, NULL, dbase);
+  iter1 = new_modified_peptides_iterator_from_mass(1268, pmod1, 
+                                                   false, // not decoy
+                                                   NULL,  // no index
+                                                   dbase);
 
   //iter2 = new_modified_peptides_iterator_from_mass(1566, pmod1, index);
 }
@@ -57,21 +58,21 @@ START_TEST(test_has_next_unmod){
   PEPTIDE_T* next_p = modified_peptides_iterator_next(iter1);
   fail_unless( next_p != NULL, "Next returned a null peptide");
   char* seq = get_peptide_sequence(next_p);
-  fail_unless( strcmp(seq, "ITNHLVAMIEK") == 0,
-               "First peptide should be ITNHLVAMIEK but is %s", seq);
+  fail_unless( strcmp(get_peptide_sequence(next_p), "QGQVATVLSAPAK") == 0,
+               "First peptide should be QGQVATVLSAPAK");
 
   fail_unless( modified_peptides_iterator_has_next(iter1) == TRUE, 
                "Iterator should have a second peptide");
 
   free_peptide(next_p);
   free(seq);
-  // This creates segfault here but not in a stand-alone. why???
-  /*next_p = modified_peptides_iterator_next(iter1);
-    fail_unless( next_p != NULL, "Next returned a null second peptide");
-    fail_unless( strcmp(get_peptide_sequence(next_p), "ITNHLVAMIEK") == 0,
+
+  next_p = modified_peptides_iterator_next(iter1);
+  fail_unless( next_p != NULL, "Next returned a null second peptide");
+  fail_unless( strcmp(get_peptide_sequence(next_p), "ITNHLVAMIEK") == 0,
                "Second peptide should be ITNHLVAMIEK");
-    free_peptide(next_p);
-  */
+  free_peptide(next_p);
+  
 }
 END_TEST
 
@@ -84,7 +85,10 @@ START_TEST(test_has_next_one_mod){
   aas['Q' - 'A'] = TRUE;
   //aamod1 should have max 1 +10 on Q
   peptide_mod_add_aa_mod(pmod1, 0, 1); // aamod is index 0, 1 copy
-  iter3 = new_modified_peptides_iterator_from_mass(1268+10, pmod1,NULL, dbase);
+  iter3 = new_modified_peptides_iterator_from_mass(1268+10, pmod1,
+                                                   false, // not decoy
+                                                   NULL, // no index
+                                                   dbase);
 
   // test if the iterator has two modified peptides
   fail_unless( modified_peptides_iterator_has_next(iter3) == TRUE,

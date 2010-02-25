@@ -776,14 +776,13 @@ MODIFIED_AA_T* get_peptide_modified_aa_sequence(PEPTIDE_T* peptide){
 
   MODIFIED_AA_T* seq_copy = NULL;
   
-  // comment me to fix files
-  if( peptide->modified_seq != NULL ){
-      carp(CARP_DETAILED_DEBUG, "mod seq cached of len %d", peptide->length);
-      //    seq_copy = copy_mod_aa_seq(peptide->modified_seq);
+  if( peptide->modified_seq != NULL ){ 
+    carp(CARP_DETAILED_DEBUG, "Getting modified seq from peptide.");
     seq_copy = copy_mod_aa_seq(peptide->modified_seq,
                                peptide->length);
-  }else{// create one from char seq
-      carp(CARP_DETAILED_DEBUG, "mod seq NOT cached");
+
+  } else {// create one from char seq
+    carp(CARP_DETAILED_DEBUG, "mod seq NOT cached");
     char* seq = get_peptide_sequence(peptide);
     seq_copy = convert_to_mod_aa_seq(seq);
     free(seq);
@@ -1097,6 +1096,7 @@ void transform_peptide_to_decoy(PEPTIDE_T* peptide){
       new_seq = generate_shuffled_sequence(peptide);
     }
     peptide->decoy_modified_seq = convert_to_mod_aa_seq(new_seq);
+    free(new_seq);
   }
 }
 
@@ -1427,7 +1427,6 @@ void print_peptide_in_format(
     if( peptide->modified_seq== NULL ){
       sequence = get_peptide_sequence(peptide);
     }else{
-      //      sequence = modified_aa_string_to_string(peptide->modified_seq);
       sequence = modified_aa_string_to_string(peptide->modified_seq, 
                                               peptide->length);
     }

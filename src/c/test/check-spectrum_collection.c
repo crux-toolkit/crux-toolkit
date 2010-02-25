@@ -6,23 +6,24 @@
 #include "../spectrum_collection.h"
 #include "../peak.h"
 #include "../crux-utils.h"
+#include "../carp.h"
+#include "../parameter.h"
 
 
-SPECTRUM_T * spectrum;
-SPECTRUM_T * second_spectrum;
-char* file_name;
-char* comment;
+static SPECTRUM_T* spectrum;
+static SPECTRUM_T* second_spectrum;
+static char* file_name;
+static char* comment;
 
-FILE* file;
-
-SPECTRUM_COLLECTION_T * collection;
-SPECTRUM_COLLECTION_T * copy;
-SPECTRUM_ITERATOR_T* spectrum_iterator;
-SPECTRUM_T * tmp1;
+static SPECTRUM_COLLECTION_T* collection;
+static SPECTRUM_COLLECTION_T* copy;
+static SPECTRUM_ITERATOR_T* spectrum_iterator;
+static SPECTRUM_T* tmp1;
 
 
 START_TEST (test_create){
   //set up
+  initialize_parameters();
   collection = new_spectrum_collection("test2.ms2");
   copy = allocate_spectrum_collection();
   spectrum = allocate_spectrum();
