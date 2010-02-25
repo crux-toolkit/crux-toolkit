@@ -10,9 +10,10 @@ START_TEST (test_create){
   int modification_counts[] = {-1, 1, 0, 0};
     
   //create new ion
-  ION_T* ion = new_ion(B_ION, 6, 2, "AKLVKNMM", AVERAGE);
-  ION_T* ion2 = new_ion(Y_ION, 7, 3, "AKLVKNMM", MONO);
-  ION_T* ion3 = new_modified_ion(B_ION, 6, 3, "AKLVKNMM", MONO, modification_counts);
+  char* seq = my_copy_string("AKLVKNMM");  // to avoid const warning
+  ION_T* ion = new_ion(B_ION, 6, 2, seq, AVERAGE);
+  ION_T* ion2 = new_ion(Y_ION, 7, 3, seq, MONO);
+  ION_T* ion3 = new_modified_ion(B_ION, 6, 3, seq, MONO, modification_counts);
 
   //check if ion mass
   fail_unless( compare_float(get_ion_mass_z(ion), 327.919342) == 0, "Ion mass/z not set correctly: ion");
@@ -42,7 +43,9 @@ START_TEST (test_create){
   set_ion_type(ion, A_ION);
   fail_unless(get_ion_type(ion) == A_ION, "Ion type not set correctly");
 
-  set_ion_peptide_sequence(ion, "AKLVK");
+  free(seq);
+  seq = my_copy_string("AKLVK");
+  set_ion_peptide_sequence(ion, seq);
   fail_unless(strcmp(get_ion_peptide_sequence(ion), "AKLVK") == 0, "Ion type not set correctly");
 
   //try print ion

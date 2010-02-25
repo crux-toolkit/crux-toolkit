@@ -13,12 +13,6 @@
 #include "../index.h"
 
 // declare things to set up
-//INDEX_T* index;
-INDEX_T* inx;
-DATABASE_T* db;
-PEPTIDE_CONSTRAINT_T* constraint;
-INDEX_PEPTIDE_ITERATOR_T* iterator;
-PEPTIDE_T* peptide;
 
 void index_setup(){
 

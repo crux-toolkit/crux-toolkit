@@ -3,12 +3,13 @@
 #include "../carp.h"
 #include "../modifications.h"
 // also in parameter.c
-void parse_custom_enzyme(char* rule_str);
+void parse_custom_enzyme(const char* rule_str);
 
 // delcare things to set up
-char* ops[1];
-char* args[1];
-char* enzyme_rule;
+const char* ops[1];
+const char* args[1];
+char enzyme_rule[128];
+char* fake_argv[4];
   
 // set up and teardown
 void param_setup(){
@@ -18,10 +19,18 @@ void param_setup(){
   select_cmd_line_options(ops, 1);
   args[0] = "protein input";
   select_cmd_line_arguments(args, 1);
+
+  fake_argv[0] = my_copy_string("test-app");
+  fake_argv[1] = my_copy_string("--parameter-file");
+  fake_argv[2] = my_copy_string("params/1mod");
+  fake_argv[3] = my_copy_string("prot");
 }
 
 void param_teardown(){
   // free all hashes?
+  for(int i=0; i<4; i++){
+    free(fake_argv[i]);
+  }
 }
 
 START_TEST(test_create){
@@ -47,7 +56,6 @@ START_TEST(test_mod){
   fclose(paramf_1m);
 
   set_verbosity_level(30);
-  char* fake_argv[4] = {"test-app", "--parameter-file", "params/1mod", "prot"};
   // parse command line and param file
   fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==TRUE,
               "Failed to parse param file %s with mods", "1mod");
@@ -78,8 +86,9 @@ START_TEST(test_mod){
   fprintf(paramf_2m, "cmod=33.3:0\n");
   fclose(paramf_2m);
 
-  char* fake_argv2[4] = {"test-ap", "--parameter-file", "params/2mod", "prot"};
-  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv2, "test-app")==TRUE,
+  free(fake_argv[2]);
+  fake_argv[2] = my_copy_string("params/2mod");
+  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==TRUE,
               "Failed to parse param file %s with mods", "2mod");
   fail_unless( get_aa_mod_list(&mod_list) == 1,
             "Got an incorrect number of mods, %d", get_aa_mod_list(&mod_list));
@@ -103,8 +112,9 @@ START_TEST(test_mod){
   fprintf(paramf_3m, "overwrite=T\n");
   fclose(paramf_3m);
 
-  char* fake_argv3[4] = {"test-ap", "--parameter-file", "params/3mod", "prot"};
-  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv3, "test-app")==TRUE,
+  free(fake_argv[2]);
+  fake_argv[2] = my_copy_string("params/3mod");
+  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==TRUE,
               "Failed to parse param file %s with mods", "2mod");
   fail_unless( get_aa_mod_list(&mod_list) == 0,
             "Got an incorrect number of mods, %d", get_aa_mod_list(&mod_list));
@@ -140,7 +150,7 @@ START_TEST(test_enzyme){
 
   // try various strings and see that they work
   // can't test error cases b/c parse_ dies on error
-  enzyme_rule = "[RK]|{P}";
+  strcpy(enzyme_rule, "[RK]|{P}");
   parse_custom_enzyme(enzyme_rule);
   fail_unless(pre_for_inclusion == TRUE,
               "For rule %s, pre_for_inclusion should be TRUE but is not.",
@@ -178,7 +188,7 @@ START_TEST(test_enzyme){
   post_list_size = 0;
 
 
-  enzyme_rule = "[PML]|[D]";
+  strcpy(enzyme_rule, "[PML]|[D]");
   parse_custom_enzyme(enzyme_rule);
   fail_unless(pre_for_inclusion == TRUE,
               "For rule %s, pre_for_inclusion should be TRUE but is not.",
@@ -219,7 +229,7 @@ START_TEST(test_enzyme){
   post_list_size = 0;
 
 
-  enzyme_rule = "{ABCDEFG}|[HIGK]";
+  strcpy(enzyme_rule, "{ABCDEFG}|[HIGK]");
   parse_custom_enzyme(enzyme_rule);
   fail_unless(pre_for_inclusion == FALSE,
               "For rule %s, pre_for_inclusion should be FALSE but is not.",
@@ -247,7 +257,7 @@ START_TEST(test_enzyme){
   pre_list_size = 0;
   post_list_size = 0;
 
-  enzyme_rule = "[X]|[X]";
+  strcpy(enzyme_rule, "[X]|[X]");
   parse_custom_enzyme(enzyme_rule);
   fail_unless(pre_for_inclusion == FALSE,
               "For rule %s, pre_for_inclusion should be FALSE but is not.",

@@ -30,10 +30,10 @@ PROTEIN_T* allocate_protein(void);
  * \returns A new protein object(heavy).
  */
 PROTEIN_T* new_protein(
-  char*         id, ///< The protein sequence id.
-  char*   sequence, ///< The protein sequence.
+  const char*         id, ///< The protein sequence id.
+  const char*   sequence, ///< The protein sequence.
   unsigned int length, ///< The length of the protein sequence.
-  char* annotation,  ///< Optional protein annotation.  -in
+  const char* annotation,  ///< Optional protein annotation.  -in
   unsigned long int offset, ///< The file location in the source file in the database -in
   unsigned int protein_idx, ///< The index of the protein in it's database. -in
   DATABASE_T* database ///< the database of its origin
@@ -146,7 +146,7 @@ char* get_protein_id_pointer(
  */
 void set_protein_id(
   PROTEIN_T* protein, ///< the protein to set it's fields -out
-  char* id ///< the sequence to add -in
+  const char* id ///< the sequence to add -in
 );
 
 /**
@@ -170,7 +170,7 @@ char* get_protein_sequence_pointer(
  */
 void set_protein_sequence(
   PROTEIN_T* protein, ///< the protein to set it's fields -out
-  char* sequence ///< the sequence to add -in
+  const char* sequence ///< the sequence to add -in
 );
 
 /**
@@ -202,7 +202,7 @@ char* get_protein_annotation(
  */
 void set_protein_annotation(
   PROTEIN_T* protein, ///< the protein to set it's fields -out
-  char* annotation ///< the sequence to add -in
+  const char* annotation ///< the sequence to add -in
 );
 
 

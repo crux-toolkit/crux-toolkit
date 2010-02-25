@@ -6,9 +6,9 @@
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 // declare things to set up
-AA_MOD_T *amod1, *amod2, *amod3;
-AA_MOD_T* amod_list[3];
-MODIFIED_AA_T mod_aa_D, id_3, id_max;
+static AA_MOD_T *amod1, *amod2, *amod3;
+static AA_MOD_T* amod_list[3];
+static MODIFIED_AA_T mod_aa_D, id_3, id_max;
 
 void mod_setup(){
   // assigns identifiers and symbols to each aamod
@@ -129,11 +129,11 @@ START_TEST(test_char_to_mod){
   fail_unless( mod_aa == 2,  
                "C should have been converted to 2, but was %d", mod_aa);
 
-  char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   MODIFIED_AA_T* converted = convert_to_mod_aa_seq(seq);
 
   int i = 0;
-  for(i = 0; i < strlen(seq); i++){ 
+  for(i = 0; i < (int)strlen(seq); i++){ 
     fail_unless( converted[i] == i, 
                  "AA %c should have been converted to %d, instead is %d",
                  seq[i], i, converted[i]);
@@ -148,7 +148,7 @@ START_TEST(test_mod_to_char){
                "mod aa D should convert to D, but it is %c",
                modified_aa_to_char(mod_aa_D));
 
-  char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   MODIFIED_AA_T* converted = convert_to_mod_aa_seq(seq);
 
   // now modify some of the aas and check that it still is converted correctly
@@ -160,7 +160,7 @@ START_TEST(test_mod_to_char){
   converted[7] = converted[7] | 0x0020; // last aa mod in param list
 
   int i = 0;
-  for(i = 0; i < strlen(seq); i++){ 
+  for(i = 0; i < (int)strlen(seq); i++){ 
     fail_unless( modified_aa_to_char(converted[i]) == seq[i], 
                  "AA %c returned char %c",
                  seq[i], i, modified_aa_to_char(converted[i]));
@@ -201,7 +201,7 @@ START_TEST(test_mod_str_to_string){
   initialize_parameters();
   force_set_aa_mod_list(amod_list, 3);
 
-  char* seq = "GBBKATRM"; 
+  const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
   MODIFIED_AA_T* modaa_seq = convert_to_mod_aa_seq(seq);
 
@@ -242,7 +242,7 @@ START_TEST(test_mod_str_to_unmod_string){
   initialize_parameters();
   force_set_aa_mod_list(amod_list, 3);
 
-  char* seq = "GBBKATRM"; 
+  const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
   MODIFIED_AA_T* modaa_seq = convert_to_mod_aa_seq(seq);
 
@@ -270,13 +270,13 @@ START_TEST(test_mod_str_to_unmod_string){
 END_TEST
 
 START_TEST(test_copy_mod_seq){
-  char* seq = "GBBKATRM"; 
+  const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
   MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(seq);
 
   MODIFIED_AA_T* copied_seq = copy_mod_aa_seq( mod_seq, len );
   int i = 0;
-  for(i = 0; i<strlen(seq); i++){
+  for(i = 0; i<len; i++){
     fail_unless( copied_seq[i] == mod_seq[i],
                  "Copied seq %s letter %d should be %d and is %d", 
                  seq, i, mod_seq[i], copied_seq[i]);
@@ -287,7 +287,7 @@ START_TEST(test_copy_mod_seq){
 END_TEST
 
 START_TEST(test_palindrome){
-  char* seq = "GBBKATRM"; 
+  const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
   MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(seq);
 

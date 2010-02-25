@@ -54,8 +54,8 @@ void ion_series_setup(){
   constraint = new_ion_constraint(MONO, charge-1, BY_ION, FALSE);// no prec ion
   bcnst = new_ion_constraint(MONO, 1, B_ION, FALSE); 
   ycnst = new_ion_constraint(MONO, 1, Y_ION, FALSE); 
-  seq = "ASEQ";
-  seq2 = "ANOTHERSEQ";
+  seq = my_copy_string("ASEQ");
+  seq2 = my_copy_string("ANOTHERSEQ");
   mod_seq = convert_to_mod_aa_seq( seq );
   mod_seq2 = convert_to_mod_aa_seq( seq2 );
   is2 = new_ion_series(seq, charge, constraint);
@@ -76,7 +76,7 @@ START_TEST (test_new){
   char* gotten_seq = get_ion_series_peptide(is2);
   fail_unless( strcmp(gotten_seq, seq) == 0,
                "Seq of ion series is %s and should be %s", gotten_seq, seq);
-  int len = get_ion_series_peptide_length(is2);
+  unsigned int len = get_ion_series_peptide_length(is2);
   fail_unless( len == strlen(seq), 
                "Ion series seq len is %i, should be %i", len, strlen(seq));
   int ch = get_ion_series_charge(is2);
@@ -102,7 +102,7 @@ START_TEST (test_update){
   fail_unless( strcmp(gotten_seq, seq) == 0,
   "Seq of ion series is %s and should be %s", gotten_seq, seq);
   */
-  int len = get_ion_series_peptide_length(is3);
+  unsigned int len = get_ion_series_peptide_length(is3);
   fail_unless( len == strlen(seq), 
                "Ion series seq len is %i, should be %i", len, strlen(seq));
 }
@@ -483,8 +483,10 @@ START_TEST (test_create){
 
   //check get, set
   fail_unless(strcmp(get_ion_series_peptide(ion_series), "AKLVKNMT") == 0, "ion series not set correctly, peptide sequence"); 
-  set_ion_series_peptide(ion_series, "AKLVKNMTM");
+  char* tmpseq = my_copy_string("AKLVKNMTM");
+  set_ion_series_peptide(ion_series, tmpseq);
   fail_unless(strcmp(get_ion_series_peptide(ion_series), "AKLVKNMTM") == 0, "ion series not set correctly, peptide sequence"); 
+  free(tmpseq);
 
   fail_unless(get_ion_series_charge(ion_series) == 2, "ion series not set correctly, peptide charge"); 
   set_ion_series_charge(ion_series, 3);

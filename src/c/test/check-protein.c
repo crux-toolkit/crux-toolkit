@@ -15,22 +15,19 @@
 #include "../database.h"
 #include "../parameter.h"
 // also in parameter.c
-void parse_custom_enzyme(char* rule_str);
+void parse_custom_enzyme(const char* rule_str);
 
 // declare things to setup
-PEPTIDE_T *peptide1, *peptide2, *peptide3, *peptide4, *peptide5, *peptide6;
-PROTEIN_T *protein1, *protein2, *protein3;
-PROTEIN_PEPTIDE_ITERATOR_T* iterator;
-PEPTIDE_CONSTRAINT_T *constraint, *enzyme_constraint;
+static PEPTIDE_T *peptide1, *peptide2;
+static PROTEIN_T *protein1;
+static PROTEIN_PEPTIDE_ITERATOR_T* iterator;
+static PEPTIDE_CONSTRAINT_T *constraint, *enzyme_constraint;
 
-PEPTIDE_SRC_T* src;
-PEPTIDE_SRC_T* association1;
-PEPTIDE_SRC_T* association2;
-PEPTIDE_SRC_T* association3;
+static PEPTIDE_SRC_T* src;
 
-DATABASE_T* db;
+static DATABASE_T* db;
 //                      0123456789
-char* prot1_sequence = "MRVLKFGGTSVANAERFLRVADILESNARQGQVAOOTVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFWVDQEFAQIKHVLHGISLWLGQC";
+static char prot1_sequence[256] = "MRVLKFGGTSVANAERFLRVADILESNARQGQVAOOTVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFWVDQEFAQIKHVLHGISLWLGQC";
 
 void protein_setup(){
 
@@ -119,7 +116,7 @@ START_TEST (test_elastase){
   int starts[128];
   int s_idx = 0;
   int idx = 0;
-  for(idx=0; idx < strlen(prot1_sequence)-1; idx++){
+  for(idx=0; idx < (int)strlen(prot1_sequence)-1; idx++){
     if((prot1_sequence[idx] == 'A' || 
         prot1_sequence[idx] == 'L' ||
         prot1_sequence[idx] == 'I' || 
@@ -180,7 +177,7 @@ START_TEST (test_elastase){
                    seq); 
     }
     // if at end of protein, skip second end check
-    if( start_idx+len < strlen(prot1_sequence) ){
+    if( start_idx+len < (int)strlen(prot1_sequence) ){
       fail_unless( (prot1_sequence[start_idx+len-1] == 'A' ||
                     prot1_sequence[start_idx+len-1] == 'L' ||
                     prot1_sequence[start_idx+len-1] == 'I' ||
@@ -204,7 +201,7 @@ START_TEST (test_chymo){
   starts[0] = 0;
   int s_idx = 1;
   int idx = 1;
-  for(idx=1; idx < strlen(prot1_sequence)-1; idx++){
+  for(idx=1; idx < (int)strlen(prot1_sequence)-1; idx++){
     if((prot1_sequence[idx] == 'F' || 
         prot1_sequence[idx] == 'W' ||
         prot1_sequence[idx] == 'Y') 
@@ -266,7 +263,7 @@ START_TEST (test_chymo){
                    seq); 
     }
     // if at end of protein, skip second end check
-    if( start_idx+len < strlen(prot1_sequence) ){
+    if( start_idx+len < (int)strlen(prot1_sequence) ){
       fail_unless( (prot1_sequence[start_idx+len-1] == 'F' ||
                     prot1_sequence[start_idx+len-1] == 'W' ||
                     prot1_sequence[start_idx+len-1] == 'Y'),
@@ -289,7 +286,7 @@ START_TEST (test_mod_chymo){
   starts[0] = 0;
   int s_idx = 1;
   int idx = 1;
-  for(idx=1; idx < strlen(prot1_sequence)-1; idx++){
+  for(idx=1; idx < (int)strlen(prot1_sequence)-1; idx++){
     if((prot1_sequence[idx] == 'F' || 
         prot1_sequence[idx] == 'W' ||
         prot1_sequence[idx] == 'Y' ||
@@ -353,7 +350,7 @@ START_TEST (test_mod_chymo){
                    seq); 
     }
     // if at end of protein, skip second end check
-    if( start_idx+len < strlen(prot1_sequence) ){
+    if( start_idx+len < (int)strlen(prot1_sequence) ){
       fail_unless( (prot1_sequence[start_idx+len-1] == 'F' ||
                     prot1_sequence[start_idx+len-1] == 'W' ||
                     prot1_sequence[start_idx+len-1] == 'Y' ||
@@ -377,7 +374,7 @@ START_TEST (test_el_tryp_chymo){
   starts[0] = 0;
   int s_idx = 1;
   int idx = 1;
-  for(idx=1; idx < strlen(prot1_sequence)-1; idx++){
+  for(idx=1; idx < (int)strlen(prot1_sequence)-1; idx++){
     if((prot1_sequence[idx] == 'A' || 
         prot1_sequence[idx] == 'L' ||
         prot1_sequence[idx] == 'I' ||
@@ -452,7 +449,7 @@ START_TEST (test_el_tryp_chymo){
                    seq); 
     }
     // if at end of protein, skip second end check
-    if( start_idx+len < strlen(prot1_sequence) ){
+    if( start_idx+len < (int)strlen(prot1_sequence) ){
       fail_unless( (prot1_sequence[start_idx+len-1] == 'A' || 
                     prot1_sequence[start_idx+len-1] == 'L' ||
                     prot1_sequence[start_idx+len-1] == 'I' ||
@@ -481,7 +478,7 @@ START_TEST(test_aspn){
   starts[0] = 0;
   int s_idx = 1;
   int idx = 1;
-  for(idx=1; idx < strlen(prot1_sequence)-1; idx++){
+  for(idx=1; idx < (int)strlen(prot1_sequence)-1; idx++){
     if(prot1_sequence[idx] == 'D' ){
       starts[s_idx] = idx;
       s_idx++;
@@ -535,7 +532,7 @@ START_TEST(test_aspn){
                    seq, prot1_sequence[start_idx]); 
     }
     // if at end of protein, skip second end check
-    if( start_idx+len < strlen(prot1_sequence) ){
+    if( start_idx+len < (int)strlen(prot1_sequence) ){
       fail_unless( prot1_sequence[start_idx+len+1] != 'D',
                    "Peptide %s did not cleave before D and should have.",
                    seq); 
@@ -567,7 +564,7 @@ START_TEST(test_other_enzymes){
    starts[0] = 0;
    int s_idx = 1;
    int idx = 0;
-   for(idx=0; idx < strlen(prot1_sequence)-1; idx++){
+   for(idx=0; idx < (int)strlen(prot1_sequence)-1; idx++){
      if(prot1_sequence[idx] == residue ){
        starts[s_idx] = idx+1;
        s_idx++;
@@ -621,7 +618,7 @@ START_TEST(test_other_enzymes){
                     enzyme_name, seq, prot1_sequence[start_idx-1], residue); 
      }
      // if at end of protein, skip second end check
-     if( start_idx+len < strlen(prot1_sequence) ){
+     if( start_idx+len < (int)strlen(prot1_sequence) ){
        fail_unless( prot1_sequence[start_idx+len-1] == residue,
                     "%s peptide %s does not end in %c and should.",
                     enzyme_name, seq, residue); 
@@ -638,7 +635,7 @@ END_TEST
 
 START_TEST(test_custom_enzyme){
   // define custom rule
-  char* rule = "[MLK]|{P}";
+  const char* rule = "[MLK]|{P}";
   parse_custom_enzyme(rule);
 
   // create list of start indexes
@@ -646,7 +643,7 @@ START_TEST(test_custom_enzyme){
   starts[0] = 0;
   int s_idx = 1;
   int idx = 0;
-  for(idx=0; idx < strlen(prot1_sequence)-1; idx++){
+  for(idx=0; idx < (int)strlen(prot1_sequence)-1; idx++){
     //    printf("seq[%i] = %c\n", );
    if((prot1_sequence[idx] == 'M' || 
         prot1_sequence[idx] == 'L' ||
@@ -709,7 +706,7 @@ START_TEST(test_custom_enzyme){
                    seq); 
     }
     // if at end of protein, skip second end check
-    if( start_idx+len < strlen(prot1_sequence) ){
+    if( start_idx+len < (int)strlen(prot1_sequence) ){
       fail_unless( (prot1_sequence[start_idx+len-1] == 'M' || 
                     prot1_sequence[start_idx+len-1] == 'L' ||
                     prot1_sequence[start_idx+len-1] == 'K') ,
@@ -736,7 +733,7 @@ START_TEST(test_custom_enzyme){
   starts[0] = 0;
   s_idx = 1;
   idx = 0;
-  for(idx=0; idx < strlen(prot1_sequence)-1; idx++){
+  for(idx=0; idx < (int)strlen(prot1_sequence)-1; idx++){
    if( prot1_sequence[idx+1] == 'Q'){
       starts[s_idx] = idx+1;
       s_idx++;
@@ -793,7 +790,7 @@ START_TEST(test_custom_enzyme){
     } 
 
     // if at end of protein, skip second end check
-    if( start_idx+len < strlen(prot1_sequence) ){
+    if( start_idx+len < (int)strlen(prot1_sequence) ){
       fail_unless( prot1_sequence[start_idx+len] == 'Q',
                    "Peptide %s should have cleaved before Q and did not.",
                    seq); 

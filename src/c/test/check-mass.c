@@ -5,10 +5,10 @@
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 
 // declare things to set up
-AA_MOD_T *amod1, *amod2, *amod3, *amodnot;
-MODIFIED_AA_T aa1, aa2, aa3;
-AA_MOD_T* amod_list[11];
-char achar1, achar2, achar3;
+static AA_MOD_T *amod1, *amod2, *amod3, *amodnot;
+static MODIFIED_AA_T aa1, aa2, aa3;
+static AA_MOD_T* amod_list[11];
+static char achar1, achar2, achar3;
 
 int is_close_to(float a, float b){
   return (a > (b - 0.0005) && a < (b + 0.0005) );
