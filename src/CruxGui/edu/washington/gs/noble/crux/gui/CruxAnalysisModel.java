@@ -1,6 +1,6 @@
 package edu.washington.gs.noble.crux.gui;
 
-public class CruxModel {
+public class CruxAnalysisModel {
 	
 	public enum CruxComponents {
 		CREATE_INDEX("create-index"), 
@@ -51,7 +51,7 @@ public class CruxModel {
 	private Enzyme enzyme;
 	private boolean allowMissedCleavages;
 	
-	public CruxModel() {
+	public CruxAnalysisModel() {
 		this.componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] = false;
 		this.componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = false;
 		this.proteinSource = null;
