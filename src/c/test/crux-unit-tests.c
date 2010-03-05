@@ -20,6 +20,7 @@
 #include "check-modified-peptides-iterator.h"
 #include "check-serialize.h"
 #include "check-mass.h"
+#include "check-match-collection.h"
 //#include "check-<<class>>.h"
 
 //must set bash export CK_FORK=no
@@ -51,6 +52,7 @@ int main(void){
   Suite* suite_mass = mass_suite();
   Suite* suite_match = match_suite(); 
   Suite* suite_ion_series_2 = ion_series_suite_2(); 
+  Suite* suite_match_collection = match_collection_suite();
   //Suite* suite_<<class>> = <<class>>_suite();
 
   //add each suite to Runner
@@ -82,6 +84,7 @@ int main(void){
   srunner_add_suite(sr, suite_mass);
   srunner_add_suite(sr,suite_match);
   srunner_add_suite(sr,suite_ion_series_2);
+  srunner_add_suite(sr,suite_match_collection);
   //srunner_add_suite(sr,suite_<<class>>);
 
   //run each check suite

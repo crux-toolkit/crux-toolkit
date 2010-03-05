@@ -1,3 +1,4 @@
+#include "check-<<class>>.h"
 #include "<<class>>.h"
 
 // declare things to set up
