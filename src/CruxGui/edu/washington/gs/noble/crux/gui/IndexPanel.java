@@ -24,9 +24,9 @@ class IndexPanel extends JPanel implements ItemListener {
 	private DigestPanel digestPanel = null;
 	private final JCheckBox missedCleavages = new JCheckBox("Allow missed-cleavages");
 	private CruxComponentButton button;
-	private CruxModel model = null;
+	private CruxAnalysisModel model = null;
 	
-	public IndexPanel(CruxModel model, final CruxComponentButton button) {
+	public IndexPanel(CruxAnalysisModel model, final CruxComponentButton button) {
 		super();
 		this.model = model;
 		this.button = button;
@@ -50,16 +50,18 @@ class IndexPanel extends JPanel implements ItemListener {
 		missedCleavages.setBackground(Color.white);
 		missedCleavages.setAlignmentX(Component.LEFT_ALIGNMENT);
 		add(missedCleavages);
-		runToolCheckBox.addItemListener(new CheckBoxChanged());
-		missedCleavages.addItemListener(new MissedCleavagesChanged());
+		runToolCheckBox.addItemListener(new RunComponentChangeListener());
+		missedCleavages.addItemListener(new MissedCleavagesChangeListener());
 		updateFromModel();
 		setVisible(false);
 
 	}
 
 	private void updateFromModel() {
-		runToolCheckBox.setSelected(model.getRunIndex());
+		runToolCheckBox.setSelected(model.getRunCreateIndex());
 		massPanel.updateFromModel();
+		digestPanel.updateFromModel();
+		enzymePanel.updateFromModel();
 		missedCleavages.setSelected(model.getAllowMissedCleavages());
 	}
 	
@@ -74,18 +76,18 @@ class IndexPanel extends JPanel implements ItemListener {
 		}
 	}
 	
-	class CheckBoxChanged implements ItemListener {
+	class RunComponentChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
-			logger.info("Use create index component set to " + ((JCheckBox) event.getSource()).isSelected());
-			button.setSelectedToRun(((JCheckBox) event.getSource()).isSelected());
-			model.setRunIndex(((JCheckBox) event.getSource()).isSelected());
+			boolean checked = ((JCheckBox) event.getSource()).isSelected();
+			button.setSelectedToRun(checked);
+			model.setRunCreateIndex(checked);
 		}
 	}	
 	
-	class MissedCleavagesChanged implements ItemListener {
+	class MissedCleavagesChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
-			logger.info("Allow Missed Cleavages set to " + missedCleavages.isSelected());
-			model.setAllowMissedCleavages(missedCleavages.isSelected());
+			boolean checked = missedCleavages.isSelected();
+			model.setAllowMissedCleavages(checked);
 		}
 	}	
 }

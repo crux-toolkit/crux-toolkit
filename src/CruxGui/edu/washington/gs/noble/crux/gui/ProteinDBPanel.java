@@ -35,7 +35,7 @@ class ProteinDBPanel extends JPanel {
 		}
 	}
 	
-	public ProteinDBPanel(CruxModel model) {
+	public ProteinDBPanel(CruxAnalysisModel model) {
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
