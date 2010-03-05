@@ -2,8 +2,8 @@ package edu.washington.gs.noble.crux.gui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 @SuppressWarnings("serial")
-class MassPanel extends JPanel implements ActionListener {
+class MassPanel extends JPanel {
 
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
@@ -23,9 +23,9 @@ class MassPanel extends JPanel implements ActionListener {
 	private final JLabel isotopicMassLabel = new JLabel("Isotopic Mass");
 	private final JRadioButton averageMass = new JRadioButton("Average Mass");
 	private final JRadioButton monoMass = new JRadioButton("Monoisotopic Mass");
-	private CruxModel model;
+	private CruxAnalysisModel model;
 
-	public MassPanel(CruxModel model) {
+	public MassPanel(CruxAnalysisModel model) {
 		this.model = model;
 		massButtons.add(averageMass);
 		massButtons.add(monoMass);
@@ -38,36 +38,35 @@ class MassPanel extends JPanel implements ActionListener {
 		monoMass.setBackground(Color.white);
 		add(monoMass);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
+		averageMass.addItemListener(new IsotopicMassTypeChangeListener());
+		monoMass.addItemListener(new IsotopicMassTypeChangeListener());
 		updateFromModel();
-		averageMass.addActionListener(this);
-		monoMass.addActionListener(this);
 	}	
 	
-	public void actionPerformed(ActionEvent event) {
-		if (averageMass.isSelected()) {
-			model.setMassType(CruxModel.IsotopicMassType.AVERAGE);
-			logger.info("Model IsotopicMassType set to AVERAGE");
-		}
-		else if (monoMass.isSelected()) {
-			model.setMassType(CruxModel.IsotopicMassType.MONOISOTOPIC);		
-			logger.info("Model IsotopicMassType set to MONOISOTOPIC");
-		}
-		
-	}
-	
 	public void updateFromModel() {
-		if (model.getMassType() == CruxModel.IsotopicMassType.AVERAGE) {
+		if (model.getMassType() == CruxAnalysisModel.IsotopicMassType.AVERAGE) {
 			averageMass.setSelected(true);
 			monoMass.setSelected(false);
-			logger.info("Mass type set to AVERAGE");
+			logger.info("Read parameter 'IsotopicMassType' from model: AVERAGE");
 		}
-		else if (model.getMassType() == CruxModel.IsotopicMassType.MONOISOTOPIC) {
+		else if (model.getMassType() == CruxAnalysisModel.IsotopicMassType.MONOISOTOPIC) {
 			averageMass.setSelected(false);
 			monoMass.setSelected(true);
-			logger.info("Mass type set to MONOISOTOPIC");
+			logger.info("Read parameter 'IsotopicMassType' from model: MONOISOTOPIC");
 		}
 		else {
-			logger.info("Unknown mass type " + model.getMassType().toString());
+			logger.info("Read unrecognized value of parameter 'IsotopicMassType' from model: " + model.getMassType().toString() + ".");
+		}
+	}
+	
+	class IsotopicMassTypeChangeListener implements ItemListener {
+		public void itemStateChanged(final ItemEvent event) {
+			if (averageMass.isSelected()) {
+				model.setMassType(CruxAnalysisModel.IsotopicMassType.AVERAGE);
+			}
+			else if (monoMass.isSelected()) {
+				model.setMassType(CruxAnalysisModel.IsotopicMassType.MONOISOTOPIC);		
+			}
 		}
 	}
 }

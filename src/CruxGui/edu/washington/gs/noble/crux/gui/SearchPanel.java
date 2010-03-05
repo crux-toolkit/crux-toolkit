@@ -25,9 +25,9 @@ class SearchPanel extends JPanel implements ItemListener {
 	private DigestPanel digestPanel = null;
 	private final JCheckBox missedCleavages = new JCheckBox("Allow missed-cleavages");
 	private CruxComponentButton button;
-	private CruxModel model = null;
+	private CruxAnalysisModel model = null;
 	
-	public SearchPanel(CruxModel model, final CruxComponentButton button) {
+	public SearchPanel(CruxAnalysisModel model, final CruxComponentButton button) {
 		super();
 		this.button = button;
 		this.model = model;
@@ -54,16 +54,18 @@ class SearchPanel extends JPanel implements ItemListener {
 		missedCleavages.setBackground(Color.white);
 		missedCleavages.setAlignmentX(Component.LEFT_ALIGNMENT);
 		add(missedCleavages);
-		runToolCheckBox.addItemListener(new CheckBoxChanged());
-		missedCleavages.addItemListener(new MissedCleavagesChanged());
+		runToolCheckBox.addItemListener(new RunComponentChangeListener());
+		missedCleavages.addItemListener(new MissedCleavagesChangeListener());
 		updateFromModel();
 		setVisible(false);
 
 	}
 	
 	private void updateFromModel() {
-		runToolCheckBox.setSelected(model.getRunSearch());
+		runToolCheckBox.setSelected(model.getRunSearchForMatches());
 		massPanel.updateFromModel();
+		digestPanel.updateFromModel();
+		enzymePanel.updateFromModel();
 		missedCleavages.setSelected(model.getAllowMissedCleavages());
 	}
 	
@@ -71,7 +73,7 @@ class SearchPanel extends JPanel implements ItemListener {
 		logger.info("User selected search component.");
 		updateFromModel();
 		if (((CruxComponentButton) event.getSource()).isSelected() == true) {
-			boolean runIndex = model.getRunIndex();
+			boolean runIndex = model.getRunCreateIndex();
 			proteinDBPanel.setVisible(!runIndex);
 			// Some components are only shown if we aren't creating an index
 			massPanel.setVisible(!runIndex);
@@ -85,19 +87,18 @@ class SearchPanel extends JPanel implements ItemListener {
 		}
 	}
 	
-	class CheckBoxChanged implements ItemListener {
+	class RunComponentChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
-			logger.info("Use search component set to " + ((JCheckBox) event.getSource()).isSelected());
 			boolean checked = ((JCheckBox) event.getSource()).isSelected();
 			button.setSelectedToRun(checked);
-			model.setRunIndex(checked);
+			model.setRunCreateIndex(checked);
 		}	
 	}
 	
-	class MissedCleavagesChanged implements ItemListener {
+	class MissedCleavagesChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
-			logger.info("Allow Missed Cleavages set to " + missedCleavages.isSelected());
-			model.setAllowMissedCleavages(missedCleavages.isSelected());
+			boolean checked = missedCleavages.isSelected();
+			model.setAllowMissedCleavages(checked);
 		}
 	}	
 }

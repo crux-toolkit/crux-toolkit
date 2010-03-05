@@ -24,7 +24,7 @@ public class CruxGuiPanel extends JPanel {
 	final CruxComponentButton percolator = new CruxComponentButton("percolator");
 	final CruxComponentButton qranker = new CruxComponentButton("q-ranker");
 
-	CruxGuiPanel(CruxModel model) {
+	CruxGuiPanel(CruxAnalysisModel model) {
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Color.white);

@@ -35,7 +35,7 @@ class SpectraPanel extends JPanel {
 		}
 	}
 	
-	public SpectraPanel(CruxModel model) {
+	public SpectraPanel(CruxAnalysisModel model) {
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
