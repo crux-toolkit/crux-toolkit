@@ -3,8 +3,8 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 3	1	518.9500	517.9422	519.5119	0			0.098	1											10	1	TTGNGA	custom-enzyme-partial-digest	gi|16127995|ref|NP_414542.1|	IG					
 10	2	419.5800	837.1443	839.9005	0			-0.072	1											12	1	SQKDSYI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	LL					
 14	2	500.4100	998.8044	1001.0148	0			-0.097	1											16	1	TQSSSEYSI	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|	IS					
-15	2	488.8200	975.6244	976.9977	0			-0.076	1											12	2	EYFNNYQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	IP					
-15	2	488.8200	975.6244	973.0533	-0.44			-0.11	2											12	2	TYKRYDQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	LY					
-16	2	520.9900	1039.9644	1040.1899	0			0.04	1											14	3	KHKNSQWL	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	QK					
-16	2	520.9900	1039.9644	1041.2585	3.7			-0.11	2											16	3	KKYFKTGGI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	IL					
-16	2	520.9900	1039.9644	1038.0913	4			-0.12	3											14	3	YTCDPRQV	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|	VP					
+15	2	488.8200	975.6244	976.9977	-0.44			-0.076	1											12	2	EYFNNYQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	IP					
+15	2	488.8200	975.6244	973.0533	0			-0.11	2											12	2	TYKRYDQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	LY					
+16	2	520.9900	1039.9644	1040.1899	3.7			0.04	1											14	3	KHKNSQWL	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	QK					
+16	2	520.9900	1039.9644	1041.2585	4			-0.11	2											16	3	KKYFKTGGI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|	IL					
+16	2	520.9900	1039.9644	1038.0913	0			-0.12	3											14	3	YTCDPRQV	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|	VP					

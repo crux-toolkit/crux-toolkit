@@ -2,7 +2,7 @@ BINDIR  =../../../bin/
 SRCDIR  =../
 PERCOLATOR_DIR=../../c/percolator
 CC	= g++	
-CFLAGS  = -g -Wall -I$(PERCOLATOR_DIR) -I$(HOME)/local/include -L$(HOME)/local/lib
+CFLAGS  = -g -Wall -I../ -I$(PERCOLATOR_DIR) -I$(HOME)/local/include -L$(HOME)/local/lib
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
 
@@ -18,6 +18,7 @@ TESTS = \
 	check-protein.c \
 	check-database.c \
 	check-match.c \
+	check-match-collection.c \
 	check-parameter.c \
 	check-modifications.c \
 	check-peptide-modifications.c \
