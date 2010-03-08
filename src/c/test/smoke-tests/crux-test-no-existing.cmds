@@ -1,0 +1,89 @@
+#List of commands to be run by crux-test.pl
+# Format is these fields separated by '
+#    test name             (printed to the output as a label for the command)
+#    standard filename     (path to file with the expected output)
+#    command               (command with options and args to be run)
+#    ignore string         (regex to ignore for diff command, 're 1' 're 2'
+
+# TESTS WITH NO INDEX
+
+# Generate Peptides
+generate_peptides_no_ops = good_results/standard_generate_peptides_no_ops.out = crux-generate-peptides test.fasta =
+
+generate_peptides_default = good_results/standard_generate_peptides_default.out = crux-generate-peptides  --output-sequence T test.fasta =
+
+generate_peptides_sort_mass_unique = good_results/standard_generate_peptides_mass.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --cleavages all --missed-cleavages T --sort mass  test.fasta =
+
+generate_peptides_sort_length_unique = good_results/standard_generate_peptides_length.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --cleavages tryptic --missed-cleavages T --sort length test.fasta =
+
+generate_peptides_sort_lexical_unique = good_results/standard_generate_peptides_lexical.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --cleavages partial --missed-cleavages T --sort lexical test.fasta =
+
+generate_peptides_change_minmax = good_results/standard_generate_peptides_change_minmax = crux-generate-peptides --parameter-file params/many_changes --output-sequence T --max-length 20 test.fasta=
+
+# Get spectrum
+get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum 2 test.ms2 get_ms2_spectrum.out; cat get_ms2_spectrum.out =
+
+get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = rm -f get_ms2_spectrum.out; crux-get-ms2-spectrum --stats T 2 test.ms2 get_ms2_spectrum.out =
+
+# Predict ion series
+predict_ions_no_ops = good_results/standard_predict_ions_no_ops.out = crux-predict-peptide-ions IAMASEQ 2=
+
+predict_ions_b_h2o = good_results/standard_predict_ions_b_h2o.out = crux-predict-peptide-ions --primary-ions b --precursor-ions T --h2o 1 IAMASEQ 2 =
+
+predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = crux-predict-peptide-ions --primary-ions y  --nh3 1 IAMASEQ 2=
+
+predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = crux-predict-peptide-ions --primary-ions by --max-ion-charge 1 --flanking T IAMASEQ 3=
+
+# Search for matches and test sqt file
+search_for_matches_default = good_results/standard_search_default.target.sqt = rm -rf target.sqt decoy.sqt test*.csm ; crux-search-for-matches --parameter-file params/set_rand_seed --output-mode all test.ms2 test.fasta; cat target.sqt = 'Time' 'atabase'
+
+# Analyze existing search results
+# analyze_matches_existing = good_results/standard_analyze_existing.target.sqt = rm -f target.sqt decoy.sqt test*.csm; crux-analyze-matches existing_search test.fasta; cat target.sqt = 'Time'
+
+# Search for matches with all defaults (except for the rand seed), no sqt file to test so use analyze
+search_for_matches_noops = good_results/empty_file = rm -rf target.sqt test*csm ; crux-search-for-matches --parameter-file params/set_rand_seed test.ms2 test.fasta; = 'Time'
+
+# Analyze matches to test default search, use no ops
+analyze_matches_no_ops_test_search =good_results/standard_analyze_default=crux-analyze-matches . test.fasta --parameter-file params/set_rand_seed; cat target.sqt = 'Time'
+
+# TESTS WITH INDEX
+
+# See that crux-generate-peptides works with an existing index
+#generate_peptides_use_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --use-index T --cleavages tryptic copy_test.fasta = '# PROTEIN DATABASE'
+
+# generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T --use-index T --cleavages tryptic existing_crux_index = '# PROTEIN DATABASE'
+
+# See that crux-search-for-matches works with existing index
+# search_for_matches_default_existing_index = good_results/standard_search_default_existing_index.target.sqt = rm -rf target.sqt decoy.sqt test*csm ; crux-search-for-matches --output-mode sqt --use-index T --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat target.sqt = 'Time' 'Database'
+
+# See that match_analysis works with an existing index and existing results
+# analyze_matches_existing_index_and_results = good_results/standard_existing-perc.sqt =  rm -f existing-perc.sqt; crux-analyze-matches --sqt-output-file existing-perc.sqt --use-index T good_results existing_crux_index; cat existing-perc.sqt = 'StartTime'
+
+# See that match_analysis works with an existing index and new results
+# analyze_matches_existing_index = good_results/standard_existing-perc.sqt =  rm -f existing-perc.sqt; crux-analyze-matches --sqt-output-file existing-perc.sqt --use-index T good_results existing_crux_index; cat existing-perc.sqt = 'StartTime'
+
+# Create index. Use crux-generate-peptides to test that it worked
+
+create_index_default = good_results/standard_create_index_default.out = rm -rf test_crux_index; crux-create-index test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
+
+generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux-generate-peptides --output-sequence T --use-index T test_crux_index = '# PROTEIN DATABASE'
+
+create_index_uniq = good_results/standard_create_index_uniq.out = rm -rf test_crux_index; crux-create-index --unique-peptides T test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
+
+# use crux-generate-peptides to test that it worked
+generate_peptides_test_index_uniq = good_results/standard_generate_peptides_use_index_uniq.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --use-index T test_crux_index=
+
+# Search for matches and test sqt file
+search_for_matches_default_index = good_results/standard_search_default.target.sqt = crux-search-for-matches --output-mode all --overwrite T --use-index T --parameter-file params/params_uniq test.ms2 test_crux_index; cat target.sqt = 'Time' 'Database'
+
+# Analyze matches using above index
+analyze_matches_index = good_results/standard_test-perc.sqt =  crux-analyze-matches --sqt-output-file test-perc.sqt --overwrite T --use-index T --parameter-file params/set_rand_seed . test_crux_index; cat test-perc.sqt = 'StartTime'
+
+
+# MORE TESTS TODO
+
+# generate tryptic peptides from non-tryptic index
+# analyze matches using qvalue
+# use ms2/fasta combos that do and do not find at least one peptide for each spec
+# named sqt and decoys
+# search with 0, 1 decoys

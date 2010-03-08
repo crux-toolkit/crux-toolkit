@@ -1,0 +1,6 @@
+custom-enzyme=[AVIL]|{P}
+digestion=partial-digest
+overwrite=T
+num-decoys-per-target=0
+precision=2
+top-match=5

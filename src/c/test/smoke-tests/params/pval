@@ -1,0 +1,9 @@
+compute-p-values=T
+enzyme=trypsin
+digestion=partial-digest
+overwrite=T
+num-decoys-per-target=0
+seed=7
+precision=2
+top-match=5
+print-search-progress=100

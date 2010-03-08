@@ -1,0 +1,46 @@
+# Test creating indexes in these situations:
+# fasta dir     index dir
+# .             ./
+# .             ../
+# .             ../sib
+# ..            ./child
+# ..            ./
+# ..            ../
+# ..            ../sib
+# ..            ./child
+# for each, remove existing index, create, check for binary fasta
+#           and correct map, overwrite with new fasta, check for same
+
+here-here = good_results/create-index/here-here = rm -rf yeast-index; crux-create-index small-yeast.fasta yeast-index; ls yeast-index/*-binary-fasta | cat - yeast-index/README yeast-index/crux_index_map = 'time'
+
+here-here-overwrite = good_results/create-index/here-here-overwrite = crux-create-index --overwrite T smaller.fasta yeast-index; ls yeast-index/*-binary-fasta | cat - yeast-index/README yeast-index/crux_index_map = 'time' 
+
+here-parent = good_results/create-index/here-parent = rm -rf ../yeast-index; crux-create-index small-yeast.fasta ../yeast-index; ls ../yeast-index/*-binary-fasta | cat - yeast-index/README yeast-index/crux_index_map = 'time'
+
+here-parent-overwrite = good_results/create-index/here-parent-overwrite = crux-create-index --overwrite T smaller.fasta ../yeast-index; ls ../yeast-index/*-binary-fasta | cat - ../yeast-index/README ../yeast-index/crux_index_map = 'time'
+
+here-sib = good_results/create-index/here-sib = rm -rf ../sib; mkdir ../sib; crux-create-index small-yeast.fasta ../sib/yeast-index; ls ../sib/yeast-index/*-binary-fasta | cat - ../sib/yeast-index/README ../sib/yeast-index/crux_index_map = 'time'
+
+here-sib-overwrite = good_results/create-index/here-sib-overwrite = crux-create-index --overwrite T smaller.fasta ../sib/yeast-index; ls ../sib/yeast-index/*-binary-fasta | cat - ../sib/yeast-index/README ../sib/yeast-index/crux_index_map = 'time'
+
+here-child = good_results/create-index/here-child = rm -rf child; mkdir child; crux-create-index small-yeast.fasta child/yeast-index; ls child/yeast-index/*-binary-fasta | cat - child/yeast-index/README child/yeast-index/crux_index_map = 'time'
+
+here-child-overwrite = good_results/create-index/here-child-overwrite = crux-create-index --overwrite T smaller.fasta child/yeast-index; ls child/yeast-index/*-binary-fasta | cat - child/yeast-index/README child/yeast-index/crux_index_map = 'time'
+
+parent-here = good_results/create-index/parent-here = rm -rf ../yeast-index; crux-create-index ../small-yeast.fasta ../yeast-index; ls ../yeast-index/*-binary-fasta | cat - ../yeast-index/README ../yeast-index/crux_index_map = 'time'
+
+parent-here-overwrite = good_results/create-index/parent-here-overwrite = crux-create-index --overwrite T ../smaller.fasta yeast-index; ls yeast-index/*-binary-fasta | cat - yeast-index/README yeast-index/crux_index_map = 'time'
+
+parent-parent = good_results/create-index/parent-parent = rm -rf ../yeast-index; crux-create-index ../small-yeast.fasta ../yeast-index; ls ../yeast-index/*-binary-fasta | cat - ../yeast-index/README ../yeast-index/crux_index_map = 'time'
+
+parent-parent-overwrite = good_results/create-index/parent-parent-overwrite = crux-create-index --overwrite T ../smaller.fasta ../yeast-index; ls ../yeast-index/*-binary-fasta | cat - ../yeast-index/README ../yeast-index/crux_index_map = 'time'
+
+parent-child = good_results/create-index/parent-child = rm -rf child; mkdir child; crux-create-index ../small-yeast.fasta child/yeast-index; ls child/yeast-index/*-binary-fasta | cat - child/yeast-index/README child/yeast-index/crux_index_map = 'time'
+
+parent-child-overwrite = good_results/create-index/parent-child-overwrite = crux-create-index --overwrite T ../smaller.fasta child/yeast-index; ls child/yeast-index/*-binary-fasta | cat - child/yeast-index/README child/yeast-index/crux_index_map = 'time'
+
+parent-sib = good_results/create-index/parent-sib = rm -rf ../sib; mkdir ../sib; crux-create-index small-yeast.fasta yeast-index; ls ../yeast-index/*-binary-fasta | cat - yeast-index/README yeast-index/crux_index_map = 'time'
+
+parent-sib-overwrite = good_results/create-index/parent-sib-overwrite = crux-create-index --overwrite T ../smaller.fasta ../sib/yeast-index; ls ../sib/yeast-index/*-binary-fasta | cat - ../sib/yeast-index/README ../sib/yeast-index/crux_index_map = 'time'
+
+
