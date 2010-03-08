@@ -1,0 +1,9 @@
+min-length=8
+max-length=12
+min-mass=404
+max-mass=4004
+#cleavages=all
+enzyme=no-enzyme
+isotopic-mass=mono
+#output-trypticity=T
+precision=2

@@ -1,0 +1,14 @@
+*.swp
+crux-output
+existing.fasta
+decoy-qval-pval
+existing_search
+error
+get_ms2_spectrum.out
+index-for-sequest-comparison
+one-decoy-file
+out
+small-yeast_binary_fasta
+tdc
+test_binary_fasta
+

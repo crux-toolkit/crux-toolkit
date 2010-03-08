@@ -1,0 +1,12 @@
+#	time created: Tue Aug  7 15:36:54 2007
+#	fasta file: ../standard2.fasta
+#	min_mass: 200.00
+#	max_mass: 7200.00
+#	min_length: 6
+#	max_length: 50
+#	peptide_type: all
+#	missed_cleavage: false
+#	mass_type: average
+#	redundancy: redundant
+#	CRUX index directory: standard2_crux_index
+#	target mass range for index file: 500.00

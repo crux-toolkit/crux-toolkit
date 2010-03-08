@@ -1,0 +1,5 @@
+beta=0.075
+max-mz=4000
+cleavages=all
+missed-cleavages=TRUE
+verbosity=100

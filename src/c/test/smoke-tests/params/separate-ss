@@ -1,0 +1,7 @@
+print-search-progress=100
+overwrite=F
+seed=7
+output-dir=ss
+# defaults are
+#decoy-location=separate-files
+#num-decoys-per-target=2

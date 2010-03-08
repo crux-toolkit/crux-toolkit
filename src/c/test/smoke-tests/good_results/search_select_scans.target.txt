@@ -1,0 +1,20 @@
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	p-value	Weibull est. q-value	decoy q-value (xcorr)	decoy q-value (p-value)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	eta	beta	shift	corr
+150	1	832.2400	831.2322	834.0013	0.33006725			0.15348954	1											12	12	LSMSQLR	trypsin-full-digest	YOR267C	KS					
+150	1	832.2400	831.2322	832.9573	0.37659162			0.10282768	2											12	12	NAPAWFK	trypsin-full-digest	YDR064W	RL					
+150	1	832.2400	831.2322	832.9578	0.58833867			0.095686667	3											14	12	VAINGFGR	trypsin-full-digest	YGR192C	RI					
+150	1	832.2400	831.2322	830.9366	1.1218612			0.063185714	4											12	12	VTDVIER	trypsin-full-digest	YDR093W	KE					
+150	1	832.2400	831.2322	829.9922	1.2506628			-0.018704424	5											14	12	DIVSAVVK	trypsin-full-digest	YMR303C	KA					
+151	2	651.6200	1301.2244	1301.4161	0.78156978			4.0218992	1											22	10	LDVDELGDVAQK	trypsin-full-digest	YLR043C	KN					
+151	2	651.6200	1301.2244	1301.4192	0.78233647			0.8785044	2											22	10	DALPSVTSEQVR	trypsin-full-digest	YBL076C	KE					
+151	2	651.6200	1301.2244	1301.4161	0.78358197			0.87542081	3											22	10	ETAQDSPELLAK	trypsin-full-digest	YPL215W	KS					
+151	2	651.6200	1301.2244	1303.4968	0.84429961			0.87041134	4											22	10	LAVCGIAAICQK	trypsin-full-digest	YFR053C	RR					
+151	2	651.6200	1301.2244	1300.4741	1.0008051			0.62621117	5											20	10	ISEGIWPEEIK	trypsin-full-digest	YGL022W	RE					
+152	2	531.2200	1060.4243	1059.2889	0.056052517			0.62058038	1											16	8	MNLQELLAK	trypsin-full-digest	YDR205W	-V					
+152	2	531.2200	1060.4243	1060.2126	0.84516144			0.58579528	2											18	8	GTIEIVSDVK	trypsin-full-digest	YLR340W	RV					
+152	2	531.2200	1060.4243	1060.1289	0.87028456			0.09608978	3											16	8	EISDAQEIR	trypsin-full-digest	YMR145C	KL					
+152	2	531.2200	1060.4243	1058.1594	1.003428			0.080498874	4											18	8	DQKPGTSGLR	trypsin-full-digest	YKL127W	KK					
+152	2	531.2200	1060.4243	1062.1960	1.0920615			-0.0021273682	5											16	8	FANWIANAR	trypsin-full-digest	YBL076C	RD					
+153	2	613.7900	1225.5643	1224.3788	1.3356566			0.16316754	1											18	4	LAFLENQDFK	trypsin-full-digest	YBR115C	RL					
+153	2	613.7900	1225.5643	1223.4375	2.2315085			-0.054768261	2											20	4	LIDFGSAVVFR	trypsin-full-digest	YOR267C	KY					
+153	2	613.7900	1225.5643	1223.2670	2.6879823			-0.20094222	3											18	4	YYGGNEHIDR	trypsin-full-digest	YLR058C	RM					
+153	2	613.7900	1225.5643	1227.4233	0			-0.27542391	4											18	4	IEVLEQELVR	trypsin-full-digest	YGR086C	KA					

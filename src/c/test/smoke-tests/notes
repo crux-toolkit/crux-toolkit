@@ -1,0 +1,262 @@
+NOTES on development of smoke testing
+
+October 24, 2007
+
+Currently implemented are the following tests (not in this order).
+
+generate_peptides:
+  use fasta	default
+		sorted by mass, uniq
+		sorted by length, uniq
+		sorted lexical, uniq
+		
+  use index	default
+
+get_ms2_spectrum:
+	one scan number that exists
+
+create_index:
+	default
+
+search_spectrum:
+	one spectrum (scan 6), standard2.fasta
+
+search_spectra:
+	test.ms2, standard2.fasta
+
+match_search_analysis:
+	test.ms2, standard2.fasta
+
+Working with code checked out from 2007/10/08, there is a segmentation
+fault with generate_peptides using the index. The error is resolved if
+I remake the index using no parameters (with the parameters in the
+crux-test.cmds command it still fails).  match_search gives a seg
+fault without other output for either index.
+
+Working with the code checked out today (2007/10/24), I get a seg
+fault from the first test.  For now, I will be working with the 10/08
+code. 
+
+---------------------------------------------------------------------
+Comments
+
+Add the ability to include a #-comment and blank line in the
+crux-test.cmd file.  Change crux-test.pl.  Done.
+
+Add comments to crux-test.cmds to describe fields and give info about
+specific tests.
+
+---------------------------------------------------------------------
+October 31, 2007
+
+Now working with the 10/26 version
+
+Changed crux-test.pl to no longer take the file|index|analysis entry
+in the command file.  Additional functionality from this is replaced
+by adding rm commands to the string before the test command (as in rm
+-rf test_crux_index; create_index ...) and by running two tests for
+create index (a create index test followed by a generate_peptides
+command).  
+
+Added an ingore string entry to the command file.  This will introduce
+a -I 'regex' option into the diff command so that, for example,
+changes in time won't show up as a failed test.  Full command syntax
+is now name = output file = command = ignore string.  The ignore
+string must be a series of regular expressions encased in single
+quotes.  Example: name = file = do this = 'Time' 'server m*'
+
+Added some tests to crux-test.cmds.  Now tested are generate_peptides,
+get_ms2_spec, match_search, match_analysis all with and without index
+(except analyze matches which only works with an index)
+
+---------------------------------------------------------------------
+November 1, 2007
+
+Before adding more tests, I would like to change the makefile (and
+then the smoke commands) to reflect the new executable names.  Since
+create_index is currently broken at the head of the revision tree, I
+will continue to work with the 10/26 version.  I should be able to
+merge the changes into the current version later.  
+
+This is done and checked into head as version 1.92.  Appears to work
+with clean checkout.
+
+Change the smoke tests to be able to test an index without having to
+build it.  Rename an existing fasta, make an index and be sure not to
+delete it in any of the test commands. Test generate_peptides and
+match-search with existing index.  Test match_analysis with existing
+index AND existing results
+
+The crux commands are checked in as version 1.19.  I haven't added the
+index or the results to the repository yet.  Full test works with code
+version 10/26.  In current version match_analysis seg faults on existing
+index and existing results.  Create_index segfaults before giving
+other output.
+
+Change the names of the executables in the smoke test.  This is done
+and checked in as version 1.20.  The test runs correctly (with 10/26
+code, recent makefile) even with the links to old names removed.
+
+
+---------------------------------------------------------------------
+December 5, 2007
+
+Current version of code works with the current commands in
+crux-test.cmds (there are some legacy discrepencies in output).
+Create-index has had it's parameter/option handling updated but no
+other apps have.  As a result, some of the default tests require a
+parameter file because of a bug that will be fixed with the parameter
+handling updates.
+
+---------------------------------------------------------------------
+December 6, 2007
+
+There are inconsistencies between ranunculus and methionine with
+precision and sorting.
+
+Generate-peptides rounds the value of masses differently between the
+two comptuters.  If the precision is extended out to more than 2
+places, it is clear that all of the discrepencies are x.xx48 to
+x.xx50.  I don't know a good way to deal with this.  Aaron thinks that
+peptides on the cusp shouldn't be in the smoke tests.  I don't see an
+easy way to eliminate them.  One possibility would be to post-process
+the output files and take off the final digit in the masses.  
+
+When generate-peptides sorts by mass, the order within a mass is not
+consistent.  Aaron thinks that there should be secondary sort
+(lexical).  This should also be applied to sort by length (maybe it
+already is?)
+
+Also, generate_peptides could not use the existing index (one created
+on ranunculus) but search-for-matches could.  I thought the existing
+index worked for Aaron on methianine, as well.
+
+ON INSPECTION:
+Some of the problems with sorting may  not be clear from the output
+files because the differences in mass are smaller than what is
+printed.  However, when printed to 6 places it is perplexing that two
+peptides with the same aa composition can have different masses.  Two
+peptides on ranunculus will have exactly the same mass (to 6 digits)
+and not have the same mass on methonine.  So even if mass ties are
+broken by lexical order, there are different peptides that tie on the
+two machines.  For now, comment out the tie-breaking code in
+sorter.c::compareTo(). 
+
+The thing to do is figure out how to deal with the small differences
+in masses. 
+
+
+
+
+TODO: 
+* exapand tests to involve more options
+(after code supports these)
+* remove param file from default runs
+* organize inputs into sub dirs
+* organize outputs (including indexes) into sub dirs
+
+
+
+---------------------------------------------------------------------
+New tests
+
+* Generate Peptides:  
+WE DO test
+ with and without parameter file
+ with and without sequence
+ with cleavages tryptic, partial, and all
+ with and without missed cleavages
+ sorted none, mass, length, lexical
+ uniq 
+ with and without index
+ change min/max mass
+ change min/max length
+ with average and mono-isotopic masses
+ output trypticity
+ command line override params file
+
+WE COULD test
+ redundant
+
+* Create index
+WE DO test
+ with parameter file
+ cleavages all
+ average isotopic masses
+ redundant and uniq peptides per prot
+ that it works with generate_peptides
+
+WE COULD test
+ without parameter file
+ change min/max mass/length
+ cleavages partial/tryptic
+ missed cleavages 
+ mono isotopic masses
+ that it works with search (this done for some, do for all?)
+
+* Search for Matches
+WE DO test
+ fasta and index input
+ output into cwd
+ sqt and binary output
+ sqt to default name
+ xcorr scoring
+ two decoy's
+ searching all charge states
+ no ops/no param file
+
+WE COULD test
+ output into different directory
+ only sqt and/or only binary output
+ sqt to given name
+ decoy sqt
+ change min/max m/z spec cutoff
+ xcorr_logp/sp_logp scoring
+ no or >2 decoys
+ searching only one charge state
+
+* Analyze Matches
+WE DO test
+ percolator
+ no parameter file
+ 
+WE COULD test
+ retention czar and/or both
+ with parameter file
+ printing a feature file (what is this?)
+
+* Get ms2 spectrum
+WE DO test
+ one spec that exists
+ outputing stats
+
+WE COULD test
+ appending to/replacing output file
+
+
+ALSO
+ inputs from different sources full and rel paths
+ predict-peptide-ions
+ score-peptide-spectrum
+
+--------------------------------------------------------------------
+
+Bug fixes: 
+
+GENERATE PEPTIDES
+different masses than original test file
+different ordering than original test file (function of diff masses?)
+redundant sequences does not seem to be functional (should be default,
+option does not seem to change it)
+if option not found, does not exit non-zero
+
+
+ANALYZE MATCHES
+fix output 
+doesn't work with only fasta
+
+
+
+
+
+

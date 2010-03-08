@@ -1,0 +1,8 @@
+fileroot=reverse
+top-match=100
+overwrite=T
+num-decoys-per-target=1
+precision=2
+reverse-sequence=T
+mod=0.5:ABCDEFGHIJKLMNOPQRSTUVWXYZ:1
+seed=7
