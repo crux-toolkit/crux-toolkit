@@ -11,6 +11,37 @@
 <h2>Version X</h2>
 
 <ul>
+<li>
+A new search command, 'sequest-search', was added.  The original
+command, 'search-for-matches', behaves as before except that no .sqt
+files are printed and no Sp scoring is performed.  The new
+'sequest-search' emulates SEQUEST searching.  It first scores all
+candidate peptides with Sp score, then ranks and filters the results
+by that score, scoring the remaining candidates with xcorr.  Results
+are printed to .txt and .sqt files.</li>
+
+<li>
+The modified decoy sequences are generated differently.  Before, all
+modified peptides were generated and each one was shuffled to create a
+decoy peptide.  Now a peptide is shuffled once for each peptide_mod
+and all modifications are applied to that same shuffled peptide.</li>
+
+<li>
+The 'percolator rank' column is now based on percolator scores instead
+of percolator q-values.  For cases where two psms have different
+percolator scores but the same q-value, the ranks will reflect the
+score differences.</li>
+
+<li>
+The Weibull parameters used for computing p-values are not printed to
+the .txt files.</li>
+
+<li>
+DeltaCn has changed in the .txt files.  For PSMs of rank i, deltaCn
+used to computed as deltaCn_i = (xcorr_0 - xcorr_i) / xcorr_0.  Note
+that deltaCn_0 always equalled 0.  Now deltaCn_i = (xcorr_0 -
+xcorr_i+1) / xcorr_0.  No changes to deltaCn in the .sqt files of crux
+sequest-search.</li>
 
 <li>
 A new command, print-processed-spectra, performs XCorr-style
