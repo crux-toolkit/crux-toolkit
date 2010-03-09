@@ -336,6 +336,9 @@ DIGEST_T string_to_digest_type(char*);
 char* digest_type_to_string(DIGEST_T);
 ENZYME_T string_to_enzyme_type(char*);
 char* enzyme_type_to_string(ENZYME_T);
+WINDOW_TYPE_T string_to_window_type(char*);
+char* window_type_to_string(WINDOW_TYPE_T);
+
 
 /**
  * \brief Open either the index or fasta file and prepare it for

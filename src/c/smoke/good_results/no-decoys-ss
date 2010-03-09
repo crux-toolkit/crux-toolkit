@@ -36,6 +36,14 @@ isotopic-mass=average
 # Available from parameter file for crux-generate-peptides and crux-search-for-matches and the the same must be used for crux compute-q-value.
 nmod=NO MODS
 
+# Window type to use for selecting peptides from precursor mz.(mass, mz, ppm) Default: mass.
+# Available for crux search-for-matches
+precursor-window-type=mass
+
+# Search peptides within +/- 'precursor-window' of the spectrum mass.  Definition of precursor window depends upon precursor-window-type. Default 3.0.
+# Available from the parameter file only for crux-search-for-matches, crux-create-index, and crux-generate-peptides.
+precursor-window=3.000000
+
 # Specify rules for in silico digestion of protein sequences. See html docs for syntax. Default to use pre-defined enzyme trypsin.
 # Overrides the enzyme option.  Two lists of residues are given enclosed in square brackets or curly braces and separated by a |. The first list contains residues required/prohibited before the cleavage site and the second list is residues after the cleavage site.  If the residues are required for digestion, they are in square brackets, '[' and ']'.  If the residues prevent digestion, then they are enclosed in curly braces, '{' and '}'.  Use X to indicate all residues.  For example, trypsin cuts after R or K but not before P which is represented as [RK]|{P}.  AspN cuts after any residue but only before D which is represented as [X]|[D].
 custom-enzyme=__NULL_STR
@@ -179,10 +187,6 @@ fileroot=no-decoys
 # Set level of output to stderr (0-100).  Default 30.
 # Available for all crux programs.  Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info.
 verbosity=30
-
-# Search peptides within +/- 'mass-window' of the spectrum mass.  Default 3.0.
-# Available from the parameter file only for crux-search-for-matches, crux-create-index, and crux-generate-peptides.
-mass-window=3.000000
 
 # Number of decoy peptides to search for every target peptide searched.  Default 2.
 # Use --decoy-location to control where they are returned (which file(s)).  Available only from the command line for search-for-matches.
