@@ -1706,7 +1706,7 @@ void print_sqt_header(
   mass_type_to_string(mass_type, temp_str);
   fprintf(output, "H\tFragmentMasses\t%s\n", temp_str); //?????????
 
-  double tol = get_double_parameter("mass-window");
+  double tol = get_double_parameter("precursor-window");
   fprintf(output, "H\tAlg-PreMasTol\t%.1f\n",tol);
   fprintf(output, "H\tAlg-FragMassTol\t%.2f\n", 
           get_double_parameter("ion-tolerance"));

@@ -281,49 +281,57 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
   INDEX_T* index,      ///< Index from which to draw peptides OR
   DATABASE_T* dbase    ///< Database from which to draw peptides
   ) {
-  if (get_boolean_parameter("use-mz-window")) {
-    MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
-      allocate_modified_peptides_iterator();
 
-    // init max aas modified
-    new_iterator->max_aas_modified = get_int_parameter("max-aas-modified");
-    
-    // init the peptide list
-    new_iterator->temp_peptide_list = new_empty_list();
-    
-    // set peptide_mod field
-    new_iterator->peptide_mod = pmod;
+  WINDOW_TYPE_T precursor_window_type = 
+    get_window_type_parameter("precursor-window-type");
+  double window = get_double_parameter("precursor-window");
+  double min_mass = 0;
+  double max_mass = 0;
+  
+  MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
+    allocate_modified_peptides_iterator();
 
-    // set is_decoy field
-    new_iterator->is_decoy = is_decoy;
-    
-    // get the mass difference
-    double delta_mass = peptide_mod_get_mass_change(pmod);
-    
-    // create peptide_generator
-    double mz_window = get_double_parameter("mass-window");
-    double min_mz = mz - mz_window;
-    double max_mz = mz + mz_window;
-    double min_mass = (min_mz - MASS_H) * (double)charge - delta_mass;
-    double max_mass = (max_mz - MASS_H) * (double)charge - delta_mass;
-	
-    new_iterator->peptide_generator = 
-      new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, index, dbase);
-    
-    // queue first peptide
-    queue_next_peptide( new_iterator );
+  // init max aas modified
+  new_iterator->max_aas_modified = get_int_parameter("max-aas-modified");
+  
+  // init the peptide list
+  new_iterator->temp_peptide_list = new_empty_list();
+  
+  // set peptide_mod field
+  new_iterator->peptide_mod = pmod;
 
-    return new_iterator;
+  // set is_decoy field
+  new_iterator->is_decoy = is_decoy;
+  
+  // get the mass difference
+  double delta_mass = peptide_mod_get_mass_change(pmod);
 
+  if (precursor_window_type == WINDOW_MASS) {
+    //TODO: should we change MASS_H to MASS_PROTON and regenerate the smokes?
+    double mass = (mz - MASS_H) * charge - delta_mass; 
+    min_mass = mass - window;
+    max_mass = mass + window;
+  } else if (precursor_window_type == WINDOW_MZ) {
+      double min_mz = mz - window;
+      double max_mz = mz + window;
+      min_mass = (min_mz - MASS_PROTON) * (double)charge - delta_mass;
+      max_mass = (max_mz - MASS_PROTON) * (double)charge - delta_mass;
+  } else if (precursor_window_type == WINDOW_PPM) {
+    double mass = (mz - MASS_PROTON) * (double)charge - delta_mass;
+    min_mass = mass / (1.0 + window * 1e-6);
+    max_mass = mass / (1.0 - window * 1e-6);
   } else {
-    return new_modified_peptides_iterator_from_mass((mz - MASS_H) * charge, 
-                                                    pmod, 
-                                                    is_decoy,
-                                                    index, 
-                                                    dbase);
+    carp(CARP_FATAL,"Invalid window type");
   }
   
+  // create peptide_generator
+    new_iterator->peptide_generator = 
+      new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, index, dbase);
+  
+  // queue first peptide
+  queue_next_peptide( new_iterator );
 
+  return new_iterator;
 }
 
 

@@ -39,7 +39,7 @@
 #define SMALL_BUFFER 256
 #define MAX_SET_PARAMS 256
 
-#define NUMBER_PARAMETER_TYPES 11
+#define NUMBER_PARAMETER_TYPES 12
 ///< number of elements in the parameter type enum
 
 // Global variables
@@ -80,7 +80,8 @@ enum parameter_type {
   SORT_TYPE_P,       ///< parameters of type SORT_TYPE_T
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
   ION_TYPE_P,        ///< parameters of type ION_TYPE_T
-  ALGORITHM_TYPE_P}; ///< parameters of type ALGORITHM_TYPE_T
+  ALGORITHM_TYPE_P,  ///< parameters of type ALGORITHM_TYPE_T
+  WINDOW_TYPE_P};    ///< parameters of type WINDOW_TYPE_T
 typedef enum parameter_type PARAMETER_TYPE_T;
 
 #ifdef __cplusplus
@@ -227,6 +228,11 @@ DIGEST_T get_digest_type_parameter(
 ENZYME_T get_enzyme_type_parameter(
   const char* name
   );
+
+WINDOW_TYPE_T get_window_type_parameter(
+  const char* name
+  );
+
 
 /**
  * Prints the parameters.  If lead_string is not null, preprends it to

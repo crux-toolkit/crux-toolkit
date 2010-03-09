@@ -106,7 +106,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
   )
 {
   // get parameters
-  double mass_window = get_double_parameter("mass-window");
+  double mass_window = get_double_parameter("precursor-window");
   double min_mass = neutral_mass - mass_window;
   double max_mass = neutral_mass + mass_window;
 

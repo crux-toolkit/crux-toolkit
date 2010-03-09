@@ -118,6 +118,35 @@ char* enzyme_type_to_string(ENZYME_T type){
   return type_str;
 }
 
+/**
+ * The string version of mass types
+ */
+static const char* window_type_strings[NUMBER_WINDOW_TYPES] = 
+  {"invalid", "mass", "mz", "ppm"};
+
+WINDOW_TYPE_T string_to_window_type(char* name){
+  int window_int = convert_enum_type_str(name, -10, 
+                                      window_type_strings, 
+                                      NUMBER_WINDOW_TYPES);
+  if( window_int < 0 ){
+    window_int = 0;
+  }
+
+  return (WINDOW_TYPE_T)window_int;
+}
+
+char* window_type_to_string(WINDOW_TYPE_T type){
+  if( (int)type > NUMBER_WINDOW_TYPES){
+    return NULL;
+  }
+
+  char* type_str = my_copy_string(window_type_strings[type]);
+
+  return type_str;
+}
+
+
+
 
 /**
  * The string version of peptide cleavage type
