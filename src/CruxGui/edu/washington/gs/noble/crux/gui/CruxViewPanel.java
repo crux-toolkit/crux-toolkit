@@ -3,18 +3,17 @@ package edu.washington.gs.noble.crux.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
-public class CruxGuiPanel extends JPanel {
+public class CruxViewPanel extends JPanel {
 	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
+	
 	ImagePanel image;
 	final JPanel properties = new JPanel();
 	final CruxAppButtonGroup buttonGroup = new CruxAppButtonGroup();
@@ -24,7 +23,7 @@ public class CruxGuiPanel extends JPanel {
 	final CruxComponentButton percolator = new CruxComponentButton("percolator");
 	final CruxComponentButton qranker = new CruxComponentButton("q-ranker");
 
-	CruxGuiPanel(CruxAnalysisModel model) {
+	CruxViewPanel(CruxAnalysisModel model) {
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Color.white);

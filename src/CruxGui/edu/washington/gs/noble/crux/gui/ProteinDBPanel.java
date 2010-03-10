@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.logging.Logger;
 
@@ -18,6 +20,7 @@ import javax.swing.JTextField;
 @SuppressWarnings("serial")
 class ProteinDBPanel extends JPanel {
 	
+	CruxAnalysisModel model;
 	JButton proteinDBButton = new JButton("Choose Protein Database");
 	JTextField proteinFileName = new JTextField();
 	private static Logger logger = 
@@ -36,6 +39,7 @@ class ProteinDBPanel extends JPanel {
 	}
 	
 	public ProteinDBPanel(CruxAnalysisModel model) {
+		this.model = model;
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -49,5 +53,14 @@ class ProteinDBPanel extends JPanel {
 		add(proteinFileName);
 		proteinFileName.setMaximumSize(new Dimension(200,25));
 	}
+	
+	class ProteinDatabaseChangeListener implements ItemListener {
+		public void itemStateChanged(final ItemEvent event) {
+			String proteinDatabase = proteinFileName.getText();
+			model.setProteinDatabase(proteinDatabase);
+		}
+	
+	}
+
 
 }

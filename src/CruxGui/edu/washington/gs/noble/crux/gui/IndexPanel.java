@@ -90,4 +90,5 @@ class IndexPanel extends JPanel implements ItemListener {
 			model.setAllowMissedCleavages(checked);
 		}
 	}	
+	
 }
