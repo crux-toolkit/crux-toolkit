@@ -37,18 +37,14 @@ class EnzymePanel extends JPanel {
 		enzymeCombo.setBackground(Color.white);
 		enzymeCombo.setMaximumSize(new Dimension(236, 24));
 		add(enzymeCombo);
-		enzymeCombo.addItemListener(new EnzymeChangeListener());
 	}
 	
-	void updateFromModel() {
+	public void updateFromModel() {
 		enzymeCombo.setSelectedIndex(model.getEnzyme().ordinal());
 		logger.info("Enzyme read from model: " + model.getEnzyme().toString());
 	}
 	
-	class EnzymeChangeListener implements ItemListener {
-		public void itemStateChanged(final ItemEvent event) {
-			CruxAnalysisModel.Enzyme e = (CruxAnalysisModel.Enzyme) enzymeCombo.getSelectedItem();
-			model.setEnzyme(e);
-		}
-	}	
+	public CruxAnalysisModel.Enzyme getEnzyme() {
+		return (CruxAnalysisModel.Enzyme) enzymeCombo.getSelectedItem();
+	}
 }

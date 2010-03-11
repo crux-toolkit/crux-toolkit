@@ -78,16 +78,16 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		restoreDefaults();
 	}
 	
-	String getName() {
+	public String getName() {
 		return name;
 	}
 	
-	void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 		logger.info("Model parameter 'name' set to " + name);
 	}
 	
-	void restoreDefaults() {
+	public void restoreDefaults() {
 		name = null;
 		componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] = false;
 		componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = false;
@@ -100,63 +100,76 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Model restored to default values");
 	}
 	
-	boolean getRunCreateIndex() {
+	public boolean getRunCreateIndex() {
 		return componentsToRun[CruxComponents.CREATE_INDEX.ordinal()];
 	}
 	
-	void setRunCreateIndex(boolean value) {
+	public void setRunCreateIndex(boolean value) {
 		componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] = value;
 		logger.info("Run 'create-index' set to " + value);
 	}
 	
-	boolean getRunSearchForMatches() {
+	public boolean getRunSearchForMatches() {
 		return componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()];
 	}
 
-	void setRunSearchForMatches(boolean value) {
+	public void setRunSearchForMatches(boolean value) {
 		componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = value;
 		logger.info("Run 'search-for-matches' set to " + value);
 	}
 	
-	IsotopicMassType getMassType() {
+	public IsotopicMassType getMassType() {
 		return this.massType;
 	}
 
-	void setMassType(IsotopicMassType type) {
+	public void setMassType(IsotopicMassType type) {
 		this.massType = type;
 		logger.info("Model parameter 'massType' set to " + type.toString());
 	}
 	
-	DigestType getDigestType() {
+	public DigestType getDigestType() {
 		return this.digestType;
 	}
 	
-	void setDigestType(DigestType type) {
+	public void setDigestType(DigestType type) {
 		this.digestType =type;
 		logger.info("Model parameter 'digestType' set to " + type.toString());
 	}
 	
-	Enzyme getEnzyme() {
+	public Enzyme getEnzyme() {
 		return this.enzyme;
 	}
 
-	void setEnzyme(Enzyme e) {
+	public void setEnzyme(Enzyme e) {
 		this.enzyme = e;
 		logger.info("Model parameter 'enzyme' set to " + e.toString());
 	}
 	
-	boolean getAllowMissedCleavages() {
+	public boolean getAllowMissedCleavages() {
 		return this.allowMissedCleavages;
 	}
 	
-	void setAllowMissedCleavages(boolean value) {
+	public void setAllowMissedCleavages(boolean value) {
 		this.allowMissedCleavages = value;
 		logger.info("Model parameter 'allowMissedCleavages' set to " + value);
 	}
 
-	void setProteinDatabase(String database) {
+	public String getProteinDatabase() {
+		return proteinSource;
+	}
+	
+	public void setProteinDatabase(String database) {
 		this.proteinSource = database;
 		logger.info("Model parameter 'proteinDatabase' set to " + database);
+	}
+	
+	public String getSpectraFilemame() {
+		return spectraSource;
+	}
+	
+	public void setSpectraFilename(String fileName) {
+		this.spectraSource = fileName;
+		logger.info("Model parameter 'spectraSource' set to " + fileName);
 	}
 	
 	public boolean toBinaryFile() {
@@ -213,7 +226,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		}
 		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
 			// Must have specified protein database
-			if (proteinSource == null) {
+			if (proteinSource == null || proteinSource.length() == 0) {
 				JOptionPane.showMessageDialog(null, "A protein database must be specified to create an index.");
 				result = false;
 			}
@@ -230,41 +243,60 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return result;
 	}
 	
-	boolean run() {
+	Process run() {
+		
+		Process process = null;
 		
 		if (!isValidAnalysis()) {
-			return false;
+			return process;
 		}
 		
 		// Write out binary file of the analysis model to the analysis directory
 		if (!toBinaryFile()) {
-			return false;
+			return process;
 		}
 		
 		// Write out a parameter file to the analysis directory
 		if (!toParameterFile()) {
-			return false;
+			return process;
 		}
 	
 		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
 			//  Run the component using the component directory and parameter file
-			String command = "crux create-index --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + CruxComponents.CREATE_INDEX.toString();
+			String subCommand = CruxComponents.CREATE_INDEX.toString();
+			String command = "crux " + subCommand + " --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
 			try {
 				logger.info("Attempte to execute command: " + command);
-				Process process = Runtime.getRuntime().exec(command);
+				process = Runtime.getRuntime().exec(command);
 			}
 			catch (IOException e) {
 				logger.info("Unable to execute command: " + e.toString());
-				JOptionPane.showMessageDialog(null, "Unable to write parameter file for analsyis: " + e.toString());
-				return false;
+				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
+				return process;
 			}
 		}
 		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]) {
-			//	create a subdirectory in the analysis directory
-			//  write out a parameter file in the component directory
-			//  run the component using the component directory and parameter file
+			//  Run the component using the component directory and parameter file
+			String proteinSource;
+			if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
+				proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
+			}
+			else {
+				proteinSource = this.proteinSource;
+			}
+			String subCommand = CruxComponents.SEARCH_FOR_MATCHES.toString();
+			String command = "crux " + subCommand + " --overwrite T --output-dir " + name + "/" + subCommand + " --parameter-file " + name + "/analysis.params " + spectraSource + " " + proteinSource;
+			try {
+				logger.info("Attempte to execute command: " + command);
+				process = Runtime.getRuntime().exec(command);
+			}
+			catch (IOException e) {
+				logger.info("Unable to execute command: " + e.toString());
+				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
+				return process;
+			}
 		}
 
-		return true;
+		return process;
 	}
 }

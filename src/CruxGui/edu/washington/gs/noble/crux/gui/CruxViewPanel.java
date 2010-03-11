@@ -52,7 +52,7 @@ public class CruxViewPanel extends JPanel {
 		IndexPanel indexPanel = new IndexPanel(model, createIndex, dummy);
 		indexPanel.setBounds(createIndex.getX(), 0, indexPanel.getMaximumSize().width, indexPanel.getMaximumSize().height);
 		properties.add(indexPanel);
-		SearchPanel searchPanel = new SearchPanel(model, search);
+		SearchPanel searchPanel = new SearchPanel(model, search, dummy);
 		searchPanel.setBounds(search.getX(), 0, searchPanel.getMaximumSize().width, searchPanel.getMaximumSize().height);
 		properties.add(indexPanel);
 		properties.add(searchPanel);
