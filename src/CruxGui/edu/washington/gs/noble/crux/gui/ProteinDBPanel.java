@@ -47,16 +47,28 @@ class ProteinDBPanel extends JPanel {
 		return proteinFileName.getText();
 	}
 
+	public void setProteinDatabase(String fileName) {
+		proteinFileName.setText(fileName);
+	}
+	
+	public void updateFromModel() {
+		proteinFileName.setText(model.getProteinDatabase());
+	}
+
 	class ProteinDBButtonListener implements ActionListener {
 		public void actionPerformed(final ActionEvent event) {
 			final JFileChooser chooser = new JFileChooser();
-			chooser.setCurrentDirectory(new File("."));
+			String fileName = model.getProteinDatabase();
+			if (fileName != null && fileName.length() > 0) {
+				chooser.setCurrentDirectory(new File(fileName));
+			}
+			else {
+				chooser.setCurrentDirectory(new File("."));
+			}
 			final int result = chooser.showOpenDialog(getParent());
 			if (result == JFileChooser.APPROVE_OPTION){
 				proteinFileName.setText(chooser.getSelectedFile().getPath());
-				model.setProteinDatabase(proteinFileName.getText());
 			}
 		}
 	}
-
 }

@@ -19,23 +19,32 @@ import javax.swing.JTextField;
 class SpectraPanel extends JPanel {
 	
 	JButton spectraButton = new JButton("Choose Spectra File");
-	JTextField spectraFileName = new JTextField();
+	JTextField spectraFilename = new JTextField();
+	CruxAnalysisModel model;
+	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 	
 	class SpectraButtonListener implements ActionListener {
 		public void actionPerformed(final ActionEvent event) {
 			final JFileChooser chooser = new JFileChooser();
-			chooser.setCurrentDirectory(new File("."));
+			String fileName = model.getSpectraFilemame();
+			if (fileName != null && fileName.length() > 0) {
+				chooser.setCurrentDirectory(new File(fileName));
+			}
+			else {
+				chooser.setCurrentDirectory(new File("."));
+			}
 			final int result = chooser.showOpenDialog(getParent());
 			if (result == JFileChooser.APPROVE_OPTION){
-				spectraFileName.setText(chooser.getSelectedFile().getPath());
-				logger.info("User selected MS2 spectra file " + spectraFileName.getText() + ".");
+				spectraFilename.setText(chooser.getSelectedFile().getPath());
+				logger.info("User selected MS2 spectra file " + spectraFilename.getText() + ".");
 			}
 		}
 	}
 	
 	public SpectraPanel(CruxAnalysisModel model) {
+		this.model = model;
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -44,10 +53,22 @@ class SpectraPanel extends JPanel {
 		spectraButton.addActionListener(new SpectraButtonListener());
 		add(spectraButton);
 		add(Box.createRigidArea(new Dimension(12,0)));
-		spectraFileName.setAlignmentX(Component.LEFT_ALIGNMENT);
-		spectraFileName.setAlignmentY(Component.CENTER_ALIGNMENT);
-		add(spectraFileName);
-		spectraFileName.setMaximumSize(new Dimension(200,25));
+		spectraFilename.setAlignmentX(Component.LEFT_ALIGNMENT);
+		spectraFilename.setAlignmentY(Component.CENTER_ALIGNMENT);
+		add(spectraFilename);
+		spectraFilename.setMaximumSize(new Dimension(200,25));
+	}
+
+	public  String  getSpectraFilename() {
+		return  spectraFilename.getText();
+	}
+	
+	public void setSpectraFilename(String fileName) {
+		spectraFilename.setText(fileName);
+	}
+	
+	public void updateFromModel() {
+		spectraFilename.setText(model.getSpectraFilemame());
 	}
 
 }

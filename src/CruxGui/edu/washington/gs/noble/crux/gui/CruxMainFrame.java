@@ -106,7 +106,6 @@ public class CruxMainFrame extends JFrame {
 		
 		public void actionPerformed(ActionEvent event) {
 			model.run();
-			
 		}
 		
 	}

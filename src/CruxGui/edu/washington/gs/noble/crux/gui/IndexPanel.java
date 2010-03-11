@@ -15,6 +15,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
@@ -57,23 +58,22 @@ class IndexPanel extends JPanel implements ItemListener {
 		massPanel = new MassPanel(model);
 		digestPanel = new DigestPanel(model);
 		runToolCheckBox.setBackground(Color.white);
+		missedCleavages.setBackground(Color.white);
 		showAdvancedParameters.setBackground(Color.white);
 		showAdvancedParameters.setEnabled(false);
-		missedCleavages.setBackground(Color.white);
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
 		buttonPanel.setBackground(Color.white);
 		buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		saveButton.addActionListener(new SaveButtonListener());
+		// saveButton.setEnabled(false);
 		buttonPanel.add(Box.createRigidArea(new Dimension(36,0)));
 		buttonPanel.add(saveButton);
-		cancelButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		cancelButton.addActionListener(new CancelButtonListener());
 		buttonPanel.add(Box.createRigidArea(new Dimension(12,0)));
 		buttonPanel.add(cancelButton);
-		loadDefaults.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(Box.createRigidArea(new Dimension(12,0)));
+		loadDefaults.setEnabled(false);
 		buttonPanel.add(loadDefaults);
 		add(Box.createRigidArea(new Dimension(0,12)));
 		add(runToolCheckBox);
@@ -92,12 +92,13 @@ class IndexPanel extends JPanel implements ItemListener {
 		add(Box.createRigidArea(new Dimension(0,12)));
 		add(buttonPanel);
 		runToolCheckBox.addItemListener(new RunComponentChangeListener());
-		missedCleavages.addItemListener(new MissedCleavagesChangeListener());
 		updateFromModel();
+		setVisible(false);
 	}
 
 	private void updateFromModel() {
 		runToolCheckBox.setSelected(model.getRunCreateIndex());
+		proteinDBPanel.updateFromModel();
 		massPanel.updateFromModel();
 		digestPanel.updateFromModel();
 		enzymePanel.updateFromModel();
@@ -117,25 +118,38 @@ class IndexPanel extends JPanel implements ItemListener {
 	
 	class RunComponentChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
-		}
-	}	
-	
-	class MissedCleavagesChangeListener implements ItemListener {
-		public void itemStateChanged(final ItemEvent event) {
+			//saveButton.setEnabled(runToolCheckBox.isSelected());
 		}
 	}
 	
 	class SaveButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			boolean checked = runToolCheckBox.isSelected();
-			button.setSelectedToRun(checked);
 			model.setRunCreateIndex(checked);
-			model.setProteinDatabase(proteinDBPanel.getProteinDatabase());
-			model.setMassType(massPanel.getMassType());
-			model.setDigestType(digestPanel.getDigestType());
-			checked = missedCleavages.isSelected();
-			model.setAllowMissedCleavages(checked);	
-			dummyButton.setSelected(true);
+			String proteinDatabase = proteinDBPanel.getProteinDatabase();
+			if (checked && proteinDatabase == null || proteinDatabase.length() == 0) {
+				model.setRunSearchForMatches(false);
+				button.setSelectedToRun(false);
+				JOptionPane.showMessageDialog(null, "A protein database must be specified to search for matches.");
+			}
+			else if (checked) {
+				model.setProteinDatabase(proteinDBPanel.getProteinDatabase());
+				model.setMassType(massPanel.getMassType());
+				model.setDigestType(digestPanel.getDigestType());
+				model.setEnzyme(enzymePanel.getEnzyme());
+				checked = missedCleavages.isSelected();
+				model.setAllowMissedCleavages(checked);	
+				model.setRunCreateIndex(true);
+				button.setSelectedToRun(true);
+				setVisible(false);			
+				dummyButton.setSelected(true);
+			}
+			else {
+				model.setRunCreateIndex(false);
+				button.setSelectedToRun(false);
+				setVisible(false);			
+				dummyButton.setSelected(true);
+			}
 		}
 	}
 	class CancelButtonListener implements ActionListener {
