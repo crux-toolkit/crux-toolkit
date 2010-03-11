@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JToggleButton;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
@@ -22,6 +24,7 @@ public class CruxViewPanel extends JPanel {
 	final CruxComponentButton computeQvalues = new CruxComponentButton("compute-q-values");
 	final CruxComponentButton percolator = new CruxComponentButton("percolator");
 	final CruxComponentButton qranker = new CruxComponentButton("q-ranker");
+	final JToggleButton dummy = new JToggleButton(); // Only exists to select, so other button are unselected.
 
 	CruxViewPanel(CruxAnalysisModel model) {
 		
@@ -35,6 +38,7 @@ public class CruxViewPanel extends JPanel {
 		buttonGroup.add(computeQvalues);
 		buttonGroup.add(percolator);
 		buttonGroup.add(qranker);
+		buttonGroup.add(dummy);
 		
 		// Set up panel with flow chart and buttons
 		image = new ImagePanel(createIndex, search, computeQvalues, percolator, qranker);
@@ -45,7 +49,7 @@ public class CruxViewPanel extends JPanel {
 		properties.setBackground(Color.white);
 		properties.setSize(new Dimension(image.getWidth(), 4 * image.getHeight()));
 		properties.setLayout(null);
-		IndexPanel indexPanel = new IndexPanel(model, createIndex);
+		IndexPanel indexPanel = new IndexPanel(model, createIndex, dummy);
 		indexPanel.setBounds(createIndex.getX(), 0, indexPanel.getMaximumSize().width, indexPanel.getMaximumSize().height);
 		properties.add(indexPanel);
 		SearchPanel searchPanel = new SearchPanel(model, search);
