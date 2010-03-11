@@ -25,14 +25,16 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		SEARCH_FOR_MATCHES("search-for-matches");
 		String name;
 		CruxComponents(String name) {this.name = name;}
+		public String toString() { return this.name; }
 		public static int getSize() { return 2; };
 	};
 	
 	public enum IsotopicMassType { 
 		AVERAGE("average"), 
-		MONOISOTOPIC("monoisotopic");
+		MONOISOTOPIC("mono");
 		String name;
 		IsotopicMassType(String name) {this.name = name;}
+		public String toString() { return this.name; }
 		public static int getSize() { return 2; };
 	};
 	
@@ -41,6 +43,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		PARTIAL("partial-digest"); 
 		String name;
 		DigestType(String name) {this.name = name;}
+		public String toString() { return this.name; }
 		public static int getSize() { return 2; };
 	};
 	
@@ -121,7 +124,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 
 	void setMassType(IsotopicMassType type) {
 		this.massType = type;
-		logger.info("Model parameter 'IsotopicMassType' set to " + type.toString());
+		logger.info("Model parameter 'massType' set to " + type.toString());
 	}
 	
 	DigestType getDigestType() {
@@ -130,7 +133,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	
 	void setDigestType(DigestType type) {
 		this.digestType =type;
-		logger.info("Model parameter 'DigestType' set to " + type.toString());
+		logger.info("Model parameter 'digestType' set to " + type.toString());
 	}
 	
 	Enzyme getEnzyme() {
@@ -139,7 +142,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 
 	void setEnzyme(Enzyme e) {
 		this.enzyme = e;
-		logger.info("Model parameter 'Enzyme' set to " + e.toString());
+		logger.info("Model parameter 'enzyme' set to " + e.toString());
 	}
 	
 	boolean getAllowMissedCleavages() {
@@ -148,11 +151,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	
 	void setAllowMissedCleavages(boolean value) {
 		this.allowMissedCleavages = value;
-		logger.info("Model parameter 'AllowMissedCleavages' set to " + value);
+		logger.info("Model parameter 'allowMissedCleavages' set to " + value);
 	}
 
 	void setProteinDatabase(String database) {
 		this.proteinSource = database;
+		logger.info("Model parameter 'proteinDatabase' set to " + database);
 	}
 	
 	public boolean toBinaryFile() {
@@ -182,7 +186,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 			out.println("isotopic-mass=" + massType);
 			out.println("digestion=" + digestType);
 			out.println("enzyme=" + enzyme);
-			out.println("missed-cleavages" + allowMissedCleavages);
+			if (allowMissedCleavages) {
+				out.println("missed-cleavages=T");
+			}
+			else {
+				out.println("missed-cleavages=F");
+			}
 			out.close();
 			logger.info("Saved analysis parameter file to " + fileName);	
 			result = true;

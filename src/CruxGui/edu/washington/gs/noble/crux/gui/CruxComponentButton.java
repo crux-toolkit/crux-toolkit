@@ -31,6 +31,7 @@ import javax.swing.JToggleButton;
  * @author Charles E. Grant
  *
  */
+@SuppressWarnings("serial")
 class CruxComponentButton extends JToggleButton {
 	
 	public enum Status {
@@ -40,8 +41,6 @@ class CruxComponentButton extends JToggleButton {
 	private final JCheckBox processCheckBox = new JCheckBox();
 	private final JLabel statusIconLabel = new JLabel();
 	private Status status = Status.NOT_RUN;
-
-	private static Logger logger = Logger.getLogger("edu.washington.gs.noble.crux.gui");
 
 	private static Color getStatusColor(Status state){
 		switch(state) {

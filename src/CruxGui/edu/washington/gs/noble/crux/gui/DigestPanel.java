@@ -41,8 +41,6 @@ class DigestPanel extends JPanel {
 		partialDigest.setBackground(Color.white);
 		add(partialDigest);
 		updateFromModel();
-		fullDigest.addItemListener(new DigestTypeChangeListener());
-		partialDigest.addItemListener(new DigestTypeChangeListener());
 	}	
 	
 	void updateFromModel() {
@@ -62,14 +60,15 @@ class DigestPanel extends JPanel {
 
 	}
 	
-	class DigestTypeChangeListener implements ItemListener {
-		public void itemStateChanged(final ItemEvent event) {
-			if (fullDigest.isSelected()) {
-				model.setDigestType(CruxAnalysisModel.DigestType.FULL);
-			}
-			else if (partialDigest.isSelected()) {
-				model.setDigestType(CruxAnalysisModel.DigestType.PARTIAL);		
-			}
+	public CruxAnalysisModel.DigestType getDigestType() {
+		if (fullDigest.isSelected()) {
+			 return CruxAnalysisModel.DigestType.FULL;
+		}
+		else if (partialDigest.isSelected()) {
+			return CruxAnalysisModel.DigestType.PARTIAL;		
+		}
+		else {
+			return null;
 		}
 	}
 }

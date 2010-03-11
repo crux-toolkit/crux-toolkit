@@ -23,20 +23,9 @@ class ProteinDBPanel extends JPanel {
 	CruxAnalysisModel model;
 	JButton proteinDBButton = new JButton("Choose Protein Database");
 	JTextField proteinFileName = new JTextField();
+	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
-	
-	class ProteinDBButtonListener implements ActionListener {
-		public void actionPerformed(final ActionEvent event) {
-			final JFileChooser chooser = new JFileChooser();
-			chooser.setCurrentDirectory(new File("."));
-			final int result = chooser.showOpenDialog(getParent());
-			if (result == JFileChooser.APPROVE_OPTION){
-				proteinFileName.setText(chooser.getSelectedFile().getPath());
-				logger.info("User selected protein database file " + proteinFileName.getText() + ".");
-			}
-		}
-	}
 	
 	public ProteinDBPanel(CruxAnalysisModel model) {
 		this.model = model;
@@ -54,13 +43,20 @@ class ProteinDBPanel extends JPanel {
 		proteinFileName.setMaximumSize(new Dimension(200,25));
 	}
 	
-	class ProteinDatabaseChangeListener implements ItemListener {
-		public void itemStateChanged(final ItemEvent event) {
-			String proteinDatabase = proteinFileName.getText();
-			model.setProteinDatabase(proteinDatabase);
-		}
-	
+	public String getProteinDatabase() {
+		return proteinFileName.getText();
 	}
 
+	class ProteinDBButtonListener implements ActionListener {
+		public void actionPerformed(final ActionEvent event) {
+			final JFileChooser chooser = new JFileChooser();
+			chooser.setCurrentDirectory(new File("."));
+			final int result = chooser.showOpenDialog(getParent());
+			if (result == JFileChooser.APPROVE_OPTION){
+				proteinFileName.setText(chooser.getSelectedFile().getPath());
+				model.setProteinDatabase(proteinFileName.getText());
+			}
+		}
+	}
 
 }

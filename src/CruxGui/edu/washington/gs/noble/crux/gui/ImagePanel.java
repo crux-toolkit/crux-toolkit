@@ -7,9 +7,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 class ImagePanel extends JPanel {
 	private BufferedImage image;
 	private static Logger logger = Logger
@@ -21,7 +21,7 @@ class ImagePanel extends JPanel {
 			CruxComponentButton computeQvalues,
 			CruxComponentButton percolator,
 			CruxComponentButton qranker
-		) {
+	) {
 		super();
 		// read the image
 		java.net.URL imgURL = getClass().getResource("/edu/washington/gs/noble/crux/gui/schematic.png");
@@ -48,12 +48,14 @@ class ImagePanel extends JPanel {
 		add(percolator);
 		qranker.setBounds(new Rectangle(808, 126, 120, 37));
 		add(qranker);
-		ButtonGroup cruxButtons = new ButtonGroup();
+		/*ButtonGroup cruxButtons = new ButtonGroup();
 		cruxButtons.add(createIndex);
 		cruxButtons.add(search);
 		cruxButtons.add(computeQvalues);
 		cruxButtons.add(percolator);
 		cruxButtons.add(qranker);
+		cruxButtons.add(dummy);
+		dummy.setSelected(true);*/
 	}
 
 	public void paintComponent(Graphics g) {

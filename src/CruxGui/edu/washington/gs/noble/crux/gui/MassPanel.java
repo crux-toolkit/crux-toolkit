@@ -38,8 +38,6 @@ class MassPanel extends JPanel {
 		monoMass.setBackground(Color.white);
 		add(monoMass);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		averageMass.addItemListener(new IsotopicMassTypeChangeListener());
-		monoMass.addItemListener(new IsotopicMassTypeChangeListener());
 		updateFromModel();
 	}	
 	
@@ -59,14 +57,16 @@ class MassPanel extends JPanel {
 		}
 	}
 	
-	class IsotopicMassTypeChangeListener implements ItemListener {
-		public void itemStateChanged(final ItemEvent event) {
-			if (averageMass.isSelected()) {
-				model.setMassType(CruxAnalysisModel.IsotopicMassType.AVERAGE);
-			}
-			else if (monoMass.isSelected()) {
-				model.setMassType(CruxAnalysisModel.IsotopicMassType.MONOISOTOPIC);		
-			}
+	public CruxAnalysisModel.IsotopicMassType getMassType() {
+		if (averageMass.isSelected()) {
+			return CruxAnalysisModel.IsotopicMassType.AVERAGE;
+		}
+		else if (monoMass.isSelected()) {
+			return CruxAnalysisModel.IsotopicMassType.MONOISOTOPIC;
+		}
+		else {
+			return null;
 		}
 	}
+
 }
