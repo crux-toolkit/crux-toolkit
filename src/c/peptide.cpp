@@ -643,7 +643,7 @@ char* get_peptide_sequence_from_peptide_src_sqt(
     get_protein_sequence_pointer(protein);
 
   // get modified petpide sequence
-  char* mod_pep_seq = get_peptide_modified_sequence(peptide);
+  char* mod_pep_seq = get_peptide_modified_sequence_with_symbols(peptide);
   int mod_pep_len = strlen(mod_pep_seq);
 
   // allocate peptide memory
@@ -799,19 +799,55 @@ MODIFIED_AA_T* get_peptide_modified_aa_sequence(PEPTIDE_T* peptide){
  * \returns A newly allocated string of the peptide sequence including
  * any modifications.
  */
-char* get_peptide_modified_sequence(
+char* get_peptide_modified_sequence_with_symbols(
  PEPTIDE_T* peptide
  ){
   char* seq_string = NULL;
 
   if( peptide->decoy_modified_seq ){
-    seq_string = modified_aa_string_to_string(peptide->decoy_modified_seq, 
+    seq_string = 
+      modified_aa_string_to_string_with_symbols(peptide->decoy_modified_seq, 
                                               peptide->length); 
   } else if( peptide->modified_seq == NULL ){
     seq_string = get_peptide_sequence(peptide);
   }else{
-    seq_string = modified_aa_string_to_string(peptide->modified_seq,
-                                              peptide->length);
+    seq_string = 
+      modified_aa_string_to_string_with_symbols(peptide->modified_seq,
+                                                peptide->length);
+  }
+  
+  return seq_string;
+}
+
+/**
+ * \brief Get the modified aa sequence in string form.
+ *
+ * If the peptide has no modifications, returns same string as
+ * get_peptide_sequence.  If modified, adds in brackets the masses of
+ * all modifications.  If merge_masses is true, prints the sum of all
+ * modifications for a residue.  If false, prints all masses in a
+ * comma separated list.
+ * \returns A newly allocated string of the peptide sequence including
+ * any modifications.
+ */
+char* get_peptide_modified_sequence_with_masses(
+ PEPTIDE_T* peptide,
+ BOOLEAN_T merge_masses
+ ){
+  char* seq_string = NULL;
+
+  if( peptide->decoy_modified_seq ){
+    seq_string = 
+      modified_aa_string_to_string_with_masses(peptide->decoy_modified_seq, 
+                                               peptide->length,
+                                               merge_masses); 
+  } else if( peptide->modified_seq == NULL ){
+    seq_string = get_peptide_sequence(peptide);
+  }else{
+    seq_string = 
+      modified_aa_string_to_string_with_masses(peptide->modified_seq,
+                                               peptide->length,
+                                               merge_masses);
   }
   
   return seq_string;
@@ -835,8 +871,9 @@ char* get_peptide_unshuffled_modified_sequence(
   if( peptide->modified_seq == NULL ){
     seq_string = get_peptide_sequence(peptide);
   }else{
-    seq_string = modified_aa_string_to_string(peptide->modified_seq,
-                                              peptide->length);
+    seq_string = 
+      modified_aa_string_to_string_with_symbols(peptide->modified_seq,
+                                                peptide->length);
   }
   
   return seq_string;
@@ -1427,8 +1464,10 @@ void print_peptide_in_format(
     if( peptide->modified_seq== NULL ){
       sequence = get_peptide_sequence(peptide);
     }else{
-      sequence = modified_aa_string_to_string(peptide->modified_seq, 
-                                              peptide->length);
+      sequence = 
+        modified_aa_string_to_string_with_masses(peptide->modified_seq, 
+                                                 peptide->length,
+                         get_boolean_parameter("display-summed-mod-masses"));
     }
   }
 

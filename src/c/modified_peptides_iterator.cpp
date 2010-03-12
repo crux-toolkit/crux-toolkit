@@ -130,7 +130,8 @@ void queue_next_peptide(
   }
   
   IF_CARP_DETAILED_DEBUG(
-    char* seq = get_peptide_modified_sequence(iterator->next_peptide);
+    char* seq = 
+    get_peptide_modified_sequence_with_masses(iterator->next_peptide, FALSE);
     carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq);
     free(seq);
   )

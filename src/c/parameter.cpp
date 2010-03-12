@@ -602,6 +602,13 @@ void initialize_parameters(void){
       "The maximum number of modified amino acids that can appear in one "
       "peptide.  Each aa can be modified multiple times.  Default no limit.",
       "Available from parameter file for search-for-matches.", "true");
+  set_boolean_parameter("display-summed-mod-masses", TRUE,
+      "When a residue has multiple modifications, print the sum of those "
+      "modifications rather than listing each in a comma-separated list.  "
+      "Default T.",
+      "Available in the parameter file for any command that prints peptides "
+      "sequences.  Example: TRUE is SE[12.40]Q and FALSE is SE[10.00,2.40]Q",
+      "true" );
   set_int_parameter("precision", 8, 1, 100, //max is arbitrary
       "Set the precision for masses and scores written to sqt and text files. "
       "Default 8.",

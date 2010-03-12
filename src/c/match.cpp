@@ -601,7 +601,8 @@ void print_match_tab(
   PEPTIDE_T* peptide = get_match_peptide(match);
   double peptide_mass = get_peptide_peptide_mass(peptide);
   // this should get the sequence from the match, not the peptide
-  char* sequence = get_match_mod_sequence_str(match);
+  char* sequence = get_match_mod_sequence_str_with_masses(match, 
+                          get_boolean_parameter("display-summed-mod-masses"));
   if( sequence == NULL ){
     sequence = my_copy_string("");  // for post-search, no shuffled sequences
   }
@@ -1265,7 +1266,7 @@ char* get_match_sequence_sqt(
   int length = get_peptide_length(get_match_peptide(match));
 
   // turn it into string
-  char* seq = modified_aa_string_to_string(mod_seq, length);
+  char* seq = modified_aa_string_to_string_with_symbols(mod_seq, length);
 
   // get peptide flanking residues 
   char c_term = get_peptide_c_term_flanking_aa(match->peptide);
@@ -1320,11 +1321,12 @@ MODIFIED_AA_T* get_match_mod_sequence(
 
 /**
  * \brief Returns a newly allocated string of sequence including any
- * modification characters. 
+ * modifications represented as symbols (*,@,#, etc) following the
+ * modified residue. 
  * \returns The peptide sequence of the match including modification
  * characters. 
  */
-char* get_match_mod_sequence_str( MATCH_T* match ){
+char* get_match_mod_sequence_str_with_symbols( MATCH_T* match ){
 
   // if post_process_match and has a null peptide you can't get sequence
   if(match->post_process_match && match->null_peptide){
@@ -1335,10 +1337,37 @@ char* get_match_mod_sequence_str( MATCH_T* match ){
     match->mod_sequence = get_peptide_modified_aa_sequence(match->peptide);
   }
 
-  return modified_aa_string_to_string(match->mod_sequence, 
+  return modified_aa_string_to_string_with_symbols(match->mod_sequence, 
                                       get_peptide_length(match->peptide));
 }
 
+/**
+ * \brief Returns a newly allocated string of sequence including any
+ * modifications represented as mass values in brackets following the
+ * modified residue. If merge_masses is true, the sum of multiple
+ * modifications on one residue are printed.  If false, each mass is
+ * printed in a comma-separated list.
+ * \returns The peptide sequence of the match including modification
+ * masses. 
+ */
+char* get_match_mod_sequence_str_with_masses( 
+ MATCH_T* match, 
+ BOOLEAN_T merge_masses)
+{
+
+  // if post_process_match and has a null peptide you can't get sequence
+  if(match->post_process_match && match->null_peptide){
+    return NULL;
+  }
+
+  if(match->mod_sequence == NULL){
+    match->mod_sequence = get_peptide_modified_aa_sequence(match->peptide);
+  }
+
+  return modified_aa_string_to_string_with_masses(match->mod_sequence, 
+                                        get_peptide_length(match->peptide),
+                                                  merge_masses);
+}
 /**
  * Must ask for score that has been computed
  *\returns the match_mode score in the match object

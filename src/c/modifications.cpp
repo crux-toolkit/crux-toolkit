@@ -166,20 +166,18 @@ MODIFIED_AA_T char_aa_to_modified(char aa){
 }
 
 /**
- * \brief Converts a MODIFIED_AA_T* to it's textual representation,
+ * \brief Converts a MODIFIED_AA_T to it's textual representation,
  * i.e. a letter followed by between 0 and 11 symbols for the
  * modifications made to the amino acid.
  * \returns A newly allocated char* with amino acid and modifciation
  * symbols. 
  */
-char* modified_aa_to_string(MODIFIED_AA_T aa){
+char* modified_aa_to_string_with_symbols(MODIFIED_AA_T aa){
 
   int modified_by = 0;
-  int mod_idx = 0;
   AA_MOD_T** mod_list = NULL;
-  //int total_mods = get_aa_mod_list(&mod_list);
   int total_mods = get_all_aa_mod_list(&mod_list);
-  for(mod_idx = 0; mod_idx< total_mods; mod_idx++){
+  for(int mod_idx = 0; mod_idx< total_mods; mod_idx++){
     if( is_aa_modified(aa, mod_list[mod_idx])){
       modified_by++;
     }
@@ -189,7 +187,7 @@ char* modified_aa_to_string(MODIFIED_AA_T aa){
   int return_idx = 0;
   return_string[return_idx] = modified_aa_to_char(aa);
   return_idx++;
-  for(mod_idx = 0; mod_idx < total_mods; mod_idx++){
+  for(int mod_idx = 0; mod_idx < total_mods; mod_idx++){
     if( is_aa_modified(aa, mod_list[mod_idx])){
       return_string[return_idx] = aa_mod_get_symbol(mod_list[mod_idx]);
       return_idx++;
@@ -200,16 +198,134 @@ char* modified_aa_to_string(MODIFIED_AA_T aa){
 }
 
 /**
+ * \brief Converts a MODIFIED_AA_T to it's textual representation,
+ * i.e. a letter either alone or followed by square brackets containing
+ * the mass(es) of any modifications.  If merge_masses is false, all
+ * masses are listed in a comma-separated list.  If true, they are
+ * summed and returned in one number.  Fixed precision of 2.
+ * 
+ * \returns A newly allocated char* with amino acid and modifciation
+ * masses in square brackets.
+ */
+char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa, 
+                                        BOOLEAN_T merge_masses){
+  int modified_by = 0;
+  AA_MOD_T** mod_list = NULL;
+  int total_mods = get_all_aa_mod_list(&mod_list);
+  for(int mod_idx = 0; mod_idx< total_mods; mod_idx++){
+    if( is_aa_modified(aa, mod_list[mod_idx])){
+      modified_by++;
+    }
+  }
+
+  // return the char if no mods
+  if( modified_by == 0 ){
+    char* aa_str = (char*)mymalloc(2 * sizeof(char));
+    sprintf(aa_str, "%c", modified_aa_to_char(aa));
+    return aa_str;
+  }
+
+  // go through all mods and sum mass or append to string
+
+  // at most 11 mods, each at most 7 char "000.00,", total 77
+  char* mass_string = (char*)mymalloc(128 * sizeof(char));
+  char* mass_string_ptr = mass_string;
+  FLOAT_T summed_masses = 0;
+
+  for(int mod_idx = 0; mod_idx < total_mods; mod_idx++){
+    if( is_aa_modified(aa, mod_list[mod_idx])){
+      // either add to the sum or to the string
+      if( merge_masses ){
+        summed_masses += aa_mod_get_mass_change(mod_list[mod_idx]);
+      } else {
+        sprintf(mass_string_ptr, "%.2f,", 
+                aa_mod_get_mass_change(mod_list[mod_idx]));
+        mass_string_ptr += strlen(mass_string_ptr);
+      }
+    }
+  }
+
+  // combine aa and masses
+  char* return_string = NULL;
+  if( merge_masses ){ // X[000.00]'/0'
+    return_string = (char*)mymalloc(10 * sizeof(char));
+    sprintf(return_string, "%c[%1.2f]", modified_aa_to_char(aa), summed_masses);
+  } else { // X[000.00,etc]'/0'
+
+    return_string = (char*)mymalloc((4 + strlen(mass_string)) * sizeof(char));
+    // take off the last comma
+    mass_string[(strlen(mass_string) - 1)] = '\0';
+    sprintf(return_string, "%c[%s]", modified_aa_to_char(aa), mass_string);
+
+  }
+  return return_string;
+}
+
+/**
+ * \brief Take an array of MODIFIED_AA_T's and return an array of
+ * char's that includes the letter of each aa and the mass change of
+ * any modifications in brackets following the modified residue.  If
+ * merge_masses is true, all AA_MOD_T's are added and one value is
+ * printed.  If false, each the mass of each AA_MOD_T is printed in a
+ * comma-separated list.
+ *
+ * \returns A newly allocated array of characters, a text
+ * representation of the modified sequence.
+ */
+char* modified_aa_string_to_string_with_masses(
+ MODIFIED_AA_T* aa_string, // the modified aa's to translate
+ int length, // length of aa_string
+ BOOLEAN_T merge_masses) // false==print each mod mass per aa, true== sum them
+{
+  if( aa_string == NULL || length == 0 ){
+    carp(CARP_ERROR, "Cannot print a NULL modified sequence");
+    return NULL;
+  }
+  // get access to the mods
+  AA_MOD_T** global_mod_list = NULL;
+  int mod_list_length = get_all_aa_mod_list(&global_mod_list);
+
+  // count up  modifications
+  int count = 0;
+  for(int mod_str_idx=0; mod_str_idx< length; mod_str_idx++){
+    // check each mod in list
+    for(int global_idx = 0; global_idx < mod_list_length; global_idx++){
+      if( is_aa_modified(aa_string[mod_str_idx], 
+                         global_mod_list[global_idx]) ){
+        count++;  // count all mods
+      }
+    }
+  }
+
+  // max total length = #aas + ( #mods * strlen([000.00,]) ) + '/0'
+  int buffer_size = length + (count * 9) + 1;
+  char* return_string = (char*)mymalloc(buffer_size * sizeof(char));
+  char* return_str_ptr = return_string;
+  for(int mod_str_idx = 0; mod_str_idx<length; mod_str_idx++){
+
+    char* cur_mod = 
+      modified_aa_to_string_with_masses( aa_string[mod_str_idx], merge_masses );
+    strcpy( return_str_ptr, cur_mod );
+    return_str_ptr += strlen(cur_mod);
+    free(cur_mod);
+  }
+
+  return return_string;
+}
+
+/**
  * \brief Take an array of MODIFIED_AA_T's and return an array of
  * char's that includes the letter of each aa and the symbol for all
  * applied modifications.
  *
- * Assumes that the array is terminated with MOD_SEQ_NULL.
  * \returns A newly allocated array of characters, a text
  * representation of the modified sequence.
  */
-char* modified_aa_string_to_string(MODIFIED_AA_T* aa_string, int length){
-  if( aa_string == NULL ){
+char* modified_aa_string_to_string_with_symbols(
+  MODIFIED_AA_T* aa_string, 
+  int length)
+{
+  if( aa_string == NULL || length == 0 ){
     carp(CARP_ERROR, "Cannot print a NULL modified sequence");
     return NULL;
   }
@@ -244,7 +360,7 @@ char* modified_aa_string_to_string(MODIFIED_AA_T* aa_string, int length){
   //  for(mod_str_idx = 0; mod_str_idx<mod_str_len; mod_str_idx++){
   for(mod_str_idx = 0; mod_str_idx<length; mod_str_idx++){
 
-    char* cur_mod = modified_aa_to_string( aa_string[mod_str_idx] );
+    char* cur_mod = modified_aa_to_string_with_symbols(aa_string[mod_str_idx]);
     strcpy( return_str_ptr, cur_mod );
     return_str_ptr += strlen(cur_mod);
     free(cur_mod);

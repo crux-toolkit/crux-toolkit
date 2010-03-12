@@ -568,7 +568,8 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
       continue;
     }    
 
-    char* cur_seq = get_match_mod_sequence_str(matches[cur_match_idx]);
+    char* cur_seq = 
+      get_match_mod_sequence_str_with_symbols(matches[cur_match_idx]);
     carp(CARP_DETAILED_DEBUG, "cur seq is %s.", cur_seq);
     int next_match_idx = cur_match_idx+1;
     for(next_match_idx=cur_match_idx+1; next_match_idx<end_idx+1; 
@@ -580,7 +581,8 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
         continue;
       }    
 
-      char* next_seq = get_match_mod_sequence_str(matches[next_match_idx]);
+      char* next_seq = 
+        get_match_mod_sequence_str_with_symbols(matches[next_match_idx]);
       carp(CARP_DETAILED_DEBUG, "next seq is %s.", next_seq);
 
       if( strcmp(cur_seq, next_seq) == 0){
@@ -863,7 +865,7 @@ BOOLEAN_T populate_match_rank_match_collection(
     FLOAT_T this_score = get_match_score(cur_match, score_type);
     
     if( NOT_SCORED == get_match_score(cur_match, score_type) ){
-      char* seq = get_match_mod_sequence_str(cur_match);
+      char* seq = get_match_mod_sequence_str_with_masses(cur_match, FALSE);
       carp(CARP_WARNING, 
            "PSM spectrum %i charge %i sequence %s was NOT scored for type %i",
            get_spectrum_first_scan(get_match_spectrum(cur_match)),
@@ -1251,8 +1253,10 @@ BOOLEAN_T score_matches_one_spectrum(
     }
 
     IF_CARP_DETAILED_DEBUG(
-      char* mod_seq = modified_aa_string_to_string(modified_sequence,
-						   strlen(sequence));
+      char* mod_seq = 
+      modified_aa_string_to_string_with_masses(modified_sequence,
+                                               strlen(sequence),
+                                               FALSE);
       carp(CARP_DETAILED_DEBUG, "Second score %f for %s (null:%i)",
 	   score, mod_seq,get_match_null_peptide(match));
       free(mod_seq);

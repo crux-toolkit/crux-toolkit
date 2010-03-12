@@ -172,26 +172,51 @@ START_TEST(test_mod_to_string){
   // init params including mods
   initialize_parameters();
   force_set_aa_mod_list(amod_list, 3);
+  // include mass shifts
+  aa_mod_set_mass_change(amod1, 3.4);
+  aa_mod_set_mass_change(amod2, 56.78);
+  aa_mod_set_mass_change(amod3, -100);
 
   // add test for mod to string (eg D*)
   // unmodified
-  char* mod_as_text = modified_aa_to_string( mod_aa_D );
+  char* mod_as_text = modified_aa_to_string_with_symbols( mod_aa_D );
+  fail_unless( strcmp(mod_as_text, "D") == 0,
+               "mod as string should be 'D' but is '%s'", mod_as_text);
+  free(mod_as_text);
+
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE );
   fail_unless( strcmp(mod_as_text, "D") == 0,
                "mod as string should be 'D' but is '%s'", mod_as_text);
   free(mod_as_text);
 
   // modify with one
   mod_aa_D = mod_aa_D | 0x0040; // second aa mod in param list
-  mod_as_text = modified_aa_to_string( mod_aa_D );
+  mod_as_text = modified_aa_to_string_with_symbols( mod_aa_D );
   fail_unless( strcmp(mod_as_text, "D#") == 0,
                "mod as string should be 'D#' but is '%s'", mod_as_text);
   free(mod_as_text);
 
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE );
+  fail_unless( strcmp(mod_as_text, "D[56.78]") == 0,
+               "mod as string should be 'D[56.78]' but is '%s'", mod_as_text);
+  free(mod_as_text);
+
   mod_aa_D = mod_aa_D | 0x0020; // first aa mod in param list
   mod_aa_D = mod_aa_D | 0x0080; // third aa mod in param list
-  mod_as_text = modified_aa_to_string( mod_aa_D );
+  mod_as_text = modified_aa_to_string_with_symbols( mod_aa_D );
   fail_unless( strcmp(mod_as_text, "D*#@") == 0,
                "mod as string should be 'D*#@' but is '%s'", mod_as_text);
+  free(mod_as_text);
+
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, TRUE );
+  fail_unless( strcmp(mod_as_text, "D[-39.82]") == 0,
+               "mod as string should be 'D-[39.82]' but is '%s'", mod_as_text);
+  free(mod_as_text);
+
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE );
+  fail_unless( strcmp(mod_as_text, "D[3.40,56.78,-100.00]") == 0,
+               "mod as string should be 'D[3.40,56.78,-100.00]' but is '%s'", 
+               mod_as_text);
   free(mod_as_text);
 }
 END_TEST
@@ -200,12 +225,21 @@ START_TEST(test_mod_str_to_string){
   // init params including mods
   initialize_parameters();
   force_set_aa_mod_list(amod_list, 3);
+  // include mass shifts
+  aa_mod_set_mass_change(amod1, 3.4);
+  aa_mod_set_mass_change(amod2, 56.78);
+  aa_mod_set_mass_change(amod3, -100);
 
   const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
   MODIFIED_AA_T* modaa_seq = convert_to_mod_aa_seq(seq);
 
-  char* modchar_seq = modified_aa_string_to_string(modaa_seq, len);
+  char* modchar_seq = modified_aa_string_to_string_with_symbols(modaa_seq, len);
+  fail_unless( strcmp(modchar_seq, seq) == 0,
+               "Seq %s should equal %s", seq, modchar_seq);
+
+  free(modchar_seq);
+  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, FALSE);
   fail_unless( strcmp(modchar_seq, seq) == 0,
                "Seq %s should equal %s", seq, modchar_seq);
 
@@ -228,10 +262,24 @@ START_TEST(test_mod_str_to_string){
   modify_aa( &modaa_seq[7], amod2 );
   modify_aa( &modaa_seq[7], amod3 );
   free(modchar_seq);
-  modchar_seq = modified_aa_string_to_string(modaa_seq, len);
+  modchar_seq = modified_aa_string_to_string_with_symbols(modaa_seq, len);
 
   fail_unless( strcmp(modchar_seq, "GB#BKA*@TRM#@") == 0,
-               "Seq %s should equal %s", seq, modchar_seq);
+               "Seq %s should equal %s", modchar_seq, "GB#BKA*@TRM#@");
+
+  free(modchar_seq);
+  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, FALSE);
+  fail_unless( strcmp(modchar_seq, 
+                      "GB[56.78]BKA[3.40,-100.00]TRM[56.78,-100.00]") == 0,
+               "Seq %s should equal %s", modchar_seq, 
+               "GB[56.78]BKA[3.40,-100.00]TRM[56.78,-100.00]");
+
+  free(modchar_seq);
+  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, TRUE);
+  fail_unless( strcmp(modchar_seq, "GB[56.78]BKA[-96.60]TRM[-43.22]") == 0,
+               "Seq %s should equal %s", modchar_seq,
+               "GB[56.78]BKA[-96.60]TRM[-43.22]");
+
 
   free(modchar_seq);
 }
@@ -315,13 +363,13 @@ START_TEST(test_palindrome){
   modify_aa(&mod_seq[2], amod1);
   fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
                "The modified seq %s should not be a palindrome.", 
-               modified_aa_string_to_string(mod_seq, len));
+               modified_aa_string_to_string_with_symbols(mod_seq, len));
 
   // modify the other half returning it to a palindrome
   modify_aa(&mod_seq[6], amod1);
   fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
                "The modified seq %s should be a palindrome.", 
-               modified_aa_string_to_string(mod_seq, len));
+               modified_aa_string_to_string_with_symbols(mod_seq, len));
 
 
   // try an almost-palindrome
