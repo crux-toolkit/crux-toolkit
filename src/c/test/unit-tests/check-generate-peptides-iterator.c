@@ -34,7 +34,7 @@ START_TEST(test_create){
   char* seq = get_peptide_sequence(next_p);
   fail_unless( strcmp(seq, "QGQVATVLSAPAK") == 0,
                "First peptide should be QGQVATVLSAPAK but is %s", seq);
-  fail_unless( get_double_parameter("mass-window") == 3,
+  fail_unless( get_double_parameter("precursor-window") == 3,
                "Default mass window should be 3.");
   fail_unless( generate_peptides_iterator_has_next(gpiter1) == TRUE,
                "Iterator should have second peptide");

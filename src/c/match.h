@@ -355,13 +355,25 @@ MODIFIED_AA_T* get_match_mod_sequence(
 
 /**
  * \brief Returns a newly allocated string of sequence including any
- * modification characters. 
+ * modifications represented as symbols (*,@,#, etc) following the
+ * modified residue. 
  * \returns The peptide sequence of the match including modification
  * characters. 
  */
-char* get_match_mod_sequence_str(
-  MATCH_T* match
-  );
+  char* get_match_mod_sequence_str_with_symbols( MATCH_T* match );
+
+/**
+ * \brief Returns a newly allocated string of sequence including any
+ * modifications represented as mass values in brackets following the
+ * modified residue. If merge_masses is true, the sum of multiple
+ * modifications on one residue are printed.  If false, each mass is
+ * printed in a comma-separated list.
+ * \returns The peptide sequence of the match including modification
+ * masses. 
+ */
+char* get_match_mod_sequence_str_with_masses( 
+ MATCH_T* match, 
+ BOOLEAN_T merge_masses);
 
 /**
  * Must ask for score that has been computed

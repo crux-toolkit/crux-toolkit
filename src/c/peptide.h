@@ -326,8 +326,24 @@ unsigned short* get_peptide_modified_aa_sequence(
  * \returns A newly allocated string of the peptide sequence including
  * any modifications.
  */
-char* get_peptide_modified_sequence(
+char* get_peptide_modified_sequence_with_symbols(
  PEPTIDE_T* peptide
+ );
+
+/**
+ * \brief Get the modified aa sequence in string form.
+ *
+ * If the peptide has no modifications, returns same string as
+ * get_peptide_sequence.  If modified, adds in brackets the masses of
+ * all modifications.  If merge_masses is true, prints the sum of all
+ * modifications for a residue.  If false, prints all masses in a
+ * comma separated list.
+ * \returns A newly allocated string of the peptide sequence including
+ * any modifications.
+ */
+char* get_peptide_modified_sequence_with_masses(
+ PEPTIDE_T* peptide,
+ BOOLEAN_T merge_masses
  );
 
 /**

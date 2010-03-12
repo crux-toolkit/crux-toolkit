@@ -92,7 +92,11 @@ START_TEST(test_create){
   fail_unless( strcmp(seq, "VADILESNAR") == 0,
                "Match returns %s as seq instead of %s", seq, "VADILESNAR");
   MODIFIED_AA_T* mod_seq = get_match_mod_sequence(m1);
-  char* mod_str = modified_aa_string_to_string(mod_seq, len);
+  char* mod_str = modified_aa_string_to_string_with_symbols(mod_seq, len);
+  fail_unless( strcmp(mod_str, seq) == 0,
+               "MOD_AA string should be %s but is %s", seq, mod_str);
+  free(mod_str);
+  mod_str = modified_aa_string_to_string_with_masses(mod_seq, len, FALSE);
   fail_unless( strcmp(mod_str, seq) == 0,
                "MOD_AA string should be %s but is %s", seq, mod_str);
 
@@ -124,10 +128,16 @@ START_TEST(test_create_mod){
                pep_seq, "VADILESNAR");
 
   MODIFIED_AA_T* aa_pep_seq = get_peptide_modified_aa_sequence(pepmod);
-  char* mod_pep_seq = modified_aa_string_to_string(aa_pep_seq, len);
+  char* mod_pep_seq = modified_aa_string_to_string_with_symbols(aa_pep_seq, len);
   fail_unless( strcmp(mod_pep_seq, "VAD*ILESNAR") == 0,
                "Modified peptide returns annotated seq as %s instead of %s",
                mod_pep_seq, "VAD*ILESNAR");
+
+  char* mod_pep_seq2 = 
+    modified_aa_string_to_string_with_masses(aa_pep_seq, len, TRUE);
+  fail_unless( strcmp(mod_pep_seq2, "VAD[0.00]ILESNAR") == 0,
+               "Modified peptide returns annotated seq as %s instead of %s",
+               mod_pep_seq2, "VAD[0.00]ILESNAR");
 
   // test getters of match with modified peptides
   char* match_seq = get_match_sequence(mmod);
@@ -136,10 +146,15 @@ START_TEST(test_create_mod){
                "Modified match returns %s instead of %s", match_seq, pep_seq);
   
   MODIFIED_AA_T* aa_match_seq = get_match_mod_sequence(mmod);
-  char* mod_str = modified_aa_string_to_string(aa_match_seq, len);
+  char* mod_str = modified_aa_string_to_string_with_symbols(aa_match_seq, len);
   fail_unless( strcmp(mod_str, mod_pep_seq) == 0,
                "MOD_AA string from mod peptide should be %s but is %s",
                mod_pep_seq, mod_str);
+  free(mod_str);
+  mod_str = modified_aa_string_to_string_with_masses(aa_match_seq, len, TRUE);
+  fail_unless( strcmp(mod_str, mod_pep_seq2) == 0,
+               "MOD_AA string from mod peptide should be %s but is %s",
+               mod_pep_seq2, mod_str);
 
   // repeat for decoy match
   free(match_seq);

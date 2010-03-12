@@ -278,7 +278,7 @@ START_TEST(test_modify_1){
   PEPTIDE_T* pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
   int len = get_peptide_length(pep); 
   MODIFIED_AA_T* mods = get_peptide_modified_aa_sequence(pep);
-  char* mod_str =  modified_aa_string_to_string(mods, len);
+  char* mod_str =  modified_aa_string_to_string_with_symbols(mods, len);
   fail_unless( strcmp(mod_str, "FGGTSV*ANAER") == 0,
 	       "Modified seq is %s but should be FGGTSV*ANAER", mod_str);
   free(pep);
@@ -297,7 +297,7 @@ START_TEST(test_modify_1){
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
   mods = get_peptide_modified_aa_sequence(pep);
-  mod_str =  modified_aa_string_to_string(mods, len);
+  mod_str =  modified_aa_string_to_string_with_symbols(mods, len);
   fail_unless( strcmp(mod_str, "F@GGTSVANAER") == 0,
 	       "Modified seq is %s but should be F@GGTSVANAER", mod_str);
   free(pep);
@@ -311,9 +311,13 @@ START_TEST(test_modify_1){
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
   mods = get_peptide_modified_aa_sequence(pep);
-  mod_str =  modified_aa_string_to_string(mods, len);
+  mod_str =  modified_aa_string_to_string_with_symbols(mods, len);
   fail_unless( strcmp(mod_str, "FGGTSVANAER@") == 0,
 	       "Modified seq is %s but should be FGGTSVANAER@", mod_str);
+  free(mod_str);
+  mod_str =  modified_aa_string_to_string_with_masses(mods, len, FALSE);
+  fail_unless( strcmp(mod_str, "FGGTSVANAER[0.00]") == 0,
+	       "Modified seq is %s but should be FGGTSVANAER[0.00]", mod_str);
   free(pep);
   free(mods);
   free(mod_str);
@@ -325,9 +329,13 @@ START_TEST(test_modify_1){
   // test that it was modified correctly
   pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
   mods = get_peptide_modified_aa_sequence(pep);
-  mod_str =  modified_aa_string_to_string(mods, len);
+  mod_str =  modified_aa_string_to_string_with_symbols(mods, len);
   fail_unless( strcmp(mod_str, "F*GGTSVANAER") == 0,
 	       "Modified seq is %s but should be F*GGTSVANAER", mod_str);
+  free(mod_str);
+  mod_str =  modified_aa_string_to_string_with_masses(mods, len, FALSE);
+  fail_unless( strcmp(mod_str, "F[0.00]GGTSVANAER") == 0,
+	       "Modified seq is %s but should be F[0.00]GGTSVANAER", mod_str);
   free(pep);
   free(mods);
   free(mod_str);

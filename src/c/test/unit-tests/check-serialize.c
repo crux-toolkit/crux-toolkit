@@ -144,7 +144,7 @@ START_TEST(test_serialize_mod){
   // add mod to peptide
   set_peptide_mod(pep1, mod_seq, pmod1);
   // check mod seq
-  char* pep1_mod_str = get_peptide_modified_sequence(pep1);
+  char* pep1_mod_str = get_peptide_modified_sequence_with_symbols(pep1);
   fail_unless( strcmp(pep1_mod_str, "VAD*ILESNAR*") == 0,
                "Modified sequence of pep1 should be VAD*ILESNAR* but is %s",
                pep1_mod_str);
@@ -158,7 +158,7 @@ START_TEST(test_serialize_mod){
   // add mod to peptide
   set_peptide_mod(pep3, mod_seq, pmod2);
   // check mod seq
-  char* pep3_mod_str = get_peptide_modified_sequence(pep3);
+  char* pep3_mod_str = get_peptide_modified_sequence_with_symbols(pep3);
   fail_unless( strcmp(pep3_mod_str, "Q*Q#SW") == 0,
                "Modified sequence of pep3 should be Q*Q#SW but is %s",
                pep3_mod_str);
@@ -179,20 +179,20 @@ START_TEST(test_serialize_mod){
   file = fopen(pep_filename, "r");
 
   pep4 = parse_peptide(file, db, FALSE); // don't use src array
-  char* pep4_seq = get_peptide_modified_sequence(pep4);
+  char* pep4_seq = get_peptide_modified_sequence_with_symbols(pep4);
   fail_unless( strcmp(pep4_seq, pep1_mod_str) == 0,
                "First peptide sequence is %s but should be %s",
                pep4_seq, pep1_mod_str);
 
   pep4 = parse_peptide(file, db, FALSE); // don't use src array
-  pep4_seq = get_peptide_modified_sequence(pep4);
-  char* pep2_seq = get_peptide_modified_sequence(pep2);
+  pep4_seq = get_peptide_modified_sequence_with_symbols(pep4);
+  char* pep2_seq = get_peptide_modified_sequence_with_symbols(pep2);
   fail_unless( strcmp(pep4_seq, pep2_seq) == 0,
                "Second peptide sequence is %s but should be %s",
                pep4_seq, pep2_seq);
 
   pep4 = parse_peptide(file, db, FALSE); // don't use src array
-  pep4_seq = get_peptide_modified_sequence(pep4);
+  pep4_seq = get_peptide_modified_sequence_with_symbols(pep4);
   fail_unless( strcmp(pep4_seq, pep3_mod_str) == 0,
                "Third peptide sequence is %s but should be %s",
                pep4_seq, pep3_mod_str);
