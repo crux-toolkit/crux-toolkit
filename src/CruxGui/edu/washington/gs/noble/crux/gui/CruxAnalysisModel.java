@@ -1,14 +1,11 @@
 package edu.washington.gs.noble.crux.gui;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.Writer;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -67,6 +64,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	
 	private String name;
 	private boolean componentsToRun[]= new boolean[CruxComponents.getSize()];
+	private int numComponentsToRun;
 	private String proteinSource;
 	private String spectraSource;
 	private IsotopicMassType massType;
@@ -89,6 +87,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	
 	public void restoreDefaults() {
 		name = null;
+		numComponentsToRun = 0;
 		componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] = false;
 		componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = false;
 		proteinSource = null;
@@ -106,6 +105,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	
 	public void setRunCreateIndex(boolean value) {
 		componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] = value;
+		if (value) {
+		    ++numComponentsToRun;
+		}
+		else {
+		    --numComponentsToRun;
+		}
 		logger.info("Run 'create-index' set to " + value);
 	}
 	
@@ -115,6 +120,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 
 	public void setRunSearchForMatches(boolean value) {
 		componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = value;
+		if (value) {
+		    ++numComponentsToRun;
+		}
+		else {
+		    --numComponentsToRun;
+		}
 		logger.info("Run 'search-for-matches' set to " + value);
 	}
 	
@@ -220,6 +231,10 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		
 		boolean result = true;
 		
+		if (numComponentsToRun <= 0) {
+			JOptionPane.showMessageDialog(null, "Please select some components to run.");
+			result = false;
+		}
 		if (name == null) {
 			JOptionPane.showMessageDialog(null, "Please choose a name for this analysis.");
 			result = false;

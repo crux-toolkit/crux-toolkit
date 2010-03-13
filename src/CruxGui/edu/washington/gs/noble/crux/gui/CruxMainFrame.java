@@ -7,10 +7,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.FileOutputStream;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -26,6 +22,7 @@ public class CruxMainFrame extends JFrame {
 		.getLogger("edu.washington.gs.noble.crux.gui");
 
 	CruxAnalysisModel model;
+	CruxViewPanel cruxGuiPanel;
 	
 	public  CruxMainFrame(final CruxGui gui) {
 		setResizable(false);
@@ -39,7 +36,7 @@ public class CruxMainFrame extends JFrame {
 			}
 		});
 		model = gui.getAnalysisModel();
-		CruxViewPanel cruxGuiPanel = new CruxViewPanel(model);
+		cruxGuiPanel = new CruxViewPanel(model);
 		add(cruxGuiPanel, BorderLayout.CENTER);
 		JPanel controls = new JPanel();
 		controls.setBorder(BorderFactory.createEtchedBorder());
@@ -105,7 +102,10 @@ public class CruxMainFrame extends JFrame {
 	class RunButtonListener implements ActionListener {
 		
 		public void actionPerformed(ActionEvent event) {
-			model.run();
+			if (model.isValidAnalysis()) {
+			    cruxGuiPanel.setVisible(false);
+			    model.run();
+			}
 		}
 		
 	}
