@@ -2,7 +2,6 @@ package edu.washington.gs.noble.crux.gui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.logging.Logger;
 
