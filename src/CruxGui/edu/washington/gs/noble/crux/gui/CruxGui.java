@@ -1,10 +1,7 @@
 package edu.washington.gs.noble.crux.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.File;
-import javax.swing.*;
-import java.util.logging.*;
+import java.awt.EventQueue;
+import java.util.logging.Logger;
 
 public class CruxGui implements Runnable {
 	
