@@ -2158,7 +2158,7 @@ BOOLEAN_T set_window_type_parameter(
   result = add_or_update_hash_copy(usages, name, usage);
   result = add_or_update_hash_copy(file_notes, name, filenotes);
   result = add_or_update_hash_copy(for_users, name, foruser);
-  result = add_or_update_hash_copy(types, name, "PRECURSOR_WINDOW_TYPE_T");
+  result = add_or_update_hash_copy(types, name, "WINDOW_TYPE_T");
   free(value_str);
   return result;
 
