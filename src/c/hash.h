@@ -55,19 +55,6 @@ BOOLEAN_T update_hash_value(
 /**
  * Updates the value for the key
  * Must already have a existing value for the key
- * Copies the value, thus no need to pass in a heap allocated value
- *\returns TRUE if successfully updates hash value, else FALSE
- */
-BOOLEAN_T add_or_update_hash_copy(
-  HASH_T* h, ///< Hash object to add to -in/out
-  const char *key, ///< key of the record to add or update -in
-  const void *value ///< value to associate with the key -in
-  );
-
-/**
- * Updates the value for the key
- * Must already have a existing value for the key
- * Does not copy the value.
  *\returns TRUE if successfully updates hash value, else FALSE
  */
 BOOLEAN_T add_or_update_hash(

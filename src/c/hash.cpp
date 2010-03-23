@@ -235,23 +235,6 @@ BOOLEAN_T add_or_update_hash(
 
 
 
-/**
- * add key and value to hash table.
- * If key exists, free current value and allocate and set new one
- * If key not found, allocate key, and allocate and set value
- * Copies the value
- *\returns TRUE if successfully adds to new record, else FALSE
- */
-BOOLEAN_T add_or_update_hash_copy(
-  HASH_T* h, ///< Hash object to add to -in/out
-  const char *key, ///< key of the record to add or update -in
-  const void *value ///< value to associate with the key -in
-  )
-{
-  char* new_value = my_copy_string((char*)value);
-  return add_or_update_hash(h, key, new_value);
-}
-
 
 /**
  * add key and value to hash table.
