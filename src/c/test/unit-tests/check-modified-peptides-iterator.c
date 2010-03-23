@@ -1,8 +1,8 @@
 #include "check-modified-peptides-iterator.h"
-#include "../modified_peptides_iterator.h"
-#include "../parameter.h"
-#include "../peptide_modifications.h"
-//#include "../modifications.h"
+#include "modified_peptides_iterator.h"
+#include "parameter.h"
+#include "peptide_modifications.h"
+//#include "modifications.h"
 // from parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 

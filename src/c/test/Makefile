@@ -20,4 +20,3 @@ clean:
 	cd unit-tests && $(MAKE) clean
 
 .PHONY: check check-smoke-tests check-unit-tests clean unit-tests
-

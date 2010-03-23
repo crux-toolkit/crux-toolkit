@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include "check-peak.h"
-#include "../mass.h"
-#include "../objects.h"
-#include "../spectrum.h"
-#include "../peak.h"
-#include "../peptide.h"
-#include "../peptide_src.h"
-#include "../protein.h"
-#include "../database.h"
-#include "../carp.h"
-#include "../crux-utils.h"
-#include "../database.h"
+#include "mass.h"
+#include "objects.h"
+#include "spectrum.h"
+#include "peak.h"
+#include "peptide.h"
+#include "peptide_src.h"
+#include "protein.h"
+#include "database.h"
+#include "carp.h"
+#include "crux-utils.h"
+#include "database.h"
 
 
 static DATABASE_T* db;

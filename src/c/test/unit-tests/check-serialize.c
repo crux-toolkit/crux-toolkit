@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include "check-serialize.h"
-#include "../modifications.h"
-#include "../parameter.h"
-#include "../database.h"
-#include "../protein.h"
-#include "../peptide.h"
-#include "../match_collection.h"
+#include "modifications.h"
+#include "parameter.h"
+#include "database.h"
+#include "protein.h"
+#include "peptide.h"
+#include "match_collection.h"
 
 // also from parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);

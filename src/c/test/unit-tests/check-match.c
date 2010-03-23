@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "check-match.h"
-#include "../match.h"
-#include "../peptide.h"
+#include "match.h"
+#include "peptide.h"
 // "included" from parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 

@@ -1,10 +1,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include "check-ion.h"
-#include "../ion.h"
-#include "../ion_series.h"
-#include "../crux-utils.h"
-#include "../objects.h"
+#include "ion.h"
+#include "ion_series.h"
+#include "crux-utils.h"
+#include "objects.h"
 // "included" from parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 

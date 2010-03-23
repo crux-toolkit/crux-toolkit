@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "check-peak.h"
-#include "../spectrum.h"
-#include "../peak.h"
-#include "../crux-utils.h"
+#include "spectrum.h"
+#include "peak.h"
+#include "crux-utils.h"
 
 
 SPECTRUM_T * spectrum;

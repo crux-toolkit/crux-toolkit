@@ -1,6 +1,6 @@
 #include "check-generate-peptides-iterator.h"
-#include "../parameter.h"
-#include "../generate_peptides_iterator.h"
+#include "parameter.h"
+#include "generate_peptides_iterator.h"
 
 // private testing functions in generate_peptides_iterator.c
 

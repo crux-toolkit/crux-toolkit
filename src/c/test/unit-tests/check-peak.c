@@ -1,8 +1,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include "check-peak.h"
-#include "../peak.h"
-#include "../crux-utils.h"
+#include "peak.h"
+#include "crux-utils.h"
 
 PEAK_T * test_peak;
 

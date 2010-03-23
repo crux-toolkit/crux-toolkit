@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "check-modifications.h"
-#include "../modifications.h"
-#include "../parameter.h"
+#include "modifications.h"
+#include "parameter.h"
 // also in parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 

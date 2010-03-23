@@ -1,3 +1,3 @@
-#include <check.h>
+#include "check.h"
 
 Suite *protein_suite(void);

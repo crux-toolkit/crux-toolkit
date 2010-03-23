@@ -1,7 +1,7 @@
 #include "check-parameter.h"
-#include "../parameter.h"
-#include "../carp.h"
-#include "../modifications.h"
+#include "parameter.h"
+#include "carp.h"
+#include "modifications.h"
 // also in parameter.c
 void parse_custom_enzyme(const char* rule_str);
 
