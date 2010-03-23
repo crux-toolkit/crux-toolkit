@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
+#include <vector>
 #include "utils.h"
 #include "alphabet.h"
 #include "parameter.h"
@@ -19,6 +20,7 @@
 #include "carp.h"
 #include "peptide_constraint.h"
 
+using namespace std;
 
 /**
  * Constants
@@ -30,7 +32,6 @@
 #define FASTA_LINE 50
 #define SMALLEST_MASS 57
 #define LARGEST_MASS 190
-#define MAX_PEPTIDES_PER_PROTEIN 1000000
 
 /**
  * \struct protein 
@@ -61,11 +62,11 @@ struct protein_peptide_iterator {
   unsigned int peptide_idx; ///< The index of the current peptide.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; ///< peptide type to iterate over.
   double* mass_array; ///< stores all the peptides' masses
-  int* nterm_cleavage_positions; ///< nterm cleavages that satisfy constraint. 
-                                 ///< 1st aa is 1.
-  int* peptide_lengths; ///< all the lengths of valid peptides
-  FLOAT_T* peptide_masses; ///< all the masses of valid peptides
-  int* cumulative_cleavages; ///< the cumulative number of cleavages so far
+  vector<int>* nterm_cleavage_positions; ///< nterm cleavages that satisfy 
+                                        ///< constraint. 1st aa is 1.
+  vector<int>* peptide_lengths; ///< all the lengths of valid peptides
+  vector<FLOAT_T>* peptide_masses; ///< all the masses of valid peptides
+  vector<int>* cumulative_cleavages; ///< cumulative number of cleavages so far
   int current_cleavage_idx; /// where are we in the cleavage positions?
   int num_cleavages; /// how many cleavage positions?
 
@@ -1071,7 +1072,7 @@ BOOLEAN_T valid_cleavage_position(
   return FALSE;
 }
 
-/*
+/**
  * \brief Adds cleavages to the protein peptide iterator that obey iterator
  * constraint.
  *
@@ -1088,19 +1089,11 @@ void iterator_add_cleavages(
     int  cterm_num_cleavages, 
     BOOLEAN_T skip_cleavage_locations){
 
-  //  carp(CARP_DETAILED_DEBUG, "Call to iterator_add_cleavages with %i c-term sites, %i nterm sites and skipped locations? %i", cterm_num_cleavages, nterm_num_cleavages, skip_cleavage_locations);
-
   // to avoid checking a lot of C-term before our current N-term cleavage
   int previous_cterm_cleavage_start= 0; 
 
   PEPTIDE_CONSTRAINT_T* constraint = iterator->peptide_constraint;
   int nterm_idx, cterm_idx;
-
-  /* Really detailed debugging. Slows stuff down.
-  unsigned int idx;
-  for (idx=0; idx < iterator->protein->length; idx++){
-    carp(CARP_DETAILED_DEBUG, "Cumulative %i = %i ", idx, iterator->cumulative_cleavages[idx]);
-  } */
 
   // iterate over possible nterm and cterm cleavage locations
   for (nterm_idx=0; nterm_idx < nterm_num_cleavages; nterm_idx++){
@@ -1111,20 +1104,16 @@ void iterator_add_cleavages(
          cterm_idx < cterm_num_cleavages; cterm_idx++){
 
       // if we have skipped a cleavage location, break to next nterm
-      if (
-          (skip_cleavage_locations == FALSE)
-          &&
-          (iterator->cumulative_cleavages[nterm_allowed_cleavages[nterm_idx]] 
-            < 
-           iterator->cumulative_cleavages[cterm_allowed_cleavages[cterm_idx]-1])
-      ){
+      if(
+         (skip_cleavage_locations == FALSE)
+         &&
+         ((*iterator->cumulative_cleavages)[nterm_allowed_cleavages[nterm_idx]] 
+          < 
+          (*iterator->cumulative_cleavages)[cterm_allowed_cleavages[cterm_idx]-1])
+         ){
         break;
       }
-
-      /* carp(CARP_DETAILED_DEBUG, "nterm = %i, cterm = %i", 
-          nterm_allowed_cleavages[nterm_idx], 
-          cterm_allowed_cleavages[cterm_idx]); */
-
+      
       if (cterm_allowed_cleavages[cterm_idx] 
             <= nterm_allowed_cleavages[nterm_idx]){
         continue;
@@ -1133,10 +1122,6 @@ void iterator_add_cleavages(
       // check our length constraint
       int length = 
        cterm_allowed_cleavages[cterm_idx] - nterm_allowed_cleavages[nterm_idx];
-
-      /* carp(CARP_DETAILED_DEBUG, "This peptide length %i, min: %i, max: %i",
-           length, get_peptide_constraint_min_length(constraint),
-           get_peptide_constraint_max_length(constraint) ); */
 
       if (length < get_peptide_constraint_min_length(constraint)){
         continue;
@@ -1151,28 +1136,18 @@ void iterator_add_cleavages(
       FLOAT_T peptide_mass = calculate_subsequence_mass(iterator->mass_array, 
           nterm_allowed_cleavages[nterm_idx], length);
 
-      /* 
-      carp(CARP_DETAILED_DEBUG, "This peptide mass %.4f, min: %.4f, max: %.4f",
-           peptide_mass, get_peptide_constraint_min_mass(constraint),
-           get_peptide_constraint_max_mass(constraint) ); */
-
       if ((get_peptide_constraint_min_mass(constraint) <= peptide_mass) && 
           (peptide_mass <= get_peptide_constraint_max_mass(constraint))){ 
 
         // we have found a peptide
-        iterator->nterm_cleavage_positions[iterator->num_cleavages] = 
-          nterm_allowed_cleavages[nterm_idx] + 1;
+        iterator->nterm_cleavage_positions->push_back(nterm_allowed_cleavages[nterm_idx] + 1);
 
-        iterator->peptide_lengths[iterator->num_cleavages] = length;
-        iterator->peptide_masses[iterator->num_cleavages] = peptide_mass;
-
+        iterator->peptide_lengths->push_back(length);
+        iterator->peptide_masses->push_back(peptide_mass);
         carp(CARP_DETAILED_DEBUG, 
             "New pep: %i (%i)", nterm_allowed_cleavages[nterm_idx], length);
 
         iterator->num_cleavages++;
-        if (iterator->num_cleavages > MAX_PEPTIDES_PER_PROTEIN){
-          carp(CARP_FATAL, "Too many peptides for a particular protein!");
-        }
       }
     }
     previous_cterm_cleavage_start = next_cterm_cleavage_start;
@@ -1229,7 +1204,7 @@ void prepare_protein_peptide_iterator(
 
     // increment cumulative cleavages before we check if current position
     // is a cleavage site because cleavages come *after* the current amino acid
-    iterator->cumulative_cleavages[sequence_idx] = cleavage_position_idx;
+    iterator->cumulative_cleavages->push_back(cleavage_position_idx);
 
     //if (valid_cleavage_position(protein->sequence + sequence_idx)){ 
     if (valid_cleavage_position(protein->sequence + sequence_idx, enzyme)){ 
@@ -1321,6 +1296,29 @@ void prepare_protein_peptide_iterator(
 }
 
 /**
+ * \brief Estimate the maximum number of peptides a protein can
+ * produce.  Counts the number of subsequences of length
+ * min_seq_length, min_seq_length + 1, ..., max_seq_length that can be
+ * formed from a protein of the given length.  No enzyme specificity
+ * assumed.  
+ */
+unsigned int count_max_peptides(
+ unsigned int protein_length,   ///< length of protein
+ unsigned int min_seq_length,   ///< min peptide length
+ unsigned int max_seq_length)  ///< max peptide length
+{
+  if( max_seq_length > protein_length ){
+    max_seq_length = protein_length;
+  }
+
+  unsigned int total_peptides = 0;
+  for(unsigned int len = min_seq_length; len <= max_seq_length; len++){
+    total_peptides += protein_length + 1 - len;
+  }
+  return total_peptides;
+}
+
+/**
  * Instantiates a new peptide_iterator from a protein.
  * \returns a PROTEIN_PEPTIDE_ITERATOR_T object.
  * assumes that the protein is heavy
@@ -1343,15 +1341,19 @@ PROTEIN_PEPTIDE_ITERATOR_T* new_protein_peptide_iterator(
     = get_peptide_constraint_num_mis_cleavage(iterator->peptide_constraint);
   iterator->protein = protein;
 
-  iterator->nterm_cleavage_positions 
-    = (int*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(int));
-  iterator->peptide_lengths 
-    = (int*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(int));
-  iterator->peptide_masses
-    = (FLOAT_T*) mymalloc(MAX_PEPTIDES_PER_PROTEIN * sizeof(FLOAT_T));
-  iterator->cumulative_cleavages
-    = (int*) mymalloc( (protein->length + 1) * sizeof(int));
+  iterator->nterm_cleavage_positions = new vector<int>();
+  iterator->peptide_lengths = new vector<int>();
+  iterator->peptide_masses = new vector<FLOAT_T>();
+  iterator->cumulative_cleavages = new vector<int>();
 
+  // estimate array size and reserve space to avoid resizing vector
+  int max_peptides = count_max_peptides(protein->length, 
+                                        get_int_parameter("min-length"),
+                                        get_int_parameter("max-length"));
+  iterator->nterm_cleavage_positions->reserve(max_peptides); 
+  iterator->peptide_lengths->reserve(max_peptides);
+  iterator->peptide_masses->reserve(max_peptides);
+  iterator->cumulative_cleavages->reserve(max_peptides);
   iterator->num_cleavages = 0;
 
   // prepare the iterator data structures
@@ -1370,11 +1372,10 @@ void free_protein_peptide_iterator(
 {
   free_peptide_constraint(protein_peptide_iterator->peptide_constraint);
   free(protein_peptide_iterator->mass_array); 
-  free(protein_peptide_iterator->nterm_cleavage_positions); 
-  free(protein_peptide_iterator->peptide_lengths); 
-  free(protein_peptide_iterator->peptide_masses); 
-  free(protein_peptide_iterator->cumulative_cleavages); 
-  //free_protein(protein_peptide_iterator->protein);
+  delete protein_peptide_iterator->nterm_cleavage_positions; 
+  delete protein_peptide_iterator->peptide_lengths; 
+  delete protein_peptide_iterator->peptide_masses; 
+  delete protein_peptide_iterator->cumulative_cleavages; 
   free(protein_peptide_iterator);
 }
 
@@ -1398,26 +1399,14 @@ PEPTIDE_T* protein_peptide_iterator_next(
   PROTEIN_PEPTIDE_ITERATOR_T* iterator
   )
 {
-  /*
-  if(!iterator->has_next){
-    free_protein_peptide_iterator(iterator);
-    carp(CARP_FATAL, "ERROR: no more peptides\n");
-  }
-  */
-  
-  // a slightly more gentle alternative
   if( !iterator->has_next){
     return NULL;
   }
 
-  // get peptide type
-  //PEPTIDE_TYPE_T peptide_type = get_peptide_constraint_peptide_type(
-  //iterator->peptide_constraint);
-
   int cleavage_idx = iterator->current_cleavage_idx;
-  int current_start = iterator->nterm_cleavage_positions[cleavage_idx];
-  int current_length = iterator->peptide_lengths[cleavage_idx];
-  FLOAT_T peptide_mass = iterator->peptide_masses[cleavage_idx];
+  int current_start = (*iterator->nterm_cleavage_positions)[cleavage_idx];
+  int current_length = (*iterator->peptide_lengths)[cleavage_idx];
+  FLOAT_T peptide_mass = (*iterator->peptide_masses)[cleavage_idx];
 
   // create new peptide
   PEPTIDE_T* peptide = new_peptide(current_length, peptide_mass, 
