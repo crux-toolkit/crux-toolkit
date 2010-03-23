@@ -1,6 +1,6 @@
 #include "check-mass.h"
-#include "../mass.h"
-#include "../modifications.h"
+#include "mass.h"
+#include "modifications.h"
 // in parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 

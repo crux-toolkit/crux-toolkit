@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include "check-peak.h"
-#include "../spectrum.h"
-#include "../spectrum_collection.h"
-#include "../peak.h"
-#include "../crux-utils.h"
-#include "../scorer.h"
-#include "../objects.h"
-#include "../parameter.h"
-#include "../ion_series.h"
+#include "spectrum.h"
+#include "spectrum_collection.h"
+#include "peak.h"
+#include "crux-utils.h"
+#include "scorer.h"
+#include "objects.h"
+#include "parameter.h"
+#include "ion_series.h"
 
 #define scan_num 16
 #define ms2_file "test.ms2"

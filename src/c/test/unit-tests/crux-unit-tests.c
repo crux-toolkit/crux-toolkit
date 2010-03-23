@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <check.h>
+#include "check.h"
 #include "check-peak.h"
 #include "check-spectrum.h"
 #include "check-spectrum_collection.h"

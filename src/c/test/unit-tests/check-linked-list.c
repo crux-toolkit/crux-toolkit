@@ -1,6 +1,6 @@
 #include "check-parameter.h"
-#include "../linked_list.h"
-#include "../utils.h"
+#include "linked_list.h"
+#include "utils.h"
 
 // declare things to set up
 int *data1, *data2, *data3;

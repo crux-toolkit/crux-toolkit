@@ -2,7 +2,7 @@ BINDIR  =../../../../bin/
 SRCDIR  =../../
 PERCOLATOR_DIR=../../../c/percolator
 CC	= g++	
-CFLAGS  = -g -Wall -I../../ -I$(PERCOLATOR_DIR) -I$(HOME)/local/include -L$(HOME)/local/lib
+CFLAGS  = -g -Wall -I../../ -I$(PERCOLATOR_DIR) -Icheck -Lcheck
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
 
@@ -35,12 +35,14 @@ CRUX_LIBS = \
   ../../MSToolkit/.libs/libmstoolkit.a
 
 unittests:  $(SRC) $(TESTS) $(CRUX_LIBS)
-	$(CC) -o unittests $(CFLAGS) $(TESTS) $(CRUX_LIBS) -lcheck -lm -D_GNU_SOURCE
+	cd check && $(MAKE)
+	$(CC) -o unittests $(CFLAGS) $(TESTS) $(CRUX_LIBS) check/check.ar  -lm -D_GNU_SOURCE
 .PHONY : check clean
 
 check: unittests
 	./unittests
 
 clean:
+	cd check  && $(MAKE) clean
 	rm -f *.o unittests
 

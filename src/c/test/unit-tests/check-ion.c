@@ -1,9 +1,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include "check-ion.h"
-#include "../ion.h"
-#include "../crux-utils.h"
-#include "../objects.h"
+#include "ion.h"
+#include "crux-utils.h"
+#include "objects.h"
 
 
 START_TEST (test_create){

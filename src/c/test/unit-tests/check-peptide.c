@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include "check-peak.h"
-#include "../mass.h"
-#include "../objects.h"
-#include "../spectrum.h"
-#include "../peak.h"
-#include "../peptide.h"
-#include "../peptide_src.h"
-#include "../peptide_constraint.h"
-#include "../protein.h"
-#include "../database.h"
+#include "mass.h"
+#include "objects.h"
+#include "spectrum.h"
+#include "peak.h"
+#include "peptide.h"
+#include "peptide_src.h"
+#include "peptide_constraint.h"
+#include "protein.h"
+#include "database.h"
 // also from parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 

@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include "check-peptide-modifications.h"
-#include "../peptide_modifications.h"
-#include "../peptide.h"
-#include "../protein.h"
+#include "peptide_modifications.h"
+#include "peptide.h"
+#include "protein.h"
 
 // also from modifications
 int generate_peptide_mod_list_TESTER(

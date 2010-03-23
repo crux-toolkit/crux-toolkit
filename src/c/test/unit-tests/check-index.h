@@ -1,3 +1,3 @@
-#include <check.h>
+#include "check.h"
 
 Suite *index_suite(void);

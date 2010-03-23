@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include "check-peak.h"
-#include "../mass.h"
-#include "../objects.h"
-#include "../spectrum.h"
-#include "../peak.h"
-#include "../peptide.h"
-#include "../peptide_src.h"
-#include "../protein.h"
-#include "../database.h"
-#include "../index.h"
+#include "mass.h"
+#include "objects.h"
+#include "spectrum.h"
+#include "peak.h"
+#include "peptide.h"
+#include "peptide_src.h"
+#include "protein.h"
+#include "database.h"
+#include "index.h"
 
 INDEX_T* _index;
 DATABASE_T* database;

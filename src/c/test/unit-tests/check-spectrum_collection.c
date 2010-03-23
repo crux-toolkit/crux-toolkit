@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "check-peak.h"
-#include "../spectrum.h"
-#include "../spectrum_collection.h"
-#include "../peak.h"
-#include "../crux-utils.h"
-#include "../carp.h"
-#include "../parameter.h"
+#include "spectrum.h"
+#include "spectrum_collection.h"
+#include "peak.h"
+#include "crux-utils.h"
+#include "carp.h"
+#include "parameter.h"
 
 
 static SPECTRUM_T* spectrum;
