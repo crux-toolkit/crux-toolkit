@@ -1,3 +1,4 @@
+CFLAGS=-I.
 CHECK_OBJ = \
   check.o \
   check_error.o \
