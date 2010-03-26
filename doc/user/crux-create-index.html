@@ -160,6 +160,42 @@ which it occurs.  Use the <code>mod</code> option for generating
 peptides both with and without the mass change.  Default C=57.
 </ul>
 
+<b>Increasing the file limit:</b>
+
+<ul>
+
+<p>
+The Crux indexing scheme relies on having a large number of files open
+simultaneously.  On some operating systems, this will result in an
+error message like this:</p>
+
+<pre>
+WARNING: cannot open all file handlers needed
+</pre>
+
+<p>
+On a Unix system, you can find out the maximum number of files that
+can be open simultaneously using a command like this:</p>
+
+<pre>
+ulimit -a
+</pre>
+
+<p>
+You can use</p>
+
+<pre>
+ulimit -n 1024
+</pre>
+
+<p>
+to reset the limit (in this case, to 1024 files). Note that once you
+have set the limit on open files handles in a shell you cannot
+increase it again for the duration of that shell.  However, if you
+start a new shell, you can once again increase the open file handle
+limit. New shells will remember the last limit set.</p>
+
+</ul>
 
 <hr></hr>
 
