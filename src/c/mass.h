@@ -91,6 +91,15 @@ FLOAT_T get_mass_mod_amino_acid_monoisotopic(
   );
 
 /**
+ * Finds the modification identifier associated with the given mass
+ * shift.  Can be the identifier from a single modfification or from
+ * multiple modficiations to the same residue.  The returned
+ * identifier can be used to modify a MODIFIED_AA_T so that it has the
+ * given mass shift. 
+ */
+MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift);
+
+/**
  * increase the amino acid mass for both mono and average
  */
 void increase_amino_acid_mass(

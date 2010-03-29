@@ -144,7 +144,8 @@ START_TEST(test_with_mod){
   // set up the mod seq
   char* pep_seq = get_peptide_sequence(peptide3);
   int len = strlen(pep_seq);
-  MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(pep_seq);
+  MODIFIED_AA_T* mod_seq = NULL;
+  convert_to_mod_aa_seq(pep_seq, &mod_seq);
   modify_aa(&mod_seq[2], amod);
   fail_unless( mod_seq[2] > pep_seq[2] - 'A',
                "Third aa should no longer be unmodified.");

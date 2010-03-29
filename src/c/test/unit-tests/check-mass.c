@@ -88,6 +88,42 @@ START_TEST(test_create){
 }
 END_TEST
 
+// test that we can get the correct bitmask back from a mass shift
+START_TEST(test_get_id){
+  // first test single exact masses of each mod
+  MODIFIED_AA_T id = get_mod_identifier(500);
+  fail_unless( id == aa_mod_get_identifier(amod1),
+               "Mass 500 should return identifier %d but instead returns", 
+               aa_mod_get_identifier(amod1), id);
+  id = get_mod_identifier(600);
+  fail_unless( id == aa_mod_get_identifier(amod2),
+               "Mass 600 should return identifier %d but instead returns", 
+               aa_mod_get_identifier(amod2), id);
+  id = get_mod_identifier(700);
+  fail_unless( id == aa_mod_get_identifier(amod3),
+               "Mass 700 should return identifier %d but instead returns", 
+               aa_mod_get_identifier(amod3), id);
+
+  // now test masses that are slightly different
+  id = get_mod_identifier(600.000001);
+  fail_unless( id == aa_mod_get_identifier(amod2),
+             "Mass 600.000001 should return identifier %d but instead returns", 
+               aa_mod_get_identifier(amod2), id);
+  // but this is too far off
+  id = get_mod_identifier(600.005);
+  fail_unless( id == 0,
+               "Mass 600.005 should return zero but instead returns %d", id);
+
+  // now combine masses together
+  id = get_mod_identifier(600+700);
+  fail_unless( id == 
+               (aa_mod_get_identifier(amod2) | aa_mod_get_identifier(amod3)),
+               "Mass 600+700 should return %d but gives %d",
+               (aa_mod_get_identifier(amod2) | aa_mod_get_identifier(amod3)),
+               id);
+}
+END_TEST
+
 START_TEST(test_avg_1mod){
   // modify each aa with each amod and test mass
   modify_aa(&aa1, amod1);
@@ -273,6 +309,7 @@ Suite* mass_suite(){
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   tcase_add_test(tc_core, test_create);
+  tcase_add_test(tc_core, test_get_id);
   tcase_add_test(tc_core, test_avg_1mod);
   tcase_add_test(tc_core, test_avg_2mod);
   tcase_add_test(tc_core, test_avg_3mod);

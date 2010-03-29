@@ -56,8 +56,8 @@ void ion_series_setup(){
   ycnst = new_ion_constraint(MONO, 1, Y_ION, FALSE); 
   seq = my_copy_string("ASEQ");
   seq2 = my_copy_string("ANOTHERSEQ");
-  mod_seq = convert_to_mod_aa_seq( seq );
-  mod_seq2 = convert_to_mod_aa_seq( seq2 );
+  convert_to_mod_aa_seq( seq, &mod_seq );
+  convert_to_mod_aa_seq( seq2, &mod_seq2 );
   is2 = new_ion_series(seq, charge, constraint);
   is3 = new_ion_series_generic(constraint, charge);
 }
@@ -336,7 +336,8 @@ START_TEST(test_masses_mod){
 
   // get a copy of seq and modify differently
   char* seq_copy = my_copy_string(seq);
-  MODIFIED_AA_T* mod_seq_copy =  convert_to_mod_aa_seq(seq_copy);
+  MODIFIED_AA_T* mod_seq_copy =  NULL;
+  convert_to_mod_aa_seq(seq_copy, &mod_seq_copy);
   modify_aa(&mod_seq_copy[1], amod2);
   modify_aa(&mod_seq_copy[1], amod3);
 

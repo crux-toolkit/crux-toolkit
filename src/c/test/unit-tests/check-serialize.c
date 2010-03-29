@@ -138,7 +138,8 @@ START_TEST(test_serialize_mod){
 
   // create mod seq
   char* pep_seq = get_peptide_sequence(pep1);
-  MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(pep_seq);
+  MODIFIED_AA_T* mod_seq = NULL;
+  convert_to_mod_aa_seq(pep_seq, &mod_seq);
   modify_aa(&mod_seq[2], amod1);
   modify_aa(&mod_seq[9], amod1);
   // add mod to peptide
@@ -152,7 +153,7 @@ START_TEST(test_serialize_mod){
   // repeat for pep3
   free(pep_seq);
   pep_seq = get_peptide_sequence(pep3);
-  mod_seq = convert_to_mod_aa_seq(pep_seq);
+  convert_to_mod_aa_seq(pep_seq, &mod_seq);
   modify_aa(&mod_seq[0], amod1);
   modify_aa(&mod_seq[1], amod2);
   // add mod to peptide

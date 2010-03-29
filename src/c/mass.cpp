@@ -223,6 +223,34 @@ FLOAT_T get_mass_mod_amino_acid_average(
 }
 
 /**
+ * Finds the modification identifier associated with the given mass
+ * shift.  Can be the identifier from a single modfification or from
+ * multiple modficiations to the same residue.  The returned
+ * identifier can be used to modify a MODIFIED_AA_T so that it has the
+ * given mass shift. 
+ */
+MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift){
+
+  if(!initialized_amino_masses){
+    initialize_amino_masses();
+  }
+
+  for(int mod_idx = 0; mod_idx < (int)NUM_MOD_MASSES; mod_idx++){
+    if( is_equal(mass_shift, aa_mod_masses[mod_idx], MOD_MASS_PRECISION) ){
+      MODIFIED_AA_T identifier = mod_idx;
+      identifier = identifier << 5;
+      return identifier;
+    }
+  }
+
+  // if we got to here, no mod found
+  carp(CARP_WARNING, "No modification identifier was found for mass shift %f.",
+       mass_shift);
+
+  return 0;
+}
+
+/**
  * \returns The monoisotopic mass of the given amino acid.
  */
 FLOAT_T get_mass_amino_acid_monoisotopic(
