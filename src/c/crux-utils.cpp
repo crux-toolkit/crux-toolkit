@@ -447,6 +447,22 @@ char* copy_string_part(const char* src, int length){
 }
 
 /**
+ * Compares two numbers and returns TRUE if when rounded to the given
+ * precision they are equal.  Otherwise, returns false.  
+ * E.g. is_equal(0.10, 0.14, 1) -> TRUE. is_equal(0.10, 0.15, 1) -> FALSE
+ */
+BOOLEAN_T is_equal(FLOAT_T a, FLOAT_T b, int precision){
+  a = (a * pow(10, precision)) + 0.5;
+  b = (b * pow(10, precision)) + 0.5;
+
+  if( (int)a == (int)b ){
+    return TRUE;
+  }
+  // else
+  return FALSE;
+}
+
+/**
  *\returns TRUE if float_a is between the interaval of min and max, else FALSE
  */
 inline BOOLEAN_T compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max){

@@ -447,7 +447,8 @@ int modify_peptide(
 
   // get the peptide sequence and convert to MODIFIED_AA_T*
   char* sequence = get_peptide_sequence(peptide);
-  MODIFIED_AA_T* pre_modified_seq = convert_to_mod_aa_seq(sequence);
+  MODIFIED_AA_T* pre_modified_seq = NULL;
+  convert_to_mod_aa_seq(sequence, &pre_modified_seq);
 
   carp(CARP_DETAILED_DEBUG, "Modifying peptide %s", sequence);
 

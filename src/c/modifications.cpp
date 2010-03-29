@@ -238,7 +238,7 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
       if( merge_masses ){
         summed_masses += aa_mod_get_mass_change(mod_list[mod_idx]);
       } else {
-        sprintf(mass_string_ptr, "%.2f,", 
+        sprintf(mass_string_ptr, "%.*f,", MOD_MASS_PRECISION,
                 aa_mod_get_mass_change(mod_list[mod_idx]));
         mass_string_ptr += strlen(mass_string_ptr);
       }
@@ -396,47 +396,74 @@ char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length){
 /**
  * \brief Allocates an array of MODIFIED_AA_T's and populates it with
  * the MODIFIED_AA_T value that corresponds to each sequence char
- * value and trailing modification symbols.
+ * value and trailing modification symbols or masses.  Returns the new
+ * sequence via the mod_sequence argument.
  *
- * \returns A newly allocated copy of the sequnce converted to type
- * MODIFIED_AA_T. 
+ * \returns The length of the mod_sequence array.
  */
-MODIFIED_AA_T* convert_to_mod_aa_seq(const char* sequence){
+int convert_to_mod_aa_seq(const char* sequence, MODIFIED_AA_T** mod_sequence){
 
   if( sequence == NULL ){
     carp(CARP_ERROR, "Cannot convert NULL sequence to modifiable characters"); 
-    return NULL;
+    return 0;
   }
 
   int seq_len = strlen(sequence);
-  MODIFIED_AA_T* new_string = 
-    (MODIFIED_AA_T*)mycalloc( seq_len+1, sizeof(MODIFIED_AA_T) );
+  MODIFIED_AA_T* new_sequence = 
+    (MODIFIED_AA_T*)mycalloc( seq_len + 1, sizeof(MODIFIED_AA_T) );
 
-  unsigned int seq_idx = 0;
-  unsigned int mod_idx = 0;
+  unsigned int seq_idx = 0;  // current position in given sequence
+  unsigned int mod_idx = 0;  // current position in the new_sequence
   for(seq_idx = 0; seq_idx < strlen(sequence); seq_idx++){
-    // aa or mod?
-    if( sequence[seq_idx] >= 'A' && sequence[seq_idx] <= 'Z' ){ // aa
-      new_string[mod_idx] = char_aa_to_modified( sequence[seq_idx] );
+    // is the character a residue?
+    if( sequence[seq_idx] >= 'A' && sequence[seq_idx] <= 'Z' ){ 
+      // add to the new sequence
+      new_sequence[mod_idx] = char_aa_to_modified( sequence[seq_idx] );
       mod_idx++;
-    } else { // mod
-      // translate character into aa_mod
-      AA_MOD_T* aa_mod = get_aa_mod_from_symbol(sequence[seq_idx]);
-      if( aa_mod == NULL ){
-        carp(CARP_ERROR, "The character %c in sequence %s is not a recognized "
-             "modification symbol.\n", sequence[seq_idx], sequence);
-        return NULL;
+      continue;
+    } 
+
+    // else it's a modification as symbol or mass
+    const AA_MOD_T* aa_mod = NULL;
+
+    if( sequence[seq_idx] == '[' || sequence[seq_idx] == ','){//mod mass
+      seq_idx++;
+      FLOAT_T delta_mass = atof(sequence + seq_idx);
+      // translate mass into aa_mod
+      aa_mod = get_aa_mod_from_mass(delta_mass);
+
+      // move to next mod or residue
+      while( sequence[seq_idx] != ']' && sequence[seq_idx] != ','){
+        seq_idx++;
       }
-      // apply modification to new_string[mod_idx-1]
-      modify_aa(&new_string[mod_idx-1], aa_mod);
-      // don't advance mod_idx
+      // back up one for the comma
+      if( sequence[seq_idx] == ',' ){
+        seq_idx--;
+      }
+    } else { // mod symbol
+      // translate character into aa_mod
+      aa_mod = get_aa_mod_from_symbol(sequence[seq_idx]);
     }
-  }
+
+    // apply the modification
+    if( aa_mod == NULL ){
+      carp(CARP_ERROR, "There is an unidentifiable modification in sequence %s "
+           "at position.\n", sequence, seq_idx - 1);
+      //return NULL;
+      return 0;
+    }
+
+    // apply modification 
+    modify_aa(&new_sequence[mod_idx-1], aa_mod);
+
+  } // next character in given sequence
 
   // null terminate
-  new_string[seq_idx] = MOD_SEQ_NULL;
+  new_sequence[seq_idx] = MOD_SEQ_NULL;
 
-  return new_string;
+  //  return new_sequence;
+  *mod_sequence = new_sequence;
+  return mod_idx;
 }
 
 /**
@@ -660,7 +687,7 @@ BOOLEAN_T is_aa_modifiable
  * Assumes that the aa is modifiable, no explicit check.  If the aa is
  * already modified for the mod, no change to aa.
  */
-void modify_aa(MODIFIED_AA_T* aa, AA_MOD_T* mod){
+void modify_aa(MODIFIED_AA_T* aa, const AA_MOD_T* mod){
   if( aa == NULL || mod == NULL ){
     carp(CARP_ERROR, "Cannot modify aa.  Either aa or mod is NULL.");
     return;
@@ -673,7 +700,7 @@ void modify_aa(MODIFIED_AA_T* aa, AA_MOD_T* mod){
  * the symbol does not represent a modification, returns null.
  * Requires that parameters have been initialized.
  */
-AA_MOD_T* get_aa_mod_from_symbol(const char symbol){
+const AA_MOD_T* get_aa_mod_from_symbol(const char symbol){
 
   AA_MOD_T** mod_list = NULL;
   int total_mods = get_all_aa_mod_list(&mod_list);
@@ -689,68 +716,34 @@ AA_MOD_T* get_aa_mod_from_symbol(const char symbol){
   return NULL;
 }
 
+// a temporary AA_MOD_T with identifier and mass for (potentially)
+// more than one modification
+AA_MOD_T multi_mod; 
+
 /**
- * \brief Finds the list of modifications made to an amino acid.
- *
- * Allocates a list of length(possible_mods) and fills it with pointers
- * to the modifications made to this aa as defined by
- * is_aa_modified().  Returns 0 and sets mod_list to NULL if the amino
- * acid is unmodified
- *
- * \returns The number of modifications made to this amino acid.
+ * \brief Return the modification identifier that can be used to modify a
+ * MODIFIED_AA_T so that it has the given mass shift.
+ * The mass may either be from a single AA_MOD_T as given by the user
+ * or from any combination of AA_MOD_T's.  If no combinations of
+ * AA_MOD_T's can be found for the mass, returns 0.
+ * Requires that parameters have been initialized.
  */
-/*
-int get_aa_mods(MODIFIED_AA_T aa, 
-                int num_possible,
-                AA_MOD_T* possible_mods, 
-                AA_MOD_T*** mod_list){
-*/
-  /*
-    int count = 0;
-    mod_list* = new AA_MOD_T[num_possible]
-    for 0 to num_possible
-      if( is_aa_modified() ){
-        mod_list[count] = this mod
-        count += 1
-      endif
-    last num_possible
-    if( count == 0 )
-       free mod_list
-    return count;
-   */
-//}
+const AA_MOD_T* get_aa_mod_from_mass(FLOAT_T mass){
 
+  // find the identifier for this mass shift
+  MODIFIED_AA_T id = get_mod_identifier(mass);
 
-/********
- Existing methods to change
+  if( id == 0 ){ // get_mod_id already warned
+    return NULL;
+  }
 
- FILE match_collection.c:
+  // set multi_mod_identifier to that id and mass
+  multi_mod.identifier = id;
+  multi_mod.mass_change = mass;
 
- print_sqt_header()
- serialize_headers()
- print_match_collection_sqt()  Actually, the change may only occur in peptide
- serialize_psm_features()
- extend_match_collection()    This is what reads psm header file info
+  return &multi_mod;
+}
 
- FILE peptide.c:
-
- serialize_peptide() minimum: number of mods, two lists--one of
-                              identifiers and one of sequnce indexes
- parse_peptide()     if modified, fill sequence, add id to indexed aa
-
-
- FILE mass.c:
- get_mass_amino_acid()  change char to short?, new method?
-
-QUESTIONS
-* do we require that the parameter file with the mods be included for
-  crux_analyae_matches?
-
-* is there a slicker way to index char aa's other than aa - 'A' ?
-
-create branch, add these files to branch
-find cvs branching tutorial, send to AK
- */
 
 /**
  * print all fields in aa mod.  For debugging
@@ -899,7 +892,7 @@ MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod){
  * \brief The character used to uniquely identify the mod in the sqt file.
  * \returns The character identifier.
  */
-char aa_mod_get_symbol(AA_MOD_T* mod){
+char aa_mod_get_symbol(const AA_MOD_T* mod){
   return mod->symbol;
 }
 
@@ -907,7 +900,7 @@ char aa_mod_get_symbol(AA_MOD_T* mod){
  * \brief The bitmask used to uniquely identify the mod.
  * \returns The short int bitmask used to identify the mod.
  */
-int aa_mod_get_identifier(AA_MOD_T* mod){
+int aa_mod_get_identifier(const AA_MOD_T* mod){
   return mod->identifier;
 }
 

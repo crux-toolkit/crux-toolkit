@@ -158,7 +158,7 @@ ION_SERIES_T* new_ion_series(
 
   // copy the peptide sequence
   ion_series->peptide = my_copy_string(peptide);
-  ion_series->modified_aa_seq = convert_to_mod_aa_seq(peptide);
+  convert_to_mod_aa_seq(peptide, &(ion_series->modified_aa_seq));
   ion_series->peptide_mass = calc_sequence_mass(peptide, MONO);
   ion_series->charge = charge;
   ion_series->constraint = constraint;

@@ -784,7 +784,7 @@ MODIFIED_AA_T* get_peptide_modified_aa_sequence(PEPTIDE_T* peptide){
   } else {// create one from char seq
     carp(CARP_DETAILED_DEBUG, "mod seq NOT cached");
     char* seq = get_peptide_sequence(peptide);
-    seq_copy = convert_to_mod_aa_seq(seq);
+    convert_to_mod_aa_seq(seq, &seq_copy);
     free(seq);
   }
   
@@ -1132,7 +1132,7 @@ void transform_peptide_to_decoy(PEPTIDE_T* peptide){
     } else {
       new_seq = generate_shuffled_sequence(peptide);
     }
-    peptide->decoy_modified_seq = convert_to_mod_aa_seq(new_seq);
+    convert_to_mod_aa_seq(new_seq, &(peptide->decoy_modified_seq));
     free(new_seq);
   }
 }
@@ -1722,8 +1722,10 @@ PEPTIDE_T* parse_peptide_tab_delimited(
 
   //populate peptide struct.
   string string_sequence = file.getString("sequence");
-  peptide -> length = string_sequence.length();
-  peptide -> peptide_mass = file.getFloat("peptide mass");
+  // string length may include mod symbols and be longer than the peptide seq
+  peptide->length = convert_to_mod_aa_seq(string_sequence.c_str(),
+                                          &peptide->modified_seq);
+  peptide->peptide_mass = file.getFloat("peptide mass");
   
   if(!parse_peptide_src_tab_delimited(peptide, file, database, use_array)){
     carp(CARP_ERROR, "Failed to parse peptide src.");
@@ -1731,11 +1733,6 @@ PEPTIDE_T* parse_peptide_tab_delimited(
     return NULL;
   };
 
-  //TODO: write parse_peptide_modification()
-  //TODO: Output this Modified Sequence to the tab delimited file, 
-  //      so it can be parsed
-  peptide -> modified_seq = convert_to_mod_aa_seq(string_sequence.c_str());
-  
   carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
 
   return peptide;

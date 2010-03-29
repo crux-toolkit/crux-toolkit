@@ -18,6 +18,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <time.h>
+#include <algorithm>
 #include "carp.h"
 #include "utils.h"
 #include "objects.h"
@@ -48,6 +49,14 @@ char* copy_string_part(const char* src, int length);
  * or perhaps all compares.
  */
 int compare_float(FLOAT_T float_a, FLOAT_T float_b);
+
+/**
+ * Compares two numbers and returns TRUE if they are within the given
+ * precision of each other, otherwise returns FALSE.  E.g. if
+ * precision is 2, a and b must be equal when rounded to two decimal
+ * places.
+ */
+BOOLEAN_T is_equal(FLOAT_T a, FLOAT_T b, int precision);
 
 /**
  * \brief Parses the filename and path of given string.

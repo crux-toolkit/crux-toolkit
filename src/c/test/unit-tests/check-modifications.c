@@ -32,8 +32,8 @@ void mod_teardown(){
   free_aa_mod(amod3); 
 }
 
+// Created three AA_MOD_T's in setup.  Test their default values via getters
 START_TEST(test_create){
-  // check default values
 
   fail_unless( aa_mod_get_mass_change(amod1) == 0, 
                "amod1 should have had mass change 0 but had %.2f",
@@ -76,18 +76,19 @@ START_TEST(test_create){
 }
 END_TEST
 
+// Test the setters for AA_MOD_T
 START_TEST(test_set){
-  // set values and check 
+  // mass
   aa_mod_set_mass_change(amod1, 45.6);
   fail_unless( aa_mod_get_mass_change(amod1) == 45.6, 
                "amod1 should have had mass change 45.6 but had %.2f",
                aa_mod_get_mass_change(amod1));
-
+  // max
   aa_mod_set_max_per_peptide(amod1, 3);
   fail_unless( aa_mod_get_max_per_peptide(amod1) == 3, 
                "amod1 should have had max per peptide 3 but had %d",
                aa_mod_get_max_per_peptide(amod1));
-
+  // distance
   aa_mod_set_max_distance(amod1, 1);
   fail_unless( aa_mod_get_max_distance(amod1) == 1,
                "amod1 should have had mass change 1 but had %d",
@@ -97,7 +98,7 @@ START_TEST(test_set){
   fail_unless( aa_mod_get_max_distance(amod1) == 40000,//MAX_PROTEIN_SEQ_LENGTH
                "amod1 should have had mass change 40000 but had %d",
                aa_mod_get_max_distance(amod1));
-
+  // position
   aa_mod_set_position(amod1, C_TERM);
   fail_unless( aa_mod_get_position(amod1) == C_TERM, 
                "amod1 should have had position %d but had %.2f",
@@ -105,6 +106,20 @@ START_TEST(test_set){
 }
 END_TEST
 
+// Test the is_aa_modifieable() function
+START_TEST(test_is_modifiable){
+  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod3);
+  mod_us['D' - 'A'] = TRUE;
+  fail_unless( is_aa_modifiable(mod_aa_D, amod3),
+               "aa_D should be modifiable by amod3.");
+
+  mod_aa_D = mod_aa_D | id_3;
+  fail_unless( !is_aa_modifiable(mod_aa_D, amod3),
+               "aa_D should not be modifiable AGAIN by amod3.");
+}
+END_TEST
+
+// Test the is_aa_modified() function
 START_TEST(test_is_modified){
   mod_aa_D = mod_aa_D | id_3;
 
@@ -123,14 +138,36 @@ START_TEST(test_is_modified){
 }
 END_TEST
 
+// modify and AA_T
+START_TEST(test_modify){
+  // it starts out unmodified
+  fail_unless( !is_aa_modified(mod_aa_D, amod3),
+               "mod_aa_D should not be modified.");
+  modify_aa(&mod_aa_D, amod3);
+  fail_unless( is_aa_modified(mod_aa_D, amod3),
+               "mod_aa_D should be modified.");
 
+  // and it should no longer be modifiable by amod3
+  fail_unless( !is_aa_modifiable(mod_aa_D, amod3),
+               "mod_aa_D should no longer be modifiable by amod3");
+}
+END_TEST
+
+// Conversion tests between MODIFIED_AA_T and char, both directions
+
+// Convert a single char -> MODIFIED_AA_T
+// Convert a char* (no mods) -> MODIFIED_AA_T*
 START_TEST(test_char_to_mod){
   MODIFIED_AA_T mod_aa = char_aa_to_modified('C');
   fail_unless( mod_aa == 2,  
                "C should have been converted to 2, but was %d", mod_aa);
 
   const char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  MODIFIED_AA_T* converted = convert_to_mod_aa_seq(seq);
+  MODIFIED_AA_T* converted = NULL;
+  int len = convert_to_mod_aa_seq(seq, &converted);
+  fail_unless(len == (int)strlen(seq), 
+              "MOD_AA_T should be same length as seq, %d, but is %d.", 
+              strlen(seq), len);
 
   int i = 0;
   for(i = 0; i < (int)strlen(seq); i++){ 
@@ -143,13 +180,15 @@ START_TEST(test_char_to_mod){
 }
 END_TEST
 
+// Convert a single MODIFIED_AA_T -> char (with no mod symbols) 
 START_TEST(test_mod_to_char){
   fail_unless( modified_aa_to_char(mod_aa_D) == 'D',
                "mod aa D should convert to D, but it is %c",
                modified_aa_to_char(mod_aa_D));
 
   const char* seq = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  MODIFIED_AA_T* converted = convert_to_mod_aa_seq(seq);
+  MODIFIED_AA_T* converted = NULL;
+  convert_to_mod_aa_seq(seq, &converted);
 
   // now modify some of the aas and check that it still is converted correctly
   // test modify function later
@@ -168,6 +207,7 @@ START_TEST(test_mod_to_char){
 }
 END_TEST
 
+// Convert a single MODIFIED_AA_T to char* with symbols or masses
 START_TEST(test_mod_to_string){
   // init params including mods
   initialize_parameters();
@@ -221,6 +261,7 @@ START_TEST(test_mod_to_string){
 }
 END_TEST
 
+// Convert MODIFIED_AA_T* to char* with symbols or masses
 START_TEST(test_mod_str_to_string){
   // init params including mods
   initialize_parameters();
@@ -232,7 +273,8 @@ START_TEST(test_mod_str_to_string){
 
   const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
-  MODIFIED_AA_T* modaa_seq = convert_to_mod_aa_seq(seq);
+  MODIFIED_AA_T* modaa_seq = NULL;
+  convert_to_mod_aa_seq(seq, &modaa_seq);
 
   char* modchar_seq = modified_aa_string_to_string_with_symbols(modaa_seq, len);
   fail_unless( strcmp(modchar_seq, seq) == 0,
@@ -285,6 +327,7 @@ START_TEST(test_mod_str_to_string){
 }
 END_TEST
 
+// Convert MODIFIED_AA_T* to a char* with no mods, even if MOD_AA_T is modified
 START_TEST(test_mod_str_to_unmod_string){
   // init params including mods
   initialize_parameters();
@@ -292,7 +335,8 @@ START_TEST(test_mod_str_to_unmod_string){
 
   const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
-  MODIFIED_AA_T* modaa_seq = convert_to_mod_aa_seq(seq);
+  MODIFIED_AA_T* modaa_seq = NULL;
+  convert_to_mod_aa_seq(seq, &modaa_seq);
 
   // change it back to a seq
   char* unmod_seq = modified_aa_to_unmodified_string(modaa_seq, len);
@@ -317,10 +361,142 @@ START_TEST(test_mod_str_to_unmod_string){
 }
 END_TEST
 
+// Convert a mod symbol to an AA_MOD_T
+START_TEST(test_symbol_to_aa_mod){
+  initialize_parameters();
+  force_set_aa_mod_list(amod_list, 3);
+
+  const AA_MOD_T* aa = get_aa_mod_from_symbol('*');
+  fail_unless( aa == amod1,
+              "The symbol * is not returning the correct AA_MOD_T.  "
+               "The returned AA_MOD_T has %c.", aa_mod_get_symbol(aa));
+  aa = get_aa_mod_from_symbol('#');
+  fail_unless( aa == amod2,
+              "The symbol # is not returning the correct AA_MOD_T.  "
+               "The returned AA_MOD_T has %c.", aa_mod_get_symbol(aa));
+   aa = get_aa_mod_from_symbol('@');
+  fail_unless( aa == amod3,
+              "The symbol @ is not returning the correct AA_MOD_T.  "
+               "The returned AA_MOD_T has %c.", aa_mod_get_symbol(aa));
+}
+END_TEST
+
+// Convert a mod mass to an AA_MOD_T
+START_TEST(test_mass_to_aa_mod){
+  initialize_parameters();
+  force_set_aa_mod_list(amod_list, 3);
+  // include mass shifts
+  aa_mod_set_mass_change(amod1, 3.4);
+  aa_mod_set_mass_change(amod2, 56.78);
+  aa_mod_set_mass_change(amod3, -100);
+
+  // test exact single masses, aa_mods won't be the same, but identifiers will
+  const AA_MOD_T* aa = get_aa_mod_from_mass(3.4);
+  fail_unless( aa_mod_get_identifier(aa) == aa_mod_get_identifier(amod1),
+               "Mass 3.4 should return id %d but returns %d.",
+               aa_mod_get_identifier(amod1), aa_mod_get_identifier(aa));
+  aa = get_aa_mod_from_mass(56.78);
+  fail_unless( aa_mod_get_identifier(aa) == aa_mod_get_identifier(amod2),
+               "Mass 56.78 should return id %d but returns %d.",
+               aa_mod_get_identifier(amod2), aa_mod_get_identifier(aa));
+  aa = get_aa_mod_from_mass(-100);
+  fail_unless( aa_mod_get_identifier(aa) == aa_mod_get_identifier(amod3),
+               "Mass -100 should return id %d but returns %d.",
+               aa_mod_get_identifier(amod3), aa_mod_get_identifier(aa));
+
+  // test single masses slightly off
+  aa = get_aa_mod_from_mass(-100.00001);
+  fail_unless( aa != NULL, "The mass -100.00001 did not return an AA_MOD_T.");
+  fail_unless( aa_mod_get_identifier(aa) == aa_mod_get_identifier(amod3),
+               "Mass -100.00001 should return id %d but returns %d.",
+               aa_mod_get_identifier(amod3), aa_mod_get_identifier(aa));
+
+  // test combinations of masses
+  aa = get_aa_mod_from_mass(3.4 - 100);
+  fail_unless( aa != NULL, 
+               "The mass %f did not return an AA_MOD_T.", 3.4 - 100);
+  fail_unless( aa_mod_get_identifier(aa) == 
+               (aa_mod_get_identifier(amod1) | aa_mod_get_identifier(amod3)),
+               "Combined masses %f returned id %d but should have returned %d.",
+               3.4-100, aa_mod_get_identifier(aa),
+               (aa_mod_get_identifier(amod1) | aa_mod_get_identifier(amod3)));
+              
+}
+END_TEST
+
+// Convert a char* with mod symbols -> MODIFIED_AA_T*
+// Convert a char* with mod masses -> MODIFIED_AA_T*
+START_TEST(test_string_to_aa_mod_str){
+  // init params including mods
+  initialize_parameters();
+  force_set_aa_mod_list(amod_list, 3);
+  // include mass shifts
+  aa_mod_set_mass_change(amod1, 3.4);  // symbol *
+  aa_mod_set_mass_change(amod2, 56.78);// symbol #
+  aa_mod_set_mass_change(amod3, -100); // symbol @
+
+  // create a MODIFIED_AA_T* with modifications, convert to string, convert back
+  const char* seq = "GBBKATRM"; 
+  int len = strlen(seq);
+  MODIFIED_AA_T* modaa_seq = NULL;
+  convert_to_mod_aa_seq(seq, &modaa_seq);
+  // now modify a couple of aas
+  modify_aa( &modaa_seq[1], amod2 );
+  modify_aa( &modaa_seq[4], amod1 );
+  modify_aa( &modaa_seq[4], amod3 );
+  modify_aa( &modaa_seq[7], amod2 );
+  modify_aa( &modaa_seq[7], amod3 );
+  // turn it into a string, "GB#BKA*@TRM#@"
+  seq = modified_aa_string_to_string_with_symbols(modaa_seq, len);
+
+  // now test reverting back to MOD_AA_T*
+  MODIFIED_AA_T* converted_modaa_seq = NULL;
+  int convert_len = convert_to_mod_aa_seq(seq, &converted_modaa_seq);
+  fail_unless( convert_len == len,
+               "MOD_AA seq converted from symbols has len %d but should be %d.",
+               convert_len, len);
+  for(int i=0; i<len; i++){
+    fail_unless(converted_modaa_seq[i] == modaa_seq[i],
+                "MOD_AA[%d] converted from symbols should be %d but is %d.",
+                i, modaa_seq[i], converted_modaa_seq[i]);
+  }
+
+  // repeat test from masses, GB[56.78]BKA[-96.60]TRM[-43.22]
+  seq = modified_aa_string_to_string_with_masses(modaa_seq, len, TRUE);
+  free(converted_modaa_seq);
+  convert_len = convert_to_mod_aa_seq(seq, &converted_modaa_seq);
+  fail_unless( convert_len == len,
+         "MOD_AA seq converted from merged masses has len %d but should be %d.",
+               convert_len, len);
+  for(int i=0; i<len; i++){
+    fail_unless(converted_modaa_seq[i] == modaa_seq[i],
+              "MOD_AA[%d] converted from merged masses should be %d but is %d.",
+                i, modaa_seq[i], converted_modaa_seq[i]);
+  }
+
+  // repeat with masses not merged, GB[56.78]BKA[3.40,-100.00]TRM[56.78,-100.00]
+  seq = modified_aa_string_to_string_with_masses(modaa_seq, len, FALSE);
+  free(converted_modaa_seq);
+  convert_len = convert_to_mod_aa_seq(seq, &converted_modaa_seq);
+  fail_unless( convert_len == len,
+    "MOD_AA seq converted from comma-separated masses has len %d but should be %d.",
+               convert_len, len);
+  for(int i=0; i<len; i++){
+    fail_unless(converted_modaa_seq[i] == modaa_seq[i],
+     "MOD_AA[%d] converted from comma-separated masses should be %d but is %d.",
+                i, modaa_seq[i], converted_modaa_seq[i]);
+  }
+
+}
+END_TEST
+
+
+// test copy function
 START_TEST(test_copy_mod_seq){
   const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
-  MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(seq);
+  MODIFIED_AA_T* mod_seq = NULL;
+  convert_to_mod_aa_seq(seq, &mod_seq);
 
   MODIFIED_AA_T* copied_seq = copy_mod_aa_seq( mod_seq, len );
   int i = 0;
@@ -334,10 +510,12 @@ START_TEST(test_copy_mod_seq){
 }
 END_TEST
 
+// test is_palindrome function
 START_TEST(test_palindrome){
   const char* seq = "GBBKATRM"; 
   int len = strlen(seq);
-  MODIFIED_AA_T* mod_seq = convert_to_mod_aa_seq(seq);
+  MODIFIED_AA_T* mod_seq = NULL;
+  convert_to_mod_aa_seq(seq, &mod_seq);
 
   fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
                "The seq %s should not be a palindrome.", seq);
@@ -346,7 +524,7 @@ START_TEST(test_palindrome){
   seq = "MACDDCAR";
   len = strlen(seq);
   free(mod_seq);
-  mod_seq = convert_to_mod_aa_seq(seq);
+  convert_to_mod_aa_seq(seq, &mod_seq);
   fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
                "The seq %s should be a palindrome.", seq);
 
@@ -354,7 +532,7 @@ START_TEST(test_palindrome){
   seq = "MACDVDCAR";
   len = strlen(seq);
   free(mod_seq);
-  mod_seq = convert_to_mod_aa_seq(seq);
+  convert_to_mod_aa_seq(seq, &mod_seq);
   fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
                "The seq %s should be a palindrome.", seq);
 
@@ -376,7 +554,7 @@ START_TEST(test_palindrome){
   seq = "MACDVCAR";
   len = strlen(seq);
   free(mod_seq);
-  mod_seq = convert_to_mod_aa_seq(seq);
+  convert_to_mod_aa_seq(seq, &mod_seq);
   fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
                "The seq %s should not be a palindrome.", seq);
 
@@ -384,39 +562,12 @@ START_TEST(test_palindrome){
   seq = "MAR";
   len = strlen(seq);
   free(mod_seq);
-  mod_seq = convert_to_mod_aa_seq(seq);
+  convert_to_mod_aa_seq(seq, &mod_seq);
   fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
                "The seq %s should not be a palindrome.", seq);
 
 }
 END_TEST
-
-START_TEST(test_is_modifiable){
-  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod3);
-  mod_us['D' - 'A'] = TRUE;
-  fail_unless( is_aa_modifiable(mod_aa_D, amod3),
-               "aa_D should be modifiable by amod3.");
-
-  mod_aa_D = mod_aa_D | id_3;
-  fail_unless( !is_aa_modifiable(mod_aa_D, amod3),
-               "aa_D should not be modifiable AGAIN by amod3.");
-}
-END_TEST
-
-START_TEST(test_modify){
-  // it starts out unmodified
-  fail_unless( !is_aa_modified(mod_aa_D, amod3),
-               "mod_aa_D should not be modified.");
-  modify_aa(&mod_aa_D, amod3);
-  fail_unless( is_aa_modified(mod_aa_D, amod3),
-               "mod_aa_D should be modified.");
-
-  // and it should no longer be modifiable by amod3
-  fail_unless( !is_aa_modifiable(mod_aa_D, amod3),
-               "mod_aa_D should no longer be modifiable by amod3");
-}
-END_TEST
-
 START_TEST(test_serialize){
   initialize_parameters();
   // create a mod with non-zero values for all fields
@@ -469,6 +620,9 @@ Suite* modifications_suite(){
   tcase_add_test(tc_core, test_mod_to_string);
   tcase_add_test(tc_core, test_mod_str_to_string);
   tcase_add_test(tc_core, test_mod_str_to_unmod_string);
+  tcase_add_test(tc_core, test_symbol_to_aa_mod);
+  tcase_add_test(tc_core, test_mass_to_aa_mod);
+  tcase_add_test(tc_core, test_string_to_aa_mod_str);
   tcase_add_test(tc_core, test_copy_mod_seq);
   tcase_add_test(tc_core, test_palindrome);
   tcase_add_test(tc_core, test_is_modifiable);
