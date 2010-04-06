@@ -27,6 +27,7 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
   psm_file_array_ = NULL;
   tab_file_array_ = NULL;
   sqt_file_array_ = NULL;
+  feature_file_ = NULL;
 
   // parameters for all three file types
   BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
@@ -78,6 +79,18 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
                  "sqt", 
                  overwrite);
   }
+
+  // only percolator and q-ranker create feature files
+  if( (program_name == PERCOLATOR_COMMAND 
+       || program_name == QRANKER_COMMAND)
+      && get_boolean_parameter("feature-file") ){
+    createFile(&feature_file_, 
+               output_directory, 
+               fileroot, 
+               program_name, 
+               "features.txt", 
+               overwrite);
+  }
 }
 
 OutputFiles::~OutputFiles(){
@@ -86,6 +99,8 @@ OutputFiles::~OutputFiles(){
     if( tab_file_array_ ){ fclose(tab_file_array_[file_idx]); }
     if( sqt_file_array_ ){ fclose(sqt_file_array_[file_idx]); }
   }
+  if( feature_file_ ){ fclose(feature_file_); }
+
   delete psm_file_array_;
   delete tab_file_array_;
   delete sqt_file_array_;
@@ -156,7 +171,42 @@ BOOLEAN_T OutputFiles::createFiles(FILE*** file_array_ptr,
 }
 
 /**
+ * \brief A private function for opening a file according to the given
+ * arguments.
  *
+ * New file is returned via the file_ptr argument.  File is named
+ * output-dir/fileroot.comand_name.extension.  Requires that the
+ * output-dir already exist and have write permissions.
+ * \returns TRUE if the file is created, else FALSE.
+ */
+BOOLEAN_T OutputFiles::createFile(FILE** file_ptr,
+                                  const char* output_dir,
+                                  const char* fileroot,
+                                  COMMAND_T command,
+                                  const char* extension,
+                                  BOOLEAN_T overwrite){
+
+  // construct file name
+  const char* basename = command_type_to_file_string_ptr(command);
+
+  ostringstream name_builder;
+  if( fileroot ){
+    name_builder << fileroot << ".";
+  }
+  name_builder << basename << "." << extension;
+  string filename = name_builder.str();
+
+  // open the file
+  *file_ptr = create_file_in_path(filename.c_str(),
+                                  output_dir,
+                                  overwrite);
+
+  if( *file_ptr == NULL ){ return FALSE; }
+
+  return TRUE;
+}
+/**
+ * \brief Write header lines to the .tab, .sqt and .csm files.
  */
 void OutputFiles::writeHeaders(int num_proteins){
 
@@ -179,7 +229,20 @@ void OutputFiles::writeHeaders(int num_proteins){
   if( psm_file_array_ ){
     serialize_headers(psm_file_array_);
   }
-
+}
+/**
+ * \brief Write header lines to the optional feature file.
+ */
+void OutputFiles::writeFeatureHeader(char** feature_names,
+                                     int num_names){
+  // write feature file header
+  if( feature_names && feature_file_ && num_names ){
+    fprintf(feature_file_, "%s", feature_names[0]);
+    for(int name_idx = 1; name_idx < num_names; name_idx++){
+      fprintf(feature_file_, "\t%s", feature_names[name_idx]);
+    }
+    fprintf(feature_file_, "\n");
+  }
 }
 /**
  * \brief Write the given matches to appropriate output files.  Limit
@@ -334,7 +397,37 @@ void OutputFiles::writeMatches(
                               NULL);// no decoy file
 }
 
+/**
+ * \brief Print features from one match to file.
+ */
+void OutputFiles::writeMatchFeatures(
+   MATCH_T* match, ///< match to provide scan num, decoy
+   double* features,///< features for this match
+   int num_features)///< size of features array
+{
+  if( feature_file_ == NULL ){ return; }
 
+  // write scan number
+  fprintf(feature_file_, "%i\t",
+          get_spectrum_first_scan(get_match_spectrum(match)) );
+
+  // decoy or target peptide
+  if (get_match_null_peptide(match) == FALSE){
+    fprintf(feature_file_, "1\t");
+  } else { 
+    fprintf(feature_file_, "-1\t");
+  };
+  
+  // print each feature, end in new-line
+  for(int feature_idx = 0; feature_idx < num_features; feature_idx++){
+    if (feature_idx < num_features - 1){
+      fprintf(feature_file_, "%.4f\t", features[feature_idx]);
+    } else {
+      fprintf(feature_file_, "%.4f\n", features[feature_idx]);
+    }
+  }
+
+}
 
 
 

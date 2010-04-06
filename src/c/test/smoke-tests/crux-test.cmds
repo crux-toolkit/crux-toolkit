@@ -121,7 +121,16 @@ analyze_matches_index = good_results/analyze_matches_index.percolator.target.txt
 search_mods_index = good_results/search_mods_index.target.txt = crux search-for-matches --parameter-file params/mods test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
 
 # Analyze matches with modifications from index
-analyze_mods_index = good_results/analyze_mods_index.percolator.target.txt = crux percolator --overwrite T --parameter-file params/mods existing_crux_index; cat crux-output/percolator.target.txt = 'Time' 'Database'
+analyze_mods_index = good_results/analyze_mods_index.percolator.target.txt = crux percolator --feature-file TRUE --overwrite T --parameter-file params/mods existing_crux_index; cat crux-output/percolator.target.txt = 'Time' 'Database'
+
+# Test the feature file
+perc-feature-file = good_results/percolator.features.txt = cat crux-output/percolator.features.txt = 
+
+# Run q-ranker on same matches
+qranker = good_results/qranker.target.txt = crux q-ranker --feature-file TRUE --overwrite T --parameter-file params/mods existing_crux_index; cat crux-output/qranker.target.txt = 
+
+# Test the feature file
+qranker-feature-file = good_results/qranker.features.txt = cat crux-output/qranker.features.txt = 
 
 # Test the q-values generated from decoys
 decoy_qval = good_results/decoy-qval.txt = rm -rf decoy-qval-pval; crux search-for-matches --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; crux compute-q-values --parameter-file params/decoy-qval-pval small-yeast.fasta; cat decoy-qval-pval/qvalues.target.txt
