@@ -837,10 +837,8 @@ BOOLEAN_T parse_spectrum_file(
   * Parses a spectrum from a MSToolkit::Spectrum
   * \returns TRUE if success. FALSE is failure.
   */
-
-
 BOOLEAN_T parse_spectrum_spectrum(
-  SPECTRUM_T* spectrum, ///< spectrum to parse the information int -out
+  SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
   void* mst_spectrum, ///< the input MSToolkit spectrum -in
   char* filename ///< filename of the spectrum, should not free -in
   ) {
@@ -858,12 +856,6 @@ BOOLEAN_T parse_spectrum_spectrum(
 
   spectrum -> spectrum_type = MS2; //assume MS2
   
-  int z_idx;
-
-  //add possible charge states.
-  for (z_idx=0;z_idx < mst_real_spectrum -> sizeZ();z_idx++) {
-    add_possible_z(spectrum, mst_real_spectrum -> atZ(z_idx).z);
-  }
 
   //add all peaks.
   
@@ -874,6 +866,28 @@ BOOLEAN_T parse_spectrum_spectrum(
       mst_real_spectrum -> at(peak_idx).mz);
   }
   
+  //add possible charge states.
+  if(  mst_real_spectrum->sizeZ() > 0 ){
+    for (int z_idx = 0; z_idx < mst_real_spectrum -> sizeZ(); z_idx++) {
+      add_possible_z(spectrum, mst_real_spectrum -> atZ(z_idx).z);
+    }
+  } else { // if no charge states detected, decide based on spectrum
+    int charge = choose_charge(spectrum->precursor_mz,
+                               spectrum->peaks,
+                               spectrum->num_peaks);
+
+    // add either +1 or +2, +3
+    if( charge == 1 ){
+      add_possible_z(spectrum, 1);
+    } else if( charge == 0 ){
+      add_possible_z(spectrum, 2);
+      add_possible_z(spectrum, 3);
+    } else {
+      carp(CARP_ERROR, "Could not determine charge state for spectrum %d.", 
+           spectrum->first_scan);
+    }
+  }
+
   spectrum -> has_peaks = TRUE;
 
   return TRUE;

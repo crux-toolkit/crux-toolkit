@@ -22,6 +22,7 @@
 #include "carp.h"
 #include "utils.h"
 #include "objects.h"
+#include "peak.h"
 
 #ifdef __cplusplus
   extern "C" {
@@ -387,6 +388,16 @@ int get_first_in_range_string(const char* range_string);
  *  or -1 if the range is invalid.
  */
 int get_last_in_range_string(const char* range_string);
+
+/**
+ * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
+ * or +3 or +4 etc). 
+ * \returns 1 if spectrum precursor is singly charged or 0 if multiply
+ * charged.
+ */
+int choose_charge(FLOAT_T precursor_mz, ///< m/z of spectrum precursor ion
+                  PEAK_T* peaks,        ///< array of spectrum peaks
+                  int num_peaks);       ///< size of peaks array
 
 #ifdef __cplusplus
 }

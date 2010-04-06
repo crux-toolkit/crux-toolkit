@@ -12,6 +12,21 @@
 
 <ul>
 <li>
+The .mzXML file format is now supported for crux search-for-matches
+and crux sequest-search when the --use-mstoolkit option is set to 
+TRUE.
+
+<li>
+Modified sequences are reported differently in the .txt files.
+Instead of modifciations being represented by symbols (*,@,#, etc.)
+they are indicated with the mass shift of the modification within
+square brackets.  As before, the modficiation information follows the
+residue that is modified.  If multiple modifications appear on one
+residue, the masses may either be summed together or printed
+separately in a comma separated list.  This behavior is controlled by
+the --display-summed-mod-masses option.
+
+<li>
 A new search command, 'sequest-search', was added.  The original
 command, 'search-for-matches', behaves as before except that no .sqt
 files are printed and no Sp scoring is performed.  The new
