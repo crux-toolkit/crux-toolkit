@@ -78,6 +78,8 @@ struct scorer {
   FLOAT_T* theoretical; ///< used for Xcorr: theoretical spectrum intensity array
 };
 
+int ion_counter=0;
+
 // defined later
 void add_intensity(
   FLOAT_T* intensity_array, ///< the intensity array to add intensity at index add_idx -out
@@ -791,6 +793,10 @@ void normalize_each_region(
   }
 }
 
+FLOAT_T* get_intensity_array_observed(SCORER_T* scorer) {
+  return scorer -> observed;
+}
+
 /**
  * create the intensity arrays for observed spectrum
  * SCORER must have been created for XCORR type
@@ -998,7 +1004,7 @@ BOOLEAN_T create_intensity_array_theoretical(
   // int charge = get_ion_series_charge(ion_series);
   // create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
-  
+
   // while there are ion's in ion iterator, add matched observed peak intensity
   while(ion_iterator_has_next(ion_iterator)){
     ion = ion_iterator_next(ion_iterator);
@@ -1087,14 +1093,6 @@ BOOLEAN_T create_intensity_array_theoretical(
   // free heap
   free_ion_iterator(ion_iterator);
 
-  /*
-  int i = 0;
-  for(; i < scorer->sp_max_mz; i++){
-    if(theoretical[i] != 0){
-      carp(CARP_INFO, "Theoretical array[%d]: %.2f", i, theoretical[i]);
-    }
-  }
-  */
   return TRUE;
 }
 
@@ -1886,6 +1884,7 @@ void add_intensity(
   )
 {
   assert(add_idx >= 0);
+  ion_counter++;
   if(intensity_array[add_idx] < intensity){
     intensity_array[add_idx] = intensity;
   }

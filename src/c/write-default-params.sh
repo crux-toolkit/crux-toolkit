@@ -40,6 +40,8 @@ for op in verbosity version parameter-file overwrite \
           enzyme custom-enzyme digestion missed-cleavages \
           mod cmod nmod max-mods max-aas-modified compute-p-values \
           feature-file output-sequence sort stats unique-peptides \
+          precursor-window precursor-window-type \
+          precursor-window-decoy precursor-window-type-decoy min-weibull-points use-mgf \
           isotope primary-ions neutral-losses flanking \
           precursor-ions nh3 max-ion-charge h2o A C D E F G H I K L M \
           N P Q R S T V W Y ; 

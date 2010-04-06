@@ -19,5 +19,6 @@
 #include "q-value.h"
 #include "percolator.h"
 #include "print-processed-spectra.h"
+#include "xlink_search.h"
 
 

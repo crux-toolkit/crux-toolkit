@@ -511,6 +511,7 @@ enum _command {
   PERCOLATOR_COMMAND,   ///< percolator
   QRANKER_COMMAND,      ///< q-ranker
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
+  XLINK_SEARCH_COMMAND, ///< search-for-xlinks	
 
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value
                         /// changes as cmds are added

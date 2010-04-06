@@ -1,6 +1,6 @@
 distdir = $(PACKAGE)_$(VERSION)
 
-SUBDIRS = ArrayLibrary MSToolkit percolator q-ranker .
+SUBDIRS = ArrayLibrary MSToolkit percolator q-ranker xlink .
 
 # Crux can use either single or double precision floating poinnt.
 if USEDOUBLES
@@ -110,7 +110,9 @@ LIBFILES= \
   spectrum.h \
   utils.cpp \
   utils.h \
-  version.h
+  version.h \
+  xlink_search.h \
+  xlink_compute_qvalues.h
 
 noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = \
@@ -132,7 +134,10 @@ PROGRAM_FILES = \
   crux \
   crux-get-ms2-spectrum \
   crux-generate-peptides \
-  crux-predict-peptide-ions 
+  crux-predict-peptide-ions \
+  xlink-predict-peptide-ions \
+  xlink-score-spectrum \
+  xlink-assign-ions
 
 bin_PROGRAMS = $(PROGRAM_FILES)
 
@@ -158,9 +163,12 @@ crux_CXXFLAGS = \
   -DMAIN \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/percolator \
-  -I$(top_srcdir)/src/c/q-ranker
+  -I$(top_srcdir)/src/c/q-ranker \
+  -I$(top_srcdir)/src/c/xlink
 crux_LDADD = \
   $(AM_LDFLAGS) \
+  -L$(top_builddir)/src/c/xlink \
+  -lxlink \
   libcrux.la \
   -lstdc++ \
   -L$(top_builddir)/src/c/ArrayLibrary \
@@ -172,6 +180,52 @@ crux_LDADD = \
   -lqranker \
   -lmstoolkit \
   -lArrayLibrary
+
+xlink_predict_peptide_ions_SOURCES=./xlink/xhhc_predict_peptide_ions.cpp
+xlink_predict_peptide_ions_CXXFLAGS= \
+  $(AM_CFLAGS) \
+  -DMAIN \
+  -I$(top_srcdir)/src/c/xlink
+
+xlink_predict_peptide_ions_LDADD = \
+  $(AM_LDFLAGS) \
+  -L$(top_builddir)/src/c/MSToolkit \
+  -L$(top_builddir)/src/c/xlink \
+  -lm \
+  -lxlink \
+  libcrux.la \
+  -lmstoolkit
+
+xlink_score_spectrum_SOURCES=./xlink/xhhc_score_peptide_spectrum.cpp
+xlink_score_spectrum_CXXFLAGS= \
+  $(AM_CFLAGS) \
+  -DMAIN \
+  -I$(top_srcdir)/src/c/xlink
+
+xlink_score_spectrum_LDADD = \
+  $(AM_LDFLAGS) \
+  -L$(top_builddir)/src/c/MSToolkit \
+  -L$(top_builddir)/src/c/xlink \
+  -lm \
+  -lxlink \
+  libcrux.la \
+  -lmstoolkit
+
+xlink_assign_ions_SOURCES=./xlink/xlink_assign_ions.cpp
+xlink_assign_ions_CXXFLAGS= \
+  $(AM_CFLAGS) \
+  -DMAIN \
+  -I$(top_srcdir)/src/c/xlink
+
+xlink_assign_ions_LDADD = \
+  $(AM_LDFLAGS) \
+  -L$(top_builddir)/src/c/MSToolkit \
+  -L$(top_builddir)/src/c/xlink \
+  -lm \
+  -lxlink \
+  libcrux.la \
+  -lmstoolkit
+
 
 paramdir = $(prefix)/doc
 param_DATA = default.params

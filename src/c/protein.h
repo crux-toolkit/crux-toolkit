@@ -318,6 +318,23 @@ PROTEIN_T* get_protein_peptide_iterator_portein(
   PROTEIN_PEPTIDE_ITERATOR_T* protein_peptide_iterator ///< working protein_peptide_iterator -in
   );
 
+
+
+/**
+ * Creates the data structures in the protein_peptide_iterator object necessary
+ * for creating peptide objects.
+ * - mass_array - cumulative distribution of masses. used to determine 
+ *     the mass of any peptide subsequence.
+ * - nterm_cleavage_positions - the nterm cleavage positions of the 
+ *     peptides that satisfy the protein_peptide_iterator contraints
+ * - peptide_lengths - the lengths of the peptides that satisfy the constraints
+ * - cumulative_cleavages - cumulative distribution of cleavage positions
+ *    used to determine if a cleavage location has been skipped
+ */
+void prepare_protein_peptide_iterator_mc(
+    PROTEIN_PEPTIDE_ITERATOR_T* iterator,
+    BOOLEAN_T missed_cleavages);
+
 #ifdef __cplusplus
 }
 #endif

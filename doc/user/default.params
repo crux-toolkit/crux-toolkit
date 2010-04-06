@@ -79,9 +79,6 @@ isotopic-mass=average
 # Parameter file only.  Used by crux-search-for-matches and crux-predict-peptide-ions.
 fragment-mass=mono
 
-# Search peptides within +/- 'mass-window' of the spectrum mass.  Default 3.0.
-# Available from the parameter file only for crux-search-for-matches, crux-create-index, and crux-generate-peptides.
-mass-window=3.000000
 
 # Use mass-to-charge rather than mass for finding the window of peptides. Default F.
 # Available for crux-search-for-matches
@@ -175,6 +172,32 @@ stats=FALSE
 # Available from command line or parameter file for crux-genereate-peptides. Returns one line per peptide when true or one line per peptide per protein occurence when false.  
 unique-peptides=TRUE
 
+
+
+# Search peptides within +/- 'precursor-window' of the spectrum mass.  Definition of precursor window depends upon precursor-window-type. Default 3.0.
+# Available from the parameter file only for crux-search-for-matches, crux-create-index, and crux-generate-peptides.
+precursor-window=3.000000
+
+# Window type to use for selecting peptides from precursor mz.(mass, mz, ppm) Default: mass.
+# Available for crux search-for-matches
+precursor-window-type=mass
+
+# Search decoy-peptides within +/- 'mass-window-decoy' of the spectrum mass.  Default 20.0.
+# Available for crux search-for-xlinks. 
+precursor-window-decoy=20.000000
+
+# Window type to use for selecting decoy peptides from precursor mz.(mass, mz, ppm) Default: mass.
+# Available for crux search-for-matches
+precursor-window-type-decoy=mass
+
+# Minimum number of points for estimating the weibull (Default 4000).
+# Available for crux search-for-xlinks
+min-weibull-points=4000
+
+# Use MGF file format for parsing files
+# Available for search-for-xlinks program (Default FALSE).
+use-mgf=FALSE
+
 # Predict the given number of isotope peaks (0|1|2). Default 0.
 # Only available for crux-predict-peptide-ion.  Automatically set to 0 for Sp scoring and 1 for xcorr scoring.
 isotope=0
@@ -212,8 +235,8 @@ h2o=0
 A=0.000000
 
 # Change the mass of all amino acids 'C' by the given amount.
-# For parameter file only.  Default +57.0.
-C=57.000000
+# For parameter file only.  Default +57.0214637206.
+C=57.021464
 
 # Change the mass of all amino acids 'D' by the given amount.
 # For parameter file only.  Default no mass change.
