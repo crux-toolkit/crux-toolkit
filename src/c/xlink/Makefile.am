@@ -1,0 +1,26 @@
+# Automake template for xlink-search library
+libxlink_la_SOURCES = \
+  xhhc.cpp \
+  xhhc.h \
+  xhhc_ion_series.cpp \
+  xhhc_ion_series.h \
+  xhhc_make_histogram.cpp \
+  xhhc_predict_peptide_ions.cpp \
+  xhhc_score_peptide_spectrum.cpp \
+  xhhc_scorer.cpp \
+  xhhc_score_peptide_spectrum.cpp \
+  xhhc_scorer.cpp \
+  xhhc_scorer.h \
+  xhhc_search.cpp \
+  xlink_assign_ions.cpp \
+  xlink_compute_qvalues.cpp
+
+
+libxlink_la_CPPFLAGS = $(AM_CPPFLAGS) \
+  -I$(top_srcdir)/src/c/ \
+  -I$(top_srcdir)/src/c/MSToolkit \
+  -I$(top_srcdir)/src/c/MSToolkit/zLib \
+  -I$(top_srcdir)/src/c/MSToolkit/RAMP
+
+noinst_LTLIBRARIES = libxlink.la
+

@@ -17,13 +17,12 @@
 #include <ios>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
 
-//extern "C" {
 #include "parameter.h"
-//}
 
 
 class DelimitedFile {
@@ -36,6 +35,11 @@ class DelimitedFile {
   std::vector<std::vector<std::string> > data_;
   std::vector<std::string> column_names_;
   unsigned int current_row_; //used for iterating through the table.
+
+  template <typename T>
+  void reorderRows(
+    std::multimap<T, unsigned int>& sort_indices, 
+    BOOLEAN_T ascending);  
 
  public:
   /**
@@ -60,6 +64,11 @@ class DelimitedFile {
     const std::string& file_name, ///< the path of the file  to read
     bool hasHeader=true ///< indicates whether header exists
   );
+
+  /**
+   * clears the table
+   */
+  void clear();
 
   /**
    * Destructor
@@ -134,6 +143,12 @@ class DelimitedFile {
   );
 
   /**
+   * adds a vector of columns to the delimited file
+   */
+  void addColumns(
+    std::vector<std::string>& column_names);
+
+  /**
    * adds a column to the delimited file
    */
   unsigned int addColumn();
@@ -143,7 +158,7 @@ class DelimitedFile {
    *\returns the column index, -1 if not found.
    */ 
   int findColumn(
-    std::string& column_name ///< the column name
+    const std::string& column_name ///< the column name
   );
 
  /**
@@ -154,7 +169,12 @@ class DelimitedFile {
     const char* column_name ///< the column name
   );
 
-  
+  /**
+    * adds a row to the delimited file
+    *\returns the new row index
+    */
+  unsigned int addRow();
+ 
   /**
    *\returns the string vector corresponding to the column
    */
@@ -176,6 +196,11 @@ class DelimitedFile {
     unsigned int col_idx ///< the column index
   );
   
+  /**
+   *\returns the column_names
+   */
+  std::vector<std::string>& getColumnNames();
+
   /**
    *\returns the string value of the cell
    */
@@ -243,6 +268,20 @@ class DelimitedFile {
       std::string svalue = ss.str();
       setString(col_idx, row_idx, svalue);
   }  
+
+  template<typename TValue>
+  void setValue(
+    const std::string& column_name, ///< the column index
+    unsigned int row_idx, ///< the row index
+    TValue value ///< the new value
+  ) {
+
+    int col_idx = findColumn(column_name);
+    if (col_idx == -1) {
+      carp(CARP_FATAL,"Column not found %s",column_name.c_str());
+    }
+    setValue(col_idx, row_idx, value);
+  }
 
   /**
    * gets a double type from cell, checks for infinity. 
@@ -347,7 +386,42 @@ class DelimitedFile {
     char delimiter=',' ///<the delimiter to use
   );
 
+  /**
+   * sorts the table by a column. Assumes the data type is
+   * Float. By default sorts in ascending order.
+   */
+  void sortByFloatColumn(
+    const std::string& column_name, ///< the column name
+    BOOLEAN_T ascending = TRUE);
   
+  /**
+   * sorts the table by a column. Assumes the data type is 
+   * integer.
+   */
+  void sortByIntegerColumn(
+    const std::string& column_name, ///< the column name
+    BOOLEAN_T ascending = TRUE);
+
+  void sortByIntegerColumn(
+    unsigned int col_idx,
+    BOOLEAN_T ascending = TRUE);
+
+
+  
+  /**
+   * sorts the table by a column. Assumes the data type is 
+   * string.
+   */
+  void sortByStringColumn(
+    const std::string& column_name,
+    BOOLEAN_T ascending = TRUE);
+
+
+  void copyToRow(
+    DelimitedFile& dest,
+    int src_row_idx, 
+    int dest_row_idx
+  ); 
 
 
   /*Iterator functions.*/
@@ -377,6 +451,25 @@ class DelimitedFile {
     char delimiter = '\t'
   );
 
+  template<typename T>
+  static std::string splice(
+    const std::vector<T>& elements,
+    char delimiter = '\t') {
+
+      if (elements.size() == 0) return "";
+
+      int precision = get_int_parameter("precision");
+      std::ostringstream ss;
+      ss << std::setprecision(precision);
+      
+      ss << elements[0];
+      for (int idx=1;idx < elements.size();idx++) {
+        ss << delimiter << elements[idx];
+      }
+      std::string out_string = ss.str();
+      return out_string;
+  }
+
   /**
    * convert string to data type
    */
@@ -389,6 +482,11 @@ class DelimitedFile {
     std::istringstream iss(s);
     return !(iss >> std::dec >> value).fail();
   }   
+  
+  /**
+   * Allows object to be printed to a stream
+   */
+  friend std::ostream &operator<< (std::ostream& os, DelimitedFile& delimited_file); 
 
 };
 

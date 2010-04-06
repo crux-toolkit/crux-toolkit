@@ -1,0 +1,62 @@
+To compile, change the crux_source and crux_lib variables
+in Makefile to point to crux source file and the libcrux.a
+library (after crux has been compiled).
+
+Then run make to compile.
+
+Make a directory called crux-ouput for output files
+
+
+
+Four executables are created:
+
+  xhhc-predict-peptide-ions
+  xhhc-score-peptide-spectrum
+  xhhc-make-histogram
+  xhhc-search
+
+Usage is at the bottom of readme.
+
+There are 7 source files:
+
+  xhhc.cpp
+  xhhc_ion_series.cpp
+  xhhc_scorer.cpp
+
+  xhhc_predict_peptide_ions.cpp
+  xhhc_score_peptide_spectrum.cpp
+  xhhc_make_histogram.cpp
+  xhhc_search.cpp 
+
+
+
+
+Things to do:
+
+- fix xhhc-make-histogram
+- fix print_spectrums method in xhhc_scorer
+- fix memory leak in xhhc-search
+- fix get_linkable_peptides method in xhhc.cpp to work for all linkers
+    - implement missed-link-cleavage and num-missed-cleavages options
+
+  
+
+
+
+
+Usage: xhhc-score-peptide-spectrum [options] <peptide-sequence-alpha> <peptide-sequence-beta> <position A> <position B> <scan-number> <ms2-filename> 
+Optional Arguments:
+  [--charge <int>] The peptide charge. 1|2|3 
+  [--parameter-file <string>] The crux parameter file to parse parameter from. 
+  [--linker-mass <string>] linker mass and linker modifications. Default 0. 
+  [--print-spectrums <int>]  
+  [--verbosity <int>] Specify the verbosity of the current processes from 0-100. 
+Required Arguments:
+  <peptide-sequence-alpha> The first peptide sequence.
+  <peptide-sequence-beta> The second peptide sequence.
+  <position A> zero based index of linker on peptide A [0, length(A)-1]
+  <position B> zero based index of linker on peptide B [0, length(B)-1]
+  <scan-number> The scan number for the MS-MS spectrum to extract from the ms2 file.
+	This is an integer in the range [1, 100000], and uniquely identifies a particular MS-MS spectrum within an .ms2 file.
+  <ms2-filename> A file containing multiple MS-MS spectra in .ms2 format.
+

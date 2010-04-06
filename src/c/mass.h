@@ -18,7 +18,7 @@
 
 
 // mass of water
-#define MASS_H2O_MONO 18.01056 ///< Mass of water (monoisotopic)
+#define MASS_H2O_MONO 18.010564684 ///< Mass of water (monoisotopic)
 #define MASS_H2O_AVERAGE 18.0153 ///< Mass of water (average)
 
 /**
@@ -28,7 +28,7 @@
 #define MASS_H_AVERAGE 1.00794 ///< Mass of hydrogen (average)
 
 // FIXME, change in spectrum, peptide to be able to pick mono, average
-#define MASS_H 1.0078246 ///< mass of hydrogen
+#define MASS_H       1.00782503207 ///< mass of hydrogen
 #define MASS_PROTON  1.00727646677 ///< mass of proton
 /**
  * Mass of oxygen

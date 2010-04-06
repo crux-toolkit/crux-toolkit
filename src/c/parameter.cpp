@@ -295,7 +295,7 @@ void initialize_parameters(void){
   set_string_parameter("peptide sequence", NULL, 
       "The sequence of the peptide.",
       "Argument for predict-peptide-ions.", "false");
-  set_int_parameter("charge state", 0, 0, 3, 
+  set_int_parameter("charge state", 0, 0, 10, 
       "The charge state of the peptide.",
       "Argument for predict-peptide-ions", "false");
 
@@ -724,9 +724,9 @@ void initialize_parameters(void){
   set_double_parameter("B", 0.0, -100, BILLION,
       "Change the mass of all amino acids 'B' by the given amount.",
       "For parameter file only.  Default no mass change.", "false");
-  set_double_parameter("C", 57.0, -100, BILLION,
+  set_double_parameter("C", 57.0214637206, -100, BILLION,
       "Change the mass of all amino acids 'C' by the given amount.",
-      "For parameter file only.  Default +57.0.", "true");
+      "For parameter file only.  Default +57.0214637206.", "true");
   set_double_parameter("D", 0.0, -100, BILLION,
       "Change the mass of all amino acids 'D' by the given amount.",
       "For parameter file only.  Default no mass change.", "true");
@@ -803,6 +803,89 @@ void initialize_parameters(void){
       "Avaliable only for crux-get-ms2-spectrum.  Does not affect contents "
       "of the output file.", "true");
 
+  /* xlink-predict-peptide-ions options*/
+  set_string_parameter("peptide A", NULL, 
+      "The sequence of peptide A.",
+      "Argument for xlink-predict-peptide-ions.", "false");
+
+  set_string_parameter("peptide B", NULL, 
+      "The sequence of peptide B.",
+      "Argument for xlink-predict-peptide-ions.", "false");
+  
+  set_int_parameter("pos A", 0 , 0, BILLION, 
+      "Position of xlink on peptide A",
+      "Available for xlink-predict-peptide-ions.", "false");
+
+  set_int_parameter("pos B", 0 , 0, BILLION, 
+      "Position of xlink on peptide B",
+      "Available for xlink-predict-peptide-ions.", "false");
+
+  set_boolean_parameter("print-theoretical-spectrum", FALSE,
+      "Print the theoretical spectrum",
+      "Available for xlink-predict-peptide-ions (Default FALSE).",
+      "true");
+
+  set_boolean_parameter("use-mgf", FALSE,
+      "Use MGF file format for parsing files",
+      "Available for search-for-xlinks program (Default FALSE).",
+      "true");
+
+
+  /* xlink-score-spectrum options */
+  set_string_parameter("xlink-score-method", "composite", 
+      "Score method for xlink {composite, modification, concatenated}. Default composite.",
+      "Argument for xlink-score-spectrum.", "false");
+
+  /* search-xlink options */
+  set_boolean_parameter("xcorr-use-flanks", TRUE,
+      "Use flank peaks in xcorr theoretical spectrum",
+      "Available for crux search-for-xlinks program (Default True).",
+      "true");
+
+  set_boolean_parameter("xlink-include-linears", TRUE, 
+      "Include linear peptides in search-for-xlinks.",
+      "Available for crux search-for-xlinks program (Default True).",
+      "true");
+  set_boolean_parameter("xlink-include-deadends", TRUE, 
+      "Include deadend peptides in search-for-xlinks (Default True).",
+      "Available for crux search-for-xlinks program.",
+      "true");
+
+  set_boolean_parameter("xlink-include-selfloops", TRUE, 
+      "Include self loop peptides in search-for-xlinks (Default True).",
+      "Available for crux search-for-xlinks program.",
+      "true");
+
+  set_double_parameter("precursor-window-decoy", 20.0, 0, 1e6, 
+      "Search decoy-peptides within +/- 'mass-window-decoy' of the "
+      "spectrum mass.  Default 20.0.",
+      "Available for crux search-for-xlinks. ",
+      "true");
+
+  set_window_type_parameter("precursor-window-type-decoy", WINDOW_MASS,
+      "Window type to use for selecting decoy peptides from precursor mz."
+      "(mass, mz, ppm) Default: mass.",
+      "Available for crux search-for-matches",
+      "true");
+
+  set_string_parameter("link sites", NULL, 
+      "Comma delimited pair of amino acid link sites, ex. A:K,A:D.",
+      "Argument for crux search-for-xlinks.", "true");
+
+  set_double_parameter("link mass", 0.0, -100, BILLION,
+      "The mass modification of a cross link between two amino acids.",
+      "Argument for crux search-for-xlinks.","true");
+
+  set_string_parameter("missed-link-cleavage", "K",
+      "Figure out what this parameter is supposed to mean,"
+      "should be an amino acid. Default K.",
+      "Available for crux search-for-xlinks",
+      "true");
+
+  set_int_parameter("min-weibull-points", 4000, 1, BILLION, 
+      "Minimum number of points for estimating the weibull (Default 4000).",
+      "Available for crux search-for-xlinks", "true");
+  
   // now we have initialized the parameters
   parameter_initialized = TRUE;
   usage_initialized = TRUE;

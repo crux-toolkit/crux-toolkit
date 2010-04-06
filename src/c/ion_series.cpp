@@ -1178,6 +1178,34 @@ void set_ion_series_charge(
 }
 
 /**
+ * get the is_predicted field of the ion_series object
+ */
+BOOLEAN_T get_ion_series_is_predicted(
+  ION_SERIES_T* ion_series /// < the working ion_series -in
+  ) {
+  return ion_series->is_predicted;
+}
+
+/**
+ * set the is_predicted field of the ion_series object
+ */
+void set_ion_series_is_predicted(
+  ION_SERIES_T* ion_series, ///< the working ion_series -in
+  BOOLEAN_T is_predicted///< the is_predicted field -in
+  ) {
+  ion_series->is_predicted = is_predicted;
+}
+
+/**
+ * get the modified_aa_seq of the ion_series object
+ */
+MODIFIED_AA_T* get_ion_series_modified_aa_seq(
+  ION_SERIES_T* ion_series /// < the working ion_series -in
+  ) {
+  return ion_series -> modified_aa_seq;
+}
+
+/**
  *\returns the constraint of the ion_series object
  */
 ION_CONSTRAINT_T* get_ion_series_ion_constraint(
@@ -1603,6 +1631,18 @@ MASS_TYPE_T get_ion_constraint_mass_type(
 {
   return ion_constraint->mass_type;
 }
+
+/**
+ * get the neutral loss field of the ion constraint.
+ */
+BOOLEAN_T get_ion_constraint_use_neutral_losses(
+  ION_CONSTRAINT_T* ion_constraint///< the ion constraints to enforce -in
+  )
+{
+  return ion_constraint -> use_neutral_losses;
+}
+
+
 
 /**************************
  *  ION_ITERATOR_T object
