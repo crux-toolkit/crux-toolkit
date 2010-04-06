@@ -1603,7 +1603,58 @@ int get_last_in_range_string(const char* range_string){
    return number;
 }
 
+/**
+ * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
+ * or +3 or +4 etc). 
+ * \returns 1 if spectrum precursor is singly charged or 0 if multiply
+ * charged or -1 on error.
+ */
+int choose_charge(FLOAT_T precursor_mz, ///< m/z of spectrum precursor ion
+                  PEAK_T* peaks,        ///< array of spectrum peaks
+                  int num_peaks)        ///< size of peaks array
+{
+  if( num_peaks == 0 || peaks == NULL ){
+    carp(CARP_ERROR, "Cannot determine charge state of empty peak array.");
+    return -1;
+  }
 
+  FLOAT_T max_peak_mz = get_peak_location(find_peak(peaks, num_peaks - 1));
+  
+  // sum peaks below and above the precursor m/z window separately
+  FLOAT_T left_sum = 0.00001;
+  FLOAT_T right_sum= 0.00001;
+  for(int peak_idx = 0; peak_idx < num_peaks; peak_idx++){
+    if(get_peak_location(find_peak(peaks, peak_idx)) < precursor_mz - 20){
+      left_sum += get_peak_intensity(find_peak(peaks, peak_idx));
+
+    } else if(get_peak_location(find_peak(peaks, peak_idx)) 
+              > precursor_mz + 20){
+      right_sum += get_peak_intensity(find_peak(peaks, peak_idx));
+
+    } // else, skip peaks around precursor
+  }
+
+  // What is the justification for this? Ask Mike
+  FLOAT_T FractionWindow = 0;
+  FLOAT_T CorrectionFactor;
+  if( (precursor_mz * 2) < max_peak_mz){
+    CorrectionFactor = 1;
+  } else {
+    FractionWindow = (precursor_mz * 2) - max_peak_mz;
+    CorrectionFactor = fabs((precursor_mz - FractionWindow)) / precursor_mz;
+  }
+
+  // if the ratio of intensities above/below the precursor is small
+  assert(left_sum != 0);
+  if( (right_sum / left_sum) < (0.2 * CorrectionFactor)){
+    return 1;  // +1 spectrum
+  } else {
+    return 0;  // multiply charged spectrum
+  }
+
+  // shouldn't get to here
+  return -1;
+}
 
 
 /*

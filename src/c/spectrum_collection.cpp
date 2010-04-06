@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <vector>
 #include "objects.h"
 #include "spectrum.h"
 #include "spectrum_collection.h" 
@@ -246,7 +247,8 @@ BOOLEAN_T parse_spectrum_collection(
 
   // check if file is still avaliable
   if ((file = fopen(spectrum_collection->filename,"r")) == NULL) {
-    carp(CARP_ERROR, "File %s could not be opened",spectrum_collection->filename);
+    carp(CARP_ERROR, "File %s could not be opened",
+         spectrum_collection->filename);
     return (FALSE);
   }
   // parse header lines 'H' into spectrum_collection comment 
@@ -270,10 +272,14 @@ BOOLEAN_T parse_spectrum_collection(
     //also, I want to use parse_header_line for
     //the collection.
     fclose(file);
-    carp(CARP_INFO,"using mstoolkit to parse spectra");
+    carp(CARP_INFO, "Using mstoolkit to parse spectra.");
 
     MSReader* mst_reader = new MSReader();
     Spectrum* mst_spectrum = new Spectrum();
+
+    // only read ms2 scans
+    mst_reader->setFilter(MSToolkit::MS2);
+
 
     mst_reader -> readFile(spectrum_collection -> filename, *mst_spectrum);
 

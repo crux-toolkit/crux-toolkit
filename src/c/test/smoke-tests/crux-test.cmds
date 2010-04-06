@@ -148,6 +148,8 @@ no-decoys-ss = good_results/no-decoys-ss = rm -f ss/no-decoys*; crux sequest-sea
 # search only a select number of spectra with the --scan option
 search_select_scans = good_results/search_select_scans.target.txt = crux search-for-matches --scan-number 150-153 --parameter-file params/minimal demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt
 
+# Test mzXML files
+mzxml = good_results/mzxml.search.target.txt = crux search-for-matches --fileroot mzxml --parameter-file params/mstk small.raw2xml.mzXML small-yeast.fasta; cat crux-output/mzxml.search.target.txt 
 
 # MORE TESTS TODO
 
