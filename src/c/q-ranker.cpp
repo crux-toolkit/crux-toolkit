@@ -45,7 +45,7 @@
 MATCH_COLLECTION_T* run_q(
   char* psm_result_folder, 
   char* fasta_file, 
-  char* feature_file); 
+  OutputFiles& output); 
 
 /**
  * \brief crux-analyze-matches: takes in a directory containing binary
@@ -77,22 +77,17 @@ int qranker_main(int argc, char** argv){
   /* Get arguments */
   char* psm_dir = get_string_parameter("output-dir");
   char* protein_input_name = get_string_parameter("protein input");
-  // TODO (BF oct-22-09): consider adding feature file to OutputFiles
-  char* feature_file = get_string_parameter("feature-file");
-  if (feature_file != NULL) {
-    prefix_fileroot_to_name(&feature_file);
-  }
 
+  OutputFiles output(QRANKER_COMMAND);
+  output.writeHeaders();
 
   /* Perform the analysis */
   MATCH_COLLECTION_T* match_collection = NULL;
   match_collection = run_q(psm_dir,
                            protein_input_name,
-                           feature_file);
+                           output);
     
   carp(CARP_INFO, "Outputting matches.");
-  OutputFiles output(QRANKER_COMMAND);
-  output.writeHeaders();
   output.writeMatches(match_collection);
 
   // MEMLEAK below causes seg fault (or used to)
@@ -101,8 +96,6 @@ int qranker_main(int argc, char** argv){
   // clean up
   free(psm_dir);
   free(protein_input_name);
-  free(feature_file);
-
 
   carp(CARP_INFO, "crux q-ranker finished.");
   exit(0);
@@ -125,7 +118,7 @@ int qranker_main(int argc, char** argv){
 MATCH_COLLECTION_T* run_q(
   char* psm_result_folder, 
   char* fasta_file, 
-  char* feature_file){ 
+  OutputFiles& output){ 
 
   unsigned int number_features = 20;
   double* features = NULL;    
@@ -137,20 +130,10 @@ MATCH_COLLECTION_T* run_q(
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_COLLECTION_T* target_match_collection = NULL;
   MATCH_T* match = NULL;
-  FILE* feature_fh = NULL;
   int set_idx = 0;
   
-  // optional feature_file
-  if(feature_file != NULL){  
-    if((feature_fh = fopen(feature_file, "w")) == NULL){
-      carp(CARP_FATAL, "Problem opening output file %s", feature_file);
-      return NULL;
-    }
-  }
+  output.writeFeatureHeader(feature_names, number_features);
 
-  carp(CARP_DETAILED_DEBUG, "Created feature file");
-
-  
   // create MATCH_COLLECTION_ITERATOR_T object
   // which will read in the serialized output PSM results and return
   // first the match_collection of TARGET followed by 
@@ -218,27 +201,7 @@ MATCH_COLLECTION_T* run_q(
       // Register PSM with features to q-ranker    
       features = get_match_percolator_features(match, match_collection);
 
-      if (feature_fh != NULL){
-        
-        fprintf(feature_fh, "%i\t",
-            get_spectrum_first_scan(get_match_spectrum(match))
-            );
-        if (get_match_null_peptide(match) == FALSE){
-          fprintf(feature_fh, "1\t");
-        } else { 
-          fprintf(feature_fh, "-1\t");
-        };
-
-        unsigned int feature_idx;
-        for (feature_idx = 0; feature_idx < number_features; feature_idx++){
-          if (feature_idx < number_features - 1){
-            fprintf(feature_fh, "%.4f\t", features[feature_idx]);
-          } else {
-            fprintf(feature_fh, "%.4f\n", features[feature_idx]);
-          }
-        }
-      }
-      
+      output.writeMatchFeatures(match, features, number_features);
       //qcRegisterPSM((SetType)set_idx, NULL, features);
       qcRegisterPSM((SetType)set_idx, get_match_sequence_sqt(match), features);
       
@@ -257,10 +220,6 @@ MATCH_COLLECTION_T* run_q(
     ++set_idx;
   } // end iteratation over each, TARGET, DECOY 1..3 match_collection sets
 
-  if (feature_fh != NULL){
-    fclose(feature_fh);
-  }
-  
   /***** Q-RANKER run *********/
 
     carp(CARP_DETAILED_DEBUG, "got to here");

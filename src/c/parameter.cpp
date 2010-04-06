@@ -659,10 +659,11 @@ void initialize_parameters(void){
       "sq-pvalue>.  Incorrect combinations of score-type and algorithm cause"
       " undefined behavior. Using 'none' will turn the binary .csm files "
       "into text.", "false");
-  set_string_parameter("feature-file", NULL,//"match_analysis.features"
+  set_boolean_parameter("feature-file", FALSE,
      "Optional file into which psm features are printed.",
-     "Available only for crux-analyze-matches.  File will contain features "
-     "used by percolator.", "true");
+     "Available only for percolator and q-ranker.  File will be named "
+     "<fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.",
+     "true");
 
   /* analyze-matches parameter options */
   set_double_parameter("pi0", 0.9, 0, 1, "Hide from user",
