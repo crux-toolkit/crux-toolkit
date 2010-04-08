@@ -20,37 +20,51 @@ A sample txt file may be found <a href="search.target.txt">here</a>.
 </p>
 <h2>List of fields</h2>
 <ol>
-<li>scan</li>
-<li>charge</li>
-<li>spectrum precursor m/z</li>
-<li>spectrum neutral mass</li>
-<li>peptide mass</li>
-<li>deta_cn</li>
-<li>sp score</li>
-<li>sp rank</li>
-<li>xcorr score</li>
-<li>xcorr rank</li>
-<li>p-value</li>
-<li>Weibull est. q-value</li>
-<li>decoy q-value (xcorr)</li>
-<li>decoy q-value (p-value)</li>
-<li>percolator score</li>
-<li>percolator rank</li>
-<li>percolator q-value</li>
-<li>q-ranker score</li>
-<li>q-ranker q-value</li>
-<li>b/y ions matched</li>
-<li>b/y ions total</li>
-<li>matches/spectrum</li>
-<li>sequence</li>
-<li>cleavage type</li>
-<li>protein id</li>
-<li>flanking aa</li>
-<li>unshuffled sequence</li>
-<li>eta</li>
-<li>beta</li>
-<li>shift</li>
-<li>corr</li>
+<li>scan: The identifying number of each scan.</li>
+<li>charge: The charge state for this spectrum in this PSM.</li>
+<li>spectrum precursor m/z: The observed m/z of the spectrum precursor ion.</li>
+<li>spectrum neutral mass: The computed mass of the spectrum precursor at the
+  given charge state. </li>
+<li>peptide mass: The computed mass of the peptide sequence (sum of
+  the amino acid masses).</li>
+<li>delta_cn: The normalized difference in xcorr for this PSM relative
+  to other PSMs for this spectrum at this charge state.</li>
+<li>sp score: The SEQUEST-type preliminary score.</li>
+<li>sp rank: The rank of this PSM when sorted by sp score.</li>
+<li>xcorr score: The SEQUEST-type cross correlation score.</li>
+<li>xcorr rank: The rank of this PSM when sorted by xcorr.</li>
+<li>p-value: The p-value computed from the estimated Weibull parameters of
+  the score distribution for this spectrum.</li>
+<li>Weibull est. q-value: The q-value computed from the p-value.</li>
+<li>decoy q-value (xcorr): The empirical q-value computed by ranking
+  target and decoy PSMs for this spectrum by xcorr.</li>
+<li>decoy q-value (p-value): The empirical q-value computed by
+  ranking target and decoy PSMs for this spectrum by p-value.</li>
+<li>percolator score: The discriminant score assigned by percolator.</li>
+<li>percolator rank: The rank of this PSM when sorted by percolator score.</li>
+<li>percolator q-value: The q-value assigned by percolator.</li>
+<li>q-ranker score: The discriminant score assigned by q-ranker.</li>
+<li>q-ranker q-value: The q-value assigned by q-ranker.</li>
+<li>b/y ions matched: The number of b-ions and y-ions in the peptide
+  that have a corresponding peak in the spectrum.</li>
+<li>b/y ions total: The total number of b- and y-ions predicted for
+  this peptide.</li>
+<li>matches/spectrum: The number of candidate peptides in the database
+  found for this spectrum.</li>
+<li>sequence: The peptide sequence.</li>
+<li>cleavage type: The cleavage rules for generating this peptide
+  based on the user-specified enzyme specificity.</li>
+<li>protein id: A comma-separated list of proteins in which this
+  peptide appears.</li>
+<li>flanking aa: The amino acids that precede and follow this peptide
+  in the parent protein id.</li>
+<li>unshuffled sequence: The target sequence from which a decoy was
+  generated.</li>
+<li>eta: Estimated Weibull scale parameter.</li>
+<li>beta: Estimated Weibull shape parameter.</li>
+<li>shift: Estimated Weibull shift parameter.</li>
+<li>corr: The correlation of the scores with the estimated Weibull
+  distribution.</li>
 </ol>
 <hr></hr>
 <p>
