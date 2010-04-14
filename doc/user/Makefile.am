@@ -28,7 +28,7 @@ dist_html_DATA  =  \
 	crux.html \
 	crux-predict-peptide-ions.html \
 	crux-search-for-matches.html \
-  crux-xlink-search.html \
+        crux-search-for-xlinks.html \
 	default.params \
 	customize-tutorial.html \
 	fasta-format.html \

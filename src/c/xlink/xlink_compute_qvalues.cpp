@@ -148,7 +148,7 @@ int xlink_compute_qvalues(){
   /* Get Arguments */
 
   string output_dir = get_string_parameter("output-dir");
-  string target_filename = get_string_parameter("search-tab-output-file");
+  string target_filename = "search.target.txt";
 
   //Read in targets.
   string target_path = output_dir + "/" + target_filename;
@@ -158,7 +158,7 @@ int xlink_compute_qvalues(){
 
   //Read in decoys.
 
-  string decoy_filename = get_string_parameter("decoy-tab-output-file");
+  string decoy_filename = "search.decoy.txt";
   string decoy_path = output_dir + "/" + decoy_filename;
   DelimitedFile decoy_matches(decoy_path);
 
@@ -240,9 +240,9 @@ int xlink_compute_qvalues(){
   //sort back by scans? or q-value?
   //target_matches_bonf.sortByFloatColumn("q-value decoy");
 
-  string result_file = output_dir + "/qvalues.target.xls";
+  string result_file = output_dir + "/qvalues.target.txt";
   target_matches_bonf.saveData(result_file);
 
-  result_file = output_dir + "/pvalues.decoy.xls";
+  result_file = output_dir + "/pvalues.decoy.txt";
   decoy_matches_bonf.saveData(result_file);
 }
