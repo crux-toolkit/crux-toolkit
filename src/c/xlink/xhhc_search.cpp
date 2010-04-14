@@ -141,7 +141,7 @@ int xlink_search_main(int argc, char** argv) {
  // best pvalues
 
   char* output_directory = get_string_parameter("output-dir");
-  char* target_filename = get_string_parameter("search-tab-output-file");
+  char* target_filename = "search.target.txt";
   
   string target_path = string(output_directory) + "/" + string(target_filename);
   ofstream search_target_file(target_path.c_str());
@@ -172,7 +172,7 @@ int xlink_search_main(int argc, char** argv) {
   search_target_file << "ion current observed"<<"\t";
   search_target_file << "ions observable bin (0-1200)"<<endl;
 
-  char *decoy_filename = get_string_parameter("decoy-tab-output-file");
+  char *decoy_filename = "search.decoy.txt";
   string decoy_path = string(output_directory) + "/" + string(decoy_filename);
 
   ofstream search_decoy_file (decoy_path.c_str());
