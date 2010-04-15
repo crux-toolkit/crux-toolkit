@@ -4,12 +4,10 @@
 #include "xhhc.h"
 
 //CRUX includes
-extern "C" {
 #include "ion_series.h"
 #include "scorer.h"
 #include "spectrum.h"
 #include "spectrum_collection.h"
-}
 
 // should this be somewhere else?
 #define bin_width_mono 1.0005079
@@ -20,7 +18,7 @@ class LinkedIonSeries {
   public:
     // constructors
     LinkedIonSeries();
-    LinkedIonSeries(char* links, int charge);
+    LinkedIonSeries(const char* links, int charge);
     //LinkedIonSeries(char* sequenceA, char* sequenceB, int posA, int posB, int charge);
     //LinkedIonSeries(char* sequenceA, char* sequenceB, char* links, int charge);
 

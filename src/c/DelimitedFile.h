@@ -241,7 +241,7 @@ class DelimitedFile {
   void setString(
     unsigned int col_idx, ///< the column index
     unsigned int row_idx, ///< the row index
-    char* value ///< the new value
+    const char* value ///< the new value
   );
 
   /**

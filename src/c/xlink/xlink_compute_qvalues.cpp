@@ -2,14 +2,10 @@
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
 
-extern "C" {
 #include "crux-utils.h"
 #include "objects.h"
 #include "scorer.h"
 #include "spectrum_collection.h"
-
-}
-
 #include "DelimitedFile.h"
 
 #include "xlink_compute_qvalues.h"

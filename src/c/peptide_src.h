@@ -7,10 +7,6 @@
 #define PEPTIDE_SRC_H
 #include <stdio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "utils.h"
 #include "mass.h"
 
@@ -97,7 +93,6 @@ void print_peptide_src(
   FILE* file  ///< the out put stream -out
   );
 
-#ifdef __cplusplus
 /**
  * \brief Read in the peptide_src objects from the given file and
  * assosiated them with the given peptide.  
@@ -115,7 +110,6 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
   DelimitedFile& file,           ///< file to read from
   DATABASE_T* database, ///< database containing proteins
   BOOLEAN_T use_array); ///< use array implementation vs. linked list
-#endif
 
 /**
  * \brief Read in the peptide_src objects from the given file and
@@ -253,10 +247,6 @@ void serialize_peptide_src(
  * file. 
  */
 int size_of_serialized_peptide_src();
-
-#ifdef __cplusplus
-}
-#endif
 
 /*
  * Local Variables:
