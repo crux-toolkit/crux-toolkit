@@ -7,9 +7,7 @@ chmod 774 crux-test.pl
 ln -fs test.fasta existing.fasta
 
 # Create an index, if it doesn't already exist.
-if [ ! -e index-for-sequest-comparison ]
-then ../../crux create-index  --parameter-file params/mods-sequest --verbosity 0 for-sequest-comparison.fasta index-for-sequest-comparison
-fi
+../../crux create-index  --parameter-file params/mods-sequest --verbosity 0 for-sequest-comparison.fasta index-for-sequest-comparison
 
 # Remove any lingering output files.
 ./clean.sh
