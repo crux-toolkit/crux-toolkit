@@ -1,10 +1,6 @@
 #ifndef XLINK_SEARCH_CMD_H
 #define XLINK_SEARCH_CMD_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * \file match_analysis.c
  */
@@ -15,12 +11,6 @@ extern "C" {
  *
  * $Revision: 1.0 $
  */
-
-
-
-#ifdef __cplusplus
-}
-#endif
 
 int xlink_search_main(int argc, char** argv);
 

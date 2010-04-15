@@ -11,7 +11,6 @@
 #include <fstream>
 
 /*Crux Includes*/
-extern "C" {
 #include "utils.h"
 #include "spectrum.h"
 #include "carp.h"
@@ -25,7 +24,6 @@ extern "C" {
 #include "objects.h"
 #include "crux-utils.h"
 #include "ion.h"
-}
 
 // get rid of these
 //#define PARAM_ESTIMATION_SAMPLE_COUNT 500

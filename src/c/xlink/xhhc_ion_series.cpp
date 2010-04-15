@@ -14,7 +14,7 @@ LinkedIonSeries::LinkedIonSeries() {
 }
 
 
-LinkedIonSeries::LinkedIonSeries(char* links, int charge) {
+LinkedIonSeries::LinkedIonSeries(const char* links, int charge) {
   charge_ = charge;
   fragment_mass_type = get_mass_type_parameter("fragment-mass");
 }

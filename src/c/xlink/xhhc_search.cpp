@@ -5,9 +5,7 @@
 
 
 //CRUX INCLUDES
-extern "C" {
 #include "objects.h"
-}
 
 #include <cmath>
 #include <ctime>

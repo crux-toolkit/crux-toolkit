@@ -1,10 +1,7 @@
 #include "xhhc.h"
 
-extern "C" {
 #include "parameter.h"
 #include "peptide.h"
-}
-
 #include "DelimitedFile.h"
 
 using namespace std;

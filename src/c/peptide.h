@@ -26,10 +26,7 @@
 //these may be elsewhere
 #define MAX_PEPTIDE_LENGTH 255
 
-#ifdef __cplusplus
 #include <string>
-extern "C" {
-#endif
 
 
 /*  Allocators/deallocators  */
@@ -580,8 +577,6 @@ BOOLEAN_T serialize_peptide(
   FILE* file
   );
  
-#ifdef __cplusplus
-
 /**
  * \brief Read in a peptide from a tab-delimited file and return it.
  *
@@ -598,9 +593,6 @@ PEPTIDE_T* parse_peptide_tab_delimited(
   DATABASE_T* database,///< the database containing the peptides -in
   BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
   );
-
-#endif
-
 
 /**
  * \brief Read in a peptide from a binary file and return it.
@@ -706,7 +698,6 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
 
-#ifdef __cplusplus
 /**
  * \brief Builds a comma delimited string listing the 
  * protein id(peptide start index) for the sources of 
@@ -715,7 +706,6 @@ PEPTIDE_SRC_T* peptide_src_iterator_next(
  * \returns a string of the protein sources for this peptide
  */
 std::string get_protein_ids_peptide_locations(PEPTIDE_T* peptide);
-#endif
 
 /**
  * \brief Builds a comma delimited string listing the protein ids
@@ -734,11 +724,6 @@ char *get_protein_ids(PEPTIDE_T *peptide);
  * If peptide has no sources returns NULL.
  */
 char *get_flanking_aas(PEPTIDE_T *peptide);
-
-#ifdef __cplusplus
-}
-#endif
-
 
 #endif
 
