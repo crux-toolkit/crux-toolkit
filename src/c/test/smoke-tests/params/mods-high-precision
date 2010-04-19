@@ -1,0 +1,6 @@
+mod=79.9:STY:2
+cmod=33.3:10
+overwrite=T
+seed=7
+precision=4
+top-match=5

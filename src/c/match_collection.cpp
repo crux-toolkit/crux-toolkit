@@ -2381,7 +2381,8 @@ void print_matches_multi_spectra
  * setup_match_collection_iterator which is called by next to find,
  * open, and parse the next psm file(s) to process.  If there are
  * multiple target psm files, it reads in all of them when set_type is
- * 0 and puts them all into one match_collection. 
+ * 0 and puts them all into one match_collection.  If the fileroot
+ * parameter is non-null, only reads files with that prefix.
  *\returns A heap allocated match_collection.
  */
 MATCH_COLLECTION_T* new_match_collection_psm_output(
@@ -2395,7 +2396,13 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   char* file_in_dir = NULL;
   FILE* result_file = NULL;
   char suffix[25];
-
+  const char* prefix = get_string_parameter_pointer("fileroot");
+  // file must also start with either sequest or search; look for 'se'
+  if( prefix == NULL || (strcmp(prefix, "__NULL_STR") == 0) ){
+    prefix = "se";
+  } else {
+    prefix = cat_string(prefix, ".se");
+  }
   carp(CARP_DEBUG, "Calling new_match_collection_psm_output");
   DATABASE_T* database = match_collection_iterator->database;
   
@@ -2438,13 +2445,18 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
     match_collection->null_peptide_collection = TRUE;
   }
   
-  carp(CARP_DEBUG, "Set type is %d and suffix is %s", (int)set_type, suffix);
+  carp(CARP_DEBUG, "Set type is %d, suffix is %s and prefix is %s.", 
+       (int)set_type, suffix, prefix);
   BOOLEAN_T found_file = FALSE;
   // iterate over all PSM files in directory to find the one to read
   while((directory_entry 
             = readdir(match_collection_iterator->working_directory))){
 
-    //carp(CARP_DETAILED_DEBUG, "Next file is %s", directory_entry->d_name);
+    // skip files without the correct prefix (fileroot)
+    if( ! prefix_compare(directory_entry->d_name, prefix)){
+      continue;
+    }
+
     if (get_boolean_parameter("parse-tab-files")) {
           // skip over any file not ending in .csm
       if( !suffix_compare(directory_entry->d_name, ".txt") ) {
@@ -2552,7 +2564,7 @@ BOOLEAN_T extend_match_collection_tab_delimited(
     /*** get spectrum specific features ***/
     charge = result_file.getInteger("charge");
     delta_cn = result_file.getFloat("delta_cn");
-    if (delta_cn == 0.0) {
+    if (delta_cn <= 0.0) {
       ln_delta_cn = 0;
     } else {
       ln_delta_cn = logf(delta_cn);

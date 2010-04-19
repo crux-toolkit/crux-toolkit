@@ -92,7 +92,7 @@ generate_peptides_use_existing_index = good_results/standard_generate_peptides_u
 search_for_matches_default_existing_index = good_results/search_for_matches_default_existing_index.target.txt = rm -rf crux-output; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
 
 # See that match_analysis works with an existing index and existing results
-analyze_matches_existing_index_and_results = good_results/analyze_matches_existing_index_and_results.percolator.target.txt =  rm -f existing_search/percolator*; crux percolator --output-dir existing_search existing_crux_index; cat existing_search/percolator.target.txt = 'StartTime' 'Database'
+analyze_matches_existing_index_and_results = good_results/analyze_matches_existing.percolator.target.txt =  rm -f existing_search/percolator*; crux percolator --output-dir existing_search existing_crux_index; cat existing_search/percolator.target.txt = 'StartTime' 'Database'
 
 # See that match_analysis works with an existing index and new results
 analyze_matches_existing_index = good_results/analyze_matches_existing_index.percolator.target.txt =  crux percolator --parameter-file params/set_rand_seed existing_crux_index; cat crux-output/percolator.target.txt = 'StartTime'
@@ -118,10 +118,10 @@ search_for_matches_default_index = good_results/search_for_matches_default_index
 analyze_matches_index = good_results/analyze_matches_index.percolator.target.txt =  crux percolator --overwrite T --parameter-file params/set_rand_seed test_crux_index; cat crux-output/percolator.target.txt = 'StartTime'
 
 # Search for matches with modifications from index
-search_mods_index = good_results/search_mods_index.target.txt = crux search-for-matches --parameter-file params/mods test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
+search_mods_index = good_results/search_mods_index.target.txt = crux search-for-matches --parameter-file params/mods-high-precision test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
 
 # Analyze matches with modifications from index
-analyze_mods_index = good_results/analyze_mods_index.percolator.target.txt = crux percolator --feature-file TRUE --overwrite T --parameter-file params/mods existing_crux_index; cat crux-output/percolator.target.txt = 'Time' 'Database'
+analyze_mods_index = good_results/analyze_mods_index.percolator.target.txt = crux percolator --feature-file TRUE --overwrite T --parameter-file params/mods-high-precision existing_crux_index; cat crux-output/percolator.target.txt = 'Time' 'Database'
 
 # Test the feature file
 perc-feature-file = good_results/percolator.features.txt = cat crux-output/percolator.features.txt = 
@@ -143,7 +143,7 @@ sequest_matching_search = good_results/seq_test.sqt = crux sequest-search --para
 separate-ss = good_results/separate-ss = rm -f ss/separate*; crux sequest-search --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta; cat ss/separate*t = 'StartTime'
 
 # Test that percolator works with the .csm files
-perc-ss = good_results/perc-ss = rm -f ss/one*csm ss/tdc*csm ss/no*csm ss/perc*; crux percolator --parameter-file params/separate-ss small-yeast.fasta; cat ss/percolator.target.txt  =
+perc-ss = good_results/perc-ss = rm -f ss/one*csm ss/tdc*csm ss/no*csm ss/perc*; crux percolator --parameter-file params/separate-ss small-yeast.fasta; cat ss/separate.percolator.target.txt  =
 
 # Decoys in one file, 2 decoys per target
 one-decoy-file-ss = good_results/one-decoy-file-ss = rm -f ss/one-decoy-file*; crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta; cat ss/one-decoy-file*t = 'StartTime'

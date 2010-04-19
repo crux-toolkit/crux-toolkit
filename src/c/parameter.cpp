@@ -675,7 +675,7 @@ void initialize_parameters(void){
 
   //parameter to parse the tab-delimited result files rather than
   //the binary csm files when analyzing matches.
-  set_boolean_parameter("parse-tab-files", FALSE,
+  set_boolean_parameter("parse-tab-files", TRUE,
     "Parse the tab delimited .txt result files rather "
     "than the .csm files. Default F.",
     "Available for compute-q-values, percolator, and q-ranker.",
