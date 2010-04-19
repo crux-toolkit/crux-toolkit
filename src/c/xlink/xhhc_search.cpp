@@ -93,7 +93,7 @@ int xlink_search_main(int argc, char** argv) {
 
   char* missed_link_cleavage = get_string_parameter("missed-link-cleavage");
 
-  int num_missed_cleavages = 0;
+  //int num_missed_cleavages = 0;
   char* ms2_file = get_string_parameter("ms2 file");
 
   FLOAT_T precursor_window = get_double_parameter("precursor-window");
@@ -108,7 +108,8 @@ int xlink_search_main(int argc, char** argv) {
   char* database = get_string_parameter("protein input");
   char* links = get_string_parameter("link sites");
 
-  int min_weibull_points = get_int_parameter("min-weibull-points");
+  unsigned int min_weibull_points = 
+    (unsigned int)get_int_parameter("min-weibull-points");
 
   int scan_num = 0;
   int charge = 1;
@@ -139,7 +140,7 @@ int xlink_search_main(int argc, char** argv) {
  // best pvalues
 
   char* output_directory = get_string_parameter("output-dir");
-  char* target_filename = "search.target.txt";
+  const char* target_filename = "search.target.txt";
   
   string target_path = string(output_directory) + "/" + string(target_filename);
   ofstream search_target_file(target_path.c_str());
@@ -170,7 +171,7 @@ int xlink_search_main(int argc, char** argv) {
   search_target_file << "ion current observed"<<"\t";
   search_target_file << "ions observable bin (0-1200)"<<endl;
 
-  char *decoy_filename = "search.decoy.txt";
+  const char *decoy_filename = "search.decoy.txt";
   string decoy_path = string(output_directory) + "/" + string(decoy_filename);
 
   ofstream search_decoy_file (decoy_path.c_str());
@@ -268,27 +269,27 @@ int xlink_search_main(int argc, char** argv) {
 
     clock_t candidate_clock = clock();
 
-    LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
+    LinkedIonSeries ion_series = LinkedIonSeries(charge);
 
     // for every ion in the mass window
     carp(CARP_DEBUG, "Scoring targets");
-    for (int i=0;i<target_xpeptides.size();i++) {
+    for (unsigned int idx=0;idx<target_xpeptides.size();idx++) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
-      ion_series.add_linked_ions(target_xpeptides[i]);
+      ion_series.add_linked_ions(target_xpeptides[idx]);
       score = hhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
-      scores.push_back(make_pair(score, target_xpeptides[i]));
+      scores.push_back(make_pair(score, target_xpeptides[idx]));
     }
 
     clock_t target_clock = clock();
 
     carp(CARP_DEBUG, "Scoring decoys.");
-    for (int i=0;i<decoy_xpeptides.size();i++) {
+    for (unsigned int idx=0;idx<decoy_xpeptides.size();idx++) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
-      ion_series.add_linked_ions(decoy_xpeptides[i]);
+      ion_series.add_linked_ions(decoy_xpeptides[idx]);
       score = hhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
-      scores.push_back(make_pair(score, decoy_xpeptides[i]));
+      scores.push_back(make_pair(score, decoy_xpeptides[idx]));
     }
 
 
@@ -299,12 +300,12 @@ int xlink_search_main(int argc, char** argv) {
     clock_t decoy_clock = clock();
     carp(CARP_DEBUG, "scoring training decoys...");
     // score all training decoys
-    for (int i=0;i<decoy_train_xpeptides.size();i++) {
+    for (unsigned int idx=0;idx<decoy_train_xpeptides.size();idx++) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
-      ion_series.add_linked_ions(decoy_train_xpeptides[i]);
+      ion_series.add_linked_ions(decoy_train_xpeptides[idx]);
       score = hhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
-      linked_decoy_scores_array[i] = score;
+      linked_decoy_scores_array[idx] = score;
     }
   
     
@@ -315,9 +316,9 @@ int xlink_search_main(int argc, char** argv) {
 
 
     
-    for (int i=0;i<scores.size();i++) {
-      if (!scores[i].second.is_decoy())
-	linked_decoy_scores_array[i+decoy_train_xpeptides.size()] = scores[i].first;
+    for (unsigned int idx=0;idx<scores.size();idx++) {
+      if (!scores[idx].second.is_decoy())
+	linked_decoy_scores_array[idx+decoy_train_xpeptides.size()] = scores[idx].first;
     }
     
     // sort scores
@@ -359,7 +360,7 @@ int xlink_search_main(int argc, char** argv) {
 
     int ndecoys = 0;
     int ntargets = 0;
-    int score_index = 0;
+    unsigned int score_index = 0;
 
     while (score_index < scores.size() && (ndecoys < top_match || ntargets < top_match)) {
  
@@ -423,7 +424,7 @@ int xlink_search_main(int argc, char** argv) {
         search_target_file <<"\t";
                 //get theoretical ions count for (0-1200, with 1Da bins).
         Scorer scorer;
-        LinkedIonSeries ion_series(links, charge);
+        LinkedIonSeries ion_series(charge);
         ion_series.add_linked_ions(scores[score_index].second);
 
         FLOAT_T ion_current_observed;
@@ -598,8 +599,8 @@ void get_protein_ids_locations(PEPTIDE_T *peptide,
 string get_protein_ids_locations(vector<PEPTIDE_T*>& peptides) {
   set<string> protein_ids_locations;
 
-  for (int i=0;i<peptides.size();i++) {
-    get_protein_ids_locations(peptides[i], protein_ids_locations);
+  for (unsigned int idx=0;idx<peptides.size();idx++) {
+    get_protein_ids_locations(peptides[idx], protein_ids_locations);
   }
 
   set<string>::iterator result_iter = protein_ids_locations.begin();

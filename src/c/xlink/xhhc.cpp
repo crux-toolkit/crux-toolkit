@@ -21,9 +21,9 @@ void get_linear_peptides(set<string>& peptides,
 
   string sequence = "";
   string last_sequence = "zz";
-  bool missed_cleavage = false;
+  //bool missed_cleavage = false;
   // keep track of whether the next peptide contains the previous one or not
-  size_t index;
+  //size_t index;
   while (database_protein_iterator_has_next(protein_iterator)) {
     protein = database_protein_iterator_next(protein_iterator);
     peptide_iterator = new_protein_peptide_iterator(protein, peptide_constraint);
@@ -66,7 +66,7 @@ void free_peptides() {
        map_iter != sequence_peptide_map.end();
        ++map_iter) {
     vector<PEPTIDE_T*>& peptides = map_iter -> second;
-    for (int i=0;i<peptides.size();i++) {
+    for (unsigned int i=0;i<peptides.size();i++) {
       free_peptide(peptides[i]);
     }
   }
@@ -140,8 +140,8 @@ void print_precursor_count(vector<LinkedPeptide>& all_ions) {
   int dead_end_products = 0;
   int xlink_products = 0;
 
-  for (int i=0;i<all_ions.size();i++) {
-    LinkedPeptide& current = all_ions[i];
+  for (unsigned int idx=0;idx<all_ions.size();idx++) {
+    LinkedPeptide& current = all_ions[idx];
     if (current.is_single())
       linear_peptides++;
     else if (current.is_dead_end())
@@ -168,7 +168,8 @@ void find_all_precursor_ions(vector<LinkedPeptide>& all_ions,
 		             char* database_file,
 			     int charge)
 {
- 
+
+  carp(CARP_DEBUG,"missed link cleavage:%s", missed_link_cleavage);
   carp(CARP_DEBUG,"find_all_precursor_ions: start()");
   DATABASE_T* db = new_database(database_file, FALSE);
   carp(CARP_DEBUG,"peptide constraint");
@@ -403,7 +404,7 @@ BondMap::BondMap(string links_string) {
   DelimitedFile::tokenize(links_string, bonds, ',');
 
   //parse each bond description.
-  for (int bond_idx = 0; bond_idx < bonds.size(); bond_idx++) {
+  for (unsigned int bond_idx = 0; bond_idx < bonds.size(); bond_idx++) {
     vector<string> residues;
     DelimitedFile::tokenize(bonds[bond_idx], residues, ':');
     //check for *.

@@ -89,7 +89,7 @@ void collapseScans(DelimitedFile& matches_in, DelimitedFile& matches_out) {
   matches_out.clear();
   //matches_out.addColumns(matches_in.getColumnNames());
   vector<string>& column_names = matches_in.getColumnNames();
-  for (int idx=0;idx<column_names.size();idx++) {
+  for (unsigned int idx=0;idx<column_names.size();idx++) {
     matches_out.addColumn(column_names[idx]);
   }
   
@@ -104,7 +104,10 @@ void collapseScans(DelimitedFile& matches_in, DelimitedFile& matches_out) {
   double best_bonf = 0;
   
 
-  for (int match_idx = 0;match_idx < matches_in.numRows(); match_idx++) {
+  for (unsigned int match_idx = 0;
+    match_idx < matches_in.numRows(); 
+    match_idx++) {
+
     int current_scan = matches_in.getInteger("scan", match_idx);
     if (last_scan != current_scan) {
       //process the scans between the first and match_idx-1.
@@ -143,6 +146,7 @@ int xlink_compute_qvalues(){
 
   /* Get Arguments */
 
+  carp(CARP_INFO,"reading targets");
   string output_dir = get_string_parameter("output-dir");
   string target_filename = "search.target.txt";
 
@@ -153,6 +157,8 @@ int xlink_compute_qvalues(){
   //cout << target_matches << endl;
 
   //Read in decoys.
+
+  carp(CARP_INFO,"reading decoys");
 
   string decoy_filename = "search.decoy.txt";
   string decoy_path = output_dir + "/" + decoy_filename;
@@ -182,9 +188,12 @@ int xlink_compute_qvalues(){
   target_matches_bonf.addColumn("q-value decoy");
 
   //carp(CARP_INFO,"Calculating q-values");
-  int decoy_idx = 0;
+  unsigned int decoy_idx = 0;
   //cout <<"Number of target rows:"<<target_matches_bonf.numRows()<<endl;
-  for (int target_idx = 0; target_idx < target_matches_bonf.numRows(); target_idx++) {
+  for (unsigned int target_idx = 0; 
+    target_idx < target_matches_bonf.numRows(); 
+    target_idx++) {
+
     //calculate q-value by b-h
     double current_pvalue = target_matches_bonf.getDouble("p-value bonf.", target_idx);
     //cout <<"Current pvalue:"<<current_pvalue<<endl;
@@ -241,4 +250,6 @@ int xlink_compute_qvalues(){
 
   result_file = output_dir + "/pvalues.decoy.txt";
   decoy_matches_bonf.saveData(result_file);
+
+  return 0;
 }

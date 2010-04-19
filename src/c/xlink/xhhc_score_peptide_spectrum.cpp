@@ -114,7 +114,7 @@ int main(int argc, char** argv){
 
   if (scoremethod=="composite") {
 
-    LinkedIonSeries ion_series("",charge);
+    LinkedIonSeries ion_series(charge);
 
     //cout << lp << endl;
     

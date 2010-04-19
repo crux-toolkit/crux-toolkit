@@ -1,4 +1,8 @@
 # Automake template for xlink-search library
+AM_CXXFLAGS = -Wall -W -Werror  $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
+            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
+
+
 libxlink_la_SOURCES = \
   xhhc.cpp \
   xhhc.h \
@@ -16,7 +20,9 @@ libxlink_la_SOURCES = \
   xlink_compute_qvalues.cpp
 
 
-libxlink_la_CPPFLAGS = $(AM_CPPFLAGS) \
+
+
+libxlink_la_CXXFLAGS = $(AM_CXXFLAGS) \
   -I$(top_srcdir)/src/c/ \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/MSToolkit/zLib \

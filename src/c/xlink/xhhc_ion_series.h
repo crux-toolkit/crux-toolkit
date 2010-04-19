@@ -18,7 +18,8 @@ class LinkedIonSeries {
   public:
     // constructors
     LinkedIonSeries();
-    LinkedIonSeries(const char* links, int charge);
+
+    LinkedIonSeries(int charge);
     //LinkedIonSeries(char* sequenceA, char* sequenceB, int posA, int posB, int charge);
     //LinkedIonSeries(char* sequenceA, char* sequenceB, char* links, int charge);
 
