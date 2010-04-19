@@ -606,11 +606,6 @@ void print_match_tab(
   if( sequence == NULL ){
     sequence = my_copy_string("");  // for post-search, no shuffled sequences
   }
-  BOOLEAN_T adjust_delta_cn = FALSE;
-
-  if (get_boolean_parameter("parse-tab-files")) {
-    adjust_delta_cn = TRUE;
-  }
 
   // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
   // Only the fraction matched is serialized.  The number possible can
@@ -632,9 +627,6 @@ void print_match_tab(
   }
 
   FLOAT_T delta_cn = get_match_delta_cn(match);
-  if( adjust_delta_cn == TRUE ){
-    delta_cn = 0.0;
-  }
   if( delta_cn == 0 ){// I hate -0, this prevents it
     delta_cn = 0.0;
   }

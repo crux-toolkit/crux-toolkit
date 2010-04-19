@@ -259,6 +259,7 @@ int search_main(int argc, char** argv){
     for(decoy_idx = 0; decoy_idx < num_decoy_collections; decoy_idx++){
       free_match_collection(decoy_collection_list[decoy_idx]);
     }
+    free(decoy_collection_list);
 
   }// next spectrum
 

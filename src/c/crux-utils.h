@@ -228,8 +228,8 @@ FILE* create_file_in_path(
  * \returns TRUE, if the string starts with the suffix, else FALSE
  */
 BOOLEAN_T prefix_compare(
-  char* string, ///< The string to compare -in
-  char* prefix  ///< The prefix to find in the string -in
+  const char* string, ///< The string to compare -in
+  const char* prefix  ///< The prefix to find in the string -in
   );
 
 /**

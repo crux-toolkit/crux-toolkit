@@ -686,13 +686,18 @@ void prefix_fileroot_to_name(char** name) {
 
 /**
  * \brief Check if the string has the correct prefix
- * \returns TRUE if the string starts with the given prefix, else FALSE
+ * \returns TRUE if the string starts with the given prefix or if the
+ * prefix is NULL, else FALSE.
  */
 BOOLEAN_T prefix_compare(
-  char* string, ///< The string to check
-  char* prefix  ///< The prefix to find in the string
+  const char* string, ///< The string to check
+  const char* prefix  ///< The prefix to find in the string
   )
 {
+  if( prefix == NULL ){
+    return TRUE;
+  }
+
   int len = strlen(string);
   int len_prefix = strlen(prefix);
 
@@ -1524,6 +1529,7 @@ void initialize_run(
   if( result == -1 ){
     carp(CARP_FATAL, "Unable to create output directory %s.", output_folder);
   }
+  free(output_folder);
 
   char* cmd_file_name = command_type_to_file_string(cmd);
 
