@@ -18,6 +18,9 @@
 #include "protein.h"
 #include "carp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Allocates a new (empty) peptide_constraint object.
@@ -199,6 +202,12 @@ void set_peptide_constraint_mass_type(
 MASS_TYPE_T get_peptide_constraint_mass_type(
   PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide constraint to query -in
   );
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif
 

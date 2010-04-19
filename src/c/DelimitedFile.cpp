@@ -142,6 +142,7 @@ void DelimitedFile::loadData(
   vector<string>tokens;
 
   if (hasHeader) {
+
     hasLine = getline(file, line) != NULL;
     if (hasLine) {
       tokenize(line, tokens, '\t');
@@ -156,26 +157,31 @@ void DelimitedFile::loadData(
       return;
     }
   }
-
+  
   hasLine = getline(file, line) != NULL;
   while (hasLine) {
+
     tokenize(line, tokens, '\t');
     if (!hasHeader && numCols() == 0) {
       //initialize the number of columns so that addRow won't fail.
       while (numCols() <= tokens.size()) {
+
         addColumn();
       }
     }
+
     int row_idx = addRow();
+
     for (unsigned int col_idx = 0; col_idx < tokens.size(); col_idx++) {
       if (numCols() <= col_idx) {
         addColumn();
       }
+
       setString(col_idx, row_idx, tokens[col_idx]);
     }
     hasLine = getline(file, line) != NULL;
   }
-  
+
   file.close();
 
   //reset the iterator.
@@ -378,9 +384,10 @@ unsigned int DelimitedFile::addRow() {
   if (numCols() == 0) {
     carp(CARP_FATAL,"Must have at least one column before calling add row!");
   }
-
+  
   unsigned int row_idx = numRows();
   for (unsigned int col_idx = 0;col_idx < numCols(); col_idx++) {
+
       setString(col_idx, row_idx, "");
   }
   return row_idx;
@@ -440,12 +447,14 @@ void DelimitedFile::setString(
 
   //ensure there are enough columns
   while (col_idx >= numCols()) {
+
     addColumn();
   }
   vector<string>& col = getColumn(col_idx);
 
   //ensure there are enough rows
   while (row_idx >= col.size()) {
+
     col.push_back("");
   }
 
@@ -459,7 +468,8 @@ void DelimitedFile::setString(
   unsigned int col_idx, ///< the column index
   unsigned int row_idx, ///< the row index
   const char* value ///< the new value
-  ) {
+) {
+
   string svalue(value);
   setString(col_idx, row_idx, svalue);
 }

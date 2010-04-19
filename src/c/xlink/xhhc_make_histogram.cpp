@@ -17,7 +17,7 @@ using namespace std;
 void plot_weibull(vector<pair<FLOAT_T, LinkedPeptide> >& scores, SPECTRUM_T* spectrum, int charge); 
 
 int main(int argc, char** argv) {
-  char* missed_link_cleavage = "K";
+  const char* missed_link_cleavage = "K";
   //int num_missed_cleavages = 0;
   char* ms2_file = NULL;
   char* min_mass_string = NULL;
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
   vector<LinkedPeptide> all_ions;
   
   //find_all_precursor_ions(all_ions, links, linker_mass, charge, missed_link_cleavage, database);
-  find_all_precursor_ions(all_ions, links, missed_link_cleavage, database, charge);
+  find_all_precursor_ions(all_ions, (char*)links, (char*)missed_link_cleavage, database, charge);
 
   FLOAT_T max_mass = all_ions.back().mass(AVERAGE);
   FLOAT_T min_mass = 0.0;
@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
     vector<pair<FLOAT_T, LinkedPeptide> > scores;
     //LinkedIonSeries ion_series;
   // for every ion in the mass window
-    LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
+    LinkedIonSeries ion_series = LinkedIonSeries(charge);
     for (vector<LinkedPeptide>::iterator ion = filtered_ions.begin(); ion != filtered_ions.end(); ++ion) {
       ion_series.clear();
       ion_series.add_linked_ions(*ion);

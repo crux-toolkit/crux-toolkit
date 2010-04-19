@@ -13,8 +13,7 @@ LinkedIonSeries::LinkedIonSeries() {
   fragment_mass_type = get_mass_type_parameter("fragment-mass");
 }
 
-
-LinkedIonSeries::LinkedIonSeries(const char* links, int charge) {
+LinkedIonSeries::LinkedIonSeries(int charge) {
   charge_ = charge;
   fragment_mass_type = get_mass_type_parameter("fragment-mass");
 }
@@ -167,6 +166,7 @@ int LinkedIonSeries::get_observable_ions(
       add_ion_bin(observed, ions_observable, ions_observable_bin, co_mz, bin_width, min_mz, max_mz, false);
     }
   }
+  return 0;
 }
 
 
@@ -199,6 +199,7 @@ int LinkedIonSeries::get_observable_by_ions(
       }
     }
   }
+  return by_observable_bin;
 }
 
 
