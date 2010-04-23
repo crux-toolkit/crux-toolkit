@@ -38,24 +38,16 @@ class ImagePanel extends JPanel {
 		setMinimumSize(new Dimension(image.getWidth(), image.getHeight()));
 		setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
 		setLayout(null);
-		createIndex.setBounds(new Rectangle(88, 61, 170, 37));
+		createIndex.setBounds(new Rectangle(88, 61, 155, 35));
 		add(createIndex);
-		search.setBounds(new Rectangle(400, 61, 170, 37));
+		search.setBounds(new Rectangle(400, 61, 155, 35));
 		add(search);
-		computeQvalues.setBounds(new Rectangle(790, 0, 160, 37));
+		computeQvalues.setBounds(new Rectangle(770, 0, 155, 35));
 		add(computeQvalues);
-		percolator.setBounds(new Rectangle(816, 61, 120, 37));
+		percolator.setBounds(new Rectangle(775, 61, 155, 35));
 		add(percolator);
-		qranker.setBounds(new Rectangle(808, 126, 120, 37));
+		qranker.setBounds(new Rectangle(770, 126, 155, 35));
 		add(qranker);
-		/*ButtonGroup cruxButtons = new ButtonGroup();
-		cruxButtons.add(createIndex);
-		cruxButtons.add(search);
-		cruxButtons.add(computeQvalues);
-		cruxButtons.add(percolator);
-		cruxButtons.add(qranker);
-		cruxButtons.add(dummy);
-		dummy.setSelected(true);*/
 	}
 
 	public void paintComponent(Graphics g) {

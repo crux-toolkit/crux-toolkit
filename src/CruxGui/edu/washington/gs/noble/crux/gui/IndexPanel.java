@@ -1,5 +1,6 @@
 package edu.washington.gs.noble.crux.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -13,6 +14,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
@@ -25,6 +27,8 @@ class IndexPanel extends JPanel implements ItemListener {
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 	
+	private JScrollPane scrollPane = null;
+	private final JPanel panel = new JPanel();
 	private final JCheckBox runToolCheckBox = new JCheckBox("Run this tool");
 	private final JCheckBox showAdvancedParameters = new JCheckBox("Show advanced parameters");
 	private ProteinDBPanel proteinDBPanel = null;
@@ -51,8 +55,16 @@ class IndexPanel extends JPanel implements ItemListener {
 				"create-index parameters"
 			)
 		);
-		setBackground(Color.white);
+		setBackground(Color.BLUE);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+	    scrollPane = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+	    scrollPane.setBackground(Color.RED);
+	    scrollPane.setSize(300, 200);
+	    add(scrollPane);
+	    panel.setMaximumSize(new Dimension(300, 200));
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+	    setSize(300,200);
+	    panel.setBackground(Color.YELLOW);
 		proteinDBPanel = new ProteinDBPanel(model);
 		enzymePanel = new EnzymePanel(model);
 		massPanel = new MassPanel(model);
@@ -75,22 +87,24 @@ class IndexPanel extends JPanel implements ItemListener {
 		buttonPanel.add(Box.createRigidArea(new Dimension(12,0)));
 		loadDefaults.setEnabled(false);
 		buttonPanel.add(loadDefaults);
-		add(Box.createRigidArea(new Dimension(0,12)));
-		add(runToolCheckBox);
-		add(Box.createRigidArea(new Dimension(0,12)));
-		add(showAdvancedParameters);
-		add(Box.createRigidArea(new Dimension(0,12)));
-	    add(proteinDBPanel);
-		add(Box.createRigidArea(new Dimension(0,12)));
-		add(massPanel);
-		add(Box.createRigidArea(new Dimension(0,12)));
-		add(digestPanel);
-		add(Box.createRigidArea(new Dimension(0,12)));
-		add(enzymePanel);
-		add(Box.createRigidArea(new Dimension(0,12)));
-		add(missedCleavages);
-		add(Box.createRigidArea(new Dimension(0,12)));
-		add(buttonPanel);
+		scrollPane.setPreferredSize(new Dimension(400,400));
+		add(scrollPane);
+		panel.add(Box.createRigidArea(new Dimension(0,12)));
+		panel.add(runToolCheckBox);
+		panel.add(Box.createRigidArea(new Dimension(0,12)));
+		panel.add(showAdvancedParameters);
+		panel.add(Box.createRigidArea(new Dimension(0,12)));
+	    panel.add(proteinDBPanel);
+		panel.add(Box.createRigidArea(new Dimension(0,12)));
+		panel.add(massPanel);
+		panel.add(Box.createRigidArea(new Dimension(0,12)));
+		panel.add(digestPanel);
+		panel.add(Box.createRigidArea(new Dimension(0,12)));
+		panel.add(enzymePanel);
+		panel.add(Box.createRigidArea(new Dimension(0,12)));
+		panel.add(missedCleavages);
+		panel.add(Box.createRigidArea(new Dimension(0,12)));
+		panel.add(buttonPanel);
 		runToolCheckBox.addItemListener(new RunComponentChangeListener());
 		updateFromModel();
 		setVisible(false);
