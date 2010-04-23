@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.util.logging.Logger;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
@@ -41,6 +42,8 @@ public class CruxViewPanel extends JPanel {
 		buttonGroup.add(dummy);
 		
 		// Set up panel with flow chart and buttons
+		Component component2 = Box.createVerticalStrut(20);
+		add(component2);
 		image = new ImagePanel(createIndex, search, computeQvalues, percolator, qranker);
 		setSize(new Dimension(image.getWidth(), image.getHeight()));
 		add(image);
@@ -50,17 +53,28 @@ public class CruxViewPanel extends JPanel {
 		properties.setSize(new Dimension(image.getWidth(), 4 * image.getHeight()));
 		properties.setLayout(null);
 		IndexPanel indexPanel = new IndexPanel(model, createIndex, dummy);
-		indexPanel.setBounds(createIndex.getX(), 0, indexPanel.getMaximumSize().width, indexPanel.getMaximumSize().height);
-		properties.add(indexPanel);
+		//indexPanel.setBounds(createIndex.getX()-25, 30, indexPanel.getMaximumSize().width, indexPanel.getMaximumSize().height);
 		SearchPanel searchPanel = new SearchPanel(model, search, dummy);
-		searchPanel.setBounds(search.getX(), 0, searchPanel.getMaximumSize().width, searchPanel.getMaximumSize().height);
+		searchPanel.setBounds(search.getX()-25, 30, searchPanel.getMaximumSize().width, searchPanel.getMaximumSize().height);
+		QValuePanel qvaluesPanel = new QValuePanel(model, computeQvalues, dummy);
+		qvaluesPanel.setBounds(percolator.getX()-25, 30, qvaluesPanel.getMaximumSize().width, qvaluesPanel.getMaximumSize().height);
+		PercolatorPanel percolatorPanel = new PercolatorPanel(model, percolator, dummy);
+		percolatorPanel.setBounds(percolator.getX()-25, 30, percolatorPanel.getMaximumSize().width, percolatorPanel.getMaximumSize().height);
+		QRankerPanel qrankerPanel = new QRankerPanel(model, qranker, dummy);
+		qrankerPanel.setBounds(percolator.getX()-25, 30, qrankerPanel.getMaximumSize().width, qrankerPanel.getMaximumSize().height);
 		properties.add(indexPanel);
 		properties.add(searchPanel);
+		properties.add(qvaluesPanel);
+		properties.add(percolatorPanel);
+		properties.add(qrankerPanel);
 		add(properties);
 		
 		// Connect applications buttons to option panels
 		createIndex.addItemListener(indexPanel);
 		search.addItemListener(searchPanel);
+		computeQvalues.addItemListener(qvaluesPanel);
+		percolator.addItemListener(percolatorPanel);
+		qranker.addItemListener(qrankerPanel);
 		
 	}
 }
