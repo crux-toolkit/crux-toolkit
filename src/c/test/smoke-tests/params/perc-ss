@@ -1,0 +1,6 @@
+print-search-progress=100
+overwrite=F
+seed=7
+output-dir=ss
+fileroot=separate
+precision=6
