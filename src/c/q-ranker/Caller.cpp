@@ -363,21 +363,21 @@ void Caller::readRetentionTime(string filename) {
   delete [] cstr;
 }
 
+void Caller::filelessSetup(unsigned int nsets, const unsigned int numFeatures, int* numSpectra, char ** featureNames, double pi0) {
 
-void Caller::filelessSetup(unsigned int nsets, const unsigned int numFeatures, const unsigned int numSpectra, char ** featureNames, double pi0) {
   pCheck = new SanityCheck();
-  normal.filelessSetup(numFeatures, numSpectra,1);
-  shuffled.filelessSetup(numFeatures, numSpectra,-1);
+  normal.filelessSetup(numFeatures, numSpectra[0],1);
+  shuffled.filelessSetup(numFeatures, numSpectra[1],-1);
   shuffled1_present=false;
   shuffled2_present=false;
   if (nsets > 2)
     {
-      shuffled1.filelessSetup(numFeatures, numSpectra,-1);
+      shuffled1.filelessSetup(numFeatures, numSpectra[2],-1);
       shuffled1_present = true;
     }
   if (nsets > 3)
     {
-      shuffled2.filelessSetup(numFeatures, numSpectra,-1);
+      shuffled2.filelessSetup(numFeatures, numSpectra[3],-1);
       shuffled2_present = true;
     }
   Scores::pi0 = pi0;

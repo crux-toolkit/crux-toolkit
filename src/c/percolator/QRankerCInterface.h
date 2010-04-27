@@ -9,7 +9,7 @@
 #ifndef QRANKER_C_INTERFACE_H_
 #define QRANKER_C_INTERFACE_H_
 
-#include "PercolatorCInterface.h"
+#include "PercolatorCommon.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +17,7 @@ extern "C" {
 
 
 /** Call that initiates percolator */
-void qcInitiate(NSet sets, unsigned int numFeatures, unsigned int numSpectra, char ** featureNames, double pi0);
+void qcInitiate(int sets, unsigned int numFeatures, int* numSpectra, char ** featureNames, double pi0);
 
 /** Call that sets verbosity level
  *  0 is quiet, 2 is default, 5 is more than you want */
