@@ -224,10 +224,6 @@ num-decoys-per-target=1
 # The search range x-y is inclusive of x and y.
 scan-number=__NULL_STR
 
-# Comma delimited pair of amino acid link sites, ex. A:K,A:D.
-# Argument for crux search-for-xlinks.
-link sites=__NULL_STR
-
 # The maximum number of modified amino acids that can appear in one peptide.  Each aa can be modified multiple times.  Default no limit.
 # Available from parameter file for search-for-matches.
 max-aas-modified=255
@@ -247,10 +243,6 @@ search-decoy-pvalue-file=search.decoy.p.txt
 # Search decoy-peptides within +/- 'mass-window-decoy' of the spectrum mass.  Default 20.0.
 # Available for crux search-for-xlinks. 
 precursor-window-decoy=20.000000
-
-# The mass modification of a cross link between two amino acids.
-# Argument for crux search-for-xlinks.
-link mass=0.000000
 
 # Minimum mass of spectra to be searched.  Default 0.
 # Available for crux-search-for-matches.
@@ -344,7 +336,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Apr 19 12:58:58 2010
+H	StartTime	Tue Apr 27 13:24:00 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

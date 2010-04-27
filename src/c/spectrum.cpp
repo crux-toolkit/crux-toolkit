@@ -456,6 +456,11 @@ void copy_spectrum(
  * Skips Header line "H"
  * FIXME if need to read 'H', header line, does not parse ID
  */
+
+//TODO: figure out a better way to handle spectrum count.  MGF doesn't really have
+//a defined format for this.  If it does, then the programs that output MGF don't
+//always conform to this format. SJM
+int spec_count = 0;
 BOOLEAN_T parse_spectrum_file_mgf(
   SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
   FILE* file, ///< the input file stream -in
@@ -494,29 +499,12 @@ BOOLEAN_T parse_spectrum_file_mgf(
   while( (line_length = getline(&new_line, &buf_length, file)) != -1){
     if (strncmp(new_line, "TITLE=",6) == 0) {
       title_found = TRUE;
-      int first_scan;
-      int last_scan;
-      //parse the title line
-      //assume the format of title line is title.first_scan.last_scan.charge.dta
-      char* period_title_ptr = index(new_line,'.');
-      char* period_first_scan_ptr = index(period_title_ptr+1,'.');
-      char* period_last_scan_ptr = index(period_first_scan_ptr+1,'.');
-      //char* period_charge_ptr = index(period_last_scan_ptr+1,'.');
-
-      *period_title_ptr = '\0';
-      carp(CARP_DETAILED_DEBUG, "title:%s", new_line);
+      int first_scan = spec_count;
+      int last_scan = spec_count;
+      //  TODO : figure out what to do here, the format is dependent 
+      // upon the machine i think
+      // parse the title line
       
-      *period_first_scan_ptr = '\0';
-      carp(CARP_DETAILED_DEBUG, "first scan:%s", (period_title_ptr+1));
-      first_scan = atoi((period_title_ptr+1));
-
-      *period_last_scan_ptr = '\0';
-      carp(CARP_DETAILED_DEBUG, "last scan:%s", (period_first_scan_ptr+1));
-      last_scan = atoi((period_first_scan_ptr+1));
-
-      carp(CARP_DETAILED_DEBUG, "first_scan:%d", first_scan);
-      carp(CARP_DETAILED_DEBUG, "last_scan:%d", last_scan);
-
       set_spectrum_first_scan(spectrum, first_scan);
       set_spectrum_last_scan(spectrum, last_scan);
       set_spectrum_spectrum_type(spectrum, MS2);
@@ -546,7 +534,7 @@ BOOLEAN_T parse_spectrum_file_mgf(
       //no more header lines, peak information is up
       peaks_found = TRUE;
       break;
-    } else if (strcmp(new_line, "END IONS")) {
+    } else if (strcmp(new_line, "END IONS") == 0) {
       //we found the end of the ions without any peaks.
       carp(CARP_WARNING,"No peaks found for mgf spectrum");
       return TRUE;
@@ -579,6 +567,8 @@ BOOLEAN_T parse_spectrum_file_mgf(
       new_line);
     }
   } while( (line_length = getline(&new_line, &buf_length, file)) != -1);
+
+  spec_count++;
 
   if (end_found) {
     //we successfully parsed this spectrum.
