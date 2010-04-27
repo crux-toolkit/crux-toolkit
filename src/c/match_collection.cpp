@@ -3228,20 +3228,20 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   // determine how many decoy sets we have
   while((directory_entry = readdir(working_directory))){
     
-    if(suffix_compare(directory_entry->d_name, "decoy-1.csm")) {
+    if(suffix_compare(directory_entry->d_name, "decoy-1.txt")) {
       carp(CARP_DEBUG, "Found decoy file %s", directory_entry->d_name);
       decoy_1 = TRUE;
     }
-    else if(suffix_compare(directory_entry->d_name, "decoy.csm")) {
+    else if(suffix_compare(directory_entry->d_name, "decoy.txt")) {
       decoy_1 = TRUE;
     }
-    else if(suffix_compare(directory_entry->d_name, "decoy-2.csm")) {
+    else if(suffix_compare(directory_entry->d_name, "decoy-2.txt")) {
       decoy_2 = TRUE;
     }
-    else if(suffix_compare(directory_entry->d_name, "decoy-3.csm")) {
+    else if(suffix_compare(directory_entry->d_name, "decoy-3.txt")) {
       decoy_3 = TRUE;
     }    
-    else if(suffix_compare(directory_entry->d_name, ".csm")){
+    else if(suffix_compare(directory_entry->d_name, ".txt")){
       carp(CARP_DEBUG, "Found target file %s", directory_entry->d_name);
       boolean_result = TRUE;
     }
