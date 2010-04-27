@@ -870,11 +870,11 @@ void initialize_parameters(void){
 
   set_string_parameter("link sites", NULL, 
       "Comma delimited pair of amino acid link sites, ex. A:K,A:D.",
-      "Argument for crux search-for-xlinks.", "true");
+      "Argument for crux search-for-xlinks.", "false");
 
   set_double_parameter("link mass", 0.0, -100, BILLION,
       "The mass modification of a cross link between two amino acids.",
-      "Argument for crux search-for-xlinks.","true");
+      "Argument for crux search-for-xlinks.","false");
 
   set_string_parameter("missed-link-cleavage", "K",
       "Figure out what this parameter is supposed to mean,"
