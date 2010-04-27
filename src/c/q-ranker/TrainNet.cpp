@@ -514,7 +514,10 @@ void Caller::train_many_nets()
 
   net.initialize(FeatureNames::getNumFeatures(),num_hu,mu,clf,lf,bs);
   net.set_weightDecay(weightDecay);
-
+  for(int count = 0; count < num_qvals; count++){
+    max_net_gen[count] = net;
+  }
+  
   cerr << "Before iterating\n";
   cerr << "trainset: ";
   getMultiFDR(trainset,net,qvals);
@@ -530,11 +533,12 @@ void Caller::train_many_nets()
   
 
   //write out the results of the general net
-  //cerr << "general net results: ";
-  //ostringstream filename;
-  //filename << res_prefix << "_hu" << num_hu;
-  //write_max_nets(filename.str(), max_net_gen);
-  
+  if (0){
+    cerr << "general net results: ";
+    ostringstream filename;
+    filename << res_prefix << "_hu" << num_hu;
+    write_max_nets(filename.str(), max_net_gen);
+  }
   //copy the general net into target nets;
   for(int count = 0; count < num_qvals; count++)
     max_net_targ[count] = max_net_gen[count];

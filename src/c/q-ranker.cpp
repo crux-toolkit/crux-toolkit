@@ -134,11 +134,44 @@ MATCH_COLLECTION_T* run_q(
   
   output.writeFeatureHeader(feature_names, number_features);
 
-  // create MATCH_COLLECTION_ITERATOR_T object
+    // create MATCH_COLLECTION_ITERATOR_T object
   // which will read in the serialized output PSM results and return
   // first the match_collection of TARGET followed by 
   // the DECOY* match_collections.
   int num_decoys = 0;
+  
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator1 =
+    new_match_collection_iterator(psm_result_folder, fasta_file, &num_decoys);
+
+  if( match_collection_iterator1 == NULL ){
+    carp(CARP_FATAL, "Failed to create a match collection iterator");
+    exit(1);
+  }
+  int num_sets = get_match_collection_iterator_number_collections(match_collection_iterator1);
+  int* num_spectra = (int*)mycalloc(num_sets, sizeof(int));
+  // iterate over each, TARGET, DECOY 1..3 match_collection sets
+  int iterations = 0;
+  while(match_collection_iterator_has_next(match_collection_iterator1)){
+    
+    
+    
+    // get the next match_collection
+    match_collection = 
+      match_collection_iterator_next(match_collection_iterator1);
+    
+
+    num_spectra[iterations] = get_match_collection_match_total(match_collection);
+    iterations++;
+    carp(CARP_DEBUG, "Match collection iteration: %i" , iterations);    
+    }
+
+  // Call that initiates q-ranker
+  
+  // create MATCH_COLLECTION_ITERATOR_T object
+  // which will read in the serialized output PSM results and return
+  // first the match_collection of TARGET followed by 
+  // the DECOY* match_collections.
+  num_decoys = 0;
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
     new_match_collection_iterator(psm_result_folder, fasta_file, &num_decoys);
 
@@ -150,7 +183,7 @@ MATCH_COLLECTION_T* run_q(
 
   
   // iterate over each, TARGET, DECOY 1..3 match_collection sets
-  int iterations = 0;
+  iterations = 0;
   while(match_collection_iterator_has_next(match_collection_iterator)){
     
     carp(CARP_DEBUG, "Match collection iteration: %i" , iterations++);
@@ -175,10 +208,11 @@ MATCH_COLLECTION_T* run_q(
 		 (NSet)get_match_collection_iterator_number_collections(
 									match_collection_iterator), 
 		 number_features, 
-		 get_match_collection_match_total(match_collection), 
+		 num_spectra, 
 		 feature_names, 
 		 pi0);
       
+      free(num_spectra);
       
       // Call that sets verbosity level
       // 0 is quiet, 2 is default, 5 is more than you want
@@ -202,11 +236,12 @@ MATCH_COLLECTION_T* run_q(
       features = get_match_percolator_features(match, match_collection);
 
       output.writeMatchFeatures(match, features, number_features);
-      //qcRegisterPSM((SetType)set_idx, NULL, features);
       qcRegisterPSM((SetType)set_idx, get_match_sequence_sqt(match), features);
       
       free(features);
     }
+
+    
 
     // ok free & update for next set
     // MEMLEAK 
