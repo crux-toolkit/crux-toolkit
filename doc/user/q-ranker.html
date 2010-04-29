@@ -19,14 +19,15 @@
 <b>Description:</b></p>
 
 <p>
-Q-ranker is a semi-supervised learning algorithm that dynamically
-learns to separate target from decoy PSMs.  The algorithm is described
-in this article:</p>
+Q-ranker dynamically learns to separate target from decoy PSMs.  The
+algorithm is described in this article:</p>
 
 <blockquote>
 Marina Spivak, Jason Weston, Leon Bottou and William Stafford Noble.
-"Direct <i>q</i>&nbsp;value optimization methods for peptide
-identification from shotgun proteomics data sets."  <i>Submitted</i>.
+<a href="http://noble.gs.washington.edu/papersspivak2009improvements.html">"Direct <i>q</i>&nbsp;value
+optimization methods for peptide identification from shotgun
+proteomics data sets."</a>  <i>Journal of Proteome Research.</i>
+8(7):3737-3745, 2009.
 </blockquote>
 
 <!--
@@ -85,8 +86,12 @@ A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
 
 <LI> 
-<code>--feature-file &lt;string&gt;</code> &ndash;
-Optional file in which to write the features. Default = none.</li>
+<code>--feature-file &lt;string&gt;</code> &ndash; Optional file in
+which to write the features. The features appear in the following
+order: xcorr, deltaCn, lnDeltaCn, Sp, logSp, deltaMass,
+abs(deltaMass), neutral mass, percent b/y ions matched, log(#
+candidates), UNUSED, UNUSED, missed cleavages, peptide length, charge
+= +1, charge = +2, charge = +3.  Default = none.</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
