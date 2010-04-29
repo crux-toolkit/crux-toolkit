@@ -20,44 +20,34 @@
 
 <blockquote>
 <p>
-This command searches a protein database with a set of spectra
-similarly to the SEQUEST database search software.  For
-each spectrum, the precursor mass is computed from the measured
-precursor m/z and an assumed charge.  Candidate peptides whose mass
-lies within a specified range of the precursor mass are identified.  These
-candidate peptides are first ranked with the SEQUEST Sp score.  The
-top 500 matches are then re-scored using XCorr.  The input protein
-database may either be in FASTA format or it may be a binary index
-created by <code>crux create-index</code>.</p>
+This command searches a protein database with a set of spectra, using
+an algorithm similar to that employed by the SEQUEST database search
+software.  This command differs from the <code>crux
+search-for-matches</code> command in the following respects:</p>
+<ul>
+<li>
+Candidate peptides (i.e., peptides that lie within the user-specified
+precursor window) are first ranked with the
+SEQUEST Sp score.  The top 500 matches are then re-scored using
+XCorr.</li>
+<li>
+The program will not compute p-values using the Weibull empirical
+curve fitting procedure.</li>
+<li>
+The program produces <a href="sqt-format.html">SQT</a> format output
+files.</li>
+</ul>
 
 <p>
-<b>Modifications:</b> Crux handles two types of modifications: static
-and variable.  Static modifications are a change of mass applied to
-a given amino acid in every peptide in which it occurs.  By default, a
-static modification of +57 da to cystine (C) is applied.
-Variable modifications allow peptides to be generated with and without
-a mass change to a given amino acid.  Crux handles variable 
-modifications as follows.   
-The user specifies an allowed set of amino acid modifications, using
-the options <code>mod</code>, <code>cmod</code> and <code>nmod</code>,
-which are described below.  Before any search is performed, <code>crux</code>
-generates an exhaustive list of all possible combinations of amino
-acid modifications that could be applied to a peptide.  For example,
-if the user specifies a modification of +79 which can be present twice
-on any peptide and a modification of +30 which can be present only
-once, then the list will contain modifications corresponding to +79
-on one residue, +79 on two different residues, +30 on one residue, +79
-on one and +30 on one, +79 on two and +30 on one.  Subsequently, for
-each spectrum, Crux performs one search for each possible combination of
-modifications.  For example, if the precursor m/z for a spectrum is
-800 da, the charge state is +2, and Crux is considering a modification
-of +79, then Crux will retrieve from the database all candidate
-peptides whose total mass is close to 221 da.  These candidates are
-scored as usual, with a preliminary score and a final score, and the
-top <i>n</i> candidate peptides are added to a composite, sorted list
-of peptides.  Finally, after all modifications have been searched,
-Crux reports for the current spectrum the top <i>m</i> peptides from
-the composite list.</p>
+Similar to <code>crux search-for-matches</code>, the input protein
+database may either be in FASTA format or it may be a binary index
+created by <code>crux create-index</code>.  Using an index will
+typically yield much faster search speeds.</p>
+
+<p>
+This command handles modifications in the same way
+as <a href="crux-search-for-matches.html"><code>crux
+search-for-matches</code></a>.</p>
 
 </blockquote>
 
@@ -80,35 +70,35 @@ the composite list.</p>
 <B>Output:</B>
 
 <p>
-The program writes files to the folder <code>crux-output</code> by default.
-The name of the output folder can be set by the user using
-the <code>--output-dir</code> option. 
-The following files will be created:</p>
+The program writes files to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option.  The following files will be
+created:</p>
 <ul>
 
 <li>
-<b>sequest.params.txt</b>:
-a file containing the name and value of all parameters/options for the
-current operation. 
-Not all parameters in the file may have been used in the operation.  
-The resulting file can be used with the <code>--parameter-file</code>
-option for other crux programs.
+<b>sequest.params.txt</b>: a file containing the name and value of all
+parameters/options for the current operation.  Not all parameters in
+the file may have been used in the operation.  The resulting file can
+be used with the <code>--parameter-file</code> option for other crux
+programs.
 </li>
 
 <li>
 <b>sequest.target.sqt</b>: an <a href="sqt-format.html">SQT</a> file
-containing the PSMs. 
+containing the PSMs.
 
 <li>
-<b>sequest.target.txt</b>: a tab-delimited text file containing the PSMs.
-See <a href="txt-format.html">txt file format</a> for a list of the fields.
-This and the sequest.decoy.txt file(s) can be used as input
-for <code>crux</code> post-search functions such as <code> q-ranker</code>.
+<b>sequest.target.txt</b>: a tab-delimited text file containing the
+PSMs.  See <a href="txt-format.html">txt file format</a> for a list of
+the fields.  This and the sequest.decoy.txt file(s) can be used as
+input for <code>crux</code> post-search functions such as <code>
+q-ranker</code>.
 </li>
 
 <li>
-<b>sequest.log.txt</b>: a log file containing a copy of all messages that were
-printed to stderr.
+<b>sequest.log.txt</b>: a log file containing a copy of all messages
+that were printed to stderr.
 
 </ul>
 
@@ -142,17 +132,17 @@ its own file) is required to run the algorithm 'percolator' in a subsequent
 crux run.  Default = 2. </li>
 
 <li>
-<code>--decoy-location &lt;target-file | one-decoy-file | 
-separate-decoy-files&gt;</code> &ndash;
-File(s) in which decoy results are returned.  Only applies
-when <code>num-decoys-per-target</code> is not zero.  Use
-'target-file' to mix target and decoy psms in one file.  Use
-'one-decoy-file' to print target psms to one file and all decoys to a
-separate file.  Use 'separate-decoy-files' to print one .csm file for
-each decoy set.  (<code>crux percolator</code> accepts up to two
+<code>--decoy-location &lt;target-file | one-decoy-file |
+separate-decoy-files&gt;</code> &ndash; File(s) in which decoy results
+are returned.  Only applies when <code>num-decoys-per-target</code> is
+not zero.  Use 'target-file' to mix target and decoy psms in one file.
+Use 'one-decoy-file' to print target psms to one file and all decoys
+to a separate file.  Use 'separate-decoy-files' to print one .csm file
+for each decoy set.  (<code>crux percolator</code> accepts up to two
 search.decoy.csm files. <code>crux q-ranker</code> accepts only one
-search.decoy.csm file.)  Note that at most one search.decoy.sqt and one
-search.decoy.txt file is produced.  Default = separate-decoy-files.
+search.decoy.csm file.)  Note that at most one search.decoy.sqt and
+one search.decoy.txt file is produced.  Default =
+separate-decoy-files.
 
 <LI>
 <code>--spectrum-min-mass &lt;float&gt;</code> &ndash; The lowest spectrum 
@@ -230,7 +220,7 @@ max-per-peptide in one peptide.  This parameter may be included
 with different values multiple times so long as the total number of
 <code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
 does not exceed 11.  The same modifications must be given for any post-search
-process (<code> crux compute-q-values</code>, <code>crux q-ranker</code>).  
+process (<code>crux compute-q-values</code>, <code>crux q-ranker</code>).
 
 <li>
 <code>cmod &lt;mass change&gt;:&lt;max distance from protein C-terminus&gt;
@@ -243,7 +233,7 @@ different values multiple times so long as the total number of
 <code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
 does not exceed 11. The same modifications must be given for any
 post-search process 
-(<code> crux compute-q-values</code>, <code>crux q-ranker</code>).  
+(<code>crux compute-q-values</code>, <code>crux q-ranker</code>).  
 
 <li>
 <code>nmod &lt;mass change&gt;:&lt;max distance from protein N-terminus&gt;
@@ -256,7 +246,7 @@ different values multiple times so long as the total number of
 <code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
 does not exceed 11. The same modifications must be given for any
 post-search process
-(<code> crux compute-q-values</code>, <code>crux q-ranker</code>).  
+(<code>crux compute-q-values</code>, <code>crux q-ranker</code>).  
 
 <li>
 <code>max-mods &lt;int&gt; &ndash;</code>
@@ -271,10 +261,10 @@ peptide.  Each aa can be modified multiple times. Default = no limit.
 <li>
 <code>precision &lt;int&gt; &ndash; </code>
 Set the precision (number of significant digits) for scores
-written to sqt and text files. Default 8. 
+written to text files. Default 8. 
 
 <li>
-<code>print-search-progress &lt;n&gt; &ndash; </code>
+<code>print-search-progress &lt;int&gt; &ndash; </code>
 Show search progress by printing every n spectra searched. Set to
 0 to show no search progress.  Default = 10.
 
@@ -340,29 +330,27 @@ residue but only before D which is represented as <code>[X]|[D]</code>.
 <LI>
 <code>digestion &lt;full-digest|partial-digest&gt;</code> &ndash;
 Degree of digestion used to generate peptides (full-digest,
-partial-digest). Either both ends or one end of a peptide must
-conform to enzyme specificity rules.  Used in
-conjunction with enzyme option when enzyme is not set to to
-'no-enzyme'.  Default full-digest.
+partial-digest). Either both ends or one end of a peptide must conform
+to enzyme specificity rules.  Used in conjunction with enzyme option
+when enzyme is not set to 'no-enzyme'.  Default full-digest.
 
 <LI>
-<code>missed-cleavages &lt;T|F&gt;</code> &ndash; 
-Allow missed cleavage sites within a peptide.  When digestion rules
-are specified (<code>enzyme</code> or <code>custom-enzyme</code> 
-T will include peptides containing one or more
-potential cleavage sites. Default = F. 
+<code>missed-cleavages &lt;T|F&gt;</code> &ndash; Allow missed
+cleavage sites within a peptide.  When digestion rules are specified
+(<code>enzyme</code> or <code>custom-enzyme</code> T) will include
+peptides containing one or more potential cleavage sites. Default = F.
 
 <LI>
-<code>isotopic-mass &lt;average|mono&gt;</code> &ndash; 
-Specify the type of isotopic masses to use when calculating the
-peptide mass. Default = average.
+<code>isotopic-mass &lt;average|mono&gt;</code> &ndash; Specify the
+type of isotopic masses to use when calculating the peptide
+mass. Default = average.
    
 <li>
-<code>&lt;A-Z&gt &lt;float&gt;</code> &ndash;
-Specify static modifications.  This is a mass change applied to the
-given amino acid (in single-letter-code A thru Z) for every peptide in
-which it occurs.  Use the <code>mod</code> option for generating
-peptides both with and without the mass change.  Default C=57.
+<code>&lt;A-Z&gt &lt;float&gt;</code> &ndash; Specify static
+modifications.  This is a mass change applied to the given amino acid
+(in single-letter-code A thru Z) for every peptide in which it occurs.
+Use the <code>mod</code> option for generating peptides both with and
+without the mass change.  Default C=57.
 </ul>
 
 <HR></hr>
