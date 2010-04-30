@@ -1,41 +1,5 @@
 #!/usr/bin/perl -w
 
-#$Log: not supported by cvs2svn $
-#Revision 1.12  2007/10/31 23:00:15  frewen
-#new commands in crux-test.cmds. tested with code from 10/26. crux-test.pl no longer uses the file/index/analysis entry.  also now has an ignore string for diffing output
-#
-#Revision 1.11  2007/10/24 23:32:48  frewen
-#changed crux-test.pl to accept blank lines and comments in crux-test.cmds.  added comments to later and reordered slightly.
-#
-#Revision 1.10  2007/08/28 20:03:38  aklammer
-#*** empty log message ***
-#
-#Revision 1.9  2007/08/07 22:59:14  cpark
-#smoke test added for match_analysis/search
-#
-#Revision 1.8  2007/08/07 18:05:13  cpark
-#fixed some more bugs
-#
-#Revision 1.7  2006/12/19 01:12:06  cpark
-#before change peptide freeing method
-#
-#Revision 1.6  2006/11/14 01:14:48  cpark
-#hu..finished the parameter file system
-#
-#Revision 1.5  2006/09/13 22:11:34  cpark
-#added smoke test for create-index
-#
-#Revision 1.4  2006/09/13 01:20:12  cpark
-#add create index smoke test
-#
-#Revision 1.3  2006/07/28 01:49:59  aklammer
-#*** empty log message ***
-#
-#Revision 1.2  2005/08/17 23:32:25  cegrant
-#Scripts for testing crux software.
-#
-#Revision 1.1  2005/08/10 21:17:14  cegrant
-#Added script for testing basic functionality of crux.
 #
 # Note: copied from Charles Grant's meme-test.pl
 
