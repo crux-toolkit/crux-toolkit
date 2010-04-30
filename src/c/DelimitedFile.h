@@ -1,9 +1,9 @@
 /**
  * \file DelimitedFile.h
- * $Revision: 1.00 $ 
  * DATE: Jan 7, 2010
  * AUTHOR: Sean McIlwain
  * \brief Object for reading tab-delimited files.
+ * 
  * This class generates a table of values. The default delimiter is tab.
  * This class is capable of reading string, integers, and floating point
  * Types from each cell of the table.  This class also provides function

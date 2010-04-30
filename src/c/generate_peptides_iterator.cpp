@@ -2,8 +2,7 @@
  * \file generate_peptides_iterator.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: Nov 8 2007
- * DESCRIPTION: object to return candidate peptides with a given restriction
- * REVISION: 
+ * \brief object to return candidate peptides with a given restriction
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>

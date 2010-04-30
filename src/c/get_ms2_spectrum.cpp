@@ -2,9 +2,8 @@
  * \file get_ms2_spectrum.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: 30 June 2006
- * DESCRIPTION: searches a given ms2 file for the spectrum with the given
- *              scan number.
- * REVISION: 
+ * \brief searches a given ms2 file for the spectrum with the given
+ * scan number.
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>

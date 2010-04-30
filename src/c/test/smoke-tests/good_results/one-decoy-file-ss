@@ -2682,7 +2682,6 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4855	1486.619507	0.91286355	141.36382	2	0.23478588	5										7	26	8	SNTNQPLGMPGENK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK				
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
-INFO: Using amino acid alphabet (ACDEFGHIKLMNPQRSTVWYBUXZ).
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96, charge 2, search number 100

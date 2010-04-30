@@ -1,22 +1,19 @@
 /**
  * \file q-ranker.cpp
- */
-/*
  * AUTHOR: Barbara Frewen and Marina Spivak
  * CREATE DATE: November 25, 2008
- * DESCRIPTION: Copied from match_analysis.c with only the percolator
- *         functionality kept.
- *         Given as input a directory containing binary psm files and
- *         a protein database, run q-ranker and return a txt file
- *         with results.
+ * \brief Given as input a directory containing binary psm files and
+ *        a protein database, run q-ranker and return a text file
+ *        with results.
  *
- *         Handles at most 4 files (target and decoy).  Looks for .csm
- *         files in the input directory and for corresponding
- *         -decoy[123].csm files.  Multiple target files in the given
- *         directory are concatinated together and presumed to be
- *         non-overlaping parts of the same ms2 file. 
- * 
- * $Revision: 1.1.2.3 $
+ * Handles at most 4 files (target and decoy).  Looks for .csm files
+ * in the input directory and for corresponding -decoy[123].csm files.
+ * Multiple target files in the given directory are concatinated
+ * together and presumed to be non-overlaping parts of the same ms2
+ * file.
+ *
+ * Copied from match_analysis.c with only the percolator functionality
+ * kept.
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>

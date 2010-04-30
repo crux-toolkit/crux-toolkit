@@ -2,10 +2,8 @@
  * \file predict_peptide_ions.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: 10/05 2006
- * DESCRIPTION: Object for given a peptide and a charge state, predict
+ * \brief Object for given a peptide and a charge state, predict
  * the ions 
- *
- * REVISION: $ $ 
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>

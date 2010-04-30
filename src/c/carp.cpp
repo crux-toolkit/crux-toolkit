@@ -1,7 +1,6 @@
 /*************************************************************************//**
  * \file carp.cpp
- * $Revision: 1.6 $
- * \brief: Object for representing a single protein.
+ * \brief Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>

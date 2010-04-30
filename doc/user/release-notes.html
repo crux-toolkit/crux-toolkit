@@ -10,35 +10,54 @@
 
 <h2>Version X</h2>
 
+<h3>
+Major enhancements</h3>
+
 <ul>
 <li>
-A new command, <code>xlink-search</code> has been added.
-This command searches a collection of spectra against a sequence database, finding cross-linked peptide matches</td></tr>
+A new command, <code>xlink-search</code>, has been added.  This command
+searches a collection of spectra against a sequence database, finding
+cross-linked peptide matches.  The algorithm was described in the
+following article:</li>
 
+<blockquote>
+Sean McIlwain, Paul Draghicescu, Pragya Singh, David R. Goodlett and
+William Stafford
+Noble.  <a href="http://noble.gs.washington.edu/proj/xhhc/">"Detecting
+cross-linked peptides by searching against a database of cross-linked
+peptide pairs."</a> <i>Journal of Proteome Research</i>.  2010.
+</blockquote>
+
+<li>
+A new search command, <code>sequest-search</code>, was added.  The
+original command, <code>search-for-matches</code>, behaves as before
+except that no .sqt files are printed and no Sp scoring is performed.
+The new <code>sequest-search</code> emulates SEQUEST searching.  It
+first scores all candidate peptides with the Sp score, then ranks and
+filters the results by that score, scoring the remaining candidates
+with xcorr.  Results are printed to .txt and .sqt files.</li>
 
 <li>
 The .mzXML file format is now supported for crux search-for-matches
-and crux sequest-search when the --use-mstoolkit option is set to 
-TRUE.
+and crux sequest-search when the <code>--use-mstoolkit</code> option
+is set to TRUE.</li>
+
+</ul>
+
+<h3>
+Minor changes</h3>
+
+<ul>
 
 <li>
 Modified sequences are reported differently in the .txt files.
-Instead of modifciations being represented by symbols (*,@,#, etc.)
+Instead of modifications being represented by symbols (*,@,#, etc.)
 they are indicated with the mass shift of the modification within
-square brackets.  As before, the modficiation information follows the
+square brackets.  As before, the modification information follows the
 residue that is modified.  If multiple modifications appear on one
 residue, the masses may either be summed together or printed
 separately in a comma separated list.  This behavior is controlled by
-the --display-summed-mod-masses option.
-
-<li>
-A new search command, 'sequest-search', was added.  The original
-command, 'search-for-matches', behaves as before except that no .sqt
-files are printed and no Sp scoring is performed.  The new
-'sequest-search' emulates SEQUEST searching.  It first scores all
-candidate peptides with Sp score, then ranks and filters the results
-by that score, scoring the remaining candidates with xcorr.  Results
-are printed to .txt and .sqt files.</li>
+the <code>--display-summed-mod-masses option</code>.</li>
 
 <li>
 The modified decoy sequences are generated differently.  Before, all
@@ -48,24 +67,30 @@ and all modifications are applied to that same shuffled peptide.</li>
 
 <li>
 The 'percolator rank' column is now based on percolator scores instead
-of percolator q-values.  For cases where two psms have different
+of percolator q-values.  For cases where two PSMs have different
 percolator scores but the same q-value, the ranks will reflect the
 score differences.</li>
 
 <li>
-The Weibull parameters used for computing p-values are not printed to
-the .txt files.</li>
+The Weibull parameters used for computing p-values are no longer
+printed to the .txt files.</li>
 
 <li>
-DeltaCn has changed in the .txt files.  For PSMs of rank i, deltaCn
-used to computed as deltaCn_i = (xcorr_0 - xcorr_i) / xcorr_0.  Note
-that deltaCn_0 always equalled 0.  Now deltaCn_i = (xcorr_0 -
-xcorr_i+1) / xcorr_0.  No changes to deltaCn in the .sqt files of crux
-sequest-search.</li>
+The reporting of DeltaCn has changed.  For PSMs of rank i, deltaCn
+used to computed be as deltaCn_i = (xcorr_0 - xcorr_i) / xcorr_0.
+Thus, deltaCn for the top-ranked PSM was always 0.  Now deltaCn_i =
+(xcorr_0 - xcorr_i+1) / xcorr_0.  This change only
+affects <code>search-for-matches</code>,
+not <code>sequest-search</code>.</li>
 
 <li>
-A new command, print-processed-spectra, performs XCorr-style
-pre-processing on all spectra in a given file.</li>
+A new command, <code>print-processed-spectra</code>, performs
+XCorr-style pre-processing on all spectra in a given file.</li>
+
+<li>
+A small bug was fixed, in which even if the user requested average
+mass, the search programs still used monoisotopic mass in the
+calculation of XCorr and Sp.</li>
 
 </ul>
 

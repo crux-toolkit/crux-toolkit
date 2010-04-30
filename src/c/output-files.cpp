@@ -1,14 +1,13 @@
 /**
  * \file output-files.cpp
- */
-/*
- * FILE: output-files.cpp
  * AUTHOR: Barbara Frewen
  * CREATE DATE: Aug 24, 2009
  * PROJECT: crux
- * DESCRIPTION: A class description for handling all the various
- * output files, excluding parameter and log files.  The filenames,
- * locations and overwrite status would be taken from parameter.c.
+ * \brief A class description for handling all the various
+ * output files, excluding parameter and log files.
+ *
+ * The filenames, locations and overwrite status are taken from
+ * parameter.c.
  */
 
 #include "output-files.h"

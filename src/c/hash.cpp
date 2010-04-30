@@ -1,8 +1,7 @@
 /*************************************************************************//**
  * \file hash.cpp
  * AUTHOR: David Crawshaw, Chris Park
- * $Revision: 1.15 $
- * \brief: Object for hashing.
+ * \brief Object for hashing.
  ****************************************************************************/
 #include <stdlib.h>
 #include <string.h>

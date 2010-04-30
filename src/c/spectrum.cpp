@@ -2,8 +2,7 @@
  * \file spectrum.cpp
  * AUTHOR: Chris Park
  * CREATE DATE:  June 22 2006
- * DESCRIPTION: code to support working with spectra
- * REVISION: $Revision: 1.71 $
+ * \brief code to support working with spectra
  ****************************************************************************/
 
 #include <math.h>
@@ -24,19 +23,33 @@
 #include "DelimitedFile.h"
 #include "./MSToolkit/Spectrum.h"
 
-//There is a name clash with MS2 in MSToolkit, so can't use the namespace decl here
-//using namespace MSToolkit;
-
+// There is a name clash with MS2 in MSToolkit, so can't use the
+// namespace declared here. Using namespace MSToolkit;
 
 /**
- * \define constants
+ * \define Maximum number of peaks per spectrum.
  */
 #define MAX_PEAKS 4000
-#define MZ_TO_PEAK_ARRAY_RESOLUTION 5 // i.e. 0.2 m/z unit
+/**
+ * \define m/z resolution.  I.e., 5 == 0.2 m/z units
+ */
+#define MZ_TO_PEAK_ARRAY_RESOLUTION 5
+/**
+ * \define Maximum possible m/z value.
+ */
 #define MAX_PEAK_MZ 5000
+/**
+ * \define Maximum allowed charge.
+ */
 #define MAX_CHARGE 6
-#define MAX_I_LINES 2 // number of 'I' lines albe to parse for one spectrum object
-#define MAX_D_LINES 2 // number of 'D' lines albe to parse for one spectrum object
+/**
+ * \define Number of 'I' lines albe to parse for one spectrum object.
+ */
+#define MAX_I_LINES 5
+/**
+ * \define Number of 'D' lines able to parse for one spectrum object
+ */
+#define MAX_D_LINES 2
 
 /**
  * \struct spectrum 
@@ -1498,11 +1511,12 @@ void set_spectrum_new_possible_z(
 }
 
 /**
- * sets the possible charge states of this spectrum
- * the function copies the possible_z into a heap allocated memory
- * num_possible_z must match the array size of possible_z 
- * frees the memory of the possible_z that is replaced
- * updates the number of possible charge states field
+ * \brief Sets the possible charge states of this spectrum.
+ *
+ * The function copies the possible_z into a heap allocated memory.
+ * num_possible_z must match the array size of possible_z.
+ * Frees the memory of the possible_z that is replaced.
+ * Updates the number of possible charge states field.
  */
 void set_spectrum_possible_z(
   SPECTRUM_T* spectrum,  ///< the spectrum to set the new_possible_z -out

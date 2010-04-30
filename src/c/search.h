@@ -1,10 +1,8 @@
 /**
- * \file match_search.c
- */
-/* AUTHOR: Barbara Frewen
+ * \file search.h
+ * AUTHOR: Barbara Frewen
  * CREATE DATE: November 24, 2008
- * DESCRIPTION: Header file for the search-for-matches crux command
- * REVISION: $Revision: 1.3 $
+ * \brief Header file for the search-for-matches crux command
  */
 #ifndef SEARCH_H
 #define SEARCH_H

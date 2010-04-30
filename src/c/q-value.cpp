@@ -3,7 +3,7 @@
  * AUTHOR: Chris Park
  * CREATE DATE: Jan 03 2007
  * \brief  Given as input a directory containing binary psm files,
- * a protein database, and an optional parameter file analyze the
+ * a protein database, and an optional parameter file, analyze the
  * matches (with percolator or q-value) and return scores indicating
  * how good the matches are. 
  *
@@ -12,8 +12,6 @@
  * '-decoy#.csm'.  Multiple target files in the given directory are
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
- * 
- * $Revision: 1.13 $
  ****************************************************************************/
 #include "q-value.h"
 

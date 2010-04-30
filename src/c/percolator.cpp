@@ -1,22 +1,19 @@
 /**
  * \file percolator.cpp
- */
-/*
  * AUTHOR: Barbara Frewen
  * CREATE DATE: November 25, 2008
- * DESCRIPTION: Copied from match_analysis.c with only the percolator
- *         functionality kept.
- *         Given as input a directory containing binary psm files and
- *         a protein database, run percolator and return an txt file
- *         with results.
+ * \brief Given as input a directory containing binary psm files and a
+ * protein database, run percolator and return a txt file with
+ * results.
  *
- *         Handles at most 4 files (target and decoy).  Looks for .csm
- *         files in the input directory and for corresponding
- *         -decoy[123].csm files.  Multiple target files in the given
- *         directory are concatinated together and presumed to be
- *         non-overlaping parts of the same ms2 file. 
- * 
- * $Revision: 1.11 $
+ * Handles at most 4 files (target and decoy).  Looks for .csm files
+ * in the input directory and for corresponding -decoy[123].csm files.
+ * Multiple target files in the given directory are concatinated
+ * together and presumed to be non-overlaping parts of the same ms2
+ * file.
+ *
+ * Copied from match_analysis.c with only the percolator functionality
+ * kept.
  ****************************************************************************/
 #include "parameter.h"
 #include "percolator.h"

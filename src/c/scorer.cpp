@@ -2,9 +2,8 @@
  * \file scorer.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: 9 Oct 2006
- * DESCRIPTION: object to score spectrum vs. spectrum or spectrum
- * vs. ion_series 
- * REVISION: $Revision: 1.70 $
+ * \brief object to score spectrum versus spectrum or spectrum
+ * versus ion_series 
  ****************************************************************************/
 
 #include <math.h>
@@ -24,36 +23,64 @@
 #include "unistd.h"
 
 
-// the bin width(Sp)
+/**
+ * \define The size of the bins for discretizing the m/z axis of the
+ * observed spectrum for XCorr and Sp.
+ */
 #define bin_width_mono 1.0005079
+
+/**
+ * \define Unused constant.
+ */
 #define bin_width_average 1.0011413
 
-// cross correlation offset range(Xcorr)
+/**
+ * \define Maximum range for cross correlation offset.
+ */
 #define MAX_XCORR_OFFSET 75
 
-// Constants for EVD p_value calculation
-// These constants are hardware dependent.
+// The following two constants are hardware dependent.
 // These values should be good for double precision floating point
 // numbers compatible with the IEEE 754 standard.
+/**
+* \define Constant for EVD p_value calculation
+*/
 #define DBL_EPSILON  2.2204460492503131e-16
+/**
+* \define Constant for EVD p_value calculation
+*/
 #define DBL_MAX_10_EXP 308
 
+/**
+ * \define Cut-off below which the simple Bonferroni calculation can
+ * be used.
+ */
 #define BONFERRONI_CUT_OFF_P 0.0001
+/**
+ * \define Cut-off below which the simple Bonferroni calculation can
+ * be used.
+ */
 #define BONFERRONI_CUT_OFF_NP 0.01
 
 #define GMTK_MAX_ION_FILES 50
 #define GMTK_NUM_CHARGES 2
-// FIX !! check different charges
 #define GMTK_NUM_BASE_IONS 3
 #define GMTK_NUM_NEUTRAL_LOSS 2
 #define GMTK_NUM_ION_SERIES \
   GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
-
 #define GMTK_NUM_PAIRED_ION_SERIES 15
 
-// Define relative peak heights.
+/**
+ * \define Relative peak height of b- and y-ions.
+ */
 #define B_Y_HEIGHT 50
+/**
+ * \define Relative height of flanking peaks.
+ */
 #define FLANK_HEIGHT 25
+/**
+ * \define Relative height of neutral loss peaks.
+ */
 #define LOSS_HEIGHT 10
 
 /**
@@ -345,10 +372,11 @@ void zero_peak_mean_stdev(
 }
 
 /**
- *  zero and extract peaks
- * extract peaks that are larger than mean + #step*stdev into new array
- * zero out the peaks that have been extracted
- * repeat twice, than replace old array with extracted peak array
+ * \brief Zero and extract peaks
+ *
+ * Extract peaks that are larger than mean + #step*stdev into new
+ * array.  Zero out the peaks that have been extracted.  Repeat twice,
+ * than replace old array with extracted peak array.
  */
 void zero_peaks(
   SCORER_T* scorer   ///< the scorer object -in/out
@@ -798,9 +826,9 @@ FLOAT_T* get_intensity_array_observed(SCORER_T* scorer) {
 }
 
 /**
- * create the intensity arrays for observed spectrum
- * SCORER must have been created for XCORR type
- * \returns TRUE if successful, else FLASE
+ * Create the intensity arrays for observed spectrum.
+ * SCORER must have been created for XCORR type.
+ * \returns TRUE if successful, else FALSE.
  */
 BOOLEAN_T create_intensity_array_observed(
   SCORER_T* scorer,        ///< the scorer object -in/out
@@ -963,7 +991,6 @@ BOOLEAN_T create_intensity_array_observed(
  * intensities array.  It's implemented here so that
  * create_intensity_array_observed() can remain private and so that
  * the scorer->observed array can be accessed directly.
- * .
  */
 void get_processed_peaks(
   SPECTRUM_T* spectrum, 
@@ -1111,7 +1138,6 @@ BOOLEAN_T create_intensity_array_xcorr(
   // DEBUG
   // carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
   
-  // if score type equals XCORR
   if(scorer->type != XCORR){
     carp(CARP_ERROR, "Incorrect scorer type, only use this method for XCORR scorers");
     return FALSE;
@@ -1452,14 +1478,12 @@ FLOAT_T score_spectrum_v_ion_series(
 {
   FLOAT_T final_score = 0;
 
-  // if score type equals SP
   if(scorer->type == SP){
     final_score = gen_score_sp(scorer, spectrum, ion_series);
   }
   else if(scorer->type == XCORR){
     final_score = gen_score_xcorr(scorer, spectrum, ion_series);
   }
-  // FIXME, later add different score types...
   else{
     carp(CARP_ERROR, "no scoring method availiable for the scorers' score type");
   }
@@ -1477,7 +1501,7 @@ FLOAT_T score_spectrum_v_spectrum(
 );
 
 /**
- * Creates the an array of ion constraints for GMTK models.
+ * Creates an array of ion constraints for GMTK models.
  * 0  - b
  * 1  - b-nh3
  * 2  - b-h2o

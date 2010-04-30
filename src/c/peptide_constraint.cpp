@@ -1,7 +1,6 @@
 /*************************************************************************//**
  * \file peptide_constraint.cpp
- * $Revision: 1.10 $
- * \brief: Object for holding the peptide constraint information.
+ * \brief Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>

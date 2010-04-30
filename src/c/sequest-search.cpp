@@ -1,17 +1,15 @@
 /**
  * \file sequest-search.cpp
- */
-/*
- * FILE: sequest-search.cpp
  * AUTHOR: Barbara Frewen
  * CREATE DATE: Oct 2, 2009
  * PROJECT: crux
- * DESCRIPTION: The crux search routine that emulates SEQUEST.  Scores
- * all candidate peptides with Sp, deletes all but the 500 top-scoring
- * candidates, scores remaining 500 with xcorr, sorts results by xcorr
- * and returns the top 5 plus the match with the best Sp score.
- * Writes results to .sqt, .txt, and .csm files.  Does not compute
- * p-values. 
+ * \brief The crux search routine that emulates SEQUEST.
+ *
+ * Scores all candidate peptides with Sp, deletes all but the 500
+ * top-scoring candidates, scores remaining 500 with xcorr, sorts
+ * results by xcorr and returns the top 5 plus the match with the best
+ * Sp score.  Writes results to .sqt, .txt, and .csm files.  Does not
+ * compute p-values.
  */
 
 #include "sequest-search.h"

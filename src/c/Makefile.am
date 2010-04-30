@@ -32,8 +32,6 @@ AM_CXXFLAGS = -Wall -W -Werror  $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
 LIBFILES= \
   alphabet.cpp \
   alphabet.h \
-  array.cpp \
-  array.h \
   carp.cpp \
   carp.h \
   create_index.cpp \

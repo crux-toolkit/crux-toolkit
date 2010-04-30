@@ -1,7 +1,6 @@
 /*************************************************************************//**
  * \file sorter.cpp
- * $Revision: 1.15 $
- * \brief: Object to sort objects
+ * \brief Object to sort objects
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,9 +1,8 @@
 /*************************************************************************//**
- * \file spectrum_collection.c
+ * \file spectrum_collection.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: 28 June 2006
- * DESCRIPTION: code to support working with collection of multiple spectra
- * REVISION: $Revision: 1.43 $
+ * \brief code to support working with collection of multiple spectra
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>
@@ -795,7 +794,7 @@ BOOLEAN_T get_spectrum_collection_is_parsed(
 /**
  * Takes the spectrum file name and creates a file with unique filenames.
  * The method will create one file for PSM result serializations for the 
- * target sequence and #number_decoy_set number of files for decoy PSM 
+ * target sequence and number_decoy_set number of files for decoy PSM 
  * result serialization.  Thus, the FILE* array will contain,
  * at index 0, the target file and the allowed indices the decoy files.
  *
