@@ -84,6 +84,11 @@
 #define LOSS_HEIGHT 10
 
 /**
+ * \define Macro for converting floating point to integers.
+ */
+#define INTEGERIZE(VALUE,BIN_SIZE) ((int)((VALUE / BIN_SIZE) + 0.5))
+
+/**
  * \struct scorer
  * \brief An object to score spectrum v. spectrum or spectrum v. ion_series
  */
@@ -524,11 +529,16 @@ BOOLEAN_T create_intensity_array_sp(
   FLOAT_T max_intensity = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  // FIXME, later be able pick between average and mono
-  FLOAT_T bin_width = bin_width_mono;
+  MASS_TYPE_T mass_type = get_mass_type_parameter("fragment-mass");
+  FLOAT_T bin_width = bin_width_average;
   FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
   int top_bins = 200;
+
+  // Switch to monoisotopic mass, if requested.
+  if (mass_type == MONO) {
+    bin_width = bin_width_mono;
+  }
 
   // DEBUG
   // carp(CARP_INFO, "precursor_mz: %.1f", precursor_mz);
@@ -561,7 +571,7 @@ BOOLEAN_T create_intensity_array_sp(
     }
     
     // map peak location to bin
-    mz = (int)(peak_location/bin_width + 0.5);
+    mz = INTEGERIZE(peak_location, bin_width);
     
     // get intensity
     intensity = sqrt(get_peak_intensity(peak));
@@ -664,6 +674,14 @@ int calculate_ion_type_sp(
   int* before_cleavage = (int*)mymalloc(get_ion_series_charge(ion_series)*sizeof(int));
   int cleavage_array_idx = 0;
 
+  MASS_TYPE_T mass_type = get_mass_type_parameter("fragment-mass");
+  FLOAT_T bin_width = bin_width_average;
+
+  // Switch to monoisotopic mass, if requested.
+  if (mass_type == MONO) {
+    bin_width = bin_width_mono;
+  }
+
   // initialize before cleavage indecies
   for(; cleavage_array_idx < get_ion_series_charge(ion_series); ++cleavage_array_idx){
     before_cleavage[cleavage_array_idx] = -1;
@@ -679,7 +697,7 @@ int calculate_ion_type_sp(
   // while there are ion's in ion iterator, add matched observed peak intensity
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
-    intensity_array_idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
+    intensity_array_idx = INTEGERIZE(get_ion_mass_z(ion), bin_width);
     // get the intensity matching to ion's m/z
     if(intensity_array_idx < scorer->sp_max_mz){
       one_intensity = scorer->intensity_array[intensity_array_idx];
@@ -841,9 +859,15 @@ BOOLEAN_T create_intensity_array_observed(
   FLOAT_T peak_location = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  FLOAT_T bin_width = bin_width_mono;
+  MASS_TYPE_T mass_type = get_mass_type_parameter("fragment-mass");
+  FLOAT_T bin_width = bin_width_average;
   FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
+
+  // Switch to monoisotopic mass, if requested.
+  if (mass_type == MONO) {
+    bin_width = bin_width_mono;
+  }
 
   // set max_mz and malloc space for the observed intensity array
   FLOAT_T sp_max_mz = 512;
@@ -908,7 +932,7 @@ BOOLEAN_T create_intensity_array_observed(
     }
     
     // map peak location to bin
-    mz = (int)(peak_location / bin_width + 0.5);
+    mz = INTEGERIZE(peak_location, bin_width);
     region = mz / region_selector;
 
     // don't let index beyond array
@@ -1027,15 +1051,21 @@ BOOLEAN_T create_intensity_array_theoretical(
   int intensity_array_idx = 0;
   int ion_charge = 0;
   ION_TYPE_T ion_type;
-  FLOAT_T bin_width = bin_width_mono;
+  MASS_TYPE_T mass_type = get_mass_type_parameter("fragment-mass");
+  FLOAT_T bin_width = bin_width_average;
   // int charge = get_ion_series_charge(ion_series);
   // create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
 
+  // Switch to monoisotopic mass, if requested.
+  if (mass_type == MONO) {
+    bin_width = bin_width_mono;
+  }
+
   // while there are ion's in ion iterator, add matched observed peak intensity
   while(ion_iterator_has_next(ion_iterator)){
     ion = ion_iterator_next(ion_iterator);
-    intensity_array_idx = (int)(get_ion_mass_z(ion) / bin_width + 0.5);
+    intensity_array_idx = INTEGERIZE(get_ion_mass_z(ion), bin_width);
     ion_type = get_ion_type(ion);
     ion_charge = get_ion_charge(ion);
 
@@ -1096,11 +1126,11 @@ BOOLEAN_T create_intensity_array_theoretical(
         // mass_z + (modification_masses[(int)ion_modification]/(FLOAT_T)charge) * modification_count;  
 
         if(ion_type == B_ION){
-          int h2o_array_idx = (int)((get_ion_mass_z(ion) - (MASS_H2O_MONO/ion_charge) ) / bin_width + 0.5);
+          int h2o_array_idx = INTEGERIZE((get_ion_mass_z(ion) - (MASS_H2O_MONO/ion_charge)), bin_width);
           add_intensity(theoretical, h2o_array_idx, LOSS_HEIGHT);
         }
 
-        int nh3_array_idx = (int)((get_ion_mass_z(ion) -  (MASS_NH3_MONO/ion_charge)) / bin_width + 0.5);
+        int nh3_array_idx = INTEGERIZE((get_ion_mass_z(ion) -  (MASS_NH3_MONO/ion_charge)), bin_width);
         add_intensity(theoretical, nh3_array_idx, LOSS_HEIGHT);
       }
       
@@ -1532,7 +1562,6 @@ ION_CONSTRAINT_T** single_ion_constraints(
   ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION, A_ION }; 
   int charges[GMTK_NUM_CHARGES] = { 1, 2 }; 
 
-  //MASS_TYPE_T mass_type = MONO; // TODO maybe change to parameter file
   MASS_TYPE_T mass_type = get_mass_type_parameter("fragment-mass");
 
   int ion_constraint_idx = 0;
