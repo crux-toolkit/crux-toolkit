@@ -1,12 +1,9 @@
 /*************************************************************************//**
- * \file match.c
+ * \file match.cpp
  * AUTHOR: Chris Park
  * CREATE DATE: 11/27 2006
- * DESCRIPTION: Object for matching a peptide and a spectrum, generate
+ * \brief Object for matching a peptide and a spectrum, generate
  * a preliminary score(e.g., Sp) 
- *
- * REVISION: $Revision: 1.78 $
- * REVISION: $Revision: 1.78 $
  ****************************************************************************/
 #include <math.h>
 #include <stdlib.h>
@@ -38,7 +35,7 @@ using namespace std;
 
 /**
  * README!
- * <Issues on the overall_type field in match struct>
+ * Issues on the overall_type field in match struct
  * 
  * Outstanding question: How do you determine the
  * peptide trypticity for multiple protein sources?

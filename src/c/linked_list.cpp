@@ -1,6 +1,6 @@
 /**
  * \file linked_list.cpp
- * Method definitions for a linked list class.
+ * \brief Method definitions for a linked list class.
  */
 
 #include "linked_list.h"

@@ -2,8 +2,7 @@
  * \file peak.cpp
  * AUTHOR: William Stafford Noble
  * CREATE DATE: 6/14/04
- * VERSION: $Revision: 1.15 $
- * DESCRIPTION: Object for representing one peak in a spectrum.
+ * \brief Object for representing one peak in a spectrum.
  ****************************************************************************/
 #include "peak.h"
 #include "utils.h"

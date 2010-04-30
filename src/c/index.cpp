@@ -1,7 +1,6 @@
 /************************************************************************//**
  * \file index.cpp
- * $Revision: 1.86 $
- * \brief: Object for representing an index of a database
+ * \brief Object for representing an index of a database
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -130,8 +129,8 @@ BOOLEAN_T check_index_constraints(INDEX_T* index);
  * The directory is also the name of the index given by the user.
  * There are no assumptions made about the name of the index
  * (directory) and the name of the fasta file from which it was
- * created.  The binary version of the fasta is named <fasta
- * filename>-binary-fasta.  The file with a list of index files and
+ * created.  The binary version of the fasta is named [fasta
+ * filename]-binary-fasta.  The file with a list of index files and
  * the masses they contain is crux_index_map.
  *
  * The index has two peptide constraints: one to define ALL the

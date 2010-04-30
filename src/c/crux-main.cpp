@@ -1,17 +1,12 @@
 /**
  * \file crux-main.cpp
- */
-/*
- AUTHOR: Barbara Frewen
- CREATE DATE: November 24, 2008
- DESCRIPTION: The starting point for what were previously three
-         separate protgrams--create-index, search-for-matches,
-         analyze-matches.  Usage is
-            crux <operation> <options> <arguments>
-         where operation is create-index, search, compute-q-values, or
-         q-ranker.     
- REVISION: $Revision: 1.2 $
-*/
+ * AUTHOR: Barbara Frewen
+ * CREATE DATE: November 24, 2008
+ * \brief The starting point for the main crux program.
+ *
+ * Usage is "crux [command] [options] [arguments]" where command
+ * is one of the primary crux commands.
+ **/
 
 #include "crux-main.h"
 

@@ -2,8 +2,7 @@
  * \file parameter.cpp
  * FILE: parameter.cpp
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
- * CREATE DATE: 2006 Oct 09
- * DESCRIPTION: General parameter handling utilities. MUST declare ALL
+ * \brief General parameter handling utilities. MUST declare ALL
  * optional command parameters here inside initalialize_parameters.
  ****************************************************************************/
 
@@ -1217,13 +1216,12 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 
 /**
  * Read the value given for custom-enzyme and enter values into global
- * params.   Correct syntax is <brace>A-Z<brace>|<brace>A-Z<brace> 
- * where <brace> can be [] or {}.  An X indicates that any residue is
- * legal. Sets pre/post_list size and allocates memory for
- * pre/post_cleavage_list.  Sets pre/post_for_inclusion as true if []
- * encloses list or false if {} encloses list. 
- * For special case of [X], set p_cleavage_list as empty and inclusion
- * as false.
+ * params.  Correct syntax is [A-Z]|[A-Z] or {A-Z}|{A-Z}.  An X
+ * indicates that any residue is legal. Sets pre/post_list size and
+ * allocates memory for pre/post_cleavage_list.  Sets
+ * pre/post_for_inclusion as true if [] encloses list or false if {}
+ * encloses list.  For special case of [X], set p_cleavage_list as
+ * empty and inclusion as false.
  */
 // NOTE (BF mar-11-09): for testing would be nice if this returned
 // error code instead of dying

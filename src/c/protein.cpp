@@ -1,7 +1,6 @@
 /*************************************************************************//**
  * \file protein.cpp
- * $Revision: 1.83 $
- * \brief: Object for representing a single protein.
+ * \brief Object for representing a single protein.
  ****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +9,6 @@
 #include <ctype.h>
 #include <vector>
 #include "utils.h"
-#include "alphabet.h"
 #include "parameter.h"
 #include "objects.h"
 #include "peptide.h"
@@ -430,8 +428,6 @@ BOOLEAN_T parse_protein_fasta_file(
     return(FALSE);
   }
   
-  // need this line to initialize alphabet to set for protein instead of DNA
-  set_alphabet(verbosity, "ACDEFGHIKLMNPQRSTVWY"); 
   buffer[0] = '\0';
 
   // Read the sequence.
@@ -484,8 +480,12 @@ static BOOLEAN_T read_title_line
   // set protein offset                   FIXME: might not need to "-1" -CHRIS
   protein->offset = ftell(fasta_file) - 1;
 
-  // chris edited, added this block to make sure all of comment line is read 
-  // although might not be stored, to ensure the file* is at start of the sequence
+  /**
+   * chris edited, added this block to make sure all of comment line
+   * is read although might not be stored, to ensure the file* is at
+   * start of the sequence
+   */
+
   {
     char* new_line = NULL;
     int line_length;
@@ -497,14 +497,6 @@ static BOOLEAN_T read_title_line
     strncpy(id_line, new_line, LONGEST_LINE-1);
     free(new_line);
   }
-
-  // this is Bill's old code
-  /*
-  // Read the ID and comment line.
-  if (fgets(id_line, LONGEST_LINE-1, fasta_file) == NULL) {
-    carp(CARP_FATAL, "Error reading Fasta file.\n");
-  }
-  */
 
   // Remove EOL.
   id_line[strlen(id_line) - 1] = '\0';
@@ -536,8 +528,6 @@ static BOOLEAN_T read_raw_sequence
    unsigned int* sequence_length // the sequence length -chris added
    )
 {
-  // char a_char;
-  // tlb; change a_char to integer so it will compile on SGI
   int a_char;
   unsigned int i_seq;
   BOOLEAN_T return_value = TRUE;
@@ -569,21 +559,8 @@ static BOOLEAN_T read_raw_sequence
       a_char = toupper((int)a_char);
 
       /**
-       * this code check the character against to what verbosity you set
-       * bill's code, char_in_string can be found in utils.c
-       * very slow!!
-      if (!char_in_string(get_alphabet(TRUE), a_char)) {
-      carp(CARP_WARNING, "Converting illegal character %c to X ",
-      a_char);
-      carp(CARP_WARNING, "in sequence %s.", name);
-      a_char = 'X';
-      }
-      */
-      
-      /**
-       * To speed up the process, checks the ASCII code, 
-       * if the char is above or below the A(65)~Z(90)range,
-       * converts the character to a 'X'
+       * Check the ASCII code.  If the char is above or below the
+       * A(65)~Z(90)range, convert the character to an 'X'.
        */
       if ( (int)a_char < 65 || (int)a_char  > 90 ) {
         carp(CARP_WARNING, "Converting illegal character %c to X ",

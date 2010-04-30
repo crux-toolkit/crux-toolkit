@@ -1,7 +1,6 @@
 /*************************************************************************//**
  * \file ion.cpp
- * $Revision: 1.31 $
- * \brief: Object for representing a single ion.
+ * \brief Object for representing a single ion.
  ****************************************************************************/
 #include <math.h>
 #include <stdio.h>

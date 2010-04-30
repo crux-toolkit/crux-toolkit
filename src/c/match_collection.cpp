@@ -1,14 +1,12 @@
 /*********************************************************************//**
  * \file match_collection.cpp
+ * AUTHOR: Chris Park
+ * CREATE DATE: 11/27 2006
  * \brief A set of peptide spectrum matches for one spectrum.
  *
  * Methods for creating and manipulating match_collections.   
  * Creating a match collection generates all matches (searches a
  * spectrum against a database.
- *
- * AUTHOR: Chris Park
- * CREATE DATE: 11/27 2006
- * $Revision: 1.123 $
  ****************************************************************************/
 #include "match_collection.h"
 
@@ -782,7 +780,7 @@ BOOLEAN_T spectrum_sort_match_collection(
 
 /**
  * \brief Reduces the number of matches in the match_collection so
- * that only the <max_rank> highest scoring (by score_type) remain.
+ * that only the [max_rank] highest scoring (by score_type) remain.
  *
  * Matches ranking up to max_rank are retained and those ranking
  * higher are freed.  The value of match_collection->total_matches is

@@ -1,6 +1,5 @@
 /**
  * \file mass.cpp 
- * $Revision: 1.17 $
  * \brief Provides constants and methods for calculating mass
  ****************************************************************************/
 #include <math.h>

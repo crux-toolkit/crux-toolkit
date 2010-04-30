@@ -1,7 +1,6 @@
 /*************************************************************************//**
  * \file peptide.cpp
- * $Revision: 1.85 $
- * \brief: Object for representing a single peptide.
+ * \brief Object for representing a single peptide.
  ****************************************************************************/
 #include "peptide.h"
 #include <string.h>
@@ -591,7 +590,7 @@ char* get_peptide_sequence_pointer(
  * \returns The sequence of peptide as used in sqt files, namely with
  * each flanking AA and any modifications 
  * 
- * Format is <AA|->.<peptide_sequence>.<AA|-> where AA is a flanking
+ * Format is [AA|-].[peptide_sequence].[AA|-] where AA is a flanking
  * amino acid and - indicates this is the end of the protein sequence
  * Gets flanking AAs from the first peptide_src, thus must have at
  * least one peptide src 

@@ -3,14 +3,14 @@
  * BASED ON: original_match_search.c
  * DATE: Aug 19, 2008
  * AUTHOR: Barbara Frewen
- * DESCRIPTION: Main file for crux-search-for-matches.  Given an ms2
- * file and a fasta file or index, compare all spectra to peptides in
- * the fasta file/index and return high scoring matches.  Peptides are
- * determined by parameters for length, mass, mass tolerance, cleavages,
- * modifications. Score first by a preliminary method, keep only the
- * top ranking matches, score those with a second method and re-rank
- * by second score.  Output in binary csm file format or text sqt file
- * format. 
+ * \brief Main file for crux-search-for-matches.
+ *
+ * Given an ms2 file and a fasta file or index, compare all spectra to
+ * peptides in the fasta file/index and return high scoring matches.
+ * Peptides are determined by parameters for length, mass, mass
+ * tolerance, cleavages, modifications. Score each spectrum with
+ * respect to all candidates, and rank by score. Output in binary csm
+ * file format or text sqt file format.
  */
 /*
  * Here is the outline for how the new search should work

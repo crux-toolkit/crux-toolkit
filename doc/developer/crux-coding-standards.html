@@ -5,11 +5,14 @@
 
 <h1>Coding standards</h1>
 
-<h3>Object-oriented philosophy</h3>
+<
+
+<h3>Objects in C</h3>
 
 <p>
-Although Crux is written in C, we aim to produce modularized code,
-with each module acting like a C++ object.  In particular, a
+Crux is currently undergoing a transition from C to C++.  For the
+remaining C code, we aim to produce modularized code, with each module
+acting like a C++ object.  In particular, a
 <code>struct</code> object should be encapsulated in a pair of
 <code>.c</code> and <code>.h</code> files.  The fields of the struct
 should only appear in the <code>.c</code> file, and the
@@ -228,6 +231,13 @@ to report information, warnings, and errors.
 Do not call <code>exit()</code> directly for fatal errors. 
 Use <code>carp(CARP_FATAL, ...)</code>.
 This will report a fatal error and call <code>exit(1)</code>.
+
+<li>
+If you find yourself making small changes in a file that doesn't meet these
+coding standards, write your changes in the existing style of the file.
+If you are making a substantial revision to the file, take the time
+to bring the entire file into conformance with these standards.
+
 </ul>
 
 <h3>Structured comments</h3>
@@ -237,12 +247,12 @@ Crux uses <a
 href='http://www.stack.nl/~dimitri/doxygen/manual.html'>doxygen</a> to
 produce documentation directly from structured comments in the source
 code.  Unstructured comments are still allowed, and do not show up in
-the generated documentation.  Because Doxygen is able to parse 'C,'
-only a few additional markup tags are required to generate
+the generated documentation.  Because Doxygen is able to parse C and
+C++ files, only a few additional markup tags are required to generate
 documentation from the structured comments.  Following is an
 abbreviated description of how to use doxygen-style structured
 comments.  See the <a
-href='http://www.stack.nl/~dimitri/doxygen/manual.html'> doxygen
+href='http://www.stack.nl/~dimitri/doxygen/manual.html'>doxygen
 documentation</a> for a full description:</p>
 
 <p>
@@ -312,41 +322,11 @@ Here are some coding standards related to structured comments:</p>
 Begin each file with a header of the following form:
 <PRE>
 /**
- * @file foo.c
+ * \file foo.c
+ * AUTHOR: Elmer Fudd
+ * CREATE DATE: December 31, 1999
+ * \brief Insert brief description of file contents here.
  *
- * Insert brief description of file contents here.
- *
- * $Id: crux-coding-standards.html,v 1.2 2009-05-23 01:34:59 cegrant Exp $
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2007/10/03 21:58:16  aklammer
- * *** empty log message ***
- *
- * Revision 1.1  2007/10/03 21:41:29  aklammer
- * *** empty log message ***
- *
- * Revision 1.6  2007/10/03 19:29:28  aklammer
- * *** empty log message ***
- *
- * Revision 1.5  2006/07/05 22:28:01  aklammer
- * *** empty log message ***
- *
- * Revision 1.4  2006/06/29 21:51:20  aklammer
- * *** empty log message ***
- *
- * Revision 1.2  2006/06/27 20:42:00  aklammer
- * *** empty log message ***
- *
- * Revision 1.1  2006/03/10 00:53:29  noble
- * *** empty log message ***
- *
- * Revision 1.8  2005/12/24 14:52:17  noble
- * *** empty log message ***
- *
- * Revision 1.7  2005/12/23 21:20:52  cegrant
- * Updated section on coding standards
- *
- * Revision 1.6  2005/12/22 19:26:32  noble
- * *** empty log message ***
  **/
 </PRE>
 
@@ -380,10 +360,6 @@ number of required arguments will differ by program, but every program
 will have at least one required argument.
 
 <li>
-Every program should send its primary output to standard output, and
-should produce informative status messages on standard error.
-
-<li>
 Command line option names should be verbose, and should be preceded
 with a double hyphen.
 
@@ -402,18 +378,8 @@ option that controls the verbosity of messages to standard error.
 <li>
 The usage message should list the default value for every option.
 
-<li>
-If you find yourself making small changes in a file that doesn't meet these
-coding standards, write your changes in the existing style of the file.
-If you are making a substantial revision to the file, take the time
-to bring the entire file into conformance with these standards.
-
 </ul>
 
-<h3>Compilation and makefile standards</h3>
-
-Write code to the ANSI C standard. Default GNU extensions are allowed.
-Compile with <code>-Wall</code>.
 </blockquote>
 </body>
 </html>

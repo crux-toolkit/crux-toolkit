@@ -411,9 +411,9 @@ char* my_copy_string(const char* src){
 }
 
 /**
- * returns copy of the src string upto the specified length
- * includes a null terminating \\0 character
- * the string is heap allocated thus, user must free
+ * Returns copy of the src string upto the specified length.
+ * Includes a null terminating character.
+ * The string is heap allocated; thus, user must free.
  */
 char* copy_string_part(const char* src, int length){
   char* copy = (char*)mycalloc(length+1, sizeof(char));
@@ -1547,10 +1547,10 @@ void initialize_run(
 }
 
 /**
- *  Read the given string of the form <first>-<last> and return <first>
- *  or -1 if the range is invalid.  In a valid range, <first> and <last> 
+ *  Read the given string of the form [first]-[last] and return [first]
+ *  or -1 if the range is invalid.  In a valid range, [first] and [last]
  *  are non-negative integers and there is exactly one '-' separating
- *  them.  No check that first < last.
+ *  them.  No check that first is less than last.
  */
 int get_first_in_range_string(const char* const_range_string){
   int number = 0;
@@ -1581,10 +1581,10 @@ int get_first_in_range_string(const char* const_range_string){
 }
  
 /**
- *  Read the given string of the form <first>-<last> and return <last>
- *  or -1 if the range is invalid.  In a valid range, <first> and <last> 
+ *  Read the given string of the form [first]-[last] and return [last]
+ *  or -1 if the range is invalid.  In a valid range, [first] and [last] 
  *  are non-negative integers and there is exactly one '-' separating
- *  them.  No check that first < last.
+ *  them.  No check that first is less than last.
  */
 int get_last_in_range_string(const char* range_string){
   int number = BILLION;

@@ -1,15 +1,10 @@
 /**
  * \file search-progress.h
- */
-
-/*
- AUTHOR: Barbara Frewen
- CREATE DATE: October 5, 2009
- DESCRIPTION: A class to keep track of how many searches have been
- attempted and how many have been successfull.  Reports progress at
- appropriate intervals     
- REVISION: $Revision: 1.0 $
-
+ * AUTHOR: Barbara Frewen
+ *  CREATE DATE: October 5, 2009
+ * \brief A class to keep track of how many searches have been
+ * attempted and how many have been successfull.  Reports progress at
+ * appropriate intervals
  */
 #ifdef __cplusplus
 extern "C" {
@@ -24,6 +19,7 @@ extern "C" {
 
 using namespace std;
 
+// FIXME: Missing documentation!
 class SearchProgress{
 
  public:

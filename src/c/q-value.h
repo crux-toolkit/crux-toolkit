@@ -2,13 +2,9 @@
 #define QVALUE_CMD_H
 
 /**
- * \file match_analysis.c
- */
-/*
+ * \file q-value.h
  * AUTHOR: Barbara Frewen
  * CREATE DATE: November 24, 2008
- * DESCRIPTION: Header file for compute-q-values crux command
- * $Revision: 1.2 $
  ****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>

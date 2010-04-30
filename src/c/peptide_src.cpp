@@ -1,7 +1,6 @@
 /*************************************************************************//**
- * \file peptide_src.c
- * $Revision: 1.21 $
- * \brief: Object for mapping a peptide to it's parent protein.
+ * \file peptide_src.cpp
+ * \brief Object for mapping a peptide to its parent protein.
  ****************************************************************************/
 
 #include <math.h>

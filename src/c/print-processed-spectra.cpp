@@ -1,12 +1,11 @@
 /**
  * \file print-processed-spectra.cpp
- *
  * AUTHOR: Barbara Frewen
  * CREATE DATE: September 18, 2009
- * DESCRIPTION: Main method for the print-processed-spectra command.
- *              For every spectrum in an ms2 file, process as for
- *              xcorr and print peaks in ms2 format to new file.
- * REVISION:
+ * \brief Main method for the print-processed-spectra command.
+ *
+ * For every spectrum in an ms2 file, process as for xcorr and print
+ * peaks in ms2 format to new file.
  */
 
 #include "print-processed-spectra.h"
