@@ -24,41 +24,41 @@
 
 
 /**
- * \define The size of the bins for discretizing the m/z axis of the
- * observed spectrum for XCorr and Sp.
+ * The size of the bins for discretizing the m/z axis of the
+ * observed spectrum.  For use with monoisotopic mass.
  */
 #define bin_width_mono 1.0005079
 
 /**
- * \define Unused constant.
+ * The size of the bins for discretizing the m/z axis of the
+ * observed spectrum.  For use with average mass.
  */
 #define bin_width_average 1.0011413
 
 /**
- * \define Maximum range for cross correlation offset.
+ * Maximum range for cross correlation offset.
  */
 #define MAX_XCORR_OFFSET 75
 
 // The following two constants are hardware dependent.
 // These values should be good for double precision floating point
 // numbers compatible with the IEEE 754 standard.
+
 /**
-* \define Constant for EVD p_value calculation
+* Constant for EVD p_value calculation
 */
 #define DBL_EPSILON  2.2204460492503131e-16
 /**
-* \define Constant for EVD p_value calculation
+* Constant for EVD p_value calculation
 */
 #define DBL_MAX_10_EXP 308
 
 /**
- * \define Cut-off below which the simple Bonferroni calculation can
- * be used.
+ * Cut-off below which the simple Bonferroni calculation can be used.
  */
 #define BONFERRONI_CUT_OFF_P 0.0001
 /**
- * \define Cut-off below which the simple Bonferroni calculation can
- * be used.
+ * Cut-off below which the simple Bonferroni calculation can be used.
  */
 #define BONFERRONI_CUT_OFF_NP 0.01
 
@@ -71,20 +71,20 @@
 #define GMTK_NUM_PAIRED_ION_SERIES 15
 
 /**
- * \define Relative peak height of b- and y-ions.
+ * Relative peak height of b- and y-ions.
  */
 #define B_Y_HEIGHT 50
 /**
- * \define Relative height of flanking peaks.
+ * Relative height of flanking peaks.
  */
 #define FLANK_HEIGHT 25
 /**
- * \define Relative height of neutral loss peaks.
+ * Relative height of neutral loss peaks.
  */
 #define LOSS_HEIGHT 10
 
 /**
- * \define Macro for converting floating point to integers.
+ * Macro for converting floating point to integers.
  */
 #define INTEGERIZE(VALUE,BIN_SIZE) ((int)((VALUE / BIN_SIZE) + 0.5))
 
