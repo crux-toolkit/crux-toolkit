@@ -18,17 +18,17 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
-class ProteinDBPanel extends JPanel {
+class ProteinDBPanel extends CruxParameterControl {
 	
-	CruxAnalysisModel model;
-	JButton proteinDBButton = new JButton("Choose Protein Database");
-	JTextField proteinFileName = new JTextField();
+	private final CruxGui cruxGui;
+	private final JButton proteinDBButton = new JButton("Choose Protein Database");
+	private final JTextField proteinFileName = new JTextField();
 	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 	
-	public ProteinDBPanel(CruxAnalysisModel model) {
-		this.model = model;
+	public ProteinDBPanel(final CruxGui cruxGui) {
+		this.cruxGui = cruxGui;
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -51,13 +51,20 @@ class ProteinDBPanel extends JPanel {
 		proteinFileName.setText(fileName);
 	}
 	
+	public void saveToModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		model.setProteinDatabase(proteinFileName.getText());
+	}
+	
 	public void updateFromModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		proteinFileName.setText(model.getProteinDatabase());
 	}
 
 	class ProteinDBButtonListener implements ActionListener {
 		public void actionPerformed(final ActionEvent event) {
 			final JFileChooser chooser = new JFileChooser();
+			CruxAnalysisModel model = cruxGui.getAnalysisModel();
 			String fileName = model.getProteinDatabase();
 			if (fileName != null && fileName.length() > 0) {
 				chooser.setCurrentDirectory(new File(fileName));

@@ -8,34 +8,37 @@ import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class MasterButtonPanel extends JPanel {
 
+	final CruxGui cruxGui;
 	final JPanel buttonPanel = new JPanel();
 	final JButton newButton = new JButton("New Analysis");
 	final JButton openButton = new JButton("Open Analysis");
 	final JButton setNameButton = new JButton("Set Analysis Name");
 	final JButton runButton = new JButton("Run Analysis");
+	final JButton setCruxPathButton = new JButton("Locate Crux");
 	final JButton exitButton = new JButton("Exit");
-	CruxGui gui;
 	
-	public MasterButtonPanel(final CruxGui gui) {
-		
-		this.gui = gui;
+	public MasterButtonPanel(final CruxGui cruxGui) {
+		this.cruxGui = cruxGui;
 		buttonPanel.setBorder(BorderFactory.createEtchedBorder());
 		add(buttonPanel, BorderLayout.SOUTH);
 		newButton.addActionListener(new OpenAnalysisButtonListener()); 
 		openButton.addActionListener(new OpenAnalysisButtonListener()); 
 		runButton.addActionListener(new RunButtonListener());
 		setNameButton.addActionListener(new SetNameButtonListener()); 
+		setCruxPathButton.addActionListener(new SetCruxPathListener());
 		exitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				gui.shutdown();
+				cruxGui.shutdown();
 			}
 		});
 		buttonPanel.setLayout(new FlowLayout());
+		buttonPanel.add(setCruxPathButton);
 		buttonPanel.add(setNameButton);
 		buttonPanel.add(newButton);
 		buttonPanel.add(openButton);
@@ -50,12 +53,23 @@ public class MasterButtonPanel extends JPanel {
 		
 	}
 
+	class SetCruxPathListener implements ActionListener {
+		public void actionPerformed(ActionEvent event) {
+			final JFileChooser fileChooser = new JFileChooser();
+			    int returnVal = fileChooser.showDialog(getParent(), "Set path to crux");
+		        if (returnVal == JFileChooser.APPROVE_OPTION) {
+		            File file = fileChooser.getSelectedFile();
+		             cruxGui.getAnalysisModel().setPathToCrux(file.toString());
+		        }
+		}
+	}
+	
 	class SetNameButtonListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent event) {
 			// Get list of existing names
 			String name = (String) JOptionPane.showInputDialog(
-					gui.frame, 
+					cruxGui.frame, 
 					"Choose a name for the analysis:", 
 					"Analysis Name", 
 					JOptionPane.PLAIN_MESSAGE, 
@@ -64,24 +78,24 @@ public class MasterButtonPanel extends JPanel {
 					""
 			);
 			if (name != null) {
-				if (name == gui.model.getName()) {
-					// Curren model alread has this name
+				if (name == cruxGui.getAnalysisModel().getName()) {
+					// Current model already has this name
 					return;
 				}
-				if (gui.analysisSet.contains(name)) {
-					JOptionPane.showMessageDialog(gui.frame, "An analysis named " + name + "already exists.");
+				if (cruxGui.analysisSet.contains(name)) {
+					JOptionPane.showMessageDialog(cruxGui.frame, "An analysis named " + name + "already exists.");
 					return;
 				}
 				// Create new directory using name
 				boolean result = (new File(name)).mkdir();
 				// Add name to analysis set and set name in model
 				if (result) {
-					gui.model.setName(name);
-					gui.analysisSet.add(name);
-					gui.frame.setTitle("Crux - " + name);
+					cruxGui.getAnalysisModel().setName(name);
+					cruxGui.analysisSet.add(name);
+					cruxGui.frame.setTitle("Crux - " + name);
 				}
 				else {
-					JOptionPane.showMessageDialog(gui.frame, "Unable to create directory for analysis named " + name);
+					JOptionPane.showMessageDialog(cruxGui.frame, "Unable to create directory for analysis named " + name);
 				}
 			}
 		}
@@ -91,9 +105,8 @@ public class MasterButtonPanel extends JPanel {
 	class RunButtonListener implements ActionListener {
 		
 		public void actionPerformed(ActionEvent event) {
-			if (gui.model.isValidAnalysis()) {
-			    gui.frame.cruxGuiPanel.setVisible(false);
-			    gui.model.run();
+			if (cruxGui.getAnalysisModel().isValidAnalysis()) {
+			    cruxGui.getAnalysisModel().run();
 			}
 		}
 		

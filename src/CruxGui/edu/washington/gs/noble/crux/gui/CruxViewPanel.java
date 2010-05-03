@@ -7,74 +7,102 @@ import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JToggleButton;
 import javax.swing.JPanel;
 
+/**
+ * The CruxViewPanelClass presents the schematic diagram of data flow between the 
+ * crux tools and the GUI elements needed to get and set the crux analysis parameters.
+ *
+ * @author Charles E. Grant
+ *
+ */
 @SuppressWarnings("serial")
 public class CruxViewPanel extends JPanel {
 	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 	
-	ImagePanel image;
-	final JPanel properties = new JPanel();
-	final CruxAppButtonGroup buttonGroup = new CruxAppButtonGroup();
-	final CruxComponentButton createIndex = new CruxComponentButton("create index");
-	final CruxComponentButton search = new CruxComponentButton("search for matches");
-	final CruxComponentButton computeQvalues = new CruxComponentButton("compute-q-values");
-	final CruxComponentButton percolator = new CruxComponentButton("percolator");
-	final CruxComponentButton qranker = new CruxComponentButton("q-ranker");
-	final JToggleButton dummy = new JToggleButton(); // Only exists to select, so other button are unselected.
+	private final CruxGui cruxGui;
+	private final JPanel properties = new JPanel();
+	private final CruxAppButtonGroup buttonGroup = new CruxAppButtonGroup();
+	private final CruxComponentButton createIndexButton = new CruxComponentButton("Create Index");
+	private final CruxComponentButton searchButton = new CruxComponentButton("Search For Matches");
+	private final CruxComponentButton computeQValuesButton = new CruxComponentButton("Compute Q-values");
+	private final CruxComponentButton percolatorButton = new CruxComponentButton("Percolator");
+	private final CruxComponentButton qrankerButton = new CruxComponentButton("Q-ranker");
+	private final CruxComponentButton dummyButton = new CruxComponentButton(""); // This button only exists to select, so that other button will be unselected.
+	private final ImagePanel image;
 
-	CruxViewPanel(CruxAnalysisModel model) {
+	CruxViewPanel(CruxGui cruxGui) {
 		
+		this.cruxGui = cruxGui;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		
 		// Group buttons
-		buttonGroup.add(createIndex);
-		buttonGroup.add(search);
-		buttonGroup.add(computeQvalues);
-		buttonGroup.add(percolator);
-		buttonGroup.add(qranker);
-		buttonGroup.add(dummy);
+		buttonGroup.add(createIndexButton);
+		buttonGroup.add(searchButton);
+		buttonGroup.add(computeQValuesButton);
+		buttonGroup.add(percolatorButton);
+		buttonGroup.add(qrankerButton);
+		buttonGroup.add(dummyButton);
 		
-		// Set up panel with flow chart and buttons
+		// Set up panel containing flow chart and buttons
 		Component component2 = Box.createVerticalStrut(20);
 		add(component2);
-		image = new ImagePanel(createIndex, search, computeQvalues, percolator, qranker);
-		setSize(new Dimension(image.getWidth(), image.getHeight()));
+		image = new ImagePanel(createIndexButton, searchButton, computeQValuesButton, percolatorButton, qrankerButton);
+		setSize(new Dimension(image.getWidth() + 25, image.getHeight() + 25));
 		add(image);
 		
-		// Setup panel where controls for setting parameters will appear
+		// Set up panel where controls for setting parameters will appear
 		properties.setBackground(Color.white);
 		properties.setSize(new Dimension(image.getWidth(), 4 * image.getHeight()));
 		properties.setLayout(null);
-		IndexPanel indexPanel = new IndexPanel(model, createIndex, dummy);
-		//indexPanel.setBounds(createIndex.getX()-25, 30, indexPanel.getMaximumSize().width, indexPanel.getMaximumSize().height);
-		SearchPanel searchPanel = new SearchPanel(model, search, dummy);
-		searchPanel.setBounds(search.getX()-25, 30, searchPanel.getMaximumSize().width, searchPanel.getMaximumSize().height);
-		QValuePanel qvaluesPanel = new QValuePanel(model, computeQvalues, dummy);
-		qvaluesPanel.setBounds(percolator.getX()-25, 30, qvaluesPanel.getMaximumSize().width, qvaluesPanel.getMaximumSize().height);
-		PercolatorPanel percolatorPanel = new PercolatorPanel(model, percolator, dummy);
-		percolatorPanel.setBounds(percolator.getX()-25, 30, percolatorPanel.getMaximumSize().width, percolatorPanel.getMaximumSize().height);
-		QRankerPanel qrankerPanel = new QRankerPanel(model, qranker, dummy);
-		qrankerPanel.setBounds(percolator.getX()-25, 30, qrankerPanel.getMaximumSize().width, qrankerPanel.getMaximumSize().height);
-		properties.add(indexPanel);
-		properties.add(searchPanel);
-		properties.add(qvaluesPanel);
-		properties.add(percolatorPanel);
-		properties.add(qrankerPanel);
+		initIndexPanel();
+		initSearchPanel();
+		initQValuesPanel();
+		initPercolatorPanel();
+		initQRankerPanel();
 		add(properties);
-		
-		// Connect applications buttons to option panels
-		createIndex.addItemListener(indexPanel);
-		search.addItemListener(searchPanel);
-		computeQvalues.addItemListener(qvaluesPanel);
-		percolator.addItemListener(percolatorPanel);
-		qranker.addItemListener(qrankerPanel);
-		
+	}
+	
+	private void initIndexPanel() {
+		ParameterPanel indexParameterPanel = new ParameterPanel(CruxAnalysisModel.CruxComponents.CREATE_INDEX, cruxGui, "Index creation paramters", createIndexButton, dummyButton);
+		indexParameterPanel.setBounds(createIndexButton.getX()-25, 30, 400, 350);
+		indexParameterPanel.addParameterControl(new ProteinDBPanel(cruxGui));
+		indexParameterPanel.addParameterControl(new EnzymePanel(cruxGui));
+		indexParameterPanel.addParameterControl(new MassPanel(cruxGui));
+		indexParameterPanel.addParameterControl(new DigestPanel(cruxGui));
+		properties.add(indexParameterPanel);
+	}
+	
+	private void initSearchPanel() {
+		ParameterPanel searchParameterPanel = new ParameterPanel(CruxAnalysisModel.CruxComponents.SEARCH_FOR_MATCHES, cruxGui, "Search paramters", searchButton, dummyButton);
+		searchParameterPanel.setBounds(searchButton.getX()-25, 30, 400, 350);
+		searchParameterPanel.addParameterControl(new ProteinDBPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new SpectraPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new EnzymePanel(cruxGui));
+		searchParameterPanel.addParameterControl(new MassPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new DigestPanel(cruxGui));
+		properties.add(searchParameterPanel);
+	}
+	
+	private void initQValuesPanel() {
+		ParameterPanel qvaluesParameterPanel = new ParameterPanel(CruxAnalysisModel.CruxComponents.COMPUTE_Q_VALUES, cruxGui, "Compute q-value paramters", computeQValuesButton, dummyButton);
+		qvaluesParameterPanel.setBounds(computeQValuesButton.getX()-25, 30, 400, 350);
+		properties.add(qvaluesParameterPanel);
+	}
+	
+	private void initPercolatorPanel() {
+		ParameterPanel percolatorParameterPanel = new ParameterPanel(CruxAnalysisModel.CruxComponents.PERCOLATOR, cruxGui, "Percolator paramters", percolatorButton, dummyButton);
+		percolatorParameterPanel.setBounds(computeQValuesButton.getX()-25, 30, 400, 350); // Line up to the leftmost of the buttons
+		properties.add(percolatorParameterPanel);
+	}
+	
+	private void initQRankerPanel() {
+		ParameterPanel qrankerParameterPanel = new ParameterPanel(CruxAnalysisModel.CruxComponents.QRANKER, cruxGui, "Q-ranker paramters", qrankerButton, dummyButton);
+		qrankerParameterPanel.setBounds(computeQValuesButton.getX()-25, 30, 400, 350);
+		properties.add(qrankerParameterPanel);
 	}
 }
