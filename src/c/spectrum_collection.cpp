@@ -678,11 +678,11 @@ int match_first_scan_line(
 
 /******************************************************************************/
 
-/**  ////// TESTME////
- * sets the filename of the ms2 file the spectra were parsed
- * this function should be used only the first time the filename is set
- * to change existing filename use set_spectrum_collection_filename
- * copies the value from arguement char* filename into a heap allocated memory
+/**
+ * Sets the filename of the ms2 file the spectra were parsed.
+ * This function should be used only the first time the filename is set.
+ * To change existing filename use set_spectrum_collection_filename.
+ * Copies the value from arguement char* filename into a heap allocated memory.
  */
 void set_spectrum_collection_new_filename(
   SPECTRUM_COLLECTION_T* spectrum_collection, ///< the spectrum_collection save filename -out
