@@ -12,20 +12,27 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+/**
+ * The DigestPanel class is the GUI elements used to get and set the 
+ * mass type for the peptides (average or monoisotopic).
+ *
+ * @author Charles E. Grant
+ *
+ */
 @SuppressWarnings("serial")
-class MassPanel extends JPanel {
+class MassPanel extends CruxParameterControl {
 
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 
+	private final CruxGui cruxGui;
 	private final ButtonGroup massButtons = new ButtonGroup();
 	private final JLabel isotopicMassLabel = new JLabel("Isotopic Mass");
 	private final JRadioButton averageMass = new JRadioButton("Average Mass");
 	private final JRadioButton monoMass = new JRadioButton("Monoisotopic Mass");
-	private CruxAnalysisModel model;
 
-	public MassPanel(CruxAnalysisModel model) {
-		this.model = model;
+	public MassPanel(CruxGui cruxGui) {
+		this.cruxGui = cruxGui;
 		massButtons.add(averageMass);
 		massButtons.add(monoMass);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -40,7 +47,13 @@ class MassPanel extends JPanel {
 		updateFromModel();
 	}	
 	
+	public void saveToModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		model.setMassType(getMassType());
+	}
+	
 	public void updateFromModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		if (model.getMassType() == CruxAnalysisModel.IsotopicMassType.AVERAGE) {
 			averageMass.setSelected(true);
 			monoMass.setSelected(false);

@@ -10,6 +10,17 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+/**
+ * The CruxAnalysisClass is used to hold all the information required to run a Crux analysis.
+ * This includes which crux components to run, the status of the run, the parameters for those 
+ * tools, the location of the crux binary, the name of the analysis, and names of the directories 
+ * containing the output of the analysis. Instances of the class can be serialized to the file system
+ * to provide permanent storage for the details of the analysis.
+ * 
+ * @author Charles E. Grant
+ *
+ */
+
 public class CruxAnalysisModel extends Object implements Serializable{
 	
 	private static final long serialVersionUID = 3352659336939985777L;
@@ -17,15 +28,20 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 
 
+	/** The list of the component tools of crux */
 	public enum CruxComponents {
 		CREATE_INDEX("create-index"), 
-		SEARCH_FOR_MATCHES("search-for-matches");
+		SEARCH_FOR_MATCHES("search-for-matches"),
+		COMPUTE_Q_VALUES("compute-q-values"),
+		PERCOLATOR("percolator"),
+		QRANKER("qranker");
 		String name;
 		CruxComponents(String name) {this.name = name;}
 		public String toString() { return this.name; }
-		public static int getSize() { return 2; };
+		public static int getSize() { return 5; };
 	};
 	
+	/** The list of allowed isotopic mass types */
 	public enum IsotopicMassType { 
 		AVERAGE("average"), 
 		MONOISOTOPIC("mono");
@@ -35,6 +51,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		public static int getSize() { return 2; };
 	};
 	
+	/** The list of allowed peptide digestion types */
 	public enum DigestType {
 		FULL("full-digest"), 
 		PARTIAL("partial-digest"); 
@@ -44,6 +61,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		public static int getSize() { return 2; };
 	};
 	
+	/** The list of allowed enzymes */
 	public enum Enzyme {
 		TRYPSIN("trypsin"),
 		CHYMOTRYPSIN("chymotrypsin"), 
@@ -63,7 +81,9 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	}
 	
 	private String name;
-	private boolean componentsToRun[]= new boolean[CruxComponents.getSize()];
+	private String pathToCrux;
+	private final boolean componentsToRun[]= new boolean[CruxComponents.getSize()];
+	private final boolean showAdvancedParameters[]= new boolean[CruxComponents.getSize()];
 	private int numComponentsToRun;
 	private String proteinSource;
 	private String spectraSource;
@@ -73,7 +93,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	private boolean allowMissedCleavages;
 	
 	public CruxAnalysisModel() {
-		restoreDefaults();
+		setDefaults();
 	}
 	
 	public String getName() {
@@ -85,11 +105,31 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Model parameter 'name' set to " + name);
 	}
 	
-	public void restoreDefaults() {
-		name = null;
-		numComponentsToRun = 0;
-		componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] = false;
-		componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = false;
+	public String getPathToCrux() {
+		return pathToCrux;
+	}
+	
+	public void setPathToCrux(String pathToCrux) {
+		this.pathToCrux = pathToCrux;
+	}
+	
+	private void setDefaults() {
+		for (CruxComponents component: CruxComponents.values()) {
+			componentsToRun[component.ordinal()] = false;
+			showAdvancedParameters[component.ordinal()] = false;
+		}
+		proteinSource = null;
+		spectraSource = null;
+		massType = IsotopicMassType.AVERAGE;
+		digestType = DigestType.FULL;
+		enzyme = Enzyme.TRYPSIN;
+		allowMissedCleavages = false;
+		logger.info("Model set to default values");
+	}
+	
+	public void restoreDefaults(CruxComponents component) {
+		componentsToRun[component.ordinal()] = false;
+		showAdvancedParameters[component.ordinal()] = false;
 		proteinSource = null;
 		spectraSource = null;
 		massType = IsotopicMassType.AVERAGE;
@@ -99,34 +139,28 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Model restored to default values");
 	}
 	
-	public boolean getRunCreateIndex() {
-		return componentsToRun[CruxComponents.CREATE_INDEX.ordinal()];
+	public boolean getRunComponent(CruxComponents component) {
+		return componentsToRun[component.ordinal()];
 	}
 	
-	public void setRunCreateIndex(boolean value) {
-		componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] = value;
+	public void setRunComponent(CruxComponents component, boolean value) {
+		componentsToRun[component.ordinal()] = value;
 		if (value) {
 		    ++numComponentsToRun;
 		}
 		else {
 		    --numComponentsToRun;
 		}
-		logger.info("Run 'create-index' set to " + value);
+		logger.info("Run " + component.toString() + " set to " + value);
 	}
 	
-	public boolean getRunSearchForMatches() {
-		return componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()];
+	public boolean getShowAdvancedParameters(CruxComponents component) {
+		return showAdvancedParameters[component.ordinal()];
 	}
-
-	public void setRunSearchForMatches(boolean value) {
-		componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = value;
-		if (value) {
-		    ++numComponentsToRun;
-		}
-		else {
-		    --numComponentsToRun;
-		}
-		logger.info("Run 'search-for-matches' set to " + value);
+	
+	public void setShowAdvancedParameters(CruxComponents component, boolean value) {
+		showAdvancedParameters[component.ordinal()] = value;
+		logger.info("Show advanced parameters for " + component.toString() + " set to " + value);
 	}
 	
 	public IsotopicMassType getMassType() {
@@ -183,8 +217,8 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Model parameter 'spectraSource' set to " + fileName);
 	}
 	
+	/** Serialize the analysis to the analysis directory */
 	public boolean toBinaryFile() {
-		// Serialze the model to the analysis directory
 		String model_path = name + "/" + name + ".model";
 		boolean result = false;
 		try {
@@ -279,7 +313,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
 			//  Run the component using the component directory and parameter file
 			String subCommand = CruxComponents.CREATE_INDEX.toString();
-			String command = "crux " + subCommand + " --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
+			String command = pathToCrux + " " + subCommand + " --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
 			try {
 				logger.info("Attempte to execute command: " + command);
 				process = Runtime.getRuntime().exec(command);

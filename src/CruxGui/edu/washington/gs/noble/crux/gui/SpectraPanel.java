@@ -16,17 +16,18 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
-class SpectraPanel extends JPanel {
+class SpectraPanel extends CruxParameterControl {
 	
-	JButton spectraButton = new JButton("Choose Spectra File");
-	JTextField spectraFilename = new JTextField();
-	CruxAnalysisModel model;
+	private final CruxGui cruxGui;
+	private final JButton spectraButton = new JButton("Choose Spectra File");
+	private final JTextField spectraFilename = new JTextField();
 	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 	
 	class SpectraButtonListener implements ActionListener {
 		public void actionPerformed(final ActionEvent event) {
+			CruxAnalysisModel model = cruxGui.getAnalysisModel();
 			final JFileChooser chooser = new JFileChooser();
 			String fileName = model.getSpectraFilemame();
 			if (fileName != null && fileName.length() > 0) {
@@ -43,8 +44,8 @@ class SpectraPanel extends JPanel {
 		}
 	}
 	
-	public SpectraPanel(CruxAnalysisModel model) {
-		this.model = model;
+	public SpectraPanel(CruxGui cruxGui) {
+		this.cruxGui = cruxGui;
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -67,8 +68,13 @@ class SpectraPanel extends JPanel {
 		spectraFilename.setText(fileName);
 	}
 	
+	public void saveToModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		model.setSpectraFilename(spectraFilename.getText());
+	}
+	
 	public void updateFromModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		spectraFilename.setText(model.getSpectraFilemame());
 	}
-
 }

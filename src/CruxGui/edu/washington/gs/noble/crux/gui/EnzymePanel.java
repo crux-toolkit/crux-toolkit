@@ -11,19 +11,26 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+/**
+ * The EnzymePanel class is the GUI elements used to get and set the 
+ * enzyme used to perform the digestion of the peptides.
+ *
+ * @author Charles E. Grant
+ *
+ */
 @SuppressWarnings("serial")
-class EnzymePanel extends JPanel {
+class EnzymePanel extends  CruxParameterControl {
 	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 
-	CruxAnalysisModel model = null;
-	final JLabel enzymeLabel = new JLabel("Enzyme:");
-	final JComboBox enzymeCombo = new JComboBox(CruxAnalysisModel.Enzyme.values());
+	private final CruxGui cruxGui;
+	private final JLabel enzymeLabel = new JLabel("Enzyme:");
+	private final JComboBox enzymeCombo = new JComboBox(CruxAnalysisModel.Enzyme.values());
 	
-	public EnzymePanel(CruxAnalysisModel model) {
+	public EnzymePanel(CruxGui cruxGui) {
 		super();
-		this.model = model;
+		this.cruxGui = cruxGui;
 		this.setBackground(Color.white);
 		this.setAlignmentX(Component.LEFT_ALIGNMENT);
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -36,7 +43,13 @@ class EnzymePanel extends JPanel {
 		add(enzymeCombo);
 	}
 	
+	public void saveToModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		model.setEnzyme(getEnzyme());
+	}
+	
 	public void updateFromModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		enzymeCombo.setSelectedIndex(model.getEnzyme().ordinal());
 		logger.info("Enzyme read from model: " + model.getEnzyme().toString());
 	}

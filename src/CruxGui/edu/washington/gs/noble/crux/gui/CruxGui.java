@@ -12,12 +12,24 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+/**
+ * This is the main class for the CruxGui. The CruxGui is a GUI wrapper for the crux
+ * set of tools for peptide-spectra matching. It allows the users to specify the most
+ * common parameters for a crux analysis, sets up the parameter files and output directories,
+ * and builds and executes the crux command lines.
+ * 
+ * The GUI interaction thread for the applications is started via the run() method for this class.
+ *
+ * @author Charles E. Grant
+ *
+ */
+
 public class CruxGui implements Runnable {
 	
 	static final String ANALYIS_LIST_FILENAME = "crux-analyses.bin";
 	public SortedSet<String> analysisSet;
-	public CruxAnalysisModel model;
 	public CruxMainFrame frame;
+	private CruxAnalysisModel model;
 
 	private static Logger logger = Logger
 			.getLogger("edu.washington.gs.noble.crux.gui");
@@ -50,7 +62,8 @@ public class CruxGui implements Runnable {
 		this.model = model;
 	}
 	
-	private boolean readModelSetFromFile() {
+	@SuppressWarnings("unchecked")
+	public boolean readModelSetFromFile() {
 		logger.info("Reading list of existing analyses.");
 		File nameListFile = new File(ANALYIS_LIST_FILENAME);
 		if (nameListFile.exists()) {
@@ -82,7 +95,7 @@ public class CruxGui implements Runnable {
 		return true;
 	}
 	
-	private boolean saveModelSetToFile() {
+	public boolean saveModelSetToFile() {
 		
 		logger.info("Reading list of existing analyses.");
 		File nameListFile = new File(ANALYIS_LIST_FILENAME);

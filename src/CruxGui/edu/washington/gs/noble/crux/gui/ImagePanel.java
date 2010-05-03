@@ -9,6 +9,15 @@ import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
+/**
+ * The ImagePanel class is the GUI elements used to display the 
+ * schematic diagram of data flow between crux components, and the
+ * buttons used to display the GUI elements needed to gather the parameters
+ * for each component.
+ *
+ * @author Charles E. Grant
+ *
+ */
 @SuppressWarnings("serial")
 class ImagePanel extends JPanel {
 	private BufferedImage image;

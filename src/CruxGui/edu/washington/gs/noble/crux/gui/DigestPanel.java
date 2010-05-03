@@ -13,20 +13,28 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+/**
+ * The DigestPanel class is the GUI elements used to get and set the 
+ * digest type parameters (full or partial digestion of the peptides
+ * with a restriction enzyme).
+ *
+ * @author Charles E. Grant
+ *
+ */
 @SuppressWarnings("serial")
-class DigestPanel extends JPanel {
+class DigestPanel extends CruxParameterControl {
 
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 
+	private final CruxGui cruxGui;
 	private final ButtonGroup digestButtons = new ButtonGroup();
 	private final JLabel digestLabel = new JLabel("Digestion");
 	private final JRadioButton fullDigest = new JRadioButton("Full Digest");
 	private final JRadioButton partialDigest = new JRadioButton("Partial Digest");
-	private CruxAnalysisModel model;
 
-	public DigestPanel(CruxAnalysisModel model) {
-		this.model = model;
+	public DigestPanel(CruxGui cruxGui) {
+		this.cruxGui = cruxGui;
 		fullDigest.setSelected(true);
 		partialDigest.setSelected(false);
 		digestButtons.add(fullDigest);
@@ -43,7 +51,13 @@ class DigestPanel extends JPanel {
 		updateFromModel();
 	}	
 	
-	void updateFromModel() {
+	public void saveToModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		model.setDigestType(getDigestType());
+	}
+	
+	public void updateFromModel() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		if (model.getDigestType() == CruxAnalysisModel.DigestType.FULL) {
 			fullDigest.setSelected(true);
 			partialDigest.setSelected(false);

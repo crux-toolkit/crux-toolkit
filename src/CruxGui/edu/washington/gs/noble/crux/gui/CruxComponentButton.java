@@ -31,6 +31,7 @@ import javax.swing.JToggleButton;
  * @author Charles E. Grant
  *
  */
+
 @SuppressWarnings("serial")
 class CruxComponentButton extends JToggleButton {
 	
