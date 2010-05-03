@@ -27,27 +27,27 @@
 // namespace declared here. Using namespace MSToolkit;
 
 /**
- * \define Maximum number of peaks per spectrum.
+ * Maximum number of peaks per spectrum.
  */
 #define MAX_PEAKS 4000
 /**
- * \define m/z resolution.  I.e., 5 == 0.2 m/z units
+ * m/z resolution.  I.e., 5 == 0.2 m/z units
  */
 #define MZ_TO_PEAK_ARRAY_RESOLUTION 5
 /**
- * \define Maximum possible m/z value.
+ * Maximum possible m/z value.
  */
 #define MAX_PEAK_MZ 5000
 /**
- * \define Maximum allowed charge.
+ * Maximum allowed charge.
  */
 #define MAX_CHARGE 6
 /**
- * \define Number of 'I' lines albe to parse for one spectrum object.
+ * Number of 'I' lines albe to parse for one spectrum object.
  */
 #define MAX_I_LINES 5
 /**
- * \define Number of 'D' lines able to parse for one spectrum object
+ * Number of 'D' lines able to parse for one spectrum object
  */
 #define MAX_D_LINES 2
 
