@@ -53,18 +53,29 @@ extern "C" {
  */
 #define CARP_MAX 100 
 
-//SJM: Code to help with optimization of verbosity code.
-//Allow for compilation to remove carp commands
-//in the preprocessor.
-
+/**
+ * Allow for compilation to remove carp commands in the preprocessor.
+ */
 #define IF_CARP(x,y) if (get_verbosity_level() >= x) {y;}
 #define CRUX_DEBUG 
 
 #ifdef CRUX_DEBUG
+/**
+ * Allow for compilation to remove carp commands in the preprocessor.
+ */
 #define IF_CARP_DEBUG(y) IF_CARP(CARP_DEBUG,y)
+/**
+ * Allow for compilation to remove carp commands in the preprocessor.
+ */
 #define IF_CARP_DETAILED_DEBUG(y) IF_CARP(CARP_DETAILED_DEBUG,y)
 #else
+/**
+ * Allow for compilation to remove carp commands in the preprocessor.
+ */
 #define IF_CARP_DEBUG(y) y;
+/**
+ * Allow for compilation to remove carp commands in the preprocessor.
+ */
 #define IF_CARP_DETAILED_DEBUG(y) y;
 #endif
 
