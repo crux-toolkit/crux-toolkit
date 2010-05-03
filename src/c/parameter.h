@@ -54,7 +54,7 @@ extern BOOLEAN_T post_for_inclusion;
 
 // TODO (BF 1-28-08): these should be private. move to parameter.c
 /**
- * \enum Data types of parameters.  Used for checking valid parameter input
+ * Data types of parameters.  Used for checking valid parameter input
  * from user.
  *
  * To add a new parameter type:  
