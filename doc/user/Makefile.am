@@ -1,9 +1,9 @@
 
-#schematic.eps: schematic.fig
-#	fig2dev -L eps schematic.fig schematic.eps
+schematic.pdf: schematic.fig
+	fig2dev -L pdf schematic.fig schematic.pdf
 
-schematic.png: schematic.eps
-	convert -density 144 -resize 40%x40% schematic.eps schematic.png
+schematic.png: schematic.pdf
+	convert -density 144 -resize 40%x40% schematic.pdf schematic.png
 
 htmldir = $(prefix)/doc
 cruximgdir = $(prefix)/doc
