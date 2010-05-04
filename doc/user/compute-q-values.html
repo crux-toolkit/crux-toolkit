@@ -12,7 +12,8 @@
 <B>Usage:</B></p>
 
 <blockquote>
-<code>crux compute-qvalues [options] &lt;protein&nbsp;input&gt; 
+<code>crux compute-qvalues [options] &lt;protein&nbsp;input&gt;
+  [--output-dir &lt;psm folder&gt;]
 </code>
 </blockquote>
 
@@ -100,20 +101,20 @@ method implemented here as "decoy q-values" is analogous to the
 
 <UL>
 
+<LI>
+&lt;protein input &gt; &ndash; 
+The name of the file in fasta format or the directory containing the
+protein index from which to retrieve proteins and peptides.</li>
+
 <li>
-&lt;psm folder&gt; &ndash; the folder in which all the PSM
-result files are located.  This is assumed to be <code>crux-output</code>,
-but it can be set by the user using the <code>--output-dir</code> option.
-The program looks for files ending in
-<code>.csm</code>, which are produced by
+&lt;psm folder&gt; [optional] &ndash; 
+A folder in which all the PSM result files are located.  This is 
+assumed to be <code>crux-output</code>, but it can be set by the user 
+using the <code>--output-dir</code> option. The program looks for 
+files beginning with '[&lt;fileroot&gt;.]search.' and ending
+in <code>target.txt</code> or <code>decoy.txt</code>, which are produced by 
 <code>crux&nbsp;search-for-matches</code>.  All such files in the
 given directory are analyzed jointly.</li>
-
-
-<LI>
-&lt;protein input &gt; &ndash; The name of the file in fasta format or
-the directory containing the protein index from which to retrieve
-proteins and peptides.</li>
 
 </UL>
 
@@ -156,11 +157,12 @@ output file names. Default = none.</li>
 <li>
 <code>--output-dir &lt;filename&gt;</code> &ndash; 
 The name of the directory where output files will be created.
-Default = crux-out.</li>
+Default = crux-output.</li>
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
-fail when trying to overwrite a file if false (F). Default =  F.
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.
 
 <li>
 <code>--parameter-file &lt;filename&gt;</code> &ndash; 
@@ -168,12 +170,12 @@ A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
 
 <LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
-current processes. Each level prints the following messages, including
-all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
-errors, 20-warnings, 30-information on the progress of execution,
-40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages, including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.
 
 <li>
 <code>--version T</code> &ndash;

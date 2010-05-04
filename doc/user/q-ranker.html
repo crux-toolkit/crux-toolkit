@@ -11,8 +11,10 @@
 <b>Usage:</b></p>
 
 <blockquote>
-<code>crux q-ranker [options] &lt;protein&nbsp;input&gt; [ --output-dir &lt;psm folder&gt; ] 
+<code>crux q-ranker [options] &lt;protein&nbsp;input&gt; 
+[--output-dir &lt;psm folder&gt;] 
 </code>
+
 </blockquote>
 
 <p>
@@ -41,30 +43,26 @@ FIXME: Insert description of algorithm here.</p>
 <ul>
 
 <LI>
-&lt;protein input &gt; &ndash; The name of the file in fasta format or
-the directory containing the protein index from which to retrieve
-proteins and peptides.</li>
+&lt;protein input &gt; &ndash; 
+The name of the file in fasta format or the directory containing the
+protein index from which to retrieve proteins and peptides.</li>
 
 <li>
-&lt;psm folder&gt; &ndash; [optional] A folder in which all the PSM
-result files are located.  This is assumed to be <code>crux-output</code>,
-but it can be set by the user using the <code>--output-dir</code> option.
-The program looks for files ending in <code>.csm</code>, which are produced by
-<code>crux&nbsp;search-for-matches</code>.  All such files in the
-given directory are analyzed jointly.</li>
+&lt;psm folder&gt; &ndash; [optional] 
+A folder in which all the PSM result files are located.  This is 
+assumed to be <code>crux-output</code>, but it can be set by the user 
+using the <code>--output-dir</code> option. The program looks for 
+files beginning with '[&lt;fileroot&gt;.]se' and ending in 
+<code>target.txt</code> or <code>decoy.txt</code>, which are produced 
+by <code>crux&nbsp;search-for-matches</code> and 
+<code>crux&nbsp;sequest-search</code> .  All such files in the given 
+directory are analyzed jointly.</li>
 
 </ul>
 
 <b>Options:</b>
 
 <ul>
-
-<LI>
-<code>--use-index &lt;T|F&gt;</code> Use an index that has already been
-created if true (T) or use a fasta file if false (F). When using
-an index the 'protein input' argument will be the name of the
-directory containing the index files (the same as the 'index name'
-argument for crux-create-index).  Default = F.
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash; 
@@ -77,8 +75,9 @@ The name of the directory where output files will be created.
 Default = crux-output.</li>
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
-fail when trying to overwrite a file if false (F). Default =  F.
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.
 
 <LI>
 <code>--parameter-file &lt;filename&gt;</code> &ndash;
@@ -86,20 +85,20 @@ A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
 
 <LI> 
-<code>--feature-file &lt;string&gt;</code> &ndash; Optional file in
-which to write the features. The features appear in the following
-order: xcorr, deltaCn, lnDeltaCn, Sp, logSp, deltaMass,
+<code>--feature-file &lt;string&gt;</code> &ndash; 
+Optional file in which to write the features. The features appear in
+the following order: xcorr, deltaCn, lnDeltaCn, Sp, logSp, deltaMass,
 abs(deltaMass), neutral mass, percent b/y ions matched, log(#
 candidates), UNUSED, UNUSED, missed cleavages, peptide length, charge
 = +1, charge = +2, charge = +3.  Default = none.</li>
 
 <LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
-current processes. Each level prints the following messages, including
-all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
-errors, 20-warnings, 30-information on the progress of execution,
-40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages, including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.
 
 <li>
 <code>--version T</code> &ndash;
