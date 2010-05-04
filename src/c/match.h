@@ -262,25 +262,6 @@ void print_match_tab(
   const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
   );
 
-/**
- * serializes the match in binary
- *
- *
- *
- * <PEPTIDE_T: serialize peptide>
- * <float: score><int: ranking>* <--serialize for all score types
- * <SPECTRUM_T: serilize spectrum>
- * <float: b_y ion match ratio for SP>
- * <PEPTIDE_TYPE_T: the peptide type over-all peptide srcs>
- * <BOOLEAN_T: is this a null peptide?>
- *
- */
-void serialize_match(
-  MATCH_T* match, ///< the match to print -in
-  FILE* file ///< output stream -out
-  );
-
-
 /*******************************************
  * match post_process extension
  ******************************************/
@@ -304,16 +285,6 @@ MATCH_T* parse_match_tab_delimited(
   );
 
 #endif
-
-/**
- *
- *\returns a match object that is parsed from the serialized result file
- */
-MATCH_T* parse_match(
-  FILE* result_file,  ///< the result file to parse PSMs -in
-  DATABASE_T* database ///< the database to which the peptides are created -in
-  // int num_top_match  ///< number of top PSMs serialized per spectrum -in
-  );
 
 /****************************
  * match get, set methods

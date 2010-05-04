@@ -203,16 +203,6 @@ ION_TYPE_T get_ion_type_parameter(
  const char* name
  );
 
-/**
- * Searches through the list of parameters, 
- * looking for one whose name matches the string.  
- * Returns a peptide_type enumerated type (in objects.h)
- */ 
-/*
-PEPTIDE_TYPE_T get_peptide_type_parameter(
-  const char* name
-  );
-*/
 DIGEST_T get_digest_type_parameter(
   const char* name
   );

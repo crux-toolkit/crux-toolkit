@@ -275,23 +275,6 @@ BOOLEAN_T add_match_to_match_collection(
   MATCH_T* match                        ///< add this match
 );
 
-/*
- * Copied from spectrum_collection::serialize_header
- * uses values from paramter.c rather than taking as arguments
- */
-void serialize_headers(FILE** file_array);
-
-/**
- * \brief Read in the header information from a cms file.  Return
- * FALSE if file appears to be corrupted or if mod information does
- * not mat parameter.c
- * \returns TRUE if header was successfully parsed, else FALSE.
- */
-BOOLEAN_T parse_csm_header
- (FILE* file,
-  int* total_spectra,
-  int* num_top_match);
-
 /**
  * \brief Print the given match collection for one spectrum to all
  * appropriate files. 
@@ -315,34 +298,6 @@ void print_matches_multi_spectra
 (MATCH_COLLECTION_T* match_collection, 
  FILE* tab_file, 
  FILE* decoy_tab_file);
-
-/**
- * Serialize the psm features to ouput file upto 'top_match' number of 
- * top peptides among the match_collection
- *
- *
- * spectrum specific features
- * first, serialize the spectrum info of the match collection    
- * Second, iterate over matches and serialize the structs
- *
- *<int: charge state of the spectrum>
- *<int: The total match objects in the match_collection searched with the spectrum
- *<float: delta_cn>
- *<float: ln_delta_cn>
- *<float: ln_experiment_size>
- *<BOOLEAN_T: did the score type been scored?>* <- for all score types
- *<MATCH: serialize match struct> *<--serialize match structs upto top-match # ranks
- *
- *
- *\returns TRUE, if sucessfully serializes the PSMs, else FALSE 
- */
-BOOLEAN_T serialize_psm_features(
-  MATCH_COLLECTION_T* match_collection, ///< working match collection -in
-  FILE* output,  ///< ouput file handle -out
-  int top_match, ///< number of top match to serialize -in
-  SCORER_TYPE_T prelim_score, ///< the preliminary score to report -in
-  SCORER_TYPE_T main_score ///<  the main score to report -in
-  );
 
 /*
  * Print the SQT file header 
@@ -568,16 +523,6 @@ BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, 
   SCORER_TYPE_T score_type,
   int sample_count, 
-  SPECTRUM_T* spectrum,
-  int charge
-  );
-
-/**
- * \brief Use the matches in match_collection->sample_matches to
- * estimate the weibull parameters to be used for computing p-values.
- */
-BOOLEAN_T estimate_weibull_parameters_from_sample_matches(
-  MATCH_COLLECTION_T* match_collection, 
   SPECTRUM_T* spectrum,
   int charge
   );

@@ -568,30 +568,6 @@ START_TEST(test_palindrome){
 
 }
 END_TEST
-START_TEST(test_serialize){
-  initialize_parameters();
-  // create a mod with non-zero values for all fields
-  aa_mod_set_mass_change(amod1, 87.9);
-  aa_mod_set_max_per_peptide(amod1, 3);
-  BOOLEAN_T* aa_list = aa_mod_get_aa_list(amod1);
-  aa_list['S' - 'A'] = TRUE;
-  aa_list['T' - 'A'] = TRUE;
-  aa_list['Y' - 'A'] = TRUE;
-
-  // write a mod to file
-  FILE* file = fopen("amod.bin", "w");
-  fail_unless( serialize_aa_mod(amod1, file),
-               "Error in serializing amod1 to file.");
-  // close the file and read it back in
-  fclose(file);
-  file = NULL;
-  file = fopen("amod.bin", "r");
-  fail_unless( parse_aa_mod(amod2, file),
-               "Error in parsing amod1 from file.");
-  // test that compare() calls them the same
-
-}
-END_TEST
 
 /* Boundry conditions test suite */
 START_TEST(test_too_many_mods){
@@ -627,7 +603,6 @@ Suite* modifications_suite(){
   tcase_add_test(tc_core, test_palindrome);
   tcase_add_test(tc_core, test_is_modifiable);
   tcase_add_test(tc_core, test_modify);
-  tcase_add_test(tc_core, test_serialize);
 
   tcase_add_checked_fixture(tc_core, mod_setup, mod_teardown);
   suite_add_tcase(s, tc_core);

@@ -115,14 +115,6 @@ SPECTRUM_T* parse_spectrum_tab_delimited(
   );
 #endif
 
-/**
- * Parse the spectrum from the serialized spectrum
- *\returns the parsed spectrum , else returns NULL for failed parse
- */
-SPECTRUM_T* parse_spectrum_binary(
-  FILE* file ///< output stream -out
-  );
-
 /***********************************************************************
  * Normalize peak intensities so that they sum to unity.
  ***********************************************************************/
@@ -437,17 +429,6 @@ FLOAT_T get_nearby_intensity_sum(
 SPECTRUM_T* process_spectrum(
   SPECTRUM_T* spectrum, ///< the spectrum to processes -in
   SCORER_TYPE_T score_type ///< the score type to which the spectrum should be sorted -in
-  );
-
-/**
- * serialize the spectrum in binary
- * Form,
- * <int: first_scan><int: last_scan><int: id><SPECTRUM_TYPE_T: spectrum_type>
- * <float: precursor_mz><float: retention_time>
- */
-void serialize_spectrum(
-  SPECTRUM_T* spectrum, ///< the spectrum to serialize -in
-  FILE* file ///< output stream -out
   );
 
 /***********************************************************************

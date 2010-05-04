@@ -198,18 +198,6 @@ char* generate_name_path(
   );
 
 /**
- * \brief Create the correct filename for a binary psm file, 
- * search.target.csm for target search and search.decoy-#.csm for 
- * decoy searches.
- *
- * Adds the appropriate
- * extension depending on the file index (0=target, 1=first decoy,
- * 2=second decoy, etc).
- * \returns A heap allocated char* with the new filename.
- */
-char* generate_psm_filename(int file_index);
-
-/**
  * \brief Open and create a file of the given name in the given
  * directory.
  *

@@ -23,7 +23,6 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
 : matches_per_spec_(get_int_parameter("top-match"))
 {
 
-  psm_file_array_ = NULL;
   tab_file_array_ = NULL;
   sqt_file_array_ = NULL;
   feature_file_ = NULL;
@@ -57,18 +56,6 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
               "txt", 
               overwrite); 
 
-
-  // search operations create .csm files
-  if( program_name == SEARCH_COMMAND ||
-      program_name == SEQUEST_COMMAND ){
-    createFiles(&psm_file_array_, 
-                output_directory, 
-                fileroot, 
-                program_name, 
-                "csm", 
-                overwrite);
-  }
-  
   // only sequest creates sqt files
   if( program_name == SEQUEST_COMMAND ){
     createFiles(&sqt_file_array_, 
@@ -94,13 +81,11 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
 
 OutputFiles::~OutputFiles(){
   for(int file_idx = 0; file_idx < num_files_; file_idx ++){
-    if( psm_file_array_ ){ fclose(psm_file_array_[file_idx]); }
     if( tab_file_array_ ){ fclose(tab_file_array_[file_idx]); }
     if( sqt_file_array_ ){ fclose(sqt_file_array_[file_idx]); }
   }
   if( feature_file_ ){ fclose(feature_file_); }
 
-  delete psm_file_array_;
   delete tab_file_array_;
   delete sqt_file_array_;
 }
@@ -205,7 +190,7 @@ BOOLEAN_T OutputFiles::createFile(FILE** file_ptr,
   return TRUE;
 }
 /**
- * \brief Write header lines to the .tab, .sqt and .csm files.
+ * \brief Write header lines to the .txt and .sqt files.
  */
 void OutputFiles::writeHeaders(int num_proteins){
 
@@ -224,16 +209,13 @@ void OutputFiles::writeHeaders(int num_proteins){
     }
     tag = "decoy";
   }
-  // write headers for all three psm files at once
-  if( psm_file_array_ ){
-    serialize_headers(psm_file_array_);
-  }
 }
 /**
  * \brief Write header lines to the optional feature file.
  */
 void OutputFiles::writeFeatureHeader(char** feature_names,
                                      int num_names){
+  // TODO (BF 27-Apr-10): label first two columns as scan, decoy
   // write feature file header
   if( feature_names && feature_file_ && num_names ){
     fprintf(feature_file_, "%s", feature_names[0]);
@@ -272,8 +254,6 @@ void OutputFiles::writeMatches(
 
   // print to each file type
   printMatchesTab(target_matches, decoy_matches_array, rank_type, spectrum);
-  
-  printMatchesPsm(target_matches, decoy_matches_array);
   
   printMatchesSqt(target_matches, decoy_matches_array, spectrum);
 
@@ -320,33 +300,6 @@ void OutputFiles::printMatchesTab(
 
 }
 
-void OutputFiles::printMatchesPsm(
-  MATCH_COLLECTION_T*  target_matches, ///< from real peptides
-  MATCH_COLLECTION_T** decoy_matches_array  
-                                ///< array of collections from shuffled peptides
-){
-  if( psm_file_array_ == NULL ){
-    return;
-  }
-
-  carp(CARP_DETAILED_DEBUG, "Writing csm results.");
-
-  MATCH_COLLECTION_T* cur_matches = target_matches;
-  
-  for(int file_idx = 0; file_idx < num_files_; file_idx++){
-
-    serialize_psm_features(cur_matches,
-                           psm_file_array_[file_idx],
-                           matches_per_spec_,
-                           SP, XCORR);
-    
-    if( decoy_matches_array ){
-      cur_matches = decoy_matches_array[file_idx];
-    } // else if NULL, num_files_==1 and this is last loop
-  }
-  
-}
-
 void OutputFiles::printMatchesSqt(
   MATCH_COLLECTION_T*  target_matches, ///< from real peptides
   MATCH_COLLECTION_T** decoy_matches_array,  
@@ -373,20 +326,6 @@ void OutputFiles::printMatchesSqt(
   }
 
 }
-
-void OutputFiles::updateHeaders(int spectrum_count){
-
-  if( psm_file_array_ == NULL ){
-    return;
-  }
-
-  for(int file_idx = 0; file_idx < num_files_; file_idx++){
-    serialize_total_number_of_spectra(spectrum_count,
-                                      psm_file_array_[file_idx]);
-  }
-}
-
-
 
 void OutputFiles::writeMatches(
   MATCH_COLLECTION_T*  matches ///< from multiple spectra

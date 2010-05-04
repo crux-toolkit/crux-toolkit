@@ -213,13 +213,11 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
 
   } // next spectrum
 
-  // update headers of .csm files
-  output_files.updateHeaders(progress.getNumSearchesWithMatches());
-
   // clean up
   
   return 0;
 }// end main
+
 #else // SEARCH_ENABLED not defined
 int sequest_search_main(int argc, char **argv){
   (void) argc;

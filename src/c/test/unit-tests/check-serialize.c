@@ -202,49 +202,6 @@ START_TEST(test_serialize_mod){
 }
 END_TEST
 
-START_TEST(test_header){
-
-  // write header
-  // set params to think there is one output file
-  // include modes
-  int fake_argc = 6;
-  char* fake_argv[6];
-  fake_argv[0] = my_copy_string("testing");
-  fake_argv[1] = my_copy_string("--num-decoys-per-target");
-  fake_argv[2] = my_copy_string("0");
-  fake_argv[3] = my_copy_string("--parameter-file");
-  fake_argv[4] = my_copy_string("params/1mod");
-  fake_argv[5] = my_copy_string("fasta_file");
-  const char* op[2] = {"num-decoys-per-target", "parameter-file"};
-  select_cmd_line_options(op, 2 );
-  const char* arg[1] = { "protein input" };
-  select_cmd_line_arguments(arg, 1);
-  parse_cmd_line_into_params_hash(fake_argc, fake_argv, "testing");
-
-  //  set_verbosity_level(CARP_DETAILED_DEBUG);
-  FILE* file = fopen(pep_filename, "w");
-  fail_unless( file != NULL, "Could not open file for serializing.");
-  serialize_headers(&file);
-/*
-  serialize_total_number_of_spectra(1, file);
-
-  fclose(file);
-
-  // read header
-  file = fopen(pep_filename, "r");
-  int total_spectra = -1;
-  int top_match = -1;
-  fail_unless( TRUE == parse_csm_header(file, &total_spectra, &top_match),
-               "Failed to parse header file");
-  fail_unless( total_spectra == 1, 
-               "Parsed header found %i spectra instead of 1", total_spectra);
-  fail_unless( top_match == 1, 
-               "Parsed header found %i top matches instead of 1", top_match);
-  fclose(file);
-  
-*/
-}
-END_TEST
 
 Suite* serialize_suite(){
   Suite* s = suite_create("Serialization");
@@ -253,7 +210,6 @@ Suite* serialize_suite(){
   tcase_add_test(tc_core, test_setup);
   tcase_add_test(tc_core, test_serialize);
   tcase_add_test(tc_core, test_serialize_mod);
-  tcase_add_test(tc_core, test_header);
 
   tcase_add_checked_fixture(tc_core, ser_setup, ser_teardown);
   suite_add_tcase(s, tc_core);

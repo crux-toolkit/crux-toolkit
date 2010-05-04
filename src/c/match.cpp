@@ -604,6 +604,8 @@ void print_match_tab(
     sequence = my_copy_string("");  // for post-search, no shuffled sequences
   }
 
+  // TODO (BF 27-Apr-10) This should no longer be a problem since we
+  // now read only .txt files
   // NOTE (BF 12-Feb-08) Here is another ugly fix for post-analysis.
   // Only the fraction matched is serialized.  The number possible can
   // be calculated from the length of the sequence and the charge, but
@@ -645,16 +647,7 @@ void print_match_tab(
   DIGEST_T digestion = get_digest_type_parameter("digestion");
   char* enz_str = enzyme_type_to_string(enzyme);
   char* dig_str = digest_type_to_string(digestion);
-
-  char* protein_ids = NULL;
-  string protein_ids_string;
-  if (get_boolean_parameter("parse-tab-files")) {
-     protein_ids_string = get_protein_ids_peptide_locations(peptide);
-  }
-  else {
-    protein_ids = get_protein_ids(peptide);
-  }
-
+  string protein_ids_string = get_protein_ids_peptide_locations(peptide);
   char *flanking_aas = get_flanking_aas(peptide);
 
   // Decide on formatting.
@@ -667,11 +660,7 @@ void print_match_tab(
   fprintf(file, "%d\t", charge);
   fprintf(file, "%.4f\t", spectrum_precursor_mz);
   fprintf(file, "%.4f\t", spectrum_mass);
-  if (get_boolean_parameter("parse-tab-files")) {
-    fprintf(file, "%.6f\t", peptide_mass);
-  } else {
-    fprintf(file, "%.4f\t", peptide_mass);
-  }
+  fprintf(file, "%.6f\t", peptide_mass);
   fprintf(file, float_format, delta_cn);
   if (sp_scored == FALSE){
     fprintf(file, "\t\t"); //score and rank
@@ -732,12 +721,9 @@ void print_match_tab(
     fprintf(file, "\t\t\t");
   }
 
-  // Output of q-ranker score and q-value will be handled here where available.
-  // For now always print an empty column. 
+  // Print q-ranker score and q-value, if available.
   if (scores_computed[QRANKER_SCORE] == TRUE) {
-    // print q-ranker score
     fprintf(file, float_format, qranker_score);
-    // print q-value
     fprintf(file, float_format, qranker_qvalue);
   }
   else {
@@ -753,12 +739,8 @@ void print_match_tab(
   fprintf(file, "%d\t", num_matches); // Matches per spectrum
   fprintf(file, "%s\t", sequence);
   fprintf(file, "%s-%s\t", enz_str, dig_str);
-  if (get_boolean_parameter("parse-tab-files")) {
-    fprintf(file, "%s\t%s", protein_ids_string.c_str(), flanking_aas);
-  } else {
-    fprintf(file, "%s\t%s", protein_ids, flanking_aas);
-  }
-  // if the peptide is a decoy, print the unshuffled version of the peptide
+  fprintf(file, "%s\t%s", protein_ids_string.c_str(), flanking_aas);
+
   if(match->null_peptide == TRUE){
     char* seq = get_peptide_unshuffled_sequence(match->peptide);
     fprintf(file, "\t%s", seq);
@@ -778,11 +760,6 @@ void print_match_tab(
   fputc('\n', file);
   
   free(flanking_aas);
-
-  if (!get_boolean_parameter("parse-tab-files")) {
-    free(protein_ids);
-  }
-
   free(sequence);
   free(enz_str);
   free(dig_str);
@@ -831,53 +808,6 @@ void qsort_match(
   qsort(match_array, match_total, sizeof(MATCH_T*), compare_method);
 }
 
-// START need to rewrite parse_match and serialize_match to include 
-// additional features
-
-/**
- * \brief Writes the match to file in binary.
- *
- * <PEPTIDE_T: serialize peptide>
- * <float: score><int: ranking>* <--serialize for all score types
- * <SPECTRUM_T: serilize spectrum>
- * <float: b_y ion match ratio for SP>
- * <PEPTIDE_TYPE_T: the peptide type over-all peptide srcs>
- * <BOOLEAN_T: is this a null peptide?>
- *
- */
-void serialize_match(
-  MATCH_T* match, ///< the match to print -in
-  FILE* file ///< output stream -out
-  )
-{
-  // first serialize peptide
-  serialize_peptide(match->peptide, file);
-  
-  // Serialize each score and rank
-  int score_type_idx;
-  // We don't want to change the CSM files contents so we omit q-ranker scores
-  // which were added to Crux after the CSM file format had been established.
-  int score_type_max = _SCORE_TYPE_NUM - 2;
-  for(score_type_idx = 0; score_type_idx < score_type_max; ++score_type_idx){
-    fwrite(&(match->match_scores[score_type_idx]), sizeof(FLOAT_T), 1, file);
-    fwrite(&(match->match_rank[score_type_idx]), sizeof(int), 1, file);
-  }
-  
-  // serialize spectrum in binary
-  serialize_spectrum(match->spectrum, file);
-  
-  // b/y ion matches ratio
-  carp(CARP_DETAILED_DEBUG,"match -> b_y_ion_fraction_matched:%f",match -> b_y_ion_fraction_matched);
-  fwrite(&(match->b_y_ion_fraction_matched), sizeof(FLOAT_T), 1, file);
-
-  // serialize match peptide overall trypticity
-  //fwrite(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, file);
-  fwrite(&(match->digest), sizeof(DIGEST_T), 1, file);
-  
-  // serialize match is it null_peptide?
-  fwrite(&(match->null_peptide), sizeof(BOOLEAN_T), 1, file);
-
-}
 
 /*******************************************
  * match post_process extension
@@ -1113,91 +1043,6 @@ MATCH_T* parse_match_tab_delimited(
   return match;
 }
 
-/**
- *\returns a match object that is parsed from the serialized result file
- */
-MATCH_T* parse_match(
-  FILE* result_file,  ///< the result file to parse PSMs -in
-  DATABASE_T* database ///< the database to which the peptides are created -in
-  // int num_top_match  ///< number of top PSMs serialized per spectrum -in
-  )
-{
-  MATCH_T* match = new_match();
-  carp(CARP_DETAILED_DEBUG, "New match charge is %d",get_match_charge(match));
-  SPECTRUM_T* spectrum = NULL;
-  PEPTIDE_T* peptide = NULL;
-  
-  // this is a post_process match object
-  match->post_process_match = TRUE;
-  int score_type_idx = 0;
-  
-  // parse peptide
-  if((peptide = parse_peptide(result_file, database, TRUE))== NULL){
-    carp(CARP_ERROR, "Failed to parse peptide");
-    // FIXME should this exit or return null. I think sometimes we can get
-    // no peptides, which is valid, in which case NULL makes sense.
-    // maybe this should be fixed at the serialize match level however.
-    return NULL;
-  }
-  carp(CARP_DETAILED_DEBUG, "Finished parsing match peptide.");
-  // parse each score and rank of match
-  // We don't want to change the CSM files contents so we omit q-ranker scores
-  // which were added to Crux after the CSM file format had been established.
-  int score_type_max = _SCORE_TYPE_NUM - 2;
-  for(score_type_idx=0; score_type_idx < score_type_max; ++score_type_idx){
-    size_t num_read = fread(&(match->match_scores[score_type_idx]), 
-                            sizeof(FLOAT_T), 1, result_file);
-    num_read += fread(&(match->match_rank[score_type_idx]), 
-                      sizeof(int), 1, result_file);
-    if( num_read != 2 ){//sizeof(FLOAT_T) + sizeof(int) ){
-      carp(CARP_ERROR, "Failed to read score and rank at index %d",
-           score_type_idx);
-    }
-  }
-  
-  // parse spectrum
-  if((spectrum = parse_spectrum_binary(result_file))== NULL){
-    carp(CARP_ERROR, "Failed to parse binary spectrum.");
-  }
-  
-  // spectrum specific features
-  if( fread(&(match->b_y_ion_fraction_matched), sizeof(FLOAT_T), 
-            1, result_file) != 1 ){
-    carp(CARP_ERROR, "Failed to parse b/y fraction.");
-  }
-
-  // calculate the total matched from the total possible and the
-  // fraction matched
-  // We could do this if we had the charge. It mysteriously appears
-  // later.  Calcualte this then???
-  /*int total_ions = (get_peptide_length(peptide) -1) * 2;
-  int matched_ions = match->b_y_ion_fraction_matched * total_ions ;
-  match->b_y_ion_matched = matched_ions;
-  match->b_y_ion_possible = total_ions;
-  int scan = get_spectrum_first_scan(spectrum);
-  carp(CARP_DETAILED_DEBUG, "For scan# %d, %d matched of %i = %.2f", 
-  scan, matched_ions, total_ions, match->b_y_ion_fraction_matched);*/
-
-  // parse match peptide overall trypticity
-  //fread(&(match->overall_type), sizeof(PEPTIDE_TYPE_T), 1, result_file);
-  if( fread(&(match->digest), sizeof(DIGEST_T), 1, result_file) != 1 ){
-    carp(CARP_ERROR, "Failed to parse digestion type");
-  }
-  
-  // parse if match is it null_peptide?
-  if( fread(&(match->null_peptide), sizeof(BOOLEAN_T), 1, result_file) != 1 ){
-    carp(CARP_ERROR, "Failed to parse null peptide flag.");
-  }
-
-  // assign fields
-  match->peptide_sequence = NULL;
-  match->spectrum = spectrum;
-  match->peptide = peptide;
-  carp(CARP_DETAILED_DEBUG, "End of parse match charge is %d",
-       get_match_charge(match));
-  
-  return match;  
-}
 
 
 /****************************

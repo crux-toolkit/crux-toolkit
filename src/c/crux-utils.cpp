@@ -1044,31 +1044,6 @@ char* generate_name(
 }
 
 /**
- * \brief Create the correct filename for a binary psm file, 
- * search.target.csm for target search and search.decoy-#.csm for 
- * decoy searches.
- *
- * Adds the appropriate
- * extension depending on the file index (0=target, 1=first decoy,
- * 2=second decoy, etc).
- * \returns A heap allocated char* with the new filename.
- */
-char* generate_psm_filename(int file_index) {///< target/decoy index -in
-  carp(CARP_DEBUG, "Given index %d", file_index);
-
-  char* fullname = (char*)mymalloc(sizeof(char) * 30);
-  if( file_index == 0 ){
-    sprintf(fullname, "search.target.csm");
-  }else{
-    sprintf(fullname, "search.decoy-%i.csm", file_index);
-  }
-  prefix_fileroot_to_name(&fullname);
-
-  return fullname;
-
-}
-
-/**
  * checks if each AA is an AA
  *\returns TRUE if sequence is valid else, FALSE
  */
