@@ -31,16 +31,20 @@ class EnzymePanel extends  CruxParameterControl {
 	public EnzymePanel(CruxGui cruxGui) {
 		super();
 		this.cruxGui = cruxGui;
-		this.setBackground(Color.white);
 		this.setAlignmentX(Component.LEFT_ALIGNMENT);
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-		enzymeLabel.setBackground(Color.white);
 		add(enzymeLabel);
 		add(Box.createRigidArea(new Dimension(6,0)));
 		enzymeCombo.setSelectedIndex(0);
 		enzymeCombo.setBackground(Color.white);
 		enzymeCombo.setMaximumSize(new Dimension(236, 24));
 		add(enzymeCombo);
+	}
+	
+	public void loadDefaults() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		enzymeCombo.setSelectedIndex(model.getDefaultEnzyme().ordinal());
+		logger.info("Enzyme read from model: " + model.getDefaultEnzyme().toString());
 	}
 	
 	public void saveToModel() {

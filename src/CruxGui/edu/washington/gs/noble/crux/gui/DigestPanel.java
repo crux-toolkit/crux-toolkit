@@ -51,6 +51,24 @@ class DigestPanel extends CruxParameterControl {
 		updateFromModel();
 	}	
 	
+	
+	public void loadDefaults() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		if (model.getDefaultDigestType() == CruxAnalysisModel.DigestType.FULL) {
+			fullDigest.setSelected(true);
+			partialDigest.setSelected(false);
+			logger.info("Read parameter 'DigestType' from model: " + CruxAnalysisModel.DigestType.FULL.toString());
+		}
+		else if (model.getDefaultDigestType() == CruxAnalysisModel.DigestType.PARTIAL) {
+			fullDigest.setSelected(false);
+			partialDigest.setSelected(true);
+			logger.info("Read parameter 'DigestType' from model: " + CruxAnalysisModel.DigestType.PARTIAL.toString());
+		}
+		else {
+			logger.info("Read unrecognized value of parameter 'DigestType' from model: " + model.getDefaultDigestType().toString());
+		}
+	}
+	
 	public void saveToModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		model.setDigestType(getDigestType());

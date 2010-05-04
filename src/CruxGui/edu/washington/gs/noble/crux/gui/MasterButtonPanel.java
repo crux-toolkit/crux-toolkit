@@ -12,12 +12,13 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class MasterButtonPanel extends JPanel {
 
 	final CruxGui cruxGui;
 	final JPanel buttonPanel = new JPanel();
 	final JButton newButton = new JButton("New Analysis");
-	final JButton openButton = new JButton("Open Analysis");
+	final JButton openButton = new JButton("Load Analysis");
 	final JButton setNameButton = new JButton("Set Analysis Name");
 	final JButton runButton = new JButton("Run Analysis");
 	final JButton setCruxPathButton = new JButton("Locate Crux");

@@ -80,17 +80,75 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		public String toString() { return this.name; };
 	}
 	
+	/** The list of allowed spectrum charges */
+	public enum AllowedSpectrumCharge {
+		ONE("1"), 
+		TWO("2"),
+		THREE("3"),
+		ALL("all") ; 
+		String name;
+		AllowedSpectrumCharge(String name) {this.name = name;}
+		public String toString() { return this.name; }
+		public static int getSize() { return 4; };
+	};
+	
 	private String name;
 	private String pathToCrux;
 	private final boolean componentsToRun[]= new boolean[CruxComponents.getSize()];
 	private final boolean showAdvancedParameters[]= new boolean[CruxComponents.getSize()];
 	private int numComponentsToRun;
-	private String proteinSource;
-	private String spectraSource;
-	private IsotopicMassType massType;
+	
+	// Crux parameters
+	private boolean allowMissedCleavages;
+	private String customEnzymeBeforeCleavage;
+	private String customEnzymeAfterCleavage;
+	private boolean decoyPValues;
 	private DigestType digestType;
 	private Enzyme enzyme;
-	private boolean allowMissedCleavages;
+	private boolean featureFile;
+	private IsotopicMassType massType;
+	private int maxLength;
+	private double maxMass;
+	private int maxMods;
+	private int minLength;
+	private double minMass;
+	private int numDecoysPerTarget;
+	private int numDecoyFiles;
+	private double pi0;
+	private int printSearchProgress;
+	private String proteinSource;
+	private double seed;
+	private String spectraSource;
+	private AllowedSpectrumCharge spectrumCharge;
+	private double spectrumMaxMass;
+	private double spectrumMinMass;
+	private int topMatch;
+	
+	// Crux parameters defaults
+	final private boolean allowMissedCleavagesDefault = false;
+	final private String customEnzymeAfterCleavageDefault = null;
+	final private String customEnzymeBeforeCleavageDefault = null;
+	final private boolean decoyPValuesDefault = false;
+	final private DigestType digestTypeDefault = DigestType.FULL;
+	final private Enzyme enzymeDefault = Enzyme.TRYPSIN;
+	final private boolean featureFileDefault = false;
+	final private IsotopicMassType massTypeDefault = IsotopicMassType.AVERAGE;
+	final private int maxLengthDefault = 50;
+	final private double maxMassDefault = 7200;
+	final private int maxModsDefaults = -1;
+	final private int minLengthDefault = 6;
+	final private double minMassDefault = 200;
+	final private int numDecoyFilesDefault = 2;
+	final private int numDecoysPerTargetDefault = 2;
+	final private double pi0Default = 0.9;
+	final private int printSearchProgressDefault = 10;
+	final private String proteinSourceDefault = null;
+	final private String spectraSourceDefault = null;
+	final private AllowedSpectrumCharge spectrumChargeDefault = AllowedSpectrumCharge.ALL;
+	final private double seedDefault = -1.0;
+	final private double spectrumMaxMassDefault = -1.0;
+	final private double spectrumMinMassDefault = 0.0;
+	final private int topMatchDefault = 5;
 	
 	public CruxAnalysisModel() {
 		setDefaults();
@@ -118,24 +176,88 @@ public class CruxAnalysisModel extends Object implements Serializable{
 			componentsToRun[component.ordinal()] = false;
 			showAdvancedParameters[component.ordinal()] = false;
 		}
-		proteinSource = null;
-		spectraSource = null;
-		massType = IsotopicMassType.AVERAGE;
-		digestType = DigestType.FULL;
-		enzyme = Enzyme.TRYPSIN;
-		allowMissedCleavages = false;
+		allowMissedCleavages = allowMissedCleavagesDefault;
+	    customEnzymeBeforeCleavage = customEnzymeBeforeCleavageDefault;
+	    customEnzymeAfterCleavage = customEnzymeAfterCleavageDefault;
+	    decoyPValues = decoyPValuesDefault;
+	    digestType = digestTypeDefault;
+	    enzyme = enzymeDefault;
+	    featureFile = featureFileDefault;
+	    massType = massTypeDefault;
+	    maxLength = maxLengthDefault;
+	    maxMass = maxMassDefault;
+	    maxMods = maxModsDefaults;
+	    minLength = minLengthDefault;
+		minMass = minMassDefault;
+		numDecoysPerTarget = numDecoysPerTargetDefault;
+		numDecoyFiles = numDecoyFilesDefault;
+	    pi0 = pi0Default;
+	    printSearchProgress = printSearchProgressDefault;
+		proteinSource = proteinSourceDefault;
+		seed = seedDefault;
+		spectraSource = spectraSourceDefault;
+	    spectrumCharge = spectrumChargeDefault;
+	    spectrumMaxMass = spectrumMaxMassDefault;
+	    spectrumMinMass = spectrumMinMassDefault;
+	    topMatch = topMatchDefault;
 		logger.info("Model set to default values");
 	}
 	
 	public void restoreDefaults(CruxComponents component) {
 		componentsToRun[component.ordinal()] = false;
 		showAdvancedParameters[component.ordinal()] = false;
-		proteinSource = null;
-		spectraSource = null;
-		massType = IsotopicMassType.AVERAGE;
-		digestType = DigestType.FULL;
-		enzyme = Enzyme.TRYPSIN;
-		allowMissedCleavages = false;
+		switch (component) {
+		    case CREATE_INDEX:
+        		allowMissedCleavages = allowMissedCleavagesDefault;
+        	    customEnzymeBeforeCleavage = customEnzymeBeforeCleavageDefault;
+	    		customEnzymeAfterCleavage = customEnzymeAfterCleavageDefault;
+        		digestType = digestTypeDefault;
+        		enzyme = enzymeDefault;
+        		massType = massTypeDefault; 
+	            maxLength = maxLengthDefault;
+        	    maxMass = maxMassDefault;
+	            minLength = minLengthDefault;
+		        minMass = minMassDefault;
+		        proteinSource = proteinSourceDefault;
+		    	break;
+		    case SEARCH_FOR_MATCHES:
+        		allowMissedCleavages = allowMissedCleavagesDefault;
+        	    customEnzymeBeforeCleavage = customEnzymeBeforeCleavageDefault;
+	    		customEnzymeAfterCleavage = customEnzymeAfterCleavageDefault;
+        	    decoyPValues = decoyPValuesDefault;
+        		digestType = digestTypeDefault;
+        		enzyme = enzymeDefault;
+        		massType = massTypeDefault; 
+	            maxLength = maxLengthDefault;
+        	    maxMass = maxMassDefault;
+	            maxMods = maxModsDefaults;
+	            minLength = minLengthDefault;
+		        minMass = minMassDefault;
+        		numDecoysPerTarget = numDecoysPerTargetDefault;
+				numDecoyFiles = numDecoyFilesDefault;
+		        proteinSource = proteinSourceDefault;
+		        spectraSource = spectraSourceDefault;
+        	    spectrumCharge = spectrumChargeDefault;
+        	    spectrumMaxMass = spectrumMaxMassDefault;
+        	    spectrumMinMass = spectrumMinMassDefault;
+		    	break;
+		    case COMPUTE_Q_VALUES:
+        	    pi0 = pi0Default;
+		        proteinSource = proteinSourceDefault;
+		    	break;
+		    case PERCOLATOR:
+        	    featureFile = featureFileDefault;
+        	    pi0 = pi0Default;
+		        proteinSource = proteinSourceDefault;
+        	    topMatch = topMatchDefault;
+		    	break;
+		    case QRANKER:
+        	    featureFile = featureFileDefault;
+        	    pi0 = pi0Default;
+		        proteinSource = proteinSourceDefault;
+        	    topMatch = topMatchDefault;
+		    	break;
+		}
 		logger.info("Model restored to default values");
 	}
 	
@@ -163,6 +285,10 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Show advanced parameters for " + component.toString() + " set to " + value);
 	}
 	
+	public IsotopicMassType getDefaultMassType() {
+		return this.massTypeDefault;
+	}
+	
 	public IsotopicMassType getMassType() {
 		return this.massType;
 	}
@@ -170,6 +296,10 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	public void setMassType(IsotopicMassType type) {
 		this.massType = type;
 		logger.info("Model parameter 'massType' set to " + type.toString());
+	}
+	
+	public DigestType getDefaultDigestType() {
+		return this.digestTypeDefault;
 	}
 	
 	public DigestType getDigestType() {
@@ -181,6 +311,10 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Model parameter 'digestType' set to " + type.toString());
 	}
 	
+	public Enzyme getDefaultEnzyme() {
+		return this.enzymeDefault;
+	}
+	
 	public Enzyme getEnzyme() {
 		return this.enzyme;
 	}
@@ -188,6 +322,10 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	public void setEnzyme(Enzyme e) {
 		this.enzyme = e;
 		logger.info("Model parameter 'enzyme' set to " + e.toString());
+	}
+	
+	public boolean getDefaultAllowMissedCleavages() {
+		return this.allowMissedCleavagesDefault;
 	}
 	
 	public boolean getAllowMissedCleavages() {
@@ -199,6 +337,10 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Model parameter 'allowMissedCleavages' set to " + value);
 	}
 
+	public String getDefaultProteinDatabase() {
+		return proteinSourceDefault;
+	}
+	
 	public String getProteinDatabase() {
 		return proteinSource;
 	}
@@ -208,7 +350,11 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Model parameter 'proteinDatabase' set to " + database);
 	}
 	
-	public String getSpectraFilemame() {
+	public String getDefaultSpectraFilename() {
+		return spectraSourceDefault;
+	}
+	
+	public String getSpectraFilename() {
 		return spectraSource;
 	}
 	
@@ -347,5 +493,225 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		}
 
 		return process;
+	}
+
+	public String getCustomEnzymeAfterCleavage() {
+		return customEnzymeAfterCleavage;
+	}
+
+	public void setCustomEnzymeAfterCleavage(String customEnzymeAfterCleavage) {
+		this.customEnzymeAfterCleavage = customEnzymeAfterCleavage;
+	}
+
+	public String getCustomEnzymeBeforeCleavage() {
+		return customEnzymeBeforeCleavage;
+	}
+
+	public void setCustomEnzymeBeforeCleavage(String customEnzymeBeforeCleavage) {
+		this.customEnzymeBeforeCleavage = customEnzymeBeforeCleavage;
+	}
+
+	public boolean isDecoyPValues() {
+		return decoyPValues;
+	}
+
+	public void setDecoyPValues(boolean decoyPValues) {
+		this.decoyPValues = decoyPValues;
+	}
+
+	public Enzyme getEnzymeDefault() {
+		return enzymeDefault;
+	}
+
+	public boolean isFeatureFile() {
+		return featureFile;
+	}
+
+	public void setFeatureFile(boolean featureFile) {
+		this.featureFile = featureFile;
+	}
+
+	public int getMaxLength() {
+		return maxLength;
+	}
+
+	public void setMaxLength(int maxLength) {
+		this.maxLength = maxLength;
+	}
+
+	public double getMaxMass() {
+		return maxMass;
+	}
+
+	public void setMaxMass(double maxMass) {
+		this.maxMass = maxMass;
+	}
+
+	public int getMaxMods() {
+		return maxMods;
+	}
+
+	public void setMaxMods(int maxMods) {
+		this.maxMods = maxMods;
+	}
+
+	public int getMinLength() {
+		return minLength;
+	}
+
+	public void setMinLength(int minLength) {
+		this.minLength = minLength;
+	}
+
+	public double getMinMass() {
+		return minMass;
+	}
+
+	public void setMinMass(double minMass) {
+		this.minMass = minMass;
+	}
+
+	public int getNumDecoyFiles() {
+		return numDecoyFiles;
+	}
+
+	public void setNumDecoyFiles(int numDecoyFiles) {
+		this.numDecoyFiles = numDecoyFiles;
+	}
+
+	public int getNumDecoysPerTarget() {
+		return numDecoysPerTarget;
+	}
+
+	public void setNumDecoysPerTarget(int numDecoysPerTarget) {
+		this.numDecoysPerTarget = numDecoysPerTarget;
+	}
+
+	public double getPi0() {
+		return pi0;
+	}
+
+	public void setPi0(double pi0) {
+		this.pi0 = pi0;
+	}
+
+	public int getPrintSearchProgress() {
+		return printSearchProgress;
+	}
+
+	public void setPrintSearchProgress(int printSearchProgress) {
+		this.printSearchProgress = printSearchProgress;
+	}
+
+	public double getSeed() {
+		return seed;
+	}
+
+	public void setSeed(double seed) {
+		this.seed = seed;
+	}
+
+	public AllowedSpectrumCharge getSpectrumCharge() {
+		return spectrumCharge;
+	}
+
+	public void setSpectrumCharge(AllowedSpectrumCharge spectrumCharge) {
+		this.spectrumCharge = spectrumCharge;
+	}
+
+	public double getSpectrumMaxMass() {
+		return spectrumMaxMass;
+	}
+
+	public void setSpectrumMaxMass(double spectrumMaxMass) {
+		this.spectrumMaxMass = spectrumMaxMass;
+	}
+
+	public double getSpectrumMinMass() {
+		return spectrumMinMass;
+	}
+
+	public void setSpectrumMinMass(double spectrumMinMass) {
+		this.spectrumMinMass = spectrumMinMass;
+	}
+
+	public int getTopMatch() {
+		return topMatch;
+	}
+
+	public void setTopMatch(int topMatch) {
+		this.topMatch = topMatch;
+	}
+
+	public String getCustomEnzymeAfterCleavageDefault() {
+		return customEnzymeAfterCleavageDefault;
+	}
+
+	public String getCustomEnzymeBeforeCleavageDefault() {
+		return customEnzymeBeforeCleavageDefault;
+	}
+
+	public DigestType getDigestTypeDefault() {
+		return digestTypeDefault;
+	}
+
+	public IsotopicMassType getMassTypeDefault() {
+		return massTypeDefault;
+	}
+
+	public int getMaxLengthDefault() {
+		return maxLengthDefault;
+	}
+
+	public double getMaxMassDefault() {
+		return maxMassDefault;
+	}
+
+	public int getMaxModsDefaults() {
+		return maxModsDefaults;
+	}
+
+	public int getMinLengthDefault() {
+		return minLengthDefault;
+	}
+
+	public double getMinMassDefault() {
+		return minMassDefault;
+	}
+
+	public int getNumDecoyFilesDefault() {
+		return numDecoyFilesDefault;
+	}
+
+	public int getNumDecoysPerTargetDefault() {
+		return numDecoysPerTargetDefault;
+	}
+
+	public double getPi0Default() {
+		return pi0Default;
+	}
+
+	public int getPrintSearchProgressDefault() {
+		return printSearchProgressDefault;
+	}
+
+	public double getSeedDefault() {
+		return seedDefault;
+	}
+
+	public AllowedSpectrumCharge getSpectrumChargeDefault() {
+		return spectrumChargeDefault;
+	}
+
+	public double getSpectrumMaxMassDefault() {
+		return spectrumMaxMassDefault;
+	}
+
+	public double getSpectrumMinMassDefault() {
+		return spectrumMinMassDefault;
+	}
+
+	public int getTopMatchDefault() {
+		return topMatchDefault;
 	}
 }

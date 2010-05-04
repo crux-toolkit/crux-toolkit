@@ -13,14 +13,14 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 /**
- * The DigestPanel class is the GUI elements used to get and set the 
+ * The MassTypePanel class is the GUI elements used to get and set the 
  * mass type for the peptides (average or monoisotopic).
  *
  * @author Charles E. Grant
  *
  */
 @SuppressWarnings("serial")
-class MassPanel extends CruxParameterControl {
+class MassTypePanel extends CruxParameterControl {
 
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
@@ -31,7 +31,7 @@ class MassPanel extends CruxParameterControl {
 	private final JRadioButton averageMass = new JRadioButton("Average Mass");
 	private final JRadioButton monoMass = new JRadioButton("Monoisotopic Mass");
 
-	public MassPanel(CruxGui cruxGui) {
+	public MassTypePanel(CruxGui cruxGui) {
 		this.cruxGui = cruxGui;
 		massButtons.add(averageMass);
 		massButtons.add(monoMass);
@@ -46,6 +46,23 @@ class MassPanel extends CruxParameterControl {
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		updateFromModel();
 	}	
+	
+	public void loadDefaults() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		if (model.getDefaultMassType() == CruxAnalysisModel.IsotopicMassType.AVERAGE) {
+			averageMass.setSelected(true);
+			monoMass.setSelected(false);
+			logger.info("Read parameter 'IsotopicMassType' from model: AVERAGE");
+		}
+		else if (model.getDefaultMassType() == CruxAnalysisModel.IsotopicMassType.MONOISOTOPIC) {
+			averageMass.setSelected(false);
+			monoMass.setSelected(true);
+			logger.info("Read default parameter 'IsotopicMassType' from model: MONOISOTOPIC");
+		}
+		else {
+			logger.info("Read unrecognized value of parameter 'IsotopicMassType' from model: " + model.getDefaultMassType().toString() + ".");
+		}
+	}
 	
 	public void saveToModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();

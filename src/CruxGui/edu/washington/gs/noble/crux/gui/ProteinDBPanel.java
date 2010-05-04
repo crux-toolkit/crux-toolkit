@@ -30,7 +30,6 @@ class ProteinDBPanel extends CruxParameterControl {
 	public ProteinDBPanel(final CruxGui cruxGui) {
 		this.cruxGui = cruxGui;
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		proteinDBButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 		proteinDBButton.setAlignmentY(Component.CENTER_ALIGNMENT);
@@ -51,6 +50,11 @@ class ProteinDBPanel extends CruxParameterControl {
 		proteinFileName.setText(fileName);
 	}
 	
+	public void loadDefaults() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		proteinFileName.setText(model.getDefaultProteinDatabase());
+	}
+
 	public void saveToModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		model.setProteinDatabase(proteinFileName.getText());

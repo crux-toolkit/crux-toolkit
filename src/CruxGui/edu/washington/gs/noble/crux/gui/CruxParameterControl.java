@@ -17,8 +17,7 @@ import javax.swing.JPanel;
  */
 @SuppressWarnings("serial")
 public abstract class CruxParameterControl extends JPanel {
-	
+	public void loadDefaults(){};
 	public void updateFromModel(){};
 	public void saveToModel(){};
-
 }
