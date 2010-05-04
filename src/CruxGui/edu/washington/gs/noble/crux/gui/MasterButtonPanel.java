@@ -18,7 +18,7 @@ public class MasterButtonPanel extends JPanel {
 	final CruxGui cruxGui;
 	final JPanel buttonPanel = new JPanel();
 	final JButton newButton = new JButton("New Analysis");
-	final JButton openButton = new JButton("Load Analysis");
+	final JButton loadButton = new JButton("Load Analysis");
 	final JButton setNameButton = new JButton("Set Analysis Name");
 	final JButton runButton = new JButton("Run Analysis");
 	final JButton setCruxPathButton = new JButton("Locate Crux");
@@ -27,34 +27,24 @@ public class MasterButtonPanel extends JPanel {
 	public MasterButtonPanel(final CruxGui cruxGui) {
 		this.cruxGui = cruxGui;
 		buttonPanel.setBorder(BorderFactory.createEtchedBorder());
+		buttonPanel.setLayout(new FlowLayout());
 		add(buttonPanel, BorderLayout.SOUTH);
-		newButton.addActionListener(new OpenAnalysisButtonListener()); 
-		openButton.addActionListener(new OpenAnalysisButtonListener()); 
+		newButton.addActionListener(new NewAnalysisButtonListener()); 
+		loadButton.addActionListener(new LoadAnalysisButtonListener()); 
 		runButton.addActionListener(new RunButtonListener());
 		setNameButton.addActionListener(new SetNameButtonListener()); 
 		setCruxPathButton.addActionListener(new SetCruxPathListener());
-		exitButton.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent e) {
-				cruxGui.shutdown();
-			}
-		});
-		buttonPanel.setLayout(new FlowLayout());
+		exitButton.addActionListener(new ExitButtonListener());
 		buttonPanel.add(setCruxPathButton);
-		buttonPanel.add(setNameButton);
 		buttonPanel.add(newButton);
-		buttonPanel.add(openButton);
+		buttonPanel.add(setNameButton);
+		buttonPanel.add(loadButton);
 		buttonPanel.add(runButton);
 		buttonPanel.add(exitButton);
 	}	
 	
-	class OpenAnalysisButtonListener implements ActionListener {
-
-		public void actionPerformed(ActionEvent event) {
-		}
-		
-	}
-
 	class SetCruxPathListener implements ActionListener {
+		
 		public void actionPerformed(ActionEvent event) {
 			final JFileChooser fileChooser = new JFileChooser();
 			    int returnVal = fileChooser.showDialog(getParent(), "Set path to crux");
@@ -63,6 +53,35 @@ public class MasterButtonPanel extends JPanel {
 		             cruxGui.getAnalysisModel().setPathToCrux(file.toString());
 		        }
 		}
+		
+	}
+	
+	class NewAnalysisButtonListener implements ActionListener {
+
+		public void actionPerformed(ActionEvent event) {
+			cruxGui.setAnalysisModel(new CruxAnalysisModel());
+		}
+		
+	}
+	
+	class LoadAnalysisButtonListener implements ActionListener {
+
+		public void actionPerformed(ActionEvent event) {
+			String name = (String) JOptionPane.showInputDialog(
+					cruxGui.frame, 
+					"Choose the analysis to load:", 
+					"Load Analysis", 
+					JOptionPane.PLAIN_MESSAGE, 
+					null, 
+					cruxGui.analysisSet.toArray(), 
+					""
+			);
+			CruxAnalysisModel model = cruxGui.getAnalysisModel().readModelFromBinaryFile(name);
+			if (model != null) {
+				cruxGui.setAnalysisModel(model);
+			}
+		}
+		
 	}
 	
 	class SetNameButtonListener implements ActionListener {
@@ -110,6 +129,14 @@ public class MasterButtonPanel extends JPanel {
 			    cruxGui.getAnalysisModel().run();
 			}
 		}
+		
+	}
+	
+	class ExitButtonListener implements ActionListener {
+		
+			public void actionPerformed(final ActionEvent e) {
+				cruxGui.shutdown();
+			}
 		
 	}
 }
