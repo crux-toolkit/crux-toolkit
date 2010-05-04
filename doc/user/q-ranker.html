@@ -51,12 +51,19 @@ protein index from which to retrieve proteins and peptides.</li>
 &lt;psm folder&gt; &ndash; [optional] 
 A folder in which all the PSM result files are located.  This is 
 assumed to be <code>crux-output</code>, but it can be set by the user 
-using the <code>--output-dir</code> option. The program looks for 
-files beginning with '[&lt;fileroot&gt;.]se' and ending in 
-<code>target.txt</code> or <code>decoy.txt</code>, which are produced 
-by <code>crux&nbsp;search-for-matches</code> and 
-<code>crux&nbsp;sequest-search</code> .  All such files in the given 
-directory are analyzed jointly.</li>
+using the <code>--output-dir</code> option.
+
+The program looks for files with names like
+'<code>&lt;fileroot&gt;.&lt;search&gt;.target.txt</code>' or
+'<code>&lt;fileroot&gt;.&lt;search&gt;.decoy.txt</code>', where
+'<code>&lt;search&gt;</code>' is either '<code>search</code>'
+(produced by <code>crux search-for-matches</code>) or
+'<code>sequest</code>' (produced by <code>crux sequest-search</code>).
+
+The search results should be from only one of the two search
+algorithms.
+
+All such files in the given directory are analyzed jointly.</li>
 
 </ul>
 

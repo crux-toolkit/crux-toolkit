@@ -21,9 +21,9 @@
 
 <blockquote>
 Given a protein fasta sequence database as input, generate an index of
-all of its peptides and save it to disk.  This index can be used with
-crux-search-for-matches instead of the fasta file to speed up the
-search.</blockquote>
+all of its peptides and save it to disk.  This index can be provided
+as input to <code>crux search-for-matches</code> instead of the fasta
+file to speed up the search.</blockquote>
 
 <p>
 <B>Input:</B>
@@ -39,14 +39,12 @@ search.</blockquote>
 
 <UL>
 
-  The main output of the program is an index for the fasta file.  An
-  index consists of a directory containing three types of files:
-  binary index files, binary sequence files, and a text file with
-  settings.  The directory is named &lt;index name&gt;.  The binary
-  sequence file will be named after the input file and ending with
-  'binary_fasta'.  The text file is named README.  Nothing is printed
-  to STDOUT.  Diagnostic messages are printed to STDERR depending on
-  the level of verbosity.  (see options below)
+<p>
+The program writes three types of files to the specified output
+directory: binary index files, a binary sequence file, and a text file
+with settings.  The binary sequence file will be have the same name as
+the input fasta file, but ending with '<code>binary_fasta</code>'.
+The text file is named '<code>README</code>'.</p>
 
 </UL>
 <B>Options:</B>
@@ -166,7 +164,7 @@ simultaneously.  On some operating systems, this will result in an
 error message like this:</p>
 
 <pre>
-WARNING: cannot open all file handlers needed
+     WARNING: cannot open all file handlers needed
 </pre>
 
 <p>
@@ -174,14 +172,14 @@ On a Unix system, you can find out the maximum number of files that
 can be open simultaneously using a command like this:</p>
 
 <pre>
-ulimit -a
+     ulimit -a
 </pre>
 
 <p>
-You can use</p>
+You can then use</p>
 
 <pre>
-ulimit -n 1024
+     ulimit -n 1024
 </pre>
 
 <p>
