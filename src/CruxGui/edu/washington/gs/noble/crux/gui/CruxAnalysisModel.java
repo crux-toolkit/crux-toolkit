@@ -1,8 +1,10 @@
 package edu.washington.gs.noble.crux.gui;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -154,6 +156,155 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		setDefaults();
 	}
 	
+	/** Serialize the analysis to the analysis directory */
+	public boolean toBinaryFile() {
+		String model_path = name + "/" + name + ".model";
+		boolean result = false;
+		try {
+			FileOutputStream fileOut = new FileOutputStream(model_path);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(this);
+			out.close();
+			logger.info("Saved model to " + model_path);	
+			result = true;
+		} catch (IOException e) {
+			logger.info("Unable to saved model: " + e.toString());
+			JOptionPane.showMessageDialog(null, "Unable to save model: " + e.toString());
+		}
+		return result;
+	}
+	
+	public CruxAnalysisModel readModelFromBinaryFile(String name) {
+		CruxAnalysisModel model = null;
+		String model_path = name + "/" + name + ".model";
+		try {
+			FileInputStream fileIn = new FileInputStream(model_path);
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			model = (CruxAnalysisModel) in.readObject();
+		} catch (IOException e) {
+			logger.info("Unable to load model " + name + ": " + e.toString());
+			JOptionPane.showMessageDialog(null, "Unable to load model " + name + ": "  + e.toString());
+		} catch (ClassNotFoundException e) {
+			logger.info("Unable to load model " + name + ": " + e.toString());
+			JOptionPane.showMessageDialog(null, "Unable to load model " + name + ": "  + e.toString());
+		}
+		return model;
+	}
+
+	public boolean toParameterFile() {
+		boolean result = false;
+		String fileName = name + "/" + "analysis.params";
+		try {
+			PrintWriter out = new PrintWriter(new File(fileName));
+			out.println("#Parameter file for analysis " + name);
+			out.println("isotopic-mass=" + massType);
+			out.println("digestion=" + digestType);
+			out.println("enzyme=" + enzyme);
+			if (allowMissedCleavages) {
+				out.println("missed-cleavages=T");
+			}
+			else {
+				out.println("missed-cleavages=F");
+			}
+			out.close();
+			logger.info("Saved analysis parameter file to " + fileName);	
+			result = true;
+		}
+		catch (IOException e) {
+			logger.info("Unable to write parameter file for analsyis: " + e.toString());
+			JOptionPane.showMessageDialog(null, "Unable to write parameter file for analsyis: " + e.toString());
+		}
+		return result;
+	}
+
+	boolean isValidAnalysis() {
+		
+		boolean result = true;
+		
+		if (numComponentsToRun <= 0) {
+			JOptionPane.showMessageDialog(null, "Please select some components to run.");
+			result = false;
+		}
+		if (name == null) {
+			JOptionPane.showMessageDialog(null, "Please choose a name for this analysis.");
+			result = false;
+		}
+		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
+			// Must have specified protein database
+			if (proteinSource == null || proteinSource.length() == 0) {
+				JOptionPane.showMessageDialog(null, "A protein database must be specified to create an index.");
+				result = false;
+			}
+		}
+		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]) {
+			// Must have specified protein database and spectra source
+			if (proteinSource == null || spectraSource == null) {
+				JOptionPane.showMessageDialog(null, "A protein database and a spectra source must be specified to search for maatches.");
+				result = false;
+			}
+		}
+		logger.info("Validation of analysis: " + result + ".");
+
+		return result;
+	}
+	
+	Process run() {
+		
+		Process process = null;
+		
+		if (!isValidAnalysis()) {
+			return process;
+		}
+		
+		// Write out binary file of the analysis model to the analysis directory
+		if (!toBinaryFile()) {
+			return process;
+		}
+		
+		// Write out a parameter file to the analysis directory
+		if (!toParameterFile()) {
+			return process;
+		}
+	
+		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
+			//  Run the component using the component directory and parameter file
+			String subCommand = CruxComponents.CREATE_INDEX.toString();
+			String command = pathToCrux + " " + subCommand + " --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
+			try {
+				logger.info("Attempte to execute command: " + command);
+				process = Runtime.getRuntime().exec(command);
+			}
+			catch (IOException e) {
+				logger.info("Unable to execute command: " + e.toString());
+				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
+				return process;
+			}
+		}
+		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]) {
+			//  Run the component using the component directory and parameter file
+			String proteinSource;
+			if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
+				proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
+			}
+			else {
+				proteinSource = this.proteinSource;
+			}
+			String subCommand = CruxComponents.SEARCH_FOR_MATCHES.toString();
+			String command = "crux " + subCommand + " --overwrite T --output-dir " + name + "/" + subCommand + " --parameter-file " + name + "/analysis.params " + spectraSource + " " + proteinSource;
+			try {
+				logger.info("Attempte to execute command: " + command);
+				process = Runtime.getRuntime().exec(command);
+			}
+			catch (IOException e) {
+				logger.info("Unable to execute command: " + e.toString());
+				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
+				return process;
+			}
+		}
+
+		return process;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -363,138 +514,6 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		logger.info("Model parameter 'spectraSource' set to " + fileName);
 	}
 	
-	/** Serialize the analysis to the analysis directory */
-	public boolean toBinaryFile() {
-		String model_path = name + "/" + name + ".model";
-		boolean result = false;
-		try {
-			FileOutputStream fileOut = new FileOutputStream(model_path);
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(this);
-			out.close();
-			logger.info("Saved model to " + model_path);	
-			result = true;
-		} catch (IOException e) {
-			logger.info("Unable to saved model: " + e.toString());
-			JOptionPane.showMessageDialog(null, "Unable to save model: " + e.toString());
-		}
-		return result;
-	}
-
-	public boolean toParameterFile() {
-		boolean result = false;
-		String fileName = name + "/" + "analysis.params";
-		try {
-			PrintWriter out = new PrintWriter(new File(fileName));
-			out.println("#Parameter file for analysis " + name);
-			out.println("isotopic-mass=" + massType);
-			out.println("digestion=" + digestType);
-			out.println("enzyme=" + enzyme);
-			if (allowMissedCleavages) {
-				out.println("missed-cleavages=T");
-			}
-			else {
-				out.println("missed-cleavages=F");
-			}
-			out.close();
-			logger.info("Saved analysis parameter file to " + fileName);	
-			result = true;
-		}
-		catch (IOException e) {
-			logger.info("Unable to write parameter file for analsyis: " + e.toString());
-			JOptionPane.showMessageDialog(null, "Unable to write parameter file for analsyis: " + e.toString());
-		}
-		return result;
-	}
-
-	boolean isValidAnalysis() {
-		
-		boolean result = true;
-		
-		if (numComponentsToRun <= 0) {
-			JOptionPane.showMessageDialog(null, "Please select some components to run.");
-			result = false;
-		}
-		if (name == null) {
-			JOptionPane.showMessageDialog(null, "Please choose a name for this analysis.");
-			result = false;
-		}
-		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
-			// Must have specified protein database
-			if (proteinSource == null || proteinSource.length() == 0) {
-				JOptionPane.showMessageDialog(null, "A protein database must be specified to create an index.");
-				result = false;
-			}
-		}
-		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]) {
-			// Must have specified protein database and spectra source
-			if (proteinSource == null || spectraSource == null) {
-				JOptionPane.showMessageDialog(null, "A protein database and a spectra source must be specified to search for maatches.");
-				result = false;
-			}
-		}
-		logger.info("Validation of analysis: " + result + ".");
-
-		return result;
-	}
-	
-	Process run() {
-		
-		Process process = null;
-		
-		if (!isValidAnalysis()) {
-			return process;
-		}
-		
-		// Write out binary file of the analysis model to the analysis directory
-		if (!toBinaryFile()) {
-			return process;
-		}
-		
-		// Write out a parameter file to the analysis directory
-		if (!toParameterFile()) {
-			return process;
-		}
-	
-		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
-			//  Run the component using the component directory and parameter file
-			String subCommand = CruxComponents.CREATE_INDEX.toString();
-			String command = pathToCrux + " " + subCommand + " --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
-			try {
-				logger.info("Attempte to execute command: " + command);
-				process = Runtime.getRuntime().exec(command);
-			}
-			catch (IOException e) {
-				logger.info("Unable to execute command: " + e.toString());
-				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
-				return process;
-			}
-		}
-		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]) {
-			//  Run the component using the component directory and parameter file
-			String proteinSource;
-			if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
-				proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
-			}
-			else {
-				proteinSource = this.proteinSource;
-			}
-			String subCommand = CruxComponents.SEARCH_FOR_MATCHES.toString();
-			String command = "crux " + subCommand + " --overwrite T --output-dir " + name + "/" + subCommand + " --parameter-file " + name + "/analysis.params " + spectraSource + " " + proteinSource;
-			try {
-				logger.info("Attempte to execute command: " + command);
-				process = Runtime.getRuntime().exec(command);
-			}
-			catch (IOException e) {
-				logger.info("Unable to execute command: " + e.toString());
-				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
-				return process;
-			}
-		}
-
-		return process;
-	}
-
 	public String getCustomEnzymeAfterCleavage() {
 		return customEnzymeAfterCleavage;
 	}

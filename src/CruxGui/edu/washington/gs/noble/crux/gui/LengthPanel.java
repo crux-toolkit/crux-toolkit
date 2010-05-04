@@ -51,22 +51,22 @@ class LengthPanel extends CruxParameterControl {
 	}	
 	
 	private void initMaxPanel() {
-		maxLabel.setMaximumSize(new Dimension(130, 20));
-		maxLength.setMaximumSize(new Dimension(75, 20));
+		maxLabel.setMaximumSize(new Dimension(130, 30));
+		maxLength.setMaximumSize(new Dimension(75, 30));
 		maxPanel.setLayout(new BoxLayout(maxPanel, BoxLayout.X_AXIS));
 		maxPanel.add(maxLabel);
-		maxPanel.add(Box.createRigidArea(new Dimension(10,20)));
+		maxPanel.add(Box.createRigidArea(new Dimension(0,20)));
 		maxPanel.add(maxLength);
 		add(maxPanel);
 		add(Box.createRigidArea(new Dimension(10,4)));
 	}
 	
 	private void initMinPanel() {
-		minLabel.setMaximumSize(new Dimension(130, 20));
-		minLength.setMaximumSize(new Dimension(75, 20));
+		minLabel.setMaximumSize(new Dimension(130, 30));
+		minLength.setMaximumSize(new Dimension(75, 30));
 		minPanel.setLayout(new BoxLayout(minPanel, BoxLayout.X_AXIS));
 		minPanel.add(minLabel);
-		minPanel.add(Box.createRigidArea(new Dimension(10,20)));
+		minPanel.add(Box.createRigidArea(new Dimension(0,20)));
 		minPanel.add(minLength);
 		add(minPanel);
 	}

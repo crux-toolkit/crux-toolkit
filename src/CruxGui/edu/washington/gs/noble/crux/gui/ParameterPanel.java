@@ -89,14 +89,14 @@ class ParameterPanel extends JPanel implements ItemListener {
 	public void addParameterControl(CruxParameterControl control) {
 		parameterControls.add(control);
 		panel.add(control);
-		panel.add(Box.createRigidArea(new Dimension(0,12)));
+		panel.add(Box.createRigidArea(new Dimension(0, 20)));
 	}
 	
 	public void addParameterControls(Vector<CruxParameterControl> controls) {
 		for (CruxParameterControl control: controls) {
 			parameterControls.add(control);
 			panel.add(control);
-			panel.add(Box.createRigidArea(new Dimension(0,12)));
+			panel.add(Box.createRigidArea(new Dimension(0, 20)));
 		}
 	}
 
