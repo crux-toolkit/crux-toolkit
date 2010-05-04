@@ -672,15 +672,6 @@ void initialize_parameters(void){
       "Set a feature for percolator that in later versions is not an option.",
       "Shouldn't be variable; hide from user.", "false");
 
-  //parameter to parse the tab-delimited result files rather than
-  //the binary csm files when analyzing matches.
-  set_boolean_parameter("parse-tab-files", TRUE,
-    "Parse the tab delimited .txt result files rather "
-    "than the .csm files. Default F.",
-    "Available for compute-q-values, percolator, and q-ranker.",
-    "false");
-
-
   /* predict-peptide-ions */
   set_ion_type_parameter("primary-ions", BY_ION,
       "The ion series to predict (b,y,by). Default 'by' (both b and y ions).",

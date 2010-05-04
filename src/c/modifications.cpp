@@ -512,64 +512,6 @@ BOOLEAN_T modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length){
 
 
 /**
- * \brief Write the given aa mod to file in binary format.  Used for
- * serializing csm file headers.
- *
- * \return TRUE if written to file without error, else false.
- */
-BOOLEAN_T serialize_aa_mod(AA_MOD_T* a_mod,
-                           FILE* file
-){
-  if( a_mod == NULL || file == NULL ){
-    carp(CARP_ERROR, "Cannot serialize aa_mod to file with NULL inputs");
-    return FALSE;
-  }
-
-  // write all member variables
-  fwrite(a_mod, sizeof(AA_MOD_T), 1, file);
-
-  // then write each aa TRUE/FALSE
-  /*
-  int aa_idx;
-  for(aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++){
-    fwrite((a_mod->aa_list)+aa_idx, sizeof(BOOLEAN_T), 1, file);
-  }
-  */
-  return TRUE;
-}
-
-/**
- * \brief Read an aa mod from file in binary format as written by
- * serialize_aa_mod().  Overwrites any data in the passed aa_mod.
- * Used for reading in csm files. If FALSE is returned, the passed
- * a_mod will contain unpredictable values.
- *
- * \returns TRUE if aa_mod successfully read, else FALSE.  
- */
-BOOLEAN_T parse_aa_mod(AA_MOD_T* a_mod,
-                       FILE* file
-){
-  if( a_mod == NULL || file == NULL ){
-    carp(CARP_ERROR, "Cannot parse aa_mod from file with NULL inputs");
-    return FALSE;
-  }
-
-  // read in struct
-  if( fread(a_mod, sizeof(AA_MOD_T), 1, file) != 1 ){
-    carp(CARP_ERROR, "Failed to read AA_MOD.");
-  };
-
-  // then read in each modifiable aa (TRUE/FALSE)
-  /*
-  int aa_idx;
-  for(aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++){
-    fread((a_mod->aa_list)+aa_idx, sizeof(BOOLEAN_T), 1, file);
-  }
-  */
-  return TRUE;
-}
-
-/**
  * \brief Frees memory for an array of MODIFIED_AA_Ts.  Assumes is
  * terminated with the MOD_SEQ_NULL value
  */

@@ -13,8 +13,7 @@
  * all candidate peptides with Sp, deletes all but the 500 top-scoring
  * candidates, scores remaining 500 with xcorr, sorts results by xcorr
  * and returns the top 5 plus the match with the best Sp score.
- * Writes results to .sqt, .txt, and .csm files.  Does not compute
- * p-values. 
+ * Writes results to .sqt and .txt.  Does not compute p-values. 
  */
 
 #include <vector>

@@ -1593,23 +1593,6 @@ FLOAT_T get_spectrum_singly_charged_mass(
   return (get_spectrum_mass(spectrum, charge) - MASS_PROTON*(charge-1));  // TESTME
 }
 
-
-/**
- * serialize the spectrum in binary
- * Form,
- * <int: first_scan><int: last_scan><int: id><SPECTRUM_TYPE_T: spectrum_type>
- * <float: precursor_mz><float: retention_time>
- */
-void serialize_spectrum(
-  SPECTRUM_T* spectrum, ///< the spectrum to serialize -in
-  FILE* file ///< output stream -out
-  )
-{
-  // serialize the spectrum struct
-  fwrite(spectrum, sizeof(SPECTRUM_T), 1, file);
-
-}
-
 /**
  * Parse the spectrum from the tab-delimited result file
  *\returns the parsed spectrum , else returns NULL for failed parse
@@ -1639,29 +1622,6 @@ SPECTRUM_T* parse_spectrum_tab_delimited(
   spectrum -> has_peaks = FALSE;
   return spectrum;
 
-}
-
-
-/**
- * Parse the spectrum from the serialized spectrum
- *\returns the parsed spectrum , else returns NULL for failed parse
- */
-SPECTRUM_T* parse_spectrum_binary(
-  FILE* file ///< output stream -out
-  )
-{
-  SPECTRUM_T* spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
-  
-  // get spectrum struct
-  if(fread(spectrum, (sizeof(SPECTRUM_T)), 1, file) != 1){
-    carp(CARP_ERROR, "serialized file corrupted, incorrect spectrum format");
-    free(spectrum);
-    return NULL;
-  }
-  
-  spectrum->has_peaks = FALSE;
-  
-  return spectrum;
 }
 
 /***********************************************************************

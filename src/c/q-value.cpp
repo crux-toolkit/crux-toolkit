@@ -8,8 +8,9 @@
  * how good the matches are. 
  *
  * Handles at most 4 files (target and decoy).  Expects psm files to
- * end with the extension '.csm' and decoys to end with
- * '-decoy#.csm'.  Multiple target files in the given directory are
+ * start with <fileroot>.se and 
+ * end with the extension '.txt' and decoys to end with
+ * '-decoy#.txt'.  Multiple target files in the given directory are
  * concatinated together and presumed to be non-overlaping parts of
  * the same ms2 file. 
  ****************************************************************************/

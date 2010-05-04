@@ -48,7 +48,7 @@ class SearchProgress{
 
  private:
   int searches_attempted_; ///< number of spec/charge's searched 
-  int searches_with_matches_; ///< number of spec with results in .csm file
+  int searches_with_matches_; ///< number of spec with results in .txt file
   int progress_increment_;  ///< how often to print progress
 
 };

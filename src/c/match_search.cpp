@@ -264,18 +264,10 @@ int search_main(int argc, char** argv){
   }// next spectrum
 
   // finished searching!
-
-  // fix headers in csm files
-  int file_idx;
-  for(file_idx=0; file_idx < num_decoy_files + 1; file_idx++){
-    carp(CARP_DEBUG, "Changing csm header to have %i spectrum searches",
-         progress.getNumSearchesWithMatches());
-    output_files.updateHeaders(progress.getNumSearchesWithMatches());
-  }
-
   carp(CARP_INFO, "Finished crux-search-for-matches");
   exit(0);
 }// end main
+
 #else // SEARCH_ENABLED not defined
 int search_main(int argc, char **argv){
   (void) argc;
