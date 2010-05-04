@@ -111,8 +111,8 @@ protein index from which to retrieve proteins and peptides.</li>
 A folder in which all the PSM result files are located.  This is 
 assumed to be <code>crux-output</code>, but it can be set by the user 
 using the <code>--output-dir</code> option. The program looks for 
-files beginning with '[&lt;fileroot&gt;.]search.' and ending
-in <code>target.txt</code> or <code>decoy.txt</code>, which are produced by 
+files with names like '<code>&lt;fileroot&gt;.search.target.txt</code>'
+or '<code>&lt;fileroot&gt;.search.decoy.txt</code>', which are produced by 
 <code>crux&nbsp;search-for-matches</code>.  All such files in the
 given directory are analyzed jointly.</li>
 
@@ -128,8 +128,7 @@ The following files will be created:</p>
 
 <li>
 <b>qvalues.target.txt</b>: a tab-delimited text file containing the PSMs.
-</li>
-See <a href="txt-format.html">txt file format</a> for a list of the fields.
+See <a href="txt-format.html">txt file format</a> for a list of the fields.</li>
 <li>
 <b>qvalues.log.txt</b>: a log file containing a copy of all messages that were
 printed to stderr.
