@@ -11,16 +11,16 @@
 <B>Usage:</B>
 
 <blockquote>
-<code>crux create-index [options] 
-  &lt;protein&nbsp;input&nbsp;file&gt; 
-  &lt;index&nbsp;name&gt; 
+<code>crux create-index [options]
+  &lt;protein&nbsp;input&nbsp;file&gt;
+  &lt;index&nbsp;name&gt;
 </code>
 </blockquote>
 
 <B>Description:</B>
 
 <blockquote>
-Given a protein fasta sequence database as input, generate an index of 
+Given a protein fasta sequence database as input, generate an index of
 all of its peptides and save it to disk.  This index can be used with
 crux-search-for-matches instead of the fasta file to speed up the
 search.</blockquote>
@@ -29,12 +29,12 @@ search.</blockquote>
 <B>Input:</B>
 
 <UL>
-  <LI>&lt;protein input file&gt; &ndash; 
+  <LI>&lt;protein input file&gt; &ndash;
   The name of the file (in fasta format) from which to parse proteins.
-  <LI>&lt;index name&gt; &ndash; 
+  <LI>&lt;index name&gt; &ndash;
   The name of the directory where the newly created index will be placed.
 	
-    </UL>
+</UL>
 <B>Output:</B>
 
 <UL>
@@ -54,44 +54,45 @@ search.</blockquote>
 <UL>
 	
 <LI>
-<code>--min-mass &lt;float&gt;</code> &ndash; 
+<code>--min-mass &lt;float&gt;</code> &ndash;
 The minimum neutral mass of the peptides to place in the
 index. Default = 200.
 	
 <LI>
-<code>--max-mass &lt;float&gt;</code> &ndash; 
-The maximum neutral mass of the peptides to place in
-index. Default = 7200.
+<code>--max-mass &lt;float&gt;</code> &ndash;
+The maximum neutral mass of the peptides to place in index. Default =
+7200.
 <LI>
-<code>--min-length &lt;int&gt;</code> &ndash; 
+<code>--min-length &lt;int&gt;</code> &ndash;
 The minimum length of the peptides to place in the index. Default = 6.
 	
 <LI>
-<code>--max-length &lt;int&gt;</code> &ndash; 
+<code>--max-length &lt;int&gt;</code> &ndash;
 The maximum length of the peptides to place in the index. Default = 50.
 
 <LI>
-<code>enzyme &lt;trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme&gt; 
-</code> &ndash; 
-Enzyme to use for <i>in silico</i> digestion of protein sequences. Used
-in conjunction with the options digestion and missed-cleavages. Use
-'no-enzyme' for non-specific digestion.  Digestion rules are as
-follows: enzyme name [cuts after one of these residues]|{but not before
-one of these residues}.  trypsin [RK]|{P}, elastase [ALIV]|{P},
-chymotrypsin [FWY]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[],
-iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease
-[E]|[], modified-chymotrypsin [FWYL]|{P},
-elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before
+<code>--enzyme &lt;trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme&gt;
+</code> &ndash;
+Enzyme to use for <i>in silico</i> digestion of protein
+sequences. Used in conjunction with the <code>digestion</code>
+and <code>missed-cleavages</code> options. Use 'no-enzyme' for
+non-specific digestion.  Digestion rules are as follows: enzyme name
+[cuts after one of these residues]|{but not before one of these
+residues}.  trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin
+[FWY]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[], iodosobenzoate
+[W]|[], proline-endopeptidase [P]|[], staph-protease [E]|[],
+modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin
+[ALIVKRWFY]|{P},aspn [X]|[D] (cuts after any residue and before
 D). Default = trypsin.
 
 <li>
-<code>custom-enzyme &lt;residues before cleavage | residues after cleavage
+<code>--custom-enzyme &lt;residues before cleavage | residues after cleavage
 &gt;</code> &ndash
 Specify rules for <i>in silico</i> digestion of protein sequences.
 Overrides the <code>enzyme</code> option.  Two lists of residues are
 given enclosed in square brackets or curly braces and separated by a
 |. The first list contains residues required/prohibited before the
-cleavage site and the second list is residues after the cleavage site.  
+cleavage site and the second list is residues after the cleavage site.
 If the residues are required for digestion, they are in square
 brackets, '[' and ']'.  If the residues prevent digestion, then they
 are enclosed in curly braces, '{' and '}'.  Use X to indicate all
@@ -100,47 +101,42 @@ which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
 residue but only before D which is represented as <code>[X]|[D]</code>.
 
 <LI>
-<code>--digestion &lt;full-digest|partial-digest&gt;
-Degree of digestion used to generate peptides (full-digest,
-partial-digest). Either both ends or one end of a peptide must
-conform to enzyme specificity rules. Default full-digest., Used in
-conjunction with enzyme option when enzyme is not set to to
-'no-enzyme'.  
+<code>--digestion &lt;full-digest|partial-digest&gt; </code>&ndash
+Degree of digestion used to generate peptides . Either both ends
+(full-digest) or at least one end (partial-digest) of a peptide must
+conform to enzyme specificity rules. Used in conjunction with
+the <code>enzyme</code> or <code>custom-enzyme</code> option
+when <code>enzyme</code> is not set to to 'no-enzyme'.   Default
+full-digest.
 
 <LI>
-<code>--missed-cleavages &lt;T|F&gt;</code> &ndash; 
-Allow missed cleavage sites within a peptide.  When used with
-enzyme specified includes peptides containing one or more
-potential cleavage sites. Default = F. 
+<code>--missed-cleavages &lt;T|F&gt;</code> &ndash;
+Allow missed cleavage sites within a peptide.  When used
+with <code>enzyme</code> and set to true, includes peptides containing
+one or more potential cleavage sites. Default = F.
 
-<!--
-<li>
-<code>--unique-peptides &lt;T|F&gt;</code> &ndash; 
-For peptides appearing in multiple proteins, store a reference to only
-one of those proteins.  Default = F.
--->
 <LI>
-<code>--isotopic-mass &lt;average|mono&gt;</code> &ndash; 
+<code>--isotopic-mass &lt;average|mono&gt;</code> &ndash;
 Specify the type of isotopic masses to use when calculating the
 peptide mass. Default = average.
 
 <li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
-fail when trying to overwrite a file if false (F). Default = F.  
+fail when trying to overwrite a file if false (F). Default = F.
 
 <LI>
-<code>--parameter-file &lt;string&gt;</code> 
+<code>--parameter-file &lt;string&gt;</code>
 A file containing command-line or additional parameters.  See the <a
 href="parameter-file.html">parameter documentation</a> page for
-details. 
+details.  Default = no parameter file.
 
 <LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
-current processes. Each level prints the following messages, including
-all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
-errors, 20-warnings, 30-information on the progress of execution,
-40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.
 
 <li>
 <code>--version T</code> &ndash;
@@ -156,8 +152,8 @@ the 'T' after --version.
 <code>&lt;A-Z&gt &lt;float&gt;</code> &ndash;
 Specify static modifications.  This is a mass change applied to the
 given amino acid (in single-letter-code A thru Z) for every peptide in
-which it occurs.  Use the <code>mod</code> option for generating
-peptides both with and without the mass change.  Default C=57.
+which it occurs.  Use the <code>mod</code> option when searching to
+generate peptides both with and without the mass change.  Default C=57.
 </ul>
 
 <b>Increasing the file limit:</b>

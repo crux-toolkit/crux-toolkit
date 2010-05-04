@@ -153,8 +153,8 @@ max-aas-modified=255
 compute-p-values=FALSE
 
 # Optional file into which psm features are printed.
-# Available only for crux-analyze-matches.  File will contain features used by percolator.
-feature-file=__NULL_STR
+# Available only for percolator and q-ranker.  File will be named <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
+feature-file=FALSE
 
 # Print peptide sequence (T,F). Default FALSE.
 # Available only for crux-generate-peptides.
@@ -171,8 +171,6 @@ stats=FALSE
 # Generate peptides only once, even if they appear in more than one protein (T,F).  Default FALSE.
 # Available from command line or parameter file for crux-genereate-peptides. Returns one line per peptide when true or one line per peptide per protein occurence when false.  
 unique-peptides=TRUE
-
-
 
 # Search peptides within +/- 'precursor-window' of the spectrum mass.  Definition of precursor window depends upon precursor-window-type. Default 3.0.
 # Available from the parameter file only for crux-search-for-matches, crux-create-index, and crux-generate-peptides.
