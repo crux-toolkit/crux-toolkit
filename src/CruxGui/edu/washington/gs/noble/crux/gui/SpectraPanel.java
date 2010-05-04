@@ -29,7 +29,7 @@ class SpectraPanel extends CruxParameterControl {
 		public void actionPerformed(final ActionEvent event) {
 			CruxAnalysisModel model = cruxGui.getAnalysisModel();
 			final JFileChooser chooser = new JFileChooser();
-			String fileName = model.getSpectraFilemame();
+			String fileName = model.getSpectraFilename();
 			if (fileName != null && fileName.length() > 0) {
 				chooser.setCurrentDirectory(new File(fileName));
 			}
@@ -47,7 +47,6 @@ class SpectraPanel extends CruxParameterControl {
 	public SpectraPanel(CruxGui cruxGui) {
 		this.cruxGui = cruxGui;
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		spectraButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 		spectraButton.setAlignmentY(Component.CENTER_ALIGNMENT);
@@ -68,6 +67,11 @@ class SpectraPanel extends CruxParameterControl {
 		spectraFilename.setText(fileName);
 	}
 	
+	public void loadDefaults() {
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		spectraFilename.setText(model.getDefaultSpectraFilename());
+	}
+	
 	public void saveToModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		model.setSpectraFilename(spectraFilename.getText());
@@ -75,6 +79,6 @@ class SpectraPanel extends CruxParameterControl {
 	
 	public void updateFromModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
-		spectraFilename.setText(model.getSpectraFilemame());
+		spectraFilename.setText(model.getSpectraFilename());
 	}
 }

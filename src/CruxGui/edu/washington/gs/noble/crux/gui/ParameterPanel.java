@@ -32,7 +32,7 @@ class ParameterPanel extends JPanel implements ItemListener {
 	private final JCheckBox showAdvancedParameters = new JCheckBox("Show advanced parameters");
 	private final JButton saveButton = new JButton("Save");
 	private final JButton cancelButton = new JButton("Cancel");
-	private final JButton loadDefaults = new JButton("Load Defaults");
+	private final JButton loadDefaultsButton = new JButton("Load Defaults");
 	private final CruxAnalysisModel.CruxComponents component;
 	private final JScrollPane scrollPane;
 	private final CruxComponentButton button;
@@ -54,12 +54,9 @@ class ParameterPanel extends JPanel implements ItemListener {
 		
 		// Top controls
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		runToolCheckBox.setBackground(Color.white);
 		runToolCheckBox.addItemListener(new RunComponentChangeListener());
 		add(runToolCheckBox);
 		add(Box.createRigidArea(new Dimension(0,12)));
-		showAdvancedParameters.setBackground(Color.white);
-		showAdvancedParameters.setEnabled(false);
 		add(showAdvancedParameters);
 		add(Box.createRigidArea(new Dimension(0,12)));
 		
@@ -73,7 +70,6 @@ class ParameterPanel extends JPanel implements ItemListener {
 	    // Bottom button panel controls
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-		buttonPanel.setBackground(Color.white);
 		buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		saveButton.addActionListener(new SaveButtonListener());
 		buttonPanel.add(Box.createRigidArea(new Dimension(36,0)));
@@ -82,8 +78,8 @@ class ParameterPanel extends JPanel implements ItemListener {
 		buttonPanel.add(Box.createRigidArea(new Dimension(12,0)));
 		buttonPanel.add(cancelButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(12,0)));
-		loadDefaults.setEnabled(false);
-		buttonPanel.add(loadDefaults);
+		loadDefaultsButton.addActionListener(new LoadDefaultsButtonListener());
+		buttonPanel.add(loadDefaultsButton);
 		add(buttonPanel);
 		
 		updateFromModel();
@@ -127,6 +123,15 @@ class ParameterPanel extends JPanel implements ItemListener {
 	class RunComponentChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
 			saveButton.setEnabled(runToolCheckBox.isSelected());
+		}
+	}
+	
+class LoadDefaultsButtonListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			CruxAnalysisModel model = cruxGui.getAnalysisModel();
+			for (CruxParameterControl component: parameterControls) {
+				component.loadDefaults();
+			}
 		}
 	}
 	

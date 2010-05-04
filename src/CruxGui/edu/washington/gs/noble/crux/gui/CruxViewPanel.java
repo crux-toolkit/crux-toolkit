@@ -72,8 +72,10 @@ public class CruxViewPanel extends JPanel {
 		indexParameterPanel.setBounds(createIndexButton.getX()-25, 30, 400, 350);
 		indexParameterPanel.addParameterControl(new ProteinDBPanel(cruxGui));
 		indexParameterPanel.addParameterControl(new EnzymePanel(cruxGui));
-		indexParameterPanel.addParameterControl(new MassPanel(cruxGui));
+		indexParameterPanel.addParameterControl(new MassTypePanel(cruxGui));
 		indexParameterPanel.addParameterControl(new DigestPanel(cruxGui));
+		indexParameterPanel.addParameterControl(new MassPanel(cruxGui));
+		indexParameterPanel.addParameterControl(new LengthPanel(cruxGui));
 		properties.add(indexParameterPanel);
 	}
 	
@@ -83,8 +85,10 @@ public class CruxViewPanel extends JPanel {
 		searchParameterPanel.addParameterControl(new ProteinDBPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new SpectraPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new EnzymePanel(cruxGui));
-		searchParameterPanel.addParameterControl(new MassPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new MassTypePanel(cruxGui));
 		searchParameterPanel.addParameterControl(new DigestPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new MassPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new LengthPanel(cruxGui));
 		properties.add(searchParameterPanel);
 	}
 	
