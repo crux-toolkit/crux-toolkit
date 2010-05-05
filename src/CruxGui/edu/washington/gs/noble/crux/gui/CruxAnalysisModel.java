@@ -160,7 +160,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	final private boolean featureFileDefault = false;
 	final private IsotopicMassType massTypeDefault = IsotopicMassType.AVERAGE;
 	final private int maxLengthDefault = 50;
-	final private double maxMassDefault = 7200;
+	final private double maxMassDefault = 7200.0;
 	final private int maxModsDefaults = 255;
 	final private int minLengthDefault = 6;
 	final private double minMassDefault = 200;
