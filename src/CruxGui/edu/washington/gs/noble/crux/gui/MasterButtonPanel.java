@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -12,8 +13,13 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import edu.washington.gs.noble.crux.gui.CruxAnalysisModel.CruxComponents;
+
 @SuppressWarnings("serial")
 public class MasterButtonPanel extends JPanel {
+	
+	private static Logger logger = 
+		Logger.getLogger("edu.washington.gs.noble.crux.gui");
 
 	final CruxGui cruxGui;
 	final JPanel buttonPanel = new JPanel();
@@ -126,11 +132,34 @@ public class MasterButtonPanel extends JPanel {
     					continueRunAnalysis = cruxGui.promptForCruxPath();
     				}
     				if (continueRunAnalysis) {
-    			        Process process = model.run();
-                		if (process.exitValue() != 0) {
-                			return;
-                		}
-                		cruxGui.frame.updateFromModel(model);
+    			        Process process = null;
+						// Write out a parameter file to the analysis directory
+						if (!model.toParameterFile()) {
+							logger.info("Unable to write parameter file.");
+							return;
+						}
+	
+    			        for (CruxComponents component: CruxComponents.values()) {
+	    			        process = model.runComponent(component);
+	    			        if (process != null) {
+		    			        try {
+									process.waitFor();
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								logger.info("Execution of " + component.toString() + " completed with exit status " + process.exitValue());
+								if (process.exitValue() == 0) {
+									model.setRunStatus(component, CruxAnalysisModel.RunStatus.COMPLETED);
+								}
+								else {
+									model.setRunStatus(component, CruxAnalysisModel.RunStatus.FAILED);
+									break;
+								}
+	    			        }
+    			        }
+    			        cruxGui.frame.updateFromModel(model);
+    			        cruxGui.frame.repaint();
     				}
     			}
     		}
