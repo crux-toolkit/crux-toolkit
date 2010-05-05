@@ -1,0 +1,69 @@
+<html>
+<head>
+<title>TXT file format (search-for-xlinks)</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<center><h1>Txt file format (search-for-xlinks)</h1></center>
+<p>
+The txt file format records the matches between MS/MS spectra
+and a sequence database using lines of tab delimited fields.
+</p>
+<p>
+A txt file consists of a single line containing the names of fields separated by tabs,
+followed by one or more lines giving the field values separated by tabs.
+</p>
+<p>
+<!--A sample txt file may be found <a href="search.target.txt">here</a>.-->
+</p>
+<h2>List of fields</h2>
+<ol>
+<li>scan: The identifying number of each scan.</li>
+<li>charge: The charge state for this spectrum in this PSM.</li>
+<li>spectrum precursor m/z: The observed m/z of the spectrum precursor ion.</li>
+<li>spectrum neutral mass: The computed mass of the spectrum precursor at the
+  given charge state. </li>
+<li>peptide mass mono: The computed mono-isotopic mass of the peptide sequence (sum of
+  the amino acid masses).</li>
+<li>peptide mass average: The computed average mass of the peptide sequence (sum of
+  the amino acid masses).</li>
+<li>mass error(ppm): The mass error between the mono-isotopic peptide mass 
+  and the spectrum neutral mass (ppm).</li>
+<li>xcorr score: The SEQUEST-type cross correlation score.</li>
+<li>xcorr rank: The rank of this PSM when sorted by xcorr.</li>
+<li>p-value: The p-value computed from the estimated Weibull parameters of
+  the score distribution for this spectrum.</li>
+<li>matches/spectrum: The number of candidate peptides in the database
+  found for this spectrum.</li>
+<li>sequence: The product sequence(s) and link locations.</li>
+<li>protein id: A comma-separated list of proteins in which this
+  peptide appears.</li>
+<li>by total: total number of b-y ions in sequence</li>
+<li>by observable (0-1200): total number of b-y ions observable in the 0-1200 m/z range.</li>
+<li>by observable bin (0-1200): total number of b-y ions observable in the 0-1200 1Da bins.</li>
+<li>by observable (0-max): total number of b-y ions observable in the entire m/z range.</li>
+<li>by obserbable bin (0-max): total number of b-y ions observable in the entire m/z range using bins.</li>
+<li>by observed bin: total number of b-y ions observed in spectrum</li>
+<li>ion current total: total ion current for spectrum</li>
+<li>ion current observed: total ion current observed for matching b-y ions</li>
+<li>ions observable bin (0-1200): total ions observable (b-y, flanks, and neutral losses) within 0-1200 m/z range.</li>
+</ol>
+
+<b>Additional fields for qvalues.target.txt</b>
+<ol>
+<li>p-value bonf.: bonferroni corrected p-value</li>
+<li>fdr b-h: false discovery rate calculated by Benjamini & Hochberg algorithm.</li>
+<li>fdr decoy: false discovery rate calculated by target/decoy using p-values.</li>
+<li>q-value b-h: q-value calculated using fdr b-h column.</li>
+<li>q-value decoy: q-value calculated using fdr decoy column.</li>
+</ol>
+
+
+<hr></hr>
+<p>
+<a href="crux.html">Crux home</a></p>
+</blockquote>
+</body>
+</html>
