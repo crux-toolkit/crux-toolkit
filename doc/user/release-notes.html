@@ -8,7 +8,7 @@
 <h1>Release notes for Crux</h1>
 
 
-<h2>Version X</h2>
+<h2>Version 1.30</h2> May 5, 2010
 
 <h3>
 Major enhancements</h3>
@@ -42,12 +42,41 @@ The .mzXML file format is now supported for crux search-for-matches
 and crux sequest-search when the <code>--use-mstoolkit</code> option
 is set to TRUE.</li>
 
+<li>
+The .csm output files from <code>search-for-matches</code> are no
+longer produced and post-search operations take .txt files as input.
+</li>
+
 </ul>
 
 <h3>
 Minor changes</h3>
 
 <ul>
+
+<li>
+Replaced <code>mass-window</code> parameter with <code>
+precursor-window</code> and added <code>precursor-window-type</code>
+for selecting windows of type mass, m/z, or ppm. 
+</li>
+
+<li>
+The <code>feature-file</code> option is now true/false instead of
+taking a file name.  The file is named '&lt;fileroot&gt;.&lt;qranker|
+percolator&gt;.features.txt'.  A header with the column names was
+added to the file.</li>
+
+<li>
+The new option, <code>--scan-number</code>, performs a search on a 
+select number of spectra.</li>
+
+<li>
+When only one decoy file is produced, the name is now 'decoy.txt'
+instead of 'decoy-1.txt'
+
+<li>
+In the .txt files, protein names are now followed by the start index
+of the peptide.
 
 <li>
 Modified sequences are reported differently in the .txt files.
@@ -57,7 +86,7 @@ square brackets.  As before, the modification information follows the
 residue that is modified.  If multiple modifications appear on one
 residue, the masses may either be summed together or printed
 separately in a comma separated list.  This behavior is controlled by
-the <code>--display-summed-mod-masses option</code>.</li>
+the <code>--display-summed-mod-masses</code> option.</li>
 
 <li>
 The modified decoy sequences are generated differently.  Before, all
@@ -72,8 +101,8 @@ percolator scores but the same q-value, the ranks will reflect the
 score differences.</li>
 
 <li>
-The Weibull parameters used for computing p-values are no longer
-printed to the .txt files.</li>
+The Weibull parameters used for computing p-values are now printed to
+the .txt files.</li> 
 
 <li>
 The reporting of DeltaCn has changed.  For PSMs of rank i, deltaCn
@@ -81,7 +110,10 @@ used to computed be as deltaCn_i = (xcorr_0 - xcorr_i) / xcorr_0.
 Thus, deltaCn for the top-ranked PSM was always 0.  Now deltaCn_i =
 (xcorr_0 - xcorr_i+1) / xcorr_0.  This change only
 affects <code>search-for-matches</code>,
-not <code>sequest-search</code>.</li>
+not <code>sequest-search</code>.  It also means that 
+<code>q-ranker</code> and <code>percolator</code> use the correct
+DeltaCn values.
+</li>
 
 <li>
 A new command, <code>print-processed-spectra</code>, performs
@@ -91,6 +123,16 @@ XCorr-style pre-processing on all spectra in a given file.</li>
 A small bug was fixed, in which even if the user requested average
 mass, the search programs still used monoisotopic mass in the
 calculation of XCorr and Sp.</li>
+
+<li>
+Protein fasta files are now parsed protein-by-protein so that parsing
+large files does not use excessive amounts of memory.</li>
+
+<li>
+Removed limit on how many peptides a protein can produce.</li>
+
+<li>
+Crux is now built with g++ instead of gcc.</li>
 
 </ul>
 
@@ -138,12 +180,6 @@ new features.</li>
 <h3>Minor changes</h3>
 
 <ul>
-
-<li>
-Replaced mass-window parameter with precursor-window and added
-precursor-window-type for selecting windows of type mass, m/z, 
-or ppm. 
-</li>
 
 <li>
 The internal normalization of the observed spectra has been modifed to
