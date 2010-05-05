@@ -36,7 +36,7 @@ class SpectraPanel extends CruxParameterControl {
 			else {
 				chooser.setCurrentDirectory(new File("."));
 			}
-			final int result = chooser.showOpenDialog(getParent());
+			final int result = chooser.showDialog(getParent(), "Choose spectra file");
 			if (result == JFileChooser.APPROVE_OPTION){
 				spectraFilename.setText(chooser.getSelectedFile().getPath());
 				logger.info("User selected MS2 spectra file " + spectraFilename.getText() + ".");

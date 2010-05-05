@@ -57,6 +57,17 @@ public class CruxMainFrame extends JFrame {
 		setLocationRelativeTo(null);
 	}
 	
+	public void updateFromModel(CruxAnalysisModel model) {
+		cruxViewPanel.updateFromModel(model);
+		String name = model.getName();
+		if (name != null) {
+		    setTitle("Crux - " + name);
+		}
+		else {
+		    setTitle("Crux");
+		}
+	}
+	
 	private class CruxWindowAdapter extends WindowAdapter {
 		public void windowClosing(WindowEvent we) {
 			cruxGui.shutdown();

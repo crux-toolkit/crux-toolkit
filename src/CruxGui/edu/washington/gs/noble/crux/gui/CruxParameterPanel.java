@@ -20,7 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
 
 @SuppressWarnings("serial")
-class ParameterPanel extends JPanel implements ItemListener {
+class CruxParameterPanel extends JPanel implements ItemListener {
 	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
@@ -38,7 +38,7 @@ class ParameterPanel extends JPanel implements ItemListener {
 	private final CruxComponentButton button;
 	private final CruxComponentButton dummyButton;
 	
-	public ParameterPanel(CruxAnalysisModel.CruxComponents component, CruxGui cruxGui, final String title, final CruxComponentButton button, final CruxComponentButton dummyButton) {
+	public CruxParameterPanel(CruxAnalysisModel.CruxComponents component, CruxGui cruxGui, final String title, final CruxComponentButton button, final CruxComponentButton dummyButton) {
 		super();
 		this.cruxGui = cruxGui;
 		this.component = component;
@@ -122,7 +122,6 @@ class ParameterPanel extends JPanel implements ItemListener {
 	
 	class RunComponentChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
-			saveButton.setEnabled(runToolCheckBox.isSelected());
 		}
 	}
 	
@@ -154,6 +153,7 @@ class LoadDefaultsButtonListener implements ActionListener {
 				setVisible(false);			
 				dummyButton.setSelected(true);
 			}
+			model.setNeedsSaving(true);
 		}
 	}
 	

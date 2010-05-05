@@ -17,10 +17,10 @@ public class MasterButtonPanel extends JPanel {
 
 	final CruxGui cruxGui;
 	final JPanel buttonPanel = new JPanel();
-	final JButton newButton = new JButton("New Analysis");
-	final JButton loadButton = new JButton("Load Analysis");
-	final JButton setNameButton = new JButton("Set Analysis Name");
-	final JButton runButton = new JButton("Run Analysis");
+	final JButton newButton = new JButton("New analysis");
+	final JButton loadButton = new JButton("Load analysis");
+	final JButton saveButton = new JButton("Save analysis");
+	final JButton runButton = new JButton("Run analysis");
 	final JButton setCruxPathButton = new JButton("Locate Crux");
 	final JButton exitButton = new JButton("Exit");
 	
@@ -32,12 +32,12 @@ public class MasterButtonPanel extends JPanel {
 		newButton.addActionListener(new NewAnalysisButtonListener()); 
 		loadButton.addActionListener(new LoadAnalysisButtonListener()); 
 		runButton.addActionListener(new RunButtonListener());
-		setNameButton.addActionListener(new SetNameButtonListener()); 
+		saveButton.addActionListener(new SaveButtonListener()); 
 		setCruxPathButton.addActionListener(new SetCruxPathListener());
 		exitButton.addActionListener(new ExitButtonListener());
 		buttonPanel.add(setCruxPathButton);
 		buttonPanel.add(newButton);
-		buttonPanel.add(setNameButton);
+		buttonPanel.add(saveButton);
 		buttonPanel.add(loadButton);
 		buttonPanel.add(runButton);
 		buttonPanel.add(exitButton);
@@ -46,12 +46,7 @@ public class MasterButtonPanel extends JPanel {
 	class SetCruxPathListener implements ActionListener {
 		
 		public void actionPerformed(ActionEvent event) {
-			final JFileChooser fileChooser = new JFileChooser();
-			    int returnVal = fileChooser.showDialog(getParent(), "Set path to crux");
-		        if (returnVal == JFileChooser.APPROVE_OPTION) {
-		            File file = fileChooser.getSelectedFile();
-		             cruxGui.getAnalysisModel().setPathToCrux(file.toString());
-		        }
+			cruxGui.promptForCruxPath();
 		}
 		
 	}
@@ -59,7 +54,14 @@ public class MasterButtonPanel extends JPanel {
 	class NewAnalysisButtonListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent event) {
-			cruxGui.setAnalysisModel(new CruxAnalysisModel());
+			CruxAnalysisModel model = cruxGui.getAnalysisModel();
+    		boolean continueNewModel = true;
+    		if (model != null && model.needsSaving()) {
+    			continueNewModel = cruxGui.promptToSave();
+    		}
+    		if (continueNewModel) {
+			    cruxGui.setAnalysisModel(new CruxAnalysisModel());
+    		}
 		}
 		
 	}
@@ -67,57 +69,45 @@ public class MasterButtonPanel extends JPanel {
 	class LoadAnalysisButtonListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent event) {
-			String name = (String) JOptionPane.showInputDialog(
-					cruxGui.frame, 
-					"Choose the analysis to load:", 
-					"Load Analysis", 
-					JOptionPane.PLAIN_MESSAGE, 
-					null, 
-					cruxGui.analysisSet.toArray(), 
-					""
-			);
-			CruxAnalysisModel model = cruxGui.getAnalysisModel().readModelFromBinaryFile(name);
-			if (model != null) {
-				cruxGui.setAnalysisModel(model);
-			}
+			CruxAnalysisModel model = cruxGui.getAnalysisModel();
+    		boolean continueLoadModel = true;
+    		if (model != null && model.needsSaving()) {
+    			continueLoadModel = cruxGui.promptToSave();
+    		}
+    		if (continueLoadModel) {
+    			String name = (String) JOptionPane.showInputDialog(
+    					cruxGui.frame, 
+    					"Choose the analysis to load:", 
+    					"Load Analysis", 
+    					JOptionPane.PLAIN_MESSAGE, 
+    					null, 
+    					cruxGui.modelSet.toArray(), 
+    					""
+    			);
+    			if (name != null) {
+        			model = cruxGui.getAnalysisModel().readModelFromBinaryFile(name);
+        			if (model != null) {
+        				cruxGui.setAnalysisModel(model);
+        			}
+    			}
+    		}
 		}
 		
 	}
 	
-	class SetNameButtonListener implements ActionListener {
+	class SaveButtonListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent event) {
-			// Get list of existing names
-			String name = (String) JOptionPane.showInputDialog(
-					cruxGui.frame, 
-					"Choose a name for the analysis:", 
-					"Analysis Name", 
-					JOptionPane.PLAIN_MESSAGE, 
-					null, 
-					null, 
-					""
-			);
-			if (name != null) {
-				if (name == cruxGui.getAnalysisModel().getName()) {
-					// Current model already has this name
-					return;
-				}
-				if (cruxGui.analysisSet.contains(name)) {
-					JOptionPane.showMessageDialog(cruxGui.frame, "An analysis named " + name + "already exists.");
-					return;
-				}
-				// Create new directory using name
-				boolean result = (new File(name)).mkdir();
-				// Add name to analysis set and set name in model
-				if (result) {
-					cruxGui.getAnalysisModel().setName(name);
-					cruxGui.analysisSet.add(name);
-					cruxGui.frame.setTitle("Crux - " + name);
-				}
-				else {
-					JOptionPane.showMessageDialog(cruxGui.frame, "Unable to create directory for analysis named " + name);
-				}
-			}
+			boolean continueSave = true;
+			CruxAnalysisModel model = cruxGui.getAnalysisModel();
+        	// Model has to have name before we can save it
+        	if (model.getName() == null) {
+        		// Get name from user
+        		continueSave = cruxGui.promptForModelName();
+        	}
+        	if (continueSave) {
+        	    model.saveModelToBinaryFile();
+        	}
 		}
 		
 	}
@@ -125,18 +115,34 @@ public class MasterButtonPanel extends JPanel {
 	class RunButtonListener implements ActionListener {
 		
 		public void actionPerformed(ActionEvent event) {
-			if (cruxGui.getAnalysisModel().isValidAnalysis()) {
-			    cruxGui.getAnalysisModel().run();
-			}
+			CruxAnalysisModel model = cruxGui.getAnalysisModel();
+    		boolean continueRunAnalysis = true;
+    		if (model != null && model.needsSaving()) {
+    			continueRunAnalysis = cruxGui.promptToSave();
+    		}
+    		if (continueRunAnalysis) {
+    			if (model.isValidAnalysis()) {
+    				if (model.getPathToCrux() == null) {
+    					continueRunAnalysis = cruxGui.promptForCruxPath();
+    				}
+    				if (continueRunAnalysis) {
+    			        Process process = model.run();
+                		if (process.exitValue() != 0) {
+                			return;
+                		}
+                		cruxGui.frame.updateFromModel(model);
+    				}
+    			}
+    		}
 		}
 		
 	}
 	
 	class ExitButtonListener implements ActionListener {
 		
-			public void actionPerformed(final ActionEvent e) {
-				cruxGui.shutdown();
-			}
+		public void actionPerformed(final ActionEvent e) {
+			cruxGui.shutdown();
+		}
 		
 	}
 }
