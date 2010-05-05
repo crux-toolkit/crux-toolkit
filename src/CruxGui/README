@@ -1,0 +1,11 @@
+To build the executable jar file for CruxGui, run
+
+  make
+
+To remove the  existing jar file, and class files, run
+
+  make clean
+
+To run CruxGui, run
+  
+  java -jar CruxGui.jar
