@@ -246,4 +246,7 @@ dist-hook:
 	if test -z "$(SEARCH_ENABLED)"; then \
     sed -e '/#ifdef SEARCH_ENABLED/,/#else/d' \
         -e '/#endif \/\/ SEARCH_ENABLED/d' \
-        < match_search.cpp > $(distdir)/match_search.cpp; fi
+        < match_search.cpp > $(distdir)/match_search.cpp; \
+    sed -e '/#ifdef SEARCH_ENABLED/,/#else/d' \
+        -e '/#endif \/\/ SEARCH_ENABLED/d' \
+        < sequest-search.cpp > $(distdir)/sequest-search.cpp; fi

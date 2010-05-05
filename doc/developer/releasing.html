@@ -5,27 +5,27 @@
 
 <h3>Before you begin</h3>
 <p>Confirm that a clean check out builds correctly and passes all the
-  smoke tests.  Update the release notes
+  smoke and unit tests.  Update the release notes
   (crux/doc/user/release-notes.html).  At the very least, the date
   will need to be added.  Update index.html in doc/user/downloads to
   point to the new version and to include links to the previous version.
-  You can also make sure that the
-  default.params file is up-to-date by running write-default-params.sh
-  in crux/src/c
+  You can also make sure that the default.params file is up-to-date by
+  running write-default-params.sh in crux/src/c.
 
 <h3>Branching</h3>
 <p>The first release of crux, version 1.0, was given its own development
 branch named <code>rel-1-0</code> in the SVN repository.  Bugs
 reported by users were fixed in this branch and builds from this
 branch were made available for download. Changes made to this branch
-are periodically merged into the trunk. The next major release should
+are periodically merged into the trunk. The next release should
 be given its own branch at which point work in <code>rel-1-0</code>
 will cease.</p>
 
 <h3>Version numbers</h3>
 <p>Each time new files are made available for download, the version
-number should increment by 0.01. The version number is maintained in
-crux/configure.ac in the line <pre>AM_INIT_AUTOMAKE(crux, 1.01)</pre>
+number should increment by 0.01 for minor releases or by 0.1 for major
+releases. The version number is maintained in crux/configure.ac in the
+line <pre>AM_INIT_AUTOMAKE(crux, 1.01)</pre> 
 
 This controls the numbering of packages and what is reported by the 
 <code>--version</code> option.  You must run configure after changing
@@ -33,21 +33,24 @@ configure.ac and make dist (see below) for the new version to take
 effect.</p>
 
 <h3>Creating an open source distribution</h3>
-The process of searching a protein database for matches to observed MS/MS spectra
-is part of the SEQUEST intellectual property. To create an open source distribution
-of Crux this function must be disabled. The search function is disabled by 
-including the <code>--disable-search</code> option on the <code>configure</code> 
-command line before running <code>make dist</code>.
-This option will cause the <code>search_main()</code> function in the <code>match_search.c</code>
-module to be replaced with a stub. The stub simply prints a message that the function has been
-disabled and exits. A warning is added to the <code>crux-search-for-match.html</code>
-man page that searching has been disabled.
+The process of searching a protein database for matches to observed
+MS/MS spectra is part of the SEQUEST intellectual property. To create
+an open source distribution of Crux this function must be
+disabled. The search function is disabled by including the 
+<code>--disable-search</code> option on the <code>configure</code> 
+command line before running <code>make dist</code>. This option will 
+cause the <code>search_main()</code> function in the 
+<code>match_search.cpp</code> and <code>sequest-search.cpp</code>
+modules to be replaced with a stub. The stub simply prints a message
+that the function has been disabled and exits. A warning is added to
+the <code>crux-search-for-match.html</code> man page that searching
+has been disabled. 
 
 <h3>Building packages</h3>
 <p>There are two targets in the root for building packages.  The
-command <code> make dist</code> will create a tarred and zipped file
+command <code>make dist</code> will create a tarred and zipped file
 in the root containing source code and documentation.  The command
-<code> make bdist </code> will create a zipped file in the root
+<code>make bdist</code> will create a zipped file in the root
 containing the compiled binaries for all of the crux tools and the
 documentation.  The binary package can only be built after the
 executables have been built.  The binary package file will include the
