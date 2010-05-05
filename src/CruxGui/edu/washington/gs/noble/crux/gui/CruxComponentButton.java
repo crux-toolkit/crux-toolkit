@@ -35,15 +35,12 @@ import javax.swing.JToggleButton;
 @SuppressWarnings("serial")
 class CruxComponentButton extends JToggleButton {
 	
-	public enum Status {
-		NOT_RUN, COMPLETED, FAILED
-	};
-
+	private final CruxAnalysisModel.CruxComponents component;
 	private final JCheckBox processCheckBox = new JCheckBox();
 	private final JLabel statusIconLabel = new JLabel();
-	private Status status = Status.NOT_RUN;
+	private CruxAnalysisModel.RunStatus status = CruxAnalysisModel.RunStatus.NOT_RUN;
 
-	private static Color getStatusColor(Status state){
+	private static Color getStatusColor(CruxAnalysisModel.RunStatus state){
 		switch(state) {
 		case COMPLETED:
 			return Color.green;
@@ -74,8 +71,9 @@ class CruxComponentButton extends JToggleButton {
 		}
 	}
 	
-	public CruxComponentButton(String text) {
+	public CruxComponentButton(String text, CruxAnalysisModel.CruxComponents component) {
 		super(text);
+		this.component = component;
 		setLayout(new BorderLayout());
 		this.setMargin(new Insets(0,0,0,0));
 		processCheckBox.setMargin(new Insets(0, 0, 0, 0));
@@ -94,12 +92,21 @@ class CruxComponentButton extends JToggleButton {
 		return this.processCheckBox.isSelected();
 	}
 	
-	public void setStatus(Status status) {
+	public void setStatus(CruxAnalysisModel.RunStatus status) {
 		this.status = status;
 	}
 	
-	public Status getStatus() {
+	public CruxAnalysisModel.RunStatus getStatus() {
 		return status;
+	}
+	
+	public void updateFromModel(CruxAnalysisModel model) {
+		setStatus(model.getRunStatus(component));
+		setSelectedToRun(model.getRunComponent(component));		
+	}
+	
+	public CruxAnalysisModel.CruxComponents getComponent() {
+		return component;
 	}
 	
 }

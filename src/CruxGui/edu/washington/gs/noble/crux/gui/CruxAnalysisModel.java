@@ -43,6 +43,17 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		public static int getSize() { return 5; };
 	};
 	
+	/** The list of run states */
+	public enum RunStatus {
+		NOT_RUN("not-run"), 
+		COMPLETED("completed"), 
+		FAILED("failed");
+		String name;
+		RunStatus(String name) {this.name = name;}
+		public String toString() { return this.name; }
+		public static int getSize() { return 3; };
+	};
+
 	/** The list of allowed isotopic mass types */
 	public enum IsotopicMassType { 
 		AVERAGE("average"), 
@@ -94,9 +105,11 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		public static int getSize() { return 4; };
 	};
 	
+	private boolean needsSaving = false;
 	private String name;
 	private String pathToCrux;
 	private final boolean componentsToRun[]= new boolean[CruxComponents.getSize()];
+	private final RunStatus componentsRunStatus[]= new RunStatus[CruxComponents.getSize()];
 	private final boolean showAdvancedParameters[]= new boolean[CruxComponents.getSize()];
 	private int numComponentsToRun;
 	
@@ -157,10 +170,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	}
 	
 	/** Serialize the analysis to the analysis directory */
-	public boolean toBinaryFile() {
+	public boolean saveModelToBinaryFile() {
 		String model_path = name + "/" + name + ".model";
 		boolean result = false;
+		boolean oldNeedsSaving = needsSaving();
 		try {
+			setNeedsSaving(false);
 			FileOutputStream fileOut = new FileOutputStream(model_path);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(this);
@@ -168,7 +183,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 			logger.info("Saved model to " + model_path);	
 			result = true;
 		} catch (IOException e) {
-			logger.info("Unable to saved model: " + e.toString());
+			logger.info("Unable to saved mode: " + e.toString());
 			JOptionPane.showMessageDialog(null, "Unable to save model: " + e.toString());
 		}
 		return result;
@@ -217,6 +232,14 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return result;
 	}
 
+	boolean needsSaving() {
+		return needsSaving;
+	}
+	
+	void setNeedsSaving(boolean needsSaving) {
+	    this.needsSaving = needsSaving;
+	}
+	
 	boolean isValidAnalysis() {
 		
 		boolean result = true;
@@ -257,8 +280,10 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		}
 		
 		// Write out binary file of the analysis model to the analysis directory
-		if (!toBinaryFile()) {
-			return process;
+		if (needsSaving) {
+    		if (!saveModelToBinaryFile()) {
+    			return process;
+    		}
 		}
 		
 		// Write out a parameter file to the analysis directory
@@ -266,21 +291,29 @@ public class CruxAnalysisModel extends Object implements Serializable{
 			return process;
 		}
 	
-		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
+		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] 
+		    && componentsRunStatus[CruxComponents.CREATE_INDEX.ordinal()] == RunStatus.NOT_RUN) {
 			//  Run the component using the component directory and parameter file
 			String subCommand = CruxComponents.CREATE_INDEX.toString();
 			String command = pathToCrux + " " + subCommand + " --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
 			try {
 				logger.info("Attempte to execute command: " + command);
 				process = Runtime.getRuntime().exec(command);
-			}
-			catch (IOException e) {
+				process.waitFor();
+				if (process.exitValue() == 0) {
+				    componentsRunStatus[CruxComponents.CREATE_INDEX.ordinal()] = RunStatus.COMPLETED;
+				}
+				else {
+				    componentsRunStatus[CruxComponents.CREATE_INDEX.ordinal()] = RunStatus.FAILED;
+				}
+			} catch (Exception e) {
 				logger.info("Unable to execute command: " + e.toString());
 				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
 				return process;
 			}
 		}
-		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]) {
+		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]
+		    && componentsRunStatus[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] == RunStatus.NOT_RUN) {
 			//  Run the component using the component directory and parameter file
 			String proteinSource;
 			if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
@@ -290,12 +323,19 @@ public class CruxAnalysisModel extends Object implements Serializable{
 				proteinSource = this.proteinSource;
 			}
 			String subCommand = CruxComponents.SEARCH_FOR_MATCHES.toString();
-			String command = "crux " + subCommand + " --overwrite T --output-dir " + name + "/" + subCommand + " --parameter-file " + name + "/analysis.params " + spectraSource + " " + proteinSource;
+			String command = pathToCrux + " " + subCommand + " --overwrite T --output-dir " + name + "/" + subCommand + " --parameter-file " + name + "/analysis.params " + spectraSource + " " + proteinSource;
 			try {
 				logger.info("Attempte to execute command: " + command);
 				process = Runtime.getRuntime().exec(command);
+				process.waitFor();
+				if (process.exitValue() == 0) {
+				    componentsRunStatus[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = RunStatus.COMPLETED;
+				}
+				else {
+				    componentsRunStatus[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = RunStatus.FAILED;
+				}
 			}
-			catch (IOException e) {
+			catch (Exception e) {
 				logger.info("Unable to execute command: " + e.toString());
 				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
 				return process;
@@ -326,6 +366,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		for (CruxComponents component: CruxComponents.values()) {
 			componentsToRun[component.ordinal()] = false;
 			showAdvancedParameters[component.ordinal()] = false;
+			componentsRunStatus[component.ordinal()] = RunStatus.NOT_RUN;
 		}
 		allowMissedCleavages = allowMissedCleavagesDefault;
 	    customEnzymeBeforeCleavage = customEnzymeBeforeCleavageDefault;
@@ -732,5 +773,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 
 	public int getTopMatchDefault() {
 		return topMatchDefault;
+	}
+	
+	public RunStatus getRunStatus(CruxComponents component) {
+		return componentsRunStatus[component.ordinal()];
+	}
+	public void setRunStatus(CruxComponents component, RunStatus status) {
+		componentsRunStatus[component.ordinal()] = status;
 	}
 }
