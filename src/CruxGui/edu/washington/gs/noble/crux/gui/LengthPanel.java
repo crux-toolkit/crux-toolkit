@@ -79,9 +79,9 @@ class LengthPanel extends CruxParameterControl {
 	
 	public void saveToModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
-		model.setMaxMass(getMaxLength());
+		model.setMaxLength(getMaxLength());
 		logger.info("Saved parameter 'max-length' to model: " + getMaxLength());
-		model.setMinMass(getMinLength());
+		model.setMinLength(getMinLength());
 		logger.info("Saved parameter 'min-length' to model: " + getMinLength());
 	}
 	
