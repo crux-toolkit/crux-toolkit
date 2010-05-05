@@ -141,14 +141,18 @@ class LoadDefaultsButtonListener implements ActionListener {
 			model.setRunComponent(component, checked);
 			if (checked) {
 				button.setSelectedToRun(true);
-				for (CruxParameterControl component: parameterControls) {
-					component.saveToModel();
+				for (CruxParameterControl control: parameterControls) {
+					control.saveToModel();
 				}
+				model.setRunStatus(component, CruxAnalysisModel.RunStatus.NOT_RUN);
+				cruxGui.frame.updateFromModel(model);
 				setVisible(false);			
 				dummyButton.setSelected(true);
 			}
 			else {
 				model.setRunComponent(component, false);
+				model.setRunStatus(component, CruxAnalysisModel.RunStatus.NOT_RUN);
+				cruxGui.frame.updateFromModel(model);
 				button.setSelectedToRun(false);
 				setVisible(false);			
 				dummyButton.setSelected(true);

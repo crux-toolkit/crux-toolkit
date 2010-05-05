@@ -116,5 +116,6 @@ public class CruxViewPanel extends JPanel {
 		computeQValuesButton.updateFromModel(model);
 		percolatorButton.updateFromModel(model);
 		qrankerButton.updateFromModel(model);
+		repaint();
 	}
 }
