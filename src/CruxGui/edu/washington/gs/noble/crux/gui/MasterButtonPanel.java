@@ -134,7 +134,7 @@ public class MasterButtonPanel extends JPanel {
     				if (continueRunAnalysis) {
     			        Process process = null;
 						// Write out a parameter file to the analysis directory
-						if (!model.toParameterFile()) {
+						if (!model.saveModelToParameterFile()) {
 							logger.info("Unable to write parameter file.");
 							return;
 						}

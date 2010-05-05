@@ -105,13 +105,23 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		public static int getSize() { return 4; };
 	};
 	
+	/** The list of allowed spectrum charges */
+	public enum DecoyLocation {
+		TARGET_FILE("target-file"), 
+		ONE_DECOY_FILE("one-decoy-file"),
+		SEPARATE_DECOY_FILES("separate-decoy-files") ; 
+		String name;
+		DecoyLocation(String name) {this.name = name;}
+		public String toString() { return this.name; }
+		public static int getSize() { return 3; };
+	};
+	
 	private boolean needsSaving = false;
 	private String name;
 	private String pathToCrux;
 	private final boolean componentsToRun[]= new boolean[CruxComponents.getSize()];
 	private final RunStatus componentsRunStatus[]= new RunStatus[CruxComponents.getSize()];
 	private final boolean showAdvancedParameters[]= new boolean[CruxComponents.getSize()];
-	private int numComponentsToRun;
 	
 	// Crux parameters
 	private boolean allowMissedCleavages;
@@ -128,7 +138,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	private int minLength;
 	private double minMass;
 	private int numDecoysPerTarget;
-	private int numDecoyFiles;
+	private DecoyLocation decoyLocation;
 	private double pi0;
 	private int printSearchProgress;
 	private String proteinSource;
@@ -143,6 +153,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	final private boolean allowMissedCleavagesDefault = false;
 	final private String customEnzymeAfterCleavageDefault = null;
 	final private String customEnzymeBeforeCleavageDefault = null;
+	final private DecoyLocation decoyLocationDefault = DecoyLocation.SEPARATE_DECOY_FILES;
 	final private boolean decoyPValuesDefault = false;
 	final private DigestType digestTypeDefault = DigestType.FULL;
 	final private Enzyme enzymeDefault = Enzyme.TRYPSIN;
@@ -150,18 +161,16 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	final private IsotopicMassType massTypeDefault = IsotopicMassType.AVERAGE;
 	final private int maxLengthDefault = 50;
 	final private double maxMassDefault = 7200;
-	final private int maxModsDefaults = -1;
+	final private int maxModsDefaults = 255;
 	final private int minLengthDefault = 6;
 	final private double minMassDefault = 200;
-	final private int numDecoyFilesDefault = 2;
 	final private int numDecoysPerTargetDefault = 2;
-	final private double pi0Default = 0.9;
 	final private int printSearchProgressDefault = 10;
 	final private String proteinSourceDefault = null;
 	final private String spectraSourceDefault = null;
 	final private AllowedSpectrumCharge spectrumChargeDefault = AllowedSpectrumCharge.ALL;
 	final private double seedDefault = -1.0;
-	final private double spectrumMaxMassDefault = -1.0;
+	final private double spectrumMaxMassDefault = 1000000000.000000;
 	final private double spectrumMinMassDefault = 0.0;
 	final private int topMatchDefault = 5;
 	
@@ -206,21 +215,39 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return model;
 	}
 
-	public boolean toParameterFile() {
+	public boolean saveModelToParameterFile() {
 		boolean result = false;
 		String fileName = name + "/" + "analysis.params";
 		try {
 			PrintWriter out = new PrintWriter(new File(fileName));
 			out.println("#Parameter file for analysis " + name);
-			out.println("isotopic-mass=" + massType);
-			out.println("digestion=" + digestType);
-			out.println("enzyme=" + enzyme);
 			if (allowMissedCleavages) {
 				out.println("missed-cleavages=T");
 			}
 			else {
 				out.println("missed-cleavages=F");
 			}
+			out.println("digestion=" + digestType);
+			out.println("enzyme=" + enzyme);
+			if (featureFile) {
+				out.println("feature-file=T");
+			}
+			else {
+				out.println("feature-file=F");
+			}
+			out.println("isotopic-mass=" + massType);
+			out.println("max-length=" + maxLength);
+			out.println("max-mass=" + maxMass);
+			out.println("max-mods=" + maxMods);
+			out.println("min-length=" + minLength);
+			out.println("min-mass=" + minMass);
+			out.println("num-decoys-per-target=" + numDecoysPerTarget);
+			out.println("decoy-location=" + decoyLocation.toString());
+			out.println("print-search-progress=" + printSearchProgress);
+			out.println("spectrum-charge=" + spectrumCharge.toString());
+			out.println("spectrum-max-mass=" + spectrumMaxMass);
+			out.println("spectrum-min-mass=" + spectrumMinMass);
+			out.println("top-match=" + topMatch);
 			out.close();
 			logger.info("Saved analysis parameter file to " + fileName);	
 			result = true;
@@ -244,10 +271,6 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		
 		boolean result = true;
 		
-		if (numComponentsToRun <= 0) {
-			JOptionPane.showMessageDialog(null, "Please select some components to run.");
-			result = false;
-		}
 		if (name == null) {
 			JOptionPane.showMessageDialog(null, "Please choose a name for this analysis.");
 			result = false;
@@ -275,7 +298,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	Process runComponent(CruxComponents component) {
 		
 		Process process = null;
-		if (componentsToRun[component.ordinal()]  && componentsRunStatus[component.ordinal()] == RunStatus.NOT_RUN) {
+		if (componentsToRun[component.ordinal()]  && componentsRunStatus[component.ordinal()] != RunStatus.COMPLETED) {
 			String subCommand = component.toString();
 			String command = null;
 			String proteinSource = this.proteinSource;
@@ -283,7 +306,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 				// If we have an index (and this is not the create index command use the
 				// index for the protein source.
 				if (componentsRunStatus[CruxComponents.CREATE_INDEX.ordinal()] == RunStatus.COMPLETED) {
-					proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
+					proteinSource = name + "/index";
 				}
 				else {
 					logger.info("Index creattion failed. Unable to execute command: " + component.toString());
@@ -294,31 +317,30 @@ public class CruxAnalysisModel extends Object implements Serializable{
 			switch(component) {
 				case CREATE_INDEX:
 					proteinSource = this.proteinSource;
-					command = pathToCrux + " " + subCommand + " --overwrite T --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
+					command = pathToCrux 
+					    + " " + subCommand 
+					    + " --overwrite T" 
+						+ " --parameter-file " + name + "/analysis.params " 
+						+ proteinSource 
+						+ " " + name + "/index";
 					break;
 				case SEARCH_FOR_MATCHES:
-					command = pathToCrux + " " + subCommand 
-					 	+ " --overwrite T --output-dir " + name + "/" + subCommand 
+					command = pathToCrux 
+						+ " " + subCommand 
+					 	+ " --overwrite T "
+						+ " --output-dir " + name + "/crux-output"
 					 	+ " --parameter-file " + name + "/analysis.params " 
 					 	+ spectraSource + " " + proteinSource;
 					break;
 				case COMPUTE_Q_VALUES:
-					break;
 				case PERCOLATOR:
-					if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
-						proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
-					}
-					else {
-						proteinSource = this.proteinSource;
-					}
-					break;
 				case QRANKER:
-					if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
-						proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
-					}
-					else {
-						proteinSource = this.proteinSource;
-					}
+					command = pathToCrux 
+						+ " " + subCommand 
+					 	+ " --overwrite T "
+						+ " --output-dir " + name + "/crux-output"
+					 	+ " --parameter-file " + name + "/analysis.params " 
+					 	+ proteinSource;
 					break;
 			}
 			try {
@@ -334,80 +356,6 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		
 	}
 	
-	Process run() {
-		
-		Process process = null;
-		
-		if (!isValidAnalysis()) {
-			return process;
-		}
-		
-		// Write out binary file of the analysis model to the analysis directory
-		if (needsSaving) {
-    		if (!saveModelToBinaryFile()) {
-    			return process;
-    		}
-		}
-		
-		// Write out a parameter file to the analysis directory
-		if (!toParameterFile()) {
-			return process;
-		}
-	
-		if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()] 
-		    && componentsRunStatus[CruxComponents.CREATE_INDEX.ordinal()] == RunStatus.NOT_RUN) {
-			//  Run the component using the component directory and parameter file
-			String subCommand = CruxComponents.CREATE_INDEX.toString();
-			String command = pathToCrux + " " + subCommand + " --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
-			try {
-				logger.info("Attempte to execute command: " + command);
-				process = Runtime.getRuntime().exec(command);
-				process.waitFor();
-				if (process.exitValue() == 0) {
-				    componentsRunStatus[CruxComponents.CREATE_INDEX.ordinal()] = RunStatus.COMPLETED;
-				}
-				else {
-				    componentsRunStatus[CruxComponents.CREATE_INDEX.ordinal()] = RunStatus.FAILED;
-				}
-			} catch (Exception e) {
-				logger.info("Unable to execute command: " + e.toString());
-				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
-				return process;
-			}
-		}
-		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]
-		    && componentsRunStatus[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] == RunStatus.NOT_RUN) {
-			//  Run the component using the component directory and parameter file
-			String proteinSource;
-			if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
-				proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
-			}
-			else {
-				proteinSource = this.proteinSource;
-			}
-			String subCommand = CruxComponents.SEARCH_FOR_MATCHES.toString();
-			String command = pathToCrux + " " + subCommand + " --overwrite T --output-dir " + name + "/" + subCommand + " --parameter-file " + name + "/analysis.params " + spectraSource + " " + proteinSource;
-			try {
-				logger.info("Attempte to execute command: " + command);
-				process = Runtime.getRuntime().exec(command);
-				process.waitFor();
-				if (process.exitValue() == 0) {
-				    componentsRunStatus[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = RunStatus.COMPLETED;
-				}
-				else {
-				    componentsRunStatus[CruxComponents.SEARCH_FOR_MATCHES.ordinal()] = RunStatus.FAILED;
-				}
-			}
-			catch (Exception e) {
-				logger.info("Unable to execute command: " + e.toString());
-				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
-				return process;
-			}
-		}
-
-		return process;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -445,8 +393,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	    minLength = minLengthDefault;
 		minMass = minMassDefault;
 		numDecoysPerTarget = numDecoysPerTargetDefault;
-		numDecoyFiles = numDecoyFilesDefault;
-	    pi0 = pi0Default;
+		decoyLocation = decoyLocationDefault;
 	    printSearchProgress = printSearchProgressDefault;
 		proteinSource = proteinSourceDefault;
 		seed = seedDefault;
@@ -489,7 +436,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	            minLength = minLengthDefault;
 		        minMass = minMassDefault;
         		numDecoysPerTarget = numDecoysPerTargetDefault;
-				numDecoyFiles = numDecoyFilesDefault;
+				decoyLocation = decoyLocationDefault;
 		        proteinSource = proteinSourceDefault;
 		        spectraSource = spectraSourceDefault;
         	    spectrumCharge = spectrumChargeDefault;
@@ -497,18 +444,15 @@ public class CruxAnalysisModel extends Object implements Serializable{
         	    spectrumMinMass = spectrumMinMassDefault;
 		    	break;
 		    case COMPUTE_Q_VALUES:
-        	    pi0 = pi0Default;
 		        proteinSource = proteinSourceDefault;
 		    	break;
 		    case PERCOLATOR:
         	    featureFile = featureFileDefault;
-        	    pi0 = pi0Default;
 		        proteinSource = proteinSourceDefault;
         	    topMatch = topMatchDefault;
 		    	break;
 		    case QRANKER:
         	    featureFile = featureFileDefault;
-        	    pi0 = pi0Default;
 		        proteinSource = proteinSourceDefault;
         	    topMatch = topMatchDefault;
 		    	break;
@@ -522,12 +466,6 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	
 	public void setRunComponent(CruxComponents component, boolean value) {
 		componentsToRun[component.ordinal()] = value;
-		if (value) {
-		    ++numComponentsToRun;
-		}
-		else {
-		    --numComponentsToRun;
-		}
 		logger.info("Run " + component.toString() + " set to " + value);
 	}
 	
@@ -694,12 +632,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		this.minMass = minMass;
 	}
 
-	public int getNumDecoyFiles() {
-		return numDecoyFiles;
+	public DecoyLocation getDecoyLocation() {
+		return decoyLocation;
 	}
 
-	public void setNumDecoyFiles(int numDecoyFiles) {
-		this.numDecoyFiles = numDecoyFiles;
+	public void setDecoyLocation(DecoyLocation location) {
+		this.decoyLocation = location;
 	}
 
 	public int getNumDecoysPerTarget() {
@@ -802,16 +740,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return minMassDefault;
 	}
 
-	public int getNumDecoyFilesDefault() {
-		return numDecoyFilesDefault;
+	public DecoyLocation getDecoyLocationDefault() {
+		return decoyLocationDefault;
 	}
 
 	public int getNumDecoysPerTargetDefault() {
 		return numDecoysPerTargetDefault;
-	}
-
-	public double getPi0Default() {
-		return pi0Default;
 	}
 
 	public int getPrintSearchProgressDefault() {

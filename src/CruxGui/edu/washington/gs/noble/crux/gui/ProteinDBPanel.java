@@ -68,6 +68,7 @@ class ProteinDBPanel extends CruxParameterControl {
 	class ProteinDBButtonListener implements ActionListener {
 		public void actionPerformed(final ActionEvent event) {
 			final JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle("Choose protein database");
 			CruxAnalysisModel model = cruxGui.getAnalysisModel();
 			String fileName = model.getProteinDatabase();
 			if (fileName != null && fileName.length() > 0) {

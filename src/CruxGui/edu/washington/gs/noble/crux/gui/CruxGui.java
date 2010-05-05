@@ -89,6 +89,7 @@ public class CruxGui implements Runnable {
 	
 	public boolean promptForCruxPath() {
 		final JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setDialogTitle("Set path to crux executable");
 	    int returnVal = fileChooser.showDialog(frame, "Set path to crux");
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();

@@ -29,6 +29,7 @@ class SpectraPanel extends CruxParameterControl {
 		public void actionPerformed(final ActionEvent event) {
 			CruxAnalysisModel model = cruxGui.getAnalysisModel();
 			final JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle("Choose spectra file");
 			String fileName = model.getSpectraFilename();
 			if (fileName != null && fileName.length() > 0) {
 				chooser.setCurrentDirectory(new File(fileName));
