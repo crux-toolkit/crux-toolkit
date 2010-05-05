@@ -271,6 +271,69 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return result;
 	}
 	
+	//  Run the component using the component directory and parameter file
+	Process runComponent(CruxComponents component) {
+		
+		Process process = null;
+		if (componentsToRun[component.ordinal()]  && componentsRunStatus[component.ordinal()] == RunStatus.NOT_RUN) {
+			String subCommand = component.toString();
+			String command = null;
+			String proteinSource = this.proteinSource;
+			if (component != CruxComponents.CREATE_INDEX && componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
+				// If we have an index (and this is not the create index command use the
+				// index for the protein source.
+				if (componentsRunStatus[CruxComponents.CREATE_INDEX.ordinal()] == RunStatus.COMPLETED) {
+					proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
+				}
+				else {
+					logger.info("Index creattion failed. Unable to execute command: " + component.toString());
+					JOptionPane.showMessageDialog(null, "Index creattion failed. Unable to execute command: " + component.toString());
+					return process;
+				}
+			}
+			switch(component) {
+				case CREATE_INDEX:
+					proteinSource = this.proteinSource;
+					command = pathToCrux + " " + subCommand + " --overwrite T --parameter-file " + name + "/analysis.params " + proteinSource + " " + name + "/" + subCommand;
+					break;
+				case SEARCH_FOR_MATCHES:
+					command = pathToCrux + " " + subCommand 
+					 	+ " --overwrite T --output-dir " + name + "/" + subCommand 
+					 	+ " --parameter-file " + name + "/analysis.params " 
+					 	+ spectraSource + " " + proteinSource;
+					break;
+				case COMPUTE_Q_VALUES:
+					break;
+				case PERCOLATOR:
+					if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
+						proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
+					}
+					else {
+						proteinSource = this.proteinSource;
+					}
+					break;
+				case QRANKER:
+					if (componentsToRun[CruxComponents.CREATE_INDEX.ordinal()]) {
+						proteinSource = name + "/" + CruxComponents.CREATE_INDEX.toString();
+					}
+					else {
+						proteinSource = this.proteinSource;
+					}
+					break;
+			}
+			try {
+				logger.info("Attempte to execute command: " + command);
+				process = Runtime.getRuntime().exec(command);
+			} catch (Exception e) {
+				process = null;
+				logger.info("Unable to execute command: " + e.toString());
+				JOptionPane.showMessageDialog(null, "Unable to execute command: " + e.toString());
+			}
+		}
+		return process;
+		
+	}
+	
 	Process run() {
 		
 		Process process = null;
