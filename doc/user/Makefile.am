@@ -47,6 +47,7 @@ dist_html_DATA  =  \
 	sqt-format.html \
 	start-tutorial.html \
 	txt-format.html \
+	xlink-txt-format.html \
 	UWlogo150p.gif \
 	data/demo.ms2 \
 	data/small-yeast.fasta \
