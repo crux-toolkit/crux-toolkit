@@ -1890,25 +1890,27 @@ BOOLEAN_T print_match_collection_tab_delimited(
   MATCH_ITERATOR_T* match_iterator = 
     new_match_iterator(match_collection, main_score, TRUE);
   int count = 0;
+  int last_rank = 0;
+
   // iterate over matches
   while(match_iterator_has_next(match_iterator)){
     match = match_iterator_next(match_iterator);    
-    //TODO : we want to print out matches up to rank top-match,
-    //so ties get printed out
-    if (count >= top_match) {
-      break;
-    }
+    int cur_rank = get_match_rank(match, main_score);
 
-    // print only up to max_rank_result of the matches
-    if( get_match_rank(match, main_score) > top_match ){
-      break;
-    }// else
+    // print if we haven't reached the limit
+    // or if we are at the limit but this match is a tie with the last
+    if( count < top_match || last_rank == cur_rank ){
 
-    print_match_tab(match_collection, match, output, scan_num, 
-		    spectrum_precursor_mz, 
-                    spectrum_neutral_mass, num_matches, charge, 
-                    match_collection->scored_type);
-    count++;
+      print_match_tab(match_collection, match, output, scan_num, 
+                      spectrum_precursor_mz, 
+                      spectrum_neutral_mass, num_matches, charge, 
+                      match_collection->scored_type);
+      count++;
+      last_rank = cur_rank;
+    } else if( count >= top_match && last_rank != cur_rank ) {
+      break;
+    } // else see if there is one more tie to print
+
   }// next match
   
   carp(CARP_DETAILED_DEBUG, "printed %d out of %d tab matches", 

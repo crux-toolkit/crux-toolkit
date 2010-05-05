@@ -1,7 +1,10 @@
+#include <iostream>
+#include <fstream>
 #include "check-match-collection.h"
 #include "match_collection.h"
 #include <vector>
 #include <cstdlib>
+#include <string>
 
 // also "included" from match_collection.
 void force_scored_by(MATCH_COLLECTION_T* match_collection, SCORER_TYPE_T type);
@@ -23,15 +26,21 @@ vector<MATCH_T*> match_list;
 int num_matches;
 // some unordered scores to use
 float scores[10] = { 78.2, 50, 23.3, 109, 34.5, 50, 45.6, 50, 38, 64};
+PEPTIDE_T* pep;
+PROTEIN_T* prot;
+char protseq[] = "FAKESEQ";
 
 void match_collection_setup(){
   mc = new_empty_match_collection(FALSE); // not decoy
 
-  // set up some matches with xcorrs to add
+  // set up some matches with xcorrs and a peptide to add
+  prot = new_protein("prot", protseq, strlen(protseq), NULL, 0, 0, NULL);
+  pep = new_peptide((unsigned char)strlen(protseq), 7.77, prot, 1);
   num_matches = 8;
   for(int i=0; i<num_matches; i++){
     MATCH_T* m = new_match();
     set_match_score(m, XCORR, scores[i]);
+    set_match_peptide(m, pep);
     match_list.push_back(m);    
   }
 }
@@ -44,10 +53,12 @@ void set_matches(MATCH_COLLECTION_T* mc, vector<MATCH_T*> matches){
 }
 void match_collection_teardown(){
   if( mc ){
-    free(mc);
+    free_match_collection(mc); // frees the matches
   }
+  if( prot ) { free_protein(prot); }
+  if( pep ) { free_peptide(pep); }
+
   for(size_t i=0; i<match_list.size(); i++){
-    free_match(match_list[i]);
     match_list[i] = NULL;
   }
 }
@@ -94,6 +105,82 @@ START_TEST(test_set){
 }
 END_TEST
 // once these tests pass, we can use set_matches() and match_iterator in other tests
+
+START_TEST(test_print_rank){
+  initialize_parameters();
+  set_matches(mc, match_list);
+  populate_match_rank_match_collection(mc, XCORR);
+
+  // other items for printing to tab file
+  int z = 1;
+  SPECTRUM_T* s = new_spectrum(7, 7, MS2, 7.77, &z, 1, "fakename");
+  const char* filename = "test-rank.txt";
+
+  /* expected values
+   rank 1 xcor 109
+   rank 2 xcor 78.2
+   rank 3 xcor 50
+   rank 3 xcor 50
+   rank 3 xcor 50
+   rank 4 xcor 45.6
+   rank 5 xcor 34.5
+   rank 6 xcor 23.3
+  */
+
+  // try printing the top 3, should get 5 lines
+  FILE* fout = fopen(filename, "w");
+  print_match_collection_tab_delimited(fout, 3, mc, s, XCORR);
+  fclose(fout);
+
+  ifstream fin(filename, ifstream::in);
+  string line;
+  int count = -1; // it will count once after getting the eof
+  while( ! fin.eof() ) {
+    getline(fin, line);
+    count++;
+  }
+
+  fail_unless( count == 5, 
+               "For top-match=3, there should have been 5 lines printed "
+               "but there were %d.", count);
+  fin.close();
+
+  // try printing top 5, should still get 5 lines
+  fout = fopen(filename, "w");
+  print_match_collection_tab_delimited(fout, 5, mc, s, XCORR);
+  fclose(fout);
+
+  fin.open(filename, ifstream::in);
+  count = -1; // it will count once after getting the eof
+  while( ! fin.eof() ) {
+    getline(fin, line);
+    count++;
+  }
+
+  fail_unless( count == 5, 
+               "For top-match=3, there should have been 5 lines printed "
+               "but there were %d.", count);
+  fin.close();
+
+  // try printing top 6, should get 6
+  fout = fopen(filename, "w");
+  print_match_collection_tab_delimited(fout, 6, mc, s, XCORR);
+  fclose(fout);
+
+  fin.open(filename, ifstream::in);
+  count = -1; // it will count once after getting the eof
+  while( ! fin.eof() ) {
+    getline(fin, line);
+    count++;
+  }
+
+  fail_unless( count == 6, 
+               "For top-match=3, there should have been 5 lines printed "
+               "but there were %d.", count);
+  fin.close();
+
+}
+END_TEST
 
 START_TEST(test_delta_cn){
   set_matches(mc, match_list);
@@ -167,6 +254,7 @@ Suite* match_collection_suite(){
   TCase *tc_core = tcase_create("Core");
   tcase_add_test(tc_core, test_create);
   tcase_add_test(tc_core, test_set);
+  tcase_add_test(tc_core, test_print_rank);
   tcase_add_test(tc_core, test_delta_cn);
   //  tcase_add_test(tc_core, test_...);
 
