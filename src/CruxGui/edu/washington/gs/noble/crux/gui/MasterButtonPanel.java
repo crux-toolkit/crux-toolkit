@@ -121,48 +121,7 @@ public class MasterButtonPanel extends JPanel {
 	class RunButtonListener implements ActionListener {
 		
 		public void actionPerformed(ActionEvent event) {
-			CruxAnalysisModel model = cruxGui.getAnalysisModel();
-    		boolean continueRunAnalysis = true;
-    		if (model != null && model.needsSaving()) {
-    			continueRunAnalysis = cruxGui.promptToSave();
-    		}
-    		if (continueRunAnalysis) {
-    			if (model.isValidAnalysis()) {
-    				if (model.getPathToCrux() == null) {
-    					continueRunAnalysis = cruxGui.promptForCruxPath();
-    				}
-    				if (continueRunAnalysis) {
-    			        Process process = null;
-						// Write out a parameter file to the analysis directory
-						if (!model.saveModelToParameterFile()) {
-							logger.info("Unable to write parameter file.");
-							return;
-						}
-	
-    			        for (CruxComponents component: CruxComponents.values()) {
-	    			        process = model.runComponent(component);
-	    			        if (process != null) {
-		    			        try {
-									process.waitFor();
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								logger.info("Execution of " + component.toString() + " completed with exit status " + process.exitValue());
-								if (process.exitValue() == 0) {
-									model.setRunStatus(component, CruxAnalysisModel.RunStatus.COMPLETED);
-								}
-								else {
-									model.setRunStatus(component, CruxAnalysisModel.RunStatus.FAILED);
-									break;
-								}
-	    			        }
-    			        }
-    			        cruxGui.frame.updateFromModel(model);
-    			        cruxGui.frame.repaint();
-    				}
-    			}
-    		}
+			cruxGui.frame.runAnalysis();
 		}
 		
 	}
