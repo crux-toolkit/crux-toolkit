@@ -18,11 +18,13 @@ import javax.swing.JPanel;
 
 /**
  * This class specifies the main window (JFrame) for the CruxGui.
- * There are two sub-components: a CruxViewPanel, and a MasterButton panel.
+ * There are three sub-components: a CruxSetupPanel, a CruxRunPanel, and a MasterButton panel.
  * 
- * The CruxViewPanel contains the a schmatic diagram of the flow of the the
+ * The CruxSetupPanel contains the a schmatic diagram of the flow of the the
  * crux tools, overlayed with buttons, and panels containing controls for setting
  * the parameters of a crux analysis.
+ * 
+ * The CruxRunPanel displays the standard error output from the analysis
  * 
  * The MasterButton panel contains several buttons for naming, loading, and running
  * analysis, and for exiting the application.
