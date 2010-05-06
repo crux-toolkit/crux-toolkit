@@ -2878,6 +2878,10 @@ print-search-progress=100
 # Available for crux-search-for-matches
 use-mz-window=FALSE
 
+# Use MSToolkit to parse spectra. Default F.
+# Available for crux-search-for-matches
+use-mstoolkit=FALSE
+
 # Prefix added to output file names. Default None. 
 # Used by crux create-index, crux search-for-matches, crux compute-q-values, and crux percolator.
 fileroot=one-decoy-file
