@@ -131,6 +131,7 @@ START_TEST(test_print_rank){
   FILE* fout = fopen(filename, "w");
   print_match_collection_tab_delimited(fout, 3, mc, s, XCORR);
   fclose(fout);
+  sleep(2);  // wait to avoid NFS latency issues
 
   ifstream fin(filename, ifstream::in);
   string line;
