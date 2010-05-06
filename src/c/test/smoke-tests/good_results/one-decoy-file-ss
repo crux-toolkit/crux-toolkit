@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Apr 27 13:23:56 2010
+H	StartTime	Thu May  6 12:28:31 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2850,10 +2850,6 @@ overwrite=F
 # Available for all crux programs. Any options specified on the command line will override values in the parameter file.
 parameter-file=params/one-decoy-file-ss
 
-# Figure out what this parameter is supposed to mean,should be an amino acid. Default K.
-# Available for crux search-for-xlinks
-missed-link-cleavage=K
-
 # Predict peaks with the given maximum number of nh3 neutral loss modifications. Default 0.
 # Only available for crux-predict-peptide-ions.
 nh3=0
@@ -3022,7 +3018,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Apr 27 13:23:56 2010
+H	StartTime	Thu May  6 12:28:31 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

@@ -66,7 +66,9 @@ int xlink_search_main(int argc, char** argv) {
     "precursor-window-decoy",
     "precursor-window-type-decoy",
     "min-weibull-points",
+    /* TODO: Implement or remove
     "missed-link-cleavage",
+    */
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
@@ -94,7 +96,6 @@ int xlink_search_main(int argc, char** argv) {
   
   carp(CARP_INFO, "Beginning crux xlink-search");
 
-  char* missed_link_cleavage = get_string_parameter("missed-link-cleavage");
 
   //int num_missed_cleavages = 0;
   char* ms2_file = get_string_parameter("ms2 file");
@@ -126,7 +127,7 @@ int xlink_search_main(int argc, char** argv) {
   LinkedPeptide::linker_mass = linker_mass;
   vector<LinkedPeptide> all_ions;
   carp(CARP_DETAILED_DEBUG,"Calling find all precursor ions");
-  find_all_precursor_ions(all_ions, links, missed_link_cleavage, database,1);
+  find_all_precursor_ions(all_ions, links, "K", database,1);
   carp(CARP_DETAILED_DEBUG,"Sort");
   // sort filtered ions and decoy ions by mass
   //sort(all_ions.begin(), all_ions.end());

@@ -866,12 +866,13 @@ void initialize_parameters(void){
       "The mass modification of a cross link between two amino acids.",
       "Argument for crux search-for-xlinks.","false");
 
+  /* TODO Implement or Remove.
   set_string_parameter("missed-link-cleavage", "K",
       "Figure out what this parameter is supposed to mean,"
       "should be an amino acid. Default K.",
       "Available for crux search-for-xlinks",
       "true");
-
+  */
   set_int_parameter("min-weibull-points", 4000, 1, BILLION, 
       "Minimum number of points for estimating the weibull (Default 4000).",
       "Available for crux search-for-xlinks", "true");

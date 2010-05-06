@@ -123,7 +123,7 @@ int main(int argc, char** argv){
   //created linked peptide.
   LinkedPeptide lp = LinkedPeptide(peptideA, peptideB, posA-1, posB-1, charge);
 
-  LinkedIonSeries ion_series;
+  LinkedIonSeries ion_series(charge);
   ion_series.add_linked_ions(lp);
   print_spectrum(spectrum, ion_series);
 
