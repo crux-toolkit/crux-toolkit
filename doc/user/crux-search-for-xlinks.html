@@ -337,20 +337,22 @@ peptides both with and without the mass change.  Default C=57.0214637206.
 <B>Frequently asked questions:</B>
 
 <blockquote>
-<b>What could cause a high q-value but a low XCorr or p-value?</b><br>
+<b>What could cause a high q-value even when the PSM gets a high
+XCorr?</b><br>
 
 <p>
-This is what the empirical curve fitting is supposed to control for.
-The idea is that a high XCorr for one spectrum means something
-different than the same XCorr for another spectrum. Using the curve
-fit and calculating a p-value for the top ranked PSM helps to control
-for the spectrum-specific effects.  As long the assumption that the
-distribution of XCorr scores for a particular spectrum follows a
-Weibull distribution, then a small q-value will be statistically
-significant.</p>
+For some spectra, even randomly generated peptides can get relatively
+high XCorr scores.  This is what the empirical curve fitting is
+supposed to control for.  The idea is that a high XCorr for one
+spectrum means something different than the same XCorr for another
+spectrum. Using the curve fit and calculating a p-value for the top
+ranked PSM helps to control for the spectrum-specific effects.  As
+long the assumption that the distribution of XCorr scores for a
+particular spectrum follows a Weibull distribution, then a small
+q-value will be statistically significant.</p>
 
 <p>
-<b>What happens if you decrease size of the precursor window?</b></p>
+<b>What happens if you decrease the size of the precursor window?</b></p>
 
 <p>
 Reducing the precursor mass tolerance has two main benefits.  One is
