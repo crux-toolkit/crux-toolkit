@@ -10,13 +10,17 @@ SOURCE = \
   edu/washington/gs/noble/crux/gui/CruxSetupPanel.java \
   edu/washington/gs/noble/crux/gui/DigestPanel.java \
   edu/washington/gs/noble/crux/gui/EnzymePanel.java \
+  edu/washington/gs/noble/crux/gui/FeatureFilePanel.java \
   edu/washington/gs/noble/crux/gui/ImagePanel.java \
   edu/washington/gs/noble/crux/gui/LengthPanel.java \
   edu/washington/gs/noble/crux/gui/MassPanel.java \
   edu/washington/gs/noble/crux/gui/MassTypePanel.java \
   edu/washington/gs/noble/crux/gui/MasterButtonPanel.java \
+  edu/washington/gs/noble/crux/gui/MaxModsPanel.java \
   edu/washington/gs/noble/crux/gui/ProteinDBPanel.java \
   edu/washington/gs/noble/crux/gui/SpectraPanel.java \
+  edu/washington/gs/noble/crux/gui/SpectrumChargePanel.java \
+  edu/washington/gs/noble/crux/gui/SpectrumMassPanel.java
 
 all: classes CruxGui.jar
 
