@@ -17,7 +17,7 @@ import javax.swing.JPanel;
  *
  */
 @SuppressWarnings("serial")
-public class CruxViewPanel extends JPanel {
+public class CruxSetupPanel extends JPanel {
 	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
@@ -33,7 +33,7 @@ public class CruxViewPanel extends JPanel {
 	private final CruxComponentButton dummyButton = new CruxComponentButton("", null); // This button only exists to select, so that other button will be unselected.
 	private final ImagePanel image;
 
-	CruxViewPanel(CruxGui cruxGui) {
+	CruxSetupPanel(CruxGui cruxGui) {
 		
 		this.cruxGui = cruxGui;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -116,6 +116,5 @@ public class CruxViewPanel extends JPanel {
 		computeQValuesButton.updateFromModel(model);
 		percolatorButton.updateFromModel(model);
 		qrankerButton.updateFromModel(model);
-		repaint();
 	}
 }

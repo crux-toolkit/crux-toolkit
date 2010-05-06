@@ -38,27 +38,29 @@ public class CruxMainFrame extends JFrame {
 		.getLogger("edu.washington.gs.noble.crux.gui");
 
 	private final CruxGui cruxGui;
-	private final CruxViewPanel cruxViewPanel;
+	private final CruxSetupPanel cruxSetupPanel;
+	private final CruxRunPanel cruxRunPanel;
 	private final MasterButtonPanel buttonPanel;
 	
 	public  CruxMainFrame(final CruxGui cruxGui) {
 		this.cruxGui = cruxGui;
-		cruxViewPanel = new CruxViewPanel(cruxGui);
+		cruxSetupPanel = new CruxSetupPanel(cruxGui);
+		cruxRunPanel = new CruxRunPanel(cruxGui);
 		buttonPanel = new MasterButtonPanel(cruxGui);
 		setResizable(false);
 		setUndecorated(false);
 		setTitle("Crux");
-		setBackground(Color.white);
+		setBackground(Color.WHITE);
 		setLayout(new BorderLayout());	
 		addWindowListener(new CruxWindowAdapter());
 		add(buttonPanel, BorderLayout.SOUTH);
-		add(cruxViewPanel, BorderLayout.CENTER);
-		setSize(cruxViewPanel.getWidth(), 4 * cruxViewPanel.getHeight());
+		add(cruxSetupPanel, BorderLayout.CENTER);
+		setSize(cruxSetupPanel.getWidth(), 4 * cruxSetupPanel.getHeight());
 		setLocationRelativeTo(null);
 	}
 	
 	public void updateFromModel(CruxAnalysisModel model) {
-		cruxViewPanel.updateFromModel(model);
+		cruxSetupPanel.updateFromModel(model);
 		String name = model.getName();
 		if (name != null) {
 		    setTitle("Crux - " + name);
@@ -66,6 +68,14 @@ public class CruxMainFrame extends JFrame {
 		else {
 		    setTitle("Crux");
 		}
+	}
+	
+	public void runAnalysis() {
+		cruxRunPanel.setVisible(true);
+		cruxSetupPanel.setVisible(false);
+		add(cruxRunPanel, BorderLayout.CENTER);
+		repaint();
+	    cruxRunPanel.runAnalysis();	
 	}
 	
 	private class CruxWindowAdapter extends WindowAdapter {
