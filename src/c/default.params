@@ -59,9 +59,9 @@ top-match=5
 # Available from parameter file for crux search-for-matches, percolator, and compute-q-values.
 precision=8
 
-# Output filename for complete list of decoy p-values.  Default 'search.decoy.p.txt'
-# Only available for crux search-for-matches. The location of this file is controlled by --output-dir.
-search-decoy-pvalue-file=search.decoy.p.txt
+# When a residue has multiple modifications, print the sum of those modifications rather than listing each in a comma-separated list.  Default T.
+# Available in the parameter file for any command that prints peptides sequences.  Example: TRUE is SE[12.40]Q and FALSE is SE[10.00,2.40]Q
+display-summed-mod-masses=TRUE
 
 # The minimum length of peptides to consider. Default 6.
 # Used from the command line or parameter file by crux-create-index and crux-generate-peptides.  Parameter file only for crux-search-for-matches.
@@ -79,14 +79,13 @@ isotopic-mass=average
 # Parameter file only.  Used by crux-search-for-matches and crux-predict-peptide-ions.
 fragment-mass=mono
 
-
-# Use mass-to-charge rather than mass for finding the window of peptides. Default F.
-# Available for crux-search-for-matches
-use-mz-window=FALSE
-
 # Tolerance used for matching observed peaks to predicted fragment ions.  Default 0.5.
 # Available from parameter-file for crux-search-for-matches.
 ion-tolerance=0.500000
+
+# Output filename for complete list of decoy p-values.  Default 'search.decoy.p.txt'
+# Only available for crux search-for-matches. The location of this file is controlled by --output-dir.
+search-decoy-pvalue-file=search.decoy.p.txt
 
 # The minimum mass of peptides to consider. Default 200.
 # Available from command line or parameter file for crux-create-index and crux-generate-peptides. Parameter file only for crux-search-for-matches.
@@ -111,6 +110,10 @@ spectrum-charge=all
 # Number of psms per spectrum to score with xcorr after preliminary scoring with Sp. Set to 0 to score all psms with xcorr. Default 500.
 # Used by crux-search-for-matches.  For positive values, the Sp (preliminary) score acts as a filter; only high scoring psms go on to be scored with xcorr.  This saves some time.  If set to 0, all psms are scored with both scores. 
 max-rank-preliminary=500
+
+# Use MSToolkit to parse spectra. Default F.
+# Available for crux-search-for-matches
+use-mstoolkit=FALSE
 
 # Enzyme to use for in silico digestion of protein sequences (trypsin, chymotrypsin, elastase, clostripain, cyanogen-bromide, iodosobenzoate, proline-endopeptidase, staph-protease, aspn, modified-chymotrypsin, no-enzyme).  Default trypsin.
 # Used in conjunction with the options digestion and missed-cleavages. Use 'no-enzyme' for non-specific digestion.  Available from command line or parameter file for crux-generate-peptides and crux create-index.  Available from parameter file for crux search-for-matches.   Digestion rules: enzyme name [cuts after one of these residues]|{but not before one of these residues}.  trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin [FWY]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[], iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease [E]|[], modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before D).
@@ -192,9 +195,29 @@ precursor-window-type-decoy=mass
 # Available for crux search-for-xlinks
 min-weibull-points=4000
 
+# Print the theoretical spectrum
+# Available for xlink-predict-peptide-ions (Default FALSE).
+print-theoretical-spectrum=FALSE
+
 # Use MGF file format for parsing files
 # Available for search-for-xlinks program (Default FALSE).
 use-mgf=FALSE
+
+# Include self loop peptides in search-for-xlinks (Default True).
+# Available for crux search-for-xlinks program.
+xlink-include-selfloops=TRUE
+
+# Include deadend peptides in search-for-xlinks (Default True).
+# Available for crux search-for-xlinks program.
+xlink-include-deadends=TRUE
+
+# Include linear peptides in search-for-xlinks.
+# Available for crux search-for-xlinks program (Default True).
+xlink-include-linears=TRUE
+
+# Use flank peaks in xcorr theoretical spectrum
+# Available for crux search-for-xlinks program (Default True).
+xcorr-use-flanks=TRUE
 
 # Predict the given number of isotope peaks (0|1|2). Default 0.
 # Only available for crux-predict-peptide-ion.  Automatically set to 0 for Sp scoring and 1 for xcorr scoring.

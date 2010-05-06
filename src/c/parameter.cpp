@@ -468,7 +468,7 @@ void initialize_parameters(void){
 
   set_boolean_parameter("use-mstoolkit", FALSE,
       "Use MSToolkit to parse spectra. Default F.",
-      "Available for crux-search-for-matches", "false");
+      "Available for crux-search-for-matches", "true");
   set_string_parameter("scan-number", NULL,
       "Search only select spectra specified as a single scan "
       "number or as a range as in x-y.  Default search all.",
