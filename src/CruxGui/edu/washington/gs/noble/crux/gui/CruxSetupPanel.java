@@ -10,7 +10,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 /**
- * The CruxViewPanelClass presents the schematic diagram of data flow between the 
+ * The CruxSetupPanelClass presents the schematic diagram of data flow between the 
  * crux tools and the GUI elements needed to get and set the crux analysis parameters.
  *
  * @author Charles E. Grant
