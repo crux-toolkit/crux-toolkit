@@ -32,17 +32,19 @@ echo "####################################################################
 for op in verbosity version parameter-file overwrite \
           output-dir fileroot print-search-progress \
           decoy-location num-decoys-per-target reverse-sequence \
-          scan-number top-match precision search-decoy-pvalue-file \
+          scan-number top-match precision display-summed-mod-masses \
           min-length max-length isotopic-mass fragment-mass \
-          mass-window use-mz-window ion-tolerance \
+          ion-tolerance  search-decoy-pvalue-file \
           min-mass max-mass spectrum-min-mass spectrum-max-mass \
-          spectrum-charge max-rank-preliminary \
+          spectrum-charge max-rank-preliminary use-mstoolkit \
           enzyme custom-enzyme digestion missed-cleavages \
           mod cmod nmod max-mods max-aas-modified compute-p-values \
           feature-file output-sequence sort stats unique-peptides \
           precursor-window precursor-window-type \
-          precursor-window-decoy precursor-window-type-decoy min-weibull-points use-mgf \
-          isotope primary-ions neutral-losses flanking \
+          precursor-window-decoy precursor-window-type-decoy \
+          min-weibull-points print-theoretical-spectrum use-mgf \
+          xlink-include-selfloops xlink-include-deadends xlink-include-linears \
+          xcorr-use-flanks isotope primary-ions neutral-losses flanking \
           precursor-ions nh3 max-ion-charge h2o A C D E F G H I K L M \
           N P Q R S T V W Y ; 
 
