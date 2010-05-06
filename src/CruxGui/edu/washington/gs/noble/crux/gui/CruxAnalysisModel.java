@@ -309,7 +309,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 					proteinSource = name + "/index";
 				}
 				else {
-					logger.info("Index creattion failed. Unable to execute command: " + component.toString());
+					logger.info("Index creation failed. Unable to execute command: " + component.toString());
 					JOptionPane.showMessageDialog(null, "Index creattion failed. Unable to execute command: " + component.toString());
 					return process;
 				}
@@ -344,7 +344,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 					break;
 			}
 			try {
-				logger.info("Attempte to execute command: " + command);
+				logger.info("Attempt to execute command: " + command);
 				process = Runtime.getRuntime().exec(command);
 			} catch (Exception e) {
 				process = null;
@@ -584,11 +584,15 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return enzymeDefault;
 	}
 
-	public boolean isFeatureFile() {
+	public boolean useFeatureFile() {
 		return featureFile;
 	}
 
-	public void setFeatureFile(boolean featureFile) {
+	public boolean getFeatureFileDefault() {
+		return featureFileDefault;
+	}
+
+	public void setUseFeatureFile(boolean featureFile) {
 		this.featureFile = featureFile;
 	}
 
@@ -728,7 +732,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return maxMassDefault;
 	}
 
-	public int getMaxModsDefaults() {
+	public int getMaxModsDefault() {
 		return maxModsDefaults;
 	}
 
