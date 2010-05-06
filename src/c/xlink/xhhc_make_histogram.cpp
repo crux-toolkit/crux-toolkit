@@ -78,13 +78,13 @@ int main(int argc, char** argv) {
     INT_ARG);
 
   // not implemented yet
-  
+  /*TODO  
   parse_arguments_set_opt(
     "missed-link-cleavage",
     "",
     (void *) &missed_link_cleavage, 
     STRING_ARG);
-  
+  */
 
   // not implemented yet
   /*

@@ -163,9 +163,9 @@ void print_precursor_count(vector<LinkedPeptide>& all_ions) {
 
 // creates an index of all linked peptides from a fasta file
 void find_all_precursor_ions(vector<LinkedPeptide>& all_ions, 
-			     char* links, 
-			     char* missed_link_cleavage,
-		             char* database_file,
+			     const char* links, 
+			     const char* missed_link_cleavage,
+		             const char* database_file,
 			     int charge)
 {
 

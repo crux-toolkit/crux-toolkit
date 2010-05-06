@@ -189,9 +189,9 @@ void add_decoys(std::vector<LinkedPeptide>& decoys, LinkedPeptide& lp);
 
 
 void find_all_precursor_ions(std::vector<LinkedPeptide>& all_ions, 
-	char* links, 
-	char* missed_link_cleavage, 
-	char* database_file,
+	const char* links, 
+	const char* missed_link_cleavage, 
+	const char* database_file,
 	int charge);
 
 
