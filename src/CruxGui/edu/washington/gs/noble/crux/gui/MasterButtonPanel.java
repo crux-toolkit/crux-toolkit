@@ -27,6 +27,7 @@ public class MasterButtonPanel extends JPanel {
 	final JButton loadButton = new JButton("Load analysis");
 	final JButton saveButton = new JButton("Save analysis");
 	final JButton runButton = new JButton("Run analysis");
+	final JButton setupButton = new JButton("Set up analysis");
 	final JButton setCruxPathButton = new JButton("Locate Crux");
 	final JButton exitButton = new JButton("Exit");
 	
@@ -38,6 +39,8 @@ public class MasterButtonPanel extends JPanel {
 		newButton.addActionListener(new NewAnalysisButtonListener()); 
 		loadButton.addActionListener(new LoadAnalysisButtonListener()); 
 		runButton.addActionListener(new RunButtonListener());
+		setupButton.addActionListener(new SetupButtonListener());
+		setupButton.setVisible(false);
 		saveButton.addActionListener(new SaveButtonListener()); 
 		setCruxPathButton.addActionListener(new SetCruxPathListener());
 		exitButton.addActionListener(new ExitButtonListener());
@@ -46,6 +49,7 @@ public class MasterButtonPanel extends JPanel {
 		buttonPanel.add(saveButton);
 		buttonPanel.add(loadButton);
 		buttonPanel.add(runButton);
+		buttonPanel.add(setupButton);
 		buttonPanel.add(exitButton);
 	}	
 	
@@ -101,6 +105,32 @@ public class MasterButtonPanel extends JPanel {
 		
 	}
 	
+	public void showRunAnalysis() {
+		cruxGui.frame.cruxRunPanel.setVisible(true);
+		cruxGui.frame.add(cruxGui.frame.cruxRunPanel, BorderLayout.CENTER);
+		cruxGui.frame.cruxSetupPanel.setVisible(false);
+		setCruxPathButton.setVisible(false);
+		newButton.setVisible(false);
+		saveButton.setVisible(false);
+		loadButton.setVisible(false);
+		runButton.setVisible(false);
+		setupButton.setVisible(true);
+		repaint();
+	}
+	
+	public void showSetupAnalysis() {
+		cruxGui.frame.cruxSetupPanel.setVisible(true);
+		cruxGui.frame.add(cruxGui.frame.cruxSetupPanel, BorderLayout.CENTER);
+		cruxGui.frame.cruxRunPanel.setVisible(false);
+		setCruxPathButton.setVisible(true);
+		newButton.setVisible(true);
+		saveButton.setVisible(true);
+		loadButton.setVisible(true);
+		runButton.setVisible(true);
+		setupButton.setVisible(false);
+		repaint();
+	}
+	
 	class SaveButtonListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent event) {
@@ -121,7 +151,22 @@ public class MasterButtonPanel extends JPanel {
 	class RunButtonListener implements ActionListener {
 		
 		public void actionPerformed(ActionEvent event) {
-			cruxGui.frame.runAnalysis();
+			CruxAnalysisModel model = cruxGui.getAnalysisModel();
+			if (model.isValidAnalysis()) {
+				showRunAnalysis();
+				logger.info("Starting Analysis.");
+				cruxGui.frame.cruxRunPanel.runAnalysis();
+				logger.info("Analysis completed.");
+			}
+		}
+		
+	}
+	
+	class SetupButtonListener implements ActionListener {
+		
+		public void actionPerformed(ActionEvent event) {
+			logger.info("Switching to analysis setup");
+			showSetupAnalysis();
 		}
 		
 	}

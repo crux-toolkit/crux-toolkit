@@ -38,8 +38,8 @@ public class CruxMainFrame extends JFrame {
 		.getLogger("edu.washington.gs.noble.crux.gui");
 
 	private final CruxGui cruxGui;
-	private final CruxSetupPanel cruxSetupPanel;
-	private final CruxRunPanel cruxRunPanel;
+	public final CruxSetupPanel cruxSetupPanel;
+	public final CruxRunPanel cruxRunPanel;
 	private final MasterButtonPanel buttonPanel;
 	
 	public  CruxMainFrame(final CruxGui cruxGui) {
@@ -68,14 +68,7 @@ public class CruxMainFrame extends JFrame {
 		else {
 		    setTitle("Crux");
 		}
-	}
-	
-	public void runAnalysis() {
-		cruxRunPanel.setVisible(true);
-		cruxSetupPanel.setVisible(false);
-		add(cruxRunPanel, BorderLayout.CENTER);
 		repaint();
-	    cruxRunPanel.runAnalysis();	
 	}
 	
 	private class CruxWindowAdapter extends WindowAdapter {

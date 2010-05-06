@@ -89,6 +89,9 @@ public class CruxSetupPanel extends JPanel {
 		searchParameterPanel.addParameterControl(new DigestPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new MassPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new LengthPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new SpectrumMassPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new SpectrumChargePanel(cruxGui));
+		searchParameterPanel.addParameterControl(new MaxModsPanel(cruxGui));
 		properties.add(searchParameterPanel);
 	}
 	
@@ -101,12 +104,14 @@ public class CruxSetupPanel extends JPanel {
 	private void initPercolatorPanel() {
 		CruxParameterPanel percolatorParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.PERCOLATOR, cruxGui, "Percolator paramters", percolatorButton, dummyButton);
 		percolatorParameterPanel.setBounds(computeQValuesButton.getX()-25, 30, 400, 350); // Line up to the leftmost of the buttons
+		percolatorParameterPanel.addParameterControl(new FeatureFilePanel(cruxGui));
 		properties.add(percolatorParameterPanel);
 	}
 	
 	private void initQRankerPanel() {
 		CruxParameterPanel qrankerParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.QRANKER, cruxGui, "Q-ranker paramters", qrankerButton, dummyButton);
 		qrankerParameterPanel.setBounds(computeQValuesButton.getX()-25, 30, 400, 350);
+		qrankerParameterPanel.addParameterControl(new FeatureFilePanel(cruxGui));
 		properties.add(qrankerParameterPanel);
 	}
 	
