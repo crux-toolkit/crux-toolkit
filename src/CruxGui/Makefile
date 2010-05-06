@@ -6,7 +6,8 @@ SOURCE = \
   edu/washington/gs/noble/crux/gui/CruxMainFrame.java \
   edu/washington/gs/noble/crux/gui/CruxParameterControl.java \
   edu/washington/gs/noble/crux/gui/CruxParameterPanel.java \
-  edu/washington/gs/noble/crux/gui/CruxViewPanel.java \
+  edu/washington/gs/noble/crux/gui/CruxRunPanel.java \
+  edu/washington/gs/noble/crux/gui/CruxSetupPanel.java \
   edu/washington/gs/noble/crux/gui/DigestPanel.java \
   edu/washington/gs/noble/crux/gui/EnzymePanel.java \
   edu/washington/gs/noble/crux/gui/ImagePanel.java \
