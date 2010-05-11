@@ -512,6 +512,7 @@ enum _command {
   QRANKER_COMMAND,      ///< q-ranker
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
   XLINK_SEARCH_COMMAND, ///< search-for-xlinks	
+  VERSION_COMMAND,      ///< just print the version number
 
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value
                         /// changes as cmds are added

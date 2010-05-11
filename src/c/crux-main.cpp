@@ -11,7 +11,8 @@
 #include "crux-main.h"
 
 const char* usage_str = "Usage: crux <command> [options] <argument>\n"
-"Commands:\n"
+"\n"
+"Crux supports the following commands:\n"
 "  create-index        Create an index for all peptides in a fasta file.\n"
 "  search-for-matches  Search a collection of spectra against a sequence\n"
 "                      database, returning a collection of peptide-spectrum\n"
@@ -28,13 +29,16 @@ const char* usage_str = "Usage: crux <command> [options] <argument>\n"
 "  print-processed-spectra\n"
 "                      Write a new ms2 file with all of the same spectra\n"
 "                      with only the peaks used for computing xcorr.\n"
-"  search-for-xlinks\n"
-"                      Search a collection of spectra against a sequence database,\n"
-"                      returning a collection of matches corresponding to\n" 
-"                      linear and xlinked peptides scored by XCorr.\n"
-"Options and arguments:\n"
-"  Specific to each command. Type 'crux <command>' to get details.\n"
-;
+"  search-for-xlinks   Search a collection of spectra against a sequence\n"
+"                      database, returning a collection of matches\n"
+"                      corresponding to linear and cross-linked peptides\n"
+"                      scored by XCorr.\n"
+"  version             Print the Crux version number to standard output,\n"
+"                      then exit.\n"
+"\n"
+"Options and arguments are specific to each command. Type 'crux <command>'\n"
+"for details.\n"
+; 
 int main(int argc, char** argv){
 
   // check the syntax for crux <operation>
@@ -80,6 +84,10 @@ int main(int argc, char** argv){
   case XLINK_SEARCH_COMMAND:
     xlink_search_main(argc-1, argv+1);
     break;
+
+  case VERSION_COMMAND:
+    printf("Crux version %s\n", VERSION);
+    break;    
 
   case INVALID_COMMAND:
     carp(CARP_FATAL, "Invalid command '%s'\n%s", op_string, usage_str);

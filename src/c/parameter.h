@@ -24,7 +24,6 @@
 #include "utils.h"
 #include "crux-utils.h"
 #include "carp.h"
-#include "version.h"
 #include "hash.h"
 #include "objects.h"
 #include "peptide.h"

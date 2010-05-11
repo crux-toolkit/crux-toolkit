@@ -44,7 +44,6 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
 {
   const char* option_list[] = {
     "verbosity",
-    "version",
     "parameter-file",
     "overwrite",
     "spectrum-min-mass",
