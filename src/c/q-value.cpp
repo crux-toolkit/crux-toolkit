@@ -44,7 +44,6 @@ int qvalue_main(int argc, char** argv){
 
   /* Define command line options and arguments */
   const char* option_list[] = {
-    "version",
     "verbosity",
     "parameter-file",
     "overwrite",

@@ -1114,12 +1114,6 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 
   success = parse_arguments_into_hash(argc, argv, parameters, 0); 
 
-  // For version option, print version and quit
-  if( get_boolean_parameter("version") ){
-    printf("Crux version %s\n", VERSION);
-    exit(0);
-  }
-
   if( success ){
     // check each option value
     for(i=1; i<argc; i++){

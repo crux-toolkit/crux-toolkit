@@ -34,7 +34,6 @@ int percolator_main(int argc, char** argv){
 
   /* Define command line arguments */
   const char* option_list[] = {
-    "version",
     "verbosity",
     "parameter-file",
     "fileroot",

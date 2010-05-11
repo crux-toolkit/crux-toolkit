@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#define NUM_INDEX_OPTIONS 13
+#define NUM_INDEX_OPTIONS 12
 #define NUM_INDEX_ARGS 2
 
 int create_index_main(int argc, char** argv);

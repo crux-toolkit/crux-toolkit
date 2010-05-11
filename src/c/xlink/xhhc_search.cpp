@@ -57,7 +57,6 @@ int xlink_search_main(int argc, char** argv) {
   /* Define optional command line arguments */
   const char* option_list[] = {
     "verbosity",
-    "version",
     "parameter-file",
     "overwrite",
     "output-dir",

@@ -31,7 +31,6 @@ int create_index_main(int argc, char** argv){
   /* Define optional command line arguments */ 
   int num_options = NUM_INDEX_OPTIONS;
   const char* option_list[NUM_INDEX_OPTIONS] = { 
-    "version",
     "verbosity",
     "parameter-file", 
     "overwrite",

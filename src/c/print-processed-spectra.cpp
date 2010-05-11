@@ -9,7 +9,7 @@
  */
 
 #include "print-processed-spectra.h"
-#define NUM_PPS_OPTIONS 4
+#define NUM_PPS_OPTIONS 3
 #define NUM_PPS_ARGS 2
 
 int print_processed_spectra_main(int argc, char** argv){
@@ -17,7 +17,6 @@ int print_processed_spectra_main(int argc, char** argv){
   // Define optional command line arguments
   int num_options = NUM_PPS_OPTIONS;
   const char* option_list[NUM_PPS_OPTIONS] = { 
-    "version",
     "verbosity",
     "parameter-file", 
     "overwrite"
