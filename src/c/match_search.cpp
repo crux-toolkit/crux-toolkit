@@ -71,19 +71,19 @@ int search_main(int argc, char** argv){
 
   /* Define optional command line arguments */
   const char* option_list[] = {
-    "verbosity",
-    "version",
-    "parameter-file",
+    "fileroot",
+    "output-dir",
     "overwrite",
+    "num-decoys-per-target",
+    "decoy-location",
     "compute-p-values",
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
     "scan-number",
-    "output-dir",
-    "fileroot",
-    "num-decoys-per-target",
-    "decoy-location"
+    "smart-offset",
+    "parameter-file",
+    "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
 
@@ -263,9 +263,10 @@ int search_main(int argc, char** argv){
 
   }// next spectrum
 
-  // finished searching!
+  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   carp(CARP_INFO, "Finished crux-search-for-matches");
-  exit(0);
+
+  return(0);
 }// end main
 
 #else // SEARCH_ENABLED not defined

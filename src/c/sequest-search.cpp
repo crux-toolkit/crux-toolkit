@@ -212,7 +212,8 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
 
   } // next spectrum
 
-  // clean up
+  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
+  carp(CARP_INFO, "Finished crux sequest-search");
   
   return 0;
 }// end main

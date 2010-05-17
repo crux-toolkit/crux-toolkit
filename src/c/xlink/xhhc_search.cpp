@@ -478,8 +478,10 @@ int xlink_search_main(int argc, char** argv) {
   carp(CARP_INFO,"Computing Q-Values");
   xlink_compute_qvalues();
 
+  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
+  carp(CARP_INFO, "Finished crux search-for-xlinks.");
 
-  return 0;
+  return(0);
 }
 
 
