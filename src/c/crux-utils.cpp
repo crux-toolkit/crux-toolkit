@@ -1444,7 +1444,6 @@ int prepare_protein_input(
   return num_proteins;
 }
 
-
 /**
  * \brief Perform the set-up steps common to all crux commands:
  * initialize parameters, parse command line, set verbosity, open
@@ -1512,7 +1511,14 @@ void initialize_run(
   char* log_file_name = cat_string(cmd_file_name, ".log.txt");
   open_log_file(&log_file_name);
   free(log_file_name);
+
+  // Store the host name, start date and time, and command line.
+  carp(CARP_INFO, "CPU: %s", hostname());
+  carp(CARP_INFO, date_and_time());
   log_command_line(argc, argv);
+
+  // Start the timer.
+  wall_clock();
 
   // Write the parameter file
   char* param_file_name = cat_string(cmd_file_name, ".params.txt");

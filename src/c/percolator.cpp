@@ -74,9 +74,10 @@ int percolator_main(int argc, char** argv){
   free(psm_dir);
   free(protein_input_name);
 
-  carp(CARP_INFO, "crux percolator finished.");
-  exit(0);
+  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
+  carp(CARP_INFO, "Finished crux percolator.");
 
+  return(0);
 }
 
 /*  ****************** Subroutines ****************/

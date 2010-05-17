@@ -100,9 +100,10 @@ int print_processed_spectra_main(int argc, char** argv){
   free_spectrum_collection(spectra);
   fclose(output_ms2);
 
-  carp(CARP_INFO, "Finished processing spectra.");
-  
-  return 0;
+  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
+  carp(CARP_INFO, "Finished crux print-processed-spectra.");
+
+  return(0);
 }
 
 
