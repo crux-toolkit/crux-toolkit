@@ -1,8 +1,12 @@
+# N.B.: when debugging the unit tests set the environment variable
+# CK_FORK=no
+# This forces all the unit tests to run in a single process, which
+# makes tracing the flow in a debugger much easier.
 BINDIR  =../../../../bin/
 SRCDIR  =../../
 PERCOLATOR_DIR=../../../c/percolator
 CC	= g++	
-CFLAGS  = -g -Wall -I../../ -I$(PERCOLATOR_DIR) -Icheck -Lcheck
+INTERNAL_CXXFLAGS  = -g -Wall -I../../ -I$(PERCOLATOR_DIR) -Icheck -Lcheck $(CXXFLAGS)
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
 
@@ -37,7 +41,7 @@ CRUX_LIBS = \
 
 unittests:  $(SRC) $(TESTS) $(CRUX_LIBS)
 	cd check && $(MAKE)
-	$(CC) -o unittests $(CFLAGS) $(TESTS) $(CRUX_LIBS) check/check.ar  -lm -D_GNU_SOURCE
+	$(CC) -o unittests $(INTERNAL_CXXFLAGS) $(TESTS) $(CRUX_LIBS) check/check.ar  -lm -D_GNU_SOURCE
 .PHONY : check clean
 
 check: unittests
