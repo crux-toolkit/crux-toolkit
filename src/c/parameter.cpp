@@ -11,6 +11,11 @@
 
 //TODO:  in all set, change result=add_... to result= result && add_...
 
+/**
+ * Starting location for zeroth m/z bin.
+ */
+#define SMART_MZ_OFFSET 0.68
+
 /*
  * Global variables
  */
@@ -464,7 +469,8 @@ void initialize_parameters(void){
       "Compute p-values for the main score type.\n     Default=F.",
       "Currently only implemented for XCORR.", "true");
   set_boolean_parameter("use-mz-window", FALSE,
-      "Use mass-to-charge rather than mass for finding the window of peptides. Default=F.",
+      "Use mass-to-charge rather than mass for finding\n"
+      "     candidate peptides. Default=F.",
       "Available for crux-search-for-matches", "true");
   set_boolean_parameter("use-mstoolkit", FALSE,
       "Use MSToolkit to parse spectra. Default=F.",
@@ -473,9 +479,16 @@ void initialize_parameters(void){
       "Search only select spectra specified as a single\n"
       "     scan number or as a range as in x-y.  Default=search all.",
       "The search range x-y is inclusive of x and y.", "true");
-  set_boolean_parameter("smart-offset", FALSE,
-      "Start the binning of the m/z axis at a data-driven\n"
-      "     value rather than using 0.0 Da.", 
+  /* N.B. Use NaN to indicate that no user preference was specified.
+   * In this case, the default value depends on the mass type. */
+  set_double_parameter("mz-bin-width", NaN(), 0.0, BILLION,
+      "Specify the width of the bins used to\n"
+      "     discretize the m/z axis.  Default=1.0005079 for monoisotopic mass\n"
+      "     or 1.0011413 for average mass.",
+      "Available for crux-search-for-matches.", "true");
+  set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, -1.0, 1.0,
+      "Specify the location of the left edge of the\n"
+      "     first bin used to discretize the m/z axis.  Default=0.68",
       "Available for crux-search-for-matches.", "true");
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
       "Minimum mass of spectra to be searched.\n     Default=0.",

@@ -27,13 +27,13 @@
  * The size of the bins for discretizing the m/z axis of the
  * observed spectrum.  For use with monoisotopic mass.
  */
-#define bin_width_mono 1.0005079
+#define BIN_WIDTH_MONO 1.0005079
 
 /**
  * The size of the bins for discretizing the m/z axis of the
  * observed spectrum.  For use with average mass.
  */
-#define bin_width_average 1.0011413
+#define BIN_WIDTH_AVERAGE 1.0011413
 
 /**
  * Maximum range for cross correlation offset.
@@ -90,11 +90,6 @@
   ((int)((VALUE / BIN_SIZE) + 0.5 + BIN_OFFSET))
 
 /**
- * Starting location for zeroth m/z bin.
- */
-#define SMART_MZ_OFFSET 0.68
-
-/**
  * \struct scorer
  * \brief An object to score spectrum v. spectrum or spectrum v. ion_series
  */
@@ -124,6 +119,24 @@ void add_intensity(
   int add_idx,            ///< the idex to add the intensity -in
   FLOAT_T intensity         ///< the intensity to add -in
   );
+
+/**
+ * Set the bin width.  If the user does not request a specific width,
+ * then use pre-defined values depending on the fragment mass type.
+ */
+static double get_mz_bin_width()
+{
+  double return_value = get_double_parameter("mz-bin-width");
+
+  if (isnan(return_value)) {
+    if (get_mass_type_parameter("fragment-mass") == MONO) {
+      return_value = BIN_WIDTH_MONO;
+    } else {
+      return_value = BIN_WIDTH_AVERAGE;
+    }
+  }
+  return(return_value);
+}
 
 /**
  *\returns An (empty) scorer object.
@@ -216,11 +229,8 @@ void nomalize_intensity_array(
 
   // normalize all peaks
   for(; mz_idx < array_size; ++mz_idx){
-    // fprintf(stderr, "%.4f", intensity_array[mz_idx]);
-    intensity_array[mz_idx] = intensity_array[mz_idx] * threshold / max_intensity;
-
-    // DEBUG
-    // carp(CARP_INFO, "norm data[%d] = %.4f, max_intensity: %.4f",mz_idx, intensity_array[mz_idx], max_intensity); 
+    intensity_array[mz_idx] 
+      = intensity_array[mz_idx] * threshold / max_intensity;
   }
 }
 
@@ -236,17 +246,18 @@ void smooth_peaks(
   FLOAT_T* array = scorer->intensity_array;
 
   // create a new array, which will replace the original intensity array
-  FLOAT_T* new_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
+  FLOAT_T* new_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, 
+					  sizeof(FLOAT_T));
 
   if (scorer->type == SP){
     // iterate over all peaks
     for(; idx < (int)scorer->sp_max_mz-2; ++idx){
       // smooooth
-      new_array[idx] = (array[idx-2]+4*array[idx-1]+6*array[idx]+4*array[idx+1]+array[idx+2])/16;
+      new_array[idx] = (array[idx-2] + 
+			(4 * array[idx-1]) + 
+			(6 * array[idx]) + 
+			(4 * array[idx+1]) + array[idx+2] ) / 16;
 
-      // DEBUG
-      // carp(CARP_INFO, "smooth data[%d] = %f",idx, new_array[idx]); 
-      
       // set last idx in the array
       if(scorer->last_idx < idx && new_array[idx] == 0){
         scorer->last_idx = idx -1;
@@ -535,21 +546,11 @@ BOOLEAN_T create_intensity_array_sp(
   FLOAT_T max_intensity = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  FLOAT_T bin_width = bin_width_average;
-  FLOAT_T bin_offset = 0.0;
+  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
   FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
   int top_bins = 200;
-
-  // Switch to monoisotopic mass, if requested.
-  if (get_mass_type_parameter("fragment-mass") == MONO) {
-    bin_width = bin_width_mono;
-  }
-
-  // Switch to smart offset, if requested.
-  if (get_boolean_parameter("smart-offset") == TRUE) {
-    bin_offset = SMART_MZ_OFFSET;
-  }
 
   // if score type equals SP
   if(scorer->type != SP){
@@ -600,10 +601,6 @@ BOOLEAN_T create_intensity_array_sp(
   // set max_intensity
   scorer->max_intensity = max_intensity;
   
-  // DEBUG!!
-  // carp(CARP_INFO, "exp_cut_off: %.2f max_intensity: %.2f", experimental_mass_cut_off, (max_intensity*max_intensity));
-
-  
   // normalize intensity
   nomalize_intensity_array(scorer->intensity_array, scorer->last_idx+1, scorer->max_intensity, 100);
   
@@ -613,10 +610,10 @@ BOOLEAN_T create_intensity_array_sp(
   // zero peaks
   zero_peaks(scorer);
   
-  // Sequest28 modifications.
-  // Determine number of top peaks to select based on the experimental mass
-  // In Sequest27, the top peaks were always selected as 200.
-  // keep top ions of square-root(16*experimental mass) ranking, but not exceeding 200 ions
+  /* Sequest28 modifications.  Determine number of top peaks to select
+   * based on the experimental mass.  In Sequest27, the top peaks were
+   * always selected as 200.  Keep top ions of sqrt(16*experimental
+   * mass) ranking, but not exceeding 200 ions. */
   if(experimental_mass_cut_off-50 < 3200){
     // top bins are sqrt of 16* experimental mass
     top_bins = (int)(sqrt((experimental_mass_cut_off-50)*16) + 0.5);    
@@ -678,18 +675,8 @@ int calculate_ion_type_sp(
   int* before_cleavage 
     = (int*)mymalloc(get_ion_series_charge(ion_series)*sizeof(int));
   int cleavage_array_idx = 0;
-  FLOAT_T bin_width = bin_width_average;
-  FLOAT_T bin_offset = 0.0;
-
-  // Switch to monoisotopic mass, if requested.
-  if (get_mass_type_parameter("fragment-mass") == MONO) {
-    bin_width = bin_width_mono;
-  }
-
-  // Switch to smart offset, if requested.
-  if (get_boolean_parameter("smart-offset")) {
-    bin_offset = SMART_MZ_OFFSET;
-  }
+  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
 
   // initialize before cleavage indecies
   for(; cleavage_array_idx < get_ion_series_charge(ion_series); ++cleavage_array_idx){
@@ -719,7 +706,7 @@ int calculate_ion_type_sp(
 
     // if there is a match in the observed spectrum
     if(one_intensity > 0){
-      // int idx = (int)(get_ion_mass_z(ion)/bin_width_mono + 0.5);
+      // int idx = (int)(get_ion_mass_z(ion)/BIN_WIDTH_MONO + 0.5);
       // carp(CARP_INFO, "idx = %d\n", idx);
   
       // DEBUG
@@ -869,20 +856,10 @@ BOOLEAN_T create_intensity_array_observed(
   FLOAT_T peak_location = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  FLOAT_T bin_width = bin_width_average;
-  FLOAT_T bin_offset = 0.0;
+  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
   FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
-
-  // Switch to monoisotopic mass, if requested.
-  if (get_mass_type_parameter("fragment-mass") == MONO) {
-    bin_width = bin_width_mono;
-  }
-
-  // Switch to smart offset, if requested.
-  if (get_boolean_parameter("smart-offset")) {
-    bin_offset = SMART_MZ_OFFSET;
-  }
 
   // set max_mz and malloc space for the observed intensity array
   FLOAT_T sp_max_mz = 512;
@@ -1052,34 +1029,24 @@ void get_processed_peaks(
 
 
 /**
- * create the intensity arrays for theoretical spectrum
- * SCORER must have been created for XCORR type
+ * Create the intensity arrays for theoretical spectrum.
+ * SCORER must have been created for XCORR type.
  * \returns TRUE if successful, else FLASE
  */
 BOOLEAN_T create_intensity_array_theoretical(
-  SCORER_T* scorer,        ///< the scorer object -in/out
-  ION_SERIES_T* ion_series, ///< the ion series to score against the spectrum(theoretical) -in
-  FLOAT_T* theoretical       ///< the empty theoretical spectrum -out
+  SCORER_T*     scorer,     ///< the scorer object -in/out
+  ION_SERIES_T* ion_series, ///< the ion series to score against the spectrum (theoretical) -in
+  FLOAT_T*      theoretical ///< the empty theoretical spectrum -out
   )
 {
   ION_T* ion = NULL;
   int intensity_array_idx = 0;
   int ion_charge = 0;
   ION_TYPE_T ion_type;
-  FLOAT_T bin_width = bin_width_average;
-  FLOAT_T bin_offset = 0.0;
+  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
   // create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
-
-  // Switch to monoisotopic mass, if requested.
-  if (get_mass_type_parameter("fragment-mass") == MONO) {
-    bin_width = bin_width_mono;
-  }
-
-  // Switch to smart offset, if requested.
-  if (get_boolean_parameter("smart-offset")) {
-    bin_offset = SMART_MZ_OFFSET;
-  }
 
   // while there are ion's in ion iterator, add matched observed peak intensity
   while(ion_iterator_has_next(ion_iterator)){

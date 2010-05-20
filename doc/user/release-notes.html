@@ -15,6 +15,21 @@
 
 <ul>
 <li>
+Two options have been added to <code>crux search-for-matches</code>
+(<code>--mz-bin-width</code> and <code>--mz-bin-offset</code>) to
+allow control of the binning of the m/z axis.</li>
+
+<li>
+The default location of the left edge of the first bin along the m/z
+axis is 0.68, rather than 0.0.  This change makes bin edges less
+likely to fall near fragment peak locations.</li>
+
+<li>
+The log file now includes information about the date and time that the
+command was issued, the name of the computer on which the command was
+run, and the elapsed wall clock time at the end of the run.</li>
+
+<li>
 The command line option "<code>--version T</code>" has been replaced
 with a command "<code>crux version</code>" that prints the version
 number to standard output and then exits.</li>
