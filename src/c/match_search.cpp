@@ -81,7 +81,8 @@ int search_main(int argc, char** argv){
     "spectrum-max-mass",
     "spectrum-charge",
     "scan-number",
-    "smart-offset",
+    "mz-bin-width",
+    "mz-bin-offset",
     "parameter-file",
     "verbosity"
   };

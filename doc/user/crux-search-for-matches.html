@@ -199,17 +199,17 @@ should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.
 
 <li>
-<code>--smart-offset</code> &ndash; The binning of the m/z axis is
-performed using bins of size 1.0005079 Da when searching using
-monoisotopic mass and 1.0011413 Da with average mass.  By default, the
-first bin starts at 0 Da.  This switch instead makes the first bin
-start at 0.68 Da.  The motivation for this change relates to the
-locations of bin edges relative to the so-called "mass defect" of
-peptide b- and y-ions from the frequency of C, H, N, O, and S in
-peptides.  The default offset of zero results in about a 50/50 chance
-of the peak in the spectrum being in a different bin from that of the
-theoretical spectrum peak. This change affects larger fragments more
-than smaller fragments.</li>
+<code>--mz-bin-width &lt;float&gt;</code> Before calculation of the
+XCorr score, the m/z axes of the observed and theoretical spectra are
+discretized.  This parameter specifies the size of each bin.  By
+default, this value is 1.0005079 Da when searching using monoisotopic
+mass and 1.0011413 Da with average mass.</li>
+
+<li>
+<code>--mz-bin-offset &lt;float&gt;</code> &ndash; In the
+discretization of the m/z axes of the observed and theoretical
+spectra, this parameter specifies the location of the left edge of the
+first bin.  Default=0.68.</li>
 
 <LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
 A file containing command-line or additional parameters.  See
