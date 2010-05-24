@@ -516,7 +516,7 @@ const char* date_and_time
 
   if (first_time) {
     date_stream = (FILE *)popen("date", "r");
-    fgets(the_date, MAX_HOST_NAME, date_stream);
+    if( fgets(the_date, MAX_HOST_NAME, date_stream) == NULL ){ return NULL; }
     pclose(date_stream);
   }
 
