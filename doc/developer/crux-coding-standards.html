@@ -5,7 +5,6 @@
 
 <h1>Coding standards</h1>
 
-<
 
 <h3>Objects in C</h3>
 
@@ -23,6 +22,12 @@ also provide <code>new_&lt;object&gt;</code>,
 <code>free_&lt;object&gt;</code> and <code>print_&lt;object&gt;</code>
 functions.
 </p>
+<p>
+For the portion of crux written in C++, classes should be split
+between .h and .cpp files with declarations in the .h files and the 
+definitions in the .cpp files.  Member variables should be declared as
+private or protected with get and set functions as necessary.
+</p>
 
 
 <h3>Syntactic standards</h3>
@@ -31,6 +36,13 @@ functions.
 
 <li>
 Insert a space after every comma.
+
+<li>
+Insert a space around arithemtic operators.
+
+<li>
+Do not separate vairable names and the arrow operator (<code>-&gt;</code>)
+with a space.
 
 <li>
 Use no more than eight parameters per function.
@@ -56,7 +68,10 @@ name.
 
 <li>
 Use underscores, rather than internal capitalization, to separate
-multi-word variable and function names.
+multi-word variable and (non-class-member) function names.
+
+<li>
+Use a single trailing underscore for class member variables.
 
 <li>
 Indent two characters per level.  Note that, within emacs, this
@@ -72,8 +87,8 @@ comment at the end of the file:
  */
 </pre>
 
-This comment should be included in every <code>.c</code> and
-<code>.h</code> file. 
+This comment should be included in every <code>.c</code>, <code>.cpp
+</code> and <code>.h</code> file. 
 <P>
 In vim this is set by including the line 
 
@@ -129,7 +144,7 @@ For example:
 
 <li>
 When a fixed string assignment continues over more then one line,
-take advantage of ANSI C's implicit concatentation:
+take advantage of ANSI C's implicit concatenation:
 
 <pre>
   string = "this is a really long string"
@@ -141,6 +156,9 @@ Do not use single-letter variable names.
 
 <li>
 Name loop indices using <code>&lt;name&gt;_idx</code>.
+
+<li>
+Name loop iterators using <code>&lt;name&gt;_itr</code>.
 
 <li>
 Use only the following allowed abbreviations:
@@ -178,10 +196,11 @@ Define variables anywhere within a block.
 <li>
 Use all lowercase characters.  The only exceptions are constants,
 enumerated types (see below) and macros, which are written in all
-uppercase.
+uppercase.  Class methods should begin with a lowercase letter and 
+capitalize multiple words (i.e. camel case).
 
 <li>
-Name files using hyphens rather than underscores.
+Name files with the class name as it is written (e.g. PeptideIterator.h).
 
 <li>
 Usage statements should conform to the following:
@@ -192,7 +211,8 @@ Usage statements should conform to the following:
   </ul>
 
 <li>
-Routines should with zero status to indicate success. Non-zero value indicates failure of some kind.
+Routines that return a status indicator should use zero to indicate success and
+a non-zero value to indicate failure of some kind.
 
 <li>
 Use <code>/*  */</code> comment style only for multi-line comments.
@@ -202,10 +222,18 @@ after the <code>//</code>.
 <li>
 Enumerated types should be defined in all caps as
 <code>&lt;type&gt;_T</code>. Values of the type should also be in all
-caps, with names like <code>&lt;name&gt;_&lt;type&gt;</code>.  One
-value should be <code>INVALID_&lt;type&gt;</code>.  All
-<code>if</code> statements that handle the type should handle all
-possible values.
+caps, with names like <code>&lt;name&gt;_&lt;type&gt;</code>.  Following all of 
+the legal values should be <code>NUM_&lt;name&gt;_TYPES</code>, which can be
+used to enumerate through all of the types.  The last value should be
+<code>INVALID_&lt;type&gt;</code>.  All <code>if</code> 
+and <code>case</code> statements that handle the type should handle all
+legal values.  <code>case</code> statments may use <code>default</code> for the
+last two invalid types.
+
+<li>
+C class-like structs should be named in all caps as 
+<code>&lt;name&gt;_T</code>.  C++ classes should be named with internal 
+capitalization as in <code>ClassName</code>.
 
 <li>
 Known deviations from the coding standards and other bugs should be
@@ -343,7 +371,6 @@ explanatory comment.
 
 </ul>
 
-
 <h3>Command line standards</h3>
 
 <ul>
@@ -352,7 +379,7 @@ explanatory comment.
 All command lines should be of the following form:
 
 <pre>
-     command [options] arg1 arg2
+     crux command [options] arg1 arg2
 </pre>
 
 where <code>arg1 arg2</code> are required arguments.  Obviously, the
@@ -372,8 +399,10 @@ name should be interpreted to mean "read from standard input."  Where
 this is possible, it should be documented.
 
 <li>
-Every program should provide a <code>--verbose [0|1|2|3|4]</code>
-option that controls the verbosity of messages to standard error.
+Every program should provide a <code>--verbose</code>
+option that controls the verbosity of messages to standard error and a
+<code>--parameter-file</code> option that allows additional parameters
+to be specified via a file.
 
 <li>
 The usage message should list the default value for every option.
