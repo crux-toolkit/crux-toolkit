@@ -1,3 +1,4 @@
+CC = gcc
 CFLAGS=-I.
 CHECK_OBJ = \
   check.o \
