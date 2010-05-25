@@ -5,7 +5,7 @@
 // also in parameter.c
 void parse_custom_enzyme(const char* rule_str);
 
-// delcare things to set up
+// declare things to set up
 const char* ops[1];
 const char* args[1];
 char enzyme_rule[128];
