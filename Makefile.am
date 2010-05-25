@@ -69,6 +69,7 @@ bdist:
 		cp tide/*.html bdist/tide; \
 		cp tide/*.css bdist/tide; \
 		cp tide/worm-demo.sh bdist/tide; \
+		cp tide/README bdist/tide; \
 		cp tide/yeast-demo.sh bdist/tide; \
 		cp tide/$(ar)/tide-index bdist/tide; \
 		cp tide/$(ar)/tide-index bdist/tide; \
