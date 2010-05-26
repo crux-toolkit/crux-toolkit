@@ -1,13 +1,12 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # A script to create the default.params file to distribute in the docs
-# and to store in src/c.
-# Writes a param file with default values.  Re-orders the options and
-# adds a header.  Copies to documents directory.
+# and to store in src/c.  Writes a param file with default values.
+# Adds a header.  Copies to documents directory.  This script assumes
+# that it is being run from crux/src/c.  It is up to the developer to
+# run this script after any changes are made to the parameters.
 
-# Assumes it is being run from crux/src/c
-
-# 1. Create param file
+# Create param file
 rm -rf crux-output 
 ./crux search-for-matches smoke/test.ms2 smoke/test.fasta 1>/dev/null 2>&1
 
@@ -17,49 +16,24 @@ then
   exit;
 fi
 
-# 2. Write a header
+# Write a header
 echo "####################################################################
 # Sample parameter file
 #
-# Lines starting with '#' will be ignored
-# Don't leave any space before or after a parameter setting
-# format: <parameter-name>=<value>
+# Lines starting with '#' will be ignored.  Don't leave any space
+# before or after a parameter setting.  The format is
+#
+# <parameter-name>=<value>
 #
 #####################################################################
 " > default.params
+cat crux-output/search.params.txt >> default.params
 
-# 3. Reorder the options so they are grouped by function
-for op in verbosity version parameter-file overwrite \
-          output-dir fileroot print-search-progress \
-          decoy-location num-decoys-per-target reverse-sequence \
-          scan-number top-match precision display-summed-mod-masses \
-          min-length max-length isotopic-mass fragment-mass \
-          ion-tolerance  search-decoy-pvalue-file \
-          min-mass max-mass spectrum-min-mass spectrum-max-mass \
-          spectrum-charge max-rank-preliminary use-mstoolkit \
-          enzyme custom-enzyme digestion missed-cleavages \
-          mod cmod nmod max-mods max-aas-modified compute-p-values \
-          feature-file output-sequence sort stats unique-peptides \
-          precursor-window precursor-window-type \
-          precursor-window-decoy precursor-window-type-decoy \
-          min-weibull-points print-theoretical-spectrum use-mgf \
-          xlink-include-selfloops xlink-include-deadends xlink-include-linears \
-          xcorr-use-flanks isotope primary-ions neutral-losses flanking \
-          precursor-ions nh3 max-ion-charge h2o A C D E F G H I K L M \
-          N P Q R S T V W Y ; 
-
-
-
-do
-  grep -B2 "^$op=" crux-output/search.params.txt >> default.params
-  echo "" >> default.params
-done
-
-# 4. Rename the value for write-parameter-file
+# Rename the value for parameter-file.
 sed -i 's/parameter-file=T/parameter-file=F/' default.params
 
-# 5. Copy to crux/doc/user
+# Copy to crux/doc/user
 cp -f default.params ../../doc/user/default.params
 
-# 6. Remove output files
+# Remove output files
 rm -rf crux-output

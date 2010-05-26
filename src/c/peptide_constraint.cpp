@@ -93,14 +93,16 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint(
  */
 PEPTIDE_CONSTRAINT_T* new_peptide_constraint_from_parameters(){
   PEPTIDE_CONSTRAINT_T* new_constraint = allocate_peptide_constraint();
-  //new_constraint->peptide_type = get_peptide_type_parameter("cleavages");
   new_constraint->enzyme = get_enzyme_type_parameter("enzyme");
   new_constraint->digestion = get_digest_type_parameter("digestion");
   new_constraint->min_mass = get_double_parameter("min-mass");
   new_constraint->max_mass = get_double_parameter("max-mass");
   new_constraint->min_length = get_int_parameter("min-length");
   new_constraint->max_length = get_int_parameter("max-length");
-  new_constraint->num_mis_cleavage = get_int_parameter("missed-cleavages");
+  // TODO : change this after missed cleavage is an integer parameter
+  // rather than boolean.
+  new_constraint->num_mis_cleavage 
+    = (int)get_boolean_parameter("missed-cleavages");
   new_constraint->mass_type = get_mass_type_parameter("isotopic-mass");
 
   return new_constraint;

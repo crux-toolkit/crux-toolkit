@@ -1,7 +1,7 @@
-# N.B.: when debugging the unit tests set the environment variable
-# CK_FORK=no
-# This forces all the unit tests to run in a single process, which
-# makes tracing the flow in a debugger much easier.
+# NOTE: When debugging unit tests using the check library you usually
+# want to set the environment variable CK_FORK to no. This keeps the
+# check library from running the tests on multiple threads which makes
+# them hard to debug.
 BINDIR  =../../../../bin/
 SRCDIR  =../../
 PERCOLATOR_DIR=../../../c/percolator

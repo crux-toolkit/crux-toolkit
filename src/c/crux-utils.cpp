@@ -1644,6 +1644,48 @@ int choose_charge(FLOAT_T precursor_mz, ///< m/z of spectrum precursor ion
   return -1;
 }
 
+/**
+ * Maximum characters per line when printing formatted text.
+ */
+#define MAX_CHARS_PER_LINE 70
+
+
+/**
+ *\brief Extend a given string with lines not exceeding a specified width, 
+ * breaking on spaces.
+ */
+void strcat_formatted
+(
+ char*       string_to_extend,
+ const char* lead_string,        // Appears at the start of each line.
+ const char* extension           // Text to add.
+ )
+{
+  int i_string = 0;
+  int string_length = strlen(extension);
+  char buffer[MAX_CHARS_PER_LINE + 1];
+
+  while (string_length - i_string > MAX_CHARS_PER_LINE) {
+
+    // Be sure to break on a space.
+    int index_of_last_space = MAX_CHARS_PER_LINE;
+    while (extension[i_string + index_of_last_space] != ' ') {
+      index_of_last_space--;
+    }
+
+    sprintf(buffer, "%.*s", index_of_last_space, &(extension[i_string]));
+
+    strcat(string_to_extend, lead_string);
+    strcat(string_to_extend, buffer);
+    strcat(string_to_extend, "\n");
+
+    i_string += index_of_last_space + 1;
+  }
+  strcat(string_to_extend, lead_string);
+  strcat(string_to_extend, &(extension[i_string]));
+  strcat(string_to_extend, "\n");
+}
+
 
 /*
  * Local Variables:

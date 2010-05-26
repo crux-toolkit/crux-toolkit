@@ -1,3 +1,14 @@
+# To set up debugging:
+#
+#   make clean
+#   make CXXFLAGS=" -ggdb -O0 -DDEBUG " CFLAGS=" -ggdb -O0 -DDEBUG "
+# 
+# CXXFLAGS contains the options for the C++ compiler. The CFLAGS
+# argument is for the C compiler, and is only needed if you are going
+# to debug down into the MSTOOLKIT routines.  The -DDEBUG will cause
+# the program to abort and dump core, rather than simply exit, when an
+# error is encountered.
+
 SUBDIRS = src doc
 
 if SEARCH
@@ -86,7 +97,7 @@ bdist:
 checksum:
 	md5sum $(distdir)-$(ar)-$(name).zip > $(distdir)-$(ar)-$(name).zip.md5sum.txt
 	md5sum $(distdir).tar.gz > $(distdir).tar.gz.md5sum.txt
-	
+
 ignore-files:
 	svn update .svnignore
 	svn propset svn:ignore -F .svnignore .

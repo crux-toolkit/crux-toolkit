@@ -118,7 +118,11 @@ void carp( int verbosity, const char* format, ...) {
   } 
   if (verbosity == CARP_FATAL) {
     // Fatal carps cause the program to exit
+#ifdef DEBUG
+    abort(); // Dump core in DEBUG mode.  Use 'make CXXFLAGS=-DDEBUG"'
+#else
     exit(1);
+#endif
   }
 }
 

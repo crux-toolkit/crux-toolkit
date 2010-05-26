@@ -213,6 +213,43 @@ void read_mods_from_file(char* param_file);
 
 
 /**
+ * The size of the bins for discretizing the m/z axis of the
+ * observed spectrum.  For use with monoisotopic mass.
+ */
+#define BIN_WIDTH_MONO 1.0005079
+
+/**
+ * The size of the bins for discretizing the m/z axis of the
+ * observed spectrum.  For use with average mass.
+ */
+#define BIN_WIDTH_AVERAGE 1.0011413
+
+/**
+ * Set the m/z bin width.  If the user does not request a specific
+ * width, then use pre-defined values depending on the fragment mass
+ * type.
+ */
+static void set_mz_bin_width()
+{
+  double new_value = get_double_parameter("mz-bin-width");
+
+  if (isnan(new_value)) {
+
+    // If no width specified, choose based on mass type.
+    if (get_mass_type_parameter("fragment-mass") == MONO) {
+      new_value = BIN_WIDTH_MONO;
+    } else {
+      new_value = BIN_WIDTH_AVERAGE;
+    }
+
+    // Update the parameter hash.
+    char buffer[PARAMETER_LENGTH];
+    snprintf(buffer, PARAMETER_LENGTH, "%f", new_value);
+    add_or_update_hash(parameters, "mz-bin-width", buffer);
+  }
+}
+
+/**
  * initialize parameters
  * ONLY add optional parameters here!!!
  * MUST declare ALL optional parameters in array to be used
@@ -328,12 +365,12 @@ void initialize_parameters(void){
       "progress of execution, 40-more progress information, 50-debug info, "
       "60-detailed debug info.", "true");
   set_string_parameter("parameter-file", NULL, 
-      "Set additional options with values in the given\n     file.",
+      "Set additional options with values in the given file.",
       "Available for all crux programs. Any options specified on the "
       "command line will override values in the parameter file.", "true");
   set_boolean_parameter("overwrite", FALSE, 
-      "Replace existing files (T) or exit if attempting to\n"
-      "     overwrite (F). Default=F.",
+      "Replace existing files (T) or exit if attempting to "
+      "overwrite (F). Default=F.",
       "Available for all crux programs.  Applies to parameter file "
       "as well as index, search, and analysis output files.", "true");
     
@@ -368,16 +405,16 @@ void initialize_parameters(void){
       "and crux-generate-peptides. Parameter file only for crux-search-"
       "for-matches.", "true");
   set_mass_type_parameter("isotopic-mass", AVERAGE, 
-      "Which isotopes to use in calcuating peptide mass.\n"
-      "     <string>=average|mono. Default=average.", 
+      "Which isotopes to use in calcuating peptide mass. "
+      "<string>=average|mono. Default=average.", 
       "Used from command line or parameter file by crux-create-index and "
       "crux-generate-peptides.  Parameter file only for "
       "crux-search-for-matches.", "true");
   set_digest_type_parameter("digestion", FULL_DIGEST,
-      "Degree of digestion used to generate peptides.\n"
-      "     <string>=full-digest|partial-digest. Either both ends or one end\n"
-      "     of a peptide must conform to enzyme specificity rules.\n"
-      "     Default=full-digest.",
+      "Degree of digestion used to generate peptides. "
+      "<string>=full-digest|partial-digest. Either both ends or one end "
+      "of a peptide must conform to enzyme specificity rules. "
+      "Default=full-digest.",
       "Used in conjunction with enzyme option when enzyme is not set to "
       "to 'no-enzyme'.  Available from command line or parameter file for "
       "crux-generate-peptides and crux create-index.  Available from parameter"
@@ -387,11 +424,11 @@ void initialize_parameters(void){
       "chymotrypsin [FWY][P].",
       "true");
   set_enzyme_type_parameter("enzyme", TRYPSIN,
-      "Enzyme to use for in silico digestion of proteins.\n"
-      "     <string>=trypsin|chymotrypsin|elastase|clostripain|\n"
-      "     cyanogen-bromide|iodosobenzoate|proline-endopeptidase|\n"
-      "     staph-protease|aspn|modified-chymotrypsin|no-enzyme.\n"
-      "     Default=trypsin.", 
+      "Enzyme to use for in silico digestion of proteins. "
+      "<string>=trypsin|chymotrypsin|elastase|clostripain| "
+      "cyanogen-bromide|iodosobenzoate|proline-endopeptidase| "
+      "staph-protease|aspn|modified-chymotrypsin|no-enzyme. "
+      "Default=trypsin.", 
       "Used in conjunction with the options digestion and missed-cleavages. "
       "Use 'no-enzyme' for non-specific digestion.  Available "
       "from command line or parameter file for crux-generate-peptides "
@@ -406,14 +443,14 @@ void initialize_parameters(void){
       "true");
 
   set_window_type_parameter("precursor-window-type", WINDOW_MASS,
-      "Window type to use for selecting candidate\n"
-      "     peptides.  <string>=mass|mz|ppm. Default=mass.",
+      "Window type to use for selecting candidate "
+      "peptides.  <string>=mass|mz|ppm. Default=mass.",
       "Available for search-for-matches, search-for-xlinks.",
       "true");
 
   set_string_parameter("custom-enzyme", NULL, 
-      "Specify rules for in silico digestion of proteins.\n"
-      "     See HTML documentation for syntax. Default is trypsin.",
+      "Specify rules for in silico digestion of proteins. "
+      "See HTML documentation for syntax. Default is trypsin.",
       "Overrides the enzyme option.  Two lists of residues are given enclosed "
       "in square brackets or curly braces and separated by a |. The first list "
       "contains residues required/prohibited before the cleavage site and the "
@@ -426,7 +463,7 @@ void initialize_parameters(void){
       "represented as [X]|[D].",
                        "true");
   set_boolean_parameter("missed-cleavages", FALSE, 
-      "Include peptides with missed cleavage sites.\n     Default=F.",
+      "Include peptides with missed cleavage sites. Default=F.",
       "Available from command line or parameter file for crux-create-index "
       "and crux-generate-peptides.  Parameter file only for crux-search-"
       "for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin> "
@@ -466,39 +503,39 @@ void initialize_parameters(void){
       " Crux also offers a p-value calculation for each psm based on xcorr "
       "or sp (xcorr-pvalue, sp-pvalue).", "false"); 
   set_boolean_parameter("compute-p-values", FALSE, 
-      "Compute p-values for the main score type.\n     Default=F.",
+      "Compute p-values for the main score type. Default=F.",
       "Currently only implemented for XCORR.", "true");
   set_boolean_parameter("use-mz-window", FALSE,
-      "Use mass-to-charge rather than mass for finding\n"
-      "     candidate peptides. Default=F.",
+      "Use mass-to-charge rather than mass for finding "
+      "candidate peptides. Default=F.",
       "Available for crux-search-for-matches", "true");
   set_boolean_parameter("use-mstoolkit", FALSE,
       "Use MSToolkit to parse spectra. Default=F.",
       "Available for crux-search-for-matches", "true");
   set_string_parameter("scan-number", NULL,
-      "Search only select spectra specified as a single\n"
-      "     scan number or as a range as in x-y.  Default=search all.",
+      "Search only select spectra specified as a single "
+      "scan number or as a range as in x-y.  Default=search all.",
       "The search range x-y is inclusive of x and y.", "true");
   /* N.B. Use NaN to indicate that no user preference was specified.
    * In this case, the default value depends on the mass type. */
   set_double_parameter("mz-bin-width", NaN(), 0.0, BILLION,
-      "Specify the width of the bins used to\n"
-      "     discretize the m/z axis.  Default=1.0005079 for monoisotopic mass\n"
-      "     or 1.0011413 for average mass.",
+      "Specify the width of the bins used to "
+      "discretize the m/z axis.  Default=1.0005079 for monoisotopic mass "
+      "or 1.0011413 for average mass.",
       "Available for crux-search-for-matches.", "true");
   set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, -1.0, 1.0,
-      "Specify the location of the left edge of the\n"
-      "     first bin used to discretize the m/z axis.  Default=0.68",
+      "Specify the location of the left edge of the "
+      "first bin used to discretize the m/z axis. Default=0.68",
       "Available for crux-search-for-matches.", "true");
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
-      "Minimum mass of spectra to be searched.\n     Default=0.",
+      "Minimum mass of spectra to be searched. Default=0.",
       "Available for crux-search-for-matches.", "true");
   set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, 
-      "Maximum mass of spectra to search.\n     Default no maximum.",
+      "Maximum mass of spectra to search. Default no maximum.",
       "Available for crux-search-for-matches.", "true");
   set_string_parameter("spectrum-charge", "all", 
-      "Spectrum charge states to search.\n"
-      "     <string>=1|2|3|all. Default=all.",
+      "Spectrum charge states to search. "
+      "<string>=1|2|3|all. Default=all.",
       "Used by crux-search-for-matches to limit the charge states "
       "considered in the search.  With 'all' every spectrum will be "
       "searched and spectra with multiple charge states will be searched "
@@ -509,8 +546,8 @@ void initialize_parameters(void){
       "Used by crux create-index, crux search-for-matches, "
       "crux compute-q-values, and crux percolator.", "true");
   set_string_parameter("output-dir", "crux-output", 
-      "Folder to which results will be written.\n"
-      "     Default='crux-output'.",
+      "Folder to which results will be written. "
+      "Default='crux-output'.",
       "Used by crux create-index, crux search-for-matches, "
       "crux compute-q-values, and crux percolator.", "true");
   set_string_parameter("search-decoy-pvalue-file", "search.decoy.p.txt", 
@@ -520,19 +557,19 @@ void initialize_parameters(void){
       "file is controlled by --output-dir.", "true");
   // user options regarding decoys
   set_int_parameter("num-decoys-per-target", 2, 0, 10,
-      "Number of decoy peptides to search for every\n"
-      "     target peptide searched. Default=2.",
-      "Use --decoy-location to control where they are returned (which\n"
-      "file(s)).  Available only from the command line for search-for-matches.\n",
+      "Number of decoy peptides to search for every "
+      "target peptide searched. Default=2.",
+      "Use --decoy-location to control where they are returned (which "
+      "file(s)).  Available only from the command line for search-for-matches. ",
       "true");
   set_string_parameter("decoy-location", "separate-decoy-files",
-      "Specify location of decoy search results.\n"
-      "     <string>=target-file|one-decoy-file|separate-decoy-files.\n"
-      "     Default=separate-decoy-files.",
-      "Applies when num-decoys-per-target > 0.  Use 'target-file' to mix\n"
-      "target and decoy search results in one file. 'one-decoy-file' will\n"
-      "return target results in one file and all decoys in another.\n"
-      "'separate-decoy-files' will create as many decoy files as\n"
+      "Specify location of decoy search results. "
+      "<string>=target-file|one-decoy-file|separate-decoy-files. "
+      "Default=separate-decoy-files.",
+      "Applies when num-decoys-per-target > 0.  Use 'target-file' to mix "
+      "target and decoy search results in one file. 'one-decoy-file' will "
+      "return target results in one file and all decoys in another. "
+      "'separate-decoy-files' will create as many decoy files as "
       "num-decoys-per-target.",
       "true");
 
@@ -564,8 +601,8 @@ void initialize_parameters(void){
       "on to be scored with xcorr.  This saves some time.  If set to 0, "
       "all psms are scored with both scores. ", "true");
   set_int_parameter("top-match", 5, 1, BILLION, 
-      "The number of PSMs per spectrum writen to the output\n" 
-      "      file(s).  Default=5.",
+      "The number of PSMs per spectrum writen to the output " 
+      " file(s).  Default=5.",
       "Available from parameter file for crux-search-for-matches.",
       "true");
   set_int_parameter("psms-per-spectrum-reported", 0, 0, BILLION,
@@ -576,22 +613,18 @@ void initialize_parameters(void){
       "Given a real-number value, will always produce the same decoy seqs",
       "false");
   set_double_parameter("precursor-window", 3.0, 0, 100, 
-      "Search peptides within +/- 'precursor-window'\n"
-      "     of the spectrum mass.  Definition of precursor window depends\n"
-      "     upon precursor-window-type. Default=3.0.",
+      "Search peptides within +/- 'precursor-window' "
+      "of the spectrum mass.  Definition of precursor window depends "
+      "upon precursor-window-type. Default=3.0.",
       "Available from the parameter file only for crux-search-for-matches, "
       "crux-create-index, and crux-generate-peptides.",
       "true");
   set_mass_type_parameter("fragment-mass", MONO, 
-      "Which isotopes to use in calculating fragment ion mass.\n"
-      "     <string>=average|mono. Default=mono.", 
+      "Which isotopes to use in calculating fragment ion mass. "
+      "<string>=average|mono. Default=mono.", 
       "Parameter file only.  "
       "Used by crux-search-for-matches and crux-predict-peptide-ions.",
                           "true");
-  set_double_parameter("ion-tolerance", 0.5, 0, BILLION,
-      "Tolerance used for matching observed peaks to predicted "
-      "fragment ions.  Default=0.5.",
-      "Available from parameter-file for crux-search-for-matches.", "true");
   set_string_parameter("mod", "NO MODS",
       "Specify a variable modification to apply to peptides.  " 
       "<mass change>:<aa list>:<max per peptide>. Default=no mods.",
@@ -852,31 +885,31 @@ void initialize_parameters(void){
       "true");
 
   set_boolean_parameter("xlink-include-linears", TRUE, 
-      "Include linear peptides in the\n"
-      "     database.  Default=T.",
+      "Include linear peptides in the "
+      "database.  Default=T.",
       "Available for crux search-for-xlinks program (Default=T).",
       "true");
   set_boolean_parameter("xlink-include-deadends", TRUE, 
-      "Include dead-end peptides in the\n"
-      "     database.  Default=T.",
+      "Include dead-end peptides in the "
+      "database.  Default=T.",
       "Available for crux search-for-xlinks program.",
       "true");
   set_boolean_parameter("xlink-include-selfloops", TRUE, 
-      "Include self-loop peptides in the\n"
-      "     database.  Default=T.",
+      "Include self-loop peptides in the "
+      "database.  Default=T.",
       "Available for crux search-for-xlinks program.",
       "true");
 
   set_double_parameter("precursor-window-decoy", 20.0, 0, 1e6, 
-      "Search decoy-peptides within +/-\n"
-      "      'mass-window-decoy' of the spectrum mass.  Default=20.0.",
+      "Search decoy-peptides within +/- "
+      " 'mass-window-decoy' of the spectrum mass.  Default=20.0.",
       "Available for crux search-for-xlinks. ",
       "true");
 
   set_window_type_parameter("precursor-window-type-decoy", WINDOW_MASS,
-      "Window type to use for selecting\n"
-      "     decoy peptides from precursor mz. <string>=mass|mz|ppm.\n"
-      "     Default=mass.",
+      "Window type to use for selecting "
+      "decoy peptides from precursor mz. <string>=mass|mz|ppm. "
+      "Default=mass.",
       "Available for crux search-for-matches",
       "true");
 
@@ -896,15 +929,18 @@ void initialize_parameters(void){
       "true");
   */
   set_int_parameter("min-weibull-points", 4000, 1, BILLION, 
-      "Minimum number of points for estimating the\n"
-      "     Weibull parameters.  Default=4000.",
+      "Minimum number of points for estimating the "
+      "Weibull parameters.  Default=4000.",
       "Available for crux search-for-xlinks", "true");
-  
+
   // now we have initialized the parameters
   parameter_initialized = TRUE;
   usage_initialized = TRUE;
   type_initialized = TRUE;
 
+  // Set m/z bin width based on mass type.
+  set_mz_bin_width();
+  
 }
 
 
@@ -968,7 +1004,7 @@ BOOLEAN_T select_cmd_line(  //remove options from name
     /* check that the option is in the params hash */
     if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
       carp(CARP_FATAL, 
-           "Cannot select parameter '%s'. Value, usage or type not found.\n"
+           "Cannot select parameter '%s'. Value, usage or type not found. "
            "Found value: %s, usage: %s, type: %s", 
            option_names[i],
            value_ptr,
@@ -1414,11 +1450,11 @@ BOOLEAN_T check_option_type_and_bounds(const char* name){
     }
     break;
   case STRING_P:
-    carp(CARP_DETAILED_DEBUG, "found string opt with value %s\n", value_str);
+    carp(CARP_DETAILED_DEBUG, "found string opt with value %s ", value_str);
     //check list of legal values?
     break;
   case MASS_TYPE_P:
-    carp(CARP_DETAILED_DEBUG, "found mass_type opt with value %s\n", 
+    carp(CARP_DETAILED_DEBUG, "found mass_type opt with value %s ", 
          value_str);
     if( ! string_to_mass_type( value_str, &mass_type )){
       success = FALSE;
@@ -1426,7 +1462,7 @@ BOOLEAN_T check_option_type_and_bounds(const char* name){
     }
     break;
   case DIGEST_TYPE_P:
-      carp(CARP_DETAILED_DEBUG, "found digest_type param, value '%s'\n", 
+      carp(CARP_DETAILED_DEBUG, "found digest_type param, value '%s' ", 
            value_str);
     if( string_to_digest_type(value_str) == INVALID_DIGEST){
       success = FALSE;
@@ -1435,7 +1471,7 @@ BOOLEAN_T check_option_type_and_bounds(const char* name){
     }
     break;
   case ENZYME_TYPE_P:
-      carp(CARP_DETAILED_DEBUG, "found enzyme_type param, value '%s'\n", 
+      carp(CARP_DETAILED_DEBUG, "found enzyme_type param, value '%s' ", 
            value_str);
     if( string_to_enzyme_type(value_str) == INVALID_ENZYME){
       success = FALSE;
@@ -1520,6 +1556,11 @@ BOOLEAN_T check_option_type_and_bounds(const char* name){
 }
 
 /**
+ * Maximum size of the description of a parameter.
+ */
+#define PARAMETER_BUFFER 10000
+
+/**
  * \brief Creates a file containing all parameters and their current
  * values in the parameter file format. Created in the output directory
  * named by the parameter "output-dir".
@@ -1542,11 +1583,11 @@ void print_parameter_file(char** filename){
     char* key = hash_iterator_next(iterator);
     char* show_users = (char*)get_hash_value(for_users, key);
     if( strcmp(show_users, "true") == 0 ){
-      fprintf(param_file, "# %s\n# %s\n%s=%s\n\n",
-              (char*)get_hash_value(usages, key),
-              (char*)get_hash_value(file_notes, key),
-              key,
-              (char*)get_hash_value(parameters, key));
+      char buffer[PARAMETER_BUFFER] = "";
+      strcat_formatted(buffer, "# ", (char*)get_hash_value(usages, key));
+      strcat_formatted(buffer, "# ", (char*)get_hash_value(file_notes, key));
+      fprintf(param_file, "%s%s=%s\n\n", buffer, key, 
+	      (char*)get_hash_value(parameters, key));
     }
   }
 
@@ -1635,8 +1676,8 @@ void parse_parameter_file(
         idx++;
       }
       if(idx == 0 || idx >= (int)(strlen(line)-1)){
-        carp(CARP_FATAL, "Lines in a parameter file must have the form:\n"
-             "\n\tname=value\n\n"
+        carp(CARP_FATAL, "Lines in a parameter file must have the form: "
+             "\n\tname=value\n "
              "In file %s, the line '%s' does not have this format",
              parameter_filename, line);
       }
@@ -1698,7 +1739,7 @@ BOOLEAN_T get_boolean_parameter(
  // make sure that there is enough storage allocated in the string
   if((int)strlen(value) 
      > PARAMETER_LENGTH) {
-    carp(CARP_FATAL, "parameter %s with value %s was too long to copy to string\n",
+    carp(CARP_FATAL, "parameter %s with value %s was too long to copy to string ",
         name,
         value);
   }
@@ -1713,7 +1754,7 @@ BOOLEAN_T get_boolean_parameter(
     return(FALSE);
   } 
   else {
-    carp(CARP_FATAL, "Invalid Boolean parameter %s.\n", buffer);
+    carp(CARP_FATAL, "Invalid Boolean parameter %s. ", buffer);
   }
   
   carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
@@ -1760,7 +1801,7 @@ int get_int_parameter(
   if ((value == LONG_MIN) || 
       (value == LONG_MAX) || 
       (endptr == int_value)) {
-    carp(CARP_FATAL, "Conversion error when trying to convert parameter %s with value %s to an int\n",
+    carp(CARP_FATAL, "Conversion error when trying to convert parameter %s with value %s to an int ",
         name, 
         int_value);
         exit(1);
@@ -1813,7 +1854,7 @@ double get_double_parameter(
   /*if((value == HUGE_VALF) ||  // AAK removed //BF: why?
     (value == -HUGE_VALF) || 
     (endptr == double_value)) {
-    capr(CARP_FATAL, "Conversion error when trying to convert parameter %s with value %s to an double\n",
+    capr(CARP_FATAL, "Conversion error when trying to convert parameter %s with value %s to an double ",
     name,
     double_value);
     exit(1); */
@@ -1907,7 +1948,7 @@ DIGEST_T get_digest_type_parameter( const char* name ){
   DIGEST_T digest_type = string_to_digest_type(param);
   if( digest_type == INVALID_DIGEST ){
     carp(CARP_FATAL, "Digest_type parameter %s has the value %s " 
-         "which is not of the correct type\n", name, param);
+         "which is not of the correct type.", name, param);
   }
   return digest_type;
 }
@@ -1919,7 +1960,7 @@ ENZYME_T get_enzyme_type_parameter( const char* name ){
   ENZYME_T enzyme_type = string_to_enzyme_type(param);
   if( enzyme_type == INVALID_ENZYME ){
     carp(CARP_FATAL, "Enzyme_type parameter %s has the value %s " 
-         "which is not of the correct type\n", name, param);
+         "which is not of the correct type.", name, param);
   }
   return enzyme_type;
 }

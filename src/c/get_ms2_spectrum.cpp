@@ -40,7 +40,6 @@ static void parse_scan_numbers
     }
     string_index++;
   }
-  fprintf(stderr, "No hyphen!\n");
 
   // If no hyphen, then the range is just a single integer.
   *min_scan = *max_scan = atoi(my_string);
