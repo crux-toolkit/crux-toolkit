@@ -79,8 +79,11 @@ void match_teardown(){
   free_match(mmod);
   free_match(mdecoymod);
   free_protein(prot);
+  /*
+    The following two lines cause problems on MacOS.  --WSN 2010-05-25
   free_peptide(pep);
   free_peptide(pepmod);
+  */
 }
 
 START_TEST(test_create){

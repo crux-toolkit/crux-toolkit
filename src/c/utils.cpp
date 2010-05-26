@@ -12,7 +12,6 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h> 
-// #include <sys/resource.h>
 #include <math.h>
 #include <assert.h>
 #include <errno.h>
@@ -488,9 +487,9 @@ int convert_enum_type_str
   return( default_value ); 
 }
 
-/****************************************************************************
-* \brief Get the name of the CPU.
-* ****************************************************************************/
+/************************************************************************//**
+ * \brief Get the name of the CPU.
+ ****************************************************************************/
 #define MAX_HOST_NAME 100
 const char* hostname
  ()

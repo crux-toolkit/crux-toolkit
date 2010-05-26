@@ -192,7 +192,6 @@ sub test_cmd() {
       system($diff_cmd);
       print "Compare by field results\n";
       open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
-      $diff_line;
       while ($diff_line = <DIFF>) {
         print $diff_line;
       }

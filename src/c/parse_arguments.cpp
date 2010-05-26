@@ -969,10 +969,8 @@ char * parse_arguments_get_usage(const char * name) {
         strcat(usage, get_option_value_type(&optional[i]));
         strcat(usage, ">");
       }
-      strcat(usage, "] ");
-      strcat(usage, optional[i].usage);
-      strcat(usage, " ");
-      strcat(usage, "\n");
+      strcat(usage, "]\n");
+      strcat_formatted(usage, "     ", optional[i].usage);
     }
     strcat(usage, "\n");
 

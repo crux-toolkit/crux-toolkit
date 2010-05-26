@@ -1030,26 +1030,6 @@ void predict_ions(
   // free mass matrix
   free(mass_matrix);
 }
-/**
- * Assign peaks to the nearest ions, within a tolerance (set in param file)
- */
-void ion_series_assign_nearest_peaks(
-    ION_SERIES_T* ion_series, 
-    SPECTRUM_T* spectrum){
-
-  //  FLOAT_T max = 0.5; // TODO set in param file 
-  FLOAT_T max = get_double_parameter("ion-tolerance"); 
-  ION_T* ion = NULL;
-  ION_ITERATOR_T* iterator = new_ion_iterator(ion_series);
-  PEAK_T* peak = NULL;
-  while(ion_iterator_has_next(iterator)){
-    ion = ion_iterator_next(iterator);
-    FLOAT_T mz = get_ion_mass_z(ion); // TODO change to mz, not mass_z
-    peak = get_nearest_peak(spectrum, mz, max);
-    set_ion_peak(ion, peak);
-  }
-  free_ion_iterator(iterator);
-}
 
 /**
  * Copies ion_series object from src to dest.

@@ -66,36 +66,6 @@ ION_CONSTRAINT_T** single_ion_constraints(
 );
 
 /**
- * Create ion files (for the single-ion GMTK model) 
- * in the output directory for all psms for a
- * single spectrum. Appends to existing files.
- * \returns TRUE for success
- */
-BOOLEAN_T output_psm_files_single(
-  char* output_directory,  ///< name of directory to place the ion files
-  SPECTRUM_T* spectrum,    ///< input spectrum
-  char** peptides, ///< the peptide sequences
-  int num_peptides, ///< the number of peptides sequences
-  int charge, ///< the charge of the peptides
-  int starting_sentence_idx ///< used to append to existing pfile
-);
-
-/**
- * Create ion files (for the paired-ion GMTK model) 
- * in the output directory for all psms for a
- * single spectrum. Appends to existing files.
- * \returns TRUE for success
- */
-BOOLEAN_T output_psm_files_paired(
-  char* output_directory,  ///< name of directory to place the ion files
-  SPECTRUM_T* spectrum,    ///< input spectrum
-  char** peptides, ///< the peptide sequences
-  int num_peptides, ///< the number of peptides sequences
-  int charge, ///< the charge of the peptides
-  int starting_sentence_idx ///< used to append to existing pfile
-);
-
-/**
  * Score a spectrum vs. another spectrum
  */
 FLOAT_T score_spectrum_v_spectrum(

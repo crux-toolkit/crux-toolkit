@@ -24,18 +24,6 @@
 
 
 /**
- * The size of the bins for discretizing the m/z axis of the
- * observed spectrum.  For use with monoisotopic mass.
- */
-#define BIN_WIDTH_MONO 1.0005079
-
-/**
- * The size of the bins for discretizing the m/z axis of the
- * observed spectrum.  For use with average mass.
- */
-#define BIN_WIDTH_AVERAGE 1.0011413
-
-/**
  * Maximum range for cross correlation offset.
  */
 #define MAX_XCORR_OFFSET 75
@@ -119,24 +107,6 @@ void add_intensity(
   int add_idx,            ///< the idex to add the intensity -in
   FLOAT_T intensity         ///< the intensity to add -in
   );
-
-/**
- * Set the bin width.  If the user does not request a specific width,
- * then use pre-defined values depending on the fragment mass type.
- */
-static double get_mz_bin_width()
-{
-  double return_value = get_double_parameter("mz-bin-width");
-
-  if (isnan(return_value)) {
-    if (get_mass_type_parameter("fragment-mass") == MONO) {
-      return_value = BIN_WIDTH_MONO;
-    } else {
-      return_value = BIN_WIDTH_AVERAGE;
-    }
-  }
-  return(return_value);
-}
 
 /**
  *\returns An (empty) scorer object.
@@ -546,7 +516,7 @@ BOOLEAN_T create_intensity_array_sp(
   FLOAT_T max_intensity = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_width = get_double_parameter("mz-bin-width");
   FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
   FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
@@ -675,7 +645,7 @@ int calculate_ion_type_sp(
   int* before_cleavage 
     = (int*)mymalloc(get_ion_series_charge(ion_series)*sizeof(int));
   int cleavage_array_idx = 0;
-  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_width = get_double_parameter("mz-bin-width");
   FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
 
   // initialize before cleavage indecies
@@ -706,8 +676,6 @@ int calculate_ion_type_sp(
 
     // if there is a match in the observed spectrum
     if(one_intensity > 0){
-      // int idx = (int)(get_ion_mass_z(ion)/BIN_WIDTH_MONO + 0.5);
-      // carp(CARP_INFO, "idx = %d\n", idx);
   
       // DEBUG
       // carp(CARP_INFO, "matched ion: %.2f ion intensity: %.2f", get_ion_mass_z(ion), one_intensity);
@@ -856,7 +824,7 @@ BOOLEAN_T create_intensity_array_observed(
   FLOAT_T peak_location = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_width = get_double_parameter("mz-bin-width");
   FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
   FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
@@ -1043,7 +1011,7 @@ BOOLEAN_T create_intensity_array_theoretical(
   int intensity_array_idx = 0;
   int ion_charge = 0;
   ION_TYPE_T ion_type;
-  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_width = get_double_parameter("mz-bin-width");
   FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
   // create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
@@ -1671,182 +1639,6 @@ void free_paired_ion_constraints(
     free_ion_constraint(ion_constraints[constraint_idx]);
   }
   free(ion_constraints);
-}
-
-/**
- * Create ion files (for paired-ion GMTK model) 
- * in the output directory. 
- * \returns TRUE for success 
- */
-BOOLEAN_T output_psm_files_paired(
-  char* output_directory, ///< name of directory to place the ion files -in
-  SPECTRUM_T* spectrum,     ///< input spectrum -in
-  char** peptides, ///< peptide sequences -in 
-  int num_peptides, ///< number of peptide sequences -in
-  int charge, ///< the peptide charge -in
-  int starting_sentence_idx ///< used to append to existing pfile -in
-){
-    
-  char* peptide_sequence = NULL;
-  carp(CARP_INFO, "Creating and outputting paired ions");
-
-  // create the output directory, if not already
-  int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
-  if(access(output_directory, F_OK)){
-    if (mkdir(output_directory, dir_access) != 0){
-      carp(CARP_FATAL, "Trouble creating dir %s!", output_directory); 
-    }
-  }
-
-  // create and open (for appending) pfiles for each ion constraint
-  carp(CARP_INFO, "Creating output file handles");
-  FILE* ion_series_files[GMTK_NUM_ION_SERIES];
-  int ion_series_idx;
-  for ( ion_series_idx=0;ion_series_idx<GMTK_NUM_PAIRED_ION_SERIES;
-        ion_series_idx++){
-    char full_path[FILENAME_LENGTH];
-    sprintf(full_path, "%s/%i-paired.prepfile", output_directory, ion_series_idx);
-    if (open_file(full_path, "a", FALSE, "append", "", 
-          &ion_series_files[ion_series_idx])==FALSE){
-      carp(CARP_FATAL, "Trouble opening output file %s!", full_path); 
-    }
-  }
-
-  // iterate through each peptide
-  carp(CARP_INFO, "Iterating through each peptide.");
-  ION_SERIES_T* ion_series;
-  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(charge); 
-  ION_CONSTRAINT_T** ion_constraints = paired_ion_constraints();
-
-  int peptide_idx;
-  for(peptide_idx=0; peptide_idx < num_peptides; peptide_idx++){ 
-    if ((peptide_idx + 1)% 100 == 0){
-      carp(CARP_INFO, "At peptide %i of %i", peptide_idx + 1, num_peptides);
-    }
-    peptide_sequence = peptides[peptide_idx];
-    carp(CARP_DETAILED_DEBUG, "%s", peptide_sequence);
-
-    // check peptide sequence
-    if(!valid_peptide_sequence(peptide_sequence)){
-      carp(CARP_FATAL, "not a valid peptide sequence: %s", peptide_sequence);
-    }
-
-    // create new ion series
-    ion_series = new_ion_series(peptide_sequence, charge, ion_constraint);
-
-    // now predict ions and assign them to their closest peaks
-    predict_ions(ion_series);
-
-    ion_series_assign_nearest_peaks(ion_series, spectrum);
-
-    // create our ion constraints
-
-    // FIX
-    int constraint_idx;
-    int ion_series_file_idx = 0;
-    for (constraint_idx=0;constraint_idx<GMTK_NUM_PAIRED_ION_SERIES*2;
-         constraint_idx+=2){
-
-      print_ion_series_paired_gmtk(
-        ion_series,
-        ion_constraints[constraint_idx],
-        ion_constraints[constraint_idx+1],
-        ion_series_files[ion_series_file_idx++],
-        peptide_idx + starting_sentence_idx);
-    }
-    free_ion_series(ion_series);
-  } 
-
-  free_single_ion_constraints(ion_constraints);
-  free_ion_constraint(ion_constraint);
-  return TRUE;
-}
-
-/**
- * Create ion files (for GMTK) in the output directory. 
- * \returns TRUE for success 
- */
-// PAIRED write an output_psm_files_paired
-BOOLEAN_T output_psm_files_single(
-  char* output_directory, ///< name of directory to place the ion files -in
-  SPECTRUM_T* spectrum,     ///< input spectrum -in
-  char** peptides, ///< peptide sequences -in 
-  int num_peptides, ///< number of peptide sequences -in
-  int charge, ///< the peptide charge -in
-  int starting_sentence_idx ///< used to append to existing pfile -in
-){
-    
-  char* peptide_sequence = NULL;
-  carp(CARP_INFO, "Creating and outputting ions");
-
-  // create the output directory, if not already
-  int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
-  if(access(output_directory, F_OK)){
-    if (mkdir(output_directory, dir_access) != 0){
-      carp(CARP_FATAL, "Trouble creating dir %s!", output_directory); 
-    }
-  }
-
-  // create and open (for appending) pfiles for each ion constraint
-  carp(CARP_INFO, "Creating output file handles");
-  FILE* ion_series_files[GMTK_NUM_ION_SERIES];
-  int ion_series_idx;
-  for (ion_series_idx=0;ion_series_idx<GMTK_NUM_ION_SERIES;ion_series_idx++){
-    char full_path[FILENAME_LENGTH];
-    sprintf(full_path, "%s/%i-single.prepfile", output_directory, ion_series_idx);
-    if (open_file(full_path, "a", FALSE, "append", "", 
-          &ion_series_files[ion_series_idx])==FALSE){
-      carp(CARP_FATAL, "Trouble opening output file %s!", full_path); 
-    }
-  }
-
-  // iterate through each peptide
-  carp(CARP_INFO, "Iterating through each peptide.");
-  ION_SERIES_T* ion_series;
-  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_gmtk(charge); 
-  ION_CONSTRAINT_T** ion_constraints = single_ion_constraints();
-
-  int peptide_idx;
-  for(peptide_idx=0; peptide_idx < num_peptides; peptide_idx++){ 
-    if ((peptide_idx + 1)% 100 == 0){
-      carp(CARP_INFO, "At peptide %i of %i", peptide_idx + 1, num_peptides);
-    }
-    peptide_sequence = peptides[peptide_idx];
-    carp(CARP_DETAILED_DEBUG, "%s", peptide_sequence);
-
-    // check peptide sequence
-    if(!valid_peptide_sequence(peptide_sequence)){
-      carp(CARP_FATAL, "not a valid peptide sequence: %s", peptide_sequence);
-    }
-
-    // create new ion series
-    ion_series = new_ion_series(peptide_sequence, charge, ion_constraint);
-
-    // now predict ions and assign them to their closest peaks
-    predict_ions(ion_series);
-
-    ion_series_assign_nearest_peaks(ion_series, spectrum);
-
-    // create our ion constraints
-
-    // iterate through each ion_constraint
-    int constraint_idx;
-    for (constraint_idx=0;constraint_idx<GMTK_NUM_ION_SERIES;
-         constraint_idx++){
-      // output the ions that obey this constraint
-      print_ion_series_single_gmtk(ion_series, 
-          ion_constraints[constraint_idx], 
-          ion_series_files[constraint_idx],
-          peptide_idx + starting_sentence_idx);
-    }
-    carp(CARP_INFO, "Appended to ion files for: %s", peptide_sequence);
-
-    free_ion_series(ion_series);
-  } 
-
-  free_single_ion_constraints(ion_constraints);
-  free_ion_constraint(ion_constraint);
-  return TRUE;
 }
 
 /*******************************

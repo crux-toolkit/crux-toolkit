@@ -150,13 +150,6 @@ void predict_ions(
 );
 
 /**
- * Assign peaks to the nearest ions, within a tolerance (set in param file)
- */
-void ion_series_assign_nearest_peaks(
-    ION_SERIES_T* ion_series, 
-    SPECTRUM_T* spectrum);
-
-/**
  * Copies ion_series object from src to dest.
  *  must pass in a memory allocated ION_SERIES_T dest
  */

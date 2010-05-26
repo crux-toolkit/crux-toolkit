@@ -387,6 +387,17 @@ int choose_charge(FLOAT_T precursor_mz, ///< m/z of spectrum precursor ion
                   PEAK_T* peaks,        ///< array of spectrum peaks
                   int num_peaks);       ///< size of peaks array
 
+/**
+ *\brief Extend a given string with lines not exceeding a specified width, 
+ * breaking on spaces.
+ */
+void strcat_formatted
+(
+ char*       string_to_extend,
+ const char* lead_string,        // Appears at the start of each line.
+ const char* extension           // Text to add.
+ );
+
 #ifdef __cplusplus
 }
 #endif

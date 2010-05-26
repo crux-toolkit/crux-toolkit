@@ -1611,7 +1611,7 @@ void print_sqt_header(
   double tol = get_double_parameter("precursor-window");
   fprintf(output, "H\tAlg-PreMasTol\t%.1f\n",tol);
   fprintf(output, "H\tAlg-FragMassTol\t%.2f\n", 
-          get_double_parameter("ion-tolerance"));
+          get_double_parameter("mz-bin-width") / 2.0);
   fprintf(output, "H\tAlg-XCorrMode\t0\n");
 
   SCORER_TYPE_T score = get_scorer_type_parameter("prelim-score-type");
