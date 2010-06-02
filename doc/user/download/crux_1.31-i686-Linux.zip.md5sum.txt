@@ -1,0 +1,1 @@
+ec2de62afe11823c0b37b93105a30299  crux_1.31-i686-Linux.zip
