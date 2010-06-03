@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # A script to create the default.params file to distribute in the docs
 # and to store in src/c.  Writes a param file with default values.
@@ -29,11 +29,13 @@ echo "####################################################################
 " > default.params
 cat crux-output/search.params.txt >> default.params
 
-# Rename the value for parameter-file.
-sed -i 's/parameter-file=T/parameter-file=F/' default.params
-
-# Copy to crux/doc/user
-cp -f default.params ../../doc/user/default.params
+# Rename the value for parameter-file, and copy to doc directory.
+# N.B. Don't use the "-i" option to 'sed' because it has different
+# syntax under Linux and Darwin.  Instead, combine the sed and the copy,
+# then copy the sed output back to the local directory.
+sed 's/parameter-file=T/parameter-file=F/' default.params \
+  > ../../doc/user/default.params
+cp ../../doc/user/default.params default.params
 
 # Remove output files
 rm -rf crux-output

@@ -225,31 +225,6 @@ void read_mods_from_file(char* param_file);
 #define BIN_WIDTH_AVERAGE 1.0011413
 
 /**
- * Set the m/z bin width.  If the user does not request a specific
- * width, then use pre-defined values depending on the fragment mass
- * type.
- */
-static void set_mz_bin_width()
-{
-  double new_value = get_double_parameter("mz-bin-width");
-
-  if (isnan(new_value)) {
-
-    // If no width specified, choose based on mass type.
-    if (get_mass_type_parameter("fragment-mass") == MONO) {
-      new_value = BIN_WIDTH_MONO;
-    } else {
-      new_value = BIN_WIDTH_AVERAGE;
-    }
-
-    // Update the parameter hash.
-    char buffer[PARAMETER_LENGTH];
-    snprintf(buffer, PARAMETER_LENGTH, "%f", new_value);
-    add_or_update_hash(parameters, "mz-bin-width", buffer);
-  }
-}
-
-/**
  * initialize parameters
  * ONLY add optional parameters here!!!
  * MUST declare ALL optional parameters in array to be used
@@ -938,9 +913,6 @@ void initialize_parameters(void){
   usage_initialized = TRUE;
   type_initialized = TRUE;
 
-  // Set m/z bin width based on mass type.
-  set_mz_bin_width();
-  
 }
 
 
@@ -1141,6 +1113,31 @@ void translate_decoy_options(){
 }
 
 /**
+ * Set the m/z bin width.  If the user does not request a specific
+ * width, then use pre-defined values depending on the fragment mass
+ * type.
+ */
+static void set_mz_bin_width()
+{
+  double new_value = get_double_parameter("mz-bin-width");
+
+  if (isnan(new_value)) {
+
+    // If no width specified, choose based on mass type.
+    if (get_mass_type_parameter("fragment-mass") == MONO) {
+      new_value = BIN_WIDTH_MONO;
+    } else {
+      new_value = BIN_WIDTH_AVERAGE;
+    }
+
+    // Update the parameter hash.
+    char buffer[PARAMETER_LENGTH];
+    snprintf(buffer, PARAMETER_LENGTH, "%f", new_value);
+    add_or_update_hash(parameters, "mz-bin-width", buffer);
+  }
+}
+
+/**
  * Take the command line string from main, find the parameter file 
  * option (if present), parse it's values into the hash, and parse
  * the command line options and arguments into the hash.
@@ -1255,6 +1252,9 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
   update_hash_value(parameters, "psms-per-spectrum-reported", value_str);
 
   parameter_plasticity = FALSE;
+
+  // Set m/z bin width based on mass type.
+  set_mz_bin_width();
 
   return success;
 }
