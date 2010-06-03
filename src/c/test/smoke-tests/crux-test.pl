@@ -43,6 +43,10 @@ use strict;
 use Getopt::Std;
 use File::Temp qw/ tempfile tempdir /;
 
+# Get the name of the architecture.
+my $arch = system('uname');
+print(STDERR "Running Crux smoke tests under $arch.\n");
+
 # Handle the command line arguments.
 my $usage = "Usage: crux-test.pl [-up] <file name>\n";
 my (%options, $update);
@@ -69,11 +73,10 @@ my $caught_interrupt = 0;
 $SIG{'INT'} = 'sigint_handler';
 
 # Read each test from the file and execute it.
-my ($line, @fields, $test_name, $standard_filename, $cmd, $result);
 my $ignore_string = "";
 my $num_tests = 0;
 my $num_successful_tests = 0;
-while ($line = <ARGV>) {
+while (my $line = <ARGV>) {
 
   if ($caught_interrupt) {
     die("Testing was interrupted.");
@@ -85,12 +88,19 @@ while ($line = <ARGV>) {
 
   # Parse the test parameters
   chomp $line;
-  @fields = split "=", $line;
-  $test_name = $fields[0];
-  $standard_filename = $fields[1];
-  $cmd = $fields[2];
+  my @fields = split "=", $line;
+  my $do_darwin = $fields[0];
+  my $test_name = $fields[1];
+  my $standard_filename = $fields[2];
+  my $cmd = $fields[3];
   $cmd =~ s/^ //;
-  $ignore_string = $fields[3];
+  $ignore_string = $fields[4];
+
+  # Skip this test if we're on a Darwin OS and it doesn't pass there.
+  if (($arch == "Darwin") && ($do_darwin == "0")) {
+    print "\n----- Skipping test $test_name \n";
+    print STDERR "\n----- Skipping test $test_name \n";
+  }
 
   # Execute the test
   print "\n----- Running test $test_name \n";
@@ -100,8 +110,8 @@ while ($line = <ARGV>) {
       die("Unable to create output file.\n");
   }
 
-  $result = &test_cmd($cmd, $standard_filename, 
-		      $output_filename, $ignore_string);
+  my $result = &test_cmd($cmd, $standard_filename, 
+			 $output_filename, $ignore_string);
   $num_tests++;
 
   if ($result == 0) {
