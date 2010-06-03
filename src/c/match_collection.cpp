@@ -3080,7 +3080,12 @@ void add_decoy_scores_match_collection(
     free(decoy_sequence);
     free(modified_seq);
     free_peptide(peptide);
-  }
+  } // next peptide
+
+  free_ion_constraint(ion_constraint);
+  free_ion_series(ion_series);
+  free_scorer(scorer);
+
 }
 
 // cheater functions for testing

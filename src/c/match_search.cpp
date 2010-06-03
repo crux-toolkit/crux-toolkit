@@ -508,6 +508,8 @@ void add_decoy_scores(
                                       spectrum, 
                                       charge, 
                                       peptide_iterator);  
+
+    free_modified_peptides_iterator(peptide_iterator);
   }
 
 
