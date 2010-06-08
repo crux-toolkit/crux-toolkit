@@ -1,5 +1,0 @@
-output-dir=tdc
-num-decoys-per-target=2
-decoy-location=target-file
-overwrite=T
-seed=7

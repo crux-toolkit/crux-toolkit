@@ -1,5 +1,0 @@
-output-dir=one-decoy-file
-num-decoys-per-target=3
-decoy-location=one-decoy-file
-overwrite=T
-seed=7

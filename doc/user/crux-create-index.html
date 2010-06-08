@@ -186,6 +186,13 @@ limit. New shells will remember the last limit set.</p>
 
 </ul>
 
+<b>Known Bugs</b>
+<p>
+In cygwin, the <code>--overwrite T</code> option does not work.  A 
+temporary directory is created with the new index but fails to be
+re-named correctly.  As a work-around, delete the existing index and
+rename the new temporary index with the correct name.</p>
+
 <hr></hr>
 
 <p>

@@ -291,13 +291,6 @@ void initialize_parameters(void){
     "false");
   //and uses 'protein input'
 
-  /* analyze-matches arguments */
-  set_string_parameter("psm-folder", NULL, 
-     "Directory containing the binary psm files created by "
-     "crux-search-for-matches.",
-     "Argument for analyze-matches.", "false");
-  //and uses protein input
-
   /* get-ms2-spectrum */
   set_int_parameter("scan number", 0, 1, BILLION, 
                     "Scan number identifying the spectrum.",
@@ -314,17 +307,6 @@ void initialize_parameters(void){
   set_int_parameter("charge state", 0, 0, 10, 
       "The charge state of the peptide.",
       "Argument for predict-peptide-ions", "false");
-
-  /* create-psm-files */
-  set_string_parameter("peptide-file-name", NULL,
-      "A file containing peptides for which to create ion files",
-      "Only for create-psm-files, which is not being distributed", "false"); 
-  set_string_parameter("output-dir", NULL,
-      "A directory in which to place the ion files",
-      "Argument for create-psm-files", "false");
-  set_string_parameter("model-type", NULL,
-      "The kind of model (paired or single)",
-      "Argument for create-psm-files", "false");
 
   /* *** Initialize Options (command line and param file) *** */
 
@@ -349,15 +331,6 @@ void initialize_parameters(void){
       "Available for all crux programs.  Applies to parameter file "
       "as well as index, search, and analysis output files.", "true");
     
-  /* create-psm-files */
-  set_int_parameter("starting-sentence-idx", 0, 0, BILLION, 
-      "Starting sentence idx",
-      "Only for create-psm-file, not distributed", "false"); 
-  set_int_parameter("charge", 2, 1, 4,
-      "Charge for peptide for which to predict ions.",
-      "for create-psm-files and score-peptide-spectrum (neither in distro",
-      "false"); 
-
   /* generate_peptide, create_index parameters  */
   set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
       "The minimum length of peptides to consider. Default=6.",
@@ -480,10 +453,6 @@ void initialize_parameters(void){
   set_boolean_parameter("compute-p-values", FALSE, 
       "Compute p-values for the main score type. Default=F.",
       "Currently only implemented for XCORR.", "true");
-  set_boolean_parameter("use-mz-window", FALSE,
-      "Use mass-to-charge rather than mass for finding "
-      "candidate peptides. Default=F.",
-      "Available for crux-search-for-matches", "true");
   set_boolean_parameter("use-mstoolkit", FALSE,
       "Use MSToolkit to parse spectra. Default=F.",
       "Available for crux-search-for-matches", "true");
@@ -582,8 +551,6 @@ void initialize_parameters(void){
       "true");
   set_int_parameter("psms-per-spectrum-reported", 0, 0, BILLION,
                    "place holder", "this may be replaced by top-match","false");
-  set_double_parameter("mass-offset", 0.0, 0, 0, "obsolete",
-      "Was used in search.", "false");
   set_string_parameter("seed", "time", "HIDE ME FROM USER",
       "Given a real-number value, will always produce the same decoy seqs",
       "false");
@@ -653,21 +620,6 @@ void initialize_parameters(void){
   set_double_parameter("max-mz", 4000, 0, BILLION, 
       "Used in scoring sp.",
       "Hide from users", "false");
-  set_int_parameter("top-fit-sp", 1000, 1, BILLION, 
-       "Hide from user",
-       "used in estimating parameters for exp sp", "false");
-  // how many peptides to sample for EVD parameter estimation
-  set_int_parameter("sample-count", 500, 0, BILLION, "NOT FOR USER",
-       "Number of psms to use for weibul estimation.", "false");
-
-  //in estimate_weibull_parameters
-  // no longer used
-  set_int_parameter("number-top-scores-to-fit", -1, -10, BILLION, 
-      "Not for general users", 
-      "The number of psms per spectrum to use for estimating the "
-      "score distribution for calculating p-values. 0 to use all. "
-      "Not compatible with 'fraction-top-scores-to-fit'. Default=0 (all).",
-      "false");
   set_double_parameter("fraction-top-scores-to-fit", 0.55, 0, 1, 
       "The fraction of psms per spectrum to use for estimating the "
       "score distribution for calculating p-values. "

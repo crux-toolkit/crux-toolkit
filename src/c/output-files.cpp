@@ -215,11 +215,10 @@ void OutputFiles::writeHeaders(int num_proteins){
  */
 void OutputFiles::writeFeatureHeader(char** feature_names,
                                      int num_names){
-  // TODO (BF 27-Apr-10): label first two columns as scan, decoy
   // write feature file header
   if( feature_names && feature_file_ && num_names ){
-    fprintf(feature_file_, "%s", feature_names[0]);
-    for(int name_idx = 1; name_idx < num_names; name_idx++){
+    fprintf(feature_file_, "scan\tlabel");
+    for(int name_idx = 0; name_idx < num_names; name_idx++){
       fprintf(feature_file_, "\t%s", feature_names[name_idx]);
     }
     fprintf(feature_file_, "\n");
