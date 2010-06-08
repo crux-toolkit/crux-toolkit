@@ -4974,11 +4974,6 @@ spectrum-charge=all
 # search-for-matches from parameter file.
 print-search-progress=100
 
-# Use mass-to-charge rather than mass for finding candidate peptides.
-# Default=F.
-# Available for crux-search-for-matches
-use-mz-window=FALSE
-
 # Use MSToolkit to parse spectra. Default=F.
 # Available for crux-search-for-matches
 use-mstoolkit=FALSE

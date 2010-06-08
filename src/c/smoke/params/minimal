@@ -1,6 +1,0 @@
-overwrite=T
-num-decoys-per-target=0
-top-match=5
-print-search-progress=100
-seed=7
-
