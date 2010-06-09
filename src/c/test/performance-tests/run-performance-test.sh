@@ -8,6 +8,9 @@
 # documentation of this particular data set is available from
 # crux-projects/panda-data.
 
+# The location of the crux binary.
+CRUX=../../crux
+
 # Increase the file limit for Crux. (Necessary on MacOS.)
 ulimit -n 1024
 
@@ -28,7 +31,7 @@ db=worm+contaminants
 if [[ -e $db ]]; then
   echo Skipping create-index.
 else
-  crux create-index $db.fa $db
+  $CRUX create-index $db.fa $db
 fi
 
 ms2=051708-worm-ASMS-10.ms2
@@ -48,7 +51,7 @@ for searchtool in sequest-search search-for-matches; do
   if [[ -e $shortname/$shortname.target.txt ]]; then
     echo Skipping $searchtool.
   else  
-    crux $searchtool \
+    $CRUX $searchtool \
       $search_parameter \
       --num-decoys-per-target 1 \
       --output-dir $shortname \
@@ -81,7 +84,7 @@ for searchtool in sequest-search search-for-matches; do
   if [[ -e $shortname/qvalues.target.txt ]]; then
     echo Skipping compute-q-values.
   else
-    crux compute-q-values \
+    $CRUX compute-q-values \
       --output-dir $shortname \
       $db
   fi
@@ -95,7 +98,7 @@ for searchtool in sequest-search search-for-matches; do
   if [[ -e $shortname/percolator.target.txt ]]; then
     echo Skipping crux percolator.
   else
-    crux percolator \
+    $CRUX percolator \
       --output-dir $shortname \
       --feature-file T \
       $db
@@ -106,12 +109,12 @@ for searchtool in sequest-search search-for-matches; do
   if [[ -e $shortname/qranker.target.txt ]]; then
     echo Skipping q-ranker.
   else
-    crux q-ranker \
+    $CRUX q-ranker \
       --output-dir $shortname \
       --feature-file T \
       $db
   fi
-  echo plot \"$shortname/qranker.target.txt\" using 12:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+  echo replot \"$shortname/qranker.target.txt\" using 12:0 title \"$shortname q-ranker\" with lines >> $gnuplot
   
 done
 
