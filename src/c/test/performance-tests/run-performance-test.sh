@@ -21,8 +21,7 @@ echo set terminal png >> $gnuplot
 echo set xlabel \"q-value threshold\" >> $gnuplot
 echo set ylabel \"Number of accepted PSMs\" >> $gnuplot
 echo set xrange \[0:0.1\] >> $gnuplot
-echo set key outside >> $gnuplot
-echo set size 1.5, 1
+echo set key center right >> $gnuplot
 # Insert dummy plot so we can use "replot" consistently below.
 echo plot 0 notitle with dots >> $gnuplot 
 
@@ -88,10 +87,13 @@ for searchtool in sequest-search search-for-matches; do
       --output-dir $shortname \
       $db
   fi
-  echo replot \"$shortname/qvalues.target.txt\" using 9:0 title \"$shortname XCorr \(decoy\)\" with lines >> $gnuplot
-  if [[ $searchtool == "search-for-matches" ]]; then
-    echo replot \"$shortname/qvalues.target.txt\" using 9:0 title \"$shortname XCorr \(Weibull\)\" with lines >> $gnuplot
-    echo replot \"$shortname/qvalues.target.txt\" using 9:0 title \"$shortname XCorr \(decoy p-value\)\" with lines >> $gnuplot
+  if [[ $searchtool == "sequest-search" ]]; then
+    echo replot \"$shortname/qvalues.target.txt\" using 9:0 title \"$shortname XCorr \(decoy\)\" with lines >> $gnuplot
+  else  
+    echo replot \"$shortname/qvalues.target.txt\" using 10:0 title \"$shortname XCorr \(Weibull\)\" with lines >> $gnuplot
+# AT THE MOMENT, THIS SERIES IS BROKEN!  --WSN 9 Jun 2010
+#    echo replot \"$shortname/qvalues.target.txt\" using 11:0 title \"$shortname XCorr \(decoy\)\" with lines >> $gnuplot
+    echo replot \"$shortname/qvalues.target.txt\" using 12:0 title \"$shortname XCorr \(decoy p-value\)\" with lines >> $gnuplot
   fi
   
   # Run Crux percolator
