@@ -74,7 +74,7 @@ for searchtool in sequest-search search-for-matches; do
         --sqt-out $shortname/l-percolator.sqt \
         --xml-output $shortname/l-percolator.xml \
         $shortname/sequest.target.sqt \
-        $shortname/sequest.decoy-1.sqt
+        $shortname/sequest.decoy.sqt
     fi
     echo replot \"$shortname/l-percolator.tsv\" using 3:0 title \"Stand-alone percolator\" with lines >> $gnuplot
   fi
