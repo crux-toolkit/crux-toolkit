@@ -13,6 +13,8 @@
 
 #ifdef __cplusplus
 class DelimitedFile;
+class DelimitedFileReader;
+class MatchFileReader;
 #endif
 
 /**

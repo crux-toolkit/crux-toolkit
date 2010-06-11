@@ -20,7 +20,7 @@
 #include "scorer.h"
 #include "carp.h"
 
-#include "DelimitedFile.h"
+#include "MatchFileReader.h"
 #include "./MSToolkit/Spectrum.h"
 
 // There is a name clash with MS2 in MSToolkit, so can't use the
@@ -1598,16 +1598,16 @@ FLOAT_T get_spectrum_singly_charged_mass(
  *\returns the parsed spectrum , else returns NULL for failed parse
  */
 SPECTRUM_T* parse_spectrum_tab_delimited(
-  DelimitedFile& file ///< output stream -out
+  MatchFileReader& file ///< output stream -out
   ) {
 
   SPECTRUM_T* spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
 
-  spectrum -> first_scan = file.getInteger("scan");
-  spectrum -> last_scan = file.getInteger("scan");
+  spectrum -> first_scan = file.getInteger(SCAN_COL);
+  spectrum -> last_scan = spectrum -> first_scan;
   spectrum -> spectrum_type = MS2; //assume MS2;
 
-  spectrum -> precursor_mz = file.getFloat("spectrum precursor m/z");
+  spectrum -> precursor_mz = file.getFloat(SPECTRUM_PRECURSOR_MZ_COL);
   //Is it okay to assign an individual spectrum object for each charge?
   //add_possible_z(spectrum, file.getInteger("charge")); 
 

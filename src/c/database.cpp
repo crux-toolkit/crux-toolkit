@@ -15,13 +15,26 @@
 #include "peptide.h"
 #include "protein.h"
 #include "database.h"
+#include "hash.h"
 #include "carp.h"
 #include "objects.h"
 #include "peptide_constraint.h"
 #include "sorter.h"
 #include "protein_index.h"
 
+#include <map>
+
+using namespace std;
+
 #define MAX_PROTEINS 3300000 ///< The maximum number of proteins in a database.
+
+//Comparator function for c type strings.
+struct cmp_str {
+
+  bool operator()(char const *a, char const *b) {
+    return strcmp(a, b) < 0;
+  }
+};
 
 /**
  * \struct database
@@ -33,7 +46,9 @@ struct database{
                          ///  A database has only one associated file.
   unsigned int num_proteins; ///< Number of proteins in this database.
   BOOLEAN_T is_parsed;  ///< Has this database been parsed yet.
-  PROTEIN_T* proteins[MAX_PROTEINS]; ///< Proteins in this database 
+  PROTEIN_T* proteins[MAX_PROTEINS]; ///< Proteins in this database. 
+  map<char*, PROTEIN_T*, cmp_str> protein_map; //map for proteins 
+  BOOLEAN_T is_hashed; //Indicator of whether the database has been hashed/mapped.
   unsigned long int size; ///< The size of the database in bytes (convenience)
   BOOLEAN_T use_light_protein; ///< should I use the light/heavy protein option
   BOOLEAN_T is_memmap; ///< Are we using a memory mapped fasta file? 
@@ -105,6 +120,8 @@ DATABASE_T* allocate_database(void){
   database->data_address = NULL;
   database->pointer_count = 1;
   database->file_size = 0;
+  database->is_hashed = FALSE;
+  database->protein_map =  map<char*, PROTEIN_T*, cmp_str>();
   // fprintf(stderr, "Free: Allocation: %i\n", database->pointer_count);
   return database;
 }
@@ -725,19 +742,33 @@ PROTEIN_T* get_database_protein_by_id_string(
   DATABASE_T* database, ///< the query database -in
   const char* protein_id ///< The id string for this protein -in
   ) {
-  //TODO: we can speed this up using a map on string -> protein ids
-  PROTEIN_T* protein = NULL;
-  unsigned int protein_idx;
-  for (protein_idx = 0; 
-    protein_idx <= database -> num_proteins;
-    protein_idx++) {
 
-    PROTEIN_T* current_protein = database -> proteins[protein_idx];
-    if (strcmp(get_protein_id_pointer(current_protein), protein_id)==0) {
-      protein = current_protein;
-      carp(CARP_DETAILED_DEBUG, "found protein %s", protein_id);
-      break;
+  //TODO - Implement as a hashtable rather than a map to make 
+  //this even faster if needed.
+  PROTEIN_T* protein = NULL;
+  if (database->is_hashed) {
+    map<char*, PROTEIN_T*>::iterator find_iter;
+    find_iter = database->protein_map.find((char*)protein_id);
+
+    if (find_iter != database->protein_map.end()) {
+      protein = find_iter->second;
     }
+  } else {
+    //create the hashtable of protein ids
+    for (unsigned int protein_idx = 0;
+      protein_idx < database->num_proteins;
+      protein_idx++) {
+
+      PROTEIN_T* current_protein = database->proteins[protein_idx];
+      char* current_id = get_protein_id_pointer(current_protein);
+      database->protein_map[current_id] = current_protein;
+
+      if (strcmp(current_id, protein_id)==0) {
+        protein = current_protein;
+      }
+        
+    }
+    database->is_hashed = TRUE;
   }
   return protein;
 }

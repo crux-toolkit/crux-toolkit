@@ -280,7 +280,7 @@ double* get_match_percolator_features(
  *\returns a match object that is parsed from the tab-delimited result file
  */
 MATCH_T* parse_match_tab_delimited(
-  DelimitedFile& result_file,  ///< the result file to parse PSMs -in
+  MatchFileReader& result_file,  ///< the result file to parse PSMs -in
   DATABASE_T* database ///< the database to which the peptides are created -in
   );
 

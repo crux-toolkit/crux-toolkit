@@ -589,7 +589,7 @@ BOOLEAN_T serialize_peptide(
  * \returns A newly allocated peptide or NULL
  */
 PEPTIDE_T* parse_peptide_tab_delimited(
-  DelimitedFile& file, ///< the tab delimited peptide file -in
+  MatchFileReader& file, ///< the tab delimited peptide file -in
   DATABASE_T* database,///< the database containing the peptides -in
   BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
   );

@@ -111,7 +111,7 @@ BOOLEAN_T parse_spectrum(
  *\returns the parsed spectrum , else returns NULL for failed parse
  */
 SPECTRUM_T* parse_spectrum_tab_delimited(
-  DelimitedFile& file ///< output stream -out
+  MatchFileReader& file ///< output stream -out
   );
 #endif
 
