@@ -109,7 +109,11 @@ for searchtool in sequest-search search-for-matches; do
       --feature-file T \
       $db $shortname 
   fi
-  echo replot \"$shortname/percolator.target.txt\" using 13:0 title \"$shortname crux percolator\" with lines >> $gnuplot
+  if [[ $searchtool == "sequest-search" ]]; then
+    echo replot \"$shortname/percolator.target.txt\" using 13:0 title \"$shortname crux percolator\" with lines >> $gnuplot
+  else
+    echo replot \"$shortname/percolator.target.txt\" using 12:0 title \"$shortname crux percolator\" with lines >> $gnuplot
+  fi
   
   # Run q-ranker.
   if [[ -e $shortname/qranker.target.txt ]]; then
@@ -120,7 +124,11 @@ for searchtool in sequest-search search-for-matches; do
       --feature-file T \
       $db $shortname
   fi
-  echo replot \"$shortname/qranker.target.txt\" using 12:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+  if [[ $searchtool == "sequest-search" ]]; then
+    echo replot \"$shortname/qranker.target.txt\" using 12:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+  else
+    echo replot \"$shortname/qranker.target.txt\" using 11:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+  fi
   
 done
 
