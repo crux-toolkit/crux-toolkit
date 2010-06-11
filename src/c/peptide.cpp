@@ -7,7 +7,7 @@
 
 #include <set>
 
-#include "DelimitedFile.h"
+#include "MatchFileReader.h"
 
 using namespace std;
 
@@ -1711,7 +1711,7 @@ BOOLEAN_T serialize_peptide(
  * \returns A newly allocated peptide or NULL
  */
 PEPTIDE_T* parse_peptide_tab_delimited(
-  DelimitedFile& file, ///< the tab delimited peptide file -in
+  MatchFileReader& file, ///< the tab delimited peptide file -in
   DATABASE_T* database,///< the database containing the peptides -in
   BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
   ) {
@@ -1720,11 +1720,11 @@ PEPTIDE_T* parse_peptide_tab_delimited(
   PEPTIDE_T* peptide = allocate_peptide();
 
   //populate peptide struct.
-  string string_sequence = file.getString("sequence");
+  string string_sequence = file.getString(SEQUENCE_COL);
   // string length may include mod symbols and be longer than the peptide seq
   peptide->length = convert_to_mod_aa_seq(string_sequence.c_str(),
                                           &peptide->modified_seq);
-  peptide->peptide_mass = file.getFloat("peptide mass");
+  peptide->peptide_mass = file.getFloat(PEPTIDE_MASS_COL);
   
   if(!parse_peptide_src_tab_delimited(peptide, file, database, use_array)){
     carp(CARP_ERROR, "Failed to parse peptide src.");

@@ -25,7 +25,7 @@ else
 endif
 
 AM_CFLAGS = -Wall -W -Werror $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
-            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE 
+            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 AM_CXXFLAGS = -Wall -W -Werror  $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
             -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
@@ -42,6 +42,10 @@ LIBFILES= \
   database.h \
   DelimitedFile.cpp \
   DelimitedFile.h \
+  DelimitedFileReader.cpp \
+  DelimitedFileReader.h \
+  MatchFileReader.cpp \
+  MatchFileReader.h \
   generate_peptides_iterator.cpp \
   generate_peptides_iterator.h \
   hash.cpp \

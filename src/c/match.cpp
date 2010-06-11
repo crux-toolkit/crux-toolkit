@@ -29,7 +29,7 @@
 
 #include <string>
 
-#include "DelimitedFile.h"
+#include "MatchFileReader.h"
 
 using namespace std;
 
@@ -958,7 +958,7 @@ double* get_match_percolator_features(
  *\returns a match object that is parsed from the tab-delimited result file
  */
 MATCH_T* parse_match_tab_delimited(
-  DelimitedFile& result_file,  ///< the result file to parse PSMs -in
+  MatchFileReader& result_file,  ///< the result file to parse PSMs -in
   DATABASE_T* database ///< the database to which the peptides are created -in
   ) {
 
@@ -979,35 +979,35 @@ MATCH_T* parse_match_tab_delimited(
     return NULL;
   }
 
-  if ((result_file.getString("sp score") == "") || 
-    (result_file.getString("sp rank") == "")) {
+  if ((result_file.getString(SP_SCORE_COL) == "") || 
+    (result_file.getString(SP_RANK_COL) == "")) {
 
     match -> match_scores[SP] = NOT_SCORED;
     match -> match_rank[SP] = 0;
   } else {
-    match -> match_scores[SP] = result_file.getFloat("sp score");
-    match -> match_rank[SP] = result_file.getInteger("sp rank");
+    match -> match_scores[SP] = result_file.getFloat(SP_SCORE_COL);
+    match -> match_rank[SP] = result_file.getInteger(SP_RANK_COL);
   }
 
-  match -> match_scores[XCORR] = result_file.getFloat("xcorr score");
-  match -> match_rank[XCORR] = result_file.getInteger("xcorr rank");
+  match -> match_scores[XCORR] = result_file.getFloat(XCORR_SCORE_COL);
+  match -> match_rank[XCORR] = result_file.getInteger(XCORR_RANK_COL);
 
-  match -> match_scores[DECOY_XCORR_QVALUE] = result_file.getFloat("decoy q-value (xcorr)");
-  match -> match_scores[DECOY_PVALUE_QVALUE] = result_file.getFloat("decoy q-value (p-value)");
+  match -> match_scores[DECOY_XCORR_QVALUE] = result_file.getFloat(DECOY_XCORR_QVALUE_COL);
+  match -> match_scores[DECOY_PVALUE_QVALUE] = result_file.getFloat(DECOY_PVALUE_QVALUE_COL);
   /* TODO I personally would like access to the raw p-value as well as the bonferonni corrected one (SJM).
   match -> match_scores[LOGP_WEIBULL_XCORR] = result_file.getFloat("logp weibull xcorr");
   */
-  match -> match_scores[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat("p-value"));
+  match -> match_scores[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat(PVALUE_COL));
   
-  match -> match_scores[Q_VALUE] = result_file.getFloat("percolator q-value");
+  match -> match_scores[Q_VALUE] = result_file.getFloat(PERCOLATOR_QVALUE_COL);
 
-  match -> match_scores[PERCOLATOR_SCORE] = result_file.getFloat("percolator score");
-  match -> match_rank[PERCOLATOR_SCORE] = result_file.getInteger("percolator rank");
+  match -> match_scores[PERCOLATOR_SCORE] = result_file.getFloat(PERCOLATOR_SCORE_COL);
+  match -> match_rank[PERCOLATOR_SCORE] = result_file.getInteger(PERCOLATOR_RANK_COL);
 
-  match -> match_scores[LOGP_QVALUE_WEIBULL_XCORR] = result_file.getFloat("Weibull est. q-value");
+  match -> match_scores[LOGP_QVALUE_WEIBULL_XCORR] = result_file.getFloat(WEIBULL_QVALUE_COL);
   
-  match -> match_scores[QRANKER_SCORE] = result_file.getFloat("q-ranker score");
-  match -> match_scores[QRANKER_Q_VALUE] = result_file.getFloat("q-ranker q-value");
+  match -> match_scores[QRANKER_SCORE] = result_file.getFloat(QRANKER_SCORE_COL);
+  match -> match_scores[QRANKER_Q_VALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
 
    // parse spectrum
   if((spectrum = parse_spectrum_tab_delimited(result_file))== NULL){
@@ -1015,25 +1015,25 @@ MATCH_T* parse_match_tab_delimited(
   }
 
   // spectrum specific features
-  if (result_file.getString("b/y ions matched") == "") {
+  if (result_file.getString(BY_IONS_MATCHED_COL) == "") {
     match -> b_y_ion_matched = 0;
     match -> b_y_ion_possible = 0;
     match -> b_y_ion_fraction_matched = 0.0;
   } else {
-    match -> b_y_ion_matched = result_file.getInteger("b/y ions matched");
-    match -> b_y_ion_possible = result_file.getInteger("b/y ions total");
+    match -> b_y_ion_matched = result_file.getInteger(BY_IONS_MATCHED_COL);
+    match -> b_y_ion_possible = result_file.getInteger(BY_IONS_TOTAL_COL);
 
     match -> b_y_ion_fraction_matched = 
       (FLOAT_T)match -> b_y_ion_matched /
       (FLOAT_T)match -> b_y_ion_possible;
   }
   //parse match overall digestion
-  match -> digest = string_to_digest_type((char*)result_file.getString("cleavage type").c_str()); 
+  match -> digest = string_to_digest_type((char*)result_file.getString(CLEAVAGE_TYPE_COL).c_str()); 
 
   //Parse if match is it null_peptide?
   //We could check if unshuffled sequence is "", since that field is not
   //set for not null peptides.
-  match -> null_peptide = result_file.getString("unshuffled sequence") != "";
+  match -> null_peptide = result_file.getString(UNSHUFFLED_SEQUENCE_COL) != "";
 
   //assign fields
   match -> peptide_sequence = NULL;

@@ -10,7 +10,7 @@
  ****************************************************************************/
 #include "match_collection.h"
 
-#include "DelimitedFile.h"
+#include "MatchFileReader.h"
 
 /* Private data types (structs) */
 
@@ -141,7 +141,7 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx);
 BOOLEAN_T extend_match_collection_tab_delimited(
   MATCH_COLLECTION_T* match_collection, ///< match collection to extend -out
   DATABASE_T* database, ///< the database holding the peptides -in
-  DelimitedFile& result_file   ///< the result file to parse PSMs -in
+  MatchFileReader& result_file   ///< the result file to parse PSMs -in
   );
 
 BOOLEAN_T add_match_to_post_match_collection(
@@ -1746,6 +1746,7 @@ void print_sqt_header(
           "total ions compared, sequence\n", main_score_str, other_score_str);
 }
 
+
 void print_tab_header(FILE* output){
 
   if( output == NULL ){
@@ -2258,7 +2259,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   fclose(result_file);
   // add all the match objects from result_file
   carp(CARP_INFO,"Parsing tab delimited file");
-  DelimitedFile delimited_result_file(file_in_dir);
+  MatchFileReader delimited_result_file(file_in_dir);
   extend_match_collection_tab_delimited(match_collection, 
                                         database, 
                                         delimited_result_file);
@@ -2278,7 +2279,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
 BOOLEAN_T extend_match_collection_tab_delimited(
   MATCH_COLLECTION_T* match_collection, ///< match collection to extend -out
   DATABASE_T* database, ///< the database holding the peptides -in
-  DelimitedFile& result_file   ///< the result file to parse PSMs -in
+  MatchFileReader& result_file   ///< the result file to parse PSMs -in
   )
 {
 
@@ -2299,32 +2300,32 @@ BOOLEAN_T extend_match_collection_tab_delimited(
   while (result_file.hasNext()) {
 
     /*** get spectrum specific features ***/
-    charge = result_file.getInteger("charge");
-    delta_cn = result_file.getFloat("delta_cn");
+    charge = result_file.getInteger(CHARGE_COL);
+    delta_cn = result_file.getFloat(DELTA_CN_COL);
     if (delta_cn <= 0.0) {
       ln_delta_cn = 0;
     } else {
       ln_delta_cn = logf(delta_cn);
     }
-    ln_experiment_size = log(result_file.getFloat("matches/spectrum"));
+    ln_experiment_size = log(result_file.getFloat(MATCHES_SPECTRUM_COL));
     
 
-    //TODO: Parse all boolean indicator for scores
+    //TODO: Parse all boolean indicators for scores
     match_collection -> 
       scored_type[SP] = 
-      result_file.getString("sp score") != "";
+      !result_file.getString(SP_SCORE_COL).empty();
 
     match_collection -> 
       scored_type[XCORR] = 
-      result_file.getString("xcorr score") != "";
+      !result_file.getString(XCORR_SCORE_COL).empty();
 
     match_collection -> 
       scored_type[DECOY_XCORR_QVALUE] = 
-      result_file.getString("decoy q-value (xcorr)") != "";
+      !result_file.getString(DECOY_XCORR_QVALUE_COL).empty();
 
     match_collection -> 
       scored_type[DECOY_PVALUE_QVALUE] = 
-      result_file.getString("decoy q-value (p-value)") != "";
+      !result_file.getString(DECOY_PVALUE_QVALUE_COL).empty();
 /* TODO
     match_collection -> 
       scored_type[LOGP_WEIBULL_XCORR] = 
@@ -2332,27 +2333,27 @@ BOOLEAN_T extend_match_collection_tab_delimited(
 */
     match_collection -> 
       scored_type[LOGP_BONF_WEIBULL_XCORR] = 
-      result_file.getString("p-value") != "";
+      !result_file.getString(PVALUE_COL).empty();
 
     match_collection -> 
       scored_type[Q_VALUE] = 
-      result_file.getString("percolator q-value") != "";
+      !result_file.getString(PERCOLATOR_QVALUE_COL).empty();
 
     match_collection -> 
       scored_type[PERCOLATOR_SCORE] = 
-      result_file.getString("percolator score") != "";
+      !result_file.getString(PERCOLATOR_SCORE_COL).empty();
 
     match_collection -> 
       scored_type[LOGP_QVALUE_WEIBULL_XCORR] = 
-      result_file.getString("Weibull est. q-value") != "";
+      !result_file.getString(WEIBULL_QVALUE_COL).empty();
   
     match_collection -> 
       scored_type[QRANKER_SCORE] = 
-      result_file.getString("q-ranker score") != "";
+      !result_file.getString(QRANKER_SCORE_COL).empty();
     
     match_collection -> 
       scored_type[QRANKER_Q_VALUE] = 
-      result_file.getString("q-ranker q-value") != "";
+      !result_file.getString(QRANKER_QVALUE_COL).empty();
 
     match_collection -> post_scored_type_set = TRUE;
 

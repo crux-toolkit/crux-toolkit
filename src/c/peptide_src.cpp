@@ -20,6 +20,7 @@
 #include <string>
 
 #include "DelimitedFile.h"
+#include "MatchFileReader.h"
 
 using namespace std;
 
@@ -431,7 +432,7 @@ int size_of_serialized_peptide_src(){
  */
 BOOLEAN_T parse_peptide_src_tab_delimited(
   PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
-  DelimitedFile& file,           ///< file to read from
+  MatchFileReader& file,           ///< file to read from
   DATABASE_T* database, ///< database containing proteins
   BOOLEAN_T use_array) ///< use array implementation vs. linked list
 {
@@ -442,10 +443,10 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
     return FALSE;
   }
 
-  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", file.getString("protein id").c_str());
+  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", file.getString(PROTEIN_ID_COL).c_str());
 
   vector<string> protein_ids;
-  file.getStringVectorFromCell("protein id", protein_ids);
+  file.getStringVectorFromCell(PROTEIN_ID_COL, protein_ids);
 
   int num_peptide_src = protein_ids.size();
   
@@ -462,31 +463,59 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
   add_peptide_peptide_src_array(peptide, peptide_src);
 
   DIGEST_T digestion = 
-    string_to_digest_type((char*)file.getString("cleavage type").c_str()); 
+    string_to_digest_type((char*)file.getString(CLEAVAGE_TYPE_COL).c_str()); 
   
   PROTEIN_T* parent_protein = NULL;
   int start_index = 1;
   for (vector<string>::iterator iter = protein_ids.begin();
     iter != protein_ids.end();
     ++iter) {
+
     carp(CARP_DETAILED_DEBUG,"Parsing %s",iter -> c_str());
     // get the protein and peptide index e.g. X(10)
     size_t left_paren_index = iter -> find('(');
-    string protein_id_string = iter -> substr(0, left_paren_index);
-    string peptide_start_index_string = iter -> substr(left_paren_index+1, 
+
+    if (left_paren_index == string::npos) {
+      //protein id is the string.
+      string protein_id_string = *iter;
+      
+      parent_protein =
+        get_database_protein_by_id_string(database, protein_id_string.c_str());
+      
+      //find the start index by searching the protein sequence.
+      string protein_sequence(get_protein_sequence_pointer(parent_protein));
+
+      //if sequence is decoy sequence, recover the position from
+      //the unshuffled sequence.
+      string sequence;
+      if (file.getString(UNSHUFFLED_SEQUENCE_COL).empty()) {
+        sequence = file.getString(SEQUENCE_COL);
+      } else {
+        sequence = file.getString(UNSHUFFLED_SEQUENCE_COL);
+      }
+      size_t pos = protein_sequence.find(sequence);
+
+      if (pos == string::npos) {
+        carp(CARP_FATAL, "Can't find sequence %s in %s",sequence.c_str(), protein_sequence.c_str());
+      }
+      start_index = (int)pos + 1;
+
+    } else {
+      string protein_id_string = iter -> substr(0, left_paren_index);
+      string peptide_start_index_string = iter -> substr(left_paren_index+1, 
       iter -> length() - 1);
 
-    //  set fields in new peptide src
-    parent_protein =
-      get_database_protein_by_id_string(database, protein_id_string.c_str());
+      //  set fields in new peptide src
+      parent_protein =
+        get_database_protein_by_id_string(database, protein_id_string.c_str());
      
-    if (parent_protein == NULL) {
-      carp(CARP_FATAL, "Can't find protein %s", iter -> c_str());
-      continue;
+      if (parent_protein == NULL) {
+        carp(CARP_FATAL, "Can't find protein %s", iter -> c_str());
+        continue;
+      }
+
+      DelimitedFile::from_string<int>(start_index, peptide_start_index_string); 
     }
-
-    DelimitedFile::from_string<int>(start_index, peptide_start_index_string); 
-
     // set parent protein of the peptide src
     set_peptide_src_parent_protein(peptide_src, parent_protein);
 
