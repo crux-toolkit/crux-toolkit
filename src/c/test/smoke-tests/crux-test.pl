@@ -44,7 +44,7 @@ use Getopt::Std;
 use File::Temp qw/ tempfile tempdir /;
 
 # Get the name of the architecture.
-my $arch = system('uname');
+my $arch = `uname`;
 print(STDERR "Running Crux smoke tests under $arch.\n");
 
 # Handle the command line arguments.
@@ -97,9 +97,10 @@ while (my $line = <ARGV>) {
   $ignore_string = $fields[4];
 
   # Skip this test if we're on a Darwin OS and it doesn't pass there.
-  if (($arch == "Darwin") && ($do_darwin == "0")) {
+  if (($arch eq "Darwin\n") && ($do_darwin == "0")) {
     print "\n----- Skipping test $test_name \n";
     print STDERR "\n----- Skipping test $test_name \n";
+    next;
   }
 
   # Execute the test
