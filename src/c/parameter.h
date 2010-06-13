@@ -222,6 +222,10 @@ WINDOW_TYPE_T get_window_type_parameter(
   const char* name
   );
 
+double get_mz_bin_width();
+ 
+double get_mz_bin_offset();
+
 
 /**
  * Prints the parameters.  If lead_string is not null, preprends it to

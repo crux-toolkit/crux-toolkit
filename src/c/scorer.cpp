@@ -72,10 +72,22 @@
 #define LOSS_HEIGHT 10
 
 /**
+ * Number of regions into which the spectrum is divided for normalization.
+ */
+#define NUM_REGIONS 10
+
+/**
+ * Maximum peak height within each region of the spectrum after normalizing.
+ */ 
+#define MAX_PER_REGION 50
+
+/**
  * Macro for converting floating point to integers.
  */
+
 #define INTEGERIZE(VALUE,BIN_SIZE,BIN_OFFSET) \
   ((int)((VALUE / BIN_SIZE) + 0.5 + BIN_OFFSET))
+
 
 /**
  * \struct scorer
@@ -93,6 +105,9 @@ struct scorer {
   FLOAT_T max_intensity; ///< the max intensity in the intensity array
   BOOLEAN_T initialized; ///< has the scorer been initialized?
   int last_idx; ///< the last index in the array, the data size of the array
+
+  FLOAT_T bin_width; ///< width of the bins to use for arrays
+  FLOAT_T bin_offset; ///< m/z offset for the bins.
 
   /// used for xcorr
   FLOAT_T* observed; ///< used for Xcorr: observed spectrum intensity array
@@ -131,12 +146,16 @@ SCORER_T* new_scorer(
   // set score type
   scorer->type = type;
   
+  // set bin_width and bin_offset.
+  scorer->bin_width = get_mz_bin_width();
+  scorer->bin_offset = get_mz_bin_offset();
+
   // set fields needed for each score type
   if(type == SP){
     scorer->sp_beta = get_double_parameter("beta");
     scorer->sp_max_mz = get_double_parameter("max-mz");
     // allocate the intensity array
-    scorer->intensity_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
+    scorer->intensity_array = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
     scorer->max_intensity = 0;
     scorer->last_idx = 0;
     // the scorer as not been initialized yet.
@@ -216,12 +235,11 @@ void smooth_peaks(
   FLOAT_T* array = scorer->intensity_array;
 
   // create a new array, which will replace the original intensity array
-  FLOAT_T* new_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, 
-					  sizeof(FLOAT_T));
+  FLOAT_T* new_array = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
 
   if (scorer->type == SP){
     // iterate over all peaks
-    for(; idx < (int)scorer->sp_max_mz-2; ++idx){
+    for(; idx < get_scorer_max_bin(scorer)-2; ++idx){
       // smooooth
       new_array[idx] = (array[idx-2] + 
 			(4 * array[idx-1]) + 
@@ -327,7 +345,7 @@ void zero_peak_mean_stdev(
 {
   int peak_count = 0;
   int idx = 0;
-  int array_size = (int)scorer->sp_max_mz;
+  int array_size = get_scorer_max_bin(scorer);
   FLOAT_T mean = 0;
   FLOAT_T stdev = 0;
 
@@ -375,7 +393,7 @@ void zero_peaks(
   )
 {
   // create a new array, which will replace the original intensity array
-  FLOAT_T* new_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
+  FLOAT_T* new_array = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
   
   // step 1,
   zero_peak_mean_stdev(scorer, scorer->intensity_array, new_array, 1);
@@ -406,7 +424,7 @@ void extract_peaks(
   )
 {
   // create a new array, which will replace the original intensity array
-  FLOAT_T* temp_array = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
+  FLOAT_T* temp_array = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
   FLOAT_T* original_array = scorer->intensity_array;
   int idx = 0;
   int temp_idx = 0;
@@ -414,7 +432,7 @@ void extract_peaks(
   FLOAT_T max_intensity;
 
   // copy all peaks to temp_array
-  for(; idx < (int)scorer->sp_max_mz; ++idx){
+  for(; idx < get_scorer_max_bin(scorer); ++idx){
     if(scorer->intensity_array[idx] > 0){
       temp_array[temp_idx] = original_array[idx];
 
@@ -435,7 +453,7 @@ void extract_peaks(
   
   // remove peaks bellow cut_off 
   // also, normalize peaks to max_intensity to 100
-  for(idx = 0; idx < (int)scorer->sp_max_mz; ++idx){
+  for(idx = 0; idx < get_scorer_max_bin(scorer); ++idx){
     // DEBUG print all temp array values
     // carp(CARP_INFO, "sorted data[%d]=%.3f",idx, temp_array[idx]);
 
@@ -516,8 +534,8 @@ BOOLEAN_T create_intensity_array_sp(
   FLOAT_T max_intensity = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  FLOAT_T bin_width = get_double_parameter("mz-bin-width");
-  FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
+  FLOAT_T bin_width = scorer->bin_width;
+  FLOAT_T bin_offset = scorer->bin_offset;
   FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
   int top_bins = 200;
@@ -645,8 +663,8 @@ int calculate_ion_type_sp(
   int* before_cleavage 
     = (int*)mymalloc(get_ion_series_charge(ion_series)*sizeof(int));
   int cleavage_array_idx = 0;
-  FLOAT_T bin_width = get_double_parameter("mz-bin-width");
-  FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
+  FLOAT_T bin_width = scorer->bin_width;
+  FLOAT_T bin_offset = scorer->bin_offset;
 
   // initialize before cleavage indecies
   for(; cleavage_array_idx < get_ion_series_charge(ion_series); ++cleavage_array_idx){
@@ -666,7 +684,7 @@ int calculate_ion_type_sp(
     intensity_array_idx 
       = INTEGERIZE(get_ion_mass_z(ion), bin_width, bin_offset);
     // get the intensity matching to ion's m/z
-    if(intensity_array_idx < scorer->sp_max_mz){
+    if(intensity_array_idx < get_scorer_max_bin(scorer)){
       one_intensity = scorer->intensity_array[intensity_array_idx];
     }
     else{
@@ -768,8 +786,8 @@ FLOAT_T gen_score_sp(
  * normalize each 10 regions of the observed spectrum to max 50
  */
 void normalize_each_region(
+  SCORER_T* scorer, ///<the scorer object
   FLOAT_T* observed,  ///< intensities to normalize
-  FLOAT_T sp_max_mz,  ///< num bins in observed
   FLOAT_T max_intensity_overall, /// the max intensity over entire spectrum
   FLOAT_T* max_intensity_per_region, ///< the max intensity in each 10 regions -in
   int region_selector ///< the size of each regions -in
@@ -781,8 +799,8 @@ void normalize_each_region(
   max_intensity_overall = 0.0; // Avoid compiler error.
 
   // normalize each region
-  for(; bin_idx < sp_max_mz; ++bin_idx){
-    if(bin_idx >= region_selector*(region_idx+1) && region_idx < 9){
+  for(; bin_idx < get_scorer_max_bin(scorer); ++bin_idx){
+    if(bin_idx >= region_selector*(region_idx+1) && region_idx < (NUM_REGIONS-1)){
       ++region_idx;
       max_intensity = max_intensity_per_region[region_idx];
     }
@@ -794,11 +812,11 @@ void normalize_each_region(
        && (observed[bin_idx] > 0.05 * max_intensity_overall))
       {
       // normalize intensity to max 50
-      observed[bin_idx] = (observed[bin_idx] / max_intensity) * 50;
+      observed[bin_idx] = (observed[bin_idx] / max_intensity) * MAX_PER_REGION;
     }
 
     // no more peaks beyond the 10 regions mark, exit
-    if(bin_idx > 10*region_selector){
+    if(bin_idx > NUM_REGIONS * region_selector){
       return;
     }
   }
@@ -824,8 +842,8 @@ BOOLEAN_T create_intensity_array_observed(
   FLOAT_T peak_location = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  FLOAT_T bin_width = get_double_parameter("mz-bin-width");
-  FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
+  FLOAT_T bin_width = scorer->bin_width;
+  FLOAT_T bin_offset = scorer->bin_offset;
   FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
 
@@ -842,9 +860,11 @@ BOOLEAN_T create_intensity_array_observed(
     }
   }
 
+  scorer->sp_max_mz = sp_max_mz;
+
   // DEBUG
   // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
-  FLOAT_T* observed = (FLOAT_T*)mycalloc((int)sp_max_mz, sizeof(FLOAT_T));
+  FLOAT_T* observed = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
   
   // create a peak iterator
   peak_iterator = new_peak_iterator(spectrum);
@@ -852,7 +872,8 @@ BOOLEAN_T create_intensity_array_observed(
   // Store the max intensity in entire spectrum
   FLOAT_T max_intensity_overall = 0.0;
   // store the max intensity in each 10 regions to later normalize
-  FLOAT_T* max_intensity_per_region = (FLOAT_T*)mycalloc(10, sizeof(FLOAT_T));
+  FLOAT_T* max_intensity_per_region 
+    = (FLOAT_T*)mycalloc(NUM_REGIONS, sizeof(FLOAT_T));
   int region_selector = 0;
 
   // while there are more peaks to iterate over..
@@ -865,8 +886,12 @@ BOOLEAN_T create_intensity_array_observed(
       max_peak = peak_location;
     }
   }
-  region_selector = (int) (max_peak / 10);
-
+  #ifdef NEW_BINNING
+  // TODO - Check to see if this is the correct thing to do.
+  region_selector = INTEGERIZE(max_peak, bin_width, bin_offset) / 10;
+  #else
+  region_selector = (int) (max_peak / NUM_REGIONS);
+  #endif
   // reset peak iterator
   peak_iterator_reset(peak_iterator);
 
@@ -896,9 +921,8 @@ BOOLEAN_T create_intensity_array_observed(
     region = mz / region_selector;
 
     // don't let index beyond array
-    if(region > 9){
+    if(region >= NUM_REGIONS){
       continue;
-      // region = 9;
     }
 
     // get intensity
@@ -931,7 +955,7 @@ BOOLEAN_T create_intensity_array_observed(
   */
 
   // normalize each 10 regions to max intensity of 50
-  normalize_each_region(observed, sp_max_mz, max_intensity_overall, 
+  normalize_each_region(scorer, observed, max_intensity_overall, 
                         max_intensity_per_region, region_selector);
   
   // DEBUG
@@ -942,15 +966,15 @@ BOOLEAN_T create_intensity_array_observed(
   } */
 
   // TODO maybe replace with a faster implementation that uses cum distribution
-  FLOAT_T* new_observed = (FLOAT_T*)mycalloc((int)sp_max_mz, sizeof(FLOAT_T));
+  FLOAT_T* new_observed = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
   int idx;
-  for(idx = 0; idx < sp_max_mz; idx++){
+  for(idx = 0; idx < get_scorer_max_bin(scorer); idx++){
     new_observed[idx] = observed[idx];
     int sub_idx;
     for(sub_idx = idx - MAX_XCORR_OFFSET; sub_idx <= idx + MAX_XCORR_OFFSET;
         sub_idx++){
 
-      if (sub_idx <= 0 || sub_idx >= sp_max_mz){
+      if (sub_idx <= 0 || sub_idx >= get_scorer_max_bin(scorer)){
         continue;
       }
 
@@ -959,7 +983,6 @@ BOOLEAN_T create_intensity_array_observed(
   }
 
   // set new values
-  scorer->sp_max_mz = sp_max_mz;
   scorer->observed = new_observed;
 
   // free heap
@@ -990,7 +1013,7 @@ void get_processed_peaks(
 
   // return the observed array and the sp_max_mz
   *intensities = scorer->observed;
-  *max_mz_bin = (int)scorer->sp_max_mz;
+  *max_mz_bin = get_scorer_max_bin(scorer);
 
   return;
 }
@@ -1011,8 +1034,8 @@ BOOLEAN_T create_intensity_array_theoretical(
   int intensity_array_idx = 0;
   int ion_charge = 0;
   ION_TYPE_T ion_type;
-  FLOAT_T bin_width = get_double_parameter("mz-bin-width");
-  FLOAT_T bin_offset = get_double_parameter("mz-bin-offset");
+  FLOAT_T bin_width = get_mz_bin_width();
+  FLOAT_T bin_offset = get_mz_bin_offset();
   // create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
 
@@ -1067,12 +1090,12 @@ BOOLEAN_T create_intensity_array_theoretical(
         // Add peaks of intensity 50.0 for B, Y type ions. 
         // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
         // Skip ions that are located beyond max mz limit
-        if((intensity_array_idx)< scorer->sp_max_mz){
+        if((intensity_array_idx)< get_scorer_max_bin(scorer)){
           add_intensity(theoretical, intensity_array_idx, B_Y_HEIGHT);
           add_intensity(theoretical, intensity_array_idx - 1, FLANK_HEIGHT);
         }
 
-        if((intensity_array_idx + 1)< scorer->sp_max_mz){
+        if((intensity_array_idx + 1)< get_scorer_max_bin(scorer)){
           add_intensity(theoretical, intensity_array_idx + 1, FLANK_HEIGHT);
         }
         
@@ -1155,7 +1178,8 @@ FLOAT_T cross_correlation(
   FLOAT_T* theoretical ///< the theoretical spectrum to score against the observed spectrum -in
   )
 {
-  int size = (int)scorer->sp_max_mz;
+
+  int size = get_scorer_max_bin(scorer);
   FLOAT_T score_at_zero = 0;
   FLOAT_T* observed = scorer->observed;
   
@@ -1191,7 +1215,7 @@ FLOAT_T gen_score_xcorr(
   }
   
   // create theoretical array
-  theoretical = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
+  theoretical = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
   
   // create intensity array for theoretical spectrum 
   if(!create_intensity_array_theoretical(scorer, ion_series, theoretical)){
@@ -1706,6 +1730,17 @@ void set_scorer_sp_max_mz(
   )
 {
   scorer->sp_max_mz = sp_max_mz;
+}
+
+/**
+ *\returns the max bin index of the scorer array(s).
+ */
+int get_scorer_max_bin(SCORER_T* scorer) {
+#ifdef NEW_BINNING
+  return INTEGERIZE(scorer->sp_max_mz, scorer->bin_width, scorer->bin_offset);
+#else
+  return (int)(scorer->sp_max_mz);
+#endif
 }
 
 /**
