@@ -232,6 +232,10 @@ void set_scorer_sp_max_mz(
   FLOAT_T sp_max_mz ///< used for Sp: the max_mz variable -in
   );
 
+/**
+ *\returns the max bin index of the scorer array(s).
+ */
+int get_scorer_max_bin(SCORER_T* scorer);
 
 /**
  *\returns the sp_array_resolution value of the scorer

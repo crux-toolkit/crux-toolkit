@@ -1090,6 +1090,35 @@ static void set_mz_bin_width()
 }
 
 /**
+ * Get the m/z bin width parameter. If NEW_BINNING is defined, then 
+ * return the mz-bin-width parameter, otherwise return based upon the 
+ * fragment-mass parameter.
+ */
+double get_mz_bin_width() {
+  #ifdef NEW_BINNING
+  return get_double_parameter("mz-bin-width");
+  #else
+  if (get_mass_type_parameter("fragment-mass") == MONO) {
+    return BIN_WIDTH_MONO;
+  } else {
+    return BIN_WIDTH_AVERAGE;
+  }
+  #endif
+}
+
+/** 
+ * Get the m/z bin offset parameter. If NEW_BINNING is defined, then
+ * return the mz-bin-offset parameter, otherwise return 0.
+ */ 
+double get_mz_bin_offset() {
+  #ifdef NEW_BINNING
+  return get_double_parameter("mz-bin-offset");
+  #else
+  return 0;
+  #endif
+}
+
+/**
  * Take the command line string from main, find the parameter file 
  * option (if present), parse it's values into the hash, and parse
  * the command line options and arguments into the hash.

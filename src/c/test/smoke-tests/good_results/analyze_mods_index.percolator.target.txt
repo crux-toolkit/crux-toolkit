@@ -1,10 +1,10 @@
 scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	p-value	Weibull est. q-value	decoy q-value (xcorr)	decoy q-value (p-value)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	eta	beta	shift	corr
-2	3	576.5400	1726.5980	1726.674683	-0.895			-0.3264	3					2.083	1	0.45				60	7	S[79.90]ISVVVNNDDATTGVR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(438)	RV					
-2	3	576.5400	1726.5980	1727.484863	-1.034			-0.3576	5					1.943	2	0.45				56	7	NGS[79.90]DYS[79.90]AAVLAACLR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(205)	RA					
-2	3	576.5400	1726.5980	1726.674683	-0.7741			-0.3049	2					1.865	3	0.45				60	7	SISVVVNNDDATT[79.90]GVR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(438)	RV					
-2	3	576.5400	1726.5980	1727.484863	-0.9434			-0.3487	4					1.828	4	0.45				56	7	NGSDY[79.90]S[79.90]AAVLAACLR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(205)	RA					
-2	3	576.5400	1726.5980	1726.674683	-0.6569			-0.184	1					0.9935	5	0.6				60	7	SISVVVNNDDAT[79.90]TGVR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(438)	RV					
-14	3	500.4100	1498.2081	1495.814941	0			-0.1825	1					0.9771	6	0.6				44	1	VMFTTFYMITNK	trypsin-full-digest	gi|6382000|ref|NP_009314.2|(29)	RY					
-15	2	488.8200	975.6255	973.093567	0			-0.05049	1					0.2248	7	0.9				16	1	SGATAYIYK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(257)	KA					
-15	3	488.8200	1463.4381	1464.811157	0			-0.09489	1					-1.638	8	0.9				44	1	QYLLLNIAYLLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(292)	KL					
-14	2	500.4100	998.8055	1001.150330	0			0.3148	1					-4.787	9	0.9				14	1	FHLELSQK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(226)	KD					
+2	3	576.5400	1726.5980	1727.484863	-1.816			-0.232	4					2.386	1	0.7875				56	7	NGS[79.90]DY[79.90]SAAVLAACLR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(205)	RA					
+2	3	576.5400	1726.5980	1726.674683	-2.348			-0.2407	5					2.258	2	0.7875				60	7	S[79.90]ISVVVNNDDATTGVR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(438)	RV					
+2	3	576.5400	1726.5980	1726.674683	-1.714			-0.1283	3					1.371	3	0.7875				60	7	SISVVVNNDDAT[79.90]TGVR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(438)	RV					
+2	3	576.5400	1726.5980	1727.484863	-0.5009			-0.1128	2					1.196	4	0.7875				56	7	NGSDY[79.90]S[79.90]AAVLAACLR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(205)	RA					
+14	3	500.4100	1498.2081	1495.814941	0			-0.1608	1					0.9953	5	0.7875				44	1	VMFTTFYMITNK	trypsin-full-digest	gi|6382000|ref|NP_009314.2|(29)	RY					
+2	3	576.5400	1726.5980	1727.484863	-0.3195			-0.08547	1					0.9694	6	0.7875				56	7	NGS[79.90]DYS[79.90]AAVLAACLR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(205)	RA					
+15	3	488.8200	1463.4381	1464.811157	0			-0.01094	1					0.8826	7	0.7875				44	1	QYLLLNIAYLLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(292)	KL					
+15	2	488.8200	975.6255	973.093567	0			-0.09945	1					-1.093	8	0.7875				16	1	SGATAYIYK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(257)	KA					
+14	2	500.4100	998.8055	1001.150330	0			0.2962	1					-2.111	9	0.8				14	1	FHLELSQK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(226)	KD					
