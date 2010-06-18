@@ -488,7 +488,8 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
       //if sequence is decoy sequence, recover the position from
       //the unshuffled sequence.
       string sequence;
-      if (file.getString(UNSHUFFLED_SEQUENCE_COL).empty()) {
+
+      if (file.empty(UNSHUFFLED_SEQUENCE_COL)) {
         sequence = file.getString(SEQUENCE_COL);
       } else {
         sequence = file.getString(UNSHUFFLED_SEQUENCE_COL);

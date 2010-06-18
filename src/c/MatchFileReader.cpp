@@ -98,7 +98,6 @@ FLOAT_T MatchFileReader::getFloat(
       match_column_strings[col_type]);
     return -1;
   } else {
-
     return DelimitedFileReader::getFloat(idx);
   }
 }
@@ -118,7 +117,7 @@ int MatchFileReader::getInteger(
       match_column_strings[col_type]);
     return -1;
   } else {
- 
+
     return DelimitedFileReader::getInteger(idx);
   }
 }
@@ -136,15 +135,31 @@ std::string& MatchFileReader::getString(
 
   int idx = match_indices_[col_type];
   if (idx == -1) {
+
     carp(CARP_FATAL,
       "column \"%s\" not found",
       match_column_strings[col_type]);
     return BLANK_STRING;
   } else {
- 
+
     return DelimitedFileReader::getString(idx);
   }
+}
 
+bool MatchFileReader::empty(
+  MATCH_COLUMNS_T col_type ///<the column type
+) {
+
+  int idx = match_indices_[col_type];
+  if (idx == -1) {
+    carp(CARP_FATAL,
+      "column \"%s\" not found",
+      match_column_strings[col_type]);
+    return true;
+  } else {
+
+    return DelimitedFileReader::getString(idx).empty();
+  }
 }
 
 /**

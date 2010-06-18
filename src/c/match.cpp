@@ -1033,7 +1033,7 @@ MATCH_T* parse_match_tab_delimited(
   //Parse if match is it null_peptide?
   //We could check if unshuffled sequence is "", since that field is not
   //set for not null peptides.
-  match -> null_peptide = result_file.getString(UNSHUFFLED_SEQUENCE_COL) != "";
+  match -> null_peptide = !result_file.empty(UNSHUFFLED_SEQUENCE_COL);
 
   //assign fields
   match -> peptide_sequence = NULL;

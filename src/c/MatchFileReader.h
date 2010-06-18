@@ -111,6 +111,14 @@ class MatchFileReader: public DelimitedFileReader {
     );
 
     /**
+     * returns whether the column is empty or not.
+     */
+    bool empty(
+      MATCH_COLUMNS_T col_type ///<the column type
+    );
+
+
+    /**
      * gets an vector of strings from cell where the
      * string in the cell has delimiters that are
      * different than the column delimiter. The
