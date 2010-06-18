@@ -50,6 +50,7 @@ class DelimitedFileReader {
   bool num_rows_valid_;
   unsigned int num_rows_;
 
+  bool column_mismatch_warned_;
 
 
  public:

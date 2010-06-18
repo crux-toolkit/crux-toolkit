@@ -112,6 +112,8 @@ void DelimitedFileReader::loadData(
   num_rows_valid_ = false;
   column_names_.clear();
   file_ptr_ = new fstream(file_name, ios::in);
+  current_row_ = 0;
+  column_mismatch_warned_ = false;
 
   if (!file_ptr_ -> is_open()) {
     carp(CARP_ERROR, "Opening %s or reading failed", file_name);
@@ -198,7 +200,7 @@ string& DelimitedFileReader::getString(
   unsigned int col_idx ///< the column index
   ) {
 
-  return data_[col_idx];
+  return data_.at(col_idx);
 }
 
 /** 
@@ -430,9 +432,28 @@ void DelimitedFileReader::reset() {
 void DelimitedFileReader::next() {
 
   if (has_next_) {
+    current_row_++;
     current_data_string_ = next_data_string_;
     //parse next_data_string_ into data_
     DelimitedFile::tokenize(next_data_string_, data_, '\t');
+
+    //make sure data has the right number of columns for the header.
+    if (data_.size() < column_names_.size()) {
+      if (!column_mismatch_warned_) {
+        carp(CARP_WARNING,
+          "Column count %d for line %d is less than header %d",
+          data_.size(), current_row_, column_names_.size());
+        carp(CARP_WARNING,
+          "%s", current_data_string_.c_str());
+        carp(CARP_WARNING,
+          "Suppressing warnings, other mismatches may exist!");
+        column_mismatch_warned_ = true;
+      }
+      while (data_.size() < column_names_.size()) {
+        data_.push_back(string(""));
+      }
+    }
+
     //read next line
     has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
     has_current_ = true;
