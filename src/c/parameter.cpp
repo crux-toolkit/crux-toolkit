@@ -358,6 +358,10 @@ void initialize_parameters(void){
       "Used from command line or parameter file by crux-create-index and "
       "crux-generate-peptides.  Parameter file only for "
       "crux-search-for-matches.", "true");
+  set_int_parameter("min-peaks", 20, 0, BILLION,
+      "The minimum number of peaks a spectrum must have for it to be searched."
+      " Default=20.", 
+      "Parameter file only for search-for-matches and sequest-search.", "true");
   set_digest_type_parameter("digestion", FULL_DIGEST,
       "Degree of digestion used to generate peptides. "
       "<string>=full-digest|partial-digest. Either both ends or one end "

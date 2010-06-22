@@ -220,6 +220,11 @@ overwrite=F
 # line will override values in the parameter file.
 parameter-file=params/no-decoys-ss
 
+# The minimum number of peaks a spectrum must have for it to be
+# searched. Default=20.
+# Parameter file only for search-for-matches and sequest-search.
+min-peaks=20
+
 # Predict peaks with the given maximum number of nh3 neutral loss
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.

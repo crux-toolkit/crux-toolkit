@@ -221,6 +221,11 @@ overwrite=FALSE
 # line will override values in the parameter file.
 parameter-file=__NULL_STR
 
+# The minimum number of peaks a spectrum must have for it to be
+# searched. Default=100.
+# Parameter file only for search-for-matches and sequest-search.
+min-peaks=20
+
 # Predict peaks with the given maximum number of nh3 neutral loss
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.
@@ -252,11 +257,6 @@ spectrum-charge=all
 # Set to 0 to show no search progress.  Available for crux
 # search-for-matches from parameter file.
 print-search-progress=10
-
-# Use mass-to-charge rather than mass for finding candidate peptides.
-# Default=F.
-# Available for crux-search-for-matches
-use-mz-window=FALSE
 
 # Use MSToolkit to parse spectra. Default=F.
 # Available for crux-search-for-matches
