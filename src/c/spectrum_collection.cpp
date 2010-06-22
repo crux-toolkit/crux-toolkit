@@ -76,6 +76,7 @@ struct filtered_spectrum_charge_iterator {
   double min_mz;       ///< return only spec above this mz
   double max_mz;      ///< return only spec below this mz
   int search_charge;   ///< which z to search, 0 for all
+  int min_peaks;       ///< minimum number of peaks a spec must have
 };
 
 
@@ -918,7 +919,8 @@ SPECTRUM_ITERATOR_T* new_spectrum_iterator(
  * as +2 and once as +3).  The charge is returned by setting the int
  * pointer in the argument list.  The iterator also filters spectra by
  * mass so that none outside the spectrum-min-mass--spectrum-max-mass
- * range (as defined in parameter.c).
+ * range (as defined in parameter.c).  The iterator also filters by
+ * minimum number of peaks.
  * \returns a SPECTRUM_ITERATOR_T object.
  */
 FILTERED_SPECTRUM_CHARGE_ITERATOR_T* new_filtered_spectrum_charge_iterator(
@@ -935,6 +937,8 @@ FILTERED_SPECTRUM_CHARGE_ITERATOR_T* new_filtered_spectrum_charge_iterator(
   iterator->charge_index = -1;
   iterator->min_mz = get_double_parameter("spectrum-min-mass");
   iterator->max_mz = get_double_parameter("spectrum-max-mass");
+  iterator->min_peaks = get_int_parameter("min-peaks");
+
   const char* charge_str = get_string_parameter_pointer("spectrum-charge");
   if( strcmp( charge_str, "all") == 0){
     iterator->search_charge = 0;
@@ -1063,10 +1067,12 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
     this_charge = iterator->charges[iterator->charge_index];
   }
   double mz = get_spectrum_precursor_mz(spec);
+  int num_peaks = get_spectrum_num_peaks(spec);
 
   if( iterator->search_charge == 0 || iterator->search_charge == this_charge ){
-    if( mz >= iterator->min_mz && mz <= iterator->max_mz ){
-      // passes both tests
+    if( mz >= iterator->min_mz && mz <= iterator->max_mz
+        && num_peaks >= iterator->min_peaks ){
+      // passes all tests
       iterator->has_next = TRUE;
       return;
     }
