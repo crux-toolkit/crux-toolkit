@@ -20,7 +20,7 @@ import javax.swing.SpinnerNumberModel;
  * @author Charles E. Grant
  *
  */
-public class SpectrumMassPanel extends CruxParameterControl {
+public class SpectrumMassPanel extends CruxAdvancedParameterControl {
 
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");

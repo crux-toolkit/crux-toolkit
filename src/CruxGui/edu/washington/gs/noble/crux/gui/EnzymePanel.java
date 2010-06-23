@@ -19,7 +19,7 @@ import javax.swing.JPanel;
  *
  */
 @SuppressWarnings("serial")
-class EnzymePanel extends  CruxParameterControl {
+class EnzymePanel extends  CruxAdvancedParameterControl {
 	
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");

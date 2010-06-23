@@ -21,7 +21,7 @@ import javax.swing.SpinnerNumberModel;
  *
  */
 @SuppressWarnings("serial")
-class MassPanel extends CruxParameterControl {
+class MassPanel extends CruxAdvancedParameterControl {
 
 	private static Logger logger = 
 		Logger.getLogger("edu.washington.gs.noble.crux.gui");
