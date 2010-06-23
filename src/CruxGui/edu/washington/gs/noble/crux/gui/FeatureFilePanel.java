@@ -21,7 +21,7 @@ import javax.swing.SpinnerNumberModel;
  *
  * @author Charles E. Grant
  *
- */public class FeatureFilePanel extends CruxParameterControl {
+ */public class FeatureFilePanel extends CruxAdvancedParameterControl {
 	 
 		private static Logger logger = 
 			Logger.getLogger("edu.washington.gs.noble.crux.gui");

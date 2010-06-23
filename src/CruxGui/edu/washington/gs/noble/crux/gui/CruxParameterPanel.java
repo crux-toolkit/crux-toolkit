@@ -55,6 +55,8 @@ class CruxParameterPanel extends JPanel implements ItemListener {
 		// Top controls
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		runToolCheckBox.addItemListener(new RunComponentChangeListener());
+		showAdvancedParameters.addActionListener(new showAdvancedParametersListener());
+
 		add(runToolCheckBox);
 		add(Box.createRigidArea(new Dimension(0,12)));
 		add(showAdvancedParameters);
@@ -99,11 +101,11 @@ class CruxParameterPanel extends JPanel implements ItemListener {
 			panel.add(Box.createRigidArea(new Dimension(0, 20)));
 		}
 	}
-
-	private void updateFromModel() {
+    private void updateFromModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		runToolCheckBox.setSelected(model.getRunComponent(component));
-		showAdvancedParameters.setSelected(model.getShowAdvancedParameters(component));
+		/* Don't think we need this */
+		//showAdvancedParameters.setSelected(model.getShowAdvancedParameters(component));
 		for (CruxParameterControl component: parameterControls) {
 			component.updateFromModel();
 		}
@@ -118,7 +120,17 @@ class CruxParameterPanel extends JPanel implements ItemListener {
 		else {
 			setVisible(false);
 		}
+		updateAdvancedParameters();
 	}
+
+    public void updateAdvancedParameters(){
+	boolean show = showAdvancedParameters.isSelected();
+	for (CruxParameterControl component: parameterControls){
+	    if (component instanceof CruxAdvancedParameterControl){
+		component.setVisible(show);
+	    }
+	}
+    }
 	
 	class RunComponentChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
@@ -164,4 +176,10 @@ class LoadDefaultsButtonListener implements ActionListener {
 			dummyButton.setSelected(true);
 		}
 	}
+
+    class showAdvancedParametersListener implements ActionListener {
+	public void actionPerformed(ActionEvent e){
+	    updateAdvancedParameters();
+	}
+    }
 }
