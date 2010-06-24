@@ -11,6 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <vector>
 #include "parameter.h"
 #include "carp.h"
 #include "spectrum.h"
@@ -128,7 +129,7 @@ int main(int argc, char** argv){
 
       int charge_state_index = 0; 
       int charge_state_num = get_spectrum_num_possible_z(spectrum);
-      int* possible_z_array = get_spectrum_possible_z(spectrum);
+      std::vector<int> possible_z_array = get_spectrum_possible_z(spectrum);
       int possible_z;
   
       printf("Scan number: %i\n", scan_number);
@@ -150,7 +151,6 @@ int main(int argc, char** argv){
 	printf("M+H+ mass:%.2f\n", 
 	       get_spectrum_singly_charged_mass(spectrum, possible_z));
       }
-      free(possible_z_array);
     }
     free_spectrum(spectrum);
     num_found++;

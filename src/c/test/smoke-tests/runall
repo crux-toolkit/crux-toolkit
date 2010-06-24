@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash 
 
 # Make sure the testing script is executable.
 chmod 774 crux-test.pl
