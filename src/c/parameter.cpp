@@ -464,6 +464,10 @@ void initialize_parameters(void){
       "Search only select spectra specified as a single "
       "scan number or as a range as in x-y.  Default=search all.",
       "The search range x-y is inclusive of x and y.", "true");
+  set_boolean_parameter("xcorr-var-bin", FALSE,
+    "Use variable binning for XCORR.  If set to true, mz-bin-width, " 
+    "and mz-bin-offset parameters are utilized",
+    "Available for crux-search-for-matches.","true");
   /* N.B. Use NaN to indicate that no user preference was specified.
    * In this case, the default value depends on the mass type. */
   set_double_parameter("mz-bin-width", NaN(), 0.0, BILLION,
@@ -1094,20 +1098,20 @@ static void set_mz_bin_width()
 }
 
 /**
- * Get the m/z bin width parameter. If NEW_BINNING is defined, then 
+ * Get the m/z bin width parameter. If xcorr-var-bin is TRUE, then 
  * return the mz-bin-width parameter, otherwise return based upon the 
  * fragment-mass parameter.
  */
 double get_mz_bin_width() {
-  #ifdef NEW_BINNING
-  return get_double_parameter("mz-bin-width");
-  #else
-  if (get_mass_type_parameter("fragment-mass") == MONO) {
-    return BIN_WIDTH_MONO;
+  if (get_boolean_parameter("xcorr-var-bin")) {
+    return get_double_parameter("mz-bin-width");
   } else {
-    return BIN_WIDTH_AVERAGE;
+    if (get_mass_type_parameter("fragment-mass") == MONO) {
+      return BIN_WIDTH_MONO;
+    } else {
+      return BIN_WIDTH_AVERAGE;
+    }
   }
-  #endif
 }
 
 /** 
@@ -1115,11 +1119,11 @@ double get_mz_bin_width() {
  * return the mz-bin-offset parameter, otherwise return 0.
  */ 
 double get_mz_bin_offset() {
-  #ifdef NEW_BINNING
-  return get_double_parameter("mz-bin-offset");
-  #else
-  return 0;
-  #endif
+  if (get_boolean_parameter("xcorr-var-bin")) {
+    return get_double_parameter("mz-bin-offset");
+  } else {
+    return 0;
+  }
 }
 
 /**

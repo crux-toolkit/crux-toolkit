@@ -1,4 +1,4 @@
-#	time created: Fri Jun 11 16:15:27 2010
+#	time created: Wed Jun 23 11:34:30 2010
 #	fasta file: test-binary-fasta
 #	min_mass: 200.00
 #	max_mass: 7200.00
@@ -20,7 +20,7 @@
 #	mass_type: 0
 #	unique_peptides: 1
 #	CRUX index directory: test_crux_index
-#	time created: Fri Jun 11 16:15:27 2010
+#	time created: Wed Jun 23 11:34:30 2010
 #	target_mass_range_for_index_file: 6.84
 crux_index_34	585.59	6.84
 crux_index_44	653.95	6.84

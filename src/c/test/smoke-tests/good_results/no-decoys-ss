@@ -1,11 +1,11 @@
-INFO: CPU: n001.grid.gs.washington.edu
-INFO: Fri Jun 11 16:16:18 PDT 2010
+INFO: CPU: n005.grid.gs.washington.edu
+INFO: Wed Jun 23 11:35:19 PDT 2010
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96, charge 2, search number 100
-INFO: Elapsed time: 1.34 s
+INFO: Elapsed time: 1.19 s
 INFO: Finished crux sequest-search
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
@@ -229,6 +229,11 @@ min-peaks=20
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.
 nh3=0
+
+# Use variable binning for XCORR.  If set to true, mz-bin-width, and
+# mz-bin-offset parameters are utilized
+# Available for crux-search-for-matches.
+xcorr-var-bin=FALSE
 
 # Number of psms per spectrum to score with xcorr after preliminary
 # scoring with Sp. Set to 0 to score all psms with xcorr. Default=500.
@@ -467,7 +472,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Jun 11 16:16:19 2010
+H	StartTime	Wed Jun 23 11:35:19 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
