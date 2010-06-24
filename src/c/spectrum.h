@@ -7,6 +7,7 @@
 #define SPECTRUM_H
 
 #include <stdio.h>
+#include <vector>
 #include "utils.h"
 #include "objects.h"
 #include "peak.h"
@@ -37,9 +38,8 @@ SPECTRUM_T* new_spectrum(
   int               first_scan,         ///< The number of the first scan -in
   int               last_scan,          ///< The number of the last scan -in
   SPECTRUM_TYPE_T   spectrum_type,      ///< The type of spectrum. -in
-  FLOAT_T             precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra) -in
-  int*              possible_z,         ///< The possible charge states of this spectrum  -in
-  int               num_possible_z,     ///< The number of possible charge states of this spectrum  -in  
+  FLOAT_T           precursor_mz,       ///< The m/z of the precursor (for MS-MS spectra) -in
+  const std::vector<int>& possible_z,         ///< The possible charge states of this spectrum  -in
   char*             filename);          ///< Optional filename  -in
 
 /**
@@ -219,28 +219,11 @@ void set_spectrum_precursor_mz(
  * number of possible charge states can be gained by 
  * the get_num_possible_z function.
  */
-int* get_spectrum_possible_z(
+const std::vector<int>& get_spectrum_possible_z(
   SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
   );
 
-/**
- * \returns the number of possible charge states of this spectrum
- */
-int get_num_possible_z(
-  SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
-  );
-
-/**
- * \returns a pointer to an array of the possible charge states of this spectrum
- * User must NOT free this or alter, not a copy
- * number of possible charge states can be gained by 
- * the get_num_possible_z function.
- */
-int* get_spectrum_possible_z_pointer(
-  SPECTRUM_T* spectrum  ///< the spectrum to query possible z -in
-  );
- 
-int get_charges_to_search(SPECTRUM_T*, int**);
+std::vector<int> get_charges_to_search(SPECTRUM_T*);
 /**
  * \sets the possible charge states of this spectrum
  * the function copies the possible_z into a heap allocated memory
@@ -250,23 +233,7 @@ int get_charges_to_search(SPECTRUM_T*, int**);
  */
 void set_spectrum_possible_z(
   SPECTRUM_T* spectrum,  ///< the spectrum to set the new_possible_z -out
-  int* possible_z, ///< possible z array -in
-  int num_possible_z ///< possible z array size -in
-  );
-
-
-/**
- * \sets the possible charge states of this spectrum
- * this function should only be used when possible_z is set to NULL
- * to change existing possible_z use set_spectrum_possible_z()
- * the function copies the possible_z into a heap allocated memory
- * num_possible_z must match the array size of possible_z 
- * updates the number of possible charge states field
- */
-void set_spectrum_new_possible_z(
-  SPECTRUM_T* spectrum,  ///< the spectrum to set the new_possible_z -out
-  int* possible_z, ///< possible z array -in
-  int num_possible_z ///< possible z array size -in
+  const std::vector<int>& possible_z ///< possible z array -in
   );
 
 /**

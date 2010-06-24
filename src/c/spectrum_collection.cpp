@@ -70,7 +70,7 @@ struct filtered_spectrum_charge_iterator {
   SPECTRUM_COLLECTION_T* spectrum_collection;///< spectra to iterate over
   BOOLEAN_T has_next;  ///< is there a spec that passes criteria
   int  spectrum_index; ///< The index of the current spectrum
-  int* charges;        ///< Array of possible charges to search
+  vector<int> charges;        ///< Array of possible charges to search
   int num_charges;     ///< how many charges does the cur spec have
   int charge_index;    ///< The index of the charge of the current spectrum
   double min_mz;       ///< return only spec above this mz
@@ -932,7 +932,6 @@ FILTERED_SPECTRUM_CHARGE_ITERATOR_T* new_filtered_spectrum_charge_iterator(
   iterator->spectrum_collection = spectrum_collection;
   iterator->has_next = FALSE;
   iterator->spectrum_index = -1;
-  iterator->charges = NULL;
   iterator->num_charges = 0;
   iterator->charge_index = -1;
   iterator->min_mz = get_double_parameter("spectrum-min-mass");
@@ -1050,10 +1049,11 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
     iterator->spectrum_index++;
     spec = iterator->spectrum_collection->spectra[iterator->spectrum_index];
     // first free any existing charges in the iterator
-    if( iterator->charges ){
-      free(iterator->charges);
+    if( ! iterator->charges.empty() ){
+      iterator->charges.clear();
     }
-    iterator->num_charges = get_charges_to_search(spec, &(iterator->charges));
+    iterator->charges = get_charges_to_search(spec);
+    iterator->num_charges = (int)iterator->charges.size();
     iterator->charge_index = 0;
   }else{ // none left
     iterator->has_next = FALSE;
