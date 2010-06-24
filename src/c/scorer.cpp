@@ -106,6 +106,7 @@ struct scorer {
   BOOLEAN_T initialized; ///< has the scorer been initialized?
   int last_idx; ///< the last index in the array, the data size of the array
 
+  BOOLEAN_T xcorr_var_bin; ///<Use the variable binning code or not
   FLOAT_T bin_width; ///< width of the bins to use for arrays
   FLOAT_T bin_offset; ///< m/z offset for the bins.
 
@@ -146,6 +147,8 @@ SCORER_T* new_scorer(
   // set score type
   scorer->type = type;
   
+  scorer->xcorr_var_bin = get_boolean_parameter("xcorr-var-bin");
+
   // set bin_width and bin_offset.
   scorer->bin_width = get_mz_bin_width();
   scorer->bin_offset = get_mz_bin_offset();
@@ -886,12 +889,12 @@ BOOLEAN_T create_intensity_array_observed(
       max_peak = peak_location;
     }
   }
-  #ifdef NEW_BINNING
-  // TODO - Check to see if this is the correct thing to do.
-  region_selector = INTEGERIZE(max_peak, bin_width, bin_offset) / 10;
-  #else
-  region_selector = (int) (max_peak / NUM_REGIONS);
-  #endif
+  if (scorer->xcorr_var_bin) {
+    // TODO - Check to see if this is the correct thing to do.
+    region_selector = INTEGERIZE(max_peak, bin_width, bin_offset) / NUM_REGIONS;
+  } else {
+    region_selector = (int) (max_peak / NUM_REGIONS);
+  }
   // reset peak iterator
   peak_iterator_reset(peak_iterator);
 
@@ -1736,11 +1739,11 @@ void set_scorer_sp_max_mz(
  *\returns the max bin index of the scorer array(s).
  */
 int get_scorer_max_bin(SCORER_T* scorer) {
-#ifdef NEW_BINNING
-  return INTEGERIZE(scorer->sp_max_mz, scorer->bin_width, scorer->bin_offset);
-#else
-  return (int)(scorer->sp_max_mz);
-#endif
+  if (scorer->xcorr_var_bin) {
+    return INTEGERIZE(scorer->sp_max_mz, scorer->bin_width, scorer->bin_offset);
+  } else {
+    return (int)(scorer->sp_max_mz);
+  }
 }
 
 /**
