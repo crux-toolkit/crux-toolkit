@@ -26,12 +26,8 @@
 #include "scorer.h"
 
 /* Global variables */
-#define NOT_SCORED FLT_MIN
-#define P_VALUE_NA -1.0
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+static const FLOAT_T NOT_SCORED = FLT_MIN;
+static const FLOAT_T P_VALUE_NA = -1.0;
 
 /**
  * \returns a new memory allocated match
@@ -54,7 +50,6 @@ void shuffle_matches(
   int end_index          ///< index AFTER the last element to shuffle
   );
 
-#ifdef __cplusplus
 
 /**
  * sort the match array with the corresponding compare method
@@ -64,7 +59,6 @@ void qsort_match(
   int match_total,  ///< the total number of match objects -in
   int (*compare_method)(const void*, const void*) ///< the compare method to use -in
   );
-#endif
 
 /**
  * compare two matches, used for qsort
@@ -274,7 +268,6 @@ double* get_match_percolator_features(
   MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
   );
 
-#ifdef __cplusplus
 /**
  *
  *\returns a match object that is parsed from the tab-delimited result file
@@ -283,8 +276,6 @@ MATCH_T* parse_match_tab_delimited(
   MatchFileReader& result_file,  ///< the result file to parse PSMs -in
   DATABASE_T* database ///< the database to which the peptides are created -in
   );
-
-#endif
 
 /****************************
  * match get, set methods
@@ -524,9 +515,6 @@ int get_match_b_y_ion_possible(
   MATCH_T* match ///< the match to work -out
   );
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif //MATCH_H
 

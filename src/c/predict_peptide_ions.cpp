@@ -19,8 +19,8 @@
 #include "ion.h"
 #include "ion_series.h"
 
-#define NUM_PREDICT_OPTIONS 9
-#define NUM_PREDICT_ARGUMENTS 2
+static const int NUM_PREDICT_OPTIONS = 9;
+static const int NUM_PREDICT_ARGUMENTS = 2;
 
 int main(int argc, char** argv){
 

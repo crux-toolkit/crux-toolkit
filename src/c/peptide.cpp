@@ -1143,7 +1143,7 @@ void transform_peptide_to_decoy(PEPTIDE_T* peptide){
  * 
  * \returns A newly-allocated char array with the shuffled sequence.
  */
-#define MAX_SHUFFLES 5 // Don't bother trying to shuffle more than this.
+static const int MAX_SHUFFLES = 5; // Don't bother trying to shuffle more than this.
 char* generate_shuffled_sequence(
   PEPTIDE_T* peptide ///< The peptide to shuffle -in 
   )

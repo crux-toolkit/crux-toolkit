@@ -8,50 +8,47 @@
 
 #include "utils.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** 
  * Verbosity level for a fatal error (e.g., could not open an input file)
  */
-#define CARP_FATAL 0    
+static const int CARP_FATAL = 0;    
 
 /** 
  * Verbosity level for a serious, not fatal, error
  * (e.g., could not close a file handle)
  */
-#define CARP_ERROR 10   
+static const int CARP_ERROR = 10;   
 
 /**
  * Verbosity level for a warning (e.g., a spectrum has no peaks)
  */
-#define CARP_WARNING 20 
+static const int CARP_WARNING = 20; 
 
 /**
  * Verbosity level for informational message (e.g., processed X lines of file)
  */
-#define CARP_INFO 30    
+static const int CARP_INFO = 30;    
 
 /**
  * Verbosity level for detailed informational message (e.g, on spectrum 1000 )
  */
-#define CARP_DETAILED_INFO 40    
+static const int CARP_DETAILED_INFO = 40;    
 
 /** 
  * Verbosity level for a debugging message
  */
-#define CARP_DEBUG 50   
+static const int CARP_DEBUG = 50;   
 
 /** 
  * Verbosity level for very detailed debugging message
  */
-#define CARP_DETAILED_DEBUG 60  
+static const int CARP_DETAILED_DEBUG = 60;  
 
 /** 
  * The maximum verbosity level
  */
-#define CARP_MAX 100 
+static const int CARP_MAX = 100; 
 
 /**
  * Allow for compilation to remove carp commands in the preprocessor.
@@ -146,8 +143,5 @@ void carp(
  * End:
  */
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif

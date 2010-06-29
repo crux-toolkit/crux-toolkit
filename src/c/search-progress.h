@@ -6,16 +6,10 @@
  * attempted and how many have been successfull.  Reports progress at
  * appropriate intervals
  */
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "carp.h"
 #include "parameter.h"
 
-#ifdef __cplusplus
-}
-#endif
 
 using namespace std;
 

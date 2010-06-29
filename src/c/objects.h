@@ -11,11 +11,9 @@
 #define QSORT_COMPARE_METHOD int(*)(const void*, const void*)
 
 
-#ifdef __cplusplus
 class DelimitedFile;
 class DelimitedFileReader;
 class MatchFileReader;
-#endif
 
 /**
  * \typedef PEAK_T 
@@ -111,8 +109,9 @@ enum _digest_type {
   FULL_DIGEST,         ///< c- AND n-term specific to ENZYME_T
   PARTIAL_DIGEST,      ///< c- OR n-term specific to ENZYME_T
   NON_SPECIFIC_DIGEST, ///< not specific to any enzyme cleavage rules
+  NUMBER_DIGEST_TYPES  ///< keep last, number of types
 };
-#define NUMBER_DIGEST_TYPES 4
+
 /**
  * \typedef DIGEST_T
  * \brief The rule governing how a peptide was digested.  Used in
@@ -137,9 +136,10 @@ enum _enzyme_type {
   ASPN,                  ///< cleave before D
   MODIFIED_CHYMOTRYPSIN, ///< cleave after FWYL, not before P
   ELASTASE_TRYPSIN_CHYMOTRYPSIN, ///< cleave after ALIVKRWFY, not before P
-  CUSTOM_ENZYME    ///< cleave after/before user-defined residues
+  CUSTOM_ENZYME,         ///< cleave after/before user-defined residues
+  NUMBER_ENZYME_TYPES    ///< leave last, number of types
 };
-#define NUMBER_ENZYME_TYPES 14
+
 /**
  * \typedef ENZYME_T
  * \brief The enzyme with which a peptide was digested.  Used in
@@ -148,24 +148,9 @@ enum _enzyme_type {
 typedef enum _enzyme_type ENZYME_T;
 
 /**
- * Being PARTIALLY_TRYPTIC is N or C terminus tryptic
- * \brief The enum for peptide type, with regard to trypticity.
- */
-/*
-#define NUMBER_PEPTIDE_TYPES 6
-enum _peptide_type { TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC}; 
-*/
-/**
- * \typedef PEPTIDE_TYPE_T 
- * \brief The typedef for peptide type, with regard to trypticity.
- */
-//typedef enum _peptide_type PEPTIDE_TYPE_T;
-
-/**
  * The enum for isotopic mass type (average, mono)
  */
-enum _mass_type {AVERAGE, MONO };
-#define NUMBER_MASS_TYPES 2
+enum _mass_type {AVERAGE, MONO, NUMBER_MASS_TYPES };
 
 /**
  * \typedef MASS_TYPE_T
@@ -181,9 +166,10 @@ enum _window_type {
   WINDOW_INVALID,
   WINDOW_MASS, 
   WINDOW_MZ, 
-  WINDOW_PPM 
+  WINDOW_PPM,
+  NUMBER_WINDOW_TYPES  
 };
-#define NUMBER_WINDOW_TYPES 4
+
 /**
  * \typedef WINDOW_TYPE_T
  * \brief The typedef for window type (mass, mz, ppm);
@@ -231,8 +217,11 @@ typedef struct database_peptide_iterator DATABASE_PEPTIDE_ITERATOR_T;
 /**
  * The enum for sort type (mass, length, lexical, none)
  */
-enum _sort_type {SORT_NONE, SORT_MASS, SORT_LENGTH, SORT_LEXICAL};
-#define NUMBER_SORT_TYPES 4
+enum _sort_type {SORT_NONE, 
+                 SORT_MASS, 
+                 SORT_LENGTH, 
+                 SORT_LEXICAL, 
+                 NUMBER_SORT_TYPES };
 
 /**
  * \typedef SORT_TYPE_T
@@ -311,8 +300,7 @@ typedef enum _index_type INDEX_TYPE_T;
  * BY_ION(B & Y ion), BYA_ION(B & Y & A ion)
  */
 enum _ion_type {A_ION, B_ION, C_ION, X_ION, Y_ION, Z_ION, 
-  P_ION, BY_ION, BYA_ION, ALL_ION};
-#define NUMBER_ION_TYPES 10
+                P_ION, BY_ION, BYA_ION, ALL_ION, NUMBER_ION_TYPES };
 
 /**
  * \typedef ION_TYPE_T
@@ -388,7 +376,6 @@ typedef struct scorer SCORER_T;
  * reading and writing scores from the CSM we omit the last two scores
  * in the score type enum.
  */
-#define NUMBER_SCORER_TYPES 16 //BF added for consistant naming
 //enum _scorer_type { SP, XCORR, DOTP, LOGP_EXP_SP, LOGP_BONF_EXP_SP, LOGP_EVD_XCORR, LOGP_BONF_EVD_XCORR, LOGP_WEIBULL_SP, LOGP_BONF_WEIBULL_SP, LOGP_WEIBULL_XCORR, LOGP_BONF_WEIBULL_XCORR, Q_VALUE, PERCOLATOR_SCORE, LOGP_QVALUE_WEIBULL_XCORR};
 enum _scorer_type { 
   SP,                  ///< SEQUEST preliminary score
@@ -409,7 +396,8 @@ enum _scorer_type {
   PERCOLATOR_SCORE,
   LOGP_QVALUE_WEIBULL_XCORR,
   QRANKER_SCORE,
-  QRANKER_Q_VALUE
+  QRANKER_Q_VALUE,
+  NUMBER_SCORER_TYPES 
 };
 
 /*
@@ -420,7 +408,6 @@ LOGP_BONF_WEIBULL_SP, sp-logp
 LOGP_BONF_WEIBULL_XCORR, xcorr-logp
 };
 */
-#define _SCORE_TYPE_NUM 16 ///< the number of different score types
 
 /**
  * \typedef SCORER_TYPE_T
@@ -455,8 +442,9 @@ typedef struct hit_iterator HIT_ITERATOR_T;
 /**
  * The enum for protein scorer type
  */
-#define NUMBER_PROTEIN_SCORER_TYPES 2
-enum _protein_scorer_type { PROTEIN_SCORER_PVALUE, PROTEIN_SCORER_OLIVER };
+enum _protein_scorer_type { PROTEIN_SCORER_PVALUE, 
+                            PROTEIN_SCORER_OLIVER, 
+                            NUMBER_PROTEIN_SCORER_TYPES };
 
 /**
  * \typedef PROTEIN_SCORER_TYPE_T
@@ -488,11 +476,16 @@ typedef struct match_iterator MATCH_ITERATOR_T;
  */
 typedef struct match_collection_iterator MATCH_COLLECTION_ITERATOR_T;
 
-#define NUMBER_ALGORITHM_TYPES 6 //BF added for consistant naming
 /**
  * The enum for algorithm type (PERCOLATOR, CZAR, ALL)
  */
-enum _algorithm {PERCOLATOR_ALGORITHM, RCZAR_ALGORITHM, QVALUE_ALGORITHM, NO_ALGORITHM, ALL_ALGORITHM, QRANKER_ALGORITHM};
+enum _algorithm {PERCOLATOR_ALGORITHM, 
+                 RCZAR_ALGORITHM, 
+                 QVALUE_ALGORITHM, 
+                 NO_ALGORITHM, 
+                 ALL_ALGORITHM, 
+                 QRANKER_ALGORITHM, 
+                 NUMBER_ALGORITHM_TYPES };
 
 /**
  * \typedef ALGORITHM_TYPE_T

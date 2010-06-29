@@ -17,10 +17,6 @@
 #include "peptide.h"
 #include "ion.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * \returns An (empty) scorer object.
  */
@@ -357,10 +353,6 @@ void add_intensity(
   FLOAT_T intensity         ///< the intensity to add -in
   );
 
-
-#ifdef __cplusplus
-}
-#endif
 
 
 

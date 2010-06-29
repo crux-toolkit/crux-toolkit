@@ -27,11 +27,6 @@
 #include "objects.h"
 #include "modifications.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 /**
  * \brief Allocate a PEPTIDE_MOD and set all fields to default values
  * (i.e. no modifications).
@@ -145,9 +140,6 @@ int compare_peptide_mod_num_aa_mods(const void* pmod1,
  */
 void print_p_mod(PEPTIDE_MOD_T* mod);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif // PEPTIDE_MODIFICATIONS_H
 

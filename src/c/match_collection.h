@@ -39,14 +39,9 @@
 #include "modifications.h"
 #include "modified_peptides_iterator.h"
 
-#define _PSM_SAMPLE_SIZE 500
-#define _MAX_NUMBER_PEPTIDES 10000000
+static const int _PSM_SAMPLE_SIZE = 500;
+static const int _MAX_NUMBER_PEPTIDES = 10000000;
 ///< max number of peptides a single match collection can hold
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 // TODO (BF 1-28-08): should this be in m_c.h ?
 /**
@@ -571,10 +566,6 @@ void add_decoy_scores_match_collection(
   int charge, ///< search spectrum at this charge state
   MODIFIED_PEPTIDES_ITERATOR_T* peptides ///< use these peptides to search
 );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 

@@ -26,7 +26,7 @@
 /**
  * Maximum range for cross correlation offset.
  */
-#define MAX_XCORR_OFFSET 75
+static const int MAX_XCORR_OFFSET = 75;
 
 // The following two constants are hardware dependent.
 // These values should be good for double precision floating point
@@ -35,51 +35,53 @@
 /**
 * Constant for EVD p_value calculation
 */
-#define DBL_EPSILON  2.2204460492503131e-16
+static const FLOAT_T DBL_EPSILON = 2.2204460492503131e-16;
 /**
 * Constant for EVD p_value calculation
 */
-#define DBL_MAX_10_EXP 308
+static const int DBL_MAX_10_EXP = 308;
 
 /**
  * Cut-off below which the simple Bonferroni calculation can be used.
  */
-#define BONFERRONI_CUT_OFF_P 0.0001
+static const FLOAT_T BONFERRONI_CUT_OFF_P = 0.0001;
 /**
  * Cut-off below which the simple Bonferroni calculation can be used.
  */
-#define BONFERRONI_CUT_OFF_NP 0.01
+static const FLOAT_T BONFERRONI_CUT_OFF_NP = 0.01;
 
-#define GMTK_MAX_ION_FILES 50
-#define GMTK_NUM_CHARGES 2
-#define GMTK_NUM_BASE_IONS 3
-#define GMTK_NUM_NEUTRAL_LOSS 2
-#define GMTK_NUM_ION_SERIES \
-  GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
-#define GMTK_NUM_PAIRED_ION_SERIES 15
+static const int GMTK_MAX_ION_FILES = 50;
+static const int GMTK_NUM_CHARGES = 2;
+static const int GMTK_NUM_BASE_IONS = 3;
+static const int GMTK_NUM_NEUTRAL_LOSS = 2;
+//#define GMTK_NUM_ION_SERIES                                           
+//  GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
+static const FLOAT_T  GMTK_NUM_ION_SERIES =
+  (FLOAT_T)GMTK_NUM_BASE_IONS * (FLOAT_T)GMTK_NUM_CHARGES * (FLOAT_T)(GMTK_NUM_NEUTRAL_LOSS + 1);
+static const int GMTK_NUM_PAIRED_ION_SERIES = 15;
 
 /**
  * Relative peak height of b- and y-ions.
  */
-#define B_Y_HEIGHT 50
+static const int B_Y_HEIGHT = 50;
 /**
  * Relative height of flanking peaks.
  */
-#define FLANK_HEIGHT 25
+static const int FLANK_HEIGHT = 25;
 /**
  * Relative height of neutral loss peaks.
  */
-#define LOSS_HEIGHT 10
+static const int LOSS_HEIGHT = 10;
 
 /**
  * Number of regions into which the spectrum is divided for normalization.
  */
-#define NUM_REGIONS 10
+static const int NUM_REGIONS = 10;
 
 /**
  * Maximum peak height within each region of the spectrum after normalizing.
  */ 
-#define MAX_PER_REGION 50
+static const int MAX_PER_REGION = 50;
 
 /**
  * Macro for converting floating point to integers.

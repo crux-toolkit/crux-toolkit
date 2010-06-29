@@ -13,7 +13,6 @@
 #include "peak.h"
 
 
-#ifdef __cplusplus
 //I don't know why including Spectrum here causes a compilation error,
 //for now just pass it in as a void pointer.  Fix this after most of
 //the files get changed to C++.
@@ -22,9 +21,6 @@ BOOLEAN_T parse_spectrum_spectrum(
   void* mst_spectrum, ///< the input MSToolkit spectrum -in
   char* filename ///< filename of the spectrum, should not free -in
 );
-
-extern "C" {
-#endif
 
 /**
  * \returns An (empty) spectrum object.
@@ -105,7 +101,6 @@ BOOLEAN_T parse_spectrum(
   char*      filename ///< the file to parse -in
   );
 
-#ifdef __cplusplus
 /**
  * Parse the spectrum from the tab-delimited result file
  *\returns the parsed spectrum , else returns NULL for failed parse
@@ -113,7 +108,6 @@ BOOLEAN_T parse_spectrum(
 SPECTRUM_T* parse_spectrum_tab_delimited(
   MatchFileReader& file ///< output stream -out
   );
-#endif
 
 /***********************************************************************
  * Normalize peak intensities so that they sum to unity.
@@ -463,9 +457,6 @@ void print_spectrum_processed_peaks(
   int max_mz_bin,       ///< num_bins in intensities
   FILE* file);          ///< print to this file
 
-#ifdef __cplusplus
-}
-#endif
 
 /**
  * Local Variables:

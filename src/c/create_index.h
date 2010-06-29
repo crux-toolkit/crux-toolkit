@@ -30,20 +30,14 @@
 #ifndef CREATE_INDEX_H
 #define CREATE_INDEX_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 
 
-#define NUM_INDEX_OPTIONS 12
-#define NUM_INDEX_ARGS 2
+static const int NUM_INDEX_OPTIONS = 12;
+static const int NUM_INDEX_ARGS = 2;
 
 int create_index_main(int argc, char** argv);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif //CREATE_INDEX_H
 

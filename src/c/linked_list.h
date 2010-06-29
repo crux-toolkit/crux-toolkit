@@ -10,10 +10,6 @@
 #include "objects.h"
 #include "carp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * \brief Allocate the first element of a new list.
  * \returns A pointer to the new list.
@@ -133,11 +129,6 @@ void delete_list_node(LIST_POINTER_T* list);
  * \returns A pointer to the new list element that follows the given one.
  */
 LIST_POINTER_T* delete_next_list_node(LIST_POINTER_T* pre_node);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 
 

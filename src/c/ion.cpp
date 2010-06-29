@@ -17,17 +17,16 @@
 #include <netinet/in.h>
 #include <inttypes.h>
 
-//#define LOG_INTENSITY 1
-#define MZ_INT_MAX 10
-#define MZ_INT_MIN 0
-#define PAIRED_ION_INTS 12
-#define PAIRED_ION_FLOATS 6
-#define SINGLE_ION_FLOATS 3
-#define SINGLE_ION_INTS 9
+static const int MZ_INT_MAX = 10;
+static const int MZ_INT_MIN = 0;
+static const int PAIRED_ION_INTS = 12;
+static const int PAIRED_ION_FLOATS = 6;
+static const int SINGLE_ION_FLOATS = 3;
+static const int SINGLE_ION_INTS = 9;
 
 // At one point I need to reverse the endianness for pfile_create to work
 // Apparently that is no longer true. Hence 0 below.
-#define REVERSE_ENDIAN 0
+static const bool REVERSE_ENDIAN = 0;
 
 /**
  * Array to store the modification masses
@@ -39,8 +38,8 @@ FLOAT_T modification_masses[MAX_MODIFICATIONS];
  */
 BOOLEAN_T initialized_modification_masses = FALSE;
 
-#define DETECTABLE_MZ_MIN 200
-#define DETECTABLE_MZ_MAX 2400
+static const int DETECTABLE_MZ_MIN = 200;
+static const int DETECTABLE_MZ_MAX = 2400;
 
 /**
  * \struct ion

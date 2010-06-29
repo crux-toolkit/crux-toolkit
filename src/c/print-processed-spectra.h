@@ -18,22 +18,7 @@
 #include "spectrum_collection.h"
 #include "scorer.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-
 int print_processed_spectra_main(int argc, char** argv);
-
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
-
 
 
 #endif //PRINT_PROCESSED_SPECTRA_H

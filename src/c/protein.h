@@ -15,10 +15,6 @@
 #include "peptide_constraint.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* CHRIS This is probably an object for which you can crib code for from an outside source. Even from in-house (like Charles).*/
 
 /**
@@ -335,9 +331,6 @@ void prepare_protein_peptide_iterator_mc(
     PROTEIN_PEPTIDE_ITERATOR_T* iterator,
     BOOLEAN_T missed_cleavages);
 
-#ifdef __cplusplus
-}
-#endif
 
 /*
  * Local Variables:

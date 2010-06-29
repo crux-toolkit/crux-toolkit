@@ -6,9 +6,6 @@
 #ifndef ALPHABET_H
 #define ALPHABET_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * Converts a character into an int using the global amino_hash 
@@ -16,8 +13,5 @@ extern "C" {
 int amino_to_int
   (char amino);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif

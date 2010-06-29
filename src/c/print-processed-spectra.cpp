@@ -9,8 +9,8 @@
  */
 
 #include "print-processed-spectra.h"
-#define NUM_PPS_OPTIONS 3
-#define NUM_PPS_ARGS 2
+static const int NUM_PPS_OPTIONS = 3;
+static const int NUM_PPS_ARGS = 2;
 
 int print_processed_spectra_main(int argc, char** argv){
 

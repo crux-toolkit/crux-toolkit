@@ -28,10 +28,10 @@
 #include "parameter.h"
 
 /* Public constants */
-enum {MAX_AA_MODS = 11};
-enum {MAX_PROTEIN_SEQ_LENGTH = 40000};
-enum {AA_LIST_LENGTH = 26}; // A-Z
-#define MOD_MASS_PRECISION 2  // printed as X[1.23]X
+static const int MAX_AA_MODS = 11;
+static const int MAX_PROTEIN_SEQ_LENGTH = 40000;
+static const int AA_LIST_LENGTH = 26; // A-Z
+static const int MOD_MASS_PRECISION = 2;  // printed as X[1.23]X
 #define GET_AA_MASK  0x001F   // 0000 0000 0001 1111
 #define GET_MOD_MASK 0xFFE0   // 1111 1111 1110 0000
 
@@ -57,10 +57,6 @@ enum {AA_LIST_LENGTH = 26}; // A-Z
  (i.e. !(mod2 || aa) )  now aa == 0100_0000_0001_0011
    If we ask again, answer == 0100_0000_0000_0000 
  */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * \brief Allocate an AA_MOD, including space for the aa_list and
@@ -358,10 +354,6 @@ char* aa_mod_get_aa_list_string(AA_MOD_T* mod);
  * Count the number of modified aas in the string.
  */
 int count_modified_aas(MODIFIED_AA_T* seq);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif //MODIFICATION_FILE_H
 
