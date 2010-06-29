@@ -17,11 +17,8 @@
 #include "mass.h"
 #include "objects.h"
 
-#define MAX_MODIFICATIONS 4 ///< maximum modifications allowed per ion
+static const int MAX_MODIFICATIONS = 4; ///< maximum modifications allowed per ion
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * \returns An (empty) ion object.
@@ -381,9 +378,6 @@ BOOLEAN_T calc_ion_mass_z_with_mass(
   );
 
 
-#ifdef __cplusplus
-}
-#endif
 
 /**
  *

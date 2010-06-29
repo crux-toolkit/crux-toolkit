@@ -23,13 +23,13 @@ using namespace std;
 /**
  * Constants
  */
-#define PROTEIN_ID_LENGTH 100
-#define PROTEIN_SEQUENCE_LENGTH 40000
-#define PROTEIN_ANNOTATION_LENGTH 100
-#define LONGEST_LINE PROTEIN_ID_LENGTH + PROTEIN_ID_LENGTH
-#define FASTA_LINE 50
-#define SMALLEST_MASS 57
-#define LARGEST_MASS 190
+static const int PROTEIN_ID_LENGTH = 100;
+static const int PROTEIN_SEQUENCE_LENGTH = 40000;
+static const int PROTEIN_ANNOTATION_LENGTH = 100;
+static const int LONGEST_LINE  = PROTEIN_ID_LENGTH + PROTEIN_ID_LENGTH;
+static const int FASTA_LINE = 50;
+static const int SMALLEST_MASS = 57;
+static const int LARGEST_MASS = 190;
 
 /**
  * \struct protein 
@@ -232,7 +232,7 @@ void print_protein(
     protein_to_heavy(protein);
   }
   int   sequence_index;
-  unsigned int   sequence_length = get_protein_length(protein);
+  int   sequence_length = get_protein_length(protein);
   char* sequence = get_protein_sequence(protein);
   char* id = get_protein_id(protein);
   char* annotation = get_protein_annotation(protein);
@@ -1041,6 +1041,7 @@ BOOLEAN_T valid_cleavage_position(
     break;
 
   case INVALID_ENZYME:
+  case NUMBER_ENZYME_TYPES:
     carp(CARP_FATAL, "Cannot generate peptides with invalid enzyme.");
     break;
 
@@ -1254,6 +1255,7 @@ void prepare_protein_peptide_iterator_mc(
       break;
 
   case INVALID_DIGEST:
+  case NUMBER_DIGEST_TYPES:
     carp(CARP_FATAL, "Invalid digestion type in protein peptide iterator.");
   }
 

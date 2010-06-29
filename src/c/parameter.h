@@ -30,16 +30,13 @@
 #include "parse_arguments.h"
 #include "modifications.h"
 
-#define PARAMETER_LENGTH 1024 
+static const int PARAMETER_LENGTH = 1024; 
 ///< maximum length of parameter name and value in characters
-#define NUM_PARAMS 512 ///< maximum number of parameters allowed
-#define MAX_LINE_LENGTH 4096 ///< maximum line length in the parameter file
-#define BILLION 1000000000
-#define SMALL_BUFFER 256
-#define MAX_SET_PARAMS 256
-
-#define NUMBER_PARAMETER_TYPES 12
-///< number of elements in the parameter type enum
+static const int NUM_PARAMS = 512; ///< maximum number of parameters allowed
+static const int MAX_LINE_LENGTH = 4096; ///< maximum line length in the parameter file
+static const int BILLION = 1000000000;
+static const int SMALL_BUFFER = 256;
+static const int MAX_SET_PARAMS = 256;
 
 // Global variables
 // NOTE (BF mar-10-09): Could be like mod lists, but will require a
@@ -80,12 +77,11 @@ enum parameter_type {
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
   ION_TYPE_P,        ///< parameters of type ION_TYPE_T
   ALGORITHM_TYPE_P,  ///< parameters of type ALGORITHM_TYPE_T
-  WINDOW_TYPE_P};    ///< parameters of type WINDOW_TYPE_T
-typedef enum parameter_type PARAMETER_TYPE_T;
+  WINDOW_TYPE_P,     ///< parameters of type WINDOW_TYPE_T
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+  NUMBER_PARAMETER_TYPES  ///< leave this last, number of types
+};
+typedef enum parameter_type PARAMETER_TYPE_T;
 
 /**
  * /brief Initialize parameters to default values.
@@ -283,9 +279,5 @@ int get_all_aa_mod_list(AA_MOD_T*** mods);
  * named by the parameter "output-dir".
  */
 void print_parameter_file(char** filename);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

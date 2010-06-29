@@ -18,16 +18,16 @@
 
 
 /* Limits on the number of arguments */
-#define MAX_OPT_ARGS 25
-#define MAX_REQ_ARGS 25
+static const int MAX_OPT_ARGS = 25;
+static const int MAX_REQ_ARGS = 25;
 
 /* Make the error message bufer large enough
  * to accomodate the longest allowed argument
  * and the longest allowed error message, and 
  * a little slack for nulls and conjucntion text */
-#define MAX_VALUE_STRLEN 50 
-#define MAX_ARG_LENGTH 250
-#define MAX_MESSAGE_BUFFER 510
+static const int MAX_VALUE_STRLEN = 50; 
+static const int MAX_ARG_LENGTH = 250;
+static const int MAX_MESSAGE_BUFFER = 510;
 
 
 

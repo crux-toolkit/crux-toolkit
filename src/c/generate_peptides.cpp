@@ -23,8 +23,8 @@
 #include "index.h"
 #include "generate_peptides_iterator.h"
 
-#define NUM_GEN_PEP_OPTIONS 15
-#define NUM_GEN_PEP_ARGS 1
+static const int NUM_GEN_PEP_OPTIONS = 15;
+static const int NUM_GEN_PEP_ARGS = 1;
 
 /* Private function declarations */
 void print_header();

@@ -14,7 +14,7 @@
  * PRECISION, determines the precision of the compare float, users
  * should lower the number if need more precision
  */
-#define PRECISION 0.000000005 
+static const FLOAT_T PRECISION = 0.000000005; 
 
 /**
  * the maximum error in terms of Units in the Last Place. 
@@ -23,7 +23,7 @@
  * MAX_ULPS can also be interpreted in terms of how many representable floats 
  * we are willing to accept between A and B. This function will allow MAX_ULPS-1 floats between A and B.
  */
-#define MAX_ULPS 2
+static const int MAX_ULPS = 2;
 
 /* Functions for converting custom types to and from strings */
 
@@ -1647,7 +1647,7 @@ int choose_charge(FLOAT_T precursor_mz, ///< m/z of spectrum precursor ion
 /**
  * Maximum characters per line when printing formatted text.
  */
-#define MAX_CHARS_PER_LINE 70
+static const int MAX_CHARS_PER_LINE = 70;
 
 
 /**

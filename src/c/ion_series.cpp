@@ -20,11 +20,11 @@
 #include "mass.h"
 #include "spectrum.h"
 
-#define BINARY_GMTK 1
-#define PRINT_NULL_IONS 1
-#define MIN_FRAMES 3
-#define MAX_IONS 10000
-#define MAX_NUM_ION_TYPE 8 // number of different ion_types
+static const int BINARY_GMTK = 1;
+static const int PRINT_NULL_IONS = 1;
+static const int MIN_FRAMES = 3;
+static const int MAX_IONS = 10000;
+static const int MAX_NUM_ION_TYPE = 8; // number of different ion_types
 
 /**
  * \struct ion_series

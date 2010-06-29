@@ -241,7 +241,7 @@ BOOLEAN_T myfwrite
 }
 
 #ifdef MYRAND
-#define MY_RAND_MAX 4096
+static const int MY_RAND_MAX = 4096;
 
 
 /********************************************************************
@@ -313,7 +313,7 @@ PROB_T my_log
 }
 
 /* The lookup table. */
-#define LOG_PRECISION 1.0e5
+static const int LOG_PRECISION = 1.0e5;
 static PROB_T log_table[(int) LOG_PRECISION + 2];
 
 /**********************************************************************
@@ -490,7 +490,7 @@ int convert_enum_type_str
 /************************************************************************//**
  * \brief Get the name of the CPU.
  ****************************************************************************/
-#define MAX_HOST_NAME 100
+static const int MAX_HOST_NAME = 100;
 const char* hostname
  ()
 {

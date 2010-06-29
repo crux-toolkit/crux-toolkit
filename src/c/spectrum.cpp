@@ -30,23 +30,23 @@
 /**
  * Maximum number of peaks per spectrum.
  */
-#define MAX_PEAKS 4000
+static const int MAX_PEAKS = 4000;
 /**
  * m/z resolution.  I.e., 5 == 0.2 m/z units
  */
-#define MZ_TO_PEAK_ARRAY_RESOLUTION 5
+static const int MZ_TO_PEAK_ARRAY_RESOLUTION = 5;
 /**
  * Maximum possible m/z value.
  */
-#define MAX_PEAK_MZ 5000
+static const int MAX_PEAK_MZ = 5000;
 /**
  * Maximum allowed charge.
  */
-#define MAX_CHARGE 6
+static const int MAX_CHARGE = 6;
 /**
  * Number of 'D' lines able to parse for one spectrum object
  */
-#define MAX_D_LINES 2
+static const int MAX_D_LINES = 2;
 
 /**
  * \struct spectrum 
@@ -253,7 +253,7 @@ void print_spectrum(
             get_spectrum_singly_charged_mass(spectrum,
                                              spectrum->possible_z[z_idx]));
     // are there any 'D' lines to print?
-    if(z_idx < MAX_D_LINES){
+    if((int)z_idx < MAX_D_LINES){
       if(spectrum->d_lines[z_idx] != NULL){
         fprintf(file, "%s", spectrum->d_lines[z_idx]);
       }
@@ -303,7 +303,7 @@ void print_spectrum_processed_peaks(
               get_spectrum_singly_charged_mass(spectrum,
                                                spectrum->possible_z[z_idx]));
       // are there any 'D' lines to print?
-      if(z_idx < MAX_D_LINES){
+      if((int)z_idx < MAX_D_LINES){
         if(spectrum->d_lines[z_idx] != NULL){
           fprintf(file, "%s", spectrum->d_lines[z_idx]);
         }

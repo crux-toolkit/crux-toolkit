@@ -25,8 +25,8 @@
 #include "MSReader.h"
 using namespace MSToolkit;
 
-#define MAX_SPECTRA 40000 ///< max number of spectrums
-#define MAX_COMMENT 1000 ///< max length of comment
+static const int MAX_SPECTRA = 40000; ///< max number of spectrums
+static const int MAX_COMMENT = 1000; ///< max length of comment
 
 
 /* Private functions */
@@ -773,7 +773,7 @@ void set_spectrum_collection_comment(
   )
 {
   // is there enough memory for new comments?
-  if(strlen(new_comment) + strlen(spectrum_collection->comment) +1 < MAX_COMMENT){
+  if(strlen(new_comment) + strlen(spectrum_collection->comment) +1 < (size_t)MAX_COMMENT){
     strncat(spectrum_collection->comment, new_comment, MAX_COMMENT); 
   }
   else{

@@ -30,9 +30,6 @@
  * sorted peptide iterator
  ***********************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * Instantiates a new sorted_peptide_iterator from a database_peptide_iterator
@@ -78,9 +75,6 @@ PEPTIDE_T* sorted_peptide_iterator_next(
   SORTED_PEPTIDE_ITERATOR_T* peptide_iterator ///< the iterator of interest -in
   );
 
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif // SORTER_H

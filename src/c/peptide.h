@@ -24,7 +24,7 @@
 #include "peptide_modifications.h"
 
 //these may be elsewhere
-#define MAX_PEPTIDE_LENGTH 255
+static const int MAX_PEPTIDE_LENGTH = 255;
 
 #include <string>
 

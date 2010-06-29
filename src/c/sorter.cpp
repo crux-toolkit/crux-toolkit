@@ -561,6 +561,8 @@ PEPTIDE_T** sort_peptide_array(
     break;
   case SORT_NONE:
     break;
+  default:
+    carp(CARP_FATAL, "Invalid sort type;");
   }
   
   // merge peptides if unique

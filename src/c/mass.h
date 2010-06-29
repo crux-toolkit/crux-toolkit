@@ -41,9 +41,6 @@
 #define MASS_CO_MONO 27.9949 ///< Mass of  (monoisotopic)
 #define MASS_CO_AVERAGE 28.0101 ///< Mass of  (average)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * \returns The mass of the given amino acid.
@@ -107,9 +104,6 @@ void increase_amino_acid_mass(
   FLOAT_T update_mass ///< the mass amount to update for the amino acid -in
   );
 
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif

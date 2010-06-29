@@ -15,10 +15,6 @@
 #include "peptide_constraint.h"
 #include "sorter.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * creates a protein index on to the output_file
  * \returns TRUE if successfully creates a protein index, else false
@@ -137,9 +133,6 @@ char* get_binary_fasta_name(
   char* fasta_file  ///< input fasta file -in                            
   );
 
-#ifdef __cplusplus
-}
-#endif
 
 /*
  * Local Variables:

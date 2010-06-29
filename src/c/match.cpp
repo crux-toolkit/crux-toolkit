@@ -65,9 +65,9 @@ using namespace std;
 struct match{
   SPECTRUM_T* spectrum; ///< the spectrum we are scoring with
   PEPTIDE_T* peptide;  ///< the peptide we are scoring
-  FLOAT_T match_scores[_SCORE_TYPE_NUM]; 
+  FLOAT_T match_scores[NUMBER_SCORER_TYPES]; 
     ///< array of scores, one for each type (index with SCORER_TYPE_T) 
-  int match_rank[_SCORE_TYPE_NUM];  
+  int match_rank[NUMBER_SCORER_TYPES];  
     ///< rank of this match for each type scored (index with SCORER_TYPE_T)
   int pointer_count; 
     ///< number of pointers to this match object (when reach 0, free memory)
@@ -99,7 +99,7 @@ MATCH_T* new_match(void){
   
   // initialize score, rank !!!!DEBUG
   int index = 0;
-  for(index = 0; index < _SCORE_TYPE_NUM; ++index){
+  for(index = 0; index < NUMBER_SCORER_TYPES; ++index){
     match->match_rank[index] = 0;
     match->match_scores[index] = NOT_SCORED;
   }

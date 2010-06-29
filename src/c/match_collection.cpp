@@ -29,7 +29,7 @@ struct match_collection{
   // TODO this should be removed, stored in match
   int charge;           ///< charge of the associated spectrum
   BOOLEAN_T null_peptide_collection; ///< are the peptides shuffled
-  BOOLEAN_T scored_type[_SCORE_TYPE_NUM]; 
+  BOOLEAN_T scored_type[NUMBER_SCORER_TYPES]; 
                         ///< TRUE if matches have been scored by the type
   SCORER_TYPE_T last_sorted; 
     ///< the last type by which it's been sorted ( -1 if unsorted)
@@ -172,7 +172,7 @@ MATCH_COLLECTION_T* allocate_match_collection()
     
   // loop over to set all score type to FALSE
   int score_type_idx = 0;
-  for(; score_type_idx < _SCORE_TYPE_NUM; ++score_type_idx){
+  for(; score_type_idx < NUMBER_SCORER_TYPES ; ++score_type_idx){
     match_collection->scored_type[score_type_idx] = FALSE;
   }
   
@@ -248,7 +248,7 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
   match_collection->charge = 0;
   match_collection->null_peptide_collection = is_decoy;
 
-  for(idx=0; idx<_SCORE_TYPE_NUM; idx++){
+  for(idx=0; idx < NUMBER_SCORER_TYPES ; idx++){
     match_collection->scored_type[idx] = FALSE;
   }
   match_collection->last_sorted = (SCORER_TYPE_T)-1;
@@ -358,12 +358,12 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
   // scored_type
   if( dest_idx == 0 ){
     int type_idx = 0;
-    for(type_idx = 0; type_idx < _SCORE_TYPE_NUM; type_idx++){
+    for(type_idx = 0; type_idx < NUMBER_SCORER_TYPES; type_idx++){
       destination->scored_type[type_idx] = source->scored_type[type_idx];
     }
   }else{ // check that same types are scored
     int type_idx = 0;
-    for(type_idx = 0; type_idx < _SCORE_TYPE_NUM; type_idx++){
+    for(type_idx = 0; type_idx < NUMBER_SCORER_TYPES; type_idx++){
       if( destination->scored_type[type_idx] != source->scored_type[type_idx]){
         char type_str[SMALL_BUFFER];
         const char* dest_str = (destination->scored_type[type_idx]) ? "" : " not";
@@ -671,6 +671,10 @@ BOOLEAN_T sort_match_collection(
         (QSORT_COMPARE_METHOD)compare_match_qranker_score);
     match_collection->last_sorted = QRANKER_SCORE;
     return TRUE;
+
+  default:
+    carp(CARP_WARNING, "Unknown sort type.");
+    return FALSE;
   }
   return FALSE;
 }
@@ -765,6 +769,9 @@ BOOLEAN_T spectrum_sort_match_collection(
     success = TRUE;
     break;
 
+  default:
+    carp(CARP_WARNING, "Unknown sort type.");
+    return FALSE;
 
   }
 
@@ -957,7 +964,7 @@ MATCH_COLLECTION_T* random_sample_match_collection(
   sample_collection->experiment_size = match_collection->experiment_size;
 
   // set scored types in the sampled matches
-  for(; score_type_idx < _SCORE_TYPE_NUM;  ++score_type_idx){
+  for(; score_type_idx < NUMBER_SCORER_TYPES ;  ++score_type_idx){
     sample_collection->scored_type[score_type_idx] 
       = match_collection->scored_type[score_type_idx];
   }
@@ -1031,15 +1038,15 @@ void constraint_function(
  * For the #top_count ranked peptides, calculate the Weibull parameters
  *\returns TRUE, if successfully calculates the Weibull parameters
  */
-#define MIN_WEIBULL_MATCHES 40
-#define MIN_XCORR_SHIFT -5.0
-#define MAX_XCORR_SHIFT  5.0
+static const FLOAT_T MIN_WEIBULL_MATCHES = 40;
+static const FLOAT_T MIN_XCORR_SHIFT = -5.0;
+static const FLOAT_T MAX_XCORR_SHIFT  = 5.0;
 //#define CORR_THRESHOLD 0.995   // Must achieve this correlation, else punt.
-#define CORR_THRESHOLD 0.0       // For now, turn off the threshold.
-#define XCORR_SHIFT 0.05
-#define MIN_SP_SHIFT -100.0
-#define MAX_SP_SHIFT 300.0
-#define SP_SHIFT 5.0
+static const FLOAT_T CORR_THRESHOLD = 0.0;       // For now, turn off the threshold.
+static const FLOAT_T XCORR_SHIFT = 0.05;
+static const FLOAT_T MIN_SP_SHIFT = -100.0;
+static const FLOAT_T MAX_SP_SHIFT = 300.0;
+static const FLOAT_T SP_SHIFT = 5.0;
 
 /**
  * \brief Check that a match collection has a sufficient number of

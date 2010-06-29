@@ -24,9 +24,6 @@
 #include "objects.h"
 #include "peak.h"
 
-#ifdef __cplusplus
-  extern "C" {
-#endif
 
 
 /**
@@ -398,8 +395,5 @@ void strcat_formatted
  const char* extension           // Text to add.
  );
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif

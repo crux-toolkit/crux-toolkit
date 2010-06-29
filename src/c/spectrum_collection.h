@@ -13,9 +13,6 @@
 #include "spectrum.h"
 #include "carp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * \returns An (empty) spectrum_collection object.
@@ -267,9 +264,6 @@ SPECTRUM_T* filtered_spectrum_charge_iterator_next(
   FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator,///< return spec from here -in
   int* charge);                 ///< put charge here -out
 
-#ifdef __cplusplus
-}
-#endif
 
 /*
  * Local Variables:

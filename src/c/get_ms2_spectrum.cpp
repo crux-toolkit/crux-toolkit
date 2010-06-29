@@ -49,8 +49,8 @@ static void parse_scan_numbers
 /****************************************************************************
  * MAIN
  ****************************************************************************/
-#define NUM_MS2_OPTIONS 3
-#define NUM_MS2_ARGUMENTS 2
+static const int NUM_MS2_OPTIONS = 3;
+static const int NUM_MS2_ARGUMENTS = 2;
 
 int main(int argc, char** argv){
 

@@ -5,7 +5,7 @@
  ********************************************************************/
 #include "alphabet.h"
 
-#define AMINO_ARRAY_CAPACITY 100
+static const int AMINO_ARRAY_CAPACITY = 100;
 static int amino_array[AMINO_ARRAY_CAPACITY];
 
 /**

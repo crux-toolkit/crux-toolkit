@@ -14,10 +14,6 @@
 #include "linked_list.h"
 #include "generate_peptides_iterator.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * \brief Create a new modified_PEPTIDES_iterator for a specific mass.
  *
@@ -124,9 +120,5 @@ PEPTIDE_T* void_modified_peptides_iterator_next(
 void void_modified_peptides_iterator_free(
   void* modified_PEPTIDES_iterator);
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // MODIFIED_PEPTIDES_ITERATOR_H

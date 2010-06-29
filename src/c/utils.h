@@ -12,10 +12,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 /*#ifndef linux
 #include <ieeefp.h>
@@ -33,23 +29,18 @@ typedef float FLOAT_T;
 typedef short BOOLEAN_T;
 
 typedef int VERBOSE_T;
-#define INVALID_VERBOSE 0
-#define QUIET_VERBOSE 1
-#define NORMAL_VERBOSE 2
-#define HIGH_VERBOSE 3
-#define HIGHER_VERBOSE 4
-#define DUMP_VERBOSE 5
+static const int INVALID_VERBOSE = 0;
+static const int QUIET_VERBOSE = 1;
+static const int NORMAL_VERBOSE = 2;
+static const int HIGH_VERBOSE = 3;
+static const int HIGHER_VERBOSE = 4;
+static const int DUMP_VERBOSE = 5;
 
-#define FILENAME_LENGTH 4096
-#define BAD_SCORE -1
-#define IDLENGTH 256
-#define PEPTIDELENGTH 80
-#define LINELENGTH 4096
-
-#define EPS 1E-10
-
-#define BIG HUGE_VAL
-#define LITTLE -BIG
+static const int FILENAME_LENGTH = 4096;
+static const int BAD_SCORE = -1;
+static const int IDLENGTH = 256;
+static const int PEPTIDELENGTH = 80;
+static const int LINELENGTH = 4096;
 
 extern int verbosity;
 
@@ -315,10 +306,6 @@ char** parse_file(
   int max_lines, 
   int* num_lines
   );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 

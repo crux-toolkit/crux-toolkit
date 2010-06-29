@@ -16,9 +16,9 @@
  ****************************************************************************/
 #include "q-value.h"
 
-#define MAX_PSMS 10000000
+static const int MAX_PSMS = 10000000;
 // 14th decimal place
-#define EPSILON 0.00000000000001 
+static const double EPSILON = 0.00000000000001;
 
 /* 
  * Private function declarations.  Details below

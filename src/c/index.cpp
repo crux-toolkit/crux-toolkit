@@ -26,14 +26,13 @@
 #include "parameter.h"
 
 // maximum proteins the index can handle
-#define MAX_PROTEIN 30000
-//#define MAX_FILE_NAME_LENGTH 30
-#define MAX_FILE_NAME_LENGTH 300
-#define NUM_CHECK_LINES 8
-#define MAX_PROTEIN_IN_BIN 2500
-#define MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN 500000000
-#define MAX_PARSE_COUNT 3
-#define SLEEP_DURATION 5
+static const int MAX_PROTEIN = 30000;
+static const int MAX_FILE_NAME_LENGTH = 300;
+static const int NUM_CHECK_LINES = 8;
+static const int MAX_PROTEIN_IN_BIN = 2500;
+static const int MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN = 500000000;
+static const int MAX_PARSE_COUNT = 3;
+static const int SLEEP_DURATION = 5;
 
 #ifdef DARWIN
 // OS X doesn't support fcloseall()

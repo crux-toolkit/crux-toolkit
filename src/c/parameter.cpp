@@ -14,7 +14,7 @@
 /**
  * Starting location for zeroth m/z bin.
  */
-#define SMART_MZ_OFFSET 0.68
+static const FLOAT_T SMART_MZ_OFFSET = 0.68;
 
 /*
  * Global variables
@@ -216,13 +216,13 @@ void read_mods_from_file(char* param_file);
  * The size of the bins for discretizing the m/z axis of the
  * observed spectrum.  For use with monoisotopic mass.
  */
-#define BIN_WIDTH_MONO 1.0005079
+static const FLOAT_T BIN_WIDTH_MONO = 1.0005079;
 
 /**
  * The size of the bins for discretizing the m/z axis of the
  * observed spectrum.  For use with average mass.
  */
-#define BIN_WIDTH_AVERAGE 1.0011413
+static const FLOAT_T  BIN_WIDTH_AVERAGE = 1.0011413;
 
 /**
  * initialize parameters
@@ -1547,7 +1547,7 @@ BOOLEAN_T check_option_type_and_bounds(const char* name){
 /**
  * Maximum size of the description of a parameter.
  */
-#define PARAMETER_BUFFER 10000
+static const int PARAMETER_BUFFER = 10000;
 
 /**
  * \brief Creates a file containing all parameters and their current
