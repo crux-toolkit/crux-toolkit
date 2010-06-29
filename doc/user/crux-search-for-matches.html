@@ -204,6 +204,13 @@ should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.
 
 <li>
+<code>--xcorr-var-bin &lt;T | F&gt;</code> &ndash
+Before calculation of the XCorr score, the m/z axes of the observed
+and theoretical spectra are discretized.  This parameter specifies
+whether to enable the <code>--mz-bin-width</code> and 
+<code>--mz-bin-offset</code> parameters. Default = F.</li>
+
+<li>
 <code>--mz-bin-width &lt;float&gt;</code> Before calculation of the
 XCorr score, the m/z axes of the observed and theoretical spectra are
 discretized.  This parameter specifies the size of each bin.  By
