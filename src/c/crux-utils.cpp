@@ -363,13 +363,22 @@ COMMAND_T string_to_command_type(char* str){
  * The string version of SCORER_TYPE_T
  */
 static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
-  {"sp", "xcorr", "dotp", "logp_exp_sp", "logp_bonf_exp_sp", 
-   "logp_evd_xcorr", "logp_bonf_evd_xcorr", "logp_weibull_sp", 
-   "sp-pvalue",  //"sp-logp", 
-   "logp_weibull_xcorr", 
-   "xcorr-pvalue", //"xcorr-logp", 
-   "q_value", "percolator_score", 
-   "qvalue", "qranker", "qranker_qvalue"};//"logp_qvalue_weibull_xcorr" };
+  {"sp",
+   "xcorr",
+   "dotp", 
+   "logp_exp_sp",
+   "logp_bonf_exp_sp", 
+   "logp_evd_xcorr",
+   "logp_bonf_evd_xcorr", 
+   "logp_weibull_sp", 
+   "sp-pvalue",  
+   "xcorr-pvalue", 
+   "q_value",
+   "percolator_score", 
+   "qvalue", 
+   "qranker", 
+   "qranker_qvalue"
+  };
 //TODO: this should probably be changed, these strings are the option args
 //Instead could have an if block in string_to_type
 

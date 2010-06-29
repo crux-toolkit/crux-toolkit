@@ -24,86 +24,10 @@ static const double EPSILON = 0.00000000000001;
  * Private function declarations.  Details below
  */
 
-MATCH_COLLECTION_T* run_qvalue(
-  char* psm_result_folder, 
-  char* fasta_file 
-  ); 
-
 MATCH_COLLECTION_T* compute_bh_qvalues(
   double* pvalues, 
   int num_pvals,
   MATCH_COLLECTION_T* fasta_file);
-
-/**
- * \brief One of the commands for crux.  Takes in a directory
- * containing binary psm files and a protein source (index or fasta
- * file) and calculates q-values based on the p-values calculated in
- * the search.
- */
-int qvalue_main(int argc, char** argv){
-
-  /* Define command line options and arguments */
-  const char* option_list[] = {
-    "verbosity",
-    "parameter-file",
-    "overwrite",
-    "output-dir",
-    "fileroot"
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  const char* argument_list[] = {
-    "protein input"
-  };
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  initialize_run(QVALUE_COMMAND, argument_list, num_arguments,
-                 option_list, num_options, argc, argv);
-
-  /* Get arguments */
-  char* psm_dir = get_string_parameter("output-dir");
-  char* protein_input_name = get_string_parameter("protein input");
-
-  /* Perform the analysis */
-  MATCH_COLLECTION_T* match_collection = NULL;
-  match_collection = run_qvalue(psm_dir, protein_input_name);
-
-  carp(CARP_INFO, "Outputting matches.");
-  OutputFiles output(QVALUE_COMMAND);
-  output.writeHeaders();
-  output.writeMatches(match_collection);
-
-  // MEMLEAK below causes seg fault (or used to)
-  // free_match_collection(match_collection);
-
-  // clean up
-  free(psm_dir);
-  free(protein_input_name);
-
-  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
-  carp(CARP_INFO, "Finished crux ccompute-q-values.");
-
-  return(0);
-}
-
-/*  ****************** Subroutines ****************/
-
-/**
- * Compare doubles
- */
-int compare_doubles_descending(
-    const void *a,
-    const void *b
-    ){
-  double temp = *((double *)a) - *((double *)b);
-  if (temp > 0){
-    return -1;
-  } else if (temp < 0){
-    return 1;
-  } else {
-    return 0;
-  }
-}
 
 
 /**
@@ -126,7 +50,6 @@ MATCH_COLLECTION_T* run_qvalue(
   char* fasta_file 
   ){
 
-  // double pi0 = get_double_parameter("pi0");
   MATCH_ITERATOR_T* match_iterator = NULL;
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_T* match = NULL;
@@ -222,23 +145,36 @@ MATCH_COLLECTION_T* run_qvalue(
 
   free_match_collection_iterator(match_collection_iterator);
 
-  if( num_decoys > 0 ){
-    // compute decoy qvalues for xcorr
-    compute_decoy_q_values(all_matches, XCORR);
-
-    // compute decoy qvalues for pvals
-    if( num_pvals > 0 ){
-      compute_decoy_q_values(all_matches, LOGP_BONF_WEIBULL_XCORR);
-    }
-  }
-
+  // Compute q-values from p-values or from the XCorr decoy distribution.
   if( num_pvals > 0 ){
     compute_bh_qvalues(pvalues, num_pvals, all_matches);
+  } else {
+    compute_decoy_q_values(all_matches);
   }
 
   free(pvalues);
 
   return all_matches;
+}
+
+
+/*  ****************** Subroutines ****************/
+
+/**
+ * Compare doubles
+ */
+int compare_doubles_descending(
+    const void *a,
+    const void *b
+    ){
+  double temp = *((double *)a) - *((double *)b);
+  if (temp > 0){
+    return -1;
+  } else if (temp < 0){
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 
@@ -255,7 +191,7 @@ MATCH_COLLECTION_T* compute_bh_qvalues(
 
   // work in negative log space, since that is where p- and qvalues end up
   double log_num_psms = - log(num_pvals);
-  double log_pi_0 = - log(get_double_parameter("pi0"));
+  double log_pi_0 = - log(get_double_parameter("pi-zero"));
 
   // convert the p-values into FDRs using Benjamini-Hochberg
   int idx;
@@ -267,7 +203,7 @@ MATCH_COLLECTION_T* compute_bh_qvalues(
     double log_qvalue = 
       log_pvalue + log_num_psms - (-log(pvalue_idx)) + log_pi_0;
     qvalues[idx] = log_qvalue;
-    carp(CARP_DETAILED_DEBUG, "no max qvalue[%i] = %.10f", idx, qvalues[idx]);
+    carp(CARP_DETAILED_DEBUG, "FDR[%i] = %.10f", idx, qvalues[idx]);
   }
 
   // convert the FDRs into q-values
@@ -316,10 +252,13 @@ MATCH_COLLECTION_T* compute_bh_qvalues(
   
   set_match_collection_scored_type(all_matches, 
                                    LOGP_QVALUE_WEIBULL_XCORR, TRUE);
-  
+
   // free the match iterator
   free_match_iterator(match_iterator);
   free(qvalues);
+  
+  // Make sure the match collection is sorted.
+  sort_match_collection(all_matches, LOGP_QVALUE_WEIBULL_XCORR);
   
   return all_matches;
 }

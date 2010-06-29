@@ -597,8 +597,6 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
 
     free(cur_seq);
   }// next match to consolidate to
-
-
 }
 
 
@@ -608,34 +606,32 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
  */
 BOOLEAN_T sort_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to sort -out
-  SCORER_TYPE_T score_type ///< the score type (SP, XCORR) to sort by -in
+  SCORER_TYPE_T score_type ///< the score type to sort by -in
   )
 {
+  carp(CARP_DEBUG, "Sorting match collection.");
+
   // check if we are allowed to alter match_collection
   if(match_collection->iterator_lock){
-    carp(CARP_ERROR, 
-         "Cannot alter match_collection when a match iterator is already"
+    carp(CARP_FATAL,
+         "Cannot sort a match collection when a match iterator is already"
          " instantiated");
-    return FALSE;
   }
 
   switch(score_type){
-  case DOTP:
-    // implement later
-    return FALSE;
-
   case XCORR:
-//case LOGP_EVD_XCORR:
+  case DECOY_XCORR_QVALUE:
   case LOGP_BONF_EVD_XCORR:
   case LOGP_WEIBULL_XCORR: 
-    // LOGP_BONF_EVD_XCORR and XCORR have same order, 
-    // sort the match to decreasing XCORR order for the return
+    carp(CARP_DEBUG, "Sorting match collection by XCorr.");
     qsort_match(match_collection->match, match_collection->match_total, 
                 (QSORT_COMPARE_METHOD)compare_match_xcorr);
     match_collection->last_sorted = XCORR;
     return TRUE;
 
   case LOGP_BONF_WEIBULL_XCORR: 
+  case LOGP_QVALUE_WEIBULL_XCORR:
+    carp(CARP_DEBUG, "Sorting match collection by p-value.");
     qsort_match(match_collection->match, match_collection->match_total,
                 (QSORT_COMPARE_METHOD)compare_match_p_value);
     match_collection->last_sorted = LOGP_BONF_WEIBULL_XCORR;
@@ -643,23 +639,18 @@ BOOLEAN_T sort_match_collection(
 
   case SP: 
   case LOGP_EXP_SP: 
-    //case LOGP_BONF_EXP_SP: 
   case LOGP_WEIBULL_SP: 
-  case DECOY_XCORR_QVALUE:
-  case DECOY_PVALUE_QVALUE:
   case LOGP_BONF_WEIBULL_SP: 
-  case LOGP_QVALUE_WEIBULL_XCORR: // should this be here?
-    // LOGP_EXP_SP and SP have same order, 
-    // thus sort the match to decreasing SP order for the return
-    carp(CARP_DETAILED_DEBUG, "Sorting match_collection of %i matches", 
-         match_collection->match_total);
+    carp(CARP_DEBUG, "Sorting match collection by Sp.");
     qsort_match(match_collection->match, 
-                match_collection->match_total, (QSORT_COMPARE_METHOD)compare_match_sp);
+                match_collection->match_total, 
+		(QSORT_COMPARE_METHOD)compare_match_sp);
     match_collection->last_sorted = SP;
     return TRUE;
 
   case Q_VALUE:
   case PERCOLATOR_SCORE:
+    carp(CARP_DEBUG, "Sorting match collection by Percolator score.");
     qsort_match(match_collection->match, match_collection->match_total, 
         (QSORT_COMPARE_METHOD)compare_match_percolator_score);
     match_collection->last_sorted = PERCOLATOR_SCORE;
@@ -667,10 +658,14 @@ BOOLEAN_T sort_match_collection(
 
   case QRANKER_Q_VALUE:
   case QRANKER_SCORE:
+    carp(CARP_DEBUG, "Sorting match collection by Q-ranker score.");
     qsort_match(match_collection->match, match_collection->match_total, 
         (QSORT_COMPARE_METHOD)compare_match_qranker_score);
     match_collection->last_sorted = QRANKER_SCORE;
     return TRUE;
+
+  case DOTP:
+    return FALSE;
 
   default:
     carp(CARP_WARNING, "Unknown sort type.");
@@ -705,7 +700,6 @@ BOOLEAN_T spectrum_sort_match_collection(
     break;
 
   case XCORR:
-    //case LOGP_EVD_XCORR:
   case LOGP_BONF_EVD_XCORR:
   case LOGP_WEIBULL_XCORR: 
   case LOGP_BONF_WEIBULL_XCORR: 
@@ -762,18 +756,11 @@ BOOLEAN_T spectrum_sort_match_collection(
     success = TRUE;
     break;
 
-  case DECOY_PVALUE_QVALUE:
-    qsort_match(match_collection->match, match_collection->match_total,
-                (QSORT_COMPARE_METHOD)compare_match_spectrum_decoy_pvalue_qvalue);
-    match_collection->last_sorted = DECOY_PVALUE_QVALUE;
-    success = TRUE;
-    break;
-
   default:
     carp(CARP_WARNING, "Unknown sort type.");
     return FALSE;
 
-  }
+ }
 
   return success;
 }
@@ -1367,41 +1354,24 @@ BOOLEAN_T compute_p_values(
 /**
  * \brief Use the matches collected from all spectra to compute FDR
  * and q_values from the ranked list of target and decoy scores.
- * Requires that matches have been scored for the given score type.
  * Assumes the match_collection has an appropriate number of
  * target/decoy matches per spectrum (e.g. one target and one decoy
- * per spec).  If p-value is NaN for a psm, q-value will also be NaN.
+ * per spec).
  * \returns TRUE if q-values successfully computed, else FALSE.
  */
 BOOLEAN_T compute_decoy_q_values(
- MATCH_COLLECTION_T* match_collection,///< m_c with matches from many spec
- SCORER_TYPE_T score_type) ///< type to sort by (xcorr or p-value)
-{
+ MATCH_COLLECTION_T* match_collection ///< Set of PSMs to be sorted.
+){
 
   if( match_collection == NULL ){
     carp(CARP_ERROR, "Cannot compute q-values for null match collection.");
     return FALSE;
   }
 
-  carp(CARP_DEBUG, "Computing decoy q-values for score type %i.",
-       score_type);
+  carp(CARP_DEBUG, "Computing decoy q-values.");
 
   // sort by score
-  sort_match_collection(match_collection, score_type);
-
-  // which q_val type are we using
-  SCORER_TYPE_T qval_type;
-  if( score_type == XCORR ){
-    qval_type = DECOY_XCORR_QVALUE;
-  }else if( score_type == LOGP_BONF_WEIBULL_XCORR ){
-    qval_type = DECOY_PVALUE_QVALUE;
-  }else{
-    char buf[SMALL_BUFFER];
-    scorer_type_to_string(score_type, buf);
-    carp(CARP_ERROR, "Don't know where to store q-values for score type %s.",
-         buf);
-    return FALSE;
-  }
+  sort_match_collection(match_collection, XCORR);
 
   // compute FDR from a running total of number targets/decoys
   // FDR = #decoys / #targets
@@ -1411,13 +1381,6 @@ BOOLEAN_T compute_decoy_q_values(
   for(match_idx = 0; match_idx < match_collection->match_total; match_idx++){
     MATCH_T* cur_match = match_collection->match[match_idx];
 
-    // skip if pvalue score is NaN
-    if( score_type == LOGP_BONF_WEIBULL_XCORR && 
-        get_match_score(cur_match, LOGP_BONF_WEIBULL_XCORR) == P_VALUE_NA){
-      set_match_score(cur_match, qval_type, P_VALUE_NA);
-      continue;
-    }
-
     if( get_match_null_peptide(cur_match) == TRUE ){
       num_decoys += 1;
     }else{
@@ -1426,10 +1389,10 @@ BOOLEAN_T compute_decoy_q_values(
     FLOAT_T score = num_decoys/num_targets;
     if( num_targets == 0 ){ score = 1.0; }
 
-    set_match_score(cur_match, qval_type, score);
+    set_match_score(cur_match, DECOY_XCORR_QVALUE, score);
     carp(CARP_DETAILED_DEBUG, 
          "match %i xcorr or pval %f num targets %i, num decoys %i, score %f",
-         match_idx, get_match_score(cur_match, score_type), 
+         match_idx, get_match_score(cur_match, XCORR), 
          (int)num_targets, (int)num_decoys, score);
   }
 
@@ -1437,20 +1400,20 @@ BOOLEAN_T compute_decoy_q_values(
   FLOAT_T min_fdr = 1.0;
   for(match_idx = match_collection->match_total-1; match_idx >= 0; match_idx--){
     MATCH_T* cur_match = match_collection->match[match_idx];
-    FLOAT_T cur_fdr = get_match_score(cur_match, qval_type);
+    FLOAT_T cur_fdr = get_match_score(cur_match, DECOY_XCORR_QVALUE);
     if( cur_fdr == P_VALUE_NA ){ continue; }
 
     if( cur_fdr < min_fdr ){
       min_fdr = cur_fdr;
     }
 
-    set_match_score(cur_match, qval_type, min_fdr);
+    set_match_score(cur_match, DECOY_XCORR_QVALUE, min_fdr);
     carp(CARP_DETAILED_DEBUG, 
          "match %i cur fdr %f min fdr %f is decoy %i",
          match_idx, cur_fdr, min_fdr, get_match_null_peptide(cur_match) );
   }
 
-  match_collection->scored_type[qval_type] = TRUE;
+  match_collection->scored_type[DECOY_XCORR_QVALUE] = TRUE;
   return TRUE;
 }
 
@@ -1760,6 +1723,7 @@ void print_tab_header(FILE* output){
     return;
   }
 
+  // N.B. Compare to the corresponding list in MatchFileReader.cpp.
   fprintf(
     output, 
     "scan\t"
@@ -1775,7 +1739,6 @@ void print_tab_header(FILE* output){
     "p-value\t"
     "Weibull est. q-value\t"
     "decoy q-value (xcorr)\t"
-    "decoy q-value (p-value)\t"
     "percolator score\t"
     "percolator rank\t"
     "percolator q-value\t"
@@ -2330,9 +2293,6 @@ BOOLEAN_T extend_match_collection_tab_delimited(
       scored_type[DECOY_XCORR_QVALUE] = 
       !result_file.getString(DECOY_XCORR_QVALUE_COL).empty();
 
-    match_collection -> 
-      scored_type[DECOY_PVALUE_QVALUE] = 
-      !result_file.getString(DECOY_PVALUE_QVALUE_COL).empty();
 /* TODO
     match_collection -> 
       scored_type[LOGP_WEIBULL_XCORR] = 
@@ -2935,6 +2895,11 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   // here it will go parse files to construct match collections
   setup_match_collection_iterator(match_collection_iterator);
 
+  if( match_collection_iterator == NULL ){
+    carp(CARP_FATAL, "Failed to create a match collection iterator");
+  }
+  carp(CARP_DETAILED_DEBUG, "Created the match collection iterator");
+
   return match_collection_iterator;
 }
 
@@ -2969,8 +2934,9 @@ void free_match_collection_iterator(
          "Removing temp binary fasta %s", fasta_file, binary_fasta);
     remove(binary_fasta);
   }
+  free(fasta_file);
 
-  // free up all match_collection_iterator 
+  // free up all match_collection_iteratory.
   free(match_collection_iterator->directory_name);
   free_database(match_collection_iterator->database);
   closedir(match_collection_iterator->working_directory); 

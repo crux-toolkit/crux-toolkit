@@ -8,6 +8,7 @@
  *******************************************************************************/
 #ifndef PERCOLATOR_COMMON_H_
 #define PERCOLATOR_COMMON_H_
+#ifndef PERCOLATOR_C_INTERFACE_H_
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,5 +23,6 @@ typedef enum {TWO_SETS=2,THREE_SETS,FOUR_SETS} NSet;
 typedef enum {TARGET=0,DECOY1,DECOY2,DECOY3} SetType;
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

@@ -17,7 +17,7 @@
 
 #include "DelimitedFileReader.h"
 
-
+// N.B. Compare to the corresponding list in match_collection.cpp.
 enum _match_columns {
   SCAN_COL,
   CHARGE_COL,
@@ -32,7 +32,6 @@ enum _match_columns {
   PVALUE_COL,
   WEIBULL_QVALUE_COL,
   DECOY_XCORR_QVALUE_COL,
-  DECOY_PVALUE_QVALUE_COL,
   PERCOLATOR_SCORE_COL,
   PERCOLATOR_RANK_COL,
   PERCOLATOR_QVALUE_COL,

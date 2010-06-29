@@ -87,16 +87,12 @@ LIBFILES= \
   peptide_modifications.h \
   peptide_src.cpp \
   peptide_src.h \
-  percolator.cpp \
-  percolator.h \
   print-processed-spectra.cpp \
   print-processed-spectra.h \
   protein.cpp \
   protein.h \
   protein_index.cpp \
   protein_index.h \
-  q-ranker.cpp \
-  q-ranker.h \
   q-value.cpp \
   q-value.h \
   search-progress.h \
