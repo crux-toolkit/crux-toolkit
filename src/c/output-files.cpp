@@ -229,8 +229,6 @@ void OutputFiles::writeFeatureHeader(char** feature_names,
  * the number of matches per spectrum based on top-match parameter
  * using the ranks from rank_type.  
  */
-// TODO: ensure this causes no changes to the match collections by
-// making them const
 void OutputFiles::writeMatches(
   MATCH_COLLECTION_T*  target_matches, ///< from real peptides
   MATCH_COLLECTION_T** decoy_matches_array,  

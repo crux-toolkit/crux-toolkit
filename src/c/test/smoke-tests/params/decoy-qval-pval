@@ -1,5 +1,4 @@
 digestion=partial-digest
-compute-p-values=T
 overwrite=T
 output-dir=decoy-qval-pval
 top-match=1

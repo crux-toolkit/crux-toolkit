@@ -34,47 +34,39 @@ of spectra.</p>
 <p>
 <code>Compute-q-values</code> requires that 
 <code>search-for-matches</code> produced decoy PSMs or that it
-computed p-values.  Up to three different types of q-values may be
-computed, depending on how <code>search-for-matches</code> was
-executed.  Each of the three types of q-value calculation is based
-upon a different method for calculating the false discovery rate, as
-follows:</p>
+computed p-values.  Two different types of q-values may be computed,
+depending on how <code>search-for-matches</code> was executed:</p>
 
 <ol>
 
 <li>
 If the collection of PSMs has p-values assigned
-by <code>search-for-matches</code> by using the  
+by <code>search-for-matches</code> by using the
 <code>--compute-p-values</code> option, then the false discovery rate
-associated with a given score is computed using the standard
-Benjamini-Hochberg algorithm (<i>Journal of the Royal Statistical
-Society B</i>, 57:289-300, 1995).  Briefly, the algorithm is as
-follows: (1) rank all <i>m</i> PSMs by p-value; (2) for a
-p-value <i>p<sub>j</sub></i> that appears at position <i>j</i> in the
-ranked list, the FDR is estimated as <i>p<sub>j</sub> *
-(m/j)</i>.</li>
+associated with a given score is computed using the Benjamini-Hochberg
+algorithm (<i>Journal of the Royal Statistical Society B</i>,
+57:289-300, 1995).  Briefly, the algorithm is as follows: (1) rank
+all <i>m</i> PSMs by p-value; (2) for a p-value <i>p<sub>j</sub></i>
+that appears at position <i>j</i> in the ranked list, the FDR is
+estimated as <i>p<sub>j</sub> * (m/j)</i>.</li>
 
 <li>
-If the collection of PSMs contains both targets and decoys, then the
+Alternatively, if the collection of PSMs does not have p-values
+assigned, then <code>compute-q-values</code> searches the input
+directory for a corresponding set of decoy PSMs.  The
 false discovery rate associated with a given xcorr score is estimated
 as the number of decoy scores above the threshold divided by the
 number of target scores above the threshold, multiplied by the ratio
 of the total number of targets to total number of decoys.</li>
 
-<li>
-If the collection has decoys and p-values, then a third false
-discovery rate estimate is computed using the decoys, but the ranking
-is based on p-values instead of xcorr.</li>
-
 </ol>
 
 <p>
 In each case, the estimated FDRs are converted to q-values by ranking
-the PSMs by score and then taking, for each PSM, 
-the minimum of the current FDR and all of the FDRs below it in the
-ranked list.  The three types of q-values are reported, respectively,
-in columns with headers "Weibull est. q-value," "decoy q-value
-(xcorr)" and "decoy q-value (p-value)".</p>
+the PSMs by score and then taking, for each PSM, the minimum of the
+current FDR and all of the FDRs below it in the ranked list.  The two
+types of q-values are reported, respectively, in columns with headers
+"Weibull q-value" or "decoy q-value".</p>
 
 <p>
 Additional background information on q-values and statistical
@@ -155,6 +147,11 @@ option for other crux programs.
 <B>Options:</B>
 
 <UL>
+
+<li>
+<code>-pi-zero &lt;value&gt;</code> &ndash;
+The estimated proportion of target scores that are drawn according to
+the null distribution.  Default=1.0.</li>
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash; 

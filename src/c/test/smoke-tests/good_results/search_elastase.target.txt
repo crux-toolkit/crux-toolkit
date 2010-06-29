@@ -1,10 +1,10 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	p-value	Weibull est. q-value	decoy q-value (xcorr)	decoy q-value (p-value)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	eta	beta	shift	corr
-2	3	576.5400	1726.5980	1725.977295	0			-0.55	1											64	1	MSPFGVPVPGPAPETKD	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(30)	LI					
-3	1	518.9500	517.9427	519.511902	0			0.098	1											10	1	TTGNGA	elastase-partial-digest	gi|16127995|ref|NP_414542.1|(15)	IG					
-10	2	419.5800	837.1454	839.900513	0			-0.072	1											12	1	SQKDSYI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(231)	LL					
-14	2	500.4100	998.8055	1001.014832	0			-0.097	1											16	1	TQSSSEYSI	elastase-partial-digest	gi|16127996|ref|NP_414543.1|(350)	IS					
-15	2	488.8200	975.6255	976.997681	-0.44			-0.076	1											12	2	EYFNNYQ	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(277)	IP					
-15	2	488.8200	975.6255	973.053284	0			-0.11	2											12	2	TYKRYDQ	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(167)	LY					
-16	2	520.9900	1039.9655	1040.189941	3.7			0.04	1											14	3	KHKNSQWL	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(217)	QK					
-16	2	520.9900	1039.9655	1041.258545	4			-0.11	2											16	3	KKYFKTGGI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(242)	IL					
-16	2	520.9900	1039.9655	1038.112793	0			-0.12	3											14	3	YTCDPRQV	elastase-partial-digest	gi|16127996|ref|NP_414543.1|(233)	VP					
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	p-value	Weibull est. q-value	decoy q-value (xcorr)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	eta	beta	shift	corr
+2	3	576.5400	1726.5980	1725.977295	0			-0.55	1										64	1	MSPFGVPVPGPAPETKD	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(30)	LI					
+3	1	518.9500	517.9427	519.511902	0			0.098	1										10	1	TTGNGA	elastase-partial-digest	gi|16127995|ref|NP_414542.1|(15)	IG					
+10	2	419.5800	837.1454	839.900513	0			-0.072	1										12	1	SQKDSYI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(231)	LL					
+14	2	500.4100	998.8055	1001.014832	0			-0.097	1										16	1	TQSSSEYSI	elastase-partial-digest	gi|16127996|ref|NP_414543.1|(350)	IS					
+15	2	488.8200	975.6255	976.997681	-0.44			-0.076	1										12	2	EYFNNYQ	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(277)	IP					
+15	2	488.8200	975.6255	973.053284	0			-0.11	2										12	2	TYKRYDQ	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(167)	LY					
+16	2	520.9900	1039.9655	1040.189941	3.7			0.04	1										14	3	KHKNSQWL	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(217)	QK					
+16	2	520.9900	1039.9655	1041.258545	4			-0.11	2										16	3	KKYFKTGGI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(242)	IL					
+16	2	520.9900	1039.9655	1038.112793	0			-0.12	3										14	3	YTCDPRQV	elastase-partial-digest	gi|16127996|ref|NP_414543.1|(233)	VP					

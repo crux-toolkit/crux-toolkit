@@ -652,9 +652,10 @@ void initialize_parameters(void){
      "true");
 
   /* analyze-matches parameter options */
-  set_double_parameter("pi0", 0.9, 0, 1, "Hide from user",
-      "Used in curve fitting for assigning q-values from p-values and "
-      "used by percolator", "false");
+  set_double_parameter("pi-zero", 0.9, 0, 1, 
+      "The estimated percent of target scores that are drawn from the "
+      "null distribution.",
+      "Used by compute-q-values, percolator and q-ranker", "true");
   set_string_parameter("percolator-intraset-features", "F",
       "Set a feature for percolator that in later versions is not an option.",
       "Shouldn't be variable; hide from user.", "false");

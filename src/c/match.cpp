@@ -637,7 +637,6 @@ void print_match_tab(
   double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
   double weibull_qvalue = get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR);
   double decoy_x_qvalue = get_match_score(match, DECOY_XCORR_QVALUE);
-  double decoy_p_qvalue = get_match_score(match, DECOY_PVALUE_QVALUE);
   double percolator_score = get_match_score(match, PERCOLATOR_SCORE);
   double percolator_rank = get_match_rank(match, PERCOLATOR_SCORE);
   double percolator_qvalue = get_match_score(match, Q_VALUE);
@@ -697,17 +696,6 @@ void print_match_tab(
     fprintf(file, float_format, decoy_x_qvalue);
   }
   else {
-    fprintf(file, "\t");
-  }
-
-  // Print decoy estimated q-value (Weibull), if available.
-  if( scores_computed[DECOY_PVALUE_QVALUE] && match->null_peptide == FALSE){
-    if (P_VALUE_NA == decoy_p_qvalue) {
-      fprintf(file, "NaN\t");
-    }else{
-      fprintf(file, float_format, decoy_p_qvalue);
-    }
-  }else {
     fprintf(file, "\t");
   }
 
@@ -993,7 +981,6 @@ MATCH_T* parse_match_tab_delimited(
   match -> match_rank[XCORR] = result_file.getInteger(XCORR_RANK_COL);
 
   match -> match_scores[DECOY_XCORR_QVALUE] = result_file.getFloat(DECOY_XCORR_QVALUE_COL);
-  match -> match_scores[DECOY_PVALUE_QVALUE] = result_file.getFloat(DECOY_PVALUE_QVALUE_COL);
   /* TODO I personally would like access to the raw p-value as well as the bonferonni corrected one (SJM).
   match -> match_scores[LOGP_WEIBULL_XCORR] = result_file.getFloat("logp weibull xcorr");
   */

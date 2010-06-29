@@ -134,8 +134,7 @@ BOOLEAN_T populate_match_rank_match_collection(
  * Requires that matches have been scored for the given score type.
  * \returns TRUE if q-values successfully computed, else FALSE.
  */
-BOOLEAN_T compute_decoy_q_values(MATCH_COLLECTION_T* match_collection,
-                                 SCORER_TYPE_T score_type);
+BOOLEAN_T compute_decoy_q_values(MATCH_COLLECTION_T* match_collection);
 
 /**
  * match_collection get, set method

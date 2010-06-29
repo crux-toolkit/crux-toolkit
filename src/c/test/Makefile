@@ -24,7 +24,6 @@ check-smoke-tests:
 performance-tests:
 	cd performance-tests && ./run-performance-test.sh
 
-
 # Remove generated files in unit-test
 clean:
 	cd unit-tests && $(MAKE) clean
