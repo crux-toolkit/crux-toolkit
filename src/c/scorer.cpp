@@ -54,10 +54,8 @@ static const int GMTK_MAX_ION_FILES = 50;
 static const int GMTK_NUM_CHARGES = 2;
 static const int GMTK_NUM_BASE_IONS = 3;
 static const int GMTK_NUM_NEUTRAL_LOSS = 2;
-//#define GMTK_NUM_ION_SERIES                                           
-//  GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1)
-static const FLOAT_T  GMTK_NUM_ION_SERIES =
-  (FLOAT_T)GMTK_NUM_BASE_IONS * (FLOAT_T)GMTK_NUM_CHARGES * (FLOAT_T)(GMTK_NUM_NEUTRAL_LOSS + 1);
+static const int GMTK_NUM_ION_SERIES =
+  GMTK_NUM_BASE_IONS * GMTK_NUM_CHARGES * (GMTK_NUM_NEUTRAL_LOSS + 1);
 static const int GMTK_NUM_PAIRED_ION_SERIES = 15;
 
 /**

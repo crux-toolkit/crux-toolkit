@@ -313,7 +313,7 @@ PROB_T my_log
 }
 
 /* The lookup table. */
-static const int LOG_PRECISION = 1.0e5;
+static const int LOG_PRECISION = 100000;
 static PROB_T log_table[(int) LOG_PRECISION + 2];
 
 /**********************************************************************
