@@ -28,7 +28,7 @@ void qcSetVerbosity(int verbosity);
 void qcRegisterPSM(SetType set, char * identifier, double * features);
 
 /** Function called when we want to start processing */
-void qcExecute(); 
+void qcExecute(bool do_xval); 
 
 /**
  * Given the set enum and features, return the Percolator score for the PSM

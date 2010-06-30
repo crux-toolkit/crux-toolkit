@@ -46,7 +46,7 @@ MATCH_COLLECTION_T* compute_bh_qvalues(
  * one q-value score in each match.
  */
 MATCH_COLLECTION_T* run_qvalue(
-  char* psm_result_folder, 
+  char* input_directory, 
   char* fasta_file 
   ){
 
@@ -63,7 +63,7 @@ MATCH_COLLECTION_T* run_qvalue(
 
   // create MATCH_COLLECTION_ITERATOR_T object
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
-    new_match_collection_iterator(psm_result_folder, fasta_file, &num_decoys);
+    new_match_collection_iterator(input_directory, fasta_file, &num_decoys);
   
   if( num_decoys > 1 ){
     carp(CARP_FATAL, "Only one decoy file per target can be processed "
@@ -124,7 +124,7 @@ MATCH_COLLECTION_T* run_qvalue(
             pvalues[num_pvals++] = cur_pval;
         }
         if (num_pvals >= MAX_PSMS){
-          carp(CARP_FATAL, "Too many psms in directory %s", psm_result_folder);
+          carp(CARP_FATAL, "Too many psms in directory %s", input_directory);
         }
 
       }// next_match

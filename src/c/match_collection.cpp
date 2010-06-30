@@ -1552,7 +1552,7 @@ void print_sqt_header(
   fprintf(output, "H\tStartTime\t%s", ctime(&hold_time));
   fprintf(output, "H\tEndTime                               \n");
 
-  char* database = get_string_parameter("protein input");
+  char* database = get_string_parameter("protein database");
   BOOLEAN_T use_index = is_directory(database);
 
   if( use_index == TRUE ){
@@ -2325,7 +2325,8 @@ BOOLEAN_T extend_match_collection_tab_delimited(
     match_collection -> post_scored_type_set = TRUE;
 
     // parse match object
-    if((match = parse_match_tab_delimited(result_file, database))==NULL){
+    match = parse_match_tab_delimited(result_file, database);
+    if (match == NULL) {
       carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
       return FALSE;
     }
@@ -2742,8 +2743,8 @@ void setup_match_collection_iterator(
 }
 
 /**
- * Create a match_collection iterator from a directory of serialized files
- * Only hadles up to one target and three decoy sets per folder
+ * Create a match_collection iterator from a directory of serialized files.
+ * Only handles up to one target and three decoy sets per folder.
  *\returns match_collection iterator instantiated from a result folder
  */
 MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
@@ -2755,7 +2756,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   )
 {
   carp(CARP_DEBUG, 
-       "Creating match collection iterator for dir %s and protein input %s",
+       "Creating match collection iterator for dir %s and protein database %s",
        output_file_directory, fasta_file);
 
   // allocate match_collection
@@ -2787,7 +2788,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   // open PSM file directory
   working_directory = opendir(output_file_directory);
   
-  if(working_directory == NULL){
+  if (working_directory == NULL) {
     carp(CARP_FATAL, "Failed to open PSM file directory: %s", 
         output_file_directory);
   }
@@ -2927,7 +2928,7 @@ void free_match_collection_iterator(
   }
   
   // if no index, remove the temp binary fasta file
-  char* fasta_file = get_string_parameter("protein input");
+  char* fasta_file = get_string_parameter("protein database");
   if( is_directory(fasta_file) == FALSE ){
     char* binary_fasta = get_binary_fasta_name(fasta_file);
     carp(CARP_DEBUG, "Protein source %s is not an index.  "

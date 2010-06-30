@@ -2959,6 +2959,10 @@ pi-zero=0.900000
 # compute-q-values, and crux percolator.
 fileroot=one-decoy-file
 
+# Turn off cross-validation to select hyperparameters.
+# Available for q-ranker.
+no-xval=FALSE
+
 # Set level of output to stderr (0-100).  Default=30.
 # Available for all crux programs.  Each level prints the following
 # messages, including all those at lower verbosity levels: 0-fatal
@@ -3097,7 +3101,7 @@ precision=8
 decoy-location=one-decoy-file
 
 # Optional file into which psm features are printed.
-# Available only for percolator and q-ranker.  File will be named
+# Available for percolator and q-ranker.  File will be named
 # <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
 feature-file=FALSE
 

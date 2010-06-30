@@ -103,11 +103,14 @@ void qcRegisterPSM(SetType set, char * identifier, double * features) {
 }
 
 /** Function called when we want to start processing */
-void qcExecute() {
+void qcExecute(
+  bool do_xval ////< Select hyperparameters via cross-validation? -in
+) {
+
   
   pCaller->fillFeatureSets();
   pCaller->preIterationSetup();
-  pCaller->train();  
+  pCaller->train(do_xval);
 } 
 
 /** Function called when retrieving target scores and q-values after processing,

@@ -35,6 +35,9 @@ using namespace std;
 
 namespace qranker {
 
+/**
+ * Number of folds for cross-validation.
+ */
 const unsigned int Caller::xval_fold = 3;
 
 Caller::Caller() : pNorm(NULL), pCheck(NULL), svmInput(NULL),
@@ -62,7 +65,7 @@ Caller::~Caller()
 
 string Caller::extendedGreeter() {
   ostringstream oss;
-  char * host = getenv("HOST");
+  const char * host = getenv("HOST");
   if (!host)
     host="unknown_host";
   oss << greeter();
@@ -414,8 +417,10 @@ void Caller::readFiles(bool &doSingleFile) {
 }
 
 
-void Caller::train() {
-  train_many_nets();
+void Caller::train(
+  bool do_xval ////< Select hyperparameters via cross-validation? -in
+  ) {
+  train_many_nets(do_xval);
 }
 
 
@@ -461,7 +466,9 @@ int Caller::preIterationSetup() {
      trainset.createXvalSets(xv_train,xv_test,xval_fold);
 }    
 
-int Caller::run() {
+int Caller::run(
+  bool do_xval ////< Select hyperparameters via cross-validation? -in
+  ) {
   srand(seed);
   if(VERB>0)  cerr << extendedGreeter();
   //File reading
@@ -469,7 +476,7 @@ int Caller::run() {
   readFiles(doSingleFile);
   fillFeatureSets();
   preIterationSetup();
-  train();
+  train(do_xval);
   
   cerr << " Found " << getOverFDR(fullset, net, selectionfdr) << " over q<" << selectionfdr << "\n";
   normal.print(fullset);

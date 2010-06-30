@@ -9,6 +9,7 @@
  **/
 
 #include "crux-main.h"
+#include "crux-utils.h" // Need to get definition of NUM_FEATURES.
 
 const char* usage_str = "Usage: crux <command> [options] <argument>\n"
 "\n"
@@ -41,11 +42,6 @@ const char* usage_str = "Usage: crux <command> [options] <argument>\n"
 ; 
 
 /**
- * The number of features used by percolator and q-ranker.
- */
-#define NUM_FEATURES 20
-
-/**
  * \brief Analyze matches using the percolator or qranker algorithm.
  * 
  * Runs the specified algorithm on the PSMs in the psm_result_folder
@@ -57,7 +53,7 @@ const char* usage_str = "Usage: crux <command> [options] <argument>\n"
  */
 static MATCH_COLLECTION_T* run_percolator_or_qranker(
   COMMAND_T command,					      
-  char* psm_result_folder, 
+  char* input_directory, 
   char* fasta_file, 
   OutputFiles& output){ 
 
@@ -80,7 +76,7 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
   // the DECOY* match_collections.
   int num_decoys = 0;
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
-    new_match_collection_iterator(psm_result_folder, fasta_file, &num_decoys);
+    new_match_collection_iterator(input_directory, fasta_file, &num_decoys);
 
   // Create an array with counts of spectra in each match collection.
   // N.B. This array is actually only needed by q-ranker.
@@ -100,7 +96,7 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
   free_match_collection_iterator(match_collection_iterator);
   num_decoys = 0;
   match_collection_iterator =
-    new_match_collection_iterator(psm_result_folder, fasta_file, &num_decoys);
+    new_match_collection_iterator(input_directory, fasta_file, &num_decoys);
 
   // iterate over each, TARGET, DECOY 1..3 match_collection sets
   iterations = 0;
@@ -232,7 +228,7 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
     pcCleanUp();
     break;
   case QRANKER_COMMAND:
-    qcExecute(); 
+    qcExecute(!get_boolean_parameter("no-xval")); 
     qcGetScores(results_score, results_q); 
     fill_result_to_match_collection(
         target_match_collection, results_q, QRANKER_Q_VALUE, TRUE);
@@ -305,7 +301,8 @@ static void analyze_matches_main(
 
   // Define required command line arguments.
   const char* argument_list[] = {
-    "protein input",
+    "protein database",
+    "search results directory"
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
@@ -328,9 +325,9 @@ static void analyze_matches_main(
     break;
   }
 
-  // Get arguments
-  char* psm_dir = get_string_parameter("output-dir");
-  char* protein_input_name = get_string_parameter("protein input");
+  // Get required arguments
+  char* protein_database_name = get_string_parameter("protein database");
+  char* input_directory = get_string_parameter("search results directory");
 
   // Prepare the output files.
   OutputFiles output(command);
@@ -340,19 +337,14 @@ static void analyze_matches_main(
   MATCH_COLLECTION_T* match_collection = NULL;
   switch(command) {
   case QVALUE_COMMAND:
-    match_collection = run_qvalue(psm_dir,
-				  protein_input_name);
+    match_collection = run_qvalue(input_directory,
+				  protein_database_name);
     break;
   case PERCOLATOR_COMMAND:
-    match_collection = run_percolator_or_qranker(command,
-						 psm_dir,
-						 protein_input_name,
-						 output);
-    break;
   case QRANKER_COMMAND:
     match_collection = run_percolator_or_qranker(command,
-						 psm_dir,
-						 protein_input_name,
+						 input_directory,
+						 protein_database_name,
 						 output);
     break;
   default:
@@ -367,8 +359,8 @@ static void analyze_matches_main(
   // free_match_collection(match_collection);
 
   // clean up
-  free(psm_dir);
-  free(protein_input_name);
+  free(input_directory);
+  free(protein_database_name);
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   char* name = command_type_to_command_line_string(command);
