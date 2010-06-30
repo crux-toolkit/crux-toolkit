@@ -70,7 +70,7 @@ int main(int argc, char** argv){
 
   /* Define required command-line arguments */
   int num_arguments = NUM_GEN_PEP_ARGS;
-  const char* argument_list[NUM_GEN_PEP_ARGS] = { "protein input" };
+  const char* argument_list[NUM_GEN_PEP_ARGS] = { "protein database" };
 
   //TODO make this a debug flag
   //set_verbosity_level(CARP_DETAILED_DEBUG);
@@ -95,7 +95,7 @@ int main(int argc, char** argv){
   /* Get parameter values */
   //  print_trypticity = get_boolean_parameter("output-trypticity");
   output_sequence = get_boolean_parameter("output-sequence");
-  filename = get_string_parameter("protein input");
+  filename = get_string_parameter("protein database");
   //use_index = get_boolean_parameter("use-index");
   use_index = is_directory(filename);
   if( use_index == TRUE ){
@@ -166,17 +166,7 @@ int main(int argc, char** argv){
 void print_header(){
   BOOLEAN_T bool_val;
 
-  //  printf("# PROTEIN DATABASE: %s\n", 
-  //         get_string_parameter_pointer("protein input"));
-
-  char* database_name = get_string_parameter("protein input");
-  /*
-  if( get_boolean_parameter("use-index") == TRUE ){
-    char* fasta_name  = get_index_binary_fasta_name(database_name);
-    free(database_name);
-    database_name = fasta_name;
-  }
-  */
+  char* database_name = get_string_parameter("protein database");
   printf("# PROTEIN DATABASE: %s\n", database_name);
 
   printf("# OPTIONS:\n");

@@ -11,10 +11,8 @@
 <b>Usage:</b></p>
 
 <blockquote>
-<code>crux q-ranker [options] &lt;protein&nbsp;input&gt; 
-[--output-dir &lt;psm folder&gt;] 
-</code>
-
+<code>crux q-ranker [options] &lt;protein&nbsp;database&gt; 
+   &lt;search results directory&gt;</code>
 </blockquote>
 
 <p>
@@ -48,22 +46,16 @@ The name of the file in fasta format or the directory containing the
 protein index from which to retrieve proteins and peptides.</li>
 
 <li>
-&lt;psm folder&gt; &ndash; [optional] 
-A folder in which all the PSM result files are located.  This is 
-assumed to be <code>crux-output</code>, but it can be set by the user 
-using the <code>--output-dir</code> option.
-
-The program looks for files with names like
+&lt;search results directory&gt; &ndash; A folder in which all the PSM
+result files are located.  The program looks for files with names like
 '<code>&lt;fileroot&gt;.&lt;search&gt;.target.txt</code>' or
 '<code>&lt;fileroot&gt;.&lt;search&gt;.decoy.txt</code>', where
 '<code>&lt;search&gt;</code>' is either '<code>search</code>'
 (produced by <code>crux search-for-matches</code>) or
 '<code>sequest</code>' (produced by <code>crux sequest-search</code>).
-
 The search results should be from only one of the two search
-algorithms.
-
-All such files in the given directory are analyzed jointly.</li>
+algorithms.  All such files in the given directory are analyzed
+jointly.</li>
 
 </ul>
 
@@ -94,7 +86,14 @@ file if false (F). Default =  F.
 <LI>
 <code>--parameter-file &lt;filename&gt;</code> &ndash;
 A file containing command-line or additional parameters.  See the <a
-href=parameter-file.html>parameter documentation</a> page for details.</li>
+href=parameter-file.html>parameter documentation</a> page for
+details.</li>
+
+<li>
+<code>--no-xval</code> &ndash; By default, q-ranker selects two
+training parameters, the learning rate and the weight decay, via
+cross-validation within the training set.  This option turns off the
+cross-validation, leaving the parameters at their default values.</li>
 
 <LI> 
 <code>--feature-file &lt;string&gt;</code> &ndash; 

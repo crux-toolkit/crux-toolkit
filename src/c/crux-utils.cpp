@@ -1125,7 +1125,7 @@ char** generate_feature_name_array()
 {
   char** name_array = NULL;
 
-  name_array = (char**)mycalloc(20, sizeof(char *));
+  name_array = (char**)mycalloc(NUM_FEATURES, sizeof(char *));
   name_array[0] =  my_copy_string("XCorr");
   name_array[1] =  my_copy_string("DeltCN");
   name_array[2] =  my_copy_string("DeltLCN");
@@ -1446,7 +1446,7 @@ int prepare_protein_input(
     } 
 
     if(!parse_database(*database)){
-      carp(CARP_FATAL, "Error with protein input");
+      carp(CARP_FATAL, "Error with protein database.");
     } 
     num_proteins = get_database_num_proteins(*database);
   }

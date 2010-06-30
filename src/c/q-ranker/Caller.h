@@ -24,7 +24,7 @@ public:
 	virtual ~Caller();
     void readRetentionTime(string filename);
     void step(Scores& train, vector<double>& w, double Cpos, double Cneg, double fdr);
-    void train();
+    void train(bool do_xval);
     void trainEm(vector<vector<double> >& w);
     int xvalidate_step(vector<vector<double> >& w);
     int xv_step(vector<vector<double> >& w);
@@ -39,7 +39,7 @@ public:
     void fillFeatureSets();    
     int preIterationSetup();
     Scores* getFullSet() {return &fullset;}    
-    int run();
+    int run(bool do_xval);
     SetHandler * getSetHandler(SetHandlerType sh) {
         switch(sh) {
            case NORMAL: return &normal;
@@ -53,7 +53,7 @@ public:
     void train_net_two(Scores &set);
     void train_many_general_nets();
     void train_many_target_nets_ave();
-    void train_many_nets();
+    void train_many_nets(bool do_xval);
     void three_plot(double qv);
     
     int getOverFDR(Scores &set, NeuralNet &n, double fdr);

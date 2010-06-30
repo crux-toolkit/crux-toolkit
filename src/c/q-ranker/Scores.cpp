@@ -44,6 +44,9 @@ Scores::~Scores()
 {
 }
 
+/**
+ * Percentage of target scores that are drawn according to the null.
+ */
 double Scores::pi0 = 0.9;
 
 void Scores::merge(vector<Scores>& sv) {
@@ -348,7 +351,9 @@ void Scores::calcPep() {
 
 
 
-
+/**
+ * Calculate the number of targets that score above a specified FDR.
+ */
 int Scores::calcOverFDR(double fdr) {
   
   vector<ScoreHolder>::iterator it = scores.begin();

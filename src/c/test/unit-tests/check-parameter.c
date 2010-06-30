@@ -17,7 +17,7 @@ void param_setup(){
   // select command line options and arguments
   ops[0] = "parameter-file";
   select_cmd_line_options(ops, 1);
-  args[0] = "protein input";
+  args[0] = "protein database";
   select_cmd_line_arguments(args, 1);
 
   fake_argv[0] = my_copy_string("test-app");

@@ -83,7 +83,7 @@ int xlink_search_main(int argc, char** argv) {
   /* Define required command line arguments */
   const char* argument_list[] = {
     "ms2 file", 
-    "protein input", 
+    "protein database", 
     "link sites", 
     "link mass"
   };
@@ -108,7 +108,7 @@ int xlink_search_main(int argc, char** argv) {
 
 
 
-  char* database = get_string_parameter("protein input");
+  char* database = get_string_parameter("protein database");
   char* links = get_string_parameter("link sites");
 
   unsigned int min_weibull_points = 

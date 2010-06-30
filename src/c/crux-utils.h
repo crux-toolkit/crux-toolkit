@@ -24,7 +24,10 @@
 #include "objects.h"
 #include "peak.h"
 
-
+/**
+ * The number of features used to represent a PSM for Percolator or q-ranker.
+ */
+const unsigned int NUM_FEATURES = 20;
 
 /**
  *\returns a heap copy of the given string

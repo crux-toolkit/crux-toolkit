@@ -68,7 +68,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
   //  BOOLEAN_T use_index = get_boolean_parameter("use-index");
 
   //  BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
-  const char*  protein_input_name = get_string_parameter_pointer("protein input");
+  const char*  protein_input_name = get_string_parameter_pointer("protein database");
   BOOLEAN_T use_index = is_directory(protein_input_name);
 
   INDEX_T* index = NULL;
