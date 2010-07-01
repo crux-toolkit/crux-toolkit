@@ -2,12 +2,16 @@
 #include "crux-utils.h"
 #include "peak.h"
 
+#include <vector>
+
+using namespace std;
+
 // declare things to set up
 int myint1, myint2, *myintptr;
 
 // helper function for reading a file with a list of peaks
 FLOAT_T read_peaks_file(const char* filename,
-                        PEAK_T** peaks, int* num_peaks){
+                        vector<PEAK_T*>& peaks, int* num_peaks){
 
   FILE* file = fopen(filename, "r");
   if( file == NULL ){
@@ -20,13 +24,13 @@ FLOAT_T read_peaks_file(const char* filename,
   // first line has num peaks, precursor mz
   fscanf(file, "%d %f", &num, &mz);
   *num_peaks = num;
-  *peaks = allocate_peak_array(num);
+  peaks = allocate_peak_vector(num);
 
   FLOAT_T peakmz, intensity;
   for(int i=0; i<num; i++){
     fscanf(file, "%f %f", &peakmz, &intensity);
-    set_peak_location(find_peak(*peaks, i), peakmz);
-    set_peak_intensity(find_peak(*peaks, i), intensity);
+    set_peak_location(peaks[i], peakmz);
+    set_peak_intensity(peaks[i], intensity);
   }
 
   fclose(file);
@@ -89,15 +93,17 @@ END_TEST
 // determine if a spectrum is +1 or more
 START_TEST(test_choose_charge){
   // error case
-  int charge = choose_charge(0, NULL, 0);
+
+  vector<PEAK_T*> peaks;
+
+  int charge = choose_charge(0, peaks);
   fail_unless( charge == -1, "Choose charge should return -1 with no peaks.");
 
   // multiply charged spec
   int num_peaks;
-  PEAK_T* peaks = NULL;
   FLOAT_T mz = read_peaks_file("input-data/mult-charge.peaks", 
-                               &peaks, &num_peaks);
-  charge = choose_charge(mz, peaks, num_peaks);
+                               peaks, &num_peaks);
+  charge = choose_charge(mz, peaks);
 
   fail_unless( charge == 0, 
                "Charge of mult-charge.peaks should be 0 but is %d",
@@ -105,24 +111,24 @@ START_TEST(test_choose_charge){
 
   // singly charged spec
   mz = read_peaks_file("input-data/single-charge.peaks", 
-                       &peaks, &num_peaks);
-  charge = choose_charge(mz, peaks, num_peaks);
+                       peaks, &num_peaks);
+  charge = choose_charge(mz, peaks);
   fail_unless( charge == 1, 
                "Charge of single-charge.peaks should be 1 but is %d",
                charge);
 
   // spec with no peaks above precursor
   mz = read_peaks_file("input-data/none-above-precursor.peaks", 
-                       &peaks, &num_peaks);
-  charge = choose_charge(mz, peaks, num_peaks);
+                       peaks, &num_peaks);
+  charge = choose_charge(mz, peaks);
   fail_unless( charge == 1, 
                "Charge of none-above-precursor.peaks should be 1 but is %d",
                charge);
 
   // spec with no peaks below precursor
   mz = read_peaks_file("input-data/none-below-precursor.peaks", 
-                       &peaks, &num_peaks);
-  charge = choose_charge(mz, peaks, num_peaks);
+                       peaks, &num_peaks);
+  charge = choose_charge(mz, peaks);
   fail_unless( charge == 0, 
                "Charge of none-below-precursor.peaks should be 0 but is %d",
                charge);

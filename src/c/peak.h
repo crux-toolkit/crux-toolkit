@@ -14,6 +14,8 @@
 #include "objects.h"
 #include "utils.h"
 
+#include <vector>
+
 /**
  * \returns A PEAK_T object
  */
@@ -88,13 +90,26 @@ PEAK_T* allocate_peak_array(
   int num_peaks///< number of peaks to allocate -in
   );
 
+/**
+ * \returns A vector of allocated PEAK_T objects
+ */
+std::vector<PEAK_T*> allocate_peak_vector(
+  unsigned int num_peaks///< number of peaks to allocate -in
+  );
 
 /**
  * \frees A PEAK_T object array
  */
 void free_peak_array(
   PEAK_T* garbage_peak ///<the peak array to free -in
-  ); 
+  );
+
+/**
+ * \frees a PEAK_T object vector
+ */
+void free_peak_vector(
+  std::vector<PEAK_T*>& peaks ///<the peak array to free -in
+  );
 
 /**
  *\returns a pointer to the peak in the peak_array
@@ -106,40 +121,38 @@ PEAK_T* find_peak(
 
 /***********************************************
  * Sort peaks
- * also functions for lib. function qsort(),
+ * also functions for lib. function sort(),
  * although maybe used for other purposes
  ************************************************/
 
 /**
- * Written for the use of lib. function, qsort()
+ * Written for the use of lib. function, sort()
  * compare the intensity of peaks
- *\returns 1 if peak_1 is larger, -1 if peak_2, 0 if equal
+ *\returns true if peak_1 is larger, false otherwise.
  */
-int compare_peaks_by_intensity(
-  const void* peak_1, ///< peak one to compare -in
-  const void* peak_2  ///< peak two to compare -in
+bool compare_peaks_by_intensity(
+  const PEAK_T* peak_one, ///< peak one to compare -in
+  const PEAK_T* peak_two  ///< peak two to compare -in
   );
 
 /**
- * Written for the use of lib. function, qsort()
+ * Written for the use of lib. function, sort()
  * compare the mz(location) of peaks
- *\returns 1 if peak_1 is larger, -1 if peak_2, 0 if equal
+ *\returns true if peak_2 is larger, false otherwise
  */
-int compare_peaks_by_mz(
-  const void* peak_1, ///< peak one to compare -in
-  const void* peak_2  ///< peak two to compare -in
+bool compare_peaks_by_mz(
+  const PEAK_T* peak_one, ///< peak one to compare -in
+  const PEAK_T* peak_two  ///< peak two to compare -in
   );
 
 /**
  * sort peaks by their intensity or location
- * use the lib. function, qsort()
+ * use the lib. function, sort()
  */
 void sort_peaks(
-  PEAK_T* peak_array, ///< peak array to sort -in/out
-  int num_peaks,  ///< number of total peaks -in
+  std::vector<PEAK_T*>& peak_array, ///< peak array to sort -in/out
   PEAK_SORT_TYPE_T sort_type ///< the sort type(location or intensity)
   );
-
 
 /*
  * Local Variables:

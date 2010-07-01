@@ -25,7 +25,6 @@
 #include "MSReader.h"
 using namespace MSToolkit;
 
-static const int MAX_SPECTRA = 40000; ///< max number of spectrums
 static const int MAX_COMMENT = 1000; ///< max length of comment
 
 
@@ -45,8 +44,7 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* it);
  * \brief A object to group together one or more spectrum objects.
  */
 struct spectrum_collection {
-  SPECTRUM_T* spectra[MAX_SPECTRA];  ///< The spectrum peaks
-  int  num_spectra;     ///< The number of spectra
+  vector<SPECTRUM_T*> spectra;  ///< The spectrum peaks
   int  num_charged_spectra; ///< The number of spectra assuming differnt charge(i.e. one spectrum with two charge states are counted as two spectra)
   char* filename;     ///< Optional filename
   char comment[MAX_COMMENT];    ///< The spectrum_collection header lines
@@ -137,10 +135,11 @@ void free_spectrum_collection(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum collection to free - in
 )
 {
-  int spectrum_index = 0;
-  for(;spectrum_index < spectrum_collection->num_spectra; ++spectrum_index){
+  unsigned int spectrum_index = 0;
+  for(;spectrum_index < spectrum_collection->spectra.size(); ++spectrum_index){
     free_spectrum(spectrum_collection->spectra[spectrum_index]);
   }
+  spectrum_collection->spectra.clear();
   free(spectrum_collection->filename);
   free(spectrum_collection);
 }
@@ -354,15 +353,8 @@ BOOLEAN_T add_spectrum_to_end(
   SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
   )
 {
-  // FIXME eventually might want it to grow dynamically
-  // check if spectrum capacity is full
-  if(get_spectrum_collection_num_spectra(spectrum_collection) == MAX_SPECTRA){
-    carp(CARP_ERROR,"ERROR: cannot add spectrum, capacity full\n"); 
-    return FALSE;
-  }
   // set spectrum
-  spectrum_collection->spectra[spectrum_collection->num_spectra] = spectrum;
-  ++spectrum_collection->num_spectra;
+  spectrum_collection->spectra.push_back(spectrum);
   spectrum_collection->num_charged_spectra += get_spectrum_num_possible_z(spectrum);
   return TRUE;
 }
@@ -377,35 +369,20 @@ BOOLEAN_T add_spectrum(
   SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
   )
 {
-  // FIXME eventually might want it to grow dynamically
-  int add_index = 0;
-  int spectrum_index;
-  
-  // check if spectrum capacity is full
-  if(get_spectrum_collection_num_spectra(spectrum_collection) == MAX_SPECTRA){
-    carp(CARP_ERROR,"ERROR: cannot add spectrum, capacity full\n"); 
-    return FALSE;
-  }
+  unsigned int add_index = 0;
+
   // find correct location
-  for(; add_index < spectrum_collection->num_spectra; ++add_index){
+  // TODO -- replace with binary search if necessary.
+  for(; add_index < spectrum_collection->spectra.size(); ++add_index){
     if(get_spectrum_first_scan(spectrum_collection->spectra[add_index])>
        get_spectrum_first_scan(spectrum)){
       break;
     }
   }
-  // do we add to end?
-  if(add_index != spectrum_collection->num_spectra +1){
-    spectrum_index = spectrum_collection->num_spectra;
-    // shift all spectrum that have greater or equal index to add_index to right  
-    for(; spectrum_index >= add_index; --spectrum_index){
-      spectrum_collection->spectra[spectrum_index+1] = 
-        spectrum_collection->spectra[spectrum_index];
-    }
-  }
-  
-  // set spectrum
-  spectrum_collection->spectra[add_index] = spectrum;
-  ++spectrum_collection->num_spectra;
+
+  spectrum_collection->
+    spectra.insert(spectrum_collection->spectra.begin()+add_index, spectrum);
+
   spectrum_collection->num_charged_spectra += get_spectrum_num_possible_z(spectrum);
   return TRUE;
 }
@@ -421,26 +398,22 @@ void remove_spectrum(
   )
 {
   int scan_num = get_spectrum_first_scan(spectrum);
-  int spectrum_index = 0;
+  unsigned int spectrum_index = 0;
   
   // find where the spectrum is located in the spectrum array
-  for(; spectrum_index < spectrum_collection->num_spectra; ++spectrum_index){
+  for(; spectrum_index < spectrum_collection->spectra.size(); ++spectrum_index){
     if(scan_num ==
        get_spectrum_first_scan(spectrum_collection->spectra[spectrum_index])){
       break;
     }
   }
   
-  free_spectrum(spectrum_collection->spectra[spectrum_index]);
-  
-  // shift all the spectra to the left to fill in the gap
-  for(; spectrum_index < spectrum_collection->num_spectra; ++spectrum_index){
-    spectrum_collection->spectra[spectrum_index] =
-      spectrum_collection->spectra[spectrum_index+1];
-  }
-  
-  --spectrum_collection->num_spectra;
   spectrum_collection->num_charged_spectra -= get_spectrum_num_possible_z(spectrum);
+
+  free_spectrum(spectrum_collection->spectra[spectrum_index]);
+  spectrum_collection->
+    spectra.erase(spectrum_collection->spectra.begin() + spectrum_index);
+
 } 
 
 
@@ -734,7 +707,7 @@ int get_spectrum_collection_num_spectra(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum_collection save filename -in                                         
   )
 {
-  return spectrum_collection->num_spectra;
+  return spectrum_collection->spectra.size();
 }
 
 /**
@@ -773,7 +746,7 @@ void set_spectrum_collection_comment(
   )
 {
   // is there enough memory for new comments?
-  if(strlen(new_comment) + strlen(spectrum_collection->comment) +1 < (size_t)MAX_COMMENT){
+  if(strlen(new_comment) + strlen(spectrum_collection->comment) +1 < MAX_COMMENT){
     strncat(spectrum_collection->comment, new_comment, MAX_COMMENT); 
   }
   else{
