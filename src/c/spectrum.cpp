@@ -28,10 +28,6 @@
 // namespace declared here. Using namespace MSToolkit;
 
 /**
- * Maximum number of peaks per spectrum.
- */
-static const int MAX_PEAKS = 4000;
-/**
  * m/z resolution.  I.e., 5 == 0.2 m/z units
  */
 static const int MZ_TO_PEAK_ARRAY_RESOLUTION = 5;
@@ -76,10 +72,9 @@ struct spectrum{
   SPECTRUM_TYPE_T  spectrum_type; ///< The type of spectrum. 
   FLOAT_T          precursor_mz;  ///< The m/z of precursor (MS-MS spectra)
   vector<int>      possible_z;    ///< The possible charge states of this spectrum
-  PEAK_T*          peaks;         ///< The spectrum peaks
+  vector<PEAK_T*>  peaks;         ///< The spectrum peaks
   FLOAT_T          min_peak_mz;   ///< The minimum m/z of all peaks
   FLOAT_T          max_peak_mz;   ///< The maximum m/z of all peaks
-  int              num_peaks;     ///< The number of peaks
   double           total_energy;  ///< The sum of intensities in all peaks
   char*            filename;      ///< Optional filename
   vector<string>   i_lines_v; ///< store i lines
@@ -153,8 +148,7 @@ BOOLEAN_T add_possible_z(
 SPECTRUM_T* allocate_spectrum(void){
   int line_idx;
   SPECTRUM_T* fresh_spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
-  fresh_spectrum->peaks = allocate_peak_array(MAX_PEAKS);
-  fresh_spectrum->num_peaks = 0;
+  fresh_spectrum->peaks = vector<PEAK_T*>();
   
   // initialize D lines
   for(line_idx = 0; line_idx < MAX_D_LINES; ++line_idx){
@@ -186,8 +180,6 @@ SPECTRUM_T* new_spectrum(
   fresh_spectrum->sorted_by_mz = FALSE;
   fresh_spectrum->has_mz_peak_array = FALSE;
   fresh_spectrum->sorted_by_intensity = FALSE;
-  fresh_spectrum->peaks = NULL;
-  fresh_spectrum->num_peaks = 0;
   fresh_spectrum->mz_peak_array = NULL;
   set_spectrum_possible_z(fresh_spectrum, possible_z);
   set_spectrum_new_filename(fresh_spectrum, filename);
@@ -206,7 +198,7 @@ void free_spectrum (
   
   // only non post_process spectrum has these features to free
   if(spectrum->has_peaks){
-    free(spectrum->peaks);
+    free_peak_vector(spectrum->peaks);
     free(spectrum->filename);
     
     // free D lines
@@ -235,7 +227,7 @@ void print_spectrum(
   FILE* file ///< output file to print at -out
   )
 {
-  int num_peak_index = 0;
+  unsigned int num_peak_index = 0;
 
   fprintf(file, "S\t%06d\t%06d\t%.2f\n", 
          spectrum->first_scan,
@@ -253,7 +245,7 @@ void print_spectrum(
             get_spectrum_singly_charged_mass(spectrum,
                                              spectrum->possible_z[z_idx]));
     // are there any 'D' lines to print?
-    if((int)z_idx < MAX_D_LINES){
+    if(z_idx < MAX_D_LINES){
       if(spectrum->d_lines[z_idx] != NULL){
         fprintf(file, "%s", spectrum->d_lines[z_idx]);
       }
@@ -261,10 +253,10 @@ void print_spectrum(
   }
   
   // print peaks
-  for(; num_peak_index < spectrum->num_peaks; ++num_peak_index){
+  for(; num_peak_index < spectrum->peaks.size(); ++num_peak_index){
     fprintf(file, "%.2f %.13f\n", 
-            get_peak_location(find_peak(spectrum->peaks, num_peak_index)),
-            get_peak_intensity(find_peak(spectrum->peaks, num_peak_index)));
+            get_peak_location(spectrum->peaks[num_peak_index]),
+            get_peak_intensity(spectrum->peaks[num_peak_index]));
   }
 }
 
@@ -303,7 +295,7 @@ void print_spectrum_processed_peaks(
               get_spectrum_singly_charged_mass(spectrum,
                                                spectrum->possible_z[z_idx]));
       // are there any 'D' lines to print?
-      if((int)z_idx < MAX_D_LINES){
+      if(z_idx < MAX_D_LINES){
         if(spectrum->d_lines[z_idx] != NULL){
           fprintf(file, "%s", spectrum->d_lines[z_idx]);
         }
@@ -407,8 +399,8 @@ void copy_spectrum(
 
   // copy each peak
   for(; num_peak_index < get_spectrum_num_peaks(src); ++num_peak_index){
-    add_peak_to_spectrum(dest, get_peak_intensity(find_peak(src->peaks, num_peak_index)),
-                         get_peak_location(find_peak(src->peaks, num_peak_index))); 
+    add_peak_to_spectrum(dest, get_peak_intensity(src->peaks[num_peak_index]),
+                         get_peak_location(src->peaks[num_peak_index])); 
   }
 }
 
@@ -424,13 +416,14 @@ void copy_spectrum(
 //TODO: figure out a better way to handle spectrum count.  MGF doesn't really have
 //a defined format for this.  If it does, then the programs that output MGF don't
 //always conform to this format. SJM
-int spec_count = 0;
 BOOLEAN_T parse_spectrum_file_mgf(
   SPECTRUM_T* spectrum, ///< spectrum to parse the information into -out
   FILE* file, ///< the input file stream -in
   char* filename ///< filename of the spectrum, should not free -in
   )
 {
+
+  static int spec_count = 1;
   //long file_index = ftell(file); // stores the location of the current working line in the file
   char* new_line = NULL;
   int line_length;
@@ -950,8 +943,7 @@ BOOLEAN_T parse_spectrum_spectrum(
     }
   } else { // if no charge states detected, decide based on spectrum
     int charge = choose_charge(spectrum->precursor_mz,
-                               spectrum->peaks,
-                               spectrum->num_peaks);
+                               spectrum->peaks);
 
     // add either +1 or +2, +3
     if( charge == 1 ){
@@ -980,17 +972,14 @@ BOOLEAN_T add_peak_to_spectrum(
   FLOAT_T location_mz ///< the location of peak to add -in
   )
 {
-  if(spectrum->num_peaks < MAX_PEAKS){  // FIXME change it to be dynamic
-    set_peak_intensity(find_peak(spectrum->peaks, spectrum->num_peaks),
-                       intensity);
-    set_peak_location(find_peak(spectrum->peaks, spectrum->num_peaks),
-                      location_mz);
-    update_spectrum_fields(spectrum, intensity, location_mz);
-    spectrum->has_peaks = TRUE;
-    return TRUE;
-  }
 
-  return FALSE;
+  PEAK_T* peak = new_peak(intensity, location_mz);
+  spectrum->peaks.push_back(peak);
+
+  update_spectrum_fields(spectrum, intensity, location_mz);
+  spectrum->has_peaks = TRUE;
+  return TRUE;
+
 }
 
 void populate_mz_peak_array(
@@ -1100,15 +1089,14 @@ void update_spectrum_fields(
   FLOAT_T location ///< the location of the peak that has been added -in
   )
 {
-  ++spectrum->num_peaks;
  
   // is new peak the smallest peak
-  if(spectrum->num_peaks == 1 || 
+  if(spectrum->peaks.size() == 1 || 
      spectrum->min_peak_mz > location){
     spectrum->min_peak_mz = location;
   }
   // is new peak the largest peak
-  if(spectrum->num_peaks == 1 || 
+  if(spectrum->peaks.size() == 1 || 
      spectrum->max_peak_mz < location){
     spectrum->max_peak_mz = location;
   }
@@ -1249,7 +1237,7 @@ int get_spectrum_num_peaks(
   SPECTRUM_T* spectrum  ///< the spectrum to query number of peaks -in
   )
 {
-  return spectrum->num_peaks;
+  return spectrum->peaks.size();
 }
 
 /**
@@ -1384,8 +1372,8 @@ FLOAT_T get_spectrum_max_peak_intensity(
   FLOAT_T max_intensity = -1;
 
   for(; num_peak_index < get_spectrum_num_peaks(spectrum); ++num_peak_index){
-    if(max_intensity <= get_peak_intensity(find_peak(spectrum->peaks, num_peak_index))){
-      max_intensity = get_peak_intensity(find_peak(spectrum->peaks, num_peak_index));
+    if(max_intensity <= get_peak_intensity(spectrum->peaks[num_peak_index])){
+      max_intensity = get_peak_intensity(spectrum->peaks[num_peak_index]);
     }
   }
   return max_intensity; 
@@ -1485,13 +1473,13 @@ void spectrum_rank_peaks(
 {
   PEAK_T* peak = NULL;
   PEAK_ITERATOR_T* peak_iterator = new_peak_iterator(spectrum);
-  sort_peaks(spectrum->peaks, spectrum->num_peaks, _PEAK_INTENSITY);
+  sort_peaks(spectrum->peaks, _PEAK_INTENSITY);
   spectrum->sorted_by_intensity = TRUE;
   spectrum->sorted_by_mz = FALSE;
-  int rank = spectrum->num_peaks;
+  int rank = spectrum->peaks.size();
   while(peak_iterator_has_next(peak_iterator)){
     peak = peak_iterator_next(peak_iterator);
-    FLOAT_T new_rank = rank/(float)spectrum->num_peaks;
+    FLOAT_T new_rank = rank/(float)spectrum->peaks.size();
     rank--;
     set_peak_intensity_rank(peak, new_rank); 
   }
@@ -1547,7 +1535,7 @@ PEAK_T* peak_iterator_next(
   PEAK_ITERATOR_T* peak_iterator  ///< the interator for the peaks -in
   )
 {
-  PEAK_T* next_peak = find_peak(peak_iterator->spectrum->peaks, peak_iterator->peak_index);
+  PEAK_T* next_peak = peak_iterator->spectrum->peaks[peak_iterator->peak_index];
   ++peak_iterator->peak_index;
   return next_peak;
 }

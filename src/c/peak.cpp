@@ -12,6 +12,10 @@
 #include <stdio.h>
 #include "carp.h"
 
+#include <algorithm>
+
+using namespace std;
+
 /**
  * \struct peak
  * \brief A spectrum peak.
@@ -134,14 +138,44 @@ PEAK_T* allocate_peak_array(
   return peak_array;
 }
 
+
 /**
- * frees A PEAK_T object array
+ * \returns A vector of allocated PEAK_T objects
+ */
+vector<PEAK_T*> allocate_peak_vector(
+  unsigned int num_peaks///< number of peaks to allocate -in
+  )
+{
+  vector<PEAK_T*> ans;
+
+  for (unsigned int idx=0;idx < num_peaks;idx++) {
+    ans.push_back(new_peak(0,0));
+  }
+
+  return ans;
+}
+
+/**
+ * \frees A PEAK_T object array
  */
 void free_peak_array(
   PEAK_T* garbage_peak ///<the peak array to free -in
   ) 
 {
   free(garbage_peak);
+}
+
+/**
+ * \frees a PEAK_T object vector
+ */
+void free_peak_vector(
+  vector<PEAK_T*>& peaks ///<the peak vector to free -in
+  )
+{
+  for (unsigned int idx=0;idx < peaks.size();idx++) {
+    free_peak(peaks[idx]);
+  }
+  peaks.clear();
 }
 
 /**
@@ -158,55 +192,33 @@ PEAK_T* find_peak(
 
 /***********************************************
  * Sort peaks
- * also functions for lib. function qsort(),
+ * also functions for lib. function sort,
  * although maybe used for other purposes
  ************************************************/
-
 /**
- * Written for the use of lib. function, qsort()
+ * Written for the use of lib. function, sort()
  * compare the intensity of peaks
- *\returns -1 if peak_1 is larger, 1 if peak_2, 0 if equal
+ *\returns true if peak_1 is larger, false otherwise.
  */
-int compare_peaks_by_intensity(
-  const void* peak_1, ///< peak one to compare -in
-  const void* peak_2  ///< peak two to compare -in
-  )
+bool compare_peaks_by_intensity(
+  const PEAK_T* peak_one,
+  const PEAK_T* peak_two
+)
 {
-  PEAK_T* peak_one = (PEAK_T*)peak_1;
-  PEAK_T* peak_two = (PEAK_T*)peak_2;
-  
-  if(peak_one->intensity > peak_two->intensity){
-    return -1;
-  }
-  else if(peak_one->intensity < peak_two->intensity){
-    return 1;
-  }
-  // peak_one == peak_two
-  return 0;
+  return (peak_one->intensity > peak_two->intensity);
 }
 
-
 /**
- * Written for the use of lib. function, qsort()
+ * Written for the use of lib. function, sort()
  * compare the mz(location) of peaks
- *\returns 1 if peak_1 is larger, -1 if peak_2, 0 if equal
+ *\returns true if peak_2 is larger, false otherwise
  */
-int compare_peaks_by_mz(
-  const void* peak_1, ///< peak one to compare -in
-  const void* peak_2  ///< peak two to compare -in
-  )
-{
-  PEAK_T* peak_one = (PEAK_T*)peak_1;
-  PEAK_T* peak_two = (PEAK_T*)peak_2;
-  
-  if(peak_one->location > peak_two->location){
-    return 1;
-  }
-  else if(peak_one->location < peak_two->location){
-    return -1;
-  }
-  // peak_one == peak_two
-  return 0;
+bool compare_peaks_by_mz(
+  const PEAK_T* peak_one, ///< peak one to compare -in
+  const PEAK_T* peak_two  ///< peak two to compare -in
+  ) {
+
+  return peak_one->location < peak_two->location;
 }
 
 /**
@@ -215,18 +227,17 @@ int compare_peaks_by_mz(
  * sorts intensity in descending order
  */
 void sort_peaks(
-  PEAK_T* peak_array, ///< peak array to sort -in/out
-  int num_peaks,  ///< number of total peaks -in
+  vector<PEAK_T*>& peak_array, ///< peak array to sort -in/out
   PEAK_SORT_TYPE_T sort_type ///< the sort type(location or intensity)
   )
 {
   if(sort_type == _PEAK_INTENSITY){
     // sort the peaks by intensity
-    qsort((void*)peak_array, num_peaks, sizeof(PEAK_T), compare_peaks_by_intensity);
+    sort(peak_array.begin(), peak_array.end(), compare_peaks_by_intensity);
   }
   else if(sort_type == _PEAK_LOCATION){
     // sort the peaks by location
-    qsort((void*)peak_array, num_peaks, sizeof(PEAK_T), compare_peaks_by_mz);
+    sort(peak_array.begin(), peak_array.end(), compare_peaks_by_mz);
   }
   else{
     carp(CARP_ERROR, "no matching peak sort type");

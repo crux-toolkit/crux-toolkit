@@ -24,6 +24,7 @@
 #include "objects.h"
 #include "peak.h"
 
+#include<vector>
 /**
  * The number of features used to represent a PSM for Percolator or q-ranker.
  */
@@ -383,9 +384,8 @@ int get_last_in_range_string(const char* range_string);
  * \returns 1 if spectrum precursor is singly charged or 0 if multiply
  * charged.
  */
-int choose_charge(FLOAT_T precursor_mz, ///< m/z of spectrum precursor ion
-                  PEAK_T* peaks,        ///< array of spectrum peaks
-                  int num_peaks);       ///< size of peaks array
+int choose_charge(FLOAT_T precursor_mz,         ///< m/z of spectrum precursor ion
+                  std::vector<PEAK_T*>& peaks); ///< array of spectrum peaks
 
 /**
  *\brief Extend a given string with lines not exceeding a specified width, 
