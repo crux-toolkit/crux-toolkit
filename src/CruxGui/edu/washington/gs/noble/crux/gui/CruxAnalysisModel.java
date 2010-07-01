@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+
 /**
  * The CruxAnalysisClass is used to hold all the information required to run a Crux analysis.
  * This includes which crux components to run, the status of the run, the parameters for those 
@@ -115,6 +116,35 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		public String toString() { return this.name; }
 		public static int getSize() { return 3; };
 	};
+    
+
+
+
+    /** The list of allowed verbosity levels */
+    public enum Verbosity{
+	FATAL_ERRORS("fatal errors"),
+	    NON_FATAL_ERRORS("non-fatal errors"),
+	    WARNINGS("warnings"),
+	    INFORMATION_ON_THE_PROGRESS_OF_EXECUTION("info on the progress of execution"),
+	    MORE_PROGRESS_INFORMATION("more progress information"),
+	    DEBUG_INFO("debug info"),
+	    DETAILED_DEBUG_INFO("detailed debug info");
+	String name;
+	Verbosity(String name) {this.name = name;};
+	public String toString() {return this.name; }
+	public static int getSize() {return 6;}
+	public String getLevel() {
+	    if (this.name.equals("fatal errors")) return "0";
+	    if (this.name.equals("non-fatal errors")) return "10";
+	    if (this.name.equals("warnings")) return "20";
+	    if (this.name.equals("info on the progress of execution")) return "30";
+	    if (this.name.equals("more progress information")) return "40";
+	    if (this.name.equals("debug info")) return "50";
+	    if (this.name.equals("detailed debug info")) return "60";
+	    return "30";
+	}
+	    
+    };
 	
 	private boolean needsSaving = false;
 	private String name;
@@ -127,6 +157,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	private boolean allowMissedCleavages;
 	private String customEnzymeBeforeCleavage;
 	private String customEnzymeAfterCleavage;
+        private String outputDir;
 	private boolean decoyPValues;
 	private DigestType digestType;
 	private Enzyme enzyme;
@@ -148,10 +179,13 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	private double spectrumMaxMass;
 	private double spectrumMinMass;
 	private int topMatch;
+        private Verbosity verbosity;
+        
 	
 	// Crux parameters defaults
 	final private boolean allowMissedCleavagesDefault = false;
 	final private String customEnzymeAfterCleavageDefault = null;
+        final private String outputDirDefault = null;
 	final private String customEnzymeBeforeCleavageDefault = null;
 	final private DecoyLocation decoyLocationDefault = DecoyLocation.SEPARATE_DECOY_FILES;
 	final private boolean decoyPValuesDefault = false;
@@ -173,6 +207,8 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	final private double spectrumMaxMassDefault = 1000000000.000000;
 	final private double spectrumMinMassDefault = 0.0;
 	final private int topMatchDefault = 5;
+        final private Verbosity verbosityDefault=Verbosity.WARNINGS;
+    
 	
 	public CruxAnalysisModel() {
 		setDefaults();
@@ -285,7 +321,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		if (componentsToRun[CruxComponents.SEARCH_FOR_MATCHES.ordinal()]) {
 			// Must have specified protein database and spectra source
 			if (proteinSource == null || spectraSource == null) {
-				JOptionPane.showMessageDialog(null, "A protein database and a spectra source must be specified to search for maatches.");
+				JOptionPane.showMessageDialog(null, "A protein database and a spectra source must be specified to search for matches.");
 				result = false;
 			}
 		}
@@ -315,11 +351,12 @@ public class CruxAnalysisModel extends Object implements Serializable{
 				}
 			}
 			switch(component) {
-				case CREATE_INDEX:
-					proteinSource = this.proteinSource;
-					command = pathToCrux 
-					    + " " + subCommand 
-					    + " --overwrite T" 
+			         case CREATE_INDEX:
+				     proteinSource = this.proteinSource;
+				     command = pathToCrux 
+						+ " " + subCommand 
+					        + " --overwrite T " 
+					        + " --verbosity "+ verbosity.getLevel()
 						+ " --parameter-file " + name + "/analysis.params " 
 						+ proteinSource 
 						+ " " + name + "/index";
@@ -328,6 +365,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 					command = pathToCrux 
 						+ " " + subCommand 
 					 	+ " --overwrite T "
+					        + " --verbosity " + verbosity.getLevel()
 						+ " --output-dir " + name + "/crux-output"
 					 	+ " --parameter-file " + name + "/analysis.params " 
 					 	+ spectraSource + " " + proteinSource;
@@ -338,6 +376,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 					command = pathToCrux 
 						+ " " + subCommand 
 					 	+ " --overwrite T "
+					        + " --verbosity "+ verbosity.getLevel()
 						+ " --output-dir " + name + "/crux-output"
 					 	+ " --parameter-file " + name + "/analysis.params " 
 					 	+ proteinSource;
@@ -402,12 +441,14 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	    spectrumMaxMass = spectrumMaxMassDefault;
 	    spectrumMinMass = spectrumMinMassDefault;
 	    topMatch = topMatchDefault;
+	    verbosity = verbosityDefault;
 		logger.info("Model set to default values");
 	}
 	
 	public void restoreDefaults(CruxComponents component) {
 		componentsToRun[component.ordinal()] = false;
 		showAdvancedParameters[component.ordinal()] = false;
+		verbosity = verbosityDefault;
 		switch (component) {
 		    case CREATE_INDEX:
         		allowMissedCleavages = allowMissedCleavagesDefault;
@@ -696,6 +737,14 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return spectrumMinMass;
 	}
 
+	public void setVerbosity(Verbosity verbosity){
+		this.verbosity = verbosity;
+	}
+
+	public Verbosity getVerbosity(){
+		return verbosity;
+	}
+		
 	public void setSpectrumMinMass(double spectrumMinMass) {
 		this.spectrumMinMass = spectrumMinMass;
 	}
@@ -707,6 +756,16 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	public void setTopMatch(int topMatch) {
 		this.topMatch = topMatch;
 	}
+
+
+        public String getOutputDir(){
+	        return outputDir;
+	}
+
+        public void setOutputDir(String outputDir){
+	        this.outputDir = outputDir;
+	}
+
 
 	public String getCustomEnzymeAfterCleavageDefault() {
 		return customEnzymeAfterCleavageDefault;
@@ -724,6 +783,10 @@ public class CruxAnalysisModel extends Object implements Serializable{
 		return massTypeDefault;
 	}
 
+        public String getOutputDirDefault(){
+	    return outputDirDefault;
+	}
+    
 	public int getMaxLengthDefault() {
 		return maxLengthDefault;
 	}
@@ -751,6 +814,7 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	public int getNumDecoysPerTargetDefault() {
 		return numDecoysPerTargetDefault;
 	}
+    
 
 	public int getPrintSearchProgressDefault() {
 		return printSearchProgressDefault;
@@ -775,11 +839,17 @@ public class CruxAnalysisModel extends Object implements Serializable{
 	public int getTopMatchDefault() {
 		return topMatchDefault;
 	}
-	
+
+    public Verbosity getVerbosityDefault(){
+	return verbosityDefault;
+    }
+    
 	public RunStatus getRunStatus(CruxComponents component) {
 		return componentsRunStatus[component.ordinal()];
 	}
 	public void setRunStatus(CruxComponents component, RunStatus status) {
 		componentsRunStatus[component.ordinal()] = status;
 	}
+
+
 }

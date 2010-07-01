@@ -39,6 +39,7 @@ public class CruxSetupPanel extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Color.white);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
+		createIndexButton.requestFocusInWindow();
 		
 		// Group buttons
 		buttonGroup.add(createIndexButton);
@@ -47,6 +48,8 @@ public class CruxSetupPanel extends JPanel {
 		buttonGroup.add(percolatorButton);
 		buttonGroup.add(qrankerButton);
 		buttonGroup.add(dummyButton);
+
+		
 		
 		// Set up panel containing flow chart and buttons
 		Component component2 = Box.createVerticalStrut(20);
@@ -65,61 +68,80 @@ public class CruxSetupPanel extends JPanel {
 		initPercolatorPanel();
 		initQRankerPanel();
 		add(properties);
+		
 	}
+
 	
 	private void initIndexPanel() {
 		CruxParameterPanel indexParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.CREATE_INDEX, cruxGui, "Index creation paramters", createIndexButton, dummyButton);
 		indexParameterPanel.setBounds(createIndexButton.getX()-25, 30, 400, 350);
 		indexParameterPanel.addParameterControl(new ProteinDBPanel(cruxGui));
+		indexParameterPanel.addParameterControl(new MissedCleavagesPanel(cruxGui));
 		indexParameterPanel.addParameterControl(new EnzymePanel(cruxGui));
 		indexParameterPanel.addParameterControl(new MassTypePanel(cruxGui));
 		indexParameterPanel.addParameterControl(new DigestPanel(cruxGui));
 		indexParameterPanel.addParameterControl(new MassPanel(cruxGui));
 		indexParameterPanel.addParameterControl(new LengthPanel(cruxGui));
+		indexParameterPanel.addParameterControl(new VerbosityPanel(cruxGui));
+		
 		properties.add(indexParameterPanel);
 	}
 	
 	private void initSearchPanel() {
 		CruxParameterPanel searchParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.SEARCH_FOR_MATCHES, cruxGui, "Search paramters", searchButton, dummyButton);
 		searchParameterPanel.setBounds(searchButton.getX()-25, 30, 400, 350);
+		searchParameterPanel.addParameterControl(new DecoyLocationPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new ProteinDBPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new SpectraPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new EnzymePanel(cruxGui));
 		searchParameterPanel.addParameterControl(new MassTypePanel(cruxGui));
+		searchParameterPanel.addParameterControl(new NumDecoysPerTargetPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new DigestPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new MassPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new LengthPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new SpectrumMassPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new SpectrumChargePanel(cruxGui));
 		searchParameterPanel.addParameterControl(new MaxModsPanel(cruxGui));
+		searchParameterPanel.addParameterControl(new VerbosityPanel(cruxGui));
 		properties.add(searchParameterPanel);
 	}
 	
 	private void initQValuesPanel() {
 		CruxParameterPanel qvaluesParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.COMPUTE_Q_VALUES, cruxGui, "Compute q-value paramters", computeQValuesButton, dummyButton);
-		qvaluesParameterPanel.setBounds(computeQValuesButton.getX()-25, 30, 400, 350);
+		//qvaluesParameterPanel.addParameterControl(new OutputDirPanel(cruxGui));
+		qvaluesParameterPanel.addParameterControl(new VerbosityPanel(cruxGui)); 
+		qvaluesParameterPanel.setBounds(computeQValuesButton.getX()-60, 30, 400, 350);
 		properties.add(qvaluesParameterPanel);
 	}
 	
 	private void initPercolatorPanel() {
 		CruxParameterPanel percolatorParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.PERCOLATOR, cruxGui, "Percolator paramters", percolatorButton, dummyButton);
-		percolatorParameterPanel.setBounds(computeQValuesButton.getX()-25, 30, 400, 350); // Line up to the leftmost of the buttons
+		percolatorParameterPanel.setBounds(computeQValuesButton.getX()-60, 30, 400, 350); // Line up to the leftmost of the buttons
+		//percolatorParameterPanel.addParameterControl(new OutputDirPanel(cruxGui));
 		percolatorParameterPanel.addParameterControl(new FeatureFilePanel(cruxGui));
+		percolatorParameterPanel.addParameterControl(new VerbosityPanel(cruxGui));
 		properties.add(percolatorParameterPanel);
 	}
 	
 	private void initQRankerPanel() {
 		CruxParameterPanel qrankerParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.QRANKER, cruxGui, "Q-ranker paramters", qrankerButton, dummyButton);
-		qrankerParameterPanel.setBounds(computeQValuesButton.getX()-25, 30, 400, 350);
+		qrankerParameterPanel.setBounds(computeQValuesButton.getX()-60, 30, 400, 350);
+		//qrankerParameterPanel.addParameterControl(new OutputDirPanel(cruxGui));
 		qrankerParameterPanel.addParameterControl(new FeatureFilePanel(cruxGui));
+		qrankerParameterPanel.addParameterControl(new VerbosityPanel(cruxGui));
 		properties.add(qrankerParameterPanel);
 	}
+
+    public void setInitialFocus(){
+	createIndexButton.requestFocusInWindow();
+    }
+
 	
-	public void updateFromModel(CruxAnalysisModel model) {
-		createIndexButton.updateFromModel(model);
-		searchButton.updateFromModel(model);
-		computeQValuesButton.updateFromModel(model);
-		percolatorButton.updateFromModel(model);
-		qrankerButton.updateFromModel(model);
-	}
+    public void updateFromModel(CruxAnalysisModel model) {
+	createIndexButton.updateFromModel(model);
+	searchButton.updateFromModel(model);
+	computeQValuesButton.updateFromModel(model);
+	percolatorButton.updateFromModel(model);
+	qrankerButton.updateFromModel(model);
+    }
 }

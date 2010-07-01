@@ -51,7 +51,10 @@ public class MasterButtonPanel extends JPanel {
 		buttonPanel.add(runButton);
 		buttonPanel.add(setupButton);
 		buttonPanel.add(exitButton);
-	}	
+	}
+    public void setInitialFocus(){
+	setCruxPathButton.requestFocusInWindow();
+    }
 	
 	class SetCruxPathListener implements ActionListener {
 		
@@ -130,6 +133,8 @@ public class MasterButtonPanel extends JPanel {
 		setupButton.setVisible(false);
 		repaint();
 	}
+
+
 	
 	class SaveButtonListener implements ActionListener {
 
@@ -149,7 +154,7 @@ public class MasterButtonPanel extends JPanel {
 	}
 
 	class RunButtonListener implements ActionListener {
-		
+	    
 		public void actionPerformed(ActionEvent event) {
 			CruxAnalysisModel model = cruxGui.getAnalysisModel();
 			if (model.isValidAnalysis()) {

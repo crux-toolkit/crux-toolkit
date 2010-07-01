@@ -50,6 +50,8 @@ public class CruxGui implements Runnable {
 		model = new CruxAnalysisModel();
 		frame = new CruxMainFrame(this);
 		frame.setVisible(true);
+		frame.setFocusable(true);
+		frame.setInitialFocus();
 	}
 	
 	public boolean promptToSave() {
