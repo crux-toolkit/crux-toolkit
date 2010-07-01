@@ -113,17 +113,20 @@ class CruxParameterPanel extends JPanel implements ItemListener {
 	
 	public void itemStateChanged(final ItemEvent event) {
 		logger.info("User selected index component.");
-		updateFromModel();
+		//updateFromModel();
+		CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		saveState(model);
+		showAdvancedParameters();
 		if (((CruxComponentButton) event.getSource()).isSelected() == true) {
 			setVisible(true);
 		}
 		else {
 			setVisible(false);
 		}
-		updateAdvancedParameters();
+		
 	}
 
-    public void updateAdvancedParameters(){
+    public void showAdvancedParameters(){
 	boolean show = showAdvancedParameters.isSelected();
 	for (CruxParameterControl component: parameterControls){
 	    if (component instanceof CruxAdvancedParameterControl){
@@ -131,6 +134,26 @@ class CruxParameterPanel extends JPanel implements ItemListener {
 	    }
 	}
     }
+
+    public void saveState(CruxAnalysisModel model){
+	boolean checked = runToolCheckBox.isSelected();
+	model.setRunComponent(component, checked);
+	if (checked) {
+	    button.setSelectedToRun(true);
+	    model.setRunComponent(component, true);
+	}
+	else {
+	    button.setSelectedToRun(false);
+	    model.setRunComponent(component, false);
+	}
+	for (CruxParameterControl control: parameterControls) {
+	    control.saveToModel();
+	}
+	model.setRunStatus(component, CruxAnalysisModel.RunStatus.NOT_RUN);
+	model.setNeedsSaving(true);
+    }
+
+    
 	
 	class RunComponentChangeListener implements ItemListener {
 		public void itemStateChanged(final ItemEvent event) {
@@ -148,22 +171,8 @@ class LoadDefaultsButtonListener implements ActionListener {
 	
 	class SaveButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			boolean checked = runToolCheckBox.isSelected();
-			CruxAnalysisModel model = cruxGui.getAnalysisModel();
-			model.setRunComponent(component, checked);
-			if (checked) {
-				button.setSelectedToRun(true);
-				model.setRunComponent(component, true);
-			}
-			else {
-				button.setSelectedToRun(false);
-				model.setRunComponent(component, false);
-			}
-			for (CruxParameterControl control: parameterControls) {
-				control.saveToModel();
-			}
-			model.setRunStatus(component, CruxAnalysisModel.RunStatus.NOT_RUN);
-			model.setNeedsSaving(true);
+		        CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		        saveState(model);
 			setVisible(false);			
 			dummyButton.setSelected(true);
 			cruxGui.frame.updateFromModel(model);
@@ -171,7 +180,10 @@ class LoadDefaultsButtonListener implements ActionListener {
 	}
 	
 	class CancelButtonListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
+	    public void actionPerformed(ActionEvent e) {
+		   CruxAnalysisModel model = cruxGui.getAnalysisModel();
+		   updateFromModel();
+		    cruxGui.frame.updateFromModel(model);
 			setVisible(false);			
 			dummyButton.setSelected(true);
 		}
@@ -179,7 +191,7 @@ class LoadDefaultsButtonListener implements ActionListener {
 
     class showAdvancedParametersListener implements ActionListener {
 	public void actionPerformed(ActionEvent e){
-	    updateAdvancedParameters();
+	    showAdvancedParameters();
 	}
     }
 }

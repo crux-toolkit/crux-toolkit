@@ -11,6 +11,8 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+
+
 /**
  * The EnzymePanel class is the GUI elements used to get and set the 
  * enzyme used to perform the digestion of the peptides.

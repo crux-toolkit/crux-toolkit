@@ -79,10 +79,12 @@ class CruxComponentButton extends JToggleButton {
 		processCheckBox.setMargin(new Insets(0, 0, 0, 0));
 		processCheckBox.setContentAreaFilled(false);
 		processCheckBox.setEnabled(false);
+
 		statusIconLabel.setIcon(new StatusIcon());
 		add(processCheckBox, BorderLayout.WEST);
 		add(statusIconLabel, BorderLayout.EAST);
 	}
+
 	
 	public void setSelectedToRun(boolean run) {
 		this.processCheckBox.setSelected(run);

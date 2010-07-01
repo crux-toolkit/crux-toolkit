@@ -79,5 +79,10 @@ public class CruxMainFrame extends JFrame {
 		}
 		
 	}
+    
+    public void setInitialFocus(){
+	//buttonPanel.setInitialFocus();
+	cruxSetupPanel.setInitialFocus();
+    }
 
 }
