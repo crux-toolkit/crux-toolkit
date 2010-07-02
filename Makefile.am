@@ -79,16 +79,16 @@ bdist:
 		cp tide/images/tide-performance.png bdist/tide/images; \
 		cp tide/*.html bdist/tide; \
 		cp tide/*.css bdist/tide; \
-		cp tide/worm-demo.sh bdist/tide; \
+		cp tide/worm-demo*.sh bdist/tide; \
 		cp tide/README bdist/tide; \
-		cp tide/yeast-demo.sh bdist/tide; \
+		cp tide/yeast-demo*.sh bdist/tide; \
 		cp tide/$(ar)/tide-index bdist/tide; \
-		cp tide/$(ar)/tide-index bdist/tide; \
-		cp tide/$(ar)/tide-import-spectra bdist/tide; \
 		cp tide/$(ar)/tide-search bdist/tide; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast-02-10000.ms2 bdist/tide; \
+		cp tide/$(ar)/msconvert bdist/tide; \
+		cp tide/$(ar)/read-spectrumrecords bdist/tide; \
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast-02-10000.spectrumrecords bdist/tide; \
 		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast.fasta bdist/tide; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm-06-10000.ms2 bdist/tide; \
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm-06-10000.spectrumrecords bdist/tide; \
 		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm.fasta bdist/tide;\
 	fi
 	zip -r $(distdir)-$(ar)-$(name).zip bdist
