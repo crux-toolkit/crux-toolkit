@@ -42,7 +42,7 @@ static const int MAX_CHARGE = 6;
 /**
  * Number of 'D' lines able to parse for one spectrum object
  */
-static const int MAX_D_LINES = 2;
+static const unsigned int MAX_D_LINES = 2;
 
 /**
  * \struct spectrum 
@@ -146,7 +146,7 @@ BOOLEAN_T add_possible_z(
  * \returns An (empty) spectrum object.
  */
 SPECTRUM_T* allocate_spectrum(void){
-  int line_idx;
+  unsigned int line_idx;
   SPECTRUM_T* fresh_spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
   fresh_spectrum->peaks = vector<PEAK_T*>();
   
@@ -194,7 +194,7 @@ void free_spectrum (
   SPECTRUM_T* spectrum ///< the spectrum to free -in
 )
 {
-  int line_idx;
+  unsigned int line_idx;
   
   // only non post_process spectrum has these features to free
   if(spectrum->has_peaks){
@@ -367,7 +367,7 @@ void copy_spectrum(
 {
   int num_peak_index = 0;
   char* new_filename;
-  int line_idx;
+  unsigned int line_idx;
 
   // copy each varible
   set_spectrum_first_scan(dest,get_spectrum_first_scan(src));
@@ -859,7 +859,7 @@ BOOLEAN_T parse_spectrum_file(
    char* line  ///< 'D' line to parse -in
    )
  {
-   int line_idx;
+   unsigned int line_idx;
    int length = strlen(line)+1;
    char* d_line = (char*)mycalloc(length, sizeof(char));
 
