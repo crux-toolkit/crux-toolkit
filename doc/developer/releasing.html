@@ -8,7 +8,7 @@
   smoke and unit tests.  Update the release notes
   (crux/doc/user/release-notes.html).  At the very least, the date
   will need to be added.  Update index.html in doc/user/downloads and
-  in docu/user/open_source_download to point to the new version and to
+  in doc/user/open_source_download to point to the new version and to
   include links to the previous version. You can also make sure that
   the default.params file is up-to-date by running
   write-default-params.sh in crux/src/c.
@@ -26,8 +26,7 @@ will cease and that directory can be deleted.</p>
 <p>Each time new files are made available for download, the version
 number should increment by 0.01 for minor releases or by 0.1 for major
 releases. The version number is maintained in crux/configure.ac in the
-line <pre>AM_INIT_AUTOMAKE(crux, 1.01)</pre> 
-
+line <pre>AM_INIT_AUTOMAKE(crux, 1.01)</pre>.  
 This controls the numbering of packages and what is reported by the 
 <code>--version</code> option.  You must run configure after changing
 configure.ac and make dist (see below) for the new version to take
