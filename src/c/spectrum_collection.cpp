@@ -25,7 +25,7 @@
 #include "MSReader.h"
 using namespace MSToolkit;
 
-static const int MAX_COMMENT = 1000; ///< max length of comment
+static const unsigned int MAX_COMMENT = 1000; ///< max length of comment
 
 
 /* Private functions */
@@ -202,8 +202,8 @@ void parse_header_line(SPECTRUM_COLLECTION_T* spectrum_collection, FILE* file){
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0; // TODO maybe should be more sensible length?
-  int new_line_length;
-  int comment_field_length;
+  unsigned int new_line_length;
+  unsigned int comment_field_length;
 
   while( (line_length =  getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == 'H'){
