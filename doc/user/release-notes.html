@@ -42,6 +42,56 @@ and <code>q-ranker</code> was modified to allow the programs to read
 from and write to separate directories.</li>
 </ul>
 <hr></hr>
+<h2>Version 1.32</h2> July 6, 2010
+
+<h3>Major enhancement</h3>
+
+<ul>
+
+<li>
+Version 1.32 includes changes only to Tide. A new binary is introduced
+&mdash; a modified version of ProteoWizard's <b>msconvert</b> program
+&mdash; that is capable of converting spectrum data from a wide range
+of file formats into Tide-readable <i>.spectrumrecords</i> input
+files.
+
+</ul>
+
+<h3>Minor changes</h3>
+
+<ul>
+
+<li>
+<b>tide-import-spectra</b> is removed from the distribution. Although
+it was faster than msconvert, it was specific to ms2 files, whereas
+msconvert now works with any ProteoWizard-supported file format.
+
+<li>
+A standalone utility for reading binary <i>.spectrumrecords</i> files
+is introduced, called <b>read-spectrumrecords</b>. This program is
+useful, for example, for visually checking the output of msconvert.
+
+<li>
+Demo input files <b>worm-06-10000.spectrumrecords</b>
+and <b>yeast-02-10000.spectrumrecords</b> now replace their
+counterparts worm-06-10000.ms2 and yeast-02-10000.ms2. With the
+introduction of Tide-compatible msconvert, ms2 files are in no way
+special to Tide anymore. Any ProteoWizard-supported file format can be
+converted to the <i>.spectrumrecords</i> format for use with
+Tide. Starting with data files in Tide's spectrumrecords format
+eliminates the conversion step in the Tide search demo.
+
+<li>
+The old demo scripts worm-demo.sh and yeast-demo.sh have each been
+replaced by a pair of new scripts that demonstrate the indexing and
+searching steps separately. This is in order to highlight the two-step
+process and the fact that indexing needs to be done just once for each
+fasta file, whereafter the index may be reused indefinitely to perform
+searches.
+
+</ul>
+
+<hr></hr>
 
 <h2>Version 1.31</h2> June 2, 2010
 
