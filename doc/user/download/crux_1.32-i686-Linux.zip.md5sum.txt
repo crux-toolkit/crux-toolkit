@@ -1,1 +1,1 @@
-ffbbc2e5a602f99a7c40cc9604abcb86  crux_1.32-i686-Linux.zip
+0a13511c58be8fa61fe6057ab27fdc97  crux_1.32-i686-Linux.zip
