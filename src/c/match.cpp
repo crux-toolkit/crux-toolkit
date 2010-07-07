@@ -830,10 +830,13 @@ double* get_match_percolator_features(
 
   // Xcorr
   feature_array[0] = get_match_score(match, XCORR);
+  // FIX - Using delta_cn as a feature in percolator/q-ranker gives
+  // erroneous results, set to zero for now and figure out what to do with
+  // it later (SJM 07-07-2010).
   // DeltCN
-  feature_array[1] = match->delta_cn;
+  feature_array[1] = 0;//match->delta_cn;
   // DeltLCN
-  feature_array[2] = match->ln_delta_cn;
+  feature_array[2] = 0;//match->ln_delta_cn;
   // SP
   feature_array[3] = get_match_score(match, SP);
   // lnrSP
