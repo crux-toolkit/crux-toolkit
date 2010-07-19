@@ -7,11 +7,17 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Version 1.3?</h2> ADD DATE HERE
+<h2>Version 1.33</h2> July 7, 2010
 
 <h3>Major enhancements</h3>
 
 <ul>
+  <li>
+The command line syntax
+for <code>compute-q-values</code>, <code>percolator</code>
+and <code>q-ranker</code> was modified to allow the programs to read
+from and write to separate directories.</li>
+<li>Fixed a q-ranker/percolator bug giving too many id's for a small q-value.</li>
 </ul>
 
 <h3>Minor changes</h3>
@@ -35,11 +41,7 @@ The option <code>--no-xval</code> was added to q-ranker, allowing
 faster execution by skipping the internal cross-validation to select
 hyperparameters.</li>
 
-<li>
-The command line syntax
-for <code>compute-q-values</code>, <code>percolator</code>
-and <code>q-ranker</code> was modified to allow the programs to read
-from and write to separate directories.</li>
+
 </ul>
 <hr></hr>
 <h2>Version 1.32</h2> July 6, 2010
