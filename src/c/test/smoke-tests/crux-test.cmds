@@ -85,6 +85,10 @@
 # Confirm that no decoy files were created for tdc and that only one decoy file created for one-decoy-file
 0 = list_files = good_results/list-files-tdc-one-decoy-file = ls one-decoy-file tdc  
 
+# Search using the two other window types
+1 = mz_window = good_results/mz-window.target.txt = crux search-for-matches --parameter-file params/mz_window --fileroot mzwin demo.ms2 small-yeast.fasta; cat crux-output/mzwin.search.target.txt = 
+
+1 = ppm_window = good_results/ppmwin.search.target.txt = crux search-for-matches --parameter-file params/ppm_window --fileroot ppmwin demo.ms2 small-yeast.fasta; cat crux-output/ppmwin.search.target.txt =
 # TESTS WITH INDEX
 
 # See that crux-generate-peptides works with an existing index
