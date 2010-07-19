@@ -91,14 +91,8 @@ public class CruxSetupPanel extends JPanel {
 		CruxParameterPanel searchParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.SEARCH_FOR_MATCHES, cruxGui, "Search paramters", searchButton, dummyButton);
 		searchParameterPanel.setBounds(searchButton.getX()-25, 30, 400, 350);
 		searchParameterPanel.addParameterControl(new DecoyLocationPanel(cruxGui));
-		searchParameterPanel.addParameterControl(new ProteinDBPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new SpectraPanel(cruxGui));
-		searchParameterPanel.addParameterControl(new EnzymePanel(cruxGui));
-		searchParameterPanel.addParameterControl(new MassTypePanel(cruxGui));
 		searchParameterPanel.addParameterControl(new NumDecoysPerTargetPanel(cruxGui));
-		searchParameterPanel.addParameterControl(new DigestPanel(cruxGui));
-		searchParameterPanel.addParameterControl(new MassPanel(cruxGui));
-		searchParameterPanel.addParameterControl(new LengthPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new SpectrumMassPanel(cruxGui));
 		searchParameterPanel.addParameterControl(new SpectrumChargePanel(cruxGui));
 		searchParameterPanel.addParameterControl(new MaxModsPanel(cruxGui));
@@ -133,15 +127,15 @@ public class CruxSetupPanel extends JPanel {
 	}
 
     public void setInitialFocus(){
-	createIndexButton.requestFocusInWindow();
+    	createIndexButton.requestFocusInWindow();
     }
 
 	
     public void updateFromModel(CruxAnalysisModel model) {
-	createIndexButton.updateFromModel(model);
-	searchButton.updateFromModel(model);
-	computeQValuesButton.updateFromModel(model);
-	percolatorButton.updateFromModel(model);
-	qrankerButton.updateFromModel(model);
+    	createIndexButton.updateFromModel(model);
+    	searchButton.updateFromModel(model);
+    	computeQValuesButton.updateFromModel(model);
+    	percolatorButton.updateFromModel(model);
+    	qrankerButton.updateFromModel(model);
     }
 }
