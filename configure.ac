@@ -3,7 +3,7 @@ AC_PREREQ(2.57)
 AC_INIT(crux, 1.0, aklammer@u.washington.edu)
 AC_CONFIG_SRCDIR(src/c/ion_series.cpp)
 AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(crux, 1.31)
+AM_INIT_AUTOMAKE(crux, 1.33)
 AM_CONFIG_HEADER([config.h])
 
 # Check for required programs.
