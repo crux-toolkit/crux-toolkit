@@ -5,11 +5,17 @@ SOURCE = \
   edu/washington/gs/noble/crux/gui/CruxGui.java \
   edu/washington/gs/noble/crux/gui/CruxMainFrame.java \
   edu/washington/gs/noble/crux/gui/CruxParameterControl.java \
+  edu/washington/gs/noble/crux/gui/CruxAdvancedParameterControl.java \
   edu/washington/gs/noble/crux/gui/CruxParameterPanel.java \
   edu/washington/gs/noble/crux/gui/CruxRunPanel.java \
   edu/washington/gs/noble/crux/gui/CruxSetupPanel.java \
+  edu/washington/gs/noble/crux/gui/MissedCleavagesPanel.java \
+  edu/washington/gs/noble/crux/gui/OutputDirPanel.java \
+  edu/washington/gs/noble/crux/gui/NumDecoysPerTargetPanel.java \
   edu/washington/gs/noble/crux/gui/DigestPanel.java \
+  edu/washington/gs/noble/crux/gui/DecoyLocationPanel.java \
   edu/washington/gs/noble/crux/gui/EnzymePanel.java \
+  edu/washington/gs/noble/crux/gui/VerbosityPanel.java \
   edu/washington/gs/noble/crux/gui/FeatureFilePanel.java \
   edu/washington/gs/noble/crux/gui/ImagePanel.java \
   edu/washington/gs/noble/crux/gui/LengthPanel.java \
@@ -20,7 +26,8 @@ SOURCE = \
   edu/washington/gs/noble/crux/gui/ProteinDBPanel.java \
   edu/washington/gs/noble/crux/gui/SpectraPanel.java \
   edu/washington/gs/noble/crux/gui/SpectrumChargePanel.java \
-  edu/washington/gs/noble/crux/gui/SpectrumMassPanel.java
+  edu/washington/gs/noble/crux/gui/SpectrumMassPanel.java 
+
 
 all: classes CruxGui.jar
 

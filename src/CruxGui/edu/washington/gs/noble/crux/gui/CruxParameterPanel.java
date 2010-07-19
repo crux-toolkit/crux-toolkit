@@ -104,8 +104,7 @@ class CruxParameterPanel extends JPanel implements ItemListener {
     private void updateFromModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		runToolCheckBox.setSelected(model.getRunComponent(component));
-		/* Don't think we need this */
-		//showAdvancedParameters.setSelected(model.getShowAdvancedParameters(component));
+		showAdvancedParameters.setSelected(model.getShowAdvancedParameters(component));
 		for (CruxParameterControl component: parameterControls) {
 			component.updateFromModel();
 		}
