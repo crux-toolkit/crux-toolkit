@@ -44,6 +44,8 @@ LIBFILES= \
   DelimitedFile.h \
   DelimitedFileReader.cpp \
   DelimitedFileReader.h \
+  MatchColumns.cpp \
+  MatchColumns.h \
   MatchFileReader.cpp \
   MatchFileReader.h \
   generate_peptides_iterator.cpp \

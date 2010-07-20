@@ -171,10 +171,6 @@ SCORER_T* new_scorer(
     // the scorer as not been initialized yet.
     scorer->initialized = FALSE;
   }
-  else if(type == LOGP_EXP_SP){// || type == LOGP_BONF_EXP_SP){
-    // the scorer does not need to be initialized for logp_exp_sp.
-    scorer->initialized = TRUE;
-  }
   else{
     // the scorer as not been initialized yet.
     scorer->initialized = FALSE;

@@ -102,17 +102,16 @@ int add_matches(
  * sort the match collection by score_type(SP, XCORR, ... )
  *\returns TRUE, if successfully sorts the match_collection
  */
-BOOLEAN_T sort_match_collection(
+void sort_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< match collection to sort -out
   SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
   );
 
 /**
  * \brief Sort a match_collection by the given score type, grouping
- * matches by spectrum (if multiple spectra present).
- * \returns TRUE if sort is successful, else FALSE;
+ * matches by spectrum (if multiple spectra are present).
  */
-BOOLEAN_T spectrum_sort_match_collection(
+void spectrum_sort_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< match collection to sort -out
   SCORER_TYPE_T score_type ///< the score type to sort by -in
   );
@@ -332,6 +331,34 @@ BOOLEAN_T print_match_collection_tab_delimited(
   );
 
 /**
+ * Retrieve the calibration parameter eta.
+ */
+FLOAT_T get_calibration_eta (
+  MATCH_COLLECTION_T* my_collection ///< The collection -in
+);
+
+/**
+ * Retrieve the calibration parameter beta.
+ */
+FLOAT_T get_calibration_beta (
+  MATCH_COLLECTION_T* my_collection ///< The collection -in
+);
+
+/**
+ * Retrieve the calibration parameter shift.
+ */
+FLOAT_T get_calibration_shift (
+  MATCH_COLLECTION_T* my_collection ///< The collection -in
+);
+
+/**
+ * Retrieve the calibration parameter correlation.
+ */
+FLOAT_T get_calibration_corr (
+  MATCH_COLLECTION_T* my_collection ///< The collection -in
+);
+
+/**
  * Print the calibration parameters eta, beta, shift and correlation
  * with tabs between.
  */
@@ -413,10 +440,10 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
  * match input TRUE for preserve_order.
  *\returns TRUE, if successfully fills the scores into match object, else FALSE.
  */
-BOOLEAN_T fill_result_to_match_collection(
+void fill_result_to_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to iterate -out
   double* results,  ///< The result score array to fill the match objects -in
-  SCORER_TYPE_T score_type,  ///< The score type of the results to fill (XCORR, Q_VALUE, ...) -in
+  SCORER_TYPE_T score_type,  ///< The score type of the results to fill -in
   BOOLEAN_T preserve_order ///< preserve match order?
   );
 

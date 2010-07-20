@@ -3,45 +3,11 @@
  * \brief Object for parsing the tab-delimited files
  ****************************************************************************/
 
+#include "MatchColumns.h"
 #include "MatchFileReader.h"
 #include "DelimitedFile.h"
 
 using namespace std;
-
-//column names to search for.
-// N.B. Compare to the corresponding list in match_collection.cpp.
-static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
-  "scan",
-  "charge",
-  "spectrum precursor m/z",
-  "spectrum neutral mass",
-  "peptide mass",
-  "delta_cn",
-  "sp score",
-  "sp rank",
-  "xcorr score",
-  "xcorr rank",
-  "p-value",
-  "Weibull est. q-value",
-  "decoy q-value (xcorr)",
-  "percolator score",
-  "percolator rank",
-  "percolator q-value",
-  "q-ranker score",
-  "q-ranker q-value",
-  "b/y ions matched",
-  "b/y ions total",
-  "matches/spectrum",
-  "sequence",
-  "cleavage type",
-  "protein id",
-  "flanking aa",
-  "unshuffled sequence",
-  "eta",
-  "beta",
-  "shift",
-  "corr"
-};
 
 /**
  * \returns a blank MatchFileReader object 
@@ -78,7 +44,7 @@ MatchFileReader::~MatchFileReader() {
 void MatchFileReader::parseHeader() {
   
   for (int idx=0;idx<NUMBER_MATCH_COLUMNS;idx++) {
-    match_indices_[idx] = findColumn(match_column_strings[idx]);
+    match_indices_[idx] = findColumn(get_column_header(idx));
   }
 }
 
@@ -94,8 +60,8 @@ FLOAT_T MatchFileReader::getFloat(
   if (idx == -1) {
 
     carp(CARP_FATAL,
-      "column \"%s\" not found",
-      match_column_strings[col_type]);
+	 "column \"%s\" not found",
+	 get_column_header(col_type));
     return -1;
   } else {
     return DelimitedFileReader::getFloat(idx);
@@ -113,8 +79,8 @@ int MatchFileReader::getInteger(
   if (idx == -1) {
 
     carp(CARP_FATAL,
-      "column \"%s\" not found",
-      match_column_strings[col_type]);
+	 "column \"%s\" not found",
+	 get_column_header(col_type));
     return -1;
   } else {
 
@@ -137,8 +103,8 @@ std::string& MatchFileReader::getString(
   if (idx == -1) {
 
     carp(CARP_FATAL,
-      "column \"%s\" not found",
-      match_column_strings[col_type]);
+	 "column \"%s\" not found",
+	 get_column_header(col_type));
     return BLANK_STRING;
   } else {
 
@@ -153,8 +119,8 @@ bool MatchFileReader::empty(
   int idx = match_indices_[col_type];
   if (idx == -1) {
     carp(CARP_FATAL,
-      "column \"%s\" not found",
-      match_column_strings[col_type]);
+	 "column \"%s\" not found",
+	 get_column_header(col_type));
     return true;
   } else {
 
@@ -163,12 +129,12 @@ bool MatchFileReader::empty(
 }
 
 /**
- * gets an vector of strings from cell where the
+ * Gets a vector of strings from cell where the
  * string in the cell has delimiters that are
  * different than the column delimiter. The
- * default delimiter is a comma
- * uses the current_row_ as the row index.
- * clears the integer vector before 
+ * default delimiter is a comma.
+ * Uses the current_row_ as the row index.
+ * Clears the integer vector before 
  * populating it.
  */
 void MatchFileReader::getStringVectorFromCell(
@@ -183,3 +149,4 @@ void MatchFileReader::getStringVectorFromCell(
   string_vector.clear();
   DelimitedFile::tokenize(string_ans, string_vector, delimiter);
 }
+

@@ -150,7 +150,16 @@ MATCH_COLLECTION_T* run_qvalue(
     compute_bh_qvalues(pvalues, num_pvals, all_matches);
   } else {
     compute_decoy_q_values(all_matches);
+			   //			   FALSE); // Not peptide-level scoring.
   }
+
+  // Identify PSMs that are top-scoring per peptide.
+  //  identify_best_psm_per_peptide(all_matches);
+
+  // Compute peptide-level decoy q-values.
+  //  compute_decoy_q_values(all_matches/
+  //			 TRUE); // Do peptide-level scoring.
+
 
   free(pvalues);
 

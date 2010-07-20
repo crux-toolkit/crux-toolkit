@@ -222,7 +222,7 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
     pcExecute(); 
     pcGetScores(results_score, results_q); 
     fill_result_to_match_collection(
-        target_match_collection, results_q, Q_VALUE, TRUE);
+        target_match_collection, results_q, PERCOLATOR_QVALUE, TRUE);
     fill_result_to_match_collection(
         target_match_collection, results_score, PERCOLATOR_SCORE, FALSE);
     pcCleanUp();
@@ -231,7 +231,7 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
     qcExecute(!get_boolean_parameter("no-xval")); 
     qcGetScores(results_score, results_q); 
     fill_result_to_match_collection(
-        target_match_collection, results_q, QRANKER_Q_VALUE, TRUE);
+        target_match_collection, results_q, QRANKER_QVALUE, TRUE);
     fill_result_to_match_collection(
         target_match_collection, results_score, QRANKER_SCORE, FALSE);
     qcCleanUp();
@@ -240,6 +240,7 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
     carp(CARP_FATAL, "Unknown command type.");
     break;
   }
+
 
   // free names
   unsigned int name_idx;
@@ -413,13 +414,9 @@ int main(int argc, char** argv){
     break;    
 
   case INVALID_COMMAND:
+  case NUMBER_COMMAND_TYPES:
     carp(CARP_FATAL, "Invalid command '%s'\n%s", op_string, usage_str);
     break;
-
-  default:
-    carp(CARP_FATAL, "Unknown command type.");
-    break;
-
   }
 
   exit (0);

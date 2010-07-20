@@ -88,11 +88,21 @@ int compare_match_p_value(
   MATCH_T** match_b  ///< the scond match -in
   );
 
+int compare_match_percolator_qvalue(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+);
+
+int compare_match_qranker_qvalue(
+  MATCH_T** match_a, ///< the first match -in  
+  MATCH_T** match_b  ///< the scond match -in
+);
+
 /**
  * compare two matches, used for qsort
  * \returns the difference between xcorr score in match_a and match_b
  */
-int compare_match_q_value(
+int compare_match_qvalue(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );
@@ -101,7 +111,7 @@ int compare_match_q_value(
  * compare two matches, used for qsort
  * \returns the difference between qranker qvalue in match_a and match_b
  */
-int compare_match_qranker_q_value(
+int compare_match_qranker_qvalue(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );
@@ -152,7 +162,7 @@ int compare_match_spectrum_xcorr(
  * or if scan number is same, if score of match a is less than
  * match b.  1 if scan number and score are equal, else 0.
  */
-int compare_match_spectrum_q_value(
+int compare_match_spectrum_percolator_qvalue(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );
@@ -164,7 +174,7 @@ int compare_match_spectrum_q_value(
  * or if scan number is same, if score of match a is less than
  * match b.  1 if scan number and score are equal, else 0.
  */
-int compare_match_spectrum_qranker_q_value(
+int compare_match_spectrum_qranker_qvalue(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
   );

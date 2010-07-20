@@ -57,28 +57,6 @@ for searchtool in sequest-search search-for-matches; do
       $ms2 $db
   fi
 
-  # Run Lukas's percolator
-  if [[ $searchtool == "search-for-matches" ]]; then
-    echo Stand-alone Percolator does not work with crux search-for-matches.
-  elif [[ `which percolator` == "" ]]; then
-    echo Skipping stand-alone Percolator -- not installed.
-  else
-    if [[ -e $shortname/l-percolator.features.tsv ]]; then
-      echo Skipping stand-alone Percolator.
-    else
-      percolator \
-        --tab-out $shortname/l-percolator.features.tsv \
-        --gist-out $shortname/l-percolator.gist.txt \
-        --weights $shortname/l-percolator.weights.txt \
-        --results $shortname/l-percolator.tsv \
-        --sqt-out $shortname/l-percolator.sqt \
-        --xml-output $shortname/l-percolator.xml \
-        $shortname/sequest.target.sqt \
-        $shortname/sequest.decoy.sqt
-    fi
-    echo replot \"$shortname/l-percolator.tsv\" using 3:0 title \"Stand-alone percolator\" with lines >> $gnuplot
-  fi
-  
   # Run compute-q-values.
   if [[ -e $shortname/qvalues.target.txt ]]; then
     echo Skipping compute-q-values.
@@ -121,6 +99,28 @@ for searchtool in sequest-search search-for-matches; do
     echo replot \"$shortname/qranker.target.txt\" using 12:0 title \"$shortname q-ranker\" with lines >> $gnuplot
   else
     echo replot \"$shortname/qranker.target.txt\" using 11:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+  fi
+  
+  # Run Lukas's percolator
+  if [[ $searchtool == "search-for-matches" ]]; then
+    echo Stand-alone Percolator does not work with crux search-for-matches.
+  elif [[ `which percolator` == "" ]]; then
+    echo Skipping stand-alone Percolator -- not installed.
+  else
+    if [[ -e $shortname/l-percolator.features.tsv ]]; then
+      echo Skipping stand-alone Percolator.
+    else
+      percolator \
+        --tab-out $shortname/l-percolator.features.tsv \
+        --gist-out $shortname/l-percolator.gist.txt \
+        --weights $shortname/l-percolator.weights.txt \
+        --results $shortname/l-percolator.tsv \
+        --sqt-out $shortname/l-percolator.sqt \
+        --xml-output $shortname/l-percolator.xml \
+        $shortname/sequest.target.sqt \
+        $shortname/sequest.decoy.sqt
+    fi
+    echo replot \"$shortname/l-percolator.tsv\" using 3:0 title \"Stand-alone percolator\" with lines >> $gnuplot
   fi
   
 done

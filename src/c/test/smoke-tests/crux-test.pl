@@ -10,9 +10,13 @@ Usage: crux-test.pl [-up] <test list file>
 The crux-test.pl script provides a framework for testing the overall 
 functionality of programs in the crux distribution. It read a list of
 tests from a '='-delimited file, one test per line. Each test is described
-by 3 fields:
+by four fields:
 
 =over 4
+
+=item 0
+a Boolean value (0 or 1) indicating whether the test should be run under a
+Darwin OS
 
 =item o
 the name of the test
@@ -25,14 +29,17 @@ the command line implementing the test
 
 =back
 
-The command line for each test is executed with the STDOUT
-captured to a file. STDERR is written as is. 
-The test output is compared to the known good
-output contained in the file specified in the 2nd field. If the test
-output matches the known good output the test succeeds, otherwise
-it fails. The results are printed to the standard output. If the 
-'-u' option is specified, the files containing the known good output
-will be replaced by the output of the test. 
+The command line for each test is executed with the STDOUT captured to
+a file. STDERR is written as is.  The test output is compared to the
+known good output contained in the file specified in the second
+field. If the test output matches the known good output, then the test
+succeeds; otherwise, it fails. The results are printed to the standard
+output.  When a test fails, a copy of the observed output (with the 
+filename extension ".observed") is placed alongside the known good output
+file.
+
+If the '-u' option is specified, then the files containing the
+known good output will be replaced by the output of the test.
 
 It is assumed that the command to be tested sends its output to
 standard out.
@@ -96,6 +103,9 @@ while (my $line = <ARGV>) {
   $cmd =~ s/^ //;
   $ignore_string = $fields[4];
 
+  # Remove whitespace from the filename.
+  $standard_filename =~ s/ //g;
+
   # Skip this test if we're on a Darwin OS and it doesn't pass there.
   if (($arch eq "Darwin\n") && ($do_darwin == "0")) {
     print "\n----- Skipping test $test_name \n";
@@ -126,7 +136,7 @@ while (my $line = <ARGV>) {
   # Clean up
   close $output_fh;
   if ($update) {
-    # If the update flag was given replace the existing standard with
+    # If the update flag was given replace the existing standard
     # with the current test ouput.
     system("cp $output_filename $standard_filename");
   }
@@ -143,7 +153,7 @@ print "----- Total Tests: $num_tests\n";
 print "-------------------------------\n\n";
 exit($num_failed_tests);
 
-=head2 test_cmd($cmd, $standard_filename, $output_filename)
+=head2 test_cmd($cmd, $standard_filename, $output_filename, $ignore_string)
 
 Arguments:
 
@@ -189,7 +199,13 @@ sub test_cmd() {
       # The output of the command matches the expected output.
     } else {
       # The output of the command doesn't match the expected output.
-      # Print the diff ouput.
+
+      # Store a copy of the observed output.
+      my $copy_command = "cp $output_filename $standard_filename.observed";
+      print("$copy_command\n");
+      system($copy_command);
+
+      # Print the diff output.
       open(DIFF, $diff_filename) || die("Unable to read diff file.\n");
       my $diff_line;
       while ($diff_line = <DIFF>) {
@@ -197,7 +213,7 @@ sub test_cmd() {
       }
       close DIFF;
 
-      # also check to see which columns changed
+      # Also check to see which columns changed.
       $diff_cmd = "./compare-by-field.pl $standard_filename $output_filename" .
           "> $diff_filename" ;
       system($diff_cmd);

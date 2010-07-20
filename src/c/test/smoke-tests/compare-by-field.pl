@@ -46,7 +46,7 @@ while(my $line1 = <FILE1>){
     $line_count++;
 
     if( ! $line2 ){
-        print "File $filename1 is longer than $filename2\n";            
+        print "File $filename1 contains more lines than $filename2\n";
         last;
     }
 
