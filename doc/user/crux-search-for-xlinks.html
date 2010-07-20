@@ -196,6 +196,12 @@ of points for weibull fitting (using targets and decoys) is achieved.
 Default = 4000.
 </li>
 
+<li><code>--max-ion-charge &lt;int&gt;</code> &ndash;
+Predict ions for the theoretical spectra up to max charge state 
+(1,2,...,6) or up to the charge state of the peptide (peptide).  
+If the max-ion-charge is greater than the charge state of the 
+peptide, then the max is the peptide charge.  Default='peptide'.
+
 <!--
 <li><code>--missed-link-cleavage &lt;string&gt;</code> &ndash;
 Currently unused parameter. Default = K.

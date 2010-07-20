@@ -218,6 +218,10 @@ WINDOW_TYPE_T get_window_type_parameter(
   const char* name
   );
 
+int get_max_ion_charge_parameter(
+  const char* name
+  );
+
 double get_mz_bin_width();
  
 double get_mz_bin_offset();

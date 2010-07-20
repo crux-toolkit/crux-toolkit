@@ -64,6 +64,7 @@ int xlink_search_main(int argc, char** argv) {
     "precursor-window-type",
     "precursor-window-decoy",
     "precursor-window-type-decoy",
+    "max-ion-charge",
     "min-weibull-points",
     /* TODO: Implement or remove
     "missed-link-cleavage",
@@ -117,6 +118,8 @@ int xlink_search_main(int argc, char** argv) {
   int scan_num = 0;
   int charge = 1;
 
+  int max_ion_charge = get_max_ion_charge_parameter("max-ion-charge");
+
   int top_match = get_int_parameter("top-match");
 
   FLOAT_T linker_mass = get_double_parameter("link mass");
@@ -126,6 +129,7 @@ int xlink_search_main(int argc, char** argv) {
   LinkedPeptide::linker_mass = linker_mass;
   vector<LinkedPeptide> all_ions;
   carp(CARP_DETAILED_DEBUG,"Calling find all precursor ions");
+  carp(CARP_INFO, "Building xlink database");
   find_all_precursor_ions(all_ions, links, "K", database,1);
   carp(CARP_DETAILED_DEBUG,"Sort");
   // sort filtered ions and decoy ions by mass
@@ -272,7 +276,9 @@ int xlink_search_main(int argc, char** argv) {
 
     clock_t candidate_clock = clock();
 
-    LinkedIonSeries ion_series = LinkedIonSeries(charge);
+    int max_charge = min(max_ion_charge, charge);
+
+    LinkedIonSeries ion_series = LinkedIonSeries(max_charge);
 
     // for every ion in the mass window
     carp(CARP_DEBUG, "Scoring targets");
