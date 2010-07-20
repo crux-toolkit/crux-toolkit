@@ -474,9 +474,10 @@ void initialize_parameters(void){
    * In this case, the default value depends on the mass type. */
   set_double_parameter("mz-bin-width", NaN(), 0.0, BILLION,
       "Specify the width of the bins used to "
-      "discretize the m/z axis.  Default=1.0005079 for monoisotopic mass "
+      "discretize the m/z axis.  Also used as tolerance for assigning "
+      "ions.  Default=1.0005079 for monoisotopic mass "
       "or 1.0011413 for average mass.",
-      "Available for crux-search-for-matches.", "true");
+      "Available for crux-search-for-matches and xlink-assign-ions.", "true");
   set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, -1.0, 1.0,
       "Specify the location of the left edge of the "
       "first bin used to discretize the m/z axis. Default=0.68",
@@ -692,9 +693,12 @@ void initialize_parameters(void){
       "Predict flanking peaks for b and y ions (T,F). Default=F.",
       "Only available for crux-predict-peptide-ion.", "true");
   set_string_parameter("max-ion-charge", "peptide",
-      "Predict ions up to this charge state (1,2,3) or to the charge state "
-      "of the peptide (peptide).  Default='peptide'.",
-      "Available only for predict-peptide-ions.  Set to 'peptide' for search.",
+      "Predict ions up to max charge state (1,2,...,6) or up to the charge state "
+      "of the peptide (peptide).  If the max-ion-charge is greater than the "
+      "charge state of the peptide, then the max is the peptide charge. "
+      "Default='peptide'.",
+      "Available for predict-peptide-ions and search-for-xlinks. "
+      "Set to 'peptide' for search.",
       "true");
   set_int_parameter("nh3",0, -100, BILLION, 
       "Predict peaks with the given maximum number of nh3 neutral loss "
@@ -1982,6 +1986,24 @@ WINDOW_TYPE_T get_window_type_parameter(
 
   return param_value;
 }
+
+int get_max_ion_charge_parameter(
+  const char* name
+  ){
+  char* param_value_str = (char*)get_hash_value(parameters, name);
+  if (strcmp(param_value_str,"peptide") == 0) {
+    return BILLION; //using this with min function on peptide charge.
+  } else {
+    int ans = atoi(param_value_str);
+    if (ans <= 0 || ans > 6) {
+      carp(CARP_FATAL,
+        "Max_ion_charge parameter %s has the value %s which is not a "
+        "legal value", name, param_value_str);
+    }
+    return ans;
+  }
+}
+
 
 SORT_TYPE_T get_sort_type_parameter(const char* name){
   char* param_value_str = (char*)get_hash_value(parameters, name);

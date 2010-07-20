@@ -1,5 +1,5 @@
-INFO: CPU: n001.grid.gs.washington.edu
-INFO: Wed Jul  7 14:12:25 PDT 2010
+INFO: CPU: n003.grid.gs.washington.edu
+INFO: Mon Jul 19 14:36:53 PDT 2010
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
@@ -112,9 +112,10 @@ D=0.000000
 # For parameter file only.  Default=no mass change.
 E=0.000000
 
-# Specify the width of the bins used to discretize the m/z axis. 
-# Default=1.0005079 for monoisotopic mass or 1.0011413 for average mass.
-# Available for crux-search-for-matches.
+# Specify the width of the bins used to discretize the m/z axis.  Also
+# used as tolerance for assigning ions.  Default=1.0005079 for
+# monoisotopic mass or 1.0011413 for average mass.
+# Available for crux-search-for-matches and xlink-assign-ions.
 mz-bin-width=1.000508
 
 # Change the mass of all amino acids 'F' by the given amount.
@@ -377,9 +378,12 @@ max-length=50
 # line per peptide per protein occurence when false.  
 unique-peptides=TRUE
 
-# Predict ions up to this charge state (1,2,3) or to the charge state of
-# the peptide (peptide).  Default='peptide'.
-# Available only for predict-peptide-ions.  Set to 'peptide' for search.
+# Predict ions up to max charge state (1,2,...,6) or up to the charge
+# state of the peptide (peptide).  If the max-ion-charge is greater than
+# the charge state of the peptide, then the max is the peptide charge.
+# Default='peptide'.
+# Available for predict-peptide-ions and search-for-xlinks. Set to
+# 'peptide' for search.
 max-ion-charge=peptide
 
 # The maximum mass of peptides to consider. Default=7200.
@@ -481,7 +485,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Jul  7 14:12:25 2010
+H	StartTime	Mon Jul 19 14:36:54 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

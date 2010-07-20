@@ -13,11 +13,8 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
-//#define bin_width_mono 1.0005079
 
 
-#define NUM_ARGUMENTS 8
-#define NUM_OPTIONS 5
 
 
 void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series);
@@ -27,28 +24,29 @@ int main(int argc, char** argv){
   set_verbosity_level(CARP_ERROR);
   
   /* Define optional command line arguments */
-  int num_options = NUM_OPTIONS;
-  const char* option_list[NUM_OPTIONS] = {
+  const char* option_list[] = {
     "verbosity",
     "version",
     "use-mgf",
-    "ion-tolerance",
+    "fragment-mass",
+    "max-ion-charge",
+    "mz-bin-width",
     "precision"
   };
-
+  int num_options = sizeof(option_list) / sizeof(char*);
   
 
   /* Define required command line arguments */
-  int num_arguments = NUM_ARGUMENTS;
-  const char* argument_list[NUM_ARGUMENTS] = {"peptide A",
-                                              "peptide B",
-					      "pos A",
-					      "pos B",
-					      "link mass",
-					      "charge state",
-					      "scan number",
-					      "ms2 file"};
-
+  const char* argument_list[] = {
+    "peptide A",
+    "peptide B",
+    "pos A",
+    "pos B",
+    "link mass",
+    "charge state",
+    "scan number",
+    "ms2 file"};
+  int num_arguments = sizeof(argument_list) / sizeof(char*);
   
   /* for debugging of parameter processing */
   //set_verbosity_level( CARP_DETAILED_DEBUG );
@@ -123,7 +121,11 @@ int main(int argc, char** argv){
   //created linked peptide.
   LinkedPeptide lp = LinkedPeptide(peptideA, peptideB, posA-1, posB-1, charge);
 
-  LinkedIonSeries ion_series(charge);
+  int max_ion_charge = get_int_parameter("max-ion-charge");
+
+  int max_charge = min(max_ion_charge, charge);
+
+  LinkedIonSeries ion_series(max_charge);
   ion_series.add_linked_ions(lp);
   print_spectrum(spectrum, ion_series);
 
@@ -143,7 +145,7 @@ void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series) {
       carp(CARP_INFO,"frac theoretical ions matched:%f",frac_by_ions);
       carp(CARP_INFO,"npeaks:%d",get_spectrum_num_peaks(spectrum));
 
-      FLOAT_T bin_width = get_double_parameter("ion-tolerance");
+      FLOAT_T bin_width = get_double_parameter("mz-bin-width");
       vector<LinkedPeptide>& ions = ion_series.ions();
       
       map<PEAK_T*, LinkedPeptide> matched;

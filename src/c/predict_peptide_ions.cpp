@@ -5,6 +5,7 @@
  * \brief Object for given a peptide and a charge state, predict
  * the ions 
  ****************************************************************************/
+#include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,14 +20,12 @@
 #include "ion.h"
 #include "ion_series.h"
 
-static const int NUM_PREDICT_OPTIONS = 9;
-static const int NUM_PREDICT_ARGUMENTS = 2;
+using namespace std;
 
 int main(int argc, char** argv){
 
   /* Define optional and required command line arguments */
-  int num_options = NUM_PREDICT_OPTIONS;
-  const char* option_list[NUM_PREDICT_OPTIONS] = {
+  const char* option_list[] = {
     "version",
     "primary-ions",
     "precursor-ions",
@@ -37,12 +36,13 @@ int main(int argc, char** argv){
     "nh3",
     "h2o"
   };
+  int num_options = sizeof(option_list) / sizeof(char*);
 
-  int num_arguments = NUM_PREDICT_ARGUMENTS;
-  const char* argument_list[NUM_PREDICT_ARGUMENTS] = {
+  const char* argument_list[] = {
     "peptide sequence",
     "charge state"
   };
+  int num_arguments = sizeof(argument_list) / sizeof(char*);
 
   /* for debugging of parameter processing */
   //set_verbosity_level( CARP_DETAILED_DEBUG );
@@ -77,7 +77,6 @@ int main(int argc, char** argv){
 
   int neutral_loss_count[MAX_MODIFICATIONS];
   BOOLEAN_T is_modification = FALSE;
-  int max_charge = charge_state;
 
   // check peptide sequence
   if(!valid_peptide_sequence(peptide_sequence)){
@@ -101,68 +100,50 @@ int main(int argc, char** argv){
    neutral_loss_count[FLANK] = (int)is_flanking;
    neutral_loss_count[ISOTOPE] = isotope_count;
 
-   // max_ion_charge
-   if(strcmp(max_ion_charge, "1")== 0){
-     max_charge = 1;
-   }
-   else if(strcmp(max_ion_charge, "2")== 0){
-     max_charge = 2;
-   }
-   else if(strcmp(max_ion_charge, "3")== 0){
-     max_charge = 3;
-   }
-   else if(strcmp(max_ion_charge, "peptide")== 0){
-     max_charge = charge_state;
-   }
-   else{
-     carp(CARP_FATAL, 
-          "max-ion-charge option must be 1,2,3 or peptide. '%s' is not legal",
-          max_charge);
-   }
-   
-   // create ion_constraint
-   MASS_TYPE_T frag_masses = get_mass_type_parameter("fragment-mass");
-   ION_CONSTRAINT_T* ion_constraint = 
-     //  new_ion_constraint(MONO, max_charge, ion_type, use_precursor_ions);
-     new_ion_constraint(frag_masses, max_charge, ion_type, use_precursor_ions);
+  int max_charge = get_max_ion_charge_parameter("max-ion-charge");
+  max_charge = min(max_charge, charge_state);
+  // create ion_constraint
+  MASS_TYPE_T frag_masses = get_mass_type_parameter("fragment-mass");
+  ION_CONSTRAINT_T* ion_constraint = 
+  //  new_ion_constraint(MONO, max_charge, ion_type, use_precursor_ions);
+    new_ion_constraint(frag_masses, max_charge, ion_type, use_precursor_ions);
 
    
    // set ion_constraint3 modification counts, if modifications should occur
-   if(is_modification){
-     set_ion_constraint_modification( ion_constraint, NH3, 
-                                      neutral_loss_count[NH3]);
-     set_ion_constraint_modification( ion_constraint, H2O, 
-                                      neutral_loss_count[H2O]);
-     set_ion_constraint_modification( ion_constraint, ISOTOPE, 
-                                      neutral_loss_count[ISOTOPE]);
-     set_ion_constraint_modification( ion_constraint, FLANK, 
-                                      neutral_loss_count[FLANK]);
-   }
+  if(is_modification){
+    set_ion_constraint_modification( ion_constraint, NH3, 
+                                     neutral_loss_count[NH3]);
+    set_ion_constraint_modification( ion_constraint, H2O, 
+                                     neutral_loss_count[H2O]);
+    set_ion_constraint_modification( ion_constraint, ISOTOPE, 
+                                     neutral_loss_count[ISOTOPE]);
+    set_ion_constraint_modification( ion_constraint, FLANK, 
+                                     neutral_loss_count[FLANK]);
+  }
 
-   // create ion_series
-   ION_SERIES_T* ion_series = new_ion_series(peptide_sequence, 
+  // create ion_series
+  ION_SERIES_T* ion_series = new_ion_series(peptide_sequence, 
                                              charge_state, ion_constraint);
    
-   // now predict ions
-   predict_ions(ion_series);
+  // now predict ions
+  predict_ions(ion_series);
    
-   // print settings
-   printf("# PEPTIDE: %s\n",peptide_sequence);
-   printf("# AVERAGE: %f MONO:%f",calc_sequence_mass(peptide_sequence, AVERAGE),calc_sequence_mass(peptide_sequence, MONO));
-   printf("# CHARGE: %d\n", charge_state);
-   printf("# MAX-ION-CHRAGE: %s\n", max_ion_charge);
-   printf("# NH3 modification: %d\n", neutral_loss_count[NH3]);
-   printf("# H2O modification: %d\n", neutral_loss_count[H2O] );
-   printf("# ISOTOPE modification: %d\n", neutral_loss_count[ISOTOPE] );
-   printf("# FLANK modification: %d\n", neutral_loss_count[FLANK]);
+  // print settings
+  printf("# PEPTIDE: %s\n",peptide_sequence);
+  printf("# AVERAGE: %f MONO:%f",calc_sequence_mass(peptide_sequence, AVERAGE),calc_sequence_mass(peptide_sequence, MONO));
+  printf("# CHARGE: %d\n", charge_state);
+  printf("# MAX-ION-CHRAGE: %s\n", max_ion_charge);
+  printf("# NH3 modification: %d\n", neutral_loss_count[NH3]);
+  printf("# H2O modification: %d\n", neutral_loss_count[H2O] );
+  printf("# ISOTOPE modification: %d\n", neutral_loss_count[ISOTOPE] );
+  printf("# FLANK modification: %d\n", neutral_loss_count[FLANK]);
+  // print ions
+  print_ion_series(ion_series, stdout);
 
-   // print ions
-   print_ion_series(ion_series, stdout);
-
-   // free
-   free_ion_constraint(ion_constraint);
-   free_ion_series(ion_series);
-
-   carp(CARP_INFO, "crux-predict-peptide-ions finished");
- exit(0);
+  // free
+  free_ion_constraint(ion_constraint);
+  free_ion_series(ion_series);
+  carp(CARP_INFO, "crux-predict-peptide-ions finished");
+  exit(0);
 }
+
