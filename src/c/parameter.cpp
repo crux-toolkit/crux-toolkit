@@ -1503,15 +1503,13 @@ BOOLEAN_T check_option_type_and_bounds(const char* name){
     if(! string_to_scorer_type( value_str, &scorer_type)){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
-      "Must be sp, xcorr, sp-pvalue, or xcorr-pvalue.", value_str, name);
+      "Must be sp, xcorr or xcorr-pvalue.", value_str, name);
     }else if((scorer_type != SP ) &&   //check for one of the accepted types
              (scorer_type != XCORR ) &&
-             (scorer_type != DOTP ) &&
-             (scorer_type != LOGP_BONF_WEIBULL_SP ) &&
              (scorer_type != LOGP_BONF_WEIBULL_XCORR )){
       success = FALSE;
       sprintf(die_str, "Illegal score value '%s' for option '%s'.  "
-      "Must be sp, xcorr, sp-pvalue, or xcorr-pvalue.", value_str, name);
+      "Must be sp, xcorr or xcorr-pvalue.", value_str, name);
     }
     break;
   case ALGORITHM_TYPE_P:

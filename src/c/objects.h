@@ -371,33 +371,33 @@ typedef struct scorer SCORER_T;
 
 /**
  * The enum for scorer type
- * The QRANKER scores were added after Crux had been released for a while.
- * We don't want to change the CSM file layout at this point, so when
- * reading and writing scores from the CSM we omit the last two scores
- * in the score type enum.
  */
 enum _scorer_type { 
   SP,                  ///< SEQUEST preliminary score
   XCORR,               ///< SEQUEST primary score
-  DOTP,                ///< not yet implemented
-  LOGP_EXP_SP,         ///< this spot hijacked for zscore
-  DECOY_XCORR_QVALUE,  ///< Benjamini-Hochberg q-value from xcorrs
-  LOGP_BONF_EVD_XCORR,
-  LOGP_WEIBULL_SP,
-  LOGP_BONF_WEIBULL_SP,
+
+  DECOY_XCORR_QVALUE,  ///< q-value derived from empirical null (decoys)
+  DECOY_XCORR_PEPTIDE_QVALUE,
+
   LOGP_WEIBULL_XCORR,
   LOGP_BONF_WEIBULL_XCORR,
-  Q_VALUE,
-  PERCOLATOR_SCORE,
   LOGP_QVALUE_WEIBULL_XCORR,
+  LOGP_PEPTIDE_QVALUE_WEIBULL,
+
+  PERCOLATOR_SCORE,
+  PERCOLATOR_QVALUE,
+  PERCOLATOR_PEPTIDE_QVALUE,
+
   QRANKER_SCORE,
-  QRANKER_Q_VALUE,
+  QRANKER_QVALUE,
+  QRANKER_PEPTIDE_QVALUE,
+
   NUMBER_SCORER_TYPES 
 };
 
 /**
  * \typedef SCORER_TYPE_T
- * \brief The typedef for scorer type (SP, XCORR, DOTP)
+ * \brief The typedef for scorer type.
  */
 typedef enum _scorer_type SCORER_TYPE_T;
 

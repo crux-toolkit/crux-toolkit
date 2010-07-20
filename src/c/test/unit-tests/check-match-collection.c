@@ -275,16 +275,3 @@ Suite* match_collection_suite(){
 
   return s;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

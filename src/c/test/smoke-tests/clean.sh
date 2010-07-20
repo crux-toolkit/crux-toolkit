@@ -4,3 +4,4 @@ rm -f nosp.txt
 rm -rf child ../yeast-index yeast-index ../sib
 rm -f existing_search/percolator.target.*
 rm -f *binary_fasta
+rm -f good_results/*.observed

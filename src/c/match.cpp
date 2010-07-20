@@ -288,56 +288,59 @@ int compare_match_p_value(
 
 
 /**
- * compare two matches, used for qsort
- * The smaller the Q value the better!!!, this is opposite to other scores
+ * Compare two matches; used for qsort.
+ * Smaller q-values are better.  Break ties using the raw score.
  * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
  * is greather than b.
  */
-int compare_match_q_value(
+int compare_match_percolator_qvalue(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
 )
 {
 
-  if((*match_b)->match_scores[Q_VALUE] < (*match_a)->match_scores[Q_VALUE]){
+  if((*match_b)->match_scores[PERCOLATOR_QVALUE] 
+     < (*match_a)->match_scores[PERCOLATOR_QVALUE]){
     return 1;
   }
-  else if((*match_b)->match_scores[Q_VALUE] > (*match_a)->match_scores[Q_VALUE]){
+  else if((*match_b)->match_scores[PERCOLATOR_QVALUE]
+	  > (*match_a)->match_scores[PERCOLATOR_QVALUE]){
     return -1;
   }
-  return 0;
+  return compare_match_percolator_score(match_a, match_b);
 }
 
 /**
- * compare two matches, used for qsort
- * The smaller the Q value the better!!!, this is opposite to other scores
+ * Compare two matches; used for qsort.
+ * Smaller q-values are better.  Break ties using the raw q-ranker score.
  * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
  * is greather than b.
  */
-int compare_match_qranker_q_value(
+int compare_match_qranker_qvalue(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
 )
 {
 
-  if((*match_b)->match_scores[QRANKER_Q_VALUE] < 
-      (*match_a)->match_scores[QRANKER_Q_VALUE]){
+  if((*match_b)->match_scores[QRANKER_QVALUE] < 
+      (*match_a)->match_scores[QRANKER_QVALUE]){
     return 1;
   }
-  else if((*match_b)->match_scores[QRANKER_Q_VALUE] > 
-          (*match_a)->match_scores[QRANKER_Q_VALUE]){
+  else if((*match_b)->match_scores[QRANKER_QVALUE] > 
+          (*match_a)->match_scores[QRANKER_QVALUE]){
     return -1;
   }
-  return 0;
+  return compare_match_qranker_score(match_a, match_b);
 }
 
 /**
- * Compare two matches by spectrum scan number and q-value, used for qsort.
+ * Compare two matches by spectrum scan number and percolator q-value, 
+ * used for qsort.
  * \returns -1 if match a spectrum number is less than that of match b
  * or if scan number is same, if score of match a is less than
  * match b.  1 if scan number and score are equal, else 0.
  */
-int compare_match_spectrum_q_value(
+int compare_match_spectrum_percolator_qvalue(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
 ){
@@ -345,11 +348,12 @@ int compare_match_spectrum_q_value(
   int return_me = compare_match_spectrum( match_a, match_b );
 
   if( return_me == 0 ){
-    return_me = compare_match_q_value(match_a, match_b);
+    return_me = compare_match_percolator_qvalue(match_a, match_b);
   }
 
   return return_me;
 }
+
 
 /**
  * Compare two matches by spectrum scan number and qranker q-value, 
@@ -358,7 +362,7 @@ int compare_match_spectrum_q_value(
  * or if scan number is same, if score of match a is less than
  * match b.  1 if scan number and score are equal, else 0.
  */
-int compare_match_spectrum_qranker_q_value(
+int compare_match_spectrum_qranker_qvalue(
   MATCH_T** match_a, ///< the first match -in  
   MATCH_T** match_b  ///< the scond match -in
 ){
@@ -366,7 +370,7 @@ int compare_match_spectrum_qranker_q_value(
   int return_me = compare_match_spectrum( match_a, match_b );
 
   if( return_me == 0 ){
-    return_me = compare_match_q_value(match_a, match_b);
+    return_me = compare_match_qranker_qvalue(match_a, match_b);
   }
 
   return return_me;
@@ -569,6 +573,220 @@ void print_match_sqt(
   return;
 }
 
+
+/**
+ * Print one field in the tab-delimited output file, based on column index.
+ */
+static void print_one_match_field(
+  int      column_idx,             ///< Index of the column to print. -in
+  char*    float_format,           ///< Formatting string for floats. -in
+  MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
+  MATCH_T* match,                  ///< the match to print -in    
+  FILE*    output_file,            ///< output stream -out
+  int      scan_num,               ///< starting scan number -in
+  FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
+  FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
+  int      num_matches,            ///< num matches in spectrum -in
+  int      charge,                 ///< charge -in
+  const BOOLEAN_T* scores_computed,///< scores_computed[TYPE] = T if match was scored for TYPE
+  int      b_y_total,              ///< total b/y ions -in
+  int      b_y_matched             ///< Number of b/y ions matched. -in
+) {
+
+  switch ((MATCH_COLUMNS_T)column_idx) {
+  case SCAN_COL:
+    fprintf(output_file, "%d", scan_num);
+    break;
+  case CHARGE_COL:
+    fprintf(output_file, "%d", charge);
+    break;
+  case SPECTRUM_PRECURSOR_MZ_COL:
+    fprintf(output_file, "%.4f", spectrum_precursor_mz);
+    break;
+  case SPECTRUM_NEUTRAL_MASS_COL:
+    fprintf(output_file, "%.4f", spectrum_mass);
+    break;
+  case PEPTIDE_MASS_COL:
+    {
+      PEPTIDE_T* peptide = get_match_peptide(match);
+      double peptide_mass = get_peptide_peptide_mass(peptide);
+      fprintf(output_file, "%.6f", peptide_mass);
+    }
+    break;
+  case DELTA_CN_COL:
+    {
+      FLOAT_T delta_cn = get_match_delta_cn(match);
+      if( delta_cn == 0 ){// I hate -0, this prevents it
+	delta_cn = 0.0;
+      }
+      fprintf(output_file, float_format, delta_cn);
+    }
+    break;
+  case SP_SCORE_COL:
+    if (scores_computed[SP] == TRUE) {
+      fprintf(output_file, float_format, get_match_score(match, SP));
+    }
+    break;
+  case SP_RANK_COL:
+    if (scores_computed[SP] == TRUE) {
+      fprintf(output_file, "%d", get_match_rank(match, SP));
+    }
+    break;
+  case XCORR_SCORE_COL:
+    fprintf(output_file, float_format, get_match_score(match, XCORR));
+    break;
+  case XCORR_RANK_COL:
+    fprintf(output_file, "%d", get_match_rank(match, XCORR));
+    break;
+  case PVALUE_COL:
+    if( scores_computed[LOGP_BONF_WEIBULL_XCORR] == TRUE ){ 
+      double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
+      if (P_VALUE_NA == log_pvalue) {
+	fprintf(output_file, "NaN");
+      }
+      else {
+	fprintf(output_file, float_format, exp(-1 * log_pvalue));
+      }
+    }
+    break;
+  case WEIBULL_QVALUE_COL:
+    if( scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == TRUE ){ 
+      double weibull_qvalue = get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR);
+      fprintf(output_file, float_format, exp(-1 * weibull_qvalue));
+    }
+    break;
+#ifdef NEW_COLUMNS
+  case WEIBULL_PEPTIDE_QVALUE_COL:
+    break;
+#endif
+  case DECOY_XCORR_QVALUE_COL:
+    if( scores_computed[DECOY_XCORR_QVALUE]  && match->null_peptide == FALSE ){
+      fprintf(output_file, float_format, 
+	      get_match_score(match, DECOY_XCORR_QVALUE));
+    }
+    break;
+#ifdef NEW_COLUMNS
+  case DECOY_XCORR_PEPTIDE_QVALUE_COL:
+    break;
+#endif
+  case PERCOLATOR_SCORE_COL:
+    if (scores_computed[PERCOLATOR_SCORE] == TRUE)  {
+      fprintf(output_file, float_format, 
+	      get_match_score(match, PERCOLATOR_SCORE));
+    }
+    break;
+  case PERCOLATOR_RANK_COL:
+    if (scores_computed[PERCOLATOR_SCORE] == TRUE)  {
+      fprintf(output_file, "%d", get_match_rank(match, PERCOLATOR_SCORE));
+    }
+    break;
+  case PERCOLATOR_QVALUE_COL:
+    if (scores_computed[PERCOLATOR_SCORE] == TRUE)  {
+      fprintf(output_file, float_format,
+	      get_match_score(match, PERCOLATOR_QVALUE));
+    }
+    break;
+#ifdef NEW_COLUMNS
+  case PERCOLATOR_PEPTIDE_QVALUE_COL:
+    break;
+#endif
+  case QRANKER_SCORE_COL:
+    if (scores_computed[QRANKER_SCORE] == TRUE) {
+      fprintf(output_file, float_format, get_match_score(match, QRANKER_SCORE));
+    }
+    break;
+  case QRANKER_QVALUE_COL:
+    if (scores_computed[QRANKER_SCORE] == TRUE) {
+      fprintf(output_file, float_format, 
+	      get_match_score(match, QRANKER_QVALUE));
+    }
+    break;
+#ifdef NEW_COLUMNS
+  case QRANKER_PEPTIDE_QVALUE_COL:
+    break;
+#endif
+  case BY_IONS_MATCHED_COL:
+    if (scores_computed[SP] != 0){
+      fprintf(output_file, "%d", b_y_matched);
+    }
+    break;
+  case BY_IONS_TOTAL_COL:
+    fprintf(output_file, "%d", b_y_total);
+    break;
+  case MATCHES_SPECTRUM_COL:
+    fprintf(output_file, "%d", num_matches);
+    break;
+  case SEQUENCE_COL:
+    {
+      // this should get the sequence from the match, not the peptide
+      char* sequence = get_match_mod_sequence_str_with_masses(match, 
+                           get_boolean_parameter("display-summed-mod-masses"));
+      if( sequence != NULL ){ // for post-search, no shuffled sequences
+	fprintf(output_file, "%s", sequence);
+      }
+      free(sequence);
+    }
+    break;
+  case CLEAVAGE_TYPE_COL:
+    {
+      ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+      char* enzyme_string = enzyme_type_to_string(enzyme);
+      DIGEST_T digestion = get_digest_type_parameter("digestion");
+      char* digestion_string = digest_type_to_string(digestion);
+      fprintf(output_file, "%s-%s", enzyme_string, digestion_string);
+      free(enzyme_string);
+      free(digestion_string);
+    }
+    break;
+  case PROTEIN_ID_COL:
+    {
+      PEPTIDE_T* peptide = get_match_peptide(match);
+      string protein_ids_string = get_protein_ids_peptide_locations(peptide);
+      fprintf(output_file, "%s", protein_ids_string.c_str());
+    }
+    break;
+  case FLANKING_AA_COL:
+    {
+      PEPTIDE_T* peptide = get_match_peptide(match);
+      char* flanking_aas = get_flanking_aas(peptide);
+      fprintf(output_file, "%s", flanking_aas);
+      free(flanking_aas);
+    }
+    break;
+  case UNSHUFFLED_SEQUENCE_COL:
+    if(match->null_peptide == TRUE){
+      char* seq = get_peptide_unshuffled_sequence(match->peptide);
+      fprintf(output_file, "%s", seq);
+      free(seq);
+    }
+    break;
+  case ETA_COL:
+    if (scores_computed[LOGP_BONF_WEIBULL_XCORR]) {
+      fprintf(output_file, "%g", get_calibration_eta(collection));
+    }
+    break;
+  case BETA_COL:
+    if (scores_computed[LOGP_BONF_WEIBULL_XCORR]) {
+      fprintf(output_file, "%g", get_calibration_beta(collection));
+    }
+    break;
+  case SHIFT_COL:
+    if (scores_computed[LOGP_BONF_WEIBULL_XCORR]) {
+      fprintf(output_file, "%g", get_calibration_shift(collection));
+    }
+    break;
+  case CORR_COL:
+    if (scores_computed[LOGP_BONF_WEIBULL_XCORR]) {
+      fprintf(output_file, "%g", get_calibration_corr(collection));
+    }
+    break;
+  case NUMBER_MATCH_COLUMNS:
+  case INVALID_COL:
+    carp(CARP_FATAL, "Error in printing code (match.cpp).");
+    break;
+  }
+}
+
 /**
  * \brief Print the match information in tab delimited format to the given file
  *
@@ -576,7 +794,7 @@ void print_match_sqt(
 void print_match_tab(
   MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
   MATCH_T* match,                  ///< the match to print -in  
-  FILE*    file,                   ///< output stream -out
+  FILE*    output_file,            ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
   FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
@@ -585,23 +803,14 @@ void print_match_tab(
   const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
   ){
 
-  if( file == NULL ){ // usually b/c no decoy file to print to
+  // Usually because no decoy file to print to.
+  if( output_file == NULL ){ 
     return;
   }
 
   if( match == NULL  ){
-    carp(CARP_ERROR, 
-         "Cannot print NULL match to tab delimited file.");
+    carp(CARP_ERROR, "Cannot print NULL match to tab delimited file.");
     return;
-  }
-
-  PEPTIDE_T* peptide = get_match_peptide(match);
-  double peptide_mass = get_peptide_peptide_mass(peptide);
-  // this should get the sequence from the match, not the peptide
-  char* sequence = get_match_mod_sequence_str_with_masses(match, 
-                          get_boolean_parameter("display-summed-mod-masses"));
-  if( sequence == NULL ){
-    sequence = my_copy_string("");  // for post-search, no shuffled sequences
   }
 
   // TODO (BF 27-Apr-10) This should no longer be a problem since we
@@ -621,138 +830,40 @@ void print_match_tab(
     }else{
       factor = 1;
     }
+    PEPTIDE_T* peptide = get_match_peptide(match);
     b_y_total = (get_peptide_length(peptide)-1) * 2 * factor;
-    b_y_matched = (int)((get_match_b_y_ion_fraction_matched(match)) * b_y_total);
+    b_y_matched = (int)((get_match_b_y_ion_fraction_matched(match)) 
+			* b_y_total);
   }
 
-  FLOAT_T delta_cn = get_match_delta_cn(match);
-  if( delta_cn == 0 ){// I hate -0, this prevents it
-    delta_cn = 0.0;
-  }
-  BOOLEAN_T sp_scored = scores_computed[SP];
-  double sp_score = get_match_score(match, SP);
-  int  sp_rank = get_match_rank(match, SP);
-  double xcorr_score = get_match_score(match, XCORR);
-  int xcorr_rank = get_match_rank(match, XCORR);
-  double log_pvalue = get_match_score(match, LOGP_BONF_WEIBULL_XCORR);
-  double weibull_qvalue = get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR);
-  double decoy_x_qvalue = get_match_score(match, DECOY_XCORR_QVALUE);
-  double percolator_score = get_match_score(match, PERCOLATOR_SCORE);
-  double percolator_rank = get_match_rank(match, PERCOLATOR_SCORE);
-  double percolator_qvalue = get_match_score(match, Q_VALUE);
-  double qranker_score = get_match_score(match, QRANKER_SCORE);
-  double qranker_qvalue = get_match_score(match, QRANKER_Q_VALUE);
-  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
-  DIGEST_T digestion = get_digest_type_parameter("digestion");
-  char* enz_str = enzyme_type_to_string(enzyme);
-  char* dig_str = digest_type_to_string(digestion);
-  string protein_ids_string = get_protein_ids_peptide_locations(peptide);
-  char *flanking_aas = get_flanking_aas(peptide);
 
   // Decide on formatting.
   int precision = get_int_parameter("precision");
   char float_format[16];
-  sprintf(float_format, "%%.%ig\t", precision);
+  sprintf(float_format, "%%.%ig", precision);
 
   // Print tab delimited fields
-  fprintf(file, "%d\t", scan_num);
-  fprintf(file, "%d\t", charge);
-  fprintf(file, "%.4f\t", spectrum_precursor_mz);
-  fprintf(file, "%.4f\t", spectrum_mass);
-  fprintf(file, "%.6f\t", peptide_mass);
-  fprintf(file, float_format, delta_cn);
-  if (sp_scored == FALSE){
-    fprintf(file, "\t\t"); //score and rank
-  }else{
-    fprintf(file, float_format, sp_score);
-    fprintf(file, "%d\t", sp_rank);
-  }
-  fprintf(file, float_format, xcorr_score);
-  fprintf(file, "%d\t", xcorr_rank);
-
-  // Print p-value, if available.
-  if( scores_computed[LOGP_BONF_WEIBULL_XCORR] == TRUE ){ 
-    if (P_VALUE_NA == log_pvalue) {
-      fprintf(file, "NaN\t");
-    }
-    else {
-      fprintf(file, float_format, exp(-1 * log_pvalue));
+  int column_idx;
+  for (column_idx = 0; column_idx < NUMBER_MATCH_COLUMNS; column_idx++) {
+    print_one_match_field(column_idx, 
+			  float_format,
+			  collection,
+			  match,
+			  output_file,
+			  scan_num,
+			  spectrum_precursor_mz,
+			  spectrum_mass,
+			  num_matches,
+			  charge,
+			  scores_computed,
+			  b_y_total,
+			  b_y_matched);
+    if (column_idx < NUMBER_MATCH_COLUMNS - 1) {
+      fprintf(output_file, "\t");
+    } else {
+      fprintf(output_file, "\n");
     }
   }
-  else {
-    fprintf(file, "\t");
-  }
-
-  // Print Weibull estimated q-value, if available.
-  if( scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == TRUE ){ 
-    fprintf(file, float_format, exp(-1 * weibull_qvalue));
-  }
-  else {
-    fprintf(file, "\t");
-  }
-
-  // Print decoy estimated q-value (xcorr), if available.
-  if( scores_computed[DECOY_XCORR_QVALUE]  && match->null_peptide == FALSE ){
-    fprintf(file, float_format, decoy_x_qvalue);
-  }
-  else {
-    fprintf(file, "\t");
-  }
-
-  // Print Percolator score, rank and p-value, if available.
-  if (scores_computed[PERCOLATOR_SCORE] == TRUE)  {
-    fprintf(file, float_format, percolator_score);
-    fprintf(file, float_format, percolator_rank);
-    fprintf(file, float_format, percolator_qvalue);
-  }
-  else {
-    fprintf(file, "\t\t\t");
-  }
-
-  // Print q-ranker score and q-value, if available.
-  if (scores_computed[QRANKER_SCORE] == TRUE) {
-    fprintf(file, float_format, qranker_score);
-    fprintf(file, float_format, qranker_qvalue);
-  }
-  else {
-    fprintf(file, "\t\t");
-  }
-
-  if (sp_scored == 0){
-    fprintf(file, "\t");
-  }else{
-    fprintf(file, "%d\t", b_y_matched);
-  }
-  fprintf(file, "%d\t", b_y_total);
-  fprintf(file, "%d\t", num_matches); // Matches per spectrum
-  fprintf(file, "%s\t", sequence);
-  fprintf(file, "%s-%s\t", enz_str, dig_str);
-  fprintf(file, "%s\t%s", protein_ids_string.c_str(), flanking_aas);
-
-  if(match->null_peptide == TRUE){
-    char* seq = get_peptide_unshuffled_sequence(match->peptide);
-    fprintf(file, "\t%s", seq);
-    free(seq);
-  }else{
-    fprintf(file, "\t");
-  }
-
-  // Print the Weibull parameters, if available.
-  if (scores_computed[LOGP_BONF_WEIBULL_XCORR]) {
-    print_calibration_parameters(collection, file);
-  } else {
-    fprintf(file, "\t\t\t\t");
-  }
-
-  // End record
-  fputc('\n', file);
-  
-  free(flanking_aas);
-  free(sequence);
-  free(enz_str);
-  free(dig_str);
-  
-  return;
 }
 
 /**
@@ -989,7 +1100,7 @@ MATCH_T* parse_match_tab_delimited(
   */
   match -> match_scores[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat(PVALUE_COL));
   
-  match -> match_scores[Q_VALUE] = result_file.getFloat(PERCOLATOR_QVALUE_COL);
+  match -> match_scores[PERCOLATOR_QVALUE] = result_file.getFloat(PERCOLATOR_QVALUE_COL);
 
   match -> match_scores[PERCOLATOR_SCORE] = result_file.getFloat(PERCOLATOR_SCORE_COL);
   match -> match_rank[PERCOLATOR_SCORE] = result_file.getInteger(PERCOLATOR_RANK_COL);
@@ -997,7 +1108,7 @@ MATCH_T* parse_match_tab_delimited(
   match -> match_scores[LOGP_QVALUE_WEIBULL_XCORR] = result_file.getFloat(WEIBULL_QVALUE_COL);
   
   match -> match_scores[QRANKER_SCORE] = result_file.getFloat(QRANKER_SCORE_COL);
-  match -> match_scores[QRANKER_Q_VALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
+  match -> match_scores[QRANKER_QVALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
 
    // parse spectrum
   if((spectrum = parse_spectrum_tab_delimited(result_file))== NULL){
@@ -1234,7 +1345,7 @@ int get_match_rank(
  */
 void set_match_rank(
   MATCH_T* match, ///< the match to work -in  
-  SCORER_TYPE_T match_mode, ///< the working mode (SP, XCORR) -in
+  SCORER_TYPE_T match_mode, ///< the working mode -in
   int match_rank ///< the rank of the match -in
   )
 {
