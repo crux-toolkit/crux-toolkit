@@ -1,0 +1,333 @@
+<html>
+<body>
+
+<h3>How to use branches in SVN</h3>
+
+<p>
+This guide is meant to be a cheat sheet for working with branches in
+SVN in the crux project.  For a more detailed discussion, please see
+this <a href="http://svnbook.red-bean.com/en/1.1/ch04.html">tutorial
+</a>.  </p>
+
+<p>
+We will create a new branch of crux named "side-project", move its
+changes into the trunk, and finally merge changes in the trunk into
+"side-project".  We will use <code>$SVNROOT</code> to mean the root of
+the SVN repository.  On the <code>gs</code> network, it will
+be <code>file:///noble/svn/crux</code> and on remote
+machines <code>svn+ssh://&lt;hostname&gt;/noble/svn/crux</code>.  All  
+the work will happen in <code>~/sandbox</code> and the current
+working directory will precede the cursor in the example commands as
+in <br><code>~/sandbox$ svn co $SVNROOT/trunk crux</code>
+
+
+<h4>Creating a branch</h4>
+<p>
+A branch is just a copy of the trunk.  By convention, we keep branches
+in the <code>$SVNROOT/branches</code> directory of the repository.
+You can create a branch without having a working copy.  After copying,
+check out your new branch.  For this example, we'll check out into a
+directory named <code>crux-side-project</code>.</p>
+<pre>
+~$ svn cp $SVNROOT/trunk $SVNROOT/branches/side-project -m "Create a new branch for a side project."
+~$ cd sandbox
+~/sandbox$ svn co $SVNROOT/branches/side-project crux-side-project
+~/sandbox$ cd crux-side-project
+</pre>
+
+<p>
+Your branch and the trunk are now identical.  Now you can work in your
+branch as you would in the trunk, making changes and checking them in
+at regular intervals.  Even though it is not required for checking in
+changes to your branch, have your code checked frequently so that your
+reviewer doesn't have to tackle huge differences.</p>  
+
+<h4>Merging</h4>
+<p>
+Merging in either direction (trunk to branch or branch to trunk)
+involves these basic steps: 
+<ol>
+<li>Get a clean working copy of the files into which you will merge changes.
+<li>Find the point of divergence.
+<li>Have SVN merge changes into a working copy.
+<li>Edit any changes SVN could not merge automatically.
+<li>Test your working copy.
+<li>Commit the changes with an appropriate log message.
+</ol>
+
+<h4>Merge a branch into the trunk</h4>
+<p>
+When you are ready for "side-project" to be part of the release
+version of crux, you will want to merge those changes into the trunk.
+
+<ol>
+<li>
+Get a clean copy of the trunk.  It is MUCH easier to undo mistakes if
+there are no changes in your local copy.  Either check out
+a clean copy or do <code>svn update -u</code> on an existing check
+out to make sure all new files have been added and all existing files
+are up to date.
+<pre>
+~/sandbox$ svn co $SVNROOT/trunk crux-trunk
+~/sandbox$ cd crux-trunk
+~/sandbox/crux-trunk$ svn status -u
+Status against revision:   3522
+</pre>
+<li>
+Check the svn log to find the revision where the branch was created.
+Using <code>--stop-on-copy</code> ends the log where the branch began.
+<pre>
+~/sandbox$ svn log --stop-on-copy $SVNROOT/branches/side-project
+...
+------------------------------------------------------------------------
+r3389 | frewen | 2010-06-10 01:44:54 -0700 (Thu, 10 Jun 2010) | 1 line
+
+Create a new branch for a side project.
+------------------------------------------------------------------------
+</pre>
+In this case we will merge the changes starting with r3389.  If you
+have already synced this branch with the trunk, look for the most
+recent entry describing the merge.  For example
+<pre>
+------------------------------------------------------------------------
+r3437 | frewen | 2010-06-29 10:09:20 -0700 (Tue, 29 Jun 2010) | 8 lines
+
+Merged trunk changes into the side-project branch.  Merge command was
+
+svn merge -r3389:HEAD <svnroot>/crux/trunk
+
+where HEAD was 3436.  Smoke and unit tests all pass.  This version
+of the branch will now be merged into the trunk.
+------------------------------------------------------------------------
+</pre>
+In this case, begin the merge with r3437.  For the rest of the
+example, we'll use r3389.</p>
+
+<li>
+Merge the branches.  This command only changes your working copy;
+there will be time to fix things before committing to the repository.
+Use the <code>--dry-run</code> option first to see what changes will take place.
+<pre>
+~/sandbox/crux-trunk$ svn merge --dry-run -r3389:HEAD $SVNROOT/trunk
+~/sandbox/crux-side-project$ svn merge -r3389:HEAD $SVNROOT/trunk
+</pre>                             
+
+<li>
+Resolve any conflicts.  See below for more details.
+
+<li>
+Build and test your newly merged working copy.  This step is
+essential.  You don't want to check in a broken version of crux.
+
+<li>
+Check in your changes with a detailed note describing the merge.  
+<pre>
+~/sandbox/crux-side-project$ svn commit -m 
+  'Merged side-project branch into trunk -r3389:HEAD where head was 3522.  Adds a new utility, crux-do-stuff.'
+</pre>
+
+<li>
+If you are done with your branch, you can delete it.  Remember that
+deleted branches can be resurrected just like any other file or
+directory in SVN.  If you want to continue working in the branch,
+bring it up to date with the trunk as described in the  next section.
+
+</ol>
+
+<h4>Merge the trunk into branch</h4>
+<p>
+Moving changes from the trunk into the branch is much the same as
+merging in the other direction.  In this case your local working copy will
+be checked out from the branch.  The changes to merge will start at
+the same revision (in the example r3389). The HEAD revision (r3523) of the
+trunk now contains all of the changes in the branch since r3389. We
+don't want to apply those changes to the branch again, so we merge from
+r3521, one version before the branch-to-trunk merge. After merging in
+both directions, you can check that the trunk and the branch are, once
+again, identical.  
+</p>
+<pre>
+~$ cd ~/sandbox
+~/sandbox$ svn co $SVNROOT/branches/side-project crux-side-project
+~/sandbox/crux-side-project$ cd crux-side-project
+~/sandbox/crux-side-project$ svn merge -r3389:3521 --dry-run $SVNROOT/trunk
+~/sandbox/crux-side-project$ svn merge -r3389:3521 $SVNROOT/trunk
+~/sandbox/crux-side-project$ ./bootstrap
+~/sandbox/crux-side-project$ ./configure
+~/sandbox/crux-side-project$ make
+~/sandbox/crux-side-project$ cd src/c/test
+~/sandbox/crux-side-project/src/c/test$ make
+~/sandbox/crux-side-project/src/c/test$ cd ~/sandbox/crux-trunk
+~/sandbox/crux-side-project$ svn commit -m 'Merged the trunk into the side-project branch, -r3389:3521.  Branch and trunk are now identical'
+</pre>
+
+
+<h4>Resolving conflicts</h4>
+
+<p>
+Often SVN cannot decide how to combine the changes from two versions
+of crux, resulting in a conflict.  The output from the following merge
+commands shows two different kinds of conflicts.
+<pre>
+~/sandbox/crux-side-project$ svn merge --dry-run -r3437:HEAD $SVNROOT/trunk 
+
+--- Merging r3438 through r3534 into '.':
+C    src/c/match_collection.cpp
+C    src/c/q-value.cpp
+C    src/c/objects.h
+U    src/c/crux-utils.h
+U    src/c/peak.h
+   C src/c/q-ranker.h
+   C src/c/percolator.cpp
+A    src/c/test/smoke-tests/params/ppm_window
+D    src/c/woops.txt
+Summary of conflicts:
+  Text conflicts: 3
+  Tree conflicts: 2
+</pre>
+
+<p>
+Output lines beginning with 'U', 'A', or 'D' indicate all is well.
+The file will be updated, added, or deleted.  Lines with a 'C' in the
+first column indicate a text conflict: SVN can't decide on the
+contents of the merged file.  A 'C' in the third column indicates a
+tree conflict: both trunk and branch added or deleted the same file
+and you must choose which addition/deletion to accept.</p>
+
+<h5>Interactive conflict resolution</h5>
+<p>
+When you do the real merge, you are presented with a prompt for each
+text conflict. 
+<pre>
+~/sandbox/crux-side-project$ svn merge -r3437:HEAD $SVNROOT/trunk 
+Conflict discovered in 'src/c/q-value.cpp'.
+Select: (p) postpone, (df) diff-full, (e) edit,
+        (mc) mine-conflict, (tc) theirs-conflict,
+        (s) show all options:
+</pre>
+
+<p>
+Type 'e' to edit the file and fix the conflict.  An editor will open
+up with the file in question.  Search for '===' or '<<<' to find the conflict.
+<pre>
+<<<<<<< .working
+
+  DECOY_XCORR_QVALUE,  ///< q-value derived from empirical null (decoys)
+  DECOY_XCORR_PEPTIDE_QVALUE,
+
+=======
+  DOTP,                ///< not yet implemented
+  LOGP_EXP_SP,         ///< this spot hijacked for zscore
+  DECOY_XCORR_QVALUE,  ///< Benjamini-Hochberg q-value from xcorrs
+  LOGP_BONF_EVD_XCORR,
+  LOGP_WEIBULL_SP,
+  LOGP_BONF_WEIBULL_SP,
+>>>>>>> .merge-right.r3534
+</pre>
+
+The branch version is between "<<<<<<< .working" and "=======".  The
+trunk version is between "=======" and ">>>>>>> .merge-right.r3534".
+You can edit the file however you want, selecting either the top block
+  or the lower block or some combination of the two.  Make sure you
+  remove the "<", ">", and "=" lines.  Once you resolve this conflict,
+    keep searching the file for more.  When you are done, save the
+    file and quit the editor.  You will be greeted with this prompt.
+<pre>
+Select: (p) postpone, (df) diff-full, (e) edit, (r) resolved,
+        (mc) mine-conflict, (tc) theirs-conflict,
+        (s) show all options: 
+</pre>
+
+<p>
+Type 'r' to mark the conflict as resolved.  The merge command will
+continue.  If you find a conflict that you don't know how to fix, exit
+the browser and type 'p' at the prompt.  This leaves the file marked
+as having a conflict.  You can examine the differences in more detail
+after the merge command is finished.  
+
+<p>
+After merging, check the status.
+<pre>
+~/sandbox/crux-side-project$ svn status
+?       src/c/match_collection.cpp.working
+?       src/c/match_collection.cpp.merge-left.r3437
+?       src/c/match_collection.cpp.merge-right.r3534
+C       src/c/match_collection.cpp
+!     C src/c/q-ranker.cpp
+      >   local delete, incoming delete upon merge
+!     C src/c/q-ranker.h
+      >   local delete, incoming delete upon merge
+</pre>
+
+<h5>Conflict resolution after the merge</h5>
+<p>
+In this example, we didn't resolve the conflict
+in <code>match_collection.cpp</code> and SVN has left us several
+different versions of the file.  The file with the original name is
+the one we looked at in the editor.  It contains whatever merges svn
+could manage plus the &lt;&lt;&lt; / === / &gt;&gt;&gt; blocks with
+alternate versions. The ".working" file is what we had locally before
+the merge: the branch version at the HEAD revision.  The ".right" file
+is the trunk version at the HEAD revision.  We can compare ".working"
+and ".right" side-by-side to help decide what the final version should
+be and make the changes in "match_collection.cpp".  I like to use
+<code>xxdiff</code> because I can compare all three files and edit and
+save with the changes highlighted.  Or you could use the command
+line <code>diff</code> with the --side option to view the changes and 
+edit "match_collection.cpp" separately.  Sometimes <code>svn
+diff</code> in the branch and/or the trunk is useful for understanding
+how the file changed.
+
+<p>
+Once "match_collection.cpp" is the way you want it, mark it as
+resolved.  Note that you can compile and test the code before you
+resolve the conflict.
+<pre>
+~/sandbox/crux-side-project$ svn resolve --accept working src/c/match_collection.cpp
+~/sandbox/crux-side-project$ svn status
+!     C src/c/q-ranker.cpp
+      >   local delete, incoming delete upon merge
+!     C src/c/q-ranker.h
+      >   local delete, incoming delete upon merge
+</pre>
+
+<p>
+Now only the tree conflicts remain.  (<code>svn resolve</code> removed
+the other versions of match_collection.cpp.)  Tree conflicts most
+often happen when a file with the same name is added in a branch and
+the trunk. The history of only one of those files can be saved and SVN
+doesn't know which to choose.  Check the contents of the two files and
+the log entries for the two files and decide which you want to keep.
+Often, they are similar enough that it doesn't matter.  You can always
+put a note in the commit log explaining the conflict.  In the example
+above, both the branch and the trunk deleted the same file, so it
+really doesn't matter whose change to accept.  Use <code>svn
+resolve</code> again.  The three most common values to use for 
+<code>--accept</code> are 'working' (whatever is in the local working 
+copy), 'mine-full' (whatever was in the branch version of the
+repository), 'theirs-full' (whatever was in the trunk version of the
+repository).  Unless you have made local changes (say, to a file being
+added), 'working' and 'mine-full' are the same. 
+<pre>
+~/sandbox/crux-side-project svn resolve --accept working src/c/q-ranker.cpp
+~/sandbox/crux-side-project svn resolve --accept working src/c/q-ranker.h
+</pre>
+
+<h5>Undoing changes</h5>
+<p>
+If you bungle things and want to start over, use svn revert to restore
+the file to its pre-merge state. (Note that this works because there
+were no local changes when we started merging.) Then repeat the merge
+with the single file. 
+<pre>
+~/sandbox/crux-side-project$ svn revert src/c/match_collection.cpp
+~/sandbox/crux-side-project$ cd src/c/
+~/sandbox/crux-side-project/src/c$ svn merge -r3437:HEAD $SVNROOT/trunk/src/c/match_collection.cpp
+</pre>
+
+
+
+
+
+</body>
+</html>
