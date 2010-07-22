@@ -183,7 +183,7 @@ FLOAT_T get_mass_mod_amino_acid(
     return get_mass_mod_amino_acid_average(amino_acid);
   case MONO:
     return get_mass_mod_amino_acid_monoisotopic(amino_acid);
-  default:
+  case NUMBER_MASS_TYPES:
     carp(CARP_FATAL,"Bad mass type.");
   }
   return 0;

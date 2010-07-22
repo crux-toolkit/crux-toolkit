@@ -38,10 +38,10 @@ private or protected with get and set functions as necessary.
 Insert a space after every comma.
 
 <li>
-Insert a space around arithemtic operators.
+Insert a space around arithmetic operators.
 
 <li>
-Do not separate vairable names and the arrow operator (<code>-&gt;</code>)
+Do not separate variable names and the arrow operator (<code>-&gt;</code>)
 with a space.
 
 <li>
@@ -231,8 +231,9 @@ the legal values should be <code>NUM_&lt;name&gt;_TYPES</code>, which can be
 used to enumerate through all of the types.  The last value should be
 <code>INVALID_&lt;type&gt;</code>.  All <code>if</code> 
 and <code>case</code> statements that handle the type should handle all
-legal values.  <code>case</code> statments may use <code>default</code> for the
-last two invalid types.
+values.  <code>case</code> statements should have an explicit case
+for <code>INVALID</code> and <code>NUM_TYPES</code> rather than
+using <code>default</code>.
 
 <li>
 C class-like structs should be named in all caps as 

@@ -561,7 +561,7 @@ PEPTIDE_T** sort_peptide_array(
     break;
   case SORT_NONE:
     break;
-  default:
+  case NUMBER_SORT_TYPES:
     carp(CARP_FATAL, "Invalid sort type;");
   }
   
