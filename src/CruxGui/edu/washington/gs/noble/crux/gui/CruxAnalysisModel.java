@@ -381,8 +381,8 @@ public class CruxAnalysisModel extends Object implements Serializable{
 				     proteinSource = this.proteinSource;
 				     command = pathToCrux 
 						+ " " + subCommand 
-					        + " --overwrite T " 
-					        + " --verbosity "+ verbosity.getLevel()
+					    + " --overwrite T " 
+					    + " --verbosity "+ verbosity.getLevel()
 						+ " --parameter-file " + name + "/analysis.params " 
 						+ proteinSource 
 						+ " " + name + "/index";
@@ -391,21 +391,42 @@ public class CruxAnalysisModel extends Object implements Serializable{
 					command = pathToCrux 
 						+ " " + subCommand 
 					 	+ " --overwrite T "
-					        + " --verbosity " + verbosity.getLevel()
+					    + " --verbosity " + verbosity.getLevel()
 						+ " --output-dir " + name + "/crux-output"
-					 	+ " --parameter-file " + name + "/analysis.params " 
-					 	+ spectraSource + " " + proteinSource;
+						+ " --num-decoys-per-target " + this.getNumDecoysPerTarget()
+					 	+ " --parameter-file " + name + "/analysis.params" 
+					 	+ " " +spectraSource 
+					 	+ " " +proteinSource;
 					break;
 				case COMPUTE_Q_VALUES:
+					command = pathToCrux
+						+ " " +subCommand
+						+ " --overwrite T "
+						+ " --verbosity " + verbosity.getLevel()
+						+ " --output-dir " + name + "/crux-output"
+						+ " --parameter-file " + name + "/analysis.params "
+						+ " " +proteinSource
+						+ " " +name + "/crux-output";
+					break;
 				case PERCOLATOR:
+					command = pathToCrux
+						+ " "+subCommand
+						+ " --overwrite T "
+						+ " --verbosity " + verbosity.getLevel()
+						+ " --output-dir " + name + "/crux-output"
+						+ " --parameter-file " + name + "/analysis.params "
+						+ " " +proteinSource
+						+ " " +name+ "/crux-output";
+					break;
 				case QRANKER:
 					command = pathToCrux 
 						+ " " + subCommand 
 					 	+ " --overwrite T "
-					        + " --verbosity "+ verbosity.getLevel()
+					 	+ " --verbosity "+ verbosity.getLevel()
 						+ " --output-dir " + name + "/crux-output"
 					 	+ " --parameter-file " + name + "/analysis.params " 
-					 	+ proteinSource;
+					 	+ " " +proteinSource
+					 	+ " " +name+ "/crux-output";
 					break;
 			}
 			try {
