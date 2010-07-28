@@ -14,7 +14,7 @@ typedef enum {TWO_SETS=2,THREE_SETS,FOUR_SETS} NSet;
 typedef enum {TARGET=0,DECOY1,DECOY2,DECOY3} SetType;
 
 /** Call that initiates percolator */
-void pcInitiate(NSet sets, unsigned int numFeatures, unsigned int numSpectra, char ** featureNames, double pi0);
+void pcInitiate(NSet sets, unsigned int numFeatures, int* numSpectra, char ** featureNames, double pi0);
 
 /** Call that sets verbosity level
  *  0 is quiet, 2 is default, 5 is more than you want */

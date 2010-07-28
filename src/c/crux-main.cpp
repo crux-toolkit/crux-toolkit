@@ -126,7 +126,7 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
           (NSet)get_match_collection_iterator_number_collections(
                   match_collection_iterator), 
           NUM_FEATURES, 
-          get_match_collection_match_total(match_collection), 
+          num_spectra, 
           feature_names, 
           pi0);
 	break;
