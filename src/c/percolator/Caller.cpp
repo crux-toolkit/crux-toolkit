@@ -321,14 +321,14 @@ void Caller::printWeights(ostream & weightStream, double * w) {
 }
 
 
-void Caller::filelessSetup(const unsigned int sets, const unsigned int numFeatures, const unsigned int numSpectra, char ** featureNames, double pi0) {
+void Caller::filelessSetup(const unsigned int sets, const unsigned int numFeatures, const int* numSpectra, char ** featureNames, double pi0) {
   pCheck = new SanityCheck();
-  normal.filelessSetup(numFeatures, numSpectra,1);
-  shuffled.filelessSetup(numFeatures, numSpectra,-1);
+  normal.filelessSetup(numFeatures, numSpectra[0],1);
+  shuffled.filelessSetup(numFeatures, numSpectra[1],-1);
   if (sets>2)
-    shuffledTest.filelessSetup(numFeatures, numSpectra,-1);
+    shuffledTest.filelessSetup(numFeatures, numSpectra[2],-1);
   if (sets>3)
-    shuffledThreshold.filelessSetup(numFeatures, numSpectra,-1);
+    shuffledThreshold.filelessSetup(numFeatures, numSpectra[3],-1);
   Scores::pi0 = pi0;
   ostringstream os;
   for (unsigned int ix=0;ix<numFeatures;ix++){

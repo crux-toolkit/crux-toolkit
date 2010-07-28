@@ -32,7 +32,7 @@ Caller * getCaller() {
 
 
 /** Call that initiates percolator */
-void pcInitiate(NSet sets, unsigned int numFeat, unsigned int numSpectra, char ** featureNames, double pi0) {
+void pcInitiate(NSet sets, unsigned int numFeat, int* numSpectra, char ** featureNames, double pi0) {
     pCaller=new Caller();
     nset=sets;
     numFeatures = numFeat;

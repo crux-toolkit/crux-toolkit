@@ -31,7 +31,7 @@ public:
     void printWeights(ostream & weightStream, double * weights);
     void readWeights(istream & weightStream, double * weights);
     void readFiles(bool &doSingleFile, bool &separateShuffledTestSetHandler, bool &separateShuffledThresholdSetHandler);
-    void filelessSetup(const unsigned int sets, const unsigned int numFeatures, const unsigned int numSpectra, char ** fetureNames, double pi0);
+    void filelessSetup(const unsigned int sets, const unsigned int numFeatures, const int* numSpectra, char ** fetureNames, double pi0);
     void fillFeatureSets(bool &separateShuffledTestSetHandler, bool &separateShuffledThresholdSetHandler);    
     int preIterationSetup(double * w);
     Scores* getTestSet() {return &testset;}    
