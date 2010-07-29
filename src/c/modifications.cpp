@@ -91,6 +91,8 @@ struct _aa_mod{
   MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
   int max_distance;        ///< the max distance from the protein terminus
   char symbol;         ///< the character to represent the mod in sqt files
+  BOOLEAN_T prevents_cleavage; ///< can modification prevent cleavage?
+  BOOLEAN_T prevents_xlink; ///< can modification prevent xlink?
   MODIFIED_AA_T identifier; ///< the bitmask assigned for unique ID
 };
 
@@ -114,7 +116,8 @@ AA_MOD_T* new_aa_mod(int mod_idx){
   mod->max_distance = MAX_PROTEIN_SEQ_LENGTH;
   mod->symbol = mod_sqt_symbols[mod_idx];
   mod->identifier = mod_id_masks[mod_idx];
-  
+  mod->prevents_cleavage = FALSE;
+  mod->prevents_xlink = FALSE;
   // allocate the aa lists for mods 
   /*
   mod->aa_list =                        // all 0's?
@@ -827,6 +830,38 @@ void aa_mod_set_position(AA_MOD_T* mod, MOD_POSITION_T position){
  */
 MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod){
   return mod->position;
+}
+
+/**
+ * \brief Sets whether the modification can prevent cleavage.
+ * \returns void
+ */
+void aa_mod_set_prevents_cleavage(AA_MOD_T* mod, BOOLEAN_T prevents_cleavage) {
+  mod->prevents_cleavage=prevents_cleavage;
+}
+
+/**
+ * \brief gets whether the modification can prevent cleavage
+ * \returns TRUE or FALSE
+ */
+BOOLEAN_T aa_mod_get_prevents_cleavage(AA_MOD_T* mod) {
+  return mod->prevents_cleavage;
+}
+
+/**
+ * \brief Sets whether the modifications can prevent cross-linking.
+ * \returns void
+ */
+void aa_mod_set_prevents_xlink(AA_MOD_T* mod, BOOLEAN_T prevents_xlink) {
+  mod->prevents_xlink = prevents_xlink;
+}
+
+/**
+ * \brief gets whether the modification can prevent cross-linking.
+ * \returns TRUE or FALSE
+ */
+BOOLEAN_T aa_mod_get_prevents_xlink(AA_MOD_T* mod) {
+  return mod->prevents_xlink;
 }
 
 /**

@@ -325,6 +325,30 @@ void aa_mod_set_position(AA_MOD_T* mod, MOD_POSITION_T position);
 MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod);
 
 /**
+ * \brief Sets whether the modification can prevent cleavage.
+ * \returns void
+ */
+void aa_mod_set_prevents_cleavage(AA_MOD_T* mod, BOOLEAN_T prevents_cleavage);
+
+/**
+ * \brief gets whether the modification can prevent cleavage
+ * \returns TRUE or FALSE
+ */
+BOOLEAN_T aa_mod_get_prevents_cleavage(AA_MOD_T* mod);
+
+/**
+ * \brief Sets whether the modifications can prevent cross-linking.
+ * \returns void
+ */
+void aa_mod_set_prevents_xlink(AA_MOD_T* mod, BOOLEAN_T prevents_xlink);
+
+/**
+ * \brief gets whether the modification can prevent cross-linking.
+ * \returns TRUE or FALSE
+ */
+BOOLEAN_T aa_mod_get_prevents_xlink(AA_MOD_T* mod);
+
+/**
  * \brief The character used to uniquely identify the mod in the sqt file.
  * \returns The character identifier.
  */

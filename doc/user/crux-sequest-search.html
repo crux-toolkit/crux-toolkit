@@ -230,13 +230,17 @@ The number of PSMs to score with XCorr after ranking PSMs by Sp.
 Default = 500.
 
 <li>
-<code>mod &lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;
+
+<code>mod &lt;mass&nbsp;change&gt;:&lt;aa&nbsp;list&gt;:&lt;max&nbsp;per&nbsp;peptide&gt;:&lt;prevents&nbsp;cleavage&gt;:&lt;prevents&nbsp;cross-link&gt;
 </code> &ndash; 
 Consider modifications on any amino acid in aa list with at most
 max-per-peptide in one peptide.  This parameter may be included
 with different values multiple times so long as the total number of
 <code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
-does not exceed 11.  The same modifications must be given for any
+does not exceed 11.  The <code>prevents&nbsp;cleavage</code> and 
+<code>prevents&nbsp;cross-link</code> are T/F optional arguments for 
+describing whether the modification prevent enzymatic cleavage or 
+cross-linking respectively. The same modifications must be given for any
 post-search process (<code>crux compute-q-values</code>, <code>crux
 q-ranker</code>, <code>crux percolator</code>). Default = no
 variable modifications.

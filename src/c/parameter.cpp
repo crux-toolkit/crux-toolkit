@@ -9,6 +9,7 @@
 #include "crux-utils.h"
 #include "parameter.h"
 
+
 //TODO:  in all set, change result=add_... to result= result && add_...
 
 /**
@@ -581,7 +582,9 @@ void initialize_parameters(void){
                           "true");
   set_string_parameter("mod", "NO MODS",
       "Specify a variable modification to apply to peptides.  " 
-      "<mass change>:<aa list>:<max per peptide>. Default=no mods.",
+      "<mass change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents cross-link>."
+      "  Sub-parameters prevents cleavage and prevents cross-link are optional (T|F)."
+      "Default=no mods.",
       "Available from parameter file for crux-generate-peptides and "
       "crux-search-for-matches and the "
       "the same must be used for crux compute-q-value.", "true");
@@ -2589,7 +2592,7 @@ char* set_aa_list(AA_MOD_T* mod, char* line, char separator){
  * Fails if line does not point to a valid integer.
  * \returns void
  */
-void read_max_per_peptide(AA_MOD_T* mod, char* line){
+char* read_max_per_peptide(AA_MOD_T* mod, char* line, char separator){
   //carp(CARP_DETAILED_DEBUG, "token points to %s", line);
   if( *line == '\0' ){
     carp(CARP_FATAL, "Missing maximum mods per peptide for mod %s", line);
@@ -2602,7 +2605,77 @@ void read_max_per_peptide(AA_MOD_T* mod, char* line){
     carp(CARP_FATAL, "Maximum mods per peptide is invalid for mod %s", line);
   }
 
+  char* next = line;
+  while(*next != '\0' && *next != separator){
+    next++;
+  }
+  if (*next != '\0') {
+    next++;  // point past the separator
+  }
+  return next;
 }
+
+char* read_prevents_cleavage(AA_MOD_T* mod, char* line, char separator) {
+  char* next = line;
+  switch(*line) {
+    case ':':
+      next++;
+    case '\0':
+      carp(CARP_DEBUG, "No prevents_cleavage property found %s",line);
+      break;
+    case 'T':
+    case 't':
+      carp(CARP_DEBUG, "prevents_cleavage set to true %s",line);
+      aa_mod_set_prevents_cleavage(mod, TRUE);
+      break;
+    case 'F':
+    case 'f':
+      carp(CARP_DEBUG, "prevents_cleavage set to false %s", line);
+      aa_mod_set_prevents_cleavage(mod, FALSE);
+      break;
+  }
+
+  while (*next != '\0' && *next != separator) {
+    next++;
+  }
+  if (*next != '\0') {
+    next++; //points past the separator
+  }
+
+  return next;
+}
+
+char* read_prevents_xlink(AA_MOD_T* mod, char* line, char separator) {
+  char* next = line;
+  switch(*line) {
+    case ':':
+      next++;
+    case '\0':
+      carp(CARP_DEBUG, "No prevents_xlink property found %s",line);
+      break;
+    case 'T':
+    case 't':
+      carp(CARP_DEBUG, "prevents_xlink set to true %s",line);
+      aa_mod_set_prevents_xlink(mod, TRUE);
+      break;
+    case 'F':
+    case 'f':
+      carp(CARP_DEBUG, "prevents_xlink set to false %s",line);
+      aa_mod_set_prevents_xlink(mod, FALSE);
+      break;
+  }
+
+  while (*next != '\0' && *next != separator) {
+    next++;
+  }
+  if (*next != '\0') {
+    next++; //points past the separator
+  }
+
+  return next;
+}
+
+
 
 /**
  * \brief Set the max_distance field in the mod with the value
@@ -2678,7 +2751,15 @@ int read_mods(
       token = set_aa_list(cur_mod, token, ':');
 
       // get max per peptide
-      read_max_per_peptide(cur_mod, token);
+      token = read_max_per_peptide(cur_mod, token, ':');
+
+      // read whether this modification prevents cleavage (OPTIONAL)
+      token = read_prevents_cleavage(cur_mod, token, ':');
+
+      // read whether this modification prevents xlink (OPTIONAL)
+      token = read_prevents_xlink(cur_mod, token, ':');
+
+
     }// fill in values for c- or n-mod
     else{
       // get the max distance
