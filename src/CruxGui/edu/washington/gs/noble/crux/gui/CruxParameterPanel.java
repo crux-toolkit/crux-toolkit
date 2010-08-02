@@ -101,7 +101,8 @@ class CruxParameterPanel extends JPanel implements ItemListener {
 			panel.add(Box.createRigidArea(new Dimension(0, 20)));
 		}
 	}
-    private void updateFromModel() {
+    
+    public void updateFromModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		runToolCheckBox.setSelected(model.getRunComponent(component));
 		showAdvancedParameters.setSelected(model.getShowAdvancedParameters(component));
@@ -112,9 +113,9 @@ class CruxParameterPanel extends JPanel implements ItemListener {
 	
 	public void itemStateChanged(final ItemEvent event) {
 		logger.info("User selected index component.");
-		//updateFromModel();
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
 		saveState(model);
+		updateFromModel();
 		showAdvancedParameters();
 		if (((CruxComponentButton) event.getSource()).isSelected() == true) {
 			setVisible(true);
