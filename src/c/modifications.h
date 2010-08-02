@@ -98,13 +98,14 @@ char* modified_aa_to_string_with_symbols(MODIFIED_AA_T aa);
  * i.e. a letter either alone or followed by square braces containing
  * the mass(es) of any modifications.  If merge_masses is false, all
  * masses are listed in a comma-separated list.  If true, they are
- * summed and returned in one number.  Fixed precision of 2.
+ * summed and returned in one number.  
  * 
  * \returns A newly allocated char* with amino acid and modifciation
  * masses in square brackets.
  */
 char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa, 
-                                        BOOLEAN_T merge_masses);
+                                        BOOLEAN_T merge_masses,
+                                        int precision);
 /**
  * \brief Take an array of MODIFIED_AA_T's and return an array of
  * char's that includes the letter of each aa and the mass change of

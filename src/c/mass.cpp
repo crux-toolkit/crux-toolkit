@@ -236,8 +236,9 @@ MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift){
     initialize_amino_masses();
   }
 
+  int precision = get_int_parameter("mod-precision");
   for(int mod_idx = 0; mod_idx < (int)NUM_MOD_MASSES; mod_idx++){
-    if( is_equal(mass_shift, aa_mod_masses[mod_idx], MOD_MASS_PRECISION) ){
+    if( is_equal(mass_shift, aa_mod_masses[mod_idx], precision) ){
       MODIFIED_AA_T identifier = mod_idx;
       identifier = identifier << 5;
       return identifier;
@@ -245,8 +246,8 @@ MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift){
   }
 
   // if we got to here, no mod found
-  carp(CARP_WARNING, "No modification identifier was found for mass shift %f.",
-       mass_shift);
+  carp(CARP_WARNING, "No modification identifier found for mass shift %.*f.",
+       precision, mass_shift);
 
   return 0;
 }

@@ -1,11 +1,11 @@
-INFO: CPU: n001.grid.gs.washington.edu
-INFO: Wed Jul 28 16:46:29 PDT 2010
+INFO: CPU: ranunculus
+INFO: Mon Aug  2 14:56:28 PDT 2010
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96, charge 2, search number 100
-INFO: Elapsed time: 2.21 s
+INFO: Elapsed time: 1.61 s
 INFO: Finished crux sequest-search
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
@@ -58,13 +58,6 @@ isotopic-mass=average
 # Include self-loop peptides in the database.  Default=T.
 # Available for crux search-for-xlinks program.
 xlink-include-selfloops=TRUE
-
-# Specify a variable modification to apply to N-terminus of peptides. 
-# <mass change>:<max distance from protein n-term (-1 for no max)>
-# Available from parameter file for crux-generate-peptides and
-# crux-search-for-matches and the the same must be used for crux
-# compute-q-value.
-nmod=NO MODS
 
 # Window type to use for selecting candidate peptides. 
 # <string>=mass|mz|ppm. Default=mass.
@@ -392,23 +385,13 @@ max-ion-charge=peptide
 # crux-search-for-matches.
 max-mass=7200.000000
 
-# Specify a variable modification to apply to peptides.  <mass
-# change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents
-# cross-link>.  Sub-parameters prevents cleavage and prevents cross-link
-# are optional (T|F).Default=no mods.
-# Available from parameter file for crux-generate-peptides and
-# crux-search-for-matches and the the same must be used for crux
-# compute-q-value.
-mod=NO MODS
-
 # The minimum mass of peptides to consider. Default=200.
 # Available from command line or parameter file for crux-create-index
 # and crux-generate-peptides. Parameter file only for
 # crux-search-for-matches.
 min-mass=200.000000
 
-# Set the precision for masses and scores written to sqt and text files.
-# Default=8.
+# Set the precision for scores written to sqt and text files. Default=8.
 # Available from parameter file for crux search-for-matches, percolator,
 # and compute-q-values.
 precision=8
@@ -458,14 +441,6 @@ h2o=0
 # Currently only implemented for XCORR.
 compute-p-values=FALSE
 
-# Specify a variable modification to apply to C-terminus of peptides.
-# <mass change>:<max distance from protein c-term (-1 for no max)>.
-# Default=no mods.
-# Available from parameter file for crux-generate-peptides and
-# crux-search-for-matches and the the same must be used for crux
-# compute-q-value.
-cmod=NO MODS
-
 # The number of PSMs per spectrum writen to the output  file(s). 
 # Default=5.
 # Available from parameter file for crux-search-for-matches.
@@ -483,11 +458,35 @@ xlink-include-linears=TRUE
 # Available only for crux-generate-peptides.
 output-sequence=FALSE
 
+# Specify a variable modification to apply to peptides.  <mass
+# change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents
+# cross-link>.  Sub-parameters prevents cleavage and prevents cross-link
+# are optional (T|F).Default=no mods.
+# Available from parameter file for crux-generate-peptides and
+# crux-search-for-matches and the the same must be used for crux
+# compute-q-value.
+mod=NO MODS
+
+# Specify a variable modification to apply to N-terminus of peptides. 
+# <mass change>:<max distance from protein n-term (-1 for no max)>
+# Available from parameter file for crux-generate-peptides and
+# crux-search-for-matches and the the same must be used for crux
+# compute-q-value.
+nmod=NO MODS
+
+# Specify a variable modification to apply to C-terminus of peptides.
+# <mass change>:<max distance from protein c-term (-1 for no max)>.
+# Default=no mods.
+# Available from parameter file for crux-generate-peptides and
+# crux-search-for-matches and the the same must be used for crux
+# compute-q-value.
+cmod=NO MODS
+
 H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Jul 28 16:46:29 2010
+H	StartTime	Mon Aug  2 14:56:28 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

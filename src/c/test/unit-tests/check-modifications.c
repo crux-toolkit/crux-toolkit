@@ -216,6 +216,7 @@ START_TEST(test_mod_to_string){
   aa_mod_set_mass_change(amod1, 3.4);
   aa_mod_set_mass_change(amod2, 56.78);
   aa_mod_set_mass_change(amod3, -100);
+  int precision = 2;
 
   // add test for mod to string (eg D*)
   // unmodified
@@ -224,7 +225,7 @@ START_TEST(test_mod_to_string){
                "mod as string should be 'D' but is '%s'", mod_as_text);
   free(mod_as_text);
 
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, precision );
   fail_unless( strcmp(mod_as_text, "D") == 0,
                "mod as string should be 'D' but is '%s'", mod_as_text);
   free(mod_as_text);
@@ -236,7 +237,7 @@ START_TEST(test_mod_to_string){
                "mod as string should be 'D#' but is '%s'", mod_as_text);
   free(mod_as_text);
 
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, precision );
   fail_unless( strcmp(mod_as_text, "D[56.78]") == 0,
                "mod as string should be 'D[56.78]' but is '%s'", mod_as_text);
   free(mod_as_text);
@@ -248,16 +249,38 @@ START_TEST(test_mod_to_string){
                "mod as string should be 'D*#@' but is '%s'", mod_as_text);
   free(mod_as_text);
 
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, TRUE );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, TRUE, precision );
   fail_unless( strcmp(mod_as_text, "D[-39.82]") == 0,
-               "mod as string should be 'D-[39.82]' but is '%s'", mod_as_text);
+               "mod as string should be 'D[-39.82]' but is '%s'", mod_as_text);
   free(mod_as_text);
 
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, precision );
   fail_unless( strcmp(mod_as_text, "D[3.40,56.78,-100.00]") == 0,
                "mod as string should be 'D[3.40,56.78,-100.00]' but is '%s'", 
                mod_as_text);
   free(mod_as_text);
+}
+END_TEST
+
+// similar to above test but with different precision
+START_TEST(test_mod_to_string_precision){
+  initialize_parameters();
+  force_set_aa_mod_list(amod_list, 3);
+  // set mass shifts
+  aa_mod_set_mass_change(amod2, 56.785);
+  // modify an aa
+  mod_aa_D = mod_aa_D | 0x0040; // second aa mod in param list
+
+  char* mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, 3 );
+  fail_unless( strcmp(mod_as_text, "D[56.785]") == 0,
+               "precision 3 mod should be D[56.785] but is %s.", mod_as_text);
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, 4 );
+  fail_unless( strcmp(mod_as_text, "D[56.7850]") == 0,
+               "precision 3 mod should be D[56.7850] but is %s.", mod_as_text);
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, 2 );
+  fail_unless( strcmp(mod_as_text, "D[56.78]") == 0,
+               "precision 3 mod should be D[56.78] but is %s.", mod_as_text);
+
 }
 END_TEST
 
@@ -594,6 +617,7 @@ Suite* modifications_suite(){
   tcase_add_test(tc_core, test_char_to_mod);
   tcase_add_test(tc_core, test_mod_to_char);
   tcase_add_test(tc_core, test_mod_to_string);
+  tcase_add_test(tc_core, test_mod_to_string_precision);
   tcase_add_test(tc_core, test_mod_str_to_string);
   tcase_add_test(tc_core, test_mod_str_to_unmod_string);
   tcase_add_test(tc_core, test_symbol_to_aa_mod);
