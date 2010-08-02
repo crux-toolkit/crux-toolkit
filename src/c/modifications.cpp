@@ -205,13 +205,14 @@ char* modified_aa_to_string_with_symbols(MODIFIED_AA_T aa){
  * i.e. a letter either alone or followed by square brackets containing
  * the mass(es) of any modifications.  If merge_masses is false, all
  * masses are listed in a comma-separated list.  If true, they are
- * summed and returned in one number.  Fixed precision of 2.
+ * summed and returned in one number.  
  * 
  * \returns A newly allocated char* with amino acid and modifciation
  * masses in square brackets.
  */
 char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa, 
-                                        BOOLEAN_T merge_masses){
+                                        BOOLEAN_T merge_masses,
+                                        int precision){
   int modified_by = 0;
   AA_MOD_T** mod_list = NULL;
   int total_mods = get_all_aa_mod_list(&mod_list);
@@ -241,7 +242,7 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
       if( merge_masses ){
         summed_masses += aa_mod_get_mass_change(mod_list[mod_idx]);
       } else {
-        sprintf(mass_string_ptr, "%.*f,", MOD_MASS_PRECISION,
+        sprintf(mass_string_ptr, "%.*f,", precision,
                 aa_mod_get_mass_change(mod_list[mod_idx]));
         mass_string_ptr += strlen(mass_string_ptr);
       }
@@ -252,7 +253,8 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
   char* return_string = NULL;
   if( merge_masses ){ // X[000.00]'/0'
     return_string = (char*)mymalloc(10 * sizeof(char));
-    sprintf(return_string, "%c[%1.2f]", modified_aa_to_char(aa), summed_masses);
+    sprintf(return_string, "%c[%1.*f]", modified_aa_to_char(aa), 
+            precision, summed_masses );
   } else { // X[000.00,etc]'/0'
 
     return_string = (char*)mymalloc((4 + strlen(mass_string)) * sizeof(char));
@@ -300,14 +302,15 @@ char* modified_aa_string_to_string_with_masses(
     }
   }
 
-  // max total length = #aas + ( #mods * strlen([000.00,]) ) + '/0'
-  int buffer_size = length + (count * 9) + 1;
+  int precision = get_int_parameter("mod-precision");
+  // max total length = #aas + ( #mods * (strlen("[000.,]")+precision) ) + '/0'
+  int buffer_size = length + (count * (9 + precision)) + 1;
   char* return_string = (char*)mymalloc(buffer_size * sizeof(char));
   char* return_str_ptr = return_string;
   for(int mod_str_idx = 0; mod_str_idx<length; mod_str_idx++){
 
     char* cur_mod = 
-      modified_aa_to_string_with_masses( aa_string[mod_str_idx], merge_masses );
+      modified_aa_to_string_with_masses( aa_string[mod_str_idx], merge_masses, precision );
     strcpy( return_str_ptr, cur_mod );
     return_str_ptr += strlen(cur_mod);
     free(cur_mod);

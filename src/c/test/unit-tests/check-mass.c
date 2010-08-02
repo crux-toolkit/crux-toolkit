@@ -14,6 +14,7 @@ int is_close_to(float a, float b){
   return (a > (b - 0.0005) && a < (b + 0.0005) );
 }
 void mass_setup(){
+  initialize_parameters();
   //initializing the arrays happens with get_amino_acid_mass()
   amod1 = new_aa_mod(0);
   amod2 = new_aa_mod(1);

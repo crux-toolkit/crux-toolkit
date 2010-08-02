@@ -133,7 +133,7 @@
 0 = perc-feature-file = good_results/percolator.features.txt = cat crux-output/percolator.features.txt = 
 
 # Run q-ranker on same matches
-0 = qranker = good_results/qranker.target.txt = crux q-ranker --feature-file TRUE --overwrite T --parameter-file params/mods existing_crux_index crux-output; cat crux-output/qranker.target.txt = 
+0 = qranker = good_results/qranker.target.txt = crux q-ranker --feature-file TRUE --overwrite T --parameter-file params/mods-high-precision existing_crux_index crux-output; cat crux-output/qranker.target.txt = 
 
 # Test the feature file
 0 = qranker-feature-file = good_results/qranker.features.txt = cat crux-output/qranker.features.txt = 

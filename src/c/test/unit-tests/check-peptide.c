@@ -110,6 +110,7 @@ START_TEST (test_cdist){// start index
 END_TEST
 
 START_TEST(test_mod_on_unmodified){
+  initialize_parameters();
   // check is_modified
   // get modified seq from peptide w/out modificationso
   MODIFIED_AA_T* mod_seq = get_peptide_modified_aa_sequence(peptide1);
