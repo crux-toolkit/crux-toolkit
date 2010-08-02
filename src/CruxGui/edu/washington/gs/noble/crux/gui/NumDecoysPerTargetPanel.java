@@ -61,7 +61,7 @@ class NumDecoysPerTargetPanel extends CruxParameterControl {
 	
 	public void saveToModel() {
 		CruxAnalysisModel model = cruxGui.getAnalysisModel();
-		model.setNumDecoysPerTarget(model.getNumDecoysPerTarget());
+		model.setNumDecoysPerTarget(getNumDecoysPerTarget());
 		logger.info("Saved parameter 'numDecoysPerTarget' to model: " + model.getNumDecoysPerTarget());
 	}
 	
@@ -71,8 +71,8 @@ class NumDecoysPerTargetPanel extends CruxParameterControl {
 		logger.info("Loaded parameter 'numDecoysPerTarget' from model: " + model.getNumDecoysPerTarget());
 	}
 	
-	public double getDecoysPerTarget() {
-		return ((Double) numDecoysPerTarget.getValue()).intValue();
+	public int getNumDecoysPerTarget() {
+	    return ((Integer) numDecoysPerTarget.getValue()).intValue();
 	}
 	
 
