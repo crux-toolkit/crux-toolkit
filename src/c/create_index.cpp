@@ -29,8 +29,7 @@ int create_index_main(int argc, char** argv){
   char* binary_fasta_file = NULL;
 
   /* Define optional command line arguments */ 
-  int num_options = NUM_INDEX_OPTIONS;
-  const char* option_list[NUM_INDEX_OPTIONS] = { 
+  const char* option_list[] = { 
     "verbosity",
     "parameter-file", 
     "overwrite",
@@ -42,20 +41,18 @@ int create_index_main(int argc, char** argv){
     "enzyme", 
     "custom-enzyme", 
     "digestion", 
-    //    "cleavages", 
     "missed-cleavages",
-    //    "unique-peptides"
+    "peptide-list"
   };
+  int num_options = sizeof(option_list) / sizeof(char*);
 
   /* Define required command line arguments */ 
-  int num_arguments = NUM_INDEX_ARGS;
-  const char* argument_list[NUM_INDEX_ARGS] = { "protein fasta file", 
-                                          "index name"}; 
+  const char* argument_list[] = { "protein fasta file", 
+				  "index name"}; 
+  int num_arguments = sizeof(argument_list) / sizeof(char*);
 
 
   /* For debugging of parameter processing */
-  // TODO make this dependant on a compile flag 
-  //set_verbosity_level(CARP_DETAILED_DEBUG);  
   set_verbosity_level(CARP_ERROR);  
   carp(CARP_DETAILED_DEBUG, "Starting create_index");
 
@@ -120,7 +117,8 @@ int create_index_main(int argc, char** argv){
                          );
   
   /* create crux_index files */
-  if(!create_index(crux_index)){
+  if(!create_index(crux_index,
+		   get_boolean_parameter("peptide-list"))){
     carp(CARP_FATAL, "Failed to create index");
   }
   

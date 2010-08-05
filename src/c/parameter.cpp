@@ -424,7 +424,6 @@ void initialize_parameters(void){
       "for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin> "
       " includes peptides containing one or more potential cleavage sites.",
       "true");
-  //  set_boolean_parameter("unique-peptides", FALSE,
   set_boolean_parameter("unique-peptides", TRUE,
       "Generate peptides only once, even if they appear in more "
       "than one protein (T,F).  Default=F.",
@@ -432,6 +431,12 @@ void initialize_parameters(void){
       "crux-genereate-peptides. Returns one line per peptide "
       "when true or one line per peptide per protein occurence when false.  ",
       "true");
+  set_boolean_parameter("peptide-list", FALSE,
+			"Create an ASCII version of the peptide list.  "
+			"Default=F.",
+			"Creates an ASCII file in the output directory "
+			"containing one peptide per line.",
+			"true");
   
   /* more generate_peptide parameters */
   set_boolean_parameter("output-sequence", FALSE, 

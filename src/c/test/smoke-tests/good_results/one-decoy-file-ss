@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Aug  2 14:56:26 2010
+H	StartTime	Wed Aug  4 17:02:40 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2681,14 +2681,14 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4855	1488.706299	0.82786644	58.670856	3	0.3005254	3									5	24	8	FANVESFHSILPK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK				
 159	2	745.7500	1489.4855	1486.619507	0.84737861	35.706837	5	0.26480255	4									4	26	8	STPEGNMQNPLGNK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK				
 159	2	745.7500	1489.4855	1486.619507	0.91286355	141.36382	2	0.23478588	5									7	26	8	SNTNQPLGMPGENK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK				
-INFO: CPU: ranunculus
-INFO: Mon Aug  2 14:56:26 PDT 2010
+INFO: CPU: lysine.gs.washington.edu
+INFO: Wed Aug  4 17:02:39 PDT 2010
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96, charge 2, search number 100
-INFO: Elapsed time: 2.37 s
+INFO: Elapsed time: 3.74 s
 INFO: Finished crux sequest-search
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
@@ -2977,6 +2977,11 @@ mz-bin-offset=0.680000
 # sequences.  Example: TRUE is SE[12.40]Q and FALSE is SE[10.00,2.40]Q
 display-summed-mod-masses=TRUE
 
+# Create an ASCII version of the peptide list.  Default=F.
+# Creates an ASCII file in the output directory containing one peptide
+# per line.
+peptide-list=FALSE
+
 # Print the theoretical spectrum
 # Available for xlink-predict-peptide-ions (Default=F).
 print-theoretical-spectrum=FALSE
@@ -3169,7 +3174,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Aug  2 14:56:26 2010
+H	StartTime	Wed Aug  4 17:02:40 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
