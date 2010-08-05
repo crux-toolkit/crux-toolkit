@@ -78,11 +78,11 @@ START_TEST(test_serialize){
   // open file for writing
   FILE* file = fopen(pep_filename, "w");
   // serialize three peptides
-  fail_unless( serialize_peptide(pep1, file) == TRUE,
+  fail_unless( serialize_peptide(pep1, file, NULL) == TRUE,
                "Failed to serialize peptide1");
-  fail_unless( serialize_peptide(pep2, file) == TRUE,
+  fail_unless( serialize_peptide(pep2, file, NULL) == TRUE,
                "Failed to serialize peptide2");
-  fail_unless( serialize_peptide(pep3, file) == TRUE,
+  fail_unless( serialize_peptide(pep3, file, NULL) == TRUE,
                "Failed to serialize peptide3");
   // close file
   fclose(file);
@@ -167,11 +167,11 @@ START_TEST(test_serialize_mod){
   // serialize all three peptides
   FILE* file = fopen(pep_filename, "w");
   // serialize three peptides
-  fail_unless( serialize_peptide(pep1, file) == TRUE,
+  fail_unless( serialize_peptide(pep1, file, NULL) == TRUE,
                "Failed to serialize peptide1");
-  fail_unless( serialize_peptide(pep2, file) == TRUE,
+  fail_unless( serialize_peptide(pep2, file, NULL) == TRUE,
                "Failed to serialize peptide2");
-  fail_unless( serialize_peptide(pep3, file) == TRUE,
+  fail_unless( serialize_peptide(pep3, file, NULL) == TRUE,
                "Failed to serialize peptide3");
   // close file
   fclose(file);

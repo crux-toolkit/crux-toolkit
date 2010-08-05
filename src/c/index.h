@@ -89,7 +89,8 @@ BOOLEAN_T parse_index(
  * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T create_index(
-  INDEX_T* index ///< An allocated index
+  INDEX_T* index, ///< An allocated index -in/out
+  BOOLEAN_T create_text_file ///< Should an ASCII text file be create? -in
   );
 
 /**

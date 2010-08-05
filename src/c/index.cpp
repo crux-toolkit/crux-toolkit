@@ -590,7 +590,6 @@ INDEX_T* new_index(
 
   // set database, has not been parsed
   set_index_database(index, database);
-  //BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
   BOOLEAN_T is_unique = TRUE;
   set_index_fields(index, output_dir,
                    constraint, mass_range, is_unique);
@@ -953,7 +952,8 @@ FILE* sort_bin(
   FILE* file, ///< the working file handle to the bin -in
   long bin_idx, ///< bin index in the file array -in
   INDEX_T* index, ///< working index -in
-  unsigned int peptide_count ///< the total peptide count in the bin -in
+  unsigned int peptide_count, ///< the total peptide count in the bin -in
+  FILE* text_file
   )
 {
   char* filename = NULL;
@@ -977,7 +977,7 @@ FILE* sort_bin(
   // serialize all peptides in sorted order
   while(bin_sorted_peptide_iterator_has_next(peptide_iterator)){
     working_peptide = bin_sorted_peptide_iterator_next(peptide_iterator);
-    serialize_peptide(working_peptide, file);
+    serialize_peptide(working_peptide, file, text_file);
     free_peptide(working_peptide);
   }
   
@@ -988,17 +988,18 @@ FILE* sort_bin(
 }
 
 /**
- * stores the peptide in the correct bin, if bin exceeds
- * MAX_PROTEIN_IN_BIN, serialize all peptides in the bin.
+ * Stores the peptide in the correct bin.  If bin exceeds
+ * MAX_PROTEIN_IN_BIN, then serialize all peptides in the bin.
+ *
  * \returns TRUE if successful in storing the peptide or serializing
- * peptides, else FALSE 
+ * peptides, else FALSE .
  */
-BOOLEAN_T dump_peptide(
-  FILE** file_array,  ///< the working file handler array to the bins -in/out
-  long int file_idx, ///< the index of the file the peptide belongs to -in
+static BOOLEAN_T dump_peptide(
+  FILE** file_array,   ///< the working file handler array to the bins -in/out
+  long int file_idx,   ///< the index of the file the peptide belongs to -in
   PEPTIDE_T* working_peptide, ///< the peptide to be stored -in
   PEPTIDE_T** peptide_array, ///< hold peptides before they're serialized -out
-  int* bin_count ///< an array of the counts of peptides in each bin -in
+  int* bin_count       ///< an array of the counts of peptides in each bin -in
   )
 {  
   int peptide_idx = 0;
@@ -1010,11 +1011,11 @@ BOOLEAN_T dump_peptide(
     file = file_array[file_idx];
     // print out all peptides
     for(peptide_idx = 0; peptide_idx < current_count; ++peptide_idx){
-      serialize_peptide(peptide_array[peptide_idx] , file);
+      serialize_peptide(peptide_array[peptide_idx], file, NULL);
       free_peptide(peptide_array[peptide_idx]);
       // FIXME this should not be allowed
     }
-    serialize_peptide(working_peptide, file);
+    serialize_peptide(working_peptide, file, NULL);
     free_peptide(working_peptide);
     // FIXME this should not be allowed
     bin_count[file_idx] = 0;
@@ -1029,17 +1030,21 @@ BOOLEAN_T dump_peptide(
 }
 
 /**
- * /brief Serializes all peptides left in the peptide array after
- * parsing the database.  Used in creatig index after parsing database
- * and before sorting peptides in each bin.
- * \returns TRUE, if successful in serializing all peptides, else FALSE
- * frees both peptide_array and bin_count once all serialized.
+ * /brief Serializes all peptides in the peptide array after parsing
+ * the database.  Used in creating index after parsing database and
+ * before sorting peptides in each bin.
+ *
+ * As a side effect, if the last parameter is non-NULL, print the
+ * peptides in ASCII format to the specified file.  Frees both the
+ * peptide_array and bin_count once all serialized.
+ *
+ * \returns TRUE, if successful in serializing all peptides, else FALSE.
  */
-BOOLEAN_T dump_peptide_all(
+static BOOLEAN_T dump_peptide_all(
   FILE** file_array,   ///< the working file handle array to the bins -out
   PEPTIDE_T*** peptide_array, ///< the array of pre-serialized peptides -in
-  int* bin_count, ///< the count array of peptides in each bin -in
-  int num_bins ///< the total number of bins -in
+  int* bin_count,      ///< the count array of peptides in each bin -in
+  int num_bins         ///< the total number of bins -in
   )
 {  
   int peptide_idx = 0;
@@ -1062,7 +1067,7 @@ BOOLEAN_T dump_peptide_all(
     // print out all peptides in this specific bin
     // BF: could we do for(pep_idx=0; pep_idx<bin_count_total; pep_idx++)
     while(bin_idx > 0){
-      serialize_peptide(working_array[peptide_idx], file);
+      serialize_peptide(working_array[peptide_idx], file, NULL);
       free_peptide(working_array[peptide_idx]);
       // FIXME this should not be allowed
       --bin_idx;
@@ -1164,7 +1169,8 @@ BOOLEAN_T transform_database_to_memmap_database(
  * \returns TRUE if success. FALSE if failure.
  */
 BOOLEAN_T create_index(
-  INDEX_T* index ///< An allocated index -in/out
+  INDEX_T* index, ///< An allocated index -in/out
+  BOOLEAN_T create_text_file ///< Should an ASCII text file be create? -in
   )
 {
   // the file stream where the index creation information is sent
@@ -1259,6 +1265,13 @@ BOOLEAN_T create_index(
   readme = fopen("README", "w");
   write_readme_file(index, readme);
   fclose(readme);
+
+  // create text file of peptides.
+  FILE* text_file = NULL;
+  if (create_text_file) {
+    carp(CARP_DEBUG, "Creating peptides.txt.");
+    text_file = fopen("peptides.txt", "w");
+  }
   
   // create the index map & info
   info_out = fopen("crux_index_map", "w");
@@ -1302,7 +1315,7 @@ BOOLEAN_T create_index(
 
     // dump peptide in bin or temporary matrix
     dump_peptide(file_array, file_idx, working_peptide, 
-        peptide_array[file_idx], bin_count); 
+		 peptide_array[file_idx], bin_count); 
   }
 
   carp(CARP_INFO, "Printing index");
@@ -1319,7 +1332,8 @@ BOOLEAN_T create_index(
     }
     // sort bin
     if((file_array[bin_idx] = sort_bin(file_array[bin_idx], bin_idx, index, 
-            peptide_count_array[bin_idx])) == NULL){
+				       peptide_count_array[bin_idx], 
+				       text_file)) == NULL){
       carp(CARP_WARNING, "Failed to sort bin %i", bin_idx);
       fcloseall();
       return FALSE;
@@ -1339,6 +1353,9 @@ BOOLEAN_T create_index(
   }
   
   // close crux_index_map, free heap allocated objects
+  if (create_text_file) {
+    fclose(text_file);
+  }
   fclose(info_out);
   free(mass_limits);
   free(file_array);

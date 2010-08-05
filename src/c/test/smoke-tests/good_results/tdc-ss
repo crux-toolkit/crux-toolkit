@@ -1,11 +1,11 @@
-INFO: CPU: ranunculus
-INFO: Mon Aug  2 14:56:28 PDT 2010
+INFO: CPU: lysine.gs.washington.edu
+INFO: Wed Aug  4 17:02:43 PDT 2010
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96, charge 2, search number 100
-INFO: Elapsed time: 1.61 s
+INFO: Elapsed time: 2.54 s
 INFO: Finished crux sequest-search
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
@@ -294,6 +294,11 @@ mz-bin-offset=0.680000
 # sequences.  Example: TRUE is SE[12.40]Q and FALSE is SE[10.00,2.40]Q
 display-summed-mod-masses=TRUE
 
+# Create an ASCII version of the peptide list.  Default=F.
+# Creates an ASCII file in the output directory containing one peptide
+# per line.
+peptide-list=FALSE
+
 # Print the theoretical spectrum
 # Available for xlink-predict-peptide-ions (Default=F).
 print-theoretical-spectrum=FALSE
@@ -486,7 +491,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Aug  2 14:56:28 2010
+H	StartTime	Wed Aug  4 17:02:44 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

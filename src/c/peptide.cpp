@@ -1633,7 +1633,8 @@ void print_filtered_peptide_in_format(
  */
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide, ///< the peptide to serialize -in
-  FILE* file ///< the output file to serlize -out
+  FILE* file,         ///< the binary output file to serialize to -out
+  FILE* text_file     ///< the ASCII output file (may be NULL)
   )
 {
 
@@ -1648,7 +1649,7 @@ BOOLEAN_T serialize_peptide(
 
   // there must be at least one peptide src
   if(!peptide_src_iterator_has_next(iterator)){
-    carp(CARP_WARNING, "no peptide src");
+    carp(CARP_WARNING, "No peptide source.");
     return FALSE;
   }
 
@@ -1694,7 +1695,14 @@ BOOLEAN_T serialize_peptide(
   // write modified seq
   fwrite(peptide->modified_seq, sizeof(MODIFIED_AA_T), mod_seq_length, file);
 
+
   free(seq);
+  
+  // If a text file was given, print the peptide in ASCII.
+  if (text_file != NULL) {
+    fprintf(text_file, "%s\n", 
+	    get_peptide_modified_sequence_with_symbols(peptide));
+  }
 
   return TRUE;
 }

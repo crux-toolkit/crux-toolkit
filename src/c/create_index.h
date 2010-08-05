@@ -30,12 +30,6 @@
 #ifndef CREATE_INDEX_H
 #define CREATE_INDEX_H
 
-
-
-
-static const int NUM_INDEX_OPTIONS = 12;
-static const int NUM_INDEX_ARGS = 2;
-
 int create_index_main(int argc, char** argv);
 
 

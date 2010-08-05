@@ -574,7 +574,8 @@ void print_filtered_peptide_in_format(
  */
 BOOLEAN_T serialize_peptide(
   PEPTIDE_T* peptide,
-  FILE* file
+  FILE* file,
+  FILE* text_file
   );
  
 /**
