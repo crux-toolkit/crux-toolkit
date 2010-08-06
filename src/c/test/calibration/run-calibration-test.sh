@@ -30,9 +30,6 @@ fi
 
 ms2=../performance-tests/051708-worm-ASMS-10.ms2
 
-# Do the whole test twice, once for each search tool.
-searchtool=search-for-matches
-
 # Run the search.
 if [[ -e search/search.target.txt ]]; then
   echo Skipping search-for-matches.
@@ -43,33 +40,4 @@ else
     --output-dir search \
     $ms2 $db
 fi
-
-# Run compute-q-values.
-if [[ -e search/qvalues.target.txt ]]; then
-  echo Skipping compute-q-values.
-else
-  $CRUX compute-q-values \
-    --output-dir search \
-    $db search
-fi
-
-# Run Crux percolator
-if [[ -e search/percolator.target.txt ]]; then
-  echo Skipping crux percolator.
-else
-  $CRUX percolator \
-    --output-dir search \
-    --feature-file T \
-    $db search 
-fi
-
-# Run q-ranker.
-if [[ -e search/qranker.target.txt ]]; then
-  echo Skipping q-ranker.
-else
-  $CRUX q-ranker \
-    --output-dir search \
-    --feature-file T \
-    $db search
-fi
-
+./make-qq-plot.py -column-header p-value search/search.target.txt search
