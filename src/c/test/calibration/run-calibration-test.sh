@@ -14,7 +14,7 @@
 # It was created with this command line:
 # fasta-shuffle-letters < ../performance-tests/worm+contaminants.fa > shuffle.fa
 #
-db=shuffled
+db=shuffle
 
 # The location of the crux binary.
 CRUX=../../crux
@@ -28,101 +28,48 @@ else
   $CRUX create-index $db.fa $db
 fi
 
-ms2=051708-worm-ASMS-10.ms2
+ms2=../performance-tests/051708-worm-ASMS-10.ms2
 
 # Do the whole test twice, once for each search tool.
-for searchtool in sequest-search search-for-matches; do
+searchtool=search-for-matches
 
-  if [[ $searchtool == "sequest-search" ]]; then
-     shortname=sequest
-     search_parameter=""
-  else
-     shortname=search
-     search_parameter="--compute-p-values T"
-  fi
+# Run the search.
+if [[ -e search/search.target.txt ]]; then
+  echo Skipping search-for-matches.
+else  
+  $CRUX search-for-matches \
+    --compute-p-values T \
+    --num-decoys-per-target 1 \
+    --output-dir search \
+    $ms2 $db
+fi
 
-  # Run the search.
-  if [[ -e $shortname/$shortname.target.txt ]]; then
-    echo Skipping $searchtool.
-  else  
-    $CRUX $searchtool \
-      $search_parameter \
-      --num-decoys-per-target 1 \
-      --output-dir $shortname \
-      $ms2 $db
-  fi
+# Run compute-q-values.
+if [[ -e search/qvalues.target.txt ]]; then
+  echo Skipping compute-q-values.
+else
+  $CRUX compute-q-values \
+    --output-dir search \
+    $db search
+fi
 
-  # Run compute-q-values.
-  if [[ -e $shortname/qvalues.target.txt ]]; then
-    echo Skipping compute-q-values.
-  else
-    $CRUX compute-q-values \
-      --output-dir $shortname \
-      $db $shortname
-  fi
-  if [[ $searchtool == "sequest-search" ]]; then
-    echo replot \"$shortname/qvalues.target.txt\" using 9:0 title \"$shortname XCorr \(decoy\)\" with lines >> $gnuplot
-  else  
-    echo replot \"$shortname/qvalues.target.txt\" using 10:0 title \"$shortname XCorr \(Weibull\)\" with lines >> $gnuplot
-  fi
-  
-  # Run Crux percolator
-  if [[ -e $shortname/percolator.target.txt ]]; then
-    echo Skipping crux percolator.
-  else
-    $CRUX percolator \
-      --output-dir $shortname \
-      --feature-file T \
-      $db $shortname 
-  fi
-  if [[ $searchtool == "sequest-search" ]]; then
-    echo replot \"$shortname/percolator.target.txt\" using 13:0 title \"$shortname crux percolator\" with lines >> $gnuplot
-  else
-    echo replot \"$shortname/percolator.target.txt\" using 12:0 title \"$shortname crux percolator\" with lines >> $gnuplot
-  fi
+# Run Crux percolator
+if [[ -e search/percolator.target.txt ]]; then
+  echo Skipping crux percolator.
+else
+  $CRUX percolator \
+    --output-dir search \
+    --feature-file T \
+    $db search 
+fi
 
-  # Run q-ranker.
-  if [[ -e $shortname/qranker.target.txt ]]; then
-    echo Skipping q-ranker.
-  else
-    $CRUX q-ranker \
-      --output-dir $shortname \
-      --feature-file T \
-      $db $shortname
-  fi
-  if [[ $searchtool == "sequest-search" ]]; then
-    echo replot \"$shortname/qranker.target.txt\" using 12:0 title \"$shortname q-ranker\" with lines >> $gnuplot
-  else
-    echo replot \"$shortname/qranker.target.txt\" using 11:0 title \"$shortname q-ranker\" with lines >> $gnuplot
-  fi
-  
-  # Run Lukas's percolator
-  if [[ $searchtool == "search-for-matches" ]]; then
-    echo Stand-alone Percolator does not work with crux search-for-matches.
-  elif [[ `which percolator` == "" ]]; then
-    echo Skipping stand-alone Percolator -- not installed.
-  else
-    if [[ -e $shortname/l-percolator.features.tsv ]]; then
-      echo Skipping stand-alone Percolator.
-    else
-      percolator \
-        --tab-out $shortname/l-percolator.features.tsv \
-        --gist-out $shortname/l-percolator.gist.txt \
-        --weights $shortname/l-percolator.weights.txt \
-        --results $shortname/l-percolator.tsv \
-        --sqt-out $shortname/l-percolator.sqt \
-        --xml-output $shortname/l-percolator.xml \
-        $shortname/sequest.target.sqt \
-        $shortname/sequest.decoy.sqt
-    fi
-    echo replot \"$shortname/l-percolator.tsv\" using 3:0 title \"Stand-alone percolator\" with lines >> $gnuplot
-  fi
-  
-done
+# Run q-ranker.
+if [[ -e search/qranker.target.txt ]]; then
+  echo Skipping q-ranker.
+else
+  $CRUX q-ranker \
+    --output-dir search \
+    --feature-file T \
+    $db search
+fi
 
-# Finalize the gnuplot script.
-echo set output >> $gnuplot
-echo replot >> $gnuplot
-
-# Make the plot.
-gnuplot $gnuplot > performance.png
