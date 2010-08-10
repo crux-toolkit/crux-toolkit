@@ -84,6 +84,7 @@ public class CruxSetupPanel extends JPanel {
 		indexParameterPanel.addParameterControl(new MassPanel(cruxGui));
 		indexParameterPanel.addParameterControl(new LengthPanel(cruxGui));
 		indexParameterPanel.addParameterControl(new VerbosityPanel(cruxGui));
+		indexParameterPanel.addParameterControl(new CustomEnzymeCleavagePanel(cruxGui));
 		
 		properties.add(indexParameterPanel);
 	}
@@ -103,7 +104,6 @@ public class CruxSetupPanel extends JPanel {
 	
 	private void initQValuesPanel() {
 		qvaluesParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.COMPUTE_Q_VALUES, cruxGui, "Compute q-value paramters", computeQValuesButton, dummyButton);
-		//qvaluesParameterPanel.addParameterControl(new OutputDirPanel(cruxGui));
 		qvaluesParameterPanel.addParameterControl(new VerbosityPanel(cruxGui)); 
 		qvaluesParameterPanel.setBounds(computeQValuesButton.getX()-60, 30, 400, 350);
 		properties.add(qvaluesParameterPanel);
@@ -112,7 +112,6 @@ public class CruxSetupPanel extends JPanel {
 	private void initPercolatorPanel() {
 		percolatorParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.PERCOLATOR, cruxGui, "Percolator paramters", percolatorButton, dummyButton);
 		percolatorParameterPanel.setBounds(computeQValuesButton.getX()-60, 30, 400, 350); // Line up to the leftmost of the buttons
-		//percolatorParameterPanel.addParameterControl(new OutputDirPanel(cruxGui));
 		percolatorParameterPanel.addParameterControl(new FeatureFilePanel(cruxGui));
 		percolatorParameterPanel.addParameterControl(new VerbosityPanel(cruxGui));
 		properties.add(percolatorParameterPanel);
@@ -121,7 +120,6 @@ public class CruxSetupPanel extends JPanel {
 	private void initQRankerPanel() {
 		qrankerParameterPanel = new CruxParameterPanel(CruxAnalysisModel.CruxComponents.QRANKER, cruxGui, "Q-ranker paramters", qrankerButton, dummyButton);
 		qrankerParameterPanel.setBounds(computeQValuesButton.getX()-60, 30, 400, 350);
-		//qrankerParameterPanel.addParameterControl(new OutputDirPanel(cruxGui));
 		qrankerParameterPanel.addParameterControl(new FeatureFilePanel(cruxGui));
 		qrankerParameterPanel.addParameterControl(new VerbosityPanel(cruxGui));
 		properties.add(qrankerParameterPanel);
