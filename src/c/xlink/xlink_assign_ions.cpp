@@ -121,7 +121,7 @@ int main(int argc, char** argv){
   //created linked peptide.
   LinkedPeptide lp = LinkedPeptide(peptideA, peptideB, posA-1, posB-1, charge);
 
-  int max_ion_charge = get_int_parameter("max-ion-charge");
+  int max_ion_charge = get_max_ion_charge_parameter("max-ion-charge");
 
   int max_charge = min(max_ion_charge, charge);
 
