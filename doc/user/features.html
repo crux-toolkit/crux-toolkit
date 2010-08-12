@@ -1,0 +1,100 @@
+<html>
+<title>Features used by percolator and q-ranker</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<H1 ALIGN=CENTER>Features used by percolator and q-ranker</H1>
+
+<p>
+Following is a list of the features used by the <code>crux
+percolator</code> and <code>crux q-ranker</code> commands to represent
+each peptide-spectrum match (PSM).</p>
+
+<ol>
+
+<li>
+<code>XCorr</code>:  The SEQUEST cross-correlation score.</li>
+
+<li>
+<code>DeltCN</code>: The difference between this PSM's XCorr and the
+XCorr of the <i>second-ranked</i> PSM for this spectrum, divided by
+this PSM's XCorr.  Note that this definition differs from that of the
+standard delta Cn reported by SEQUEST.</li>
+
+<li>
+<code>DeltLCN</code>:  The difference between this PSM's XCorr and the
+XCorr of the <i>lowest ranked</i> PSM for this spectrum, divided by
+this PSM's XCorr.</li>
+
+<li>
+<code>Sp</code>:  The preliminary SEQUEST score.</li>
+
+<li>
+<code>lnrSp</code>: The natural logarithm of the rank of the match
+based on the Sp score</li>
+
+<li>
+<code>Mass</code>: The observed mass [M+H]<sup>+</sup></li>
+
+<li>
+<code>dM</code>: The difference in calculated and observed mass</li>
+
+<li>
+<code>absdM</code>: The absolute value of the difference in calculated
+and observed mass.</li>
+
+<li>
+<code>ionFrac</code>: The fraction of matched b and y ions.</li>
+
+<li>
+<code>lnSM</code>: The natural logarithm of the number of database
+peptides within the specified m/z range</li>
+
+<li>
+<code>enzN</code>: Boolean: Is the peptide preceded by an enzymatic
+(tryptic) site?</li>
+
+<li>
+<code>enzC</code>: Boolean: Does the peptide have an enzymatic
+(tryptic) C-terminus?</li>
+
+<li>
+<code>enzInt</code>: Number of missed internal enzymatic (tryptic)
+sites.</li>
+
+<li>
+<code>pepLen</code>: The length of the matched peptide, in residues.</li>
+
+<li>
+<code>charge1</code>: Boolean: Is this a 1+ charged spectrum?</li>
+
+<li>
+<code>charge2</code>: Boolean: Is this a 2+ charged spectrum?</li>
+
+<li>
+<code>charge3</code>: Boolean: Is this a 3+ charged spectrum?</li>
+
+<li>
+<code>numPep</code>: The natural log of the number of PSMs for which
+this is the best scoring peptide.</li>
+
+<li>
+<code>numProt</code>: The natural log of the number of times the
+matched protein matches other PSMs.</li>
+
+<li>
+<code>pepSite</code>: The natural log of the number of different
+peptides that match this protein.</li>
+
+</ol>
+
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
+</body>
+</html>
+

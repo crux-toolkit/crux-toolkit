@@ -48,7 +48,11 @@ a second derived from matching against "decoy" peptides.  Crux generates
 these decoys on the fly.  Percolator will also accept a second set of
 decoy PSMs and use one set in training and one in calculating
 q-values.  Producing two sets of decoy PSMs is the search-for-matches
-default behavior.
+default behavior.</p>
+
+<p>
+The features used by percolator to represent each PSM are summarized
+<a href="features.html">here</a>.</p>
 
 <p>
 <b>Input:</b></p>
@@ -105,7 +109,7 @@ printed to stderr.
 <ul>
 
 <li>
-<code>-pi-zero &lt;value&gt;</code> &ndash;
+<code>--pi-zero &lt;value&gt;</code> &ndash;
 The estimated proportion of target scores that are drawn according to
 the null distribution.  Default=1.0.</li>
 
