@@ -248,10 +248,13 @@ void quicksort(FLOAT_T numbers[], int array_size);
 void shuffle_floats(FLOAT_T* array, int size);
 
 /**
- * \brief Comparison function for reverse sorting FLOAT_Ts.
+ * \brief Comparison function for reverse sorting floats.
  * \returns -1,0,1 if a is <,=,> b
  */
-int compare_floats_descending(const void* a, const void* b);
+struct compareDescending {
+  bool operator() (double i,double j) { return (i>j);}
+  bool operator() (float i,float j) { return (i>j);}
+}; 
 
 /**
  *\returns a heap allocated feature name array for the algorithm type

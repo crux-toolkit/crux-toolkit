@@ -1,6 +1,5 @@
 /**
  * \file hash.h 
- * $Revision: 1.6 $
  * \brief Object for hashing.
  */
 #include "crux-utils.h"

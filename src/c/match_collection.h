@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <map>
 #include <time.h>
 #include "carp.h"
 #include "parse_arguments.h"
@@ -38,6 +39,8 @@
 #include "protein_index.h"
 #include "modifications.h"
 #include "modified_peptides_iterator.h"
+
+using namespace std;
 
 static const int _PSM_SAMPLE_SIZE = 500;
 static const int _MAX_NUMBER_PEPTIDES = 10000000;
@@ -591,6 +594,26 @@ void add_decoy_scores_match_collection(
   SPECTRUM_T* spectrum, ///< search this spectrum
   int charge, ///< search spectrum at this charge state
   MODIFIED_PEPTIDES_ITERATOR_T* peptides ///< use these peptides to search
+);
+
+
+/**
+ * Extract a given type of score into an array.  The array is
+ * allocated here and must be freed by the caller.
+ */
+FLOAT_T* extract_scores_match_collection(
+  SCORER_TYPE_T       score_type, ///< Type of score to extract.
+  MATCH_COLLECTION_T* all_matches ///< add scores to this collection
+);
+
+/**
+ * Given a hash table that maps from a score to its q-value, assign
+ * q-values to all of the matches in a given collection.
+ */
+void assign_match_collection_qvalues(
+  const map<FLOAT_T, FLOAT_T>* score_to_qvalue_hash,
+  SCORER_TYPE_T score_type,
+  MATCH_COLLECTION_T* all_matches
 );
 
 #endif

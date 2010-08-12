@@ -1241,24 +1241,6 @@ void shuffle_floats(FLOAT_T* array, int size){
 }
 
 /**
- * \brief Comparison function for reverse sorting floats.
- * \returns -1,0,1 if a is <,=,> b
- */
-int compare_floats_descending(const void* a, const void* b){
-
-  FLOAT_T diff = ( *(float*)b - *(float*)a);
-  if( diff < 0 ){
-    return -1;
-  }else if( diff > 0 ){
-    return 1;
-  }else{
-    return 0;
-  }
-  
-}
-
-
-/**
  * Fits a three-parameter Weibull distribution to the input data. 
  * Implementation of Weibull distribution parameter estimation from 
  * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm

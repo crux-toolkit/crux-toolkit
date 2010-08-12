@@ -60,7 +60,7 @@ using namespace std;
 
 /**
  *\struct match
- *\brief An object that stores the score & rank for each pepide-spectrum match
+ *\brief An object that stores the score & rank for each peptide-spectrum match
  */
 struct match{
   SPECTRUM_T* spectrum; ///< the spectrum we are scoring with
@@ -89,6 +89,7 @@ struct match{
   FLOAT_T ln_delta_cn; ///< the natural log of delta_cn
   FLOAT_T ln_experiment_size; 
      ///< natural log of total number of candidate peptides evaluated
+  BOOLEAN_T best_per_peptide; ///< Is this the best scoring PSM for this peptide?
 };
 
 /**
@@ -112,6 +113,8 @@ MATCH_T* new_match(void){
   // set default as not tryptic
   // a full evaluation is done when set peptide
   //  match->overall_type = NOT_TRYPTIC;
+
+  match->best_per_peptide = FALSE;
 
   return match;
 }
@@ -652,21 +655,33 @@ static void print_one_match_field(
   case WEIBULL_QVALUE_COL:
     if( scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == TRUE ){ 
       double weibull_qvalue = get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR);
-      fprintf(output_file, float_format, exp(-1 * weibull_qvalue));
+      fprintf(output_file, float_format, weibull_qvalue);
     }
     break;
 #ifdef NEW_COLUMNS
   case WEIBULL_PEPTIDE_QVALUE_COL:
+    if ((scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == TRUE) &&
+	(match->best_per_peptide == TRUE)) {
+      double qvalue = get_match_score(match, LOGP_PEPTIDE_QVALUE_WEIBULL);
+      fprintf(output_file, float_format, qvalue);
+    }
     break;
 #endif
   case DECOY_XCORR_QVALUE_COL:
-    if( scores_computed[DECOY_XCORR_QVALUE]  && match->null_peptide == FALSE ){
+    if ((scores_computed[DECOY_XCORR_QVALUE]) && 
+	(match->null_peptide == FALSE)) {
       fprintf(output_file, float_format, 
 	      get_match_score(match, DECOY_XCORR_QVALUE));
     }
     break;
 #ifdef NEW_COLUMNS
   case DECOY_XCORR_PEPTIDE_QVALUE_COL:
+    if ((scores_computed[DECOY_XCORR_QVALUE]) && 
+	(match->null_peptide == FALSE) &&
+	(match->best_per_peptide == TRUE)) {
+      fprintf(output_file, float_format, 
+	      get_match_score(match, DECOY_XCORR_PEPTIDE_QVALUE));
+    }
     break;
 #endif
   case PERCOLATOR_SCORE_COL:
@@ -688,11 +703,17 @@ static void print_one_match_field(
     break;
 #ifdef NEW_COLUMNS
   case PERCOLATOR_PEPTIDE_QVALUE_COL:
+    if ((scores_computed[PERCOLATOR_SCORE] == TRUE) &&
+	(match->best_per_peptide == TRUE)) {
+      fprintf(output_file, float_format,
+	      get_match_score(match, PERCOLATOR_PEPTIDE_QVALUE));
+    }
     break;
 #endif
   case QRANKER_SCORE_COL:
     if (scores_computed[QRANKER_SCORE] == TRUE) {
-      fprintf(output_file, float_format, get_match_score(match, QRANKER_SCORE));
+      fprintf(output_file, float_format,
+	      get_match_score(match, QRANKER_SCORE));
     }
     break;
   case QRANKER_QVALUE_COL:
@@ -703,6 +724,11 @@ static void print_one_match_field(
     break;
 #ifdef NEW_COLUMNS
   case QRANKER_PEPTIDE_QVALUE_COL:
+    if ((scores_computed[QRANKER_SCORE] == TRUE) &&
+	(match->best_per_peptide == TRUE)) {
+      fprintf(output_file, float_format, 
+	      get_match_score(match, QRANKER_PEPTIDE_QVALUE));
+    }
     break;
 #endif
   case BY_IONS_MATCHED_COL:
@@ -1563,6 +1589,16 @@ void increment_match_pointer_count(
   ++match->pointer_count;
 }
 
+
+/**
+ * Set the best-per-peptide Boolean to TRUE.
+ */
+void set_best_per_peptide(
+  MATCH_T* match ///< the match to work with -in
+  )
+{
+  match->best_per_peptide = TRUE;
+}
 
 /*
  * Local Variables:

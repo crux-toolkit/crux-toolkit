@@ -15,7 +15,7 @@ ulimit -n 1024
 
 # Run the actual tests.
 # N.B. Add a "-u" option to this line to update all of the output files.
-./crux-test.pl -p ../../ crux-test.cmds 1>out 2>error
+./crux-test.pl -u -p ../../ crux-test.cmds 1>out 2>error
 
 # Print an error message if the test aborted.
 if [ $? == 25 ]

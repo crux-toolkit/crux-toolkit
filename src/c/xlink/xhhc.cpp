@@ -245,7 +245,7 @@ BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
   }
 
   // reverse sort the first num_samples of them
-  qsort(scores, num_scores, sizeof(float), compare_floats_descending);
+  sort(scores, scores + num_scores, compareDescending());
 
   // use only a fraction of the samples, the high-scoring tail
   // this parameter is hidden from the user
