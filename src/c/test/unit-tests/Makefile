@@ -11,27 +11,28 @@ DEBUG   = -DNDEBUG -DBOUNDS_CHECK
 DEBUG   = -DDEBUG -g
 
 TESTS = \
-	check-peak.c \
-	check-spectrum.c \
-	check-spectrum_collection.c \
+	check-crux-utils.c \
+	check-database.c \
+	check-generate-peptides-iterator.c \
+	check-index2.c \
 	check-ion.c \
 	check-ion_series.c \
-	check-index2.c \
-	check-scorer.c \
+	check-linked-list.c \
+	check-mass.c \
+	check-match-collection.c \
+	check-match.c \
+	check-modifications.c \
+	check-modified-peptides-iterator.c \
+	check-parameter.c \
+	check-peak.c \
+	check-peptide-modifications.c \
 	check-peptide.c \
 	check-protein.c \
-	check-database.c \
-	check-match.c \
-	check-match-collection.c \
-	check-parameter.c \
-	check-modifications.c \
-	check-peptide-modifications.c \
-	check-linked-list.c \
-	check-generate-peptides-iterator.c \
-	check-modified-peptides-iterator.c \
+	check-qvalue.c \
+	check-scorer.c \
 	check-serialize.c \
-	check-mass.c \
-	check-crux-utils.c \
+	check-spectrum.c \
+	check-spectrum_collection.c \
 	crux-unit-tests.c
 
 CRUX_LIBS = \

@@ -525,6 +525,12 @@ int get_match_b_y_ion_possible(
   MATCH_T* match ///< the match to work -out
   );
 
+/**
+ * Set the best-per-peptide Boolean to TRUE.
+ */
+void set_best_per_peptide(
+  MATCH_T* match ///< the match to work with -in
+  );
 
 #endif //MATCH_H
 

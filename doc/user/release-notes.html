@@ -7,11 +7,16 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Version 1.xx</h2>
+<h2>Version 1.XX</h3>
 
 <h3>Minor changes</h3>
 
 <ul>
+
+<li>
+The default value of the "pi-zero" parameter has been changed from 0.9
+to 1.0.</li>
+
 <li>
 A new option <code>--peptide-list</code> has been added to <code>crux
 create-index</code>.  When set to T, this option causes an ASCII
@@ -19,39 +24,54 @@ file of peptides to be included in the output directory.</li>
 
 </ul>
 
+<hr></hr>
+
 
 <h2>Version 1.33</h2> July 7, 2010
 
 <h3>Major enhancements</h3>
 
 <ul>
-  <li>
+
+<li>
 The command line syntax
 for <code>compute-q-values</code>, <code>percolator</code>
 and <code>q-ranker</code> was modified to allow the programs to read
 from and write to separate directories.</li>
-<li>Fixed a q-ranker/percolator bug giving too many id's for a small q-value.</li>
+
+<li>
+A bug in q-ranker and percolator was fixed.  This bug was introduced
+several versions ago, and it led to erroneously many PSMs receiving
+very small q-values.  The problem relates to the scaling of the delta
+Cn feature, and the fix is a temporary stopgap: we remove the feature
+entirely.  The next version should have the corrected feature in
+place.</li>
+
 </ul>
 
 <h3>Minor changes</h3>
 
 <ul>
+
 <li>
-A new option "<code>--min-peaks</code>" has been added to set a filter 
+A new option <code>--min-peaks</code> has been added to set a filter 
 for the minimum number of peaks a spectrum must have in order for it
 to be searched.  The default minimum is 20 peaks.</li>
+
 <li>
 The hardcoded limit for the number of proteins allowed in a database 
 has been removed.</li>
+
 <li>
 The hardcoded limit for the number of spectra and the number of 
 peaks/spectrum has been removed.</li>
+
 <li>
-A new option "<code>--xcorr-var-bin</code>" has been added to toggle the
+A new option <code>--xcorr-var-bin</code> has been added to toggle the
 new binning of the m/z axis.</li>
 
 <li>
-The option "<code>--max-ion-charge</code>" now places a limit on the
+The option <code>--max-ion-charge</code> now places a limit on the
 maximum charge state of the ions generated for the xcorr theoretical 
 spectra for <code>crux search-for-xlinks</code>.  This change is also 
 supported by <code>xlink-assign-ions</code>.
@@ -72,7 +92,9 @@ and support has been provided for the <code>"prevents&nbsp;cleavage"</code>
 sub-option.</li>
 
 </ul>
+
 <hr></hr>
+
 <h2>Version 1.32</h2> July 6, 2010
 
 <h3>Major enhancement</h3>
@@ -84,7 +106,7 @@ Version 1.32 includes changes only to Tide. A new binary is introduced
 &mdash; a modified version of ProteoWizard's <b>msconvert</b> program
 &mdash; that is capable of converting spectrum data from a wide range
 of file formats into Tide-readable <i>.spectrumrecords</i> input
-files.
+files.</li>
 
 </ul>
 
@@ -95,12 +117,12 @@ files.
 <li>
 <b>tide-import-spectra</b> is removed from the distribution. Although
 it was faster than msconvert, it was specific to ms2 files, whereas
-msconvert now works with any ProteoWizard-supported file format.
+msconvert now works with any ProteoWizard-supported file format.</li>
 
 <li>
 A standalone utility for reading binary <i>.spectrumrecords</i> files
 is introduced, called <b>read-spectrumrecords</b>. This program is
-useful, for example, for visually checking the output of msconvert.
+useful, for example, for visually checking the output of msconvert.</li>
 
 <li>
 Demo input files <b>worm-06-10000.spectrumrecords</b>
@@ -110,7 +132,7 @@ introduction of Tide-compatible msconvert, ms2 files are in no way
 special to Tide anymore. Any ProteoWizard-supported file format can be
 converted to the <i>.spectrumrecords</i> format for use with
 Tide. Starting with data files in Tide's spectrumrecords format
-eliminates the conversion step in the Tide search demo.
+eliminates the conversion step in the Tide search demo.</li>
 
 <li>
 The old demo scripts worm-demo.sh and yeast-demo.sh have each been
@@ -118,7 +140,7 @@ replaced by a pair of new scripts that demonstrate the indexing and
 searching steps separately. This is in order to highlight the two-step
 process and the fact that indexing needs to be done just once for each
 fasta file, whereafter the index may be reused indefinitely to perform
-searches.
+searches.</li>
 
 </ul>
 
@@ -165,8 +187,8 @@ command was issued, the name of the computer on which the command was
 run, and the elapsed wall clock time at the end of the run.</li>
 
 <li>
-The command line option "<code>--version T</code>" has been replaced
-with a command "<code>crux version</code>" that prints the version
+The command line option <code>--version T</code> has been replaced
+with a command <code>crux version</code> that prints the version
 number to standard output and then exits.</li>
 
 <li>
