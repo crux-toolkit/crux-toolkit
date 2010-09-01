@@ -22,6 +22,10 @@ A new option <code>--peptide-list</code> has been added to <code>crux
 create-index</code>.  When set to T, this option causes an ASCII
 file of peptides to be included in the output directory.</li>
 
+<li>
+The default bin offset was returned to 0.68.  It had erroniously been
+changed to 0 in version 1.33.
+
 </ul>
 
 <hr></hr>
@@ -68,7 +72,10 @@ peaks/spectrum has been removed.</li>
 
 <li>
 A new option <code>--xcorr-var-bin</code> has been added to toggle the
-new binning of the m/z axis.</li>
+new binning of the m/z axis.  The default bin offset was returned back
+to 0, but the default bin width is still 1.000508. (<i>Note: this
+erronious change will reverted in version 1.34)
+</li>
 
 <li>
 The option <code>--max-ion-charge</code> now places a limit on the
@@ -179,7 +186,8 @@ tools.</li>
 <li>
 The default location of the left edge of the first bin along the m/z
 axis is 0.68, rather than 0.0.  This change makes bin edges less
-likely to fall near fragment peak locations.</li>
+likely to fall near fragment peak locations.  The default bin width
+has also changed from 1.001141 to 1.000508</li>
 
 <li>
 The log file now includes information about the date and time that the
@@ -193,7 +201,7 @@ number to standard output and then exits.</li>
 
 <li>
 The header for the feature file produced optionally by 
-<code>crux percolator</crux> and <code>crux q-ranker</code> now includes names
+<code>crux percolator</code> and <code>crux q-ranker</code> now includes names
 for the first two columns, scan number and label (i.e. target or decoy peptide).
 
 </ul>
