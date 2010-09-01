@@ -1143,7 +1143,7 @@ double get_mz_bin_offset() {
   if (get_boolean_parameter("xcorr-var-bin")) {
     return get_double_parameter("mz-bin-offset");
   } else {
-    return 0;
+    return SMART_MZ_OFFSET;
   }
 }
 
