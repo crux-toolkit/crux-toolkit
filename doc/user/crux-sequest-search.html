@@ -219,12 +219,15 @@ fall within this window.  For the <code>mass</code> window-type, the
 spectrum precursor m/z is converted to mass, and the window is defined
 as that mass &plusmn;precursor-window. The peptide mass is computed as the
 sum of the average amino acid masses plus 18 Da for the terminal OH
-group, plus 1 Da for each charge.  The <code>mz</code> window-type
-simply uses the mass divided by the charge.  For the parts-per-million
-(<code>ppm</code>) window-type, the lower bound of the window is
-defined as spectrum mass / (1.0 + (precursor-window / 1000000)) and the
-upper bound is defined as spectrum mass / (1.0 - (precursor-window /
-1000000)).  Default = mass.</li>
+group, plus 1 Da for each charge.  The <code>mz</code> window-type calculates
+the &plusmin; window for the precursor m/z location and then coverts the 
+resulting m/z range to the peptide mass range using the precursor charge. 
+For the parts-per-million (<code>ppm</code>) window-type, the spectrum mass is 
+calculated as in the <code>mass</code> type.  The lower bound of the mass 
+window is then defined as the 
+spectrum mass / (1.0 + (precursor-window / 1000000)) and the upper bound 
+is defined as spectrum mass / (1.0 - (precursor-window / 1000000)).  
+Default = mass.</li>
 
 <li>
 <code>use-mstoolkit &lt;T|F&gt;</code> &ndash;
