@@ -462,6 +462,10 @@ void initialize_parameters(void){
       "possible psms for each spectrum. Default is the SEQUEST-style xcorr."
       " Crux also offers a p-value calculation for each psm based on xcorr "
       "or sp (xcorr-pvalue, sp-pvalue).", "false"); 
+  set_boolean_parameter("compute-sp", FALSE,
+      "Compute the Sp score for all candidate peptides.  Default=F",
+      "Available for search-for-matches.  Sp scoring is always done for "
+      "sequest-search.", "true");
   set_boolean_parameter("compute-p-values", FALSE, 
       "Compute p-values for the main score type. Default=F.",
       "Currently only implemented for XCORR.", "true");
@@ -665,7 +669,7 @@ void initialize_parameters(void){
 
   // **** percolator options. ****
   set_boolean_parameter("feature-file", FALSE,
-     "Optional file into which psm features are printed.",
+     "Optional file into which psm features are printed. Default=F.",
      "Available for percolator and q-ranker.  File will be named "
      "<fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.",
      "true");

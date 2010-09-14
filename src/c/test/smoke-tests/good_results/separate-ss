@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Sep  1 16:12:35 2010
+H	StartTime	Mon Sep 13 15:01:25 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2361,7 +2361,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Sep  1 16:12:35 2010
+H	StartTime	Mon Sep 13 15:01:25 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4721,13 +4721,13 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4855	1489.731934	1.5115745	50.942402	3	0.48464414	3									4	24	4	NTLFVELVLEQGK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK				
 159	2	745.7500	1489.4855	1486.619507	0	34.398674	4	-0.35609987	4									4	26	4	SLTPNPGNNQMGEK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK				
 INFO: CPU: ranunculus
-INFO: Wed Sep  1 16:12:35 PDT 2010
+INFO: Mon Sep 13 15:01:25 PDT 2010
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96, charge 2, search number 100
-INFO: Elapsed time: 2.37 s
+INFO: Elapsed time: 2.38 s
 INFO: Finished crux sequest-search
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
@@ -4996,6 +4996,11 @@ fileroot=separate
 # Available for q-ranker.
 no-xval=FALSE
 
+# Compute the Sp score for all candidate peptides.  Default=F
+# Available for search-for-matches.  Sp scoring is always done for
+# sequest-search.
+compute-sp=FALSE
+
 # Set level of output to stderr (0-100).  Default=30.
 # Available for all crux programs.  Each level prints the following
 # messages, including all those at lower verbosity levels: 0-fatal
@@ -5133,7 +5138,7 @@ precision=8
 # num-decoys-per-target.
 decoy-location=separate-decoy-files
 
-# Optional file into which psm features are printed.
+# Optional file into which psm features are printed. Default=F.
 # Available for percolator and q-ranker.  File will be named
 # <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
 feature-file=FALSE
@@ -5213,7 +5218,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Sep  1 16:12:35 2010
+H	StartTime	Mon Sep 13 15:01:25 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

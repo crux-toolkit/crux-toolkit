@@ -26,6 +26,13 @@ file of peptides to be included in the output directory.</li>
 The default bin offset was returned to 0.68.  It had erroniously been
 changed to 0 in version 1.33.
 
+<li>
+A new option <code>--compute-sp</code> has been added to <code>crux
+search-for-matches</code>.  When set to true, all candidate peptides
+will be scored by Sp in addition to xcorr.  Recommended prior
+to <code>percolator</code> or <code>q-ranker</code>.
+
+
 </ul>
 
 <hr></hr>

@@ -239,6 +239,14 @@ info, 60-detailed debug info. Default = 30.
 </UL>
 <B>Parameter file options:</B>
 <ul>
+
+<li>
+<code>compute-sp &lt;T|F&gt;</code> &ndash;
+Have <code>search-for-matches</code> compute the Sp score for all
+candidate peptides, which is recommended if results are to be analyzed
+by <code>percolator</code> or <code>q-ranker</code>.  
+<code>sequst-search</code> always computes Sp.  Default = F.
+
 <li>
 <code>fragment-mass &lt;average|mono&gt;</code> &ndash; 
 Which isotopes to use in calcuating fragment ion mass (average,

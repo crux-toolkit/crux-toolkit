@@ -154,7 +154,8 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
                               peptide_iterator,
                               FALSE, // not decoy
                               FALSE, // don't save scores for p-values
-                              TRUE   // do preliminary scoring
+                              TRUE,  // do preliminary Sp scoring
+                              TRUE   // filter by Sp
                               ); 
 
       // add matches to each decoy
@@ -177,7 +178,8 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
                     peptide_iterator,
                     TRUE,  // is decoy
                     FALSE, // don't save scores for p-values
-                    TRUE   // do preliminary scoring
+                    TRUE,  // do preliminary Sp scoring
+                    TRUE   // filter by Sp
                     ); 
       }
 

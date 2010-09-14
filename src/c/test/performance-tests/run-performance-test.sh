@@ -43,7 +43,7 @@ for searchtool in sequest-search search-for-matches; do
      search_parameter=""
   else
      shortname=search
-     search_parameter="--compute-p-values T"
+     search_parameter="--compute-p-values T --compute-sp T"
   fi
 
   # Run the search.
@@ -83,7 +83,7 @@ for searchtool in sequest-search search-for-matches; do
   if [[ $searchtool == "sequest-search" ]]; then
     echo replot \"$shortname/percolator.target.txt\" using 13:0 title \"$shortname crux percolator\" with lines >> $gnuplot
   else
-    echo replot \"$shortname/percolator.target.txt\" using 12:0 title \"$shortname crux percolator\" with lines >> $gnuplot
+    echo replot \"$shortname/percolator.target.txt\" using 14:0 title \"$shortname crux percolator\" with lines >> $gnuplot
   fi
 
   # Run q-ranker.
@@ -98,7 +98,7 @@ for searchtool in sequest-search search-for-matches; do
   if [[ $searchtool == "sequest-search" ]]; then
     echo replot \"$shortname/qranker.target.txt\" using 12:0 title \"$shortname q-ranker\" with lines >> $gnuplot
   else
-    echo replot \"$shortname/qranker.target.txt\" using 11:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+    echo replot \"$shortname/qranker.target.txt\" using 13:0 title \"$shortname q-ranker\" with lines >> $gnuplot
   fi
   
   # Run Lukas's percolator
