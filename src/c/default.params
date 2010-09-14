@@ -60,13 +60,6 @@ isotopic-mass=average
 # Available for crux search-for-xlinks program.
 xlink-include-selfloops=TRUE
 
-# Specify a variable modification to apply to N-terminus of peptides. 
-# <mass change>:<max distance from protein n-term (-1 for no max)>
-# Available from parameter file for crux-generate-peptides and
-# crux-search-for-matches and the the same must be used for crux
-# compute-q-value.
-nmod=NO MODS
-
 # Window type to use for selecting candidate peptides. 
 # <string>=mass|mz|ppm. Default=mass.
 # Available for search-for-matches, search-for-xlinks.
@@ -113,9 +106,10 @@ D=0.000000
 # For parameter file only.  Default=no mass change.
 E=0.000000
 
-# Specify the width of the bins used to discretize the m/z axis. 
-# Default=1.0005079 for monoisotopic mass or 1.0011413 for average mass.
-# Available for crux-search-for-matches.
+# Specify the width of the bins used to discretize the m/z axis.  Also
+# used as tolerance for assigning ions.  Default=1.0005079 for
+# monoisotopic mass or 1.0011413 for average mass.
+# Available for crux-search-for-matches and xlink-assign-ions.
 mz-bin-width=1.000508
 
 # Change the mass of all amino acids 'F' by the given amount.
@@ -222,7 +216,7 @@ overwrite=FALSE
 parameter-file=__NULL_STR
 
 # The minimum number of peaks a spectrum must have for it to be
-# searched. Default=100.
+# searched. Default=20.
 # Parameter file only for search-for-matches and sequest-search.
 min-peaks=20
 
@@ -230,6 +224,11 @@ min-peaks=20
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.
 nh3=0
+
+# Use variable binning for XCORR.  If set to true, mz-bin-width, and
+# mz-bin-offset parameters are utilized
+# Available for crux-search-for-matches.
+xcorr-var-bin=FALSE
 
 # Number of psms per spectrum to score with xcorr after preliminary
 # scoring with Sp. Set to 0 to score all psms with xcorr. Default=500.
@@ -262,6 +261,11 @@ print-search-progress=10
 # Available for crux-search-for-matches
 use-mstoolkit=FALSE
 
+# The estimated percent of target scores that are drawn from the null
+# distribution.
+# Used by compute-q-values, percolator and q-ranker
+pi-zero=1.000000
+
 # Prefix added to output file names. Default=none. 
 # Used by crux create-index, crux search-for-matches, crux
 # compute-q-values, and crux percolator.
@@ -270,6 +274,11 @@ fileroot=__NULL_STR
 # Turn off cross-validation to select hyperparameters.
 # Available for q-ranker.
 no-xval=FALSE
+
+# Compute the Sp score for all candidate peptides.  Default=F
+# Available for search-for-matches.  Sp scoring is always done for
+# sequest-search.
+compute-sp=FALSE
 
 # Set level of output to stderr (0-100).  Default=30.
 # Available for all crux programs.  Each level prints the following
@@ -290,6 +299,11 @@ mz-bin-offset=0.680000
 # Available in the parameter file for any command that prints peptides
 # sequences.  Example: TRUE is SE[12.40]Q and FALSE is SE[10.00,2.40]Q
 display-summed-mod-masses=TRUE
+
+# Create an ASCII version of the peptide list.  Default=F.
+# Creates an ASCII file in the output directory containing one peptide
+# per line.
+peptide-list=FALSE
 
 # Print the theoretical spectrum
 # Available for xlink-predict-peptide-ions (Default=F).
@@ -368,9 +382,12 @@ max-length=50
 # line per peptide per protein occurence when false.  
 unique-peptides=TRUE
 
-# Predict ions up to this charge state (1,2,3) or to the charge state of
-# the peptide (peptide).  Default='peptide'.
-# Available only for predict-peptide-ions.  Set to 'peptide' for search.
+# Predict ions up to max charge state (1,2,...,6) or up to the charge
+# state of the peptide (peptide).  If the max-ion-charge is greater than
+# the charge state of the peptide, then the max is the peptide charge.
+# Default='peptide'.
+# Available for predict-peptide-ions and search-for-xlinks. Set to
+# 'peptide' for search.
 max-ion-charge=peptide
 
 # The maximum mass of peptides to consider. Default=7200.
@@ -379,21 +396,13 @@ max-ion-charge=peptide
 # crux-search-for-matches.
 max-mass=7200.000000
 
-# Specify a variable modification to apply to peptides.  <mass
-# change>:<aa list>:<max per peptide>. Default=no mods.
-# Available from parameter file for crux-generate-peptides and
-# crux-search-for-matches and the the same must be used for crux
-# compute-q-value.
-mod=NO MODS
-
 # The minimum mass of peptides to consider. Default=200.
 # Available from command line or parameter file for crux-create-index
 # and crux-generate-peptides. Parameter file only for
 # crux-search-for-matches.
 min-mass=200.000000
 
-# Set the precision for masses and scores written to sqt and text files.
-# Default=8.
+# Set the precision for scores written to sqt and text files. Default=8.
 # Available from parameter file for crux search-for-matches, percolator,
 # and compute-q-values.
 precision=8
@@ -443,14 +452,6 @@ h2o=0
 # Currently only implemented for XCORR.
 compute-p-values=FALSE
 
-# Specify a variable modification to apply to C-terminus of peptides.
-# <mass change>:<max distance from protein c-term (-1 for no max)>.
-# Default=no mods.
-# Available from parameter file for crux-generate-peptides and
-# crux-search-for-matches and the the same must be used for crux
-# compute-q-value.
-cmod=NO MODS
-
 # The number of PSMs per spectrum writen to the output  file(s). 
 # Default=5.
 # Available from parameter file for crux-search-for-matches.
@@ -467,4 +468,28 @@ xlink-include-linears=TRUE
 # Print peptide sequence (T,F). Default=F.
 # Available only for crux-generate-peptides.
 output-sequence=FALSE
+
+# Specify a variable modification to apply to peptides.  <mass
+# change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents
+# cross-link>.  Sub-parameters prevents cleavage and prevents cross-link
+# are optional (T|F).Default=no mods.
+# Available from parameter file for crux-generate-peptides and
+# crux-search-for-matches and the the same must be used for crux
+# compute-q-value.
+mod=NO MODS
+
+# Specify a variable modification to apply to N-terminus of peptides. 
+# <mass change>:<max distance from protein n-term (-1 for no max)>
+# Available from parameter file for crux-generate-peptides and
+# crux-search-for-matches and the the same must be used for crux
+# compute-q-value.
+nmod=NO MODS
+
+# Specify a variable modification to apply to C-terminus of peptides.
+# <mass change>:<max distance from protein c-term (-1 for no max)>.
+# Default=no mods.
+# Available from parameter file for crux-generate-peptides and
+# crux-search-for-matches and the the same must be used for crux
+# compute-q-value.
+cmod=NO MODS
 

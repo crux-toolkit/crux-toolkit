@@ -293,7 +293,8 @@ int add_matches(
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy,     ///< are peptides to be shuffled
   BOOLEAN_T store_scores, ///< save scores for p-val estimation
-  BOOLEAN_T do_prelim_scoring ///< start with SP scoring
+  BOOLEAN_T do_sp_scoring, ///< start with SP scoring
+  BOOLEAN_T filter_by_sp  ///< truncate matches based on Sp scores
 ){
 
   if( matches == NULL || peptide_iterator == NULL || spectrum == NULL ){
@@ -314,17 +315,19 @@ int add_matches(
 
   int xcorr_max_rank = get_int_parameter("psms-per-spectrum-reported");
 
-  // two scoring steps for sequest-search
-  if( do_prelim_scoring ){
+  // optional Sp score on all candidate peptides
+  if( do_sp_scoring ){
     score_matches_one_spectrum(SP, matches, spectrum, charge,
                                FALSE); // don't store scores
     populate_match_rank_match_collection(matches, SP);
-    save_top_sp_match(matches);
-    int sp_max_rank = get_int_parameter("max-rank-preliminary");
-    truncate_match_collection(matches, 
-                              sp_max_rank + 1, // extra for deltacn of last
-                              SP);
-    xcorr_max_rank = sp_max_rank;
+    if( filter_by_sp ){ // keep only high-ranking sp psms
+      save_top_sp_match(matches);
+      int sp_max_rank = get_int_parameter("max-rank-preliminary");
+      truncate_match_collection(matches, 
+                                sp_max_rank + 1, // extra for deltacn of last
+                                SP);
+      xcorr_max_rank = sp_max_rank;
+    }
   }
 
   // main scoring

@@ -76,6 +76,7 @@ int search_main(int argc, char** argv){
     "overwrite",
     "num-decoys-per-target",
     "decoy-location",
+    "compute-sp",
     "compute-p-values",
     "spectrum-min-mass",
     "spectrum-max-mass",
@@ -396,7 +397,8 @@ int search_pep_mods(
                             peptide_iterator,
                             is_decoy,
                             store_scores,
-                            FALSE // don't do prelim scoring
+                            get_boolean_parameter("compute-sp"),
+                            FALSE // don't filtery by Sp
                             );
     
     carp(CARP_DEBUG, "Added %i matches", added);
@@ -459,9 +461,9 @@ void print_spectrum_matches(
       }
       
       // sort and rank
-      if( get_match_collection_scored_type(merged_decoy_psms, SP) == TRUE ){
-        populate_match_rank_match_collection(merged_decoy_psms, SP);
-      }
+      // NOTE (BF 09-14-10): since the multiple decoy collections have already
+      // been truncated, the merged ranks aren't accurate for the total space
+      // of decoys searched
       populate_match_rank_match_collection(merged_decoy_psms, XCORR);
       
       output_files.writeMatches(target_psms, &merged_decoy_psms, 

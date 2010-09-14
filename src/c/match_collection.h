@@ -98,7 +98,8 @@ int add_matches(
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy,     ///< do we shuffle the peptides
   BOOLEAN_T store_scores, ///< TRUE means save scores in xcorrs[]
-  BOOLEAN_T do_prelim_score///< TRUE means do Sp before xcorr
+  BOOLEAN_T do_sp_score,  ///< TRUE means do Sp before xcorr
+  BOOLEAN_T filter_by_sp  ///< TRUE means keep only high sp scoring psms
 );
 
 /**
