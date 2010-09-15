@@ -47,10 +47,10 @@
 1 = analyze_matches_existing = good_results/analyze_matches_existing.percolator.target.txt = crux percolator --overwrite T --output-dir existing_search test.fasta existing_search; cat existing_search/percolator.target.txt = 'Time' 'Database'
 
 # Search for matches with Sp
-1 = search_sp = good_results/no-sp.txt = crux search-for-matches --parameter-file params/sp --output-dir crux-output-sp test.ms2 test.fasta; cat crux-output-sp/search.target.txt
+1 = search_sp = good_results/sp.search.target.txt = crux search-for-matches --parameter-file params/sp --output-dir crux-output-sp test.ms2 test.fasta; cat crux-output-sp/search.target.txt
 
 # Percolate search-for-matches results with sp
-1 = percolator = good_results/analyze_matches_no_ops_test_search.percolator.tartet.txt =  crux percolator --parameter-file params/sp --output-dir crux-output-sp test.fasta crux-output-sp; cat crux-output-sp/percolator.target.txt = 'Time'
+1 = percolator = good_results/sp.percolator.target.txt =  crux percolator --parameter-file params/sp --output-dir crux-output-sp test.fasta crux-output-sp; cat crux-output-sp/percolator.target.txt = 'Time'
 
 # Search and estimate p-values
 0 = search_pvalues = good_results/search_pvalues.target.txt = rm -rf crux-output; crux search-for-matches --parameter-file params/pval demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt = 'Time'
