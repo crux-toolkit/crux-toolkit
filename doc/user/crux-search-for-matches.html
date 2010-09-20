@@ -119,6 +119,16 @@ percolator</code>, <code>crux compute-q-values</code>, and <code>crux
 q-ranker</code>.
 </li>
 
+
+<li>
+<b>search.target.pep.xml</b>: a file containing the PSMs in pepxml format. See 
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
+pep xml file format</a> for further reference. This file can be used as input 
+to some of the tools in the 
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
+Transproteomic Pipeline</a>.
+</li>
+
 <li>
 <b>search.log.txt</b>: a log file containing a copy of all messages
 that were printed to stderr.
@@ -127,7 +137,7 @@ that were printed to stderr.
 
 <p>
 If decoys are enabled using <code>--num-decoys-per-target</code>, then
-files called search.decoy.txt are also produced.</p>
+files called search.decoy.txt and search.decoy.pep.xml are also produced.</p>
 
 
 <B>Options:</B>

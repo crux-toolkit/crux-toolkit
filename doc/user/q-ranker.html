@@ -62,6 +62,40 @@ algorithms.  All such files in the given directory are analyzed
 jointly.</li>
 
 </ul>
+<b>Output:</b>
+<ul>
+  The program writes files to the folder <code>crux-output</code> by default.
+The name of the output folder can be set by the user using the <code>--output-dir</code> option.
+The following files will be created:</p>
+
+<li>
+<b>qranker.params.txt</b>:
+a file containing the name and value of all parameters/options for the current operation.  
+Not all parameters in the file may have been used in the operation.  
+The resulting file can be used with the <code>--parameter-file</code>
+option for other crux programs.
+</li>
+
+<li>
+<b>qranker.target.txt</b>: a tab-delimited text file containing the PSMs.
+See <a href="txt-format.html">txt file format</a> for a list of the
+fields.</li>
+
+<li>
+<b>qranker.target.pep.xml</b>: a file containing the PSMs in pepxml format. See
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
+pep xml file format</a> for further reference. This file can be used as input 
+to some of the tools in the 
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
+Transproteomic Pipeline</a>.
+</li>
+
+<li>
+<b>qranker.log.txt</b>: a log file containing a copy of all messages that were
+printed to stderr.
+</li>
+</ul>
+
 
 <b>Options:</b>
 
