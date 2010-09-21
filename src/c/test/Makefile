@@ -6,7 +6,7 @@
 # them hard to debug.
 
 # Run all tests
-check: check-unit-tests check-smoke-tests performance-tests
+check: check-unit-tests check-cpp-unit-tests check-smoke-tests performance-tests
 
 # Build the unit test executable
 unit-tests:
@@ -15,6 +15,14 @@ unit-tests:
 # Run just the unit tests
 check-unit-tests:
 	cd unit-tests && $(MAKE) check
+
+# Build the cpp-unit test executable
+cpp-unit-tests:
+	cd cppunit-tests && ./configure && $(MAKE)
+
+# Run just the cpp-unit tests
+check-cpp-unit-tests:
+	cd cppunit-tests && $(MAKE) check
 
 # Run just the smoke tests
 check-smoke-tests:
