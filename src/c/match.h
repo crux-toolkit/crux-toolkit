@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <set>
 #include <ctype.h>
 #include <float.h>
 #include <unistd.h>
@@ -24,6 +25,7 @@
 #include "objects.h"
 #include "parameter.h"
 #include "scorer.h"
+
 
 /* Global variables */
 static const FLOAT_T NOT_SCORED = FLT_MIN;
@@ -248,6 +250,67 @@ void print_match(
 void print_match_sqt(
   MATCH_T* match, ///< the match to print -in  
   FILE* file      ///< output stream -out
+);
+
+
+
+/**
+ * \brief Print the match information in xml format to the given file
+ *
+ * Prints out the match information in the format described as pep xml.
+ * Fills out as much information as available.
+ *
+ */
+void print_match_xml(
+  MATCH_T* match,
+  FILE* output_file,
+  FLOAT_T spectrum_mass,
+  const BOOLEAN_T* scores_computed
+);
+
+
+/**
+ * \brief Counts the number of internal cleavages
+ *
+ */
+int get_num_internal_cleavage(
+  char* peptide_sequence, 
+  ENZYME_T enzyme
+);
+
+
+/**
+ * \brief Counts the number of terminal cleavage. Either 0, 1, or 2
+ *
+ */
+int get_num_terminal_cleavage(
+  char* peptide_sequence, 
+  char flanking_aas_prev,
+  char flanking_aas_next,
+  ENZYME_T enzyme
+);
+
+
+/**
+ * \brief prints both variable and static modifications for 
+ *  peptide sequence
+ *
+ *
+ */
+void print_modifications_xml(
+  char* mod_seq,
+  char* peptide_sequence,
+  FILE* output_file
+);
+
+/**
+ * \brief Takes a empty set of pairs of strings and a peptide
+ *  and fills the set with protein id paired with protein annotation
+ *
+ */
+void get_information_of_proteins(
+  std::set<std::pair<char*, char*> >& protein_info,
+  PEPTIDE_T* peptide
 );
 
 /**

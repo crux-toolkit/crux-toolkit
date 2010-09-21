@@ -52,7 +52,7 @@ const char* usage_str = "Usage: crux <command> [options] <argument>\n"
  * \callgraph
  */
 static MATCH_COLLECTION_T* run_percolator_or_qranker(
-  COMMAND_T command,					      
+  COMMAND_T command,                                          
   char* input_directory, 
   char* fasta_file, 
   OutputFiles& output){ 
@@ -122,14 +122,14 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
       // Call that initiates q-ranker or percolator.
       switch (command) {
       case PERCOLATOR_COMMAND:
-	pcInitiate(
+        pcInitiate(
           (NSet)get_match_collection_iterator_number_collections(
                   match_collection_iterator), 
           NUM_FEATURES, 
           num_spectra, 
           feature_names, 
           pi0);
-	break;
+        break;
       case QRANKER_COMMAND:
         qcInitiate(
             (NSet)get_match_collection_iterator_number_collections(
@@ -148,8 +148,8 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
       case VERSION_COMMAND:
       case INVALID_COMMAND:
       case NUMBER_COMMAND_TYPES:
-	carp(CARP_FATAL, "Unknown command type.");
-	break;
+        carp(CARP_FATAL, "Unknown command type.");
+        break;
       }
       free(num_spectra);
 
@@ -157,30 +157,30 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
       // 0 is quiet, 2 is default, 5 is more than you want
       switch (command) {
       case PERCOLATOR_COMMAND:
-	if(verbosity < CARP_ERROR){
-	  pcSetVerbosity(0);
-	}    
-	else if(verbosity < CARP_INFO){
-	  pcSetVerbosity(1); // FIXME
-	}
-	else{
-	  pcSetVerbosity(5); // FIXME
-	}
-	break;
+        if(verbosity < CARP_ERROR){
+          pcSetVerbosity(0);
+        }    
+        else if(verbosity < CARP_INFO){
+          pcSetVerbosity(1); // FIXME
+        }
+        else{
+          pcSetVerbosity(5); // FIXME
+        }
+        break;
       case QRANKER_COMMAND:
-	if(verbosity < CARP_ERROR){
-	  qcSetVerbosity(0);
-	}    
-	else if(verbosity < CARP_INFO){
-	  qcSetVerbosity(1);
-	}
-	else{
-	  qcSetVerbosity(5);
-	}
-	break;
+        if(verbosity < CARP_ERROR){
+          qcSetVerbosity(0);
+        }    
+        else if(verbosity < CARP_INFO){
+          qcSetVerbosity(1);
+        }
+        else{
+          qcSetVerbosity(5);
+        }
+        break;
       default:
-	carp(CARP_FATAL, "Unknown command type.");
-	break;
+        carp(CARP_FATAL, "Unknown command type.");
+        break;
       }
     }
 
@@ -195,18 +195,18 @@ static MATCH_COLLECTION_T* run_percolator_or_qranker(
       output.writeMatchFeatures(match, features, NUM_FEATURES);
       switch (command) {
       case PERCOLATOR_COMMAND:
-	pcRegisterPSM((SetType)set_idx, 
-		      NULL, // no sequence used
-		      features);
-	break;
+        pcRegisterPSM((SetType)set_idx, 
+                      NULL, // no sequence used
+                      features);
+        break;
       case QRANKER_COMMAND:
-	qcRegisterPSM((SetType)set_idx,
-		      get_match_sequence_sqt(match),
-		      features);
-	break;
+        qcRegisterPSM((SetType)set_idx,
+                      get_match_sequence_sqt(match),
+                      features);
+        break;
       default:
-	carp(CARP_FATAL, "Unknown command type.");
-	break;
+        carp(CARP_FATAL, "Unknown command type.");
+        break;
       }
       
       free(features);
@@ -319,15 +319,15 @@ static void analyze_matches_main(
   switch(command) {
   case QVALUE_COMMAND:
     initialize_run(command, argument_list, num_arguments,
-		   qvalue_option_list, qvalue_num_options, argc, argv);
+                   qvalue_option_list, qvalue_num_options, argc, argv);
     break;
   case PERCOLATOR_COMMAND:
     initialize_run(command, argument_list, num_arguments,
-		   percolator_option_list, percolator_num_options, argc, argv);
+                   percolator_option_list, percolator_num_options, argc, argv);
     break;
   case QRANKER_COMMAND:
     initialize_run(command, argument_list, num_arguments,
-		   qranker_option_list, qranker_num_options, argc, argv);
+                   qranker_option_list, qranker_num_options, argc, argv);
     break;
   default:
     carp(CARP_FATAL, "Unknown command type.");
@@ -347,14 +347,14 @@ static void analyze_matches_main(
   switch(command) {
   case QVALUE_COMMAND:
     match_collection = run_qvalue(input_directory,
-				  protein_database_name);
+                                  protein_database_name);
     break;
   case PERCOLATOR_COMMAND:
   case QRANKER_COMMAND:
     match_collection = run_percolator_or_qranker(command,
-						 input_directory,
-						 protein_database_name,
-						 output);
+                                                 input_directory,
+                                                 protein_database_name,
+                                                 output);
     break;
   default:
     carp(CARP_FATAL, "Unknown command type.");
@@ -364,9 +364,10 @@ static void analyze_matches_main(
   carp(CARP_INFO, "Outputting matches.");
   output.writeMatches(match_collection);
 
+
   // MEMLEAK below causes seg fault (or used to)
   // free_match_collection(match_collection);
-
+  output.writeFooters();
   // clean up
   free(input_directory);
   free(protein_database_name);

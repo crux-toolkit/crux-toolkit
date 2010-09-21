@@ -687,8 +687,8 @@ void sort_match_collection(
 
   // Do the sort.
   qsort_match(match_collection->match,
-	      match_collection->match_total,
-	      compare_match_function);
+              match_collection->match_total,
+              compare_match_function);
   match_collection->last_sorted = sort_by;
 }
 
@@ -1232,7 +1232,7 @@ BOOLEAN_T score_matches_one_spectrum(
                                                strlen(sequence),
                                                FALSE);
       carp(CARP_DETAILED_DEBUG, "Second score %f for %s (null:%i)",
-	   score, mod_seq,get_match_null_peptide(match));
+           score, mod_seq,get_match_null_peptide(match));
       free(mod_seq);
     )
     free(sequence);
@@ -1296,14 +1296,14 @@ BOOLEAN_T compute_p_values(
   // Print separator in the decoy p-value file.
   if (output_pvalue_file) {
     fprintf(output_pvalue_file, "# scan: %d charge: %d candidates: %d\n", 
-	    scan_number, match_collection->charge,
-	    match_collection->experiment_size);
+            scan_number, match_collection->charge,
+            match_collection->experiment_size);
     fprintf(output_pvalue_file, 
-	    "# eta: %g beta: %g shift: %g correlation: %g\n",
-	    match_collection->eta, 
-	    match_collection->beta,
-	    match_collection->shift,
-	    match_collection->correlation);
+            "# eta: %g beta: %g shift: %g correlation: %g\n",
+            match_collection->eta, 
+            match_collection->beta,
+            match_collection->shift,
+            match_collection->correlation);
   }
 
   // iterate over all matches 
@@ -1313,10 +1313,10 @@ BOOLEAN_T compute_p_values(
 
     // Get the Weibull p-value.
     double pvalue = compute_weibull_pvalue(get_match_score(cur_match, 
-							   main_score),
-					   match_collection->eta, 
-					   match_collection->beta,
-					   match_collection->shift);
+                                                           main_score),
+                                           match_collection->eta, 
+                                           match_collection->beta,
+                                           match_collection->shift);
 
     // Print the pvalue, if requested
     if (output_pvalue_file) {
@@ -1382,18 +1382,18 @@ BOOLEAN_T compute_decoy_q_values(
     if (peptide_level) {
       // Skip PSMs that are not top-scoring for their peptide.
       if (!is_peptide_level(cur_match)) {
-	score = NOT_SCORED;
-	set_match_score(cur_match, DECOY_XCORR_PEPTIDE_QVALUE, NOT_SCORED);
+        score = NOT_SCORED;
+        set_match_score(cur_match, DECOY_XCORR_PEPTIDE_QVALUE, NOT_SCORED);
       } else {
-	set_match_score(cur_match, DECOY_XCORR_PEPTIDE_QVALUE, SCORE);
+        set_match_score(cur_match, DECOY_XCORR_PEPTIDE_QVALUE, SCORE);
       }
     } else {
     */
     set_match_score(cur_match, DECOY_XCORR_QVALUE, score);
     carp(CARP_DETAILED_DEBUG, 
-	 "match %i xcorr or pval %f num targets %i, num decoys %i, score %f",
-	 match_idx, get_match_score(cur_match, XCORR), 
-	 (int)num_targets, (int)num_decoys, score);
+         "match %i xcorr or pval %f num targets %i, num decoys %i, score %f",
+         match_idx, get_match_score(cur_match, XCORR), 
+         (int)num_targets, (int)num_decoys, score);
   }
 
   // compute q-value: go through list in reverse and use min FDR seen
@@ -1528,6 +1528,199 @@ void transfer_match_collection_weibull(
   to_collection->correlation = from_collection->correlation;
 }
 
+/**
+ * \brief Prints out the pepxml header to the output stream
+ * passed in as a parameter.
+ */
+
+void print_xml_header(
+  FILE* output
+  ){
+  if (output == NULL ){
+    return;
+  }
+  time_t hold_time;
+  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+  char* enz_str = enzyme_type_to_string(enzyme);
+  char* database = get_string_parameter("protein database");
+  char* msms_file = get_string_parameter("ms2 file");
+  char* absolute_msms_path;
+  if (msms_file == NULL){
+    absolute_msms_path = (char*) malloc(sizeof(char)*3);
+    strcpy(absolute_msms_path, "NA");
+  } else {
+    #if DARWIN
+    char path_buffer[PATH_MAX];
+    absolute_msms_path =  realpath(msms_file, path_buffer);
+    #else
+    absolute_msms_path =  realpath(msms_file, NULL);
+    #endif
+    free(msms_file);
+  }
+  // Removes the extension from ms2 file path
+  char* extension = strstr(absolute_msms_path, ".ms2");
+  if (extension != NULL) (*extension) = '\0';
+  
+  
+  MASS_TYPE_T isotopic_mass_type = get_mass_type_parameter("isotopic-mass");
+  MASS_TYPE_T fragment_mass_type = get_mass_type_parameter("fragment-mass");
+
+  const char* isotopic_mass;
+  const char* fragment_mass;
+  DIGEST_T digest = get_digest_type_parameter("digestion");
+  int max_num_internal_cleavages;
+  int min_number_termini;
+  BOOLEAN_T missed_cleavage = get_boolean_parameter("missed-cleavages");
+  if (missed_cleavage){
+    max_num_internal_cleavages = get_int_parameter("max-length");
+  } else {
+    max_num_internal_cleavages = 0;
+  }
+
+  if (digest == FULL_DIGEST){
+    min_number_termini = 2;
+  } else if (digest == PARTIAL_DIGEST){
+    min_number_termini = 1;
+  } else {
+    min_number_termini = 0;
+  }
+  
+  if (isotopic_mass_type == AVERAGE){
+    isotopic_mass = "average";
+  } else {
+    isotopic_mass = "monoisotopic";
+  }
+
+  if (fragment_mass_type == AVERAGE){
+    fragment_mass =  "average";
+  } else {
+    fragment_mass =  "monoisotopic";
+  }
+
+
+
+
+  BOOLEAN_T use_index = is_directory(database);
+  if( use_index == TRUE ){
+    char* fasta_name  = get_index_binary_fasta_name(database);
+    free(database);
+    database = fasta_name;
+  }
+  #if DARWIN
+  char path_buffer[PATH_MAX];
+  char* absolute_database_path =  realpath(database, path_buffer);
+  #else
+  char* absolute_database_path =  realpath(database, NULL);
+  #endif
+  free(database);
+
+  hold_time = time(0);
+
+  fprintf(output, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+  fprintf(output, "<?xml-stylesheet type=\"text/xsl\" href=\"\">\n");
+  fprintf(output, "<msms_pipeline_analysis date=\"%s\" xmlns=\"\""
+          " xmlns:xsi=\"\" xsi:schemaLocation=\"\""
+          " summary_xml=\"\">\n",
+          ctime(&hold_time));
+
+  fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
+          "msModel=\"%s\" msIonization=\"%s\" msAnalyzer=\"%s\" "
+          "msDectector=\"%s\" raw_data_type=\"%s\" raw_data=\"%s\" >\n",
+          absolute_msms_path,
+          "NA", // TODO, dummy value
+          "NA", // TODO, dummy value
+          "NA", // TODO, dummy value
+          "NA", // TODO, dummy value
+          "NA", // TODO, dummy value
+          "NA", // TODO, dummy value
+          "NA" // TODO, dummy value
+          );
+  
+
+  fprintf(output, "<sample_enzyme name=\"%s\">\n</sample_enzyme>\n", enz_str);
+
+  fprintf(output, "<search_summary base_name=\"%s\" search_engine=\"%s\" "
+          "precursor_mass_type=\"%s\" fragment_mass_type=\"%s\" "
+          "out_data_type=\"%s\" out_data=\"%s\" search_id=\"%i\" >\n",
+          absolute_msms_path,
+          "Crux",
+          isotopic_mass, // isotopic mass type is precursor mass type?
+          fragment_mass,
+          "NA", // TODO, dummy value
+          "NA",
+          1 // TODO, dummy value
+          );
+
+  
+  fprintf(output, "<search_database local_path=\"%s\" type=\"%s\" />\n", 
+          absolute_database_path, 
+          "AA"
+          );
+  fprintf(output, "<enzymatic_search_constraint enzyme=\"%s\" "
+          "max_num_internal_cleavages=\"%i\" min_number_termini=\"%i\"/>\n",
+          enz_str,
+          max_num_internal_cleavages,
+          min_number_termini
+          );
+
+  free(absolute_msms_path);
+  free(absolute_database_path);
+  free(enz_str);
+
+
+  char aa_str[2];
+  aa_str[1] = '\0';
+  int alphabet_size = (int)'A'+ ((int)'Z'-(int)'A');
+  MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
+  int aa = 0;
+
+  // static amino acid modifications
+  for (aa = (int)'A'; aa < alphabet_size-1; aa++){
+    aa_str[0] = (char)aa;
+    double mod = get_double_parameter(aa_str);
+    double mass = get_mass_amino_acid(aa, isotopic_type);
+    
+    if (mod != 0 ){
+      fprintf(output, "<aminoacid_modification aminoacid=\"%s\" mass=\"%f\" "
+              "massdiff=\"%f\" variable=\"%s\" />\n",
+              aa_str,
+              mass,
+              mod,
+              "N" // N if static modification
+              );      
+    }
+  }
+  
+  // variable amino acid modifications
+  AA_MOD_T** mod_list = NULL;
+  int num_mods = get_all_aa_mod_list(&mod_list);
+  for (int mod_idx = 0; mod_idx < num_mods; mod_idx++){
+    FLOAT_T mass = aa_mod_get_mass_change(mod_list[mod_idx]);
+    
+    BOOLEAN_T* aas_modified = aa_mod_get_aa_list(mod_list[mod_idx]);
+    for (int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++){
+      if (aas_modified[aa_idx] == TRUE ){
+        int aa = (aa_idx+'A');
+        FLOAT_T original_mass = get_mass_amino_acid(aa , isotopic_type);
+        FLOAT_T mass_dif = mass - original_mass;
+        fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%f\" "
+                "massdiff=\"%f\" variable=\"%s\" />\n",
+                aa,
+                mass,
+                mass_dif,
+                "Y" // Y if variable modification
+                );    
+
+      }
+    }
+
+  }
+  print_parameters_xml(output);
+  
+  fprintf(output, "</search_summary>\n");
+  
+}
+
 
 void print_sqt_header(
  FILE* output, 
@@ -1562,7 +1755,6 @@ void print_sqt_header(
     database = fasta_name;
   }
   fprintf(output, "H\tDatabase\t%s\n", database);
-  free(database);
 
   if(decoy){
   fprintf(output, "H\tComment\tDatabase shuffled; these are decoy matches\n");
@@ -1736,6 +1928,130 @@ void print_tab_header(FILE* output){
     }
   }
 }
+
+
+/**
+ * Print Footer lines for xml files
+ */
+void print_xml_footer(FILE* output){
+  if (output == NULL ){
+    return;
+  }
+  
+  fprintf(output, "</msms_run_summary>\n");
+  fprintf(output, "</msms_pipeline_analysis>\n");
+}
+
+
+/**
+ * \brief Print the given match collection for several spectra to
+ * xml files only. Takes the spectrum information from the
+ * matches in the collection. At least for now, prints all matches in
+ * the collection rather than limiting by top-match parameter. 
+ */
+void print_matches_multi_spectra_xml(
+  MATCH_COLLECTION_T* match_collection,
+  FILE* output){
+  carp(CARP_DETAILED_DEBUG, "Writing matches to xml file");
+  static int index_count = 1;
+  int match_idx = 0;
+  int num_matches = match_collection->match_total;
+  for (match_idx = 0; match_idx < num_matches; match_idx++){
+    MATCH_T* cur_match = match_collection->match[match_idx];
+    BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
+    SPECTRUM_T* spectrum = get_match_spectrum(cur_match);
+    int charge = get_match_charge(cur_match);
+    print_spectrum_xml(spectrum, output, charge, index_count);
+    fprintf(output, "    <search_result>\n");
+    FLOAT_T spec_mass = get_spectrum_neutral_mass(spectrum, charge);
+    if (! is_decoy){
+      print_match_xml(cur_match, output, spec_mass,
+                      match_collection->scored_type );
+      fprintf(output, "    </search_result>\n");
+      fprintf(output, "    </spectrum_query>\n");
+    }
+    index_count++;
+  }
+  
+}
+
+/**
+ * \brief Print the psm features to file in xml format
+ *
+ * Prints a spectrum_query tag which encompasses the search_hit tag
+ * which represents peptide to spectra match.
+ *
+ * returns TRUE, if succesfully printed xml format of PSMs, else FALSE
+ *
+ */
+
+BOOLEAN_T print_match_collection_xml(
+  FILE* output,
+  int top_match,
+  MATCH_COLLECTION_T* match_collection,
+  SPECTRUM_T* spectrum,
+  SCORER_TYPE_T main_score,
+  int index
+  )
+{
+  if ( output == NULL || match_collection == NULL || spectrum == NULL ){
+    return FALSE;
+  }
+  int charge = match_collection->charge; 
+  int num_matches = match_collection->experiment_size;
+  FLOAT_T spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
+
+  // calculate delta_cn and populate fields in the matches
+  calculate_delta_cn(match_collection, SEARCH_COMMAND);
+
+  /* print spectrum query */
+  print_spectrum_xml(spectrum, output,  charge, index);
+
+
+  MATCH_T* match = NULL;
+  // create match iterator
+  // TRUE: return match in sorted order of main_score type
+  MATCH_ITERATOR_T* match_iterator = 
+    new_match_iterator(match_collection, main_score, TRUE);
+  int count = 0;
+  int last_rank = 0;
+  
+  fprintf(output, "    <search_result>\n");
+   // iterate over matches
+  while(match_iterator_has_next(match_iterator)){
+    match = match_iterator_next(match_iterator);    
+    int cur_rank = get_match_rank(match, main_score);
+  
+
+    
+    // print if we haven't reached the limit
+    // or if we are at the limit but this match is a tie with the last
+    if( count < top_match || last_rank == cur_rank ){
+      
+      print_match_xml(match, 
+                      output, 
+                      spectrum_neutral_mass,
+                      match_collection->scored_type);
+      count++;
+      last_rank = cur_rank;
+    } else if( count >= top_match && last_rank != cur_rank ) {
+      break;
+    } // else see if there is one more tie to print
+
+  }// next match
+  
+  carp(CARP_DETAILED_DEBUG, "printed %d out of %d xml matches", 
+       count, num_matches);
+
+  free_match_iterator(match_iterator);
+  fprintf(output, "    </search_result>\n");
+  fprintf(output, "    </spectrum_query>\n");
+  
+  return TRUE;
+
+    
+}
+
 
 /**
  * \brief Print the psm features to file in sqt format.

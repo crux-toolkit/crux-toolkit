@@ -332,6 +332,21 @@ void prepare_protein_peptide_iterator_mc(
     BOOLEAN_T missed_cleavages);
 
 
+/**
+ * Compares the first and second amino acids in the given sequence to
+ * see if they conform to the cleavage rules of the given enzyme.  For
+ * NO_ENZYME, always returns TRUE.
+ *
+ * \returns TRUE if this is a valid cleavage position for the given enzyme.
+ */
+BOOLEAN_T valid_cleavage_position(
+   char* sequence,
+   ENZYME_T enzyme);
+
+
+
+
+
 /*
  * Local Variables:
  * mode: c

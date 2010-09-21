@@ -44,6 +44,8 @@ static const int MAX_CHARGE = 6;
  */
 static const unsigned int MAX_D_LINES = 2;
 
+
+
 /**
  * \struct spectrum 
  * \brief A mass spectrum
@@ -313,12 +315,63 @@ void print_spectrum_processed_peaks(
   return;
 }
 
+
+
+/**
+ * Prints a spectrum object to file in xml format.
+ */
+void print_spectrum_xml(
+  SPECTRUM_T* spectrum, ///< spectrum to print -in
+  FILE* file,           ///< output file to print at -out
+  int charge,            ///< charge used for the search -in
+  int index              ///< used to output index to file
+  ){
+  int start_scan = get_spectrum_first_scan(spectrum);
+  int last_scan = get_spectrum_last_scan(spectrum);
+  char* filepath = spectrum->filename;
+  char** name_ext_array = NULL;
+  const char* filename = NULL;
+  if (filepath == NULL){
+    filename = "NA";
+  } else {
+    name_ext_array = parse_filename_path_extension(filepath, ".ms2");
+    filename = name_ext_array[0];
+  }
+  const char* period = ".";
+  std::ostringstream spectrum_id;
+  spectrum_id << filename << period << std::setw(5)  << std::setfill('0') 
+              << start_scan << period << std::setw(5) << std::setfill('0') 
+              << last_scan << period <<charge ;
+  fprintf(file, "    <spectrum_query spectrum=\"%s\" start_scan=\"%i\""
+          " end_scan=\"%i\" precursor_neutral_mass=\"%f\""
+          " assumed_charge=\"%i\" index=\"%i\">\n",
+          spectrum_id.str().c_str(),
+          start_scan, 
+          last_scan,
+          get_spectrum_neutral_mass(spectrum, charge),
+          charge, 
+          index
+          );
+
+  if (name_ext_array != NULL){
+    if (name_ext_array[0] != NULL){
+      free(name_ext_array[0]);
+    }
+    if (name_ext_array[1] != NULL){
+      free(name_ext_array[1]);
+    }
+    free(name_ext_array);
+  }
+
+}
+
+
 /**
  * Prints a spectrum object to file in sqt format.
  */
 void print_spectrum_sqt(
   SPECTRUM_T* spectrum, ///< spectrum to print -in
-  FILE* file,           ///< output file to print at -out
+  FILE* file,           ///< output file to print at -
   int num_matches,      ///< number of peptides compared to this spec -in
   int charge            ///< charge used for the search -in
   ){
@@ -1425,10 +1478,10 @@ SPECTRUM_T* parse_spectrum_tab_delimited(
   ) {
 
   SPECTRUM_T* spectrum = (SPECTRUM_T*)mycalloc(1, sizeof(SPECTRUM_T));
-
   spectrum -> first_scan = file.getInteger(SCAN_COL);
   spectrum -> last_scan = spectrum -> first_scan;
   spectrum -> spectrum_type = MS2; //assume MS2;
+
 
   spectrum -> precursor_mz = file.getFloat(SPECTRUM_PRECURSOR_MZ_COL);
   //Is it okay to assign an individual spectrum object for each charge?
