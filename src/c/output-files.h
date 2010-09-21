@@ -31,6 +31,7 @@ class OutputFiles{
   void writeHeaders(int num_proteins = 0);
   void writeFeatureHeader(char** feature_names = NULL,
                           int num_names = 0);
+  void writeFooters();
   void writeMatches(MATCH_COLLECTION_T* matches,
                     MATCH_COLLECTION_T** decoy_matches_array,
                     int num_decoys,
@@ -54,6 +55,14 @@ class OutputFiles{
                        COMMAND_T command,
                        const char* extension,
                        BOOLEAN_T overwrite);
+
+  void printMatchesXml(
+		       MATCH_COLLECTION_T* target_matches,
+		       MATCH_COLLECTION_T** decoy_matches_array,
+		       SPECTRUM_T* spectrum,
+		       SCORER_TYPE_T rank_type);
+ 
+
   void printMatchesTab(
     MATCH_COLLECTION_T*  target_matches, ///< from real peptides
     MATCH_COLLECTION_T** decoy_matches_array,  
@@ -70,6 +79,7 @@ class OutputFiles{
   int num_files_;         ///< num files in each array
   FILE** tab_file_array_; ///< array of .txt files
   FILE** sqt_file_array_; ///< array of .sqt files
+  FILE** xml_file_array_; ///< array of .xml files
   FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to
   int matches_per_spec_;  ///< print this many matches per spec
 };

@@ -24,6 +24,7 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
 {
 
   tab_file_array_ = NULL;
+  xml_file_array_ = NULL;
   sqt_file_array_ = NULL;
   feature_file_ = NULL;
 
@@ -56,6 +57,14 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
               "txt", 
               overwrite); 
 
+  // all operations create xml files
+  createFiles(&xml_file_array_,
+              output_directory,
+              fileroot,
+              program_name,
+              "pep.xml",
+              overwrite);
+  
   // only sequest creates sqt files
   if( program_name == SEQUEST_COMMAND ){
     createFiles(&sqt_file_array_, 
@@ -77,17 +86,20 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
                "features.txt", 
                overwrite);
   }
+
 }
 
 OutputFiles::~OutputFiles(){
   for(int file_idx = 0; file_idx < num_files_; file_idx ++){
     if( tab_file_array_ ){ fclose(tab_file_array_[file_idx]); }
     if( sqt_file_array_ ){ fclose(sqt_file_array_[file_idx]); }
+    if (xml_file_array_ ){ fclose(xml_file_array_[file_idx]); }
   }
   if( feature_file_ ){ fclose(feature_file_); }
 
   delete tab_file_array_;
   delete sqt_file_array_;
+  delete xml_file_array_;
 }
 
 /**
@@ -190,7 +202,7 @@ BOOLEAN_T OutputFiles::createFile(FILE** file_ptr,
   return TRUE;
 }
 /**
- * \brief Write header lines to the .txt and .sqt files.
+ * \brief Write header lines to the .txt ,.sqt files ,and .pep.xml files.
  */
 void OutputFiles::writeHeaders(int num_proteins){
 
@@ -207,6 +219,12 @@ void OutputFiles::writeHeaders(int num_proteins){
                        tag,
                        num_proteins, FALSE); // not post search
     }
+    
+    if ( xml_file_array_){
+      print_xml_header(xml_file_array_[file_idx]);
+    }
+
+    
     tag = "decoy";
   }
 }
@@ -224,6 +242,20 @@ void OutputFiles::writeFeatureHeader(char** feature_names,
     fprintf(feature_file_, "\n");
   }
 }
+
+
+/**
+ * \brief Write footer lines to xml files
+ */
+void OutputFiles::writeFooters(){
+  if (xml_file_array_){
+    for (int file_idx = 0; file_idx < num_files_; file_idx++){
+      print_xml_footer(xml_file_array_[file_idx]);
+    }
+  }
+
+}
+
 /**
  * \brief Write the given matches to appropriate output files.  Limit
  * the number of matches per spectrum based on top-match parameter
@@ -237,6 +269,7 @@ void OutputFiles::writeMatches(
   SCORER_TYPE_T rank_type,           ///< use ranks for this type
   SPECTRUM_T* spectrum     ///< given when all matches are to one spec
   ){
+  
 
   if( target_matches == NULL ){
     return;  // warn?
@@ -253,6 +286,8 @@ void OutputFiles::writeMatches(
   printMatchesTab(target_matches, decoy_matches_array, rank_type, spectrum);
   
   printMatchesSqt(target_matches, decoy_matches_array, spectrum);
+
+  printMatchesXml(target_matches, decoy_matches_array, spectrum, rank_type);
 
 }
 
@@ -324,12 +359,48 @@ void OutputFiles::printMatchesSqt(
 
 }
 
+
+void OutputFiles::printMatchesXml(
+  MATCH_COLLECTION_T*  target_matches, ///< from real peptides
+  MATCH_COLLECTION_T** decoy_matches_array,  
+                                ///< array of collections from shuffled peptides
+  SPECTRUM_T* spectrum,
+  SCORER_TYPE_T rank_type
+  
+){
+  
+  static int index = 1;
+  if( xml_file_array_ == NULL ){
+    return;
+  }
+
+  MATCH_COLLECTION_T* cur_matches = target_matches;
+
+  for(int file_idx = 0; file_idx < num_files_; file_idx++){
+
+    print_match_collection_xml(xml_file_array_[file_idx],
+                               matches_per_spec_,
+                               cur_matches,
+                               spectrum,
+                               rank_type,
+                               index);
+
+    if( decoy_matches_array ){
+      cur_matches = decoy_matches_array[file_idx];
+    } // else if NULL, num_files_==1 and this is last loop
+  }
+  index++;
+
+}
+
 void OutputFiles::writeMatches(
   MATCH_COLLECTION_T*  matches ///< from multiple spectra
 ){
   print_matches_multi_spectra(matches, 
                               tab_file_array_[0], 
                               NULL);// no decoy file
+  print_matches_multi_spectra_xml(matches,
+                                  xml_file_array_[0]);
 }
 
 /**

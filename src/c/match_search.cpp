@@ -265,6 +265,7 @@ int search_main(int argc, char** argv){
     free(decoy_collection_list);
 
   }// next spectrum
+  output_files.writeFooters();
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   carp(CARP_INFO, "Finished crux-search-for-matches");

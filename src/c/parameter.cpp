@@ -548,8 +548,8 @@ void initialize_parameters(void){
       "Target-decoy competition. puts decoy psms in target file. ",
       "Now hidden from the user", "false");
   set_boolean_parameter("decoy-p-values", FALSE,
-			"Store all decoy p-values in a file",
-			"", "false");
+                        "Store all decoy p-values in a file",
+                        "", "false");
 
   set_boolean_parameter("reverse-sequence", FALSE,
       "Generate decoys by reversing the peptide string rather than shuffling."
@@ -1274,7 +1274,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 }
 
 /**
- * Read the value given for custom-enzyme and enter values into global
+ * Read the value given for cusom-enzyme and enter values into global
  * params.  Correct syntax is [A-Z]|[A-Z] or {A-Z}|{A-Z}.  An X
  * indicates that any residue is legal. Sets pre/post_list size and
  * allocates memory for pre/post_cleavage_list.  Sets
@@ -1620,6 +1620,36 @@ void print_mods_parameter_file(FILE* param_file,
     fprintf(param_file, "%s%s=NO MODS\n\n", comments, name);
   }
 }
+
+
+/**
+ * \brief prints all parameters except mods into the output stream
+ * in xml format. 
+ *
+ * Each parameter has a self closing tag and has attributes name for 
+ * parameter name and value for parameter value
+ */
+void print_parameters_xml(FILE* output){
+  if (output == NULL){
+    return;
+  }
+  carp(CARP_DEBUG, "Printing parameters to xml output");
+  HASH_ITERATOR_T* iterator = new_hash_iterator(parameters);
+  while (hash_iterator_has_next(iterator)){
+    char * key = hash_iterator_next(iterator);
+    char * show_users = (char *)get_hash_value(for_users, key);
+    if ( strcmp(show_users, "true") == 0 ){
+      if (strcmp(key, "mod") == 0 || strcmp(key, "cmod") == 0
+          || strcmp(key, "nmod") == 0){
+        continue;
+      }
+      fprintf(output, "<parameter name=\"%s\" value=\"%s\"/>\n",
+              key, (char*) get_hash_value(parameters, key));
+    }
+  }
+  free_hash_iterator(iterator);
+}
+
 
 /**
  * \brief Creates a file containing all parameters and their current

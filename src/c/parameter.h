@@ -228,6 +228,16 @@ double get_mz_bin_offset();
 
 
 /**
+ * \brief prints all parameters except mods into the output stream
+ * in xml format. 
+ *
+ * Each parameter has a self closing tag and has attributes name for 
+ * parameter name and value for parameter value
+ */
+void print_parameters_xml(FILE* output);
+
+
+/**
  * Prints the parameters.  If lead_string is not null, preprends it to
  * each line.
  */
