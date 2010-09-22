@@ -12,6 +12,7 @@
 #include <string.h>
 #include <assert.h>
 #include <set>
+#include <map>
 #include <ctype.h>
 #include <float.h>
 #include <unistd.h>
@@ -295,13 +296,34 @@ int get_num_terminal_cleavage(
  * \brief prints both variable and static modifications for 
  *  peptide sequence
  *
- *
  */
 void print_modifications_xml(
   char* mod_seq,
-  char* peptide_sequence,
+  char* sequence,
   FILE* output_file
 );
+
+/**
+ * \brief takes an empty mapping of index to mass
+ * of static mods and a full mapping of var mods
+ * to fill up the mapping of static mods
+ */
+void find_static_modifications(
+  std::map<int, double>& static_mods,
+  std::map<int, double>& var_mods,
+  char* sequence
+);
+
+/**
+ * \brief takes an empty mapping of index to mass
+ * and extract information from mod sequence fill
+ * up map
+ */
+void find_variable_modifications(
+ std::map<int, double>& mods,
+ char* mod_seq
+);
+
 
 /**
  * \brief Takes a empty set of pairs of strings and a peptide

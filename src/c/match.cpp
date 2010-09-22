@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <set>
+#include <map>
 #include "carp.h"
 #include "parse_arguments.h"
 #include "spectrum.h"
@@ -952,6 +953,7 @@ void print_match_xml(
   print_modifications_xml(mod_seq,
                       peptide_sequence,
                       output_file);
+
   free(mod_seq);
   
 
@@ -998,17 +1000,59 @@ void print_match_xml(
  *
  *
  */
-void print_modifications_xml(char* mod_seq,
-                         char* peptide_sequence,
-                         FILE* output_file
+void print_modifications_xml(
+  char* mod_seq,
+  char* pep_seq,
+  FILE* output_file
 ){
-  set<int> var_mod_indices;
-  // get variable modifications
-  int is_modified = strcmp(mod_seq, peptide_sequence);
-  if (is_modified){
+  map<int, double> var_mods;
+  map<int, double> static_mods;
+
+  // variable modifications
+  find_variable_modifications(var_mods, mod_seq);
+  if (!var_mods.empty()){
     fprintf(output_file, 
             "<modification_info modified_peptide=\"%s\">\n",
-            mod_seq);
+	    mod_seq);
+    for (map<int, double>::iterator it = var_mods.begin()
+	   ; it != var_mods.end(); ++it){
+      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%f\"/>\n",
+	      (*it).first,   //index
+	      (*it).second); //mass
+    }
+    fprintf(output_file, "</modification_info>\n");
+  }
+
+  // static modifications
+  find_static_modifications(static_mods, var_mods, pep_seq);
+  if (!static_mods.empty()){
+    fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n",
+	    pep_seq);
+    for (map<int, double>::iterator it = static_mods.begin(); 
+	 it != static_mods.end(); ++it){
+      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%f\"/>\n",
+	      (*it).first,   //index
+	      (*it).second); //mass
+    }
+    fprintf(output_file, "</modification_info>\n");
+  }
+
+  static_mods.clear();
+  var_mods.clear();
+
+}
+
+
+/**
+ * \brief takes an empty mapping of index to mass
+ * and extract information from mod sequence fill
+ * up map
+ */
+void find_variable_modifications(
+ map<int, double>& mods,
+ char* mod_seq
+){
+  
     int seq_index = 1;
     char* amino = mod_seq;
     char* end = NULL;
@@ -1025,21 +1069,25 @@ void print_modifications_xml(char* mod_seq,
         char* mass  = (char *) mymalloc(sizeof(char)*(end-start+1));
         strncpy(mass, start, end-start);
         mass[end-start] = '\0';
-        fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%s\"/>\n",
-                seq_index,
-                mass);
-        var_mod_indices.insert(seq_index);
-        free(mass);
+	mods[seq_index] = atof(mass);
         amino = end;
+	free(mass);
       }
       seq_index++;
       amino++;
-      }
-    fprintf(output_file, "</modification_info>\n");
-  }
+    }
+}
 
-  // get modification info for static modifications
-  BOOLEAN_T printed_mod_tag = FALSE;
+/**
+ * \brief takes an empty mapping of index to mass
+ * of static mods and a full mapping of var mods
+ * to fill up the mapping of static mods
+ */
+void find_static_modifications(
+  map<int, double>& static_mods,
+  map<int, double>& var_mods,
+  char* peptide_sequence
+){
   char* seq_iter = peptide_sequence;
   
   MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
@@ -1052,28 +1100,16 @@ void print_modifications_xml(char* mod_seq,
     // write static mod if user requested static mod and also
     // if there is no variable mod on the same character
     if (get_double_parameter( (const char *)aa)!= 0 && 
-        var_mod_indices.find(seq_index) == var_mod_indices.end()){
-      if (printed_mod_tag == FALSE){
-        fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n",
-                peptide_sequence);
-        printed_mod_tag = TRUE;
-      }
+        var_mods.find(seq_index) == var_mods.end()){
+
       double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
-      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%f\"/>\n",
-              seq_index,
-              mass);
+      static_mods[seq_index] = mass;
     }
     seq_iter++;
     seq_index++;
   }
-  if (printed_mod_tag == TRUE){
-    fprintf(output_file, "</modification_info>\n");
-  }
-  
 
-  var_mod_indices.clear();
 }
-
 
 
 /**
@@ -1110,7 +1146,7 @@ int get_num_terminal_cleavage(
   char cleavage[3];
   cleavage[2] = '\0';
   cleavage[0] = flanking_aas_prev;
-  cleavage[1] = peptide_sequence[1];
+  cleavage[1] = peptide_sequence[0];
   if (flanking_aas_prev == '-' ||
       valid_cleavage_position(cleavage, enzyme) == TRUE){
       num_tol_term++;
