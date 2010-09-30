@@ -12,7 +12,6 @@
 
 #include <cppunit/config/SourcePrefix.h>
 #include "Test[class].h"
-#include "[class].h"
 #include "parameter.h" 
 
 CPPUNIT_TEST_SUITE_REGISTRATION( Test[class] );
@@ -23,7 +22,7 @@ void Test[class]::setUp(){
   // initialize variables to use for testing
 }
 
-void TestModifications::tearDown(){
+void Test[class]::tearDown(){
   // delete anything you allocated
 }
 

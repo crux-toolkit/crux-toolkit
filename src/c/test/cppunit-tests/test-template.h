@@ -13,6 +13,7 @@
 #define CPP_UNIT_TESTMODIFICATIONS_H
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "[class].h"
 
 class Test[class] : public CPPUNIT_NS::TestFixture
 {
