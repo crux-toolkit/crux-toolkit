@@ -1,6 +1,7 @@
 #ifndef _MSTOOLKITTYPES_H
 #define _MSTOOLKITTYPES_H
 
+namespace MSToolkit{
 enum MSFileType {
   MS1,
   MS2,
@@ -55,6 +56,7 @@ struct ZState {
   double mz;
 };
 
+} // namespace
 #endif
 
 

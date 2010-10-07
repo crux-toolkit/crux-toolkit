@@ -1,6 +1,7 @@
 #include "MSReader.h"
 #include <iostream>
 using namespace std;
+using namespace MSToolkit;
 
 MSReader::MSReader(){
 	fileIn=NULL;
