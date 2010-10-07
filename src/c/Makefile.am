@@ -81,6 +81,8 @@ LIBFILES= \
   parse_arguments.h \
   peak.cpp \
   peak.h \
+  PeakIterator.cpp \
+  PeakIterator.h \
   peptide.cpp \
   peptide_constraint.cpp \
   peptide_constraint.h \
@@ -108,6 +110,8 @@ LIBFILES= \
   spectrum_collection.cpp \
   spectrum_collection.h \
   spectrum.h \
+  Spectrum.cpp \
+  Spectrum.h \
   utils.cpp \
   utils.h \
   version.h \

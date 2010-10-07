@@ -1,6 +1,8 @@
 #include "Spectrum.h"
 #include <iostream>
 
+using namespace MSToolkit; 
+
 Spectrum::Spectrum(){
   rTime=0;
   charge=0;
