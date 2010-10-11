@@ -31,14 +31,15 @@ class Scorer {
     // creates theoretical spectrum from ion series and
     // scores against observed spectrum
     // returns xcorr score
-    float score_spectrum_vs_series(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series);
+    float score_spectrum_vs_series(Spectrum* spectrum, 
+                                   LinkedIonSeries& ion_series);
 
-    static int get_matched_by_ions(SPECTRUM_T* spectrum,
+    static int get_matched_by_ions(Spectrum* spectrum,
 				   LinkedIonSeries& ion_series);
 
     static void add_intensity_map(std::map<int, FLOAT_T>& theoretical, 
-		       int idx, 
-		       FLOAT_T intensity);
+                                  int idx, 
+                                  FLOAT_T intensity);
 /* 
     void add_intensity(
       FLOAT_T* intensity_array, ///< the intensity array to add intensity at index add_idx -out
@@ -57,21 +58,21 @@ class Scorer {
     );
     void set_print(bool print) { print_spectrums_ = print;}
     FLOAT_T hhc_gen_score_xcorr(
-      SPECTRUM_T* spectrum,    ///< the spectrum to score -in
+      Spectrum* spectrum,    ///< the spectrum to score -in
       LinkedIonSeries& ion_series ///< the ion series to score against the spectrum -in
     );
 
     FLOAT_T getIonCurrentExplained(LinkedIonSeries& ion_series, 
-      SPECTRUM_T* spectrum, 
+      Spectrum* spectrum, 
       FLOAT_T& explained, 
       int& by_observed);
 
 
   private:
-    void print_spectrums(FLOAT_T* theoretical, SPECTRUM_T* spectrum);
+    void print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum);
     bool print_spectrums_;
     SCORER_T* scorer;
-    SPECTRUM_T* current_spectrum;
+    Spectrum* current_spectrum;
     FLOAT_T max_mz;
     static int ion_counter;
 };

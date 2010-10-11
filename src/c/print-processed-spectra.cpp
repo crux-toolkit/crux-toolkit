@@ -78,11 +78,11 @@ int print_processed_spectra_main(int argc, char** argv){
   // loop over all spectra, process, print
   while(filtered_spectrum_charge_iterator_has_next(spectrum_iterator)){
     int cur_charge = 0;
-    SPECTRUM_T* cur_spectrum = 
+    Spectrum* cur_spectrum = 
       filtered_spectrum_charge_iterator_next(spectrum_iterator, &cur_charge);
 
     carp(CARP_DETAILED_INFO, "Processing spectrum %d charge %d.",
-         get_spectrum_first_scan(cur_spectrum), cur_charge);
+         cur_spectrum->get_first_scan(), cur_charge);
 
     // change the peak values
     FLOAT_T* intensities = NULL;
@@ -91,9 +91,9 @@ int print_processed_spectra_main(int argc, char** argv){
                         &intensities, &max_mz_bin);
 
     // print processed spectrum
-    print_spectrum_processed_peaks(cur_spectrum, cur_charge, 
-                                   intensities, max_mz_bin,
-                                   output_ms2);
+    cur_spectrum->print_processed_peaks(cur_charge, 
+                                        intensities, max_mz_bin,
+                                        output_ms2);
   }
 
   // close output file

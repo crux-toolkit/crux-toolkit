@@ -231,7 +231,7 @@ BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
   FLOAT_T* beta,
   FLOAT_T* shift,
   FLOAT_T* correlation,
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   int charge
   ){
 
@@ -239,7 +239,7 @@ BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
   if( num_scores < MIN_WEIBULL_MATCHES ){
     carp(CARP_DETAILED_INFO, "Too few psms (%i) to estimate "
          "p-value parameters for spectrum %i, charge %i",
-         num_scores, get_spectrum_first_scan(spectrum), charge);
+         num_scores, spectrum->get_first_scan(), charge);
     // set eta, beta, and shift to something???
     return FALSE;
   }

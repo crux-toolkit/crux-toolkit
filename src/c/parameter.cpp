@@ -1274,7 +1274,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int argc,
 }
 
 /**
- * Read the value given for cusom-enzyme and enter values into global
+ * Read the value given for custom-enzyme and enter values into global
  * params.  Correct syntax is [A-Z]|[A-Z] or {A-Z}|{A-Z}.  An X
  * indicates that any residue is legal. Sets pre/post_list size and
  * allocates memory for pre/post_cleavage_list.  Sets

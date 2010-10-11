@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <vector>
 #include "objects.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "spectrum_collection.h" 
 #include "protein_index.h" 
 #include "peak.h"
@@ -23,7 +23,6 @@
 
 #include "Spectrum.h"
 #include "MSReader.h"
-using namespace MSToolkit;
 
 static const unsigned int MAX_COMMENT = 1000; ///< max length of comment
 
@@ -44,7 +43,7 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* it);
  * \brief A object to group together one or more spectrum objects.
  */
 struct spectrum_collection {
-  vector<SPECTRUM_T*> spectra;  ///< The spectrum peaks
+  vector<Spectrum*> spectra;  ///< The spectrum peaks
   int  num_charged_spectra; ///< The number of spectra assuming differnt charge(i.e. one spectrum with two charge states are counted as two spectra)
   char* filename;     ///< Optional filename
   char comment[MAX_COMMENT];    ///< The spectrum_collection header lines
@@ -135,9 +134,13 @@ void free_spectrum_collection(
   SPECTRUM_COLLECTION_T* spectrum_collection ///< the spectrum collection to free - in
 )
 {
+  if( spectrum_collection == NULL ){
+    return;
+  }
   unsigned int spectrum_index = 0;
   for(;spectrum_index < spectrum_collection->spectra.size(); ++spectrum_index){
-    free_spectrum(spectrum_collection->spectra[spectrum_index]);
+    delete spectrum_collection->spectra[spectrum_index];
+    spectrum_collection->spectra[spectrum_index] = NULL;
   }
   spectrum_collection->spectra.clear();
   free(spectrum_collection->filename);
@@ -160,7 +163,7 @@ void print_spectrum_collection(
   // print each spectrum
   spectrum_iterator = new_spectrum_iterator(spectrum_collection);
   while(spectrum_iterator_has_next(spectrum_iterator)){
-    print_spectrum(spectrum_iterator_next(spectrum_iterator), file);
+    spectrum_iterator_next(spectrum_iterator)->print(file);
   }
   free_spectrum_iterator(spectrum_iterator);
 }
@@ -174,7 +177,7 @@ void copy_spectrum_collection(
   SPECTRUM_COLLECTION_T* dest///< spectrum to copy to -out
   )
 {
-  SPECTRUM_T* new_spectrum;
+  Spectrum* new_spectrum;
   // copy each varible
   set_spectrum_collection_filename(dest,src->filename);
   set_spectrum_collection_comment(dest,src->comment);
@@ -184,8 +187,7 @@ void copy_spectrum_collection(
   // copy spectrum
   SPECTRUM_ITERATOR_T* spectrum_iterator = new_spectrum_iterator(src);
   while(spectrum_iterator_has_next(spectrum_iterator)){
-    new_spectrum = allocate_spectrum();
-    copy_spectrum(spectrum_iterator_next(spectrum_iterator), new_spectrum);
+    new_spectrum = new Spectrum(*spectrum_iterator_next(spectrum_iterator));
     add_spectrum_to_end(dest, new_spectrum);
   }
   free_spectrum_iterator(spectrum_iterator);
@@ -242,7 +244,7 @@ BOOLEAN_T parse_spectrum_collection(
   }
 
   FILE* file;
-  SPECTRUM_T* parsed_spectrum;
+  Spectrum* parsed_spectrum;
 
   // get a list of scans to include if requested
   const char* range_string = get_string_parameter("scan-number");
@@ -277,8 +279,8 @@ BOOLEAN_T parse_spectrum_collection(
     fclose(file);
     carp(CARP_INFO, "Using mstoolkit to parse spectra.");
 
-    MSReader* mst_reader = new MSReader();
-    Spectrum* mst_spectrum = new Spectrum();
+    MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
+    MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();
 
     // only read ms2 scans
     mst_reader->setFilter(MSToolkit::MS2);
@@ -296,12 +298,11 @@ BOOLEAN_T parse_spectrum_collection(
       if( mst_spectrum ->  getScanNumber() > last_scan ){
         break;
       }
-      parsed_spectrum = allocate_spectrum();
-      parse_spectrum_spectrum(parsed_spectrum, 
-        mst_spectrum, 
-        spectrum_collection->filename);
+      parsed_spectrum = new Spectrum();
+      parsed_spectrum->parse_mstoolkit_spectrum(mst_spectrum,
+                                                spectrum_collection->filename);
       if (!add_spectrum_to_end(spectrum_collection, parsed_spectrum)) {
-        free_spectrum(parsed_spectrum);
+        delete parsed_spectrum;
         return FALSE;
       }
       mst_reader -> readFile(NULL, *mst_spectrum);
@@ -309,29 +310,32 @@ BOOLEAN_T parse_spectrum_collection(
     delete mst_spectrum;
     delete mst_reader;
   } else { // not MSToolkit
-    parsed_spectrum = allocate_spectrum();
     // parse one spectrum at a time
-    while(parse_spectrum_file(parsed_spectrum, file, spectrum_collection->filename)){
+    Spectrum* parsed_spectrum = 
+      Spectrum::new_spectrum_from_file(file, spectrum_collection->filename);
+    while(parsed_spectrum){
       // is this a scan to include? if not skip it
-      if( get_spectrum_first_scan(parsed_spectrum) < first_scan ){
-        free_spectrum(parsed_spectrum);
-        parsed_spectrum = allocate_spectrum();
+      if( parsed_spectrum->get_first_scan() < first_scan ){
+        delete parsed_spectrum;
+        parsed_spectrum = 
+          Spectrum::new_spectrum_from_file(file, spectrum_collection->filename);
         continue;
       } 
       // are we past the last scan?
-      if( get_spectrum_first_scan(parsed_spectrum) > last_scan ){
+      if( parsed_spectrum->get_first_scan() > last_scan ){
         break;
       }
       // is spectrum capacity not full?
       if(!add_spectrum_to_end(spectrum_collection, parsed_spectrum)){
-        free_spectrum(parsed_spectrum);
+        delete parsed_spectrum;
         fclose(file);
         return FALSE;
       }
-      parsed_spectrum = allocate_spectrum();
+      parsed_spectrum = 
+        Spectrum::new_spectrum_from_file(file, spectrum_collection->filename);
     }
     
-    free_spectrum(parsed_spectrum); // CHECKME why free_spectrum??
+    delete parsed_spectrum; // CHECKME why free_spectrum??
     fclose(file);
   }
   spectrum_collection->is_parsed = TRUE;
@@ -350,12 +354,12 @@ BOOLEAN_T parse_spectrum_collection(
  */
 BOOLEAN_T add_spectrum_to_end(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
-  SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
+  Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
   )
 {
   // set spectrum
   spectrum_collection->spectra.push_back(spectrum);
-  spectrum_collection->num_charged_spectra += get_spectrum_num_possible_z(spectrum);
+  spectrum_collection->num_charged_spectra += spectrum->get_num_possible_z();
   return TRUE;
 }
 
@@ -366,7 +370,7 @@ BOOLEAN_T add_spectrum_to_end(
  */
 BOOLEAN_T add_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
-  SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
+  Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
   )
 {
   unsigned int add_index = 0;
@@ -374,8 +378,8 @@ BOOLEAN_T add_spectrum(
   // find correct location
   // TODO -- replace with binary search if necessary.
   for(; add_index < spectrum_collection->spectra.size(); ++add_index){
-    if(get_spectrum_first_scan(spectrum_collection->spectra[add_index])>
-       get_spectrum_first_scan(spectrum)){
+    if((spectrum_collection->spectra[add_index])->get_first_scan() >
+       spectrum->get_first_scan()){
       break;
     }
   }
@@ -383,7 +387,7 @@ BOOLEAN_T add_spectrum(
   spectrum_collection->
     spectra.insert(spectrum_collection->spectra.begin()+add_index, spectrum);
 
-  spectrum_collection->num_charged_spectra += get_spectrum_num_possible_z(spectrum);
+  spectrum_collection->num_charged_spectra += spectrum->get_num_possible_z();
   return TRUE;
 }
 
@@ -394,23 +398,24 @@ BOOLEAN_T add_spectrum(
  */
 void remove_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
-  SPECTRUM_T* spectrum ///< spectrum to be removed from spectrum_collection -in
+  Spectrum* spectrum ///< spectrum to be removed from spectrum_collection -in
   )
 {
-  int scan_num = get_spectrum_first_scan(spectrum);
+  int scan_num = spectrum->get_first_scan();
   unsigned int spectrum_index = 0;
   
   // find where the spectrum is located in the spectrum array
   for(; spectrum_index < spectrum_collection->spectra.size(); ++spectrum_index){
     if(scan_num ==
-       get_spectrum_first_scan(spectrum_collection->spectra[spectrum_index])){
+       (spectrum_collection->spectra[spectrum_index])->get_first_scan() ){
       break;
     }
   }
   
-  spectrum_collection->num_charged_spectra -= get_spectrum_num_possible_z(spectrum);
+  spectrum_collection->num_charged_spectra -= spectrum->get_num_possible_z();
 
-  free_spectrum(spectrum_collection->spectra[spectrum_index]);
+  delete spectrum_collection->spectra[spectrum_index];
+  spectrum_collection->spectra[spectrum_index] = NULL;
   spectrum_collection->
     spectra.erase(spectrum_collection->spectra.begin() + spectrum_index);
 
@@ -419,13 +424,14 @@ void remove_spectrum(
 
 /**
  * Parses a single spectrum from a spectrum_collection with first scan
- * number equal to first_scan. Use binary search
- * \returns TRUE if the spectrum with. FALSE is failure.
+ * number equal to first_scan.  Use binary search.  Removes any
+ * existing information in the given spectrum.
+ * \returns TRUE if the spectrum was allocated, FALSE on error.
  */
 BOOLEAN_T get_spectrum_collection_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection, ///< The spectrum collection -out
   int first_scan,      ///< The first scan of the spectrum to retrieve -in
-  SPECTRUM_T* spectrum ///< The (empty) allocated SPECTRUM_T object -in
+  Spectrum* spectrum   ///< Put the spectrum info here
   )
 {
   FILE* file;
@@ -436,6 +442,11 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     return (FALSE);
   }
 
+  if( spectrum == NULL ){
+    carp(CARP_ERROR, "Can't parse into a NULL spectrum.");
+    return FALSE;
+  }
+
   if (get_boolean_parameter("use-mstoolkit")) {
     //We now know that the file exists,
     //MSToolkit doesn't check or doesn't report an
@@ -443,8 +454,8 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     //the file, so close it. (SJM)
     fclose(file);
     carp(CARP_INFO,"using mstoolkit to parse spectrum");
-    MSReader* mst_reader = new MSReader();
-    Spectrum* mst_spectrum = new Spectrum();
+    MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
+    MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();
     BOOLEAN_T parsed = FALSE;
 
     mst_reader -> readFile(
@@ -453,9 +464,8 @@ BOOLEAN_T get_spectrum_collection_spectrum(
       first_scan);
 
     if (mst_spectrum -> getScanNumber() != 0) {
-      parse_spectrum_spectrum(spectrum, 
-            mst_spectrum, 
-            spectrum_collection->filename);
+      spectrum->parse_mstoolkit_spectrum(mst_spectrum,
+                                         spectrum_collection->filename);
       parsed = TRUE;
     }
     else {
@@ -475,13 +485,76 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     }
     fseek(file, target_index, SEEK_SET);
     // parse spectrum, check if failed to parse spectrum return false
-    if(!parse_spectrum_file(spectrum, file, spectrum_collection->filename)){
+    if(!spectrum->parse_file(file, spectrum_collection->filename)){
       fclose(file);
       return FALSE;
     }
     fclose(file);
     return TRUE;
   }
+}
+
+
+/**
+ * Parses a single spectrum from a spectrum_collection with first scan
+ * number equal to first_scan. Use binary search
+ * \returns TRUE if the spectrum with. FALSE is failure.
+ */
+Spectrum* get_spectrum_collection_spectrum(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< The spectrum collection -out
+  int first_scan      ///< The first scan of the spectrum to retrieve -in
+  )
+{
+  FILE* file;
+  long target_index;
+  // check if file is still avaliable
+  if ((file = fopen(spectrum_collection->filename,"r")) == NULL) {
+    carp(CARP_ERROR,"File %s could not be opened",spectrum_collection->filename);
+    return (FALSE);
+  }
+
+  Spectrum* return_spec = NULL;
+
+  if (get_boolean_parameter("use-mstoolkit")) {
+    //We now know that the file exists,
+    //MSToolkit doesn't check or doesn't report an
+    //error.  So we need this check about, but not
+    //the file, so close it. (SJM)
+    fclose(file);
+    carp(CARP_INFO,"using mstoolkit to parse spectrum");
+    MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
+    MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();
+
+    mst_reader -> readFile(
+      spectrum_collection -> filename,
+      *mst_spectrum,
+      first_scan);
+
+    if (mst_spectrum -> getScanNumber() != 0) {
+      return_spec = new Spectrum();
+      return_spec->parse_mstoolkit_spectrum(mst_spectrum,
+                                            spectrum_collection->filename); 
+    } else {
+      carp(CARP_ERROR,"Spectrum %d does not exist in file", first_scan);
+      return_spec = NULL;
+    }
+    delete mst_spectrum;
+    delete mst_reader;
+  } else {
+
+    target_index = binary_search_spectrum(file, first_scan);
+    // first_scan not found
+    if(target_index == -1){
+      fclose(file);
+      return NULL;
+    }
+    fseek(file, target_index, SEEK_SET);
+    // parse spectrum, check if failed to parse spectrum return false
+    return_spec = 
+      Spectrum::new_spectrum_from_file(file, spectrum_collection->filename);
+    fclose(file);
+  }
+  return return_spec;
 }
 
 /**
@@ -970,11 +1043,11 @@ BOOLEAN_T filtered_spectrum_charge_iterator_has_next(
 /**
  * The basic iterator function next.
  */
-SPECTRUM_T* spectrum_iterator_next(
+Spectrum* spectrum_iterator_next(
   SPECTRUM_ITERATOR_T* spectrum_iterator///< return the next spectrum -in
 )
 {
-  SPECTRUM_T* next_spectrum = 
+  Spectrum* next_spectrum = 
     spectrum_iterator->spectrum_collection->spectra[spectrum_iterator->spectrum_index];
   ++spectrum_iterator->spectrum_index;
   return next_spectrum;
@@ -984,12 +1057,12 @@ SPECTRUM_T* spectrum_iterator_next(
  * The basic iterator function next.  Also returns the charge state to
  * use for this spectrum.
  */
-SPECTRUM_T* filtered_spectrum_charge_iterator_next(
+Spectrum* filtered_spectrum_charge_iterator_next(
   FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator,
   int* charge                            ///< put charge here -out
 )
 {
-  SPECTRUM_T* next_spectrum = 
+  Spectrum* next_spectrum = 
     iterator->spectrum_collection->spectra[iterator->spectrum_index];
   *charge = iterator->charges[iterator->charge_index];
 
@@ -1010,7 +1083,7 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
     return;
   }
 
-  SPECTRUM_T* spec = NULL;
+  Spectrum* spec = NULL;
 
   // Are there any more charge states for this spectrum?
   if( iterator->charge_index < iterator->num_charges-1 ){
@@ -1025,7 +1098,7 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
     if( ! iterator->charges.empty() ){
       iterator->charges.clear();
     }
-    iterator->charges = get_charges_to_search(spec);
+    iterator->charges = spec->get_charges_to_search();
     iterator->num_charges = (int)iterator->charges.size();
     iterator->charge_index = 0;
   }else{ // none left
@@ -1039,8 +1112,8 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
   if (iterator->charge_index < iterator->num_charges) {
     this_charge = iterator->charges[iterator->charge_index];
   }
-  double mz = get_spectrum_precursor_mz(spec);
-  int num_peaks = get_spectrum_num_peaks(spec);
+  double mz = spec->get_precursor_mz();
+  int num_peaks = spec->get_num_peaks();
 
   if( iterator->search_charge == 0 || iterator->search_charge == this_charge ){
     if( mz >= iterator->min_mz && mz <= iterator->max_mz

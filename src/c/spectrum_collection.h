@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "objects.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "carp.h"
 
 
@@ -65,12 +65,23 @@ BOOLEAN_T parse_spectrum_collection(
 /**
  * Parses a single spectrum from a spectrum_collection with first scan
  * number equal to first_scan.
- * \returns TRUE if the spectrum with. FALSE is failure.
+ * \returns The newly allocated Spectrum or NULL if scan number not found.
+ */
+Spectrum* get_spectrum_collection_spectrum(
+  SPECTRUM_COLLECTION_T* spectrum_collection, ///< The spectrum collection -out
+  int first_scan      ///< The first scan of the spectrum to retrieve -in
+  );
+
+/**
+ * Parses a single spectrum from a spectrum_collection with first scan
+ * number equal to first_scan.  Removes any existing information in the
+ * given spectrum.
+ * \returns True if the spectrum was allocated, false on error.
  */
 BOOLEAN_T get_spectrum_collection_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection, ///< The spectrum collection -out
   int first_scan,      ///< The first scan of the spectrum to retrieve -in
-  SPECTRUM_T* spectrum ///< The (empty) allocated SPECTRUM_T object -in
+  Spectrum* spectrum   ///< Put the spectrum info here
   );
 
 /**
@@ -81,7 +92,7 @@ BOOLEAN_T get_spectrum_collection_spectrum(
  */
 BOOLEAN_T add_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
-  SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
+  Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
 ); 
 
 /**
@@ -94,7 +105,7 @@ BOOLEAN_T add_spectrum(
  */
 BOOLEAN_T add_spectrum_to_end(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
-  SPECTRUM_T* spectrum ///< spectrum to add to spectrum_collection -in
+  Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
   );
 
 /**
@@ -102,7 +113,7 @@ BOOLEAN_T add_spectrum_to_end(
  */
 void remove_spectrum(
   SPECTRUM_COLLECTION_T* spectrum_collection,///< the working spectrum_collection -out
-  SPECTRUM_T* spectrum ///< spectrum to be removed from spectrum_collection -in
+  Spectrum* spectrum ///< spectrum to be removed from spectrum_collection -in
   ); 
 
 /** 
@@ -252,7 +263,7 @@ BOOLEAN_T filtered_spectrum_charge_iterator_has_next(
 /**
  * The basic iterator function next.
  */
-SPECTRUM_T* spectrum_iterator_next(
+Spectrum* spectrum_iterator_next(
   SPECTRUM_ITERATOR_T* spectrum_iterator///< return the next spectrum -in
 );
 
@@ -260,7 +271,7 @@ SPECTRUM_T* spectrum_iterator_next(
  * The basic iterator function next.  Also returns the charge state to
  * use for this spectrum.
  */
-SPECTRUM_T* filtered_spectrum_charge_iterator_next(
+Spectrum* filtered_spectrum_charge_iterator_next(
   FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator,///< return spec from here -in
   int* charge);                 ///< put charge here -out
 

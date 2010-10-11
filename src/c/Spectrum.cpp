@@ -276,12 +276,24 @@ void Spectrum::print_sqt(
 /**
  * Parses a spectrum from a file, either mgf or ms2.
  */
- Spectrum* Spectrum::parse_file(FILE* file, const char* filename)
+ Spectrum* Spectrum::new_spectrum_from_file(FILE* file, const char* filename)
 {
   if (get_boolean_parameter("use-mgf")) {
-    return Spectrum::parse_mgf(file, filename);
+    return Spectrum::new_spectrum_mgf(file, filename);
   } else {
-    return Spectrum::parse_ms2(file, filename);
+    return Spectrum::new_spectrum_ms2(file, filename);
+  }
+}
+
+/**
+ * Parses a spectrum from a file, either mgf or ms2.
+ */
+bool Spectrum::parse_file(FILE* file, const char* filename)
+{
+  if (get_boolean_parameter("use-mgf")) {
+    return this->parse_mgf(file, filename);
+  } else {
+    return this->parse_ms2(file, filename);
   }
 }
 
@@ -289,14 +301,32 @@ void Spectrum::print_sqt(
  * Parses a spectrum from an .mgf file
  * \returns A newly allocated spectrum or NULL on error or EOF.
  */
+Spectrum* Spectrum::new_spectrum_mgf
+(FILE* file, ///< the input file stream -in
+ const char* filename) ///< filename of the spectrum
+{
+  Spectrum* spectrum = new Spectrum();
+  if( spectrum->parse_mgf(file, filename) ){
+    return spectrum;
+  } else {
+    delete spectrum;
+  }
+  return false;
+}
+
+/**
+ * Parses a spectrum from an .mgf file
+ * \returns True if successfully parsed or false on error or EOF.
+ */
 // TODO: figure out a better way to handle spectrum count.  
 // MGF doesn't really have
 // a defined format for this.  If it does, then the programs that output 
 // MGF don't always conform to this format. SJM
-Spectrum* Spectrum::parse_mgf
+bool Spectrum::parse_mgf
 (FILE* file, ///< the input file stream -in
  const char* filename) ///< filename of the spectrum
 {
+  // TODO: delete any existing peaks
   static int spec_count = 1;
   char* new_line = NULL;
   int line_length;
@@ -323,10 +353,9 @@ Spectrum* Spectrum::parse_mgf
   
   if (!begin_found) {
     carp(CARP_DEBUG,"Couldn't find any more scans");
-    return NULL;
+    return false;
   }
   
-  Spectrum* spectrum = new Spectrum();
   //scan for the header fields
   while( (line_length = getline(&new_line, &buf_length, file)) != -1){
     if (strncmp(new_line, "TITLE=",6) == 0) {
@@ -337,8 +366,8 @@ Spectrum* Spectrum::parse_mgf
       // upon the machine i think
       // parse the title line
       
-      spectrum->first_scan_ = first_scan;
-      spectrum->last_scan_ = last_scan;
+      this->first_scan_ = first_scan;
+      this->last_scan_ = last_scan;
     } else if (strncmp(new_line, "CHARGE=",7) == 0) {
       //parse the charge line
       int charge;
@@ -349,7 +378,7 @@ Spectrum* Spectrum::parse_mgf
       
       carp(CARP_DETAILED_DEBUG, "charge:%d", charge);
       
-      spectrum->possible_z_.push_back(charge);
+      this->possible_z_.push_back(charge);
       
       charge_found = true;
     } else if (strncmp(new_line, "PEPMASS=",8) == 0) {
@@ -359,7 +388,7 @@ Spectrum* Spectrum::parse_mgf
       pepmass = atof(new_line+8);
       carp(CARP_DETAILED_DEBUG, "pepmass:%f",pepmass);
       //TODO - check to see if this is correct.
-      spectrum->precursor_mz_ = pepmass;
+      this->precursor_mz_ = pepmass;
       pepmass_found = true;
     } else if (isdigit(new_line[0])) {
       //no more header lines, peak information is up
@@ -368,7 +397,7 @@ Spectrum* Spectrum::parse_mgf
     } else if (strcmp(new_line, "END IONS") == 0) {
       //we found the end of the ions without any peaks.
       carp(CARP_WARNING,"No peaks found for mgf spectrum");
-      return spectrum;
+      return true;
     }
   }
   
@@ -390,7 +419,7 @@ Spectrum* Spectrum::parse_mgf
     {
       carp(CARP_DETAILED_DEBUG,"adding peak %f %f",location_mz, intensity);
       //add the peak to the spectrum object
-      spectrum->add_peak(intensity, location_mz);
+      this->add_peak(intensity, location_mz);
     } else {
       //file format error.
       carp(CARP_ERROR,
@@ -404,12 +433,11 @@ Spectrum* Spectrum::parse_mgf
   
   if (end_found) {
     //we successfully parsed this spectrum.
-    spectrum->filename_ = filename;
-    return spectrum;
+    this->filename_ = filename;
+    return true;
   } else {
     //something happened, bomb.
-    delete spectrum;
-    return NULL;
+    return false;
   }
 }
 
@@ -417,11 +445,27 @@ Spectrum* Spectrum::parse_mgf
  * Parses a spectrum from an ms2 file.
  * \returns A newly allocated Spectrum or NULL on error or EOF.
  */
-Spectrum* Spectrum::parse_ms2
+Spectrum* Spectrum::new_spectrum_ms2
   (FILE* file, ///< the input file stream -in
    const char* filename) ///< filename of the spectrum
 {
+  Spectrum* spectrum = new Spectrum();
+  if( spectrum->parse_ms2(file, filename)){
+    return spectrum;
+  } else {
+    delete spectrum;
+  }
+  return NULL;
+}
 
+/**
+ * Parses a spectrum from an ms2 file.
+ * \returns True if successfully parsed or false on error or EOF.
+ */
+bool Spectrum::parse_ms2
+  (FILE* file, ///< the input file stream -in
+   const char* filename) ///< filename of the spectrum
+{
   long file_index = ftell(file); // stores the location of the current working line in the file
   char* new_line = NULL;
   int line_length;
@@ -436,8 +480,6 @@ Spectrum* Spectrum::parse_ms2
   FLOAT_T test_float;
   char test_char;
   
-  Spectrum* spectrum = new Spectrum();
-
   while( (line_length = getline(&new_line, &buf_length, file)) != -1){
     // checks if 'S' is not the first line
     if((!record_S || (record_S && start_add_peaks)) && 
@@ -454,7 +496,7 @@ Spectrum* Spectrum::parse_ms2
     // Reads the 'S' line
     else if(new_line[0] == 'S' && !record_S){
       record_S = true;
-      if(!spectrum->parse_S_line(new_line, buf_length)){
+      if(!this->parse_S_line(new_line, buf_length)){
         file_format = false;
         break; // File format incorrect
       }
@@ -462,7 +504,7 @@ Spectrum* Spectrum::parse_ms2
     // Reads the 'Z' line 
     else if(new_line[0] == 'Z'){
       record_Z = true;
-      if(!spectrum->parse_Z_line(new_line)){
+      if(!this->parse_Z_line(new_line)){
         file_format = false;
         break; // File format incorrect
       }
@@ -470,7 +512,7 @@ Spectrum* Spectrum::parse_ms2
 
     // Reads the 'D' line 
     else if(new_line[0] == 'D'){
-      if(!spectrum->parse_D_line(new_line)){
+      if(!this->parse_D_line(new_line)){
         file_format = false;
         break; // File format incorrect
       }
@@ -478,7 +520,7 @@ Spectrum* Spectrum::parse_ms2
 
     // Reads the 'I' line 
     else if(new_line[0] == 'I'){
-      if(!spectrum->parse_I_line(new_line)){
+      if(!this->parse_I_line(new_line)){
         file_format = false;
         break; // File format incorrect
       }
@@ -540,7 +582,7 @@ Spectrum* Spectrum::parse_ms2
         {
           file_format = true;
           start_add_peaks = true;
-          spectrum->add_peak(intensity, location_mz);
+          this->add_peak(intensity, location_mz);
         }
       }
     // *************************
@@ -552,21 +594,19 @@ Spectrum* Spectrum::parse_ms2
   myfree(new_line);
   
   // set filename of empty spectrum
-  spectrum->filename_ = filename;
+  this->filename_ = filename;
 
   // No more spectrum in .ms file
   if(!record_S && !file_format){
-    delete spectrum;
-    return NULL;
+    return false;
   }
   
   // File format incorrect
   if(!file_format){ 
     carp(CARP_ERROR, "Incorrect ms2 file format.");
-    delete spectrum;
-    return NULL;
+    return false;
   }
-  return spectrum;
+  return true;
 }
 
 /**
@@ -730,7 +770,7 @@ bool Spectrum::parse_I_line(char* line)  ///< 'I' line to parse -in
  * \returns TRUE if success. FALSE is failure.
  */
 bool Spectrum::parse_mstoolkit_spectrum
- (void* mst_spectrum, ///< the input MSToolkit spectrum -in
+  (MSToolkit::Spectrum* mst_spectrum, ///< the input MSToolkit spectrum -in
   const char* filename ///< filename of the spectrum
   ) {
 

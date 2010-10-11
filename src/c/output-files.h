@@ -36,7 +36,7 @@ class OutputFiles{
                     MATCH_COLLECTION_T** decoy_matches_array,
                     int num_decoys,
                     SCORER_TYPE_T rank_type = XCORR,
-                    SPECTRUM_T* spectrum = NULL);
+                    Spectrum* spectrum = NULL);
   void writeMatches(MATCH_COLLECTION_T* matches);
   void writeMatchFeatures(MATCH_T* match, 
                           double* features,
@@ -59,7 +59,7 @@ class OutputFiles{
   void printMatchesXml(
 		       MATCH_COLLECTION_T* target_matches,
 		       MATCH_COLLECTION_T** decoy_matches_array,
-		       SPECTRUM_T* spectrum,
+		       Spectrum* spectrum,
 		       SCORER_TYPE_T rank_type);
  
 
@@ -68,13 +68,13 @@ class OutputFiles{
     MATCH_COLLECTION_T** decoy_matches_array,  
                            ///< array of collections from shuffled peptides
     SCORER_TYPE_T rank_type,
-    SPECTRUM_T* spectrum = NULL);
+    Spectrum* spectrum = NULL);
 
   void printMatchesSqt(
     MATCH_COLLECTION_T*  target_matches, ///< from real peptides
     MATCH_COLLECTION_T** decoy_matches_array,  
                            ///< array of collections from shuffled peptides
-  SPECTRUM_T* spectrum = NULL);
+  Spectrum* spectrum = NULL);
 
   int num_files_;         ///< num files in each array
   FILE** tab_file_array_; ///< array of .txt files

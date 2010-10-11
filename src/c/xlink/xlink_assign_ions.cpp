@@ -6,6 +6,7 @@
 #include "scorer.h"
 #include "spectrum_collection.h"
 #include "DelimitedFile.h"
+#include "PeakIterator.h"
 
 #include <math.h>
 #include <assert.h>
@@ -17,7 +18,7 @@
 
 
 
-void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series);
+void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series);
 int main(int argc, char** argv){
 
   /* Verbosity level for set-up/command line reading */
@@ -95,14 +96,14 @@ int main(int argc, char** argv){
   //cout << "lp " << lp << endl; 
 
   SPECTRUM_ITERATOR_T* spectrum_iterator = new_spectrum_iterator(collection);
-  SPECTRUM_T* spectrum = NULL;
-  SPECTRUM_T* current_spectrum = NULL;
+  Spectrum* spectrum = NULL;
+  Spectrum* current_spectrum = NULL;
 
   //TODO allow a binary search on both mgf and ms2 files.
 
   while (spectrum_iterator_has_next(spectrum_iterator)) {
     current_spectrum = spectrum_iterator_next(spectrum_iterator);
-    if (get_spectrum_first_scan(current_spectrum) == scan_num) {
+    if (current_spectrum->get_first_scan() == scan_num) {
       spectrum = current_spectrum;
       break;
     }
@@ -134,7 +135,7 @@ int main(int argc, char** argv){
   //free_spectrum(spectrum);
 }
 
-void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series) {
+void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
       int total_by_ions = ion_series.get_total_by_ions();
       int matched_by_ions = Scorer::get_matched_by_ions(spectrum, ion_series);
@@ -143,7 +144,7 @@ void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series) {
       carp(CARP_INFO, "total theoretical ions:%d",total_by_ions);
       carp(CARP_INFO,"theoretical ions matched:%d",matched_by_ions);
       carp(CARP_INFO,"frac theoretical ions matched:%f",frac_by_ions);
-      carp(CARP_INFO,"npeaks:%d",get_spectrum_num_peaks(spectrum));
+      carp(CARP_INFO,"npeaks:%d",spectrum->get_num_peaks());
 
       FLOAT_T bin_width = get_double_parameter("mz-bin-width");
       vector<LinkedPeptide>& ions = ion_series.ions();
@@ -156,7 +157,8 @@ void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series) {
         
 	//if (ion -> get_mz(MONO) >= 400 && ion -> get_mz(MONO) <= 1400) {
 	  if (ion -> type() == B_ION || ion -> type() == Y_ION) {
-	    PEAK_T* peak = get_nearest_peak(spectrum, ion -> get_mz(MONO), bin_width);
+	    PEAK_T* peak = spectrum->get_nearest_peak(ion->get_mz(MONO), 
+                                                      bin_width);
 	    if (peak != NULL) {
               if (matched.find(peak) == matched.end()) {
                 matched_intensity += get_peak_intensity(peak);
@@ -169,7 +171,7 @@ void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series) {
 	//}
       }
 
-      double total_intensity = get_spectrum_total_energy(spectrum);
+      double total_intensity = spectrum->get_total_energy();
       double frac_intensity = matched_intensity / total_intensity;
 
       carp(CARP_INFO,"matched intensity:%lf",matched_intensity);
@@ -191,9 +193,9 @@ void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series) {
       unsigned int seq_col = result_file.addColumn("sequence");
       
 
-      PEAK_ITERATOR_T* peak_iter = new_peak_iterator(spectrum);
-      while (peak_iterator_has_next(peak_iter)) {
-	PEAK_T* peak = peak_iterator_next(peak_iter);
+      PeakIterator* peak_iter = new PeakIterator(spectrum);
+      while (peak_iter->has_next()) {
+	PEAK_T* peak = peak_iter->next();
         
 	//if (get_peak_location(peak) >= 400 && get_peak_location(peak) <= 1400) {
           unsigned int row_idx = result_file.addRow();
@@ -234,7 +236,7 @@ void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series) {
           }
         //}
       }
-      free_peak_iterator(peak_iter);
+      delete peak_iter;
 
       cout << result_file;
 

@@ -14,7 +14,7 @@
 #include <vector>
 #include "parameter.h"
 #include "carp.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "peak.h"
 #include "spectrum_collection.h"
 #include "unistd.h"
@@ -106,53 +106,49 @@ int main(int argc, char** argv){
   carp(CARP_DETAILED_DEBUG, "Creating spectrum collection.");
   SPECTRUM_COLLECTION_T* collection = new_spectrum_collection(ms2_filename);
 
-  int scan_number;
   int num_found = 0;
-  for (scan_number = min_scan; scan_number <= max_scan; scan_number++) {
-    SPECTRUM_T* spectrum = allocate_spectrum();
+  for (int scan_number = min_scan; scan_number <= max_scan; scan_number++) {
 
     /* search for spectrum with the correct scan number */
-    BOOLEAN_T spectrum_found = get_spectrum_collection_spectrum(collection, 
-								scan_number, 
-								spectrum);
-    if( !spectrum_found ){
+    Spectrum* spectrum = get_spectrum_collection_spectrum(collection, 
+                                                          scan_number);
+    if( spectrum == NULL ){
       carp(CARP_WARNING, "Could not find scan number %i", scan_number);
-      free_spectrum(spectrum);
       continue;
     }
 
     /* Print either the spectrum or stats. */
     if (!options){
-      print_spectrum(spectrum, stdout);
+      spectrum->print(stdout);
 
     } else {
 
       int charge_state_index = 0; 
-      int charge_state_num = get_spectrum_num_possible_z(spectrum);
-      std::vector<int> possible_z_array = get_spectrum_possible_z(spectrum);
+      int charge_state_num = spectrum->get_num_possible_z();
+      std::vector<int> possible_z_array = spectrum->get_possible_z();
       int possible_z;
   
       printf("Scan number: %i\n", scan_number);
-      printf("Precursor m/z:%.2f\n", get_spectrum_precursor_mz(spectrum));
-      printf("Total Ion Current:%.2f\n", get_spectrum_total_energy(spectrum));
+      printf("Precursor m/z:%.2f\n", spectrum->get_precursor_mz());
+      printf("Total Ion Current:%.2f\n", spectrum->get_total_energy());
       printf("Base Peak Intensity:%.1f\n", 
-	     get_spectrum_max_peak_intensity(spectrum)); // base is max
-      printf("Number of peaks:%d\n", get_spectrum_num_peaks(spectrum));
-      printf("Minimum m/z:%.1f\n", get_spectrum_min_peak_mz(spectrum));
-      printf("Maximum m/z:%.1f\n", get_spectrum_max_peak_mz(spectrum));
+	     spectrum->get_max_peak_intensity()); // base is max
+      printf("Number of peaks:%d\n", spectrum->get_num_peaks());
+      printf("Minimum m/z:%.1f\n", spectrum->get_min_peak_mz());
+      printf("Maximum m/z:%.1f\n", spectrum->get_max_peak_mz());
     
       for(charge_state_index=0; charge_state_index < charge_state_num; 
 	  ++charge_state_index){
 	possible_z = possible_z_array[charge_state_index];
 	printf("Charge state:%d\n", possible_z);
 	printf("Neutral mass:%.2f\n", 
-	       get_spectrum_neutral_mass(spectrum, possible_z));
-	printf("Charged mass:%.2f\n", get_spectrum_mass(spectrum, possible_z));
+	       spectrum->get_neutral_mass(possible_z));
+	printf("Charged mass:%.2f\n", spectrum->get_mass(possible_z));
 	printf("M+H+ mass:%.2f\n", 
-	       get_spectrum_singly_charged_mass(spectrum, possible_z));
+	       spectrum->get_singly_charged_mass(possible_z));
       }
     }
-    free_spectrum(spectrum);
+    delete spectrum;
     num_found++;
   }
   free_spectrum_collection(collection);

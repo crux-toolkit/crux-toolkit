@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "peak.h"
+#include "MSToolkit/Spectrum.h"
 
 /**
  * \class Spectrum 
@@ -63,6 +64,34 @@ class Spectrum{
   static const int MAX_CHARGE = 6;     ///< Maximum allowed charge.
   
   // private methods
+  /**
+   * Parses a spectrum from file, deleting any existing values in the
+   * object.
+   * Skips Header line "H"
+   * \returns The newly allocated spectrum or NULL on error or EOF.
+   */
+  static Spectrum* new_spectrum_ms2(FILE* file, const char* filename = NULL); 
+  
+  /**
+   * Parses a spectrum from file, deleting any existing values in the
+   * object.
+   * Skips Header line "H"
+   * \returns The newly allocated spectrum or NULL on error or EOF.
+   */
+  bool parse_ms2(FILE* file, const char* filename = NULL); 
+  
+  /**
+   * Parse a spectrum from a file in mgf format.
+   * \returns A newly allocated spectrum or NULL on error or EOF.
+   */
+  static Spectrum* new_spectrum_mgf(FILE* file, const char* filename = NULL); 
+  
+  /**
+   * Parse a spectrum from a file in mgf format.
+   * \returns True if successfully parsed or false on error or EOF.
+   */
+  bool parse_mgf(FILE* file, const char* filename = NULL); 
+
   /**
    * Parses the 'S' line of a spectrum
    * \returns TRUE if success. FALSE is failure.
@@ -161,27 +190,19 @@ class Spectrum{
   /**
    * Parses a spectrum from a file, either mgf or ms2.
    */
-  static Spectrum* parse_file(FILE* file, const char* filename);
+  static Spectrum* new_spectrum_from_file(FILE* file, 
+                                          const char* filename = NULL);
 
   /**
-   * Parses a spectrum from file, deleting any existing values in the
-   * object.
-   * Skips Header line "H"
-   * \returns The newly allocated spectrum or NULL on error or EOF.
+   * Parses a spectrum from a file, either mgf or ms2.
    */
-  static Spectrum* parse_ms2(FILE* file, const char* filename); 
-
-  /**
-   * Parse a spectrum from a file in mgf format.
-   * \returns A newly allocated spectrum or NULL on error or EOF.
-   */
-  static Spectrum* parse_mgf(FILE* file, const char* filename); 
+  bool parse_file(FILE* file, const char* filename = NULL);
 
   /**
    * Transfer values from an MSToolkit spectrum to the crux Spectrum.
    */
-  // FIXME: pass an MSToolkit spectrum instead of void*
-  bool parse_mstoolkit_spectrum(void* mst_spectrum, const char* filename);
+  bool parse_mstoolkit_spectrum(MSToolkit::Spectrum* mst_spectrum, 
+                                const char* filename = NULL);
 
   /**
    * Parse the spectrum from the tab-delimited result file

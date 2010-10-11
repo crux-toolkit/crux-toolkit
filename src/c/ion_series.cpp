@@ -18,7 +18,7 @@
 #include "parameter.h"
 #include "peptide.h"
 #include "mass.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 
 static const int BINARY_GMTK = 1;
 static const int PRINT_NULL_IONS = 1;

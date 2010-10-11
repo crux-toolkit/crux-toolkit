@@ -19,7 +19,7 @@ void print_matches(
   OutputFiles& output_files,       
   MATCH_COLLECTION_T* target_psms, 
   vector<MATCH_COLLECTION_T*>& decoy_psms,
-  SPECTRUM_T* spectrum,             
+  Spectrum* spectrum,             
   BOOLEAN_T combine_target_decoy,
   int num_decoy_files
                    );
@@ -115,10 +115,10 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
   // Perform search on each spectrum
   while(filtered_spectrum_charge_iterator_has_next(spectrum_iterator)){
     int charge = 0;
-    SPECTRUM_T* spectrum = 
+    Spectrum* spectrum = 
       filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
 
-    progress.report(get_spectrum_first_scan(spectrum), charge);
+    progress.report(spectrum->get_first_scan(), charge);
 
     // create empty match collections to store results in
     MATCH_COLLECTION_T* target_psms = new_empty_match_collection(FALSE); 
@@ -138,7 +138,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
       PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
 
       // get peptide iterator
-      FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
+      FLOAT_T precursor_mz = spectrum->get_precursor_mz();
       MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator =
         new_modified_peptides_iterator_from_mz(precursor_mz,
                                                charge,
@@ -195,7 +195,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
 
     if( total_matches == 0 ){
       carp(CARP_WARNING, "No matches found for spectrum %i, charge %i.",
-           get_spectrum_first_scan(spectrum), charge);
+           spectrum->get_first_scan(), charge);
       progress.increment(FALSE);
 
     }else{  
@@ -255,7 +255,7 @@ void print_matches(
   OutputFiles& output_files,       ///< files to print to
   MATCH_COLLECTION_T* target_psms, ///< target psms to print
   vector<MATCH_COLLECTION_T*>& decoy_psms,///< decoy psms to print
-  SPECTRUM_T* spectrum,            ///< all matches are to this spec
+  Spectrum* spectrum,            ///< all matches are to this spec
   BOOLEAN_T combine_target_decoy,  ///< merge targets and decoys?
   int num_decoy_files              ///< merge decoys?
 ){ 

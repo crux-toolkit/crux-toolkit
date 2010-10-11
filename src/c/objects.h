@@ -33,29 +33,6 @@ enum _peak_sort_type {_PEAK_LOCATION, _PEAK_INTENSITY};
 typedef enum _peak_sort_type PEAK_SORT_TYPE_T;
 
 /**
- * \typedef SPECTRUM_T 
- * \brief A spectrum
- */
-typedef struct spectrum SPECTRUM_T;
-
-/**
- * The enum for spectrum type (MS1, MS2, MS3)
- */
-enum _spectrum_type { MS1, MS2, MS3 };
-
-/**
- * \typedef SPECTRUM_TYPE_T 
- * \brief The typedef for spectrum type (MS1, MS2, MS3)
- */
-typedef enum _spectrum_type SPECTRUM_TYPE_T;
-
-/**
- * \typedef PEAK_ITERATOR_T 
- * \brief An object to iterate over the peaks in a spectrum
- */
-typedef struct peak_iterator PEAK_ITERATOR_T;
-
-/**
  * \typedef SPECTRUM_COLLECTION_T 
  * \brief A collection of spectra
  */
