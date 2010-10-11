@@ -101,7 +101,7 @@ void Spectrum::print(FILE* file) ///< output file to print at -out
   // print 'Z', 'D' line
   for(size_t z_idx = 0; z_idx < possible_z_.size(); z_idx++){
     fprintf(file, "Z\t%d\t%.2f\n", possible_z_[z_idx],
-            this->get_singly_charged_mass(possible_z_[z_idx]));
+            this->getSinglyChargedMass(possible_z_[z_idx]));
     // are there any 'D' lines to print?
     if(z_idx < d_lines_v_.size() ){
       fprintf(file, "%s", d_lines_v_[z_idx].c_str());
@@ -121,7 +121,7 @@ void Spectrum::print(FILE* file) ///< output file to print at -out
  * observed peaks.  Assumes intensities are in m/z bins from 0 to
  * max_mz_bin.  Only prints non-zero intensities.
  */
-void Spectrum::print_processed_peaks(
+void Spectrum::printProcessedPeaks(
   int charge,           ///< print at this charge state
   FLOAT_T* intensities, ///< intensities of new peaks
   int max_mz_bin,       ///< num_bins in intensities
@@ -141,13 +141,13 @@ void Spectrum::print_processed_peaks(
   // print 'Z', 'D' line
   if( charge != 0 ){  // print only one charge state
     fprintf(file, "Z\t%d\t%.2f\n", charge,
-            this->get_singly_charged_mass(charge));
+            this->getSinglyChargedMass(charge));
     // TODO find associated Z line and print
   } else {  // print all charge states
 
     for(size_t z_idx = 0; z_idx < possible_z_.size(); z_idx++){
       fprintf(file, "Z\t%d\t%.2f\n", possible_z_[z_idx],
-              this->get_singly_charged_mass(possible_z_[z_idx]));
+              this->getSinglyChargedMass(possible_z_[z_idx]));
       // are there any 'D' lines to print?
       if(z_idx < d_lines_v_.size()){
         fprintf(file, "%s", d_lines_v_[z_idx].c_str());
@@ -167,7 +167,7 @@ void Spectrum::print_processed_peaks(
 /**
  * Prints a spectrum object to file in xml format.
  */
-void Spectrum::print_xml(
+void Spectrum::printXml(
   FILE* file,           ///< output file to print at -out
   int charge,            ///< charge used for the search -in
   int index              ///< used to output index to file
@@ -194,7 +194,7 @@ void Spectrum::print_xml(
           spectrum_id.str().c_str(),
           start_scan,
           last_scan,
-          this->get_neutral_mass(charge),
+          this->getNeutralMass(charge),
           charge,
           index
           );
@@ -214,7 +214,7 @@ void Spectrum::print_xml(
 /**
  * Prints a spectrum object to file in sqt format.
  */
-void Spectrum::print_sqt(
+void Spectrum::printSqt(
   FILE* file,           ///< output file to print to -out
   int num_matches,      ///< number of peptides compared to this spec -in
   int charge            ///< charge used for the search -in
@@ -232,7 +232,7 @@ void Spectrum::print_sqt(
           charge, 
           0.0, // FIXME dummy <process time>
           "server", // FIXME dummy <server>
-          this->get_neutral_mass(charge), //this is used in search
+          this->getNeutralMass(charge), //this is used in search
           0.0, // FIXME dummy <total intensity>
           0.0, // FIXME dummy <lowest sp>
           num_matches);
@@ -262,13 +262,13 @@ void Spectrum::print_sqt(
 
   // copy each peak
   for(int peak_idx=0; peak_idx < (int)old_spectrum.peaks_.size(); ++peak_idx){
-    this->add_peak(get_peak_intensity(old_spectrum.peaks_[peak_idx]),
+    this->addPeak(get_peak_intensity(old_spectrum.peaks_[peak_idx]),
                    get_peak_location(old_spectrum.peaks_[peak_idx])); 
   }
 
   /*  Should we do this??
   if( old_spectrum.mz_peak_array ){
-    populate_mz_peak_array();
+    populateMzPeakArray();
   }
   */
 }
@@ -276,24 +276,24 @@ void Spectrum::print_sqt(
 /**
  * Parses a spectrum from a file, either mgf or ms2.
  */
- Spectrum* Spectrum::new_spectrum_from_file(FILE* file, const char* filename)
+ Spectrum* Spectrum::newSpectrumFromFile(FILE* file, const char* filename)
 {
   if (get_boolean_parameter("use-mgf")) {
-    return Spectrum::new_spectrum_mgf(file, filename);
+    return Spectrum::newSpectrumMgf(file, filename);
   } else {
-    return Spectrum::new_spectrum_ms2(file, filename);
+    return Spectrum::newSpectrumMs2(file, filename);
   }
 }
 
 /**
  * Parses a spectrum from a file, either mgf or ms2.
  */
-bool Spectrum::parse_file(FILE* file, const char* filename)
+bool Spectrum::parseFile(FILE* file, const char* filename)
 {
   if (get_boolean_parameter("use-mgf")) {
-    return this->parse_mgf(file, filename);
+    return this->parseMgf(file, filename);
   } else {
-    return this->parse_ms2(file, filename);
+    return this->parseMs2(file, filename);
   }
 }
 
@@ -301,12 +301,12 @@ bool Spectrum::parse_file(FILE* file, const char* filename)
  * Parses a spectrum from an .mgf file
  * \returns A newly allocated spectrum or NULL on error or EOF.
  */
-Spectrum* Spectrum::new_spectrum_mgf
+Spectrum* Spectrum::newSpectrumMgf
 (FILE* file, ///< the input file stream -in
  const char* filename) ///< filename of the spectrum
 {
   Spectrum* spectrum = new Spectrum();
-  if( spectrum->parse_mgf(file, filename) ){
+  if( spectrum->parseMgf(file, filename) ){
     return spectrum;
   } else {
     delete spectrum;
@@ -322,7 +322,7 @@ Spectrum* Spectrum::new_spectrum_mgf
 // MGF doesn't really have
 // a defined format for this.  If it does, then the programs that output 
 // MGF don't always conform to this format. SJM
-bool Spectrum::parse_mgf
+bool Spectrum::parseMgf
 (FILE* file, ///< the input file stream -in
  const char* filename) ///< filename of the spectrum
 {
@@ -419,7 +419,7 @@ bool Spectrum::parse_mgf
     {
       carp(CARP_DETAILED_DEBUG,"adding peak %f %f",location_mz, intensity);
       //add the peak to the spectrum object
-      this->add_peak(intensity, location_mz);
+      this->addPeak(intensity, location_mz);
     } else {
       //file format error.
       carp(CARP_ERROR,
@@ -445,12 +445,12 @@ bool Spectrum::parse_mgf
  * Parses a spectrum from an ms2 file.
  * \returns A newly allocated Spectrum or NULL on error or EOF.
  */
-Spectrum* Spectrum::new_spectrum_ms2
+Spectrum* Spectrum::newSpectrumMs2
   (FILE* file, ///< the input file stream -in
    const char* filename) ///< filename of the spectrum
 {
   Spectrum* spectrum = new Spectrum();
-  if( spectrum->parse_ms2(file, filename)){
+  if( spectrum->parseMs2(file, filename)){
     return spectrum;
   } else {
     delete spectrum;
@@ -462,7 +462,7 @@ Spectrum* Spectrum::new_spectrum_ms2
  * Parses a spectrum from an ms2 file.
  * \returns True if successfully parsed or false on error or EOF.
  */
-bool Spectrum::parse_ms2
+bool Spectrum::parseMs2
   (FILE* file, ///< the input file stream -in
    const char* filename) ///< filename of the spectrum
 {
@@ -474,7 +474,7 @@ bool Spectrum::parse_ms2
   FLOAT_T intensity;
   bool record_S = false; // check's if it read S line
   bool record_Z = false; // check's if it read Z line
-  bool start_add_peaks = false; // check's if it started reading peaks
+  bool start_addPeaks = false; // check's if it started reading peaks
   bool file_format = false; // is the file format correct so far
   
   FLOAT_T test_float;
@@ -482,7 +482,7 @@ bool Spectrum::parse_ms2
   
   while( (line_length = getline(&new_line, &buf_length, file)) != -1){
     // checks if 'S' is not the first line
-    if((!record_S || (record_S && start_add_peaks)) && 
+    if((!record_S || (record_S && start_addPeaks)) && 
             (new_line[0] == 'Z' ||  
              new_line[0] == 'I' ||
              new_line[0] == 'D' )){
@@ -496,7 +496,7 @@ bool Spectrum::parse_ms2
     // Reads the 'S' line
     else if(new_line[0] == 'S' && !record_S){
       record_S = true;
-      if(!this->parse_S_line(new_line, buf_length)){
+      if(!this->parseSLine(new_line, buf_length)){
         file_format = false;
         break; // File format incorrect
       }
@@ -504,7 +504,7 @@ bool Spectrum::parse_ms2
     // Reads the 'Z' line 
     else if(new_line[0] == 'Z'){
       record_Z = true;
-      if(!this->parse_Z_line(new_line)){
+      if(!this->parseZLine(new_line)){
         file_format = false;
         break; // File format incorrect
       }
@@ -512,7 +512,7 @@ bool Spectrum::parse_ms2
 
     // Reads the 'D' line 
     else if(new_line[0] == 'D'){
-      if(!this->parse_D_line(new_line)){
+      if(!this->parseDLine(new_line)){
         file_format = false;
         break; // File format incorrect
       }
@@ -520,14 +520,14 @@ bool Spectrum::parse_ms2
 
     // Reads the 'I' line 
     else if(new_line[0] == 'I'){
-      if(!this->parse_I_line(new_line)){
+      if(!this->parseILine(new_line)){
         file_format = false;
         break; // File format incorrect
       }
     }
     
     // Stops, when encounters the start of next spectrum 'S' line
-    else if(new_line[0] == 'S' && start_add_peaks){ // start of next spectrum
+    else if(new_line[0] == 'S' && start_addPeaks){ // start of next spectrum
       break;
     }
 
@@ -581,8 +581,8 @@ bool Spectrum::parse_ms2
         #endif
         {
           file_format = true;
-          start_add_peaks = true;
-          this->add_peak(intensity, location_mz);
+          start_addPeaks = true;
+          this->addPeak(intensity, location_mz);
         }
       }
     // *************************
@@ -614,7 +614,7 @@ bool Spectrum::parse_ms2
  * \returns true if success. false is failure.
  * 
  */
-bool Spectrum::parse_S_line
+bool Spectrum::parseSLine
   (char* line, ///< 'S' line to parse -in
    int buf_length ///< line length -in
    )
@@ -695,7 +695,7 @@ bool Spectrum::parse_S_line
  * \returns TRUE if success. FALSE is failure.
  * 
  */
-bool Spectrum::parse_Z_line(char* line)  ///< 'Z' line to parse -in
+bool Spectrum::parseZLine(char* line)  ///< 'Z' line to parse -in
 {
   int tokens;
   char line_name;
@@ -743,7 +743,7 @@ bool Spectrum::parse_Z_line(char* line)  ///< 'Z' line to parse -in
  * Parses the 'D' line of the a spectrum
  * \returns TRUE if success. FALSE is failure.
  */
-bool Spectrum::parse_D_line(char* line)  ///< 'D' line to parse -in 
+bool Spectrum::parseDLine(char* line)  ///< 'D' line to parse -in 
 {
   string d_line = line;
   d_lines_v_.push_back(d_line);
@@ -755,7 +755,7 @@ bool Spectrum::parse_D_line(char* line)  ///< 'D' line to parse -in
  * Parses the 'I' line of the a spectrum
  * \returns TRUE if success. FALSE is failure.
  */
-bool Spectrum::parse_I_line(char* line)  ///< 'I' line to parse -in
+bool Spectrum::parseILine(char* line)  ///< 'I' line to parse -in
 {
    string line_str(line);
    // remove the newline (windows or unix style)
@@ -769,7 +769,7 @@ bool Spectrum::parse_I_line(char* line)  ///< 'I' line to parse -in
  * Transfer values from an MSToolkit spectrum to the crux Spectrum.
  * \returns TRUE if success. FALSE is failure.
  */
-bool Spectrum::parse_mstoolkit_spectrum
+bool Spectrum::parseMstoolkitSpectrum
   (MSToolkit::Spectrum* mst_spectrum, ///< the input MSToolkit spectrum -in
   const char* filename ///< filename of the spectrum
   ) {
@@ -793,7 +793,7 @@ bool Spectrum::parse_mstoolkit_spectrum
 
   //add all peaks.
   for(int peak_idx = 0; peak_idx < (int)mst_real_spectrum->size(); peak_idx++){
-    this->add_peak(mst_real_spectrum->at(peak_idx).intensity,
+    this->addPeak(mst_real_spectrum->at(peak_idx).intensity,
                    mst_real_spectrum->at(peak_idx).mz);
   }
   
@@ -824,7 +824,7 @@ bool Spectrum::parse_mstoolkit_spectrum
  * Adds a peak to the spectrum given a intensity and location
  * calls update_spectrum_fields to update num_peaks, min_peak ...
  */
-bool Spectrum::add_peak
+bool Spectrum::addPeak
 ( FLOAT_T intensity, ///< the intensity of peak to add -in
   FLOAT_T location_mz ///< the location of peak to add -in
   )
@@ -833,7 +833,7 @@ bool Spectrum::add_peak
   PEAK_T* peak = new_peak(intensity, location_mz);
   peaks_.push_back(peak);
 
-  update_fields(intensity, location_mz);
+  updateFields(intensity, location_mz);
   has_peaks_ = true;
   return true;
 
@@ -844,7 +844,7 @@ bool Spectrum::add_peak
  * in the Spectrum's vector of peaks.  Peaks in the array are
  * indexed by ???
  */
-void Spectrum::populate_mz_peak_array()
+void Spectrum::populateMzPeakArray()
 {
   if (has_mz_peak_array_ == true){
     return;
@@ -878,12 +878,12 @@ void Spectrum::populate_mz_peak_array()
  * spectrum object that it needs.
  * TODO: reimplement with faster peak lookup
  */
-PEAK_T* Spectrum::get_nearest_peak(
+PEAK_T* Spectrum::getNearestPeak(
   FLOAT_T mz, ///< the mz of the peak around which to sum intensities -in
   FLOAT_T max ///< the maximum distance to get intensity -in
   )
 {
-  this->populate_mz_peak_array(); // for rapid peak lookup by mz
+  this->populateMzPeakArray(); // for rapid peak lookup by mz
 
   FLOAT_T min_distance = BILLION;
   int min_mz_idx = (int)((mz - max) * MZ_TO_PEAK_ARRAY_RESOLUTION + 0.5);
@@ -915,7 +915,7 @@ PEAK_T* Spectrum::get_nearest_peak(
 /**
  * Updates num_peaks, min_peak_mz, max_peak_mz, total_energy.
  */
-void Spectrum::update_fields(
+void Spectrum::updateFields(
   FLOAT_T intensity, ///< the intensity of the peak that has been added -in
   FLOAT_T location ///< the location of the peak that has been added -in
   )
@@ -936,7 +936,7 @@ void Spectrum::update_fields(
 /**
  * \returns The number of the first scan.
  */
-int Spectrum::get_first_scan()
+int Spectrum::getFirstScan()
 {
   return first_scan_;
 }
@@ -944,7 +944,7 @@ int Spectrum::get_first_scan()
 /**
  * \returns The number of the last scan.
  */
-int Spectrum::get_last_scan()
+int Spectrum::getLastScan()
 {
   return last_scan_;
 }
@@ -952,7 +952,7 @@ int Spectrum::get_last_scan()
 /**
  * \returns The m/z of the precursor.
  */
-FLOAT_T Spectrum::get_precursor_mz()
+FLOAT_T Spectrum::getPrecursorMz()
 {
   return precursor_mz_;
 }
@@ -960,7 +960,7 @@ FLOAT_T Spectrum::get_precursor_mz()
 /**
  * \returns The minimum m/z of all peaks.
  */
-FLOAT_T Spectrum::get_min_peak_mz()
+FLOAT_T Spectrum::getMinPeakMz()
 {
   return min_peak_mz_;
 }
@@ -968,7 +968,7 @@ FLOAT_T Spectrum::get_min_peak_mz()
 /**
  * \returns The maximum m/z of all peaks.
  */
-FLOAT_T Spectrum::get_max_peak_mz()
+FLOAT_T Spectrum::getMaxPeakMz()
 {
   return max_peak_mz_;
 }
@@ -976,7 +976,7 @@ FLOAT_T Spectrum::get_max_peak_mz()
 /**
  * \returns The number of peaks.
  */
-int Spectrum::get_num_peaks()
+int Spectrum::getNumPeaks()
 {
   return (int)peaks_.size();
 }
@@ -985,7 +985,7 @@ int Spectrum::get_num_peaks()
 /**
  * \returns The sum of intensities in all peaks.
  */
-double Spectrum::get_total_energy()
+double Spectrum::getTotalEnergy()
 {
   return total_energy_;
 }
@@ -994,7 +994,7 @@ double Spectrum::get_total_energy()
  * \returns A read-only reference to the vector of possible chare
  * states for this spectrum.
  */
-const vector<int>& Spectrum::get_possible_z()
+const vector<int>& Spectrum::getPossibleZ()
 {
   return possible_z_;
 }
@@ -1005,7 +1005,7 @@ const vector<int>& Spectrum::get_possible_z()
  *  spectrum: all of them or the one selected by the parameter.
  * /returns A vector of charge states to consider for this spectrum.
  */ 
-vector<int> Spectrum::get_charges_to_search(){
+vector<int> Spectrum::getChargesToSearch(){
 
   vector<int> select_charges;
   const char* charge_str = get_string_parameter_pointer("spectrum-charge");
@@ -1030,7 +1030,7 @@ vector<int> Spectrum::get_charges_to_search(){
 /**
  * \returns The number of possible charge states of this spectrum.
  */
-int Spectrum::get_num_possible_z()
+int Spectrum::getNumPossibleZ()
 {
   return (int)possible_z_.size();
 }
@@ -1038,7 +1038,7 @@ int Spectrum::get_num_possible_z()
 /**
  * \returns The intensity of the peak with the maximum intensity.
  */
-FLOAT_T Spectrum::get_max_peak_intensity()
+FLOAT_T Spectrum::getMaxPeakIntensity()
 {
   FLOAT_T max_intensity = -1;
 
@@ -1055,7 +1055,7 @@ FLOAT_T Spectrum::get_max_peak_intensity()
  * \returns The mass of the charged precursor ion, according to the formula 
  * mass = m/z * charge
  */
-FLOAT_T Spectrum::get_mass(int charge) ///< the charge of precursor ion -in
+FLOAT_T Spectrum::getMass(int charge) ///< the charge of precursor ion -in
 {
   return (precursor_mz_ * charge);
 }
@@ -1064,25 +1064,25 @@ FLOAT_T Spectrum::get_mass(int charge) ///< the charge of precursor ion -in
  * \returns The mass of the neutral precursor ion, according to the formula 
  * mass = m/z * charge - mass_H * charge
  */
-FLOAT_T Spectrum::get_neutral_mass(int charge) ///< the charge of precursor ion -in
+FLOAT_T Spectrum::getNeutralMass(int charge) ///< the charge of precursor ion -in
 {
-  return (this->get_mass(charge) - MASS_PROTON * charge); // TESTME
+  return (this->getMass(charge) - MASS_PROTON * charge); // TESTME
 }
 
 /**
  * \returns The mass of the singly charged precursor ion, according to
  * the formula mass = m/z * charge - (mass_H * (charge - 1))
  */
-FLOAT_T Spectrum::get_singly_charged_mass(int charge) ///< charge of the precursor ion 
+FLOAT_T Spectrum::getSinglyChargedMass(int charge) ///< charge of the precursor ion 
 {
-  return (this->get_mass(charge) - MASS_PROTON*(charge-1));  // TESTME
+  return (this->getMass(charge) - MASS_PROTON*(charge-1));  // TESTME
 }
 
 /**
  * Parse the spectrum from the tab-delimited result file.
  *\returns The parsed spectrum, else returns NULL for failed parse.
  */
-Spectrum* Spectrum::parse_tab_delimited(
+Spectrum* Spectrum::parseTabDelimited(
   MatchFileReader& file ///< output stream -out
   ) {
 
@@ -1111,7 +1111,7 @@ Spectrum* Spectrum::parse_tab_delimited(
 /**
  * Normalize peak intensities so that they sum to unity.
  */
-void Spectrum::sum_normalize()
+void Spectrum::sumNormalize()
 {
   for(int peak_idx = 0; peak_idx < (int)peaks_.size(); peak_idx++){
     PEAK_T* peak = peaks_[peak_idx];
@@ -1123,7 +1123,7 @@ void Spectrum::sum_normalize()
 /**
  * Populate peaks with rank information.
  */
-void Spectrum::rank_peaks()
+void Spectrum::rankPeaks()
 {
   sort_peaks(peaks_, _PEAK_INTENSITY);
   sorted_by_intensity_ = true;

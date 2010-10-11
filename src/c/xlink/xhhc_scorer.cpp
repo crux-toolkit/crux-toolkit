@@ -28,8 +28,8 @@ int Scorer::get_matched_by_ions(Spectrum* spectrum,
   for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
     if (ion -> get_mz(MONO) >= 400 && ion -> get_mz(MONO) <= 1200) {
     if (ion -> type() == B_ION || ion -> type() == Y_ION) {
-      PEAK_T* peak = spectrum->get_nearest_peak(ion->get_mz(AVERAGE), 
-                                                bin_width);
+      PEAK_T* peak = spectrum->getNearestPeak(ion->get_mz(AVERAGE), 
+                                              bin_width);
       if (peak != NULL) {
 	ans++;
       }
@@ -231,7 +231,7 @@ FLOAT_T Scorer::getIonCurrentExplained(LinkedIonSeries& ion_series,
   FLOAT_T& explained, 
   int& by_observed) {
 
-  max_mz = spectrum->get_max_peak_mz();
+  max_mz = spectrum->getMaxPeakMz();
   FLOAT_T* theoretical = (FLOAT_T*)mycalloc((size_t)max_mz+1, sizeof(FLOAT_T));
   hhc_create_intensity_array_theoretical(ion_series, theoretical);
 
@@ -302,7 +302,7 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
     average += get_peak_intensity(peak_iter->next());
   }
 
-  average = average / spectrum->get_num_peaks();
+  average = average / spectrum->getNumPeaks();
   //cout << "AVERAGE " << average << endl;
   // make spectacle file for observed peaks
   peak_iter->reset();
@@ -337,7 +337,7 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
   while (i <= max_mz)  {
     if (((*index > 1 && !noflanks) || *index > 26) && i >= min_mz) {
         theoretical_file << i << "\t" << *index << "\tnolabel\tred" << endl;
-      PEAK_T* peak = spectrum->get_nearest_peak(i, 1);
+      PEAK_T* peak = spectrum->getNearestPeak(i, 1);
       if (peak != NULL) {
 	++match_count;
 	peak_colors[peak] = "green";

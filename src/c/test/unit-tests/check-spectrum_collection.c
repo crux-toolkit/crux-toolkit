@@ -33,8 +33,8 @@ START_TEST (test_create){
 
   //try parse one single spectrum
   second_spectrum = get_spectrum_collection_spectrum(collection, 16);
-  fail_unless(second_spectrum->get_first_scan() == 16 &&
-              second_spectrum->get_last_scan() == 16, 
+  fail_unless(second_spectrum->getFirstScan() == 16 &&
+              second_spectrum->getLastScan() == 16, 
               "failed to get specific spectrum from .ms2");
 
   //parse all spectrum now...
@@ -87,7 +87,7 @@ START_TEST (test_create){
   free_spectrum_iterator(spectrum_iterator);
   
   fail_unless((get_spectrum_collection_num_spectra(collection) == 5 &&
-               tmp1->get_first_scan() == 16), "failed to remove");
+               tmp1->getFirstScan() == 16), "failed to remove");
   
   
   //add the spectrum back into collection
@@ -97,7 +97,7 @@ START_TEST (test_create){
   tmp1 = spectrum_iterator_next(spectrum_iterator);
   
   fail_unless(get_spectrum_collection_num_spectra(collection) == 6 &&
-              tmp1->get_first_scan() == 15, "failed to add");
+              tmp1->getFirstScan() == 15, "failed to add");
   //free up
   delete second_spectrum;
   free_spectrum_collection(sc_copy);

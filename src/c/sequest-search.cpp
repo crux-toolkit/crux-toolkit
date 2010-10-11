@@ -118,7 +118,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
     Spectrum* spectrum = 
       filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
 
-    progress.report(spectrum->get_first_scan(), charge);
+    progress.report(spectrum->getFirstScan(), charge);
 
     // create empty match collections to store results in
     MATCH_COLLECTION_T* target_psms = new_empty_match_collection(FALSE); 
@@ -138,7 +138,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
       PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
 
       // get peptide iterator
-      FLOAT_T precursor_mz = spectrum->get_precursor_mz();
+      FLOAT_T precursor_mz = spectrum->getPrecursorMz();
       MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator =
         new_modified_peptides_iterator_from_mz(precursor_mz,
                                                charge,
@@ -195,7 +195,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
 
     if( total_matches == 0 ){
       carp(CARP_WARNING, "No matches found for spectrum %i, charge %i.",
-           spectrum->get_first_scan(), charge);
+           spectrum->getFirstScan(), charge);
       progress.increment(FALSE);
 
     }else{  

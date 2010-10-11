@@ -169,7 +169,7 @@ int search_main(int argc, char** argv){
       filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
     BOOLEAN_T is_decoy = FALSE;
 
-    progress.report(spectrum->get_first_scan(), charge);
+    progress.report(spectrum->getFirstScan(), charge);
 
     // with the target database decide how many peptide mods to use
     MATCH_COLLECTION_T* target_psms = new_empty_match_collection(is_decoy); 
@@ -187,7 +187,7 @@ int search_main(int argc, char** argv){
     if( get_match_collection_match_total(target_psms) == 0 ){
       // don't print and don't search decoys
       carp(CARP_WARNING, "No matches found for spectrum %i, charge %i",
-           spectrum->get_first_scan(), charge);
+           spectrum->getFirstScan(), charge);
       free_match_collection(target_psms);
       progress.increment(FALSE);
       continue; // next spectrum
@@ -383,7 +383,7 @@ int search_pep_mods(
     
     // get peptide iterator
     MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator =
-      new_modified_peptides_iterator_from_mz(spectrum->get_precursor_mz(),
+      new_modified_peptides_iterator_from_mz(spectrum->getPrecursorMz(),
                                              charge,
                                              peptide_mod, 
                                              is_decoy,
@@ -502,7 +502,7 @@ void add_decoy_scores(
   for(mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++){
     MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator = 
       new_modified_peptides_iterator_from_mz(
-                                          spectrum->get_precursor_mz(),
+                                          spectrum->getPrecursorMz(),
                                           charge,
                                           peptide_mods[mod_idx],
                                           TRUE, // is decoy

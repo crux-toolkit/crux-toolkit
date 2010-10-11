@@ -209,7 +209,7 @@ int xlink_search_main(int argc, char** argv) {
   while (filtered_spectrum_charge_iterator_has_next(spectrum_iterator)) {
     spectrum = filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
     //SCORER_T* scorer = new_scorer(XCORR);
-    scan_num = spectrum->get_first_scan();
+    scan_num = spectrum->getFirstScan();
 
     if (search_count % 100 == 0)
       carp(CARP_INFO,"count %d scan %d charge %d", search_count, scan_num, charge);
@@ -224,8 +224,8 @@ int xlink_search_main(int argc, char** argv) {
     vector<LinkedPeptide> decoy_train_xpeptides;
     vector<LinkedPeptide> decoy_xpeptides;
 
-    FLOAT_T precursor_mz = spectrum->get_precursor_mz();
-    FLOAT_T precursor_mass = spectrum->get_neutral_mass(charge); 
+    FLOAT_T precursor_mz = spectrum->getPrecursorMz();
+    FLOAT_T precursor_mass = spectrum->getNeutralMass(charge); 
  
 
 
@@ -439,7 +439,7 @@ int xlink_search_main(int argc, char** argv) {
         ion_series.add_linked_ions(scores[score_index].second);
 
         FLOAT_T ion_current_observed;
-        FLOAT_T ion_current_total = spectrum->get_total_energy();
+        FLOAT_T ion_current_total = spectrum->getTotalEnergy();
         int by_total = ion_series.get_total_by_ions();
         int by_observable;
         int by_observable2;
@@ -450,7 +450,7 @@ int xlink_search_main(int argc, char** argv) {
         int ions_observable_bin;
         ion_series.get_observable_ions(0, 1200, bin_width_mono, ions_observable, ions_observable_bin);
         ion_series.get_observable_by_ions(0, 1200, bin_width_mono, by_observable, by_observable_bin);
-        ion_series.get_observable_by_ions(0, spectrum->get_max_peak_mz(), bin_width_mono, by_observable2, by_observable_bin2);
+        ion_series.get_observable_by_ions(0, spectrum->getMaxPeakMz(), bin_width_mono, by_observable2, by_observable_bin2);
         scorer.getIonCurrentExplained(ion_series, spectrum, ion_current_observed, by_observed_bin);
         
   

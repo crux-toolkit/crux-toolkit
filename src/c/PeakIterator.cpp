@@ -29,7 +29,7 @@ PeakIterator::~PeakIterator(){}
  */
 bool PeakIterator::has_next()
 {
-  return (peak_index_ < spectrum_->get_num_peaks());
+  return (peak_index_ < spectrum_->getNumPeaks());
 }
 
 /**
@@ -37,7 +37,7 @@ bool PeakIterator::has_next()
  */
 PEAK_T* PeakIterator::next()
 {
-  if( peak_index_ > spectrum_->get_num_peaks() ){
+  if( peak_index_ > spectrum_->getNumPeaks() ){
     return NULL;
   }
   PEAK_T* next_peak = spectrum_->peaks_[peak_index_];

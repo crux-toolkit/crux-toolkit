@@ -299,7 +299,7 @@ BOOLEAN_T parse_spectrum_collection(
         break;
       }
       parsed_spectrum = new Spectrum();
-      parsed_spectrum->parse_mstoolkit_spectrum(mst_spectrum,
+      parsed_spectrum->parseMstoolkitSpectrum(mst_spectrum,
                                                 spectrum_collection->filename);
       if (!add_spectrum_to_end(spectrum_collection, parsed_spectrum)) {
         delete parsed_spectrum;
@@ -312,17 +312,17 @@ BOOLEAN_T parse_spectrum_collection(
   } else { // not MSToolkit
     // parse one spectrum at a time
     Spectrum* parsed_spectrum = 
-      Spectrum::new_spectrum_from_file(file, spectrum_collection->filename);
+      Spectrum::newSpectrumFromFile(file, spectrum_collection->filename);
     while(parsed_spectrum){
       // is this a scan to include? if not skip it
-      if( parsed_spectrum->get_first_scan() < first_scan ){
+      if( parsed_spectrum->getFirstScan() < first_scan ){
         delete parsed_spectrum;
         parsed_spectrum = 
-          Spectrum::new_spectrum_from_file(file, spectrum_collection->filename);
+          Spectrum::newSpectrumFromFile(file, spectrum_collection->filename);
         continue;
       } 
       // are we past the last scan?
-      if( parsed_spectrum->get_first_scan() > last_scan ){
+      if( parsed_spectrum->getFirstScan() > last_scan ){
         break;
       }
       // is spectrum capacity not full?
@@ -332,7 +332,7 @@ BOOLEAN_T parse_spectrum_collection(
         return FALSE;
       }
       parsed_spectrum = 
-        Spectrum::new_spectrum_from_file(file, spectrum_collection->filename);
+        Spectrum::newSpectrumFromFile(file, spectrum_collection->filename);
     }
     
     delete parsed_spectrum; // CHECKME why free_spectrum??
@@ -359,7 +359,7 @@ BOOLEAN_T add_spectrum_to_end(
 {
   // set spectrum
   spectrum_collection->spectra.push_back(spectrum);
-  spectrum_collection->num_charged_spectra += spectrum->get_num_possible_z();
+  spectrum_collection->num_charged_spectra += spectrum->getNumPossibleZ();
   return TRUE;
 }
 
@@ -378,8 +378,8 @@ BOOLEAN_T add_spectrum(
   // find correct location
   // TODO -- replace with binary search if necessary.
   for(; add_index < spectrum_collection->spectra.size(); ++add_index){
-    if((spectrum_collection->spectra[add_index])->get_first_scan() >
-       spectrum->get_first_scan()){
+    if((spectrum_collection->spectra[add_index])->getFirstScan() >
+       spectrum->getFirstScan()){
       break;
     }
   }
@@ -387,7 +387,7 @@ BOOLEAN_T add_spectrum(
   spectrum_collection->
     spectra.insert(spectrum_collection->spectra.begin()+add_index, spectrum);
 
-  spectrum_collection->num_charged_spectra += spectrum->get_num_possible_z();
+  spectrum_collection->num_charged_spectra += spectrum->getNumPossibleZ();
   return TRUE;
 }
 
@@ -401,18 +401,18 @@ void remove_spectrum(
   Spectrum* spectrum ///< spectrum to be removed from spectrum_collection -in
   )
 {
-  int scan_num = spectrum->get_first_scan();
+  int scan_num = spectrum->getFirstScan();
   unsigned int spectrum_index = 0;
   
   // find where the spectrum is located in the spectrum array
   for(; spectrum_index < spectrum_collection->spectra.size(); ++spectrum_index){
     if(scan_num ==
-       (spectrum_collection->spectra[spectrum_index])->get_first_scan() ){
+       (spectrum_collection->spectra[spectrum_index])->getFirstScan() ){
       break;
     }
   }
   
-  spectrum_collection->num_charged_spectra -= spectrum->get_num_possible_z();
+  spectrum_collection->num_charged_spectra -= spectrum->getNumPossibleZ();
 
   delete spectrum_collection->spectra[spectrum_index];
   spectrum_collection->spectra[spectrum_index] = NULL;
@@ -464,7 +464,7 @@ BOOLEAN_T get_spectrum_collection_spectrum(
       first_scan);
 
     if (mst_spectrum -> getScanNumber() != 0) {
-      spectrum->parse_mstoolkit_spectrum(mst_spectrum,
+      spectrum->parseMstoolkitSpectrum(mst_spectrum,
                                          spectrum_collection->filename);
       parsed = TRUE;
     }
@@ -485,7 +485,7 @@ BOOLEAN_T get_spectrum_collection_spectrum(
     }
     fseek(file, target_index, SEEK_SET);
     // parse spectrum, check if failed to parse spectrum return false
-    if(!spectrum->parse_file(file, spectrum_collection->filename)){
+    if(!spectrum->parseFile(file, spectrum_collection->filename)){
       fclose(file);
       return FALSE;
     }
@@ -532,7 +532,7 @@ Spectrum* get_spectrum_collection_spectrum(
 
     if (mst_spectrum -> getScanNumber() != 0) {
       return_spec = new Spectrum();
-      return_spec->parse_mstoolkit_spectrum(mst_spectrum,
+      return_spec->parseMstoolkitSpectrum(mst_spectrum,
                                             spectrum_collection->filename); 
     } else {
       carp(CARP_ERROR,"Spectrum %d does not exist in file", first_scan);
@@ -551,7 +551,7 @@ Spectrum* get_spectrum_collection_spectrum(
     fseek(file, target_index, SEEK_SET);
     // parse spectrum, check if failed to parse spectrum return false
     return_spec = 
-      Spectrum::new_spectrum_from_file(file, spectrum_collection->filename);
+      Spectrum::newSpectrumFromFile(file, spectrum_collection->filename);
     fclose(file);
   }
   return return_spec;
@@ -1098,7 +1098,7 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
     if( ! iterator->charges.empty() ){
       iterator->charges.clear();
     }
-    iterator->charges = spec->get_charges_to_search();
+    iterator->charges = spec->getChargesToSearch();
     iterator->num_charges = (int)iterator->charges.size();
     iterator->charge_index = 0;
   }else{ // none left
@@ -1112,8 +1112,8 @@ void queue_next_spectrum(FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator){
   if (iterator->charge_index < iterator->num_charges) {
     this_charge = iterator->charges[iterator->charge_index];
   }
-  double mz = spec->get_precursor_mz();
-  int num_peaks = spec->get_num_peaks();
+  double mz = spec->getPrecursorMz();
+  int num_peaks = spec->getNumPeaks();
 
   if( iterator->search_charge == 0 || iterator->search_charge == this_charge ){
     if( mz >= iterator->min_mz && mz <= iterator->max_mz

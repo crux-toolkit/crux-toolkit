@@ -103,7 +103,7 @@ int main(int argc, char** argv){
 
   while (spectrum_iterator_has_next(spectrum_iterator)) {
     current_spectrum = spectrum_iterator_next(spectrum_iterator);
-    if (current_spectrum->get_first_scan() == scan_num) {
+    if (current_spectrum->getFirstScan() == scan_num) {
       spectrum = current_spectrum;
       break;
     }
@@ -144,7 +144,7 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
       carp(CARP_INFO, "total theoretical ions:%d",total_by_ions);
       carp(CARP_INFO,"theoretical ions matched:%d",matched_by_ions);
       carp(CARP_INFO,"frac theoretical ions matched:%f",frac_by_ions);
-      carp(CARP_INFO,"npeaks:%d",spectrum->get_num_peaks());
+      carp(CARP_INFO,"npeaks:%d",spectrum->getNumPeaks());
 
       FLOAT_T bin_width = get_double_parameter("mz-bin-width");
       vector<LinkedPeptide>& ions = ion_series.ions();
@@ -157,8 +157,8 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
         
 	//if (ion -> get_mz(MONO) >= 400 && ion -> get_mz(MONO) <= 1400) {
 	  if (ion -> type() == B_ION || ion -> type() == Y_ION) {
-	    PEAK_T* peak = spectrum->get_nearest_peak(ion->get_mz(MONO), 
-                                                      bin_width);
+	    PEAK_T* peak = spectrum->getNearestPeak(ion->get_mz(MONO), 
+                                                    bin_width);
 	    if (peak != NULL) {
               if (matched.find(peak) == matched.end()) {
                 matched_intensity += get_peak_intensity(peak);
@@ -171,7 +171,7 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 	//}
       }
 
-      double total_intensity = spectrum->get_total_energy();
+      double total_intensity = spectrum->getTotalEnergy();
       double frac_intensity = matched_intensity / total_intensity;
 
       carp(CARP_INFO,"matched intensity:%lf",matched_intensity);

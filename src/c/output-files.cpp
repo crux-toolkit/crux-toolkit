@@ -415,7 +415,7 @@ void OutputFiles::writeMatchFeatures(
 
   // write scan number
   fprintf(feature_file_, "%i\t",
-          (get_match_spectrum(match))->get_first_scan() );
+          (get_match_spectrum(match))->getFirstScan() );
 
   // decoy or target peptide
   if (get_match_null_peptide(match) == FALSE){
