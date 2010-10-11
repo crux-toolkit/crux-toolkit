@@ -166,8 +166,8 @@ int compare_match_spectrum(
 
   Spectrum* spec_a = get_match_spectrum((*match_a));
   Spectrum* spec_b = get_match_spectrum((*match_b));
-  int scan_a = spec_a->get_first_scan();
-  int scan_b = spec_b->get_first_scan();
+  int scan_a = spec_a->getFirstScan();
+  int scan_b = spec_b->getFirstScan();
   int charge_a = get_match_charge((*match_a));
   int charge_b = get_match_charge((*match_b));
 
@@ -1349,17 +1349,17 @@ double* get_match_percolator_features(
   unsigned int protein_idx = 0;
   double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
   FLOAT_T weight_diff = get_peptide_peptide_mass(match->peptide) -
-    (match->spectrum)->get_neutral_mass(match->charge);
+    (match->spectrum)->getNeutralMass(match->charge);
 
   
   carp(CARP_DETAILED_DEBUG, "spec: %d, charge: %d", 
-    match->spectrum->get_first_scan(),
+    match->spectrum->getFirstScan(),
     match -> charge);
 
   carp(CARP_DETAILED_DEBUG,"peptide mass:%f", 
        get_peptide_peptide_mass(match->peptide));
   carp(CARP_DETAILED_DEBUG,"spectrum neutral mass:%f", 
-       (match->spectrum)->get_neutral_mass(match->charge));
+       (match->spectrum)->getNeutralMass(match->charge));
 
   // Xcorr
   feature_array[0] = get_match_score(match, XCORR);
@@ -1384,7 +1384,7 @@ double* get_match_percolator_features(
   // absdM
   feature_array[6] = fabsf(weight_diff);
   // Mass
-  feature_array[7] = match->spectrum->get_neutral_mass(match->charge);
+  feature_array[7] = match->spectrum->getNeutralMass(match->charge);
   // ionFrac
   feature_array[8] = match->b_y_ion_fraction_matched;
   // lnSM
@@ -1533,7 +1533,7 @@ MATCH_T* parse_match_tab_delimited(
   match -> match_scores[QRANKER_QVALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
 
    // parse spectrum
-  if((spectrum = Spectrum::parse_tab_delimited(result_file))== NULL){
+  if((spectrum = Spectrum::parseTabDelimited(result_file))== NULL){
     carp(CARP_ERROR, "Failed to parse spectrum (tab delimited).");
   }
 

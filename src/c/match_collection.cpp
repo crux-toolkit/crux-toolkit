@@ -842,7 +842,7 @@ BOOLEAN_T populate_match_rank_match_collection(
       char* seq = get_match_mod_sequence_str_with_masses(cur_match, FALSE);
       carp(CARP_WARNING, 
            "PSM spectrum %i charge %i sequence %s was NOT scored for type %i",
-           (get_match_spectrum(cur_match))->get_first_scan(),
+           (get_match_spectrum(cur_match))->getFirstScan(),
            get_match_charge(cur_match), seq,
            (int)score_type);
       free(seq);
@@ -1062,7 +1062,7 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
   if( num_scores < MIN_WEIBULL_MATCHES ){
     carp(CARP_DETAILED_DEBUG, "Too few psms (%i) to estimate "
          "p-value parameters for spectrum %i, charge %i",
-         num_scores, spectrum->get_first_scan(), charge);
+         num_scores, spectrum->getFirstScan(), charge);
     // set eta, beta, and shift to something???
     return FALSE;
   }
@@ -1274,7 +1274,7 @@ BOOLEAN_T compute_p_values(
   }
 
   int scan_number = 
-    (get_match_spectrum(match_collection->match[0]))->get_first_scan();
+    (get_match_spectrum(match_collection->match[0]))->getFirstScan();
   carp(CARP_DEBUG, "Computing p-values for %s spec %d charge %d "
        "with eta %f beta %f shift %f",
        (match_collection->null_peptide_collection) ? "decoy" : "target",
@@ -1962,9 +1962,9 @@ void print_matches_multi_spectra_xml(
     BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
     Spectrum* spectrum = get_match_spectrum(cur_match);
     int charge = get_match_charge(cur_match);
-    spectrum->print_xml(output, charge, index_count);
+    spectrum->printXml(output, charge, index_count);
     fprintf(output, "    <search_result>\n");
-    FLOAT_T spec_mass = spectrum->get_neutral_mass(charge);
+    FLOAT_T spec_mass = spectrum->getNeutralMass(charge);
     if (! is_decoy){
       print_match_xml(cur_match, output, spec_mass,
                       match_collection->scored_type );
@@ -2000,13 +2000,13 @@ BOOLEAN_T print_match_collection_xml(
   }
   int charge = match_collection->charge; 
   int num_matches = match_collection->experiment_size;
-  FLOAT_T spectrum_neutral_mass = spectrum->get_neutral_mass(charge);
+  FLOAT_T spectrum_neutral_mass = spectrum->getNeutralMass(charge);
 
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection, SEARCH_COMMAND);
 
   /* print spectrum query */
-  spectrum->print_xml(output,  charge, index);
+  spectrum->printXml(output, charge, index);
 
 
   MATCH_T* match = NULL;
@@ -2086,7 +2086,7 @@ BOOLEAN_T print_match_collection_sqt(
   calculate_delta_cn(match_collection, SEQUEST_COMMAND);
 
   // First, print spectrum info
-  spectrum->print_sqt(output, num_matches, charge);
+  spectrum->printSqt(output, num_matches, charge);
   
   MATCH_T* match = NULL;
   
@@ -2142,9 +2142,9 @@ BOOLEAN_T print_match_collection_tab_delimited(
   }
   int charge = match_collection->charge; 
   int num_matches = match_collection->experiment_size;
-  int scan_num = spectrum->get_first_scan();
-  FLOAT_T spectrum_neutral_mass = spectrum->get_neutral_mass(charge);
-  FLOAT_T spectrum_precursor_mz = spectrum->get_precursor_mz();
+  int scan_num = spectrum->getFirstScan();
+  FLOAT_T spectrum_neutral_mass = spectrum->getNeutralMass(charge);
+  FLOAT_T spectrum_precursor_mz = spectrum->getPrecursorMz();
 
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection, SEARCH_COMMAND);
@@ -2380,10 +2380,10 @@ void print_matches_multi_spectra
     MATCH_T* cur_match = match_collection->match[match_idx];
     BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
     Spectrum* spectrum = get_match_spectrum(cur_match);
-    int scan_num = spectrum->get_first_scan();
-    FLOAT_T mz = spectrum->get_precursor_mz();
+    int scan_num = spectrum->getFirstScan();
+    FLOAT_T mz = spectrum->getPrecursorMz();
     int charge = get_match_charge(cur_match);
-    FLOAT_T spec_mass = spectrum->get_neutral_mass(charge);
+    FLOAT_T spec_mass = spectrum->getNeutralMass(charge);
     FLOAT_T num_psm_per_spec = get_match_ln_experiment_size(cur_match);
     num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
 

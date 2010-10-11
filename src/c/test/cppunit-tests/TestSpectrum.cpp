@@ -19,23 +19,23 @@ void TestSpectrum::tearDown(){
 
 void TestSpectrum::defaultGetters(){
   // available tests include 
-  CPPUNIT_ASSERT(default_s->get_first_scan() == 0);
-  CPPUNIT_ASSERT(default_s->get_precursor_mz() == 0);
-  CPPUNIT_ASSERT(default_s->get_num_possible_z() == 0);
+  CPPUNIT_ASSERT(default_s->getFirstScan() == 0);
+  CPPUNIT_ASSERT(default_s->getPrecursorMz() == 0);
+  CPPUNIT_ASSERT(default_s->getNumPossibleZ() == 0);
 
-  const vector<int>& charges = default_s->get_possible_z(); 
+  const vector<int>& charges = default_s->getPossibleZ(); 
   CPPUNIT_ASSERT(charges.size() == 0);
-  vector <int> charges_to_search = default_s->get_charges_to_search();
+  vector <int> charges_to_search = default_s->getChargesToSearch();
   CPPUNIT_ASSERT(charges_to_search.size() == 0);
 
-  CPPUNIT_ASSERT(default_s->get_min_peak_mz() == 0);
-  CPPUNIT_ASSERT(default_s->get_max_peak_mz() == 0);
-  CPPUNIT_ASSERT(default_s->get_num_peaks() == 0);
-  CPPUNIT_ASSERT(default_s->get_total_energy() == 0);
-  CPPUNIT_ASSERT(default_s->get_max_peak_intensity() == -1);
-  CPPUNIT_ASSERT(default_s->get_mass(1) == 0);
-  CPPUNIT_ASSERT(default_s->get_neutral_mass(1) < 0);
-  CPPUNIT_ASSERT(default_s->get_singly_charged_mass(1) == 0);
+  CPPUNIT_ASSERT(default_s->getMinPeakMz() == 0);
+  CPPUNIT_ASSERT(default_s->getMaxPeakMz() == 0);
+  CPPUNIT_ASSERT(default_s->getNumPeaks() == 0);
+  CPPUNIT_ASSERT(default_s->getTotalEnergy() == 0);
+  CPPUNIT_ASSERT(default_s->getMaxPeakIntensity() == -1);
+  CPPUNIT_ASSERT(default_s->getMass(1) == 0);
+  CPPUNIT_ASSERT(default_s->getNeutralMass(1) < 0);
+  CPPUNIT_ASSERT(default_s->getSinglyChargedMass(1) == 0);
 
 }
 

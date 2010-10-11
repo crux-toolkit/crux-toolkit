@@ -310,7 +310,7 @@ FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
   int mz = 0;
   FLOAT_T intensity = 0;
   FLOAT_T bin_width = bin_width_mono;
-  FLOAT_T precursor_mz = spectrum->get_precursor_mz();
+  FLOAT_T precursor_mz = spectrum->getPrecursorMz();
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
 
   // set max_mz and malloc space for the observed intensity array

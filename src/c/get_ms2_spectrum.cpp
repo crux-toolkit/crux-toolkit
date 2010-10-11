@@ -124,28 +124,28 @@ int main(int argc, char** argv){
     } else {
 
       int charge_state_index = 0; 
-      int charge_state_num = spectrum->get_num_possible_z();
-      std::vector<int> possible_z_array = spectrum->get_possible_z();
+      int charge_state_num = spectrum->getNumPossibleZ();
+      std::vector<int> possible_z_array = spectrum->getPossibleZ();
       int possible_z;
   
       printf("Scan number: %i\n", scan_number);
-      printf("Precursor m/z:%.2f\n", spectrum->get_precursor_mz());
-      printf("Total Ion Current:%.2f\n", spectrum->get_total_energy());
+      printf("Precursor m/z:%.2f\n", spectrum->getPrecursorMz());
+      printf("Total Ion Current:%.2f\n", spectrum->getTotalEnergy());
       printf("Base Peak Intensity:%.1f\n", 
-	     spectrum->get_max_peak_intensity()); // base is max
-      printf("Number of peaks:%d\n", spectrum->get_num_peaks());
-      printf("Minimum m/z:%.1f\n", spectrum->get_min_peak_mz());
-      printf("Maximum m/z:%.1f\n", spectrum->get_max_peak_mz());
+	     spectrum->getMaxPeakIntensity()); // base is max
+      printf("Number of peaks:%d\n", spectrum->getNumPeaks());
+      printf("Minimum m/z:%.1f\n", spectrum->getMinPeakMz());
+      printf("Maximum m/z:%.1f\n", spectrum->getMaxPeakMz());
     
       for(charge_state_index=0; charge_state_index < charge_state_num; 
 	  ++charge_state_index){
 	possible_z = possible_z_array[charge_state_index];
 	printf("Charge state:%d\n", possible_z);
 	printf("Neutral mass:%.2f\n", 
-	       spectrum->get_neutral_mass(possible_z));
-	printf("Charged mass:%.2f\n", spectrum->get_mass(possible_z));
+	       spectrum->getNeutralMass(possible_z));
+	printf("Charged mass:%.2f\n", spectrum->getMass(possible_z));
 	printf("M+H+ mass:%.2f\n", 
-	       spectrum->get_singly_charged_mass(possible_z));
+	       spectrum->getSinglyChargedMass(possible_z));
       }
     }
     delete spectrum;

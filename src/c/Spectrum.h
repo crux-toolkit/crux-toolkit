@@ -70,7 +70,7 @@ class Spectrum{
    * Skips Header line "H"
    * \returns The newly allocated spectrum or NULL on error or EOF.
    */
-  static Spectrum* new_spectrum_ms2(FILE* file, const char* filename = NULL); 
+  static Spectrum* newSpectrumMs2(FILE* file, const char* filename = NULL); 
   
   /**
    * Parses a spectrum from file, deleting any existing values in the
@@ -78,25 +78,25 @@ class Spectrum{
    * Skips Header line "H"
    * \returns The newly allocated spectrum or NULL on error or EOF.
    */
-  bool parse_ms2(FILE* file, const char* filename = NULL); 
+  bool parseMs2(FILE* file, const char* filename = NULL); 
   
   /**
    * Parse a spectrum from a file in mgf format.
    * \returns A newly allocated spectrum or NULL on error or EOF.
    */
-  static Spectrum* new_spectrum_mgf(FILE* file, const char* filename = NULL); 
+  static Spectrum* newSpectrumMgf(FILE* file, const char* filename = NULL); 
   
   /**
    * Parse a spectrum from a file in mgf format.
    * \returns True if successfully parsed or false on error or EOF.
    */
-  bool parse_mgf(FILE* file, const char* filename = NULL); 
+  bool parseMgf(FILE* file, const char* filename = NULL); 
 
   /**
    * Parses the 'S' line of a spectrum
    * \returns TRUE if success. FALSE is failure.
    */
-  bool parse_S_line
+  bool parseSLine
     (char* line, ///< 'S' line to parse -in
      int buf_length ///< line length -in
      );
@@ -105,24 +105,24 @@ class Spectrum{
    * Parses the 'Z' line of the a spectrum
    * \returns TRUE if success. FALSE is failure.
    */
-  bool parse_Z_line(char* line);  ///< 'Z' line to parse -in
+  bool parseZLine(char* line);  ///< 'Z' line to parse -in
 
   /**
    * Parses the 'D' line of the a spectrum
    * \returns TRUE if success. FALSE is failure.
    */
-  bool parse_D_line(char* line);  ///< 'D' line to parse -in
+  bool parseDLine(char* line);  ///< 'D' line to parse -in
 
   /**
    * Parses the 'I' line of the a spectrum
    * \returns TRUE if success. FALSE is failure.
    */
-  bool parse_I_line(char* line);  ///< 'I' line to parse -in
+  bool parseILine(char* line);  ///< 'I' line to parse -in
 
   /**
    * Updates num_peaks, min_peak_mz, max_peak_mz, total_energy fields.
    */
-  void update_fields
+  void updateFields
     (FLOAT_T intensity,///< the intensity of the peak that has been added -in
      FLOAT_T location  ///< the location of the peak that has been added -in
      );
@@ -164,7 +164,7 @@ class Spectrum{
    * observed peaks.  Assumes intensities are in m/z bins from 0 to
    * max_mz_bin.  Only prints non-zero intensities.
    */
-  void print_processed_peaks
+  void printProcessedPeaks
     (int cur_charge,       ///< print at this charge state
      FLOAT_T* intensities, ///< intensities of new peaks
      int max_mz_bin,       ///< num_bins in intensities
@@ -173,7 +173,7 @@ class Spectrum{
   /**
    * Prints a spectrum object to file in xml format.
    */
-  void print_xml
+  void printXml
     (FILE* file,           ///< output file to print at -out
      int charge,            ///< charge used for the search -in
      int index);            ///< used to output index to file
@@ -181,7 +181,7 @@ class Spectrum{
   /**
    * Prints a spectrum object to file in sqt format.
    */
-  void print_sqt
+  void printSqt
     (FILE* file,           ///< output file to print at -out
      int num_matches,      ///< number of peptides compared to this spec -in
      int charge            ///< charge used for the search -in
@@ -190,56 +190,56 @@ class Spectrum{
   /**
    * Parses a spectrum from a file, either mgf or ms2.
    */
-  static Spectrum* new_spectrum_from_file(FILE* file, 
+  static Spectrum* newSpectrumFromFile(FILE* file, 
                                           const char* filename = NULL);
 
   /**
    * Parses a spectrum from a file, either mgf or ms2.
    */
-  bool parse_file(FILE* file, const char* filename = NULL);
+  bool parseFile(FILE* file, const char* filename = NULL);
 
   /**
    * Transfer values from an MSToolkit spectrum to the crux Spectrum.
    */
-  bool parse_mstoolkit_spectrum(MSToolkit::Spectrum* mst_spectrum, 
+  bool parseMstoolkitSpectrum(MSToolkit::Spectrum* mst_spectrum, 
                                 const char* filename = NULL);
 
   /**
    * Parse the spectrum from the tab-delimited result file
    *\returns the parsed spectrum , else returns NULL for failed parse
    */
-  static Spectrum* parse_tab_delimited(MatchFileReader& file); 
+  static Spectrum* parseTabDelimited(MatchFileReader& file); 
   
   /**
    * Normalize peak intensities so that they sum to unity.
    */
-  void sum_normalize();
+  void sumNormalize();
 
   /**
    * Populate peaks with rank information.
    */
-  void rank_peaks();
+  void rankPeaks();
 
   /**
    * \returns The number of the first scan.
    */
-  int get_first_scan();
+  int getFirstScan();
 
   /**
    * \returns The number of the last scan.
    */
-  int get_last_scan();
+  int getLastScan();
 
   /**
    * \returns The m/z of the precursor.
    */
-  FLOAT_T get_precursor_mz();
+  FLOAT_T getPrecursorMz();
 
   /**
    * \returns The a const reference to a vector of the possible charge
    * states of this spectrum.
    */
-  const std::vector<int>& get_possible_z();
+  const std::vector<int>& getPossibleZ();
 
   /**
    * Considers the spectrum-charge parameter and returns the
@@ -247,27 +247,27 @@ class Spectrum{
    * spectrum: all of them or the one selected by the parameter.
    * /returns A vector of charge states to consider for this spectrum.
    */ 
-  std::vector<int> get_charges_to_search();
+  std::vector<int> getChargesToSearch();
   
   /**
    * \returns The number of possible charge states of this spectrum.
    */
-  int get_num_possible_z();
+  int getNumPossibleZ();
 
   /**
    * \returns The minimum m/z of all peaks.
    */
-  FLOAT_T get_min_peak_mz();
+  FLOAT_T getMinPeakMz();
   
   /**
    * \returns The maximum m/z of all peaks.
    */
-  FLOAT_T get_max_peak_mz();
+  FLOAT_T getMaxPeakMz();
   
   /**
    * \returns The number of peaks.
    */
-  int get_num_peaks();
+  int getNumPeaks();
 
   /**
    * \returns The closest PEAK_T within 'max' of 'mz' in 'spectrum'
@@ -275,7 +275,7 @@ class Spectrum{
    * This should lazily create the data structures within the
    * spectrum object that it needs.
    */
-  PEAK_T* get_nearest_peak
+  PEAK_T* getNearestPeak
     (FLOAT_T mz, ///< the mz of the peak around which to sum intensities -in
      FLOAT_T max ///< the maximum distance to get intensity -in
      );
@@ -283,42 +283,42 @@ class Spectrum{
   /**
    * \returns The sum of intensities in all peaks.
    */
-  double get_total_energy();
+  double getTotalEnergy();
 
   /**
    * \returns The intensity of the peak with the maximum intensity.
    */
-  FLOAT_T get_max_peak_intensity();
+  FLOAT_T getMaxPeakIntensity();
 
   /**
    * \returns The mass of the charged precursor ion, according to the formula 
    * mass = m/z * charge
    */
-  FLOAT_T get_mass(int charge); ///< the charge of precursor ion -in
+  FLOAT_T getMass(int charge); ///< the charge of precursor ion -in
 
   /**
    * \returns The mass of the neutral precursor ion, according to the formula 
    * mass = m/z * charge - mass_H * charge
    */
-  FLOAT_T get_neutral_mass(int charge); ///< the charge of precursor ion -in
+  FLOAT_T getNeutralMass(int charge); ///< the charge of precursor ion -in
 
   /**
    * \returns The mass of the singly charged precursor ion, according
    * to the formula mass = m/z * charge - (mass_H * (charge - 1))
    */
-  FLOAT_T get_singly_charged_mass(int charge); ///< the charge of the precursor ion -in
+  FLOAT_T getSinglyChargedMass(int charge); ///< the charge of the precursor ion -in
 
   /**
    * Adds a possible charge(z) to the spectrum.
    */
-  bool add_possible_z(int charge);  ///< charge to add
+  bool addPossibleZ(int charge);  ///< charge to add
 
   /**
    * Adds a peak to the spectrum given a intensity and location.
    * Calls update_fields.
    * \returns TRUE if successfully added.
    */
-  bool add_peak
+  bool addPeak
     (FLOAT_T intensity,  ///< the intensity of peak to add -in
      FLOAT_T location_mz ///< the location of peak to add -in
      );
@@ -328,7 +328,7 @@ class Spectrum{
    * in the Spectrum's vector of peaks.  Peaks in the array are
    * indexed by ???
    */
-  void populate_mz_peak_array();
+  void populateMzPeakArray();
 
 };    
 
