@@ -17,7 +17,8 @@
 #include "objects.h"
 #include "ion_series.h"
 #include "crux-utils.h"
-#include "spectrum.h"
+#include "Spectrum.h"
+#include "PeakIterator.h"
 #include "scorer.h"
 #include "parameter.h"
 #include "unistd.h"
@@ -522,20 +523,19 @@ void equalize_peaks(
  * \returns TRUE if successful, else FLASE
  */
 BOOLEAN_T create_intensity_array_sp(
-  SPECTRUM_T* spectrum,    ///< the spectrum to score -in
+  Spectrum* spectrum,    ///< the spectrum to score -in
   SCORER_T* scorer,        ///< the scorer object -in/out
   int charge               ///< the peptide charge -in 
   )
 {
   PEAK_T* peak = NULL;
-  PEAK_ITERATOR_T* peak_iterator = NULL;
   FLOAT_T peak_location = 0;
   FLOAT_T max_intensity = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
   FLOAT_T bin_width = scorer->bin_width;
   FLOAT_T bin_offset = scorer->bin_offset;
-  FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
+  FLOAT_T precursor_mz = spectrum->get_precursor_mz();
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
   int top_bins = 200;
 
@@ -546,11 +546,11 @@ BOOLEAN_T create_intensity_array_sp(
   }
   
   // create a peak iterator
-  peak_iterator = new_peak_iterator(spectrum);
+  PeakIterator* peak_iterator = new PeakIterator(spectrum);
   
   // while there are more peaks to iterate over..
-  while(peak_iterator_has_next(peak_iterator)){
-    peak = peak_iterator_next(peak_iterator);
+  while(peak_iterator->has_next()){
+    peak = peak_iterator->next();
     peak_location = get_peak_location(peak);
     
     // skip all peaks larger than experimental mass
@@ -632,7 +632,7 @@ BOOLEAN_T create_intensity_array_sp(
   */
   
   // free peak iterator
-  free_peak_iterator(peak_iterator);
+  delete peak_iterator;
   
   // scorer now been initialized!, ready to score peptides..
   scorer->initialized = TRUE;
@@ -729,7 +729,7 @@ int calculate_ion_type_sp(
  */
 FLOAT_T gen_score_sp(
   SCORER_T* scorer,        ///< the scorer object -in
-  SPECTRUM_T* spectrum,    ///< the spectrum to score -in
+  Spectrum* spectrum,    ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
   )
 {
@@ -832,18 +832,17 @@ FLOAT_T* get_intensity_array_observed(SCORER_T* scorer) {
  */
 BOOLEAN_T create_intensity_array_observed(
   SCORER_T* scorer,        ///< the scorer object -in/out
-  SPECTRUM_T* spectrum,    ///< the spectrum to score(observed) -in
+  Spectrum* spectrum,    ///< the spectrum to score(observed) -in
   int charge               ///< the peptide charge -in 
   )
 {  
   PEAK_T* peak = NULL;
-  PEAK_ITERATOR_T* peak_iterator = NULL;
   FLOAT_T peak_location = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
   FLOAT_T bin_width = scorer->bin_width;
   FLOAT_T bin_offset = scorer->bin_offset;
-  FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
+  FLOAT_T precursor_mz = spectrum->get_precursor_mz();
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
 
   // set max_mz and malloc space for the observed intensity array
@@ -866,7 +865,7 @@ BOOLEAN_T create_intensity_array_observed(
   FLOAT_T* observed = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
   
   // create a peak iterator
-  peak_iterator = new_peak_iterator(spectrum);
+  PeakIterator* peak_iterator = new PeakIterator(spectrum);
 
   // Store the max intensity in entire spectrum
   FLOAT_T max_intensity_overall = 0.0;
@@ -878,8 +877,8 @@ BOOLEAN_T create_intensity_array_observed(
   // while there are more peaks to iterate over..
   // find the maximum peak m/z (location)
   double max_peak = 0.0;
-  while(peak_iterator_has_next(peak_iterator)){
-    peak = peak_iterator_next(peak_iterator);
+  while(peak_iterator->has_next()){
+    peak = peak_iterator->next();
     peak_location = get_peak_location(peak);
     if (peak_location < experimental_mass_cut_off && peak_location > max_peak) {
       max_peak = peak_location;
@@ -892,7 +891,7 @@ BOOLEAN_T create_intensity_array_observed(
     region_selector = (int) (max_peak / NUM_REGIONS);
   }
   // reset peak iterator
-  peak_iterator_reset(peak_iterator);
+  peak_iterator->reset();
 
   // DEBUG
   // carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
@@ -901,8 +900,8 @@ BOOLEAN_T create_intensity_array_observed(
   
   // while there are more peaks to iterate over..
   // bin peaks, adjust intensties, find max for each region
-  while(peak_iterator_has_next(peak_iterator)){
-    peak = peak_iterator_next(peak_iterator);
+  while(peak_iterator->has_next()){
+    peak = peak_iterator->next();
     peak_location = get_peak_location(peak);
     
     // skip all peaks larger than experimental mass
@@ -987,7 +986,7 @@ BOOLEAN_T create_intensity_array_observed(
   // free heap
   free(observed);
   free(max_intensity_per_region);
-  free_peak_iterator(peak_iterator);
+  delete peak_iterator;
 
   return TRUE;
 }
@@ -999,7 +998,7 @@ BOOLEAN_T create_intensity_array_observed(
  * the scorer->observed array can be accessed directly.
  */
 void get_processed_peaks(
-  SPECTRUM_T* spectrum, 
+  Spectrum* spectrum, 
   int charge,
   FLOAT_T** intensities, ///< pointer to array of intensities
   int* max_mz_bin){
@@ -1140,7 +1139,7 @@ BOOLEAN_T create_intensity_array_theoretical(
  * \returns TRUE if successful, else FLASE
  */
 BOOLEAN_T create_intensity_array_xcorr(
-  SPECTRUM_T* spectrum,    ///< the spectrum to score(observed) -in
+  Spectrum* spectrum,    ///< the spectrum to score(observed) -in
   SCORER_T* scorer,        ///< the scorer object -in/out
   int charge               ///< the peptide charge -in 
   )
@@ -1197,7 +1196,7 @@ FLOAT_T cross_correlation(
  */
 FLOAT_T gen_score_xcorr(
   SCORER_T* scorer,        ///< the scorer object -in
-  SPECTRUM_T* spectrum,    ///< the spectrum to score -in
+  Spectrum* spectrum,    ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
   )
 {
@@ -1484,7 +1483,7 @@ FLOAT_T score_logp_bonf_evd_xcorr(
  */
 FLOAT_T score_spectrum_v_ion_series(
   SCORER_T* scorer,        ///< the scorer object -in
-  SPECTRUM_T* spectrum,    ///< the spectrum to score -in
+  Spectrum* spectrum,      ///< the spectrum to score -in
   ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
   )
 {
@@ -1508,8 +1507,8 @@ FLOAT_T score_spectrum_v_ion_series(
  */
 FLOAT_T score_spectrum_v_spectrum(
   SCORER_T* scorer,           ///< the scorer object
-  SPECTRUM_T* first_spectrum, ///< the first spectrum to score 
-  SPECTRUM_T* second_spectrum ///<  the second spectrum to score
+  Spectrum* first_spectrum, ///< the first spectrum to score 
+  Spectrum* second_spectrum ///<  the second spectrum to score
 );
 
 /**

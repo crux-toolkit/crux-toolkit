@@ -267,7 +267,7 @@ void OutputFiles::writeMatches(
                                 ///< array of collections from shuffled peptides
   int num_decoy_collections,    ///< num collections in array
   SCORER_TYPE_T rank_type,           ///< use ranks for this type
-  SPECTRUM_T* spectrum     ///< given when all matches are to one spec
+  Spectrum* spectrum     ///< given when all matches are to one spec
   ){
   
 
@@ -296,7 +296,7 @@ void OutputFiles::printMatchesTab(
   MATCH_COLLECTION_T*  target_matches, ///< from real peptides
   MATCH_COLLECTION_T** decoy_matches_array,  
   SCORER_TYPE_T rank_type,
-  SPECTRUM_T* spectrum
+  Spectrum* spectrum
 ){
 
   carp(CARP_DETAILED_DEBUG, "Writing tab delimited results.");
@@ -336,7 +336,7 @@ void OutputFiles::printMatchesSqt(
   MATCH_COLLECTION_T*  target_matches, ///< from real peptides
   MATCH_COLLECTION_T** decoy_matches_array,  
                                 ///< array of collections from shuffled peptides
-  SPECTRUM_T* spectrum
+  Spectrum* spectrum
 ){
 
   if( sqt_file_array_ == NULL ){
@@ -364,7 +364,7 @@ void OutputFiles::printMatchesXml(
   MATCH_COLLECTION_T*  target_matches, ///< from real peptides
   MATCH_COLLECTION_T** decoy_matches_array,  
                                 ///< array of collections from shuffled peptides
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   SCORER_TYPE_T rank_type
   
 ){
@@ -415,7 +415,7 @@ void OutputFiles::writeMatchFeatures(
 
   // write scan number
   fprintf(feature_file_, "%i\t",
-          get_spectrum_first_scan(get_match_spectrum(match)) );
+          (get_match_spectrum(match))->get_first_scan() );
 
   // decoy or target peptide
   if (get_match_null_peptide(match) == FALSE){

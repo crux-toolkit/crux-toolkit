@@ -14,7 +14,7 @@
 #include "parameter.h"
 #include "protein.h"
 #include "peptide.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "parse_arguments.h" 
 #include "spectrum_collection.h"
 #include "generate_peptides_iterator.h"

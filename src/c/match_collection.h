@@ -23,7 +23,7 @@
 #include <time.h>
 #include "carp.h"
 #include "parse_arguments.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "spectrum_collection.h"
 #include "ion.h"
 #include "ion_series.h"
@@ -93,7 +93,7 @@ void free_match_collection(
  */
 int add_matches(
   MATCH_COLLECTION_T* match_collection,///< add matches to this
-  SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
+  Spectrum* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy,     ///< do we shuffle the peptides
@@ -278,7 +278,7 @@ BOOLEAN_T add_match_to_match_collection(
  */
 void print_matches
 (MATCH_COLLECTION_T* match_collection, 
- SPECTRUM_T* spectrum, 
+ Spectrum* spectrum, 
  BOOLEAN_T is_decoy,
  FILE* psm_file,
  FILE* sqt_file, 
@@ -345,7 +345,7 @@ BOOLEAN_T print_match_collection_xml(
   FILE* output,
   int top_match,
   MATCH_COLLECTION_T* match_collection,
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   SCORER_TYPE_T main_score,
   int index
   );
@@ -360,7 +360,7 @@ BOOLEAN_T print_match_collection_sqt(
   FILE* output, ///< the output file -out
   int top_match, ///< the top matches to output -in
   MATCH_COLLECTION_T* match_collection, ///< the match_collection to print -in
-  SPECTRUM_T* spectrum ///< the spectrum to print sqt -in
+  Spectrum* spectrum ///< the spectrum to print sqt -in
   );
 
 /**
@@ -372,7 +372,7 @@ BOOLEAN_T print_match_collection_tab_delimited(
   FILE* output, ///< the output file -out
   int top_match, ///< the top matches to output -in
   MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
-  SPECTRUM_T* spectrum, ///< the spectrum to print sqt -in
+  Spectrum* spectrum, ///< the spectrum to print sqt -in
   SCORER_TYPE_T main_score  ///< the main score to report -in
   );
 
@@ -590,7 +590,7 @@ BOOLEAN_T estimate_weibull_parameters(
   MATCH_COLLECTION_T* match_collection, 
   SCORER_TYPE_T score_type,
   int sample_count, 
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   int charge
   );
 
@@ -605,7 +605,7 @@ BOOLEAN_T estimate_weibull_parameters(
  */
 BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
   MATCH_COLLECTION_T* match_collection, 
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   int charge
   );
 
@@ -634,7 +634,7 @@ BOOLEAN_T set_match_collection_charge(
  */
 void add_decoy_scores_match_collection(
   MATCH_COLLECTION_T* target_matches, ///< add scores to this collection
-  SPECTRUM_T* spectrum, ///< search this spectrum
+  Spectrum* spectrum, ///< search this spectrum
   int charge, ///< search spectrum at this charge state
   MODIFIED_PEPTIDES_ITERATOR_T* peptides ///< use these peptides to search
 );

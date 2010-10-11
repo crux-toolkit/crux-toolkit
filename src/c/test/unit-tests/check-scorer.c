@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "check-peak.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "spectrum_collection.h"
 #include "peak.h"
 #include "crux-utils.h"
@@ -16,8 +16,8 @@
 #define parameter_file "test_parameter_file"
 
 START_TEST (test_create){
-  SPECTRUM_T* spectrum = NULL;
-  SPECTRUM_COLLECTION_T * collection = NULL; ///<spectrum collection
+  Spectrum* spectrum = NULL;
+  SPECTRUM_COLLECTION_T * sp_collection = NULL; ///<spectrum collection
   ION_SERIES_T* ion_series = NULL;
   SCORER_T* scorer = NULL;
   float score = 0;
@@ -44,11 +44,11 @@ START_TEST (test_create){
   predict_ions(ion_series);
 
   //read ms2 file
-  collection = new_spectrum_collection(ms2_file);
-  spectrum = allocate_spectrum();
+  sp_collection = new_spectrum_collection(ms2_file);
+  spectrum = new Spectrum();
   
   //search for spectrum with correct scan number
-  fail_unless(get_spectrum_collection_spectrum(collection, scan_num, spectrum), "failed to find scan_num in ms3 file");
+  fail_unless(get_spectrum_collection_spectrum(sp_collection, scan_num) == NULL, "failed to find scan_num in ms3 file");
 
   //create new scorer
   scorer = new_scorer(SP);  
@@ -70,8 +70,8 @@ START_TEST (test_create){
   free_scorer(scorer);
   free_ion_constraint(ion_constraint);
   free_ion_series(ion_series);
-  free_spectrum_collection(collection);
-  free_spectrum(spectrum);
+  free_spectrum_collection(sp_collection);
+  delete spectrum;
 }
 END_TEST
 

@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include "carp.h"
 #include "parse_arguments.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "spectrum_collection.h"
 #include "ion.h"
 #include "ion_series.h"
@@ -471,7 +471,7 @@ void set_match_rank(
 /**
  *\returns the spectrum in the match object
  */
-SPECTRUM_T* get_match_spectrum(
+Spectrum* get_match_spectrum(
   MATCH_T* match ///< the match to work -in  
   );
 
@@ -480,7 +480,7 @@ SPECTRUM_T* get_match_spectrum(
  */
 void set_match_spectrum(
   MATCH_T* match, ///< the match to work -out
-  SPECTRUM_T* spectrum  ///< the working spectrum -in
+  Spectrum* spectrum  ///< the working spectrum -in
   );
 
 /**

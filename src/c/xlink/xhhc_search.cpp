@@ -6,6 +6,7 @@
 
 //CRUX INCLUDES
 #include "objects.h"
+#include "Spectrum.h"
 
 #include <cmath>
 #include <ctime>
@@ -44,7 +45,8 @@ void get_ions_from_mz_range(vector<LinkedPeptide>& filtered_ions,
 	FLOAT_T mass_window,
 	int decoy_iterations);
 
-void plot_weibull(vector<pair<FLOAT_T, LinkedPeptide> >& scores, SPECTRUM_T* spectrum, int charge); 
+void plot_weibull(vector<pair<FLOAT_T, LinkedPeptide> >& scores, 
+                  Spectrum* spectrum, int charge); 
 
 
 string get_protein_ids_locations(vector<PEPTIDE_T*>& peptides);
@@ -137,7 +139,7 @@ int xlink_search_main(int argc, char** argv) {
 
 
   carp(CARP_INFO,"Loading Spectra");
-  SPECTRUM_T* spectrum = allocate_spectrum();
+  Spectrum* spectrum = new Spectrum();
   SPECTRUM_COLLECTION_T* spectra = new_spectrum_collection(ms2_file);
   parse_spectrum_collection(spectra);
   FILTERED_SPECTRUM_CHARGE_ITERATOR_T* spectrum_iterator = 
@@ -207,7 +209,7 @@ int xlink_search_main(int argc, char** argv) {
   while (filtered_spectrum_charge_iterator_has_next(spectrum_iterator)) {
     spectrum = filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
     //SCORER_T* scorer = new_scorer(XCORR);
-    scan_num = get_spectrum_first_scan(spectrum);
+    scan_num = spectrum->get_first_scan();
 
     if (search_count % 100 == 0)
       carp(CARP_INFO,"count %d scan %d charge %d", search_count, scan_num, charge);
@@ -222,8 +224,8 @@ int xlink_search_main(int argc, char** argv) {
     vector<LinkedPeptide> decoy_train_xpeptides;
     vector<LinkedPeptide> decoy_xpeptides;
 
-    FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
-    FLOAT_T precursor_mass = get_spectrum_neutral_mass(spectrum, charge); 
+    FLOAT_T precursor_mz = spectrum->get_precursor_mz();
+    FLOAT_T precursor_mass = spectrum->get_neutral_mass(charge); 
  
 
 
@@ -437,7 +439,7 @@ int xlink_search_main(int argc, char** argv) {
         ion_series.add_linked_ions(scores[score_index].second);
 
         FLOAT_T ion_current_observed;
-        FLOAT_T ion_current_total = get_spectrum_total_energy(spectrum);
+        FLOAT_T ion_current_total = spectrum->get_total_energy();
         int by_total = ion_series.get_total_by_ions();
         int by_observable;
         int by_observable2;
@@ -448,7 +450,7 @@ int xlink_search_main(int argc, char** argv) {
         int ions_observable_bin;
         ion_series.get_observable_ions(0, 1200, bin_width_mono, ions_observable, ions_observable_bin);
         ion_series.get_observable_by_ions(0, 1200, bin_width_mono, by_observable, by_observable_bin);
-        ion_series.get_observable_by_ions(0, get_spectrum_max_peak_mz(spectrum), bin_width_mono, by_observable2, by_observable_bin2);
+        ion_series.get_observable_by_ions(0, spectrum->get_max_peak_mz(), bin_width_mono, by_observable2, by_observable_bin2);
         scorer.getIonCurrentExplained(ion_series, spectrum, ion_current_observed, by_observed_bin);
         
   

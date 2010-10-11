@@ -112,7 +112,7 @@ struct match_collection_iterator{
 /******* Private function declarations, described in definintions below ***/
 int add_unscored_peptides(
   MATCH_COLLECTION_T* match_collection, 
-  SPECTRUM_T* spectrum, 
+  Spectrum* spectrum, 
   int charge, 
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
   BOOLEAN_T is_decoy
@@ -121,7 +121,7 @@ int add_unscored_peptides(
 BOOLEAN_T score_matches_one_spectrum(
   SCORER_TYPE_T score_type, 
   MATCH_COLLECTION_T* match_collection,
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   int charge,
   BOOLEAN_T store_scores
   );
@@ -288,7 +288,7 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
  */
 int add_matches(
   MATCH_COLLECTION_T* matches, ///< add matches to this
-  SPECTRUM_T* spectrum,  ///< compare peptides to this spectrum
+  Spectrum* spectrum,  ///< compare peptides to this spectrum
   int charge,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy,     ///< are peptides to be shuffled
@@ -842,7 +842,7 @@ BOOLEAN_T populate_match_rank_match_collection(
       char* seq = get_match_mod_sequence_str_with_masses(cur_match, FALSE);
       carp(CARP_WARNING, 
            "PSM spectrum %i charge %i sequence %s was NOT scored for type %i",
-           get_spectrum_first_scan(get_match_spectrum(cur_match)),
+           (get_match_spectrum(cur_match))->get_first_scan(),
            get_match_charge(cur_match), seq,
            (int)score_type);
       free(seq);
@@ -1047,7 +1047,7 @@ BOOLEAN_T has_enough_weibull_points(
  */
 BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
   MATCH_COLLECTION_T* match_collection, 
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   int charge
   ){
 
@@ -1062,7 +1062,7 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
   if( num_scores < MIN_WEIBULL_MATCHES ){
     carp(CARP_DETAILED_DEBUG, "Too few psms (%i) to estimate "
          "p-value parameters for spectrum %i, charge %i",
-         num_scores, get_spectrum_first_scan(spectrum), charge);
+         num_scores, spectrum->get_first_scan(), charge);
     // set eta, beta, and shift to something???
     return FALSE;
   }
@@ -1099,7 +1099,7 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
  */
 int add_unscored_peptides(
   MATCH_COLLECTION_T* match_collection, 
-  SPECTRUM_T* spectrum, 
+  Spectrum* spectrum, 
   int charge, 
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
   BOOLEAN_T is_decoy
@@ -1162,7 +1162,7 @@ int add_unscored_peptides(
 BOOLEAN_T score_matches_one_spectrum(
   SCORER_TYPE_T score_type, 
   MATCH_COLLECTION_T* match_collection,
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   int charge,
   BOOLEAN_T store_scores
   ){
@@ -1273,8 +1273,8 @@ BOOLEAN_T compute_p_values(
     return FALSE;
   }
 
-  int scan_number
-    = get_spectrum_first_scan(get_match_spectrum(match_collection->match[0]));
+  int scan_number = 
+    (get_match_spectrum(match_collection->match[0]))->get_first_scan();
   carp(CARP_DEBUG, "Computing p-values for %s spec %d charge %d "
        "with eta %f beta %f shift %f",
        (match_collection->null_peptide_collection) ? "decoy" : "target",
@@ -1755,6 +1755,7 @@ void print_sqt_header(
     database = fasta_name;
   }
   fprintf(output, "H\tDatabase\t%s\n", database);
+  free(database);
 
   if(decoy){
   fprintf(output, "H\tComment\tDatabase shuffled; these are decoy matches\n");
@@ -1959,11 +1960,11 @@ void print_matches_multi_spectra_xml(
   for (match_idx = 0; match_idx < num_matches; match_idx++){
     MATCH_T* cur_match = match_collection->match[match_idx];
     BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
-    SPECTRUM_T* spectrum = get_match_spectrum(cur_match);
+    Spectrum* spectrum = get_match_spectrum(cur_match);
     int charge = get_match_charge(cur_match);
-    print_spectrum_xml(spectrum, output, charge, index_count);
+    spectrum->print_xml(output, charge, index_count);
     fprintf(output, "    <search_result>\n");
-    FLOAT_T spec_mass = get_spectrum_neutral_mass(spectrum, charge);
+    FLOAT_T spec_mass = spectrum->get_neutral_mass(charge);
     if (! is_decoy){
       print_match_xml(cur_match, output, spec_mass,
                       match_collection->scored_type );
@@ -1989,7 +1990,7 @@ BOOLEAN_T print_match_collection_xml(
   FILE* output,
   int top_match,
   MATCH_COLLECTION_T* match_collection,
-  SPECTRUM_T* spectrum,
+  Spectrum* spectrum,
   SCORER_TYPE_T main_score,
   int index
   )
@@ -1999,13 +2000,13 @@ BOOLEAN_T print_match_collection_xml(
   }
   int charge = match_collection->charge; 
   int num_matches = match_collection->experiment_size;
-  FLOAT_T spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
+  FLOAT_T spectrum_neutral_mass = spectrum->get_neutral_mass(charge);
 
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection, SEARCH_COMMAND);
 
   /* print spectrum query */
-  print_spectrum_xml(spectrum, output,  charge, index);
+  spectrum->print_xml(output,  charge, index);
 
 
   MATCH_T* match = NULL;
@@ -2069,7 +2070,7 @@ BOOLEAN_T print_match_collection_sqt(
   int top_match,                 ///< the top matches to output -in
   MATCH_COLLECTION_T* match_collection,
   ///< the match_collection to print sqt -in
-  SPECTRUM_T* spectrum           ///< the spectrum to print sqt -in
+  Spectrum* spectrum           ///< the spectrum to print sqt -in
   )
 {
 
@@ -2085,7 +2086,7 @@ BOOLEAN_T print_match_collection_sqt(
   calculate_delta_cn(match_collection, SEQUEST_COMMAND);
 
   // First, print spectrum info
-  print_spectrum_sqt(spectrum, output, num_matches, charge);
+  spectrum->print_sqt(output, num_matches, charge);
   
   MATCH_T* match = NULL;
   
@@ -2131,7 +2132,7 @@ BOOLEAN_T print_match_collection_tab_delimited(
   int top_match,                 ///< the top matches to output -in
   MATCH_COLLECTION_T* match_collection,
   ///< the match_collection to print sqt -in
-  SPECTRUM_T* spectrum,          ///< the spectrum to print sqt -in
+  Spectrum* spectrum,          ///< the spectrum to print sqt -in
   SCORER_TYPE_T main_score       ///< the main score to report -in
   )
 {
@@ -2141,9 +2142,9 @@ BOOLEAN_T print_match_collection_tab_delimited(
   }
   int charge = match_collection->charge; 
   int num_matches = match_collection->experiment_size;
-  int scan_num = get_spectrum_first_scan(spectrum);
-  FLOAT_T spectrum_neutral_mass = get_spectrum_neutral_mass(spectrum, charge);
-  FLOAT_T spectrum_precursor_mz = get_spectrum_precursor_mz(spectrum);
+  int scan_num = spectrum->get_first_scan();
+  FLOAT_T spectrum_neutral_mass = spectrum->get_neutral_mass(charge);
+  FLOAT_T spectrum_precursor_mz = spectrum->get_precursor_mz();
 
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection, SEARCH_COMMAND);
@@ -2378,11 +2379,11 @@ void print_matches_multi_spectra
   for(match_idx = 0; match_idx < num_matches; match_idx++){
     MATCH_T* cur_match = match_collection->match[match_idx];
     BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
-    SPECTRUM_T* spectrum = get_match_spectrum(cur_match);
-    int scan_num = get_spectrum_first_scan(spectrum);
-    FLOAT_T mz = get_spectrum_precursor_mz(spectrum);
+    Spectrum* spectrum = get_match_spectrum(cur_match);
+    int scan_num = spectrum->get_first_scan();
+    FLOAT_T mz = spectrum->get_precursor_mz();
     int charge = get_match_charge(cur_match);
-    FLOAT_T spec_mass = get_spectrum_neutral_mass(spectrum, charge);
+    FLOAT_T spec_mass = spectrum->get_neutral_mass(charge);
     FLOAT_T num_psm_per_spec = get_match_ln_experiment_size(cur_match);
     num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
 
@@ -3309,7 +3310,7 @@ BOOLEAN_T set_match_collection_charge(
  */
 void add_decoy_scores_match_collection(
   MATCH_COLLECTION_T* target_matches, ///< add scores to this collection
-  SPECTRUM_T* spectrum, ///< search this spectrum
+  Spectrum* spectrum, ///< search this spectrum
   int charge, ///< search spectrum at this charge state
   MODIFIED_PEPTIDES_ITERATOR_T* peptides ///< use these peptides to search
 ){

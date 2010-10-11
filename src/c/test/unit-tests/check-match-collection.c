@@ -114,7 +114,7 @@ START_TEST(test_print_rank){
   // other items for printing to tab file
   int z = 1;
   vector<int> possible_z(z);
-  SPECTRUM_T* s = new_spectrum(7, 7, MS2, 7.77, possible_z, (char *)"fakename");
+  Spectrum* s = new Spectrum(7, 7, 7.77, possible_z, (char *)"fakename");
   const char* filename = "test-rank.txt";
 
   /* expected values

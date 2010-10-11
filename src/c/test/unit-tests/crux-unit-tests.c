@@ -20,7 +20,6 @@
 #include "check-qvalue.h"
 #include "check-scorer.h"
 #include "check-serialize.h"
-#include "check-spectrum.h"
 #include "check-spectrum_collection.h"
 #include "check-crux-utils.h"
 /* To add a new suite for <<<class>>>, add a line of the following form:

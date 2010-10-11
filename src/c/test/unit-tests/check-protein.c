@@ -4,7 +4,7 @@
 #include "check-peak.h"
 #include "mass.h"
 #include "objects.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "peak.h"
 #include "peptide.h"
 #include "peptide_src.h"
@@ -20,7 +20,7 @@ void parse_custom_enzyme(const char* rule_str);
 // declare things to setup
 static PEPTIDE_T *peptide1, *peptide2;
 static PROTEIN_T *protein1;
-static PROTEIN_PEPTIDE_ITERATOR_T* iterator;
+static PROTEIN_PEPTIDE_ITERATOR_T* pp_iterator;
 static PEPTIDE_CONSTRAINT_T *constraint, *enzyme_constraint;
 
 static PEPTIDE_SRC_T* src;
@@ -40,7 +40,7 @@ void protein_setup(){
                          NULL, 0, 0, db);//annotation, file offset, index
 
   constraint = new_peptide_constraint_from_parameters();
-  iterator = new_protein_peptide_iterator(protein1, constraint);
+  pp_iterator = new_protein_peptide_iterator(protein1, constraint);
 
   // For testing enzymes 
   // remove mass constraints, set len 4-100, no missed cleavages
@@ -53,7 +53,7 @@ void protein_teardown(){
   free_database(db);
   free_protein(protein1);
   free_peptide_constraint(constraint);
-  free_protein_peptide_iterator(iterator);
+  free_protein_peptide_iterator(pp_iterator);
 }
 
 START_TEST (test_new){
@@ -63,49 +63,49 @@ START_TEST (test_new){
 END_TEST
 
 START_TEST (test_peptide_iterator){
-  fail_unless(iterator != NULL, "Failed to create peptide iterator.");
-  fail_unless(protein_peptide_iterator_has_next(iterator) == TRUE,
+  fail_unless(pp_iterator != NULL, "Failed to create peptide iterator.");
+  fail_unless(protein_peptide_iterator_has_next(pp_iterator) == TRUE,
               "New iterator should have first peptide.");
-  peptide1 = protein_peptide_iterator_next(iterator);
+  peptide1 = protein_peptide_iterator_next(pp_iterator);
   fail_unless(peptide1 != NULL, "Iterator failed to return first peptide.");
 
   // check sequence of all seven peptides
   char* seq = get_peptide_sequence(peptide1); 
   fail_unless( strcmp(seq, "FGGTSVANAER") == 0,
                "First peptide should be FGGTSVANAER but is %s.", seq);
-  peptide1 = protein_peptide_iterator_next(iterator);
+  peptide1 = protein_peptide_iterator_next(pp_iterator);
   seq = get_peptide_sequence(peptide1); 
   fail_unless( strcmp(seq, "VADILESNAR") == 0,
                "Second peptide should be VADILESNAR but is %s.", seq);
-  peptide1 = protein_peptide_iterator_next(iterator);
+  peptide1 = protein_peptide_iterator_next(pp_iterator);
   seq = get_peptide_sequence(peptide1); 
   fail_unless( strcmp(seq, "QGQVAOOTVLSAPAK") == 0,
                "Third peptide should be QGQVAOOTVLSAPAK but is %s.", seq);
-  peptide1 = protein_peptide_iterator_next(iterator);
+  peptide1 = protein_peptide_iterator_next(pp_iterator);
   seq = get_peptide_sequence(peptide1); 
   fail_unless( strcmp(seq, "ITNHLVAMIEK") == 0,
                "Fourth peptide should be ITNHLVAMIEK but is %s.", seq);
-  peptide1 = protein_peptide_iterator_next(iterator);
+  peptide1 = protein_peptide_iterator_next(pp_iterator);
   seq = get_peptide_sequence(peptide1); 
   fail_unless( strcmp(seq, "TISGQDALPNISDAER") == 0,
                "Fifth peptide should be TISGQDALPNISDAER but is %s.", seq);
-  peptide1 = protein_peptide_iterator_next(iterator);
+  peptide1 = protein_peptide_iterator_next(pp_iterator);
   seq = get_peptide_sequence(peptide1); 
   fail_unless( strcmp(seq, "IFAELLTGLAAAQPGFPLAQLK") == 0,
                "Sixth peptide should be IFAELLTGLAAAQPGFPLAQLK but is %s.",
                seq);
-  peptide1 = protein_peptide_iterator_next(iterator);
+  peptide1 = protein_peptide_iterator_next(pp_iterator);
   seq = get_peptide_sequence(peptide1); 
   fail_unless( strcmp(seq, "TFWVDQEFAQIK") == 0,
                "Seventh peptide should be TFWVDQEFAQIK but is %s.", seq);
 
-  peptide1 = protein_peptide_iterator_next(iterator);
+  peptide1 = protein_peptide_iterator_next(pp_iterator);
   seq = get_peptide_sequence(peptide1); 
   fail_unless( strcmp(seq, "HVLHGISLWLGQC") == 0,
                "Eighth peptide should be HVLHGISLWLGQC but is %s.", seq);
 
   // now there should be no more peptides
-  fail_unless( protein_peptide_iterator_has_next(iterator) == FALSE,
+  fail_unless( protein_peptide_iterator_has_next(pp_iterator) == FALSE,
                "Default iterator should not have more than 7 peptides.");
 
 }
@@ -137,16 +137,16 @@ START_TEST (test_elastase){
   set_peptide_constraint_enzyme(enzyme_constraint, ELASTASE);
 
   // create new iterator
-  free_protein_peptide_iterator(iterator);
-  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+  free_protein_peptide_iterator(pp_iterator);
+  pp_iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
 
-  fail_unless( iterator != NULL, "Failed to create elastase peptide iterator.");
+  fail_unless( pp_iterator != NULL, "Failed to create elastase peptide iterator.");
 
   idx = 0;
   // for each peptide 
-  while(protein_peptide_iterator_has_next(iterator)){
+  while(protein_peptide_iterator_has_next(pp_iterator)){
     // get peptide
-    peptide2 = protein_peptide_iterator_next(iterator);
+    peptide2 = protein_peptide_iterator_next(pp_iterator);
     fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
     char* seq = get_peptide_sequence(peptide2);
 
@@ -223,17 +223,17 @@ START_TEST (test_chymo){
   set_peptide_constraint_enzyme(enzyme_constraint, CHYMOTRYPSIN);
 
   // create new iterator
-  free_protein_peptide_iterator(iterator);
-  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+  free_protein_peptide_iterator(pp_iterator);
+  pp_iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
 
-  fail_unless( iterator != NULL, 
+  fail_unless( pp_iterator != NULL, 
                "Failed to create chymotrypsin peptide iterator.");
 
   idx = 0;
   // for each peptide 
-  while(protein_peptide_iterator_has_next(iterator)){
+  while(protein_peptide_iterator_has_next(pp_iterator)){
     // get peptide
-    peptide2 = protein_peptide_iterator_next(iterator);
+    peptide2 = protein_peptide_iterator_next(pp_iterator);
     fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
     char* seq = get_peptide_sequence(peptide2);
 
@@ -309,17 +309,17 @@ START_TEST (test_mod_chymo){
   set_peptide_constraint_enzyme(enzyme_constraint, MODIFIED_CHYMOTRYPSIN);
 
   // create new iterator
-  free_protein_peptide_iterator(iterator);
-  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+  free_protein_peptide_iterator(pp_iterator);
+  pp_iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
 
-  fail_unless( iterator != NULL, 
+  fail_unless( pp_iterator != NULL, 
                "Failed to create chymotrypsin peptide iterator.");
 
   idx = 0;
   // for each peptide 
-  while(protein_peptide_iterator_has_next(iterator)){
+  while(protein_peptide_iterator_has_next(pp_iterator)){
     // get peptide
-    peptide2 = protein_peptide_iterator_next(iterator);
+    peptide2 = protein_peptide_iterator_next(pp_iterator);
     fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
     char* seq = get_peptide_sequence(peptide2);
 
@@ -403,17 +403,17 @@ START_TEST (test_el_tryp_chymo){
                                 ELASTASE_TRYPSIN_CHYMOTRYPSIN);
 
   // create new iterator
-  free_protein_peptide_iterator(iterator);
-  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+  free_protein_peptide_iterator(pp_iterator);
+  pp_iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
 
-  fail_unless( iterator != NULL, 
+  fail_unless( pp_iterator != NULL, 
                "Failed to create chymotrypsin peptide iterator.");
 
   idx = 0;
   // for each peptide 
-  while(protein_peptide_iterator_has_next(iterator)){
+  while(protein_peptide_iterator_has_next(pp_iterator)){
     // get peptide
-    peptide2 = protein_peptide_iterator_next(iterator);
+    peptide2 = protein_peptide_iterator_next(pp_iterator);
     fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
     char* seq = get_peptide_sequence(peptide2);
 
@@ -497,17 +497,17 @@ START_TEST(test_aspn){
   set_peptide_constraint_enzyme(enzyme_constraint, ASPN);
 
   // create new iterator
-  free_protein_peptide_iterator(iterator);
-  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+  free_protein_peptide_iterator(pp_iterator);
+  pp_iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
 
-  fail_unless( iterator != NULL, 
+  fail_unless( pp_iterator != NULL, 
                "Failed to create aspn peptide iterator.");
 
   idx = 0;
   // for each peptide 
-  while(protein_peptide_iterator_has_next(iterator)){
+  while(protein_peptide_iterator_has_next(pp_iterator)){
     // get peptide
-    peptide2 = protein_peptide_iterator_next(iterator);
+    peptide2 = protein_peptide_iterator_next(pp_iterator);
     fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
     char* seq = get_peptide_sequence(peptide2);
 
@@ -583,17 +583,17 @@ START_TEST(test_other_enzymes){
    set_peptide_constraint_enzyme(enzyme_constraint, enzyme);
    
    // create new iterator
-   free_protein_peptide_iterator(iterator);
-   iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+   free_protein_peptide_iterator(pp_iterator);
+   pp_iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
    
-   fail_unless( iterator != NULL, 
+   fail_unless( pp_iterator != NULL, 
                 "Failed to create %s peptide iterator.", enzyme_name);
    
    idx = 0;
    // for each peptide 
-   while(protein_peptide_iterator_has_next(iterator)){
+   while(protein_peptide_iterator_has_next(pp_iterator)){
      // get peptide
-     peptide2 = protein_peptide_iterator_next(iterator);
+     peptide2 = protein_peptide_iterator_next(pp_iterator);
      fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
      char* seq = get_peptide_sequence(peptide2);
      
@@ -666,17 +666,17 @@ START_TEST(test_custom_enzyme){
                                 CUSTOM_ENZYME);
 
   // create new iterator
-  free_protein_peptide_iterator(iterator);
-  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+  free_protein_peptide_iterator(pp_iterator);
+  pp_iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
 
-  fail_unless( iterator != NULL, 
+  fail_unless( pp_iterator != NULL, 
                "Failed to create custom enzyme peptide iterator.");
 
   idx=0;
   // for each peptide 
-  while(protein_peptide_iterator_has_next(iterator)){
+  while(protein_peptide_iterator_has_next(pp_iterator)){
     // get peptide
-    peptide2 = protein_peptide_iterator_next(iterator);
+    peptide2 = protein_peptide_iterator_next(pp_iterator);
     fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
     char* seq = get_peptide_sequence(peptide2);
 
@@ -754,17 +754,17 @@ START_TEST(test_custom_enzyme){
                                 CUSTOM_ENZYME);
 
   // create new iterator
-  free_protein_peptide_iterator(iterator);
-  iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
+  free_protein_peptide_iterator(pp_iterator);
+  pp_iterator = new_protein_peptide_iterator(protein1, enzyme_constraint);
 
-  fail_unless( iterator != NULL, 
+  fail_unless( pp_iterator != NULL, 
                "Failed to create custom enzyme peptide iterator.");
 
   idx=0;
   // for each peptide 
-  while(protein_peptide_iterator_has_next(iterator)){
+  while(protein_peptide_iterator_has_next(pp_iterator)){
     // get peptide
-    peptide2 = protein_peptide_iterator_next(iterator);
+    peptide2 = protein_peptide_iterator_next(pp_iterator);
     fail_unless(peptide2 != NULL, "Failed to get peptide from iterator.");
     char* seq = get_peptide_sequence(peptide2);
 

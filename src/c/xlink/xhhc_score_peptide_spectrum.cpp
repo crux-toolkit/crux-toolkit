@@ -5,6 +5,7 @@
 #include "objects.h"
 #include "scorer.h"
 #include "spectrum_collection.h"
+#include "PeakIterator.h"
 
 #include <math.h>
 #include <assert.h>
@@ -19,8 +20,9 @@
 #define NUM_OPTIONS 4
 
 
-double get_concat_score(char* peptideA, char* peptideB, int link_site, int charge, SPECTRUM_T* spectrum);
-void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series);
+double get_concat_score(char* peptideA, char* peptideB, int link_site, 
+                        int charge, Spectrum* spectrum);
+void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series);
 int main(int argc, char** argv){
 
   /* Verbosity level for set-up/command line reading */
@@ -90,13 +92,12 @@ int main(int argc, char** argv){
 
   // read ms2 file
   SPECTRUM_COLLECTION_T* collection = new_spectrum_collection(ms2_file);
-  SPECTRUM_T* spectrum = allocate_spectrum();
-  //cout << "lp " << lp << endl; 
+
   // search for spectrum with correct scan number
-  if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
-    carp(CARP_ERROR, "failed to find spectrum with  scan_num: %d", scan_num);
+  Spectrum* spectrum = get_spectrum_collection_spectrum(collection, scan_num);
+  if( spectrum == NULL ){
+    carp(CARP_ERROR, "Failed to find spectrum with scan_num: %d", scan_num);
     free_spectrum_collection(collection);
-    free_spectrum(spectrum);
     exit(1);
   }
   
@@ -180,11 +181,11 @@ int main(int argc, char** argv){
   }
   // free heap
   free_spectrum_collection(collection);
-  free_spectrum(spectrum);
+  delete spectrum;
 }
 
 
-double get_concat_score(char* peptideA, char* peptideB, int link_site, int charge, SPECTRUM_T* spectrum) {
+double get_concat_score(char* peptideA, char* peptideB, int link_site, int charge, Spectrum* spectrum) {
   string lpeptide = string(peptideA) + string(peptideB); 
   
   ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_smart(XCORR, charge);
@@ -303,14 +304,13 @@ double get_concat_score(char* peptideA, char* peptideB, int link_site, int charg
 
 }
 
-FLOAT_T* get_observed_raw(SPECTRUM_T* spectrum, int charge) {
+FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
   PEAK_T* peak = NULL;
-  PEAK_ITERATOR_T* peak_iterator = NULL;
   FLOAT_T peak_location = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
   FLOAT_T bin_width = bin_width_mono;
-  FLOAT_T precursor_mz = get_spectrum_precursor_mz(spectrum);
+  FLOAT_T precursor_mz = spectrum->get_precursor_mz();
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
 
   // set max_mz and malloc space for the observed intensity array
@@ -331,15 +331,15 @@ FLOAT_T* get_observed_raw(SPECTRUM_T* spectrum, int charge) {
   FLOAT_T* observed = (FLOAT_T*)mycalloc((int)sp_max_mz, sizeof(FLOAT_T));
   
   // create a peak iterator
-  peak_iterator = new_peak_iterator(spectrum);
+  PeakIterator* peak_iterator = new PeakIterator(spectrum);
 
   // DEBUG
   // carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
   
   // while there are more peaks to iterate over..
   // bin peaks, adjust intensties, find max for each region
-  while(peak_iterator_has_next(peak_iterator)){
-    peak = peak_iterator_next(peak_iterator);
+  while(peak_iterator->has_next()){
+    peak = peak_iterator->next();
     peak_location = get_peak_location(peak);
     
     // skip all peaks larger than experimental mass
@@ -372,7 +372,7 @@ FLOAT_T* get_observed_raw(SPECTRUM_T* spectrum, int charge) {
 
 
 
-void print_spectrum(SPECTRUM_T* spectrum, LinkedIonSeries& ion_series) {
+void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
 
       SCORER_T* scorer = new_scorer(XCORR);

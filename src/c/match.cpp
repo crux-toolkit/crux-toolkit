@@ -16,7 +16,7 @@
 #include <map>
 #include "carp.h"
 #include "parse_arguments.h"
-#include "spectrum.h"
+#include "Spectrum.h"
 #include "spectrum_collection.h"
 #include "ion.h"
 #include "ion_series.h"
@@ -60,17 +60,12 @@ using namespace std;
  *
  */
 
-
-
-
-
-
 /**
  *\struct match
  *\brief An object that stores the score & rank for each peptide-spectrum match
  */
 struct match{
-  SPECTRUM_T* spectrum; ///< the spectrum we are scoring with
+  Spectrum* spectrum; ///< the spectrum we are scoring with
   PEPTIDE_T* peptide;  ///< the peptide we are scoring
   FLOAT_T match_scores[NUMBER_SCORER_TYPES]; 
     ///< array of scores, one for each type (index with SCORER_TYPE_T) 
@@ -145,7 +140,7 @@ void free_match(
       free_peptide(match->peptide);
     }
     if(match->post_process_match && match->spectrum !=NULL){
-      free_spectrum(match->spectrum);
+      delete match->spectrum;
     }
     if (match->peptide_sequence != NULL){
       free(match->peptide_sequence);
@@ -169,10 +164,10 @@ int compare_match_spectrum(
   MATCH_T** match_b  ///< the scond match -in
   ){
 
-  SPECTRUM_T* spec_a = get_match_spectrum((*match_a));
-  SPECTRUM_T* spec_b = get_match_spectrum((*match_b));
-  int scan_a = get_spectrum_first_scan(spec_a);
-  int scan_b = get_spectrum_first_scan(spec_b);
+  Spectrum* spec_a = get_match_spectrum((*match_a));
+  Spectrum* spec_b = get_match_spectrum((*match_b));
+  int scan_a = spec_a->get_first_scan();
+  int scan_b = spec_b->get_first_scan();
   int charge_a = get_match_charge((*match_a));
   int charge_b = get_match_charge((*match_b));
 
@@ -1354,15 +1349,17 @@ double* get_match_percolator_features(
   unsigned int protein_idx = 0;
   double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
   FLOAT_T weight_diff = get_peptide_peptide_mass(match->peptide) -
-    get_spectrum_neutral_mass(match->spectrum, match->charge);
+    (match->spectrum)->get_neutral_mass(match->charge);
 
   
   carp(CARP_DETAILED_DEBUG, "spec: %d, charge: %d", 
-    get_spectrum_first_scan(match -> spectrum),
+    match->spectrum->get_first_scan(),
     match -> charge);
 
-  carp(CARP_DETAILED_DEBUG,"peptide mass:%f", get_peptide_peptide_mass(match -> peptide));
-  carp(CARP_DETAILED_DEBUG,"spectrum neutral mass:%f", get_spectrum_neutral_mass(match -> spectrum, match -> charge));
+  carp(CARP_DETAILED_DEBUG,"peptide mass:%f", 
+       get_peptide_peptide_mass(match->peptide));
+  carp(CARP_DETAILED_DEBUG,"spectrum neutral mass:%f", 
+       (match->spectrum)->get_neutral_mass(match->charge));
 
   // Xcorr
   feature_array[0] = get_match_score(match, XCORR);
@@ -1387,7 +1384,7 @@ double* get_match_percolator_features(
   // absdM
   feature_array[6] = fabsf(weight_diff);
   // Mass
-  feature_array[7] = get_spectrum_neutral_mass(match->spectrum, match->charge);
+  feature_array[7] = match->spectrum->get_neutral_mass(match->charge);
   // ionFrac
   feature_array[8] = match->b_y_ion_fraction_matched;
   // lnSM
@@ -1492,7 +1489,7 @@ MATCH_T* parse_match_tab_delimited(
   //TODO - FINISH and TEST
   MATCH_T* match = new_match();
 
-  SPECTRUM_T* spectrum = NULL;
+  Spectrum* spectrum = NULL;
   PEPTIDE_T* peptide = NULL;
 
   // this is a post_process match object
@@ -1536,7 +1533,7 @@ MATCH_T* parse_match_tab_delimited(
   match -> match_scores[QRANKER_QVALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
 
    // parse spectrum
-  if((spectrum = parse_spectrum_tab_delimited(result_file))== NULL){
+  if((spectrum = Spectrum::parse_tab_delimited(result_file))== NULL){
     carp(CARP_ERROR, "Failed to parse spectrum (tab delimited).");
   }
 
@@ -1780,7 +1777,7 @@ void set_match_rank(
 /**
  *\returns the spectrum in the match object
  */
-SPECTRUM_T* get_match_spectrum(
+Spectrum* get_match_spectrum(
   MATCH_T* match ///< the match to work -in  
   )
 {
@@ -1792,7 +1789,7 @@ SPECTRUM_T* get_match_spectrum(
  */
 void set_match_spectrum(
   MATCH_T* match, ///< the match to work -out
-  SPECTRUM_T* spectrum  ///< the working spectrum -in
+  Spectrum* spectrum  ///< the working spectrum -in
   )
 {
 
