@@ -1032,8 +1032,8 @@ BOOLEAN_T create_intensity_array_theoretical(
   int intensity_array_idx = 0;
   int ion_charge = 0;
   ION_TYPE_T ion_type;
-  FLOAT_T bin_width = get_mz_bin_width();
-  FLOAT_T bin_offset = get_mz_bin_offset();
+  FLOAT_T bin_width = scorer->bin_width;
+  FLOAT_T bin_offset = scorer->bin_offset;
   // create the ion iterator that will iterate through the ions
   ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
 
@@ -1046,7 +1046,7 @@ BOOLEAN_T create_intensity_array_theoretical(
     ion_charge = get_ion_charge(ion);
 
     // skip ions that are located beyond max mz limit
-    if(intensity_array_idx >= scorer->sp_max_mz){
+    if(intensity_array_idx >= get_scorer_max_bin(scorer)){
       continue;
     }
 
