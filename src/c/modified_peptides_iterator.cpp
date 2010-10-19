@@ -106,7 +106,7 @@ void queue_next_peptide(
   IF_CARP_DETAILED_DEBUG(
     char* umodseq = get_peptide_sequence(unmod_peptide);
     carp(CARP_DETAILED_DEBUG, "Iterator is modifying peptide %s",
-	 umodseq);
+         umodseq);
     free(umodseq);
   )
   modify_peptide(unmod_peptide, 

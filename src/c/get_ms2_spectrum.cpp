@@ -92,7 +92,7 @@ int main(int argc, char** argv){
   int max_scan;
   parse_scan_numbers(get_string_parameter("scan number"), &min_scan, &max_scan);
   fprintf(stderr, "Scanning from %d to %d.\n", min_scan, max_scan);
-				   
+
   const char* ms2_filename = get_string_parameter_pointer("ms2 file");
   carp(CARP_DETAILED_DEBUG, "ms2_filename: %s", ms2_filename);
 
@@ -132,20 +132,20 @@ int main(int argc, char** argv){
       printf("Precursor m/z:%.2f\n", spectrum->getPrecursorMz());
       printf("Total Ion Current:%.2f\n", spectrum->getTotalEnergy());
       printf("Base Peak Intensity:%.1f\n", 
-	     spectrum->getMaxPeakIntensity()); // base is max
+             spectrum->getMaxPeakIntensity()); // base is max
       printf("Number of peaks:%d\n", spectrum->getNumPeaks());
       printf("Minimum m/z:%.1f\n", spectrum->getMinPeakMz());
       printf("Maximum m/z:%.1f\n", spectrum->getMaxPeakMz());
     
       for(charge_state_index=0; charge_state_index < charge_state_num; 
-	  ++charge_state_index){
-	possible_z = possible_z_array[charge_state_index];
-	printf("Charge state:%d\n", possible_z);
-	printf("Neutral mass:%.2f\n", 
-	       spectrum->getNeutralMass(possible_z));
-	printf("Charged mass:%.2f\n", spectrum->getMass(possible_z));
-	printf("M+H+ mass:%.2f\n", 
-	       spectrum->getSinglyChargedMass(possible_z));
+          ++charge_state_index){
+        possible_z = possible_z_array[charge_state_index];
+        printf("Charge state:%d\n", possible_z);
+        printf("Neutral mass:%.2f\n", 
+               spectrum->getNeutralMass(possible_z));
+        printf("Charged mass:%.2f\n", spectrum->getMass(possible_z));
+        printf("M+H+ mass:%.2f\n", 
+               spectrum->getSinglyChargedMass(possible_z));
       }
     }
     delete spectrum;

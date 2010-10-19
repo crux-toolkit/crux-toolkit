@@ -663,7 +663,7 @@ static void print_one_match_field(
 #ifdef NEW_COLUMNS
   case WEIBULL_PEPTIDE_QVALUE_COL:
     if ((scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == TRUE) &&
-	(match->best_per_peptide == TRUE)) {
+        (match->best_per_peptide == TRUE)) {
       double qvalue = get_match_score(match, LOGP_PEPTIDE_QVALUE_WEIBULL);
       fprintf(output_file, float_format, qvalue);
     }
@@ -671,7 +671,7 @@ static void print_one_match_field(
 #endif
   case DECOY_XCORR_QVALUE_COL:
     if ((scores_computed[DECOY_XCORR_QVALUE]) && 
-	(match->null_peptide == FALSE)) {
+        (match->null_peptide == FALSE)) {
       fprintf(output_file, float_format, 
               get_match_score(match, DECOY_XCORR_QVALUE));
     }
@@ -679,10 +679,10 @@ static void print_one_match_field(
 #ifdef NEW_COLUMNS
   case DECOY_XCORR_PEPTIDE_QVALUE_COL:
     if ((scores_computed[DECOY_XCORR_QVALUE]) && 
-	(match->null_peptide == FALSE) &&
-	(match->best_per_peptide == TRUE)) {
+        (match->null_peptide == FALSE) &&
+        (match->best_per_peptide == TRUE)) {
       fprintf(output_file, float_format, 
-	      get_match_score(match, DECOY_XCORR_PEPTIDE_QVALUE));
+              get_match_score(match, DECOY_XCORR_PEPTIDE_QVALUE));
     }
     break;
 #endif
@@ -706,16 +706,16 @@ static void print_one_match_field(
 #ifdef NEW_COLUMNS
   case PERCOLATOR_PEPTIDE_QVALUE_COL:
     if ((scores_computed[PERCOLATOR_SCORE] == TRUE) &&
-	(match->best_per_peptide == TRUE)) {
+        (match->best_per_peptide == TRUE)) {
       fprintf(output_file, float_format,
-	      get_match_score(match, PERCOLATOR_PEPTIDE_QVALUE));
+              get_match_score(match, PERCOLATOR_PEPTIDE_QVALUE));
     }
     break;
 #endif
   case QRANKER_SCORE_COL:
     if (scores_computed[QRANKER_SCORE] == TRUE) {
       fprintf(output_file, float_format,
-	      get_match_score(match, QRANKER_SCORE));
+              get_match_score(match, QRANKER_SCORE));
     }
     break;
   case QRANKER_QVALUE_COL:
@@ -727,9 +727,9 @@ static void print_one_match_field(
 #ifdef NEW_COLUMNS
   case QRANKER_PEPTIDE_QVALUE_COL:
     if ((scores_computed[QRANKER_SCORE] == TRUE) &&
-	(match->best_per_peptide == TRUE)) {
+        (match->best_per_peptide == TRUE)) {
       fprintf(output_file, float_format, 
-	      get_match_score(match, QRANKER_PEPTIDE_QVALUE));
+              get_match_score(match, QRANKER_PEPTIDE_QVALUE));
     }
     break;
 #endif
@@ -1008,12 +1008,12 @@ void print_modifications_xml(
   if (!var_mods.empty()){
     fprintf(output_file, 
             "<modification_info modified_peptide=\"%s\">\n",
-	    mod_seq);
+            mod_seq);
     for (map<int, double>::iterator it = var_mods.begin()
-	   ; it != var_mods.end(); ++it){
+           ; it != var_mods.end(); ++it){
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%f\"/>\n",
-	      (*it).first,   //index
-	      (*it).second); //mass
+              (*it).first,   //index
+              (*it).second); //mass
     }
     fprintf(output_file, "</modification_info>\n");
   }
@@ -1022,12 +1022,12 @@ void print_modifications_xml(
   find_static_modifications(static_mods, var_mods, pep_seq);
   if (!static_mods.empty()){
     fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n",
-	    pep_seq);
+            pep_seq);
     for (map<int, double>::iterator it = static_mods.begin(); 
-	 it != static_mods.end(); ++it){
+         it != static_mods.end(); ++it){
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%f\"/>\n",
-	      (*it).first,   //index
-	      (*it).second); //mass
+              (*it).first,   //index
+              (*it).second); //mass
     }
     fprintf(output_file, "</modification_info>\n");
   }
@@ -1064,9 +1064,9 @@ void find_variable_modifications(
         char* mass  = (char *) mymalloc(sizeof(char)*(end-start+1));
         strncpy(mass, start, end-start);
         mass[end-start] = '\0';
-	mods[seq_index] = atof(mass);
+        mods[seq_index] = atof(mass);
         amino = end;
-	free(mass);
+        free(mass);
       }
       seq_index++;
       amino++;

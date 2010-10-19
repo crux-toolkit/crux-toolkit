@@ -108,9 +108,9 @@ SPECTRUM_COLLECTION_T* new_spectrum_collection(
   #endif
   if (absolute_path_file == NULL){
     carp(CARP_FATAL,
-	   "Error from file '%s'. (%s)",
-	   filename,
-	   strerror(errno)); 
+         "Error from file '%s'. (%s)",
+         filename,
+         strerror(errno)); 
   }
   
   if(access(absolute_path_file, F_OK)){

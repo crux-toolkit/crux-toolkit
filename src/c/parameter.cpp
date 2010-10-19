@@ -432,11 +432,11 @@ void initialize_parameters(void){
       "when true or one line per peptide per protein occurence when false.  ",
       "true");
   set_boolean_parameter("peptide-list", FALSE,
-			"Create an ASCII version of the peptide list.  "
-			"Default=F.",
-			"Creates an ASCII file in the output directory "
-			"containing one peptide per line.",
-			"true");
+                        "Create an ASCII version of the peptide list.  "
+                        "Default=F.",
+                        "Creates an ASCII file in the output directory "
+                        "containing one peptide per line.",
+                        "true");
   
   /* more generate_peptide parameters */
   set_boolean_parameter("output-sequence", FALSE, 

@@ -242,9 +242,9 @@ void smooth_peaks(
     for(; idx < get_scorer_max_bin(scorer)-2; ++idx){
       // smooooth
       new_array[idx] = (array[idx-2] + 
-			(4 * array[idx-1]) + 
-			(6 * array[idx]) + 
-			(4 * array[idx+1]) + array[idx+2] ) / 16;
+                        (4 * array[idx-1]) + 
+                        (6 * array[idx]) + 
+                        (4 * array[idx+1]) + array[idx+2] ) / 16;
 
       // set last idx in the array
       if(scorer->last_idx < idx && new_array[idx] == 0){
@@ -1103,17 +1103,17 @@ BOOLEAN_T create_intensity_array_theoretical(
 
         if(ion_type == B_ION){
           int h2o_array_idx = 
-	    INTEGERIZE((get_ion_mass_z(ion) - (MASS_H2O_MONO/ion_charge)),
-		       bin_width, bin_offset);
+            INTEGERIZE((get_ion_mass_z(ion) - (MASS_H2O_MONO/ion_charge)),
+                       bin_width, bin_offset);
           add_intensity(theoretical, h2o_array_idx, LOSS_HEIGHT);
         }
 
         int nh3_array_idx 
-	  = INTEGERIZE((get_ion_mass_z(ion) -  (MASS_NH3_MONO/ion_charge)),
-		       bin_width, bin_offset);
+          = INTEGERIZE((get_ion_mass_z(ion) -  (MASS_NH3_MONO/ion_charge)),
+                       bin_width, bin_offset);
         add_intensity(theoretical, nh3_array_idx, LOSS_HEIGHT);
       }
-      
+
 
     }// is it A ion?
     else if(ion_type == A_ION){
