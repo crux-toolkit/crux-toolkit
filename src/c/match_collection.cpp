@@ -2390,12 +2390,12 @@ void print_matches_multi_spectra
     if( is_decoy ){
       print_match_tab(match_collection, cur_match, decoy_file, scan_num, mz, 
                       spec_mass, (int)num_psm_per_spec, charge, 
-		      match_collection->scored_type );
+                      match_collection->scored_type );
     }
     else{
       print_match_tab(match_collection, cur_match, tab_file, scan_num, mz,
                       spec_mass, (int)num_psm_per_spec, charge, 
-		      match_collection->scored_type );
+                      match_collection->scored_type );
     }
 
   }
@@ -3368,7 +3368,7 @@ FLOAT_T* extract_scores_match_collection(
 )
 {
   FLOAT_T* return_value = (FLOAT_T*)mycalloc(all_matches->match_total,
-					     sizeof(FLOAT_T));
+                                             sizeof(FLOAT_T));
 
   MATCH_ITERATOR_T* match_iterator = 
     new_match_iterator(all_matches, XCORR, FALSE);
@@ -3405,8 +3405,8 @@ void assign_match_collection_qvalues(
       = score_to_qvalue_hash->find(score);
     if (map_position == score_to_qvalue_hash->end()) {
       carp(CARP_FATAL,
-	   "Cannot find q-value corresponding to score of %g.",
-	   score);
+           "Cannot find q-value corresponding to score of %g.",
+           score);
     }
     FLOAT_T qvalue = map_position->second;
 

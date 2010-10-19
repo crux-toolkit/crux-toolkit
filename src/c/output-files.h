@@ -57,10 +57,10 @@ class OutputFiles{
                        BOOLEAN_T overwrite);
 
   void printMatchesXml(
-		       MATCH_COLLECTION_T* target_matches,
-		       MATCH_COLLECTION_T** decoy_matches_array,
-		       Spectrum* spectrum,
-		       SCORER_TYPE_T rank_type);
+                       MATCH_COLLECTION_T* target_matches,
+                       MATCH_COLLECTION_T** decoy_matches_array,
+                       Spectrum* spectrum,
+                       SCORER_TYPE_T rank_type);
  
 
   void printMatchesTab(

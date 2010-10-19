@@ -257,7 +257,7 @@ void DelimitedFile::saveData(
     for (unsigned int col_idx=1;col_idx<numCols();col_idx++) {
       fout <<"\t";
       if (row_idx < numRows(col_idx))
-	fout << getString(col_idx, row_idx);
+        fout << getString(col_idx, row_idx);
     }
     fout << endl;
   }
@@ -725,17 +725,17 @@ void DelimitedFile::reorderRows(multimap<T, unsigned int>& sort_indices, BOOLEAN
     if (ascending) {
       typename multimap<T, unsigned int>::iterator sort_iter;
       for (sort_iter = sort_indices.begin();
-	   sort_iter != sort_indices.end();
-	   ++sort_iter) {
-          row_idx = sort_iter -> second;
-          string current_cell = getString(col_idx, row_idx);
-          current_col.push_back(current_cell);
-        }
+           sort_iter != sort_indices.end();
+           ++sort_iter) {
+        row_idx = sort_iter -> second;
+        string current_cell = getString(col_idx, row_idx);
+        current_col.push_back(current_cell);
+      }
     } else {
       typename multimap<T, unsigned int>::reverse_iterator sort_iter;
       for (sort_iter = sort_indices.rbegin();
-	   sort_iter != sort_indices.rend();
-	   ++sort_iter) {
+           sort_iter != sort_indices.rend();
+           ++sort_iter) {
         row_idx = sort_iter -> second;
         string current_cell = data_[col_idx][row_idx];
         current_col.push_back(current_cell);

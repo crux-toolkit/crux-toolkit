@@ -493,8 +493,8 @@ static BOOLEAN_T equal_peptides(
   int start_idx = get_peptide_src_start_idx(peptide_object->peptide_src);
 
   int result = strncmp(peptide_sequence, 
-		       &(parent_sequence[start_idx-1]), 
-		       peptide_object->length);
+                       &(parent_sequence[start_idx-1]), 
+                       peptide_object->length);
 
   // Return TRUE if strncmp returns 0.
   return((BOOLEAN_T)(!result));
@@ -1701,7 +1701,7 @@ BOOLEAN_T serialize_peptide(
   // If a text file was given, print the peptide in ASCII.
   if (text_file != NULL) {
     fprintf(text_file, "%s\n", 
-	    get_peptide_modified_sequence_with_symbols(peptide));
+            get_peptide_modified_sequence_with_symbols(peptide));
   }
 
   return TRUE;

@@ -1015,11 +1015,11 @@ void build_message(const char * arg) {
   switch (error) {
     case TOO_MANY_REQ_ARGS:
       snprintf(message, MAX_MESSAGE_BUFFER - 1, error_messages[error],
-	       MAX_REQ_ARGS);
+               MAX_REQ_ARGS);
       break;
     case TOO_MANY_OPT_ARGS:
       snprintf(message, MAX_MESSAGE_BUFFER - 1, error_messages[error],
-	       MAX_OPT_ARGS);
+               MAX_OPT_ARGS);
       break;
     default:
       snprintf(message, MAX_MESSAGE_BUFFER - 1, error_messages[error], arg);

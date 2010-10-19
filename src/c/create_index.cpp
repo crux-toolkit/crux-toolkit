@@ -48,7 +48,7 @@ int create_index_main(int argc, char** argv){
 
   /* Define required command line arguments */ 
   const char* argument_list[] = { "protein fasta file", 
-				  "index name"}; 
+                                  "index name"}; 
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
 
@@ -118,7 +118,7 @@ int create_index_main(int argc, char** argv){
   
   /* create crux_index files */
   if(!create_index(crux_index,
-		   get_boolean_parameter("peptide-list"))){
+                   get_boolean_parameter("peptide-list"))){
     carp(CARP_FATAL, "Failed to create index");
   }
   

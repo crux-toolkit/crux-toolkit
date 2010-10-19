@@ -1276,7 +1276,7 @@ void fit_three_parameter_weibull(
   for (cur_shift = max_shift; cur_shift > min_shift ; cur_shift -= step){
 
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
-			      cur_shift, &cur_eta, &cur_beta, &cur_correlation);
+                              cur_shift, &cur_eta, &cur_beta, &cur_correlation);
 
     if (cur_correlation > best_correlation){
       best_eta = cur_eta;
