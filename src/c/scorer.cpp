@@ -18,7 +18,6 @@
 #include "ion_series.h"
 #include "crux-utils.h"
 #include "Spectrum.h"
-#include "PeakIterator.h"
 #include "scorer.h"
 #include "parameter.h"
 #include "unistd.h"
@@ -545,12 +544,12 @@ BOOLEAN_T create_intensity_array_sp(
     return FALSE;
   }
   
-  // create a peak iterator
-  PeakIterator* peak_iterator = new PeakIterator(spectrum);
-  
   // while there are more peaks to iterate over..
-  while(peak_iterator->has_next()){
-    peak = peak_iterator->next();
+  for (PeakIterator peak_iterator = spectrum->begin();
+    peak_iterator != spectrum->end();
+    ++peak_iterator) {
+
+    peak = *peak_iterator;
     peak_location = get_peak_location(peak);
     
     // skip all peaks larger than experimental mass
@@ -630,9 +629,6 @@ BOOLEAN_T create_intensity_array_sp(
     }
   }
   */
-  
-  // free peak iterator
-  delete peak_iterator;
   
   // scorer now been initialized!, ready to score peptides..
   scorer->initialized = TRUE;
@@ -863,9 +859,6 @@ BOOLEAN_T create_intensity_array_observed(
   // DEBUG
   // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
   FLOAT_T* observed = (FLOAT_T*)mycalloc(get_scorer_max_bin(scorer), sizeof(FLOAT_T));
-  
-  // create a peak iterator
-  PeakIterator* peak_iterator = new PeakIterator(spectrum);
 
   // Store the max intensity in entire spectrum
   FLOAT_T max_intensity_overall = 0.0;
@@ -877,8 +870,12 @@ BOOLEAN_T create_intensity_array_observed(
   // while there are more peaks to iterate over..
   // find the maximum peak m/z (location)
   double max_peak = 0.0;
-  while(peak_iterator->has_next()){
-    peak = peak_iterator->next();
+
+  for (PeakIterator peak_iterator = spectrum->begin();
+    peak_iterator != spectrum->end();
+    ++peak_iterator) {
+
+    peak = *peak_iterator;
     peak_location = get_peak_location(peak);
     if (peak_location < experimental_mass_cut_off && peak_location > max_peak) {
       max_peak = peak_location;
@@ -890,8 +887,6 @@ BOOLEAN_T create_intensity_array_observed(
   } else {
     region_selector = (int) (max_peak / NUM_REGIONS);
   }
-  // reset peak iterator
-  peak_iterator->reset();
 
   // DEBUG
   // carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
@@ -900,8 +895,10 @@ BOOLEAN_T create_intensity_array_observed(
   
   // while there are more peaks to iterate over..
   // bin peaks, adjust intensties, find max for each region
-  while(peak_iterator->has_next()){
-    peak = peak_iterator->next();
+  for (PeakIterator peak_iterator = spectrum->begin();
+    peak_iterator != spectrum->end();
+    ++peak_iterator) {
+    peak = *peak_iterator;
     peak_location = get_peak_location(peak);
     
     // skip all peaks larger than experimental mass
@@ -986,7 +983,6 @@ BOOLEAN_T create_intensity_array_observed(
   // free heap
   free(observed);
   free(max_intensity_per_region);
-  delete peak_iterator;
 
   return TRUE;
 }

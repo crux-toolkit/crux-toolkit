@@ -6,7 +6,6 @@
 #include "scorer.h"
 #include "spectrum_collection.h"
 #include "DelimitedFile.h"
-#include "PeakIterator.h"
 
 #include <math.h>
 #include <assert.h>
@@ -192,10 +191,11 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
       unsigned int ion_col = result_file.addColumn("ion");
       unsigned int seq_col = result_file.addColumn("sequence");
       
+      for (PeakIterator peak_iter = spectrum->begin();
+        peak_iter != spectrum->end();
+        ++peak_iter) {
 
-      PeakIterator* peak_iter = new PeakIterator(spectrum);
-      while (peak_iter->has_next()) {
-	PEAK_T* peak = peak_iter->next();
+	PEAK_T* peak = *peak_iter;
         
 	//if (get_peak_location(peak) >= 400 && get_peak_location(peak) <= 1400) {
           unsigned int row_idx = result_file.addRow();
@@ -236,7 +236,6 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
           }
         //}
       }
-      delete peak_iter;
 
       cout << result_file;
 
