@@ -15,6 +15,13 @@
 #include "MSToolkit/Spectrum.h"
 
 /**
+ * \class PeakIterator
+ * \brief Object to iterate over the peaks in a spectrum.
+ */
+
+typedef std::vector<PEAK_T*>::const_iterator PeakIterator;
+
+/**
  * \class Spectrum 
  * \brief A mass spectrum
 
@@ -35,7 +42,6 @@
  * "max_peak_mz", and "total_energy".
  */
 class Spectrum{
-  friend class PeakIterator; // allow the iterator access to the peaks
  protected:
   // member variables
   int              first_scan_;    ///< The number of the first scan
@@ -153,6 +159,18 @@ class Spectrum{
    * Default destructor.
    */
   ~Spectrum();
+
+  /**
+   * \returns the peak iterator that signifies the start of the peaks 
+   * in the spectrum
+   */
+  PeakIterator begin();
+
+  /**
+   * \returns the peak iterator that signifies the end of the peaks 
+   * in the spectrum
+   */
+  PeakIterator end();
 
   /**
    * Prints a spectrum object to file.

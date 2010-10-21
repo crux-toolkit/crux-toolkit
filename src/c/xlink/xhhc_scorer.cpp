@@ -2,7 +2,6 @@
 #include "xhhc.h"
 
 #include "Spectrum.h"
-#include "PeakIterator.h"
 
 #include <fstream>
 
@@ -241,14 +240,14 @@ FLOAT_T Scorer::getIonCurrentExplained(LinkedIonSeries& ion_series,
   FLOAT_T bin_width = bin_width_mono;
 
   FLOAT_T ans = 0.0;
-  
-  PeakIterator* peak_iter = new PeakIterator(spectrum);
 
   map<int, bool> by_found;
 
-  while (peak_iter->has_next()) {
+  for (PeakIterator peak_iter = spectrum->begin();
+    peak_iter != spectrum->end();
+    ++peak_iter) {
 
-    PEAK_T* peak = peak_iter->next();
+    PEAK_T* peak = *peak_iter;
     FLOAT_T spec_mz = get_peak_location(peak);
     FLOAT_T spec_intensity = get_peak_intensity(peak);
     //for each peak in the spectrum, find the array index for the theoretical.
@@ -263,7 +262,6 @@ FLOAT_T Scorer::getIonCurrentExplained(LinkedIonSeries& ion_series,
       ans += spec_intensity;
     }
   }
-  delete peak_iter;
   free(theoretical);
 
 
@@ -296,19 +294,22 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
   carp(CARP_DEBUG, "min mz: %d, max mz: %d\n", max_mz);
   FLOAT_T average = 0;
 
-  PeakIterator* peak_iter = new PeakIterator(spectrum);
+  for (PeakIterator peak_iter = spectrum->begin();
+    peak_iter != spectrum->end();
+    ++peak_iter) {
 
-  while (peak_iter->has_next()) {
-    average += get_peak_intensity(peak_iter->next());
+    average += get_peak_intensity(*peak_iter);
   }
 
   average = average / spectrum->getNumPeaks();
   //cout << "AVERAGE " << average << endl;
   // make spectacle file for observed peaks
-  peak_iter->reset();
+ 
+  for (PeakIterator peak_iter = spectrum->begin();
+    peak_iter != spectrum->end();
+    ++peak_iter) {
 
-  while (peak_iter->has_next()) {
-    PEAK_T* peak = peak_iter->next();
+    PEAK_T* peak = *peak_iter;
     FLOAT_T location = get_peak_location(peak);
     FLOAT_T intensity = get_peak_intensity(peak); 
     if (location > min_mz && location < max_mz) {
@@ -325,8 +326,6 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
     }
   }
   
-  delete peak_iter;
-
 
   observed_file.close();
   // make spectacle file for theoretical peaks

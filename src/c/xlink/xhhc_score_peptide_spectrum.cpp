@@ -5,7 +5,6 @@
 #include "objects.h"
 #include "scorer.h"
 #include "spectrum_collection.h"
-#include "PeakIterator.h"
 
 #include <math.h>
 #include <assert.h>
@@ -330,16 +329,14 @@ FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
   // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
   FLOAT_T* observed = (FLOAT_T*)mycalloc((int)sp_max_mz, sizeof(FLOAT_T));
   
-  // create a peak iterator
-  PeakIterator* peak_iterator = new PeakIterator(spectrum);
-
   // DEBUG
   // carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
   
-  // while there are more peaks to iterate over..
-  // bin peaks, adjust intensties, find max for each region
-  while(peak_iterator->has_next()){
-    peak = peak_iterator->next();
+  for (PeakIterator peak_iterator = spectrum->begin();
+    peak_iterator != spectrum->end();
+    ++peak_iterator) {
+
+    peak = *peak_iterator;
     peak_location = get_peak_location(peak);
     
     // skip all peaks larger than experimental mass
@@ -348,7 +345,7 @@ FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
     }
     
     // skip all peaks within precursor ion mz +/- 15
-    if(peak_location < precursor_mz + 15 &&  peak_location > precursor_mz - 15){
+    if(peak_location < precursor_mz + 15 &&  peak_location > precursor_mz - 15) {
       continue;
     }
     

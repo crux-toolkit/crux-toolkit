@@ -83,6 +83,23 @@ Spectrum::~Spectrum()
 }
 
 /**
+ * \returns the peak iterator that signifies the start of the peaks 
+ * in the spectrum
+ */
+PeakIterator Spectrum::begin() {
+
+  return peaks_.begin();
+}
+
+/**
+ * \returns the peak iterator that signifies the end of the peaks 
+ * in the spectrum
+ */
+PeakIterator Spectrum::end() {
+  return peaks_.end();
+}
+
+/**
  * Prints a spectrum object to file in ms2 format.
  */
 void Spectrum::print(FILE* file) ///< output file to print at -out
