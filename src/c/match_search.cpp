@@ -30,8 +30,8 @@
 #include "parameter.h"
 #include "spectrum_collection.h"
 #include <errno.h>
-#include "output-files.h"
-#include "search-progress.h"
+#include "OutputFiles.h"
+#include "SearchProgress.h"
 
 /* Private functions */
 int search_pep_mods(

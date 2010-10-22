@@ -1,5 +1,5 @@
 /**
- * \file output-files.cpp
+ * \file OutputFiles.cpp
  * AUTHOR: Barbara Frewen
  * CREATE DATE: Aug 24, 2009
  * PROJECT: crux
@@ -10,7 +10,7 @@
  * parameter.c.
  */
 
-#include "output-files.h"
+#include "OutputFiles.h"
 using namespace std;
 
 /**

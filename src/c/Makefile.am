@@ -32,6 +32,8 @@ AM_CXXFLAGS = -Wall -W -Werror  $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
 LIBFILES= \
   alphabet.cpp \
   alphabet.h \
+  analyze_psms.cpp \
+  analyze_psms.h \
   carp.cpp \
   carp.h \
   create_index.cpp \
@@ -73,8 +75,8 @@ LIBFILES= \
   modified_peptides_iterator.h \
   search.h \
   objects.h \
-  output-files.cpp \
-  output-files.h \
+  OutputFiles.cpp \
+  OutputFiles.h \
   parameter.cpp \
   parameter.h \
   parse_arguments.cpp \
@@ -97,7 +99,7 @@ LIBFILES= \
   protein_index.h \
   q-value.cpp \
   q-value.h \
-  search-progress.h \
+  SearchProgress.h \
   sequest-search.cpp \
   sequest-search.h \
   scorer.cpp \

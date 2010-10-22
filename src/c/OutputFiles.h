@@ -1,8 +1,8 @@
 /**
- * \file output-files.h
+ * \file OutputFiles.h
  */
 /*
- * FILE: output-files.h
+ * FILE: OutputFiles.h
  * AUTHOR: Barbara Frewen
  * CREATE DATE: Aug 24, 2009
  * PROJECT: crux
