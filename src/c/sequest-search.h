@@ -17,8 +17,8 @@
  */
 
 #include <vector>
-#include "output-files.h"
-#include "search-progress.h"
+#include "OutputFiles.h"
+#include "SearchProgress.h"
 #include "objects.h"
 #include "carp.h"
 #include "parameter.h"
