@@ -50,6 +50,8 @@ LIBFILES= \
   MatchColumns.h \
   MatchFileReader.cpp \
   MatchFileReader.h \
+  FilteredSpectrumChargeIterator.cpp \
+  FilteredSpectrumChargeIterator.h \
   generate_peptides_iterator.cpp \
   generate_peptides_iterator.h \
   hash.cpp \
@@ -108,6 +110,8 @@ LIBFILES= \
   sorter.h \
   spectrum_collection.cpp \
   spectrum_collection.h \
+  SpectrumCollection.cpp \
+  SpectrumCollection.h \
   Spectrum.cpp \
   Spectrum.h \
   utils.cpp \
