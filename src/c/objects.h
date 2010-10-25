@@ -15,6 +15,7 @@ class DelimitedFile;
 class DelimitedFileReader;
 class MatchFileReader;
 class Spectrum;
+class FilteredSpectrumChargeIterator;
 
 /**
  * \typedef PEAK_T 
