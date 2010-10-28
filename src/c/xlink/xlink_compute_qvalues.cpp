@@ -5,7 +5,6 @@
 #include "crux-utils.h"
 #include "objects.h"
 #include "scorer.h"
-#include "spectrum_collection.h"
 #include "DelimitedFile.h"
 
 #include "xlink_compute_qvalues.h"

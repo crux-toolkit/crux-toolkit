@@ -9,6 +9,8 @@
  */
 
 #include "print-processed-spectra.h"
+
+
 static const int NUM_PPS_OPTIONS = 3;
 static const int NUM_PPS_ARGS = 2;
 
@@ -53,33 +55,33 @@ int print_processed_spectra_main(int argc, char** argv){
                                          output_dir,
                                          overwrite);
   // open input file
-  SPECTRUM_COLLECTION_T* spectra = new_spectrum_collection(input_ms2_name);
+  SpectrumCollection* spectra = new SpectrumCollection(input_ms2_name);
   if( spectra == NULL ){
     carp(CARP_FATAL, "Could not read spectra from %s.", input_ms2_name);
   }
 
-  parse_spectrum_collection(spectra);
+  spectra->parse();
   carp(CARP_DEBUG, "Found %d spectra in file.", 
-       get_spectrum_collection_num_spectra(spectra));
+       spectra->getNumSpectra());
 
   // write header to output file
-  char* header = get_spectrum_collection_comment(spectra);
+  char* header = spectra->getComment();
   fprintf(output_ms2, "%s", header);
   fprintf(output_ms2, "H\tComment\tSpectra processed as for Xcorr\n");
 
   // create iterator for getting spectra
-  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* spectrum_iterator =
-    new_filtered_spectrum_charge_iterator(spectra);
+  FilteredSpectrumChargeIterator* spectrum_iterator =
+    new FilteredSpectrumChargeIterator(spectra);
 
   if( spectrum_iterator == NULL ){
     carp(CARP_FATAL, "Could create spectrum iterator");
   }
 
   // loop over all spectra, process, print
-  while(filtered_spectrum_charge_iterator_has_next(spectrum_iterator)){
+  while(spectrum_iterator->hasNext()){
     int cur_charge = 0;
     Spectrum* cur_spectrum = 
-      filtered_spectrum_charge_iterator_next(spectrum_iterator, &cur_charge);
+      spectrum_iterator->next(&cur_charge);
 
     carp(CARP_DETAILED_INFO, "Processing spectrum %d charge %d.",
          cur_spectrum->getFirstScan(), cur_charge);
@@ -97,7 +99,7 @@ int print_processed_spectra_main(int argc, char** argv){
   }
 
   // close output file
-  free_spectrum_collection(spectra);
+  delete spectra;
   fclose(output_ms2);
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);

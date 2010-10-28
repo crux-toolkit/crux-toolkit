@@ -94,7 +94,7 @@ class SpectrumCollection {
    * variable.
    * \returns TRUE if the spectra are parsed successfully. FALSE if otherwise.
    */
-  bool parseSpectrumCollection();
+  bool parse();
 
   /**
    * Parses a single spectrum from a spectrum_collection with first scan

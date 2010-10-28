@@ -28,7 +28,8 @@
 #include "carp.h"
 #include "crux-utils.h"
 #include "parameter.h"
-#include "spectrum_collection.h"
+#include "SpectrumCollection.h"
+#include "FilteredSpectrumChargeIterator.h"
 #include <errno.h>
 #include "OutputFiles.h"
 #include "SearchProgress.h"
@@ -101,16 +102,16 @@ int search_main(int argc, char** argv){
   const char* ms2_file = get_string_parameter_pointer("ms2 file");
 
   // open ms2 file
-  SPECTRUM_COLLECTION_T* spectra = new_spectrum_collection(ms2_file);
+  SpectrumCollection* spectra = new SpectrumCollection(ms2_file);
 
   // parse the ms2 file for spectra
   carp(CARP_INFO, "Reading in ms2 file %s", ms2_file);
-  if(!parse_spectrum_collection(spectra)){
+  if(!spectra->parse()){
     carp(CARP_FATAL, "Failed to parse ms2 file: %s", ms2_file);
   }
   
   carp(CARP_DEBUG, "There were %i spectra found in the ms2 file",
-       get_spectrum_collection_num_spectra(spectra));
+       spectra->getNumSpectra());
 
   /* Get input: protein file */
   char* input_file = get_string_parameter("protein database");
@@ -147,8 +148,8 @@ int search_main(int argc, char** argv){
   /* Perform search: loop over spectra*/
 
   // create spectrum iterator
-  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* spectrum_iterator = 
-    new_filtered_spectrum_charge_iterator(spectra);
+  FilteredSpectrumChargeIterator* spectrum_iterator =
+    new FilteredSpectrumChargeIterator(spectra);
 
   // get search parameters for match_collection
   BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
@@ -163,10 +164,9 @@ int search_main(int argc, char** argv){
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
 
   // for each spectrum
-  while(filtered_spectrum_charge_iterator_has_next(spectrum_iterator)){
+  while(spectrum_iterator->hasNext()) {
     int charge = 0;
-    Spectrum* spectrum = 
-      filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
+    Spectrum* spectrum = spectrum_iterator->next(&charge);
     BOOLEAN_T is_decoy = FALSE;
 
     progress.report(spectrum->getFirstScan(), charge);

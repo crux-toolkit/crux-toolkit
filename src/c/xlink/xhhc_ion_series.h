@@ -7,7 +7,7 @@
 #include "ion_series.h"
 #include "scorer.h"
 #include "Spectrum.h"
-#include "spectrum_collection.h"
+#include "SpectrumCollection.h"
 
 // should this be somewhere else?
 #define bin_width_mono 1.0005079

@@ -15,7 +15,8 @@
 #include "crux-utils.h"
 #include "carp.h"
 #include "parameter.h"
-#include "spectrum_collection.h"
+#include "SpectrumCollection.h"
+#include "FilteredSpectrumChargeIterator.h"
 #include "scorer.h"
 
 int print_processed_spectra_main(int argc, char** argv);

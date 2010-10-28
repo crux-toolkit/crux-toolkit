@@ -17,7 +17,6 @@
 #include "carp.h"
 #include "parse_arguments.h"
 #include "Spectrum.h"
-#include "spectrum_collection.h"
 #include "ion.h"
 #include "ion_series.h"
 #include "crux-utils.h"

@@ -16,7 +16,7 @@
 #include "carp.h"
 #include "Spectrum.h"
 #include "peak.h"
-#include "spectrum_collection.h"
+#include "SpectrumCollection.h"
 #include "unistd.h"
 
 /****************************************************************************
@@ -104,14 +104,14 @@ int main(int argc, char** argv){
     carp(CARP_FATAL, "Could not read from ms2 file '%s'", ms2_filename);
   }
   carp(CARP_DETAILED_DEBUG, "Creating spectrum collection.");
-  SPECTRUM_COLLECTION_T* collection = new_spectrum_collection(ms2_filename);
+  SpectrumCollection* collection = new SpectrumCollection(ms2_filename);
 
   int num_found = 0;
   for (int scan_number = min_scan; scan_number <= max_scan; scan_number++) {
 
     /* search for spectrum with the correct scan number */
-    Spectrum* spectrum = get_spectrum_collection_spectrum(collection, 
-                                                          scan_number);
+    Spectrum* spectrum = collection->getSpectrum(scan_number);
+
     if( spectrum == NULL ){
       carp(CARP_WARNING, "Could not find scan number %i", scan_number);
       continue;
@@ -151,7 +151,7 @@ int main(int argc, char** argv){
     delete spectrum;
     num_found++;
   }
-  free_spectrum_collection(collection);
+  delete collection;
 
   carp(CARP_INFO, "Found %d spectra.\n", num_found);
   carp(CARP_INFO, "crux-get-ms2-spectrum finished.");
