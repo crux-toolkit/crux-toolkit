@@ -7,6 +7,7 @@
 //CRUX INCLUDES
 #include "objects.h"
 #include "Spectrum.h"
+#include "FilteredSpectrumChargeIterator.h"
 
 #include <cmath>
 #include <ctime>
@@ -140,10 +141,11 @@ int xlink_search_main(int argc, char** argv) {
 
   carp(CARP_INFO,"Loading Spectra");
   Spectrum* spectrum = new Spectrum();
-  SPECTRUM_COLLECTION_T* spectra = new_spectrum_collection(ms2_file);
-  parse_spectrum_collection(spectra);
-  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* spectrum_iterator = 
-	new_filtered_spectrum_charge_iterator(spectra);
+  SpectrumCollection* spectra = new SpectrumCollection(ms2_file);
+  spectra->parse();
+
+  FilteredSpectrumChargeIterator* spectrum_iterator =
+    new FilteredSpectrumChargeIterator(spectra);
  
   FLOAT_T score;
  // best pvalues
@@ -206,8 +208,8 @@ int xlink_search_main(int argc, char** argv) {
   int search_count = 0;
 
   // for every observed spectrum 
-  while (filtered_spectrum_charge_iterator_has_next(spectrum_iterator)) {
-    spectrum = filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
+  while (spectrum_iterator->hasNext()) {
+    spectrum = spectrum_iterator->next(&charge);
     //SCORER_T* scorer = new_scorer(XCORR);
     scan_num = spectrum->getFirstScan();
 

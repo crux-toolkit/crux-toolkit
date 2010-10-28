@@ -24,8 +24,8 @@
 #include "parameter.h"
 #include "protein.h"
 #include "peptide.h"
-#include "spectrum_collection.h"
-
+#include "SpectrumCollection.h"
+#include "FilteredSpectrumChargeIterator.h"
 
 using namespace std;
 

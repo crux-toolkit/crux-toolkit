@@ -4,7 +4,7 @@
 
 #include "objects.h"
 #include "scorer.h"
-#include "spectrum_collection.h"
+#include "SpectrumCollection.h"
 #include "DelimitedFile.h"
 
 #include <math.h>
@@ -88,33 +88,31 @@ int main(int argc, char** argv){
   }
 
   // read ms2 file
-  SPECTRUM_COLLECTION_T* collection = new_spectrum_collection(ms2_file);
-  parse_spectrum_collection(collection);
+  SpectrumCollection* collection = new SpectrumCollection(ms2_file);
+  collection->parse();
 
   
   //cout << "lp " << lp << endl; 
-
-  SPECTRUM_ITERATOR_T* spectrum_iterator = new_spectrum_iterator(collection);
   Spectrum* spectrum = NULL;
   Spectrum* current_spectrum = NULL;
 
   //TODO allow a binary search on both mgf and ms2 files.
 
-  while (spectrum_iterator_has_next(spectrum_iterator)) {
-    current_spectrum = spectrum_iterator_next(spectrum_iterator);
+  for (SpectrumIterator spectrum_iterator = collection->begin();
+    spectrum_iterator != collection->end();
+    ++spectrum_iterator) {
+
+    current_spectrum = *spectrum_iterator;
     if (current_spectrum->getFirstScan() == scan_num) {
       spectrum = current_spectrum;
       break;
     }
   }
-  free(spectrum_iterator);
-
-
 
   // search for spectrum with correct scan number
   if (spectrum == NULL) {
     carp(CARP_ERROR, "failed to find spectrum with  scan_num: %d", scan_num);
-    free_spectrum_collection(collection);
+    delete collection;
     exit(1);
   }
 
@@ -130,7 +128,7 @@ int main(int argc, char** argv){
   print_spectrum(spectrum, ion_series);
 
   // free heap
-  free_spectrum_collection(collection);
+  delete collection;
   //free_spectrum(spectrum);
 }
 

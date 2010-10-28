@@ -82,16 +82,16 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
   const char* ms2_file = get_string_parameter_pointer("ms2 file");
 
   // open ms2 file
-  SPECTRUM_COLLECTION_T* spectra = new_spectrum_collection(ms2_file);
+  SpectrumCollection* spectra = new SpectrumCollection(ms2_file);
 
   // parse the ms2 file for spectra
   carp(CARP_INFO, "Reading in ms2 file %s", ms2_file);
-  if(!parse_spectrum_collection(spectra)){
+  if(!spectra->parse()){
     carp(CARP_FATAL, "Failed to parse ms2 file: %s", ms2_file);
   }
   
   carp(CARP_DEBUG, "There were %i spectra found in the ms2 file",
-       get_spectrum_collection_num_spectra(spectra));
+       spectra->getNumSpectra());
 
   // Prepare output files 
   OutputFiles output_files(SEQUEST_COMMAND); 
@@ -109,14 +109,14 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
 
   // create spectrum iterator
-  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* spectrum_iterator = 
-    new_filtered_spectrum_charge_iterator(spectra);
+  FilteredSpectrumChargeIterator* spectrum_iterator = 
+    new FilteredSpectrumChargeIterator(spectra);
 
   // Perform search on each spectrum
-  while(filtered_spectrum_charge_iterator_has_next(spectrum_iterator)){
+  while(spectrum_iterator->hasNext()){
     int charge = 0;
     Spectrum* spectrum = 
-      filtered_spectrum_charge_iterator_next(spectrum_iterator, &charge);
+      spectrum_iterator->next(&charge);
 
     progress.report(spectrum->getFirstScan(), charge);
 

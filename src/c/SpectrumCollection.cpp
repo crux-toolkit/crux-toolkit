@@ -46,6 +46,8 @@ SpectrumCollection::SpectrumCollection(
   const char* filename///< The spectrum collection filename. -in
   ) {
 
+  filename_ = NULL;
+  memset(comment_, 0, sizeof(char)*MAX_COMMENT);
   is_parsed_ = false;
   #if DARWIN
   char path_buffer[PATH_MAX];
@@ -64,7 +66,6 @@ SpectrumCollection::SpectrumCollection(
     free(absolute_path_file);
     carp(CARP_FATAL,"File %s could not be opened\n", absolute_path_file);
   } // FIXME check if file is empty
-  
   this->setFilename(absolute_path_file);
   #ifndef DARWIN
   free(absolute_path_file);
@@ -107,6 +108,20 @@ SpectrumCollection::~SpectrumCollection() {
   spectra_.clear();
   free(filename_);
 }  
+
+/**
+ * \returns the begining of the spectra vector
+ */
+SpectrumIterator SpectrumCollection::begin() {
+  return spectra_.begin();
+}
+
+/**
+ * \returns the end of the spectra vector
+ */
+SpectrumIterator SpectrumCollection::end() {
+  return spectra_.end();
+}
 
 /**
  * Prints a spectrum_collection object to file.
@@ -171,7 +186,7 @@ void SpectrumCollection::parseHeaderLine(
  * variable.
  * \returns TRUE if the spectra are parsed successfully. FALSE if otherwise.
  */
-bool SpectrumCollection::parseSpectrumCollection() {
+bool SpectrumCollection::parse() {
 
   // spectrum_collection has already been parsed
   if(is_parsed_){

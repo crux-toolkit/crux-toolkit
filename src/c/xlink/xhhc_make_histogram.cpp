@@ -179,12 +179,12 @@ int main(int argc, char** argv) {
   cout << "total       " << filtered_ions.size() << "<br>" << endl;
 
   Spectrum* spectrum = new Spectrum();
-  SPECTRUM_COLLECTION_T* collection = new_spectrum_collection(ms2_file);
+  SpectrumCollection* collection = new SpectrumCollection(ms2_file);
   //SCORER_T* scorer = new_scorer(XCORR);
   Scorer xhhc_scorer;
-  if(!get_spectrum_collection_spectrum(collection, scan_num, spectrum)){
+  if(!collection->getSpectrum(scan_num, spectrum)){
     carp(CARP_ERROR, "failed to find spectrum with  scan_num: %d", scan_num);
-    free_spectrum_collection(collection);
+    delete collection;
     delete spectrum;
     exit(1);
   }
@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
     }
   }
   //free_scorer(scorer);
-  free_spectrum_collection(collection);
+  delete collection;
   delete spectrum;
   return 0;
 }

@@ -4,7 +4,7 @@
 
 #include "objects.h"
 #include "scorer.h"
-#include "spectrum_collection.h"
+#include "SpectrumCollection.h"
 
 #include <math.h>
 #include <assert.h>
@@ -90,13 +90,13 @@ int main(int argc, char** argv){
   }
 
   // read ms2 file
-  SPECTRUM_COLLECTION_T* collection = new_spectrum_collection(ms2_file);
+  SpectrumCollection* collection = new SpectrumCollection(ms2_file);
 
   // search for spectrum with correct scan number
-  Spectrum* spectrum = get_spectrum_collection_spectrum(collection, scan_num);
+  Spectrum* spectrum = collection->getSpectrum(scan_num);
   if( spectrum == NULL ){
     carp(CARP_ERROR, "Failed to find spectrum with scan_num: %d", scan_num);
-    free_spectrum_collection(collection);
+    delete collection;
     exit(1);
   }
   
@@ -179,7 +179,7 @@ int main(int argc, char** argv){
     carp(CARP_ERROR,"Unknown method");
   }
   // free heap
-  free_spectrum_collection(collection);
+  delete collection;
   delete spectrum;
 }
 
