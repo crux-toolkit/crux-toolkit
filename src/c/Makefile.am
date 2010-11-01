@@ -60,6 +60,8 @@ LIBFILES= \
   hash.h \
   index.cpp \
   index.h \
+  Ion.cpp \
+  Ion.h \
   ion.cpp \
   ion.h \
   ion_series.cpp \
