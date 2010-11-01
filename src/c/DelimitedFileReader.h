@@ -99,7 +99,7 @@ class DelimitedFileReader {
    * populating the data matrix with the 
    * strings separated by tabs.
    */
-  void loadData(
+  virtual void loadData(
     const char *file_name, ///< the file path
     bool hasHeader=true ///< header indicator
   );
@@ -107,7 +107,7 @@ class DelimitedFileReader {
   /**
    * loads a tab delimited file
    */
-  void loadData(
+  virtual void loadData(
     const std::string& file_name, ///< the file path
     bool hasHeader=true ///< header indicator
   );

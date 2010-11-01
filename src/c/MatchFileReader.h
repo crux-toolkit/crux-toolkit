@@ -54,6 +54,22 @@ class MatchFileReader: public DelimitedFileReader {
     virtual ~MatchFileReader();
 
     /**
+     * Open a new file from an existing MatchFileReader.
+     */
+    virtual void loadData(
+      const char* file_name, ///< new file to open
+      bool hasHeader = true  ///< parse first line as header
+    );
+
+    /**
+     * Open a new file from an existing MatchFileReader.
+     */
+    virtual void loadData(
+      const std::string& file_name, ///< new file to open
+      bool hasHeader = true         ///< parse first line has header
+    );
+
+    /**
      * \returns the FLOAT_T value of a cell, checks for infinity
      */
     FLOAT_T getFloat(
@@ -96,6 +112,14 @@ class MatchFileReader: public DelimitedFileReader {
       std::vector<std::string>& string_vector, ///<the vector of integers
       char delimiter=',' ///<the delimiter to use
     );
+
+    /**
+     * Fills in the given vector with a bool value indicating if each
+     * MATCH_COLUMN_T type is present in the file being read.
+     * \returns Argument vector has NUM_MATCH_COLUMN_T values if a
+     * valid file is open and header has been parsed, else vector is empty.
+     */
+    void getMatchColumnsPresent (std::vector<bool>& col_is_present);
 
 };
 

@@ -9,7 +9,9 @@ TESTS = \
 	main.cpp \
 	TestModifications.cpp \
 	TestXml.cpp \
-        TestSpectrum.cpp 
+        TestSpectrum.cpp \
+        TestMatchFileReader.cpp \
+        TestDelimitedFileWriter.cpp 
 
 unittests: $(TESTS) $(CRUX_LIB) $(MSTOOLKIT_LIB) $(UNIT_LIB)  
 	$(CC) -o unittests $(CFLAGS) $(TESTS) $(CRUX_LIB) $(MSTOOLKIT_LIB) $(UNIT_LIB) $(LDFLAGS)
