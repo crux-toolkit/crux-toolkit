@@ -39,6 +39,32 @@ MatchFileReader::~MatchFileReader() {
 }
 
 /**
+ * Open a new file from an existing MatchFileReader.
+ */
+void MatchFileReader::loadData(
+  const char* file_name, ///< new file to open
+  bool hasHeader
+){
+  DelimitedFileReader::loadData(file_name, hasHeader);
+  if( hasHeader ){
+    parseHeader();
+  }
+}
+
+/**
+ * Open a new file from an existing MatchFileReader.
+ */
+void MatchFileReader::loadData(
+  const string& file_name, ///< new file to open
+  bool hasHeader
+){
+  DelimitedFileReader::loadData(file_name, hasHeader);
+  if( hasHeader ){
+    parseHeader();
+  }
+}
+
+/**
  * parses the header and builds the internal hash table
  */
 void MatchFileReader::parseHeader() {
@@ -148,5 +174,27 @@ void MatchFileReader::getStringVectorFromCell(
   //get the list of strings separated by delimiter
   string_vector.clear();
   DelimitedFile::tokenize(string_ans, string_vector, delimiter);
+}
+
+/**
+ * Fills in the given vector with a bool value indicating if each
+ * MATCH_COLUMN_T type is present in the file being read.
+ * \returns Argument vector has NUM_MATCH_COLUMN_T values if a
+ * valid file is open and header has been parsed, else vector is empty.
+ */
+void MatchFileReader::getMatchColumnsPresent(
+  std::vector<bool>& col_is_present)
+{
+  col_is_present.clear();
+
+  // has a header been parsed? 
+  if( column_names_.empty() ){
+    return;
+  }
+  col_is_present.assign(NUMBER_MATCH_COLUMNS, false);
+
+  for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++){
+    col_is_present[col_idx] = (match_indices_[col_idx] > -1);
+  }
 }
 

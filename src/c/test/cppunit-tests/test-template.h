@@ -9,8 +9,8 @@
 // 7. Add the new file to SVN.
 // SEE ALSO test-template.cpp
 
-#ifndef CPP_UNIT_TESTMODIFICATIONS_H
-#define CPP_UNIT_TESTMODIFICATIONS_H
+#ifndef CPP_UNIT_[class]_H
+#define CPP_UNIT_[class]_H
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "[class].h"
@@ -32,4 +32,4 @@ class Test[class] : public CPPUNIT_NS::TestFixture
   void myTestName();
 };
 
-#endif //CPP_UNIT_TESTMODIFICATIONS_H
+#endif //CPP_UNIT_[class]_H

@@ -9,8 +9,8 @@
 // 7. Add the new file to SVN.
 // SEE ALSO test-template.cpp
 
-#ifndef CPP_UNIT_TESTMODIFICATIONS_H
-#define CPP_UNIT_TESTMODIFICATIONS_H
+#ifndef CPP_UNIT_TESTSPECTRUM_H
+#define CPP_UNIT_TESTSPECTRUM_H
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <vector>
@@ -34,4 +34,4 @@ class TestSpectrum : public CPPUNIT_NS::TestFixture
   void defaultGetters();
 };
 
-#endif //CPP_UNIT_TESTMODIFICATIONS_H
+#endif //CPP_UNIT_TESTSPECTRUM_H

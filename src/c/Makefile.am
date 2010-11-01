@@ -46,6 +46,8 @@ LIBFILES= \
   DelimitedFile.h \
   DelimitedFileReader.cpp \
   DelimitedFileReader.h \
+  DelimitedFileWriter.cpp \
+  DelimitedFileWriter.h \
   MatchColumns.cpp \
   MatchColumns.h \
   MatchFileReader.cpp \
