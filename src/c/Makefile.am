@@ -110,8 +110,6 @@ LIBFILES= \
   scorer.h \
   sorter.cpp \
   sorter.h \
-  spectrum_collection.cpp \
-  spectrum_collection.h \
   SpectrumCollection.cpp \
   SpectrumCollection.h \
   Spectrum.cpp \

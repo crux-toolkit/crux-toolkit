@@ -3,7 +3,7 @@
 #include <string.h>
 #include "check-peak.h"
 #include "Spectrum.h"
-#include "spectrum_collection.h"
+#include "SpectrumCollection.h"
 #include "peak.h"
 #include "crux-utils.h"
 #include "scorer.h"
@@ -17,7 +17,7 @@
 
 START_TEST (test_create){
   Spectrum* spectrum = NULL;
-  SPECTRUM_COLLECTION_T * sp_collection = NULL; ///<spectrum collection
+  SpectrumCollection* sp_collection = NULL; ///<spectrum collection
   ION_SERIES_T* ion_series = NULL;
   SCORER_T* scorer = NULL;
   float score = 0;
@@ -44,11 +44,11 @@ START_TEST (test_create){
   predict_ions(ion_series);
 
   //read ms2 file
-  sp_collection = new_spectrum_collection(ms2_file);
+  sp_collection = new SpectrumCollection(ms2_file);
   spectrum = new Spectrum();
   
   //search for spectrum with correct scan number
-  fail_unless(get_spectrum_collection_spectrum(sp_collection, scan_num) == NULL, "failed to find scan_num in ms3 file");
+  fail_unless(sp_collection->getSpectrum(scan_num) == NULL, "failed to find scan_num in ms3 file");
 
   //create new scorer
   scorer = new_scorer(SP);  
@@ -70,7 +70,7 @@ START_TEST (test_create){
   free_scorer(scorer);
   free_ion_constraint(ion_constraint);
   free_ion_series(ion_series);
-  free_spectrum_collection(sp_collection);
+  delete sp_collection;
   delete spectrum;
 }
 END_TEST

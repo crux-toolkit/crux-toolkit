@@ -31,7 +31,6 @@ TESTS = \
 	check-qvalue.c \
 	check-scorer.c \
 	check-serialize.c \
-	check-spectrum_collection.c \
 	crux-unit-tests.c
 
 CRUX_LIBS = \

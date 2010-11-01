@@ -62,7 +62,7 @@ int main(void){
   //Suite* suite_scorer = scorer_suite();
   Suite* suite_serialize = serialize_suite();
   //Suite* suite_spectrum = spectrum_suite();
-  Suite* suite_spectrum_collection = spectrum_collection_suite();
+  //Suite* suite_spectrum_collection = spectrum_collection_suite();
 
   //add each suite to Runner
   SRunner *sr = srunner_create(NULL);
@@ -94,7 +94,7 @@ int main(void){
   //srunner_add_suite(sr,suite_scorer);
   srunner_add_suite(sr, suite_serialize);
   //srunner_add_suite(sr,suite_spectrum);
-  srunner_add_suite(sr, suite_spectrum_collection);
+  //srunner_add_suite(sr, suite_spectrum_collection);
 
   // Run each check suite.
   srunner_run_all(sr, CK_NORMAL);
