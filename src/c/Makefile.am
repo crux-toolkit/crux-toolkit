@@ -48,10 +48,6 @@ LIBFILES= \
   DelimitedFileReader.h \
   DelimitedFileWriter.cpp \
   DelimitedFileWriter.h \
-  MatchColumns.cpp \
-  MatchColumns.h \
-  MatchFileReader.cpp \
-  MatchFileReader.h \
   FilteredSpectrumChargeIterator.cpp \
   FilteredSpectrumChargeIterator.h \
   generate_peptides_iterator.cpp \
@@ -70,6 +66,12 @@ LIBFILES= \
   mass.h \
   match.cpp \
   match.h \
+  MatchColumns.cpp \
+  MatchColumns.h \
+  MatchFileReader.cpp \
+  MatchFileReader.h \
+  MatchFileWriter.cpp \
+  MatchFileWriter.h \
   match_collection.cpp \
   match_collection.h \
   match_search.cpp \
