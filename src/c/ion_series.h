@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "objects.h"
 #include "peptide.h"
-#include "ion.h"
+#include "Ion.h"
 #include "ion_series.h"
 
 
@@ -166,7 +166,7 @@ void copy_ion_series(
 /**
  * \returns the ion that meets the constraint or NULL
  */
-ION_T* get_ion_series_ion(
+Ion* get_ion_series_ion(
   ION_SERIES_T* ion_series, ///< the ion_series -in                          
   ION_CONSTRAINT_T* ion_constraint,
   int cleavage_idx
@@ -364,7 +364,7 @@ void copy_ion_constraint(
  */
 BOOLEAN_T ion_constraint_is_satisfied(
    ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
-   ION_T* ion ///< query ion -in
+   Ion* ion ///< query ion -in
    );
 
 /**
@@ -441,7 +441,7 @@ BOOLEAN_T ion_iterator_has_next(
 /**
  * The basic iterator function next.
  */
-ION_T* ion_iterator_next(
+Ion* ion_iterator_next(
   ION_ITERATOR_T* ion_iterator///< return the next ion -in
 );
 
@@ -477,7 +477,7 @@ BOOLEAN_T ion_filtered_iterator_has_next(
 /**
  * The basic iterator function next.
  */
-ION_T* ion_filtered_iterator_next(
+Ion* ion_filtered_iterator_next(
   ION_FILTERED_ITERATOR_T* ion_iterator///< return the next ion -in
 );
 

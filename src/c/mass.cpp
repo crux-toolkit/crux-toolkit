@@ -12,7 +12,7 @@
 #include "protein.h"
 #include "peptide.h"
 #include "carp.h"
-#include "ion.h"
+#include "Ion.h"
 #include "modifications.h"
 
 /* Private Variables */

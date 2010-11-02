@@ -203,11 +203,11 @@ double get_concat_score(char* peptideA, char* peptideB, int link_site, int charg
   int llength = lpeptide.length();
   
   while(ion_iterator_has_next(ion_iterator)){
-    ION_T* ion = ion_iterator_next(ion_iterator);
+    Ion* ion = ion_iterator_next(ion_iterator);
       //check to see if if is the cterm of 1st peptide.
-      int ion_charge = get_ion_charge(ion);
-      int cleavage_idx = get_ion_cleavage_idx(ion);
-      ION_TYPE_T ion_type = get_ion_type(ion);
+      int ion_charge = ion->getCharge();
+      int cleavage_idx = ion->getCleavageIdx();
+      ION_TYPE_T ion_type = ion->getType();
 
       //if contains cterm of 1st peptide, modify by -OH 
       
@@ -266,24 +266,24 @@ double get_concat_score(char* peptideA, char* peptideB, int link_site, int charg
 
       //if it contains the cterm of the 1st peptide, modify by -OH
       if (cterm_1st) {
-	FLOAT_T old_mass = (get_ion_mass_z(ion) - MASS_H_MONO) * (FLOAT_T)ion_charge;
+	FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
 	FLOAT_T new_mass = old_mass + MASS_H2O_MONO - MASS_H_MONO;
 	FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
-	set_ion_mass_z(ion, new_mz);
+	ion->setMassZ(new_mz);
       }
       //if contains the nterm of 2nd peptide, modify by -H
       if (nterm_2nd) {
-	FLOAT_T old_mass = (get_ion_mass_z(ion) - MASS_H_MONO) * (FLOAT_T)ion_charge;
+	FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
 	FLOAT_T new_mass = old_mass + MASS_H_MONO;
 	FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
-	set_ion_mass_z(ion, new_mz);
+	ion->setMassZ(new_mz);
       }
       //if contains the link site, modify by link mass.
       if (has_link_site) {
-	FLOAT_T old_mass = (get_ion_mass_z(ion) - MASS_H_MONO) * (FLOAT_T)ion_charge;
+	FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
 	FLOAT_T new_mass = old_mass + LinkedPeptide::linker_mass;
 	FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
-	set_ion_mass_z(ion, new_mz);
+	ion->setMassZ(new_mz);
       }
     
 

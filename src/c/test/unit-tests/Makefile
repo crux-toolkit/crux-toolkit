@@ -15,7 +15,6 @@ TESTS = \
 	check-database.c \
 	check-generate-peptides-iterator.c \
 	check-index2.c \
-	check-ion.c \
 	check-ion_series.c \
 	check-linked-list.c \
 	check-mass.c \
