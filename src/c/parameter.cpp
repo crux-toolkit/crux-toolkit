@@ -2163,6 +2163,10 @@ ION_TYPE_T get_ion_type_parameter(const char* name){
  **************************************************
  */
 
+BOOLEAN_T reset_parameter(const char* name, const char* value){
+  return add_or_update_hash(parameters, name, value);
+}
+
 BOOLEAN_T set_boolean_parameter(
  const char* name,       ///< the name of the parameter looking for -in
  BOOLEAN_T   set_value,  ///< the value to be set -in

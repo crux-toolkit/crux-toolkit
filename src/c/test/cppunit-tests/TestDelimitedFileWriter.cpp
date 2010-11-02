@@ -89,7 +89,6 @@ void TestDelimitedFileWriter::setIntValues(){
 
   getline(file, line);// header
   getline(file, line);
-  cerr << "line is '" << line << "'" << endl;
   CPPUNIT_ASSERT(line == "	999	");
 
   file.close();

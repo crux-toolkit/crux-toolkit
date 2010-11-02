@@ -11,7 +11,8 @@ TESTS = \
 	TestXml.cpp \
         TestSpectrum.cpp \
         TestMatchFileReader.cpp \
-        TestDelimitedFileWriter.cpp 
+        TestDelimitedFileWriter.cpp \
+        TestMatchFileWriter.cpp
 
 unittests: $(TESTS) $(CRUX_LIB) $(MSTOOLKIT_LIB) $(UNIT_LIB)  
 	$(CC) -o unittests $(CFLAGS) $(TESTS) $(CRUX_LIB) $(MSTOOLKIT_LIB) $(UNIT_LIB) $(LDFLAGS)
