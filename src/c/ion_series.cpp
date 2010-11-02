@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include "objects.h"
-#include "ion.h"
+#include "Ion.h"
 #include "ion_series.h"
 #include "utils.h"
 #include "crux-utils.h"
@@ -40,12 +40,12 @@ struct ion_series {
   FLOAT_T peptide_mass; ///< The peptide neutral mass. For efficiency. 
   int charge; ///< /<The charge state of the peptide for this ion series
   ION_CONSTRAINT_T* constraint; ///< The constraints which these ions obey
-  ION_T* ions[MAX_IONS]; ///< The ions in this series
+  Ion* ions[MAX_IONS]; ///< The ions in this series
   int num_ions; ///< the number of ions in this series
   BOOLEAN_T is_predicted; ///< has this ion_series been predicted already?
   int num_specific_ions[MAX_NUM_ION_TYPE]; 
     ///< the number of ions of a specific ion_type
-  ION_T* specific_ions[MAX_NUM_ION_TYPE][MAX_IONS]; 
+  Ion* specific_ions[MAX_NUM_ION_TYPE][MAX_IONS]; 
     ///< specific ions in the series, reference to master array of ions
   LOSS_LIMIT_T* loss_limit; 
     ///< nh3, h2o loss limit for a given cleavage index, 
@@ -111,8 +111,8 @@ struct ion_filtered_iterator {
   ION_CONSTRAINT_T* constraint; ///< constraints which the ions obey
   BOOLEAN_T has_next; ///< the boolean which the iterator has a next ion
   int ion_idx; ///< the current ion that is being returned 
-  ION_T* ion; ///< the next ion to return when called upon
-  ION_T** ion_array; 
+  Ion* ion; ///< the next ion to return when called upon
+  Ion** ion_array; 
   ///< the specfic ion array we are iterating over, B ion, Y ion or all
   int array_size; ///< size of the ion_array
 };
@@ -218,7 +218,7 @@ void update_ion_series(
   
   // iterate over all ions, and free them
   while(ion_series->num_ions > 0){
-    free_ion(ion_series->ions[ion_series->num_ions-1]);
+    delete ion_series->ions[ion_series->num_ions-1];
     --ion_series->num_ions;
   }
   
@@ -268,7 +268,7 @@ void free_ion_series(
 
   // iterate over all ions, and free them
   while(ion_series->num_ions > 0){
-    free_ion(ion_series->ions[ion_series->num_ions-1]);
+    delete (ion_series->ions[ion_series->num_ions-1]);
     --ion_series->num_ions;
   }
 
@@ -296,7 +296,7 @@ void print_ion_series(
   // print each ion in the ion series
   int ion_idx;
   for(ion_idx=0; ion_idx < ion_series->num_ions; ++ion_idx){
-    print_ion(ion_series->ions[ion_idx], file);
+    ion_series->ions[ion_idx]->print(file);
   }
 }
 
@@ -314,7 +314,7 @@ void print_ion_series_single_gmtk(
     new_ion_filtered_iterator(ion_series, ion_constraint);
   
   // foreach ion in ion iterator, add matched observed peak intensity
-  ION_T* ion;
+  Ion* ion;
   int frame_idx = 0;
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
@@ -322,7 +322,7 @@ void print_ion_series_single_gmtk(
 #ifdef BINARY_GMTK
     print_ion_gmtk_single_binary(ion, file, sentence_idx, frame_idx);
 #else
-    print_ion_gmtk_single(ion, file);
+    ion->printGmtkSingle(file);
     sentence_idx++; // hack to avoid error for not using sentence_idx
 #endif
     frame_idx++;
@@ -362,14 +362,14 @@ void print_ion_series_paired_gmtk(
   // foreach ion in ion iterator, add matched observed peak intensity
   int frame_idx = 0;
   while(ion_filtered_iterator_has_next(ion_iterator)){
-    ION_T* first_ion = ion_filtered_iterator_next(ion_iterator);
-    int cleavage_idx = get_ion_cleavage_idx(first_ion);
-    ION_T* second_ion = get_ion_series_ion(
+    Ion* first_ion = ion_filtered_iterator_next(ion_iterator);
+    int cleavage_idx = first_ion->getCleavageIdx();
+    Ion* second_ion = get_ion_series_ion(
                             ion_series, second_ion_constraint, cleavage_idx);
     if ( (first_ion == NULL) || (second_ion == NULL) ){
       continue;
-    }
-    print_ion_gmtk_paired_binary(
+      }
+    Ion::printGmtkPairedBinary(
                                  first_ion, 
                                  second_ion, 
                                  file,
@@ -498,15 +498,15 @@ FLOAT_T* create_ion_mass_matrix(
  */
 void add_ion_to_ion_series(
   ION_SERIES_T* ion_series, ///< the ion series to predict ions for -out
-  ION_T* ion ///< ion to add -in
+  Ion* ion ///< ion to add -in
   )
 {
   // add ion to ion series
   ion_series->ions[ion_series->num_ions++] = ion;   
   
   // add a pointer of ion to the specific ion_type array
-  ion_series->specific_ions[get_ion_type(ion)]
-    [ion_series->num_specific_ions[get_ion_type(ion)]++] = ion;
+  ion_series->specific_ions[ion->getType()]
+    [ion_series->num_specific_ions[ion->getType()]++] = ion;
 }
 
 /**
@@ -523,7 +523,7 @@ BOOLEAN_T add_ions_by_charge(
 {
   ION_CONSTRAINT_T* constraint = ion_series->constraint;
   int charge_idx = 1;
-  ION_T* ion = NULL;
+  Ion* ion = NULL;
   int max_charge;
 
   // check if there's enough space to add the new ions
@@ -543,12 +543,12 @@ BOOLEAN_T add_ions_by_charge(
   // iterate over all different charge
   for(; charge_idx <= max_charge; ++charge_idx){
     // create ion
-    ion = new_ion_with_mass(ion_type, 
-                            cleavage_idx, 
-                            charge_idx, 
-                            ion_series->peptide, 
-                            constraint->mass_type, 
-                            mass); 
+    ion = new Ion(ion_type, 
+                  cleavage_idx, 
+                  charge_idx, 
+                  ion_series->peptide, 
+                  constraint->mass_type, 
+                  mass); 
     // add ion to ion series
     add_ion_to_ion_series(ion_series, ion);
   }
@@ -736,12 +736,12 @@ BOOLEAN_T generate_ions_no_modification(
  */
 BOOLEAN_T can_ion_lose_modification(
   ION_SERIES_T* ion_series, ///< ion_series to print -in/out  
-  ION_T* ion, ///< the ion to check if can lose nh3 -in
+  Ion* ion, ///< the ion to check if can lose nh3 -in
   ION_MODIFICATION_T mod_type, ///< generate ions of this modification_type -in/out
   int increment  ///< the add/loss of the modification
   )
 {
-  int cleavage_idx = get_ion_cleavage_idx(ion);
+  int cleavage_idx = ion->getCleavageIdx();
 
   // check for NH3 modification
   if(mod_type == NH3){
@@ -751,7 +751,7 @@ BOOLEAN_T can_ion_lose_modification(
     }
     
     // is forward ion_type(ABC)?
-    if(is_forward_ion_type(ion)){
+    if(ion->isForwardType()){
       // does this ion contain enough counts of the RKQN
       if(-increment >  (&ion_series->loss_limit[cleavage_idx-1])->nh3){
         return FALSE;
@@ -782,7 +782,7 @@ BOOLEAN_T can_ion_lose_modification(
     }
     
     // is forward ion_type(ABC)?
-    if(is_forward_ion_type(ion)){
+    if(ion->isForwardType()){
       // does this ion contain enough counts of the STED
       if(-increment >  (&ion_series->loss_limit[cleavage_idx-1])->h2o){
         return FALSE;
@@ -808,7 +808,7 @@ BOOLEAN_T can_ion_lose_modification(
   // check for ISOTOPE modification
   else if(mod_type == ISOTOPE){
     // adding is ok
-    if(increment >= 0 && get_ion_type(ion) != P_ION){
+    if(increment >= 0 && ion->getType() != P_ION){
       return TRUE;
     }
     // add more constraint if needed
@@ -816,9 +816,9 @@ BOOLEAN_T can_ion_lose_modification(
   // check for FLANK modification
   else if(mod_type == FLANK){
     // only add flanking ions to type B,Y ions
-    if(get_ion_type(ion) == B_ION || get_ion_type(ion) == Y_ION){
+    if(ion->getType() == B_ION || ion->getType() == Y_ION){
       // only add ions with no modifications
-      if(!ion_is_modified(ion)){
+      if(!ion->isModified()){
         return TRUE;
       }
     }
@@ -840,8 +840,8 @@ BOOLEAN_T generate_ions(
 {
   int ion_idx = 0;
   int total_ion = ion_series->num_ions;
-  ION_T* working_ion = NULL;
-  ION_T* new_ion = NULL;
+  Ion* working_ion = NULL;
+  Ion* new_ion = NULL;
   int* modifications = ion_series->constraint->modifications;
 
   // modification index
@@ -871,11 +871,11 @@ BOOLEAN_T generate_ions(
     // add/sub thorugh all mod_type modifications!!!
     for(type_idx = type_increment; abs(type_idx) <= abs(modifications[mod_type]); ){
       // copy the src ion, into new ion
-      new_ion = allocate_ion();
-      copy_ion(working_ion, new_ion, get_ion_peptide_sequence(working_ion));
+      new_ion = new Ion();
+      Ion::copy(working_ion, new_ion, working_ion->getPeptideSequence());
       
       // add the modification to the new ion
-      add_modification(new_ion, mod_type, type_idx, ion_series->constraint->mass_type);
+      new_ion->addModification(mod_type, type_idx, ion_series->constraint->mass_type);
       
       // add ion to ion_series
       add_ion_to_ion_series(ion_series, new_ion);
@@ -904,9 +904,9 @@ BOOLEAN_T generate_ions_flank(
 {
   int ion_idx = 0;
   int total_ion = ion_series->num_ions;
-  ION_T* working_ion = NULL;
-  ION_T* new_ion = NULL;
-  ION_T* new_ion2 = NULL;
+  Ion* working_ion = NULL;
+  Ion* new_ion = NULL;
+  Ion* new_ion2 = NULL;
   int* modifications = ion_series->constraint->modifications;
 
   // modification index
@@ -924,7 +924,7 @@ BOOLEAN_T generate_ions_flank(
     working_ion = ion_series->ions[ion_idx];
     
     // no more ions that are not modified, thus done
-    if(get_ion_single_modification_count(working_ion, NH3) != 0){
+    if(working_ion->getSingleModificationCount(NH3) != 0){
       break;
     }
 
@@ -936,14 +936,14 @@ BOOLEAN_T generate_ions_flank(
     // add/sub thorugh all mod_type modifications!!!
     for(type_idx = type_increment; type_idx <= modifications[FLANK]; type_idx += type_increment){
       // copy the src ion, into new ion
-      new_ion = allocate_ion();
-      new_ion2 = allocate_ion();
-      copy_ion(working_ion, new_ion, get_ion_peptide_sequence(working_ion));
-      copy_ion(working_ion, new_ion2, get_ion_peptide_sequence(working_ion));
+      new_ion = new Ion();
+      new_ion2 = new Ion();
+      Ion::copy(working_ion, new_ion, working_ion->getPeptideSequence());
+      Ion::copy(working_ion, new_ion2, working_ion->getPeptideSequence());
       
       // add the modification to the new ion
-      add_modification(new_ion, FLANK, type_idx, ion_series->constraint->mass_type);
-      add_modification(new_ion2, FLANK, -type_idx, ion_series->constraint->mass_type);
+      new_ion->addModification(FLANK, type_idx, ion_series->constraint->mass_type);
+      new_ion2->addModification(FLANK, -type_idx, ion_series->constraint->mass_type);
 
       // add ion to ion_series
       add_ion_to_ion_series(ion_series, new_ion);
@@ -1041,8 +1041,8 @@ void copy_ion_series(
   ION_SERIES_T* dest///< ion to copy to -out
   )
 {
-  ION_T* src_ion = NULL;
-  ION_T* dest_ion = NULL;
+  Ion* src_ion = NULL;
+  Ion* dest_ion = NULL;
   
   dest->peptide = my_copy_string(src->peptide);
   dest->charge = src->charge;
@@ -1059,8 +1059,8 @@ void copy_ion_series(
   while(ion_iterator_has_next(iterator)){
     src_ion = ion_iterator_next(iterator);
     // add ion
-    dest_ion = allocate_ion(); 
-    copy_ion(src_ion, dest_ion, dest->peptide);
+    dest_ion = new Ion();
+    Ion::copy(src_ion, dest_ion, dest->peptide);
     add_ion_to_ion_series(dest, dest_ion);
   }
   // free up iterator
@@ -1077,7 +1077,7 @@ void copy_ion_series(
  * \returns the ion that meets the criteria or NULL
  * TODO possibly reimplement if linear scan is too slow
  */
-ION_T* get_ion_series_ion(
+Ion* get_ion_series_ion(
     ION_SERIES_T* ion_series,
     ION_CONSTRAINT_T* ion_constraint,
     int cleavage_idx
@@ -1085,11 +1085,11 @@ ION_T* get_ion_series_ion(
 
   ION_FILTERED_ITERATOR_T* ion_iterator = 
     new_ion_filtered_iterator(ion_series, ion_constraint);
-  ION_T* ion = NULL;
+  Ion* ion = NULL;
 
   while(ion_filtered_iterator_has_next(ion_iterator) == TRUE){
     ion = ion_filtered_iterator_next(ion_iterator);
-    if(get_ion_cleavage_idx(ion) == cleavage_idx){
+    if(ion->getCleavageIdx() == cleavage_idx){
       return ion;
     }
   }
@@ -1477,7 +1477,7 @@ void copy_ion_constraint(
  */
 BOOLEAN_T ion_constraint_is_satisfied(
    ION_CONSTRAINT_T* ion_constraint,///< the ion constraints to enforce -in
-   ION_T* ion ///< query ion -in
+   Ion* ion ///< query ion -in
    )
 {
   int* counts = NULL;
@@ -1487,7 +1487,7 @@ BOOLEAN_T ion_constraint_is_satisfied(
   // print_ion(ion, stderr);
   // fprintf(stderr, "%i->%i\n", ion_constraint->min_charge, ion_constraint->max_charge);
   // check ion type
-  ION_TYPE_T ion_type = get_ion_type(ion);
+  ION_TYPE_T ion_type = ion->getType();
   if(
      !(ion_type == ion_constraint->ion_type)
       
@@ -1514,16 +1514,16 @@ BOOLEAN_T ion_constraint_is_satisfied(
   }
   
   // check charge
-  if(get_ion_charge(ion) > ion_constraint->max_charge){
+  if(ion->getCharge() > ion_constraint->max_charge){
     return_val = FALSE;
   }
   
-  if(get_ion_charge(ion) < ion_constraint->min_charge){
+  if(ion->getCharge() < ion_constraint->min_charge){
     return_val = FALSE;
   }
 
   // check modifications
-  counts = get_ion_modification_counts(ion);
+  counts = ion->getModificationCounts();
   int mod_idx;
   for(mod_idx=0; mod_idx < MAX_MODIFICATIONS; ++mod_idx){
     if(ion_constraint->modifications[mod_idx] >= 0){
@@ -1664,7 +1664,7 @@ BOOLEAN_T ion_iterator_has_next(
 /**
  * The basic iterator function next.
  */
-ION_T* ion_iterator_next(
+Ion* ion_iterator_next(
   ION_ITERATOR_T* ion_iterator///< return the next ion -in
   )
 {
@@ -1687,7 +1687,7 @@ BOOLEAN_T setup_ion_filtered_iterator(
   )
 {
   BOOLEAN_T found = FALSE;
-  ION_T* ion = NULL;
+  Ion* ion = NULL;
 
   // iterate over ions until discovers the first ion that meets the ion constraint
   while(ion_iterator->ion_idx < ion_iterator->array_size){
@@ -1770,11 +1770,11 @@ BOOLEAN_T ion_filtered_iterator_has_next(
 /**
  * The basic iterator function next.
  */
-ION_T* ion_filtered_iterator_next(
+Ion* ion_filtered_iterator_next(
   ION_FILTERED_ITERATOR_T* ion_iterator///< return the next ion -in
   )
 {
-  ION_T* next_ion = NULL;
+  Ion* next_ion = NULL;
   
   // check if a ion is present to return
   if(!ion_iterator->has_next){

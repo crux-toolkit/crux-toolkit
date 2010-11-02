@@ -17,7 +17,7 @@
 #include "objects.h"
 #include "Spectrum.h"
 #include "peptide.h"
-#include "ion.h"
+#include "Ion.h"
 
 /**
  * \returns An (empty) scorer object.

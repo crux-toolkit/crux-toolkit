@@ -62,8 +62,6 @@ LIBFILES= \
   index.h \
   Ion.cpp \
   Ion.h \
-  ion.cpp \
-  ion.h \
   ion_series.cpp \
   ion_series.h \
   linked_list.cpp \

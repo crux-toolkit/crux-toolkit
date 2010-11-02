@@ -275,7 +275,7 @@ class Ion {
    * 6. second rank
    *
    */
-  void printGmtkPairedBinary(
+  static void printGmtkPairedBinary(
     Ion* first_ion, ///< print this ion -in
     Ion* second_ion, ///< print this ion -in
     FILE* file, ///< to this file -in
@@ -304,7 +304,7 @@ class Ion {
    * must pass in a seperate pointer peptide sequence from its own ion_series object
    * must pass in a memory allocated ION_T* dest
    */
-  void copy(
+  static void copy(
     Ion* src,///< ion to copy from -in
     Ion* dest,///< ion to copy to -out
     char* peptide_sequence ///< the peptide sequence that the dest should refer to -in

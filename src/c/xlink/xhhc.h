@@ -23,7 +23,7 @@
 #include "parameter.h"
 #include "objects.h"
 #include "crux-utils.h"
-#include "ion.h"
+#include "Ion.h"
 
 // get rid of these
 //#define PARAM_ESTIMATION_SAMPLE_COUNT 500

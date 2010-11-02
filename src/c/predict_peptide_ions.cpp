@@ -17,7 +17,7 @@
 #include "crux-utils.h"
 #include "objects.h"
 #include "parameter.h"
-#include "ion.h"
+#include "Ion.h"
 #include "ion_series.h"
 
 using namespace std;

@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "check-ion.h"
-#include "ion.h"
+#include "Ion.h"
 #include "ion_series.h"
 #include "crux-utils.h"
 #include "objects.h"
@@ -123,7 +123,7 @@ START_TEST (test_predict){
 
   // look at all ions and confirm that the masses are correct
   // reuse these
-  ION_T* ion = NULL;
+  Ion* ion = NULL;
   int i=0;
 
   // check b-ions
@@ -132,7 +132,7 @@ START_TEST (test_predict){
   while( ion_filtered_iterator_has_next(iter) ){
     running_total += get_mass_amino_acid(seq[i], MONO);
     ion = ion_filtered_iterator_next(iter);
-    float mz = get_ion_mass_z(ion);
+    float mz = ion->getMassZ();
     //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
     fail_unless( is_same(mz, running_total),
                  "y-ion %i of seq has mz %f, should have mz %f",
@@ -147,7 +147,7 @@ START_TEST (test_predict){
   while( ion_filtered_iterator_has_next(iter) ){
     running_total += get_mass_amino_acid(seq[i], MONO);
     ion = ion_filtered_iterator_next(iter);
-    float mz = get_ion_mass_z(ion);
+    float mz = ion->getMassZ();
     //printf("\nion mz: %f, type: %i, calc: %f",mz,get_ion_type(ion),running_total);
     fail_unless( is_same(mz, running_total),
                "y-ion %i of seq has mz %f, should have mz %f",
@@ -177,8 +177,8 @@ START_TEST (test_predict2){
   int i = 0;
   while( ion_filtered_iterator_has_next(iter) ){
     running_total += get_mass_amino_acid(seq2[i], MONO);
-    ION_T* ion = ion_filtered_iterator_next(iter);
-    float mz = get_ion_mass_z(ion);
+    Ion* ion = ion_filtered_iterator_next(iter);
+    float mz = ion->getMassZ();
     //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
     fail_unless( is_same(mz, running_total),
                  "b-ion %i of seq 2 has mz %f, should have mz %f", 
@@ -192,8 +192,8 @@ START_TEST (test_predict2){
   running_total = MASS_H_MONO + MASS_H2O_MONO;
   while( ion_filtered_iterator_has_next(iter) ){
     running_total += get_mass_amino_acid(seq2[i], MONO);
-    ION_T* ion = ion_filtered_iterator_next(iter);
-    float mz = get_ion_mass_z(ion);
+    Ion* ion = ion_filtered_iterator_next(iter);
+    float mz = ion->getMassZ();
 //print("\nion mz: %f, type: %i, calc: %f",mz,get_ion_type(ion),running_total);
     fail_unless( is_same(mz, running_total),
                  "y-ion %i of seq2 has mz %f, should have mz %f",
@@ -223,7 +223,7 @@ START_TEST (test_predict_mod){
 
   // look at all ions and confirm that the masses are correct
   // reuse these
-  ION_T* ion = NULL;
+  Ion* ion = NULL;
   int i=0;
 
   // check b-ions
@@ -234,7 +234,7 @@ START_TEST (test_predict_mod){
     running_total += get_mass_amino_acid(seq[i], MONO);
     if( i == 1 ){ running_total += aa_mod_get_mass_change(amod1); }
     ion = ion_filtered_iterator_next(iter);
-    float mz = get_ion_mass_z(ion);
+    float mz = ion->getMassZ();
     //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
     fail_unless( is_same(mz, running_total),
                  "b-ion %i of mod seq has mz %f, should have mz %f",
@@ -249,7 +249,7 @@ START_TEST (test_predict_mod){
   while( ion_filtered_iterator_has_next(iter) ){
     running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
     ion = ion_filtered_iterator_next(iter);
-    float mz = get_ion_mass_z(ion);
+    float mz = ion->getMassZ();
 //print("\nion mz: %f, type: %i, calc: %f",mz,get_ion_type(ion),running_total);
     fail_unless( is_same(mz, running_total),
                "y-ion %i of mod_seq has mz %f, should have mz %f",
@@ -283,7 +283,7 @@ START_TEST (test_predict_mod2){
   ION_CONSTRAINT_T* bcnst = new_ion_constraint(MONO, 1, B_ION, FALSE); 
   ION_CONSTRAINT_T* ycnst = new_ion_constraint(MONO, 1, Y_ION, FALSE); 
   // reuse these
-  ION_T* ion = NULL;
+  Ion* ion = NULL;
   int i=0;
 
   // check b-ions
@@ -292,7 +292,7 @@ START_TEST (test_predict_mod2){
   while( ion_filtered_iterator_has_next(iter) ){
     running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
     ion = ion_filtered_iterator_next(iter);
-    float mz = get_ion_mass_z(ion);
+    float mz = ion->getMassZ();
     //printf("\nion mz: %f, type: %i", get_ion_mass_z(ion), get_ion_type(ion));
     fail_unless( is_same(mz, running_total),
                  "b-ion %i of mod seq has mz %f, should have mz %f",
@@ -307,7 +307,7 @@ START_TEST (test_predict_mod2){
   while( ion_filtered_iterator_has_next(iter) ){
     running_total += get_mass_mod_amino_acid(mod_seq[i], MONO);
     ion = ion_filtered_iterator_next(iter);
-    float mz = get_ion_mass_z(ion);
+    float mz = ion->getMassZ();
 //print("\nion mz: %f, type: %i, calc: %f",mz,get_ion_type(ion),running_total);
     fail_unless( is_same(mz, running_total),
                "y-ion %i of mod_seq has mz %f, should have mz %f",
@@ -362,8 +362,8 @@ START_TEST(test_masses_mod){
                num_ions, num_ions_copy);
 
   // reuse these
-  ION_T* ion = NULL;
-  ION_T* ion_copy = NULL;
+  Ion* ion = NULL;
+  Ion* ion_copy = NULL;
   int i=0;
 
   ION_FILTERED_ITERATOR_T* iter = new_ion_filtered_iterator(is3, bcnst);
@@ -377,17 +377,17 @@ START_TEST(test_masses_mod){
     ion = ion_filtered_iterator_next(iter);
     ion_copy = ion_filtered_iterator_next(iter_copy);
     // get cleavage index and ion type
-    int clev = get_ion_cleavage_idx(ion);
-    int clev_copy = get_ion_cleavage_idx(ion_copy);
+    int clev = ion->getCleavageIdx();
+    int clev_copy = ion->getCleavageIdx();
     fail_unless( clev == clev_copy, 
                  "Ion %i has cleavage index %i and %i.",
                  clev, clev_copy);
-    fail_unless( is_same(predicted_mass, get_ion_mass_z(ion)),
+    fail_unless( is_same(predicted_mass, ion->getMassZ()),
                  "Predicted mass is %f and ion mass is %f.",
-                 predicted_mass, get_ion_mass_z(ion));
-    fail_unless( is_same(get_ion_mass_z(ion), get_ion_mass_z(ion_copy)),
+                 predicted_mass, ion->getMassZ());
+    fail_unless( is_same(ion->getMassZ(), ion_copy->getMassZ()),
                  "Masses for ion %i, index %i, %f and %f should be %f.", i,
-                 get_ion_mass_z(ion), get_ion_mass_z(ion_copy), predicted_mass);
+                 ion->getMassZ(), ion_copy->getMassZ(), predicted_mass);
     i++;
   }// next ion
 
@@ -533,7 +533,7 @@ START_TEST (test_create){
   ION_FILTERED_ITERATOR_T* ion_filtered_iterator = new_ion_filtered_iterator(ion_series, ion_constraint4);
 
   int total_ions = 0;
-  ION_T* temp_ion;
+  Ion* temp_ion;
 
   //iterate over all ions
   while(ion_iterator_has_next(ion_iterator)){

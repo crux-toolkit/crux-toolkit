@@ -650,7 +650,7 @@ int calculate_ion_type_sp(
   )
 {
   int cleavage_idx = 0;
-  ION_T* ion = NULL;
+  Ion* ion = NULL;
   FLOAT_T one_intensity = 0;
   int ion_match = 0;
   int ion_charge = 0;
@@ -677,7 +677,7 @@ int calculate_ion_type_sp(
   while(ion_filtered_iterator_has_next(ion_iterator)){
     ion = ion_filtered_iterator_next(ion_iterator);
     intensity_array_idx 
-      = INTEGERIZE(get_ion_mass_z(ion), bin_width, bin_offset);
+      = INTEGERIZE(ion->getMassZ(), bin_width, bin_offset);
     // get the intensity matching to ion's m/z
     if(intensity_array_idx < get_scorer_max_bin(scorer)){
       one_intensity = scorer->intensity_array[intensity_array_idx];
@@ -697,10 +697,10 @@ int calculate_ion_type_sp(
       *intensity_sum = *intensity_sum + one_intensity;
       
       // get ion charge
-      ion_charge = get_ion_charge(ion) - 1;
+      ion_charge = ion->getCharge() - 1;
       
       // check if repeated ion b1, b2, ...
-      if((cleavage_idx = get_ion_cleavage_idx(ion)) == before_cleavage[ion_charge] + 1){
+      if((cleavage_idx = ion->getCleavageIdx()) == before_cleavage[ion_charge] + 1){
         ++*repeat_count;
       }
       
@@ -1024,7 +1024,7 @@ BOOLEAN_T create_intensity_array_theoretical(
   FLOAT_T*      theoretical ///< the empty theoretical spectrum -out
   )
 {
-  ION_T* ion = NULL;
+  Ion* ion = NULL;
   int intensity_array_idx = 0;
   int ion_charge = 0;
   ION_TYPE_T ion_type;
@@ -1037,9 +1037,9 @@ BOOLEAN_T create_intensity_array_theoretical(
   while(ion_iterator_has_next(ion_iterator)){
     ion = ion_iterator_next(ion_iterator);
     intensity_array_idx 
-      = INTEGERIZE(get_ion_mass_z(ion), bin_width, bin_offset);
-    ion_type = get_ion_type(ion);
-    ion_charge = get_ion_charge(ion);
+      = INTEGERIZE(ion->getMassZ(), bin_width, bin_offset);
+    ion_type = ion->getType();
+    ion_charge = ion->getCharge();
 
     // skip ions that are located beyond max mz limit
     if(intensity_array_idx >= get_scorer_max_bin(scorer)){
@@ -1073,7 +1073,7 @@ BOOLEAN_T create_intensity_array_theoretical(
        ion_type == Y_ION){
 
       // neutral loss peak?
-      if(ion_is_modified(ion)){
+      if(ion->isModified()){
         // Add peaks of intensity of 10.0 for neutral loss of H2O, ammonia.
         // In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each neutral loss.
         // add_intensity(theoretical, intensity_array_idx, 10);
@@ -1099,13 +1099,13 @@ BOOLEAN_T create_intensity_array_theoretical(
 
         if(ion_type == B_ION){
           int h2o_array_idx = 
-            INTEGERIZE((get_ion_mass_z(ion) - (MASS_H2O_MONO/ion_charge)),
+            INTEGERIZE((ion->getMassZ() - (MASS_H2O_MONO/ion_charge)),
                        bin_width, bin_offset);
           add_intensity(theoretical, h2o_array_idx, LOSS_HEIGHT);
         }
 
         int nh3_array_idx 
-          = INTEGERIZE((get_ion_mass_z(ion) -  (MASS_NH3_MONO/ion_charge)),
+          = INTEGERIZE((ion->getMassZ() -  (MASS_NH3_MONO/ion_charge)),
                        bin_width, bin_offset);
         add_intensity(theoretical, nh3_array_idx, LOSS_HEIGHT);
       }

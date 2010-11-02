@@ -20,7 +20,7 @@
 #include "parse_arguments.h"
 #include "Spectrum.h"
 #include "SpectrumCollection.h"
-#include "ion.h"
+#include "Ion.h"
 #include "ion_series.h"
 #include "crux-utils.h"
 #include "objects.h"
