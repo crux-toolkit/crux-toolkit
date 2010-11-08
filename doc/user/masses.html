@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Notes on how Crux handles masses</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>Notes on how Crux handles masses</h1>
+
+<p>
+In the context of writing Crux and responding to user queries, it
+turns out that the various types of masses and m/z ratios used by Crux
+can be confusing.  The purpose of this document is to point out some
+of the subtleties, most of which result from basic biochemistry.</p>
+
+<ul>
+
+<li>
+Each amino acid can be characterized either by its monoisotopic mass,
+which is the mass of the most common isotopic form of that amino acid,
+or the average mass, which is a weighted average of the masses of all
+the isotopic forms.  By default, Crux uses average mass to calculate
+peptide masses, though this can be controlled by the
+<code>--isotopic-mass</code> option to <code>crux create-index</code>.
+For fragments, Crux always uses the monoisotopic mass.</li>
+
+<li>
+The neutral mass of a peptide is not the sum of the masses of its
+amino acids.  The C-terminus (i.e., the suffix) of the peptide has an
+additional water group, whose mass is either 18.010564684 Da
+(monoisotopic) or 18.0153 Da (average).</li>
+
+<li>
+By default, Crux adds a static modification of 57.021464 Da to all
+cysteines.  This is because in most protein preparation protocols
+the peptides are alkylated with iodoacetamise, resulting in 
+carbidomethylation of cysteine. The alkylation step prevents the 
+reformation of disulfide bonds.  Other alykylation reagents may be
+used, in which case the appropriate mass shift can be specified with the
+<code>C=[mass]</code> option.  Set <code>C=0</code> for no
+modification.
+</li>
+
+<li>
+A charged peptide has an additional approximately 1 Da mass for each
+charge, corresponding to the mass of a hydrogen atom.  The exact mass
+to be added depend on whether we are using the monoisotopic mass
+(1.0078246) or average mass (1.00794).</li>
+
+<li>
+<i>What is the deal with MASS_H, MASS_H_AVERAGE, MASS_H_MONO and
+  MASS_PROTON?  Do we really need all of these constants?</i></li>
+
+</ul>
+
+
+</blockquote>
+</body>
+</html>
+
+
