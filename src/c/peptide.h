@@ -119,13 +119,6 @@ void set_peptide_peptide_mass(
   );
 
 /** 
- * \returns the neutral mass of the peptide
- */
-FLOAT_T get_peptide_neutral_mass(
-  PEPTIDE_T* peptide ///< the query peptide -in
-  );
-
-/** 
  * \returns the mass of the peptide if it had charge "charge"
  */
 FLOAT_T get_peptide_charged_mass(

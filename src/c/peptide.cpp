@@ -314,7 +314,6 @@ void set_peptide_peptide_mass(
   peptide->peptide_mass = peptide_mass;
 }
 
-// TODO: this a little absurd.  why not just one function?
 /**
  * \returns the peptide mass
  */
@@ -326,16 +325,6 @@ void set_peptide_peptide_mass(
   return peptide->peptide_mass;
 }
 
-
-/** 
- * \returns The neutral (uncharged) mass of the peptide.
- */
-FLOAT_T get_peptide_neutral_mass(
-  PEPTIDE_T* peptide ///< the query peptide -in
-  )
-{
-  return get_peptide_peptide_mass(peptide);
-}
 
 /** 
  * \returns The mass of the peptide if it had charge "charge"
@@ -1700,8 +1689,9 @@ BOOLEAN_T serialize_peptide(
   
   // If a text file was given, print the peptide in ASCII.
   if (text_file != NULL) {
-    fprintf(text_file, "%s\n", 
-            get_peptide_modified_sequence_with_symbols(peptide));
+    fprintf(text_file, "%s %.5f\n", 
+            get_peptide_modified_sequence_with_symbols(peptide),
+	    get_peptide_peptide_mass(peptide));
   }
 
   return TRUE;
