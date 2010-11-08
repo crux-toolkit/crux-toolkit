@@ -130,7 +130,7 @@ START_TEST(test_mod_on_unmodified){
 END_TEST
 
 START_TEST(test_with_mod){
-  double initial_mass = get_peptide_neutral_mass(peptide3);
+  double initial_mass = get_peptide_peptide_mass(peptide3);
   // set up the mod
   AA_MOD_T* amod = new_aa_mod(0);
   aa_mod_set_mass_change(amod, 100);
@@ -166,7 +166,7 @@ START_TEST(test_with_mod){
    "Peptide3 should have returned modified seq %s, but instead returned %s",
                mod_seq_str, returned_str);
   // check the mass
-  fail_unless( (initial_mass + 100.0) == get_peptide_neutral_mass(peptide3),
+  fail_unless( (initial_mass + 100.0) == get_peptide_peptide_mass(peptide3),
                "Modified peptide should have initial mass + 100.");
 }
 END_TEST
