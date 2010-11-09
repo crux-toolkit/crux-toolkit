@@ -27,9 +27,21 @@
 #define MASS_H_MONO 1.0078246 ///< Mass of hydrogen (monoisotopic)
 #define MASS_H_AVERAGE 1.00794 ///< Mass of hydrogen (average)
 
+/* As for the constants, these are for supporting mono-isotopic and
+ * average masses.  When I was collaborating with Pragya with
+ * cross-linking code, she wanted more accurate calculations on the
+ * mass of the peptides and the mass of the spectrum neutral mass.
+ * MASS_PROTON was added in order to improve the accuracy of the
+ * calculated spectrum mass and the precision of the mono-isotopic
+ * masses of the amino acids were extended.  When we are going to
+ * support accurate masses for the precursor ions, I think that
+ * MASS_PROTON will be the correct one to use for the spectrum
+ * mass. --Sean McIlwain, 8 November 2010 */
+
 // FIXME, change in spectrum, peptide to be able to pick mono, average
 #define MASS_H       1.00782503207 ///< mass of hydrogen
 #define MASS_PROTON  1.00727646677 ///< mass of proton
+
 /**
  * Mass of oxygen
  */
