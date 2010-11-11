@@ -8,13 +8,39 @@
 
 <h1 align=center>Crux Frequently Asked Questions</h1>
 
-
 <ol>
+
+<li>
+<b>How does Crux differ from SEQUEST?</b></li>
+
+<p>
+SEQUEST has split into at least four different development threads:
+(1) the version developed in the Yates lab, initially at the
+University of Washington and later at Scripps, (2) the version mainted
+by Thermo Scientific, (3) the version mainted by Sage-N, and (4) the
+version maintained in the MacCoss lab at the University of Washington.
+Crux is based on the Yates lab development thread, SEQUEST version 28,
+whose last documented modification is dated 8/16/99.</p>
+
+<p>
+The Crux command <code>sequest-search</code> is an imperfect
+reimplementation of SEQUEST 28.  The imperfection arose because, to
+avoid copyright infringement, Crux was reverse engineered from the
+SEQUEST binary; i.e., the Crux developers did not have access to the
+SEQUEST source code.  The reverse engineering continued until the
+developers deemed the remaining differences to be of negligible
+importance.  A quantitative comparison of the scores computed by Crux
+and SEQUEST can be seen in
+the <a href="http://noble.gs.washington.edu/papers/park2008rapid.html">original
+Crux paper</a>.  The differences between Crux and SEQUEST v28 are
+comparable in magnitude to the differences between different versions
+of SEQUEST.</p>
 
 <li>
 <b>How does Crux compute the masses of peptides and peptide
   fragments?</b></li>
 
+<p>
 <ul>
 
 <li>
@@ -28,9 +54,11 @@ For fragments, Crux always uses the monoisotopic mass.</li>
 
 <li>
 The neutral mass of a peptide is not the sum of the masses of its
-amino acids.  The C-terminus (i.e., the suffix) of the peptide has an
-additional water group, whose mass is either 18.010564684 Da
-(monoisotopic) or 18.0153 Da (average).</li>
+amino acids.  The C-terminus (i.e., the suffix, or y-ion) of the
+peptide has an additional water group, whose mass is either
+18.010564684 Da (monoisotopic) or 18.0153 Da (average).  Note that,
+for cleavage ions, this additional mass should be added to the mass of
+a y-ion, but not to a b-ion.</li>
 
 <li>
 By default, Crux adds a static modification of 57.021464 Da to all
@@ -50,6 +78,74 @@ to be added depend on whether we are using the monoisotopic mass
 (1.0078246) or average mass (1.00794).</li>
 
 </ul>
+</p>
+
+<li>
+<b>What operating systems does Crux work with?</b></li>
+
+<p>
+Crux is written in C++, so in principle it should work on virtually
+any modern operating system.  We provide pre-compiled binaries for
+Linux, MacOS and Windows.  The latter requires that you have Cygwin
+installed.</p>
+
+<li>
+<b>How does Crux select candidate peptides from the database?</b></li>
+
+<li>
+<b>How is the theoretical spectrum for a peptide generated?</b></li>
+
+<li>
+<b>In the calculation of XCorr, what preprocessing steps does the
+observed spectrum undergo prior to comparison with the theoretical
+spectrum?</b></li>
+
+<li>
+<b>What enhancements to Crux are planned?</b></li>
+
+<p>
+Crux is under constant development, so the following list of
+enhancements may be out of date.  As of November, 2010, the list
+includes the following:</p>
+
+<p>
+<ul>
+
+<li>
+Support for more input file types, including FIXME</li>
+
+<li>
+The ability to produce XML outputs.</li>
+
+<li>
+The ability to exploit accurate precursor masses.</li>
+
+<li>
+The ability to compute peptide-level q-values
+via <code>compute-q-values</code>, <code>percolator</code>
+or <code>q-ranker</code>.</li>
+
+</ul>
+</p>
+
+<li>
+<b>How can I contribute to Crux?</b></li>
+
+<p>
+Please email crux-support@uw.edu to obtain read-only access to our
+Subversion repository, along with access to our development team web
+pages.  Patches implementing new features can then be emailed to the
+development team for review and inclusion in subsequent releases of
+Crux.</p>
+
+<li>
+<b>Where does the name "Crux" come from?</b></li>
+
+<p>
+Thin air.  The name is not an acronym or a reference to anything in
+particular.</p>
+
+</ol>
 
 </blockquote>
 </body>
