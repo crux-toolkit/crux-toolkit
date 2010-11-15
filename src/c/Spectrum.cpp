@@ -104,10 +104,11 @@ PeakIterator Spectrum::end() {
  */
 void Spectrum::print(FILE* file) ///< output file to print at -out
 {
-  
-  fprintf(file, "S\t%06d\t%06d\t%.2f\n", 
+  int mass_precision = get_int_parameter("mass-precision");
+  fprintf(file, "S\t%06d\t%06d\t%.*f\n", 
          first_scan_,
          last_scan_,
+         mass_precision,
          precursor_mz_);
 
   // print 'I' line
@@ -117,7 +118,7 @@ void Spectrum::print(FILE* file) ///< output file to print at -out
   
   // print 'Z', 'D' line
   for(size_t z_idx = 0; z_idx < possible_z_.size(); z_idx++){
-    fprintf(file, "Z\t%d\t%.2f\n", possible_z_[z_idx],
+    fprintf(file, "Z\t%d\t%.*f\n", possible_z_[z_idx], mass_precision,
             this->getSinglyChargedMass(possible_z_[z_idx]));
     // are there any 'D' lines to print?
     if(z_idx < d_lines_v_.size() ){
@@ -127,8 +128,9 @@ void Spectrum::print(FILE* file) ///< output file to print at -out
 
   // print peaks
   for(int peak_idx = 0; peak_idx < (int)peaks_.size(); ++peak_idx){
-    fprintf(file, "%.2f %.13f\n", 
+    fprintf(file, "%.2f %.*f\n", 
             get_peak_location(peaks_[peak_idx]),
+            mass_precision,
             get_peak_intensity(peaks_[peak_idx]));
   }
 }
@@ -144,8 +146,11 @@ void Spectrum::printProcessedPeaks(
   int max_mz_bin,       ///< num_bins in intensities
   FILE* file){          ///< print to this file
 
+  int mass_precision = get_int_parameter("mass-precision");
+
   // print S line
-  fprintf(file, "S\t%06d\t%06d\t%.2f\n", 
+  fprintf(file, "S\t%06d\t%06d\t%.*f\n", 
+          mass_precision,
           first_scan_,
           last_scan_,
           precursor_mz_);
@@ -157,13 +162,13 @@ void Spectrum::printProcessedPeaks(
 
   // print 'Z', 'D' line
   if( charge != 0 ){  // print only one charge state
-    fprintf(file, "Z\t%d\t%.2f\n", charge,
+    fprintf(file, "Z\t%d\t%.*f\n", charge, mass_precision,
             this->getSinglyChargedMass(charge));
     // TODO find associated Z line and print
   } else {  // print all charge states
 
     for(size_t z_idx = 0; z_idx < possible_z_.size(); z_idx++){
-      fprintf(file, "Z\t%d\t%.2f\n", possible_z_[z_idx],
+      fprintf(file, "Z\t%d\t%.*f\n", possible_z_[z_idx], mass_precision,
               this->getSinglyChargedMass(possible_z_[z_idx]));
       // are there any 'D' lines to print?
       if(z_idx < d_lines_v_.size()){
@@ -175,7 +180,8 @@ void Spectrum::printProcessedPeaks(
   // print peaks
   for(int bin_idx = 0; bin_idx < max_mz_bin; bin_idx++){
     if( intensities[bin_idx] != 0 ){
-      fprintf(file, "%d %.4f\n", bin_idx, intensities[bin_idx]); 
+      fprintf(file, "%d %.*f\n", bin_idx, mass_precision, 
+              intensities[bin_idx]); 
     }
   }
   return;
@@ -206,11 +212,12 @@ void Spectrum::printXml(
               << start_scan << period << std::setw(5) << std::setfill('0')
               << last_scan << period <<charge ;
   fprintf(file, "    <spectrum_query spectrum=\"%s\" start_scan=\"%i\""
-          " end_scan=\"%i\" precursor_neutral_mass=\"%f\""
+          " end_scan=\"%i\" precursor_neutral_mass=\"%.*f\""
           " assumed_charge=\"%i\" index=\"%i\">\n",
           spectrum_id.str().c_str(),
           start_scan,
           last_scan,
+          get_int_parameter("mass-precision"),
           this->getNeutralMass(charge),
           charge,
           index
@@ -237,20 +244,17 @@ void Spectrum::printSqt(
   int charge            ///< charge used for the search -in
   ){
 
-  int precision = get_int_parameter("precision");
-  char format[64];
-  sprintf(format, 
-          "S\t%%d\t%%d\t%%d\t%%.%if\t%%s\t%%.%if\t%%.%if\t%%.%if\t%%d\n", 
-          precision, precision, precision, precision);
-  //<first scan><last scan><charge><precursor m/z><# sequence match>
-  fprintf(file, format,
+  fprintf(file,
+          "S\t%d\t%d\t%d\t%.1f\t%s\t%.*f\t%.2f\t%.*f\t%d\n", 
           first_scan_, 
           last_scan_,
           charge, 
           0.0, // FIXME dummy <process time>
           "server", // FIXME dummy <server>
+          get_int_parameter("mass-precision"),
           this->getNeutralMass(charge), //this is used in search
           0.0, // FIXME dummy <total intensity>
+          get_int_parameter("precision"),
           0.0, // FIXME dummy <lowest sp>
           num_matches);
 }

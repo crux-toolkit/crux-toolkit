@@ -537,9 +537,10 @@ void print_match_sqt(
   int precision = get_int_parameter("precision");
 
   // print match info
-  fprintf(file, "M\t%i\t%i\t%.4f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
+  fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
           get_match_rank(match, XCORR),
           get_match_rank(match, SP),
+          get_int_parameter("mass-precision"),
           get_peptide_peptide_mass(peptide),
           delta_cn,
           precision,
@@ -605,16 +606,19 @@ static void print_one_match_field(
     fprintf(output_file, "%d", charge);
     break;
   case SPECTRUM_PRECURSOR_MZ_COL:
-    fprintf(output_file, "%.4f", spectrum_precursor_mz);
+    fprintf(output_file, "%.*f", get_int_parameter("mass-precision"),
+            spectrum_precursor_mz);
     break;
   case SPECTRUM_NEUTRAL_MASS_COL:
-    fprintf(output_file, "%.4f", spectrum_mass);
+    fprintf(output_file, "%.*f", get_int_parameter("mass-precision"),
+            spectrum_mass);
     break;
   case PEPTIDE_MASS_COL:
     {
       PEPTIDE_T* peptide = get_match_peptide(match);
       double peptide_mass = get_peptide_peptide_mass(peptide);
-      fprintf(output_file, "%.6f", peptide_mass);
+      fprintf(output_file, "%.*f", get_int_parameter("mass-precision"),
+              peptide_mass);
     }
     break;
   case DELTA_CN_COL:
@@ -889,12 +893,14 @@ void print_match_xml(
   // Print out search hit only with the first protein
   char* protein_annotation;
   char* protein_id;
+  int mass_precision = get_int_parameter("mass-precision");
   set<pair<char* , char*> >::iterator prot_iter = protein_info.begin();
   protein_annotation = ((*prot_iter).second);
   protein_id = ((*prot_iter).first);
   fprintf(output_file, "    <search_hit hit_rank=\"%i\" peptide=\"%s\" "
           "peptide_prev_aa=\"%c\" peptide_next_aa=\"%c\" protein=\"%s\" "
-          "num_tot_proteins=\"%i\" calc_neutral_pep_mass=\"%f\" massdiff=\"%+f\" "
+          "num_tot_proteins=\"%i\" calc_neutral_pep_mass=\"%.*f\" "
+          "massdiff=\"%+.*f\" "
           "num_tol_term=\"%i\" num_missed_cleavages=\"%i\"  is_rejected=\"%i\" ",
           ranking, // -1 if unavailable, uses xcorr rank otherwise
           peptide_sequence,
@@ -902,7 +908,9 @@ void print_match_xml(
           flanking_aas_next,
           protein_id,
           (int) protein_info.size(),
+          mass_precision,
           peptide_mass,
+          mass_precision,
           spectrum_mass-peptide_mass,
           num_tol_term, 
           num_missed_cleavages, 
@@ -952,32 +960,33 @@ void print_match_xml(
   
 
   // print all scores available
+  int precision = get_int_parameter("precision");
   fprintf(output_file, 
-          "        <search_score name=\"delta_cn\" value=\"%f\" />\n",
-          delta_cn);
+          "        <search_score name=\"delta_cn\" value=\"%.*f\" />\n",
+          precision, delta_cn);
 
   if (scores_computed[PERCOLATOR_SCORE]){
     fprintf(output_file, 
-            "        <search_score name=\"percolator_score\" value=\"%f\" />\n"
-            "        <search_score name=\"percolator_qvalue\" value=\"%f\" />\n",
-            get_match_score(match, PERCOLATOR_SCORE),
-            get_match_score(match, PERCOLATOR_QVALUE));
+            "        <search_score name=\"percolator_score\" value=\"%.*f\" />\n"
+            "        <search_score name=\"percolator_qvalue\" value=\"%.*f\" />\n",
+            precision, get_match_score(match, PERCOLATOR_SCORE),
+            precision, get_match_score(match, PERCOLATOR_QVALUE));
     }
   if (scores_computed[QRANKER_SCORE]){
     fprintf(output_file, 
-            "        <search_score name=\"qranker_score\" value=\"%f\" />\n"
-            "        <search_score name=\"qranker_qvalue\" value=\"%f\" />\n",
-            get_match_score(match, QRANKER_SCORE),
-            get_match_score(match, QRANKER_QVALUE));
+            "        <search_score name=\"qranker_score\" value=\"%.*f\" />\n"
+            "        <search_score name=\"qranker_qvalue\" value=\"%.*f\" />\n",
+            precision, get_match_score(match, QRANKER_SCORE),
+            precision, get_match_score(match, QRANKER_QVALUE));
   }
   if (scores_computed[LOGP_QVALUE_WEIBULL_XCORR]){
     fprintf(output_file, 
-            "        <search_score name=\"weibull est. p-value\" value=\"%f\" />\n",
-            get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR));
+            "        <search_score name=\"weibull est. p-value\" value=\"%.*f\" />\n",
+            precision, get_match_score(match, LOGP_QVALUE_WEIBULL_XCORR));
   }
   fprintf(output_file, 
-          "        <search_score name=\"xcorr_score\" value=\"%f\" />\n",
-          get_match_score(match, XCORR));
+          "        <search_score name=\"xcorr_score\" value=\"%.*f\" />\n",
+          precision, get_match_score(match, XCORR));
     
   
   fprintf(output_file, 
@@ -1003,6 +1012,7 @@ void print_modifications_xml(
   map<int, double> static_mods;
 
   // variable modifications
+  int mod_precision = get_int_parameter("mod-precision");
   find_variable_modifications(var_mods, mod_seq);
   if (!var_mods.empty()){
     fprintf(output_file, 
@@ -1010,9 +1020,9 @@ void print_modifications_xml(
             mod_seq);
     for (map<int, double>::iterator it = var_mods.begin()
            ; it != var_mods.end(); ++it){
-      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%f\"/>\n",
+      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index
-              (*it).second); //mass
+              mod_precision, (*it).second); //mass
     }
     fprintf(output_file, "</modification_info>\n");
   }
@@ -1024,9 +1034,9 @@ void print_modifications_xml(
             pep_seq);
     for (map<int, double>::iterator it = static_mods.begin(); 
          it != static_mods.end(); ++it){
-      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%f\"/>\n",
+      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index
-              (*it).second); //mass
+              mod_precision, (*it).second); //mass
     }
     fprintf(output_file, "</modification_info>\n");
   }
