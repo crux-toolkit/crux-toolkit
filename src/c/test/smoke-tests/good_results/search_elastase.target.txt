@@ -1,10 +1,10 @@
 scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	p-value	Weibull est. q-value	decoy q-value (xcorr)	percolator score	percolator rank	percolator q-value	q-ranker score	q-ranker q-value	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	eta	beta	shift	corr
-2	3	576.5400	1726.5980	1725.977295	0			-0.48	1										64	1	MSPFGVPVPGPAPETKD	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(30)	LI					
-3	1	518.9500	517.9427	519.511902	0			0.13	1										10	1	TTGNGA	elastase-partial-digest	gi|16127995|ref|NP_414542.1|(15)	IG					
-10	2	419.5800	837.1454	839.900513	0			-0.045	1										12	1	SQKDSYI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(231)	LL					
-14	2	500.4100	998.8055	1001.014832	0			-0.039	1										16	1	TQSSSEYSI	elastase-partial-digest	gi|16127996|ref|NP_414543.1|(350)	IS					
-15	2	488.8200	975.6255	976.997681	-7.4			-0.019	1										12	2	EYFNNYQ	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(277)	IP					
-15	2	488.8200	975.6255	973.053284	0			-0.16	2										12	2	TYKRYDQ	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(167)	LY					
-16	2	520.9900	1039.9655	1040.189941	2.8			0.034	1										14	3	KHKNSQWL	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(217)	QK					
-16	2	520.9900	1039.9655	1038.112793	3.8			-0.06	2										14	3	YTCDPRQV	elastase-partial-digest	gi|16127996|ref|NP_414543.1|(233)	VP					
-16	2	520.9900	1039.9655	1041.258545	0			-0.094	3										16	3	KKYFKTGGI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(242)	IL					
+2	3	576.5400	1726.5980	1725.9773	0			-0.48	1										64	1	MSPFGVPVPGPAPETKD	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(30)	LI					
+3	1	518.9500	517.9427	519.5119	0			0.13	1										10	1	TTGNGA	elastase-partial-digest	gi|16127995|ref|NP_414542.1|(15)	IG					
+10	2	419.5800	837.1454	839.9005	0			-0.045	1										12	1	SQKDSYI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(231)	LL					
+14	2	500.4100	998.8055	1001.0148	0			-0.039	1										16	1	TQSSSEYSI	elastase-partial-digest	gi|16127996|ref|NP_414543.1|(350)	IS					
+15	2	488.8200	975.6255	976.9977	-7.4			-0.019	1										12	2	EYFNNYQ	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(277)	IP					
+15	2	488.8200	975.6255	973.0533	0			-0.16	2										12	2	TYKRYDQ	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(167)	LY					
+16	2	520.9900	1039.9655	1040.1899	2.8			0.034	1										14	3	KHKNSQWL	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(217)	QK					
+16	2	520.9900	1039.9655	1038.1128	3.8			-0.06	2										14	3	YTCDPRQV	elastase-partial-digest	gi|16127996|ref|NP_414543.1|(233)	VP					
+16	2	520.9900	1039.9655	1041.2585	0			-0.094	3										16	3	KKYFKTGGI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(242)	IL					

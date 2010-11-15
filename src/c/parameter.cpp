@@ -636,6 +636,10 @@ void initialize_parameters(void){
       "Default=8.",
       "Available from parameter file for crux search-for-matches, percolator, "
       "and compute-q-values.", "true");
+  set_int_parameter("mass-precision", 4, 1, 100, // max is arbitrary
+      "Set the precision for masses and m/z written to sqt and .txt files.  "
+      "Default=4",
+      "Available from parameter file for all commands.", "true");
   set_int_parameter("print-search-progress", 10, 0, BILLION,
       "Show search progress by printing every n spectra searched.  Default="
       "10.", "Set to 0 to show no search progress.  Available for crux "
