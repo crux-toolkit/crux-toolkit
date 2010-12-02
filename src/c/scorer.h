@@ -45,21 +45,21 @@ void free_scorer(
 FLOAT_T score_spectrum_v_ion_series(
   SCORER_T* scorer,        ///< the scorer object -in
   Spectrum* spectrum,      ///< the spectrum to score -in
-  ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
+  IonSeries* ion_series ///< the ion series to score against the spectrum -in
 );
 
 /**
  * Frees the single_ion_constraints array
  */
 void free_single_ion_constraints(
-  ION_CONSTRAINT_T** ion_constraints
+  IonConstraint** ion_constraints
 );
 
 /**
  * Creates the an array of ion constraints for GMTK models.
  * TODO do we need one for paired and single? Do we want an iterator?
  */
-ION_CONSTRAINT_T** single_ion_constraints(
+IonConstraint** single_ion_constraints(
     void
 );
 

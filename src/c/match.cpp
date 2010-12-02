@@ -18,7 +18,7 @@
 #include "parse_arguments.h"
 #include "Spectrum.h"
 #include "Ion.h"
-#include "ion_series.h"
+#include "IonSeries.h"
 #include "crux-utils.h"
 #include "objects.h"
 #include "parameter.h"

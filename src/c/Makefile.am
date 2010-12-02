@@ -64,8 +64,6 @@ LIBFILES= \
   IonFilteredIterator.h \
   IonSeries.cpp \
   IonSeries.h \
-  ion_series.cpp \
-  ion_series.h \
   linked_list.cpp \
   linked_list.h \
   mass.cpp \

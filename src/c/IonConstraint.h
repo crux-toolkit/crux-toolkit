@@ -140,6 +140,9 @@ class IonConstraint {
     Ion* ion ///< query ion -in
     );
 
+  /**
+   * \returns ION_TYPE for this constraint
+   */
   ION_TYPE_T getIonType();
 
 

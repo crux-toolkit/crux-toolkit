@@ -280,26 +280,26 @@ void hhc_create_ion_mass_matrix(
  * in the ion_series as ion objects. 
  */
 void hhc_predict_ions(
-  ION_SERIES_T* ion_series, ///< the ion series to predict ions for -in
+  IonSeries* ion_series, ///< the ion series to predict ions for -in
   FLOAT_T linker_mass,
   int linker_site
   )
 {
 
 
-  if(get_ion_series_is_predicted(ion_series)){
+  if(ion_series->getIsPredicted()){
     carp(CARP_WARNING, "The ion series has already been predicted and added");
     return;
   }
 
 
-  ION_CONSTRAINT_T* constraint = get_ion_series_ion_constraint(ion_series);
+  IonConstraint* constraint = ion_series->getIonConstraint();
   
   // create a mass matrix
  
-    hhc_create_ion_mass_matrix(get_ion_series_modified_aa_seq(ion_series), 
-			       get_ion_constraint_mass_type(constraint), 
-			       get_ion_series_peptide_length(ion_series), 
+    hhc_create_ion_mass_matrix(ion_series->getModifiedAASeq(), 
+			       constraint->getMassType(), 
+			       ion_series->getPeptideLength(), 
 			       linker_mass, linker_site);  
   /*
   printf("cumulative mass sum is:\n");
@@ -311,40 +311,40 @@ void hhc_predict_ions(
   // scan for the first and last  (S, T, E, D) and (R, K, Q, N), 
   // initialize to determine modification is ok.
   // the first, last of STED, RKQN are stored in ion_series.
-  scan_for_aa_for_neutral_loss(ion_series);
+  ion_series->scanForAAForNeutralLoss();
   
   // generate ions without any modifications
-  if(!generate_ions_no_modification(ion_series, mass_matrix)){
+  if(!ion_series->generateIonsNoModification(mass_matrix)){
     carp(CARP_FATAL, "failed to generate ions, no modifications");
   }
 
   // create modification ions?
-  if(get_ion_constraint_use_neutral_losses(constraint)){
+  if(constraint->getUseNeutralLosses()){
     
     // generate ions with nh3 modification
-    if(abs(get_ion_constraint_modification(constraint, NH3)) > 0){
-      if(!generate_ions(ion_series, NH3)){
+    if(abs(constraint->getModification(NH3)) > 0){
+      if(!ion_series->generateIons(NH3)){
         carp(CARP_FATAL, "failed to generate ions, NH3 modifications");
       }
     }
     
     // generate ions with h2o modification
-    if(abs(get_ion_constraint_modification(constraint, H2O)) > 0){
-      if(!generate_ions(ion_series, H2O)){
+    if(abs(constraint->getModification(H2O)) > 0){
+      if(!ion_series->generateIons(H2O)){
         carp(CARP_FATAL, "failed to generate ions, H2O modifications");
       }
     }
 
     // generate ions with isotope modification
-    if(get_ion_constraint_modification(constraint,ISOTOPE) > 0){
-      if(!generate_ions(ion_series, ISOTOPE)){
+    if(constraint->getModification(ISOTOPE) > 0){
+      if(!ion_series->generateIons(ISOTOPE)){
         carp(CARP_FATAL, "failed to generate ions, ISOTOPE modifications");
       }
     }
 
     // generate ions with flank modification
-    if(get_ion_constraint_modification(constraint,FLANK) > 0){
-      if(!generate_ions_flank(ion_series)){
+    if(constraint->getModification(FLANK) > 0){
+      if(!ion_series->generateIonsFlank()){
         carp(CARP_FATAL, "failed to generate ions, FLANK modifications");
       }
     }
@@ -354,6 +354,6 @@ void hhc_predict_ions(
   }
   
   // ion series now been predicted
-  set_ion_series_is_predicted(ion_series, TRUE);
+  ion_series->setIsPredicted(true);
 
 }

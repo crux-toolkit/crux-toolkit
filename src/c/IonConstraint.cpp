@@ -350,6 +350,14 @@ bool IonConstraint::isSatisfied(
   return return_val;
 }
 
+/**
+ * \returns ION_TYPE for this constraint
+ */
+ION_TYPE_T IonConstraint::getIonType() {
+  return ion_type_;
+}
+
+
 
 /**
  * sets the modification count
@@ -397,11 +405,34 @@ int IonConstraint::getModification(
 }
 
 /**
+ * \returns the modifications array
+ */
+int* IonConstraint::getModifications() {
+  return modifications_;
+}
+
+
+/**
  * gets the mass type of the ion_constraint
  */
 MASS_TYPE_T IonConstraint::getMassType()
 {
   return mass_type_;
+}
+
+/**
+ * get the maximum charge of the IonConstraint
+ */
+int IonConstraint::getMaxCharge() 
+{
+  return max_charge_;
+}
+
+/**
+ *\returns precuror_ion_
+ */
+bool IonConstraint::getPrecursorIon() {
+  return precursor_ion_;
 }
 
 /**

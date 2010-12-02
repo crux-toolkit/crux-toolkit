@@ -15,7 +15,9 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include "objects.h"
-#include "ion_series.h"
+#include "IonConstraint.h"
+#include "IonFilteredIterator.h"
+#include "IonSeries.h"
 #include "crux-utils.h"
 #include "Spectrum.h"
 #include "scorer.h"
@@ -643,7 +645,7 @@ BOOLEAN_T create_intensity_array_sp(
  */
 int calculate_ion_type_sp(
   SCORER_T* scorer,        ///< the scorer object -in                          
-  ION_SERIES_T* ion_series, ///< the ion series to score against the spectrum -in
+  IonSeries* ion_series, ///< the ion series to score against the spectrum -in
   FLOAT_T* intensity_sum,     ///< the total intensity sum of all matches so far -out
   ION_TYPE_T ion_type,      ///< the ion type to check -in
   int* repeat_count         ///< the repeated count of ions (ex. consecutive b ions) -out
@@ -656,26 +658,26 @@ int calculate_ion_type_sp(
   int ion_charge = 0;
   int intensity_array_idx = 0;
   int* before_cleavage 
-    = (int*)mymalloc(get_ion_series_charge(ion_series)*sizeof(int));
+    = (int*)mymalloc(ion_series->getCharge()*sizeof(int));
   int cleavage_array_idx = 0;
   FLOAT_T bin_width = scorer->bin_width;
   FLOAT_T bin_offset = scorer->bin_offset;
 
   // initialize before cleavage indecies
-  for(; cleavage_array_idx < get_ion_series_charge(ion_series); ++cleavage_array_idx){
+  for(; cleavage_array_idx < ion_series->getCharge(); ++cleavage_array_idx){
     before_cleavage[cleavage_array_idx] = -1;
   }
   
   // create ion constraint
-  ION_CONSTRAINT_T* ion_constraint = 
-    new_ion_constraint(get_ion_constraint_mass_type(get_ion_series_ion_constraint(ion_series)), get_ion_series_charge(ion_series), ion_type, FALSE);
+  IonConstraint* ion_constraint =
+    new IonConstraint(ion_series->getIonConstraint()->getMassType(), ion_series->getCharge(), ion_type, FALSE);
   
   // create the filtered iterator that will select among the ions
-  ION_FILTERED_ITERATOR_T* ion_iterator = new_ion_filtered_iterator(ion_series, ion_constraint);
+  IonFilteredIterator* ion_iterator = new IonFilteredIterator(ion_series, ion_constraint);
   
   // while there are ion's in ion iterator, add matched observed peak intensity
-  while(ion_filtered_iterator_has_next(ion_iterator)){
-    ion = ion_filtered_iterator_next(ion_iterator);
+  while(ion_iterator->hasNext()){
+    ion = ion_iterator->next();
     intensity_array_idx 
       = INTEGERIZE(ion->getMassZ(), bin_width, bin_offset);
     // get the intensity matching to ion's m/z
@@ -712,8 +714,8 @@ int calculate_ion_type_sp(
   
   // free ion iterator, ion_constraint
   free(before_cleavage);
-  free_ion_constraint(ion_constraint);
-  free_ion_filtered_iterator(ion_iterator);
+  IonConstraint::free(ion_constraint);
+  delete ion_iterator;
 
   return ion_match;
 }
@@ -726,7 +728,7 @@ int calculate_ion_type_sp(
 FLOAT_T gen_score_sp(
   SCORER_T* scorer,        ///< the scorer object -in
   Spectrum* spectrum,    ///< the spectrum to score -in
-  ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
+  IonSeries* ion_series ///< the ion series to score against the spectrum -in
   )
 {
   FLOAT_T final_score = 0;
@@ -737,7 +739,7 @@ FLOAT_T gen_score_sp(
   // initialize the scorer before scoring if necessary
   if(!scorer->initialized){
     // create intensity array
-    if(!create_intensity_array_sp(spectrum, scorer, get_ion_series_charge(ion_series))){
+    if(!create_intensity_array_sp(spectrum, scorer, ion_series->getCharge())){
       carp(CARP_FATAL, "failed to produce Sp");
     }
   }
@@ -749,8 +751,8 @@ FLOAT_T gen_score_sp(
   
   // set the fraction of  b,y ions matched for this ion_series
   scorer->sp_b_y_ion_matched  = ion_match;
-  scorer->sp_b_y_ion_possible = get_ion_series_num_ions(ion_series);
-  scorer->sp_b_y_ion_fraction_matched = (FLOAT_T)ion_match / get_ion_series_num_ions(ion_series);
+  scorer->sp_b_y_ion_possible = ion_series->getNumIons();
+  scorer->sp_b_y_ion_fraction_matched = (FLOAT_T)ion_match / ion_series->getNumIons();
 
   //// DEBUG!!!!
   /*
@@ -761,7 +763,7 @@ FLOAT_T gen_score_sp(
   // calculate Sp score.
   if(ion_match != 0){
     final_score = 
-      (intensity_sum * ion_match) * (1+ (repeat_count * scorer->sp_beta)) / get_ion_series_num_ions(ion_series);
+      (intensity_sum * ion_match) * (1+ (repeat_count * scorer->sp_beta)) / ion_series->getNumIons();
   }
   
   // return score
@@ -1020,7 +1022,7 @@ void get_processed_peaks(
  */
 BOOLEAN_T create_intensity_array_theoretical(
   SCORER_T*     scorer,     ///< the scorer object -in/out
-  ION_SERIES_T* ion_series, ///< the ion series to score against the spectrum (theoretical) -in
+  IonSeries* ion_series, ///< the ion series to score against the spectrum (theoretical) -in
   FLOAT_T*      theoretical ///< the empty theoretical spectrum -out
   )
 {
@@ -1031,11 +1033,14 @@ BOOLEAN_T create_intensity_array_theoretical(
   FLOAT_T bin_width = scorer->bin_width;
   FLOAT_T bin_offset = scorer->bin_offset;
   // create the ion iterator that will iterate through the ions
-  ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
+
 
   // while there are ion's in ion iterator, add matched observed peak intensity
-  while(ion_iterator_has_next(ion_iterator)){
-    ion = ion_iterator_next(ion_iterator);
+  for (IonIterator ion_iterator = ion_series->begin();
+    ion_iterator != ion_series->end();
+    ++ion_iterator) {
+
+    ion = *ion_iterator;
     intensity_array_idx 
       = INTEGERIZE(ion->getMassZ(), bin_width, bin_offset);
     ion_type = ion->getType();
@@ -1123,8 +1128,6 @@ BOOLEAN_T create_intensity_array_theoretical(
     }
   }
     
-  // free heap
-  free_ion_iterator(ion_iterator);
 
   return TRUE;
 }
@@ -1193,7 +1196,7 @@ FLOAT_T cross_correlation(
 FLOAT_T gen_score_xcorr(
   SCORER_T* scorer,        ///< the scorer object -in
   Spectrum* spectrum,    ///< the spectrum to score -in
-  ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
+  IonSeries* ion_series ///< the ion series to score against the spectrum -in
   )
 {
   FLOAT_T final_score = 0;
@@ -1203,7 +1206,7 @@ FLOAT_T gen_score_xcorr(
   // preprocess the observed spectrum in scorer
   if(!scorer->initialized){
     // create intensity array for observed spectrum, if already not been done
-    if(!create_intensity_array_xcorr(spectrum, scorer, get_ion_series_charge(ion_series))){
+    if(!create_intensity_array_xcorr(spectrum, scorer, ion_series->getCharge())){
       carp(CARP_FATAL, "failed to produce XCORR");
     }
   }
@@ -1480,7 +1483,7 @@ FLOAT_T score_logp_bonf_evd_xcorr(
 FLOAT_T score_spectrum_v_ion_series(
   SCORER_T* scorer,        ///< the scorer object -in
   Spectrum* spectrum,      ///< the spectrum to score -in
-  ION_SERIES_T* ion_series ///< the ion series to score against the spectrum -in
+  IonSeries* ion_series ///< the ion series to score against the spectrum -in
   )
 {
   FLOAT_T final_score = 0;
@@ -1528,13 +1531,12 @@ FLOAT_T score_spectrum_v_spectrum(
  * 16 - a-nh3+2
  * 17 - a-h2o+2
  */
-ION_CONSTRAINT_T** single_ion_constraints(
+IonConstraint** single_ion_constraints(
   void
 ){
 
   carp(CARP_INFO, "Num ion series %i", GMTK_NUM_ION_SERIES);
-  ION_CONSTRAINT_T** ion_constraints = (ION_CONSTRAINT_T**) 
-    malloc(GMTK_NUM_ION_SERIES * sizeof(ION_CONSTRAINT_T*));
+  IonConstraint** ion_constraints = new IonConstraint*[GMTK_NUM_ION_SERIES];
 
   ION_TYPE_T ion_types[GMTK_NUM_BASE_IONS] = { B_ION, Y_ION, A_ION }; 
   int charges[GMTK_NUM_CHARGES] = { 1, 2 }; 
@@ -1552,17 +1554,17 @@ ION_CONSTRAINT_T** single_ion_constraints(
 
       int neutral_idx;
       for(neutral_idx=0; neutral_idx< GMTK_NUM_NEUTRAL_LOSS+1; neutral_idx++){
-        ION_CONSTRAINT_T* ion_constraint =
-          new_ion_constraint( mass_type, charges[charge_idx],
+        IonConstraint* ion_constraint =
+          new IonConstraint( mass_type, charges[charge_idx],
                               ion_types[ion_type_idx], FALSE);
-        set_ion_constraint_exactness(ion_constraint, TRUE);
+        ion_constraint->setExactness(true);
         if (neutral_idx == 0){
           ;
         }
         else if (neutral_idx == 1){
-          set_ion_constraint_modification(ion_constraint, NH3, -1);
+          ion_constraint->setModification(NH3, -1);
         } else if (neutral_idx == 2){
-          set_ion_constraint_modification(ion_constraint, H2O, -1);
+          ion_constraint->setModification(H2O, -1);
         }
         ion_constraints[ion_constraint_idx] = ion_constraint;
         ion_constraint_idx++;
@@ -1576,13 +1578,13 @@ ION_CONSTRAINT_T** single_ion_constraints(
  * Frees the single_ion_constraints array
  */
 void free_single_ion_constraints(
-    ION_CONSTRAINT_T** ion_constraints
+    IonConstraint** ion_constraints
     ){
   int constraint_idx;
   for (constraint_idx=0; constraint_idx<GMTK_NUM_ION_SERIES; constraint_idx++){
-    free_ion_constraint(ion_constraints[constraint_idx]);
+    IonConstraint::free(ion_constraints[constraint_idx]);
   }
-  free(ion_constraints);
+  delete ion_constraints;
 }
 
 /**
@@ -1590,14 +1592,14 @@ void free_single_ion_constraints(
 
  * TODO do we need one for paired and single? Do we want an iterator?
  */
-ION_CONSTRAINT_T** paired_ion_constraints(
+IonConstraint** paired_ion_constraints(
   void
   ){
 
   carp(CARP_INFO, "Num ion series %i", GMTK_NUM_PAIRED_ION_SERIES);
-  ION_CONSTRAINT_T** base_ion_constraints = single_ion_constraints(); 
-  ION_CONSTRAINT_T** ion_constraints = (ION_CONSTRAINT_T**) 
-    malloc(2 * GMTK_NUM_PAIRED_ION_SERIES * sizeof(ION_CONSTRAINT_T*));
+  IonConstraint** base_ion_constraints = single_ion_constraints(); 
+  IonConstraint** ion_constraints = 
+    new IonConstraint*[2 * GMTK_NUM_PAIRED_ION_SERIES];
 
   // FIX magic numbers
   /* 0  - b
@@ -1639,7 +1641,7 @@ ION_CONSTRAINT_T** paired_ion_constraints(
 
   int idx;
   for (idx = 0; idx < GMTK_NUM_PAIRED_ION_SERIES * 2; idx++){
-    ion_constraints[idx] = copy_ion_constraint_ptr(
+    ion_constraints[idx] = IonConstraint::copy(
         base_ion_constraints[indices[idx]]);
   }
   return ion_constraints;
@@ -1649,14 +1651,14 @@ ION_CONSTRAINT_T** paired_ion_constraints(
  * Frees the paired ion_constraints array
  */
 void free_paired_ion_constraints(
-    ION_CONSTRAINT_T** ion_constraints
+    IonConstraint** ion_constraints
     ){
   int constraint_idx;
   for (constraint_idx=0; constraint_idx<GMTK_NUM_PAIRED_ION_SERIES; 
        constraint_idx++){
-    free_ion_constraint(ion_constraints[constraint_idx]);
+    IonConstraint::free(ion_constraints[constraint_idx]);
   }
-  free(ion_constraints);
+  delete ion_constraints;
 }
 
 /*******************************

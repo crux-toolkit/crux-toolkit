@@ -250,24 +250,6 @@ typedef struct index_filtered_peptide_iterator INDEX_FILTERED_PEPTIDE_ITERATOR_T
 typedef struct sorted_peptide_iterator SORTED_PEPTIDE_ITERATOR_T;
 
 /**
- * \typedef ION_T 
- * \brief An object to represent a (fragment) ion of a peptide
- */
-typedef struct ion ION_T;
-
-/**
- * \typedef ION_SERIES_T 
- * \brief An object to represent a series of ions
- */
-typedef struct ion_series ION_SERIES_T;
-
-/**
- * \typedef ION_CONSTRAINT_T
- * \brief An object to represent a constraint to be applied to ions
- */
-typedef struct ion_constraint ION_CONSTRAINT_T;
-
-/**
  * The enum for index type
  */
 enum _index_type {DB_INDEX, BIN_INDEX};
@@ -332,12 +314,6 @@ typedef struct protein_index_iterator PROTEIN_INDEX_ITERATOR_T;
  * \brief An object to iterate over all ion objects in the ion_series
  */
 typedef struct ion_iterator ION_ITERATOR_T;
-
-/**
- * \typedef ION_FILTERED_ITERATOR_T
- * \brief An object to iterate over ion objects that meet constraint in the ion_series
- */
-typedef struct ion_filtered_iterator ION_FILTERED_ITERATOR_T;
 
 /**
  *\typedef LOSS_LIMIT_T

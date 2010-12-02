@@ -4,7 +4,7 @@
 #include "xhhc.h"
 
 //CRUX includes
-#include "ion_series.h"
+#include "IonSeries.h"
 #include "scorer.h"
 #include "Spectrum.h"
 #include "SpectrumCollection.h"
@@ -73,7 +73,7 @@ class LinkedIonSeries {
 
 
 void hhc_predict_ions(
-  ION_SERIES_T* ion_series, ///< the ion series to predict ions for -in
+  IonSeries* ion_series, ///< the ion series to predict ions for -in
   FLOAT_T linker_mass,
   int linker_site);
 

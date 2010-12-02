@@ -3,8 +3,10 @@
 #include "xhhc_scorer.h"
 
 #include "objects.h"
+#include "IonConstraint.h"
 #include "scorer.h"
 #include "SpectrumCollection.h"
+
 
 #include <math.h>
 #include <assert.h>
@@ -187,32 +189,32 @@ int main(int argc, char** argv){
 double get_concat_score(char* peptideA, char* peptideB, int link_site, int charge, Spectrum* spectrum) {
   string lpeptide = string(peptideA) + string(peptideB); 
   
-  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_smart(XCORR, charge);
+  IonConstraint* ion_constraint = IonConstraint::newIonConstraintSmart(XCORR, charge);
   
-  ION_SERIES_T* ion_series = new_ion_series(lpeptide.c_str(), charge, ion_constraint);
+  IonSeries* ion_series = new IonSeries(lpeptide.c_str(), charge, ion_constraint);
   
-  predict_ions(ion_series);
+  ion_series->predictIons();
   
   //modify ions.
-
-  ION_ITERATOR_T* ion_iterator = new_ion_iterator(ion_series);
-  
   
   //int pepA_begin = 0;
   int pepB_begin = string(peptideA).length();
   int llength = lpeptide.length();
   
-  while(ion_iterator_has_next(ion_iterator)){
-    Ion* ion = ion_iterator_next(ion_iterator);
-      //check to see if if is the cterm of 1st peptide.
-      int ion_charge = ion->getCharge();
-      int cleavage_idx = ion->getCleavageIdx();
-      ION_TYPE_T ion_type = ion->getType();
+  for (IonIterator ion_iterator = ion_series->begin();
+    ion_iterator != ion_series->end();
+    ++ion_iterator) {
 
-      //if contains cterm of 1st peptide, modify by -OH 
+    Ion* ion = *ion_iterator;
+    //check to see if if is the cterm of 1st peptide.
+    int ion_charge = ion->getCharge();
+    int cleavage_idx = ion->getCleavageIdx();
+    ION_TYPE_T ion_type = ion->getType();
+
+    //if contains cterm of 1st peptide, modify by -OH 
       
-      carp(CARP_DEBUG,"====================");
-      if (ion_type == B_ION) {
+    carp(CARP_DEBUG,"====================");
+    if (ion_type == B_ION) {
 	carp(CARP_DEBUG,"B-ion");
 	carp(CARP_DEBUG,"%s",lpeptide.substr(0,cleavage_idx).c_str());
       } else if (ion_type == Y_ION) {
