@@ -58,6 +58,12 @@ LIBFILES= \
   index.h \
   Ion.cpp \
   Ion.h \
+  IonConstraint.cpp \
+  IonConstraint.h \
+  IonFilteredIterator.cpp \
+  IonFilteredIterator.h \
+  IonSeries.cpp \
+  IonSeries.h \
   ion_series.cpp \
   ion_series.h \
   linked_list.cpp \
