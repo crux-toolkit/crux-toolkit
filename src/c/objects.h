@@ -1,3 +1,4 @@
+
 /**
  * \file objects.h 
  * $Revision: 1.62 $
@@ -13,6 +14,9 @@
 
 class DelimitedFile;
 class DelimitedFileReader;
+class IonConstraint;
+class IonFilteredIterator;
+class IonSeries;
 class MatchFileReader;
 class Spectrum;
 class FilteredSpectrumChargeIterator;
