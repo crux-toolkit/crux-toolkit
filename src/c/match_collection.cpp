@@ -1180,13 +1180,14 @@ BOOLEAN_T score_matches_one_spectrum(
   carp(CARP_DETAILED_DEBUG, "Scoring matches for %s", type_str);
 
   // create ion constraint
-  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_smart(score_type, 
-                                                              charge);
+  IonConstraint* ion_constraint = 
+    IonConstraint::newIonConstraintSmart(score_type, charge);
+
   // create scorer
   SCORER_T* scorer = new_scorer(score_type);
 
   // create a generic ion_series that will be reused for each peptide sequence
-  ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);  
+  IonSeries* ion_series = new IonSeries(ion_constraint, charge);  
   
   // score all matches
   int match_idx;
@@ -1208,8 +1209,8 @@ BOOLEAN_T score_matches_one_spectrum(
     MODIFIED_AA_T* modified_sequence = get_match_mod_sequence(match);
 
     // create ion series for this peptide
-    update_ion_series(ion_series, sequence, modified_sequence);
-    predict_ions(ion_series);
+    ion_series->update(sequence, modified_sequence);
+    ion_series->predictIons();
 
     // get the score
     FLOAT_T score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
@@ -1243,8 +1244,8 @@ BOOLEAN_T score_matches_one_spectrum(
   match_collection->scored_type[score_type] = TRUE;
 
   // clean up
-  free_ion_constraint(ion_constraint);
-  free_ion_series(ion_series);
+  IonConstraint::free(ion_constraint);
+  delete ion_series;
   free_scorer(scorer);
   return TRUE;
 }
@@ -3316,8 +3317,10 @@ void add_decoy_scores_match_collection(
 ){
 
   // reuse these for scoring all matches
-  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_smart(XCORR, charge); 
-  ION_SERIES_T* ion_series = new_ion_series_generic(ion_constraint, charge);  
+  IonConstraint* ion_constraint = 
+    IonConstraint::newIonConstraintSmart(XCORR, charge);
+ 
+  IonSeries* ion_series = new IonSeries(ion_constraint, charge);  
   SCORER_T* scorer = new_scorer(XCORR);
   
   // for each peptide in the iterator
@@ -3329,8 +3332,8 @@ void add_decoy_scores_match_collection(
     MODIFIED_AA_T* modified_seq = get_peptide_modified_aa_sequence(peptide);
 
     // create the ion series for this peptide
-    update_ion_series(ion_series, decoy_sequence, modified_seq);
-    predict_ions(ion_series);
+    ion_series->update(decoy_sequence, modified_seq);
+    ion_series->predictIons();
 
     // get the score
     FLOAT_T score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
@@ -3345,8 +3348,8 @@ void add_decoy_scores_match_collection(
     free_peptide(peptide);
   } // next peptide
 
-  free_ion_constraint(ion_constraint);
-  free_ion_series(ion_series);
+  IonConstraint::free(ion_constraint);
+  delete ion_series;
   free_scorer(scorer);
 
 }

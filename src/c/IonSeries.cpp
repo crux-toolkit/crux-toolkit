@@ -53,13 +53,7 @@ void IonSeries::init() {
   peptide_mass_ = 0;
   charge_ = 0;
   constraint_ = NULL;
-  num_ions_ = 0;
   is_predicted_ = false;
-
-  // initialize all num_specific_ion count to 0
-  for(int ion_type_idx = 0; ion_type_idx < MAX_NUM_ION_TYPE; ++ion_type_idx){
-    num_specific_ions_[ion_type_idx] = 0;
-  }
   
   loss_limit_ = NULL;
   peptide_length_ = 0;
@@ -151,18 +145,18 @@ void IonSeries::update(
   }
   
   // iterate over all ions, and free them
-  while(num_ions_ > 0){
-    delete ions_[num_ions_-1];
-    --num_ions_;
+  for (unsigned int idx=0;idx<ions_.size();idx++) {
+    delete ions_[idx];
   }
+  ions_.clear();
   
-  // initialize all num_specific_ion count back to 0
+  // initialize all specific_ions back to 0
   int ion_idx;
+
   for(ion_idx=0; ion_type_idx < MAX_NUM_ION_TYPE; ++ion_type_idx){
-    num_specific_ions_[ion_type_idx] = 0;
+    specific_ions_[ion_type_idx].clear();
   }
-  
-  num_ions_ = 0;
+
   is_predicted_ = FALSE;
   
   // set ion_series for new instance of peptide
@@ -198,10 +192,23 @@ IonSeries::~IonSeries()
   // free constraint?
 
   // iterate over all ions, and free them
-  while(num_ions_ > 0){
-    delete (ions_[num_ions_-1]);
-    --num_ions_;
+
+  for (unsigned int idx=0;idx<ions_.size();idx++) {
+    delete ions_[idx];
   }
+  ions_.clear();
+
+}
+
+/**
+ * Iterator access
+ */
+IonIterator IonSeries::begin() {
+  return ions_.begin();
+}
+
+IonIterator IonSeries::end() {
+  return ions_.end();
 }
 
 /**
@@ -222,8 +229,8 @@ void IonSeries::print(
   
   
   // print each ion in the ion series
-  int ion_idx;
-  for(ion_idx=0; ion_idx < num_ions_; ++ion_idx){
+  unsigned int ion_idx;
+  for(ion_idx=0; ion_idx < ions_.size(); ++ion_idx){
     ions_[ion_idx]->print(file);
   }
 }
@@ -375,6 +382,7 @@ FLOAT_T* IonSeries::createIonMassMatrix(
     carp(CARP_ERROR, "Cannot create mass matrix from NULL seqence");
     return NULL;
   }
+
   FLOAT_T* mass_matrix = (FLOAT_T*)mymalloc(sizeof(FLOAT_T)*(peptide_length+1));
   
   // at index 0, the length of the peptide is stored
@@ -420,11 +428,10 @@ void IonSeries::addIon(
   )
 {
   // add ion to ion series
-  ions_[num_ions_++] = ion;   
+  ions_.push_back(ion);
   
   // add a pointer of ion to the specific ion_type array
-  specific_ions_[ion->getType()]
-    [num_specific_ions_[ion->getType()]++] = ion;
+  specific_ions_[ion->getType()].push_back(ion);
 }
 
 /**
@@ -505,7 +512,7 @@ bool IonSeries::generateIonsNoModification(
       else{ // average
         mass -= MASS_CO_AVERAGE; 
       }
-      
+
       // add ions up to max charge
       if(!this->addIonsByCharge(mass, cleavage_idx, A_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge for A ion");
@@ -521,12 +528,13 @@ bool IonSeries::generateIonsNoModification(
       
       // set mass
       mass = mass_matrix[cleavage_idx];
-      
+
       // add ions up to max charge
       if(!this->addIonsByCharge(mass, cleavage_idx, B_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge for B ion");
         return false;
       }
+
     }
     
     // add C ion
@@ -582,7 +590,7 @@ bool IonSeries::generateIonsNoModification(
       else{ // average
         mass += MASS_H2O_AVERAGE;
       }
-      
+
       // add ions up to max charge
       if(!this->addIonsByCharge(mass, cleavage_idx, Y_ION)){
         carp(CARP_ERROR, "failed to add ions by different charge Y ion");
@@ -746,7 +754,7 @@ bool IonSeries::generateIons(
   )
 {
   int ion_idx = 0;
-  int total_ion = num_ions_;
+  int total_ion = ions_.size();
   Ion* working_ion = NULL;
   Ion* new_ion = NULL;
   int* modifications = constraint_->getModifications();
@@ -802,7 +810,7 @@ bool IonSeries::generateIons(
 bool IonSeries::generateIonsFlank()
 {
   int ion_idx = 0;
-  int total_ion = num_ions_;
+  int total_ion = ions_.size();
   Ion* working_ion = NULL;
   Ion* new_ion = NULL;
   Ion* new_ion2 = NULL;
@@ -873,8 +881,9 @@ void IonSeries::predictIons()
   // scan for the first and last  (S, T, E, D) and (R, K, Q, N), 
   // initialize to determine modification is ok.
   // the first, last of STED, RKQN are stored in ion_series.
+
   scanForAAForNeutralLoss();
-  
+
   // generate ions without any modifications
   if(!generateIonsNoModification(mass_matrix)){
     carp(CARP_FATAL, "failed to generate ions, no modifications");
@@ -917,9 +926,9 @@ void IonSeries::predictIons()
   
   // ion series now been predicted
   is_predicted_ = true;
-
   // free mass matrix
   free(mass_matrix);
+
 }
 
 /**
@@ -1081,7 +1090,7 @@ void IonSeries::setIonConstraint(
  */
 int IonSeries::getNumIons()
 {
-  return num_ions_;
+  return ions_.size();
 }
 
 /**
@@ -1091,9 +1100,15 @@ int IonSeries::getNumIonsOneType(
   ION_TYPE_T ion_type ///< the type of ions -in
   )
 {
-  return num_specific_ions_[ion_type];
+  return specific_ions_[ion_type].size();
 }
 
+vector<Ion*>& IonSeries::getSpecificIons(
+  ION_TYPE_T ion_type ///< the type of ions -in
+  )
+{
+  return specific_ions_[ion_type];
+}
 
 
 /*

@@ -18,7 +18,8 @@
 #include "objects.h"
 #include "parameter.h"
 #include "Ion.h"
-#include "ion_series.h"
+#include "IonSeries.h"
+#include "IonConstraint.h"
 
 using namespace std;
 
@@ -104,30 +105,27 @@ int main(int argc, char** argv){
   max_charge = min(max_charge, charge_state);
   // create ion_constraint
   MASS_TYPE_T frag_masses = get_mass_type_parameter("fragment-mass");
-  ION_CONSTRAINT_T* ion_constraint = 
+  
+  IonConstraint* ion_constraint = 
   //  new_ion_constraint(MONO, max_charge, ion_type, use_precursor_ions);
-    new_ion_constraint(frag_masses, max_charge, ion_type, use_precursor_ions);
+    new IonConstraint(frag_masses, max_charge, ion_type, use_precursor_ions);
 
    
    // set ion_constraint3 modification counts, if modifications should occur
   if(is_modification){
-    set_ion_constraint_modification( ion_constraint, NH3, 
-                                     neutral_loss_count[NH3]);
-    set_ion_constraint_modification( ion_constraint, H2O, 
-                                     neutral_loss_count[H2O]);
-    set_ion_constraint_modification( ion_constraint, ISOTOPE, 
-                                     neutral_loss_count[ISOTOPE]);
-    set_ion_constraint_modification( ion_constraint, FLANK, 
-                                     neutral_loss_count[FLANK]);
+    ion_constraint->setModification(NH3, neutral_loss_count[NH3]);
+    ion_constraint->setModification(H2O, neutral_loss_count[H2O]);
+    ion_constraint->setModification(ISOTOPE, neutral_loss_count[ISOTOPE]);
+    ion_constraint->setModification(FLANK, neutral_loss_count[FLANK]);
   }
 
   // create ion_series
-  ION_SERIES_T* ion_series = new_ion_series(peptide_sequence, 
+  IonSeries* ion_series = new IonSeries(peptide_sequence, 
                                              charge_state, ion_constraint);
    
   // now predict ions
-  predict_ions(ion_series);
-   
+  ion_series->predictIons();
+
   // print settings
   printf("# PEPTIDE: %s\n",peptide_sequence);
   printf("# AVERAGE: %f MONO:%f\n",calc_sequence_mass(peptide_sequence, AVERAGE),calc_sequence_mass(peptide_sequence, MONO));
@@ -138,11 +136,12 @@ int main(int argc, char** argv){
   printf("# ISOTOPE modification: %d\n", neutral_loss_count[ISOTOPE] );
   printf("# FLANK modification: %d\n", neutral_loss_count[FLANK]);
   // print ions
-  print_ion_series(ion_series, stdout);
+  ion_series->print(stdout);
 
   // free
-  free_ion_constraint(ion_constraint);
-  free_ion_series(ion_series);
+  IonConstraint::free(ion_constraint);
+
+  delete ion_series;
   carp(CARP_INFO, "crux-predict-peptide-ions finished");
   exit(0);
 }

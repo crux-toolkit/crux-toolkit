@@ -9,7 +9,8 @@
 #include "scorer.h"
 #include "objects.h"
 #include "parameter.h"
-#include "ion_series.h"
+#include "IonSeries.h"
+#include "IonConstraint.h"
 
 #define scan_num 16
 #define ms2_file "test.ms2"
@@ -18,7 +19,7 @@
 START_TEST (test_create){
   Spectrum* spectrum = NULL;
   SpectrumCollection* sp_collection = NULL; ///<spectrum collection
-  ION_SERIES_T* ion_series = NULL;
+  IonSeries* ion_series = NULL;
   SCORER_T* scorer = NULL;
   float score = 0;
 
@@ -35,13 +36,13 @@ START_TEST (test_create){
   int peptide_charge = get_int_parameter("charge");
 
   //set ion constraint to sequest settings
-  ION_CONSTRAINT_T* ion_constraint = new_ion_constraint_sequest_sp(peptide_charge);  
+  IonConstraint* ion_constraint = IonConstraint::newIonConstraintSequestSp(peptide_charge);  
   
   //create new ion series
-  ion_series = new_ion_series("AKLVKNMT", 2, ion_constraint);
+  ion_series = new IonSeries("AKLVKNMT", 2, ion_constraint);
 
   //now predict ions
-  predict_ions(ion_series);
+  ion_series->predictIons();
 
   //read ms2 file
   sp_collection = new SpectrumCollection(ms2_file);
@@ -68,8 +69,8 @@ START_TEST (test_create){
   
   //free heap
   free_scorer(scorer);
-  free_ion_constraint(ion_constraint);
-  free_ion_series(ion_series);
+  delete ion_constraint;
+  delete ion_series;
   delete sp_collection;
   delete spectrum;
 }

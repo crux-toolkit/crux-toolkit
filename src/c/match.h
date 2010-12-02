@@ -21,7 +21,7 @@
 #include "Spectrum.h"
 #include "SpectrumCollection.h"
 #include "Ion.h"
-#include "ion_series.h"
+#include "IonSeries.h"
 #include "crux-utils.h"
 #include "objects.h"
 #include "parameter.h"

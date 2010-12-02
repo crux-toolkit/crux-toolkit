@@ -38,10 +38,7 @@ class IonSeries {
   int charge_; ///< /<The charge state of the peptide for this ion series
   IonConstraint* constraint_; ///< The constraints which these ions obey
   std::vector<Ion*> ions_; ///< The ions in this series
-  int num_ions_; ///< the number of ions in this series
   BOOLEAN_T is_predicted_; ///< has this ion_series been predicted already?
-  int num_specific_ions_[MAX_NUM_ION_TYPE]; 
-    ///< the number of ions of a specific ion_type
   std::vector<Ion*> specific_ions_[MAX_NUM_ION_TYPE]; 
     ///< specific ions in the series, reference to master array of ions
   LOSS_LIMIT_T* loss_limit_; 
