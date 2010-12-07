@@ -86,7 +86,7 @@ FLOAT_T MatchFileReader::getFloat(
   if (idx == -1) {
 
     carp(CARP_FATAL,
-         "column \"%s\" not found",
+         "column \"%s\" not found for getFloat",
          get_column_header(col_type));
     return -1;
   } else {
@@ -105,7 +105,7 @@ int MatchFileReader::getInteger(
   if (idx == -1) {
 
     carp(CARP_FATAL,
-         "column \"%s\" not found",
+         "column \"%s\" not found for getInteger",
          get_column_header(col_type));
     return -1;
   } else {
@@ -129,7 +129,7 @@ std::string& MatchFileReader::getString(
   if (idx == -1) {
 
     carp(CARP_FATAL,
-         "column \"%s\" not found",
+         "column \"%s\" not found for getString",
          get_column_header(col_type));
     return BLANK_STRING;
   } else {
@@ -144,9 +144,6 @@ bool MatchFileReader::empty(
 
   int idx = match_indices_[col_type];
   if (idx == -1) {
-    carp(CARP_FATAL,
-         "column \"%s\" not found",
-         get_column_header(col_type));
     return true;
   } else {
 

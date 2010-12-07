@@ -107,6 +107,7 @@ struct match_collection_iterator{
   MATCH_COLLECTION_T* match_collection; ///< the match collection to return
   BOOLEAN_T is_another_collection; 
   ///< is there another match_collection to return?
+  vector<bool> cols_in_file; ///< which columns were in the target file
 };
 
 /******* Private function declarations, described in definintions below ***/
@@ -2129,7 +2130,7 @@ BOOLEAN_T print_match_collection_sqt(
  * PSMs, else FALSE  
  */
 BOOLEAN_T print_match_collection_tab_delimited(
-  FILE* output,                  ///< the output file -out
+  MatchFileWriter* output,                  ///< the output file -out
   int top_match,                 ///< the top matches to output -in
   MATCH_COLLECTION_T* match_collection,
   ///< the match_collection to print sqt -in
@@ -2170,8 +2171,7 @@ BOOLEAN_T print_match_collection_tab_delimited(
 
       print_match_tab(match_collection, match, output, scan_num, 
                       spectrum_precursor_mz, 
-                      spectrum_neutral_mass, num_matches, charge, 
-                      match_collection->scored_type);
+                      spectrum_neutral_mass, num_matches, charge );
       count++;
       last_rank = cur_rank;
     } else if( count >= top_match && last_rank != cur_rank ) {
@@ -2363,13 +2363,13 @@ void free_match_iterator(
  */
 void print_matches_multi_spectra
 (MATCH_COLLECTION_T* match_collection, 
- FILE* tab_file, 
- FILE* decoy_tab_file){
+ MatchFileWriter* tab_file, 
+ MatchFileWriter* decoy_tab_file){
 
   carp(CARP_DETAILED_DEBUG, "Writing matches to file");
 
   // if file location is target (i.e. tdc=T), print all to target
-  FILE* decoy_file = decoy_tab_file;
+  MatchFileWriter* decoy_file = decoy_tab_file;
   if( get_boolean_parameter("tdc") == TRUE ){
     decoy_file = tab_file;
   }
@@ -2390,13 +2390,11 @@ void print_matches_multi_spectra
 
     if( is_decoy ){
       print_match_tab(match_collection, cur_match, decoy_file, scan_num, mz, 
-                      spec_mass, (int)num_psm_per_spec, charge, 
-                      match_collection->scored_type );
+                      spec_mass, (int)num_psm_per_spec, charge);
     }
     else{
       print_match_tab(match_collection, cur_match, tab_file, scan_num, mz,
-                      spec_mass, (int)num_psm_per_spec, charge, 
-                      match_collection->scored_type );
+                      spec_mass, (int)num_psm_per_spec, charge);
     }
 
   }
@@ -2529,6 +2527,11 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
                                         database, 
                                         delimited_result_file);
 
+  // set headers based on input files
+  if( set_type == SET_TARGET ){
+    delimited_result_file.getMatchColumnsPresent(match_collection_iterator->cols_in_file); 
+  }
+
   carp(CARP_DETAILED_DEBUG, "Extended match collection " );
   free(file_in_dir);
   free(non_const_prefix);
@@ -2577,16 +2580,15 @@ BOOLEAN_T extend_match_collection_tab_delimited(
 
     //TODO: Parse all boolean indicators for scores
     match_collection -> 
-      scored_type[SP] = 
-      !result_file.getString(SP_SCORE_COL).empty();
+      scored_type[SP] = !result_file.empty(SP_SCORE_COL);
 
     match_collection -> 
       scored_type[XCORR] = 
-      !result_file.getString(XCORR_SCORE_COL).empty();
+      !result_file.empty(XCORR_SCORE_COL);
 
     match_collection -> 
       scored_type[DECOY_XCORR_QVALUE] = 
-      !result_file.getString(DECOY_XCORR_QVALUE_COL).empty();
+      !result_file.empty(DECOY_XCORR_QVALUE_COL);
 
 /* TODO
     match_collection -> 
@@ -2595,27 +2597,27 @@ BOOLEAN_T extend_match_collection_tab_delimited(
 */
     match_collection -> 
       scored_type[LOGP_BONF_WEIBULL_XCORR] = 
-      !result_file.getString(PVALUE_COL).empty();
+      !result_file.empty(PVALUE_COL);
 
     match_collection -> 
       scored_type[PERCOLATOR_QVALUE] = 
-      !result_file.getString(PERCOLATOR_QVALUE_COL).empty();
+      !result_file.empty(PERCOLATOR_QVALUE_COL);
 
     match_collection -> 
       scored_type[PERCOLATOR_SCORE] = 
-      !result_file.getString(PERCOLATOR_SCORE_COL).empty();
+      !result_file.empty(PERCOLATOR_SCORE_COL);
 
     match_collection -> 
       scored_type[LOGP_QVALUE_WEIBULL_XCORR] = 
-      !result_file.getString(WEIBULL_QVALUE_COL).empty();
+      !result_file.empty(WEIBULL_QVALUE_COL);
   
     match_collection -> 
       scored_type[QRANKER_SCORE] = 
-      !result_file.getString(QRANKER_SCORE_COL).empty();
+      !result_file.empty(QRANKER_SCORE_COL);
     
     match_collection -> 
       scored_type[QRANKER_QVALUE] = 
-      !result_file.getString(QRANKER_QVALUE_COL).empty();
+      !result_file.empty(QRANKER_QVALUE_COL);
 
     match_collection -> post_scored_type_set = TRUE;
 
@@ -3458,6 +3460,12 @@ void assign_match_collection_qvalues(
 
   }
   free_match_iterator(match_iterator);
+}
+
+const vector<bool>& get_match_collection_iterator_cols_in_file(
+  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator){
+
+  return match_collection_iterator->cols_in_file;
 }
 
 

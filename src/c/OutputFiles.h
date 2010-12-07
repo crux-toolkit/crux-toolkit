@@ -21,6 +21,7 @@
 #include "parameter.h"
 #include "objects.h"
 #include "match_collection.h"
+#include "MatchFileWriter.h"
 
 class OutputFiles{
 
@@ -29,6 +30,7 @@ class OutputFiles{
 
   ~OutputFiles();
   void writeHeaders(int num_proteins = 0);
+  void writeHeaders(const std::vector<bool>& add_this_col);
   void writeFeatureHeader(char** feature_names = NULL,
                           int num_names = 0);
   void writeFooters();
@@ -43,18 +45,27 @@ class OutputFiles{
                           int num_features);
 
  private:
-  BOOLEAN_T createFiles(FILE*** file_array_ptr,
-                        const char* output_dir,
-                        const char* fileroot,
-                        COMMAND_T command,
-                        const char* extension,
-                        BOOLEAN_T overwrite);
-  BOOLEAN_T createFile(FILE** file_ptr,
-                       const char* output_dir,
-                       const char* fileroot,
-                       COMMAND_T command,
-                       const char* extension,
-                       BOOLEAN_T overwrite);
+  bool createFiles(FILE*** file_array_ptr,
+                   const char* output_dir,
+                   const char* fileroot,
+                   COMMAND_T command,
+                   const char* extension,
+                   bool overwrite);
+  bool createFiles(MatchFileWriter*** file_array_ptr,
+                   const char* output_dir,
+                   const char* fileroot,
+                   COMMAND_T command,
+                   const char* extension);
+  bool createFile(FILE** file_ptr,
+                  const char* output_dir,
+                  const char* filename,
+                  bool overwrite);
+  string makeFileName(const char* fileroot,
+                      COMMAND_T command,
+                      const char* target_decoy,
+                      const char* extension,
+                      const char* directory = NULL );
+  void makeTargetDecoyList();
 
   void printMatchesXml(
                        MATCH_COLLECTION_T* target_matches,
@@ -77,11 +88,13 @@ class OutputFiles{
   Spectrum* spectrum = NULL);
 
   int num_files_;         ///< num files in each array
-  FILE** tab_file_array_; ///< array of .txt files
+  std::string* target_decoy_list_; ///< target or decoy[-n] string of each file
+  MatchFileWriter** delim_file_array_; ///< array of .txt files
   FILE** sqt_file_array_; ///< array of .sqt files
   FILE** xml_file_array_; ///< array of .xml files
   FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to
   int matches_per_spec_;  ///< print this many matches per spec
+  COMMAND_T command_;     ///< which crux command is writing these files
 };
 
 

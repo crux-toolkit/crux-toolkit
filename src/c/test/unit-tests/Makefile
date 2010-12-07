@@ -19,7 +19,6 @@ TESTS = \
 	check-linked-list.c \
 	check-mass.c \
 	check-match-collection.c \
-	check-match.c \
 	check-modifications.c \
 	check-modified-peptides-iterator.c \
 	check-parameter.c \
@@ -27,10 +26,11 @@ TESTS = \
 	check-peptide-modifications.c \
 	check-peptide.c \
 	check-protein.c \
-	check-qvalue.c \
 	check-scorer.c \
-	check-serialize.c \
 	crux-unit-tests.c
+	#check-match.c \
+	#check-serialize.c \
+	#check-qvalue.c \
 
 CRUX_LIBS = \
   ../../.libs/libcrux.a \

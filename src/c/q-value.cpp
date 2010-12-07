@@ -256,7 +256,8 @@ FLOAT_T* compute_decoy_qvalues(
  */
 MATCH_COLLECTION_T* run_qvalue(
   char* input_directory, 
-  char* fasta_file 
+  char* fasta_file,
+  OutputFiles& output 
   ){
 
   int num_decoys = 0; // to be set by match_collection_iterator
@@ -307,6 +308,11 @@ MATCH_COLLECTION_T* run_qvalue(
     }
     free_match_iterator(match_iterator);
   }
+
+  // get from the input files which columns to print in the output files
+  const vector<bool>& cols_to_print =
+    get_match_collection_iterator_cols_in_file(match_collection_iterator);
+  output.writeHeaders(cols_to_print);
   free_match_collection_iterator(match_collection_iterator);
 
   // Compute q-values from p-values.

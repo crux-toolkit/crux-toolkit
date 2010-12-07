@@ -6,6 +6,7 @@
 #ifndef MATCH_H
 #define MATCH_H
 
+#include "MatchFileWriter.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -342,15 +343,13 @@ void get_information_of_proteins(
 void print_match_tab(
   MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
   MATCH_T* match,                  ///< the match to print -in  
-  FILE*    file,                   ///< output stream -out
+  MatchFileWriter*    file,                   ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
   FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
   int      num_matches,            ///< num matches in spectrum -in
-  int      charge,                 ///< charge -in
-  const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
+  int      charge                  ///< charge -in
   );
-
 /*******************************************
  * match post_process extension
  ******************************************/
