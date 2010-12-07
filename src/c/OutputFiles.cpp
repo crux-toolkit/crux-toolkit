@@ -20,16 +20,17 @@ using namespace std;
  * Requires that the output directory already exist. 
  */
 OutputFiles::OutputFiles(COMMAND_T program_name)
-: matches_per_spec_(get_int_parameter("top-match"))
+: matches_per_spec_(get_int_parameter("top-match")),
+  command_(program_name)
 {
 
-  tab_file_array_ = NULL;
+  delim_file_array_ = NULL;
   xml_file_array_ = NULL;
   sqt_file_array_ = NULL;
   feature_file_ = NULL;
 
   // parameters for all three file types
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  bool overwrite = get_boolean_parameter("overwrite");
   const char* output_directory = get_string_parameter_pointer("output-dir");
   const char* fileroot = get_string_parameter_pointer("fileroot");
   if( strcmp(fileroot, "__NULL_STR") == 0 ){
@@ -44,18 +45,19 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
     num_files_ = 1;
   }
 
+  makeTargetDecoyList();
+
   carp(CARP_DEBUG, 
        "OutputFiles is opening %d files (%d decoys) in '%s' with root '%s'."
        " Overwrite: %d.", 
        num_files_, num_decoy_files, output_directory, fileroot, overwrite);
 
   // all operations create tab files
-  createFiles(&tab_file_array_, 
+  createFiles(&delim_file_array_, 
               output_directory, 
               fileroot, 
               program_name, 
-              "txt", 
-              overwrite); 
+              "txt");
 
   // all operations create xml files
   createFiles(&xml_file_array_,
@@ -79,11 +81,12 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
   if( (program_name == PERCOLATOR_COMMAND 
        || program_name == QRANKER_COMMAND)
       && get_boolean_parameter("feature-file") ){
+    string filename = makeFileName(fileroot, program_name, 
+                                   NULL, // not target or decoy
+                                   "features.txt");
     createFile(&feature_file_, 
                output_directory, 
-               fileroot, 
-               program_name, 
-               "features.txt", 
+               filename.c_str(), 
                overwrite);
   }
 
@@ -91,15 +94,71 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
 
 OutputFiles::~OutputFiles(){
   for(int file_idx = 0; file_idx < num_files_; file_idx ++){
-    if( tab_file_array_ ){ fclose(tab_file_array_[file_idx]); }
+    if( delim_file_array_ ){ delete delim_file_array_[file_idx]; }
     if( sqt_file_array_ ){ fclose(sqt_file_array_[file_idx]); }
-    if (xml_file_array_ ){ fclose(xml_file_array_[file_idx]); }
+    if( xml_file_array_ ){ fclose(xml_file_array_[file_idx]); }
   }
   if( feature_file_ ){ fclose(feature_file_); }
 
-  delete tab_file_array_;
+  delete delim_file_array_;
   delete sqt_file_array_;
   delete xml_file_array_;
+}
+
+/**
+ * Creates an array of num_files_ strings with the target or decoy
+ * tag that the file in that position should have.  The first string
+ * will always be "target", the second will be "decoy" (iff num_files_
+ * = 2) or "decoy-1", the third "decoy-2" and so on.
+ */
+void OutputFiles::makeTargetDecoyList(){
+  target_decoy_list_ = new string[num_files_];
+  target_decoy_list_[0] = "target";
+  if( num_files_ == 2 ){
+    target_decoy_list_[1] = "decoy";
+  }else{
+    for(int file_idx = 1; file_idx < num_files_; file_idx++){
+      ostringstream name_builder;
+      name_builder << "decoy-" << file_idx;
+      target_decoy_list_[file_idx] = name_builder.str();
+    }
+  }
+}
+
+/**
+ * \returns A string with all of the parts of the filename
+ * concatenated together as
+ * directory/fileroot.command-name.[target|decoy]extension.  Assumes
+ * that extension includes a ".".  Either fileroot and/or target_decoy
+ * may be NULL. Directory argument is optional.
+ */
+string OutputFiles::makeFileName(const char* fileroot,
+                                 COMMAND_T command,
+                                 const char* target_decoy,
+                                 const char* extension,
+                                 const char* directory ){
+
+  // get command name
+  const char* basename = command_type_to_file_string_ptr(command);
+
+  ostringstream name_builder;
+  if( directory ){
+    name_builder << directory;
+    if( directory[strlen(directory) - 1] != '/' ){
+      name_builder << "/";
+    }
+  }
+  if( fileroot ){
+    name_builder << fileroot << ".";
+  }
+  name_builder << basename << "." ;
+  if( target_decoy != NULL && target_decoy[0] != '\0' ){
+    name_builder << target_decoy << ".";
+  }
+  name_builder << extension;
+  string filename = name_builder.str();
+
+  return filename;
 }
 
 /**
@@ -109,59 +168,70 @@ OutputFiles::~OutputFiles(){
  * New files are returned via the file_array_ptr argument.  When
  * num_files > 1, exactly one target file is created and the remaining
  * are decoys.  Files are named 
- * "output-dir/fileroot.command_name.target|decoy[n].extension".
+ * "output-dir/fileroot.command_name.target|decoy[-n].extension".
  * Requires that the output-dir already exist and have write
  * permissions. 
  * \returns TRUE if num_files new files are created, else FALSE.
  */
-BOOLEAN_T OutputFiles::createFiles(FILE*** file_array_ptr,
-                                   const char* output_dir,
-                                   const char* fileroot,
-                                   COMMAND_T command,
-                                   const char* extension,
-                                   BOOLEAN_T overwrite){
+bool OutputFiles::createFiles(FILE*** file_array_ptr,
+                              const char* output_dir,
+                              const char* fileroot,
+                              COMMAND_T command,
+                              const char* extension,
+                              bool overwrite){
   if( num_files_ == 0 ){
     return FALSE;
   }
   
   // allocate array
-  *file_array_ptr = (FILE**)mycalloc(num_files_, sizeof(FILE*));
-  const char* basename = command_type_to_file_string_ptr(command);
-
-  // determine the target/decoy name component for each file
-  string* target_decoy_list = new string[num_files_];
-  target_decoy_list[0] = "target";
-  if( num_files_ == 2 ){
-    target_decoy_list[1] = "decoy";
-  }else{
-    for(int file_idx = 1; file_idx < num_files_; file_idx++){
-      ostringstream name_builder;
-      name_builder << "decoy-" << file_idx;
-      target_decoy_list[file_idx] = name_builder.str();
-    }
-  }
+  *file_array_ptr = new FILE*[num_files_];
 
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    // concatinate the pieces of the name
-    ostringstream name_builder;
-    if( fileroot ){
-      name_builder << fileroot << "." ;
-    }
-    name_builder << basename << ".";
-    if( !target_decoy_list[file_idx].empty() ){
-      name_builder << target_decoy_list[file_idx] << "." ;
-    }
-    name_builder << extension;
-    string filename = name_builder.str();
-    
-    // open the file (it checks for success)
-    (*file_array_ptr)[file_idx] = create_file_in_path(filename.c_str(),
-                                                      output_dir,
-                                                      overwrite);
+    string filename = makeFileName( fileroot, command,
+                                    target_decoy_list_[file_idx].c_str(),
+                                    extension);
+    createFile(&(*file_array_ptr)[file_idx], 
+               output_dir, 
+               filename.c_str(), 
+               overwrite);
+
   }// next file
   
-  delete [] target_decoy_list;
+  return TRUE;
+}
+
+/**
+ * A private function for generating target and decoy MatchFileWriters named
+ * according to the given arguments.
+ *
+ * MatchFileWriters are returned via the file_array_ptr argument.  When
+ * num_files > 1, exactly one target file is created and the remaining
+ * are decoys.  Files are named 
+ * "output-dir/fileroot.command_name.target|decoy[-n].extension".
+ * Requires that the output-dir already exist and have write
+ * permissions. 
+ * \returns TRUE if num_files new MatchFileWriters are created, else FALSE.
+ */
+bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
+                              const char* output_dir,
+                              const char* fileroot,
+                              COMMAND_T command,
+                              const char* extension ){
+  if( num_files_ == 0 ){
+    return FALSE;
+  }
+  
+  // allocate array
+  *file_array_ptr = new MatchFileWriter*[num_files_];
+
+  // create each file writer
+  for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
+    string filename = makeFileName(fileroot, command,
+                                   target_decoy_list_[file_idx].c_str(),
+                                   extension, output_dir);
+    (*file_array_ptr)[file_idx] = new MatchFileWriter(filename.c_str());
+  }
   
   return TRUE;
 }
@@ -171,29 +241,17 @@ BOOLEAN_T OutputFiles::createFiles(FILE*** file_array_ptr,
  * arguments.
  *
  * New file is returned via the file_ptr argument.  File is named
- * output-dir/fileroot.comand_name.extension.  Requires that the
+ * output-dir/fileroot.comand_name[target_decoy].extension.  Requires that the
  * output-dir already exist and have write permissions.
  * \returns TRUE if the file is created, else FALSE.
  */
-BOOLEAN_T OutputFiles::createFile(FILE** file_ptr,
-                                  const char* output_dir,
-                                  const char* fileroot,
-                                  COMMAND_T command,
-                                  const char* extension,
-                                  BOOLEAN_T overwrite){
-
-  // construct file name
-  const char* basename = command_type_to_file_string_ptr(command);
-
-  ostringstream name_builder;
-  if( fileroot ){
-    name_builder << fileroot << ".";
-  }
-  name_builder << basename << "." << extension;
-  string filename = name_builder.str();
+bool OutputFiles::createFile(FILE** file_ptr,
+                             const char* output_dir,
+                             const char* filename,
+                             bool overwrite){
 
   // open the file
-  *file_ptr = create_file_in_path(filename.c_str(),
+  *file_ptr = create_file_in_path(filename,
                                   output_dir,
                                   overwrite);
 
@@ -201,8 +259,11 @@ BOOLEAN_T OutputFiles::createFile(FILE** file_ptr,
 
   return TRUE;
 }
+
 /**
- * \brief Write header lines to the .txt ,.sqt files ,and .pep.xml files.
+ * \brief Write header lines to the .txt, .sqt files, and .pep.xml
+ * files.  Optional num_proteins argument for .sqt files.  Use this
+ * for search commands, not post-search.
  */
 void OutputFiles::writeHeaders(int num_proteins){
 
@@ -210,8 +271,9 @@ void OutputFiles::writeHeaders(int num_proteins){
 
   // write headers one file at a time for tab and sqt
   for(int file_idx = 0; file_idx < num_files_; file_idx++){
-    if( tab_file_array_ ){
-      print_tab_header(tab_file_array_[file_idx]);
+    if( delim_file_array_ ){
+        delim_file_array_[file_idx]->addColumnNames(command_, (bool)file_idx);
+        delim_file_array_[file_idx]->writeHeader();
     }
 
     if( sqt_file_array_ ){
@@ -224,10 +286,35 @@ void OutputFiles::writeHeaders(int num_proteins){
       print_xml_header(xml_file_array_[file_idx]);
     }
 
-    
     tag = "decoy";
   }
 }
+
+/**
+ * \brief Write header lines to the .txt and .pep.xml
+ * files.  Use this for post-search commands, not search.
+ */
+void OutputFiles::writeHeaders(const vector<bool>& add_this_col){
+
+  const char* tag = "target";
+
+  // write headers one file at a time for tab and sqt
+  for(int file_idx = 0; file_idx < num_files_; file_idx++){
+    if( delim_file_array_ ){
+        delim_file_array_[file_idx]->addColumnNames(command_, 
+                                                    (bool)file_idx, 
+                                                    add_this_col);
+        delim_file_array_[file_idx]->writeHeader();
+    }
+
+    if ( xml_file_array_){
+      print_xml_header(xml_file_array_[file_idx]);
+    }
+
+    tag = "decoy";
+  }
+}
+
 /**
  * \brief Write header lines to the optional feature file.
  */
@@ -266,10 +353,9 @@ void OutputFiles::writeMatches(
   MATCH_COLLECTION_T** decoy_matches_array,  
                                 ///< array of collections from shuffled peptides
   int num_decoy_collections,    ///< num collections in array
-  SCORER_TYPE_T rank_type,           ///< use ranks for this type
-  Spectrum* spectrum     ///< given when all matches are to one spec
+  SCORER_TYPE_T rank_type,      ///< use ranks for this type
+  Spectrum* spectrum            ///< given when all matches are to one spec
   ){
-  
 
   if( target_matches == NULL ){
     return;  // warn?
@@ -301,7 +387,7 @@ void OutputFiles::printMatchesTab(
 
   carp(CARP_DETAILED_DEBUG, "Writing tab delimited results.");
 
-  if( tab_file_array_ == NULL ){
+  if( delim_file_array_ == NULL ){
     return;
   }
 
@@ -311,7 +397,7 @@ void OutputFiles::printMatchesTab(
 
     for(int file_idx = 0; file_idx < num_files_; file_idx++){
 
-      print_match_collection_tab_delimited(tab_file_array_[file_idx],
+      print_match_collection_tab_delimited(delim_file_array_[file_idx],
                                            matches_per_spec_,
                                            cur_matches,
                                            spectrum,
@@ -326,8 +412,8 @@ void OutputFiles::printMatchesTab(
   } else { // use the multi-spectra print function which assumes
            // targets and decoys are merged
     print_matches_multi_spectra(target_matches,
-                                tab_file_array_[0],
-                                (num_files_ > 1) ? tab_file_array_[1] : NULL);
+                                delim_file_array_[0],
+                                (num_files_ > 1) ? delim_file_array_[1] : NULL);
   }
 
 }
@@ -397,7 +483,7 @@ void OutputFiles::writeMatches(
   MATCH_COLLECTION_T*  matches ///< from multiple spectra
 ){
   print_matches_multi_spectra(matches, 
-                              tab_file_array_[0], 
+                              delim_file_array_[0],
                               NULL);// no decoy file
   print_matches_multi_spectra_xml(matches,
                                   xml_file_array_[0]);

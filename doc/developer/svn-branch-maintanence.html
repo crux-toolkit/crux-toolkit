@@ -64,7 +64,7 @@ version of crux, you will want to merge those changes into the trunk.
 <li>
 Get a clean copy of the trunk.  It is MUCH easier to undo mistakes if
 there are no changes in your local copy.  Either check out
-a clean copy or do <code>svn update -u</code> on an existing check
+a clean copy or do <code>svn update</code> on an existing check
 out to make sure all new files have been added and all existing files
 are up to date.
 <pre>
@@ -108,8 +108,8 @@ Merge the branches.  This command only changes your working copy;
 there will be time to fix things before committing to the repository.
 Use the <code>--dry-run</code> option first to see what changes will take place.
 <pre>
-~/sandbox/crux-trunk$ svn merge --dry-run -r3389:HEAD $SVNROOT/trunk
-~/sandbox/crux-side-project$ svn merge -r3389:HEAD $SVNROOT/trunk
+~/sandbox/crux-trunk$ svn merge --dry-run -r3389:HEAD $SVNROOT/branches/side-project
+~/sandbox/crux-trunk$ svn merge -r3389:HEAD $SVNROOT/branches/side-project
 </pre>                             
 
 <li>
@@ -122,7 +122,7 @@ essential.  You don't want to check in a broken version of crux.
 <li>
 Check in your changes with a detailed note describing the merge.  
 <pre>
-~/sandbox/crux-side-project$ svn commit -m 
+~/sandbox/crux-trunk$ svn commit -m 
   'Merged side-project branch into trunk -r3389:HEAD where head was 3522.  Adds a new utility, crux-do-stuff.'
 </pre>
 

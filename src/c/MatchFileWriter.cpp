@@ -58,6 +58,7 @@ void MatchFileWriter::setPrecision(){
     case CHARGE_COL:
     case SP_RANK_COL:
     case XCORR_RANK_COL:
+    case PERCOLATOR_RANK_COL:
     case BY_IONS_MATCHED_COL:
     case BY_IONS_TOTAL_COL:
     case MATCHES_SPECTRUM_COL:
@@ -73,7 +74,7 @@ void MatchFileWriter::setPrecision(){
     case SPECTRUM_PRECURSOR_MZ_COL:
     case SPECTRUM_NEUTRAL_MASS_COL:
     case PEPTIDE_MASS_COL:
-      match_precision_[col_idx] = 4; // add a --mass-precision option?
+      match_precision_[col_idx] = get_int_parameter("mass-precision");
       break;
 
       // score fields
@@ -84,14 +85,9 @@ void MatchFileWriter::setPrecision(){
     case WEIBULL_QVALUE_COL:
     case DECOY_XCORR_QVALUE_COL:
     case PERCOLATOR_SCORE_COL:
-    case PERCOLATOR_RANK_COL:
     case PERCOLATOR_QVALUE_COL:
     case QRANKER_SCORE_COL:
     case QRANKER_QVALUE_COL:
-    case ETA_COL:
-    case BETA_COL:
-    case SHIFT_COL:
-    case CORR_COL:
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
@@ -100,6 +96,15 @@ void MatchFileWriter::setPrecision(){
 #endif
       match_precision_[col_idx] = get_int_parameter("precision");
       break;
+
+      // special cases
+    case ETA_COL:
+    case BETA_COL:
+    case SHIFT_COL:
+    case CORR_COL:
+      match_precision_[col_idx] = 6;
+      break;
+
 
 
     case NUMBER_MATCH_COLUMNS:
@@ -280,7 +285,7 @@ void MatchFileWriter::addColumnNames
  * Write header to file using column names that have been set.
  */
 void MatchFileWriter::writeHeader(){
-
+  num_columns_ = 0;
   // set file position index for all columns being printed
   for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
     if( match_to_print_[col_type] == true ){

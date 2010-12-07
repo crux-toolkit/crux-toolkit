@@ -49,7 +49,7 @@ int main(void){
   Suite* suite_ion_series_2 = ion_series_suite_2(); 
   Suite* suite_list = list_suite();
   Suite* suite_mass = mass_suite();
-  Suite* suite_match = match_suite(); 
+  //  Suite* suite_match = match_suite(); 
   Suite* suite_match_collection = match_collection_suite();
   Suite* suite_modifications = modifications_suite();
   Suite* suite_modified_peptides_iterator = modified_peptides_iterator_suite();
@@ -58,9 +58,9 @@ int main(void){
   Suite* suite_peptide = peptide_suite(); 
   Suite* suite_peptide_modifications = peptide_modifications_suite();
   Suite* suite_protein = protein_suite(); 
-  Suite* suite_qvalue = qvalue_suite(); 
+  //  Suite* suite_qvalue = qvalue_suite(); 
   //Suite* suite_scorer = scorer_suite();
-  Suite* suite_serialize = serialize_suite();
+  //  Suite* suite_serialize = serialize_suite();
   //Suite* suite_spectrum = spectrum_suite();
   //Suite* suite_spectrum_collection = spectrum_collection_suite();
 
@@ -81,7 +81,7 @@ int main(void){
   srunner_add_suite(sr, suite_ion_series_2);
   srunner_add_suite(sr, suite_list);
   srunner_add_suite(sr, suite_mass);
-  srunner_add_suite(sr, suite_match);
+  //  srunner_add_suite(sr, suite_match);
   srunner_add_suite(sr, suite_match_collection);
   srunner_add_suite(sr, suite_modifications);
   srunner_add_suite(sr, suite_modified_peptides_iterator);
@@ -90,9 +90,9 @@ int main(void){
   srunner_add_suite(sr, suite_peptide);
   srunner_add_suite(sr, suite_peptide_modifications);
   srunner_add_suite(sr, suite_protein);
-  srunner_add_suite(sr, suite_qvalue);
+  //  srunner_add_suite(sr, suite_qvalue);
   //srunner_add_suite(sr,suite_scorer);
-  srunner_add_suite(sr, suite_serialize);
+  //  srunner_add_suite(sr, suite_serialize);
   //srunner_add_suite(sr,suite_spectrum);
   //srunner_add_suite(sr, suite_spectrum_collection);
 

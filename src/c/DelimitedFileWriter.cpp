@@ -44,7 +44,6 @@ DelimitedFileWriter::DelimitedFileWriter
  */
 DelimitedFileWriter::~DelimitedFileWriter(){
   if( file_ptr_ ){
-    writeRow();
     file_ptr_->close();
     delete file_ptr_;
   }
@@ -65,7 +64,7 @@ void DelimitedFileWriter::openFile(const char* filename){
   // open the file if either it doesn't exist or if we are allowed to overwrite
   file_ptr_ = create_file(filename, get_boolean_parameter("overwrite"));
   if( file_ptr_ == NULL ){
-    carp(CARP_ERROR, "Error creating file '%s'.", filename);
+    carp(CARP_FATAL, "Error creating file '%s'.", filename);
   }
 }
 
@@ -141,8 +140,7 @@ void DelimitedFileWriter::writeHeader(){
   }
   
   if( file_ptr_ == NULL || !file_ptr_->is_open() ){
-    carp(CARP_ERROR, "Cannot write to NULL delimited file.");
-    return;
+    carp(CARP_FATAL, "Cannot write to NULL delimited file.");
   }
   
   *file_ptr_ << column_names_[0];

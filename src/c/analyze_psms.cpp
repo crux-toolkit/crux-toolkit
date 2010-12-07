@@ -77,14 +77,14 @@ void analyze_matches_main(
 
   // Prepare the output files.
   OutputFiles output(command);
-  output.writeHeaders();
 
   // Perform the analysis.
   MATCH_COLLECTION_T* match_collection = NULL;
   switch(command) {
   case QVALUE_COMMAND:
     match_collection = run_qvalue(input_directory,
-                                  protein_database_name);
+                                  protein_database_name,
+                                  output);
     break;
   case PERCOLATOR_COMMAND:
   case QRANKER_COMMAND:
@@ -152,7 +152,6 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
     new_match_collection_iterator(input_directory, fasta_file, &num_decoys);
 
   // Create an array with counts of spectra in each match collection.
-  // N.B. This array is actually only needed by q-ranker.
   int num_sets = get_match_collection_iterator_number_collections(
       match_collection_iterator);
   int* num_spectra = (int*)mycalloc(num_sets, sizeof(int));
@@ -164,6 +163,11 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
       get_match_collection_match_total(match_collection);
     iterations++;
   }
+
+  // get from the match files the columns to print in the output files
+  const vector<bool>& cols_to_print = 
+    get_match_collection_iterator_cols_in_file(match_collection_iterator);
+  output.writeHeaders(cols_to_print);
 
   // Reset the iterator. (FIXME: There should be a function to do this!)
   free_match_collection_iterator(match_collection_iterator);

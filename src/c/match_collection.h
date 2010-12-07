@@ -39,6 +39,7 @@
 #include "protein_index.h"
 #include "modifications.h"
 #include "modified_peptides_iterator.h"
+#include "MatchFileWriter.h"
 
 using namespace std;
 
@@ -293,8 +294,8 @@ void print_matches
  */
 void print_matches_multi_spectra
 (MATCH_COLLECTION_T* match_collection, 
- FILE* tab_file, 
- FILE* decoy_tab_file);
+ MatchFileWriter* tab_file, 
+ MatchFileWriter* decoy_tab_file);
 
 
 /**
@@ -369,7 +370,7 @@ BOOLEAN_T print_match_collection_sqt(
  *\returns TRUE, if sucessfully print sqt format of the PSMs, else FALSE 
  */
 BOOLEAN_T print_match_collection_tab_delimited(
-  FILE* output, ///< the output file -out
+  MatchFileWriter* output, ///< the output file -out
   int top_match, ///< the top matches to output -in
   MATCH_COLLECTION_T* match_collection, ///< the match_collection to print sqt -in
   Spectrum* spectrum, ///< the spectrum to print sqt -in
@@ -658,6 +659,9 @@ void assign_match_collection_qvalues(
   SCORER_TYPE_T score_type,
   MATCH_COLLECTION_T* all_matches
 );
+
+const vector<bool>& get_match_collection_iterator_cols_in_file(
+  MATCH_COLLECTION_ITERATOR_T* match_collection);
 
 #endif
 

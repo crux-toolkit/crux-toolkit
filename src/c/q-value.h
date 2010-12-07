@@ -21,6 +21,7 @@
 #include "scorer.h"
 #include "match.h"
 #include "match_collection.h"
+#include "OutputFiles.h"
 
 FLOAT_T* compute_decoy_qvalues(
   FLOAT_T* target_scores,
@@ -36,7 +37,8 @@ FLOAT_T* compute_qvalues_from_pvalues(
 
 MATCH_COLLECTION_T* run_qvalue(
   char* psm_result_folder, 
-  char* fasta_file );
+  char* fasta_file,
+  OutputFiles& output );
 
 #endif //QVALUE_H
 

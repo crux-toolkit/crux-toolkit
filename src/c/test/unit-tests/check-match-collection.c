@@ -2,6 +2,7 @@
 #include <fstream>
 #include "check-match-collection.h"
 #include "match_collection.h"
+#include "MatchFileWriter.h"
 #include <vector>
 #include <cstdlib>
 #include <string>
@@ -43,6 +44,7 @@ void match_collection_setup(){
     set_match_peptide(m, pep);
     match_list.push_back(m);    
   }
+  set_verbosity_level(CARP_ERROR);
 }
 
 void set_matches(MATCH_COLLECTION_T* mc, vector<MATCH_T*> matches){
@@ -129,9 +131,12 @@ START_TEST(test_print_rank){
   */
 
   // try printing the top 3, should get 5 lines
-  FILE* fout = fopen(filename, "w");
+  unlink(filename);
+  MatchFileWriter* fout = new MatchFileWriter(filename);
+  fout->addColumnNames(SEARCH_COMMAND, false);
+  fout->writeHeader();
   print_match_collection_tab_delimited(fout, 3, mc, s, XCORR);
-  fclose(fout);
+  delete fout;
   sleep(2);  // wait to avoid NFS latency issues
 
   ifstream fin(filename, ifstream::in);
@@ -142,32 +147,18 @@ START_TEST(test_print_rank){
     count++;
   }
 
-  fail_unless( count == 5, 
-               "For top-match=3, there should have been 5 lines printed "
+  fail_unless( count == 6, 
+               "For top-match=3, there should have been 6 lines printed "
                "but there were %d.", count);
   fin.close();
 
   // try printing top 5, should still get 5 lines
-  fout = fopen(filename, "w");
+  unlink(filename);
+  fout = new MatchFileWriter(filename);
+  fout->addColumnNames(SEARCH_COMMAND, false);
+  fout->writeHeader();
   print_match_collection_tab_delimited(fout, 5, mc, s, XCORR);
-  fclose(fout);
-
-  fin.open(filename, ifstream::in);
-  count = -1; // it will count once after getting the eof
-  while( ! fin.eof() ) {
-    getline(fin, line);
-    count++;
-  }
-
-  fail_unless( count == 5, 
-               "For top-match=3, there should have been 5 lines printed "
-               "but there were %d.", count);
-  fin.close();
-
-  // try printing top 6, should get 6
-  fout = fopen(filename, "w");
-  print_match_collection_tab_delimited(fout, 6, mc, s, XCORR);
-  fclose(fout);
+  delete fout;
 
   fin.open(filename, ifstream::in);
   count = -1; // it will count once after getting the eof
@@ -177,7 +168,27 @@ START_TEST(test_print_rank){
   }
 
   fail_unless( count == 6, 
-               "For top-match=3, there should have been 5 lines printed "
+               "For top-match=3, there should have been 6 lines printed "
+               "but there were %d.", count);
+  fin.close();
+
+  // try printing top 6, should get 6
+  unlink(filename);
+  fout = new MatchFileWriter(filename);
+  fout->addColumnNames(SEARCH_COMMAND, false);
+  fout->writeHeader();
+  print_match_collection_tab_delimited(fout, 6, mc, s, XCORR);
+  delete fout;
+
+  fin.open(filename, ifstream::in);
+  count = -1; // it will count once after getting the eof
+  while( ! fin.eof() ) {
+    getline(fin, line);
+    count++;
+  }
+
+  fail_unless( count == 7, 
+               "For top-match=3, there should have been 7 lines printed "
                "but there were %d.", count);
   fin.close();
 

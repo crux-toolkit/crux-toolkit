@@ -100,6 +100,7 @@ void TestDelimitedFileWriter::setStringValues(){
   defaultWriterPtr->setColumnCurrentRow(0, "const char*");
   string a = "string";
   defaultWriterPtr->setColumnCurrentRow(1, a);
+  defaultWriterPtr->writeRow();
 
   delete defaultWriterPtr;
   defaultWriterPtr = NULL;
@@ -123,6 +124,7 @@ void TestDelimitedFileWriter::setFloatValues(){
   defaultWriterPtr->setColumnCurrentRow(3, b); // default precision
   defaultWriterPtr->setColumnCurrentRow(4, b, 1); // low precision
   defaultWriterPtr->setColumnCurrentRow(5, b, 3); // high precision
+  defaultWriterPtr->writeRow();
 
   delete defaultWriterPtr;
   defaultWriterPtr = NULL;
