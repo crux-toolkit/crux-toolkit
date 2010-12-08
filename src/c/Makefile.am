@@ -36,12 +36,20 @@ LIBFILES= \
   analyze_psms.h \
   carp.cpp \
   carp.h \
+  ComputeQValues.cpp \
+  ComputeQValues.h \
+  CreateIndex.cpp \
+  CreateIndex.h \
   create_index.cpp \
   create_index.h \
   crux-utils.cpp \
   crux-utils.h \
   database.cpp \
   database.h \
+  CruxApplication.cpp \
+  CruxApplication.h \
+  CruxApplicationList.cpp \
+  CruxApplicationList.h \
   DelimitedFile.cpp \
   DelimitedFile.h \
   DelimitedFileReader.cpp \
@@ -76,6 +84,8 @@ LIBFILES= \
   MatchFileReader.h \
   MatchFileWriter.cpp \
   MatchFileWriter.h \
+  MatchSearch.cpp \
+  MatchSearch.h \
   match_collection.cpp \
   match_collection.h \
   match_search.cpp \
@@ -101,15 +111,23 @@ LIBFILES= \
   peptide_modifications.h \
   peptide_src.cpp \
   peptide_src.h \
+  Percolator.cpp \
+  Percolator.h \
+  PrintProcessedSpectra.cpp \
+  PrintProcessedSpectra.h \
   print-processed-spectra.cpp \
   print-processed-spectra.h \
   protein.cpp \
   protein.h \
   protein_index.cpp \
   protein_index.h \
+  QRanker.cpp \
+  QRanker.h \
   q-value.cpp \
   q-value.h \
   SearchProgress.h \
+  SequestSearch.cpp \
+  SequestSearch.h \
   sequest-search.cpp \
   sequest-search.h \
   scorer.cpp \
@@ -123,6 +141,8 @@ LIBFILES= \
   utils.cpp \
   utils.h \
   version.h \
+  Version.cpp \
+  Version.h \
   xlink_search.h \
   xlink_compute_qvalues.h
 
