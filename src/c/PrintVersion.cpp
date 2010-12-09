@@ -1,30 +1,30 @@
-#include "Version.h"
+#include "PrintVersion.h"
 
 #include "version.h"
 
 
 using namespace std;
 
-Version::Version() {
+PrintVersion::PrintVersion() {
 
 }
 
-Version::~Version() {
+PrintVersion::~PrintVersion() {
 }
 
 
-int Version::main(int argc, char** argv) {
+int PrintVersion::main(int argc, char** argv) {
   (void)argc;
   (void)argv;
   printf("Crux version %s\n", VERSION);
   return 0;
 }
 
-string Version::getName() {
+string PrintVersion::getName() {
   return "version";
 }
 
-string Version::getDescription() {
+string PrintVersion::getDescription() {
   return 
     "Print the Crux version number to standard output, "
     "then exit";

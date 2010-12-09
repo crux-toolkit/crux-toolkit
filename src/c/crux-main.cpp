@@ -20,7 +20,7 @@
 #include "QRanker.h"
 #include "PrintProcessedSpectra.h"
 #include "SearchForXLinks.h"
-#include "Version.h"
+#include "PrintVersion.h"
 
 /**
  * The starting point for crux.  Prints a general usage statement when
@@ -39,7 +39,7 @@ int main(int argc, char** argv){
   applications.add(new QRanker());
   applications.add(new PrintProcessedSpectra());
   applications.add(new SearchForXLinks());
-  applications.add(new Version());
+  applications.add(new PrintVersion());
 
   int ret = applications.main(argc, argv);
   exit(ret);

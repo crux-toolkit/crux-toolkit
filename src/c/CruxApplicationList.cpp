@@ -89,7 +89,7 @@ void CruxApplicationList::usage() {
 
   }
 
-  cerr <<"max:"<<max_name_length<<endl;
+  //cerr <<"max:"<<max_name_length<<endl;
 
 
   cerr <<" Usage: " << list_name_ << " <command> [options] <argument>" << endl;

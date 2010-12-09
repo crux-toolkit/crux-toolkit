@@ -1,23 +1,23 @@
 /**
- * \file Version.h 
+ * \file PrintVersion.h 
  * AUTHOR: Sean McIlwain
  * CREATE DATE: 6 December 2010
  * \brief Object for printing the crux version number.
  *****************************************************************************/
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef PRINTVERSION_H
+#define PRINTVERSION_H
 
 #include "CruxApplication.h"
 #include "DelimitedFileReader.h"
 
 #include <string>
 
-class Version: public CruxApplication {
+class PrintVersion: public CruxApplication {
 
  public:
 
-  Version();
-  ~Version();
+  PrintVersion();
+  ~PrintVersion();
   virtual int main(int argc, char** argv);
   virtual std::string getName();
   virtual std::string getDescription();
