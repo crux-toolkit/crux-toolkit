@@ -65,6 +65,101 @@ void match_collection_teardown(){
   }
 }
 
+// test a private helper function in match_collection.cpp
+void get_target_decoy_filenames(vector<string>& target_decoy_names,
+                                DIR* directory,
+                                SET_TYPE_T type);
+
+START_TEST(test_list_files){
+
+  // CASE: search files, one decoy file
+  create_output_directory("list-files-1", TRUE);
+  system("touch list-files-1/search.target.txt");
+  system("touch list-files-1/somefileroot.search.target.txt");
+  system("touch list-files-1/search.target.pep.xml");
+  system("touch list-files-1/search.decoy.txt");
+  system("touch list-files-1/somefileroot.search.decoy.txt");
+  system("touch list-files-1/search.decoy.pep.xml");
+  system("touch list-files-1/search.log.txt");
+
+  DIR* dir = opendir("list-files-1");
+  // for target,decoy
+  for(int type=0; type < 2; type++){
+    vector<string> found_names;
+    get_target_decoy_filenames( found_names, dir, (SET_TYPE_T)type);
+    fail_unless( found_names.size() == 2, "Should have found 2 filenames in "
+                 "list-files-1 for type %d but only found %d.", 
+                 type, found_names.size() );
+    // check each name
+    for(size_t i=0; i<found_names.size(); i++){
+      fail_unless( found_names[i].find("search") != string::npos,
+                   "Filename returned (%s) did not have 'search' in it.",
+                   found_names[i].c_str());
+    }
+  }
+  closedir( dir );
+
+  // CASE: sequest files, one decoy file
+  create_output_directory("list-files-2", TRUE);
+  system("touch list-files-2/sequest.decoy.pep.xml");
+  system("touch list-files-2/sequest.decoy.sqt");
+  system("touch list-files-2/sequest.decoy.txt");
+  system("touch list-files-2/sequest.log.txt");
+  system("touch list-files-2/sequest.target.pep.xml");
+  system("touch list-files-2/sequest.target.sqt");
+  system("touch list-files-2/sequest.target.txt");
+  system("touch list-files-2/somefileroot.sequest.decoy.txt");
+  system("touch list-files-2/somefileroot.sequest.target.txt");
+  
+  dir = opendir("list-files-2");
+  // for target,decoy
+  for(int type=0; type < 2; type++){
+    vector<string> found_names;
+    get_target_decoy_filenames( found_names, dir, (SET_TYPE_T)type);
+    fail_unless( found_names.size() == 2, "Should have found 2 filenames in "
+                 "list-files-2 for type %d but only found %d.", 
+                 type, found_names.size() );
+    // check each name
+    for(size_t i=0; i<found_names.size(); i++){
+      fail_unless( found_names[i].find("sequest") != string::npos,
+                   "Filename returned (%s) did not have 'sequest' in it.",
+                   found_names[i].c_str());
+    }
+  }
+  closedir( dir );
+
+  // CASE: search files, two decoys
+  create_output_directory("list-files-2", TRUE);
+  system("touch list-files-3/search.decoy-1.pep.xml");
+  system("touch list-files-3/search.decoy-1.txt");
+  system("touch list-files-3/search.decoy-2.pep.xml");
+  system("touch list-files-3/search.decoy-2.txt");
+  system("touch list-files-3/search.log.txt");
+  system("touch list-files-3/search.target.pep.xml");
+  system("touch list-files-3/search.target.txt");
+  system("touch list-files-3/somefileroot.search.decoy-1.txt");
+  system("touch list-files-3/somefileroot.search.decoy-2.txt");
+  system("touch list-files-3/somefileroot.search.target.txt");
+
+  dir = opendir("list-files-3");
+  // for target,decoy
+  for(int type=0; type < 3; type++){
+    vector<string> found_names;
+    get_target_decoy_filenames( found_names, dir, (SET_TYPE_T)type);
+    fail_unless( found_names.size() == 2, "Should have found 2 filenames in "
+                 "list-files-3 for type %d but only found %d.", 
+                 type, found_names.size() );
+    // check each name
+    for(size_t i=0; i<found_names.size(); i++){
+      fail_unless( found_names[i].find("search") != string::npos,
+                   "Filename returned (%s) did not have 'search' in it.",
+                   found_names[i].c_str());
+    }
+  }
+  closedir( dir );
+}
+END_TEST
+
 START_TEST(test_create){
   // TODO add more create tests
   fail_unless( mc != NULL, "New empty match collection should not equal NULL.");
@@ -265,6 +360,7 @@ Suite* match_collection_suite(){
   Suite* s = suite_create("match_collection");
   // Test basic features
   TCase *tc_core = tcase_create("Core");
+  tcase_add_test(tc_core, test_list_files);
   tcase_add_test(tc_core, test_create);
   tcase_add_test(tc_core, test_set);
   tcase_add_test(tc_core, test_print_rank);
