@@ -115,6 +115,8 @@ LIBFILES= \
   Percolator.h \
   PrintProcessedSpectra.cpp \
   PrintProcessedSpectra.h \
+  PrintVersion.cpp \
+  PrintVersion.h \
   print-processed-spectra.cpp \
   print-processed-spectra.h \
   protein.cpp \
@@ -141,8 +143,6 @@ LIBFILES= \
   utils.cpp \
   utils.h \
   version.h \
-  Version.cpp \
-  Version.h \
   xlink_search.h \
   xlink_compute_qvalues.h
 
