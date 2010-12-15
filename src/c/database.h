@@ -249,7 +249,8 @@ PROTEIN_T* database_protein_iterator_protein_idx(
  */
 DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   DATABASE_T* database, ///< the database of interest -in
-  PEPTIDE_CONSTRAINT_T* peptide_constraint ///< the peptide_constraint to filter peptides -in
+  PEPTIDE_CONSTRAINT_T* peptide_constraint, ///< the peptide_constraint to filter peptides -in
+  bool store_all_peptides ///< true: parse all (unique) peptides into map
   );
 
 /**

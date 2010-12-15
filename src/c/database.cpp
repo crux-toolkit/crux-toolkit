@@ -67,7 +67,9 @@ struct database_protein_iterator {
 /**
  * \struct database_peptide_iterator
  * \brief Object to iterate over the peptides within a database, in an
- * unspecified order.
+ * unspecified order.  Can either parse and store all peptides on
+ * instantiation, removing duplicates in the process (for search), or
+ * parse peptides as they are returned (for build index).
  */
 struct database_peptide_iterator {
   DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; 
@@ -81,6 +83,9 @@ struct database_peptide_iterator {
   BOOLEAN_T first_passed; 
     ///< is it ok to convert prior_protein to light?
   PEPTIDE_T* cur_peptide; ///< the peptide to return by next()
+  bool store_all_peptides; ///< true for search so duplicates are combined
+  map<char*, PEPTIDE_T*, cmp_str> peptide_map; ///< store peptides by sequence
+  map<char*, PEPTIDE_T*>::iterator cur_map_position; ///< next in map to return
 };
 
 /**
@@ -101,6 +106,7 @@ BOOLEAN_T database_peptide_iterator_has_next_from_file(
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator
   );
 void generate_all_peptides(DATABASE_PEPTIDE_ITERATOR_T* iter);
+void queue_first_peptide_from_map(DATABASE_PEPTIDE_ITERATOR_T* iter);
 
 
 /**
@@ -855,8 +861,9 @@ PROTEIN_T* database_protein_iterator_next(
 DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   DATABASE_T* database, 
     ///< the database of interest -in
-  PEPTIDE_CONSTRAINT_T* peptide_constraint 
+  PEPTIDE_CONSTRAINT_T* peptide_constraint,
     ///< the peptide_constraint with which to filter peptides -in
+  bool store_all_peptides ///< for removing duplicates
   )
 {
   // set peptide implementation to linklist peptide_src
@@ -869,6 +876,12 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
     (DATABASE_PEPTIDE_ITERATOR_T*)
     mycalloc(1, sizeof(DATABASE_PEPTIDE_ITERATOR_T));
   
+  // set up peptide storage
+  database_peptide_iterator->store_all_peptides = store_all_peptides;
+  database_peptide_iterator->peptide_map = map<char*, PEPTIDE_T*, cmp_str>();
+  database_peptide_iterator->cur_map_position = 
+    database_peptide_iterator->peptide_map.begin();
+
   // set a new protein iterator
   database_peptide_iterator->database_protein_iterator =
     new_database_protein_iterator(database);
@@ -947,10 +960,73 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   // set the current working protein
   database_peptide_iterator->prior_protein = next_protein;
   
-  database_peptide_iterator->cur_peptide = 
+  // queue up first peptide
+  if( store_all_peptides ){
+    generate_all_peptides(database_peptide_iterator);  // fill the map
+    queue_first_peptide_from_map(database_peptide_iterator);
+
+  } else {  
+    database_peptide_iterator->cur_peptide = 
       database_peptide_iterator_next_from_file(database_peptide_iterator);
+  }
 
   return database_peptide_iterator;
+}
+
+/**
+ * Private function to generate peptides for this iterator, sort them
+ * and remove duplicates before returning them to the caller.
+ * Peptides are stored in the iterator's member variable peptide_map.
+ */
+void generate_all_peptides(DATABASE_PEPTIDE_ITERATOR_T* db_peptide_iter
+){
+  if( db_peptide_iter == NULL ){
+    carp(CARP_FATAL, "Cannot generate peptides for a null iterator.");
+  }
+
+  PEPTIDE_T* cur_peptide = NULL;
+  map<char*, PEPTIDE_T*, cmp_str>& peptide_map = db_peptide_iter->peptide_map;
+  map<char*, PEPTIDE_T*>::iterator peptide_map_ptr;
+
+  // populate map with all peptides, combining when duplicates found
+  while(database_peptide_iterator_has_next_from_file(db_peptide_iter)){
+    cur_peptide = database_peptide_iterator_next_from_file(db_peptide_iter);
+    char* sequence = get_peptide_sequence(cur_peptide);
+
+    // does it already exist in the map?
+    peptide_map_ptr = peptide_map.find(sequence);
+    if( peptide_map_ptr == peptide_map.end() ){ // not found, add it
+      peptide_map[sequence] = cur_peptide;
+    } else {  // already exists, combine new peptide with existing
+      merge_peptides_copy_src(peptide_map_ptr->second, cur_peptide);
+      free_peptide(cur_peptide); 
+      free(sequence); 
+    }
+  } // next peptide
+
+}
+
+/**
+ * Once the peptide_map has been populated with peptides, point the
+ * cur_peptide to first in map, point map pointer to second in map.
+ */
+void queue_first_peptide_from_map(DATABASE_PEPTIDE_ITERATOR_T* iter){
+
+  if( iter == NULL ){
+    carp(CARP_FATAL, "Can't queue first peptide from null db peptide iter.");
+  }
+
+  if( iter->peptide_map.empty() ){  // no peptides to return
+    iter->cur_peptide = NULL;
+    iter->cur_map_position = iter->peptide_map.end();
+    return;
+  }
+
+  // set cur_peptide to first peptide in map
+  iter->cur_peptide = iter->peptide_map.begin()->second;
+  // set map pointer to one past first (i.e. next to return)
+  iter->cur_map_position = iter->peptide_map.begin();  
+  ++(iter->cur_map_position);
 }
 
 /**
@@ -966,6 +1042,18 @@ void free_database_peptide_iterator(
   free_database_protein_iterator(
                      database_peptide_iterator->database_protein_iterator);
   free_peptide_constraint(database_peptide_iterator->peptide_constraint);
+
+  // free seqs in map
+  map<char*, PEPTIDE_T*>::iterator peptide_iter = 
+    database_peptide_iterator->peptide_map.begin();
+  for(; peptide_iter != database_peptide_iterator->peptide_map.end(); 
+      ++peptide_iter){
+
+    free (peptide_iter->first);  // free sequence
+    // peptide freed elsewhere?  segfault if here
+  }
+  database_peptide_iterator->peptide_map.clear();
+
   free(database_peptide_iterator);
 
 }
@@ -1014,11 +1102,23 @@ PEPTIDE_T* database_peptide_iterator_next(
   }
   
   PEPTIDE_T* return_peptide = iter->cur_peptide;
-  if( database_peptide_iterator_has_next_from_file(iter) ){
-    iter->cur_peptide = database_peptide_iterator_next_from_file(iter);
+
+  // fetch next peptide either from file or from map
+  if( iter->store_all_peptides ){
+    if( iter->cur_map_position == iter->peptide_map.end() ){
+      iter->cur_peptide = NULL;
+    } else {
+      iter->cur_peptide = iter->cur_map_position->second;
+      ++(iter->cur_map_position);
+    }
   } else {
-    iter->cur_peptide = NULL;
+    if( database_peptide_iterator_has_next_from_file(iter) ){
+      iter->cur_peptide = database_peptide_iterator_next_from_file(iter);
+    } else {
+      iter->cur_peptide = NULL;
+    }
   }
+
   return return_peptide;
 }
 
@@ -1133,7 +1233,8 @@ DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
 
   // create the database peptide iterator
   DATABASE_PEPTIDE_ITERATOR_T* db_peptide_iterator =
-    new_database_peptide_iterator(database, peptide_constraint);
+    new_database_peptide_iterator(database, peptide_constraint, 
+                                  false);// do not store peptides
 
   // create a sorted peptide iterator from db peptide iterator
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =

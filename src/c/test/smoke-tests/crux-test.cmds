@@ -46,6 +46,9 @@
 # Analyze existing search results
 1 = analyze_matches_existing = good_results/analyze_matches_existing.percolator.target.txt = crux percolator --overwrite T --output-dir existing_search test.fasta existing_search; cat existing_search/percolator.target.txt = 'Time' 'Database'
 
+# Search fasta with duplicate peptides, return one copy of each
+1 = search_duplicates = good_results/search_for_matches_duplicates.target.txt = crux search-for-matches --parameter-file params/set_rand_seed --fileroot duplicates test.ms2 duplicates.fasta; cat crux-output/duplicates.search.target.txt
+
 # Search for matches with Sp
 1 = search_sp = good_results/sp.search.target.txt = crux search-for-matches --parameter-file params/sp --output-dir crux-output-sp test.ms2 test.fasta; cat crux-output-sp/search.target.txt
 
