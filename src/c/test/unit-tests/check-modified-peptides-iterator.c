@@ -58,8 +58,8 @@ START_TEST(test_has_next_unmod){
   PEPTIDE_T* next_p = modified_peptides_iterator_next(iter1);
   fail_unless( next_p != NULL, "Next returned a null peptide");
   char* seq = get_peptide_sequence(next_p);
-  fail_unless( strcmp(get_peptide_sequence(next_p), "QGQVATVLSAPAK") == 0,
-               "First peptide should be QGQVATVLSAPAK");
+  fail_unless( strcmp(get_peptide_sequence(next_p), "ITNHLVAMIEK") == 0,
+               "First peptide should be ITNHLVAMIEK");
 
   fail_unless( modified_peptides_iterator_has_next(iter1) == TRUE, 
                "Iterator should have a second peptide");
@@ -69,8 +69,8 @@ START_TEST(test_has_next_unmod){
 
   next_p = modified_peptides_iterator_next(iter1);
   fail_unless( next_p != NULL, "Next returned a null second peptide");
-  fail_unless( strcmp(get_peptide_sequence(next_p), "ITNHLVAMIEK") == 0,
-               "Second peptide should be ITNHLVAMIEK");
+  fail_unless( strcmp(get_peptide_sequence(next_p), "QGQVATVLSAPAK") == 0,
+               "Second peptide should be QGQVATVLSAPAK");
   free_peptide(next_p);
   
 }

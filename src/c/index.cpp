@@ -1279,7 +1279,8 @@ BOOLEAN_T create_index(
                     
   // create database peptide_iterator
   peptide_iterator =
-    new_database_peptide_iterator(index->database, index->disk_constraint);
+    new_database_peptide_iterator(index->database, index->disk_constraint, 
+                                  false);// don't parse all pep into memory
 
   long int file_idx = 0;
   int low_mass = mass_limits[0];
