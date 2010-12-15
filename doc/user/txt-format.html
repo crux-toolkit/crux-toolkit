@@ -24,9 +24,12 @@ A sample txt file may be found <a href="search.target.txt">here</a>.
 <li>charge: The charge state for this spectrum in this PSM.</li>
 <li>spectrum precursor m/z: The observed m/z of the spectrum precursor ion.</li>
 <li>spectrum neutral mass: The computed mass of the spectrum precursor at the
-  given charge state. </li>
-<li>peptide mass: The computed mass of the peptide sequence (sum of
-  the amino acid masses).</li>
+  given charge state. This is equal to the precursor m/z minus the
+  mass of a proton (1.00727646677 Da), all multiplied by the charge. </li>
+<li>peptide mass: The mass of the peptide sequence, computed as the
+  sum of the the amino acid masses plus the mass of water
+  (18.010564684 Da or 18.0153 Da, depending on whether we are using
+  monoisotopic or average mass).</li>
 <li>delta_cn: The normalized difference in xcorr for this PSM relative
   to other PSMs for this spectrum at this charge state.</li>
 <li>sp score: The SEQUEST-type preliminary score.</li>
