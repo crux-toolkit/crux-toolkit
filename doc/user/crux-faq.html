@@ -13,6 +13,16 @@
 <li>
 <b>What input file formats does Crux support?</b></li>
 
+<p>
+Crux can search spectra in .ms2 and .mzXML file formats.  The .ms2
+files can be generated from Thermo .RAW files using the <a 
+href="http://proteome.gs.washington.edu/software.html">MakeMS2</a>
+program.  The .ms2 format is described <a href="ms2-format.html">here</a>. 
+When searching .mzXML files, use the <code>use-mstoolkit=T</code>
+option in the parameter file.  Additional file formats will be
+supported in future releases. 
+</p>
+
 <li>
 <b>How does Crux differ from SEQUEST?</b></li>
 
@@ -101,6 +111,55 @@ installed.</p>
 <li>
 <b>How does Crux select candidate peptides from the database?</b></li>
 
+<p>
+Crux selects candidate peptides for each spectrum based on its
+precursor m/z and an assumed charge state (specified in the input
+file).  A window around that precursor m/z is defined in one of three
+ways based on the <code>precursor-window-type</code>
+and <code>precursor-window</code> options.
+<ul>
+<li>  
+If the <code>precursor-window-type</code> is set to <code>mz</code>,
+then the window is calculated as precursor m/z &plusmn;
+<code>precursor-window</code> and the resulting range is converted
+to mass using the charge state.</li>
+<li>
+If the <code>precursor-window-type</code> is set to <code>mass</code>, then
+the charge state is used to convert the precursor m/z to mass, and the
+window is defined as precursor mass &plusmn; precursor-window.</li>
+<li>
+If the <code>precursor-window-type</code> is set to <code>ppm</code>
+(parts per million), then the precursor m/z is converted to mass and
+the window spans from precursor mass / (1.0 + window * 1e-6) to 
+precursor mass / (1.0 - window * 1e-6).</li>
+</ul>
+Candidate peptides are those whose mass falls within the defined
+window.  The peptide mass is computed as the sum of the average amino
+acid masses plus 18 Da for the terminal OH group, plus 1 Da for each
+charge.  Candidate peptides can also be constrained by minimum and
+maximum allowed length. </p>
+
+<p>
+Peptides are selected from protein sequence given either in a fasta
+file or a fasta file that has been indexed by <a href="crux-create-index.html">
+<code>crux create-index</code></a>.  The options <code>enzyme</code>, 
+<code>digestion</code> and <code>missed-cleavages</code> define how
+the proteins are broken up into peptides.  When <code>enzyme</code> is
+set to <code>no-enzyme</code> then any subsequence of a protein may be
+considered as a candidate peptide, and the options <code>digestion</code>
+and <code>missed-cleavages</code> are not used.  For other values of
+<code>enzyme</code>, the residues at the termini of the protein
+subsequence must follow specific rules.  For example, trypsin requires
+that the preceeding residue must be an R or K and the following
+residue may not be a P.  When <code>digestion</code> is set
+to <code>full-digest</code>, then these rules must be true at both ends of the
+peptide.  When it is <code>partial-digest</code>, then the rules must be true
+at at least one of the ends.  If <code>missed-cleavages</code> is set
+to false, then no cleavage site may lie within the peptide sequence;
+alternatively, if true then any number of sites may lie within the
+peptide sequence. </p>
+
+<!--
 <li>
 <b>How is the theoretical spectrum for a peptide generated?</b></li>
 
@@ -108,6 +167,7 @@ installed.</p>
 <b>In the calculation of XCorr, what preprocessing steps does the
 observed spectrum undergo prior to comparison with the theoretical
 spectrum?</b></li>
+-->
 
 <li>
 <b>What enhancements to Crux are planned?</b></li>
@@ -122,9 +182,6 @@ includes the following:</p>
 
 <li>
 Support for more input file types.</li>
-
-<li>
-The ability to produce XML outputs.</li>
 
 <li>
 The ability to exploit accurate precursor masses.</li>
