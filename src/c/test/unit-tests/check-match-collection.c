@@ -129,7 +129,7 @@ START_TEST(test_list_files){
   closedir( dir );
 
   // CASE: search files, two decoys
-  create_output_directory("list-files-2", TRUE);
+  create_output_directory("list-files-3", TRUE);
   system("touch list-files-3/search.decoy-1.pep.xml");
   system("touch list-files-3/search.decoy-1.txt");
   system("touch list-files-3/search.decoy-2.pep.xml");
