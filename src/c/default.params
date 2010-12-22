@@ -72,6 +72,11 @@ precursor-window-type=mass
 # crux-create-index, and crux-generate-peptides.
 precursor-window=3.000000
 
+# Set the precision for masses and m/z written to sqt and .txt files. 
+# Default=4
+# Available from parameter file for all commands.
+mass-precision=4
+
 # Specify rules for in silico digestion of proteins. See HTML
 # documentation for syntax. Default is trypsin.
 # Overrides the enzyme option.  Two lists of residues are given enclosed
@@ -267,8 +272,8 @@ use-mstoolkit=FALSE
 pi-zero=1.000000
 
 # Prefix added to output file names. Default=none. 
-# Used by crux create-index, crux search-for-matches, crux
-# compute-q-values, and crux percolator.
+# Used by crux search-for-matches, crux sequest-search, crux percolator
+# crux compute-q-values, and crux q-ranker.
 fileroot=__NULL_STR
 
 # Turn off cross-validation to select hyperparameters.
@@ -417,7 +422,7 @@ precision=8
 # num-decoys-per-target.
 decoy-location=separate-decoy-files
 
-# Optional file into which psm features are printed.
+# Optional file into which psm features are printed. Default=F.
 # Available for percolator and q-ranker.  File will be named
 # <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
 feature-file=FALSE

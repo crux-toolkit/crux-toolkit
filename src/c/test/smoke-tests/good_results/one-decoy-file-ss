@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Dec 15 11:39:57 2010
+H	StartTime	Tue Dec 21 18:59:35 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2675,13 +2675,13 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4855	1486.6195	1.01405990	10.49388313	7	-0.00195638	4	2	26	8	SPQGNTLNNEPGMK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK
 159	2	745.7500	1489.4855	1488.7063	1.08661401	17.71540642	4	-0.01036976	5	3	24	8	FHENISLPVASFK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK
 INFO: CPU: ranunculus
-INFO: Wed Dec 15 11:39:57 PST 2010
+INFO: Tue Dec 21 18:59:35 PST 2010
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96, charge 2, search number 100
-INFO: Elapsed time: 2.46 s
+INFO: Elapsed time: 2.45 s
 INFO: Finished crux sequest-search
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
@@ -2947,8 +2947,8 @@ use-mstoolkit=FALSE
 pi-zero=1.000000
 
 # Prefix added to output file names. Default=none. 
-# Used by crux create-index, crux search-for-matches, crux
-# compute-q-values, and crux percolator.
+# Used by crux search-for-matches, crux sequest-search, crux percolator
+# crux compute-q-values, and crux q-ranker.
 fileroot=one-decoy-file
 
 # Turn off cross-validation to select hyperparameters.
@@ -3177,7 +3177,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Dec 15 11:39:57 2010
+H	StartTime	Tue Dec 21 18:59:35 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

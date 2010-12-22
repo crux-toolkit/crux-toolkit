@@ -508,8 +508,8 @@ void initialize_parameters(void){
       "that charge will be searched.", "true");
   set_string_parameter("fileroot", NULL, 
       "Prefix added to output file names. Default=none. ",
-      "Used by crux create-index, crux search-for-matches, "
-      "crux compute-q-values, and crux percolator.", "true");
+      "Used by crux search-for-matches, crux sequest-search, crux percolator "
+      "crux compute-q-values, and crux q-ranker.", "true");
   set_string_parameter("output-dir", "crux-output", 
       "Folder to which results will be written. "
       "Default='crux-output'.",
