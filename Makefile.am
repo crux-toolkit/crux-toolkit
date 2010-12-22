@@ -29,8 +29,9 @@ clean-ac:
 ar=`arch`
 name=`uname`
 bdist:
-	rm -fr bdist
+	rm -fr bdist bdist-data
 	mkdir bdist
+	mkdir bdist-data
 	mkdir bdist/doc
 	mkdir bdist/bin
 	cp -R \
@@ -86,13 +87,15 @@ bdist:
 		cp tide/$(ar)/tide-search bdist/tide; \
 		cp tide/$(ar)/msconvert bdist/tide; \
 		cp tide/$(ar)/read-spectrumrecords bdist/tide; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast-02-10000.spectrumrecords bdist/tide; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast.fasta bdist/tide; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm-06-10000.spectrumrecords bdist/tide; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm.fasta bdist/tide;\
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast-02-10000.spectrumrecords bdist-data/; \
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast.fasta bdist-data/; \
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm-06-10000.spectrumrecords bdist-data/; \
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm.fasta bdist-data/;\
 	fi
 	zip -r $(distdir)-$(ar)-$(name).zip bdist
 	rm -fr bdist/
+	zip -r $(distdir)-data.zip bdist-data
+	rm -rf bdist-data
 
 checksum:
 	md5sum $(distdir)-$(ar)-$(name).zip > $(distdir)-$(ar)-$(name).zip.md5sum.txt
@@ -111,4 +114,4 @@ distcleancheck_listfiles = $(top_srcdir)/src/c/version.h
 # limited license distribution, COPYRIGHT for open source distribution.
 dist-hook:
 	if test -z "$(SEARCH_ENABLED)"; \
-    then cp COPYRIGHT $(distdir)/COPYING; fi
+	then cp COPYRIGHT $(distdir)/COPYING; fi
