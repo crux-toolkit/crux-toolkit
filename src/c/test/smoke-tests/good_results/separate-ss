@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Dec 15 09:56:27 2010
+H	StartTime	Tue Dec 21 18:59:32 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2365,7 +2365,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Dec 15 09:56:27 2010
+H	StartTime	Tue Dec 21 18:59:32 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4731,7 +4731,7 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4855	1488.7063	1.65527105	16.10622406	2	-0.06388148	3	3	24	4	FPISALNVSFEHK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK
 159	2	745.7500	1489.4855	1490.6510	0.00000000	2.07540607	4	-0.25453031	4	1	24	4	EVHNVDEMVFSGK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK
 INFO: CPU: ranunculus
-INFO: Wed Dec 15 09:56:27 PST 2010
+INFO: Tue Dec 21 18:59:32 PST 2010
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
@@ -5003,8 +5003,8 @@ use-mstoolkit=FALSE
 pi-zero=1.000000
 
 # Prefix added to output file names. Default=none. 
-# Used by crux create-index, crux search-for-matches, crux
-# compute-q-values, and crux percolator.
+# Used by crux search-for-matches, crux sequest-search, crux percolator
+# crux compute-q-values, and crux q-ranker.
 fileroot=separate
 
 # Turn off cross-validation to select hyperparameters.
@@ -5233,7 +5233,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Dec 15 09:56:27 2010
+H	StartTime	Tue Dec 21 18:59:32 2010
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
