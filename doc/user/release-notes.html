@@ -7,7 +7,7 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Version 1.XX</h3>
+<h2>Version 1.34</h3> December 22, 2010
 
 <h3>Minor changes</h3>
 
@@ -33,6 +33,36 @@ search-for-matches</code>.  When set to true, all candidate peptides
 will be scored by Sp in addition to xcorr.  This option is recommended
 for generating input to <code>percolator</code>
 or <code>q-ranker</code>.</li>
+
+<li>
+Added <code>max-ion-charge</code> parameter to designate the maximum
+charge for theoretical ions in <code>crux search-for-xlinks</code> and 
+<code>crux xlink-assign-ions</code>.
+
+<li>
+Modifications may optionally indicate if they prevent cleavage or
+prevent cross linking.
+
+<li>
+Results are printed to .pep.xml files in addition to .txt files.
+
+<li>
+Added a <code>mass-precision</code> option which sets how many digits
+are written for all mass and m/z values in .txt, .sqt, and .ms2 files.
+
+<li>
+The columns printed to the .txt files now vary with the 
+<code>crux</code> command being run and the settings so that unused
+columns are not printed.  
+
+<li>
+Fixed a bug that limited what files were used as input for post-search
+commands (e.g. <code>crux percolator</code>) based on fileroot.  Now
+files with different fileroots can be analyzed together.
+
+<li>
+Fixed a bug that caused searches using fasta files to search peptides 
+multiple times if they appeared in a file multiple times.
 
 
 </ul>
