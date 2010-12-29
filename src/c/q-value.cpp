@@ -307,13 +307,13 @@ MATCH_COLLECTION_T* run_qvalue(
       }
     }
     free_match_iterator(match_iterator);
+    free_match_collection(match_collection);
   }
 
   // get from the input files which columns to print in the output files
   const vector<bool>& cols_to_print =
     get_match_collection_iterator_cols_in_file(match_collection_iterator);
   output.writeHeaders(cols_to_print);
-  free_match_collection_iterator(match_collection_iterator);
 
   // Compute q-values from p-values.
   FLOAT_T* pvalues = NULL; // N.B. Misnamed for decoy calculation.
@@ -359,6 +359,7 @@ MATCH_COLLECTION_T* run_qvalue(
   assign_match_collection_qvalues(qvalue_hash, score_type, target_matches);
   free(pvalues);
   free(qvalues);
+  delete qvalue_hash;
 
   // Identify PSMs that are top-scoring per peptide.
   identify_best_psm_per_peptide(target_matches, score_type);
@@ -369,8 +370,11 @@ MATCH_COLLECTION_T* run_qvalue(
 
   // Store targets by score.
   sort_match_collection(target_matches, score_type);
+  output.writeMatches(target_matches);
 
   free_match_collection(decoy_matches);
+  free_match_collection_iterator(match_collection_iterator);
+
   return(target_matches);
 }
 

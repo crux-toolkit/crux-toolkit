@@ -2741,6 +2741,7 @@ BOOLEAN_T add_match_to_post_match_collection(
   // update hash table
   char* hash_value = get_peptide_hash_value(peptide); 
   add_hash(match_collection->post_hash, hash_value, NULL); 
+  free(hash_value);
   
   return TRUE;
 }

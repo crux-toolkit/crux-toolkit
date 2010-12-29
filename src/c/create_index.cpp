@@ -132,5 +132,5 @@ int create_index_main(int argc, char** argv){
   /* successfull exit message */
   carp(CARP_INFO, "crux-create-index finished.");
 
-  exit(0);
+  return 0;
 }

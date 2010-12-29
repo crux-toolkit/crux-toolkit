@@ -680,6 +680,10 @@ void free_index(
   INDEX_T* index
   )
 {
+  if(index == NULL ){
+    return;
+  }
+
   if (index->num_pointers > 1){
     index->num_pointers--;
   } else {
