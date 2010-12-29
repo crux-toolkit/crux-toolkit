@@ -35,7 +35,7 @@ class OutputFiles{
                           int num_names = 0);
   void writeFooters();
   void writeMatches(MATCH_COLLECTION_T* matches,
-                    MATCH_COLLECTION_T** decoy_matches_array,
+                    std::vector<MATCH_COLLECTION_T*>& decoy_matches_array,
                     int num_decoys,
                     SCORER_TYPE_T rank_type = XCORR,
                     Spectrum* spectrum = NULL);
@@ -69,21 +69,21 @@ class OutputFiles{
 
   void printMatchesXml(
                        MATCH_COLLECTION_T* target_matches,
-                       MATCH_COLLECTION_T** decoy_matches_array,
+                       vector<MATCH_COLLECTION_T*>& decoy_matches_array,
                        Spectrum* spectrum,
                        SCORER_TYPE_T rank_type);
  
 
   void printMatchesTab(
     MATCH_COLLECTION_T*  target_matches, ///< from real peptides
-    MATCH_COLLECTION_T** decoy_matches_array,  
+    std::vector<MATCH_COLLECTION_T*>& decoy_matches_array,  
                            ///< array of collections from shuffled peptides
     SCORER_TYPE_T rank_type,
     Spectrum* spectrum = NULL);
 
   void printMatchesSqt(
     MATCH_COLLECTION_T*  target_matches, ///< from real peptides
-    MATCH_COLLECTION_T** decoy_matches_array,  
+    std::vector<MATCH_COLLECTION_T*>& decoy_matches_array,  
                            ///< array of collections from shuffled peptides
   Spectrum* spectrum = NULL);
 

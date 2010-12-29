@@ -42,7 +42,7 @@ int main(int argc, char** argv){
   applications.add(new PrintVersion());
 
   int ret = applications.main(argc, argv);
-  exit(ret);
+  return ret;
 
 }// end main
 

@@ -899,7 +899,6 @@ void print_match_xml(
           );
   fprintf(output_file, "protein_descr=\"%s\">\n",
           protein_annotation);
-  free(protein_annotation);
   
   
   
@@ -925,11 +924,15 @@ void print_match_xml(
             num_tol_term, 
             flanking_aas_prev,
             flanking_aas_next);
-    free(protein_annotation);
   }
   flanking_aas_iter = NULL;
   free(flanking_aas);
   
+  set<pair<char* , char*> >::iterator itr = protein_info.begin();
+  for(; itr != protein_info.end(); ++itr){
+    free((*itr).first);
+    free((*itr).second);
+  }
   protein_info.clear();
 
   // print modifications to the output file
@@ -974,6 +977,7 @@ void print_match_xml(
           "    </search_hit>\n");
   
 
+  free(peptide_sequence);
 }
 
 
@@ -1192,6 +1196,7 @@ void get_information_of_proteins(
     
     protein_info.insert(make_pair(protein_id, protein_annotation));
   }
+  free_peptide_src_iterator(peptide_src_iterator);
 }
                              
 

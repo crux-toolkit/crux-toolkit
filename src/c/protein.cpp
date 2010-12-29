@@ -211,9 +211,6 @@ void free_protein(
     if (protein->annotation != NULL){
       free(protein->annotation);
     }
-    if (protein->database != NULL){
-      free_database(protein->database); 
-    }
   }
   free(protein);
 }
@@ -608,7 +605,11 @@ char* get_protein_id(
   PROTEIN_T* protein ///< the query protein -in 
   )
 {
-  
+  if( protein == NULL ){
+    carp(CARP_ERROR, "Cannot get protein id from NULL protein.\n");
+    return NULL;
+  } 
+
   if(protein->is_light){
     carp(CARP_FATAL, "Cannot get ID from light protein.");
   }

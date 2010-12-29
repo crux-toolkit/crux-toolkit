@@ -44,8 +44,8 @@ struct database{
   FILE*        file;     ///< Open filehandle for this database.
                          ///  A database has only one associated file.
   BOOLEAN_T is_parsed;  ///< Has this database been parsed yet.
-  std::vector<PROTEIN_T*> proteins; ///< Proteins in this database.
-  map<char*, PROTEIN_T*, cmp_str> protein_map; //map for proteins 
+  std::vector<PROTEIN_T*>* proteins; ///< Proteins in this database.
+  map<char*, PROTEIN_T*, cmp_str>* protein_map; //map for proteins 
   BOOLEAN_T is_hashed; //Indicator of whether the database has been hashed/mapped.
   unsigned long int size; ///< The size of the database in bytes (convenience)
   BOOLEAN_T use_light_protein; ///< should I use the light/heavy protein option
@@ -124,7 +124,8 @@ DATABASE_T* allocate_database(void){
   database->pointer_count = 1;
   database->file_size = 0;
   database->is_hashed = FALSE;
-  database->protein_map =  map<char*, PROTEIN_T*, cmp_str>();
+  database->proteins = new vector<PROTEIN_T*>();
+  database->protein_map = new map<char*, PROTEIN_T*, cmp_str>();
   // fprintf(stderr, "Free: Allocation: %i\n", database->pointer_count);
   return database;
 }
@@ -154,7 +155,10 @@ void free_database(
   DATABASE_T* database ///< An allocated database -in
   )
 {
-  
+  if(database == NULL){
+    return;
+  }
+
   // decrement database pointer counter
   --database->pointer_count;
   carp(CARP_DETAILED_DEBUG, "Database pointer count %i",  
@@ -163,10 +167,8 @@ void free_database(
   // DEBUG show the databse pointer count
   // printf("Free: After free: %s: %d\n", database->pointer_count);
 
-  // only free up memory when pointer count is zero
-  if(database->pointer_count > 0){ 
-    // TODO maybe change this to number of proteins? 
-    // since I think we now have circular references
+  // only free up memory when remaining pointers are from the proteins
+  if((size_t)database->pointer_count > database->proteins->size() ){ 
     return;
   }
   
@@ -178,10 +180,11 @@ void free_database(
     
     // free each protein in the array
     unsigned int protein_idx;
-    for(protein_idx=0; protein_idx < database->proteins.size(); ++protein_idx){
-      free_protein(database->proteins[protein_idx]);
+    for(protein_idx=0; protein_idx < database->proteins->size(); ++protein_idx){
+      free_protein((*database->proteins)[protein_idx]);
     }
-    // free(database->proteins);
+    delete database->proteins;
+    delete database->protein_map; // contents already deleted
     
     // free memory mapped binary file from memory
     if(database->is_memmap){
@@ -295,7 +298,7 @@ BOOLEAN_T parse_database_text_fasta(
       set_protein_database(new_protein, database);
       
       // add protein to database
-      database->proteins.push_back(new_protein);
+      database->proteins->push_back(new_protein);
     }
     // job well done..free iterator
     free_protein_index_iterator(protein_index_iterator);
@@ -323,10 +326,10 @@ BOOLEAN_T parse_database_text_fasta(
           if(!parse_protein_fasta_file(new_protein ,file)){
             fclose(file);
             free_protein(new_protein);
-            for(protein_idx=0;protein_idx<database->proteins.size();protein_idx++){
-              free_protein(database->proteins[protein_idx]);
+            for(protein_idx=0;protein_idx<database->proteins->size();protein_idx++){
+              free_protein((*database->proteins)[protein_idx]);
             }
-            database->proteins.clear();
+            database->proteins->clear();
             carp(CARP_ERROR, "failed to parse fasta file");
             return FALSE;
           }
@@ -334,9 +337,9 @@ BOOLEAN_T parse_database_text_fasta(
         }
         
         // add protein to database
-        database->proteins.push_back(new_protein);
+        database->proteins->push_back(new_protein);
         // set protein index, database
-        set_protein_protein_idx(new_protein, database->proteins.size()-1);
+        set_protein_protein_idx(new_protein, database->proteins->size()-1);
         set_protein_database(new_protein, database);
       }
       working_index = ftell(file);
@@ -408,19 +411,19 @@ BOOLEAN_T populate_proteins_from_memmap(
       // failed to parse the protein from memmap
       // free all proteins, and return FALSE
       free_protein(new_protein);
-      for(; protein_idx < database->proteins.size(); ++protein_idx){
-        free_protein(database->proteins[protein_idx]);
+      for(; protein_idx < database->proteins->size(); ++protein_idx){
+        free_protein((*database->proteins)[protein_idx]);
       }
-      database->proteins.clear();
+      database->proteins->clear();
       carp(CARP_ERROR, "failed to parse fasta file");
       return FALSE;
     }
     set_protein_is_light(new_protein, FALSE);
     
     // add protein to database
-    database->proteins.push_back(new_protein);
+    database->proteins->push_back(new_protein);
     // set protein index, database
-    set_protein_protein_idx(new_protein, database->proteins.size()-1);
+    set_protein_protein_idx(new_protein, database->proteins->size()-1);
     set_protein_database(new_protein, database);
   }
 
@@ -668,7 +671,7 @@ unsigned int get_database_num_proteins(
   DATABASE_T* database ///< the query database -in 
   )
 {
-  return database->proteins.size();
+  return database->proteins->size();
 }
 
 /**
@@ -703,13 +706,13 @@ PROTEIN_T* get_database_protein_at_idx(
 {
   //carp(CARP_DETAILED_DEBUG, "Getting db protein idx = %i, num proteins %i", 
   //     protein_idx, database->proteins.size());
-  if( protein_idx >= database->proteins.size()){
+  if( protein_idx >= database->proteins->size()){
     carp(CARP_FATAL, 
          "Protein index %i out of bounds.  %i proteins in the database",
-         protein_idx, database->proteins.size());
+         protein_idx, database->proteins->size());
   }
 
-  return database->proteins[protein_idx];
+  return (*database->proteins)[protein_idx];
 }
 
 /**
@@ -725,20 +728,20 @@ PROTEIN_T* get_database_protein_by_id_string(
   PROTEIN_T* protein = NULL;
   if (database->is_hashed) {
     map<char*, PROTEIN_T*>::iterator find_iter;
-    find_iter = database->protein_map.find((char*)protein_id);
+    find_iter = database->protein_map->find((char*)protein_id);
 
-    if (find_iter != database->protein_map.end()) {
+    if (find_iter != database->protein_map->end()) {
       protein = find_iter->second;
     }
   } else {
     //create the hashtable of protein ids
     for (unsigned int protein_idx = 0;
-      protein_idx < database->proteins.size();
+      protein_idx < database->proteins->size();
       protein_idx++) {
 
-      PROTEIN_T* current_protein = database->proteins[protein_idx];
+      PROTEIN_T* current_protein = (*database->proteins)[protein_idx];
       char* current_id = get_protein_id_pointer(current_protein);
-      database->protein_map[current_id] = current_protein;
+      (*database->protein_map)[current_id] = current_protein;
 
       if (strcmp(current_id, protein_id)==0) {
         protein = current_protein;
@@ -843,10 +846,10 @@ PROTEIN_T* database_protein_iterator_next(
   if(database_protein_iterator->cur_protein % 500 == 0){
     carp(CARP_DETAILED_DEBUG, "Reached protein %d out of %d", 
          database_protein_iterator->cur_protein,
-         database_protein_iterator->database->proteins.size());
+         database_protein_iterator->database->proteins->size());
   }
   
-  return database_protein_iterator->database->proteins[database_protein_iterator->cur_protein-1];
+  return (*database_protein_iterator->database->proteins)[database_protein_iterator->cur_protein-1];
 }
 
 /***********************************************

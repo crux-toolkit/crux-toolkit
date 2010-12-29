@@ -98,12 +98,11 @@ void analyze_matches_main(
     break;
   }
 
-  carp(CARP_INFO, "Outputting matches.");
-  output.writeMatches(match_collection);
+  // NOTE: return this step once the db/index is created and freed here
+  //carp(CARP_INFO, "Outputting matches.");
+  //output.writeMatches(match_collection);
 
-
-  // MEMLEAK below causes seg fault (or used to)
-  // free_match_collection(match_collection);
+  free_match_collection(match_collection);
   output.writeFooters();
   // clean up
   free(input_directory);
@@ -112,6 +111,7 @@ void analyze_matches_main(
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   char* name = command_type_to_command_line_string(command);
   carp(CARP_INFO, "Finished crux %s.", name);
+  free(name);
 }
 
 /**
@@ -326,6 +326,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
     break;
   }
 
+  output.writeMatches(target_match_collection);
 
   // free names
   unsigned int name_idx;
@@ -340,6 +341,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
   // TODO put free back in. took out because glibc claimed it was corrupted
   // double linked list
   // free_parameters();
+
   return target_match_collection;
 }
 

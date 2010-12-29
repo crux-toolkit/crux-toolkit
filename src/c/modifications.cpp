@@ -263,6 +263,7 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
     sprintf(return_string, "%c[%s]", modified_aa_to_char(aa), mass_string);
 
   }
+  free(mass_string);
   return return_string;
 }
 

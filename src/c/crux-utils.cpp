@@ -942,13 +942,15 @@ BOOLEAN_T delete_dir(char* dir) {
 
   //chdir(".."); // assumes the directory to delete is in cwd
   if( chdir(cwd) == -1 ){ 
+    free(cwd);
     return FALSE;
   }
   result = rmdir(dir);
   if(result == FALSE){
+    free(cwd);
     return FALSE;
   }
-  
+  free(cwd);
   return TRUE;
 }
 

@@ -347,6 +347,9 @@ void free_generate_peptides_iterator(
 {
   // free the nested iterator
   generate_peptides_iterator->free(generate_peptides_iterator->iterator);
+
+  free_database(generate_peptides_iterator->database);
+  free_index(generate_peptides_iterator->index);
   free_peptide_constraint(generate_peptides_iterator->constraint);
   free(generate_peptides_iterator);
 }
