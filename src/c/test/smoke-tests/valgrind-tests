@@ -1,0 +1,28 @@
+# A list of tests to check with valgrind to look for errors and memory leaks
+
+# create index
+valgrind --leak-check=full ../../crux create-index --overwrite T test.fasta index
+
+# search fasta
+valgrind --leak-check=full ../../crux search-for-matches --overwrite T test.ms2 test.fasta 
+
+# search index
+valgrind --leak-check=full ../../crux search-for-matches --overwrite T test.ms2 index
+
+# search mods
+valgrind --leak-check=full ../../crux search-for-matches --overwrite T --parameter-file params/mods test.ms2 index
+
+# search p-values
+valgrind --leak-check=full ../../crux search-for-matches --overwrite T --compute-p-values T test.ms2 index
+
+# sequest search
+valgrind --leak-check=full ../../crux sequest-search --overwrite T test.ms2 index
+
+# compute q-values decoy
+rm -rf crux-output; ../../crux search-for-matches --overwrite T --num-decoys-per-target 1 test.ms2 index
+valgrind --leak-check=full ../../crux compute-q-values --overwrite T index crux-output
+
+# compute q-values p-val
+rm -rf crux-output; ../../crux search-for-matches --overwrite T --compute-p-values T --num-decoys-per-target 1 test.ms2 index
+valgrind --leak-check=full ../../crux compute-q-values --overwrite T index crux-output
+

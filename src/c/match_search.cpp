@@ -61,7 +61,6 @@ void print_spectrum_matches(
   OutputFiles& output_files,       
   MATCH_COLLECTION_T* target_psms, 
   vector<MATCH_COLLECTION_T*>& decoy_psms,
-  int num_decoy_collections,
   Spectrum* spectrum,             
   BOOLEAN_T combine_target_decoy,
   int num_decoy_files
@@ -248,7 +247,6 @@ int search_main(int argc, char** argv){
     print_spectrum_matches(output_files, 
                            target_psms, 
                            decoy_collection_list,
-                           num_decoy_collections,
                            spectrum, 
                            combine_target_decoy, 
                            num_decoy_files);
@@ -432,7 +430,6 @@ void print_spectrum_matches(
   OutputFiles& output_files,       
   MATCH_COLLECTION_T* target_psms, 
   vector<MATCH_COLLECTION_T*>& decoy_psms,
-  int num_decoy_collections,
   Spectrum* spectrum,             
   BOOLEAN_T combine_target_decoy,
   int num_decoy_files
@@ -455,7 +452,6 @@ void print_spectrum_matches(
     vector<MATCH_COLLECTION_T*> empty_list;
     output_files.writeMatches(all_psms, // target matches
                               empty_list, // decoy matches
-                              0,        // num decoys
                               XCORR, spectrum); 
     
   }else{ // targets and decoys in separate files
@@ -478,13 +474,12 @@ void print_spectrum_matches(
       vector<MATCH_COLLECTION_T*> decoy_list(1, merged_decoy_psms);
       output_files.writeMatches(target_psms, 
                                 decoy_list, 
-                                1, // num decoys
                                 XCORR, spectrum);
       
     }else{
       // already sorted and ranked
       output_files.writeMatches(target_psms, decoy_psms, 
-                                num_decoy_collections, XCORR, spectrum);
+                                XCORR, spectrum);
     }
   }
 }

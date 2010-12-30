@@ -285,7 +285,6 @@ void print_matches(
     vector<MATCH_COLLECTION_T*> empty_list;
     output_files.writeMatches(all_psms, // target matches
                               empty_list,     // decoy matches
-                              0,        // num decoys
                               XCORR,    // use XCORR rank for cutoff
                               spectrum); 
 
@@ -308,7 +307,6 @@ void print_matches(
 
       vector<MATCH_COLLECTION_T*> decoy_list(1, merged_decoy_psms);
       output_files.writeMatches(target_psms, decoy_list, 
-                                1, // num decoys
                                 XCORR, spectrum);
       
     }else{   // write targets and decoys to separate files
@@ -320,7 +318,7 @@ void print_matches(
         decoy_psm_array.push_back(decoy_psms.at(decoy_idx));
       }
 
-      output_files.writeMatches(target_psms, decoy_psm_array, num_decoys, 
+      output_files.writeMatches(target_psms, decoy_psm_array, 
                                 XCORR, spectrum);
     }
   }
