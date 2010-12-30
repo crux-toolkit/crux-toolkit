@@ -353,7 +353,6 @@ void OutputFiles::writeMatches(
   MATCH_COLLECTION_T*  target_matches, ///< from real peptides
   vector<MATCH_COLLECTION_T*>& decoy_matches_array,  
                                 ///< array of collections from shuffled peptides
-  int num_decoy_collections,    ///< num collections in array
   SCORER_TYPE_T rank_type,      ///< use ranks for this type
   Spectrum* spectrum            ///< given when all matches are to one spec
   ){
@@ -363,10 +362,10 @@ void OutputFiles::writeMatches(
   }
 
   // confirm that there are the expected number of decoy collections
-  if( num_decoy_collections != num_files_ - 1){
+  if( (int)decoy_matches_array.size() != num_files_ - 1){
     carp(CARP_FATAL, 
          "WriteMatches was given %d decoy collections but was expecting %d.",
-         num_decoy_collections, num_files_ - 1);
+         (int)decoy_matches_array.size(), num_files_ - 1);
   }
 
   // print to each file type

@@ -36,7 +36,6 @@ class OutputFiles{
   void writeFooters();
   void writeMatches(MATCH_COLLECTION_T* matches,
                     std::vector<MATCH_COLLECTION_T*>& decoy_matches_array,
-                    int num_decoys,
                     SCORER_TYPE_T rank_type = XCORR,
                     Spectrum* spectrum = NULL);
   void writeMatches(MATCH_COLLECTION_T* matches);

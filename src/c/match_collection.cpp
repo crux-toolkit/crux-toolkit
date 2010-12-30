@@ -110,7 +110,7 @@ struct match_collection_iterator{
   MATCH_COLLECTION_T* match_collection; ///< the match collection to return
   BOOLEAN_T is_another_collection; 
   ///< is there another match_collection to return?
-  vector<bool> cols_in_file; ///< which columns were in the target file
+  vector<bool>* cols_in_file; ///< which columns were in the target file
 };
 
 /******* Private function declarations, described in definintions below ***/
@@ -2542,7 +2542,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
     // for the first target file, set headers based on input files
     if( set_type == SET_TARGET && file_idx == 0 ){
       delimited_result_file.getMatchColumnsPresent(
-                                  match_collection_iterator->cols_in_file); 
+                                  *match_collection_iterator->cols_in_file); 
     }
   } // next file
 
@@ -3193,6 +3193,8 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
     my_copy_string(output_file_directory);
   match_collection_iterator->is_another_collection = FALSE;
 
+  match_collection_iterator->cols_in_file = new vector<bool>();
+
   // setup the match collection iterator for iteration
   // here it will go parse files to construct match collections
   setup_match_collection_iterator(match_collection_iterator);
@@ -3242,6 +3244,8 @@ void free_match_collection_iterator(
   free(match_collection_iterator->directory_name);
   free_database(match_collection_iterator->database);
   closedir(match_collection_iterator->working_directory); 
+  delete match_collection_iterator->cols_in_file;
+
   free(match_collection_iterator);
 }
 
@@ -3475,7 +3479,7 @@ void assign_match_collection_qvalues(
 const vector<bool>& get_match_collection_iterator_cols_in_file(
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator){
 
-  return match_collection_iterator->cols_in_file;
+  return *match_collection_iterator->cols_in_file;
 }
 
 

@@ -305,6 +305,7 @@ MATCH_COLLECTION_T* run_qvalue(
       } else {
         add_match_to_match_collection(target_matches, match);
       }
+      free_match(match);
     }
     free_match_iterator(match_iterator);
     free_match_collection(match_collection);
