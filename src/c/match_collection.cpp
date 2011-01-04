@@ -1668,8 +1668,10 @@ void print_xml_header(
           min_number_termini
           );
 
+#ifndef DARWIN
   free(absolute_msms_path);
   free(absolute_database_path);
+#endif
   free(enz_str);
 
 
@@ -3489,4 +3491,5 @@ const vector<bool>& get_match_collection_iterator_cols_in_file(
  * c-basic-offset: 2
  * End:
  */
+
 
