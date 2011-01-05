@@ -1048,7 +1048,7 @@ void find_variable_modifications(
     char* start = NULL;
     // Parse returned string to find modifications within
     // brackets
-    while (*(amino+1) != '\0'){
+    while (*(amino) != '\0'){
       if (*(amino+1) =='['){
         start = amino+2;
         end = amino+2;
