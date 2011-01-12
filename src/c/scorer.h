@@ -311,6 +311,7 @@ int get_scorer_sp_b_y_ion_possible(
 void get_processed_peaks(
   Spectrum* spectrum, 
   int charge,
+  SCORER_TYPE_T score_type,
   FLOAT_T** intensities, ///< pointer to array of intensities
   int* mz_bins);
 

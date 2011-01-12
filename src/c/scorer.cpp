@@ -998,11 +998,12 @@ BOOLEAN_T create_intensity_array_observed(
 void get_processed_peaks(
   Spectrum* spectrum, 
   int charge,
+  SCORER_TYPE_T score_type,  // SP, XCORR
   FLOAT_T** intensities, ///< pointer to array of intensities
   int* max_mz_bin){
 
   // create a scorer
-  SCORER_T* scorer = allocate_scorer();
+  SCORER_T* scorer = new_scorer(score_type);
 
   // call create_intensity_array_observed
   create_intensity_array_observed(scorer, spectrum, charge);

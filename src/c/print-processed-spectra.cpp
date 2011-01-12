@@ -10,37 +10,26 @@
 
 #include "print-processed-spectra.h"
 
-
-static const int NUM_PPS_OPTIONS = 3;
-static const int NUM_PPS_ARGS = 2;
-
 int print_processed_spectra_main(int argc, char** argv){
 
   // Define optional command line arguments
-  int num_options = NUM_PPS_OPTIONS;
-  const char* option_list[NUM_PPS_OPTIONS] = { 
+  const char* option_list[] = { 
     "verbosity",
     "parameter-file", 
     "overwrite"
   };
+  int num_options = sizeof(option_list) / sizeof(char*);
 
   // Define required command line arguments
-  int num_arguments = NUM_PPS_ARGS ;
-  const char* argument_list[NUM_PPS_ARGS] = { "ms2 file", 
+  const char* argument_list[] = { "ms2 file", 
                                               "output file"}; 
+  int num_arguments = sizeof(argument_list) / sizeof(char*);
 
-  // For output of parameter parsing
-  set_verbosity_level(CARP_ERROR);  
-
-  // set up parameters and their defaults in parameter.c
-  initialize_parameters();
-
-  // Define optional and required command line arguments
-  select_cmd_line_options( option_list, num_options );
-  select_cmd_line_arguments( argument_list, num_arguments);
-
-  // Parse the command line, including the optional params file
-  parse_cmd_line_into_params_hash(argc, argv, "crux print-processed-spectra");
+  initialize_run(PROCESS_SPEC_COMMAND, 
+                 argument_list, 
+                 num_arguments,
+                 option_list, num_options,
+                 argc, argv);
 
   // Get arguments and options
   const char* input_ms2_name  = get_string_parameter_pointer("ms2 file");
@@ -89,7 +78,7 @@ int print_processed_spectra_main(int argc, char** argv){
     // change the peak values
     FLOAT_T* intensities = NULL;
     int max_mz_bin = 0;
-    get_processed_peaks(cur_spectrum, cur_charge,
+    get_processed_peaks(cur_spectrum, cur_charge, XCORR,
                         &intensities, &max_mz_bin);
 
     // print processed spectrum

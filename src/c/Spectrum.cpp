@@ -150,9 +150,9 @@ void Spectrum::printProcessedPeaks(
 
   // print S line
   fprintf(file, "S\t%06d\t%06d\t%.*f\n", 
-          mass_precision,
           first_scan_,
           last_scan_,
+          mass_precision,
           precursor_mz_);
 
   // print I line(s)
