@@ -1621,12 +1621,16 @@ void print_xml_header(
 
   hold_time = time(0);
 
+  const char* xsi = "http://www.w3.org/2001/XMLSchema-instance";
+  const char* xmlns = "http://regis-web.systemsbiology.net/pepXML";
+  const char* schema_location = "/usr/local/tpp/schema/pepXML_v110.xsd";
   fprintf(output, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-  fprintf(output, "<?xml-stylesheet type=\"text/xsl\" href=\"\">\n");
-  fprintf(output, "<msms_pipeline_analysis date=\"%s\" xmlns=\"\""
-          " xmlns:xsi=\"\" xsi:schemaLocation=\"\""
+  fprintf(output, "<?xml-stylesheet type=\"text/xsl\" href=\"\"?>\n");
+  fprintf(output, "<msms_pipeline_analysis date=\"%s\" xmlns=\"%s\""
+          " xmlns:xsi=\"%s\" xsi:schemaLocation=\"%s %s\""
           " summary_xml=\"\">\n",
-          ctime(&hold_time));
+          ctime(&hold_time),
+          xmlns, xsi, xmlns, schema_location);
 
   fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
           "msModel=\"%s\" msIonization=\"%s\" msAnalyzer=\"%s\" "
