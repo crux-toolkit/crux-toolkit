@@ -13,21 +13,49 @@
 
 using namespace std;
 
-// FIXME: Missing documentation!
+/**
+ * \class SearchProgress
+ *
+ * A class to keep track of how many searches have been performed and
+ * output the information at appropriate intervals.  Instantiate a
+ * class at the beginning of the search and call increment() after
+ * each search.  Frequency of output messages is determined by the
+ * parameter "print-search-progress".
+ */
 class SearchProgress{
 
  public:
+  /**
+   * Default constructor.
+   */
   SearchProgress() :
     searches_attempted_(0), 
     searches_with_matches_(0), 
-    progress_increment_(get_int_parameter("print-search-progress"))
-      { };
+    progress_increment_(get_int_parameter("print-search-progress")),
+    total_searches_(1)
+    { 
+      report_format_ = "Searching spectrum number %i (%i+), search number %i";
+    };
+
+  /**
+   * Constructor that also sets the total number of searches expected
+   * to be performed.
+   */
+  SearchProgress(int total_searches) :
+    searches_attempted_(0), 
+    searches_with_matches_(0), 
+    progress_increment_(get_int_parameter("print-search-progress")),
+    total_searches_(total_searches)
+    { 
+      report_format_ = "Searching spectrum number %i (%i+), search number %i"
+        " of %i, %.2f%% complete";
+    };
 
     void report(int scan_num, int charge){
       if( ((searches_attempted_ + 1) % progress_increment_) == 0 ){
-        carp(CARP_INFO, 
-             "Searching spectrum number %i, charge %i, search number %i",
-             scan_num, charge, searches_attempted_ + 1 );
+        carp(CARP_INFO, report_format_, 
+             scan_num, charge, searches_attempted_ + 1, total_searches_,
+             (float)(searches_attempted_ + 1) / (float)total_searches_ );
       }
     };
 
@@ -41,10 +69,11 @@ class SearchProgress{
     int getNumSearchesWithMatches(){ return searches_with_matches_; };
 
  private:
-  int searches_attempted_; ///< number of spec/charge's searched 
+  int searches_attempted_;    ///< number of spec/charge's searched 
   int searches_with_matches_; ///< number of spec with results in .txt file
-  int progress_increment_;  ///< how often to print progress
-
+  int progress_increment_;    ///< how often to print progress
+  int total_searches_;        ///< expected number of searches to perform
+  const char* report_format_; ///< format string to print
 };
 
 

@@ -38,8 +38,7 @@ SpectrumCollection::SpectrumCollection() {
  * Instantiates a new spectrum_collection object from a filename. 
  * Does *NOT* parse all spectra in the file. 
  * This will be done lazily depending on the subsequent method
- * calls (parse_spectrum_collection get_spectrum_collection_spectrum).
- * Uses the scan-number option to determine which spectra to include.
+ * calls (parse() or  getSpectrum()).
  * \returns  SPECTRUM_COLLECTION_T
  */
 SpectrumCollection::SpectrumCollection(

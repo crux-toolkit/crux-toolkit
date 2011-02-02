@@ -156,7 +156,7 @@ int search_main(int argc, char** argv){
   int num_decoy_files = get_int_parameter("num-decoy-files");
 
   // For remembering and reporting number of searches
-  SearchProgress progress;
+  SearchProgress progress(spectra->getNumChargedSpectra());
 
   // get list of mods
   PEPTIDE_MOD_T** peptide_mods = NULL;
