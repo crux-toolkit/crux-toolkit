@@ -41,7 +41,7 @@ double Random::uniform(double a, double b)
 	}
     }
 
-  double u = rand() % 1000000 / 999999.0;
+  double u = random() % 1000000 / 999999.0;
   return u * (b-a) + a;
 }
 

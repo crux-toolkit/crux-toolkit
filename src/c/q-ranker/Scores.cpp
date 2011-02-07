@@ -114,7 +114,7 @@ void Scores::createXvalSets(vector<Scores>& train,vector<Scores>& test, const un
   }
   
   for(unsigned int j=0;j<scores.size();j++) {
-    ix = rand()%(scores.size()-j);
+    ix = random()%(scores.size()-j);
     fold = 0;
     while(ix>remain[fold])
       ix-= remain[fold++];
@@ -462,8 +462,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -527,8 +527,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
    for(i = 0; i < n; i++)
      {
-       int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
-       int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+       int p1 = (int)((double)random()/RAND_MAX*(n-1)); 
+       int p2 = (int)((double)random()/RAND_MAX*(n-1)); 
        s = all_neg_examples[p1];
        all_neg_examples[p1] = all_neg_examples[p2];
        all_neg_examples[p2] = s;
@@ -619,8 +619,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -686,8 +686,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
    for(i = 0; i < n+nt; i++)
      {
-       int p1 = (int)((double)rand()/RAND_MAX*(n+nt-1)); 
-       int p2 = (int)((double)rand()/RAND_MAX*(n+nt-1)); 
+       int p1 = (int)((double)random()/RAND_MAX*(n+nt-1)); 
+       int p2 = (int)((double)random()/RAND_MAX*(n+nt-1)); 
        s = all_neg_examples[p1];
        all_neg_examples[p1] = all_neg_examples[p2];
        all_neg_examples[p2] = s;
@@ -789,8 +789,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -863,8 +863,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
    for(i = 0; i < n+nt+nt1; i++)
      {
-       int p1 = (int)((double)rand()/RAND_MAX*(n+nt+nt1-1)); 
-       int p2 = (int)((double)rand()/RAND_MAX*(n+nt+nt1-1)); 
+       int p1 = (int)((double)random()/RAND_MAX*(n+nt+nt1-1)); 
+       int p2 = (int)((double)random()/RAND_MAX*(n+nt+nt1-1)); 
        s = all_neg_examples[p1];
        all_neg_examples[p1] = all_neg_examples[p2];
        all_neg_examples[p2] = s;
@@ -970,8 +970,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -1035,8 +1035,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
    for(i = 0; i < n; i++)
      {
-       int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
-       int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+       int p1 = (int)((double)random()/RAND_MAX*(n-1)); 
+       int p2 = (int)((double)random()/RAND_MAX*(n-1)); 
        s = all_neg_examples[p1];
        all_neg_examples[p1] = all_neg_examples[p2];
        all_neg_examples[p2] = s;
@@ -1166,8 +1166,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -1236,8 +1236,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
    for(i = 0; i < n+nt; i++)
      {
-       int p1 = (int)((double)rand()/RAND_MAX*(n+nt-1)); 
-       int p2 = (int)((double)rand()/RAND_MAX*(n+nt-1)); 
+       int p1 = (int)((double)random()/RAND_MAX*(n+nt-1)); 
+       int p2 = (int)((double)random()/RAND_MAX*(n+nt-1)); 
        s = all_neg_examples[p1];
        all_neg_examples[p1] = all_neg_examples[p2];
        all_neg_examples[p2] = s;
@@ -1372,8 +1372,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -1446,8 +1446,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
    for(i = 0; i < n+nt+nt1; i++)
      {
-       int p1 = (int)((double)rand()/RAND_MAX*(n+nt+nt1-1)); 
-       int p2 = (int)((double)rand()/RAND_MAX*(n+nt+nt1-1)); 
+       int p1 = (int)((double)random()/RAND_MAX*(n+nt+nt1-1)); 
+       int p2 = (int)((double)random()/RAND_MAX*(n+nt+nt1-1)); 
        s = all_neg_examples[p1];
        all_neg_examples[p1] = all_neg_examples[p2];
        all_neg_examples[p2] = s;
@@ -1591,8 +1591,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -1632,8 +1632,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < n; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(n-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(n-1)); 
       s = all_neg_examples[p1];
       all_neg_examples[p1] = all_neg_examples[p2];
       all_neg_examples[p2] = s;
@@ -1702,8 +1702,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -1743,8 +1743,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < n; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(n-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(n-1)); 
       s = all_neg_examples[p1];
       all_neg_examples[p1] = all_neg_examples[p2];
       all_neg_examples[p2] = s;
@@ -1779,8 +1779,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nt; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nt-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nt-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nt-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nt-1)); 
       s = all_neg_examples1[p1];
       all_neg_examples1[p1] = all_neg_examples1[p2];
       all_neg_examples1[p2] = s;
@@ -1856,8 +1856,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nz; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nz-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nz-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nz-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nz-1)); 
       s = all_pos_examples[p1];
       all_pos_examples[p1] = all_pos_examples[p2];
       all_pos_examples[p2] = s;
@@ -1895,8 +1895,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < n; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(n-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(n-1)); 
       s = all_neg_examples[p1];
       all_neg_examples[p1] = all_neg_examples[p2];
       all_neg_examples[p2] = s;
@@ -1928,8 +1928,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
   //mix up the examples
   for(i = 0; i < nt; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(nt-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(nt-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(nt-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(nt-1)); 
       s = all_neg_examples1[p1];
       all_neg_examples1[p1] = all_neg_examples1[p2];
       all_neg_examples1[p2] = s;
@@ -1961,8 +1961,8 @@ void Scores::fillFeaturesSplit(Scores& train,Scores& test,SetHandler& norm,SetHa
    //mix up the examples
    for(i = 0; i < ntt; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(ntt-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(ntt-1)); 
+      int p1 = (int)((double)random()/RAND_MAX*(ntt-1)); 
+      int p2 = (int)((double)random()/RAND_MAX*(ntt-1)); 
       s = all_neg_examples2[p1];
       all_neg_examples2[p1] = all_neg_examples2[p2];
       all_neg_examples2[p2] = s;

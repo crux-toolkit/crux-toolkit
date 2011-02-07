@@ -24,7 +24,7 @@ void Linear :: resize(int m, int n)
     }
   for(int k = 0; k < num_neurons; k++)
     for(int j = 0; j < len_w; j++)
-      w[k][j] = ((double)rand()/RAND_MAX - 0.5)/num_features;
+      w[k][j] = ((double)random()/RAND_MAX - 0.5)/num_features;
   
   
 }
