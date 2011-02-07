@@ -601,7 +601,7 @@ int Caller::preIterationSetup(double * w) {
 int Caller::run() {
   time(&startTime);
   startClock=clock();
-  srand(seed);
+  srandom(seed);
   if(VERB>0)  cerr << extendedGreeter();
   //File reading
   bool doSingleFile = !shuffledWC.empty();

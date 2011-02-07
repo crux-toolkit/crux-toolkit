@@ -469,7 +469,7 @@ int Caller::preIterationSetup() {
 int Caller::run(
   bool do_xval ////< Select hyperparameters via cross-validation? -in
   ) {
-  srand(seed);
+  srandom(seed);
   if(VERB>0)  cerr << extendedGreeter();
   //File reading
   bool doSingleFile = !decoyWC.empty();

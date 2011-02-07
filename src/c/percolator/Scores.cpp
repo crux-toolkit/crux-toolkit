@@ -86,7 +86,7 @@ void Scores::fillFeatures(Scores& train,Scores& thresh,Scores& test,SetHandler& 
   const double * featVec;
   while((featVec=shuffIter.getNext())!=NULL) {
     int remain = k+m+l - ix1 - ix2 -ix3;
-    int sel = (rand() % remain);
+    int sel = (random() % remain);
     if (sel<(k-ix1)) {
 //    if (((int)(ix1+ix2+ix3+1)*trainRatio)>=ix1+1) {
       train.scores[ix1].label=-1;
@@ -147,7 +147,7 @@ void Scores::fillFeatures(Scores& train,Scores& test,SetHandler& norm,SetHandler
   const double * featVec;
   while((featVec=shuffIter.getNext())!=NULL) {
     int remain = k + l - ix1 - ix2;
-    int sel = (rand() % remain);
+    int sel = (random() % remain);
 //    if (((int)(ix1+ix2+1)*ratio)>=ix1+1) {
     if (sel<(k-ix1)) {
       train.scores[ix1].label=-1;

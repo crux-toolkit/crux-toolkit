@@ -306,7 +306,7 @@ void Caller :: train_net_two(Scores &set)
       if(ind_low<0)
 	{
 	  unsigned int ind;
-	  ind = rand()%set.size();
+	  ind = random()%set.size();
 	  featVec = set[ind].pPSM->features;
 	  label = set[ind].label;
 	  net.train(featVec,label);
@@ -320,7 +320,7 @@ void Caller :: train_net_two(Scores &set)
 	  if(interval == 0)
 	    ind1 = 0;
 	  else
-	    ind1 = rand()%(interval);
+	    ind1 = random()%(interval);
 	  if(ind1<0 || ind1>set.size()-1) continue;
 	  if(set[ind1].label == 1)
 	    label_flag = -1;
@@ -331,14 +331,14 @@ void Caller :: train_net_two(Scores &set)
 	  while(1)
 	    {
 	      if(interval == 0)
-		ind2 = rand()%set.size();
+		ind2 = random()%set.size();
 	      else
-		ind2 = rand()%(interval);
+		ind2 = random()%(interval);
 	      if(ind2<0 || ind2>set.size()-1) continue;
 	      if(set[ind2].label == label_flag) break;
 	      if(cn > 1000)
 		{
-		  ind2 = rand()%set.size();
+		  ind2 = random()%set.size();
 		  break;
 	      	}
 	      cn++;

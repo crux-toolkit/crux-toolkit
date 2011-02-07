@@ -1260,7 +1260,7 @@ void shuffle_matches(
     carp(CARP_ERROR, "Cannot shuffle null match array.");
     return;
   }
-  //  srand(time(NULL));
+  //  srandom(time(NULL));
 
   int match_idx = 0;
   for(match_idx = start_index; match_idx < end_index-1; match_idx++){

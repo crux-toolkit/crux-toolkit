@@ -919,7 +919,7 @@ MATCH_COLLECTION_T* random_sample_match_collection(
   int match_idx = 0;
   int score_type_idx = 0;
   MATCH_COLLECTION_T* sample_collection = allocate_match_collection();
-  srand(time(NULL));
+  srandom(time(NULL));
 
   // make sure we don't sample more than the matches in the match collection
   if (count_max >= match_collection->match_total){
@@ -929,10 +929,10 @@ MATCH_COLLECTION_T* random_sample_match_collection(
 
   // ranomly select matches upto count_max
   for(; count_idx < count_max; ++count_idx){
-    match_idx = (int)((double)rand()/((double)RAND_MAX + (double)1)) 
+    match_idx = (int)((double)random()/((double)RAND_MAX + (double)1)) 
       * match_collection->match_total;
     
-    // match_idx = rand() % match_collection->match_total;
+    // match_idx = random() % match_collection->match_total;
     sample_collection->match[count_idx] = match_collection->match[match_idx];
     // increment pointer count of the match object 
     increment_match_pointer_count(sample_collection->match[count_idx]);
