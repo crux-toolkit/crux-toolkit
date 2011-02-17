@@ -57,6 +57,17 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
   DATABASE_T* dbase    ///< Database from which to draw peptides
   );
 
+MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_zstate(
+  double mz,               ///< Spectrum precrusor mz
+  SpectrumZState& zstate,  ///< Target mz of peptides
+  PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  BOOLEAN_T is_decoy,  ///< generate decoy peptides
+  INDEX_T* index,      ///< Index from which to draw peptides OR
+  DATABASE_T* dbase    ///< Database from which to draw peptides
+  );
+
+
+
 /**
  * \brief Create a new modified_PEPTIDES_iterator for all peptides in
  * the database or index.

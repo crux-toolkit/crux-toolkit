@@ -16,8 +16,8 @@ class FilteredSpectrumChargeIterator {
   SpectrumCollection* spectrum_collection_;///< spectra to iterate over
   bool has_next_;  ///< is there a spec that passes criteria
   int spectrum_index_; ///< The index of the current spectrum
-  std::vector<int> charges_;        ///< Array of possible charges to search
-  int charge_index_;    ///< The index of the charge of the current spectrum
+  std::vector<SpectrumZState> zstates_;        ///< Array of possible zstates to search
+  int zstate_index_;    ///< The index of the z-state for the current spectrum
   double min_mz_;       ///< return only spec above this mz
   double max_mz_;      ///< return only spec below this mz
   int search_charge_;   ///< which z to search, 0 for all
@@ -60,7 +60,7 @@ class FilteredSpectrumChargeIterator {
   /**
    * The basic iterator function next.
    */
-  Spectrum* next(int* charge);
+  Spectrum* next(SpectrumZState& zstate);
 
 };
 

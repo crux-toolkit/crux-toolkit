@@ -95,7 +95,7 @@ void free_match_collection(
 int add_matches(
   MATCH_COLLECTION_T* match_collection,///< add matches to this
   Spectrum* spectrum,  ///< compare peptides to this spectrum
-  int charge,            ///< use this charge state for spectrum
+  SpectrumZState& zstate,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy,     ///< do we shuffle the peptides
   BOOLEAN_T store_scores, ///< TRUE means save scores in xcorrs[]
@@ -622,9 +622,15 @@ BOOLEAN_T compute_p_values(
  *
  * \returns TRUE if the match_collection's charge state was changed.
  */
+/*
 BOOLEAN_T set_match_collection_charge(
   MATCH_COLLECTION_T* match_collection,  ///< match collection to change
   int charge ///< new charge state
+);
+*/
+BOOLEAN_T set_match_collection_zstate(
+  MATCH_COLLECTION_T* match_collection, ///< match collection to change
+  SpectrumZState& zstate ///< new zstate
 );
 
 /**

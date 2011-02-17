@@ -41,7 +41,7 @@ int search_pep_mods(
   INDEX_T* index,       ///< index to use for generating peptides
   DATABASE_T* database, ///< db to use for generating peptides
   Spectrum* spectrum, ///< spectrum to search
-  int charge,           ///< seach spectrum at this charge state
+  SpectrumZState& zstate,           ///< seach spectrum at this charge state
   PEPTIDE_MOD_T** pep_mod_list, ///< list of peptide mods to apply
   int num_peptide_mods, ///< how many p_mods to use from the list
   BOOLEAN_T store_scores///< keep all scores for p-value estimation
@@ -164,8 +164,10 @@ int search_main(int argc, char** argv){
 
   // for each spectrum
   while(spectrum_iterator->hasNext()) {
-    int charge = 0;
-    Spectrum* spectrum = spectrum_iterator->next(&charge);
+    SpectrumZState zstate;
+    Spectrum* spectrum = spectrum_iterator->next(zstate);
+    int charge = zstate.getCharge();
+    
     BOOLEAN_T is_decoy = FALSE;
 
     progress.report(spectrum->getFirstScan(), charge);
@@ -177,7 +179,7 @@ int search_main(int argc, char** argv){
                                         index,       
                                         database, 
                                         spectrum, 
-                                        charge,
+                                        zstate,
                                         peptide_mods, 
                                         num_peptide_mods,
                                         compute_pvalues); 
@@ -209,7 +211,7 @@ int search_main(int argc, char** argv){
                       index, 
                       database, 
                       spectrum, 
-                      charge, 
+                      zstate, 
                       peptide_mods, 
                       max_pep_mods,
                       compute_pvalues);
@@ -345,14 +347,17 @@ int search_pep_mods(
   INDEX_T* index,       ///< index to use for generating peptides
   DATABASE_T* database, ///< db to use for generating peptides
   Spectrum* spectrum, ///< spectrum to search
-  int charge,           ///< seach spectrum at this charge state
+  SpectrumZState& zstate, ///< seach spectrum at this z-state
   PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to apply
   int num_peptide_mods, ///< how many p_mods to use from the list
   BOOLEAN_T store_scores///< save all scores for p-value estimation
 ){
 
   // set match_collection charge
-  set_match_collection_charge(match_collection, charge);
+  set_match_collection_zstate(match_collection, zstate);
+
+  // get spectrum precursor mz
+  double mz = spectrum->getPrecursorMz();
 
   int mod_idx = 0;
 
@@ -388,8 +393,8 @@ int search_pep_mods(
     
     // get peptide iterator
     MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator =
-      new_modified_peptides_iterator_from_mz(spectrum->getPrecursorMz(),
-                                             charge,
+      new_modified_peptides_iterator_from_zstate(mz,
+                                             zstate,
                                              peptide_mod, 
                                              is_decoy,
                                              index,
@@ -399,7 +404,7 @@ int search_pep_mods(
     // score peptides
     int added = add_matches(match_collection, 
                             spectrum, 
-                            charge, 
+                            zstate, 
                             peptide_iterator,
                             is_decoy,
                             store_scores,

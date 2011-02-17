@@ -68,10 +68,12 @@ int print_processed_spectra_main(int argc, char** argv){
 
   // loop over all spectra, process, print
   while(spectrum_iterator->hasNext()){
+    SpectrumZState cur_zstate;
     int cur_charge = 0;
     Spectrum* cur_spectrum = 
-      spectrum_iterator->next(&cur_charge);
+      spectrum_iterator->next(cur_zstate);
 
+    cur_charge = cur_zstate.getCharge();
     carp(CARP_DETAILED_INFO, "Processing spectrum %d charge %d.",
          cur_spectrum->getFirstScan(), cur_charge);
 
@@ -82,7 +84,7 @@ int print_processed_spectra_main(int argc, char** argv){
                         &intensities, &max_mz_bin);
 
     // print processed spectrum
-    cur_spectrum->printProcessedPeaks(cur_charge, 
+    cur_spectrum->printProcessedPeaks(cur_zstate, 
                                         intensities, max_mz_bin,
                                         output_ms2);
   }

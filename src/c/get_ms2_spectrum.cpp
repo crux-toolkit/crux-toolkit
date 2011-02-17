@@ -124,9 +124,8 @@ int main(int argc, char** argv){
     } else {
 
       int charge_state_index = 0; 
-      int charge_state_num = spectrum->getNumPossibleZ();
-      std::vector<int> possible_z_array = spectrum->getPossibleZ();
-      int possible_z;
+      int charge_state_num = spectrum->getNumZStates();
+      std::vector<SpectrumZState> zstates_array = spectrum->getZStates();
   
       printf("Scan number: %i\n", scan_number);
       printf("Precursor m/z:%.2f\n", spectrum->getPrecursorMz());
@@ -139,13 +138,14 @@ int main(int argc, char** argv){
     
       for(charge_state_index=0; charge_state_index < charge_state_num; 
           ++charge_state_index){
-        possible_z = possible_z_array[charge_state_index];
-        printf("Charge state:%d\n", possible_z);
-        printf("Neutral mass:%.2f\n", 
-               spectrum->getNeutralMass(possible_z));
-        printf("Charged mass:%.2f\n", spectrum->getMass(possible_z));
-        printf("M+H+ mass:%.2f\n", 
-               spectrum->getSinglyChargedMass(possible_z));
+
+        SpectrumZState& zstate = zstates_array[charge_state_index];
+        FLOAT_T charged_mass = spectrum->getPrecursorMz() * (FLOAT_T)zstate.getCharge();
+
+        printf("Charge state:%d\n", zstate.getCharge());
+        printf("Neutral mass:%.2f\n", zstate.getNeutralMass());
+        printf("Charged mass:%.2f\n", charged_mass);
+        printf("M+H+ mass:%.2f\n", zstate.getSinglyChargedMass());
       }
     }
     delete spectrum;

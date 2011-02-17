@@ -266,7 +266,6 @@ void print_match_sqt(
 void print_match_xml(
   MATCH_T* match,
   FILE* output_file,
-  FLOAT_T spectrum_mass,
   const BOOLEAN_T* scores_computed
 );
 
@@ -346,9 +345,7 @@ void print_match_tab(
   MatchFileWriter*    file,                   ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-  FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
-  int      num_matches,            ///< num matches in spectrum -in
-  int      charge                  ///< charge -in
+  int      num_matches            ///< num matches in spectrum -in
   );
 /*******************************************
  * match post_process extension
@@ -500,15 +497,33 @@ void set_match_peptide(
 /**
  * sets the match charge
  */
+
+void set_match_zstate(
+  MATCH_T* match,
+  SpectrumZState& zstate);
+
+
+SpectrumZState& get_match_zstate_(MATCH_T* match);
+
+
+/*
 void set_match_charge(
   MATCH_T* match, ///< the match to work -out
   int charge  ///< the charge of spectrum -in
   );
-
+*/
 /**
  * gets the match charge
  */
+
 int get_match_charge(
+  MATCH_T* match ///< the match to work -out
+  );
+
+/**
+ * gets the match neutral mass
+ */
+FLOAT_T get_match_neutral_mass(
   MATCH_T* match ///< the match to work -out
   );
 

@@ -30,7 +30,8 @@ struct match_collection{
   int match_total;      ///< size of match array, may vary w/truncation
   int experiment_size;  ///< total matches before any truncation
   // TODO this should be removed, stored in match
-  int charge;           ///< charge of the associated spectrum
+  //int charge;           ///< charge of the associated spectrum
+  SpectrumZState zstate; ///< zstate of the associated spectrum
   BOOLEAN_T null_peptide_collection; ///< are the peptides shuffled
   BOOLEAN_T scored_type[NUMBER_SCORER_TYPES]; 
                         ///< TRUE if matches have been scored by the type
@@ -117,7 +118,7 @@ struct match_collection_iterator{
 int add_unscored_peptides(
   MATCH_COLLECTION_T* match_collection, 
   Spectrum* spectrum, 
-  int charge, 
+  SpectrumZState& charge, 
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
   BOOLEAN_T is_decoy
 );
@@ -249,7 +250,7 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
   // set member variables according to parameter.c 
   match_collection->match_total = 0;
   match_collection->experiment_size = 0; 
-  match_collection->charge = 0;
+  match_collection->zstate = SpectrumZState();
   match_collection->null_peptide_collection = is_decoy;
 
   for(idx=0; idx < NUMBER_SCORER_TYPES ; idx++){
@@ -293,7 +294,7 @@ MATCH_COLLECTION_T* new_empty_match_collection(BOOLEAN_T is_decoy){
 int add_matches(
   MATCH_COLLECTION_T* matches, ///< add matches to this
   Spectrum* spectrum,  ///< compare peptides to this spectrum
-  int charge,            ///< use this charge state for spectrum
+  SpectrumZState& zstate,            ///< use this charge state for spectrum
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
   BOOLEAN_T is_decoy,     ///< are peptides to be shuffled
   BOOLEAN_T store_scores, ///< save scores for p-val estimation
@@ -306,11 +307,11 @@ int add_matches(
          "collection, spectrum and/or peptide iterator are NULL.");
   }
 
-  assert(matches->charge == charge);
+  //assert(matches->zstate == zstate);
 
   // generate a match for each peptide in the iterator, storing them
   // in the match collection
-  int num_matches_added = add_unscored_peptides(matches, spectrum, charge,
+  int num_matches_added = add_unscored_peptides(matches, spectrum, zstate,
                                                 peptide_iterator, is_decoy);
 
   if( num_matches_added == 0 ){
@@ -321,7 +322,7 @@ int add_matches(
 
   // optional Sp score on all candidate peptides
   if( do_sp_scoring ){
-    score_matches_one_spectrum(SP, matches, spectrum, charge,
+    score_matches_one_spectrum(SP, matches, spectrum, zstate.getCharge(),
                                FALSE); // don't store scores
     populate_match_rank_match_collection(matches, SP);
     if( filter_by_sp ){ // keep only high-ranking sp psms
@@ -335,7 +336,7 @@ int add_matches(
   }
 
   // main scoring
-  score_matches_one_spectrum(XCORR, matches, spectrum, charge, 
+  score_matches_one_spectrum(XCORR, matches, spectrum, zstate.getCharge(), 
                              store_scores); 
   populate_match_rank_match_collection(matches, XCORR);
   truncate_match_collection(matches, 
@@ -847,7 +848,7 @@ BOOLEAN_T populate_match_rank_match_collection(
       carp(CARP_WARNING, 
            "PSM spectrum %i charge %i sequence %s was NOT scored for type %i",
            (get_match_spectrum(cur_match))->getFirstScan(),
-           get_match_charge(cur_match), seq,
+           get_match_charge, seq,
            (int)score_type);
       free(seq);
     }
@@ -1104,7 +1105,7 @@ BOOLEAN_T estimate_weibull_parameters_from_xcorrs(
 int add_unscored_peptides(
   MATCH_COLLECTION_T* match_collection, 
   Spectrum* spectrum, 
-  int charge, 
+  SpectrumZState& zstate, 
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
   BOOLEAN_T is_decoy
 ){
@@ -1128,7 +1129,7 @@ int add_unscored_peptides(
     // set match fields
     set_match_peptide(match, peptide);
     set_match_spectrum(match, spectrum);
-    set_match_charge(match, charge);
+    set_match_zstate(match, zstate);
     set_match_null_peptide(match, is_decoy);
 
     // add to match collection
@@ -1284,7 +1285,7 @@ BOOLEAN_T compute_p_values(
        "with eta %f beta %f shift %f",
        (match_collection->null_peptide_collection) ? "decoy" : "target",
        scan_number,
-       match_collection->charge,
+       match_collection->zstate.getCharge(),
        match_collection->eta, match_collection->beta, match_collection->shift);
 
   SCORER_TYPE_T main_score = get_scorer_type_parameter("score-type");
@@ -1301,7 +1302,7 @@ BOOLEAN_T compute_p_values(
   // Print separator in the decoy p-value file.
   if (output_pvalue_file) {
     fprintf(output_pvalue_file, "# scan: %d charge: %d candidates: %d\n", 
-            scan_number, match_collection->charge,
+            scan_number, match_collection->zstate.getCharge(),
             match_collection->experiment_size);
     fprintf(output_pvalue_file, 
             "# eta: %g beta: %g shift: %g correlation: %g\n",
@@ -1497,7 +1498,7 @@ int get_match_collection_charge(
   MATCH_COLLECTION_T* match_collection ///< working match collection -in
   )
 {
-  return match_collection->charge;
+  return match_collection->zstate.getCharge();
 }
 
 /**
@@ -1972,12 +1973,11 @@ void print_matches_multi_spectra_xml(
     MATCH_T* cur_match = match_collection->match[match_idx];
     BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
     Spectrum* spectrum = get_match_spectrum(cur_match);
-    int charge = get_match_charge(cur_match);
-    spectrum->printXml(output, charge, index_count);
+    SpectrumZState& zstate = match_collection->zstate;
+    spectrum->printXml(output, zstate, index_count);
     fprintf(output, "    <search_result>\n");
-    FLOAT_T spec_mass = spectrum->getNeutralMass(charge);
     if (! is_decoy){
-      print_match_xml(cur_match, output, spec_mass,
+      print_match_xml(cur_match, output, 
                       match_collection->scored_type );
       fprintf(output, "    </search_result>\n");
       fprintf(output, "    </spectrum_query>\n");
@@ -2009,15 +2009,14 @@ BOOLEAN_T print_match_collection_xml(
   if ( output == NULL || match_collection == NULL || spectrum == NULL ){
     return FALSE;
   }
-  int charge = match_collection->charge; 
+  SpectrumZState zstate = match_collection->zstate; 
   int num_matches = match_collection->experiment_size;
-  FLOAT_T spectrum_neutral_mass = spectrum->getNeutralMass(charge);
 
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection, SEARCH_COMMAND);
 
   /* print spectrum query */
-  spectrum->printXml(output, charge, index);
+  spectrum->printXml(output, zstate, index);
 
 
   MATCH_T* match = NULL;
@@ -2042,7 +2041,6 @@ BOOLEAN_T print_match_collection_xml(
       
       print_match_xml(match, 
                       output, 
-                      spectrum_neutral_mass,
                       match_collection->scored_type);
       count++;
       last_rank = cur_rank;
@@ -2090,14 +2088,14 @@ BOOLEAN_T print_match_collection_sqt(
   }
   time_t hold_time;
   hold_time = time(0);
-  int charge = match_collection->charge; 
+  SpectrumZState& zstate = match_collection->zstate; 
   int num_matches = match_collection->experiment_size;
 
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection, SEQUEST_COMMAND);
 
   // First, print spectrum info
-  spectrum->printSqt(output, num_matches, charge);
+  spectrum->printSqt(output, num_matches, zstate);
   
   MATCH_T* match = NULL;
   
@@ -2151,10 +2149,10 @@ BOOLEAN_T print_match_collection_tab_delimited(
   if( output == NULL || match_collection == NULL || spectrum == NULL ){
     return FALSE;
   }
-  int charge = match_collection->charge; 
+  //int charge = match_collection->charge; 
   int num_matches = match_collection->experiment_size;
   int scan_num = spectrum->getFirstScan();
-  FLOAT_T spectrum_neutral_mass = spectrum->getNeutralMass(charge);
+  //FLOAT_T spectrum_neutral_mass = spectrum->getNeutralMass(charge);
   FLOAT_T spectrum_precursor_mz = spectrum->getPrecursorMz();
 
   // calculate delta_cn and populate fields in the matches
@@ -2180,7 +2178,7 @@ BOOLEAN_T print_match_collection_tab_delimited(
 
       print_match_tab(match_collection, match, output, scan_num, 
                       spectrum_precursor_mz, 
-                      spectrum_neutral_mass, num_matches, charge );
+                      num_matches);
       count++;
       last_rank = cur_rank;
     } else if( count >= top_match && last_rank != cur_rank ) {
@@ -2392,18 +2390,18 @@ void print_matches_multi_spectra
     Spectrum* spectrum = get_match_spectrum(cur_match);
     int scan_num = spectrum->getFirstScan();
     FLOAT_T mz = spectrum->getPrecursorMz();
-    int charge = get_match_charge(cur_match);
-    FLOAT_T spec_mass = spectrum->getNeutralMass(charge);
+    //int charge = get_match_zstate(cur_match).getCharge();
+    //FLOAT_T spec_mass = get_match_zstate(cur_match).getNeutralMass();
     FLOAT_T num_psm_per_spec = get_match_ln_experiment_size(cur_match);
     num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
 
     if( is_decoy ){
       print_match_tab(match_collection, cur_match, decoy_file, scan_num, mz, 
-                      spec_mass, (int)num_psm_per_spec, charge);
+                      (int)num_psm_per_spec);
     }
     else{
       print_match_tab(match_collection, cur_match, tab_file, scan_num, mz,
-                      spec_mass, (int)num_psm_per_spec, charge);
+                      (int)num_psm_per_spec);
     }
 
   }
@@ -2567,7 +2565,6 @@ BOOLEAN_T extend_match_collection_tab_delimited(
 {
 
 
-  int charge = 0;
   MATCH_T* match = NULL;
 
   FLOAT_T delta_cn = 0;
@@ -2583,7 +2580,10 @@ BOOLEAN_T extend_match_collection_tab_delimited(
   while (result_file.hasNext()) {
 
     /*** get spectrum specific features ***/
-    charge = result_file.getInteger(CHARGE_COL);
+    SpectrumZState zstate;
+    zstate.setNeutralMass(
+      result_file.getFloat(SPECTRUM_NEUTRAL_MASS_COL),
+      result_file.getInteger(CHARGE_COL));
     delta_cn = result_file.getFloat(DELTA_CN_COL);
     if (delta_cn <= 0.0) {
       ln_delta_cn = 0;
@@ -2644,7 +2644,7 @@ BOOLEAN_T extend_match_collection_tab_delimited(
     }
 
     //set all spectrum specific features to parsed match
-    set_match_charge(match, charge);
+    set_match_zstate(match, zstate);
     set_match_delta_cn(match, delta_cn);
     set_match_ln_delta_cn(match, ln_delta_cn);
     set_match_ln_experiment_size(match, ln_experiment_size);
@@ -3310,6 +3310,23 @@ char* get_match_collection_iterator_directory_name(
  *
  * \returns TRUE if the match_collection's charge state was changed.
  */
+
+BOOLEAN_T set_match_collection_zstate(
+  MATCH_COLLECTION_T* match_collection, ///< match collection to change
+  SpectrumZState& zstate ///< new zstate
+  ) {
+
+  if (get_match_collection_charge(match_collection) == 0) {
+    match_collection->zstate = zstate;
+    return TRUE;
+  } else {
+    //error
+    carp(CARP_WARNING, "Cannot change the zstate of a match collection "
+        "once it has been set.");
+    return FALSE;
+  }
+}
+/*
 BOOLEAN_T set_match_collection_charge(
   MATCH_COLLECTION_T* match_collection,  ///< match collection to change
   int charge){///< new charge value
@@ -3323,7 +3340,7 @@ BOOLEAN_T set_match_collection_charge(
        "once it has been set.");
   return FALSE;
 }
-
+*/
 
 /**
  * Search the given database or index using shuffled peptides and the

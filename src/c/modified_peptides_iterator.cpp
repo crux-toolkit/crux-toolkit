@@ -6,6 +6,8 @@
  * generate_peptides_iterator to include modified peptides.
  */
 #include "modified_peptides_iterator.h"
+#include "SpectrumZState.h"
+
 
 /* Private data structures */
 /**
@@ -320,6 +322,80 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
     double mass = (mz - MASS_PROTON) * (double)charge - delta_mass;
     min_mass = mass / (1.0 + window * 1e-6);
     max_mass = mass / (1.0 - window * 1e-6);
+  } else {
+    carp(CARP_FATAL,"Invalid window type");
+  }
+  
+  // create peptide_generator
+    new_iterator->peptide_generator = 
+      new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, index, dbase);
+  
+  // queue first peptide
+  queue_next_peptide( new_iterator );
+
+  return new_iterator;
+}
+
+/**
+ * \brief Create a new modified_PEPTIDES_iterator for a specific mass/charge.
+ *
+ * The returned iterator is initialized with the first peptide queued
+ * up and ready to return.  Also creates a generate_peptides_iterator
+ * from which it gets the peptides to modify. Peptides are of mass +/-
+ * mass-window or mz +/- mass-window(mz) taken from parameter.c.  All other peptide
+ * specifications are taken from parameter.c.  If no peptides meet the
+ * specifications, an iterator is still returned and when given to
+ * has_next will always return FALSE.
+ * 
+ * \returns A newly allocated modified_peptides_iterator.
+ */
+MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_zstate(
+  double mz, ///< Spectrum precursor mz.
+  SpectrumZState& zstate, ///< zstate to search.
+  PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  BOOLEAN_T is_decoy,  ///< generate decoy peptides
+  INDEX_T* index,      ///< Index from which to draw peptides OR
+  DATABASE_T* dbase    ///< Database from which to draw peptides
+  ) {
+
+  WINDOW_TYPE_T precursor_window_type = 
+    get_window_type_parameter("precursor-window-type");
+  double window = get_double_parameter("precursor-window");
+  double min_mass = 0;
+  double max_mass = 0;
+  
+  MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
+    allocate_modified_peptides_iterator();
+
+  // init max aas modified
+  new_iterator->max_aas_modified = get_int_parameter("max-aas-modified");
+  
+  // init the peptide list
+  new_iterator->temp_peptide_list = new_empty_list();
+  
+  // set peptide_mod field
+  new_iterator->peptide_mod = pmod;
+
+  // set is_decoy field
+  new_iterator->is_decoy = is_decoy;
+  
+  // get the mass difference
+  double delta_mass = peptide_mod_get_mass_change(pmod);
+
+  if (precursor_window_type == WINDOW_MASS) {
+    double mass = zstate.getNeutralMass() - delta_mass;
+    min_mass = mass - window;
+    max_mass = mass + window;
+  } else if (precursor_window_type == WINDOW_MZ) {
+    double min_mz = mz - window;
+    double max_mz = mz + window;
+    min_mass = (min_mz - MASS_PROTON) * (double)zstate.getCharge() - delta_mass;
+    max_mass = (max_mz - MASS_PROTON) * (double)zstate.getCharge() - delta_mass;
+  } else if (precursor_window_type == WINDOW_PPM) {
+    double mass = zstate.getNeutralMass() - delta_mass;
+    min_mass = mass / (1.0 + window * 1e-6);
+    max_mass = mass / (1.0 - window * 1e-6);
+    carp(CARP_DEBUG,"mass:%f charge:%i min_mass:%f max_mass:%f",mass, zstate.getCharge(), min_mass, max_mass);
   } else {
     carp(CARP_FATAL,"Invalid window type");
   }

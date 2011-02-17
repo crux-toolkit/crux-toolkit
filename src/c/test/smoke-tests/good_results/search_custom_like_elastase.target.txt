@@ -1,10 +1,10 @@
 scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa
-2	3	576.5400	1726.5980	1725.9773	0.00	-0.48	1	1	MSPFGVPVPGPAPETKD	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(30)	LI
+2	3	576.5400	1726.5927	1725.9773	0.00	-0.48	1	1	MSPFGVPVPGPAPETKD	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(30)	LI
 3	1	518.9500	517.9427	519.5119	0.00	0.13	1	1	TTGNGA	custom-enzyme-partial-digest	gi|16127995|ref|NP_414542.1|(15)	IG
-10	2	419.5800	837.1454	839.9005	0.00	-0.04	1	1	SQKDSYI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(231)	LL
-14	2	500.4100	998.8055	1001.0148	0.00	-0.04	1	1	TQSSSEYSI	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|(350)	IS
-15	2	488.8200	975.6255	976.9977	-7.36	-0.02	1	2	EYFNNYQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(277)	IP
-15	2	488.8200	975.6255	973.0533	0.00	-0.16	2	2	TYKRYDQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(167)	LY
-16	2	520.9900	1039.9655	1040.1899	2.78	0.03	1	3	KHKNSQWL	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(217)	QK
-16	2	520.9900	1039.9655	1038.1128	3.79	-0.06	2	3	YTCDPRQV	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|(233)	VP
-16	2	520.9900	1039.9655	1041.2585	0.00	-0.09	3	3	KKYFKTGGI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(242)	IL
+10	2	419.5800	837.1428	839.9005	0.00	-0.04	1	1	SQKDSYI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(231)	LL
+14	2	500.4100	998.8027	1001.0148	0.00	-0.04	1	1	TQSSSEYSI	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|(350)	IS
+15	2	488.8200	975.6227	976.9977	-7.36	-0.02	1	2	EYFNNYQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(277)	IP
+15	2	488.8200	975.6227	973.0533	0.00	-0.16	2	2	TYKRYDQ	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(167)	LY
+16	2	520.9900	1039.9626	1040.1899	2.78	0.03	1	3	KHKNSQWL	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(217)	QK
+16	2	520.9900	1039.9626	1038.1128	3.79	-0.06	2	3	YTCDPRQV	custom-enzyme-partial-digest	gi|16127996|ref|NP_414543.1|(233)	VP
+16	2	520.9900	1039.9626	1041.2585	0.00	-0.09	3	3	KKYFKTGGI	custom-enzyme-partial-digest	gi|6381999|ref|NP_009311.2|(242)	IL
