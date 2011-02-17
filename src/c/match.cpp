@@ -82,7 +82,8 @@ struct match{
   DIGEST_T digest;
   //  PEPTIDE_TYPE_T overall_type; 
     ///< overall peptide trypticity, set in set_match_peptide, see README above
-  int charge; ///< the charge state of the match 
+  //int charge; ///< the charge state of the match 
+  SpectrumZState zstate_;
   // post_process match object features
   // only valid when post_process_match is TRUE
   BOOLEAN_T post_process_match; ///< Is this a post process match object?
@@ -167,8 +168,8 @@ int compare_match_spectrum(
   Spectrum* spec_b = get_match_spectrum((*match_b));
   int scan_a = spec_a->getFirstScan();
   int scan_b = spec_b->getFirstScan();
-  int charge_a = get_match_charge((*match_a));
-  int charge_b = get_match_charge((*match_b));
+  int charge_a = get_match_charge(*match_a);
+  int charge_b = get_match_charge(*match_b);
 
   if( scan_a < scan_b ){
     return -1;
@@ -589,9 +590,7 @@ static void print_one_match_field(
   MatchFileWriter*    output_file,            ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-  FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
   int      num_matches,            ///< num matches in spectrum -in
-  int      charge,                 ///< charge -in
   int      b_y_total,              ///< total b/y ions -in
   int      b_y_matched             ///< Number of b/y ions matched. -in
 ) {
@@ -601,7 +600,8 @@ static void print_one_match_field(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, scan_num);
     break;
   case CHARGE_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, charge);
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                      get_match_charge(match));
     break;
   case SPECTRUM_PRECURSOR_MZ_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
@@ -609,7 +609,7 @@ static void print_one_match_field(
     break;
   case SPECTRUM_NEUTRAL_MASS_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     spectrum_mass);
+                                     get_match_neutral_mass(match));
     break;
   case PEPTIDE_MASS_COL:
     {
@@ -810,7 +810,6 @@ static void print_one_match_field(
 void print_match_xml(
   MATCH_T* match,                  ///< the match to print -in  
   FILE*    output_file,            ///< output stream -out
-  FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
   const BOOLEAN_T* scores_computed ///< scores_computed[TYPE] = T if match was scored for TYPE
   ){
 
@@ -822,6 +821,9 @@ void print_match_xml(
     carp(CARP_ERROR, "Cannot print NULL match to xml file.");
     return;
   }
+
+  FLOAT_T spectrum_mass = get_match_neutral_mass(match);
+
 
   FLOAT_T delta_cn = get_match_delta_cn(match);
   
@@ -1212,9 +1214,7 @@ void print_match_tab(
   MatchFileWriter*    output_file,            ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-  FLOAT_T  spectrum_mass,          ///< spectrum neutral mass -in
-  int      num_matches,            ///< num matches in spectrum -in
-  int      charge                  ///< charge -in
+  int      num_matches            ///< num matches in spectrum -in
   ){
 
   // Usually because no decoy file to print to.
@@ -1239,9 +1239,7 @@ void print_match_tab(
                           output_file,
                           scan_num,
                           spectrum_precursor_mz,
-                          spectrum_mass,
                           num_matches,
-                          charge,
                           b_y_total,
                           b_y_matched);
   }
@@ -1311,17 +1309,17 @@ double* get_match_percolator_features(
   unsigned int protein_idx = 0;
   double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
   FLOAT_T weight_diff = get_peptide_peptide_mass(match->peptide) -
-    (match->spectrum)->getNeutralMass(match->charge);
+    (match->zstate_.getNeutralMass());
 
   
   carp(CARP_DETAILED_DEBUG, "spec: %d, charge: %d", 
     match->spectrum->getFirstScan(),
-    match -> charge);
+    match -> zstate_.getCharge());
 
   carp(CARP_DETAILED_DEBUG,"peptide mass:%f", 
        get_peptide_peptide_mass(match->peptide));
   carp(CARP_DETAILED_DEBUG,"spectrum neutral mass:%f", 
-       (match->spectrum)->getNeutralMass(match->charge));
+       (match-> zstate_.getNeutralMass()));
 
   // Xcorr
   feature_array[0] = get_match_score(match, XCORR);
@@ -1346,7 +1344,7 @@ double* get_match_percolator_features(
   // absdM
   feature_array[6] = fabsf(weight_diff);
   // Mass
-  feature_array[7] = match->spectrum->getNeutralMass(match->charge);
+  feature_array[7] = match->zstate_.getNeutralMass();
   // ionFrac
   feature_array[8] = match->b_y_ion_fraction_matched;
   // lnSM
@@ -1375,14 +1373,16 @@ double* get_match_percolator_features(
   // pepLen
   feature_array[13] = get_peptide_length(match->peptide);
   
+  int charge = match->zstate_.getCharge();
+
   // set charge
-  if(match->charge == 1){
+  if(charge == 1){
     feature_array[14] = TRUE;
   }
-  else if(match->charge == 2){
+  else if(charge == 2){
     feature_array[15] = TRUE;
   }
-  else if(match->charge == 3){
+  else if(charge == 3){
     feature_array[16] = TRUE;
   }
   
@@ -1821,12 +1821,29 @@ BOOLEAN_T get_match_null_peptide(
 /**
  * sets the match charge
  */
+/*
 void set_match_charge(
   MATCH_T* match, ///< the match to work -out
   int charge  ///< the charge of spectrum -in
   )
 {
   match->charge = charge;
+}
+*/
+
+void set_match_zstate(
+  MATCH_T* match,
+  SpectrumZState& zstate) {
+
+  match->zstate_ = zstate;
+
+}
+
+SpectrumZState& get_match_zstate(
+  MATCH_T* match) {
+
+  return match->zstate_;
+
 }
 
 /**
@@ -1836,8 +1853,25 @@ int get_match_charge(
   MATCH_T* match ///< the match to work -out
   )
 {
-  return match->charge;
+  return get_match_zstate(match).getCharge();
+
 }
+
+/**
+ * /returns the match neutral mass
+ */
+FLOAT_T get_match_neutral_mass(
+  MATCH_T* match ///< the match to work -out
+  )
+{
+  return get_match_zstate(match).getNeutralMass();
+
+}
+
+
+
+
+
 
 /**
  * sets the match delta_cn

@@ -114,20 +114,23 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
 
   // Perform search on each spectrum
   while(spectrum_iterator->hasNext()){
-    int charge = 0;
-    Spectrum* spectrum = 
-      spectrum_iterator->next(&charge);
 
-    progress.report(spectrum->getFirstScan(), charge);
+    SpectrumZState zstate;
+    Spectrum* spectrum = 
+      spectrum_iterator->next(zstate);
+
+    double mz = spectrum->getPrecursorMz();
+
+    progress.report(spectrum->getFirstScan(), zstate.getCharge());
 
     // create empty match collections to store results in
     MATCH_COLLECTION_T* target_psms = new_empty_match_collection(FALSE); 
-    set_match_collection_charge(target_psms, charge);
+    set_match_collection_zstate(target_psms, zstate);
 
     vector<MATCH_COLLECTION_T*> decoy_psm_collections;
     for(int decoy_idx=0; decoy_idx < num_decoys_per_target; decoy_idx++){
       MATCH_COLLECTION_T* psms = new_empty_match_collection(TRUE);
-      set_match_collection_charge(psms, charge);
+      set_match_collection_zstate(psms, zstate);
       decoy_psm_collections.push_back(psms);
     }
 
@@ -138,10 +141,11 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
       PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
 
       // get peptide iterator
-      FLOAT_T precursor_mz = spectrum->getPrecursorMz();
+
       MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator =
-        new_modified_peptides_iterator_from_mz(precursor_mz,
-                                               charge,
+        new_modified_peptides_iterator_from_zstate(
+                                               mz,
+                                               zstate,
                                                peptide_mod, 
                                                FALSE, // not decoy
                                                index,
@@ -150,7 +154,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
       // add matches to targets
       int added = add_matches(target_psms,
                               spectrum,
-                              charge,
+                              zstate,
                               peptide_iterator,
                               FALSE, // not decoy
                               FALSE, // don't save scores for p-values
@@ -164,8 +168,9 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
         // get new peptide iterator
         free_modified_peptides_iterator(peptide_iterator);
         peptide_iterator =
-          new_modified_peptides_iterator_from_mz(precursor_mz,
-                                                 charge,
+          new_modified_peptides_iterator_from_zstate(
+                                                 mz,
+                                                 zstate,
                                                  peptide_mod, 
                                                  TRUE,  // is decoy
                                                  index,
@@ -174,7 +179,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
         MATCH_COLLECTION_T* cur_decoys = decoy_psm_collections.at(decoy_idx);
         add_matches(cur_decoys,
                     spectrum,
-                    charge,
+                    zstate,
                     peptide_iterator,
                     TRUE,  // is decoy
                     FALSE, // don't save scores for p-values
@@ -195,7 +200,7 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
 
     if( total_matches == 0 ){
       carp(CARP_WARNING, "No matches found for spectrum %i, charge %i.",
-           spectrum->getFirstScan(), charge);
+           spectrum->getFirstScan(), zstate.getCharge());
       progress.increment(FALSE);
 
     }else{  

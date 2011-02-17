@@ -20,6 +20,7 @@ class IonSeries;
 class MatchFileReader;
 class Spectrum;
 class FilteredSpectrumChargeIterator;
+class SpectrumZState;
 
 /**
  * \typedef PEAK_T 

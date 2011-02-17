@@ -140,6 +140,8 @@ LIBFILES= \
   SpectrumCollection.h \
   Spectrum.cpp \
   Spectrum.h \
+  SpectrumZState.cpp \
+  SpectrumZState.h \
   utils.cpp \
   utils.h \
   version.h \

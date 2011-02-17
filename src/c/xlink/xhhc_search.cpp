@@ -119,8 +119,8 @@ int xlink_search_main(int argc, char** argv) {
     (unsigned int)get_int_parameter("min-weibull-points");
 
   int scan_num = 0;
-  int charge = 1;
-
+  //int charge = 1;
+  SpectrumZState zstate;
   int max_ion_charge = get_max_ion_charge_parameter("max-ion-charge");
 
   int top_match = get_int_parameter("top-match");
@@ -209,7 +209,11 @@ int xlink_search_main(int argc, char** argv) {
 
   // for every observed spectrum 
   while (spectrum_iterator->hasNext()) {
-    spectrum = spectrum_iterator->next(&charge);
+    int charge;
+    spectrum = spectrum_iterator->next(zstate);
+
+    charge = zstate.getCharge();
+
     //SCORER_T* scorer = new_scorer(XCORR);
     scan_num = spectrum->getFirstScan();
 
@@ -227,7 +231,7 @@ int xlink_search_main(int argc, char** argv) {
     vector<LinkedPeptide> decoy_xpeptides;
 
     FLOAT_T precursor_mz = spectrum->getPrecursorMz();
-    FLOAT_T precursor_mass = spectrum->getNeutralMass(charge); 
+    FLOAT_T precursor_mass = zstate.getNeutralMass(); 
  
 
 

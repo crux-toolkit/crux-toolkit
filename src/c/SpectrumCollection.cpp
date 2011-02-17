@@ -307,7 +307,7 @@ bool SpectrumCollection::addSpectrumToEnd(
 {
   // set spectrum
   spectra_.push_back(spectrum);
-  num_charged_spectra_ += spectrum->getNumPossibleZ();
+  num_charged_spectra_ += spectrum->getNumZStates();
   return true;
 }
 
@@ -333,7 +333,7 @@ bool SpectrumCollection::addSpectrum(
 
   spectra_.insert(spectra_.begin()+add_index, spectrum);
 
-  num_charged_spectra_ += spectrum->getNumPossibleZ();
+  num_charged_spectra_ += spectrum->getNumZStates();
   return true;
 }
 
@@ -356,7 +356,7 @@ void SpectrumCollection::removeSpectrum(
     }
   }
   
-  num_charged_spectra_ -= spectrum->getNumPossibleZ();
+  num_charged_spectra_ -= spectrum->getNumZStates();
 
   delete spectra_[spectrum_index];
   spectra_[spectrum_index] = NULL;

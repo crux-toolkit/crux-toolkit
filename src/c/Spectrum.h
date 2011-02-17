@@ -12,7 +12,9 @@
 #include "utils.h"
 #include "objects.h"
 #include "peak.h"
+
 #include "MSToolkit/Spectrum.h"
+#include "SpectrumZState.h"
 
 /**
  * \class PeakIterator
@@ -47,7 +49,8 @@ class Spectrum{
   int              first_scan_;    ///< The number of the first scan
   int              last_scan_;     ///< The number of the last scan
   FLOAT_T          precursor_mz_;  ///< The m/z of precursor (MS-MS spectra)
-  std::vector<int> possible_z_; ///< The possible charge states of this spectrum
+  std::vector<SpectrumZState> zstates_;
+
   std::vector<PEAK_T*>  peaks_;         ///< The spectrum peaks
   FLOAT_T          min_peak_mz_;   ///< The minimum m/z of all peaks
   FLOAT_T          max_peak_mz_;   ///< The maximum m/z of all peaks
@@ -183,7 +186,7 @@ class Spectrum{
    * max_mz_bin.  Only prints non-zero intensities.
    */
   void printProcessedPeaks
-    (int cur_charge,       ///< print at this charge state
+    (SpectrumZState& zstate,       ///< print at this charge state
      FLOAT_T* intensities, ///< intensities of new peaks
      int max_mz_bin,       ///< num_bins in intensities
      FILE* file);          ///< print to this file
@@ -193,7 +196,7 @@ class Spectrum{
    */
   void printXml
     (FILE* file,           ///< output file to print at -out
-     int charge,            ///< charge used for the search -in
+     SpectrumZState& zstate,            ///< zstate used for the search -in
      int index);            ///< used to output index to file
 
   /**
@@ -202,7 +205,7 @@ class Spectrum{
   void printSqt
     (FILE* file,           ///< output file to print at -out
      int num_matches,      ///< number of peptides compared to this spec -in
-     int charge            ///< charge used for the search -in
+     SpectrumZState& zstate            ///< charge used for the search -in
      );
 
   /**
@@ -257,7 +260,7 @@ class Spectrum{
    * \returns The a const reference to a vector of the possible charge
    * states of this spectrum.
    */
-  const std::vector<int>& getPossibleZ();
+  const std::vector<SpectrumZState>& getZStates();
 
   /**
    * Considers the spectrum-charge parameter and returns the
@@ -265,12 +268,16 @@ class Spectrum{
    * spectrum: all of them or the one selected by the parameter.
    * /returns A vector of charge states to consider for this spectrum.
    */ 
-  std::vector<int> getChargesToSearch();
+  //std::vector<int> getChargesToSearch();
+
+
+  std::vector<SpectrumZState> getZStatesToSearch();
+
   
   /**
    * \returns The number of possible charge states of this spectrum.
    */
-  int getNumPossibleZ();
+  int getNumZStates();
 
   /**
    * \returns The minimum m/z of all peaks.
@@ -309,27 +316,15 @@ class Spectrum{
   FLOAT_T getMaxPeakIntensity();
 
   /**
-   * \returns The mass of the charged precursor ion, according to the formula 
-   * mass = m/z * charge
-   */
-  FLOAT_T getMass(int charge); ///< the charge of precursor ion -in
-
-  /**
-   * \returns The mass of the neutral precursor ion, according to the formula 
-   * mass = m/z * charge - mass_H * charge
-   */
-  FLOAT_T getNeutralMass(int charge); ///< the charge of precursor ion -in
-
-  /**
    * \returns The mass of the singly charged precursor ion, according
    * to the formula mass = m/z * charge - (mass_H * (charge - 1))
    */
-  FLOAT_T getSinglyChargedMass(int charge); ///< the charge of the precursor ion -in
+  //FLOAT_T getSinglyChargedMass(int charge); ///< the charge of the precursor ion -in
 
   /**
    * Adds a possible charge(z) to the spectrum.
    */
-  bool addPossibleZ(int charge);  ///< charge to add
+  //bool addPossibleZ(int charge);  ///< charge to add
 
   /**
    * Adds a peak to the spectrum given a intensity and location.

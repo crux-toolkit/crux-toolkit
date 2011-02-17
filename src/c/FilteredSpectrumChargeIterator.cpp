@@ -21,20 +21,18 @@ void FilteredSpectrumChargeIterator::queueNextSpectrum() {
   Spectrum* spec = NULL;
 
   // Are there any more charge states for this spectrum?
-  if( charge_index_ < (int)charges_.size()-1 ){
-    charge_index_++;
+  if( zstate_index_ < (int)zstates_.size()-1 ){
+    zstate_index_++;
   }
   // Are there any more spectra?
   else if( spectrum_index_ < spectrum_collection_->getNumSpectra()-1){
 
     spectrum_index_++;
     spec = spectrum_collection_->spectra_[spectrum_index_];
-    // first free any existing charges in the iterator
-    if( ! charges_.empty() ){
-      charges_.clear();
-    }
-    charges_ = spec->getChargesToSearch();
-    charge_index_ = 0;
+    // first free any existing zstates in the iterator
+    zstates_.clear();
+    zstates_ = spec->getZStatesToSearch();
+    zstate_index_ = 0;
   }else{ // none left
     has_next_ = false;
     return;
@@ -43,8 +41,8 @@ void FilteredSpectrumChargeIterator::queueNextSpectrum() {
   // Does the current pass?
   spec = spectrum_collection_->spectra_[spectrum_index_];
   int this_charge = -1;
-  if (charge_index_ < (int)charges_.size()) {
-    this_charge = charges_[charge_index_];
+  if (zstate_index_ < (int)zstates_.size()) {
+    this_charge = zstates_[zstate_index_].getCharge();
   }
   double mz = spec->getPrecursorMz();
   int num_peaks = spec->getNumPeaks();
@@ -82,7 +80,7 @@ FilteredSpectrumChargeIterator::FilteredSpectrumChargeIterator(
   spectrum_collection_ = spectrum_collection;  
   has_next_ = false;
   spectrum_index_ = -1;
-  charge_index_ = -1;
+  zstate_index_ = -1;
   min_mz_ = get_double_parameter("spectrum-min-mass");
   max_mz_ = get_double_parameter("spectrum-max-mass");
   min_peaks_ = get_int_parameter("min-peaks");
@@ -95,7 +93,9 @@ FilteredSpectrumChargeIterator::FilteredSpectrumChargeIterator(
   }
 
   // queue next spectrum
+  carp(CARP_DEBUG,"Queueing next spectrum");
   queueNextSpectrum();
+  carp(CARP_DEBUG,"Done Queueing next spectrum");
 
 }
   
@@ -107,15 +107,18 @@ bool FilteredSpectrumChargeIterator::hasNext() {
   return has_next_;
 }
 
-Spectrum* FilteredSpectrumChargeIterator::next(int* charge) {
+Spectrum* FilteredSpectrumChargeIterator::next(SpectrumZState& zstate) {
 
+  carp(CARP_DEBUG,"FilteredSpectrumChargeIterator::next()");
   Spectrum* next_spectrum = NULL;
   if (has_next_) {
-    next_spectrum =
+    next_spectrum = 
       spectrum_collection_->spectra_[spectrum_index_];
 
-    *charge = charges_[charge_index_];
+    zstate = zstates_[zstate_index_];
+    carp(CARP_DEBUG,"Queueing next spectrum");
     queueNextSpectrum();
+    carp(CARP_DEBUG,"Done queueing next spectrum");
   }
   return next_spectrum;
 
