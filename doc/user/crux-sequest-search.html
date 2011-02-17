@@ -206,28 +206,29 @@ mono). Default = mono.
 <li>
 <code>precursor-window &lt;float&gt;</code> &ndash;
 Tolerance used for matching peptides to spectra.  Peptides must be
-within +/- 'precursor-window' of the spectrum value.  Definition of
-precursor window units depends upon precursor-window-type. Default =
+within +/- '<code>precursor-window</code>' of the spectrum value.  Definition of
+precursor window units depends upon <code>precursor-window-type</code>. Default =
 3.0.
 
 <li>
 <code>precursor-window-type &lt;mass|mz|ppm&gt;</code> &ndash; Specify
 the units for the window that is used to select peptides around the
-precursor m/z location (mass, mz, ppm).  The magnitude of the window
-is defined by the precursor-window option, and candidate peptides must
+precursor mass location (mass, mz, ppm).  The magnitude of the window
+is defined by the <code>precursor-window</code> option, and candidate peptides must
 fall within this window.  For the <code>mass</code> window-type, the
-spectrum precursor m/z is converted to mass, and the window is defined
-as that mass &plusmn; precursor-window. The peptide mass is computed as the
-sum of the average amino acid masses plus 18 Da for the terminal OH
-group, plus 1 Da for each charge.  The <code>mz</code> window-type calculates
-the window as spectrum precursor m/z &plusmn; precursor-window and then 
+spectrum precursor singly charged mass (m+h) is converted to mass, and the window is defined
+as that mass &plusmn; <code>precursor-window</code>. If the m+h value is not available, then
+the mass is calculated from the precursor mass-to-charge (m/z) and provided charge. 
+The peptide mass is computed as the sum of the average amino acid masses plus 
+18 Da for the terminal OH group.  The <code>mz</code> window-type calculates
+the window as spectrum precursor m/z &plusmn; <code>precursor-window</code> and then 
 converts the resulting m/z range to the peptide mass range using the precursor 
 charge. 
 For the parts-per-million (<code>ppm</code>) window-type, the spectrum mass is 
 calculated as in the <code>mass</code> type.  The lower bound of the mass 
 window is then defined as the 
-spectrum mass / (1.0 + (precursor-window / 1000000)) and the upper bound 
-is defined as spectrum mass / (1.0 - (precursor-window / 1000000)).  
+spectrum mass / (1.0 + (<code>precursor-window</code> / 1000000)) and the upper bound 
+is defined as spectrum mass / (1.0 - (<code>precursor-window</code> / 1000000)).  
 Default = mass.</li>
 
 <li>
