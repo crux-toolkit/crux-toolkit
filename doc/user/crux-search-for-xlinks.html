@@ -30,10 +30,10 @@ open source warning -->
 <blockquote>
 <p>
 This command searches a protein database with a set of spectra.  For
-each spectrum, the precursor mass is computed from the measured
-precursor m/z and a specified charge.  Candidates molecules are linear
-peptides, dead-end products, self-loop products or cross-linked
-products whose mass lies within a specified range of the precursor
+each spectrum, the precursor mass is computed from either the precursor 
+singly charged mass (m+h) or the mass-to-charge (m/z) and an assumed charge.  
+Candidates molecules are linear peptides, dead-end products, self-loop 
+products or cross-linked products whose mass lies within a specified range of the precursor
 mass.  These candidate peptides are ranked using XCorr.  The input
 protein database is in FASTA format.</p>
 
@@ -170,32 +170,33 @@ Default = 30.
 <li>
 <code>--precursor-window</code> &ndash;
 Tolerance used for matching peptides to spectra.  Peptides must be
-within +/- 'precursor-window' of the spectrum mass.  Definition of
-precursor window depends upon precursor-window-type. Default = 3.0.
+within +/- '<code>precursor-window</code>' of the spectrum mass.  Definition of
+precursor window depends upon <code>precursor-window-type</code>. Default = 3.0.
 </li>
 
 <li>
 <code>precursor-window-type &lt;mass|mz|ppm&gt;</code> &ndash; Specify
 the units for the window that is used to select peptides around the
-precursor m/z location (mass, mz, ppm).  The magnitude of the window
-is defined by the precursor-window option, and candidate peptides must
+precursor mass location (mass, mz, ppm).  The magnitude of the window
+is defined by the <code>precursor-window</code> option, and candidate peptides must
 fall within this window.  For the <code>mass</code> window-type, the
-spectrum precursor m/z is converted to mass, and the window is defined
-as that mass &plusmn; precursor-window. The peptide mass is computed as the
+spectrum precursor m+h value is converted to mass, and the window is defined
+as that mass &plusmn; <code>precursor-window</code>. If the m+h value is not available, then
+the mass is calculated from the precursor m/z and provided charge. The peptide mass is computed as the
 sum of the average amino acid masses plus 18 Da for the terminal OH
-group, plus 1 Da for each charge.  The <code>mz</code> window-type calculates
-the window as spectrum precursor m/z &plusmn; precursor-window and then 
+group.  The <code>mz</code> window-type calculates
+the window as spectrum precursor m/z &plusmn; <code>precursor-window</code> and then 
 converts the resulting m/z range to the peptide mass range using the precursor 
 charge. 
 For the parts-per-million (<code>ppm</code>) window-type, the spectrum mass is 
 calculated as in the <code>mass</code> type.  The lower bound of the mass 
 window is then defined as the 
-spectrum mass / (1.0 + (precursor-window / 1000000)) and the upper bound 
-is defined as spectrum mass / (1.0 - (precursor-window / 1000000)).  
+spectrum mass / (1.0 + (<code>precursor-window</code> / 1000000)) and the upper bound 
+is defined as spectrum mass / (1.0 - (<code>precursor-window</code> / 1000000)).  
 Default = mass.</li>
 
 <li><code>--precursor-window-decoy &lt;0-1e6&gt;</code> &ndash; Search
-decoy peptides within +/- 'precursor-window-decoy of the precursor mass.
+decoy peptides within +/- '<code>precursor-window-decoy</code>' of the precursor mass.
 Default = 20.
 </li>
 

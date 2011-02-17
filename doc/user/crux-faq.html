@@ -114,30 +114,36 @@ installed.</p>
 
 <p>
 Crux selects candidate peptides for each spectrum based on its
-precursor m/z and an assumed charge state (specified in the input
-file).  A window around that precursor m/z is defined in one of three
-ways based on the <code>precursor-window-type</code>
-and <code>precursor-window</code> options.
+precursor singly charged mass (m+h) or the mass-to-charge (m/z) and an 
+assumed charge state (specified in the input file).  If the m+h and charge is 
+provided in the input file (from the Z lines), then the precursor mass 
+is calculated from the m+h minus the mass of a proton. Otherwise, the 
+precursor mass is calculated from the precursor m/z and an assumed charge. 
+A mass window is defined in one of three ways based on the 
+<code>precursor-window-type</code> and <code>precursor-window</code> options.
 <ul>
 <li>  
 If the <code>precursor-window-type</code> is set to <code>mz</code>,
-then the window is calculated as precursor m/z &plusmn;
+then the window is calculated as spectrum precursor m/z &plusmn;
 <code>precursor-window</code> and the resulting range is converted
-to mass using the charge state.</li>
+to mass using the charge state with the formula:<br>  
+Mass=m/z * charge - MASS_PROTON * charge, where MASS_PROTON=1.00727646677
+</li>
+
 <li>
 If the <code>precursor-window-type</code> is set to <code>mass</code>, then
-the charge state is used to convert the precursor m/z to mass, and the
-window is defined as precursor mass &plusmn; precursor-window.</li>
+the window is defined as the precursor mass &plusmn; 
+<code>precursor-window</code>.
+</li>
+
 <li>
 If the <code>precursor-window-type</code> is set to <code>ppm</code>
-(parts per million), then the precursor m/z is converted to mass and
-the window spans from precursor mass / (1.0 + window * 1e-6) to 
-precursor mass / (1.0 - window * 1e-6).</li>
+(parts per million), then the window spans from the 
+precursor mass / (1.0 + window * 1e-6) to precursor mass / (1.0 - window * 1e-6).</li>
 </ul>
 Candidate peptides are those whose mass falls within the defined
 window.  The peptide mass is computed as the sum of the average amino
-acid masses plus 18 Da for the terminal OH group, plus 1 Da for each
-charge.  Candidate peptides can also be constrained by minimum and
+acid masses plus 18 Da for the terminal OH group.  Candidate peptides can also be constrained by minimum and
 maximum allowed length. </p>
 
 <p>
@@ -221,6 +227,12 @@ Thin air.  The name is not an acronym or a reference to anything in
 particular.</p>
 
 </ol>
+
+<hr></hr>
+
+<p>
+<a href="crux.html">Crux home</a></p>
+
 
 </blockquote>
 </body>
