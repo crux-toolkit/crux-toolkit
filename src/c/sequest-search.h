@@ -22,7 +22,7 @@
 #include "objects.h"
 #include "carp.h"
 #include "parameter.h"
-#include "protein.h"
+#include "Protein.h"
 #include "peptide.h"
 #include "SpectrumCollection.h"
 #include "FilteredSpectrumChargeIterator.h"

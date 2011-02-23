@@ -19,8 +19,8 @@ class IonFilteredIterator;
 class IonSeries;
 class MatchFileReader;
 class Spectrum;
-class FilteredSpectrumChargeIterator;
 class SpectrumZState;
+
 
 /**
  * \typedef PEAK_T 
@@ -40,10 +40,10 @@ enum _peak_sort_type {_PEAK_LOCATION, _PEAK_INTENSITY};
 typedef enum _peak_sort_type PEAK_SORT_TYPE_T;
 
 /**
- * \typedef SPECTRUM_COLLECTION_T 
+ * \class SpectrumCollection
  * \brief A collection of spectra
  */
-typedef struct spectrum_collection SPECTRUM_COLLECTION_T;
+class SpectrumCollection;
 
 /**
  * \typedef SPECTRUM_ITERATOR_T 
@@ -52,10 +52,10 @@ typedef struct spectrum_collection SPECTRUM_COLLECTION_T;
 typedef struct spectrum_iterator SPECTRUM_ITERATOR_T;
 
 /**
- * \typedef FILTERED_SPECTRUM_CHARGE_ITERATOR_T 
+ * \class FilteredSpectrumChargeIterator 
  * \brief An object to iterate over the spectra in a spectrum_collection
  */
-typedef struct filtered_spectrum_charge_iterator FILTERED_SPECTRUM_CHARGE_ITERATOR_T;
+class FilteredSpectrumChargeIterator;
 
 /**
  * \typedef PEPTIDE_T
@@ -168,16 +168,17 @@ typedef struct peptide_src PEPTIDE_SRC_T;
 
 
 /**
- * \typedef PROTEIN_T
+ * \class Protein
  * \brief A protein sequence
  */
-typedef struct protein PROTEIN_T;
+class Protein;
+
 
 /**
- * \typedef PROTEIN_PEPTIDE_ITERATOR_T
+ * \class ProteinPeptideIterator
  * \brief An object to iterate over the peptides in a protein sequence
  */
-typedef struct protein_peptide_iterator PROTEIN_PEPTIDE_ITERATOR_T;
+class ProteinPeptideIterator;
 
 /**
  * \typedef DATABASE_T

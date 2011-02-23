@@ -9,7 +9,7 @@
 #include "peptide.h"
 #include "peptide_src.h"
 #include "peptide_constraint.h"
-#include "protein.h"
+#include "Protein.h"
 #include "database.h"
 // also from parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
@@ -20,13 +20,13 @@ void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
  ********************************************/
 
 static PEPTIDE_T *peptide1, *peptide2, *peptide3, *palindrome_peptide;
-static PROTEIN_T *protein1; 
+static Protein *protein1; 
 static char protseq1[1024] = "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITIKAVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW";
 
 // old test commented out at botom of file
 
 void pep_setup(){
-  protein1 = new_protein( "Protein1", protseq1, strlen(protseq1), 
+  protein1 = new Protein( "Protein1", protseq1, strlen(protseq1), 
                           NULL, 0, 0, NULL);//description, offset, idx, dbase
   peptide1 = new_peptide( 10, 1087.20, protein1, 20);//VADILESNAR
   peptide2 = new_peptide( 16, 1736.02, protein1, 1);//MRVLKFGGTSVANAER
@@ -39,7 +39,7 @@ void pep_teardown(){
   free_peptide(peptide1);
   free_peptide(peptide2);
   free_peptide(peptide3);
-  free_protein(protein1);
+  delete protein1;
 }
 
 START_TEST (test_ndist){// start index

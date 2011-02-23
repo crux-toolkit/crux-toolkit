@@ -9,7 +9,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "mass.h"
-#include "protein.h"
+#include "Protein.h"
 #include "peptide.h"
 #include "carp.h"
 #include "Ion.h"

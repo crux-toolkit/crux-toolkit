@@ -10,7 +10,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
 #include "carp.h"
 #include "peptide_constraint.h"
 #include "sorter.h"
@@ -79,7 +79,7 @@ BOOLEAN_T transform_database_text_to_memmap(
 BOOLEAN_T get_database_protein_at_idx(
     DATABASE_T* database, ///< A parsed database object -in
     unsigned int protein_idx, ///< The index of the protein to retrieve -in
-    PROTEIN_T** protein   ///< A pointer to a pointer to a PROTEIN object -out
+    Protein** protein   ///< A pointer to a pointer to a PROTEIN object -out
     );
 **/
 
@@ -150,7 +150,7 @@ void set_database_file(
 /**
  *\returns the nth protein of the database
  */
-PROTEIN_T* get_database_protein_at_idx(
+Protein* get_database_protein_at_idx(
   DATABASE_T* database, ///< the query database -in 
   unsigned int protein_idx ///< The index of the protein to retrieve -in
   );
@@ -158,7 +158,7 @@ PROTEIN_T* get_database_protein_at_idx(
 /**
  *\returns the protein designated by protein id of the database
  */
-PROTEIN_T* get_database_protein_by_id_string(
+Protein* get_database_protein_by_id_string(
   DATABASE_T* database, ///< the query database -in
   const char* protein_id ///< The id string for this protein -in
   );
@@ -226,14 +226,14 @@ BOOLEAN_T database_protein_iterator_has_next(
 /**
  * \returns The next protein in the database.
  */
-PROTEIN_T* database_protein_iterator_next(
+Protein* database_protein_iterator_next(
     DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator ///< the iterator of interest -in
     );
 
 /**
  * \returns the protein to the corresponding protein_idx in the database.
  */
-PROTEIN_T* database_protein_iterator_protein_idx(
+Protein* database_protein_iterator_protein_idx(
     DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator, ///< the iterator of interest -in
     unsigned int protein_idx ///< protein_idx to which protein to return -in
     );

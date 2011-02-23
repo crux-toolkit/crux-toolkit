@@ -227,68 +227,6 @@ class SpectrumCollection {
   );
 
 };
-  /******************************************************************************/
-
- 
-
-
-  /**
-   * Instantiates a new spectrum_iterator object from spectrum_collection.
-   * \returns a SPECTRUM_ITERATOR_T object.
-   */
-SPECTRUM_ITERATOR_T* new_spectrum_iterator(
-  SPECTRUM_COLLECTION_T* spectrum_collection///< spectrum_collection to iterate -in
-);        
-
-/**
- * Instantiates a new spectrum_iterator object from
- * spectrum_collection.  This iterator returns unique spectrum-charge
- * pairs (e.g.a spectrum to be searched as +2 and +3 is returned once
- * as +2 and once as +3).  The charge is returned by setting the int
- * pointer in the argument list.  The iterator also filters spectra by
- * mass so that none outside the spectrum-min-mass--spectrum-max-mass
- * range (as defined in parameter.c).
- * \returns a SPECTRUM_ITERATOR_T object.
- */
-FILTERED_SPECTRUM_CHARGE_ITERATOR_T* new_filtered_spectrum_charge_iterator(
-  SPECTRUM_COLLECTION_T* spectrum_collection///< spectra to iterate over
-);        
-
-/**
- * Frees an allocated spectrum_iterator object.
- */
-void free_spectrum_iterator(
-  SPECTRUM_ITERATOR_T* spectrum_iterator///< free spectrum_iterator -in
-);
-
-/**
- * The basic iterator function has_next.
- */
-BOOLEAN_T spectrum_iterator_has_next(
-  SPECTRUM_ITERATOR_T* spectrum_iterator///< is there a next spectrum? -in
-);
-
-/**
- * The basic iterator function has_next.
- */
-BOOLEAN_T filtered_spectrum_charge_iterator_has_next(
-  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator);
-
-/**
- * The basic iterator function next.
- */
-Spectrum* spectrum_iterator_next(
-  SPECTRUM_ITERATOR_T* spectrum_iterator///< return the next spectrum -in
-);
-
-/**
- * The basic iterator function next.  Also returns the charge state to
- * use for this spectrum.
- */
-Spectrum* filtered_spectrum_charge_iterator_next(
-  FILTERED_SPECTRUM_CHARGE_ITERATOR_T* iterator,///< return spec from here -in
-  int* charge);                 ///< put charge here -out
-
 
 /*
  * Local Variables:

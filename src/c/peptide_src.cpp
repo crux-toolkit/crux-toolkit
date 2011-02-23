@@ -12,7 +12,7 @@
 #include "mass.h"
 #include "objects.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
 #include "peptide_src.h"
 #include "peptide_constraint.h"
 
@@ -31,7 +31,7 @@ using namespace std;
 struct peptide_src{
   //PEPTIDE_TYPE_T peptide_type;///< the peptide type for the corresponding protein
   DIGEST_T digestion; ///< how specific the ends are relative to the enzyme
-  PROTEIN_T* parent_protein; ///< the parent of this preptide
+  Protein* parent_protein; ///< the parent of this preptide
   int start_idx; ///< start index of the peptide in the protein sequence, first residue is 1 
   PEPTIDE_SRC_T* next_association; ///< a linklist of peptide_src     
 };
@@ -53,7 +53,7 @@ PEPTIDE_SRC_T* allocate_peptide_src(void){
 PEPTIDE_SRC_T* new_peptide_src(
 //PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
   DIGEST_T digest,
-  PROTEIN_T* parent_protein, ///< the parent of this preptide -in
+  Protein* parent_protein, ///< the parent of this preptide -in
   int start_idx ///< start index of the peptide in the protein sequence -in
   )
 {
@@ -136,7 +136,7 @@ void set_peptide_src_array(
   int array_idx, ///< array index of the peptide_src to set
   //PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
   DIGEST_T digest,
-  PROTEIN_T* parent_protein, ///< the parent of this preptide -in
+  Protein* parent_protein, ///< the parent of this preptide -in
   int start_idx ///< start index of the peptide in the protein sequence -in
   )
 {
@@ -299,7 +299,7 @@ DIGEST_T get_peptide_src_digest(
  */
 void set_peptide_src_parent_protein(
   PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
-  PROTEIN_T* parent_protein ///< the parent of this preptide -in  
+  Protein* parent_protein ///< the parent of this preptide -in  
   )
 {
   new_association->parent_protein = parent_protein;
@@ -309,7 +309,7 @@ void set_peptide_src_parent_protein(
 /**
  * \returns a pointer to the parent protein
  */
-PROTEIN_T* get_peptide_src_parent_protein( 
+Protein* get_peptide_src_parent_protein( 
   PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
   )
 {
@@ -366,7 +366,7 @@ char* get_peptide_src_sequence_pointer(
   PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
   )
 {
-  char* start_pointer = get_protein_sequence_pointer(peptide_src->parent_protein);
+  char* start_pointer = peptide_src->parent_protein->getSequencePointer();
   return &(start_pointer[peptide_src->start_idx - 1]);
 }
 
@@ -392,8 +392,7 @@ void serialize_peptide_src(
   )
 {
   // write protein index in database
-  unsigned int protein_idx = 
-    get_protein_protein_idx(peptide_src->parent_protein);
+  unsigned int protein_idx = peptide_src->parent_protein->getProteinIdx();
   // carp(CARP_DETAILED_DEBUG, "protein idx to write is %i", protein_idx);
 
   fwrite(&protein_idx, sizeof(int), 1, file);
@@ -465,7 +464,7 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
   DIGEST_T digestion = 
     string_to_digest_type((char*)file.getString(CLEAVAGE_TYPE_COL).c_str()); 
   
-  PROTEIN_T* parent_protein = NULL;
+  Protein* parent_protein = NULL;
   int start_index = 1;
   for (vector<string>::iterator iter = protein_ids.begin();
     iter != protein_ids.end();
@@ -483,7 +482,7 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
         get_database_protein_by_id_string(database, protein_id_string.c_str());
       
       //find the start index by searching the protein sequence.
-      string protein_sequence(get_protein_sequence_pointer(parent_protein));
+      string protein_sequence(parent_protein->getSequencePointer());
 
       //if sequence is decoy sequence, recover the position from
       //the unshuffled sequence.
@@ -580,7 +579,7 @@ BOOLEAN_T parse_peptide_src(
   // read in each peptide_src (prot index, peptide type, start index)
   int src_idx = 0;
   int protein_index = -1;
-  PROTEIN_T* parent_protein = NULL;
+  Protein* parent_protein = NULL;
   //PEPTIDE_TYPE_T peptide_type;
   DIGEST_T digestion;
   int start_index = -1;

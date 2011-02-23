@@ -10,7 +10,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
 #include "carp.h"
 #include "peptide_constraint.h"
 #include "sorter.h"
@@ -91,7 +91,7 @@ BOOLEAN_T protein_index_iterator_has_next(
  *
  *\return the next protein index in the protein index file
  */
-PROTEIN_T* protein_index_iterator_next(
+Protein* protein_index_iterator_next(
   PROTEIN_INDEX_ITERATOR_T* protein_index_iterator ///< the iterator of interest -in
 );
 

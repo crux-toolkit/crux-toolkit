@@ -13,7 +13,8 @@
 #include "utils.h"
 #include "crux-utils.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
+#include "ProteinPeptideIterator.h"
 #include "database.h"
 #include "hash.h"
 #include "carp.h"
@@ -44,8 +45,8 @@ struct database{
   FILE*        file;     ///< Open filehandle for this database.
                          ///  A database has only one associated file.
   BOOLEAN_T is_parsed;  ///< Has this database been parsed yet.
-  std::vector<PROTEIN_T*>* proteins; ///< Proteins in this database.
-  map<char*, PROTEIN_T*, cmp_str>* protein_map; //map for proteins 
+  std::vector<Protein*>* proteins; ///< Proteins in this database.
+  map<char*, Protein*, cmp_str>* protein_map; //map for proteins 
   BOOLEAN_T is_hashed; //Indicator of whether the database has been hashed/mapped.
   unsigned long int size; ///< The size of the database in bytes (convenience)
   BOOLEAN_T use_light_protein; ///< should I use the light/heavy protein option
@@ -74,11 +75,11 @@ struct database_protein_iterator {
 struct database_peptide_iterator {
   DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator; 
     ///< The protein iterator. 
-  PROTEIN_PEPTIDE_ITERATOR_T* cur_protein_peptide_iterator; 
+  ProteinPeptideIterator* cur_protein_peptide_iterator; 
     ///< The peptide iterator for the current protein.
   PEPTIDE_CONSTRAINT_T* peptide_constraint; 
     ///< The constraint for the kind of peptide to iterate over.
-  PROTEIN_T* prior_protein; 
+  Protein* prior_protein; 
     ///< the protein that was used before the current working protein
   BOOLEAN_T first_passed; 
     ///< is it ok to convert prior_protein to light?
@@ -124,8 +125,8 @@ DATABASE_T* allocate_database(void){
   database->pointer_count = 1;
   database->file_size = 0;
   database->is_hashed = FALSE;
-  database->proteins = new vector<PROTEIN_T*>();
-  database->protein_map = new map<char*, PROTEIN_T*, cmp_str>();
+  database->proteins = new vector<Protein*>();
+  database->protein_map = new map<char*, Protein*, cmp_str>();
   // fprintf(stderr, "Free: Allocation: %i\n", database->pointer_count);
   return database;
 }
@@ -181,7 +182,7 @@ void free_database(
     // free each protein in the array
     unsigned int protein_idx;
     for(protein_idx=0; protein_idx < database->proteins->size(); ++protein_idx){
-      free_protein((*database->proteins)[protein_idx]);
+      delete ((*database->proteins)[protein_idx]);
     }
     delete database->proteins;
     delete database->protein_map; // contents already deleted
@@ -211,7 +212,7 @@ void print_database(
   FILE* file    ///< output file stream -out             
   )
 {
-  PROTEIN_T* protein = NULL;
+  Protein* protein = NULL;
 
   fprintf(file, "filename:%s\n", database->filename);
   fprintf(file, "is_parsed:");
@@ -226,9 +227,9 @@ void print_database(
       protein = database_protein_iterator_next(iterator);
       // if the database uses light/heavy functionality
       if(database->use_light_protein){
-        protein_to_heavy(protein);
+        protein->toHeavy();
       }
-      print_protein(protein, stdout);
+      protein->print(stdout);
   
       // if the database uses light/heavy functionality
       /** 
@@ -264,7 +265,7 @@ BOOLEAN_T parse_database_text_fasta(
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
-  PROTEIN_T* new_protein;
+  Protein* new_protein;
   unsigned int protein_idx;
 
   carp(CARP_DEBUG, "Parsing text fasta file '%s'", database->filename);
@@ -295,7 +296,7 @@ BOOLEAN_T parse_database_text_fasta(
     while(protein_index_iterator_has_next(protein_index_iterator)){
       // check if there's space for more proteins
       new_protein = protein_index_iterator_next(protein_index_iterator);
-      set_protein_database(new_protein, database);
+      new_protein->setDatabase(database);
       
       // add protein to database
       database->proteins->push_back(new_protein);
@@ -309,13 +310,13 @@ BOOLEAN_T parse_database_text_fasta(
     while((line_length =  getline(&new_line, &buf_length, file)) != -1){
       if(new_line[0] == '>'){
         // the new protein to be added
-        new_protein = allocate_protein();
+        new_protein = new Protein();
         
         // do not parse the protein sequence if using light/heavy functionality
         if(database->use_light_protein){
           // set light and offset
-          set_protein_offset(new_protein, working_index);
-          set_protein_is_light(new_protein, TRUE);
+          new_protein->setOffset(working_index);
+          new_protein->setIsLight(true);
         }
         else{
           // rewind to the beginning of the protein to include ">" line
@@ -323,24 +324,23 @@ BOOLEAN_T parse_database_text_fasta(
           
           // failed to parse the protein from fasta file
           // protein offset is set in the parse_protein_fasta_file method
-          if(!parse_protein_fasta_file(new_protein ,file)){
+          if(!new_protein->parseProteinFastaFile(file)){
             fclose(file);
-            free_protein(new_protein);
+            delete new_protein;
             for(protein_idx=0;protein_idx<database->proteins->size();protein_idx++){
-              free_protein((*database->proteins)[protein_idx]);
+              delete ((*database->proteins)[protein_idx]);
             }
             database->proteins->clear();
             carp(CARP_ERROR, "failed to parse fasta file");
             return FALSE;
           }
-          set_protein_is_light(new_protein, FALSE);
+          new_protein->setIsLight(false);
         }
-        
         // add protein to database
         database->proteins->push_back(new_protein);
         // set protein index, database
-        set_protein_protein_idx(new_protein, database->proteins->size()-1);
-        set_protein_database(new_protein, database);
+        new_protein->setProteinIdx(database->proteins->size()-1);
+        new_protein->setDatabase(database);
       }
       working_index = ftell(file);
     }
@@ -396,7 +396,7 @@ BOOLEAN_T populate_proteins_from_memmap(
   DATABASE_T* database ///< An allocated database -in/out
   )
 {
-  PROTEIN_T* new_protein;
+  Protein* new_protein;
   unsigned int protein_idx = 0;
   char* data = (char*)database->data_address;
   
@@ -404,27 +404,27 @@ BOOLEAN_T populate_proteins_from_memmap(
   while((int)data[0] != 1){
     
     // the new protein to be added
-    new_protein = allocate_protein();
+    new_protein = new Protein();
     
     // parse protein from memory map
-    if(!parse_protein_binary_memmap(new_protein, &data)){
+    if(!new_protein->parseProteinBinaryMemmap(&data)){
       // failed to parse the protein from memmap
       // free all proteins, and return FALSE
-      free_protein(new_protein);
+      delete new_protein;
       for(; protein_idx < database->proteins->size(); ++protein_idx){
-        free_protein((*database->proteins)[protein_idx]);
+        delete ((*database->proteins)[protein_idx]);
       }
       database->proteins->clear();
       carp(CARP_ERROR, "failed to parse fasta file");
       return FALSE;
     }
-    set_protein_is_light(new_protein, FALSE);
+    new_protein->setIsLight(false);
     
     // add protein to database
     database->proteins->push_back(new_protein);
     // set protein index, database
-    set_protein_protein_idx(new_protein, database->proteins->size()-1);
-    set_protein_database(new_protein, database);
+    new_protein->setProteinIdx(database->proteins->size()-1);
+    new_protein->setDatabase(database);
   }
 
   return TRUE;
@@ -699,7 +699,7 @@ void set_database_file(
  * \returns the nth protein of the database
  * 
  */
-PROTEIN_T* get_database_protein_at_idx(
+Protein* get_database_protein_at_idx(
   DATABASE_T* database,    ///< the query database -in 
   unsigned int protein_idx ///< The index of the protein to retrieve -in
   )
@@ -718,16 +718,16 @@ PROTEIN_T* get_database_protein_at_idx(
 /**
  *\returns the protein designated by protein id of the database
  */
-PROTEIN_T* get_database_protein_by_id_string(
+Protein* get_database_protein_by_id_string(
   DATABASE_T* database, ///< the query database -in
   const char* protein_id ///< The id string for this protein -in
   ) {
 
   //TODO - Implement as a hashtable rather than a map to make 
   //this even faster if needed.
-  PROTEIN_T* protein = NULL;
+  Protein* protein = NULL;
   if (database->is_hashed) {
-    map<char*, PROTEIN_T*>::iterator find_iter;
+    map<char*, Protein*>::iterator find_iter;
     find_iter = database->protein_map->find((char*)protein_id);
 
     if (find_iter != database->protein_map->end()) {
@@ -739,8 +739,8 @@ PROTEIN_T* get_database_protein_by_id_string(
       protein_idx < database->proteins->size();
       protein_idx++) {
 
-      PROTEIN_T* current_protein = (*database->proteins)[protein_idx];
-      char* current_id = get_protein_id_pointer(current_protein);
+      Protein* current_protein = (*database->proteins)[protein_idx];
+      char* current_id = current_protein->getIdPointer();
       (*database->protein_map)[current_id] = current_protein;
 
       if (strcmp(current_id, protein_id)==0) {
@@ -835,7 +835,7 @@ BOOLEAN_T database_protein_iterator_has_next(
 /**
  * \returns The next protein in the database.
  */
-PROTEIN_T* database_protein_iterator_next(
+Protein* database_protein_iterator_next(
   DATABASE_PROTEIN_ITERATOR_T* database_protein_iterator  
     ///< the query iterator -in
   )
@@ -873,7 +873,7 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   // this determines which peptide free method to use
   set_peptide_src_implementation(TRUE);
 
-  PROTEIN_T* next_protein = NULL;
+  Protein* next_protein = NULL;
   
   DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator =
     (DATABASE_PEPTIDE_ITERATOR_T*)
@@ -906,8 +906,8 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
         database_peptide_iterator->database_protein_iterator);
 
     // if using light/heavy functionality parse the light protein
-    if(database->use_light_protein && get_protein_is_light(next_protein)){
-      if(!protein_to_heavy(next_protein)){
+    if(database->use_light_protein && next_protein->getIsLight()){
+      if(!next_protein->toHeavy()){
         carp(CARP_FATAL, "failed to create a database_peptide_iterator,"
                          "no proteins in database");
       }
@@ -915,11 +915,10 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
 
     // set new protein peptide iterator
     database_peptide_iterator->cur_protein_peptide_iterator =
-      new_protein_peptide_iterator(next_protein, peptide_constraint);
+      new ProteinPeptideIterator(next_protein, peptide_constraint);
  
     // if first protein does not contain a match peptide, reinitailize
-    while(!protein_peptide_iterator_has_next(
-          database_peptide_iterator->cur_protein_peptide_iterator)){
+    while(!database_peptide_iterator->cur_protein_peptide_iterator->hasNext()) {
       // covert the heavy back to light
       /** 
        * uncomment this code if you want to restore a protein to 
@@ -936,23 +935,22 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
       }
       else{ // create new protein_peptide_iterator for next protein
         // free old iterator
-        free_protein_peptide_iterator(
-            database_peptide_iterator->cur_protein_peptide_iterator);
+            delete (database_peptide_iterator->cur_protein_peptide_iterator);
         
         // get next protein
         next_protein = database_protein_iterator_next(
             database_peptide_iterator->database_protein_iterator);
 
          // if using light/heavy functionality parse the light protein
-        if(database->use_light_protein && get_protein_is_light(next_protein)){
-          if(!protein_to_heavy(next_protein)){
+        if(database->use_light_protein && next_protein->getIsLight()){
+          if(!next_protein->toHeavy()){
             carp(CARP_FATAL, "failed to create a database_peptide_iterator"
                               " no proteins in database");
           }
         }
         // create new protein_peptide_iterator
         database_peptide_iterator->cur_protein_peptide_iterator =
-          new_protein_peptide_iterator(next_protein, peptide_constraint);
+          new ProteinPeptideIterator(next_protein, peptide_constraint);
       }
     }
   }
@@ -1040,8 +1038,7 @@ void free_database_peptide_iterator(
   ///< the iterator to free -in
   )
 {
-  free_protein_peptide_iterator(
-                     database_peptide_iterator->cur_protein_peptide_iterator);
+  delete database_peptide_iterator->cur_protein_peptide_iterator;
   free_database_protein_iterator(
                      database_peptide_iterator->database_protein_iterator);
   free_peptide_constraint(database_peptide_iterator->peptide_constraint);
@@ -1071,7 +1068,7 @@ BOOLEAN_T database_peptide_iterator_has_next_from_file(
   ///< the iterator of interest -in
   )
 {
-  if(protein_peptide_iterator_has_next(database_peptide_iterator->cur_protein_peptide_iterator)){ 
+  if(database_peptide_iterator->cur_protein_peptide_iterator->hasNext()){ 
     return TRUE;
   }
   return FALSE;
@@ -1143,17 +1140,15 @@ PEPTIDE_T* database_peptide_iterator_next_from_file(
   
   // the peptide to return
   PEPTIDE_T* next_peptide =
-    protein_peptide_iterator_next(
-                   database_peptide_iterator->cur_protein_peptide_iterator);
+    database_peptide_iterator->cur_protein_peptide_iterator->next();
   
   DATABASE_T* database = 
     database_peptide_iterator->database_protein_iterator->database;
   
   // reset database_peptide_iterator if needed
-  while(!protein_peptide_iterator_has_next(
-               database_peptide_iterator->cur_protein_peptide_iterator)){
+  while(!database_peptide_iterator->cur_protein_peptide_iterator->hasNext()){
     reset = TRUE;
-    PROTEIN_T* next_protein = NULL; 
+    Protein* next_protein = NULL; 
     
     /** 
      * uncomment this code if you want to restore a protein to 
@@ -1170,22 +1165,22 @@ PEPTIDE_T* database_peptide_iterator_next_from_file(
     }
     else{ // create new protein_peptide_iterator for next protein
       // free old iterator
-      free_protein_peptide_iterator(database_peptide_iterator->cur_protein_peptide_iterator);
+      delete database_peptide_iterator->cur_protein_peptide_iterator;
       
       // get next protein
       next_protein = 
         database_protein_iterator_next(database_peptide_iterator->database_protein_iterator);
       
       // if using light/heavy functionality parse the light protein
-      if(database->use_light_protein && get_protein_is_light(next_protein)){
-        if(!protein_to_heavy(next_protein)){
+      if(database->use_light_protein && next_protein->getIsLight()){
+        if(!next_protein->toHeavy()){
           carp(CARP_FATAL, "Failed to create a database_peptide_iterator, " 
                             "no proteins in database");
         }
       }
       // create new protein_peptide_iterator
       database_peptide_iterator->cur_protein_peptide_iterator =
-        new_protein_peptide_iterator(next_protein, 
+        new ProteinPeptideIterator(next_protein, 
                                      database_peptide_iterator->peptide_constraint);
     }        
   }
@@ -1193,7 +1188,8 @@ PEPTIDE_T* database_peptide_iterator_next_from_file(
   // are we using the light functionality?
   if(database->use_light_protein){
     // get the current working protein
-    PROTEIN_T* protein_bye = get_protein_peptide_iterator_portein(database_peptide_iterator->cur_protein_peptide_iterator);
+    Protein* protein_bye = database_peptide_iterator->
+      cur_protein_peptide_iterator->getProtein();
     // set first passed, shows that we extraced at least one protein since we moved on to the next protein
     if(!reset && !database_peptide_iterator->first_passed){
       database_peptide_iterator->first_passed = TRUE;

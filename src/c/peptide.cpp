@@ -116,7 +116,7 @@ int get_peptide_sizeof(){
 PEPTIDE_T* new_peptide(
   unsigned char length,     ///< The length of the peptide -in
   FLOAT_T peptide_mass,       ///< The neutral mass of the peptide -in
-  PROTEIN_T* parent_protein, ///< the parent_protein of this peptide -in
+  Protein* parent_protein, ///< the parent_protein of this peptide -in
   int start_idx ///< the start index of this peptide in the protein sequence -in
   //PEPTIDE_TYPE_T peptide_type ///<  The type of peptides(TRYPTIC, C_TRYPTIC, N_TRYPTIC, NOT_TRYPTIC, ANY_TRYPTIC) -in
   )
@@ -431,14 +431,14 @@ DATABASE_T* get_peptide_first_src_database(
   PEPTIDE_T* peptide ///< working peptide -in
   )
 {
-  return get_protein_database(get_peptide_src_parent_protein(peptide->peptide_src));
+  return get_peptide_src_parent_protein(peptide->peptide_src)->getDatabase();
 }
 
 // set by peptide_src?
 /**
  * returns a pointer to the peptide's first parent protein field of the peptide
  */
-PROTEIN_T* get_peptide_parent_protein(
+Protein* get_peptide_parent_protein(
   PEPTIDE_T* peptide  ///< the peptide to query the parent_protein -in
   )
 {
@@ -478,7 +478,8 @@ static BOOLEAN_T equal_peptides(
  )
 {
   char* parent_sequence = 
-    get_protein_sequence_pointer(get_peptide_src_parent_protein(peptide_object->peptide_src));
+    get_peptide_src_parent_protein(peptide_object->peptide_src)->
+    getSequencePointer();
   int start_idx = get_peptide_src_start_idx(peptide_object->peptide_src);
 
   int result = strncmp(peptide_sequence, 
@@ -541,7 +542,7 @@ char* get_peptide_unshuffled_sequence(
   }
 
   char* parent_sequence = 
-    get_protein_sequence_pointer(get_peptide_src_parent_protein(peptide->peptide_src));
+    get_peptide_src_parent_protein(peptide->peptide_src)->getSequencePointer();
   int start_idx = get_peptide_src_start_idx(peptide->peptide_src);
 
   char* copy_sequence = copy_string_part(&parent_sequence[start_idx-1],
@@ -567,7 +568,7 @@ char* get_peptide_sequence_pointer(
     carp(CARP_FATAL, "ERROR: no peptide_src to retrieve peptide sequence pointer\n");
   }
   char* parent_sequence = 
-    get_protein_sequence_pointer(get_peptide_src_parent_protein(peptide->peptide_src));
+    get_peptide_src_parent_protein(peptide->peptide_src)->getSequencePointer();
   int start_idx = get_peptide_src_start_idx(peptide->peptide_src);
 
   char* pointer_peptide_sequence = &parent_sequence[start_idx-1];
@@ -621,14 +622,14 @@ char* get_peptide_sequence_from_peptide_src_sqt(
  )
 {
   char* copy_sequence = NULL;
-  PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
+  Protein* protein = get_peptide_src_parent_protein(peptide_src);
   // get peptide start idx of protein in prarent protein
   int start_idx = get_peptide_src_start_idx(peptide_src);
   // parent protein length
-  int protein_length = get_protein_length(protein);
+  int protein_length = protein->getLength();
 
   char* parent_sequence = 
-    get_protein_sequence_pointer(protein);
+    protein->getSequencePointer();
 
   // get modified petpide sequence
   char* mod_pep_seq = get_peptide_modified_sequence_with_symbols(peptide);
@@ -678,8 +679,8 @@ char get_peptide_c_term_flanking_aa(
   }
 
   // get protein seq
-  PROTEIN_T* protein = get_peptide_src_parent_protein(peptide->peptide_src);
-  char* protein_seq = get_protein_sequence_pointer(protein);
+  Protein* protein = get_peptide_src_parent_protein(peptide->peptide_src);
+  char* protein_seq = protein->getSequencePointer();
 
   // get peptide start idx, protein index starts at 1
   int start_index = get_peptide_src_start_idx(peptide->peptide_src);
@@ -709,9 +710,9 @@ char get_peptide_n_term_flanking_aa(
   }
 
   // get protein seq and length
-  PROTEIN_T* protein = get_peptide_src_parent_protein(peptide->peptide_src);
-  char* protein_seq = get_protein_sequence_pointer(protein);
-  int protein_length = get_protein_length(protein);
+  Protein* protein = get_peptide_src_parent_protein(peptide->peptide_src);
+  char* protein_seq = protein->getSequencePointer();
+  int protein_length = protein->getLength();
 
   // get peptide end idx, protein index starts at 1
   int start_index = get_peptide_src_start_idx(peptide->peptide_src);
@@ -1032,8 +1033,7 @@ int get_peptide_n_distance(PEPTIDE_T* peptide){
 
   while( cur_src != NULL ){
     // get protein length
-    int protein_length = get_protein_length( 
-                           get_peptide_src_parent_protein(cur_src));
+    int protein_length = get_peptide_src_parent_protein(cur_src)->getLength();
     // get index of end
     int start_index = get_peptide_src_start_idx(cur_src);
 
@@ -1059,7 +1059,8 @@ char* get_peptide_hash_value(
 {
   char* hash_value = NULL;
   int peptide_length_space = get_number_digits(peptide->length);
-  unsigned int protein_idx = get_protein_protein_idx(get_peptide_src_parent_protein(peptide->peptide_src));
+  unsigned int protein_idx = 
+    get_peptide_src_parent_protein(peptide->peptide_src)->getProteinIdx();
   int protein_idx_space = get_number_digits(protein_idx);
   int peptide_start_idx = get_peptide_src_start_idx(peptide->peptide_src);
   int peptide_start_idx_space = get_number_digits(peptide_start_idx);
@@ -1437,7 +1438,7 @@ void print_peptide_in_format(
   FILE* file  ///< the out put stream -out
   )
 {
-  PROTEIN_T* parent = NULL;
+  Protein* parent = NULL;
   PEPTIDE_SRC_T* next_src = peptide->peptide_src;
   char* id = NULL;
   int start_idx = 0;
@@ -1462,7 +1463,7 @@ void print_peptide_in_format(
   // iterate over all peptide src
   while(next_src != NULL){
     parent = get_peptide_src_parent_protein(next_src);    
-    id = get_protein_id_pointer(parent);
+    id = parent->getIdPointer();
     start_idx = get_peptide_src_start_idx(next_src);
     
     fprintf(file, "\t%s\t%d\t%d", id, start_idx, peptide->length);
@@ -1524,7 +1525,7 @@ void print_filtered_peptide_in_format(
   //PEPTIDE_TYPE_T peptide_type ///< the peptide_type of src to print -in
   )
 {
-  PROTEIN_T* parent = NULL;
+  Protein* parent = NULL;
   PEPTIDE_SRC_T* next_src = peptide->peptide_src;
   //char* id = NULL;
   //int start_idx = 0;
@@ -2014,8 +2015,8 @@ string get_protein_ids_peptide_locations(PEPTIDE_T* peptide) {
   if (peptide_src_iterator_has_next(peptide_src_iterator)) {
     while(peptide_src_iterator_has_next(peptide_src_iterator)){
       PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-      PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
-      char* protein_id = get_protein_id(protein);
+      Protein* protein = get_peptide_src_parent_protein(peptide_src);
+      char* protein_id = protein->getId();
       int peptide_loc = get_peptide_src_start_idx(peptide_src);
       std::ostringstream protein_loc_stream;
       protein_loc_stream << protein_id << "(" << peptide_loc << ")";
@@ -2054,10 +2055,10 @@ char *get_protein_ids(PEPTIDE_T *peptide) {
     // Peptide has at least one parent.
     
     PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-    PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
+    Protein* protein = get_peptide_src_parent_protein(peptide_src);
 
     const int allocation_factor = 1;
-    char* protein_id = get_protein_id(protein);
+    char* protein_id = protein->getId();
     size_t protein_id_len = strlen(protein_id);
     size_t protein_field_len = allocation_factor * protein_id_len + 1; // Buffer size
     protein_field = (char*)mymalloc(sizeof(char) * protein_field_len);
@@ -2077,7 +2078,7 @@ char *get_protein_ids(PEPTIDE_T *peptide) {
     while(peptide_src_iterator_has_next(peptide_src_iterator)){
       peptide_src = peptide_src_iterator_next(peptide_src_iterator);
       protein = get_peptide_src_parent_protein(peptide_src);
-      protein_id = get_protein_id(protein);
+      protein_id = protein->getId();
       protein_id_len = strlen(protein_id);
 
       // Allocate more memory if needed, allow space for comma and null
@@ -2125,13 +2126,13 @@ char *get_flanking_aas(PEPTIDE_T *peptide) {
     // Peptide has at least one parent.
     
     PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-    PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
+    Protein* protein = get_peptide_src_parent_protein(peptide_src);
 
-    int protein_length = get_protein_length(protein);
+    int protein_length = protein->getLength();
     int peptide_length = get_peptide_length(peptide);
     int start_index = get_peptide_src_start_idx(peptide_src);
     int end_index = start_index + peptide_length - 1;
-    char* protein_seq = get_protein_sequence_pointer(protein);
+    char* protein_seq = protein->getSequencePointer();
     const int allocation_factor = 1;
     size_t flanking_str_len = 2; // left and right flanking AA
     size_t flanking_field_len = allocation_factor * flanking_str_len + 1;
@@ -2157,11 +2158,11 @@ char *get_flanking_aas(PEPTIDE_T *peptide) {
 
       peptide_src = peptide_src_iterator_next(peptide_src_iterator);
       protein = get_peptide_src_parent_protein(peptide_src);
-      protein_length = get_protein_length(protein);
+      protein_length = protein->getLength();
       peptide_length = get_peptide_length(peptide);
       start_index = get_peptide_src_start_idx(peptide_src);
       end_index = start_index + peptide_length - 1;
-      protein_seq = get_protein_sequence_pointer(protein);
+      protein_seq = protein->getSequencePointer();
 
       // Allocate more memory if needed
       if (flanking_field_free < flanking_str_len + 1) {

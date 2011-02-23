@@ -9,7 +9,7 @@
 #include "utils.h"
 #include "crux-utils.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
 #include "database.h"
 #include "carp.h"
 #include "objects.h"
@@ -35,7 +35,7 @@ struct protein_index{
  */
 struct protein_index_iterator{
   FILE* file;  ///< The file handler of the fasta file
-  PROTEIN_T* next_protein; ///< the next protein index to return
+  Protein* next_protein; ///< the next protein index to return
   BOOLEAN_T has_next; ///< is there a new protein to return?
 };
 
@@ -205,7 +205,7 @@ BOOLEAN_T setup_protein_index_iterator(
   unsigned long int offset;
   unsigned int protein_idx;
   
-  PROTEIN_T* protein = NULL;
+  Protein* protein = NULL;
   BOOLEAN_T found = FALSE;
 
   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
@@ -230,7 +230,7 @@ BOOLEAN_T setup_protein_index_iterator(
   
   // there is a next protein to return
   if(found){
-    protein = new_light_protein(offset, protein_idx);
+    protein = Protein::newLightProtein(offset, protein_idx);
     protein_index_iterator->next_protein = protein;
     protein_index_iterator->has_next = TRUE;
   }
@@ -285,7 +285,7 @@ void free_protein_index_iterator(
 
   // free unused protein
   if(protein_index_iterator->next_protein != NULL){
-    free_protein(protein_index_iterator->next_protein);
+    delete (protein_index_iterator->next_protein);
   }
   // free iterator
   free(protein_index_iterator);
@@ -306,11 +306,11 @@ BOOLEAN_T protein_index_iterator_has_next(
  *
  *\return the next protein in the protein index file
  */
-PROTEIN_T* protein_index_iterator_next(
+Protein* protein_index_iterator_next(
   PROTEIN_INDEX_ITERATOR_T* protein_index_iterator ///< the iterator of interest -in
   )
 {
-  PROTEIN_T* protein = protein_index_iterator->next_protein;
+  Protein* protein = protein_index_iterator->next_protein;
   protein_index_iterator->next_protein = NULL;
 
   // set up the protein_index_iterator
@@ -351,7 +351,7 @@ BOOLEAN_T create_binary_fasta_file(
   int line_length;
   size_t buf_length = 0;
   unsigned int protein_idx = 0;
-  PROTEIN_T* new_protein = NULL;
+  Protein* new_protein = NULL;
 
   carp(CARP_DEBUG, "Creating binary fasta");
   // open file and 
@@ -373,29 +373,29 @@ BOOLEAN_T create_binary_fasta_file(
   while((line_length =  getline(&new_line, &buf_length, file)) != -1){
     if(new_line[0] == '>'){
       // the new protein to be serialize
-      new_protein = allocate_protein();
+      new_protein = new Protein();
       
       // rewind to the begining of the protein to include ">" line
       fseek(file, working_index, SEEK_SET);
           
       // failed to parse the protein from fasta file
       // protein offset is set in the parse_protein_fasta_file method
-      if(!parse_protein_fasta_file(new_protein ,file)){
+      if(!new_protein->parseProteinFastaFile(file)){
         fclose(file);
-        free_protein(new_protein);
+        delete new_protein;
         carp(CARP_ERROR, "Failed to parse fasta file");
         return FALSE;
       }
-      set_protein_is_light(new_protein, FALSE);
+      new_protein->setIsLight(false);
       
       // serialize protein as binary to output file
-      serialize_protein(new_protein, output_file);
+      new_protein->serialize(output_file);
 
       // update protein count
       ++protein_idx;
 
       // free this protein
-      free_protein(new_protein);
+      delete new_protein;
     }
     
     // print status
