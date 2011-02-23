@@ -2,7 +2,7 @@
 #include "check-peptide-modifications.h"
 #include "peptide_modifications.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
 
 // also from modifications
 int generate_peptide_mod_list_TESTER(
@@ -19,7 +19,7 @@ static PEPTIDE_MOD_T *pmod1, *pmod2;
 static AA_MOD_T *amod1, *amod2, *amod3;
 static AA_MOD_T* amod_list[3];
 static PEPTIDE_T* pep1;
-static PROTEIN_T* prot1;
+static Protein* prot1;
 static char seq[265] = "MRVLKFGGTSVANAERFLRVADILESNARQGQVAOOTVLSAPAKITNHLVA" \
 "MIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQC";
 
@@ -41,7 +41,7 @@ void pmod_setup(){
   initialize_parameters();
   force_set_aa_mod_list(amod_list, 3);
 
-  prot1 = new_protein( "Protein1", seq, strlen(seq), NULL, 0, 0, NULL);
+  prot1 = new Protein( "Protein1", seq, strlen(seq), NULL, 0, 0, NULL);
   pep1 = new_peptide( 11, 1108.18, prot1, 6);// seq: FGGTSVANAER
 }
 

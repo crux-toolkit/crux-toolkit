@@ -119,8 +119,10 @@ LIBFILES= \
   PrintVersion.h \
   print-processed-spectra.cpp \
   print-processed-spectra.h \
-  protein.cpp \
-  protein.h \
+  Protein.cpp \
+  Protein.h \
+  ProteinPeptideIterator.cpp \
+  ProteinPeptideIterator.h \
   protein_index.cpp \
   protein_index.h \
   QRanker.cpp \

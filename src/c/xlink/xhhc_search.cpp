@@ -603,8 +603,8 @@ void get_protein_ids_locations(PEPTIDE_T *peptide,
   if (peptide_src_iterator_has_next(peptide_src_iterator)) {
     while(peptide_src_iterator_has_next(peptide_src_iterator)){
       PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-      PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
-      char* protein_id = get_protein_id(protein);
+      Protein* protein = get_peptide_src_parent_protein(peptide_src);
+      char* protein_id = protein->getId();
       int peptide_loc = get_peptide_src_start_idx(peptide_src);
       std::ostringstream protein_loc_stream;
       protein_loc_stream << protein_id << "(" << peptide_loc << ")";

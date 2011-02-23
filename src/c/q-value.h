@@ -12,7 +12,7 @@
 #include "crux-utils.h"
 #include "objects.h"
 #include "parameter.h"
-#include "protein.h"
+#include "Protein.h"
 #include "peptide.h"
 #include "Spectrum.h"
 #include "parse_arguments.h" 

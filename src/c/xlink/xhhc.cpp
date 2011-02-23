@@ -4,6 +4,8 @@
 #include "peptide.h"
 #include "DelimitedFile.h"
 
+#include "ProteinPeptideIterator.h"
+
 using namespace std;
 
 FLOAT_T LinkedPeptide::linker_mass;
@@ -15,8 +17,8 @@ void get_linear_peptides(set<string>& peptides,
 			 DATABASE_PROTEIN_ITERATOR_T* protein_iterator,
 			 PEPTIDE_CONSTRAINT_T* peptide_constraint) {
 
-  PROTEIN_PEPTIDE_ITERATOR_T* peptide_iterator = NULL;
-  PROTEIN_T* protein;
+  ProteinPeptideIterator* peptide_iterator = NULL;
+  Protein* protein;
   PEPTIDE_T* peptide;
 
   string sequence = "";
@@ -26,12 +28,12 @@ void get_linear_peptides(set<string>& peptides,
   //size_t index;
   while (database_protein_iterator_has_next(protein_iterator)) {
     protein = database_protein_iterator_next(protein_iterator);
-    peptide_iterator = new_protein_peptide_iterator(protein, peptide_constraint);
+    peptide_iterator = new ProteinPeptideIterator(protein, peptide_constraint);
     // missed_cleavages must be TRUE in protein.c for this to work
-    prepare_protein_peptide_iterator_mc(peptide_iterator, TRUE); 
-    while (protein_peptide_iterator_has_next(peptide_iterator)) {
+    peptide_iterator->prepareMc(true);
+    while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
-      peptide = protein_peptide_iterator_next(peptide_iterator);
+      peptide = peptide_iterator->next();
       sequence = get_peptide_sequence(peptide); 
       carp(CARP_INFO,"Adding linear peptide:%s",get_peptide_sequence(peptide));
       peptides.insert(sequence);
@@ -79,8 +81,8 @@ void get_linkable_peptides(set<string>& peptides,
 	DATABASE_PROTEIN_ITERATOR_T* protein_iterator,
 	PEPTIDE_CONSTRAINT_T* peptide_constraint) 
 {
-  PROTEIN_PEPTIDE_ITERATOR_T* peptide_iterator = NULL;
-  PROTEIN_T* protein;
+  ProteinPeptideIterator* peptide_iterator = NULL;
+  Protein* protein;
   PEPTIDE_T* peptide;
   string sequence = "";
   string last_sequence = "zz";
@@ -89,12 +91,12 @@ void get_linkable_peptides(set<string>& peptides,
   size_t index;
   while (database_protein_iterator_has_next(protein_iterator)) {
     protein = database_protein_iterator_next(protein_iterator);
-    peptide_iterator = new_protein_peptide_iterator(protein, peptide_constraint);
+    peptide_iterator = new ProteinPeptideIterator(protein, peptide_constraint);
     // missed_cleavages must be TRUE in protein.c for this to work
-    prepare_protein_peptide_iterator_mc(peptide_iterator, TRUE); 
-    while (protein_peptide_iterator_has_next(peptide_iterator)) {
+    peptide_iterator->prepareMc(true); 
+    while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
-      peptide = protein_peptide_iterator_next(peptide_iterator);
+      peptide = peptide_iterator->next();
       sequence = get_peptide_sequence(peptide); 
 
       map<string, vector<PEPTIDE_T*> >::iterator find_iter;
@@ -177,7 +179,7 @@ void find_all_precursor_ions(vector<LinkedPeptide>& all_ions,
   // add 
   set_peptide_constraint_num_mis_cleavage(peptide_constraint, 1);
   //set_verbosity_level(CARP_INFO);
-  //PROTEIN_T* protein = NULL;
+  //Protein* protein = NULL;
   carp(CARP_DEBUG,"protein iterator");
   DATABASE_PROTEIN_ITERATOR_T* protein_iterator = new_database_protein_iterator(db);
   //PROTEIN_PEPTIDE_ITERATOR_T* peptide_iterator = NULL;

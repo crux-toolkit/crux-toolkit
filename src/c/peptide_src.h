@@ -27,7 +27,7 @@ PEPTIDE_SRC_T* new_peptide_src(
                                //  PEPTIDE_TYPE_T peptide_type, 
     ///< the peptide type for the corresponding protein -in
 DIGEST_T digest,
-  PROTEIN_T* parent_protein, ///< the parent of this preptide -in
+  Protein* parent_protein, ///< the parent of this preptide -in
   int start_idx ///< peptide start index in protein sequence, first is 1 -in
   );
 
@@ -65,7 +65,7 @@ void set_peptide_src_array(
   int array_idx, ///< array index of the peptide_src to set
   //PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
 DIGEST_T digest,
-  PROTEIN_T* parent_protein, ///< the parent of this preptide -in
+  Protein* parent_protein, ///< the parent of this preptide -in
   int start_idx ///< start index of the peptide in the protein sequence -in
   );
 
@@ -180,13 +180,13 @@ DIGEST_T get_peptide_src_digest(
  */
 void set_peptide_src_parent_protein(
   PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
-  PROTEIN_T* parent_protein ///< the parent of this preptide -in  
+  Protein* parent_protein ///< the parent of this preptide -in  
   );
 
 /**
  * \returns a pointer to the parent protein
  */
-PROTEIN_T* get_peptide_src_parent_protein( 
+Protein* get_peptide_src_parent_protein( 
   PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
   );
 

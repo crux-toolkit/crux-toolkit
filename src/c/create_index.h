@@ -21,7 +21,7 @@
 #include "carp.h"
 #include "peptide.h"
 #include "peptide_src.h"
-#include "protein.h"
+#include "Protein.h"
 #include "database.h"
 #include "index.h"
 #include "protein_index.h"

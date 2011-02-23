@@ -13,7 +13,7 @@
 #include "utils.h"
 #include "crux-utils.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
 #include "index.h"
 #include "carp.h"
 #include "objects.h"
@@ -107,8 +107,8 @@ int compareTo(
   else if(sort_type == SORT_LEXICAL){
     
     // convert the protein to heavy if needed
-    protein_to_heavy(get_peptide_parent_protein(peptide_one));
-    protein_to_heavy(get_peptide_parent_protein(peptide_two));
+    get_peptide_parent_protein(peptide_one)->toHeavy();
+    get_peptide_parent_protein(peptide_two)->toHeavy();
           
     char* peptide_one_sequence = get_peptide_sequence_pointer(peptide_one);
     char* peptide_two_sequence = get_peptide_sequence_pointer(peptide_two);

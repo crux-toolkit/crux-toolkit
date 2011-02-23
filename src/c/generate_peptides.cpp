@@ -16,7 +16,7 @@
 #include "carp.h"
 #include "peptide.h"
 #include "peptide_src.h"
-#include "protein.h"
+#include "Protein.h"
 #include "database.h"
 #include "parse_arguments.h"
 #include "parameter.h"
@@ -98,12 +98,14 @@ int main(int argc, char** argv){
   filename = get_string_parameter("protein database");
   //use_index = get_boolean_parameter("use-index");
   use_index = is_directory(filename);
+
   if( use_index == TRUE ){
     index = new_index_from_disk(filename);//, 
   }else{
     database = new_database(filename, FALSE); // not memmapped
   }
   free(filename);
+
 
   // get list of mods
   PEPTIDE_MOD_T** peptide_mods = NULL;

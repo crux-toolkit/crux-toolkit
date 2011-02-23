@@ -8,7 +8,7 @@
 #include "peak.h"
 #include "peptide.h"
 #include "peptide_src.h"
-#include "protein.h"
+#include "Protein.h"
 #include "database.h"
 #include "carp.h"
 #include "crux-utils.h"

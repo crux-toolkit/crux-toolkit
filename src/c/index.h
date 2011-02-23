@@ -11,7 +11,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
 #include "sorter.h"
 #include "carp.h"
 #include "peptide_constraint.h"

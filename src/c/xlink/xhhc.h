@@ -17,7 +17,7 @@
 #include "peptide_constraint.h"
 #include "peptide.h"
 #include "peptide_src.h"
-#include "protein.h"
+#include "Protein.h"
 #include "database.h"
 #include "parse_arguments.h"
 #include "parameter.h"

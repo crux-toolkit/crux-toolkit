@@ -11,7 +11,7 @@
 #include "objects.h"
 #include "mass.h"
 #include "peptide.h"
-#include "protein.h"
+#include "Protein.h"
 #include "carp.h"
 #include "peptide_constraint.h"
 

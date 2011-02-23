@@ -2763,7 +2763,7 @@ void update_protein_counters(
 {
   PEPTIDE_SRC_ITERATOR_T* src_iterator = NULL;
   PEPTIDE_SRC_T* peptide_src = NULL;
-  PROTEIN_T* protein = NULL;
+  Protein* protein = NULL;
   unsigned int protein_idx = 0;
   int hash_count = 0;
   BOOLEAN_T unique = FALSE;
@@ -2790,7 +2790,7 @@ void update_protein_counters(
   while(peptide_src_iterator_has_next(src_iterator)){
     peptide_src = peptide_src_iterator_next(src_iterator);
     protein = get_peptide_src_parent_protein(peptide_src);
-    protein_idx = get_protein_protein_idx(protein);
+    protein_idx = protein->getProteinIdx();
     
     // update the number of PSM this protein matches
     ++match_collection->post_protein_counter[protein_idx];

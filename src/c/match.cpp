@@ -16,6 +16,7 @@
 #include <map>
 #include "carp.h"
 #include "parse_arguments.h"
+#include "ProteinPeptideIterator.h"
 #include "Spectrum.h"
 #include "Ion.h"
 #include "IonSeries.h"
@@ -558,7 +559,7 @@ void print_match_sqt(
     new_peptide_src_iterator(peptide);
   PEPTIDE_SRC_T* peptide_src = NULL;
   char* protein_id = NULL;
-  PROTEIN_T* protein = NULL;
+  Protein* protein = NULL;
   const char* rand = "";
   if( match->null_peptide ){
     rand = "rand_";
@@ -567,7 +568,7 @@ void print_match_sqt(
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     peptide_src = peptide_src_iterator_next(peptide_src_iterator);
     protein = get_peptide_src_parent_protein(peptide_src);
-    protein_id = get_protein_id(protein);
+    protein_id = protein->getId();
     
     // print match info (locus line), add rand_ to locus name for decoys
     fprintf(file, "L\t%s%s\n", rand, protein_id);      
@@ -1113,7 +1114,7 @@ int get_num_internal_cleavage(char* peptide_sequence, ENZYME_T enzyme){
   char * seq_iter = peptide_sequence;
   
   while (*(seq_iter+1) != '\0'){
-    if (valid_cleavage_position(seq_iter, enzyme) == TRUE){
+    if (ProteinPeptideIterator::validCleavagePosition(seq_iter, enzyme)){
       num_missed_cleavages++;
     }
     seq_iter++;
@@ -1139,13 +1140,13 @@ int get_num_terminal_cleavage(
   cleavage[0] = flanking_aas_prev;
   cleavage[1] = peptide_sequence[0];
   if (flanking_aas_prev == '-' ||
-      valid_cleavage_position(cleavage, enzyme) == TRUE){
+      ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme)){
       num_tol_term++;
   }
   cleavage[0] = peptide_sequence[strlen(peptide_sequence)-1];
   cleavage[1] = flanking_aas_next;
   if (flanking_aas_next == '-' ||
-      valid_cleavage_position(cleavage, enzyme) == TRUE){
+      ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme)){
     num_tol_term++;
   }
   return num_tol_term;
@@ -1168,9 +1169,9 @@ void get_information_of_proteins(
   // for each protein that the peptide maps, get its id and description
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-    PROTEIN_T* protein = get_peptide_src_parent_protein(peptide_src);
-    char* protein_id = get_protein_id(protein);
-    char* protein_annotation = get_protein_annotation(protein);      
+    Protein* protein = get_peptide_src_parent_protein(peptide_src);
+    char* protein_id = protein->getId();
+    char* protein_annotation = protein->getAnnotation();      
     char* str_iter = protein_annotation;
     // replaces double quotes with single quote in the description
     while ( (*str_iter) != '\0' ){
@@ -1305,7 +1306,7 @@ double* get_match_percolator_features(
   int feature_count = 20;
   PEPTIDE_SRC_ITERATOR_T* src_iterator = NULL;
   PEPTIDE_SRC_T* peptide_src = NULL;
-  PROTEIN_T* protein = NULL;
+  Protein* protein = NULL;
   unsigned int protein_idx = 0;
   double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
   FLOAT_T weight_diff = get_peptide_peptide_mass(match->peptide) -
@@ -1399,7 +1400,7 @@ double* get_match_percolator_features(
     while(peptide_src_iterator_has_next(src_iterator)){
       peptide_src = peptide_src_iterator_next(src_iterator);
       protein = get_peptide_src_parent_protein(peptide_src);
-      protein_idx = get_protein_protein_idx(protein);
+      protein_idx = protein->getProteinIdx();
 
       // numProt
       if(feature_array[18] < get_match_collection_protein_counter(
