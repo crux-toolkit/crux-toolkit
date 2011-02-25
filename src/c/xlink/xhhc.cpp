@@ -1,4 +1,6 @@
 #include "xhhc.h"
+#include "XLinkBondMap.h"
+
 
 #include "parameter.h"
 #include "peptide.h"
@@ -274,7 +276,7 @@ BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
 // of peptides and every possible link site
 
 void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides, string links, int charge) {
-  BondMap bonds(links); 
+  XLinkBondMap bonds(links); 
   vector<LinkedPeptide> ions;
 
   // iterate over both sequences, adding linked peptides with correct links
@@ -290,44 +292,73 @@ void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides,
       ions.push_back(lp);
     }
 
+    string seqA = *pepA;
+    vector<PEPTIDE_T*>& crux_peptides = get_peptides_from_sequence(seqA);
+    
+    if (get_boolean_parameter("xlink-include-deadends")) {
 
-    for (size_t i = 0; i < pepA->length(); ++i) {
-      BondMap::iterator bond = bonds.find(pepA->at(i));
-      // if a link aa and doesn't end in K
-      if (bond != bonds.end() && i != pepA->length()-1) {
-	if (i == pepA->length()-1 && pepA->at(i) == 'K') continue;
-        // add dead end
-	//TODO: make these options.
-	if (get_boolean_parameter("xlink-include-deadends")) {
-	  ions.push_back(LinkedPeptide(sequenceA, NULL, i, -1, charge));
-	}
-        // add self loops
+      for (unsigned int seq_idx=0;seq_idx < pepA->length();seq_idx++) {
+        bool canLink = false;
 
-	if (get_boolean_parameter("xlink-include-selfloops")) {
-	  
-	  for (size_t j = i+1; j < pepA->length(); ++j) {
-	    if (bond->second.find(pepA->at(j)) != bond->second.end()) { 
-	      //skip if linked to a K at the end
-	      if (j == pepA->length()-1 && pepA->at(j) == 'K') continue;
-	      ions.push_back(LinkedPeptide(sequenceA, NULL, i, j, charge));
-	    }
-	  }
-	}
-        // add linked precursor
-        for (set<string>::iterator pepB = pepA; pepB != peptides.end(); ++pepB) {
-          char* sequenceB = (char*) pepB->c_str();
-          for (size_t j = 0; j < pepB->length(); ++j) {
-	    // if a link aa and doesn't end in K
-	    if (bond->second.find(pepB->at(j)) != bond->second.end()) { 
-	      // skip if link to K at end
-	      if (j == pepB->length()-1 && pepB->at(j) == 'K') continue;
-	      //if (strcmp(sequenceA, sequenceB) != 0)
-	      ions.push_back(LinkedPeptide(sequenceA, sequenceB, i, j, charge));
-	    }
+        for (unsigned int pep_idx=0;pep_idx < crux_peptides.size();pep_idx++) {
+          canLink |= bonds.canLink(crux_peptides[pep_idx], seq_idx);
+        }
+        if (canLink) {
+          if (seq_idx == pepA->length()-1 && pepA->at(seq_idx) == 'K') {
+            continue;
+          } else {
+            ions.push_back(LinkedPeptide(sequenceA, NULL, seq_idx, -1, charge));
           }
-	} // get next pepB 
+        }  
       }
-    }
+    } /* xlink-include-dead-ends */
+
+    if (get_boolean_parameter("xlink-include-selfloops")) {
+      
+      for (unsigned int seq_idx1 = 0;seq_idx1 < pepA->length()-1; seq_idx1++) {
+        for (unsigned int seq_idx2=seq_idx1+1;seq_idx2 < pepA->length()-1; seq_idx2++) {
+          bool canLink = false;
+          for (unsigned int pep_idx1=0;pep_idx1 < crux_peptides.size();pep_idx1++) {
+            canLink |= bonds.canLink(crux_peptides[pep_idx1],seq_idx1,seq_idx2);
+          }
+          if (canLink) {
+            if (seq_idx1 == pepA->length()-1 && pepA->at(seq_idx1) == 'K') continue;
+            else if (seq_idx2 == pepA->length()-1 && pepA->at(seq_idx2) == 'K') continue;
+            else {
+              ions.push_back(LinkedPeptide(sequenceA, NULL, seq_idx1, seq_idx2, charge));
+            }
+          }
+        }
+      }
+    } /* xlink-include-selfloops */
+
+    {
+      set<string>::iterator pepB = pepA;
+      pepB++;
+      for (;pepB != peptides.end(); ++pepB) {
+        string seqB = *pepB;
+        vector<PEPTIDE_T*>& crux_peptides2 = get_peptides_from_sequence(seqB);
+        
+        for (unsigned int seq_idx1 = 0; seq_idx1 < pepA->length();seq_idx1++) {
+          for (unsigned int seq_idx2 = 0; seq_idx2 < pepB->length();seq_idx2++) {
+            bool canLink = false;
+            for (unsigned int pep_idx1=0;pep_idx1 < crux_peptides.size();pep_idx1++) {
+              for (unsigned int pep_idx2=0;pep_idx2 < crux_peptides2.size();pep_idx2++) {
+                canLink |= bonds.canLink(crux_peptides[pep_idx1],crux_peptides2[pep_idx2],seq_idx1,seq_idx2);
+              }
+            }
+            if (canLink) {
+              if (seq_idx1 == pepA->length()-1 && pepA->at(seq_idx1) == 'K') continue;
+              else if (seq_idx2 == pepB->length()-1 && pepB->at(seq_idx2) == 'K') continue;
+              else {
+                char* sequenceB = (char*) pepB->c_str();
+                ions.push_back(LinkedPeptide(sequenceA, sequenceB, seq_idx1, seq_idx2, charge));
+              }
+            }
+          }
+        }
+      }
+    } /* xlink-inter/intra links */
   } // get next pepA 
    all_ions.insert(all_ions.end(), ions.begin(), ions.end());
 }
@@ -379,74 +410,6 @@ Peptide shuffle(Peptide peptide) {
   shuffled_peptide.set_sequence(shuffled);
   return shuffled_peptide;
 }
-
-
-
-// BondMap class methods definitions below
-//
-///////////////////////////////////////////////////////////
-const static char* amino_alpha="ABCDEFGHIKLMNPQRSTUVWYZX";
-const static int num_amino_alpha = 24;
-
-BondMap::BondMap() : map<char, set<char> >() {
-}
-
-BondMap::~BondMap() {
-}
-
-BondMap::BondMap(string links_string) {
-  /*
-  for (size_t i = 0; i < links.length() - 2; i += 4) {
-     bonds[links[i+2]].insert(links[i]);
-     bonds[links[i]].insert(links[i+2]);
-  }
-*/
-  //get each bond description
-  vector<string> bonds;
-  DelimitedFile::tokenize(links_string, bonds, ',');
-
-  //parse each bond description.
-  for (unsigned int bond_idx = 0; bond_idx < bonds.size(); bond_idx++) {
-    vector<string> residues;
-    DelimitedFile::tokenize(bonds[bond_idx], residues, ':');
-    //check for *.
-    if (residues[0] == "*" && residues[1] == "*") {
-      //add all possible links between residues.
-      carp(CARP_INFO, "Linking all residues to each other");
-      for (int i=0;i<num_amino_alpha;i++) {
-        for (int j=0;j<num_amino_alpha;j++) {
-          (*this)[amino_alpha[i]].insert(amino_alpha[j]);
-        }
-      }
-    } else if (residues[0] == "*" || residues[1] == "*") {
-      //only one star detected.
-      char amino = residues[0][0] == '*' ? residues[1][0] : residues[0][0]; 
-      carp(CARP_INFO, "Linking %c to all other residues", amino);
-      for (int i=0;i<num_amino_alpha;i++) {
-        (*this)[amino].insert(amino_alpha[i]);
-        (*this)[amino_alpha[i]].insert(amino);
-      }  
-    } else {
-      //there is no star, insert the link normally
-      (*this)[residues[0][0]].insert(residues[1][0]);
-      (*this)[residues[1][0]].insert(residues[0][0]);
-    }
-  }
-
-  //print out the bond map for debugging purposes.
-/*
-  for (BondMap::iterator bond_iter = this -> begin();
-        bond_iter != this -> end();
-        ++bond_iter) {
-    for (set<char>::iterator bond2_iter = bond_iter -> second.begin();
-      bond2_iter != bond_iter -> second.end();
-      ++bond2_iter) {
-      cout <<bond_iter -> first << " link to " << *bond2_iter <<endl;
-    }
-  }
-*/
-}
-
 
 //
 //

@@ -42,6 +42,7 @@ LIBFILES= \
   CreateIndex.h \
   create_index.cpp \
   create_index.h \
+  crux-file-utils.h \
   crux-utils.cpp \
   crux-utils.h \
   database.cpp \

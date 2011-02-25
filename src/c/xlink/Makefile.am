@@ -19,7 +19,11 @@ libxlink_la_SOURCES = \
   SearchForXLinks.cpp \
   SearchForXLinks.h \
   xlink_assign_ions.cpp \
-  xlink_compute_qvalues.cpp
+  xlink_compute_qvalues.cpp \
+  XLinkSite.cpp \
+  XLinkSite.h \
+  XLinkBondMap.cpp \
+  XLinkBondMap.h
 
 
 
