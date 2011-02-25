@@ -43,27 +43,6 @@
 std::vector<PEPTIDE_T*>& get_peptides_from_sequence(std::string& sequence);
 void free_peptides();
 
-
-/*
-void prepare_protein_peptide_iterator(
-    PROTEIN_PEPTIDE_ITERATOR_T* iterator
-  );
-*/
-
-//using namespace std;
-
-//typedef std::map<char, std::set<char> > BondMap;
-
-class BondMap: public std::map<char, std::set<char> > {
-
-public:
-  BondMap();
-  virtual ~BondMap();
-  BondMap(std::string links_string);
-
-};
-
-
 class Peptide;
 class LinkedPeptide {
  public:

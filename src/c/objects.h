@@ -552,5 +552,19 @@ typedef struct _linked_list_node LIST_POINTER_T;
  */
 typedef struct modified_peptides_iterator_t MODIFIED_PEPTIDES_ITERATOR_T;
 
+/**
+ * \enum _xlink_site_t (typedefed as XLINK_SITE_T)
+ * \brief An indication of the type of the crosslinking site that
+ * may occur in a peptide.
+ * Default is UNKNOWN.
+ */
+enum XLINK_SITE_T{
+  XLINKSITE_UNKNOWN,
+  XLINKSITE_NTERM,
+  XLINKSITE_ALL,
+  XLINKSITE_AA,
+  NUMBER_XLINKSITES
+};
+
 #endif
 

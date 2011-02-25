@@ -435,6 +435,7 @@ bool Spectrum::parseMgf
   if (pepmass_found && charge_found) {
     SpectrumZState zstate;
     zstate.setMZ(precursor_mz_, charge);
+    zstates_.push_back(zstate);
   }
 
 
