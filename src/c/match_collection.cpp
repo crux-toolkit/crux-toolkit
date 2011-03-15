@@ -29,8 +29,6 @@ struct match_collection{
   MATCH_T* match[_MAX_NUMBER_PEPTIDES]; ///< array of match object
   int match_total;      ///< size of match array, may vary w/truncation
   int experiment_size;  ///< total matches before any truncation
-  // TODO this should be removed, stored in match
-  //int charge;           ///< charge of the associated spectrum
   SpectrumZState zstate; ///< zstate of the associated spectrum
   BOOLEAN_T null_peptide_collection; ///< are the peptides shuffled
   BOOLEAN_T scored_type[NUMBER_SCORER_TYPES]; 
@@ -2390,8 +2388,6 @@ void print_matches_multi_spectra
     Spectrum* spectrum = get_match_spectrum(cur_match);
     int scan_num = spectrum->getFirstScan();
     FLOAT_T mz = spectrum->getPrecursorMz();
-    //int charge = get_match_zstate(cur_match).getCharge();
-    //FLOAT_T spec_mass = get_match_zstate(cur_match).getNeutralMass();
     FLOAT_T num_psm_per_spec = get_match_ln_experiment_size(cur_match);
     num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
 
@@ -2413,22 +2409,18 @@ void print_matches_multi_spectra
  ******************************************/
 
 /**
- * Read files in the directory and return the names of target or
- * decoy files to use for post-search commands.
- * \returns Vector parameter filled with names of target or decoy
- * files.
+ * Create a list of file names that we will look for in the psm directory.
  */
-void get_target_decoy_filenames(vector<string>& target_decoy_names,
-                                DIR* directory,
-                                SET_TYPE_T type){
-  if( directory == NULL ){
-    carp(CARP_FATAL, "Cannot read files from NULL directory.");
+void set_possible_names(vector<string>& possible_names, SET_TYPE_T type){
+
+  // if a specific file has been requested, return just that file name
+  const char* psm_filename = get_string_parameter_pointer("input PSM");
+  if( psm_filename == NULL || strcmp(psm_filename, "__NULL_STR") != 0 ){
+    possible_names.push_back(psm_filename);
+    return;
   }
 
-  // look for both files from search-for-matches and sequest-search
-  vector<string> possible_names;
-
-  // decide on the search string (target/decoy)
+  // else, decide on the search string for targets or decoys
   switch(type){
   case SET_TARGET:
     possible_names.push_back("search.target.txt");
@@ -2449,6 +2441,25 @@ void get_target_decoy_filenames(vector<string>& target_decoy_names,
     possible_names.push_back("sequest.decoy-3.txt");
     break;
   }
+}
+
+/**
+ * Read files in the directory and return the names of target or
+ * decoy files to use for post-search commands.
+ * \returns Vector parameter filled with names of target or decoy
+ * files.
+ */
+void get_target_decoy_filenames(vector<string>& target_decoy_names,
+                                DIR* directory,
+                                SET_TYPE_T type){
+  if( directory == NULL ){
+    carp(CARP_FATAL, "Cannot read files from NULL directory.");
+  }
+
+  // look for both files from search-for-matches and sequest-search
+  vector<string> possible_names;
+
+  set_possible_names(possible_names, type);
 
   // open the directory
   struct dirent* directory_entry = NULL;
@@ -2463,19 +2474,21 @@ void get_target_decoy_filenames(vector<string>& target_decoy_names,
     }
   }
 
-  // check that it is only sequest or search files, not both
+  // check that files are only sequest or search, not both
   bool found_search = false;
   bool found_sequest = false;
-  for(int name_idx = 0; name_idx < (int)target_decoy_names.size(); name_idx++){
-    // don't look for just "search" and "sequest" in case they are in
-    // the fileroot
-    if( target_decoy_names[name_idx].find(possible_names.front()) 
-        != string::npos ){
-      found_search = true;
-    }
-    if( target_decoy_names[name_idx].find(possible_names.back()) 
-        != string::npos ){
-      found_sequest = true;
+  if( target_decoy_names.size() > 1 ){
+    for(int name_idx = 0; name_idx < (int)target_decoy_names.size();name_idx++){
+      // don't look for just "search" and "sequest" in case they are in
+      // the fileroot
+      if( target_decoy_names[name_idx].find(possible_names.front()) 
+          != string::npos ){
+        found_search = true;
+      }
+      if( target_decoy_names[name_idx].find(possible_names.back()) 
+          != string::npos ){
+        found_sequest = true;
+      }
     }
   }
 
@@ -3055,9 +3068,9 @@ void setup_match_collection_iterator(
  *\returns match_collection iterator instantiated from a result folder
  */
 MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
-  char* output_file_directory, 
+  const char* output_file_directory, 
     ///< the directory path where the PSM output files are located -in
-  char* fasta_file, 
+  const char* fasta_file, 
     ///< The name of the fasta file for peptides for match_collections. -in
   int* decoy_count
   )

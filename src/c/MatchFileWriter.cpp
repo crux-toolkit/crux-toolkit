@@ -67,6 +67,7 @@ void MatchFileWriter::setPrecision(){
     case PROTEIN_ID_COL:
     case FLANKING_AA_COL:
     case UNSHUFFLED_SEQUENCE_COL:
+    case PARSIMONY_RANK_COL:
       match_precision_[col_idx] = 0;
       break;
 
@@ -88,6 +89,8 @@ void MatchFileWriter::setPrecision(){
     case PERCOLATOR_QVALUE_COL:
     case QRANKER_SCORE_COL:
     case QRANKER_QVALUE_COL:
+    case SIN_SCORE_COL:
+    case NSAF_SCORE_COL:
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
@@ -140,7 +143,7 @@ void MatchFileWriter::addColumnName(MATCH_COLUMNS_T column_type){
 
 /**
  * Adds which columns to print based on the COMMAND_TYPE_T. Only for
- * search-for-matches and sequest-search.
+ * search-for-matches, sequest-search and spectral-counts.
  */
 void MatchFileWriter::addColumnNames(COMMAND_T command, bool has_decoys){
 
@@ -195,6 +198,27 @@ void MatchFileWriter::addColumnNames(COMMAND_T command, bool has_decoys){
   case XLINK_SEARCH_COMMAND:
     // TODO: does search-for-xlinks use MatchFileWriter?
     break;
+
+  case SPECTRAL_COUNTS_COMMAND:
+    // protein or peptide
+    if( get_quant_level_type_parameter("quant-level") == PEPTIDE_QUANT_LEVEL ){
+      addColumnName(SEQUENCE_COL);
+    } else {
+      addColumnName(PROTEIN_ID_COL);
+      // parsimony?
+      if( get_parsimony_type_parameter("parsimony") != PARSIMONY_NONE ){
+        addColumnName(PARSIMONY_RANK_COL);
+      }
+    }
+
+    // SIN or NSAF score
+    if( get_measure_type_parameter("measure") == MEASURE_SIN ){
+      addColumnName(SIN_SCORE_COL);
+    } else {
+      addColumnName(NSAF_SCORE_COL);
+    }
+
+    return; // do not add additional columns
   }
 
   // All search commands have these columns
@@ -232,6 +256,7 @@ void MatchFileWriter::addColumnNames
   case PROCESS_SPEC_COMMAND: ///< print-processed-spectra
   case VERSION_COMMAND:      ///< just print the version number
   // invalid
+  case SPECTRAL_COUNTS_COMMAND:
   case NUMBER_COMMAND_TYPES:
   case INVALID_COMMAND:
     carp(CARP_FATAL, "Invalid command (%s) for creating a MatchFileWriter.",

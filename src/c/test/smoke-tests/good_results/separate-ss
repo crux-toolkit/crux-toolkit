@@ -4782,6 +4782,12 @@ primary-ions=by
 # xcorr scoring.
 neutral-losses=all
 
+# Perform parsimony analysis on the proteins and report a parsimony rank
+# column in output file. Default=none. Can be
+# <string>=none|simple|greedy
+# Available for spectral-counts.
+parsimony=none
+
 # Which isotopes to use in calcuating peptide mass.
 # <string>=average|mono. Default=average.
 # Used from command line or parameter file by crux-create-index and
@@ -4792,6 +4798,11 @@ isotopic-mass=average
 # Include self-loop peptides in the database.  Default=T.
 # Available for crux search-for-xlinks program.
 xlink-include-selfloops=TRUE
+
+# Quantification at protein or peptide level (PROTEIN,PEPTIDE).
+# Default=PROTEIN.
+# Available for spectral-counts and either NSAF and SIN.
+quant-level=protein
 
 # Window type to use for selecting candidate peptides. 
 # <string>=mass|mz|ppm. Default=mass.
@@ -4963,6 +4974,12 @@ min-peaks=20
 # Only available for crux-predict-peptide-ions.
 nh3=0
 
+# Type of analysis to make on the match results: (NSAF|SIN).
+# Default=SIN. 
+# Available for spectral-counts.  NSAF is Normalized Spectral Abundance
+# Factor and SIN is Spectral Index Normalized.
+measure=SIN
+
 # Use variable binning for XCORR.  If set to true, mz-bin-width, and
 # mz-bin-offset parameters are utilized
 # Available for crux-search-for-matches.
@@ -4988,6 +5005,10 @@ max-mods=255
 # state.  With 1, 2 ,or 3 only spectra with that that charge will be
 # searched.
 spectrum-charge=all
+
+# MS2 file corresponding to the psm file. Required for SIN.
+# Available for spectral-counts with measure=SIN.
+input-ms2=__NULL_STR
 
 # Show search progress by printing every n spectra searched. 
 # Default=10.
@@ -5155,6 +5176,17 @@ precision=8
 # num-decoys-per-target.
 decoy-location=separate-decoy-files
 
+# The p-value or q-value threshold. Default=0.01.
+# Available for spectral-counts.  All PSMs with q-value higher than this
+# will be ignored.
+threshold=0.010000
+
+# Bullseye output from the accompanying MS1 file to provide area under
+# the chromatogram peak.  Default is to use total ion intenstiy
+# Available for spectral-counts and the SIN measure.  Use areas under
+# peaks instead of total ion intensity.
+input-bullseye=__NULL_STR
+
 # Optional file into which psm features are printed. Default=F.
 # Available for percolator and q-ranker.  File will be named
 # <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
@@ -5185,6 +5217,10 @@ xcorr-use-flanks=TRUE
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.
 h2o=0
+
+# Ignore peptides with multiple mappings to proteins (T,F). Default=F.
+# Available for spectral-counts.
+unique-mapping=FALSE
 
 # Compute p-values for the main score type. Default=F.
 # Currently only implemented for XCORR.

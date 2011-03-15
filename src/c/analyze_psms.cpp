@@ -220,6 +220,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
       case SEARCH_COMMAND:
       case SEQUEST_COMMAND:
       case QVALUE_COMMAND:
+      case SPECTRAL_COUNTS_COMMAND:
       case PROCESS_SPEC_COMMAND:
       case XLINK_SEARCH_COMMAND:
       case VERSION_COMMAND:

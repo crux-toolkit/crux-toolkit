@@ -793,6 +793,11 @@ static void print_one_match_field(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      get_calibration_corr(collection));
     break;
+    // values only for spectral-counts
+  case SIN_SCORE_COL:
+  case NSAF_SCORE_COL:
+  case PARSIMONY_RANK_COL:
+    return;
   case NUMBER_MATCH_COLUMNS:
   case INVALID_COL:
     carp(CARP_FATAL, "Error in printing code (match.cpp).");
@@ -1478,27 +1483,27 @@ MATCH_T* parse_match_tab_delimited(
   match -> match_rank[XCORR] = result_file.getInteger(XCORR_RANK_COL);
 
   if (!result_file.empty(DECOY_XCORR_QVALUE_COL)){
-    match -> match_scores[DECOY_XCORR_QVALUE] = result_file.getFloat(DECOY_XCORR_QVALUE_COL);
+    match->match_scores[DECOY_XCORR_QVALUE] = result_file.getFloat(DECOY_XCORR_QVALUE_COL);
   }
   /* TODO I personally would like access to the raw p-value as well as the bonferonni corrected one (SJM).
   match -> match_scores[LOGP_WEIBULL_XCORR] = result_file.getFloat("logp weibull xcorr");
   */
   if (!result_file.empty(PVALUE_COL)){
-    match -> match_scores[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat(PVALUE_COL));
+    match->match_scores[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat(PVALUE_COL));
   }
   if (!result_file.empty(PERCOLATOR_QVALUE_COL)){
-    match -> match_scores[PERCOLATOR_QVALUE] = result_file.getFloat(PERCOLATOR_QVALUE_COL);
+    match->match_scores[PERCOLATOR_QVALUE] = result_file.getFloat(PERCOLATOR_QVALUE_COL);
   }
   if (!result_file.empty(PERCOLATOR_SCORE_COL)){
-    match -> match_scores[PERCOLATOR_SCORE] = result_file.getFloat(PERCOLATOR_SCORE_COL);
-    match -> match_rank[PERCOLATOR_SCORE] = result_file.getInteger(PERCOLATOR_RANK_COL);
+    match->match_scores[PERCOLATOR_SCORE] = result_file.getFloat(PERCOLATOR_SCORE_COL);
+    match->match_rank[PERCOLATOR_SCORE] = result_file.getInteger(PERCOLATOR_RANK_COL);
   }
   if (!result_file.empty(WEIBULL_QVALUE_COL)){
-    match -> match_scores[LOGP_QVALUE_WEIBULL_XCORR] = result_file.getFloat(WEIBULL_QVALUE_COL);
+    match->match_scores[LOGP_QVALUE_WEIBULL_XCORR] = result_file.getFloat(WEIBULL_QVALUE_COL);
   }
   if (!result_file.empty(QRANKER_SCORE_COL)){
-    match -> match_scores[QRANKER_SCORE] = result_file.getFloat(QRANKER_SCORE_COL);
-    match -> match_scores[QRANKER_QVALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
+    match->match_scores[QRANKER_SCORE] = result_file.getFloat(QRANKER_SCORE_COL);
+    match->match_scores[QRANKER_QVALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
   }
 
   // get experiment size

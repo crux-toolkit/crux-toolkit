@@ -340,6 +340,14 @@ ENZYME_T string_to_enzyme_type(char*);
 char* enzyme_type_to_string(ENZYME_T);
 WINDOW_TYPE_T string_to_window_type(char*);
 char* window_type_to_string(WINDOW_TYPE_T);
+PARSIMONY_TYPE_T string_to_parsimony_type(char* name);
+char * parsimony_type_to_string(PARSIMONY_TYPE_T type);
+MEASURE_TYPE_T string_to_measure_type(char* name);
+char * measure_type_to_string(MEASURE_TYPE_T type);
+QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name);
+char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type);
+
+
 
 
 /**

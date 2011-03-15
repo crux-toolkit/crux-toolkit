@@ -8,6 +8,9 @@
 #define OBJECTS_H
 
 #include <stdio.h>
+#include <set>
+#include <map>
+#include "utils.h"
 
 #define QSORT_COMPARE_METHOD int(*)(const void*, const void*)
 
@@ -153,6 +156,58 @@ enum _window_type {
   WINDOW_PPM,
   NUMBER_WINDOW_TYPES  
 };
+
+
+/**
+ * The enum for measure type for spectral counts
+ */
+enum _measure_type {
+  MEASURE_INVALID,
+  MEASURE_SIN,
+  MEASURE_NSAF,
+  NUMBER_MEASURE_TYPES
+};
+
+/**
+ * \typedef MEASURE_TYPE_T
+ * \brief The typedef for measure type (sin, nsaf)
+ */
+typedef enum _measure_type MEASURE_TYPE_T;
+
+/**
+ * The quantification level type for spectral counts
+ */
+enum _quant_level_type {
+  QUANT_LEVEL_INVALID,
+  PEPTIDE_QUANT_LEVEL,
+  PROTEIN_QUANT_LEVEL,
+  NUMBER_QUANT_LEVEL_TYPES
+};
+
+/**
+ * \typedef QUANT_LEVEL_TYPE_T
+ * \brief The typdef for quantificaiton level (peptide, protein)
+ */
+typedef enum _quant_level_type QUANT_LEVEL_TYPE_T;
+
+
+/**
+ * The enum for parsimony type for spectral counts
+ */
+enum _parsimony_type {
+  PARSIMONY_INVALID,
+  PARSIMONY_SIMPLE,
+  PARSIMONY_GREEDY,
+  PARSIMONY_NONE,
+  NUMBER_PARSIMONY_TYPES
+};
+
+/*
+ * \typedef PARSIMONY_TYPE_T
+ * \brief The typedef for parsimony type (simple, greedy, none)
+ */
+typedef enum _parsimony_type PARSIMONY_TYPE_T;
+
 
 /**
  * \typedef WINDOW_TYPE_T
@@ -452,6 +507,7 @@ enum _command {
   SEQUEST_COMMAND,      ///< sequest-search
   QVALUE_COMMAND,       ///< compute-q-values
   PERCOLATOR_COMMAND,   ///< percolator
+  SPECTRAL_COUNTS_COMMAND, ///< spectral counts
   QRANKER_COMMAND,      ///< q-ranker
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
   XLINK_SEARCH_COMMAND, ///< search-for-xlinks
@@ -565,6 +621,37 @@ enum XLINK_SITE_T{
   XLINKSITE_AA,
   NUMBER_XLINKSITES
 };
+
+/**
+ * \typedef peptideToScore
+ * \brief Mapping of peptide object to scores
+ */
+typedef std::map<PEPTIDE_T*, FLOAT_T, bool(*)(PEPTIDE_T*, PEPTIDE_T*) > PeptideToScore;
+
+/**
+ * \typedef ProteinToScore
+ * \brief Mapping of protein object to scores
+ */
+typedef std::map<Protein*, FLOAT_T, bool(*)(Protein*, Protein*) > ProteinToScore;
+
+/**
+ * \typedef MetaProtein
+ * \brief Collection of protein objects which contain exactly the same
+ * set of peptides.
+ */
+typedef std::set<Protein*, bool(*)(Protein*, Protein*) > MetaProtein;
+
+/**
+ * \typedef ProteinToMeta
+ * \brief Mapping of Protein to MetaProtein to which it belongs
+ */
+typedef std::map<Protein*, MetaProtein, bool(*)(Protein*, Protein*) > ProteinToMetaProtein;
+
+/**
+ * \typedef MetaToRank
+ * \brief Mapping of MetaProtein to ranks to the rank asigned to it
+ */
+typedef std::map<MetaProtein, int, bool(*)(MetaProtein, MetaProtein) > MetaToRank;
 
 #endif
 

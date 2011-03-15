@@ -41,7 +41,7 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
   num_files_ = num_decoy_files + 1; // plus target file
 
   // TODO (BF oct-21-09): consider moving this logic to parameter.c
-  if( program_name != SEARCH_COMMAND && program_name != SEQUEST_COMMAND ){
+  if( command_ != SEARCH_COMMAND && command_ != SEQUEST_COMMAND ){
     num_files_ = 1;
   }
 
@@ -56,32 +56,34 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
   createFiles(&delim_file_array_, 
               output_directory, 
               fileroot, 
-              program_name, 
+              command_, 
               "txt");
 
-  // all operations create xml files
-  createFiles(&xml_file_array_,
-              output_directory,
-              fileroot,
-              program_name,
-              "pep.xml",
-              overwrite);
+  // almost all operations create xml files
+  if( command_ != SPECTRAL_COUNTS_COMMAND ){
+    createFiles(&xml_file_array_,
+                output_directory,
+                fileroot,
+                command_,
+                "pep.xml",
+                overwrite);
+  }
   
   // only sequest creates sqt files
-  if( program_name == SEQUEST_COMMAND ){
+  if( command_ == SEQUEST_COMMAND ){
     createFiles(&sqt_file_array_, 
                  output_directory, 
                  fileroot, 
-                 program_name, 
+                 command_, 
                  "sqt", 
                  overwrite);
   }
 
   // only percolator and q-ranker create feature files
-  if( (program_name == PERCOLATOR_COMMAND 
-       || program_name == QRANKER_COMMAND)
+  if( (command_ == PERCOLATOR_COMMAND 
+       || command_ == QRANKER_COMMAND)
       && get_boolean_parameter("feature-file") ){
-    string filename = makeFileName(fileroot, program_name, 
+    string filename = makeFileName(fileroot, command_, 
                                    NULL, // not target or decoy
                                    "features.txt");
     createFile(&feature_file_, 
@@ -521,9 +523,95 @@ void OutputFiles::writeMatchFeatures(
 
 }
 
+/**
+ * Print the given peptides and their scores in sorted order by score.
+ */
+void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
+
+  // rearrange pairs to sort by score
+  vector<pair<FLOAT_T, PEPTIDE_T*> > scoreToPeptide;
+  for(PeptideToScore::iterator it = peptideToScore.begin();
+       it != peptideToScore.end(); ++it){
+    PEPTIDE_T* peptide = it->first;
+    FLOAT_T score = it->second;
+    scoreToPeptide.push_back(make_pair(score, peptide));
+  }
+  
+  // sort by score
+  sort(scoreToPeptide.begin(), scoreToPeptide.end());
+  reverse(scoreToPeptide.begin(), scoreToPeptide.end());
+
+  MatchFileWriter* file = delim_file_array_[0];
+  MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
+  if( get_measure_type_parameter("measure") == MEASURE_NSAF ){
+    score_col = NSAF_SCORE_COL;
+  }
+  // print each pair
+  for(vector<pair<FLOAT_T, PEPTIDE_T*> >::iterator it = scoreToPeptide.begin();
+      it != scoreToPeptide.end(); ++it){
+    PEPTIDE_T* peptide = it->second;
+    FLOAT_T score = it->first;
+    char* seq = get_peptide_sequence(peptide);
+
+    file->setColumnCurrentRow(SEQUENCE_COL, seq);
+    file->setColumnCurrentRow(score_col, score);
+    file->writeRow();
+    free(seq);
+  }
+
+}
 
 
+/**
+ * Print all of the proteins and their associated scores in sorted
+ * order by score. If there is parsimony information, also print the
+ * parsimony rank.
+ */
+void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
+                                      MetaToRank& metaToRank,
+                                      ProteinToMetaProtein& proteinToMeta){
 
+  bool isParsimony = (proteinToMeta.size() != 0);
+
+  // reorganize the protein,score pairs to sort by score
+  vector<pair<FLOAT_T, Protein*> > scoreToProtein;
+  for (ProteinToScore::iterator it = proteinToScore.begin(); 
+       it != proteinToScore.end(); ++it){
+    Protein* protein = it->first;
+    FLOAT_T score = it->second;
+    scoreToProtein.push_back(make_pair(score, protein));
+  }
+  
+  // sort and reverse the list
+  sort(scoreToProtein.begin(), scoreToProtein.end());
+  reverse(scoreToProtein.begin(), scoreToProtein.end());
+
+  MatchFileWriter* file = delim_file_array_[0];
+  MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
+  if( get_measure_type_parameter("measure") == MEASURE_NSAF ){
+    score_col = NSAF_SCORE_COL;
+  }
+
+  // print each protein
+  for(vector<pair<FLOAT_T, Protein*> >::iterator it = scoreToProtein.begin(); 
+      it != scoreToProtein.end(); ++it){
+    FLOAT_T score = it->first;
+    Protein* protein = it->second;
+
+    file->setColumnCurrentRow(PROTEIN_ID_COL, protein->getId());
+    file->setColumnCurrentRow(score_col, score);
+
+    if (isParsimony){
+      MetaProtein metaProtein = proteinToMeta[protein];
+      int rank = -1;
+      if (metaToRank.find(metaProtein) != metaToRank.end()){
+	rank = metaToRank[metaProtein];
+      } 
+      file->setColumnCurrentRow(PARSIMONY_RANK_COL, rank);
+    }
+    file->writeRow();
+  }
+}
 
 
 

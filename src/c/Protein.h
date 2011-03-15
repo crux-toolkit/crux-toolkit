@@ -280,6 +280,11 @@ class Protein {
 
 };
 
+/** 
+ * Comparison function for sorting proteins by protein id.
+ */
+bool protein_id_less_than(Protein* protein_one, Protein* protein_two);
+
 
 /*
  * Local Variables:

@@ -139,6 +139,8 @@ LIBFILES= \
   scorer.h \
   sorter.cpp \
   sorter.h \
+  SpectralCounts.cpp \
+  SpectralCounts.h \
   SpectrumCollection.cpp \
   SpectrumCollection.h \
   Spectrum.cpp \

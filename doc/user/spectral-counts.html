@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>crux spectral-counts</title>
+
+<link href="nsaf_files/crux.css" rel="styleSheet" type="text/css">
+<style type="text/css">
+  ul {
+  margin-top:0px;
+  padding-top:0px;
+  }
+</style>
+ </head>
+<body>
+<blockquote>
+<h1 align="center">crux spectral-counts</h1>
+<p>
+<b>Usage:</b></p>
+<blockquote>
+<code>crux spectral-counts [options] &lt;input
+  PSM&gt;&nbsp;&lt;protein database&gt;</code>
+</blockquote>
+<p>
+<b>Description:</b></p>
+<blockquote>
+<p>Given a collection of scored PSMs, produce a&nbsp;list
+of proteins or peptides ranked by their a quantification score. Spectral-counts
+supports two types of quantification: Normalized Spectral Abundance
+Factor (NSAF) and Normalized Spectral Index (SI<sub>N</sub>). The
+NSAF method is from a 
+<a href="http://www.ncbi.nlm.nih.gov/pubmed/17138671">publication
+by Paoletti et al. (2006)</a>. The SI<sub>N</sub> method is from the 
+<a href="http://www.nature.com/nbt/journal/v28/n1/abs/nbt.1592.html">Griffin
+et al. (2010) paper</a>. The two quantification methods are listed below:</p> 
+<div>
+<div> <u>Protein Quantification </u>
+<ol>
+<li>
+  <p>For each protein in a given database, the NSAF score is:</p>
+  <p><img alt="" src="nsaf_prot_equation.png"></p>
+<div>where:</div>
+<ul>
+<li>N is protein index</li>
+<li>S<sub>N</sub> is the number Spectra matched to protein index</li>
+<li>L<sub>N</sub> is the length of protein N </li>
+<li>n is the total number of proteins in the input database</li>
+</ul></li>
+<li>
+  <p>For each protein in a given database, the SI<sub>N</sub> score is:</p>
+  <p><img alt="" src="sin_prot_equation.png"></p>
+  <div>where:</div>
+  <ul>
+    <li>N is protein index</li>
+    <li>p<sub>n</sub> is number of unique peptides in protein N</li>
+    <li>s<sub>j</sub> number of spectra assigned to peptide j</li>
+    <li>i<sub>k</sub> is the total fragment ion intensity of spectrum k</li>
+    <li>L<sub>N</sub> is length of protein N</li>
+  </ul>
+</li>
+</ol>
+</div>
+
+<div> <u>Peptide Quantification</u>
+  <ol>
+<li><p>For each peptide in a given database, the NSAF score is:</p>
+<p><img alt="" src="nsaf_pep_equation.png"></p>
+<div>where:</div>
+<ul>
+<li>N is peptide index</li>
+<li>S<sub>N</sub> is the number Spectra matched to peptide N</li>
+<li>L<sub>N</sub> is the length of peptide N </li>
+<li>n is the total number of peptides in the input database</li>
+</ul></li>
+<li>
+
+	<p>For each peptide in a given database, the SI<sub>N</sub> score is:</p>
+	<p><img alt="" src="sin_pep_equation.png"></p>
+	<div>where:</div>
+	<ul>
+		<li>N is peptide index</li>
+		<li>s<sub>N</sub> is number of spectra assigned to peptide N</li>
+		<li>i<sub>k</sub> is the total fragment ion intensity of spectra</li>
+		<li>L<sub>N</sub> is length of peptide N</li>
+	</ul>
+</li>
+</ol>
+</div>
+</div>
+
+
+</blockquote>
+<p>
+<b>Input:</b></p>
+<ul>
+<li>
+<code>&lt;input PSM&gt;</code>&ndash;A tab delimited text file
+produced by a <code>crux</code> post-search command, for example
+percolator.target.txt or qranker.target.txt.</li>
+<li><code>&lt;protein database&gt;</code>&ndash;
+The name of the file in fasta format or the directory containing the
+protein index from which to retrieve proteins and peptides.&nbsp;</li>
+</ul>
+<b>Output:</b>
+<ul>
+<p>
+The program writes one file to the folder <code>crux-output</code>
+by default.
+The name of the output folder can be set by the user using the 
+<code>--output-dir</code> option. The following files will be created:</p>
+<li>
+<b>spectral-count.target.txt</b>:
+a tab-delimited text file containing the protein IDs and their
+corresponding scores, in sorted order. 
+<li><b>spectral-count.log.txt</b>: All messages written to STDERR.
+</li>
+</ul>
+
+<b>Options:</b>
+<br>
+<ul>
+
+<li>
+<code>--measure &lt;NSAF|SIN&gt;</code> &ndash;
+Type of analysis to make on match results: (NSAF | SIN). Default SIN.
+</li>
+
+<li>
+<code>--quant-level &lt;protein|peptide&gt;</code> &ndash; 
+Quantification at protein or peptide level. Methods described under 
+Description. Default=protein.
+</li>
+
+<li>
+<code>--parsimony &lt;none|simple|greedy&gt;</code> &ndash; 
+Perform a parsimony
+analysis on the proteins, and report a "parsimony rank" column in the
+output file.  This column contains integers indicating the protein's
+rank in a list sorted by spectral counts.  However, if the parsimony
+analysis results in two proteins being merged, then their parsimony
+rank is the same.  In such a case, the rank is assigned based on the
+largest spectral count of any protein in the merged meta-protein.  The
+"simple" parsimony algorithm only merges two proteins A and B if the
+peptides identified in protein A are the same as or a subset of the
+peptides identified in protein B.  The "greedy" parsimony algorithm
+does additional merging, using the peptide q-values to greedily assign
+each peptide to a single protein.
+</li>
+
+<li>
+<code>--threshold &lt;double&gt; </code> &ndash;
+Only consider PSMs with a q-value lower than this threshold.  The
+q-value may be in the file's 'percolator q-value' column, 'q-ranker
+q-value' column or 'decoy q-value (xcorr)' column. Default = 0.01.
+</li>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash;
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.
+</li>
+
+<li>
+<code>--input-MS2 &lt;string&gt;</code> &ndash;
+MS2 file corresponding to the psm file. Required to measure the
+SIN. Ignored for NSAF.
+</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash;
+The name of the directory where output files will be created.
+Default = crux-output.
+</li>
+
+<li>
+  <code>--unique-mapping &lt;unique-mapping&gt;</code> &ndash;
+  Ignore peptides with multiple mappings to proteins (T,F). Default (F)
+</li>
+
+<li>
+<code>--overwrite T|F</code> &ndash; 
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default = F.
+</li>
+
+<li>
+<code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command-line or additional parameters.  See the <a
+href=parameter-file.html>parameter documentation</a> page for details.</li>
+
+</ul>
+<hr>
+<p><a href="http://noble.gs.washington.edu/%7Eandrones/internal/proj/crux-spit/doc/user/crux.html">Crux
+home</a></p>
+</blockquote>
+</body></html>

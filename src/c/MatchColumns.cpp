@@ -50,7 +50,10 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "eta",
   "beta",
   "shift",
-  "corr"
+  "corr",
+  "SIN",
+  "NSAF",
+  "parsimony rank"
 };
 
 /**
