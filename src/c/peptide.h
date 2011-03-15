@@ -182,6 +182,11 @@ DATABASE_T* get_peptide_first_src_database(
 );
 
 /**
+ * \returns The number of peptide sources (i.e. proteins) the peptide has.
+ */
+int get_peptide_num_peptide_src(PEPTIDE_T* peptide);
+
+/**
  * returns a pointer to the peptide's first parent protein field of the peptide
  */
 Protein* get_peptide_parent_protein(
@@ -478,7 +483,27 @@ MODIFIED_AA_T* generate_reversed_mod_sequence(
  * Compare peptide sequence
  * \returns TRUE if peptide sequence is identical else FALSE
  */
-BOOLEAN_T compare_peptide_sequence(
+bool compare_peptide_sequence(
+  PEPTIDE_T* peptide_one,
+  PEPTIDE_T* peptide_two
+  );
+
+/**
+ * Compare two peptide sequences.
+ * \returns Zero (0) if the sequences are identical, -1 if the first
+ * sequence is less than the first and 1 if the first sequence is
+ * greater than teh first.
+ */
+int tri_compare_peptide_sequence(
+  PEPTIDE_T* peptide_one,  ///< the peptide sequence to compare  -out
+  PEPTIDE_T* peptide_two  ///< the peptide sequence to compare  -out
+  );
+
+/**
+ * Compare the sequence of two peptides and return true if the first
+ * petpide sequence is less than (in a lexical sort) the second peptide.
+ */
+bool peptide_less_than(
   PEPTIDE_T* peptide_one,
   PEPTIDE_T* peptide_two
   );

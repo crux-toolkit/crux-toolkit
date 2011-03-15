@@ -425,6 +425,22 @@ PEPTIDE_SRC_T* get_peptide_peptide_src(
 }
 
 /**
+ * \returns The number of peptide sources (i.e. proteins) the peptide has.
+ */
+int get_peptide_num_peptide_src(PEPTIDE_T* peptide){
+  if(peptide == NULL){
+    carp(CARP_FATAL, "Cannot get number of peptide src from NULL peptide");
+  }
+  int num_proteins = 0;
+  PEPTIDE_SRC_ITERATOR_T* src_itr = new_peptide_src_iterator(peptide);
+  while(peptide_src_iterator_has_next(src_itr)){
+    peptide_src_iterator_next(src_itr);
+    ++num_proteins;
+  }
+  return num_proteins;
+}
+
+/**
  * get the peptide->first peptide_src->parent protein->database
  */
 DATABASE_T* get_peptide_first_src_database(
@@ -1284,12 +1300,12 @@ MODIFIED_AA_T* generate_reversed_mod_sequence(
  * Compare peptide sequence
  * \returns TRUE if peptide sequence is identical else FALSE
  */
-BOOLEAN_T compare_peptide_sequence(
+bool compare_peptide_sequence(
   PEPTIDE_T* peptide_one,  ///< the peptide sequence to compare  -out
   PEPTIDE_T* peptide_two  ///< the peptide sequence to compare  -out
   )
 {
-  // is Mass and Length identical
+  // are mass and length identical?
   if(compare_float(peptide_one->peptide_mass, peptide_two->peptide_mass) != 0 ||
      peptide_one->length != peptide_two->length){
     return FALSE;
@@ -1309,6 +1325,92 @@ BOOLEAN_T compare_peptide_sequence(
   return TRUE;
 }
 
+/**
+ * Compare two peptide sequences.
+ * \returns Zero (0) if the sequences are identical, -1 if the first
+ * sequence is less than the first and 1 if the first sequence is
+ * greater than teh first.
+ */
+int tri_compare_peptide_sequence(
+  PEPTIDE_T* peptide_one,  ///< the peptide sequence to compare  -out
+  PEPTIDE_T* peptide_two  ///< the peptide sequence to compare  -out
+  )
+{
+  // find the shorter peptide
+  int short_len = 0;
+  if( peptide_one->length < peptide_two->length ){
+    short_len = peptide_one->length;
+  } else {
+    short_len = peptide_two->length;
+  }
+
+  char* seq_one = get_peptide_src_sequence_pointer(peptide_one->peptide_src);
+  char* seq_two = get_peptide_src_sequence_pointer(peptide_two->peptide_src);
+    
+  // stop comparing as soon as they differ
+  int pep_idx = 0;
+  for(pep_idx = 0; pep_idx < short_len; pep_idx++ ){
+      if(seq_one[pep_idx] != seq_two[pep_idx]){
+        pep_idx++; // stop pointing one after the difference
+        break;
+      }
+  }
+
+  // move index back one to the last letter compared
+  pep_idx--;
+
+  // if the seqs are the same up to this point, then compare the lengths
+  if( seq_one[pep_idx] == seq_two[pep_idx] ){
+    if( peptide_one->length == peptide_two->length ){ // same seq
+      return 0;
+    } else if ( peptide_one->length < peptide_two->length ){ 
+      return -1;
+    } else {
+      return 1;
+    }
+  }
+
+  // else, the seqs are different
+  if(seq_one[pep_idx] < seq_two[pep_idx]){
+    return -1;
+  } else {
+    return 1;
+  }
+
+}
+/**
+ * Compare the sequence of two peptides and return true if the first
+ * petpide sequence is less than (in a lexical sort) the second
+ * peptide.  Return false if they are idential peptides.
+ */
+bool peptide_less_than(
+  PEPTIDE_T* peptide_one,
+  PEPTIDE_T* peptide_two
+  ){
+  // find the shorter peptide
+  int short_len = 0;
+  if( peptide_one->length < peptide_two->length ){
+    short_len = peptide_one->length;
+  } else {
+    short_len = peptide_two->length;
+  }
+
+  char* seq_one = get_peptide_src_sequence_pointer(peptide_one->peptide_src);
+  char* seq_two = get_peptide_src_sequence_pointer(peptide_two->peptide_src);
+    
+  // stop comparing as soon as they differ
+  int pep_idx = 0;
+  for(pep_idx = 0; pep_idx < short_len; pep_idx++ ){
+      if(seq_one[pep_idx] != seq_two[pep_idx]){
+        break;
+      }
+  }
+  if( seq_one[pep_idx] == seq_two[pep_idx] ){
+    return (peptide_one->length < peptide_two->length);
+  } 
+
+  return (seq_one[pep_idx] < seq_two[pep_idx]);
+}
 
 /**
  * compares two peptides with the lexical sort type

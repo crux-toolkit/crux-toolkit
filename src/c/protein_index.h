@@ -121,8 +121,8 @@ BOOLEAN_T create_binary_fasta_in_cur(
  * merge to one method
  */
 BOOLEAN_T create_binary_fasta_here(
-  char* fasta_filename,
-  char* binary_filename
+  const char* fasta_filename,
+  const char* binary_filename
 );
 
 /**
@@ -130,7 +130,7 @@ BOOLEAN_T create_binary_fasta_here(
  *\returns the binary fasta name which was created from the given fasta file
  */
 char* get_binary_fasta_name(
-  char* fasta_file  ///< input fasta file -in                            
+  const char* fasta_file  ///< input fasta file -in                            
   );
 
 

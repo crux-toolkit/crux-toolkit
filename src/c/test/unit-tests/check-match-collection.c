@@ -71,6 +71,7 @@ void get_target_decoy_filenames(vector<string>& target_decoy_names,
                                 SET_TYPE_T type);
 
 START_TEST(test_list_files){
+  initialize_parameters();
 
   // CASE: search files, one decoy file
   create_output_directory("list-files-1", TRUE);
@@ -86,6 +87,7 @@ START_TEST(test_list_files){
   // for target,decoy
   for(int type=0; type < 2; type++){
     vector<string> found_names;
+
     get_target_decoy_filenames( found_names, dir, (SET_TYPE_T)type);
     fail_unless( found_names.size() == 2, "Should have found 2 filenames in "
                  "list-files-1 for type %d but only found %d.", 

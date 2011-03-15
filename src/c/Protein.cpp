@@ -759,6 +759,16 @@ DATABASE_T* Protein::getDatabase()
   return database_;
 }
 
+/** 
+ * Comparison function for sorting proteins by protein id.
+ */
+bool protein_id_less_than(Protein* protein_one, Protein* protein_two){
+  int compare = strcmp(protein_one->getIdPointer(),
+                       protein_two->getIdPointer());
+  return (compare > 0);
+}
+
+
 /*
  * Local Variables:
  * mode: c

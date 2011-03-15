@@ -341,7 +341,7 @@ Protein* protein_index_iterator_next(
  * reason it is being done this way?
  */
 BOOLEAN_T create_binary_fasta_file(
-  char* fasta_file,  ///< input fasta file -in
+  const char* fasta_file,  ///< input fasta file -in
   FILE* output_file  ///< the output filestream -out
   )
 {
@@ -448,8 +448,8 @@ BOOLEAN_T create_binary_fasta(
  * create_file_in_path method with read/write info)
  */
 BOOLEAN_T create_binary_fasta_here(
-  char* fasta_filename,
-  char* binary_filename
+  const char* fasta_filename,
+  const char* binary_filename
 ){
 
   FILE* output_file = fopen(binary_filename, "w");
@@ -483,7 +483,7 @@ BOOLEAN_T create_binary_fasta_in_cur(
  *\returns the binary fasta name which was created from the given fasta file
  */
 char* get_binary_fasta_name(
-  char* fasta_file  ///< input fasta file -in                            
+  const char* fasta_file  ///< input fasta file -in                            
   )
 {
   // separate path from file name

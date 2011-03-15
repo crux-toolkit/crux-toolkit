@@ -173,6 +173,9 @@
 0 = search-for-xlinks = good_results/search-xlink.target.txt =  crux search-for-xlinks --parameter-file params/xlink xlink.ms2 xlink.fasta E:K,D:K -18.01; cat crux-output/search.target.txt
 
 
+#spectral-counts
+1 = spectral-counts = good_results/spectral-count.target.txt = crux spectral-counts --overwrite T --unique-mapping F --quant-level protein --input-ms2 test.ms2 --parsimony greedy --measure SIN test.target.txt test.fasta; cat crux-output/spectral-counts.target.txt
+
 # MORE TESTS TODO
 
 # generate tryptic peptides from non-tryptic index
