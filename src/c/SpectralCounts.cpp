@@ -268,7 +268,7 @@ void SpectralCounts::normalize_peptide_scores()
  * all b and y ions that are not modified.
  * \return The sum of unmodified b and y ions.
  */
-int SpectralCounts::sum_match_intensity(MATCH_T* match,
+FLOAT_T SpectralCounts::sum_match_intensity(MATCH_T* match,
                                         SpectrumCollection* spectra)
 {
   FLOAT_T match_intensity = 0;

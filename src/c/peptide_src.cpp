@@ -481,6 +481,11 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
       parent_protein =
         get_database_protein_by_id_string(database, protein_id_string.c_str());
       
+      if (parent_protein == NULL) {
+        carp(CARP_WARNING, "Can't find protein %s",protein_id_string.c_str());
+        continue;
+      }
+
       //find the start index by searching the protein sequence.
       string protein_sequence(parent_protein->getSequencePointer());
 
@@ -496,7 +501,11 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
       size_t pos = protein_sequence.find(sequence);
 
       if (pos == string::npos) {
-        carp(CARP_FATAL, "Can't find sequence %s in %s",sequence.c_str(), protein_sequence.c_str());
+        carp(CARP_WARNING, "Can't find sequence %s in %s:%s",
+          sequence.c_str(),
+          protein_id_string.c_str(),
+          protein_sequence.c_str());
+        pos = 0;
       }
       start_index = (int)pos + 1;
 
@@ -510,7 +519,7 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
         get_database_protein_by_id_string(database, protein_id_string.c_str());
      
       if (parent_protein == NULL) {
-        carp(CARP_FATAL, "Can't find protein %s", iter -> c_str());
+        carp(CARP_WARNING, "Can't find protein %s", iter -> c_str());
         continue;
       }
 
@@ -528,6 +537,8 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
     // set current peptide_src to the next empty peptide src
     peptide_src = get_peptide_src_next_association(peptide_src);
   } // next peptide_src in file
+
+  carp(CARP_DETAILED_DEBUG, "Done parsing id line:%s", file.getString(PROTEIN_ID_COL).c_str());
 
   return TRUE;
 }
