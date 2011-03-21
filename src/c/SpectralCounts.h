@@ -77,7 +77,7 @@ class SpectralCounts: public CruxApplication {
   void normalize_protein_scores();
   void make_unique_mapping();
   void getSpectra(std::map<std::pair<int,int>, Spectrum*>& spectra);
-  int sum_match_intensity(MATCH_T* match,
+  FLOAT_T sum_match_intensity(MATCH_T* match,
                           SpectrumCollection* spectra);
 
   // member variables
