@@ -17,6 +17,8 @@
 SpectrumZState::SpectrumZState() {
   charge_ = 0;
   neutral_mass_ = 0;
+  rtime_ = 0;
+  area_ = 0;
 }
 
 SpectrumZState::SpectrumZState(
@@ -26,6 +28,8 @@ SpectrumZState::SpectrumZState(
 
   neutral_mass_ = neutral_mass;
   charge_ = charge;
+  rtime_ = 0;
+  area_ = 0;
 }
 
 /** 
@@ -38,7 +42,7 @@ SpectrumZState::~SpectrumZState() {
 /**
  * \returns The charge for this z-state
  */
-int SpectrumZState::getCharge() {
+int SpectrumZState::getCharge() const {
   return charge_;
 }
 
@@ -98,6 +102,41 @@ FLOAT_T SpectrumZState::getNeutralMass() {
 
   return neutral_mass_;
 }
+
+/** 
+ * Sets the retention time for this z-state
+ */
+void SpectrumZState::setRTime(
+  FLOAT_T rtime
+  ) {
+
+  rtime_ = rtime;
+}
+
+/**
+ * \returns The retention time for this z-state
+ */
+FLOAT_T SpectrumZState::getRTime() {
+  return rtime_;
+}
+
+/**
+ * Sets the area for this z-state
+ */
+void SpectrumZState::setArea(
+    FLOAT_T area
+  ) {
+
+  area_ = area;
+}
+
+/**
+ * \returns The area for this z-state
+ */
+FLOAT_T SpectrumZState::getArea() {
+  return area_;
+}
+
 
 /**
  * Local Variables:

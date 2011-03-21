@@ -21,6 +21,7 @@
 #include "carp.h"
 #include <vector>
 #include <string>
+#include "DelimitedFile.h"
 #include "MatchFileReader.h"
 #include "MSToolkit/Spectrum.h"
 
@@ -777,6 +778,9 @@ bool Spectrum::parseZLine(char* line)  ///< 'Z' line to parse -in
   return true;
  }
 
+
+
+
 /**
  * FIXME currently does not parse D line, just copies the entire line
  * Parses the 'D' line of the a spectrum
@@ -801,8 +805,60 @@ bool Spectrum::parseILine(char* line)  ///< 'I' line to parse -in
    line_str.erase( line_str.find_first_of("\r\n") );
    i_lines_v_.push_back(line_str);
 
-  return TRUE;
+   if (line_str.find("EZ") != string::npos) {
+     return parseEZLine(line_str);
+   }
+
+
+  return true;
 }
+
+/**
+ * Parses the 'EZ' line of the a spectrum
+ * \returns TRUE if success. FALSE is failure.
+ * 
+ */
+bool Spectrum::parseEZLine(string line_str) ///< 'EZ' line to parse -in
+{
+
+  vector<string> tokens;
+
+  DelimitedFile::tokenize(line_str, tokens, '\t');
+  
+  int charge;
+  FLOAT_T m_h_plus;
+  FLOAT_T rtime;
+  FLOAT_T area;
+
+  if (tokens.size() < 6) {
+    carp(CARP_FATAL,
+      "Failed to parse 'EZ' line %d/6 tokens:\n %s", 
+      tokens.size(),
+      line_str.c_str());
+    return false;
+  }
+
+  DelimitedFile::from_string(charge, tokens.at(2));
+  DelimitedFile::from_string(m_h_plus, tokens.at(3));
+  DelimitedFile::from_string(rtime, tokens.at(4));
+  DelimitedFile::from_string(area, tokens.at(5));
+
+  carp(CARP_DETAILED_DEBUG, "EZLine-Charge:%i", charge);
+  carp(CARP_DETAILED_DEBUG, "EZLine-M+H:%f", m_h_plus);
+  carp(CARP_DETAILED_DEBUG, "EZLine-RTime:%f", rtime);
+  carp(CARP_DETAILED_DEBUG, "EZLine-Area:%f", area);
+
+  SpectrumZState ezstate;
+  ezstate.setSinglyChargedMass(m_h_plus, charge);
+  ezstate.setRTime(rtime);
+  ezstate.setArea(area);
+
+  ezstates_.push_back(ezstate);
+
+  return true;
+
+}
+
 
 /**
  * Transfer values from an MSToolkit spectrum to the crux Spectrum.
@@ -1043,10 +1099,14 @@ double Spectrum::getTotalEnergy()
 
 /**
  * \returns A read-only reference to the vector of possible chare
- * states for this spectrum.
+ * states for this spectrum.  If EZ states are available, return those.
  */
 const vector<SpectrumZState>& Spectrum::getZStates() {
-  return zstates_;
+  if (ezstates_.size() != 0) {
+    return ezstates_;
+  } else {
+    return zstates_;
+  }
 }
 
 
@@ -1086,7 +1146,7 @@ vector<SpectrumZState> Spectrum::getZStatesToSearch() {
 
   
   if( strcmp( charge_str, "all") == 0){ // return full array of charges
-    select_zstates = zstates_;
+    select_zstates = getZStates();
   } else { // return a single charge state.
 
     int param_charge = atoi(charge_str);
@@ -1096,9 +1156,9 @@ vector<SpectrumZState> Spectrum::getZStatesToSearch() {
            "'%s' is not valid", MAX_CHARGE, charge_str);
     }
 
-    for (unsigned int zstate_idx=0;zstate_idx < zstates_.size();zstate_idx++) {
-      if (zstates_[zstate_idx].getCharge() == param_charge) {
-        select_zstates.push_back(zstates_[zstate_idx]);
+    for (unsigned int zstate_idx=0;zstate_idx < getNumZStates();zstate_idx++) {
+      if (getZState(zstate_idx).getCharge() == param_charge) {
+        select_zstates.push_back(getZState(zstate_idx));
       }
     }
   }
@@ -1107,13 +1167,21 @@ vector<SpectrumZState> Spectrum::getZStatesToSearch() {
 
 }
 
+/**
+ * \returns the ZState at the requested index
+ */
+const SpectrumZState& Spectrum::getZState(
+  int idx ///< the zstate index
+) {
+  return getZStates().at(idx);
+}
+
 
 /**
  * \returns The number of possible charge states of this spectrum.
  */
-int Spectrum::getNumZStates()
-{
-  return (int)zstates_.size();
+unsigned int Spectrum::getNumZStates() {
+  return getZStates().size();
 }
 
 /**

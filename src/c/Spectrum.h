@@ -50,7 +50,7 @@ class Spectrum{
   int              last_scan_;     ///< The number of the last scan
   FLOAT_T          precursor_mz_;  ///< The m/z of precursor (MS-MS spectra)
   std::vector<SpectrumZState> zstates_;
-
+  std::vector<SpectrumZState> ezstates_;
   std::vector<PEAK_T*>  peaks_;         ///< The spectrum peaks
   FLOAT_T          min_peak_mz_;   ///< The minimum m/z of all peaks
   FLOAT_T          max_peak_mz_;   ///< The maximum m/z of all peaks
@@ -115,6 +115,12 @@ class Spectrum{
    * \returns TRUE if success. FALSE is failure.
    */
   bool parseZLine(char* line);  ///< 'Z' line to parse -in
+
+  /**
+   * Parses the 'EZ' line of a spectrum
+   * \returns true if success. false is failure.
+   */
+  bool parseEZLine(std::string line_str);
 
   /**
    * Parses the 'D' line of the a spectrum
@@ -258,9 +264,14 @@ class Spectrum{
 
   /**
    * \returns The a const reference to a vector of the possible charge
-   * states of this spectrum.
+   * states of this spectrum. If EZ states are available, return those.
    */
   const std::vector<SpectrumZState>& getZStates();
+
+  /**
+   * \returns the ZState at the requested index
+   */
+  const SpectrumZState& getZState(int idx);
 
   /**
    * Considers the spectrum-charge parameter and returns the
@@ -269,15 +280,14 @@ class Spectrum{
    * /returns A vector of charge states to consider for this spectrum.
    */ 
   //std::vector<int> getChargesToSearch();
-
-
+ 
   std::vector<SpectrumZState> getZStatesToSearch();
 
   
   /**
    * \returns The number of possible charge states of this spectrum.
    */
-  int getNumZStates();
+  unsigned int getNumZStates();
 
   /**
    * \returns The minimum m/z of all peaks.
