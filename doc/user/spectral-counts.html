@@ -1,15 +1,8 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>crux spectral-counts</title>
-
-<link href="nsaf_files/crux.css" rel="styleSheet" type="text/css">
-<style type="text/css">
-  ul {
-  margin-top:0px;
-  padding-top:0px;
-  }
-</style>
- </head>
+<html>
+<head>
+<title>crux spectral-counts</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
 <body>
 <blockquote>
 <h1 align="center">crux spectral-counts</h1>
@@ -24,15 +17,18 @@
 <blockquote>
 <p>Given a collection of scored PSMs, produce a&nbsp;list
 of proteins or peptides ranked by their a quantification score. Spectral-counts
-supports two types of quantification: Normalized Spectral Abundance
-Factor (NSAF) and Normalized Spectral Index (SI<sub>N</sub>). The
+supports three types of quantification: Normalized Spectral Abundance
+Factor (NSAF), Normalized Spectral Index (SI<sub>N</sub>) and 
+Exponentially Modified Protein Abundance Index (emPAI). The
 NSAF method is from a 
 <a href="http://www.ncbi.nlm.nih.gov/pubmed/17138671">publication
 by Paoletti et al. (2006)</a>. The SI<sub>N</sub> method is from the 
 <a href="http://www.nature.com/nbt/journal/v28/n1/abs/nbt.1592.html">Griffin
-et al. (2010) paper</a>. The two quantification methods are listed below:</p> 
-<div>
-<div> <u>Protein Quantification </u>
+et al. (2010) paper</a>. The emPAI method was first described in
+<a href="http://www.mcponline.org/content/4/9/1265">Ishihama et al
+  (2005)</a>. 
+The the quantification methods are defined below:</p> 
+<b>Protein Quantification </b>
 <ol>
 <li>
   <p>For each protein in a given database, the NSAF score is:</p>
@@ -56,6 +52,16 @@ et al. (2010) paper</a>. The two quantification methods are listed below:</p>
     <li>L<sub>N</sub> is length of protein N</li>
   </ul>
 </li>
+<li>
+  <p>For each protein in a given database, the emPAI score is:</p>
+  <p><img alt="" src="quant_empai_1.gif"></p>
+<div>where:</div>
+<ul>
+<li>N<sub>observed</sub> is the number of experimentally observed
+  peptides with scores above a specified threshold.</li>
+<li>N<sub>obervable</sub> is the calcualted number of observable
+  peptides for a the protein given the search constraints.</li>
+</ul></li>
 </ol>
 </div>
 
@@ -119,14 +125,14 @@ corresponding scores, in sorted order.
 <ul>
 
 <li>
-<code>--measure &lt;NSAF|SIN&gt;</code> &ndash;
-Type of analysis to make on match results: (NSAF | SIN). Default SIN.
+<code>--measure &lt;NSAF|SIN|EMPAI&gt;</code> &ndash;
+Type of analysis to make on match results: (NSAF | SIN | EMPAI). Default = SIN.
 </li>
 
 <li>
 <code>--quant-level &lt;protein|peptide&gt;</code> &ndash; 
 Quantification at protein or peptide level. Methods described under 
-Description. Default=protein.
+Description. Default = protein.
 </li>
 
 <li>
@@ -142,7 +148,7 @@ largest spectral count of any protein in the merged meta-protein.  The
 peptides identified in protein A are the same as or a subset of the
 peptides identified in protein B.  The "greedy" parsimony algorithm
 does additional merging, using the peptide q-values to greedily assign
-each peptide to a single protein.
+each peptide to a single protein. Default = none.
 </li>
 
 <li>
@@ -161,7 +167,7 @@ output file names. Default = none.
 <li>
 <code>--input-MS2 &lt;string&gt;</code> &ndash;
 MS2 file corresponding to the psm file. Required to measure the
-SIN. Ignored for NSAF.
+SIN. Ignored for NSAF and EMPAI.
 </li>
 
 <li>
@@ -171,12 +177,17 @@ Default = crux-output.
 </li>
 
 <li>
-  <code>--unique-mapping &lt;unique-mapping&gt;</code> &ndash;
-  Ignore peptides with multiple mappings to proteins (T,F). Default (F)
+<code>--unique-mapping &lt;unique-mapping&gt;</code> &ndash;
+Ignore peptides with mappings to multiple proteins (T,F). Default (F)
 </li>
 
 <li>
-<code>--overwrite T|F</code> &ndash; 
+<code>--input-bullseye &lt;string&gt;</code> &ndash;
+Bullseye output from the accompanying MS1 file to provide area under
+the chromatogram peak.  Default is to use total ion intensity.
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash; 
 Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default = F.
 </li>
@@ -188,7 +199,7 @@ href=parameter-file.html>parameter documentation</a> page for details.</li>
 
 </ul>
 <hr>
-<p><a href="http://noble.gs.washington.edu/%7Eandrones/internal/proj/crux-spit/doc/user/crux.html">Crux
-home</a></p>
+<p><a href="crux.html">Crux home</a></p>
 </blockquote>
-</body></html>
+</body>
+</html>
