@@ -10,13 +10,13 @@
 <b>Usage:</b></p>
 <blockquote>
 <code>crux spectral-counts [options] &lt;input
-  PSM&gt;&nbsp;&lt;protein database&gt;</code>
+  PSMs&gt;&nbsp;&lt;protein database&gt;</code>
 </blockquote>
 <p>
 <b>Description:</b></p>
 <blockquote>
 <p>Given a collection of scored PSMs, produce a&nbsp;list
-of proteins or peptides ranked by their a quantification score. Spectral-counts
+of proteins or peptides ranked by a quantification score. Spectral-counts
 supports three types of quantification: Normalized Spectral Abundance
 Factor (NSAF), Normalized Spectral Index (SI<sub>N</sub>) and 
 Exponentially Modified Protein Abundance Index (emPAI). The
@@ -27,7 +27,7 @@ by Paoletti et al. (2006)</a>. The SI<sub>N</sub> method is from the
 et al. (2010) paper</a>. The emPAI method was first described in
 <a href="http://www.mcponline.org/content/4/9/1265">Ishihama et al
   (2005)</a>. 
-The the quantification methods are defined below:</p> 
+The quantification methods are defined below:</p> 
 <b>Protein Quantification </b>
 <ol>
 <li>
@@ -36,7 +36,7 @@ The the quantification methods are defined below:</p>
 <div>where:</div>
 <ul>
 <li>N is protein index</li>
-<li>S<sub>N</sub> is the number Spectra matched to protein index</li>
+<li>S<sub>N</sub> is the number spectra matched to protein index</li>
 <li>L<sub>N</sub> is the length of protein N </li>
 <li>n is the total number of proteins in the input database</li>
 </ul></li>
@@ -46,10 +46,10 @@ The the quantification methods are defined below:</p>
   <div>where:</div>
   <ul>
     <li>N is protein index</li>
-    <li>p<sub>n</sub> is number of unique peptides in protein N</li>
-    <li>s<sub>j</sub> number of spectra assigned to peptide j</li>
+    <li>p<sub>n</sub> is the number of unique peptides in protein N</li>
+    <li>s<sub>j</sub> is the number of spectra assigned to peptide j</li>
     <li>i<sub>k</sub> is the total fragment ion intensity of spectrum k</li>
-    <li>L<sub>N</sub> is length of protein N</li>
+    <li>L<sub>N</sub> is the length of protein N</li>
   </ul>
 </li>
 <li>
@@ -59,8 +59,8 @@ The the quantification methods are defined below:</p>
 <ul>
 <li>N<sub>observed</sub> is the number of experimentally observed
   peptides with scores above a specified threshold.</li>
-<li>N<sub>obervable</sub> is the calcualted number of observable
-  peptides for a the protein given the search constraints.</li>
+<li>N<sub>obervable</sub> is the calculated number of observable
+  peptides for the protein given the search constraints.</li>
 </ul></li>
 </ol>
 </div>
@@ -71,22 +71,23 @@ The the quantification methods are defined below:</p>
 <p><img alt="" src="nsaf_pep_equation.png"></p>
 <div>where:</div>
 <ul>
-<li>N is peptide index</li>
-<li>S<sub>N</sub> is the number Spectra matched to peptide N</li>
+<li>N is the peptide index</li>
+<li>S<sub>N</sub> is the number spectra matched to peptide N</li>
 <li>L<sub>N</sub> is the length of peptide N </li>
 <li>n is the total number of peptides in the input database</li>
 </ul></li>
+
 <li>
 
-	<p>For each peptide in a given database, the SI<sub>N</sub> score is:</p>
-	<p><img alt="" src="sin_pep_equation.png"></p>
-	<div>where:</div>
-	<ul>
-		<li>N is peptide index</li>
-		<li>s<sub>N</sub> is number of spectra assigned to peptide N</li>
-		<li>i<sub>k</sub> is the total fragment ion intensity of spectra</li>
-		<li>L<sub>N</sub> is length of peptide N</li>
-	</ul>
+<p>For each peptide in a given database, the SI<sub>N</sub> score is:</p>
+<p><img alt="" src="sin_pep_equation.png"></p>
+<div>where:</div>
+<ul>
+<li>N is the peptide index</li>
+<li>s<sub>N</sub> is the number of spectra assigned to peptide N</li>
+<li>i<sub>k</sub> is the total fragment ion intensity of spectrum k</li>
+<li>L<sub>N</sub> is the length of peptide N</li>
+</ul>
 </li>
 </ol>
 </div>
@@ -97,27 +98,35 @@ The the quantification methods are defined below:</p>
 <p>
 <b>Input:</b></p>
 <ul>
+
 <li>
 <code>&lt;input PSM&gt;</code>&ndash;A tab delimited text file
 produced by a <code>crux</code> post-search command, for example
-percolator.target.txt or qranker.target.txt.</li>
-<li><code>&lt;protein database&gt;</code>&ndash;
-The name of the file in fasta format or the directory containing the
-protein index from which to retrieve proteins and peptides.&nbsp;</li>
+<code>percolator.target.txt</code>
+or <code>qranker.target.txt</code>.</li>
+
+<li><code>&lt;protein database&gt;</code>&ndash; The name of the file
+in fasta format or the directory containing the protein index from
+which to retrieve proteins and peptides.</li>
 </ul>
+
 <b>Output:</b>
 <ul>
+
 <p>
-The program writes one file to the folder <code>crux-output</code>
-by default.
-The name of the output folder can be set by the user using the 
-<code>--output-dir</code> option. The following files will be created:</p>
+The program writes one file to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option. The following files will be
+created:</p>
+
 <li>
-<b>spectral-count.target.txt</b>:
-a tab-delimited text file containing the protein IDs and their
-corresponding scores, in sorted order. 
-<li><b>spectral-count.log.txt</b>: All messages written to STDERR.
-</li>
+<code>spectral-count.target.txt</code>: a tab-delimited text file
+containing the protein IDs and their corresponding scores, in sorted
+order.</li>
+
+<li><code>spectral-count.log.txt</code>: All messages written to
+standard error.</li>
+
 </ul>
 
 <b>Options:</b>
@@ -136,26 +145,25 @@ Description. Default = protein.
 </li>
 
 <li>
-<code>--parsimony &lt;none|simple|greedy&gt;</code> &ndash; 
-Perform a parsimony
-analysis on the proteins, and report a "parsimony rank" column in the
-output file.  This column contains integers indicating the protein's
-rank in a list sorted by spectral counts.  However, if the parsimony
-analysis results in two proteins being merged, then their parsimony
-rank is the same.  In such a case, the rank is assigned based on the
-largest spectral count of any protein in the merged meta-protein.  The
-"simple" parsimony algorithm only merges two proteins A and B if the
-peptides identified in protein A are the same as or a subset of the
-peptides identified in protein B.  The "greedy" parsimony algorithm
-does additional merging, using the peptide q-values to greedily assign
-each peptide to a single protein. Default = none.
-</li>
+<code>--parsimony &lt;none|simple|greedy&gt;</code> &ndash; Perform a
+parsimony analysis on the proteins, and report a "parsimony rank"
+column in the output file.  This column contains integers indicating
+the protein's rank in a list sorted by spectral counts.  If the
+parsimony analysis results in two proteins being merged, then their
+parsimony rank is the same.  In such a case, the rank is assigned
+based on the largest spectral count of any protein in the merged
+meta-protein.  The "simple" parsimony algorithm only merges two
+proteins A and B if the peptides identified in protein A are the same
+as or a subset of the peptides identified in protein B.  The "greedy"
+parsimony algorithm does additional merging, using the peptide
+q-values to greedily assign each peptide to a single protein. Default
+= none.</li>
 
 <li>
-<code>--threshold &lt;double&gt; </code> &ndash;
-Only consider PSMs with a q-value lower than this threshold.  The
-q-value may be in the file's 'percolator q-value' column, 'q-ranker
-q-value' column or 'decoy q-value (xcorr)' column. Default = 0.01.
+<code>--threshold &lt;double&gt; </code> &ndash; Only consider PSMs
+with a q-value lower than this threshold.  The q-value may be in the
+file's "percolator q-value" column, "q-ranker q-value" column or
+"decoy q-value (xcorr)" column. Default = 0.01.
 </li>
 
 <li>
@@ -166,7 +174,7 @@ output file names. Default = none.
 
 <li>
 <code>--input-MS2 &lt;string&gt;</code> &ndash;
-MS2 file corresponding to the psm file. Required to measure the
+MS2 file corresponding to the PSM file. Required to measure the
 SIN. Ignored for NSAF and EMPAI.
 </li>
 
@@ -182,24 +190,26 @@ Ignore peptides with mappings to multiple proteins (T,F). Default (F)
 </li>
 
 <li>
-<code>--input-bullseye &lt;string&gt;</code> &ndash;
-Bullseye output from the accompanying MS1 file to provide area under
-the chromatogram peak.  Default is to use total ion intensity.
+<code>--input-bullseye &lt;string&gt;</code> &ndash; Read Bullseye
+output from the accompanying MS1 file to provide area under the
+chromatogram peak.  Default is to use total ion intensity.</li>
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> &ndash; 
-Replace existing files if true (T) or fail when trying to overwrite a
-file if false (F). Default = F.
-</li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash; Replace existing files if
+true (T) or fail when trying to overwrite a file if false (F). Default
+= F.</li>
 
 <li>
-<code>--parameter-file &lt;filename&gt;</code> &ndash; 
-A file containing command-line or additional parameters.  See the <a
-href=parameter-file.html>parameter documentation</a> page for details.</li>
+<code>--parameter-file &lt;filename&gt;</code> &ndash; A file
+containing command line or additional parameters.  See
+the <a href=parameter-file.html>parameter documentation</a> page for
+details.</li>
 
 </ul>
 <hr>
+
 <p><a href="crux.html">Crux home</a></p>
+
 </blockquote>
 </body>
 </html>
