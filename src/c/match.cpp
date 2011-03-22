@@ -796,6 +796,7 @@ static void print_one_match_field(
     // values only for spectral-counts
   case SIN_SCORE_COL:
   case NSAF_SCORE_COL:
+  case EMPAI_SCORE_COL:
   case PARSIMONY_RANK_COL:
     return;
   case NUMBER_MATCH_COLUMNS:

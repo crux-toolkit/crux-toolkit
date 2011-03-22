@@ -91,6 +91,7 @@ void MatchFileWriter::setPrecision(){
     case QRANKER_QVALUE_COL:
     case SIN_SCORE_COL:
     case NSAF_SCORE_COL:
+    case EMPAI_SCORE_COL:
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
@@ -214,8 +215,10 @@ void MatchFileWriter::addColumnNames(COMMAND_T command, bool has_decoys){
     // SIN or NSAF score
     if( get_measure_type_parameter("measure") == MEASURE_SIN ){
       addColumnName(SIN_SCORE_COL);
-    } else {
+    } else if( get_measure_type_parameter("measure") == MEASURE_NSAF){
       addColumnName(NSAF_SCORE_COL);
+    } else if( get_measure_type_parameter("measure") == MEASURE_EMPAI){
+      addColumnName(EMPAI_SCORE_COL);
     }
 
     return; // do not add additional columns

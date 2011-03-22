@@ -326,6 +326,9 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
     carp(CARP_FATAL,"Invalid window type");
   }
   
+  carp(CARP_DETAILED_DEBUG, "Generating peptides from %.5f to %.5f for "
+       "precursor m/z %.2f, mass %.5f, window size %.2f", min_mass, max_mass, 
+       mz, ((mz - MASS_PROTON) * (double)charge - delta_mass), window);
   // create peptide_generator
     new_iterator->peptide_generator = 
       new_generate_peptides_iterator_from_mass_range(min_mass, max_mass, index, dbase);
