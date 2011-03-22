@@ -4974,11 +4974,12 @@ min-peaks=20
 # Only available for crux-predict-peptide-ions.
 nh3=0
 
-# Type of analysis to make on the match results: (NSAF|SIN).
-# Default=SIN. 
+# Type of analysis to make on the match results: (NSAF|SIN|EMPAI).
+# Default=NSAF. 
 # Available for spectral-counts.  NSAF is Normalized Spectral Abundance
-# Factor and SIN is Spectral Index Normalized.
-measure=SIN
+# Factor, SIN is Spectral Index Normalized and EMPAI is Exponentially
+# Modified Protein Abundance Index
+measure=NSAF
 
 # Use variable binning for XCORR.  If set to true, mz-bin-width, and
 # mz-bin-offset parameters are utilized
