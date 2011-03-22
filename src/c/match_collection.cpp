@@ -2456,6 +2456,18 @@ void get_target_decoy_filenames(vector<string>& target_decoy_names,
     carp(CARP_FATAL, "Cannot read files from NULL directory.");
   }
 
+  // first see if there is a specific file to open
+  const char* psm_file = get_string_parameter_pointer("input PSMs");
+  if( psm_file != NULL && strcmp(psm_file, "__NULL_STR") != 0 ){
+    // strip off the path
+    char** name_path = parse_filename_path(psm_file);
+    target_decoy_names.push_back(name_path[0]);
+    free(name_path[0]);
+    free(name_path[1]);
+    free(name_path);
+    return;
+  }
+
   // look for both files from search-for-matches and sequest-search
   vector<string> possible_names;
 
@@ -2550,6 +2562,8 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
       get_full_filename(match_collection_iterator->directory_name,
                         file_names[file_idx].c_str());
     MatchFileReader delimited_result_file(full_filename);
+    carp(CARP_DEBUG, "Creating new match collection from '%s' file.",
+         full_filename);
     free(full_filename);
 
     extend_match_collection_tab_delimited(match_collection, 
@@ -3041,7 +3055,6 @@ void setup_match_collection_iterator(
   // are there any more match_collections to return?
   if(match_collection_iterator->collection_idx 
       < match_collection_iterator->number_collections){
-
     // then go parse the match_collection
     match_collection_iterator->match_collection = 
       new_match_collection_psm_output(match_collection_iterator, 

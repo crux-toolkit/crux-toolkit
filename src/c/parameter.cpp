@@ -770,11 +770,12 @@ void initialize_parameters(void){
        "Available for spectral-counts.  All PSMs with q-value higher than "
        "this will be ignored.",
        "true");
-  set_measure_type_parameter("measure", MEASURE_SIN,
-       "Type of analysis to make on the match results: (NSAF|SIN). "
-       "Default=SIN. ", 
+  set_measure_type_parameter("measure", MEASURE_NSAF,
+       "Type of analysis to make on the match results: (NSAF|SIN|EMPAI). "
+       "Default=NSAF. ", 
        "Available for spectral-counts.  NSAF is Normalized Spectral "
-       "Abundance Factor and SIN is Spectral Index Normalized.",
+       "Abundance Factor, SIN is Spectral Index Normalized and EMPAI is "
+       "Exponentially Modified Protein Abundance Index",
        "true");
   set_boolean_parameter("unique-mapping", FALSE,
        "Ignore peptides with multiple mappings to proteins (T,F). Default=F.",
@@ -1487,6 +1488,14 @@ void check_parameter_consistency(){
     free(val_str);
     update_hash_value(parameters, "missed-cleavages", (void*)"TRUE");
   }
+
+  // spectral counts SIN requires an MS2 file
+  if( get_measure_type_parameter("measure") == MEASURE_SIN ){
+    if( strcmp(get_string_parameter_pointer("input-ms2"), "__NULL_STR") == 0 ){
+      carp(CARP_FATAL, "The SIN computation for spectral-counts requires "
+           "that the --input-ms2 option specify a file.");
+    }
+  }
 }
 
 
@@ -1628,7 +1637,7 @@ BOOLEAN_T check_option_type_and_bounds(const char* name){
     if (string_to_measure_type(value_str) == MEASURE_INVALID){
       success = FALSE;
       sprintf(die_str, "Illegal measure type '%s' for option '%s'. "
-	      "Must be (NSAF, SIN)", value_str, name);
+	      "Must be (NSAF, SIN, EMPAI)", value_str, name);
     }
     break;
   case PARSIMONY_TYPE_P:
