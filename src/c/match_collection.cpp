@@ -2414,7 +2414,7 @@ void print_matches_multi_spectra
 void set_possible_names(vector<string>& possible_names, SET_TYPE_T type){
 
   // if a specific file has been requested, return just that file name
-  const char* psm_filename = get_string_parameter_pointer("input PSM");
+  const char* psm_filename = get_string_parameter_pointer("input PSMs");
   if( psm_filename == NULL || strcmp(psm_filename, "__NULL_STR") != 0 ){
     possible_names.push_back(psm_filename);
     return;

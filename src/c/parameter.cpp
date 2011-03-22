@@ -754,7 +754,7 @@ void initialize_parameters(void){
 
 
   // ***** spectral-counts aguments *****
-  set_string_parameter("input PSM", NULL,
+  set_string_parameter("input PSMs", NULL,
        "Name of file in text format which holds match results.",
        "For quantify to retrieve scores for protein and peptides.",
        "false");
@@ -779,12 +779,6 @@ void initialize_parameters(void){
   set_boolean_parameter("unique-mapping", FALSE,
        "Ignore peptides with multiple mappings to proteins (T,F). Default=F.",
        "Available for spectral-counts.",
-       "true");
-  set_string_parameter("input-bullseye", NULL,
-       "Bullseye output from the accompanying MS1 file to provide area under "
-       "the chromatogram peak.  Default is to use total ion intenstiy",
-       "Available for spectral-counts and the SIN measure.  Use areas under "
-       "peaks instead of total ion intensity.",
        "true");
   set_quant_level_parameter("quant-level", PROTEIN_QUANT_LEVEL,
        "Quantification at protein or peptide level (PROTEIN,PEPTIDE). "

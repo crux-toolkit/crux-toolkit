@@ -135,6 +135,11 @@ class ProteinPeptideIterator {
   Protein* getProtein();
 
   /**
+   * \returns The total number of peptides in this protein.
+   */
+  int getTotalPeptides();
+
+  /**
    * Creates the data structures in the protein_peptide_iterator object necessary
    * for creating peptide objects.
    * - mass_array - cumulative distribution of masses. used to determine 

@@ -590,6 +590,8 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
   MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
   if( get_measure_type_parameter("measure") == MEASURE_NSAF ){
     score_col = NSAF_SCORE_COL;
+  } else if( get_measure_type_parameter("measure") == MEASURE_EMPAI ){
+    score_col = EMPAI_SCORE_COL;
   }
 
   // print each protein

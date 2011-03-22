@@ -449,12 +449,6 @@ decoy-location=separate-decoy-files
 # will be ignored.
 threshold=0.010000
 
-# Bullseye output from the accompanying MS1 file to provide area under
-# the chromatogram peak.  Default is to use total ion intenstiy
-# Available for spectral-counts and the SIN measure.  Use areas under
-# peaks instead of total ion intensity.
-input-bullseye=__NULL_STR
-
 # Optional file into which psm features are printed. Default=F.
 # Available for percolator and q-ranker.  File will be named
 # <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.

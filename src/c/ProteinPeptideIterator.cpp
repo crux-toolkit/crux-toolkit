@@ -560,6 +560,14 @@ Protein* ProteinPeptideIterator::getProtein()
   return protein_;
 }
 
+/**
+ * \returns The total number of peptides in this protein.
+ */
+int ProteinPeptideIterator::getTotalPeptides(){
+  return num_cleavages_;
+}
+
+
 /*
  * Local Variables:
  * mode: c
