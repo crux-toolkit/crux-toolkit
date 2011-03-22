@@ -100,14 +100,14 @@ The quantification methods are defined below:</p>
 <ul>
 
 <li>
-<code>&lt;input PSM&gt;</code>&ndash;A tab delimited text file
-produced by a <code>crux</code> post-search command, for example
-<code>percolator.target.txt</code>
+<code>&lt;input PSMs&gt;</code>&ndash;
+A tab delimited text file produced by a <code>crux</code> post-search
+command, for example <code>percolator.target.txt</code>
 or <code>qranker.target.txt</code>.</li>
 
-<li><code>&lt;protein database&gt;</code>&ndash; The name of the file
-in fasta format or the directory containing the protein index from
-which to retrieve proteins and peptides.</li>
+<li><code>&lt;protein database&gt;</code>&ndash; 
+The name of the file in fasta format or the directory containing the
+protein index from which to retrieve proteins and peptides.</li>
 </ul>
 
 <b>Output:</b>
@@ -135,7 +135,8 @@ standard error.</li>
 
 <li>
 <code>--measure &lt;NSAF|SIN|EMPAI&gt;</code> &ndash;
-Type of analysis to make on match results: (NSAF | SIN | EMPAI). Default = SIN.
+Type of analysis to make on match results: (NSAF | SIN |
+EMPAI). Default = SIN. 
 </li>
 
 <li>
@@ -145,25 +146,25 @@ Description. Default = protein.
 </li>
 
 <li>
-<code>--parsimony &lt;none|simple|greedy&gt;</code> &ndash; Perform a
-parsimony analysis on the proteins, and report a "parsimony rank"
-column in the output file.  This column contains integers indicating
-the protein's rank in a list sorted by spectral counts.  If the
-parsimony analysis results in two proteins being merged, then their
-parsimony rank is the same.  In such a case, the rank is assigned
-based on the largest spectral count of any protein in the merged
-meta-protein.  The "simple" parsimony algorithm only merges two
+<code>--parsimony &lt;none|simple|greedy&gt;</code> &ndash; 
+Perform a parsimony analysis on the proteins, and report a "parsimony
+rank" column in the output file.  This column contains integers
+indicating the protein's rank in a list sorted by spectral counts.  If
+the parsimony analysis results in two proteins being merged, then
+their parsimony rank is the same.  In such a case, the rank is
+assigned based on the largest spectral count of any protein in the
+merged meta-protein.  The "simple" parsimony algorithm only merges two
 proteins A and B if the peptides identified in protein A are the same
 as or a subset of the peptides identified in protein B.  The "greedy"
 parsimony algorithm does additional merging, using the peptide
 q-values to greedily assign each peptide to a single protein. Default
-= none.</li>
+= none.</li> 
 
 <li>
-<code>--threshold &lt;double&gt; </code> &ndash; Only consider PSMs
-with a q-value lower than this threshold.  The q-value may be in the
-file's "percolator q-value" column, "q-ranker q-value" column or
-"decoy q-value (xcorr)" column. Default = 0.01.
+<code>--threshold &lt;double&gt; </code> &ndash; 
+Only consider PSMs with a q-value lower than this threshold.  The
+q-value may be in the file's "percolator q-value" column, "q-ranker
+q-value" column or "decoy q-value (xcorr)" column. Default = 0.01. 
 </li>
 
 <li>
@@ -190,18 +191,13 @@ Ignore peptides with mappings to multiple proteins (T,F). Default (F)
 </li>
 
 <li>
-<code>--input-bullseye &lt;string&gt;</code> &ndash; Read Bullseye
-output from the accompanying MS1 file to provide area under the
-chromatogram peak.  Default is to use total ion intensity.</li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash; 
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default = F.</li> 
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> &ndash; Replace existing files if
-true (T) or fail when trying to overwrite a file if false (F). Default
-= F.</li>
-
-<li>
-<code>--parameter-file &lt;filename&gt;</code> &ndash; A file
-containing command line or additional parameters.  See
+<code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command line or additional parameters.  See
 the <a href=parameter-file.html>parameter documentation</a> page for
 details.</li>
 

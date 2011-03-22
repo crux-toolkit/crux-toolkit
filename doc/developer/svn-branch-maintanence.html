@@ -18,7 +18,7 @@ be <code>file:///noble/svn/crux</code> and on remote
 machines <code>svn+ssh://&lt;hostname&gt;/noble/svn/crux</code>.  All  
 the work will happen in <code>~/sandbox</code> and the current
 working directory will precede the cursor in the example commands as
-in <br><code>~/sandbox$ svn co $SVNROOT/trunk crux</code>
+in <br><code>~/sandbox&#36; svn co $SVNROOT/trunk crux</code>
 
 
 <h4>Creating a branch</h4>
@@ -228,8 +228,11 @@ up with the file in question.  Search for '===' or '<<<' to find the conflict.
 The branch version is between "<<<<<<< .working" and "=======".  The
 trunk version is between "=======" and ">>>>>>> .merge-right.r3534".
 You can edit the file however you want, selecting either the top block
-  or the lower block or some combination of the two.  Make sure you
-  remove the "<", ">", and "=" lines.  Once you resolve this conflict,
+or the lower block or some combination of the two.  Make sure you
+remove the "<", ">", and "=" lines.  It can be helpful to have clean
+copies of the branch and the trunk checked out for reference.  Using a
+side-by-side editor such as xxdiff with the pre-merged files can be helpful.
+Once you resolve this conflict,
     keep searching the file for more.  When you are done, save the
     file and quit the editor.  You will be greeted with this prompt.
 <pre>
@@ -248,7 +251,7 @@ after the merge command is finished.
 <p>
 After merging, check the status.
 <pre>
-~/sandbox/crux-side-project$ svn status
+~/sandbox/crux-side-project&#36; svn status
 ?       src/c/match_collection.cpp.working
 ?       src/c/match_collection.cpp.merge-left.r3437
 ?       src/c/match_collection.cpp.merge-right.r3534
@@ -283,8 +286,8 @@ Once "match_collection.cpp" is the way you want it, mark it as
 resolved.  Note that you can compile and test the code before you
 resolve the conflict.
 <pre>
-~/sandbox/crux-side-project$ svn resolve --accept working src/c/match_collection.cpp
-~/sandbox/crux-side-project$ svn status
+~/sandbox/crux-side-project&#36; svn resolve --accept working src/c/match_collection.cpp
+~/sandbox/crux-side-project&#36; svn status
 !     C src/c/q-ranker.cpp
       >   local delete, incoming delete upon merge
 !     C src/c/q-ranker.h
@@ -309,8 +312,8 @@ repository), 'theirs-full' (whatever was in the trunk version of the
 repository).  Unless you have made local changes (say, to a file being
 added), 'working' and 'mine-full' are the same. 
 <pre>
-~/sandbox/crux-side-project svn resolve --accept working src/c/q-ranker.cpp
-~/sandbox/crux-side-project svn resolve --accept working src/c/q-ranker.h
+~/sandbox/crux-side-project&#36; svn resolve --accept working src/c/q-ranker.cpp
+~/sandbox/crux-side-project&#36; svn resolve --accept working src/c/q-ranker.h
 </pre>
 
 <h5>Undoing changes</h5>
@@ -320,9 +323,9 @@ the file to its pre-merge state. (Note that this works because there
 were no local changes when we started merging.) Then repeat the merge
 with the single file. 
 <pre>
-~/sandbox/crux-side-project$ svn revert src/c/match_collection.cpp
-~/sandbox/crux-side-project$ cd src/c/
-~/sandbox/crux-side-project/src/c$ svn merge -r3437:HEAD $SVNROOT/trunk/src/c/match_collection.cpp
+~/sandbox/crux-side-project&#36; svn revert src/c/match_collection.cpp
+~/sandbox/crux-side-project&#36; cd src/c/
+~/sandbox/crux-side-project/src/c&#36; svn merge -r3437:HEAD $SVNROOT/trunk/src/c/match_collection.cpp
 </pre>
 
 
