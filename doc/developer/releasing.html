@@ -3,6 +3,9 @@
 <body>
  <h2 align=center>Notes on releasing new versions of Crux</h2>
 
+<p><i>Note: A detailed <a href=#todo>checklist</a> is at the bottom of
+    this page</i>
+
 <h3>Before you begin</h3>
 <p>Confirm that a clean check out builds correctly and passes all the
   smoke and unit tests.  Update the release notes
@@ -85,9 +88,75 @@ recorded in <code>crux/ChangeLog</code>.  A more general description of changes
  <code>/var/noble/www/htdocs/proj/crux</code>
  and its address is http://noble.gs.washington.edu/proj/crux/.  The
 <code>proj/crux/</code> directory should contain all of the files and
- subdirectories of <code>crux/doc/user/</code>.  The the target
+ sub-directories of <code>crux/doc/user/</code>.  The the target
  <code>webpage</code> in <code>crux/doc/user</code> will copy all
  necessary files to the web directory. The login/password
  for the downloads page is <code>crux</code> and <code>warm.Brandy</code>.
+
+<a name="todo">
+<h3>Checklist</h3></a>
+<p>Here is a list of steps to follow, roughly in this order</p>
+<ol>
+<li>Do a clean checkout.
+<h4>Update documentation</h4>
+<li>Change version number in <code>crux/configure.ac</code>.
+<li>Look at the SVN log since the last release and update release
+  notes accordingly.
+<li>Change the <code>crux/doc/user/download/index.html</code> page.
+<li>Change the <code>crux/doc/user/open_source_download/index.html</code> page.
+<h4>Build and test</h4>
+<li>Build, checking version number in the configure output.
+<li>Check unit and smoke tests.
+<li>Check version number with <code>crux version</code>.
+<li>Commit changes.
+<h4>Create files for distribution</h4>
+<li>Package the full version:
+  <ul> 
+    <li><code>make dist</code>  
+    <li><code>make bdist</code>
+    <li><code>make checksum</code>
+  </ul>
+You should now have these files:
+  <ul>
+   <li>crux_1.xx-data.zip
+   <li>crux_1.xx.tar.gz
+   <li>crux_1.xx.tar.gz.md5sum.txt
+   <li>crux_1.xx-PLATFORM.zip
+   <li>crux_1.xx-PLATFORM.zip.md5sum.txt
+  </ul>
+<li>Build and package the open-source version:
+  <ul>
+    <li><code>make clean</code>
+    <li><code>configure --disable-search</code>
+    <li><code>make</code>
+    <li>Check that search is disabled. 
+        <code>src/c/crux search-for-matches a b</code
+    <li><code>make dist PACKAGE="open_crux"
+    <li><code>make bdist PACKAGE="open_crux"
+    <li><code>make checksum PACKAGE="open_crux"
+  </ul>
+You should have these files:
+  <ul>
+    <li>open_crux_1.xx-data.zip
+    <li>open_crux_1.xx.tar.gz
+    <li>open_crux_1.xx.tar.gz.md5sum.txt
+    <li>open_crux_1.xx-PLATFORM.zip
+    <li>open_crux_1.xx-PLATFORM.zip.md5sum.txt
+  </ul>
+
+<li>Repeat the build and package steps for remaining platforms.  Note
+  that you do not need to package up the source files again.
+<h4>Check the distribution files</h4>
+<li>Unpack and build the source file tarballs.
+<li>Unpack and run the binary files.  <i>You may want to ask someone
+    else to do these steps on different computers.</i>
+<h4>Update the website</h4>
+<li>Move the distribution files to <code>crux/doc/user/download</code>
+and <code>crux/doc/user/open_source_download</code>.
+<li>Copy the documentation and distribution files to the website with
+<code>make webpage</code> from <code>crux/doc/user</code>.
+<li>Test that the links all work.
+<li>Send a message to the crux users list announcing the new release.
+</ol>
 </body>
 </html>
