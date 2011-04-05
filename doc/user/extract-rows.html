@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>extract-rows</TITLE>
+</HEAD>
+<BODY>
+<blockquote>
+<H1 ALIGN=CENTER>extract-rows</H1>
+
+<B>Usage:</B>
+
+<blockquote>
+<code>crux extract-rows [options] &nbsp;&lt;tsv&nbsp;filename&gt; 
+  &nbsp;&lt;column&nbsp;name&gt;&nbsp;&lt;column&nbsp;value&gt; </code>
+</blockquote>
+
+<B>Description:</B>
+<p>
+Given a tab-delimited filename, a column name and a column cell value, 
+extract the rows that have the matching values for that column.
+</p>
+
+<B>Input:</B>
+<UL>
+
+<li>
+&lt;tsv&nbsp;filename&gt; &ndash; A tab-delimited file with column headers.
+</li>
+	
+<li>
+&lt;column name&gt; &ndash; A column name
+</li>
+
+<li>
+&lt;column value&gt; &ndash; A cell value for a column
+</li>
+
+</UL>
+
+<B>Output:</B>
+
+<ul>
+The program prints to standard output the rows for which the value
+observed in the specified column of the tab-delimited input file
+match the <code>&lt;column value&gt;</code> given on the command line.
+</ul>
+
+<B>Options:</B>
+
+<UL>
+
+<li>
+<code>--header T|F</code> &ndash; Print the header line of the file,
+in addition to the rows that match.  Default=T.</code>
+</li>
+
+<li>
+<code>--column-type int|real|string</code> &ndash; Specify the data
+ type of the column, either an integer (<code>int</code>), 
+ a floating point number (<code>real</code>), or
+ a <code>string</code>. The default value is <code>string</code>.
+</li>
+
+<li>
+<code>--comparison &lt;operator&gt;</code> &ndash; Specify the
+operator that is used to compare an entry in the specified column to
+the value given on the command line.  Legal values are as folows:
+<ul>
+<li><code>eq</code> &ndash; The two values are equal</li>
+<li><code>lt</code> &ndash; The file value is less than the argument value</li>
+<li><code>lte</code> &ndash; The file value is less than or equal to the argument value</li>
+<li><code>gt</code> &ndash;  The file value is greater than the argument value</li>
+<li><code>gte</code> &ndash; The file value is greater than or equal to the argument value</li>
+<li><code>neq</code> &ndash; The file value is not equal to the argument value</li>
+</ul>
+The default value is <code>eq</code></li>
+
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.</li>
+
+</ul>
+
+<hr></hr>
+
+<p>
+<a href="crux.html">Crux home</a></p>
+
+</blockquote>
+</body>
+</html>

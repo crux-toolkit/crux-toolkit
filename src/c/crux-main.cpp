@@ -20,7 +20,9 @@
 #include "QRanker.h"
 #include "PrintProcessedSpectra.h"
 #include "SearchForXLinks.h"
+#include "ExtractColumns.h"
 #include "SpectralCounts.h"
+#include "ExtractRows.h"
 #include "PrintVersion.h"
 
 /**
@@ -40,8 +42,15 @@ int main(int argc, char** argv){
   applications.add(new QRanker());
   applications.add(new PrintProcessedSpectra());
   applications.add(new SearchForXLinks());
+  
+  applications.add(new ExtractColumns());
+  applications.add(new ExtractRows());
   applications.add(new SpectralCounts());
+
   applications.add(new PrintVersion());
+
+
+
 
   int ret = applications.main(argc, argv);
   return ret;

@@ -2,7 +2,8 @@
  * \file CruxApplicationList.h 
  * AUTHOR: Sean McIlwain
  * CREATE DATE: 6 December 2010
- * \brief Object for a CruxApplicationList
+ * \brief Maintains a list of executable applications.  Calling the main method
+ * will try to find the application by name and try to execute it if found.
  *****************************************************************************/
 #ifndef CRUXAPPLICATIONLIST_H
 #define CRUXAPPLICATIONLIST_H
@@ -12,9 +13,11 @@
 #include <vector>
 #include <string>
 
-class CruxApplicationList : std::vector<CruxApplication*> {
+
+class CruxApplicationList {
 
  protected:
+  std::vector<CruxApplication*> applications_; ///< list of applications
   std::string list_name_; ///<Name of this list
 
  public:
@@ -32,19 +35,25 @@ class CruxApplicationList : std::vector<CruxApplication*> {
   /**
    * Adds an application pointer to the list of applications
    */
-  void add(CruxApplication* application);
+  void add(
+    CruxApplication* application ///< application to add
+  );
 
   /**
    * \returns an application by a name,
    * returns NULL if not found
    */
-  CruxApplication* find(const std::string& appname);
+  CruxApplication* find(
+    const std::string& appname ///< name of application to find
+  );
 
   /**
    * \returns an application by a name,
    * returns NULL if not found
    */
-  CruxApplication* find(const char* appname);
+  CruxApplication* find(
+    const char* appname ///< name of application to find
+  );
 
   /**
    * prints out the usage statement for this application list.

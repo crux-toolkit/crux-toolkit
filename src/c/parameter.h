@@ -241,6 +241,13 @@ double get_mz_bin_width();
  
 double get_mz_bin_offset();
 
+COLTYPE_T get_column_type_parameter(
+  const char* name
+  );
+
+COMPARISON_T get_comparison_parameter(
+  const char* name
+  );
 
 /**
  * \brief prints all parameters except mods into the output stream

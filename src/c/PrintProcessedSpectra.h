@@ -25,14 +25,41 @@
 class PrintProcessedSpectra: public CruxApplication {
 
  public:
-
+  /**
+   * \returns a blank PrintProcessedSpectra object
+   */
   PrintProcessedSpectra();
+  
+  /**
+   * Destructor
+   */
   ~PrintProcessedSpectra();
+
+  /**
+   * main method for PrintProcessedSpectra
+   */
   virtual int main(int argc, char** argv);
+
+  /**
+   * \returns the command name for PrintProcessedSpectra
+   */
   virtual std::string getName();
+
+  /**
+   * \returns the description for PrintProcessedSpectra
+   */
   virtual std::string getDescription();
 
 };
 
 
 #endif
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+
+

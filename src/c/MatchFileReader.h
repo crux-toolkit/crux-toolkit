@@ -86,7 +86,7 @@ class MatchFileReader: public DelimitedFileReader {
     /**
      * gets a string value of the cell
      */
-    std::string& getString(
+    const std::string& getString(
       MATCH_COLUMNS_T col_type ///<the column type
     );
 

@@ -346,6 +346,9 @@ MEASURE_TYPE_T string_to_measure_type(char* name);
 char * measure_type_to_string(MEASURE_TYPE_T type);
 QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name);
 char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type);
+COLTYPE_T string_to_column_type(char* name);
+COMPARISON_T string_to_comparison(char* name);
+
 
 
 

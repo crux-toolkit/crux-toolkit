@@ -7,43 +7,47 @@
 #ifndef CREATEINDEX_H
 #define CREATEINDEX_H
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <signal.h>
-#include "objects.h"
-#include "carp.h"
-#include "peptide.h"
-#include "peptide_src.h"
-#include "Protein.h"
-#include "database.h"
 #include "index.h"
-#include "protein_index.h"
 #include "parameter.h"
-
 #include "CruxApplication.h"
-
-
-
 
 #include <string>
 
 class CreateIndex: public CruxApplication {
 
  public:
-
+  /**
+   * \returns a blank CreateIndex object
+   */
   CreateIndex();
-  ~CreateIndex();
-  virtual int main(int argc, char** argv);
-  virtual std::string getName();
-  virtual std::string getDescription();
   
+  /**
+   * Destructor
+   */
+  ~CreateIndex();
 
+  /**
+   * main method for CreateIndex
+   */
+  virtual int main(int argc, char** argv);
+
+  /**
+   * \returns the command name for CreateIndex
+   */
+  virtual std::string getName();
+
+  /**
+   * \returns the description for CreateIndex
+   */
+  virtual std::string getDescription();
 };
 
 
 #endif
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */

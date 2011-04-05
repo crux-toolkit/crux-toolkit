@@ -8,7 +8,6 @@
 #define ComputeQValues_H
 
 #include "CruxApplication.h"
-#include "DelimitedFileReader.h"
 
 #include <string>
 
@@ -16,13 +15,43 @@ class ComputeQValues: public CruxApplication {
 
  public:
 
+  /**
+   * \returns a blank ComputeQValues object
+   */
   ComputeQValues();
+  
+  /**
+   * Destructor
+   */
   ~ComputeQValues();
+
+  /**
+   * main method for ComputeQValues
+   */
   virtual int main(int argc, char** argv);
+
+  /**
+   * \returns the command name for ComputeQValues
+   */
   virtual std::string getName();
+
+  /**
+   * \returns the description for ComputeQValues
+   */
   virtual std::string getDescription();
+
+  /**
+   * \returns the filestem for ComputeQValues
+   */
   virtual std::string getFileStem();
 };
 
 
 #endif
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
