@@ -15,14 +15,39 @@
 class Percolator: public CruxApplication {
 
  public:
-
+  /**
+   * \returns a blank Percolator object
+   */
   Percolator();
+  
+  /**
+   * Destructor
+   */
   ~Percolator();
-  virtual int main(int argc, char** argv);
-  virtual std::string getName();
-  virtual std::string getDescription();
 
+  /**
+   * main method for Percolator
+   */
+  virtual int main(int argc, char** argv);
+
+  /**
+   * \returns the command name for Percolator
+   */
+  virtual std::string getName();
+
+  /**
+   * \returns the description for Percolator
+   */
+  virtual std::string getDescription();
 };
 
 
 #endif
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+

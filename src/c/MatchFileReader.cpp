@@ -121,7 +121,7 @@ string BLANK_STRING="";
 /**
  * \returns the string value of a cell
  */
-std::string& MatchFileReader::getString(
+const std::string& MatchFileReader::getString(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
 
@@ -166,7 +166,7 @@ void MatchFileReader::getStringVectorFromCell(
       char delimiter ///<the delimiter to use
 ) {
 
-  string& string_ans = getString(col_type);
+  const string& string_ans = getString(col_type);
 
   //get the list of strings separated by delimiter
   string_vector.clear();

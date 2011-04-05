@@ -74,7 +74,9 @@ DelimitedFile::DelimitedFile(
   loadData(file_name, hasHeader);
 }
 
-
+/**
+ * empties the delimited file
+ */
 void DelimitedFile::clear() {
   for (unsigned int idx=0;idx < data_.size(); idx++) {
     data_[idx].clear();
@@ -714,9 +716,16 @@ void DelimitedFile::getIntegerVectorFromCell(
   }
 }
 
+/**
+ * reorders the rows of a delimited file using a built map 
+ * of sorted indices.  
+ */
 template <typename T>
-void DelimitedFile::reorderRows(multimap<T, unsigned int>& sort_indices, BOOLEAN_T ascending) {
-  //cout <<"reorderRows: start"<<endl;
+void DelimitedFile::reorderRows(
+  multimap<T, unsigned int>& sort_indices, ///<map of indices sorted by type T 
+  bool ascending ///<sort in ascending order?
+  ) {
+
   vector<vector<string> > newData;
 
   for (unsigned int col_idx = 0;col_idx < numCols();col_idx++) {
@@ -746,9 +755,13 @@ void DelimitedFile::reorderRows(multimap<T, unsigned int>& sort_indices, BOOLEAN
   data_.swap(newData);
 }
 
+/**
+ * sorts the delimited file treating the key column as float values
+ */
 void DelimitedFile::sortByFloatColumn(
-  const string& column_name,
-  BOOLEAN_T ascending) {
+  const string& column_name, ///<The name of the key column
+  bool ascending ///<sort in ascending order?
+  ) {
 
   multimap<FLOAT_T, unsigned int> sort_indices;
   int sort_col_idx = findColumn(column_name); 
@@ -764,9 +777,13 @@ void DelimitedFile::sortByFloatColumn(
   reorderRows(sort_indices, ascending);
 }
 
+/**
+ * sorts the delimited file treating the key column as integers
+ */
 void DelimitedFile::sortByIntegerColumn(
-  unsigned int col_idx,
-  BOOLEAN_T ascending) {
+  unsigned int col_idx, ///< the index of the key column 
+  bool ascending ///< sort in ascending order?
+  ) {
   
   multimap<int, unsigned int> sort_indices;
   for (unsigned int row_idx=0;row_idx<numRows();row_idx++) {
@@ -777,10 +794,12 @@ void DelimitedFile::sortByIntegerColumn(
 }
 
 
-
+/**
+ * sorts the delimited file treating the key column as integers
+ */
 void DelimitedFile::sortByIntegerColumn(
-  const string& column_name,
-  BOOLEAN_T ascending
+  const string& column_name, ///< the name of the key column
+  bool ascending ///< sort in ascending order?
   ) {
   
   int sort_col_idx = findColumn(column_name); 
@@ -791,13 +810,13 @@ void DelimitedFile::sortByIntegerColumn(
 
 }
 
-
-
-
-
+/**
+ * sorts the delimited file treating the key column as a string
+ */
 void DelimitedFile::sortByStringColumn(
-  const string& column_name,
-  BOOLEAN_T ascending) {
+  const string& column_name, ///< the name of the key column
+  bool ascending ///< sort in ascending order?
+  ) {
   
   multimap<string, unsigned int> sort_indices;
 
@@ -815,11 +834,13 @@ void DelimitedFile::sortByStringColumn(
 
 }
 
-
+/**
+ * copies a row to a another DelimitedFile
+ */ 
 void DelimitedFile::copyToRow(
-  DelimitedFile& dest,
-  int src_row_idx,
-  int dest_row_idx
+  DelimitedFile& dest, ///<The DelimitedFile to copy the row to
+  int src_row_idx, ///<The row index of the source (this)
+  int dest_row_idx ///<The row index of the destination.
   ) {
 
   for (unsigned int src_col_idx=0;src_col_idx < numCols();src_col_idx++) {
@@ -830,8 +851,6 @@ void DelimitedFile::copyToRow(
     }
   }
 }
-
-
 
 /*Iterator functions.*/
 /**
@@ -850,20 +869,21 @@ void DelimitedFile::next() {
     current_row_++;
 }
 
-
 /**
  * \returns whether there are more rows to 
  * iterate through
  */
-BOOLEAN_T DelimitedFile::hasNext() {
+bool DelimitedFile::hasNext() {
   return current_row_ < numRows();
 }
-
 
 /**
  *Allows object to be printed to a stream
  */
-std::ostream &operator<< (std::ostream& os, DelimitedFile& delimited_file) {
+std::ostream &operator<< (
+  std::ostream& os, ///< The stream to output to
+  DelimitedFile& delimited_file ///< The delimited file to output
+  ) {
 
   //find the maximum number of rows.
   unsigned int maxRow = 0;

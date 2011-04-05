@@ -17,13 +17,39 @@ class SearchForXLinks: public CruxApplication {
 
  public:
 
+  /**
+   * \returns a blank SearchForXLinks object
+   */
   SearchForXLinks();
+  
+  /**
+   * Destructor
+   */
   ~SearchForXLinks();
+
+  /**
+   * main method for SearchForXLinks
+   */
   virtual int main(int argc, char** argv);
+
+  /**
+   * \returns the command name for SearchForXLinks
+   */
   virtual std::string getName();
+
+  /**
+   * \returns the description for SearchForXLinks
+   */
   virtual std::string getDescription();
 
 };
 
 
 #endif
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */

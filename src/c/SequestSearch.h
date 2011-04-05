@@ -17,16 +17,38 @@
 
 class SequestSearch: public CruxApplication {
 
- protected:
  public:
-
+  /**
+   * \returns a blank SequestSearch object
+   */
   SequestSearch();
+  
+  /**
+   * Destructor
+   */
   ~SequestSearch();
+
+  /**
+   * main method for SequestSearch
+   */
   virtual int main(int argc, char** argv);
+
+  /**
+   * \returns the command name for SequestSearch
+   */
   virtual std::string getName();
+
+  /**
+   * \returns the description for SequestSearch
+   */
   virtual std::string getDescription();
-  virtual std::string getFileStem();
 };
 
-
 #endif
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */

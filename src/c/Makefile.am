@@ -57,6 +57,10 @@ LIBFILES= \
   DelimitedFileReader.h \
   DelimitedFileWriter.cpp \
   DelimitedFileWriter.h \
+  ExtractColumns.cpp \
+  ExtractColumns.h \
+  ExtractRows.cpp \
+  ExtractRows.h \
   FilteredSpectrumChargeIterator.cpp \
   FilteredSpectrumChargeIterator.h \
   generate_peptides_iterator.cpp \

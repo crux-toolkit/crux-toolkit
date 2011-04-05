@@ -1,42 +1,44 @@
 /**
- * \file PrintVersion.h 
+ * \file ExtractColumns.h 
  * AUTHOR: Sean McIlwain
  * CREATE DATE: 6 December 2010
- * \brief Object for printing the crux version number.
+ * \brief Give a tab delimited file and a comma-separated list of column names
+ * print out a tab delimied file with only those columns
  *****************************************************************************/
-#ifndef PRINTVERSION_H
-#define PRINTVERSION_H
+#ifndef EXTRACTCOLUMNS_H
+#define EXTRACTCOLUMNS_H
 
 #include "CruxApplication.h"
 #include "DelimitedFileReader.h"
 
 #include <string>
 
-class PrintVersion: public CruxApplication {
+class ExtractColumns: public CruxApplication {
 
  public:
+
   /**
-   * \returns a blank PrintVersion object
+   * \returns a blank ExtractRows object
    */
-  PrintVersion();
-  
+  ExtractColumns();
+
   /**
    * Destructor
    */
-  ~PrintVersion();
+  ~ExtractColumns();
 
   /**
-   * main method for PrintVersion
+   * main method for ExtractColumns
    */
   virtual int main(int argc, char** argv);
 
   /**
-   * \returns the command name for PrintVersion
+   * \returns the command name for ExtractColumns
    */
   virtual std::string getName();
 
   /**
-   * \returns the description for PrintVersion
+   * \returns the description for ExtractColumns
    */
   virtual std::string getDescription();
 

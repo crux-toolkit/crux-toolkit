@@ -15,7 +15,9 @@ using namespace std;
 /**
  * Creates an application list with a listname
  */
-CruxApplicationList::CruxApplicationList(const char* list_name) {
+CruxApplicationList::CruxApplicationList(
+  const char* list_name ///<name of the list
+) {
   list_name_ = string(list_name);
 }
 
@@ -25,30 +27,34 @@ CruxApplicationList::CruxApplicationList(const char* list_name) {
  */
 CruxApplicationList::~CruxApplicationList() {
   
-  for (unsigned int idx=0;idx < size();idx++) {
-    delete at(idx);
+  for (unsigned int idx=0;idx < applications_.size();idx++) {
+    delete applications_.at(idx);
   }
-  clear();
+  applications_.clear();
 
 }
 
 /**
  * Adds an application pointer to the list of applications
  */
-void CruxApplicationList::add(CruxApplication* application) {
+void CruxApplicationList::add(
+  CruxApplication* application ///< application to add
+  ) {
 
   if (find(application->getName()) != NULL) {
     carp(CARP_FATAL, "Name clash! %s",application->getName().c_str());
   }
 
-  push_back(application);
+  applications_.push_back(application);
 }
 
 /**
  * \returns an application by a name,
  * returns NULL if not found
  */
-CruxApplication* CruxApplicationList::find(const string& appname) {
+CruxApplication* CruxApplicationList::find(
+  const string& appname ///<name of the application to find
+  ) {
   return find(appname.c_str());
 }
 
@@ -56,12 +62,15 @@ CruxApplication* CruxApplicationList::find(const string& appname) {
  * \returns an application by a name,
  * returns NULL if not found
  */
-CruxApplication* CruxApplicationList::find(const char* appname) {
+CruxApplication* CruxApplicationList::find(
+  const char* appname ///<name of the application to find
+  ) {
 
   CruxApplication* crux_application = NULL;
 
-  for (CruxApplicationList::iterator app_iter = this-> begin();
-    app_iter != this->end();
+  for (vector<CruxApplication*>::iterator app_iter = 
+    applications_.begin();
+    app_iter != applications_.end();
     ++app_iter) {
     if (appname == (*app_iter) -> getName()) {
       crux_application = *app_iter;
@@ -77,27 +86,24 @@ CruxApplication* CruxApplicationList::find(const char* appname) {
  */
 void CruxApplicationList::usage() {
 
-  CruxApplicationList::iterator iter;
+  vector<CruxApplication*>::iterator iter;
 
   size_t max_name_length=0;
 
-  for (iter = this->begin();
-    iter != this->end();
+  for (iter = applications_.begin();
+    iter != applications_.end();
     ++iter) {
 
     max_name_length = max(max_name_length, (*iter) -> getName().length());
 
   }
 
-  //cerr <<"max:"<<max_name_length<<endl;
-
-
   cerr <<" Usage: " << list_name_ << " <command> [options] <argument>" << endl;
   cerr << endl;
   cerr << list_name_ << " supports the following commands:"<<endl;
 
-  for (CruxApplicationList::iterator iter = this->begin();
-    iter != this->end();
+  for (iter = applications_.begin();
+    iter != applications_.end();
     ++iter) {
   
     string name = (*iter)->getName();

@@ -624,6 +624,32 @@ enum XLINK_SITE_T{
 };
 
 /**
+ * \enum COMPARISON_T
+ */
+enum COMPARISON_T{
+  COMPARISON_INVALID,
+  COMPARISON_LT,
+  COMPARISON_LTE,
+  COMPARISON_EQ,
+  COMPARISON_GTE,
+  COMPARISON_GT,
+  COMPARISON_NEQ,
+  NUMBER_COMPARISONS,
+};
+
+/**
+ * \enum COLTYPE_T
+ */
+enum COLTYPE_T{
+  COLTYPE_INVALID,
+  COLTYPE_INT,
+  COLTYPE_REAL,
+  COLTYPE_STRING,
+  NUMBER_COLTYPES
+};
+
+
+/**
  * \typedef peptideToScore
  * \brief Mapping of peptide object to scores
  */

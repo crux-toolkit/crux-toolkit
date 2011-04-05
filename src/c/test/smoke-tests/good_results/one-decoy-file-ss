@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Feb 16 14:21:48 2011
+H	StartTime	Thu Mar 24 22:05:19 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2675,7 +2675,7 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1486.6195	1.01405990	10.49388313	7	-0.00195638	4	2	26	8	SPQGNTLNNEPGMK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK
 159	2	745.7500	1489.4827	1488.7063	1.08661401	17.71540642	4	-0.01036976	5	3	24	8	FHENISLPVASFK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK
 INFO: CPU: n001.grid.gs.washington.edu
-INFO: Wed Feb 16 14:21:48 PST 2011
+INFO: Thu Mar 24 22:05:18 PDT 2011
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
@@ -2683,7 +2683,7 @@ INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
 INFO: Freeing database.
 INFO: Closing database filehandle
-INFO: Elapsed time: 4.96 s
+INFO: Elapsed time: 3.41 s
 INFO: Finished crux sequest-search
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
@@ -2695,6 +2695,12 @@ fragment-mass=mono
 # Avaliable only for crux-get-ms2-spectrum.  Does not affect contents of
 # the output file.
 stats=FALSE
+
+# Specifies the operator that is used to compare an entry in the
+# specified column to the value given on the command line. 
+# (eq|gt|gte|lt|lte). Default: string-equal.
+# Available for crux extract-rows
+comparison=eq
 
 # Minimum number of points for estimating the Weibull parameters. 
 # Default=4000.
@@ -3060,6 +3066,10 @@ search-decoy-pvalue-file=search.decoy.p.txt
 # Available for crux search-for-xlinks. 
 precursor-window-decoy=20.000000
 
+# Print the header line of the tsv file. Default=T.
+# Available for crux extract-columns and extract-rows
+header=TRUE
+
 # Minimum mass of spectra to be searched. Default=0.
 # Available for crux-search-for-matches.
 spectrum-min-mass=0.000000
@@ -3152,6 +3162,11 @@ enzyme=trypsin
 # Available for crux search-for-xlinks program (Default=T).
 xcorr-use-flanks=TRUE
 
+# Specifies the data type the column contains (int|real|string) Default:
+# string
+# Available for crux extract-rows
+column-type=string
+
 # Predict peaks with the given maximum number of h2o neutral loss
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.
@@ -3210,7 +3225,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Feb 16 14:21:48 2011
+H	StartTime	Thu Mar 24 22:05:19 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
