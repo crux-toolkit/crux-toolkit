@@ -87,10 +87,10 @@ bdist:
 		cp tide/$(ar)/tide-search bdist/tide; \
 		cp tide/$(ar)/msconvert bdist/tide; \
 		cp tide/$(ar)/read-spectrumrecords bdist/tide; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast-02-10000.spectrumrecords bdist-data/; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/yeast/yeast.fasta bdist-data/; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm-06-10000.spectrumrecords bdist-data/; \
-		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/worm/worm.fasta bdist-data/;\
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/tide-data-1/yeast-02-10000.spectrumrecords bdist-data/; \
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/tide-data-1/yeast.fasta bdist-data/; \
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/tide-data-1/worm-06-10000.spectrumrecords bdist-data/; \
+		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/tide-data-1/worm.fasta bdist-data/;\
 	fi
 	zip -r $(distdir)-$(ar)-$(name).zip bdist
 	rm -fr bdist/
