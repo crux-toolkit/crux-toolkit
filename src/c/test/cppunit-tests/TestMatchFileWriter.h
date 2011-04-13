@@ -17,6 +17,7 @@ class TestMatchFileWriter : public CPPUNIT_NS::TestFixture
   
  protected:
   MatchFileWriter* defaultWriterPtr;
+  CruxApplication* defaultApplicationPtr;
   const char* filename;
 
  public:

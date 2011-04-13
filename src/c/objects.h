@@ -513,7 +513,7 @@ enum _command {
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
   XLINK_SEARCH_COMMAND, ///< search-for-xlinks
   VERSION_COMMAND,      ///< just print the version number
-
+  MISC_COMMAND,         ///< miscellaneous command
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value
                         /// changes as cmds are added
 };

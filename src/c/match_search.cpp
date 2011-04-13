@@ -33,6 +33,8 @@
 #include <errno.h>
 #include "OutputFiles.h"
 #include "SearchProgress.h"
+#include "MatchSearch.h"
+
 
 /* Private functions */
 int search_pep_mods(
@@ -94,7 +96,8 @@ int search_main(int argc, char** argv){
   const char* argument_list[] = {"ms2 file", "protein database"};
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
-  initialize_run(SEARCH_COMMAND, argument_list, num_arguments,
+  MatchSearch application;
+  application.initialize(argument_list, num_arguments,
                  option_list, num_options, argc, argv);
 
   // Get input: ms2 file 
@@ -127,7 +130,8 @@ int search_main(int argc, char** argv){
   }
   
   /* Prepare output files */
-  OutputFiles output_files(SEARCH_COMMAND); 
+
+  OutputFiles output_files(&application); 
   output_files.writeHeaders(num_proteins);
   // TODO (BF oct-21-09): consider adding pvalue file to OutputFiles
   FILE* decoy_pvalue_file = NULL;

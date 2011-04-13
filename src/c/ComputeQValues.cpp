@@ -56,6 +56,18 @@ string ComputeQValues::getFileStem() {
   return "qvalues";
 }
 
+COMMAND_T ComputeQValues::getCommand() {
+  return QVALUE_COMMAND;
+}
+
+/**
+ * \returns whether the application needs the output directory or not.
+ */
+bool ComputeQValues::needsOutputDirectory() {
+  return true;
+}
+
+
 /*
  * Local Variables:
  * mode: c

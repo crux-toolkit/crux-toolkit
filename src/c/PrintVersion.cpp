@@ -46,3 +46,7 @@ string PrintVersion::getDescription() {
     "Print the Crux version number to standard output, "
     "then exit";
 }
+
+COMMAND_T PrintVersion::getCommand() {
+  return VERSION_COMMAND;
+}

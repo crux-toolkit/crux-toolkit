@@ -13,6 +13,7 @@
  */
 
 #include "sequest-search.h"
+#include "SequestSearch.h"
 
 // Private functions, commented below at definition
 void print_matches(
@@ -61,7 +62,8 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
   const char* argument_list[] = {"ms2 file", "protein database"};
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
-  initialize_run(SEQUEST_COMMAND, argument_list, num_arguments,
+  SequestSearch application;
+  application.initialize(argument_list, num_arguments,
                  option_list, num_options, argc, argv);
 
   // Get input: protein file
@@ -94,7 +96,8 @@ int sequest_search_main(int argc,   ///< number of cmd line tokens
        spectra->getNumSpectra());
 
   // Prepare output files 
-  OutputFiles output_files(SEQUEST_COMMAND); 
+  
+  OutputFiles output_files(&application); 
   output_files.writeHeaders(num_proteins);
 
   // get search parameters for match_collection

@@ -48,6 +48,21 @@ string SequestSearch::getDescription() {
 
 }
 
+/**
+ * \returns the file stem of the application, default getName.
+ */
+string SequestSearch::getFileStem() {
+  return "sequest";
+}
+
+COMMAND_T SequestSearch::getCommand() {
+  return SEQUEST_COMMAND;
+}
+
+bool SequestSearch::needsOutputDirectory() {
+  return true;
+}
+
 /*
  * Local Variables:
  * mode: c

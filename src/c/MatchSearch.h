@@ -20,6 +20,11 @@ class MatchSearch : public CruxApplication {
   virtual std::string getFileStem();
   virtual std::string getDescription();
 
+  virtual COMMAND_T getCommand();
+
+  virtual bool needsOutputDirectory();
+
+
   MatchSearch();
   virtual ~MatchSearch();
 

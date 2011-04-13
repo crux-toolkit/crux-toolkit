@@ -1,6 +1,12 @@
 #include <cppunit/config/SourcePrefix.h>
 #include "TestMatchFileWriter.h"
 #include "parameter.h" 
+#include "MatchSearch.h"
+#include "SequestSearch.h"
+#include "Percolator.h"
+#include "QRanker.h"
+#include "ComputeQValues.h"
+
 #include <fstream>
 #include <iostream>
 
@@ -138,54 +144,74 @@ void TestMatchFileWriter::precision(){
 void TestMatchFileWriter::setColumnsCommand(){
 
   // search-for-matches target
-  defaultWriterPtr->addColumnNames(SEARCH_COMMAND, false);
+  defaultApplicationPtr = new MatchSearch();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false);
   defaultWriterPtr->writeHeader();
+  delete defaultApplicationPtr;
   delete defaultWriterPtr;
+  
+  defaultApplicationPtr = NULL;
   defaultWriterPtr = NULL;
+  
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // search-for-matches decoy
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(SEARCH_COMMAND, true);
+  defaultApplicationPtr = new MatchSearch();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, true);
   defaultWriterPtr->writeHeader();
+  delete defaultApplicationPtr;
   delete defaultWriterPtr;
+  defaultApplicationPtr = NULL;
   defaultWriterPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence");
 
   // search-for-matches target, p-values
   reset_parameter("compute-p-values", "TRUE");
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(SEARCH_COMMAND, false);
+  defaultApplicationPtr = new MatchSearch();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false);
   defaultWriterPtr->writeHeader();
   delete defaultWriterPtr;
+  delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
+  defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	p-value	matches/spectrum	sequence	cleavage type	protein id	flanking aa	eta	beta	shift	corr");
 
   // search-for-matches target, sp
   reset_parameter("compute-p-values", "FALSE");// undo previous
   reset_parameter("compute-sp", "TRUE");
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(SEARCH_COMMAND, false);
+  defaultApplicationPtr = new MatchSearch();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false);
   defaultWriterPtr->writeHeader();
   delete defaultWriterPtr;
+  delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
+  defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // sequest-search
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(SEQUEST_COMMAND, false);
+  defaultApplicationPtr = new SequestSearch();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false);
   defaultWriterPtr->writeHeader();
   delete defaultWriterPtr;
+  delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
+  defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // sequest-search no sp
   reset_parameter("max-rank-preliminary", "0");
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(SEQUEST_COMMAND, false);
+  defaultApplicationPtr = new SequestSearch();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false);
   defaultWriterPtr->writeHeader();
   delete defaultWriterPtr;
+  delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
+  defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // for post-search commands, create a bool vector 
@@ -207,35 +233,47 @@ void TestMatchFileWriter::setColumnsCommand(){
 
   // percolator
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(PERCOLATOR_COMMAND, false, printThese);
+  defaultApplicationPtr = new Percolator();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false, printThese);
   defaultWriterPtr->writeHeader();
   delete defaultWriterPtr;
+  delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
+  defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	percolator score	percolator rank	percolator q-value	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // q-ranker
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(QRANKER_COMMAND, false, printThese);
+  defaultApplicationPtr = new QRanker();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false, printThese);
   defaultWriterPtr->writeHeader();
   delete defaultWriterPtr;
+  delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
+  defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	q-ranker score	q-ranker q-value	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // q-values, decoys
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(QVALUE_COMMAND, false, printThese);
+  defaultApplicationPtr = new ComputeQValues();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false, printThese);
   defaultWriterPtr->writeHeader();
   delete defaultWriterPtr;
+  delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
+  defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	decoy q-value (xcorr)	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // q-values, weibull
   printThese[PVALUE_COL] = true;
   defaultWriterPtr = new MatchFileWriter(filename);
-  defaultWriterPtr->addColumnNames(QVALUE_COMMAND, false, printThese);
+  defaultApplicationPtr = new ComputeQValues();
+  defaultWriterPtr->addColumnNames(defaultApplicationPtr, false, printThese);
   defaultWriterPtr->writeHeader();
   delete defaultWriterPtr;
+  delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
+  defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	p-value	Weibull est. q-value	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 } 
 

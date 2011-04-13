@@ -46,6 +46,17 @@ string SearchForXLinks::getDescription() {
     "scored by XCorr.";
 }
 
+/**
+ * \returns the enum of the application, default MISC_COMMAND
+ */
+COMMAND_T SearchForXLinks::getCommand() {
+  return XLINK_SEARCH_COMMAND;
+}
+
+bool SearchForXLinks::needsOutputDirectory() {
+  return true;
+}
+
 /*
  * Local Variables:
  * mode: c

@@ -3,7 +3,9 @@
  */
 
 #include "analyze_psms.h"
-
+#include "ComputeQValues.h"
+#include "QRanker.h"
+#include "Percolator.h"
 /**
  * \brief Takes a directory containing PSM files and a protein index
  * and analyzes the PSMs using compute-q-values, percolator or q-ranker.
@@ -52,19 +54,30 @@ void analyze_matches_main(
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
+  CruxApplication* application = NULL;
+
   // Do some common initialization stuff.
   switch(command) {
   case QVALUE_COMMAND:
-    initialize_run(command, argument_list, num_arguments,
-                   qvalue_option_list, qvalue_num_options, argc, argv);
+  {
+    application = new ComputeQValues();
+    application->initialize(argument_list, num_arguments,
+      qvalue_option_list, qvalue_num_options, argc, argv);
+  }
     break;
   case PERCOLATOR_COMMAND:
-    initialize_run(command, argument_list, num_arguments,
-                   percolator_option_list, percolator_num_options, argc, argv);
+  {
+    application = new Percolator();
+    application->initialize(argument_list, num_arguments,
+      percolator_option_list, percolator_num_options, argc, argv);
+  }
     break;
   case QRANKER_COMMAND:
-    initialize_run(command, argument_list, num_arguments,
+  {
+    application = new QRanker();
+    application->initialize(argument_list, num_arguments,
                    qranker_option_list, qranker_num_options, argc, argv);
+  }
     break;
   default:
     carp(CARP_FATAL, "Unknown command type.");
@@ -76,7 +89,7 @@ void analyze_matches_main(
   char* input_directory = get_string_parameter("search results directory");
 
   // Prepare the output files.
-  OutputFiles output(command);
+  OutputFiles output(application);
 
   // Perform the analysis.
   MATCH_COLLECTION_T* match_collection = NULL;
@@ -109,9 +122,10 @@ void analyze_matches_main(
   free(protein_database_name);
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
-  char* name = command_type_to_command_line_string(command);
-  carp(CARP_INFO, "Finished crux %s.", name);
-  free(name);
+  string name = application->getName();
+
+  carp(CARP_INFO, "Finished crux %s.", name.c_str());
+  delete application;
 }
 
 /**
@@ -223,6 +237,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
       case SPECTRAL_COUNTS_COMMAND:
       case PROCESS_SPEC_COMMAND:
       case XLINK_SEARCH_COMMAND:
+      case MISC_COMMAND:
       case VERSION_COMMAND:
       case INVALID_COMMAND:
       case NUMBER_COMMAND_TYPES:

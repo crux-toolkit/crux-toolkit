@@ -31,3 +31,10 @@ string MatchSearch::getFileStem() {
   return "search";
 }
 
+COMMAND_T MatchSearch::getCommand() {
+  return SEARCH_COMMAND;
+}
+
+bool MatchSearch::needsOutputDirectory() {
+  return true;
+}

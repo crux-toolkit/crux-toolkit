@@ -42,6 +42,17 @@ class SequestSearch: public CruxApplication {
    * \returns the description for SequestSearch
    */
   virtual std::string getDescription();
+
+  /**
+   * \returns the file stem of the application, default getName.
+   */
+  virtual std::string getFileStem();
+
+
+  virtual COMMAND_T getCommand();
+
+  virtual bool needsOutputDirectory();
+
 };
 
 #endif

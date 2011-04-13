@@ -40,6 +40,19 @@ class QRanker: public CruxApplication {
    */
   virtual std::string getDescription();
 
+  /**
+   * \returns the file stem of the application, default getName.
+   */
+  virtual std::string getFileStem();
+
+  virtual COMMAND_T getCommand();
+
+  /**
+   * \returns whether the application needs the output directory or not.
+   */
+  virtual bool needsOutputDirectory();
+
+
 };
 #endif
 

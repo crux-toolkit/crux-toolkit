@@ -44,6 +44,18 @@ class ComputeQValues: public CruxApplication {
    * \returns the filestem for ComputeQValues
    */
   virtual std::string getFileStem();
+
+  /**
+   * \returns the enum of the application, default MISC_COMMAND
+   */
+  virtual COMMAND_T getCommand();
+
+  /**
+   * \returns whether the application needs the output directory or not.
+   */
+  virtual bool needsOutputDirectory();
+
+
 };
 
 

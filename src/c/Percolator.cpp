@@ -46,6 +46,25 @@ string Percolator::getDescription() {
 
 }
 
+/**
+ * \returns the file stem of the application, default getName.
+ */
+string Percolator::getFileStem() {
+  return "percolator";
+}
+
+COMMAND_T Percolator::getCommand() {
+
+  return PERCOLATOR_COMMAND;
+}
+
+/**
+ * \returns whether the application needs the output directory or not.
+ */
+bool Percolator::needsOutputDirectory() {
+  return true;
+}
+
 /*
  * Local Variables:
  * mode: c
