@@ -40,8 +40,6 @@ LIBFILES= \
   ComputeQValues.h \
   CreateIndex.cpp \
   CreateIndex.h \
-  create_index.cpp \
-  create_index.h \
   crux-file-utils.h \
   crux-utils.cpp \
   crux-utils.h \
@@ -122,8 +120,6 @@ LIBFILES= \
   PrintProcessedSpectra.h \
   PrintVersion.cpp \
   PrintVersion.h \
-  print-processed-spectra.cpp \
-  print-processed-spectra.h \
   Protein.cpp \
   Protein.h \
   ProteinPeptideIterator.cpp \

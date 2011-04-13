@@ -3,6 +3,7 @@
 //#include "xhhc_search.h"
 #include "xlink_compute_qvalues.h"
 
+#include "SearchForXLinks.h"
 
 //CRUX INCLUDES
 #include "objects.h"
@@ -93,8 +94,8 @@ int xlink_search_main(int argc, char** argv) {
   };
 
   int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  initialize_run(XLINK_SEARCH_COMMAND, argument_list, num_arguments,
+  SearchForXLinks search;
+  search.initialize(argument_list, num_arguments,
 		 option_list, num_options, argc, argv);
   
   carp(CARP_INFO, "Beginning crux xlink-search");

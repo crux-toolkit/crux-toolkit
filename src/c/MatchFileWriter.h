@@ -60,14 +60,14 @@ class MatchFileWriter : public DelimitedFileWriter {
    * Adds which columns to print based on the COMMAND_TYPE_T. Only for
    * search-for-matches and sequest-search.
    */
-  void addColumnNames(COMMAND_T command, bool has_decoys);
+  void addColumnNames(CruxApplication* application, bool has_decoys);
 
   /**
    * Adds which columns to print based on the COMMAND_TYPE_T and a list
    * of columns to print. For all post-search commands.
    */
   void addColumnNames
-    (COMMAND_T command, 
+    (CruxApplication* application, 
      bool has_decoys,
      const std::vector<bool>& cols_to_print);
 

@@ -19,9 +19,9 @@ using namespace std;
  * and fileroot and on the name given (search, percolator, etc.).
  * Requires that the output directory already exist. 
  */
-OutputFiles::OutputFiles(COMMAND_T program_name)
+OutputFiles::OutputFiles(CruxApplication* program_name)
 : matches_per_spec_(get_int_parameter("top-match")),
-  command_(program_name)
+  application_(program_name)
 {
 
   delim_file_array_ = NULL;
@@ -41,7 +41,8 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
   num_files_ = num_decoy_files + 1; // plus target file
 
   // TODO (BF oct-21-09): consider moving this logic to parameter.c
-  if( command_ != SEARCH_COMMAND && command_ != SEQUEST_COMMAND ){
+  COMMAND_T command = application_->getCommand();
+  if( command != SEARCH_COMMAND && command != SEQUEST_COMMAND ){
     num_files_ = 1;
   }
 
@@ -56,34 +57,34 @@ OutputFiles::OutputFiles(COMMAND_T program_name)
   createFiles(&delim_file_array_, 
               output_directory, 
               fileroot, 
-              command_, 
+              application_, 
               "txt");
 
   // almost all operations create xml files
-  if( command_ != SPECTRAL_COUNTS_COMMAND ){
+  if( command != SPECTRAL_COUNTS_COMMAND ){
     createFiles(&xml_file_array_,
                 output_directory,
                 fileroot,
-                command_,
+                application_,
                 "pep.xml",
                 overwrite);
   }
   
   // only sequest creates sqt files
-  if( command_ == SEQUEST_COMMAND ){
+  if( command == SEQUEST_COMMAND ){
     createFiles(&sqt_file_array_, 
                  output_directory, 
                  fileroot, 
-                 command_, 
+                 application_, 
                  "sqt", 
                  overwrite);
   }
 
   // only percolator and q-ranker create feature files
-  if( (command_ == PERCOLATOR_COMMAND 
-       || command_ == QRANKER_COMMAND)
+  if( (command == PERCOLATOR_COMMAND 
+       || command == QRANKER_COMMAND)
       && get_boolean_parameter("feature-file") ){
-    string filename = makeFileName(fileroot, command_, 
+    string filename = makeFileName(fileroot, application_, 
                                    NULL, // not target or decoy
                                    "features.txt");
     createFile(&feature_file_, 
@@ -136,13 +137,14 @@ void OutputFiles::makeTargetDecoyList(){
  * may be NULL. Directory argument is optional.
  */
 string OutputFiles::makeFileName(const char* fileroot,
-                                 COMMAND_T command,
+                                 CruxApplication* application,
                                  const char* target_decoy,
                                  const char* extension,
                                  const char* directory ){
 
   // get command name
-  const char* basename = command_type_to_file_string_ptr(command);
+  string basename_str = application->getFileStem();
+  const char* basename = basename_str.c_str();
 
   ostringstream name_builder;
   if( directory ){
@@ -179,7 +181,7 @@ string OutputFiles::makeFileName(const char* fileroot,
 bool OutputFiles::createFiles(FILE*** file_array_ptr,
                               const char* output_dir,
                               const char* fileroot,
-                              COMMAND_T command,
+                              CruxApplication* application,
                               const char* extension,
                               bool overwrite){
   if( num_files_ == 0 ){
@@ -191,7 +193,7 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
 
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename = makeFileName( fileroot, command,
+    string filename = makeFileName( fileroot, application,
                                     target_decoy_list_[file_idx].c_str(),
                                     extension);
     createFile(&(*file_array_ptr)[file_idx], 
@@ -219,7 +221,7 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
 bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
                               const char* output_dir,
                               const char* fileroot,
-                              COMMAND_T command,
+                              CruxApplication* application,
                               const char* extension ){
   if( num_files_ == 0 ){
     return FALSE;
@@ -230,7 +232,7 @@ bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
 
   // create each file writer
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename = makeFileName(fileroot, command,
+    string filename = makeFileName(fileroot, application,
                                    target_decoy_list_[file_idx].c_str(),
                                    extension, output_dir);
     (*file_array_ptr)[file_idx] = new MatchFileWriter(filename.c_str());
@@ -275,7 +277,7 @@ void OutputFiles::writeHeaders(int num_proteins){
   // write headers one file at a time for tab and sqt
   for(int file_idx = 0; file_idx < num_files_; file_idx++){
     if( delim_file_array_ ){
-        delim_file_array_[file_idx]->addColumnNames(command_, (bool)file_idx);
+        delim_file_array_[file_idx]->addColumnNames(application_, (bool)file_idx);
         delim_file_array_[file_idx]->writeHeader();
     }
 
@@ -304,7 +306,7 @@ void OutputFiles::writeHeaders(const vector<bool>& add_this_col){
   // write headers one file at a time for tab and sqt
   for(int file_idx = 0; file_idx < num_files_; file_idx++){
     if( delim_file_array_ ){
-        delim_file_array_[file_idx]->addColumnNames(command_, 
+        delim_file_array_[file_idx]->addColumnNames(application_, 
                                                     (bool)file_idx, 
                                                     add_this_col);
         delim_file_array_[file_idx]->writeHeader();

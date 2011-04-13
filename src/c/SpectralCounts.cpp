@@ -32,6 +32,8 @@ SpectralCounts::~SpectralCounts() {
   delete output_;
 }
 
+
+
 /**
  * Given a collection of scored PSMs, print a list of proteins
  * ranked by their a specified score. Spectral-counts supports two
@@ -62,13 +64,13 @@ int SpectralCounts::main(int argc, char** argv) {
   int num_options = sizeof(option_list) / sizeof(char*);
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
-  initialize_run(SPECTRAL_COUNTS_COMMAND, argument_list, num_arguments,
+  initialize(argument_list, num_arguments,
 		 option_list, num_options, argc, argv);
 
   getParameterValues(); // all the get_<type>_parameter calls here
 
   // open output files
-  output_ = new OutputFiles(SPECTRAL_COUNTS_COMMAND);
+  output_ = new OutputFiles(this);
   output_->writeHeaders();
 
   // get a set of matches that pass the threshold
@@ -595,6 +597,13 @@ string SpectralCounts::getDescription() {
     "Rank proteins or peptides according to one of two quantification methods.";
 }
 
+COMMAND_T SpectralCounts::getCommand() {
+  return SPECTRAL_COUNTS_COMMAND;
+}
+
+bool SpectralCounts::needsOutputDirectory() {
+  return true;
+}
 
 
 // static comparison functions

@@ -49,6 +49,21 @@ string QRanker::getDescription() {
 
 }
 
+/**
+ * \returns the file stem of the application, default getName.
+ */
+string QRanker::getFileStem() {
+  return "qranker";
+}
+
+COMMAND_T QRanker::getCommand() {
+  return QRANKER_COMMAND;
+}
+
+bool QRanker::needsOutputDirectory() {
+  return true;
+}
+
 /*
  * Local Variables:
  * mode: c

@@ -3,6 +3,7 @@
 #include "check-match-collection.h"
 #include "match_collection.h"
 #include "MatchFileWriter.h"
+#include "MatchSearch.h"
 #include <vector>
 #include <cstdlib>
 #include <string>
@@ -230,7 +231,8 @@ START_TEST(test_print_rank){
   // try printing the top 3, should get 5 lines
   unlink(filename);
   MatchFileWriter* fout = new MatchFileWriter(filename);
-  fout->addColumnNames(SEARCH_COMMAND, false);
+  MatchSearch application;
+  fout->addColumnNames(&application, false);
   fout->writeHeader();
   print_match_collection_tab_delimited(fout, 3, mc, s, XCORR);
   delete fout;
@@ -252,7 +254,7 @@ START_TEST(test_print_rank){
   // try printing top 5, should still get 5 lines
   unlink(filename);
   fout = new MatchFileWriter(filename);
-  fout->addColumnNames(SEARCH_COMMAND, false);
+  fout->addColumnNames(&application, false);
   fout->writeHeader();
   print_match_collection_tab_delimited(fout, 5, mc, s, XCORR);
   delete fout;
@@ -272,7 +274,7 @@ START_TEST(test_print_rank){
   // try printing top 6, should get 6
   unlink(filename);
   fout = new MatchFileWriter(filename);
-  fout->addColumnNames(SEARCH_COMMAND, false);
+  fout->addColumnNames(&application, false);
   fout->writeHeader();
   print_match_collection_tab_delimited(fout, 6, mc, s, XCORR);
   delete fout;

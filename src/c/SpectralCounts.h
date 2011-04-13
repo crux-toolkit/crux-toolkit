@@ -26,6 +26,8 @@ class SpectralCounts: public CruxApplication {
   virtual int main(int argc, char** argv);
   virtual std::string getName();
   virtual std::string getDescription();
+  virtual COMMAND_T getCommand();
+  virtual bool needsOutputDirectory();
 
  private:
   // internally-used types

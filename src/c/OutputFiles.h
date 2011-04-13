@@ -26,7 +26,7 @@
 class OutputFiles{
 
  public:
-  OutputFiles(COMMAND_T program_name);///< command printing files
+  OutputFiles(CruxApplication* application);///< command printing files
 
   ~OutputFiles();
   void writeHeaders(int num_proteins = 0);
@@ -53,20 +53,20 @@ class OutputFiles{
   bool createFiles(FILE*** file_array_ptr,
                    const char* output_dir,
                    const char* fileroot,
-                   COMMAND_T command,
+                   CruxApplication* application,
                    const char* extension,
                    bool overwrite);
   bool createFiles(MatchFileWriter*** file_array_ptr,
                    const char* output_dir,
                    const char* fileroot,
-                   COMMAND_T command,
+                   CruxApplication* application,
                    const char* extension);
   bool createFile(FILE** file_ptr,
                   const char* output_dir,
                   const char* filename,
                   bool overwrite);
   string makeFileName(const char* fileroot,
-                      COMMAND_T command,
+                      CruxApplication* application,
                       const char* target_decoy,
                       const char* extension,
                       const char* directory = NULL );
@@ -99,7 +99,7 @@ class OutputFiles{
   FILE** xml_file_array_; ///< array of .xml files
   FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to
   int matches_per_spec_;  ///< print this many matches per spec
-  COMMAND_T command_;     ///< which crux command is writing these files
+  CruxApplication* application_;     ///< which crux application is writing these files
 };
 
 
