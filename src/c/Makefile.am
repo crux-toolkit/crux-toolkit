@@ -91,12 +91,10 @@ LIBFILES= \
   MatchSearch.h \
   match_collection.cpp \
   match_collection.h \
-  match_search.cpp \
   modifications.cpp \
   modifications.h \
   modified_peptides_iterator.cpp \
   modified_peptides_iterator.h \
-  search.h \
   objects.h \
   OutputFiles.cpp \
   OutputFiles.h \
