@@ -78,8 +78,10 @@ char** parse_filename_path(const char* file);
  * \brief Parses the filename, path, and file extension of given string.
  *  
  * The array returned, A, contains the filename (A[0]) striped of the
- * given file extension and the path (A[1]).  Path is NULL if no / in
- * given name.  Filename is unchanged if it does not include the
+ * given file extension and the path (A[1]).  If extension is NULL,
+ * strips all characters after the last "." from the filename.  Use
+ * parse_filename_path() to return filename with extension.  
+ * Returned path is NULL if no "/" in given name.
  * extension. e.g. Given "../../filname.ext" and ".ext" returns
  * A[0]="filename" A[1]="../../".  Given "filename" returns A[0] =
  * NULL and A[1] = "filename". 
