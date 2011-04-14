@@ -65,7 +65,7 @@ int SpectralCounts::main(int argc, char** argv) {
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
   initialize(argument_list, num_arguments,
-		 option_list, num_options, argc, argv);
+             option_list, num_options, argc, argv);
 
   getParameterValues(); // all the get_<type>_parameter calls here
 
@@ -414,6 +414,13 @@ void SpectralCounts::filterMatches()
     match_collection = match_collection_iterator_next(match_collection_it);
     match_iterator = new_match_iterator(match_collection, XCORR, TRUE);
     
+    // figure out which qvalue we are using
+    SCORER_TYPE_T qval_type = get_qval_type(match_collection);
+    if( qval_type == INVALID_SCORER_TYPE ){
+      carp(CARP_FATAL, "The matches in %s do not have q-values from percolator,"
+           " q-ranker, or compute-q-values.\n", psm_file_.c_str());
+    }
+
     while(match_iterator_has_next(match_iterator)){
       MATCH_T* match = match_iterator_next(match_iterator);
       qualify = false;
@@ -421,18 +428,8 @@ void SpectralCounts::filterMatches()
 	continue;
       }
       // find a qvalue score lower than threshold
-      if (get_match_score(match, PERCOLATOR_QVALUE) != FLT_MIN &&
-	  get_match_score(match, PERCOLATOR_QVALUE) <= threshold_)  {
-	qualify = true;
-      } else if (get_match_score(match, QRANKER_QVALUE) != FLT_MIN &&
-                 get_match_score(match, QRANKER_QVALUE) <= threshold_)  {
-	qualify = true;
-      } else if (get_match_score(match, DECOY_XCORR_QVALUE) != FLT_MIN &&
-		 get_match_score(match, DECOY_XCORR_QVALUE) <= threshold_)  {
-	qualify = true;
-      } 
-
-      if (qualify == true){
+      if (get_match_score(match, qval_type) != FLT_MIN &&
+	  get_match_score(match, qval_type) <= threshold_)  {
         matches_.insert(match);
       }
     } // next match
@@ -440,6 +437,27 @@ void SpectralCounts::filterMatches()
   free(path_info[1]);
   free(path_info[0]);
   free(path_info);
+}
+
+/**
+ * Figures out which kind of q-value was scored for this match collection.
+ * \returns PERCOLATOR_QVALUE, QRANKER_QVALUE, or DECOY_XCORR_QVALUE
+ * if any of those were scored or INVALID_SCORER_TYPE if none were scored. 
+ */
+SCORER_TYPE_T SpectralCounts::get_qval_type(
+  MATCH_COLLECTION_T* match_collection){
+  SCORER_TYPE_T scored_type = INVALID_SCORER_TYPE;
+
+  if(get_match_collection_scored_type(match_collection, PERCOLATOR_QVALUE)){
+    scored_type =  PERCOLATOR_QVALUE;
+  } else if(get_match_collection_scored_type(match_collection, QRANKER_QVALUE)){
+    scored_type = QRANKER_QVALUE;
+  } else if(get_match_collection_scored_type(match_collection, 
+                                             DECOY_XCORR_QVALUE)){
+    scored_type = DECOY_XCORR_QVALUE;
+  }
+
+  return scored_type;
 }
 
 /**
