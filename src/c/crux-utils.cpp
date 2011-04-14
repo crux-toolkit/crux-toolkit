@@ -572,8 +572,10 @@ char** parse_filename_path(const char* file){
  * \brief Parses the filename, path, and file extension of given string.
  *  
  * The array returned, A, contains the filename (A[0]) striped of the
- * given file extension and the path (A[1]).  Path is NULL if no / in
- * given name.  Filename is unchanged if it does not include the
+ * given file extension and the path (A[1]).  If extension is NULL,
+ * strips all characters after the last "." from the filename.  Use
+ * parse_filename_path() to return filename with extension.  
+ * Returned path is NULL if no "/" in given name.
  * extension. e.g. Given "../../filname.ext" and ".ext" returns
  * A[0]="filename" A[1]="../../".  Given "filename" returns A[0] =
  * NULL and A[1] = "filename". 
@@ -595,38 +597,23 @@ char** parse_filename_path_extension(
 
     carp(CARP_DETAILED_DEBUG, "File trimmed of path is %s", trimmed_filename);
     if( ! suffix_compare(trimmed_filename, extension) ){
-        return file_path_array;
+      return file_path_array;  // extension not found, don't change filename
     }
+
     int file_len = strlen(trimmed_filename);
     int ext_len = strlen(extension);
-
-    /* compare_suffix replaces the following
-    int file_idx = file_len;
-    int ext_idx = ext_len;
-
-    if( ext_len > file_len ){
-      carp(CARP_ERROR, 
-           "Cannot parse file extension.  The file extension %s is longer "
-           "than the filename '%s'", extension, file);
-      return file_path_array;
-    }
-    carp(CARP_DETAILED_DEBUG, "Name len %d ext len %d", file_idx, ext_idx);
-
-    //compare name and ext from end of strings backwards
-    for(ext_idx = ext_idx; ext_idx > -1; ext_idx--){
-      carp(CARP_DETAILED_DEBUG, "Name[%d]='%d', ext[%d]='%d'", 
-           file_idx, trimmed_filename[file_idx], ext_idx, extension[ext_idx]);
-      // if they stop matching, don't change filename
-      if( extension[ext_idx] != trimmed_filename[file_idx--]){
-        return file_path_array;
-      }
-    }
-    */
     // after comparing the whole extension, it matched
     trimmed_filename[file_len - ext_len] = '\0';
-    carp(CARP_DETAILED_DEBUG, "Final trimmed filename %s", trimmed_filename);
 
+  } else { // find the last "."
+    char* dot = strrchr(trimmed_filename, '.');
+    if( dot != NULL ){
+      *dot = '\0';
+    }
   }
+
+  carp(CARP_DETAILED_DEBUG, "Final trimmed filename %s", trimmed_filename);
+
 
   return file_path_array;
 }

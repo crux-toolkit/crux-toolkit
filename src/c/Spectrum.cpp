@@ -211,7 +211,7 @@ void Spectrum::printXml(
   if (filepath == NULL){
     filename = "NA";
   } else {
-    name_ext_array = parse_filename_path_extension(filepath, ".ms2");
+    name_ext_array = parse_filename_path_extension(filepath, NULL);
     filename = name_ext_array[0];
   }
   const char* period = ".";
