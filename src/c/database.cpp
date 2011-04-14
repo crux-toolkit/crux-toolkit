@@ -177,7 +177,7 @@ void free_database(
   
   // only free proteins if been parsed and file has been opened
   if(database->is_parsed){
-    carp(CARP_INFO, "Freeing database.");
+    carp(CARP_DEBUG, "Freeing database.");
     
     // free each protein in the array
     unsigned int protein_idx;
@@ -197,7 +197,7 @@ void free_database(
     // not memory mapped
     else{
       // close file handle
-      carp(CARP_INFO, "Closing database filehandle");
+      carp(CARP_DEBUG, "Closing database filehandle");
       fclose(database->file);
     }
   }

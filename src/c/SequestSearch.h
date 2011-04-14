@@ -1,8 +1,15 @@
 /**
- * \file SequestSearch.h 
- * AUTHOR: Sean McIlwain
- * CREATE DATE: 6 December 2010
- * \brief Object for running sequest-search
+ * \file SequestSearch.h
+ * AUTHOR: Barbara Frewen
+ * CREATE DATE: Oct 2, 2009
+ * PROJECT: crux
+ * \brief The crux search routine that emulates SEQUEST.
+ *
+ * Scores all candidate peptides with Sp, deletes all but the 500
+ * top-scoring candidates, scores remaining 500 with xcorr, sorts
+ * results by xcorr and returns the top 5 plus the match with the best
+ * Sp score.  Writes results to .sqt, .txt, and .pep.xml files.  Does not
+ * compute p-values.
  *****************************************************************************/
 #ifndef SEQUESTSEARCH_H
 #define SEQUESTSEARCH_H
@@ -16,6 +23,28 @@
 #include <vector>
 
 class SequestSearch: public CruxApplication {
+
+ protected:
+  /* Private function definitions */
+
+  /**
+   * \brief Pring the target and decoy match collections to their
+   * respective target and decoy files.
+   *
+   * Three possibilities: 1. combine the target and all decoy
+   * collections and print to target file.  2. print targets to target
+   * file and combine all decoys and print to one decoy file.  3. print
+   * each collection to a separate file.
+   * Possible side effectos: Collections may be merged and re-ranked.
+   */
+  void printMatches(
+    OutputFiles& output_files,       ///< files to print to
+    MATCH_COLLECTION_T* target_psms, ///< target psms to print
+    std::vector<MATCH_COLLECTION_T*>& decoy_psms,///< decoy psms to print
+    Spectrum* spectrum,            ///< all matches are to this spec
+    BOOLEAN_T combine_target_decoy,  ///< merge targets and decoys?
+    int num_decoy_files              ///< merge decoys?
+  );
 
  public:
   /**
@@ -48,9 +77,14 @@ class SequestSearch: public CruxApplication {
    */
   virtual std::string getFileStem();
 
-
+  /**
+   * \returns the enum of the application, default MISC_COMMAND
+   */
   virtual COMMAND_T getCommand();
 
+  /**
+   * \returns whether the application needs the output directory or not. (default false).
+   */
   virtual bool needsOutputDirectory();
 
 };

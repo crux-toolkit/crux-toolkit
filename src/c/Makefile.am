@@ -133,8 +133,6 @@ LIBFILES= \
   SearchProgress.h \
   SequestSearch.cpp \
   SequestSearch.h \
-  sequest-search.cpp \
-  sequest-search.h \
   scorer.cpp \
   scorer.h \
   sorter.cpp \
