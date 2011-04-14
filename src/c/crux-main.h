@@ -14,7 +14,6 @@
 #include "utils.h"
 #include "crux-utils.h"
 #include "search.h"
-#include "sequest-search.h"
 #include "q-value.h"
 #include "xlink_search.h"
 #include "PercolatorCInterface.h"
