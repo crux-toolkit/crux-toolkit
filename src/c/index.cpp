@@ -1008,12 +1008,14 @@ static BOOLEAN_T dump_peptide(
 {  
   int peptide_idx = 0;
   FILE* file = NULL;
-  int current_count;
+  int current_count = bin_count[file_idx];
   
+  assert(file_idx < MAX_INDEX_FILES);
   // if the peptide count is over the limit
-  if((current_count = bin_count[file_idx]) > MAX_PROTEIN_IN_BIN){
+  if(current_count > MAX_PROTEIN_IN_BIN){
     file = file_array[file_idx];
     // print out all peptides
+    assert(current_count < MAX_PROTEIN_IN_BIN);
     for(peptide_idx = 0; peptide_idx < current_count; ++peptide_idx){
       serialize_peptide(peptide_array[peptide_idx], file, NULL);
       free_peptide(peptide_array[peptide_idx]);
@@ -1027,7 +1029,8 @@ static BOOLEAN_T dump_peptide(
   // if the peptide count is bellow the limit
   else{
     // store peptide in peptide array , these peptides will be printed later togehter
-    peptide_array[(bin_count[file_idx])] = working_peptide;
+    assert(current_count < MAX_PROTEIN_IN_BIN);
+    peptide_array[current_count] = working_peptide;
     ++bin_count[file_idx];
   }
   return TRUE;
@@ -1057,6 +1060,7 @@ static BOOLEAN_T dump_peptide_all(
   int bin_idx = 0;
   int file_idx = 0;
   
+  assert(num_bins <= MAX_INDEX_FILES);
   // print out all remaining peptides in the file_array
   for(file_idx = 0; file_idx < num_bins; ++file_idx){
     carp(CARP_DETAILED_DEBUG, "Serializing bin %d", file_idx);
@@ -1243,6 +1247,7 @@ BOOLEAN_T create_index(
  
   // get number of bins needed
   num_bins = get_num_bins_needed(index, mass_limits);
+  assert(num_bins <= MAX_INDEX_FILES);
   
   // create file handle array
   file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
@@ -1290,6 +1295,7 @@ BOOLEAN_T create_index(
   int low_mass = mass_limits[0];
   long int count_peptide = 0;
   int mod_me = 1000;
+  int files_open = 0;
   
   // iterate through all peptides
   while(database_peptide_iterator_has_next(peptide_iterator)){    
@@ -1304,15 +1310,17 @@ BOOLEAN_T create_index(
     working_peptide = database_peptide_iterator_next(peptide_iterator);
     working_mass = get_peptide_peptide_mass(working_peptide);
     file_idx = (long int)((working_mass - low_mass) / mass_range);
+    assert(file_idx < MAX_INDEX_FILES);
 
     // check if first time using this bin, if so create new file handle
     if(file_array[file_idx] == NULL){
       if(!generate_one_file_handler(file_array, file_idx)){
         carp(CARP_ERROR, 
-             "Exceeded filehandle limit on system with %d files", file_idx);
+             "Exceeded filehandle limit on system with %d files", files_open);
         fcloseall();
         return FALSE;
       }
+      files_open++;
     }
     
     // increment total peptide count of bin
