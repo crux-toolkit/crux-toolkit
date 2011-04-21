@@ -3,6 +3,7 @@
 
 #include "objects.h"
 #include "IonConstraint.h"
+#include "SpectrumCollectionFactory.h"
 
 #include <fstream>
 #include <math.h>
@@ -182,7 +183,7 @@ int main(int argc, char** argv) {
   cout << "total       " << filtered_ions.size() << "<br>" << endl;
 
   Spectrum* spectrum = new Spectrum();
-  SpectrumCollection* collection = new SpectrumCollection(ms2_file);
+  SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_file);
   //SCORER_T* scorer = new_scorer(XCORR);
   Scorer xhhc_scorer;
   if(!collection->getSpectrum(scan_num, spectrum)){

@@ -4,7 +4,7 @@
 
 #include "objects.h"
 #include "scorer.h"
-#include "SpectrumCollection.h"
+#include "SpectrumCollectionFactory.h"
 #include "DelimitedFile.h"
 
 #include <math.h>
@@ -88,7 +88,7 @@ int main(int argc, char** argv){
   }
 
   // read ms2 file
-  SpectrumCollection* collection = new SpectrumCollection(ms2_file);
+  SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_file);
   collection->parse();
 
   

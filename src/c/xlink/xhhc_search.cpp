@@ -8,6 +8,7 @@
 //CRUX INCLUDES
 #include "objects.h"
 #include "Spectrum.h"
+#include "SpectrumCollectionFactory.h"
 #include "FilteredSpectrumChargeIterator.h"
 
 #include <cmath>
@@ -142,7 +143,7 @@ int xlink_search_main(int argc, char** argv) {
 
   carp(CARP_INFO,"Loading Spectra");
   Spectrum* spectrum = new Spectrum();
-  SpectrumCollection* spectra = new SpectrumCollection(ms2_file);
+  SpectrumCollection* spectra = SpectrumCollectionFactory::create(ms2_file);
   spectra->parse();
 
   FilteredSpectrumChargeIterator* spectrum_iterator =

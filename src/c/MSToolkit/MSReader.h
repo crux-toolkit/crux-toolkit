@@ -43,7 +43,7 @@ class MSReader {
   void appendFile(char* c, Spectrum& s);
   void appendFile(char* c, MSObject& m);
   
-  MSFileFormat checkFileFormat(char *fn);
+  MSFileFormat checkFileFormat(const char *fn);
 
   MSHeader& getHeader();
   //Spectrum readBinaryFile(char* c, Spectrum& s, int scNum=0);
@@ -57,9 +57,9 @@ class MSReader {
   void writeFile(char* c, bool text, MSObject& m);
   void writeFile(char* c, MSFileFormat ff, MSObject& m);
 
-  bool readFile(char* c, bool text, Spectrum& s, int scNum=0);
-  bool readFile(char* c, MSFileFormat f, Spectrum& s, int scNum=0);
-  bool readFile(char* c, Spectrum& s, int scNum=0);
+  bool readFile(const char* c, bool text, Spectrum& s, int scNum=0);
+  bool readFile(const char* c, MSFileFormat f, Spectrum& s, int scNum=0);
+  bool readFile(const char* c, Spectrum& s, int scNum=0);
   void setFilter(MSSpectrumType m);
 
   //File compression
@@ -96,7 +96,7 @@ class MSReader {
 
   //Functions
   void closeFile();
-  int openFile(char* c, bool text=false);
+  int openFile(const char* c, bool text=false);
   bool findSpectrum(int i);
 	void readCompressSpec(FILE* fileIn, MSScanInfo& ms, Spectrum& s);
   void readSpecHeader(FILE* fileIn, MSScanInfo& ms);

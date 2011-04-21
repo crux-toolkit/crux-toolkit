@@ -3,7 +3,7 @@
 #include <string.h>
 #include "check-peak.h"
 #include "Spectrum.h"
-#include "SpectrumCollection.h"
+#include "SpectrumCollectionFactory.h"
 #include "peak.h"
 #include "crux-utils.h"
 #include "scorer.h"
@@ -45,7 +45,7 @@ START_TEST (test_create){
   ion_series->predictIons();
 
   //read ms2 file
-  sp_collection = new SpectrumCollection(ms2_file);
+  sp_collection = SpectrumCollectionFactory::create(ms2_file);
   spectrum = new Spectrum();
   
   //search for spectrum with correct scan number

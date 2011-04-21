@@ -43,6 +43,33 @@ void crux_utils_setup(){
 void crux_utils_teardown(){
 }
 
+// does has_extension() work?
+START_TEST(has_extension){
+
+  fail_unless( has_extension("", "") == true,
+               "An empty string should have the empty extension.");
+
+  fail_unless( has_extension("", "end") == false,
+               "An empty string should not have any extension.");
+
+  fail_unless( has_extension("anystring", "") == true,
+               "Any string should have the empty extension.");
+
+  fail_unless( has_extension("anystring", NULL) == true,
+               "Any string should have the null extension.");
+
+  fail_unless( has_extension(NULL, "ext") == false,
+               "A NULL string should not have an extension.");
+
+  fail_unless( has_extension("namewithend", "end") == true,
+               "namewithend should end in 'end'.");
+
+  fail_unless( has_extension("namenoend", "no") == false,
+               "namenoend should not have the extension 'no'.");
+
+}
+END_TEST
+
 // are two floating point numbers within rounding error of eachother
 START_TEST(test_is_equal){
   FLOAT_T a = 4.02;
@@ -141,6 +168,7 @@ Suite* crux_utils_suite(){
   // Test basic features
   TCase *tc_core = tcase_create("Core");
   tcase_add_test(tc_core, test_is_equal);
+  tcase_add_test(tc_core, has_extension);
   tcase_add_test(tc_core, test_choose_charge);
 
   tcase_add_checked_fixture(tc_core, crux_utils_setup, crux_utils_teardown);

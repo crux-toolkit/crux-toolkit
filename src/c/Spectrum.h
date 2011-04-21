@@ -74,32 +74,10 @@ class Spectrum{
   
   // private methods
   /**
-   * Parses a spectrum from file, deleting any existing values in the
-   * object.
-   * Skips Header line "H"
-   * \returns The newly allocated spectrum or NULL on error or EOF.
-   */
-  static Spectrum* newSpectrumMs2(FILE* file, const char* filename = NULL); 
-  
-  /**
-   * Parses a spectrum from file, deleting any existing values in the
-   * object.
-   * Skips Header line "H"
-   * \returns The newly allocated spectrum or NULL on error or EOF.
-   */
-  bool parseMs2(FILE* file, const char* filename = NULL); 
-  
-  /**
-   * Parse a spectrum from a file in mgf format.
-   * \returns A newly allocated spectrum or NULL on error or EOF.
-   */
-  static Spectrum* newSpectrumMgf(FILE* file, const char* filename = NULL); 
-  
-  /**
    * Parse a spectrum from a file in mgf format.
    * \returns True if successfully parsed or false on error or EOF.
    */
-  bool parseMgf(FILE* file, const char* filename = NULL); 
+  bool parseMgf(FILE* file, int scan_num, const char* filename = NULL); 
 
   /**
    * Parses the 'S' line of a spectrum
@@ -215,15 +193,28 @@ class Spectrum{
      );
 
   /**
-   * Parses a spectrum from a file, either mgf or ms2.
+   * Parses a spectrum from file, deleting any existing values in the
+   * object.
+   * Skips Header line "H"
+   * \returns The newly allocated spectrum or NULL on error or EOF.
    */
-  static Spectrum* newSpectrumFromFile(FILE* file, 
-                                          const char* filename = NULL);
+  static Spectrum* newSpectrumMs2(FILE* file, const char* filename = NULL); 
+  
 
   /**
-   * Parses a spectrum from a file, either mgf or ms2.
+   * Parse a spectrum from a file in mgf format.
+   * \returns A newly allocated spectrum or NULL on error or EOF.
    */
-  bool parseFile(FILE* file, const char* filename = NULL);
+  static Spectrum* newSpectrumMgf(FILE* file, int scan_num, 
+                                  const char* filename = NULL); 
+  
+  /**
+   * Parses a spectrum from file, deleting any existing values in the
+   * object.
+   * Skips Header line "H"
+   * \returns The newly allocated spectrum or NULL on error or EOF.
+   */
+  bool parseMs2(FILE* file, const char* filename = NULL); 
 
   /**
    * Transfer values from an MSToolkit spectrum to the crux Spectrum.

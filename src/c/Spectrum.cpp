@@ -303,39 +303,16 @@ void Spectrum::printSqt(
 }
 
 /**
- * Parses a spectrum from a file, either mgf or ms2.
- */
- Spectrum* Spectrum::newSpectrumFromFile(FILE* file, const char* filename)
-{
-  if (get_boolean_parameter("use-mgf")) {
-    return Spectrum::newSpectrumMgf(file, filename);
-  } else {
-    return Spectrum::newSpectrumMs2(file, filename);
-  }
-}
-
-/**
- * Parses a spectrum from a file, either mgf or ms2.
- */
-bool Spectrum::parseFile(FILE* file, const char* filename)
-{
-  if (get_boolean_parameter("use-mgf")) {
-    return this->parseMgf(file, filename);
-  } else {
-    return this->parseMs2(file, filename);
-  }
-}
-
-/**
  * Parses a spectrum from an .mgf file
  * \returns A newly allocated spectrum or NULL on error or EOF.
  */
 Spectrum* Spectrum::newSpectrumMgf
 (FILE* file, ///< the input file stream -in
+ int scan_num, ///< assign the spectrum this scan number
  const char* filename) ///< filename of the spectrum
 {
   Spectrum* spectrum = new Spectrum();
-  if( spectrum->parseMgf(file, filename) ){
+  if( spectrum->parseMgf(file, scan_num, filename) ){
     return spectrum;
   } else {
     delete spectrum;
@@ -344,19 +321,16 @@ Spectrum* Spectrum::newSpectrumMgf
 }
 
 /**
- * Parses a spectrum from an .mgf file
+ * Parses a spectrum from an .mgf file, assigning it the given scan
+ * number.
  * \returns True if successfully parsed or false on error or EOF.
  */
-// TODO: figure out a better way to handle spectrum count.  
-// MGF doesn't really have
-// a defined format for this.  If it does, then the programs that output 
-// MGF don't always conform to this format. SJM
 bool Spectrum::parseMgf
 (FILE* file, ///< the input file stream -in
+ int scan_num, ///< scan number to give this spectrum
  const char* filename) ///< filename of the spectrum
 {
   // TODO: delete any existing peaks
-  static int spec_count = 1;
   char* new_line = NULL;
   int line_length;
   size_t buf_length = 0;
@@ -391,14 +365,12 @@ bool Spectrum::parseMgf
   while( (line_length = getline(&new_line, &buf_length, file)) != -1){
     if (strncmp(new_line, "TITLE=",6) == 0) {
       title_found = true;
-      int first_scan = spec_count;
-      int last_scan = spec_count;
       //  TODO : figure out what to do here, the format is dependent 
       // upon the machine i think
       // parse the title line
       
-      this->first_scan_ = first_scan;
-      this->last_scan_ = last_scan;
+      this->first_scan_ = scan_num;
+      this->last_scan_ = scan_num;
     } else if (strncmp(new_line, "CHARGE=",7) == 0) {
       //parse the charge line
  
@@ -464,8 +436,6 @@ bool Spectrum::parseMgf
            new_line);
     }
   } while( (line_length = getline(&new_line, &buf_length, file)) != -1);
-  
-  spec_count++;
   
   if (end_found) {
     //we successfully parsed this spectrum.
