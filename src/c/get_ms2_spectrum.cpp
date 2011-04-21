@@ -16,7 +16,7 @@
 #include "carp.h"
 #include "Spectrum.h"
 #include "peak.h"
-#include "SpectrumCollection.h"
+#include "SpectrumCollectionFactory.h"
 #include "unistd.h"
 
 /****************************************************************************
@@ -104,7 +104,7 @@ int main(int argc, char** argv){
     carp(CARP_FATAL, "Could not read from ms2 file '%s'", ms2_filename);
   }
   carp(CARP_DETAILED_DEBUG, "Creating spectrum collection.");
-  SpectrumCollection* collection = new SpectrumCollection(ms2_filename);
+  SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_filename);
 
   int num_found = 0;
   for (int scan_number = min_scan; scan_number <= max_scan; scan_number++) {
