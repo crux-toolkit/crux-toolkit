@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Mar 24 22:05:19 2011
+H	StartTime	Mon Apr 25 09:24:25 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2674,17 +2674,18 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1489.7319	1.00265265	56.18601608	2	0.38843513	3	4	24	8	NVGVFTLQEELLK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK
 159	2	745.7500	1489.4827	1486.6195	1.01405990	10.49388313	7	-0.00195638	4	2	26	8	SPQGNTLNNEPGMK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK
 159	2	745.7500	1489.4827	1488.7063	1.08661401	17.71540642	4	-0.01036976	5	3	24	8	FHENISLPVASFK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK
-INFO: CPU: n001.grid.gs.washington.edu
-INFO: Thu Mar 24 22:05:18 PDT 2011
+INFO: CPU: ranunculus
+INFO: Mon Apr 25 09:24:25 PDT 2011
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Freeing database.
-INFO: Closing database filehandle
-INFO: Elapsed time: 3.41 s
+INFO: Elapsed time: 2.49 s
 INFO: Finished crux sequest-search
+INFO: Elapsed time: 2.49 s
+INFO: Finished crux sequest-search.
+INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
 # Parameter file only.  Used by crux-search-for-matches and
@@ -2788,6 +2789,11 @@ custom-enzyme=__NULL_STR
 # Predict flanking peaks for b and y ions (T,F). Default=F.
 # Only available for crux-predict-peptide-ion.
 flanking=FALSE
+
+# Include peaks +/- 1da around b/y ions in theoretical spectrum. 
+# sequest-search default=T. search-for-matches default=F.
+# Available in the paramter file for all search commands.
+use-flanking-peaks=TRUE
 
 # Change the mass of all amino acids 'A' by the given amount.
 # For parameter file only.  Default=no mass change.
@@ -3225,7 +3231,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Mar 24 22:05:19 2011
+H	StartTime	Mon Apr 25 09:24:25 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

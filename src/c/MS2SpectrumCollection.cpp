@@ -16,7 +16,7 @@
 MS2SpectrumCollection::MS2SpectrumCollection(
   const char* filename   ///< The spectrum collection filename.
  ) : SpectrumCollection(filename){
-
+   memset(comment_, 0, MAX_COMMENT);
 }
 
 /**
