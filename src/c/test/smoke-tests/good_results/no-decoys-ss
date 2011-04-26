@@ -1,14 +1,15 @@
-INFO: CPU: n001.grid.gs.washington.edu
-INFO: Thu Mar 24 22:05:25 PDT 2011
+INFO: CPU: ranunculus
+INFO: Mon Apr 25 09:24:29 PDT 2011
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Freeing database.
-INFO: Closing database filehandle
-INFO: Elapsed time: 1.33 s
+INFO: Elapsed time: 0.894 s
 INFO: Finished crux sequest-search
+INFO: Elapsed time: 0.894 s
+INFO: Finished crux sequest-search.
+INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
 # <string>=average|mono. Default=mono.
 # Parameter file only.  Used by crux-search-for-matches and
@@ -112,6 +113,11 @@ custom-enzyme=__NULL_STR
 # Predict flanking peaks for b and y ions (T,F). Default=F.
 # Only available for crux-predict-peptide-ion.
 flanking=FALSE
+
+# Include peaks +/- 1da around b/y ions in theoretical spectrum. 
+# sequest-search default=T. search-for-matches default=F.
+# Available in the paramter file for all search commands.
+use-flanking-peaks=TRUE
 
 # Change the mass of all amino acids 'A' by the given amount.
 # For parameter file only.  Default=no mass change.
@@ -549,7 +555,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Mar 24 22:05:25 2011
+H	StartTime	Mon Apr 25 09:24:29 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
