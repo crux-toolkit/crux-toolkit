@@ -30,6 +30,7 @@ int ExtractColumns::main(int argc, char** argv) {
 
    /* Define optional command line arguments */
   const char* option_list[] = {
+    "delimiter",
     "header",
     "verbosity"
   };
@@ -47,7 +48,9 @@ int ExtractColumns::main(int argc, char** argv) {
 
   string column_names_string = string(get_string_parameter_pointer("column names"));
 
-  DelimitedFileReader delimited_file(delimited_filename, true);
+  char delimiter = get_delimiter_parameter("delimiter");
+
+  DelimitedFileReader delimited_file(delimited_filename, true, delimiter);
   
   vector<string> column_name_list;
   DelimitedFile::tokenize(column_names_string, column_name_list, ',');
@@ -69,7 +72,7 @@ int ExtractColumns::main(int argc, char** argv) {
   if (get_boolean_parameter("header")) {
     cout << column_name_list[0];
     for (unsigned int col_idx = 1;col_idx<column_name_list.size();col_idx++) {
-      cout <<"\t" << column_name_list[col_idx];
+      cout << delimiter << column_name_list[col_idx];
     }
     cout<<endl;
   }
@@ -79,7 +82,7 @@ int ExtractColumns::main(int argc, char** argv) {
     cout << delimited_file.getString(col_idx);
     for (unsigned int col_idx_idx = 1;col_idx_idx < column_indices.size();col_idx_idx++) {
       col_idx = column_indices[col_idx_idx];
-      cout << "\t" << delimited_file.getString(col_idx);
+      cout << delimiter << delimited_file.getString(col_idx);
     }
     cout <<endl;
     delimited_file.next();

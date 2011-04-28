@@ -34,24 +34,49 @@ class DelimitedFileReader {
    *  data_[0] is a string vector of all data in a column.
    */
 
-  std::string next_data_string_; //the next data string.
-  std::string current_data_string_; //the current data string.
-  std::vector<std::string> data_; //the current vectorized data.
-  std::vector<std::string> column_names_; //the column names.
+  std::string next_data_string_; ///<the next data string.
+  std::string current_data_string_; ///<the current data string.
+  std::vector<std::string> data_; ///<the current vectorized data.
+  std::vector<std::string> column_names_; ///<the column names.
 
-  unsigned int current_row_; //current row count
-  bool has_next_;
-  bool has_current_;
-  bool has_header_;
-  std::fstream* file_ptr_;
+  char delimiter_; ///<the delimiter to use.
 
-  std::string file_name_;
+  unsigned int current_row_; ///<current row count
+  bool has_next_; ///<indicator of whether there is another row to parse
+  bool has_current_; ///<indicator of whether the current row is parsed
+  bool has_header_; ///<indicator of whether there is a header in the file
 
-  bool num_rows_valid_;
-  unsigned int num_rows_;
+  bool owns_stream_; ///<indicator of whether the object owns the stream
 
-  bool column_mismatch_warned_;
+  std::istream* istream_ptr_; ///<pointer to the stream itself
 
+  std::streampos istream_begin_; ///<position pointer for the beginning of the stream
+
+  std::string file_name_; ///<file name that the stream is open on.
+
+  bool num_rows_valid_; ///<indicator whether the number of rows is valid
+  unsigned int num_rows_; ///<number of rows in the file.
+
+  bool column_mismatch_warned_; ///<indicator of whether the column mismatch warning has been issued
+
+  /**
+   * clears the current data and column names,
+   * parses the header if it exists,
+   * reads the file one line at a time while
+   * populating the data matrix with the 
+   * strings separated by delimiter.
+   */
+  void loadData();
+
+  virtual void loadData(
+    const char *file_name, ///< the file path
+    bool has_header=true ///< header indicator
+  );
+
+  virtual void loadData(
+    const std::string& file_name, ///< the file path
+    bool has_header=true ///< header indicator
+  );
 
  public:
   /**
@@ -64,8 +89,9 @@ class DelimitedFileReader {
    * data specified by file_name.
    */  
   DelimitedFileReader(
-    const char *file_name, ///< the path of the file to read 
-    bool hasHeader=true ///< indicate whether header exists
+    const char *file_name, ///< the path of the file to read
+    bool has_header=true, ///< indicates whether the header exists (default true).
+    char delimiter='\t' ///< the delimiter to use (default tab).
   );
 
   /** 
@@ -74,7 +100,14 @@ class DelimitedFileReader {
    */
   DelimitedFileReader(
     const std::string& file_name, ///< the path of the file  to read
-    bool hasHeader=true ///< indicates whether header exists
+    bool has_header=true, ///< indicates whether the header exists (default true).
+    char delimiter='\t' ///< the delimiter to use (default tab)
+  );
+
+  DelimitedFileReader(
+    std::istream* istream_ptr, ///< the stream to be read
+    bool has_header=true, ///<indicates whether header exists
+    char delimiter='\t' ///< the delimiter to use (default tab)
   );
 
   /**
@@ -102,25 +135,6 @@ class DelimitedFileReader {
    */
   std::string getHeaderString();
 
-  /**
-   * clears the current data and column names,
-   * parses the header if it exists,
-   * reads the file one line at a time while
-   * populating the data matrix with the 
-   * strings separated by tabs.
-   */
-  virtual void loadData(
-    const char *file_name, ///< the file path
-    bool hasHeader=true ///< header indicator
-  );
-
-  /**
-   * loads a tab delimited file
-   */
-  virtual void loadData(
-    const std::string& file_name, ///< the file path
-    bool hasHeader=true ///< header indicator
-  );
 
   /**
    * finds the index of a column
