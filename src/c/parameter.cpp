@@ -969,8 +969,12 @@ void initialize_parameters(void){
 
   /* crux-util parameters */
   set_string_parameter("tsv file", NULL,
-    "Path to a delimited file",
+    "Path to a delimited file (-) for standard input",
     "Available for the delimited utility programs", "false");
+
+  set_string_parameter("delimiter", "tab",
+    "Character delimiter to use when parsing a delimited file (Default tab).",
+    "Available for the delimited utility programs.", "false");
 
   set_string_parameter("column names", NULL,
     "List of column names separated by a comma",
@@ -2313,6 +2317,23 @@ int get_max_ion_charge_parameter(
         "legal value", name, param_value_str);
     }
     return ans;
+  }
+}
+
+char get_delimiter_parameter(
+  const char* name
+  ) {
+  
+  char* param_value_str = (char*)get_hash_value(parameters, name);
+  if (strcmp(param_value_str,"tab") == 0) {
+    return '\t'; //using this with min function on peptide charge.
+  } else {
+    if (strlen(param_value_str) != 1) {
+      carp(CARP_FATAL,
+        "delimiter parameter %s with value %s is not a single character or "
+        "'tab'", name, param_value_str);
+    }
+    return param_value_str[0];
   }
 }
 
