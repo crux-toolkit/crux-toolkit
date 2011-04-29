@@ -1,0 +1,133 @@
+<html>
+<title>The change-review-commit cycle</title>
+<body>
+<blockquote>
+
+
+<h1>The change-review-commit cycle</h1>
+
+<h2>Introduction</h2>
+<p>
+If you are reading this document, you may be new to the crux
+development team.  Welcome!  The following is an outline of a typical
+work cycle.  If you are a seasoned programmer, it will give you an
+idea of how we combine our versioning system (Subversion, or SVN) with
+our code review process.  However, it is written with the junior
+developer in mind with useful tips for folks who may not be accustomed
+to working on a multi-person project.  The outline is also 
+sprinkled with links to more details of the various components of the
+process.  We strive to keep our documentation current and complete.
+If you find something unclear or out-of-date, don't hesitate to update
+this page or others. 
+
+<ol>
+<h2>Prepare your working copy</h2>
+
+<li>
+To begin work on crux, you will need a copy of the code base.  Do a
+clean 
+<a href="http://noble.gs.washington.edu/internal/cvs-instructions.html">
+check out</a> from the SVN repository or update your existing
+working copy.  Most changes can be made directly in the trunk, but if
+you are working on something experimental or sufficiently complicated,
+you can create a <a href="svn-branch-maintanence.html">branch</a>, do
+your work there, and later merge your changes into the trunk.
+
+<li>
+Run <code>svn update -u</code> to make sure you are beginning with an
+exact copy of what is in the repository.
+
+<li>
+<a href="autotools.html">Build</a> crux and run the 
+<a href="crux-tests.html">tests</a> to make sure everything is working
+before you start.
+
+<h2>Implement your changes</h2>
+<li>
+This is the part you already know how to do.  Edit or add files.
+Build and test frequently.  Consider adding new 
+<a href="crux-tests.html">smoke or unit tests</a> for your new
+functionality or bug-fix.  Remember to follow the 
+<a href="crux-coding-standards.html">coding standards</a>.
+
+<h2>Prepare for your code review</h2>
+<li>
+When you are ready for a <a href="code-review.html">code review</a>, do a
+final build and test to see that everything is working.
+
+<li>
+Run <code>svn status</code> to see the list of files that changed and
+to confirm that you added any new files to SVN.
+
+<li>
+Run <code>svn status -u</code> to see if there are any changes in the
+repository you need to incorporate into your working copy.  If there
+are, run <code>svn update</code>, build, and test.
+
+<li>
+From the root of the crux project, run <code>svn diff &gt;
+my-changes.diff</code>.  Give <code>my-changes.diff</code> a
+short meaningful name, for example new-column.diff.  Look it over to
+make sure it has only those changes you intended. (* see below for
+notes on <a href="#branches">code review in branches</a>)
+
+<li>
+Ask someone on the development team to do a code review for you and
+send him or her the diff file.
+
+<li>
+Make any changes suggested by your reviewer.  Build, test, and prepare
+another diff file, repeating the cycle until you and your reviewer
+have agreed on the set of changes.
+
+<h2>Check in your changes</h2>
+<li>
+Commit your changes to the repository with <code>svn commit</code>.
+Add a short, descriptive comment including the name of your reviewer.
+For example, "Added a new column, myscore, to the output of
+search-for-matches.  Code reviewed by Bill."
+
+</ol>
+<hr>
+
+<a name="branches"></a>
+<h2>Notes on branches</h2>
+<p>
+If you are working in a branch, you can change the review cycle
+slightly.  When you are ready for a code review, you may check your
+changes into the branch and point your reviewer to it.  Give him or
+her the name of the branch and the versions to compare for the
+change.  For example, "My changes are in crux/branches/thestuff.  See
+-r5444:5466 for the relevant changes".  In a branch, the code need not
+be fully functional when it is reviewed.  For example, if you are
+creating a new class, the first review may be just of the header file
+defining the new class.  It's more important that your reviewer be
+given manageable amounts of change than that you finish everything
+before someone sees it.
+</p>
+
+<h2>Notes on simultaneous changes</h2>
+<p>
+You may have several small projects you are working on at once which
+you want reviewed separately.  There are two possible approaches.  You
+may put all the changes in one working copy and have them reviewed and
+checked in separately.  For example, if you are writing some helper
+functions in crux-utils.cpp to be used later, you could prepare those
+files for review separately and check them in separately.
+<pre>
+$ svn diff src/c/crux-utils.cpp src/c/crux-utils.h /src/c/test/unit-tests/check-crux-utils.c > helper.diff
+$ svn commit -m 'Added a do_cool_stuff() to crux-utils. Reviewed by Bill' src/c/crux-utils.cpp src/c/crux-utils.h /src/c/test/unit-tests/check-crux-utils.c > helper.diff
+</pre>
+<p>
+More often than not, the two projects will overlap and it's easier to
+keep two working copies.  In that case, you might implement
+do_cool_stuff() and send it off for review.  Then while you are
+waiting, check out a clean copy and start working on your next
+project.  When the code review comes back, commit the crux-utils
+changes and then you can even delete that copy.  Do <code>svn
+    update</code> in the new project to pick up the crux-utils
+changes.
+</p>
+</blockquote>
+</body>
+</html>
