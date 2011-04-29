@@ -178,7 +178,7 @@ void DelimitedFileReader::loadData() {
   }
   current_row_ = 0;
   num_rows_valid_ = false;
-
+  has_current_ = false;
   column_names_.clear();
   column_mismatch_warned_ = false;
   istream_begin_ = istream_ptr_->tellg(); 
@@ -198,7 +198,7 @@ void DelimitedFileReader::loadData() {
 
   if (has_next_) {
     next();
-  }
+  } 
 
 }
 
@@ -301,6 +301,14 @@ const string& DelimitedFileReader::getString() {
 const string& DelimitedFileReader::getString(
   unsigned int col_idx ///< the column index
   ) {
+
+  if (col_idx >= data_.size()) {
+    carp(CARP_FATAL, 
+      "col idx:%i is out of bounds! (0,%i,%i)",
+      col_idx, 
+      (column_names_.size()-1),
+      (data_.size()-1));
+  }
 
   return data_.at(col_idx);
 }
@@ -545,8 +553,7 @@ void DelimitedFileReader::next() {
     current_row_++;
     current_data_string_ = next_data_string_;
     //parse next_data_string_ into data_
-    DelimitedFile::tokenize(next_data_string_, data_, delimiter_);
-
+    DelimitedFile::tokenize(current_data_string_, data_, delimiter_);
     //make sure data has the right number of columns for the header.
     if (data_.size() < column_names_.size()) {
       if (!column_mismatch_warned_) {

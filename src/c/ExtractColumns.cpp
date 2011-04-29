@@ -78,6 +78,7 @@ int ExtractColumns::main(int argc, char** argv) {
   }
 
   while(delimited_file.hasNext()) {
+
     int col_idx = column_indices[0];
     cout << delimited_file.getString(col_idx);
     for (unsigned int col_idx_idx = 1;col_idx_idx < column_indices.size();col_idx_idx++) {
