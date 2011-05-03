@@ -78,7 +78,7 @@ void SpectrumZState::setSinglyChargedMass(
 /**
  * \returns the m+h charged mass for this z-state
  */
-FLOAT_T SpectrumZState:: getSinglyChargedMass() {
+FLOAT_T SpectrumZState:: getSinglyChargedMass() const {
   
   return neutral_mass_ + MASS_PROTON;
 }
@@ -98,7 +98,7 @@ void SpectrumZState::setNeutralMass(
 /**
  * \returns The neutral mass for this z-state
  */
-FLOAT_T SpectrumZState::getNeutralMass() {
+FLOAT_T SpectrumZState::getNeutralMass() const {
 
   return neutral_mass_;
 }
@@ -116,7 +116,7 @@ void SpectrumZState::setRTime(
 /**
  * \returns The retention time for this z-state
  */
-FLOAT_T SpectrumZState::getRTime() {
+FLOAT_T SpectrumZState::getRTime() const {
   return rtime_;
 }
 
@@ -133,7 +133,7 @@ void SpectrumZState::setArea(
 /**
  * \returns The area for this z-state
  */
-FLOAT_T SpectrumZState::getArea() {
+FLOAT_T SpectrumZState::getArea() const {
   return area_;
 }
 
