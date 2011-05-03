@@ -382,10 +382,10 @@ int Scores::calcOverFDR(double fdr) {
     if (fdr>=q)
       posNow = positives;
   }
-  //for (ix=scores.size();--ix;) {
-  //if (scores[ix-1].pPSM->q > scores[ix].pPSM->q)
-  //  scores[ix-1].pPSM->q = scores[ix].pPSM->q;  
-  //}
+  for (ix=scores.size();--ix;) {
+    if (scores[ix-1].pPSM->q > scores[ix].pPSM->q)
+     scores[ix-1].pPSM->q = scores[ix].pPSM->q;  
+  }
   return posNow;
 }
 
