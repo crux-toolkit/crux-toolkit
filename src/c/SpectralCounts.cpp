@@ -318,10 +318,10 @@ FLOAT_T SpectralCounts::sumMatchIntensity(MATCH_T* match,
     ion = (*ion_it);
     if (ion -> getType() == B_ION || ion -> getType() == Y_ION){
       if (!ion->isModified()){
-        PEAK_T* peak = spectrum->getNearestPeak(ion->getMassZ(),
+        Peak * peak = spectrum->getNearestPeak(ion->getMassZ(),
                                                 bin_width_);
         if (peak != NULL){
-          match_intensity += get_peak_intensity(peak);
+	  match_intensity += peak->getIntensity();
         }
       }
     }

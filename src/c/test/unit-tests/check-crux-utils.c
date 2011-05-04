@@ -1,6 +1,6 @@
 #include "check-crux-utils.h"
 #include "crux-utils.h"
-#include "peak.h"
+#include "Peak.h"
 
 #include <vector>
 
@@ -11,7 +11,7 @@ int myint1, myint2, *myintptr;
 
 // helper function for reading a file with a list of peaks
 FLOAT_T read_peaks_file(const char* filename,
-                        vector<PEAK_T*>& peaks, int* num_peaks){
+                        vector<Peak*>& peaks, int* num_peaks){
 
   FILE* file = fopen(filename, "r");
   if( file == NULL ){
@@ -29,8 +29,8 @@ FLOAT_T read_peaks_file(const char* filename,
   FLOAT_T peakmz, intensity;
   for(int i=0; i<num; i++){
     fscanf(file, "%f %f", &peakmz, &intensity);
-    set_peak_location(peaks[i], peakmz);
-    set_peak_intensity(peaks[i], intensity);
+    peaks[i]->setLocation(peakmz);
+    peaks[i]->setIntensity(intensity);
   }
 
   fclose(file);
@@ -121,7 +121,7 @@ END_TEST
 START_TEST(test_choose_charge){
   // error case
 
-  vector<PEAK_T*> peaks;
+  vector<Peak*> peaks;
 
   int charge = choose_charge(0, peaks);
   fail_unless( charge == -1, "Choose charge should return -1 with no peaks.");

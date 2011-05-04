@@ -22,11 +22,13 @@
 #include "carp.h"
 #include "utils.h"
 #include "objects.h"
-#include "peak.h"
+#include "Peak.h"
 
 #include "CruxApplication.h"
 
 #include<vector>
+
+using namespace std;
 /**
  * The number of features used to represent a PSM for Percolator or q-ranker.
  */
@@ -382,7 +384,7 @@ int get_last_in_range_string(const char* range_string);
  * charged.
  */
 int choose_charge(FLOAT_T precursor_mz,         ///< m/z of spectrum precursor ion
-                  std::vector<PEAK_T*>& peaks); ///< array of spectrum peaks
+		  vector<Peak*>& peaks); ///< array of spectrum peaks
 
 /**
  *\brief Extend a given string with lines not exceeding a specified width, 

@@ -31,8 +31,6 @@ CreateIndex::~CreateIndex() {
  */
 int CreateIndex::main(int argc, char** argv) {
 
-  //return create_index_main(argc, argv);
-
   /* Declarations */
   int min_length;
   int max_length;

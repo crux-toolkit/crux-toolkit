@@ -11,7 +11,7 @@
 #include <string>
 #include "utils.h"
 #include "objects.h"
-#include "peak.h"
+#include "Peak.h"
 
 #include "MSToolkit/Spectrum.h"
 #include "SpectrumZState.h"
@@ -21,7 +21,7 @@
  * \brief Object to iterate over the peaks in a spectrum.
  */
 
-typedef std::vector<PEAK_T*>::const_iterator PeakIterator;
+typedef std::vector<Peak*>::const_iterator PeakIterator;
 
 /**
  * \class Spectrum 
@@ -51,7 +51,7 @@ class Spectrum{
   FLOAT_T          precursor_mz_;  ///< The m/z of precursor (MS-MS spectra)
   std::vector<SpectrumZState> zstates_;
   std::vector<SpectrumZState> ezstates_;
-  std::vector<PEAK_T*>  peaks_;         ///< The spectrum peaks
+  std::vector<Peak*>  peaks_;         ///< The spectrum peaks
   FLOAT_T          min_peak_mz_;   ///< The minimum m/z of all peaks
   FLOAT_T          max_peak_mz_;   ///< The maximum m/z of all peaks
   double           total_energy_;  ///< The sum of intensities in all peaks
@@ -62,7 +62,7 @@ class Spectrum{
   bool             sorted_by_mz_; ///< Are the spectrum peaks sorted by m/z...
   bool             sorted_by_intensity_; ///< ... or by intensity?
   bool             has_mz_peak_array_; ///< Is the mz_peak_array populated.
-  PEAK_T**         mz_peak_array_;  ///< Allows rapid peak retrieval by mz.
+  Peak         **mz_peak_array_;  ///< Allows rapid peak retrieval by mz.
 
   // constants
   /**
@@ -301,7 +301,7 @@ class Spectrum{
    * This should lazily create the data structures within the
    * spectrum object that it needs.
    */
-  PEAK_T* getNearestPeak
+  Peak * getNearestPeak
     (FLOAT_T mz, ///< the mz of the peak around which to sum intensities -in
      FLOAT_T max ///< the maximum distance to get intensity -in
      );

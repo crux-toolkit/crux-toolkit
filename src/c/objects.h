@@ -29,7 +29,7 @@ class SpectrumZState;
  * \typedef PEAK_T 
  * A peak in a spectrum
  */
-typedef struct peak PEAK_T;
+class Peak;
 
 /**
  * The enum for peak sort type(_PEAK_LOCATION, _PEAK_INTENSITY)

@@ -27,7 +27,7 @@ int Scorer::get_matched_by_ions(Spectrum* spectrum,
   for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
     if (ion -> get_mz(MONO) >= 400 && ion -> get_mz(MONO) <= 1200) {
     if (ion -> type() == B_ION || ion -> type() == Y_ION) {
-      PEAK_T* peak = spectrum->getNearestPeak(ion->get_mz(AVERAGE), 
+      Peak * peak = spectrum->getNearestPeak(ion->get_mz(AVERAGE), 
                                               bin_width);
       if (peak != NULL) {
 	ans++;
@@ -247,9 +247,9 @@ FLOAT_T Scorer::getIonCurrentExplained(LinkedIonSeries& ion_series,
     peak_iter != spectrum->end();
     ++peak_iter) {
 
-    PEAK_T* peak = *peak_iter;
-    FLOAT_T spec_mz = get_peak_location(peak);
-    FLOAT_T spec_intensity = get_peak_intensity(peak);
+    Peak * peak = *peak_iter;
+    FLOAT_T spec_mz = peak->getLocation();
+    FLOAT_T spec_intensity = peak->getIntensity();
     //for each peak in the spectrum, find the array index for the theoretical.
     int intensity_array_idx = (int)(spec_mz / bin_width + 0.5);
 
@@ -290,15 +290,15 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
   int max_mz = MAX_MZ;
   int min_mz = MIN_MZ;
   // keep track of colors
-  map<PEAK_T*, string> peak_colors;
+  map<Peak *, string> peak_colors;
   carp(CARP_DEBUG, "min mz: %d, max mz: %d\n", max_mz);
   FLOAT_T average = 0;
 
   for (PeakIterator peak_iter = spectrum->begin();
     peak_iter != spectrum->end();
     ++peak_iter) {
-
-    average += get_peak_intensity(*peak_iter);
+    
+    average += (*peak_iter)->getIntensity();
   }
 
   average = average / spectrum->getNumPeaks();
@@ -309,9 +309,9 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
     peak_iter != spectrum->end();
     ++peak_iter) {
 
-    PEAK_T* peak = *peak_iter;
-    FLOAT_T location = get_peak_location(peak);
-    FLOAT_T intensity = get_peak_intensity(peak); 
+    Peak * peak = *peak_iter;
+    FLOAT_T location = peak->getLocation();
+    FLOAT_T intensity = peak->getIntensity(); 
     if (location > min_mz && location < max_mz) {
     if (normalize) {
       peak_colors[peak] = "blue";
@@ -336,7 +336,7 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
   while (i <= max_mz)  {
     if (((*index > 1 && !noflanks) || *index > 26) && i >= min_mz) {
         theoretical_file << i << "\t" << *index << "\tnolabel\tred" << endl;
-      PEAK_T* peak = spectrum->getNearestPeak(i, 1);
+      Peak * peak = spectrum->getNearestPeak(i, 1);
       if (peak != NULL) {
 	++match_count;
 	peak_colors[peak] = "green";
@@ -352,9 +352,9 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
   }
   FLOAT_T location;
   FLOAT_T intensity;
-  for (map<PEAK_T*, string>::iterator it = peak_colors.begin(); it != peak_colors.end(); ++it) {
-    location = get_peak_location(it->first);
-    intensity = get_peak_intensity(it->first);
+  for (map<Peak *, string>::iterator it = peak_colors.begin(); it != peak_colors.end(); ++it) {
+    location = it->first->getLocation();
+    intensity = it->first->getIntensity();;
     //spectrums_file << location << "\t" << pow(intensity * average * normalize, 0.2) << "\tnolabel\t" << it->second << endl;
     spectrums_file << location << "\t" << intensity << "\tnolabel\t" << it->second << endl;
   }
