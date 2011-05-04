@@ -16,6 +16,9 @@
 static int G_verbosity; 
 static FILE* log_file = NULL;
 
+HASH_T * messages_;
+unsigned int hash_size_ = 1000;
+
 void set_verbosity_level(int verbosity){
   G_verbosity = verbosity;
 }
@@ -124,6 +127,51 @@ void carp( int verbosity, const char* format, ...) {
     exit(1);
 #endif
   }
+}
+
+/**
+ * Similar to carp(), but multiple similar messages will
+ * be printed only once.
+ */
+void warn_once(const char * msg1, const char * msg2_format, ...) {
+
+  // Create hash table if not exist
+  if (messages_ == NULL) {
+    messages_ = new_hash(hash_size_);
+  }
+
+  // Look up msg1 in the hash table
+  if (get_hash_value(messages_, msg1) == NULL) {
+    // if msg1 does not exist in the hash table, then we will save it to the hash table
+    // we also have to make sure that the hash table still has enough space
+    if (hash_size(messages_) == hash_size_) {
+      hash_size_ *= 2;
+      HASH_T * temp = new_hash(hash_size_);
+      HASH_ITERATOR_T * it = new_hash_iterator(messages_);
+      while (hash_iterator_has_next(it)) {
+	char * key = hash_iterator_next(it);
+	add_hash(temp, key, key);
+      }
+      free_hash_iterator(it);
+      free_hash(messages_);
+      messages_ = temp;
+    }
+    
+    // now we add msg1 to our hash table
+    add_hash(messages_, msg1, msg1);
+    // and we print msg1 to stderr and log msg1 to log_file
+    carp(CARP_WARNING, msg1);
+  }
+  
+  va_list argp;
+  // msg2 is only printed to the log file
+  if (log_file != NULL) { 
+      va_start(argp, msg2_format); //BF: added to fix segfault
+      vfprintf(log_file, msg2_format, argp);
+      va_end(argp);
+      fflush(log_file);
+  }
+  
 }
 
 /*

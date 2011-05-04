@@ -13,7 +13,6 @@
 #include <ctype.h>
 #include "objects.h"
 #include "Spectrum.h"
-#include "peak.h"
 #include "utils.h"
 #include "mass.h"
 #include "parameter.h"
@@ -86,7 +85,7 @@ Spectrum::~Spectrum()
   free_peak_vector(peaks_);
   
   if(has_mz_peak_array_){
-    free(mz_peak_array_);
+    delete [] mz_peak_array_;
   }
 }
 
@@ -136,10 +135,10 @@ void Spectrum::print(FILE* file) ///< output file to print at -out
 
   // print peaks
   for(int peak_idx = 0; peak_idx < (int)peaks_.size(); ++peak_idx){
-    fprintf(file, "%.2f %.*f\n", 
-            get_peak_location(peaks_[peak_idx]),
+    fprintf(file, "%.2f %.*f\n",
+	    peaks_[peak_idx]->getLocation(),
             mass_precision,
-            get_peak_intensity(peaks_[peak_idx]));
+	    peaks_[peak_idx]->getIntensity());
   }
 }
 
@@ -291,8 +290,8 @@ void Spectrum::printSqt(
 
   // copy each peak
   for(int peak_idx=0; peak_idx < (int)old_spectrum.peaks_.size(); ++peak_idx){
-    this->addPeak(get_peak_intensity(old_spectrum.peaks_[peak_idx]),
-                   get_peak_location(old_spectrum.peaks_[peak_idx])); 
+    this->addPeak(old_spectrum.peaks_[peak_idx]->getIntensity(),
+		  old_spectrum.peaks_[peak_idx]->getLocation());
   }
 
   /*  Should we do this??
@@ -931,7 +930,7 @@ bool Spectrum::parseMstoolkitSpectrum
   free_peak_vector(peaks_);
   i_lines_v_.clear();
   d_lines_v_.clear();
-  if( mz_peak_array_ ){ free(mz_peak_array_); }
+  if( mz_peak_array_ ){ delete [] mz_peak_array_; }
 
   MSToolkit::Spectrum* mst_real_spectrum = (MSToolkit::Spectrum*)mst_spectrum;
 
@@ -993,7 +992,8 @@ bool Spectrum::addPeak
   )
 {
 
-  PEAK_T* peak = new_peak(intensity, location_mz);
+  //PEAK_T* peak = new_peak(intensity, location_mz);
+  Peak *peak = new Peak(intensity, location_mz);
   peaks_.push_back(peak);
 
   updateFields(intensity, location_mz);
@@ -1014,17 +1014,17 @@ void Spectrum::populateMzPeakArray()
   }
   
   int array_length = MZ_TO_PEAK_ARRAY_RESOLUTION * MAX_PEAK_MZ;
-  mz_peak_array_ = (PEAK_T**)mymalloc(array_length * sizeof(PEAK_T*));
+  mz_peak_array_ = new Peak * [array_length];
   for (int peak_idx = 0; peak_idx < array_length; peak_idx++){
     mz_peak_array_[peak_idx] = NULL;
   }
   for(int peak_idx = 0; peak_idx < (int)peaks_.size(); peak_idx++){
-    PEAK_T* peak = peaks_[peak_idx];
-    FLOAT_T peak_mz = get_peak_location(peak);
+    Peak * peak = peaks_[peak_idx];
+    FLOAT_T peak_mz = peak->getLocation();
     int mz_idx = (int) (peak_mz * MZ_TO_PEAK_ARRAY_RESOLUTION);
     if (mz_peak_array_[mz_idx] != NULL){
       carp(CARP_INFO, "Peak collision at mz %.3f = %i", peak_mz, mz_idx);
-      if(get_peak_intensity(mz_peak_array_[mz_idx])< get_peak_intensity(peak)){
+      if (mz_peak_array_[mz_idx]->getIntensity() < peak->getIntensity()) {
         mz_peak_array_[mz_idx] = peak;
       }
     } else {
@@ -1041,7 +1041,7 @@ void Spectrum::populateMzPeakArray()
  * spectrum object that it needs.
  * TODO: reimplement with faster peak lookup
  */
-PEAK_T* Spectrum::getNearestPeak(
+Peak * Spectrum::getNearestPeak(
   FLOAT_T mz, ///< the mz of the peak around which to sum intensities -in
   FLOAT_T max ///< the maximum distance to get intensity -in
   )
@@ -1055,14 +1055,14 @@ PEAK_T* Spectrum::getNearestPeak(
   int absolute_max_mz_idx = MAX_PEAK_MZ * MZ_TO_PEAK_ARRAY_RESOLUTION - 1;
   max_mz_idx = max_mz_idx > absolute_max_mz_idx 
     ? absolute_max_mz_idx : max_mz_idx;
-  PEAK_T* peak = NULL;
-  PEAK_T* nearest_peak = NULL;
+  Peak * peak = NULL;
+  Peak * nearest_peak = NULL;
   int peak_idx;
   for (peak_idx=min_mz_idx; peak_idx < max_mz_idx + 1; peak_idx++){
     if ((peak = mz_peak_array_[peak_idx]) == NULL){
       continue;
     }
-    FLOAT_T peak_mz = get_peak_location(peak);
+    FLOAT_T peak_mz = peak->getLocation();
     FLOAT_T distance = fabs(mz - peak_mz);
     if (distance > max){
       continue;
@@ -1172,29 +1172,6 @@ const vector<SpectrumZState>& Spectrum::getZStates() {
  *  spectrum: all of them or the one selected by the parameter.
  * /returns A vector of charge states to consider for this spectrum.
  */ 
-/*
-vector<int> Spectrum::getChargesToSearch(){
-
-  vector<int> select_charges;
-  const char* charge_str = get_string_parameter_pointer("spectrum-charge");
-
-  
-  if( strcmp( charge_str, "all") == 0){ // return full array of charges
-    select_charges = possible_z_;
-  } else { // return one charge
-
-    int param_charge = atoi(charge_str);
-    
-    if( (param_charge < 1) || (param_charge > MAX_CHARGE) ){
-      carp(CARP_FATAL, "spectrum-charge option must be 1,2,3,.. %d or 'all'.  "
-           "'%s' is not valid", MAX_CHARGE, charge_str);
-    }
-    
-    select_charges.push_back(param_charge);
-  }
-  return select_charges;
-}
-*/
 vector<SpectrumZState> Spectrum::getZStatesToSearch() {
 
   vector<SpectrumZState> select_zstates;
@@ -1248,8 +1225,8 @@ FLOAT_T Spectrum::getMaxPeakIntensity()
   FLOAT_T max_intensity = -1;
 
   for(int peak_idx = 0; peak_idx < (int)peaks_.size(); ++peak_idx){
-    if(max_intensity <= get_peak_intensity(peaks_[peak_idx])){
-      max_intensity = get_peak_intensity(peaks_[peak_idx]);
+    if (max_intensity <= peaks_[peak_idx]->getIntensity()) {
+      max_intensity = peaks_[peak_idx]->getIntensity();
     }
   }
   return max_intensity; 
@@ -1301,9 +1278,9 @@ Spectrum* Spectrum::parseTabDelimited(
 void Spectrum::sumNormalize()
 {
   for(int peak_idx = 0; peak_idx < (int)peaks_.size(); peak_idx++){
-    PEAK_T* peak = peaks_[peak_idx];
-    FLOAT_T new_intensity = get_peak_intensity(peak) / total_energy_;
-    set_peak_intensity(peak, new_intensity);
+    Peak * peak = peaks_[peak_idx];
+    FLOAT_T new_intensity = peak->getIntensity() / total_energy_;
+    peak->setIntensity(new_intensity);
   }
 }
 
@@ -1317,10 +1294,10 @@ void Spectrum::rankPeaks()
   sorted_by_mz_ = false;
   int rank = (int)peaks_.size();
   for(int peak_idx = 0; peak_idx < (int) peaks_.size(); peak_idx++){
-    PEAK_T* peak = peaks_[peak_idx];
+    Peak * peak = peaks_[peak_idx];
     FLOAT_T new_rank = rank/(float)peaks_.size();
     rank--;
-    set_peak_intensity_rank(peak, new_rank); 
+    peak->setIntensityRank(new_rank);
   }
 
 }

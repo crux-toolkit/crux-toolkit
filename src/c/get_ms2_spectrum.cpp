@@ -15,7 +15,7 @@
 #include "parameter.h"
 #include "carp.h"
 #include "Spectrum.h"
-#include "peak.h"
+#include "Peak.h"
 #include "SpectrumCollectionFactory.h"
 #include "unistd.h"
 

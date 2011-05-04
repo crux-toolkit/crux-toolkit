@@ -4,7 +4,7 @@
 #include "check-peak.h"
 #include "Spectrum.h"
 #include "SpectrumCollectionFactory.h"
-#include "peak.h"
+#include "Peak.h"
 #include "crux-utils.h"
 #include "scorer.h"
 #include "objects.h"

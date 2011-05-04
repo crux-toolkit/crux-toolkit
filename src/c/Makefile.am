@@ -108,8 +108,8 @@ LIBFILES= \
   parameter.h \
   parse_arguments.cpp \
   parse_arguments.h \
-  peak.cpp \
-  peak.h \
+  Peak.cpp \
+  Peak.h \
   peptide.cpp \
   peptide_constraint.cpp \
   peptide_constraint.h \

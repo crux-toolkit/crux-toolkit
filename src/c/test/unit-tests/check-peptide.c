@@ -5,7 +5,7 @@
 #include "mass.h"
 #include "objects.h"
 #include "Spectrum.h"
-#include "peak.h"
+#include "Peak.h"
 #include "peptide.h"
 #include "peptide_src.h"
 #include "peptide_constraint.h"

@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "mass.h"
 #include "objects.h"
+#include "Peak.h"
 
 static const int MAX_MODIFICATIONS = 4; ///< maximum modifications allowed per ion
 
@@ -31,7 +32,7 @@ class Ion {
   FLOAT_T peptide_mass_; ///< the mass of the peptide. For efficiency
   int modification_counts_[MAX_MODIFICATIONS]; ///< an array of the number of different ion modifications
   FLOAT_T ion_mass_z_;   ///< The mass/z of the ion. 
-  PEAK_T* peak_;  ///< The assigned peak. NULL if no peak // TODO add ptr count
+  Peak * peak_;  ///< The assigned peak. NULL if no peak // TODO add ptr count
 
   static const int MZ_INT_MAX = 10;
   static const int MZ_INT_MIN = 0;
@@ -296,7 +297,7 @@ class Ion {
    * Adds the given ION_MODIFICATION to this ion
    */
   void setPeak(
-    PEAK_T* peak ///< peak to add to this ion -in
+    Peak * peak ///< peak to add to this ion -in
     );
 
   /**

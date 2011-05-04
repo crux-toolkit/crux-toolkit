@@ -53,7 +53,6 @@ int main(int argc, char** argv){
 
   
   /* for debugging of parameter processing */
-  //set_verbosity_level( CARP_DETAILED_DEBUG );
   set_verbosity_level( CARP_ERROR );
   
   /* Set default values for parameters in parameter.c */
@@ -306,7 +305,6 @@ double get_concat_score(char* peptideA, char* peptideB, int link_site, int charg
 }
 
 FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
-  PEAK_T* peak = NULL;
   FLOAT_T peak_location = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
@@ -338,8 +336,8 @@ FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
     peak_iterator != spectrum->end();
     ++peak_iterator) {
 
-    peak = *peak_iterator;
-    peak_location = get_peak_location(peak);
+    Peak *peak = *peak_iterator;
+    peak_location = peak->getLocation();
     
     // skip all peaks larger than experimental mass
     if(peak_location > experimental_mass_cut_off){
@@ -356,7 +354,7 @@ FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
 
     // get intensity
     // sqrt the original intensity
-    intensity = get_peak_intensity(peak);
+    intensity = peak->getIntensity();
 
     // set intensity in array with correct mz, only if max peak in the bin
     if(observed[mz] < intensity){

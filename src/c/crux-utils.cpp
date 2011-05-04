@@ -10,8 +10,6 @@
 #include "crux-utils.h"
 #include "parameter.h"
 
-#include <iostream>
-
 using namespace std;
 
 /**
@@ -1572,26 +1570,24 @@ int get_last_in_range_string(const char* range_string){
  * charged or -1 on error.
  */
 int choose_charge(FLOAT_T precursor_mz,    ///< m/z of spectrum precursor ion
-                  vector<PEAK_T*>& peaks)  ///< array of spectrum peaks
+                  vector<Peak*>& peaks)  ///< array of spectrum peaks
 {
   if(peaks.empty()){
     carp(CARP_ERROR, "Cannot determine charge state of empty peak array.");
     return -1;
   }
 
-  FLOAT_T max_peak_mz = get_peak_location(peaks.back());
+  FLOAT_T max_peak_mz = peaks.back()->getLocation();
   
   // sum peaks below and above the precursor m/z window separately
   FLOAT_T left_sum = 0.00001;
   FLOAT_T right_sum= 0.00001;
   for(unsigned int peak_idx = 0; peak_idx < peaks.size(); peak_idx++){
-    if(get_peak_location(peaks[peak_idx]) < precursor_mz - 20){
-      left_sum += get_peak_intensity(peaks[peak_idx]);
-
-    } else if(get_peak_location(peaks[peak_idx]) 
-              > precursor_mz + 20){
-      right_sum += get_peak_intensity(peaks[peak_idx]);
-
+    if (peaks[peak_idx]->getLocation() < precursor_mz - 20) {
+      left_sum += peaks[peak_idx]->getIntensity();
+    }
+    else if (peaks[peak_idx]->getLocation() > precursor_mz + 20) {
+      right_sum += peaks[peak_idx]->getIntensity();
     } // else, skip peaks around precursor
   }
 
