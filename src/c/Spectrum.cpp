@@ -1254,6 +1254,7 @@ Spectrum* Spectrum::parseTabDelimited(
   FLOAT_T neutral_mass = file.getFloat(SPECTRUM_NEUTRAL_MASS_COL);
   
   SpectrumZState zstate;
+
   zstate.setNeutralMass(neutral_mass, charge);
 
   spectrum->zstates_.push_back(zstate);

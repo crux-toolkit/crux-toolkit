@@ -2607,8 +2607,7 @@ BOOLEAN_T extend_match_collection_tab_delimited(
   while (result_file.hasNext()) {
 
     /*** get spectrum specific features ***/
-    SpectrumZState zstate;
-    zstate.setNeutralMass(
+    match_collection-> zstate.setNeutralMass(
       result_file.getFloat(SPECTRUM_NEUTRAL_MASS_COL),
       result_file.getInteger(CHARGE_COL));
     delta_cn = result_file.getFloat(DELTA_CN_COL);
@@ -2671,7 +2670,7 @@ BOOLEAN_T extend_match_collection_tab_delimited(
     }
 
     //set all spectrum specific features to parsed match
-    set_match_zstate(match, zstate);
+    set_match_zstate(match, match_collection->zstate);
     set_match_delta_cn(match, delta_cn);
     set_match_ln_delta_cn(match, ln_delta_cn);
     set_match_ln_experiment_size(match, ln_experiment_size);
