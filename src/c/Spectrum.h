@@ -17,13 +17,6 @@
 #include "SpectrumZState.h"
 
 /**
- * \class PeakIterator
- * \brief Object to iterate over the peaks in a spectrum.
- */
-
-typedef std::vector<Peak*>::const_iterator PeakIterator;
-
-/**
  * \class Spectrum 
  * \brief A mass spectrum
 

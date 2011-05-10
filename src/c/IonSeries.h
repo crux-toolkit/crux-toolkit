@@ -17,12 +17,6 @@
 static const int MAX_NUM_ION_TYPE = 8; // number of different ion_types
 
 /**
- * \object IonIterator
- * \brief An object to iterate over all ion objects in the IonSeries
- */
-typedef std::vector<Ion*>::iterator IonIterator;
-
-/**
  * \class IonSeries
  * \brief An object to represent a series of ions, and organize them.
  * For which additional data structures will be created as needed 
