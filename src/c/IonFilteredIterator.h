@@ -35,7 +35,7 @@ class IonFilteredIterator{
   /**
    * Only copies in the constraint as pointer
    * Instantiates a new ion_filtered_iterator object from ion_series.
-   * \returns a ION_FILTERED_ITERATOR_T object.
+   * \returns an IonFilteredIterator object.
    */
   IonFilteredIterator(
     IonSeries* ion_series, ///< ion_series to iterate -in

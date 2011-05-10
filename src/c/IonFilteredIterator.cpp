@@ -1,9 +1,9 @@
+/**
+ * \file IonFilteredIterator.cpp 
+ * \brief An object to iterate over ion objects that meet constraints
+ * in the IonSeries.
+ *****************************************************************************/
 #include "IonFilteredIterator.h"
-
-
-/**********************************
- * ION_FILTERED_ITERATOR_T object
- **********************************/
 
 /**
  * sets up the iterator for next iteration.

@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
+#include <errno.h>
 
 #include "utils.h"
 #include "crux-utils.h"
@@ -1688,7 +1689,10 @@ BOOLEAN_T parse_crux_index_map(
   carp(CARP_DETAILED_DEBUG, "Opening map file '%s'", full_filename);
   file = fopen(full_filename, "r");
   if(file == NULL){
-    carp(CARP_WARNING, "Cannot open crux_index_map file.");
+    int errsv = errno;
+    carp(CARP_WARNING, "Cannot open crux_index_map file.:%s\nError:%s", 
+      full_filename, 
+      strerror(errsv));
     return FALSE;
   }
   
