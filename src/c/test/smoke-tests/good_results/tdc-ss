@@ -1,13 +1,13 @@
-INFO: CPU: ranunculus
-INFO: Mon Apr 25 09:24:27 PDT 2011
+INFO: CPU: n001.grid.gs.washington.edu
+INFO: Thu May 12 14:30:42 PDT 2011
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 1.66 s
+INFO: Elapsed time: 2.29 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.66 s
+INFO: Elapsed time: 2.3 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -23,7 +23,7 @@ stats=FALSE
 
 # Specifies the operator that is used to compare an entry in the
 # specified column to the value given on the command line. 
-# (eq|gt|gte|lt|lte). Default: string-equal.
+# (eq|gt|gte|lt|lte|neq). Default: eq.
 # Available for crux extract-rows
 comparison=eq
 
@@ -315,6 +315,10 @@ fileroot=tdc
 # Available for q-ranker.
 no-xval=FALSE
 
+# Sort in ascending order.  Otherwise, descending. Default: True.
+# Available for sort-by-column
+ascending=TRUE
+
 # Compute the Sp score for all candidate peptides.  Default=F
 # Available for search-for-matches.  Sp scoring is always done for
 # sequest-search.
@@ -555,7 +559,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Apr 25 09:24:28 2011
+H	StartTime	Thu May 12 14:30:42 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

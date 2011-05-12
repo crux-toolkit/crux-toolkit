@@ -35,6 +35,8 @@ class DelimitedFile {
   std::vector<std::vector<std::string> > data_;
   std::vector<std::string> column_names_;
   unsigned int current_row_; //used for iterating through the table.
+  char delimiter_;
+
 
   /**
    * reorders the rows of a delimited file using a built map 
@@ -48,9 +50,11 @@ class DelimitedFile {
 
  public:
   /**
-   * \returns a blank DelimitedFile object 
+   * \returns a DelimitedFile object 
    */
-  DelimitedFile();
+  DelimitedFile(
+    char delimiter='\t' ///< the delimiter to use (default tab)
+  );
   
   /**
    * \returns a DelimitedFile object and loads the tab-delimited
@@ -58,7 +62,8 @@ class DelimitedFile {
    */  
   DelimitedFile(
     const char *file_name, ///< the path of the file to read 
-    bool hasHeader=true ///< indicate whether header exists
+    bool hasHeader=true, ///< indicate whether header exists
+    char delimiter='\t' ///< the delimiter to use (default tab)
   );
 
   /** 
@@ -67,7 +72,8 @@ class DelimitedFile {
    */
   DelimitedFile(
     const std::string& file_name, ///< the path of the file  to read
-    bool hasHeader=true ///< indicates whether header exists
+    bool hasHeader=true, ///< indicates whether header exists
+    char delimiter='\t' ///< the delimiter to use (default tab)
   );
 
   /**
@@ -80,6 +86,19 @@ class DelimitedFile {
    */
   virtual ~DelimitedFile();
   
+
+  /**
+   * sets the delimiter
+   */
+  void setDelimiter(
+    char delimiter ///< the delimiter
+  );
+
+  /**
+   * /returns the delimtier
+   */
+  char getDelimiter() const;
+
   /**
    *\returns the number of rows, assuming a square matrix
    */
@@ -106,7 +125,8 @@ class DelimitedFile {
    */
   void loadData(
     const char *file_name, ///< the file path
-    bool hasHeader=true ///< header indicator
+    bool hasHeader=true, ///< header indicator
+    char delimiter='\t' ///< the delimiter to use (default tab).
   );
 
   /**
@@ -114,7 +134,8 @@ class DelimitedFile {
    */
   void loadData(
     const std::string& file_name, ///< the file path
-    bool hasHeader=true ///< header indicator
+    bool hasHeader=true, ///< header indicator
+    char delimiter='\t' ///< the delimiter to use (default tab).
   );
 
   /**
@@ -136,7 +157,7 @@ class DelimitedFile {
    *\returns the column index.
    */
   unsigned int addColumn(
-    std::string& column_name ///< the column name
+    const std::string& column_name ///< the column name
   );
 
   /**
@@ -237,7 +258,7 @@ class DelimitedFile {
   void setString(
     unsigned int col_idx, ///< the column index
     unsigned int row_idx, ///< the row index
-    std::string& value ///< the new value
+    const std::string& value ///< the new value
   );
 
   /**

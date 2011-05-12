@@ -39,7 +39,6 @@ class Percolator: public CruxApplication {
    * \returns the description for Percolator
    */
   virtual std::string getDescription();
-
   /**
    * \returns the file stem of the application, default getName.
    */

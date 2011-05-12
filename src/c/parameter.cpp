@@ -968,6 +968,12 @@ void initialize_parameters(void){
       "Available for crux search-for-xlinks", "true");
 
   /* crux-util parameters */
+
+  set_boolean_parameter("ascending", TRUE,
+    "Sort in ascending order.  Otherwise, descending. "
+    "Default: True.",
+    "Available for sort-by-column", "true");
+
   set_string_parameter("tsv file", NULL,
     "Path to a delimited file (-) for standard input",
     "Available for the delimited utility programs", "false");
@@ -1002,8 +1008,8 @@ void initialize_parameters(void){
   set_string_parameter("comparison", "eq",
     "Specifies the operator that is used to compare an "
     "entry in the specified column to the value given "
-    "on the command line.  (eq|gt|gte|lt|lte). "
-    "Default: string-equal.",
+    "on the command line.  (eq|gt|gte|lt|lte|neq). "
+    "Default: eq.",
     "Available for crux extract-rows",
     "true");
 
