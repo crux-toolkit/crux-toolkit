@@ -46,8 +46,12 @@ void DelimitedFile::tokenize(
 /**
  * \returns a DelimitedFile object
  */  
-DelimitedFile::DelimitedFile() {
+DelimitedFile::DelimitedFile(
+  char delimiter ///< the delimiter to use (default tab)
+) {
+  delimiter_ = delimiter;
   clear();
+ 
 }
 
 /**
@@ -56,10 +60,11 @@ DelimitedFile::DelimitedFile() {
  */  
 DelimitedFile::DelimitedFile(
   const char *file_name, ///< the path of the file to read 
-  bool hasHeader ///< indicate whether header exists
+  bool hasHeader, ///< indicate whether header exists
+  char delimiter ///< the delimiter to use (default tab)
   ){
 
-  loadData(file_name, hasHeader);
+  loadData(file_name, hasHeader, delimiter);
 }
 
 /** 
@@ -68,10 +73,11 @@ DelimitedFile::DelimitedFile(
  */
 DelimitedFile::DelimitedFile(
     const string& file_name, ///< the path of the file  to read
-    bool hasHeader ///< indicates whether header exists
+    bool hasHeader, ///< indicates whether header exists
+    char delimiter ///< the delimiter to use (default tab)
   ){
 
-  loadData(file_name, hasHeader);
+  loadData(file_name, hasHeader, delimiter);
 }
 
 /**
@@ -91,6 +97,23 @@ void DelimitedFile::clear() {
  */
 DelimitedFile::~DelimitedFile() {
   clear();
+}
+
+/**
+ * sets the delimiter
+ */
+void DelimitedFile::setDelimiter(
+  char delimiter ///< the delimiter
+  ) {
+
+  delimiter_ = delimiter;
+}
+
+/**
+ * /returns the delimiter
+ */
+char DelimitedFile::getDelimiter() const {
+  return delimiter_;
 }
 
 
@@ -138,9 +161,11 @@ unsigned int DelimitedFile::numCols() {
  */
 void DelimitedFile::loadData(
   const char *file_name, ///< the file path
-  bool hasHeader ///< header indicator
+  bool hasHeader, ///< header indicator
+  char delimiter ///< delimiter to use
   ) {
 
+  setDelimiter(delimiter);
   clear();
 
   fstream file(file_name, ios::in);
@@ -159,7 +184,7 @@ void DelimitedFile::loadData(
 
     hasLine = getline(file, line) != NULL;
     if (hasLine) {
-      tokenize(line, tokens, '\t');
+      tokenize(line, tokens, getDelimiter());
       for (vector<string>::iterator iter = tokens.begin();
         iter != tokens.end();
         ++iter) {
@@ -175,11 +200,10 @@ void DelimitedFile::loadData(
   hasLine = getline(file, line) != NULL;
   while (hasLine) {
 
-    tokenize(line, tokens, '\t');
+    tokenize(line, tokens, getDelimiter());
     if (!hasHeader && numCols() == 0) {
       //initialize the number of columns so that addRow won't fail.
       while (numCols() <= tokens.size()) {
-
         addColumn();
       }
     }
@@ -207,10 +231,11 @@ void DelimitedFile::loadData(
  */
 void DelimitedFile::loadData(
   const string& file, ///< the file path
-  bool hasHeader ///< header indicator
+  bool hasHeader, ///< header indicator
+  char delimiter ///< the delimiter to use
   ) {
 
-  loadData(file.c_str(), hasHeader);
+  loadData(file.c_str(), hasHeader, delimiter);
 }
 
 /**
@@ -242,22 +267,22 @@ void DelimitedFile::saveData(
   if (column_names_.size() != 0) {
     fout << column_names_[0];
     for (unsigned int col_idx=1; col_idx<column_names_.size(); col_idx++) {
-      fout << "\t" << column_names_[col_idx];
+      fout << getDelimiter() << column_names_[col_idx];
     }
     fout << endl;
   }
 
-  //print out all rows, using \t when
+  //print out all rows, using delimiter_ when
   //the row goes past the current column
   //size.
   for (unsigned int row_idx=0; row_idx<maxRow; row_idx++) {
     if (row_idx < numRows(0)) {
       fout << getString((unsigned int)0, row_idx);
     } else {
-      fout << "\t";
+      fout << delimiter_;
     }
     for (unsigned int col_idx=1;col_idx<numCols();col_idx++) {
-      fout <<"\t";
+      fout << getDelimiter();
       if (row_idx < numRows(col_idx))
         fout << getString(col_idx, row_idx);
     }
@@ -272,7 +297,7 @@ void DelimitedFile::saveData(
  *\returns the column index.
  */
 unsigned int DelimitedFile::addColumn(
-  string& column_name ///< the column name
+  const string& column_name ///< the column name
   ) {
 
   vector<string> new_col;
@@ -456,7 +481,7 @@ string& DelimitedFile::getString(
 void DelimitedFile::setString(
   unsigned int col_idx, ///< the column index
   unsigned int row_idx, ///< the row index
-  string& value ///< the new value
+  const string& value ///< the new value
   ) {
 
   //ensure there are enough columns
@@ -895,22 +920,22 @@ std::ostream &operator<< (
   if (delimited_file.column_names_.size() != 0) {
     os << delimited_file.column_names_[0];
     for (unsigned int col_idx=1; col_idx < delimited_file.column_names_.size(); col_idx++) {
-      os << "\t" << delimited_file.column_names_[col_idx];
+      os << delimited_file.getDelimiter() << delimited_file.column_names_[col_idx];
     }
     os << endl;
   }
 
-  //print out all rows, using \t when
+  //print out all rows, using delimiter_ when
   //the row goes past the current column
   //size.
   for (unsigned int row_idx=0; row_idx<maxRow; row_idx++) {
     if (row_idx < delimited_file.numRows(0)) {
       os << delimited_file.getString((unsigned int)0, row_idx);
     } else {
-      os << "\t";
+      os << delimited_file.getDelimiter();
     }
     for (unsigned int col_idx=1;col_idx<delimited_file.numCols();col_idx++) {
-      os <<"\t";
+      os <<delimited_file.getDelimiter();
       if (row_idx < delimited_file.numRows(col_idx))
         os << delimited_file.getString(col_idx, row_idx);
     }
