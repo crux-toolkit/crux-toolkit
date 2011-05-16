@@ -285,6 +285,14 @@ const vector<string>& DelimitedFileReader::getColumnNames() {
 }
 
 /**
+ *\returns the current row index
+ */
+int DelimitedFileReader::getCurrentRowIndex() const {
+  return current_row_;
+}
+
+
+/**
  * \returns the current row string
  */
 const string& DelimitedFileReader::getString() {

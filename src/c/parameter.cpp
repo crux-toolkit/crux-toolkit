@@ -1896,6 +1896,12 @@ void free_parameters(void){
     free_hash(types);
     free_hash(min_values);
     free_hash(max_values);
+
+    for (int mod_idx=0; mod_idx < MAX_AA_MODS; mod_idx++) {
+      free_aa_mod(list_of_mods[mod_idx]);
+      list_of_mods[mod_idx] = NULL;
+    }
+
   }
   // this is mostly so I can test repeatedly
   num_mods = 0;

@@ -165,6 +165,11 @@ class DelimitedFileReader {
   const std::vector<std::string>& getColumnNames();
 
   /**
+   *\returns the current row index
+   */
+  int getCurrentRowIndex() const;
+
+  /**
    * \returns the current row string
    */
   const std::string& getString();
