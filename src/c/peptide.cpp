@@ -437,6 +437,9 @@ int get_peptide_num_peptide_src(PEPTIDE_T* peptide){
     peptide_src_iterator_next(src_itr);
     ++num_proteins;
   }
+  
+  free_peptide_src_iterator(src_itr);
+
   return num_proteins;
 }
 

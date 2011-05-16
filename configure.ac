@@ -127,6 +127,7 @@ AC_CONFIG_FILES([\
     src/c/q-ranker/Makefile \
     src/c/xlink/Makefile \
     src/python/Makefile \
+    src/external/Makefile
 ])
 
 AM_CONDITIONAL(DARWIN, \
