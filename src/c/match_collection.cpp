@@ -1574,7 +1574,7 @@ void print_xml_header(
   DIGEST_T digest = get_digest_type_parameter("digestion");
   int max_num_internal_cleavages;
   int min_number_termini;
-  BOOLEAN_T missed_cleavage = get_boolean_parameter("missed-cleavages");
+  int missed_cleavage = get_int_parameter("missed-cleavages");
   if (missed_cleavage){
     max_num_internal_cleavages = get_int_parameter("max-length");
   } else {

@@ -2,6 +2,7 @@
  * \file CreateIndex.cpp 
  * ORIGINAL AUTHOR: Chris Park
  * CRUX APPLICATION CONVERSION: Sean McIlwain
+ * Missed-cleavage Conversion: Kha Nguyen
  * \brief Given a protein fasta sequence database as input, generate
  * crux_index files that contain list of peptides in the database that
  * meet certain criteria (e.g. mass, length, trypticity) as output.
@@ -94,7 +95,8 @@ int CreateIndex::main(int argc, char** argv) {
   min_length = get_int_parameter("min-length");
   max_length = get_int_parameter("max-length");
 
-  missed_cleavages = get_boolean_parameter("missed-cleavages");
+  // missed_cleavages = get_boolean_parameter("missed-cleavages");
+  missed_cleavages = get_int_parameter("missed-cleavages");
   enzyme = get_enzyme_type_parameter("enzyme");
   digest = get_digest_type_parameter("digestion");
   mass_type = get_mass_type_parameter("isotopic-mass");
@@ -142,17 +144,12 @@ int CreateIndex::main(int argc, char** argv) {
   free(in_file);
   free_parameters();
 
-  /* successfull exit message */
-  //carp(CARP_INFO, "crux-create-index finished.");
-
   return 0;
-
-
 
 }
 
 /**
- * \returns the command name for CreateIndex
+ * returns the command name for CreateIndex
  */
 string CreateIndex::getName() {
   return "create-index";
@@ -167,14 +164,14 @@ string CreateIndex::getDescription() {
 }
 
 /**
- * \returns the file stem of the application, default getName.
+ * returns the file stem of the application, default getName.
  */
 string CreateIndex::getFileStem() {
   return "index";
 }
 
 /**
- * \returns the enum of the application, default MISC_COMMAND
+ * returns the enum of the application, default MISC_COMMAND
  */
 COMMAND_T CreateIndex::getCommand() {
   return INDEX_COMMAND;

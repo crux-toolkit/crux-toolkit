@@ -6,7 +6,7 @@
 #	max-length: 50
 #	enzyme: trypsin
 #	digestion: full-digest
-#	allow missed-cleavages: TRUE
+#	number of allowed missed-cleavages: 1
 #	sort: length
 #	isotopic mass type: average
 #	verbosity: 30

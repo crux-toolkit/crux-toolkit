@@ -151,7 +151,7 @@ class ProteinPeptideIterator {
    *    used to determine if a cleavage location has been skipped
    */
   void prepareMc(
-    bool missed_cleavages
+    int missed_cleavages
   );
 
   /**

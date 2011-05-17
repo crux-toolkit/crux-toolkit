@@ -16,9 +16,9 @@
 
 1 = generate_peptides_sort_mass_unique = good_results/standard_generate_peptides_mass.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme no-enzyme --sort mass  test.fasta =
 
-1 = generate_peptides_sort_length_unique = good_results/standard_generate_peptides_length.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --missed-cleavages T --sort length test.fasta =
+1 = generate_peptides_sort_length_unique = good_results/standard_generate_peptides_length.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --missed-cleavages 1 --sort length test.fasta =
 
-1 = generate_peptides_sort_lexical_unique = good_results/standard_generate_peptides_lexical.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --digestion partial-digest --missed-cleavages T --sort lexical test.fasta =
+1 = generate_peptides_sort_lexical_unique = good_results/standard_generate_peptides_lexical.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --digestion partial-digest --missed-cleavages 1 --sort lexical test.fasta =
 
 1 = generate_peptides_change_minmax = good_results/standard_generate_peptides_change_minmax = crux-generate-peptides --parameter-file params/many_changes --output-sequence T --max-length 20 test.fasta=
 
