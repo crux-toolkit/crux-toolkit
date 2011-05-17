@@ -473,7 +473,7 @@ BOOLEAN_T check_index_constraints(INDEX_T* index){
   }else if(max_len < get_int_parameter("max-length")){
     success = FALSE;
     param = "max-length";
-  }else if(missed_cleavages < get_boolean_parameter("missed-cleavages")){
+  }else if(missed_cleavages < get_int_parameter("missed-cleavages")){
     success = FALSE;
     param = "missed-cleavages";
   }else if(mass_type != get_mass_type_parameter("isotopic-mass")){

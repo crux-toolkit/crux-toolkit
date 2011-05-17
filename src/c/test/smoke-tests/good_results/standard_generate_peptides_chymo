@@ -6,7 +6,7 @@
 #	max-length: 50
 #	enzyme: chymotrypsin
 #	digestion: full-digest
-#	allow missed-cleavages: FALSE
+#	number of allowed missed-cleavages: 0
 #	sort: none
 #	isotopic mass type: average
 #	verbosity: 30

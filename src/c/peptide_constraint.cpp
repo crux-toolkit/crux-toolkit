@@ -102,7 +102,7 @@ PEPTIDE_CONSTRAINT_T* new_peptide_constraint_from_parameters(){
   // TODO : change this after missed cleavage is an integer parameter
   // rather than boolean.
   new_constraint->num_mis_cleavage 
-    = (int)get_boolean_parameter("missed-cleavages");
+    = get_int_parameter("missed-cleavages");
   new_constraint->mass_type = get_mass_type_parameter("isotopic-mass");
 
   return new_constraint;

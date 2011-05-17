@@ -297,11 +297,11 @@ void ProteinPeptideIterator::addCleavages(
  */
 void ProteinPeptideIterator::prepare()
 {
-  prepareMc(get_boolean_parameter("missed-cleavages"));
+  prepareMc(get_int_parameter("missed-cleavages"));
 }
 
 void ProteinPeptideIterator::prepareMc(
-    bool missed_cleavages)
+    int missed_cleavages)
 {
   Protein* protein = protein_;
   MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(peptide_constraint_);

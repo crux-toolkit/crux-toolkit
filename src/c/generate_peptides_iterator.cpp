@@ -142,7 +142,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
   MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
-  BOOLEAN_T missed_cleavages = get_boolean_parameter("missed-cleavages");
+  int missed_cleavages = get_int_parameter("missed-cleavages");
   SORT_TYPE_T sort_type = get_sort_type_parameter("sort");
   BOOLEAN_T is_unique = get_boolean_parameter("unique-peptides");
 
