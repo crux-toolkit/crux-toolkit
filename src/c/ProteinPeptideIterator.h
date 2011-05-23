@@ -71,7 +71,7 @@ class ProteinPeptideIterator {
    * A small inconsistency: 
    *  Allowed cleavages start at 0, while the output cleavages start at 1.
    */
-  void addCleavages(
+  void selectPeptides(
     int* nterm_allowed_cleavages, 
     int  nterm_num_cleavages, 
     int* cterm_allowed_cleavages, 
