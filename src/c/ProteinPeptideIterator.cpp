@@ -203,15 +203,22 @@ bool ProteinPeptideIterator::validCleavagePosition(
 }
 
 /**
- * \brief Adds cleavages to the protein peptide iterator that obey iterator
- * constraint.
- *
- * Uses the allowed cleavages arrays, and whether skipped cleavages
- * are allowed. 
+ * \brief Adds peptides to the iterator based on our constraint and
+ * the given possible cleavage positions.
+ * 
+ * The allowed cleavages on either end of the peptide are specified
+ * separately so that the ends can obey different cleavage rules
+ * (e.g. tryptic and non).  Use the member variable
+ * cumulative_cleavages_ to keep track of skipped enzyme cleavage
+ * sites since the cterm allowed cleavages may be non-tryptic for a partially
+ * tryptic search.  Add a peptide to the iterator for each
+ * pair of n- and c-term cleavages that obey all of the peptide
+ * constraints: correct length, mass, and number of internal cleavage
+ * positions.
  * A small inconsistency: 
  *  Allowed cleavages start at 0, while the output cleavages start at 1.
  */
-void ProteinPeptideIterator::addCleavages(
+void ProteinPeptideIterator::selectPeptides(
     int* nterm_allowed_cleavages, 
     int  nterm_num_cleavages, 
     int* cterm_allowed_cleavages, 
@@ -224,36 +231,38 @@ void ProteinPeptideIterator::addCleavages(
   PEPTIDE_CONSTRAINT_T* constraint = peptide_constraint_;
   int nterm_idx, cterm_idx;
 
-  // iterate over possible nterm and cterm cleavage locations
+  // for each possible n-term (start) position...
   for (nterm_idx=0; nterm_idx < nterm_num_cleavages; nterm_idx++){
     
+    // check all possible c-term (end) positions
     int next_cterm_cleavage_start = previous_cterm_cleavage_start;
     bool no_new_cterm_cleavage_start = true;
     for (cterm_idx = previous_cterm_cleavage_start; 
          cterm_idx < cterm_num_cleavages; cterm_idx++){
 
-      // if we have skipped a cleavage location, break to next nterm
-      if(
-         (skip_cleavage_locations == false)
-         &&
-         ((*cumulative_cleavages_)[nterm_allowed_cleavages[nterm_idx]] 
-          < 
-          (*cumulative_cleavages_)[cterm_allowed_cleavages[cterm_idx]-1])
-         ){
+      // if missed cleavages are not allowed and we have skipped one, do next nterm
+      if( (skip_cleavage_locations == false)
+          &&
+          ((*cumulative_cleavages_)[nterm_allowed_cleavages[nterm_idx]] 
+           < 
+           (*cumulative_cleavages_)[cterm_allowed_cleavages[cterm_idx]-1])
+          ){
         break;
       }
       
       if (cterm_allowed_cleavages[cterm_idx] 
-            <= nterm_allowed_cleavages[nterm_idx]){
+          <= nterm_allowed_cleavages[nterm_idx]){
         continue;
       }
-
+      
       // check our length constraint
       int length = 
-       cterm_allowed_cleavages[cterm_idx] - nterm_allowed_cleavages[nterm_idx];
-
+        cterm_allowed_cleavages[cterm_idx] - nterm_allowed_cleavages[nterm_idx];
+      
+      // if too short, try next cterm position
       if (length < get_peptide_constraint_min_length(constraint)){
         continue;
+        // if too long, go to next nterm (start) position
       } else if (length > get_peptide_constraint_max_length(constraint)){
         break;
       } else if (no_new_cterm_cleavage_start){
@@ -265,6 +274,8 @@ void ProteinPeptideIterator::addCleavages(
       FLOAT_T peptide_mass = calculateSubsequenceMass(mass_array_, 
           nterm_allowed_cleavages[nterm_idx], length);
 
+      // TODO: if too small, try next cterm (end), if too large, try
+      // next nterm (start), else in range so add peptide
       if ((get_peptide_constraint_min_mass(constraint) <= peptide_mass) && 
           (peptide_mass <= get_peptide_constraint_max_mass(constraint))){ 
 
@@ -369,7 +380,7 @@ void ProteinPeptideIterator::prepareMc(
   switch (digestion){
 
   case FULL_DIGEST:
-      this->addCleavages(
+      this->selectPeptides(
         cleavage_positions, num_cleavage_positions-1,
         cleavage_positions+1, num_cleavage_positions-1, 
         missed_cleavages);
@@ -378,7 +389,7 @@ void ProteinPeptideIterator::prepareMc(
 
   case PARTIAL_DIGEST:
       // add the C-term tryptic cleavage positions.
-      this->addCleavages(
+      this->selectPeptides(
         all_positions, protein->getLength(),
         cleavage_positions+1, num_cleavage_positions-1, 
         missed_cleavages);
@@ -386,7 +397,7 @@ void ProteinPeptideIterator::prepareMc(
       // add the N-term tryptic cleavage positions.
       // no +1 below for non_cleavage_positions below 
       // because it does not include sequence beginning. it is *special*
-      this->addCleavages(
+      this->selectPeptides(
         cleavage_positions, num_cleavage_positions-1,
         non_cleavage_positions, num_non_cleavage_positions-1,
         missed_cleavages);
@@ -394,7 +405,7 @@ void ProteinPeptideIterator::prepareMc(
       break;
 
   case NON_SPECIFIC_DIGEST:
-      this->addCleavages(
+      this->selectPeptides(
         all_positions, protein->getLength(),
         all_positions+1, protein->getLength(), // len-1?
         TRUE); // for unspecific ends, allow internal cleavage sites
