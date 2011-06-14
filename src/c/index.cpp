@@ -23,7 +23,7 @@
 #include "objects.h"
 #include "PeptideConstraint.h"
 #include "database.h"
-#include "protein_index.h"
+#include "ProteinIndex.h"
 #include "parameter.h"
 
 // maximum proteins the index can handle

@@ -5,7 +5,7 @@
  * \brief Abstract class for accessing spectra from a file.
  */
 #include "SpectrumCollection.h" 
-#include "protein_index.h" 
+#include "ProteinIndex.h" 
 #include "Peak.h"
 #include "utils.h"
 #include "unistd.h"

@@ -128,8 +128,10 @@ LIBFILES= \
   Protein.h \
   ProteinPeptideIterator.cpp \
   ProteinPeptideIterator.h \
-  protein_index.cpp \
-  protein_index.h \
+  ProteinIndex.cpp \
+  ProteinIndex.h \
+  ProteinIndexIterator.cpp \
+  ProteinIndexIterator.h \
   QRanker.cpp \
   QRanker.h \
   q-value.cpp \

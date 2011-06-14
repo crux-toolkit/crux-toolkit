@@ -36,7 +36,7 @@
 #include "match.h"
 #include "hash.h"
 #include "peptide_src.h"
-#include "protein_index.h"
+#include "ProteinIndex.h"
 #include "modifications.h"
 #include "modified_peptides_iterator.h"
 #include "MatchFileWriter.h"
