@@ -19,7 +19,7 @@
 #include "hash.h"
 #include "carp.h"
 #include "objects.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 #include "sorter.h"
 #include "protein_index.h"
 
@@ -77,7 +77,7 @@ struct database_peptide_iterator {
     ///< The protein iterator. 
   ProteinPeptideIterator* cur_protein_peptide_iterator; 
     ///< The peptide iterator for the current protein.
-  PEPTIDE_CONSTRAINT_T* peptide_constraint; 
+  PeptideConstraint* peptide_constraint; 
     ///< The constraint for the kind of peptide to iterate over.
   Protein* prior_protein; 
     ///< the protein that was used before the current working protein
@@ -864,7 +864,7 @@ Protein* database_protein_iterator_next(
 DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
   DATABASE_T* database, 
     ///< the database of interest -in
-  PEPTIDE_CONSTRAINT_T* peptide_constraint,
+  PeptideConstraint* peptide_constraint,
     ///< the peptide_constraint with which to filter peptides -in
   bool store_all_peptides ///< for removing duplicates
   )
@@ -896,7 +896,7 @@ DATABASE_PEPTIDE_ITERATOR_T* new_database_peptide_iterator(
 
   // set peptide constraint
   database_peptide_iterator->peptide_constraint 
-    = copy_peptide_constraint_ptr(peptide_constraint);
+    = PeptideConstraint::copyPtr(peptide_constraint);
   
   // check if there are any proteins to create peptides from
   if(database_protein_iterator_has_next(
@@ -1041,7 +1041,7 @@ void free_database_peptide_iterator(
   delete database_peptide_iterator->cur_protein_peptide_iterator;
   free_database_protein_iterator(
                      database_peptide_iterator->database_protein_iterator);
-  free_peptide_constraint(database_peptide_iterator->peptide_constraint);
+  PeptideConstraint::free(database_peptide_iterator->peptide_constraint);
 
   // free seqs in map
   map<char*, PEPTIDE_T*>::iterator peptide_iter = 
@@ -1219,7 +1219,7 @@ PEPTIDE_T* database_peptide_iterator_next_from_file(
  */
 DATABASE_SORTED_PEPTIDE_ITERATOR_T* new_database_sorted_peptide_iterator(
   DATABASE_T* database, ///< the database of interest -in
-  PEPTIDE_CONSTRAINT_T* peptide_constraint, 
+  PeptideConstraint* peptide_constraint, 
     ///< the peptide_constraint to filter peptides -in
   SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
   BOOLEAN_T unique ///< only return unique peptides? -in

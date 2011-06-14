@@ -76,11 +76,11 @@ class FilteredSpectrumChargeIterator;
 typedef struct peptide PEPTIDE_T;
 
 /**
- * \typedef PEPTIDE_CONSTRAINT_T
+ * \class PeptideConstraint
  * \brief An object representing constraints which a peptide may or may not
  * satisfy.
  */
-typedef struct peptide_constraint PEPTIDE_CONSTRAINT_T;
+class PeptideConstraint;
 
 /**
  * \typedef RESIDUE_ITERATOR_T 

@@ -12,7 +12,7 @@
 
 #include "objects.h"
 #include "carp.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 
 /**
  * \returns An (empty) peptide_src object.

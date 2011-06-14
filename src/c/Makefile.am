@@ -111,8 +111,8 @@ LIBFILES= \
   Peak.cpp \
   Peak.h \
   peptide.cpp \
-  peptide_constraint.cpp \
-  peptide_constraint.h \
+  PeptideConstraint.cpp \
+  PeptideConstraint.h \
   peptide.h \
   peptide_modifications.cpp \
   peptide_modifications.h \

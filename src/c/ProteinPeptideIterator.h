@@ -20,7 +20,7 @@ class ProteinPeptideIterator {
   unsigned short int cur_start_; ///< Start in protein of the current peptide.
   unsigned short int cur_length_; ///< The length of the current peptide.
   unsigned int peptide_idx_; ///< The index of the current peptide.
-  PEPTIDE_CONSTRAINT_T* peptide_constraint_; ///< peptide type to iterate over.
+  PeptideConstraint* peptide_constraint_; ///< peptide type to iterate over.
   double* mass_array_; ///< stores all the peptides' masses
   std::vector<int>* nterm_cleavage_positions_; ///< nterm cleavages that satisfy 
                                         ///< constraint. 1st aa is 1.
@@ -110,7 +110,7 @@ class ProteinPeptideIterator {
    */
   ProteinPeptideIterator(
     Protein* protein,
-    PEPTIDE_CONSTRAINT_T* peptide_constraint
+    PeptideConstraint* peptide_constraint
   );
 
   /**

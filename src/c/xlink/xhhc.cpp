@@ -17,7 +17,7 @@ map<string, vector<PEPTIDE_T*> > sequence_peptide_map; //hack to keep track of p
 
 void get_linear_peptides(set<string>& peptides,
 			 DATABASE_PROTEIN_ITERATOR_T* protein_iterator,
-			 PEPTIDE_CONSTRAINT_T* peptide_constraint) {
+			 PeptideConstraint* peptide_constraint) {
 
   ProteinPeptideIterator* peptide_iterator = NULL;
   Protein* protein;
@@ -81,7 +81,7 @@ void free_peptides() {
 // a hack, works for EDC linker only
 void get_linkable_peptides(set<string>& peptides, 
 	DATABASE_PROTEIN_ITERATOR_T* protein_iterator,
-	PEPTIDE_CONSTRAINT_T* peptide_constraint) 
+	PeptideConstraint* peptide_constraint) 
 {
   ProteinPeptideIterator* peptide_iterator = NULL;
   Protein* protein;
@@ -177,9 +177,10 @@ void find_all_precursor_ions(vector<LinkedPeptide>& all_ions,
   carp(CARP_DEBUG,"find_all_precursor_ions: start()");
   DATABASE_T* db = new_database(database_file, FALSE);
   carp(CARP_DEBUG,"peptide constraint");
-  PEPTIDE_CONSTRAINT_T* peptide_constraint = new_peptide_constraint_from_parameters();
+  PeptideConstraint* peptide_constraint = 
+    PeptideConstraint::newFromParameters();
   // add 
-  set_peptide_constraint_num_mis_cleavage(peptide_constraint, 1);
+  peptide_constraint->setNumMisCleavage(1);
   //set_verbosity_level(CARP_INFO);
   //Protein* protein = NULL;
   carp(CARP_DEBUG,"protein iterator");

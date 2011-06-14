@@ -13,7 +13,7 @@
 #include "database.h"
 #include "carp.h"
 #include "objects.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 #include "sorter.h"
 #include "protein_index.h"
 

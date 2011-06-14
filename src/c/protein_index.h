@@ -12,7 +12,7 @@
 #include "peptide.h"
 #include "Protein.h"
 #include "carp.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 #include "sorter.h"
 
 /**

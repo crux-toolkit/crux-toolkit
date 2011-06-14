@@ -43,7 +43,7 @@ int CreateIndex::main(int argc, char** argv) {
   int missed_cleavages; 
 
   double mass_range;
-  PEPTIDE_CONSTRAINT_T* constraint;
+  PeptideConstraint* constraint;
   char* in_file = NULL;
   INDEX_T* crux_index;
   char* binary_fasta_file = NULL;
@@ -101,7 +101,7 @@ int CreateIndex::main(int argc, char** argv) {
   mass_type = get_mass_type_parameter("isotopic-mass");
 
   /* create peptide constraint */
-  constraint = new_peptide_constraint(enzyme, digest, min_mass, max_mass, 
+  constraint = new PeptideConstraint(enzyme, digest, min_mass, max_mass, 
                                       min_length, max_length, 
                                       missed_cleavages, mass_type);
   
