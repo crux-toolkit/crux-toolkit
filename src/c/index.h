@@ -14,7 +14,7 @@
 #include "Protein.h"
 #include "sorter.h"
 #include "carp.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 #include "database.h"
 
 static const int MAX_INDEX_FILES = 1024;
@@ -37,7 +37,7 @@ INDEX_T* allocate_index(void);
 INDEX_T* new_index(
   const char* fasta_filename,  ///< The fasta file
   const char* output_dir,      ///< The name of the new index
-  PEPTIDE_CONSTRAINT_T* constraint,///< Constraint which these peptides satisfy
+  PeptideConstraint* constraint,///< Constraint which these peptides satisfy
   FLOAT_T mass_range  ///< the range of masses contained in each index file
 );         
 
@@ -172,7 +172,7 @@ void set_index_database(
 /**
  *\returns a pointer to the peptides constraint
  */
-PEPTIDE_CONSTRAINT_T* get_index_constraint(
+PeptideConstraint* get_index_constraint(
   INDEX_T* index ///< The index -in
   );
 
@@ -182,7 +182,7 @@ PEPTIDE_CONSTRAINT_T* get_index_constraint(
 /*
 void set_index_constraint(
   INDEX_T* index, ///< The index -in
-  PEPTIDE_CONSTRAINT_T* constraint ///< Constraint which these peptides satisfy -in
+  PeptideConstraint* constraint ///< Constraint which these peptides satisfy -in
   );
 */
 
@@ -193,7 +193,7 @@ void set_index_constraint(
  */
 void set_index_search_constraint(
   INDEX_T* index, ///< The index -in
-  PEPTIDE_CONSTRAINT_T* constraint ///< Constraint for the next iterator
+  PeptideConstraint* constraint ///< Constraint for the next iterator
   );
 
 /**

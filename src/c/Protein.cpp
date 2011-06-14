@@ -16,7 +16,7 @@
 #include "peptide_src.h"
 #include "database.h"
 #include "carp.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 
 using namespace std;
 

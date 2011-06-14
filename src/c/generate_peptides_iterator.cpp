@@ -32,7 +32,7 @@ struct generate_peptides_iterator_t{
   void (*free)(void*);          ///< the function pointer to *_free
   INDEX_T* index;               ///< the index object needed
   DATABASE_T* database;         ///< the database object needed
-  PEPTIDE_CONSTRAINT_T* constraint; ///< peptide constraint
+  PeptideConstraint* constraint; ///< peptide constraint
 };
 //do index,database, and constraint need to be members since they are
 //not used in has_next, get_next, or free?
@@ -152,13 +152,13 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     = allocate_generate_peptides_iterator();
   
   // peptide constraint
-  PEPTIDE_CONSTRAINT_T* constraint 
+  PeptideConstraint* constraint 
     //= new_peptide_constraint(peptide_type, min_mass, max_mass, 
-    = new_peptide_constraint(enzyme, digestion, min_mass, max_mass, 
+    = new PeptideConstraint(enzyme, digestion, min_mass, max_mass, 
         min_length, max_length, missed_cleavages, mass_type);
   
   // assign to iterator
-  gen_peptide_iterator->constraint = copy_peptide_constraint_ptr(constraint); 
+  gen_peptide_iterator->constraint = PeptideConstraint::copyPtr(constraint); 
 
   // Check that index OR database exists
   if (database == NULL && index == NULL ){
@@ -266,7 +266,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
       gen_peptide_iterator->free = &void_free_database_sorted_peptide_iterator;
     }
   }
-  free_peptide_constraint(constraint);
+  PeptideConstraint::free(constraint);
   return gen_peptide_iterator;
 }
 
@@ -350,7 +350,7 @@ void free_generate_peptides_iterator(
 
   free_database(generate_peptides_iterator->database);
   free_index(generate_peptides_iterator->index);
-  free_peptide_constraint(generate_peptides_iterator->constraint);
+  PeptideConstraint::free(generate_peptides_iterator->constraint);
   free(generate_peptides_iterator);
 }
 /*

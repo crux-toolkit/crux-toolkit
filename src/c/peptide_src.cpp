@@ -14,7 +14,7 @@
 #include "peptide.h"
 #include "Protein.h"
 #include "peptide_src.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 
 #include <vector>
 #include <string>

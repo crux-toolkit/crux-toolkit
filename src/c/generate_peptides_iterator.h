@@ -18,7 +18,7 @@
 #include "index.h"
 #include "carp.h"
 #include "objects.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 #include "peptide_modifications.h"
 #include "database.h"
 #include "linked_list.h"

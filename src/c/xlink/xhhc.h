@@ -14,7 +14,7 @@
 #include "utils.h"
 #include "Spectrum.h"
 #include "carp.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 #include "peptide.h"
 #include "peptide_src.h"
 #include "Protein.h"
@@ -156,7 +156,7 @@ BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
 
 void get_linkable_peptides(std::set<std::string>& peptides, 
 	DATABASE_PROTEIN_ITERATOR_T* protein_iterator,
-	PEPTIDE_CONSTRAINT_T* peptide_constraint); 
+	PeptideConstraint* peptide_constraint); 
 
 void add_linked_peptides(std::vector<LinkedPeptide>& all_ions, std::set<std::string>& peptides, std::string links, int charge);
 

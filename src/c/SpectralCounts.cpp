@@ -274,7 +274,7 @@ void SpectralCounts::normalizeProteinScores(){
  * unique peptides for each protein.
  */
 void SpectralCounts::computeEmpai(){
-  PEPTIDE_CONSTRAINT_T* constraint = new_peptide_constraint_from_parameters();
+  PeptideConstraint* constraint = PeptideConstraint::newFromParameters();
 
   ProteinToScore::iterator it = protein_scores_.begin();;
   for (; it != protein_scores_.end(); ++it){
@@ -288,7 +288,7 @@ void SpectralCounts::computeEmpai(){
 
     delete iter;
   }
-  free_peptide_constraint(constraint);
+  PeptideConstraint::free(constraint);
 }
 
 /**

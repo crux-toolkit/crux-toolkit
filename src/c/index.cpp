@@ -21,7 +21,7 @@
 #include "carp.h"
 #include "sorter.h"
 #include "objects.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 #include "database.h"
 #include "protein_index.h"
 #include "parameter.h"
@@ -157,8 +157,8 @@ struct index{
   int num_pointers; ///< The number of pointers to this index.
   DATABASE_T* database; ///< The database that has been indexed.
   char* directory; ///< The directory containing the indexed files
-  PEPTIDE_CONSTRAINT_T* disk_constraint;///< Defines peptides on disk
-  PEPTIDE_CONSTRAINT_T* search_constraint;///< Defines peptides being searched
+  PeptideConstraint* disk_constraint;///< Defines peptides on disk
+  PeptideConstraint* search_constraint;///< Defines peptides being searched
   BOOLEAN_T on_disk; ///< Does this index exist on disk yet?
   FLOAT_T mass_range;  ///< the range of masses contained in each index file -in
   BOOLEAN_T is_unique; ///< only unique peptides? -in
@@ -342,7 +342,7 @@ BOOLEAN_T set_index_fields_from_disk(
   }
 
   // create constraint
-  index->disk_constraint = allocate_peptide_constraint();
+  index->disk_constraint = new PeptideConstraint();
   index->search_constraint = NULL;
 
   // open map file
@@ -387,16 +387,16 @@ void set_index_field_from_map(INDEX_T* index, char* line){
   carp(CARP_DEBUG, "Index map header found %s value %.2f", trait_name, value);
 
   if(strcmp("min_mass:", trait_name) == 0){
-    set_peptide_constraint_min_mass(index->disk_constraint, value);
+    index->disk_constraint->setMinMass(value);
   }
   else if(strcmp("max_mass:", trait_name) == 0){
-    set_peptide_constraint_max_mass(index->disk_constraint, value);
+    index->disk_constraint->setMaxMass(value);
   }
   else if(strcmp("min_length:", trait_name) == 0){
-    set_peptide_constraint_min_length(index->disk_constraint, (int)value);
+    index->disk_constraint->setMinLength((int)value);
   }
   else if(strcmp("max_length:", trait_name) == 0){
-    set_peptide_constraint_max_length(index->disk_constraint, (int)value);
+    index->disk_constraint->setMaxLength((int)value);
   }
   else if(strcmp("peptide_type:", trait_name) == 0){
     //    set_peptide_constraint_peptide_type(index->disk_constraint, value);
@@ -404,16 +404,16 @@ void set_index_field_from_map(INDEX_T* index, char* line){
          "Rebuild with current version of crux to use 'enzyme_type'.");
   }
   else if(strcmp("enzyme_type:", trait_name) == 0){
-    set_peptide_constraint_enzyme(index->disk_constraint, (ENZYME_T)value);
+    index->disk_constraint->setEnzyme((ENZYME_T)value);
   }
   else if(strcmp("digest_type:", trait_name) == 0){
-    set_peptide_constraint_digest(index->disk_constraint, (DIGEST_T)value);
+    index->disk_constraint->setDigest((DIGEST_T)value);
   }
   else if(strcmp("missed_cleavages:", trait_name) == 0){
-   set_peptide_constraint_num_mis_cleavage(index->disk_constraint, (int)value);
+   index->disk_constraint->setNumMisCleavage((int)value);
   }
   else if(strcmp("mass_type:", trait_name) == 0){
-   set_peptide_constraint_mass_type(index->disk_constraint, (MASS_TYPE_T)value);
+   index->disk_constraint->setMassType((MASS_TYPE_T)value);
   }
   else if(strcmp("unique_peptides:", trait_name) == 0){
     index->is_unique = (BOOLEAN_T)value;
@@ -446,17 +446,17 @@ void set_index_field_from_map(INDEX_T* index, char* line){
  * \returns TRUE if all constraints will work with those in parameter.c.
  */
 BOOLEAN_T check_index_constraints(INDEX_T* index){
-  double min_mass = get_peptide_constraint_min_mass(index->disk_constraint);
-  double max_mass = get_peptide_constraint_max_mass(index->disk_constraint);
-  double min_len = get_peptide_constraint_min_length(index->disk_constraint);
-  double max_len = get_peptide_constraint_max_length(index->disk_constraint);
+  double min_mass = index->disk_constraint->getMinMass();
+  double max_mass = index->disk_constraint->getMaxMass();
+  double min_len = index->disk_constraint->getMinLength();
+  double max_len = index->disk_constraint->getMaxLength();
   int missed_cleavages = 
-    get_peptide_constraint_num_mis_cleavage(index->disk_constraint);
+    index->disk_constraint->getNumMisCleavage();
   //  PEPTIDE_TYPE_T cleavage_type = 
   //    get_peptide_constraint_peptide_type(index->disk_constraint);
-  ENZYME_T enzyme = get_peptide_constraint_enzyme(index->disk_constraint);
-  DIGEST_T digestion = get_peptide_constraint_digest(index->disk_constraint);
-  MASS_TYPE_T mass_type = get_peptide_constraint_mass_type(index->disk_constraint);
+  ENZYME_T enzyme = index->disk_constraint->getEnzyme();
+  DIGEST_T digestion = index->disk_constraint->getDigest();
+  MASS_TYPE_T mass_type = index->disk_constraint->getMassType();
   //  BOOLEAN_T unique = index->is_unique;
 
   BOOLEAN_T success = TRUE;
@@ -523,7 +523,7 @@ BOOLEAN_T check_index_constraints(INDEX_T* index){
 void set_index_fields(
   INDEX_T* index,  ///< Index to set -out                       
   const char* output_dir,      ///< The name of the new index
-  PEPTIDE_CONSTRAINT_T* constraint,  
+  PeptideConstraint* constraint,  
   ///< Constraint which these peptides satisfy -in
   FLOAT_T mass_range,  
   ///< the range of mass that each index file should be partitioned into -in
@@ -573,7 +573,7 @@ void set_index_fields(
 INDEX_T* new_index(
   const char* fasta_filename, ///< The fasta file
   const char* output_dir,     ///< The name of the new index
-  PEPTIDE_CONSTRAINT_T* constraint,  
+  PeptideConstraint* constraint,  
     ///< Constraint which these peptides will satisfy
   FLOAT_T mass_range  
     ///< the range of mass that each index file should be partitioned into
@@ -695,11 +695,11 @@ void free_index(
     }
     if (index->disk_constraint != NULL){
       carp(CARP_DEBUG, "Freeing index disk constraint");
-      free_peptide_constraint(index->disk_constraint);
+      PeptideConstraint::free(index->disk_constraint);
     }
     if (index->search_constraint != NULL){
       carp(CARP_DEBUG, "Freeing index search constraint");
-      free_peptide_constraint(index->search_constraint);
+      PeptideConstraint::free(index->search_constraint);
     }
     free(index->directory);
     free(index);
@@ -717,18 +717,18 @@ BOOLEAN_T write_header(
 {
   time_t hold_time;
   hold_time = time(0);
-  PEPTIDE_CONSTRAINT_T* constraint = index->disk_constraint;
+  PeptideConstraint* constraint = index->disk_constraint;
   
   
-  fprintf(file, "#\tmin_mass: %.2f\n", get_peptide_constraint_min_mass(constraint));
-  fprintf(file, "#\tmax_mass: %.2f\n", get_peptide_constraint_max_mass(constraint));
-  fprintf(file, "#\tmin_length: %d\n", get_peptide_constraint_min_length(constraint));
-  fprintf(file, "#\tmax_length: %d\n", get_peptide_constraint_max_length(constraint));
+  fprintf(file, "#\tmin_mass: %.2f\n", constraint->getMinMass());
+  fprintf(file, "#\tmax_mass: %.2f\n", constraint->getMaxMass());
+  fprintf(file, "#\tmin_length: %d\n", constraint->getMinLength());
+  fprintf(file, "#\tmax_length: %d\n", constraint->getMaxLength());
   //fprintf(file, "#\tpeptide_type: %d\n", get_peptide_constraint_peptide_type(constraint));
-  fprintf(file, "#\tenzyme_type: %d\n", get_peptide_constraint_enzyme(constraint));
-  fprintf(file, "#\tdigest_type: %d\n", get_peptide_constraint_digest(constraint));
-  fprintf(file, "#\tmissed_cleavages: %d\n", get_peptide_constraint_num_mis_cleavage(constraint));
-  fprintf(file, "#\tmass_type: %d\n", get_peptide_constraint_mass_type(constraint));
+  fprintf(file, "#\tenzyme_type: %d\n", constraint->getEnzyme());
+  fprintf(file, "#\tdigest_type: %d\n", constraint->getDigest());
+  fprintf(file, "#\tmissed_cleavages: %d\n", constraint->getNumMisCleavage());
+  fprintf(file, "#\tmass_type: %d\n", constraint->getMassType());
   fprintf(file, "#\tunique_peptides: %d\n", get_index_is_unique(index));
   
   fprintf(file, "#\tCRUX index directory: %s\n", index->directory);
@@ -750,20 +750,20 @@ BOOLEAN_T write_readme_file(
 {
   time_t hold_time;
   hold_time = time(0);
-  PEPTIDE_CONSTRAINT_T* constraint = index->disk_constraint;
+  PeptideConstraint* constraint = index->disk_constraint;
   char* fasta_file = get_database_filename(index->database);
   char* fasta_file_no_path = parse_filename(fasta_file);
   
   fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
   fprintf(file, "#\tfasta file: %s\n",  fasta_file_no_path); 
   fprintf(file, "#\tmin_mass: %.2f\n",
-          get_peptide_constraint_min_mass(constraint));
+          constraint->getMinMass());
   fprintf(file, "#\tmax_mass: %.2f\n",
-          get_peptide_constraint_max_mass(constraint));
+          constraint->getMaxMass());
   fprintf(file, "#\tmin_length: %d\n",
-          get_peptide_constraint_min_length(constraint));
+          constraint->getMinLength());
   fprintf(file, "#\tmax_length: %d\n",
-          get_peptide_constraint_max_length(constraint));
+          constraint->getMaxLength());
 
   /*
   PEPTIDE_TYPE_T type = get_peptide_constraint_peptide_type(constraint);
@@ -772,17 +772,17 @@ BOOLEAN_T write_readme_file(
   fprintf(file, "#\tpeptide_type: %s\n", type_str);
   */
   char* value_str = 
-    enzyme_type_to_string(get_peptide_constraint_enzyme(constraint));
+    enzyme_type_to_string(constraint->getEnzyme());
   fprintf(file, "#\tenzyme_type: %s\n", value_str);
   free(value_str);
   value_str = 
-    digest_type_to_string(get_peptide_constraint_digest(constraint));
+    digest_type_to_string(constraint->getDigest());
   free(value_str);
 
   fprintf(file, "#\tmissed_cleavage: %s\n", 
-        (get_peptide_constraint_num_mis_cleavage(constraint)? "true":"false"));
+        (constraint->getNumMisCleavage()? "true":"false"));
   fprintf(file, "#\tmass_type: %s\n", 
-          (get_peptide_constraint_mass_type(constraint)==AVERAGE? 
+          (constraint->getMassType()==AVERAGE? 
            "average":"mono"));
   fprintf(file, "#\tunique peptides: %s\n", 
           (get_index_is_unique(index)? "unique":"redundant"));
@@ -840,10 +840,10 @@ long get_num_bins_needed(
   int* mass_limits  ///< an array that holds the min/max mass limit -in
   )
 {
-  int min_length = get_peptide_constraint_min_length(index->disk_constraint);
-  int max_length = get_peptide_constraint_max_length(index->disk_constraint);
-  FLOAT_T min_mass = get_peptide_constraint_min_mass(index->disk_constraint);
-  FLOAT_T max_mass = get_peptide_constraint_max_mass(index->disk_constraint);
+  int min_length = index->disk_constraint->getMinLength();
+  int max_length = index->disk_constraint->getMaxLength();
+  FLOAT_T min_mass = index->disk_constraint->getMinMass();
+  FLOAT_T max_mass = index->disk_constraint->getMaxMass();
   FLOAT_T min_mass_limit = min_mass;
   FLOAT_T max_mass_limit = max_mass;
   long num_bins = 0;
@@ -1478,18 +1478,18 @@ void set_index_database(
  */
 void set_index_search_constraint(
   INDEX_T* index, ///< The index -in
-  PEPTIDE_CONSTRAINT_T* constraint ///< Constraint for the next iterator
+  PeptideConstraint* constraint ///< Constraint for the next iterator
   )
 {
   if(  index->search_constraint ){
-    free_peptide_constraint(index->search_constraint);
+    PeptideConstraint::free(index->search_constraint);
   }
-  index->search_constraint = copy_peptide_constraint_ptr(constraint);
+  index->search_constraint = PeptideConstraint::copyPtr(constraint);
   // check that the new mass window is within the index
-  double search_min = get_peptide_constraint_min_mass(constraint);
-  double search_max = get_peptide_constraint_max_mass(constraint);
-  double index_min = get_peptide_constraint_min_mass(index->disk_constraint);
-  double index_max = get_peptide_constraint_max_mass(index->disk_constraint);
+  double search_min = constraint->getMinMass();
+  double search_max = constraint->getMaxMass();
+  double index_min = index->disk_constraint->getMinMass();
+  double index_max = index->disk_constraint->getMaxMass();
   
   if( search_min < index_min ){
     carp_once(CARP_WARNING, 
@@ -1664,11 +1664,9 @@ BOOLEAN_T parse_crux_index_map(
   FLOAT_T range;
   BOOLEAN_T start_file = FALSE;
   FLOAT_T min_mass = 
-    get_peptide_constraint_min_mass(
-          index_peptide_iterator->index->search_constraint);
+    index_peptide_iterator->index->search_constraint->getMinMass();
   FLOAT_T max_mass = 
-    get_peptide_constraint_max_mass(
-          index_peptide_iterator->index->search_constraint);
+    index_peptide_iterator->index->search_constraint->getMaxMass();
 
   // used as buffer for reading in from file
   char full_filename[MAX_FILE_NAME_LENGTH] = "";
@@ -1773,7 +1771,7 @@ BOOLEAN_T fast_forward_index_file(
   // peptide to parse, reuse this memory while we look
   PEPTIDE_T* peptide = allocate_peptide();
 
-  PEPTIDE_CONSTRAINT_T* index_constraint = 
+  PeptideConstraint* index_constraint = 
     index_peptide_iterator->index->search_constraint;
 
   // loop until we get to a peptide that fits the constraint, we find
@@ -1791,16 +1789,16 @@ BOOLEAN_T fast_forward_index_file(
     int peptide_length = get_peptide_length(peptide);
     
     // if peptide mass larger than constraint, no more peptides to return
-    if(peptide_mass > get_peptide_constraint_max_mass(index_constraint)){
+    if(peptide_mass > index_constraint->getMaxMass()){
       //free(peptide);
       free_peptide(peptide);
       return FALSE;
     }
 
     // does this peptide fit the constraint?
-    double min_mass = get_peptide_constraint_min_mass(index_constraint);
-    int min_length = get_peptide_constraint_min_length(index_constraint);
-    int max_length = get_peptide_constraint_max_length(index_constraint);
+    double min_mass = index_constraint->getMinMass();
+    int min_length = index_constraint->getMinLength();
+    int max_length = index_constraint->getMaxLength();
     if( peptide_mass >= min_mass 
         && peptide_length >= min_length
         && peptide_length <= max_length){
@@ -1909,7 +1907,7 @@ BOOLEAN_T find_peptide_in_current_index_file(
   // peptide to return, reuse this memory while we look
   PEPTIDE_T* peptide = allocate_peptide();
   // constraint to meet
-  PEPTIDE_CONSTRAINT_T* index_constraint = iterator->index->search_constraint;
+  PeptideConstraint* index_constraint = iterator->index->search_constraint;
 
   // loop until we get to a peptide that fits the constraint, 
   // a peptide bigger (mass) than the constraint, or reach eof
@@ -1935,7 +1933,7 @@ BOOLEAN_T find_peptide_in_current_index_file(
     int peptide_length = get_peptide_length(peptide);
 
     // if peptide mass larger than constraint, no more peptides to return
-    if(peptide_mass > get_peptide_constraint_max_mass(index_constraint)){
+    if(peptide_mass > index_constraint->getMaxMass()){
       carp(CARP_DETAILED_DEBUG, "peptide found is bigger than constraint");
       file_finished = TRUE;
       continue;
@@ -1943,9 +1941,9 @@ BOOLEAN_T find_peptide_in_current_index_file(
 
     // does this peptide fit the constraint?
 
-    double min_mass = get_peptide_constraint_min_mass(index_constraint);
-    int min_length = get_peptide_constraint_min_length(index_constraint);
-    int max_length = get_peptide_constraint_max_length(index_constraint);
+    double min_mass = index_constraint->getMinMass();
+    int min_length = index_constraint->getMinLength();
+    int max_length = index_constraint->getMaxLength();
 
 
     /*
@@ -2175,7 +2173,7 @@ BOOLEAN_T setup_index_filtered_peptide_iterator(
   PEPTIDE_TYPE_T peptide_type = 
     get_peptide_constraint_peptide_type(iterator->index_peptide_iterator->index->search_constraint);
   */
-  DIGEST_T required_digestion = get_peptide_constraint_digest(iterator->index_peptide_iterator->index->search_constraint);
+  DIGEST_T required_digestion = iterator->index_peptide_iterator->index->search_constraint->getDigest();
   BOOLEAN_T match = FALSE;
 
   // initialize index_filered

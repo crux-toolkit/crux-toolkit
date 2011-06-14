@@ -8,7 +8,7 @@
 #include "Peak.h"
 #include "peptide.h"
 #include "peptide_src.h"
-#include "peptide_constraint.h"
+#include "PeptideConstraint.h"
 #include "Protein.h"
 #include "database.h"
 // also from parameter.c
