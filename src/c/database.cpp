@@ -21,7 +21,8 @@
 #include "objects.h"
 #include "PeptideConstraint.h"
 #include "sorter.h"
-#include "protein_index.h"
+#include "ProteinIndex.h"
+#include "ProteinIndexIterator.h"
 
 #include <map>
 #include <vector>
@@ -284,25 +285,25 @@ BOOLEAN_T parse_database_text_fasta(
   }
   
   // check if use light protein and parse thos light proteins fomr protein index
-  if(database->use_light_protein && protein_index_on_disk(database->filename, FALSE)){
+  if(database->use_light_protein && ProteinIndex::onDisk(database->filename, false)){
     // let the user know that protein index file is being used
     carp(CARP_INFO, "using protein index file");
 
     // create a protein index iterator
-    PROTEIN_INDEX_ITERATOR_T* protein_index_iterator =
-      new_protein_index_iterator(database->filename);
+    ProteinIndexIterator* protein_index_iterator =
+      new ProteinIndexIterator(database->filename);
 
     // iterate over all proteins in protein index
-    while(protein_index_iterator_has_next(protein_index_iterator)){
+    while(protein_index_iterator->hasNext()){
       // check if there's space for more proteins
-      new_protein = protein_index_iterator_next(protein_index_iterator);
+      new_protein = protein_index_iterator->next();
       new_protein->setDatabase(database);
       
       // add protein to database
       database->proteins->push_back(new_protein);
     }
     // job well done..free iterator
-    free_protein_index_iterator(protein_index_iterator);
+    delete protein_index_iterator;
   }
   else{  
     working_index = ftell(file);

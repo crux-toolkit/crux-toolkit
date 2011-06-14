@@ -13,9 +13,6 @@
 
 #include <vector>
 
-
-typedef std::vector<Spectrum*>::iterator SpectrumIterator; 
-
 /**
  * \class SpectrumCollection
  * \brief An abstract class for accessing spectra from a file.

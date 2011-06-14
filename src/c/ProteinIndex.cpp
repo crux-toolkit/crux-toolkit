@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file protein_index.cpp
+ * \file ProteinIndex.cpp
  * \brief Object for creating a protein index or binary fasta file
  ****************************************************************************/
 #include <stdio.h>
@@ -15,29 +15,8 @@
 #include "objects.h"
 #include "PeptideConstraint.h"
 #include "sorter.h"
-#include "protein_index.h"
+#include "ProteinIndex.h"
 
-
-/*** type def. ***/
-
-/**
- * \struct protein_index
- * \brief Object to store the protein relation to the fasta file
- */
-struct protein_index{
-  unsigned long int offset;  ///< The offset of the protein in the fasta file
-  unsigned int protein_idx;   ///< The protein idx of the protein in the fasta file
-};
-
-/**
- * \struct protein_index_iterator
- * \brief Object to iterate over the proteins in the protein index file
- */
-struct protein_index_iterator{
-  FILE* file;  ///< The file handler of the fasta file
-  Protein* next_protein; ///< the next protein index to return
-  BOOLEAN_T has_next; ///< is there a new protein to return?
-};
 
 /***************/
 
@@ -47,7 +26,7 @@ struct protein_index_iterator{
  */
 FILE* get_output_file(
   char* fasta_file,  ///< input fasta file -in
-  BOOLEAN_T is_binary_file  ///< Are we creating a binary fasta file?
+  bool is_binary_file  ///< Are we creating a binary fasta file?
   )
 {
   char* name = NULL;
@@ -68,9 +47,9 @@ FILE* get_output_file(
 
 /**
  * creates a protein index on to the output_file
- * \returns TRUE if successfully creates a protein index, else false
+ * \returns true if successfully creates a protein index, else false
  */
-BOOLEAN_T create_protein_index(
+bool ProteinIndex::create(
   char* fasta_file  ///< input fasta file -in
   )
 {
@@ -88,7 +67,7 @@ BOOLEAN_T create_protein_index(
   // check if succesfully opened file
   if(file == NULL){
     carp(CARP_FATAL, "Failed to open fasta file '%s'", fasta_file);
-    return FALSE;
+    return false;
   }
 
   // get output file
@@ -98,7 +77,7 @@ BOOLEAN_T create_protein_index(
   if(output_file == NULL){
     carp(CARP_ERROR, "Failed to create protein index file");
     fclose(file);
-    return FALSE;
+    return false;
   }
 
   working_index = ftell(file);
@@ -116,7 +95,7 @@ BOOLEAN_T create_protein_index(
   fclose(file);
   fclose(output_file);
 
-  return TRUE;
+  return true;
 }
 
 /***************************************************************
@@ -155,9 +134,9 @@ void free_protein_index(
  *
  *\returns TRUE if protein index or binary fasta file is on disk, else FALSE
  */
-BOOLEAN_T protein_index_on_disk(
+bool ProteinIndex::onDisk(
   char* fasta_file, ///< input fasta file -in
-  BOOLEAN_T is_binary ///< are we looking for the binary fasta file? or preotein index
+  bool is_binary ///< are we looking for the binary fasta file? or preotein index
   )
 {
   char* name = NULL;
@@ -173,11 +152,11 @@ BOOLEAN_T protein_index_on_disk(
   // check if can open file
   if(access(name, F_OK)){
     free(name);
-    return FALSE;
+    return false;
   }
   
   free(name);
-  return TRUE;
+  return true;
 }
 
 /**
@@ -185,141 +164,6 @@ BOOLEAN_T protein_index_on_disk(
  * the protein index iterator parses the protein index file
  * for each protein index one by one and returns a new light protein.
  */
-
-/**
- *
- *\returns TRUE if successfully sets the protein_index_iterator, else FALSE
- */
-BOOLEAN_T setup_protein_index_iterator(
-  PROTEIN_INDEX_ITERATOR_T* protein_index_iterator ///< the iterator to setup -in
-  )
-{
-  // used to parse each line from file
-  char* new_line = NULL;
-  int line_length;
-  size_t buf_length = 0;
-  FILE* file = protein_index_iterator->file;
-
-  // protein fields
-  char star[2] = "";
-  unsigned long int offset;
-  unsigned int protein_idx;
-  
-  Protein* protein = NULL;
-  BOOLEAN_T found = FALSE;
-
-  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
-    // begining of the protein feilds
-    if(new_line[0] == '*'){
-      // read the crux_index_file information
-      if(sscanf(new_line,"%s %d %ld", 
-                star, &protein_idx, &offset) < 2){
-        free(new_line);
-        carp(CARP_WARNING, "incorrect file format");
-        fclose(file);
-        return FALSE;
-      }
-      found = TRUE;
-      break;
-    }
-    // skip header lines
-    else if(new_line[0] == '#'){
-      continue;
-    }
-  }
-  
-  // there is a next protein to return
-  if(found){
-    protein = Protein::newLightProtein(offset, protein_idx);
-    protein_index_iterator->next_protein = protein;
-    protein_index_iterator->has_next = TRUE;
-  }
-  // no more proteins..
-  else{
-    protein_index_iterator->has_next = FALSE;
-  }
-  
-  free(new_line);
-  return TRUE;
-}
-
-/**
- * There must be the correct protein index file present
- *\returns a new heap allocated protein index iterator
- */
-PROTEIN_INDEX_ITERATOR_T* new_protein_index_iterator(
-  char* fasta_file ///< input fasta file -in
-  )
-{
-  char* name = generate_name(fasta_file, "_protein_index", ".fasta", NULL);
-  FILE* file = fopen(name, "r");
-
-  if(file == NULL){
-    carp(CARP_FATAL, "failed to open protein index file: %s", name);
-  }
-
-  free(name);
-
-  PROTEIN_INDEX_ITERATOR_T* iterator = 
-    (PROTEIN_INDEX_ITERATOR_T*)mycalloc(1, sizeof(PROTEIN_INDEX_ITERATOR_T));
-  
-  iterator->file = file;
-  
-  // set up the protein_index_iterator
-  if(!setup_protein_index_iterator(iterator)){
-    carp(CARP_FATAL, "failed to setup protein_index_iterator");
-  }
-  
-  return iterator;
-}
-
-/**
- * Frees the allocated protein index iterator
- */
-void free_protein_index_iterator(
-  PROTEIN_INDEX_ITERATOR_T* protein_index_iterator ///< the iterator to free -in
-  )
-{
-  // free the file handler
-  fclose(protein_index_iterator->file);
-
-  // free unused protein
-  if(protein_index_iterator->next_protein != NULL){
-    delete (protein_index_iterator->next_protein);
-  }
-  // free iterator
-  free(protein_index_iterator);
-}
-
-/**
- *
- *\returns TRUE if there is another protein to return, else FALSE
- */
-BOOLEAN_T protein_index_iterator_has_next(
-  PROTEIN_INDEX_ITERATOR_T* protein_index_iterator ///< the iterator of interest -in
-  )
-{
-  return protein_index_iterator->has_next;
-}
-
-/**
- *
- *\return the next protein in the protein index file
- */
-Protein* protein_index_iterator_next(
-  PROTEIN_INDEX_ITERATOR_T* protein_index_iterator ///< the iterator of interest -in
-  )
-{
-  Protein* protein = protein_index_iterator->next_protein;
-  protein_index_iterator->next_protein = NULL;
-
-  // set up the protein_index_iterator
-  if(!setup_protein_index_iterator(protein_index_iterator)){
-    carp(CARP_FATAL, "failed to setup protein_index_iterator");
-  }
-  
-  return protein;
-}
 
 /***********************************************
  *
@@ -430,12 +274,12 @@ BOOLEAN_T create_binary_fasta_file(
  * the fasta file
  * \returns TRUE if successfully creates a binary fasta file, else false
  */
-BOOLEAN_T create_binary_fasta(
+bool create_binary_fasta(
   char* fasta_file  ///< input fasta file -in
   )
 {
   // get output file
-  FILE* output_file = get_output_file(fasta_file, TRUE);
+  FILE* output_file = get_output_file(fasta_file, true);
   
   return create_binary_fasta_file(fasta_file, output_file);
 }
@@ -447,7 +291,7 @@ BOOLEAN_T create_binary_fasta(
  * dirs, so overwriting not an issue.  In the future, fix it (write a
  * create_file_in_path method with read/write info)
  */
-BOOLEAN_T create_binary_fasta_here(
+bool create_binary_fasta_here(
   const char* fasta_filename,
   const char* binary_filename
 ){
@@ -462,7 +306,7 @@ BOOLEAN_T create_binary_fasta_here(
  * \returns TRUE if successfully creates a binary fasta file, else false
  */
 
-BOOLEAN_T create_binary_fasta_in_cur(
+bool create_binary_fasta_in_cur(
   char* fasta_file_w_path, ///< input fasta file with full path -in
   char* fasta_filename, ///< input fasta a file, only filename -in
   char** output_file_name ///< get output filename -out

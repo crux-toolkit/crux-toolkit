@@ -58,10 +58,10 @@ typedef std::vector<Peak*>::const_iterator PeakIterator;
 class SpectrumCollection;
 
 /**
- * \typedef SPECTRUM_ITERATOR_T 
- * \brief An object to iterate over the spectra in a spectrum_collection
+ * \typedef SpectrumIterator
+ * \brief An object to iterate over the spectra in a SpectrumCollection
  */
-typedef struct spectrum_iterator SPECTRUM_ITERATOR_T;
+typedef std::vector<Spectrum*>::iterator SpectrumIterator;
 
 /**
  * \class FilteredSpectrumChargeIterator 
@@ -383,16 +383,16 @@ typedef struct bin_peptide_iterator BIN_PEPTIDE_ITERATOR_T;
 typedef struct bin_sorted_peptide_iterator BIN_SORTED_PEPTIDE_ITERATOR_T;
 
 /**
- * \typedef  PROTEIN_INDEX_T
+ * \class ProtienIndex
  * \brief Object to store the protein relation to the fasta file
  */
-typedef struct protein_index PROTEIN_INDEX_T;
+class ProteinIndex;
 
 /**
- * \typedef PROTEIN_INDEX_ITERATOR_T
+ * \class ProteinIndexIterator
  * \brief Object to iterate over the protein index in the protein index file
  */
-typedef struct protein_index_iterator PROTEIN_INDEX_ITERATOR_T;
+class ProteinIndexIterator;
 
 /**
  * \typedef IonIterator
