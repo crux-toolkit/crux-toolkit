@@ -76,7 +76,7 @@ class ProteinPeptideIterator {
     int  nterm_num_cleavages, 
     int* cterm_allowed_cleavages, 
     int  cterm_num_cleavages, 
-    bool skip_cleavage_locations);
+    int  num_skip_cleavages);
 
   /**
    * Creates the data structures in the protein_peptide_iterator object necessary

@@ -223,33 +223,29 @@ void ProteinPeptideIterator::selectPeptides(
     int  nterm_num_cleavages, 
     int* cterm_allowed_cleavages, 
     int  cterm_num_cleavages, 
-    bool skip_cleavage_locations){
+    int  int_num_skip_cleavages){
 
   // to avoid checking a lot of C-term before our current N-term cleavage
-  int previous_cterm_cleavage_start= 0; 
+  int previous_cterm_cleavage_start= 0;
 
   PeptideConstraint* constraint = peptide_constraint_;
   int nterm_idx, cterm_idx;
 
   // for each possible n-term (start) position...
   for (nterm_idx=0; nterm_idx < nterm_num_cleavages; nterm_idx++){
-    
+
     // check all possible c-term (end) positions
+
     int next_cterm_cleavage_start = previous_cterm_cleavage_start;
     bool no_new_cterm_cleavage_start = true;
     for (cterm_idx = previous_cterm_cleavage_start; 
          cterm_idx < cterm_num_cleavages; cterm_idx++){
 
-      // if missed cleavages are not allowed and we have skipped one, do next nterm
-      if( (skip_cleavage_locations == false)
-          &&
-          ((*cumulative_cleavages_)[nterm_allowed_cleavages[nterm_idx]] 
-           < 
-           (*cumulative_cleavages_)[cterm_allowed_cleavages[cterm_idx]-1])
-          ){
-        break;
+      if ((*cumulative_cleavages_)[cterm_allowed_cleavages[cterm_idx]-1] - \
+	  (*cumulative_cleavages_)[nterm_allowed_cleavages[nterm_idx]] \
+	  > int_num_skip_cleavages) {
+	break;
       }
-      
       if (cterm_allowed_cleavages[cterm_idx] 
           <= nterm_allowed_cleavages[nterm_idx]){
         continue;
@@ -341,7 +337,7 @@ void ProteinPeptideIterator::prepareMc(
 
   // calculate our cleavage positions and masses
   for(start_idx = 1; start_idx < protein->getLength()+1; start_idx++){
-    int sequence_idx = start_idx - 1; 
+    int sequence_idx = start_idx - 1;
     mass_array[start_idx] = mass_array[start_idx-1] + 
       get_mass_amino_acid(protein->getSequencePointer()[sequence_idx], mass_type);
 
@@ -408,7 +404,7 @@ void ProteinPeptideIterator::prepareMc(
       this->selectPeptides(
         all_positions, protein->getLength(),
         all_positions+1, protein->getLength(), // len-1?
-        TRUE); // for unspecific ends, allow internal cleavage sites
+        500); // for unspecific ends, allow internal cleavage sites
       break;
 
   case INVALID_DIGEST:
