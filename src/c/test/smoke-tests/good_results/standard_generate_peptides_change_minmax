@@ -6,7 +6,7 @@
 #	max-length: 20
 #	enzyme: no-enzyme
 #	digestion: non-specific-digest
-#	number of allowed missed-cleavages: 0
+#	number of allowed missed-cleavages: 500
 #	sort: none
 #	isotopic mass type: mono
 #	verbosity: 30
