@@ -1575,7 +1575,7 @@ void check_parameter_consistency(){
     char* val_str = digest_type_to_string(NON_SPECIFIC_DIGEST);
     update_hash_value(parameters, "digestion", val_str);
     free(val_str);
-    update_hash_value(parameters, "missed-cleavages", (void*)"TRUE");
+    update_hash_value(parameters, "missed-cleavages", (void*)"500");
   }
 
   // spectral counts SIN requires an MS2 file
