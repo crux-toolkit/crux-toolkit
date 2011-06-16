@@ -31,8 +31,8 @@ void get_linear_peptides(set<string>& peptides,
   while (database_protein_iterator_has_next(protein_iterator)) {
     protein = database_protein_iterator_next(protein_iterator);
     peptide_iterator = new ProteinPeptideIterator(protein, peptide_constraint);
-    // missed_cleavages must be TRUE in protein.c for this to work
-    peptide_iterator->prepareMc(true);
+    // missed_cleavages must be all in protein.c for this to work
+    peptide_iterator->prepareMc(500);
     while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
       peptide = peptide_iterator->next();
@@ -94,8 +94,9 @@ void get_linkable_peptides(set<string>& peptides,
   while (database_protein_iterator_has_next(protein_iterator)) {
     protein = database_protein_iterator_next(protein_iterator);
     peptide_iterator = new ProteinPeptideIterator(protein, peptide_constraint);
-    // missed_cleavages must be TRUE in protein.c for this to work
-    peptide_iterator->prepareMc(true); 
+    // missed_cleavages must be all in protein.c for this to work
+    //TODO either fix this code or make an option to allow all missed cleavages...
+    peptide_iterator->prepareMc(500); 
     while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
       peptide = peptide_iterator->next();
@@ -180,7 +181,7 @@ void find_all_precursor_ions(vector<LinkedPeptide>& all_ions,
   PeptideConstraint* peptide_constraint = 
     PeptideConstraint::newFromParameters();
   // add 
-  peptide_constraint->setNumMisCleavage(1);
+  peptide_constraint->setNumMisCleavage(get_int_parameter("missed-cleavages") + 1);
   //set_verbosity_level(CARP_INFO);
   //Protein* protein = NULL;
   carp(CARP_DEBUG,"protein iterator");
