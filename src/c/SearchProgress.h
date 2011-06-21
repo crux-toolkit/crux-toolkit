@@ -48,14 +48,14 @@ class SearchProgress{
     total_searches_(total_searches)
     { 
       report_format_ = "Searching spectrum number %i (%i+), search number %i"
-        " of %i, %.2f%% complete";
+        " of %i, %.0f%% complete";
     };
 
     void report(int scan_num, int charge){
       if( ((searches_attempted_ + 1) % progress_increment_) == 0 ){
         carp(CARP_INFO, report_format_, 
              scan_num, charge, searches_attempted_ + 1, total_searches_,
-             (float)(searches_attempted_ + 1) / (float)total_searches_ );
+             (float)100 * (searches_attempted_ + 1) / (float)total_searches_ );
       }
     };
 
