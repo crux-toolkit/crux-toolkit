@@ -164,7 +164,6 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
   int num_decoys = 0;
   MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
     new_match_collection_iterator(input_directory, fasta_file, &num_decoys);
-
   // Create an array with counts of spectra in each match collection.
   int num_sets = get_match_collection_iterator_number_collections(
       match_collection_iterator);

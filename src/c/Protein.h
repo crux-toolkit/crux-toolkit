@@ -19,7 +19,7 @@
 
 class Protein {
  protected:
-  DATABASE_T*  database_; ///< Which database is this protein part of
+  Database*  database_; ///< Which database is this protein part of
   unsigned long int offset_; ///< The file location in the database source file
   unsigned int protein_idx_; ///< The index of the protein in it's database.
   bool    is_light_; ///< is the protein a light protein?
@@ -72,7 +72,7 @@ class Protein {
     const char* annotation,  ///< Optional protein annotation.  -in
     unsigned long int offset, ///< The file location in the source file in the database -in
     unsigned int protein_idx, ///< The index of the protein in it's database. -in
-    DATABASE_T* database ///< the database of its origin
+    Database* database ///< the database of its origin
   );         
 
   /**
@@ -258,13 +258,13 @@ class Protein {
    * sets the database for protein
    */
   void setDatabase(
-    DATABASE_T*  database ///< Which database is this protein part of -in
+    Database*  database ///< Which database is this protein part of -in
     );
 
   /**
    *\returns Which database is this protein part of
    */
-  DATABASE_T* getDatabase();
+  Database* getDatabase();
 
   /**
    * prints a binary representation of the protein

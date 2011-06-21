@@ -12,7 +12,7 @@ static MODIFIED_PEPTIDES_ITERATOR_T *iter1, *iter3;
 static PEPTIDE_MOD_T* pmod1;
 static AA_MOD_T *amod1, *amod2, *amod3;
 static AA_MOD_T* amod_list[3];
-static DATABASE_T* dbase;
+static Database* dbase;
 
 void mpi_setup(){
   initialize_parameters();
@@ -29,7 +29,7 @@ void mpi_setup(){
   force_set_aa_mod_list(amod_list, 3);
 
   pmod1 = new_peptide_mod();
-  dbase = new_database("input-data/test.fasta", FALSE);
+  dbase = new Database("input-data/test.fasta", FALSE);
 
   //iter1 = new_modified_peptides_iterator_from_mass(1566, pmod1, NULL, dbase);
   //there seems to be a bug so that the two peptides in this window aren't being returned
@@ -43,7 +43,7 @@ void mpi_setup(){
 
 void mpi_teardown(){
   free_modified_peptides_iterator(iter1);
-  free_database(dbase);
+  Database::freeDatabase(dbase);
   free_peptide_mod(pmod1);
 }
 

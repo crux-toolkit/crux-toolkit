@@ -18,7 +18,8 @@
 #include "peptide.h"
 #include "peptide_src.h"
 #include "Protein.h"
-#include "database.h"
+#include "Database.h"
+#include "DatabaseProteinIterator.h"
 #include "parse_arguments.h"
 #include "parameter.h"
 #include "objects.h"
@@ -155,7 +156,7 @@ BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
   );
 
 void get_linkable_peptides(std::set<std::string>& peptides, 
-	DATABASE_PROTEIN_ITERATOR_T* protein_iterator,
+	DatabaseProteinIterator* protein_iterator,
 	PeptideConstraint* peptide_constraint); 
 
 void add_linked_peptides(std::vector<LinkedPeptide>& all_ions, std::set<std::string>& peptides, std::string links, int charge);

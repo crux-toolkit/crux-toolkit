@@ -78,7 +78,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
 
   // Prepare input, fasta or index 
   INDEX_T* index = NULL;
-  DATABASE_T* database = NULL;
+  Database* database = NULL;
   int num_proteins = prepare_protein_input(input_file, &index, &database); 
   free(input_file);
 
@@ -237,7 +237,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
   }
   free(peptide_mods);
   free_index(index);
-  free_database(database);
+  Database::freeDatabase(database);
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   carp(CARP_INFO, "Finished crux sequest-search");

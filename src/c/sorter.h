@@ -23,7 +23,7 @@
 #include "carp.h"
 #include "objects.h"
 #include "PeptideConstraint.h"
-#include "database.h"
+#include "Database.h"
 
 
 /***********************************
@@ -36,7 +36,7 @@
  * \returns a SORTED_PEPTIDE_ITERATOR_T object.
  */
 SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
-  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator, ///< the peptide iterator to extend -in
+  DatabasePeptideIterator* database_peptide_iterator, ///< the peptide iterator to extend -in
   SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
   BOOLEAN_T unique ///< only return unique peptides? -in
   );

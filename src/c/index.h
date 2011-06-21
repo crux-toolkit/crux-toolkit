@@ -15,7 +15,7 @@
 #include "sorter.h"
 #include "carp.h"
 #include "PeptideConstraint.h"
-#include "database.h"
+#include "Database.h"
 
 static const int MAX_INDEX_FILES = 1024;
 
@@ -48,7 +48,6 @@ INDEX_T* new_index(
  */
 INDEX_T* new_index_from_disk(
   const char* fasta_filename  ///< The fasta file
-  //  BOOLEAN_T is_unique ///< only unique peptides? -in
   );
 
 /**
@@ -78,7 +77,7 @@ void free_index(INDEX_T* index);
  * populate fields in index.
  * \returns TRUE if success. FALSE if failure.
  */
-BOOLEAN_T parse_index(
+bool parse_index(
   INDEX_T* index ///< An allocated index
   );
 
@@ -88,9 +87,9 @@ BOOLEAN_T parse_index(
  *
  * \returns TRUE if success. FALSE if failure.
  */
-BOOLEAN_T create_index(
+bool create_index(
   INDEX_T* index, ///< An allocated index -in/out
-  BOOLEAN_T create_text_file ///< Should an ASCII text file be create? -in
+  bool create_text_file ///< Should an ASCII text file be create? -in
   );
 
 /**
@@ -98,7 +97,7 @@ BOOLEAN_T create_index(
  *
  * \returns TRUE if it does. FALSE if it does not.
  */
-BOOLEAN_T index_exists(
+bool index_exists(
   INDEX_T* index ///< An allocated index
   );
 
@@ -107,7 +106,7 @@ BOOLEAN_T index_exists(
  * this file is used later by the index object to index the files with a given interval
  * \returns TRUE if it creates a list of infex files. FALSE if it fails.
  */
-BOOLEAN_T create_index_files(
+bool create_index_files(
   INDEX_T* index, ///< An allocated index
   FILE* file ///< output stream to print
   );
@@ -157,7 +156,7 @@ void set_index_directory(
 /**
  *\returns a pointer to the database
  */
-DATABASE_T* get_index_database(
+Database* get_index_database(
   INDEX_T* index ///< The index -in
   );
 
@@ -166,7 +165,7 @@ DATABASE_T* get_index_database(
  */
 void set_index_database(
   INDEX_T* index, ///< The index -in
-  DATABASE_T* database ///< The database that has been indexed. -in
+  Database* database ///< The database that has been indexed. -in
   );
 
 /**
@@ -199,7 +198,7 @@ void set_index_search_constraint(
 /**
  *\returns TRUE if index files are on disk else FALSE
  */
-BOOLEAN_T get_index_on_disk(
+bool get_index_on_disk(
   INDEX_T* index ///< The index -in
   );
 
@@ -208,7 +207,7 @@ BOOLEAN_T get_index_on_disk(
  */
 void set_index_on_disk(
   INDEX_T* index, ///< The index -in
-  BOOLEAN_T on_disk ///< Does this index exist on disk yet? -in
+  bool on_disk ///< Does this index exist on disk yet? -in
   );
 
 /**
@@ -230,7 +229,7 @@ void set_index_mass_range(
 /**
  *\returns TRUE if only allow unique peptides else FALSE
  */
-BOOLEAN_T get_index_is_unique(
+bool get_index_is_unique(
   INDEX_T* index ///< The index -in
   );
 
@@ -239,7 +238,7 @@ BOOLEAN_T get_index_is_unique(
  */
 void set_index_is_unique(
   INDEX_T* index, ///< The index -in
-  BOOLEAN_T is_unique ///< do you allow duplicate peptides? -in
+  bool is_unique ///< do you allow duplicate peptides? -in
   );
 
 int get_index_num_proteins( INDEX_T* index );
@@ -255,7 +254,6 @@ int get_index_num_proteins( INDEX_T* index );
  */
 INDEX_PEPTIDE_ITERATOR_T* new_index_peptide_iterator(
   INDEX_T* index ///< The index -in
-  // BOOLEAN_T seq ///< output sequence -in
   );
 
 /**
@@ -269,7 +267,7 @@ void free_index_peptide_iterator(
  * The basic iterator functions.
  * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
  */
-BOOLEAN_T index_peptide_iterator_has_next(
+bool index_peptide_iterator_has_next(
     INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator ///< the iterator of interest -in
     );
 
@@ -294,7 +292,7 @@ void void_free_index_peptide_iterator(
  * The basic iterator functions.
  * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
  */
-BOOLEAN_T void_index_peptide_iterator_has_next(
+bool void_index_peptide_iterator_has_next(
     void* index_peptide_iterator ///< the iterator of interest -in
     );
 
@@ -331,7 +329,7 @@ PEPTIDE_T* index_filtered_peptide_iterator_next(
  * check to see if the index_filtered_peptide_iterator has more peptides to return
  *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
  */
-BOOLEAN_T index_filtered_peptide_iterator_has_next(
+bool index_filtered_peptide_iterator_has_next(
   INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
   );
 
@@ -359,7 +357,7 @@ PEPTIDE_T* void_index_filtered_peptide_iterator_next(
  * check to see if the index_filtered_peptide_iterator has more peptides to return
  *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
  */
-BOOLEAN_T void_index_filtered_peptide_iterator_has_next(
+bool void_index_filtered_peptide_iterator_has_next(
   void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
   );
 
@@ -384,7 +382,7 @@ void void_free_index_filtered_peptide_iterator(
 BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
   INDEX_T* index, ///< The index object which we are iterating over -in
   FILE* file, ///< the bin to parse peptides
-  BOOLEAN_T use_array  ///< should I use array peptide_src or link list when parsing peptides -in
+  bool use_array  ///< should I use array peptide_src or link list when parsing peptides -in
   );
 
 /**
@@ -400,7 +398,7 @@ PEPTIDE_T* bin_peptide_iterator_next(
  * check to see if the bin_peptide_iterator has more peptides to return
  *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
  */
-BOOLEAN_T bin_peptide_iterator_has_next(
+bool bin_peptide_iterator_has_next(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< the bin_peptide_iterator to initialize -in
   );
 
@@ -439,7 +437,7 @@ PEPTIDE_T* bin_sorted_peptide_iterator_next(
  * check to see if the bin_sorted_peptide_iterator has more peptides to return
  *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
  */
-BOOLEAN_T bin_sorted_peptide_iterator_has_next(
+bool bin_sorted_peptide_iterator_has_next(
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator ///< the bin_peptide_iterator to initialize -in
   );
 

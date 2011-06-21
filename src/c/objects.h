@@ -23,7 +23,7 @@ class SpectrumZState;
 
 
 /**
- * \typedef PEAK_T 
+ * \class Peak 
  * A peak in a spectrum
  */
 class Peak;
@@ -246,23 +246,22 @@ class Protein;
 class ProteinPeptideIterator;
 
 /**
- * \typedef DATABASE_T
+ * \class Database
  * \brief A database of protein sequences.
  */
-typedef struct database DATABASE_T;
+class Database;
 
 /**
- * \typedef DATABASE_PROTEIN_ITERATOR_T
+ * \class DatabaseProteinIterator
  * \brief An object to iterate over the proteins in a database 
  */
-typedef struct database_protein_iterator DATABASE_PROTEIN_ITERATOR_T;
+class DatabaseProteinIterator;
 
 /**
- * \typedef DATABASE_PEPTIDE_ITERATOR_T
+ * \class DatabasePeptideIterator
  * \brief An object to iterate over the peptides in a database 
  */
-typedef struct database_peptide_iterator DATABASE_PEPTIDE_ITERATOR_T;
-
+class DatabasePeptideIterator;
 
 /**
  * The enum for sort type (mass, length, lexical, none)
@@ -280,10 +279,10 @@ enum _sort_type {SORT_NONE,
 typedef enum _sort_type SORT_TYPE_T;
 
 /**
- * \typedef DATABASE_SORTED_PEPTIDE_ITERATOR_T
+ * \class DatabaseSortedPeptideIterator
  * \brief An object to iterate over the peptides in a database in sorted order 
  */
-typedef struct database_sorted_peptide_iterator DATABASE_SORTED_PEPTIDE_ITERATOR_T;
+class DatabaseSortedPeptideIterator;
 
 /**
  * \typedef PEPTIDE_WRAPPER_T

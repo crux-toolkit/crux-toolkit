@@ -18,8 +18,8 @@
 #include "carp.h"
 #include "objects.h"
 #include "PeptideConstraint.h"
-#include "database.h"
-
+#include "Database.h"
+#include "DatabasePeptideIterator.h"
 
 /**
  * \struct sorted_peptide_iterator
@@ -585,7 +585,7 @@ unsigned long total_number_peptide = 0;
  * \returns a SORTED_PEPTIDE_ITERATOR_T object.
  */
 SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
-  DATABASE_PEPTIDE_ITERATOR_T* database_peptide_iterator, 
+  DatabasePeptideIterator* database_peptide_iterator, 
     ///< the peptide iterator to extend -in
   SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
   BOOLEAN_T unique ///< only return unique peptides? -in
@@ -604,7 +604,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
 
 
   // iterate over all peptides in a protein
-  while(database_peptide_iterator_has_next(database_peptide_iterator)){
+  while(database_peptide_iterator->hasNext()){
     // debug purpuse
     ++total_number_peptide;
     if(total_number_peptide % 1000000 == 0){
@@ -615,13 +615,13 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
     if(start){
       start = FALSE;
       current_wrapper =
-        wrap_peptide(database_peptide_iterator_next(database_peptide_iterator));
+        wrap_peptide(database_peptide_iterator->next());
       list_wrapper = current_wrapper;
     }
     else{
       // wrap the next peptide
       current_wrapper->next_wrapper =
-        wrap_peptide(database_peptide_iterator_next(database_peptide_iterator));
+        wrap_peptide(database_peptide_iterator->next());
       current_wrapper = current_wrapper->next_wrapper;
     }
   }
