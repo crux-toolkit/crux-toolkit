@@ -18,7 +18,7 @@
 #include "peptide.h"
 #include "peptide_src.h"
 #include "Protein.h"
-#include "database.h"
+#include "Database.h"
 #include "parse_arguments.h"
 #include "parameter.h"
 #include "index.h"
@@ -41,7 +41,7 @@ int main(int argc, char** argv){
   long total_peptides = 0;
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator = NULL; 
   PEPTIDE_T* peptide = NULL;
-  DATABASE_T* database = NULL;
+  Database* database = NULL;
   INDEX_T* index = NULL;
     
   /* Define optional command line arguments */ 
@@ -96,7 +96,7 @@ int main(int argc, char** argv){
   if( use_index == TRUE ){
     index = new_index_from_disk(filename);//, 
   }else{
-    database = new_database(filename, FALSE); // not memmapped
+    database = new Database(filename, FALSE); // not memmapped
   }
   free(filename);
 

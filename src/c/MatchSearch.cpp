@@ -89,7 +89,7 @@ int MatchSearch::searchPepMods(
   MATCH_COLLECTION_T* match_collection, ///< store PSMs here
   BOOLEAN_T is_decoy,   ///< generate decoy peptides from index/db
   INDEX_T* index,       ///< index to use for generating peptides
-  DATABASE_T* database, ///< db to use for generating peptides
+  Database* database, ///< db to use for generating peptides
   Spectrum* spectrum, ///< spectrum to search
   SpectrumZState& zstate, ///< seach spectrum at this z-state
   PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to apply
@@ -246,7 +246,7 @@ void MatchSearch::addDecoyScores(
   Spectrum* spectrum, ///<
   int charge, ///< 
   INDEX_T* index, ///< search this index if not null
-  DATABASE_T* database, ///< search this database if not null
+  Database* database, ///< search this database if not null
   PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to search
   int num_peptide_mods ///< number of mods in the above array
 ){
@@ -324,7 +324,7 @@ int MatchSearch::main(int argc, char** argv){
 
   /* Prepare input, fasta or index */
   INDEX_T* index = NULL;
-  DATABASE_T* database = NULL;
+  Database* database = NULL;
   int num_proteins = prepare_protein_input(input_file, &index, &database); 
   free(input_file);
 
@@ -480,7 +480,7 @@ int MatchSearch::main(int argc, char** argv){
   }
   free(peptide_mods);
   free_index(index);
-  free_database(database);
+  Database::freeDatabase(database);
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   carp(CARP_INFO, "Finished crux-search-for-matches");

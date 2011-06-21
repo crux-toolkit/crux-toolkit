@@ -102,7 +102,7 @@ struct match_collection_iterator{
   DIR* working_directory; 
   ///< the working directory for the iterator to find match_collections
   char* directory_name; ///< the directory name in char
-  DATABASE_T* database; ///< the database for which the match_collection
+  Database* database; ///< the database for which the match_collection
   int number_collections; 
   ///< the total number of match_collections in the directory (target+decoy)
   int collection_idx;  ///< the index of the current collection to return
@@ -143,7 +143,7 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx);
 
 BOOLEAN_T extend_match_collection_tab_delimited(
   MATCH_COLLECTION_T* match_collection, ///< match collection to extend -out
-  DATABASE_T* database, ///< the database holding the peptides -in
+  Database* database, ///< the database holding the peptides -in
   MatchFileReader& result_file   ///< the result file to parse PSMs -in
   );
 
@@ -2537,9 +2537,9 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
   match_collection->post_process_collection = TRUE;
   
   // the protein counter size, create protein counter
-  DATABASE_T* database = match_collection_iterator->database;
+  Database* database = match_collection_iterator->database;
   match_collection->post_protein_counter_size 
-   = get_database_num_proteins(database);
+   = database->getNumProteins();
   match_collection->post_protein_counter 
    = (int*)mycalloc(match_collection->post_protein_counter_size, sizeof(int));
   match_collection->post_protein_peptide_counter 
@@ -2586,7 +2586,7 @@ MATCH_COLLECTION_T* new_match_collection_psm_output(
  */
 BOOLEAN_T extend_match_collection_tab_delimited(
   MATCH_COLLECTION_T* match_collection, ///< match collection to extend -out
-  DATABASE_T* database, ///< the database holding the peptides -in
+  Database* database, ///< the database holding the peptides -in
   MatchFileReader& result_file   ///< the result file to parse PSMs -in
   )
 {
@@ -3098,7 +3098,7 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
 
   DIR* working_directory = NULL;
   struct dirent* directory_entry = NULL;
-  DATABASE_T* database = NULL;
+  Database* database = NULL;
   BOOLEAN_T use_index = is_directory(fasta_file);
 
   /*
@@ -3201,12 +3201,12 @@ MATCH_COLLECTION_ITERATOR_T* new_match_collection_iterator(
   carp(CARP_DEBUG, "Creating a new database");
   // now create a database, 
   // using fasta file either binary_file(index) or fastafile
-  database = new_database(binary_fasta, TRUE);
+  database = new Database(binary_fasta, TRUE);
   
   // check if already parsed
-  if(!get_database_is_parsed(database)){
+  if(!database->getIsParsed()){
     carp(CARP_DETAILED_DEBUG,"Parsing database");
-    if(!parse_database(database)){
+    if(!database->parse()){
       carp(CARP_FATAL, "Failed to parse database, cannot create new index");
     }
   }
@@ -3273,7 +3273,7 @@ void free_match_collection_iterator(
 
   // free up all match_collection_iteratory.
   free(match_collection_iterator->directory_name);
-  free_database(match_collection_iterator->database);
+  Database::freeDatabase(match_collection_iterator->database);
   closedir(match_collection_iterator->working_directory); 
   delete match_collection_iterator->cols_in_file;
 

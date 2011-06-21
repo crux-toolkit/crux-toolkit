@@ -1469,7 +1469,7 @@ void fit_two_parameter_weibull(
 int prepare_protein_input(
   char* input_file,     ///< name of the fasta file or index directory
   INDEX_T** index,      ///< return new index here OR
-  DATABASE_T** database)///< return new fasta database here
+  Database** database)///< return new fasta database here
 {
 
   int num_proteins = 0;
@@ -1486,15 +1486,15 @@ int prepare_protein_input(
 
   } else {
     carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
-    *database = new_database(input_file, FALSE);         
+    *database = new Database(input_file, FALSE);         
     if( database == NULL ){
       carp(CARP_FATAL, "Could not create protein database");
     } 
 
-    if(!parse_database(*database)){
+    if(!(*database)->parse()){
       carp(CARP_FATAL, "Error with protein database.");
     } 
-    num_proteins = get_database_num_proteins(*database);
+    num_proteins = (*database)->getNumProteins();
   }
   return num_proteins;
 }

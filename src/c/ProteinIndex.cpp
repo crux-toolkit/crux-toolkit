@@ -10,7 +10,7 @@
 #include "crux-utils.h"
 #include "peptide.h"
 #include "Protein.h"
-#include "database.h"
+#include "Database.h"
 #include "carp.h"
 #include "objects.h"
 #include "PeptideConstraint.h"

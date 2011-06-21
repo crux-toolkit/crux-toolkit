@@ -108,7 +108,7 @@ void print_peptide_src(
 BOOLEAN_T parse_peptide_src_tab_delimited(
   PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
   MatchFileReader& file,           ///< file to read from
-  DATABASE_T* database, ///< database containing proteins
+  Database* database, ///< database containing proteins
   BOOLEAN_T use_array); ///< use array implementation vs. linked list
 
 /**
@@ -128,7 +128,7 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
 BOOLEAN_T parse_peptide_src(
   PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
   FILE* file,           ///< file to read from
-  DATABASE_T* database, ///< database containing proteins
+  Database* database, ///< database containing proteins
   BOOLEAN_T use_array);///< use array implementation vs. linked list
 
 /**

@@ -14,7 +14,7 @@
 #include "peptide.h"
 #include "Protein.h"
 #include "peptide_src.h"
-#include "database.h"
+#include "Database.h"
 #include "carp.h"
 #include "PeptideConstraint.h"
 
@@ -63,7 +63,7 @@ Protein::Protein(
   const char* annotation,  ///< Optional protein annotation.  -in
   unsigned long int offset, ///< The file location in the source file in the database -in
   unsigned int protein_idx, ///< The index of the protein in it's database.-in  
-  DATABASE_T* database ///< the database of its origin
+  Database* database ///< the database of its origin
   )
 {
   init();
@@ -74,7 +74,7 @@ Protein::Protein(
   setOffset(offset);
   setProteinIdx(protein_idx);
   setIsLight(false);
-  database_ = copy_database_ptr(database); 
+  database_ = Database::copyPtr(database); 
   is_memmap_ = false;
 }         
 
@@ -105,7 +105,7 @@ bool Protein::toHeavy()
     return true;
   }
   
-  FILE* file = get_database_file(database_);
+  FILE* file = database_->getFile();
   
   // rewind to the begining of the protein to include ">" line
   fseek(file, offset_, SEEK_SET);
@@ -745,16 +745,16 @@ bool Protein::getIsLight()
  * sets the database for protein
  */
 void Protein::setDatabase(
-  DATABASE_T*  database ///< Which database is this protein part of -in
+  Database*  database ///< Which database is this protein part of -in
   )
 {
-  database_ = copy_database_ptr(database);
+  database_ = Database::copyPtr(database);
 }
 
 /**
  *\returns Which database is this protein part of
  */
-DATABASE_T* Protein::getDatabase()
+Database* Protein::getDatabase()
 {
   return database_;
 }

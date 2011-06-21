@@ -10,10 +10,9 @@
 #include "peptide_src.h"
 #include "Protein.h"
 #include "ProteinPeptideIterator.h"
-#include "database.h"
+#include "Database.h"
 #include "carp.h"
 #include "crux-utils.h"
-#include "database.h"
 #include "parameter.h"
 // also in parameter.c
 void parse_custom_enzyme(const char* rule_str);
@@ -26,7 +25,7 @@ static PeptideConstraint *constraint, *enzyme_constraint;
 
 static PEPTIDE_SRC_T* src;
 
-static DATABASE_T* db;
+static Database* db;
 //                      0123456789
 static char prot1_sequence[256] = "MRVLKFGGTSVANAERFLRVADILESNARQGQVAOOTVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFWVDQEFAQIKHVLHGISLWLGQC";
 
@@ -34,8 +33,8 @@ void protein_setup(){
 
   initialize_parameters();
   // a protein must have a database as its source of sequences
-  db = new_database("input-data/protein1.fasta", FALSE); //not mem mapped
-  parse_database(db);  // assuming we have already tested database
+  db = new Database("input-data/protein1.fasta", FALSE); //not mem mapped
+  db->parse();  // assuming we have already tested database
 
   protein1 = new Protein("protein1", prot1_sequence, strlen(prot1_sequence),
                          NULL, 0, 0, db);//annotation, file offset, index
@@ -51,7 +50,7 @@ void protein_setup(){
 }
 
 void protein_teardown(){
-  free_database(db);
+  Database::freeDatabase(db);
   delete protein1;
   PeptideConstraint::free(constraint);
   delete pp_iterator;

@@ -364,7 +364,7 @@ COMPARISON_T string_to_comparison(char* name);
 int prepare_protein_input(
   char* input_file,      ///< name of the fasta file or index directory
   INDEX_T** index,       ///< return new index here OR
-  DATABASE_T** database);///< return new fasta database here
+  Database** database);///< return new fasta database here
 
 /**
  *  Read the string of the form <first>-<last> and returns <first>

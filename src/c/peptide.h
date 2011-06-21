@@ -19,7 +19,7 @@
 #include "objects.h"
 #include "carp.h"
 #include "PeptideConstraint.h"
-#include "database.h"
+#include "Database.h"
 #include "modifications.h"
 #include "peptide_modifications.h"
 
@@ -177,7 +177,7 @@ PEPTIDE_SRC_T* get_peptide_peptide_src(
 /**
  * get the peptide->first peptide_src->parent protein->database
  */
-DATABASE_T* get_peptide_first_src_database(
+Database* get_peptide_first_src_database(
   PEPTIDE_T* peptide ///< working peptide -in
 );
 
@@ -587,7 +587,7 @@ void print_filtered_peptide_in_format(
  *
  *<PEPTIDE_T: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>]+
  * the bracket peptide src information repeats for the number of peptide src listed before the bracket
- * the protein index is the index of the parent protein in the database DATABASE_T
+ * the protein index is the index of the parent protein in the database Database
  *
  */
 BOOLEAN_T serialize_peptide(
@@ -609,7 +609,7 @@ BOOLEAN_T serialize_peptide(
  */
 PEPTIDE_T* parse_peptide_tab_delimited(
   MatchFileReader& file, ///< the tab delimited peptide file -in
-  DATABASE_T* database,///< the database containing the peptides -in
+  Database* database,///< the database containing the peptides -in
   BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
   );
 
@@ -626,7 +626,7 @@ PEPTIDE_T* parse_peptide_tab_delimited(
  */
 PEPTIDE_T* parse_peptide(
   FILE* file, ///< the serialized peptide file -in
-  DATABASE_T* database,///< the database containing the peptides -in
+  Database* database,///< the database containing the peptides -in
   BOOLEAN_T use_array  ///< should I use array peptide_src or link list -in  
   );
 

@@ -43,8 +43,14 @@ LIBFILES= \
   crux-file-utils.h \
   crux-utils.cpp \
   crux-utils.h \
-  database.cpp \
-  database.h \
+  Database.cpp \
+  Database.h \
+  DatabaseProteinIterator.cpp \
+  DatabaseProteinIterator.h \
+  DatabasePeptideIterator.cpp \
+  DatabasePeptideIterator.h \
+  DatabaseSortedPeptideIterator.cpp \
+  DatabaseSortedPeptideIterator.h \
   CruxApplication.cpp \
   CruxApplication.h \
   CruxApplicationList.cpp \

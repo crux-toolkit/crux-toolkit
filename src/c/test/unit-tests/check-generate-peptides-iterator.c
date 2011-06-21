@@ -7,17 +7,17 @@
 
 // declare things to set up
 GENERATE_PEPTIDES_ITERATOR_T* gpiter1;
-DATABASE_T* dbase;
+Database* dbase;
 
 void gpiter_setup(){
   initialize_parameters();
-  dbase = new_database("input-data/test.fasta", FALSE);
+  dbase = new Database("input-data/test.fasta", FALSE);
   gpiter1 = new_generate_peptides_iterator_from_mass(1268, NULL, dbase);
   //gpiter1 = new_generate_peptides_iterator_from_mass(1566, index, NULL);
 }
 
 void gpiter_teardown(){
-  free_database(dbase);
+  Database::freeDatabase(dbase);
   free_generate_peptides_iterator(gpiter1);
 }
 

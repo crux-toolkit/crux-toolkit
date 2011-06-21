@@ -166,7 +166,7 @@ void queue_next_peptide(
 MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator(
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   INDEX_T* index,      ///< Index from which to draw peptides OR
-  DATABASE_T* dbase    ///< Database from which to draw peptides
+  Database* dbase    ///< Database from which to draw peptides
 ){
   if( index == NULL && dbase == NULL ){
     carp(CARP_FATAL, 
@@ -231,7 +231,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mass(
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   BOOLEAN_T is_decoy,  ///< generate decoy peptides
   INDEX_T* index,      ///< Index from which to draw peptides OR
-  DATABASE_T* dbase    ///< Database from which to draw peptides
+  Database* dbase    ///< Database from which to draw peptides
   ){
   MODIFIED_PEPTIDES_ITERATOR_T* new_iterator = 
     allocate_modified_peptides_iterator();
@@ -281,7 +281,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_mz(
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   BOOLEAN_T is_decoy,  ///< generate decoy peptides
   INDEX_T* index,      ///< Index from which to draw peptides OR
-  DATABASE_T* dbase    ///< Database from which to draw peptides
+  Database* dbase    ///< Database from which to draw peptides
   ) {
 
   WINDOW_TYPE_T precursor_window_type = 
@@ -358,7 +358,7 @@ MODIFIED_PEPTIDES_ITERATOR_T* new_modified_peptides_iterator_from_zstate(
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   BOOLEAN_T is_decoy,  ///< generate decoy peptides
   INDEX_T* index,      ///< Index from which to draw peptides OR
-  DATABASE_T* dbase    ///< Database from which to draw peptides
+  Database* dbase    ///< Database from which to draw peptides
   ) {
 
   WINDOW_TYPE_T precursor_window_type = 

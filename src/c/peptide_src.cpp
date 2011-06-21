@@ -383,7 +383,7 @@ int get_peptide_src_sizeof(){
  *
  *<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>
  * the protein index is the index of the parent protein in the
- *database DATABASE_T 
+ *database Database 
  *
  */
 void serialize_peptide_src(
@@ -432,7 +432,7 @@ int size_of_serialized_peptide_src(){
 BOOLEAN_T parse_peptide_src_tab_delimited(
   PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
   MatchFileReader& file,           ///< file to read from
-  DATABASE_T* database, ///< database containing proteins
+  Database* database, ///< database containing proteins
   BOOLEAN_T use_array) ///< use array implementation vs. linked list
 {
   //TODO - Implement
@@ -479,7 +479,7 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
       string protein_id_string = *iter;
       
       parent_protein =
-        get_database_protein_by_id_string(database, protein_id_string.c_str());
+        database->getProteinByIdString(protein_id_string.c_str());
       
       if (parent_protein == NULL) {
         carp(CARP_WARNING, "Can't find protein %s",protein_id_string.c_str());
@@ -516,7 +516,7 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
 
       //  set fields in new peptide src
       parent_protein =
-        get_database_protein_by_id_string(database, protein_id_string.c_str());
+        database->getProteinByIdString(protein_id_string.c_str());
      
       if (parent_protein == NULL) {
         carp(CARP_WARNING, "Can't find protein %s", iter -> c_str());
@@ -559,7 +559,7 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
 BOOLEAN_T parse_peptide_src(
   PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
   FILE* file,           ///< file to read from
-  DATABASE_T* database, ///< database containing proteins
+  Database* database, ///< database containing proteins
   BOOLEAN_T use_array) ///< use array implementation vs. linked list
 {
   if( peptide == NULL || file == NULL ){
@@ -630,7 +630,7 @@ BOOLEAN_T parse_peptide_src(
 
     // set fields in new peptide src
     parent_protein = 
-      get_database_protein_at_idx(database, protein_index);
+      database->getProteinAtIdx(protein_index);
     
     // set parent protein of the peptide src
     set_peptide_src_parent_protein(peptide_src, parent_protein);
