@@ -569,7 +569,19 @@ BOOLEAN_T create_intensity_array_sp(
     
     // map peak location to bin
     mz = INTEGERIZE(peak_location, bin_width, bin_offset);
-    
+
+    if (mz >= get_scorer_max_bin(scorer)) {
+      carp_once(CARP_WARNING,
+                "SP Scoring: bin:%i is greater than max:%i\n"
+                "   mz:%g bin width:%g bin offset:%g\n"
+                "   max mz:%g\n"
+                "   This warning will not be repeated", 
+                mz, get_scorer_max_bin(scorer),
+                peak_location, bin_width, bin_offset,
+                scorer->sp_max_mz);
+      continue;
+    }
+
     // get intensity
     intensity = sqrt(peak->getIntensity());
     
