@@ -26,12 +26,12 @@ using namespace std;
  * 
  */
 struct match_collection{
-  MATCH_T* match[_MAX_NUMBER_PEPTIDES]; ///< array of match object
+  Match* match[_MAX_NUMBER_PEPTIDES]; ///< array of match object
   int match_total;      ///< size of match array, may vary w/truncation
   int experiment_size;  ///< total matches before any truncation
   SpectrumZState zstate; ///< zstate of the associated spectrum
   BOOLEAN_T null_peptide_collection; ///< are the peptides shuffled
-  BOOLEAN_T scored_type[NUMBER_SCORER_TYPES]; 
+  bool scored_type[NUMBER_SCORER_TYPES]; 
                         ///< TRUE if matches have been scored by the type
   SCORER_TYPE_T last_sorted; 
     ///< the last type by which it's been sorted ( -1 if unsorted)
@@ -57,7 +57,7 @@ struct match_collection{
   FLOAT_T shift; ///< The location parameter for the Weibull distribution.
   FLOAT_T correlation; ///< The correlation parameter for the Weibull distribution.
   // replace this ...
-  MATCH_T* sample_matches[_PSM_SAMPLE_SIZE];
+  Match* sample_matches[_PSM_SAMPLE_SIZE];
   int num_samples;  // the number of items in the above array
   // ...with this
   FLOAT_T xcorrs[_MAX_NUMBER_PEPTIDES]; ///< xcorrs to be used for weibull
@@ -77,7 +77,7 @@ struct match_collection{
   BOOLEAN_T post_scored_type_set; 
   ///< has the scored type been confirmed for the match collection,
   // set after the first match collection is extended
-  MATCH_T* top_scoring_sp; ///< the match with Sp rank == 1 
+  Match* top_scoring_sp; ///< the match with Sp rank == 1 
 };
 
 /**
@@ -139,7 +139,7 @@ void store_new_xcorrs(MATCH_COLLECTION_T* match_collection,
                       BOOLEAN_T keep_matches);
 
 void collapse_redundant_matches(MATCH_COLLECTION_T* matches);
-void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx);
+void consolidate_matches(Match** matches, int start_idx, int end_idx);
 
 BOOLEAN_T extend_match_collection_tab_delimited(
   MATCH_COLLECTION_T* match_collection, ///< match collection to extend -out
@@ -149,7 +149,7 @@ BOOLEAN_T extend_match_collection_tab_delimited(
 
 BOOLEAN_T add_match_to_post_match_collection(
   MATCH_COLLECTION_T* match_collection, 
-  MATCH_T* match 
+  Match* match 
   );
 
 void update_protein_counters(
@@ -200,14 +200,14 @@ void free_match_collection(
   // decrement the pointer count in each match object
   while(match_collection->match_total > 0){
     --match_collection->match_total;
-    free_match(match_collection->match[match_collection->match_total]);
+    Match::freeMatch(match_collection->match[match_collection->match_total]);
     match_collection->match[match_collection->match_total] = NULL;
   }
 
   // and free the sample matches
   while(match_collection->num_samples > 0){
     --match_collection->num_samples;
-   free_match(match_collection->sample_matches[match_collection->num_samples]);
+   Match::freeMatch(match_collection->sample_matches[match_collection->num_samples]);
     match_collection->sample_matches[match_collection->num_samples] = NULL;
   }
   
@@ -224,7 +224,7 @@ void free_match_collection(
   }
 
   if(match_collection->top_scoring_sp){
-    free_match(match_collection->top_scoring_sp);
+    Match::freeMatch(match_collection->top_scoring_sp);
   }
 
   free(match_collection);
@@ -396,10 +396,10 @@ int merge_match_collections(MATCH_COLLECTION_T* source,
   int src_idx = 0;
   // for each match in source
   for(src_idx = 0; src_idx < src_num_matches; src_idx++){
-    MATCH_T* cur_match = source->match[src_idx];
+    Match* cur_match = source->match[src_idx];
 
     // copy pointer and add to destination
-    increment_match_pointer_count(cur_match);
+    cur_match->incrementPointerCount();
     destination->match[dest_idx] = cur_match;
 
     dest_idx++;
@@ -447,12 +447,12 @@ void store_new_xcorrs(
   }
 
   for(psm_idx=start_index; psm_idx < match_collection->match_total; psm_idx++){
-    FLOAT_T score = get_match_score( match_collection->match[psm_idx], XCORR);
+    FLOAT_T score = match_collection->match[psm_idx]->getScore(XCORR);
     match_collection->xcorrs[score_idx] = score;
     score_idx++;
 
     if( keep_matches == FALSE ){
-      free_match(match_collection->match[psm_idx]);
+      Match::freeMatch(match_collection->match[psm_idx]);
       match_collection->match[psm_idx] = NULL;
       match_collection->experiment_size -= 1;  // these should be decoys and 
                                                // we are not counting them
@@ -493,20 +493,20 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
   assert( (match_collection->last_sorted == SP) || 
           (match_collection->last_sorted == XCORR) );
 
-  MATCH_T** matches = match_collection->match;
+  Match** matches = match_collection->match;
   int match_idx = 0;
-  FLOAT_T cur_score = get_match_score(matches[match_idx], SP);
+  FLOAT_T cur_score = matches[match_idx]->getScore(SP);
 
   // for entire list of matches
   while(match_idx < match_total-1){
-    FLOAT_T next_score = get_match_score(matches[match_idx+1], SP);
+    FLOAT_T next_score = matches[match_idx+1]->getScore(SP);
 
     // find the index of the last match with the same score
     int cur_score_last_index = match_idx;
     
     while(next_score == cur_score && cur_score_last_index < match_total-2){
       cur_score_last_index++;
-      next_score = get_match_score(matches[cur_score_last_index+1], SP);
+      next_score = matches[cur_score_last_index+1]->getScore(SP);
     }
     // if the last two were equal, the last index was not incremented
     if( next_score == cur_score ){ cur_score_last_index++; }
@@ -551,7 +551,7 @@ void collapse_redundant_matches(MATCH_COLLECTION_T* match_collection){
  * Since there may be different peptide sequences with the same score,
  * compare each match to the remaining matches.
  */
-void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
+void consolidate_matches(Match** matches, int start_idx, int end_idx){
 
   carp(CARP_DETAILED_DEBUG, "Consolidating index %i to %i.", start_idx, end_idx);
   int cur_match_idx = 0;
@@ -566,7 +566,7 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
     }    
 
     char* cur_seq = 
-      get_match_mod_sequence_str_with_symbols(matches[cur_match_idx]);
+      matches[cur_match_idx]->getModSequenceStrWithSymbols();
     carp(CARP_DETAILED_DEBUG, "cur seq is %s.", cur_seq);
     int next_match_idx = cur_match_idx+1;
     for(next_match_idx=cur_match_idx+1; next_match_idx<end_idx+1; 
@@ -579,7 +579,7 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
       }    
 
       char* next_seq = 
-        get_match_mod_sequence_str_with_symbols(matches[next_match_idx]);
+        matches[next_match_idx]->getModSequenceStrWithSymbols();
       carp(CARP_DETAILED_DEBUG, "next seq is %s.", next_seq);
 
       if( strcmp(cur_seq, next_seq) == 0){
@@ -588,13 +588,13 @@ void consolidate_matches(MATCH_T** matches, int start_idx, int end_idx){
              cur_seq, next_seq, next_match_idx, cur_match_idx);
 
         // add peptide src of next to cur
-        merge_peptides_copy_src( get_match_peptide(matches[cur_match_idx]),
-                        get_match_peptide(matches[next_match_idx]));
+        merge_peptides_copy_src( matches[cur_match_idx]->getPeptide(),
+                        matches[next_match_idx]->getPeptide());
         // this frees the second peptide, so set what pointed to it to NULL
         //set_match_peptide(matches[next_match_idx], NULL);
 
         // delete match
-        free_match(matches[next_match_idx]);
+        Match::freeMatch(matches[next_match_idx]);
         matches[next_match_idx] = NULL;
       }
 
@@ -626,12 +626,12 @@ void sort_match_collection(
   // Switch to the equivalent sort key.
   SCORER_TYPE_T sort_by = NUMBER_SCORER_TYPES; // Initialize to nonsense.
   int (*compare_match_function)(const void*, const void*) 
-    = (QSORT_COMPARE_METHOD)compare_match_sp;
+    = (QSORT_COMPARE_METHOD)compareSp;
   switch (score_type) {
   case SP: 
     carp(CARP_DEBUG, "Sorting match collection by Sp.");
     sort_by = SP;
-    compare_match_function = (QSORT_COMPARE_METHOD)compare_match_sp;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareSp;
     break;
 
   case XCORR:
@@ -640,7 +640,7 @@ void sort_match_collection(
   case DECOY_XCORR_PEPTIDE_QVALUE:
     carp(CARP_DEBUG, "Sorting match collection by XCorr.");
     sort_by = XCORR;
-    compare_match_function = (QSORT_COMPARE_METHOD)compare_match_xcorr;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareXcorr;
     break;
 
   case LOGP_BONF_WEIBULL_XCORR: 
@@ -648,32 +648,32 @@ void sort_match_collection(
   case LOGP_PEPTIDE_QVALUE_WEIBULL:
     carp(CARP_DEBUG, "Sorting match collection by p-value.");
     sort_by = LOGP_BONF_WEIBULL_XCORR;
-    compare_match_function = (QSORT_COMPARE_METHOD)compare_match_p_value;
+    compare_match_function = (QSORT_COMPARE_METHOD)comparePValue;
     break;
 
   case PERCOLATOR_SCORE:
     carp(CARP_INFO, "Sorting match collection by Percolator score.");
     sort_by = PERCOLATOR_SCORE;
-    compare_match_function = (QSORT_COMPARE_METHOD)compare_match_percolator_score;
+    compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorScore;
     break;
 
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
     carp(CARP_DEBUG, "Sorting match collection by Percolator q-value.");
     sort_by = PERCOLATOR_QVALUE;
-    compare_match_function = (QSORT_COMPARE_METHOD)compare_match_percolator_qvalue;
+    compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorQValue;
     break;
 
   case QRANKER_SCORE:
     carp(CARP_DEBUG, "Sorting match collection by Q-ranker score.");
     sort_by = QRANKER_SCORE;
-    compare_match_function = (QSORT_COMPARE_METHOD)compare_match_qranker_score;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareQRankerScore;
     break;
 
   case QRANKER_QVALUE:
   case QRANKER_PEPTIDE_QVALUE:
     carp(CARP_DEBUG, "Sorting match collection by Q-ranker q-value.");
-    compare_match_function = (QSORT_COMPARE_METHOD)compare_match_qranker_qvalue;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareQRankerQValue;
     sort_by = QRANKER_QVALUE;
     break;
 
@@ -689,7 +689,7 @@ void sort_match_collection(
   }
 
   // Do the sort.
-  qsort_match(match_collection->match,
+  qsortMatch(match_collection->match,
               match_collection->match_total,
               compare_match_function);
   match_collection->last_sorted = sort_by;
@@ -713,8 +713,8 @@ void spectrum_sort_match_collection(
 
   switch(score_type){
   case SP: 
-    qsort_match(match_collection->match, match_collection->match_total,
-                (QSORT_COMPARE_METHOD)compare_match_spectrum_sp);
+    qsortMatch(match_collection->match, match_collection->match_total,
+                (QSORT_COMPARE_METHOD)compareSpectrumSp);
     match_collection->last_sorted = SP;
     break;
 
@@ -727,34 +727,34 @@ void spectrum_sort_match_collection(
   case DECOY_XCORR_PEPTIDE_QVALUE:
     /* If we are sorting on a per-spectrum basis, then the xcorr is
        good enough, even in the presence of p-values. */
-    qsort_match(match_collection->match, match_collection->match_total,
-                (QSORT_COMPARE_METHOD)compare_match_spectrum_xcorr);
+    qsortMatch(match_collection->match, match_collection->match_total,
+                (QSORT_COMPARE_METHOD)compareSpectrumXcorr);
     match_collection->last_sorted = XCORR;
     break;
 
   case PERCOLATOR_SCORE:
-    qsort_match(match_collection->match, match_collection->match_total,
-                (QSORT_COMPARE_METHOD)compare_match_spectrum_percolator_score);
+    qsortMatch(match_collection->match, match_collection->match_total,
+                (QSORT_COMPARE_METHOD)compareSpectrumPercolatorScore);
     match_collection->last_sorted = PERCOLATOR_SCORE;
     break;
 
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
-    qsort_match(match_collection->match, match_collection->match_total,
-                (QSORT_COMPARE_METHOD)compare_match_spectrum_percolator_qvalue);
+    qsortMatch(match_collection->match, match_collection->match_total,
+                (QSORT_COMPARE_METHOD)compareSpectrumPercolatorQValue);
     match_collection->last_sorted = PERCOLATOR_QVALUE;
     break;
 
   case QRANKER_SCORE:
-    qsort_match(match_collection->match, match_collection->match_total,
-                (QSORT_COMPARE_METHOD)compare_match_spectrum_qranker_score);
+    qsortMatch(match_collection->match, match_collection->match_total,
+                (QSORT_COMPARE_METHOD)compareSpectrumQRankerScore);
     match_collection->last_sorted = QRANKER_SCORE;
     break;
 
   case QRANKER_QVALUE:
   case QRANKER_PEPTIDE_QVALUE:
-    qsort_match(match_collection->match, match_collection->match_total,
-                (QSORT_COMPARE_METHOD)compare_match_spectrum_qranker_qvalue);
+    qsortMatch(match_collection->match, match_collection->match_total,
+                (QSORT_COMPARE_METHOD)compareSpectrumQRankerQValue);
     match_collection->last_sorted = QRANKER_QVALUE;
     break;
 
@@ -794,13 +794,13 @@ void truncate_match_collection(
 
   // Free high ranking matches
   int highest_index = match_collection->match_total - 1;
-  MATCH_T** matches = match_collection->match;
-  int cur_rank = get_match_rank(matches[highest_index], score_type);
+  Match** matches = match_collection->match;
+  int cur_rank = matches[highest_index]->getRank(score_type);
 
   while( cur_rank > max_rank ){
-    free_match(matches[highest_index]);
+    Match::freeMatch(matches[highest_index]);
     highest_index--;
-    cur_rank = get_match_rank(matches[highest_index], score_type);
+    cur_rank = matches[highest_index]->getRank(score_type);
   }
   match_collection->match_total = highest_index + 1;
 
@@ -838,15 +838,15 @@ BOOLEAN_T populate_match_rank_match_collection(
   int cur_rank = 0;
   FLOAT_T cur_score = NOT_SCORED;
   for(match_index=0; match_index<match_collection->match_total; ++match_index){
-    MATCH_T* cur_match = match_collection->match[match_index];
-    FLOAT_T this_score = get_match_score(cur_match, score_type);
+    Match* cur_match = match_collection->match[match_index];
+    FLOAT_T this_score = cur_match->getScore(score_type);
     
-    if( NOT_SCORED == get_match_score(cur_match, score_type) ){
-      char* seq = get_match_mod_sequence_str_with_masses(cur_match, FALSE);
+    if( NOT_SCORED == cur_match->getScore(score_type) ){
+      char* seq = cur_match->getModSequenceStrWithMasses(FALSE);
       carp(CARP_WARNING, 
            "PSM spectrum %i charge %i sequence %s was NOT scored for type %i",
-           (get_match_spectrum(cur_match))->getFirstScan(),
-           get_match_charge, seq,
+           cur_match->getSpectrum()->getFirstScan(),
+           cur_match->getCharge(), seq,
            (int)score_type);
       free(seq);
     }
@@ -858,7 +858,7 @@ BOOLEAN_T populate_match_rank_match_collection(
     }
 
     //    set_match_rank( cur_match, score_type, match_index+1);
-    set_match_rank( cur_match, score_type, cur_rank);
+    cur_match->setRank(score_type, cur_rank);
 
     carp(CARP_DETAILED_DEBUG, "Match rank %i, score %f", cur_rank, cur_score);
   }
@@ -879,27 +879,27 @@ void save_top_sp_match(MATCH_COLLECTION_T* match_collection){
   }
 
   assert(match_collection->match_total > 0);
-  MATCH_T* cur_rank_one_match = match_collection->match[0];
+  Match* cur_rank_one_match = match_collection->match[0];
 
   // confirm that matches are sorted and ranks are set
   if( match_collection->last_sorted != SP || 
-      get_match_rank(cur_rank_one_match, SP) != 1 ){
+      cur_rank_one_match->getRank(SP) != 1 ){
     populate_match_rank_match_collection(match_collection, SP);
   }
 
   // if no top sp yet, set it
   if( match_collection->top_scoring_sp == NULL ){
     match_collection->top_scoring_sp = cur_rank_one_match;
-    increment_match_pointer_count(cur_rank_one_match);
+    cur_rank_one_match->incrementPointerCount();
     return;
   }
 
   // otherwise, see if the current top-ranked match has a higher score
   // the rank of top_scoring_sp should have a new rank
-  if( get_match_rank(match_collection->top_scoring_sp, SP) > 1 ){
-    free_match(match_collection->top_scoring_sp);
+  if( match_collection->top_scoring_sp->getRank(SP) > 1 ){
+    Match::freeMatch(match_collection->top_scoring_sp);
     match_collection->top_scoring_sp = cur_rank_one_match;
-    increment_match_pointer_count(cur_rank_one_match);
+    cur_rank_one_match->incrementPointerCount();
   }
 }
 
@@ -934,7 +934,7 @@ MATCH_COLLECTION_T* random_sample_match_collection(
     // match_idx = random() % match_collection->match_total;
     sample_collection->match[count_idx] = match_collection->match[match_idx];
     // increment pointer count of the match object 
-    increment_match_pointer_count(sample_collection->match[count_idx]);
+    sample_collection->match[count_idx]->incrementPointerCount();
   }
   
   // set total number of matches sampled
@@ -985,11 +985,11 @@ void constraint_function(
   FLOAT_T score = 0;
   FLOAT_T denominator = 0;
   FLOAT_T score_sum = 0;
-  MATCH_T** matches = match_collection->match;
+  Match** matches = match_collection->match;
 
   // iterate over the matches to calculate numerator, exponential value, denominator
   for(; idx < match_collection->match_total; ++idx){
-    score = get_match_score(matches[idx], score_type);
+    score = matches[idx]->getScore(score_type);
     exponential[idx] = exp(-l_value * score);
     numerator += (exponential[idx] * score);
     denominator += exponential[idx];
@@ -1122,13 +1122,13 @@ int add_unscored_peptides(
     PEPTIDE_T* peptide = modified_peptides_iterator_next(peptide_iterator);
 
     // create a match
-    MATCH_T* match = new_match();
+    Match* match = new Match();
 
     // set match fields
-    set_match_peptide(match, peptide);
-    set_match_spectrum(match, spectrum);
-    set_match_zstate(match, zstate);
-    set_match_null_peptide(match, is_decoy);
+    match->setPeptide(peptide);
+    match->setSpectrum(spectrum);
+    match->setZState(zstate);
+    match->setNullPeptide(is_decoy);
 
     // add to match collection
     if(match_collection->match_total >= _MAX_NUMBER_PEPTIDES){
@@ -1175,7 +1175,7 @@ BOOLEAN_T score_matches_one_spectrum(
     return FALSE;
   }
   
-  MATCH_T** matches = match_collection->match;
+  Match** matches = match_collection->match;
   int num_matches = match_collection->match_total;
 
   char type_str[64];
@@ -1197,19 +1197,19 @@ BOOLEAN_T score_matches_one_spectrum(
 
   for(match_idx = 0; match_idx < num_matches; match_idx++){
 
-    MATCH_T* match = matches[match_idx];
+    Match* match = matches[match_idx];
     assert( match != NULL );
 
     // skip it if it's already been scored
-    if( NOT_SCORED != get_match_score(match, score_type)){
+    if( NOT_SCORED != match->getScore(score_type)){
       continue;
     }
 
     // make sure it's the same spec and charge
-    assert( spectrum == get_match_spectrum(match));
-    assert( charge == get_match_charge(match));
-    char* sequence = get_match_sequence(match);
-    MODIFIED_AA_T* modified_sequence = get_match_mod_sequence(match);
+    assert( spectrum == match->getSpectrum());
+    assert( charge == match->getCharge());
+    char* sequence = match->getSequence();
+    MODIFIED_AA_T* modified_sequence = match->getModSequence();
 
     // create ion series for this peptide
     ion_series->update(sequence, modified_sequence);
@@ -1219,9 +1219,9 @@ BOOLEAN_T score_matches_one_spectrum(
     FLOAT_T score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
 
     // set score in match
-    set_match_score(match, score_type, score);
+    match->setScore(score_type, score);
     if( score_type == SP ){
-      set_match_b_y_ion_info(match, scorer);
+      match->setBYIonInfo(scorer);
     }
 
     // save score in collection
@@ -1236,7 +1236,7 @@ BOOLEAN_T score_matches_one_spectrum(
                                                strlen(sequence),
                                                FALSE);
       carp(CARP_DETAILED_DEBUG, "Second score %f for %s (null:%i)",
-           score, mod_seq,get_match_null_peptide(match));
+           score, mod_seq, match->getNullPeptide());
       free(mod_seq);
     )
     free(sequence);
@@ -1278,7 +1278,7 @@ BOOLEAN_T compute_p_values(
   }
 
   int scan_number = 
-    (get_match_spectrum(match_collection->match[0]))->getFirstScan();
+    match_collection->match[0]->getSpectrum()->getFirstScan();
   carp(CARP_DEBUG, "Computing p-values for %s spec %d charge %d "
        "with eta %f beta %f shift %f",
        (match_collection->null_peptide_collection) ? "decoy" : "target",
@@ -1313,11 +1313,10 @@ BOOLEAN_T compute_p_values(
   // iterate over all matches 
   int match_idx =0;
   for(match_idx=0; match_idx < match_collection->match_total; match_idx++){
-    MATCH_T* cur_match = match_collection->match[match_idx];
+    Match* cur_match = match_collection->match[match_idx];
 
     // Get the Weibull p-value.
-    double pvalue = compute_weibull_pvalue(get_match_score(cur_match, 
-                                                           main_score),
+    double pvalue = compute_weibull_pvalue(cur_match->getScore(main_score),
                                            match_collection->eta, 
                                            match_collection->beta,
                                            match_collection->shift);
@@ -1331,7 +1330,7 @@ BOOLEAN_T compute_p_values(
     pvalue = bonferroni_correction(pvalue, match_collection->experiment_size);
 
     // set pvalue in match
-    set_match_score(cur_match, LOGP_BONF_WEIBULL_XCORR, -log(pvalue));
+    cur_match->setScore(LOGP_BONF_WEIBULL_XCORR, -log(pvalue));
     //#endif
 
   }// next match
@@ -1372,9 +1371,9 @@ BOOLEAN_T compute_decoy_q_values(
   FLOAT_T num_decoys = 0;
   int match_idx = 0;
   for(match_idx = 0; match_idx < match_collection->match_total; match_idx++){
-    MATCH_T* cur_match = match_collection->match[match_idx];
+    Match* cur_match = match_collection->match[match_idx];
 
-    if ( get_match_null_peptide(cur_match) == TRUE ){
+    if ( cur_match->getNullPeptide() == TRUE ){
       num_decoys += 1;
     }else{
       num_targets += 1;
@@ -1393,28 +1392,28 @@ BOOLEAN_T compute_decoy_q_values(
       }
     } else {
     */
-    set_match_score(cur_match, DECOY_XCORR_QVALUE, score);
+    cur_match->setScore(DECOY_XCORR_QVALUE, score);
     carp(CARP_DETAILED_DEBUG, 
          "match %i xcorr or pval %f num targets %i, num decoys %i, score %f",
-         match_idx, get_match_score(cur_match, XCORR), 
+         match_idx, cur_match->getScore(XCORR), 
          (int)num_targets, (int)num_decoys, score);
   }
 
   // compute q-value: go through list in reverse and use min FDR seen
   FLOAT_T min_fdr = 1.0;
   for(match_idx = match_collection->match_total-1; match_idx >= 0; match_idx--){
-    MATCH_T* cur_match = match_collection->match[match_idx];
-    FLOAT_T cur_fdr = get_match_score(cur_match, DECOY_XCORR_QVALUE);
+    Match* cur_match = match_collection->match[match_idx];
+    FLOAT_T cur_fdr = cur_match->getScore(DECOY_XCORR_QVALUE);
     if( cur_fdr == P_VALUE_NA ){ continue; }
 
     if( cur_fdr < min_fdr ){
       min_fdr = cur_fdr;
     }
 
-    set_match_score(cur_match, DECOY_XCORR_QVALUE, min_fdr);
+    cur_match->setScore(DECOY_XCORR_QVALUE, min_fdr);
     carp(CARP_DETAILED_DEBUG, 
          "match %i cur fdr %f min fdr %f is decoy %i",
-         match_idx, cur_fdr, min_fdr, get_match_null_peptide(cur_match) );
+         match_idx, cur_fdr, min_fdr, cur_match->getNullPeptide() );
   }
 
   match_collection->scored_type[DECOY_XCORR_QVALUE] = TRUE;
@@ -1968,15 +1967,14 @@ void print_matches_multi_spectra_xml(
   int match_idx = 0;
   int num_matches = match_collection->match_total;
   for (match_idx = 0; match_idx < num_matches; match_idx++){
-    MATCH_T* cur_match = match_collection->match[match_idx];
-    BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
-    Spectrum* spectrum = get_match_spectrum(cur_match);
+    Match* cur_match = match_collection->match[match_idx];
+    BOOLEAN_T is_decoy = cur_match->getNullPeptide();
+    Spectrum* spectrum = cur_match->getSpectrum();
     SpectrumZState& zstate = match_collection->zstate;
     spectrum->printXml(output, zstate, index_count);
     fprintf(output, "    <search_result>\n");
     if (! is_decoy){
-      print_match_xml(cur_match, output, 
-                      match_collection->scored_type );
+      cur_match->printXml(output, match_collection->scored_type );
       fprintf(output, "    </search_result>\n");
       fprintf(output, "    </spectrum_query>\n");
     }
@@ -2017,7 +2015,7 @@ BOOLEAN_T print_match_collection_xml(
   spectrum->printXml(output, zstate, index);
 
 
-  MATCH_T* match = NULL;
+  Match* match = NULL;
   // create match iterator
   // TRUE: return match in sorted order of main_score type
   MATCH_ITERATOR_T* match_iterator = 
@@ -2029,7 +2027,7 @@ BOOLEAN_T print_match_collection_xml(
    // iterate over matches
   while(match_iterator_has_next(match_iterator)){
     match = match_iterator_next(match_iterator);    
-    int cur_rank = get_match_rank(match, main_score);
+    int cur_rank = match->getRank(main_score);
   
 
     
@@ -2037,9 +2035,7 @@ BOOLEAN_T print_match_collection_xml(
     // or if we are at the limit but this match is a tie with the last
     if( count < top_match || last_rank == cur_rank ){
       
-      print_match_xml(match, 
-                      output, 
-                      match_collection->scored_type);
+      match->printXml(output, match_collection->scored_type);
       count++;
       last_rank = cur_rank;
     } else if( count >= top_match && last_rank != cur_rank ) {
@@ -2095,7 +2091,7 @@ BOOLEAN_T print_match_collection_sqt(
   // First, print spectrum info
   spectrum->printSqt(output, num_matches, zstate);
   
-  MATCH_T* match = NULL;
+  Match* match = NULL;
   
   // create match iterator
   // TRUE: return match in sorted order of main_score type
@@ -2107,17 +2103,17 @@ BOOLEAN_T print_match_collection_sqt(
     match = match_iterator_next(match_iterator);    
 
     // print only up to max_rank_result of the matches
-    if( get_match_rank(match, XCORR) > top_match ){
+    if( match->getRank(XCORR) > top_match ){
       break;
     }// else
 
-    print_match_sqt(match, output);
+    match->printSqt(output);
 
   }// next match
   
   // print the match with Sp rank==1 if its xcorr rank > top_match rank.  
-  if( get_match_rank(match_collection->top_scoring_sp, XCORR) > top_match ){
-    print_match_sqt(match_collection->top_scoring_sp, output);
+  if( match_collection->top_scoring_sp->getRank(XCORR) > top_match ){
+    match_collection->top_scoring_sp->printSqt(output);
   }
 
   free_match_iterator(match_iterator);
@@ -2156,7 +2152,7 @@ BOOLEAN_T print_match_collection_tab_delimited(
   // calculate delta_cn and populate fields in the matches
   calculate_delta_cn(match_collection, SEARCH_COMMAND);
 
-  MATCH_T* match = NULL;
+  Match* match = NULL;
   
   // create match iterator
   // TRUE: return match in sorted order of main_score type
@@ -2168,13 +2164,13 @@ BOOLEAN_T print_match_collection_tab_delimited(
   // iterate over matches
   while(match_iterator_has_next(match_iterator)){
     match = match_iterator_next(match_iterator);    
-    int cur_rank = get_match_rank(match, main_score);
+    int cur_rank = match->getRank(main_score);
 
     // print if we haven't reached the limit
     // or if we are at the limit but this match is a tie with the last
     if( count < top_match || last_rank == cur_rank ){
 
-      print_match_tab(match_collection, match, output, scan_num, 
+      match->printTab(match_collection, output, scan_num, 
                       spectrum_precursor_mz, 
                       num_matches);
       count++;
@@ -2335,7 +2331,7 @@ BOOLEAN_T match_iterator_has_next(
  * return the next match struct!
  *\returns the match in decreasing score order for the match_mode(SCORER_TYPE_T)
  */
-MATCH_T* match_iterator_next(
+Match* match_iterator_next(
   MATCH_ITERATOR_T* match_iterator ///< the working match iterator -in
   )
 {
@@ -2383,20 +2379,20 @@ void print_matches_multi_spectra
   int match_idx = 0;
   int num_matches = match_collection->match_total;
   for(match_idx = 0; match_idx < num_matches; match_idx++){
-    MATCH_T* cur_match = match_collection->match[match_idx];
-    BOOLEAN_T is_decoy = get_match_null_peptide(cur_match);
-    Spectrum* spectrum = get_match_spectrum(cur_match);
+    Match* cur_match = match_collection->match[match_idx];
+    BOOLEAN_T is_decoy = cur_match->getNullPeptide();
+    Spectrum* spectrum = cur_match->getSpectrum();
     int scan_num = spectrum->getFirstScan();
     FLOAT_T mz = spectrum->getPrecursorMz();
-    FLOAT_T num_psm_per_spec = get_match_ln_experiment_size(cur_match);
+    FLOAT_T num_psm_per_spec = cur_match->getLnExperimentSize();
     num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
 
     if( is_decoy ){
-      print_match_tab(match_collection, cur_match, decoy_file, scan_num, mz, 
+      cur_match->printTab(match_collection, decoy_file, scan_num, mz, 
                       (int)num_psm_per_spec);
     }
     else{
-      print_match_tab(match_collection, cur_match, tab_file, scan_num, mz,
+      cur_match->printTab(match_collection, tab_file, scan_num, mz,
                       (int)num_psm_per_spec);
     }
 
@@ -2592,7 +2588,7 @@ BOOLEAN_T extend_match_collection_tab_delimited(
 {
 
 
-  MATCH_T* match = NULL;
+  Match* match = NULL;
 
   FLOAT_T delta_cn = 0;
   FLOAT_T ln_delta_cn = 0;
@@ -2663,17 +2659,17 @@ BOOLEAN_T extend_match_collection_tab_delimited(
     match_collection -> post_scored_type_set = TRUE;
 
     // parse match object
-    match = parse_match_tab_delimited(result_file, database);
+    match = Match::parseTabDelimited(result_file, database);
     if (match == NULL) {
       carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
       return FALSE;
     }
 
     //set all spectrum specific features to parsed match
-    set_match_zstate(match, match_collection->zstate);
-    set_match_delta_cn(match, delta_cn);
-    set_match_ln_delta_cn(match, ln_delta_cn);
-    set_match_ln_experiment_size(match, ln_experiment_size);
+    match->setZState(match_collection->zstate);
+    match->setDeltaCn(delta_cn);
+    match->setLnDeltaCn(ln_delta_cn);
+    match->setLnExperimentSize(ln_experiment_size);
 
     //add match to match collection.
     add_match_to_post_match_collection(match_collection, match);
@@ -2696,7 +2692,7 @@ BOOLEAN_T extend_match_collection_tab_delimited(
  */
 BOOLEAN_T add_match_to_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
-  MATCH_T* match ///< the match to add -in
+  Match* match ///< the match to add -in
   )
 {
   if( match_collection == NULL || match == NULL ){
@@ -2711,7 +2707,7 @@ BOOLEAN_T add_match_to_match_collection(
 
   // add a new match to array
   match_collection->match[match_collection->match_total] = match;
-  increment_match_pointer_count(match);
+  match->incrementPointerCount();
   
   // increment total rich match count
   ++match_collection->match_total;
@@ -2731,7 +2727,7 @@ BOOLEAN_T add_match_to_match_collection(
 // this method renamed so that a more general add_match_to_match_collection could be implemented
 BOOLEAN_T add_match_to_post_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< the match collection to free -out
-  MATCH_T* match ///< the match to add -in
+  Match* match ///< the match to add -in
   )
 {
   if( match_collection == NULL || match == NULL ){
@@ -2754,7 +2750,7 @@ BOOLEAN_T add_match_to_post_match_collection(
 
   // add a new match to array
   match_collection->match[match_collection->match_total] = match;
-  increment_match_pointer_count(match);
+  match->incrementPointerCount();
   
   // increment total rich match count
   ++match_collection->match_total;
@@ -2765,7 +2761,7 @@ BOOLEAN_T add_match_to_post_match_collection(
   }
 
   // match peptide
-  peptide = get_match_peptide(match);
+  peptide = match->getPeptide();
   
   // update protein counter, protein_peptide counter
   update_protein_counters(match_collection, peptide);
@@ -2844,19 +2840,19 @@ void fill_result_to_match_collection(
   BOOLEAN_T preserve_order   ///< preserve match order?
   )
 {
-  MATCH_T** match_array = NULL;
+  Match** match_array = NULL;
   SCORER_TYPE_T score_type_old = match_collection->last_sorted;
 
   // iterate over match object in collection, set scores
   int match_idx = 0;
   for(; match_idx < match_collection->match_total; ++match_idx){
-    MATCH_T* match = match_collection->match[match_idx];
-    set_match_score(match, score_type, results[match_idx]);    
+    Match* match = match_collection->match[match_idx];
+    match->setScore(score_type, results[match_idx]);    
   }
   
   // if need to preserve order store a copy of array in original order 
   if(preserve_order){
-    match_array = (MATCH_T**)mycalloc(match_collection->match_total, sizeof(MATCH_T*));
+    match_array = (Match**)mycalloc(match_collection->match_total, sizeof(Match*));
     for(match_idx=0; match_idx < match_collection->match_total; ++match_idx){
       match_array[match_idx] = match_collection->match[match_idx];
     }
@@ -2914,40 +2910,40 @@ BOOLEAN_T calculate_delta_cn( MATCH_COLLECTION_T* match_collection,
 
   // sort, if not already
   // N.B. Can't use sort_match_collection because iterator already exists!
-  MATCH_T** matches = match_collection->match;
+  Match** matches = match_collection->match;
   int num_matches = match_collection->match_total;
   if( match_collection->last_sorted != XCORR ){
-    qsort_match(matches, num_matches, (QSORT_COMPARE_METHOD)compare_match_xcorr);
+    qsortMatch(matches, num_matches, (QSORT_COMPARE_METHOD)compareXcorr);
     match_collection->last_sorted = XCORR;
   }
 
   // get xcorr of first match
-  FLOAT_T max_xcorr = get_match_score(matches[0], XCORR);
+  FLOAT_T max_xcorr = matches[0]->getScore(XCORR);
 
   // for each match, calculate deltacn
   for(int match_idx = 0; match_idx < num_matches; match_idx++){
     FLOAT_T next_xcorr = 0;
     
     if( search_type == SEQUEST_COMMAND ){ // use this match's xcorr
-      next_xcorr = get_match_score(matches[match_idx], XCORR);
+      next_xcorr = matches[match_idx]->getScore(XCORR);
     } else {                              // find next non-equal xcorr
-      FLOAT_T this_xcorr = get_match_score(matches[match_idx], XCORR);
+      FLOAT_T this_xcorr = matches[match_idx]->getScore(XCORR);
       int score_idx = match_idx + 1;
       
       while( score_idx < num_matches &&
-             get_match_score(matches[score_idx], XCORR) == this_xcorr ){
+             matches[score_idx]->getScore(XCORR) == this_xcorr ){
         score_idx++;
       }
       
       if( score_idx < num_matches ){
-        next_xcorr = get_match_score(matches[score_idx], XCORR);
+        next_xcorr = matches[score_idx]->getScore(XCORR);
       } else { // if this is the last match, set dcn to 0
         next_xcorr = max_xcorr;
       }
     }
     
     FLOAT_T delta_cn = (max_xcorr - next_xcorr) / max_xcorr;
-    set_match_delta_cn(matches[match_idx], delta_cn);
+    matches[match_idx]->setDeltaCn(delta_cn);
   }
 
   return TRUE;
@@ -3441,8 +3437,8 @@ FLOAT_T* extract_scores_match_collection(
     new_match_iterator(all_matches, XCORR, FALSE);
   int idx = 0;
   while(match_iterator_has_next(match_iterator)){
-    MATCH_T* match = match_iterator_next(match_iterator); 
-    return_value[idx] = get_match_score(match, score_type);
+    Match* match = match_iterator_next(match_iterator); 
+    return_value[idx] = match->getScore(score_type);
     idx++;
   }
   free_match_iterator(match_iterator);
@@ -3464,8 +3460,8 @@ void assign_match_collection_qvalues(
   MATCH_ITERATOR_T* match_iterator = new_match_iterator(all_matches, 
                                                         score_type, FALSE);
   while(match_iterator_has_next(match_iterator)){
-    MATCH_T* match = match_iterator_next(match_iterator);
-    FLOAT_T score = get_match_score(match, score_type);
+    Match* match = match_iterator_next(match_iterator);
+    FLOAT_T score = match->getScore(score_type);
 
     // Retrieve the corresponding q-value.
     map<FLOAT_T, FLOAT_T>::const_iterator map_position 
@@ -3517,7 +3513,7 @@ void assign_match_collection_qvalues(
       carp(CARP_FATAL, "Something is terribly wrong!");
     }
 
-    set_match_score(match, derived_score_type, qvalue);
+    match->setScore(derived_score_type, qvalue);
     all_matches->scored_type[derived_score_type] = TRUE;
 
   }

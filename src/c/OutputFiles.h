@@ -39,7 +39,7 @@ class OutputFiles{
                     SCORER_TYPE_T rank_type = XCORR,
                     Spectrum* spectrum = NULL);
   void writeMatches(MATCH_COLLECTION_T* matches);
-  void writeMatchFeatures(MATCH_T* match, 
+  void writeMatchFeatures(Match* match, 
                           double* features,
                           int num_features);
   void writeRankedProteins(ProteinToScore& proteinToScore,

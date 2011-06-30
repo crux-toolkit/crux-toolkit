@@ -19,7 +19,7 @@
 #include "SpectrumCollection.h"
 #include "generate_peptides_iterator.h"
 #include "scorer.h"
-#include "match.h"
+#include "Match.h"
 #include "match_collection.h"
 #include "OutputFiles.h"
 

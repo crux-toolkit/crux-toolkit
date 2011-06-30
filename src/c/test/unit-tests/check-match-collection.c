@@ -23,8 +23,8 @@ bool is_close(double a, double b, double tol){
 
 // declare things to set up
 MATCH_COLLECTION_T* mc;
-MATCH_T* m;
-vector<MATCH_T*> match_list;
+Match* m;
+vector<Match*> match_list;
 int num_matches;
 // some unordered scores to use
 float scores[10] = { 78.2, 50, 23.3, 109, 34.5, 50, 45.6, 50, 38, 64};
@@ -40,15 +40,15 @@ void match_collection_setup(){
   pep = new_peptide((unsigned char)strlen(protseq), 7.77, prot, 1);
   num_matches = 8;
   for(int i=0; i<num_matches; i++){
-    MATCH_T* m = new_match();
-    set_match_score(m, XCORR, scores[i]);
-    set_match_peptide(m, pep);
+    Match* m = new Match();
+    m->setScore(XCORR, scores[i]);
+    m->setPeptide(pep);
     match_list.push_back(m);    
   }
   set_verbosity_level(CARP_ERROR);
 }
 
-void set_matches(MATCH_COLLECTION_T* mc, vector<MATCH_T*> matches){
+void set_matches(MATCH_COLLECTION_T* mc, vector<Match*> matches){
   for(size_t i=0; i<matches.size(); i++){
     add_match_to_match_collection(mc, matches[i]);
   }
@@ -179,8 +179,8 @@ START_TEST(test_set){
   MATCH_ITERATOR_T* mi = new_match_iterator(mc, XCORR, FALSE); // don't sort
   int idx = 0;
   while( match_iterator_has_next(mi) ){
-    MATCH_T* cur_match = match_iterator_next(mi);
-    double xcorr = get_match_score(cur_match, XCORR);
+    Match* cur_match = match_iterator_next(mi);
+    double xcorr = cur_match->getScore(XCORR);
     fail_unless( xcorr == scores[idx], 
                  "Xcorr of match %d is %.1f but should be %.1f.",
                  idx, xcorr, scores[idx]);
@@ -193,8 +193,8 @@ START_TEST(test_set){
   idx = 0;
   double last_score = 10000;
   while( match_iterator_has_next(mi) ){
-    MATCH_T* cur_match = match_iterator_next(mi);
-    double xcorr = get_match_score(cur_match, XCORR);
+    Match* cur_match = match_iterator_next(mi);
+    double xcorr = cur_match->getScore(XCORR);
     fail_unless( xcorr <= last_score, 
                  "Xcorr of match %d is %.1f and should be less than %.1f.",
                  idx, xcorr, last_score);
@@ -300,11 +300,11 @@ START_TEST(test_delta_cn){
 
   // check delta_cn scores
   MATCH_ITERATOR_T* mi = new_match_iterator(mc, XCORR, FALSE); // don't sort
-  MATCH_T* cur_match = match_iterator_next(mi);
-  double first_xcorr = get_match_score(cur_match, XCORR);
+  Match* cur_match = match_iterator_next(mi);
+  double first_xcorr = cur_match->getScore(XCORR);
 
   // for sequest, delta cn of first should be 0
-  double dcn = get_match_delta_cn(cur_match);
+  double dcn = cur_match->getDeltaCn();
   fail_unless(dcn == 0, "First deltaCn should be 0 for SEQUEST but is %.1f", 
               dcn);
 
@@ -312,11 +312,11 @@ START_TEST(test_delta_cn){
   vector<double> dcns;
   while( match_iterator_has_next(mi) ){
     cur_match = match_iterator_next(mi);
-    dcn = get_match_delta_cn(cur_match);
+    dcn = cur_match->getDeltaCn();
     if( dcns.empty() || dcn != dcns.back() ){ 
       dcns.push_back(dcn); 
     }
-    double predicted_dcn = (first_xcorr - get_match_score(cur_match, XCORR))/first_xcorr;
+    double predicted_dcn = (first_xcorr - cur_match->getScore(XCORR))/first_xcorr;
     fail_unless( is_close(dcn, predicted_dcn, 0.001), 
                  "DeltaCn is %.10f and should be %.10f", dcn, predicted_dcn);
   }
@@ -330,12 +330,12 @@ START_TEST(test_delta_cn){
   cur_match = match_iterator_next(mi);
 
   // for non sequest, delta cn of first should not be 0
-  dcn = get_match_delta_cn(cur_match);
+  dcn = cur_match->getDeltaCn();
   fail_unless(dcn != 0, "First deltaCn should not be 0 for SEARCH but is %.1f", 
               dcn);
 
   // check deltaCn compared to SEQUEST values
-  double last_xcorr = get_match_score(cur_match, XCORR);
+  double last_xcorr = cur_match->getScore(XCORR);
   vector<double>::iterator previous_dcn = dcns.begin();
 
   while( match_iterator_has_next(mi) ){
@@ -343,11 +343,11 @@ START_TEST(test_delta_cn){
     fail_unless( is_close(dcn, *previous_dcn, 0.001), 
                  "DeltaCn is %.10f and should be %.10f", dcn, *previous_dcn);
     
-    last_xcorr = get_match_score(cur_match, XCORR);
+    last_xcorr = cur_match->getScore(XCORR);
     cur_match = match_iterator_next(mi);
-    dcn = get_match_delta_cn(cur_match);
+    dcn = cur_match->getDeltaCn();
 
-    if( last_xcorr != get_match_score(cur_match, XCORR) &&
+    if( last_xcorr != cur_match->getScore(XCORR) &&
         previous_dcn + 1 < dcns.end() ){
       previous_dcn++;
     }

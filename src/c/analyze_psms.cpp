@@ -152,7 +152,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
   MATCH_ITERATOR_T* match_iterator = NULL;
   MATCH_COLLECTION_T* match_collection = NULL;
   MATCH_COLLECTION_T* target_match_collection = NULL;
-  MATCH_T* match = NULL;
+  Match* match = NULL;
   int set_idx = 0;
   
   output.writeFeatureHeader(feature_names, NUM_FEATURES);
@@ -282,7 +282,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
     while(match_iterator_has_next(match_iterator)){
       match = match_iterator_next(match_iterator);
       // Register PSM with features
-      features = get_match_percolator_features(match, match_collection);
+      features = match->getPercolatorFeatures(match_collection);
 
       output.writeMatchFeatures(match, features, NUM_FEATURES);
       switch (command) {
@@ -293,7 +293,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
         break;
       case QRANKER_COMMAND:
         qcRegisterPSM((SetType)set_idx,
-                      get_match_sequence_sqt(match),
+                      match->getSequenceSqt(),
                       features);
         break;
       default:
@@ -342,6 +342,8 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
   }
 
   output.writeMatches(target_match_collection);
+
+  carp(CARP_DETAILED_DEBUG, "analyze_psms: cleanup");
 
   // free names
   unsigned int name_idx;

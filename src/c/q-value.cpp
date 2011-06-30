@@ -41,12 +41,12 @@ static void identify_best_psm_per_peptide
   MATCH_ITERATOR_T* match_iterator 
     = new_match_iterator(all_matches, score_type, FALSE);
   while(match_iterator_has_next(match_iterator)){
-    MATCH_T* match = match_iterator_next(match_iterator);
+    Match* match = match_iterator_next(match_iterator);
 
     // Skip matches that are not top-ranked.
-    if (get_match_rank(match, score_type) == 1) {
-      char *peptide = get_match_mod_sequence_str_with_symbols(match);
-      FLOAT_T this_score = get_match_score(match, score_type);
+    if (match->getRank(score_type) == 1) {
+      char *peptide = match->getModSequenceStrWithSymbols();
+      FLOAT_T this_score = match->getScore(score_type);
 
       map<string, FLOAT_T>::iterator map_position 
         = best_score_per_peptide.find(peptide);
@@ -68,18 +68,18 @@ static void identify_best_psm_per_peptide
   // Set the best_per_peptide Boolean in the match, based on the hash.
   match_iterator = new_match_iterator(all_matches, score_type, FALSE);
   while(match_iterator_has_next(match_iterator)){
-    MATCH_T* match = match_iterator_next(match_iterator);
+    Match* match = match_iterator_next(match_iterator);
 
      // Skip matches that are not top-ranked.
-    if (get_match_rank(match, score_type) == 1) {
-      char* peptide = get_match_mod_sequence_str_with_symbols(match);
-      FLOAT_T this_score = get_match_score(match, score_type);
+    if (match->getRank(score_type) == 1) {
+      char* peptide = match->getModSequenceStrWithSymbols();
+      FLOAT_T this_score = match->getScore(score_type);
 
       map<string, FLOAT_T>::iterator map_position 
         = best_score_per_peptide.find(peptide);
 
       if (map_position->second == this_score) {
-        set_best_per_peptide(match);
+        match->setBestPerPeptide();
         
         // Prevent ties from causing two peptides to be best.
         best_score_per_peptide[peptide] = HUGE_VAL;
@@ -292,20 +292,20 @@ MATCH_COLLECTION_T* run_qvalue(
     MATCH_ITERATOR_T* match_iterator =
       new_match_iterator(match_collection, XCORR, FALSE);
     while(match_iterator_has_next(match_iterator)){
-      MATCH_T* match = match_iterator_next(match_iterator);
+      Match* match = match_iterator_next(match_iterator);
       
       // Only use top-ranked matches.
-      if( get_match_rank(match, XCORR) != 1 ){
+      if( match->getRank(XCORR) != 1 ){
         continue;
       }
       
-      if (get_match_null_peptide(match) == TRUE) {
+      if (match->getNullPeptide() == TRUE) {
         add_match_to_match_collection(decoy_matches, match);
         have_decoys = TRUE;
       } else {
         add_match_to_match_collection(target_matches, match);
       }
-      free_match(match);
+      Match::freeMatch(match);
     }
     free_match_iterator(match_iterator);
     free_match_collection(match_collection);

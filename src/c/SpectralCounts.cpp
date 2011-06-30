@@ -296,14 +296,14 @@ void SpectralCounts::computeEmpai(){
  * all b and y ions that are not modified.
  * \return The sum of unmodified b and y ions.
  */
-FLOAT_T SpectralCounts::sumMatchIntensity(MATCH_T* match,
+FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
                                         SpectrumCollection* spectra)
 {
   FLOAT_T match_intensity = 0;
-  char* peptide_seq = get_match_sequence(match);
-  MODIFIED_AA_T* modified_sequence = get_match_mod_sequence(match);
-  int charge = get_match_charge(match);
-  Spectrum* temp = get_match_spectrum(match);
+  char* peptide_seq = match->getSequence();
+  MODIFIED_AA_T* modified_sequence = match->getModSequence();
+  int charge = match->getCharge();
+  Spectrum* temp = match->getSpectrum();
   int scan = temp->getFirstScan();
   Spectrum* spectrum = spectra->getSpectrum(scan);
   Ion* ion;
@@ -354,12 +354,12 @@ void SpectralCounts::getPeptideScores()
     spectra = SpectrumCollectionFactory::create(get_string_parameter_pointer("input-ms2"));
   }
 
-  for(set<MATCH_T*>::iterator match_it = matches_.begin();
+  for(set<Match*>::iterator match_it = matches_.begin();
       match_it != matches_.end(); ++match_it){
 
     FLOAT_T match_intensity = 1; // for NSAF just count each for the peptide/
 
-    MATCH_T* match = (*match_it);
+    Match* match = (*match_it);
     // for sin, calculate total ion intensity for match by
     // summing up peak intensities
     if( measure_ == MEASURE_SIN ){
@@ -367,7 +367,7 @@ void SpectralCounts::getPeptideScores()
     }
 
     // add ion_intensity to peptide scores
-    PEPTIDE_T* peptide = get_match_peptide(match);
+    PEPTIDE_T* peptide = match->getPeptide();
     if (peptide_scores_.find(peptide) ==  peptide_scores_.end()){
       peptide_scores_.insert(make_pair(peptide, 0.0));
     }
@@ -423,14 +423,14 @@ void SpectralCounts::filterMatches()
     }
 
     while(match_iterator_has_next(match_iterator)){
-      MATCH_T* match = match_iterator_next(match_iterator);
+      Match* match = match_iterator_next(match_iterator);
       qualify = false;
-      if (get_match_rank(match, XCORR) != 1){
+      if (match->getRank(XCORR) != 1){
 	continue;
       }
       // find a qvalue score lower than threshold
-      if (get_match_score(match, qval_type) != FLT_MIN &&
-	  get_match_score(match, qval_type) <= threshold_)  {
+      if (match->getScore(qval_type) != FLT_MIN &&
+	  match->getScore(qval_type) <= threshold_)  {
         matches_.insert(match);
       }
     } // next match
