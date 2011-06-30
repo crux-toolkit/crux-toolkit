@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <map>
 #include "TestXml.h"
-#include "match.h"
+#include "Match.h"
 #include "peptide.h"
 #include "modifications.h"
 #include "parameter.h"

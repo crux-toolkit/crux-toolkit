@@ -85,8 +85,8 @@ LIBFILES= \
   linked_list.h \
   mass.cpp \
   mass.h \
-  match.cpp \
-  match.h \
+  Match.cpp \
+  Match.h \
   MatchColumns.cpp \
   MatchColumns.h \
   MatchFileReader.cpp \

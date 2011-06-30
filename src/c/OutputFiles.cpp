@@ -497,7 +497,7 @@ void OutputFiles::writeMatches(
  * \brief Print features from one match to file.
  */
 void OutputFiles::writeMatchFeatures(
-   MATCH_T* match, ///< match to provide scan num, decoy
+   Match* match, ///< match to provide scan num, decoy
    double* features,///< features for this match
    int num_features)///< size of features array
 {
@@ -505,10 +505,10 @@ void OutputFiles::writeMatchFeatures(
 
   // write scan number
   fprintf(feature_file_, "%i\t",
-          (get_match_spectrum(match))->getFirstScan() );
+          match->getSpectrum()->getFirstScan());
 
   // decoy or target peptide
-  if (get_match_null_peptide(match) == FALSE){
+  if (match->getNullPeptide() == FALSE){
     fprintf(feature_file_, "1\t");
   } else { 
     fprintf(feature_file_, "-1\t");

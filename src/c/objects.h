@@ -489,10 +489,10 @@ enum _protein_scorer_type { PROTEIN_SCORER_PVALUE,
 typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
 
 /**
- *\typedef MATCH_T
+ *\class Match
  *\brief An object that contains the information of a peptide and the scoring of multiple types
  */
-typedef struct match MATCH_T;
+class Match;
 
 /**
  *\typedef MATCH_COLLECTION_T

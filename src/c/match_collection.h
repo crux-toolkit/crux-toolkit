@@ -33,7 +33,7 @@
 #include "scorer.h" 
 #include "index.h"
 #include "generate_peptides_iterator.h" 
-#include "match.h"
+#include "Match.h"
 #include "hash.h"
 #include "peptide_src.h"
 #include "ProteinIndex.h"
@@ -270,7 +270,7 @@ int merge_match_collections(
  */
 BOOLEAN_T add_match_to_match_collection(
   MATCH_COLLECTION_T* match_collection, ///< add to here
-  MATCH_T* match                        ///< add this match
+  Match* match                        ///< add this match
 );
 
 /**
@@ -454,7 +454,7 @@ BOOLEAN_T match_iterator_has_next(
  * MUST set the iterator to correct mode before initialially calling this method
  *\returns the match in decreasing score order for the match_mode(SCORER_TYPE_T)
  */
-MATCH_T* match_iterator_next(
+Match* match_iterator_next(
   MATCH_ITERATOR_T* match_iterator ///< the working match iterator -in
   );
 
