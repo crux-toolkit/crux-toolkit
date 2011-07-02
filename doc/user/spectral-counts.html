@@ -32,14 +32,28 @@ The quantification methods are defined below:</p>
 <ol>
 <li>
   <p>For each protein in a given database, the NSAF score is:</p>
-  <p><img alt="" src="nsaf_prot_equation.png"></p>
+  <p><img alt="" src="nsaf_prot_equation_a.png"></p>
 <div>where:</div>
 <ul>
 <li>N is protein index</li>
 <li>S<sub>N</sub> is the number spectra matched to protein index</li>
 <li>L<sub>N</sub> is the length of protein N </li>
 <li>n is the total number of proteins in the input database</li>
-</ul></li>
+</ul>
+  <p>With the distribution factor of shared spectra matched, the NSAF score is:</p>
+  <p><img alt="" src="nsaf_prot_equation_b.png"></p>
+<div>where:</div>
+<ul>
+<li>N is the protein index</li>
+<li>uSpc<sub>N</sub> is the unique number spectra matched to the protein index</li>
+<li>sSpc<sub>N</sub> is the shared number spectra matched to the protein index</li>
+<li>uL<sub>N</sub> is the unique length of protein N</li>
+<li>sL<sub>N</sub> is the shared length of protein N</li>
+<li>n is the total number of proteins in the input database</li>
+<li>d is the distributing factor of protein N, given by</li>
+<p><img alt="" src="d.png"></p>
+</ul>
+</li>
 <li>
   <p>For each protein in a given database, the SI<sub>N</sub> score is:</p>
   <p><img alt="" src="sin_prot_equation.png"></p>
@@ -68,14 +82,28 @@ The quantification methods are defined below:</p>
 <div> <u>Peptide Quantification</u>
   <ol>
 <li><p>For each peptide in a given database, the NSAF score is:</p>
-<p><img alt="" src="nsaf_pep_equation.png"></p>
+<p><img alt="" src="nsaf_pep_equation_a.png"></p>
 <div>where:</div>
 <ul>
 <li>N is the peptide index</li>
 <li>S<sub>N</sub> is the number spectra matched to peptide N</li>
 <li>L<sub>N</sub> is the length of peptide N </li>
 <li>n is the total number of peptides in the input database</li>
-</ul></li>
+</ul>
+  <p>With the distribution factor of shared spectra matched, the NSAF score is:</p>
+  <p><img alt="" src="nsaf_pep_equation_b.png"></p>
+<div>where:</div>
+<ul>
+<li>N is the peptide index</li>
+<li>uSpc<sub>N</sub> is the unique number spectra matched to the peptide index</li>
+<li>sSpc<sub>N</sub> is the shared number spectra matched to the peptide index</li>
+<li>uL<sub>N</sub> is the unique length of peptide N</li>
+<li>sL<sub>N</sub> is the shared length of peptide N</li>
+<li>n is the total number of peptides in the input database</li>
+<li>d is the distributing factor of peptide N, given by</li>
+<p><img alt="" src="d.png"></p>
+</ul>
+</li>
 
 <li>
 
