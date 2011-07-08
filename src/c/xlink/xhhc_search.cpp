@@ -112,7 +112,7 @@ int xlink_search_main(int argc, char** argv) {
   WINDOW_TYPE_T window_type_decoy = 
     get_window_type_parameter("precursor-window-type-decoy");
 
-
+  char* output_directory = get_string_parameter("output-dir");
 
   char* database = get_string_parameter("protein database");
   char* links = get_string_parameter("link sites");
@@ -134,12 +134,23 @@ int xlink_search_main(int argc, char** argv) {
   LinkedPeptide::linker_mass = linker_mass;
   vector<LinkedPeptide> all_ions;
   carp(CARP_DETAILED_DEBUG,"Calling find all precursor ions");
-  carp(CARP_INFO, "Building xlink database");
   find_all_precursor_ions(all_ions, links, "K", database,1);
   carp(CARP_DETAILED_DEBUG,"Sort");
   // sort filtered ions and decoy ions by mass
   //sort(all_ions.begin(), all_ions.end());
+  {
+    ostringstream oss;
+    oss << output_directory << "/" << "xlink_peptides.txt";
+    string temp = oss.str();
+    ofstream peptides_file(temp.c_str());
+    peptides_file << "mass\tsequence"<<endl;
+    for (unsigned int idx=0;idx < all_ions.size();idx++) {
+      peptides_file << all_ions.at(idx).mass(MONO) << "\t";
+      peptides_file << all_ions.at(idx) << endl;
+    }
+    peptides_file.flush();
 
+  }
 
   carp(CARP_INFO,"Loading Spectra");
   Spectrum* spectrum = new Spectrum();
@@ -152,7 +163,6 @@ int xlink_search_main(int argc, char** argv) {
   FLOAT_T score;
  // best pvalues
 
-  char* output_directory = get_string_parameter("output-dir");
   const char* target_filename = "search.target.txt";
   
   string target_path = string(output_directory) + "/" + string(target_filename);

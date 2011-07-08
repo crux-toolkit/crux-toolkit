@@ -1,0 +1,6 @@
+overwrite=T
+fragment-mass=mono
+enzyme=trypsin
+missed-cleavages=T
+isotopic-mass=mono
+C=-57.0214637206

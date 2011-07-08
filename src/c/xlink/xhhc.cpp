@@ -335,9 +335,8 @@ void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides,
     } /* xlink-include-selfloops */
 
     {
-      set<string>::iterator pepB = pepA;
-      pepB++;
-      for (;pepB != peptides.end(); ++pepB) {
+
+      for (set<string>::iterator pepB = pepA ;pepB != peptides.end(); ++pepB) {
         string seqB = *pepB;
         vector<PEPTIDE_T*>& crux_peptides2 = get_peptides_from_sequence(seqB);
         
