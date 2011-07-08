@@ -93,9 +93,14 @@ void collapseScans(DelimitedFile& matches_in, DelimitedFile& matches_out) {
   }
   
   //make sure scans are together.
+  carp(CARP_DETAILED_DEBUG, "Sorting matches by scan");
   matches_in.sortByIntegerColumn("scan");
 
   matches_out.addColumn("p-value bonf.");
+
+  if (matches_in.numRows() == 0) {
+    return;
+  }
 
   int last_scan = matches_in.getInteger("scan", 0);
   int first_row = 0;
@@ -179,6 +184,22 @@ int xlink_compute_qvalues(){
   carp(CARP_INFO,"Sorting by p-value bonf.");
   target_matches_bonf.sortByFloatColumn("p-value bonf.");
   decoy_matches_bonf.sortByFloatColumn("p-value bonf."); 
+
+  //test the decoy p-values for accuracy.
+  for (unsigned int idx=0;idx < decoy_matches_bonf.numRows();idx++) {
+    double calc_pvalue = decoy_matches_bonf.getDouble("p-value bonf.", idx);
+    double rank_pvalue = (double)(idx + 1) / (double) decoy_matches_bonf.numRows();
+
+    if ((calc_pvalue > 2 * rank_pvalue) || (calc_pvalue < 0.5 * rank_pvalue)) {
+      carp(CARP_WARNING, "inaccurate p-values!");
+      carp(CARP_WARNING, "scan:%d charge:%d mass: %g rank:%g calc:%g", 
+        decoy_matches_bonf.getInteger("scan", idx),
+        decoy_matches_bonf.getInteger("charge", idx),
+        decoy_matches_bonf.getDouble("spectrum neutral mass"),
+        rank_pvalue,
+        calc_pvalue);
+    } 
+  }
   
   carp(CARP_INFO,"Adding q-value column");
   target_matches_bonf.addColumn("fdr b-h");
