@@ -495,22 +495,22 @@ typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
 class Match;
 
 /**
- *\typedef MATCH_COLLECTION_T
+ *\class MatchCollection
  *\brief An object that contains mutiple match objects
  */
-typedef struct match_collection MATCH_COLLECTION_T;
+class MatchCollection;
 
 /**
- *\typedef MATCH_ITERATOR_T
+ *\class MatchIterator
  *\brief An object that navigates the matches
  */
-typedef struct match_iterator MATCH_ITERATOR_T;
+class MatchIterator;
 
 /**
- *\typedef MATCH_COLLECTION_ITERATOR_T
+ *\class MatchCollectionIterator
  *\brief An object that navigates the match_collection objects
  */
-typedef struct match_collection_iterator MATCH_COLLECTION_ITERATOR_T;
+class MatchCollectionIterator;
 
 /**
  * The enum for algorithm type (PERCOLATOR, CZAR, ALL)

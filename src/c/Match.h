@@ -95,7 +95,7 @@ class Match {
    */
   void printOneMatchField(
     int      column_idx,             ///< Index of the column to print. -in
-    MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
+    MatchCollection* collection,  ///< collection holding this match -in 
     MatchFileWriter*    output_file,            ///< output stream -out
     int      scan_num,               ///< starting scan number -in
     FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
@@ -172,7 +172,7 @@ class Match {
    *
    */
   void printTab(
-    MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
+    MatchCollection* collection,  ///< collection holding this match -in 
     MatchFileWriter*    file,                   ///< output stream -out
     int      scan_num,               ///< starting scan number -in
     FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
@@ -187,7 +187,7 @@ class Match {
    *\returns the feature FLOAT_T array
    */
   double* getPercolatorFeatures(
-    MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
+    MatchCollection* match_collection ///< the match collection to iterate -in
     );
 
   /**

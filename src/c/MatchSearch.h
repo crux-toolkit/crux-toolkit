@@ -25,7 +25,7 @@ class MatchSearch : public CruxApplication {
    * In the future, implement and option and test for a minimum score.
    * \returns TRUE if no more PSMs need be searched.
    */
-  bool isSearchComplete(MATCH_COLLECTION_T* matches, 
+  bool isSearchComplete(MatchCollection* matches, 
                              int mods_per_peptide);
 
   /**
@@ -39,7 +39,7 @@ class MatchSearch : public CruxApplication {
    * \return The number of peptide mods searched.
    */
   int searchPepMods(
-    MATCH_COLLECTION_T* match_collection, ///< store PSMs here
+    MatchCollection* match_collection, ///< store PSMs here
     BOOLEAN_T is_decoy,   ///< generate decoy peptides from index/db
     INDEX_T* index,       ///< index to use for generating peptides
     Database* database, ///< db to use for generating peptides
@@ -62,8 +62,8 @@ class MatchSearch : public CruxApplication {
    */
   void printSpectrumMatches(
     OutputFiles& output_files,       
-    MATCH_COLLECTION_T* target_psms, 
-    vector<MATCH_COLLECTION_T*>& decoy_psms,
+    MatchCollection* target_psms, 
+    vector<MatchCollection*>& decoy_psms,
     Spectrum* spectrum,             
     BOOLEAN_T combine_target_decoy,
     int num_decoy_files
@@ -78,7 +78,7 @@ class MatchSearch : public CruxApplication {
    * search with all peptide mods in the list.
    */
   void addDecoyScores(
-    MATCH_COLLECTION_T* target_psms, ///< add scores to these matches
+    MatchCollection* target_psms, ///< add scores to these matches
     Spectrum* spectrum, ///<
     int charge, ///< 
     INDEX_T* index, ///< search this index if not null

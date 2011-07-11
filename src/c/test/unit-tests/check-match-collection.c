@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "check-match-collection.h"
-#include "match_collection.h"
+#include "MatchCollection.h"
 #include "MatchFileWriter.h"
 #include "MatchSearch.h"
 #include <vector>
@@ -9,8 +9,8 @@
 #include <string>
 
 // also "included" from match_collection.
-void force_scored_by(MATCH_COLLECTION_T* match_collection, SCORER_TYPE_T type);
-BOOLEAN_T calculate_delta_cn( MATCH_COLLECTION_T* mc, COMMAND_T search_type );
+void force_scored_by(MatchCollection* match_collection, SCORER_TYPE_T type);
+BOOLEAN_T calculate_delta_cn( MatchCollection* mc, COMMAND_T search_type );
 
 using namespace std;
 
@@ -22,7 +22,7 @@ bool is_close(double a, double b, double tol){
 }
 
 // declare things to set up
-MATCH_COLLECTION_T* mc;
+MatchCollection* mc;
 Match* m;
 vector<Match*> match_list;
 int num_matches;
@@ -33,7 +33,7 @@ Protein* prot;
 char protseq[] = "FAKESEQ";
 
 void match_collection_setup(){
-  mc = new_empty_match_collection(FALSE); // not decoy
+  mc = new MatchCollection(FALSE); // not decoy
 
   // set up some matches with xcorrs and a peptide to add
   prot = new Protein("prot", protseq, strlen(protseq), NULL, 0, 0, NULL);
@@ -48,15 +48,15 @@ void match_collection_setup(){
   set_verbosity_level(CARP_ERROR);
 }
 
-void set_matches(MATCH_COLLECTION_T* mc, vector<Match*> matches){
+void set_matches(MatchCollection* mc, vector<Match*> matches){
   for(size_t i=0; i<matches.size(); i++){
-    add_match_to_match_collection(mc, matches[i]);
+    mc->addMatch(matches[i]);
   }
-  force_scored_by(mc, XCORR);
+  mc->forceScoredBy(XCORR);
 }
 void match_collection_teardown(){
   if( mc ){
-    free_match_collection(mc); // frees the matches
+    delete mc; // frees the matches
   }
   if( prot ) { delete prot; }
   if( pep ) { free_peptide(pep); }
@@ -171,15 +171,15 @@ END_TEST
 
 START_TEST(test_set){
   set_matches(mc, match_list);
-  fail_unless( get_match_collection_match_total(mc) == num_matches,
+  fail_unless( mc->getMatchTotal() == num_matches,
                "Added %d matches but collection only has %d.", 
-               num_matches, get_match_collection_match_total(mc));
+               num_matches, mc->getMatchTotal());
 
   // check scores of all matches
-  MATCH_ITERATOR_T* mi = new_match_iterator(mc, XCORR, FALSE); // don't sort
+  MatchIterator* mi = new MatchIterator(mc, XCORR, FALSE); // don't sort
   int idx = 0;
-  while( match_iterator_has_next(mi) ){
-    Match* cur_match = match_iterator_next(mi);
+  while( mi->hasNext() ){
+    Match* cur_match = mi->next();
     double xcorr = cur_match->getScore(XCORR);
     fail_unless( xcorr == scores[idx], 
                  "Xcorr of match %d is %.1f but should be %.1f.",
@@ -188,12 +188,12 @@ START_TEST(test_set){
   }
 
   // also check that they sort correctly
-  free_match_iterator(mi);
-  mi = new_match_iterator(mc, XCORR, TRUE); // do sort
+  delete mi;
+  mi = new MatchIterator(mc, XCORR, TRUE); // do sort
   idx = 0;
   double last_score = 10000;
-  while( match_iterator_has_next(mi) ){
-    Match* cur_match = match_iterator_next(mi);
+  while( mi->hasNext() ){
+    Match* cur_match = mi->next();
     double xcorr = cur_match->getScore(XCORR);
     fail_unless( xcorr <= last_score, 
                  "Xcorr of match %d is %.1f and should be less than %.1f.",
@@ -201,7 +201,7 @@ START_TEST(test_set){
     idx++;
     last_score = xcorr;
   }
-  free_match_iterator(mi);
+  delete mi;
 }
 END_TEST
 // once these tests pass, we can use set_matches() and match_iterator in other tests
@@ -209,7 +209,7 @@ END_TEST
 START_TEST(test_print_rank){
   initialize_parameters();
   set_matches(mc, match_list);
-  populate_match_rank_match_collection(mc, XCORR);
+  mc->populateMatchRank(XCORR);
 
   // other items for printing to tab file
   int z = 1;
@@ -234,7 +234,7 @@ START_TEST(test_print_rank){
   MatchSearch application;
   fout->addColumnNames(&application, false);
   fout->writeHeader();
-  print_match_collection_tab_delimited(fout, 3, mc, s, XCORR);
+  mc->printTabDelimited(fout, 3, s, XCORR);
   delete fout;
   sleep(2);  // wait to avoid NFS latency issues
 
@@ -256,7 +256,7 @@ START_TEST(test_print_rank){
   fout = new MatchFileWriter(filename);
   fout->addColumnNames(&application, false);
   fout->writeHeader();
-  print_match_collection_tab_delimited(fout, 5, mc, s, XCORR);
+  mc->printTabDelimited(fout, 5, s, XCORR);
   delete fout;
 
   fin.open(filename, ifstream::in);
@@ -276,7 +276,7 @@ START_TEST(test_print_rank){
   fout = new MatchFileWriter(filename);
   fout->addColumnNames(&application, false);
   fout->writeHeader();
-  print_match_collection_tab_delimited(fout, 6, mc, s, XCORR);
+  mc->printTabDelimited(fout, 6, s, XCORR);
   delete fout;
 
   fin.open(filename, ifstream::in);
@@ -296,11 +296,11 @@ END_TEST
 
 START_TEST(test_delta_cn){
   set_matches(mc, match_list);
-  calculate_delta_cn(mc, SEQUEST_COMMAND);
+  mc->calculateDeltaCn(SEQUEST_COMMAND);
 
   // check delta_cn scores
-  MATCH_ITERATOR_T* mi = new_match_iterator(mc, XCORR, FALSE); // don't sort
-  Match* cur_match = match_iterator_next(mi);
+  MatchIterator* mi = new MatchIterator(mc, XCORR, FALSE); // don't sort
+  Match* cur_match = mi->next();
   double first_xcorr = cur_match->getScore(XCORR);
 
   // for sequest, delta cn of first should be 0
@@ -310,8 +310,8 @@ START_TEST(test_delta_cn){
 
   // check remaining delta cns and save them for next test
   vector<double> dcns;
-  while( match_iterator_has_next(mi) ){
-    cur_match = match_iterator_next(mi);
+  while( mi->hasNext() ){
+    cur_match = mi->next();
     dcn = cur_match->getDeltaCn();
     if( dcns.empty() || dcn != dcns.back() ){ 
       dcns.push_back(dcn); 
@@ -322,12 +322,12 @@ START_TEST(test_delta_cn){
   }
 
   // now test with search command
-  calculate_delta_cn(mc, SEARCH_COMMAND);
+  mc->calculateDeltaCn(SEARCH_COMMAND);
 
   // check delta_cn scores
-  free_match_iterator(mi);
-  mi = new_match_iterator(mc, XCORR, FALSE); // don't sort
-  cur_match = match_iterator_next(mi);
+  delete mi;
+  mi = new MatchIterator(mc, XCORR, FALSE); // don't sort
+  cur_match = mi->next();
 
   // for non sequest, delta cn of first should not be 0
   dcn = cur_match->getDeltaCn();
@@ -338,13 +338,13 @@ START_TEST(test_delta_cn){
   double last_xcorr = cur_match->getScore(XCORR);
   vector<double>::iterator previous_dcn = dcns.begin();
 
-  while( match_iterator_has_next(mi) ){
+  while( mi->hasNext() ){
 
     fail_unless( is_close(dcn, *previous_dcn, 0.001), 
                  "DeltaCn is %.10f and should be %.10f", dcn, *previous_dcn);
     
     last_xcorr = cur_match->getScore(XCORR);
-    cur_match = match_iterator_next(mi);
+    cur_match = mi->next();
     dcn = cur_match->getDeltaCn();
 
     if( last_xcorr != cur_match->getScore(XCORR) &&

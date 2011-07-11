@@ -20,7 +20,7 @@
 #include "generate_peptides_iterator.h"
 #include "scorer.h"
 #include "Match.h"
-#include "match_collection.h"
+#include "MatchCollection.h"
 #include "OutputFiles.h"
 
 FLOAT_T* compute_decoy_qvalues(
@@ -35,7 +35,7 @@ FLOAT_T* compute_qvalues_from_pvalues(
   int      num_pvals,
   FLOAT_T  pi_zero);
 
-MATCH_COLLECTION_T* run_qvalue(
+MatchCollection* run_qvalue(
   char* psm_result_folder, 
   char* fasta_file,
   OutputFiles& output );
