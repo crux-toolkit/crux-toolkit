@@ -3,6 +3,7 @@
 #include "OutputFiles.h"
 #include "ProteinPeptideIterator.h"
 #include "SpectrumCollectionFactory.h"
+#include "MatchCollectionIterator.h"
 
 using namespace std;
 
@@ -402,18 +403,18 @@ void SpectralCounts::filterMatches()
 
   // create match collection
   int decoy_count = 0;
-  MATCH_COLLECTION_ITERATOR_T* match_collection_it 
-    = new_match_collection_iterator(path_info[1], 
+  MatchCollectionIterator* match_collection_it 
+    = new MatchCollectionIterator(path_info[1], 
                                     database_name_.c_str(), &decoy_count);
 
   matches_.clear();
-  MATCH_ITERATOR_T* match_iterator = NULL;
-  MATCH_COLLECTION_T* match_collection = NULL;
+  MatchIterator* match_iterator = NULL;
+  MatchCollection* match_collection = NULL;
   bool qualify = false;
-  while (match_collection_iterator_has_next(match_collection_it)){
+  while (match_collection_it->hasNext()){
     
-    match_collection = match_collection_iterator_next(match_collection_it);
-    match_iterator = new_match_iterator(match_collection, XCORR, TRUE);
+    match_collection = match_collection_it->next();
+    match_iterator = new MatchIterator(match_collection, XCORR, TRUE);
     
     // figure out which qvalue we are using
     SCORER_TYPE_T qval_type = get_qval_type(match_collection);
@@ -422,8 +423,8 @@ void SpectralCounts::filterMatches()
            " q-ranker, or compute-q-values.\n", psm_file_.c_str());
     }
 
-    while(match_iterator_has_next(match_iterator)){
-      Match* match = match_iterator_next(match_iterator);
+    while(match_iterator->hasNext()){
+      Match* match = match_iterator->next();
       qualify = false;
       if (match->getRank(XCORR) != 1){
 	continue;
@@ -446,15 +447,14 @@ void SpectralCounts::filterMatches()
  * if any of those were scored or INVALID_SCORER_TYPE if none were scored. 
  */
 SCORER_TYPE_T SpectralCounts::get_qval_type(
-  MATCH_COLLECTION_T* match_collection){
+  MatchCollection* match_collection){
   SCORER_TYPE_T scored_type = INVALID_SCORER_TYPE;
 
-  if(get_match_collection_scored_type(match_collection, PERCOLATOR_QVALUE)){
+  if(match_collection->getScoredType(PERCOLATOR_QVALUE)){
     scored_type =  PERCOLATOR_QVALUE;
-  } else if(get_match_collection_scored_type(match_collection, QRANKER_QVALUE)){
+  } else if(match_collection->getScoredType(QRANKER_QVALUE)){
     scored_type = QRANKER_QVALUE;
-  } else if(get_match_collection_scored_type(match_collection, 
-                                             DECOY_XCORR_QVALUE)){
+  } else if(match_collection->getScoredType(DECOY_XCORR_QVALUE)){
     scored_type = DECOY_XCORR_QVALUE;
   }
 

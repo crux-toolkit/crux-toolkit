@@ -29,10 +29,10 @@ void analyze_matches_main(
  * for a search against the sequence database fasta_file. Optionally 
  * puts the percolator PSM feature vectors into feature_file, if it is 
  * not NULL.
- * \returns a pointer to a MATCH_COLLECTION_T object
+ * \returns a pointer to a MatchCollection object
  * \callgraph
  */
-MATCH_COLLECTION_T* run_percolator_or_qranker(
+MatchCollection* run_percolator_or_qranker(
   COMMAND_T command,                                          
   char* input_directory, 
   char* fasta_file, 

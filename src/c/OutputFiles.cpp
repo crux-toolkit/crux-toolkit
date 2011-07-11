@@ -282,13 +282,13 @@ void OutputFiles::writeHeaders(int num_proteins){
     }
 
     if( sqt_file_array_ ){
-      print_sqt_header(sqt_file_array_[file_idx],
+      MatchCollection::printSqtHeader(sqt_file_array_[file_idx],
                        tag,
-                       num_proteins, FALSE); // not post search
+                       num_proteins, false); // not post search
     }
     
     if ( xml_file_array_){
-      print_xml_header(xml_file_array_[file_idx]);
+      MatchCollection::printXmlHeader(xml_file_array_[file_idx]);
     }
 
     tag = "decoy";
@@ -313,7 +313,7 @@ void OutputFiles::writeHeaders(const vector<bool>& add_this_col){
     }
 
     if ( xml_file_array_){
-      print_xml_header(xml_file_array_[file_idx]);
+      MatchCollection::printXmlHeader(xml_file_array_[file_idx]);
     }
 
     tag = "decoy";
@@ -342,7 +342,7 @@ void OutputFiles::writeFeatureHeader(char** feature_names,
 void OutputFiles::writeFooters(){
   if (xml_file_array_){
     for (int file_idx = 0; file_idx < num_files_; file_idx++){
-      print_xml_footer(xml_file_array_[file_idx]);
+      MatchCollection::printXmlFooter(xml_file_array_[file_idx]);
     }
   }
 
@@ -354,8 +354,8 @@ void OutputFiles::writeFooters(){
  * using the ranks from rank_type.  
  */
 void OutputFiles::writeMatches(
-  MATCH_COLLECTION_T*  target_matches, ///< from real peptides
-  vector<MATCH_COLLECTION_T*>& decoy_matches_array,  
+  MatchCollection*  target_matches, ///< from real peptides
+  vector<MatchCollection*>& decoy_matches_array,  
                                 ///< array of collections from shuffled peptides
   SCORER_TYPE_T rank_type,      ///< use ranks for this type
   Spectrum* spectrum            ///< given when all matches are to one spec
@@ -383,8 +383,8 @@ void OutputFiles::writeMatches(
 
 // already confirmed that num_files_ = num decoy collections + 1
 void OutputFiles::printMatchesTab(
-  MATCH_COLLECTION_T*  target_matches, ///< from real peptides
-  vector<MATCH_COLLECTION_T*>& decoy_matches_array,  
+  MatchCollection*  target_matches, ///< from real peptides
+  vector<MatchCollection*>& decoy_matches_array,  
   SCORER_TYPE_T rank_type,
   Spectrum* spectrum
 ){
@@ -397,13 +397,12 @@ void OutputFiles::printMatchesTab(
 
   // if a spectrum is given, use one print function
   if( spectrum ){
-    MATCH_COLLECTION_T* cur_matches = target_matches;
+    MatchCollection* cur_matches = target_matches;
 
     for(int file_idx = 0; file_idx < num_files_; file_idx++){
 
-      print_match_collection_tab_delimited(delim_file_array_[file_idx],
+      cur_matches->printTabDelimited(delim_file_array_[file_idx],
                                            matches_per_spec_,
-                                           cur_matches,
                                            spectrum,
                                            rank_type);
 
@@ -415,16 +414,15 @@ void OutputFiles::printMatchesTab(
 
   } else { // use the multi-spectra print function which assumes
            // targets and decoys are merged
-    print_matches_multi_spectra(target_matches,
-                                delim_file_array_[0],
+    target_matches->printMultiSpectra(delim_file_array_[0],
                                 (num_files_ > 1) ? delim_file_array_[1] : NULL);
   }
 
 }
 
 void OutputFiles::printMatchesSqt(
-  MATCH_COLLECTION_T*  target_matches, ///< from real peptides
-  vector<MATCH_COLLECTION_T*>& decoy_matches_array,  
+  MatchCollection*  target_matches, ///< from real peptides
+  vector<MatchCollection*>& decoy_matches_array,  
                                 ///< array of collections from shuffled peptides
   Spectrum* spectrum
 ){
@@ -433,13 +431,12 @@ void OutputFiles::printMatchesSqt(
     return;
   }
 
-  MATCH_COLLECTION_T* cur_matches = target_matches;
+  MatchCollection* cur_matches = target_matches;
 
   for(int file_idx = 0; file_idx < num_files_; file_idx++){
 
-    print_match_collection_sqt(sqt_file_array_[file_idx],
+    cur_matches->printSqt(sqt_file_array_[file_idx],
                                matches_per_spec_,
-                               cur_matches,
                                spectrum);
 
     if( decoy_matches_array.size() > (size_t)file_idx ){
@@ -451,8 +448,8 @@ void OutputFiles::printMatchesSqt(
 
 
 void OutputFiles::printMatchesXml(
-  MATCH_COLLECTION_T*  target_matches, ///< from real peptides
-  vector<MATCH_COLLECTION_T*>& decoy_matches_array,  
+  MatchCollection*  target_matches, ///< from real peptides
+  vector<MatchCollection*>& decoy_matches_array,  
                                 ///< array of collections from shuffled peptides
   Spectrum* spectrum,
   SCORER_TYPE_T rank_type
@@ -464,13 +461,12 @@ void OutputFiles::printMatchesXml(
     return;
   }
 
-  MATCH_COLLECTION_T* cur_matches = target_matches;
+  MatchCollection* cur_matches = target_matches;
 
   for(int file_idx = 0; file_idx < num_files_; file_idx++){
 
-    print_match_collection_xml(xml_file_array_[file_idx],
+    cur_matches->printXml(xml_file_array_[file_idx],
                                matches_per_spec_,
-                               cur_matches,
                                spectrum,
                                rank_type,
                                index);
@@ -484,13 +480,11 @@ void OutputFiles::printMatchesXml(
 }
 
 void OutputFiles::writeMatches(
-  MATCH_COLLECTION_T*  matches ///< from multiple spectra
+  MatchCollection*  matches ///< from multiple spectra
 ){
-  print_matches_multi_spectra(matches, 
-                              delim_file_array_[0],
+  matches->printMultiSpectra(delim_file_array_[0],
                               NULL);// no decoy file
-  print_matches_multi_spectra_xml(matches,
-                                  xml_file_array_[0]);
+  matches->printMultiSpectraXml(xml_file_array_[0]);
 }
 
 /**

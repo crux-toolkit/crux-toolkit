@@ -95,8 +95,12 @@ LIBFILES= \
   MatchFileWriter.h \
   MatchSearch.cpp \
   MatchSearch.h \
-  match_collection.cpp \
-  match_collection.h \
+  MatchCollection.cpp \
+  MatchCollection.h \
+  MatchCollectionIterator.cpp \
+  MatchCollectionIterator.h \
+  MatchIterator.cpp \
+  MatchIterator.h \
   MGFSpectrumCollection.cpp \
   MGFSpectrumCollection.h \
   modifications.cpp \

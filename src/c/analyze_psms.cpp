@@ -6,6 +6,10 @@
 #include "ComputeQValues.h"
 #include "QRanker.h"
 #include "Percolator.h"
+#include "MatchCollectionIterator.h"
+#include "MatchIterator.h"
+
+
 /**
  * \brief Takes a directory containing PSM files and a protein index
  * and analyzes the PSMs using compute-q-values, percolator or q-ranker.
@@ -92,7 +96,7 @@ void analyze_matches_main(
   OutputFiles output(application);
 
   // Perform the analysis.
-  MATCH_COLLECTION_T* match_collection = NULL;
+  MatchCollection* match_collection = NULL;
   switch(command) {
   case QVALUE_COMMAND:
     match_collection = run_qvalue(input_directory,
@@ -115,7 +119,7 @@ void analyze_matches_main(
   //carp(CARP_INFO, "Outputting matches.");
   //output.writeMatches(match_collection);
 
-  free_match_collection(match_collection);
+  delete match_collection;
   output.writeFooters();
   // clean up
   free(input_directory);
@@ -135,10 +139,10 @@ void analyze_matches_main(
  * for a search against the sequence database fasta_file. Optionally 
  * puts the percolator PSM feature vectors into feature_file, if it is 
  * not NULL.
- * \returns a pointer to a MATCH_COLLECTION_T object
+ * \returns a pointer to a MatchCollection object
  * \callgraph
  */
-MATCH_COLLECTION_T* run_percolator_or_qranker(
+MatchCollection* run_percolator_or_qranker(
   COMMAND_T command,                                          
   char* input_directory, 
   char* fasta_file, 
@@ -149,9 +153,9 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
   double* results_score = NULL;
   double pi0 = get_double_parameter("pi-zero");
   char** feature_names = generate_feature_name_array();
-  MATCH_ITERATOR_T* match_iterator = NULL;
-  MATCH_COLLECTION_T* match_collection = NULL;
-  MATCH_COLLECTION_T* target_match_collection = NULL;
+  MatchIterator* match_iterator = NULL;
+  MatchCollection* match_collection = NULL;
+  MatchCollection* target_match_collection = NULL;
   Match* match = NULL;
   int set_idx = 0;
   
@@ -162,41 +166,39 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
   // first the match_collection of TARGET followed by 
   // the DECOY* match_collections.
   int num_decoys = 0;
-  MATCH_COLLECTION_ITERATOR_T* match_collection_iterator =
-    new_match_collection_iterator(input_directory, fasta_file, &num_decoys);
+  MatchCollectionIterator* match_collection_iterator =
+    new MatchCollectionIterator(input_directory, fasta_file, &num_decoys);
   // Create an array with counts of spectra in each match collection.
-  int num_sets = get_match_collection_iterator_number_collections(
-      match_collection_iterator);
+  int num_sets = match_collection_iterator->getNumberCollections();
   int* num_spectra = (int*)mycalloc(num_sets, sizeof(int));
   int iterations = 0;
-  while(match_collection_iterator_has_next(match_collection_iterator)){
+  while(match_collection_iterator->hasNext()){
     match_collection = 
-      match_collection_iterator_next(match_collection_iterator);
+      match_collection_iterator->next();
     num_spectra[iterations] = 
-      get_match_collection_match_total(match_collection);
+      match_collection->getMatchTotal();
     iterations++;
   }
 
   // get from the match files the columns to print in the output files
   const vector<bool>& cols_to_print = 
-    get_match_collection_iterator_cols_in_file(match_collection_iterator);
+    match_collection_iterator->getColsInFile();
   output.writeHeaders(cols_to_print);
 
   // Reset the iterator. (FIXME: There should be a function to do this!)
-  free_match_collection_iterator(match_collection_iterator);
+  delete match_collection_iterator;
   num_decoys = 0;
   match_collection_iterator =
-    new_match_collection_iterator(input_directory, fasta_file, &num_decoys);
+    new MatchCollectionIterator(input_directory, fasta_file, &num_decoys);
 
   // iterate over each, TARGET, DECOY 1..3 match_collection sets
   iterations = 0;
-  while(match_collection_iterator_has_next(match_collection_iterator)){
+  while(match_collection_iterator->hasNext()){
     
     carp(CARP_DEBUG, "Match collection iteration: %i" , iterations++);
 
     // get the next match_collection
-    match_collection = 
-      match_collection_iterator_next(match_collection_iterator);
+    match_collection = match_collection_iterator->next();
     
     // intialize percolator, using information from first match_collection
     if (set_idx == 0) {
@@ -205,16 +207,15 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
 
       // result array that stores the algorithm scores
       results_q = (double*)mycalloc(
-          get_match_collection_match_total(match_collection), sizeof(double));
+          match_collection->getMatchTotal(), sizeof(double));
       results_score = (double*)mycalloc(
-          get_match_collection_match_total(match_collection), sizeof(double));
+          match_collection->getMatchTotal(), sizeof(double));
       
       // Call that initiates q-ranker or percolator.
       switch (command) {
       case PERCOLATOR_COMMAND:
         pcInitiate(
-          (NSet)get_match_collection_iterator_number_collections(
-                  match_collection_iterator), 
+          (NSet)match_collection_iterator->getNumberCollections(), 
           NUM_FEATURES, 
           num_spectra, 
           feature_names, 
@@ -222,8 +223,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
         break;
       case QRANKER_COMMAND:
         qcInitiate(
-            (NSet)get_match_collection_iterator_number_collections(
-                     match_collection_iterator), 
+            (NSet)match_collection_iterator->getNumberCollections(),
             NUM_FEATURES, 
             num_spectra, 
             feature_names, 
@@ -277,10 +277,11 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
     }
 
     // create iterator, to register each PSM feature.
-    match_iterator = new_match_iterator(match_collection, XCORR, FALSE);
+    carp(CARP_DETAILED_DEBUG, "Registering PSMs");
+    match_iterator = new MatchIterator(match_collection, XCORR, FALSE);
     
-    while(match_iterator_has_next(match_iterator)){
-      match = match_iterator_next(match_iterator);
+    while(match_iterator->hasNext()){
+      match = match_iterator->next();
       // Register PSM with features
       features = match->getPercolatorFeatures(match_collection);
 
@@ -306,34 +307,35 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
 
     // ok free & update for next set
     // MEMLEAK 
-    free_match_iterator(match_iterator);
+    delete match_iterator;
 
     // don't free the target_match_collection
     if(set_idx != 0){
-      free_match_collection(match_collection);
+      delete match_collection;
     }
 
     ++set_idx;
   } // end iteratation over each, TARGET, DECOY 1..3 match_collection sets
 
+  carp(CARP_DETAILED_DEBUG, "Processing PSMs");
   // Start processing
   switch (command) {
   case PERCOLATOR_COMMAND:
     pcExecute(); 
     pcGetScores(results_score, results_q); 
-    fill_result_to_match_collection(
-        target_match_collection, results_q, PERCOLATOR_QVALUE, TRUE);
-    fill_result_to_match_collection(
-        target_match_collection, results_score, PERCOLATOR_SCORE, FALSE);
+    target_match_collection->fillResult(
+      results_q, PERCOLATOR_QVALUE, TRUE);
+    target_match_collection->fillResult(
+      results_score, PERCOLATOR_SCORE, FALSE);
     pcCleanUp();
     break;
   case QRANKER_COMMAND:
     qcExecute(!get_boolean_parameter("no-xval")); 
     qcGetScores(results_score, results_q); 
-    fill_result_to_match_collection(
-        target_match_collection, results_q, QRANKER_QVALUE, TRUE);
-    fill_result_to_match_collection(
-        target_match_collection, results_score, QRANKER_SCORE, FALSE);
+    target_match_collection->fillResult(
+        results_q, QRANKER_QVALUE, TRUE);
+    target_match_collection->fillResult(
+        results_score, QRANKER_SCORE, FALSE);
     qcCleanUp();
     break;
   default:
@@ -341,6 +343,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
     break;
   }
 
+  carp(CARP_DETAILED_DEBUG, "Writing matches");
   output.writeMatches(target_match_collection);
 
   carp(CARP_DETAILED_DEBUG, "analyze_psms: cleanup");
@@ -353,7 +356,7 @@ MATCH_COLLECTION_T* run_percolator_or_qranker(
   free(feature_names);
   free(results_q);
   free(results_score);
-  free_match_collection_iterator(match_collection_iterator);
+  delete match_collection_iterator;
 
   // TODO put free back in. took out because glibc claimed it was corrupted
   // double linked list

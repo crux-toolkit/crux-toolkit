@@ -82,7 +82,7 @@ class SpectralCounts: public CruxApplication {
   void getSpectra(std::map<std::pair<int,int>, Spectrum*>& spectra);
   FLOAT_T sumMatchIntensity(Match* match,
                           SpectrumCollection* spectra);
-  SCORER_TYPE_T get_qval_type(MATCH_COLLECTION_T* match_collection);
+  SCORER_TYPE_T get_qval_type(MatchCollection* match_collection);
 
   // member variables
   OutputFiles* output_;

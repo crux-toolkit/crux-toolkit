@@ -25,7 +25,7 @@
 #include "parameter.h"
 #include "scorer.h" 
 #include "Match.h" 
-#include "match_collection.h" 
+#include "MatchCollection.h" 
 #include "generate_peptides_iterator.h" 
 #include "peptide.h"
 
@@ -534,7 +534,7 @@ void Match::printSqt(
  */
 void Match::printOneMatchField(
   int      column_idx,             ///< Index of the column to print. -in
-  MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
+  MatchCollection* collection,  ///< collection holding this match -in 
   MatchFileWriter*    output_file,            ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
@@ -725,19 +725,19 @@ void Match::printOneMatchField(
     break;
   case ETA_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     get_calibration_eta(collection));
+                                     collection->getCalibrationEta());
     break;
   case BETA_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     get_calibration_beta(collection));
+                                     collection->getCalibrationBeta());
     break;
   case SHIFT_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     get_calibration_shift(collection));
+                                     collection->getCalibrationShift());
     break;
   case CORR_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     get_calibration_corr(collection));
+                                     collection->getCalibrationCorr());
     break;
     // values only for spectral-counts
   case SIN_SCORE_COL:
@@ -939,7 +939,7 @@ void Match::printXml(
  *
  */
 void Match::printTab(
-  MATCH_COLLECTION_T* collection,  ///< collection holding this match -in 
+  MatchCollection* collection,  ///< collection holding this match -in 
   MatchFileWriter*    output_file,            ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
@@ -1054,7 +1054,7 @@ void qsortMatch(
  *\returns the feature FLOAT_T array
  */
 double* Match::getPercolatorFeatures(
-  MATCH_COLLECTION_T* match_collection ///< the match collection to iterate -in
+  MatchCollection* match_collection ///< the match collection to iterate -in
   )
 {
   int feature_count = 20;
@@ -1146,7 +1146,7 @@ double* Match::getPercolatorFeatures(
         get_string_parameter_pointer("percolator-intraset-features"), "T")==0){
     carp(CARP_DETAILED_DEBUG, "Using intraset features!");
     feature_array[17] 
-      = get_match_collection_hash(match_collection, peptide_);
+      = match_collection->getHash(peptide_);
     
     src_iterator = new_peptide_src_iterator(peptide_);
     // iterate overall parent proteins
@@ -1157,17 +1157,17 @@ double* Match::getPercolatorFeatures(
       protein_idx = protein->getProteinIdx();
 
       // numProt
-      if(feature_array[18] < get_match_collection_protein_counter(
-                              match_collection, protein_idx)){
-        feature_array[18] = get_match_collection_protein_counter(
-                              match_collection, protein_idx);
+      if(feature_array[18] < match_collection->getProteinCounter(
+                              protein_idx)){
+        feature_array[18] = match_collection->getProteinCounter(
+                              protein_idx);
       }
       
       // pepSite
-      if(feature_array[19] < get_match_collection_protein_peptide_counter(
-                              match_collection, protein_idx)){
-        feature_array[19] = get_match_collection_protein_peptide_counter(
-                              match_collection, protein_idx);      
+      if(feature_array[19] < match_collection->getProteinPeptideCounter(
+                              protein_idx)){
+        feature_array[19] = match_collection->getProteinPeptideCounter(
+                              protein_idx);      
       }
     }
   } else {
