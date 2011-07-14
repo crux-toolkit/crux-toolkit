@@ -439,6 +439,16 @@ string& DelimitedFile::getString(
   unsigned int col_idx, ///< the column index
   unsigned int row_idx  ///< the row index
   ) {
+
+  vector<string>& column = getColumn(col_idx);
+  if (row_idx >= column.size()) {
+    carp(CARP_FATAL, "Row is out of range for column %i:%s row %i:%i", 
+      col_idx, 
+      getColumnName(col_idx).c_str(), 
+      row_idx, 
+      column.size());
+  }
+
   return getColumn(col_idx).at(row_idx);
 }
 
@@ -771,7 +781,7 @@ void DelimitedFile::reorderRows(
            sort_iter != sort_indices.rend();
            ++sort_iter) {
         row_idx = sort_iter -> second;
-        string current_cell = data_[col_idx][row_idx];
+        string current_cell = getString(col_idx, row_idx);
         current_col.push_back(current_cell);
       }
     }
@@ -873,6 +883,8 @@ void DelimitedFile::copyToRow(
     int dest_col_idx = dest.findColumn(getColumnName(src_col_idx));
     if (dest_col_idx != -1) {
       dest.setString(dest_col_idx, dest_row_idx, getString(src_col_idx, src_row_idx));
+    } else {
+      carp(CARP_WARNING, "Column %s not found in destination", getColumnName(src_col_idx).c_str());
     }
   }
 }
