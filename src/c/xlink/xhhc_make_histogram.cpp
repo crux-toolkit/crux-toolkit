@@ -279,8 +279,8 @@ void plot_weibull(vector<pair<FLOAT_T, LinkedPeptide> >& scores,
   int num_targets = 0;
   int num_decoys = 0;
 
-  FLOAT_T decoy_scores_array[num_scores];
-  FLOAT_T target_scores_array[num_scores];
+  FLOAT_T* decoy_scores_array = new FLOAT_T[num_scores];
+  FLOAT_T* target_scores_array = new FLOAT_T[num_scores];
 
   for (vector<pair<FLOAT_T, LinkedPeptide> >::iterator score_pair = scores.begin();
 	score_pair != scores.end(); ++score_pair) {
@@ -321,6 +321,9 @@ void plot_weibull(vector<pair<FLOAT_T, LinkedPeptide> >& scores,
 	* exp(- pow((x+shift_decoy)/eta_decoy, beta_decoy));
       decoy_fit_file << x << "\t" << y << endl;
   }
+
+  delete target_scores_array;
+  delete decoy_scores_array;
 
   cout << "target correlation " << correlation_target << " <br>" << endl;
   cout << "decoy correlation " << correlation_decoy << " <br>" << endl;
