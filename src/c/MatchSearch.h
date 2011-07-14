@@ -41,7 +41,7 @@ class MatchSearch : public CruxApplication {
   int searchPepMods(
     MatchCollection* match_collection, ///< store PSMs here
     BOOLEAN_T is_decoy,   ///< generate decoy peptides from index/db
-    INDEX_T* index,       ///< index to use for generating peptides
+    Index* index,       ///< index to use for generating peptides
     Database* database, ///< db to use for generating peptides
     Spectrum* spectrum, ///< spectrum to search
     SpectrumZState& zstate, ///< seach spectrum at this z-state
@@ -81,7 +81,7 @@ class MatchSearch : public CruxApplication {
     MatchCollection* target_psms, ///< add scores to these matches
     Spectrum* spectrum, ///<
     int charge, ///< 
-    INDEX_T* index, ///< search this index if not null
+    Index* index, ///< search this index if not null
     Database* database, ///< search this database if not null
     PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to search
     int num_peptide_mods ///< number of mods in the above array

@@ -14,7 +14,7 @@
 #include "crux-utils.h"
 #include "peptide.h"
 #include "Protein.h"
-#include "index.h"
+#include "Index.h"
 #include "carp.h"
 #include "objects.h"
 #include "PeptideConstraint.h"

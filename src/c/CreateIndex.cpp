@@ -45,7 +45,7 @@ int CreateIndex::main(int argc, char** argv) {
   double mass_range;
   PeptideConstraint* constraint;
   char* in_file = NULL;
-  INDEX_T* crux_index;
+  Index* crux_index;
   char* binary_fasta_file = NULL;
 
   /* Define optional command line arguments */ 
@@ -124,20 +124,20 @@ int CreateIndex::main(int argc, char** argv) {
   }
 
   /* create new index object */
-  crux_index = new_index(in_file,
+  crux_index = new Index(in_file,
                          out_dir,
                          constraint,
                          mass_range
                          );
   
   /* create crux_index files */
-  if(!create_index(crux_index,
-                   get_boolean_parameter("peptide-list"))){
+  if(!crux_index->create(get_boolean_parameter("peptide-list"))){
     carp(CARP_FATAL, "Failed to create index");
   }
   
   /* free index(frees constraint together) */
-  free_index(crux_index);     
+  Index::free(crux_index);
+     
   free(binary_fasta_file);
   free(out_dir);
   free(in_file);

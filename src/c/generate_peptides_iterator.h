@@ -15,7 +15,7 @@
 #include "crux-utils.h"
 #include "peptide.h"
 #include "Protein.h"
-#include "index.h"
+#include "Index.h"
 #include "carp.h"
 #include "objects.h"
 #include "PeptideConstraint.h"
@@ -58,7 +58,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void);
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
   FLOAT_T neutral_mass, ///< The target mass (uncharged) for peptides
-  INDEX_T* index,     ///< The index from which to draw peptides OR
+  Index* index,     ///< The index from which to draw peptides OR
   Database* database///< The database from which to draw peptides
 );
 
@@ -78,7 +78,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   double min_mass,     ///< The min mass of peptides to generate -in
   double max_mass,     ///< The maximum mas of peptide to generate -in
-  INDEX_T* index,      ///< The index
+  Index* index,      ///< The index
   Database* database ///< The database
   );
 
@@ -98,7 +98,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mods(
   double mass,                ///< target mass of peptides
   PEPTIDE_MOD_T* peptide_mod, ///< the peptide mod to apply
-  INDEX_T* index,             ///< index from which to draw peptides OR
+  Index* index,             ///< index from which to draw peptides OR
   Database* dbase           ///< database from which to draw peptides
   );
 

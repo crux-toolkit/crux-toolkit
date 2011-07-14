@@ -30,7 +30,7 @@
 #include "objects.h"
 #include "parameter.h"
 #include "scorer.h" 
-#include "index.h"
+#include "Index.h"
 #include "generate_peptides_iterator.h" 
 #include "Match.h"
 #include "hash.h"

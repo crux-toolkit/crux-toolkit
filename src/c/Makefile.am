@@ -71,8 +71,12 @@ LIBFILES= \
   generate_peptides_iterator.h \
   hash.cpp \
   hash.h \
-  index.cpp \
-  index.h \
+  Index.cpp \
+  Index.h \
+  IndexFile.cpp \
+  IndexFile.h \
+  IndexPeptideIterator.cpp \
+  IndexPeptideIterator.h \
   Ion.cpp \
   Ion.h \
   IonConstraint.cpp \

@@ -1468,7 +1468,7 @@ void fit_two_parameter_weibull(
  */
 int prepare_protein_input(
   char* input_file,     ///< name of the fasta file or index directory
-  INDEX_T** index,      ///< return new index here OR
+  Index** index,      ///< return new index here OR
   Database** database)///< return new fasta database here
 {
 
@@ -1477,12 +1477,12 @@ int prepare_protein_input(
 
   if (use_index == TRUE){
     carp(CARP_INFO, "Preparing protein index %s", input_file);
-    *index = new_index_from_disk(input_file);
+    *index = new Index(input_file);
 
     if (index == NULL){
       carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
     }
-    num_proteins = get_index_num_proteins(*index);
+    num_proteins = (*index)->getNumProteins();
 
   } else {
     carp(CARP_INFO, "Preparing protein fasta file %s", input_file);

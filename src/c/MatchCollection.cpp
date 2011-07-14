@@ -1471,7 +1471,7 @@ void MatchCollection::printXmlHeader(
 
   bool use_index = is_directory(database);
   if( use_index == true ){
-    char* fasta_name  = get_index_binary_fasta_name(database);
+    char* fasta_name  = Index::getBinaryFastaName(database);
     free(database);
     database = fasta_name;
   }
@@ -1625,7 +1625,7 @@ void MatchCollection::printSqtHeader(
   bool use_index = is_directory(database);
 
   if( use_index == true ){
-    char* fasta_name  = get_index_binary_fasta_name(database);
+    char* fasta_name  = Index::getBinaryFastaName(database);
     free(database);
     database = fasta_name;
   }
