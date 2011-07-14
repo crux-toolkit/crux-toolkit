@@ -10,7 +10,7 @@
 #include "peptide_src.h"
 #include "Protein.h"
 #include "Database.h"
-#include "index.h"
+#include "Index.h"
 
 // declare things to set up
 

@@ -130,7 +130,7 @@ typedef void *malloc_t;
 /********************************************************************
  * Only free memory if the given pointer is non-null.
  ********************************************************************/
-#define myfree(x) if (x) free((char* ) (x))
+#define myfree(x) if (x) std::free((char* ) (x))
 
 /********************************************************************
  * Set the seed for the random number generator.

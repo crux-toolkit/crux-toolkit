@@ -7,7 +7,7 @@
 #ifndef CREATEINDEX_H
 #define CREATEINDEX_H
 
-#include "index.h"
+#include "Index.h"
 #include "parameter.h"
 #include "CruxApplication.h"
 

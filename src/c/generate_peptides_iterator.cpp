@@ -19,7 +19,8 @@
 #include "DatabasePeptideIterator.h"
 #include "DatabaseSortedPeptideIterator.h"
 #include "parameter.h"
-#include "index.h"
+#include "Index.h"
+#include "IndexPeptideIterator.h"
 #include "generate_peptides_iterator.h"
 
 /**
@@ -32,7 +33,7 @@ struct generate_peptides_iterator_t{
   bool (*has_next)(void*); ///< the function pointer to *_has_next
   PEPTIDE_T* (*next)(void*);    ///< the function pointer to *_next
   void (*free)(void*);          ///< the function pointer to *_free
-  INDEX_T* index;               ///< the index object needed
+  Index* index;               ///< the index object needed
   Database* database;         ///< the database object needed
   PeptideConstraint* constraint; ///< peptide constraint
 };
@@ -73,12 +74,12 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
   const char*  protein_input_name = get_string_parameter_pointer("protein database");
   BOOLEAN_T use_index = is_directory(protein_input_name);
 
-  INDEX_T* index = NULL;
+  Index* index = NULL;
   Database* database = NULL;
   // TODO (BF 27-Feb-08): set use_index according to the input, true if dir
   if (use_index == TRUE){
     //index = new_index_from_disk(protein_input_name, is_unique);
-    index = new_index_from_disk(protein_input_name);
+    index = new Index(protein_input_name);
   } else {
     // FALSE indicates that we are not using a binary fasta file
     database = new Database(protein_input_name, false);
@@ -102,7 +103,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator(void){
  */
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
   FLOAT_T neutral_mass, ///< The target mass (uncharged) for peptides
-  INDEX_T* index,     ///< The index from which to draw peptides OR
+  Index* index,     ///< The index from which to draw peptides OR
   Database* database///< The database from which to draw peptides
   )
 {
@@ -134,7 +135,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass(
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
   double min_mass,     ///< The min mass of peptides to generate -in
   double max_mass,     ///< The maximum mas of peptide to generate -in
-  INDEX_T* index,      ///< The index
+  Index* index,      ///< The index
   Database* database ///< The database
   )
 {
@@ -186,15 +187,15 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
 
     // create index and set to generate_peptides_iterator
     //    set_index_constraint(index, constraint); 
-    set_index_search_constraint(index, constraint); 
-    gen_peptide_iterator->index = copy_index_ptr(index);
+    index->setSearchConstraint(constraint); 
+    gen_peptide_iterator->index = index->copyPtr();
     
     // only resrict peptide by mass and length, default iterator
     //if(peptide_type == ANY_TRYPTIC){ //BF: == ALL? 
     if(digestion == NON_SPECIFIC_DIGEST){
       // create index peptide interator & set generate_peptides_iterator
-      INDEX_PEPTIDE_ITERATOR_T* index_peptide_iterator
-        = new_index_peptide_iterator(index);        
+      IndexPeptideIterator* index_peptide_iterator
+        = new IndexPeptideIterator(index);        
       gen_peptide_iterator->iterator = index_peptide_iterator;
       gen_peptide_iterator->has_next = &void_index_peptide_iterator_has_next;
       gen_peptide_iterator->next = &void_index_peptide_iterator_next;
@@ -290,7 +291,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
 GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_mods(
   double mass,                ///< target mass of peptides
   PEPTIDE_MOD_T* pmod,        ///< the peptide mod to apply
-  INDEX_T* index,             ///< index from which to draw peptides OR
+  Index* index,             ///< index from which to draw peptides OR
   Database* dbase){         ///< database from which to draw peptides
   
   // allocate a new iterator
@@ -351,7 +352,7 @@ void free_generate_peptides_iterator(
   generate_peptides_iterator->free(generate_peptides_iterator->iterator);
 
   Database::freeDatabase(generate_peptides_iterator->database);
-  free_index(generate_peptides_iterator->index);
+  Index::free(generate_peptides_iterator->index);
   PeptideConstraint::free(generate_peptides_iterator->constraint);
   free(generate_peptides_iterator);
 }

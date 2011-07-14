@@ -143,7 +143,7 @@ MatchCollectionIterator::MatchCollectionIterator(
   // get binary fasta file name with path to crux directory 
   char* binary_fasta  = NULL;
   if (use_index == true){ 
-    binary_fasta = get_index_binary_fasta_name(fasta_file);
+    binary_fasta = Index::getBinaryFastaName(fasta_file);
   } else {
     binary_fasta = get_binary_fasta_name(fasta_file);
     carp(CARP_DEBUG, "Looking for binary fasta %s", binary_fasta);

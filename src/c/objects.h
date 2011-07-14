@@ -291,17 +291,16 @@ class DatabaseSortedPeptideIterator;
 typedef struct peptide_wrapper PEPTIDE_WRAPPER_T;
 
 /**
- * \typedef INDEX_T
+ * \class Index
  * \brief An index of a database 
  */
-typedef struct index INDEX_T;
+class Index;
 
 /**
- * \typedef INDEX_PEPTIDE_ITERATOR_T
+ * \class IndexPeptideIterator
  * \brief An object to iterate over the peptides in an index
  */
-typedef struct index_peptide_iterator INDEX_PEPTIDE_ITERATOR_T;
-
+class IndexPeptideIterator;
 
 /**
  * \typedef INDEX_FILTERED_PEPTIDE_ITERATOR_T

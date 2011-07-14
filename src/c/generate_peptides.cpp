@@ -21,7 +21,7 @@
 #include "Database.h"
 #include "parse_arguments.h"
 #include "parameter.h"
-#include "index.h"
+#include "Index.h"
 #include "generate_peptides_iterator.h"
 
 static const int NUM_GEN_PEP_OPTIONS = 15;
@@ -42,7 +42,7 @@ int main(int argc, char** argv){
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator = NULL; 
   PEPTIDE_T* peptide = NULL;
   Database* database = NULL;
-  INDEX_T* index = NULL;
+  Index* index = NULL;
     
   /* Define optional command line arguments */ 
   int num_options = NUM_GEN_PEP_OPTIONS;
@@ -94,7 +94,7 @@ int main(int argc, char** argv){
   use_index = is_directory(filename);
 
   if( use_index == TRUE ){
-    index = new_index_from_disk(filename);//, 
+    index = new Index(filename);//, 
   }else{
     database = new Database(filename, FALSE); // not memmapped
   }
