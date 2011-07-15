@@ -224,7 +224,7 @@ bool IndexPeptideIterator::findPeptideInCurrentIndexFile()
       carp(CARP_DETAILED_DEBUG, "peptide length bigger than min length.");
     }
     if( peptide_length <= max_length ){
-      carp(CARP_DETAILED_DEBUG, "peptide length bigger than min length.");
+      carp(CARP_DETAILED_DEBUG, "peptide length smaller than max length.");
     }
 
     if( peptide_mass >= min_mass

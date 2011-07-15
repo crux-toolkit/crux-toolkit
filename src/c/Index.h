@@ -191,14 +191,15 @@ class Index {
   );
 
  public:
-  
+
   /**
    * \returns An (empty) index object.
    */
   Index();
 
   /**
-   * \returns A new index object.
+   * Constructor for creating a new, empty index to be
+   * populated from a fasta file. 
    */
   Index(
     const char* fasta_filename,  ///< The fasta file
@@ -208,9 +209,7 @@ class Index {
     );         
 
   /**
-   * wrapper function, create index object for search purpose
-   * from disk. If no crux_index files have been created on disk, returns null
-   * \returns A new index object ready for search.
+   * Constructor for opening an existing index for searching.
    */
   Index(
     const char* fasta_filename  ///< The fasta file
@@ -223,21 +222,13 @@ class Index {
   virtual ~Index();
 
   /**
-   * Merely increments the index ptr count
+   * Increments the index pointer count.
    */
   Index* copyPtr();
 
   /**
-   * Get index ptr count
-   */
-  int getPtrCount();
-
-
-
-  /**
-   * Scans the index on disk to 
-   * populate fields in index.
-   * \returns TRUE if success. FALSE if failure.
+   * Scans the index on disk to populate fields in index.
+   * \returns True if success, false if failure.
    */
   bool parse();
 
@@ -252,22 +243,6 @@ class Index {
     );
 
   /**
-   * Does this index exist on disk?
-   *
-   * \returns TRUE if it does. FALSE if it does not.
-   */
-  bool exists();
-
-  /**
-   * prints all the index files to a file
-   * this file is used later by the index object to index the files with a given interval
-   * \returns TRUE if it creates a list of infex files. FALSE if it fails.
-   */
-  bool createFiles(
-    FILE* file ///< output stream to print
-    );
-
-  /**
    * \brief Looks in given directory for a file ending in
    * "-binary-fasta" and returns a heap-allocated string of the full
    * name including the index directory.
@@ -279,59 +254,38 @@ class Index {
    */
   static char* getBinaryFastaName(const char* index_name);
 
-  /**
-   * foo.fasta --> foo_crux_index/foo_binary_fasta
-   * \returns the binary fasta file name with crux directory name
-   */
-  static char* getBinaryFastaNameInCruxDir(
-    char* fasta_filename  ///< fasta file name -in
-    );
 
   /*********************************************
    * set and get methods for the object fields
    *********************************************/
 
   /**
-   *\returns the directory of the index
-   * returns a heap allocated new copy of the directory
-   * user must free the return directory name
+   * \returns A newly allocated copy of the directory name.
    */
   char* getDirectory();
 
   /**
-   * sets the directory of the index
-   * index->directory must been initiailized
+   * Sets the directory of the index.
+   * index->directory must been initiailized.
    */
-  void setDirectory(
-    const char* directory ///< the directory to add -in
-    );
-
+  void setDirectory(const char* directory); ///< the directory to add -in
+  
   /**
-   *\returns a pointer to the database
+   * \returns A pointer to the database.
    */
   Database* getDatabase();
 
   /**
-   * sets the database of the index
+   * Sets the database of the index.
    */
   void setDatabase(
     Database* database ///< The database that has been indexed. -in
-    );
+  );
 
   /**
    *\returns a pointer to the peptides constraint
    */
   PeptideConstraint* getSearchConstraint();
-
-  /**
-   * sets the peptides constraint
-   */
-  /*
-  void set_index_constraint(
-    Index* index, ///< The index -in
-    PeptideConstraint* constraint ///< Constraint which these peptides satisfy -in
-    );
-  */
 
   /**
    * \brief Sets the peptide search constraint to be used by the
@@ -343,41 +297,10 @@ class Index {
     );
 
   /**
-   *\returns TRUE if index files are on disk else FALSE
-   */
-  bool getOnDisk();
-
-  /**
-   * sets the on disk field of index
-   */
-  void setOnDisk(
-    bool on_disk ///< Does this index exist on disk yet? -in
-    );
-
-  /**
-   *\returns the range of mass that each index file should be partitioned into
-   */
-  FLOAT_T getMassRange();
-
-  /**
-   * sets the mass_range field of index
-   */
-  void setMassRange(
-    FLOAT_T mass_range  ///< the range of mass that each index file should be partitioned into -in
-    );
-
-
-  /**
    *\returns TRUE if only allow unique peptides else FALSE
    */
   bool getIsUnique();
-
-  /**
-   * sets the is_unique field
-   */
-  void setIsUnique(
-    bool is_unique ///< do you allow duplicate peptides? -in
-    );
+                           
 
   int getNumProteins();
 };
@@ -412,71 +335,6 @@ bool void_index_peptide_iterator_has_next(
 PEPTIDE_T* void_index_peptide_iterator_next(
     void* index_peptide_iterator ///< the iterator of interest -in
     );
-
-
-/***********************************************
- * index_filtered_peptide_iterator
- ***********************************************/
-
-/**
- * Instantiates a new index_filtered_peptide_iterator from a index.
- * \returns a new heap allocated index_filtered_peptide_iterator object
- */
-INDEX_FILTERED_PEPTIDE_ITERATOR_T* new_index_filtered_peptide_iterator(
-  Index* index ///< The index object which we are iterating over -in
-  );
-
-/**
- *  The basic iterator functions.
- * \returns The next peptide in the index.
- */
-PEPTIDE_T* index_filtered_peptide_iterator_next(
-  INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  );
-
-/**
- * The basic iterator functions.
- * check to see if the index_filtered_peptide_iterator has more peptides to return
- *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
- */
-bool index_filtered_peptide_iterator_has_next(
-  INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  );
-
-/**
- * Frees an allocated index_filtered_peptide_iterator object.
- */
-void free_index_filtered_peptide_iterator(
-  INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  );
-
-/**********************************************************************
- * wrapper, for generate_peptides_iterator, cast back to original type
- ***********************************************************************/
-
-/**
- *  The basic iterator functions.
- * \returns The next peptide in the index.
- */
-PEPTIDE_T* void_index_filtered_peptide_iterator_next(
-  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  );
-
-/**
- * The basic iterator functions.
- * check to see if the index_filtered_peptide_iterator has more peptides to return
- *\returns TRUE if there are additional peptides to iterate over, FALSE if not.
- */
-bool void_index_filtered_peptide_iterator_has_next(
-  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  );
-
-/**
- * Frees an allocated index_filtered_peptide_iterator object.
- */
-void void_free_index_filtered_peptide_iterator(
-  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  );
 
 
 

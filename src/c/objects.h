@@ -303,10 +303,10 @@ class Index;
 class IndexPeptideIterator;
 
 /**
- * \typedef INDEX_FILTERED_PEPTIDE_ITERATOR_T
- * \brief An iterator to filter out the peptides wanted from the index_peptide_iterator
+ * \brief An iterator to further filter peptides from an
+ * IndexPeptideIterator based on digestion.
  */
-typedef struct index_filtered_peptide_iterator INDEX_FILTERED_PEPTIDE_ITERATOR_T;
+class IndexFilteredPeptideIterator;
 
 /**
  * \typedef SORTED_PEPTIDE_ITERATOR_T

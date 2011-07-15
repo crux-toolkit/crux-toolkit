@@ -19,6 +19,7 @@
 #include "Protein.h"
 #include "Index.h"
 #include "IndexPeptideIterator.h"
+#include "IndexFilteredPeptideIterator.h"
 #include "carp.h"
 #include "sorter.h"
 #include "objects.h"
@@ -30,7 +31,6 @@
 
 // maximum proteins the index can handle
 static const int MAX_PROTEIN = 30000;
-
 static const int NUM_CHECK_LINES = 8;
 static const int MAX_PROTEIN_IN_BIN = 2500;
 static const int MAX_FILE_SIZE_TO_USE_LIGHT_PROTEIN = 500000000;
@@ -111,18 +111,6 @@ char temp_folder_name[12] = "";
  * LATER Develop a conversion from light to heavy and heavy to light protein
  * objects to avoid excessive memory use.
  */
-
-
-/**
- * \struct index_filtered_peptide_iterator
- * \brief An iterator to filter out the peptides wanted from the
- * index_peptide_iterator 
- */
-struct index_filtered_peptide_iterator{
-  IndexPeptideIterator* index_peptide_iterator;///< Core peptide iterator
-  bool has_next; ///< Is there another peptide?
-  PEPTIDE_T* peptide; ///< the next peptide to return
-};    
 
 /**
  * \struct bin_peptide_iterator
@@ -384,8 +372,6 @@ bool Index::checkConstraints(){
   double max_len = disk_constraint_->getMaxLength();
   int missed_cleavages = 
     disk_constraint_->getNumMisCleavage();
-  //  PEPTIDE_TYPE_T cleavage_type = 
-  //    get_peptide_constraint_peptide_type(index->disk_constraint);
   ENZYME_T enzyme = disk_constraint_->getEnzyme();
   DIGEST_T digestion = disk_constraint_->getDigest();
   MASS_TYPE_T mass_type = disk_constraint_->getMassType();
@@ -410,21 +396,6 @@ bool Index::checkConstraints(){
   }else if(mass_type != get_mass_type_parameter("isotopic-mass")){
     success = false;
     param = "isotopic-mass";
-    /*
-  }else if(unique != get_boolean_parameter("unique-peptides")){
-    // TODO (BF 07-24-08): would like to change so that non-unique
-    // index could return unique peptides in generate-peptides
-    // only if index is unique(1) and requesting not-unique (0) is a problem
-    success = false;
-    param = "unique-peptides";
-    */
-    /*
-  }else if(cleavage_type < get_peptide_type_parameter("cleavages")){
-    // tryptic < partial < any  BUG for N- or C-tryptic)
-    success = false;
-    param = "cleavages";
-  }
-    */
   }else if(enzyme != get_enzyme_type_parameter("enzyme")){
     printf("constraint e: %i, param e: %i.", (int)enzyme, (int)get_enzyme_type_parameter("enzyme"));
     success = false;
@@ -464,11 +435,11 @@ void Index::setFields(
   DIR* check_dir = NULL;
   
   if((check_dir = opendir(output_dir)) != NULL){
-    setOnDisk(true);
+    on_disk_ = true;
     closedir(check_dir);
   }
   else{
-    setOnDisk(false);
+    on_disk_ = false;
   }
 
   carp(CARP_DEBUG, "Index on disk is '%i' for dir '%s'", 
@@ -579,16 +550,7 @@ int Index::getNumProteins(){
 }
 
 /**
- * Frees an allocated index object.
- */
-int Index::getPtrCount() {
-
-  return num_pointers_;
-}
-
-
-/**
- * Frees an allocated index object.
+ * Increase the number of objects pointing to this.
  */
 Index* Index::copyPtr() {
 
@@ -651,7 +613,6 @@ bool Index::writeHeader(
   fprintf(file, "#\tmax_mass: %.2f\n", constraint->getMaxMass());
   fprintf(file, "#\tmin_length: %d\n", constraint->getMinLength());
   fprintf(file, "#\tmax_length: %d\n", constraint->getMaxLength());
-  //fprintf(file, "#\tpeptide_type: %d\n", get_peptide_constraint_peptide_type(constraint));
   fprintf(file, "#\tenzyme_type: %d\n", constraint->getEnzyme());
   fprintf(file, "#\tdigest_type: %d\n", constraint->getDigest());
   fprintf(file, "#\tmissed_cleavages: %d\n", constraint->getNumMisCleavage());
@@ -691,12 +652,6 @@ bool Index::writeReadmeFile(
   fprintf(file, "#\tmax_length: %d\n",
           constraint->getMaxLength());
 
-  /*
-  PEPTIDE_TYPE_T type = get_peptide_constraint_peptide_type(constraint);
-  char type_str[64];
-  peptide_type_to_string(type, type_str);
-  fprintf(file, "#\tpeptide_type: %s\n", type_str);
-  */
   char* value_str = 
     enzyme_type_to_string(constraint->getEnzyme());
   fprintf(file, "#\tenzyme_type: %s\n", value_str);
@@ -1033,15 +988,6 @@ bool Index::transformDatabaseToMemmapDatabase() {
   if(!create_binary_fasta_in_cur(fasta_file,
                                database_->getFilenamePointer(),
                                &binary_fasta)){
-    /*
-    // remove directory
-    chdir("..");
-    clean_up(1);
-    // free index
-    free_index(index);
-    free(fasta_file);
-    carp(CARP_FATAL, "Failed to create protein index on disk");
-    */
     carp(CARP_ERROR, "Failed to create protein index on disk");
     return false;
   }
@@ -1055,14 +1001,6 @@ bool Index::transformDatabaseToMemmapDatabase() {
        "Database was not parsed after creating the binary fasta, parsing now");
 
     if(!database_->parse()){
-      /*
-      carp(CARP_FATAL, "failed to parse database, cannot create new index");
-      free(index);
-      free(fasta_file);
-      free(binary_fasta);
-      fcloseall();
-      exit(1);
-      */
       carp(CARP_ERROR, "Failed to parse database, cannot create new index");
       return false;
     }
@@ -1102,7 +1040,6 @@ bool Index::create(
   // the file stream where the index creation information is sent
   FILE* info_out = NULL; 
   FILE* readme = NULL;
-  // new stuff
   char* temp_dir_name = NULL;
   FILE** file_array = NULL;
   int* mass_limits = (int*)mycalloc(2, sizeof(int));
@@ -1155,12 +1092,6 @@ bool Index::create(
   // 1. create binary fasta file in temporary directory
   // 2. transform database into memory mapped database from text base database
   // 3. then, parse database
-  /*
-  if(! transform_database_to_memmap_database(index)){
-    clean_up(1);
-    // free ??
-    exit(1);
-    } */
  
   // get number of bins needed
   num_bins = getNumBinsNeeded(mass_limits);
@@ -1314,16 +1245,6 @@ bool Index::create(
   return true;
 }
 
-/**
- * Does this index exist on disk?
- *
- * \returns true if it does. false if it does not.
- */
-bool Index::exists()
-{
-  return on_disk_;
-}
-
 
 /*********************************************
  * set and get methods for the object fields
@@ -1378,7 +1299,6 @@ PeptideConstraint* Index::getSearchConstraint() {
 }
 
 
-
 /**
  * \brief Sets the peptide search constraint to be used by the
  * generate_peptides_iterator.  Makes a copy of the constraint pointer.
@@ -1412,43 +1332,6 @@ void Index::setSearchConstraint(
   }
 }
 
-
-/**
- *\returns true if index files are on disk else false
- */
-bool Index::getOnDisk()
-{
-  return on_disk_;
-}
-
-/**
- * sets the on disk field of index
- */
-void Index::setOnDisk(
-  bool on_disk ///< Does this index exist on disk yet? -in
-  )
-{
-  on_disk_ = on_disk;
-}
-
-/**
- *\returns the range of mass that each index file should be partitioned into
- */
-FLOAT_T Index::getMassRange()
-{
-  return mass_range_;
-}
-
-/**
- * sets the mass_range field of index
- */
-void Index::setMassRange(
-  FLOAT_T mass_range  ///< the range of mass that each index file should be partitioned into -in
-  )
-{
-  mass_range_ = mass_range;
-}
-
 /**
  *\returns true if only allow unique peptides else false
  */
@@ -1456,17 +1339,6 @@ bool Index::getIsUnique()
 {
   return is_unique_;
 }
-
-/**
- * sets the is_unique field
- */
-void Index::setIsUnique(
-  bool is_unique ///< do you allow duplicate peptides? -in
-  )
-{
-  is_unique_ = is_unique;
-}
-
 
 /**
  * clean_up
@@ -1482,149 +1354,6 @@ void clean_up( int dummy ) {
   dummy = dummy;
 }
 
-
-/***********************************************
- * index_filtered_peptide_iterator
- ***********************************************/
-
-/**
- * sets up the index_filtered_peptide_iterator
- * \returns true if successfully sets up the iterator, else false
- */
-bool setup_index_filtered_peptide_iterator(
-  INDEX_FILTERED_PEPTIDE_ITERATOR_T* iterator
-  )
-{
-  PEPTIDE_T* peptide = NULL;
-  PEPTIDE_SRC_T* src = NULL;
-  /*
-  PEPTIDE_TYPE_T peptide_type = 
-    get_peptide_constraint_peptide_type(iterator->index_peptide_iterator->index->search_constraint);
-  */
-  DIGEST_T required_digestion = iterator->index_peptide_iterator->getIndex()->getSearchConstraint()->getDigest();
-  bool match = false;
-
-  // initialize index_filered
-  while(iterator->index_peptide_iterator->hasNext()){
-    peptide = iterator->index_peptide_iterator->next();
-    src = get_peptide_peptide_src(peptide);
-    // mass, length has been already checked in index_peptide_iterator
-    // check if peptide type matches the constraint
-    // find at least one peptide_src for which cleavage is correct
-    while(src != NULL){
-      /*
-      char this_type_str[16];
-      char request_type_str[16];
-      peptide_type_to_string(peptide_type, request_type_str);
-      peptide_type_to_string(get_peptide_src_peptide_type(src), this_type_str);
-      carp(CARP_DETAILED_DEBUG, "request: %s, this: %s", request_type_str, this_type_str);
-      if(get_peptide_src_peptide_type(src) == peptide_type ||
-         (peptide_type == PARTIALLY_TRYPTIC && 
-          (get_peptide_src_peptide_type(src) == N_TRYPTIC ||
-           get_peptide_src_peptide_type(src) == C_TRYPTIC))
-         ){
-      */
-      if(get_peptide_src_digest(src) >= required_digestion){
-        match = true;
-        break;
-      }
-      // check the next peptide src
-      src = get_peptide_src_next_association(src);
-    }
-
-    // add more filters to the peptides here, if they don't meet
-    // requirements change 'match' to false 
-
-    // this peptide meets the peptide_type
-    if(match){
-      iterator->peptide = peptide;
-      iterator->has_next = true;
-      return true;
-    }
-    free_peptide(peptide);
-
-  }// next peptide
-  // no peptides meet the constraint
-  iterator->has_next = false;
-  return true;
-}
-
-/**
- * Instantiates a new index_filtered_peptide_iterator from a index.
- * \returns a new heap allocated index_filtered_peptide_iterator object
- */
-INDEX_FILTERED_PEPTIDE_ITERATOR_T* new_index_filtered_peptide_iterator(
-  Index* index ///< The index object which we are iterating over -in
-  )
-{
-  // create new index_filtered_peptide_iterator
-  INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_iterator =
-    (INDEX_FILTERED_PEPTIDE_ITERATOR_T*)mycalloc(
-        1, sizeof(INDEX_FILTERED_PEPTIDE_ITERATOR_T));
-
-  // create new index peptide iterator, the core peptide iterator
-  index_filtered_iterator->index_peptide_iterator = 
-    new IndexPeptideIterator(index);
-  
-  // setup index_filered_iterator
-  if(!setup_index_filtered_peptide_iterator(index_filtered_iterator)){
-    carp(CARP_ERROR, "Failed to setup index filtered peptide iterator");
-  }
-  
-  return index_filtered_iterator;
-}
-
-/**
- *  The basic iterator functions.
- * \returns The next peptide in the index.
- */
-PEPTIDE_T* index_filtered_peptide_iterator_next(
-  INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  )
-{
-  PEPTIDE_T* peptide_to_return = index_filtered_peptide_iterator->peptide;
-
-  // check if there's actually a peptide to return
-  if(!index_filtered_peptide_iterator_has_next(index_filtered_peptide_iterator)
-     || index_filtered_peptide_iterator->peptide == NULL){
-    return NULL;
-  }
-  
-  // setup the interator for the next peptide, if avaliable
-  if(!setup_index_filtered_peptide_iterator(index_filtered_peptide_iterator)){
-    carp(CARP_FATAL, "failed to setup index_filtered_peptide_iterator for next iteration");
-  }
-  return peptide_to_return;
-}
-
-/**
- * The basic iterator functions.
- * check to see if the index_filtered_peptide_iterator has more peptides to return
- *\returns true if there are additional peptides to iterate over, false if not.
- */
-bool index_filtered_peptide_iterator_has_next(
-  INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  )
-{
-  return index_filtered_peptide_iterator->has_next; 
-}
-
-/**
- * Frees an allocated index_filtered_peptide_iterator object.
- */
-void free_index_filtered_peptide_iterator(
-  INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator ///< the iterator to free -in
-  )
-{
-  delete index_filtered_peptide_iterator->index_peptide_iterator;
-    
-  // if did not iterate over all peptides, free the last peptide not returned
-  if(index_filtered_peptide_iterator_has_next(index_filtered_peptide_iterator)){
-    free_peptide(index_filtered_peptide_iterator->peptide);
-  }
-
-  free(index_filtered_peptide_iterator);
-}
 
 /****************************
  * bin_peptide_iterator
@@ -1839,78 +1568,6 @@ void free_bin_sorted_peptide_iterator(
 }
 
 
-
-/**********************************************************************
- * wrapper, for generate_peptides_iterator, cast back to original type
- ***********************************************************************/
-
-/**
- *  The basic iterator functions.
- * \returns The next peptide in the index.
- */
-PEPTIDE_T* void_index_filtered_peptide_iterator_next(
-  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  )
-{
-  return index_filtered_peptide_iterator_next((INDEX_FILTERED_PEPTIDE_ITERATOR_T*)index_filtered_peptide_iterator);
-
-}
-
-/**
- * The basic iterator functions.
- * check to see if the index_filtered_peptide_iterator has more peptides to return
- *\returns true if there are additional peptides to iterate over, false if not.
- */
-bool void_index_filtered_peptide_iterator_has_next(
-  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  )
-{
-  return index_filtered_peptide_iterator_has_next((INDEX_FILTERED_PEPTIDE_ITERATOR_T*)index_filtered_peptide_iterator);
-}
-
-/**
- * Frees an allocated index_filtered_peptide_iterator object.
- */
-void void_free_index_filtered_peptide_iterator(
-  void* index_filtered_peptide_iterator ///< the index_filtered_peptide_iterator to initialize -in
-  )
-{
-  free_index_filtered_peptide_iterator(
-      (INDEX_FILTERED_PEPTIDE_ITERATOR_T*)index_filtered_peptide_iterator);
-}
-
-/**
- * Frees an allocated index_peptide_iterator object.
- */
-void void_free_index_peptide_iterator(
-    void* index_peptide_iterator  ///< the iterator to free -in
-    )
-{
-  delete (IndexPeptideIterator*)index_peptide_iterator;
-}
-
-/**
- * The basic iterator functions.
- * \returns true if there are additional peptides to iterate over, false if not.
- */
-bool void_index_peptide_iterator_has_next(
-    void* index_peptide_iterator ///< the iterator of interest -in
-    )
-{
-
-  return ((IndexPeptideIterator*)index_peptide_iterator)->hasNext();
-}
-
-/**
- * \returns The next peptide in the index.
- */
-PEPTIDE_T* void_index_peptide_iterator_next(
-    void* index_peptide_iterator ///< the iterator of interest -in
-    )
-{
-
-  return ((IndexPeptideIterator*)index_peptide_iterator)->next();
-}
 
 
 /*
