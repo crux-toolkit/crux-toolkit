@@ -21,6 +21,7 @@
 #include "parameter.h"
 #include "Index.h"
 #include "IndexPeptideIterator.h"
+#include "IndexFilteredPeptideIterator.h"
 #include "generate_peptides_iterator.h"
 
 /**
@@ -205,9 +206,9 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     // if need to select among peptides by enzyme
     else{
 
-      INDEX_FILTERED_PEPTIDE_ITERATOR_T* index_filtered_peptide_iterator 
-        = new_index_filtered_peptide_iterator(index);
-      gen_peptide_iterator->iterator = index_filtered_peptide_iterator;
+      IndexFilteredPeptideIterator* iterator 
+        = new IndexFilteredPeptideIterator(index);
+      gen_peptide_iterator->iterator = iterator;
       gen_peptide_iterator->has_next 
         = &void_index_filtered_peptide_iterator_has_next;
       gen_peptide_iterator->next = &void_index_filtered_peptide_iterator_next;

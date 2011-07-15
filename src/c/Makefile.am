@@ -77,6 +77,8 @@ LIBFILES= \
   IndexFile.h \
   IndexPeptideIterator.cpp \
   IndexPeptideIterator.h \
+  IndexFilteredPeptideIterator.cpp \
+  IndexFilteredPeptideIterator.h \
   Ion.cpp \
   Ion.h \
   IonConstraint.cpp \
