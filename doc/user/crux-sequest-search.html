@@ -42,6 +42,10 @@ precursor window) are first ranked with the SEQUEST Sp score.  The top
 The program will not compute p-values using the Weibull empirical
 curve fitting procedure.</li>
 <li>
+By default, the theoretical spectrum used to compute XCorr includes
+two flanking peaks on either side of each b- and y-ion.  These can be
+turned off using the <code>use-flanking-peaks</code> parameter.</li>
+<li>
 The program produces <a href="sqt-format.html">SQT</a> format output
 files.</li>
 </ul>
@@ -201,41 +205,43 @@ info, 60-detailed debug info. Default = 30.
 <li>
 <code>fragment-mass &lt;average|mono&gt;</code> &ndash; 
 Which isotopes to use in calculating fragment ion mass (average,
-mono). Default = mono.
+mono). Default = mono.</li>
 
 <li>
 <code>use-flanking-peaks &lt;T|F&gt;</code> &ndash;
 Turn on or off the peaks flanking the b/y ions.  For <code>crux 
-search-for-matches</code>, default = F, for other search commands, default = T.
-
+search-for-matches</code>, default = F; for <code>crux
+  sequest-search</code>, default = T.</li>
  
 <li>
-<code>precursor-window &lt;float&gt;</code> &ndash;
-Tolerance used for matching peptides to spectra.  Peptides must be
-within +/- '<code>precursor-window</code>' of the spectrum value.  Definition of
-precursor window units depends upon <code>precursor-window-type</code>. Default =
-3.0.
+<code>precursor-window &lt;float&gt;</code> &ndash; Tolerance used for
+matching peptides to spectra.  Peptides must be within +/-
+'<code>precursor-window</code>' of the spectrum value.  Definition of
+precursor window units depends
+upon <code>precursor-window-type</code>. Default = 3.0.</li>
 
 <li>
 <code>precursor-window-type &lt;mass|mz|ppm&gt;</code> &ndash; Specify
 the units for the window that is used to select peptides around the
 precursor mass location (mass, mz, ppm).  The magnitude of the window
-is defined by the <code>precursor-window</code> option, and candidate peptides must
-fall within this window.  For the <code>mass</code> window-type, the
-spectrum precursor singly charged mass (m+h) is converted to mass, and the window is defined
-as that mass &plusmn; <code>precursor-window</code>. If the m+h value is not available, then
-the mass is calculated from the precursor mass-to-charge (m/z) and provided charge. 
-The peptide mass is computed as the sum of the average amino acid masses plus 
-18 Da for the terminal OH group.  The <code>mz</code> window-type calculates
-the window as spectrum precursor m/z &plusmn; <code>precursor-window</code> and then 
-converts the resulting m/z range to the peptide mass range using the precursor 
-charge. 
-For the parts-per-million (<code>ppm</code>) window-type, the spectrum mass is 
-calculated as in the <code>mass</code> type.  The lower bound of the mass 
-window is then defined as the 
-spectrum mass / (1.0 + (<code>precursor-window</code> / 1000000)) and the upper bound 
-is defined as spectrum mass / (1.0 - (<code>precursor-window</code> / 1000000)).  
-Default = mass.</li>
+is defined by the <code>precursor-window</code> option, and candidate
+peptides must fall within this window.  For the <code>mass</code>
+window-type, the spectrum precursor singly charged mass (m+h) is
+converted to mass, and the window is defined as that mass
+&plusmn; <code>precursor-window</code>. If the m+h value is not
+available, then the mass is calculated from the precursor
+mass-to-charge (m/z) and provided charge.  The peptide mass is
+computed as the sum of the average amino acid masses plus 18 Da for
+the terminal OH group.  The <code>mz</code> window-type calculates the
+window as spectrum precursor m/z
+&plusmn; <code>precursor-window</code> and then converts the resulting
+m/z range to the peptide mass range using the precursor charge.  For
+the parts-per-million (<code>ppm</code>) window-type, the spectrum
+mass is calculated as in the <code>mass</code> type.  The lower bound
+of the mass window is then defined as the spectrum mass / (1.0 +
+(<code>precursor-window</code> / 1000000)) and the upper bound is
+defined as spectrum mass / (1.0 - (<code>precursor-window</code> /
+1000000)).  Default = mass.</li>
 
 <li>
 <code>use-mstoolkit &lt;T|F&gt;</code> &ndash;
