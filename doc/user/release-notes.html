@@ -22,31 +22,36 @@
 
 <ul>
 <li>
-Qranker reports q-value instead of FDR.
+Q-ranker now reports q-values instead of false discovery rates.</li>
 
 <li>
-Corrected spectrum file, charge, and neutral mass in .pep.xml output.
+Corrected spectrum file, charge, and neutral mass in pep.xml output.</li>
 
 <li>
-Allowed the <code>missed-cleavages</code> option to specify the maximum
-number of missed cleavages in a peptide rather than specifying none/any.
+Changed the <code>missed-cleavages</code> option to allow specifying
+the maximum number of missed cleavages in a peptide rather than
+specifying none/any.</li>
 
 <li>
 Fixed a bug that did not print the spectrum file name correctly in the
-.pep.xml files.
+pep.xml files.</li>
 
 <li>
 Fixed error reporting for <code>crux spectral-counts</code> when the input
-psm file does not contain the required q-values.
+psm file does not contain the required q-values.</li>
 
 <li>
-Made the use of flanking peaks optional with <code>use-flanking-peaks</code>.
-Flanking peaks are not used by default for 
-<code>crux search-for-matches</code>.
+Previously, Crux's theoretical spectrum includes two flanking peaks
+around each b- and y-ion.  The new
+Boolean flag <code>use-flanking-peaks</code>, allows these to be
+either on or off.  Flanking peaks are by default in 
+<code>crux sequest-search</code> but are not used by default
+in <code>crux search-for-matches</code>.</li>
 
 </ul>
 
-<hr>
+<hr></hr>
+
 <h2>Version 1.35</h2> March 23, 2011
 
 <h3>Major enhancements</h3>
@@ -84,7 +89,7 @@ Added an <code>nterm</code> option to the link argument of <code>crux
 search-for-xlinks</code>.</li>
 
 </ul>
-<hr>
+
 <hr></hr>
 
 <h2>Version 1.34</h3> December 22, 2010
