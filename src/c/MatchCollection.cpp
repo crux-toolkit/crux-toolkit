@@ -2430,7 +2430,7 @@ void MatchCollection::updateProteinCounters(
   )
 {
   PEPTIDE_SRC_ITERATOR_T* src_iterator = NULL;
-  PEPTIDE_SRC_T* peptide_src = NULL;
+  PeptideSrc* peptide_src = NULL;
   Protein* protein = NULL;
   unsigned int protein_idx = 0;
   int hash_count = 0;
@@ -2457,7 +2457,7 @@ void MatchCollection::updateProteinCounters(
   // iterate overall parent proteins
   while(peptide_src_iterator_has_next(src_iterator)){
     peptide_src = peptide_src_iterator_next(src_iterator);
-    protein = get_peptide_src_parent_protein(peptide_src);
+    protein = peptide_src->getParentProtein();
     protein_idx = protein->getProteinIdx();
     
     // update the number of PSM this protein matches

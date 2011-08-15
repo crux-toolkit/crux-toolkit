@@ -379,6 +379,7 @@ START_TEST(test_modify_2){
     PEPTIDE_T* pep = (PEPTIDE_T*)pop_front_linked_list(returned_list);
     //printf("seq: %s\n", get_peptide_sequence(pep));
     free_peptide(pep);
+
   }
 
   // create mod of one G/A* and one A@ -> 8 versions

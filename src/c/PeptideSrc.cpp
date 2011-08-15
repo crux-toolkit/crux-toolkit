@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file peptide_src.cpp
+ * \file PeptideSrc.cpp
  * \brief Object for mapping a peptide to its parent protein.
  ****************************************************************************/
 
@@ -13,7 +13,7 @@
 #include "objects.h"
 #include "peptide.h"
 #include "Protein.h"
-#include "peptide_src.h"
+#include "PeptideSrc.h"
 #include "PeptideConstraint.h"
 
 #include <vector>
@@ -24,65 +24,58 @@
 
 using namespace std;
 
+
 /**
- * \struct peptide_src
- * \brief object for mapping a peptide to it's parent protein.
+ * Initializes an (empty) PeptideSrc object
  */
-struct peptide_src{
-  //PEPTIDE_TYPE_T peptide_type;///< the peptide type for the corresponding protein
-  DIGEST_T digestion; ///< how specific the ends are relative to the enzyme
-  Protein* parent_protein; ///< the parent of this preptide
-  int start_idx; ///< start index of the peptide in the protein sequence, first residue is 1 
-  PEPTIDE_SRC_T* next_association; ///< a linklist of peptide_src     
-};
+void PeptideSrc::init() {
+
+  digestion_ = (DIGEST_T)0;
+  parent_protein_ = NULL;
+  start_idx_ = 0;
+  next_association_ = NULL;
+}
 
 /**
  * \returns An (empty) peptide_src object.
  */
-PEPTIDE_SRC_T* allocate_peptide_src(void){
-  PEPTIDE_SRC_T* peptide_src =
-    (PEPTIDE_SRC_T*)mymalloc(sizeof(PEPTIDE_SRC_T));
+PeptideSrc::PeptideSrc() {
 
-  peptide_src->next_association = NULL;
-  return peptide_src;
+  init();
+
 }
 
 /**
  *\returns a PROTEIN_PEPTIDE_ASSOCIATION object, populated with user specified parameters
  */
-PEPTIDE_SRC_T* new_peptide_src(
-//PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
+PeptideSrc::PeptideSrc(
   DIGEST_T digest,
   Protein* parent_protein, ///< the parent of this preptide -in
   int start_idx ///< start index of the peptide in the protein sequence -in
-  )
-{
-  PEPTIDE_SRC_T* new_association = allocate_peptide_src();
-  //set_peptide_src_peptide_type(new_association, peptide_type);
-  set_peptide_src_digest(new_association, digest);
-  set_peptide_src_parent_protein(new_association, parent_protein);
-  set_peptide_src_start_idx(new_association, start_idx);
-  return new_association;
+  ) {
+
+  init();
+  setDigest(digest);
+  setParentProtein(parent_protein);
+  setStartIdx(start_idx);
 }
 
 /**
  *\returns an array of PROTEIN_PEPTIDE_SRC object
  * only used in index.c, when the peptide src count for  peptide is known
  */
-PEPTIDE_SRC_T* new_peptide_src_array(
+PeptideSrc* PeptideSrc::newArray(
   int size ///< the size of the peptide_src array -in
-  )
-{
-  int array_idx = 0;
-  PEPTIDE_SRC_T* src_array = (PEPTIDE_SRC_T*)mycalloc(size,
-                                                      sizeof(PEPTIDE_SRC_T));
-  
+  ) {
+
+  PeptideSrc* src_array = new PeptideSrc[size];
+
+  src_array[0].init();
   // set all next peptide src pointers
-  for(array_idx = 0; array_idx < size - 1; ++array_idx){
-    ((PEPTIDE_SRC_T*)(&(src_array[array_idx])))->next_association =
-      &src_array[array_idx + 1];
+  for(int array_idx = 1; array_idx < size ; array_idx++){
+    src_array[array_idx].init();
+    src_array[array_idx-1].setNextAssociation(&(src_array[array_idx]));
   }
-  ((PEPTIDE_SRC_T*)(&(src_array[array_idx])))->next_association = NULL;
   return src_array;
 }
 
@@ -90,14 +83,15 @@ PEPTIDE_SRC_T* new_peptide_src_array(
  * \brief Fill in the values from the original array into the new array.
  * Assumes that the new array has been allocated by new_peptide_src_array().
  */
-void copy_peptide_src_array(PEPTIDE_SRC_T* original_array, 
-                            PEPTIDE_SRC_T* new_array, 
-                            int array_size){
-  int src_idx = 0;
-  for(src_idx =0; src_idx < array_size; src_idx++){
-    new_array[src_idx].digestion = original_array[src_idx].digestion;
-    new_array[src_idx].parent_protein = original_array[src_idx].parent_protein;
-    new_array[src_idx].start_idx = original_array[src_idx].start_idx;
+void PeptideSrc::copyArray(
+  PeptideSrc* original_array, 
+  PeptideSrc* new_array, 
+  int array_size){
+
+  for(int src_idx = 0; src_idx < array_size; src_idx++){
+    new_array[src_idx].digestion_ = original_array[src_idx].digestion_;
+    new_array[src_idx].parent_protein_ = original_array[src_idx].parent_protein_;
+    new_array[src_idx].start_idx_ = original_array[src_idx].start_idx_;
   }
 
 }
@@ -106,23 +100,22 @@ void copy_peptide_src_array(PEPTIDE_SRC_T* original_array,
  *\returns a linklist of PROTEIN_PEPTIDE_SRC object
  * only used in index.c, when the peptide src count for peptide is known
  */
-PEPTIDE_SRC_T* new_peptide_src_linklist(
+PeptideSrc* PeptideSrc::newLinklist(
   int size ///< the size of the peptide_src array -in
-  )
-{
-  int src_idx = 1;
+  ) {
+
   // create one peptide src
-  PEPTIDE_SRC_T* src_list = (PEPTIDE_SRC_T*)mycalloc(1, sizeof(PEPTIDE_SRC_T));
-  PEPTIDE_SRC_T* curr_src = src_list;
+  PeptideSrc* src_list = new PeptideSrc();
+  PeptideSrc* curr_src = src_list;
 
   // set all next peptide src pointers, if size is greater than 1
-  for(src_idx = 0; src_idx < size - 1; ++src_idx){
-    curr_src->next_association = (PEPTIDE_SRC_T*)mycalloc(1, sizeof(PEPTIDE_SRC_T));
-    curr_src = curr_src->next_association;
+  for(int src_idx = 0; src_idx < size - 1; ++src_idx){
+    curr_src->next_association_ = new PeptideSrc();
+    curr_src = curr_src->next_association_;
   }
 
   // set last association to null
-  curr_src->next_association = NULL;
+  curr_src->next_association_ = NULL;
   return src_list;
 }
 
@@ -131,21 +124,19 @@ PEPTIDE_SRC_T* new_peptide_src_linklist(
  * index starts at 0.
  * only used in index.c, when the peptide src count for  peptide is known
  */
-void set_peptide_src_array(
-  PEPTIDE_SRC_T* src_array , ///< the working peptide src_arry -out
+void PeptideSrc::setArray(
+  PeptideSrc* src_array , ///< the working peptide src_arry -out
   int array_idx, ///< array index of the peptide_src to set
-  //PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
   DIGEST_T digest,
   Protein* parent_protein, ///< the parent of this preptide -in
   int start_idx ///< start index of the peptide in the protein sequence -in
-  )
-{
+  ) {
+
   // set all valuse
-  PEPTIDE_SRC_T* peptide_src = &src_array[array_idx];
-  //  peptide_src->peptide_type = peptide_type;
-  peptide_src->digestion = digest;
-  peptide_src->parent_protein = parent_protein;
-  peptide_src->start_idx = start_idx;
+  PeptideSrc* peptide_src = &src_array[array_idx];
+  peptide_src->digestion_ = digest;
+  peptide_src->parent_protein_ = parent_protein;
+  peptide_src->start_idx_ = start_idx;
 }
 
 
@@ -153,40 +144,28 @@ void set_peptide_src_array(
  * Frees the entire allocated peptide_src linklist object
  * Assumes that peptide src is Link list implementation
  */
-void free_peptide_src(
-  PEPTIDE_SRC_T* peptide_src  ///< object to free -in 
-  )
-{
-  PEPTIDE_SRC_T* to_free = peptide_src;
-  PEPTIDE_SRC_T* next = peptide_src->next_association;
+void PeptideSrc::free(PeptideSrc* peptide_src) {
+
+  PeptideSrc* to_free = peptide_src;
+  PeptideSrc* next = peptide_src->next_association_;
 
   // free first peptide_src
-  free(to_free);
+  delete to_free;
   
   // iterate over all peptide_srcs
   while(next != NULL){
     to_free = next;
-    next = next->next_association;
-    free(to_free);
+    next = next->next_association_;
+    delete to_free;
   }
-
-  /*
-  if(peptide_src->next_association != NULL){
-    free_peptide_src(peptide_src->next_association);
-  }  
-  free(peptide_src);  
-  */
 }
 
 /**
  * Frees the an individual allocated peptide_src object
  * assumes that new_association pointer is NULL or some other pointer exist for the rest of the linklist 
  */
-void free_one_peptide_src(
-  PEPTIDE_SRC_T* peptide_src  ///< object to free -in 
-  )
-{
-  free(peptide_src);
+PeptideSrc::~PeptideSrc() {
+  ;
 }
 
 // FIXME might need to change how this is printed
@@ -231,150 +210,111 @@ void print_peptide_src(
  * Copies the entire linklist of peptide_src object src to dest.
  * dest must be a heap allocated peptide_src
  */
-void copy_peptide_src(
-  PEPTIDE_SRC_T* src, ///< source peptide_src -in
-  PEPTIDE_SRC_T* dest ///< destination peptide_src -out
+void PeptideSrc::copy(
+  PeptideSrc* src, ///< source peptide_src -in
+  PeptideSrc* dest ///< destination peptide_src -out
   )
 {
-  PEPTIDE_SRC_T* next_association;
+  PeptideSrc* next_association;
   //set_peptide_src_peptide_type(dest, src->peptide_type);
-  set_peptide_src_digest(dest, src->digestion);
-  set_peptide_src_parent_protein(dest, src->parent_protein);
-  set_peptide_src_start_idx(dest, src->start_idx);
+  dest->setDigest(src->digestion_);
+  dest->setParentProtein(src->parent_protein_);
+  dest->setStartIdx(src->start_idx_);
   // check if end of the linklist
-  if(get_peptide_src_next_association(src) != NULL){
-    next_association = allocate_peptide_src();
-    dest->next_association = next_association;
-    copy_peptide_src(src->next_association, next_association);
+  if(src->getNextAssociation() != NULL){
+    next_association = new PeptideSrc();
+    dest->next_association_ = next_association;
+    copy(src->next_association_, next_association);
   }
 }
 
 /**
- * sets the peptide type
- * peptide type: TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NON_TRYPTIC
- */
-/*
-void set_peptide_src_peptide_type( 
-  PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
-  PEPTIDE_TYPE_T peptide_type ///< the type of the peptide -in
-  )
-{
-  new_association->peptide_type = peptide_type;
-}
-*/
-/**
- * \returns the peptide type with association to the parent protein
- * peptide type: TRYPTIC, PARTIALLY_TRYPTIC, N_TRYPTIC, C_TRYPTIC, NON_TRYPTIC
- */
- /*
-PEPTIDE_TYPE_T get_peptide_src_peptide_type( 
-  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
-  )
-{
-  return peptide_src->peptide_type;
-}
- */
-
-/**
  * sets the level of digestion
  */
-void set_peptide_src_digest( 
-  PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
+void PeptideSrc::setDigest(
   DIGEST_T digest ///< the type of the peptide -in
   ){
-  new_association->digestion = digest;
+
+  digestion_ = digest;
 }
 
 /**
  * \returns the level of digestion
  */
-DIGEST_T get_peptide_src_digest( 
-  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
-  ){
-  return peptide_src->digestion;
+DIGEST_T PeptideSrc::getDigest() {
+
+  return digestion_;
 }
 
 /**
  * sets the parent protein
  */
-void set_peptide_src_parent_protein(
-  PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
+void PeptideSrc::setParentProtein(
   Protein* parent_protein ///< the parent of this preptide -in  
-  )
-{
-  new_association->parent_protein = parent_protein;
+  ) {
 
+  parent_protein_ = parent_protein;
 }
 
 /**
  * \returns a pointer to the parent protein
  */
-Protein* get_peptide_src_parent_protein( 
-  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
-  )
-{
-  return peptide_src->parent_protein;
+Protein* PeptideSrc::getParentProtein() {
+
+  return parent_protein_;
 }
 
 /**
  * sets the start index of the peptide in the protein sequence
  */
-void set_peptide_src_start_idx(
-  PEPTIDE_SRC_T* new_association, ///< the peptide_src to set -out   
+void PeptideSrc::setStartIdx(
   int start_idx ///< start index of the peptide in the protein sequence -in
-  )
-{
-  new_association->start_idx = start_idx;
+  ) {
+
+  start_idx_ = start_idx;
 }
 
 /**
  * \returns the start index of the peptide in the protein sequence
  */
-int get_peptide_src_start_idx( 
-  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
-  )
-{
-  return peptide_src->start_idx;
+int PeptideSrc::getStartIdx() {
+
+  return start_idx_;
 }
 
 /**
  * sets the next peptide_src on the link list
  * assumes that the src_association's next_association field is NULL
  */
-void set_peptide_src_next_association(
-  PEPTIDE_SRC_T* src_association, ///< the peptide_src to set -out   
-  PEPTIDE_SRC_T* new_association ///< the new peptide_src to add -in   
-  )
-{
-  src_association->next_association = new_association;
+void PeptideSrc::setNextAssociation(
+  PeptideSrc* new_association ///< the new peptide_src to add -in   
+  ) {
+
+  next_association_ = new_association;
 }
 
 /**
  * \returns the next peptide_src on the link list
  */
-PEPTIDE_SRC_T* get_peptide_src_next_association( 
-  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
-  )
-{
-  return peptide_src->next_association;
+PeptideSrc* PeptideSrc::getNextAssociation() {
+
+  return next_association_;
 }
 
 /**
  * \returns a pointer to the start of the peptide with in it's parent protein sequence
  */
-char* get_peptide_src_sequence_pointer(
-  PEPTIDE_SRC_T* peptide_src ///< the query peptide_src -in   
-  )
-{
-  char* start_pointer = peptide_src->parent_protein->getSequencePointer();
-  return &(start_pointer[peptide_src->start_idx - 1]);
+char* PeptideSrc::getSequencePointer() {
+
+  char* start_pointer = parent_protein_->getSequencePointer();
+  return &(start_pointer[start_idx_ - 1]);
 }
 
 /**
  *\returns the peptide_src strct size, value of sizeof function
  */
-int get_peptide_src_sizeof(){
-  return sizeof(PEPTIDE_SRC_T);
+int PeptideSrc::getSizeOf(){
+  return sizeof(PeptideSrc);
 }
 
 /**
@@ -386,13 +326,12 @@ int get_peptide_src_sizeof(){
  *database Database 
  *
  */
-void serialize_peptide_src(
-  PEPTIDE_SRC_T* peptide_src, ///< peptide_src to serialize -in   
+void PeptideSrc::serialize(
   FILE* file  ///< output file -in   
-  )
-{
+  ) {
+
   // write protein index in database
-  unsigned int protein_idx = peptide_src->parent_protein->getProteinIdx();
+  unsigned int protein_idx = parent_protein_->getProteinIdx();
   // carp(CARP_DETAILED_DEBUG, "protein idx to write is %i", protein_idx);
 
   fwrite(&protein_idx, sizeof(int), 1, file);
@@ -400,10 +339,9 @@ void serialize_peptide_src(
        protein_idx); 
    
   // write peptide src type(tryptic, all, ...)
-  //  fwrite(&(peptide_src->peptide_type), sizeof(PEPTIDE_TYPE_T), 1, file);
-  fwrite(&(peptide_src->digestion), sizeof(DIGEST_T), 1, file);
+  fwrite(&(digestion_), sizeof(DIGEST_T), 1, file);
   // write start index in protein of peptide in this peptide src
-  fwrite(&(peptide_src->start_idx), sizeof(int), 1, file);
+  fwrite(&(start_idx_), sizeof(int), 1, file);
   
 }
 
@@ -412,8 +350,8 @@ void serialize_peptide_src(
  * serialized to file.  Used for skipping past peptide_src in an index
  * file. 
  */
-int size_of_serialized_peptide_src(){
-  //return (sizeof(int)*2 + sizeof(PEPTIDE_TYPE_T));
+int PeptideSrc::sizeOfSerialized(){
+
   return (sizeof(int)*2 + sizeof(DIGEST_T));
 }
 
@@ -426,20 +364,20 @@ int size_of_serialized_peptide_src(){
  * linked list implementation of multiple peptide_src is used based on
  * the value of use_array.
  *
- * \returns TRUE if peptide_src's were successfully parsed, else
- * returns FALSE.
+ * \returns true if peptide_src's were successfully parsed, else
+ * returns false.
  */
-BOOLEAN_T parse_peptide_src_tab_delimited(
+bool PeptideSrc::parseTabDelimited(
   PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
   MatchFileReader& file,           ///< file to read from
   Database* database, ///< database containing proteins
-  BOOLEAN_T use_array) ///< use array implementation vs. linked list
+  bool use_array) ///< use array implementation vs. linked list
 {
   //TODO - Implement
 
   if( peptide == NULL ){
     carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide.");
-    return FALSE;
+    return false;
   }
 
   carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", file.getString(PROTEIN_ID_COL).c_str());
@@ -449,13 +387,13 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
 
   int num_peptide_src = protein_ids.size();
   
-  PEPTIDE_SRC_T* peptide_src = NULL;
+  PeptideSrc* peptide_src = NULL;
 
   // allocate new src based on requested type
   if(use_array){
-    peptide_src = new_peptide_src_array(num_peptide_src);
+    peptide_src = newArray(num_peptide_src);
   } else {
-    peptide_src = new_peptide_src_linklist(num_peptide_src);
+    peptide_src = newLinklist(num_peptide_src);
   }
 
   // give it to the peptide
@@ -526,21 +464,21 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
       DelimitedFile::from_string<int>(start_index, peptide_start_index_string); 
     }
     // set parent protein of the peptide src
-    set_peptide_src_parent_protein(peptide_src, parent_protein);
+    peptide_src->setParentProtein(parent_protein);
 
     // set digest type of peptide src
-    set_peptide_src_digest(peptide_src, digestion);
+    peptide_src->setDigest(digestion);
 
     // set start index of peptide src
-    set_peptide_src_start_idx(peptide_src, start_index);
+    peptide_src->setStartIdx(start_index);
 
     // set current peptide_src to the next empty peptide src
-    peptide_src = get_peptide_src_next_association(peptide_src);
+    peptide_src = peptide_src->getNextAssociation();
   } // next peptide_src in file
 
   carp(CARP_DETAILED_DEBUG, "Done parsing id line:%s", file.getString(PROTEIN_ID_COL).c_str());
 
-  return TRUE;
+  return true;
 }
 
 
@@ -553,18 +491,18 @@ BOOLEAN_T parse_peptide_src_tab_delimited(
  * linked list implementation of multiple peptide_src is used based on
  * the value of use_array.
  *
- * \returns TRUE if peptide_src's were successfully parsed, else
- * returns FALSE.
+ * \returns true if peptide_src's were successfully parsed, else
+ * returns false.
  */
-BOOLEAN_T parse_peptide_src(
+bool PeptideSrc::parse(
   PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
   FILE* file,           ///< file to read from
   Database* database, ///< database containing proteins
-  BOOLEAN_T use_array) ///< use array implementation vs. linked list
+  bool use_array) ///< use array implementation vs. linked list
 {
   if( peptide == NULL || file == NULL ){
     carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide or file.");
-    return FALSE;
+    return false;
   }
 
   // first field in file should be number of src's
@@ -573,15 +511,15 @@ BOOLEAN_T parse_peptide_src(
   if( num_peptide_src < 1 || num_read != 1 ){
     carp(CARP_ERROR, 
          "Index file corrupted, peptide must have at least one peptide src");
-    return FALSE;
+    return false;
   }
 
-  PEPTIDE_SRC_T* peptide_src = NULL;
+  PeptideSrc* peptide_src = NULL;
   // allocate new src based on requested type
   if(use_array){
-    peptide_src = new_peptide_src_array(num_peptide_src);
+    peptide_src = newArray(num_peptide_src);
   }else{
-    peptide_src = new_peptide_src_linklist(num_peptide_src);
+    peptide_src = newLinklist(num_peptide_src);
   }
 
   // give it to the peptide
@@ -599,8 +537,8 @@ BOOLEAN_T parse_peptide_src(
     size_t num_read = fread(&protein_index, (sizeof(int)), 1, file);
     if( protein_index < 0 || num_read != 1){
       carp(CARP_ERROR, "Index file corrupted could not read protein index");
-      free(peptide_src);
-      return FALSE;
+      delete peptide_src;
+      return false;
     }
     carp(CARP_DETAILED_DEBUG, "Peptide src %d has protein idx %i", 
          src_idx, protein_index);
@@ -610,22 +548,22 @@ BOOLEAN_T parse_peptide_src(
     if(fread(&peptide_type, sizeof(PEPTIDE_TYPE_T), 1, file) != 1){
       carp(CARP_ERROR, "Index file corrupted, failed to read peptide type.");
       free(peptide_src);
-      return FALSE;
+      return false;
     }
     */
 
     // read digestion level of peptide src
     if(fread(&digestion, sizeof(DIGEST_T), 1, file) != 1){
       carp(CARP_ERROR, "Index file corrupted, failed to read digestion type.");
-      free(peptide_src);
-      return FALSE;
+      delete peptide_src;
+      return false;
     }
 
     // read start index of peptide in parent protein of thsi peptide src
     if(fread(&start_index, sizeof(int), 1, file) != 1){
       carp(CARP_ERROR, "Index file corrupted, failed to read start index.");
-      free(peptide_src);
-      return FALSE;
+      delete peptide_src;
+      return false;
     }
 
     // set fields in new peptide src
@@ -633,21 +571,21 @@ BOOLEAN_T parse_peptide_src(
       database->getProteinAtIdx(protein_index);
     
     // set parent protein of the peptide src
-    set_peptide_src_parent_protein(peptide_src, parent_protein);
+    peptide_src->setParentProtein(parent_protein);
 
     // set peptide type of peptide src
     //    set_peptide_src_peptide_type(peptide_src, peptide_type);
-    set_peptide_src_digest(peptide_src, digestion);
+    peptide_src->setDigest(digestion);
 
     // set start index of peptide src
-    set_peptide_src_start_idx(peptide_src, start_index);
+    peptide_src->setStartIdx(start_index);
     
     // set current_peptide_src to the next empty peptide src
-    peptide_src = get_peptide_src_next_association(peptide_src);
+    peptide_src = peptide_src->getNextAssociation();
   }// next peptide_src in file
 
   carp(CARP_DETAILED_DEBUG, "Finished parsing peptide src.");
-  return TRUE;
+  return true;
 }
 
 

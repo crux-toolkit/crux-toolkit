@@ -143,7 +143,7 @@ FLOAT_T get_peptide_mz(
  */
 void set_peptide_peptide_src(
   PEPTIDE_T* peptide,  ///< the peptide to set -out 
-  PEPTIDE_SRC_T* new_association ///< new peptide_src -in
+  PeptideSrc* new_association ///< new peptide_src -in
 );
 
 /**
@@ -154,7 +154,7 @@ void set_peptide_peptide_src(
  */
 void add_peptide_peptide_src(
   PEPTIDE_T* peptide,  ///< the peptide to set -out
-  PEPTIDE_SRC_T* new_association ///< new peptide_src -in
+  PeptideSrc* new_association ///< new peptide_src -in
   );
 
 /**
@@ -164,13 +164,13 @@ void add_peptide_peptide_src(
  */
 void add_peptide_peptide_src_array(
   PEPTIDE_T* peptide,  ///< the peptide to set -out
-  PEPTIDE_SRC_T* peptide_src_array ///< new peptide_src -in
+  PeptideSrc* peptide_src_array ///< new peptide_src -in
   );
 
 /**
  * returns a point to the peptide_protein_association field of the peptide
  */
-PEPTIDE_SRC_T* get_peptide_peptide_src(
+PeptideSrc* get_peptide_peptide_src(
   PEPTIDE_T* peptide  ///< the peptide to query the peptide_peptide_src -in
 );
 
@@ -266,7 +266,7 @@ char* get_peptide_sequence_sqt(
  */
 char* get_peptide_sequence_from_peptide_src_sqt(
  PEPTIDE_T* peptide, ///< peptide to query sequence -in
- PEPTIDE_SRC_T* peptide_src ///< peptide_src -in 
+ PeptideSrc* peptide_src ///< peptide_src -in 
  );
 
 /**
@@ -689,7 +689,7 @@ char residue_iterator_next(
 
 /**
  * Instantiates a new peptide_src_iterator from a peptide.
- * \returns a PEPTIDE_SRC_T object.
+ * \returns a PeptideSrc object.
  */
 PEPTIDE_SRC_ITERATOR_T* new_peptide_src_iterator(
   PEPTIDE_T* peptide ///< peptide's fields to iterate -in
@@ -713,7 +713,7 @@ BOOLEAN_T peptide_src_iterator_has_next(
 /**
  * \returns The next peptide_srcs in the peptide.
  */
-PEPTIDE_SRC_T* peptide_src_iterator_next(
+PeptideSrc* peptide_src_iterator_next(
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
   );
 

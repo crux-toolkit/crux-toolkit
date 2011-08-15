@@ -7,7 +7,7 @@
 #include "Spectrum.h"
 #include "Peak.h"
 #include "peptide.h"
-#include "peptide_src.h"
+#include "PeptideSrc.h"
 #include "PeptideConstraint.h"
 #include "Protein.h"
 #include "Database.h"
@@ -62,13 +62,13 @@ START_TEST (test_ndist){// start index
 
   // test for multiple protein sources, first is least, first not least
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NON_SPECIFIC_DIGEST, protein1, 25) );
+                           new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 25) );
   ndist = get_peptide_n_distance(peptide1); 
   fail_unless( ndist == 456, 
                "Incorrect distance from peptide n-terminus to " \
                "protein n-ternimus.  Got %d, should be 456", ndist);
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NON_SPECIFIC_DIGEST, protein1, 100));
+                           new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 100));
 
   ndist = get_peptide_n_distance(peptide1); 
   fail_unless( ndist == 381, 
@@ -95,13 +95,13 @@ START_TEST (test_cdist){// start index
 
   // test for multiple protein sources, first is least, first not least
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NON_SPECIFIC_DIGEST, protein1, 5) );
+                           new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 5) );
   cdist = get_peptide_c_distance(peptide1); 
   fail_unless( cdist == 4, 
                "Incorrect distance from peptide c-terminus to " \
                "protein c-ternimus.  Got %d, should be 4", cdist);
   add_peptide_peptide_src( peptide1,
-                           new_peptide_src(NON_SPECIFIC_DIGEST, protein1, 30) );
+                           new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 30) );
   cdist = get_peptide_c_distance(peptide1); 
   fail_unless( cdist == 4, 
                "Incorrect distance from peptide c-terminus to " \

@@ -149,9 +149,9 @@ void SpectralCounts::getProteinToPeptides(){
     PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator =
       new_peptide_src_iterator(peptide);
     while( peptide_src_iterator_has_next(peptide_src_iterator)) {
-      PEPTIDE_SRC_T* peptide_src = 
+      PeptideSrc* peptide_src = 
         peptide_src_iterator_next(peptide_src_iterator);
-      Protein* protein = get_peptide_src_parent_protein(peptide_src);
+      Protein* protein = peptide_src->getParentProtein();
       if (protein_supporting_peptides_.find(protein) == 
           protein_supporting_peptides_.end()){
         PeptideSet newset(peptide_less_than);
@@ -198,9 +198,9 @@ void SpectralCounts::getProteinScores(){
     PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator =
       new_peptide_src_iterator(peptide);
     while( peptide_src_iterator_has_next(peptide_src_iterator)) {
-      PEPTIDE_SRC_T* peptide_src = 
+      PeptideSrc* peptide_src = 
         peptide_src_iterator_next(peptide_src_iterator);
-      Protein* protein = get_peptide_src_parent_protein(peptide_src);
+      Protein* protein = peptide_src->getParentProtein();
       if (protein_scores_.find(protein) == protein_scores_.end()){
         protein_scores_.insert(make_pair(protein, 0.0));
       }

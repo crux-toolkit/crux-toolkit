@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include "carp.h"
 #include "peptide.h"
-#include "peptide_src.h"
+#include "PeptideSrc.h"
 #include "Protein.h"
 #include "Database.h"
 #include "DatabasePeptideIterator.h"
