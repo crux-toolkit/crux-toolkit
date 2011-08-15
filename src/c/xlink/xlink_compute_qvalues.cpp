@@ -4,7 +4,7 @@
 
 #include "crux-utils.h"
 #include "objects.h"
-#include "scorer.h"
+#include "Scorer.h"
 #include "DelimitedFile.h"
 
 #include "xlink_compute_qvalues.h"

@@ -11,14 +11,60 @@
 #define MIN_MZ 400;
 #define NO_FLANKS 1
 
-
-Scorer::Scorer(FLOAT_T a_max_mz) {
-  max_mz = a_max_mz;
+/**
+ * Initializes an empty XHHC_Scorer object
+ */
+void XHHC_Scorer::init() {
+  print_spectrums_ = false;
+  scorer_ = NULL;
+  max_mz_ = 0.0;
+  current_spectrum_ = NULL;
 }
 
+/**
+ * \returns an empty XHHC_Scorer object
+ */
+XHHC_Scorer::XHHC_Scorer() {
+  init();
+}
+  
+/**
+ * \returns an XHHC_Scorer object with the max_mz initialized
+ */
+XHHC_Scorer::XHHC_Scorer(
+  FLOAT_T max_mz ///< max_mz for the scorer.
+  ) {
 
-int Scorer::get_matched_by_ions(Spectrum* spectrum,
-				LinkedIonSeries& ion_series) {
+  init();
+  max_mz_ = max_mz;
+}
+
+/**
+ * \returns the max_mz
+ */
+FLOAT_T XHHC_Scorer::getMaxMz() {
+  
+  return max_mz_;
+}
+
+/*
+ * Sets the print_spectrums_ variable
+ */
+void XHHC_Scorer::setPrint(
+  bool print_spectrums ///< indicator of whether we are printing spectrums
+  ) { 
+
+  print_spectrums_ = print_spectrums;
+}
+
+/**
+ * \returns the number of BY ions in the Ionseries that are
+ * matched to peaks in the spectrum
+ */
+int XHHC_Scorer::getMatchedBYIons(
+  Spectrum* spectrum,
+  LinkedIonSeries& ion_series) {
+
   FLOAT_T bin_width = bin_width_mono;
   vector<LinkedPeptide>& ions = ion_series.ions();
 
@@ -38,85 +84,89 @@ int Scorer::get_matched_by_ions(Spectrum* spectrum,
   return ans;
 }
 
-float Scorer::score_spectrum_vs_series(
-      Spectrum* spectrum,
-      LinkedIonSeries& ion_series
+/**
+ * \returns the xcorr score for the spectrum and the ion_series
+ */
+FLOAT_T XHHC_Scorer::scoreSpectrumVsSeries(
+  Spectrum* spectrum, ///< Spectrum to score
+  LinkedIonSeries& ion_series ///< LinkedIonSeries to score
   ) {
-    //SCORER_T* scorer = new_scorer(XCORR);
-    float score = 0.0;
-    score =  hhc_gen_score_xcorr(spectrum, ion_series);
-    return score; 
-  } 
+
+  FLOAT_T score = 0.0;
+  score =  hhcGenScoreXcorr(spectrum, ion_series);
+  return score; 
+} 
  
-FLOAT_T Scorer::hhc_gen_score_xcorr(
-    Spectrum* spectrum,    ///< the spectrum to score -in
-    LinkedIonSeries& ion_series ///< the ion series to score against the spectrum -in
-  )
-  
-  {
+/**
+ * Generates the theoretical/observed arrays and scores the spectrum for xcorr
+ */
+FLOAT_T XHHC_Scorer::hhcGenScoreXcorr(
+  Spectrum* spectrum,    ///< the spectrum to score -in
+  LinkedIonSeries& ion_series ///< the ion series to score against the spectrum -in
+  ) {
 
-    //cout <<"hhc_gen_score_xcorr() - start."<<endl;
+  FLOAT_T final_score = 0;
+  FLOAT_T* theoretical = NULL;
 
-    FLOAT_T final_score = 0;
-    FLOAT_T* theoretical = NULL;
-
-    if (current_spectrum != spectrum) {
-      //cout <<"Creating scorer"<<endl;
-      current_spectrum = spectrum;
-      if (scorer != NULL) { free_scorer(scorer); scorer=NULL;}
-      scorer = new_scorer(XCORR);
-      if (!create_intensity_array_xcorr(spectrum, scorer, ion_series.charge())) {
-        carp(CARP_FATAL, "failed to produce XCORR");
-      }
-    } else {
-      //cout <<"Using same scorer"<<endl;
+  if (current_spectrum_ != spectrum) {
+    current_spectrum_ = spectrum;
+    if (scorer_ != NULL) { 
+      delete scorer_; 
+      scorer_=NULL;
     }
-
-    max_mz = get_scorer_sp_max_mz(scorer);
-
-    // create theoretical array
-    //cout <<"Creating theoretical array"<<endl;
-    theoretical = (FLOAT_T*)mycalloc((size_t)max_mz, sizeof(FLOAT_T));
-  
-    // create intensity array for theoretical spectrum 
-    //if(!create_intensity_array_theoretical(scorer, ion_series, theoretical)){
-   
-   if (!hhc_create_intensity_array_theoretical(ion_series, theoretical)) {
-      carp(CARP_ERROR, "failed to create theoretical spectrum for Xcorr");
-      return FALSE;
+    scorer_ = new Scorer(XCORR);
+    if (!scorer_->createIntensityArrayXcorr(spectrum, ion_series.charge())) {
+      carp(CARP_FATAL, "failed to produce XCORR");
     }
-   
-   //cout <<"Doing cross correlation"<<endl;
-    // do cross correlation between observed spectrum(in scorer) and theoretical spectrum.
-    // use the two intensity arrays that were created
-    final_score = cross_correlation(scorer, theoretical);
-    //cout <<"Done cross correlation"<<endl;
-    if (print_spectrums_) {
-      //cout <<"printing spectrums"<<endl;
-      print_spectrums(theoretical, spectrum);
-    }
-    //print_spectrums(theoretical, spectrum, 300, 750, 1);
-
-    // free theoretical spectrum
-    //cout <<"freeing theoretical"<<endl;
-    free(theoretical);
-    //cout <<"hhc_gen_score_xcorr() - done."<<endl;
-    // return score
-    return final_score;
   }
 
-void Scorer::add_intensity_map(std::map<int, FLOAT_T>& theoretical, int idx, FLOAT_T intensity) {
+  max_mz_ = scorer_->getSpMaxMz();
+
+  // create theoretical array
+  theoretical = (FLOAT_T*)mycalloc((size_t)max_mz_, sizeof(FLOAT_T));
   
-  std::map<int, FLOAT_T>::iterator iter = theoretical.find(idx);
+ if (!hhcCreateIntensityArrayTheoretical(ion_series, theoretical)) {
+    carp(CARP_ERROR, "failed to create theoretical spectrum for Xcorr");
+    return FALSE;
+  }
+   
+  // do cross correlation between observed spectrum(in scorer) and theoretical spectrum.
+  // use the two intensity arrays that were created
+  final_score = scorer_->crossCorrelation(theoretical);
+  if (print_spectrums_) {
+    printSpectrums(theoretical, spectrum);
+  }
+  // free theoretical spectrum
+  free(theoretical);
+  return final_score;
+}
+
+/**
+ * adds an intensity in the theoretical map at peak idx
+ */
+void XHHC_Scorer::addIntensityMap(
+  map<int, FLOAT_T>& theoretical, ///< the theoretical map 
+  int idx, ///< the idx to add   
+  FLOAT_T intensity ///< the corresponding intensity
+  ) {
+  
+  map<int, FLOAT_T>::iterator iter = theoretical.find(idx);
   if (iter == theoretical.end())
     theoretical[idx] = intensity;
   else
     iter -> second = max(intensity, iter -> second);
 }
 
-bool Scorer::xlink_create_map_theoretical(
-					  LinkedIonSeries& ion_series,
-					  std::map<int, FLOAT_T>& theoretical) {
+
+/**
+ * \returns whether create a theoretical map of peak_idx,intensity pairs
+ * is sucessful
+ */
+bool XHHC_Scorer::xlinkCreateMapTheoretical(
+  LinkedIonSeries& ion_series, ///< LinkedIonSeries to create the map from -in
+  map<int, FLOAT_T>& theoretical ///< The theoretical map -out
+  ) {
+
   theoretical.clear();
   //ION_T* ion = NULL;
   int ion_charge = 0;
@@ -136,12 +186,12 @@ bool Scorer::xlink_create_map_theoretical(
     // Add peaks of intensity 50.0 for B, Y type ions. 
     // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
     // Skip ions that are located beyond max mz limit
-    add_intensity_map(theoretical, intensity_array_idx, 50);
+    addIntensityMap(theoretical, intensity_array_idx, 50);
     if (get_boolean_parameter("xcorr-use-flanks")) {
       if (intensity_array_idx > 0) {
-	add_intensity_map(theoretical, intensity_array_idx - 1, 25);
+	addIntensityMap(theoretical, intensity_array_idx - 1, 25);
       }
-      add_intensity_map(theoretical, intensity_array_idx + 1, 25);
+      addIntensityMap(theoretical, intensity_array_idx + 1, 25);
      
     }
 
@@ -151,88 +201,88 @@ bool Scorer::xlink_create_map_theoretical(
     //TODO put this back in
     //if(ion_type == B_ION){
       int h2o_array_idx = (int)((ion->get_mz(MONO) - (MASS_H2O_MONO/ion->charge()) ) / bin_width + 0.5);
-      add_intensity_map(theoretical, h2o_array_idx, 10);
+      addIntensityMap(theoretical, h2o_array_idx, 10);
     //}
     
     int co_array_idx = (int)((ion -> get_mz(MONO) - (MASS_CO_MONO/ion->charge())) / bin_width + 0.5);
-    add_intensity_map(theoretical, co_array_idx, 10);
+    addIntensityMap(theoretical, co_array_idx, 10);
 
     int nh3_array_idx = (int)((ion->get_mz(MONO) -  (MASS_NH3_MONO/ion->charge())) / bin_width + 0.5);
-    add_intensity_map(theoretical, nh3_array_idx, 10);        
+    addIntensityMap(theoretical, nh3_array_idx, 10);        
   }
   return true;
 }
 
+/**
+ * Fills in the theoretical array using the LinkedIonSeries
+ */
+bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
+  LinkedIonSeries& ion_series, ///< The linked ion series to use -in
+  FLOAT_T* theoretical       ///< the empty theoretical spectrum -out
+  ) {
 
-bool Scorer::hhc_create_intensity_array_theoretical(
-    LinkedIonSeries& ion_series,
-    FLOAT_T* theoretical       ///< the empty theoretical spectrum -out
-    )
-  {
-    //ION_T* ion = NULL;
-    int ion_charge = 0;
-    ION_TYPE_T ion_type;
-    int intensity_array_idx = 0;
-    FLOAT_T bin_width = bin_width_mono;
-    vector<LinkedPeptide>& ions = ion_series.ions();
-    // while there are ion's in ion iterator, add matched observed peak intensity
-    for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
-    //while(ion_iterator_has_next(ion_iterator)){
-      //cout << "ion " << *ion << "\tmz " << ion->get_mz() << endl;
-      intensity_array_idx = (int)(ion->get_mz(MONO) / bin_width + 0.5);
-      //if (intensity_array_idx <= 1) continue;
-      //cout << "index " << intensity_array_idx << endl;
-      ion_type = ion->type();
-      ion_charge = ion->charge();
-      //cout << "m/z: " << ion->get_mz() << " charge: " << ion->charge() << endl;
-      // skip ions that are located beyond max mz limit
-
-      // is it B, Y ion?
-
-      // neutral loss peak?
-      // Add peaks of intensity 50.0 for B, Y type ions. 
-      // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
-      // Skip ions that are located beyond max mz limit
-      if((intensity_array_idx)< max_mz){
-        //if (ion->type() == Y_ION)
-        //add_intensity(theoretical, intensity_array_idx, 51);
-        add_intensity(theoretical, intensity_array_idx, 50);
-        if (get_boolean_parameter("xcorr-use-flanks") &&
-	    intensity_array_idx > 0) {
-	      add_intensity(theoretical, intensity_array_idx - 1, 25);
+  int ion_charge = 0;
+  ION_TYPE_T ion_type;
+  int intensity_array_idx = 0;
+  FLOAT_T bin_width = bin_width_mono;
+  vector<LinkedPeptide>& ions = ion_series.ions();
+  // while there are ion's in ion iterator, add matched observed peak intensity
+  for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
+    intensity_array_idx = (int)(ion->get_mz(MONO) / bin_width + 0.5);
+    ion_type = ion->type();
+    ion_charge = ion->charge();
+    // skip ions that are located beyond max mz limit
+    // is it B, Y ion?
+    // neutral loss peak?
+    // Add peaks of intensity 50.0 for B, Y type ions. 
+    // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
+    // Skip ions that are located beyond max mz limit
+    if((intensity_array_idx)< max_mz_){
+      //if (ion->type() == Y_ION)
+      //add_intensity(theoretical, intensity_array_idx, 51);
+      Scorer::addIntensity(theoretical, intensity_array_idx, 50);
+      if (get_boolean_parameter("xcorr-use-flanks") &&
+        intensity_array_idx > 0) {
+        Scorer::addIntensity(theoretical, intensity_array_idx - 1, 25);
       }
-	if(get_boolean_parameter("xcorr-use-flanks") &&
-	   ((intensity_array_idx + 1)< max_mz)) {
-        add_intensity(theoretical, intensity_array_idx + 1, 25);
-	}
+      if(get_boolean_parameter("xcorr-use-flanks") &&
+	   ((intensity_array_idx + 1)< max_mz_)) {
+        Scorer::addIntensity(theoretical, intensity_array_idx + 1, 25);
       }
+    }
 
-      // add neutral loss of water and NH3
-      //  mass_z + (modification_masses[(int)ion_modification]/(FLOAT_T)charge) * modification_count;  
+    // add neutral loss of water and NH3
+    //  mass_z + (modification_masses[(int)ion_modification]/(FLOAT_T)charge) * modification_count;  
 
 
-      if(ion_type == B_ION){
-        int h2o_array_idx = (int)((ion->get_mz(MONO) - (MASS_H2O_MONO/ion->charge()) ) / bin_width + 0.5);
-	if (h2o_array_idx < max_mz)
-	  add_intensity(theoretical, h2o_array_idx, 10);
+    if(ion_type == B_ION){
+      int h2o_array_idx = (int)((ion->get_mz(MONO) - (MASS_H2O_MONO/ion->charge()) ) / bin_width + 0.5);
+      if (h2o_array_idx < max_mz_)
+	Scorer::addIntensity(theoretical, h2o_array_idx, 10);
       }
 
       int nh3_array_idx = (int)((ion->get_mz(MONO) -  (MASS_NH3_MONO/ion->charge())) / bin_width + 0.5);
-      if (nh3_array_idx < max_mz)
-	add_intensity(theoretical, nh3_array_idx, 10);        
-    }
-    return true;
+      if (nh3_array_idx < max_mz_) {
+        Scorer::addIntensity(theoretical, nh3_array_idx, 10);
+      }
   }
+  return true;
+}
 
+/**
+ * \returns the sum of the spectrum peak intensities of the by-ions that are matched
+ * to the LinkedIonSeries
+ */ 
+FLOAT_T XHHC_Scorer::getIonCurrentExplained(
+  LinkedIonSeries& ion_series, ///<The LinkedIonSeries to match 
+  Spectrum* spectrum, ///<The spectrum to match
+  FLOAT_T& explained, ///<The ion current explained -out
+  int& by_observed ///<The number of by ions matched
+  ) {
 
-FLOAT_T Scorer::getIonCurrentExplained(LinkedIonSeries& ion_series, 
-  Spectrum* spectrum, 
-  FLOAT_T& explained, 
-  int& by_observed) {
-
-  max_mz = spectrum->getMaxPeakMz();
-  FLOAT_T* theoretical = (FLOAT_T*)mycalloc((size_t)max_mz+1, sizeof(FLOAT_T));
-  hhc_create_intensity_array_theoretical(ion_series, theoretical);
+  max_mz_ = spectrum->getMaxPeakMz();
+  FLOAT_T* theoretical = (FLOAT_T*)mycalloc((size_t)max_mz_+1, sizeof(FLOAT_T));
+  hhcCreateIntensityArrayTheoretical(ion_series, theoretical);
 
   explained = 0.0;
   by_observed = 0;
@@ -269,10 +319,15 @@ FLOAT_T Scorer::getIonCurrentExplained(LinkedIonSeries& ion_series,
   return ans;
 }
 
-
-
-//creates three files for spectacle.pl: spectrums.out, theoretical.out, observed.out
-void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
+/**
+ * Prints out an annotated spectrum
+ * creates three files for spectacle.pl: spectrums.out, 
+ * theoretical.out, observed.out
+ */
+void XHHC_Scorer::printSpectrums(
+  FLOAT_T* theoretical, ///< The theoretical spectrum array
+  Spectrum* spectrum ///< The spectrum to print
+  ){
    
   ofstream theoretical_file;
   ofstream observed_file;
@@ -302,7 +357,6 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
   }
 
   average = average / spectrum->getNumPeaks();
-  //cout << "AVERAGE " << average << endl;
   // make spectacle file for observed peaks
  
   for (PeakIterator peak_iter = spectrum->begin();
@@ -313,16 +367,12 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
     FLOAT_T location = peak->getLocation();
     FLOAT_T intensity = peak->getIntensity(); 
     if (location > min_mz && location < max_mz) {
-    if (normalize) {
-      peak_colors[peak] = "blue";
-      //observed_file << location<< "\t" << pow(intensity * average * normalize, 0.2) << "\tnolabel\tred" << endl;
-      //spectrums_file << location<< "\t" << pow(intensity * average * normalize, 0.2) << "\tnolabel\tblue" << endl;
-      //spectrums_file << location<< "\t" << pow(intensity * average * normalize, 0.25) << "\tnolabel" << endl;
-    } else {
-      observed_file << location<< "\t" << intensity << "\tnolabel\tred" << endl;
-      spectrums_file << location<< "\t" << intensity  << "\tnolabel\tblue" << endl;
-      //spectrums_file << location<< "\t" << intensity  << "\tnolabel" << endl;
-    }
+      if (normalize) {
+        peak_colors[peak] = "blue";
+      } else {
+        observed_file << location<< "\t" << intensity << "\tnolabel\tred" << endl;
+        spectrums_file << location<< "\t" << intensity  << "\tnolabel\tblue" << endl;
+      }
     }
   }
   
@@ -359,8 +409,13 @@ void Scorer::print_spectrums(FLOAT_T* theoretical, Spectrum* spectrum) {
     spectrums_file << location << "\t" << intensity << "\tnolabel\t" << it->second << endl;
   }
 
-  //cout << "match: " << match_count << " mismatch: " << mismatch_count << endl;
   theoretical_file.close();
   spectrums_file.close();
 }
 
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */

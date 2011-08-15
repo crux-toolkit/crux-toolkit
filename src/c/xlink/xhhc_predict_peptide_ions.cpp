@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
     carp(CARP_INFO,"writing theoretical spectrum");
     map<int, FLOAT_T> theoretical;
 
-    Scorer::xlink_create_map_theoretical(ion_series,
+    XHHC_Scorer::xlinkCreateMapTheoretical(ion_series,
 					 theoretical);
 
 

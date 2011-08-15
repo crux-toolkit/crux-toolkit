@@ -184,8 +184,8 @@ int main(int argc, char** argv) {
 
   Spectrum* spectrum = new Spectrum();
   SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_file);
-  //SCORER_T* scorer = new_scorer(XCORR);
-  Scorer xhhc_scorer;
+
+  XHHC_Scorer xhhc_scorer;
   if(!collection->getSpectrum(scan_num, spectrum)){
     carp(CARP_ERROR, "failed to find spectrum with  scan_num: %d", scan_num);
     delete collection;
@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
   // Pragya's open modification method
   if (open_modification) {
   FLOAT_T mod_mass;
-    SCORER_T* scorer = new_scorer(XCORR);
+    Scorer* scorer = new Scorer(XCORR);
     IonSeries* ion_series = NULL; 
     IonConstraint* ion_constraint = 
 	IonConstraint::newIonConstraintSequestXcorr(charge);
@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
         mod_mass = linker_mass + peptides[1].mass(MONO);	
 	ion_series = new IonSeries((char*)peptides[0].sequence().c_str(), ion->charge(), ion_constraint);
 	hhc_predict_ions(ion_series, mod_mass, peptides[0].link_site());
-	score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+	score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
 	//score = xhhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
         ss.str("");
 	ss << peptides[0].sequence() << " mod " << peptides[1].sequence() << ", " << peptides[0].link_site();
@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
 	ion_series = new IonSeries((char*)peptides[1].sequence().c_str(), ion->charge(), ion_constraint);
 	hhc_predict_ions(ion_series, mod_mass, peptides[1].link_site());
         //score = xhhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
-	score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+	score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
 	ss.str("");
 	ss << peptides[1].sequence() << " mod " << peptides[0].sequence() << ", " << peptides[1].link_site();
         scores.insert(make_pair(score, ss.str()));
@@ -245,7 +245,7 @@ int main(int argc, char** argv) {
     for (vector<LinkedPeptide>::iterator ion = filtered_ions.begin(); ion != filtered_ions.end(); ++ion) {
       ion_series.clear();
       ion_series.add_linked_ions(*ion);
-      score = xhhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
+      score = xhhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
      //score = hhc_score_spectrum_v_ion_series(scorer, spectrum, ion_series);
       scores.push_back(make_pair(score, *ion));
     }

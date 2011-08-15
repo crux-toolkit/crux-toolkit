@@ -412,10 +412,10 @@ class IonFilteredIterator;
 typedef struct loss_limit LOSS_LIMIT_T;
 
 /**
- * \typedef SCORER_T
+ * \class Scorer
  * \brief An object to score a spectrum v. ion_series or spectrum v. spectrum
  */
-typedef struct scorer SCORER_T;
+class Scorer;
 
 /**
  * The enum for scorer type
@@ -455,24 +455,6 @@ typedef enum _scorer_type SCORER_TYPE_T;
  *\brief An object that navigates the options and selects the correct peptide iterator to use
  */
 typedef struct generate_peptides_iterator_t GENERATE_PEPTIDES_ITERATOR_T;
-
-/**
- *\typedef HIT_T
- *\brief An object that contains the a protein and its score. 
- */
-typedef struct hit HIT_T;
-
-/**
- *\typedef HIT_COLLECTION_T
- *\brief An object that contains multiple hit objects
- */
-typedef struct hit_collection HIT_COLLECTION_T;
-
-/**
- *\typedef HIT_ITERATOR_T
- *\brief An object that navigates the hits in a hit collection
- */
-typedef struct hit_iterator HIT_ITERATOR_T;
 
 /**
  * The enum for protein scorer type

@@ -18,7 +18,7 @@
 #include "parameter.h"
 #include "SpectrumCollection.h"
 #include "FilteredSpectrumChargeIterator.h"
-#include "scorer.h"
+#include "Scorer.h"
 
 #include <string>
 

@@ -16,7 +16,7 @@
 #include "utils.h"
 #include "mass.h"
 #include "parameter.h"
-#include "scorer.h"
+#include "Scorer.h"
 #include "carp.h"
 #include <vector>
 #include <string>

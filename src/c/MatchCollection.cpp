@@ -1082,7 +1082,7 @@ bool MatchCollection::scoreMatchesOneSpectrum(
     IonConstraint::newIonConstraintSmart(score_type, charge);
 
   // create scorer
-  SCORER_T* scorer = new_scorer(score_type);
+  Scorer* scorer = new Scorer(score_type);
 
   // create a generic ion_series that will be reused for each peptide sequence
   IonSeries* ion_series = new IonSeries(ion_constraint, charge);  
@@ -1111,7 +1111,7 @@ bool MatchCollection::scoreMatchesOneSpectrum(
     ion_series->predictIons();
 
     // get the score
-    FLOAT_T score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+    FLOAT_T score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
 
     // set score in match
     match->setScore(score_type, score);
@@ -1144,7 +1144,7 @@ bool MatchCollection::scoreMatchesOneSpectrum(
   // clean up
   IonConstraint::free(ion_constraint);
   delete ion_series;
-  free_scorer(scorer);
+  delete scorer;
   return true;
 }
 
@@ -2718,7 +2718,7 @@ void MatchCollection::addDecoyScores(
     IonConstraint::newIonConstraintSmart(XCORR, charge);
  
   IonSeries* ion_series = new IonSeries(ion_constraint, charge);  
-  SCORER_T* scorer = new_scorer(XCORR);
+  Scorer* scorer = new Scorer(XCORR);
   
   // for each peptide in the iterator
   while( modified_peptides_iterator_has_next(peptides)){
@@ -2733,7 +2733,7 @@ void MatchCollection::addDecoyScores(
     ion_series->predictIons();
 
     // get the score
-    FLOAT_T score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+    FLOAT_T score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
 
     // add to collection's list of xcorrs
     xcorrs_[num_xcorrs_] = score;
@@ -2747,7 +2747,7 @@ void MatchCollection::addDecoyScores(
 
   IonConstraint::free(ion_constraint);
   delete ion_series;
-  free_scorer(scorer);
+  delete scorer;
 
 }
 

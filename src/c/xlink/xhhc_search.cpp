@@ -214,7 +214,7 @@ int xlink_search_main(int argc, char** argv) {
   search_decoy_file << "matches/spectrum\t";
   search_decoy_file << "sequence"<<endl;
 
-  Scorer hhc_scorer;
+  XHHC_Scorer hhc_scorer;
   // main loop over spectra in ms2 file
  
   int search_count = 0;
@@ -306,7 +306,7 @@ int xlink_search_main(int argc, char** argv) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
       ion_series.add_linked_ions(target_xpeptides[idx]);
-      score = hhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
+      score = hhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
       scores.push_back(make_pair(score, target_xpeptides[idx]));
     }
 
@@ -317,7 +317,7 @@ int xlink_search_main(int argc, char** argv) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
       ion_series.add_linked_ions(decoy_xpeptides[idx]);
-      score = hhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
+      score = hhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
       scores.push_back(make_pair(score, decoy_xpeptides[idx]));
     }
 
@@ -333,7 +333,7 @@ int xlink_search_main(int argc, char** argv) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
       ion_series.add_linked_ions(decoy_train_xpeptides[idx]);
-      score = hhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
+      score = hhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
       linked_decoy_scores_array[idx] = score;
     }
   
@@ -452,7 +452,7 @@ int xlink_search_main(int argc, char** argv) {
         }
         search_target_file <<"\t";
                 //get theoretical ions count for (0-1200, with 1Da bins).
-        Scorer scorer;
+        XHHC_Scorer scorer;
         LinkedIonSeries ion_series(charge);
         ion_series.add_linked_ions(scores[score_index].second);
 

@@ -155,8 +155,8 @@ LIBFILES= \
   SearchProgress.h \
   SequestSearch.cpp \
   SequestSearch.h \
-  scorer.cpp \
-  scorer.h \
+  Scorer.cpp \
+  Scorer.h \
   SortColumn.cpp \
   SortColumn.h \
   sorter.cpp \
