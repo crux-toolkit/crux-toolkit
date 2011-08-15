@@ -31,6 +31,7 @@ float scores[10] = { 78.2, 50, 23.3, 109, 34.5, 50, 45.6, 50, 38, 64};
 PEPTIDE_T* pep;
 Protein* prot;
 char protseq[] = "FAKESEQ";
+SpectrumZState zstate;
 
 void match_collection_setup(){
   mc = new MatchCollection(FALSE); // not decoy
@@ -40,9 +41,8 @@ void match_collection_setup(){
   pep = new_peptide((unsigned char)strlen(protseq), 7.77, prot, 1);
   num_matches = 8;
   for(int i=0; i<num_matches; i++){
-    Match* m = new Match();
+    Match* m = new Match(pep, NULL, zstate, false);
     m->setScore(XCORR, scores[i]);
-    m->setPeptide(pep);
     match_list.push_back(m);    
   }
   set_verbosity_level(CARP_ERROR);

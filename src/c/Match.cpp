@@ -70,6 +70,23 @@ Match::Match(){
 }
 
 /**
+ * Create a new match with the given members.
+ */
+Match::Match(PEPTIDE_T* peptide, ///< the peptide for this match
+             Spectrum* spectrum, ///< the spectrum for this match
+             SpectrumZState& zstate, ///< the charge/mass of the spectrum
+             bool is_decoy)///< is the peptide a decoy or not
+{
+  init();
+  peptide_ = peptide;
+  spectrum_ = spectrum;
+  zstate_ = zstate;
+  null_peptide_ = is_decoy;
+
+  ++pointer_count_;
+}
+
+/**
  * free the memory allocated match
  * spectrum is not freed by match
  */
@@ -1492,47 +1509,11 @@ Spectrum* Match::getSpectrum()
 }
 
 /**
- * sets the match spectrum
- */
-void Match::setSpectrum(
-  Spectrum* spectrum  ///< the working spectrum -in
-  )
-{
-  spectrum_ = spectrum;
-}
-
-/**
  *\returns the peptide in the match object
  */
 PEPTIDE_T* Match::getPeptide()
 {
   return peptide_;
-}
-
-/**
- * Sets the match's peptide field.  Only cache a copy of the peptide
- * sequence after it has been requested.
- *
- * Go to top README for N,C terminus tryptic feature info.
- */
-void Match::setPeptide(
-  PEPTIDE_T* peptide  ///< the working peptide -in
-  )
-{
-  // set peptide 
-  peptide_ = peptide;
-
-  digest_ = NON_SPECIFIC_DIGEST;  // FIXME
-}
-
-/**
- * sets the match if it is a null_peptide match
- */
-void Match::setNullPeptide(
-  bool is_null_peptide  ///< is the match a null peptide? -in
-  )
-{
-  null_peptide_ = is_null_peptide;  
 }
 
 /**
@@ -1543,19 +1524,6 @@ bool Match::getNullPeptide()
 {
   return null_peptide_;
 }
-
-/**
- * sets the match charge
- */
-/*
-void set_match_charge(
-  Match* match, ///< the match to work -out
-  int charge  ///< the charge of spectrum -in
-  )
-{
-  match->charge = charge;
-}
-*/
 
 void Match::setZState(
   SpectrumZState& zstate) {
