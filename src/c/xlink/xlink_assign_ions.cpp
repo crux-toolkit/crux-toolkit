@@ -3,7 +3,7 @@
 #include "xhhc_scorer.h"
 
 #include "objects.h"
-#include "scorer.h"
+#include "Scorer.h"
 #include "SpectrumCollectionFactory.h"
 #include "DelimitedFile.h"
 
@@ -134,7 +134,7 @@ int main(int argc, char** argv){
 void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
       int total_by_ions = ion_series.get_total_by_ions();
-      int matched_by_ions = Scorer::get_matched_by_ions(spectrum, ion_series);
+      int matched_by_ions = XHHC_Scorer::getMatchedBYIons(spectrum, ion_series);
       FLOAT_T frac_by_ions = (double)matched_by_ions / (double) total_by_ions;
 
       carp(CARP_INFO, "total theoretical ions:%d",total_by_ions);

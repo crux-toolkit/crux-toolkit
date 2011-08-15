@@ -6,7 +6,7 @@
 #include "SpectrumCollectionFactory.h"
 #include "Peak.h"
 #include "crux-utils.h"
-#include "scorer.h"
+#include "Scorer.h"
 #include "objects.h"
 #include "parameter.h"
 #include "IonSeries.h"
@@ -20,7 +20,7 @@ START_TEST (test_create){
   Spectrum* spectrum = NULL;
   SpectrumCollection* sp_collection = NULL; ///<spectrum collection
   IonSeries* ion_series = NULL;
-  SCORER_T* scorer = NULL;
+  Scorer* scorer = NULL;
   float score = 0;
 
   //parse paramter file
@@ -52,15 +52,15 @@ START_TEST (test_create){
   fail_unless(sp_collection->getSpectrum(scan_num) == NULL, "failed to find scan_num in ms3 file");
 
   //create new scorer
-  scorer = new_scorer(SP);  
+  scorer = new Scorer(SP);  
 
   //check if scorer has been set right
-  fail_unless(get_scorer_type(scorer) == SP, "failed to set scorer type");
-  fail_unless(compare_float(get_scorer_sp_beta(scorer), 0.075) == 0, "failed to set beta");
-  fail_unless(compare_float(get_scorer_sp_max_mz(scorer), 4000) == 0, "failed to set max mz");
+  fail_unless(scorer->getType() == SP, "failed to set scorer type");
+  fail_unless(compare_float(scorer->getSpBeta(), 0.075) == 0, "failed to set beta");
+  fail_unless(compare_float(scorer->getSpMaxMz(), 4000) == 0, "failed to set max mz");
 
   //calculates the Sp score
-  score = score_spectrum_v_ion_series(scorer, spectrum, ion_series);
+  score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
 
   //print the Sp score
   printf("Sp score is: %.2f\n", score);
@@ -68,7 +68,7 @@ START_TEST (test_create){
   fail_unless(compare_float(score, 5.35885334014892578125) == 0, "sp score does not match the expected value");
   
   //free heap
-  free_scorer(scorer);
+  delete scorer;
   delete ion_constraint;
   delete ion_series;
   delete sp_collection;

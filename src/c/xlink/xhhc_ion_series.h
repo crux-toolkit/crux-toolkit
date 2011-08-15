@@ -5,7 +5,7 @@
 
 //CRUX includes
 #include "IonSeries.h"
-#include "scorer.h"
+#include "Scorer.h"
 #include "Spectrum.h"
 #include "SpectrumCollection.h"
 

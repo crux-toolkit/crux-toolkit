@@ -99,7 +99,7 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
     // change the peak values
     FLOAT_T* intensities = NULL;
     int max_mz_bin = 0;
-    get_processed_peaks(cur_spectrum, cur_charge, XCORR,
+    Scorer::getProcessedPeaks(cur_spectrum, cur_charge, XCORR,
                         &intensities, &max_mz_bin);
 
     // print processed spectrum

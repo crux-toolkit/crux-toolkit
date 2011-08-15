@@ -23,7 +23,7 @@
 #include "crux-utils.h"
 #include "objects.h"
 #include "parameter.h"
-#include "scorer.h" 
+#include "Scorer.h" 
 #include "Match.h" 
 #include "MatchCollection.h" 
 #include "generate_peptides_iterator.h" 
@@ -1644,15 +1644,12 @@ FLOAT_T Match::getLnExperimentSize()
  * sets the match b_y_ion information
  */
 void Match::setBYIonInfo(
-  SCORER_T* scorer ///< the scorer from which to extract information -in
-  )
-{
-  b_y_ion_fraction_matched_ = 
-    get_scorer_sp_b_y_ion_fraction_matched(scorer); 
-  b_y_ion_matched_ = 
-    get_scorer_sp_b_y_ion_matched(scorer); 
-  b_y_ion_possible_ = 
-    get_scorer_sp_b_y_ion_possible(scorer); 
+  Scorer* scorer ///< the scorer from which to extract information -in
+  ) {
+
+  b_y_ion_fraction_matched_ = scorer->getSpBYIonFractionMatched(); 
+  b_y_ion_matched_ = scorer->getSpBYIonMatched(); 
+  b_y_ion_possible_ = scorer->getSpBYIonPossible(); 
 }
 
 /**

@@ -27,7 +27,7 @@
 #include "crux-utils.h"
 #include "objects.h"
 #include "parameter.h"
-#include "scorer.h"
+#include "Scorer.h"
 
 
 /* Global variables */
@@ -394,7 +394,7 @@ class Match {
    * sets the match b_y_ion info
    */
   void setBYIonInfo(
-    SCORER_T* scorer ///< the scorer from which to extract information -in
+    Scorer* scorer ///< the scorer from which to extract information -in
     );
 
   /**
