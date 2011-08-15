@@ -10,7 +10,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "peptide.h"
-#include "peptide_src.h"
+#include "PeptideSrc.h"
 #include "carp.h"
 #include "PeptideConstraint.h"
 

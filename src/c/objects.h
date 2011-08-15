@@ -226,18 +226,16 @@ typedef enum _parsimony_type PARSIMONY_TYPE_T;
 typedef enum _window_type WINDOW_TYPE_T;
 
 /**
- * \typedef PEPTIDE_SRC_T
+ * \class PeptideSrc
  * \brief object for mapping a peptide to it's parent protein.
  */
-typedef struct peptide_src PEPTIDE_SRC_T;
-
+class PeptideSrc;
 
 /**
  * \class Protein
  * \brief A protein sequence
  */
 class Protein;
-
 
 /**
  * \class ProteinPeptideIterator

@@ -132,8 +132,8 @@ LIBFILES= \
   peptide.h \
   peptide_modifications.cpp \
   peptide_modifications.h \
-  peptide_src.cpp \
-  peptide_src.h \
+  PeptideSrc.cpp \
+  PeptideSrc.h \
   Percolator.cpp \
   Percolator.h \
   PrintProcessedSpectra.cpp \

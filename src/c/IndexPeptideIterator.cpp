@@ -247,7 +247,7 @@ bool IndexPeptideIterator::findPeptideInCurrentIndexFile()
     pep_end = ftell(cur_file);
     fseek(cur_file, src_loc, SEEK_SET);
     Database* database = index_->getDatabase();
-    if( ! parse_peptide_src(peptide, cur_file, database, true) ){
+    if( ! PeptideSrc::parse(peptide, cur_file, database, true) ){
       carp(CARP_ERROR, "Could not parse peptide src");
       file_finished = true; // maybe we could read more, but unlikly
     }
@@ -507,7 +507,7 @@ bool IndexPeptideIterator::fastForwardIndexFile(
   long int pep_end = ftell(file);
   fseek(file, src_loc, SEEK_SET);
   Database* database = index_->getDatabase();
-  if( ! parse_peptide_src(peptide, file, database, true) ){
+  if( ! PeptideSrc::parse(peptide, file, database, true) ){
     carp(CARP_ERROR, "Could not parse peptide src");
     free_peptide(peptide);
     return false;

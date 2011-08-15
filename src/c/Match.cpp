@@ -505,7 +505,7 @@ void Match::printSqt(
   
   PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
     new_peptide_src_iterator(peptide);
-  PEPTIDE_SRC_T* peptide_src = NULL;
+  PeptideSrc* peptide_src = NULL;
   char* protein_id = NULL;
   Protein* protein = NULL;
   const char* rand = "";
@@ -515,12 +515,12 @@ void Match::printSqt(
   
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-    protein = get_peptide_src_parent_protein(peptide_src);
+    protein = peptide_src->getParentProtein();
     protein_id = protein->getId();
     
     // print match info (locus line), add rand_ to locus name for decoys
     fprintf(file, "L\t%s%s\n", rand, protein_id);      
-    free(protein_id);
+    delete protein_id;
   }
   
   free_peptide_src_iterator(peptide_src_iterator);
@@ -1059,7 +1059,7 @@ double* Match::getPercolatorFeatures(
 {
   int feature_count = 20;
   PEPTIDE_SRC_ITERATOR_T* src_iterator = NULL;
-  PEPTIDE_SRC_T* peptide_src = NULL;
+  PeptideSrc* peptide_src = NULL;
   Protein* protein = NULL;
   unsigned int protein_idx = 0;
   double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
@@ -1153,7 +1153,7 @@ double* Match::getPercolatorFeatures(
     // find largest numProt and pepSite among the parent proteins
     while(peptide_src_iterator_has_next(src_iterator)){
       peptide_src = peptide_src_iterator_next(src_iterator);
-      protein = get_peptide_src_parent_protein(peptide_src);
+      protein = peptide_src->getParentProtein();
       protein_idx = protein->getProteinIdx();
 
       // numProt
@@ -1881,8 +1881,8 @@ void get_information_of_proteins(
   std::ostringstream protein_field_stream;
   // for each protein that the peptide maps, get its id and description
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
-    PEPTIDE_SRC_T* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-    Protein* protein = get_peptide_src_parent_protein(peptide_src);
+    PeptideSrc* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    Protein* protein = peptide_src->getParentProtein();
     char* protein_id = protein->getId();
     char* protein_annotation = protein->getAnnotation();      
     char* str_iter = protein_annotation;

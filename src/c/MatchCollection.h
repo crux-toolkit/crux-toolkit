@@ -34,7 +34,7 @@
 #include "generate_peptides_iterator.h" 
 #include "Match.h"
 #include "hash.h"
-#include "peptide_src.h"
+#include "PeptideSrc.h"
 #include "ProteinIndex.h"
 #include "modifications.h"
 #include "modified_peptides_iterator.h"

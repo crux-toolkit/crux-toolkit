@@ -7,7 +7,7 @@
 #include "Spectrum.h"
 #include "Peak.h"
 #include "peptide.h"
-#include "peptide_src.h"
+#include "PeptideSrc.h"
 #include "Protein.h"
 #include "ProteinPeptideIterator.h"
 #include "Database.h"
@@ -23,7 +23,7 @@ static Protein *protein1;
 static ProteinPeptideIterator* pp_iterator;
 static PeptideConstraint *constraint, *enzyme_constraint;
 
-static PEPTIDE_SRC_T* src;
+static PeptideSrc* src;
 
 static Database* db;
 //                      0123456789
@@ -155,7 +155,7 @@ START_TEST (test_elastase){
     fail_unless(src != NULL, "Failed to get peptide src from peptide.");
 
     // get peptide indecies in sequence
-    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    int start_idx = src->getStartIdx();// this is 1-based
     start_idx--;
     int len = get_peptide_length(peptide2);
     while( starts[idx] == -1 ){ idx++;}
@@ -242,7 +242,7 @@ START_TEST (test_chymo){
     fail_unless(src != NULL, "Failed to get peptide src from peptide.");
 
     // get peptide indecies in sequence
-    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    int start_idx = src->getStartIdx();// this is 1-based
     start_idx--;
     int len = get_peptide_length(peptide2);
     while( starts[idx] == -1 ){ idx++;}
@@ -328,7 +328,7 @@ START_TEST (test_mod_chymo){
     fail_unless(src != NULL, "Failed to get peptide src from peptide.");
 
     // get peptide indecies in sequence
-    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    int start_idx = src->getStartIdx();// this is 1-based
     start_idx--;
     int len = get_peptide_length(peptide2);
     while( starts[idx] == -1 ){ idx++;}
@@ -421,7 +421,7 @@ START_TEST (test_el_tryp_chymo){
     fail_unless(src != NULL, "Failed to get peptide src from peptide.");
 
     // get peptide indecies in sequence
-    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    int start_idx = src->getStartIdx();// this is 1-based
     start_idx--;
     int len = get_peptide_length(peptide2);
     while( starts[idx] == -1 ){ idx++;}
@@ -515,7 +515,7 @@ START_TEST(test_aspn){
     fail_unless(src != NULL, "Failed to get peptide src from peptide.");
 
     // get peptide indecies in sequence
-    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    int start_idx = src->getStartIdx();// this is 1-based
     start_idx--;
     int len = get_peptide_length(peptide2);
     while( starts[idx] == -1 ){ idx++;}
@@ -601,7 +601,7 @@ START_TEST(test_other_enzymes){
      fail_unless(src != NULL, "Failed to get peptide src from peptide.");
      
      // get peptide indecies in sequence
-     int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+     int start_idx = src->getStartIdx();// this is 1-based
      start_idx--;
      int len = get_peptide_length(peptide2);
      while( starts[idx] == -1 ){ idx++;}
@@ -683,7 +683,7 @@ START_TEST(test_custom_enzyme){
     fail_unless(src != NULL, "Failed to get peptide src from peptide.");
 
     // get peptide indecies in sequence
-    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    int start_idx = src->getStartIdx();// this is 1-based
     start_idx--;
     int len = get_peptide_length(peptide2);
     while( starts[idx] == -1 ){ idx++;}
@@ -770,7 +770,7 @@ START_TEST(test_custom_enzyme){
     fail_unless(src != NULL, "Failed to get peptide src from peptide.");
 
     // get peptide indecies in sequence
-    int start_idx = get_peptide_src_start_idx(src);// this is 1-based
+    int start_idx = src->getStartIdx();// this is 1-based
     start_idx--;
     int len = get_peptide_length(peptide2);
     while( starts[idx] == -1 ){ idx++;}

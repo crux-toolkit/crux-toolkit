@@ -53,9 +53,9 @@ bool IndexFilteredPeptideIterator::hasNext(){
 bool IndexFilteredPeptideIterator::setup()
 {
   PEPTIDE_T* peptide = NULL;
-  PEPTIDE_SRC_T* src = NULL;
+  PeptideSrc* src = NULL;
   DIGEST_T required_digestion = index_->getSearchConstraint()->getDigest();
-  bool match = FALSE;
+  bool match = false;
   
   // initialize index_filered
   while(IndexPeptideIterator::hasNext()){
@@ -65,16 +65,16 @@ bool IndexFilteredPeptideIterator::setup()
     // check if peptide type matches the constraint
     // find at least one peptide_src for which cleavage is correct
     while(src != NULL){
-      if(get_peptide_src_digest(src) >= required_digestion){
-        match = TRUE;
+      if(src->getDigest() >= required_digestion){
+        match = true;
         break;
       }
       // check the next peptide src
-      src = get_peptide_src_next_association(src);
+      src = src->getNextAssociation();
     }
     
     // add more filters to the peptides here, if they don't meet
-    // requirements change 'match' to FALSE 
+    // requirements change 'match' to false 
     
     // this peptide meets the peptide_type
     if(match){
