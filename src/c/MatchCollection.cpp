@@ -1018,13 +1018,7 @@ int MatchCollection::addUnscoredPeptides(
     PEPTIDE_T* peptide = modified_peptides_iterator_next(peptide_iterator);
 
     // create a match
-    Match* match = new Match();
-
-    // set match fields
-    match->setPeptide(peptide);
-    match->setSpectrum(spectrum);
-    match->setZState(zstate);
-    match->setNullPeptide(is_decoy);
+    Match* match = new Match(peptide, spectrum, zstate, is_decoy);
 
     // add to match collection
     if(match_total_ >= _MAX_NUMBER_PEPTIDES){

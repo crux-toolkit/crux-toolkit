@@ -114,6 +114,14 @@ class Match {
   Match();
 
   /**
+   *
+   */
+  Match(PEPTIDE_T* peptide, ///< the peptide for this match
+        Spectrum* spectrum, ///< the spectrum for this match
+        SpectrumZState& zstate, ///< the charge/mass of the spectrum
+        bool is_decoy);///< is the peptide a decoy or not
+
+  /**
    * free the memory allocated match
    */
   static void freeMatch(
@@ -291,26 +299,12 @@ class Match {
   Spectrum* getSpectrum();
 
   /**
-   * sets the match spectrum
-   */
-  void setSpectrum(
-    Spectrum* spectrum  ///< the working spectrum -in
-    );
-
-  /**
    *\returns the peptide in the match object
    */
   PEPTIDE_T* getPeptide();
 
   /**
-   * sets the match peptide
-   */
-  void setPeptide(
-    PEPTIDE_T* peptide  ///< the working peptide -in
-    );
-
-  /**
-   * sets the match charge
+   * sets the match charge and mass
    */
 
   void setZState(
@@ -319,12 +313,6 @@ class Match {
 
   SpectrumZState& getZState();
 
-  /*
-  void set_match_charge(
-    Match* match, ///< the match to work -out
-    int charge  ///< the charge of spectrum -in
-    );
-  */
   /**
    * gets the match charge
    */
@@ -376,13 +364,6 @@ class Match {
    *Increments the pointer count to the match object
    */
   void incrementPointerCount();
-
-  /**
-   * sets the match if it is a null_peptide match
-   */
-  void setNullPeptide(
-    bool is_null_peptid  ///< is the match a null peptide? -in
-    );
 
   /**
    * gets the match if it is a null_peptide match
