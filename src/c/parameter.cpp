@@ -521,7 +521,8 @@ void initialize_parameters(void){
   // initialize as "unset", then set as bool after cmdline parsed
   set_string_parameter("use-flanking-peaks", "unset",
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
-      "sequest-search default=T. search-for-matches default=F.",
+      "sequest-search and search-for-xlinks default=T. search-for-matches "
+      "default=F.",
       "Available in the paramter file for all search commands.",
       "true");
   set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
@@ -917,6 +918,10 @@ void initialize_parameters(void){
       "Available for search-for-xlinks program (Default=F).",
       "true");
 
+  set_boolean_parameter("use-old-xlink", TRUE /* Turn to false later */,
+      "Use old xlink searching algorihtm",
+      "Available for search-for-xlinks program (Default=F).",
+      "false");
 
   // **** xlink-score-spectrum options ****
   set_string_parameter("xlink-score-method", "composite", 
@@ -924,10 +929,11 @@ void initialize_parameters(void){
       "Argument for xlink-score-spectrum.", "false");
 
   // **** search-xlink options ****
-  set_boolean_parameter("xcorr-use-flanks", TRUE,
-      "Use flank peaks in xcorr theoretical spectrum",
-      "Available for crux search-for-xlinks program (Default=T).",
-      "true");
+
+  set_boolean_parameter("xlink-print-db", FALSE,
+    "Print the database in tab delimited format to xlink_peptides.txt",
+    "Used for testing the candidate generatation (Default=F).",
+    "false");
 
   set_boolean_parameter("xlink-include-linears", TRUE, 
       "Include linear peptides in the "
@@ -944,6 +950,14 @@ void initialize_parameters(void){
       "database.  Default=T.",
       "Available for crux search-for-xlinks program.",
       "true");
+
+  
+  set_string_parameter("xlink-prevents-cleavage", "K",
+		       "List of amino acids that xlinker can prevent cleavage",
+		       "Available for search-for-xlinks program (Default=K).",
+		       "false" /*TODO - turn this to true after new
+                                        xlink code is implemented */
+                        );
 
   set_double_parameter("precursor-window-decoy", 20.0, 0, 1e6, 
       "Search decoy-peptides within +/- "

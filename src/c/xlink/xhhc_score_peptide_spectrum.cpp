@@ -34,7 +34,7 @@ int main(int argc, char** argv){
   const char* option_list[NUM_OPTIONS] = {
     "verbosity",
     "version",
-    "xcorr-use-flanks",
+    "use-flanking-peaks",
     "xlink-score-method"
   };
 
