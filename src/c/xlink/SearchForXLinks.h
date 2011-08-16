@@ -15,6 +15,19 @@
 
 class SearchForXLinks: public CruxApplication {
 
+ protected:
+  /**
+   * The main method for the new xlink search code
+   * \returns return code after execution
+   */
+  int xlinkSearchMain();
+
+  /**
+   * The main method for the old xlink search code
+   * \returns return code after execution
+   */
+  int xhhcSearchMain();
+
  public:
 
   /**

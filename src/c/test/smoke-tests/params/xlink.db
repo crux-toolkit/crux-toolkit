@@ -1,4 +1,5 @@
 overwrite=T
+xlink-print-db=T
 fragment-mass=mono
 enzyme=trypsin
 missed-cleavages=T

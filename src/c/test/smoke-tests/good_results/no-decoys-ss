@@ -1,13 +1,13 @@
-INFO: CPU: n001.grid.gs.washington.edu
-INFO: Tue Jun 14 21:20:43 PDT 2011
+INFO: CPU: n010.grid.gs.washington.edu
+INFO: Mon Aug 15 15:41:33 PDT 2011
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 1.31 s
+INFO: Elapsed time: 1.22 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.31 s
+INFO: Elapsed time: 1.23 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -115,7 +115,8 @@ custom-enzyme=__NULL_STR
 flanking=FALSE
 
 # Include peaks +/- 1da around b/y ions in theoretical spectrum. 
-# sequest-search default=T. search-for-matches default=F.
+# sequest-search and search-for-xlinks default=T. search-for-matches
+# default=F.
 # Available in the paramter file for all search commands.
 use-flanking-peaks=TRUE
 
@@ -492,10 +493,6 @@ feature-file=FALSE
 # [ALIVKRWFY]|{P},aspn []|[D] (cuts before D).
 enzyme=trypsin
 
-# Use flank peaks in xcorr theoretical spectrum
-# Available for crux search-for-xlinks program (Default=T).
-xcorr-use-flanks=TRUE
-
 # Specifies the data type the column contains (int|real|string) Default:
 # string
 # Available for crux extract-rows
@@ -559,7 +556,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Jun 14 21:20:43 2011
+H	StartTime	Mon Aug 15 15:41:33 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

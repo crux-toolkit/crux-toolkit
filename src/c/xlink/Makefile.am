@@ -16,6 +16,7 @@ libxlink_la_SOURCES = \
   xhhc_scorer.cpp \
   xhhc_scorer.h \
   xhhc_search.cpp \
+  xlink_search.cpp \
   SearchForXLinks.cpp \
   SearchForXLinks.h \
   xlink_assign_ions.cpp \
