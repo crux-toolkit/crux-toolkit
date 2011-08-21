@@ -525,10 +525,10 @@ void OutputFiles::writeMatchFeatures(
 void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
 
   // rearrange pairs to sort by score
-  vector<pair<FLOAT_T, PEPTIDE_T*> > scoreToPeptide;
+  vector<pair<FLOAT_T, Peptide*> > scoreToPeptide;
   for(PeptideToScore::iterator it = peptideToScore.begin();
        it != peptideToScore.end(); ++it){
-    PEPTIDE_T* peptide = it->first;
+    Peptide* peptide = it->first;
     FLOAT_T score = it->second;
     scoreToPeptide.push_back(make_pair(score, peptide));
   }
@@ -543,11 +543,11 @@ void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
     score_col = NSAF_SCORE_COL;
   }
   // print each pair
-  for(vector<pair<FLOAT_T, PEPTIDE_T*> >::iterator it = scoreToPeptide.begin();
+  for(vector<pair<FLOAT_T, Peptide*> >::iterator it = scoreToPeptide.begin();
       it != scoreToPeptide.end(); ++it){
-    PEPTIDE_T* peptide = it->second;
+    Peptide* peptide = it->second;
     FLOAT_T score = it->first;
-    char* seq = get_peptide_sequence(peptide);
+    char* seq = peptide->getSequence();
 
     file->setColumnCurrentRow(SEQUENCE_COL, seq);
     file->setColumnCurrentRow(score_col, score);

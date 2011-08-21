@@ -9,7 +9,7 @@
 #include "objects.h"
 #include "Ion.h"
 #include "alphabet.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Peak.h"
 #include "mass.h"
 #include "utils.h"
@@ -101,7 +101,7 @@ void Ion::initBasicIon(
   charge_ = charge;
   peptide_sequence_ = peptide;
   // TODO get mass type from param file
-  peptide_mass_ = calc_sequence_mass(peptide, MONO); 
+  peptide_mass_ = Peptide::calcSequenceMass(peptide, MONO); 
   peak_ = NULL;
 }
 

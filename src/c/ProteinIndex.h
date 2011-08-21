@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "utils.h"
 #include "objects.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "carp.h"
 #include "PeptideConstraint.h"

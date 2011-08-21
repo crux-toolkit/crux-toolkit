@@ -25,7 +25,7 @@ DatabasePeptideIterator::DatabasePeptideIterator(
 {
   // set peptide implementation to linklist peptide_src
   // this determines which peptide free method to use
-  set_peptide_src_implementation(true);
+  Peptide::setPeptideSrcImplementation(true);
 
   Protein* next_protein = NULL;
 
@@ -41,7 +41,7 @@ DatabasePeptideIterator::DatabasePeptideIterator(
   
   // set up peptide storage
   store_all_peptides_ = store_all_peptides;
-  peptide_map_ = map<char*, PEPTIDE_T*, cmp_str>();
+  peptide_map_ = map<char*, Peptide*, cmp_str>();
   cur_map_position_ = peptide_map_.begin();
 
   // set a new protein iterator
@@ -130,22 +130,22 @@ DatabasePeptideIterator::DatabasePeptideIterator(
  */
 void DatabasePeptideIterator::generateAllPeptides(){
 
-  PEPTIDE_T* cur_peptide = NULL;
-  map<char*, PEPTIDE_T*, cmp_str>& peptide_map = peptide_map_;
-  map<char*, PEPTIDE_T*>::iterator peptide_map_ptr;
+  Peptide* cur_peptide = NULL;
+  map<char*, Peptide*, cmp_str>& peptide_map = peptide_map_;
+  map<char*, Peptide*>::iterator peptide_map_ptr;
 
   // populate map with all peptides, combining when duplicates found
   while(hasNextFromFile()){
     cur_peptide = nextFromFile();
-    char* sequence = get_peptide_sequence(cur_peptide);
+    char* sequence = cur_peptide->getSequence();
 
     // does it already exist in the map?
     peptide_map_ptr = peptide_map.find(sequence);
     if( peptide_map_ptr == peptide_map.end() ){ // not found, add it
       peptide_map[sequence] = cur_peptide;
     } else {  // already exists, combine new peptide with existing
-      merge_peptides_copy_src(peptide_map_ptr->second, cur_peptide);
-      free_peptide(cur_peptide); 
+      Peptide::mergePeptidesCopySrc(peptide_map_ptr->second, cur_peptide);
+      delete cur_peptide; 
       free(sequence); 
     }
   } // next peptide
@@ -181,7 +181,7 @@ DatabasePeptideIterator::~DatabasePeptideIterator() {
   PeptideConstraint::free(peptide_constraint_);
 
   // free seqs in map
-  map<char*, PEPTIDE_T*>::iterator peptide_iter = 
+  map<char*, Peptide*>::iterator peptide_iter = 
     peptide_map_.begin();
   for(; peptide_iter != peptide_map_.end(); 
       ++peptide_iter){
@@ -212,9 +212,9 @@ bool DatabasePeptideIterator::hasNext() {
   return (cur_peptide_ != NULL);
 }
 
-PEPTIDE_T* DatabasePeptideIterator::next() {
+Peptide* DatabasePeptideIterator::next() {
 
-  PEPTIDE_T* return_peptide = cur_peptide_;
+  Peptide* return_peptide = cur_peptide_;
 
   // fetch next peptide either from file or from map
   if( store_all_peptides_ ){
@@ -238,7 +238,7 @@ PEPTIDE_T* DatabasePeptideIterator::next() {
 /**
  * \returns The next peptide in the database.
  */
-PEPTIDE_T* DatabasePeptideIterator::nextFromFile()
+Peptide* DatabasePeptideIterator::nextFromFile()
 {
   /*BF: Could this be simplified?  if next peptide, return it
     if not, look for next protein, if not return NULL
@@ -248,7 +248,7 @@ PEPTIDE_T* DatabasePeptideIterator::nextFromFile()
   bool reset = false;
   
   // the peptide to return
-  PEPTIDE_T* next_peptide =
+  Peptide* next_peptide =
     cur_protein_peptide_iterator_->next();
   
   Database* database = 

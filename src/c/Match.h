@@ -62,7 +62,7 @@ class Match {
    *
    */
   Spectrum* spectrum_; ///< the spectrum we are scoring with
-  PEPTIDE_T* peptide_;  ///< the peptide we are scoring
+  Peptide* peptide_;  ///< the peptide we are scoring
   FLOAT_T match_scores_[NUMBER_SCORER_TYPES]; 
     ///< array of scores, one for each type (index with SCORER_TYPE_T) 
   int match_rank_[NUMBER_SCORER_TYPES];  
@@ -77,9 +77,6 @@ class Match {
   char* peptide_sequence_; ///< peptide sequence is that of peptide or shuffled
   MODIFIED_AA_T* mod_sequence_; ///< seq of peptide or shuffled if null peptide
   DIGEST_T digest_;
-  //  PEPTIDE_TYPE_T overall_type; 
-    ///< overall peptide trypticity, set in set_match_peptide, see README above
-  //int charge; ///< the charge state of the match 
   SpectrumZState zstate_;
   // post_process match object features
   // only valid when post_process_match is true
@@ -116,7 +113,7 @@ class Match {
   /**
    *
    */
-  Match(PEPTIDE_T* peptide, ///< the peptide for this match
+  Match(Peptide* peptide, ///< the peptide for this match
         Spectrum* spectrum, ///< the spectrum for this match
         SpectrumZState& zstate, ///< the charge/mass of the spectrum
         bool is_decoy);///< is the peptide a decoy or not
@@ -301,7 +298,7 @@ class Match {
   /**
    *\returns the peptide in the match object
    */
-  PEPTIDE_T* getPeptide();
+  Peptide* getPeptide();
 
   /**
    * sets the match charge and mass
@@ -673,7 +670,7 @@ void find_variable_modifications(
  */
 void get_information_of_proteins(
   std::set<std::pair<char*, char*> >& protein_info,
-  PEPTIDE_T* peptide
+  Peptide* peptide
 );
 
 #endif //MATCH_H

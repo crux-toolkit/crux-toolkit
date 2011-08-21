@@ -28,7 +28,7 @@ vector<Match*> match_list;
 int num_matches;
 // some unordered scores to use
 float scores[10] = { 78.2, 50, 23.3, 109, 34.5, 50, 45.6, 50, 38, 64};
-PEPTIDE_T* pep;
+Peptide* pep;
 Protein* prot;
 char protseq[] = "FAKESEQ";
 SpectrumZState zstate;
@@ -38,7 +38,7 @@ void match_collection_setup(){
 
   // set up some matches with xcorrs and a peptide to add
   prot = new Protein("prot", protseq, strlen(protseq), NULL, 0, 0, NULL);
-  pep = new_peptide((unsigned char)strlen(protseq), 7.77, prot, 1);
+  pep = new Peptide((unsigned char)strlen(protseq), 7.77, prot, 1);
   num_matches = 8;
   for(int i=0; i<num_matches; i++){
     Match* m = new Match(pep, NULL, zstate, false);
@@ -59,7 +59,7 @@ void match_collection_teardown(){
     delete mc; // frees the matches
   }
   if( prot ) { delete prot; }
-  if( pep ) { free_peptide(pep); }
+  if( pep ) { delete pep; }
 
   for(size_t i=0; i<match_list.size(); i++){
     match_list[i] = NULL;

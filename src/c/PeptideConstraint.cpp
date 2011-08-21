@@ -1,5 +1,5 @@
 /*************************************************************************//**
- * \file peptide_constraint.cpp
+ * \file PeptideConstraint.cpp
  * \brief Object for holding the peptide constraint information.
  ****************************************************************************/
 #include <math.h>
@@ -10,7 +10,7 @@
 #include "crux-utils.h"
 #include "objects.h"
 #include "mass.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "carp.h"
 #include "PeptideConstraint.h"
@@ -112,13 +112,13 @@ PeptideConstraint* PeptideConstraint::copyPtr(
  * \returns TRUE if the constraint is satisified. FALSE if not.
  */
 bool PeptideConstraint::isSatisfied(
-  PEPTIDE_T* peptide ///< the query peptide -in
+  Peptide* peptide ///< the query peptide -in
   ) {
 
-  return (get_peptide_length(peptide) <= getMaxLength() &&
-     get_peptide_length(peptide) >= getMinLength() &&
-     get_peptide_peptide_mass(peptide) <= getMaxMass() &&
-     get_peptide_peptide_mass(peptide) >= getMinMass()
+  return (peptide->getLength() <= getMaxLength() &&
+     peptide->getLength() >= getMinLength() &&
+     peptide->getPeptideMass() <= getMaxMass() &&
+     peptide->getPeptideMass() >= getMinMass()
      );
 }
 

@@ -6,7 +6,7 @@
 #include "objects.h"
 #include "Spectrum.h"
 #include "Peak.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "PeptideSrc.h"
 #include "Protein.h"
 #include "Database.h"

@@ -55,23 +55,23 @@ START_TEST(test_has_next_unmod){
                "Iterator as set up should have a peptide");
 
   // get the first peptide
-  PEPTIDE_T* next_p = modified_peptides_iterator_next(iter1);
+  Peptide* next_p = modified_peptides_iterator_next(iter1);
   fail_unless( next_p != NULL, "Next returned a null peptide");
-  char* seq = get_peptide_sequence(next_p);
-  fail_unless( strcmp(get_peptide_sequence(next_p), "ITNHLVAMIEK") == 0,
+  char* seq = next_p->getSequence();
+  fail_unless( strcmp(next_p->getSequence(), "ITNHLVAMIEK") == 0,
                "First peptide should be ITNHLVAMIEK");
 
   fail_unless( modified_peptides_iterator_has_next(iter1) == TRUE, 
                "Iterator should have a second peptide");
 
-  free_peptide(next_p);
+  delete next_p;
   free(seq);
 
   next_p = modified_peptides_iterator_next(iter1);
   fail_unless( next_p != NULL, "Next returned a null second peptide");
-  fail_unless( strcmp(get_peptide_sequence(next_p), "QGQVATVLSAPAK") == 0,
+  fail_unless( strcmp(next_p->getSequence(), "QGQVATVLSAPAK") == 0,
                "Second peptide should be QGQVATVLSAPAK");
-  free_peptide(next_p);
+  delete next_p;
   
 }
 END_TEST
@@ -93,33 +93,33 @@ START_TEST(test_has_next_one_mod){
   // test if the iterator has two modified peptides
   fail_unless( modified_peptides_iterator_has_next(iter3) == TRUE,
                "Iterator with one Q mod should have first peptide");
-  PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
+  Peptide* pep = modified_peptides_iterator_next(iter3);
   fail_unless( pep != NULL, "Iterator returned a NULL peptide");
   // check unmodified sequence
-  fail_unless( strcmp(get_peptide_sequence(pep), "QGQVATVLSAPAK") == 0,
+  fail_unless( strcmp(pep->getSequence(), "QGQVATVLSAPAK") == 0,
                "First peptide should be QGQVATVLSAPAK");
   // check modified sequence
-  char* mod_seq = get_peptide_modified_sequence_with_symbols(pep);
+  char* mod_seq = pep->getModifiedSequenceWithSymbols();
   fail_unless( strcmp(mod_seq, "Q*GQVATVLSAPAK") == 0,
                "First peptide should be Q*GQVATVLSAPAK but is %s", mod_seq);
 
   // test for second peptide
   fail_unless( modified_peptides_iterator_has_next(iter3) == TRUE,
                "Iterator with one Q mod should have second peptide");
-  free_peptide(pep);
+  delete pep;
   pep = NULL;
   pep = modified_peptides_iterator_next(iter3);
   fail_unless( pep != NULL, "Iterator returned a NULL peptide");
   // check unmodified sequence
-  fail_unless( strcmp(get_peptide_sequence(pep), "QGQVATVLSAPAK") == 0,
+  fail_unless( strcmp(pep->getSequence(), "QGQVATVLSAPAK") == 0,
                "Second peptide should be QGQVATVLSAPAK");
   // check modified sequence
-  mod_seq = get_peptide_modified_sequence_with_symbols(pep);
+  mod_seq = pep->getModifiedSequenceWithSymbols();
   fail_unless( strcmp(mod_seq, "QGQ*VATVLSAPAK") == 0,
                "Second peptide should be QGQ*VATVLSAPAK but is %s", mod_seq);
 
   // check that there are no more modified peptides
-  free_peptide(pep);
+ delete pep;
   fail_unless( ! modified_peptides_iterator_has_next(iter3),
                "Iterator should have no more peptides");
   fail_unless( NULL == modified_peptides_iterator_next(iter3),
@@ -138,7 +138,7 @@ START_TEST(test_all_pep){
 
   /*
   while( modified_peptides_iterator_has_next(iter3) ){
-    PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
+    Peptide* pep = modified_peptides_iterator_next(iter3);
     char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
     printf("%s\n", mod_seq);
   }
@@ -170,7 +170,7 @@ START_TEST(test_looksee){
   iter3 = new_modified_peptides_iterator_from_mass(1268, pmod1, NULL, dbase);
 
   while( modified_peptides_iterator_has_next(iter3)){
-    PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
+    Peptide* pep = modified_peptides_iterator_next(iter3);
     char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
     printf("%s\n", mod_seq);
   }
@@ -181,8 +181,8 @@ START_TEST(test_looksee){
   peptide_mod_add_aa_mod(pmod1, 0, 2); // aamod is index 1, 1 copy
   iter3 = new_modified_peptides_iterator_from_mass(1268, pmod1, NULL, dbase);
   while( modified_peptides_iterator_has_next(iter3)){
-    PEPTIDE_T* pep = modified_peptides_iterator_next(iter3);
-    char* mod_seq = modified_aa_string_to_string(get_peptide_modified_sequence(pep));
+    Peptide* pep = modified_peptides_iterator_next(iter3);
+    char* mod_seq = modified_aa_string_to_string(pep->getModifiedSequence());
     printf("%s\n", mod_seq);
   }
   */

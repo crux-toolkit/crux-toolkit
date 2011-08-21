@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include "utils.h"
 #include "crux-utils.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "ProteinPeptideIterator.h"
 #include "Database.h"
@@ -709,7 +709,7 @@ bool void_database_peptide_iterator_has_next(
 /**
  * \returns The next peptide in the database.
  */
-PEPTIDE_T* void_database_peptide_iterator_next(
+Peptide* void_database_peptide_iterator_next(
   void* database_peptide_iterator ///< the iterator of interest -in
   )
 {
@@ -746,7 +746,7 @@ bool void_database_sorted_peptide_iterator_has_next(
  * returns each peptide in sorted order
  * \returns The next peptide in the database.
  */
-PEPTIDE_T* void_database_sorted_peptide_iterator_next(
+Peptide* void_database_sorted_peptide_iterator_next(
   void* database_peptide_iterator ///< the iterator of interest -in
   )
 {

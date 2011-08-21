@@ -17,7 +17,7 @@
 
 #include "utils.h"
 #include "crux-utils.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "Index.h"
 #include "carp.h"
@@ -71,7 +71,7 @@ BOOLEAN_T sorted_peptide_iterator_has_next(
  * returns each peptide in sorted order
  * \returns The next peptide in the database.
  */
-PEPTIDE_T* sorted_peptide_iterator_next(
+Peptide* sorted_peptide_iterator_next(
   SORTED_PEPTIDE_ITERATOR_T* peptide_iterator ///< the iterator of interest -in
   );
 

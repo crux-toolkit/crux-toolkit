@@ -101,7 +101,7 @@ BOOLEAN_T modified_peptides_iterator_has_next(
  * \brief Return the next peptide or NULL if no peptides remain.
  * \returns A modified peptide.
  */
-PEPTIDE_T* modified_peptides_iterator_next(
+Peptide* modified_peptides_iterator_next(
   MODIFIED_PEPTIDES_ITERATOR_T* modified_peptides_iterator);
 
 /**
@@ -121,7 +121,7 @@ BOOLEAN_T void_modified_peptides_iterator_has_next(
  * \brief Void wrapper of modified_peptides_iterator_next to be
  * used by generate_peptides_iterator. 
  */
-PEPTIDE_T* void_modified_peptides_iterator_next(
+Peptide* void_modified_peptides_iterator_next(
   void* modified_peptides_iterator);
 
 /**

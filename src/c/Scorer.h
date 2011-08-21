@@ -16,7 +16,7 @@
 #include <string>
 #include "objects.h"
 #include "Spectrum.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Ion.h"
 
 class Scorer {

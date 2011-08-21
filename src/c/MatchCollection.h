@@ -142,7 +142,7 @@ class MatchCollection {
     );
 
   void updateProteinCounters(
-    PEPTIDE_T* peptide  
+    Peptide* peptide  
     );
 
 
@@ -631,7 +631,7 @@ class MatchCollection {
    * is the best scoring peptide
    */
   int getHash(
-    PEPTIDE_T* peptide  ///< the peptide to check hash value
+    Peptide* peptide  ///< the peptide to check hash value
     );
 
 // cheater functions for testing

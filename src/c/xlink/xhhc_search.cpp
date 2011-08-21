@@ -63,7 +63,7 @@ void get_ions_from_mass_range(
  * locations for the peptides
  */ 
 string get_protein_ids_locations(
-  vector<PEPTIDE_T*>& peptides ///< vector of peptides
+  vector<Peptide*>& peptides ///< vector of peptides
   );
 
 /**
@@ -402,13 +402,13 @@ int SearchForXLinks::xhhcSearchMain() {
         //output protein ids/peptide locations.  If it is a linear, dead or self loop, only
         //use the 1st field.
         string sequence1  = scores[score_index].second.peptides()[0].sequence();
-        vector<PEPTIDE_T*>& peptides1 = get_peptides_from_sequence(sequence1);
+        vector<Peptide*>& peptides1 = get_peptides_from_sequence(sequence1);
         string result_string = get_protein_ids_locations(peptides1);
         search_target_file << result_string << "\t";
         //if it is cross-linked peptide, use the second field
         if (scores[score_index].second.is_linked()) {
           string sequence2  = scores[score_index].second.peptides()[1].sequence();
-          vector<PEPTIDE_T*>& peptides2 = get_peptides_from_sequence(sequence2);
+          vector<Peptide*>& peptides2 = get_peptides_from_sequence(sequence2);
           string result_string = get_protein_ids_locations(peptides2);
           search_target_file << result_string;
         }
@@ -530,7 +530,7 @@ void get_ions_from_mass_range(
  * with a set of strings that are protein_id(peptide start index).
  */
 void get_protein_ids_locations(
-  PEPTIDE_T *peptide, ///< peptide to generate locations from -in
+  Peptide *peptide, ///< peptide to generate locations from -in
   set<string>& protein_ids_locations ///< set of protein_id(peptide start index). -out
   ) {
 
@@ -559,7 +559,7 @@ void get_protein_ids_locations(
  * locations for the peptides
  */ 
 string get_protein_ids_locations(
-  vector<PEPTIDE_T*>& peptides ///< vector of peptides
+  vector<Peptide*>& peptides ///< vector of peptides
   ) {
   
   set<string> protein_ids_locations;

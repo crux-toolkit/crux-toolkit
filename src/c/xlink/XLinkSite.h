@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "peptide.h"
+#include "Peptide.h"
 
 /**
  * \class XLinkSite
@@ -43,7 +43,7 @@ class XLinkSite {
    * \returns whether the peptide contains this site at the supplied sequence index.
    */
   bool hasSite(
-    PEPTIDE_T* peptide, ///<peptide object pointer 
+    Peptide* peptide, ///<peptide object pointer 
     int idx             ///<sequence index
     ) const;
     

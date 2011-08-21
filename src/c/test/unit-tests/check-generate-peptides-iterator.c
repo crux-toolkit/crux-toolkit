@@ -29,9 +29,9 @@ START_TEST(test_create){
   fail_unless( generate_peptides_iterator_has_next(gpiter1) == TRUE,
                "Iterator should have peptide as set up");
 
-  PEPTIDE_T* next_p = generate_peptides_iterator_next(gpiter1);
+  Peptide* next_p = generate_peptides_iterator_next(gpiter1);
   fail_unless( next_p != NULL, "Next returned a null peptide");
-  char* seq = get_peptide_sequence(next_p);
+  char* seq = next_p->getSequence();
   fail_unless( strcmp(seq, "ITNHLVAMIEK") == 0,
                "First peptide should be ITNHLVAMIEK but is %s", seq);
   fail_unless( get_double_parameter("precursor-window") == 3,
@@ -41,7 +41,7 @@ START_TEST(test_create){
 
   next_p = generate_peptides_iterator_next(gpiter1);
   free(seq);
-  seq = get_peptide_sequence(next_p);
+  seq = next_p->getSequence();
   fail_unless( strcmp(seq, "QGQVATVLSAPAK") == 0,
                "Second peptide should be QGQVATVLSAPAK but is %s", seq);
   free(seq);

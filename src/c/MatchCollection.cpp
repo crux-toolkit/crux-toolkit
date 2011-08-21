@@ -498,7 +498,7 @@ void MatchCollection::consolidateMatches(
              cur_seq, next_seq, next_match_idx, cur_match_idx);
 
         // add peptide src of next to cur
-        merge_peptides_copy_src( matches[cur_match_idx]->getPeptide(),
+        Peptide::mergePeptidesCopySrc( matches[cur_match_idx]->getPeptide(),
                         matches[next_match_idx]->getPeptide());
         // this frees the second peptide, so set what pointed to it to NULL
         //set_match_peptide(matches[next_match_idx], NULL);
@@ -1015,7 +1015,7 @@ int MatchCollection::addUnscoredPeptides(
 
   while( modified_peptides_iterator_has_next(peptide_iterator)){
     // get peptide
-    PEPTIDE_T* peptide = modified_peptides_iterator_next(peptide_iterator);
+    Peptide* peptide = modified_peptides_iterator_next(peptide_iterator);
 
     // create a match
     Match* match = new Match(peptide, spectrum, zstate, is_decoy);
@@ -1717,7 +1717,6 @@ void MatchCollection::printSqtHeader(
           get_int_parameter("top-match")); 
   // this is not correct for an sqt from analzyed matches
 
-  //PEPTIDE_TYPE_T cleavages = get_peptide_type_parameter("cleavages");
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
   //peptide_type_to_string(cleavages, temp_str);
@@ -2374,7 +2373,7 @@ bool MatchCollection::addMatchToPostMatchCollection(
   if( match == NULL ){
     carp(CARP_FATAL, "Cannot add NULL match to NULL collection.");
   }
-  PEPTIDE_T* peptide = NULL;
+  Peptide* peptide = NULL;
 
   // only for post_process_collections
   if(!post_process_collection_){
@@ -2408,7 +2407,7 @@ bool MatchCollection::addMatchToPostMatchCollection(
   updateProteinCounters(peptide);
   
   // update hash table
-  char* hash_value = get_peptide_hash_value(peptide); 
+  char* hash_value = peptide->getHashValue(); 
   add_hash(post_hash_, hash_value, NULL); 
   free(hash_value);
   
@@ -2420,7 +2419,7 @@ bool MatchCollection::addMatchToPostMatchCollection(
  * run specific features
  */
 void MatchCollection::updateProteinCounters(
-  PEPTIDE_T* peptide  ///< peptide information to update counters -in
+  Peptide* peptide  ///< peptide information to update counters -in
   )
 {
   PEPTIDE_SRC_ITERATOR_T* src_iterator = NULL;
@@ -2437,7 +2436,7 @@ void MatchCollection::updateProteinCounters(
   }
   
   // See if this peptide has been observed before?
-  char* hash_value = get_peptide_hash_value(peptide);
+  char* hash_value = peptide->getHashValue();
   hash_count = get_hash_count(post_hash_, hash_value);
   free(hash_value);
 
@@ -2633,7 +2632,7 @@ int MatchCollection::getProteinPeptideCounter(
  *\returns the match_collection hash value of PSMS for which this is the best scoring peptide
  */
 int MatchCollection::getHash(
-  PEPTIDE_T* peptide  ///< the peptide to check hash value -in
+  Peptide* peptide  ///< the peptide to check hash value -in
   )
 {
   // only for post_process_collections
@@ -2641,7 +2640,7 @@ int MatchCollection::getHash(
     carp(CARP_FATAL, "Must be a post process match collection, to get match_collection_hash");
   }
   
-  char* hash_value = get_peptide_hash_value(peptide);
+  char* hash_value = peptide->getHashValue();
   int count = get_hash_count(post_hash_, hash_value);
   free(hash_value);
   
@@ -2718,9 +2717,9 @@ void MatchCollection::addDecoyScores(
   while( modified_peptides_iterator_has_next(peptides)){
 
     // get peptide and sequence
-    PEPTIDE_T* peptide = modified_peptides_iterator_next(peptides);
-    char* decoy_sequence = get_peptide_sequence(peptide);
-    MODIFIED_AA_T* modified_seq = get_peptide_modified_aa_sequence(peptide);
+    Peptide* peptide = modified_peptides_iterator_next(peptides);
+    char* decoy_sequence = peptide->getSequence();
+    MODIFIED_AA_T* modified_seq = peptide->getModifiedAASequence();
 
     // create the ion series for this peptide
     ion_series->update(decoy_sequence, modified_seq);
@@ -2736,7 +2735,7 @@ void MatchCollection::addDecoyScores(
     // clean up
     free(decoy_sequence);
     free(modified_seq);
-    free_peptide(peptide);
+    delete peptide;
   } // next peptide
 
   IonConstraint::free(ion_constraint);

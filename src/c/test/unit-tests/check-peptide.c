@@ -6,7 +6,7 @@
 #include "objects.h"
 #include "Spectrum.h"
 #include "Peak.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "PeptideSrc.h"
 #include "PeptideConstraint.h"
 #include "Protein.h"
@@ -19,7 +19,7 @@ void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
  *
  ********************************************/
 
-static PEPTIDE_T *peptide1, *peptide2, *peptide3, *palindrome_peptide;
+static Peptide *peptide1, *peptide2, *peptide3, *palindrome_peptide;
 static Protein *protein1; 
 static char protseq1[1024] = "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITIKAVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKHVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSW";
 
@@ -28,49 +28,47 @@ static char protseq1[1024] = "MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITIKAVAM
 void pep_setup(){
   protein1 = new Protein( "Protein1", protseq1, strlen(protseq1), 
                           NULL, 0, 0, NULL);//description, offset, idx, dbase
-  peptide1 = new_peptide( 10, 1087.20, protein1, 20);//VADILESNAR
-  peptide2 = new_peptide( 16, 1736.02, protein1, 1);//MRVLKFGGTSVANAER
-  peptide3 = new_peptide( 4, 547.57, protein1, 487);//QQSW
-  palindrome_peptide = new_peptide( 9, 547.57, protein1, 40);//PAKITIKAV
+  peptide1 = new Peptide( 10, 1087.20, protein1, 20);//VADILESNAR
+  peptide2 = new Peptide( 16, 1736.02, protein1, 1);//MRVLKFGGTSVANAER
+  peptide3 = new Peptide( 4, 547.57, protein1, 487);//QQSW
+  palindrome_peptide = new Peptide( 9, 547.57, protein1, 40);//PAKITIKAV
 
 }
 
 void pep_teardown(){
-  free_peptide(peptide1);
-  free_peptide(peptide2);
-  free_peptide(peptide3);
+  delete peptide1;
+  delete peptide2;
+  delete peptide3;
   delete protein1;
 }
 
 START_TEST (test_ndist){// start index
   // get_peptide_n_distance at 0, mid, near end
-  int ndist = get_peptide_n_distance(peptide1); 
+  int ndist = peptide1->getNDistance(); 
   fail_unless( ndist == 461, 
                "Incorrect distance from peptide n-terminus to " \
                "protein n-ternimus.  Got %d, should be 461", ndist);
 
-  ndist = get_peptide_n_distance(peptide2); 
+  ndist = peptide2->getNDistance(); 
   fail_unless( ndist == 474, 
                "Incorrect distance from peptide n-terminus to " \
                "protein n-ternimus.  Got %d, should be 474", ndist);
 
 
-  ndist = get_peptide_n_distance(peptide3); 
+  ndist = peptide3->getNDistance(); 
   fail_unless( ndist == 0, 
                "Incorrect distance from peptide n-terminus to " \
                "protein n-ternimus.  Got %d, should be 0", ndist);
 
   // test for multiple protein sources, first is least, first not least
-  add_peptide_peptide_src( peptide1,
-                           new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 25) );
-  ndist = get_peptide_n_distance(peptide1); 
+  peptide1->addPeptideSrc(new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 25));
+  ndist = peptide1->getNDistance(); 
   fail_unless( ndist == 456, 
                "Incorrect distance from peptide n-terminus to " \
                "protein n-ternimus.  Got %d, should be 456", ndist);
-  add_peptide_peptide_src( peptide1,
-                           new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 100));
+  peptide1->addPeptideSrc(new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 100));
 
-  ndist = get_peptide_n_distance(peptide1); 
+  ndist = peptide1->getNDistance(); 
   fail_unless( ndist == 381, 
                "Incorrect distance from peptide n-terminus to " \
                "protein n-ternimus.  Got %d, should be 381", ndist);
@@ -79,30 +77,28 @@ END_TEST
 
 START_TEST (test_cdist){// start index
   // get peptide_cdist at 0, mid, near end
-  int cdist = get_peptide_c_distance(peptide1); 
+  int cdist = peptide1->getCDistance(); 
   //fail_unless( cdist == 461, 
   fail_unless( cdist == 19, 
                "Incorrect distance from peptide c-terminus to " \
                "protein c-ternimus.  Got %d, should be 19", cdist);
-  cdist = get_peptide_c_distance(peptide2); 
+  cdist = peptide2->getCDistance(); 
   fail_unless( cdist == 0, 
                "Incorrect distance from peptide c-terminus to " \
                "protein c-ternimus.  Got %d, should be 0", cdist);
-  cdist = get_peptide_c_distance(peptide3); 
+  cdist = peptide3->getCDistance(); 
   fail_unless( cdist == 486, 
                "Incorrect distance from peptide c-terminus to " \
                "protein c-ternimus.  Got %d, should be 486", cdist);
 
   // test for multiple protein sources, first is least, first not least
-  add_peptide_peptide_src( peptide1,
-                           new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 5) );
-  cdist = get_peptide_c_distance(peptide1); 
+  peptide1->addPeptideSrc(new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 5) );
+  cdist = peptide1->getCDistance(); 
   fail_unless( cdist == 4, 
                "Incorrect distance from peptide c-terminus to " \
                "protein c-ternimus.  Got %d, should be 4", cdist);
-  add_peptide_peptide_src( peptide1,
-                           new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 30) );
-  cdist = get_peptide_c_distance(peptide1); 
+  peptide1->addPeptideSrc(new PeptideSrc(NON_SPECIFIC_DIGEST, protein1, 30));
+  cdist = peptide1->getCDistance(); 
   fail_unless( cdist == 4, 
                "Incorrect distance from peptide c-terminus to " \
                "protein c-ternimus.  Got %d, should be 4", cdist);
@@ -113,12 +109,12 @@ START_TEST(test_mod_on_unmodified){
   initialize_parameters();
   // check is_modified
   // get modified seq from peptide w/out modificationso
-  MODIFIED_AA_T* mod_seq = get_peptide_modified_aa_sequence(peptide1);
+  MODIFIED_AA_T* mod_seq = peptide1->getModifiedAASequence();
   
   fail_unless( mod_seq != NULL,
                "An unmodified peptide should not return NULL mod seq");
-  char* seq = get_peptide_sequence(peptide1);
-  int len = get_peptide_length(peptide1);
+  char* seq = peptide1->getSequence();
+  int len = peptide1->getLength();
   char* converted = modified_aa_string_to_string_with_symbols(mod_seq, len);
   fail_unless( strcmp(seq, converted) == 0,
                "The modified seq returned should be the same as seq.");
@@ -130,7 +126,7 @@ START_TEST(test_mod_on_unmodified){
 END_TEST
 
 START_TEST(test_with_mod){
-  double initial_mass = get_peptide_peptide_mass(peptide3);
+  double initial_mass = peptide3->getPeptideMass();
   // set up the mod
   AA_MOD_T* amod = new_aa_mod(0);
   aa_mod_set_mass_change(amod, 100);
@@ -143,7 +139,7 @@ START_TEST(test_with_mod){
   peptide_mod_add_aa_mod(pep_mod, 0, 1);
 
   // set up the mod seq
-  char* pep_seq = get_peptide_sequence(peptide3);
+  char* pep_seq = peptide3->getSequence();
   int len = strlen(pep_seq);
   MODIFIED_AA_T* mod_seq = NULL;
   convert_to_mod_aa_seq(pep_seq, &mod_seq);
@@ -157,16 +153,16 @@ START_TEST(test_with_mod){
   char* mod_seq_str = modified_aa_string_to_string_with_symbols(mod_seq, len);
 
   // set the modification
-  set_peptide_mod(peptide3, mod_seq, pep_mod);
+  peptide3->setMod(mod_seq, pep_mod);
   // check is_modified
   // get modified seq
-  MODIFIED_AA_T* returned_seq = get_peptide_modified_aa_sequence(peptide3);
+  MODIFIED_AA_T* returned_seq = peptide3->getModifiedAASequence();
   char* returned_str = modified_aa_string_to_string_with_symbols(returned_seq, len);
   fail_unless( strcmp(returned_str, mod_seq_str) == 0,
    "Peptide3 should have returned modified seq %s, but instead returned %s",
                mod_seq_str, returned_str);
   // check the mass
-  fail_unless( (initial_mass + 100.0) == get_peptide_peptide_mass(peptide3),
+  fail_unless( (initial_mass + 100.0) == peptide3->getPeptideMass(),
                "Modified peptide should have initial mass + 100.");
 }
 END_TEST
@@ -174,14 +170,14 @@ END_TEST
 START_TEST(test_reversed_seq){
   //char* original_seq = get_peptide_sequence(peptide1);
   // VADILESNAR
-  char* reversed_seq = generate_reversed_sequence(peptide1);
+  char* reversed_seq = peptide1->generateReversedSequence();
   fail_unless(strcmp(reversed_seq, "VANSELIDAR")== 0,
               "Reversed sequence should be 'VANSELIDAR' but is %s", 
               reversed_seq);
 
-  char* original_seq = get_peptide_sequence(palindrome_peptide);
+  char* original_seq = palindrome_peptide->getSequence();
   free(reversed_seq);
-  reversed_seq = generate_reversed_sequence(palindrome_peptide);
+  reversed_seq = palindrome_peptide->generateReversedSequence();
   fail_unless(strcmp(reversed_seq, original_seq) != 0,
               "Reversed palindrome sequence %s should have been shuffled",
               reversed_seq);
@@ -189,12 +185,12 @@ START_TEST(test_reversed_seq){
 END_TEST
 
 START_TEST(test_shuffled_mod_seq){
-  MODIFIED_AA_T* aa_seq = get_peptide_modified_aa_sequence(peptide1);
-  int len = get_peptide_length(peptide1);
+  MODIFIED_AA_T* aa_seq = peptide1->getModifiedAASequence();
+  int len = peptide1->getLength();
   char* seq = modified_aa_string_to_string_with_symbols( aa_seq, len );
   fail_unless( strcmp(seq, "VADILESNAR") == 0,
                "Unshuffled seq is %s but should be %s", seq, "VADILESNAR"); 
-  MODIFIED_AA_T* shuf_aa_seq= generate_shuffled_mod_sequence(peptide1);
+  MODIFIED_AA_T* shuf_aa_seq= peptide1->generateShuffledModSequence();
   char* shuf_seq = modified_aa_string_to_string_with_symbols( shuf_aa_seq, len );
   fail_unless( strcmp(shuf_seq, seq) != 0,
                "Sequence was %s, shuffled is %s, should be different",

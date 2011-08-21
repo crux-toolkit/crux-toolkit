@@ -16,7 +16,7 @@
 #include "utils.h"
 #include "crux-utils.h"
 #include "parameter.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "mass.h"
 
 #include "IonFilteredIterator.h"
@@ -90,7 +90,7 @@ IonSeries::IonSeries(
   // copy the peptide sequence
   peptide_ = my_copy_string(peptide);
   convert_to_mod_aa_seq(peptide_, &(modified_aa_seq_));
-  peptide_mass_ = calc_sequence_mass(peptide_, MONO);
+  peptide_mass_ = Peptide::calcSequenceMass(peptide_, MONO);
   charge_ = charge;
   constraint_ = constraint;
   peptide_length_ = strlen(peptide_);

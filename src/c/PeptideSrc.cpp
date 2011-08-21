@@ -11,7 +11,7 @@
 #include "utils.h"
 #include "mass.h"
 #include "objects.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "PeptideSrc.h"
 #include "PeptideConstraint.h"
@@ -178,7 +178,6 @@ void print_peptide_src(
   FILE* file  ///< the out put stream -out
   )
 {
-  PEPTIDE_TYPE_T peptide_type = get_peptide_src_peptide_type(peptide_src);
   char* sequence = get_protein_sequence(peptide_src->parent_protein);
   fprintf(file, "parent protein:%s\n", sequence);
 
@@ -368,7 +367,7 @@ int PeptideSrc::sizeOfSerialized(){
  * returns false.
  */
 bool PeptideSrc::parseTabDelimited(
-  PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
+  Peptide* peptide,   ///< assign peptide_src(s) to this peptide
   MatchFileReader& file,           ///< file to read from
   Database* database, ///< database containing proteins
   bool use_array) ///< use array implementation vs. linked list
@@ -397,7 +396,7 @@ bool PeptideSrc::parseTabDelimited(
   }
 
   // give it to the peptide
-  add_peptide_peptide_src_array(peptide, peptide_src);
+  peptide->addPeptideSrcArray(peptide_src);
 
   DIGEST_T digestion = 
     string_to_digest_type((char*)file.getString(CLEAVAGE_TYPE_COL).c_str()); 
@@ -495,7 +494,7 @@ bool PeptideSrc::parseTabDelimited(
  * returns false.
  */
 bool PeptideSrc::parse(
-  PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
+  Peptide* peptide,   ///< assign peptide_src(s) to this peptide
   FILE* file,           ///< file to read from
   Database* database, ///< database containing proteins
   bool use_array) ///< use array implementation vs. linked list
@@ -523,13 +522,12 @@ bool PeptideSrc::parse(
   }
 
   // give it to the peptide
-  add_peptide_peptide_src_array(peptide, peptide_src);
+  peptide->addPeptideSrcArray(peptide_src);
 
   // read in each peptide_src (prot index, peptide type, start index)
   int src_idx = 0;
   int protein_index = -1;
   Protein* parent_protein = NULL;
-  //PEPTIDE_TYPE_T peptide_type;
   DIGEST_T digestion;
   int start_index = -1;
   for(src_idx = 0; src_idx < num_peptide_src; src_idx++){

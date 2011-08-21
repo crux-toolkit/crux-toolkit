@@ -78,7 +78,6 @@ class PeptideSrc {
   static void setArray(
     PeptideSrc* src_array , ///< the working peptide src_arry -out
     int array_idx, ///< array index of the peptide_src to set
-    //PEPTIDE_TYPE_T peptide_type, ///< the peptide type for the corresponding protein -in
     DIGEST_T digest,
     Protein* parent_protein, ///< the parent of this preptide -in
     int start_idx ///< start index of the peptide in the protein sequence -in
@@ -119,7 +118,7 @@ class PeptideSrc {
    * returns false.
    */
   static bool parseTabDelimited(
-    PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
+    Peptide* peptide,   ///< assign peptide_src(s) to this peptide
     MatchFileReader& file,           ///< file to read from
     Database* database, ///< database containing proteins
     bool use_array); ///< use array implementation vs. linked list
@@ -139,7 +138,7 @@ class PeptideSrc {
    * NULL. 
    */
   static bool parse(
-    PEPTIDE_T* peptide,   ///< assign peptide_src(s) to this peptide
+    Peptide* peptide,   ///< assign peptide_src(s) to this peptide
     FILE* file,           ///< file to read from
     Database* database, ///< database containing proteins
     bool use_array);///< use array implementation vs. linked list

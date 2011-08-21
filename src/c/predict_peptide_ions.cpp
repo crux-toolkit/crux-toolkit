@@ -128,7 +128,9 @@ int main(int argc, char** argv){
 
   // print settings
   printf("# PEPTIDE: %s\n",peptide_sequence);
-  printf("# AVERAGE: %f MONO:%f\n",calc_sequence_mass(peptide_sequence, AVERAGE),calc_sequence_mass(peptide_sequence, MONO));
+  printf("# AVERAGE: %f MONO:%f\n",
+    Peptide::calcSequenceMass(peptide_sequence, AVERAGE),
+    Peptide::calcSequenceMass(peptide_sequence, MONO));
   printf("# CHARGE: %d\n", charge_state);
   printf("# MAX-ION-CHRAGE: %s\n", max_ion_charge);
   printf("# NH3 modification: %d\n", neutral_loss_count[NH3]);

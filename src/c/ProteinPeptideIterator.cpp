@@ -69,7 +69,6 @@ bool ProteinPeptideIterator::isResidueLegal(char aa,
  */
 bool ProteinPeptideIterator::validCleavagePosition(
    char* sequence,
-   //   PEPTIDE_TYPE_T cleavage
    ENZYME_T enzyme
 ){
 
@@ -314,7 +313,6 @@ void ProteinPeptideIterator::prepareMc(
   MASS_TYPE_T mass_type = peptide_constraint_->getMassType();
   double* mass_array = (double*)mycalloc(protein->getLength()+1, sizeof(double));
 
-  //  PEPTIDE_TYPE_T pep_type = get_peptide_type_parameter("cleavages");
   ENZYME_T enzyme = peptide_constraint_->getEnzyme();
   FLOAT_T mass_h2o = MASS_H2O_AVERAGE;
 
@@ -532,7 +530,7 @@ bool ProteinPeptideIterator::hasNext()
  * \returns The next peptide in the protein, in an unspecified order
  * the Peptide is new heap allocated object, user must free it
  */
-PEPTIDE_T* ProteinPeptideIterator::next()
+Peptide* ProteinPeptideIterator::next()
 {
   if( !has_next_){
     carp(CARP_DEBUG, "Returning null");
@@ -545,7 +543,7 @@ PEPTIDE_T* ProteinPeptideIterator::next()
   FLOAT_T peptide_mass = (*peptide_masses_)[cleavage_idx];
 
   // create new peptide
-  PEPTIDE_T* peptide = new_peptide(current_length, peptide_mass, 
+  Peptide* peptide = new Peptide(current_length, peptide_mass, 
                                    protein_, current_start);//, peptide_type);
   // update position of iterator
   ++current_cleavage_idx_;

@@ -8,7 +8,7 @@
 #include <ctype.h>
 #include "utils.h"
 #include "crux-utils.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "Database.h"
 #include "carp.h"

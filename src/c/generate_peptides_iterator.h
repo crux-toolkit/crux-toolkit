@@ -13,7 +13,7 @@
 #include <dirent.h>
 #include "utils.h"
 #include "crux-utils.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "Index.h"
 #include "carp.h"
@@ -115,7 +115,7 @@ BOOLEAN_T generate_peptides_iterator_has_next(
 /**
  *\returns the next peptide in the iterator
  */
-PEPTIDE_T* generate_peptides_iterator_next(
+Peptide* generate_peptides_iterator_next(
   GENERATE_PEPTIDES_ITERATOR_T* generate_peptide_iterator ///< working iterator
   );
 

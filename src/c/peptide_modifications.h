@@ -69,7 +69,7 @@ int generate_peptide_mod_list(
  * but not more than once by a single aa_mod as defined in modifiable().
  * \returns TRUE if the sequence can be modified, else FALSE
  */
-BOOLEAN_T is_peptide_modifiable( PEPTIDE_T* peptide,
+BOOLEAN_T is_peptide_modifiable( Peptide* peptide,
                             PEPTIDE_MOD_T* peptide_mod);
 
 
@@ -85,7 +85,7 @@ BOOLEAN_T is_peptide_modifiable( PEPTIDE_T* peptide,
  * \returns The number of modified peptides in the array pointed to by
  * modified_peptides. 
  */
-int modify_peptide(PEPTIDE_T* peptide,
+int modify_peptide(Peptide* peptide,
                    PEPTIDE_MOD_T* peptide_mod,
                    LINKED_LIST_T* modified_peptides,
                    int max_aas_modified

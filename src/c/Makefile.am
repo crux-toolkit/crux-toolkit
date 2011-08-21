@@ -126,10 +126,10 @@ LIBFILES= \
   parse_arguments.h \
   Peak.cpp \
   Peak.h \
-  peptide.cpp \
+  Peptide.cpp \
+  Peptide.h \
   PeptideConstraint.cpp \
   PeptideConstraint.h \
-  peptide.h \
   peptide_modifications.cpp \
   peptide_modifications.h \
   PeptideSrc.cpp \

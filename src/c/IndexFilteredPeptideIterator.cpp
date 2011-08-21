@@ -23,7 +23,7 @@ IndexFilteredPeptideIterator::IndexFilteredPeptideIterator(
 IndexFilteredPeptideIterator::~IndexFilteredPeptideIterator(){
   // if did not iterate over all peptides, free the last peptide not returned
   if(has_next_){
-    free_peptide(peptide_);
+    delete peptide_;
   }
 }
 
@@ -31,8 +31,8 @@ IndexFilteredPeptideIterator::~IndexFilteredPeptideIterator(){
  *  The basic iterator functions.
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* IndexFilteredPeptideIterator::next(){
-  PEPTIDE_T* peptide_to_return = peptide_;
+Peptide* IndexFilteredPeptideIterator::next(){
+  Peptide* peptide_to_return = peptide_;
   setup();
   return peptide_to_return;
 }
@@ -52,7 +52,7 @@ bool IndexFilteredPeptideIterator::hasNext(){
  */
 bool IndexFilteredPeptideIterator::setup()
 {
-  PEPTIDE_T* peptide = NULL;
+  Peptide* peptide = NULL;
   PeptideSrc* src = NULL;
   DIGEST_T required_digestion = index_->getSearchConstraint()->getDigest();
   bool match = false;
@@ -60,7 +60,7 @@ bool IndexFilteredPeptideIterator::setup()
   // initialize index_filered
   while(IndexPeptideIterator::hasNext()){
     peptide = IndexPeptideIterator::next();
-    src = get_peptide_peptide_src(peptide);
+    src = peptide->getPeptideSrc();
     // mass, length has been already checked in index_peptide_iterator
     // check if peptide type matches the constraint
     // find at least one peptide_src for which cleavage is correct
@@ -82,7 +82,7 @@ bool IndexFilteredPeptideIterator::setup()
       has_next_ = true;
       return true;
     }
-    free_peptide(peptide);
+    delete peptide;
   }// next peptide
   // no peptides meet the constraint
   has_next_ = false;
@@ -97,7 +97,7 @@ bool IndexFilteredPeptideIterator::setup()
  *  The basic iterator functions.
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* void_index_filtered_peptide_iterator_next(
+Peptide* void_index_filtered_peptide_iterator_next(
   void* iterator ///< the index_filtered_peptide_iterator to initialize -in
   )
 {
@@ -151,7 +151,7 @@ bool void_index_peptide_iterator_has_next(
 /**
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* void_index_peptide_iterator_next(
+Peptide* void_index_peptide_iterator_next(
     void* index_peptide_iterator ///< the iterator of interest -in
     )
 {

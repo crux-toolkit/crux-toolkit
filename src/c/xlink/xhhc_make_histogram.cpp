@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
     // for every precursor in the mass window
     for (vector<LinkedPeptide>::iterator ion = filtered_ions.begin(); ion != filtered_ions.end(); ++ion) {
       if (ion->size() == 2) {
-	vector<Peptide> peptides = ion->peptides();
+	vector<XHHC_Peptide> peptides = ion->peptides();
 	// score the first peptide with modification of second peptide	
         mod_mass = linker_mass + peptides[1].mass(MONO);	
 	ion_series = new IonSeries((char*)peptides[0].sequence().c_str(), ion->charge(), ion_constraint);
