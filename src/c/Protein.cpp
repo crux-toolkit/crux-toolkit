@@ -11,7 +11,7 @@
 #include "utils.h"
 #include "parameter.h"
 #include "objects.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "PeptideSrc.h"
 #include "Database.h"

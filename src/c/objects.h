@@ -70,10 +70,10 @@ typedef std::vector<Spectrum*>::iterator SpectrumIterator;
 class FilteredSpectrumChargeIterator;
 
 /**
- * \typedef PEPTIDE_T
+ * \class Peptide
  * \brief A peptide subsequence of a protein
  */
-typedef struct peptide PEPTIDE_T;
+class Peptide;
 
 /**
  * \class PeptideConstraint
@@ -664,7 +664,7 @@ enum COLTYPE_T{
  * \typedef peptideToScore
  * \brief Mapping of peptide object to scores
  */
-typedef std::map<PEPTIDE_T*, FLOAT_T, bool(*)(PEPTIDE_T*, PEPTIDE_T*) > PeptideToScore;
+typedef std::map<Peptide*, FLOAT_T, bool(*)(Peptide*, Peptide*) > PeptideToScore;
 
 /**
  * \typedef ProteinToScore

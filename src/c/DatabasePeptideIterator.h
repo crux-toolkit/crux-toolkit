@@ -24,13 +24,13 @@ class DatabasePeptideIterator {
     ///< the protein that was used before the current working protein
   bool first_passed_; 
     ///< is it ok to convert prior_protein to light?
-  PEPTIDE_T* cur_peptide_; ///< the peptide to return by next()
+  Peptide* cur_peptide_; ///< the peptide to return by next()
   bool store_all_peptides_; ///< true for search so duplicates are combined
-  map<char*, PEPTIDE_T*, cmp_str> peptide_map_; ///< store peptides by sequence
-  map<char*, PEPTIDE_T*>::iterator cur_map_position_; ///< next in map to return
+  map<char*, Peptide*, cmp_str> peptide_map_; ///< store peptides by sequence
+  map<char*, Peptide*>::iterator cur_map_position_; ///< next in map to return
 
   /* Private Functions */
-  PEPTIDE_T* nextFromFile();
+  Peptide* nextFromFile();
   bool hasNextFromFile();
   void generateAllPeptides();
   void queueFirstPeptideFromMap();
@@ -61,7 +61,7 @@ class DatabasePeptideIterator {
   /**
    * \returns The next peptide in the database.
    */
-  PEPTIDE_T* next();
+  Peptide* next();
 
 };
 

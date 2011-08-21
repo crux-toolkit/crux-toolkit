@@ -56,7 +56,7 @@ bool DatabaseSortedPeptideIterator::hasNext() {
  * returns each peptide in sorted order
  * \returns The next peptide in the database.
  */
-PEPTIDE_T* DatabaseSortedPeptideIterator::next() {
+Peptide* DatabaseSortedPeptideIterator::next() {
 
   return sorted_peptide_iterator_next(sorted_peptide_iterator_);
 }

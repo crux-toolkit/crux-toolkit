@@ -47,7 +47,7 @@ class DatabaseSortedPeptideIterator {
    * returns each peptide in sorted order
    * \returns The next peptide in the database.
    */
-  PEPTIDE_T* next();
+  Peptide* next();
 
 };
 

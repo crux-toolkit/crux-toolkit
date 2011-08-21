@@ -320,7 +320,7 @@ BOOLEAN_T is_sequence_position_modifiable(
  * \returns TRUE if the sequence can be modified, else FALSE
  */
 BOOLEAN_T is_peptide_modifiable
- (PEPTIDE_T* peptide,          ///< The peptide to apply mods to
+ (Peptide* peptide,          ///< The peptide to apply mods to
   PEPTIDE_MOD_T* peptide_mod){ ///< The mods to apply
 
   // a NULL peptide cannot be modified
@@ -333,7 +333,7 @@ BOOLEAN_T is_peptide_modifiable
     return TRUE;
   }
 
-  char* sequence = get_peptide_sequence( peptide );
+  char* sequence = peptide->getSequence();
 
   // for each aa_mod (skip those not in peptide_mod)
   
@@ -359,13 +359,13 @@ BOOLEAN_T is_peptide_modifiable
     int cur_seq_idx = 0;  
     switch( aa_mod_get_position(cur_aa_mod) ){
     case C_TERM: 
-      if( max_distance < get_peptide_c_distance(peptide)){ 
+      if( max_distance < peptide->getCDistance()){ 
         //return FALSE; 
         success = FALSE;
       }
       break;
     case N_TERM:
-      if( max_distance < get_peptide_n_distance(peptide)){ 
+      if( max_distance < peptide->getNDistance()){ 
         //return FALSE; 
         success = FALSE;
       }
@@ -441,7 +441,7 @@ BOOLEAN_T is_peptide_modifiable
 
 // move this to peptide.c
 /*
-void add_peptide_mod_seq(PEPTIDE_T* peptide, MODIFIED_AA_T* cur_mod_seq){
+void add_peptide_mod_seq(Peptide* peptide, MODIFIED_AA_T* cur_mod_seq){
   if( peptide == NULL || cur_mod_seq == NULL ){
     carp(CARP_ERROR, "Cannot add NULL modified sequence to null peptide");
   }
@@ -476,7 +476,7 @@ void add_peptide_mod_seq(PEPTIDE_T* peptide, MODIFIED_AA_T* cur_mod_seq){
  * modified_peptides. 
  */
 int modify_peptide(
-  PEPTIDE_T* peptide,             ///< the peptide to modify
+  Peptide* peptide,             ///< the peptide to modify
   PEPTIDE_MOD_T* peptide_mod,     ///< the set of aa_mods to apply
   LINKED_LIST_T* modified_peptides,///< the returned modified peptides
   int max_aas_modified            ///< filter out peptides > m_a_m
@@ -495,13 +495,13 @@ int modify_peptide(
       peptide_mod_get_num_aa_mods(peptide_mod) == 0 ){
     carp(CARP_DETAILED_DEBUG, 
          "Modifying peptide with no aa_mods, return peptide copy");
-    PEPTIDE_T* peptide_copy = copy_peptide(peptide); 
+    Peptide* peptide_copy = new Peptide(peptide); 
     push_back_linked_list(modified_peptides, peptide_copy);
     return 1;
   }
 
   // get the peptide sequence and convert to MODIFIED_AA_T*
-  char* sequence = get_peptide_sequence(peptide);
+  char* sequence = peptide->getSequence();
   MODIFIED_AA_T* pre_modified_seq = NULL;
   convert_to_mod_aa_seq(sequence, &pre_modified_seq);
 
@@ -554,8 +554,8 @@ int modify_peptide(
       continue;
     }
 
-    PEPTIDE_T* cur_peptide = copy_peptide(peptide);
-    set_peptide_mod(cur_peptide, cur_mod_seq, peptide_mod);
+    Peptide* cur_peptide = new Peptide(peptide);
+    cur_peptide->setMod(cur_mod_seq, peptide_mod);
 
     push_back_linked_list(modified_peptides, cur_peptide );
     total_count++;

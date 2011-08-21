@@ -59,7 +59,7 @@ XLinkBondMap::~XLinkBondMap() {
  * peptide (for deadlinks).
  */
 bool XLinkBondMap::canLink(
-  PEPTIDE_T* peptide, ///<peptide object pointer
+  Peptide* peptide, ///<peptide object pointer
   int idx             ///<sequence index
    ) {
 
@@ -78,7 +78,7 @@ bool XLinkBondMap::canLink(
  * peptide (for selfloops).
  */
 bool XLinkBondMap::canLink(
-    PEPTIDE_T* peptide, ///<peptide object pointer
+    Peptide* peptide, ///<peptide object pointer
     int idx1,           ///<1st sequence idx
     int idx2            ///<2nd sequence idx
     ) {
@@ -105,8 +105,8 @@ bool XLinkBondMap::canLink(
  * respective sequence positions (for inter/intra links).
  */
 bool XLinkBondMap::canLink(
-  PEPTIDE_T* peptide1,  ///<1st peptide object pointer 
-  PEPTIDE_T* peptide2,  ///<2nd peptide object pointer
+  Peptide* peptide1,  ///<1st peptide object pointer 
+  Peptide* peptide2,  ///<2nd peptide object pointer
   int idx1,             ///<1st peptide sequence idx
   int idx2              ///<2nd peptide sequence idx
   ) { //for inter/intra links

@@ -18,7 +18,7 @@ class IndexPeptideIterator {
   int current_index_file_; ///< the index file open or one to open next 
   FILE* index_file_; ///< The current file stream that we are reading from
   bool has_next_; ///< Is there another peptide?
-  PEPTIDE_T* peptide_; ///< the next peptide to return
+  Peptide* peptide_; ///< the next peptide to return
 
   /**
    * \brief Parses the "crux_index_map" file that contains the mapping
@@ -113,7 +113,7 @@ class IndexPeptideIterator {
   /**
    * \returns The next peptide in the index.
    */
-  PEPTIDE_T* next();
+  Peptide* next();
 
   Index* getIndex();
 

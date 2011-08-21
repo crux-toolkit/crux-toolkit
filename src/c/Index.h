@@ -10,7 +10,7 @@
 
 #include "utils.h"
 #include "objects.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "sorter.h"
 #include "carp.h"
@@ -187,7 +187,7 @@ class Index {
    * Returns the index filename appropriate for this peptide
    */
   char* getPeptideFileName(
-    PEPTIDE_T* peptide
+    Peptide* peptide
   );
 
  public:
@@ -332,7 +332,7 @@ bool void_index_peptide_iterator_has_next(
 /**
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* void_index_peptide_iterator_next(
+Peptide* void_index_peptide_iterator_next(
     void* index_peptide_iterator ///< the iterator of interest -in
     );
 
@@ -357,7 +357,7 @@ BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
  *  The basic iterator functions.
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* bin_peptide_iterator_next(
+Peptide* bin_peptide_iterator_next(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< the bin_peptide_iterator to get peptide -in
   );
 
@@ -396,7 +396,7 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
  *  The basic iterator functions.
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* bin_sorted_peptide_iterator_next(
+Peptide* bin_sorted_peptide_iterator_next(
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator ///< the bin_peptide_iterator to get peptide -in
   );
 

@@ -15,7 +15,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include "carp.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "PeptideSrc.h"
 #include "Protein.h"
 #include "Database.h"
@@ -40,7 +40,7 @@ int main(int argc, char** argv){
   
   long total_peptides = 0;
   MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator = NULL; 
-  PEPTIDE_T* peptide = NULL;
+  Peptide* peptide = NULL;
   Database* database = NULL;
   Index* index = NULL;
     
@@ -125,11 +125,11 @@ int main(int argc, char** argv){
     while(modified_peptides_iterator_has_next(peptide_iterator)){
       ++total_peptides;
       peptide = modified_peptides_iterator_next(peptide_iterator);
-      print_peptide_in_format(peptide, output_sequence, 
+      peptide->printInFormat(output_sequence, 
                                stdout);
     
       // free peptide
-      free_peptide(peptide);
+      delete peptide;
     
       if(total_peptides % orders_of_magnitude == 0){
         if( (total_peptides)/10 == orders_of_magnitude){

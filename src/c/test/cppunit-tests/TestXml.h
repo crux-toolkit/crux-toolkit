@@ -5,7 +5,7 @@
 #include <map>
 #include "crux-utils.h"
 #include "Match.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "modifications.h"
 
 

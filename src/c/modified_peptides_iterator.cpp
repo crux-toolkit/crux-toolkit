@@ -18,7 +18,7 @@ struct modified_peptides_iterator_t{
   GENERATE_PEPTIDES_ITERATOR_T* peptide_generator; 
   ///< for getting unmodified peptides
   PEPTIDE_MOD_T* peptide_mod;///< the modification to apply to peptides
-  PEPTIDE_T* next_peptide;///< peptide queued to return next
+  Peptide* next_peptide;///< peptide queued to return next
   LINKED_LIST_T* temp_peptide_list;///< storage for modified peptides
   int max_aas_modified; 
   ///< return peptides with no more than this many aas modified
@@ -57,7 +57,7 @@ void queue_next_peptide(
   // first, try getting next from the temp list
   if( ! is_empty_linked_list( iterator->temp_peptide_list) ){
     carp(CARP_DETAILED_DEBUG,"Queue is getting next peptide from temp list");
-    iterator->next_peptide = (PEPTIDE_T*)pop_front_linked_list(iterator->temp_peptide_list);
+    iterator->next_peptide = (Peptide*)pop_front_linked_list(iterator->temp_peptide_list);
 
     return;
   }
@@ -70,18 +70,18 @@ void queue_next_peptide(
   }
 
   // else, get the next unmodified peptide
-  PEPTIDE_T* unmod_peptide = 
+  Peptide* unmod_peptide = 
     generate_peptides_iterator_next( iterator->peptide_generator);
   
   IF_CARP_DETAILED_DEBUG(
-    char* debugseq = get_peptide_sequence(unmod_peptide);
+    char* debugseq = unmod_peptide->getSequence();
     carp(CARP_DETAILED_DEBUG, "Next peptide in pep_gen is %s", debugseq);
     free(debugseq);
   )
 
   // turn the peptide into a decoy, if required
   if( iterator->is_decoy ){
-    transform_peptide_to_decoy(unmod_peptide);
+    unmod_peptide->transformToDecoy();
   }
 
   // apply modifications, discard peptides that can't be modified
@@ -93,7 +93,7 @@ void queue_next_peptide(
                                  iterator->peptide_mod) ){ 
     // carp(CARP_DETAILED_DEBUG, "Skipping peptide %s from the generator",
     //   get_peptide_sequence(unmod_peptide)); //memleak
-    free_peptide( unmod_peptide );
+    delete unmod_peptide;
     unmod_peptide = 
       generate_peptides_iterator_next( iterator->peptide_generator );
   }
@@ -106,7 +106,7 @@ void queue_next_peptide(
   }
   
   IF_CARP_DETAILED_DEBUG(
-    char* umodseq = get_peptide_sequence(unmod_peptide);
+    char* umodseq = unmod_peptide->getSequence();
     carp(CARP_DETAILED_DEBUG, "Iterator is modifying peptide %s",
          umodseq);
     free(umodseq);
@@ -116,7 +116,7 @@ void queue_next_peptide(
                  iterator->temp_peptide_list,
                  iterator->max_aas_modified );
   // this put a copy in the list, get rid of the original
-  free_peptide(unmod_peptide);
+  delete unmod_peptide;
 
   if( is_empty_linked_list(iterator->temp_peptide_list) ){
     carp(CARP_DETAILED_DEBUG, "Modifier didn't return any peptides");
@@ -125,14 +125,14 @@ void queue_next_peptide(
   }
 
   // now set next_peptide to the first in the list and move list forward
-  iterator->next_peptide = (PEPTIDE_T*)pop_front_linked_list(iterator->temp_peptide_list);
+  iterator->next_peptide = (Peptide*)pop_front_linked_list(iterator->temp_peptide_list);
   if( iterator->next_peptide == NULL ){
     printf("Iterator's next peptide was lost\n");
   }
   
   IF_CARP_DETAILED_DEBUG(
     char* seq = 
-    get_peptide_modified_sequence_with_masses(iterator->next_peptide, FALSE);
+    iterator->next_peptide->getModifiedSequenceWithMasses(false);
     carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq);
     free(seq);
   )
@@ -436,13 +436,13 @@ BOOLEAN_T modified_peptides_iterator_has_next(
  * Filters out peptides that have too many aas modified.
  * \returns A modified peptide.
  */
-PEPTIDE_T* modified_peptides_iterator_next(
+Peptide* modified_peptides_iterator_next(
   MODIFIED_PEPTIDES_ITERATOR_T* iterator){
   if( iterator == NULL ){
     return NULL;
   }
 
-  PEPTIDE_T* returnme = iterator->next_peptide;
+  Peptide* returnme = iterator->next_peptide;
   queue_next_peptide(iterator);
 
   return returnme;
@@ -455,7 +455,7 @@ void free_modified_peptides_iterator(
   MODIFIED_PEPTIDES_ITERATOR_T* iterator){
   if( iterator ){
     delete_linked_list( iterator->temp_peptide_list );
-    free_peptide( iterator->next_peptide );
+    delete iterator->next_peptide;
     // maybe don't??
     //free_peptide_mod( iterator->peptide_mod );
     free_generate_peptides_iterator( iterator->peptide_generator);
@@ -477,7 +477,7 @@ BOOLEAN_T void_modified_peptides_iterator_has_next(
  * \brief Void wrapper of modified_peptides_iterator_next to be
  * used by generate_peptides_iterator. 
  */
-PEPTIDE_T* void_modified_peptides_iterator_next(
+Peptide* void_modified_peptides_iterator_next(
   void* modified_peptides_iterator){
   return modified_peptides_iterator_next(
            (MODIFIED_PEPTIDES_ITERATOR_T*)modified_peptides_iterator);

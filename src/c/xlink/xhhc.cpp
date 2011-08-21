@@ -3,7 +3,7 @@
 
 
 #include "parameter.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "DelimitedFile.h"
 #include "DatabaseProteinIterator.h"
 #include "ProteinPeptideIterator.h"
@@ -13,7 +13,7 @@ using namespace std;
 FLOAT_T LinkedPeptide::linker_mass;
 
 
-map<string, vector<PEPTIDE_T*> > sequence_peptide_map; //hack to keep track of peptides.
+map<string, vector<Peptide*> > sequence_peptide_map; //hack to keep track of peptides.
 
 void get_linear_peptides(set<string>& peptides,
 			 DatabaseProteinIterator* protein_iterator,
@@ -21,7 +21,7 @@ void get_linear_peptides(set<string>& peptides,
 
   ProteinPeptideIterator* peptide_iterator = NULL;
   Protein* protein;
-  PEPTIDE_T* peptide;
+  Peptide* peptide;
 
   string sequence = "";
   string last_sequence = "zz";
@@ -36,18 +36,18 @@ void get_linear_peptides(set<string>& peptides,
     while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
       peptide = peptide_iterator->next();
-      sequence = get_peptide_sequence(peptide); 
-      carp(CARP_INFO,"Adding linear peptide:%s",get_peptide_sequence(peptide));
+      sequence = peptide->getSequence(); 
+      carp(CARP_INFO,"Adding linear peptide:%s",peptide->getSequence());
       peptides.insert(sequence);
 
-      map<string, vector<PEPTIDE_T*> >::iterator find_iter;
+      map<string, vector<Peptide*> >::iterator find_iter;
 
       find_iter = sequence_peptide_map.find(sequence);
 
       carp(CARP_DEBUG,"Adding to map:%s,",sequence.c_str());
 
       if (find_iter == sequence_peptide_map.end()) {
-        vector<PEPTIDE_T*> peptide_vector;
+        vector<Peptide*> peptide_vector;
         peptide_vector.push_back(peptide);
         sequence_peptide_map.insert(make_pair(sequence, peptide_vector));
       } else {
@@ -59,19 +59,19 @@ void get_linear_peptides(set<string>& peptides,
   } 
 }
 
-vector<PEPTIDE_T*>& get_peptides_from_sequence(string& sequence) {
+vector<Peptide*>& get_peptides_from_sequence(string& sequence) {
   return sequence_peptide_map[sequence];
 }
 
 void free_peptides() {
-  map<string, vector<PEPTIDE_T*> >::iterator map_iter;
+  map<string, vector<Peptide*> >::iterator map_iter;
 
   for (map_iter = sequence_peptide_map.begin();
        map_iter != sequence_peptide_map.end();
        ++map_iter) {
-    vector<PEPTIDE_T*>& peptides = map_iter -> second;
+    vector<Peptide*>& peptides = map_iter -> second;
     for (unsigned int i=0;i<peptides.size();i++) {
-      free_peptide(peptides[i]);
+      delete peptides[i];
     }
   }
   sequence_peptide_map.clear();
@@ -85,7 +85,7 @@ void get_linkable_peptides(set<string>& peptides,
 {
   ProteinPeptideIterator* peptide_iterator = NULL;
   Protein* protein;
-  PEPTIDE_T* peptide;
+  Peptide* peptide;
   string sequence = "";
   string last_sequence = "zz";
   bool missed_cleavage = false;
@@ -100,16 +100,16 @@ void get_linkable_peptides(set<string>& peptides,
     while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
       peptide = peptide_iterator->next();
-      sequence = get_peptide_sequence(peptide); 
+      sequence = peptide->getSequence(); 
 
-      map<string, vector<PEPTIDE_T*> >::iterator find_iter;
+      map<string, vector<Peptide*> >::iterator find_iter;
 
       find_iter = sequence_peptide_map.find(sequence);
 
       carp(CARP_DEBUG,"Adding to map:%s",sequence.c_str());
 
       if (find_iter == sequence_peptide_map.end()) {
-        vector<PEPTIDE_T*> peptide_vector;
+        vector<Peptide*> peptide_vector;
         peptide_vector.push_back(peptide);
         sequence_peptide_map.insert(make_pair(sequence, peptide_vector));
       } else {
@@ -125,16 +125,16 @@ void get_linkable_peptides(set<string>& peptides,
       if (index == string::npos || missed_cleavage) {
         missed_cleavage = !missed_cleavage;
         if (!missed_cleavage && last_sequence[last_sequence.size()-1] != 'K') {
-	  carp(CARP_DETAILED_DEBUG, "skipping1 %s", get_peptide_sequence(peptide));
+	  carp(CARP_DETAILED_DEBUG, "skipping1 %s", peptide->getSequence());
 	  continue;
 	}
-	carp(CARP_DETAILED_DEBUG, "peptide %s", get_peptide_sequence(peptide));
-        peptides.insert(string(get_peptide_sequence(peptide)));
+	carp(CARP_DETAILED_DEBUG, "peptide %s", peptide->getSequence());
+        peptides.insert(string(peptide->getSequence()));
       } else {
-	carp(CARP_DETAILED_DEBUG, "skipping2 %s", get_peptide_sequence(peptide));
+	carp(CARP_DETAILED_DEBUG, "skipping2 %s", peptide->getSequence());
 	missed_cleavage = false;
       }
-      last_sequence = string(get_peptide_sequence(peptide));
+      last_sequence = string(peptide->getSequence());
     }
   } 
 }
@@ -286,7 +286,7 @@ void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides,
     char* sequenceA = (char*) pepA->c_str();
     // add unlinked precursor
     LinkedPeptide lp = LinkedPeptide(charge);
-    Peptide p = Peptide(sequenceA);
+    XHHC_Peptide p = XHHC_Peptide(sequenceA);
     lp.add_peptide(p);
 
     //TODO separate linears from xlinking stuff.
@@ -295,7 +295,7 @@ void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides,
     }
 
     string seqA = *pepA;
-    vector<PEPTIDE_T*>& crux_peptides = get_peptides_from_sequence(seqA);
+    vector<Peptide*>& crux_peptides = get_peptides_from_sequence(seqA);
     
     if (get_boolean_parameter("xlink-include-deadends")) {
 
@@ -338,7 +338,7 @@ void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides,
 
       for (set<string>::iterator pepB = pepA ;pepB != peptides.end(); ++pepB) {
         string seqB = *pepB;
-        vector<PEPTIDE_T*>& crux_peptides2 = get_peptides_from_sequence(seqB);
+        vector<Peptide*>& crux_peptides2 = get_peptides_from_sequence(seqB);
         
         for (unsigned int seq_idx1 = 0; seq_idx1 < pepA->length();seq_idx1++) {
           for (unsigned int seq_idx2 = 0; seq_idx2 < pepB->length();seq_idx2++) {
@@ -366,12 +366,12 @@ void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides,
 
 // append one shuffled decoy to decoys vector
 void add_decoys(vector<LinkedPeptide>& decoys, LinkedPeptide& lp) {
-  vector<Peptide> peptides = lp.peptides();
+  vector<XHHC_Peptide> peptides = lp.peptides();
   LinkedPeptide decoy = LinkedPeptide(lp.charge()); 
-  Peptide pepA_shuffled = shuffle(peptides[0]);
+  XHHC_Peptide pepA_shuffled = shuffle(peptides[0]);
   decoy.add_peptide(pepA_shuffled);
   if (lp.size() == 2) {
-    Peptide pepB_shuffled = shuffle(peptides[1]);
+    XHHC_Peptide pepB_shuffled = shuffle(peptides[1]);
     decoy.add_peptide(pepB_shuffled);
   }
   decoy.set_decoy();
@@ -380,9 +380,9 @@ void add_decoys(vector<LinkedPeptide>& decoys, LinkedPeptide& lp) {
 }
 
 // return a shuffled peptide, preserving any links
-Peptide shuffle(Peptide peptide) {
+XHHC_Peptide shuffle(XHHC_Peptide peptide) {
   string shuffled = string(peptide.sequence());
-  Peptide shuffled_peptide = Peptide(peptide.sequence());
+  XHHC_Peptide shuffled_peptide = XHHC_Peptide(peptide.sequence());
   for (size_t i = 0; i < shuffled.length(); ++i) {
     if (peptide.has_link_at(i)) shuffled_peptide.add_link(i);
   }
@@ -419,12 +419,12 @@ Peptide shuffle(Peptide peptide) {
 //////////////////////////////////////////////////////////
 
 
-void Peptide::set_sequence(string sequence) {
+void XHHC_Peptide::set_sequence(string sequence) {
   sequence_ = sequence;
   length_ = sequence.length();  
 }
 
-void Peptide::remove_link(int index) {
+void XHHC_Peptide::remove_link(int index) {
   links[index] = false;
   num_links--;
 }
@@ -447,7 +447,7 @@ LinkedPeptide::LinkedPeptide(char* peptide_A, char* peptide_B, int posA, int pos
   charge_ = charge;
   decoy_ = false;
   type_ = (ION_TYPE_T)NULL;
-  Peptide pepA = Peptide(peptide_A);
+  XHHC_Peptide pepA = XHHC_Peptide(peptide_A);
   // if a self link or dead end
   if (peptide_B == NULL) {
      pepA.add_link(posA);
@@ -456,7 +456,7 @@ LinkedPeptide::LinkedPeptide(char* peptide_A, char* peptide_B, int posA, int pos
     peptides_.push_back(pepA);
   } else {
     carp(CARP_DETAILED_DEBUG, "adding links at %d and %d", posA, posB);
-    Peptide pepB = Peptide(peptide_B);
+    XHHC_Peptide pepB = XHHC_Peptide(peptide_B);
     pepA.add_link(posA);
     pepB.add_link(posB);
     peptides_.push_back(pepA);
@@ -467,7 +467,7 @@ LinkedPeptide::LinkedPeptide(char* peptide_A, char* peptide_B, int posA, int pos
 
 
 
-int Peptide::link_site() {
+int XHHC_Peptide::link_site() {
   for (int i = 0; i < length_; ++i) {
     if (has_link_at(i)) 
       return i;
@@ -475,11 +475,11 @@ int Peptide::link_site() {
   return -1;
 }
 
-FLOAT_T Peptide::mass(MASS_TYPE_T mass_type) {
+FLOAT_T XHHC_Peptide::mass(MASS_TYPE_T mass_type) {
   if (mass_calculated[mass_type]) 
     return mass_[mass_type];
   else {
-    mass_[mass_type] = calc_sequence_mass((char*)sequence_.c_str(), mass_type);
+    mass_[mass_type] = Peptide::calcSequenceMass((char*)sequence_.c_str(), mass_type);
     mass_calculated[mass_type] = true;
     return mass_[mass_type];
   }
@@ -503,7 +503,7 @@ void LinkedPeptide::calculate_mass(MASS_TYPE_T mass_type) {
     //cout <<"AVERAGE ";
   }
 
-  mass_[mass_type] = calc_sequence_mass((char*)peptides_[0].sequence().c_str(), mass_type);   
+  mass_[mass_type] = Peptide::calcSequenceMass((char*)peptides_[0].sequence().c_str(), mass_type);   
   //cout << "Mass of "<<peptides_[0].sequence().c_str()<<":"
   //    <<calc_sequence_mass((char*)peptides_[0].sequence().c_str(), mass_type)<<endl;
 
@@ -512,7 +512,7 @@ void LinkedPeptide::calculate_mass(MASS_TYPE_T mass_type) {
   }
 
   if (size() == 2) {
-    mass_[mass_type] += calc_sequence_mass((char*)peptides_[1].sequence().c_str(), mass_type);
+    mass_[mass_type] += Peptide::calcSequenceMass((char*)peptides_[1].sequence().c_str(), mass_type);
      //cout << "Mass of "<<peptides_[1].sequence().c_str() <<":"
        //<<calc_sequence_mass((char*)peptides_[1].sequence().c_str(), mass_type)<<endl;
   }
@@ -543,7 +543,7 @@ FLOAT_T LinkedPeptide::get_mz(MASS_TYPE_T mass_type) {
   return mz[mass_type];
 }
 
-void Peptide::add_link(int index) {
+void XHHC_Peptide::add_link(int index) {
   links[index] = true;
   num_links++;
 }
@@ -552,8 +552,8 @@ void Peptide::add_link(int index) {
 // linked peptide.
 void LinkedPeptide::split(vector<pair<LinkedPeptide, LinkedPeptide> >& ion_pairs) {
   bool is_loop = false;
-  Peptide peptideA = peptides_[0];  
-  Peptide peptideB = peptides_[0];
+  XHHC_Peptide peptideA = peptides_[0];  
+  XHHC_Peptide peptideB = peptides_[0];
   // dead end
   if (is_dead_end()) {
    peptideB.set_sequence("");
@@ -576,8 +576,8 @@ void LinkedPeptide::split(vector<pair<LinkedPeptide, LinkedPeptide> >& ion_pairs
 }
 
 void LinkedPeptide::splitA(vector<pair<LinkedPeptide, LinkedPeptide> >& ion_pairs) {
-  Peptide peptideA = peptides_[0];
-  Peptide peptideB = peptides_[1];
+  XHHC_Peptide peptideA = peptides_[0];
+  XHHC_Peptide peptideB = peptides_[1];
 
   for (int i = 1; i < peptideA.length(); ++i) {
     peptideA.split_at(i, ion_pairs, charge_, peptideB, false);
@@ -585,8 +585,8 @@ void LinkedPeptide::splitA(vector<pair<LinkedPeptide, LinkedPeptide> >& ion_pair
 }
 
 void LinkedPeptide::splitB(vector<pair<LinkedPeptide, LinkedPeptide> >& ion_pairs) {
-  Peptide peptideA = peptides_[0];
-  Peptide peptideB = peptides_[1];
+  XHHC_Peptide peptideA = peptides_[0];
+  XHHC_Peptide peptideB = peptides_[1];
 
   for (int i = 1; i < peptideB.length(); ++i) {
     peptideB.split_at(i, ion_pairs, charge_, peptideA, false);
@@ -596,7 +596,7 @@ void LinkedPeptide::splitB(vector<pair<LinkedPeptide, LinkedPeptide> >& ion_pair
 
 // temporary
 std::ostream &operator<< (std::ostream& os, LinkedPeptide& lp) {
-  vector<Peptide> peptides = lp.peptides();
+  vector<XHHC_Peptide> peptides = lp.peptides();
   ostringstream link_positions;
   link_positions << "(";
   for (int i = 0; i < peptides[0].length(); ++i) {
@@ -614,12 +614,18 @@ std::ostream &operator<< (std::ostream& os, LinkedPeptide& lp) {
 }
 
 // this needs to change
-void Peptide::split_at(int index, vector<pair<LinkedPeptide, LinkedPeptide> >& pairs, int charge, Peptide& other, bool is_loop) {
+void XHHC_Peptide::split_at(
+  int index, 
+  vector<pair<LinkedPeptide, LinkedPeptide> >& pairs, 
+  int charge, 
+  XHHC_Peptide& other, 
+  bool is_loop) {
+
   bool self_flag = false;
   // for every charge state
   for (int c = 0; c <= charge; ++c) {
-    Peptide pepA = Peptide(sequence_.substr(0, index));
-    Peptide pepB = Peptide(sequence_.substr(index, length_ - index));
+    XHHC_Peptide pepA = XHHC_Peptide(sequence_.substr(0, index));
+    XHHC_Peptide pepB = XHHC_Peptide(sequence_.substr(index, length_ - index));
     LinkedPeptide linkedA = LinkedPeptide(c);
     LinkedPeptide linkedB = LinkedPeptide(charge - c);
     self_flag = true;

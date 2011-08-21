@@ -14,7 +14,7 @@
 #include "crux-utils.h"
 #include "objects.h"
 #include "mass.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "carp.h"
 
@@ -55,7 +55,6 @@ class PeptideConstraint {
   PeptideConstraint(
     ENZYME_T enzyme, ///< the enzyme to use for digestion
     DIGEST_T digest, ///< the degree of digestion
-  //  PEPTIDE_TYPE_T peptide_type, ///< the peptide_type -in
     FLOAT_T min_mass, ///< the minimum mass -in
     FLOAT_T max_mass, ///< the maximum mass -in
     int min_length, ///< the minimum length of peptide -in
@@ -76,7 +75,7 @@ class PeptideConstraint {
    * \returns TRUE if the constraint is satisified. FALSE if not.
    */
   bool isSatisfied(
-   PEPTIDE_T* peptide ///< the query peptide -in   
+   Peptide* peptide ///< the query peptide -in   
    );
 
   /**

@@ -13,7 +13,7 @@
 #include "objects.h"
 #include "parameter.h"
 #include "Protein.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "Spectrum.h"
 #include "parse_arguments.h" 
 #include "SpectrumCollection.h"

@@ -27,7 +27,7 @@ IndexPeptideIterator::IndexPeptideIterator(
 
   // set peptide implementation to array peptide_src
   // this determines which peptide free method to use
-  set_peptide_src_implementation(false);
+  Peptide::setPeptideSrcImplementation(false);
 
   // initialize a new index_peptide_iterator object
   index_ = NULL;
@@ -67,9 +67,9 @@ IndexPeptideIterator::IndexPeptideIterator(
  *  The basic iterator functions.
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* IndexPeptideIterator::next()
+Peptide* IndexPeptideIterator::next()
 {
-  PEPTIDE_T* peptide_to_return = peptide_;
+  Peptide* peptide_to_return = peptide_;
 
   queueNextPeptide();
 
@@ -100,7 +100,7 @@ IndexPeptideIterator::~IndexPeptideIterator()
   
   // if did not iterate over all peptides, free the last peptide not returned
   if(hasNext()){
-    free_peptide(peptide_);
+    delete peptide_;
   }
   
   // free the index
@@ -167,7 +167,7 @@ bool IndexPeptideIterator::findPeptideInCurrentIndexFile()
   }
 
   // peptide to return, reuse this memory while we look
-  PEPTIDE_T* peptide = allocate_peptide();
+  Peptide* peptide = new Peptide();
   // constraint to meet
   PeptideConstraint* index_constraint = index_->getSearchConstraint();
 
@@ -182,7 +182,7 @@ bool IndexPeptideIterator::findPeptideInCurrentIndexFile()
          peptide_fits, file_finished);
 
     // read in next peptide
-    bool found_pep = parse_peptide_no_src(peptide, cur_file, &src_loc);
+    bool found_pep = peptide->parseNoSrc(cur_file, &src_loc);
     // returns false if eof
     if( ! found_pep ){
       carp(CARP_DETAILED_DEBUG, "parse peptide returned false");
@@ -191,8 +191,8 @@ bool IndexPeptideIterator::findPeptideInCurrentIndexFile()
     }
 
     // check our peptide to see if it fits the constraint
-    FLOAT_T peptide_mass = get_peptide_peptide_mass(peptide);
-    int peptide_length = get_peptide_length(peptide);
+    FLOAT_T peptide_mass = peptide->getPeptideMass();
+    int peptide_length = peptide->getLength();
 
     // if peptide mass larger than constraint, no more peptides to return
     if(peptide_mass > index_constraint->getMaxMass()){
@@ -263,7 +263,7 @@ bool IndexPeptideIterator::findPeptideInCurrentIndexFile()
       peptide_ = NULL;
 
       carp(CARP_DETAILED_DEBUG, "about to free peptide.");
-      free_peptide(peptide);
+      delete peptide;
       carp(CARP_DETAILED_DEBUG, "Done cleaning up.");
       return false;
   }
@@ -465,7 +465,7 @@ bool IndexPeptideIterator::fastForwardIndexFile(
 {
   FILE* file = index_file_;
   // peptide to parse, reuse this memory while we look
-  PEPTIDE_T* peptide = allocate_peptide();
+  Peptide* peptide = new Peptide();
 
   PeptideConstraint* index_constraint = 
     index_->getSearchConstraint();
@@ -476,18 +476,18 @@ bool IndexPeptideIterator::fastForwardIndexFile(
   long int src_loc = 0;
   while( ! peptide_fits ){
     // read in next peptide, returns false if eof
-    if( ! parse_peptide_no_src(peptide, file, &src_loc) ){
-      free_peptide(peptide);
+    if( ! peptide->parseNoSrc(file, &src_loc) ){
+      delete peptide;
       return false;
     }
     // get mass & length
-    int peptide_mass = (int)get_peptide_peptide_mass(peptide);
-    int peptide_length = get_peptide_length(peptide);
+    int peptide_mass = (int)peptide->getPeptideMass();
+    int peptide_length = peptide->getLength();
     
     // if peptide mass larger than constraint, no more peptides to return
     if(peptide_mass > index_constraint->getMaxMass()){
       //free(peptide);
-      free_peptide(peptide);
+      delete peptide;
       return false;
     }
 
@@ -509,7 +509,7 @@ bool IndexPeptideIterator::fastForwardIndexFile(
   Database* database = index_->getDatabase();
   if( ! PeptideSrc::parse(peptide, file, database, true) ){
     carp(CARP_ERROR, "Could not parse peptide src");
-    free_peptide(peptide);
+    delete peptide;
     return false;
   }
 

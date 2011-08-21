@@ -12,7 +12,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include "carp.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "PeptideSrc.h"
 #include "Protein.h"
 #include "Database.h"
@@ -32,7 +32,7 @@
 struct generate_peptides_iterator_t{
   void* iterator;     ///< the index or database iterator we are wrapping 
   bool (*has_next)(void*); ///< the function pointer to *_has_next
-  PEPTIDE_T* (*next)(void*);    ///< the function pointer to *_next
+  Peptide* (*next)(void*);    ///< the function pointer to *_next
   void (*free)(void*);          ///< the function pointer to *_free
   Index* index;               ///< the index object needed
   Database* database;         ///< the database object needed
@@ -184,7 +184,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
     } 
 
     // use array implementation of peptide_src
-    set_peptide_src_implementation(FALSE);
+    Peptide::setPeptideSrcImplementation(false);
 
     // create index and set to generate_peptides_iterator
     //    set_index_constraint(index, constraint); 
@@ -225,7 +225,7 @@ GENERATE_PEPTIDES_ITERATOR_T* new_generate_peptides_iterator_from_mass_range(
 
     // set for all peptide src use link list implementation
     // this routine sets the static global in peptide.c
-    set_peptide_src_implementation(TRUE);
+    Peptide::setPeptideSrcImplementation(true);
 
     // create a new database & set generate_peptides_iterator
     gen_peptide_iterator->database = Database::copyPtr(database);
@@ -334,7 +334,7 @@ BOOLEAN_T generate_peptides_iterator_has_next(
 /**
  *\returns the next peptide in the iterator
  */
-PEPTIDE_T* generate_peptides_iterator_next(
+Peptide* generate_peptides_iterator_next(
  GENERATE_PEPTIDES_ITERATOR_T* generate_peptides_iterator ///< working iterator
   )
 {

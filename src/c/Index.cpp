@@ -15,7 +15,7 @@
 #include "utils.h"
 #include "crux-utils.h"
 
-#include "peptide.h"
+#include "Peptide.h"
 #include "Protein.h"
 #include "Index.h"
 #include "IndexPeptideIterator.h"
@@ -121,7 +121,7 @@ struct bin_peptide_iterator{
   Index* index; ///< The index object which we are iterating over
   FILE* index_file; ///< The current file stream that we are reading from
   bool has_next; ///< Is there another peptide?
-  PEPTIDE_T* peptide; ///< the next peptide to return
+  Peptide* peptide; ///< the next peptide to return
   bool use_array; 
   ///< Use array peptide_src or link list peptide_src when parsing peptides
 };    
@@ -849,7 +849,7 @@ FILE* Index::sortBin(
 
   BIN_SORTED_PEPTIDE_ITERATOR_T* peptide_iterator =
     new_bin_sorted_peptide_iterator(this, file, peptide_count);
-  PEPTIDE_T* working_peptide = NULL;
+  Peptide* working_peptide = NULL;
   
   // get the filename for this file bin
   filename = get_crux_filename(bin_idx, 0);
@@ -861,8 +861,8 @@ FILE* Index::sortBin(
   // serialize all peptides in sorted order
   while(bin_sorted_peptide_iterator_has_next(peptide_iterator)){
     working_peptide = bin_sorted_peptide_iterator_next(peptide_iterator);
-    serialize_peptide(working_peptide, file, text_file);
-    free_peptide(working_peptide);
+    working_peptide->serialize(file, text_file);
+    delete working_peptide;
   }
   
   std::free(filename);
@@ -881,8 +881,8 @@ FILE* Index::sortBin(
 static bool dump_peptide(
   FILE** file_array,   ///< the working file handler array to the bins -in/out
   long int file_idx,   ///< the index of the file the peptide belongs to -in
-  PEPTIDE_T* working_peptide, ///< the peptide to be stored -in
-  PEPTIDE_T** peptide_array, ///< hold peptides before they're serialized -out
+  Peptide* working_peptide, ///< the peptide to be stored -in
+  Peptide** peptide_array, ///< hold peptides before they're serialized -out
   int* bin_count       ///< an array of the counts of peptides in each bin -in
   )
 {  
@@ -895,12 +895,12 @@ static bool dump_peptide(
     file = file_array[file_idx];
     // print out all peptides
     for(peptide_idx = 0; peptide_idx < current_count; ++peptide_idx){
-      serialize_peptide(peptide_array[peptide_idx], file, NULL);
-      free_peptide(peptide_array[peptide_idx]);
+      peptide_array[peptide_idx]->serialize(file, NULL);
+      delete peptide_array[peptide_idx];
       // FIXME this should not be allowed
     }
-    serialize_peptide(working_peptide, file, NULL);
-    free_peptide(working_peptide);
+    working_peptide->serialize(file, NULL);
+    delete working_peptide;
     // FIXME this should not be allowed
     bin_count[file_idx] = 0;
   }
@@ -926,14 +926,14 @@ static bool dump_peptide(
  */
 static bool dump_peptide_all(
   FILE** file_array,   ///< the working file handle array to the bins -out
-  PEPTIDE_T*** peptide_array, ///< the array of pre-serialized peptides -in
+  Peptide*** peptide_array, ///< the array of pre-serialized peptides -in
   int* bin_count,      ///< the count array of peptides in each bin -in
   int num_bins         ///< the total number of bins -in
   )
 {  
   int peptide_idx = 0;
   FILE* file = NULL;
-  PEPTIDE_T** working_array = NULL;
+  Peptide** working_array = NULL;
   int bin_idx = 0;
   int file_idx = 0;
   
@@ -951,8 +951,8 @@ static bool dump_peptide_all(
     // print out all peptides in this specific bin
     // BF: could we do for(pep_idx=0; pep_idx<bin_count_total; pep_idx++)
     while(bin_idx > 0){
-      serialize_peptide(working_array[peptide_idx], file, NULL);
-      free_peptide(working_array[peptide_idx]);
+      working_array[peptide_idx]->serialize(file, NULL);
+      delete working_array[peptide_idx];
       // FIXME this should not be allowed
       --bin_idx;
       ++peptide_idx;
@@ -1045,7 +1045,7 @@ bool Index::create(
   int* mass_limits = (int*)mycalloc(2, sizeof(int));
   long num_bins = 0;
   DatabasePeptideIterator* peptide_iterator = NULL;
-  PEPTIDE_T* working_peptide = NULL;
+  Peptide* working_peptide = NULL;
   FLOAT_T working_mass;
   char* filename = NULL;
   FLOAT_T mass_range = mass_range_;
@@ -1100,12 +1100,12 @@ bool Index::create(
   file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
 
   // peptide array to store the peptides before serializing them all together
-  PEPTIDE_T*** peptide_array = (PEPTIDE_T***)
-    mycalloc(num_bins, sizeof(PEPTIDE_T**));
+  Peptide*** peptide_array = (Peptide***)
+    mycalloc(num_bins, sizeof(Peptide**));
   int sub_indx;
   for(sub_indx = 0; sub_indx < num_bins; ++sub_indx){
-    peptide_array[sub_indx] = (PEPTIDE_T**)
-      mycalloc(MAX_PROTEIN_IN_BIN, sizeof(PEPTIDE_T*));
+    peptide_array[sub_indx] = (Peptide**)
+      mycalloc(MAX_PROTEIN_IN_BIN, sizeof(Peptide*));
   }
   // int array that stores the peptide count for each peptide array branch
   // this is used to determine when to output all peptides in buffer
@@ -1154,7 +1154,7 @@ bool Index::create(
     }
 
     working_peptide = peptide_iterator->next();
-    working_mass = get_peptide_peptide_mass(working_peptide);
+    working_mass = working_peptide->getPeptideMass();
     file_idx = (long int)((working_mass - low_mass) / mass_range);
 
     // check if first time using this bin, if so create new file handle
@@ -1376,8 +1376,8 @@ bool initialize_bin_peptide_iterator(
   bool use_src_array = bin_peptide_iterator->use_array;
 
   // allocate peptide to used to parse
-  //  PEPTIDE_T* peptide = allocate_peptide();
-  PEPTIDE_T* peptide = parse_peptide(file, database, use_src_array);
+  //  Peptide* peptide = allocate_peptide();
+  Peptide* peptide = Peptide::parse(file, database, use_src_array);
 
   if( peptide == NULL ){
     bin_peptide_iterator->peptide = NULL;
@@ -1406,10 +1406,10 @@ BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
   if(use_array){
     // set peptide implementation to array peptide_src
     // this determines which peptide free method to use
-    set_peptide_src_implementation(false);
+    Peptide::setPeptideSrcImplementation(false);
   }
   else{// use link list
-    set_peptide_src_implementation(true);
+    Peptide::setPeptideSrcImplementation(true);
   }
 
   // allocate a new index_peptide_iterator object
@@ -1434,11 +1434,11 @@ BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
  *  The basic iterator functions.
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* bin_peptide_iterator_next(
+Peptide* bin_peptide_iterator_next(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator ///< the bin_peptide_iterator to get peptide -in
   )
 {
-  PEPTIDE_T* peptide_to_return = bin_peptide_iterator->peptide;
+  Peptide* peptide_to_return = bin_peptide_iterator->peptide;
 
   // check if there's actually a peptide to return
   if(!bin_peptide_iterator_has_next(bin_peptide_iterator) ||
@@ -1477,7 +1477,7 @@ void free_bin_peptide_iterator(
   
   // if did not iterate over all peptides, free the last peptide not returned
   if(bin_peptide_iterator_has_next(bin_peptide_iterator)){
-    free_peptide(bin_peptide_iterator->peptide);
+    delete bin_peptide_iterator->peptide;
   }
 
   free(bin_peptide_iterator);
@@ -1500,7 +1500,7 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
 {
   // set peptide implementation to array peptide_src
   // this determines which peptide free method to use
-  set_peptide_src_implementation(false);
+  Peptide::setPeptideSrcImplementation(false);
   
   // create database sorted peptide iterator
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator =
@@ -1535,12 +1535,12 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
  * The basic iterator functions.
  * \returns The next peptide in the index.
  */
-PEPTIDE_T* bin_sorted_peptide_iterator_next(
+Peptide* bin_sorted_peptide_iterator_next(
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator 
     ///< the bin_peptide_iterator to get peptide -in
   )
 {
-  PEPTIDE_T* peptide = sorted_peptide_iterator_next(bin_sorted_peptide_iterator->sorted_peptide_iterator);
+  Peptide* peptide = sorted_peptide_iterator_next(bin_sorted_peptide_iterator->sorted_peptide_iterator);
   return peptide;
 }
 

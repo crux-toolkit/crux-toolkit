@@ -15,7 +15,7 @@
 #include "Spectrum.h"
 #include "carp.h"
 #include "PeptideConstraint.h"
-#include "peptide.h"
+#include "Peptide.h"
 #include "PeptideSrc.h"
 #include "Protein.h"
 #include "Database.h"
@@ -41,10 +41,10 @@
 
 
 //HACK for getting protein ids.
-std::vector<PEPTIDE_T*>& get_peptides_from_sequence(std::string& sequence);
+std::vector<Peptide*>& get_peptides_from_sequence(std::string& sequence);
 void free_peptides();
 
-class Peptide;
+class XHHC_Peptide;
 class LinkedPeptide {
  public:
   // constructor for a linked peptide. If A or B null, then
@@ -53,7 +53,7 @@ class LinkedPeptide {
   LinkedPeptide() {mass_calculated[MONO] = false; mass_calculated[AVERAGE]=false;}
     LinkedPeptide(char* peptide_A, char* peptide_B, int posA, int posB, int charge);
     LinkedPeptide(int charge) : charge_(charge), decoy_(false) {mass_calculated[MONO]=false; mass_calculated[AVERAGE]=false;}
-    std::vector<Peptide>& peptides() 	{ return peptides_;}
+    std::vector<XHHC_Peptide>& peptides() 	{ return peptides_;}
     int charge() 			{ return charge_;}
     void set_charge(int charge)		{ charge_ = charge; }
     void set_type(ION_TYPE_T type)   	{ type_ = type; }
@@ -62,7 +62,7 @@ class LinkedPeptide {
 
     void set_decoy()			{ decoy_ = true; }
     bool is_decoy()			{ return decoy_;}
-    void add_peptide(Peptide& peptide)  { peptides_.push_back(peptide); } 
+    void add_peptide(XHHC_Peptide& peptide)  { peptides_.push_back(peptide); } 
     bool is_linked() 			{ return size() == 2; }
     bool is_dead_end();
     bool is_self_loop();
@@ -98,15 +98,15 @@ class LinkedPeptide {
     ION_TYPE_T type_; //B_ION or Y_ION
       FLOAT_T mass_[NUMBER_MASS_TYPES];
       FLOAT_T mz[NUMBER_MASS_TYPES];
-      std::vector<Peptide> peptides_;
+      std::vector<XHHC_Peptide> peptides_;
 };
 
 //FLOAT_T LinkedPeptide::linker_mass;
 
-class Peptide {
+class XHHC_Peptide {
  public:
-  Peptide() {mass_calculated[MONO] = false; mass_calculated[AVERAGE] = false;}
-  Peptide(std::string sequence) : num_links(0), sequence_(sequence), length_(sequence.length())  {
+  XHHC_Peptide() {mass_calculated[MONO] = false; mass_calculated[AVERAGE] = false;}
+  XHHC_Peptide(std::string sequence) : num_links(0), sequence_(sequence), length_(sequence.length())  {
     mass_calculated[MONO] = false;
     mass_calculated[AVERAGE] = false;
     int length = sequence.length();
@@ -115,7 +115,7 @@ class Peptide {
   }
     // cleave the peptide at an index, adding b and y ions
     // skips if a cleave site on self loop between the link
-    void split_at(int index, std::vector<std::pair<LinkedPeptide, LinkedPeptide> >& pairs, int charge, Peptide& other, bool is_loop);
+    void split_at(int index, std::vector<std::pair<LinkedPeptide, LinkedPeptide> >& pairs, int charge, XHHC_Peptide& other, bool is_loop);
     bool has_link_at(int index)		{ return (links[index]); }
     int length()			{ return length_; }
     bool has_link() 			{ return num_links > 0; }
@@ -130,7 +130,6 @@ class Peptide {
 private:
     bool mass_calculated[NUMBER_MASS_TYPES];
     int num_links;
-    //std::map<int, Peptide> links_;
     std::vector<bool> links;
     std::string sequence_;
     int length_;
@@ -142,7 +141,7 @@ private:
 // defined in xhhc.cpp
 //////////////////////////////////////////
 
-Peptide shuffle(Peptide peptide);
+XHHC_Peptide shuffle(XHHC_Peptide peptide);
 
 BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
   FLOAT_T* scores,

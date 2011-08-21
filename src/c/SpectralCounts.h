@@ -35,7 +35,7 @@ class SpectralCounts: public CruxApplication {
    * \typedef PeptideSet
    * \brief Collection of peptide objects (not a meta-peptide)
    */
-  typedef std::set<PEPTIDE_T*, bool(*)(PEPTIDE_T*, PEPTIDE_T*)> PeptideSet;
+  typedef std::set<Peptide*, bool(*)(Peptide*, Peptide*)> PeptideSet;
   /**
    * \typedef MetaMapping
    * \brief Mapping of peptideSet to MetaProtein
