@@ -166,6 +166,22 @@ to false, then no cleavage site may lie within the peptide sequence;
 alternatively, if true then any number of sites may lie within the
 peptide sequence. </p>
 
+<li>
+<b>How can I search my ITRAQ data?</b></li>
+<p>
+ITRAQ and other tagged seaches can be done by using terninal
+modifications.  For example, if your tag has a mass of 304.199040, add
+these lines to your parameter file:
+<pre>
+nmod=304.199040:-1
+cmod=304.199040:-1
+</pre>
+<p>
+Crux will then generate peptides with this modification (+304.199904)
+on the n-terminus, the c-terminus and on both termini.  The -1 in the
+option means to add the modification regardless of where the peptide
+terminus lies relative to the rest of the protein.
+
 <!--
 <li>
 <b>How is the theoretical spectrum for a peptide generated?</b></li>
