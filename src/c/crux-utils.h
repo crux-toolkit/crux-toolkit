@@ -23,6 +23,7 @@
 #include "utils.h"
 #include "objects.h"
 #include "Peak.h"
+#include "Index.h"
 
 #include "CruxApplication.h"
 
@@ -193,6 +194,21 @@ char* generate_name(
   const char* file_extension,
   const char* suffix
   );
+/**
+ * \brief Take a filename, strip its leading path information (if
+ * any) and file extension (if any).  Tries all file extensions until
+ * one is found.  Add a new path (if given) and a new suffix (exension).
+ *
+ * If given ../dir/filename.ext, [.txt, .ext, t], .new-ext, otherdir
+ * would return  otherdir/filename.new-ext 
+ * \returns A heap allocated filename
+ */
+char* generate_name_path(
+  const char* filename,
+  vector<const char*> old_suffixes,
+  const char* new_suffix,
+  const char* new_path
+  );
 
 /**
  * \brief Take a filename, strip its leading path information (if
@@ -254,10 +270,44 @@ BOOLEAN_T valid_peptide_sequence(const char* sequence);
 void quicksort(FLOAT_T numbers[], int array_size);
 
 /**
+ * User define our upper and our lower bounds.
+ * The random number will always be 
+ * between low and high, inclusive.
+ * There is no seeding in this function, user must do it for themselves
+ *\returns a random number between the interval user provides
+ */
+int get_random_number_interval(
+  int low, ///< the number for lower bound -in
+  int high ///< the number for higher bound -in
+  );
+
+/**
  * \brief Shuffle an array of FLOAT_Ts.  Uses the Knuth algorithm.  Uses
  * get_random_number_interval() to generate random numbers. 
  */
 void shuffle_floats(FLOAT_T* array, int size);
+
+/**
+ * \brief Shuffles an array of elements.  Uses the Knuth algorithm.  Uses
+ * get_random_number_interval() to generate random numbers. 
+ */
+template<typename T>
+void shuffle_array(T* array, int size){
+  if( array == NULL ){
+    carp(CARP_ERROR, "Cannot shuffle NULL array.");
+    return;
+  }
+
+  int idx, switch_idx;
+  int last_element_idx = size - 1;
+  T temp_value;
+  for(idx=0; idx < size; idx++){
+    switch_idx = get_random_number_interval(idx, last_element_idx);
+    temp_value = array[idx];
+    array[idx] = array[switch_idx];
+    array[switch_idx] = temp_value;
+  }
+}
 
 /**
  * \brief Comparison function for reverse sorting floats.
@@ -278,18 +328,6 @@ char** generate_feature_name_array();
  */
 int get_number_digits(
   int number ///< the number to count digits
-  );
-
-/**
- * User define our upper and our lower bounds.
- * The random number will always be 
- * between low and high, inclusive.
- * There is no seeding in this function, user must do it for themselves
- *\returns a random number between the interval user provides
- */
-int get_random_number_interval(
-  int low, ///< the number for lower bound -in
-  int high ///< the number for higher bound -in
   );
 
 /**
@@ -328,10 +366,6 @@ void fit_two_parameter_weibull(
 
 BOOLEAN_T string_to_mass_type(char*, MASS_TYPE_T*);
 BOOLEAN_T mass_type_to_string(MASS_TYPE_T, char*);
-//BOOLEAN_T string_to_peptide_type(char*, PEPTIDE_TYPE_T*);
-//BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str);
-BOOLEAN_T string_to_sort_type(char*, SORT_TYPE_T*);
-BOOLEAN_T sort_type_to_string(SORT_TYPE_T, char*);
 BOOLEAN_T string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);
 BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T, char*);
 BOOLEAN_T string_to_scorer_type(char*, SCORER_TYPE_T*);
@@ -355,6 +389,8 @@ QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name);
 char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type);
 COLTYPE_T string_to_column_type(char* name);
 COMPARISON_T string_to_comparison(char* name);
+DECOY_TYPE_T string_to_decoy_type(const char* name);
+char* decoy_type_to_string(DECOY_TYPE_T type);
 
 /**
  * \brief Open either the index or fasta file and prepare it for
@@ -396,6 +432,14 @@ void strcat_formatted
  const char* lead_string,        // Appears at the start of each line.
  const char* extension           // Text to add.
  );
+
+/**
+ * Check parameter values for what kind of decoys are requested.  Make
+ * sure it is compatible with other search parameters and fail if not.  
+ * \returns Zero if no decoys are searched, one if there are decoys
+ * with an index search, or num-decoys-per-target for a fasta search.
+ */
+int get_num_decoys(bool have_index);
 
 
 #endif

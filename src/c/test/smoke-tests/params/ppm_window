@@ -2,4 +2,4 @@ precursor-window-type=ppm
 isotopic-mass=mono
 precursor-window=100
 overwrite=T
-num-decoys-per-target=0
+decoys=none

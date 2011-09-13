@@ -29,6 +29,28 @@ static const int MAX_ULPS = 2;
 
 /* Functions for converting custom types to and from strings */
 
+static const int INVALID_ENUM_STRING = -10;
+/**
+ * The string version of the decoy types
+ */
+static const char* decoy_type_strings[NUMBER_DECOY_TYPES] = 
+  { "invalid", "none", "reverse", "protein-shuffle", "peptide-shuffle" };
+
+DECOY_TYPE_T string_to_decoy_type(const char* name){
+  int decoy_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+                                        decoy_type_strings, 
+                                        NUMBER_DECOY_TYPES);
+  if( decoy_int < 0 ){
+    decoy_int = 0;
+  }
+
+  return (DECOY_TYPE_T)decoy_int;
+}
+
+char* decoy_type_to_string(DECOY_TYPE_T type){
+  return my_copy_string(decoy_type_strings[type]);
+}
+
 /**
  * The string version of isotopic mass type (average, mono)
  */
@@ -37,8 +59,8 @@ static const char* mass_type_strings[NUMBER_MASS_TYPES] = {"average", "mono"};
 BOOLEAN_T string_to_mass_type(char* name, MASS_TYPE_T* result){
   BOOLEAN_T success = TRUE;
   //this is copied from parameter.c::get_peptide_mass_type
-  int mass_type = convert_enum_type_str(
-                          name, -10, mass_type_strings, NUMBER_MASS_TYPES);
+  int mass_type = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+                                        mass_type_strings, NUMBER_MASS_TYPES);
 
   (*result) = (MASS_TYPE_T)mass_type;
 
@@ -69,7 +91,7 @@ static const char* digest_type_strings[NUMBER_DIGEST_TYPES] =
   {"invalid", "full-digest", "partial-digest", "non-specific-digest"};
 
 DIGEST_T string_to_digest_type(char* name){
-  int clev_int = convert_enum_type_str(name, -10, 
+  int clev_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
                                        digest_type_strings, 
                                        NUMBER_DIGEST_TYPES);
   if( clev_int < 0 ){
@@ -100,7 +122,7 @@ static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] =
    "custom-enzyme"};
 
 ENZYME_T string_to_enzyme_type(char* name){
-  int enz_int = convert_enum_type_str(name, -10, 
+  int enz_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
                                       enzyme_type_strings, 
                                       NUMBER_ENZYME_TYPES);
   if( enz_int < 0 ){
@@ -127,9 +149,9 @@ static const char* window_type_strings[NUMBER_WINDOW_TYPES] =
   {"invalid", "mass", "mz", "ppm"};
 
 WINDOW_TYPE_T string_to_window_type(char* name){
-  int window_int = convert_enum_type_str(name, -10, 
-                                      window_type_strings, 
-                                      NUMBER_WINDOW_TYPES);
+  int window_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+                                         window_type_strings, 
+                                         NUMBER_WINDOW_TYPES);
   if( window_int < 0 ){
     window_int = 0;
   }
@@ -154,7 +176,7 @@ static const char* parsimony_type_strings[NUMBER_PARSIMONY_TYPES] =
   {"invalid", "simple", "greedy", "none"};
 
 PARSIMONY_TYPE_T string_to_parsimony_type(char* name){
-  int parsimony_int = convert_enum_type_str(name, -10,
+  int parsimony_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
 					    parsimony_type_strings,
 					    NUMBER_PARSIMONY_TYPES);
   if ( parsimony_int < 0 ){
@@ -184,9 +206,9 @@ static const char* measure_type_strings[NUMBER_MEASURE_TYPES] =
   {"invalid", "SIN", "NSAF", "EMPAI"};
 
 MEASURE_TYPE_T string_to_measure_type(char* name){
-  int measure_int = convert_enum_type_str(name, -10,
-					    measure_type_strings,
-					    NUMBER_PARSIMONY_TYPES);
+  int measure_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
+                                          measure_type_strings,
+                                          NUMBER_PARSIMONY_TYPES);
   if ( measure_int < 0 ){
     measure_int = 0;
   }
@@ -212,9 +234,9 @@ static const char* quant_level_type_strings[NUMBER_QUANT_LEVEL_TYPES] =
   {"invalid", "peptide", "protein"};
 
 QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name){
-  int quant_int = convert_enum_type_str(name, -10,
-					    quant_level_type_strings,
-					    NUMBER_QUANT_LEVEL_TYPES);
+  int quant_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
+                                        quant_level_type_strings,
+                                        NUMBER_QUANT_LEVEL_TYPES);
   if ( quant_int < 0 ){
     quant_int = 0;
   }
@@ -242,7 +264,7 @@ static const char* column_type_strings[NUMBER_COLTYPES] =
 COLTYPE_T string_to_column_type(char* name) {
   int coltype_int = convert_enum_type_str(
     name, 
-    -10,
+    INVALID_ENUM_STRING,
     column_type_strings,
     NUMBER_COLTYPES);
 
@@ -263,7 +285,7 @@ static const char* comparison_type_strings[NUMBER_COMPARISONS] =
 COMPARISON_T string_to_comparison(char* name) {
   int comparison_int = convert_enum_type_str(
     name,
-    -10,
+    INVALID_ENUM_STRING,
     comparison_type_strings,
     NUMBER_COMPARISONS);
 
@@ -275,72 +297,6 @@ COMPARISON_T string_to_comparison(char* name) {
   
 }
 
-
-
-/**
- * The string version of peptide cleavage type
- */
-/*
-static char* peptide_type_strings[NUMBER_PEPTIDE_TYPES] = 
-{"tryptic", "partial", "N_TRYPTIC", "C_TRYPTIC", "NOT_TRYPTIC", "all"};
-
-BOOLEAN_T string_to_peptide_type(char* name, PEPTIDE_TYPE_T* result){
-
-  BOOLEAN_T success = TRUE;
-  //this is copied from parameter.c::get_peptide_mass_type
-  int pep_type = convert_enum_type_str(
-                     name, -10, peptide_type_strings, NUMBER_PEPTIDE_TYPES);
-  (*result) = (PEPTIDE_TYPE_T)pep_type;
-
-  if( pep_type < 0 ){
-    success = FALSE;
-  }
-  return success;
-}
-
-BOOLEAN_T peptide_type_to_string(PEPTIDE_TYPE_T type, char* type_str){
-  BOOLEAN_T success = TRUE;
-  if( (int)type > NUMBER_PEPTIDE_TYPES){
-    success = FALSE;
-    type_str = NULL;
-  }
-
-  //type_str = peptide_type_strings[type];
-  strcpy(type_str, peptide_type_strings[type]);
-
-  return success;
-}
-*/
-/**
- * The string version of peptide sort types
- */
-static const char* sort_type_strings[NUMBER_SORT_TYPES] =
-  { "none", "mass", "length", "lexical" };
-
-BOOLEAN_T string_to_sort_type(char* name, SORT_TYPE_T* result){
-  BOOLEAN_T success = TRUE;
-
-  int sort_type = convert_enum_type_str(
-                        name, -10, sort_type_strings, NUMBER_SORT_TYPES);
-  (*result) = (SORT_TYPE_T)sort_type;
-
-  if( sort_type < 0){
-    success = FALSE;
-  }
-  return success;
-}
-
-BOOLEAN_T sort_type_to_string(SORT_TYPE_T type, 
-                              char* type_str){
-  BOOLEAN_T success = TRUE;
-  if( (int)type > NUMBER_SORT_TYPES ){
-    success = FALSE;
-    type_str = NULL;
-  }
-  strcpy(type_str, sort_type_strings[type]);
-  return success;
-}
-
 /*
  * The string version of ion types
  */
@@ -350,8 +306,8 @@ static const char* ion_type_strings[NUMBER_ION_TYPES] = {
 BOOLEAN_T string_to_ion_type(char* name, ION_TYPE_T* result){
   BOOLEAN_T success = TRUE;
 
-  int ion_type = convert_enum_type_str(
-                       name, -10, ion_type_strings, NUMBER_ION_TYPES);
+  int ion_type = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+                                       ion_type_strings, NUMBER_ION_TYPES);
   (*result) = (ION_TYPE_T)ion_type;
 
   if( ion_type < 0){
@@ -376,13 +332,12 @@ BOOLEAN_T ion_type_to_string(ION_TYPE_T type,
  */
 static const char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
   {"percolator", "rczar", "curve-fit",
-   //"qvalue",
    "none", "all", "q-ranker"};
 
 BOOLEAN_T string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result){
   BOOLEAN_T success = TRUE;
 
-  int algorithm_type = convert_enum_type_str(name, -10,
+  int algorithm_type = convert_enum_type_str(name, INVALID_ENUM_STRING,
                                              algorithm_type_strings,
                                              NUMBER_ALGORITHM_TYPES);
   (*result) = (ALGORITHM_TYPE_T)algorithm_type;
@@ -432,7 +387,8 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
 BOOLEAN_T string_to_scorer_type(char* name, SCORER_TYPE_T* result){
   BOOLEAN_T success = TRUE;
 
-  int scorer_type = convert_enum_type_str(name, -10, scorer_type_strings,
+  int scorer_type = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+                                          scorer_type_strings,
                                           NUMBER_SCORER_TYPES);
   (*result) = (SCORER_TYPE_T)scorer_type;
 
@@ -1013,6 +969,35 @@ BOOLEAN_T delete_dir(char* dir) {
 
 /**
  * \brief Take a filename, strip its leading path information (if
+ * any) and file extension (if any).  Tries all file extensions until
+ * one is found.  Add a new path (if given) and a new suffix (exension).
+ *
+ * If given ../dir/filename.ext, [.txt, .ext, t], .new-ext, otherdir
+ * would return  otherdir/filename.new-ext 
+ * \returns A heap allocated filename
+ */
+char* generate_name_path(
+  const char* filename,
+  vector<const char*> old_suffixes,
+  const char* new_suffix,
+  const char* new_path
+  ){
+
+  // check the filename for the extension.  Use the first that matches
+  for(size_t suffix_idx = 0; suffix_idx < old_suffixes.size(); suffix_idx++){
+    if( has_extension(filename, old_suffixes[suffix_idx])){
+      return generate_name_path(filename, old_suffixes[suffix_idx],
+                                new_suffix, new_path);
+    }
+  }
+  // if we got to here, none of the suffixes were found, so it
+  // doesn't matter which we use
+  return generate_name_path(filename, "", new_suffix, new_path);
+
+}
+
+/**
+ * \brief Take a filename, strip its leading path information (if
  * any) and file extension (if any).  Add a new path (if given) and a
  * new suffix (exension).
  *
@@ -1484,6 +1469,16 @@ int prepare_protein_input(
     }
     num_proteins = (*index)->getNumProteins();
 
+    // check that the index decoys are compatible with the search
+    DECOY_TYPE_T search_decoys = get_decoy_type_parameter("decoys");
+    DECOY_TYPE_T index_decoys = (*index)->getDecoyType();
+    if( search_decoys != NO_DECOYS && search_decoys != index_decoys ){
+      carp(CARP_FATAL, 
+           "Cannot search for %s decoys using an index with %s decoys",
+           decoy_type_to_string(search_decoys), 
+           decoy_type_to_string(index_decoys));
+    }
+
   } else {
     carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
     *database = new Database(input_file, FALSE);         
@@ -1653,6 +1648,48 @@ void strcat_formatted
   strcat(string_to_extend, lead_string);
   strcat(string_to_extend, &(extension[i_string]));
   strcat(string_to_extend, "\n");
+}
+
+/**
+ * Check parameter values for what kind of decoys are requested.  Make
+ * sure it is compatible with other search parameters and fail if not.  
+ * \returns Zero if no decoys are searched, one if there are decoys
+ * with an index search, or num-decoys-per-target for a fasta search.
+ */
+int get_num_decoys(bool have_index){
+
+  DECOY_TYPE_T decoy_type = get_decoy_type_parameter("decoys");
+
+  switch(decoy_type){
+  case NO_DECOYS:
+    return 0;
+
+    // valid for index or database
+  case REVERSE_DECOYS: 
+  case PEPTIDE_SHUFFLE_DECOYS:
+    if( have_index ){
+      return 1;
+    } else { // searching fasta
+      return  get_int_parameter("num-decoys-per-target"); 
+    }
+
+    //only valid for index
+  case PROTEIN_SHUFFLE_DECOYS:
+    if( have_index ){
+      return 1;
+    } else {
+      carp(CARP_FATAL, 
+           "Cannot generate shuffle whole proteins for fasta search.  Either "
+           "convert fasta to index or use reverse or peptide shuffling.");
+    }
+
+  case INVALID_DECOY_TYPE: // already checked in parameters...but
+  case NUMBER_DECOY_TYPES:
+    carp(CARP_FATAL, "Invalid decoy type.");
+  }
+
+  // shouldn't get here
+  return 0;
 }
 
 

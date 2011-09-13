@@ -7,7 +7,6 @@
 #	enzyme: trypsin
 #	digestion: partial-digest
 #	number of allowed missed-cleavages: 3
-#	sort: lexical
 #	isotopic mass type: average
 #	verbosity: 30
 #	use index: FALSE

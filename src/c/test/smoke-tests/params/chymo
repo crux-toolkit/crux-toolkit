@@ -1,5 +1,5 @@
 enzyme=chymotrypsin
 digestion=full-digest
 overwrite=T
-num-decoys-per-target=0
+decoys=none
 precision=2

@@ -16,7 +16,7 @@
  * the iterator to hand it off when 'next' called.
  *
  * When no more match_collections (i.e. psm files) are available, set
- * match_collection_iterator->is_another_collection to false
+ * match_collection_iterator->has_another_collection to false
  * \returns void
  */
 void MatchCollectionIterator::setup()
@@ -28,7 +28,7 @@ void MatchCollectionIterator::setup()
       new MatchCollection(this, (SET_TYPE_T)collection_idx_);
 
     // we have another match_collection to return
-    is_another_collection_ = true;
+    has_another_collection_ = true;
     
     // let's move on to the next one next time
     ++collection_idx_;
@@ -38,7 +38,7 @@ void MatchCollectionIterator::setup()
   }
   else{
     // we're done, no more match_collections to return
-    is_another_collection_ = false;
+    has_another_collection_ = false;
   }
 }
 
@@ -53,16 +53,16 @@ MatchCollectionIterator::MatchCollectionIterator(
   const char* fasta_file, 
     ///< The name of the fasta file for peptides for match_collections. -in
   int* decoy_count
-  )
+) :
+  working_directory_(NULL), directory_name_(NULL), database_(NULL),
+  decoy_database_(NULL), number_collections_(0), collection_idx_(-1),
+  match_collection_(NULL), has_another_collection_(false)
 {
   carp(CARP_DEBUG, 
        "Creating match collection iterator for dir %s and protein database %s",
        output_file_directory, fasta_file);
 
-
-  DIR* working_directory = NULL;
   struct dirent* directory_entry = NULL;
-  Database* database = NULL;
   bool use_index = is_directory(fasta_file);
 
   /*
@@ -82,15 +82,15 @@ MatchCollectionIterator::MatchCollectionIterator(
   bool decoy_3 = false;
 
   // open PSM file directory
-  working_directory = opendir(output_file_directory);
+  working_directory_ = opendir(output_file_directory);
   
-  if (working_directory == NULL) {
+  if (working_directory_ == NULL) {
     carp(CARP_FATAL, "Failed to open PSM file directory: %s", 
         output_file_directory);
   }
   
   // determine how many decoy sets we have
-  while((directory_entry = readdir(working_directory))){
+  while((directory_entry = readdir(working_directory_))){
     
     if(suffix_compare(directory_entry->d_name, "decoy-1.txt")) {
       carp(CARP_DEBUG, "Found decoy file %s", directory_entry->d_name);
@@ -141,55 +141,33 @@ MatchCollectionIterator::MatchCollectionIterator(
   }
 
   // get binary fasta file name with path to crux directory 
-  char* binary_fasta  = NULL;
   if (use_index == true){ 
-    binary_fasta = Index::getBinaryFastaName(fasta_file);
-  } else {
-    binary_fasta = get_binary_fasta_name(fasta_file);
-    carp(CARP_DEBUG, "Looking for binary fasta %s", binary_fasta);
-    if (access(binary_fasta, F_OK)){
-      carp(CARP_DEBUG, "Could not find binary fasta %s", binary_fasta);
-      if (!create_binary_fasta_here(fasta_file, binary_fasta)){
-       carp(CARP_FATAL, "Could not create binary fasta file %s", binary_fasta);
-      };
-    }
-  }
-  
-  // check if input file exist
-  if(access(binary_fasta, F_OK)){
+    char* binary_fasta = Index::getBinaryFastaName(fasta_file);
+    database_ = new Database(binary_fasta, true);// is memmapped
     free(binary_fasta);
-    carp(CARP_FATAL, "The file \"%s\" does not exist (or is not readable, "
-        "or is empty) for crux index.", binary_fasta);
-  }
-  
-  carp(CARP_DEBUG, "Creating a new database");
-  // now create a database, 
-  // using fasta file either binary_file(index) or fastafile
-  database = new Database(binary_fasta, true);
-  
-  // check if already parsed
-  if(!database->getIsParsed()){
-    carp(CARP_DETAILED_DEBUG,"Parsing database");
-    if(!database->parse()){
-      carp(CARP_FATAL, "Failed to parse database, cannot create new index");
+    binary_fasta = Index::getDecoyBinaryFastaName(fasta_file);
+    if( binary_fasta != NULL ){
+      decoy_database_ = new Database(binary_fasta, true);// is memmapped
+      decoy_database_->parse();
+      free(binary_fasta);
     }
+  } else {
+    database_ = new Database(fasta_file, false);// not memmapped
+    database_->transformTextToMemmap(".", true);// is temp
+    decoy_database_ = NULL;
   }
-  
-  free(binary_fasta);
+  database_->parse();
 
   // reset directory
-  rewinddir(working_directory);
-  
+  rewinddir(working_directory_);
  
 
   // set match_collection_iterator fields
   collection_idx_ = 0;
-  working_directory_ = working_directory;
-  database_ = database;  
   number_collections_ = total_sets;
   directory_name_ = 
     my_copy_string(output_file_directory);
-  is_another_collection_ = false;
+  has_another_collection_ = false;
 
   carp(CARP_DETAILED_DEBUG,"num collections:%d",number_collections_);
 
@@ -207,7 +185,7 @@ MatchCollectionIterator::MatchCollectionIterator(
 bool MatchCollectionIterator::hasNext()
 {
   // Do we have another match_collection to return
-  return is_another_collection_;
+  return has_another_collection_;
 }
 
 /**
@@ -220,19 +198,10 @@ MatchCollectionIterator::~MatchCollectionIterator()
     delete match_collection_;
   }
   
-  // if no index, remove the temp binary fasta file
-  char* fasta_file = get_string_parameter("protein database");
-  if( is_directory(fasta_file) == false ){
-    char* binary_fasta = get_binary_fasta_name(fasta_file);
-    carp(CARP_DEBUG, "Protein source %s is not an index.  "
-         "Removing temp binary fasta %s", fasta_file, binary_fasta);
-    remove(binary_fasta);
-  }
-  free(fasta_file);
-
   // free up all match_collection_iteratory.
   free(directory_name_);
   Database::freeDatabase(database_);
+  Database::freeDatabase(decoy_database_);
   closedir(working_directory_); 
   delete cols_in_file_;
 }
@@ -246,7 +215,7 @@ MatchCollection* MatchCollectionIterator::next()
 {
   MatchCollection* match_collection = NULL;
   
-  if(is_another_collection_){
+  if(has_another_collection_){
     match_collection = match_collection_;
     match_collection_ = NULL;
     setup();
@@ -263,6 +232,13 @@ MatchCollection* MatchCollectionIterator::next()
  */
 Database* MatchCollectionIterator::getDatabase() {
   return database_;
+}
+    
+/**
+ *\returns the decoy database
+ */
+Database* MatchCollectionIterator::getDecoyDatabase() {
+  return decoy_database_;
 }
     
 

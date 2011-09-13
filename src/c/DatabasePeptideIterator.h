@@ -11,8 +11,9 @@
 #include "DatabaseProteinIterator.h"
 #include "ProteinPeptideIterator.h"
 #include "PeptideConstraint.h"
+#include "PeptideIterator.h"
 
-class DatabasePeptideIterator {
+class DatabasePeptideIterator : public PeptideIterator {
  protected:
   DatabaseProteinIterator* database_protein_iterator_; 
     ///< The protein iterator. 
@@ -24,10 +25,11 @@ class DatabasePeptideIterator {
     ///< the protein that was used before the current working protein
   bool first_passed_; 
     ///< is it ok to convert prior_protein to light?
-  Peptide* cur_peptide_; ///< the peptide to return by next()
   bool store_all_peptides_; ///< true for search so duplicates are combined
   map<char*, Peptide*, cmp_str> peptide_map_; ///< store peptides by sequence
   map<char*, Peptide*>::iterator cur_map_position_; ///< next in map to return
+  bool already_initialized_; ///< flag for first call to queueNextPeptide
+  bool is_decoy_; ///< transform all peptides to decoys before returning
 
   /* Private Functions */
   Peptide* nextFromFile();
@@ -44,7 +46,8 @@ class DatabasePeptideIterator {
   DatabasePeptideIterator(
     Database* database, ///< the database of interest -in
     PeptideConstraint* peptide_constraint, ///< the peptide_constraint to filter peptides -in
-    bool store_all_peptides ///< true: parse all (unique) peptides into map
+    bool store_all_peptides, ///< true: parse all (unique) peptides into map
+    bool is_decoy = false ///< return decoy or target peptides
     );
 
   /**
@@ -52,16 +55,7 @@ class DatabasePeptideIterator {
    */
   ~DatabasePeptideIterator();
 
-  /**
-   * The basic iterator functions.
-   * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
-   */
-  bool hasNext();
-
-  /**
-   * \returns The next peptide in the database.
-   */
-  Peptide* next();
+  virtual bool queueNextPeptide();
 
 };
 

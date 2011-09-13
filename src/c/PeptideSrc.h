@@ -121,7 +121,9 @@ class PeptideSrc {
     Peptide* peptide,   ///< assign peptide_src(s) to this peptide
     MatchFileReader& file,           ///< file to read from
     Database* database, ///< database containing proteins
-    bool use_array); ///< use array implementation vs. linked list
+    bool use_array, ///< use array implementation vs. linked list
+    Database* decoy_database = NULL ///< optional database with decoy proteins
+    );
 
   /**
    * \brief Read in the peptide_src objects from the given file and

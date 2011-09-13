@@ -145,6 +145,7 @@ MatchCollection::MatchCollection(
   
   // the protein counter size, create protein counter
   Database* database = match_collection_iterator->getDatabase();
+  Database* decoy_database = match_collection_iterator->getDecoyDatabase();
   post_protein_counter_size_ 
    = database->getNumProteins();
   post_protein_counter_ 
@@ -172,7 +173,7 @@ MatchCollection::MatchCollection(
          full_filename);
     free(full_filename);
 
-    extendTabDelimited(database, delimited_result_file);
+    extendTabDelimited(database, delimited_result_file, decoy_database);
 
     // for the first target file, set headers based on input files
     if( set_type == SET_TARGET && file_idx == 0 ){
@@ -209,7 +210,7 @@ MatchCollection::MatchCollection(
 int MatchCollection::addMatches(
   Spectrum* spectrum,  ///< compare peptides to this spectrum
   SpectrumZState& zstate,            ///< use this charge state for spectrum
-  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
+  ModifiedPeptidesIterator* peptide_iterator, ///< use these peptides
   bool is_decoy,     ///< are peptides to be shuffled
   bool store_scores, ///< save scores for p-val estimation
   bool do_sp_scoring, ///< start with SP scoring
@@ -1001,7 +1002,7 @@ bool MatchCollection::estimateWeibullParametersFromXcorrs(
 int MatchCollection::addUnscoredPeptides(
   Spectrum* spectrum, 
   SpectrumZState& zstate, 
-  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
+  ModifiedPeptidesIterator* peptide_iterator,
   bool is_decoy
 ){
 
@@ -1013,9 +1014,9 @@ int MatchCollection::addUnscoredPeptides(
 
   int starting_number_of_psms = match_total_;
 
-  while( modified_peptides_iterator_has_next(peptide_iterator)){
+  while( peptide_iterator->hasNext() ){
     // get peptide
-    Peptide* peptide = modified_peptides_iterator_next(peptide_iterator);
+    Peptide* peptide = peptide_iterator->next();
 
     // create a match
     Match* match = new Match(peptide, spectrum, zstate, is_decoy);
@@ -1040,7 +1041,6 @@ int MatchCollection::addUnscoredPeptides(
   last_sorted_ = (SCORER_TYPE_T)-1; // unsorted
   return matches_added;
 }
-
 /**
  * \brief Use the score type to compare the spectrum and peptide in
  * the matches in match collection.  
@@ -1719,7 +1719,6 @@ void MatchCollection::printSqtHeader(
 
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
-  //peptide_type_to_string(cleavages, temp_str);
   char* enz_str = enzyme_type_to_string(enzyme);
   char* dig_str = digest_type_to_string(digestion);
   char custom_str[SMALL_BUFFER];
@@ -1860,7 +1859,7 @@ bool MatchCollection::printXml(
   int index
   )
 {
-  if ( output == NULL || spectrum == NULL ){
+  if ( output == NULL || spectrum == NULL || match_total_ == 0){
     return false;
   }
   SpectrumZState zstate = zstate_; 
@@ -1934,7 +1933,7 @@ bool MatchCollection::printSqt(
   )
 {
 
-  if( output == NULL || spectrum == NULL ){
+  if( output == NULL || spectrum == NULL || match_total_ == 0 ){
     return false;
   }
   time_t hold_time;
@@ -1995,7 +1994,7 @@ bool MatchCollection::printTabDelimited(
   )
 {
 
-  if( output == NULL || spectrum == NULL ){
+  if( output == NULL || spectrum == NULL || match_total_ == 0 ){
     return false;
   }
   //int charge = match_collection->charge; 
@@ -2235,11 +2234,10 @@ void get_target_decoy_filenames(vector<string>& target_decoy_names,
  */
 bool MatchCollection::extendTabDelimited(
   Database* database, ///< the database holding the peptides -in
-  MatchFileReader& result_file   ///< the result file to parse PSMs -in
+  MatchFileReader& result_file,   ///< the result file to parse PSMs -in
+  Database* decoy_database ///< the database holding the decoy peptides -in
   )
 {
-
-
   Match* match = NULL;
 
   FLOAT_T delta_cn = 0;
@@ -2301,7 +2299,7 @@ bool MatchCollection::extendTabDelimited(
     post_scored_type_set_ = true;
 
     // parse match object
-    match = Match::parseTabDelimited(result_file, database);
+    match = Match::parseTabDelimited(result_file, database, decoy_database);
     if (match == NULL) {
       carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
       return false;
@@ -2702,11 +2700,12 @@ bool set_match_collection_charge(
  */
 void MatchCollection::addDecoyScores(
   Spectrum* spectrum, ///< search this spectrum
-  int charge, ///< search spectrum at this charge state
-  MODIFIED_PEPTIDES_ITERATOR_T* peptides ///< use these peptides to search
+  SpectrumZState& zstate, ///< search spectrum at this charge state
+  ModifiedPeptidesIterator* peptides ///< use these peptides to search
 ){
 
   // reuse these for scoring all matches
+  int charge = zstate.getCharge();
   IonConstraint* ion_constraint = 
     IonConstraint::newIonConstraintSmart(XCORR, charge);
  
@@ -2714,10 +2713,10 @@ void MatchCollection::addDecoyScores(
   Scorer* scorer = new Scorer(XCORR);
   
   // for each peptide in the iterator
-  while( modified_peptides_iterator_has_next(peptides)){
+  while( peptides->hasNext() ){
 
     // get peptide and sequence
-    Peptide* peptide = modified_peptides_iterator_next(peptides);
+    Peptide* peptide = peptides->next();
     char* decoy_sequence = peptide->getSequence();
     MODIFIED_AA_T* modified_seq = peptide->getModifiedAASequence();
 

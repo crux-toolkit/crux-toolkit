@@ -1,24 +1,25 @@
 #include "check-generate-peptides-iterator.h"
 #include "parameter.h"
-#include "generate_peptides_iterator.h"
+#include "GeneratePeptidesIterator.h"
 
-// private testing functions in generate_peptides_iterator.c
+// private testing functions in GeneratePeptidesIterator.c
 
 
 // declare things to set up
-GENERATE_PEPTIDES_ITERATOR_T* gpiter1;
+GeneratePeptidesIterator* gpiter1;
 Database* dbase;
 
 void gpiter_setup(){
   initialize_parameters();
   dbase = new Database("input-data/test.fasta", FALSE);
-  gpiter1 = new_generate_peptides_iterator_from_mass(1268, NULL, dbase);
-  //gpiter1 = new_generate_peptides_iterator_from_mass(1566, index, NULL);
+  gpiter1 = new GeneratePeptidesIterator(
+                       pair<FLOAT_T,FLOAT_T>(1268 - 3, 1268 + 3),
+                       false, dbase, NULL);
 }
 
 void gpiter_teardown(){
   Database::freeDatabase(dbase);
-  free_generate_peptides_iterator(gpiter1);
+  delete gpiter1;
 }
 
 START_TEST(test_create){
@@ -26,20 +27,20 @@ START_TEST(test_create){
                "Got NULL instead of peptide iterator.");
 
 
-  fail_unless( generate_peptides_iterator_has_next(gpiter1) == TRUE,
+  fail_unless( gpiter1->hasNext() == true,
                "Iterator should have peptide as set up");
 
-  Peptide* next_p = generate_peptides_iterator_next(gpiter1);
+  Peptide* next_p = gpiter1->next();
   fail_unless( next_p != NULL, "Next returned a null peptide");
   char* seq = next_p->getSequence();
   fail_unless( strcmp(seq, "ITNHLVAMIEK") == 0,
                "First peptide should be ITNHLVAMIEK but is %s", seq);
   fail_unless( get_double_parameter("precursor-window") == 3,
                "Default mass window should be 3.");
-  fail_unless( generate_peptides_iterator_has_next(gpiter1) == TRUE,
+  fail_unless( gpiter1->hasNext() == true,
                "Iterator should have second peptide");
 
-  next_p = generate_peptides_iterator_next(gpiter1);
+  next_p = gpiter1->next();
   free(seq);
   seq = next_p->getSequence();
   fail_unless( strcmp(seq, "QGQVATVLSAPAK") == 0,

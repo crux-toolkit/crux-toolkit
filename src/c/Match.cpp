@@ -26,7 +26,6 @@
 #include "Scorer.h" 
 #include "Match.h" 
 #include "MatchCollection.h" 
-#include "generate_peptides_iterator.h" 
 #include "Peptide.h"
 
 #include <string>
@@ -526,14 +525,17 @@ void Match::printSqt(
   char* protein_id = NULL;
   Protein* protein = NULL;
   const char* rand = "";
-  if( null_peptide_ ){
-    rand = "rand_";
-  }
   
   while(peptide_src_iterator_has_next(peptide_src_iterator)){
     peptide_src = peptide_src_iterator_next(peptide_src_iterator);
     protein = peptide_src->getParentProtein();
     protein_id = protein->getId();
+
+    // only prepend "rand_" if we are doing a fasta search
+    if( null_peptide_ 
+        && (protein->getDatabase()->getDecoyType() == NO_DECOYS) ){
+      rand = "rand_";
+    }
     
     // print match info (locus line), add rand_ to locus name for decoys
     fprintf(file, "L\t%s%s\n", rand, protein_id);      
@@ -1217,18 +1219,22 @@ double* Match::getPercolatorFeatures(
  */
 Match* Match::parseTabDelimited(
   MatchFileReader& result_file,  ///< the result file to parse PSMs -in
-  Database* database ///< the database to which the peptides are created -in
+  Database* database, ///< the database to which the peptides are created -in
+  Database* decoy_database ///< database with decoy peptides
   ) {
 
   Match* match = new Match();
 
   Spectrum* spectrum = NULL;
-  Peptide* peptide = NULL;
 
   // this is a post_process match object
   match->post_process_match_ = true;
 
-  if((peptide = Peptide::parseTabDelimited(result_file, database, true))== NULL){
+  Peptide* peptide = Peptide::parseTabDelimited(result_file, 
+                                                database, 
+                                                true, 
+                                                decoy_database);
+  if(peptide == NULL){
     carp(CARP_ERROR, "Failed to parse peptide (tab delimited)");
     // FIXME should this exit or return null. I think sometimes we can get
     // no peptides, which is valid, in which case NULL makes sense.

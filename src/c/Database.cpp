@@ -20,24 +20,26 @@
 #include "carp.h"
 #include "objects.h"
 #include "PeptideConstraint.h"
-#include "sorter.h"
 #include "ProteinIndex.h"
 #include "ProteinIndexIterator.h"
 
 #include "DatabaseProteinIterator.h"
 #include "DatabasePeptideIterator.h"
-#include "DatabaseSortedPeptideIterator.h"
 
 #include <map>
 #include <vector>
+#include <iostream>
 
 using namespace std;
+
+const string Database::binary_suffix = "-binary-fasta";
+const string Database::decoy_binary_suffix = "-binary-fasta-decoy";
+const string Database::decoy_fasta_suffix = "-random.fasta";
 
 /**
  * intializes a database object
  */
 void Database::init(){
-  filename_ = NULL;
   file_ = NULL;
   is_parsed_ = false;
   size_ = 0; 
@@ -49,7 +51,8 @@ void Database::init(){
   is_hashed_ = false;
   proteins_ = new vector<Protein*>();
   protein_map_ = new map<char*, Protein*, cmp_str>();
-  // fprintf(stderr, "Free: Allocation: %i\n", database->pointer_count);
+  decoys_ = NO_DECOYS;
+  binary_is_temp_ = false;
 }
 
 /**
@@ -66,14 +69,20 @@ Database::Database() {
 Database::Database(
   const char*         filename, ///< The file from which to parse the database. 
   ///< either text fasta file or binary fasta file -in
-  bool is_memmap ///< are we using a memory mapped binary fasta file? 
+  bool is_memmap, ///< are we using a memory mapped binary fasta file? 
   ///< If so, all proteins are memory mapped -in
+  DECOY_TYPE_T decoys ///< is this a decoy database
   )         
 {
   carp(CARP_DEBUG, "Creating new database from '%s'", filename);
   init();
-  setFilename(filename);
   is_memmap_ = is_memmap;
+  if( is_memmap_ ){
+    binary_filename_ = filename;
+  } else {
+    fasta_filename_ = filename;
+  }
+  decoys_ = decoys;
 }  
 
 /**
@@ -105,8 +114,6 @@ void Database::freeDatabase(
 
 Database::~Database() {
 
-  free(filename_);
-  
   // only free proteins if been parsed and file has been opened
   if(is_parsed_){
     carp(CARP_DEBUG, "Freeing database.");
@@ -133,6 +140,12 @@ Database::~Database() {
       fclose(file_);
     }
   }
+
+  if( binary_is_temp_ && !binary_filename_.empty() ){
+    carp(CARP_DEBUG, "Deleting temp binary fasta %s.", 
+         binary_filename_.c_str());
+    remove(binary_filename_.c_str());
+  }
 }
 
 /**
@@ -144,7 +157,11 @@ void Database::print(
 {
   Protein* protein = NULL;
 
-  fprintf(file, "filename:%s\n", filename_);
+  if( is_memmap_ ){
+    fprintf(file, "filename:%s\n", binary_filename_.c_str());
+  } else {
+    fprintf(file, "filename:%s\n", fasta_filename_.c_str());
+  }
   fprintf(file, "is_parsed:");
   
   // has the database been parsed?
@@ -196,29 +213,29 @@ bool Database::parseTextFasta()
   Protein* new_protein;
   unsigned int protein_idx;
 
-  carp(CARP_DEBUG, "Parsing text fasta file '%s'", filename_);
+  carp(CARP_DEBUG, "Parsing text fasta file '%s'", fasta_filename_.c_str());
   // check if already parsed
   if(is_parsed_){
     return true;
   }
   
   // open file and 
-  file = fopen(filename_, "r");
+  file = fopen(fasta_filename_.c_str(), "r");
   
   // check if succesfully opened file
   if(file == NULL){
-    carp(CARP_ERROR, "Failed to open fasta file %s", filename_);
+    carp(CARP_ERROR, "Failed to open fasta file %s", fasta_filename_.c_str());
     return false;
   }
   
-  // check if use light protein and parse thos light proteins fomr protein index
-  if(use_light_protein_ && ProteinIndex::onDisk(filename_, false)){
+  // check if use light protein and parse those proteins from protein index
+  if(use_light_protein_ && ProteinIndex::onDisk(fasta_filename_.c_str(), false)){
     // let the user know that protein index file is being used
     carp(CARP_INFO, "using protein index file");
 
     // create a protein index iterator
     ProteinIndexIterator* protein_index_iterator =
-      new ProteinIndexIterator(filename_);
+      new ProteinIndexIterator(fasta_filename_.c_str());
 
     // iterate over all proteins in protein index
     while(protein_index_iterator->hasNext()){
@@ -259,7 +276,7 @@ bool Database::parseTextFasta()
               delete (proteins_->at(protein_idx));
             }
             proteins_->clear();
-            carp(CARP_ERROR, "failed to parse fasta file");
+            carp(CARP_ERROR, "Failed to parse fasta file");
             return false;
           }
           new_protein->setIsLight(false);
@@ -292,10 +309,10 @@ bool Database::memoryMap(
   struct stat file_info;
   
   // get information of the binary fasta file
-  if (stat(filename_, &file_info) == -1) {
+  if (stat(binary_filename_.c_str(), &file_info) == -1) {
     carp(CARP_ERROR,
          "Failed to retrieve information of binary fasta file: %s",
-         filename_);
+         binary_filename_.c_str());
     return false;
   }
   
@@ -304,11 +321,13 @@ bool Database::memoryMap(
   file_size_ = file_info.st_size;
   
   // memory map the entire binary fasta file!
-  data_address_ = mmap((caddr_t)0, file_info.st_size, PROT_READ, MAP_PRIVATE /*MAP_SHARED*/, file_d, 0);
+  data_address_ = mmap((caddr_t)0, file_info.st_size, 
+                       PROT_READ, MAP_PRIVATE /*MAP_SHARED*/, file_d, 0);
 
   // check if memory mapping has succeeded
   if ((caddr_t)(data_address_) == (caddr_t)(-1)){
-    carp(CARP_ERROR, "failed to use mmap function for binary fasta file: %s", filename_);
+    carp(CARP_ERROR, "Failed to use mmap function for binary fasta file: %s", 
+         binary_filename_.c_str());
     return false;
   }
   
@@ -316,8 +335,10 @@ bool Database::memoryMap(
 }
 
 /**
- * Assumes that there is a 1 at the very end after all the proteins in binary file
- *\return true successfully populates the proteins from memory mapped binary fasta file, else false
+ * Assumes that there is a 1 at the very end after all the proteins in
+ * binary file.
+ * \returns True successfully populates the proteins from memory mapped
+ * binary fasta file, else false .
  */
 bool Database::populateProteinsFromMemmap()
 {
@@ -340,7 +361,7 @@ bool Database::populateProteinsFromMemmap()
         delete proteins_->at(protein_idx);
       }
       proteins_->clear();
-      carp(CARP_ERROR, "failed to parse fasta file");
+      carp(CARP_ERROR, "Failed to parse fasta file");
       return false;
     }
     new_protein->setIsLight(false);
@@ -367,7 +388,7 @@ bool Database::populateProteinsFromMemmap()
 bool Database::parseMemmapBinary()
 {
   int file_d = -1;
-  carp(CARP_DEBUG, "Parsing binary fasta file '%s'", filename_);
+  carp(CARP_DEBUG, "Parsing binary fasta file '%s'", binary_filename_.c_str());
  
   // check if already parsed
   if(is_parsed_){
@@ -375,7 +396,7 @@ bool Database::parseMemmapBinary()
   }
   
   // open file and 
-  file_d = open(filename_, O_RDONLY);
+  file_d = open(binary_filename_.c_str(), O_RDONLY);
   
   // check if succesfully opened file
   if(file_d == -1){
@@ -461,44 +482,143 @@ bool Database::parse()
  * \returns true if all processes succeed, else false.
  */
 bool Database::transformTextToMemmap(
-  char* output_dir
+  const char* output_dir,
+  bool binary_is_temp
   ){
 
-  bool success = false;
-
-  // from output_dir name and database filename, get binary_filename
-  char* binary_filename = generate_name_path( filename_, ".fasta",
-                                           "-binary-fasta", output_dir);
-
-
-  carp(CARP_DEBUG, "Transforming text file '%s' to binary file '%s'",
-       filename_, binary_filename);
-
-  // create binary fasta
-  success = create_binary_fasta_here(filename_, 
-                                     binary_filename);
-
-  if(! success ){
-    carp(CARP_ERROR, 
-         "Could not create binary fasta file '%s' from text fasta file '%s'", 
-         binary_filename, filename_);
-    return false;
-  }
-  // change database filename to new binary fasta
-  char* binary_filename_no_path = parse_filename(binary_filename);
-  setFilename(binary_filename);
+  createBinaryFasta(output_dir, binary_is_temp);
 
   // set is_memmap to true
   setMemmap(true);
 
   // parse the binary fasta
-  success = parse();
+  bool success = parse();
 
-  free(binary_filename);
-  free(binary_filename_no_path);
   return success;
 }
 
+/**
+ * Using the fasta file the Database was instantiated with, write a
+ * binary protein file in the given directory to use for memory
+ * mapping.  If is_temp, delete the file on destruction.  Warns if
+ * Database was not opened with a text file.  If the database is to
+ * contain decoy proteins, randomizes each protein before
+ * serializing.  Also prints a new fasta file of the decoy proteins in
+ * the same directory as the binary file.
+ */
+void Database::createBinaryFasta(const char* directory, bool is_temp){
+  binary_is_temp_ = is_temp;
+
+  if( fasta_filename_.empty() ){
+    carp(CARP_WARNING, "No fasta file to transform to binary.");
+    return;
+  }
+
+  // get the name of the new binary file
+  const char* binary_suffix = Database::binary_suffix.c_str();
+  if( decoys_ != NO_DECOYS ){
+    binary_suffix = Database::decoy_binary_suffix.c_str();
+  }
+  binary_filename_ = generate_name_path( fasta_filename_.c_str(), ".fasta",
+                                         binary_suffix, directory);
+  carp(CARP_DEBUG, "Transforming text file '%s' to binary file '%s'",
+       fasta_filename_.c_str(), binary_filename_.c_str());
+
+  // open output file
+  FILE* output_file = fopen(binary_filename_.c_str(), "w");
+  if( output_file == NULL ){
+    carp(CARP_FATAL, "Could not open binary protein file %s", 
+         binary_filename_.c_str());
+  }
+  // also open a fasta file if this is a decoy database
+  FILE* output_fasta = NULL;
+  if( decoys_ != NO_DECOYS){
+    vector<const char*> suffixes;
+    suffixes.push_back(".fasta");
+    suffixes.push_back(".fa");
+    suffixes.push_back(".fsa");
+    char* fasta_output_name = generate_name_path( fasta_filename_.c_str(),
+                                                  suffixes, 
+                                                  decoy_fasta_suffix.c_str(),
+                                                  directory);
+    output_fasta = fopen(fasta_output_name, "w");
+    if( output_fasta == NULL ){
+      carp(CARP_FATAL, "Could not open new fasta file %s for decoy proteins.",
+           output_fasta);
+    }
+  }
+
+
+  // open input file
+  FILE* input_file = fopen(fasta_filename_.c_str(), "r");
+  if( input_file == NULL ){
+    carp(CARP_FATAL, "Could not open fasta file %s", fasta_filename_.c_str());
+  }
+
+  // for file reading
+  char* new_line = NULL;
+  int line_length = 0;
+  size_t buf_length = 0;
+  unsigned int mod_me = 1000;
+  unsigned int protein_idx = 0;
+
+  // read through the fasta and at each line beginning with >, parse a protein
+  unsigned long working_index = ftell(input_file);
+  while((line_length =  getline(&new_line, &buf_length, input_file)) != -1){
+    if(new_line[0] == '>'){
+      // the new protein to be serialize
+      Protein* new_protein = new Protein();
+      
+      // rewind to the begining of the protein to include ">" line
+      fseek(input_file, working_index, SEEK_SET);
+      // protein offset is set in the parse_protein_fasta_file method
+      if(!new_protein->parseProteinFastaFile(input_file)){
+        fclose(input_file);
+        delete new_protein;
+        carp(CARP_FATAL, "Failed to parse fasta file");
+      }
+      new_protein->setIsLight(false);
+
+      if( decoys_ != NO_DECOYS ){
+        new_protein->shuffle(decoys_);
+        new_protein->print(output_fasta);
+      }
+      
+      // serialize protein as binary to output file
+      new_protein->serialize(output_file);
+
+      // update protein count
+      ++protein_idx;
+
+      // free this protein
+      delete new_protein;
+    } 
+
+    // print status
+    if(protein_idx % mod_me == 0){
+      if((protein_idx / 10) == mod_me){
+        mod_me *= 10;
+      }
+      carp(CARP_INFO, "Reached protein %d", protein_idx);
+    }
+
+    working_index = ftell(input_file);
+  } // next line
+
+  // write the end character to binary fasta file
+  char term_char = 1;  // use 1 and not '*' as the terminal
+                       // character for the file b/c id length is 
+                       // stored in same field and id len == 42
+                       // is the smae as '*'
+  fwrite(&term_char, sizeof(char), 1, output_file);
+
+  // print final status
+  carp(CARP_INFO, "Total proteins found: %d", protein_idx);
+  
+  free(new_line);
+  fclose(input_file);
+  fclose(output_file);
+}
 
 /** 
  * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
@@ -521,7 +641,10 @@ void Database::setMemmap(
  */
 char* Database::getFilename()
 {
-  return my_copy_string(filename_);
+  if( is_memmap_ ){
+    return my_copy_string(binary_filename_.c_str());
+  }
+  return my_copy_string(fasta_filename_.c_str());
 }
 
 
@@ -529,22 +652,12 @@ char* Database::getFilename()
  *\returns the pointer to the filename of the database
  * user must not free or change the filename
  */
-char* Database::getFilenamePointer()
+const char* Database::getFilenamePointer()
 {
-  return filename_;
-}
-
-/**
- * sets the filename of the database
- * protein->sequence must been initiailized
- */
-void Database::setFilename(
-  const char* filename ///< the filename to add -in
-  )
-{
-  free(filename_);
-  // MEMLEAK below
-  filename_ = my_copy_string(filename);
+  if( is_memmap_ ){
+    return binary_filename_.c_str();
+  }
+  return fasta_filename_.c_str();
 }
 
 /**
@@ -554,6 +667,14 @@ bool Database::getIsParsed()
 {
   return is_parsed_;
 }
+
+/**
+ * \returns The type of shuffling used on the proteins in this database
+ */
+DECOY_TYPE_T Database::getDecoyType(){
+  return decoys_;
+}
+
 
 /**
  * sets the use_light_protein of the database
@@ -670,88 +791,6 @@ Database* Database::copyPtr(
   return database;
 }
 
-
-
-
-/***********************************************
- * Iterators
- ***********************************************/
-
-
-
-
-/**********************************************************************
- * wrapper, for generate_peptides_iterator, cast back to original type
- ***********************************************************************/
-
-/**
- * Frees an allocated database_peptide_iterator object.
- */
-void void_free_database_peptide_iterator(
-  void* database_peptide_iterator ///< the iterator to free -in
-  )
-{
-
-  delete (DatabasePeptideIterator*)database_peptide_iterator;
-}
-
-/**
- * The basic iterator functions.
- * \returns true if there are additional peptides, false if not.
- */
-bool void_database_peptide_iterator_has_next(
-  void* database_peptide_iterator ///< the iterator of interest -in
-  )
-{
-  return ((DatabasePeptideIterator*)database_peptide_iterator)->hasNext();
-}
-
-/**
- * \returns The next peptide in the database.
- */
-Peptide* void_database_peptide_iterator_next(
-  void* database_peptide_iterator ///< the iterator of interest -in
-  )
-{
-
-  return ((DatabasePeptideIterator*)database_peptide_iterator)->next();
-}
-
-/**********************************************************************
- * wrapper, for generate_peptides_iterator, cast back to original type
- ***********************************************************************/
-
-/**
- * Frees an allocated database_sorted_peptide_iterator object.
- */
-void void_free_database_sorted_peptide_iterator(
-  void* database_peptide_iterator ///< the iterator to free -in
-  )
-{
-  delete (DatabaseSortedPeptideIterator*)database_peptide_iterator;
-}
-
-/**
- * The basic iterator functions.
- * \returns true if there are additional peptides to iterate over, false if not.
- */
-bool void_database_sorted_peptide_iterator_has_next(
-  void* database_peptide_iterator ///< the iterator of interest -in
-  )
-{
-  return ((DatabaseSortedPeptideIterator*)database_peptide_iterator)->hasNext();
-}
-
-/**
- * returns each peptide in sorted order
- * \returns The next peptide in the database.
- */
-Peptide* void_database_sorted_peptide_iterator_next(
-  void* database_peptide_iterator ///< the iterator of interest -in
-  )
-{
-  return ((DatabaseSortedPeptideIterator*)database_peptide_iterator)->next();
-}
 
 /*
  * Local Variables:

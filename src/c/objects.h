@@ -218,6 +218,17 @@ enum _parsimony_type {
  */
 typedef enum _parsimony_type PARSIMONY_TYPE_T;
 
+/**
+ * \enum DECOY_TYPE_T
+ */
+enum DECOY_TYPE_T {
+  INVALID_DECOY_TYPE,
+  NO_DECOYS,
+  REVERSE_DECOYS,
+  PROTEIN_SHUFFLE_DECOYS,
+  PEPTIDE_SHUFFLE_DECOYS,
+  NUMBER_DECOY_TYPES
+};
 
 /**
  * \typedef WINDOW_TYPE_T
@@ -264,23 +275,11 @@ class DatabasePeptideIterator;
 /**
  * The enum for sort type (mass, length, lexical, none)
  */
-enum _sort_type {SORT_NONE, 
-                 SORT_MASS, 
-                 SORT_LENGTH, 
-                 SORT_LEXICAL, 
-                 NUMBER_SORT_TYPES };
-
-/**
- * \typedef SORT_TYPE_T
- * \brief The typedef for sort type (mass, length)
- */
-typedef enum _sort_type SORT_TYPE_T;
-
-/**
- * \class DatabaseSortedPeptideIterator
- * \brief An object to iterate over the peptides in a database in sorted order 
- */
-class DatabaseSortedPeptideIterator;
+enum SORT_TYPE_T {SORT_NONE, 
+                  SORT_MASS, 
+                  SORT_LENGTH, 
+                  SORT_LEXICAL, 
+                  NUMBER_SORT_TYPES };
 
 /**
  * \typedef PEPTIDE_WRAPPER_T
@@ -449,12 +448,6 @@ enum _scorer_type {
 typedef enum _scorer_type SCORER_TYPE_T;
 
 /**
- *\typedef GENERATE_PEPTIDES_ITERATOR_T
- *\brief An object that navigates the options and selects the correct peptide iterator to use
- */
-typedef struct generate_peptides_iterator_t GENERATE_PEPTIDES_ITERATOR_T;
-
-/**
  * The enum for protein scorer type
  */
 enum _protein_scorer_type { PROTEIN_SCORER_PVALUE, 
@@ -613,12 +606,6 @@ typedef struct _linked_list_head LINKED_LIST_T;
  * list or walking through a list.  Cannot allocate a new one.
  */
 typedef struct _linked_list_node LIST_POINTER_T;
-
-/**
- * \typedef modified_peptides_iterator_t is typedefed as
- * MODIFIED_PEPTIDES_ITERATOR_T 
- */
-typedef struct modified_peptides_iterator_t MODIFIED_PEPTIDES_ITERATOR_T;
 
 /**
  * \enum _xlink_site_t (typedefed as XLINK_SITE_T)

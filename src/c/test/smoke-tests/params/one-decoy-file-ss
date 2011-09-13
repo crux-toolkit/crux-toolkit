@@ -1,7 +1,8 @@
 print-search-progress=100
 overwrite=F
 seed=7
+decoys=peptide-shuffle
 decoy-location=one-decoy-file
 output-dir=ss
 # defaults are
-#num-decoys-per-target=2
+num-decoys-per-target=2

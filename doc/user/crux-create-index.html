@@ -21,9 +21,12 @@
 
 <blockquote>
 Given a protein fasta sequence database as input, generate an index of
-all of its peptides and save it to disk.  This index can be provided
-as input to <code>crux search-for-matches</code> instead of the fasta
-file to speed up the search.</blockquote>
+all of its peptides and save it to disk.  Optionally, the index may
+also include decoy peptides to be used for post-processing commands
+such as <code>crux percolator</code>, <code>crux q-ranker</code>
+<code>crux compute-q-values</code> or <code>crux barista</code>.  The
+index can be provided as input to <code>crux search-for-matches</code>
+instead of the fasta file to speed up the search.</blockquote>
 
 <p>
 <B>Input:</B>

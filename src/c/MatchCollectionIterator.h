@@ -17,12 +17,13 @@ class MatchCollectionIterator {
   DIR* working_directory_; 
   ///< the working directory for the iterator to find match_collections
   char* directory_name_; ///< the directory name in char
-  Database* database_; ///< the database for which the match_collection
+  Database* database_; ///< database of proteins in the results files
+  Database* decoy_database_; ///< optional database of decoy proteins in files
   int number_collections_; 
   ///< the total number of match_collections in the directory (target+decoy)
   int collection_idx_;  ///< the index of the current collection to return
   MatchCollection* match_collection_; ///< the match collection to return
-  bool is_another_collection_; ///< is there another match_collection to return?
+  bool has_another_collection_; ///< has another match_collection to return?
   vector<bool>* cols_in_file_; ///< which columns were in the target file
 
   /**
@@ -30,7 +31,7 @@ class MatchCollectionIterator {
    * the iterator to hand it off when 'next' called.
    *
    * When no more match_collections (i.e. psm files) are available, set
-   * match_collection_iterator->is_another_collection to false
+   * match_collection_iterator->has_another_collection to false
    * \returns void
    */
   void setup();
@@ -70,6 +71,11 @@ class MatchCollectionIterator {
    */
   Database* getDatabase();
     
+  /**
+   *\returns the decoy database
+   */
+  Database* getDecoyDatabase();
+
   /**
    *\returns the total number of match_collections to return
    */
