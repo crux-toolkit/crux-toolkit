@@ -3,6 +3,7 @@ overwrite=F
 seed=7
 output-dir=ss
 fileroot=separate
+decoys=peptide-shuffle
 # defaults are
 #decoy-location=separate-files
-#num-decoys-per-target=2
+num-decoys-per-target=2

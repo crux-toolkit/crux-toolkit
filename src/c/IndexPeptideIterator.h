@@ -8,8 +8,9 @@
 
 #include "Index.h"
 #include "IndexFile.h"
+#include "PeptideIterator.h"
 
-class IndexPeptideIterator {
+class IndexPeptideIterator : public PeptideIterator {
  protected:
   Index* index_; ///< The index object which we are iterating over
   IndexFile* index_files_[MAX_INDEX_FILES]; 
@@ -17,8 +18,7 @@ class IndexPeptideIterator {
   int total_index_files_; ///< the total count of index_files
   int current_index_file_; ///< the index file open or one to open next 
   FILE* index_file_; ///< The current file stream that we are reading from
-  bool has_next_; ///< Is there another peptide?
-  Peptide* peptide_; ///< the next peptide to return
+  bool is_decoy_;    ///< return decoy or target peptides
 
   /**
    * \brief Parses the "crux_index_map" file that contains the mapping
@@ -40,7 +40,7 @@ class IndexPeptideIterator {
    * \returns true if no errors were encountered while reading files
    * (even if there is no peptide to return).
    */
-  bool queueNextPeptide();
+  virtual bool queueNextPeptide();
 
   /**
    * \brief Prepare an index peptide iterator to have its index files
@@ -83,7 +83,7 @@ class IndexPeptideIterator {
    */
   bool addNewIndexFile(
     ///< the index_peptide_iterator to add file -out
-    char* filename_parsed,  ///< the filename to add -in
+    const char* filename_parsed,  ///< the filename to add -in
     FLOAT_T start_mass,  ///< the start mass of the index file  -in
     FLOAT_T range  ///< the mass range of the index file  -in
     );
@@ -92,11 +92,11 @@ class IndexPeptideIterator {
 
   /**
    * Instantiates a new peptide_iterator from an index, which returns peptides
-   * that obey peptide constraint. At first will only accept constraints
-   * that will require reading in one file (e.g a 1m/z range). 
+   * that obey peptide constraint. 
    */
   IndexPeptideIterator(
-    Index* index ///< The index -in
+    Index* index, ///< The index -in
+    bool is_decoy = false ///< return target or decoy peptides
     );
 
   /**
@@ -104,20 +104,7 @@ class IndexPeptideIterator {
    */
   ~IndexPeptideIterator();
 
-  /**
-   * The basic iterator functions.
-   * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
-   */
-  bool hasNext();
-
-  /**
-   * \returns The next peptide in the index.
-   */
-  Peptide* next();
-
   Index* getIndex();
-
-
 
 };
 

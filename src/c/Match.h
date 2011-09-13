@@ -201,7 +201,8 @@ class Match {
    */
   static Match* parseTabDelimited(
     MatchFileReader& result_file,  ///< the result file to parse PSMs -in
-    Database* database ///< the database to which the peptides are created -in
+    Database* database, ///< the database to which the peptides are created -in
+    Database* decoy_database = NULL ///< optional database with decoy peptides
     );
 
   /****************************

@@ -1,6 +1,6 @@
 enzyme=elastase
 digestion=partial-digest
 overwrite=T
-num-decoys-per-target=0
+decoys=none
 precision=2
 top-match=5

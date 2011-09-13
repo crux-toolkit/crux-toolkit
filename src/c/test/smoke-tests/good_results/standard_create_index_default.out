@@ -1,5 +1,6 @@
 #	time created: Tue Jun 14 21:19:50 2011
 #	fasta file: test-binary-fasta
+#	decoy fasta file: test-binary-fasta-decoy
 #	min_mass: 200.00
 #	max_mass: 7200.00
 #	min_length: 6
@@ -19,6 +20,7 @@
 #	missed_cleavages: 0
 #	mass_type: 0
 #	unique_peptides: 1
+#	decoys: 4
 #	CRUX index directory: test_crux_index
 #	time created: Tue Jun 14 21:19:50 2011
 #	target_mass_range_for_index_file: 6.84

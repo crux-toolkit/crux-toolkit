@@ -7,6 +7,7 @@
 #	missed_cleavages: 0
 #	mass_type: 0
 #	unique_peptides: 1
+#	decoys: 4
 #	CRUX index directory: new-existing-index
 #	time created: Wed Jun 24 15:37:29 2009
 #	target_mass_range_for_index_file: 6.84

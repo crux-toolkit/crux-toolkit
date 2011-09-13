@@ -31,13 +31,12 @@
 #include "parameter.h"
 #include "Scorer.h" 
 #include "Index.h"
-#include "generate_peptides_iterator.h" 
 #include "Match.h"
 #include "hash.h"
 #include "PeptideSrc.h"
 #include "ProteinIndex.h"
 #include "modifications.h"
-#include "modified_peptides_iterator.h"
+#include "ModifiedPeptidesIterator.h"
 #include "MatchFileWriter.h"
 #include "MatchIterator.h"
 
@@ -108,7 +107,7 @@ class MatchCollection {
   int addUnscoredPeptides(
     Spectrum* spectrum, 
     SpectrumZState& charge, 
-    MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator,
+    ModifiedPeptidesIterator* peptide_iterator,
     bool is_decoy
     );
 
@@ -134,7 +133,8 @@ class MatchCollection {
 
   bool extendTabDelimited(
     Database* database, ///< the database holding the peptides -in
-    MatchFileReader& result_file   ///< the result file to parse PSMs -in
+    MatchFileReader& result_file,   ///< the result file to parse PSMs -in
+    Database* decoy_database = NULL ///< optional database with decoy peptides
     );
 
   bool addMatchToPostMatchCollection(
@@ -201,11 +201,10 @@ class MatchCollection {
    *
    * \returns The number of matches added.
    */
-  
   int addMatches(
     Spectrum* spectrum,  ///< compare peptides to this spectrum
     SpectrumZState& zstate,            ///< use this charge state for spectrum
-    MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator, ///< use these peptides
+    ModifiedPeptidesIterator* peptide_iterator, ///< use these peptides
     bool is_decoy,     ///< do we shuffle the peptides
     bool store_scores, ///< true means save scores in xcorrs[]
     bool do_sp_score,  ///< true means do Sp before xcorr
@@ -569,8 +568,8 @@ class MatchCollection {
    */
   void addDecoyScores(
     Spectrum* spectrum, ///< search this spectrum
-    int charge, ///< search spectrum at this charge state
-    MODIFIED_PEPTIDES_ITERATOR_T* peptides ///< use these peptides to search
+    SpectrumZState& zstate, ///< search spectrum at this charge state
+    ModifiedPeptidesIterator* peptides ///< use these peptides to search
   );
 
   /**

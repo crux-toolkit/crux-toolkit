@@ -370,16 +370,18 @@ bool PeptideSrc::parseTabDelimited(
   Peptide* peptide,   ///< assign peptide_src(s) to this peptide
   MatchFileReader& file,           ///< file to read from
   Database* database, ///< database containing proteins
-  bool use_array) ///< use array implementation vs. linked list
+  bool use_array, ///< use array implementation vs. linked list
+  Database* decoy_database ///< database containing decoy proteins
+)
 {
-  //TODO - Implement
 
   if( peptide == NULL ){
     carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide.");
     return false;
   }
 
-  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", file.getString(PROTEIN_ID_COL).c_str());
+  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", 
+       file.getString(PROTEIN_ID_COL).c_str());
 
   vector<string> protein_ids;
   file.getStringVectorFromCell(PROTEIN_ID_COL, protein_ids);
@@ -419,8 +421,14 @@ bool PeptideSrc::parseTabDelimited(
         database->getProteinByIdString(protein_id_string.c_str());
       
       if (parent_protein == NULL) {
-        carp(CARP_WARNING, "Can't find protein %s",protein_id_string.c_str());
-        continue;
+       if( decoy_database != NULL ){
+          parent_protein =
+            decoy_database->getProteinByIdString(protein_id_string.c_str());
+        }
+        if (parent_protein == NULL) {
+          carp(CARP_WARNING, "Can't find protein %s",protein_id_string.c_str());
+          continue;
+        }
       }
 
       //find the start index by searching the protein sequence.
@@ -456,8 +464,14 @@ bool PeptideSrc::parseTabDelimited(
         database->getProteinByIdString(protein_id_string.c_str());
      
       if (parent_protein == NULL) {
-        carp(CARP_WARNING, "Can't find protein %s", iter -> c_str());
-        continue;
+       if( decoy_database != NULL ){
+          parent_protein =
+            decoy_database->getProteinByIdString(protein_id_string.c_str());
+        }
+        if (parent_protein == NULL) {
+          carp(CARP_WARNING, "Can't find protein %s", iter -> c_str());
+          continue;
+        }
       }
 
       DelimitedFile::from_string<int>(start_index, peptide_start_index_string); 

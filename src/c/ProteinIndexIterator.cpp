@@ -64,7 +64,7 @@ bool ProteinIndexIterator::setup() {
  *\returns a new heap allocated protein index iterator
  */
 ProteinIndexIterator::ProteinIndexIterator(
-  char* fasta_file ///< input fasta file -in
+  const char* fasta_file ///< input fasta file -in
   )
 {
   char* name = generate_name(fasta_file, "_protein_index", ".fasta", NULL);

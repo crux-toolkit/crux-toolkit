@@ -1,5 +1,6 @@
 #	time created: Wed Jun 24 15:37:29 2009
 #	fasta file: test-binary-fasta
+#	decoy fasta file: test-binary-fasta-decoy
 #	min_mass: 200.00
 #	max_mass: 7200.00
 #	min_length: 6

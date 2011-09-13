@@ -145,7 +145,7 @@ void analyze_matches_main(
 MatchCollection* run_percolator_or_qranker(
   COMMAND_T command,                                          
   char* input_directory, 
-  char* fasta_file, 
+  char* fasta_file, // actually fasta or index
   OutputFiles& output){ 
 
   double* features = NULL;    

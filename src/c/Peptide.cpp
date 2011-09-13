@@ -1027,7 +1027,7 @@ char* Peptide::getHashValue() {
  */
 void Peptide::transformToDecoy(){
 
-  bool reverse_seq = get_boolean_parameter("reverse-sequence");
+  bool reverse_seq = (get_decoy_type_parameter("decoys") == REVERSE_DECOYS);
 
   // delete any existing decoy sequence
   if(decoy_modified_seq_){ 
@@ -1710,7 +1710,8 @@ bool Peptide::serialize(
 Peptide* Peptide::parseTabDelimited(
   MatchFileReader& file, ///< the tab delimited peptide file -in
   Database* database,///< the database containing the peptides -in
-  bool use_array  ///< should I use array peptide_src or link list -in  
+  bool use_array,  ///< should I use array peptide_src or link list -in  
+  Database* decoy_database ///< database with decoy peptides
   ) {
 
   // the new peptide to be given values in file
@@ -1723,7 +1724,8 @@ Peptide* Peptide::parseTabDelimited(
                                           &peptide->modified_seq_);
   peptide->peptide_mass_ = file.getFloat(PEPTIDE_MASS_COL);
   
-  if(!PeptideSrc::parseTabDelimited(peptide, file, database, use_array)){
+  if(!PeptideSrc::parseTabDelimited(peptide, file, database, 
+                                    use_array, decoy_database)){
     carp(CARP_ERROR, "Failed to parse peptide src.");
     free(peptide);
     return NULL;

@@ -33,7 +33,7 @@ class ProteinIndexIterator {
    *\returns a new heap allocated protein index iterator
    */
   ProteinIndexIterator(
-    char* fasta_file ///< input fasta file -in
+    const char* fasta_file ///< input fasta file -in
   );
 
   /**

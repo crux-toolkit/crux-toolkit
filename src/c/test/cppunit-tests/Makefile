@@ -16,7 +16,8 @@ TESTS = \
         TestSpectrum.cpp \
         TestMatchFileReader.cpp \
         TestDelimitedFileWriter.cpp \
-        TestMatchFileWriter.cpp
+        TestMatchFileWriter.cpp \
+	TestProtein.cpp
 
 unittests: $(TESTS) $(CRUX_LIB) $(MSTOOLKIT_LIB) $(UNIT_LIB)  
 	$(CC) -o unittests $(CFLAGS) $(TESTS) $(CRUX_LIB) $(MSTOOLKIT_LIB) $(QRANKER_LIB) $(PERCOLATOR_LIB) $(ARRAY_LIB) $(UNIT_LIB) $(LDFLAGS)

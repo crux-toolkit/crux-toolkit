@@ -20,7 +20,8 @@ DatabasePeptideIterator::DatabasePeptideIterator(
     ///< the database of interest -in
   PeptideConstraint* peptide_constraint,
     ///< the peptide_constraint with which to filter peptides -in
-  bool store_all_peptides ///< for removing duplicates
+  bool store_all_peptides, ///< for removing duplicates
+  bool is_decoy ///< return decoy instead of target peptides
   )
 {
   // set peptide implementation to linklist peptide_src
@@ -35,8 +36,8 @@ DatabasePeptideIterator::DatabasePeptideIterator(
   peptide_constraint_ = NULL;
   prior_protein_ = NULL;
   first_passed_ = false;
-  cur_peptide_ = NULL;
   store_all_peptides_ = false;
+  is_decoy_ = is_decoy;
   
   
   // set up peptide storage
@@ -119,8 +120,13 @@ DatabasePeptideIterator::DatabasePeptideIterator(
     queueFirstPeptideFromMap();
 
   } else {  
-    cur_peptide_ = nextFromFile();
+    next_peptide_ = nextFromFile();
   }
+  // parent class requires a call to queueNextPeptide via initialize(),
+  // but the first peptide is already queued.  This is a lazy way to
+  // get around it.
+  already_initialized_ = false;
+  initialize();
 }
 
 /**
@@ -159,13 +165,13 @@ void DatabasePeptideIterator::generateAllPeptides(){
 void DatabasePeptideIterator::queueFirstPeptideFromMap(){
 
   if( peptide_map_.empty() ){  // no peptides to return
-    cur_peptide_ = NULL;
+    next_peptide_ = NULL;
     cur_map_position_ = peptide_map_.end();
     return;
   }
 
   // set cur_peptide to first peptide in map
-  cur_peptide_ = peptide_map_.begin()->second;
+  next_peptide_ = peptide_map_.begin()->second;
   // set map pointer to one past first (i.e. next to return)
   cur_map_position_ = peptide_map_.begin();  
   ++(cur_map_position_);
@@ -203,36 +209,49 @@ bool DatabasePeptideIterator::hasNextFromFile() {
 }
 
 /**
- * The basic iterator functions.
- * \returns true if there are additional peptides to iterate over,
- * false if not. 
+ * Implementation of PeptideIterator's method to prepare the iterator
+ * to return the next peptide.
+ * \returns True if there is another peptide to return, else false.
  */
-bool DatabasePeptideIterator::hasNext() {
+bool DatabasePeptideIterator::queueNextPeptide() {
 
-  return (cur_peptide_ != NULL);
-}
-
-Peptide* DatabasePeptideIterator::next() {
-
-  Peptide* return_peptide = cur_peptide_;
+  // parent class will make the first call without returning any peptides
+  // but we already queued up the first one in the constructor
+  if( already_initialized_ == false ){
+    already_initialized_ = true;
+    if(is_decoy_ && next_peptide_){
+      next_peptide_->transformToDecoy();
+    }
+    return (next_peptide_ != NULL); // are we starting out with a peptide
+  }
+  bool has_next = false;
 
   // fetch next peptide either from file or from map
   if( store_all_peptides_ ){
     if( cur_map_position_ == peptide_map_.end() ){
-      cur_peptide_ = NULL;
+      next_peptide_ = NULL;
+      has_next = false;
     } else {
-      cur_peptide_ = cur_map_position_->second;
+      next_peptide_ = cur_map_position_->second;
       ++(cur_map_position_);
+      has_next = true;
     }
   } else {
     if( hasNextFromFile() ){
-      cur_peptide_ = nextFromFile();
+      next_peptide_ = nextFromFile();
+      has_next = (next_peptide_ != NULL);
     } else {
-      cur_peptide_ = NULL;
+      next_peptide_ = NULL;
+      has_next = false;
     }
   }
 
-  return return_peptide;
+  // take care of decoys
+  if(is_decoy_ && next_peptide_){
+    next_peptide_->transformToDecoy();
+  }
+
+  return has_next;
 }
 
 /**

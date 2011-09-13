@@ -105,7 +105,7 @@ int SpectralCounts::main(int argc, char** argv) {
       carp(CARP_INFO, "Number of meta proteins %i", meta_mapping_.size());
       
       if( parsimony_ == PARSIMONY_GREEDY ){ //if parsimony is greedy
-	performParsimonyAnalysis();
+        performParsimonyAnalysis();
       }
       getMetaScores();
       getMetaRanks();
@@ -322,7 +322,7 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
         Peak * peak = spectrum->getNearestPeak(ion->getMassZ(),
                                                 bin_width_);
         if (peak != NULL){
-	  match_intensity += peak->getIntensity();
+          match_intensity += peak->getIntensity();
         }
       }
     }
@@ -405,7 +405,7 @@ void SpectralCounts::filterMatches()
   int decoy_count = 0;
   MatchCollectionIterator* match_collection_it 
     = new MatchCollectionIterator(path_info[1], 
-                                    database_name_.c_str(), &decoy_count);
+                                  database_name_.c_str(), &decoy_count);
 
   matches_.clear();
   MatchIterator* match_iterator = NULL;
@@ -427,11 +427,11 @@ void SpectralCounts::filterMatches()
       Match* match = match_iterator->next();
       qualify = false;
       if (match->getRank(XCORR) != 1){
-	continue;
+        continue;
       }
       // find a qvalue score lower than threshold
       if (match->getScore(qval_type) != FLT_MIN &&
-	  match->getScore(qval_type) <= threshold_)  {
+          match->getScore(qval_type) <= threshold_)  {
         matches_.insert(match);
       }
     } // next match
@@ -439,6 +439,12 @@ void SpectralCounts::filterMatches()
   free(path_info[1]);
   free(path_info[0]);
   free(path_info);
+  // cannot delete the mach_collection_iterator b/c it deletes the
+  // database which deletes the proteins which are still in use after
+  // filterMatches returns.
+  // TODO create a database in calling function, pass to
+  // filterMatches, have a MatchCollectionIterator constructor that
+  // takes a database
 }
 
 /**

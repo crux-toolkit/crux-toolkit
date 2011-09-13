@@ -73,7 +73,6 @@ enum parameter_type {
   ENZYME_TYPE_P,     ///< parameters of type ENZUME_T
   //PEPTIDE_TYPE_P,    ///< parameters of type PEPTIDE_TYPE_T
   BOOLEAN_P,         ///< parameters of type BOOLEAN_T
-  SORT_TYPE_P,       ///< parameters of type SORT_TYPE_T
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
   ION_TYPE_P,        ///< parameters of type ION_TYPE_T
   ALGORITHM_TYPE_P,  ///< parameters of type ALGORITHM_TYPE_T
@@ -81,6 +80,7 @@ enum parameter_type {
   MEASURE_TYPE_P,    ///< parameters of type MEASURE_TYPE_T
   PARSIMONY_TYPE_P,  ///< parameters of type PARSIMONY_TYPE_T
   QUANT_LEVEL_TYPE_P,///< parameters of type QUANT_LEVEL_TYPE_T
+  DECOY_TYPE_P,      ///< parameters of type DECOY_TYPE_T
 
   NUMBER_PARAMETER_TYPES  ///< leave this last, number of types
 };
@@ -189,10 +189,6 @@ char get_delimiter_parameter(
   const char* name
   );
 
-SORT_TYPE_T get_sort_type_parameter(
- const char* name
- );
-
 ALGORITHM_TYPE_T get_algorithm_type_parameter(
  const char* name
  );
@@ -234,6 +230,10 @@ QUANT_LEVEL_TYPE_T get_quant_level_type_parameter(
   );
 
 MEASURE_TYPE_T get_measure_type_parameter(
+  const char* name
+  );
+
+DECOY_TYPE_T get_decoy_type_parameter(
   const char* name
   );
 

@@ -62,7 +62,8 @@ int CreateIndex::main(int argc, char** argv) {
     "custom-enzyme", 
     "digestion", 
     "missed-cleavages",
-    "peptide-list"
+    "peptide-list",
+    "decoys"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
 
@@ -99,6 +100,7 @@ int CreateIndex::main(int argc, char** argv) {
   enzyme = get_enzyme_type_parameter("enzyme");
   digest = get_digest_type_parameter("digestion");
   mass_type = get_mass_type_parameter("isotopic-mass");
+  DECOY_TYPE_T decoys = get_decoy_type_parameter("decoys");
 
   /* create peptide constraint */
   constraint = new PeptideConstraint(enzyme, digest, min_mass, max_mass, 
@@ -127,7 +129,8 @@ int CreateIndex::main(int argc, char** argv) {
   crux_index = new Index(in_file,
                          out_dir,
                          constraint,
-                         mass_range
+                         mass_range,
+                         decoys
                          );
   
   /* create crux_index files */

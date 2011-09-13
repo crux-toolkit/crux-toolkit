@@ -22,7 +22,7 @@
 #include "parse_arguments.h"
 #include "parameter.h"
 #include "Index.h"
-#include "generate_peptides_iterator.h"
+#include "ModifiedPeptidesIterator.h"
 
 static const int NUM_GEN_PEP_OPTIONS = 15;
 static const int NUM_GEN_PEP_ARGS = 1;
@@ -33,20 +33,18 @@ void print_header();
 int main(int argc, char** argv){
 
   /* Declarations */
-  //int verbosity;
   BOOLEAN_T output_sequence;
   BOOLEAN_T use_index;
   char* filename;
   
   long total_peptides = 0;
-  MODIFIED_PEPTIDES_ITERATOR_T* peptide_iterator = NULL; 
+  ModifiedPeptidesIterator* peptide_iterator = NULL; 
   Peptide* peptide = NULL;
   Database* database = NULL;
   Index* index = NULL;
     
   /* Define optional command line arguments */ 
-  int num_options = NUM_GEN_PEP_OPTIONS;
-  const char* option_list[NUM_GEN_PEP_OPTIONS] = {
+  const char* option_list[] = {
     "version",
     "verbosity",
     "parameter-file",
@@ -58,18 +56,15 @@ int main(int argc, char** argv){
     "enzyme", 
     "custom-enzyme", 
     "digestion", 
-    //    "cleavages",
     "missed-cleavages",
     "unique-peptides",
-    //"use-index",
     "output-sequence",
-    //"output-trypticity",
-    "sort"
   };
 
   /* Define required command-line arguments */
-  int num_arguments = NUM_GEN_PEP_ARGS;
-  const char* argument_list[NUM_GEN_PEP_ARGS] = { "protein database" };
+  int num_options = sizeof(option_list)/ sizeof(char*);
+  const char* argument_list[] = { "protein database" };
+  int num_arguments = sizeof(argument_list) / sizeof(char*);
 
   //TODO make this a debug flag
   set_verbosity_level(CARP_ERROR);
@@ -94,9 +89,9 @@ int main(int argc, char** argv){
   use_index = is_directory(filename);
 
   if( use_index == TRUE ){
-    index = new Index(filename);//, 
+    index = new Index(filename); 
   }else{
-    database = new Database(filename, FALSE); // not memmapped
+    database = new Database(filename, false); // not memmapped
   }
   free(filename);
 
@@ -116,17 +111,17 @@ int main(int argc, char** argv){
     carp(CARP_DETAILED_DEBUG, "Using peptide mod %d with %d aa mods", 
          mod_idx, peptide_mod_get_num_aa_mods(peptide_mods[mod_idx]));
     // create peptide iterator
-    peptide_iterator = new_modified_peptides_iterator(peptide_mods[mod_idx],
-                                                      index,
-                                                      database);
+    peptide_iterator = new ModifiedPeptidesIterator(peptide_mods[mod_idx],
+                                                    index,
+                                                    database);
 
     // iterate over all peptides
     int orders_of_magnitude = 1000; // for counting when to print
-    while(modified_peptides_iterator_has_next(peptide_iterator)){
+    while(peptide_iterator->hasNext()){
       ++total_peptides;
-      peptide = modified_peptides_iterator_next(peptide_iterator);
+      peptide = peptide_iterator->next();
       peptide->printInFormat(output_sequence, 
-                               stdout);
+                              stdout);
     
       // free peptide
       delete peptide;
@@ -138,7 +133,7 @@ int main(int argc, char** argv){
         carp(CARP_INFO, "Reached peptide %d", total_peptides);
       }
     }// last peptide
-    free_modified_peptides_iterator(peptide_iterator);
+    delete peptide_iterator;
 
   }// last peptide modification
 
@@ -168,7 +163,6 @@ void print_header(){
   printf("#\tdigestion: %s\n", get_string_parameter_pointer("digestion"));
   missed_cleavages = get_int_parameter("missed-cleavages");
   printf("#\tnumber of allowed missed-cleavages: %d\n", missed_cleavages);
-  printf("#\tsort: %s\n",  get_string_parameter_pointer("sort"));
   printf("#\tisotopic mass type: %s\n", 
          get_string_parameter_pointer("isotopic-mass"));
   printf("#\tverbosity: %d\n", get_verbosity_level());

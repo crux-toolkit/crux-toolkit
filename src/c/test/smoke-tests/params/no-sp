@@ -1,4 +1,4 @@
 overwrite=T
-num-decoys-per-target=0
+decoys=none
 max-rank-preliminary=0
 top-match=5

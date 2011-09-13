@@ -574,7 +574,8 @@ class Peptide {
   static Peptide* parseTabDelimited(
     MatchFileReader& file, ///< the tab delimited peptide file -in
     Database* database,///< the database containing the peptides -in
-    bool use_array  ///< should I use array peptide_src or link list -in  
+    bool use_array,  ///< should I use array peptide_src or link list -in  
+    Database* decoy_database = NULL ///< optional database with decoy peptides
     );
 
   /**

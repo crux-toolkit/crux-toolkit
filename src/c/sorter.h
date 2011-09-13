@@ -32,16 +32,6 @@
 
 
 /**
- * Instantiates a new sorted_peptide_iterator from a database_peptide_iterator
- * \returns a SORTED_PEPTIDE_ITERATOR_T object.
- */
-SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_database(
-  DatabasePeptideIterator* database_peptide_iterator, ///< the peptide iterator to extend -in
-  SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
-  BOOLEAN_T unique ///< only return unique peptides? -in
-  );
-
-/**
  * Instantiates a new sorted_peptide_iterator from a bin_peptide_iterator
  * \returns a SORTED_PEPTIDE_ITERATOR_T object.
  */

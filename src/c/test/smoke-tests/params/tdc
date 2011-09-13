@@ -1,4 +1,5 @@
 output-dir=tdc
+decoys=peptide-shuffle
 num-decoys-per-target=2
 decoy-location=target-file
 overwrite=T
