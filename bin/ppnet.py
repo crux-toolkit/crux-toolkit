@@ -2,6 +2,8 @@
 # CREATE DATE: 13 Sep 2011
 # AUTHOR: William Stafford Noble
 import sys
+import os
+import subprocess
 
 PEPTIDE_COLUMN = "sequence"
 PROTEIN_COLUMN = "protein id"
@@ -20,25 +22,99 @@ USAGE = """USAGE: ppnet.py [options] <file> <root>
   <root>.<int>.gvz and <root>.<int>.png, where <root> is given on the
   command line and <int> is an ascending integer.  The gvz file
   contains a graphviz description of one component of the graph, and
-  the png file contains a picture of the graph.
+  the png file contains a picture of the graph.  An HTML file named
+  <root>.html is also created, showing all of the PNG images.
 
   Options:
 
-    --min-component <int>   Skip components with fewer than <int> nodes.
+    --min-nodes <int>   Skip components with fewer than <int> nodes.
+    --min-peptides <int>  Skip components with fewer than <int> peptides.
+    --min-proteins <int>  Skip components with fewer than <int> proteins.
 """ % (PEPTIDE_COLUMN, PROTEIN_COLUMN)
+
+###############################################################################
+# Add one edge to the graph.  Each edge is represented twice (once for each
+# direction) with a node as the key and a list of nodes as the value.
+def addEdge(node1, node2):
+
+  if (edges.has_key(node1)):
+    edges[node1].append(node2)
+  else:
+    edges[node1] = [node2]
+
+  if (edges.has_key(node2)):
+    edges[node2].append(node1)
+  else:
+    edges[node2] = [node1]
+
+###############################################################################
+def printConnectedPeptides(startProtein, graphvizString, stats):
+
+  if (not proteins[startProtein]):
+    graphvizString = "%s\"%s\";\n" % (graphvizString, startProtein)
+    proteins[startProtein] = True # Mark this protein as printed.
+    stats[0] += 1
+
+    for peptide in edges[startProtein]:
+      if (not peptides[peptide]):
+        graphvizString = "%s\"%s\" -- \"%s\";\n" % (graphvizString, 
+                                                    startProtein, peptide)
+        stats[2] += 1
+        graphvizString = printConnectedProteins(peptide, graphvizString, stats)
+
+  return(graphvizString)
+
+###############################################################################
+def printConnectedProteins(startPeptide, graphvizString, stats):
+
+  if (not peptides[startPeptide]):
+    graphvizString = "%s\"%s\";\n" % (graphvizString, startPeptide)
+    peptides[startPeptide] = True # Mark this peptide as printed.
+    stats[1] += 1
+
+    for proteinID in edges[startPeptide]:
+      if (not proteins[proteinID]):
+        graphvizString = "%s\"%s\" -- \"%s\";\n" % (graphvizString,
+                                                    proteinID, startPeptide)
+        stats[2] += 1
+        graphvizString = \
+            printConnectedPeptides(proteinID, graphvizString, stats)
+
+  return(graphvizString)
+
+#############################################################################
+# Run a command with error checking.
+def runCommand(command):
+  sys.stderr.write("RUN: %s\n" % command)
+  try:
+    returnCode = subprocess.call(command, shell=True)
+    if (returnCode != 0):
+      sys.stderr.write("Child was terminated by signal %d\n" % -returnCode)
+      sys.exit(1)
+  except OSError, e:
+    sys.stderr.write("Execution failed: %s\n" % e)
+    sys.exit(1)
 
 ###############################################################################
 # MAIN
 ###############################################################################
 
 # Parse the command line.
-minComponent = 1
+minNodes = 1
+minPeptides = 1
+minProteins = 1
 sys.argv = sys.argv[1:]
 while (len(sys.argv) > 2):
-  nextArg = sys.argv[1]
+  nextArg = sys.argv[0]
   sys.argv = sys.argv[1:]
-  if (nextArg == "--min-component"):
-    minComponent = int(sys.argv[0])
+  if (nextArg == "--min-nodes"):
+    minNodes = int(sys.argv[0])
+    sys.argv = sys.argv[1:]
+  elif (nextArg == "--min-peptides"):
+    minPeptides = int(sys.argv[0])
+    sys.argv = sys.argv[1:]
+  elif (nextArg == "--min-proteins"):
+    minProteins = int(sys.argv[0])
     sys.argv = sys.argv[1:]
   else:
     sys.stderr.write("Invalid option (%s).\n" % nextArg)
@@ -70,7 +146,76 @@ if (proteinColumn == -1):
   sys.exit(1)
 sys.stderr.write("Reading protein IDs from column %d.\n" % proteinColumn)
 
+# Define the graph data structure.
+# N.B. These are global variables.
+peptides = {} # Key = peptide sequence, value = Boolean (printed?)
+proteins = {} # Key = protein ID, value = Boolean (printed?)
+edges = {}    # Key = peptide sequence or protein ID, value = list of 
+              #       peptide sequences or protein IDs
 
+# Read the graph from the input file.
+lineNum = 0
+for line in inputFile:
+  line = line.rstrip()
+  words = line.split("\t")
+  peptideSequence = words[peptideColumn]
+  proteinIDs = words[proteinColumn].split(",")
+  peptides[peptideSequence] = False
+  for proteinID in proteinIDs:
+    proteinID = proteinID.split("(")[0] # Get rid of (<int>) on each ID.
+    proteins[proteinID] = False
+    addEdge(peptideSequence, proteinID)
+  lineNum += 1
+inputFile.close()
+sys.stderr.write("Read %d peptides, %d proteins and %d edges from %s.\n"
+                 % (len(peptides), len(proteins), len(edges), inputFileName))
 
-# Print the graphviz files.
+# Initialize the HTML
+htmlFileName = "%s.html" % outputFileRoot
+htmlFile = open(htmlFileName, "w")
+htmlFile.write("<html><body>\n")
 
+graphNumber = 0
+for startProtein in proteins:
+  if (not proteins[startProtein]):
+
+    # Initialize a counter of number of proteins, peptides, edges.
+    stats = [0, 0, 0]
+
+    # Create the graphviz-formmated graph.
+    graphvizString = "graph G {\n"
+    graphvizString = printConnectedPeptides(startProtein, 
+                                            graphvizString, stats)
+    graphvizString = "%s}\n" % graphvizString
+
+    # Is this component big enough?
+    if ((stats[0] + stats[1] >= minNodes) and
+        (stats[0] >= minProteins) and
+        (stats[1] >= minPeptides)):
+
+      # Print the graphviz file.
+      graphFileName = "%s.%d.gvz" % (outputFileRoot, graphNumber)
+      graphFile = open(graphFileName, "w")
+      graphFile.write(graphvizString)
+      graphFile.close()
+
+      # Create the PNG file.
+      pngFileName = "%s.%d.png" % (outputFileRoot, graphNumber)
+      runCommand("dot -Tpng %s > %s" % (graphFileName, pngFileName))
+
+      # Add it to the HTML page.
+      htmlFile.write("<img src=\"%s\">\n" % pngFileName)
+      message = "%d: %d proteins, %d peptides, %d edges.\n" % \
+          (graphNumber, stats[0], stats[1], stats[2]))
+      htmlFile.write("%s<hr></hr>\n" % message)
+
+      sys.stderr.write(message)
+      graphNumber += 1
+
+#    else:
+#      sys.stderr.write("Skipping component with %d proteins and %d peptides.\n"
+#                       % (stats[0], stats[1]))
+
+sys.stderr.write("Printed %d graphs.\n" % graphNumber)
+htmlFile.write("</body></html>\n")
+htmlFile.close()
