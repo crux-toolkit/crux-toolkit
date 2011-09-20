@@ -49,7 +49,7 @@
 1 = search_duplicates = good_results/search_for_matches_duplicates.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed --fileroot duplicates test.ms2 duplicates.fasta; cat crux-output/duplicates.search.target.txt
 
 # Search for matches with Sp
-1 = search_sp = good_results/sp.search.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/sp --output-dir crux-output-sp test.ms2 test.fasta; cat crux-output-sp/search.target.txt
+1 = search_sp = good_results/sp.search.target.txt = rm -rf crux-output-sp; crux search-for-matches --decoys peptide-shuffle --parameter-file params/sp --output-dir crux-output-sp test.ms2 test.fasta; cat crux-output-sp/search.target.txt
 
 # Percolate search-for-matches results with sp
 1 = percolator = good_results/sp.percolator.target.txt =  crux percolator --parameter-file params/sp --output-dir crux-output-sp test.fasta crux-output-sp; cat crux-output-sp/percolator.target.txt = 'Time'

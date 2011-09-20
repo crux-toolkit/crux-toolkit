@@ -197,7 +197,7 @@ bool Peptide::mergePeptides(
   PeptideSrc* current_src = peptide_dest->peptide_src_;
   PeptideSrc* next_src = current_src->getNextAssociation();
   
-  // does all peptides have at least one peptide_src?
+  // do both peptides have at least one peptide_src?
   if(current_src == NULL || peptide_bye->peptide_src_ == NULL){
     carp(CARP_ERROR, "failed to merge two peptides");
     return false;
@@ -209,7 +209,10 @@ bool Peptide::mergePeptides(
     next_src =  current_src->getNextAssociation();
   }
   current_src->setNextAssociation(peptide_bye->peptide_src_);
-  free(peptide_bye);
+  // peptide_dest now points to the src's, don't delete them
+  peptide_bye->peptide_src_ = NULL;
+  delete peptide_bye;
+
   return true;
 }
 
@@ -1727,7 +1730,7 @@ Peptide* Peptide::parseTabDelimited(
   if(!PeptideSrc::parseTabDelimited(peptide, file, database, 
                                     use_array, decoy_database)){
     carp(CARP_ERROR, "Failed to parse peptide src.");
-    free(peptide);
+    delete peptide;
     return NULL;
   };
 
@@ -1765,7 +1768,7 @@ Peptide* Peptide::parse(
   if(fread(&p, sizeof(PRINT_PEPTIDE_T), 1, file) != 1){
     carp(CARP_DETAILED_DEBUG, "Did not read peptide struct from file");
     // there is no peptide
-    free(peptide);
+    delete peptide;
     return NULL;
   }
   // copy values to the peptide  
@@ -1777,7 +1780,7 @@ Peptide* Peptide::parse(
   
   if(!PeptideSrc::parse(peptide, file, database, use_array)){
     carp(CARP_ERROR, "Failed to parse peptide src.");
-    free(peptide);
+    delete peptide;
     return NULL;
   };
 

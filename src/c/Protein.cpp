@@ -544,8 +544,10 @@ bool Protein::readRawSequence
  */
 void Protein::shuffle(
   DECOY_TYPE_T decoy_type){ ///< method for shuffling
+  char* decoy_str = decoy_type_to_string(decoy_type);
   carp(CARP_DEBUG, "Shuffling protein %s as %s", 
-       id_, decoy_type_to_string(decoy_type));
+       id_, decoy_str);
+  free(decoy_str);
 
   switch(decoy_type){
   case NO_DECOYS:
@@ -726,18 +728,14 @@ void Protein::setAnnotation(
   const char* annotation ///< the sequence to add -in
   )
 {
+  free(annotation_);
+  annotation_ = NULL;
+
   if( annotation == NULL ){
     return;
   }
 
-  if(!is_light_){
-    free(annotation_);
-  }
-  int annotation_length = strlen(annotation) +1; // +\0
-  char * copy_annotation = 
-    (char *)mymalloc(sizeof(char)*annotation_length);
-  annotation_ =
-    strncpy(copy_annotation, annotation, annotation_length);  
+  annotation_ = my_copy_string(annotation);
 }
 
 /**
@@ -873,7 +871,9 @@ void Protein::peptideShuffleSequence(){
 
   // shuffle end of sequence
   end = length_ - 1;
-  shuffleRegion(start, end);
+  if( start < end ){
+    shuffleRegion(start, end);
+  }
 }
 
 /**
@@ -885,15 +885,14 @@ void Protein::shuffleRegion(
   int start, ///< index of peptide start
   int end){///< index of last residue in peptide
 
-  char buf[256]; // buffer for storing regions before shuffling
-
   int sub_seq_length = end - start - 1;
+  char* buf = new char[sub_seq_length + 1];
   if( sub_seq_length > 1 ){
     carp(CARP_DETAILED_DEBUG, "Shuffle from %d to %d.", start+1, end);
 
-    // store the sequence before shuffling including the unmoved residues
-    strncpy(buf, sequence_ + start, sub_seq_length + 2);
-    buf[sub_seq_length + 2] = '\0';
+    // store the sequence before shuffling not including the unmoved residues
+    strncpy(buf, sequence_ + start + 1, sub_seq_length);
+    buf[sub_seq_length] = '\0';
 
     shuffle_array(sequence_ + start + 1, sub_seq_length);
 
@@ -911,8 +910,8 @@ void Protein::shuffleRegion(
              "different than the original for sequence %s of protein %s "
              "at position %d.", buf, id_, start);
     }
- 
   }
+  delete [] buf;
 }
 
 
