@@ -519,8 +519,10 @@ void Database::createBinaryFasta(const char* directory, bool is_temp){
   if( decoys_ != NO_DECOYS ){
     binary_suffix = Database::decoy_binary_suffix.c_str();
   }
-  binary_filename_ = generate_name_path( fasta_filename_.c_str(), ".fasta",
-                                         binary_suffix, directory);
+  char* tmp_name = generate_name_path( fasta_filename_.c_str(), ".fasta",
+                                       binary_suffix, directory);
+  binary_filename_ = tmp_name;
+  free(tmp_name);
   carp(CARP_DEBUG, "Transforming text file '%s' to binary file '%s'",
        fasta_filename_.c_str(), binary_filename_.c_str());
 
@@ -546,6 +548,7 @@ void Database::createBinaryFasta(const char* directory, bool is_temp){
       carp(CARP_FATAL, "Could not open new fasta file %s for decoy proteins.",
            output_fasta);
     }
+    free(fasta_output_name);
   }
 
 

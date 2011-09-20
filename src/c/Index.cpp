@@ -982,7 +982,7 @@ static bool dump_peptide(
   int current_count;
   
   // if the peptide count is over the limit
-  if((current_count = bin_count[file_idx]) > MAX_PROTEIN_IN_BIN){
+  if((current_count = bin_count[file_idx]) >= MAX_PROTEIN_IN_BIN){
     file = file_array[file_idx];
     // print out all peptides
     for(peptide_idx = 0; peptide_idx < current_count; ++peptide_idx){
@@ -1150,7 +1150,7 @@ bool Index::create(
   info_out = NULL;
   if( text_file){
     fclose(text_file);
-    text_file = NULL;
+    text_file = fopen("decoy-peptides.txt", "w");
   }
 
   
@@ -1158,7 +1158,11 @@ bool Index::create(
   info_out = fopen("crux_decoy_index_map", "w");
   writeHeader(info_out);
   index_database(decoy_database_, Index::decoy_index_file_prefix, 
-                 info_out, NULL);
+                 info_out, text_file);//NULL);
+  if( text_file){
+    fclose(text_file);
+    text_file = NULL;
+  }
   
   //move out of temp dir
   if( chdir("..") == -1 ){ 
