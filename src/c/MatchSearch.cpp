@@ -329,8 +329,9 @@ int MatchSearch::main(int argc, char** argv){
   
   /* Prepare output files */
 
+  BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
   OutputFiles output_files(this); 
-  output_files.writeHeaders(num_proteins);
+  output_files.writeHeaders(num_proteins, combine_target_decoy);
   // TODO (BF oct-21-09): consider adding pvalue file to OutputFiles
   FILE* decoy_pvalue_file = NULL;
   if( get_boolean_parameter("decoy-p-values") ){
@@ -354,7 +355,6 @@ int MatchSearch::main(int argc, char** argv){
 
   // get search parameters for match_collection
   BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
-  BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
   int num_decoy_files = get_int_parameter("num-decoy-files");
 
   // For remembering and reporting number of searches
@@ -409,6 +409,7 @@ int MatchSearch::main(int argc, char** argv){
     for(decoy_idx = 0; decoy_idx < num_decoy_collections; decoy_idx++){
 
       MatchCollection* decoy_psms = new MatchCollection(is_decoy);
+      decoy_psms->setTargetExperimentSize(target_psms->getExperimentSize());
       decoy_collection_list.push_back(decoy_psms);
 
       searchPepMods(decoy_psms, 

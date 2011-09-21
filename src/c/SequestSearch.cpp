@@ -106,11 +106,11 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
 
   // Prepare output files 
   
+  BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
   OutputFiles output_files(this); 
-  output_files.writeHeaders(num_proteins);
+  output_files.writeHeaders(num_proteins, combine_target_decoy);
 
   // get search parameters for match_collection
-  BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
   int num_decoy_files = get_int_parameter("num-decoy-files");
   bool have_index = (index != NULL);
   int num_decoys_per_target = get_num_decoys(have_index); 
@@ -185,6 +185,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
                                                         database);
         // add matches
         MatchCollection* cur_decoys = decoy_psm_collections.at(decoy_idx);
+        cur_decoys->setTargetExperimentSize(target_psms->getExperimentSize());
         cur_decoys->addMatches(spectrum,
                     zstate,
                     peptide_iterator,

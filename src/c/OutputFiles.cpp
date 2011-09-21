@@ -270,14 +270,19 @@ bool OutputFiles::createFile(FILE** file_ptr,
  * files.  Optional num_proteins argument for .sqt files.  Use this
  * for search commands, not post-search.
  */
-void OutputFiles::writeHeaders(int num_proteins){
+void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
 
   const char* tag = "target";
 
   // write headers one file at a time for tab and sqt
   for(int file_idx = 0; file_idx < num_files_; file_idx++){
     if( delim_file_array_ ){
-        delim_file_array_[file_idx]->addColumnNames(application_, (bool)file_idx);
+      bool has_decoy = (bool)file_idx; // only first file (idx 0) is target
+      if( isMixedTargetDecoy ){ // unless it is both
+        has_decoy = true;
+      }
+        delim_file_array_[file_idx]->addColumnNames(application_, 
+                                                    has_decoy);
         delim_file_array_[file_idx]->writeHeader();
     }
 

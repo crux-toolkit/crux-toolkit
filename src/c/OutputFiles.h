@@ -29,7 +29,7 @@ class OutputFiles{
   OutputFiles(CruxApplication* application);///< command printing files
 
   ~OutputFiles();
-  void writeHeaders(int num_proteins = 0);
+  void writeHeaders(int num_proteins = 0, bool isMixedTargetDecoy = false);
   void writeHeaders(const std::vector<bool>& add_this_col);
   void writeFeatureHeader(char** feature_names = NULL,
                           int num_names = 0);

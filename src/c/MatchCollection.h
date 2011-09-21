@@ -53,6 +53,7 @@ class MatchCollection {
   Match* match_[_MAX_NUMBER_PEPTIDES]; ///< array of match object
   int match_total_;      ///< size of match array, may vary w/truncation
   int experiment_size_;  ///< total matches before any truncation
+  int target_experiment_size_; ///< total target matches for same spectrum
   SpectrumZState zstate_; ///< zstate of the associated spectrum
   bool null_peptide_collection_; ///< are the peptides shuffled
   bool scored_type_[NUMBER_SCORER_TYPES]; 
@@ -310,8 +311,20 @@ class MatchCollection {
   /**
    *\returns the total peptides searched in the experiment in match_collection
    */
-  int getExperimentalSize();
+  int getExperimentSize();
 
+  /**
+   * Sets the total number of target peptides searched for this
+   * spectrum.  Only to be used by decoy match collections.
+   */
+  void setTargetExperimentSize(int numMatches);
+
+  /**
+   * \returns the number of target matches that this spectrum had.
+   * Different than getExperimentSize() for decoy match collections.
+   */
+  int getTargetExperimentSize();
+    
   /**
    * \returns true if the match_collection only contains decoy matches,
    * else (all target or mixed) returns false.

@@ -54,7 +54,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "SIN",
   "NSAF",
   "EMPAI",
-  "parsimony rank"
+  "parsimony rank",
+  "decoy matches/spectrum"
 };
 
 /**

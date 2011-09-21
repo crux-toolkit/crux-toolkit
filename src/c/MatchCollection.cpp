@@ -26,6 +26,7 @@ void MatchCollection::init() {
 
   match_total_ = 0;
   experiment_size_ = 0;
+  target_experiment_size_ = 0;
   zstate_ = SpectrumZState();
   null_peptide_collection_ = false;
 
@@ -266,9 +267,10 @@ int MatchCollection::addMatches(
  * \returns The number of matches added.
  */
 int MatchCollection::merge(MatchCollection* source,
-                            MatchCollection* destination){
+                           MatchCollection* destination){
   if( source == NULL || destination == NULL ){
     carp(CARP_ERROR, "Cannot merge null match collections.");
+    return 0;
   }
   carp(CARP_DETAILED_DEBUG, "Merging match collections.");
 
@@ -321,8 +323,14 @@ int MatchCollection::merge(MatchCollection* source,
   }
 
   // update destination count
+  // a target match collection may not have the target experiment size set
+  if( destination->target_experiment_size_ == 0 ){ 
+    destination->target_experiment_size_ = 
+      destination->getTargetExperimentSize();
+  }
   destination->match_total_ += src_num_matches;
   destination->experiment_size_ += source->experiment_size_;
+  destination->target_experiment_size_ += source->getTargetExperimentSize();
   destination->last_sorted_ = (SCORER_TYPE_T)-1;  // unset any last-sorted flag
 
   return src_num_matches;
@@ -844,6 +852,7 @@ MatchCollection* MatchCollection::randomSample(
   sample_collection->match_total_ = count_idx;
 
   sample_collection->experiment_size_ = experiment_size_;
+  sample_collection->target_experiment_size_ = target_experiment_size_;
 
   // set scored types in the sampled matches
   for(; score_type_idx < NUMBER_SCORER_TYPES ;  ++score_type_idx){
@@ -1337,10 +1346,31 @@ int MatchCollection::getMatchTotal()
 }
 
 /**
- *\returns the total peptides searched in the experiment in match_collection
+ * \returns The total number of peptides searched for this spectrum,
+ * target peptides for a target collection or decoy peptides for a
+ * decoy collection.
  */
-int MatchCollection::getExperimentalSize()
+int MatchCollection::getExperimentSize()
 {
+  return experiment_size_;
+}
+
+/**
+ * Sets the total number of target peptides searched for this
+ * spectrum.  Only needs to be used by decoy match collections.
+ */
+void MatchCollection::setTargetExperimentSize(int numMatches){
+  target_experiment_size_ = numMatches;
+}
+
+/**
+ * \returns The number of target matches that this spectrum had.
+ * Different than getExperimentSize() for decoy match collections.
+ */
+int MatchCollection::getTargetExperimentSize(){
+  if( null_peptide_collection_ ){
+    return target_experiment_size_;
+  }
   return experiment_size_;
 }
 
@@ -1587,7 +1617,7 @@ void MatchCollection::printXmlHeader(
   print_parameters_xml(output);
   
   fprintf(output, "</search_summary>\n");
-  
+
 }
 
 
@@ -1997,10 +2027,9 @@ bool MatchCollection::printTabDelimited(
   if( output == NULL || spectrum == NULL || match_total_ == 0 ){
     return false;
   }
-  //int charge = match_collection->charge; 
-  int num_matches = experiment_size_;
+  int num_target_matches = getTargetExperimentSize();
+  int num_decoy_matches = getExperimentSize();
   int scan_num = spectrum->getFirstScan();
-  //FLOAT_T spectrum_neutral_mass = spectrum->getNeutralMass(charge);
   FLOAT_T spectrum_precursor_mz = spectrum->getPrecursorMz();
 
   // calculate delta_cn and populate fields in the matches
@@ -2026,7 +2055,7 @@ bool MatchCollection::printTabDelimited(
 
       match->printTab(this, output, scan_num, 
                       spectrum_precursor_mz, 
-                      num_matches);
+                      num_target_matches, num_decoy_matches);
       count++;
       last_rank = cur_rank;
     } else if( count >= top_match && last_rank != cur_rank ) {
@@ -2036,7 +2065,7 @@ bool MatchCollection::printTabDelimited(
   }// next match
   
   carp(CARP_DETAILED_DEBUG, "printed %d out of %d tab matches", 
-       count, num_matches);
+       count, num_target_matches);
 
   delete match_iterator;
   
@@ -2106,14 +2135,15 @@ void MatchCollection::printMultiSpectra(
     FLOAT_T mz = spectrum->getPrecursorMz();
     FLOAT_T num_psm_per_spec = cur_match->getLnExperimentSize();
     num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
+    int num_target_psm_per_spec = cur_match->getTargetExperimentSize();
 
     if( is_decoy ){
       cur_match->printTab(this, decoy_file, scan_num, mz, 
-                      (int)num_psm_per_spec);
+                          (int)num_psm_per_spec, num_target_psm_per_spec);
     }
     else{
       cur_match->printTab(this, tab_file, scan_num, mz,
-                      (int)num_psm_per_spec);
+                          (int)num_psm_per_spec, num_target_psm_per_spec);
     }
 
   }
