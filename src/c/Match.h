@@ -85,6 +85,8 @@ class Match {
   FLOAT_T ln_delta_cn_; ///< the natural log of delta_cn
   FLOAT_T ln_experiment_size_; 
      ///< natural log of total number of candidate peptides evaluated
+  int num_target_matches_; ///< total target candidates for this spectrum
+  int num_decoy_matches_;///< decoy candidates for this spectrum if decoy match
   bool best_per_peptide_; ///< Is this the best scoring PSM for this peptide?
 
   /**
@@ -94,11 +96,12 @@ class Match {
     int      column_idx,             ///< Index of the column to print. -in
     MatchCollection* collection,  ///< collection holding this match -in 
     MatchFileWriter*    output_file,            ///< output stream -out
-    int      scan_num,               ///< starting scan number -in
-    FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-    int      num_matches,            ///< num matches in spectrum -in
-    int      b_y_total,              ///< total b/y ions -in
-    int      b_y_matched             ///< Number of b/y ions matched. -in
+    int     scan_num,               ///< starting scan number -in
+    FLOAT_T spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
+    int     num_target_matches,     ///< target matches for this spectrum -in
+    int     num_decoy_matches, ///< decoy matches (if any) for this spectrum -in
+    int     b_y_total,              ///< total b/y ions -in
+    int     b_y_matched             ///< Number of b/y ions matched. -in
     );
 
   void init();
@@ -181,7 +184,8 @@ class Match {
     MatchFileWriter*    file,                   ///< output stream -out
     int      scan_num,               ///< starting scan number -in
     FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-    int      num_matches            ///< num matches in spectrum -in
+    int      num_targetmatches,      ///< target matches for this spectrum -in
+    int      num_decoy_matches ///< decoy matches (if any) for this spectrum -in
     );
 
   /*******************************************
@@ -357,6 +361,17 @@ class Match {
    * gets the match ln_experiment_size
    */
   FLOAT_T getLnExperimentSize();
+
+  /**
+   * \returns The total number of target matches searched for this spectrum.
+   */
+  int getTargetExperimentSize();
+
+  /**
+   * \returns The total number of decoy matches searched for this
+   * spectrum if this is a match to a decoy spectrum.
+   */
+  int getDecoyExperimentSize();
 
   /**
    *Increments the pointer count to the match object

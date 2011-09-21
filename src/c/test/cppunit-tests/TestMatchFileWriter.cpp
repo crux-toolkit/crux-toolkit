@@ -136,7 +136,7 @@ void TestMatchFileWriter::precision(){
   string line;
   getline(file, line);// header
   getline(file, line);
-  CPPUNIT_ASSERT(line == "777	777	777.1235	777.1235	777.1235	777.12345679	777.12345679	777	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777.12345679	777.12345679	777.12345679	777	777	777	777	777	777	777	777	777.123457	777.123457	777.123457	777.123457	777.12345679	777.12345679	777.12345679	777");
+  CPPUNIT_ASSERT(line == "777	777	777.1235	777.1235	777.1235	777.12345679	777.12345679	777	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777.12345679	777.12345679	777.12345679	777	777	777	777	777	777	777	777	777.123457	777.123457	777.123457	777.123457	777.12345679	777.12345679	777.12345679	777	777");
 
 }
 
@@ -152,7 +152,6 @@ void TestMatchFileWriter::setColumnsCommand(){
   
   defaultApplicationPtr = NULL;
   defaultWriterPtr = NULL;
-  
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // search-for-matches decoy
@@ -164,7 +163,7 @@ void TestMatchFileWriter::setColumnsCommand(){
   delete defaultWriterPtr;
   defaultApplicationPtr = NULL;
   defaultWriterPtr = NULL;
-  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence");
+  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	decoy matches/spectrum");
 
   // search-for-matches target, p-values
   reset_parameter("compute-p-values", "TRUE");

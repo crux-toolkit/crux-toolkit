@@ -56,6 +56,8 @@ void Match::init() {
   delta_cn_ = 0;
   ln_delta_cn_ = 0;
   ln_experiment_size_ = 0;
+  num_target_matches_ = 0;
+  num_decoy_matches_ = 0;
   best_per_peptide_ = false;
 }
 
@@ -557,7 +559,8 @@ void Match::printOneMatchField(
   MatchFileWriter*    output_file,            ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-  int      num_matches,            ///< num matches in spectrum -in
+  int      num_target_matches,            ///< num matches per spectrum -in
+  int      num_decoy_matches,     ///< target matches for same spectrum -in
   int      b_y_total,              ///< total b/y ions -in
   int      b_y_matched             ///< Number of b/y ions matched. -in
 ) {
@@ -693,7 +696,14 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, b_y_total);
     break;
   case MATCHES_SPECTRUM_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, num_matches);
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                     num_target_matches);
+    break;
+  case DECOY_MATCHES_SPECTRUM_COL:
+    if( null_peptide_ ){
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                       num_decoy_matches);
+    }
     break;
   case SEQUENCE_COL:
     {
@@ -962,7 +972,8 @@ void Match::printTab(
   MatchFileWriter*    output_file,            ///< output stream -out
   int      scan_num,               ///< starting scan number -in
   FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-  int      num_matches            ///< num matches in spectrum -in
+  int      num_target_matches,     ///< num matches in spectrum -in
+  int num_decoy_matches ///< target matches for same spectrum -in
   ){
 
   carp(CARP_DETAILED_DEBUG, "Match::printTab: begin.");
@@ -980,13 +991,14 @@ void Match::printTab(
   for (column_idx = 0; column_idx < NUMBER_MATCH_COLUMNS; column_idx++) {
     carp(CARP_DETAILED_DEBUG,"print col:%i",column_idx);
     printOneMatchField(column_idx, 
-                          collection,
-                          output_file,
-                          scan_num,
-                          spectrum_precursor_mz,
-                          num_matches,
-                          b_y_total,
-                          b_y_matched);
+                       collection,
+                       output_file,
+                       scan_num,
+                       spectrum_precursor_mz,
+                       num_target_matches,
+                       num_decoy_matches,
+                       b_y_total,
+                       b_y_matched);
   }
   output_file->writeRow();
   carp(CARP_DETAILED_DEBUG, "Match::printTab done.");
@@ -1279,6 +1291,10 @@ Match* Match::parseTabDelimited(
 
   // get experiment size
   match->ln_experiment_size_ = log(result_file.getInteger(MATCHES_SPECTRUM_COL));
+  match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);
+  if (!result_file.empty(DECOY_MATCHES_SPECTRUM_COL)){
+        match->num_decoy_matches_ = result_file.getInteger(DECOY_MATCHES_SPECTRUM_COL);
+  }
 
   // parse spectrum
   if((spectrum = Spectrum::parseTabDelimited(result_file))== NULL){
@@ -1612,6 +1628,21 @@ void Match::setLnExperimentSize(
 FLOAT_T Match::getLnExperimentSize()
 {
   return ln_experiment_size_;
+}
+
+/**
+ * \returns The total number of target matches searched for this spectrum.
+ */
+int Match::getTargetExperimentSize(){
+  return num_target_matches_;
+}
+
+/**
+ * \returns The total number of decoy matches searched for this
+ * spectrum if this is a match to a decoy spectrum.
+ */
+int Match::getDecoyExperimentSize(){
+  return num_decoy_matches_;
 }
 
 /**

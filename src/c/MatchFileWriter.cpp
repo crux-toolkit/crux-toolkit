@@ -146,7 +146,8 @@ void MatchFileWriter::addColumnName(MATCH_COLUMNS_T column_type){
  * Adds which columns to print based on the COMMAND_TYPE_T. Only for
  * search-for-matches, sequest-search and spectral-counts.
  */
-void MatchFileWriter::addColumnNames(CruxApplication* application, bool has_decoys){
+void MatchFileWriter::addColumnNames(CruxApplication* application, 
+                                     bool has_decoys){
 
   COMMAND_T command = application->getCommand();
 
@@ -188,6 +189,9 @@ void MatchFileWriter::addColumnNames(CruxApplication* application, bool has_deco
       addColumnName(BY_IONS_MATCHED_COL);
       addColumnName(BY_IONS_TOTAL_COL);
     }
+    if( has_decoys ){
+      addColumnName(DECOY_MATCHES_SPECTRUM_COL);
+    }
     break;
 
   case SEQUEST_COMMAND:      ///< sequest-search
@@ -196,6 +200,9 @@ void MatchFileWriter::addColumnNames(CruxApplication* application, bool has_deco
       addColumnName(SP_RANK_COL);
       addColumnName(BY_IONS_MATCHED_COL);
       addColumnName(BY_IONS_TOTAL_COL);
+    }
+    if( has_decoys ){
+      addColumnName(DECOY_MATCHES_SPECTRUM_COL);
     }
     break;
 

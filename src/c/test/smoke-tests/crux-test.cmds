@@ -129,7 +129,9 @@
 1 = index_decoys = good_results/index_decoy.target.txt = cut -f1-17 ss/sequest.decoy.txt > good_results/index_decoy.target.txt; crux sequest-search --output-dir ss --fileroot fasta --decoys none test.ms2 test_crux_index/test-random.fasta; cat ss/fasta.sequest.target.txt
 
 # compare a concatinated fasta seach with an indexed target-decoy-competition search
-1 = competition = good_results/competition.target.txt = rm -rf comp; cat test.fasta test_crux_index/test-random.fasta > concat.fasta; crux sequest-search --output-dir comp --fileroot concat test.ms2 concat.fasta; cp comp/concat.sequest.target.txt good_results/competition.target.txt; crux sequest-search --output-dir comp --decoy-location target-file test.ms2 test_crux_index; cat comp/sequest.target.txt
+# the concatinated test can't use the same matches per spectrum value for targets and decoys so remove that column
+# those results also do not have the unshuffled peptide or decoy matches/spectrum columns
+1 = competition = good_results/competition.target.txt = rm -rf comp; cat test.fasta test_crux_index/test-random.fasta > concat.fasta; crux sequest-search --output-dir comp --fileroot concat test.ms2 concat.fasta; cut --comp -f13 comp/concat.sequest.target.txt > good_results/competition.target.txt; crux sequest-search --output-dir comp --decoy-location target-file test.ms2 test_crux_index; cut --comp -f13,18,19 comp/sequest.target.txt
 
 # Search for matches with modifications from index
 1 = search_mods_index = good_results/search_mods_index.target.txt = crux search-for-matches --parameter-file params/mods-high-precision test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
