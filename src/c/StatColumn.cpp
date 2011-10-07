@@ -82,10 +82,14 @@ int StatColumn::main(int argc, char** argv) {
   FLOAT_T max = data.back();
   
   FLOAT_T average = sum / (FLOAT_T)data.size();
-  
+ 
+
+ 
   FLOAT_T median = 0.0;
 
-  if (data.size() >= 2) {
+  if (data.size() == 0) {
+    carp(CARP_WARNING, "Warning no data!");
+  } else {
     int half = data.size() / 2;
     if (data.size() % 2 == 0) {
       median = (data[half] + data[half-1]) / 2.0;
