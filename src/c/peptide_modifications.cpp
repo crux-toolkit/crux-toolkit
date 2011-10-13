@@ -716,14 +716,14 @@ int apply_mod_to_seq(
   }
 
   // special case: positional mods
-  if( C_TERM == aa_mod_get_position(mod) ){
+  if( N_TERM == aa_mod_get_position(mod) ){
     //MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
     MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq, seq_len);
     modify_aa( &seq_copy[0], mod );
     push_back_linked_list(return_list, seq_copy);
     return 1;  // one added to list
   }
-  if( N_TERM == aa_mod_get_position(mod)){
+  if( C_TERM == aa_mod_get_position(mod)){
     //MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
     MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq, seq_len);
     /*

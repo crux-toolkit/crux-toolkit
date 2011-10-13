@@ -304,8 +304,8 @@ START_TEST(test_modify_1){
   free(mods);
   free(mod_str);
 
-  // test an n-term mod
-  aa_mod_set_position(amod3, N_TERM);
+  // test a c-term mod
+  aa_mod_set_position(amod3, C_TERM);
   fail_unless( 1 == modify_peptide(pep1, pmod2, returned_list, max_aas_modified),
                "Modify should return one version of FGGTSVANAER*" );
   // test that it was modified correctly
@@ -322,8 +322,8 @@ START_TEST(test_modify_1){
   free(mods);
   free(mod_str);
 
-  // test an c-term mod
-  aa_mod_set_position(amod1, C_TERM);
+  // test an n-term mod
+  aa_mod_set_position(amod1, N_TERM);
   fail_unless( 1 == modify_peptide(pep1, pmod1, returned_list, max_aas_modified),
                "Modify should return one version of F*GGTSVANAER" );
   // test that it was modified correctly
