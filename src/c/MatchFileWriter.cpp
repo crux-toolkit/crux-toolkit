@@ -24,6 +24,7 @@ MatchFileWriter::MatchFileWriter()
     num_columns_(0){
   for(int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
     match_to_print_[col_type] = false;
+    match_precision_[col_type] = 0;
   }
   setPrecision();
 } 
@@ -37,6 +38,7 @@ MatchFileWriter::MatchFileWriter(const char* filename)
     num_columns_(0){
   for(int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
     match_to_print_[col_type] = false;
+    match_precision_[col_type] = 0;
   }
   setPrecision();
 }
