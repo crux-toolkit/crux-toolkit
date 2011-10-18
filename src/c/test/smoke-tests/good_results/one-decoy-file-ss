@@ -3136,6 +3136,16 @@ decoy-location=one-decoy-file
 # will be ignored.
 threshold=0.010000
 
+# Specify a fixed modification to apply to the N-terminus of peptides.
+# Available from parameter file for crux sequest-search and
+# search-for-matches.
+nmod-fixed=NO MODS
+
+# Specify a fixed modification to apply to the C-terminus of peptides.
+# Available from parameter file for crux sequest-search and
+# search-for-matches.
+cmod-fixed=NO MODS
+
 # Optional file into which psm features are printed. Default=F.
 # Available for percolator and q-ranker.  File will be named
 # <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
