@@ -722,7 +722,7 @@ char* aa_mod_to_string(AA_MOD_T* mod){
 
   // get position info
   const char* pos_format = "%c-term most %d from end";
-  char* pos_buffer = (char*)mycalloc(strlen(pos_format), sizeof(char));
+  char* pos_buffer = (char*)mycalloc(strlen(pos_format) + 9, sizeof(char));
   switch(mod->position){
   case ANY_POSITION:
     strcpy(pos_buffer, "any");

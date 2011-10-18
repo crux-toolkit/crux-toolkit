@@ -314,6 +314,17 @@ int get_n_mod_list(AA_MOD_T*** mods);
 int get_all_aa_mod_list(AA_MOD_T*** mods);
 
 /**
+ * \returns The index of the C_TERM or N_TERM fixed modification in
+ * the global list of modifications.
+ */
+int get_fixed_mod_index(MOD_POSITION_T p);
+
+/**
+ * \returns the number of fixed terminal modifications: 0, 1, or 2.
+ */
+int get_num_fixed_mods();
+
+/**
  * \brief Creates a file containing all parameters and their current
  * values in the parameter file format. Created in the output directory
  * named by the parameter "output-dir".

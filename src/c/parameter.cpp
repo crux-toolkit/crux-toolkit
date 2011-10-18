@@ -42,11 +42,17 @@ HASH_T* max_values; // for numeric parameters
 
 AA_MOD_T* list_of_mods[MAX_AA_MODS]; // list containing all aa mods
                                     // in param file, c-,n-term mods at end
+AA_MOD_T** list_of_variable_mods = NULL; // pointer to first non-fixed mod
 AA_MOD_T** list_of_c_mods = NULL; // pointer to first c_term mod in list
 AA_MOD_T** list_of_n_mods = NULL; //pointer to first n_term mod in list
-int num_mods = 0;
-int num_c_mods = 0;
-int num_n_mods = 0;//require num_mods + num_c_mods + num_n_mods <= MAX_AA_MODS
+int fixed_c_mod = -1; // position in list_of_mods or -1 if not present
+int fixed_n_mod = -1; // position in list_of_mods or -1 if not present
+int num_fixed_mods = 0;
+int num_mods = 0;     // ANY_POSITION mods
+int num_c_mods = 0; // variable c-term mods
+int num_n_mods = 0; // variable n-term mods
+//require num_mods + num_c_mods + num_n_mods + 
+//(fixed_c_mod > -1) + (fixed_n_mod > -1) <= MAX_AA_MODS
 
 BOOLEAN_T parameter_initialized = FALSE; //have param values been initialized
 BOOLEAN_T usage_initialized = FALSE; // have the usages been initialized?
@@ -638,6 +644,15 @@ void initialize_parameters(void){
       "Available from parameter file for crux-generate-peptides and "
       "crux-search-for-matches and the "
       "the same must be used for crux compute-q-value.", "true");
+  set_string_parameter("cmod-fixed", "NO MODS",
+      "Specify a fixed modification to apply to the C-terminus of peptides.",
+      "Available from parameter file for crux sequest-search and "
+      "search-for-matches.", "true");
+  set_string_parameter("nmod-fixed", "NO MODS",
+      "Specify a fixed modification to apply to the N-terminus of peptides.",
+      "Available from parameter file for crux sequest-search and "
+      "search-for-matches.", "true");
+
   set_int_parameter("max-mods", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
       "The maximum number of modifications that can be applied to a single " 
       "peptide.  Default=no limit.",
@@ -2908,7 +2923,7 @@ BOOLEAN_T update_aa_masses(){
 int get_aa_mod_list
   (AA_MOD_T*** mods) ///< the address of an array of pointers
 {
-  *mods = list_of_mods;
+  *mods = list_of_variable_mods;
   return num_mods;
 
 }
@@ -2949,7 +2964,34 @@ int get_all_aa_mod_list
   (AA_MOD_T*** mods) ///< the address of an array of pointers
 {
   *mods = list_of_mods;
-  return num_mods + num_c_mods + num_n_mods;
+  return num_mods + num_c_mods + num_n_mods + num_fixed_mods;
+}
+ 
+/**
+ * \returns The index of the C_TERM or N_TERM fixed modification in
+ * the global list of modifications.
+ */
+int get_fixed_mod_index(MOD_POSITION_T position){
+  int index = -1;
+  switch(position){
+  case N_TERM:
+    index = fixed_n_mod;
+    break;
+  case C_TERM:
+    index = fixed_c_mod;
+    break;
+  case ANY_POSITION:
+    carp(CARP_ERROR, "Getting non-terminal fixed mods not implemented.");
+    break;
+  }
+  return index;
+}
+
+/**
+ * \returns the number of fixed terminal modifications: 0, 1, or 2.
+ */
+int get_num_fixed_mods(){
+  return num_fixed_mods;
 }
 
 /* Helper functions for read_mods_from_file */
@@ -2978,7 +3020,7 @@ char* read_mass_change(AA_MOD_T* mod, char* line, char separator,
   }
   char* next = line;
   char* decimal = NULL;
-  while(*next != separator){
+  while(*next != '\0' && *next != separator){
     if(*next == '.'){
       decimal = next;
     }
@@ -3129,13 +3171,11 @@ char* read_prevents_xlink(AA_MOD_T* mod, char* line, char separator) {
  * \returns void
  */
 void read_max_distance(AA_MOD_T* mod, char* line){
-  //carp(CARP_DEBUG, "token points to %s", line);
-  if( *line == '\0' ){
-    carp(CARP_FATAL,
-         "Missing maximum distance from protein terminus for mod %s", line);
+  if( *line == '\0' ){ // assume no distance restriction
+    aa_mod_set_max_distance(mod, -1);
+  } else {
+    aa_mod_set_max_distance(mod, atoi(line));
   }
-
-  aa_mod_set_max_distance(mod, atoi(line));
  
 }
 
@@ -3250,9 +3290,37 @@ void read_mods_from_file(char* param_filename){
   int total_num_mods = 0;
   int max_precision = MOD_MASS_PRECISION;
 
+  // start with fixed terminal mods
+  total_num_mods = read_mods(param_file, 0, "nmod-fixed=", 
+                             N_TERM, max_precision);
+  // keep track of where we stored the fixed mod
+  if( total_num_mods == 1 ){
+    fixed_n_mod = 0;  // first in list
+  } else if (total_num_mods > 1){
+    carp(CARP_FATAL, 
+         "Cannot specify more than one fixed n-terminal modification.");
+  }
+  rewind( param_file );
+
+  total_num_mods = read_mods(param_file, total_num_mods, "cmod-fixed=", 
+                             C_TERM, max_precision);
+  // keep track of where we stored the fixed mod
+  if( total_num_mods == 1 && fixed_n_mod == -1 ){
+    fixed_c_mod = 0;  // first in list
+  } else if( total_num_mods == 2 ){
+    fixed_c_mod = 1;  // second in list
+  } else if (total_num_mods > 2){
+    carp(CARP_FATAL, 
+         "Cannot specify more than one fixed n-terminal modification.");
+  }
+  rewind( param_file );
+  num_fixed_mods = total_num_mods;
+
+  // now get the variable mods
+  list_of_variable_mods = &list_of_mods[total_num_mods];
   total_num_mods = read_mods(param_file, total_num_mods,
                              "mod=", ANY_POSITION, max_precision);
-  num_mods = total_num_mods;  // set global var
+  num_mods = total_num_mods - num_fixed_mods;  // set global var
 
   // Read the file again to get the cmods
   rewind( param_file );
@@ -3260,8 +3328,9 @@ void read_mods_from_file(char* param_filename){
   // set cmod pointer to next in array
   list_of_c_mods = &list_of_mods[total_num_mods];
 
-  total_num_mods = read_mods(param_file, total_num_mods, "cmod=", C_TERM, max_precision);
-  num_c_mods = total_num_mods - num_mods;
+  total_num_mods = read_mods(param_file, total_num_mods, "cmod=", 
+                             C_TERM, max_precision);
+  num_c_mods = total_num_mods - num_mods - num_fixed_mods;
 
   // if no cmods present, don't point to the list of mods
   if( num_c_mods == 0){
@@ -3274,8 +3343,9 @@ void read_mods_from_file(char* param_filename){
   // set nmod pointer to next in array
   list_of_n_mods = &list_of_mods[total_num_mods];
 
-  total_num_mods = read_mods(param_file, total_num_mods, "nmod=", N_TERM, max_precision);
-  num_n_mods = total_num_mods - num_mods - num_c_mods;
+  total_num_mods = read_mods(param_file, total_num_mods, "nmod=", 
+                             N_TERM, max_precision);
+  num_n_mods = total_num_mods - num_mods - num_c_mods - num_fixed_mods;
 
   // if no nmods present, don't point to the list of mods
   if( num_n_mods == 0){

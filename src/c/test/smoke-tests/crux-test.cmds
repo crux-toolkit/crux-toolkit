@@ -20,6 +20,8 @@
 
 1 = generate_peptides_mods = good_results/standard_generate_peptides_mods = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20 test.fasta =
 
+1 = generate_peptides_fixed_mods = good_results/standard_generate_peptides_fixed_mods = crux-generate-peptides --parameter-file params/fixed-mods --output-sequence T --max-length 20 test.fasta =
+
 1 = generate_peptides_chymo = good_results/standard_generate_peptides_chymo = crux-generate-peptides --parameter-file params/chymo --output-sequence T test.fasta = 
 
 # Get spectrum

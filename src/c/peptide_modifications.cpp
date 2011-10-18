@@ -67,7 +67,22 @@ PEPTIDE_MOD_T* new_peptide_mod(){
   for(i=0; i<MAX_AA_MODS;i++){
     new_mod->aa_mod_counts[i] = 0;
   }
-   
+  // add any fixed terminal mods by setting their count to 1
+  int index = get_fixed_mod_index(N_TERM); 
+  AA_MOD_T** list = NULL;
+  get_all_aa_mod_list(&list);
+  if( index > -1 ){
+    new_mod->aa_mod_counts[index] = 1;
+    new_mod->num_mods++;
+    new_mod->mass_change += aa_mod_get_mass_change(list[index]);
+  }
+  index = get_fixed_mod_index(C_TERM); 
+  if( index > -1 ){
+    new_mod->aa_mod_counts[index] = 1;
+    new_mod->num_mods++;
+    new_mod->mass_change += aa_mod_get_mass_change(list[index]);
+  }
+
   return new_mod;
 }
 
@@ -144,9 +159,10 @@ int generate_peptide_mod_list_TESTER(
   LINKED_LIST_T* final_list = new_list( new_peptide_mod() );
   int final_counter = 1;
 
-  // for each aa_mod
-  int mod_list_idx = 0;
-  for(mod_list_idx=0; mod_list_idx < num_aa_mods; mod_list_idx++){
+  // for each non-fixed aa_mod
+  int num_fixed_mods = get_num_fixed_mods();
+  for(int mod_list_idx = num_fixed_mods; mod_list_idx < num_aa_mods; 
+      mod_list_idx++){
 
     AA_MOD_T* cur_aa_mod = aa_mod_list[mod_list_idx];
     int cur_mod_max = aa_mod_get_max_per_peptide(cur_aa_mod);
@@ -343,8 +359,7 @@ BOOLEAN_T is_peptide_modifiable
   assert( num_aa_mods < MAX_AA_MODS );
 
   BOOLEAN_T success = TRUE;
-  int amod_idx = 0;
-  for(amod_idx = 0; amod_idx < num_aa_mods; amod_idx++){
+  for(int amod_idx = 0; amod_idx < num_aa_mods; amod_idx++){
 
     // FIRST: check to see if it is included in this pmod
     if( peptide_mod->aa_mod_counts[amod_idx] == 0 ){
