@@ -1318,13 +1318,11 @@ void Index::index_database(
  *********************************************/
 
 /**
- *\returns the directory of the index
- * returns a heap allocated new copy of the directory
- * user must free the return directory name
+ *\returns A const pointer to the directory of the index
  */
-char* Index::getDirectory()
+const char* Index::getDirectory()
 {
-  return my_copy_string(directory_);
+  return directory_;
 }
 
 /**

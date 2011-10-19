@@ -276,9 +276,9 @@ class Index {
    *********************************************/
 
   /**
-   * \returns A newly allocated copy of the directory name.
+   * \returns A const pointer to the directory name.
    */
-  char* getDirectory();
+  const char* getDirectory();
 
   /**
    * Sets the directory of the index.

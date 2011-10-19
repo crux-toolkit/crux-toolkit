@@ -2022,7 +2022,7 @@ string Peptide::getProteinIdsLocations() {
       int peptide_loc = peptide_src->getStartIdx();
       std::ostringstream protein_loc_stream;
       protein_loc_stream << protein_id << "(" << peptide_loc << ")";
-      delete protein_id;
+      free(protein_id);
       protein_ids_locations.insert(protein_loc_stream.str());
     }
   }

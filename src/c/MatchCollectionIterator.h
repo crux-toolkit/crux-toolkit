@@ -84,9 +84,9 @@ class MatchCollectionIterator {
   /**
    * \brief Get the name of the directory the match_collection_iterator
    * is working in.
-   * \returns A heap allocated string (char*) of the directory name.
+   * \returns A const pointer to the directory name.
    */
-  char* getDirectoryName();
+  const char* getDirectoryName();
   
   /**
    * \brief Get the working directory

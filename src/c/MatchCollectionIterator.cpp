@@ -253,14 +253,11 @@ int MatchCollectionIterator::getNumberCollections()
 /**
  * \brief Get the name of the directory the match_collection_iterator
  * is working in.
- * \returns A heap allocated string (char*) of the directory name.
+ * \returns A const pointer to the directory name.
  */
-char* MatchCollectionIterator::getDirectoryName()
+const char* MatchCollectionIterator::getDirectoryName()
 {
-
-  char* dir_name = my_copy_string(directory_name_);
-
-  return dir_name;
+  return directory_name_;
 }
 
 /**
