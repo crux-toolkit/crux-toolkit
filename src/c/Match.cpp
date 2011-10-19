@@ -541,7 +541,7 @@ void Match::printSqt(
     
     // print match info (locus line), add rand_ to locus name for decoys
     fprintf(file, "L\t%s%s\n", rand, protein_id);      
-    delete protein_id;
+    free(protein_id);
   }
   
   free_peptide_src_iterator(peptide_src_iterator);
