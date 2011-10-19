@@ -1658,6 +1658,15 @@ void strcat_formatted
  */
 int get_num_decoys(bool have_index){
 
+  int requested_decoys_per_target = get_int_parameter("num-decoys-per-target");
+  if( requested_decoys_per_target == 0 ){
+    return 0;
+  }  else if( requested_decoys_per_target > 1 && have_index ){
+    carp(CARP_FATAL, 
+         "Cannot search %d decoys per target. The index contains only one.", 
+         requested_decoys_per_target);
+  }
+
   DECOY_TYPE_T decoy_type = get_decoy_type_parameter("decoys");
 
   switch(decoy_type){
@@ -1670,7 +1679,7 @@ int get_num_decoys(bool have_index){
     if( have_index ){
       return 1;
     } else { // searching fasta
-      return  get_int_parameter("num-decoys-per-target"); 
+      return  requested_decoys_per_target; 
     }
 
     //only valid for index
