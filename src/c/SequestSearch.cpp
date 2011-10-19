@@ -313,11 +313,12 @@ void SequestSearch::printMatches(
                                 merged_decoy_psms);
       }
       
-      // sort and rank
-      merged_decoy_psms->populateMatchRank(SP);
-      merged_decoy_psms->saveTopSpMatch();
-      merged_decoy_psms->populateMatchRank(XCORR);
-
+      // re-sort and rank if we merged multiple collections
+      if( decoy_psms.size() > 1 ){
+        merged_decoy_psms->populateMatchRank(SP);
+        merged_decoy_psms->saveTopSpMatch();
+        merged_decoy_psms->populateMatchRank(XCORR);
+      }
       vector<MatchCollection*> decoy_list(1, merged_decoy_psms);
       output_files.writeMatches(target_psms, decoy_list, 
                                 XCORR, spectrum);
