@@ -3,5 +3,5 @@ top-match=100
 overwrite=T
 decoys=reverse
 precision=2
-mod=0.5:ABCDEFGHIJKLMNOPQRSTUVWXYZ:1
+mod=0.50:ABCDEFGHIJKLMNOPQRSTUVWXYZ:1
 seed=7
