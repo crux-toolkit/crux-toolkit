@@ -3020,7 +3020,8 @@ char* read_mass_change(AA_MOD_T* mod, char* line, char separator,
   }
   char* next = line;
   char* decimal = NULL;
-  while(*next != '\0' && *next != separator){
+  // read to end of line, colon, or whitespace
+  while(*next != '\0' && *next != separator && *next != ' ' && *next != '\t'){
     if(*next == '.'){
       decimal = next;
     }
@@ -3171,12 +3172,15 @@ char* read_prevents_xlink(AA_MOD_T* mod, char* line, char separator) {
  * \returns void
  */
 void read_max_distance(AA_MOD_T* mod, char* line){
-  if( *line == '\0' ){ // assume no distance restriction
-    aa_mod_set_max_distance(mod, -1);
-  } else {
-    aa_mod_set_max_distance(mod, atoi(line));
+  int max_distance = atoi(line);
+
+  // make sure it's 0 because the file says 0; if not, default to max
+  if( max_distance == 0 && *line != '0' ){
+    max_distance = MAX_PROTEIN_SEQ_LENGTH;
   }
- 
+  aa_mod_set_max_distance(mod, max_distance);
+
+  return;
 }
 
 /**
@@ -3288,7 +3292,7 @@ void read_mods_from_file(char* param_filename){
 
   // get first mod
   int total_num_mods = 0;
-  int max_precision = MOD_MASS_PRECISION;
+  int max_precision = 0;  // gets updated with max seen in param file
 
   // start with fixed terminal mods
   total_num_mods = read_mods(param_file, 0, "nmod-fixed=", 

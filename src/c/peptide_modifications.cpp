@@ -375,16 +375,16 @@ BOOLEAN_T is_peptide_modifiable
     switch( aa_mod_get_position(cur_aa_mod) ){
     case C_TERM: 
       if( max_distance < peptide->getCDistance()){ 
-        //return FALSE; 
         success = FALSE;
       }
       break;
+
     case N_TERM:
       if( max_distance < peptide->getNDistance()){ 
-        //return FALSE; 
         success = FALSE;
       }
       break;
+
       // count leagal locations for this aa mod, compare with counts
     case ANY_POSITION:
       // look for an aa in the seq where this mod can be placed
@@ -400,57 +400,15 @@ BOOLEAN_T is_peptide_modifiable
         success = FALSE;
       }
       break;
+
     }// end of switch
 
     if( success == FALSE ){
       break; // done look at any more aa_mods
     }
   }// next in aa_mod list
-  /*
-  // now check position-specific modifications
-  AA_MOD_T** c_mods = NULL;
-  int num_c_mods = get_c_mod_list(&c_mods);
-  int last_mod = amod_idx;
-  for(amod_idx = 0; amod_idx < num_c_mods; amod_idx++){
-    // first see if it is included in this pmod
-    if( peptide_mod->aa_mod_counts[amod_idx+last_mod] == 0 ){
-      continue;
-    }
-    
-    AA_MOD_T* cur_aa_mod = c_mods[amod_idx];
-    int max_distance = aa_mod_get_max_distance(cur_aa_mod);
-    
-    carp(CARP_DETAILED_DEBUG, "c mod max distance %d, this distance %d",
-         max_distance, get_peptide_c_distance( peptide ));
-    if( get_peptide_c_distance( peptide ) > max_distance ){
-      return FALSE;
-    }
-  }// next aa mod in list
 
-  printf("checking n-mods for modifyability\n");
-  AA_MOD_T** n_mods = NULL;
-  int num_n_mods = get_n_mod_list(&n_mods);
-  last_mod += amod_idx;
-  for(amod_idx = 0; amod_idx < num_n_mods; amod_idx++){
-    printf("for index (%d+%d, count is %d\n", last_mod, amod_idx, peptide_mod->aa_mod_counts[amod_idx+last_mod]);
-    // first see if it is included in this pmod
-    if( peptide_mod->aa_mod_counts[amod_idx+last_mod] == 0 ){
-      continue;
-    }
-    
-    AA_MOD_T* cur_aa_mod = n_mods[amod_idx];
-    int max_distance = aa_mod_get_max_distance(cur_aa_mod);
-    
-    carp(CARP_DETAILED_DEBUG, "n mod max distance %d, this distance %d",
-         max_distance, get_peptide_n_distance( peptide ));
-    if( get_peptide_n_distance( peptide ) > max_distance ){
-      return FALSE;
-    }
-  }// next aa mod in list
-  */
-  // found locations for all aa_mods in the seq
   free(sequence);
-  //return TRUE;
   return success;
 }
 

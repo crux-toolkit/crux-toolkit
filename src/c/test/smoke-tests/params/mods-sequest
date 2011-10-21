@@ -1,7 +1,7 @@
 overwrite=T
 enzyme=no-enzyme
 decoys=none
-mod=79.9:S:2
+mod=79.90:S:2
 precision=2
 top-match=5
 decoys=none
