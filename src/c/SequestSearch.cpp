@@ -106,7 +106,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
 
   // Prepare output files 
   
-  BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
+  bool combine_target_decoy = get_boolean_parameter("tdc");
   OutputFiles output_files(this); 
   output_files.writeHeaders(num_proteins, combine_target_decoy);
 
@@ -137,12 +137,12 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
     progress.report(spectrum->getFirstScan(), zstate.getCharge());
 
     // create empty match collections to store results in
-    MatchCollection* target_psms = new MatchCollection(FALSE); 
+    MatchCollection* target_psms = new MatchCollection(false); 
     target_psms->setZState(zstate);
 
     vector<MatchCollection*> decoy_psm_collections;
     for(int decoy_idx=0; decoy_idx < num_decoys_per_target; decoy_idx++){
-      MatchCollection* psms = new MatchCollection(TRUE);
+      MatchCollection* psms = new MatchCollection(true);
       psms->setZState(zstate);
       decoy_psm_collections.push_back(psms);
     }
@@ -158,7 +158,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
         new ModifiedPeptidesIterator(mz,
                                      zstate,
                                      peptide_mod, 
-                                     FALSE, // not decoy
+                                     false, // not decoy
                                      index,
                                      database);
 
@@ -166,10 +166,10 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
       int added = target_psms->addMatches(spectrum,
                               zstate,
                               peptide_iterator,
-                              FALSE, // not decoy
-                              FALSE, // don't save scores for p-values
-                              TRUE,  // do preliminary Sp scoring
-                              TRUE   // filter by Sp
+                              false, // not decoy
+                              false, // don't save scores for p-values
+                              true,  // do preliminary Sp scoring
+                              true   // filter by Sp
                               ); 
 
       // add matches to each decoy
@@ -180,7 +180,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
         peptide_iterator = new ModifiedPeptidesIterator(mz,
                                                         zstate,
                                                         peptide_mod, 
-                                                        TRUE,  // is decoy
+                                                        true,  // is decoy
                                                         index,
                                                         database);
         // add matches
@@ -189,10 +189,10 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
         cur_decoys->addMatches(spectrum,
                     zstate,
                     peptide_iterator,
-                    TRUE,  // is decoy
-                    FALSE, // don't save scores for p-values
-                    TRUE,  // do preliminary Sp scoring
-                    TRUE   // filter by Sp
+                    true,  // is decoy
+                    false, // don't save scores for p-values
+                    true,  // do preliminary Sp scoring
+                    true   // filter by Sp
                     ); 
       }
 
@@ -209,12 +209,12 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
     if( total_matches == 0 ){
       carp(CARP_WARNING, "No matches found for spectrum %i, charge %i.",
            spectrum->getFirstScan(), zstate.getCharge());
-      progress.increment(FALSE);
+      progress.increment(false);
 
     }else{  
       printMatches(output_files, target_psms, decoy_psm_collections,
                     spectrum, combine_target_decoy, num_decoy_files);
-      progress.increment(TRUE);
+      progress.increment(true);
     }
 
     // clean up
@@ -279,7 +279,7 @@ void SequestSearch::printMatches(
   MatchCollection* target_psms, ///< target psms to print
   vector<MatchCollection*>& decoy_psms,///< decoy psms to print
   Spectrum* spectrum,            ///< all matches are to this spec
-  BOOLEAN_T combine_target_decoy,  ///< merge targets and decoys?
+  bool combine_target_decoy,  ///< merge targets and decoys?
   int num_decoy_files              ///< merge decoys?
 ){ 
 

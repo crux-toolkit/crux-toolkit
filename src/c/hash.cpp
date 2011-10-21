@@ -57,7 +57,7 @@ struct hash_iterator {
 };
 
 // Function definition, description found below 
-BOOLEAN_T add_hash_when_grow(
+bool add_hash_when_grow(
   HASH_T* h, ///< Hash object to add -in/out
   const char *key, ///< key of the record to add -in
   const void *value, ///< value to add to be hashed if needed -in
@@ -66,7 +66,7 @@ BOOLEAN_T add_hash_when_grow(
 
 /**
  * Increase the size of hash table
- *\returns the TRUE if successfully inceased hash table size, else FALSE
+ *\returns the true if successfully inceased hash table size, else false
  */
 static int hash_grow(
   HASH_T* h ///< Hash object to grow -out
@@ -80,13 +80,13 @@ static int hash_grow(
   old_recs = h->records;
   
   if (h->size_index == sizes_count - 1){
-    return FALSE;
+    return false;
   }
   // increase larger hash table
   if ((h->records = (RECORD_T*)mycalloc(sizes[++h->size_index],
                              sizeof(RECORD_T))) == NULL) {
     h->records = old_recs;
-    return FALSE;
+    return false;
   }
   
   h->records_count = 0;
@@ -100,7 +100,7 @@ static int hash_grow(
   
   free(old_recs);
   
-  return TRUE;
+  return true;
 }
 
 /**
@@ -175,9 +175,9 @@ void free_hash(
  * If key exists, free current value and allocate and set new one
  * If key not found, allocate key, and allocate and set value
  * Does not copy value (for use with void pointers).
- *\returns TRUE if successfully adds to new record, else FALSE
+ *\returns true if successfully adds to new record, else false
  */
-BOOLEAN_T add_or_update_hash(
+bool add_or_update_hash(
   HASH_T* h, ///< Hash object to add to -in/out
   const char *key, ///< key of the record to add or update -in
   const void *value ///< value to associate with the key -in
@@ -187,7 +187,7 @@ BOOLEAN_T add_or_update_hash(
   int rc;
   unsigned int off, ind, size, code;
 
-  if (key == NULL || *key == '\0') return FALSE;
+  if (key == NULL || *key == '\0') return false;
   
   code = strhash(key);
   recs = h->records;
@@ -206,7 +206,7 @@ BOOLEAN_T add_or_update_hash(
       free(recs[ind].value); 
       // set new value
       recs[ind].value = (void*)my_copy_string((char*)value);
-      return TRUE;
+      return true;
     }
     else{
       // continue to search
@@ -218,7 +218,7 @@ BOOLEAN_T add_or_update_hash(
   // first check size
   if (h->records_count > sizes[h->size_index] * load_factor) {
     rc = hash_grow(h);
-    if (rc) return FALSE;
+    if (rc) return false;
   }
 
 
@@ -229,7 +229,7 @@ BOOLEAN_T add_or_update_hash(
   
   h->records_count++;
   
-  return TRUE;
+  return true;
 }
 
 
@@ -239,9 +239,9 @@ BOOLEAN_T add_or_update_hash(
  * add key and value to hash table.
  * Must add a heap allocated key, value may be NULL
  * If finds duplicate key, just increase count by 1
- *\returns TRUE if successfully adds to new record, else FALSE
+ *\returns true if successfully adds to new record, else false
  */
-BOOLEAN_T add_hash(
+bool add_hash(
   HASH_T* h, ///< Hash object to add -in/out
   const char *key, ///< key of the record to add -in
   const void *value ///< value to add to be hashed if needed -in
@@ -251,10 +251,10 @@ BOOLEAN_T add_hash(
     int rc;
     unsigned int off, ind, size, code;
 
-    if (key == NULL || *key == '\0') return FALSE;
+    if (key == NULL || *key == '\0') return false;
     if (h->records_count > sizes[h->size_index] * load_factor) {
         rc = hash_grow(h);
-        if (rc) return FALSE;
+        if (rc) return false;
     }
 
     code = strhash(key);
@@ -272,7 +272,7 @@ BOOLEAN_T add_hash(
           strcmp(key, recs[ind].key) == 0){
         // increment count
         ++recs[ind].count;        
-        return TRUE;
+        return true;
       }
       else{
         // continue to search
@@ -287,14 +287,14 @@ BOOLEAN_T add_hash(
 
     h->records_count++;
     
-    return TRUE;
+    return true;
 }
 
 /**
  * add key and value to hash table.
- *\returns TRUE if successfully adds to new record, else FALSE
+ *\returns true if successfully adds to new record, else false
  */
-BOOLEAN_T add_hash_when_grow(
+bool add_hash_when_grow(
   HASH_T* h, ///< Hash object to add -in/out
   const char *key, ///< key of the record to add -in
   const void *value, ///< value to add to be hashed if needed -in
@@ -305,10 +305,10 @@ BOOLEAN_T add_hash_when_grow(
     int rc;
     unsigned int off, ind, size, code;
 
-    if (key == NULL || *key == '\0') return FALSE;
+    if (key == NULL || *key == '\0') return false;
     if (h->records_count > sizes[h->size_index] * load_factor) {
         rc = hash_grow(h);
-        if (rc) return FALSE;
+        if (rc) return false;
     }
 
     code = strhash(key);
@@ -330,16 +330,16 @@ BOOLEAN_T add_hash_when_grow(
     
     h->records_count++;
     
-    return TRUE;
+    return true;
 }
 
 /**
  * Updates the value for the key
  * Must already have a existing value for the key
  * Copies the value, thus no need to pass in a heap allocated value
- *\returns TRUE if successfully updates hash value, else FALSE
+ *\returns true if successfully updates hash value, else false
  */
-BOOLEAN_T update_hash_value(
+bool update_hash_value(
   HASH_T* h, ///< Hash object to add -in/out
   const char *key, ///< key of the record to update -in
   const void *value ///< value to add to be hash -in
@@ -348,7 +348,7 @@ BOOLEAN_T update_hash_value(
   RECORD_T* recs;  
   unsigned int off, ind, size, code;
   
-  if (key == NULL || *key == '\0') return FALSE;
+  if (key == NULL || *key == '\0') return false;
   
   code = strhash(key);
   recs = h->records;
@@ -367,7 +367,7 @@ BOOLEAN_T update_hash_value(
       free(recs[ind].value); 
       // set new value
       recs[ind].value = my_copy_string((char*)value); 
-      return TRUE;
+      return true;
     }
     else{
       // continue to search
@@ -375,7 +375,7 @@ BOOLEAN_T update_hash_value(
     }
   }
   //carp(CARP_ERROR, "Failed to find key %s in hash table", key);
-  return FALSE;
+  return false;
 }
 
 /**
@@ -549,9 +549,9 @@ HASH_ITERATOR_T* new_hash_iterator(
 
 /**
  * Does the hash_iterator have another hash object to return?
- * \returns TRUE, if hash iterator has a next hash, else FALSE
+ * \returns true, if hash iterator has a next hash, else false
  */
-BOOLEAN_T hash_iterator_has_next(
+bool hash_iterator_has_next(
   HASH_ITERATOR_T* hash_iterator ///< the working  hash iterator -in
   )
 {

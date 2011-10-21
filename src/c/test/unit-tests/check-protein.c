@@ -33,7 +33,7 @@ void protein_setup(){
 
   initialize_parameters();
   // a protein must have a database as its source of sequences
-  db = new Database("input-data/protein1.fasta", FALSE); //not mem mapped
+  db = new Database("input-data/protein1.fasta", false); //not mem mapped
   db->parse();  // assuming we have already tested database
 
   protein1 = new Protein("protein1", prot1_sequence, strlen(prot1_sequence),
@@ -825,7 +825,7 @@ START_TEST (test_create){
   char* name2 = NULL;
   
   //try create a new database
-  db = new_database("fasta_file_binary_fasta", FALSE);
+  db = new_database("fasta_file_binary_fasta", false);
   fail_unless(parse_database(db), "failed to parse database");
   fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
   free(name);
@@ -876,7 +876,7 @@ START_TEST (test_create){
     free_peptide(peptide1);
   }  
 
-  //  print_peptide_in_format(peptide5, TRUE,  stdout);
+  //  print_peptide_in_format(peptide5, true,  stdout);
 
   //free stuff
   free_protein(protein1);

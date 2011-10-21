@@ -77,20 +77,20 @@ START_TEST(test_is_equal){
   int prec = 2;
 
   // same number
-  fail_unless( is_equal(a, b, prec) == TRUE,
+  fail_unless( is_equal(a, b, prec) == true,
                "%.*f and %.*f should be equal to %d places.",
                prec+1, a, prec+1, b, prec);
 
   // biggest difference but still the same
   a = 4.015;
   b = 4.024;
-  fail_unless( is_equal(a, b, prec) == TRUE,
+  fail_unless( is_equal(a, b, prec) == true,
                "%.*f and %.*f should be equal to %d places.",
                prec+1, a, prec+1, b, prec);
 
   // not the same at higher precision
   prec = 3;
-  fail_unless( is_equal(a, b, prec) == FALSE,
+  fail_unless( is_equal(a, b, prec) == false,
                "%.*f and %.*f should NOT be equal to %d places.",
                prec+1, a, prec+1, b, prec);
 
@@ -98,19 +98,19 @@ START_TEST(test_is_equal){
   a = 100.115;
   b = 100.114;
   prec = 2;
-  fail_unless( is_equal(a, b, prec) == FALSE,
+  fail_unless( is_equal(a, b, prec) == false,
                "%.*f and %.*f should NOT be equal to %d places.",
                prec+1, a, prec+1, b, prec);
 
   // check integer case
   prec = 0;
-  fail_unless( is_equal(a, b, prec) == TRUE,
+  fail_unless( is_equal(a, b, prec) == true,
                "%.*f and %.*f should be equal to %d places.",
                prec+1, a, prec+1, b, prec);
 
   // unequal integers
   a += 0.8;
-  fail_unless( is_equal(a, b, prec) == FALSE,
+  fail_unless( is_equal(a, b, prec) == false,
                "%.*f and %.*f should NOT be equal to %d places.",
                prec+1, a, prec+1, b, prec);
 

@@ -127,7 +127,7 @@ FLOAT_T XHHC_Scorer::hhcGenScoreXcorr(
   
  if (!hhcCreateIntensityArrayTheoretical(ion_series, theoretical)) {
     carp(CARP_ERROR, "failed to create theoretical spectrum for Xcorr");
-    return FALSE;
+    return false;
   }
    
   // do cross correlation between observed spectrum(in scorer) and theoretical spectrum.

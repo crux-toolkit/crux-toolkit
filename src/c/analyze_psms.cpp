@@ -278,7 +278,7 @@ MatchCollection* run_percolator_or_qranker(
 
     // create iterator, to register each PSM feature.
     carp(CARP_DETAILED_DEBUG, "Registering PSMs");
-    match_iterator = new MatchIterator(match_collection, XCORR, FALSE);
+    match_iterator = new MatchIterator(match_collection, XCORR, false);
     
     while(match_iterator->hasNext()){
       match = match_iterator->next();
@@ -324,18 +324,18 @@ MatchCollection* run_percolator_or_qranker(
     pcExecute(); 
     pcGetScores(results_score, results_q); 
     target_match_collection->fillResult(
-      results_q, PERCOLATOR_QVALUE, TRUE);
+      results_q, PERCOLATOR_QVALUE, true);
     target_match_collection->fillResult(
-      results_score, PERCOLATOR_SCORE, FALSE);
+      results_score, PERCOLATOR_SCORE, false);
     pcCleanUp();
     break;
   case QRANKER_COMMAND:
     qcExecute(!get_boolean_parameter("no-xval")); 
     qcGetScores(results_score, results_q); 
     target_match_collection->fillResult(
-        results_q, QRANKER_QVALUE, TRUE);
+        results_q, QRANKER_QVALUE, true);
     target_match_collection->fillResult(
-        results_score, QRANKER_SCORE, FALSE);
+        results_score, QRANKER_SCORE, false);
     qcCleanUp();
     break;
   default:

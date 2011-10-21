@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Sep 20 16:14:26 2011
+H	StartTime	Fri Oct 21 12:02:34 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2365,7 +2365,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Sep 20 16:14:26 2011
+H	StartTime	Fri Oct 21 12:02:34 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4730,16 +4730,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1486.6195	1.16445863	10.49388313	3	-0.00195638	2	2	26	4	SPQGNTLNNEPGMK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	4
 159	2	745.7500	1489.4827	1488.7063	1.65527105	16.10622406	2	-0.06388148	3	3	24	4	FPISALNVSFEHK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	4
 159	2	745.7500	1489.4827	1490.6510	0.00000000	2.07540607	4	-0.25453031	4	1	24	4	EVHNVDEMVFSGK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	4
-INFO: CPU: ranunculus
-INFO: Tue Sep 20 16:14:26 PDT 2011
+INFO: CPU: n001.grid.gs.washington.edu
+INFO: Fri Oct 21 12:02:34 PDT 2011
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 2.48 s
+INFO: Elapsed time: 3.33 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 2.48 s
+INFO: Elapsed time: 3.35 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -4751,7 +4751,7 @@ fragment-mass=mono
 # Print to stdout additional information about the spectrum.
 # Avaliable only for crux-get-ms2-spectrum.  Does not affect contents of
 # the output file.
-stats=FALSE
+stats=false
 
 # Specifies the operator that is used to compare an entry in the
 # specified column to the value given on the command line. 
@@ -4799,7 +4799,7 @@ isotopic-mass=average
 
 # Include self-loop peptides in the database.  Default=T.
 # Available for crux search-for-xlinks program.
-xlink-include-selfloops=TRUE
+xlink-include-selfloops=true
 
 # Quantification at protein or peptide level (PROTEIN,PEPTIDE).
 # Default=PROTEIN.
@@ -4839,13 +4839,13 @@ custom-enzyme=__NULL_STR
 
 # Predict flanking peaks for b and y ions (T,F). Default=F.
 # Only available for crux-predict-peptide-ion.
-flanking=FALSE
+flanking=false
 
 # Include peaks +/- 1da around b/y ions in theoretical spectrum. 
 # sequest-search and search-for-xlinks default=T. search-for-matches
 # default=F.
 # Available in the paramter file for all search commands.
-use-flanking-peaks=TRUE
+use-flanking-peaks=true
 
 # Change the mass of all amino acids 'A' by the given amount.
 # For parameter file only.  Default=no mass change.
@@ -4935,7 +4935,7 @@ Y=0.000000
 
 # Print version number and quit.
 # Available for all crux programs.  On command line use '--version T'.
-version=FALSE
+version=false
 
 # The minimum length of peptides to consider. Default=6.
 # Used from the command line or parameter file by crux-create-index and
@@ -4947,7 +4947,7 @@ min-length=6
 # multiple charge states) consistent with the other specified options.
 # (T,F) Default=F.
 # Only available for crux-predict-peptide-ions.
-precursor-ions=FALSE
+precursor-ions=false
 
 # Degree of digestion used to generate peptides.
 # <string>=full-digest|partial-digest. Either both ends or one end of a
@@ -4992,7 +4992,7 @@ measure=NSAF
 # Use variable binning for XCORR.  If set to true, mz-bin-width, and
 # mz-bin-offset parameters are utilized
 # Available for crux-search-for-matches.
-xcorr-var-bin=FALSE
+xcorr-var-bin=false
 
 # Number of psms per spectrum to score with xcorr after preliminary
 # scoring with Sp. Set to 0 to score all psms with xcorr. Default=500.
@@ -5027,7 +5027,7 @@ print-search-progress=100
 
 # Use MSToolkit to parse spectra. Default=F.
 # Available for crux-search-for-matches
-use-mstoolkit=FALSE
+use-mstoolkit=false
 
 # The estimated percent of target scores that are drawn from the null
 # distribution.
@@ -5041,16 +5041,16 @@ fileroot=separate
 
 # Turn off cross-validation to select hyperparameters.
 # Available for q-ranker.
-no-xval=FALSE
+no-xval=false
 
 # Sort in ascending order.  Otherwise, descending. Default: True.
 # Available for sort-by-column
-ascending=TRUE
+ascending=true
 
 # Compute the Sp score for all candidate peptides.  Default=F
 # Available for search-for-matches.  Sp scoring is always done for
 # sequest-search.
-compute-sp=FALSE
+compute-sp=false
 
 # Set level of output to stderr (0-100).  Default=30.
 # Available for all crux programs.  Each level prints the following
@@ -5069,21 +5069,21 @@ mz-bin-offset=0.680000
 # modifications rather than listing each in a comma-separated list. 
 # Default=T.
 # Available in the parameter file for any command that prints peptides
-# sequences.  Example: TRUE is SE[12.40]Q and FALSE is SE[10.00,2.40]Q
-display-summed-mod-masses=TRUE
+# sequences.  Example: true is SE[12.40]Q and false is SE[10.00,2.40]Q
+display-summed-mod-masses=true
 
 # Create an ASCII version of the peptide list.  Default=F.
 # Creates an ASCII file in the output directory containing one peptide
 # per line.
-peptide-list=FALSE
+peptide-list=false
 
 # Print the theoretical spectrum
 # Available for xlink-predict-peptide-ions (Default=F).
-print-theoretical-spectrum=FALSE
+print-theoretical-spectrum=false
 
 # Use MGF file format for parsing files
 # Available for search-for-xlinks program (Default=F).
-use-mgf=FALSE
+use-mgf=false
 
 # Number of decoy peptides to search for every target peptide
 # searched.Only valid for fasta searches when --decoys is not none.
@@ -5125,7 +5125,7 @@ precursor-window-decoy=20.000000
 
 # Print the header line of the tsv file. Default=T.
 # Available for crux extract-columns and extract-rows
-header=TRUE
+header=true
 
 # Minimum mass of spectra to be searched. Default=0.
 # Available for crux-search-for-matches.
@@ -5138,7 +5138,7 @@ output-dir=ss
 
 # Include dead-end peptides in the database.  Default=T.
 # Available for crux search-for-xlinks program.
-xlink-include-deadends=TRUE
+xlink-include-deadends=true
 
 # The maximum length of peptides to consider. Default=50.
 # Available from command line or parameter file for crux-create-index 
@@ -5151,7 +5151,7 @@ max-length=50
 # Available from command line or parameter file for
 # crux-genereate-peptides. Returns one line per peptide when true or one
 # line per peptide per protein occurence when false.  
-unique-peptides=TRUE
+unique-peptides=true
 
 # Predict ions up to max charge state (1,2,...,6) or up to the charge
 # state of the peptide (peptide).  If the max-ion-charge is greater than
@@ -5205,7 +5205,7 @@ cmod-fixed=NO MODS
 # Optional file into which psm features are printed. Default=F.
 # Available for percolator and q-ranker.  File will be named
 # <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
-feature-file=FALSE
+feature-file=false
 
 # Enzyme to use for in silico digestion of proteins.
 # <string>=trypsin|chymotrypsin|elastase|clostripain|
@@ -5236,11 +5236,11 @@ h2o=0
 
 # Ignore peptides with multiple mappings to proteins (T,F). Default=F.
 # Available for spectral-counts.
-unique-mapping=FALSE
+unique-mapping=false
 
 # Compute p-values for the main score type. Default=F.
 # Currently only implemented for XCORR.
-compute-p-values=FALSE
+compute-p-values=false
 
 # The number of PSMs per spectrum writen to the output  file(s). 
 # Default=5.
@@ -5253,7 +5253,7 @@ spectrum-max-mass=1000000000.000000
 
 # Include linear peptides in the database.  Default=T.
 # Available for crux search-for-xlinks program (Default=T).
-xlink-include-linears=TRUE
+xlink-include-linears=true
 
 # Include a decoy version of every peptide by shuffling or reversing the
 # target sequence. 
@@ -5265,7 +5265,7 @@ decoys=peptide-shuffle
 
 # Print peptide sequence (T,F). Default=F.
 # Available only for crux-generate-peptides.
-output-sequence=FALSE
+output-sequence=false
 
 # Specify a variable modification to apply to peptides.  <mass
 # change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents
@@ -5295,7 +5295,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Sep 20 16:14:26 2011
+H	StartTime	Fri Oct 21 12:02:34 2011
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

@@ -81,13 +81,13 @@ void* get_data_linked_list(LIST_POINTER_T* list);
  * \brief Is this list empty?
  * \returns TRUE if node->next is NULL, else FALSE
  */
-BOOLEAN_T is_empty_linked_list(LINKED_LIST_T* head);
+bool is_empty_linked_list(LINKED_LIST_T* head);
 
 /**
  * \brief Is this list element at the end of the list?
  * \returns FALSE if node->next is NULL, else TRUE
  */
-BOOLEAN_T has_next_linked_list(LIST_POINTER_T* node);
+bool has_next_linked_list(LIST_POINTER_T* node);
 
 /**
  * \brief Combines two lists by having the end of the first list point

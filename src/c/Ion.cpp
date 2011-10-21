@@ -714,7 +714,7 @@ FLOAT_T Ion::getMass(
     int real_cleavage_idx = strlen(peptide_sequence_) - cleavage_idx_;
     ion_sequence = &(peptide_sequence_[real_cleavage_idx]);
     ion_length = strlen(ion_sequence);
-    reverse = TRUE;
+    reverse = true;
   }
   // get sequence for a,b,c ion
   else{
@@ -768,7 +768,7 @@ FLOAT_T Ion::modifyMass(
 /**
  * is_modified, indiciates if there are any modification to the ion
  * speeds up the proccess if FALSE.
- *\returns TRUE if successfully computes the mass/z of the ion, else FALSE
+ *\returns true if successfully computes the mass/z of the ion, else FALSE
  */
 bool Ion::calcMassZWithMass(
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
@@ -805,7 +805,7 @@ bool Ion::calcMassZWithMass(
 /**
  * is_modified, indiciates if there are any modification to the ion
  * speeds up the proccess if FLASE.
- *\returns TRUE if successfully computes the mass/z of the ion, else FALSE
+ *\returns true if successfully computes the mass/z of the ion, else FALSE
  */
 bool Ion::calcMassZ(
   MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
@@ -844,7 +844,7 @@ void Ion::copy(
 
 
 /**
- * \returns TRUE if forward ion_type(A,B,C), 
+ * \returns true if forward ion_type(A,B,C), 
  * else reverse ion_type(X,Y,Z) FALSE
  */
 bool Ion::isForwardType()
@@ -862,7 +862,7 @@ bool Ion::isForwardType()
 }
 
 /**
- *\returns TRUE if the ion has modifications, else FALSE
+ *\returns true if the ion has modifications, else FALSE
  */
 bool Ion::isModified()
 {

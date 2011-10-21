@@ -157,7 +157,7 @@ void IonSeries::update(
     specific_ions_[ion_type_idx].clear();
   }
 
-  is_predicted_ = FALSE;
+  is_predicted_ = false;
   
   // set ion_series for new instance of peptide
   
@@ -437,7 +437,7 @@ void IonSeries::addIon(
 /**
  * helper function: add_ions
  * add all the ions to ion_series up to the max charge
- *\returns TRUE if successfully adds all ions, else FALSE
+ *\returns true if successfully adds all ions, else false
  */
 bool IonSeries::addIonsByCharge(
   FLOAT_T mass, ///< the base mass of the ion to add
@@ -477,7 +477,7 @@ bool IonSeries::addIonsByCharge(
 /**
  * Creates all the ions with no modifications up to the max charge
  * Adds each ion to ion_series
- *\returns TRUE if successfully generates all the ions, else FALSE
+ *\returns true if successfully generates all the ions, else false
  */
 bool IonSeries::generateIonsNoModification(
   FLOAT_T* mass_matrix ///< the mass matrix that stores the mass
@@ -486,7 +486,7 @@ bool IonSeries::generateIonsNoModification(
   if( mass_matrix == NULL ){
     carp(CARP_ERROR,
          "Cannot generate ions from NULL mass matrix");
-    return FALSE;
+    return false;
   }
   int cleavage_idx = 1;
   IonConstraint* constraint = constraint_;
@@ -649,7 +649,7 @@ bool IonSeries::generateIonsNoModification(
  * The modification depends on the loss/add && if the ion contains RKQN or STED
  * The number of losses possible cannot exceed the number of RKQN or STED in the ion
  * The loss_limit array in the ion_series must be populated prior to this method call
- *\returns TRUE if the ion can lose the mod_type modification, else FALSE
+ *\returns true if the ion can lose the mod_type modification, else false
  */
 bool IonSeries::canIonLoseModification(
   Ion* ion, ///< the ion to check if can lose nh3 -in
@@ -747,7 +747,7 @@ bool IonSeries::canIonLoseModification(
  * creates all the ions with specific modifications up to the max charge
  * copies all the existing ions that can be modified,
  * then applies the different modifications then adds the new modified ions to ion_series
- *\returns TRUE if successfully generates all the ions with modifications, else FALSE
+ *\returns true if successfully generates all the ions with modifications, else false
  */
 bool IonSeries::generateIons(
   ION_MODIFICATION_T mod_type ///< generate ions of this modification_type -in/out
@@ -805,7 +805,7 @@ bool IonSeries::generateIons(
  * assumes the ions with no modification all are at the begining of the ion[] in ion_series
  * copies all the existing ions that can be modified,
  * then applies the different modifications then adds the new modified ions to ion_series
- *\returns TRUE if successfully generates all the ions with modifications, else FALSE
+ *\returns true if successfully generates all the ions with modifications, else false
  */
 bool IonSeries::generateIonsFlank()
 {

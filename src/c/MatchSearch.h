@@ -41,14 +41,14 @@ class MatchSearch : public CruxApplication {
    */
   int searchPepMods(
     MatchCollection* match_collection, ///< store PSMs here
-    BOOLEAN_T is_decoy,   ///< generate decoy peptides from index/db
+    bool is_decoy,   ///< generate decoy peptides from index/db
     Index* index,       ///< index to use for generating peptides
     Database* database, ///< db to use for generating peptides
     Spectrum* spectrum, ///< spectrum to search
     SpectrumZState& zstate, ///< seach spectrum at this z-state
     PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to apply
     int num_peptide_mods, ///< how many p_mods to use from the list
-    BOOLEAN_T store_scores///< save all scores for p-value estimation
+    bool store_scores///< save all scores for p-value estimation
   );
 
   /**
@@ -66,7 +66,7 @@ class MatchSearch : public CruxApplication {
     MatchCollection* target_psms, ///< target psms to print
     vector<MatchCollection*>& decoy_psms, ///< decoy psms to print
     Spectrum* spectrum, ///< spectrum for all psms
-    BOOLEAN_T combine_target_decoy, ///< print target and decoys to same file
+    bool combine_target_decoy, ///< print target and decoys to same file
     int num_decoy_files ///< number of decoy files to print to
    );
 

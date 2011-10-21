@@ -27,7 +27,7 @@
  * specified sorted order.(mass, length, lexical)
  */
 struct sorted_peptide_iterator {
-  BOOLEAN_T use_database; ///< are we using the database or bin? TRUE if database, use linklist else array
+  bool use_database; ///< are we using the database or bin? true if database, use linklist else array
   
   /**for sorting with linklist ****/
   // use linklist for database fasta peptide sorting
@@ -260,7 +260,7 @@ PEPTIDE_WRAPPER_T* merge(
   PEPTIDE_WRAPPER_T* wrapper_one, ///< fist peptide wrapper list -in
   PEPTIDE_WRAPPER_T* wrapper_two, ///< second peptide wrapper list -in
   SORT_TYPE_T sort_type, ///< the sort type of the new merged list -in
-  BOOLEAN_T unique ///< do you merge two lists into a unique list? -in
+  bool unique ///< do you merge two lists into a unique list? -in
   )
 {
   PEPTIDE_WRAPPER_T* wrapper_final = NULL;
@@ -311,7 +311,7 @@ PEPTIDE_WRAPPER_T* merge(
     else{
       int compared_mass = -1;
 
-      // if duplicate peptide, merge into one peptide only if unique is TRUE
+      // if duplicate peptide, merge into one peptide only if unique is true
       if(compared == 0 && unique){
         // only check if same peptide if mass is identical
         if(sort_type == SORT_MASS ||
@@ -385,7 +385,7 @@ PEPTIDE_WRAPPER_T** split(
   PEPTIDE_WRAPPER_T* split1_current = split1;
   PEPTIDE_WRAPPER_T* split2 = NULL;
   PEPTIDE_WRAPPER_T* split2_current = split2;
-  BOOLEAN_T one = TRUE;
+  bool one = true;
 
   // split wrapper until no more wrapper left in wrapper_src
   while(wrapper_src != NULL){
@@ -401,7 +401,7 @@ PEPTIDE_WRAPPER_T** split(
         split1_current->next_wrapper = wrapper_src;
         split1_current = split1_current->next_wrapper;
       }
-      one = FALSE;
+      one = false;
     }
     // add to second list
     else{
@@ -415,7 +415,7 @@ PEPTIDE_WRAPPER_T** split(
         split2_current->next_wrapper = wrapper_src;
         split2_current = split2_current->next_wrapper;
       }
-      one = TRUE;
+      one = true;
     }
     wrapper_src = wrapper_src->next_wrapper;
   }
@@ -441,7 +441,7 @@ PEPTIDE_WRAPPER_T** split(
 PEPTIDE_WRAPPER_T* merge_sort(
   PEPTIDE_WRAPPER_T* wrapper_list, ///< the list of wrappers to sort -in
   SORT_TYPE_T sort_type, ///<the sort type (length, mass, lexicographical) -in
-  BOOLEAN_T unique ///< return a list of unique peptides? -in
+  bool unique ///< return a list of unique peptides? -in
   )
 {
   PEPTIDE_WRAPPER_T* final_sorted_list = NULL;
@@ -544,7 +544,7 @@ Peptide** sort_peptide_array(
   Peptide** peptide_array, ///< the list of peptide to sort -in/out
   unsigned int peptide_count, ///< peptide count in array(array size) -in
   SORT_TYPE_T sort_type, ///<the sort type (length, mass, lexicographical) -in
-  BOOLEAN_T unique, ///< return a list of unique peptides? -in
+  bool unique, ///< return a list of unique peptides? -in
   unsigned int* unique_peptide_count ///< The unique peptide count in array and/or new peptide count -out
   )
 {
@@ -586,7 +586,7 @@ unsigned long total_number_peptide = 0;
 SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator, ///< the peptide iterator to extend -in
   SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
-  BOOLEAN_T unique, ///< only return unique peptides? -in
+  bool unique, ///< only return unique peptides? -in
   unsigned int peptide_count ///< the total peptide count in the bin -in
   )
 {  
@@ -597,7 +597,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
     (SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(SORTED_PEPTIDE_ITERATOR_T));
 
   // we are using bin sorting
-  sorted_peptide_iterator->use_database = FALSE;
+  sorted_peptide_iterator->use_database = false;
 
   // create an array of peptides to sort
   sorted_peptide_iterator->peptide_array =
@@ -638,14 +638,14 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
 SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator, ///< the peptide iterator to extend -in
   SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
-  BOOLEAN_T unique, ///< only return unique peptides? -in
+  bool unique, ///< only return unique peptides? -in
   unsigned int peptide_count ///< the total peptide count in the bin -in
   )
 {
   PEPTIDE_WRAPPER_T* master_list_wrapper = NULL;
   PEPTIDE_WRAPPER_T* list_wrapper = NULL;
   PEPTIDE_WRAPPER_T* current_wrapper = NULL;
-  BOOLEAN_T start = TRUE;
+  bool start = true;
   
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =
     (SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(SORTED_PEPTIDE_ITERATOR_T));
@@ -659,7 +659,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
     }
     
     if(start){
-      start = FALSE;
+      start = false;
       current_wrapper =
         wrap_peptide(bin_peptide_iterator_next(bin_peptide_iterator));
       list_wrapper = current_wrapper;
@@ -690,28 +690,28 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
 
 /**
  * The basic iterator functions.
- * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
+ * \returns true if there are additional peptides to iterate over, false if not.
  */
-BOOLEAN_T sorted_peptide_iterator_has_next(
+bool sorted_peptide_iterator_has_next(
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator ///< the iterator of interest -in
   )
 {
   // are we using peptides from database or bin(aka, linklist or array implementation)?
   switch (sorted_peptide_iterator->use_database){
     
-  case FALSE: // use array implementation
+  case false: // use array implementation
     if(sorted_peptide_iterator->current_idx < sorted_peptide_iterator->peptide_count){
-      return TRUE;
+      return true;
     }
     break;
-  case TRUE:  // use linklist implementation
+  case true:  // use linklist implementation
     if(sorted_peptide_iterator->peptide_wrapper != NULL){
-      return TRUE;
+      return true;
     }
     break;
   }
   
-  return FALSE;
+  return false;
 }
 
 /**
@@ -727,11 +727,11 @@ Peptide* sorted_peptide_iterator_next(
   // are we using peptides from database or bin(aka, linklist or array implementation)?
   switch (sorted_peptide_iterator->use_database){
   
-  case FALSE: // use array implementation
+  case false: // use array implementation
     next_peptide = sorted_peptide_iterator->peptide_array[sorted_peptide_iterator->current_idx];
     ++sorted_peptide_iterator->current_idx;
     break;
-  case TRUE:  // use linklist implementation
+  case true:  // use linklist implementation
     // strip the peptide out of the peptide wrapper
     next_peptide = sorted_peptide_iterator->peptide_wrapper->peptide;
     // free the empty peptide wrapper
@@ -756,7 +756,7 @@ void free_sorted_peptide_iterator(
   // are we using peptides from database or bin(aka, linklist or array implementation)?
   switch (sorted_peptide_iterator->use_database){
 
-  case FALSE: // use array implementation
+  case false: // use array implementation
     // free all unused peptides
     while(sorted_peptide_iterator->current_idx < sorted_peptide_iterator->peptide_count){
       delete sorted_peptide_iterator->peptide_array[sorted_peptide_iterator->current_idx++];
@@ -764,7 +764,7 @@ void free_sorted_peptide_iterator(
     // free peptide array
     free(sorted_peptide_iterator->peptide_array);
     break;
-  case TRUE:  // use linklist implementation    
+  case true:  // use linklist implementation    
     // free all unused peptide wrappers the iterator contains
     while(sorted_peptide_iterator->peptide_wrapper != NULL){
       old_wrapper = sorted_peptide_iterator->peptide_wrapper;

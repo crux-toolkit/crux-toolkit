@@ -29,7 +29,7 @@ void mpi_setup(){
   force_set_aa_mod_list(amod_list, 3);
 
   pmod1 = new_peptide_mod();
-  dbase = new Database("input-data/test.fasta", FALSE);
+  dbase = new Database("input-data/test.fasta", false);
   zstate.setNeutralMass(1268, 1);
 
   //iter1 = new_modified_peptides_iterator_from_mass(1566, pmod1, NULL, dbase);
@@ -82,8 +82,8 @@ START_TEST(test_has_next_one_mod){
   // create the peptide mod
   aa_mod_set_mass_change(amod1, 10);
   aa_mod_set_max_per_peptide(amod1, 1);
-  BOOLEAN_T* aas = aa_mod_get_aa_list(amod1);
-  aas['Q' - 'A'] = TRUE;
+  bool* aas = aa_mod_get_aa_list(amod1);
+  aas['Q' - 'A'] = true;
   //aamod1 should have max 1 +10 on Q
   peptide_mod_add_aa_mod(pmod1, 0, 1); // aamod is index 0, 1 copy
   zstate.setNeutralMass(1268+10, 1);
@@ -132,8 +132,8 @@ END_TEST
 START_TEST(test_all_pep){
   aa_mod_set_mass_change(amod1, -89);
   aa_mod_set_max_per_peptide(amod1, 1);
-  BOOLEAN_T* aas = aa_mod_get_aa_list(amod1);
-  aas['Q' - 'A'] = TRUE;
+  bool* aas = aa_mod_get_aa_list(amod1);
+  aas['Q' - 'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 0, 1); // aamod is index 0, 1 copy
 
   iter3 = new ModifiedPeptidesIterator(pmod1, NULL, dbase);
@@ -163,10 +163,10 @@ START_TEST(test_looksee){
 
   /*
   // one change per peptide on one of three aas
-  BOOLEAN_T* aas = aa_mod_get_aa_list(amod2);
-  aas['Q' - 'A'] = TRUE;
-  aas['V' - 'A'] = TRUE;
-  aas['L' - 'A'] = TRUE;
+  bool* aas = aa_mod_get_aa_list(amod2);
+  aas['Q' - 'A'] = true;
+  aas['V' - 'A'] = true;
+  aas['L' - 'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 1, 1); // aamod is index 1, 1 copy
   printf("One copy of @ on Q,V,L\n");
   iter3 = new_modified_peptides_iterator_from_mass(1268, pmod1, NULL, dbase);
@@ -179,7 +179,7 @@ START_TEST(test_looksee){
 
   printf("One copy of @ on Q,V,L and two copies of * on T\n");
   aas = aa_mod_get_aa_list(amod1);
-  aas['T' - 'A'] = TRUE;
+  aas['T' - 'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 0, 2); // aamod is index 1, 1 copy
   iter3 = new_modified_peptides_iterator_from_mass(1268, pmod1, NULL, dbase);
   while( modified_peptides_iterator_has_next(iter3)){

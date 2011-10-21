@@ -210,24 +210,24 @@ void* get_data_linked_list(LIST_POINTER_T* node){
 
 /**
  * \brief Is this list empty?
- * \returns TRUE if node->next is NULL, else FALSE
+ * \returns true if node->next is NULL, else false
  */
-BOOLEAN_T is_empty_linked_list(LINKED_LIST_T* head){
+bool is_empty_linked_list(LINKED_LIST_T* head){
   if( head == NULL || head->next == NULL ){
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 /**
  * \brief Is this list element at the end of the list?
- * \returns FALSE if node->next is NULL, else TRUE
+ * \returns false if node->next is NULL, else true
  */
-BOOLEAN_T has_next_linked_list(LIST_POINTER_T* node){
+bool has_next_linked_list(LIST_POINTER_T* node){
   if( node == NULL || node->next == NULL ){
-    return FALSE;
+    return false;
   }
-  return TRUE;
+  return true;
 }
 
 /**

@@ -45,8 +45,8 @@ extern char* pre_cleavage_list;
 extern char* post_cleavage_list;
 extern int pre_list_size;
 extern int post_list_size;
-extern BOOLEAN_T pre_for_inclusion;
-extern BOOLEAN_T post_for_inclusion;
+extern bool pre_for_inclusion;
+extern bool post_for_inclusion;
 
 // TODO (BF 1-28-08): these should be private. move to parameter.c
 /**
@@ -72,7 +72,7 @@ enum parameter_type {
   DIGEST_TYPE_P,   ///< parameters of type DIGEST_T
   ENZYME_TYPE_P,     ///< parameters of type ENZUME_T
   //PEPTIDE_TYPE_P,    ///< parameters of type PEPTIDE_TYPE_T
-  BOOLEAN_P,         ///< parameters of type BOOLEAN_T
+  BOOLEAN_P,         ///< parameters of type bool
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
   ION_TYPE_P,        ///< parameters of type ION_TYPE_T
   ALGORITHM_TYPE_P,  ///< parameters of type ALGORITHM_TYPE_T
@@ -108,7 +108,7 @@ void free_parameters(void);
  * Requires that initialize_parameters() has been run.
  * /returns TRUE on success.
  */
-BOOLEAN_T select_cmd_line_options(const char**, int);
+bool select_cmd_line_options(const char**, int);
 
 /**
  * /brief Identify the required command line arguments.
@@ -117,7 +117,7 @@ BOOLEAN_T select_cmd_line_options(const char**, int);
  * Requires that initialize_parameters() has been run.
  * /returns TRUE on success.
  */
-BOOLEAN_T select_cmd_line_arguments(const char**, int);
+bool select_cmd_line_arguments(const char**, int);
 
 /**
  * Take the command line string from main, find the parameter fil
@@ -125,7 +125,7 @@ BOOLEAN_T select_cmd_line_arguments(const char**, int);
  * the command line options and arguments into the hash
  * main then retrieves the values through get_value
  */
-BOOLEAN_T parse_cmd_line_into_params_hash(int, char**, const char*);
+bool parse_cmd_line_into_params_hash(int, char**, const char*);
 
 /**
  * Each of the following functions searches through the hash table of
@@ -133,7 +133,7 @@ BOOLEAN_T parse_cmd_line_into_params_hash(int, char**, const char*);
  * function returns the corresponding value.
  * \returns TRUE if paramater value is TRUE, else FALSE
  */ 
-BOOLEAN_T get_boolean_parameter(
+bool get_boolean_parameter(
  const char*     name  ///< the name of the parameter looking for -in
  );
 

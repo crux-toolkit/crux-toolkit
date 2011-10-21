@@ -11,7 +11,7 @@
 #include <iostream>
 
 // from parameter.cpp
-BOOLEAN_T reset_parameter(const char* name, const char* value);
+bool reset_parameter(const char* name, const char* value);
 
 using namespace std;
 

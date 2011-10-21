@@ -47,10 +47,10 @@ MatchSearch::~MatchSearch() {
 
 /**
  * \brief Look at matches and search parameters to determine if a
- * sufficient number PSMs have been found.  Returns TRUE if the
+ * sufficient number PSMs have been found.  Returns true if the
  * maximum number of modifications per peptide have been considered.
  * In the future, implement and option and test for a minimum score.
- * \returns TRUE if no more PSMs need be searched.
+ * \returns true if no more PSMs need be searched.
  */
 bool MatchSearch::isSearchComplete(
   MatchCollection* matches, ///< matches to consider
@@ -89,14 +89,14 @@ bool MatchSearch::isSearchComplete(
  */
 int MatchSearch::searchPepMods(
   MatchCollection* match_collection, ///< store PSMs here
-  BOOLEAN_T is_decoy,   ///< generate decoy peptides from index/db
+  bool is_decoy,   ///< generate decoy peptides from index/db
   Index* index,       ///< index to use for generating peptides
   Database* database, ///< db to use for generating peptides
   Spectrum* spectrum, ///< spectrum to search
   SpectrumZState& zstate, ///< seach spectrum at this z-state
   PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to apply
   int num_peptide_mods, ///< how many p_mods to use from the list
-  BOOLEAN_T store_scores///< save all scores for p-value estimation
+  bool store_scores///< save all scores for p-value estimation
   ){
 
   // set match_collection charge
@@ -120,7 +120,7 @@ int MatchSearch::searchPepMods(
     
     if( this_aa_mods > cur_aa_mods ){
       carp(CARP_DEBUG, "Finished searching %i mods", cur_aa_mods);
-      BOOLEAN_T passes = isSearchComplete(match_collection, cur_aa_mods);
+      bool passes = isSearchComplete(match_collection, cur_aa_mods);
       if( passes ){
         carp(CARP_DETAILED_DEBUG, 
              "Ending search with %i modifications per peptide", cur_aa_mods);
@@ -149,7 +149,7 @@ int MatchSearch::searchPepMods(
                             is_decoy,
                             store_scores,
                             get_boolean_parameter("compute-sp"),
-                            FALSE // don't filtery by Sp
+                            false // don't filtery by Sp
                             );
     
     carp(CARP_DEBUG, "Added %i matches", added);
@@ -176,12 +176,12 @@ void MatchSearch::printSpectrumMatches(
   MatchCollection* target_psms, ///< target psms to print
   vector<MatchCollection*>& decoy_psms, ///< decoy psms to print
   Spectrum* spectrum, ///< spectrum for all psms
-  BOOLEAN_T combine_target_decoy, ///< print targets and decoys to one file
+  bool combine_target_decoy, ///< print targets and decoys to one file
   int num_decoy_files ///< number of decoy files to print
   ){
 
   // now print matches to one, two or several files
-  if( combine_target_decoy == TRUE ){
+  if( combine_target_decoy == true ){
     // merge all collections
     MatchCollection* all_psms = target_psms;
     for(size_t decoy_idx = 0; decoy_idx < decoy_psms.size(); decoy_idx++){
@@ -189,7 +189,7 @@ void MatchSearch::printSpectrumMatches(
     }
     
     // sort and rank
-    if( all_psms->getScoredType(SP) == TRUE ){
+    if( all_psms->getScoredType(SP) == true ){
       all_psms->populateMatchRank(SP);
     }
     all_psms->populateMatchRank(XCORR);
@@ -254,7 +254,7 @@ void MatchSearch::addDecoyScores(
       new ModifiedPeptidesIterator(spectrum->getPrecursorMz(),
                                    zstate,
                                    peptide_mods[mod_idx],
-                                   TRUE, // is decoy
+                                   true, // is decoy
                                    index,
                                    database);
     target_psms->addDecoyScores(spectrum, 
@@ -329,7 +329,7 @@ int MatchSearch::main(int argc, char** argv){
   
   /* Prepare output files */
 
-  BOOLEAN_T combine_target_decoy = get_boolean_parameter("tdc");
+  bool combine_target_decoy = get_boolean_parameter("tdc");
   OutputFiles output_files(this); 
   output_files.writeHeaders(num_proteins, combine_target_decoy);
   // TODO (BF oct-21-09): consider adding pvalue file to OutputFiles
@@ -354,7 +354,7 @@ int MatchSearch::main(int argc, char** argv){
     new FilteredSpectrumChargeIterator(spectra);
 
   // get search parameters for match_collection
-  BOOLEAN_T compute_pvalues = get_boolean_parameter("compute-p-values");
+  bool compute_pvalues = get_boolean_parameter("compute-p-values");
   int num_decoy_files = get_int_parameter("num-decoy-files");
 
   // For remembering and reporting number of searches
@@ -374,7 +374,7 @@ int MatchSearch::main(int argc, char** argv){
     Spectrum* spectrum = spectrum_iterator->next(zstate);
     int charge = zstate.getCharge();
     
-    BOOLEAN_T is_decoy = FALSE;
+    bool is_decoy = false;
 
     progress.report(spectrum->getFirstScan(), charge);
 
@@ -396,12 +396,12 @@ int MatchSearch::main(int argc, char** argv){
       carp(CARP_WARNING, "No matches found for spectrum %i, charge %i",
            spectrum->getFirstScan(), charge);
       delete target_psms;
-      progress.increment(FALSE);
+      progress.increment(false);
       continue; // next spectrum
     }
     
     // now search decoys with the same number of mods
-    is_decoy = TRUE;
+    is_decoy = true;
     // create separate decoy match_collections 
     vector<MatchCollection*> decoy_collection_list;
 
@@ -425,7 +425,7 @@ int MatchSearch::main(int argc, char** argv){
 
     // calculate p-values for each collection of PSMs separately
     // use targets to get Weibull parameters, use same params for decoys
-    if( compute_pvalues == TRUE ){
+    if( compute_pvalues == true ){
 
       carp(CARP_DEBUG, "Estimating Weibull parameters.");
       while( ! target_psms->hasEnoughWeibullPoints() ){
@@ -458,7 +458,7 @@ int MatchSearch::main(int argc, char** argv){
                            combine_target_decoy, 
                            num_decoy_files);
 
-    progress.increment(TRUE);
+    progress.increment(true);
 
     // clean up
     delete target_psms;

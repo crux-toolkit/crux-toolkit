@@ -35,7 +35,7 @@ void param_teardown(){
 
 START_TEST(test_create){
   // check getters for each type (TODO)
-  fail_unless( get_boolean_parameter("overwrite") == FALSE, 
+  fail_unless( get_boolean_parameter("overwrite") == false, 
               "Does not return the bool parameter %s correctly", "overwrite");
 
 }
@@ -57,7 +57,7 @@ START_TEST(test_mod){
 
   set_verbosity_level(30);
   // parse command line and param file
-  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==TRUE,
+  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==true,
               "Failed to parse param file %s with mods", "1mod");
 
   // get standard mods
@@ -88,7 +88,7 @@ START_TEST(test_mod){
 
   free(fake_argv[2]);
   fake_argv[2] = my_copy_string("params/2mod");
-  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==TRUE,
+  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==true,
               "Failed to parse param file %s with mods", "2mod");
   fail_unless( get_aa_mod_list(&mod_list) == 1,
             "Got an incorrect number of mods, %d", get_aa_mod_list(&mod_list));
@@ -114,7 +114,7 @@ START_TEST(test_mod){
 
   free(fake_argv[2]);
   fake_argv[2] = my_copy_string("params/3mod");
-  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==TRUE,
+  fail_unless(parse_cmd_line_into_params_hash(4, fake_argv, "test-app")==true,
               "Failed to parse param file %s with mods", "2mod");
   fail_unless( get_aa_mod_list(&mod_list) == 0,
             "Got an incorrect number of mods, %d", get_aa_mod_list(&mod_list));
@@ -143,20 +143,20 @@ START_TEST(test_enzyme){
   fail_unless(post_list_size == 0, 
               "Custom enzyme post-cleavage site list size should be "
               "initialized to 0 but is %i", post_list_size);
-  fail_unless(pre_for_inclusion == TRUE,
-              "Pre_for_inclusion should be initialized to TRUE but is not.");
-  fail_unless(post_for_inclusion == FALSE,
-              "Post_for_inclusion should be initialized to FALSE but is not.");
+  fail_unless(pre_for_inclusion == true,
+              "Pre_for_inclusion should be initialized to true but is not.");
+  fail_unless(post_for_inclusion == false,
+              "Post_for_inclusion should be initialized to false but is not.");
 
   // try various strings and see that they work
   // can't test error cases b/c parse_ dies on error
   strcpy(enzyme_rule, "[RK]|{P}");
   parse_custom_enzyme(enzyme_rule);
-  fail_unless(pre_for_inclusion == TRUE,
-              "For rule %s, pre_for_inclusion should be TRUE but is not.",
+  fail_unless(pre_for_inclusion == true,
+              "For rule %s, pre_for_inclusion should be true but is not.",
               enzyme_rule);
-  fail_unless(post_for_inclusion == FALSE,
-              "For rule %s, post_for_inclusion should be FALSE but is not.",
+  fail_unless(post_for_inclusion == false,
+              "For rule %s, post_for_inclusion should be false but is not.",
               enzyme_rule);
   fail_unless(pre_list_size == 2, 
               "For rule %s pre-cleavage site list size should be "
@@ -190,11 +190,11 @@ START_TEST(test_enzyme){
 
   strcpy(enzyme_rule, "[PML]|[D]");
   parse_custom_enzyme(enzyme_rule);
-  fail_unless(pre_for_inclusion == TRUE,
-              "For rule %s, pre_for_inclusion should be TRUE but is not.",
+  fail_unless(pre_for_inclusion == true,
+              "For rule %s, pre_for_inclusion should be true but is not.",
               enzyme_rule);
-  fail_unless(post_for_inclusion == TRUE,
-              "For rule %s, post_for_inclusion should be TRUE but is not.",
+  fail_unless(post_for_inclusion == true,
+              "For rule %s, post_for_inclusion should be true but is not.",
               enzyme_rule);
   fail_unless(pre_list_size == 3, 
               "For rule %s pre-cleavage site list size should be "
@@ -231,11 +231,11 @@ START_TEST(test_enzyme){
 
   strcpy(enzyme_rule, "{ABCDEFG}|[HIGK]");
   parse_custom_enzyme(enzyme_rule);
-  fail_unless(pre_for_inclusion == FALSE,
-              "For rule %s, pre_for_inclusion should be FALSE but is not.",
+  fail_unless(pre_for_inclusion == false,
+              "For rule %s, pre_for_inclusion should be false but is not.",
               enzyme_rule);
-  fail_unless(post_for_inclusion == TRUE,
-              "For rule %s, post_for_inclusion should be TRUE but is not.",
+  fail_unless(post_for_inclusion == true,
+              "For rule %s, post_for_inclusion should be true but is not.",
               enzyme_rule);
   fail_unless(pre_list_size == 7, 
               "For rule %s pre-cleavage site list size should be "
@@ -259,11 +259,11 @@ START_TEST(test_enzyme){
 
   strcpy(enzyme_rule, "[X]|[X]");
   parse_custom_enzyme(enzyme_rule);
-  fail_unless(pre_for_inclusion == FALSE,
-              "For rule %s, pre_for_inclusion should be FALSE but is not.",
+  fail_unless(pre_for_inclusion == false,
+              "For rule %s, pre_for_inclusion should be false but is not.",
               enzyme_rule);
-  fail_unless(post_for_inclusion == FALSE,
-              "For rule %s, post_for_inclusion should be FALSE but is not.",
+  fail_unless(post_for_inclusion == false,
+              "For rule %s, post_for_inclusion should be false but is not.",
               enzyme_rule);
   fail_unless(pre_list_size == 0, 
               "For rule %s pre-cleavage site list size should be "

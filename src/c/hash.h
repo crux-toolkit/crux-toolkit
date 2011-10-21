@@ -30,7 +30,7 @@ void free_hash(
  * If finds duplicate key, just increase count by 1
  *\returns TRUE if successfully adds to new record, else FALSE
  */
-BOOLEAN_T add_hash(
+bool add_hash(
   HASH_T* h, ///< Hash object to add -in/out
   const char *key, ///< key of the record to add -in
   const void *value ///< value to add to be hashed if needed -in
@@ -42,7 +42,7 @@ BOOLEAN_T add_hash(
  * Copies the value, thus no need to pass in a heap allocated value
  *\returns TRUE if successfully updates hash value, else FALSE
  */
-BOOLEAN_T update_hash_value(
+bool update_hash_value(
   HASH_T* h, ///< Hash object to add -in/out
   const char *key, ///< key of the record to update -in
   const void *value ///< value to add to be hash -in
@@ -53,7 +53,7 @@ BOOLEAN_T update_hash_value(
  * Must already have a existing value for the key
  *\returns TRUE if successfully updates hash value, else FALSE
  */
-BOOLEAN_T add_or_update_hash(
+bool add_or_update_hash(
   HASH_T* h, ///< Hash object to add to -in/out
   const char *key, ///< key of the record to add or update -in
   const void *value ///< value to associate with the key -in
@@ -110,7 +110,7 @@ HASH_ITERATOR_T* new_hash_iterator(
  * This is implemented inefficiently, visiting each possible RECORD once.
  * \returns TRUE, if hash iterator has a next hash, else FALSE
  */
-BOOLEAN_T hash_iterator_has_next(
+bool hash_iterator_has_next(
   HASH_ITERATOR_T* hash_iterator ///< the working  hash iterator -in
   );
 

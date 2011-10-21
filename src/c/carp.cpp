@@ -34,7 +34,7 @@ int get_verbosity_level(void){
  */
 void open_log_file(char **log_file_name) {
   char* output_dir = get_string_parameter("output-dir");
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  bool overwrite = get_boolean_parameter("overwrite");
   prefix_fileroot_to_name(log_file_name);
   log_file = create_file_in_path(*log_file_name, output_dir, overwrite);
   free(output_dir);

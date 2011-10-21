@@ -55,7 +55,7 @@ static const int NUM_MS2_ARGUMENTS = 2;
 int main(int argc, char** argv){
 
   /* Declarations */
-  BOOLEAN_T options = FALSE; ///< do we want options?
+  bool options = false; ///< do we want options?
 
   /* Define optional command line arguments */
   int num_options = NUM_MS2_OPTIONS;

@@ -108,8 +108,8 @@ END_TEST
 
 // Test the is_aa_modifieable() function
 START_TEST(test_is_modifiable){
-  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod3);
-  mod_us['D' - 'A'] = TRUE;
+  bool* mod_us = aa_mod_get_aa_list(amod3);
+  mod_us['D' - 'A'] = true;
   fail_unless( is_aa_modifiable(mod_aa_D, amod3),
                "aa_D should be modifiable by amod3.");
 
@@ -225,7 +225,7 @@ START_TEST(test_mod_to_string){
                "mod as string should be 'D' but is '%s'", mod_as_text);
   free(mod_as_text);
 
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, precision );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, false, precision );
   fail_unless( strcmp(mod_as_text, "D") == 0,
                "mod as string should be 'D' but is '%s'", mod_as_text);
   free(mod_as_text);
@@ -237,7 +237,7 @@ START_TEST(test_mod_to_string){
                "mod as string should be 'D#' but is '%s'", mod_as_text);
   free(mod_as_text);
 
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, precision );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, false, precision );
   fail_unless( strcmp(mod_as_text, "D[56.78]") == 0,
                "mod as string should be 'D[56.78]' but is '%s'", mod_as_text);
   free(mod_as_text);
@@ -249,12 +249,12 @@ START_TEST(test_mod_to_string){
                "mod as string should be 'D*#@' but is '%s'", mod_as_text);
   free(mod_as_text);
 
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, TRUE, precision );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, true, precision );
   fail_unless( strcmp(mod_as_text, "D[-39.82]") == 0,
                "mod as string should be 'D[-39.82]' but is '%s'", mod_as_text);
   free(mod_as_text);
 
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, precision );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, false, precision );
   fail_unless( strcmp(mod_as_text, "D[3.40,56.78,-100.00]") == 0,
                "mod as string should be 'D[3.40,56.78,-100.00]' but is '%s'", 
                mod_as_text);
@@ -271,13 +271,13 @@ START_TEST(test_mod_to_string_precision){
   // modify an aa
   mod_aa_D = mod_aa_D | 0x0040; // second aa mod in param list
 
-  char* mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, 3 );
+  char* mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, false, 3 );
   fail_unless( strcmp(mod_as_text, "D[56.785]") == 0,
                "precision 3 mod should be D[56.785] but is %s.", mod_as_text);
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, 4 );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, false, 4 );
   fail_unless( strcmp(mod_as_text, "D[56.7850]") == 0,
                "precision 3 mod should be D[56.7850] but is %s.", mod_as_text);
-  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, FALSE, 2 );
+  mod_as_text = modified_aa_to_string_with_masses( mod_aa_D, false, 2 );
   fail_unless( strcmp(mod_as_text, "D[56.78]") == 0,
                "precision 3 mod should be D[56.78] but is %s.", mod_as_text);
 
@@ -304,7 +304,7 @@ START_TEST(test_mod_str_to_string){
                "Seq %s should equal %s", seq, modchar_seq);
 
   free(modchar_seq);
-  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, FALSE);
+  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, false);
   fail_unless( strcmp(modchar_seq, seq) == 0,
                "Seq %s should equal %s", seq, modchar_seq);
 
@@ -333,14 +333,14 @@ START_TEST(test_mod_str_to_string){
                "Seq %s should equal %s", modchar_seq, "GB#BKA*@TRM#@");
 
   free(modchar_seq);
-  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, FALSE);
+  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, false);
   fail_unless( strcmp(modchar_seq, 
                       "GB[56.78]BKA[3.40,-100.00]TRM[56.78,-100.00]") == 0,
                "Seq %s should equal %s", modchar_seq, 
                "GB[56.78]BKA[3.40,-100.00]TRM[56.78,-100.00]");
 
   free(modchar_seq);
-  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, TRUE);
+  modchar_seq = modified_aa_string_to_string_with_masses(modaa_seq, len, true);
   fail_unless( strcmp(modchar_seq, "GB[56.78]BKA[-96.60]TRM[-43.22]") == 0,
                "Seq %s should equal %s", modchar_seq,
                "GB[56.78]BKA[-96.60]TRM[-43.22]");
@@ -485,7 +485,7 @@ START_TEST(test_string_to_aa_mod_str){
   }
 
   // repeat test from masses, GB[56.78]BKA[-96.60]TRM[-43.22]
-  seq = modified_aa_string_to_string_with_masses(modaa_seq, len, TRUE);
+  seq = modified_aa_string_to_string_with_masses(modaa_seq, len, true);
   free(converted_modaa_seq);
   convert_len = convert_to_mod_aa_seq(seq, &converted_modaa_seq);
   fail_unless( convert_len == len,
@@ -498,7 +498,7 @@ START_TEST(test_string_to_aa_mod_str){
   }
 
   // repeat with masses not merged, GB[56.78]BKA[3.40,-100.00]TRM[56.78,-100.00]
-  seq = modified_aa_string_to_string_with_masses(modaa_seq, len, FALSE);
+  seq = modified_aa_string_to_string_with_masses(modaa_seq, len, false);
   free(converted_modaa_seq);
   convert_len = convert_to_mod_aa_seq(seq, &converted_modaa_seq);
   fail_unless( convert_len == len,
@@ -540,7 +540,7 @@ START_TEST(test_palindrome){
   MODIFIED_AA_T* mod_seq = NULL;
   convert_to_mod_aa_seq(seq, &mod_seq);
 
-  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == false,
                "The seq %s should not be a palindrome.", seq);
 
   // try a palindrome
@@ -548,7 +548,7 @@ START_TEST(test_palindrome){
   len = strlen(seq);
   free(mod_seq);
   convert_to_mod_aa_seq(seq, &mod_seq);
-  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == true,
                "The seq %s should be a palindrome.", seq);
 
   // try a palindrome of odd length
@@ -556,19 +556,19 @@ START_TEST(test_palindrome){
   len = strlen(seq);
   free(mod_seq);
   convert_to_mod_aa_seq(seq, &mod_seq);
-  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == true,
                "The seq %s should be a palindrome.", seq);
 
   // modify half making it not a palindrome
   force_set_aa_mod_list(amod_list, 3);  // in setup???
   modify_aa(&mod_seq[2], amod1);
-  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == false,
                "The modified seq %s should not be a palindrome.", 
                modified_aa_string_to_string_with_symbols(mod_seq, len));
 
   // modify the other half returning it to a palindrome
   modify_aa(&mod_seq[6], amod1);
-  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == true,
                "The modified seq %s should be a palindrome.", 
                modified_aa_string_to_string_with_symbols(mod_seq, len));
 
@@ -578,7 +578,7 @@ START_TEST(test_palindrome){
   len = strlen(seq);
   free(mod_seq);
   convert_to_mod_aa_seq(seq, &mod_seq);
-  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == FALSE,
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == false,
                "The seq %s should not be a palindrome.", seq);
 
   // try a short seq
@@ -586,7 +586,7 @@ START_TEST(test_palindrome){
   len = strlen(seq);
   free(mod_seq);
   convert_to_mod_aa_seq(seq, &mod_seq);
-  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == TRUE,
+  fail_unless( modified_aa_seq_is_palindrome(mod_seq, len) == true,
                "The seq %s should not be a palindrome.", seq);
 
 }

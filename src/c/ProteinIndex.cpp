@@ -70,7 +70,7 @@ bool ProteinIndex::create(
   }
 
   // get output file
-  output_file = get_output_file(fasta_file, FALSE);
+  output_file = get_output_file(fasta_file, false);
 
   // check if succesfully created file
   if(output_file == NULL){
@@ -131,7 +131,7 @@ void free_protein_index(
  * should have been created.
  * or if creating binary fasta file, is that already on disk?
  *
- *\returns TRUE if protein index or binary fasta file is on disk, else FALSE
+ *\returns TRUE if protein index or binary fasta file is on disk, else false
  */
 bool ProteinIndex::onDisk(
   const char* fasta_file, ///< input fasta file -in

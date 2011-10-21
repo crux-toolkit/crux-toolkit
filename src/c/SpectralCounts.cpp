@@ -414,7 +414,7 @@ void SpectralCounts::filterMatches()
   while (match_collection_it->hasNext()){
     
     match_collection = match_collection_it->next();
-    match_iterator = new MatchIterator(match_collection, XCORR, TRUE);
+    match_iterator = new MatchIterator(match_collection, XCORR, true);
     
     // figure out which qvalue we are using
     SCORER_TYPE_T qval_type = get_qval_type(match_collection);

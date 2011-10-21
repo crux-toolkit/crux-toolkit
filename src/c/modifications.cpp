@@ -43,7 +43,7 @@
    list and so on.  Note that each AA_MOD_T can be applied only once
    to an amino acid.  A MODIFED_AA_T can have between 0 and 11
    modifications applied to it.  There is a function that will take a
-   MODIFIED_AA_T* and the index of an AA_MOD_T and return TRUE if the
+   MODIFIED_AA_T* and the index of an AA_MOD_T and return true if the
    MODIFIED_AA_T has had the AA_MOD_T applied to it.
 
    For a textual representation of a modiciation, there are 11
@@ -85,14 +85,14 @@ unsigned short mod_id_masks[MAX_AA_MODS] =
  */
 struct _aa_mod{ 
   double mass_change;  ///< the amount by which the mass of the residue changes
-  BOOLEAN_T aa_list[AA_LIST_LENGTH];
+  bool aa_list[AA_LIST_LENGTH];
                        ///< an array indexed by AA, true if can be modified
   int max_per_peptide; ///< the maximum number of mods per peptide
   MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
   int max_distance;        ///< the max distance from the protein terminus
   char symbol;         ///< the character to represent the mod in sqt files
-  BOOLEAN_T prevents_cleavage; ///< can modification prevent cleavage?
-  BOOLEAN_T prevents_xlink; ///< can modification prevent xlink?
+  bool prevents_cleavage; ///< can modification prevent cleavage?
+  bool prevents_xlink; ///< can modification prevent xlink?
   MODIFIED_AA_T identifier; ///< the bitmask assigned for unique ID
 };
 
@@ -116,17 +116,17 @@ AA_MOD_T* new_aa_mod(int mod_idx){
   mod->max_distance = MAX_PROTEIN_SEQ_LENGTH;
   mod->symbol = mod_sqt_symbols[mod_idx];
   mod->identifier = mod_id_masks[mod_idx];
-  mod->prevents_cleavage = FALSE;
-  mod->prevents_xlink = FALSE;
+  mod->prevents_cleavage = false;
+  mod->prevents_xlink = false;
   // allocate the aa lists for mods 
   /*
   mod->aa_list =                        // all 0's?
-    (BOOLEAN_T*)mycalloc(AA_LIST_LENGTH, sizeof(BOOLEAN_T)); 
+    (bool*)mycalloc(AA_LIST_LENGTH, sizeof(bool)); 
   */
-  // initialize to FALSE
+  // initialize to false
   int aa_idx = 0;
   for(aa_idx=0; aa_idx < AA_LIST_LENGTH; aa_idx++){
-    mod->aa_list[aa_idx] = FALSE;
+    mod->aa_list[aa_idx] = false;
   }
   return mod;
 }
@@ -211,7 +211,7 @@ char* modified_aa_to_string_with_symbols(MODIFIED_AA_T aa){
  * masses in square brackets.
  */
 char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa, 
-                                        BOOLEAN_T merge_masses,
+                                        bool merge_masses,
                                         int precision){
   int modified_by = 0;
   AA_MOD_T** mod_list = NULL;
@@ -281,7 +281,7 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
 char* modified_aa_string_to_string_with_masses(
  MODIFIED_AA_T* aa_string, // the modified aa's to translate
  int length, // length of aa_string
- BOOLEAN_T merge_masses) // false==print each mod mass per aa, true== sum them
+ bool merge_masses) // false==print each mod mass per aa, true== sum them
 {
   if( aa_string == NULL || length == 0 ){
     carp(CARP_ERROR, "Cannot print a NULL modified sequence");
@@ -493,12 +493,12 @@ MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length){
  * Used by reverse_sequence to avoid returning a reversed sequence
  * that is the same as the target.  Ignores the first and last
  * residues. 
- * \returns TRUE if the reversed sequence would be the same as the
- * forward, otherwise FALSE.
+ * \returns true if the reversed sequence would be the same as the
+ * forward, otherwise false.
  */
-BOOLEAN_T modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length){
+bool modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length){
   if( seq == NULL ){
-    return FALSE;
+    return false;
   }
 
   int left_idx = 1;    // skip first and last residues
@@ -506,14 +506,14 @@ BOOLEAN_T modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length){
 
   while( left_idx < right_idx ){
     if( seq[left_idx] != seq[right_idx] ){
-      return FALSE;
+      return false;
     }// else, keep checking
     left_idx++;
     right_idx--;
   }
 
   // if we got to here, they all matched
-  return TRUE;
+  return true;
 }
 
 
@@ -532,76 +532,76 @@ void free_mod_aa_seq( MODIFIED_AA_T* seq ){
  * serialized PSMs matches those in the paramter file.
  *
  * If there was no parameter file or if it did not contain any mods,
- * return FALSE.  If the given mod list does not exactly match the
+ * return false.  If the given mod list does not exactly match the
  * mods read from the parameter file (including the order in which
- * they are listed) return FALSE.  If returning false, print a warning
+ * they are listed) return false.  If returning false, print a warning
  * with the lines that should be included in the parameter file.
  *
- * \returns TRUE if the given mods are the same as those from the
+ * \returns true if the given mods are the same as those from the
  * parameter file.
  */
-BOOLEAN_T compare_mods(AA_MOD_T** psm_file_mod_list, int file_num_mods){
+bool compare_mods(AA_MOD_T** psm_file_mod_list, int file_num_mods){
   AA_MOD_T** mod_list = NULL;
   int num_mods = get_all_aa_mod_list(&mod_list);
 
   if( num_mods != file_num_mods ){
-    return FALSE;
+    return false;
   }
   int mod_idx = 0;
   for(mod_idx=0; mod_idx<num_mods; mod_idx++){
     if( ! compare_two_mods(mod_list[mod_idx], psm_file_mod_list[mod_idx]) ){
       print_a_mod(mod_list[mod_idx]);
       print_a_mod(psm_file_mod_list[mod_idx]);
-      return FALSE;
+      return false;
     }
   }
-  return TRUE;
+  return true;
 }
 
 /**
  * \brief Compare two mods to see if they are the same, i.e. same mass
  * change, unique identifier, position
  */
-BOOLEAN_T compare_two_mods(AA_MOD_T* mod1, AA_MOD_T* mod2){
+bool compare_two_mods(AA_MOD_T* mod1, AA_MOD_T* mod2){
   if(mod1->mass_change != mod2->mass_change ){
-    return FALSE;
+    return false;
   }
   if(mod1->max_per_peptide != mod2->max_per_peptide ){
-    return FALSE;
+    return false;
   }
   if(mod1->position != mod2->position ){
-    return FALSE;
+    return false;
   }
   if(mod1->max_distance != mod2->max_distance ){
-    return FALSE;
+    return false;
   }
   if(mod1->symbol != mod2->symbol ){
-    return FALSE;
+    return false;
   }
   if(mod1->identifier != mod2->identifier ){
-    return FALSE;
+    return false;
   }
   // aa list
   int i = 0;
   for(i=0; i<AA_LIST_LENGTH; i++){
     if(mod1->aa_list[i] != mod2->aa_list[i]){
-      return FALSE;
+      return false;
     }
   }
   // everything matched
-  return TRUE;
+  return true;
 }
 
 
 // FIXME: implement this
-BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
+bool is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
 
   MODIFIED_AA_T id = mod->identifier;
   if( (aa & id) != 0 ){  // should == id
-    return TRUE;
+    return true;
   } 
 
-  return FALSE;
+  return false;
 }
 
 /**
@@ -611,22 +611,22 @@ BOOLEAN_T is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
  * Checks the mod list of modifiable residues to see if aa is in the
  * list.  Also checks to see if aa has already been modified by this
  * mod.  
- * \returns TRUE if it can be modified, else FALSE
+ * \returns true if it can be modified, else false
  */
-BOOLEAN_T is_aa_modifiable
+bool is_aa_modifiable
  (MODIFIED_AA_T aa, ///< The sequence amino acid to be modified
   AA_MOD_T* mod){   ///< The aa_mod to modify it with
 
-  if( is_aa_modified(aa, mod) == TRUE ){
-    return FALSE;
+  if( is_aa_modified(aa, mod) == true ){
+    return false;
   }
-  if( mod->aa_list[ (int)modified_aa_to_char(aa) - 'A' ] == TRUE ){
-  //if( mod->aa_list[ (int)modified_aa_to_char(aa) ] == TRUE 
+  if( mod->aa_list[ (int)modified_aa_to_char(aa) - 'A' ] == true ){
+  //if( mod->aa_list[ (int)modified_aa_to_char(aa) ] == true 
     //      && ! is_aa_modified(aa, mod)){
-    return TRUE;
+    return true;
   }
   // else not in list or already modified by this mod
-  return FALSE;
+  return false;
 }
 
 /**
@@ -703,7 +703,7 @@ void print_a_mod(AA_MOD_T* mod){
 
   int i = 0;
   for(i=0; i<AA_LIST_LENGTH; i++){
-    if( mod->aa_list[i] == TRUE ){
+    if( mod->aa_list[i] == true ){
       printf("%c", (i + 'A'));
     }
   }
@@ -740,7 +740,7 @@ char* aa_mod_to_string(AA_MOD_T* mod){
   char* str_ptr = return_str + length;
   int i = 0;
   for(i=0; i<AA_LIST_LENGTH; i++){
-    if( mod->aa_list[i] == TRUE ){
+    if( mod->aa_list[i] == true ){
       sprintf(str_ptr, "%c", (i + 'A'));
       str_ptr++;
     }
@@ -774,7 +774,7 @@ double aa_mod_get_mass_change(AA_MOD_T* mod){
  * \returns A pointer to the list of amino acids on which this mod can
  * be placed.
  */
-BOOLEAN_T* aa_mod_get_aa_list(AA_MOD_T* mod){
+bool* aa_mod_get_aa_list(AA_MOD_T* mod){
   return mod->aa_list;
 }
 
@@ -840,15 +840,15 @@ MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod){
  * \brief Sets whether the modification can prevent cleavage.
  * \returns void
  */
-void aa_mod_set_prevents_cleavage(AA_MOD_T* mod, BOOLEAN_T prevents_cleavage) {
+void aa_mod_set_prevents_cleavage(AA_MOD_T* mod, bool prevents_cleavage) {
   mod->prevents_cleavage=prevents_cleavage;
 }
 
 /**
  * \brief gets whether the modification can prevent cleavage
- * \returns TRUE or FALSE
+ * \returns true or false
  */
-BOOLEAN_T aa_mod_get_prevents_cleavage(AA_MOD_T* mod) {
+bool aa_mod_get_prevents_cleavage(AA_MOD_T* mod) {
   return mod->prevents_cleavage;
 }
 
@@ -856,15 +856,15 @@ BOOLEAN_T aa_mod_get_prevents_cleavage(AA_MOD_T* mod) {
  * \brief Sets whether the modifications can prevent cross-linking.
  * \returns void
  */
-void aa_mod_set_prevents_xlink(AA_MOD_T* mod, BOOLEAN_T prevents_xlink) {
+void aa_mod_set_prevents_xlink(AA_MOD_T* mod, bool prevents_xlink) {
   mod->prevents_xlink = prevents_xlink;
 }
 
 /**
  * \brief gets whether the modification can prevent cross-linking.
- * \returns TRUE or FALSE
+ * \returns true or false
  */
-BOOLEAN_T aa_mod_get_prevents_xlink(AA_MOD_T* mod) {
+bool aa_mod_get_prevents_xlink(AA_MOD_T* mod) {
   return mod->prevents_xlink;
 }
 
@@ -895,7 +895,7 @@ char* aa_mod_get_aa_list_string(AA_MOD_T* mod){
   char* list_string = (char*)mycalloc(AA_LIST_LENGTH+1, sizeof(char));
   int mod_idx, string_idx=0;
   for(mod_idx = 0; mod_idx < AA_LIST_LENGTH; mod_idx++){
-    if(mod->aa_list[mod_idx] == TRUE){
+    if(mod->aa_list[mod_idx] == true){
       list_string[string_idx] = (char)('A' + mod_idx);
       string_idx++;
     }

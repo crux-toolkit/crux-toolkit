@@ -9,7 +9,7 @@
 #	number of allowed missed-cleavages: 0
 #	isotopic mass type: average
 #	verbosity: 30
-#	use index: FALSE
+#	use index: false
 4511.09	gi|16127996|ref|NP_414543.1|	418	43	AALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLF
 2169.48	gi|16127996|ref|NP_414543.1|	337	20	AAMSRARISVVLITQSSSEY
 2257.66	gi|16127996|ref|NP_414543.1|	72	22	AELLTGLAAAQPGFPLAQLKTF

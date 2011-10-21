@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
   int posB = 0;
   FLOAT_T linker_mass = 0;
   int charge = 1; 
-  BOOLEAN_T print_spectrum = FALSE;
+  bool print_spectrum = false;
 
 
   /* Verbosity level for set-up/command line reading */
