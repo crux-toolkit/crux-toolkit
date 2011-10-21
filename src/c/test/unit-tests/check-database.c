@@ -17,7 +17,7 @@
 static Database* db;
 
 void db_setup(){
-  db = new Database("input-data/protein2.fasta", FALSE);  // not memmapped
+  db = new Database("input-data/protein2.fasta", false);  // not memmapped
 }
 
 void db_teardown(){
@@ -45,7 +45,7 @@ START_TEST (test_create){
   char* name = NULL;
 
   //try create a new database
-  db = new_database("fasta_file_binary_fasta", FALSE);
+  db = new_database("fasta_file_binary_fasta", false);
   fail_unless(parse_database(db), "failed to parse database");
   fail_unless(strncmp((name = get_database_filename(db)), "fasta_file", 10) == 0, "database filename not set correctly");
   free(name);
@@ -53,7 +53,7 @@ START_TEST (test_create){
   fail_unless(get_database_num_proteins(db) == 3, "database number of proteins not set correctly");
   set_database_use_light_protein(db, TRUE);
   fail_unless(get_database_use_light_protein(db), "database use_light_protein not correctly set");
-  set_database_use_light_protein(db, FALSE);
+  set_database_use_light_protein(db, false);
   fail_unless(!get_database_use_light_protein(db), "database use_light_protein not correctly set");
   
   //peptide constraint
@@ -133,7 +133,7 @@ START_TEST (test_create){
   fail_unless(get_database_num_proteins(db) == 3, "database number of proteins not set correctly");
   set_database_use_light_protein(db, TRUE);
   fail_unless(get_database_use_light_protein(db), "database use_light_protein not correctly set");
-  set_database_use_light_protein(db, FALSE);
+  set_database_use_light_protein(db, false);
   fail_unless(!get_database_use_light_protein(db), "database use_light_protein not correctly set");
   
 

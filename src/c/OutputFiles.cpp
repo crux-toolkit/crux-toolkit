@@ -176,7 +176,7 @@ string OutputFiles::makeFileName(const char* fileroot,
  * "output-dir/fileroot.command_name.target|decoy[-n].extension".
  * Requires that the output-dir already exist and have write
  * permissions. 
- * \returns TRUE if num_files new files are created, else FALSE.
+ * \returns true if num_files new files are created, else false.
  */
 bool OutputFiles::createFiles(FILE*** file_array_ptr,
                               const char* output_dir,
@@ -185,7 +185,7 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
                               const char* extension,
                               bool overwrite){
   if( num_files_ == 0 ){
-    return FALSE;
+    return false;
   }
   
   // allocate array
@@ -203,7 +203,7 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
 
   }// next file
   
-  return TRUE;
+  return true;
 }
 
 /**
@@ -216,7 +216,7 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
  * "output-dir/fileroot.command_name.target|decoy[-n].extension".
  * Requires that the output-dir already exist and have write
  * permissions. 
- * \returns TRUE if num_files new MatchFileWriters are created, else FALSE.
+ * \returns true if num_files new MatchFileWriters are created, else false.
  */
 bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
                               const char* output_dir,
@@ -224,7 +224,7 @@ bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
                               CruxApplication* application,
                               const char* extension ){
   if( num_files_ == 0 ){
-    return FALSE;
+    return false;
   }
   
   // allocate array
@@ -238,7 +238,7 @@ bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
     (*file_array_ptr)[file_idx] = new MatchFileWriter(filename.c_str());
   }
   
-  return TRUE;
+  return true;
 }
 
 /**
@@ -248,7 +248,7 @@ bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
  * New file is returned via the file_ptr argument.  File is named
  * output-dir/fileroot.comand_name[target_decoy].extension.  Requires that the
  * output-dir already exist and have write permissions.
- * \returns TRUE if the file is created, else FALSE.
+ * \returns true if the file is created, else false.
  */
 bool OutputFiles::createFile(FILE** file_ptr,
                              const char* output_dir,
@@ -260,9 +260,9 @@ bool OutputFiles::createFile(FILE** file_ptr,
                                   output_dir,
                                   overwrite);
 
-  if( *file_ptr == NULL ){ return FALSE; }
+  if( *file_ptr == NULL ){ return false; }
 
-  return TRUE;
+  return true;
 }
 
 /**
@@ -507,7 +507,7 @@ void OutputFiles::writeMatchFeatures(
           match->getSpectrum()->getFirstScan());
 
   // decoy or target peptide
-  if (match->getNullPeptide() == FALSE){
+  if (match->getNullPeptide() == false){
     fprintf(feature_file_, "1\t");
   } else { 
     fprintf(feature_file_, "-1\t");

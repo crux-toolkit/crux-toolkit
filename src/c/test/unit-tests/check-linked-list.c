@@ -34,19 +34,19 @@ START_TEST(test_create){
   fail_unless( list3 != NULL, "Failed to create a new empty list.");
   LIST_POINTER_T* first_node = get_first_linked_list(list3);
   fail_unless( first_node == NULL, "Empty list should not have a first node");
-  fail_unless( is_empty_linked_list( list3 ) == TRUE, 
+  fail_unless( is_empty_linked_list( list3 ) == true, 
                "List3 should be empty on creation.");
 
   // test one-item ilst
   fail_unless( list1 != NULL, "Failed to create a new list." );
-  fail_unless( is_empty_linked_list(list1) == FALSE,
+  fail_unless( is_empty_linked_list(list1) == false,
                "List 1 should not be empty on creation.");
   first_node = get_first_linked_list( list1 );
   fail_unless( first_node != NULL,
                "List1 as created should have first item" );
   fail_unless( get_data_linked_list( first_node ) == data1, 
                "List head does not point to correct data." );
-  fail_unless( has_next_linked_list( first_node ) == FALSE,
+  fail_unless( has_next_linked_list( first_node ) == false,
                "First node of one-item list should not have next.");
   fail_unless( get_next_linked_list( first_node ) == NULL,
                "Next of newly created list is not NULL.");
@@ -56,7 +56,7 @@ END_TEST
 START_TEST(test_push_front){
   // add to empty list
   LIST_POINTER_T* new_node = push_front_linked_list(list3, data1);
-  fail_unless( is_empty_linked_list(list3) == FALSE, 
+  fail_unless( is_empty_linked_list(list3) == false, 
                "Previously empty list should not be after push front.");
   fail_unless( new_node != NULL, 
                "Node added to empty list should not be NULL");
@@ -95,7 +95,7 @@ START_TEST(test_push_front){
 
   // can you get the new end from the head?
   LIST_POINTER_T* cur_node = get_first_linked_list(list1);
-  while( has_next_linked_list(cur_node) == TRUE ) {
+  while( has_next_linked_list(cur_node) == true ) {
     cur_node = get_next_linked_list(cur_node);
   }
   fail_unless( cur_node == end_node, 
@@ -107,7 +107,7 @@ END_TEST
 START_TEST(test_push_back){
   // add to empty list
   LIST_POINTER_T* new_node = push_back_linked_list(list3, data1);
-  fail_unless( is_empty_linked_list(list3) == FALSE, 
+  fail_unless( is_empty_linked_list(list3) == false, 
                "Previously empty list should not be after push back.");
   fail_unless( new_node != NULL, 
                "Node added to empty list should not be NULL");
@@ -132,7 +132,7 @@ START_TEST(test_push_back){
   // check next
   fail_unless( get_next_linked_list(was_end) == node_added, 
                "Push back did not add correctly to the list end");
-  fail_unless( has_next_linked_list(node_added) == FALSE, 
+  fail_unless( has_next_linked_list(node_added) == false, 
                "Push back did not set end node next to NULL.");
 
   // repeat for a second data item
@@ -145,12 +145,12 @@ START_TEST(test_push_back){
                "Data pushed back is not correct.");
   fail_unless( get_next_linked_list(was_end) == node_added, 
                "Push back did not add correctly to the list end");
-  fail_unless( has_next_linked_list(node_added) == FALSE, 
+  fail_unless( has_next_linked_list(node_added) == false, 
                "Push back did not set end node next to NULL.");
 
   // can you get the new end from the head?
   LIST_POINTER_T* cur_node = get_first_linked_list(list1);
-  while( has_next_linked_list(cur_node) == TRUE ) {
+  while( has_next_linked_list(cur_node) == true ) {
     cur_node = get_next_linked_list(cur_node);
   }
   fail_unless( cur_node == node_added, 
@@ -189,17 +189,17 @@ START_TEST(test_combine){
   combine_lists(list1, list3);
 
   // end of list1 should be same
-  fail_unless( has_next_linked_list( begin2 ) == FALSE,
+  fail_unless( has_next_linked_list( begin2 ) == false,
                "No new nodes should be on the end of list1");
 
   // add list1 to an empty list
   fail_unless( list3 != NULL, "List3 should not be null");
-  fail_unless( is_empty_linked_list(list3) == TRUE,
+  fail_unless( is_empty_linked_list(list3) == true,
                "List3 should still be empty");
   fail_unless( get_first_linked_list(list3) == NULL, 
                "first element of list3 is not null");
   combine_lists(list3, list1);
-  fail_unless( is_empty_linked_list(list3) == FALSE,
+  fail_unless( is_empty_linked_list(list3) == false,
                "List3 should no longer be empty");
 }
 END_TEST
@@ -244,7 +244,7 @@ START_TEST(test_copy){
   copy = copy_list( list3 );
   fail_unless( copy != NULL, 
                "Copied list should not be null after copying empty list.");
-  fail_unless( is_empty_linked_list(copy) == TRUE, 
+  fail_unless( is_empty_linked_list(copy) == true, 
                "Copied list should still be empty.");
   fail_unless( get_first_linked_list(copy) == NULL,
                "Should be no elements to get from empty list.");
@@ -255,13 +255,13 @@ START_TEST(test_clear){
 
   // clear one-element list
   clear_list(list1);
-  fail_unless( is_empty_linked_list(list1) == TRUE,
+  fail_unless( is_empty_linked_list(list1) == true,
                "List should be empty after being cleared.");
   fail_unless( *data1 == 7, "Data was corrupted after clear");
 
   // clear empty list
   clear_list(list1);
-  fail_unless( is_empty_linked_list(list1) == TRUE,
+  fail_unless( is_empty_linked_list(list1) == true,
                "Empty list should be empty after being cleared.");
 
   // add to cleared list
@@ -269,12 +269,12 @@ START_TEST(test_clear){
   for(i=0; i< 5; i++){
     push_back_linked_list(list1, data1);
   }
-  fail_unless( !is_empty_linked_list(list1) == TRUE,
+  fail_unless( !is_empty_linked_list(list1) == true,
                "List should not be empty.");
 
   // clear multi-element list
   clear_list(list1);
-  fail_unless( is_empty_linked_list(list1) == TRUE,
+  fail_unless( is_empty_linked_list(list1) == true,
                "List should be empty after being cleared.");
   fail_unless( *data1 == 7, "Data was corrupted after multi-element clear");
 }
@@ -348,14 +348,14 @@ START_TEST(test_pop){
   // pop front/back list with one element
   fail_unless( pop_front_linked_list(list1) == data1,
                "Data1 should have been popped from front of list.");
-  fail_unless( is_empty_linked_list(list1) == TRUE,
+  fail_unless( is_empty_linked_list(list1) == true,
                "List1 should be empty after only element popped.");
   fail_unless( pop_back_linked_list(list1) == NULL,
                "Now empty list should return NULL from pop_back.");
 
   fail_unless( pop_back_linked_list(list2) == data3,
                "Data1 should have been popped from front of list.");
-  fail_unless( is_empty_linked_list(list2) == TRUE,
+  fail_unless( is_empty_linked_list(list2) == true,
                "List2 should be empty after only element popped.");
   fail_unless( pop_front_linked_list(list2) == NULL,
                "Now empty list should return NULL from pop_front.");
@@ -390,10 +390,10 @@ START_TEST(test_check_null){
   LINKED_LIST_T* null_list = NULL;
   LIST_POINTER_T* null_list_p = NULL;
 
-  fail_unless( is_empty_linked_list(null_list) == TRUE, 
+  fail_unless( is_empty_linked_list(null_list) == true, 
                "NULL list should be empty");
-  // has next from empty list, return FALSE
-  fail_unless( has_next_linked_list( null_list_p) == FALSE, 
+  // has next from empty list, return false
+  fail_unless( has_next_linked_list( null_list_p) == false, 
                "Failed on has next for empty list");
 
 }

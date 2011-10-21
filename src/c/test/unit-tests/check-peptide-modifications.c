@@ -175,62 +175,62 @@ END_TEST
 START_TEST(test_modifiable){
   // test an empty mod and any peptide
   set_verbosity_level(CARP_INFO);
-  fail_unless( is_peptide_modifiable( pep1, pmod1 ) == TRUE,
+  fail_unless( is_peptide_modifiable( pep1, pmod1 ) == true,
                "Pep mod with no aa mods failed to modify a peptide");
 
 
   // mod with one aa mod, no aa's in pep
   aa_mod_set_max_per_peptide(amod1, 1);
   aa_mod_set_mass_change(amod1, 80);
-  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
-  mod_us['C'-'A'] = TRUE;
-  mod_us['Y'-'A'] = TRUE;
+  bool* mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['C'-'A'] = true;
+  mod_us['Y'-'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 0, 1);
-  fail_unless( is_peptide_modifiable(pep1, pmod1) == FALSE, 
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == false, 
                "Should NOT be able to modifiy pep1 (%s) with CY",
                pep1->getSequence());
 
   // pmod with one aa mod, one aa listed in pep
-  mod_us['S'-'A'] = TRUE;
-  fail_unless( is_peptide_modifiable(pep1, pmod1) == TRUE, 
+  mod_us['S'-'A'] = true;
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == true, 
                "Should be able to modify pep1 (%s) with CYS",
                pep1->getSequence());
 
   // pmod with two aa mods, one listed one not
   aa_mod_set_mass_change(amod2, 44);
   mod_us = aa_mod_get_aa_list(amod2);
-  mod_us['D'-'A'] = TRUE;
+  mod_us['D'-'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 1, 1);
-  fail_unless( is_peptide_modifiable(pep1, pmod1) == FALSE, 
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == false, 
                "Should NOT be able to modify pep1 (%s) with CYS,D",
                pep1->getSequence());
 
   // pmod with two aa mods, both listed
-  mod_us['V'-'A'] = TRUE;
-  fail_unless( is_peptide_modifiable(pep1, pmod1) == TRUE, 
+  mod_us['V'-'A'] = true;
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == true, 
                "Should be able to modify pep1 (%s) with CYS,DF",
                pep1->getSequence());
 
   // pmod with aa mod and not enough locations
   peptide_mod_add_aa_mod(pmod1, 1, 1);
-  fail_unless( is_peptide_modifiable(pep1, pmod1) == FALSE, 
+  fail_unless( is_peptide_modifiable(pep1, pmod1) == false, 
                "Should NOT be able to modify pep1 (%s) with CYS,DF,DF",
                pep1->getSequence());
 
   // try n and c mods
   aa_mod_set_position( amod3, N_TERM );
   mod_us = aa_mod_get_aa_list( amod3 );
-  mod_us['F'-'A'] = TRUE; // should be true for all, but this is n-term
+  mod_us['F'-'A'] = true; // should be true for all, but this is n-term
   peptide_mod_add_aa_mod(pmod2, 2, 1); //amod3 is index 2, add one of them
   force_set_n_mod_list( amod_list+2, 1);
 
   // pmod with one aa nmod, distance ok
-  fail_unless( is_peptide_modifiable(pep1, pmod2) == TRUE, 
+  fail_unless( is_peptide_modifiable(pep1, pmod2) == true, 
            "Should be able to modify the n-term with no distance restriction");
 
   // pmod with one aa nmod, distance too far
   aa_mod_set_max_distance( amod3, 0);
-  fail_unless( is_peptide_modifiable(pep1, pmod2) == FALSE, 
+  fail_unless( is_peptide_modifiable(pep1, pmod2) == false, 
                "Should NOT be able to modify n-term of pep in mid prot");
   
   // pmod with one aa cmod, distance ok
@@ -238,12 +238,12 @@ START_TEST(test_modifiable){
   aa_mod_set_position( amod2, C_TERM);
   peptide_mod_add_aa_mod( pmod2, 1, 1 );  //amod2 is index 1, add one of them
   force_set_c_mod_list( amod_list+1, 1 );
-  fail_unless( is_peptide_modifiable(pep1, pmod2) == TRUE,
+  fail_unless( is_peptide_modifiable(pep1, pmod2) == true,
                "Should be able to modify c-term with no dist restriction");
 
   // pmod with one aa cmod, distance too far
   aa_mod_set_max_distance( amod2, 0);
-  fail_unless( is_peptide_modifiable(pep1, pmod2) == FALSE,
+  fail_unless( is_peptide_modifiable(pep1, pmod2) == false,
                "Should NOT be able to modify c-term not at protein end");
   
 }
@@ -266,8 +266,8 @@ START_TEST(test_modify_1){
 
   // create a pmod that creates one modified version
   aa_mod_set_max_per_peptide(amod1, 1);
-  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
-  mod_us['V'-'A'] = TRUE;
+  bool* mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['V'-'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one copy
 
   // test mod that is first in list
@@ -288,7 +288,7 @@ START_TEST(test_modify_1){
   // test mod that is mid in list
   aa_mod_set_max_per_peptide(amod3, 1);
   mod_us = aa_mod_get_aa_list(amod3);
-  mod_us['F'-'A'] = TRUE;
+  mod_us['F'-'A'] = true;
   peptide_mod_add_aa_mod(pmod2, 2, 1); //third in list, one copy
   delete_linked_list(returned_list);
   returned_list = new_empty_list();
@@ -315,7 +315,7 @@ START_TEST(test_modify_1){
   fail_unless( strcmp(mod_str, "FGGTSVANAER@") == 0,
 	       "Modified seq is %s but should be FGGTSVANAER@", mod_str);
   free(mod_str);
-  mod_str =  modified_aa_string_to_string_with_masses(mods, len, FALSE);
+  mod_str =  modified_aa_string_to_string_with_masses(mods, len, false);
   fail_unless( strcmp(mod_str, "FGGTSVANAER[0.00]") == 0,
 	       "Modified seq is %s but should be FGGTSVANAER[0.00]", mod_str);
   free(pep);
@@ -333,7 +333,7 @@ START_TEST(test_modify_1){
   fail_unless( strcmp(mod_str, "F*GGTSVANAER") == 0,
 	       "Modified seq is %s but should be F*GGTSVANAER", mod_str);
   free(mod_str);
-  mod_str =  modified_aa_string_to_string_with_masses(mods, len, FALSE);
+  mod_str =  modified_aa_string_to_string_with_masses(mods, len, false);
   fail_unless( strcmp(mod_str, "F[0.00]GGTSVANAER") == 0,
 	       "Modified seq is %s but should be F[0.00]GGTSVANAER", mod_str);
   free(pep);
@@ -347,8 +347,8 @@ START_TEST(test_modify_2){
   //printf("modify 2\n");
   // create a pmod that creates two modified versions
   aa_mod_set_max_per_peptide(amod1, 1);
-  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
-  mod_us['G'-'A'] = TRUE;
+  bool* mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['G'-'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 0, 1); //first in list, one copy
 
   LINKED_LIST_T* returned_list = new_empty_list();
@@ -364,7 +364,7 @@ START_TEST(test_modify_2){
   // create mod of one G and one A-> four versions of seq
   aa_mod_set_max_per_peptide(amod2, 1);
   mod_us = aa_mod_get_aa_list(amod2);
-  mod_us['A'-'A'] = TRUE;
+  mod_us['A'-'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 1, 1); //second mod in list, one copy
   fail_unless( peptide_mod_get_num_aa_mods(pmod1) == 2,
                "pmod1 should have two aa mods");
@@ -384,7 +384,7 @@ START_TEST(test_modify_2){
 
   // create mod of one G/A* and one A@ -> 8 versions
   mod_us = aa_mod_get_aa_list(amod1);
-  mod_us['A'-'A'] = TRUE;
+  mod_us['A'-'A'] = true;
   num_returned = modify_peptide(pep1, pmod1, returned_list, max_aas_modified);
   fail_unless( 8 == num_returned,
                "Modify should give 8 of FGGTSVANAER(GA*,A@), but gave %d",
@@ -402,9 +402,9 @@ START_TEST(test_modify_3){
 
   //printf("LOOK HERE\n");
   aa_mod_set_max_per_peptide(amod1, 10);
-  BOOLEAN_T* mod_us = aa_mod_get_aa_list(amod1);
-  mod_us['G'-'A'] = TRUE;
-  mod_us['A'-'A'] = TRUE;
+  bool* mod_us = aa_mod_get_aa_list(amod1);
+  mod_us['G'-'A'] = true;
+  mod_us['A'-'A'] = true;
   peptide_mod_add_aa_mod(pmod1, 0, 3); //first in list, three copies
 
   LINKED_LIST_T* returned_list = new_empty_list();

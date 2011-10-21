@@ -38,7 +38,7 @@
 SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator, ///< the peptide iterator to extend -in
   SORT_TYPE_T sort_type, ///< the sort type for this iterator -in
-  BOOLEAN_T unique, ///< only return unique peptides? -in
+  bool unique, ///< only return unique peptides? -in
   unsigned int peptide_count ///< the total peptide count in the bin -in
   );
 
@@ -53,7 +53,7 @@ void free_sorted_peptide_iterator(
  * The basic iterator functions.
  * \returns TRUE if there are additional peptides to iterate over, FALSE if not.
  */
-BOOLEAN_T sorted_peptide_iterator_has_next(
+bool sorted_peptide_iterator_has_next(
   SORTED_PEPTIDE_ITERATOR_T* peptide_iterator ///< the iterator of interest -in
   );
 

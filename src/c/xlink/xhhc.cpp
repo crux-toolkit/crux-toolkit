@@ -176,7 +176,7 @@ void find_all_precursor_ions(vector<LinkedPeptide>& all_ions,
 
   carp(CARP_DEBUG,"missed link cleavage:%s", missed_link_cleavage);
   carp(CARP_DEBUG,"find_all_precursor_ions: start()");
-  Database* db = new Database(database_file, FALSE);
+  Database* db = new Database(database_file, false);
   carp(CARP_DEBUG,"peptide constraint");
   PeptideConstraint* peptide_constraint = 
     PeptideConstraint::newFromParameters();
@@ -230,7 +230,7 @@ void find_all_precursor_ions(vector<LinkedPeptide>& all_ions,
 
 
 // modified version of crux's estimate_weibull_parameters_from_xcorrs
-BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
+bool hhc_estimate_weibull_parameters_from_xcorrs(
   FLOAT_T* scores,
   int num_scores,
   FLOAT_T* eta,
@@ -247,7 +247,7 @@ BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
          "p-value parameters for spectrum %i, charge %i",
          num_scores, spectrum->getFirstScan(), charge);
     // set eta, beta, and shift to something???
-    return FALSE;
+    return false;
   }
 
   // reverse sort the first num_samples of them
@@ -270,7 +270,7 @@ BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
       "Corr: %.6f Eta: %.6f Beta: %.6f Shift: %.6f",
       *correlation, *eta, *beta, *shift);
 
-  return TRUE;
+  return true;
 }
 
 // helper function for get_linkable_peptides

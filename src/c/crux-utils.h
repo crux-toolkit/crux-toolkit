@@ -63,7 +63,7 @@ int compare_float(FLOAT_T float_a, FLOAT_T float_b);
  * precision is 2, a and b must be equal when rounded to two decimal
  * places.
  */
-BOOLEAN_T is_equal(FLOAT_T a, FLOAT_T b, int precision);
+bool is_equal(FLOAT_T a, FLOAT_T b, int precision);
 
 /**
  * \brief Parses the filename and path of given string.
@@ -148,7 +148,7 @@ char* get_full_filename(const char* path, const char* filename);
 /**
  *\returns TRUE if float_a is between the interaval of min and max, else FALSE
  */
-inline BOOLEAN_T compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max);
+inline bool compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max);
 
 /**
  * returns the file size of the given filename
@@ -166,7 +166,7 @@ long get_filesize(char *FileName);
 */
 int create_output_directory(
   const char *output_folder, // Name of output folder.
-  BOOLEAN_T overwrite  // Whether or not to overwrite an existing dir 
+  bool overwrite  // Whether or not to overwrite an existing dir 
 ); 
 
 /**
@@ -174,14 +174,14 @@ int create_output_directory(
  * Returns TRUE if a directory, FALSE otherwise.
  * Terminates program if unable to determine status of file.
  */
-BOOLEAN_T is_directory(const char *FileName);
+bool is_directory(const char *FileName);
 
 /**
  * deletes a given directory and it's files inside.
  * assumes that there's no sub directories, only files
  * \returns TRUE if successfully deleted directory
  */
-BOOLEAN_T delete_dir(char* dir);
+bool delete_dir(char* dir);
 
 /**
  * given a fasta_file name it returns a name with the name_tag add to the end
@@ -237,14 +237,14 @@ char* generate_name_path(
 FILE* create_file_in_path(
   const char* filename,  ///< the filename to create & open -in
   const char* directory,  ///< the directory to open the file in -in
-  BOOLEAN_T overwrite  ///< replace the file (T) or die if exists (F)
+  bool overwrite  ///< replace the file (T) or die if exists (F)
   );
 
 /**
  * check if the string has the correct suffix
  * \returns TRUE, if the string starts with the suffix, else FALSE
  */
-BOOLEAN_T prefix_compare(
+bool prefix_compare(
   const char* string, ///< The string to compare -in
   const char* prefix  ///< The prefix to find in the string -in
   );
@@ -253,7 +253,7 @@ BOOLEAN_T prefix_compare(
  * check if the string has the correct suffix
  * \returns TRUE, if the string starts with the suffix, else FALSE
  */
-BOOLEAN_T suffix_compare(
+bool suffix_compare(
   const char* string, ///< The string to compare -in
   const char* suffix  ///< The suffix to find in the string -in
   );
@@ -262,7 +262,7 @@ BOOLEAN_T suffix_compare(
  * checks if each AA is an AA
  *\returns TRUE if sequence is valid else, FALSE
  */
-BOOLEAN_T valid_peptide_sequence(const char* sequence);
+bool valid_peptide_sequence(const char* sequence);
 
 /**
  * quickSort for FLOAT_Ts
@@ -364,14 +364,14 @@ void fit_two_parameter_weibull(
     FLOAT_T* correlation ///< the best correlation -out
     );
 
-BOOLEAN_T string_to_mass_type(char*, MASS_TYPE_T*);
-BOOLEAN_T mass_type_to_string(MASS_TYPE_T, char*);
-BOOLEAN_T string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);
-BOOLEAN_T algorithm_type_to_string(ALGORITHM_TYPE_T, char*);
-BOOLEAN_T string_to_scorer_type(char*, SCORER_TYPE_T*);
-BOOLEAN_T scorer_type_to_string(SCORER_TYPE_T, char*);
-BOOLEAN_T string_to_ion_type(char* , ION_TYPE_T*);
-BOOLEAN_T ion_type_to_string(ION_TYPE_T, char*);
+bool string_to_mass_type(char*, MASS_TYPE_T*);
+bool mass_type_to_string(MASS_TYPE_T, char*);
+bool string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);
+bool algorithm_type_to_string(ALGORITHM_TYPE_T, char*);
+bool string_to_scorer_type(char*, SCORER_TYPE_T*);
+bool scorer_type_to_string(SCORER_TYPE_T, char*);
+bool string_to_ion_type(char* , ION_TYPE_T*);
+bool ion_type_to_string(ION_TYPE_T, char*);
 
 // new style of type_to_string and string_to_type functions
 // requires an invalid value for each enum

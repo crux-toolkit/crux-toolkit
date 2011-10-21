@@ -9,7 +9,7 @@
 #	number of allowed missed-cleavages: 500
 #	isotopic mass type: mono
 #	verbosity: 30
-#	use index: FALSE
+#	use index: false
 757.38	gi|16127996|ref|NP_414543.1|	79	8	AAAQPGFP
 870.46	gi|16127996|ref|NP_414543.1|	79	9	AAAQPGFPL
 941.50	gi|16127996|ref|NP_414543.1|	79	10	AAAQPGFPLA

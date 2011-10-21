@@ -33,8 +33,8 @@ void print_header();
 int main(int argc, char** argv){
 
   /* Declarations */
-  BOOLEAN_T output_sequence;
-  BOOLEAN_T use_index;
+  bool output_sequence;
+  bool use_index;
   char* filename;
   
   long total_peptides = 0;
@@ -88,7 +88,7 @@ int main(int argc, char** argv){
   filename = get_string_parameter("protein database");
   use_index = is_directory(filename);
 
-  if( use_index == TRUE ){
+  if( use_index == true ){
     index = new Index(filename); 
   }else{
     database = new Database(filename, false); // not memmapped
@@ -148,7 +148,7 @@ int main(int argc, char** argv){
 }
 
 void print_header(){
-  BOOLEAN_T bool_val;
+  bool bool_val;
   int missed_cleavages;
 
   char* database_name = get_string_parameter("protein database");

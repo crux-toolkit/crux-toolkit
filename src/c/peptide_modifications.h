@@ -69,7 +69,7 @@ int generate_peptide_mod_list(
  * but not more than once by a single aa_mod as defined in modifiable().
  * \returns TRUE if the sequence can be modified, else FALSE
  */
-BOOLEAN_T is_peptide_modifiable( Peptide* peptide,
+bool is_peptide_modifiable( Peptide* peptide,
                             PEPTIDE_MOD_T* peptide_mod);
 
 

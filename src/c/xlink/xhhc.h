@@ -143,7 +143,7 @@ private:
 
 XHHC_Peptide shuffle(XHHC_Peptide peptide);
 
-BOOLEAN_T hhc_estimate_weibull_parameters_from_xcorrs(
+bool hhc_estimate_weibull_parameters_from_xcorrs(
   FLOAT_T* scores,
   int num_scores,
   FLOAT_T* eta,

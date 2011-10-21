@@ -53,9 +53,9 @@ void ion_series_setup(){
   charge = 2;
   is1 = new IonSeries();
 
-  constraint = new IonConstraint(MONO, charge-1, BY_ION, FALSE);// no prec ion
-  bcnst = new IonConstraint(MONO, 1, B_ION, FALSE); 
-  ycnst = new IonConstraint(MONO, 1, Y_ION, FALSE); 
+  constraint = new IonConstraint(MONO, charge-1, BY_ION, false);// no prec ion
+  bcnst = new IonConstraint(MONO, 1, B_ION, false); 
+  ycnst = new IonConstraint(MONO, 1, Y_ION, false); 
   seq = my_copy_string("ASEQ");
   seq2 = my_copy_string("ANOTHERSEQ");
   convert_to_mod_aa_seq( seq, &mod_seq );
@@ -282,8 +282,8 @@ START_TEST (test_predict_mod2){
 
   // look at all ions and confirm that the masses are correct
   // create a b- and a y-ion constraint
-  IonConstraint* bcnst = new IonConstraint(MONO, 1, B_ION, FALSE); 
-  IonConstraint* ycnst = new IonConstraint(MONO, 1, Y_ION, FALSE); 
+  IonConstraint* bcnst = new IonConstraint(MONO, 1, B_ION, false); 
+  IonConstraint* ycnst = new IonConstraint(MONO, 1, Y_ION, false); 
   // reuse these
   Ion* ion = NULL;
   int i=0;
@@ -440,8 +440,8 @@ START_TEST (test_create){
   //creat new ion_constraint
   IonConstraint* ion_constraint = IonConstraint::newIonConstraintSequest(MONO, 3, ALL_ION, true);
   IonConstraint* ion_constraint2 = new IonConstraint();
-  IonConstraint* ion_constraint3 = new IonConstraint(MONO, 3, ALL_ION, TRUE);  
-  IonConstraint* ion_constraint4 = new IonConstraint(MONO, 3, B_ION, FALSE);  
+  IonConstraint* ion_constraint3 = new IonConstraint(MONO, 3, ALL_ION, true);  
+  IonConstraint* ion_constraint4 = new IonConstraint(MONO, 3, B_ION, false);  
 
   //set ion_constraint3 modification counts
   ion_constraint3->setModification(NH3, -2);

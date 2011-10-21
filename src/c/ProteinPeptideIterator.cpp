@@ -39,7 +39,7 @@ FLOAT_T ProteinPeptideIterator::calculateSubsequenceMass (
  * list or an exclusion list.  A cleavage can happen before/after the
  * given residue if it is either in the inclusion list or is not in
  * the exculsion list.
- * \returns TRUE if the residue is in the inclusion list or not in the
+ * \returns true if the residue is in the inclusion list or not in the
  * exclusion list.
  */
 bool ProteinPeptideIterator::isResidueLegal(char aa, 
@@ -48,24 +48,24 @@ bool ProteinPeptideIterator::isResidueLegal(char aa,
                            bool for_inclusion){
 
   // The logic for returning for_inclusion:
-  // For an inclusion list (TRUE), once we find the aa it passes (TRUE)
-  // For an exclusion list (FALSE), once we find the aa, it fails (FALSE)
+  // For an inclusion list (true), once we find the aa it passes (true)
+  // For an exclusion list (false), once we find the aa, it fails (false)
   int idx=0;
   for(idx=0; idx < list_size; idx++){
     if( aa == aa_list[idx] ){ return for_inclusion; }
   }
   // or if we got to the end of the list and didn't find a match
-  // for inclusion, it fails (!TRUE)
-  // for exclusion, it passes (!FALSE)
+  // for inclusion, it fails (!true)
+  // for exclusion, it passes (!false)
   return ! for_inclusion;
 }
 
 /**
  * Compares the first and second amino acids in the given sequence to
  * see if they conform to the cleavage rules of the given enzyme.  For
- * NO_ENZYME, always returns TRUE.
+ * NO_ENZYME, always returns true.
  *
- * \returns TRUE if this is a valid cleavage position for the given enzyme.
+ * \returns true if this is a valid cleavage position for the given enzyme.
  */
 bool ProteinPeptideIterator::validCleavagePosition(
    char* sequence,
@@ -76,18 +76,18 @@ bool ProteinPeptideIterator::validCleavagePosition(
 
   case TRYPSIN:
     if ((sequence[0] == 'K' || sequence[0] == 'R') && (sequence[1] != 'P')){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
     
   case CHYMOTRYPSIN:
     if ((sequence[0] == 'F' || sequence[0] == 'W' || sequence[0] == 'Y') 
         && (sequence[1] != 'P')){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
     break;
@@ -96,57 +96,57 @@ bool ProteinPeptideIterator::validCleavagePosition(
     if ((sequence[0] == 'A' || sequence[0] == 'L' ||
          sequence[0] == 'I' || sequence[0] == 'V') 
         && (sequence[1] != 'P')){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
   case CLOSTRIPAIN:
     if (sequence[0] == 'R'){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
   case CYANOGEN_BROMIDE:
     if (sequence[0] == 'M'){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
   case IODOSOBENZOATE:
     if (sequence[0] == 'W'){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
   case PROLINE_ENDOPEPTIDASE:
     if (sequence[0] == 'P'){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
   case STAPH_PROTEASE:
     if (sequence[0] == 'E'){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
   case ASPN:
     if (sequence[1] == 'D'){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
@@ -154,9 +154,9 @@ bool ProteinPeptideIterator::validCleavagePosition(
     if ((sequence[0] == 'F' || sequence[0] == 'L' ||
          sequence[0] == 'W' || sequence[0] == 'Y') 
         && (sequence[1] != 'P')){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
@@ -167,9 +167,9 @@ bool ProteinPeptideIterator::validCleavagePosition(
          sequence[0] == 'W' || sequence[0] == 'F' ||
          sequence[0] == 'Y' ) 
         && (sequence[1] != 'P')){
-      return TRUE;
+      return true;
     } else {
-      return FALSE;
+      return false;
     }
     break;
 
@@ -188,7 +188,7 @@ bool ProteinPeptideIterator::validCleavagePosition(
     break;
 
   case NO_ENZYME:
-    return TRUE;
+    return true;
     break;
 
   case INVALID_ENZYME:
@@ -198,7 +198,7 @@ bool ProteinPeptideIterator::validCleavagePosition(
 
   }// end switch
 
-  return FALSE;
+  return false;
 }
 
 /**
@@ -262,7 +262,7 @@ void ProteinPeptideIterator::selectPeptides(
         break;
       } else if (no_new_cterm_cleavage_start){
         next_cterm_cleavage_start = cterm_idx;
-        no_new_cterm_cleavage_start = FALSE;
+        no_new_cterm_cleavage_start = false;
       }
      
       // check our mass constraint
@@ -519,7 +519,7 @@ ProteinPeptideIterator::~ProteinPeptideIterator()
 
 /**
  * The basic iterator functions.
- * \returns TRUE if there are additional peptides, FALSE if not.
+ * \returns true if there are additional peptides, false if not.
  */
 bool ProteinPeptideIterator::hasNext()
 {

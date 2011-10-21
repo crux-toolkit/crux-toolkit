@@ -122,17 +122,17 @@ double wall_clock(){
 /************************************************************************
  * See .h file for description.
  ************************************************************************/
-BOOLEAN_T open_file
+bool open_file
   (const char *    filename,      /* Name of the file to be opened. */
    const char *    file_mode,     /* Mode to be passed to fopen. */
-   BOOLEAN_T allow_stdin,         /* If true, filename "-" is stdin. */
+   bool allow_stdin,         /* If true, filename "-" is stdin. */
    const char *    file_description,   
    const char *    content_description,
    FILE **         afile)         /* Pointer to the open file. */
 {
   if (filename == NULL) {
     carp(CARP_ERROR, "No %s filename specified.\n", file_description);
-    return(FALSE);
+    return(false);
   } else if ((allow_stdin) && (strcmp(filename, "-") == 0)) {
     if (strchr(file_mode, 'r') != NULL) {
         carp(CARP_INFO, "Reading %s from stdin.\n", content_description);
@@ -143,13 +143,13 @@ BOOLEAN_T open_file
     } else {
       carp(CARP_INFO, "Sorry, I can't figure out whether to use stdin ");
       carp(CARP_INFO, "or stdout for %s.\n", content_description);
-      return(FALSE);
+      return(false);
     }
   } else if ((*afile = fopen(filename, file_mode)) == NULL) {
     carp(CARP_INFO, "Error opening file %s.\n", filename);
-    return(FALSE);
+    return(false);
   }
-  return(TRUE);
+  return(true);
 }
 
 /********************************************************************
@@ -226,7 +226,7 @@ void * myrealloc
 /********************************************************************
  * fwrite with a check to make sure it was successful (useful for NFS problems)
  ********************************************************************/
-BOOLEAN_T myfwrite
+bool myfwrite
   (const void *ptr, 
    size_t size, 
    size_t nitems, 
@@ -235,9 +235,9 @@ BOOLEAN_T myfwrite
   size_t ret = fwrite(ptr, size, nitems, stream);
   if (nitems != ret){
     carp(CARP_ERROR, "Problem writing %i items", nitems);
-    return FALSE;
+    return false;
   }
-  return TRUE;
+  return true;
 }
 
 #ifdef MYRAND
@@ -356,31 +356,31 @@ PROB_T log_prob
 /**************************************************************************
  * See .h file for description.
  **************************************************************************/
-BOOLEAN_T is_zero
+bool is_zero
   (double    value,
-   BOOLEAN_T log_form)
+   bool log_form)
 {
   if ((log_form) && (value < LOG_SMALL)) {
-    return(TRUE);
+    return(true);
   } else if ((!log_form) && (value == 0.0)) {
-    return(TRUE);
+    return(true);
   } else {
-    return(FALSE);
+    return(false);
   }
 }
 
 /**************************************************************************
  * See .h file for description.
  **************************************************************************/
-BOOLEAN_T almost_equal
+bool almost_equal
   (double value1,
    double value2,
    double slop)
 {
   if ((value1 - slop > value2) || (value1 + slop < value2)) {
-    return(FALSE);
+    return(false);
   } else {
-    return(TRUE);
+    return(true);
   }
 }
 
@@ -388,42 +388,42 @@ BOOLEAN_T almost_equal
  * Convert a boolean to and from a "true" or "false" string.
  *************************************************************************/
 char* boolean_to_string
- (BOOLEAN_T the_boolean)
+ (bool the_boolean)
 {
   static char * true_or_false;
-  static BOOLEAN_T first_time = TRUE;
+  static bool first_time = true;
 
   if (first_time) {
     true_or_false = (char *)mymalloc(sizeof(char) * 6);
-    first_time = FALSE;
+    first_time = false;
   }
 
   if (the_boolean) {
-    strcpy(true_or_false, "TRUE");
+    strcpy(true_or_false, "true");
   } else {
-    strcpy(true_or_false, "FALSE");
+    strcpy(true_or_false, "false");
   }
   return(true_or_false);
 }
 
-BOOLEAN_T boolean_from_string
+bool boolean_from_string
   (char* true_or_false)
 {
   if (strcmp(true_or_false, "true") == 0) {
-    return(TRUE);
+    return(true);
   } else if (strcmp(true_or_false, "false") == 0) {
-    return(FALSE);
+    return(false);
   } else {
     carp(CARP_FATAL, "Invalid input to boolean_from_string (%s)\n", true_or_false);
   }
-  return(FALSE); /* Unreachable. */
+  return(false); /* Unreachable. */
 }
 
 
 /**************************************************************************
  * Does a given character appear in a given string?
  **************************************************************************/
-BOOLEAN_T char_in_string
+bool char_in_string
   (const char* a_string,
    char        a_char)
 {
@@ -434,12 +434,12 @@ BOOLEAN_T char_in_string
   string_char = a_string[i_string];
   while (string_char != '\0') {
     if (string_char == a_char) {
-      return(TRUE);
+      return(true);
     }
     i_string++;
     string_char = a_string[i_string];
   }
-  return(FALSE);
+  return(false);
 }
 
 /**************************************************************************
@@ -511,7 +511,7 @@ const char* date_and_time
 {
   FILE *           date_stream;
   static char      the_date[MAX_HOST_NAME];
-  static BOOLEAN_T first_time = TRUE;
+  static bool first_time = true;
 
   if (first_time) {
     date_stream = (FILE *)popen("date", "r");
@@ -523,7 +523,7 @@ const char* date_and_time
   assert(the_date[strlen(the_date)-1] == '\n');
   the_date[strlen(the_date)-1] = '\0';
 
-  first_time = FALSE;
+  first_time = false;
   return(the_date);
 }
 
@@ -610,8 +610,8 @@ int main (int argc, char *argv[])
   // double double_array[8] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0};
   // fwrite(double_array, sizeof(double), 8, outfile);
   int int_array[8] = {1,2,3,4,5,6,7,8};
-  BOOLEAN_T a = myfwrite(int_array, sizeof(int), 0, outfile);
-  if (a == TRUE){ 
+  bool a = myfwrite(int_array, sizeof(int), 0, outfile);
+  if (a == true){ 
     printf("myfwrite succeeded\n");
   } else {
     printf("myfwrite failed\n");

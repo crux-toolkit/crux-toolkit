@@ -28,7 +28,7 @@ FLOAT_T aa_mod_masses[(int)NUM_MOD_MASSES];
 /**
  * Have we initialized the amino acid masses?
  */
-BOOLEAN_T initialized_amino_masses = FALSE;
+bool initialized_amino_masses = false;
 
 /* Private functions */
 void initialize_aa_mod_combinations_array();
@@ -96,7 +96,7 @@ void initialize_amino_masses (void)
   // modifications
   initialize_aa_mod_combinations_array();
 
-  initialized_amino_masses = TRUE;
+  initialized_amino_masses = true;
 }
 
 /**
@@ -199,7 +199,7 @@ FLOAT_T get_mass_amino_acid_average(
   // has the amino_masses array been initialized?
   if(!initialized_amino_masses){
     initialize_amino_masses();
-    initialized_amino_masses = TRUE;
+    initialized_amino_masses = true;
   }
   return(amino_masses[(short int)amino_acid - 'A']);
 }
@@ -262,7 +262,7 @@ FLOAT_T get_mass_amino_acid_monoisotopic(
   // has the amino_masses array been initialized?
   if(!initialized_amino_masses){
     initialize_amino_masses();
-    initialized_amino_masses = TRUE;
+    initialized_amino_masses = true;
   }
   return(amino_masses[(short int)amino_acid - 'A' + 26 ]);
 }
@@ -297,7 +297,7 @@ void increase_amino_acid_mass(
   // has the amino_masses array been initialized?
   if(!initialized_amino_masses){
     initialize_amino_masses();
-    initialized_amino_masses = TRUE;
+    initialized_amino_masses = true;
   }
 
   // check if amino acid

@@ -41,7 +41,7 @@ static void identify_best_psm_per_peptide
 
   // Store in the hash the best score per peptide.
   MatchIterator* match_iterator 
-    = new MatchIterator(all_matches, score_type, FALSE);
+    = new MatchIterator(all_matches, score_type, false);
   while(match_iterator->hasNext()){
     Match* match = match_iterator->next();
 
@@ -68,7 +68,7 @@ static void identify_best_psm_per_peptide
 
 
   // Set the best_per_peptide Boolean in the match, based on the hash.
-  match_iterator = new MatchIterator(all_matches, score_type, FALSE);
+  match_iterator = new MatchIterator(all_matches, score_type, false);
   while(match_iterator->hasNext()){
     Match* match = match_iterator->next();
 
@@ -271,14 +271,14 @@ MatchCollection* run_qvalue(
   }
 
   // Create two match collections, for targets and decoys.
-  MatchCollection* target_matches = new MatchCollection(FALSE);
-  MatchCollection* decoy_matches = new MatchCollection(TRUE);
-  target_matches->setScoredType(XCORR, TRUE);
-  decoy_matches->setScoredType(XCORR, TRUE);
+  MatchCollection* target_matches = new MatchCollection(false);
+  MatchCollection* decoy_matches = new MatchCollection(true);
+  target_matches->setScoredType(XCORR, true);
+  decoy_matches->setScoredType(XCORR, true);
 
   // Did we find something from which to get q-values?
-  BOOLEAN_T have_pvalues = FALSE;
-  BOOLEAN_T have_decoys = FALSE;
+  bool have_pvalues = false;
+  bool have_decoys = false;
 
   // Iterate over all match collections in this directory.
   while(match_collection_iterator->hasNext()){
@@ -291,7 +291,7 @@ MatchCollection* run_qvalue(
     
     // Iterate, gathering matches into one or two collections.
     MatchIterator* match_iterator =
-      new MatchIterator(match_collection, XCORR, FALSE);
+      new MatchIterator(match_collection, XCORR, false);
     while(match_iterator->hasNext()){
       Match* match = match_iterator->next();
       
@@ -300,9 +300,9 @@ MatchCollection* run_qvalue(
         continue;
       }
       
-      if (match->getNullPeptide() == TRUE) {
+      if (match->getNullPeptide() == true) {
         decoy_matches->addMatch(match);
-        have_decoys = TRUE;
+        have_decoys = true;
       } else {
         target_matches->addMatch(match);
       }
@@ -322,10 +322,10 @@ MatchCollection* run_qvalue(
   int num_pvals = target_matches->getMatchTotal();
   FLOAT_T* qvalues = NULL;
   SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
-  if (have_pvalues == TRUE) {
+  if (have_pvalues == true) {
     carp(CARP_DEBUG, "There are %d PSMs for q-value computation.", num_pvals);
     target_matches->setScoredType(LOGP_BONF_WEIBULL_XCORR, 
-                                     TRUE);
+                                     true);
     pvalues = target_matches->extractScores(LOGP_BONF_WEIBULL_XCORR);
     qvalues = compute_qvalues_from_pvalues(pvalues, num_pvals,
                                            get_double_parameter("pi-zero"));
@@ -333,7 +333,7 @@ MatchCollection* run_qvalue(
   }
 
   // Compute q-values from the XCorr decoy distribution.
-  else if (have_decoys == TRUE) {
+  else if (have_decoys == true) {
     int num_decoys = decoy_matches->getMatchTotal();
     carp(CARP_DEBUG,
          "There are %d target and %d decoy PSMs for q-value computation.",
@@ -366,7 +366,7 @@ MatchCollection* run_qvalue(
 
   // Compute peptide-level q-values.
   //  compute_decoy_q_values(all_matches/
-  // TRUE); // Do peptide-level scoring.
+  // true); // Do peptide-level scoring.
 
   // Store targets by score.
   target_matches->sort(score_type);

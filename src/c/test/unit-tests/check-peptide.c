@@ -118,7 +118,7 @@ START_TEST(test_mod_on_unmodified){
   char* converted = modified_aa_string_to_string_with_symbols(mod_seq, len);
   fail_unless( strcmp(seq, converted) == 0,
                "The modified seq returned should be the same as seq.");
-  converted = modified_aa_string_to_string_with_masses(mod_seq, len, FALSE);
+  converted = modified_aa_string_to_string_with_masses(mod_seq, len, false);
   fail_unless( strcmp(seq, converted) == 0,
                "The modified seq returned should be the same as seq.");
 
@@ -226,7 +226,7 @@ Suite* peptide_suite(void){
 // set setup!!
 
 START_TEST (test_create){
-  database = new_database("test", FALSE);
+  database = new_database("test", false);
 
   //test on link_list implementaion of peptide_src
   set_peptide_src_implementation(TRUE);

@@ -1596,7 +1596,7 @@ void MatchCollection::printXmlHeader(
   for (int mod_idx = 0; mod_idx < num_mods; mod_idx++){
     FLOAT_T mass = aa_mod_get_mass_change(mod_list[mod_idx]);
     
-    BOOLEAN_T* aas_modified = aa_mod_get_aa_list(mod_list[mod_idx]);
+    bool* aas_modified = aa_mod_get_aa_list(mod_list[mod_idx]);
     for (int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++){
       if (aas_modified[aa_idx] == true ){
         int aa = (aa_idx+'A');

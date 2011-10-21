@@ -9,7 +9,7 @@
 
 
 using namespace std;
-BOOLEAN_T set_double_parameter(
+bool set_double_parameter(
  const char*     name,  ///< the name of the parameter looking for -in
  double set_value,  ///< the value to be set -in
  double min_value,  ///< the value to be set -in

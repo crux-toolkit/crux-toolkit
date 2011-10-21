@@ -59,7 +59,7 @@ class SearchProgress{
       }
     };
 
-    void increment(BOOLEAN_T generated_matches){
+    void increment(bool generated_matches){
       searches_attempted_++;
       if( generated_matches ){
         searches_with_matches_++;

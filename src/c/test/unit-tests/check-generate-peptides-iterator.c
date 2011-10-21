@@ -11,7 +11,7 @@ Database* dbase;
 
 void gpiter_setup(){
   initialize_parameters();
-  dbase = new Database("input-data/test.fasta", FALSE);
+  dbase = new Database("input-data/test.fasta", false);
   gpiter1 = new GeneratePeptidesIterator(
                        pair<FLOAT_T,FLOAT_T>(1268 - 3, 1268 + 3),
                        false, dbase, NULL);

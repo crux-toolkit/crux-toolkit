@@ -35,7 +35,7 @@ static const int MAX_MESSAGE_BUFFER = 510;
  * The argument struct holds information about a command line argument.
  */
 typedef struct {
-  BOOLEAN_T command_line; ///<  the value come from the command line
+  bool command_line; ///<  the value come from the command line
   const char *name;  ///< the name of arguemt
   const char *usage; ///< the type of argument
   void *container;  ///< A pointer to storage for the parsed value of the option. 
@@ -104,7 +104,7 @@ int parse_arguments_set_opt(const char * name, const char * usage, void * contai
     optional[optional_count].usage = usage;
     optional[optional_count].container = container;
     optional[optional_count].type = type;
-    optional[optional_count].command_line = FALSE;
+    optional[optional_count].command_line = false;
     optional_count++;
     result = 1;
   } else {
@@ -146,7 +146,7 @@ int parse_arguments_set_req(const char * name, const char * usage, void * contai
     required[required_count].usage = usage;
     required[required_count].container = container;
     required[required_count].type = type;
-    required[required_count].command_line = FALSE;
+    required[required_count].command_line = false;
     required_count++;
     result = 1;
   } else {
@@ -428,12 +428,12 @@ int assign_value_from_required(/*const*/ argument * req,  /*const*/ char * value
       *((/*const*/ char **) req->container) = value;
       break;
     case BOOLEAN_ARG:
-      *((BOOLEAN_T*) req->container) = atoi(value);
+      *((bool*) req->container) = atoi(value);
       break;
   }
   
   // yes this required value came from the command line
-  req->command_line = TRUE;
+  req->command_line = true;
 
   return NO_ERROR;
 }
@@ -479,7 +479,7 @@ int assign_value_from_required_to_hash(/*const*/ argument * req,
   /* BF: there was no type checking unlike option.  why? */
   
   // yes this required value came from the command line
-  req->command_line = TRUE;
+  req->command_line = true;
 
   return NO_ERROR;
 }
@@ -604,7 +604,7 @@ int assign_value_from_option(/*const*/ argument * option,  int *index) {
   }
   
   // yes this optional value came from the command line
-  option->command_line = TRUE;
+  option->command_line = true;
 
   return result;
 }
@@ -740,7 +740,7 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
   }
   
   // yes this optional value came from the command line
-  option->command_line = TRUE;
+  option->command_line = true;
 
   return result;
 }
@@ -1109,15 +1109,15 @@ int is_numeric(/*const*/ char * s) {
 /**
  * updates all the parameters in the parameter file with the 
  * higher precedence command line parameters
- * returns TRUE is sucessful, else FALSE
+ * returns true is sucessful, else false
  */
-/*BOOLEAN_T update_parameter(){
+/*bool update_parameter(){
   int array_idx = 0;
   argument* optional_arg = NULL;
   argument* required_arg = NULL;
   char dest[PARAMETER_LENGTH];
   int result = 0;
-  char* bool = "FALSE";
+  char* bool = "false";
   
   // look at every optional arg and update parameter file
   // if the valuse were set from command line
@@ -1133,7 +1133,7 @@ int is_numeric(/*const*/ char * s) {
     switch (optional_arg->type){
       case FLAG_ARG:
         if(*((int *) optional_arg->container) == 1){
-          bool = "TRUE";
+          bool = "true";
         }
         result = snprintf(dest, PARAMETER_LENGTH, "%s", 
                           bool);
@@ -1161,9 +1161,9 @@ int is_numeric(/*const*/ char * s) {
     }
 
     // update value in paramters
-    if(!set_options_command_line(optional_arg->name, dest, FALSE) || result < 1){
+    if(!set_options_command_line(optional_arg->name, dest, false) || result < 1){
       fprintf(stderr,"failed to update parameters from command line\n");
-      return FALSE;
+      return false;
     } 
   }
 
@@ -1175,10 +1175,10 @@ int is_numeric(/*const*/ char * s) {
     switch (required_arg->type){
       case FLAG_ARG:
         if(*((int *)required_arg->container) == 1){
-          bool = "TRUE";
+          bool = "true";
         }
         else{
-          bool = "FALSE";
+          bool = "false";
         }
         result = snprintf(dest, PARAMETER_LENGTH, "%s", 
                           bool);
@@ -1206,12 +1206,12 @@ int is_numeric(/*const*/ char * s) {
 }
 
     // update value in paramters
-    if(!set_options_command_line(required_arg->name, dest, TRUE) || result < 1){
+    if(!set_options_command_line(required_arg->name, dest, true) || result < 1){
       fprintf(stderr,"failed to update parameters from command line\n");
-      return FALSE;
+      return false;
     } 
   }
-  return TRUE;
+  return true;
 }
 */
 

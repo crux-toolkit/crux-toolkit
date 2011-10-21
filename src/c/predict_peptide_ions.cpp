@@ -69,15 +69,15 @@ int main(int argc, char** argv){
 
   /* Get Options */
   ION_TYPE_T ion_type = get_ion_type_parameter("primary-ions");
-  BOOLEAN_T use_precursor_ions = get_boolean_parameter("precursor-ions");
+  bool use_precursor_ions = get_boolean_parameter("precursor-ions");
   int isotope_count = get_int_parameter("isotope");
-  BOOLEAN_T is_flanking = get_boolean_parameter("flanking");
+  bool is_flanking = get_boolean_parameter("flanking");
   const char* max_ion_charge = get_string_parameter_pointer("max-ion-charge");
   int nh3_count = get_int_parameter("nh3");
   int h2o_count = get_int_parameter("h2o");
 
   int neutral_loss_count[MAX_MODIFICATIONS];
-  BOOLEAN_T is_modification = FALSE;
+  bool is_modification = false;
 
   // check peptide sequence
   if(!valid_peptide_sequence(peptide_sequence)){

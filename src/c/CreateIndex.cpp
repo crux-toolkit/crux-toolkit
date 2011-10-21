@@ -119,7 +119,7 @@ int CreateIndex::main(int argc, char** argv) {
      fail if --overwrite is false */
   char* out_dir = get_string_parameter("index name");
   carp(CARP_DEBUG, "New index name is '%s'", out_dir);
-  BOOLEAN_T overwrite = get_boolean_parameter("overwrite");
+  bool overwrite = get_boolean_parameter("overwrite");
   if( (!overwrite) && (chdir(out_dir) == 0)){
       carp(CARP_FATAL, "Index '%s' already exists. Use " \
            "--overwrite T to replace.", out_dir);
