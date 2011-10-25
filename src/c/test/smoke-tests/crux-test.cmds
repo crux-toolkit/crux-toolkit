@@ -170,7 +170,7 @@
 1 = tdc-ss = good_results/tdc-ss = rm -f ss/tdc*; crux sequest-search --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta; cat ss/tdc*t = 'StartTime' 'Elapsed time' 'INFO:'
 
 # No decoys; create an index with decoys for this test
-1 = no-decoys-ss = good_results/no-decoys-ss = rm -f ss/no-decoys*; crux create-index small-yeast.fasta small-yeast-index; crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index; cat ss/no-decoys*t = 'StartTime' 'Elapsed time' 'INFO:'
+1 = no-decoys-ss = good_results/no-decoys-ss = rm -f ss/no-decoys*; crux create-index --overwrite T small-yeast.fasta small-yeast-index; crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index; cat ss/no-decoys*t = 'StartTime' 'Elapsed time' 'INFO:'
 
 # search only a select number of spectra with the --scan option
 1 = search_select_scans = good_results/search_select_scans.target.txt = crux search-for-matches --scan-number 150-153 --parameter-file params/minimal demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt

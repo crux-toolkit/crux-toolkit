@@ -11,6 +11,7 @@
 #	CRUX index directory: new-existing-index
 #	time created: Wed Jun 24 15:37:29 2009
 #	target_mass_range_for_index_file: 6.84
+#       static_mod_C: +57.021465
 crux_index_34	585.59	6.84
 crux_index_44	653.95	6.84
 crux_index_48	681.29	6.84

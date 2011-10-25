@@ -161,6 +161,10 @@ void Index::init() {
   mass_range_ = 0.0;
   is_unique_ = false;
   decoys_ = NO_DECOYS;
+  static_mods_ = new FLOAT_T[Alphabet::numAminoAcids];
+  for(int aa_idx = 0; aa_idx < Alphabet::numAminoAcids; aa_idx++){
+    static_mods_[aa_idx] = 0;
+  }
 }  
 
 /**
@@ -363,6 +367,17 @@ bool Index::setFieldsFromDisk() {
   std::free(map_filename);
   myfree(line);
 
+  // check that the static mods in the index are the same as the parameters
+  for(int aa_idx = 0; aa_idx < Alphabet::numAminoAcids; aa_idx++){
+    const char* amino_acid = Alphabet::aminoAcids[aa_idx];
+    FLOAT_T param_mod = get_double_parameter(amino_acid);
+    if( static_mods_[aa_idx] != param_mod ){
+      carp(CARP_FATAL, "Index cannot be searched with static mod "
+           "%s=%f.  The index's static mod for %s is %f.",
+           amino_acid, param_mod, amino_acid, static_mods_[aa_idx]);
+    }
+  }
+
   on_disk_ = true;
   return true;
 }
@@ -422,6 +437,11 @@ void Index::setFieldFromMap(
   }
   else if(strcmp("decoys:",trait_name) == 0 ){
     decoys_ = (DECOY_TYPE_T)value;
+  }
+  else if(strncmp("static_mod_", trait_name, strlen("static_mod_")) == 0){
+    const char* aa = trait_name + strlen("static_mod_");
+    int aa_idx = Alphabet::aminoToInt(*aa);
+    static_mods_[aa_idx] = value;
   }
   else if(strcmp("CRUX", trait_name) == 0){
     return;
@@ -714,6 +734,7 @@ Index::~Index() {
     }
 
   std::free(directory_);
+  delete [] static_mods_;
 }
 
 /**
@@ -743,6 +764,13 @@ bool Index::writeHeader(
   fprintf(file, "#\ttime created: %s",  ctime(&hold_time)); 
   fprintf(file, "#\ttarget_mass_range_for_index_file: %.2f\n", mass_range_);
   
+  for(int aa_idx = 0; aa_idx < Alphabet::numAminoAcids; aa_idx++){
+    const char* amino_acid = Alphabet::aminoAcids[aa_idx];
+    FLOAT_T mod =  get_double_parameter(amino_acid);
+    if( mod != 0 ){
+      fprintf(file, "#\tstatic_mod_%s: %+.6f\n", amino_acid, mod);
+    }
+  }
   return true;
 }
 

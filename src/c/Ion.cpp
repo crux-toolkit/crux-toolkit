@@ -311,8 +311,8 @@ void Ion::printGmtkSingle(
       mz_int,                                                   // 5 
       cleavage_idx_,                                            // 6
       strlen(peptide_sequence_) - cleavage_idx_ + 1,            // 7
-      amino_to_int(peptide_sequence_[cleavage_idx_-1]),         // 8 
-      amino_to_int(peptide_sequence_[cleavage_idx_]),           // 9 
+      Alphabet::aminoToInt(peptide_sequence_[cleavage_idx_-1]),// 8 
+      Alphabet::aminoToInt(peptide_sequence_[cleavage_idx_]), // 9 
       is_possible,                                              // 10 
       is_detectable,                                            // 11
       is_detected                                               // 12
@@ -371,8 +371,8 @@ void Ion::printGmtkSingleBinary(
 
   int mz_int = (int)(mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
   int cterm_idx = strlen(peptide_sequence_) - cleavage_idx_; 
-  int left_amino = amino_to_int(peptide_sequence_[cleavage_idx_-1]);
-  int right_amino = amino_to_int(peptide_sequence_[cleavage_idx_]);
+  int left_amino = Alphabet::aminoToInt(peptide_sequence_[cleavage_idx_-1]);
+  int right_amino = Alphabet::aminoToInt(peptide_sequence_[cleavage_idx_]);
   int is_detectable = 0;
   if ( 
        ((ion_mass_z_ >= DETECTABLE_MZ_MIN) 
@@ -563,9 +563,9 @@ void Ion::printGmtkPairedBinary(
   int c_mz_int = (int)(c_mz_ratio * (MZ_INT_MAX - MZ_INT_MIN) + MZ_INT_MIN);
   int cterm_idx = strlen(first_ion->peptide_sequence_) 
     - first_ion->cleavage_idx_; 
-  int left_amino = amino_to_int(
+  int left_amino = Alphabet::aminoToInt(
       first_ion->peptide_sequence_[first_ion->cleavage_idx_-1]);
-  int right_amino = amino_to_int(
+  int right_amino = Alphabet::aminoToInt(
       first_ion->peptide_sequence_[first_ion->cleavage_idx_]);
   int first_is_detectable = 0;
   if ( 
