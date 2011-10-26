@@ -30,8 +30,8 @@ AM_CXXFLAGS = -Wall -W -Werror  $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
             -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
 LIBFILES= \
-  alphabet.cpp \
-  alphabet.h \
+  Alphabet.cpp \
+  Alphabet.h \
   analyze_psms.cpp \
   analyze_psms.h \
   carp.cpp \
