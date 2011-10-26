@@ -15,7 +15,7 @@
 #include "carp.h"
 #include "PeptideConstraint.h"
 #include "Database.h"
-#include "alphabet.h"
+#include "Alphabet.h"
 
 static const int MAX_INDEX_FILES = 1024;
 

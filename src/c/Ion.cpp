@@ -8,7 +8,7 @@
 #include <string.h>
 #include "objects.h"
 #include "Ion.h"
-#include "alphabet.h"
+#include "Alphabet.h"
 #include "Peptide.h"
 #include "Peak.h"
 #include "mass.h"

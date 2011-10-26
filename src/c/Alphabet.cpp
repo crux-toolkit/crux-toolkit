@@ -3,7 +3,7 @@
  * AUTHOR: Unknown
  * \brief Provide a function for converting amino acids to ints.
  ********************************************************************/
-#include "alphabet.h"
+#include "Alphabet.h"
 
 int Alphabet::amino_array_[AMINO_ARRAY_CAPACITY] = {0};
 bool Alphabet::amino_array_populated_ = false;
