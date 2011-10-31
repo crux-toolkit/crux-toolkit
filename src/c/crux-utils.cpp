@@ -1177,25 +1177,21 @@ char** generate_feature_name_array()
   name_array = (char**)mycalloc(NUM_FEATURES, sizeof(char *));
   name_array[0] =  my_copy_string("XCorr");
   name_array[1] =  my_copy_string("DeltCN");
-  name_array[2] =  my_copy_string("DeltLCN");
-  name_array[3] =  my_copy_string("Sp");
-  name_array[4] =  my_copy_string("lnrSp");
-  name_array[5] =  my_copy_string("dM");
-  name_array[6] =  my_copy_string("absdM");
-  name_array[7] =  my_copy_string("Mass");
-  name_array[8] =  my_copy_string("ionFrac");
-  name_array[9] =  my_copy_string("lnSM");
-  name_array[10] =  my_copy_string("enzN");
-  name_array[11] =  my_copy_string("enzC");
-  name_array[12] =  my_copy_string("enzInt");
-  name_array[13] =  my_copy_string("pepLen");
-  name_array[14] =  my_copy_string("charge1");
-  name_array[15] =  my_copy_string("charge2");
-  name_array[16] =  my_copy_string("charge3");
-  name_array[17] =  my_copy_string("numPep");
-  name_array[18] =  my_copy_string("numProt");
-  name_array[19] =  my_copy_string("pepSite");
-  
+  name_array[2] =  my_copy_string("Sp");
+  name_array[3] =  my_copy_string("lnrSp");
+  name_array[4] =  my_copy_string("dM");
+  name_array[5] =  my_copy_string("absdM");
+  name_array[6] =  my_copy_string("Mass");
+  name_array[7] =  my_copy_string("ionFrac");
+  name_array[8] =  my_copy_string("lnSM");
+  name_array[9] =  my_copy_string("enzN");
+  name_array[10] =  my_copy_string("enzC");
+  name_array[11] =  my_copy_string("enzInt");
+  name_array[12] =  my_copy_string("pepLen");
+  name_array[13] =  my_copy_string("charge1");
+  name_array[14] =  my_copy_string("charge2");
+  name_array[15] =  my_copy_string("charge3");
+
   return name_array;
 }
 

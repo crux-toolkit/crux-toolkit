@@ -1088,11 +1088,8 @@ double* Match::getPercolatorFeatures(
   MatchCollection* match_collection ///< the match collection to iterate -in
   )
 {
-  int feature_count = 20;
-  PEPTIDE_SRC_ITERATOR_T* src_iterator = NULL;
-  PeptideSrc* peptide_src = NULL;
-  Protein* protein = NULL;
-  unsigned int protein_idx = 0;
+  match_collection->isDecoy();
+  int feature_count = NUM_FEATURES;
   double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
   FLOAT_T weight_diff = peptide_->getPeptideMass() -
     (zstate_.getNeutralMass());
@@ -1114,100 +1111,50 @@ double* Match::getPercolatorFeatures(
   // it later (SJM 07-07-2010).
   // DeltCN
   feature_array[1] = 0;//match->delta_cn;
-  // DeltLCN
-  feature_array[2] = 0;//match->ln_delta_cn;
+  
   // SP
-  feature_array[3] = getScore(SP);
+  feature_array[2] = getScore(SP);
   // lnrSP
-  feature_array[4] = logf(getRank(SP));
+  feature_array[3] = logf(getRank(SP));
   // SP is no longer scored so we need place holder values
-  if( feature_array[3] == NOT_SCORED ){ 
+  if( feature_array[2] == NOT_SCORED ){ 
+    feature_array[2] = 0;
     feature_array[3] = 0;
-    feature_array[4] = 0;
   }
   // dM
-  feature_array[5] = weight_diff;
+  feature_array[4] = weight_diff;
   // absdM
-  feature_array[6] = fabsf(weight_diff);
+  feature_array[5] = fabsf(weight_diff);
   // Mass
-  feature_array[7] = zstate_.getNeutralMass();
+  feature_array[6] = zstate_.getNeutralMass();
   // ionFrac
-  feature_array[8] = b_y_ion_fraction_matched_;
+  feature_array[7] = b_y_ion_fraction_matched_;
   // lnSM
-  feature_array[9] = ln_experiment_size_;
-  
-  // peptide cleavage info.
-  // START figure out the right way to set these features for on the fly
-  // peptide generation
-/*
-  if(match->overall_type == TRYPTIC){
-    feature_array[10] = true;
-    feature_array[11] = true;
-  }
-  else if(match->overall_type == N_TRYPTIC){
-    feature_array[10] = true;
-  }
-  else if(match->overall_type == C_TRYPTIC){
-    feature_array[11] = true;
-  }
-  */
-  feature_array[10] = true; // TODO(if perc support continues, figure out what these should be
-  feature_array[11] = true;
+  feature_array[8] = ln_experiment_size_;
+
+  feature_array[9] = true; // TODO(if perc support continues, figure out what these should be
+  feature_array[10] = true;
   // get the missed cleave sites
-  feature_array[12] = peptide_->getMissedCleavageSites();
+  feature_array[11] = peptide_->getMissedCleavageSites();
   
   // pepLen
-  feature_array[13] = peptide_->getLength();
+  feature_array[12] = peptide_->getLength();
   
   int charge = zstate_.getCharge();
 
   // set charge
   if(charge == 1){
-    feature_array[14] = true;
+    feature_array[13] = true;
   }
   else if(charge == 2){
-    feature_array[15] = true;
+    feature_array[14] = true;
   }
   else if(charge == 3){
-    feature_array[16] = true;
+    feature_array[15] = true;
   }
-  
-  // run specific features
-  if (strcmp(
-        get_string_parameter_pointer("percolator-intraset-features"), "T")==0){
-    carp(CARP_DETAILED_DEBUG, "Using intraset features!");
-    feature_array[17] 
-      = match_collection->getHash(peptide_);
-    
-    src_iterator = new_peptide_src_iterator(peptide_);
-    // iterate overall parent proteins
-    // find largest numProt and pepSite among the parent proteins
-    while(peptide_src_iterator_has_next(src_iterator)){
-      peptide_src = peptide_src_iterator_next(src_iterator);
-      protein = peptide_src->getParentProtein();
-      protein_idx = protein->getProteinIdx();
 
-      // numProt
-      if(feature_array[18] < match_collection->getProteinCounter(
-                              protein_idx)){
-        feature_array[18] = match_collection->getProteinCounter(
-                              protein_idx);
-      }
-      
-      // pepSite
-      if(feature_array[19] < match_collection->getProteinPeptideCounter(
-                              protein_idx)){
-        feature_array[19] = match_collection->getProteinPeptideCounter(
-                              protein_idx);      
-      }
-    }
-  } else {
-    feature_array[17] = feature_array[18] = feature_array[19] = 0.0;
-  }
-  
   // now check that no value is with in infinity
-  int check_idx;
-  for(check_idx=0; check_idx < 20; ++check_idx){
+  for(int check_idx=0; check_idx < feature_count; ++check_idx){
     
     FLOAT_T feature = feature_array[check_idx];
     carp(CARP_DETAILED_DEBUG, "feature[%d]=%f", check_idx, feature);
@@ -1218,8 +1165,6 @@ double* Match::getPercolatorFeatures(
       feature_array[check_idx] = feature <= - BILLION ? -BILLION : BILLION;
     }
   }
-
-  free_peptide_src_iterator(src_iterator);
 
   return feature_array;
 }
