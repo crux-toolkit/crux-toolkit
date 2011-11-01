@@ -902,8 +902,15 @@ bool Scorer::createIntensityArrayObserved(
     region = mz / region_selector;
 
     // don't let index beyond array
-    if(region >= NUM_REGIONS){
-      continue;
+    if(region>= NUM_REGIONS) {
+      if (region == NUM_REGIONS&&  mz<  experimental_mass_cut_off) {
+        // Force peak into lower bin
+        region = NUM_REGIONS - 1;
+      }
+      else {
+        // Skip peak altogether
+        continue;
+      }
     }
 
     // get intensity
