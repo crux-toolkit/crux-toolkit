@@ -1,7 +1,7 @@
 /**
  * \file StatColumn.cpp 
  * \brief Given a delimited file and a column-name, print out statistics
- * for that column (n, min, max, sum, average, median).
+ * for that column (n, min, max, sum, average, stddev, median).
  *****************************************************************************/
 #include "StatColumn.h"
 
@@ -32,6 +32,7 @@ int StatColumn::main(int argc, char** argv) {
   const char* option_list[] = {
     "delimiter",
     "header",
+    "precision",
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -78,11 +79,26 @@ int StatColumn::main(int argc, char** argv) {
   
   sort(data.begin(), data.end(), less<FLOAT_T>());
 
+  unsigned int num_points = data.size();
+
   FLOAT_T min = data.front();
   FLOAT_T max = data.back();
   
-  FLOAT_T average = sum / (FLOAT_T)data.size();
+  FLOAT_T average = sum / (FLOAT_T)num_points;
  
+  FLOAT_T std_dev = 0.0;
+
+  if (num_points >= 2) {
+
+    for (unsigned int idx = 0 ; idx < num_points ; idx++) {
+      FLOAT_T temp = data.at(idx) - average;
+      std_dev += temp * temp;
+    }
+    std_dev = std_dev / (1.0 / (double)(num_points - 1));
+    std_dev = sqrt(std_dev);
+  }
+  
+
 
  
   FLOAT_T median = 0.0;
@@ -101,14 +117,20 @@ int StatColumn::main(int argc, char** argv) {
   //print out the header
 
   if (header_) {
-    cout <<"N\tMin\tMax\tSum\tAverage\tMedian"<<endl;
+    cout <<"N\tMin\tMax\tSum\tAverage\tStdDev\tMedian"<<endl;
   }
 
-  cout << data.size() << delimiter_;
-  cout << min << delimiter_;
-  cout << max << delimiter_;
-  cout << sum << delimiter_;
-  cout << average << delimiter_;
+  cout << std::setprecision(get_int_parameter("precision"));
+  cout << num_points << delimiter_;
+  cout << min        << delimiter_;
+  cout << max        << delimiter_;
+  cout << sum        << delimiter_;
+  cout << average    << delimiter_;
+  if (num_points >= 2) {
+    cout << std_dev << delimiter_;
+  } else {
+    cout << "N/A" << delimiter_;
+  }
   cout << median << endl;
 
   return 0;
