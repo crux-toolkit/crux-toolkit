@@ -4987,11 +4987,6 @@ nh3=0
 # Modified Protein Abundance Index
 measure=NSAF
 
-# Use variable binning for XCORR.  If set to true, mz-bin-width, and
-# mz-bin-offset parameters are utilized
-# Available for crux-search-for-matches.
-xcorr-var-bin=false
-
 # Number of psms per spectrum to score with xcorr after preliminary
 # scoring with Sp. Set to 0 to score all psms with xcorr. Default=500.
 # Used by crux-search-for-matches.  For positive values, the Sp
