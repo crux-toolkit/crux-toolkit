@@ -136,11 +136,9 @@ Scorer::Scorer(
   // set score type
   type_ = type;
   
-  xcorr_var_bin_ = get_boolean_parameter("xcorr-var-bin");
-
   // set bin_width and bin_offset.
-  bin_width_ = get_mz_bin_width();
-  bin_offset_ = get_mz_bin_offset();
+  bin_width_ = get_double_parameter("mz-bin-width");
+  bin_offset_ = get_double_parameter("mz-bin-offset");
 
   // set fields needed for each score type
   if(type == SP){
