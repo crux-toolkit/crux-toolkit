@@ -203,7 +203,7 @@ void DelimitedFile::loadData(
     tokenize(line, tokens, getDelimiter());
     if (!hasHeader && numCols() == 0) {
       //initialize the number of columns so that addRow won't fail.
-      while (numCols() <= tokens.size()) {
+      while (numCols() < tokens.size()) {
         addColumn();
       }
     }
