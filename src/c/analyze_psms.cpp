@@ -2,13 +2,17 @@
  * \file analyze_psms.cpp
  */
 
+#include <vector>
+#include <functional>
 #include "analyze_psms.h"
 #include "ComputeQValues.h"
 #include "QRanker.h"
 #include "Percolator.h"
 #include "MatchCollectionIterator.h"
 #include "MatchIterator.h"
+#include "posterior-error/PosteriorEstimator.h"
 
+using namespace pep;
 
 /**
  * \brief Takes a directory containing PSM files and a protein index
@@ -133,6 +137,52 @@ void analyze_matches_main(
 }
 
 /**
+ * Compute posterior error probabilities (PEP) from the given target
+ * and decoy scores.
+ * \returns A newly allocated array of PEP for the target scores
+ * sorted.
+ */
+double* compute_PEP(double* target_scores, ///< scores for target matches
+                    int num_targets,       ///< size of target_scores
+                    double* decoy_scores,  ///< scores for decoy matches
+                    int num_decoys         ///< size of decoy_scores
+){
+  if( target_scores == NULL || decoy_scores == NULL 
+      || num_targets == 0 || num_decoys == 0 ){
+    carp(CARP_FATAL, "Cannot compute PEP without target or decoy scores.");
+  }
+
+  // put all of the scores in a single vector of pairs: score, is_target
+  vector<pair<double, bool> > score_labels;
+  transform(target_scores, target_scores + num_targets,
+            back_inserter(score_labels),
+            bind2nd(ptr_fun(make_pair<double, bool>), true));
+  transform(decoy_scores, decoy_scores + num_decoys,
+            back_inserter(score_labels),
+            bind2nd(ptr_fun(make_pair<double, bool>), false));
+
+  // sort them in descending order
+  sort(score_labels.begin(), score_labels.end(),
+       greater<pair<double, bool> >());
+
+  // get p-values
+  vector<double> pvals;
+  PosteriorEstimator::getPValues(score_labels, pvals);
+  
+  // estimate pi0
+  double pi0 = PosteriorEstimator::estimatePi0(pvals);
+
+  // estimate PEPs
+  vector<double> PEP_vector;
+  PosteriorEstimator::estimatePEP(score_labels, pi0, PEP_vector, 
+                                  false); // don't include decoy PEPs
+
+  double* PEP_array = new double[num_targets];
+  copy(PEP_vector.begin(), PEP_vector.end(), PEP_array);
+  return PEP_array;
+}
+
+/**
  * \brief Analyze matches using the percolator or qranker algorithm.
  * 
  * Runs the specified algorithm on the PSMs in the psm_result_folder
@@ -191,6 +241,8 @@ MatchCollection* run_percolator_or_qranker(
   match_collection_iterator =
     new MatchCollectionIterator(input_directory, fasta_file, &num_decoys);
 
+  int num_target_matches = 0;
+  int num_decoy_matches = 0;  // in first decoy set
   // iterate over each, TARGET, DECOY 1..3 match_collection sets
   iterations = 0;
   while(match_collection_iterator->hasNext()){
@@ -210,6 +262,7 @@ MatchCollection* run_percolator_or_qranker(
           match_collection->getMatchTotal(), sizeof(double));
       results_score = (double*)mycalloc(
           match_collection->getMatchTotal(), sizeof(double));
+      num_target_matches = match_collection->getMatchTotal();
       
       // Call that initiates q-ranker or percolator.
       switch (command) {
@@ -274,6 +327,8 @@ MatchCollection* run_percolator_or_qranker(
         carp(CARP_FATAL, "Unknown command type.");
         break;
       }
+    } else if( set_idx == 1 ){
+      num_decoy_matches = match_collection->getMatchTotal();
     }
 
     // create iterator, to register each PSM feature.
@@ -317,6 +372,9 @@ MatchCollection* run_percolator_or_qranker(
     ++set_idx;
   } // end iteratation over each, TARGET, DECOY 1..3 match_collection sets
 
+  double* decoy_scores = new double[num_decoy_matches]; //first decoy set
+  double* PEPs = NULL;
+
   carp(CARP_DETAILED_DEBUG, "Processing PSMs");
   // Start processing
   switch (command) {
@@ -332,8 +390,13 @@ MatchCollection* run_percolator_or_qranker(
   case QRANKER_COMMAND:
     qcExecute(!get_boolean_parameter("no-xval")); 
     qcGetScores(results_score, results_q); 
+    qcGetDecoyScores(decoy_scores);
+    PEPs = compute_PEP(results_score, num_target_matches,
+                       decoy_scores, num_decoy_matches);
     target_match_collection->fillResult(
         results_q, QRANKER_QVALUE, true);
+    target_match_collection->fillResult(
+        PEPs, QRANKER_PEP, true);
     target_match_collection->fillResult(
         results_score, QRANKER_SCORE, false);
     qcCleanUp();
@@ -357,6 +420,8 @@ MatchCollection* run_percolator_or_qranker(
   free(results_q);
   free(results_score);
   delete match_collection_iterator;
+  delete[] decoy_scores;
+  delete[] PEPs;
 
   // TODO put free back in. took out because glibc claimed it was corrupted
   // double linked list

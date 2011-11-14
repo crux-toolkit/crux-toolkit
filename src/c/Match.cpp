@@ -681,6 +681,10 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getScore(QRANKER_QVALUE));
     break;
+  case QRANKER_PEP_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                     getScore(QRANKER_PEP));
+    break;
 #ifdef NEW_COLUMNS
   case QRANKER_PEPTIDE_QVALUE_COL:
     if (match->best_per_peptide == true) {

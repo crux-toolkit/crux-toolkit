@@ -91,6 +91,7 @@ void MatchFileWriter::setPrecision(){
     case PERCOLATOR_QVALUE_COL:
     case QRANKER_SCORE_COL:
     case QRANKER_QVALUE_COL:
+    case QRANKER_PEP_COL:
     case SIN_SCORE_COL:
     case NSAF_SCORE_COL:
     case EMPAI_SCORE_COL:
@@ -308,6 +309,7 @@ void MatchFileWriter::addColumnNames
   case QRANKER_COMMAND:
     addColumnName(QRANKER_SCORE_COL);
     addColumnName(QRANKER_QVALUE_COL);
+    addColumnName(QRANKER_PEP_COL);
     break;
   }
 
