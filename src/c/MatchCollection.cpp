@@ -590,6 +590,7 @@ void MatchCollection::sort(
 
   case QRANKER_QVALUE:
   case QRANKER_PEPTIDE_QVALUE:
+  case QRANKER_PEP:
     carp(CARP_DEBUG, "Sorting match collection by Q-ranker q-value.");
     compare_match_function = (QSORT_COMPARE_METHOD)compareQRankerQValue;
     sort_by = QRANKER_QVALUE;
@@ -670,6 +671,7 @@ void MatchCollection::spectrumSort(
 
   case QRANKER_QVALUE:
   case QRANKER_PEPTIDE_QVALUE:
+  case QRANKER_PEP:
     qsortMatch(match_, match_total_,
                 (QSORT_COMPARE_METHOD)compareSpectrumQRankerQValue);
     last_sorted_ = QRANKER_QVALUE;
@@ -2859,6 +2861,7 @@ void MatchCollection::assignQValues(
       derived_score_type = QRANKER_PEPTIDE_QVALUE;
       break;
     // Should never reach this point.
+    case QRANKER_PEP:// should we handle this??
     case SP: 
     case LOGP_WEIBULL_XCORR: 
     case DECOY_XCORR_PEPTIDE_QVALUE:

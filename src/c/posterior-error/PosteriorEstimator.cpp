@@ -1,0 +1,433 @@
+/*******************************************************************************
+ Copyright 2006-2009 Lukas Käll <lukas.kall@cbr.su.se>
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+ ******************************************************************************/
+
+#include<cmath>
+#include<vector>
+#include<utility>
+#include<cstdlib>
+#include<limits.h>
+#include<fstream>
+#include<sstream>
+#include<iterator>
+#include<algorithm>
+#include<numeric>
+#include<functional>
+using namespace std;
+
+
+#include "PosteriorEstimator.h"
+#include "Transform.h"
+
+namespace pep {
+
+static unsigned int noIntevals = 500;
+static unsigned int numLambda = 100;
+static double maxLambda = 0.5;
+
+bool PosteriorEstimator::reversed = false;
+bool PosteriorEstimator::pvalInput = false;
+bool PosteriorEstimator::competition = false;
+
+class IsDecoy {
+  public:
+    bool operator()(const pair<double, bool>& aPair) {
+      return !aPair.second;
+    }
+};
+
+template<class T> void bootstrap(const vector<T>& in, vector<T>& out,
+                                 size_t max_size = 1000) {
+  out.clear();
+  double n = in.size();
+  size_t num_draw = min(in.size(), max_size);
+  for (size_t ix = 0; ix < num_draw; ++ix) {
+    size_t draw = (size_t)((double)rand() / ((double)RAND_MAX + (double)1)
+        * n);
+    out.push_back(in[draw]);
+  }
+  // sort in desending order
+  sort(out.begin(), out.end());
+}
+
+double PEP_mymin(double a, double b) {
+  return a > b ? b : a;
+}
+
+void PosteriorEstimator::estimatePEP(
+                                     vector<pair<double, bool> >& combined,
+                                     double pi0, vector<double>& peps,
+                                     bool includeNegativesInResult) {
+  // Logistic regression on the data
+  size_t nTargets = 0, nDecoys = 0;
+  LogisticRegression lr;
+  estimate(combined, lr);
+  vector<double> xvals(0);
+  vector<pair<double, bool> >::const_iterator elem = combined.begin();
+  for (; elem != combined.end(); ++elem)
+    if (elem->second) {
+      xvals.push_back(elem->first);
+      ++nTargets;
+    } else {
+      if (includeNegativesInResult) {
+        xvals.push_back(elem->first);
+      }
+      ++nDecoys;
+    }
+  lr.predict(xvals, peps);
+  double factor = pi0 * ((double)nTargets / (double)nDecoys);
+  double top = min(1.0, factor
+      * exp(*max_element(peps.begin(), peps.end())));
+  vector<double>::iterator pep = peps.begin();
+  bool crap = false;
+  for (; pep != peps.end(); ++pep) {
+    if (crap) {
+      *pep = top;
+      continue;
+    }
+    *pep = factor * exp(*pep);
+    if (*pep >= top) {
+      *pep = top;
+      crap = true;
+    }
+  }
+  partial_sum(peps.rbegin(), peps.rend(), peps.rbegin(), PEP_mymin);
+}
+
+/*
+// BF: for target/decoy competition, I think
+void PosteriorEstimator::estimatePEPGeneralized(
+                                     vector<pair<double, bool> >& combined,
+                                     vector<double>& peps) {
+  // Logistic regression on the data
+  size_t nTargets = 0, nDecoys = 0;
+  LogisticRegression lr;
+  estimate(combined, lr);
+  vector<double> xvals(0);
+  vector<pair<double, bool> >::const_iterator elem = combined.begin();
+  for (; elem != combined.end(); ++elem) {
+    xvals.push_back(elem->first);
+    if (elem->second) {
+      ++nTargets;
+    } else {
+      ++nDecoys;
+    }
+  }
+  lr.predict(xvals, peps);
+  //#define OUTPUT_DEBUG_FILES
+#undef OUTPUT_DEBUG_FILES
+#ifdef OUTPUT_DEBUG_FILES
+  ofstream drFile("decoyRate.all", ios::out), xvalFile("xvals.all", ios::out);
+  ostream_iterator<double> drIt(drFile, "\n"), xvalIt(xvalFile, "\n");
+  copy(peps.begin(), peps.end(), drIt);
+  copy(xvals.begin(), xvals.end(), xvalIt);
+#endif
+  double top = exp(*max_element(peps.begin(), peps.end()));
+  top = top/(1+top);
+  bool crap = false;
+  vector<double>::iterator pep = peps.begin();
+  for (; pep != peps.end(); ++pep) {
+    if (crap) {
+      *pep = top;
+      continue;
+    }
+    // eg = p/(1-p)
+    // eg - egp = p
+    // p = eg/(1+eg)
+    double eg = exp(*pep);
+    *pep = eg/(1+eg);
+    if (*pep >= top) {
+      *pep = top;
+      crap = true;
+    }
+  }
+  partial_sum(peps.rbegin(), peps.rend(), peps.rbegin(), mymin);
+  double high = *max_element(peps.begin(), peps.end());
+  double low = *min_element(peps.begin(), peps.end());
+  assert(high>low);
+
+  if (VERB > 2) {
+    cerr << "Highest generalized decoy rate =" << high
+	 << ", low rate = " << low << endl;
+  }
+
+  pep = peps.begin();
+  for (; pep != peps.end(); ++pep) {
+    *pep = (*pep - low)/(high-low);
+  }
+}
+*/
+
+void PosteriorEstimator::estimate(vector<pair<double, bool> >& combined,
+                                  LogisticRegression& lr) {
+  // switch sorting order
+  if (!reversed) {
+    reverse(combined.begin(), combined.end());
+  }
+  vector<double> medians;
+  vector<unsigned int> negatives, sizes;
+  binData(combined, medians, negatives, sizes);
+  lr.setData(medians, negatives, sizes);
+  lr.iterativeReweightedLeastSquares();
+  // restore sorting order
+  if (!reversed) {
+    reverse(combined.begin(), combined.end());
+  }
+}
+
+void PosteriorEstimator::binData(
+                                 const vector<pair<double, bool> >& combined,
+                                 vector<double>& medians, vector<
+                                     unsigned int> & negatives, vector<
+                                     unsigned int> & sizes) {
+  // Create bins and count number of negatives in each bin
+  size_t binsLeft = noIntevals;
+  double targetedBinSize = max(floor(combined.size()
+      / (double)(noIntevals)), 1.0);
+  vector<pair<double, bool> >::const_iterator combinedIter =
+      combined.begin();
+  size_t firstIx, pastIx = 0;
+  while (pastIx < combined.size()) {
+    while (((combined.size() - pastIx) / targetedBinSize < binsLeft)
+        && binsLeft > 1) {
+      --binsLeft;
+    }
+    double binSize =
+        max((combined.size() - pastIx) / (double)(binsLeft--), 1.0);
+    firstIx = pastIx;
+    pastIx = min(combined.size(), (size_t)(firstIx + binSize));
+    // Handle ties
+    while ((pastIx < combined.size()) && (combined[pastIx - 1].first
+        == combined[pastIx].first)) {
+      ++pastIx;
+    }
+    int inBin = pastIx - firstIx;
+    assert(inBin > 0);
+    int negInBin = count_if(combinedIter, combinedIter + inBin, IsDecoy());
+    combinedIter += inBin;
+    double median = combined[firstIx + inBin / 2].first;
+    if (medians.size() > 0 && *(medians.rbegin()) == median) {
+      *(sizes.rbegin()) += inBin;
+      *(negatives.rbegin()) += negInBin;
+    } else {
+      medians.push_back(median);
+      sizes.push_back(inBin);
+      negatives.push_back(negInBin);
+    }
+  }
+}
+
+/*
+void PosteriorEstimator::getQValues(double pi0, const vector<pair<double,
+    bool> > & combined, vector<double>& q) {
+  // assuming combined sorted in decending order
+  vector<pair<double, bool> >::const_iterator myPair = combined.begin();
+  unsigned int nTargets = 0, nDecoys = 0;
+  while (myPair != combined.end()) {
+    if (!(myPair->second)) {
+      ++nDecoys;
+    } else {
+      ++nTargets;
+      q.push_back(((double)nDecoys) / (double)nTargets);
+    }
+    ++myPair;
+  }
+  double factor = pi0 * ((double)nTargets / (double)nDecoys);
+  transform(q.begin(), q.end(), q.begin(), bind2nd(multiplies<double> (),
+                                                   factor));
+  partial_sum(q.rbegin(), q.rend(), q.rbegin(), mymin);
+  return;
+}
+*/
+
+/*
+void PosteriorEstimator::getQValuesFromP(double pi0,
+                                         const vector<double>& p, vector<
+										 double> & q) {
+	double m = (double)p.size();
+	int nP = 1;
+	// assuming combined sorted in decending order
+	for (vector<double>::const_iterator myP = p.begin(); myP != p.end(); ++myP, ++nP) {
+		q.push_back((*myP * m * pi0) / (double)nP);
+	}
+	partial_sum(q.rbegin(), q.rend(), q.rbegin(), mymin);
+	return;
+}
+void PosteriorEstimator::getQValuesFromPEP(const vector<double>& pep, vector<double> & q) {
+	int nP = 0;
+	double sum = 0.0;
+	// assuming combined sorted in decending order
+	for (vector<double>::const_iterator myP = pep.begin(); myP != pep.end(); ++myP, ++nP) {
+		sum += *myP;
+		q.push_back(sum / (double)nP);
+	}
+	partial_sum(q.rbegin(), q.rend(), q.rbegin(), mymin);
+	return;
+}
+*/
+
+void PosteriorEstimator::getPValues(
+                                    const vector<pair<double, bool> >& combined,
+                                    vector<double>& p) {
+  // assuming combined sorted in best hit first order
+  vector<pair<double, bool> >::const_iterator myPair = combined.begin();
+  size_t nDecoys = 0, posSame = 0, negSame = 0;
+  double prevScore = -4711.4711; // number that hopefully never turn up first in sequence
+  while (myPair != combined.end()) {
+    if (myPair->first != prevScore) {
+      for (size_t ix = 0; ix < posSame; ++ix) {
+        p.push_back((double)nDecoys + (((double)negSame)
+            / (double)(posSame + 1)) * (ix + 1));
+      }
+      nDecoys += negSame;
+      negSame = 0;
+      posSame = 0;
+      prevScore = myPair->first;
+    }
+    if (myPair->second) {
+      ++posSame;
+    } else {
+      ++negSame;
+    }
+    ++myPair;
+  }
+  transform(p.begin(), p.end(), p.begin(), bind2nd(divides<double> (),
+                                                   (double)nDecoys));
+  // p sorted in acending order
+  return;
+}
+
+/*
+ * Described in Storey, "A direct approach to false discovery rates."
+ * JRSS 2002.
+ */
+double PosteriorEstimator::estimatePi0(vector<double>& p,
+                                       const unsigned int numBoot) {
+  vector<double> pBoot, lambdas, pi0s, mse;
+  vector<double>::iterator start;
+  size_t n = p.size();
+  // Calculate pi0 for different values for lambda
+  // N.B. numLambda and maxLambda are global variables.
+  for (unsigned int ix = 0; ix <= numLambda; ++ix) {
+    double lambda = ((ix + 1) / (double)numLambda) * maxLambda;
+    // Find the index of the first element in p that is < lambda.
+    // N.B. Assumes p is sorted in ascending order.
+    start = lower_bound(p.begin(), p.end(), lambda);
+    // Calculates the difference in index between start and end
+    double Wl = (double)distance(start, p.end());
+    double pi0 = Wl / n / (1 - lambda);
+    if (pi0 > 0.0) {
+      lambdas.push_back(lambda);
+      pi0s.push_back(pi0);
+    }
+  }
+  double minPi0 = *min_element(pi0s.begin(), pi0s.end());
+  // Initialize the vector mse with zeroes.
+  fill_n(back_inserter(mse), pi0s.size(), 0.0);
+  // Examine which lambda level that is most stable under bootstrap
+  for (unsigned int boot = 0; boot < numBoot; ++boot) {
+    // Create an array of bootstrapped p-values, and sort in ascending order.
+    bootstrap<double> (p, pBoot);
+    n = pBoot.size();
+    for (unsigned int ix = 0; ix < lambdas.size(); ++ix) {
+      start = lower_bound(pBoot.begin(), pBoot.end(), lambdas[ix]);
+      double Wl = (double)distance(start, pBoot.end());
+      double pi0Boot = Wl / n / (1 - lambdas[ix]);
+      // Estimated mean-squared error.
+      mse[ix] += (pi0Boot - minPi0) * (pi0Boot - minPi0);
+    }
+  }
+  // Which index did the iterator get?
+  unsigned int minIx = distance(mse.begin(), min_element(mse.begin(),
+                                                         mse.end()));
+  double pi0 = max(min(pi0s[minIx], 1.0), 0.0);
+  return pi0;
+}
+
+/*
+int PosteriorEstimator::run() {
+  ifstream target(targetFile.c_str(), ios::in), decoy(decoyFile.c_str(),
+                                                      ios::in);
+  istream_iterator<double> tarIt(target), decIt(decoy);
+  // Merge a labeled version of the two lists into a combined list
+  vector<pair<double, bool> > combined;
+  vector<double> pvals;
+  if (!pvalInput) {
+    transform(tarIt,
+              istream_iterator<double> (),
+              back_inserter(combined),
+              bind2nd(ptr_fun(make_my_pair), true));
+    size_t targetSize = combined.size();
+    transform(decIt,
+              istream_iterator<double> (),
+              back_inserter(combined),
+              bind2nd(ptr_fun(make_my_pair), false));
+    if (VERB > 0) {
+      cerr << "Read " << targetSize << " target scores and "
+        << (combined.size() - targetSize) << " decoy scores" << endl;
+    }
+  } else {
+    copy(tarIt, istream_iterator<double> (), back_inserter(pvals));
+    sort(pvals.begin(), pvals.end());
+    transform(pvals.begin(),
+              pvals.end(),
+              back_inserter(combined),
+              bind2nd(ptr_fun(make_my_pair), true));
+    size_t nDec = pvals.size();
+    double step = 1.0 / 2.0 / (double)nDec;
+    for (size_t ix = 0; ix < nDec; ++ix) {
+      combined.push_back(make_my_pair(step * (1 + 2 * ix), false));
+    }
+    reversed = true;
+    if (VERB > 0) {
+      cerr << "Read " << pvals.size() << " statistics" << endl;
+    }
+  }
+  if (reversed) {
+    if (VERB > 0) {
+      cerr << "Reversing all scores" << endl;
+    }
+  }
+  if (reversed)
+  // sorting in ascending order
+  {
+    sort(combined.begin(), combined.end());
+  } else
+  // sorting in decending order
+  {
+    sort(combined.begin(), combined.end(), greater<pair<double, bool> > ());
+  }
+  if (!pvalInput) {
+    getPValues(combined, pvals);
+  }
+  vector<double> peps;
+  if (competition) {
+    estimatePEPGeneralized(combined, peps);
+	finishStandaloneGeneralized(combined, peps);
+	return 0;
+  } 
+  double pi0 = estimatePi0(pvals);
+  if (VERB > 1) {
+    cerr << "Selecting pi_0=" << pi0 << endl;
+  }
+  // Logistic regression on the data
+  estimatePEP(combined, pi0, peps);
+  finishStandalone(combined, peps, pvals, pi0);
+  return 0;
+}
+*/
+
+} // namespace

@@ -44,6 +44,12 @@ void qcScorePSM(
   * as the features were inserted */
 void qcGetScores(double *scoreArr, double *qArr); 
 
+/**
+ * Fill the given score array with the q-ranker scores for the first
+ * decoy set.
+ */
+void qcGetDecoyScores(double* scoreArr); 
+
 /** Function that should be called after processing finished */
 void qcCleanUp(); 
 

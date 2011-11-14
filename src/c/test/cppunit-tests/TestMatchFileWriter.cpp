@@ -36,6 +36,7 @@ void testFileLine(const char* fileName, const char* correctLine){
   string line;
   getline(file, line);
   //cerr << "line is '" << line << "'" << endl;
+  //cerr << "should be '" << correctLine << "'" << endl;
   CPPUNIT_ASSERT(line == correctLine);
   file.close();
 }
@@ -136,8 +137,13 @@ void TestMatchFileWriter::precision(){
   string line;
   getline(file, line);// header
   getline(file, line);
-  CPPUNIT_ASSERT(line == "777	777	777.1235	777.1235	777.1235	777.12345679	777.12345679	777	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777.12345679	777.12345679	777.12345679	777	777	777	777	777	777	777	777	777.123457	777.123457	777.123457	777.123457	777.12345679	777.12345679	777.12345679	777	777");
+  //cerr << line << endl;
+  CPPUNIT_ASSERT(line ==
+                 "777	777	777.1235	777.1235	777.1235	777.12345679	777.12345679	777	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777	777	777	777	777	777	777	777.123457	777.123457	777.123457	777.123457	777.12345679	777.12345679	777.12345679	777	777");
 
+  /*
+  CPPUNIT_ASSERT(line == "777	777	777.1235	777.1235	777.1235	777.12345679	777.12345679	777	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777.12345679	777.12345679	777.12345679	777	777	777	777	777	777	777	777	777.123457	777.123457	777.123457	777.123457	777.12345679	777.12345679	777.12345679	777	777");
+  */
 }
 
 // try setting the columns for each command type
@@ -250,7 +256,7 @@ void TestMatchFileWriter::setColumnsCommand(){
   delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
   defaultApplicationPtr = NULL;
-  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	q-ranker score	q-ranker q-value	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
+  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	q-ranker score	q-ranker q-value	q-ranker PEP	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // q-values, decoys
   defaultWriterPtr = new MatchFileWriter(filename);

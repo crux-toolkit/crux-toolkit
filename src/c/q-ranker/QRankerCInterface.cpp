@@ -125,6 +125,19 @@ void qcGetScores(double *scoreArr,double *qArr) {
   }
 } 
 
+/**
+ * Fill the given score array with the q-ranker scores for the first
+ * decoy set.
+ */
+void qcGetDecoyScores(double* scoreArray){ 
+  int match_idx = 0;
+  SetHandler::Iterator psmIter(pCaller->getSetHandler(Caller::SHUFFLED));
+  while(PSMDescription* psm = psmIter.getNext()){
+    scoreArray[match_idx] = psm->sc;
+    match_idx++;    
+  }
+}
+
 /** Function that should be called after processing finished */
 void qcCleanUp() {
     if (pCaller) {

@@ -38,6 +38,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "percolator q-value",
   "q-ranker score",
   "q-ranker q-value",
+  "q-ranker PEP",
 #endif
   "b/y ions matched",
   "b/y ions total",
