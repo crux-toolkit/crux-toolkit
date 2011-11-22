@@ -15,8 +15,10 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <dirent.h>
 #include <unistd.h>
+#endif
 #include <time.h>
 #include <algorithm>
 #include "carp.h"

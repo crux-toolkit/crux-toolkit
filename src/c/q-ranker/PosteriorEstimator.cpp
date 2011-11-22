@@ -43,6 +43,7 @@ using namespace std;
 #include "PosteriorEstimator.h"
 #include "Transform.h"
 #include "Globals.h"
+#include "WinCrux.h"
 
 namespace qranker {
 
@@ -169,7 +170,7 @@ void PosteriorEstimator::binData(const vector<pair<double,bool> >& combined,
     int negInBin = count_if(combinedIter,combinedIter+inBin,IsDecoy());
     combinedIter += inBin;
     double median = combined[firstIx+inBin/2].first;
-    if (medians.size()>0 and *(medians.rbegin())==median) {
+    if (medians.size()>0 && *(medians.rbegin())==median) {
       *(sizes.rbegin()) += inBin;
       *(negatives.rbegin()) += negInBin;
     } else {

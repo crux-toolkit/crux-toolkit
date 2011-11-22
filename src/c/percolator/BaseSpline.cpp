@@ -74,7 +74,7 @@ double BaseSpline::splineEval(double xx) {
   return gx;
 }
 
-static double tao = 2/(1+sqrt(5));   // inverse of golden section
+static double tao = 2/(1+sqrt(5.0));   // inverse of golden section
 
 void BaseSpline::iterativeReweightedLeastSquares() {
 

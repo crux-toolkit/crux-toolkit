@@ -6,9 +6,11 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#ifndef WIN32
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#endif
 #include <time.h>
 #include <errno.h>
 #include <iostream>
@@ -30,6 +32,7 @@
 #include "DatabasePeptideIterator.h"
 #include "ProteinIndex.h"
 #include "parameter.h"
+#include "WinCrux.h"
 
 // maximum proteins the index can handle
 static const int MAX_PROTEIN = 30000;
@@ -418,16 +421,16 @@ void Index::setFieldFromMap(
          "Rebuild with current version of crux to use 'enzyme_type'.");
   }
   else if(strcmp("enzyme_type:", trait_name) == 0){
-    disk_constraint_->setEnzyme((ENZYME_T)value);
+    disk_constraint_->setEnzyme((ENZYME_T) ((int) value));
   }
   else if(strcmp("digest_type:", trait_name) == 0){
-    disk_constraint_->setDigest((DIGEST_T)value);
+    disk_constraint_->setDigest(((DIGEST_T) (int) value));
   }
   else if(strcmp("missed_cleavages:", trait_name) == 0){
     disk_constraint_->setNumMisCleavage((int)value);
   }
   else if(strcmp("mass_type:", trait_name) == 0){
-    disk_constraint_->setMassType((MASS_TYPE_T)value);
+    disk_constraint_->setMassType((MASS_TYPE_T)((int) value));
   }
   else if(strcmp("unique_peptides:", trait_name) == 0){
     is_unique_ = (bool)value;
@@ -436,7 +439,7 @@ void Index::setFieldFromMap(
     mass_range_ = value;
   }
   else if(strcmp("decoys:",trait_name) == 0 ){
-    decoys_ = (DECOY_TYPE_T)value;
+    decoys_ = (DECOY_TYPE_T)((int) value);
   }
   else if(strncmp("static_mod_", trait_name, strlen("static_mod_")) == 0){
     const char* aa = trait_name + strlen("static_mod_");

@@ -10,7 +10,9 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include "carp.h"
 #include "parameter.h"
 #include "parse_arguments.h"

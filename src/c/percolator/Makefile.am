@@ -1,4 +1,4 @@
-AM_CXXFLAGS=$(DEBUG_OPTIONS) -I$(top_srcdir)/src/c/ArrayLibrary -D_LARGEFILE_SOURCE
+AM_CXXFLAGS=$(DEBUG_OPTIONS) -I$(top_srcdir)/src/c -I$(top_srcdir)/src/c/ArrayLibrary -D_LARGEFILE_SOURCE
 
 libpercolator_la_SOURCES = \
   BaseSpline.cpp \

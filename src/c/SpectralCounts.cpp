@@ -1,3 +1,4 @@
+#include <iterator>
 #include "SpectralCounts.h"
 #include "crux-utils.h"
 #include "OutputFiles.h"

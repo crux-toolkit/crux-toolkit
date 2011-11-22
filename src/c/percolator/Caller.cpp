@@ -28,6 +28,7 @@ using namespace std;
 #include "ssl.h"
 #include "Caller.h"
 #include "Globals.h"
+#include "WinCrux.h"
 
 const unsigned int Caller::xval_fold = 3;
 

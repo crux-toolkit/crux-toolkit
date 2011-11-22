@@ -17,7 +17,9 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <map>
 #include <time.h>
 #include "carp.h"

@@ -15,6 +15,7 @@
 #include <string>
 
 #include "MatchFileReader.h"
+#include "WinCrux.h"
 
 using namespace std;
 

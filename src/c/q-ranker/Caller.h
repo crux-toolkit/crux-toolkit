@@ -37,7 +37,7 @@ public:
     void readFiles(bool &doSingleFile);
     void filelessSetup(unsigned int nsets,const unsigned int numFeatures, int* numSpectra, char ** fetureNames, double pi0);
     void fillFeatureSets();    
-    int preIterationSetup();
+    void preIterationSetup();
     Scores* getFullSet() {return &fullset;}    
     int run(bool do_xval);
     SetHandler * getSetHandler(SetHandlerType sh) {

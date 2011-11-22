@@ -19,9 +19,9 @@ DescriptionOfCorrect::~DescriptionOfCorrect()
 
 string DescriptionOfCorrect::aaAlphabet = "ACDEFGHIKLMNPQRSTVWY";
 string DescriptionOfCorrect::isoAlphabet = "DECYHKR";   
-float DescriptionOfCorrect::pKiso[7] = {-3.86,-4.25,-8.33,-10.0,6.0,10.5,12.4}; // Lehninger
-float DescriptionOfCorrect::pKN = 9.69;
-float DescriptionOfCorrect::pKC = 2.34;
+float DescriptionOfCorrect::pKiso[7] = {-3.86f,-4.25f,-8.33f,-10.0f,6.0f,10.5f,12.4f}; // Lehninger
+float DescriptionOfCorrect::pKN = 9.69f;
+float DescriptionOfCorrect::pKC = 2.34f;
 bool DescriptionOfCorrect::doIsotopeMass=false;
 
 
@@ -208,15 +208,15 @@ void DescriptionOfCorrect::fillFeaturesAllIndex(const string& peptide, double *f
 
 
 float DescriptionOfCorrect::krokhin_index['Z'-'A'+1] = 
-         {0.8, 0.0, -0.8, -0.5, 0.0,  10.5, -0.9, -1.3, 8.4, 0.0, -1.9,9.6,5.8,
-          -1.2,0.0,0.2,-0.9,-1.3,-0.8,0.4,0.0,5.0,11.0,0.0,4.0,0.0};
+         {0.8f, 0.0f, -0.8f, -0.5f, 0.0f,  10.5f, -0.9f, -1.3f, 8.4f, 0.0f, -1.9f,9.6f,5.8f,
+          -1.2f,0.0f,0.2f,-0.9f,-1.3f,-0.8f,0.4f,0.0f,5.0f,11.0f,0.0f,4.0f,0.0f};
 // negated hessa scale
 float DescriptionOfCorrect::hessa_index['Z'-'A'+1] = 
-         {-0.11,-0.0,0.13,-3.49,-2.68,0.32,-0.74,-2.06,0.60,0.0,-2.71,0.55,0.10,-2.05,
-          0.0,-2.23,-2.36,-2.58,-0.84,-0.52,0.0,0.31,-0.30,0.0,-0.68,0.0};
+         {-0.11f,-0.0f,0.13f,-3.49f,-2.68f,0.32f,-0.74f,-2.06f,0.60f,0.0f,-2.71f,0.55f,0.10f,-2.05f,
+          0.0f,-2.23f,-2.36f,-2.58f,-0.84f,-0.52f,0.0f,0.31f,-0.30f,0.0f,-0.68f,0.0f};
 float DescriptionOfCorrect::kytedoolittle_index['Z'-'A'+1] =
-         {1.80,0.0,2.50,-3.50,-3.50,2.80,-0.40,-3.20,0.0,4.50,3.90,3.80,1.90,-3.50,
-          0.0,-1.60,-3.50,-4.50,-0.80,-0.70,0.0,4.20,-0.90,0.0,-1.30,0.0};
+         {1.80f,0.0f,2.50f,-3.50f,-3.50f,2.80f,-0.40f,-3.20f,0.0f,4.50f,3.90f,3.80f,1.90f,-3.50f,
+          0.0f,-1.60f,-3.50f,-4.50f,-0.80f,-0.70f,0.0f,4.20f,-0.90f,0.0f,-1.30f,0.0f};
 
 } // qranker namspace
 

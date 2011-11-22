@@ -534,7 +534,7 @@ typedef struct record RECORD_T;
  * \typedef HASH_T
  * \brief HASH_T hash table, contains the records
  */
-typedef struct hash HASH_T;
+typedef struct our_hash HASH_T;
 
 /**
  * \typedef HASH_ITERATOR_T

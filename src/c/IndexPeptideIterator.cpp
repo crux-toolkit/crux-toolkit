@@ -5,6 +5,7 @@
 
 #include "IndexPeptideIterator.h"
 #include <errno.h>
+#include "WinCrux.h"
 
 static const int MAX_FILE_NAME_LENGTH = 300;
 static const int MAX_PARSE_COUNT = 3;

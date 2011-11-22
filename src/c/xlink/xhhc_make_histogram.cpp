@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
     exit(1);
   }
   
-  float score = 0;
+  FLOAT_T score = 0;
   // Pragya's open modification method
   if (open_modification) {
   FLOAT_T mod_mass;

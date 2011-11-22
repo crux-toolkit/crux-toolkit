@@ -6,9 +6,12 @@
 
 #include <errno.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include "crux-utils.h"
 #include "parameter.h"
+#include "WinCrux.h"
 
 using namespace std;
 
@@ -465,8 +468,8 @@ char* copy_string_part(const char* src, int length){
  * E.g. is_equal(0.10, 0.14, 1) -> true. is_equal(0.10, 0.15, 1) -> false
  */
 bool is_equal(FLOAT_T a, FLOAT_T b, int precision){
-  a = (a * pow(10, precision)) + 0.5;
-  b = (b * pow(10, precision)) + 0.5;
+  a = (a * pow(10.0, (FLOAT_T) precision)) + 0.5;
+  b = (b * pow(10.0, (FLOAT_T) precision)) + 0.5;
 
   if( (int)a == (int)b ){
     return true;

@@ -8,6 +8,7 @@
  *******************************************************************************/
 #include <assert.h>
 #include <iostream>
+#include <iterator>
 #include <fstream>
 #include <utility>
 #include <algorithm>
@@ -23,6 +24,9 @@ using namespace std;
 #include "Globals.h"
 #include "PosteriorEstimator.h"
 #include "ssl.h"
+#ifdef WIN32
+#include "WinCrux.h"
+#endif
 
 inline bool operator>(const ScoreHolder &one, const ScoreHolder &other) 
     {return (one.score>other.score);}

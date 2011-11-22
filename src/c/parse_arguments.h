@@ -31,12 +31,13 @@
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
-#include <ctype.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include "carp.h"
-#include "parse_arguments.h"
 #include "objects.h"
 #include "hash.h"
+#include "WinCrux.h"
 
 enum argument_type { FLAG_ARG, INT_ARG, LONG_ARG, DOUBLE_ARG, 
                      STRING_ARG, BOOLEAN_ARG };

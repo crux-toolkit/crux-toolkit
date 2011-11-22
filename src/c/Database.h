@@ -16,6 +16,10 @@
 #include <string>
 #include <map>
 
+#ifdef WIN32
+#include "WinCrux.h"
+#endif
+
 //Comparator function for c type strings.
 struct cmp_str {
 
@@ -38,6 +42,9 @@ class Database {
   unsigned long int size_; ///< The size of the database in bytes (convenience)
   bool use_light_protein_; ///< should I use the light/heavy protein option
   bool is_memmap_; ///< Are we using a memory mapped fasta file? 
+#ifdef WIN32
+  SIMPLE_UNMMAP unmap_info_;
+#endif
   void* data_address_; ///< pointer to the beginning of the memory mapped data, 
   unsigned int pointer_count_; ///< number of pointers referencing this database. 
   long file_size_; ///< the size of the binary fasta file, when memory mapping

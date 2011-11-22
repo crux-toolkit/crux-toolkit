@@ -24,6 +24,7 @@ using namespace std;
 #include "Globals.h"
 #include "MSReader.h"
 #include "Spectrum.h"
+#include "WinCrux.h"
 
 
 
@@ -185,7 +186,7 @@ void Caller :: train_target_net(Scores &train, Scores &thresh, double qv)
   best_overFDR = overFDR;
   //cerr << "target_q " << qv << " starting " << overFDR << "\n";
  
-  for(int i = switch_iter; i < niter; i++)
+  for(unsigned int i = switch_iter; i < niter; i++)
     {
       overFDR = getOverFDR(train,net,qv);
       train_net_two(train);

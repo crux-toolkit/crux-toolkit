@@ -12,8 +12,13 @@
 #define SCORER_H
 
 #include <stdio.h>
+#ifndef WIN32
 #include <dirent.h>
+#endif
 #include <string>
+#ifdef WIN32
+#include "windirent.h"
+#endif
 #include "objects.h"
 #include "Spectrum.h"
 #include "Peptide.h"

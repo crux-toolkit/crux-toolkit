@@ -12,12 +12,15 @@
 #include <assert.h>
 #include <ctype.h>
 #include <vector>
+#ifndef WIN32
+#include <unistd.h>
+#endif
 #include "parameter.h"
 #include "carp.h"
 #include "Spectrum.h"
 #include "Peak.h"
 #include "SpectrumCollectionFactory.h"
-#include "unistd.h"
+#include "WinCrux.h"
 
 /****************************************************************************
  * Read a string into either a single positive integer or a range of

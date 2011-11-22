@@ -10,8 +10,6 @@
 
 //Macros for 64-bit file support
 #ifdef _MSC_VER
-extern "C" int __cdecl _fseeki64(FILE *, __int64, int);
-extern "C" __int64 __cdecl _ftelli64(FILE *);
 typedef __int64 f_off;
 #define fseek(h,p,o) _fseeki64(h,p,o)
 #define ftell(h) _ftelli64(h)

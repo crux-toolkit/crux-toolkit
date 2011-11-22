@@ -32,6 +32,7 @@ using namespace std;
 #include "Globals.h"
 #include "MSReader.h"
 #include "Spectrum.h"
+#include "WinCrux.h"
 
 namespace qranker {
 
@@ -462,7 +463,7 @@ void Caller::fillFeatureSets() {
 
 
 
-int Caller::preIterationSetup() {
+void Caller::preIterationSetup() {
      trainset.createXvalSets(xv_train,xv_test,xval_fold);
 }    
 

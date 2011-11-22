@@ -40,7 +40,7 @@ struct record {
  * \struct hash
  * \brief hash table, contains the records
  */
-struct hash {
+struct our_hash {
   RECORD_T* records; ///< record holds key & values
   unsigned int records_count; ///< number of records
   unsigned int size_index; ///< index into the size array, thus can get the size of the hash table
@@ -210,7 +210,7 @@ bool add_or_update_hash(
     }
     else{
       // continue to search
-      ind = (code + (int)pow(++off,2)) % size;
+      ind = (code + (int)pow(++off,2.0)) % size;
     }
   }
 
@@ -276,7 +276,7 @@ bool add_hash(
       }
       else{
         // continue to search
-        ind = (code + (int)pow(++off,2)) % size;
+        ind = (code + (int)pow(++off,2.0)) % size;
       }
     }
     
@@ -320,7 +320,7 @@ bool add_hash_when_grow(
 
     // probe down until reach open slot
     while (recs[ind].key){
-      ind = (code + (int)pow(++off,2)) % size;
+      ind = (code + (int)pow(++off,2.0)) % size;
     }
     
     recs[ind].hash = code;
@@ -371,7 +371,7 @@ bool update_hash_value(
     }
     else{
       // continue to search
-      ind = (code + (int)pow(++off,2)) % size;
+      ind = (code + (int)pow(++off,2.0)) % size;
     }
   }
   //carp(CARP_ERROR, "Failed to find key %s in hash table", key);
@@ -402,7 +402,7 @@ void* get_hash_value(
     if ((code == recs[ind].hash) && recs[ind].key &&
         strcmp(key, recs[ind].key) == 0)
       return recs[ind].value;
-    ind = (code + (int)pow(++off,2)) % size;
+    ind = (code + (int)pow(++off,2.0)) % size;
   }
   
   return NULL;
@@ -437,7 +437,7 @@ void** get_hash_value_ref(
     if ((code == recs[ind].hash) && recs[ind].key &&
         strcmp(key, recs[ind].key) == 0)
       return &recs[ind].value;
-    ind = (code + (int)pow(++off,2)) % size;
+    ind = (code + (int)pow(++off,2.0)) % size;
   }
   
   return NULL;
@@ -467,7 +467,7 @@ int get_hash_count(
     if ((code == recs[ind].hash) && recs[ind].key &&
         strcmp(key, recs[ind].key) == 0)
       return recs[ind].count;
-    ind = (code + (int)pow(++off,2)) % size;
+    ind = (code + (int)pow(++off,2.0)) % size;
   }
   
   return -1;
@@ -504,7 +504,7 @@ void* remove_hash(
       h->records_count--;
       return value;
     }
-    ind = (code + (int)pow(++off, 2)) % size;
+    ind = (code + (int)pow(++off, 2.0)) % size;
   }
   
   return NULL;
