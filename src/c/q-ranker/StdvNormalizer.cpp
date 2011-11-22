@@ -23,6 +23,7 @@ using namespace std;
 #include "StdvNormalizer.h"
 #include "SetHandler.h"
 #include "Globals.h"
+#include "WinCrux.h"
 
 namespace qranker {
 

@@ -36,6 +36,10 @@
 
 using namespace std;
 
+#ifdef WIN32
+#define random rand
+#endif
+
 class Random
 {
 public:

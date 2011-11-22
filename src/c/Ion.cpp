@@ -14,9 +14,11 @@
 #include "mass.h"
 #include "utils.h"
 #include <sys/types.h>
+#ifndef WIN32
 #include <netinet/in.h>
 #include <inttypes.h>
-
+#endif
+#include "WinCrux.h"
 
 // At one point I need to reverse the endianness for pfile_create to work
   // Apparently that is no longer true. Hence 0 below.

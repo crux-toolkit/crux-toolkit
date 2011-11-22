@@ -8,6 +8,7 @@
 
 #include "carp.h"
 #include "parameter.h"
+#include "WinCrux.h"
 
 using namespace std;
 

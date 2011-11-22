@@ -11,9 +11,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#ifndef WIN32
 #include <dirent.h>
+#include <unistd.h>
+#endif
 #include <ctype.h>
 #include <sys/stat.h>
+#ifdef WIN32
+#include "windirent.h"
+#endif
 #include "objects.h"
 #include "IonConstraint.h"
 #include "IonFilteredIterator.h"
@@ -22,7 +28,7 @@
 #include "Spectrum.h"
 #include "Scorer.h"
 #include "parameter.h"
-#include "unistd.h"
+
 
 
 /**
@@ -34,6 +40,7 @@ static const int MAX_XCORR_OFFSET = 75;
 // These values should be good for double precision floating point
 // numbers compatible with the IEEE 754 standard.
 
+#ifndef WIN32
 /**
 * Constant for EVD p_value calculation
 */
@@ -42,6 +49,7 @@ static const FLOAT_T DBL_EPSILON = 2.2204460492503131e-16;
 * Constant for EVD p_value calculation
 */
 static const int DBL_MAX_10_EXP = 308;
+#endif
 
 /**
  * Cut-off below which the simple Bonferroni calculation can be used.

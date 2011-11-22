@@ -40,7 +40,14 @@ static const int LINELENGTH = 4096;
 
 extern int verbosity;
 
-#ifdef DARWIN
+#ifdef DARWINX
+#define INCLUDE_GETLINE
+#endif
+#ifdef WIN32
+#define INCLUDE_GETLINE
+#endif
+
+#ifdef INCLUDE_GETLINE
 /*********************************************************
  This function replaces the GNU extension of the same name.
  Reads a line from the given stream.
@@ -127,18 +134,6 @@ typedef void *malloc_t;
  * Only free memory if the given pointer is non-null.
  ********************************************************************/
 #define myfree(x) if (x) std::free((char* ) (x))
-
-/********************************************************************
- * Set the seed for the random number generator.
- ********************************************************************/
-void my_srand
-  (long seed);
-
-/********************************************************************
- * Get a random number X such that 0 <= X < 1.
- ********************************************************************/
-double my_drand
-  (void);
 
 /********************************************************************
  * Math macros.
@@ -302,6 +297,7 @@ char** parse_file(
   int max_lines, 
   int* num_lines
   );
+
 
 #endif
 

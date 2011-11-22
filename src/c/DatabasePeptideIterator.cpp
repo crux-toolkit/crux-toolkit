@@ -138,7 +138,7 @@ void DatabasePeptideIterator::generateAllPeptides(){
 
   Peptide* cur_peptide = NULL;
   map<char*, Peptide*, cmp_str>& peptide_map = peptide_map_;
-  map<char*, Peptide*>::iterator peptide_map_ptr;
+  map<char*, Peptide*, cmp_str>::iterator peptide_map_ptr;
 
   // populate map with all peptides, combining when duplicates found
   while(hasNextFromFile()){
@@ -187,7 +187,7 @@ DatabasePeptideIterator::~DatabasePeptideIterator() {
   PeptideConstraint::free(peptide_constraint_);
 
   // free seqs in map
-  map<char*, Peptide*>::iterator peptide_iter = 
+  map<char*, Peptide*, cmp_str>::iterator peptide_iter = 
     peptide_map_.begin();
   for(; peptide_iter != peptide_map_.end(); 
       ++peptide_iter){

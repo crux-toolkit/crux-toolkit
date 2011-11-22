@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}</ProjectGuid>
+    <RootNamespace>qranker</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>\\psf\Home\projects\crux-windows-port\src\c;\\psf\Home\projects\crux-windows-port\src\c\MSToolkit\RAMP;\\psf\Home\projects\crux-windows-port\src\c\ArrayLibrary;\\psf\Home\projects\crux-windows-port\src\c\MSToolkit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\c\q-ranker\BaseSpline.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\Caller.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\DataSet.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\DescriptionOfCorrect.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\FeatureNames.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\Globals.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\IntraSetRelation.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\LogisticRegression.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\Net.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\Normalizer.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\Option.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\PosteriorEstimator.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\PSMDescription.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\QRankerCInterface.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\ResultHolder.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\SanityCheck.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\Scores.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\SetHandler.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\SqtSanityCheck.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\ssl.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\StdvNormalizer.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\TrainNet.cpp" />
+    <ClCompile Include="..\..\src\c\q-ranker\UniNormalizer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\c\q-ranker\BaseSpline.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\Caller.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\config.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\DataSet.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\DescriptionOfCorrect.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\FeatureNames.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\Globals.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\IntraSetRelation.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\LogisticRegression.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\Net.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\Normalizer.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\Option.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\PercolatorCommon.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\PosteriorEstimator.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\PSMDescription.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\QRankerCInterface.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\ResultHolder.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\SanityCheck.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\Scores.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\SetHandler.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\SqtSanityCheck.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\ssl.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\StdvNormalizer.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\Transform.h" />
+    <ClInclude Include="..\..\src\c\q-ranker\UniNormalizer.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

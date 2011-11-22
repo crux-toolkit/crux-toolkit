@@ -15,6 +15,7 @@
 #include "objects.h"
 #include "PeptideConstraint.h"
 #include "ProteinIndex.h"
+#include "WinCrux.h"
 
 
 /***************/

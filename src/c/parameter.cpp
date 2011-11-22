@@ -9,6 +9,7 @@
 
 #include "crux-utils.h"
 #include "parameter.h"
+#include "WinCrux.h"
 
 
 //TODO:  in all set, change result=add_... to result= result && add_...

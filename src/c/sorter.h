@@ -10,9 +10,11 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#ifndef WIN32
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#endif
 #include <time.h>
 
 #include "utils.h"

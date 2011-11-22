@@ -4,11 +4,11 @@
  * CREATE DATE: 28 June 2006
  * \brief Class to read spectra files using the MSToolkit library.
  */
+#include "MSReader.h"
 #include "MSToolkitSpectrumCollection.h" 
 #include "crux-utils.h"
 #include "parameter.h"
-#include "MSReader.h"
-//#include "Spectrum.h"
+#include "Spectrum.h"
 
 /**
  * Instantiates a new spectrum_collection object from a filename. 

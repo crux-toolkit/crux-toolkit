@@ -49,6 +49,7 @@ libqranker_la_SOURCES = \
 
 
 libqranker_la_CXXFLAGS = $(AM_CXXFLAGS) \
+  -I$(top_srcdir)/src/c \
   -I$(top_srcdir)/src/c/ArrayLibrary \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/MSToolkit/zLib \

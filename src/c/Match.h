@@ -17,7 +17,9 @@
 #include <map>
 #include <ctype.h>
 #include <float.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include "carp.h"
 #include "parse_arguments.h"
 #include "Spectrum.h"

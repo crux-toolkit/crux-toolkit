@@ -7,6 +7,7 @@
  * $Id: Scores.cpp,v 1.69.2.5 2009/08/01 20:29:50 jasonw Exp $
  *******************************************************************************/
 #include <assert.h>
+#include <iterator>
 #include <iostream>
 #include <fstream>
 #include <utility>
@@ -23,6 +24,7 @@ using namespace std;
 #include "Globals.h"
 #include "PosteriorEstimator.h"
 #include "ssl.h"
+#include "WinCrux.h"
 
 namespace qranker {
 

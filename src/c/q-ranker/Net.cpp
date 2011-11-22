@@ -2,9 +2,11 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#include <string>
 #include <assert.h>
 using namespace std;
 #include "Net.h"
+#include "WinCrux.h"
 
 
 namespace qranker {

@@ -11,7 +11,9 @@
 #include <math.h>
 #include <assert.h>
 #include <ctype.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <iostream>
 #include <fstream>
 #define bin_width_mono 1.0005079

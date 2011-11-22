@@ -6,10 +6,12 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#include <sys/mman.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#ifndef WIN32
+#include <sys/mman.h>
 #include <unistd.h>
+#endif
 #include "utils.h"
 #include "crux-utils.h"
 #include "Peptide.h"
@@ -129,9 +131,13 @@ Database::~Database() {
     // free memory mapped binary file from memory
     if(is_memmap_){
       // un map the memory!!
+#ifdef WIN32
+      stub_unmmap(&unmap_info_); 
+#else
       if(munmap(data_address_, file_size_) != 0){
         carp(CARP_ERROR, "failed to unmap the memory of binary fasta file");
       }
+#endif
     }
     // not memory mapped
     else{
@@ -321,6 +327,10 @@ bool Database::memoryMap(
   file_size_ = file_info.st_size;
   
   // memory map the entire binary fasta file!
+#ifdef WIN32
+  data_address_ = stub_mmap(binary_filename_.c_str(), &unmap_info_);
+
+#else
   data_address_ = mmap((caddr_t)0, file_info.st_size, 
                        PROT_READ, MAP_PRIVATE /*MAP_SHARED*/, file_d, 0);
 
@@ -330,6 +340,7 @@ bool Database::memoryMap(
          binary_filename_.c_str());
     return false;
   }
+#endif
   
   return true;
 }
@@ -753,7 +764,7 @@ Protein* Database::getProteinByIdString(
   //this even faster if needed.
   Protein* protein = NULL;
   if (is_hashed_) {
-    map<char*, Protein*>::iterator find_iter;
+    map<char*, Protein*, cmp_str>::iterator find_iter;
     find_iter = protein_map_->find((char*)protein_id);
 
     if (find_iter != protein_map_->end()) {

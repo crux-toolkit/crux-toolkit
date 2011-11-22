@@ -11,7 +11,9 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <set>
 #include <map>
 #include "carp.h"
@@ -1239,7 +1241,7 @@ Match* Match::parseTabDelimited(
   }
 
   // get experiment size
-  match->ln_experiment_size_ = log(result_file.getInteger(MATCHES_SPECTRUM_COL));
+  match->ln_experiment_size_ = log((FLOAT_T) result_file.getInteger(MATCHES_SPECTRUM_COL));
   match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);
   if (!result_file.empty(DECOY_MATCHES_SPECTRUM_COL)){
         match->num_decoy_matches_ = result_file.getInteger(DECOY_MATCHES_SPECTRUM_COL);
