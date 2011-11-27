@@ -41,7 +41,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>\\psf\Home\projects\crux-windows-port\src\c;\\psf\Home\projects\crux-windows-port\src\c\MSToolkit\RAMP;\\psf\Home\projects\crux-windows-port\src\c\ArrayLibrary;\\psf\Home\projects\crux-windows-port\src\c\MSToolkit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\c;..\..\src\c\MSToolkit\RAMP;..\..\src\c\ArrayLibrary;..\..\src\c\MSToolkit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
