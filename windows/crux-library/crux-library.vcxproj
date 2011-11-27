@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C4BCBCF8-E852-46CF-AF83-65353359B218}</ProjectGuid>
-    <RootNamespace>crux</RootNamespace>
+    <RootNamespace>crux-library</RootNamespace>
     <ProjectName>crux-library</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
