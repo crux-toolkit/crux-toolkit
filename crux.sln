@@ -1,26 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crux-library", ".\windows\crux-library\crux-library.vcxproj", "{C4BCBCF8-E852-46CF-AF83-65353359B218}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crux-library", "windows\crux-library\crux-library.vcxproj", "{C4BCBCF8-E852-46CF-AF83-65353359B218}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MSToolkit", ".\windows\MSToolkit\MSToolkit.vcxproj", "{AF642C17-5942-4A4A-90A6-AD75DA06481E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MSToolkit", "windows\MSToolkit\MSToolkit.vcxproj", "{AF642C17-5942-4A4A-90A6-AD75DA06481E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "q-ranker", ".\windows\q-ranker\q-ranker.vcxproj", "{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "q-ranker", "windows\q-ranker\q-ranker.vcxproj", "{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "percolator", ".\windows\percolator\percolator.vcxproj", "{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "percolator", "windows\percolator\percolator.vcxproj", "{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xlink", ".\windows\xlink\xlink.vcxproj", "{F2853A94-C9D3-4AC2-8C50-31F88B052216}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xlink", "windows\xlink\xlink.vcxproj", "{F2853A94-C9D3-4AC2-8C50-31F88B052216}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "get_ms2_spectrum", ".\windows\get_ms2_spectrum\get_ms2_spectrum.vcxproj", "{16E9B33F-9D2F-4F0C-94E0-110472D84EF8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "get_ms2_spectrum", "windows\get_ms2_spectrum\get_ms2_spectrum.vcxproj", "{16E9B33F-9D2F-4F0C-94E0-110472D84EF8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "predict_peptide_ions", ".\windows\predict_peptide_ions\predict_peptide_ions.vcxproj", "{70C53750-5D9E-4144-AF5C-58BB1C6B8A64}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "predict_peptide_ions", "windows\predict_peptide_ions\predict_peptide_ions.vcxproj", "{70C53750-5D9E-4144-AF5C-58BB1C6B8A64}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "generate_peptides", ".\windows\generate_peptides\generate_peptides.vcxproj", "{E4BADE30-D3B8-4BCB-9008-5D8EC51D336B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "generate_peptides", "windows\generate_peptides\generate_peptides.vcxproj", "{3351392E-9281-47DA-9DAC-B1DF230ABF1C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C4BCBCF8-E852-46CF-AF83-65353359B218} = {C4BCBCF8-E852-46CF-AF83-65353359B218}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crux", ".\windows\crux\crux.vcxproj", "{949410D5-52D9-4A79-80C0-EE85B80C4A6E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crux", "windows\crux\crux.vcxproj", "{949410D5-52D9-4A79-80C0-EE85B80C4A6E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AF642C17-5942-4A4A-90A6-AD75DA06481E} = {AF642C17-5942-4A4A-90A6-AD75DA06481E}
 		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D} = {EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}
@@ -29,7 +29,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crux", ".\windows\crux\crux
 		{C4BCBCF8-E852-46CF-AF83-65353359B218} = {C4BCBCF8-E852-46CF-AF83-65353359B218}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArrayLibrary", ".\windows\ArrayLibrary\ArrayLibrary.vcxproj", "{2119492E-9189-4F46-BADA-723692E67D30}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArrayLibrary", "windows\ArrayLibrary\ArrayLibrary.vcxproj", "{2119492E-9189-4F46-BADA-723692E67D30}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "posterior_error", "windows\posterior_error\posterior_error.vcxproj", "{671CCD4C-C27C-41F7-BBA4-39FA197170B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,10 +67,10 @@ Global
 		{70C53750-5D9E-4144-AF5C-58BB1C6B8A64}.Debug|Win32.Build.0 = Debug|Win32
 		{70C53750-5D9E-4144-AF5C-58BB1C6B8A64}.Release|Win32.ActiveCfg = Release|Win32
 		{70C53750-5D9E-4144-AF5C-58BB1C6B8A64}.Release|Win32.Build.0 = Release|Win32
-		{E4BADE30-D3B8-4BCB-9008-5D8EC51D336B}.Debug|Win32.ActiveCfg = Debug|Win32
-		{E4BADE30-D3B8-4BCB-9008-5D8EC51D336B}.Debug|Win32.Build.0 = Debug|Win32
-		{E4BADE30-D3B8-4BCB-9008-5D8EC51D336B}.Release|Win32.ActiveCfg = Release|Win32
-		{E4BADE30-D3B8-4BCB-9008-5D8EC51D336B}.Release|Win32.Build.0 = Release|Win32
+		{3351392E-9281-47DA-9DAC-B1DF230ABF1C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3351392E-9281-47DA-9DAC-B1DF230ABF1C}.Debug|Win32.Build.0 = Debug|Win32
+		{3351392E-9281-47DA-9DAC-B1DF230ABF1C}.Release|Win32.ActiveCfg = Release|Win32
+		{3351392E-9281-47DA-9DAC-B1DF230ABF1C}.Release|Win32.Build.0 = Release|Win32
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.Debug|Win32.Build.0 = Debug|Win32
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.Release|Win32.ActiveCfg = Release|Win32
@@ -77,6 +79,10 @@ Global
 		{2119492E-9189-4F46-BADA-723692E67D30}.Debug|Win32.Build.0 = Debug|Win32
 		{2119492E-9189-4F46-BADA-723692E67D30}.Release|Win32.ActiveCfg = Release|Win32
 		{2119492E-9189-4F46-BADA-723692E67D30}.Release|Win32.Build.0 = Release|Win32
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.Debug|Win32.Build.0 = Debug|Win32
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.Release|Win32.ActiveCfg = Release|Win32
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
