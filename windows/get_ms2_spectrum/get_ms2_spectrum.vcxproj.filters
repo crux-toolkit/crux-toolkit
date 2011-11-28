@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="../../src/cget_ms2_spectrum.cpp">
+    <ClCompile Include="../../src/c/get_ms2_spectrum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

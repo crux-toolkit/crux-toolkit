@@ -225,7 +225,7 @@
     <ClCompile Include="..\..\src\c\WinCrux.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..src\c\analyze_psms.cpp">
+    <ClCompile Include="..\..\src\c\analyze_psms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

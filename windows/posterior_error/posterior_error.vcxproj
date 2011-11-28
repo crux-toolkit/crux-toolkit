@@ -10,19 +10,43 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\c\posterior-error\Array.cpp" />
+    <ClCompile Include="..\..\src\c\posterior-error\BaseSpline.cpp" />
+    <ClCompile Include="..\..\src\c\posterior-error\LogisticRegression.cpp" />
+    <ClCompile Include="..\..\src\c\posterior-error\Numerical.cpp" />
+    <ClCompile Include="..\..\src\c\posterior-error\PackedMatrix.cpp" />
+    <ClCompile Include="..\..\src\c\posterior-error\PackedVector.cpp" />
+    <ClCompile Include="..\..\src\c\posterior-error\PosteriorEstimator.cpp" />
+    <ClCompile Include="..\..\src\c\posterior-error\Set.cpp" />
+    <ClCompile Include="..\..\src\c\posterior-error\Vector.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\c\posterior-error\Array.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\BaseSpline.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\LogisticRegression.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\Numerical.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\PackedMatrix.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\PackedVector.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\PosteriorEstimator.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\Set.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\Streamable.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\Transform.h" />
+    <ClInclude Include="..\..\src\c\posterior-error\Vector.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{16E9B33F-9D2F-4F0C-94E0-110472D84EF8}</ProjectGuid>
+    <ProjectGuid>{671CCD4C-C27C-41F7-BBA4-39FA197170B1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>get_ms2_spectrum</RootNamespace>
+    <RootNamespace>posterior_error</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -37,47 +61,40 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>
       </PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="../../src/c/get_ms2_spectrum.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
