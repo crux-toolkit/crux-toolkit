@@ -112,6 +112,20 @@ void pcGetScores(double *scoreArr,double *qArr) {
   }
 } 
 
+/**
+ * Fill the given score array with the percolator scores for the first
+ * decoy set.
+ */
+void pcGetDecoyScores(double* scoreArray){ 
+  int match_idx = 0;
+  SetHandler::Iterator psmIter(pCaller->getSetHandler(Caller::SHUFFLED));
+  while(double* feature = psmIter.getNext()){
+    scoreArray[match_idx] = pCaller->getTestSet()->calcScore(feature);
+    match_idx++;    
+  }
+}
+
+
 /** Function that should be called after processing finished */
 void pcCleanUp() {
     if (pCaller) {

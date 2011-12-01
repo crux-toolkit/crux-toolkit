@@ -632,6 +632,10 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                              getScore(LOGP_QVALUE_WEIBULL_XCORR));
     break;
+  case WEIBULL_PEP_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(LOGP_WEIBULL_PEP));
+    break;
 #ifdef NEW_COLUMNS
   case WEIBULL_PEPTIDE_QVALUE_COL:
     if ((scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == true) &&
@@ -645,6 +649,12 @@ void Match::printOneMatchField(
     if (null_peptide_ == false) {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
               getScore(DECOY_XCORR_QVALUE));
+    }
+    break;
+  case DECOY_XCORR_PEP_COL:
+    if (null_peptide_ == false) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                       getScore(DECOY_XCORR_PEP));
     }
     break;
 #ifdef NEW_COLUMNS
@@ -666,6 +676,10 @@ void Match::printOneMatchField(
   case PERCOLATOR_QVALUE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getScore(PERCOLATOR_QVALUE));
+    break;
+  case PERCOLATOR_PEP_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                     getScore(PERCOLATOR_PEP));
     break;
 #ifdef NEW_COLUMNS
   case PERCOLATOR_PEPTIDE_QVALUE_COL:

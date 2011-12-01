@@ -139,11 +139,9 @@ void TestMatchFileWriter::precision(){
   getline(file, line);
   //cerr << line << endl;
   CPPUNIT_ASSERT(line ==
-                 "777	777	777.1235	777.1235	777.1235	777.12345679	777.12345679	777	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777	777	777	777	777	777	777	777.123457	777.123457	777.123457	777.123457	777.12345679	777.12345679	777.12345679	777	777");
+                 "777	777	777.1235	777.1235	777.1235	777.12345679	777.12345679	777	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777.12345679	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777.12345679	777	777	777	777	777	777	777	777	777.123457	777.123457	777.123457	777.123457	777.12345679	777.12345679	777.12345679	777	777");
 
-  /*
-  CPPUNIT_ASSERT(line == "777	777	777.1235	777.1235	777.1235	777.12345679	777.12345679	777	777.12345679	777	777.12345679	777.12345679	777.12345679	777.12345679	777	777.12345679	777.12345679	777.12345679	777	777	777	777	777	777	777	777	777.123457	777.123457	777.123457	777.123457	777.12345679	777.12345679	777.12345679	777	777");
-  */
+
 }
 
 // try setting the columns for each command type
@@ -245,7 +243,7 @@ void TestMatchFileWriter::setColumnsCommand(){
   delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
   defaultApplicationPtr = NULL;
-  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	percolator score	percolator rank	percolator q-value	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
+  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	percolator score	percolator rank	percolator q-value	percolator PEP	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // q-ranker
   defaultWriterPtr = new MatchFileWriter(filename);
@@ -267,7 +265,7 @@ void TestMatchFileWriter::setColumnsCommand(){
   delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
   defaultApplicationPtr = NULL;
-  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	decoy q-value (xcorr)	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
+  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	decoy q-value (xcorr)	decoy PEP (xcorr)	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 
   // q-values, weibull
   printThese[PVALUE_COL] = true;
@@ -279,7 +277,7 @@ void TestMatchFileWriter::setColumnsCommand(){
   delete defaultApplicationPtr;
   defaultWriterPtr = NULL;
   defaultApplicationPtr = NULL;
-  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	p-value	Weibull est. q-value	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
+  testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	p-value	Weibull est. q-value	Weibull est. PEP	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
 } 
 
 

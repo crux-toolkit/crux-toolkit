@@ -175,10 +175,31 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
   // estimate PEPs
   vector<double> PEP_vector;
   PosteriorEstimator::estimatePEP(score_labels, pi0, PEP_vector, 
-                                  false); // don't include decoy PEPs
+                                  true);  // include decoy PEPs
 
-  double* PEP_array = new double[num_targets];
-  copy(PEP_vector.begin(), PEP_vector.end(), PEP_array);
+  // now score_labels and PEPs are similarly sorted
+
+  // pull out the PEPs in the order that the scores were given
+  double* PEP_array = new double[PEP_vector.size()];
+
+  for(int target_idx = 0; target_idx < num_targets; target_idx++){
+    
+    // the score to return next    
+    double curr_target_score = target_scores[target_idx];
+
+    // find its position in score_labels
+    vector< pair<double, bool> >::iterator found_score_pos 
+      = lower_bound(score_labels.begin(), score_labels.end(), 
+                    make_pair(curr_target_score, true),
+                    greater<pair<double, bool> >()); 
+
+
+    size_t found_index = distance(score_labels.begin(), found_score_pos);
+
+    // pull out the PEP at the same position in PEP_vector
+    PEP_array[target_idx] = PEP_vector[found_index];
+   }
+
   return PEP_array;
 }
 
@@ -381,8 +402,13 @@ MatchCollection* run_percolator_or_qranker(
   case PERCOLATOR_COMMAND:
     pcExecute(); 
     pcGetScores(results_score, results_q); 
+    pcGetDecoyScores(decoy_scores);
+    PEPs = compute_PEP(results_score, num_target_matches,
+                       decoy_scores, num_decoy_matches);
     target_match_collection->fillResult(
       results_q, PERCOLATOR_QVALUE, true);
+    target_match_collection->fillResult(
+      PEPs, PERCOLATOR_PEP, true);
     target_match_collection->fillResult(
       results_score, PERCOLATOR_SCORE, false);
     pcCleanUp();

@@ -38,5 +38,17 @@ MatchCollection* run_percolator_or_qranker(
   char* fasta_file, 
   OutputFiles& output);
 
+/**
+ * Compute posterior error probabilities (PEP) from the given target
+ * and decoy scores.
+ * \returns A newly allocated array of PEP for the target scores
+ * sorted.
+ */
+double* compute_PEP(double* target_scores, ///< scores for target matches
+                    int num_targets,       ///< size of target_scores
+                    double* decoy_scores,  ///< scores for decoy matches
+                    int num_decoys);       ///< size of decoy_scores
+
+
 #endif //ANALYZE_PSMS_H
 

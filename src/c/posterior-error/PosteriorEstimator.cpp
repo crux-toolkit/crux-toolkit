@@ -108,6 +108,10 @@ void PosteriorEstimator::estimatePEP(
 }
 
 /*
+double mymin(double a, double b) {
+  return a > b ? b : a;
+}
+
 // BF: for target/decoy competition, I think
 void PosteriorEstimator::estimatePEPGeneralized(
                                      vector<pair<double, bool> >& combined,
@@ -333,6 +337,9 @@ double PosteriorEstimator::estimatePi0(vector<double>& p,
       lambdas.push_back(lambda);
       pi0s.push_back(pi0);
     }
+  }
+  if( pi0s.empty() ){ 
+    return 1;
   }
   double minPi0 = *min_element(pi0s.begin(), pi0s.end());
   // Initialize the vector mse with zeroes.
