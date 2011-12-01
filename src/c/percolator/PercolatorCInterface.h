@@ -41,6 +41,13 @@ void pcScorePSM(
   * as the features were inserted */
 void pcGetScores(double *scoreArr, double *qArr); 
 
+/**
+ * Fill the given score array with the percolator scores for the first
+ * decoy set.
+ */
+void pcGetDecoyScores(double* scoreArr); 
+
+
 /** Function that should be called after processing finished */
 void pcCleanUp(); 
 

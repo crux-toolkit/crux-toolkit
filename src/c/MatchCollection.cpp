@@ -557,6 +557,7 @@ void MatchCollection::sort(
   case DECOY_XCORR_QVALUE:
   case LOGP_WEIBULL_XCORR: 
   case DECOY_XCORR_PEPTIDE_QVALUE:
+  case DECOY_XCORR_PEP:
     carp(CARP_DEBUG, "Sorting match collection by XCorr.");
     sort_by = XCORR;
     compare_match_function = (QSORT_COMPARE_METHOD)compareXcorr;
@@ -565,6 +566,7 @@ void MatchCollection::sort(
   case LOGP_BONF_WEIBULL_XCORR: 
   case LOGP_QVALUE_WEIBULL_XCORR:
   case LOGP_PEPTIDE_QVALUE_WEIBULL:
+  case LOGP_WEIBULL_PEP:
     carp(CARP_DEBUG, "Sorting match collection by p-value.");
     sort_by = LOGP_BONF_WEIBULL_XCORR;
     compare_match_function = (QSORT_COMPARE_METHOD)comparePValue;
@@ -578,6 +580,7 @@ void MatchCollection::sort(
 
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
+  case PERCOLATOR_PEP:
     carp(CARP_DEBUG, "Sorting match collection by Percolator q-value.");
     sort_by = PERCOLATOR_QVALUE;
     compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorQValue;
@@ -642,8 +645,10 @@ void MatchCollection::spectrumSort(
   case LOGP_BONF_WEIBULL_XCORR: 
   case LOGP_QVALUE_WEIBULL_XCORR: 
   case LOGP_PEPTIDE_QVALUE_WEIBULL:
+  case LOGP_WEIBULL_PEP:
   case DECOY_XCORR_QVALUE:
   case DECOY_XCORR_PEPTIDE_QVALUE:
+  case DECOY_XCORR_PEP:
     /* If we are sorting on a per-spectrum basis, then the xcorr is
        good enough, even in the presence of p-values. */
     qsortMatch(match_, match_total_,
@@ -659,6 +664,7 @@ void MatchCollection::spectrumSort(
 
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
+  case PERCOLATOR_PEP:
     qsortMatch(match_, match_total_,
                 (QSORT_COMPARE_METHOD)compareSpectrumPercolatorQValue);
     last_sorted_ = PERCOLATOR_QVALUE;
@@ -2862,13 +2868,16 @@ void MatchCollection::assignQValues(
       derived_score_type = QRANKER_PEPTIDE_QVALUE;
       break;
     // Should never reach this point.
-    case QRANKER_PEP:// should we handle this??
     case SP: 
     case LOGP_WEIBULL_XCORR: 
     case DECOY_XCORR_PEPTIDE_QVALUE:
     case LOGP_PEPTIDE_QVALUE_WEIBULL:
     case PERCOLATOR_PEPTIDE_QVALUE:
     case QRANKER_PEPTIDE_QVALUE:
+    case QRANKER_PEP:
+    case DECOY_XCORR_PEP:
+    case LOGP_WEIBULL_PEP:
+    case PERCOLATOR_PEP:
     case NUMBER_SCORER_TYPES:
     case INVALID_SCORER_TYPE:
       carp(CARP_FATAL, "Something is terribly wrong!");
@@ -2880,6 +2889,77 @@ void MatchCollection::assignQValues(
   }
   delete match_iterator;
 }
+
+/**
+ * Given a hash table that maps from a score to its PEP, assign
+ * PEPs to all of the matches in a given collection.
+ */
+void MatchCollection::assignPEPs(
+    const map<FLOAT_T, FLOAT_T>* score_to_pep_hash,
+    SCORER_TYPE_T score_type )
+{
+  // Iterate over the matches filling in the q-values
+  MatchIterator* match_iterator = 
+    new MatchIterator(this, score_type, false);
+
+  while(match_iterator->hasNext()){
+    Match* match = match_iterator->next();
+    FLOAT_T score = match->getScore(score_type);
+
+    // Retrieve the corresponding PEP.
+    map<FLOAT_T, FLOAT_T>::const_iterator map_position 
+      = score_to_pep_hash->find(score);
+    if (map_position == score_to_pep_hash->end()) {
+      carp(CARP_FATAL,
+           "Cannot find q-value corresponding to score of %g.",
+           score);
+    }
+    FLOAT_T qvalue = map_position->second;
+
+    /* If we're given a base score, then store the q-value.  If we're
+       given a q-value, then store the peptide-level q-value. */
+    SCORER_TYPE_T derived_score_type = INVALID_SCORER_TYPE;
+    switch (score_type) {
+    case XCORR:
+      derived_score_type = DECOY_XCORR_PEP;
+      break;
+    case LOGP_BONF_WEIBULL_XCORR: 
+      derived_score_type = LOGP_WEIBULL_PEP;
+      break;
+    case PERCOLATOR_SCORE:
+      derived_score_type = PERCOLATOR_PEP;
+      break;
+    case QRANKER_SCORE:
+      derived_score_type = QRANKER_PEP;
+      break;
+    // Should never reach this point.
+    case SP: 
+    case LOGP_WEIBULL_XCORR: 
+    case DECOY_XCORR_PEPTIDE_QVALUE:
+    case DECOY_XCORR_QVALUE:
+    case LOGP_QVALUE_WEIBULL_XCORR:
+    case LOGP_PEPTIDE_QVALUE_WEIBULL:
+    case PERCOLATOR_PEPTIDE_QVALUE:
+    case QRANKER_PEPTIDE_QVALUE:
+    case QRANKER_PEP:
+    case QRANKER_QVALUE:
+    case DECOY_XCORR_PEP:
+    case LOGP_WEIBULL_PEP:
+    case PERCOLATOR_QVALUE:
+    case PERCOLATOR_PEP:
+    case NUMBER_SCORER_TYPES:
+    case INVALID_SCORER_TYPE:
+      carp(CARP_FATAL, "Something is terribly wrong!");
+    }
+
+    match->setScore(derived_score_type, qvalue);
+    scored_type_[derived_score_type] = true;
+
+  }
+  delete match_iterator;
+
+}
+
 
 /*
  * Local Variables:

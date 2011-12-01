@@ -16,8 +16,11 @@
  ****************************************************************************/
 #include "q-value.h"
 #include "MatchCollectionIterator.h"
+#include "analyze_psms.h"
+#include "posterior-error/PosteriorEstimator.h"
 
 #include <map>
+#include <utility>
 
 using namespace std;
 
@@ -245,6 +248,90 @@ FLOAT_T* compute_decoy_qvalues(
 }
 
 /**
+ * A wrapper to take care of the FLOAT_T to double conversion.  Calls
+ * compute_PEP in analyse_psms.
+ * \returns A newly allocated array of PEP values sorted in the same
+ * order as the targets.
+ */
+FLOAT_T* compute_PEP_local(FLOAT_T* targets,
+                          int num_targets, 
+                          FLOAT_T* decoys, 
+                          int num_decoys){
+
+  double* targets_d = new double[num_targets];
+  for(int val_idx = 0; val_idx < num_targets; val_idx++){
+    targets_d[val_idx] = targets[val_idx];
+  }
+
+  double* decoys_d = new double[num_decoys];
+  for(int val_idx = 0; val_idx < num_decoys; val_idx++){
+    decoys_d[val_idx] = decoys[val_idx];
+  }
+
+  double* PEPs_d = compute_PEP(targets_d, num_targets, decoys_d, num_decoys);
+
+  FLOAT_T* PEPs = new FLOAT_T[num_targets];
+  for(int val_idx = 0; val_idx < num_targets; val_idx++){
+    PEPs[val_idx] = PEPs_d[val_idx];
+  }
+
+  delete targets_d;
+  delete decoys_d;
+
+  return PEPs;
+}
+
+/**
+ * Use the given p-values to estimate PEP using the
+ * PosteriorEstimator.
+ * \returns A newly allocated array of PEP values.
+ */
+FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
+
+  // convert the -ln(pval) to pval
+  vector<double> pvalues_vector(pvalues, pvalues + num_pvals);
+  for(size_t val_idx = 0; val_idx < pvalues_vector.size(); val_idx++){
+    pvalues_vector[val_idx] = exp(-pvalues_vector[val_idx]);
+  }
+
+  // sort them
+  sort(pvalues_vector.begin(), pvalues_vector.end());
+
+  // put them in a score_label vector
+  vector<pair<double, bool> > score_label;
+  transform(pvalues_vector.begin(),
+            pvalues_vector.end(),
+            back_inserter(score_label),
+            bind2nd(ptr_fun(make_pair<double,bool>), true));
+
+  // create decoy p-values
+  double step = 1.0 / 2.0 / (double)num_pvals;
+  for(int val_idx = 0; val_idx < num_pvals; val_idx++){
+    score_label.push_back(make_pair<double, bool>(step * (1 + 2 * val_idx),
+                                               false));
+  }
+
+  // sort ascending order
+  sort(score_label.begin(), score_label.end());
+  pep::PosteriorEstimator::setReversed(true);
+
+  // estimate PEPs 
+  double pi0 = pep::PosteriorEstimator::estimatePi0(pvalues_vector);
+  vector<double> PEP_vector;
+  pep::PosteriorEstimator::estimatePEP(score_label, pi0, PEP_vector );
+
+  // return values
+  FLOAT_T* PEPs = new FLOAT_T[PEP_vector.size()];
+  for(size_t pep_idx = 0; pep_idx < PEP_vector.size(); pep_idx++){
+    PEPs[pep_idx] = PEP_vector[pep_idx];
+  }
+
+  return PEPs;
+}
+
+
+
+/**
  * \brief Compute a q-values based on what is in the PSM files in the
  * directory.  Store q-values in the match collection returned.
  *
@@ -253,8 +340,8 @@ FLOAT_T* compute_decoy_qvalues(
  * and compute empirical q-values based on the number of decoys and
  * targets above the score threshold.
  *
- * \returns a collection of target PSMs with one q-value in each
- * match.
+ * \returns a collection of target PSMs with one q-value and one PEP
+ * in each match.
  */
 MatchCollection* run_qvalue(
   char* input_directory, 
@@ -321,6 +408,7 @@ MatchCollection* run_qvalue(
   FLOAT_T* pvalues = NULL; // N.B. Misnamed for decoy calculation.
   int num_pvals = target_matches->getMatchTotal();
   FLOAT_T* qvalues = NULL;
+  FLOAT_T* PEPs = NULL;
   SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
   if (have_pvalues == true) {
     carp(CARP_DEBUG, "There are %d PSMs for q-value computation.", num_pvals);
@@ -329,6 +417,7 @@ MatchCollection* run_qvalue(
     pvalues = target_matches->extractScores(LOGP_BONF_WEIBULL_XCORR);
     qvalues = compute_qvalues_from_pvalues(pvalues, num_pvals,
                                            get_double_parameter("pi-zero"));
+    PEPs = compute_PEP_from_pvalues(pvalues, num_pvals);
     score_type = LOGP_BONF_WEIBULL_XCORR;
   }
 
@@ -344,6 +433,9 @@ MatchCollection* run_qvalue(
     qvalues = compute_decoy_qvalues(pvalues, num_pvals, 
                                     decoy_xcorrs, num_decoys,
                                     get_double_parameter("pi-zero"));
+
+    PEPs = compute_PEP_local(pvalues, num_pvals, decoy_xcorrs, num_decoys);
+
     free(decoy_xcorrs);
     score_type = XCORR;
   }
@@ -357,9 +449,19 @@ MatchCollection* run_qvalue(
   map<FLOAT_T, FLOAT_T>* qvalue_hash 
     = store_arrays_as_hash(pvalues, qvalues, num_pvals);
   target_matches->assignQValues(qvalue_hash, score_type);
+
+  // Store p-values to PEP as a has and then assign them
+  map<FLOAT_T, FLOAT_T>* PEP_hash 
+    = store_arrays_as_hash(pvalues, PEPs, num_pvals);
+  target_matches->assignPEPs(PEP_hash, score_type);
+
+
+
   free(pvalues);
   free(qvalues);
+  delete PEPs;
   delete qvalue_hash;
+  delete PEP_hash;
 
   // Identify PSMs that are top-scoring per peptide.
   identify_best_psm_per_peptide(target_matches, score_type);

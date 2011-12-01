@@ -604,6 +604,15 @@ class MatchCollection {
     SCORER_TYPE_T score_type
     );
 
+  /**
+   * Given a hash table that maps from a score to its PEP, assign
+   * PEPs to all of the matches in a given collection.
+   */
+  void assignPEPs(
+    const map<FLOAT_T, FLOAT_T>* score_to_qvalue_hash,
+    SCORER_TYPE_T score_type
+    );
+
   /*******************************************
    * match_collection post_process extension
    ******************************************/
