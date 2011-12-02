@@ -127,6 +127,15 @@ directory a text file listing all of the peptides in the database,
 along with their neutral masses, one per line.  Default = F.</li>
 
 <li>
+<code>--decoys &lt;string&gt;</code> &ndash; Include a decoy version
+of every peptide by shuffling or reversing the target sequence.
+Possible values are <code>none, reverse, protein-shuffle,
+peptide-shuffle</code>. Use 'reverse' to reverse each protein sequence,
+'protein-shuffle' to shuffle each protein sequence, or 'peptide-shuffle'
+to shuffle the sequence between enzyme cleavage sites, leaving the
+termini in place. Use 'none' for no decoys.  Default=protein-shuffle. 
+
+<li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
 fail when trying to overwrite a file if false (F). Default = F.
 
