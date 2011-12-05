@@ -39,7 +39,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>..\..\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
     <IncludePath>..\..\src\c\xlink;..\..\src\c\MSToolkit;..\..\src\c\q-ranker;..\..\src\c\percolator;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
