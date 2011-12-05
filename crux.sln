@@ -12,11 +12,20 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xlink", "windows\xlink\xlink.vcxproj", "{F2853A94-C9D3-4AC2-8C50-31F88B052216}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "get_ms2_spectrum", "windows\get_ms2_spectrum\get_ms2_spectrum.vcxproj", "{16E9B33F-9D2F-4F0C-94E0-110472D84EF8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF642C17-5942-4A4A-90A6-AD75DA06481E} = {AF642C17-5942-4A4A-90A6-AD75DA06481E}
+		{C4BCBCF8-E852-46CF-AF83-65353359B218} = {C4BCBCF8-E852-46CF-AF83-65353359B218}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "predict_peptide_ions", "windows\predict_peptide_ions\predict_peptide_ions.vcxproj", "{70C53750-5D9E-4144-AF5C-58BB1C6B8A64}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF642C17-5942-4A4A-90A6-AD75DA06481E} = {AF642C17-5942-4A4A-90A6-AD75DA06481E}
+		{C4BCBCF8-E852-46CF-AF83-65353359B218} = {C4BCBCF8-E852-46CF-AF83-65353359B218}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "generate_peptides", "windows\generate_peptides\generate_peptides.vcxproj", "{3351392E-9281-47DA-9DAC-B1DF230ABF1C}"
 	ProjectSection(ProjectDependencies) = postProject
+		{AF642C17-5942-4A4A-90A6-AD75DA06481E} = {AF642C17-5942-4A4A-90A6-AD75DA06481E}
 		{C4BCBCF8-E852-46CF-AF83-65353359B218} = {C4BCBCF8-E852-46CF-AF83-65353359B218}
 	EndProjectSection
 EndProject
@@ -24,6 +33,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crux", "windows\crux\crux.v
 	ProjectSection(ProjectDependencies) = postProject
 		{AF642C17-5942-4A4A-90A6-AD75DA06481E} = {AF642C17-5942-4A4A-90A6-AD75DA06481E}
 		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D} = {EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}
+		{2119492E-9189-4F46-BADA-723692E67D30} = {2119492E-9189-4F46-BADA-723692E67D30}
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1} = {671CCD4C-C27C-41F7-BBA4-39FA197170B1}
 		{F2853A94-C9D3-4AC2-8C50-31F88B052216} = {F2853A94-C9D3-4AC2-8C50-31F88B052216}
 		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB} = {C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}
 		{C4BCBCF8-E852-46CF-AF83-65353359B218} = {C4BCBCF8-E852-46CF-AF83-65353359B218}
@@ -33,7 +44,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArrayLibrary", "windows\Arr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "posterior_error", "windows\posterior_error\posterior_error.vcxproj", "{671CCD4C-C27C-41F7-BBA4-39FA197170B1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{012B9B61-6140-457C-A609-F09B2B58BF94}"
+	ProjectSection(SolutionItems) = preProject
+		crux.vsmdi = crux.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = crux.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32

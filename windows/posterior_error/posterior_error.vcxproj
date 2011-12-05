@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\c\posterior-error\Array.cpp" />
     <ClCompile Include="..\..\src\c\posterior-error\BaseSpline.cpp" />
     <ClCompile Include="..\..\src\c\posterior-error\LogisticRegression.cpp" />
     <ClCompile Include="..\..\src\c\posterior-error\Numerical.cpp" />
@@ -72,6 +71,7 @@
       </PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>
       </PrecompiledHeaderOutputFile>
+      <AdditionalIncludeDirectories>..\..\src\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
