@@ -22,6 +22,7 @@
 #include "Ion.h"
 #include "IonSeries.h"
 #include "IonConstraint.h"
+#include "Peptide.h"
 
 using namespace std;
 

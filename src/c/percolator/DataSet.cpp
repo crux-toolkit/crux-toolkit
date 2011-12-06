@@ -669,7 +669,7 @@ void DataSet::readSQT(const string fname, IntraSetRelation * intraRel,const stri
          if (charge <= 5) look=true;
          ms=0;
     }
-    if (look & line[0]=='L' && ms < hitsPerSpectrum) {
+    if ((look & line[0]=='L') && (ms < hitsPerSpectrum)) {
          lineParse.str(line);  
          lineParse >> tmp >> prot;
          if(!doPattern || ((line.find(wild,0)!= string::npos)==match)) {

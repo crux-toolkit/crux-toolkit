@@ -182,7 +182,7 @@ Index::Index() {
  * Database::binary_suffix.
  * \returns 1 if filename has ending, else 0
  */
-#ifdef DARWIN
+#if (defined DARWIN || defined WIN32)
 int is_binary_fasta_name(struct dirent *entry){
 #else
 int is_binary_fasta_name(const struct dirent *entry){
@@ -215,7 +215,7 @@ int is_binary_fasta_name(const struct dirent *entry){
  * Database::decoy_binary_suffix.
  * \returns 1 if filename has ending, else 0. 
  */
-#ifdef DARWIN
+#if (defined DARWIN || defined WIN32)
 int is_decoy_binary_fasta_name(struct dirent *entry){
 #else
 int is_decoy_binary_fasta_name(const struct dirent *entry){

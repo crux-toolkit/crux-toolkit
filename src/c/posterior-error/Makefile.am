@@ -18,7 +18,7 @@ libpep_la_SOURCES = \
   Vector.h 
 
 libpep_la_CXXFLAGS = $(AM_CXXFLAGS) \
-  -D_LARGEFILE_SOURCE
+  -I.. -D_LARGEFILE_SOURCE
 
 noinst_LTLIBRARIES = libpep.la
 

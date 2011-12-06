@@ -459,7 +459,14 @@ const char* date_and_time
   static bool first_time = true;
 
   if (first_time) {
+    // FIXME: we should be able to get the date
+    // from a function call rather than having
+    // to call a shell command.
+#ifdef WIN32
+    date_stream = (FILE *)popen("date /T", "r");
+#else
     date_stream = (FILE *)popen("date", "r");
+#endif
     if( fgets(the_date, MAX_HOST_NAME, date_stream) == NULL ){ return NULL; }
     pclose(date_stream);
   }

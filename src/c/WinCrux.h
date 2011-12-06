@@ -8,11 +8,13 @@
 #include <time.h>
 #include <WinSock2.h>
 #include <windows.h>
+#include "utils.h"
 #include "windirent.h"
 
 // Rename some functions to the windows version
 #define access _access
 #define drand48 rand
+#define isfinite _finite
 #define isnan _isnan
 #define pclose _pclose
 #define popen _popen
@@ -26,6 +28,8 @@
 #define snprintf _snprintf
 
 #undef NO_ERROR
+#undef max
+#undef min
 
 #define R_OK 04
 #define W_OK 02
@@ -60,5 +64,9 @@ int alphasort(const void *d1, const void *d2);
 
 char *mkdtemp(char *temp);
 
+int isinf(FLOAT_T x);
+float log2(float x);
+
 #endif
 #endif
+

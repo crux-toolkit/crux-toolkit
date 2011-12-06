@@ -43,7 +43,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\posterior-error;..\..\src\c\xlink;..\..\src\c\q-ranker;..\..\src\c\percolator;..\..\src\c\MSToolkit;..\..\src\c\MSToolkit\RAMP;..\..\src\c\ArrayLibrary;..\..\src\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;WIN32;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>
