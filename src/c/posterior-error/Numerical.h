@@ -7,6 +7,7 @@
 #include <iostream>
 #include <math.h>
 #include <limits>
+#include "WinCrux.h"
 
 using namespace std;
 

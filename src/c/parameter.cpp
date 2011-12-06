@@ -1260,8 +1260,15 @@ static void set_mz_bin_width()
 {
   double new_value = get_double_parameter("mz-bin-width");
 
+#ifdef WIN32
+  // Peculiarities of Windows floating point handling 
+  // results in us getting 0.0 here rather than Nan
+  // FIXME: is there a more portable way of checking
+  // that a floating point value has not been set?
+  if (new_value == 0.0) {
+#else
   if (isnan(new_value)) {
-
+#endif
     // If no width specified, choose based on mass type.
     if (get_mass_type_parameter("fragment-mass") == MONO) {
       new_value = BIN_WIDTH_MONO;

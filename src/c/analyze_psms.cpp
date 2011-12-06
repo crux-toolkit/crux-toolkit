@@ -154,12 +154,20 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
 
   // put all of the scores in a single vector of pairs: score, is_target
   vector<pair<double, bool> > score_labels;
+#ifdef WIN32
+  // There is a bug in Microsoft's implementation of
+  // make_pair<> that keeps this code from working.
+  // They promise to fix it in VC 11
+  // https://connect.microsoft.com/VisualStudio/feedback/details/606746/incorrect-overload-resolution
+  // FIXME: find workaround until then
+#else
   transform(target_scores, target_scores + num_targets,
             back_inserter(score_labels),
             bind2nd(ptr_fun(make_pair<double, bool>), true));
   transform(decoy_scores, decoy_scores + num_decoys,
             back_inserter(score_labels),
             bind2nd(ptr_fun(make_pair<double, bool>), false));
+#endif
 
   // sort them in descending order
   sort(score_labels.begin(), score_labels.end(),

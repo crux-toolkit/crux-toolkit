@@ -299,10 +299,19 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
 
   // put them in a score_label vector
   vector<pair<double, bool> > score_label;
+
+#ifdef WIN32
+  // There is a bug in Microsoft's implementation of
+  // make_pair<> that keeps this code from working.
+  // They promise to fix it in VC 11
+  // https://connect.microsoft.com/VisualStudio/feedback/details/606746/incorrect-overload-resolution
+  // FIXME: find workaround until then
+#else
   transform(pvalues_vector.begin(),
             pvalues_vector.end(),
             back_inserter(score_label),
             bind2nd(ptr_fun(make_pair<double,bool>), true));
+#endif
 
   // create decoy p-values
   double step = 1.0 / 2.0 / (double)num_pvals;

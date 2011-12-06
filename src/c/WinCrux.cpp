@@ -168,3 +168,13 @@ char *mkdtemp(char *temp) {
   // FIXME this is only a stub
   return NULL;
 }
+
+int isinf(FLOAT_T x) {
+  // FIXME this is only a stub
+  return false;
+}
+
+float log2(float x) {
+  // FIXME this is only a stub
+  return 0.0;
+}
