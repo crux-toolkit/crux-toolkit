@@ -1,5 +1,5 @@
 scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa
-14	2	500.4100	998.8027	1001.1503	0.00	0.01	1	1	FHLELSQK	trypsin-full-digest	copy-prot3(226),prot3(226)	KD,KD
-14	3	500.4100	1498.2026	1495.8149	0.00	-0.33	1	1	VMFTTFYMITNK	trypsin-full-digest	copy-prot4(29),prot4(29),prot4-internal-dups(121),prot4-internal-dups(29),prot4-internal-dups(75)	RY,RY,RY,RY,RY
+14	2	500.4100	998.8027	1001.1503	0.00	0.00	1	1	FHLELSQK	trypsin-full-digest	copy-prot3(226),prot3(226)	KD,KD
+14	3	500.4100	1498.2026	1495.8149	0.00	-0.34	1	1	VMFTTFYMITNK	trypsin-full-digest	copy-prot4(29),prot4(29),prot4-internal-dups(121),prot4-internal-dups(29),prot4-internal-dups(75)	RY,RY,RY,RY,RY
 15	2	488.8200	975.6227	973.0936	0.00	0.01	1	1	SGATAYIYK	trypsin-full-digest	copy-prot3(257),prot3(257)	KA,KA
-15	3	488.8200	1463.4326	1464.8112	0.00	-0.08	1	1	QYLLLNIAYLLK	trypsin-full-digest	copy-prot3(292),prot3(292)	KL,KL
+15	3	488.8200	1463.4326	1464.8112	0.00	-0.09	1	1	QYLLLNIAYLLK	trypsin-full-digest	copy-prot3(292),prot3(292)	KL,KL

@@ -772,7 +772,9 @@ FLOAT_T Scorer::genScoreSp(
  *****************************************************/
 
 /**
- * normalize each 10 regions of the observed spectrum to max 50
+ * Normalize each peak intensity of the observed spectrum to max 50
+ * based on the max intenstiy in each of 10 regions.
+ * .
  */
 void Scorer::normalizeEachRegion(
   FLOAT_T* observed,  ///< intensities to normalize
@@ -788,7 +790,10 @@ void Scorer::normalizeEachRegion(
 
   // normalize each region
   for(; bin_idx < getMaxBin(); ++bin_idx){
-    if(bin_idx >= region_selector*(region_idx+1) && region_idx < (NUM_REGIONS-1)){
+    // increment the region index and update max_intensity if this
+    // peak is in the next region
+    if(bin_idx >= region_selector*(region_idx+1) 
+       && region_idx < (NUM_REGIONS-1)){
       ++region_idx;
       max_intensity = max_intensity_per_region[region_idx];
     }
@@ -803,10 +808,6 @@ void Scorer::normalizeEachRegion(
       observed[bin_idx] = (observed[bin_idx] / max_intensity) * MAX_PER_REGION;
     }
 
-    // no more peaks beyond the 10 regions mark, exit
-    if(bin_idx > NUM_REGIONS * region_selector){
-      return;
-    }
   }
 }
 
