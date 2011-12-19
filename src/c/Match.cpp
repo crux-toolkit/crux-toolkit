@@ -805,9 +805,9 @@ void Match::printOneMatchField(
  * \ brief Print the match information in xml format to the given file. 
  *
  * Prints whatever score is available. Also prints out any modifications
- * if any exist for this match. If more than one protein is mapped from the peptide,
- * then those proteins are presented in an alternative_protein tag following the search
- * hit tag
+ * if any exist for this match. If more than one protein is mapped
+ * from the peptide, then those proteins are presented in an
+ * alternative_protein tag following the search hit tag.
  */
 void Match::printXml(
   FILE*    output_file,            ///< output stream -out
@@ -819,8 +819,6 @@ void Match::printXml(
   }
 
   FLOAT_T spectrum_mass = getNeutralMass();
-
-
   FLOAT_T delta_cn = getDeltaCn();
   
   // filters matches with delta cn less than 0
@@ -828,17 +826,14 @@ void Match::printXml(
     return;
   }
   
-  if( delta_cn == 0 ){// I hate -0, this prevents it
+  if( delta_cn == 0 ){// this prevents -0
     delta_cn = 0.0;
   }
   
   Peptide* peptide = getPeptide();
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   char* peptide_sequence = peptide->getSequence();
-
   double peptide_mass = peptide->getPeptideMass();
-  
-
   
   // Get data
   set<pair<char*, char*> > protein_info;
@@ -848,26 +843,21 @@ void Match::printXml(
   if (scores_computed[XCORR]){
     ranking = getRank(XCORR);
   }
-  char * flanking_aas = peptide->getFlankingAAs();
-  char * flanking_aas_iter = flanking_aas;
-  char * mod_seq = 
-    getModSequenceStrWithMasses(true);
+  char* flanking_aas = peptide->getFlankingAAs();
+  char* flanking_aas_iter = flanking_aas;
+  char* mod_seq = getModSequenceStrWithMasses(true);
   
-  char flanking_aas_prev = '\0';
-  char flanking_aas_next = '\0';
-  flanking_aas_prev = flanking_aas[0];
-  flanking_aas_next = flanking_aas[1];
-  
+  char flanking_aas_prev = flanking_aas[0];
+  char flanking_aas_next = flanking_aas[1];
 
-  int num_missed_cleavages = get_num_internal_cleavage(peptide_sequence, enzyme);
-  
+  int num_missed_cleavages = get_num_internal_cleavage(peptide_sequence, 
+                                                       enzyme);
   
   // Get number of peptide termini consistent with cleavage 
   int num_tol_term = get_num_terminal_cleavage(peptide_sequence, 
                                                flanking_aas_prev,
                                                flanking_aas_next,
                                                enzyme);
-
   
   // Print out search hit only with the first protein
   char* protein_annotation;
@@ -897,9 +887,6 @@ void Match::printXml(
           );
   fprintf(output_file, "protein_descr=\"%s\">\n",
           protein_annotation);
-  
-  
-  
   
   // print additional proteins in alternative_protein tags
   while (++prot_iter != protein_info.end()){
@@ -937,17 +924,18 @@ void Match::printXml(
   print_modifications_xml(mod_seq,
                       peptide_sequence,
                       output_file);
-
   free(mod_seq);
   
 
   // print all scores available
   int precision = get_int_parameter("precision");
+  bool post_search = false; // q-ranker, percolator, etc
   fprintf(output_file, 
           "        <search_score name=\"delta_cn\" value=\"%.*f\" />\n",
           precision, delta_cn);
 
   if (scores_computed[PERCOLATOR_SCORE]){
+    post_search = true;
     fprintf(output_file, 
             "        <search_score name=\"percolator_score\" value=\"%.*f\" />\n"
             "        <search_score name=\"percolator_qvalue\" value=\"%.*f\" />\n",
@@ -955,6 +943,7 @@ void Match::printXml(
             precision, getScore(PERCOLATOR_QVALUE));
     }
   if (scores_computed[QRANKER_SCORE]){
+    post_search = true;
     fprintf(output_file, 
             "        <search_score name=\"qranker_score\" value=\"%.*f\" />\n"
             "        <search_score name=\"qranker_qvalue\" value=\"%.*f\" />\n",
@@ -962,6 +951,7 @@ void Match::printXml(
             precision, getScore(QRANKER_QVALUE));
   }
   if (scores_computed[LOGP_QVALUE_WEIBULL_XCORR]){
+    post_search = true;
     fprintf(output_file, 
             "        <search_score name=\"weibull est. p-value\" value=\"%.*f\" />\n",
             precision, getScore(LOGP_QVALUE_WEIBULL_XCORR));
@@ -969,11 +959,50 @@ void Match::printXml(
   fprintf(output_file, 
           "        <search_score name=\"xcorr_score\" value=\"%.*f\" />\n",
           precision, getScore(XCORR));
+
+  // add peptideprophet tag for post-search commands 
+  // for ProteinProphet compatiblity
+  if( post_search ){
+    SCORER_TYPE_T score = INVALID_SCORER_TYPE;
+    SCORER_TYPE_T qval = INVALID_SCORER_TYPE;
+    SCORER_TYPE_T pep = INVALID_SCORER_TYPE;
+    string score_name;
     
-  
+    if (scores_computed[PERCOLATOR_SCORE]){
+      score = PERCOLATOR_SCORE;
+      qval = PERCOLATOR_QVALUE;
+      pep = PERCOLATOR_PEP;
+      score_name = "percolator_score";
+    } else if (scores_computed[QRANKER_SCORE]){
+      score =  QRANKER_SCORE; 
+      qval = QRANKER_QVALUE;
+      pep = QRANKER_PEP;
+      score_name = "q-ranker_score";
+    } else if (scores_computed[LOGP_QVALUE_WEIBULL_XCORR]){
+      qval = LOGP_QVALUE_WEIBULL_XCORR;
+      pep = LOGP_WEIBULL_PEP;
+    }
+    
+    fprintf(output_file, "<analysis_result analysis=\"peptideprophet\">\n");
+    fprintf(output_file, "<peptideprophet_result probability=\"%.*f\">\n", 
+            precision, (1 - getScore(pep)));
+    fprintf(output_file, "<search_score_summary>\n");
+    if( !score_name.empty() ){
+      fprintf(output_file, "<parameter name=\"%s\" value=\"%.*f\"/>\n",
+              score_name.c_str(), precision, getScore(score));
+    }
+    fprintf(output_file, "<parameter name=\"%s\" value=\"%.*f\"/>\n", 
+            "qvalue", precision, getScore(qval));
+    fprintf(output_file, "<parameter name=\"%s\" value=\"%.*f\"/>\n", 
+            "pep", precision, getScore(pep));
+    fprintf(output_file, "</search_score_summary>\n");
+    fprintf(output_file, "</peptideprophet_result>\n");
+    fprintf(output_file, "</analysis_result>\n");
+  }
+
+  // close the outer-most tag
   fprintf(output_file, 
           "    </search_hit>\n");
-  
 
   free(peptide_sequence);
 }
