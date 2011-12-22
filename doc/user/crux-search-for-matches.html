@@ -171,6 +171,16 @@ its own file) is required to run the algorithm 'percolator' in a
 subsequent crux run.  Default = 2. </li>
 
 <li>
+<code>--decoys &lt;string&gt;</code> &ndash; Include a decoy version
+of every peptide by shuffling or reversing the target sequence.
+Possible values are <code>none, reverse, protein-shuffle,
+peptide-shuffle</code>. Use 'reverse' to reverse each protein sequence,
+'protein-shuffle' to shuffle each protein sequence, or 'peptide-shuffle'
+to shuffle the sequence between enzyme cleavage sites, leaving the
+termini in place. Use 'none' for no decoys.  Default=protein-shuffle. 
+
+
+<li>
 <code>--decoy-location &lt;target-file | one-decoy-file |
 separate-decoy-files&gt;</code> &ndash; 
 File(s) in which decoy results are returned.  Only applies
@@ -181,6 +191,13 @@ separate file.  Use 'separate-decoy-files' to print one .txt file for
 each decoy set.  (<code>crux percolator</code> accepts up to two
 search.decoy.txt files. <code>crux q-ranker</code> accepts only one
 search.decoy.txt file.) Default = separate-decoy-files.
+
+<li>
+<code>compute-sp &lt;T|F&gt;</code> &ndash;
+Have <code>search-for-matches</code> compute the Sp score for all
+candidate peptides, which is recommended if results are to be analyzed
+by <code>percolator</code> or <code>q-ranker</code>.  
+<code>sequst-search</code> always computes Sp.  Default = F.
 
 <li>
 <code>--compute-p-values &lt;T | F&gt;</code> &ndash
@@ -206,22 +223,10 @@ at each charge state.  With 1, 2, or 3 only spectra with that charge
 will be searched. Default = all.</li>
 
 <LI>
-<code>--min-peaks &lt;int&gt;</code> &ndash;
-The minimum number of peaks a spectrum must have in order to be
-searched.  Default = 20.
-
-<LI>
 <code>--scan-number &lt;number range&gt;</code> &ndash;
 A single scan number or a range of numbers to be searched. Range
 should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.
-
-<li>
-<code>--xcorr-var-bin &lt;T | F&gt;</code> &ndash
-Before calculation of the XCorr score, the m/z axes of the observed
-and theoretical spectra are discretized.  This parameter specifies
-whether to enable the <code>--mz-bin-width</code> and 
-<code>--mz-bin-offset</code> parameters. Default = F.</li>
 
 <li>
 <code>--mz-bin-width &lt;float&gt;</code> Before calculation of the
@@ -253,12 +258,10 @@ info, 60-detailed debug info. Default = 30.</li>
 <B>Parameter file options:</B>
 <ul>
 
-<li>
-<code>compute-sp &lt;T|F&gt;</code> &ndash;
-Have <code>search-for-matches</code> compute the Sp score for all
-candidate peptides, which is recommended if results are to be analyzed
-by <code>percolator</code> or <code>q-ranker</code>.  
-<code>sequst-search</code> always computes Sp.  Default = F.
+<LI>
+<code>--min-peaks &lt;int&gt;</code> &ndash;
+The minimum number of peaks a spectrum must have in order to be
+searched.  Default = 20.
 
 <li>
 <code>fragment-mass &lt;average|mono&gt;</code> &ndash; 

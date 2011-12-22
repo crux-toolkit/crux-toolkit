@@ -7,11 +7,23 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Version 1.37</h2> Month day, 2011
+<h2>Version 1.37</h2> December 22, 2011
 
 <h3>Major enhancements</h3>
 
 <ul>
+<li>
+Added <code>crux barista</code>, a tool for inferring protein
+identifications. 
+
+<li>
+Reimplemented <code>crux q-ranker</code> with new outputs and
+command-line syntax.
+
+<li>
+<code>crux create-index</code> can now now generate and store decoy
+peptides in the index.  Decoys can still be generated on-the-fly when
+searching .fasta files.
 
 </ul>
 
@@ -20,7 +32,7 @@
 <ul>
 
 <li>
-Q-ranker now computes posterior error probabilities.
+Percolator and compute-q-values now compute posterior error probabilities.
 
 <li>
 A pair of options, <code>cterm-fixed</code>
@@ -31,6 +43,23 @@ both termini.
 <li>
 Spectrum processing was changed to include the highest m/z fragment peaks.
 Xcorrs have changed slightly as a result.
+
+<li>
+Simplified the <code>--mz-bin-width</code> and 
+</code>--mz-offset</code> parameters so that <code>--xcorr-var-bin</code>
+is no longer needed for their values to be used.
+
+<li>
+Indexes now store information about any static mods used when they
+were created.
+
+<li>
+In the tab-delimited output files the 'matches/spectrum' column gives
+the number of target peptides compared to the spectrum and the decoy
+file has an additional column, 'decoy matches/spectrum' that gives the
+number of decoy peptides compared to the spectrum.  These two numbers
+may differ when decoys are not generated on-the-fly.
+
 
 </ul>
 <hr>
@@ -149,7 +178,7 @@ Made the <code>pep.xml</code> file header produced by Crux compatible
 with the Transproteomic Pipeline.</li>
 
 <li>
-Introduced several changes to improve performonace on MacOS X.</li>
+Introduced several changes to improve performance on MacOS X.</li>
 
 <li>
 Added an <code>nterm</code> option to the link argument of <code>crux

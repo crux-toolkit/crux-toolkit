@@ -202,7 +202,7 @@ output file names. Default = none.
 </li>
 
 <li>
-<code>--input-MS2 &lt;string&gt;</code> &ndash;
+<code>--input-ms2 &lt;string&gt;</code> &ndash;
 MS2 file corresponding to the PSM file. Required to measure the
 SIN. Ignored for NSAF and EMPAI.
 </li>
@@ -228,6 +228,14 @@ file if false (F). Default = F.</li>
 A file containing command line or additional parameters.  See
 the <a href=parameter-file.html>parameter documentation</a> page for
 details.</li>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages, including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.</li>
 
 </ul>
 <hr>

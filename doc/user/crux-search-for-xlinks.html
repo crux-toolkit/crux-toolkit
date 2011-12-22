@@ -154,6 +154,13 @@ charge state.  With 1, 2, or 3 only spectra with that charge will be
 searched. Default = all. 
 </LI>
 
+<li>
+<code>--compute-sp &lt;T|F&gt;</code> &ndash;
+Have <code>search-for-matches</code> compute the Sp score for all
+candidate peptides, which is recommended if results are to be analyzed
+by <code>percolator</code> or <code>q-ranker</code>.  
+<code>sequst-search</code> always computes Sp.  Default = F.
+
 <LI><code>--parameter-file &lt;filename&gt;</code> &ndash; A file containing
 command-line or additional parameters.  See the <a
 href="parameter-file.html">parameter documentation</a> page for
@@ -177,7 +184,7 @@ precursor window depends upon <code>precursor-window-type</code>. Default = 3.0.
 </li>
 
 <li>
-<code>precursor-window-type &lt;mass|mz|ppm&gt;</code> &ndash; Specify
+<code>--precursor-window-type &lt;mass|mz|ppm&gt;</code> &ndash; Specify
 the units for the window that is used to select peptides around the
 precursor mass location (mass, mz, ppm).  The magnitude of the window
 is defined by the <code>precursor-window</code> option, and candidate peptides must
@@ -238,7 +245,11 @@ Include selfloops in the search. Default = T.
 </li>
 
 <li>
-<code>use-flanking-peaks &lt;T|F&gt;</code> &ndash;
+<code>--xlink-prevents-cleavage &lt;string&gt;</code> &ndash;
+List of amino acids that xlinker can prevent cleavage.
+
+<li>
+<code>--use-flanking-peaks &lt;T|F&gt;</code> &ndash;
 Turn on or off the peaks flanking the b/y ions.  For <code>crux 
 search-for-matches</code>, default = F; for <code>crux
   sequest-search</code>, default = T; for <code> crux
