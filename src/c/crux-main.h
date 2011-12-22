@@ -17,7 +17,6 @@
 #include "q-value.h"
 #include "xlink_search.h"
 #include "PercolatorCInterface.h"
-#include "QRankerCInterface.h"
 #include "SpectralCounts.h"
 #include "analyze_psms.h"
 

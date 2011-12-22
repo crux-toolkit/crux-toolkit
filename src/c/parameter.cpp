@@ -449,13 +449,13 @@ void initialize_parameters(void){
                        "true");
   
   set_int_parameter("missed-cleavages",
-		    0, 0, 500,
-		    "Include peptides with up to n missed cleavage sites. Default=0.",
-		    "Available from command line or parameter file for crux-create-index "
-		    "and crux-generate-peptides.  Parameter file only for crux-search-"
-		    "for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin> "
-		    " includes peptides containing one or more potential cleavage sites.",
-		    "true");	    
+                    0, 0, 500,
+      "Include peptides with up to n missed cleavage sites. Default=0.",
+      "Available from command line or parameter file for crux-create-index "
+      "and crux-generate-peptides.  Parameter file only for crux-search-"
+      "for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin> "
+      " includes peptides containing one or more potential cleavage sites.",
+      "true");   
 
   set_boolean_parameter("unique-peptides", true,
       "Generate peptides only once, even if they appear in more "
@@ -718,10 +718,86 @@ void initialize_parameters(void){
      "<fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.",
      "true");
 
+  // **** q-ranker-barista arguments ****
+  set_string_parameter("database", NULL,
+     "The program requires the FASTA format protein database files against "
+     "which the search was performed. The protein database input may be a "
+     "concatenated database or separate target and decoy databases; the "
+     "latter is supported with the --separate-searches option, described "
+     "below. In either case, Barista distinguishes between target and decoy "
+     "proteins based on the presence of a decoy prefix on the sequence "
+     "identifiers (see the --decoy-prefix option, below). The database can "
+     "be provided in three different ways: (1) as a a single FASTA file "
+     "with suffix \".fa\", \".fsa\" or \".fasta\", (2) as a text file "
+     "containing a list of FASTA files, one per line, or (3) as a directory "
+     "containing multiple FASTA files (identified via the filename suffixes "
+     "\".fa\", \".fsa\" or \".fasta\").", 
+     "argument for barista", "false"); 
+
+  set_string_parameter("spectra", NULL,
+     "The fragmentation spectra must be provided in MS2 format. Like the "
+     "database, the spectra can be specified in three different ways: (1) "
+     "as a single file with suffix \".ms2\", (2) as a text file containing a "
+     "list of MS2 files or (3) as a directory in which all the MS2 files can "
+     "be found.", 
+     "argument for q-ranker and barista", "false");
+  
+  set_string_parameter("search results", NULL,
+     "Q-ranker recognizes search results in SQT format. Like the spectra, the "
+     "search results can be provided as a single file, a list of files or a "
+     "directory of files. Note, however, that the input mode for spectra and "
+     "for search results must be the same; i.e., if you provide a list of "
+     "files for the spectra, then you must also provide a list of files "
+     "containing your search results. When the MS2 files and SQT files are "
+     "provided via a file listing, Q-ranker assumes that the order of the MS2 "
+     "files matches the order of the SQT files. Alternatively, when the MS2 "
+     "files and SQT files are provided via directories, Q-ranker will search "
+     "for pairs of files with the same root name but different extensions "
+     "(\".ms2\" and \".sqt\").", 
+     "argument for q-ranker and barista", "false");
+  
+
   // **** q-ranker options. ****
-  set_boolean_parameter("no-xval", false, 
-      "Turn off cross-validation to select hyperparameters.",
-      "Available for q-ranker.", "true");
+  set_boolean_parameter("skip-cleanup", false, 
+     "Q-ranker analysis begins with a pre-processsing step that creates a "
+     "set of lookup tables which are then used during training. Normally, "
+     "these lookup tables are deleted at the end of the Q-ranker analysis, "
+     "but setting this option to T prevents the deletion of these tables. "
+     "Subsequently, the Q-ranker analysis can be repeated more efficiently "
+     "by specifying the --re-run option. Default = F.", 
+     "Available for q-ranker and barista.", "true");
+
+  set_boolean_parameter("use-spec-features", true, 
+     "Q-ranker uses enriched feature set derived from the spectra in ms2 "
+     "files. It can be forced to use minimal feature set by setting the "
+     "--use-spec-features option to F. Default T.", 
+     "Available for q-ranker and barista.", "true");
+
+  set_string_parameter("decoy-prefix", "rand_",
+     "Specifies the prefix of the protein names that indicates a decoy. "
+     "Default = rand_.",
+     "Available for q-ranker and barista.", "true");
+
+  set_string_parameter("re-run", "__NULL_STR",
+     "Re-run a previous Q-ranker analysis using a previously computed set of"
+     "lookup tables.",
+     "Available for q-ranker and barista.", "true");
+
+  set_string_parameter("separate-searches", "__NULL_STR",
+     "If the target and decoy searches were run separately, rather than" 
+     " using a concatenated database, then Q-ranker will assume that the"
+     "database search results provided as a required argument are from the"
+     "target database search. This option then allows the user to specify"
+     "the location of the decoy search results. Like the required arguments,"
+     "these search results can be provided as a single file, a list of files"
+     "or a directory. However, the choice (file, list or directory) must be"
+     "consistent for the MS2 files and the target and decoy SQT files. Also,"
+     "if the MS2 and SQT files are provided in directories, then Q-ranker"
+     "will use the MS2 filename (foo.ms2) to identify corresponding target"
+     "and decoy SQT files with names like foo*.target.sqt and"
+     "foo*.decoy.sqt. This naming convention allows the target and decoy SQT"
+     "files to reside in the same directory.",
+     "Available for q-ranker and barista.", "true");
 
   /* analyze-matches parameter options */
   set_double_parameter("pi-zero", 1.0, 0, 1, 
@@ -810,7 +886,7 @@ void initialize_parameters(void){
        "Default=none. Can be <string>=none|simple|greedy",
        "Available for spectral-counts.",
        "true");
-		       
+
 
   // ***** static mods *****
   set_double_parameter("A", 0.0, -100, BILLION, 
@@ -960,10 +1036,10 @@ void initialize_parameters(void){
 
   
   set_string_parameter("xlink-prevents-cleavage", "K",
-		       "List of amino acids that xlinker can prevent cleavage",
-		       "Available for search-for-xlinks program (Default=K).",
-		       "false" /*TODO - turn this to true after new
-                                        xlink code is implemented */
+      "List of amino acids that xlinker can prevent cleavage",
+      "Available for search-for-xlinks program (Default=K).",
+      "false" /*TODO - turn this to true after new
+                                      xlink code is implemented */
                         );
 
   set_double_parameter("precursor-window-decoy", 20.0, 0, 1e6, 
@@ -1728,11 +1804,11 @@ bool check_option_type_and_bounds(const char* name){
     break;
   case MEASURE_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found measure type param, value '%s'",
-	 value_str);
+         value_str);
     if (string_to_measure_type(value_str) == MEASURE_INVALID){
       success = false;
       sprintf(die_str, "Illegal measure type '%s' for option '%s'. "
-	      "Must be (NSAF, SIN, EMPAI)", value_str, name);
+              "Must be (NSAF, SIN, EMPAI)", value_str, name);
     }
     break;
   case PARSIMONY_TYPE_P:
@@ -1741,16 +1817,16 @@ bool check_option_type_and_bounds(const char* name){
     if (string_to_parsimony_type(value_str) == PARSIMONY_INVALID){
       success = false;
       sprintf(die_str, "Illegal parsimony type '%s' for option '%s'. "
-	      "Must be (none, simple, greedy)", value_str, name);
+              "Must be (none, simple, greedy)", value_str, name);
     }
     break;
   case QUANT_LEVEL_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found quant level type param, value");// '%s'",
-    //	 value_str);
+    //value_str);
     if (string_to_quant_level_type(value_str) == QUANT_LEVEL_INVALID){
       success = false;
       sprintf(die_str, "Illegal quantitation level type '%s' for option '%s'. "
-	      "Must be (peptide, protein)", value_str, name);
+              "Must be (peptide, protein)", value_str, name);
     }
     break;
   case DECOY_TYPE_P:
@@ -1758,7 +1834,7 @@ bool check_option_type_and_bounds(const char* name){
     if (string_to_decoy_type(value_str) == INVALID_DECOY_TYPE){
       success = false;
       sprintf(die_str, "Illegal decoy type '%s' for option '%s'. "
-	      "Must be one of none, reverse, protein-shuffle, peptide-shuffle",
+              "Must be one of none, reverse, protein-shuffle, peptide-shuffle",
               value_str, name);
     }
     break;

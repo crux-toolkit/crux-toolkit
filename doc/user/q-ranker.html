@@ -7,13 +7,6 @@
 
 <H1 ALIGN=CENTER>crux q-ranker</H1>
 
-<p>
-<b>Usage:</b></p>
-
-<blockquote>
-<code>crux q-ranker [options] &lt;protein&nbsp;database&gt; 
-   &lt;search results directory&gt;</code>
-</blockquote>
 
 <p>
 <b>Description:</b></p>
@@ -30,70 +23,103 @@ proteomics data sets."</a>  <i>Journal of Proteome Research.</i>
 8(7):3737-3745, 2009.
 </blockquote>
 
-<!--
 <p>
-FIXME: Insert description of algorithm here.</p>
--->
+<b>Usage:</b></p>
+
+<blockquote>
+<code>crux q-ranker [options]
+  &lt;spectra&gt; &lt;search&nbsp;results&gt;</code>
+</blockquote>
+
 
 <p>
-The features used by q-ranker to represent each PSM are summarized
-<a href="features.html">here</a>.</p>
-
-<p>
-<b>Input:</b></p>
+<b>Required Input:</b></p>
 
 <ul>
 
-<LI>
-&lt;protein input &gt; &ndash; 
-The name of the file in fasta format or the directory containing the
-protein index from which to retrieve proteins and peptides.</li>
+<li>
+<b>spectra</b> &ndash; The fragmentation spectra must be provided
+in <a href="ms2-format.html">MS2 format</a>.  Like the database, the
+spectra can be specified in three different ways: (1) as a single file
+with suffix ".ms2", (2) as a text file containing a list of MS2 files
+or (3) as a directory in which all the MS2 files can be found.</li>
+
 
 <li>
-&lt;search results directory&gt; &ndash; A folder in which all the PSM
-result files are located.  The program looks for files produced by 
-<code>crux search-for-matches</code> (ending in
-'<code>.search.target.txt</code>' or '<code>.search.decoy.txt</code>')
-or by <code>crux sequest-search</code> (ending in
-'<code>.sequest.target.txt</code>' or
-'<code>.sequest.decoy.txt</code>').  All such files in the given
-directory are analyzed jointly.  Note that the directory should not
-contain results from both types of search algorithms.</li>
+<b>search results</b> &ndash; Q-ranker recognizes search results
+in <a href="sqt-format.html">SQT format</a>.  Like the spectra, the
+search results can be provided as a single file, a list of files or a
+directory of files.  Note, however, that the input mode for spectra
+and for search results must be the same; i.e., if you provide a list
+of files for the spectra, then you must also provide a list of files
+containing your search results.  When the MS2 files and SQT files are
+provided via a file listing, Q-ranker assumes that the order of the MS2
+files matches the order of the SQT files.  Alternatively, when the MS2
+files and SQT files are provided via directories, Q-ranker will search
+for pairs of files with the same root name but different extensions
+(".ms2" and ".sqt").</li>
 
 </ul>
-<b>Output:</b>
-<ul>
-  The program writes files to the folder <code>crux-output</code> by default.
-The name of the output folder can be set by the user using the <code>--output-dir</code> option.
-The following files will be created:</p>
 
-<li>
-<b>qranker.params.txt</b>:
-a file containing the name and value of all parameters/options for the current operation.  
-Not all parameters in the file may have been used in the operation.  
-The resulting file can be used with the <code>--parameter-file</code>
-option for other crux programs.
+<B>Output:</B>
+
+<UL>
+<p>
+The program writes files to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option.  The following files will be
+created:</p>
+
 </li>
 
 <li>
-<b>qranker.target.txt</b>: a tab-delimited text file containing the PSMs.
-See <a href="txt-format.html">txt file format</a> for a list of the
-fields.</li>
-
-<li>
-<b>qranker.target.pep.xml</b>: a file containing the PSMs in pepxml format. See
-<a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
-pep xml file format</a> for further reference. This file can be used as input 
-to some of the tools in the 
-<a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
-Transproteomic Pipeline</a>.
+ <b> qranker_output.xml </b>: An xml file containing ranked list of target peptide-spectrum matches. The
+ following entries are included:
+<ol>
+<li>scan: the scan number</li>
+<li>charge: the inferred charge state</li>
+<li> psm_id: PSM identifier. </li>
+<li>q-value: The minimal PSM-level false discovery rate at which this
+  PSM is deemed significant.  This q-value is computed based on the
+  ranking of the PSMs induced by the Barista score.</li>
+<li>score: The score assigned to the PSM by Barista.  Higher
+  values correspond to more confident identifications.</code>
+<li> precursor_mass: precrusor mass as recorded during the MS1 scan </li>
+<li>peptide: the peptide sequence</li>
+<li>filename: name of the file in which the PSM appears</li>
+</ol>
 </li>
 
 <li>
-<b>qranker.log.txt</b>: a log file containing a copy of all messages that were
-printed to stderr.
+<b>qranker.target.psm.txt</b>: a tab-delimited file containing a
+ranked list of target peptide-spectrum matches with the associated
+Q-ranker scores and q-values.  The following columns are included:
+<ol>
+<li>q-value: The minimal PSM-level false discovery rate at which this
+  PSM is deemed significant.  This q-value is computed based on the
+  ranking of the PSMs induced by the Q-ranker score.</li>
+<li>q-ranker score: The score assigned to the PSM by Q-ranker.  Higher
+  values correspond to more confident identifications.</code>
+<li>scan: the scan number</li>
+<li>charge: the inferred charge state</li>
+<li>peptide: the peptide sequence</li>
+<li>filename: name of the file in which the PSM appears</li>
+</ol>
 </li>
+
+
+<li>
+<b>qranker.log.txt</b>: a file where the program reports its progress. 
+</li>
+
+<li>
+<b>qranker.params.txt</b>: a file with the values of all the options
+given to the current run.
+</li>
+
+
 </ul>
+
 
 
 <b>Options:</b>
@@ -101,59 +127,165 @@ printed to stderr.
 <ul>
 
 <li>
-<code>-pi-zero &lt;value&gt;</code> &ndash;
-The estimated proportion of target scores that are drawn according to
-the null distribution.  Default=1.0.</li>
+<code>--enzyme trypsin|chymotrypsin|elastase</code> &ndash; The enzyme
+used to digest the proteins in the experiment.  Default =
+trypsin.</li>
 
 <li>
-<code>--fileroot &lt;string&gt;</code> &ndash; 
+<code>--decoy-prefix &lt;string&gt;</code> &ndash; specifies the
+prefix of the protein names that indicates a decoy. Default = rand_.
+</li>
+
+<li>
+<code>--separate-searches &lt;search&nbsp;results&gt;</code> &ndash;
+If the target and decoy searches were run separately, rather than
+using a concatenated database, then Q-ranker will assume that the
+database search results provided as a required argument are from the
+target database search.  This option then allows the user to specify
+the location of the decoy search results.  Like the required
+arguments, these search results can be provided as a single file, a
+list of files or a directory.  However, the choice (file, list or
+directory) must be consistent for the MS2 files and the target and
+decoy SQT files.  Also, if the MS2 and SQT files are provided in
+directories, then Q-ranker will use the MS2 filename
+(<code>foo.ms2</code>) to identify corresponding target and decoy SQT
+files with names like <code>foo*.target.sqt</code>
+and <code>foo*.decoy.sqt</code>.  This naming convention allows the
+target and decoy SQT files to reside in the same directory.</li>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash;
 The <code>fileroot</code> string will be added as a prefix to all
 output file names. Default = none.</li>
 
 <li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; 
+<code>--output-dir &lt;directory&gt;</code> &ndash; 
 The name of the directory where output files will be created.
 Default = crux-output.</li>
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> &ndash;
-Replace existing files if true (T) or fail when trying to overwrite a
-file if false (F). Default =  F.
-
-<LI>
-<code>--parameter-file &lt;filename&gt;</code> &ndash;
-A file containing command-line or additional parameters.  See the <a
-href=parameter-file.html>parameter documentation</a> page for
-details.</li>
+<code>--overwrite &lt;T/F&gt;</code> &ndash; The option applies to the
+situation when the output directory specified for the run already
+exists. If set to T, Q-ranker will overwrite the contents of the
+output directory specified for the run. Default = F.</li>
 
 <li>
-<code>--no-xval</code> &ndash; By default, q-ranker selects two
-training parameters, the learning rate and the weight decay, via
-cross-validation within the training set.  This option turns off the
-cross-validation, leaving the parameters at their default values.</li>
-
-<LI> 
-<code>--feature-file &lt;string&gt;</code> &ndash; 
-Optional file in which to write the features. The features appear in
-the following order: xcorr, deltaCn, lnDeltaCn, Sp, logSp, deltaMass,
-abs(deltaMass), neutral mass, percent b/y ions matched, log(#
-candidates), UNUSED, UNUSED, missed cleavages, peptide length, charge
-= +1, charge = +2, charge = +3.  Default = none.</li>
-
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; 
-Specify the verbosity of the current processes. Each level prints the
-following messages, including all those at lower verbosity levels:
-0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
-the progress of execution, 40-more progress information, 50-debug
-info, 60-detailed debug info. Default = 30.
+<code>--skip-cleanup &lt;T/F&gt;</code> &ndash; Q-ranker analysis
+begins with a pre-processsing step that creates a set of lookup tables
+which are then used during training. Normally, these lookup tables are
+deleted at the end of the Q-ranker analysis, but setting this option
+to <code>T</code> prevents the deletion of these tables.
+Subsequently, the Q-ranker analysis can be repeated more efficiently by
+specifying the <code>--re-run</code> option (see below). Default =
+F.</li>
 
 <li>
-<code>--version T</code> &ndash;
-Print the version number and quit.  Please note that you must include
-the 'T' after --version.
+<code>--re-run &lt;directory&gt;</code> &ndash; Re-run a previous
+Q-ranker analysis using a previously computed set of lookup tables.
+For this option to work, the <code>--skip-cleanup</code> must have
+been set to true when Q-ranker was run the first time.</li>
+
+<li>
+<code>--use-spec-features &lt;T/F&gt;</code> &ndash; Q-ranker uses
+enriched feature set derived from the spectra in ms2 files. It can be
+forced to use minimal feature set by setting the --use-spec-features
+option to F. Default T. </li>
+
+<li><code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command-line or additional parameters.  See
+the <a href="parameter-file.html">parameter documentation</a> page
+for details.  Default = no parameter file.</li>
+
 
 </ul>
+
+</ul>
+
+<p>
+<b>Selected Examples of Use:</b></p>
+
+<ul>
+
+<li> 
+<b> Search was done against concatenated target-decoy database. </b>
+
+<ol>
+  <li> To analyse single files, with decoy prefix random_ (the
+  default for the decoy prefix is set to decoy_). The output is in
+  the directory crux-output by default:
+    <br> <br>
+    <code> crux q-ranker --decoy-prefix random_ spectra.ms2 matches.sqt </code>
+    <br><br>
+  </li>
+
+  <li> Assume that directory spectra-dir contains 10 ms2 files, and
+  directory matches-dir constains the 10 sqt files, corresponding to
+  searches against a single target-decoy database, with decoy prefix
+  reverse_. To analyse lists of ms2 and sqt files in the directores,
+  overwriting previous results:
+    <br> <br>
+    <code> crux q-ranker --decoy-prefix reverse_ --overwrite T spectra-list.txt matches-list.txt </code>
+    <br><br>
+  </li>
+
+  <li> To specify directories with ms2 and sqt files, and the output directory called results-dir: 
+    <br> <br>
+    <code> crux q-ranker --decoy-prefix reverse_ --output-dir results-dir spectra-dir matches-dir </code>
+    <br><br>
+  </li>
+  
+  <li> Q-ranker uses reach feature set by default. When analysing large dataset, it
+  may be desirable to speed up the feature extraction step and to revert to
+  minimal feature set:
+    <br> <br>
+    <code> crux q-ranker --decoy-prefix reverse_ --output-dir results --overwrite T --use-spec-features F spectra-list.txt matches-list.txt </code>
+    <br><br>
+  </li>
+  
+</ol>
+</li>
+
+<li> <b> Separate searches were done against target and decoy databases. </b>
+<br>
+The searches against the target database are provided as the required
+&lt search results &gt argument. To specify the searches against the decoy
+database, use --separate-searches option.
+
+<ol>
+<li> To analyse a single ms2 file and sqt files matches-target.sqt and matches-decoy.sqt:
+    <br> <br>
+    <code> crux q-ranker --decoy-prefix random_ --use-separate-searches matches-decoy.sqt spectra.ms2 matches-target.sqt </code>
+    <br><br>
+</li>
+
+<li> If ms2 files are in spectra-dir directory, sqt files are in matches-target-dir and matches-decoy-dir:
+    <br> <br>
+    <code> crux q-ranker --decoy-prefix random_ --use-separate-searches matches-decoy-dir spectra-dir matches-target-dir </code>
+    <br><br>
+</li>
+
+<li> If ms2 files are listed in spectra-list.txt, sqt files are listed in matches-target-list.txt and matches-decoy-list.txt:
+    <br> <br>
+    <code> crux q-ranker --decoy-prefix random_ --use-separate-searches matches-decoy-list.txt spectra-list.txt matches-target-list.txt </code>
+    <br><br>
+</li>
+</ol>
+</li>
+
+<li> <b> Running Q-ranker with Crux database search </b>
+
+<ol>
+<li>
+Please use crux sequest-search because it produces database search
+results in the sqt format, compatible with q-ranker input. (see
+<a href="crux-sequest-search.html"> sequest-search</a>).
+</li>
+</ol>
+
+</li>
+
+</ul>
+
 
 
 <hr></hr>

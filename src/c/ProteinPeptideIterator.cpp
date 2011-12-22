@@ -241,9 +241,9 @@ void ProteinPeptideIterator::selectPeptides(
          cterm_idx < cterm_num_cleavages; cterm_idx++){
 
       if ((*cumulative_cleavages_)[cterm_allowed_cleavages[cterm_idx]-1] - \
-	  (*cumulative_cleavages_)[nterm_allowed_cleavages[nterm_idx]] \
-	  > int_num_skip_cleavages) {
-	break;
+          (*cumulative_cleavages_)[nterm_allowed_cleavages[nterm_idx]]  \
+          > int_num_skip_cleavages) {
+        break;
       }
       if (cterm_allowed_cleavages[cterm_idx] 
           <= nterm_allowed_cleavages[nterm_idx]){

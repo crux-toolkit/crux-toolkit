@@ -43,11 +43,16 @@ instead of the fasta file to speed up the search.</blockquote>
 <UL>
 
 <p>
-The program writes three types of files to the specified output
+The program writes four types of files to the specified output
 directory: binary index files, a binary sequence file, and a text file
-with settings.  The binary sequence file will be have the same name as
-the input fasta file, but ending with '<code>binary_fasta</code>'.
-The text file is named '<code>README</code>'.</p>
+with settings, a fasta file with decoy protein sequences to be used
+during search.  The binary sequence file will have the same name as
+the input fasta file, but ending with '<code>binary_fasta</code>'. The
+fasta file with decoy protein sequences will have the same name is the
+input fasta file, with ending '<code>-random.fasta</code> if the
+random shuffling is used and '<code>-reverse.fasta</code> if the
+protein sequences are reversed (see options below).  The text file is
+named '<code>README</code>'.</p>
 
 </UL>
 <B>Options:</B>

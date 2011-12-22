@@ -174,6 +174,7 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   case QVALUE_COMMAND:       ///< compute-q-values
   case PERCOLATOR_COMMAND:
   case QRANKER_COMMAND:
+  case BARISTA_COMMAND:
     carp(CARP_FATAL, 
          "Post-search command %s requires a list of columns to print.",
          application->getName().c_str());
@@ -316,6 +317,10 @@ void MatchFileWriter::addColumnNames
     addColumnName(QRANKER_SCORE_COL);
     addColumnName(QRANKER_QVALUE_COL);
     addColumnName(QRANKER_PEP_COL);
+    break;
+
+  case BARISTA_COMMAND:
+    // place holder
     break;
   }
 

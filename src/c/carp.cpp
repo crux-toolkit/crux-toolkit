@@ -149,8 +149,8 @@ void warn_once(const char * msg1, const char * msg2_format, ...) {
       HASH_T * temp = new_hash(hash_size_);
       HASH_ITERATOR_T * it = new_hash_iterator(messages_);
       while (hash_iterator_has_next(it)) {
-	char * key = hash_iterator_next(it);
-	add_hash(temp, key, key);
+        char * key = hash_iterator_next(it);
+        add_hash(temp, key, key);
       }
       free_hash_iterator(it);
       free_hash(messages_);

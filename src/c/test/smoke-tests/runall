@@ -6,12 +6,13 @@ chmod 774 crux-test.pl
 # Make a soft link for some inscrutable reason.
 ln -fs test.fasta existing.fasta
 
+# Remove any lingering output files.
+./clean.sh
+
 # Create an index, if it doesn't already exist.
 ulimit -n 1024
 ../../crux create-index  --parameter-file params/mods-sequest --verbosity 0 for-sequest-comparison.fasta index-for-sequest-comparison
-
-# Remove any lingering output files.
-./clean.sh
+../../crux create-index --parameter-file params/set_rand_seed --verbosity 0 --decoys peptide-shuffle small-yeast.fasta yeast-index
 
 # Run the actual tests.
 # N.B. Add a "-u" option to this line to update all of the output files.

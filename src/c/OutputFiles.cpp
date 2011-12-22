@@ -608,7 +608,7 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
       MetaProtein metaProtein = proteinToMeta[protein];
       int rank = -1;
       if (metaToRank.find(metaProtein) != metaToRank.end()){
-	rank = metaToRank[metaProtein];
+        rank = metaToRank[metaProtein];
       } 
       file->setColumnCurrentRow(PARSIMONY_RANK_COL, rank);
     }

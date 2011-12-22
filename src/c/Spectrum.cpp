@@ -291,7 +291,7 @@ void Spectrum::printSqt(
   // copy each peak
   for(int peak_idx=0; peak_idx < (int)old_spectrum.peaks_.size(); ++peak_idx){
     this->addPeak(old_spectrum.peaks_[peak_idx]->getIntensity(),
-		  old_spectrum.peaks_[peak_idx]->getLocation());
+                  old_spectrum.peaks_[peak_idx]->getLocation());
   }
 
   /*  Should we do this??

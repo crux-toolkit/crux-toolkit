@@ -1693,7 +1693,7 @@ bool Peptide::serialize(
   if (text_file != NULL) {
     fprintf(text_file, "%s %.5f\n", 
             getModifiedSequenceWithSymbols(),
-	    getPeptideMass());
+            getPeptideMass());
   }
 
   return true;

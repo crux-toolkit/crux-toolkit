@@ -180,8 +180,8 @@ static const char* parsimony_type_strings[NUMBER_PARSIMONY_TYPES] =
 
 PARSIMONY_TYPE_T string_to_parsimony_type(char* name){
   int parsimony_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
-					    parsimony_type_strings,
-					    NUMBER_PARSIMONY_TYPES);
+                                            parsimony_type_strings,
+                                            NUMBER_PARSIMONY_TYPES);
   if ( parsimony_int < 0 ){
     parsimony_int = 0;
   }
