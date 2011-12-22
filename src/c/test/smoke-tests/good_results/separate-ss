@@ -5030,10 +5030,6 @@ pi-zero=1.000000
 # crux compute-q-values, and crux q-ranker.
 fileroot=separate
 
-# Turn off cross-validation to select hyperparameters.
-# Available for q-ranker.
-no-xval=false
-
 # Sort in ascending order.  Otherwise, descending. Default: True.
 # Available for sort-by-column
 ascending=true
@@ -5042,6 +5038,22 @@ ascending=true
 # Available for search-for-matches.  Sp scoring is always done for
 # sequest-search.
 compute-sp=false
+
+# If the target and decoy searches were run separately, rather than
+# using a concatenated database, then Q-ranker will assume that
+# thedatabase search results provided as a required argument are from
+# thetarget database search. This option then allows the user to
+# specifythe location of the decoy search results. Like the required
+# arguments,these search results can be provided as a single file, a
+# list of filesor a directory. However, the choice (file, list or
+# directory) must beconsistent for the MS2 files and the target and
+# decoy SQT files. Also,if the MS2 and SQT files are provided in
+# directories, then Q-rankerwill use the MS2 filename (foo.ms2) to
+# identify corresponding targetand decoy SQT files with names like
+# foo*.target.sqt andfoo*.decoy.sqt. This naming convention allows the
+# target and decoy SQTfiles to reside in the same directory.
+# Available for q-ranker and barista.
+separate-searches=__NULL_STR
 
 # Set level of output to stderr (0-100).  Default=30.
 # Available for all crux programs.  Each level prints the following
@@ -5114,6 +5126,11 @@ search-decoy-pvalue-file=search.decoy.p.txt
 # Available for crux search-for-xlinks. 
 precursor-window-decoy=20.000000
 
+# Re-run a previous Q-ranker analysis using a previously computed set
+# oflookup tables.
+# Available for q-ranker and barista.
+re-run=__NULL_STR
+
 # Print the header line of the tsv file. Default=T.
 # Available for crux extract-columns and extract-rows
 header=true
@@ -5143,6 +5160,15 @@ max-length=50
 # crux-genereate-peptides. Returns one line per peptide when true or one
 # line per peptide per protein occurence when false.  
 unique-peptides=true
+
+# Q-ranker analysis begins with a pre-processsing step that creates a
+# set of lookup tables which are then used during training. Normally,
+# these lookup tables are deleted at the end of the Q-ranker analysis,
+# but setting this option to T prevents the deletion of these tables.
+# Subsequently, the Q-ranker analysis can be repeated more efficiently
+# by specifying the --re-run option. Default = F.
+# Available for q-ranker and barista.
+skip-cleanup=false
 
 # Predict ions up to max charge state (1,2,...,6) or up to the charge
 # state of the peptide (peptide).  If the max-ion-charge is greater than
@@ -5187,6 +5213,12 @@ threshold=0.010000
 # Available from parameter file for crux sequest-search and
 # search-for-matches.
 nmod-fixed=NO MODS
+
+# Q-ranker uses enriched feature set derived from the spectra in ms2
+# files. It can be forced to use minimal feature set by setting the
+# --use-spec-features option to F. Default T.
+# Available for q-ranker and barista.
+use-spec-features=true
 
 # Specify a fixed modification to apply to the C-terminus of peptides.
 # Available from parameter file for crux sequest-search and
@@ -5245,6 +5277,11 @@ spectrum-max-mass=1000000000.000000
 # Include linear peptides in the database.  Default=T.
 # Available for crux search-for-xlinks program (Default=T).
 xlink-include-linears=true
+
+# Specifies the prefix of the protein names that indicates a decoy.
+# Default = rand_.
+# Available for q-ranker and barista.
+decoy-prefix=rand_
 
 # Include a decoy version of every peptide by shuffling or reversing the
 # target sequence. 

@@ -1,6 +1,6 @@
 distdir = $(PACKAGE)_$(VERSION)
 
-SUBDIRS = ArrayLibrary MSToolkit percolator q-ranker xlink posterior-error .
+SUBDIRS = ArrayLibrary MSToolkit percolator xlink posterior-error qranker-barista .
 
 # Crux can use either single or double precision floating poinnt.
 if USEDOUBLES
@@ -147,8 +147,6 @@ LIBFILES= \
   ProteinIndex.h \
   ProteinIndexIterator.cpp \
   ProteinIndexIterator.h \
-  QRanker.cpp \
-  QRanker.h \
   q-value.cpp \
   q-value.h \
   SearchProgress.h \
@@ -183,7 +181,7 @@ libcrux_la_CFLAGS = \
   $(AM_CFLAGS) \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/percolator/ \
-  -I$(top_srcdir)/src/c/q-ranker/ \
+  -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/
 
 libcrux_la_CXXFLAGS = \
@@ -191,7 +189,7 @@ libcrux_la_CXXFLAGS = \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/MSToolkit/RAMP \
   -I$(top_srcdir)/src/c/percolator/ \
-  -I$(top_srcdir)/src/c/q-ranker/ \
+  -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/ \
   -I$(top_srcdir)/src/external/
 
@@ -230,9 +228,10 @@ crux_CXXFLAGS = \
   -DMAIN \
   -I$(top_srcdir)/src/c/MSToolkit \
   -I$(top_srcdir)/src/c/percolator \
-  -I$(top_srcdir)/src/c/q-ranker \
   -I$(top_srcdir)/src/c/posterior-error \
-  -I$(top_srcdir)/src/c/xlink
+  -I$(top_srcdir)/src/c/xlink \
+  -I$(top_srcdir)/src/c/qranker-barista
+
 crux_LDADD = \
   $(AM_LDFLAGS) \
   -L$(top_builddir)/src/c/xlink \
@@ -242,11 +241,12 @@ crux_LDADD = \
   -L$(top_builddir)/src/c/ArrayLibrary \
   -L$(top_builddir)/src/c/MSToolkit \
   -L$(top_builddir)/src/c/percolator \
-  -L$(top_builddir)/src/c/q-ranker \
+  -L$(top_builddir)/src/c/posterior-error \
+  -L$(top_builddir)/src/c/qranker-barista \
   -L$(top_builddir)/src/c/posterior-error \
   -lm \
   -lpercolator \
-  -lqranker \
+  -lqranker_barista \
   -lpep \
   -lmstoolkit \
   -lArrayLibrary

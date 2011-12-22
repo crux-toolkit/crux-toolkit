@@ -271,7 +271,7 @@ int MS2SpectrumCollection::matchFirstScanLine(
   )
 {
   
-  char *spliced_line = new char[buf_length];
+  char* spliced_line = new char[buf_length];
   int line_index = 0;
   int spliced_line_index = 0;
   int first_scan;
@@ -337,6 +337,9 @@ int MS2SpectrumCollection::matchFirstScanLine(
       line
     );
   }
+
+  delete [] spliced_line ;
+
   if(first_scan == query_first_scan){
     return 0;
   }

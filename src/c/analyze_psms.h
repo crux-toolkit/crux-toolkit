@@ -10,7 +10,6 @@
 #include "OutputFiles.h"
 #include "q-value.h"
 #include "PercolatorCInterface.h"
-#include "QRankerCInterface.h"
 
 /**
  * \brief Takes a directory containing PSM files and a protein index
@@ -32,8 +31,7 @@ void analyze_matches_main(
  * \returns a pointer to a MatchCollection object
  * \callgraph
  */
-MatchCollection* run_percolator_or_qranker(
-  COMMAND_T command,                                          
+MatchCollection* run_percolator(
   char* input_directory, 
   char* fasta_file, 
   OutputFiles& output);

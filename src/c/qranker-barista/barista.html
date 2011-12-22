@@ -1,0 +1,215 @@
+<html>
+<title>crux barista</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<H1 ALIGN=CENTER>crux barista</H1>
+
+
+<p>
+<b>Description:</b></p>
+
+<p>
+Barista is a protein identification algorithm that combines two
+different tasks&mdash;peptide-spectrum match (PSM) verification and
+protein inference&mdash;into a single learning algorithm.  The program
+requires two inputs: the results of a database search and a database
+of proteins.  Barista produces as output a ranking of proteins based
+on how likely they are to be present in the sample.  Barista also
+re-ranks the peptide identifications to more accurately distinguish
+between correct and incorrect identifications.  Barista uses a machine
+learning strategy that requires that the database search be carried
+out on target and decoy proteins.</p>
+
+<p>
+<b>Usage:</b></p>
+
+<blockquote>
+<code>crux barista [options] &lt;protein&nbsp;database&nbsp;folder&gt; &lt;sqt folder&gt; &lt;ms2 folder&gt;</p> 
+<code>crux barista [options] &lt;list&nbsp;of&nbsp;protein&nbsp;database&nbsp;files&gt;&nbsp;&lt;list&nbsp;of&nbsp;sqt&nbsp;files&gt;&nbsp;&lt;list&nbsp;of&nbsp;ms2&nbsp;files&gt; </p> 
+<code>crux barista [options] &lt;protein&nbsp;database&nbsp;file&gt;&nbsp;&lt;sqt&nbsp;file&gt;&nbsp;&lt;ms2&nbsp;file&gt; 
+
+</code>
+</blockquote>
+
+
+<p>
+<b>Required Input:</b></p>
+
+<ul>
+
+<li>
+protein database &ndash; The program requires the protein database
+files against which the search was performed. The protein database
+input may be a concatenated database or separate target and decoy
+databases. However, in both cases, the program distinguishes between
+target and decoy proteins based on the decoy prefix. There is an
+option to specify the prefix to the protein name that indicates a
+decoy, the default is "random_".
+   
+</p>
+The format of the input can be a directory containing the database
+files, a text file with a list of protein database files or a single
+database file.  If the protein database input contains suffix "fasta",
+the program assumes a single-file input. Otherwise it checks whether
+the input is a directory or a text file.
+</li>
+</p>
+<li>
+psm input &ndash; Barista recognizes sqt format for psm input. The psm
+input can be specified as a single file with suffix "sqt" and should
+be accompanied by the corresponding ms2 file as a third required
+argument. Alternatively, psm input can be given as a text file containing
+the list of all the "sqt" files and should be accompanied by the text
+file with the list of the corresponding ms2 files as a third required
+argument. 
+</p>
+Finally, the psm input can be specified as a directory in which all
+the database search results are located. In this case, the program
+collects all the files with prefix "sqt" contained in the directory and
+analyses them jointly. As it finds each sqt file, it simultaneously
+searches the ms2 input directory for an ms2 file with the same name,
+but with the suffix "sqt" replaced with suffix the "ms2".
+
+</p>
+The multiple files can be results of many different experiments or of
+multiple duplicate runs. They can also be the result of separate
+target and decoy searches.  All such files in the given directory are
+analyzed jointly.
+</p>
+<li>
+ms2 input &ndash; The ms2 input can be specified as a single file with
+suffix "ms2" and as a text file containing the list of all the ms2
+files and or as a directory where all the ms2 files corresponding to
+the psm input in the second argument can be found.
+
+</ul>
+
+<B>Output:</B>
+
+<UL>
+<p>
+The program writes files to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option.  The following files will be
+created:</p>
+
+<li>
+<b>barista.target.html</b>: an HTML file that summarizes the protein
+ranking in a human-readable format.  Sets of indistinguishable
+proteins are grouped together, and their IDs are printed along with
+the Barista q-value.  Along with each protein group is a list of the
+corresponding peptides. The information about each peptide includes its
+amino acid sequence, scan and charge of the peptide, its position in
+the protein, the q-value and score assigned by Barista. Following is a
+portion of a sample output file, showing the identification of a pair
+of proteins:</li>
+
+<hr></hr>
+
+<p>
+<table cellpadding="10">
+
+<tr><td><b>q-value</b></td><td><b>score</b></td><td><b>ID</b></td>
+<td><b>Peptides</b></td><td><b>Matched</b></td>
+<td><b>Description</b></td></tr>
+
+<tr><td>0.001</td><td>1.25</td><td>foo</td><td>12</td><td>3</td>
+<td>Phosphotyrosine glutamate transporter</td></tr>
+<tr><td></td><td></td><td>foobar</td><td>7</td><td>3</td>
+<td>Phosphotyrosine glutamate transporter (N-terminal domain)</td></tr>
+</table>
+
+<ul>
+<table cellpadding="5" border="1">
+<tr><td>EAMPK</td><td>scan=000230</td><td>charge=2</td><td>20-24</td><td>q=0.07</td><td>score=1.27</td></tr>
+<tr><td>YRMLK</td><td>scan=004870</td><td>charge=2</td><td>27-31</td><td>q=0.09</td><td>score=1.05</td></tr>
+<tr><td>NLMMRPPK</td><td>scan=006790</td><td>charge=3</td><td>54-61</td><td>q=0.59</td><td>score=-0.09</td></tr>
+</table>
+</ul>
+
+<hr></hr>
+
+<li>
+<b>barista.target.proteins.txt</b>: a tab-delimited file containing a
+ranked list of groups of indistinguishable target proteins with
+associated Barista scores and q-values and with peptides that
+contributed to the identification of the protein group).  The
+following columns are included: proteins in group, Barista score,
+decoy q-value, peptides with scan and charge (for example,
+EAMPK-001285.2).  The semantics of these columns are explained
+in <a href="txt-format.html">this document</a>.</li>
+
+<li>
+<b>barista.target.peptides.txt</b>: a tab-delimited file containing a
+ranked list of target peptides with the associated Barista scores and
+q-values.  The following columns are included: peptide, scan of
+spectrum in the peptide-spectrum match, charge of spectrum in the
+peptide-spectrum match, Barista score, decoy q-value.  The semantics
+of these columns are explained in <a href="txt-format.html">this
+document</a>.</li>
+
+<li>
+<b>barista.target.psm.txt</b>: a tab-delimited file containing a
+ranked list of target peptide-spectrum matches with the associated
+Barista scores and q-values.  The following columns are included: scan
+of spectrum in the peptide-spectrum match, charge of spectrum in the
+peptide-spectrum match, peptide in the peptide-spectrum match, Barista
+score, decoy q-value, the filename where each psm was found.  The
+semantics of these columns are explained
+in <a href="txt-format.html">this document</a>.</li>
+
+</ul>
+
+<b>Options:</b>
+
+<ul>
+
+<li>
+<code>--enzyme trypsin|chymotrypsin|elastase</code> &ndash; The enzyme
+used to digest the proteins in the experiment.  Default =
+trypsin.</li>
+
+<li>
+<code>--decoy-prefix &lt;string&gt;</code> &ndash; specifies the
+prefix of the protein names that indicates a decoy.
+</li>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.
+</li>
+
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.
+</li>
+
+<li>
+<code>--skip-cleanup &lt;T/F&gt;</code> &ndash; Barista analysis
+consists of preprocessing data and creating lookup tables which are
+then used during training. This option allows keeping the tables after
+the analysis and doing training directly by specifying the
+--dir-with-tables option (see below). Default = F.
+</li>
+
+
+<li>
+<code>--dir-with-tables &lt;filename&gt;</code> &ndash; The name of
+the directory where the lookup tables with preprocessed data are
+located. Default = none.
+</li>
+
+
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
+</body>
+</html>

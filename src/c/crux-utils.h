@@ -422,7 +422,7 @@ int get_last_in_range_string(const char* range_string);
  * charged.
  */
 int choose_charge(FLOAT_T precursor_mz,         ///< m/z of spectrum precursor ion
-		  vector<Peak*>& peaks); ///< array of spectrum peaks
+                  vector<Peak*>& peaks); ///< array of spectrum peaks
 
 /**
  *\brief Extend a given string with lines not exceeding a specified width, 

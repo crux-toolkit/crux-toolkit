@@ -518,6 +518,7 @@ enum _command {
   PERCOLATOR_COMMAND,   ///< percolator
   SPECTRAL_COUNTS_COMMAND, ///< spectral counts
   QRANKER_COMMAND,      ///< q-ranker
+  BARISTA_COMMAND,      ///< barista
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
   XLINK_SEARCH_COMMAND, ///< search-for-xlinks
   VERSION_COMMAND,      ///< just print the version number
