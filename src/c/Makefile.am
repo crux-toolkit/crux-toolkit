@@ -174,7 +174,8 @@ LIBFILES= \
   utils.h \
   version.h \
   xlink_search.h \
-  xlink_compute_qvalues.h
+  xlink_compute_qvalues.h \
+  WinCrux.h
 
 noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = \

@@ -153,7 +153,7 @@ ostream & operator >>(ostream & os, Array<T> & rhs);
 
 #include "Set.h"
 
-#include "Array.cpp"
+#include "Array.formerly-cpp.h"
 
 #endif
 

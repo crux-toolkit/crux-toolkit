@@ -1,5 +1,7 @@
       
 libpep_la_SOURCES = \
+  Array.h \
+  Array.formerly-cpp.h \
   BaseSpline.cpp \
   BaseSpline.h \
   LogisticRegression.cpp \
@@ -14,6 +16,8 @@ libpep_la_SOURCES = \
   PosteriorEstimator.h \
   Set.cpp \
   Set.h \
+  Streamable.h \
+  Transform.h \
   Vector.cpp \
   Vector.h 
 
