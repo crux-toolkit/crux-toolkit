@@ -14,16 +14,20 @@
 <ul>
 <li>
 Added <code>crux barista</code>, a tool for inferring protein
-identifications. 
+identifications.</li>
 
 <li>
 Reimplemented <code>crux q-ranker</code> with new outputs and
-command-line syntax.
+command-line syntax.</li>
 
 <li>
-<code>crux create-index</code> can now now generate and store decoy
+Percolator and compute-q-values now compute and report posterior error
+probabilities, in addition to q-values.</li>
+
+<li>
+<code>crux create-index</code> now generates and store decoy
 peptides in the index.  Decoys can still be generated on-the-fly when
-searching .fasta files.
+searching .fasta files.</li>
 
 </ul>
 
@@ -32,37 +36,36 @@ searching .fasta files.
 <ul>
 
 <li>
-Percolator and compute-q-values now compute posterior error probabilities.
-
-<li>
 A pair of options, <code>cterm-fixed</code>
-and <code>nterm-fixed</code> allow fixed terminal peptide
-modifications, i.e. a mass shift applied to every peptide on either or
-both termini.
+and <code>nterm-fixed</code>, allow fixed terminal peptide
+modifications, i.e., a mass shift applied to every peptide on either or
+both termini.</li>
 
 <li>
-Spectrum processing was changed to include the highest m/z fragment peaks.
-Xcorrs have changed slightly as a result.
+A bug in the spectrum processing code was fixed, which was erroneously
+eliminating a few of the highest m/z fragment peaks.  Xcorrs have
+changed slightly as a result.</li>
 
 <li>
 Simplified the <code>--mz-bin-width</code> and 
 </code>--mz-offset</code> parameters so that <code>--xcorr-var-bin</code>
-is no longer needed for their values to be used.
+is no longer needed.</li>
 
 <li>
 Indexes now store information about any static mods used when they
-were created.
+were created.</li>
 
 <li>
 In the tab-delimited output files the 'matches/spectrum' column gives
 the number of target peptides compared to the spectrum and the decoy
 file has an additional column, 'decoy matches/spectrum' that gives the
 number of decoy peptides compared to the spectrum.  These two numbers
-may differ when decoys are not generated on-the-fly.
-
+may differ when decoys are not generated on-the-fly.</li>
 
 </ul>
-<hr>
+
+<hr></hr>
+
 <h2>Version 1.36</h2> August 4, 2011
 
 <h3>Tide changes</h3>
@@ -102,16 +105,7 @@ by <code>tide-index</code>. Index files created by previous versions
 of Tide should not be used with the new version.</li>
 
 </ul>
--
-<!--
-<h3>Major enhancements</h3>
 
-<ul>
-
-<li>
-
-</ul>
--->
 <h3>Minor changes</h3>
 
 <ul>
