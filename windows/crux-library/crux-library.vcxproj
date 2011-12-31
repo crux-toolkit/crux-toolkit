@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C4BCBCF8-E852-46CF-AF83-65353359B218}</ProjectGuid>
     <RootNamespace>crux-library</RootNamespace>
-    <ProjectName>crux-library</ProjectName>
+    <ProjectName>crux_library</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -44,7 +44,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src\c\posterior-error;..\..\src\c\xlink;..\..\src\c\q-ranker;..\..\src\c\percolator;..\..\src\c\MSToolkit;..\..\src\c\MSToolkit\RAMP;..\..\src\c\ArrayLibrary;..\..\src\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\c\posterior-error;..\..\src\c\xlink;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\MSToolkit;..\..\src\c\MSToolkit\RAMP;..\..\src\c\ArrayLibrary;..\..\src\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>
@@ -64,7 +64,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>USE_DOUBLE;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\src\c\posterior-error;..\..\src\c\xlink;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\MSToolkit;..\..\src\c\MSToolkit\RAMP;..\..\src\c\ArrayLibrary;..\..\src\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -130,7 +131,6 @@
     <ClCompile Include="..\..\src\c\ProteinIndexIterator.cpp" />
     <ClCompile Include="..\..\src\c\ProteinPeptideIterator.cpp" />
     <ClCompile Include="..\..\src\c\q-value.cpp" />
-    <ClCompile Include="..\..\src\c\QRanker.cpp" />
     <ClCompile Include="..\..\src\c\Scorer.cpp" />
     <ClCompile Include="..\..\src\c\SequestSearch.cpp" />
     <ClCompile Include="..\..\src\c\SortColumn.cpp" />
@@ -209,7 +209,6 @@
     <ClInclude Include="..\..\src\c\ProteinIndexIterator.h" />
     <ClInclude Include="..\..\src\c\ProteinPeptideIterator.h" />
     <ClInclude Include="..\..\src\c\q-value.h" />
-    <ClInclude Include="..\..\src\c\QRanker.h" />
     <ClInclude Include="..\..\src\c\Scorer.h" />
     <ClInclude Include="..\..\src\c\SearchProgress.h" />
     <ClInclude Include="..\..\src\c\SequestSearch.h" />

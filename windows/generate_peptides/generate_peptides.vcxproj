@@ -40,6 +40,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <TargetName>crux-generate-peptides</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -54,7 +55,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux-library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;q-ranker.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -71,6 +72,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
