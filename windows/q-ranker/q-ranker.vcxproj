@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}</ProjectGuid>
     <RootNamespace>qranker</RootNamespace>
+    <ProjectName>qranker_barista</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -63,56 +64,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\c\q-ranker\BaseSpline.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\Caller.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\DataSet.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\DescriptionOfCorrect.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\FeatureNames.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\Globals.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\IntraSetRelation.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\LogisticRegression.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\Net.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\Normalizer.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\Option.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\PosteriorEstimator.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\PSMDescription.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\QRankerCInterface.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\ResultHolder.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\SanityCheck.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\Scores.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\SetHandler.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\SqtSanityCheck.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\ssl.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\StdvNormalizer.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\TrainNet.cpp" />
-    <ClCompile Include="..\..\src\c\q-ranker\UniNormalizer.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\Barista.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\BipartiteGraph.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\DataSet.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\NeuralNet.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\PepScores.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\ProtScores.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\PSMScores.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\QRanker.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\SpecFeatures.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\SQTParser.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\TabDelimParser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\c\q-ranker\BaseSpline.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\Caller.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\config.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\DataSet.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\DescriptionOfCorrect.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\FeatureNames.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\Globals.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\IntraSetRelation.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\LogisticRegression.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\Net.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\Normalizer.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\Option.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\PercolatorCommon.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\PosteriorEstimator.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\PSMDescription.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\QRankerCInterface.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\ResultHolder.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\SanityCheck.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\Scores.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\SetHandler.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\SqtSanityCheck.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\ssl.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\StdvNormalizer.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\Transform.h" />
-    <ClInclude Include="..\..\src\c\q-ranker\UniNormalizer.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\Barista.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\BipartiteGraph.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\DataSet.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\NeuralNet.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\PepScores.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\ProtScores.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\PSMScores.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\QRanker.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\SpecFeatures.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\SQTParser.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\TabDelimParser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
