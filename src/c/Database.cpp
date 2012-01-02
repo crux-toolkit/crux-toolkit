@@ -226,7 +226,7 @@ bool Database::parseTextFasta()
   }
   
   // open file and 
-  file = fopen(fasta_filename_.c_str(), "r");
+  file = fopen(fasta_filename_.c_str(), "rb");
   
   // check if succesfully opened file
   if(file == NULL){
@@ -538,7 +538,7 @@ void Database::createBinaryFasta(const char* directory, bool is_temp){
        fasta_filename_.c_str(), binary_filename_.c_str());
 
   // open output file
-  FILE* output_file = fopen(binary_filename_.c_str(), "w");
+  FILE* output_file = fopen(binary_filename_.c_str(), "wb");
   if( output_file == NULL ){
     carp(CARP_FATAL, "Could not open binary protein file %s", 
          binary_filename_.c_str());
@@ -554,7 +554,7 @@ void Database::createBinaryFasta(const char* directory, bool is_temp){
                                                   suffixes, 
                                                   decoy_fasta_suffix.c_str(),
                                                   directory);
-    output_fasta = fopen(fasta_output_name, "w");
+    output_fasta = fopen(fasta_output_name, "wb");
     if( output_fasta == NULL ){
       carp(CARP_FATAL, "Could not open new fasta file %s for decoy proteins.",
            output_fasta);
@@ -564,7 +564,7 @@ void Database::createBinaryFasta(const char* directory, bool is_temp){
 
 
   // open input file
-  FILE* input_file = fopen(fasta_filename_.c_str(), "r");
+  FILE* input_file = fopen(fasta_filename_.c_str(), "rb");
   if( input_file == NULL ){
     carp(CARP_FATAL, "Could not open fasta file %s", fasta_filename_.c_str());
   }

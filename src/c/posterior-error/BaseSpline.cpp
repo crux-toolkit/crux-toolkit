@@ -21,6 +21,7 @@
 #include<numeric>
 #include<functional>
 #include<cmath>
+#include <time.h>
 #include "BaseSpline.h"
 //#include "Globals.h"
 

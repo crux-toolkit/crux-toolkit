@@ -92,11 +92,16 @@ class SpecFeaturesGenerator
   double **ts_m7;
  
   //mass info for neutral losses
-  static const double mass_h2o_mono = 18.01056;
-  static const double mass_nh3_mono = 17.02655;
-  static const double mass_co_mono = 27.9949;
-  static const double proton_mass = 1.00727646688;
-  static const double bin_width_mono = 1.0005079;
+  // While GNU g++ implements an extension that
+  // allows intializing static const doubles, this
+  // is not allowed by the strict C++ standard, so we
+  // have to initialze the doubles in the implementation
+  // to support compilers other than g++.
+  static const double mass_h2o_mono;
+  static const double mass_nh3_mono;
+  static const double mass_co_mono;
+  static const double proton_mass;
+  static const double bin_width_mono;
   static const int num_regions = 10;
   static const int max_per_region = 50;
   static const int max_xcorr_offset = 75;

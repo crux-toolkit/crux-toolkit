@@ -1135,7 +1135,7 @@ FILE* create_file_in_path(
 {
   char* file_full_path = get_full_filename(directory, filename);
   // FIXME CEG consider using stat instead
-  FILE* file = fopen(file_full_path, "r"); //to test if file exists
+  FILE* file = fopen(file_full_path, "rb"); //to test if file exists
   if( file != NULL ){  
     //The file exists, are we allowed to overwrite it?
     fclose(file);
@@ -1159,7 +1159,7 @@ FILE* create_file_in_path(
     }
   }
   
-  file = fopen(file_full_path, "w+"); //read and write, replace existing
+  file = fopen(file_full_path, "wb+"); //read and write, replace existing
 
   if(file == NULL){
     carp(CARP_FATAL, "Failed to create and open file: %s", file_full_path);

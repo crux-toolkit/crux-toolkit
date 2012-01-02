@@ -492,7 +492,7 @@ void SQTParser :: extract_psm_features(sqt_match &m, enzyme enz, double *x, int 
   memset(x,0,sizeof(double)*num_features);
   //log rank by Sp
   if (m.sp_rank[i] > 0)
-    x[0] = log(m.sp_rank[i]);
+    x[0] = log((double) m.sp_rank[i]);
   else
     x[0] = 0.0;
   //deltaLCN
@@ -541,7 +541,7 @@ void SQTParser :: extract_psm_features(sqt_match &m, enzyme enz, double *x, int 
   
   //log rank by Sp
   if (m.sp_rank[i] > 0)
-    x[0] = log(m.sp_rank[i]);
+    x[0] = log((double) m.sp_rank[i]);
   else
     x[0] = 0.0;
   
