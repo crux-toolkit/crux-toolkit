@@ -2,9 +2,10 @@
 #define SQTPARSER_H
 #define CRUX
 
-#include <sys/types.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <dirent.h>
+#endif
 #include <iostream>
 #include <fstream>
 #include <sstream>

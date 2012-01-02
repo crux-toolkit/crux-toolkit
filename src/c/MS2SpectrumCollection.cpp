@@ -80,7 +80,7 @@ bool MS2SpectrumCollection::parse() {
   }
   
   // check if file is still avaliable
-  if ((file = fopen(filename_.c_str(),"r")) == NULL) {
+  if ((file = fopen(filename_.c_str(),"rb")) == NULL) {
     carp(CARP_ERROR, "Spectrum file %s could not be opened",
          filename_.c_str());
     return false;
@@ -124,7 +124,7 @@ bool MS2SpectrumCollection::getSpectrum(
   FILE* file;
   long target_index;
   // check if file is still avaliable
-  if ((file = fopen(filename_.c_str(), "r")) == NULL) {
+  if ((file = fopen(filename_.c_str(), "rb")) == NULL) {
     carp(CARP_ERROR, "File %s could not be opened", filename_.c_str());
     return false;
   }
@@ -162,7 +162,7 @@ Spectrum* MS2SpectrumCollection::getSpectrum(
   FILE* file;
   long target_index;
   // check if file is still avaliable
-  if ((file = fopen(filename_.c_str(), "r")) == NULL) {
+  if ((file = fopen(filename_.c_str(), "rb")) == NULL) {
     carp(CARP_ERROR, "File %s could not be opened", filename_.c_str());
     return (false);
   }

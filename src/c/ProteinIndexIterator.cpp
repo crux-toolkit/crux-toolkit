@@ -68,7 +68,7 @@ ProteinIndexIterator::ProteinIndexIterator(
   )
 {
   char* name = generate_name(fasta_file, "_protein_index", ".fasta", NULL);
-  FILE* file = fopen(name, "r");
+  FILE* file = fopen(name, "rb");
 
   if(file == NULL){
     carp(CARP_FATAL, "failed to open protein index file: %s", name);

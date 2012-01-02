@@ -1,5 +1,11 @@
 #include "SpecFeatures.h"
 
+const double SpecFeaturesGenerator::mass_h2o_mono = 18.01056;
+const double SpecFeaturesGenerator::mass_nh3_mono = 17.02655;
+const double SpecFeaturesGenerator::mass_co_mono = 27.9949;
+const double SpecFeaturesGenerator::proton_mass = 1.00727646688;
+const double SpecFeaturesGenerator::bin_width_mono = 1.0005079;
+
 SpecFeaturesGenerator :: SpecFeaturesGenerator(): max_mz(1025),ts_main_ion((double**)0),
 						  ts_m3((double**)0),ts_m6((double**)0),ts_m7((double**)0)
 {

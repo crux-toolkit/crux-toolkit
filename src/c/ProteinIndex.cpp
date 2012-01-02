@@ -39,7 +39,7 @@ FILE* get_output_file(
     name = generate_name(fasta_file, "_protein_index", ".fasta", NULL);
   }
   
-  FILE* file = fopen(name, "w");
+  FILE* file = fopen(name, "wb");
   free(name);
   return file;
 }
@@ -62,7 +62,7 @@ bool ProteinIndex::create(
   FILE* output_file = NULL;
 
   // open file and 
-  file = fopen(fasta_file, "r");
+  file = fopen(fasta_file, "rb");
 
   // check if succesfully opened file
   if(file == NULL){

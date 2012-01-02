@@ -2032,7 +2032,7 @@ void parse_parameter_file(
     carp(CARP_FATAL, "Could not open parameter file.");
   }
 
-  file = fopen(parameter_filename, "r");
+  file = fopen(parameter_filename, "rb");
   if(file == NULL){
     carp(CARP_FATAL, "Couldn't open parameter file '%s'", parameter_filename);
   }
@@ -3343,7 +3343,7 @@ void read_mods_from_file(char* param_filename){
   carp(CARP_DEBUG, "Reading mods from parameter file '%s'", param_filename);
 
   // open file
-  FILE* param_file = fopen(param_filename, "r");
+  FILE* param_file = fopen(param_filename, "rb");
   if( param_file == NULL ){
     carp(CARP_FATAL, "Could not open parameter file '%s'", param_filename);
   }
