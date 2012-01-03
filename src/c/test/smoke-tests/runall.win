@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Make sure the testing script is executable.
+chmod 774 crux-test.pl
+
+# Make a soft link for some inscrutable reason.
+ln -fs test.fasta existing.fasta
+
+# Remove any lingering output files.
+./clean.sh
+
+# Create an index, if it doesn't already exist.
+ulimit -n 1024
+../../../../release/crux create-index  --parameter-file params/mods-sequest --verbosity 0 for-sequest-comparison.fasta index-for-sequest-comparison
+../../../../release/crux create-index --parameter-file params/set_rand_seed --verbosity 0 --decoys peptide-shuffle small-yeast.fasta yeast-index
+
+# Run the actual tests.
+# N.B. Add a "-u" option to this line to update all of the output files.
+# or do 'for f in good_results/*.observed; do mv $f ${f%.observed}; done'
+./crux-test.pl -p ../../../../Release crux-test.cmds 1>out 2>error
+
+# Print an error message if the test aborted.
+if [ $? == 25 ]
+then echo "Test aborted"
+else
+	tail -n6 out
+fi
+
+echo "  Test output in the file 'out'.  Error messages in 'error'."
