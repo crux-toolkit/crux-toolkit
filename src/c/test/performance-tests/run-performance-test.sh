@@ -88,18 +88,22 @@ for searchtool in sequest-search search-for-matches; do
   echo replot \"$shortname/qvalues.percolator.txt\" using 1:0 title \"$shortname crux percolator\" with lines >> $gnuplot
 
   # Run q-ranker.
-  if [[ -e $shortname/qranker.target.txt ]]; then
-    echo Skipping q-ranker.
+  if [[ $searchtool == "search-for-matches" ]]; then
+    echo q-ranker does not work with crux search-for-matches.
   else
-    $CRUX q-ranker \
-      --output-dir $shortname \
-      --feature-file T \
-      $db $shortname
-  fi
-  $CRUX extract-columns $shortname/qranker.target.txt "q-ranker q-value" > $shortname/qvalues.qranker.txt
-
+    if [[ -e $shortname/q-ranker.target.psms.txt ]]; then
+      echo Skipping q-ranker.
+    else
+      $CRUX q-ranker \
+        --output-dir $shortname \
+        --feature-file T \
+        --separate-searches $shortname/$shortname.decoy.sqt \
+        $ms2 $shortname/$shortname.target.sqt
+    fi
+    $CRUX extract-columns $shortname/q-ranker.target.psms.txt "q-value" > $shortname/qvalues.qranker.txt
   
-  echo replot \"$shortname/qvalues.qranker.txt\" using 1:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+    echo replot \"$shortname/qvalues.qranker.txt\" using 1:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+  fi
   
   # Run Lukas's percolator
   if [[ $searchtool == "search-for-matches" ]]; then
