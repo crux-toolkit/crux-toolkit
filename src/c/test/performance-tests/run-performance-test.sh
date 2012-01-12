@@ -89,7 +89,7 @@ for searchtool in sequest-search search-for-matches; do
 
   # Run q-ranker.
   if [[ $searchtool == "search-for-matches" ]]; then
-    echo q-ranker does not work with crux search-for-matches.
+    echo barista and q-ranker do not work with crux search-for-matches.
   else
     if [[ -e $shortname/q-ranker.target.psms.txt ]]; then
       echo Skipping q-ranker.
@@ -103,6 +103,20 @@ for searchtool in sequest-search search-for-matches; do
     $CRUX extract-columns $shortname/q-ranker.target.psms.txt "q-value" > $shortname/qvalues.qranker.txt
   
     echo replot \"$shortname/qvalues.qranker.txt\" using 1:0 title \"$shortname q-ranker\" with lines >> $gnuplot
+
+    if [[ -e $shortname/barista.target.psms.txt ]]; then
+      echo Skipping barista.
+    else
+      $CRUX barista \
+        --output-dir $shortname \
+        --feature-file T \
+        --separate-searches $shortname/$shortname.decoy.sqt \
+        $ms2 $shortname/$shortname.target.sqt
+    fi
+    $CRUX extract-columns $shortname/barista.target.psms.txt "q-value" > $shortname/qvalues.barista.txt
+  
+    echo replot \"$shortname/qvalues.barista.txt\" using 1:0 title \"$shortname barista\" with lines >> $gnuplot
+
   fi
   
   # Run Lukas's percolator
