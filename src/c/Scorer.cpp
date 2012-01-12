@@ -114,7 +114,6 @@ void Scorer::init() {
   intensity_array_ = NULL;
   initialized_ = false;
   last_idx_ = 0;
-  xcorr_var_bin_ = false;
   bin_width_ = 0;
   bin_offset_ = 0;
   observed_ = NULL;
@@ -850,7 +849,7 @@ bool Scorer::createIntensityArrayObserved(
   sp_max_mz_ = sp_max_mz;
 
   // DEBUG
-  // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, scorer->sp_max_mz);
+  // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, sp_max_mz);
   FLOAT_T* observed = (FLOAT_T*)mycalloc(getMaxBin(), sizeof(FLOAT_T));
 
   // Store the max intensity in entire spectrum
@@ -874,12 +873,7 @@ bool Scorer::createIntensityArrayObserved(
       max_peak = peak_location;
     }
   }
-  if (xcorr_var_bin_) {
-    // TODO - Check to see if this is the correct thing to do.
-    region_selector = INTEGERIZE(max_peak, bin_width, bin_offset) / NUM_REGIONS;
-  } else {
-    region_selector = (int) (max_peak / NUM_REGIONS);
-  }
+  region_selector = INTEGERIZE(max_peak, bin_width, bin_offset) / NUM_REGIONS;
 
   // DEBUG
   // carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
@@ -1479,11 +1473,7 @@ void Scorer::setSpMaxMz(
  *\returns the max bin index of the scorer array(s).
  */
 int Scorer::getMaxBin() {
-  if (xcorr_var_bin_) {
     return INTEGERIZE(sp_max_mz_, bin_width_, bin_offset_);
-  } else {
-    return (int)(sp_max_mz_);
-  }
 }
 
 /**

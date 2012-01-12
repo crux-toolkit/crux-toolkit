@@ -39,7 +39,6 @@ class Scorer {
   bool initialized_; ///< has the scorer been initialized?
   int last_idx_; ///< the last index in the array, the data size of the array
 
-  bool xcorr_var_bin_; ///<Use the variable binning code or not
   FLOAT_T bin_width_; ///< width of the bins to use for arrays
   FLOAT_T bin_offset_; ///< m/z offset for the bins.
 
