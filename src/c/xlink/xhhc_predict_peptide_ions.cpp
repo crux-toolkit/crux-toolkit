@@ -1,5 +1,6 @@
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
+#include "LinkedPeptide.h"
 
 #include <iostream>
 #include <fstream>
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
 
   print_spectrum = get_boolean_parameter("print-theoretical-spectrum");
 
-  LinkedPeptide::linker_mass = linker_mass; 
+  LinkedPeptide::setLinkerMass(linker_mass); 
   LinkedPeptide linked_peptide;
 
   if (string(peptideB) == "NULL")
@@ -101,7 +102,7 @@ int main(int argc, char** argv) {
 
 
     ofstream fout("theoretical.out");
-    fout <<"> "<< linked_peptide<<"\t"<<linked_peptide.get_mz(MONO)<<endl;
+    fout <<"> "<< linked_peptide<<"\t"<<linked_peptide.getMZ(MONO)<<endl;
     
     map<int, FLOAT_T>::iterator iter;
 

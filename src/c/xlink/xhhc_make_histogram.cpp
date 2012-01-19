@@ -1,5 +1,6 @@
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
+#include "LinkedPeptide.h"
 
 #include "objects.h"
 #include "IonConstraint.h"
@@ -141,7 +142,7 @@ int main(int argc, char** argv) {
   //find_all_precursor_ions(all_ions, links, linker_mass, charge, missed_link_cleavage, database);
   find_all_precursor_ions(all_ions, (char*)links, (char*)missed_link_cleavage, database, charge);
 
-  FLOAT_T max_mass = all_ions.back().mass(AVERAGE);
+  FLOAT_T max_mass = all_ions.back().getMass(AVERAGE);
   FLOAT_T min_mass = 0.0;
   if (min_mass_string != NULL) min_mass = atof(min_mass_string);
   if (max_mass_string != NULL) max_mass = atof(max_mass_string);
@@ -155,9 +156,9 @@ int main(int argc, char** argv) {
   vector<LinkedPeptide> filtered_ions;
   for (vector<LinkedPeptide>::iterator ion = all_ions.begin(); ion != all_ions.end(); ++ion) {
 
-      ion->calculate_mass(AVERAGE);
+      ion->calculateMass(AVERAGE);
     // if the mass is in the range
-    if (min_mass <= ion->mass(AVERAGE) && ion->mass(AVERAGE) <= max_mass) {
+    if (min_mass <= ion->getMass(AVERAGE) && ion->getMass(AVERAGE) <= max_mass) {
       //ion->set_charge(charge);
       ++num_ions;
       filtered_ions.push_back(*ion);
@@ -206,10 +207,10 @@ int main(int argc, char** argv) {
     // for every precursor in the mass window
     for (vector<LinkedPeptide>::iterator ion = filtered_ions.begin(); ion != filtered_ions.end(); ++ion) {
       if (ion->size() == 2) {
-	vector<XHHC_Peptide> peptides = ion->peptides();
+	vector<XHHC_Peptide> peptides = ion->getPeptides();
 	// score the first peptide with modification of second peptide	
         mod_mass = linker_mass + peptides[1].mass(MONO);	
-	ion_series = new IonSeries((char*)peptides[0].sequence().c_str(), ion->charge(), ion_constraint);
+	ion_series = new IonSeries((char*)peptides[0].sequence().c_str(), ion->getCharge(), ion_constraint);
 	hhc_predict_ions(ion_series, mod_mass, peptides[0].link_site());
 	score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
 	//score = xhhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
@@ -218,7 +219,10 @@ int main(int argc, char** argv) {
         scores.insert(make_pair(score, ss.str()));	
 	// score second peptide with modification of first peptide
         mod_mass = linker_mass + peptides[0].mass(MONO);	
-	ion_series = new IonSeries((char*)peptides[1].sequence().c_str(), ion->charge(), ion_constraint);
+	ion_series = new IonSeries(
+          (char*)peptides[1].sequence().c_str(), 
+          ion->getCharge(), ion_constraint);
+
 	hhc_predict_ions(ion_series, mod_mass, peptides[1].link_site());
         //score = xhhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
 	score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
@@ -284,7 +288,7 @@ void plot_weibull(vector<pair<FLOAT_T, LinkedPeptide> >& scores,
 
   for (vector<pair<FLOAT_T, LinkedPeptide> >::iterator score_pair = scores.begin();
 	score_pair != scores.end(); ++score_pair) {
-    if (score_pair->second.is_decoy()) {
+    if (score_pair->second.isDecoy()) {
       decoy_score_file << score_pair->first << endl;
       decoy_scores_array[num_decoys++] = score_pair->first;
     } else {
@@ -336,7 +340,7 @@ void plot_weibull(vector<pair<FLOAT_T, LinkedPeptide> >& scores,
     pvalue_target = compute_weibull_pvalue(score_pair->first, eta_target, beta_target, shift_target);
     pvalue_decoy = compute_weibull_pvalue(score_pair->first, eta_decoy, beta_decoy, shift_decoy);
 
-    if (score_pair->second.is_decoy()) {
+    if (score_pair->second.isDecoy()) {
       target_pvalue_file << pvalue_target << endl;
       decoy_pvalue_file << pvalue_decoy << endl;
     }

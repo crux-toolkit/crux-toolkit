@@ -4,6 +4,8 @@ AM_CXXFLAGS = -Wall -W -Werror  $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
 
 
 libxlink_la_SOURCES = \
+  LinkedPeptide.cpp \
+  LinkedPeptide.h \
   xhhc.cpp \
   xhhc.h \
   xhhc_ion_series.cpp \
