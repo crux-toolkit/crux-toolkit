@@ -45,63 +45,6 @@ std::vector<Peptide*>& get_peptides_from_sequence(std::string& sequence);
 void free_peptides();
 
 class XHHC_Peptide;
-class LinkedPeptide {
- public:
-  // constructor for a linked peptide. If A or B null, then
-  // a self link will be created. If an index is -1, a link to nothing
-  // will be created.
-  LinkedPeptide() {mass_calculated[MONO] = false; mass_calculated[AVERAGE]=false;}
-    LinkedPeptide(char* peptide_A, char* peptide_B, int posA, int posB, int charge);
-    LinkedPeptide(int charge) : charge_(charge), decoy_(false) {mass_calculated[MONO]=false; mass_calculated[AVERAGE]=false;}
-    std::vector<XHHC_Peptide>& peptides() 	{ return peptides_;}
-    int charge() 			{ return charge_;}
-    void set_charge(int charge)		{ charge_ = charge; }
-    void set_type(ION_TYPE_T type)   	{ type_ = type; }
-    ION_TYPE_T type()			{ return type_;}
-    int size()				{ return peptides_.size(); }
-
-    void set_decoy()			{ decoy_ = true; }
-    bool is_decoy()			{ return decoy_;}
-    void add_peptide(XHHC_Peptide& peptide)  { peptides_.push_back(peptide); } 
-    bool is_linked() 			{ return size() == 2; }
-    bool is_dead_end();
-    bool is_self_loop();
-    bool is_single();
-    FLOAT_T get_mz(MASS_TYPE_T mass_type);
-    void calculate_mass(MASS_TYPE_T mass_type);
-    FLOAT_T mass(MASS_TYPE_T mass_type);
-  
-    void splitA(std::vector<std::pair<LinkedPeptide, LinkedPeptide> >& ion_pairs);
-    void splitB(std::vector<std::pair<LinkedPeptide, LinkedPeptide> >& ion_pairs);
-
-    void split(std::vector<std::pair<LinkedPeptide, LinkedPeptide> >& ion_pairs);
-    friend std::ostream &operator<< (std::ostream& os, LinkedPeptide& lp); 
-
-    // for sorting LinkedPeptides by mass
-    friend bool operator< (const LinkedPeptide &lp1, const LinkedPeptide &lp2) {
-      return lp1.mass_ < lp2.mass_;
-      //return lp1.mz < lp2.mz;
-    }
-
-    friend bool compareMassMono(const LinkedPeptide& lp1, const LinkedPeptide& lp2);
-    friend bool compareMassAverage(const LinkedPeptide& lp1, const LinkedPeptide& lp2);
-
-    static void sortByMass(std::vector<LinkedPeptide>& linked_peptides, MASS_TYPE_T mass_type=MONO);
-    
-
-
-    static FLOAT_T linker_mass;
-   private:
-    bool mass_calculated[NUMBER_MASS_TYPES]; //MONO or AVERAGE.
-    int charge_;
-    bool decoy_;
-    ION_TYPE_T type_; //B_ION or Y_ION
-      FLOAT_T mass_[NUMBER_MASS_TYPES];
-      FLOAT_T mz[NUMBER_MASS_TYPES];
-      std::vector<XHHC_Peptide> peptides_;
-};
-
-//FLOAT_T LinkedPeptide::linker_mass;
 
 class XHHC_Peptide {
  public:

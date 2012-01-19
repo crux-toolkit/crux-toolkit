@@ -1,6 +1,8 @@
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
 
+#include "LinkedPeptide.h"
+
 #include <iostream>
 
 FLOAT_T* mass_matrix = NULL;
@@ -28,11 +30,11 @@ void LinkedIonSeries::print() {
   cout << "m/z\ttype\tion" << endl;
   string ion_type;
   for (vector<LinkedPeptide>::iterator ion = all_ions.begin(); ion != all_ions.end(); ++ion) {
-    if (ion->type() == B_ION) 
+    if (ion->getIonType() == B_ION) 
       ion_type = "B_ION";
     else 
       ion_type = "Y_ION";
-    cout << ion->get_mz(fragment_mass_type) << "\t" << ion_type << "\t" << *ion << endl;
+    cout << ion->getMZ(fragment_mass_type) << "\t" << ion_type << "\t" << *ion << endl;
   }
 }
 
@@ -44,7 +46,7 @@ void LinkedIonSeries::print() {
 void LinkedIonSeries::add_linked_ions(LinkedPeptide& linked_peptide,int split_type) {
 
   //if (charge_ == 0) charge_ = linked_peptide.charge();
-  linked_peptide.set_charge(charge_);
+  linked_peptide.setCharge(charge_);
 
   fragments.clear();
   // split the precursor at every cleavage site
@@ -67,16 +69,16 @@ void LinkedIonSeries::add_linked_ions(LinkedPeptide& linked_peptide,int split_ty
     ++ion_pair) {
 
     // if b-ion and not a neutral loss
-    if (ion_pair->first.charge() != 0) {
-      ion_pair->first.set_type(B_ION); 
-      ion_pair->first.calculate_mass(fragment_mass_type);
+    if (ion_pair->first.getCharge() != 0) {
+      ion_pair->first.setIonType(B_ION); 
+      ion_pair->first.calculateMass(fragment_mass_type);
       //cout << ion_pair->first.get_mz() << " B " << ion_pair->first << endl;
       all_ions.push_back(ion_pair->first);
     }
     // if y-ion and not a neutral loss
-    if (ion_pair->second.charge() != 0) {
-      ion_pair->second.set_type(Y_ION); 
-      ion_pair->second.calculate_mass(fragment_mass_type);
+    if (ion_pair->second.getCharge() != 0) {
+      ion_pair->second.setIonType(Y_ION); 
+      ion_pair->second.calculateMass(fragment_mass_type);
       //cout << ion_pair->second.get_mz() << " Y " << ion_pair->second << endl;
       all_ions.push_back(ion_pair->second);
     }
@@ -94,7 +96,7 @@ int LinkedIonSeries::get_total_by_ions() {
        ion_iter != all_ions.end(); 
        ++ion_iter) {
         //if (ion_iter -> get_mz(MONO) >= 400 && ion_iter -> get_mz(MONO) <= 1200) {
-	  if (ion_iter -> type() == B_ION || ion_iter -> type() == Y_ION) {
+	  if (ion_iter -> getIonType() == B_ION || ion_iter -> getIonType() == Y_ION) {
 	    ans++;
 	  }
 	//}
@@ -154,15 +156,16 @@ int LinkedIonSeries::get_observable_ions(
     ion_iter != all_ions.end();
     ++ion_iter) {
 
-    double mz = ion_iter -> get_mz(MONO);
+    double mz = ion_iter -> getMZ(MONO);
 
-    if (ion_iter -> type() == B_ION || ion_iter -> type() == Y_ION) {
+    if (ion_iter -> getIonType() == B_ION || 
+      ion_iter -> getIonType() == Y_ION) {
       add_ion_bin(observed, ions_observable, ions_observable_bin, mz, bin_width, min_mz, max_mz, true);
-      double h2O_mz = ion_iter -> get_mz(MONO) - (MASS_H2O_MONO/ ion_iter -> charge());
+      double h2O_mz = ion_iter -> getMZ(MONO) - (MASS_H2O_MONO/ ion_iter -> getCharge());
       add_ion_bin(observed, ions_observable, ions_observable_bin, h2O_mz, bin_width, min_mz, max_mz, false);
-      double nh3_mz = ion_iter -> get_mz(MONO) - (MASS_NH3_MONO/ ion_iter -> charge());
+      double nh3_mz = ion_iter -> getMZ(MONO) - (MASS_NH3_MONO/ ion_iter -> getCharge());
       add_ion_bin(observed, ions_observable, ions_observable_bin, nh3_mz, bin_width, min_mz, max_mz, false);
-      double co_mz = ion_iter -> get_mz(MONO) - (MASS_CO_MONO / ion_iter -> charge());
+      double co_mz = ion_iter -> getMZ(MONO) - (MASS_CO_MONO / ion_iter -> getCharge());
       add_ion_bin(observed, ions_observable, ions_observable_bin, co_mz, bin_width, min_mz, max_mz, false);
     }
   }
@@ -187,11 +190,11 @@ int LinkedIonSeries::get_observable_by_ions(
   for (ion_iter = all_ions.begin(); 
        ion_iter != all_ions.end(); 
        ++ion_iter) {
-    if (ion_iter -> get_mz(MONO) >= min_mz && ion_iter -> get_mz(MONO) <= max_mz) {
-      if (ion_iter -> type() == B_ION || ion_iter -> type() == Y_ION) {
+    if (ion_iter -> getMZ(MONO) >= min_mz && ion_iter -> getMZ(MONO) <= max_mz) {
+      if (ion_iter ->getIonType() == B_ION || ion_iter -> getIonType() == Y_ION) {
         by_observable++;
         int bin_idx = 
-          (int)(ion_iter->get_mz(MONO) / bin_width + 0.5);
+          (int)(ion_iter->getMZ(MONO) / bin_width + 0.5);
         if (observed.find(bin_idx) == observed.end()) {
           observed[bin_idx] = true;
           by_observable_bin++;

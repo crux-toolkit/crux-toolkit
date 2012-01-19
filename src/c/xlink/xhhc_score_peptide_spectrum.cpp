@@ -1,6 +1,7 @@
 #include "xhhc.h"
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
+#include "LinkedPeptide.h"
 
 #include "objects.h"
 #include "IonConstraint.h"
@@ -82,7 +83,7 @@ int main(int argc, char** argv){
 
   char* ms2_file = get_string_parameter("ms2 file");
 
-  LinkedPeptide::linker_mass = get_double_parameter("link mass");
+  LinkedPeptide::setLinkerMass(get_double_parameter("link mass"));
  
   // create new ion series
   
@@ -106,7 +107,7 @@ int main(int argc, char** argv){
   //created linked peptide.
   LinkedPeptide lp = LinkedPeptide(peptideA, peptideB, posA, posB, charge);
 
-  cout <<"LinkedPeptide:"<<lp<<" mass:"<<lp.mass(MONO)<<endl;
+  cout <<"LinkedPeptide:"<<lp<<" mass:"<<lp.getMass(MONO)<<endl;
   
   XHHC_Scorer xhhc_scorer;
   xhhc_scorer.setPrint(false);
@@ -284,7 +285,7 @@ double get_concat_score(char* peptideA, char* peptideB, int link_site, int charg
       //if contains the link site, modify by link mass.
       if (has_link_site) {
 	FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
-	FLOAT_T new_mass = old_mass + LinkedPeptide::linker_mass;
+	FLOAT_T new_mass = old_mass + LinkedPeptide::getLinkerMass();
 	FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
 	ion->setMassZ(new_mz);
       }

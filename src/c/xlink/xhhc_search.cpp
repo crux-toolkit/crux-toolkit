@@ -17,6 +17,7 @@
 #include "xhhc_ion_series.h"
 #include "xlink_compute_qvalues.h"
 #include "SearchForXLinks.h"
+#include "LinkedPeptide.h"
 
 //CRUX INCLUDES
 #include "objects.h"
@@ -97,7 +98,7 @@ int SearchForXLinks::xhhcSearchMain() {
   SpectrumZState zstate;
  
   //Set the static variable for the linker mass
-  LinkedPeptide::linker_mass = linker_mass;
+  LinkedPeptide::setLinkerMass(linker_mass);
 
   vector<LinkedPeptide> all_ions;
   carp(CARP_DETAILED_DEBUG,"Calling find all precursor ions");
@@ -112,7 +113,7 @@ int SearchForXLinks::xhhcSearchMain() {
     ofstream peptides_file(temp.c_str());
     peptides_file << "mass\tsequence"<<endl;
     for (unsigned int idx=0;idx < all_ions.size();idx++) {
-      peptides_file << all_ions.at(idx).mass(MONO) << "\t";
+      peptides_file << all_ions.at(idx).getMass(MONO) << "\t";
       peptides_file << all_ions.at(idx) << endl;
     }
     peptides_file.flush();
@@ -312,7 +313,7 @@ int SearchForXLinks::xhhcSearchMain() {
 
     
     for (unsigned int idx=0;idx<scores.size();idx++) {
-      if (!scores[idx].second.is_decoy())
+      if (!scores[idx].second.isDecoy())
 	linked_decoy_scores_array[idx+decoy_train_xpeptides.size()] = scores[idx].first;
     }
     
@@ -360,8 +361,8 @@ int SearchForXLinks::xhhcSearchMain() {
     while (score_index < scores.size() && (ndecoys < top_match || ntargets < top_match)) {
  
       
-      double ppm_error = fabs(scores[score_index].second.mass(MONO) - precursor_mass) / 
-          scores[score_index].second.mass(MONO) * 1e6;
+      double ppm_error = fabs(scores[score_index].second.getMass(MONO) - precursor_mass) / 
+          scores[score_index].second.getMass(MONO) * 1e6;
 
       double pvalue = compute_weibull_pvalue(scores[score_index].first, eta_linked, beta_linked, shift_linked);
 	
@@ -369,14 +370,14 @@ int SearchForXLinks::xhhcSearchMain() {
         pvalue = 1;
       }
 
-      if (scores[score_index].second.is_decoy() && ndecoys < top_match) {
+      if (scores[score_index].second.isDecoy() && ndecoys < top_match) {
         ndecoys++;
 	search_decoy_file << scan_num << "\t"; 
 	search_decoy_file << charge << "\t"; 
 	search_decoy_file << precursor_mz << "\t";
 	search_decoy_file << precursor_mass << "\t";
-	search_decoy_file << scores[score_index].second.mass(MONO) << "\t";
-	search_decoy_file << scores[score_index].second.mass(AVERAGE) << "\t";
+	search_decoy_file << scores[score_index].second.getMass(MONO) << "\t";
+	search_decoy_file << scores[score_index].second.getMass(AVERAGE) << "\t";
         search_decoy_file << ppm_error << "\t";
 	search_decoy_file << scores[score_index].first <<"\t";
 	search_decoy_file << ndecoys << "\t";
@@ -384,14 +385,14 @@ int SearchForXLinks::xhhcSearchMain() {
 	search_decoy_file << decoy_xpeptides.size() << "\t";
 	search_decoy_file << scores[score_index].second<<endl;
 
-      } else if (!scores[score_index].second.is_decoy() && ntargets < top_match) {
+      } else if (!scores[score_index].second.isDecoy() && ntargets < top_match) {
 	ntargets++;
 	search_target_file << scan_num << "\t"; 
 	search_target_file << charge << "\t"; 
 	search_target_file << precursor_mz << "\t";
 	search_target_file << precursor_mass << "\t";
-	search_target_file << scores[score_index].second.mass(MONO) << "\t";
-	search_target_file << scores[score_index].second.mass(AVERAGE) << "\t";
+	search_target_file << scores[score_index].second.getMass(MONO) << "\t";
+	search_target_file << scores[score_index].second.getMass(AVERAGE) << "\t";
         search_target_file << ppm_error << "\t";
 	search_target_file << scores[score_index].first <<"\t";
 	search_target_file << ntargets << "\t";
@@ -401,13 +402,13 @@ int SearchForXLinks::xhhcSearchMain() {
 
         //output protein ids/peptide locations.  If it is a linear, dead or self loop, only
         //use the 1st field.
-        string sequence1  = scores[score_index].second.peptides()[0].sequence();
+        string sequence1  = scores[score_index].second.getPeptides()[0].sequence();
         vector<Peptide*>& peptides1 = get_peptides_from_sequence(sequence1);
         string result_string = get_protein_ids_locations(peptides1);
         search_target_file << result_string << "\t";
         //if it is cross-linked peptide, use the second field
-        if (scores[score_index].second.is_linked()) {
-          string sequence2  = scores[score_index].second.peptides()[1].sequence();
+        if (scores[score_index].second.isCrossLinked()) {
+          string sequence2  = scores[score_index].second.getPeptides()[1].sequence();
           vector<Peptide*>& peptides2 = get_peptides_from_sequence(sequence2);
           string result_string = get_protein_ids_locations(peptides2);
           search_target_file << result_string;
@@ -518,7 +519,7 @@ void get_ions_from_mass_range(
   for (vector<LinkedPeptide>::iterator ion = all_ions.begin();
     ion != all_ions.end();
     ++ion) {
-    double mass = ion -> mass(mass_type);
+    double mass = ion -> getMass(mass_type);
     if (mass >= min_mass && mass <= max_mass) {
       filtered_ions.push_back(*ion);
     }

@@ -1,6 +1,9 @@
+
+
 #include "xhhc.h"
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
+#include "LinkedPeptide.h"
 
 #include "objects.h"
 #include "Scorer.h"
@@ -78,7 +81,7 @@ int main(int argc, char** argv){
 
   char* ms2_file = get_string_parameter("ms2 file");
 
-  LinkedPeptide::linker_mass = get_double_parameter("link mass");
+  LinkedPeptide::setLinkerMass(get_double_parameter("link mass"));
  
   // create new ion series
   
@@ -153,8 +156,8 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 	   ion != ions.end(); 
 	   ++ion) {
 
-	  if (ion -> type() == B_ION || ion -> type() == Y_ION) {
-	    Peak * peak = spectrum->getNearestPeak(ion->get_mz(MONO), 
+	  if (ion -> getIonType() == B_ION || ion -> getIonType() == Y_ION) {
+	    Peak * peak = spectrum->getNearestPeak(ion->getMZ(MONO), 
                                                     bin_width);
 	    if (peak != NULL) {
               if (matched.find(peak) == matched.end()) {
@@ -203,10 +206,10 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
 	  if (matched.find(peak) != matched.end()) {
               LinkedPeptide& ion = matched[peak];
-              double mz_calc = ion.get_mz(MONO);
+              double mz_calc = ion.getMZ(MONO);
               double mz_obs = peak->getLocation();
-              int charge = ion.charge();
-              double mass_calc = ion.mass(MONO);
+              int charge = ion.getCharge();
+              double mass_calc = ion.getMass(MONO);
               double mass_obs = (mz_obs - MASS_PROTON) * (double)charge;
               double ppm =  fabs(mass_calc - mass_obs) / mass_calc * 1e6;
               
@@ -219,9 +222,9 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
            
 
 
-              if (ion.type() == B_ION) {
+              if (ion.getIonType() == B_ION) {
                 ion_string_oss << "b";
-              } else if (ion.type() == Y_ION) {
+              } else if (ion.getIonType() == Y_ION) {
                 ion_string_oss << "y";
               } else {
                 ion_string_oss << "u";

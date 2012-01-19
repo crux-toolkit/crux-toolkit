@@ -627,6 +627,19 @@ enum XLINK_SITE_T{
 };
 
 /**
+ * \class LinkedPeptide
+ * \brief a cross-linked peptide
+ *
+ */
+class LinkedPeptide;
+
+/**
+ * \class XHHC_Peptide
+ * \brief a XHHC Peptide
+ */
+class XHHC_Peptide;
+
+/**
  * \enum COMPARISON_T
  */
 enum COMPARISON_T{
