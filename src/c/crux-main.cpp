@@ -20,6 +20,7 @@
 #include "QRanker.h"
 #include "Barista.h"
 #include "PrintProcessedSpectra.h"
+#include "GeneratePeptides.h"
 #include "SearchForXLinks.h"
 #include "ExtractColumns.h"
 #include "SpectralCounts.h"
@@ -39,21 +40,24 @@ int main(int argc, char** argv){
 
   applications.add(new CreateIndex());
 
+  // search
   applications.add(new MatchSearch());
   applications.add(new SequestSearch());
+  applications.add(new SearchForXLinks());
 
+  // post-search
   applications.add(new ComputeQValues());
   applications.add(new Percolator());
   applications.add(new QRanker());
-
   applications.add(new Barista());
-
-  applications.add(new PrintProcessedSpectra());
-
-  applications.add(new SearchForXLinks());
-
   applications.add(new SpectralCounts());
 
+  // fasta/ms2 utilities
+  applications.add(new PrintProcessedSpectra());
+  applications.add(new GeneratePeptides());
+
+
+  // delimited file utilities
   applications.add(new ExtractColumns());
   applications.add(new ExtractRows());
   applications.add(new StatColumn());

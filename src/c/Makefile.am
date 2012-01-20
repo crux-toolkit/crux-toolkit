@@ -135,6 +135,8 @@ LIBFILES= \
   PeptideSrc.h \
   Percolator.cpp \
   Percolator.h \
+  GeneratePeptides.cpp \
+  GeneratePeptides.h \
   PrintProcessedSpectra.cpp \
   PrintProcessedSpectra.h \
   PrintVersion.cpp \
@@ -199,7 +201,6 @@ libcrux_la_SOURCES = $(LIBFILES)
 PROGRAM_FILES = \
   crux \
   crux-get-ms2-spectrum \
-  crux-generate-peptides \
   crux-predict-peptide-ions \
   xlink-predict-peptide-ions \
   xlink-score-spectrum \
@@ -212,10 +213,6 @@ crux_get_ms2_spectrum_CXXFLAGS = $(AM_CFLAGS) -DMAIN -I$(top_srcdir)/src/c//MSTo
 crux_get_ms2_spectrum_LDADD = \
   $(AM_LDFLAGS) \
   libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
-
-crux_generate_peptides_SOURCES = generate_peptides.cpp
-crux_generate_peptides_CXXFLAGS = $(AM_CFLAGS) -DMAIN
-crux_generate_peptides_LDADD = $(AM_LDFLAGS) libcrux.la -lm  
 
 crux_predict_peptide_ions_SOURCES = predict_peptide_ions.cpp
 crux_predict_peptide_ions_CXXFLAGS = $(AM_CFLAGS) -DMAIN

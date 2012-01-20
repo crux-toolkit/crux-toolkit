@@ -174,7 +174,7 @@ string ExtractRows::getName() {
  */
 string ExtractRows::getDescription() {
 
-  return "Prints out rows that match a particular column value";
+  return "Prints out rows that match a particular column value.";
 
 }
 

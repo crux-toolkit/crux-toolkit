@@ -7,6 +7,35 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
+<h2>Version 1.38</h2> Month 00, 2012
+
+<h3>Major enhancements</h3>
+
+<ul>
+<li>
+</ul>
+
+<h3>Minor changes</h3>
+
+<ul>
+<li>
+Ambiguous amino acids are handled differently.  'J' is interpreted to
+indicate 'I or L' and its mass will be the same as that of I or L.
+Peptides containing B, Z, and X will no longer be considered and a
+warning stating that will be issued.
+
+<li>
+The stand-alone crux-generate-peptides application has been replaced
+with a new command for the general crux application, 'crux
+generate-peptides'.
+
+
+<li>
+Fixed a bug that affected the intensity adjustment of observed spectra
+when the bin width was set much larger or smaller than 1.
+
+</ul>
+
 <h2>Version 1.37</h2> December 22, 2011
 
 <h3>Major enhancements</h3>

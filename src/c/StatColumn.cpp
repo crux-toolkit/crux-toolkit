@@ -149,7 +149,7 @@ string StatColumn::getName() {
 string StatColumn::getDescription() {
 
   return "Collects statistics from a column of data in "
-         "a delimited file";
+         "a delimited file.";
 }
 
 /*
