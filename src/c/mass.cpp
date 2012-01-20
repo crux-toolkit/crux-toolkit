@@ -41,7 +41,8 @@ void initialize_amino_masses (void)
 {
   // average mass
   amino_masses['A' - 'A'] = 71.0788;
-  amino_masses['B' - 'A'] = 114.5962;
+  // set mass high to prevent peptides containing B
+  amino_masses['B' - 'A'] = 7000.0;
   amino_masses['C' - 'A'] = 103.1388;
   amino_masses['D' - 'A'] = 115.0886;
   amino_masses['E' - 'A'] = 129.1155;
@@ -49,6 +50,7 @@ void initialize_amino_masses (void)
   amino_masses['G' - 'A'] = 57.0519;
   amino_masses['H' - 'A'] = 137.1411;
   amino_masses['I' - 'A'] = 113.1594;
+  amino_masses['J' - 'A'] = 113.1594;
   amino_masses['K' - 'A'] = 128.1741;
   amino_masses['L' - 'A'] = 113.1594;
   amino_masses['M' - 'A'] = 131.1926;
@@ -62,13 +64,16 @@ void initialize_amino_masses (void)
   amino_masses['U' - 'A'] = 150.0388;
   amino_masses['V' - 'A'] = 99.1326;
   amino_masses['W' - 'A'] = 186.2132;
-  amino_masses['X' - 'A'] = 113.1594;
+  // set mass high to prevent peptides containing X
+  amino_masses['X' - 'A'] = 7000.0;
   amino_masses['Y' - 'A'] = 163.1760;
-  amino_masses['Z' - 'A'] = 128.6231;
+  // set mass high to prevent peptides containing Z
+  amino_masses['Z' - 'A'] = 7000.0;
   
   // monoisotopic mass
   amino_masses['A' - 'A' + 26] = 71.03711;
-  amino_masses['B' - 'A' + 26] = 114.53494;
+  // set mass high to prevent peptides containing B
+  amino_masses['B' - 'A'] = 7000.0;
   amino_masses['C' - 'A' + 26] = 103.00919;
   amino_masses['D' - 'A' + 26] = 115.02694;
   amino_masses['E' - 'A' + 26] = 129.04259;
@@ -76,6 +81,7 @@ void initialize_amino_masses (void)
   amino_masses['G' - 'A' + 26] = 57.02146;
   amino_masses['H' - 'A' + 26] = 137.05891;
   amino_masses['I' - 'A' + 26] = 113.08406;
+  amino_masses['J' - 'A' + 26] = 113.08406;
   amino_masses['K' - 'A' + 26] = 128.09496;
   amino_masses['L' - 'A' + 26] = 113.08406;
   amino_masses['M' - 'A' + 26] = 131.04049;
@@ -89,9 +95,11 @@ void initialize_amino_masses (void)
   amino_masses['U' - 'A' + 26] = 150.04344;
   amino_masses['V' - 'A' + 26] = 99.06841;
   amino_masses['W' - 'A' + 26] = 186.07931;
-  amino_masses['X' - 'A' + 26] = 113.08406;
+  // set mass high to prevent peptides containing X
+  amino_masses['X' - 'A'] = 7000.0;
   amino_masses['Y' - 'A' + 26] = 163.06333;
-  amino_masses['Z' - 'A' + 26] = 128.55059;
+  // set mass high to prevent peptides containing Z
+  amino_masses['Z' - 'A'] = 7000.0;
   
   // modifications
   initialize_aa_mod_combinations_array();

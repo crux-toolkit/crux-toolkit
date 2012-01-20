@@ -37,7 +37,7 @@ void mass_setup(){
 
   achar1 = 'S';
   achar2 = 'A';
-  achar3 = 'Z';
+  achar3 = 'V';
 
   aa1 = char_aa_to_modified(achar1);
   aa2 = char_aa_to_modified(achar2);
@@ -69,9 +69,9 @@ START_TEST(test_create){
                "Mass of %c should be %.3f but is %.3f", 
                achar2, 71.0787, avg_mass);
   avg_mass = get_mass_mod_amino_acid_average(aa3);
-  fail_unless( is_close_to(avg_mass, 128.6231),
-               "Mass of %c should be %.3f but is %.3f", 
-               achar3, 128.6231, avg_mass);
+  fail_unless( is_close_to(avg_mass, 99.1326),
+               "Mass of %c should be %.5f but is %.5f", 
+               achar3, 99.1326, avg_mass);
 
   // get monoisotipic masses of unmodified aas
   float mono_mass = get_mass_mod_amino_acid_monoisotopic(aa1);
@@ -83,9 +83,9 @@ START_TEST(test_create){
                "Mono mass of %c should be %.3f but is %.3f", 
                achar2, 71.03711, mono_mass);
   mono_mass = get_mass_mod_amino_acid_monoisotopic(aa3);
-  fail_unless( is_close_to(mono_mass, 128.55059),
+  fail_unless( is_close_to(mono_mass, 99.06841),
                "Mono mass of %c should be %.3f but is %.3f", 
-               achar3, 128.55059, mono_mass);
+               achar3, 99.06841, mono_mass);
 }
 END_TEST
 
@@ -138,11 +138,11 @@ START_TEST(test_avg_1mod){
   avg_mass = get_mass_mod_amino_acid_average(aa2);
   fail_unless( is_close_to(avg_mass, 71.0787 + 500),
                "Mod 1 mass of %c should be %.3f but is %.3f", 
-               achar1, 71.0787 + 500, avg_mass);
+               achar2, 71.0787 + 500, avg_mass);
   avg_mass = get_mass_mod_amino_acid_average(aa3);
-  fail_unless( is_close_to(avg_mass, 128.6231 + 500),
+  fail_unless( is_close_to(avg_mass, 99.1326 + 500),
                "Mod 1 mass of %c should be %.3f but is %.3f", 
-               achar1, 128.6231 + 500, avg_mass);
+               achar3, 99.1326 + 500, avg_mass);
 
   // unmodify
   aa1 = char_aa_to_modified(achar1);
@@ -163,9 +163,9 @@ START_TEST(test_avg_1mod){
                "Mod 2 mass of %c should be %.3f but is %.3f", 
                achar2, 71.0787 + 600, avg_mass);
   avg_mass = get_mass_mod_amino_acid_average(aa3);
-  fail_unless( is_close_to(avg_mass, 128.6231 + 600),
+  fail_unless( is_close_to(avg_mass, 99.1326 + 600),
                "Mod 2 mass of %c should be %.3f but is %.3f", 
-               achar3, 128.6231 + 600, avg_mass);
+               achar3, 99.1326 + 600, avg_mass);
 
   // unmodify
   aa1 = char_aa_to_modified(achar1);
@@ -186,9 +186,9 @@ START_TEST(test_avg_1mod){
                "Mod 3 mass of %c should be %.3f but is %.3f", 
                achar2, 71.0787 + 700, avg_mass);
   avg_mass = get_mass_mod_amino_acid_average(aa3);
-  fail_unless( is_close_to(avg_mass, 128.6231 + 700),
+  fail_unless( is_close_to(avg_mass, 99.1326 + 700),
                "Mod 3 mass of %c should be %.3f but is %.3f", 
-               achar3, 128.6231 + 700, avg_mass);
+               achar3, 99.1326 + 700, avg_mass);
 }
 END_TEST
 
@@ -210,11 +210,11 @@ START_TEST(test_avg_2mod){
   avg_mass = get_mass_mod_amino_acid_average(aa2);
   fail_unless( is_close_to(avg_mass, 71.0787 + 500 + 600),
                "Mod 1 mass of %c should be %.3f but is %.3f", 
-               achar1, 71.0787 + 500 + 600, avg_mass);
+               achar2, 71.0787 + 500 + 600, avg_mass);
   avg_mass = get_mass_mod_amino_acid_average(aa3);
-  fail_unless( is_close_to(avg_mass, 128.6231 + 500 + 600),
+  fail_unless( is_close_to(avg_mass, 99.1326 + 500 + 600),
                "Mod 1 mass of %c should be %.3f but is %.3f", 
-               achar1, 128.6231 + 500 + 600, avg_mass);
+               achar3, 99.1326 + 500 + 600, avg_mass);
 
   // unmodify
   aa1 = char_aa_to_modified(achar1);
@@ -237,9 +237,9 @@ START_TEST(test_avg_2mod){
                "Mod 2 mass of %c should be %.3f but is %.3f", 
                achar2, 71.0787 + 500 + 700, avg_mass);
   avg_mass = get_mass_mod_amino_acid_average(aa3);
-  fail_unless( is_close_to(avg_mass, 128.6231 + 500 + 700),
+  fail_unless( is_close_to(avg_mass, 99.1326 + 500 + 700),
                "Mod 2 mass of %c should be %.3f but is %.3f", 
-               achar3, 128.6231 + 500 + 700, avg_mass);
+               achar3, 99.1326 + 500 + 700, avg_mass);
 
   // unmodify
   aa1 = char_aa_to_modified(achar1);
@@ -263,9 +263,9 @@ START_TEST(test_avg_2mod){
                "Mod 3 mass of %c should be %.3f but is %.3f", 
                achar2, 71.0787 + 600 + 700, avg_mass);
   avg_mass = get_mass_mod_amino_acid_average(aa3);
-  fail_unless( is_close_to(avg_mass, 128.6231 + 600 + 700),
+  fail_unless( is_close_to(avg_mass, 99.1326 + 600 + 700),
                "Mod 3 mass of %c should be %.3f but is %.3f", 
-               achar3, 128.6231 + 600 + 700, avg_mass);
+               achar3, 99.1326 + 600 + 700, avg_mass);
 }
 END_TEST
 
@@ -291,11 +291,11 @@ START_TEST(test_avg_3mod){
   avg_mass = get_mass_mod_amino_acid_average(aa2);
   fail_unless( is_close_to(avg_mass, 71.0787 + 500 + 600 + 700),
                "Mod 1 mass of %c should be %.3f but is %.3f", 
-               achar1, 71.0787 + 500 + 600 + 700, avg_mass);
+               achar2, 71.0787 + 500 + 600 + 700, avg_mass);
   avg_mass = get_mass_mod_amino_acid_average(aa3);
-  fail_unless( is_close_to(avg_mass, 128.6231 + 500 + 600 + 700),
+  fail_unless( is_close_to(avg_mass, 99.1326 + 500 + 600 + 700),
                "Mod 1 mass of %c should be %.3f but is %.3f", 
-               achar1, 128.6231 + 500 + 600 + 700, avg_mass);
+               achar3, 99.1326 + 500 + 600 + 700, avg_mass);
 
 }
 END_TEST

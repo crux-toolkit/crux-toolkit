@@ -336,8 +336,14 @@ void ProteinPeptideIterator::prepareMc(
   // calculate our cleavage positions and masses
   for(start_idx = 1; start_idx < protein->getLength()+1; start_idx++){
     int sequence_idx = start_idx - 1;
+    char amino_acid = protein->getSequencePointer()[sequence_idx];
     mass_array[start_idx] = mass_array[start_idx-1] + 
-      get_mass_amino_acid(protein->getSequencePointer()[sequence_idx], mass_type);
+      get_mass_amino_acid(amino_acid, mass_type);
+
+    if( amino_acid == 'B' || amino_acid == 'X' || amino_acid == 'Z' ){
+      carp_once(CARP_WARNING, 
+                "Ignoring peptides with ambiguous amino acids (B, X, Z).");
+    } 
 
     // increment cumulative cleavages before we check if current position
     // is a cleavage site because cleavages come *after* the current amino acid
