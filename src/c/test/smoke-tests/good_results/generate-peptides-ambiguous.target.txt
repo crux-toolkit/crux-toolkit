@@ -1,7 +1,10 @@
+INFO: Beginning generate-peptides.
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 WARNING: Ignoring peptides with ambiguous amino acids (B, X, Z).
 INFO: total peptides: 2
-INFO: crux-generate-peptides finished.
+INFO: Elapsed time: 0.000172 s
+INFO: Finished crux generate-peptides.
+INFO: Return Code:0
 # PROTEIN DATABASE: ambiguous.fasta
 # OPTIONS:
 #	min-mass: 1464.00

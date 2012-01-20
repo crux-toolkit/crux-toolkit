@@ -10,21 +10,21 @@
 # TESTS WITH NO INDEX
  
 # Generate Peptides
-1 = generate_peptides_no_ops = good_results/standard_generate_peptides_no_ops.out = crux-generate-peptides test.fasta =
+1 = generate_peptides_no_ops = good_results/standard_generate_peptides_no_ops.out = crux generate-peptides test.fasta =
 
-1 = generate_peptides_default = good_results/standard_generate_peptides_default.out = crux-generate-peptides  --output-sequence T test.fasta =
+1 = generate_peptides_default = good_results/standard_generate_peptides_default.out = crux generate-peptides  --output-sequence T test.fasta =
 
-1 = generate_peptides_specifying_miss_cleavages = good_results/standard_generate_peptides_specifying_missed_cleavages.out = crux-generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --digestion partial-digest --missed-cleavages 3 test.fasta =
+1 = generate_peptides_specifying_miss_cleavages = good_results/standard_generate_peptides_specifying_missed_cleavages.out = crux generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --digestion partial-digest --missed-cleavages 3 test.fasta =
 
-1 = generate_peptides_change_minmax = good_results/standard_generate_peptides_change_minmax = crux-generate-peptides --parameter-file params/many_changes --output-sequence T --max-length 20 test.fasta =
+1 = generate_peptides_change_minmax = good_results/standard_generate_peptides_change_minmax = crux generate-peptides --parameter-file params/many_changes --output-sequence T --max-length 20 test.fasta =
 
-1 = generate_peptides_mods = good_results/standard_generate_peptides_mods = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20 test.fasta =
+1 = generate_peptides_mods = good_results/standard_generate_peptides_mods = crux generate-peptides --parameter-file params/mods --output-sequence T --max-length 20 test.fasta =
 
-1 = generate_peptides_fixed_mods = good_results/standard_generate_peptides_fixed_mods = crux-generate-peptides --parameter-file params/fixed-mods --output-sequence T --max-length 20 test.fasta =
+1 = generate_peptides_fixed_mods = good_results/standard_generate_peptides_fixed_mods = crux generate-peptides --parameter-file params/fixed-mods --output-sequence T --max-length 20 test.fasta =
 
-1 = generate_peptides_chymo = good_results/standard_generate_peptides_chymo = crux-generate-peptides --parameter-file params/chymo --output-sequence T test.fasta = 
+1 = generate_peptides_chymo = good_results/standard_generate_peptides_chymo = crux generate-peptides --parameter-file params/chymo --output-sequence T test.fasta = 
 
-1 = generate-peptides-ambiguous-residues = good_results/generate-peptides-ambiguous.target.txt = crux-generate-peptides --min-mass 1464 --max-mass 1496 --output-sequence T ambiguous.fasta > a  2>&1; cat a = 
+1 = generate-peptides-ambiguous-residues = good_results/generate-peptides-ambiguous.target.txt = crux generate-peptides --min-mass 1464 --max-mass 1496 --output-sequence T ambiguous.fasta > a  2>&1; cat a =  'time'
 
 # Get spectrum
 1 = get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = crux-get-ms2-spectrum 2 test.ms2 =
@@ -94,8 +94,8 @@
 1 = ppm_window = good_results/ppmwin.search.target.txt = crux search-for-matches --parameter-file params/ppm_window --fileroot ppmwin demo.ms2 small-yeast.fasta; cat crux-output/ppmwin.search.target.txt =
 # TESTS WITH INDEX
 
-# See that crux-generate-peptides works with an existing index
-1 = generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux-generate-peptides --output-sequence T  --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
+# See that crux generate-peptides works with an existing index
+1 = generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux generate-peptides --output-sequence T  --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
 
 # See that crux-search-for-matches works with existing index
 1 = search_for_matches_default_existing_index = good_results/search_for_matches_default_existing_index.target.txt = rm -rf crux-output; crux search-for-matches --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
@@ -106,18 +106,18 @@
 # See that match_analysis works with an existing index and new results
 1 = analyze_matches_existing_index = good_results/analyze_matches_existing_index.percolator.target.txt =  crux percolator --parameter-file params/set_rand_seed existing_crux_index crux-output; cat crux-output/percolator.target.txt = 'StartTime'
 
-# Create index. Use crux-generate-peptides to test that it worked
+# Create index. Use crux generate-peptides to test that it worked
 
 1 = create_index_no_decoy = good_results/standard_create_index_no_decoy.out = rm -rf test_crux_index; crux create-index --decoys none test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
 
-1 = generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux-generate-peptides --output-sequence T test_crux_index = '# PROTEIN DATABASE'
+1 = generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux generate-peptides --output-sequence T test_crux_index = '# PROTEIN DATABASE'
 
 # test that mods work with the index
-1 = generate_peptides_mods_index = good_results/standard_generate_peptides_mods_index = crux-generate-peptides --parameter-file params/mods --output-sequence T --max-length 20  test_crux_index =
+1 = generate_peptides_mods_index = good_results/standard_generate_peptides_mods_index = crux generate-peptides --parameter-file params/mods --output-sequence T --max-length 20  test_crux_index =
 
 # create an index with all defaults (including decoys, but do set the random seed)
 1 = create_index_default = good_results/standard_create_index_default.out = rm -rf test_crux_index; crux create-index --parameter-file params/set_rand_seed test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
-1 = generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux-generate-peptides --output-sequence T test_crux_index = '# PROTEIN DATABASE'
+1 = generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux generate-peptides --output-sequence T test_crux_index = '# PROTEIN DATABASE'
 
 # Search for matches and test txt file
 1 = search_for_matches_default_index = good_results/search_for_matches_default_index.target.txt = rm -f crux-output/search.target.txt; crux search-for-matches --overwrite T --parameter-file params/params_uniq test.ms2 test_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'

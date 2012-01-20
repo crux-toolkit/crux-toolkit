@@ -42,7 +42,7 @@ string Percolator::getName() {
 string Percolator::getDescription() {
   return 
     "Analyze a collection of PSMs to target and decoy "
-    "sequences using the percolator algorithm";
+    "sequences using the percolator algorithm.";
 
 }
 

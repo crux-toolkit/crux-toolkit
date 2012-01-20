@@ -1210,7 +1210,7 @@ string QRanker::getName() {
 string QRanker::getDescription() {
   return 
     "Analyze a collection of PSMs to target and decoy "
-    "sequences using the q-ranker algorithm (marina's new q-ranker)";
+    "sequences using the new q-ranker algorithm.";
 
 }
 

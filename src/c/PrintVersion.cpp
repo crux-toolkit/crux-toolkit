@@ -44,7 +44,7 @@ string PrintVersion::getName() {
 string PrintVersion::getDescription() {
   return 
     "Print the Crux version number to standard output, "
-    "then exit";
+    "then exit.";
 }
 
 COMMAND_T PrintVersion::getCommand() {

@@ -45,7 +45,7 @@ string ComputeQValues::getDescription() {
   return 
   "Assign a q-value, which is a statistical confidence "
   "measure that accounts for multiple testing, to each "
-  "PSM in a given set";
+  "PSM in a given set.";
 
 }
 

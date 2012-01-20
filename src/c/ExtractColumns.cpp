@@ -106,7 +106,7 @@ string ExtractColumns::getName() {
 string ExtractColumns::getDescription() {
 
   return "Prints a delimited file using only the columns specified from "
-         "the original delimited file";
+         "the original delimited file.";
 }
 
 /*

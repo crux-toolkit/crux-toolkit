@@ -214,7 +214,7 @@ string SortColumn::getName() {
  */
 string SortColumn::getDescription() {
 
-  return "Sorts a delimited file by a column ";
+  return "Sorts a delimited file by a column.";
 }
 
 /**
