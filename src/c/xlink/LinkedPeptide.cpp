@@ -5,7 +5,7 @@
  * \brief Object for keeping track of a (non-)crosslinked peptide.
  *****************************************************************************/
 #include "LinkedPeptide.h"
-
+#include "XHHC_Peptide.h"
 
 
 /**
@@ -45,15 +45,15 @@ LinkedPeptide::LinkedPeptide(
   XHHC_Peptide pepA = XHHC_Peptide(peptide_A);
   // if a self link or dead end
   if (peptide_B == NULL) {
-     pepA.add_link(posA);
+     pepA.addLink(posA);
     if (posB >= 0)
-      pepA.add_link(posB);
+      pepA.addLink(posB);
     peptides_.push_back(pepA);
   } else {
     carp(CARP_DETAILED_DEBUG, "adding links at %d and %d", posA, posB);
     XHHC_Peptide pepB = XHHC_Peptide(peptide_B);
-    pepA.add_link(posA);
-    pepB.add_link(posB);
+    pepA.addLink(posA);
+    pepB.addLink(posB);
     peptides_.push_back(pepA);
     peptides_.push_back(pepB);
   }
@@ -186,21 +186,21 @@ bool LinkedPeptide::isCrossLinked() {
  * \returns whether the Peptide is a normal/linear peptide
  */
 bool LinkedPeptide::isLinear() {
-  return (peptides_.size() == 1 && peptides_[0].link_site() == -1);
+  return (peptides_.size() == 1 && peptides_[0].linkSite() == -1);
 } 
 
 /**
  * \returns whether the Peptide is a deadend
  */
 bool LinkedPeptide::isDeadEnd() {
-  return (peptides_.size() == 1 && peptides_[0].get_num_links() == 1);
+  return (peptides_.size() == 1 && peptides_[0].getNumLinks() == 1);
 }
 
 /**
  * \returns whether the Peptide is a self-loop
  */
 bool LinkedPeptide::isSelfLoop() {
-  return (peptides_.size() == 1 && peptides_[0].get_num_links() == 2);
+  return (peptides_.size() == 1 && peptides_[0].getNumLinks() == 2);
 }
 
 /**
@@ -231,16 +231,16 @@ void LinkedPeptide::calculateMass(
     //cout <<"AVERAGE ";
   }
 
-  mass_[mass_type] = Peptide::calcSequenceMass((char*)peptides_[0].sequence().c_str(), mass_type);   
+  mass_[mass_type] = Peptide::calcSequenceMass((char*)peptides_[0].getSequence().c_str(), mass_type);   
   //cout << "Mass of "<<peptides_[0].sequence().c_str()<<":"
   //    <<calc_sequence_mass((char*)peptides_[0].sequence().c_str(), mass_type)<<endl;
 
-  if (peptides_[0].get_num_links() > 0) {
+  if (peptides_[0].getNumLinks() > 0) {
     mass_[mass_type] += linker_mass_;
   }
 
   if (size() == 2) {
-    mass_[mass_type] += Peptide::calcSequenceMass((char*)peptides_[1].sequence().c_str(), mass_type);
+    mass_[mass_type] += Peptide::calcSequenceMass((char*)peptides_[1].getSequence().c_str(), mass_type);
      //cout << "Mass of "<<peptides_[1].sequence().c_str() <<":"
        //<<calc_sequence_mass((char*)peptides_[1].sequence().c_str(), mass_type)<<endl;
   }
@@ -289,21 +289,21 @@ void LinkedPeptide::split(
   XHHC_Peptide peptideB = peptides_[0];
   // dead end
   if (isDeadEnd()) {
-   peptideB.set_sequence("");
+   peptideB.setSequence("");
   }
   // if a loop
-  if (peptideA.get_num_links() == 2) {
+  if (peptideA.getNumLinks() == 2) {
     is_loop = true;
   } else if (isCrossLinked()) {
     peptideB = peptides_[1];
   }
-  for (int i = 1; i < peptideA.length(); ++i) {
-    peptideA.split_at(i, ion_pairs, charge_, peptideB, is_loop);
+  for (int idx = 1; idx < peptideA.getLength(); ++idx) {
+    peptideA.splitAt(idx, ion_pairs, charge_, peptideB, is_loop);
   }
  
   if (isCrossLinked()) {
-    for (int i = 1; i < peptideB.length(); ++i) {
-      peptideB.split_at(i, ion_pairs, charge_, peptideA, is_loop);
+    for (int idx = 1; idx < peptideB.getLength(); ++idx) {
+      peptideB.splitAt(idx, ion_pairs, charge_, peptideA, is_loop);
     }
   } 
 }
@@ -318,8 +318,8 @@ void LinkedPeptide::splitA(
   XHHC_Peptide peptideA = peptides_[0];
   XHHC_Peptide peptideB = peptides_[1];
 
-  for (int i = 1; i < peptideA.length(); ++i) {
-    peptideA.split_at(i, ion_pairs, charge_, peptideB, false);
+  for (int idx = 1; idx < peptideA.getLength(); ++idx) {
+    peptideA.splitAt(idx, ion_pairs, charge_, peptideB, false);
   }
 }
 
@@ -333,8 +333,8 @@ void LinkedPeptide::splitB(
   XHHC_Peptide peptideA = peptides_[0];
   XHHC_Peptide peptideB = peptides_[1];
 
-  for (int i = 1; i < peptideB.length(); ++i) {
-    peptideB.split_at(i, ion_pairs, charge_, peptideA, false);
+  for (int idx = 1; idx < peptideB.getLength(); ++idx) {
+    peptideB.splitAt(idx, ion_pairs, charge_, peptideA, false);
   }
 }
 
@@ -356,18 +356,18 @@ std::ostream &operator<< (std::ostream& os, LinkedPeptide& lp) {
   vector<XHHC_Peptide> peptides = lp.getPeptides();
   ostringstream link_positions;
   link_positions << "(";
-  for (int i = 0; i < peptides[0].length(); ++i) {
-	if (peptides[0].has_link_at(i)) link_positions << (i+1) << "," ;
+  for (int idx = 0; idx < peptides[0].getLength(); ++idx) {
+	if (peptides[0].hasLinkAt(idx)) link_positions << (idx+1) << "," ;
   }
   if (peptides.size() == 2) {
-    for (int i = 0; i < peptides[1].length(); ++i) {
-	if (peptides[1].has_link_at(i)) link_positions << (i+1) << ")";
+    for (int idx = 0; idx < peptides[1].getLength(); ++idx) {
+	if (peptides[1].hasLinkAt(idx)) link_positions << (idx+1) << ")";
     }
-    return os << peptides[0].sequence() << ", " << peptides[1].sequence() << " " << link_positions.str();// << " +" << lp.charge();
+    return os << peptides[0].getSequence() << ", " << peptides[1].getSequence() << " " << link_positions.str();// << " +" << lp.charge();
   }
   string final = link_positions.str();
   if (final.length() > 1) final.erase(final.end()-1);
-  return os << peptides[0].sequence() << " " << final << ")";// +" << lp.charge();
+  return os << peptides[0].getSequence() << " " << final << ")";// +" << lp.charge();
 }
 
 bool compareMassAverage(const LinkedPeptide& lp1, const LinkedPeptide& lp2) {

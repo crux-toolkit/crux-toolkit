@@ -1,6 +1,7 @@
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
 #include "LinkedPeptide.h"
+#include "XHHC_Peptide.h"
 
 #include "objects.h"
 #include "IonConstraint.h"
@@ -209,25 +210,25 @@ int main(int argc, char** argv) {
       if (ion->size() == 2) {
 	vector<XHHC_Peptide> peptides = ion->getPeptides();
 	// score the first peptide with modification of second peptide	
-        mod_mass = linker_mass + peptides[1].mass(MONO);	
-	ion_series = new IonSeries((char*)peptides[0].sequence().c_str(), ion->getCharge(), ion_constraint);
-	hhc_predict_ions(ion_series, mod_mass, peptides[0].link_site());
+        mod_mass = linker_mass + peptides[1].getMass(MONO);	
+	ion_series = new IonSeries((char*)peptides[0].getSequence().c_str(), ion->getCharge(), ion_constraint);
+	hhc_predict_ions(ion_series, mod_mass, peptides[0].linkSite());
 	score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
 	//score = xhhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
         ss.str("");
-	ss << peptides[0].sequence() << " mod " << peptides[1].sequence() << ", " << peptides[0].link_site();
+	ss << peptides[0].getSequence() << " mod " << peptides[1].getSequence() << ", " << peptides[0].linkSite();
         scores.insert(make_pair(score, ss.str()));	
 	// score second peptide with modification of first peptide
-        mod_mass = linker_mass + peptides[0].mass(MONO);	
+        mod_mass = linker_mass + peptides[0].getMass(MONO);	
 	ion_series = new IonSeries(
-          (char*)peptides[1].sequence().c_str(), 
+          (char*)peptides[1].getSequence().c_str(), 
           ion->getCharge(), ion_constraint);
 
-	hhc_predict_ions(ion_series, mod_mass, peptides[1].link_site());
+	hhc_predict_ions(ion_series, mod_mass, peptides[1].linkSite());
         //score = xhhc_scorer.score_spectrum_vs_series(spectrum, ion_series);
 	score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
 	ss.str("");
-	ss << peptides[1].sequence() << " mod " << peptides[0].sequence() << ", " << peptides[1].link_site();
+	ss << peptides[1].getSequence() << " mod " << peptides[0].getSequence() << ", " << peptides[1].linkSite();
         scores.insert(make_pair(score, ss.str()));
       }
     }

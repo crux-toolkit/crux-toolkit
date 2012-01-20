@@ -1,6 +1,7 @@
 #include "xhhc.h"
 #include "XLinkBondMap.h"
 #include "LinkedPeptide.h"
+#include "XHHC_Peptide.h"
 
 #include "parameter.h"
 #include "Peptide.h"
@@ -363,10 +364,10 @@ void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides,
 void add_decoys(vector<LinkedPeptide>& decoys, LinkedPeptide& lp) {
   vector<XHHC_Peptide> peptides = lp.getPeptides();
   LinkedPeptide decoy = LinkedPeptide(lp.getCharge()); 
-  XHHC_Peptide pepA_shuffled = shuffle(peptides[0]);
+  XHHC_Peptide pepA_shuffled = peptides[0].shuffle();
   decoy.addPeptide(pepA_shuffled);
   if (lp.size() == 2) {
-    XHHC_Peptide pepB_shuffled = shuffle(peptides[1]);
+    XHHC_Peptide pepB_shuffled = peptides[1].shuffle();
     decoy.addPeptide(pepB_shuffled);
   }
   decoy.setDecoy();
@@ -374,122 +375,6 @@ void add_decoys(vector<LinkedPeptide>& decoys, LinkedPeptide& lp) {
   decoys.push_back(decoy);
 }
 
-// return a shuffled peptide, preserving any links
-XHHC_Peptide shuffle(XHHC_Peptide peptide) {
-  string shuffled = string(peptide.sequence());
-  XHHC_Peptide shuffled_peptide = XHHC_Peptide(peptide.sequence());
-  for (size_t i = 0; i < shuffled.length(); ++i) {
-    if (peptide.has_link_at(i)) shuffled_peptide.add_link(i);
-  }
 
-  int start_idx = 1;
-  int end_idx = peptide.length() - 2;
-  int switch_idx = 0;
-  char temp_char = 0;
-  while(start_idx <= end_idx){
-    switch_idx = get_random_number_interval(start_idx, end_idx);
-    temp_char = shuffled[start_idx];
-    shuffled[start_idx] = shuffled[switch_idx];
-    shuffled[switch_idx] = temp_char;
-    if (shuffled_peptide.has_link_at(switch_idx)) {
-      //if not a self loop
-      if (!shuffled_peptide.has_link_at(start_idx)) {
-        shuffled_peptide.remove_link(switch_idx);
-        shuffled_peptide.add_link(start_idx);
-      }
-    } else if (shuffled_peptide.has_link_at(start_idx)) {
-      shuffled_peptide.remove_link(start_idx);
-      shuffled_peptide.add_link(switch_idx);
-    }
-    ++start_idx;
-  }
-  shuffled_peptide.set_sequence(shuffled);
-  return shuffled_peptide;
-}
-
-//
-//
-// Peptide and LinkedPeptide class method definitions below
-//
-//////////////////////////////////////////////////////////
-
-
-void XHHC_Peptide::set_sequence(string sequence) {
-  sequence_ = sequence;
-  length_ = sequence.length();  
-}
-
-void XHHC_Peptide::remove_link(int index) {
-  links[index] = false;
-  num_links--;
-}
-
-
-
-
-int XHHC_Peptide::link_site() {
-  for (int i = 0; i < length_; ++i) {
-    if (has_link_at(i)) 
-      return i;
-  }
-  return -1;
-}
-
-FLOAT_T XHHC_Peptide::mass(MASS_TYPE_T mass_type) {
-  if (mass_calculated[mass_type]) 
-    return mass_[mass_type];
-  else {
-    mass_[mass_type] = Peptide::calcSequenceMass((char*)sequence_.c_str(), mass_type);
-    mass_calculated[mass_type] = true;
-    return mass_[mass_type];
-  }
-}
-
-
-void XHHC_Peptide::add_link(int index) {
-  links[index] = true;
-  num_links++;
-}
-
-
-// this needs to change
-void XHHC_Peptide::split_at(
-  int index, 
-  vector<pair<LinkedPeptide, LinkedPeptide> >& pairs, 
-  int charge, 
-  XHHC_Peptide& other, 
-  bool is_loop) {
-
-  bool self_flag = false;
-  // for every charge state
-  for (int c = 0; c <= charge; ++c) {
-    XHHC_Peptide pepA = XHHC_Peptide(sequence_.substr(0, index));
-    XHHC_Peptide pepB = XHHC_Peptide(sequence_.substr(index, length_ - index));
-    LinkedPeptide linkedA = LinkedPeptide(c);
-    LinkedPeptide linkedB = LinkedPeptide(charge - c);
-    self_flag = true;
-    // for every position on pepA
-    for (int i = 0; i < index; i++) {
-      if (has_link_at(i)) {
-        pepA.add_link(i); 
-        if (!other.empty() && !is_loop) linkedA.addPeptide(other);
-        // if a loop, skip cleavages in between link sites (same mass as precursor)
-	if (is_loop) self_flag = !self_flag;
-      }
-    }
-    if (!self_flag) continue;
-    // for every position on pepB
-    for (int i = index; i < length_; i++) {
-      if (has_link_at(i)) {
-        pepB.add_link(i - index);
-	if (!other.empty() && !is_loop) linkedB.addPeptide(other);
-	//else (self_flag = !self_flag);
-      }
-    } 
-    linkedA.addPeptide(pepA);
-    linkedB.addPeptide(pepB);
-    pairs.push_back(pair<LinkedPeptide, LinkedPeptide> (linkedA, linkedB));
-  }
-}
 
 
