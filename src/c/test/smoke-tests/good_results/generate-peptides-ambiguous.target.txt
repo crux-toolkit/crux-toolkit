@@ -1,0 +1,18 @@
+INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
+WARNING: Ignoring peptides with ambiguous amino acids (B, X, Z).
+INFO: total peptides: 2
+INFO: crux-generate-peptides finished.
+# PROTEIN DATABASE: ambiguous.fasta
+# OPTIONS:
+#	min-mass: 1464.00
+#	max-mass: 1496.00
+#	min-length: 6
+#	max-length: 50
+#	enzyme: trypsin
+#	digestion: full-digest
+#	number of allowed missed-cleavages: 0
+#	isotopic mass type: average
+#	verbosity: 30
+#	use index: false
+1464.81	gi|6381999|ref|NP_009311.2|	292	12	QYJLJNIAYLLK
+1495.81	gi|6382000|ref|NP_009314.2|	29	12	VMFTTFYMJTNK
