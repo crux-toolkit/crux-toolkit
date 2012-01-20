@@ -2,6 +2,7 @@
 #include "xhhc_scorer.h"
 
 #include "LinkedPeptide.h"
+#include "XHHC_Peptide.h"
 
 #include <iostream>
 

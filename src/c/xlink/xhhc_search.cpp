@@ -18,6 +18,7 @@
 #include "xlink_compute_qvalues.h"
 #include "SearchForXLinks.h"
 #include "LinkedPeptide.h"
+#include "XHHC_Peptide.h"
 
 //CRUX INCLUDES
 #include "objects.h"
@@ -117,6 +118,8 @@ int SearchForXLinks::xhhcSearchMain() {
       peptides_file << all_ions.at(idx) << endl;
     }
     peptides_file.flush();
+    carp(CARP_INFO, "outputted database to xlink_peptides.txt");
+    return 0;
   }
 
   carp(CARP_INFO,"Loading Spectra");
@@ -402,13 +405,13 @@ int SearchForXLinks::xhhcSearchMain() {
 
         //output protein ids/peptide locations.  If it is a linear, dead or self loop, only
         //use the 1st field.
-        string sequence1  = scores[score_index].second.getPeptides()[0].sequence();
+        string sequence1  = scores[score_index].second.getPeptides()[0].getSequence();
         vector<Peptide*>& peptides1 = get_peptides_from_sequence(sequence1);
         string result_string = get_protein_ids_locations(peptides1);
         search_target_file << result_string << "\t";
         //if it is cross-linked peptide, use the second field
         if (scores[score_index].second.isCrossLinked()) {
-          string sequence2  = scores[score_index].second.getPeptides()[1].sequence();
+          string sequence2  = scores[score_index].second.getPeptides()[1].getSequence();
           vector<Peptide*>& peptides2 = get_peptides_from_sequence(sequence2);
           string result_string = get_protein_ids_locations(peptides2);
           search_target_file << result_string;

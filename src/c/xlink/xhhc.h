@@ -44,40 +44,6 @@
 std::vector<Peptide*>& get_peptides_from_sequence(std::string& sequence);
 void free_peptides();
 
-class XHHC_Peptide;
-
-class XHHC_Peptide {
- public:
-  XHHC_Peptide() {mass_calculated[MONO] = false; mass_calculated[AVERAGE] = false;}
-  XHHC_Peptide(std::string sequence) : num_links(0), sequence_(sequence), length_(sequence.length())  {
-    mass_calculated[MONO] = false;
-    mass_calculated[AVERAGE] = false;
-    int length = sequence.length();
-    for (int i = 0; i < length; ++i)
-      links.push_back(false);
-  }
-    // cleave the peptide at an index, adding b and y ions
-    // skips if a cleave site on self loop between the link
-    void split_at(int index, std::vector<std::pair<LinkedPeptide, LinkedPeptide> >& pairs, int charge, XHHC_Peptide& other, bool is_loop);
-    bool has_link_at(int index)		{ return (links[index]); }
-    int length()			{ return length_; }
-    bool has_link() 			{ return num_links > 0; }
-    std::string sequence() 		{ return sequence_;}	
-    bool empty() 			{ return length_ == 0; }
-    int get_num_links() 		{ return num_links; }
-    void add_link(int index);
-    void remove_link(int index);
-    int link_site(); 
-    void set_sequence(std::string sequence);
-    FLOAT_T mass(MASS_TYPE_T mass_type);
-private:
-    bool mass_calculated[NUMBER_MASS_TYPES];
-    int num_links;
-    std::vector<bool> links;
-    std::string sequence_;
-    int length_;
-    FLOAT_T mass_[NUMBER_MASS_TYPES];
-};
 
 
 // methods used by xhhc_search.cpp and xhhc_make_histogram.cpp

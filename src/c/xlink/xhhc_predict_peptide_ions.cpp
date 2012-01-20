@@ -1,6 +1,7 @@
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
 #include "LinkedPeptide.h"
+#include "XHHC_Peptide.h"
 
 #include <iostream>
 #include <fstream>
