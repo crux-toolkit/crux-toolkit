@@ -376,19 +376,20 @@ The maximum number of modified amino acids that can appear in one
 peptide.  Each aa can be modified multiple times. Default = no limit.
 
 <li>
-<code>mod-mass-format &lt;mod-mass|total-mass|multiple-separate&gt;<code>&ndash;
-Sequence modifications are reported as a number enclosed in square
-braces following the modified reside.  The mass can appear in one of
-three ways.  'mod-mass' will report the value of the mass shift
-incurred by the modification (total mass minus modification). 'total-mass'
+<code>mod-mass-format &lt;mod-only|total|separate&gt;<code> &ndash;
+specify how sequence modifications are reported in various ouptut
+files.  Each modification is reported as a number enclosed in square
+braces following the modified reside; however, the number may
+correspond to one of three different masses: (1) 'mod-only' reports
+the value of the mass shift induced by the modification; (2) 'total'
 reports the mass of the residue with the modification (residue mass
-plus modification mass).  'multiple-separate' is the same as 'mod-mass' 
-except when there is more than one modification to the residue.  In
-that case each modification is given in a comma-separated list.  For
-example, suppose the sequence ADC had two modifications on D.  D has an
-unmodified mass of 115, and say the two modifications were +14 and
-+2.  The sequence would appear as AD[16]C with 'mod-mass', AD[131]C
-with 'total-mass', and AD[14,2]C with 'multiple-separate'.
+plus modification mass); (3) 'separate' is the same as 'mod-only', but
+multiple modifications to a single amino acid are reported as a
+comma-separated list of values. For example, suppose amino
+acid <i>d</i> has an unmodified mass of 115 as well as two
+modifications of masses +14 and +2.  In this case, the amino acid
+would be reported as d[16] with 'mod-only', d[131] with 'total', and
+d[14,2] with 'separate'.</li>
 
 <li>
 <code>precision &lt;int&gt;</code> &ndash;
