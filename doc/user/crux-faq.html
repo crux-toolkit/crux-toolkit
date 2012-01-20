@@ -110,6 +110,20 @@ Linux and Windows.  The latter requires that you have Cygwin
 installed.</p>
 
 <li>
+<b>I thought Crux was supposed to be fast, but I am seeing very slow
+  search speeds.  What's going on?</b></li>
+
+<p>
+Crux is not particularly optimized to run quickly on a FASTA file.  To
+get Crux to go fast, you must do the "crux create-index" step first,
+and then run your searches using the resulting index.  If, after doing
+this, you are still getting slow search speeds, it may be because you
+are using the Network File System (NFS).   Crux uses a memory mapping
+mechanism that often works poorly over a system like NFS.  The
+solution is to copy your index to a local disk.  Then Crux should run
+much more quickly.</p>
+
+<li>
 <b>How does Crux select candidate peptides from the database?</b></li>
 
 <p>
