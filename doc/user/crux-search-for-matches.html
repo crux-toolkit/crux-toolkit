@@ -179,7 +179,6 @@ peptide-shuffle</code>. Use 'reverse' to reverse each protein sequence,
 to shuffle the sequence between enzyme cleavage sites, leaving the
 termini in place. Use 'none' for no decoys.  Default=protein-shuffle. 
 
-
 <li>
 <code>--decoy-location &lt;target-file | one-decoy-file |
 separate-decoy-files&gt;</code> &ndash; 
@@ -362,7 +361,7 @@ Add a modification of the given mass change to the C-terminus of every
 peptide.
 
 <li>
-<code>nmod-fixed &lt;mass change&gt</code>&ndash;
+<code>nmod-fixed &lt;mass change&gt;</code>&ndash;
 Add a modification of the given mass change to the N-terminus of every
 peptide.
 
@@ -375,6 +374,21 @@ peptide. Default = no limit.
 <code>max-aas-modified &lt;int&gt;</code> &ndash;
 The maximum number of modified amino acids that can appear in one
 peptide.  Each aa can be modified multiple times. Default = no limit.
+
+<li>
+<code>mod-mass-format &lt;mod-mass|total-mass|multiple-separate&gt;<code>&ndash;
+Sequence modifications are reported as a number enclosed in square
+braces following the modified reside.  The mass can appear in one of
+three ways.  'mod-mass' will report the value of the mass shift
+incurred by the modification (total mass minus modification). 'total-mass'
+reports the mass of the residue with the modification (residue mass
+plus modification mass).  'multiple-separate' is the same as 'mod-mass' 
+except when there is more than one modification to the residue.  In
+that case each modification is given in a comma-separated list.  For
+example, suppose the sequence ADC had two modifications on D.  D has an
+unmodified mass of 115, and say the two modifications were +14 and
++2.  The sequence would appear as AD[16]C with 'mod-mass', AD[131]C
+with 'total-mass', and AD[14,2]C with 'multiple-separate'.
 
 <li>
 <code>precision &lt;int&gt;</code> &ndash;
