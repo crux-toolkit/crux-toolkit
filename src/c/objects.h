@@ -231,6 +231,18 @@ enum DECOY_TYPE_T {
 };
 
 /**
+ * \enum MASS_FORMAT_T
+ */
+enum MASS_FORMAT_T {
+  INVALID_MASS_FORMAT,
+  MOD_MASS_ONLY,
+  AA_PLUS_MOD,
+  MOD_MASSES_SEPARATE,
+  NUMBER_MASS_FORMATS
+};
+
+
+/**
  * \typedef WINDOW_TYPE_T
  * \brief The typedef for window type (mass, mz, ppm);
  */

@@ -331,7 +331,7 @@ class Peptide {
    * any modifications.
    */
   char* getModifiedSequenceWithMasses(
-    bool merge_masses ///< do we want to merge masses?
+    MASS_FORMAT_T merge_masses ///< do we want to merge masses?
     );
 
   /**

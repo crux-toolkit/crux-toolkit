@@ -55,6 +55,27 @@ char* decoy_type_to_string(DECOY_TYPE_T type){
 }
 
 /**
+ * The string version of the mass format types
+ */
+static const char* mass_format_type_strings[NUMBER_MASS_FORMATS] = 
+  { "invalid", "mod-only", "total", "separate" };
+
+MASS_FORMAT_T string_to_mass_format(const char* name){
+  int mass_format_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+                                              mass_format_type_strings, 
+                                              NUMBER_MASS_FORMATS);
+  if( mass_format_int < 0 ){
+    mass_format_int = 0;
+  }
+
+  return (MASS_FORMAT_T)mass_format_int;
+}
+
+char* mass_format_type_to_string(MASS_FORMAT_T type){
+  return my_copy_string(mass_format_type_strings[type]);
+}
+
+/**
  * The string version of isotopic mass type (average, mono)
  */
 static const char* mass_type_strings[NUMBER_MASS_TYPES] = {"average", "mono"};

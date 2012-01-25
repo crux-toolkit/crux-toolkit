@@ -315,7 +315,7 @@ START_TEST(test_modify_1){
   fail_unless( strcmp(mod_str, "FGGTSVANAER@") == 0,
 	       "Modified seq is %s but should be FGGTSVANAER@", mod_str);
   free(mod_str);
-  mod_str =  modified_aa_string_to_string_with_masses(mods, len, false);
+  mod_str =  modified_aa_string_to_string_with_masses(mods, len, MOD_MASS_ONLY);
   fail_unless( strcmp(mod_str, "FGGTSVANAER[0.00]") == 0,
 	       "Modified seq is %s but should be FGGTSVANAER[0.00]", mod_str);
   free(pep);
@@ -333,7 +333,7 @@ START_TEST(test_modify_1){
   fail_unless( strcmp(mod_str, "F*GGTSVANAER") == 0,
 	       "Modified seq is %s but should be F*GGTSVANAER", mod_str);
   free(mod_str);
-  mod_str =  modified_aa_string_to_string_with_masses(mods, len, false);
+  mod_str =  modified_aa_string_to_string_with_masses(mods, len, MOD_MASS_ONLY);
   fail_unless( strcmp(mod_str, "F[0.00]GGTSVANAER") == 0,
 	       "Modified seq is %s but should be F[0.00]GGTSVANAER", mod_str);
   free(pep);

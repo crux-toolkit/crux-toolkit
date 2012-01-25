@@ -728,7 +728,8 @@ void Match::printOneMatchField(
   case SEQUENCE_COL:
     {
       // this should get the sequence from the match, not the peptide
-      char* sequence = getModSequenceStrWithMasses(get_boolean_parameter("display-summed-mod-masses"));
+      char* sequence = getModSequenceStrWithMasses(
+                get_mass_format_type_parameter("mod-mass-format"));
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, sequence);
       free(sequence);
     }
@@ -845,7 +846,7 @@ void Match::printXml(
   }
   char* flanking_aas = peptide->getFlankingAAs();
   char* flanking_aas_iter = flanking_aas;
-  char* mod_seq = getModSequenceStrWithMasses(true);
+  char* mod_seq = getModSequenceStrWithMasses(get_mass_format_type_parameter("mod-mass-format"));
   
   char flanking_aas_prev = flanking_aas[0];
   char flanking_aas_next = flanking_aas[1];
@@ -1456,7 +1457,7 @@ char* Match::getModSequenceStrWithSymbols(){
  * masses. 
  */
 char* Match::getModSequenceStrWithMasses(
- bool merge_masses)
+ MASS_FORMAT_T mass_format)
 {
 
   // if post_process_match and has a null peptide you can't get sequence
@@ -1469,8 +1470,8 @@ char* Match::getModSequenceStrWithMasses(
   }
 
   return modified_aa_string_to_string_with_masses(mod_sequence_, 
-                                        peptide_->getLength(),
-                                                  merge_masses);
+                                                  peptide_->getLength(),
+                                                  mass_format);
 }
 /**
  * Must ask for score that has been computed

@@ -81,6 +81,7 @@ enum parameter_type {
   PARSIMONY_TYPE_P,  ///< parameters of type PARSIMONY_TYPE_T
   QUANT_LEVEL_TYPE_P,///< parameters of type QUANT_LEVEL_TYPE_T
   DECOY_TYPE_P,      ///< parameters of type DECOY_TYPE_T
+  MASS_FORMAT_P,     ///< parameters of type MASS_FORMAT_T
 
   NUMBER_PARAMETER_TYPES  ///< leave this last, number of types
 };
@@ -234,6 +235,10 @@ MEASURE_TYPE_T get_measure_type_parameter(
   );
 
 DECOY_TYPE_T get_decoy_type_parameter(
+  const char* name
+  );
+
+MASS_FORMAT_T get_mass_format_type_parameter(
   const char* name
   );
 

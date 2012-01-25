@@ -118,7 +118,8 @@ START_TEST(test_mod_on_unmodified){
   char* converted = modified_aa_string_to_string_with_symbols(mod_seq, len);
   fail_unless( strcmp(seq, converted) == 0,
                "The modified seq returned should be the same as seq.");
-  converted = modified_aa_string_to_string_with_masses(mod_seq, len, false);
+  converted = modified_aa_string_to_string_with_masses(mod_seq, len, 
+                                                       MOD_MASS_ONLY);
   fail_unless( strcmp(seq, converted) == 0,
                "The modified seq returned should be the same as seq.");
 
@@ -126,6 +127,7 @@ START_TEST(test_mod_on_unmodified){
 END_TEST
 
 START_TEST(test_with_mod){
+  initialize_parameters();
   double initial_mass = peptide3->getPeptideMass();
   // set up the mod
   AA_MOD_T* amod = new_aa_mod(0);
@@ -168,6 +170,7 @@ START_TEST(test_with_mod){
 END_TEST
 
 START_TEST(test_reversed_seq){
+  initialize_parameters();
   //char* original_seq = get_peptide_sequence(peptide1);
   // VADILESNAR
   char* reversed_seq = peptide1->generateReversedSequence();
@@ -185,6 +188,7 @@ START_TEST(test_reversed_seq){
 END_TEST
 
 START_TEST(test_shuffled_mod_seq){
+  initialize_parameters();
   MODIFIED_AA_T* aa_seq = peptide1->getModifiedAASequence();
   int len = peptide1->getLength();
   char* seq = modified_aa_string_to_string_with_symbols( aa_seq, len );

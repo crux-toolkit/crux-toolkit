@@ -1,0 +1,7 @@
+mod=79.90:STY:2
+cmod=33.3:10
+mod-mass-format=total
+overwrite=T
+seed=7
+precision=2
+top-match=5

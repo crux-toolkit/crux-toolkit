@@ -28,7 +28,7 @@ static const char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = {
   "ENZYME_T", 
   "bool", "SCORER_TYPE_T", "ION_TYPE_T",
   "ALGORITHM_TYPE_T", "WINDOW_TYPE_T", "MEASURE_TYPE_T", 
-  "PARSIMONY_TYPE_T", "QUANT_LEVEL_TYPE_T", "DECOY_TYPE_T"};
+  "PARSIMONY_TYPE_T", "QUANT_LEVEL_TYPE_T", "DECOY_TYPE_T", "MASS_FORMAT_T"};
 
 //one hash for parameter values, one for usage statements, one for types
 // all hashes keyed on parameter/option name
@@ -224,6 +224,13 @@ bool set_measure_type_parameter(
 bool set_decoy_type_parameter(
   const char* name, ///< the name of the parameter looking for -in
   DECOY_TYPE_T set_value, ///< the value to be set -in
+  const char* usage, ///< string to print in usage statement
+  const char* filenotes, ///<additional infor for param file
+  const char* foruser);
+
+bool set_mass_format_type_parameter(
+  const char* name, ///< the name of the parameter looking for -in
+  MASS_FORMAT_T set_value, ///< the value to be set -in
   const char* usage, ///< string to print in usage statement
   const char* filenotes, ///<additional infor for param file
   const char* foruser);
@@ -659,13 +666,13 @@ void initialize_parameters(void){
       "The maximum number of modified amino acids that can appear in one "
       "peptide.  Each aa can be modified multiple times.  Default=no limit.",
       "Available from parameter file for search-for-matches.", "true");
-  set_boolean_parameter("display-summed-mod-masses", true,
-      "When a residue has multiple modifications, print the sum of those "
-      "modifications rather than listing each in a comma-separated list.  "
-      "Default=T.",
-      "Available in the parameter file for any command that prints peptides "
-      "sequences.  Example: true is SE[12.40]Q and false is SE[10.00,2.40]Q",
-      "true" );
+  set_mass_format_type_parameter("mod-mass-format", MOD_MASS_ONLY,
+      "Print the masses of modified sequences in one of three ways 'mod-only', "
+      "'total' (residue mass plus modification), or 'separate' (for multiple "
+      "mods to one residue): Default 'mod-only'.",
+      "Available in the parameter file for search-for-matches, sequest-search "
+      "and generate-peptides.",
+      "true");
   set_int_parameter("mod-precision", MOD_MASS_PRECISION, 0, 20,//arbitrary
       "Set the precision for modifications as written to .txt files.",
       "Also changes mods written to parameter file. Set internally based on "
@@ -1396,8 +1403,8 @@ void set_flanking_peaks(const char* exe_name){
  * \returns true is command line is successfully parsed.
  */
 bool parse_cmd_line_into_params_hash(int argc, 
-                                          char** argv, 
-                                          const char* exe_name){
+                                     char** argv, 
+                                     const char* exe_name){
   carp(CARP_DETAILED_DEBUG, "Parameter.c is parsing the command line");
   assert(parameter_initialized && usage_initialized && type_initialized);
   bool success = true;
@@ -1835,6 +1842,15 @@ bool check_option_type_and_bounds(const char* name){
       success = false;
       sprintf(die_str, "Illegal decoy type '%s' for option '%s'. "
               "Must be one of none, reverse, protein-shuffle, peptide-shuffle",
+              value_str, name);
+    }
+    break;
+  case MASS_FORMAT_P:
+    carp(CARP_DEBUG, "found mass format param, value %s", value_str);
+    if (string_to_mass_format(value_str) == INVALID_MASS_FORMAT){
+      success = false;
+      sprintf(die_str, "Illegal mass format '%s' for option '%s'. "
+              "Must be one of mod-only, total, separate",
               value_str, name);
     }
     break;
@@ -2389,6 +2405,16 @@ DECOY_TYPE_T get_decoy_type_parameter(
   return param_value;
 }
 
+MASS_FORMAT_T get_mass_format_type_parameter(
+  const char* name
+  ){
+  char * param_value_str = (char*)get_hash_value(parameters, name);
+  MASS_FORMAT_T param_value =
+    string_to_mass_format(param_value_str);
+  
+  return param_value;
+}
+
 int get_max_ion_charge_parameter(
   const char* name
   ){
@@ -2788,6 +2814,34 @@ bool set_decoy_type_parameter(
   result = add_or_update_hash(file_notes, name, filenotes);
   result = add_or_update_hash(for_users, name, foruser);
   result = add_or_update_hash(types, name, "DECOY_TYPE_T");
+  free(value_str);
+  return result;
+  
+}
+
+bool set_mass_format_type_parameter(
+  const char* name, ///< the name of the parameter looking for -in
+  MASS_FORMAT_T set_value, ///< the value to be set -in
+  const char* usage, ///< string to print in usage statement
+  const char* filenotes, ///<additional infor for param file
+  const char* foruser 
+  ){
+  bool result = true;
+
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return false;
+  }
+  
+  /* stringify the value */
+  char* value_str = mass_format_type_to_string(set_value);
+  
+  result = add_or_update_hash(parameters, name, value_str);
+  result = add_or_update_hash(usages, name, usage);
+  result = add_or_update_hash(file_notes, name, filenotes);
+  result = add_or_update_hash(for_users, name, foruser);
+  result = add_or_update_hash(types, name, "MASS_FORMAT_T");
   free(value_str);
   return result;
   

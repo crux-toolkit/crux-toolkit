@@ -255,14 +255,15 @@ class Match {
   /**
    * \brief Returns a newly allocated string of sequence including any
    * modifications represented as mass values in brackets following the
-   * modified residue. If merge_masses is true, the sum of multiple
-   * modifications on one residue are printed.  If false, each mass is
-   * printed in a comma-separated list.
+   * modified residue. If mass_format is MOD_MASS_ONLY, the sum of multiple
+   * modifications on one residue are printed.  If MOD_MASSES_SEPARATE,
+   * each mass is printed in a comma-separated list.  If AA_PLUS_MOD, then
+   * the mass printed is that of the amino acid plus the modification.
    * \returns The peptide sequence of the match including modification
    * masses. 
    */
   char* getModSequenceStrWithMasses( 
-   bool merge_masses
+   MASS_FORMAT_T mass_format
     );
 
   /**

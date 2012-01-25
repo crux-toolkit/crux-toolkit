@@ -3018,13 +3018,6 @@ verbosity=30
 # Available for crux-search-for-matches.
 mz-bin-offset=0.680000
 
-# When a residue has multiple modifications, print the sum of those
-# modifications rather than listing each in a comma-separated list. 
-# Default=T.
-# Available in the parameter file for any command that prints peptides
-# sequences.  Example: true is SE[12.40]Q and false is SE[10.00,2.40]Q
-display-summed-mod-masses=true
-
 # Create an ASCII version of the peptide list.  Default=F.
 # Creates an ASCII file in the output directory containing one peptide
 # per line.
@@ -3244,6 +3237,13 @@ decoys=peptide-shuffle
 # Print peptide sequence (T,F). Default=F.
 # Available only for crux-generate-peptides.
 output-sequence=false
+
+# Print the masses of modified sequences in one of three ways
+# 'mod-only', 'total' (residue mass plus modification), or 'separate'
+# (for multiple mods to one residue): Default 'mod-only'.
+# Available in the parameter file for search-for-matches, sequest-search
+# and generate-peptides.
+mod-mass-format=mod-only
 
 # Specify a variable modification to apply to peptides.  <mass
 # change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents
