@@ -96,23 +96,26 @@ char* modified_aa_to_string_with_symbols(MODIFIED_AA_T aa);
 /**
  * \brief Converts a MODIFIED_AA_T to it's textual representation,
  * i.e. a letter either alone or followed by square braces containing
- * the mass(es) of any modifications.  If merge_masses is false, all
- * masses are listed in a comma-separated list.  If true, they are
- * summed and returned in one number.  
+ * the mass(es) of any modifications.  If mass_format is
+ * MOD_MASSES_SEPARATE, all masses are listed in a comma-separated
+ * list.  If MOD_MASS_ONLY, they are summed and returned in one
+ * number.  If AA_PLUS_MOD, the mass of the residue plus the mass of
+ * the modifciation(s) is printed.
  * 
  * \returns A newly allocated char* with amino acid and modifciation
  * masses in square brackets.
  */
 char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa, 
-                                        bool merge_masses,
+                                        MASS_FORMAT_T mass_format,
                                         int precision);
 /**
  * \brief Take an array of MODIFIED_AA_T's and return an array of
  * char's that includes the letter of each aa and the mass change of
  * any modifications in brackets following the modified residue.  If
- * merge_masses is true, all AA_MOD_T's are added and one value is
- * printed.  If false, each the mass of each AA_MOD_T is printed in a
- * comma-separated list.
+ * If is mass_format MOD_MASSES_SEPARATE, all masses are listed in a
+ * comma-separated list.  If MOD_MASS_ONLY, they are summed and
+ * returned in one number.  If AA_PLUS_MOD, the mass of the residue
+ * plus the mass of the modifciation(s) is printed.
  *
  * \returns A newly allocated array of characters, a text
  * representation of the modified sequence.
@@ -120,7 +123,7 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
 char* modified_aa_string_to_string_with_masses(
  MODIFIED_AA_T* aa_string, // the modified aa's to translate
  int length, // length of aa_string
- bool merge_masses); // false==print each mod mass per aa, true== sum them
+ MASS_FORMAT_T mass_format); // which mass value to print
 
 /**
  * \brief Take an array of MODIFIED_AA_T's and return an array of
@@ -151,7 +154,8 @@ char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length);
  *
  * \returns The length of the mod_sequence array.
  */
-int convert_to_mod_aa_seq(const char* sequence, MODIFIED_AA_T** mod_sequence);
+int convert_to_mod_aa_seq(const char* sequence, MODIFIED_AA_T** mod_sequence,
+                          MASS_FORMAT_T mass_format = MOD_MASS_ONLY);
 
 /**
  * \brief Allocate a new MODIFIED_AA_T array and copy values into it.

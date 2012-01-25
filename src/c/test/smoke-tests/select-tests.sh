@@ -12,7 +12,7 @@ echo "Running test $testnames"
 rm -f select-tests
 for t in $testnames
 do
- grep $t crux-test.cmds >> select-tests
+ grep " $t " crux-test.cmds >> select-tests
 
  if [ $? != 0 ] ; then
     echo "Could not find test $t."

@@ -432,7 +432,7 @@ Suite *ion_series_suite_2(void){
 
 //chris's test
 START_TEST (test_create){
-  
+  initialize_parameters();  
   /****************************
    * test ion_constraint
    ***************************/

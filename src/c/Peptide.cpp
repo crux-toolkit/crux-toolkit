@@ -769,7 +769,7 @@ char* Peptide::getModifiedSequenceWithSymbols() {
  * any modifications.
  */
 char* Peptide::getModifiedSequenceWithMasses(
- bool merge_masses
+  MASS_FORMAT_T mass_format
  ){
 
   char* seq_string = NULL;
@@ -778,14 +778,14 @@ char* Peptide::getModifiedSequenceWithMasses(
     seq_string = 
       modified_aa_string_to_string_with_masses(decoy_modified_seq_, 
                                                length_,
-                                               merge_masses); 
+                                               mass_format); 
   } else if( modified_seq_ == NULL ){
     seq_string = getSequence();
   }else{
     seq_string = 
       modified_aa_string_to_string_with_masses(modified_seq_,
                                                length_,
-                                               merge_masses);
+                                               mass_format);
   }
   
   return seq_string;
@@ -1455,13 +1455,12 @@ void Peptide::printInFormat(
 
   // obtain peptide sequence
   if(flag_out){
-    parent = next_src->getParentProtein();        
     if( modified_seq_== NULL ){
       sequence = getSequence();
     }else{
       sequence = 
         modified_aa_string_to_string_with_masses(modified_seq_, length_,
-                         get_boolean_parameter("display-summed-mod-masses"));
+                         get_mass_format_type_parameter("mod-mass-format"));
     }
   }
 

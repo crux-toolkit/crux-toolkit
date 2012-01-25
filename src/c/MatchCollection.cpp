@@ -766,7 +766,7 @@ bool MatchCollection::populateMatchRank(
     FLOAT_T this_score = cur_match->getScore(score_type);
     
     if( NOT_SCORED == cur_match->getScore(score_type) ){
-      char* seq = cur_match->getModSequenceStrWithMasses(false);
+      char* seq = cur_match->getModSequenceStrWithMasses(MOD_MASS_ONLY);
       carp(CARP_WARNING, 
            "PSM spectrum %i charge %i sequence %s was NOT scored for type %i",
            cur_match->getSpectrum()->getFirstScan(),
@@ -1141,7 +1141,7 @@ bool MatchCollection::scoreMatchesOneSpectrum(
       char* mod_seq = 
       modified_aa_string_to_string_with_masses(modified_sequence,
                                                strlen(sequence),
-                                               false);
+                                               MOD_MASS_ONLY);
       carp(CARP_DETAILED_DEBUG, "Second score %f for %s (null:%i)",
            score, mod_seq, match->getNullPeptide());
       free(mod_seq);
