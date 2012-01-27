@@ -363,11 +363,11 @@ std::ostream &operator<< (std::ostream& os, LinkedPeptide& lp) {
     for (int idx = 0; idx < peptides[1].getLength(); ++idx) {
 	if (peptides[1].hasLinkAt(idx)) link_positions << (idx+1) << ")";
     }
-    return os << peptides[0].getSequence() << ", " << peptides[1].getSequence() << " " << link_positions.str();// << " +" << lp.charge();
+    return os << peptides[0].getSequence() << "," << peptides[1].getSequence() << link_positions.str();// << " +" << lp.charge();
   }
   string final = link_positions.str();
   if (final.length() > 1) final.erase(final.end()-1);
-  return os << peptides[0].getSequence() << " " << final << ")";// +" << lp.charge();
+  return os << peptides[0].getSequence() << final << ")";// +" << lp.charge();
 }
 
 bool compareMassAverage(const LinkedPeptide& lp1, const LinkedPeptide& lp2) {
