@@ -35,13 +35,13 @@
 1 = print_processed_spectrum = good_results/processed-test.ms2 = crux print-processed-spectra test.ms2 processed-test.ms2 ; cat crux-output/processed-test.ms2
 
 # Predict ion series
-1 = predict_ions_no_ops = good_results/standard_predict_ions_no_ops.out = crux-predict-peptide-ions IAMASEQ 2=
+1 = predict_ions_no_ops = good_results/standard_predict_ions_no_ops.out = crux predict-peptide-ions IAMASEQ 2=
 
-1 = predict_ions_b_h2o = good_results/standard_predict_ions_b_h2o.out = crux-predict-peptide-ions --primary-ions b --precursor-ions T --h2o 1 IAMASEQ 2 =
+1 = predict_ions_b_h2o = good_results/standard_predict_ions_b_h2o.out = crux predict-peptide-ions --primary-ions b --precursor-ions T --h2o 1 IAMASEQ 2 =
 
-1 = predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = crux-predict-peptide-ions --primary-ions y  --nh3 1 IAMASEQ 2=
+1 = predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = crux predict-peptide-ions --primary-ions y  --nh3 1 IAMASEQ 2=
 
-1 = predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = crux-predict-peptide-ions --primary-ions by --max-ion-charge 1 --flanking T IAMASEQ 3=
+1 = predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = crux predict-peptide-ions --primary-ions by --max-ion-charge 1 --flanking T IAMASEQ 3=
 
 # Search for matches and test txt file
 1 = search_for_matches_default = good_results/search_for_matches_default.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed test.ms2 test.fasta; cat crux-output/search.target.txt = 'Time' 'atabase'

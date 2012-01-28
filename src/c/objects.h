@@ -534,6 +534,7 @@ enum _command {
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
   XLINK_SEARCH_COMMAND, ///< search-for-xlinks
   GENERATE_PEPTIDES_COMMAND, ///< generate-peptides
+  PREDICT_PEPTIDE_IONS_COMMAND, ///< predict-peptide-ions
   VERSION_COMMAND,      ///< just print the version number
   MISC_COMMAND,         ///< miscellaneous command
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value

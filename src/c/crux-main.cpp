@@ -21,6 +21,7 @@
 #include "Barista.h"
 #include "PrintProcessedSpectra.h"
 #include "GeneratePeptides.h"
+#include "PredictPeptideIons.h"
 #include "SearchForXLinks.h"
 #include "ExtractColumns.h"
 #include "SpectralCounts.h"
@@ -55,7 +56,7 @@ int main(int argc, char** argv){
   // fasta/ms2 utilities
   applications.add(new PrintProcessedSpectra());
   applications.add(new GeneratePeptides());
-
+  applications.add(new PredictPeptideIons());
 
   // delimited file utilities
   applications.add(new ExtractColumns());
