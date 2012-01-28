@@ -1,10 +1,16 @@
-/*************************************************************************//**
- * \file predict_peptide_ions.cpp
- * AUTHOR: Chris Park
- * CREATE DATE: 10/05 2006
- * \brief Object for given a peptide and a charge state, predict
- * the ions 
- ****************************************************************************/
+/**
+ * \file PredictPeptideIons.cpp
+ *
+ * AUTHOR: Manijeh Naseri
+ * CREATE DATE: January 27, 2012
+ *
+ * DESCRIPTION: Main method for the predict-peptide-ions.
+ *              Given a peptide sequence, and a charge state, predict
+ *              the fragmentation ions.
+ */
+
+#include "PredictPeptideIons.h"
+
 #include <algorithm>
 #include <math.h>
 #include <stdlib.h>
@@ -26,7 +32,23 @@
 
 using namespace std;
 
-int main(int argc, char** argv){
+/**
+ * \returns A blank PredictPeptideIons object.
+ */
+PredictPeptideIons::PredictPeptideIons() {
+
+}
+
+/**
+ * Destructor
+ */
+PredictPeptideIons::~PredictPeptideIons() {
+}
+
+/**
+ * Main method for PredictPeptideIons.
+ */
+int PredictPeptideIons::main(int argc, char** argv) {
 
   /* Define optional and required command line arguments */
   const char* option_list[] = {
@@ -48,23 +70,11 @@ int main(int argc, char** argv){
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
-  /* for debugging of parameter processing */
-  //set_verbosity_level( CARP_DETAILED_DEBUG );
-  set_verbosity_level( CARP_ERROR );
-
-  /* Set default values for parameters in parameter.c */
-  initialize_parameters();
-
-  /* Define optional and required command line arguments */
-  select_cmd_line_options( option_list, num_options );
-  select_cmd_line_arguments( argument_list, num_arguments);
-
-  /* Parse the command line, including the optional params file */
-  /* does sytnax, type, bounds checking and dies if neccessessary */
-  parse_cmd_line_into_params_hash(argc, argv, "crux-predict-peptide-ions");
-
-  /* Set verbosity */
-  set_verbosity_level(get_int_parameter("verbosity"));
+  initialize(argument_list,
+	     num_arguments,
+	     option_list,
+	     num_options,
+	     argc, argv);
 
   /* Get Arguments */
   const char* peptide_sequence = get_string_parameter_pointer("peptide sequence");
@@ -147,7 +157,36 @@ int main(int argc, char** argv){
   IonConstraint::free(ion_constraint);
 
   delete ion_series;
-  carp(CARP_INFO, "crux-predict-peptide-ions finished");
-  exit(0);
+
+  return 0;
 }
+
+/**
+ * \returns The command name for PredictPeptideIons.
+ */
+string PredictPeptideIons::getName() {
+  return "predict-peptide-ions";
+}
+
+/**
+ * \returns The description for PredictPeptideIons.
+ */
+string PredictPeptideIons::getDescription() {
+  return "Given a peptide sequence, and a charge state, predict "
+    "the fragmentation ions.";
+}
+
+/**
+ * \returns The enum of the application, default PREDICT_PEPTIDE_IONS_COMMAND.
+ */
+COMMAND_T PredictPeptideIons::getCommand() {
+  return PREDICT_PEPTIDE_IONS_COMMAND;
+}
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
 
