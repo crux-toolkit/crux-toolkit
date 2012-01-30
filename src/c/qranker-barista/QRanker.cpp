@@ -101,6 +101,8 @@ void QRanker :: write_results()
   fname << out_dir << "/" << fileroot << "q-ranker.target.psms.txt";
   d.load_data_all_results();
   d.load_data_psm_results();
+  d.load_labels_psm_training();
+  computePEP();
 
   ofstream f1(fname.str().c_str()); 
   write_results_psm_tab(f1);
@@ -121,7 +123,7 @@ void QRanker :: write_results()
 void QRanker :: write_results_psm_tab(ofstream &os)
 {
   os << "scan" << "\t" << "charge" << "\t" << "q-value" << "\t" 
-     << "qranker score" << "\t" << "peptide" << "\t" 
+     << "qranker score" << "\t" << "PEP\t" << "peptide" << "\t" 
      << "filename" << endl;
 
   for(int i = 0; i < fullset.size(); i++)
@@ -131,6 +133,7 @@ void QRanker :: write_results_psm_tab(ofstream &os)
         int pepind = d.psmind2pepind(psmind);
         os << d.psmind2scan(psmind) << "\t" << d.psmind2charge(psmind) << "\t" 
            << fullset[i].q << "\t" << fullset[i].score << "\t"  
+           << fullset[i].PEP << "\t"
            << d.ind2pep(pepind) << "\t" << d.psmind2fname(psmind) << endl;
       }
     }
@@ -925,6 +928,54 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
 
   
 }
+
+/**
+ * Uses the target and decoy scores to compute posterior error
+ * probabilities. 
+ */
+void QRanker::computePEP(){
+  carp(CARP_DEBUG, "Computing PEPs");
+  vector<double> target_scores_vect;
+  vector<double> decoy_scores_vect;
+
+  // pull out the target and decoy scores
+  for(int i = 0; i < fullset.size(); i++){
+    int psm_index = fullset[i].psmind;
+    if( d.psmind2label(psm_index) == 1 ){
+      target_scores_vect.push_back(fullset[i].score);
+    } else { // == -1
+      decoy_scores_vect.push_back(fullset[i].score);
+    }
+  }
+
+  int num_targets = target_scores_vect.size();
+  int num_decoys = decoy_scores_vect.size();
+  carp(CARP_DEBUG, "Found %d targets and %d decoys", num_targets, num_decoys); 
+
+  // copy them to an array as required by the compute_PEP method
+  double* target_scores = new double[num_targets];
+  copy(target_scores_vect.begin(), target_scores_vect.end(), target_scores);
+  double* decoy_scores = new double[num_decoys];
+  copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
+
+  double* PEPs = compute_PEP(target_scores, num_targets, 
+                             decoy_scores, num_decoys);
+
+  // fill in the data set with the new scores for the targets
+  int target_idx = 0;
+  for(int full_idx = 0; full_idx < fullset.size(); full_idx++){
+    int psm_index = fullset[full_idx].psmind;
+    if( d.psmind2label(psm_index) == 1 ){
+      fullset[full_idx].PEP = PEPs[target_idx];
+      target_idx++; 
+    } // else, skip decoys
+  }
+
+  delete target_scores;
+  delete decoy_scores;
+  delete PEPs;
+}
+
 
 
 /*

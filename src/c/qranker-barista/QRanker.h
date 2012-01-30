@@ -17,6 +17,7 @@ using namespace std;
 #include "crux-utils.h"
 #include "parameter.h"
 #endif
+#include "analyze_psms.h"
 #include "NeuralNet.h"
 #include "DataSet.h"
 #include "PSMScores.h"
@@ -48,6 +49,7 @@ public:
     void write_results_psm_tab(ofstream &os);
     void get_pep_seq(string &pep, string &seq, string &n, string &c);
     void write_results_psm_xml(ofstream &os);
+    void computePEP();
 
     void write_max_nets(string filename, NeuralNet *max_net);
     void write_unique_peptides(string filename, NeuralNet* max_net);

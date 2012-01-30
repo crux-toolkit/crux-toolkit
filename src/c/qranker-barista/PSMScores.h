@@ -11,8 +11,9 @@ public:
   double score; 
   int psmind;
   double q;
+  double PEP;
   int label;
- PSMScoreHolder():score(0.0),psmind(0),q(0.0),label(0){;}
+ PSMScoreHolder():score(0.0),psmind(0),q(0.0),PEP(0.0),label(0){;}
   virtual ~PSMScoreHolder() {;}
 };
 
