@@ -10,6 +10,7 @@
 #include "Percolator.h"
 #include "MatchCollectionIterator.h"
 #include "MatchIterator.h"
+#include "PercolatorCInterface.h"
 #include "posterior-error/PosteriorEstimator.h"
 
 using namespace pep;

@@ -9,7 +9,6 @@
 #include "carp.h"
 #include "OutputFiles.h"
 #include "q-value.h"
-#include "PercolatorCInterface.h"
 
 /**
  * \brief Takes a directory containing PSM files and a protein index
