@@ -1320,7 +1320,7 @@ int SQTParser :: run()
   
   allocate_feature_space();
   open_files(out_dir);
-  cout << "parsing files:\n";
+  carp(CARP_INFO, "parsing files:");
   int num_files_read = 0;
   for(unsigned int i = 0; i < sqt_file_names.size(); i++)
     {

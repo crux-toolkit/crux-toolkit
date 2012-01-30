@@ -19,9 +19,9 @@ public:
 class PSMScores
 {
 public:
-	PSMScores();
-	~PSMScores();
-	void clear();
+    PSMScores();
+    ~PSMScores();
+    void clear();
     vector<PSMScoreHolder>::iterator begin() {return scores.begin();}
     vector<PSMScoreHolder>::iterator end() {return scores.end();}    
     static double pi0;

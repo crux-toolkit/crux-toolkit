@@ -94,7 +94,6 @@ void QRanker :: write_results()
   thresholdset.clear();
   d.load_labels_psm_training();
   PSMScores::fillFeaturesFull(fullset, d);
-  d.clear_labels_psm_training();
   getOverFDR(fullset,net, qvals[4]);
   d.clear_data_psm_training();
 
@@ -102,29 +101,38 @@ void QRanker :: write_results()
   fname << out_dir << "/" << fileroot << "q-ranker.target.psms.txt";
   d.load_data_all_results();
   d.load_data_psm_results();
-    ofstream f1(fname.str().c_str()); 
+
+  ofstream f1(fname.str().c_str()); 
   write_results_psm_tab(f1);
   f1.close();
   fname.str("");
 
   fname << out_dir << "/" << fileroot << "q-ranker_output.xml";
   ofstream f2(fname.str().c_str()); 
-  write_results_psm_tab(f2);
+  write_results_psm_xml(f2);
   f2.close();
 
   d.clear_data_all_results();
   d.clear_data_psm_results();
+  d.clear_labels_psm_training();
   
 }
 
 void QRanker :: write_results_psm_tab(ofstream &os)
 {
-  os << "scan" << "\t" << "charge" << "\t" << "q-value" << "\t" << "qranker score" <<"\t"  << "peptide" << "\t" << "filename" << endl;
+  os << "scan" << "\t" << "charge" << "\t" << "q-value" << "\t" 
+     << "qranker score" << "\t" << "peptide" << "\t" 
+     << "filename" << endl;
+
   for(int i = 0; i < fullset.size(); i++)
     {
-      int psmind = fullset[i].psmind;
-      int pepind = d.psmind2pepind(psmind);
-      os << d.psmind2scan(psmind) << "\t" << d.psmind2charge(psmind) << "\t" << fullset[i].q << "\t" << fullset[i].score << "\t"  << d.ind2pep(pepind) << "\t" << d.psmind2fname(psmind) << endl;
+      if( fullset[i].label == 1 ){ // only print target psms
+        int psmind = fullset[i].psmind;
+        int pepind = d.psmind2pepind(psmind);
+        os << d.psmind2scan(psmind) << "\t" << d.psmind2charge(psmind) << "\t" 
+           << fullset[i].q << "\t" << fullset[i].score << "\t"  
+           << d.ind2pep(pepind) << "\t" << d.psmind2fname(psmind) << endl;
+      }
     }
 }
 
@@ -149,6 +157,11 @@ void QRanker :: write_results_psm_xml(ofstream &os)
   int cn = 0;
   for(int i = 0; i < fullset.size(); i++)
     {
+      // only print target psms
+      if( fullset[i].label == -1 ){
+        continue;
+      }
+
       int psmind = fullset[i].psmind;
       if(fullset[i].label == 1)
 	{
