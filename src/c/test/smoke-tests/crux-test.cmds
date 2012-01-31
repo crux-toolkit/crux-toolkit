@@ -94,7 +94,7 @@
 1 = ppm_window = good_results/ppmwin.search.target.txt = crux search-for-matches --parameter-file params/ppm_window --fileroot ppmwin demo.ms2 small-yeast.fasta; cat crux-output/ppmwin.search.target.txt =
 
 # search with mods and produce output complient with the TPP
-1 = tpp = good_results/tpp.pep.xml = crux search-for-matches --parameter-file params/mods-tpp --fileroot tpp test.ms2 small-yeast.fasta; cat crux-output/tpp.search.target.pep.xml = 'date'
+1 = tpp = good_results/tpp.pep.xml = crux search-for-matches --parameter-file params/mods-tpp --fileroot tpp test.ms2 small-yeast.fasta; cat crux-output/tpp.search.target.pep.xml = 'date' 'base_name' 'local_path'
 
 # TESTS WITH INDEX
 

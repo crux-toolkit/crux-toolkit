@@ -47,6 +47,8 @@
  */
 #define MASS_O 16.0013 ///< mass of oxygen
 
+#define MASS_OH 17.00274
+
 /**
  * Mass of carbon monoxide
  */

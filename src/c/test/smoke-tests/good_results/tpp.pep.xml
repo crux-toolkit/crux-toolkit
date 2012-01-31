@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Mon Jan 23 17:31:51 2012
+<msms_pipeline_analysis date="Tue Jan 31 11:42:39 2012
 " xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="/home/frewen/research/crux/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
@@ -8,36 +8,11 @@
 <search_summary base_name="/home/frewen/research/crux/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
 <search_database local_path="/home/frewen/research/crux/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
-<aminoacid_modification aminoacid="C" mass="160.160263" massdiff="57.021464" variable="N" />
-<aminoacid_modification aminoacid="S" mass="79.900002" massdiff="-7.178200" variable="Y" />
-<aminoacid_modification aminoacid="T" mass="79.900002" massdiff="-21.205101" variable="Y" />
-<aminoacid_modification aminoacid="Y" mass="79.900002" massdiff="-83.275993" variable="Y" />
-<aminoacid_modification aminoacid="A" mass="33.299999" massdiff="-37.778797" variable="Y" />
-<aminoacid_modification aminoacid="B" mass="33.299999" massdiff="-6966.700195" variable="Y" />
-<aminoacid_modification aminoacid="C" mass="33.299999" massdiff="-126.860260" variable="Y" />
-<aminoacid_modification aminoacid="D" mass="33.299999" massdiff="-81.788605" variable="Y" />
-<aminoacid_modification aminoacid="E" mass="33.299999" massdiff="-95.815491" variable="Y" />
-<aminoacid_modification aminoacid="F" mass="33.299999" massdiff="-113.876602" variable="Y" />
-<aminoacid_modification aminoacid="G" mass="33.299999" massdiff="-23.751900" variable="Y" />
-<aminoacid_modification aminoacid="H" mass="33.299999" massdiff="-103.841095" variable="Y" />
-<aminoacid_modification aminoacid="I" mass="33.299999" massdiff="-79.859406" variable="Y" />
-<aminoacid_modification aminoacid="J" mass="33.299999" massdiff="-79.859406" variable="Y" />
-<aminoacid_modification aminoacid="K" mass="33.299999" massdiff="-94.874100" variable="Y" />
-<aminoacid_modification aminoacid="L" mass="33.299999" massdiff="-79.859406" variable="Y" />
-<aminoacid_modification aminoacid="M" mass="33.299999" massdiff="-97.892593" variable="Y" />
-<aminoacid_modification aminoacid="N" mass="33.299999" massdiff="-80.803802" variable="Y" />
-<aminoacid_modification aminoacid="O" mass="33.299999" massdiff="-80.847198" variable="Y" />
-<aminoacid_modification aminoacid="P" mass="33.299999" massdiff="-63.816700" variable="Y" />
-<aminoacid_modification aminoacid="Q" mass="33.299999" massdiff="-94.830704" variable="Y" />
-<aminoacid_modification aminoacid="R" mass="33.299999" massdiff="-122.887497" variable="Y" />
-<aminoacid_modification aminoacid="S" mass="33.299999" massdiff="-53.778202" variable="Y" />
-<aminoacid_modification aminoacid="T" mass="33.299999" massdiff="-67.805099" variable="Y" />
-<aminoacid_modification aminoacid="U" mass="33.299999" massdiff="-116.738800" variable="Y" />
-<aminoacid_modification aminoacid="V" mass="33.299999" massdiff="-65.832596" variable="Y" />
-<aminoacid_modification aminoacid="W" mass="33.299999" massdiff="-152.913193" variable="Y" />
-<aminoacid_modification aminoacid="X" mass="33.299999" massdiff="-6966.700195" variable="Y" />
-<aminoacid_modification aminoacid="Y" mass="33.299999" massdiff="-129.875992" variable="Y" />
-<aminoacid_modification aminoacid="Z" mass="33.299999" massdiff="-6966.700195" variable="Y" />
+<aminoacid_modification aminoacid="C" mass="217.181727" massdiff="57.021464" variable="N" />
+<aminoacid_modification aminoacid="S" mass="166.978210" massdiff="79.900002" variable="Y" />
+<aminoacid_modification aminoacid="T" mass="181.005096" massdiff="79.900002" variable="Y" />
+<aminoacid_modification aminoacid="Y" mass="243.075989" massdiff="79.900002" variable="Y" />
+<terminal_modification terminus="c" mass="50.302739" massdiff="33.299999" variable="Y" />
 <parameter name="fragment-mass" value="mono"/>
 <parameter name="stats" value="false"/>
 <parameter name="comparison" value="eq"/>

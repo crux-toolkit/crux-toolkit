@@ -1499,23 +1499,23 @@ void MatchCollection::printXmlHeader(
     fragment_mass =  "monoisotopic";
   }
 
-
-
-
-  bool use_index = is_directory(database);
-  if( use_index == true ){
-    char* fasta_name  = Index::getBinaryFastaName(database);
+  char* absolute_database_path = NULL;
+  if( database != NULL ){
+    bool use_index = is_directory(database);
+    if( use_index == true ){
+      char* fasta_name  = Index::getBinaryFastaName(database);
+      free(database);
+      database = fasta_name;
+    }
+#if DARWIN
+    char path_buffer[PATH_MAX];
+    absolute_database_path =  realpath(database, path_buffer);
+#else
+    absolute_database_path =  realpath(database, NULL);
+#endif
     free(database);
-    database = fasta_name;
-  }
-  #if DARWIN
-  char path_buffer[PATH_MAX];
-  char* absolute_database_path =  realpath(database, path_buffer);
-  #else
-  char* absolute_database_path =  realpath(database, NULL);
-  #endif
-  free(database);
-
+  } 
+  
   hold_time = time(0);
 
   const char* xsi = "http://www.w3.org/2001/XMLSchema-instance";
@@ -1592,7 +1592,7 @@ void MatchCollection::printXmlHeader(
       fprintf(output, "<aminoacid_modification aminoacid=\"%s\" mass=\"%f\" "
               "massdiff=\"%f\" variable=\"%s\" />\n",
               aa_str,
-              mass,
+              mass + mod,
               mod,
               "N" // N if static modification
               );      
@@ -1601,28 +1601,69 @@ void MatchCollection::printXmlHeader(
   
   // variable amino acid modifications
   AA_MOD_T** mod_list = NULL;
-  int num_mods = get_all_aa_mod_list(&mod_list);
+  int num_mods = get_aa_mod_list(&mod_list);
   for (int mod_idx = 0; mod_idx < num_mods; mod_idx++){
-    FLOAT_T mass = aa_mod_get_mass_change(mod_list[mod_idx]);
+    FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
     
     bool* aas_modified = aa_mod_get_aa_list(mod_list[mod_idx]);
     for (int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++){
       if (aas_modified[aa_idx] == true ){
         int aa = (aa_idx+'A');
-        FLOAT_T original_mass = get_mass_amino_acid(aa , isotopic_type);
-        FLOAT_T mass_dif = mass - original_mass;
+        FLOAT_T aa_mass = get_mass_amino_acid(aa , isotopic_type);
         fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%f\" "
                 "massdiff=\"%f\" variable=\"%s\" />\n",
                 aa,
-                mass,
-                mass_dif,
+                aa_mass + mod_mass,
+                mod_mass,
                 "Y" // Y if variable modification
                 );    
-
       }
     }
 
   }
+
+  // terminal modifciations
+  // variable
+  num_mods = get_c_mod_list(&mod_list); // variable c mods
+  for(int mod_idx = 0; mod_idx < num_mods; mod_idx++){
+    FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
+    fprintf(output, "<terminal_modification terminus=\"c\" "
+            "mass=\"%f\" massdiff=\"%f\" variable=\"Y\" />\n",
+            MASS_OH + mod_mass,
+            mod_mass
+            );
+  }
+  num_mods = get_n_mod_list(&mod_list); // variable n mods
+  for(int mod_idx = 0; mod_idx < num_mods; mod_idx++){
+    FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
+    fprintf(output, "<terminal_modification terminus=\"n\" "
+            "mass=\"%f\" massdiff=\"%f\" variable=\"Y\" />\n",
+            MASS_H_MONO + mod_mass,
+            mod_mass
+            );
+  }
+  // fixed
+  if( get_num_fixed_mods() != 0 ){
+    get_all_aa_mod_list(&mod_list);
+    int fixed_mod_idx = get_fixed_mod_index(N_TERM); // fixed n mods
+    if( fixed_mod_idx > -1 ){
+      fprintf(output, "<terminal_modification terminus=\"n\" "
+              "mass=\"?\" massdiff=\"%f\" variable=\"N\" />\n",
+              aa_mod_get_mass_change(mod_list[fixed_mod_idx])
+              );
+    }
+
+    fixed_mod_idx = get_fixed_mod_index(C_TERM); // fixed c mods
+    if( fixed_mod_idx > -1 ){
+      fprintf(output, "<terminal_modification terminus=\"c\" "
+              "mass=\"?\" massdiff=\"%f\" variable=\"N\" />\n",
+              aa_mod_get_mass_change(mod_list[fixed_mod_idx])
+              );
+    }
+
+  }
+
+
   print_parameters_xml(output);
   
   fprintf(output, "</search_summary>\n");
