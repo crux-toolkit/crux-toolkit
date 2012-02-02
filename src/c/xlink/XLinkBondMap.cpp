@@ -14,6 +14,8 @@ using namespace std;
  * Default constructor.
  */
 XLinkBondMap::XLinkBondMap() {
+  string links_string(get_string_parameter_pointer("link sites"));
+  init(links_string);
 }
 
 /**
@@ -22,9 +24,20 @@ XLinkBondMap::XLinkBondMap() {
  * A and B, or C and D.
  */
 XLinkBondMap::XLinkBondMap(
-  string& links_string ///<link string
+  string& links_string ///<links string
   ) {
-  
+  init(links_string);
+}
+
+/**
+ * Initializes XLinkBondMap using the links string.
+ * Format: A:B,C:D,... which means that a link can occur between residue
+ * A and B, or C and D.
+ */
+void XLinkBondMap::init(
+  string& links_string ///< links string
+  ) {
+
   vector<string> bond_strings;
 
   DelimitedFile::tokenize(links_string, bond_strings, ',');

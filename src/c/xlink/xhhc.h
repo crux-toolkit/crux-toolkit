@@ -1,3 +1,8 @@
+/**
+ * \file xhhc.h
+ * $Revision: 1.00$
+ * \brief utility routines for xlinking programs
+ */
 #ifndef XHHC_H
 #define XHHC_H
 
@@ -26,8 +31,10 @@
 #include "crux-utils.h"
 #include "Ion.h"
 
-// get rid of these
-//#define PARAM_ESTIMATION_SAMPLE_COUNT 500
+#include "XLinkBondMap.h"
+#include "XLinkablePeptide.h"
+
+// TODO: get rid of these
 #define MIN_WEIBULL_MATCHES 40 
 #define MIN_XCORR_SHIFT -5.0
 #define MAX_XCORR_SHIFT  5.0
@@ -39,18 +46,19 @@
 #define MIN_WEIBULL_SAMPLES 750 
 #define MIN_PRECURSORS 3
 
+/**
+ * \returns the peptide objects from a sequence string
+ * TODO - eliminate this from xlink (this is a HACK)
+ */
+std::vector<Peptide*>& get_peptides_from_sequence(
+  std::string& sequence ///< the peptide sequence string
+  );
 
-//HACK for getting protein ids.
-std::vector<Peptide*>& get_peptides_from_sequence(std::string& sequence);
+/**
+ * frees allocated peptides
+ */
 void free_peptides();
 
-
-
-// methods used by xhhc_search.cpp and xhhc_make_histogram.cpp
-// defined in xhhc.cpp
-//////////////////////////////////////////
-
-XHHC_Peptide shuffle(XHHC_Peptide peptide);
 
 bool hhc_estimate_weibull_parameters_from_xcorrs(
   FLOAT_T* scores,
@@ -63,22 +71,42 @@ bool hhc_estimate_weibull_parameters_from_xcorrs(
   int charge
   );
 
-void get_linkable_peptides(std::set<std::string>& peptides, 
-	DatabaseProteinIterator* protein_iterator,
-	PeptideConstraint* peptide_constraint); 
+void get_linkable_peptides(
+  std::set<XLinkablePeptide>& peptides, 
+  XLinkBondMap& bondmap,
+  DatabaseProteinIterator* protein_iterator,
+  PeptideConstraint* peptide_constraint
+  ); 
 
-void add_linked_peptides(std::vector<LinkedPeptide>& all_ions, std::set<std::string>& peptides, std::string links, int charge);
+void add_linked_peptides(
+  std::vector<LinkedPeptide>& all_ions, 
+  std::set<XLinkablePeptide>& peptides, 
+  XLinkBondMap& bondmap, 
+  int charge
+  );
 
-//void add_decoys(vector<LinkedPeptide>& decoys, LinkedPeptide& lp, char* links, int charge, FLOAT_T linker_mass);
+/**
+ * appends one shuffled decoy to a vector
+ */
+void add_decoy(
+  std::vector<LinkedPeptide>& decoys, ///< decoy list to add to
+  LinkedPeptide& lp ///< linked peptide to generate decoy from
+  );
 
-void add_decoys(std::vector<LinkedPeptide>& decoys, LinkedPeptide& lp);
 
-
-void find_all_precursor_ions(std::vector<LinkedPeptide>& all_ions, 
-	const char* links, 
-	const char* missed_link_cleavage, 
-	const char* database_file,
-	int charge);
-
+/**
+ * Generates all of the product precursors for the
+ * search.
+ */
+void find_all_precursor_ions(
+  std::vector<LinkedPeptide>& all_ions ///< all of the precursors found -out 
+  );
 
 #endif
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */

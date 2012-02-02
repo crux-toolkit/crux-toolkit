@@ -33,6 +33,15 @@ class XLinkBondMap: public std::map<XLinkSite, std::set<XLinkSite> > {
   XLinkBondMap(
     std::string& links_string ///<link string
     );
+
+  /**
+   * Initializes XLinkBondMap using the links string.
+   * Format: A:B,C:D,... which means that a link can occur between residue
+   * A and B, or C and D.
+   */
+  void init(
+    std::string& links_string ///< links string
+    );  
   
   /**
    * Default destructor

@@ -87,9 +87,6 @@ int SearchForXLinks::xhhcSearchMain() {
 
   char* output_directory = get_string_parameter("output-dir");
 
-  char* database = get_string_parameter("protein database");
-  char* links = get_string_parameter("link sites");
-
   unsigned int min_weibull_points = 
     (unsigned int)get_int_parameter("min-weibull-points");
   int max_ion_charge = get_max_ion_charge_parameter("max-ion-charge");
@@ -103,7 +100,7 @@ int SearchForXLinks::xhhcSearchMain() {
 
   vector<LinkedPeptide> all_ions;
   carp(CARP_DETAILED_DEBUG,"Calling find all precursor ions");
-  find_all_precursor_ions(all_ions, links, "K", database,1);
+  find_all_precursor_ions(all_ions);
   carp(CARP_DETAILED_DEBUG,"Sort");
   // sort filtered ions and decoy ions by mass
   //sort(all_ions.begin(), all_ions.end());
@@ -247,7 +244,7 @@ int SearchForXLinks::xhhcSearchMain() {
     //create the decoys from the target found in the target_mass_window.
     for (vector<LinkedPeptide>::iterator ion = target_xpeptides.begin();
 	 ion != target_xpeptides.end(); ++ion) {
-        add_decoys(decoy_xpeptides, *ion);
+        add_decoy(decoy_xpeptides, *ion);
     }
     
     
@@ -256,7 +253,7 @@ int SearchForXLinks::xhhcSearchMain() {
     while (decoy_train_xpeptides.size() < min_weibull_points) {
       for (vector<LinkedPeptide>::iterator ion = target_decoy_xpeptides.begin();
 	   ion != target_decoy_xpeptides.end(); ++ion) {
-	add_decoys(decoy_train_xpeptides, *ion);
+	add_decoy(decoy_train_xpeptides, *ion);
       }
     }    
 
