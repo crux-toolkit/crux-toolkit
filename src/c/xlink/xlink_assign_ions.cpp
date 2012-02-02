@@ -184,6 +184,7 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
       unsigned int mz_obs_col = result_file.addColumn("m/z obs");
       unsigned int int_col = result_file.addColumn("intensity");
+      unsigned int int_matched_col = result_file.addColumn("matched intensity");
       unsigned int mz_calc_col = result_file.addColumn("m/z calc");
       unsigned int mass_obs_col = result_file.addColumn("mass obs");
       unsigned int mass_calc_col = result_file.addColumn("mass calc");
@@ -196,6 +197,8 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
         ++peak_iter) {
 
 	Peak * peak = *peak_iter;
+        if (peak->getIntensity() > 0) { 
+
 
           unsigned int row_idx = result_file.addRow();
           result_file.setValue(mz_obs_col, row_idx, peak->getLocation());
@@ -211,7 +214,8 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
               double mass_calc = ion.getMass(MONO);
               double mass_obs = (mz_obs - MASS_PROTON) * (double)charge;
               double ppm =  fabs(mass_calc - mass_obs) / mass_calc * 1e6;
-              
+         
+              result_file.setValue(int_matched_col, row_idx, peak->getIntensity()); 
               result_file.setValue(mz_calc_col, row_idx, mz_calc);
               result_file.setValue(mass_obs_col, row_idx, mass_obs);
               result_file.setValue(mass_calc_col, row_idx, mass_calc);
@@ -233,8 +237,8 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
               result_file.setValue(ion_col, row_idx, ion_string_oss.str());
               result_file.setValue(seq_col, row_idx, ion);
           }
+        }
       }
-
       cout << result_file;
 
 }

@@ -1,2 +1,5 @@
 overwrite=T
 seed=7
+missed-cleavages=1
+mz-bin-offset=0
+

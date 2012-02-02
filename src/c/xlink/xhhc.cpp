@@ -2,6 +2,8 @@
 #include "XLinkBondMap.h"
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
+#include "XLinkablePeptide.h"
+
 
 #include "parameter.h"
 #include "Peptide.h"
@@ -11,14 +13,19 @@
 
 using namespace std;
 
-
-
-
+/**
+ * Global Variable
+ */
 map<string, vector<Peptide*> > sequence_peptide_map; //hack to keep track of peptides.
 
-void get_linear_peptides(set<string>& peptides,
-			 DatabaseProteinIterator* protein_iterator,
-			 PeptideConstraint* peptide_constraint) {
+
+void get_linear_peptides(
+  set<string>& peptides, 
+  DatabaseProteinIterator* protein_iterator,
+  PeptideConstraint* peptide_constraint
+  ) {
+
+  int max_missed_cleavages = get_int_parameter("missed-cleavages");
 
   ProteinPeptideIterator* peptide_iterator = NULL;
   Protein* protein;
@@ -38,24 +45,25 @@ void get_linear_peptides(set<string>& peptides,
       //peptide = database_peptide_iterator_next(peptide_iterator);
       peptide = peptide_iterator->next();
       sequence = peptide->getSequence(); 
-      carp(CARP_INFO,"Adding linear peptide:%s",peptide->getSequence());
-      peptides.insert(sequence);
 
-      map<string, vector<Peptide*> >::iterator find_iter;
+      if (peptide->getMissedCleavageSites() <= max_missed_cleavages) {
+        carp(CARP_DEBUG, "Adding linear peptide:%s",peptide->getSequence());
+        peptides.insert(sequence);
 
-      find_iter = sequence_peptide_map.find(sequence);
+        map<string, vector<Peptide*> >::iterator find_iter;
 
-      carp(CARP_DEBUG,"Adding to map:%s,",sequence.c_str());
+        find_iter = sequence_peptide_map.find(sequence);
 
-      if (find_iter == sequence_peptide_map.end()) {
-        vector<Peptide*> peptide_vector;
-        peptide_vector.push_back(peptide);
-        sequence_peptide_map.insert(make_pair(sequence, peptide_vector));
-      } else {
-        find_iter -> second.push_back(peptide);
+        carp(CARP_DEBUG,"Adding to map:%s,",sequence.c_str());
+
+        if (find_iter == sequence_peptide_map.end()) {
+          vector<Peptide*> peptide_vector;
+          peptide_vector.push_back(peptide);
+          sequence_peptide_map.insert(make_pair(sequence, peptide_vector));
+        } else {
+          find_iter -> second.push_back(peptide);
+        }
       }
-      
-
     }
   } 
 }
@@ -79,8 +87,9 @@ void free_peptides() {
 }
 
 
-// a hack, works for EDC linker only
-void get_linkable_peptides(set<string>& peptides, 
+void get_linkable_peptides(
+        set<XLinkablePeptide>& peptides, 
+        XLinkBondMap& bondmap,
 	DatabaseProteinIterator* protein_iterator,
 	PeptideConstraint* peptide_constraint) 
 {
@@ -89,9 +98,7 @@ void get_linkable_peptides(set<string>& peptides,
   Peptide* peptide;
   string sequence = "";
   string last_sequence = "zz";
-  bool missed_cleavage = false;
   // keep track of whether the next peptide contains the previous one or not
-  size_t index;
   while (protein_iterator->hasNext()) {
     protein = protein_iterator->next();
     peptide_iterator = new ProteinPeptideIterator(protein, peptide_constraint);
@@ -116,26 +123,15 @@ void get_linkable_peptides(set<string>& peptides,
       } else {
         find_iter -> second.push_back(peptide);
       }
-      
 
+      char* seq = peptide->getSequence();
 
-
-      index = sequence.find(last_sequence);
-      // if doesn't contain last peptide
-      if (sequence[0] == 'R' && sequence[1] != 'P') { continue;}
-      if (index == string::npos || missed_cleavage) {
-        missed_cleavage = !missed_cleavage;
-        if (!missed_cleavage && last_sequence[last_sequence.size()-1] != 'K') {
-	  carp(CARP_DETAILED_DEBUG, "skipping1 %s", peptide->getSequence());
-	  continue;
-	}
-	carp(CARP_DETAILED_DEBUG, "peptide %s", peptide->getSequence());
-        peptides.insert(string(peptide->getSequence()));
-      } else {
-	carp(CARP_DETAILED_DEBUG, "skipping2 %s", peptide->getSequence());
-	missed_cleavage = false;
+      XLinkablePeptide xlinkable(peptide, bondmap);
+  
+      if (xlinkable.isLinkable()) {
+        peptides.insert(xlinkable);
       }
-      last_sequence = string(peptide->getSequence());
+      free(seq);
     }
   } 
 }
@@ -168,51 +164,47 @@ void print_precursor_count(vector<LinkedPeptide>& all_ions) {
 }
 
 // creates an index of all linked peptides from a fasta file
-void find_all_precursor_ions(vector<LinkedPeptide>& all_ions, 
-			     const char* links, 
-			     const char* missed_link_cleavage,
-		             const char* database_file,
-			     int charge)
-{
+void find_all_precursor_ions(
+  vector<LinkedPeptide>& all_ions
+  ) {
 
-  carp(CARP_DEBUG,"missed link cleavage:%s", missed_link_cleavage);
+  char* database_file = get_string_parameter("protein database");
+  
   carp(CARP_DEBUG,"find_all_precursor_ions: start()");
   Database* db = new Database(database_file, false);
   carp(CARP_DEBUG,"peptide constraint");
   PeptideConstraint* peptide_constraint = 
     PeptideConstraint::newFromParameters();
-  // add 
-  peptide_constraint->setNumMisCleavage(get_int_parameter("missed-cleavages") + 1);
-  //set_verbosity_level(CARP_INFO);
-  //Protein* protein = NULL;
+  // add two to account for a self loop that prevents two cleavages
+  peptide_constraint->setNumMisCleavage(get_int_parameter("missed-cleavages") + 2);
+
   carp(CARP_DEBUG,"protein iterator");
   DatabaseProteinIterator* protein_iterator = new DatabaseProteinIterator(db);
-  //PROTEIN_PEPTIDE_ITERATOR_T* peptide_iterator = NULL;
-  string bonds_string = string(links);
-  set<string> peptides;
+
+  set<XLinkablePeptide> peptides;
   carp(CARP_DEBUG,"get_linkable_peptides");
-  get_linkable_peptides(peptides, protein_iterator, peptide_constraint);
-  carp(CARP_DEBUG,"add_linked_peptides");
-  add_linked_peptides(all_ions, peptides, bonds_string, charge);
+  XLinkBondMap bondmap;
+  get_linkable_peptides(peptides, bondmap, protein_iterator, peptide_constraint);
+  carp(CARP_DEBUG, "add_linked_peptides");
+  add_linked_peptides(all_ions, peptides, bondmap, 1);
   
-  /*
   if (get_boolean_parameter("xlink-include-linears")) {
-    free_database_protein_iterator(protein_iterator);
-    protein_iterator = new_database_protein_iterator(db);
-    peptides.clear();    
-    get_linear_peptides(peptides, protein_iterator, peptide_constraint);
+    delete protein_iterator;
+    protein_iterator = new DatabaseProteinIterator(db);
+    set<string> linear_peptides;
+    get_linear_peptides(linear_peptides, protein_iterator, peptide_constraint);
     
     set<string>::iterator iter;
-    for (iter = peptides.begin();
-	 iter != peptides.end();
+    for (iter = linear_peptides.begin();
+	 iter != linear_peptides.end();
 	 ++iter) {
-      LinkedPeptide lp = LinkedPeptide(charge);
-      Peptide p = Peptide(*iter);
-      lp.add_peptide(p);
+      LinkedPeptide lp = LinkedPeptide(1);
+      XHHC_Peptide p(*iter);
+      lp.addPeptide(p);
       all_ions.push_back(lp);
     }
   }
-  */
+  
 
   delete protein_iterator;
 
@@ -273,95 +265,109 @@ bool hhc_estimate_weibull_parameters_from_xcorrs(
 // creates single and cross-linked peptides, considering every pair
 // of peptides and every possible link site
 
-void add_linked_peptides(vector<LinkedPeptide>& all_ions, set<string>& peptides, string links, int charge) {
-  XLinkBondMap bonds(links); 
+void add_linked_peptides(
+  vector<LinkedPeptide>& all_ions, 
+  set<XLinkablePeptide>& peptides, 
+  XLinkBondMap& bondmap, 
+  int charge) {
+
   vector<LinkedPeptide> ions;
 
   // iterate over both sequences, adding linked peptides with correct links
-  for (set<string>::iterator pepA = peptides.begin(); pepA != peptides.end(); ++pepA) {
-    char* sequenceA = (char*) pepA->c_str();
+  for (set<XLinkablePeptide>::iterator iterA = peptides.begin(); iterA != peptides.end(); ++iterA) {
+
+    XLinkablePeptide pepA = *iterA;
+    string seqA = pepA.getModifiedSequenceString();
+    
     // add unlinked precursor
     LinkedPeptide lp = LinkedPeptide(charge);
-    XHHC_Peptide p = XHHC_Peptide(sequenceA);
+    XHHC_Peptide p = XHHC_Peptide(seqA);
     lp.addPeptide(p);
 
-    //TODO separate linears from xlinking stuff.
-    if (get_boolean_parameter("xlink-include-linears")) {
-      ions.push_back(lp);
-    }
+    //vector<Peptide*>& crux_peptides = get_peptides_from_sequence(seqA);
 
-    string seqA = *pepA;
-    vector<Peptide*>& crux_peptides = get_peptides_from_sequence(seqA);
-    
-    if (get_boolean_parameter("xlink-include-deadends")) {
-
-      for (unsigned int seq_idx=0;seq_idx < pepA->length();seq_idx++) {
-        bool canLink = false;
-
-        for (unsigned int pep_idx=0;pep_idx < crux_peptides.size();pep_idx++) {
-          canLink |= bonds.canLink(crux_peptides[pep_idx], seq_idx);
+    int max_missed_cleavages = get_int_parameter("missed-cleavages");
+    int seqA_missed_cleavages = pepA.getMissedCleavageSites();
+    carp(CARP_DEBUG,"seqA:%s %i %i",seqA.c_str(), pepA.numLinkSites(), seqA_missed_cleavages);
+    if (get_boolean_parameter("xlink-include-deadends") && 
+      seqA_missed_cleavages <= (max_missed_cleavages+1)) {
+      
+      for (size_t link_idx = 0;link_idx < pepA.numLinkSites();link_idx++) {
+        int seq_idx = pepA.getLinkSite(link_idx);
+        int total_cleavages = seqA_missed_cleavages;
+        if (pepA.linkSitePreventsCleavage(link_idx)) {
+          total_cleavages--;
         }
-        if (canLink) {
-          if (seq_idx == pepA->length()-1 && pepA->at(seq_idx) == 'K') {
-            continue;
-          } else {
-            ions.push_back(LinkedPeptide(sequenceA, NULL, seq_idx, -1, charge));
-          }
-        }  
+        if (total_cleavages <= max_missed_cleavages) {
+          ions.push_back(LinkedPeptide((char*)seqA.c_str(), NULL, seq_idx, -1, charge));
+        }
       }
     } /* xlink-include-dead-ends */
 
-    if (get_boolean_parameter("xlink-include-selfloops")) {
+    if (get_boolean_parameter("xlink-include-selfloops") && 
+        (seqA_missed_cleavages <= (max_missed_cleavages+2))) {
       
-      for (unsigned int seq_idx1 = 0;seq_idx1 < pepA->length()-1; seq_idx1++) {
-        for (unsigned int seq_idx2=seq_idx1+1;seq_idx2 < pepA->length()-1; seq_idx2++) {
-          bool canLink = false;
-          for (unsigned int pep_idx1=0;pep_idx1 < crux_peptides.size();pep_idx1++) {
-            canLink |= bonds.canLink(crux_peptides[pep_idx1],seq_idx1,seq_idx2);
-          }
-          if (canLink) {
-            if (seq_idx1 == pepA->length()-1 && pepA->at(seq_idx1) == 'K') continue;
-            else if (seq_idx2 == pepA->length()-1 && pepA->at(seq_idx2) == 'K') continue;
-            else {
-              ions.push_back(LinkedPeptide(sequenceA, NULL, seq_idx1, seq_idx2, charge));
+      for (size_t link_idx1 = 0;link_idx1 < pepA.numLinkSites()-1;link_idx1++) {
+        for (size_t link_idx2 = link_idx1+1;link_idx2 < pepA.numLinkSites();link_idx2++) {
+          int seq_idx1 = pepA.getLinkSite(link_idx1);
+          int seq_idx2 = pepA.getLinkSite(link_idx2);
+
+          if (bondmap.canLink(pepA.getPeptide(), seq_idx1, seq_idx2)) {
+            int total_missed_cleavages = seqA_missed_cleavages;
+            if (pepA.linkSitePreventsCleavage(link_idx1)) {
+              total_missed_cleavages--;
+            }
+            if (pepA.linkSitePreventsCleavage(link_idx2)) {
+              total_missed_cleavages--;
+            }
+            if (total_missed_cleavages <= max_missed_cleavages) {
+              ions.push_back(LinkedPeptide((char*)seqA.c_str(), NULL, seq_idx1, seq_idx2, charge));
             }
           }
         }
       }
     } /* xlink-include-selfloops */
 
-    {
+    /* xlink-inter/intra links */
+    if (seqA_missed_cleavages <= max_missed_cleavages+1) {
+    
+      for (set<XLinkablePeptide>::iterator iterB = iterA; iterB != peptides.end();++iterB) {
+        XLinkablePeptide pepB = *iterB;
+        string seqB = pepB.getModifiedSequenceString();
+        int seqB_missed_cleavages = pepB.getMissedCleavageSites();
+        if (seqB_missed_cleavages <= (max_missed_cleavages+1)) {
+          for (size_t link_idx1 = 0;link_idx1 < pepA.numLinkSites();link_idx1++) {
+            for (size_t link_idx2 = 0; link_idx2 < pepB.numLinkSites();link_idx2++) {
+              int seq_idx1 = pepA.getLinkSite(link_idx1);
+              int seq_idx2 = pepB.getLinkSite(link_idx2);
+              if (bondmap.canLink(pepA.getPeptide(), pepB.getPeptide(), seq_idx1, seq_idx2)) {
 
-      for (set<string>::iterator pepB = pepA ;pepB != peptides.end(); ++pepB) {
-        string seqB = *pepB;
-        vector<Peptide*>& crux_peptides2 = get_peptides_from_sequence(seqB);
-        
-        for (unsigned int seq_idx1 = 0; seq_idx1 < pepA->length();seq_idx1++) {
-          for (unsigned int seq_idx2 = 0; seq_idx2 < pepB->length();seq_idx2++) {
-            bool canLink = false;
-            for (unsigned int pep_idx1=0;pep_idx1 < crux_peptides.size();pep_idx1++) {
-              for (unsigned int pep_idx2=0;pep_idx2 < crux_peptides2.size();pep_idx2++) {
-                canLink |= bonds.canLink(crux_peptides[pep_idx1],crux_peptides2[pep_idx2],seq_idx1,seq_idx2);
-              }
-            }
-            if (canLink) {
-              if (seq_idx1 == pepA->length()-1 && pepA->at(seq_idx1) == 'K') continue;
-              else if (seq_idx2 == pepB->length()-1 && pepB->at(seq_idx2) == 'K') continue;
-              else {
-                char* sequenceB = (char*) pepB->c_str();
-                ions.push_back(LinkedPeptide(sequenceA, sequenceB, seq_idx1, seq_idx2, charge));
+                int totalA = seqA_missed_cleavages;
+                if (pepA.linkSitePreventsCleavage(link_idx1)) {
+                  totalA--;
+                }
+
+                int totalB = seqB_missed_cleavages;
+                if (pepB.linkSitePreventsCleavage(link_idx2)) {
+                  totalB--;
+                }
+
+                if (totalA <= max_missed_cleavages && 
+                    totalB <= max_missed_cleavages) {
+                  ions.push_back(LinkedPeptide((char*)seqA.c_str(), (char*)seqB.c_str(), seq_idx1, seq_idx2, charge));
+                }
               }
             }
           }
         }
       }
-    } /* xlink-inter/intra links */
+    }
   } // get next pepA 
-   all_ions.insert(all_ions.end(), ions.begin(), ions.end());
+  all_ions.insert(all_ions.end(), ions.begin(), ions.end());
 }
 
 // append one shuffled decoy to decoys vector
-void add_decoys(vector<LinkedPeptide>& decoys, LinkedPeptide& lp) {
+void add_decoy(vector<LinkedPeptide>& decoys, LinkedPeptide& lp) {
   vector<XHHC_Peptide> peptides = lp.getPeptides();
   LinkedPeptide decoy = LinkedPeptide(lp.getCharge()); 
   XHHC_Peptide pepA_shuffled = peptides[0].shuffle();
@@ -375,6 +381,11 @@ void add_decoys(vector<LinkedPeptide>& decoys, LinkedPeptide& lp) {
   decoys.push_back(decoy);
 }
 
-
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
 
 

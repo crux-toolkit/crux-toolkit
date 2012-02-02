@@ -2,6 +2,6 @@ overwrite=T
 xlink-print-db=T
 fragment-mass=mono
 enzyme=trypsin
-missed-cleavages=T
+missed-cleavages=0
 isotopic-mass=mono
 C=-57.0214637206
