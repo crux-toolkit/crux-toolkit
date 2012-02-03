@@ -27,9 +27,9 @@
 1 = generate-peptides-ambiguous-residues = good_results/generate-peptides-ambiguous.target.txt = crux generate-peptides --min-mass 1464 --max-mass 1496 --output-sequence T ambiguous.fasta > a  2>&1; cat a =  'time'
 
 # Get spectrum
-1 = get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = crux-get-ms2-spectrum 2 test.ms2 =
+1 = get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = crux get-ms2-spectrum 2 test.ms2 =
 
-1 = get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = crux-get-ms2-spectrum --stats T 2 test.ms2 =
+1 = get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = crux get-ms2-spectrum --stats T 2 test.ms2 =
 
 # Print processed spectrum
 1 = print_processed_spectrum = good_results/processed-test.ms2 = crux print-processed-spectra test.ms2 processed-test.ms2 ; cat crux-output/processed-test.ms2

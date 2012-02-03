@@ -67,6 +67,8 @@ LIBFILES= \
   FilteredSpectrumChargeIterator.h \
   GeneratePeptidesIterator.cpp \
   GeneratePeptidesIterator.h \
+  GetMs2Spectrum.h\
+  GetMs2Spectrum.cpp\
   hash.cpp \
   hash.h \
   Index.cpp \
@@ -202,18 +204,11 @@ libcrux_la_SOURCES = $(LIBFILES)
 
 PROGRAM_FILES = \
   crux \
-  crux-get-ms2-spectrum \
   xlink-predict-peptide-ions \
   xlink-score-spectrum \
   xlink-assign-ions
 
 bin_PROGRAMS = $(PROGRAM_FILES)
-
-crux_get_ms2_spectrum_SOURCES = get_ms2_spectrum.cpp
-crux_get_ms2_spectrum_CXXFLAGS = $(AM_CFLAGS) -DMAIN -I$(top_srcdir)/src/c//MSToolkit
-crux_get_ms2_spectrum_LDADD = \
-  $(AM_LDFLAGS) \
-  libcrux.la -L$(top_builddir)/src/c/MSToolkit -lm -lmstoolkit
 
 crux_SOURCES = crux-main.cpp crux-main.h
 crux_CXXFLAGS = \
