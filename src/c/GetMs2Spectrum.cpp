@@ -1,10 +1,15 @@
-/*************************************************************************//**
- * \file get_ms2_spectrum.cpp
- * AUTHOR: Chris Park
- * CREATE DATE: 30 June 2006
- * \brief searches a given ms2 file for the spectrum with the given
+/**
+ * \file GetMs2Spectrum.cpp
+ *
+ * AUTHOR: Manijeh Naser
+ * CREATE DATE: January 31, 2012
+ *
+ * DESCRIPTION:brief searches a given ms2 file for the spectrum with the given
  * scan number.
- ****************************************************************************/
+ */
+
+#include "GetMs2Spectrum.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,6 +26,22 @@
 #include "Peak.h"
 #include "SpectrumCollectionFactory.h"
 #include "WinCrux.h"
+#include "ModifiedPeptidesIterator.h"
+
+using namespace std;
+
+/**
+ * \returns A blank GetMs2Spectrum object.
+ */
+GetMs2Spectrum::GetMs2Spectrum() {
+
+}
+
+/**
+ * Destructorm
+ */
+GetMs2Spectrum::~GetMs2Spectrum() {
+}
 
 /****************************************************************************
  * Read a string into either a single positive integer or a range of
@@ -52,44 +73,30 @@ static void parse_scan_numbers
 /****************************************************************************
  * MAIN
  ****************************************************************************/
-static const int NUM_MS2_OPTIONS = 3;
-static const int NUM_MS2_ARGUMENTS = 2;
+int GetMs2Spectrum :: main(int argc, char** argv){
 
-int main(int argc, char** argv){
 
-  /* Declarations */
-  bool options = false; ///< do we want options?
-
-  /* Define optional command line arguments */
-  int num_options = NUM_MS2_OPTIONS;
-  const char* option_list[NUM_MS2_OPTIONS] = { 
+  const char* option_list[] = { 
     "version", 
     "stats", 
     "verbosity"/*,
     "use-mstoolkit"*/};
 
-  int num_arguments = NUM_MS2_ARGUMENTS;
-  const char* argument_list[NUM_MS2_ARGUMENTS] = {
+ int num_options = sizeof(option_list) / sizeof(char*);
+
+  
+  const char* argument_list[] = {
     "scan number",
     "ms2 file"
   };
+  int num_arguments = sizeof(argument_list) / sizeof(char*);
+  initialize(argument_list,
+	     num_arguments,
+	     option_list,
+	     num_options,
+	     argc, argv);
 
-  /* for debugging parameter handling */
-  set_verbosity_level(CARP_ERROR);
-
-  /* set up parameters and default values */
-  initialize_parameters();
-
-  /* Define optional and required arguments */
-  select_cmd_line_options( option_list, num_options );
-  select_cmd_line_arguments( argument_list, num_arguments );
-
-  /* Parse the command line, for now param file not available */
-  parse_cmd_line_into_params_hash(argc, argv, "crux-get-ms2-spectrum");
-
-  /* Set verbosity */
-  //set_verbosity_level(get_int_parameter("verbosity"));
-
+  
   /* Get arguments */
   int min_scan;
   int max_scan;
@@ -100,7 +107,7 @@ int main(int argc, char** argv){
   carp(CARP_DETAILED_DEBUG, "ms2_filename: %s", ms2_filename);
 
   /* Get options */
-  options = get_boolean_parameter("stats");
+  bool options = get_boolean_parameter("stats");
 
   /* read input file */
   if( access(ms2_filename, F_OK)){
@@ -157,6 +164,34 @@ int main(int argc, char** argv){
   delete collection;
 
   carp(CARP_INFO, "Found %d spectra.\n", num_found);
-  carp(CARP_INFO, "crux-get-ms2-spectrum finished.");
+  
   return(0);
 }
+/**
+ * \returns The command name for GetMs2SPectrum. 
+ */
+string GetMs2Spectrum::getName() {
+  return "get-ms2-spectrum";
+}
+
+/**
+ * \returns The description for GetMs2Spectrum.
+ */
+string GetMs2Spectrum::getDescription() {
+  return "brief searches a given ms2 file for the spectrum with the given scan number.";
+}
+
+/**
+ * \returns The enum of the application, default GET_MS2_SPECTRUM_COMMAND.
+ */
+COMMAND_T GetMs2Spectrum::getCommand() {
+  return GET_MS2_SPECTRUM_COMMAND;
+}
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+

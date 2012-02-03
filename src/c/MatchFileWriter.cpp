@@ -163,6 +163,7 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   case INDEX_COMMAND:        ///< create-index
   case PROCESS_SPEC_COMMAND: ///< print-processed-spectra
   case GENERATE_PEPTIDES_COMMAND: ///< generate-peptides
+  case GET_MS2_SPECTRUM_COMMAND: ///< get-ms2-spectrum 
   case PREDICT_PEPTIDE_IONS_COMMAND: ///< predict-peptide-ions
   case VERSION_COMMAND:      ///< just print the version number
   // invalid
@@ -280,6 +281,7 @@ void MatchFileWriter::addColumnNames
   case INDEX_COMMAND:        ///< create-index
   case PROCESS_SPEC_COMMAND: ///< print-processed-spectra
   case GENERATE_PEPTIDES_COMMAND: ///< generate-peptides
+  case GET_MS2_SPECTRUM_COMMAND: ///< get-ms2-spectrum 
   case PREDICT_PEPTIDE_IONS_COMMAND: /// predict-peptide-ions
   case VERSION_COMMAND:      ///< just print the version number
   // invalid
