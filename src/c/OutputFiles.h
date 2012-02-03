@@ -22,6 +22,7 @@
 #include "objects.h"
 #include "MatchCollection.h"
 #include "MatchFileWriter.h"
+#include "PepXMLWriter.h"
 
 class OutputFiles{
 
@@ -51,6 +52,12 @@ class OutputFiles{
 
  private:
   bool createFiles(FILE*** file_array_ptr,
+                   const char* output_dir,
+                   const char* fileroot,
+                   CruxApplication* application,
+                   const char* extension,
+                   bool overwrite);
+  bool createFiles(PepXMLWriter*** file_array_ptr,
                    const char* output_dir,
                    const char* fileroot,
                    CruxApplication* application,
@@ -96,10 +103,10 @@ class OutputFiles{
   std::string* target_decoy_list_; ///< target or decoy[-n] string of each file
   MatchFileWriter** delim_file_array_; ///< array of .txt files
   FILE** sqt_file_array_; ///< array of .sqt files
-  FILE** xml_file_array_; ///< array of .xml files
+  PepXMLWriter** xml_file_array_; ///< array of .pep.xml files
   FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to
   int matches_per_spec_;  ///< print this many matches per spec
-  CruxApplication* application_;     ///< which crux application is writing these files
+  CruxApplication* application_;///< crux application writing these files
 };
 
 

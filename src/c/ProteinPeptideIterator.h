@@ -162,7 +162,7 @@ class ProteinPeptideIterator {
    * \returns TRUE if this is a valid cleavage position for the given enzyme.
    */
   static bool validCleavagePosition(
-    char* sequence,
+    const char* sequence,
     ENZYME_T enzyme
   );
 

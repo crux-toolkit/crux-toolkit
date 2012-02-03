@@ -99,7 +99,7 @@ OutputFiles::~OutputFiles(){
   for(int file_idx = 0; file_idx < num_files_; file_idx ++){
     if( delim_file_array_ ){ delete delim_file_array_[file_idx]; }
     if( sqt_file_array_ ){ fclose(sqt_file_array_[file_idx]); }
-    if( xml_file_array_ ){ fclose(xml_file_array_[file_idx]); }
+    if( xml_file_array_ ){ xml_file_array_[file_idx]->closeFile(); }
   }
   if( feature_file_ ){ fclose(feature_file_); }
 
@@ -207,6 +207,44 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
 }
 
 /**
+ * A private function for generating target and decoy pepxml files named
+ * according to the given arguments.
+ *
+ * New files are returned via the file_array_ptr argument.  When
+ * num_files > 1, exactly one target file is created and the remaining
+ * are decoys.  Files are named 
+ * "output-dir/fileroot.command_name.target|decoy[-n].extension".
+ * Requires that the output-dir already exist and have write
+ * permissions. 
+ * \returns true if num_files new files are created, else false.
+ */
+bool OutputFiles::createFiles(PepXMLWriter*** xml_writer_array_ptr,
+                              const char* output_dir,
+                              const char* fileroot,
+                              CruxApplication* application,
+                              const char* extension,
+                              bool overwrite){
+  if( num_files_ == 0 ){
+    return false;
+  }
+  
+  // allocate array
+  *xml_writer_array_ptr = new PepXMLWriter*[num_files_];
+
+  // create each file
+  for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
+    string filename = makeFileName( fileroot, application,
+                                    target_decoy_list_[file_idx].c_str(),
+                                    extension, output_dir);
+    (*xml_writer_array_ptr)[file_idx] = new PepXMLWriter();
+    (*xml_writer_array_ptr)[file_idx]->openFile(filename.c_str(), overwrite);
+
+  }// next file
+  
+  return true;
+}
+
+/**
  * A private function for generating target and decoy MatchFileWriters named
  * according to the given arguments.
  *
@@ -288,12 +326,11 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
 
     if( sqt_file_array_ ){
       MatchCollection::printSqtHeader(sqt_file_array_[file_idx],
-                       tag,
-                       num_proteins, false); // not post search
+                       tag, num_proteins); 
     }
     
     if ( xml_file_array_){
-      MatchCollection::printXmlHeader(xml_file_array_[file_idx]);
+      xml_file_array_[file_idx]->writeHeader();
     }
 
     tag = "decoy";
@@ -318,7 +355,7 @@ void OutputFiles::writeHeaders(const vector<bool>& add_this_col){
     }
 
     if ( xml_file_array_){
-      MatchCollection::printXmlHeader(xml_file_array_[file_idx]);
+      xml_file_array_[file_idx]->writeHeader();
     }
 
     tag = "decoy";
@@ -347,7 +384,7 @@ void OutputFiles::writeFeatureHeader(char** feature_names,
 void OutputFiles::writeFooters(){
   if (xml_file_array_){
     for (int file_idx = 0; file_idx < num_files_; file_idx++){
-      MatchCollection::printXmlFooter(xml_file_array_[file_idx]);
+      xml_file_array_[file_idx]->writeFooter();
     }
   }
 
@@ -473,8 +510,7 @@ void OutputFiles::printMatchesXml(
     cur_matches->printXml(xml_file_array_[file_idx],
                                matches_per_spec_,
                                spectrum,
-                               rank_type,
-                               index);
+                               rank_type);
 
     if( decoy_matches_array.size() > (size_t)file_idx ){
       cur_matches = decoy_matches_array[file_idx];

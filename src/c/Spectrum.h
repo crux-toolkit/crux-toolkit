@@ -49,6 +49,7 @@ class Spectrum{
   FLOAT_T          max_peak_mz_;   ///< The maximum m/z of all peaks
   double           total_energy_;  ///< The sum of intensities in all peaks
   std::string           filename_;      ///< Optional filename
+  std::string           stripped_filename_; ///< filename, no path or extension
   std::vector<std::string> i_lines_v_;  ///< store i lines
   std::vector<std::string> d_lines_v_;  ///< store d lines
   bool             has_peaks_;  ///< Does the spectrum contain peak information
@@ -167,14 +168,6 @@ class Spectrum{
      FLOAT_T* intensities, ///< intensities of new peaks
      int max_mz_bin,       ///< num_bins in intensities
      FILE* file);          ///< print to this file
-
-  /**
-   * Prints a spectrum object to file in xml format.
-   */
-  void printXml
-    (FILE* file,           ///< output file to print at -out
-     SpectrumZState& zstate,            ///< zstate used for the search -in
-     int index);            ///< used to output index to file
 
   /**
    * Prints a spectrum object to file in sqt format.
@@ -337,6 +330,11 @@ class Spectrum{
    */
   void populateMzPeakArray();
 
+  /**
+   * \returns The name of the file this spectrum came from or an empty
+   * string, if unavailable.
+   */
+  const char* getFilename();
 };    
 
 

@@ -68,7 +68,7 @@ bool ProteinPeptideIterator::isResidueLegal(char aa,
  * \returns true if this is a valid cleavage position for the given enzyme.
  */
 bool ProteinPeptideIterator::validCleavagePosition(
-   char* sequence,
+   const char* sequence,
    ENZYME_T enzyme
 ){
 

@@ -248,6 +248,13 @@
     </spectrum_query>
     <spectrum_query spectrum="test.00012.00012.1" start_scan="12" end_scan="12" precursor_neutral_mass="609.0627" assumed_charge="1" index="5">
     <search_result>
+    <search_hit hit_rank="1" peptide="GSVAAK" peptide_prev_aa="K" peptide_next_aa="T" protein="YML092C" num_tot_proteins="1" calc_neutral_pep_mass="611.5097" massdiff="-2.4470" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="PRE8 SGDID:S000004557, Chr XIII from 86739-85987, reverse complement, Verified ORF, '20S proteasome beta-type subunit'">
+<modification_info modified_peptide="GS[166.98]VAAK">
+<mod_aminoacid_mass position="2" mass="166.98"/>
+</modification_info>
+        <search_score name="delta_cn" value="-0.07" />
+        <search_score name="xcorr_score" value="-0.12" />
+    </search_hit>
     <search_hit hit_rank="2" peptide="AYGGSR" peptide_prev_aa="R" peptide_next_aa="C" protein="YER056C-A" num_tot_proteins="1" calc_neutral_pep_mass="609.6396" massdiff="-0.5768" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="RPL34A SGDID:S000002135, Chr V from 270183-270147,269749-269421, reverse complement, Verified ORF, 'Protein component of the large (60S) ribosomal subunit, nearly identical to Rpl34Bp and ">
         <search_score name="delta_cn" value="0.00" />
         <search_score name="xcorr_score" value="-0.13" />

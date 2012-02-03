@@ -2947,7 +2947,7 @@ bool set_scorer_type_parameter(
     return false;
   }
   /* stringify value */
-  scorer_type_to_string(set_value, value_str);
+  strcpy(value_str, scorer_type_to_string(set_value));
   carp(CARP_DETAILED_DEBUG, "setting score type to %s", value_str);  
 
   result = add_or_update_hash(parameters, name, value_str);

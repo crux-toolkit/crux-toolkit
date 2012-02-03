@@ -135,6 +135,8 @@ LIBFILES= \
   peptide_modifications.h \
   PeptideSrc.cpp \
   PeptideSrc.h \
+  PepXMLWriter.cpp \
+  PepXMLWriter.h \
   Percolator.cpp \
   Percolator.h \
   GeneratePeptides.cpp \

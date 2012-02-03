@@ -237,6 +237,11 @@ class Protein {
   char* getAnnotation();
 
   /**
+   *\returns A const pointer to the annotation of the protein.
+   */
+  const char* getAnnotationPointer();
+
+   /**
    * sets the annotation of the protein
    */
   void setAnnotation(

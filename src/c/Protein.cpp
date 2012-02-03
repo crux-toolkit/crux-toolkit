@@ -722,6 +722,13 @@ char* Protein::getAnnotation()
 }
 
 /**
+ *\returns A const pointer to the annotation of the protein.
+ */
+const char* Protein::getAnnotationPointer(){
+  return annotation_;
+}
+ 
+/**
  * sets the annotation of the protein
  */
 void Protein::setAnnotation(

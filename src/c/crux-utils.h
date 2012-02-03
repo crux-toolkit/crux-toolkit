@@ -371,7 +371,7 @@ bool mass_type_to_string(MASS_TYPE_T, char*);
 bool string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);
 bool algorithm_type_to_string(ALGORITHM_TYPE_T, char*);
 bool string_to_scorer_type(char*, SCORER_TYPE_T*);
-bool scorer_type_to_string(SCORER_TYPE_T, char*);
+const char* scorer_type_to_string(SCORER_TYPE_T);
 bool string_to_ion_type(char* , ION_TYPE_T*);
 bool ion_type_to_string(ION_TYPE_T, char*);
 
