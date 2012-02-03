@@ -1885,6 +1885,46 @@ bool Peptide::parseNoSrc(
   return true;
 }
 
+/**
+ * Fills the given vectors with the names and descriptions of all
+ * proteins containing this peptide.  Makes the descriptions
+ * xml-friendly by swapping double for single quotes and angled braces
+ * for square. Returned in the same order as getFlankingAAs().  Clears
+ * any existing values in the vectors.
+ * Adapted from Match::get_information_of_proteins()
+ * \returns The number of proteins.
+ */
+int Peptide::getProteinInfo(vector<string>& protein_ids,
+                            vector<string>& protein_descriptions){
+
+  protein_ids.clear();
+  protein_descriptions.clear();
+
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
+    new_peptide_src_iterator(this);
+
+  while(peptide_src_iterator_has_next(peptide_src_iterator)){
+    PeptideSrc* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    Protein* protein = peptide_src->getParentProtein();
+    protein_ids.push_back(protein->getIdPointer());
+
+    string description = protein->getAnnotationPointer();
+    // replace double quotes with single quotes
+    replace(description.begin(), description.end(), '"', '\'');
+    // remove any xml tags in the description by replacing <> with []
+    replace(description.begin(), description.end(), '<', '[');
+    replace(description.begin(), description.end(), '>', ']');
+    protein_descriptions.push_back(description);
+
+  } // next protein
+
+  free_peptide_src_iterator(peptide_src_iterator);
+
+  return protein_ids.size();
+}
+
+
+
 /* Public functions--Iterators */
 
 /**

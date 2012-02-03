@@ -227,6 +227,8 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
 
   } // next spectrum
 
+  output_files.writeFooters();
+
   // clean up
   delete spectrum_iterator;
   delete spectra;

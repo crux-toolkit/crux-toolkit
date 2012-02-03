@@ -387,26 +387,28 @@ bool algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
  */
 static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
   {"sp",
-   "xcorr",
+   "xcorr_score",
 
    "decoy_xcorr_qvalue",
    "decoy_xcorr_peptide_qvalue",
+   "decoy_xcorr_PEP",
 
    "logp_weibull_xcorr",
    "logp_bonf_weibull_xcorr",
    "logp_qvalue_weibull_xcorr",
+   "logp_weibull_PEP",
    "logp_peptide_qvalue_weibull",
 
    "percolator_score", 
    "percolator_qvalue",
    "percolator_peptide_qvalue",
+   "percolator_PEP",
 
    "qranker_score", 
    "qranker_qvalue",
    "qranker_peptide_qvalue"
+   "qranker_PEP"
   };
-//TODO: this should probably be changed, these strings are the option args
-//Instead could have an if block in string_to_type
 
 bool string_to_scorer_type(char* name, SCORER_TYPE_T* result){
   bool success = true;
@@ -422,14 +424,11 @@ bool string_to_scorer_type(char* name, SCORER_TYPE_T* result){
   return success;
 }
 
-bool scorer_type_to_string(SCORER_TYPE_T type, char* type_str){
-  bool success = true;
+const char* scorer_type_to_string(SCORER_TYPE_T type){
   if( (int)type > NUMBER_SCORER_TYPES){
-    success = false;
-    type_str = NULL;
+    return NULL;
   }
-  strcpy(type_str, scorer_type_strings[type]);
-  return success;
+  return scorer_type_strings[type];
 }
 
 

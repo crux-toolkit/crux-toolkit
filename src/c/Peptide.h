@@ -640,9 +640,18 @@ class Peptide {
    * \returns a pointer to the string. Caller is responsible for freeing memeory.
    * If peptide has no sources returns NULL.
    */
-  char *getFlankingAAs();
-};
+  char* getFlankingAAs();
 
+  /**
+   * Fills the given vectors with the names and descriptions of all
+   * proteins containing this peptide.  Returned in the same order as
+   * getFlankingAAs().  Clears any existing data in the vectors.
+   * \returns The number of proteins.
+   */
+  int getProteinInfo(std::vector<std::string>& protein_ids,
+                     std::vector<std::string>& protein_descriptions);
+
+};  // class Peptide
 
 /*  Iterators */
 

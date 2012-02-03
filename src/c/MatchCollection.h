@@ -41,6 +41,7 @@
 #include "ModifiedPeptidesIterator.h"
 #include "MatchFileWriter.h"
 #include "MatchIterator.h"
+#include "PepXMLWriter.h"
 
 using namespace std;
 
@@ -435,7 +436,7 @@ class MatchCollection {
    * the collection rather than limiting by top-match parameter. 
    */
   void printMultiSpectraXml(
-    FILE* output
+    PepXMLWriter* output
     );
 
   /*
@@ -449,8 +450,7 @@ class MatchCollection {
   static void printSqtHeader(
     FILE* outfile, 
     const char* type, 
-    int proteins, 
-    bool is_for_match_analysis
+    int proteins 
     );
 
   /*
@@ -468,16 +468,15 @@ class MatchCollection {
     );
 
   /**
-   * Print the psm features to output file upto 'top_match' number of
+   * Print the psm features to output file up to 'top_match' number of
    * top peptides among the match_collection in xml file format
    * returns true, if sucessfully print xml format of the PSMs, else false
    */
   bool printXml(
-    FILE* output,
+    PepXMLWriter* output,
     int top_match,
     Spectrum* spectrum,
-    SCORER_TYPE_T main_score,
-    int index
+    SCORER_TYPE_T main_score
     );
 
   /**

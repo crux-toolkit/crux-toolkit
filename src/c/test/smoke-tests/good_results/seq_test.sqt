@@ -13,7 +13,7 @@ H	Alg-PreMasTol	3.0
 H	Alg-FragMassTol	0.50
 H	Alg-XCorrMode	0
 H	Comment	preliminary algorithm sp
-H	Comment	final algorithm xcorr
+H	Comment	final algorithm xcorr_score
 H	StaticMod	C=160.160
 H	DiffMod	S*=+79.90
 H	Alg-DisplayTop	5

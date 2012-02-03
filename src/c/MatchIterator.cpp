@@ -51,8 +51,7 @@ MatchIterator::MatchIterator(
   
   // has the score type been populated in match collection?
   if(!match_collection->scored_type_[score_type]){
-    char score_str[64];
-    scorer_type_to_string(score_type, score_str);
+    const char* score_str = scorer_type_to_string(score_type);
     carp(CARP_ERROR, "New match iterator for score type %s.", score_str);
     carp(CARP_FATAL, 
          "The match collection has not been scored for request score type.");

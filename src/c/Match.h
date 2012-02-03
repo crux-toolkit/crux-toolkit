@@ -163,22 +163,9 @@ class Match {
     FILE* file      ///< output stream -out
     );
 
-
-
   /**
-   * \brief Print the match information in xml format to the given file
-   *
-   * Prints out the match information in the format described as pep xml.
-   * Fills out as much information as available.
-   *
-   */
-  void printXml(
-    FILE* output_file,
-    const bool* scores_computed
-  );
-
-  /**
-   * \brief Print the match information in tab delimited format to the given file
+   * \brief Print the match information in tab delimited format to the
+   * given file.
    *
    */
   void printTab(
@@ -325,7 +312,7 @@ class Match {
   int getCharge();
 
   /**
-   * gets the match neutral mass
+   * gets the spectrum neutral mass
    */
   FLOAT_T getNeutralMass();
 
@@ -633,7 +620,7 @@ int compareSpectrumDecoyPValueQValue(
  * why is this here?
  */
 int get_num_internal_cleavage(
-  char* peptide_sequence, 
+  const char* peptide_sequence, 
   ENZYME_T enzyme
 );
 
@@ -642,9 +629,9 @@ int get_num_internal_cleavage(
  *
  */
 int get_num_terminal_cleavage(
-  char* peptide_sequence, 
-  char flanking_aas_prev,
-  char flanking_aas_next,
+  const char* peptide_sequence, 
+  const char flanking_aas_prev,
+  const char flanking_aas_next,
   ENZYME_T enzyme
 );
 
@@ -655,8 +642,8 @@ int get_num_terminal_cleavage(
  *
  */
 void print_modifications_xml(
-  char* mod_seq,
-  char* sequence,
+  const char* mod_seq,
+  const char* sequence,
   FILE* output_file
 );
 
@@ -668,7 +655,7 @@ void print_modifications_xml(
 void find_static_modifications(
   std::map<int, double>& static_mods,
   std::map<int, double>& var_mods,
-  char* sequence
+  const char* sequence
 );
 
 /**
@@ -678,19 +665,10 @@ void find_static_modifications(
  */
 void find_variable_modifications(
  std::map<int, double>& mods,
- char* mod_seq
+ const char* mod_seq
 );
 
 
-/**
- * \brief Takes a empty set of pairs of strings and a peptide
- *  and fills the set with protein id paired with protein annotation
- *
- */
-void get_information_of_proteins(
-  std::set<std::pair<char*, char*> >& protein_info,
-  Peptide* peptide
-);
 
 #endif //MATCH_H
 

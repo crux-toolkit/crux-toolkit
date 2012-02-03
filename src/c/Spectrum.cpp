@@ -194,53 +194,6 @@ void Spectrum::printProcessedPeaks(
   return;
 }
 
-/**
- * Prints a spectrum object to file in xml format.
- */
-void Spectrum::printXml(
-  FILE* file,           ///< output file to print at -out
-  SpectrumZState& zstate,            ///< charge used for the search -in
-  int index              ///< used to output index to file
-  ){
-  int start_scan = first_scan_;
-  int last_scan = last_scan_;
-  const char* filepath = filename_.c_str();
-  char** name_ext_array = NULL;
-  const char* filename = NULL;
-  if (filepath == NULL){
-    filename = "NA";
-  } else {
-    name_ext_array = parse_filename_path_extension(filepath, NULL);
-    filename = name_ext_array[0];
-  }
-  const char* period = ".";
-  std::ostringstream spectrum_id;
-  spectrum_id << filename << period << std::setw(5)  << std::setfill('0')
-              << start_scan << period << std::setw(5) << std::setfill('0')
-              << last_scan << period << zstate.getCharge() ;
-  fprintf(file, "    <spectrum_query spectrum=\"%s\" start_scan=\"%i\""
-          " end_scan=\"%i\" precursor_neutral_mass=\"%.*f\""
-          " assumed_charge=\"%i\" index=\"%i\">\n",
-          spectrum_id.str().c_str(),
-          start_scan,
-          last_scan,
-          get_int_parameter("mass-precision"),
-          zstate.getNeutralMass(),
-          zstate.getCharge(),
-          index
-          );
-  if (name_ext_array != NULL){
-    if (name_ext_array[0] != NULL){
-      free(name_ext_array[0]);
-    }
-    if (name_ext_array[1] != NULL){
-      free(name_ext_array[1]);
-    }
-    free(name_ext_array);
-  }
-  
-}
-
 
 /**
  * Prints a spectrum object to file in sqt format.
@@ -1303,6 +1256,30 @@ void Spectrum::rankPeaks()
 
 }
 
+/**
+ * \returns The name of the file (no path or extension) this spectrum
+ * came from or an empty string, if filename is unavailable.
+ */
+const char* Spectrum::getFilename(){
+
+  if( filename_.empty() ){
+    return "";
+  }
+
+  // store the filename stripped of path and extension
+  if( stripped_filename_.empty() ){
+    char** name_ext_array = parse_filename_path_extension(filename_.c_str(), 
+                                                          NULL);
+    stripped_filename_ = name_ext_array[0];
+    free(name_ext_array[0]);
+    if(name_ext_array[1] != NULL ){
+      free(name_ext_array[1]);
+    }
+    free(name_ext_array);
+  }
+
+  return stripped_filename_.c_str();
+}
 
 /*
  * Local Variables:
