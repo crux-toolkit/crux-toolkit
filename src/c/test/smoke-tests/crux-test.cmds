@@ -199,6 +199,9 @@
 # xlink candidate generation
 0 = xlink-db = good_results/xlink_peptides.txt = crux search-for-xlinks --parameter-file params/xlink.db xlink.ms2 xlink.db.fasta K:K 222; cat crux-output/xlink_peptides.txt
 
+# xlink ion generation
+0 = xlink-ion = good_results/xlink_ions.txt = xlink-predict-peptide-ions KVIKNVAEVK LYMAED 4 6 2 -18.01
+
 #spectral-counts
 1 = spectral-counts = good_results/spectral-count.target.txt = crux spectral-counts --overwrite T --unique-mapping F --quant-level protein --input-ms2 test.ms2 --parsimony greedy --measure SIN test.target.txt test.fasta; cat crux-output/spectral-counts.target.txt
 
