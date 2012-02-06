@@ -93,7 +93,9 @@
     <ClCompile Include="..\..\src\c\ExtractColumns.cpp" />
     <ClCompile Include="..\..\src\c\ExtractRows.cpp" />
     <ClCompile Include="..\..\src\c\FilteredSpectrumChargeIterator.cpp" />
+    <ClCompile Include="..\..\src\c\GeneratePeptides.cpp" />
     <ClCompile Include="..\..\src\c\GeneratePeptidesIterator.cpp" />
+    <ClCompile Include="..\..\src\c\GetMs2Spectrum.cpp" />
     <ClCompile Include="..\..\src\c\hash.cpp" />
     <ClCompile Include="..\..\src\c\Index.cpp" />
     <ClCompile Include="..\..\src\c\IndexFile.cpp" />
@@ -126,7 +128,9 @@
     <ClCompile Include="..\..\src\c\PeptideConstraint.cpp" />
     <ClCompile Include="..\..\src\c\PeptideSrc.cpp" />
     <ClCompile Include="..\..\src\c\peptide_modifications.cpp" />
+    <ClCompile Include="..\..\src\c\PepXMLWriter.cpp" />
     <ClCompile Include="..\..\src\c\Percolator.cpp" />
+    <ClCompile Include="..\..\src\c\PredictPeptideIons.cpp" />
     <ClCompile Include="..\..\src\c\PrintProcessedSpectra.cpp" />
     <ClCompile Include="..\..\src\c\PrintVersion.cpp" />
     <ClCompile Include="..\..\src\c\Protein.cpp" />
@@ -164,6 +168,10 @@
     <ClInclude Include="..\..\src\c\DelimitedFile.h" />
     <ClInclude Include="..\..\src\c\DelimitedFileReader.h" />
     <ClInclude Include="..\..\src\c\DelimitedFileWriter.h" />
+    <ClInclude Include="..\..\src\c\GeneratePeptides.h" />
+    <ClInclude Include="..\..\src\c\GetMs2Spectrum.h" />
+    <ClInclude Include="..\..\src\c\PepXMLWriter.h" />
+    <ClInclude Include="..\..\src\c\PredictPeptideIons.h" />
     <ClInclude Include="..\..\src\c\WinCrux.h" />
     <ClInclude Include="..\..\src\c\windirent.h" />
     <ClInclude Include="..\..\src\c\ExtractColumns.h" />

@@ -24,9 +24,6 @@
     <ClCompile Include="..\..\src\c\xlink\xhhc_ion_series.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\c\xlink\xhhc_make_histogram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\c\xlink\xhhc_predict_peptide_ions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -54,6 +51,15 @@
     <ClCompile Include="..\..\src\c\xlink\XLinkSite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\c\xlink\LinkedPeptide.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\c\xlink\XHHC_Peptide.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\c\xlink\XLinkablePeptide.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\c\xlink\SearchForXLinks.h">
@@ -72,6 +78,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\c\xlink\XLinkSite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\c\xlink\LinkedPeptide.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\c\xlink\XHHC_Peptide.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\c\xlink\XLinkablePeptide.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
