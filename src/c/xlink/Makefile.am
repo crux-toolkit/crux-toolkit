@@ -12,7 +12,6 @@ libxlink_la_SOURCES = \
   xhhc.h \
   xhhc_ion_series.cpp \
   xhhc_ion_series.h \
-  xhhc_predict_peptide_ions.cpp \
   xhhc_score_peptide_spectrum.cpp \
   xhhc_scorer.cpp \
   xhhc_score_peptide_spectrum.cpp \

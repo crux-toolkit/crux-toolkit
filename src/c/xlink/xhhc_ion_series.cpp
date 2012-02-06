@@ -1,3 +1,5 @@
+//TODO - Change cout/cerr to carp.
+
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
 
@@ -24,18 +26,20 @@ LinkedIonSeries::LinkedIonSeries(int charge) {
 // prints out tab delimited information about the ion series
 void LinkedIonSeries::print() {
 
-  cout <<"Sorting ions"<<endl;
-
   LinkedPeptide::sortByMass(all_ions, fragment_mass_type);
 
-  cout << "m/z\ttype\tion" << endl;
+  cout << "m/z\ttype\tcharge\tion" << endl;
   string ion_type;
   for (vector<LinkedPeptide>::iterator ion = all_ions.begin(); ion != all_ions.end(); ++ion) {
     if (ion->getIonType() == B_ION) 
       ion_type = "B_ION";
     else 
       ion_type = "Y_ION";
-    cout << ion->getMZ(fragment_mass_type) << "\t" << ion_type << "\t" << *ion << endl;
+    
+    cout << ion->getMZ(fragment_mass_type) << "\t" << 
+            ion_type << "\t" << 
+            ion->getCharge() << "\t" << 
+            *ion << endl;
   }
 }
 

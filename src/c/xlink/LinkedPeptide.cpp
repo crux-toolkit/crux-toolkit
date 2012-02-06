@@ -4,6 +4,8 @@
  * CREATE DATE: 18 January 2012
  * \brief Object for keeping track of a (non-)crosslinked peptide.
  *****************************************************************************/
+//TODO Change cout/cerrs to CARP.
+
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
 

@@ -1,3 +1,5 @@
+//TODO - change cerr/couts to carp.
+
 #include "xhhc.h"
 #include "xhhc_ion_series.h"
 #include "xhhc_scorer.h"
