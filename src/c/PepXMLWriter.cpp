@@ -125,9 +125,6 @@ void PepXMLWriter::writePSM(
   }
   // else, just add to the search_result list
 
-  cerr << "Writer is using spectrum mass " << spectrum_neutral_mass 
-       << " and peptide mass " << peptide_mass 
-       << " with diff of " << spectrum_neutral_mass - peptide_mass << endl;
   printPeptideElement(PSM_rank, 
                       unmodified_peptide_sequence,
                       modified_peptide_sequence, 
@@ -240,7 +237,6 @@ void PepXMLWriter::printPeptideElement(int rank,
           protein_annotation.c_str());
 
   // print additonal proteins
-  cerr << "flanking aas is '" << flanking_aas << "'" << endl;
   for(int prot_idx = 1; prot_idx < num_proteins; prot_idx++){
     int flank_idx = strlen("XX,") * prot_idx;
     flanking_aas_prev = flanking_aas[flank_idx];
