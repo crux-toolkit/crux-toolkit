@@ -1553,7 +1553,7 @@ void find_variable_modifications(
     const char* start = NULL;
     // Parse returned string to find modifications within
     // brackets
-    while (*(amino) != '\0'){
+    while (*(amino) != '\0' && *(amino+1) != '\0'){
       if (*(amino+1) =='['){
         start = amino+2;
         end = amino+2;
@@ -1566,6 +1566,14 @@ void find_variable_modifications(
         mods[seq_index] = atof(mass);
         amino = end;
         free(mass);
+      } else if (*(amino+1) < 'A' || *(amino+1) > 'Z'){ // a mod symbol
+        double mass = 0; // sum up all adjacent symbols
+        end = amino + 1;
+        while( *end < 'A' || *end > 'Z' ){
+          mass += get_mod_mass_from_symbol(*end);
+          end++;
+        }
+        mods[seq_index] = mass;
       }
       seq_index++;
       amino++;

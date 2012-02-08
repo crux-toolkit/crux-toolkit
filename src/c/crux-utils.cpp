@@ -406,7 +406,7 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
 
    "qranker_score", 
    "qranker_qvalue",
-   "qranker_peptide_qvalue"
+   "qranker_peptide_qvalue",
    "qranker_PEP"
   };
 

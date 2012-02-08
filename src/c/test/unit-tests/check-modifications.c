@@ -633,6 +633,31 @@ START_TEST(test_palindrome){
 }
 END_TEST
 
+START_TEST(test_unmodify){
+  const char* unmod = "MODSEQHERE";
+  const char* mod1 = "MODSE*QHERE^";
+  const char* mod2 = "M[8.8]ODSEQHERE";
+
+  char* undone = unmodify_sequence(unmod);
+  fail_unless( strcmp(unmod, undone) == 0,
+               "The sequence '%s' should not have changed but it is '%s'",
+               unmod, undone);
+  free(undone);
+
+  undone = unmodify_sequence(mod1);
+  fail_unless( strcmp(unmod, undone) == 0,
+               "The sequence '%s' should not have changed but it is '%s'",
+               unmod, undone);
+  free(undone);
+
+  undone = unmodify_sequence(mod2);
+  fail_unless( strcmp(unmod, undone) == 0,
+               "The sequence '%s' should not have changed but it is '%s'",
+               unmod, undone);
+  free(undone);
+}
+END_TEST
+
 /* Boundry conditions test suite */
 START_TEST(test_too_many_mods){
   /* This fails as it should, but doesn't get caught nicely
@@ -668,6 +693,7 @@ Suite* modifications_suite(){
   tcase_add_test(tc_core, test_palindrome);
   tcase_add_test(tc_core, test_is_modifiable);
   tcase_add_test(tc_core, test_modify);
+  tcase_add_test(tc_core, test_unmodify);
 
   tcase_add_checked_fixture(tc_core, mod_setup, mod_teardown);
   suite_add_tcase(s, tc_core);

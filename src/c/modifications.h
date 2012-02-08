@@ -163,6 +163,18 @@ int convert_to_mod_aa_seq(const char* sequence, MODIFIED_AA_T** mod_sequence,
 MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length);
 
 /**
+ * \brief Remove any characters not A-Z from a peptide sequence.
+ * \returns A newly allocated string with the given sequence less any
+ * modififcation symbols or masses.
+ */
+char* unmodify_sequence(const char* modified_seqeunce);
+
+/**
+ * \brief Remove any characters not A-Z from a peptide sequence.
+ */
+void unmodify_sequence_in_place(char* modified_seqeunce);
+
+/**
  * \brief Determine if an array of MODIFIED_AA_T is a palindrome.  
  * Used by reverse_sequence to avoid returning a reversed sequence
  * that is the same as the target.  Ignores the first and last
@@ -230,6 +242,13 @@ void modify_aa(MODIFIED_AA_T* aa, const AA_MOD_T* mod);
 const AA_MOD_T* get_aa_mod_from_symbol(const char symbol);
 
 /**
+ * \brief Return the delta mass associated with the given modification
+ * symbol.  If the symbol does not represent a modification, returns
+ * 0. Requires that parameters have been initialized.
+ */
+FLOAT_T get_mod_mass_from_symbol(const char symbol);
+
+/**
  * \brief Return the AA_MOD_T associated with the given mass shift.
  * The mass may either be from a single AA_MOD_T as given by the user
  * or from any combination of AA_MOD_T's.  If no AA_MOD_T(s) can be
@@ -275,7 +294,7 @@ void aa_mod_set_mass_change(AA_MOD_T* mod, double mass_change);
  * \brief Get the mass change caused by this modification.
  * \returns The mass change caused by this modification.
  */
-double aa_mod_get_mass_change(AA_MOD_T* mod);
+double aa_mod_get_mass_change(const AA_MOD_T* mod);
 
 /**
  * \brief Access to the aa_list of the AA_MOD_T struct.  This pointer

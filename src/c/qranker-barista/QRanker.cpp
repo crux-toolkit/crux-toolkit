@@ -1,4 +1,5 @@
 #include "QRanker.h"
+#include "modifications.h"
 
 QRanker::QRanker() :  
   seed(0),
@@ -110,9 +111,10 @@ void QRanker :: write_results()
   fname.str("");
 
   fname << out_dir << "/" << fileroot << "q-ranker_output.xml";
-  ofstream f2(fname.str().c_str()); 
-  write_results_psm_xml(f2);
-  f2.close();
+  PepXMLWriter xmlfile;
+  xmlfile.openFile(fname.str().c_str(), overwrite_flag);
+  write_results_psm_xml(xmlfile);
+  xmlfile.closeFile();
 
   d.clear_data_all_results();
   d.clear_data_psm_results();
@@ -154,10 +156,24 @@ void QRanker :: get_pep_seq(string &pep, string &seq, string &n, string &c)
 }
 
 
-void QRanker :: write_results_psm_xml(ofstream &os)
+void QRanker :: write_results_psm_xml(PepXMLWriter& xmlfile)
 {
-  os << "<psms>" <<endl;
-  int cn = 0;
+  xmlfile.writeHeader();
+
+  bool* scores_to_print = new bool[NUMBER_SCORER_TYPES];
+  for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
+    scores_to_print[score_idx] = false;
+  }
+  //scores_to_print[SP] = true; // todo
+  //scores_to_print[XCORR] = true;
+  scores_to_print[QRANKER_SCORE] = true;
+  scores_to_print[QRANKER_QVALUE] = true;
+  scores_to_print[QRANKER_PEP] = true;
+
+  xmlfile.SetScoresComputed(scores_to_print);
+
+  double* scores = new double[NUMBER_SCORER_TYPES];
+
   for(int i = 0; i < fullset.size(); i++)
     {
       // only print target psms
@@ -166,26 +182,62 @@ void QRanker :: write_results_psm_xml(ofstream &os)
       }
 
       int psmind = fullset[i].psmind;
-      if(fullset[i].label == 1)
-	{
-	  cn++;
-	  //write out proteins
-	  os << " <psm psm_id=" << "\"" << psmind << "\"" << ">" << endl;
-	  os << "  <q_value>" << fullset[i].q << "</q_value>" << endl;
-	  os << "  <score>" << fullset[i].score << "</score>" << endl;
-	  os << "  <scan>" << d.psmind2scan(psmind) << "</scan>" << endl;
-	  os << "  <charge>" << d.psmind2charge(psmind) << "</charge>" << endl;
-	  os << "  <precursor_mass>" << d.psmind2precursor_mass(psmind) << "</precursor_mass>" << endl;
-	  int pepind = d.psmind2pepind(psmind);
-	  string pep = d.ind2pep(pepind);
-	  string seq, n,c;
-	  get_pep_seq(pep,seq,n,c);
-	  os << "  <peptide_seq n =\"" << n << "\" c=\"" << c << "\" seq=\"" << seq << "\"/>" << endl;
-	  os << "  <file_name>" << d.psmind2fname(psmind) << "</file_name>" << endl;
-	  os << " </psm>" << endl;  
-	}
+
+      // spectrum info
+      int scan = d.psmind2scan(psmind);
+      const char* filename = d.psmind2fname(psmind).c_str();
+      char** path_name = parse_filename_path_extension(filename, NULL);
+      filename = path_name[0];
+      double spectrum_mass = d.psmind2precursor_mass(psmind); 
+      int charge = d.psmind2charge(psmind);
+
+      // peptide info
+      int pepind = d.psmind2pepind(psmind);
+      string pep = d.ind2pep(pepind);
+      string modified_sequence, n,c;
+      get_pep_seq(pep, modified_sequence, n, c);
+      char* sequence = unmodify_sequence(modified_sequence.c_str());
+      string flanking_aas = n + c;
+      double peptide_mass = 0; // where is this?
+
+      // protein info
+      int num_proteins = 1; // d.pepind2num_prot(pepind); 
+      //int* protein_indexes = d.pepind2protinds(pepind);
+      vector<string> protein_names;
+      vector<string> protein_descriptions;
+      for(int prot_idx = 0; prot_idx < num_proteins; prot_idx++){
+        string protein_name = "name"; // d.ind2prot(protein_indexes[prot_idx]);
+        protein_names.push_back(protein_name);
+        protein_descriptions.push_back("prot description");
+        // flanking_aas += ", " + n + c; // todo
+      }
+
+      // psm info
+      int psm_rank = 1;
+      double delta_cn = 0;  // where is this?
+      scores[QRANKER_SCORE] = fullset[i].score;
+      scores[QRANKER_QVALUE] = fullset[i].q;
+      scores[QRANKER_PEP] = fullset[i].PEP;
+      // todo xcorr and SP
+
+      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
+                       sequence, modified_sequence.c_str(),
+                       peptide_mass, num_proteins,
+                       flanking_aas.c_str(), protein_names, 
+                       protein_descriptions, delta_cn, scores_to_print, scores);
+
+      free(sequence);
+      if( path_name[0] ){
+        free(path_name[0]);
+      }
+      if( path_name[1] ){
+        free(path_name[1]);
+      }
+      free(path_name);
+
     }
-  os << "</psms>" << endl;
+
+  xmlfile.writeFooter();
 }
 
 
@@ -837,6 +889,8 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
   int found_dir_with_tables;
 
   bool spec_features_flag;
+
+  overwrite_flag = get_boolean_parameter("overwrite");
 
   fileroot = get_string_parameter_pointer("fileroot");
   if(fileroot != "__NULL_STR")
