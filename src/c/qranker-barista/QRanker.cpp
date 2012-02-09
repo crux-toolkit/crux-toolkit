@@ -776,7 +776,7 @@ void QRanker::train_many_nets()
 }
 
 int QRanker::run( ) {
-  //srand(seed);
+  srand(seed);
   carp(CARP_INFO, "reading data");
   
   ostringstream res;
