@@ -163,7 +163,7 @@ void Dataset :: load_data_psm_results()
       return;
     }
   psmind_to_xcorr = new double[num_psms];
-  f_psmind_to_xcorr.read((char*)psmind_to_xcorr,sizeof(int)*num_psms);
+  f_psmind_to_xcorr.read((char*)psmind_to_xcorr,sizeof(double)*num_psms);
   f_psmind_to_xcorr.close();
   fname.str("");
 
@@ -176,7 +176,7 @@ void Dataset :: load_data_psm_results()
       return;
     }
   psmind_to_deltaCn = new double[num_psms];
-  f_psmind_to_deltaCn.read((char*)psmind_to_deltaCn,sizeof(int)*num_psms);
+  f_psmind_to_deltaCn.read((char*)psmind_to_deltaCn,sizeof(double)*num_psms);
   f_psmind_to_deltaCn.close();
   fname.str("");
   
@@ -189,7 +189,7 @@ void Dataset :: load_data_psm_results()
       return;
     }
   psmind_to_spscore = new double[num_psms];
-  f_psmind_to_spscore.read((char*)psmind_to_spscore,sizeof(int)*num_psms);
+  f_psmind_to_spscore.read((char*)psmind_to_spscore,sizeof(double)*num_psms);
   f_psmind_to_spscore.close();
   fname.str("");
 
@@ -589,7 +589,7 @@ void Dataset :: load_data_all_results()
       return;
     }
   psmind_to_xcorr = new double[num_psms];
-  f_psmind_to_xcorr.read((char*)psmind_to_xcorr,sizeof(int)*num_psms);
+  f_psmind_to_xcorr.read((char*)psmind_to_xcorr,sizeof(double)*num_psms);
   f_psmind_to_xcorr.close();
   fname.str("");
 
@@ -602,7 +602,7 @@ void Dataset :: load_data_all_results()
       return;
     }
   psmind_to_deltaCn = new double[num_psms];
-  f_psmind_to_deltaCn.read((char*)psmind_to_deltaCn,sizeof(int)*num_psms);
+  f_psmind_to_deltaCn.read((char*)psmind_to_deltaCn,sizeof(double)*num_psms);
   f_psmind_to_deltaCn.close();
   fname.str("");
   
@@ -615,7 +615,7 @@ void Dataset :: load_data_all_results()
       return;
     }
   psmind_to_spscore = new double[num_psms];
-  f_psmind_to_spscore.read((char*)psmind_to_spscore,sizeof(int)*num_psms);
+  f_psmind_to_spscore.read((char*)psmind_to_spscore,sizeof(double)*num_psms);
   f_psmind_to_spscore.close();
   fname.str("");
 
