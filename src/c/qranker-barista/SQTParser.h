@@ -78,8 +78,7 @@ class SQTParser{
   int collect_ms2_files(string &ms2_source, string &sqt_source);
   int set_input_sources(string &ms2_source, string &sqt_source);
   void read_list_of_files(string &list, vector<string> &fnames);
-  int check_files(string &in_dir);
-
+  
   /********* for separate database searches ********************************************/
   int match_target_sqt_to_ms2(string &sqt_source, string &prefix);
   int match_decoy_sqt_to_ms2(string &sqt_source, string &prefix);
@@ -110,6 +109,7 @@ class SQTParser{
   void open_files(string &out_dir);
   void close_files();
   void clean_up(string dir);
+  int check_file(ostringstream &fname);
   int check_input_dir(string &in_dir);
   
   //spec features generator
@@ -193,6 +193,11 @@ class SQTParser{
   ofstream f_protind_to_num_all_pep;
   ofstream f_fileind_to_fname;
   ofstream f_psmind_to_fileind;
+  
+  ofstream f_psmind_to_xcorr;
+  ofstream f_psmind_to_spscore;
+  ofstream f_psmind_to_deltaCn;
+  ofstream f_psmind_to_calculated_mass;
   
   //final hits per spectrum
   int fhps;

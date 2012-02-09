@@ -29,15 +29,8 @@ class Dataset
   void clear_data_prot_training();
   void load_labels_prot_training();
   void clear_labels_prot_training();
-  void load_aux_data();
-  void clear_aux_data();
-
   void load_data_all_results();
   void clear_data_all_results();
-  void load_data_prot_results();
-  void clear_data_prot_results();
-  void load_data_pep_results();
-  void clear_data_pep_results();
 
   inline void set_input_dir(string input_dir){in_dir = input_dir;}
   void normalize_psms();
@@ -49,6 +42,10 @@ class Dataset
   inline int psmind2charge(int psmind){return psmind_to_charge[psmind];}
   inline int psmind2pepind(int psmind){return psmind_to_pepind[psmind];}
   inline double psmind2precursor_mass(int psmind){return psmind_to_precursor_mass[psmind];}
+  inline double psmind2xcorr(int psmind){return psmind_to_xcorr[psmind];}
+  inline double psmind2spscore(int psmind){return psmind_to_spscore[psmind];}
+  inline double psmind2deltaCn(int psmind){return psmind_to_deltaCn[psmind];}
+  inline double psmind2peptide_mass(int psmind){return psmind_to_calculated_mass[psmind];}
   string& psmind2fname(int psmind);
   inline string& ind2pep(int ind){return ind_to_pep[ind];}
   inline int get_num_psms(){return num_psms;}
@@ -80,6 +77,10 @@ class Dataset
   int *psmind_to_pepind;
   int *psmind_to_scan;
   int *psmind_to_charge;
+  double *psmind_to_xcorr;
+  double *psmind_to_spscore;
+  double *psmind_to_deltaCn;
+  double *psmind_to_calculated_mass;
   double *psmind_to_precursor_mass;
   map <int, string> fileind_to_fname;
   int *psmind_to_fileind;

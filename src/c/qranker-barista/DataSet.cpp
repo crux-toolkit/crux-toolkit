@@ -45,7 +45,6 @@ Dataset::~Dataset()
 
 void Dataset :: load_data_psm_training()
 {
-  clear_data_psm_training();
 
   ostringstream fname;
   fname << in_dir << "/summary";
@@ -78,7 +77,6 @@ void Dataset :: clear_data_psm_training()
 
 void Dataset :: load_labels_psm_training()
 {
-  clear_labels_psm_training();
 
   ostringstream fname;
   fname << in_dir << "/summary";
@@ -106,7 +104,6 @@ void Dataset :: clear_labels_psm_training()
 
 void Dataset :: load_data_psm_results()
 {
-  clear_data_psm_results();
 
   ostringstream fname;
   fname << in_dir << "/summary";
@@ -156,7 +153,59 @@ void Dataset :: load_data_psm_results()
   f_psmind_to_charge.read((char*)psmind_to_charge,sizeof(int)*num_psms);
   f_psmind_to_charge.close();
   fname.str("");
+
+  //psmind_to_xcorr
+  fname << in_dir << "/psmind_to_xcorr";
+  ifstream f_psmind_to_xcorr(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_xcorr.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_xcorr = new double[num_psms];
+  f_psmind_to_xcorr.read((char*)psmind_to_xcorr,sizeof(int)*num_psms);
+  f_psmind_to_xcorr.close();
+  fname.str("");
+
+  //psmind_to_deltaCn
+  fname << in_dir << "/psmind_to_deltaCn";
+  ifstream f_psmind_to_deltaCn(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_deltaCn.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_deltaCn = new double[num_psms];
+  f_psmind_to_deltaCn.read((char*)psmind_to_deltaCn,sizeof(int)*num_psms);
+  f_psmind_to_deltaCn.close();
+  fname.str("");
   
+  //psmind_to_spscore
+  fname << in_dir << "/psmind_to_spscore";
+  ifstream f_psmind_to_spscore(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_spscore.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_spscore = new double[num_psms];
+  f_psmind_to_spscore.read((char*)psmind_to_spscore,sizeof(int)*num_psms);
+  f_psmind_to_spscore.close();
+  fname.str("");
+
+  //psmind_to_calculated_mass
+  fname << in_dir << "/psmind_to_calculated_mass";
+  ifstream f_psmind_to_calculated_mass(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_calculated_mass.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_calculated_mass = new double[num_psms];
+  f_psmind_to_calculated_mass.read((char*)psmind_to_calculated_mass,sizeof(double)*num_psms);
+  f_psmind_to_calculated_mass.close();
+  fname.str("");
+
   //psmind_to_precursor_mass
   fname << in_dir << "/psmind_to_precursor_mass";
   ifstream f_psmind_to_precursor_mass(fname.str().c_str(),ios::binary);
@@ -203,7 +252,50 @@ void Dataset :: load_data_psm_results()
   f_psmind_to_fileind.read((char*)psmind_to_fileind,sizeof(int)*num_psms);
   f_psmind_to_fileind.close();
   fname.str("");
-  
+
+  //ind_to_pep
+  fname << in_dir << "/ind_to_pep";
+  ifstream f_ind_to_pep(fname.str().c_str(),ios::binary);
+  string pep;
+  f_ind_to_pep >> ind;
+  f_ind_to_pep >> pep;
+  while(!f_ind_to_pep.eof())
+    {
+      ind_to_pep[ind] = pep;
+      f_ind_to_pep >> ind;
+      f_ind_to_pep >> pep;
+    }
+  f_ind_to_pep.close();
+  fname.str("");
+
+  //ind_to_prot
+  fname << in_dir << "/ind_to_prot";
+  ifstream f_ind_to_prot(fname.str().c_str(),ios::binary);
+ 
+  string prot;
+  f_ind_to_prot >> ind;
+  f_ind_to_prot >> prot;
+  while(!f_ind_to_prot.eof())
+    {
+      ind_to_prot[ind] = prot;
+      f_ind_to_prot >> ind;
+      f_ind_to_prot >> prot;
+    }
+  f_ind_to_prot.close();
+  fname.str("");
+
+  //pepind_to_protinds
+  fname << in_dir << "/pepind_to_protinds";
+  ifstream f_pepind_to_protinds(fname.str().c_str(),ios::binary);
+  if(!f_pepind_to_protinds.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  pepind_to_protinds.load(f_pepind_to_protinds);
+  f_pepind_to_protinds.close();
+  fname.str("");
+
 }
 
 void Dataset :: clear_data_psm_results()
@@ -212,10 +304,13 @@ void Dataset :: clear_data_psm_results()
   delete [] psmind_to_pepind; psmind_to_pepind = (int*)0;
   delete [] psmind_to_scan; psmind_to_scan = (int*)0;
   delete [] psmind_to_charge; psmind_to_charge = (int*)0;
+  delete [] psmind_to_xcorr; psmind_to_xcorr = (double*)0;
   delete [] psmind_to_precursor_mass; psmind_to_precursor_mass = (double*)0;
   fileind_to_fname.clear();
   delete [] psmind_to_fileind; psmind_to_fileind = (int*)0;
-  
+  ind_to_pep.clear();
+  ind_to_prot.clear();
+  pepind_to_protinds.clear();
 }
 
 string& Dataset :: psmind2fname(int psmind)
@@ -228,7 +323,6 @@ string& Dataset :: psmind2fname(int psmind)
 /************************************************************/
 void Dataset :: load_data_prot_training()
 {
-  clear_data_prot_training();
 
   ostringstream fname;
   fname << in_dir << "/summary";
@@ -251,6 +345,20 @@ void Dataset :: load_data_prot_training()
   f_summary.close();
   fname.str("");
   
+  //psm features
+  fname << in_dir << "/" << "psm";
+  ifstream f_psm_feat(fname.str().c_str(),ios::binary);
+  if(!f_psm_feat.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_features = new double[num_psms*num_features];
+  f_psm_feat.read((char*)psmind_to_features,sizeof(double)*num_psms*num_features);
+  f_psm_feat.close();
+  fname.str("");
+
+
   //pepind_to_psminds
   fname << in_dir << "/pepind_to_psminds";
   ifstream f_pepind_to_psminds(fname.str().c_str(),ios::binary);
@@ -287,19 +395,29 @@ void Dataset :: load_data_prot_training()
   protind_to_pepinds.load(f_protind_to_pepinds);
   f_protind_to_pepinds.close();
   fname.str("");
+
+  //pepind_to_protinds
+  fname << in_dir << "/pepind_to_protinds";
+  ifstream f_pepind_to_protinds(fname.str().c_str(),ios::binary);
+  if(!f_pepind_to_protinds.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  pepind_to_protinds.load(f_pepind_to_protinds);
+  f_pepind_to_protinds.close();
+  fname.str("");
+
 }
 
 void Dataset :: clear_data_prot_training()
 {
-  pepind_to_psminds.clear();
-  pepind_to_protinds.clear(); 
+  delete [] psmind_to_features; psmind_to_features = (double*)0;
   delete [] protind_to_num_all_pep; protind_to_num_all_pep = (int*)0;
-  protind_to_pepinds.clear();
 }
 
 void Dataset :: load_labels_prot_training()
 {
-  clear_labels_prot_training();
 
   ostringstream fname;
   fname << in_dir << "/summary";
@@ -371,34 +489,8 @@ void Dataset :: clear_labels_prot_training()
 }
 
 
-void Dataset :: load_aux_data()
-{
-  clear_aux_data();
-
-  ostringstream fname;
-  //pepind_to_protinds
-  fname << in_dir << "/pepind_to_protinds";
-  ifstream f_pepind_to_protinds(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_protinds.is_open())
-    {
-      cout << "could not open file " << fname.str() <<  " for reading data\n";
-      return;
-    }
-  pepind_to_protinds.load(f_pepind_to_protinds);
-  f_pepind_to_protinds.close();
-  fname.str("");
-
-}
-
-void Dataset :: clear_aux_data()
-{
-  pepind_to_protinds.clear();
-}
-
-
 void Dataset :: load_data_all_results()
 {
-  clear_data_all_results();
 
   ostringstream fname;
   //ind_to_pep
@@ -433,30 +525,6 @@ void Dataset :: load_data_all_results()
   f_ind_to_prot.close();
   fname.str("");
 
-}
-
-void Dataset :: clear_data_all_results()
-{
-  ind_to_pep.clear();
-  ind_to_prot.clear();
-}
-
-void Dataset :: load_data_prot_results()
-{
-  clear_data_prot_results();
-
-  ostringstream fname;
-  //protind_to_pepinds
-  fname << in_dir << "/protind_to_pepinds";
-  ifstream f_protind_to_pepinds(fname.str().c_str(),ios::binary);
-  if(!f_protind_to_pepinds.is_open())
-    {
-      cout << "could not open file " << fname.str() <<  " for reading data\n";
-      return;
-    }
-  protind_to_pepinds.load(f_protind_to_pepinds);
-  f_protind_to_pepinds.close();
-  fname.str("");
 
   //protind_to_label
   fname << in_dir << "/protind_to_label";
@@ -471,53 +539,169 @@ void Dataset :: load_data_prot_results()
   f_protind_to_label.close();
   fname.str("");
 
+  //psm data
+
+  //psmind_to_pepind
+  fname << in_dir << "/psmind_to_pepind";
+  ifstream f_psmind_to_pepind(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_pepind.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_pepind = new int[num_psms];
+  f_psmind_to_pepind.read((char*)psmind_to_pepind,sizeof(int)*num_psms);
+  f_psmind_to_pepind.close();
+  fname.str("");
   
+  //psmind_to_scan
+  fname << in_dir << "/psmind_to_scan";
+  ifstream f_psmind_to_scan(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_scan.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_scan = new int[num_psms];
+  f_psmind_to_scan.read((char*)psmind_to_scan,sizeof(int)*num_psms);
+  f_psmind_to_scan.close();
+  fname.str("");
+
+  //psmind_to_charge
+  fname << in_dir << "/psmind_to_charge";
+  ifstream f_psmind_to_charge(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_charge.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_charge = new int[num_psms];
+  f_psmind_to_charge.read((char*)psmind_to_charge,sizeof(int)*num_psms);
+  f_psmind_to_charge.close();
+  fname.str("");
+
+  //psmind_to_xcorr
+  fname << in_dir << "/psmind_to_xcorr";
+  ifstream f_psmind_to_xcorr(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_xcorr.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_xcorr = new double[num_psms];
+  f_psmind_to_xcorr.read((char*)psmind_to_xcorr,sizeof(int)*num_psms);
+  f_psmind_to_xcorr.close();
+  fname.str("");
+
+  //psmind_to_deltaCn
+  fname << in_dir << "/psmind_to_deltaCn";
+  ifstream f_psmind_to_deltaCn(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_deltaCn.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_deltaCn = new double[num_psms];
+  f_psmind_to_deltaCn.read((char*)psmind_to_deltaCn,sizeof(int)*num_psms);
+  f_psmind_to_deltaCn.close();
+  fname.str("");
+  
+  //psmind_to_spscore
+  fname << in_dir << "/psmind_to_spscore";
+  ifstream f_psmind_to_spscore(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_spscore.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_spscore = new double[num_psms];
+  f_psmind_to_spscore.read((char*)psmind_to_spscore,sizeof(int)*num_psms);
+  f_psmind_to_spscore.close();
+  fname.str("");
+
+  //psmind_to_calculated_mass
+  fname << in_dir << "/psmind_to_calculated_mass";
+  ifstream f_psmind_to_calculated_mass(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_calculated_mass.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_calculated_mass = new double[num_psms];
+  f_psmind_to_calculated_mass.read((char*)psmind_to_calculated_mass,sizeof(double)*num_psms);
+  f_psmind_to_calculated_mass.close();
+  fname.str("");
+
+  //psmind_to_precursor_mass
+  fname << in_dir << "/psmind_to_precursor_mass";
+  ifstream f_psmind_to_precursor_mass(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_precursor_mass.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_precursor_mass = new double[num_psms];
+  f_psmind_to_precursor_mass.read((char*)psmind_to_precursor_mass,sizeof(double)*num_psms);
+  f_psmind_to_precursor_mass.close();
+  fname.str("");
+  
+  //fileind_to_fname
+  fname << in_dir << "/fileind_to_fname";
+  ifstream f_fileind_to_fname(fname.str().c_str(),ios::binary);
+  if(!f_fileind_to_fname.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+
+  string filename;
+  f_fileind_to_fname >> ind;
+  f_fileind_to_fname >> filename;
+  while(!f_fileind_to_fname.eof())
+    {
+      fileind_to_fname[ind] = filename;
+      f_fileind_to_fname >> ind;
+      f_fileind_to_fname >> filename;
+    }
+  f_fileind_to_fname.close();
+  fname.str("");
+  
+  //psmind_to_filename
+  fname << in_dir << "/psmind_to_fileind";
+  ifstream f_psmind_to_fileind(fname.str().c_str(),ios::binary);
+  if(!f_psmind_to_fileind.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  psmind_to_fileind = new int[num_psms];
+  f_psmind_to_fileind.read((char*)psmind_to_fileind,sizeof(int)*num_psms);
+  f_psmind_to_fileind.close();
+  fname.str("");
+
 
 }
 
-void Dataset :: clear_data_prot_results()
+void Dataset :: clear_data_all_results()
 {
-  ostringstream fname;
+  ind_to_pep.clear();
+  ind_to_prot.clear();
   protind_to_pepinds.clear();
   delete [] protind_to_label; protind_to_label = (int*)0;
-}
-
-
-void Dataset :: load_data_pep_results()
-{
-  clear_data_pep_results();
-
-  ostringstream fname;
-  //pepind_to_psminds
-  fname << in_dir << "/pepind_to_psminds";
-  ifstream f_pepind_to_psminds(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_psminds.is_open())
-    {
-      cout << "could not open file " << fname.str() <<  " for reading data\n";
-      return;
-    }
-  pepind_to_psminds.load(f_pepind_to_psminds);
-  f_pepind_to_psminds.close();
-  fname.str("");
-
-  //pepind_to_protinds
-  fname << in_dir << "/pepind_to_protinds";
-  ifstream f_pepind_to_protinds(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_protinds.is_open())
-    {
-      cout << "could not open file " << fname.str() <<  " for reading data\n";
-      return;
-    }
-  pepind_to_protinds.load(f_pepind_to_protinds);
-  f_pepind_to_protinds.close();
-  fname.str("");
-}
-
-void Dataset :: clear_data_pep_results()
-{
   pepind_to_psminds.clear();
   pepind_to_protinds.clear();
+  delete [] psmind_to_label; psmind_to_label = (int*)0; 
+  delete [] psmind_to_pepind; psmind_to_pepind = (int*)0;
+  delete [] psmind_to_scan; psmind_to_scan = (int*)0;
+  delete [] psmind_to_charge; psmind_to_charge = (int*)0;
+  delete [] psmind_to_xcorr; psmind_to_xcorr = (double*)0;
+  delete [] psmind_to_precursor_mass; psmind_to_precursor_mass = (double*)0;
+  fileind_to_fname.clear();
+  delete [] psmind_to_fileind; psmind_to_fileind = (int*)0;
+
 }
+
+
 
 
 /******************************************************/
