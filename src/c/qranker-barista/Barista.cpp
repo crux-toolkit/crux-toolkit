@@ -951,33 +951,7 @@ void Barista :: write_results_psm_xml(ofstream &os)
 
 
 
-void Barista :: report_all_results_xml()
-{
-  ostringstream fname;
-  fname << out_dir << "/" << fileroot << "barista_output.xml";
-  ofstream of(fname.str().c_str());
-  of << "<barista_output>" << endl;
-  of << endl;
-  
-  d.load_data_prot_results();
-  write_results_prot_xml(of);
-  write_results_subset_prot_xml(of);
-  d.clear_data_prot_results();
-  
-  d.load_data_pep_results();
-  write_results_peptides_xml(of);
-  d.clear_data_pep_results();
-  
-  
-  d.load_data_psm_results();
-  write_results_psm_xml(of);
-  d.clear_data_psm_results();
-  
-  of << endl;
-  of << "</barista_output>" << endl;
-  of.close();
-    
-}
+
 
 /*************************************************************************/
 
@@ -1406,31 +1380,49 @@ void Barista :: write_results_psm_tab(ofstream &os)
 
 
 
+void Barista :: report_all_results_xml()
+{
+  ostringstream fname;
+  fname << out_dir << "/" << fileroot << "barista_output.xml";
+  ofstream of(fname.str().c_str());
+  of << "<barista_output>" << endl;
+  of << endl;
+  
+  write_results_prot_xml(of);
+  write_results_subset_prot_xml(of);
+  
+  write_results_peptides_xml(of);
+
+  write_results_psm_xml(of);
+
+  
+  of << endl;
+  of << "</barista_output>" << endl;
+  of.close();
+    
+}
+
+
 void Barista :: report_all_results_tab()
 {
   ofstream of;
   ostringstream fname;
     
-  d.load_data_psm_results();
-
-  d.load_data_prot_results();  
   fname << out_dir << "/" << fileroot << "barista.target.proteins.txt";
   of.open(fname.str().c_str());
   write_results_prot_tab(of);
   of.close();
   fname.str("");
+
   fname << out_dir << "/" << fileroot << "barista.target.subset-proteins.txt";
   of.open(fname.str().c_str());
   write_results_subset_prot_tab(of);
   of.close();
   fname.str("");
-  d.clear_data_prot_results();
   
   fname << out_dir << "/" << fileroot << "barista.target.peptides.txt";
   of.open(fname.str().c_str());
-  d.load_data_pep_results();
   write_results_peptides_tab(of);
-  d.clear_data_pep_results();
   of.close();
   fname.str("");
   
@@ -1440,25 +1432,28 @@ void Barista :: report_all_results_tab()
   of.close();
   fname.str("");
   
-  d.clear_data_psm_results();
-
 }
+
 
 void Barista :: report_all_results_xml_tab()
 {
-  d.load_data_all_results();
   setup_for_reporting_results();
+  d.clear_data_prot_training();
+
+  stringstream fname;
+  
+  d.load_data_all_results();
   
   report_all_results_xml();
   report_all_results_tab();
   
-  d.clear_data_all_results();
+  d.clear_data_all_results(); 
+  
 }
 
 void Barista :: setup_for_reporting_results()
 {
   d.load_labels_prot_training();
-  d.load_aux_data();
   trainset.clear();
   testset.clear();
 
@@ -1469,8 +1464,7 @@ void Barista :: setup_for_reporting_results()
   cout << "finished training, making parsimonious protein set\n";
 #endif
   trainset.make_meta_set(d);
-  d.clear_aux_data();
-
+  
   psmtrainset.clear();
   psmtestset.clear();
   PSMScores::fillFeaturesFull(psmtrainset, d);
@@ -1498,9 +1492,8 @@ void Barista :: setup_for_reporting_results()
   cout << "psms at q< " << selectionfdr << ": " << fdr_trn_psm << endl;
 #endif
   d.clear_labels_psm_training();
-
-  d.clear_data_psm_training();
-  d.clear_data_prot_training();
+  
+  
   
 }
 
@@ -1968,7 +1961,7 @@ void Barista :: setup_for_training(int trn_to_tst)
    
   d.load_data_prot_training();
   d.load_labels_prot_training();
-  d.load_aux_data();
+  
   if(trn_to_tst)
     {
 #ifdef CRUX
@@ -1993,7 +1986,7 @@ void Barista :: setup_for_training(int trn_to_tst)
 #endif
     }
   thresholdset = trainset;
-  d.clear_aux_data();
+  
 
   if(trn_to_tst)
     PSMScores::fillFeaturesSplit(psmtrainset, psmtestset, d, 0.5);
@@ -2004,8 +1997,7 @@ void Barista :: setup_for_training(int trn_to_tst)
   else
     PepScores::fillFeaturesFull(peptrainset, d);
   d.clear_labels_prot_training();
-
-  d.load_data_psm_training();
+  
   if(feature_file_flag)
     {
       string str = feature_file_name.str();
@@ -2122,8 +2114,10 @@ int Barista :: run_tries_multi_task()
     
   //net.copy(max_net_prot);
   int interval= getOverFDRPSM(psmtrainset,max_net_psm,0.01)*2;
-  if(interval > psmtrainset.size() || interval < 10)
-  interval/=2;
+  if(interval > psmtrainset.size())
+    interval = psmtrainset.size()/4;
+  if(interval < 50)
+    interval = psmtrainset.size()/4;
   train_net_multi_task(selectionfdr, interval);
     
   //report_all_fdr_counts();
@@ -2568,7 +2562,7 @@ int Barista::main(int argc, char **argv) {
   //if(!set_command_line_options(argc,argv))
   //return 1;
 
-  //srandom(seed);
+  srandom(seed);
   run_tries_multi_task();
   if(skip_cleanup_flag != 1)
     sqtp.clean_up(out_dir);

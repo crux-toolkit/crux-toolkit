@@ -551,7 +551,11 @@ void SQTParser :: extract_psm_features(sqt_match &m, enzyme enz, double *x, int 
   //deltaCN
   x[2] = 0.0;
   if(i < hits_read-1)
-    x[2] = (m.xcorr_score[i] - m.xcorr_score[i+1])/m.xcorr_score[i];
+    {
+      double xs = fabs(m.xcorr_score[i]);
+      if(xs > 0.00001)
+	x[2] = (m.xcorr_score[i] - m.xcorr_score[i+1])/m.xcorr_score[i];
+    }
   //x[2] = m.delta_cn[i];
   
   //xcorr score
@@ -635,7 +639,20 @@ void SQTParser :: extract_features(sqt_match &m, int hits_read, int final_hits,e
       else
 	f_psm.write((char*)x, sizeof(double)*num_features);
 
+     
       //write psm tables
+      double deltaCN = m.delta_cn[i];
+      f_psmind_to_deltaCn.write((char*)(&deltaCN),sizeof(double));
+
+      double xcorr = m.xcorr_score[i]; 
+      f_psmind_to_xcorr.write((char*)(&xcorr),sizeof(double));
+
+      double sp = m.sp_score[i];
+      f_psmind_to_spscore.write((char*)(&sp),sizeof(double));
+
+      double calc_mass = m.calc_mass[i];
+      f_psmind_to_calculated_mass.write((char*)(&calc_mass),sizeof(double));
+
       int scan = m.scan;
       f_psmind_to_scan.write((char*)(&scan),sizeof(int));
 
@@ -752,15 +769,14 @@ int SQTParser :: parse_sqt_spectrum_matches(ifstream &is, sqt_match &m)
 	  is >> prot;
 	  m.proteins.push_back(prot);
 	  num_proteins_in_match++;
+	  tempstr = "";
 	}
       if(tempstr.compare("S") == 0)
-	{
-	  if (num_hits > 0)
-	    m.num_proteins_in_match.push_back(num_proteins_in_match);
-	  break;
-	}
-	
+	break;
     }
+  if (num_hits > 0)
+    m.num_proteins_in_match.push_back(num_proteins_in_match);
+  assert(num_hits == (int)m.num_proteins_in_match.size());
   return num_hits;
 
   
@@ -793,210 +809,132 @@ void SQTParser :: read_sqt_file(ifstream &is, string &decoy_prefix, int final_hi
   
 }
 
+int SQTParser :: check_file(ostringstream &fname)
+{
+  ifstream f(fname.str().c_str());
+  if(!f.is_open())
+    {
+      carp(CARP_INFO,"could not open %s", fname.str().c_str());
+      return 0;
+    }
+  f.close();
+  fname.str("");
+  return 1;
+}
+
 
 int SQTParser :: check_input_dir(string &in_dir)
 {
   
   ostringstream fname;
+  
   fname << in_dir << "/summary";
-  ifstream f_summary(fname.str().c_str());
-  if(!f_summary.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      //cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_summary.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
       
   fname << in_dir << "/psm";
-  ifstream f_psm(fname.str().c_str(), ios::binary);
-  if(!f_psm.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_psm.close();
-  fname.str("");
-  
-  
+  if(!check_file(fname))
+    return 0;
+   
   //psmind_to_label
   fname << in_dir << "/psmind_to_label";
-  ifstream f_psmind_to_label(fname.str().c_str(),ios::binary);
-  if(!f_psmind_to_label.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_psmind_to_label.close();
-  fname.str("");
-
+  if(!check_file(fname))
+    return 0;
+ 
   //psmind_to_pepind
   fname << in_dir << "/psmind_to_pepind";
-  ifstream f_psmind_to_pepind(fname.str().c_str(),ios::binary);
-  if(!f_psmind_to_pepind.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_psmind_to_pepind.close();
-  fname.str("");
-      
+  if(!check_file(fname))
+    return 0;
+       
   //psmind_to_scan
   fname << in_dir << "/psmind_to_scan";
-  ifstream f_psmind_to_scan(fname.str().c_str(),ios::binary);
-  if(!f_psmind_to_scan.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_psmind_to_scan.close();
-  fname.str("");
-      
+  if(!check_file(fname))
+    return 0;
+  
   //psmind_to_charge
   fname << in_dir << "/psmind_to_charge";
-  ifstream f_psmind_to_charge(fname.str().c_str(),ios::binary );
-  if(!f_psmind_to_charge.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_psmind_to_charge.close();
-  fname.str("");
-
+  if(!check_file(fname))
+    return 0;
+  
   //psmind_to_precursor_mass
   fname << in_dir << "/psmind_to_precursor_mass";
-  ifstream f_psmind_to_precursor_mass(fname.str().c_str(),ios::binary );
-  if(!f_psmind_to_precursor_mass.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_psmind_to_precursor_mass.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
   //psmind_to_fileind
   fname << in_dir << "/psmind_to_fileind";
-  ifstream f_psmind_to_fileind(fname.str().c_str(),ios::binary );
-  if(!f_psmind_to_fileind.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_psmind_to_fileind.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
   //fileind_to_fname
   fname << in_dir << "/fileind_to_fname";
-  ifstream f_fileind_to_fname(fname.str().c_str(),ios::binary );
-  if(!f_fileind_to_fname.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_fileind_to_fname.close();
-  fname.str("");
-
+  if(!check_file(fname))
+    return 0;
+  
+  //psmind_to_xcorr
+  fname << in_dir << "/psmind_to_xcorr";
+  if(!check_file(fname))
+    return 0;
+  
+  //psmind_to_spscore
+  fname << in_dir << "/psmind_to_spscore";
+  if(!check_file(fname))
+    return 0;
+  
+  //psmind_to_spscore
+  fname << in_dir << "/psmind_to_deltaCn";
+  if(!check_file(fname))
+    return 0;
+  
+  //psmind_to_calculated_mass
+  fname << in_dir << "/psmind_to_calculated_mass";
+  if(!check_file(fname))
+    return 0;
+  
   //pepind_to_label
   fname << in_dir << "/pepind_to_label";
-  ifstream f_pepind_to_label(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_label.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }  
-  f_pepind_to_label.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
   //protind_to_label
   fname << in_dir << "/protind_to_label";
-  ifstream f_protind_to_label(fname.str().c_str(),ios::binary);
-  if(!f_protind_to_label.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_protind_to_label.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
   fname << in_dir << "/protind_to_num_all_pep";
-  ifstream f_protind_to_num_all_pep(fname.str().c_str(),ios::binary);
-  if(!f_protind_to_num_all_pep.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_protind_to_num_all_pep.close();
-  fname.str("");
-
+  if(!check_file(fname))
+    return 0;
   
   //ind_to_pep
   fname << in_dir << "/ind_to_pep";
-  ifstream f_ind_to_pep(fname.str().c_str());
-  if(!f_ind_to_pep.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_ind_to_pep.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
   //pep_to_ind
   fname << in_dir << "/pep_to_ind";
-  ifstream f_pep_to_ind(fname.str().c_str());
-  if(!f_pep_to_ind.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_pep_to_ind.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
   //ind_to_prot
   fname << in_dir << "/ind_to_prot";
-  ifstream f_ind_to_prot(fname.str().c_str(),ios::binary);
-  if(!f_ind_to_prot.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_ind_to_prot.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
   //prot_to_ind
   fname << in_dir << "/prot_to_ind";
-  ifstream f_prot_to_ind(fname.str().c_str(),ios::binary);
-  if(!f_prot_to_ind.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_prot_to_ind.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
   //pepind_to_protinds
   fname << in_dir << "/pepind_to_protinds";
-  ifstream f_pepind_to_protinds(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_protinds.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_pepind_to_protinds.close();
-  fname.str("");
-    
+  if(!check_file(fname))
+    return 0;
+  
   //pepind_to_psminds
   fname << in_dir << "/pepind_to_psminds";
-  ifstream f_pepind_to_psminds(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_psminds.is_open())
-    {
-      carp(CARP_INFO,"could not open %s", fname.str().c_str());
-      return 0;
-    }
-  f_pepind_to_psminds.close();
-  fname.str("");
+  if(!check_file(fname))
+    return 0;
   
-
   return 1;
 }
 
@@ -1049,6 +987,26 @@ void SQTParser :: clean_up(string dir)
   remove(fname.str().c_str());
   fname.str("");
 
+  //psmind_to_calculated_mass
+  fname << out_dir << "/psmind_to_calculated_mass";
+  remove(fname.str().c_str());
+  fname.str("");
+
+  //psmind_to_xcorr
+  fname << out_dir << "/psmind_to_xcorr";
+  remove(fname.str().c_str());
+  fname.str("");
+
+  //psmind_to_spscore
+  fname << out_dir << "/psmind_to_spscore";
+  remove(fname.str().c_str());
+  fname.str("");
+
+  //psmind_to_deltaCn
+  fname << out_dir << "/psmind_to_deltaCn";
+  remove(fname.str().c_str());
+  fname.str("");
+  
   //pepind_to_label
   fname << out_dir << "/pepind_to_label";
   remove(fname.str().c_str());
@@ -1109,112 +1067,79 @@ void SQTParser :: open_files(string &out_dir)
 
   ostringstream fname;
 
-  //if(append_dir_exists)
-  if(0)
-    {
-      cout << "appending to tables in directory " << out_dir << endl;
-      fname << out_dir << "/psm";
-      f_psm.open(fname.str().c_str(), ios::binary | ios:: app);
-      fname.str("");
-           
-      //psmind_to_label
-      fname << out_dir << "/psmind_to_label";
-      f_psmind_to_label.open(fname.str().c_str(), ios::binary | ios :: app);
-      fname.str("");
-
-      //psmind_to_pepind
-      fname << out_dir << "/psmind_to_pepind";
-      f_psmind_to_pepind.open(fname.str().c_str(),ios::binary | ios :: app);
-      fname.str("");
-      
-      //psmind_to_scan
-      fname << out_dir << "/psmind_to_scan";
-      f_psmind_to_scan.open(fname.str().c_str(),ios::binary | ios :: app);
-      fname.str("");
-      
-      //psmind_to_charge
-      fname << out_dir << "/psmind_to_charge";
-      f_psmind_to_charge.open(fname.str().c_str(),ios::binary | ios :: app);
-      fname.str("");
-
-      //psmind_to_precursor_mass
-      fname << out_dir << "/psmind_to_precursor_mass";
-      f_psmind_to_precursor_mass.open(fname.str().c_str(),ios::binary | ios :: app);
-      fname.str("");
-
-      //pepind_to_label
-      fname << out_dir << "/pepind_to_label";
-      f_pepind_to_label.open(fname.str().c_str(),ios::binary | ios :: app);
-      fname.str("");
-
-      //protind_to_label
-      fname << out_dir << "/protind_to_label";
-      f_protind_to_label.open(fname.str().c_str(),ios::binary | ios :: app);
-      fname.str("");
+  fname << out_dir << "/psm";
+  f_psm.open(fname.str().c_str(), ios::binary);
+  fname.str("");
   
-      fname << out_dir << "/protind_to_num_all_pep";
-      f_protind_to_num_all_pep.open(fname.str().c_str(),ios::binary | ios :: app);
-      fname.str("");
-      
-      fname << out_dir << "/psmind_to_fileind";
-      f_psmind_to_fileind.open(fname.str().c_str(),ios::binary | ios :: app);
-      fname.str("");
-
-    }
-  else
-    {
-      fname << out_dir << "/psm";
-      f_psm.open(fname.str().c_str(), ios::binary);
-      fname.str("");
-           
-      //psmind_to_label
-      fname << out_dir << "/psmind_to_label";
-      f_psmind_to_label.open(fname.str().c_str(),ios::binary);
-      fname.str("");
-
-      //psmind_to_pepind
-      fname << out_dir << "/psmind_to_pepind";
-      f_psmind_to_pepind.open(fname.str().c_str(),ios::binary);
-      fname.str("");
-      
-      //psmind_to_scan
-      fname << out_dir << "/psmind_to_scan";
-      f_psmind_to_scan.open(fname.str().c_str(),ios::binary);
-      fname.str("");
-      
-      //psmind_to_charge
-      fname << out_dir << "/psmind_to_charge";
-      f_psmind_to_charge.open(fname.str().c_str(),ios::binary );
-      fname.str("");
-
-      //psmind_to_precursor_mass
-      fname << out_dir << "/psmind_to_precursor_mass";
-      f_psmind_to_precursor_mass.open(fname.str().c_str(),ios::binary );
-      fname.str("");
-
-      //pepind_to_label
-      fname << out_dir << "/pepind_to_label";
-      f_pepind_to_label.open(fname.str().c_str(),ios::binary);
-      fname.str("");
-
-      //protind_to_label
-      fname << out_dir << "/protind_to_label";
-      f_protind_to_label.open(fname.str().c_str(),ios::binary);
-      fname.str("");
-      
-      fname << out_dir << "/protind_to_num_all_pep";
-      f_protind_to_num_all_pep.open(fname.str().c_str(),ios::binary);
-      fname.str("");
-
-      fname << out_dir << "/fileind_to_fname";
-      f_fileind_to_fname.open(fname.str().c_str(),ios::binary);
-      fname.str("");
-
-      fname << out_dir << "/psmind_to_fileind";
-      f_psmind_to_fileind.open(fname.str().c_str(),ios::binary);
-      fname.str("");
-    }
-
+  //psmind_to_label
+  fname << out_dir << "/psmind_to_label";
+  f_psmind_to_label.open(fname.str().c_str(),ios::binary);
+  fname.str("");
+  
+  //psmind_to_pepind
+  fname << out_dir << "/psmind_to_pepind";
+  f_psmind_to_pepind.open(fname.str().c_str(),ios::binary);
+  fname.str("");
+  
+  //psmind_to_scan
+  fname << out_dir << "/psmind_to_scan";
+  f_psmind_to_scan.open(fname.str().c_str(),ios::binary);
+  fname.str("");
+  
+  //psmind_to_charge
+  fname << out_dir << "/psmind_to_charge";
+  f_psmind_to_charge.open(fname.str().c_str(),ios::binary );
+  fname.str("");
+  
+  //psmind_to_precursor_mass
+  fname << out_dir << "/psmind_to_precursor_mass";
+  f_psmind_to_precursor_mass.open(fname.str().c_str(),ios::binary );
+  fname.str("");
+  
+  ///additional info
+  //psmind_to_xcorr
+  fname << out_dir << "/psmind_to_xcorr";
+  f_psmind_to_xcorr.open(fname.str().c_str(),ios::binary );
+  fname.str("");
+  
+  //psmind_to_spscore
+  fname << out_dir << "/psmind_to_spscore";
+  f_psmind_to_spscore.open(fname.str().c_str(),ios::binary );
+  fname.str("");
+  
+  //psmind_to_deltaCn
+  fname << out_dir << "/psmind_to_deltaCn";
+  f_psmind_to_deltaCn.open(fname.str().c_str(),ios::binary );
+  fname.str("");
+  
+  //psmind_to_calculated_mass
+  fname << out_dir << "/psmind_to_calculated_mass";
+  f_psmind_to_calculated_mass.open(fname.str().c_str(),ios::binary );
+  fname.str("");
+  //end of additional info
+  
+  //pepind_to_label
+  fname << out_dir << "/pepind_to_label";
+  f_pepind_to_label.open(fname.str().c_str(),ios::binary);
+  fname.str("");
+  
+  //protind_to_label
+  fname << out_dir << "/protind_to_label";
+  f_protind_to_label.open(fname.str().c_str(),ios::binary);
+  fname.str("");
+  
+  fname << out_dir << "/protind_to_num_all_pep";
+  f_protind_to_num_all_pep.open(fname.str().c_str(),ios::binary);
+  fname.str("");
+  
+  fname << out_dir << "/fileind_to_fname";
+  f_fileind_to_fname.open(fname.str().c_str(),ios::binary);
+  fname.str("");
+  
+  fname << out_dir << "/psmind_to_fileind";
+  f_psmind_to_fileind.open(fname.str().c_str(),ios::binary);
+  fname.str("");
+  
 }
 
 void SQTParser :: close_files()
@@ -1228,6 +1153,11 @@ void SQTParser :: close_files()
   f_psmind_to_scan.close();
   f_psmind_to_charge.close();
   f_psmind_to_precursor_mass.close();
+
+  f_psmind_to_xcorr.close();
+  f_psmind_to_spscore.close();
+  f_psmind_to_deltaCn.close();
+  f_psmind_to_calculated_mass.close();
 
   f_pepind_to_label.close();
   f_protind_to_label.close();
@@ -1402,208 +1332,6 @@ void SQTParser :: read_list_of_files(string &list, vector<string> &fnames)
   f.close();
 }
 
-
-int SQTParser :: check_files(string &in_dir)
-{
-    ostringstream fname;
-  fname << in_dir << "/summary";
-  ifstream f_summary(fname.str().c_str());
-  if(!f_summary.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_summary.close();
-  fname.str("");
-      
-  fname << in_dir << "/psm";
-  ifstream f_psm(fname.str().c_str(), ios::binary);
-  if(!f_psm.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_psm.close();
-  fname.str("");
-  
-  
-  //psmind_to_label
-  fname << in_dir << "/psmind_to_label";
-  ifstream f_psmind_to_label(fname.str().c_str(),ios::binary);
-  if(!f_psmind_to_label.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_psmind_to_label.close();
-  fname.str("");
-
-  //psmind_to_pepind
-  fname << in_dir << "/psmind_to_pepind";
-  ifstream f_psmind_to_pepind(fname.str().c_str(),ios::binary);
-  if(!f_psmind_to_pepind.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_psmind_to_pepind.close();
-  fname.str("");
-      
-  //psmind_to_scan
-  fname << in_dir << "/psmind_to_scan";
-  ifstream f_psmind_to_scan(fname.str().c_str(),ios::binary);
-  if(!f_psmind_to_scan.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_psmind_to_scan.close();
-  fname.str("");
-      
-  //psmind_to_charge
-  fname << in_dir << "/psmind_to_charge";
-  ifstream f_psmind_to_charge(fname.str().c_str(),ios::binary );
-  if(!f_psmind_to_charge.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_psmind_to_charge.close();
-  fname.str("");
-
-  //psmind_to_precursor_mass
-  fname << in_dir << "/psmind_to_precursor_mass";
-  ifstream f_psmind_to_precursor_mass(fname.str().c_str(),ios::binary );
-  if(!f_psmind_to_precursor_mass.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_psmind_to_precursor_mass.close();
-  fname.str("");
-  
-  //psmind_to_fileind
-  fname << in_dir << "/psmind_to_fileind";
-  ifstream f_psmind_to_fileind(fname.str().c_str(),ios::binary );
-  if(!f_psmind_to_fileind.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_psmind_to_fileind.close();
-  fname.str("");
-  
-  //fileind_to_fname
-  fname << in_dir << "/fileind_to_fname";
-  ifstream f_fileind_to_fname(fname.str().c_str(),ios::binary );
-  if(!f_fileind_to_fname.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_fileind_to_fname.close();
-  fname.str("");
-
-  //pepind_to_label
-  fname << in_dir << "/pepind_to_label";
-  ifstream f_pepind_to_label(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_label.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }  
-  f_pepind_to_label.close();
-  fname.str("");
-  
-  //protind_to_label
-  fname << in_dir << "/protind_to_label";
-  ifstream f_protind_to_label(fname.str().c_str(),ios::binary);
-  if(!f_protind_to_label.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_protind_to_label.close();
-  fname.str("");
-  
-  fname << in_dir << "/protind_to_num_all_pep";
-  ifstream f_protind_to_num_all_pep(fname.str().c_str(),ios::binary);
-  if(!f_protind_to_num_all_pep.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_protind_to_num_all_pep.close();
-  fname.str("");
-
-  
-  //ind_to_pep
-  fname << in_dir << "/ind_to_pep";
-  ifstream f_ind_to_pep(fname.str().c_str());
-  if(!f_ind_to_pep.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_ind_to_pep.close();
-  fname.str("");
-  
-  //pep_to_ind
-  fname << in_dir << "/pep_to_ind";
-  ifstream f_pep_to_ind(fname.str().c_str());
-  if(!f_pep_to_ind.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_pep_to_ind.close();
-  fname.str("");
-  
-  //ind_to_prot
-  fname << in_dir << "/ind_to_prot";
-  ifstream f_ind_to_prot(fname.str().c_str(),ios::binary);
-  if(!f_ind_to_prot.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_ind_to_prot.close();
-  fname.str("");
-  
-  //prot_to_ind
-  fname << in_dir << "/prot_to_ind";
-  ifstream f_prot_to_ind(fname.str().c_str(),ios::binary);
-  if(!f_prot_to_ind.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_prot_to_ind.close();
-  fname.str("");
-  
-  //pepind_to_protinds
-  fname << in_dir << "/pepind_to_protinds";
-  ifstream f_pepind_to_protinds(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_protinds.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_pepind_to_protinds.close();
-  fname.str("");
-    
-  //pepind_to_psminds
-  fname << in_dir << "/pepind_to_psminds";
-  ifstream f_pepind_to_psminds(fname.str().c_str(),ios::binary);
-  if(!f_pepind_to_psminds.is_open())
-    {
-      cout << "could not open " << fname.str() << endl;
-      return 0;
-    }
-  f_pepind_to_psminds.close();
-  fname.str("");
-  return 1;
-}
 
 int SQTParser :: set_output_dir(string &output_dir, int overwrite_flag)
 {

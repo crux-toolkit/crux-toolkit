@@ -95,14 +95,14 @@ void QRanker :: write_results()
   thresholdset.clear();
   d.load_labels_psm_training();
   PSMScores::fillFeaturesFull(fullset, d);
+  d.clear_labels_psm_training();
   getOverFDR(fullset,net, qvals[4]);
   d.clear_data_psm_training();
-
+  
   ostringstream fname;
   fname << out_dir << "/" << fileroot << "q-ranker.target.psms.txt";
-  d.load_data_all_results();
+
   d.load_data_psm_results();
-  d.load_labels_psm_training();
   computePEP();
 
   ofstream f1(fname.str().c_str()); 
@@ -115,11 +115,7 @@ void QRanker :: write_results()
   xmlfile.openFile(fname.str().c_str(), overwrite_flag);
   write_results_psm_xml(xmlfile);
   xmlfile.closeFile();
-
-  d.clear_data_all_results();
   d.clear_data_psm_results();
-  d.clear_labels_psm_training();
-  
 }
 
 void QRanker :: write_results_psm_tab(ofstream &os)
@@ -156,7 +152,7 @@ void QRanker :: get_pep_seq(string &pep, string &seq, string &n, string &c)
 }
 
 
-void QRanker :: write_results_psm_xml(PepXMLWriter& xmlfile)
+void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
 {
   xmlfile.writeHeader();
 
@@ -198,23 +194,25 @@ void QRanker :: write_results_psm_xml(PepXMLWriter& xmlfile)
       get_pep_seq(pep, modified_sequence, n, c);
       char* sequence = unmodify_sequence(modified_sequence.c_str());
       string flanking_aas = n + c;
-      double peptide_mass = 0; // where is this?
-
+      double peptide_mass = d.psmind2peptide_mass(psmind);
+      
       // protein info
-      int num_proteins = 1; // d.pepind2num_prot(pepind); 
-      //int* protein_indexes = d.pepind2protinds(pepind);
+      int num_proteins = d.pepind2num_prot(pepind); 
+      int* protein_indexes = d.pepind2protinds(pepind);
       vector<string> protein_names;
       vector<string> protein_descriptions;
       for(int prot_idx = 0; prot_idx < num_proteins; prot_idx++){
-        string protein_name = "name"; // d.ind2prot(protein_indexes[prot_idx]);
-        protein_names.push_back(protein_name);
+        string protein_name = d.ind2prot(protein_indexes[prot_idx]);
+	protein_names.push_back(protein_name);
         protein_descriptions.push_back("prot description");
         // flanking_aas += ", " + n + c; // todo
       }
 
       // psm info
       int psm_rank = 1;
-      double delta_cn = 0;  // where is this?
+      double xcorr = d.psmind2xcorr(psmind);
+      double delta_cn = d.psmind2deltaCn(psmind);
+      double sp_score = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = fullset[i].score;
       scores[QRANKER_QVALUE] = fullset[i].q;
       scores[QRANKER_PEP] = fullset[i].PEP;
@@ -976,7 +974,7 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
     }
  
    if(!sqtp.check_input_dir(in_dir))
-    carp(CARP_FATAL, "Please re-run with database, ms2 input and sqt input.");
+    carp(CARP_FATAL, "Please re-run with ms2 input and sqt input.");
 
   return 1;
 
@@ -994,8 +992,7 @@ void QRanker::computePEP(){
 
   // pull out the target and decoy scores
   for(int i = 0; i < fullset.size(); i++){
-    int psm_index = fullset[i].psmind;
-    if( d.psmind2label(psm_index) == 1 ){
+    if( fullset[i].label == 1 ){
       target_scores_vect.push_back(fullset[i].score);
     } else { // == -1
       decoy_scores_vect.push_back(fullset[i].score);
@@ -1018,8 +1015,7 @@ void QRanker::computePEP(){
   // fill in the data set with the new scores for the targets
   int target_idx = 0;
   for(int full_idx = 0; full_idx < fullset.size(); full_idx++){
-    int psm_index = fullset[full_idx].psmind;
-    if( d.psmind2label(psm_index) == 1 ){
+    if( fullset[full_idx].label == 1 ){
       fullset[full_idx].PEP = PEPs[target_idx];
       target_idx++; 
     } // else, skip decoys
@@ -1305,9 +1301,6 @@ int QRanker::main(int argc, char **argv) {
   if(!crux_set_command_line_options(argc, argv))
     return 1;
 
-  //if(!set_command_line_options(argc, argv))
-  //return 1;
-  //srandom(seed);
   run();
   if(skip_cleanup_flag != 1)
     sqtp.clean_up(out_dir);
