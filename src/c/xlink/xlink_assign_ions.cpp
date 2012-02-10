@@ -1,7 +1,7 @@
 //TODO - change cerr/couts to carp.
 
 #include "xhhc.h"
-#include "xhhc_ion_series.h"
+#include "LinkedIonSeries.h"
 #include "xhhc_scorer.h"
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
@@ -129,7 +129,7 @@ int main(int argc, char** argv){
   int max_charge = min(max_ion_charge, charge);
 
   LinkedIonSeries ion_series(max_charge);
-  ion_series.add_linked_ions(lp);
+  ion_series.addLinkedIons(lp);
   print_spectrum(spectrum, ion_series);
 
   // free heap
@@ -139,7 +139,7 @@ int main(int argc, char** argv){
 
 void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
-      int total_by_ions = ion_series.get_total_by_ions();
+      int total_by_ions = ion_series.getTotalBYIons();
       int matched_by_ions = XHHC_Scorer::getMatchedBYIons(spectrum, ion_series);
       FLOAT_T frac_by_ions = (double)matched_by_ions / (double) total_by_ions;
 
@@ -149,7 +149,7 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
       carp(CARP_INFO,"npeaks:%d",spectrum->getNumPeaks());
 
       FLOAT_T bin_width = get_double_parameter("mz-bin-width");
-      vector<LinkedPeptide>& ions = ion_series.ions();
+      vector<LinkedPeptide>& ions = ion_series.getIons();
       
       map<Peak*, LinkedPeptide> matched;
       double matched_intensity = 0;

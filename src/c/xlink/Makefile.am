@@ -10,8 +10,8 @@ libxlink_la_SOURCES = \
   LinkedPeptide.h \
   xhhc.cpp \
   xhhc.h \
-  xhhc_ion_series.cpp \
-  xhhc_ion_series.h \
+  LinkedIonSeries.cpp \
+  LinkedIonSeries.h \
   xhhc_score_peptide_spectrum.cpp \
   xhhc_scorer.cpp \
   xhhc_score_peptide_spectrum.cpp \
@@ -21,7 +21,6 @@ libxlink_la_SOURCES = \
   xlink_search.cpp \
   SearchForXLinks.cpp \
   SearchForXLinks.h \
-  xlink_assign_ions.cpp \
   xlink_compute_qvalues.cpp \
   XLinkSite.cpp \
   XLinkSite.h \

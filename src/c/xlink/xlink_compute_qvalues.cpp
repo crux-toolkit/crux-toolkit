@@ -1,7 +1,7 @@
 //TODO - change cout/cerrs to carp.
 
 #include "xhhc.h"
-#include "xhhc_ion_series.h"
+#include "LinkedIonSeries.h"
 #include "xhhc_scorer.h"
 #include "LinkedPeptide.h"
 

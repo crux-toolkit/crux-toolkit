@@ -11,7 +11,7 @@
 
 #include "Scorer.h"
 
-#include "xhhc_ion_series.h"
+#include "LinkedIonSeries.h"
 
 #include <map>
 

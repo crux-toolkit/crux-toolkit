@@ -183,7 +183,7 @@ class LinkedPeptide {
     LinkedPeptide& lp); 
 
   /**
-   * used for sorting LinkedPeptides by mass
+   * used for sorting LinkedPeptides
    */
   friend bool operator< (
     const LinkedPeptide &lp1, 
@@ -192,16 +192,36 @@ class LinkedPeptide {
  
   friend bool compareMassMono(
     const LinkedPeptide& lp1, 
-    const LinkedPeptide& lp2);
+    const LinkedPeptide& lp2
+  );
 
   friend bool compareMassAverage(
     const LinkedPeptide& lp1, 
-    const LinkedPeptide& lp2);
+    const LinkedPeptide& lp2
+  );
+
+  friend bool compareMZMono(
+    const LinkedPeptide& lp1,
+    const LinkedPeptide& lp2
+  );
+
+  friend bool compareMZAverage(
+    const LinkedPeptide& lp1,
+    const LinkedPeptide& lp2
+  );
 
   /**
    * Sorts a vector of LinkedPeptide by mass
    */
   static void sortByMass(
+    std::vector<LinkedPeptide>& linked_peptides, ///< The LinkedPeptides to sort
+    MASS_TYPE_T mass_type=MONO ///< MONO or AVERAGE
+  );
+
+  /**
+   * Sorts a vector of LinkedPeptide by m/z
+   */
+  static void sortByMZ(
     std::vector<LinkedPeptide>& linked_peptides, ///< The LinkedPeptides to sort
     MASS_TYPE_T mass_type=MONO ///< MONO or AVERAGE
   );

@@ -14,7 +14,7 @@
 
 //XLINK INCLUDES
 #include "xhhc_scorer.h"
-#include "xhhc_ion_series.h"
+#include "LinkedIonSeries.h"
 #include "xlink_compute_qvalues.h"
 #include "SearchForXLinks.h"
 #include "LinkedPeptide.h"
@@ -272,7 +272,7 @@ int SearchForXLinks::xhhcSearchMain() {
     for (unsigned int idx=0;idx<target_xpeptides.size();idx++) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
-      ion_series.add_linked_ions(target_xpeptides[idx]);
+      ion_series.addLinkedIons(target_xpeptides[idx]);
       score = hhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
       scores.push_back(make_pair(score, target_xpeptides[idx]));
     }
@@ -283,7 +283,7 @@ int SearchForXLinks::xhhcSearchMain() {
     for (unsigned int idx=0;idx<decoy_xpeptides.size();idx++) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
-      ion_series.add_linked_ions(decoy_xpeptides[idx]);
+      ion_series.addLinkedIons(decoy_xpeptides[idx]);
       score = hhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
       scores.push_back(make_pair(score, decoy_xpeptides[idx]));
     }
@@ -299,7 +299,7 @@ int SearchForXLinks::xhhcSearchMain() {
     for (unsigned int idx=0;idx<decoy_train_xpeptides.size();idx++) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
       ion_series.clear();
-      ion_series.add_linked_ions(decoy_train_xpeptides[idx]);
+      ion_series.addLinkedIons(decoy_train_xpeptides[idx]);
       score = hhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
       linked_decoy_scores_array[idx] = score;
     }
@@ -417,11 +417,11 @@ int SearchForXLinks::xhhcSearchMain() {
                 //get theoretical ions count for (0-1200, with 1Da bins).
         XHHC_Scorer scorer;
         LinkedIonSeries ion_series(charge);
-        ion_series.add_linked_ions(scores[score_index].second);
+        ion_series.addLinkedIons(scores[score_index].second);
 
         FLOAT_T ion_current_observed;
         FLOAT_T ion_current_total = spectrum->getTotalEnergy();
-        int by_total = ion_series.get_total_by_ions();
+        int by_total = ion_series.getTotalBYIons();
         int by_observable;
         int by_observable2;
         int by_observable_bin;
@@ -429,9 +429,9 @@ int SearchForXLinks::xhhcSearchMain() {
         int by_observed_bin;
         int ions_observable;
         int ions_observable_bin;
-        ion_series.get_observable_ions(0, 1200, bin_width_mono, ions_observable, ions_observable_bin);
-        ion_series.get_observable_by_ions(0, 1200, bin_width_mono, by_observable, by_observable_bin);
-        ion_series.get_observable_by_ions(0, spectrum->getMaxPeakMz(), bin_width_mono, by_observable2, by_observable_bin2);
+        ion_series.getObservableIons(0, 1200, bin_width_mono, ions_observable, ions_observable_bin);
+        ion_series.getObservableBYIons(0, 1200, bin_width_mono, by_observable, by_observable_bin);
+        ion_series.getObservableBYIons(0, spectrum->getMaxPeakMz(), bin_width_mono, by_observable2, by_observable_bin2);
         scorer.getIonCurrentExplained(ion_series, spectrum, ion_current_observed, by_observed_bin);
         
   
