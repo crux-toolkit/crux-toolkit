@@ -2559,10 +2559,6 @@ int Barista::main(int argc, char **argv) {
   if(!crux_set_command_line_options(argc,argv))
     return 1;
 
-  //if(!set_command_line_options(argc,argv))
-  //return 1;
-
-  srandom(seed);
   run_tries_multi_task();
   if(skip_cleanup_flag != 1)
     sqtp.clean_up(out_dir);
