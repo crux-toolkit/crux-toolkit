@@ -679,6 +679,18 @@ enum COLTYPE_T{
   NUMBER_COLTYPES
 };
 
+/**
+ * \enum SPLITTYPE_T
+ * \brief indication of which peptide in a crosslinked peptide to
+ * generate ions for
+ */
+enum SPLITTYPE_T{
+  SPLITTYPE_INVALID,
+  SPLITTYPE_BOTH,
+  SPLITTYPE_A,
+  SPLITTYPE_B,
+  NUMBER_SPLITTYPES
+};
 
 /**
  * \typedef peptideToScore

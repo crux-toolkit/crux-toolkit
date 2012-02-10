@@ -1,4 +1,4 @@
-#include "xhhc_ion_series.h"
+#include "LinkedIonSeries.h"
 #include "xhhc_scorer.h"
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
   carp(CARP_INFO, "====================");
 
   LinkedIonSeries ion_series(charge);
-  ion_series.add_linked_ions(linked_peptide);
+  ion_series.addLinkedIons(linked_peptide);
   ion_series.print(); 
 
   if (print_spectrum) {

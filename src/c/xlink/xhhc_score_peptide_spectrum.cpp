@@ -1,7 +1,7 @@
 //TODO - Change cout to carps
 
 #include "xhhc.h"
-#include "xhhc_ion_series.h"
+#include "LinkedIonSeries.h"
 #include "xhhc_scorer.h"
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
@@ -125,7 +125,7 @@ int main(int argc, char** argv){
 
     //cout << lp << endl;
     
-    ion_series.add_linked_ions(lp);
+    ion_series.addLinkedIons(lp);
        
     double score = xhhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
 
@@ -138,11 +138,11 @@ int main(int argc, char** argv){
   } else if (scoremethod=="modification") {
     
     LinkedIonSeries ion_seriesA;
-    ion_seriesA.add_linked_ions(lp, 1);
+    ion_seriesA.addLinkedIons(lp, SPLITTYPE_A);
     double scoreA = xhhc_scorer.scoreSpectrumVsSeries(spectrum, ion_seriesA);
     
     LinkedIonSeries ion_seriesB;
-    ion_seriesB.add_linked_ions(lp, 2);
+    ion_seriesB.addLinkedIons(lp, SPLITTYPE_B);
 
     
 
@@ -379,9 +379,9 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
 
       Scorer* scorer = new Scorer(XCORR);
-      scorer->createIntensityArrayObserved(spectrum, ion_series.charge());
+      scorer->createIntensityArrayObserved(spectrum, ion_series.getCharge());
 
-      FLOAT_T* observed_raw = get_observed_raw(spectrum, ion_series.charge());
+      FLOAT_T* observed_raw = get_observed_raw(spectrum, ion_series.getCharge());
       FLOAT_T* observed_processed = scorer->getIntensityArrayObserved();
 
 

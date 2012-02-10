@@ -59,6 +59,8 @@ LinkedPeptide::LinkedPeptide(
     peptides_.push_back(pepA);
     peptides_.push_back(pepB);
   }
+  getMZ(MONO);
+  getMZ(AVERAGE);
 }
 
 /**
@@ -174,6 +176,8 @@ void LinkedPeptide::addPeptide(
   ) {
 
   peptides_.push_back(peptide);
+  mass_calculated_[MONO] = false;
+  mass_calculated_[AVERAGE] = false;
 }
 
 /**
@@ -225,17 +229,9 @@ void LinkedPeptide::calculateMass(
   MASS_TYPE_T mass_type ///< MONO or AVERAGE
   ){
 
-// calculates mass of linked peptide,
-// remove H2O from mass if it's a b-ion
-  if (mass_type == MONO) {
-    //cout <<"MONO ";
-  } else {
-    //cout <<"AVERAGE ";
-  }
+  // remove H2O from mass if it's a b-ion
 
   mass_[mass_type] = Peptide::calcSequenceMass((char*)peptides_[0].getSequence().c_str(), mass_type);   
-  //cout << "Mass of "<<peptides_[0].sequence().c_str()<<":"
-  //    <<calc_sequence_mass((char*)peptides_[0].sequence().c_str(), mass_type)<<endl;
 
   if (peptides_[0].getNumLinks() > 0) {
     mass_[mass_type] += linker_mass_;
@@ -243,13 +239,8 @@ void LinkedPeptide::calculateMass(
 
   if (size() == 2) {
     mass_[mass_type] += Peptide::calcSequenceMass((char*)peptides_[1].getSequence().c_str(), mass_type);
-     //cout << "Mass of "<<peptides_[1].sequence().c_str() <<":"
-       //<<calc_sequence_mass((char*)peptides_[1].sequence().c_str(), mass_type)<<endl;
   }
 
-  //cout <<"Total Mass of" << (*this) << ":" <<mass_[mass_type]<<endl;
-
-  //mass += MASS_H_MONO*charge_;
   if (type_ == B_ION) {
     if (mass_type == MONO) {
       mass_[mass_type] -= MASS_H2O_MONO;
@@ -264,11 +255,10 @@ void LinkedPeptide::calculateMass(
 /**
  * \returns the m/z of the LinkedPeptide
  */
-FLOAT_T LinkedPeptide::getMZ(
+FLOAT_T LinkedPeptide::getMZ (
   MASS_TYPE_T mass_type ///< MONO or AVERAGE
-  ) {
-  //if (mz < 5)
-  //mz = mass_ / charge_;
+  )  {
+
   if (mass_type == MONO) {
     mz_[MONO] = (getMass(MONO) + MASS_PROTON * charge_) / charge_;
   } else {
@@ -373,12 +363,32 @@ std::ostream &operator<< (std::ostream& os, LinkedPeptide& lp) {
 }
 
 bool compareMassAverage(const LinkedPeptide& lp1, const LinkedPeptide& lp2) {
-  return lp1.mass_[AVERAGE] < lp2.mass_[AVERAGE];
+  if (lp1.mass_calculated_[AVERAGE] && lp2.mass_calculated_[AVERAGE]) { 
+    return lp1.mass_[AVERAGE] < lp2.mass_[AVERAGE];
+  } else {
+    carp(CARP_FATAL, "LinkedPeptide Average mass not calculated!");
+    return false;
+  }
 }
 
 bool compareMassMono(const LinkedPeptide& lp1, const LinkedPeptide& lp2) {
-  return lp1.mass_[MONO] < lp2.mass_[MONO];
+  if (lp1.mass_calculated_[MONO] && lp2.mass_calculated_[MONO]) {
+    return lp1.mass_[MONO] < lp2.mass_[MONO];
+  } else {
+    carp(CARP_FATAL, "LinkedPeptide Mono mass not calculated!");
+    return false;
+  }
 }
+
+bool compareMZAverage(const LinkedPeptide& lp1, const LinkedPeptide& lp2) {
+
+  return lp1.mz_[AVERAGE] < lp2.mz_[AVERAGE];
+}
+
+bool compareMZMono(const LinkedPeptide& lp1, const LinkedPeptide& lp2) {
+  return lp1.mz_[MONO] < lp2.mz_[MONO];
+}
+
 
 /**
  * Sorts a vector of LinkedPeptide by mass
@@ -397,6 +407,36 @@ void LinkedPeptide::sortByMass(
     sort(linked_peptides.begin(), linked_peptides.end(), compareMassAverage);
   }
 }
+
+/**
+ * Sorts a vector of LinkedPeptide by m/z
+ */
+/**
+ * Sorts a vector of LinkedPeptide by mass
+ */
+void LinkedPeptide::sortByMZ(
+  vector<LinkedPeptide>& linked_peptides, ///< the LinkedPeptides to sort 
+  MASS_TYPE_T mass_type ///< MONO or AVERAGE
+  ) {
+
+  IF_CARP(CARP_DEBUG,
+    //sanity check
+    for (unsigned int idx=0;idx < linked_peptides.size();idx++) {
+      if (!linked_peptides.at(idx).mass_calculated_[mass_type]) {
+        carp(CARP_ERROR, "mass not calculated for LinkedPeptide!");
+        linked_peptides.at(idx).getMZ(mass_type);
+      }
+    }
+  )
+
+  if (mass_type == MONO) {
+    sort(linked_peptides.begin(), linked_peptides.end(), compareMZMono);
+  }
+  else {
+    sort(linked_peptides.begin(), linked_peptides.end(), compareMZAverage);
+  }
+}
+
 
 /*
  * Local Variables:
