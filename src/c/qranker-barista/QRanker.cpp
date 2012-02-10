@@ -160,8 +160,8 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
   for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
     scores_to_print[score_idx] = false;
   }
-  //scores_to_print[SP] = true; // todo
-  //scores_to_print[XCORR] = true;
+  scores_to_print[SP] = true; 
+  scores_to_print[XCORR] = true;
   scores_to_print[QRANKER_SCORE] = true;
   scores_to_print[QRANKER_QVALUE] = true;
   scores_to_print[QRANKER_PEP] = true;
@@ -204,19 +204,18 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
       for(int prot_idx = 0; prot_idx < num_proteins; prot_idx++){
         string protein_name = d.ind2prot(protein_indexes[prot_idx]);
 	protein_names.push_back(protein_name);
-        protein_descriptions.push_back("prot description");
-        // flanking_aas += ", " + n + c; // todo
+        protein_descriptions.push_back("");
+        flanking_aas += "," + n + c; // todo
       }
 
       // psm info
       int psm_rank = 1;
-      double xcorr = d.psmind2xcorr(psmind);
       double delta_cn = d.psmind2deltaCn(psmind);
-      double sp_score = d.psmind2spscore(psmind);
+      scores[XCORR] = d.psmind2xcorr(psmind);
+      scores[SP] = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = fullset[i].score;
       scores[QRANKER_QVALUE] = fullset[i].q;
       scores[QRANKER_PEP] = fullset[i].PEP;
-      // todo xcorr and SP
 
       xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
                        sequence, modified_sequence.c_str(),
@@ -776,7 +775,6 @@ void QRanker::train_many_nets()
 }
 
 int QRanker::run( ) {
-  srand(seed);
   carp(CARP_INFO, "reading data");
   
   ostringstream res;
