@@ -21,34 +21,31 @@
 
 <li>
 Updated crux search-for-xlinks to handle multiple missed cleavages
-correctly (controlled by missed-cleavages parameter).
+correctly (controlled by missed-cleavages parameter).</li>
 
 <li>
 Ambiguous amino acids are handled differently.  'J' is interpreted to
 indicate 'I or L' and its mass will be the same as that of I or L.
-Peptides containing B, Z, and X will no longer be considered and a
-warning stating that will be issued.
+Peptides containing B, Z, and X are no longer be considered, and a
+warning stating is issued when these amino acid codes are
+encountered.</li>
 
 <li>
-The stand-alone crux-predict-peptide-ions application has been replaced
-with a new command for the general crux application, 'crux
-predict-peptide-ions'.
+The stand-alone <code>crux-predict-peptide-ions</code>
+and <code>crux-generate-peptides</a> applications have been integrated
+into the main <code>crux</code> application.</li>
 
 <li>
-The stand-alone crux-generate-peptides application has been replaced
-with a new command for the general crux application, 'crux
-generate-peptides'.
+A bug has been fixed that affected the intensity adjustment of
+observed spectra when the bin width was set much larger or smaller
+than 1.</li>
 
 <li>
-Fixed a bug that affected the intensity adjustment of observed spectra
-when the bin width was set much larger or smaller than 1.
-
-<li>
-Q-ranker once again returns only target psms. 
+Q-ranker once again returns only target PSMs.</li>
 
 <li>
 Q-ranker now computes and reports posterior error probabilities in
-addition to q-values.
+addition to q-values.</li>
 
 </ul>
 
