@@ -32,11 +32,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "posterior_error", "windows\
 		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB} = {C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win_scandir", "win_scandir\win_scandir.vcxproj", "{0F3E8710-9BD0-4735-87BD-DD47F416A123}"
-	ProjectSection(ProjectDependencies) = postProject
-		{C4BCBCF8-E852-46CF-AF83-65353359B218} = {C4BCBCF8-E852-46CF-AF83-65353359B218}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -82,10 +77,6 @@ Global
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.Debug|Win32.Build.0 = Debug|Win32
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.Release|Win32.ActiveCfg = Release|Win32
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.Release|Win32.Build.0 = Release|Win32
-		{0F3E8710-9BD0-4735-87BD-DD47F416A123}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0F3E8710-9BD0-4735-87BD-DD47F416A123}.Debug|Win32.Build.0 = Debug|Win32
-		{0F3E8710-9BD0-4735-87BD-DD47F416A123}.Release|Win32.ActiveCfg = Release|Win32
-		{0F3E8710-9BD0-4735-87BD-DD47F416A123}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
