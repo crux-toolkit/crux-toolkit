@@ -1442,7 +1442,6 @@ bool parse_cmd_line_into_params_hash(int argc,
     char* error_message = NULL;
     char* usage = parse_arguments_get_usage(exe_name);
     int error_code = parse_arguments_get_error(&error_message);
-    free(usage);
     carp(
       CARP_FATAL, 
       "Error in command line. Error # %d\n%s\n%s", 

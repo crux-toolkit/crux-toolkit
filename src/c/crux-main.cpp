@@ -38,6 +38,12 @@
  */
 int main(int argc, char** argv){
 
+#ifdef WIN32
+  // Turn off auto-tranlation of line-feed to 
+  // carriage-return/line-feed
+  _set_fmode(_O_BINARY);
+#endif 
+
   CruxApplicationList applications("crux");
 
   applications.add(new CreateIndex());

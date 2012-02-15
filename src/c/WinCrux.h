@@ -3,6 +3,7 @@
 
 #ifdef WIN32
 #include <direct.h>
+#include <fcntl.h>
 #include <io.h>
 #include <string.h>
 #include <time.h>

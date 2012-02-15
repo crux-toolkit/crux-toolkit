@@ -10,7 +10,9 @@
 #include <time.h>
 #include <windows.h>
 #include <iostream>
+#include <vector>
 
+using namespace std;
 
 // Windows GetTimeOfDay() code from http://www.suacommunity.com/dictionary/index.php
 
@@ -153,10 +155,31 @@ int scandir(
   int (*select)(struct dirent *),
   int (*compar)(const void *, const void *)
 ) {
+	errno = 0;
+	
+	DIR *directory = opendir(dirname);
+	if (!directory) {
+		return -1;
+	}
 
-  // FIXME this is only a stub
-  return 0;
-}
+	struct dirent *entry;
+	vector<struct dirent *> *entries = new vector<struct dirent *>;
+	while(entry = readdir(directory)) {
+		if (!select || select(entry)) {
+			struct dirent *valid_entry = new struct dirent;
+			copy_dirent(entry, valid_entry);
+			entries->push_back(valid_entry);
+		}
+	}
+	if (errno) {
+		return -1;
+	}
+
+	*namelist = static_cast<struct dirent **>(malloc(sizeof(struct dirent *) * entries->size()));
+	copy(entries->begin(), entries->end(), *namelist);
+
+	return entries->size();
+ }
 
 int alphasort(const void *d1, const void *d2) {
 
@@ -165,8 +188,21 @@ int alphasort(const void *d1, const void *d2) {
 }
 
 char *mkdtemp(char *temp) {
-  // FIXME this is only a stub
-  return NULL;
+  
+  // Create temporary file name from template
+  char *dirname = _mktemp(temp);
+  
+  if (dirname) {
+	  // Create the directory
+    int result = _mkdir(dirname);
+    if (result < 0) {
+      free(dirname);
+      dirname = NULL;
+    }
+  }
+
+  return dirname;
+
 }
 
 int isinf(FLOAT_T x) {
