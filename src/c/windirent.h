@@ -164,6 +164,7 @@ typedef struct DIR
 
 
 /* Forward declarations */
+static void copy_dirent(struct dirent *src, struct dirent *dest);
 static DIR *opendir(const char *dirname);
 static struct dirent *readdir(DIR *dirp);
 static int closedir(DIR *dirp);
@@ -184,6 +185,14 @@ static void rewinddir(DIR* dirp);
 #define DIRENT_SET_ERRNO(x) (errno = (x))
 #endif
 
+/*****************************************************************************
+ * Copy a dirent structure.
+ */
+static void copy_dirent(struct dirent *src, struct dirent *dest) {
+   dest->d_type = src->d_type;
+   dest->d_namlen = src->d_namlen;
+   strncpy(dest->d_name, src->d_name, src->d_namlen + 1);
+}
 
 /*****************************************************************************
  * Open directory stream DIRNAME for read and return a pointer to the
