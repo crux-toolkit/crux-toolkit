@@ -4,8 +4,8 @@
 QRanker::QRanker() :  
   seed(0),
   selectionfdr(0.01),
-  num_hu(3),
-  mu(0.005),
+  num_hu(4),
+  mu(0.01),
   weightDecay(0.000),
   in_dir(""), 
   out_dir(""), 

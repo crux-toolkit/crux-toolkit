@@ -479,6 +479,23 @@ void Dataset :: load_labels_prot_training()
   f_protind_to_label.close();
   fname.str("");
 
+  //ind_to_pep
+  fname << in_dir << "/ind_to_pep";
+  ifstream f_ind_to_pep(fname.str().c_str(),ios::binary);
+  int ind;
+  string pep;
+  f_ind_to_pep >> ind;
+  f_ind_to_pep >> pep;
+  while(!f_ind_to_pep.eof())
+    {
+      ind_to_pep[ind] = pep;
+      f_ind_to_pep >> ind;
+      f_ind_to_pep >> pep;
+    }
+  f_ind_to_pep.close();
+  fname.str("");
+
+
 }
 
 void Dataset :: clear_labels_prot_training()
@@ -486,6 +503,7 @@ void Dataset :: clear_labels_prot_training()
   delete [] psmind_to_label; psmind_to_label = (int*)0;
   delete [] pepind_to_label; pepind_to_label = (int*)0;
   delete [] protind_to_label; protind_to_label = (int*)0;
+  ind_to_pep.clear();
 }
 
 
