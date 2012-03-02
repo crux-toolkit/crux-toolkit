@@ -77,6 +77,10 @@ class SpectralCounts: public CruxApplication {
   void performParsimonyAnalysis();
   void normalizePeptideScores();
   void normalizeProteinScores();
+  /**
+   * Checks that the normalized scores add up to one
+   */
+  void checkProteinNormalization();
   void computeEmpai();
   void makeUniqueMapping();
   void getSpectra(std::map<std::pair<int,int>, Spectrum*>& spectra);

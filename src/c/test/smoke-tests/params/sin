@@ -1,0 +1,6 @@
+overwrite=T
+unique-mapping=F
+quant-level=protein
+input-ms2=test.ms2
+parsimony=greedy
+measure=SIN

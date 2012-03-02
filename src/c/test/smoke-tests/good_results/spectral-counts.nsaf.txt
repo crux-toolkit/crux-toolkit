@@ -1,0 +1,3 @@
+protein id	NSAF	parsimony rank
+gi|6382000|ref|NP_009314.2|	0.88499999	1
+gi|6381999|ref|NP_009311.2|	0.11499999	2
