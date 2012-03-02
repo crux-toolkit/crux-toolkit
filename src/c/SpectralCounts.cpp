@@ -97,6 +97,7 @@ int SpectralCounts::main(int argc, char** argv) {
     
     getProteinScores();
     normalizeProteinScores();
+    checkProteinNormalization();
     carp(CARP_INFO, "Number of Proteins %i", protein_scores_.size());
         
     if( parsimony_ != PARSIMONY_NONE ){ //if parsimony is not none
@@ -217,9 +218,8 @@ void SpectralCounts::getProteinScores(){
  * of all scores and then by the peptide length
  *
  */
-void SpectralCounts::normalizePeptideScores()
-{
-  carp(CARP_INFO, "Normalizing peptide scores");
+void SpectralCounts::normalizePeptideScores() {
+  carp(CARP_DEBUG, "Normalizing peptide scores");
   FLOAT_T total = 0.0;
 
   // calculate sum of all scores
@@ -240,6 +240,7 @@ void SpectralCounts::normalizePeptideScores()
 
 }
 
+
 /**
  * Changes the scores in protien_scores_ to either be divided by the
  * sum of all scores times the peptide length (SIN, NSAF) or to be the
@@ -250,13 +251,17 @@ void SpectralCounts::normalizeProteinScores(){
     computeEmpai();
   } else {
 
-    carp(CARP_INFO, "Normalizing protein scores");
+    carp(CARP_DEBUG, "Normalizing protein scores");
     FLOAT_T total = 0.0;
     
     // calculate sum of all scores
     for (ProteinToScore::iterator it = protein_scores_.begin();
          it != protein_scores_.end(); ++it){
       FLOAT_T score = it->second;
+      Protein* protein = it->first;
+      if ( measure_ == MEASURE_NSAF ) {
+        score = score / (FLOAT_T)protein->getLength();
+      }
       total += score;
     }
     
@@ -265,11 +270,45 @@ void SpectralCounts::normalizeProteinScores(){
          it != protein_scores_.end(); ++it){
       FLOAT_T score = it->second;
       Protein* protein = it->first;
-      it->second = score / total / protein->getLength();
+      it->second = score / total / (FLOAT_T)protein->getLength();
     }
   }
 }
 
+/**
+ * Checks that the normalized scores add up to one
+ */
+void SpectralCounts::checkProteinNormalization() {
+
+  if (measure_ != MEASURE_EMPAI) {
+    //empai is not normalized to one.
+    FLOAT_T sum = 0;
+
+    for (ProteinToScore::iterator iter = protein_scores_.begin();
+      iter != protein_scores_.end();
+      ++iter) {
+
+      FLOAT_T score = iter->second;
+      if (measure_ == MEASURE_SIN) {
+        //The normalized values of sin do not add up to 1, but they
+        //should if you multiply the length back in...
+        score = score * (FLOAT_T)iter->first->getLength();
+      }
+
+      sum += score;
+    }
+
+    if (fabs(sum-1.0) > 0.00001) {
+      carp(CARP_ERROR, "Normalized protein scores do not add up to one!:%f", sum);
+      for (ProteinToScore::iterator iter = protein_scores_.begin();
+      iter != protein_scores_.end();
+      ++iter) {
+        carp(CARP_DEBUG, "%s %f",iter->first->getIdPointer(), iter->second);
+      }
+      carp(CARP_FATAL, "Exiting crux spectral-counts");
+    }
+  }
+}
 /**
  * Computes the 10^(observed/total) - 1 score for each protein.  Assumes
  * that protein_scores_ has been populated with the count of observed
@@ -475,7 +514,7 @@ SCORER_TYPE_T SpectralCounts::get_qval_type(
  *
  */
 void SpectralCounts::getMetaMapping(){
-  carp(CARP_INFO, "Creating a mapping of meta protein to peptides");
+  carp(CARP_DEBUG, "Creating a mapping of meta protein to peptides");
   int count = 0;
   for(ProteinToPeptides::iterator prot_it= protein_supporting_peptides_.begin();
        prot_it != protein_supporting_peptides_.end(); ++prot_it){
@@ -500,7 +539,7 @@ void SpectralCounts::getMetaMapping(){
  *
  */
 void SpectralCounts::getMetaScores(){
-  carp(CARP_INFO, "Finding scores of meta proteins");
+  carp(CARP_DEBUG, "Finding scores of meta proteins");
   for (MetaMapping::iterator meta_it = meta_mapping_.begin();
        meta_it != meta_mapping_.end(); ++meta_it ){
     MetaProtein proteins = (*meta_it).second;
@@ -522,7 +561,7 @@ void SpectralCounts::getMetaScores(){
  *
  */
 void SpectralCounts::getMetaRanks(){
-  carp(CARP_INFO, "Finding ranks of meta proteins");
+  carp(CARP_DEBUG, "Finding ranks of meta proteins");
   vector< pair<FLOAT_T, MetaProtein> > metaVector;
   for (MetaToScore::iterator meta_it = meta_protein_scores_.begin();
        meta_it != meta_protein_scores_.end(); ++meta_it){
@@ -553,7 +592,7 @@ void SpectralCounts::getMetaRanks(){
  * small enough that performance should not be an issue.
  */
 void SpectralCounts::performParsimonyAnalysis(){
-  carp(CARP_INFO, "Performing Greedy Parsimony analysis");
+  carp(CARP_DEBUG, "Performing Greedy Parsimony analysis");
   MetaMapping result(comparePeptideSets);
   vector< pair<PeptideSet, MetaProtein > > peps_vector;
 
@@ -594,7 +633,7 @@ void SpectralCounts::performParsimonyAnalysis(){
  * sequence belongs in more than one protein
  */
 void SpectralCounts::makeUniqueMapping(){
-  carp(CARP_INFO, "Filtering peptides that have more"
+  carp(CARP_DEBUG, "Filtering peptides that have more"
        "than one protein source");
   for (PeptideToScore::iterator it = peptide_scores_.begin();
        it != peptide_scores_.end(); ++it){
