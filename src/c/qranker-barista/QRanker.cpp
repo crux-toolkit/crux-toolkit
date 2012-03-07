@@ -120,8 +120,8 @@ void QRanker :: write_results()
 
 void QRanker :: write_results_psm_tab(ofstream &os)
 {
-  os << "scan" << "\t" << "charge" << "\t" << "q-value" << "\t" 
-     << "qranker score" << "\t" << "PEP\t" << "peptide" << "\t" 
+  os << "scan" << "\t" << "charge" << "\t" << "q-ranker q-value" << "\t" 
+     << "q-ranker score" << "\t" << "PEP\t" << "sequence" << "\t" 
      << "filename" << endl;
 
   for(int i = 0; i < fullset.size(); i++)

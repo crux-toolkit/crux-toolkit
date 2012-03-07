@@ -57,6 +57,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "corr",
   "SIN",
   "NSAF",
+  "dNSAF",
   "EMPAI",
   "parsimony rank",
   "decoy matches/spectrum"

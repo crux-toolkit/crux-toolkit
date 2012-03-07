@@ -97,6 +97,7 @@ void MatchFileWriter::setPrecision(){
     case QRANKER_PEP_COL:
     case SIN_SCORE_COL:
     case NSAF_SCORE_COL:
+    case DNSAF_SCORE_COL:
     case EMPAI_SCORE_COL:
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
@@ -233,12 +234,21 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     }
 
     // SIN or NSAF score
-    if( get_measure_type_parameter("measure") == MEASURE_SIN ){
-      addColumnName(SIN_SCORE_COL);
-    } else if( get_measure_type_parameter("measure") == MEASURE_NSAF){
-      addColumnName(NSAF_SCORE_COL);
-    } else if( get_measure_type_parameter("measure") == MEASURE_EMPAI){
-      addColumnName(EMPAI_SCORE_COL);
+    switch (get_measure_type_parameter("measure")) {
+      case MEASURE_SIN:
+        addColumnName(SIN_SCORE_COL);
+        break;
+      case MEASURE_NSAF:
+        addColumnName(NSAF_SCORE_COL);
+        break;
+      case MEASURE_DNSAF:
+        addColumnName(DNSAF_SCORE_COL);
+        break;
+      case MEASURE_EMPAI:
+        addColumnName(EMPAI_SCORE_COL);
+        break;
+      default:
+        ;//do nothing  
     }
 
     return; // do not add additional columns

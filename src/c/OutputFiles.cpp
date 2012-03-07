@@ -580,9 +580,25 @@ void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
 
   MatchFileWriter* file = delim_file_array_[0];
   MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
-  if( get_measure_type_parameter("measure") == MEASURE_NSAF ){
-    score_col = NSAF_SCORE_COL;
+
+  MEASURE_TYPE_T measure_type = get_measure_type_parameter("measure");
+  switch (measure_type) {
+    case MEASURE_SIN:
+      score_col = SIN_SCORE_COL;
+      break;
+    case MEASURE_NSAF:
+      score_col = NSAF_SCORE_COL;
+      break;
+    case MEASURE_DNSAF:
+      score_col = DNSAF_SCORE_COL;
+      break;
+    case MEASURE_EMPAI:
+      score_col = EMPAI_SCORE_COL;
+       break;
+    default:
+      carp(CARP_FATAL, "Invalid measure type!");
   }
+
   // print each pair
   for(vector<pair<FLOAT_T, Peptide*> >::iterator it = scoreToPeptide.begin();
       it != scoreToPeptide.end(); ++it){
@@ -625,10 +641,23 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
 
   MatchFileWriter* file = delim_file_array_[0];
   MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
-  if( get_measure_type_parameter("measure") == MEASURE_NSAF ){
-    score_col = NSAF_SCORE_COL;
-  } else if( get_measure_type_parameter("measure") == MEASURE_EMPAI ){
-    score_col = EMPAI_SCORE_COL;
+
+  MEASURE_TYPE_T measure_type = get_measure_type_parameter("measure");
+  switch (measure_type) {
+    case MEASURE_SIN:
+      score_col = SIN_SCORE_COL;
+      break;
+    case MEASURE_NSAF:
+      score_col = NSAF_SCORE_COL;
+      break;
+    case MEASURE_DNSAF:
+      score_col = DNSAF_SCORE_COL;
+      break;
+    case MEASURE_EMPAI:
+      score_col = EMPAI_SCORE_COL;
+       break;
+    default:
+      carp(CARP_FATAL, "Invalid measure type!");
   }
 
   // print each protein

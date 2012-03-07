@@ -6,6 +6,7 @@
 #ifndef PEPTIDE_SRC_H
 #define PEPTIDE_SRC_H
 #include <stdio.h>
+#include <string>
 
 #include "utils.h"
 #include "mass.h"
@@ -23,10 +24,23 @@ class PeptideSrc {
   int start_idx_; ///< start index of the peptide in the protein sequence, first residue is 1 
   PeptideSrc* next_association_; ///< a linklist of peptide_src     
 
+  static std::map<std::string, Peptide* > sequence_to_peptide_; ///< Maps a sequence to a peptide object
+  static std::map<std::string, Peptide* > decoy_sequence_to_peptide_; ///< Maps a decoy sequence to a peptide object
+
   /**
    * Initializes an (empty) PeptideSrc object
    */
   void init();
+
+  /**
+   * \brief fills the sequence_to_peptide_ member variable for use in parseTabDelimited
+   * used when the tab delimited file doesn't provide a protein id, but we have
+   * sequences and access to the database.
+   */
+  static void fillPeptides(
+    Database* database, ///< the protein database 
+    Database* decoy_database ///< the decoy database
+    );
 
  public:
 

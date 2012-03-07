@@ -85,7 +85,7 @@ FLOAT_T MatchFileReader::getFloat(
   int idx = match_indices_[col_type];
   if (idx == -1) {
 
-    carp(CARP_FATAL,
+    carp(CARP_DEBUG,
          "column \"%s\" not found for getFloat",
          get_column_header(col_type));
     return -1;
@@ -104,7 +104,7 @@ int MatchFileReader::getInteger(
   int idx = match_indices_[col_type];
   if (idx == -1) {
 
-    carp(CARP_FATAL,
+    carp(CARP_DEBUG,
          "column \"%s\" not found for getInteger",
          get_column_header(col_type));
     return -1;
@@ -128,7 +128,7 @@ const std::string& MatchFileReader::getString(
   int idx = match_indices_[col_type];
   if (idx == -1) {
 
-    carp(CARP_FATAL,
+    carp(CARP_DEBUG,
          "column \"%s\" not found for getString",
          get_column_header(col_type));
     return BLANK_STRING;
