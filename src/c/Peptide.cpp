@@ -1721,18 +1721,30 @@ Peptide* Peptide::parseTabDelimited(
 
   //populate peptide struct.
   string string_sequence = file.getString(SEQUENCE_COL);
-  // string length may include mod symbols and be longer than the peptide seq
-  peptide->length_ = convert_to_mod_aa_seq(string_sequence.c_str(),
-                                          &peptide->modified_seq_);
-  peptide->peptide_mass_ = file.getFloat(PEPTIDE_MASS_COL);
-  
-  if(!PeptideSrc::parseTabDelimited(peptide, file, database, 
-                                    use_array, decoy_database)){
-    carp(CARP_ERROR, "Failed to parse peptide src.");
-    delete peptide;
-    return NULL;
-  };
 
+  if (string_sequence.length() > 0) {
+    //In cases where the sequence is in X.seq.X format, parse out
+    //the seq part.
+    if ((string_sequence.length() > 4) && 
+        (string_sequence[1] == '.') && 
+        (string_sequence[string_sequence.length()-2]=='.')) {
+      carp_once(CARP_WARNING, "parsing sequence out of %s", string_sequence.c_str());
+      string_sequence = string_sequence.substr(2, string_sequence.length()-4);
+      carp_once(CARP_WARNING, "sequence is now:%s", string_sequence.c_str());
+    }
+
+    // string length may include mod symbols and be longer than the peptide seq
+    peptide->length_ = convert_to_mod_aa_seq(string_sequence.c_str(),
+                                          &peptide->modified_seq_);
+    peptide->peptide_mass_ = file.getFloat(PEPTIDE_MASS_COL);
+  
+    if(!PeptideSrc::parseTabDelimited(peptide, file, database, 
+                                      use_array, decoy_database)){
+      carp(CARP_ERROR, "Failed to parse peptide src.");
+      delete peptide;
+      return NULL;
+    };
+  }
   carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
 
   return peptide;

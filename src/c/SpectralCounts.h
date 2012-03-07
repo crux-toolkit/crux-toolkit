@@ -68,6 +68,16 @@ class SpectralCounts: public CruxApplication {
   void getParameterValues();
   void filterMatches();
   void getPeptideScores();
+  
+  /**
+   * calculates the protein scores based upon the dNSAF metric.  First,
+   * the spectral counts for the peptides unique to each protein is added,
+   * then the spectral counts for the peptide shared amongst the proteins
+   * are added with a distribution factor based upon the number of unique
+   * counts that each protein is assigned
+   */
+  void getProteinScoresDNSAF();
+
   void getProteinScores();
   void getProteinToPeptides();
   void getProteinToMetaProtein();
@@ -99,8 +109,15 @@ class SpectralCounts: public CruxApplication {
   MEASURE_TYPE_T measure_;
   FLOAT_T bin_width_;
   std::set<Match*> matches_;
+
   PeptideToScore peptide_scores_;
+  PeptideToScore peptide_scores_unique_;
+  PeptideToScore peptide_scores_shared_;
+
   ProteinToScore protein_scores_;
+  ProteinToScore protein_scores_unique_;
+  ProteinToScore protein_scores_shared_;
+
   ProteinToPeptides protein_supporting_peptides_;
   ProteinToMetaProtein protein_meta_protein_;
   MetaMapping meta_mapping_;

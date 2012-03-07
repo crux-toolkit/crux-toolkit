@@ -792,6 +792,7 @@ void Match::printOneMatchField(
     // values only for spectral-counts
   case SIN_SCORE_COL:
   case NSAF_SCORE_COL:
+  case DNSAF_SCORE_COL:
   case EMPAI_SCORE_COL:
   case PARSIMONY_RANK_COL:
     return;

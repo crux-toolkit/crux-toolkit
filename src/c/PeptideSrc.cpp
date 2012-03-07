@@ -11,10 +11,12 @@
 #include "utils.h"
 #include "mass.h"
 #include "objects.h"
+#include "DatabasePeptideIterator.h"
 #include "Peptide.h"
 #include "Protein.h"
 #include "PeptideSrc.h"
 #include "PeptideConstraint.h"
+#include "PeptideIterator.h"
 
 #include <vector>
 #include <string>
@@ -23,6 +25,13 @@
 #include "MatchFileReader.h"
 
 using namespace std;
+
+
+/**
+ * Static variable definitions
+ */
+map<string, Peptide* > PeptideSrc::sequence_to_peptide_; ///< Maps a sequence to a peptide object
+map<string, Peptide* > PeptideSrc::decoy_sequence_to_peptide_; ///< Maps a decoy sequence to a peptide object
 
 
 /**
@@ -138,7 +147,6 @@ void PeptideSrc::setArray(
   peptide_src->parent_protein_ = parent_protein;
   peptide_src->start_idx_ = start_idx;
 }
-
 
 /**
  * Frees the entire allocated peptide_src linklist object
@@ -355,6 +363,41 @@ int PeptideSrc::sizeOfSerialized(){
 }
 
 /**
+ * fills the sequence_to_peptide_ member variable for use in parseTabDelimited
+ * used when the tab delimited file doesn't provide a protein id, but we have
+ * sequences and access to the database.
+ */
+void PeptideSrc::fillPeptides(
+  Database* database, ///< the protein database 
+  Database* decoy_database ///< the decoy database
+  ) {
+  
+  PeptideConstraint* constraint = PeptideConstraint::newFromParameters();
+  PeptideIterator* iterator = new DatabasePeptideIterator(database, constraint, true, false);
+
+  while (iterator->hasNext()) {
+
+    Peptide* peptide = iterator->next();
+    char* sequence = peptide->getSequence();
+    string sequence_string = string(sequence);
+    std::free(sequence);
+
+    if (sequence_to_peptide_.find(sequence_string) == sequence_to_peptide_.end()) {
+      sequence_to_peptide_[sequence_string] = peptide;
+    }
+  }
+  delete iterator;
+  delete constraint;
+
+
+  //TODO - map the decoy sequences to Peptides if we need them in the future.
+  if (decoy_database == NULL) {
+    carp(CARP_INFO, "decoy database is null");
+  }
+
+}
+
+/**
  * \brief Read in the peptide_src objects from the given file and
  * assosiated them with the given peptide.  
  * Proteins for the pepitde_src are found in the given database.  If
@@ -372,8 +415,7 @@ bool PeptideSrc::parseTabDelimited(
   Database* database, ///< database containing proteins
   bool use_array, ///< use array implementation vs. linked list
   Database* decoy_database ///< database containing decoy proteins
-)
-{
+) {
 
   if( peptide == NULL ){
     carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide.");
@@ -383,8 +425,54 @@ bool PeptideSrc::parseTabDelimited(
   carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", 
        file.getString(PROTEIN_ID_COL).c_str());
 
-  vector<string> protein_ids;
-  file.getStringVectorFromCell(PROTEIN_ID_COL, protein_ids);
+  //if the protein id field is empty, then we have to search the database...
+  if (file.empty(PROTEIN_ID_COL)) {
+    carp_once(CARP_WARNING, "empty protein id string in tab delimited file. "
+                            "searching database to find proteins to match peptide "
+                            "sequence");
+
+    //if we haven't done this already, build a map of sequence strings to peptide
+    //objects.
+    if (sequence_to_peptide_.size() == 0) {
+      fillPeptides(database, decoy_database);
+    }
+
+    char* seq = peptide->getUnshuffledModifiedSequence();
+    string seq_string(seq);
+    std::free(seq);
+    
+    if (sequence_to_peptide_.find(seq_string) == sequence_to_peptide_.end()) {
+      carp(CARP_WARNING, "Cannot find peptide in database!");
+      return false;
+    }
+    Peptide* src_peptide = sequence_to_peptide_[seq_string];
+
+    PeptideSrc* dest = NULL;
+
+    carp_once(CARP_INFO, 
+      "adding %d proteins to peptide %s",
+      src_peptide->getNumPeptideSrc(), seq_string.c_str());
+    if (use_array) {
+      dest = newArray(src_peptide->getNumPeptideSrc());
+      PeptideSrc::copy(src_peptide->getPeptideSrc(), dest);
+    }  else {
+      dest = newLinklist(src_peptide->getNumPeptideSrc());
+      PeptideSrc::copy(src_peptide->getPeptideSrc(), dest);
+      
+    }
+    peptide->addPeptideSrcArray(dest);
+    peptide->getParentProtein()->getProteinIdx();
+    return true;
+
+
+  } else {
+    vector<string> protein_ids;
+    file.getStringVectorFromCell(PROTEIN_ID_COL, protein_ids);
+  
+    if (protein_ids.size() == 0) {
+      carp(CARP_ERROR, "No protein ids found!");
+      return false;
+    }
 
   int num_peptide_src = protein_ids.size();
   
@@ -492,6 +580,7 @@ bool PeptideSrc::parseTabDelimited(
   carp(CARP_DETAILED_DEBUG, "Done parsing id line:%s", file.getString(PROTEIN_ID_COL).c_str());
 
   return true;
+  } 
 }
 
 

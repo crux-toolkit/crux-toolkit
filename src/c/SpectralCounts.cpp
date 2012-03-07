@@ -20,7 +20,11 @@ SpectralCounts::SpectralCounts()
     measure_(MEASURE_SIN),
     bin_width_(0),
     peptide_scores_(Peptide::lessThan),
+    peptide_scores_unique_(Peptide::lessThan),
+    peptide_scores_shared_(Peptide::lessThan),
     protein_scores_(protein_id_less_than),
+    protein_scores_unique_(protein_id_less_than),
+    protein_scores_shared_(protein_id_less_than),
     protein_supporting_peptides_(protein_id_less_than),
     protein_meta_protein_(protein_id_less_than),
     meta_mapping_(comparePeptideSets),
@@ -81,12 +85,16 @@ int SpectralCounts::main(int argc, char** argv) {
   carp(CARP_INFO, "Number of matches passed the threshold %i", 
        matches_.size());
 
+  if (matches_.size() == 0) {
+    carp(CARP_FATAL, "No matches passed the threshold!");
+  }
+
   // get a set of peptides
   getPeptideScores();
   if( unique_mapping_ ){
     makeUniqueMapping();
   }
-  carp(CARP_INFO, "Number of Unique Peptides %i", peptide_scores_.size());
+  carp(CARP_INFO, "Number of Peptides %i", peptide_scores_.size());
 
   // quantify at either the peptide or protein level
   if( quantitation_ == PEPTIDE_QUANT_LEVEL ){ // peptide level
@@ -187,28 +195,132 @@ void SpectralCounts::getProteinToMetaProtein(){
 }
 
 /**
+ * calculates the protein scores based upon the dNSAF metric.  First,
+ * the spectral counts for the peptides unique to each protein is added,
+ * then the spectral counts for the peptide shared amongst the proteins
+ * are added with a distribution factor based upon the number of unique
+ * counts that each protein is assigned
+ */
+void SpectralCounts::getProteinScoresDNSAF() {
+
+  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = NULL;
+
+  //calculate unique scores (unique peptides).
+  for (PeptideToScore::iterator pep_it = peptide_scores_unique_.begin();
+    pep_it != peptide_scores_unique_.end();
+    ++pep_it) {
+
+    Peptide* peptide = pep_it->first;
+    FLOAT_T pep_score = pep_it->second;
+    peptide_src_iterator = new_peptide_src_iterator(peptide);
+    while( peptide_src_iterator_has_next(peptide_src_iterator)) {
+      PeptideSrc* peptide_src = 
+        peptide_src_iterator_next(peptide_src_iterator);
+      Protein* protein = peptide_src->getParentProtein();
+      if (protein_scores_unique_.find(protein) == protein_scores_unique_.end()){
+        protein_scores_unique_[protein] = 0;
+        protein_scores_shared_[protein] = 0;
+      }
+
+      protein_scores_unique_[protein] += pep_score;
+    }
+    free(peptide_src_iterator);    
+  }
+
+  //Handle shared peptides
+  //For each peptide that is shared across multiple proteins,
+  //we calculate a distribution factor based upon the unique
+  //peptides assigned to each protein that is sharing this peptide
+  //we then add the shared peptide count * the protein's distribution
+  //to each protein that is sharing that peptide.
+  //There is a wierd feature that a protein with no unique peptide will
+  //have a dNSAF score of zero... I don't know if we should include the
+  //zero score in the list of proteins...
+  for (PeptideToScore::iterator pep_it = peptide_scores_shared_.begin();
+    pep_it != peptide_scores_shared_.end();
+    ++pep_it) {
+    Peptide* peptide = pep_it->first;
+    FLOAT_T shared_pep_score = pep_it->second;
+    peptide_src_iterator = new_peptide_src_iterator(peptide);
+    double unique_sum = 0.0;
+   
+    peptide_src_iterator = new_peptide_src_iterator(peptide);
+    while( peptide_src_iterator_has_next(peptide_src_iterator)) {
+      PeptideSrc* peptide_src = 
+      peptide_src_iterator_next(peptide_src_iterator);
+      
+      Protein* protein = peptide_src->getParentProtein();
+      if (protein_scores_unique_.find(protein) != protein_scores_unique_.end()) {
+        unique_sum += protein_scores_unique_[protein];
+      }
+        
+    }
+    free(peptide_src_iterator);    
+  
+    if (unique_sum != 0) {
+      peptide_src_iterator = new_peptide_src_iterator(peptide);
+      while (peptide_src_iterator_has_next(peptide_src_iterator)) {
+        PeptideSrc* peptide_src = 
+        peptide_src_iterator_next(peptide_src_iterator);
+      
+        Protein* protein = peptide_src->getParentProtein();
+        if (protein_scores_unique_.find(protein) != protein_scores_unique_.end()) {
+          
+    
+          FLOAT_T d_factor = protein_scores_unique_[protein] / unique_sum;
+          protein_scores_shared_[protein] += d_factor * shared_pep_score;
+        }
+      }
+      free(peptide_src_iterator);
+    }
+  }
+
+  //add up shared and unique scores to get final score
+  for (ProteinToScore::iterator prot_iter = protein_scores_unique_.begin();
+    prot_iter != protein_scores_unique_.end();
+    ++prot_iter) {
+    Protein* protein = prot_iter->first;
+    FLOAT_T unique_score = prot_iter->second;
+    protein_scores_[protein] = unique_score;
+  }
+
+  for (ProteinToScore::iterator prot_iter = protein_scores_shared_.begin();
+    prot_iter != protein_scores_shared_.end();
+    ++prot_iter) {
+    Protein *protein = prot_iter->first;
+    FLOAT_T shared_score = prot_iter->second;
+    protein_scores_[protein] += shared_score;
+  }
+}
+
+/**
  * A score for each protein is calculated by summing 
  * the scores of each peptide that belongs to a protein
  */
 void SpectralCounts::getProteinScores(){
 
-  // iterate through each peptide
-  for (PeptideToScore::iterator pep_it = peptide_scores_.begin();
-       pep_it != peptide_scores_.end(); ++pep_it){
-    Peptide* peptide = pep_it->first;
-    FLOAT_T pep_score = pep_it->second;
-    PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator =
-      new_peptide_src_iterator(peptide);
-    while( peptide_src_iterator_has_next(peptide_src_iterator)) {
-      PeptideSrc* peptide_src = 
-        peptide_src_iterator_next(peptide_src_iterator);
-      Protein* protein = peptide_src->getParentProtein();
-      if (protein_scores_.find(protein) == protein_scores_.end()){
-        protein_scores_.insert(make_pair(protein, 0.0));
+  if (measure_ == MEASURE_DNSAF) {
+    getProteinScoresDNSAF();
+  } else {
+
+    // iterate through each peptide
+    for (PeptideToScore::iterator pep_it = peptide_scores_.begin();
+         pep_it != peptide_scores_.end(); ++pep_it){
+      Peptide* peptide = pep_it->first;
+      FLOAT_T pep_score = pep_it->second;
+      PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator =
+        new_peptide_src_iterator(peptide);
+      while( peptide_src_iterator_has_next(peptide_src_iterator)) {
+        PeptideSrc* peptide_src = 
+          peptide_src_iterator_next(peptide_src_iterator);
+        Protein* protein = peptide_src->getParentProtein();
+        if (protein_scores_.find(protein) == protein_scores_.end()){
+          protein_scores_.insert(make_pair(protein, 0.0));
+        }
+        protein_scores_[protein] += pep_score;
       }
-      protein_scores_[protein] += pep_score;
+      free(peptide_src_iterator);
     }
-    free(peptide_src_iterator);
   }
 }
 
@@ -234,7 +346,7 @@ void SpectralCounts::normalizePeptideScores() {
        it != peptide_scores_.end(); ++it){
     FLOAT_T score = it->second;
     Peptide* peptide = it->first;
-    it->second = score / total / peptide->getLength();
+    it->second = score / total / (FLOAT_T)peptide->getLength();
 
   }
 
@@ -259,7 +371,7 @@ void SpectralCounts::normalizeProteinScores(){
          it != protein_scores_.end(); ++it){
       FLOAT_T score = it->second;
       Protein* protein = it->first;
-      if ( measure_ == MEASURE_NSAF ) {
+      if ( (measure_ == MEASURE_NSAF) || (measure_ == MEASURE_DNSAF)) {
         score = score / (FLOAT_T)protein->getLength();
       }
       total += score;
@@ -292,7 +404,8 @@ void SpectralCounts::checkProteinNormalization() {
       if (measure_ == MEASURE_SIN) {
         //The normalized values of sin do not add up to 1, but they
         //should if you multiply the length back in...
-        score = score * (FLOAT_T)iter->first->getLength();
+        Protein* protein = iter->first;
+        score = score * (FLOAT_T)protein->getLength();
       }
 
       sum += score;
@@ -409,10 +522,27 @@ void SpectralCounts::getPeptideScores()
 
     // add ion_intensity to peptide scores
     Peptide* peptide = match->getPeptide();
+
+    if ( measure_ == MEASURE_DNSAF) {
+      //keep track of unique and shared mappings.
+      if (peptide->getNumPeptideSrc() > 1) {
+        if (peptide_scores_shared_.find(peptide) == peptide_scores_shared_.end()) {
+          peptide_scores_shared_.insert(make_pair(peptide,0.0));
+        }
+        peptide_scores_shared_[peptide] += match_intensity;
+      } else {
+        if (peptide_scores_unique_.find(peptide) == peptide_scores_unique_.end()) {
+          peptide_scores_unique_.insert(make_pair(peptide, 0.0));
+        }
+        peptide_scores_unique_[peptide] += match_intensity;
+      }
+    }
+
     if (peptide_scores_.find(peptide) ==  peptide_scores_.end()){
       peptide_scores_.insert(make_pair(peptide, 0.0));
     }
     peptide_scores_[peptide] += match_intensity;
+
   }
 
   if( measure_ == MEASURE_SIN ){
@@ -433,8 +563,8 @@ void SpectralCounts::getPeptideScores()
  * Create a set of matches, all with an XCORR rank == 1 and all of which
  * have a qvalue score lower than user-specified threshold.
  */
-void SpectralCounts::filterMatches()
-{
+void SpectralCounts::filterMatches() {
+
   // get input file directory
   char** path_info = parse_filename_path(psm_file_.c_str());
   if( path_info[1] == NULL ){
@@ -454,21 +584,33 @@ void SpectralCounts::filterMatches()
   while (match_collection_it->hasNext()){
     
     match_collection = match_collection_it->next();
-    match_iterator = new MatchIterator(match_collection, XCORR, true);
-    
-    // figure out which qvalue we are using
+
+   // figure out which qvalue we are using
     SCORER_TYPE_T qval_type = get_qval_type(match_collection);
     if( qval_type == INVALID_SCORER_TYPE ){
       carp(CARP_FATAL, "The matches in %s do not have q-values from percolator,"
            " q-ranker, or compute-q-values.\n", psm_file_.c_str());
     }
 
+    carp(CARP_INFO,
+      "filterMatches(): Getting match iterator for %s", 
+      scorer_type_to_string(qval_type));
+
+    match_iterator = new MatchIterator(match_collection, qval_type, true);
+    
+ 
+
     while(match_iterator->hasNext()){
       Match* match = match_iterator->next();
       qualify = false;
-      if (match->getRank(XCORR) != 1){
+      
+      carp(CARP_DEBUG, "xcorr rank:%d q-value:%f",match->getRank(XCORR), match->getScore(qval_type));
+
+      if ((qval_type == DECOY_XCORR_QVALUE || qval_type == LOGP_QVALUE_WEIBULL_XCORR) && 
+        (match->getRank(XCORR) != 1)){
         continue;
       }
+      
       // find a qvalue score lower than threshold
       if (match->getScore(qval_type) != FLT_MIN &&
           match->getScore(qval_type) <= threshold_)  {
@@ -633,17 +775,21 @@ void SpectralCounts::performParsimonyAnalysis(){
  * sequence belongs in more than one protein
  */
 void SpectralCounts::makeUniqueMapping(){
+
+  if (measure_ == MEASURE_DNSAF) {
+    carp(CARP_WARNING, "--unique-mapping ignored for dNSAF!");
+  } else {
   carp(CARP_DEBUG, "Filtering peptides that have more"
-       "than one protein source");
-  for (PeptideToScore::iterator it = peptide_scores_.begin();
-       it != peptide_scores_.end(); ++it){
-    Peptide* peptide = it->first;
-    int num_proteins = peptide->getNumPeptideSrc();
-    if (num_proteins > 1){
-      peptide_scores_.erase(it);
+         "than one protein source");
+    for (PeptideToScore::iterator it = peptide_scores_.begin();
+         it != peptide_scores_.end(); ++it){
+      Peptide* peptide = it->first;
+      int num_proteins = peptide->getNumPeptideSrc();
+      if (num_proteins > 1){
+        peptide_scores_.erase(it);
+      }
     }
   }
-
 }
 
 
