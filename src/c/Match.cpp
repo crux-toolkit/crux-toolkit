@@ -309,6 +309,29 @@ int compareQRankerQValue(
 }
 
 /**
+ * Compare two matches; used for qsort.
+ * Smaller q-values are better.  Break ties using the raw barista score.
+ * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
+ * is greather than b.
+ */
+int compareBaristaQValue(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+)
+{
+
+  if((*match_b)->getScore(BARISTA_QVALUE) < 
+      (*match_a)->getScore(BARISTA_QVALUE)){
+    return 1;
+  }
+  else if((*match_b)->getScore(BARISTA_QVALUE) > 
+          (*match_a)->getScore(BARISTA_QVALUE)){
+    return -1;
+  }
+  return compareBaristaScore(match_a, match_b);
+}
+
+/**
  * Compare two matches by spectrum scan number and percolator q-value, 
  * used for qsort.
  * \returns -1 if match a spectrum number is less than that of match b
@@ -346,6 +369,27 @@ int compareSpectrumQRankerQValue(
 
   if( return_me == 0 ){
     return_me = compareQRankerQValue(match_a, match_b);
+  }
+
+  return return_me;
+}
+
+/**
+ * Compare two matches by spectrum scan number and barista q-value, 
+ * used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compareSpectrumBaristaQValue(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+){
+
+  int return_me = compareSpectrum( match_a, match_b );
+
+  if( return_me == 0 ){
+    return_me = compareBaristaQValue(match_a, match_b);
   }
 
   return return_me;
@@ -415,6 +459,30 @@ int compareQRankerScore(
 }
 
 /**
+ * compare two matches, used for BARISTA_SCORE
+ * \returns 0 if qranker scores are equal, -1 if a is less than b,
+ * 1 if a is greather than b.
+ */
+int compareBaristaScore(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+)
+{
+  if((*match_b)->getScore(BARISTA_SCORE) 
+     > (*match_a)->getScore(BARISTA_SCORE)){
+    return 1;
+  }
+  else if((*match_b)->getScore(BARISTA_SCORE) 
+          < (*match_a)->getScore(BARISTA_SCORE)){
+    return -1;
+  }
+  return 0;
+
+}
+
+
+
+/**
  * Compare two matches by spectrum scan number and qranker score,
  * used for qsort. 
  * \returns -1 if match a spectrum number is less than that of match b
@@ -431,6 +499,28 @@ int compareSpectrumQRankerScore(
 
   if( return_me == 0 ){
     return_me = compareQRankerScore(match_a, match_b);
+  }
+
+  return return_me;
+}
+
+/**
+ * Compare two matches by spectrum scan number and barista score,
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compareSpectrumBaristaScore(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  )
+{
+
+  int return_me = compareSpectrum( match_a, match_b );
+
+  if( return_me == 0 ){
+    return_me = compareBaristaScore(match_a, match_b);
   }
 
   return return_me;

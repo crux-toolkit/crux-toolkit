@@ -599,6 +599,20 @@ void MatchCollection::sort(
     sort_by = QRANKER_QVALUE;
     break;
 
+  case BARISTA_SCORE:
+    carp(CARP_DEBUG, "Sorting match collection by barista score.");
+    sort_by = BARISTA_SCORE;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareBaristaScore;
+    break;
+
+  case BARISTA_QVALUE:
+  case BARISTA_PEPTIDE_QVALUE:
+  case BARISTA_PEP:
+    carp(CARP_DEBUG, "Sorting match collection by barista q-value.");
+    compare_match_function = (QSORT_COMPARE_METHOD)compareBaristaQValue;
+    sort_by = BARISTA_QVALUE;
+    break;
+
   // Should never reach this point.
   case NUMBER_SCORER_TYPES:
   case INVALID_SCORER_TYPE:
@@ -681,6 +695,20 @@ void MatchCollection::spectrumSort(
     qsortMatch(match_, match_total_,
                 (QSORT_COMPARE_METHOD)compareSpectrumQRankerQValue);
     last_sorted_ = QRANKER_QVALUE;
+    break;
+
+  case BARISTA_SCORE:
+    qsortMatch(match_, match_total_,
+                (QSORT_COMPARE_METHOD)compareSpectrumBaristaScore);
+    last_sorted_ = BARISTA_SCORE;
+    break;
+
+  case BARISTA_QVALUE:
+  case BARISTA_PEPTIDE_QVALUE:
+  case BARISTA_PEP:
+    qsortMatch(match_, match_total_,
+                (QSORT_COMPARE_METHOD)compareSpectrumBaristaQValue);
+    last_sorted_ = BARISTA_QVALUE;
     break;
 
 
@@ -2927,6 +2955,12 @@ void MatchCollection::assignQValues(
     case QRANKER_QVALUE:
       derived_score_type = QRANKER_PEPTIDE_QVALUE;
       break;
+    case BARISTA_SCORE:
+      derived_score_type = BARISTA_QVALUE;
+      break;
+    case BARISTA_QVALUE:
+      derived_score_type = BARISTA_PEPTIDE_QVALUE;
+      break;
     // Should never reach this point.
     case SP: 
     case LOGP_WEIBULL_XCORR: 
@@ -2935,6 +2969,8 @@ void MatchCollection::assignQValues(
     case PERCOLATOR_PEPTIDE_QVALUE:
     case QRANKER_PEPTIDE_QVALUE:
     case QRANKER_PEP:
+    case BARISTA_PEPTIDE_QVALUE:
+    case BARISTA_PEP:
     case DECOY_XCORR_PEP:
     case LOGP_WEIBULL_PEP:
     case PERCOLATOR_PEP:
@@ -2992,6 +3028,9 @@ void MatchCollection::assignPEPs(
     case QRANKER_SCORE:
       derived_score_type = QRANKER_PEP;
       break;
+    case BARISTA_SCORE:
+      derived_score_type = BARISTA_PEP;
+      break;
     // Should never reach this point.
     case SP: 
     case LOGP_WEIBULL_XCORR: 
@@ -3003,6 +3042,9 @@ void MatchCollection::assignPEPs(
     case QRANKER_PEPTIDE_QVALUE:
     case QRANKER_PEP:
     case QRANKER_QVALUE:
+    case BARISTA_PEPTIDE_QVALUE:
+    case BARISTA_PEP:
+    case BARISTA_QVALUE:
     case DECOY_XCORR_PEP:
     case LOGP_WEIBULL_PEP:
     case PERCOLATOR_QVALUE:
