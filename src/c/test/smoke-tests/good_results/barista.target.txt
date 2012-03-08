@@ -1,263 +1,263 @@
-scan	charge	q-value	barista score	peptide	filename
-85	3	0	2.46481	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-53	2	0	2.4515	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-131	2	0	2.44939	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-11	2	0	2.44639	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-62	2	0	2.44468	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-77	2	0	2.43871	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-54	3	0	2.42577	K.IEVLEQELVR.A	crux-output/sequest.target.sqt
-50	2	0	2.42455	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-26	2	0	2.41866	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
-146	2	0	2.41641	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
-92	3	0	2.41411	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-67	2	0	2.40966	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
-121	2	0	2.4095	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-159	2	0	2.39418	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-70	2	0	2.39415	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
-156	3	0	2.38555	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-151	2	0	2.38314	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-96	2	0	2.36966	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-141	3	0	2.36824	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-119	2	0	2.36082	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-72	2	0	2.3574	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-25	2	0	2.33593	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-15	2	0	2.33473	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
-76	2	0	2.32972	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
-48	2	0	2.32722	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
-139	3	0	2.29535	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-130	2	0	2.25412	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
-118	3	0	2.23218	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-75	2	0	2.15671	K.LVSWYDNEYGYSTR.V	crux-output/sequest.target.sqt
-108	3	0	2.14831	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-51	2	0	2.14183	K.NGFQTGSASK.A	crux-output/sequest.target.sqt
-49	2	0	2.11165	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-117	2	0	2.08895	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-69	2	0	1.99825	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-137	3	0	1.96012	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-126	2	0	1.94957	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-38	3	0	1.93008	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-47	2	0	1.89209	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
-61	2	0	1.87128	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
-82	3	0.0218131	1.85623	K.YQVTVIDAPGHR.D	crux-output/sequest.target.sqt
-141	3	0.0218131	1.85008	K.FHVSISNPEFLAK.Y	crux-output/sequest.target.sqt
-149	2	0.0218131	1.82001	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
-144	3	0.0218131	1.80268	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-93	2	0.0218131	1.79318	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
-111	3	0.0218131	1.78518	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-90	3	0.0218131	1.77303	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-18	3	0.0385925	1.71311	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-37	2	0.0385925	1.70043	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
-27	2	0.0385925	1.68343	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
-95	2	0.0385925	1.65779	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
-42	3	0.0385925	1.63252	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-143	2	0.0385925	1.63106	R.FDIGDLVK.A	crux-output/sequest.target.sqt
-12	3	0.0537538	1.61097	K.VLEFHPFDPVSK.K	crux-output/sequest.target.sqt
-22	1	0.0537538	1.59036	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
-102	2	0.0537538	1.56449	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
-32	3	0.0537538	1.55856	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
-107	3	0.0880179	1.51777	R.FEELCADLFR.S	crux-output/sequest.target.sqt
-136	1	0.10034	1.51144	K.SLEITR.D	crux-output/sequest.target.sqt
-89	3	0.10034	1.49736	K.GMLNVQLLVVNR.N	crux-output/sequest.target.sqt
-97	3	0.10034	1.46456	R.ISEGIWPEEIK.E	crux-output/sequest.target.sqt
-83	2	0.115145	1.46038	K.LTSQGIYR.Y	crux-output/sequest.target.sqt
-144	3	0.125426	1.43613	K.FHVSISNPEFLAK.Y	crux-output/sequest.target.sqt
-107	3	0.125426	1.41504	-.MPYTLSDAHHK.L	crux-output/sequest.target.sqt
-154	1	0.125426	1.40182	K.KPDDDK.I	crux-output/sequest.target.sqt
-137	3	0.138933	1.36765	K.FHVSISNPEFLAK.Y	crux-output/sequest.target.sqt
-143	2	0.152031	1.33372	R.HHEELLK.E	crux-output/sequest.target.sqt
-73	3	0.177071	1.31357	K.YQVTVIDAPGHR.D	crux-output/sequest.target.sqt
-45	2	0.177071	1.31343	K.ETSNFIK.K	crux-output/sequest.target.sqt
-135	2	0.215015	1.25624	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
-12	3	0.215015	1.25237	K.NTLEEYIYTLR.G	crux-output/sequest.target.sqt
-41	2	0.222979	1.22118	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
-43	1	0.222979	1.21331	K.SGPTPTR.S	crux-output/sequest.target.sqt
-78	2	0.228624	1.18849	K.EQPESTSK.N	crux-output/sequest.target.sqt
-51	2	0.228624	1.18768	K.SSIQLGEHK.K	crux-output/sequest.target.sqt
-89	3	0.228624	1.1525	K.FDSGTSGSQNMPK.A	crux-output/sequest.target.sqt
-94	3	0.228624	1.09892	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
-52	3	0.228624	1.0971	K.AALLNQYFAQAYK.G	crux-output/sequest.target.sqt
-78	3	0.228624	1.09692	R.GEYHFFQGITR.G	crux-output/sequest.target.sqt
-83	3	0.228624	1.08952	R.TTLHYALSELEK.D	crux-output/sequest.target.sqt
-31	3	0.250851	1.04487	R.YLPNGDCECCGR.A	crux-output/sequest.target.sqt
-78	3	0.250851	1.01905	K.GDDEANGATSFDR.T	crux-output/sequest.target.sqt
-54	3	0.250851	1.01098	K.EILGTDEPTVR.T	crux-output/sequest.target.sqt
-59	3	0.250851	1.00972	K.GEDELWCVINGK.V	crux-output/sequest.target.sqt
-99	3	0.250851	1.0019	K.SLLNIDPHSSDYLIR.L	crux-output/sequest.target.sqt
-92	3	0.268352	0.99357	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
-23	1	0.268352	0.96931	K.ESVTEIK.A	crux-output/sequest.target.sqt
-13	1	0.276801	0.94952	K.SLEITR.D	crux-output/sequest.target.sqt
-78	3	0.278723	0.939175	K.GMLNVQLLVVNR.N	crux-output/sequest.target.sqt
-24	3	0.278723	0.935505	R.AAGQLDQLVEDYINDELEIVSR.I	crux-output/sequest.target.sqt
-59	2	0.278723	0.935188	-.MSQQDNVK.A	crux-output/sequest.target.sqt
-142	1	0.319766	0.906666	K.EAAELGK.G	crux-output/sequest.target.sqt
-14	3	0.327197	0.900268	K.YLTNTGNLLLASQIR.H	crux-output/sequest.target.sqt
-89	2	0.345257	0.894212	K.ESTPDNDK.E	crux-output/sequest.target.sqt
-65	2	0.37126	0.869623	K.EQPESTSK.N	crux-output/sequest.target.sqt
-82	3	0.37126	0.865591	K.FDSGTSGSQNMPK.A	crux-output/sequest.target.sqt
-18	3	0.37126	0.862019	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
-91	2	0.37126	0.851103	-.MSIPETQK.A	crux-output/sequest.target.sqt
-38	3	0.37126	0.835629	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
-14	3	0.37126	0.832672	K.ATAGDTHLGGEDFDNR.L	crux-output/sequest.target.sqt
-139	3	0.37126	0.819967	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
-64	3	0.376277	0.810164	K.NVIAETGAGQHGVATATACAK.F	crux-output/sequest.target.sqt
-31	3	0.376277	0.792165	K.AALLNQYFAQAYK.G	crux-output/sequest.target.sqt
-94	3	0.376277	0.785824	R.EANPSTQVPQSDTFPNGSK.R	crux-output/sequest.target.sqt
-30	1	0.376277	0.772801	K.KPDDDK.I	crux-output/sequest.target.sqt
-100	1	0.376277	0.762814	R.NPYNTR.S	crux-output/sequest.target.sqt
-96	2	0.376277	0.759837	R.LAVCGIAAICQK.R	crux-output/sequest.target.sqt
-24	3	0.376277	0.749143	K.VMPYSTGLTTPLSNFEAQQNYK.D	crux-output/sequest.target.sqt
-40	2	0.376277	0.745946	R.TVLDLEVNNTR.T	crux-output/sequest.target.sqt
-87	3	0.376277	0.741043	K.AALLNQYFAQAYK.G	crux-output/sequest.target.sqt
-148	1	0.376277	0.740022	K.NPAVGEK.K	crux-output/sequest.target.sqt
-114	3	0.376277	0.730624	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
-154	1	0.376277	0.726159	K.DVMPAGK.G	crux-output/sequest.target.sqt
-120	2	0.385925	0.698748	K.QSNDSLR.S	crux-output/sequest.target.sqt
-108	3	0.385925	0.698237	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
-72	2	0.385925	0.687749	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
-33	3	0.385925	0.683732	K.TSFFQALGVPTK.I	crux-output/sequest.target.sqt
-140	1	0.385925	0.681455	K.EAAELGK.G	crux-output/sequest.target.sqt
-73	3	0.399661	0.65962	K.GDDEANGATSFDR.T	crux-output/sequest.target.sqt
-106	1	0.409723	0.629159	K.NPAVGEK.K	crux-output/sequest.target.sqt
-82	2	0.409723	0.628188	R.FDIGDLVK.A	crux-output/sequest.target.sqt
-82	2	0.422922	0.605359	K.ESTPDNDK.E	crux-output/sequest.target.sqt
-35	1	0.427681	0.598553	R.SIHILK.V	crux-output/sequest.target.sqt
-114	3	0.433471	0.588815	K.YDSPVSSPITSASELGSIAK.L	crux-output/sequest.target.sqt
-31	3	0.433471	0.588234	K.LHHAFFVGDILTK.R	crux-output/sequest.target.sqt
-73	2	0.433471	0.586534	R.FDIGDLVK.A	crux-output/sequest.target.sqt
-16	1	0.453921	0.560752	K.NPAVGEK.K	crux-output/sequest.target.sqt
-89	2	0.466148	0.532561	R.FDIGDLVK.A	crux-output/sequest.target.sqt
-50	2	0.482256	0.518135	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
-127	2	0.482256	0.511184	K.IFENVSIK.A	crux-output/sequest.target.sqt
-35	1	0.486265	0.506611	K.AFAQFK.E	crux-output/sequest.target.sqt
-156	3	0.509304	0.460777	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
-65	2	0.509304	0.453379	K.ESTPDNDK.E	crux-output/sequest.target.sqt
-99	3	0.520284	0.432014	-.MNSLVTQYAAPLFER.Y	crux-output/sequest.target.sqt
-19	3	0.520284	0.403501	R.GYLVAMTGDGVNDAPSLK.K	crux-output/sequest.target.sqt
-10	2	0.520284	0.397533	R.TVLDLEVNNTR.T	crux-output/sequest.target.sqt
-60	1	0.534186	0.381472	R.TLYGFGG.-	crux-output/sequest.target.sqt
-97	3	0.534186	0.36828	K.TSFFQALGVPTK.I	crux-output/sequest.target.sqt
-21	1	0.534186	0.360321	K.ESTIDIK.I	crux-output/sequest.target.sqt
-21	1	0.534186	0.354104	K.ESVTEIK.A	crux-output/sequest.target.sqt
-78	2	0.548528	0.324813	K.QGVTSLGIK.A	crux-output/sequest.target.sqt
-68	2	0.548528	0.295644	K.LNLEGDFK.K	crux-output/sequest.target.sqt
-157	2	0.548528	0.280162	R.MQSVIDLGR.N	crux-output/sequest.target.sqt
-151	2	0.548528	0.27938	K.DALPSVTSEQVR.E	crux-output/sequest.target.sqt
-59	3	0.548528	0.258376	K.ADTGIAVEGATDAAR.S	crux-output/sequest.target.sqt
-125	1	0.548528	0.252888	K.ESVTEIK.A	crux-output/sequest.target.sqt
-66	2	0.548528	0.234138	K.SALVPGGVR.I	crux-output/sequest.target.sqt
-13	1	0.548528	0.226251	K.LLPFVK.G	crux-output/sequest.target.sqt
-66	2	0.548528	0.223754	K.GPLATPIGK.G	crux-output/sequest.target.sqt
-111	3	0.548528	0.200921	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
-49	2	0.548528	0.196633	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
-29	2	0.550889	0.1819	K.EILGTDEPTVR.T	crux-output/sequest.target.sqt
-119	2	0.550889	0.181413	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
-19	3	0.550889	0.180592	R.LQDGVPDSIALLAEAGIK.L	crux-output/sequest.target.sqt
-112	3	0.592921	0.11843	R.VNGDAHVISHR.A	crux-output/sequest.target.sqt
-115	2	0.595569	0.110284	R.QFWLGPR.D	crux-output/sequest.target.sqt
-157	2	0.61748	0.0658471	K.ITSGQELNR.V	crux-output/sequest.target.sqt
-100	1	0.624761	0.0498502	R.MAAELTK.R	crux-output/sequest.target.sqt
-33	2	0.624761	0.0379374	K.EPGVPTIR.I	crux-output/sequest.target.sqt
-134	2	0.624761	0.0303826	R.QTVAVGVIK.S	crux-output/sequest.target.sqt
-32	3	0.627128	0.0260967	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
-145	1	0.634683	-0.00383284	K.LLPFVK.G	crux-output/sequest.target.sqt
-91	2	0.634683	-0.00678682	R.QVSDIVNR.I	crux-output/sequest.target.sqt
-20	2	0.634683	-0.0263395	K.STVVSANPK.K	crux-output/sequest.target.sqt
-122	1	0.634683	-0.0306287	K.SGDAALVK.F	crux-output/sequest.target.sqt
-35	1	0.634683	-0.0402379	K.DFQTAK.D	crux-output/sequest.target.sqt
-81	2	0.634683	-0.0427166	K.GPLATPIGK.G	crux-output/sequest.target.sqt
-14	2	0.660925	-0.128428	K.FFCALFDAK.K	crux-output/sequest.target.sqt
-132	2	0.674909	-0.14605	K.LTWLADTK.D	crux-output/sequest.target.sqt
-133	2	0.676853	-0.167248	R.VLVHTQIR.K	crux-output/sequest.target.sqt
-63	2	0.684676	-0.192555	R.DLDRPGSK.F	crux-output/sequest.target.sqt
-112	2	0.710011	-0.234835	K.ELDTAQK.H	crux-output/sequest.target.sqt
-74	2	0.716717	-0.27918	K.GPLATPIGK.G	crux-output/sequest.target.sqt
-109	2	0.716717	-0.279483	K.SDNVMDR.W	crux-output/sequest.target.sqt
-107	2	0.716717	-0.28063	K.NDFIMVK.G	crux-output/sequest.target.sqt
-17	2	0.716717	-0.28131	K.TPLPPAPAPK.K	crux-output/sequest.target.sqt
-69	2	0.728729	-0.327703	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
-124	2	0.728729	-0.337767	K.YSFLEGGSK.L	crux-output/sequest.target.sqt
-23	1	0.728729	-0.361013	K.THAIFSK.I	crux-output/sequest.target.sqt
-103	2	0.728729	-0.364403	R.YHIEEEGSR.K	crux-output/sequest.target.sqt
-17	2	0.72925	-0.372882	K.SLEASVIDR.N	crux-output/sequest.target.sqt
-14	2	0.72925	-0.40219	R.YHIEEEGSR.K	crux-output/sequest.target.sqt
-52	2	0.72925	-0.405132	K.EALGELVIR.A	crux-output/sequest.target.sqt
-73	2	0.72925	-0.412848	K.QGVTSLGIK.A	crux-output/sequest.target.sqt
-76	2	0.736193	-0.430435	R.TCVVETPTLNSDK.S	crux-output/sequest.target.sqt
-158	2	0.739067	-0.43919	K.HASLILAK.A	crux-output/sequest.target.sqt
-105	2	0.739067	-0.4399	R.SDTPLLYR.S	crux-output/sequest.target.sqt
-79	2	0.74048	-0.46462	R.INMIEELEK.V	crux-output/sequest.target.sqt
-62	2	0.768565	-0.492316	K.ESVMEHNFGDVVK.N	crux-output/sequest.target.sqt
-84	2	0.771037	-0.499115	K.QGIYGLAR.S	crux-output/sequest.target.sqt
-138	1	0.771037	-0.512913	K.DVMPAGK.G	crux-output/sequest.target.sqt
-105	2	0.778762	-0.532518	R.VLVHTQIR.K	crux-output/sequest.target.sqt
-55	2	0.778762	-0.532677	-.MSQQDNVK.A	crux-output/sequest.target.sqt
-125	1	0.778762	-0.558275	K.THAIFSK.I	crux-output/sequest.target.sqt
-155	2	0.778762	-0.563167	K.SDNVMDR.W	crux-output/sequest.target.sqt
-14	2	0.778762	-0.585924	K.YDGAFDCLR.K	crux-output/sequest.target.sqt
-80	2	0.778762	-0.586908	K.VSSAEYYAK.K	crux-output/sequest.target.sqt
-116	2	0.778762	-0.604659	R.LAFLENQDFK.L	crux-output/sequest.target.sqt
-57	2	0.778762	-0.615118	R.GDVVMIYSSR.G	crux-output/sequest.target.sqt
-58	2	0.778762	-0.626611	K.NSPWVVDSVK.N	crux-output/sequest.target.sqt
-43	1	0.778762	-0.628834	K.HIDAGAK.K	crux-output/sequest.target.sqt
-70	2	0.778762	-0.630034	-.MSESNAHFSFPK.E	crux-output/sequest.target.sqt
-47	2	0.790418	-0.671774	R.EEPDLENLLFNK.F	crux-output/sequest.target.sqt
-80	2	0.790418	-0.682279	K.ITSGQELNR.V	crux-output/sequest.target.sqt
-11	2	0.790418	-0.690654	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
-36	2	0.790418	-0.696383	K.GPLATPIGK.G	crux-output/sequest.target.sqt
-88	2	0.790418	-0.702254	K.SDNVMDR.W	crux-output/sequest.target.sqt
-58	2	0.790418	-0.705925	K.NVVAVEMDPR.M	crux-output/sequest.target.sqt
-146	2	0.790418	-0.715084	R.LAMFLTDSNTIR.E	crux-output/sequest.target.sqt
-104	2	0.790418	-0.737623	K.NVVAVEMDPR.M	crux-output/sequest.target.sqt
-79	2	0.790418	-0.779268	K.FLDGQIALLK.K	crux-output/sequest.target.sqt
-127	2	0.790418	-0.797429	K.LTWLADTK.D	crux-output/sequest.target.sqt
-136	1	0.790418	-0.802836	K.NPAVGEK.K	crux-output/sequest.target.sqt
-145	1	0.796128	-0.826875	K.SGPTPTR.S	crux-output/sequest.target.sqt
-117	2	0.798056	-0.852305	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
-131	2	0.798056	-0.87327	K.ESVMEHNFGDVVK.N	crux-output/sequest.target.sqt
-40	2	0.808912	-0.911346	K.SGLIVEIQGVQK.E	crux-output/sequest.target.sqt
-110	2	0.808912	-0.911615	K.LIDFGSAVVFR.Y	crux-output/sequest.target.sqt
-20	2	0.808912	-0.933458	K.FFADAVTK.A	crux-output/sequest.target.sqt
-71	2	0.808912	-0.936779	K.STSANILLR.L	crux-output/sequest.target.sqt
-59	2	0.808912	-0.94264	R.LQTIIDSR.G	crux-output/sequest.target.sqt
-148	1	0.808912	-0.94696	K.HIDAGAK.K	crux-output/sequest.target.sqt
-87	2	0.808912	-0.951676	K.EALGELVIR.A	crux-output/sequest.target.sqt
-34	2	0.808912	-0.953544	R.YLPNGDCECCGR.A	crux-output/sequest.target.sqt
-37	2	0.808912	-0.971808	R.ISEGIWPEEIK.E	crux-output/sequest.target.sqt
-16	1	0.808912	-0.979344	K.HIDAGAK.K	crux-output/sequest.target.sqt
-60	1	0.808912	-0.981947	K.HIDAGAK.K	crux-output/sequest.target.sqt
-101	1	0.808912	-0.991047	K.DIVSAVVK.A	crux-output/sequest.target.sqt
-19	2	0.827297	-1.02812	R.DTLKPMAIYR.V	crux-output/sequest.target.sqt
-153	2	0.827297	-1.07586	R.LAFLENQDFK.L	crux-output/sequest.target.sqt
-56	2	0.827297	-1.11434	R.AEAESLVAEAQLSNITR.S	crux-output/sequest.target.sqt
-77	2	0.827297	-1.14149	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
-113	2	0.827297	-1.1679	R.YLPNGDCECCGR.A	crux-output/sequest.target.sqt
-56	2	0.827297	-1.17546	K.LSAIESLAGVEILCSDK.T	crux-output/sequest.target.sqt
-152	2	0.827297	-1.17884	R.GTIEIVSDVK.V	crux-output/sequest.target.sqt
-44	2	0.827297	-1.18512	K.IPDIENSVNMVPVDHVAR.V	crux-output/sequest.target.sqt
-135	2	0.827297	-1.1884	K.YDSPVSSPITSASELGSIAK.L	crux-output/sequest.target.sqt
-126	2	0.827297	-1.19491	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
-52	2	0.827297	-1.20768	K.IAAVGAANGVR.K	crux-output/sequest.target.sqt
-46	2	0.827297	-1.20993	R.LAFLENQDFK.L	crux-output/sequest.target.sqt
-129	2	0.827297	-1.21538	K.ELEELTGVR.N	crux-output/sequest.target.sqt
-53	2	0.827297	-1.22886	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
-98	2	0.827297	-1.24916	R.YLPNGDCECCGR.A	crux-output/sequest.target.sqt
-25	2	0.827297	-1.26064	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
-22	1	0.827297	-1.26172	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
-103	2	0.827297	-1.2633	R.TLQPNPECR.F	crux-output/sequest.target.sqt
-10	2	0.83617	-1.27664	K.SGLIVEIQGVQK.E	crux-output/sequest.target.sqt
-123	2	0.857239	-1.33548	K.YESATASALVN.-	crux-output/sequest.target.sqt
-93	2	0.857239	-1.34111	-.MSESNAHFSFPK.E	crux-output/sequest.target.sqt
-159	2	0.857239	-1.34877	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
-132	2	0.857239	-1.35897	R.LQTIIDSR.G	crux-output/sequest.target.sqt
-147	2	0.857239	-1.37843	K.IEVLEQELVR.A	crux-output/sequest.target.sqt
-100	1	0.857239	-1.38075	K.SGDAALVK.F	crux-output/sequest.target.sqt
-79	2	0.857239	-1.38925	R.DYFGAHTFR.V	crux-output/sequest.target.sqt
-27	2	0.857239	-1.39985	R.EEPDLENLLFNK.F	crux-output/sequest.target.sqt
-41	2	0.86622	-1.4174	R.EANPSTQVPQSDTFPNGSK.R	crux-output/sequest.target.sqt
-87	2	0.86622	-1.43076	K.IAAVGAANGVR.K	crux-output/sequest.target.sqt
-61	2	0.866754	-1.44731	R.EANPSTQVPQSDTFPNGSK.R	crux-output/sequest.target.sqt
-44	2	0.872693	-1.47572	K.FESIIHEFDPWFNYR.A	crux-output/sequest.target.sqt
-95	2	0.872693	-1.48951	R.EANPSTQVPQSDTFPNGSK.R	crux-output/sequest.target.sqt
-29	2	0.872693	-1.49281	R.LAFLENQDFK.L	crux-output/sequest.target.sqt
-64	2	0.872693	-1.49499	K.LVETLPSSYPSR.E	crux-output/sequest.target.sqt
-98	2	0.873191	-1.50967	K.LHHAFFVGDILTK.R	crux-output/sequest.target.sqt
+scan	charge	q-value	barista score	PEP	peptide	filename
+85	3	0	2.46481	0.031885	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+53	2	0	2.4515	0.032857	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+131	2	0	2.44939	0.0330138	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+11	2	0	2.44639	0.0332375	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+62	2	0	2.44468	0.0333664	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+77	2	0	2.43871	0.0338188	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+54	3	0	2.42577	0.0348202	K.IEVLEQELVR.A	crux-output/sequest.target.sqt
+50	2	0	2.42455	0.0349165	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+26	2	0	2.41866	0.0353829	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
+146	2	0	2.41641	0.0355634	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
+92	3	0	2.41411	0.0357483	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+67	2	0	2.40966	0.036109	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
+121	2	0	2.4095	0.0361215	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+159	2	0	2.39418	0.0373916	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+70	2	0	2.39415	0.037394	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
+156	3	0	2.38555	0.0381266	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+151	2	0	2.38314	0.0383347	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+96	2	0	2.36966	0.0395177	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+141	3	0	2.36824	0.0396444	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+119	2	0	2.36082	0.0403135	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+72	2	0	2.3574	0.0406251	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+25	2	0	2.33593	0.0426392	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+15	2	0	2.33473	0.0427551	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
+76	2	0	2.32972	0.04324	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
+48	2	0	2.32722	0.0434848	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
+139	3	0	2.29535	0.0467205	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+130	2	0	2.25412	0.0512592	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
+118	3	0	2.23218	0.0538471	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+75	2	0	2.15671	0.0637535	K.LVSWYDNEYGYSTR.V	crux-output/sequest.target.sqt
+108	3	0	2.14831	0.0649582	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+51	2	0	2.14183	0.0659032	K.NGFQTGSASK.A	crux-output/sequest.target.sqt
+49	2	0	2.11165	0.0704756	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+117	2	0	2.08895	0.0741136	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+69	2	0	1.99825	0.0904646	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+137	3	0	1.96012	0.0982787	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+126	2	0	1.94957	0.100547	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+38	3	0	1.93008	0.104861	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+47	2	0	1.89209	0.113743	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
+61	2	0	1.87128	0.118883	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
+82	3	0.0218131	1.85623	0.122725	K.YQVTVIDAPGHR.D	crux-output/sequest.target.sqt
+141	3	0.0218131	1.85008	0.124323	K.FHVSISNPEFLAK.Y	crux-output/sequest.target.sqt
+149	2	0.0218131	1.82001	0.132407	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
+144	3	0.0218131	1.80268	0.137265	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+93	2	0.0218131	1.79318	0.139993	K.TASEFDSAIAQDK.L	crux-output/sequest.target.sqt
+111	3	0.0218131	1.78518	0.142324	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+90	3	0.0218131	1.77303	0.145923	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+18	3	0.0385925	1.71311	0.164779	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+37	2	0.0385925	1.70043	0.169007	K.LDVDELGDVAQK.N	crux-output/sequest.target.sqt
+27	2	0.0385925	1.68343	0.174807	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
+95	2	0.0385925	1.65779	0.183844	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
+42	3	0.0385925	1.63252	0.193092	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+143	2	0.0385925	1.63106	0.193635	R.FDIGDLVK.A	crux-output/sequest.target.sqt
+12	3	0.0537538	1.61097	0.201239	K.VLEFHPFDPVSK.K	crux-output/sequest.target.sqt
+22	1	0.0537538	1.59036	0.209259	R.NFLETVELQVGLK.N	crux-output/sequest.target.sqt
+102	2	0.0537538	1.56449	0.219641	K.NEVSAMPTLLLFK.N	crux-output/sequest.target.sqt
+32	3	0.0537538	1.55856	0.222065	K.ELESAAYDHAEPVQPEDAPQDIANDELK.D	crux-output/sequest.target.sqt
+107	3	0.0880179	1.51777	0.239236	R.FEELCADLFR.S	crux-output/sequest.target.sqt
+136	1	0.10034	1.51144	0.241973	K.SLEITR.D	crux-output/sequest.target.sqt
+89	3	0.10034	1.49736	0.248133	K.GMLNVQLLVVNR.N	crux-output/sequest.target.sqt
+97	3	0.10034	1.46456	0.262839	R.ISEGIWPEEIK.E	crux-output/sequest.target.sqt
+83	2	0.115145	1.46038	0.264749	K.LTSQGIYR.Y	crux-output/sequest.target.sqt
+144	3	0.125426	1.43613	0.275982	K.FHVSISNPEFLAK.Y	crux-output/sequest.target.sqt
+107	3	0.125426	1.41504	0.285957	-.MPYTLSDAHHK.L	crux-output/sequest.target.sqt
+154	1	0.125426	1.40182	0.292308	K.KPDDDK.I	crux-output/sequest.target.sqt
+137	3	0.138933	1.36765	0.309039	K.FHVSISNPEFLAK.Y	crux-output/sequest.target.sqt
+143	2	0.152031	1.33372	0.326078	R.HHEELLK.E	crux-output/sequest.target.sqt
+73	3	0.177071	1.31357	0.336383	K.YQVTVIDAPGHR.D	crux-output/sequest.target.sqt
+45	2	0.177071	1.31343	0.336454	K.ETSNFIK.K	crux-output/sequest.target.sqt
+135	2	0.215015	1.25624	0.366376	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
+12	3	0.215015	1.25237	0.368434	K.NTLEEYIYTLR.G	crux-output/sequest.target.sqt
+41	2	0.222979	1.22118	0.385165	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
+43	1	0.222979	1.21331	0.38942	K.SGPTPTR.S	crux-output/sequest.target.sqt
+78	2	0.228624	1.18849	0.402948	K.EQPESTSK.N	crux-output/sequest.target.sqt
+51	2	0.228624	1.18768	0.403391	K.SSIQLGEHK.K	crux-output/sequest.target.sqt
+89	3	0.228624	1.1525	0.422799	K.FDSGTSGSQNMPK.A	crux-output/sequest.target.sqt
+94	3	0.228624	1.09892	0.452803	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
+52	3	0.228624	1.0971	0.45383	K.AALLNQYFAQAYK.G	crux-output/sequest.target.sqt
+78	3	0.228624	1.09692	0.45393	R.GEYHFFQGITR.G	crux-output/sequest.target.sqt
+83	3	0.228624	1.08952	0.458113	R.TTLHYALSELEK.D	crux-output/sequest.target.sqt
+31	3	0.250851	1.04487	0.483493	R.YLPNGDCECCGR.A	crux-output/sequest.target.sqt
+78	3	0.250851	1.01905	0.498268	K.GDDEANGATSFDR.T	crux-output/sequest.target.sqt
+54	3	0.250851	1.01098	0.502896	K.EILGTDEPTVR.T	crux-output/sequest.target.sqt
+59	3	0.250851	1.00972	0.503616	K.GEDELWCVINGK.V	crux-output/sequest.target.sqt
+99	3	0.250851	1.0019	0.508106	K.SLLNIDPHSSDYLIR.L	crux-output/sequest.target.sqt
+92	3	0.268352	0.99357	0.512894	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
+23	1	0.268352	0.96931	0.526849	K.ESVTEIK.A	crux-output/sequest.target.sqt
+13	1	0.276801	0.94952	0.53824	K.SLEITR.D	crux-output/sequest.target.sqt
+78	3	0.278723	0.939175	0.544194	K.GMLNVQLLVVNR.N	crux-output/sequest.target.sqt
+24	3	0.278723	0.935505	0.546306	R.AAGQLDQLVEDYINDELEIVSR.I	crux-output/sequest.target.sqt
+59	2	0.278723	0.935188	0.546489	-.MSQQDNVK.A	crux-output/sequest.target.sqt
+142	1	0.319766	0.906666	0.562883	K.EAAELGK.G	crux-output/sequest.target.sqt
+14	3	0.327197	0.900268	0.566555	K.YLTNTGNLLLASQIR.H	crux-output/sequest.target.sqt
+89	2	0.345257	0.894212	0.570028	K.ESTPDNDK.E	crux-output/sequest.target.sqt
+65	2	0.37126	0.869623	0.584103	K.EQPESTSK.N	crux-output/sequest.target.sqt
+82	3	0.37126	0.865591	0.586407	K.FDSGTSGSQNMPK.A	crux-output/sequest.target.sqt
+18	3	0.37126	0.862019	0.588447	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
+91	2	0.37126	0.851103	0.594675	-.MSIPETQK.A	crux-output/sequest.target.sqt
+38	3	0.37126	0.835629	0.603488	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
+14	3	0.37126	0.832672	0.605171	K.ATAGDTHLGGEDFDNR.L	crux-output/sequest.target.sqt
+139	3	0.37126	0.819967	0.612391	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
+64	3	0.376277	0.810164	0.617954	K.NVIAETGAGQHGVATATACAK.F	crux-output/sequest.target.sqt
+31	3	0.376277	0.792165	0.628145	K.AALLNQYFAQAYK.G	crux-output/sequest.target.sqt
+94	3	0.376277	0.785824	0.631729	R.EANPSTQVPQSDTFPNGSK.R	crux-output/sequest.target.sqt
+30	1	0.376277	0.772801	0.639078	K.KPDDDK.I	crux-output/sequest.target.sqt
+100	1	0.376277	0.762814	0.644702	R.NPYNTR.S	crux-output/sequest.target.sqt
+96	2	0.376277	0.759837	0.646377	R.LAVCGIAAICQK.R	crux-output/sequest.target.sqt
+24	3	0.376277	0.749143	0.652386	K.VMPYSTGLTTPLSNFEAQQNYK.D	crux-output/sequest.target.sqt
+40	2	0.376277	0.745946	0.65418	R.TVLDLEVNNTR.T	crux-output/sequest.target.sqt
+87	3	0.376277	0.741043	0.656929	K.AALLNQYFAQAYK.G	crux-output/sequest.target.sqt
+148	1	0.376277	0.740022	0.657501	K.NPAVGEK.K	crux-output/sequest.target.sqt
+114	3	0.376277	0.730624	0.662762	K.SGVGICATCVLRPDLLFK.N	crux-output/sequest.target.sqt
+154	1	0.376277	0.726159	0.665258	K.DVMPAGK.G	crux-output/sequest.target.sqt
+120	2	0.385925	0.698748	0.680518	K.QSNDSLR.S	crux-output/sequest.target.sqt
+108	3	0.385925	0.698237	0.680801	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
+72	2	0.385925	0.687749	0.686606	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
+33	3	0.385925	0.683732	0.688825	K.TSFFQALGVPTK.I	crux-output/sequest.target.sqt
+140	1	0.385925	0.681455	0.69008	K.EAAELGK.G	crux-output/sequest.target.sqt
+73	3	0.399661	0.65962	0.70207	K.GDDEANGATSFDR.T	crux-output/sequest.target.sqt
+106	1	0.409723	0.629159	0.7186	K.NPAVGEK.K	crux-output/sequest.target.sqt
+82	2	0.409723	0.628188	0.719123	R.FDIGDLVK.A	crux-output/sequest.target.sqt
+82	2	0.422922	0.605359	0.731327	K.ESTPDNDK.E	crux-output/sequest.target.sqt
+35	1	0.427681	0.598553	0.734932	R.SIHILK.V	crux-output/sequest.target.sqt
+114	3	0.433471	0.588815	0.740062	K.YDSPVSSPITSASELGSIAK.L	crux-output/sequest.target.sqt
+31	3	0.433471	0.588234	0.740368	K.LHHAFFVGDILTK.R	crux-output/sequest.target.sqt
+73	2	0.433471	0.586534	0.741259	R.FDIGDLVK.A	crux-output/sequest.target.sqt
+16	1	0.453921	0.560752	0.754646	K.NPAVGEK.K	crux-output/sequest.target.sqt
+89	2	0.466148	0.532561	0.768962	R.FDIGDLVK.A	crux-output/sequest.target.sqt
+50	2	0.482256	0.518135	0.776146	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
+127	2	0.482256	0.511184	0.779571	K.IFENVSIK.A	crux-output/sequest.target.sqt
+35	1	0.486265	0.506611	0.781812	K.AFAQFK.E	crux-output/sequest.target.sqt
+156	3	0.509304	0.460777	0.803674	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
+65	2	0.509304	0.453379	0.807098	K.ESTPDNDK.E	crux-output/sequest.target.sqt
+99	3	0.520284	0.432014	0.816818	-.MNSLVTQYAAPLFER.Y	crux-output/sequest.target.sqt
+19	3	0.520284	0.403501	0.829395	R.GYLVAMTGDGVNDAPSLK.K	crux-output/sequest.target.sqt
+10	2	0.520284	0.397533	0.83197	R.TVLDLEVNNTR.T	crux-output/sequest.target.sqt
+60	1	0.534186	0.381472	0.8388	R.TLYGFGG.-	crux-output/sequest.target.sqt
+97	3	0.534186	0.36828	0.8443	K.TSFFQALGVPTK.I	crux-output/sequest.target.sqt
+21	1	0.534186	0.360321	0.847571	K.ESTIDIK.I	crux-output/sequest.target.sqt
+21	1	0.534186	0.354104	0.850101	K.ESVTEIK.A	crux-output/sequest.target.sqt
+78	2	0.548528	0.324813	0.861724	K.QGVTSLGIK.A	crux-output/sequest.target.sqt
+68	2	0.548528	0.295644	0.872811	K.LNLEGDFK.K	crux-output/sequest.target.sqt
+157	2	0.548528	0.280162	0.878502	R.MQSVIDLGR.N	crux-output/sequest.target.sqt
+151	2	0.548528	0.27938	0.878786	K.DALPSVTSEQVR.E	crux-output/sequest.target.sqt
+59	3	0.548528	0.258376	0.886284	K.ADTGIAVEGATDAAR.S	crux-output/sequest.target.sqt
+125	1	0.548528	0.252888	0.888203	K.ESVTEIK.A	crux-output/sequest.target.sqt
+66	2	0.548528	0.234138	0.894633	K.SALVPGGVR.I	crux-output/sequest.target.sqt
+13	1	0.548528	0.226251	0.897279	K.LLPFVK.G	crux-output/sequest.target.sqt
+66	2	0.548528	0.223754	0.898109	K.GPLATPIGK.G	crux-output/sequest.target.sqt
+111	3	0.548528	0.200921	0.905533	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
+49	2	0.548528	0.196633	0.906893	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
+29	2	0.550889	0.1819	0.911479	K.EILGTDEPTVR.T	crux-output/sequest.target.sqt
+119	2	0.550889	0.181413	0.911628	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
+19	3	0.550889	0.180592	0.911879	R.LQDGVPDSIALLAEAGIK.L	crux-output/sequest.target.sqt
+112	3	0.592921	0.11843	0.929581	R.VNGDAHVISHR.A	crux-output/sequest.target.sqt
+115	2	0.595569	0.110284	0.931696	R.QFWLGPR.D	crux-output/sequest.target.sqt
+157	2	0.61748	0.0658471	0.939957	K.ITSGQELNR.V	crux-output/sequest.target.sqt
+100	1	0.624761	0.0498502	0.939957	R.MAAELTK.R	crux-output/sequest.target.sqt
+33	2	0.624761	0.0379374	0.939957	K.EPGVPTIR.I	crux-output/sequest.target.sqt
+134	2	0.624761	0.0303826	0.939957	R.QTVAVGVIK.S	crux-output/sequest.target.sqt
+32	3	0.627128	0.0260967	0.939957	R.YPFEDGVTMAHGIVGSDPYLAPEVITSTK.S	crux-output/sequest.target.sqt
+145	1	0.634683	-0.00383284	0.939957	K.LLPFVK.G	crux-output/sequest.target.sqt
+91	2	0.634683	-0.00678682	0.939957	R.QVSDIVNR.I	crux-output/sequest.target.sqt
+20	2	0.634683	-0.0263395	0.939957	K.STVVSANPK.K	crux-output/sequest.target.sqt
+122	1	0.634683	-0.0306287	0.939957	K.SGDAALVK.F	crux-output/sequest.target.sqt
+35	1	0.634683	-0.0402379	0.939957	K.DFQTAK.D	crux-output/sequest.target.sqt
+81	2	0.634683	-0.0427166	0.939957	K.GPLATPIGK.G	crux-output/sequest.target.sqt
+14	2	0.660925	-0.128428	0.939957	K.FFCALFDAK.K	crux-output/sequest.target.sqt
+132	2	0.674909	-0.14605	0.939957	K.LTWLADTK.D	crux-output/sequest.target.sqt
+133	2	0.676853	-0.167248	0.939957	R.VLVHTQIR.K	crux-output/sequest.target.sqt
+63	2	0.684676	-0.192555	0.939957	R.DLDRPGSK.F	crux-output/sequest.target.sqt
+112	2	0.710011	-0.234835	0.939957	K.ELDTAQK.H	crux-output/sequest.target.sqt
+74	2	0.716717	-0.27918	0.939957	K.GPLATPIGK.G	crux-output/sequest.target.sqt
+109	2	0.716717	-0.279483	0.939957	K.SDNVMDR.W	crux-output/sequest.target.sqt
+107	2	0.716717	-0.28063	0.939957	K.NDFIMVK.G	crux-output/sequest.target.sqt
+17	2	0.716717	-0.28131	0.939957	K.TPLPPAPAPK.K	crux-output/sequest.target.sqt
+69	2	0.728729	-0.327703	0.939957	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
+124	2	0.728729	-0.337767	0.939957	K.YSFLEGGSK.L	crux-output/sequest.target.sqt
+23	1	0.728729	-0.361013	0.939957	K.THAIFSK.I	crux-output/sequest.target.sqt
+103	2	0.728729	-0.364403	0.939957	R.YHIEEEGSR.K	crux-output/sequest.target.sqt
+17	2	0.72925	-0.372882	0.939957	K.SLEASVIDR.N	crux-output/sequest.target.sqt
+14	2	0.72925	-0.40219	0.939957	R.YHIEEEGSR.K	crux-output/sequest.target.sqt
+52	2	0.72925	-0.405132	0.939957	K.EALGELVIR.A	crux-output/sequest.target.sqt
+73	2	0.72925	-0.412848	0.939957	K.QGVTSLGIK.A	crux-output/sequest.target.sqt
+76	2	0.736193	-0.430435	0.939957	R.TCVVETPTLNSDK.S	crux-output/sequest.target.sqt
+158	2	0.739067	-0.43919	0.939957	K.HASLILAK.A	crux-output/sequest.target.sqt
+105	2	0.739067	-0.4399	0.939957	R.SDTPLLYR.S	crux-output/sequest.target.sqt
+79	2	0.74048	-0.46462	0.939957	R.INMIEELEK.V	crux-output/sequest.target.sqt
+62	2	0.768565	-0.492316	0.939957	K.ESVMEHNFGDVVK.N	crux-output/sequest.target.sqt
+84	2	0.771037	-0.499115	0.939957	K.QGIYGLAR.S	crux-output/sequest.target.sqt
+138	1	0.771037	-0.512913	0.939957	K.DVMPAGK.G	crux-output/sequest.target.sqt
+105	2	0.778762	-0.532518	0.939957	R.VLVHTQIR.K	crux-output/sequest.target.sqt
+55	2	0.778762	-0.532677	0.939957	-.MSQQDNVK.A	crux-output/sequest.target.sqt
+125	1	0.778762	-0.558275	0.939957	K.THAIFSK.I	crux-output/sequest.target.sqt
+155	2	0.778762	-0.563167	0.939957	K.SDNVMDR.W	crux-output/sequest.target.sqt
+14	2	0.778762	-0.585924	0.939957	K.YDGAFDCLR.K	crux-output/sequest.target.sqt
+80	2	0.778762	-0.586908	0.939957	K.VSSAEYYAK.K	crux-output/sequest.target.sqt
+116	2	0.778762	-0.604659	0.939957	R.LAFLENQDFK.L	crux-output/sequest.target.sqt
+57	2	0.778762	-0.615118	0.939957	R.GDVVMIYSSR.G	crux-output/sequest.target.sqt
+58	2	0.778762	-0.626611	0.939957	K.NSPWVVDSVK.N	crux-output/sequest.target.sqt
+43	1	0.778762	-0.628834	0.939957	K.HIDAGAK.K	crux-output/sequest.target.sqt
+70	2	0.778762	-0.630034	0.939957	-.MSESNAHFSFPK.E	crux-output/sequest.target.sqt
+47	2	0.790418	-0.671774	0.939957	R.EEPDLENLLFNK.F	crux-output/sequest.target.sqt
+80	2	0.790418	-0.682279	0.939957	K.ITSGQELNR.V	crux-output/sequest.target.sqt
+11	2	0.790418	-0.690654	0.939957	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
+36	2	0.790418	-0.696383	0.939957	K.GPLATPIGK.G	crux-output/sequest.target.sqt
+88	2	0.790418	-0.702254	0.939957	K.SDNVMDR.W	crux-output/sequest.target.sqt
+58	2	0.790418	-0.705925	0.939957	K.NVVAVEMDPR.M	crux-output/sequest.target.sqt
+146	2	0.790418	-0.715084	0.939957	R.LAMFLTDSNTIR.E	crux-output/sequest.target.sqt
+104	2	0.790418	-0.737623	0.939957	K.NVVAVEMDPR.M	crux-output/sequest.target.sqt
+79	2	0.790418	-0.779268	0.939957	K.FLDGQIALLK.K	crux-output/sequest.target.sqt
+127	2	0.790418	-0.797429	0.939957	K.LTWLADTK.D	crux-output/sequest.target.sqt
+136	1	0.790418	-0.802836	0.939957	K.NPAVGEK.K	crux-output/sequest.target.sqt
+145	1	0.796128	-0.826875	0.939957	K.SGPTPTR.S	crux-output/sequest.target.sqt
+117	2	0.798056	-0.852305	0.939957	K.ETAQDSPELLAK.S	crux-output/sequest.target.sqt
+131	2	0.798056	-0.87327	0.939957	K.ESVMEHNFGDVVK.N	crux-output/sequest.target.sqt
+40	2	0.808912	-0.911346	0.939981	K.SGLIVEIQGVQK.E	crux-output/sequest.target.sqt
+110	2	0.808912	-0.911615	0.939982	K.LIDFGSAVVFR.Y	crux-output/sequest.target.sqt
+20	2	0.808912	-0.933458	0.940163	K.FFADAVTK.A	crux-output/sequest.target.sqt
+71	2	0.808912	-0.936779	0.940205	K.STSANILLR.L	crux-output/sequest.target.sqt
+59	2	0.808912	-0.94264	0.94029	R.LQTIIDSR.G	crux-output/sequest.target.sqt
+148	1	0.808912	-0.94696	0.940361	K.HIDAGAK.K	crux-output/sequest.target.sqt
+87	2	0.808912	-0.951676	0.940446	K.EALGELVIR.A	crux-output/sequest.target.sqt
+34	2	0.808912	-0.953544	0.940482	R.YLPNGDCECCGR.A	crux-output/sequest.target.sqt
+37	2	0.808912	-0.971808	0.940904	R.ISEGIWPEEIK.E	crux-output/sequest.target.sqt
+16	1	0.808912	-0.979344	0.941115	K.HIDAGAK.K	crux-output/sequest.target.sqt
+60	1	0.808912	-0.981947	0.941192	K.HIDAGAK.K	crux-output/sequest.target.sqt
+101	1	0.808912	-0.991047	0.941483	K.DIVSAVVK.A	crux-output/sequest.target.sqt
+19	2	0.827297	-1.02812	0.942964	R.DTLKPMAIYR.V	crux-output/sequest.target.sqt
+153	2	0.827297	-1.07586	0.945549	R.LAFLENQDFK.L	crux-output/sequest.target.sqt
+56	2	0.827297	-1.11434	0.948193	R.AEAESLVAEAQLSNITR.S	crux-output/sequest.target.sqt
+77	2	0.827297	-1.14149	0.950385	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
+113	2	0.827297	-1.1679	0.952805	R.YLPNGDCECCGR.A	crux-output/sequest.target.sqt
+56	2	0.827297	-1.17546	0.953554	K.LSAIESLAGVEILCSDK.T	crux-output/sequest.target.sqt
+152	2	0.827297	-1.17884	0.953896	R.GTIEIVSDVK.V	crux-output/sequest.target.sqt
+44	2	0.827297	-1.18512	0.954546	K.IPDIENSVNMVPVDHVAR.V	crux-output/sequest.target.sqt
+135	2	0.827297	-1.1884	0.954893	K.YDSPVSSPITSASELGSIAK.L	crux-output/sequest.target.sqt
+126	2	0.827297	-1.19491	0.955596	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
+52	2	0.827297	-1.20768	0.957029	K.IAAVGAANGVR.K	crux-output/sequest.target.sqt
+46	2	0.827297	-1.20993	0.957289	R.LAFLENQDFK.L	crux-output/sequest.target.sqt
+129	2	0.827297	-1.21538	0.957929	K.ELEELTGVR.N	crux-output/sequest.target.sqt
+53	2	0.827297	-1.22886	0.959565	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
+98	2	0.827297	-1.24916	0.962175	R.YLPNGDCECCGR.A	crux-output/sequest.target.sqt
+25	2	0.827297	-1.26064	0.963723	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
+22	1	0.827297	-1.26172	0.963871	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
+103	2	0.827297	-1.2633	0.964089	R.TLQPNPECR.F	crux-output/sequest.target.sqt
+10	2	0.83617	-1.27664	0.965965	K.SGLIVEIQGVQK.E	crux-output/sequest.target.sqt
+123	2	0.857239	-1.33548	0.974941	K.YESATASALVN.-	crux-output/sequest.target.sqt
+93	2	0.857239	-1.34111	0.975854	-.MSESNAHFSFPK.E	crux-output/sequest.target.sqt
+159	2	0.857239	-1.34877	0.977111	K.SPMPQNNTLGGENK.L	crux-output/sequest.target.sqt
+132	2	0.857239	-1.35897	0.978813	R.LQTIIDSR.G	crux-output/sequest.target.sqt
+147	2	0.857239	-1.37843	0.982138	K.IEVLEQELVR.A	crux-output/sequest.target.sqt
+100	1	0.857239	-1.38075	0.982541	K.SGDAALVK.F	crux-output/sequest.target.sqt
+79	2	0.857239	-1.38925	0.984031	R.DYFGAHTFR.V	crux-output/sequest.target.sqt
+27	2	0.857239	-1.39985	0.985914	R.EEPDLENLLFNK.F	crux-output/sequest.target.sqt
+41	2	0.86622	-1.4174	0.989091	R.EANPSTQVPQSDTFPNGSK.R	crux-output/sequest.target.sqt
+87	2	0.86622	-1.43076	0.991555	K.IAAVGAANGVR.K	crux-output/sequest.target.sqt
+61	2	0.866754	-1.44731	0.994654	R.EANPSTQVPQSDTFPNGSK.R	crux-output/sequest.target.sqt
+44	2	0.872693	-1.47572	1	K.FESIIHEFDPWFNYR.A	crux-output/sequest.target.sqt
+95	2	0.872693	-1.48951	1	R.EANPSTQVPQSDTFPNGSK.R	crux-output/sequest.target.sqt
+29	2	0.872693	-1.49281	1	R.LAFLENQDFK.L	crux-output/sequest.target.sqt
+64	2	0.872693	-1.49499	1	K.LVETLPSSYPSR.E	crux-output/sequest.target.sqt
+98	2	0.873191	-1.50967	1	K.LHHAFFVGDILTK.R	crux-output/sequest.target.sqt
