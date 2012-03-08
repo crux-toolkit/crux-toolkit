@@ -22,6 +22,7 @@ class MatchFileWriter : public DelimitedFileWriter {
   bool match_to_print_[NUMBER_MATCH_COLUMNS];///< set before writing header
   int match_indices_[NUMBER_MATCH_COLUMNS];///<idx of each MATCH_COLUMN in file
   int match_precision_[NUMBER_MATCH_COLUMNS];///< precision for each column
+  bool match_fixed_float_[NUMBER_MATCH_COLUMNS]; ///< do we use fixed format for the float field?
   unsigned int num_columns_; ///< number of columns being printed
 
   void setPrecision();
@@ -90,7 +91,7 @@ class MatchFileWriter : public DelimitedFileWriter {
       return;
     }
     current_row_[file_column] = 
-      DelimitedFileWriter::to_string(value, match_precision_[col_type]);
+      DelimitedFileWriter::to_string(value, match_precision_[col_type], match_fixed_float_[col_type]);
   }
 
 };
