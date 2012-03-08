@@ -454,6 +454,11 @@ enum _scorer_type {
   QRANKER_PEPTIDE_QVALUE,
   QRANKER_PEP,        ///< posterior error prob from q-ranker scores
 
+  BARISTA_SCORE,
+  BARISTA_QVALUE,
+  BARISTA_PEPTIDE_QVALUE,
+  BARISTA_PEP,        ///< posterior error prob from barista scores
+
   NUMBER_SCORER_TYPES,
   INVALID_SCORER_TYPE
 };

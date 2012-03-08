@@ -19,6 +19,7 @@
 #include "parameter.h"
 #endif
 #include "analyze_psms.h"
+#include "PepXMLWriter.h"
 #include "DataSet.h"
 #include "ProtScores.h"
 #include "PSMScores.h"
@@ -88,6 +89,7 @@ class Barista : public CruxApplication
   void write_results_subset_prot_xml(ofstream &os);
   void write_results_peptides_xml(ofstream &os);
   void write_results_psm_xml(ofstream &os);
+  void write_results_pep_xml(PepXMLWriter& xmlfile);
   void report_all_results_xml();
   void write_results_prot_special_case_tab(ofstream &os, int i);
   void write_results_prot_tab(ofstream &os);

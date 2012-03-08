@@ -500,6 +500,15 @@ int compareQRankerQValue(
   );
 
 /**
+ * compare two matches, used for qsort
+ * \returns the difference between barista qvalue in match_a and match_b
+ */
+int compareBaristaQValue(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  );
+
+/**
  * compare two matches, used for PERCOLATOR_SCORE
  * \returns the difference between PERCOLATOR_SCORE score in match_a and match_b
  */
@@ -513,6 +522,15 @@ int comparePercolatorScore(
  * \returns the difference between QRANKER_SCORE score in match_a and match_b
  */
 int compareQRankerScore(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  );
+
+/**
+ * compare two matches, used for BARISTA_SCORE
+ * \returns the difference between BARISTA_SCORE score in match_a and match_b
+ */
+int compareBaristaScore(
   Match** match_a, ///< the first match -in  
   Match** match_b  ///< the scond match -in
   );
@@ -563,6 +581,18 @@ int compareSpectrumQRankerQValue(
   );
 
 /**
+ * Compare two matches by spectrum scan number and barista q-value, 
+ * used for qsort.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compareSpectrumBaristaQValue(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  );
+
+/**
  * Compare two matches by spectrum scan number and percolator score,
  * used for qsort. 
  * \returns -1 if match a spectrum number is less than that of match b
@@ -582,6 +612,18 @@ int compareSpectrumPercolatorScore(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumQRankerScore(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  );
+
+/**
+ * Compare two matches by spectrum scan number and barista score,
+ * used for qsort. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compareSpectrumBaristaScore(
   Match** match_a, ///< the first match -in  
   Match** match_b  ///< the scond match -in
   );

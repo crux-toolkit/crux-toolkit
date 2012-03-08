@@ -950,6 +950,88 @@ void Barista :: write_results_psm_xml(ofstream &os)
 }
 
 
+void Barista :: write_results_pep_xml(PepXMLWriter& xmlfile)
+{
+  xmlfile.writeHeader();
+
+  bool* scores_to_print = new bool[NUMBER_SCORER_TYPES];
+  for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
+    scores_to_print[score_idx] = false;
+  }
+  scores_to_print[SP] = true; 
+  scores_to_print[XCORR] = true;
+  scores_to_print[BARISTA_SCORE] = true;
+  scores_to_print[BARISTA_QVALUE] = true;
+  scores_to_print[BARISTA_PEP] = true;
+
+  xmlfile.SetScoresComputed(scores_to_print);
+
+  double* scores = new double[NUMBER_SCORER_TYPES];
+
+  for(int i = 0; i < psmtrainset.size(); i++) {
+    // only print target psms
+    if( psmtrainset[i].label == -1 ){
+      continue;
+    }
+
+      int psmind = psmtrainset[i].psmind;
+
+      // spectrum info
+      int scan = d.psmind2scan(psmind);
+      const char* filename = d.psmind2fname(psmind).c_str();
+      char** path_name = parse_filename_path_extension(filename, NULL);
+      filename = path_name[0];
+      double spectrum_mass = d.psmind2precursor_mass(psmind); 
+      int charge = d.psmind2charge(psmind);
+
+      // peptide info
+      int pepind = d.psmind2pepind(psmind);
+      string pep = d.ind2pep(pepind);
+      string modified_sequence, n,c;
+      get_pep_seq(pep, modified_sequence, n, c);
+      char* sequence = unmodify_sequence(modified_sequence.c_str());
+      string flanking_aas = n + c;
+      double peptide_mass = d.psmind2peptide_mass(psmind);
+
+      // protein info
+      int num_proteins = d.pepind2num_prot(pepind); 
+      int* protein_indexes = d.pepind2protinds(pepind);
+      vector<string> protein_names;
+      vector<string> protein_descriptions;
+      for(int prot_idx = 0; prot_idx < num_proteins; prot_idx++){
+        string protein_name = d.ind2prot(protein_indexes[prot_idx]);
+	protein_names.push_back(protein_name);
+        protein_descriptions.push_back("");
+        flanking_aas += "," + n + c; // todo
+      }
+
+      // psm info
+      int psm_rank = 1;
+      double delta_cn = d.psmind2deltaCn(psmind);
+      scores[XCORR] = d.psmind2xcorr(psmind);
+      scores[SP] = d.psmind2spscore(psmind);
+      scores[QRANKER_SCORE] = psmtrainset[i].score;
+      scores[QRANKER_QVALUE] = psmtrainset[i].q;
+      scores[QRANKER_PEP] = psmtrainset[i].PEP;
+
+      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
+                       sequence, modified_sequence.c_str(),
+                       peptide_mass, num_proteins,
+                       flanking_aas.c_str(), protein_names, 
+                       protein_descriptions, delta_cn, scores_to_print, scores);
+
+      free(sequence);
+      if( path_name[0] ){
+        free(path_name[0]);
+      }
+      if( path_name[1] ){
+        free(path_name[1]);
+      }
+      free(path_name);
+  }
+
+  xmlfile.writeFooter();
+}
 
 
 
@@ -1396,6 +1478,15 @@ void Barista :: report_all_results_xml()
   write_results_peptides_xml(of);
 
   write_results_psm_xml(of);
+
+  ostringstream xml_file_name;
+  xml_file_name << out_dir << "/" << fileroot << "barista.target.pep.xml";
+  PepXMLWriter xmlfile;
+  xmlfile.openFile(xml_file_name.str().c_str(), overwrite_flag);
+
+  //...
+  xmlfile.closeFile();
+  write_results_pep_xml(xmlfile);
 
   
   of << endl;
@@ -2246,6 +2337,8 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
 
   decoy_prefix = get_string_parameter_pointer("decoy-prefix");
   sqtp.set_decoy_prefix(decoy_prefix);
+
+  overwrite_flag = get_boolean_parameter("overwrite");
 
   enzyme = get_string_parameter_pointer("enzyme");
   sqtp.set_enzyme(enzyme);

@@ -407,7 +407,12 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "qranker_score", 
    "qranker_qvalue",
    "qranker_peptide_qvalue",
-   "qranker_PEP"
+   "qranker_PEP",
+
+   "barista_score", 
+   "barista_qvalue",
+   "barista_peptide_qvalue",
+   "barista_PEP"
   };
 
 bool string_to_scorer_type(char* name, SCORER_TYPE_T* result){
