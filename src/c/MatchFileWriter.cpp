@@ -25,6 +25,7 @@ MatchFileWriter::MatchFileWriter()
   for(int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
     match_to_print_[col_type] = false;
     match_precision_[col_type] = 0;
+    match_fixed_float_[col_type] = true;
   }
   setPrecision();
 } 
@@ -39,6 +40,7 @@ MatchFileWriter::MatchFileWriter(const char* filename)
   for(int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
     match_to_print_[col_type] = false;
     match_precision_[col_type] = 0;
+    match_fixed_float_[col_type] = true;
   }
   setPrecision();
 }
@@ -51,6 +53,7 @@ MatchFileWriter::~MatchFileWriter(){
 
 /**
  * Set the correct level of precision for each MATCH_COLUMNS_T type.
+ * Also set whether the field should be fixed float or not.
  */
 void MatchFileWriter::setPrecision(){
   for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++){
@@ -71,6 +74,7 @@ void MatchFileWriter::setPrecision(){
     case UNSHUFFLED_SEQUENCE_COL:
     case PARSIMONY_RANK_COL:
       match_precision_[col_idx] = 0;
+      match_fixed_float_[col_idx] = true;
       break;
 
       // mass fields
@@ -78,6 +82,7 @@ void MatchFileWriter::setPrecision(){
     case SPECTRUM_NEUTRAL_MASS_COL:
     case PEPTIDE_MASS_COL:
       match_precision_[col_idx] = get_int_parameter("mass-precision");
+      match_fixed_float_[col_idx] = true;
       break;
 
       // score fields
@@ -106,6 +111,7 @@ void MatchFileWriter::setPrecision(){
     case QRANKER_PEPTIDE_QVALUE_COL:      // NEW
 #endif
       match_precision_[col_idx] = get_int_parameter("precision");
+      match_fixed_float_[col_idx] = false;
       break;
 
       // special cases
@@ -114,6 +120,7 @@ void MatchFileWriter::setPrecision(){
     case SHIFT_COL:
     case CORR_COL:
       match_precision_[col_idx] = 6;
+      match_fixed_float_[col_idx] = false;
       break;
 
 
