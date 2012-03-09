@@ -69,6 +69,11 @@ class CruxApplication{
    */
   virtual ~CruxApplication();
 
+  /**
+   * Should this application be kept from the usage statement?
+   */
+  virtual bool hidden();
+
 };
 
 

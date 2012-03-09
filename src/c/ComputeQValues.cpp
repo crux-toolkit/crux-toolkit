@@ -35,7 +35,7 @@ int ComputeQValues::main(int argc, char** argv) {
  * \returns the command name for ComputeQValues
  */
 string ComputeQValues::getName() {
-  return "compute-q-values";
+  return "calibrate-scores";
 }
 
 /**

@@ -106,6 +106,9 @@ void CruxApplicationList::usage() {
     iter != applications_.end();
     ++iter) {
   
+    if( (*iter)->hidden() ){ // skip deprecated commands
+      continue;
+    }
     string name = (*iter)->getName();
     string description = (*iter)->getDescription();
     int name_length = name.length();

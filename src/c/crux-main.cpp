@@ -16,6 +16,7 @@
 #include "MatchSearch.h"
 #include "SequestSearch.h"
 #include "ComputeQValues.h"
+#include "ComputeQValuesLegacy.h"
 #include "Percolator.h"
 #include "QRanker.h"
 #include "Barista.h"
@@ -55,6 +56,7 @@ int main(int argc, char** argv){
 
   // post-search
   applications.add(new ComputeQValues());
+  applications.add(new ComputeQValuesLegacy()); // depricated name
   applications.add(new Percolator());
   applications.add(new QRanker());
   applications.add(new Barista());
