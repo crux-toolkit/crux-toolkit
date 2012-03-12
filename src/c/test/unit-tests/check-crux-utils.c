@@ -123,8 +123,9 @@ START_TEST(test_choose_charge){
 
   vector<Peak*> peaks;
 
-  int charge = choose_charge(0, peaks);
-  fail_unless( charge == -1, "Choose charge should return -1 with no peaks.");
+  CHARGE_STATE_T charge = choose_charge(0, peaks);
+  fail_unless( charge == INVALID_CHARGE_STATE, "Choose charge should return INVALID_CHARGE_STATE(%d) with no peaks.",
+	       INVALID_CHARGE_STATE);
 
   // multiply charged spec
   int num_peaks;
@@ -132,33 +133,33 @@ START_TEST(test_choose_charge){
                                peaks, &num_peaks);
   charge = choose_charge(mz, peaks);
 
-  fail_unless( charge == 0, 
-               "Charge of mult-charge.peaks should be 0 but is %d",
-               charge);
+  fail_unless( charge == MULTIPLE_CHARGE_STATE, 
+               "Charge of mult-charge.peaks should be  MULTIPLE_CAHRGE_STATE(%d) but is %d",
+               MULTIPLE_CHARGE_STATE,charge);
 
   // singly charged spec
   mz = read_peaks_file("input-data/single-charge.peaks", 
                        peaks, &num_peaks);
   charge = choose_charge(mz, peaks);
-  fail_unless( charge == 1, 
-               "Charge of single-charge.peaks should be 1 but is %d",
-               charge);
+  fail_unless( charge == SINGLE_CHARGE_STATE, 
+               "Charge of single-charge(%d).peaks should be  but is %d",
+               SINGLE_CHARGE_STATE,charge);
 
   // spec with no peaks above precursor
   mz = read_peaks_file("input-data/none-above-precursor.peaks", 
                        peaks, &num_peaks);
   charge = choose_charge(mz, peaks);
-  fail_unless( charge == 1, 
-               "Charge of none-above-precursor.peaks should be 1 but is %d",
-               charge);
+  fail_unless( charge == SINGLE_CHARGE_STATE, 
+               "Charge of none-above-precursor.peaks should be SINGLE_CHARGE_STATE(%d) but is %d",
+	       SINGLE_CHARGE_STATE,charge);
 
   // spec with no peaks below precursor
   mz = read_peaks_file("input-data/none-below-precursor.peaks", 
                        peaks, &num_peaks);
   charge = choose_charge(mz, peaks);
-  fail_unless( charge == 0, 
-               "Charge of none-below-precursor.peaks should be 0 but is %d",
-               charge);
+  fail_unless( charge == MULTIPLE_CHARGE_STATE, 
+               "Charge of none-below-precursor.peaks should be MULTIPLE_CHARGE_STATE(%d) but is %d",
+               MULTIPLE_CHARGE_STATE,charge);
 
 }
 END_TEST
