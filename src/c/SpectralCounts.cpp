@@ -44,7 +44,10 @@ SpectralCounts::~SpectralCounts() {
 /**
  * Given a collection of scored PSMs, print a list of proteins
  * ranked by their a specified score. Spectral-counts supports two
- * types of quantification: Normalized Spectral Abundance Factor (NSAF)
+ * types of quantification: Raw counts (RAW), 
+ * Normalized Spectral Abundance Factor (NSAF),
+ * Distributed Normalized Spectral Abundance Factor (dNSAF),
+ * EMPAI,
  * and Normalized Spectral Index (SIN). 
  * \returns 0 on successful completion.
  */
@@ -98,14 +101,18 @@ int SpectralCounts::main(int argc, char** argv) {
 
   // quantify at either the peptide or protein level
   if( quantitation_ == PEPTIDE_QUANT_LEVEL ){ // peptide level
-    normalizePeptideScores();
+    if (measure_ != MEASURE_RAW) {
+      normalizePeptideScores();
+    }
     output_->writeRankedPeptides(peptide_scores_);
 
   } else if( quantitation_ == PROTEIN_QUANT_LEVEL ){ // protein level
     
     getProteinScores();
-    normalizeProteinScores();
-    checkProteinNormalization();
+    if (measure_ != MEASURE_RAW) {
+      normalizeProteinScores();
+      checkProteinNormalization();
+    }
     carp(CARP_INFO, "Number of Proteins %i", protein_scores_.size());
         
     if( parsimony_ != PARSIMONY_NONE ){ //if parsimony is not none
@@ -459,7 +466,14 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
   int charge = match->getCharge();
   Spectrum* temp = match->getSpectrum();
   int scan = temp->getFirstScan();
+
   Spectrum* spectrum = spectra->getSpectrum(scan);
+
+  if (spectrum == NULL) {
+    carp(CARP_FATAL, "scan: %d doesn't exist or not found!");
+    return 0.0;
+  }
+
   Ion* ion;
   SCORER_TYPE_T score_type = XCORR;
   IonConstraint* ion_constraint =

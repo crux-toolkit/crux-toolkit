@@ -872,10 +872,13 @@ void initialize_parameters(void){
        "this will be ignored.",
        "true");
   set_measure_type_parameter("measure", MEASURE_NSAF,
-       "Type of analysis to make on the match results: (NSAF|SIN|EMPAI). "
+       "Type of analysis to make on the match results: "
+       "(RAW|NSAF|dNSAF|SIN|EMPAI). "
        "Default=NSAF. ", 
-       "Available for spectral-counts.  NSAF is Normalized Spectral "
-       "Abundance Factor, SIN is Spectral Index Normalized and EMPAI is "
+       "Available for spectral-counts.  RAW is raw counts, "
+       "NSAF is Normalized Spectral Abundance Factor, "
+       "dNSAF is Distributed Spectral Abundance Factor, "
+       "SIN is Spectral Index Normalized and EMPAI is "
        "Exponentially Modified Protein Abundance Index",
        "true");
   set_boolean_parameter("unique-mapping", false,

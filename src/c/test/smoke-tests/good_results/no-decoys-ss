@@ -1,13 +1,13 @@
 INFO: CPU: arginine.gs.washington.edu
-INFO: Wed Mar  7 15:08:22 PST 2012
+INFO: Mon Mar 12 12:46:40 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 1.62 s
+INFO: Elapsed time: 1.53 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.63 s
+INFO: Elapsed time: 1.54 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -250,9 +250,10 @@ min-peaks=20
 # Only available for crux-predict-peptide-ions.
 nh3=0
 
-# Type of analysis to make on the match results: (NSAF|SIN|EMPAI).
-# Default=NSAF. 
-# Available for spectral-counts.  NSAF is Normalized Spectral Abundance
+# Type of analysis to make on the match results:
+# (RAW|NSAF|dNSAF|SIN|EMPAI). Default=NSAF. 
+# Available for spectral-counts.  RAW is raw counts, NSAF is Normalized
+# Spectral Abundance Factor, dNSAF is Distributed Spectral Abundance
 # Factor, SIN is Spectral Index Normalized and EMPAI is Exponentially
 # Modified Protein Abundance Index
 measure=NSAF
@@ -595,7 +596,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Mar  7 15:08:22 2012
+H	StartTime	Mon Mar 12 12:46:41 2012
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?

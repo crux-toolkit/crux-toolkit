@@ -583,6 +583,9 @@ void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
 
   MEASURE_TYPE_T measure_type = get_measure_type_parameter("measure");
   switch (measure_type) {
+    case MEASURE_RAW:
+      score_col = RAW_SCORE_COL;
+      break;
     case MEASURE_SIN:
       score_col = SIN_SCORE_COL;
       break;
@@ -644,6 +647,9 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
 
   MEASURE_TYPE_T measure_type = get_measure_type_parameter("measure");
   switch (measure_type) {
+    case MEASURE_RAW:
+      score_col = RAW_SCORE_COL;
+      break;
     case MEASURE_SIN:
       score_col = SIN_SCORE_COL;
       break;

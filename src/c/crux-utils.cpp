@@ -227,7 +227,7 @@ char * parsimony_type_to_string(PARSIMONY_TYPE_T type){
  * The string version of measure types
  */
 static const char* measure_type_strings[NUMBER_MEASURE_TYPES] =
-  {"invalid", "SIN", "NSAF", "dNSAF", "EMPAI"};
+  {"invalid", "RAW", "SIN", "NSAF", "dNSAF", "EMPAI"};
 
 MEASURE_TYPE_T string_to_measure_type(char* name){
   int measure_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
