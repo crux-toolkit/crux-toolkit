@@ -331,6 +331,11 @@ class Spectrum{
   void populateMzPeakArray();
 
   /**
+   *if ms2 file dose not have any Z line then assignZState will create it  
+   */
+  bool assignZState();
+
+  /**
    * \returns The name of the file this spectrum came from or an empty
    * string, if unavailable.
    */

@@ -1585,15 +1585,15 @@ int get_last_in_range_string(const char* range_string){
 /**
  * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
  * or +3 or +4 etc). 
- * \returns 1 if spectrum precursor is singly charged or 0 if multiply
- * charged or -1 on error.
+ * \returns SINGLE_STATE_CHARGE if spectrum precursor is singly or charged MULTIPLE_CHARGE_STATE if multiply
+ * charged or INVALID_CHARGE_STATE on error.
  */
-int choose_charge(FLOAT_T precursor_mz,    ///< m/z of spectrum precursor ion
+CHARGE_STATE_T choose_charge(FLOAT_T precursor_mz,    ///< m/z of spectrum precursor ion
                   vector<Peak*>& peaks)  ///< array of spectrum peaks
 {
   if(peaks.empty()){
     carp(CARP_ERROR, "Cannot determine charge state of empty peak array.");
-    return -1;
+    return  INVALID_CHARGE_STATE;
   }
 
   FLOAT_T max_peak_mz = peaks.back()->getLocation();
@@ -1610,7 +1610,7 @@ int choose_charge(FLOAT_T precursor_mz,    ///< m/z of spectrum precursor ion
     } // else, skip peaks around precursor
   }
 
-  // What is the justification for this? Ask Mike
+  // What is the justification for this? Ask Mike MacCoss
   FLOAT_T FractionWindow = 0;
   FLOAT_T CorrectionFactor;
   if( (precursor_mz * 2) < max_peak_mz){
@@ -1623,13 +1623,13 @@ int choose_charge(FLOAT_T precursor_mz,    ///< m/z of spectrum precursor ion
   // if the ratio of intensities above/below the precursor is small
   assert(left_sum != 0);
   if( (right_sum / left_sum) < (0.2 * CorrectionFactor)){
-    return 1;  // +1 spectrum
+    return SINGLE_CHARGE_STATE;  // +1 spectrum
   } else {
-    return 0;  // multiply charged spectrum
+    return MULTIPLE_CHARGE_STATE;  // multiply charged spectrum
   }
 
   // shouldn't get to here
-  return -1;
+  return  INVALID_CHARGE_STATE;
 }
 
 /**
