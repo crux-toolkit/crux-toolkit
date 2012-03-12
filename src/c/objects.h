@@ -172,6 +172,7 @@ enum _window_type {
  */
 enum _measure_type {
   MEASURE_INVALID,
+  MEASURE_RAW,
   MEASURE_SIN,
   MEASURE_NSAF,
   MEASURE_DNSAF,

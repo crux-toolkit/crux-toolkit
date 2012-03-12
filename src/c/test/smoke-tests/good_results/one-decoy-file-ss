@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Mar  7 15:08:08 2012
+H	StartTime	Mon Mar 12 12:46:26 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2677,15 +2677,15 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1486.6195	1.0140599	10.493883	7	-0.0019563767	4	2	26	8	SPQGNTLNNEPGMK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	8
 159	2	745.7500	1489.4827	1488.7063	1.086614	17.715406	4	-0.010369763	5	3	24	8	FHENISLPVASFK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	8
 INFO: CPU: arginine.gs.washington.edu
-INFO: Wed Mar  7 15:08:07 PST 2012
+INFO: Mon Mar 12 12:46:26 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 5.88 s
+INFO: Elapsed time: 5.34 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 5.9 s
+INFO: Elapsed time: 5.36 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -2928,9 +2928,10 @@ min-peaks=20
 # Only available for crux-predict-peptide-ions.
 nh3=0
 
-# Type of analysis to make on the match results: (NSAF|SIN|EMPAI).
-# Default=NSAF. 
-# Available for spectral-counts.  NSAF is Normalized Spectral Abundance
+# Type of analysis to make on the match results:
+# (RAW|NSAF|dNSAF|SIN|EMPAI). Default=NSAF. 
+# Available for spectral-counts.  RAW is raw counts, NSAF is Normalized
+# Spectral Abundance Factor, dNSAF is Distributed Spectral Abundance
 # Factor, SIN is Spectral Index Normalized and EMPAI is Exponentially
 # Modified Protein Abundance Index
 measure=NSAF
@@ -3273,7 +3274,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Mar  7 15:08:08 2012
+H	StartTime	Mon Mar 12 12:46:26 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

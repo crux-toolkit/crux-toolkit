@@ -73,6 +73,7 @@ void MatchFileWriter::setPrecision(){
     case FLANKING_AA_COL:
     case UNSHUFFLED_SEQUENCE_COL:
     case PARSIMONY_RANK_COL:
+    case RAW_SCORE_COL:  //Raw counts should be integral
       match_precision_[col_idx] = 0;
       match_fixed_float_[col_idx] = true;
       break;
@@ -242,6 +243,9 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
 
     // SIN or NSAF score
     switch (get_measure_type_parameter("measure")) {
+      case MEASURE_RAW:
+        addColumnName(RAW_SCORE_COL);
+        break;
       case MEASURE_SIN:
         addColumnName(SIN_SCORE_COL);
         break;

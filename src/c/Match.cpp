@@ -880,6 +880,7 @@ void Match::printOneMatchField(
                                      collection->getCalibrationCorr());
     break;
     // values only for spectral-counts
+  case RAW_SCORE_COL:
   case SIN_SCORE_COL:
   case NSAF_SCORE_COL:
   case DNSAF_SCORE_COL:
