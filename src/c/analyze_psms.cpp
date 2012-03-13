@@ -4,6 +4,9 @@
 
 #include <vector>
 #include <functional>
+#ifdef WIN32
+#include <iterator>
+#endif
 #include "analyze_psms.h"
 #include "ComputeQValues.h"
 #include "QRanker.h"
@@ -119,6 +122,16 @@ void analyze_matches_main(
   delete application;
 }
 
+#ifdef WIN32
+// The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
+// function call when the STL make_pair is combined with the STL ptr_fun.
+// They promise to fix this in v11, but until then we create our own wrapper
+// for this use of make_pair. (See corresponding ifdef block in compute_PEP)
+pair<double,bool> make_pair(double db, bool b) {
+    return std::pair<double,bool>(db, b);
+}
+#endif
+
 /**
  * Compute posterior error probabilities (PEP) from the given target
  * and decoy scores.
@@ -143,6 +156,13 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
   // They promise to fix it in VC 11
   // https://connect.microsoft.com/VisualStudio/feedback/details/606746/incorrect-overload-resolution
   // FIXME: find workaround until then
+  transform(target_scores, target_scores + num_targets,
+            back_inserter(score_labels),
+            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), true));
+  transform(decoy_scores, decoy_scores + num_decoys,
+            back_inserter(score_labels),
+            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), false));
+
 #else
   transform(target_scores, target_scores + num_targets,
             back_inserter(score_labels),
