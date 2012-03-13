@@ -42,6 +42,8 @@ Global
 		Debug|x64 = Debug|x64
 		DebugPercolator|Win32 = DebugPercolator|Win32
 		DebugPercolator|x64 = DebugPercolator|x64
+		DebugQRanker|Win32 = DebugQRanker|Win32
+		DebugQRanker|x64 = DebugQRanker|x64
 		DebugSearch|Win32 = DebugSearch|Win32
 		DebugSearch|x64 = DebugSearch|x64
 		Release|Win32 = Release|Win32
@@ -58,6 +60,10 @@ Global
 		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugPercolator|Win32.Build.0 = DebugPercolator|Win32
 		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugPercolator|x64.ActiveCfg = DebugPercolator|x64
 		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugPercolator|x64.Build.0 = DebugPercolator|x64
+		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugQRanker|Win32.ActiveCfg = DebugQRanker|Win32
+		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugQRanker|Win32.Build.0 = DebugQRanker|Win32
+		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugQRanker|x64.ActiveCfg = DebugQRanker|x64
+		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugQRanker|x64.Build.0 = DebugQRanker|x64
 		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugSearch|Win32.ActiveCfg = DebugSearch|Win32
 		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugSearch|Win32.Build.0 = DebugSearch|Win32
 		{C4BCBCF8-E852-46CF-AF83-65353359B218}.DebugSearch|x64.ActiveCfg = DebugSearch|x64
@@ -78,6 +84,10 @@ Global
 		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugPercolator|Win32.Build.0 = DebugPercolator|Win32
 		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugPercolator|x64.ActiveCfg = DebugPercolator|x64
 		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugPercolator|x64.Build.0 = DebugPercolator|x64
+		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugQRanker|Win32.ActiveCfg = DebugQRanker|Win32
+		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugQRanker|Win32.Build.0 = DebugQRanker|Win32
+		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugQRanker|x64.ActiveCfg = DebugQRanker|x64
+		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugQRanker|x64.Build.0 = DebugQRanker|x64
 		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugSearch|Win32.ActiveCfg = DebugSearch|Win32
 		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugSearch|Win32.Build.0 = DebugSearch|Win32
 		{AF642C17-5942-4A4A-90A6-AD75DA06481E}.DebugSearch|x64.ActiveCfg = DebugSearch|x64
@@ -98,6 +108,10 @@ Global
 		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugPercolator|Win32.Build.0 = DebugPercolator|Win32
 		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugPercolator|x64.ActiveCfg = DebugPercolator|x64
 		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugPercolator|x64.Build.0 = DebugPercolator|x64
+		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugQRanker|Win32.ActiveCfg = DebugQRanker|Win32
+		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugQRanker|Win32.Build.0 = DebugQRanker|Win32
+		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugQRanker|x64.ActiveCfg = DebugQRanker|x64
+		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugQRanker|x64.Build.0 = DebugQRanker|x64
 		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugSearch|Win32.ActiveCfg = DebugSearch|Win32
 		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugSearch|Win32.Build.0 = DebugSearch|Win32
 		{C7BE0DB9-3D01-4F2A-B7F0-534F7A4BC8BB}.DebugSearch|x64.ActiveCfg = DebugSearch|x64
@@ -118,6 +132,10 @@ Global
 		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugPercolator|Win32.Build.0 = DebugPercolator|Win32
 		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugPercolator|x64.ActiveCfg = DebugPercolator|x64
 		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugPercolator|x64.Build.0 = DebugPercolator|x64
+		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugQRanker|Win32.ActiveCfg = DebugQRanker|Win32
+		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugQRanker|Win32.Build.0 = DebugQRanker|Win32
+		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugQRanker|x64.ActiveCfg = DebugQRanker|x64
+		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugQRanker|x64.Build.0 = DebugQRanker|x64
 		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugSearch|Win32.ActiveCfg = DebugSearch|Win32
 		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugSearch|Win32.Build.0 = DebugSearch|Win32
 		{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}.DebugSearch|x64.ActiveCfg = DebugSearch|x64
@@ -138,6 +156,10 @@ Global
 		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugPercolator|Win32.Build.0 = DebugPercolator|Win32
 		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugPercolator|x64.ActiveCfg = DebugPercolator|x64
 		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugPercolator|x64.Build.0 = DebugPercolator|x64
+		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugQRanker|Win32.ActiveCfg = DebugQRanker|Win32
+		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugQRanker|Win32.Build.0 = DebugQRanker|Win32
+		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugQRanker|x64.ActiveCfg = DebugQRanker|x64
+		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugQRanker|x64.Build.0 = DebugQRanker|x64
 		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugSearch|Win32.ActiveCfg = DebugSearch|Win32
 		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugSearch|Win32.Build.0 = DebugSearch|Win32
 		{F2853A94-C9D3-4AC2-8C50-31F88B052216}.DebugSearch|x64.ActiveCfg = DebugSearch|x64
@@ -158,6 +180,10 @@ Global
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugPercolator|Win32.Build.0 = DebugPercolator|Win32
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugPercolator|x64.ActiveCfg = DebugPercolator|x64
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugPercolator|x64.Build.0 = DebugPercolator|x64
+		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugQRanker|Win32.ActiveCfg = DebugQRanker|Win32
+		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugQRanker|Win32.Build.0 = DebugQRanker|Win32
+		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugQRanker|x64.ActiveCfg = DebugQRanker|x64
+		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugQRanker|x64.Build.0 = DebugQRanker|x64
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugSearch|Win32.ActiveCfg = DebugSearch|Win32
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugSearch|Win32.Build.0 = DebugSearch|Win32
 		{949410D5-52D9-4A79-80C0-EE85B80C4A6E}.DebugSearch|x64.ActiveCfg = DebugSearch|x64
@@ -178,6 +204,10 @@ Global
 		{2119492E-9189-4F46-BADA-723692E67D30}.DebugPercolator|Win32.Build.0 = DebugPercolator|Win32
 		{2119492E-9189-4F46-BADA-723692E67D30}.DebugPercolator|x64.ActiveCfg = DebugPercolator|x64
 		{2119492E-9189-4F46-BADA-723692E67D30}.DebugPercolator|x64.Build.0 = DebugPercolator|x64
+		{2119492E-9189-4F46-BADA-723692E67D30}.DebugQRanker|Win32.ActiveCfg = DebugQRanker|Win32
+		{2119492E-9189-4F46-BADA-723692E67D30}.DebugQRanker|Win32.Build.0 = DebugQRanker|Win32
+		{2119492E-9189-4F46-BADA-723692E67D30}.DebugQRanker|x64.ActiveCfg = DebugQRanker|x64
+		{2119492E-9189-4F46-BADA-723692E67D30}.DebugQRanker|x64.Build.0 = DebugQRanker|x64
 		{2119492E-9189-4F46-BADA-723692E67D30}.DebugSearch|Win32.ActiveCfg = DebugSearch|Win32
 		{2119492E-9189-4F46-BADA-723692E67D30}.DebugSearch|Win32.Build.0 = DebugSearch|Win32
 		{2119492E-9189-4F46-BADA-723692E67D30}.DebugSearch|x64.ActiveCfg = DebugSearch|x64
@@ -198,6 +228,10 @@ Global
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugPercolator|Win32.Build.0 = DebugPercolator|Win32
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugPercolator|x64.ActiveCfg = DebugPercolator|x64
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugPercolator|x64.Build.0 = DebugPercolator|x64
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugQRanker|Win32.ActiveCfg = DebugQRanker|Win32
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugQRanker|Win32.Build.0 = DebugQRanker|Win32
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugQRanker|x64.ActiveCfg = DebugQRanker|x64
+		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugQRanker|x64.Build.0 = DebugQRanker|x64
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugSearch|Win32.ActiveCfg = DebugSearch|Win32
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugSearch|Win32.Build.0 = DebugSearch|Win32
 		{671CCD4C-C27C-41F7-BBA4-39FA197170B1}.DebugSearch|x64.ActiveCfg = DebugSearch|x64

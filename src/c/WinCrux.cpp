@@ -206,11 +206,9 @@ char *mkdtemp(char *temp) {
 }
 
 int isinf(FLOAT_T x) {
-  // FIXME this is only a stub
-  return false;
+  return !_finite(x);
 }
 
-float log2(float x) {
-  // FIXME this is only a stub
-  return 0.0;
+float log2(FLOAT_T x) {
+  return log(x) / log(2.0);
 }

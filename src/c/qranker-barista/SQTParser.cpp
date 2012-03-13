@@ -526,7 +526,7 @@ void SQTParser :: extract_psm_features(sqt_match &m, enzyme enz, double *x, int 
   // missed cleavages
   x[13]=(double)cntEnz(pep,enz);
   // number of sequence_comparisons
-  x[14] = log(m.num_sequence_comparisons);
+  x[14] = log((FLOAT_T) m.num_sequence_comparisons);
   //x[14] = m.num_sequence_comparisons;
   //difference between measured and calculated mass
   x[15] = m.precursor_mass-m.calc_mass[i];

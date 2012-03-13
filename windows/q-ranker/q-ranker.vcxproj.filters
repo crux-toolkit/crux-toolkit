@@ -83,5 +83,8 @@
     <ClInclude Include="..\..\src\c\qranker-barista\TabDelimParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\c\crux-utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
