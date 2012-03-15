@@ -18,6 +18,9 @@ QRanker::QRanker() :
 
 QRanker::~QRanker()
 {
+  delete [] max_net_gen;
+  delete [] max_net_targ;
+  delete [] nets;
 }
 
 int QRanker :: getOverFDR(PSMScores &set, NeuralNet &n, double fdr)
@@ -96,7 +99,22 @@ void QRanker :: write_results()
   d.load_labels_psm_training();
   PSMScores::fillFeaturesFull(fullset, d);
   d.clear_labels_psm_training();
-  getOverFDR(fullset,net, qvals[4]);
+
+  //choose the best net for the selectionfdr
+  int max_fdr = 0;
+  int fdr = 0;
+  int ind = 0;
+  for(unsigned int count = 0; count < qvals.size();count++)
+    {
+      fdr = getOverFDR(fullset, max_net_targ[count], selectionfdr);
+      if(fdr > max_fdr)
+	{
+	  max_fdr = fdr;
+	  ind = count;
+	}
+    }
+  net = max_net_targ[ind];
+  getOverFDR(fullset,net, selectionfdr);
   d.clear_data_psm_training();
   
   ostringstream fname;
@@ -750,28 +768,13 @@ void QRanker::train_many_nets()
 
   train_many_target_nets();  
  
-  //choose the best net for the selectionfdr
-  int max_fdr = 0;
-  int fdr = 0;
-  int ind = 0;
-  for(unsigned int count = 0; count < qvals.size();count++)
-    {
-      fdr = getOverFDR(thresholdset, max_net_targ[count], selectionfdr);
-      if(fdr > max_fdr)
-	{
-	  max_fdr = fdr;
-	  ind = count;
-	}
-    }
-  net = max_net_targ[ind];
+  
 
   ostringstream fname;
   fname << out_dir << "/" << fileroot << "q-ranker.psms.at.fdr.thresholds.txt";;
   write_max_nets(fname.str(), max_net_targ);
 
-  delete [] max_net_gen;
-  delete [] max_net_targ;
-  delete [] nets;
+  
 }
 
 int QRanker::run( ) {
@@ -790,7 +793,7 @@ int QRanker::run( ) {
     }
   d.normalize_psms();
   d.load_labels_psm_training();
-  PSMScores::fillFeaturesSplit(trainset, testset, d, 0.5);
+  PSMScores::fillFeaturesSplit(trainset, testset, d, 0.75);
   thresholdset = trainset;
   d.clear_labels_psm_training();
   train_many_nets();
