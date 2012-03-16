@@ -594,7 +594,7 @@ void SpectralCounts::filterMatches() {
   matches_.clear();
   MatchIterator* match_iterator = NULL;
   MatchCollection* match_collection = NULL;
-  bool qualify = false;
+
   while (match_collection_it->hasNext()){
     
     match_collection = match_collection_it->next();
@@ -616,7 +616,6 @@ void SpectralCounts::filterMatches() {
 
     while(match_iterator->hasNext()){
       Match* match = match_iterator->next();
-      qualify = false;
       
       carp(CARP_DEBUG, "xcorr rank:%d q-value:%f",match->getRank(XCORR), match->getScore(qval_type));
 

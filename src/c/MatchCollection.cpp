@@ -2063,8 +2063,7 @@ bool MatchCollection::printSqt(
   if( output == NULL || spectrum == NULL || match_total_ == 0 ){
     return false;
   }
-  time_t hold_time;
-  hold_time = time(0);
+
   SpectrumZState& zstate = zstate_; 
   int num_matches = experiment_size_;
 

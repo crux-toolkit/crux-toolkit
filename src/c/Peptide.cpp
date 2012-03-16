@@ -1527,10 +1527,6 @@ void Peptide::printFilteredInFormat(
   FILE* file  ///< the out put stream -out
   ) {
 
-  Protein* parent = NULL;
-  PeptideSrc* next_src = peptide_src_;
-  //char* id = NULL;
-  //int start_idx = 0;
   char* sequence = NULL;
   // bool light = false;
 
@@ -1539,7 +1535,7 @@ void Peptide::printFilteredInFormat(
 
   // obtain peptide sequence
   if(flag_out){
-    parent = next_src->getParentProtein();
+    //parent = next_src->getParentProtein();
     
     // covnert to heavy protein
 /*    

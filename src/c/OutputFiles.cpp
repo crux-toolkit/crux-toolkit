@@ -343,7 +343,6 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
  */
 void OutputFiles::writeHeaders(const vector<bool>& add_this_col){
 
-  const char* tag = "target";
 
   // write headers one file at a time for tab and sqt
   for(int file_idx = 0; file_idx < num_files_; file_idx++){
@@ -358,7 +357,6 @@ void OutputFiles::writeHeaders(const vector<bool>& add_this_col){
       xml_file_array_[file_idx]->writeHeader();
     }
 
-    tag = "decoy";
   }
 }
 

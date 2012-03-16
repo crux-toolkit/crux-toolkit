@@ -170,17 +170,14 @@ bool XHHC_Scorer::xlinkCreateMapTheoretical(
   ) {
 
   theoretical.clear();
-  //ION_T* ion = NULL;
-  int ion_charge = 0;
-  ION_TYPE_T ion_type;
   int intensity_array_idx = 0;
   FLOAT_T bin_width = bin_width_mono;
   vector<LinkedPeptide>& ions = ion_series.getIons();
   // while there are ion's in ion iterator, add matched observed peak intensity
   for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
     intensity_array_idx = (int)(ion->getMZ(MONO) / bin_width + 0.5);
-    ion_type = ion->getIonType();
-    ion_charge = ion->getCharge();
+    //ion_type = ion->getIonType();
+    //ion_charge = ion->getCharge();
 
     // is it B, Y ion?
     
@@ -223,7 +220,6 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
   FLOAT_T* theoretical       ///< the empty theoretical spectrum -out
   ) {
 
-  int ion_charge = 0;
   ION_TYPE_T ion_type;
   int intensity_array_idx = 0;
   FLOAT_T bin_width = bin_width_mono;
@@ -232,7 +228,7 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
   for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
     intensity_array_idx = (int)(ion->getMZ(MONO) / bin_width + 0.5);
     ion_type = ion->getIonType();
-    ion_charge = ion->getCharge();
+    //ion_charge = ion->getCharge();
     // skip ions that are located beyond max mz limit
     // is it B, Y ion?
     // neutral loss peak?
