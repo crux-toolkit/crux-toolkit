@@ -619,7 +619,7 @@ char* parse_filename(const char* file){
   }
   
   // copy filename
-  filename = copy_string_part(&file[end_idx], len); 
+  filename = copy_string_part(&file[end_path], len); 
   
   return filename;
 }

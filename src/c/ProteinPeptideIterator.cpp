@@ -314,13 +314,7 @@ void ProteinPeptideIterator::prepareMc(
   double* mass_array = (double*)mycalloc(protein->getLength()+1, sizeof(double));
 
   ENZYME_T enzyme = peptide_constraint_->getEnzyme();
-  FLOAT_T mass_h2o = MASS_H2O_AVERAGE;
 
-  // set correct H2O mass
-  if(mass_type == MONO){
-    mass_h2o = MASS_H2O_MONO;
-  }
-  
   // initialize mass matrix and enzyme cleavage positions
   int* cleavage_positions = (int*) mycalloc(protein->getLength()+1, sizeof(int));
   int* non_cleavage_positions = (int*)mycalloc(protein->getLength()+1, sizeof(int));

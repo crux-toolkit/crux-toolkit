@@ -295,7 +295,6 @@ bool Spectrum::parseMgf
   bool title_found = false;
   bool charge_found = false;
   bool pepmass_found = false;
-  bool peaks_found = false;
   bool end_found = false;
   bool scans_found = false;
 
@@ -377,7 +376,6 @@ bool Spectrum::parseMgf
     } else if (isdigit(new_line_str.at(0))) {
 
       //no more header lines, peak information is up
-      peaks_found = true;
       break;
 
     } else if (strcmp(new_line, "END IONS") == 0) {
@@ -517,7 +515,6 @@ bool Spectrum::parseMs2
   FLOAT_T location_mz;
   FLOAT_T intensity;
   bool record_S = false; // check's if it read S line
-  bool record_Z = false; // check's if it read Z line
   bool start_addPeaks = false; // check's if it started reading peaks
   bool file_format = false; // is the file format correct so far
   
@@ -547,7 +544,6 @@ bool Spectrum::parseMs2
     }
     // Reads the 'Z' line 
     else if(new_line[0] == 'Z'){
-      record_Z = true;
       if(!this->parseZLine(new_line)){
         file_format = false;
         break; // File format incorrect
