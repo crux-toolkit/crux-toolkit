@@ -1,0 +1,198 @@
+<html>
+<head>
+<title>crux bullseye</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<H1 ALIGN=CENTER>crux bullseye</H1>
+
+<B>Usage:</B>
+
+<blockquote>
+<code>crux bullseye [options] &lt;MS&nbsp;spectra&gt; &lt;MS/MS&nbsp;spectra&gt;</code>
+</blockquote>
+
+<B>Description:</B>
+
+<blockquote>
+<p>
+Bullseye assigns high resolution precursor m/z values to MS/MS
+data. Bullseye uses the Hardkl&ouml;r algorithm to identify persistent
+peptide isotope distributions (PPID). MS/MS scans that occur within a
+specified time and m/z range have the average monoisotopic m/z from
+the PPID assigned as a precursor m/z.  A detailed description of the
+Bullseye algorithm is given in</p>
+
+<quote>
+Hsieh EJ, Hoopmann MR, Maclean B, MacCoss
+MJ. <a href="http://pubs.acs.org/doi/abs/10.1021/pr900816a">"Comparison
+of Database Search Strategies for High Precursor Mass Accuracy MS/MS
+Data"</a>. <i>Journal of Proteome Research</i>. 9(2):1138-43, 2010.
+</quote>
+
+<p>
+Bullseye attempts to match monoisotopic mass measurements, from
+identified PPIDs, to MS/MS spectra. In complex samples, it is not
+unsual for multiple PPIDs to be found near an MS/MS spectrum. In those
+cases, Bullseye will assign both mass measurements to the spectrum. In
+a .ms2 file, multiple Z line entries will be made for the scan
+number.</p>
+
+<p>
+It may be possible to reduce the number of scans with multiple PPIDs
+by adjusting Bullseye's parameters. For example, reducing the
+retention time tolerance ("--retention-tolerance") or reducing the
+tolerance for persistent peptides ("--persist-tolerance") will reduce
+the chances of multiple PPIDs being assigned.</p>
+
+</blockquote>
+
+<p>
+<B>Input:</B>
+
+<UL>
+
+<LI>
+&lt;MS1 spectra&gt; &ndash; The name of a file from which to parse
+high-resolution spectra of intact peptides.  The file may be in MS1 (.ms1),
+binary MS1 (.bms1), compressed MS1 (.cms1), or mzXML (.mzXML) format.
+</li>
+
+<LI>
+&lt;MS2 spectra&gt; &ndash; The name of a file from which to parse
+peptide fragmentation spectra.  The file may be in MS2 (.ms2), 
+binary MS2 (.bms2), compressed MS2 (.cms2) or mzXML (.mzXML) format.
+</li>
+
+</UL>
+
+<B>Output:</B>
+
+<p>
+The program writes files to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option.  The following files will be
+created:</p>
+<ul>
+
+<li>
+<b>bullseye.params.txt</b>: a file containing the name and value of all
+parameters/options for the current operation.  Not all parameters in
+the file may have been used in the operation.  The resulting file can
+be used with the <code>--parameter-file</code> option for other crux
+programs.
+</li>
+
+<li>
+<b>bullseye.pid.&lt;format&gt;</b>: a file containing the
+fragmentation spectra for which accurate masses were successfully
+inferred.  Unless otherwise specified (with
+the <code>--spectrum-format</code> option), the output file format is
+the same as the input MS/MS file format.</li>
+
+<li>
+<b>bullseye.no-pid.&lt;format&gt</b>: a file containing the
+fragmentation spectra for which accurate masses were not
+inferred.</li>
+
+<li>
+<b>bullseye.log.txt</b>: a log file containing a copy of all messages
+that were printed to stderr.
+
+</ul>
+
+<B>Options:</B>
+<UL>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.</li>
+
+<li>
+<code>--max-persist &lt;float&gt;</code> &ndash; Ignore peptides that
+persist for this length. The unit of time is whatever unit is used in 
+your data file (usually minutes). These peptides are considered contaminants.  
+Default = 2.0.</li>
+
+<li>
+<code>--exact-match &lt;T|F&gt;</code> &ndash; Require an exact match to the
+precursor ion. Rather than use wide precursor boundaries, this flag
+forces Bullseye to match precursors to the base isotope peak
+identified in Hardklor. The tolerance is set with
+the <code>--persist-tolerance</code> flag. Default = F.</li>
+
+<li>
+<code>--exact-tolerance &lt;float&gt;</code> &ndash; Set the tolerance
+(&plusmn;ppm) for exact match searches.  Default = 10.0.</li>
+
+<li>
+<code>--persist-tolerance &lt;float&gt;</code> &ndash; Set the tolerance
+(&plusmn;ppm) for finding persistent peptides.  Default = 10.0.</li>
+
+<li>
+<code>--gap-tolerance &lt;int&gt;</code> &ndash; Gap size tolerance when 
+checking for peptides across consecutive MS1 scans.  Used in conjunction with
+<code>--scan-tolerance</code>. Default = 1.</li>
+
+<li>
+<code>--scan-tolerance &lt;int&gt;</code> &ndash; Number of consecutive 
+MS1 scans over which a peptide must be observed to be considered real. Gaps 
+in persistence are allowed when setting <code>--gap-tolerance</code>.
+Default = 3.</li>
+
+<li>
+<code>--bullseye-max-mass &lt;float&gt;</code> &ndash; Only consider peptides
+below this maximum mass in daltons.  Default = 8000.0.</li>
+
+<li>
+<code>--bullseye-min-mass &lt;float&gt;</code> &ndash; Only consider peptides
+above this minimum mass in daltons.  Default = 600.0.</li>
+
+<li>
+<code>--retention-tolerance &lt;float&gt;</code> &ndash; Set the
+tolerance (&plusmn;units) around the retention time over which a peptide
+can be matched to the MS/MS spectrum.  The unit of time is whatever unit is 
+used in your data file (usually minutes).  Default = 0.5.</li>
+
+<li>
+<code>--spectrum-format &lt;ms2|bms2|cms2|mgf&gt;</code>
+&ndash; The format to write the output spectra to.  By default, the
+spectra will be output in the same format as the MS/MS input.</li>
+
+<li>
+<code>--parameter-file &lt;filename&gt;</code> &ndash; A file
+containing command-line or additional parameters.  See
+the <a href="parameter-file.html">parameter documentation</a> page for
+details.  Default = no parameter file.</li>
+
+<li>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages, including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.</li>
+
+</ul>
+
+<hr></hr>
+
+<p>
+<a href="crux.html">Crux home</A></P>
+
+</blockquote>
+</body>
+</html>

@@ -18,8 +18,8 @@ class SortColumn: public CruxApplication {
 
  protected:
   //parameters
-  string delimited_filename_; ///<delimited filename to sort
-  string column_name_string_; ///<column name to sort by
+  std::string delimited_filename_; ///<delimited filename to sort
+  std::string column_name_string_; ///<column name to sort by
   COLTYPE_T column_type_;     ///<column's type (int, real, string).
   bool ascending_;            ///<ascending/descending order?
   char delimiter_;            ///<file's delimiter

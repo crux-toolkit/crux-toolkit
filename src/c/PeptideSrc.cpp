@@ -562,7 +562,7 @@ bool PeptideSrc::parseTabDelimited(
         }
       }
 
-      DelimitedFile::from_string<int>(start_index, peptide_start_index_string); 
+      from_string<int>(start_index, peptide_start_index_string); 
     }
     // set parent protein of the peptide src
     peptide_src->setParentProtein(parent_protein);

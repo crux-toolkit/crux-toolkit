@@ -5,6 +5,7 @@
 #include "parameter.h" 
 
 using namespace std;
+using namespace Crux;
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestSpectrum );
 

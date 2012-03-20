@@ -67,7 +67,7 @@ bool hhc_estimate_weibull_parameters_from_xcorrs(
   FLOAT_T* beta,
   FLOAT_T* shift,
   FLOAT_T* correlation,
-  Spectrum* spectrum,
+  Crux::Spectrum* spectrum,
   int charge
   );
 

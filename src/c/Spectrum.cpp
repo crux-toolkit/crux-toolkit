@@ -22,7 +22,7 @@
 #include <string>
 #include "DelimitedFile.h"
 #include "MatchFileReader.h"
-#include "MSToolkit/Spectrum.h"
+#include "MSToolkit/include/Spectrum.h"
 
 using namespace std;
 
@@ -337,10 +337,10 @@ bool Spectrum::parseMgf
       carp(CARP_DETAILED_DEBUG, "parsing scans:%s",scans_str.c_str());
       vector<string> tokens;
       DelimitedFile::tokenize(scans_str, tokens, '-');
-      DelimitedFile::from_string(first_scan_, tokens[0]);
+      from_string(first_scan_, tokens[0]);
 
       if (tokens.size() > 1) {
-        DelimitedFile::from_string(last_scan_,tokens[1]);
+        from_string(last_scan_,tokens[1]);
       } else {
         last_scan_ = first_scan_;
       }
@@ -354,7 +354,7 @@ bool Spectrum::parseMgf
       int plus_index = new_line_str.find("+");
       string charge_str = new_line_str.substr(7,plus_index);
       carp(CARP_DETAILED_DEBUG,"Parsing charge:%s",charge_str.c_str());
-      DelimitedFile::from_string(charge, charge_str);
+      from_string(charge, charge_str);
       carp(CARP_DETAILED_DEBUG, "charge:%d", charge);
       charge_found = true;
 
@@ -367,7 +367,7 @@ bool Spectrum::parseMgf
       carp(CARP_DETAILED_DEBUG, "Parsing pepmass %s", pepmass_str.c_str());
       vector<string> tokens;
       DelimitedFile::tokenize(pepmass_str, tokens, ' ');
-      DelimitedFile::from_string(pepmass, tokens[0]);
+      from_string(pepmass, tokens[0]);
       carp(CARP_DETAILED_DEBUG, "pepmass:%f", pepmass);
       //TODO - check to see if this is correct.
       precursor_mz_ = pepmass;
@@ -409,9 +409,9 @@ bool Spectrum::parseMgf
         //try to parse the first scan, last scan, and charge from the title, keeping track
         //of whether we were successful.
 
-        bool success = DelimitedFile::from_string(title_charge, scan_title_tokens[n-2]);
-        success &= DelimitedFile::from_string(title_last_scan, scan_title_tokens[n-3]);
-        success &= DelimitedFile::from_string(title_first_scan, scan_title_tokens[n-4]);
+        bool success = from_string(title_charge, scan_title_tokens[n-2]);
+        success &= from_string(title_last_scan, scan_title_tokens[n-3]);
+        success &= from_string(title_first_scan, scan_title_tokens[n-4]);
 
         if (success) {
           //okay we parsed the three numbers, fill in the results.
@@ -848,10 +848,10 @@ bool Spectrum::parseEZLine(string line_str) ///< 'EZ' line to parse -in
     return false;
   }
 
-  DelimitedFile::from_string(charge, tokens.at(2));
-  DelimitedFile::from_string(m_h_plus, tokens.at(3));
-  DelimitedFile::from_string(rtime, tokens.at(4));
-  DelimitedFile::from_string(area, tokens.at(5));
+  from_string(charge, tokens.at(2));
+  from_string(m_h_plus, tokens.at(3));
+  from_string(rtime, tokens.at(4));
+  from_string(area, tokens.at(5));
 
   carp(CARP_DETAILED_DEBUG, "EZLine-Charge:%i", charge);
   carp(CARP_DETAILED_DEBUG, "EZLine-M+H:%f", m_h_plus);

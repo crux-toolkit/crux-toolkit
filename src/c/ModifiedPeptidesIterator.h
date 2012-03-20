@@ -18,8 +18,8 @@ class ModifiedPeptidesIterator : public PeptideIterator
   LINKED_LIST_T* temp_peptide_list_;///< modified peptides ready to return
   int max_aas_modified_;///< modify no more than this many aas per peptides
 
-  pair<FLOAT_T,FLOAT_T> getMinMaxMass();
-  pair<FLOAT_T,FLOAT_T> getMinMaxMass(
+  std::pair<FLOAT_T,FLOAT_T> getMinMaxMass();
+  std::pair<FLOAT_T,FLOAT_T> getMinMaxMass(
     double mz, 
     SpectrumZState& zstate, 
     PEPTIDE_MOD_T* pmod);

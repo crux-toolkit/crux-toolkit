@@ -24,6 +24,8 @@
 #include "Peptide.h"
 #include "Ion.h"
 
+using namespace Crux;
+
 class Scorer {
 
  protected:

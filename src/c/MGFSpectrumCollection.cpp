@@ -27,9 +27,11 @@ bool MGFSpectrumCollection::parse(){
 
   // get a list of scans to include if requested
   const char* range_string = get_string_parameter("scan-number");
-  int first_scan = get_first_in_range_string(range_string);
-  int last_scan = get_last_in_range_string(range_string);
-  if( first_scan == -1 || last_scan == -1 ){
+  int first_scan;
+  int last_scan;
+  bool success = get_range_from_string(range_string, first_scan, last_scan);
+
+  if( !success ){
     carp(CARP_FATAL, "The scan number range '%s' is invalid. "
          "Must be of the form <first>-<last>.", range_string);
   }

@@ -3,7 +3,7 @@
  * \brief General-use functions for crux
  */
 
-
+#include <fstream>
 #include <errno.h>
 #include <sys/stat.h>
 #ifndef WIN32
@@ -382,6 +382,50 @@ bool algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
   return success;
 }
 
+/* 
+ * The string version of HARDKLOR_ALGORITHM_T
+ */
+static const char* hardklor_algorithm_type_strings[NUMBER_HK_ALGORITHM_TYPES] =
+  {"invalid", "basic", "fewest-peptides", "fast-fewest-peptides", 
+   "fewest-peptides-choice", "fast-fewest-peptides-choice" };
+
+static const char* hardklor_hardklor_algorithm_type_strings[NUMBER_HK_ALGORITHM_TYPES] =
+  {"invalid", "Basic", "FewestPeptides", "FastFewestPeptides",
+   "FewestPeptidesChoice", "FastFewestPeptidesChoice" };
+
+HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(
+  char* name
+  ) {
+
+  int hk_algorithm = convert_enum_type_str(name, INVALID_ENUM_STRING,
+    hardklor_algorithm_type_strings, NUMBER_HK_ALGORITHM_TYPES);
+
+  if (hk_algorithm < 0) {
+    hk_algorithm = 0;
+  }
+
+  return (HARDKLOR_ALGORITHM_T)hk_algorithm;
+
+}
+
+char* hardklor_algorithm_type_to_string(
+  HARDKLOR_ALGORITHM_T type
+  ){
+
+  char* type_str = my_copy_string(hardklor_algorithm_type_strings[type]);
+
+  return type_str;
+}
+
+char* hardklor_hardklor_algorithm_type_to_string(
+  HARDKLOR_ALGORITHM_T type
+  ){
+
+  char *type_str = my_copy_string(hardklor_hardklor_algorithm_type_strings[type]);
+
+  return type_str;
+}
+
 /*
  * The string version of SCORER_TYPE_T
  */
@@ -512,6 +556,26 @@ inline bool compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max){
     return false;
   }
   return true;
+}
+
+/**
+ * \returns whether the file exists
+ */
+bool file_exists(const string& filename) {
+
+  bool exists = false;
+
+  ifstream test_stream;
+
+  test_stream.open(filename.c_str(), ios::in);
+
+  if (test_stream.is_open()) {
+    exists = true;
+  }
+
+  test_stream.close();
+
+  return exists;
 }
 
 /**
@@ -737,6 +801,34 @@ void prefix_fileroot_to_name(char** name) {
     (*name)[len_root] = '.';
     free(fileroot);
   };
+}
+
+/**
+ * \returns the filepath 'output_dir'/'fileroot'.'filename' 
+ */
+string make_file_path(
+  const string& filename ///< the name of the file
+  ) {
+
+  string output_directory = 
+    string(get_string_parameter_pointer("output-dir"));
+  string fileroot = 
+    string(get_string_parameter_pointer("fileroot"));
+
+  ostringstream name_builder;
+  name_builder << output_directory;
+  
+  if ( output_directory.at(output_directory.length()-1) != '/' ){
+        name_builder << "/";
+  }
+
+  if( fileroot != "__NULL_STR" ){
+    name_builder << fileroot << ".";
+  }
+
+  name_builder << filename;
+
+  return name_builder.str();
 }
 
 /**
@@ -1516,70 +1608,6 @@ int prepare_protein_input(
     num_proteins = (*database)->getNumProteins();
   }
   return num_proteins;
-}
-
-/**
- *  Read the given string of the form [first]-[last] and return [first]
- *  or -1 if the range is invalid.  In a valid range, [first] and [last]
- *  are non-negative integers and there is exactly one '-' separating
- *  them.  No check that first is less than last.
- */
-int get_first_in_range_string(const char* const_range_string){
-  int number = 0;
-  if( const_range_string == NULL ){
-    return number;
-  }
-  char* range_string = my_copy_string(const_range_string);
-
-  char* dash = strchr(range_string, '-');
-  if( dash == NULL ){ // a single number
-    number = atoi(range_string);
-  } else {
-    *dash = '\0';
-    number = atoi(range_string);
-    *dash = '-';
-  }
-  // if it wasn't a real number, return -1
-  if( number == 0 && range_string[0] != '0'){
-   number = -1;
-  }
-  // invalid if more than one dash
-  dash = strchr(dash + 1, '-');
-  if( dash != NULL ){
-    number = -1;
-  }
-  free(range_string);
-  return number;
-}
- 
-/**
- *  Read the given string of the form [first]-[last] and return [last]
- *  or -1 if the range is invalid.  In a valid range, [first] and [last] 
- *  are non-negative integers and there is exactly one '-' separating
- *  them.  No check that first is less than last.
- */
-int get_last_in_range_string(const char* range_string){
-  int number = BILLION;
-  if( range_string == NULL ){
-    return number;
-  }
-  const char* dash = strchr(range_string, '-');
-  if( dash == NULL ){ // a single number
-    number = atoi(range_string);
-  } else {
-    dash++;
-    number = atoi(dash);
-  }
-  // if it wasn't a real number or even if it was zero
-  if( number == 0 ){
-   number = -1;
-  }
-  // invalid if more than one dash
-  dash = strchr(dash + 1, '-');
-  if( dash != NULL ){
-    number = -1;
-  }
-   return number;
 }
 
 /**

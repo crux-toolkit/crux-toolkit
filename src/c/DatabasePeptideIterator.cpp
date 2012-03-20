@@ -5,6 +5,8 @@
 
 #include "DatabasePeptideIterator.h"
 
+using namespace std;
+
 /***********************************************
  * database_peptide_Iterators - can use the light protein functionality 
  * to save space

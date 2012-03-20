@@ -504,19 +504,6 @@ class DelimitedFile {
   }
 
   /**
-   * convert string to data type
-   */
-  template<typename TValue>  
-  static bool from_string(
-    TValue& value,
-    const std::string& s
-    ) {
-
-    std::istringstream iss(s);
-    return !(iss >> std::dec >> value).fail();
-  }   
-  
-  /**
    * Allows object to be printed to a stream
    */
   friend std::ostream &operator<< (
@@ -525,11 +512,6 @@ class DelimitedFile {
   ); 
 
 };
-
-
-
-
-
 
 #endif //DELIMITEDFILE_H
 

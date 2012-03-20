@@ -13,7 +13,8 @@
 #include "objects.h"
 #include "Peak.h"
 
-#include "MSToolkit/Spectrum.h"
+#include "Spectrum.h"
+#include "../external/MSToolkit/include/Spectrum.h"
 #include "SpectrumZState.h"
 
 /**
@@ -36,6 +37,9 @@
  * peaks but is convenient to have is stored as "min_peak_mz",
  * "max_peak_mz", and "total_energy".
  */
+
+namespace Crux {
+
 class Spectrum{
  protected:
   // member variables
@@ -342,6 +346,7 @@ class Spectrum{
   const char* getFilename();
 };    
 
+}
 
 /**
  * Local Variables:
