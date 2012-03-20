@@ -20,10 +20,10 @@
 <p>
 Bullseye assigns high resolution precursor m/z values to MS/MS
 data. Bullseye uses the Hardkl&ouml;r algorithm to identify persistent
-peptide isotope distributions (PPID). MS/MS scans that occur within a
-specified time and m/z range have the average monoisotopic m/z from
-the PPID assigned as a precursor m/z.  A detailed description of the
-Bullseye algorithm is given in</p>
+peptide isotope distributions (PPIDs) in MS scans. For each PPID,
+MS/MS scans that occur within a specified time and m/z range have the
+average monoisotopic m/z from the PPID assigned as a precursor m/z.  A
+detailed description of the Bullseye algorithm is given in</p>
 
 <quote>
 Hsieh EJ, Hoopmann MR, Maclean B, MacCoss
@@ -33,19 +33,17 @@ Data"</a>. <i>Journal of Proteome Research</i>. 9(2):1138-43, 2010.
 </quote>
 
 <p>
-Bullseye attempts to match monoisotopic mass measurements, from
-identified PPIDs, to MS/MS spectra. In complex samples, it is not
-unsual for multiple PPIDs to be found near an MS/MS spectrum. In those
-cases, Bullseye will assign both mass measurements to the spectrum. In
-a .ms2 file, multiple Z line entries will be made for the scan
-number.</p>
+Note that, in complex samples, it is not unsual for multiple PPIDs to
+be found near an MS/MS spectrum. In those cases, Bullseye will assign
+both mass measurements to the spectrum. In a .ms2 file, multiple Z
+line entries will be made for the scan number.</p>
 
 <p>
-It may be possible to reduce the number of scans with multiple PPIDs
-by adjusting Bullseye's parameters. For example, reducing the
-retention time tolerance ("--retention-tolerance") or reducing the
-tolerance for persistent peptides ("--persist-tolerance") will reduce
-the chances of multiple PPIDs being assigned.</p>
+It is possible to reduce the number of scans with multiple PPIDs by
+adjusting Bullseye's parameters. For example, reducing the retention
+time tolerance ("--retention-tolerance") or reducing the tolerance for
+persistent peptides ("--persist-tolerance") will reduce the chances of
+multiple PPIDs being assigned.</p>
 
 </blockquote>
 
@@ -58,6 +56,7 @@ the chances of multiple PPIDs being assigned.</p>
 &lt;MS1 spectra&gt; &ndash; The name of a file from which to parse
 high-resolution spectra of intact peptides.  The file may be in MS1 (.ms1),
 binary MS1 (.bms1), compressed MS1 (.cms1), or mzXML (.mzXML) format.
+Bullseye will search for PPIDs in these spectra.
 </li>
 
 <LI>
@@ -99,7 +98,7 @@ inferred.</li>
 
 <li>
 <b>bullseye.log.txt</b>: a log file containing a copy of all messages
-that were printed to stderr.
+that were printed to standard error.</li>
 
 </ul>
 
