@@ -929,12 +929,17 @@ bool Spectrum::addPeak
   )
 {
 
-  //PEAK_T* peak = new_peak(intensity, location_mz);
-  Peak *peak = new Peak(intensity, location_mz);
-  peaks_.push_back(peak);
+  /* TODO : why do we return a bool here? Do we need to test
+   * for success?
+   */ 
+  if (intensity > 0) {
 
-  updateFields(intensity, location_mz);
-  has_peaks_ = true;
+    Peak *peak = new Peak(intensity, location_mz);
+    peaks_.push_back(peak);
+
+    updateFields(intensity, location_mz);
+    has_peaks_ = true;
+  }
   return true;
 
 }
