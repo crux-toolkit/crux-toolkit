@@ -122,11 +122,13 @@ AC_CONFIG_FILES([\
     src/Makefile \
     src/c/Makefile \
     src/c/ArrayLibrary/Makefile \
-    src/c/MSToolkit/Makefile \
+    src/external/MSToolkit/Makefile \
     src/c/percolator/Makefile \
     src/c/qranker-barista/Makefile \
     src/c/posterior-error/Makefile \
     src/c/xlink/Makefile \
+    src/c/hardklor/Makefile \
+    src/c/bullseye/Makefile \
     src/python/Makefile \
     src/external/Makefile
 ])

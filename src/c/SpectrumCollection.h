@@ -13,6 +13,8 @@
 
 #include <vector>
 
+using namespace Crux;
+
 /**
  * \class SpectrumCollection
  * \brief An abstract class for accessing spectra from a file.

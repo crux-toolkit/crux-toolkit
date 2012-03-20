@@ -14,7 +14,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <vector>
-#include "Spectrum.h"
+#include "../../Spectrum.h"
 
 class TestSpectrum : public CPPUNIT_NS::TestFixture
 {
@@ -24,7 +24,7 @@ class TestSpectrum : public CPPUNIT_NS::TestFixture
   
  protected:
   // variables to use in testing
-  Spectrum* default_s;
+  Crux::Spectrum* default_s;
 
  public:
   void setUp();

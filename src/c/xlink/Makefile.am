@@ -35,9 +35,7 @@ libxlink_la_SOURCES = \
 
 libxlink_la_CXXFLAGS = $(AM_CXXFLAGS) \
   -I$(top_srcdir)/src/c/ \
-  -I$(top_srcdir)/src/c/MSToolkit \
-  -I$(top_srcdir)/src/c/MSToolkit/zLib \
-  -I$(top_srcdir)/src/c/MSToolkit/RAMP
+  -I$(top_srcdir)/src/external/MSToolkit/include
 
 noinst_LTLIBRARIES = libxlink.la
 

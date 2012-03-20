@@ -35,11 +35,11 @@ TESTS = \
 CRUX_LIBS = \
   ../../.libs/libcrux.a \
   $(PERCOLATOR_DIR)/.libs/libpercolator.a \
-  ../../MSToolkit/.libs/libmstoolkit.a
+  ../../../external/MSToolkit/.libs/libmstoolkit.a
 
 unittests:  $(SRC) $(TESTS) $(CRUX_LIBS)
 	cd check && $(MAKE)
-	$(CC) -o unittests $(INTERNAL_CXXFLAGS) $(TESTS) $(CRUX_LIBS) check/check.ar  -lm -D_GNU_SOURCE
+	$(CC) -o unittests $(INTERNAL_CXXFLAGS) $(TESTS) $(CRUX_LIBS) check/check.ar  -lm -lpthread -ldl -D_GNU_SOURCE
 .PHONY : check clean
 
 check: unittests

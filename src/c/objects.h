@@ -39,11 +39,16 @@ enum _peak_sort_type {_PEAK_LOCATION, _PEAK_INTENSITY};
  */
 typedef enum _peak_sort_type PEAK_SORT_TYPE_T;
 
+
+namespace Crux {
+
 /**
  * \class Spectrum 
  * \brief A spectrum
  */
 class Spectrum;
+
+}
 
 /**
  * \typedef PeakIterator
@@ -61,7 +66,7 @@ class SpectrumCollection;
  * \typedef SpectrumIterator
  * \brief An object to iterate over the spectra in a SpectrumCollection
  */
-typedef std::vector<Spectrum*>::iterator SpectrumIterator;
+typedef std::vector<Crux::Spectrum*>::iterator SpectrumIterator;
 
 /**
  * \class FilteredSpectrumChargeIterator 
@@ -534,6 +539,19 @@ enum _algorithm {PERCOLATOR_ALGORITHM,
  * \brief The typedef for _algorithm (PERCOLATOR, CZAR, ALL)
  */
 typedef enum _algorithm ALGORITHM_TYPE_T;
+
+/**
+ * the enum for hardklor algorithm type
+ */
+enum _hardklor_algorithm {INVALID_HK_ALGORITHM,
+                          BASIC_HK_ALGORITHM,
+                          FEWEST_PEPTIDES_HK_ALGORITHM,
+                          FAST_FEWEST_PEPTIDES_HK_ALGORITHM,
+                          FEWEST_PEPTIDES_CHOICE_HK_ALGORITHM,
+                          FAST_FEWEST_PEPTIDES_CHOICE_HK_ALGORITHM,
+                          NUMBER_HK_ALGORITHM_TYPES };
+
+typedef enum _hardklor_algorithm HARDKLOR_ALGORITHM_T;
 
 /**
  * One value for each command that can be passed to crux

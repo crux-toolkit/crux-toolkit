@@ -11,6 +11,7 @@
 #include "parameter.h"
 #include "WinCrux.h"
 
+using namespace std;
 
 //TODO:  in all set, change result=add_... to result= result && add_...
 
@@ -27,7 +28,7 @@ static const char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = {
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "DIGEST_T", 
   "ENZYME_T", 
   "bool", "SCORER_TYPE_T", "ION_TYPE_T",
-  "ALGORITHM_TYPE_T", "WINDOW_TYPE_T", "MEASURE_TYPE_T", 
+  "HARDKLOR_ALGORITHM_T", "ALGORITHM_TYPE_T", "WINDOW_TYPE_T", "MEASURE_TYPE_T", 
   "PARSIMONY_TYPE_T", "QUANT_LEVEL_TYPE_T", "DECOY_TYPE_T", "MASS_FORMAT_T"};
 
 //one hash for parameter values, one for usage statements, one for types
@@ -185,6 +186,13 @@ bool set_algorithm_type_parameter(
  const char* usage,
  const char* filenotes,
  const char* foruser);
+
+bool set_hardklor_algorithm_type_parameter(
+  const char* name,
+  HARDKLOR_ALGORITHM_T set_value,
+  const char* usage,
+  const char* filenotes,
+  const char* foruser);
 
 bool set_scorer_type_parameter(
  const char* name,
@@ -347,6 +355,16 @@ void initialize_parameters(void){
   set_int_parameter("charge state", 0, 0, 10, 
       "The charge state of the peptide.",
       "Argument for predict-peptide-ions", "false");
+
+  /* hardklor arguments */
+  set_string_parameter("spectra", NULL,
+                       "The name of a file from which to parse "
+                       "high-resolution spectra. The file may be "
+                       "in MS1 (.ms1), binary MS1 (.bms1), compressed MS1 (.cms1), or "
+                       "mzXML (.mzXML) format.",
+                       "Argument, not option, for hardklor",
+                       "false");
+
 
   /* *** Initialize Options (command line and param file) *** */
 
@@ -1079,6 +1097,188 @@ void initialize_parameters(void){
       "Weibull parameters.  Default=4000.",
       "Available for crux search-for-xlinks", "true");
 
+  /* hardklor parameters */
+  set_hardklor_algorithm_type_parameter(
+    "hardklor-algorithm", FAST_FEWEST_PEPTIDES_HK_ALGORITHM, 
+    "Choose the algorithm for analyzing combinations of "
+    "multiple peptide or protein isotope distributions. "
+    "(basic | fewest-peptides | fast-fewest-peptides | "
+    "fewest-peptides-choice | fast-fewest-peptides-choice) "
+    "Default=fast-fewest-peptides.", "Available for crux hardklor", "true");
+
+  set_string_parameter("cdm", "Q",
+    "Choose the charge state determination method. (B|F|P|Q|S). "
+    "Default=Q.",
+    "Available for crux hardklor", "true");
+
+  set_int_parameter("min-charge", 1, 1, BILLION,
+    "Set the minimum charge state to look for when analyzing a spectrum. "
+    "Default=1.",
+    "Available for crux hardklor", "true");
+
+  set_int_parameter("max-charge", 5, 1, BILLION,
+    "Set the maximum charge state to look for when analyzing a spectrum. "
+    "Default=5.",
+    "Available for crux hardklor", "true");
+
+  set_double_parameter("corr", 0.85, 0,1.0, 
+    "Set the correlation threshold [0,1.0] to accept a predicted "
+    "isotope distribution.  Default=0.85",
+    "Available for crux hardklor", "true");
+
+  set_int_parameter("depth", 3, 1, BILLION,
+    "Set the depth of combinatorial analysis. Default 3.",
+    "Available for crux hardklor", "true");
+
+  set_boolean_parameter("distribution-area", false,
+    "Reports peptide intensities as the distribution area. Default false.",
+    "Available for crux hardklor",
+    "true");
+
+  set_string_parameter("averagine-mod", "__NULL_STR",
+    "Include alternative averagine models in the analysis that  "
+    "incorporate additional atoms or isotopic enrichments.",
+    "Available for crux hardklor",
+    "true");
+
+  set_string_parameter("mzxml-filter", "none",
+    "Set a filter for mzXML files. Default=none",
+    "Available for crux hardklor",
+    "true");
+
+  set_boolean_parameter("no-base", false,
+    "Specify \"no base\" averagine. Only modified averagine models "
+    "will be used in the analysis. Default = F ",
+    "Available for crux hardklor",
+    "true");
+
+  set_int_parameter("max-p", 10, 1, BILLION,
+    "Set the maximum number of peptides or proteins that are "
+    "estimated from the peaks found in a spectrum segment. The "
+    "default value is 10.",
+    "Available for crux hardklor", "true");  
+
+  set_double_parameter("resolution", 100000, 1, BILLION,
+    "Set the resolution of the observed spectra at m/z 400. "
+    "Used in conjunction with --instrument The default is 100000.",
+    "Available for crux hardklor",
+    "true");
+
+  set_string_parameter("instrument", "fticr",
+    "Type of instrument (fticr|orbi|tof|qit) on which the data was "
+    "collected. Used in conjuction with --resolution. The default is fticr.",
+    "Available for crux hardklor",
+    "true");
+
+  //scan-number already defined.
+
+  set_int_parameter("sensitivity", 2, 0, 3,
+    "Set the sensitivity level. There are four levels, 0 (low), 1 (moderate), "
+    "2 (high), and 3 (max). The default value is 2.",
+    "Available for crux hardklor", "true");
+
+  set_double_parameter("signal-to-noise", 1.0, 0.0, BILLION,
+    "Set the signal-to-noise threshold. Any integer or decimal "
+    "value greater than or equal to 0.0 is valid. The default value is 1.0.",
+    "Available for crux hardklor", "true");
+
+  set_double_parameter("sn-window", 250.0, 0.0, BILLION,
+    "Set the signal-to-noise window length (in m/z). Because noise may "
+    "be non-uniform across a spectra, this value adjusts the segment size "
+    "considered when calculating a signal-over-noise ratio. The default "
+    "value is 250.0.",
+    "Available for crux hardklor", "true");
+
+  set_boolean_parameter("static-sn", true, 
+    "If true, Hardklor will calculate the local noise levels across the "
+    "spectrum using --sn-window, then select a floor of this set of noise "
+    "levels to apply to the whole spectrum.",
+    "Available for crux hardklor", "true");
+
+  set_string_parameter("mz-window", "__NULL_STR",
+    "Restrict analysis to only a small window in each segment ( (min-max) in m/z). "
+    "The user must specify the starting and ending m/z values between which "
+    "the analysis will be performed. By default the whole spectrum is analyzed.",
+    "Available for crux hardklor", "true");
+
+  set_double_parameter("max-width", 4.0, 0.0, BILLION,
+    "Set the maximum width of any set of peaks in a spectrum when computing the "
+    "results (in m/z). Thus, if the value was 5.0, then sets of peaks greater "
+    "than 5 m/z are divided into smaller sets prior to analysis. The default value is 4.0.",
+    "Available for crux hardklor", "true");
+
+  set_string_parameter("hardklor-options", "__NULL_STR", 
+    "Directly set hardklor options",
+    "Available for crux hardklor", "false");
+
+  /* bullseye parameters */
+  set_string_parameter("MS1 spectra", NULL, 
+    "The name of a file from which to parse high-resolution spectra of intact peptides.\n"
+    " The file may be in MS1 (.ms1), binary MS1 (.bms1), compressed MS1 (.cms1), or "
+    "mzXML (.mzXML) format. ",
+    "Argument for crux bullseye.", "false");
+
+  set_string_parameter("MS2 spectra", NULL, 
+    "The name of a file from which to parse peptide fragmentation spectra.\n The file may "
+    "be in MS2 (.ms2), binary MS2 (.bms2), compressed MS2 (.cms2) or mzXML (.mzXML) format. ",
+    "Argument for crux bullseye.", "false");
+
+  set_string_parameter("hardklor-file", "__NULL_STR",
+    "Input hardklor file into bullseye",
+    "Hidden option for crux bullseye.", "false");
+
+  set_double_parameter("max-persist", 2.0, 0, BILLION,
+    "Ignore peptides that persist for this length. The unit of time is whatever unit is "
+    "used in your data file (usually minutes). These peptides are considered contaminants." 
+    " Default = 2.0.",
+    "Available for crux bullseye", "true");
+
+  set_boolean_parameter("exact-match", false, 
+    "Require an exact match to the precursor ion. Rather than use wide precursor boundaries, "
+    "this flag forces Bullseye to match precursors to the base isotope peak identified in "
+    "Hardklor. The tolerance is set with the --persist-tolerance flag. Default = F.",
+    "Available for crux bullseye", "true");
+
+  set_int_parameter("gap-tolerance", 1, 0, BILLION,
+    "Gap size tolerance when checking for peptides across consecutive MS1 scans. Used in "
+    "conjunction with --scan-tolerance. Default = 1.",
+    "Available for crux bullseye", "true");
+
+  set_double_parameter("bullseye-min-mass", 600, 0, BILLION,
+      "The minimum mass of peptides to consider. Default=600.",
+      "Available from command line or parameter file for crux bullseye",
+      "true");
+
+  set_double_parameter("bullseye-max-mass", 8000, 1, BILLION, 
+      "The maximum mass of peptides to consider. Default=8000.",
+      "Available from command line or parameter file for crux bullseye",
+      "true");
+  
+  set_double_parameter("exact-tolerance", 10.0, 0, BILLION,
+    "Set the tolerance (+/-ppm) for exact match searches. Default = 10.0.",
+    "Available for crux bullseye", "true");
+
+  set_double_parameter("persist-tolerance", 10.0, 0, BILLION,
+    "Set the tolerance (+/-ppm) for finding persistent peptides. Default = 10.0.",
+    "Available for crux bullseye", "true");
+
+  set_int_parameter("scan-tolerance", 3, 0, BILLION,
+    "Number of consecutive MS1 scans over which a peptide must be observed to "
+    "be considered real. Gaps in persistence are allowed when setting --gap-tolerance. "
+    "Default = 3.",
+    "Available for crux bullseye", "true");
+
+  set_double_parameter("retention-tolerance", 0.5, 0, BILLION,
+    "Set the tolerance (+/-units) around the retention time over which a peptide "
+    "can be matched to the MS/MS spectrum. The unit of time is whatever unit is "
+    "used in your data file (usually minutes). Default = 0.5.",
+    "Available for crux bullseye", "true");
+
+  set_string_parameter("spectrum-format", "__NULL_STR",
+    "The format to write the output spectra to. By default, the spectra will be "
+    "output in the same format as the MS/MS input.",
+    "Available for crux bullseye", "true");
+
   /* crux-util parameters */
 
   set_boolean_parameter("ascending", true,
@@ -1794,6 +1994,15 @@ bool check_option_type_and_bounds(const char* name){
               "Must be percolator, curve-fit, or none.", value_str, name);
     }
     break;
+  case HARDKLOR_ALGORITHM_TYPE_P:
+    if (string_to_hardklor_algorithm_type(value_str) == INVALID_HK_ALGORITHM) {
+      success = false;
+      sprintf(die_str, "Illegal value '%s' for option '%s'.   "
+                       "Must be basic, fewest-peptides, fast-fewest-peptides, "
+                       "fewest-peptides-choice, or fast-fewest-peptides-choice",
+                        value_str, name);
+    }
+    break;
   case ION_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found ion_type param, value '%s'",
          value_str);
@@ -2341,6 +2550,21 @@ ENZYME_T get_enzyme_type_parameter( const char* name ){
   }
   return enzyme_type;
 }
+
+HARDKLOR_ALGORITHM_T get_hardklor_algorithm( const char* name ){
+
+  char* param = (char*)get_hash_value(parameters, name);
+  
+  HARDKLOR_ALGORITHM_T hk_algorithm = 
+    string_to_hardklor_algorithm_type(param);
+
+  if ( hk_algorithm == INVALID_HK_ALGORITHM) {
+    carp(CARP_FATAL, "Hardklor-algorithm parameter %s has "
+      "the value %s which is not of the correct type.",name,param);
+  }
+  return hk_algorithm;
+}
+
 
 MASS_TYPE_T get_mass_type_parameter(
    const char* name
@@ -2931,6 +3155,33 @@ bool set_algorithm_type_parameter(
   result = add_or_update_hash(for_users, name, foruser);
   result = add_or_update_hash(types, name, (void*)"ALGORITHM_TYPE_T");
   return result;
+}
+
+bool set_hardklor_algorithm_type_parameter(
+  const char* name,
+  HARDKLOR_ALGORITHM_T set_value,
+  const char* usage,
+  const char* filenotes,
+  const char* foruser) {
+
+  bool result = true;
+  
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return false;
+  }
+  /* stringify value */
+  char* value_str = hardklor_algorithm_type_to_string(set_value);
+  carp(CARP_DETAILED_DEBUG, "setting algorithm type to %s", value_str);  
+
+  result = add_or_update_hash(parameters, name, value_str);
+  result = add_or_update_hash(usages, name, usage);
+  result = add_or_update_hash(file_notes, name, filenotes);
+  result = add_or_update_hash(for_users, name, foruser);
+  result = add_or_update_hash(types, name, (void*)"HARDKLOR_ALGORITHM_TYPE_T");
+  return result;
+  
 }
 
 

@@ -10,6 +10,8 @@
 #include "parameter.h"
 #include "WinCrux.h"
 
+#include <iostream>
+
 using namespace std;
 
 
@@ -53,7 +55,7 @@ void CruxApplication::initialize(
   // Initialize parameter.c and set default values
   initialize_parameters();
 
-  // Define optional and required arguments 
+  // Define optional and required arguments
   select_cmd_line_options(option_list, num_options);
   select_cmd_line_arguments(argument_list, num_arguments);
 
@@ -61,6 +63,7 @@ void CruxApplication::initialize(
   // Includes syntax, type, and bounds checking, dies on error 
   string cmd_name = this->getName();
   char* full_cmd = cat_string("crux ", cmd_name.c_str());
+
   parse_cmd_line_into_params_hash(argc, argv, cmd_name.c_str());
 
   free(full_cmd);

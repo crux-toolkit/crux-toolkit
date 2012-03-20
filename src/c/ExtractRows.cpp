@@ -119,10 +119,10 @@ int ExtractRows::main(int argc, char** argv) {
     string(get_string_parameter_pointer("column value"));
 
   int column_value_int = 0;
-  DelimitedFile::from_string(column_value_int, column_value_str);
+  from_string(column_value_int, column_value_str);
 
   FLOAT_T column_value_real = 0;
-  DelimitedFile::from_string(column_value_real, column_value_str);
+  from_string(column_value_real, column_value_str);
 
 
   while (delimited_file.hasNext()) {

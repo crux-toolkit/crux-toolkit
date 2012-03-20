@@ -34,6 +34,8 @@
 #include "parameter.h"
 #include "WinCrux.h"
 
+using namespace std;
+
 // maximum proteins the index can handle
 static const int MAX_PROTEIN = 30000;
 static const int NUM_CHECK_LINES = 8;

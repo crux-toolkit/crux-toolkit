@@ -12,6 +12,7 @@
 #include "ProteinPeptideIterator.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * Global Variable

@@ -76,6 +76,7 @@ enum parameter_type {
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
   ION_TYPE_P,        ///< parameters of type ION_TYPE_T
   ALGORITHM_TYPE_P,  ///< parameters of type ALGORITHM_TYPE_T
+  HARDKLOR_ALGORITHM_TYPE_P, ///< parameters of type HARDKLOR_ALGORITHM_T
   WINDOW_TYPE_P,     ///< parameters of type WINDOW_TYPE_T
   MEASURE_TYPE_P,    ///< parameters of type MEASURE_TYPE_T
   PARSIMONY_TYPE_P,  ///< parameters of type PARSIMONY_TYPE_T
@@ -245,6 +246,11 @@ MASS_FORMAT_T get_mass_format_type_parameter(
 int get_max_ion_charge_parameter(
   const char* name
   );
+
+HARDKLOR_ALGORITHM_T get_hardklor_algorithm(
+  const char* name
+  );
+
 
 double get_mz_bin_width();
  

@@ -2,6 +2,7 @@
 #include "parameter.h"
 #include "GeneratePeptidesIterator.h"
 
+using namespace std;
 // private testing functions in GeneratePeptidesIterator.c
 
 

@@ -1,6 +1,6 @@
 distdir = $(PACKAGE)_$(VERSION)
 
-SUBDIRS = ArrayLibrary MSToolkit percolator xlink posterior-error qranker-barista .
+SUBDIRS = ArrayLibrary percolator xlink posterior-error qranker-barista hardklor bullseye .
 
 # Crux can use either single or double precision floating poinnt.
 if USEDOUBLES
@@ -27,7 +27,8 @@ endif
 AM_CFLAGS = -Wall -W -Werror $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
             -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 AM_CXXFLAGS = -Wall -W -Werror  $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
-            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
+            -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DGCC \
+            -DHAVE_EXPAT_CONFIG_H
 
 LIBFILES= \
   Alphabet.cpp \
@@ -188,18 +189,20 @@ LIBFILES= \
 noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = \
   $(AM_CFLAGS) \
-  -I$(top_srcdir)/src/c/MSToolkit \
+  -I$(top_srcdir)/src/external/MSToolkit/include \
   -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/
 
 libcrux_la_CXXFLAGS = \
   $(AM_CXXFLAGS) \
-  -I$(top_srcdir)/src/c/MSToolkit \
-  -I$(top_srcdir)/src/c/MSToolkit/RAMP \
+  -I$(top_srcdir)/src/external/MSToolkit/include \
+  -I$(top_srcdir)/src/external/MSToolkit/RAMP \
   -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/ \
+  -I$(top_srcdir)/src/c/hardklor/ \
+  -I$(top_srcdir)/src/c/bullseye/ \
   -I$(top_srcdir)/src/external/
 
 libcrux_la_SOURCES = $(LIBFILES)
@@ -216,11 +219,13 @@ crux_SOURCES = crux-main.cpp crux-main.h
 crux_CXXFLAGS = \
   $(AM_CXXFLAGS) \
   -DMAIN \
-  -I$(top_srcdir)/src/c/MSToolkit \
+  -I$(top_srcdir)/src/external/MSToolkit \
   -I$(top_srcdir)/src/c/percolator \
   -I$(top_srcdir)/src/c/posterior-error \
   -I$(top_srcdir)/src/c/xlink \
-  -I$(top_srcdir)/src/c/qranker-barista
+  -I$(top_srcdir)/src/c/qranker-barista \
+  -I$(top_srcdir)/src/c/hardklor \
+  -I$(top_srcdir)/src/c/bullseye
 
 crux_LDADD = \
   $(AM_LDFLAGS) \
@@ -229,16 +234,20 @@ crux_LDADD = \
   libcrux.la \
   -lstdc++ \
   -L$(top_builddir)/src/c/ArrayLibrary \
-  -L$(top_builddir)/src/c/MSToolkit \
+  -L$(top_builddir)/src/external/MSToolkit \
   -L$(top_builddir)/src/c/percolator \
   -L$(top_builddir)/src/c/posterior-error \
   -L$(top_builddir)/src/c/qranker-barista \
   -L$(top_builddir)/src/c/posterior-error \
-  -lm \
+  -L$(top_builddir)/src/c/hardklor \
+  -L$(top_builddir)/src/c/bullseye \
   -lpercolator \
   -lqranker_barista \
+  -lhardklor \
+  -lbullseye \
   -lpep \
   -lmstoolkit \
+  -lm -lpthread -ldl \
   -lArrayLibrary
 
 xlink_predict_peptide_ions_SOURCES=./xlink/xhhc_predict_peptide_ions.cpp
@@ -249,7 +258,7 @@ xlink_predict_peptide_ions_CXXFLAGS= \
 
 xlink_predict_peptide_ions_LDADD = \
   $(AM_LDFLAGS) \
-  -L$(top_builddir)/src/c/MSToolkit \
+  -L$(top_builddir)/src/external/MSToolkit \
   -L$(top_builddir)/src/c/xlink \
   -lm \
   -lxlink \
@@ -264,9 +273,9 @@ xlink_score_spectrum_CXXFLAGS= \
 
 xlink_score_spectrum_LDADD = \
   $(AM_LDFLAGS) \
-  -L$(top_builddir)/src/c/MSToolkit \
+  -L$(top_builddir)/src/external/MSToolkit \
   -L$(top_builddir)/src/c/xlink \
-  -lm \
+  -lm -lpthread -ldl \
   -lxlink \
   libcrux.la \
   -lmstoolkit
@@ -279,9 +288,9 @@ xlink_assign_ions_CXXFLAGS= \
 
 xlink_assign_ions_LDADD = \
   $(AM_LDFLAGS) \
-  -L$(top_builddir)/src/c/MSToolkit \
+  -L$(top_builddir)/src/external/MSToolkit \
   -L$(top_builddir)/src/c/xlink \
-  -lm \
+  -lm -lpthread -ldl \
   -lxlink \
   libcrux.la \
   -lmstoolkit

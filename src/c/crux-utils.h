@@ -21,17 +21,21 @@
 #endif
 #include <time.h>
 #include <algorithm>
+#include <limits>
 #include "carp.h"
 #include "utils.h"
 #include "objects.h"
+#include "parameter.h"
 #include "Peak.h"
 #include "Index.h"
 
 #include "CruxApplication.h"
 
-#include<vector>
 
-using namespace std;
+#include <sstream>
+#include <string>
+#include <vector>
+
 /**
  * The number of features used to represent a PSM for Percolator or q-ranker.
  */
@@ -66,6 +70,11 @@ int compare_float(FLOAT_T float_a, FLOAT_T float_b);
  * places.
  */
 bool is_equal(FLOAT_T a, FLOAT_T b, int precision);
+
+/**
+ * \returns whether the file exists
+ */
+bool file_exists(const std::string& filename);
 
 /**
  * \brief Parses the filename and path of given string.
@@ -141,6 +150,14 @@ char* cat_string(const char* string_one, const char* string_two);
 void prefix_fileroot_to_name(char** name);
 
 /**
+ * \returns the filepath 'output_dir'/'fileroot'.'filename' 
+ */
+std::string make_file_path(
+  const std::string& filename ///< the name of the file
+  );
+
+
+/**
  * given the path and the filename return a file with path
  * "path/filename"
  * \returns a heap allocated string, "path/filename"
@@ -207,7 +224,7 @@ char* generate_name(
  */
 char* generate_name_path(
   const char* filename,
-  vector<const char*> old_suffixes,
+  std::vector<const char*> old_suffixes,
   const char* new_suffix,
   const char* new_path
   );
@@ -396,6 +413,11 @@ char* decoy_type_to_string(DECOY_TYPE_T type);
 MASS_FORMAT_T string_to_mass_format(const char* name);
 char* mass_format_type_to_string(MASS_FORMAT_T type);
 
+HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(char* name);
+char* hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
+char* hardklor_hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
+
+
 /**
  * \brief Open either the index or fasta file and prepare it for
  * searching.  Die if the input file cannot be found or read.
@@ -407,15 +429,65 @@ int prepare_protein_input(
   Database** database);///< return new fasta database here
 
 /**
- *  Read the string of the form <first>-<last> and returns <first>
- *  or -1 if the range is invalid.
+ * convert string to data type
+ * \returns whether the conversion was successful or not.
  */
-int get_first_in_range_string(const char* range_string);
+template<typename TValue>  
+static bool from_string(
+  TValue& value,
+  const std::string& s
+  ) {
+
+  std::istringstream iss(s);
+  return !(iss >> std::dec >> value).fail();
+}   
+
 /**
- *  Read the string of the form <first>-<last> and returns <last>
- *  or -1 if the range is invalid.
+ * converts a string in #-# format to
+ * a first and last variable
+ * \returns whether the extraction was successful or not
  */
-int get_last_in_range_string(const char* range_string);
+
+template<typename TValue>
+static bool get_range_from_string(
+  const char* const_range_string, ///< the string to extract 
+  TValue& first,  ///< the first value
+  TValue& last ///< the last value
+  ) {
+
+  if (const_range_string == NULL) {
+    first = (TValue)0;
+    last = std::numeric_limits<TValue>::max();
+    return true;
+  }
+  char* range_string = my_copy_string(const_range_string);
+
+  bool ret;
+
+  char* dash = strchr(range_string, '-');
+  if( dash == NULL ){ // a single number
+    ret = from_string(first, range_string);
+    last=first;
+  } else {
+
+    *dash = '\0';
+    ret = from_string(first,range_string);
+    *dash = '-';
+    dash++;
+    ret &= from_string(last,dash);
+  }
+
+  //invalid if more than one dash
+  dash = strchr(dash + 1, '-');
+  if (dash != NULL) {
+    ret = false;
+  }
+
+  free(range_string);
+  return ret;    
+}
+
+
 
 /**
  * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
@@ -424,7 +496,7 @@ int get_last_in_range_string(const char* range_string);
  * MULTIPLE_CHARGE_STATE if multiply charged.
  */
 CHARGE_STATE_T choose_charge(FLOAT_T precursor_mz,         ///< m/z of spectrum precursor ion
-                  vector<Peak*>& peaks); ///< array of spectrum peaks
+		  std::vector<Peak*>& peaks); ///< array of spectrum peaks
 
 /**
  *\brief Extend a given string with lines not exceeding a specified width, 

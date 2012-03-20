@@ -1,0 +1,55 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource1.h"
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON2               ICON                    "Images\\Hardklor5.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,0,1,0
+ PRODUCTVERSION 2,0,1,0
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Michael R. Hoopmann, Michael J. MacCoss, Build Date: Sep 23, 2011"
+            VALUE "CompanyName", "University of Washington, Department of Genome Sciences"
+            VALUE "FileDescription", "Hardklör"
+            VALUE "FileVersion", "2, 0, 1, 0"
+            VALUE "InternalName", "Hardklör"
+            VALUE "LegalCopyright", "Copyright (C) 2007-2011"
+            VALUE "OriginalFilename", "Hardklor.exe"
+            VALUE "ProductName", "Hardklör"
+            VALUE "ProductVersion", "2, 0, 1, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+

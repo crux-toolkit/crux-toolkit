@@ -5,6 +5,8 @@
 #include "ModifiedPeptidesIterator.h"
 #include "SpectrumZState.h"
 
+using namespace std;
+
 /**
  * Constructor that sets all fields with the given values.  Will
  * return peptides in a window around the given m/z or mass with the

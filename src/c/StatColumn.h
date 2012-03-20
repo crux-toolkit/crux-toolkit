@@ -16,8 +16,8 @@
 class StatColumn: public CruxApplication {
 
  protected:
-  string delimited_filename_;
-  string column_name_string_;
+  std::string delimited_filename_;
+  std::string column_name_string_;
   char delimiter_;
   bool header_;
 

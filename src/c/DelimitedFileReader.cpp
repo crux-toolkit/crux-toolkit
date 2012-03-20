@@ -348,7 +348,7 @@ TValue DelimitedFileReader::getValue(
 
   const string& string_ans = getString(col_idx);
   TValue type_ans;
-  DelimitedFile::from_string<TValue>(type_ans, string_ans);
+  from_string<TValue>(type_ans, string_ans);
   return type_ans;
 }
 
@@ -503,7 +503,7 @@ void DelimitedFileReader::getIntegerVectorFromCell(
     ++string_iter) {
 
     int int_ans;
-    DelimitedFile::from_string<int>(int_ans, *string_iter);
+    from_string<int>(int_ans, *string_iter);
     int_vector.push_back(int_ans);
   }
 }
@@ -536,7 +536,7 @@ void DelimitedFileReader::getDoubleVectorFromCell(
     ++string_iter) {
 
     double double_ans;
-    DelimitedFile::from_string<double>(double_ans, *string_iter);
+    from_string<double>(double_ans, *string_iter);
     double_vector.push_back(double_ans);
   }
 }
