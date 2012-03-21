@@ -22,21 +22,28 @@
 <blockquote>
 
 <p>
-Given a collection of scored PSMs, estimate the significance of
-each. The two measures of significance are a q-value and a posterior
-error probability (PEP).  The q-value is a statistical confidence
-measure that is analogous to a p-value but that incorporates multiple
-testing.  The q-value associated with a score threshold T is defined
-as the minimal false discovery rate at which a score of T is deemed
-significant.  In this setting, the q-value accounts for the fact that
-we are analyzing a large collection of spectra. A posterior error
-probability is ...</p>
+Given a collection of scored peptide-spectrum matches (PSMs), estimate
+two statistical confidence measures for each: a q-value and a
+posterior error probability (PEP).  To compute these
+measures, <code>calibrate-scores</code> relies either on decoy PSM
+scores or p-values estimated by <code>search-for-matches</code>.  If
+neither decoys nor p-values were included in the initial search,
+then <code>calibrate-scores</code> will exit with an error.</p>
 
 <p>
-<code>calibrate-scores</code> requires that 
-<code>search-for-matches</code> produced decoy PSMs or that it
-computed p-values.  Two different types of q-values may be computed,
-depending on how <code>search-for-matches</code> was executed:</p>
+<b>q-value</b></p>
+
+<p>
+The q-value is analogous to a p-value but incorporates false discovery
+rate multiple testing correction.  The q-value associated with a score
+threshold T is defined as the minimal false discovery rate at which a
+score of T is deemed significant.  In this setting, the q-value
+accounts for the fact that we are analyzing a large collection of
+PSMs.</p>
+
+<p>
+The q-values may be estimated in two different ways, depending on
+how <code>search-for-matches</code> was executed:</p>
 
 <ol>
 
@@ -58,7 +65,19 @@ directory for a corresponding set of decoy PSMs.  The
 false discovery rate associated with a given xcorr score is estimated
 as the number of decoy scores above the threshold divided by the
 number of target scores above the threshold, multiplied by the ratio
-of the total number of targets to total number of decoys.</li>
+of the total number of targets to total number of decoys.  This
+methodology is described in the following article:
+<blockquote>
+Lukas K&auml;ll, John D. Storey, Michael J. MacCoss and William
+Stafford
+Noble.  <a href="http://noble.gs.washington.edu/papers/kall2008assigning.html">"Assigning
+significance to peptides identified by tandem mass spectrometry using
+decoy databases."</a> <i>Journal of Proteome Research</i>. 7(1):29-34,
+2008.</blockquote>
+Note that calibrate-scores does not (yet) estimate the percentage of
+incorrect targets, as described in the above article.  Hence, the
+method implemented here as "decoy q-values" is analogous to the
+"Simple FDR" procedure shown in Figure 4A of the above article.</li>
 
 </ol>
 
@@ -70,27 +89,42 @@ types of q-values are reported, respectively, in columns with headers
 "Weibull q-value" or "decoy q-value".</p>
 
 <p>
-Additional background information on q-values and statistical
-confidence measures can be found in this article:</p>
+<b>Posterior error probability</b></p>
+
+<p>
+Unlike the q-value, which is calculated with respect to the collection
+of PSMs with scores above a specified threshold, the PEP (also known
+in the literature as the "local FDR") is calculated with respect to a
+single score. The PEP is the probability that a particular PSM is
+incorrect.  Crux's PEPs are estimated using the methodology described
+in this article:</p>
 
 <blockquote>
-Lukas K&auml;ll, John D. Storey, Michael J. MacCoss and William
-Stafford
-Noble.  <a href="http://noble.gs.washington.edu/papers/kall2008assigning.html">"Assigning
-significance to peptides identified by tandem mass spectrometry using
-decoy databases."</a> <i>Journal of Proteome Research</i>. 7(1):29-34,
+Lukas Käll, John Storey and William Stafford
+Noble. <a href="http://noble.gs.washington.edu/papers/kall2008nonparametric.html">"Non-parametric
+estimation of posterior error probabilities associated with peptides
+identified by tandem mass spectrometry."</a> <i>Bioinformatics
+(Proceedings of the ECCB)</i>. 24(16):i42-i48, 2008.</blockquote>
+
+<p>
+A primer on multiple testing correction can be found here:</p>
+
+<blockquote>
+William Stafford
+Noble. <a href="http://noble.gs.washington.edu/papers/noble2009how.html">"How
+does multiple testing correction work?"</a> <i>Nature
+Biotechnology.</i> 27(12):1135-1137, 2009.</blockquote>
+
+<p>
+A discussion of q-values versus posterior error probabilities is
+provided in this article:</p>
+
+<blockquote>
+Lukas Käll, John D. Storey, Michael J. MacCoss and William Stafford
+Noble. <a href="http://noble.gs.washington.edu/papers/kall2008posterior.html">"Posterior
+error probabilities and false discovery rates: two sides of the same
+coin."</a> <i>Journal of Proteome Research.</i> 7(1):40-44,
 2008.</blockquote>
-
-<p>
-Note that calibrate-scores does not (yet) estimate the percentage of
-incorrect targets, as described in the above article.  Hence, the
-method implemented here as "decoy q-values" is analogous to the
-"Simple FDR" procedure shown in Figure 4A of the above article.</p>
-
-<p>
-A description of how posterior error probabilities are estimated is
-<a href="http://noble.gs.washington.edu/papers/kall2008nonparametric.html">
-here</a>
 
 <p>
 Note that, in Crux v1.37 and below, this command did not estimate
@@ -161,7 +195,7 @@ The estimated proportion of target scores that are drawn according to
 the null distribution.  Default=1.0.</li>
 
 <li>
-<code>mod-mass-format &lt;mod-only|total|separate&gt;<code> &ndash;
+<code>--mod-mass-format &lt;mod-only|total|separate&gt;</code> &ndash;
 Specify how sequence modifications are reported in various ouptut
 files.  Each modification is reported as a number enclosed in square
 braces following the modified reside; however, the number may
