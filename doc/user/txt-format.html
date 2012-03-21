@@ -39,15 +39,22 @@ A sample txt file may be found <a href="search.target.txt">here</a>.
 <li>p-value: The p-value computed from the estimated Weibull parameters of
   the score distribution for this spectrum.</li>
 <li>Weibull est. q-value: The q-value computed from the p-value.</li>
+<li>Weibull est. PEP: The PEP computed from the p-value.</li>
 <li>decoy q-value (xcorr): The empirical q-value computed by ranking
   target and decoy PSMs for this spectrum by xcorr.</li>
+<li>decoy PEP (xcorr): The PEP computed by ranking target and decoy
+  PSMs for this spectrum by xcorr.</li> 
 <li>percolator score: The discriminant score assigned by percolator.</li>
 <li>percolator rank: The rank of this PSM when sorted by percolator score.</li>
 <li>percolator q-value: The q-value assigned by percolator.</li>
+<li>percolator PEP: The PEP assigned by percolator.</li>
 <li>q-ranker score: The discriminant score assigned by q-ranker.</li>
 <li>q-ranker q-value: The q-value assigned by q-ranker.</li>
 <li>q-ranker PEP:  The posterior error probability estimated from the q-ranker
   score.</li>
+<li>barista score: The discriminant score assigned by barista.</li>
+<li>barista q-value: The q-value assigned by barista.</li>
+<li>barista PEP: The PEP assigned by barista.</li>
 <li>b/y ions matched: The number of b-ions and y-ions in the peptide
   that have a corresponding peak in the spectrum.</li>
 <li>b/y ions total: The total number of b- and y-ions predicted for
@@ -69,6 +76,20 @@ A sample txt file may be found <a href="search.target.txt">here</a>.
 <li>shift: Estimated Weibull shift parameter.</li>
 <li>corr: The correlation of the scores with the estimated Weibull
   distribution.</li>
+<li>RAW: The raw (not normalized) count of spectra per peptide
+  computed by spectral-counts.</li>
+<li>SIN: A protein quantification score computed by spectral-counts.
+<li>NSAF: The normalized spectral abundace factor computed by
+  spectral-counts.</li>
+<li>dNSAF: The distributed normalized spectral abundace factor computed by
+  spectral-counts.</li>
+<li>EMPAI: The exponentially modified protein abundance index computed
+  by spectral-counts.</li>
+<li>parsimony rank: The protein rank based on its spectral-counts
+  score.</li>
+<li>decoy matches/spectrum: The number of decoy peptides compared to
+  this spectrum.  May be different than the number of target peptides,
+  depending on how the decoys were generated.</li>
 </ol>
 <hr></hr>
 <p>
