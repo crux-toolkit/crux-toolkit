@@ -67,8 +67,8 @@ class SpecFeaturesGenerator
 
  protected:
   ifstream f_ms2;
-  long pos_in_file;
-  
+  streamoff pos_in_file;
+
   int first_scan;
   int last_scan;
   double precursor_mz;
@@ -76,7 +76,8 @@ class SpecFeaturesGenerator
   vector<int> all_charges_of_spec;
   double rtime;
 
-  map<string,long> spec_to_pos_in_file;
+  //map<string,unsigned long> spec_to_pos_in_file;
+  map<string,streamoff> spec_to_pos_in_file;
   map <int, double> scan_to_rtime;
 
   //for the processed spectrum

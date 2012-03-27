@@ -611,13 +611,13 @@ void SQTParser :: extract_features(sqt_match &m, int hits_read, int final_hits,e
       //extract_psm_features(m, enz, x, i);
       extract_psm_features(m, enz, x, i, hits_read);
       
+     
       if (num_spec_features > 0)
 	{
+	  
 	  ostringstream scan_stream;
 	  scan_stream << m.scan << "." << m.charge;
 	  string scan_str = scan_stream.str();
-	  //if((m.scan %10000) == 0 && i == 0)
-	  //cout << scan_str << endl;
 	  if(num_cur_psm % 5000 == 0)
 	    carp(CARP_INFO, "PSM number %d", num_cur_psm);
 	  string peptide = m.peptides[i];
@@ -627,10 +627,10 @@ void SQTParser :: extract_features(sqt_match &m, int hits_read, int final_hits,e
 	  pept = pept.substr(0,pos);
 	  
 	  if(num_spec_features == 3)
-	      sfg.get_spec_features_m3(m.scan, m.charge,pept,xs);
+	    sfg.get_spec_features_m3(m.scan, m.charge,pept,xs);
 	  if(num_spec_features == 7)
 	    sfg.get_spec_features_m7(m.scan, m.charge,pept,xs);
-
+	    
 	  //write out features
 	  f_psm.write((char*)x, sizeof(double)*num_features);
 	  f_psm.write((char*)xs, sizeof(double)*num_spec_features);
@@ -1252,21 +1252,30 @@ int SQTParser :: run()
   open_files(out_dir);
   carp(CARP_INFO, "parsing files:");
   int num_files_read = 0;
+  string ms2_fn = "";
+  string last_ms2 = "";
+  if(num_spec_features > 0)
+    sfg.initialize_aa_tables();
   for(unsigned int i = 0; i < sqt_file_names.size(); i++)
     {
       if(num_spec_features>0)
 	{
-	  string ms2_fn = ms2_file_names[i];
-	  //prepare to generate spectrum features
-	  sfg.clear();
-	  if(!sfg.open_ms2_file_for_reading(ms2_fn))
+	  ms2_fn = ms2_file_names[i];
+	  if(ms2_fn.compare(last_ms2) != 0)
 	    {
-	      carp(CARP_WARNING, "could not open ms2 file %s for reading", ms2_fn.c_str());
-	      return 0;
+	      //prepare to generate spectrum features
+	      sfg.clear();
+	      if(!sfg.open_ms2_file_for_reading(ms2_fn))
+		{
+		  carp(CARP_WARNING, "could not open ms2 file %s for reading", ms2_fn.c_str());
+		  return 0;
+		}
+	      carp(CARP_INFO, "reading file %s", ms2_fn.c_str());
+	      sfg.read_ms2_file();
+	      //sfg.save_spec_positions(out_dir);
+	      //sfg.load_spec_positions(out_dir);
 	    }
-	  carp(CARP_INFO, "reading file %s", ms2_fn.c_str());
-	  sfg.read_ms2_file();
-	  sfg.initialize_aa_tables();
+	  last_ms2 = ms2_fn;
 	}
 
       cur_fname = sqt_file_names[i];
