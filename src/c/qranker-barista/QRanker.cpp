@@ -778,6 +778,7 @@ void QRanker::train_many_nets()
 }
 
 int QRanker::run( ) {
+  srand(seed);
   carp(CARP_INFO, "reading data");
   
   ostringstream res;
@@ -1299,9 +1300,10 @@ int QRanker :: set_command_line_options(int argc, char *argv[])
 
 int QRanker::main(int argc, char **argv) {
 
+  
   if(!crux_set_command_line_options(argc, argv))
     return 1;
-
+  
   run();
   if(skip_cleanup_flag != 1)
     sqtp.clean_up(out_dir);

@@ -27,18 +27,23 @@ void SpecFeaturesGenerator :: clear()
   clear_tspec(ts_m6,6); ts_m6 = 0;
   clear_tspec(ts_m7,7); ts_m7 = 0;
   clear_tspec(ts_main_ion, NUM_AA*2); ts_main_ion = 0;
+  
   if(f_ms2.is_open())
     f_ms2.close();
 }
 
 int SpecFeaturesGenerator :: open_ms2_file_for_reading(string &ms2_filename)
 {
+  
+  //f_ms2 = fopen(ms2_filename.c_str(),"r");
+  
   f_ms2.open(ms2_filename.c_str());
   if(!f_ms2.is_open())
     {
       cout << "could not open file " << ms2_filename << " for reading" << endl;
       return 0;
     }
+  
   return 1;
 }
 
@@ -48,7 +53,7 @@ void SpecFeaturesGenerator :: save_spec_positions(string &out_dir)
   fname << out_dir << "/spec_to_pos_in_file.txt";
   ofstream f_spec_to_pos_in_file(fname.str().c_str());
   f_spec_to_pos_in_file << max_mz << endl;
-  for(map<string,long> :: iterator it = spec_to_pos_in_file.begin(); it != spec_to_pos_in_file.end(); it++)
+  for(map<string,streamoff> :: iterator it = spec_to_pos_in_file.begin(); it != spec_to_pos_in_file.end(); it++)
     f_spec_to_pos_in_file << it->first << " " << it->second << endl;
   f_spec_to_pos_in_file.close();
 }
@@ -69,10 +74,11 @@ void SpecFeaturesGenerator :: load_spec_positions(string &in_dir)
 {
   ostringstream fname;
   fname << in_dir << "/spec_to_pos_in_file.txt";
+  cout << fname.str() << endl;
   ifstream f_spec_to_pos_in_file(fname.str().c_str());
   f_spec_to_pos_in_file >> max_mz;
   string spec;
-  int line_num;
+  unsigned long line_num;
   while(!f_spec_to_pos_in_file.eof())
     {
       f_spec_to_pos_in_file >> spec;
@@ -194,7 +200,9 @@ void SpecFeaturesGenerator :: read_spectrum(string &tempstr)
 	break;
       else if (tempstr.compare("Z") == 0)
 	{
+	  
 	  f_ms2 >> charge;
+	  //cout << "scan " << first_scan << " " << charge << " " << endl;
 	  all_charges_of_spec.push_back(charge);
 	  getline(f_ms2,tempstr);
 	}
@@ -216,7 +224,6 @@ void SpecFeaturesGenerator :: read_spectrum(string &tempstr)
 	}
       f_ms2 >> tempstr;
     }
-  
 }
 
 
@@ -384,7 +391,7 @@ void SpecFeaturesGenerator :: read_ms2_file()
 	{
 	  num_spec_read++;
 	  //if((num_spec_read%5000) == 0)
-	  //cout << "spectrum number " << num_spec_read << endl;
+	  //cout << "spectrum number " << num_spec_read << " " << pos_in_file  << endl;
 	  if(num_spec_read > 0)
 	    {
 	      scan_to_rtime[first_scan] = rtime;
@@ -447,9 +454,10 @@ void SpecFeaturesGenerator :: get_observed_spectrum(string &spec)
 {
   if(f_ms2.fail())
     f_ms2.clear();
-  int pos_in_file = spec_to_pos_in_file[spec];
+  pos_in_file = spec_to_pos_in_file[spec];
   f_ms2.seekg(pos_in_file,ios::beg);
-  
+  pos_in_file = f_ms2.tellg();
+    
   string tempstr;
   read_spectrum(tempstr);
   ostringstream spec_read;
