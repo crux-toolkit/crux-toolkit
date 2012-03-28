@@ -14,6 +14,7 @@ libbullseye_la_SOURCES = \
 	CKronik2.h \
 	CKronik2.cpp \
 	bullseye.cpp \
+	CruxBullseyeApplication.h \
         CruxBullseyeApplication.cpp
 
 
