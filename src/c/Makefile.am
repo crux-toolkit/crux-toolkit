@@ -39,6 +39,7 @@ LIBFILES= \
   carp.h \
   ComputeQValues.cpp \
   ComputeQValues.h \
+  ComputeQValuesLegacy.h \
   CreateIndex.cpp \
   CreateIndex.h \
   crux-file-utils.h \
