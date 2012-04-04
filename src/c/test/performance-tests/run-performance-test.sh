@@ -100,7 +100,7 @@ for searchtool in sequest-search search-for-matches; do
         --separate-searches $shortname/$shortname.decoy.sqt \
         $ms2 $shortname/$shortname.target.sqt
     fi
-    $CRUX extract-columns $shortname/q-ranker.target.psms.txt "q-value" > $shortname/qvalues.qranker.txt
+    $CRUX extract-columns $shortname/q-ranker.target.psms.txt "q-ranker q-value" > $shortname/qvalues.qranker.txt
   
     echo replot \"$shortname/qvalues.qranker.txt\" using 1:0 title \"$shortname q-ranker\" with lines >> $gnuplot
 
@@ -111,7 +111,7 @@ for searchtool in sequest-search search-for-matches; do
         --output-dir $shortname \
         --feature-file T \
         --separate-searches $shortname/$shortname.decoy.sqt \
-        $ms2 $shortname/$shortname.target.sqt
+        $db $ms2 $shortname/$shortname.target.sqt
     fi
     $CRUX extract-columns $shortname/barista.target.psms.txt "q-value" > $shortname/qvalues.barista.txt
   

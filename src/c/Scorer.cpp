@@ -785,7 +785,6 @@ void Scorer::normalizeEachRegion(
   int bin_idx = 0;
   int region_idx = 0;
   FLOAT_T max_intensity = max_intensity_per_region[region_idx];
-  max_intensity_overall = 0.0; // Avoid compiler error.
 
   // normalize each region
   for(; bin_idx < getMaxBin(); ++bin_idx){
@@ -805,6 +804,9 @@ void Scorer::normalizeEachRegion(
       {
       // normalize intensity to max 50
       observed[bin_idx] = (observed[bin_idx] / max_intensity) * MAX_PER_REGION;
+    }
+    else {
+      observed[bin_idx] = 0.0;
     }
 
   }
