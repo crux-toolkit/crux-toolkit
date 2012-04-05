@@ -11,17 +11,17 @@
 <B>Usage:</B>
 
 <blockquote>
-<code>crux bullseye [options] &lt;MS&nbsp;spectra&gt; &lt;MS/MS&nbsp;spectra&gt;</code>
+<code>crux bullseye [options] &lt;MS1&nbsp;spectra&gt; &lt;MS2&nbsp;spectra&gt;</code>
 </blockquote>
 
 <B>Description:</B>
 
 <blockquote>
 <p>
-Bullseye assigns high resolution precursor m/z values to MS/MS
+Bullseye assigns high resolution precursor m/z values to MS2
 data. Bullseye uses the Hardkl&ouml;r algorithm to identify persistent
-peptide isotope distributions (PPIDs) in MS scans. For each PPID,
-MS/MS scans that occur within a specified time and m/z range have the
+peptide isotope distributions (PPIDs) in MS1 scans. For each PPID,
+MS2 scans that occur within a specified time and m/z range have the
 average monoisotopic m/z from the PPID assigned as a precursor m/z.  A
 detailed description of the Bullseye algorithm is given in</p>
 
@@ -34,7 +34,7 @@ Data"</a>. <i>Journal of Proteome Research</i>. 9(2):1138-43, 2010.
 
 <p>
 Note that, in complex samples, it is not unusual for multiple PPIDs to
-be found near an MS/MS spectrum. In those cases, Bullseye will assign
+be found near an MS2 spectrum. In those cases, Bullseye will assign
 both mass measurements to the spectrum. In a .ms2 file, multiple Z
 line entries will be made for the scan number.</p>
 
@@ -89,7 +89,7 @@ programs.
 fragmentation spectra for which accurate masses were successfully
 inferred.  Unless otherwise specified (with
 the <code>--spectrum-format</code> option), the output file format is
-the same as the input MS/MS file format.</li>
+the same as the input MS2 file format.</li>
 
 <li>
 <b>bullseye.no-pid.&lt;format&gt</b>: a file containing the
@@ -102,8 +102,64 @@ that were printed to standard error.</li>
 
 </ul>
 
-<B>Options:</B>
-<UL>
+<B>Options:</B><br>
+<i>Identifying PPIDs in MS1 Spectra</i>
+<ul>
+<li>
+<code>--max-persist &lt;float&gt;</code> &ndash; Ignore PPIDs that
+persist for this length of time in the MS1 spectra. The unit of time is 
+whatever unit is used in your data file (usually minutes). 
+These PPIDs are considered contaminants.  Default = 2.0.</li>
+
+<li>
+<code>--persist-tolerance &lt;float&gt;</code> &ndash; Set the mass tolerance
+(&plusmn;ppm) for finding PPIDs peptides in the consecutive MS1 scans.  Default = 10.0.</li>
+
+<li>
+<code>--gap-tolerance &lt;int&gt;</code> &ndash; Gap size tolerance when 
+checking for PPIDs across consecutive MS1 scans.  Used in conjunction with
+<code>--scan-tolerance</code>. Default = 1.</li>
+
+<li>
+<code>--scan-tolerance &lt;int&gt;</code> &ndash; Number of consecutive 
+MS1 scans over which a PPID must be observed to be considered real. Gaps 
+in persistence are allowed when setting <code>--gap-tolerance</code>.
+Default = 3.</li>
+
+<li>
+<code>--bullseye-max-mass &lt;float&gt;</code> &ndash; Only consider PPIDs
+below this maximum mass in daltons.  Default = 8000.0.</li>
+
+<li>
+<code>--bullseye-min-mass &lt;float&gt;</code> &ndash; Only consider PPIDs
+above this minimum mass in daltons.  Default = 600.0.</li>
+</ul>
+
+<i>Matching PPIDs to MS2 Spectra</i>
+<ul>
+<li>
+<code>--exact-match &lt;T|F&gt;</code> &ndash; When true, require an exact match of
+the precursor isolation window in the MS2 scan to the base isotopic peak 
+of the PPID, otherwise use wide precursor boundaries.  The tolerance is set with
+the <code>--exact-tolerance</code> flag. Default = F.</li>
+
+<li>
+<code>--exact-tolerance &lt;float&gt;</code> &ndash; Set the tolerance
+(&plusmn;ppm) for <code>--exact match</code>.  Default = 10.0.</li>
+<li>
+
+<code>--retention-tolerance &lt;float&gt;</code> &ndash; Set the
+tolerance (&plusmn;units) around the retention time over which a PPID
+can be matched to the MS2 spectrum.  The unit of time is whatever unit is 
+used in your data file (usually minutes).  Default = 0.5.</li>
+
+</ul>
+<i>Other options</i>
+<ul>
+<li>
+<code>--spectrum-format &lt;ms2|bms2|cms2|mgf&gt;</code>
+&ndash; The format to write the output spectra to.  By default, the
+spectra will be output in the same format as the MS2 input.</li>
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash; 
@@ -121,57 +177,6 @@ Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
 
 <li>
-<code>--max-persist &lt;float&gt;</code> &ndash; Ignore peptides that
-persist for this length. The unit of time is whatever unit is used in 
-your data file (usually minutes). These peptides are considered contaminants.  
-Default = 2.0.</li>
-
-<li>
-<code>--exact-match &lt;T|F&gt;</code> &ndash; Require an exact match to the
-precursor ion. Rather than use wide precursor boundaries, this flag
-forces Bullseye to match precursors to the base isotope peak
-identified in Hardklor. The tolerance is set with
-the <code>--persist-tolerance</code> flag. Default = F.</li>
-
-<li>
-<code>--exact-tolerance &lt;float&gt;</code> &ndash; Set the tolerance
-(&plusmn;ppm) for exact match searches.  Default = 10.0.</li>
-
-<li>
-<code>--persist-tolerance &lt;float&gt;</code> &ndash; Set the tolerance
-(&plusmn;ppm) for finding persistent peptides.  Default = 10.0.</li>
-
-<li>
-<code>--gap-tolerance &lt;int&gt;</code> &ndash; Gap size tolerance when 
-checking for peptides across consecutive MS1 scans.  Used in conjunction with
-<code>--scan-tolerance</code>. Default = 1.</li>
-
-<li>
-<code>--scan-tolerance &lt;int&gt;</code> &ndash; Number of consecutive 
-MS1 scans over which a peptide must be observed to be considered real. Gaps 
-in persistence are allowed when setting <code>--gap-tolerance</code>.
-Default = 3.</li>
-
-<li>
-<code>--bullseye-max-mass &lt;float&gt;</code> &ndash; Only consider peptides
-below this maximum mass in daltons.  Default = 8000.0.</li>
-
-<li>
-<code>--bullseye-min-mass &lt;float&gt;</code> &ndash; Only consider peptides
-above this minimum mass in daltons.  Default = 600.0.</li>
-
-<li>
-<code>--retention-tolerance &lt;float&gt;</code> &ndash; Set the
-tolerance (&plusmn;units) around the retention time over which a peptide
-can be matched to the MS/MS spectrum.  The unit of time is whatever unit is 
-used in your data file (usually minutes).  Default = 0.5.</li>
-
-<li>
-<code>--spectrum-format &lt;ms2|bms2|cms2|mgf&gt;</code>
-&ndash; The format to write the output spectra to.  By default, the
-spectra will be output in the same format as the MS/MS input.</li>
-
-<li>
 <code>--parameter-file &lt;filename&gt;</code> &ndash; A file
 containing command-line or additional parameters.  See
 the <a href="parameter-file.html">parameter documentation</a> page for
@@ -184,6 +189,18 @@ following messages, including all those at lower verbosity levels:
 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
 the progress of execution, 40-more progress information, 50-debug
 info, 60-detailed debug info. Default = 30.</li>
+</ul>
+
+<b>Notes:</b>
+<ul>
+
+<li>Bullseye depends upon Hardkl&ouml;r output.  See <a href="hardklor.html">hardkl&ouml;r</a> 
+documentation for additional parameters.
+</li>
+
+<li>For users who used the standalone version of Bullseye, the parameter mappings are 
+<a href="bullseye_standalone_to_crux.html">here</a>.
+</li>
 
 </ul>
 
