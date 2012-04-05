@@ -118,15 +118,14 @@ tolerance (&plusmn;ppm) for finding PPIDs in consecutive MS1 scans.
 Default = 10.0.</li>
 
 <li>
-<code>--gap-tolerance &lt;int&gt;</code> &ndash; Gap size tolerance when 
-checking for PPIDs across consecutive MS1 scans.  Used in conjunction with
-<code>--scan-tolerance</code>. Default = 1.</li>
+<code>--scan-tolerance &lt;int&gt;</code> &ndash; Total number of MS1
+scans over which a PPID must be observed to be considered real. Gaps
+in persistence are allowed by setting <code>--gap-tolerance</code>.
+Default = 3.</li>
 
 <li>
-<code>--scan-tolerance &lt;int&gt;</code> &ndash; Number of consecutive 
-MS1 scans over which a PPID must be observed to be considered real. Gaps 
-in persistence are allowed when setting <code>--gap-tolerance</code>.
-Default = 3.</li>
+<code>--gap-tolerance &lt;int&gt;</code> &ndash; Allowed gap size when
+checking for PPIDs across consecutive MS1 scans. Default = 1.</li>
 
 <li>
 <code>--bullseye-max-mass &lt;float&gt;</code> &ndash; Only consider PPIDs
@@ -138,12 +137,18 @@ above this minimum mass in daltons.  Default = 600.0.</li>
 </ul>
 
 <i>Matching PPIDs to MS2 Spectra:</i>
+
 <ul>
+
 <li>
-<code>--exact-match &lt;T|F&gt;</code> &ndash; When true, require an exact match of
-the center of the precursor isolation window in the MS2 scan to the base isotopic peak 
-of the PPID; otherwise, use wide precursor boundaries.  The tolerance is set with
-the <code>--exact-tolerance</code> flag. Default = F.</li>
+<code>--exact-match &lt;T|F&gt;</code> &ndash; When true, require an
+exact match (as defined by <code>--exact-tolerance</code>) between the
+center of the precursor isolation window in the MS2 scan and the base
+isotopic peak of the PPID.  If this option is set to false and no
+exact match is observed, then attempt to match using a wider m/z
+tolerance.  This wider tolerance calculated using the PPID's
+mono-isotopic mass and charge (the higher the charge, the smaller the
+window). Default = F.</li>
 
 <li>
 <code>--exact-tolerance &lt;float&gt;</code> &ndash; Set the tolerance
