@@ -217,9 +217,9 @@ enrichment (as a decimal) followed by the atom being enriched and an
 index of the isotope. For example, 0.75H1 specifies 75% enrichment of
 the first heavy isotope of hydrogen. In other words, 75% deuterium
 enrichment. Two or more modifications can be combined into the same
-model and separated by colons: "B2:0.5B1". This parameter can also be
-used redundantly to include multiple alternative averagine models in a
-single analysis.</li>
+model and separated by colons: "B2:0.5B1". Multiple averagine models
+are supported in a single analysis by separating the models with a 
+semicolon: "B2:0.5B1;C2:0.7C1".</li>
 
 <li>
 <code>--mzxml-filter ms1|ms2|ms3|none</code> &ndash; Set a filter for
@@ -351,9 +351,13 @@ Here's my recommended settings for overriding default values:
 
 
 -->
-
-
 </ul>
+<b>Notes:</b>
+<ul>
+<li>
+For users familiar with the standalone version of Hardkl&ouml;r, the 
+parameter mappings are <a href="hardklor_standalone_to_crux.html">here</a>.
+
 
 <hr></hr>
 
