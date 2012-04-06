@@ -368,29 +368,37 @@ void SpectralCounts::normalizePeptideScores() {
 void SpectralCounts::normalizeProteinScores(){
   if( measure_ == MEASURE_EMPAI ){
     computeEmpai();
-  } else {
+  } 
 
-    carp(CARP_DEBUG, "Normalizing protein scores");
-    FLOAT_T total = 0.0;
+  carp(CARP_DEBUG, "Normalizing protein scores");
+  FLOAT_T total = 0.0;
     
-    // calculate sum of all scores
-    for (ProteinToScore::iterator it = protein_scores_.begin();
-         it != protein_scores_.end(); ++it){
-      FLOAT_T score = it->second;
-      Protein* protein = it->first;
-      if ( (measure_ == MEASURE_NSAF) || (measure_ == MEASURE_DNSAF)) {
-        score = score / (FLOAT_T)protein->getLength();
-      }
-      total += score;
+  // calculate sum of all scores
+  for (ProteinToScore::iterator it = protein_scores_.begin();
+       it != protein_scores_.end(); ++it){
+
+    FLOAT_T score = it->second;
+    Protein* protein = it->first;
+    if ( (measure_ == MEASURE_NSAF) || (measure_ == MEASURE_DNSAF)) {
+      score = score / (FLOAT_T)protein->getLength();
     }
+    total += score;
+  }
     
-    // normalize by sum of all scores and length
-    for (ProteinToScore::iterator it = protein_scores_.begin();
-         it != protein_scores_.end(); ++it){
-      FLOAT_T score = it->second;
-      Protein* protein = it->first;
-      it->second = score / total / (FLOAT_T)protein->getLength();
+  // normalize by sum of all scores
+  for (ProteinToScore::iterator it = protein_scores_.begin();
+       it != protein_scores_.end(); ++it){
+
+    FLOAT_T score = it->second;
+    Protein* protein = it->first;
+    score = score / total;
+    // normalize by length
+    if (measure_ == MEASURE_NSAF || 
+        measure_ == MEASURE_DNSAF || 
+        measure_ == MEASURE_SIN ) {
+      score = score / (FLOAT_T)protein->getLength();
     }
+    it->second = score;
   }
 }
 
@@ -399,36 +407,35 @@ void SpectralCounts::normalizeProteinScores(){
  */
 void SpectralCounts::checkProteinNormalization() {
 
-  if (measure_ != MEASURE_EMPAI) {
-    //empai is not normalized to one.
-    FLOAT_T sum = 0;
+  FLOAT_T sum = 0;
 
+  for (ProteinToScore::iterator iter = protein_scores_.begin();
+    iter != protein_scores_.end();
+    ++iter) {
+
+    FLOAT_T score = iter->second;
+    if (measure_ == MEASURE_SIN) {
+      //The normalized values of sin do not add up to 1, but they
+      //should if you multiply the length back in...
+      Protein* protein = iter->first;
+      score = score * (FLOAT_T)protein->getLength();
+    }
+
+    sum += score;
+  }
+
+  if (fabs(sum-1.0) > 0.00001) {
+    carp(CARP_ERROR, "Normalized protein scores do not add up to one!:%f", sum);
     for (ProteinToScore::iterator iter = protein_scores_.begin();
       iter != protein_scores_.end();
       ++iter) {
 
-      FLOAT_T score = iter->second;
-      if (measure_ == MEASURE_SIN) {
-        //The normalized values of sin do not add up to 1, but they
-        //should if you multiply the length back in...
-        Protein* protein = iter->first;
-        score = score * (FLOAT_T)protein->getLength();
-      }
-
-      sum += score;
+      carp(CARP_DEBUG, "%s %f",iter->first->getIdPointer(), iter->second);
     }
-
-    if (fabs(sum-1.0) > 0.00001) {
-      carp(CARP_ERROR, "Normalized protein scores do not add up to one!:%f", sum);
-      for (ProteinToScore::iterator iter = protein_scores_.begin();
-      iter != protein_scores_.end();
-      ++iter) {
-        carp(CARP_DEBUG, "%s %f",iter->first->getIdPointer(), iter->second);
-      }
-      carp(CARP_FATAL, "Exiting crux spectral-counts");
-    }
+    carp(CARP_FATAL, "Exiting crux spectral-counts");
   }
 }
+
 /**
  * Computes the 10^(observed/total) - 1 score for each protein.  Assumes
  * that protein_scores_ has been populated with the count of observed
@@ -445,7 +452,7 @@ void SpectralCounts::computeEmpai(){
                                                               constraint);
     FLOAT_T possible_peptides = iter->getTotalPeptides();
 
-    it->second = pow(10, (observed_peptides / possible_peptides)) - 1;
+    it->second = pow(10, (observed_peptides / possible_peptides)) - 1.0;
 
     delete iter;
   }
