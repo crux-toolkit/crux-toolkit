@@ -43,6 +43,7 @@ class Scorer {
 
   FLOAT_T bin_width_; ///< width of the bins to use for arrays
   FLOAT_T bin_offset_; ///< m/z offset for the bins.
+  bool use_flanks_; ///< use flanking peaks in calculation of XCorr theoretical
 
   /// used for xcorr
   FLOAT_T* observed_; ///< used for Xcorr: observed spectrum intensity array
