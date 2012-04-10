@@ -170,9 +170,8 @@ Scorer::Scorer(
     initialized_ = false;
   }
 
-  if( get_boolean_parameter("use-flanking-peaks") == false ){
-    FLANK_HEIGHT = 0;
-  }
+  use_flanks_ = get_boolean_parameter("use-flanking-peaks");
+
 }
 
 /**
@@ -1068,31 +1067,22 @@ bool Scorer::createIntensityArrayTheoretical(
     // is it B, Y ion?
     if(ion_type == B_ION || 
        ion_type == Y_ION){
-
-      // neutral loss peak?
-      if(ion->isModified()){
-        // Add peaks of intensity of 10.0 for neutral loss of H2O, ammonia.
-        // In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each neutral loss.
-        // add_intensity(theoretical, intensity_array_idx, 10);
-        // add_intensity(theoretical, intensity_array_idx + 1, 10);
-        // add_intensity(theoretical, intensity_array_idx - 1, 10);
-      }
-      else{
+      if (!ion->isModified()){
         // Add peaks of intensity 50.0 for B, Y type ions. 
-        // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
+        // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion if requested.
         // Skip ions that are located beyond max mz limit
         if((intensity_array_idx)< getMaxBin()){
           addIntensity(theoretical, intensity_array_idx, B_Y_HEIGHT);
-          addIntensity(theoretical, intensity_array_idx - 1, FLANK_HEIGHT);
+          if (use_flanks_) {
+            addIntensity(theoretical, intensity_array_idx - 1, FLANK_HEIGHT);
+          }
         }
-
-        if((intensity_array_idx + 1)< getMaxBin()){
+        
+        if (use_flanks_ && (intensity_array_idx + 1)< getMaxBin()){
           addIntensity(theoretical, intensity_array_idx + 1, FLANK_HEIGHT);
         }
         
-
         // add neutral loss of water and NH3
-        // mass_z + (modification_masses[(int)ion_modification]/(FLOAT_T)charge) * modification_count;  
 
         if(ion_type == B_ION){
           int h2o_array_idx = 
@@ -1107,19 +1097,16 @@ bool Scorer::createIntensityArrayTheoretical(
         addIntensity(theoretical, nh3_array_idx, LOSS_HEIGHT);
       }
 
-
     }// is it A ion?
     else if(ion_type == A_ION){
       // Add peaks of intensity 10.0 for A type ions. 
-      // In addition, add peaks of intensity of 10.0 to +/- 1 m/z flanking each A type ion.
-        addIntensity(theoretical, intensity_array_idx, LOSS_HEIGHT);
+      addIntensity(theoretical, intensity_array_idx, LOSS_HEIGHT);
     }
     else{// ERROR!, only should create B, Y, A type ions for xcorr theoreical 
       carp(CARP_ERROR, "only should create B, Y, A type ions for xcorr theoretical spectrum");
       return false;
     }
   }
-    
 
   return true;
 }
