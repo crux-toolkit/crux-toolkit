@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # CREATE DATE: 13 Sep 2011
 # AUTHOR: William Stafford Noble
 import sys
