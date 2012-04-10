@@ -19,9 +19,8 @@
 <B>Description:</B>
 
 <p>
-Given a peptide and a charge state, predict the ions according to the 
-provided options.  These are the ions used in <a
-href="crux-search-for-matches.html">crux search-for-matches</a>.</p>
+Given a peptide and a charge state, predict the corresponding fragment
+ions according to the provided options.</p>
 
 <p>
 <B>Input:</B>
@@ -37,28 +36,36 @@ predict the ions.
 <UL>
 
   <p>
-  The program prints to standard output a series of header lines,
+  The program prints to standard output a series of lines,
   describing how the ions were predicted.</p>
 
   <pre>
   # PEPTIDE: &lt;peptide sequence&gt;
-  # CHARGE: &lt;peptide charge&gt;</pre>
-  And then the predicted ions, in the following format:
-  <pre>
-  &lt;m/z&gt; &lt;mass&gt; &lt;charge&gt; &lt;ion-series&gt; &lt;bond-index&gt; &lt;NH3&gt; &lt;H2O&gt; &lt;ISOTOPE&gt; &lt;FLANK&gt;</pre>
-  where
+  # CHARGE: &lt;peptide charge&gt;
+  </pre>
+
+  The program then prints a one-line header that labels the
+  tab-delimited columns, followed by one line per ion:
+
+  <pre><table cellpadding="10"><tr><td>m/z</td><td>mass</td><td>charge</td><td>ion-series</td><td>peptide-bond-index</td><td>NH3</td><td>H2O</td><td>ISOTOPE</td><td>FLANK</td></tr></table></pre>
+<!-- FIXME: Change uppercase to lowercase in the program output. -->
+
+  The columns contain the following values:
   <pre>
   &lt;m/z&gt; is the ion's mass-to-charge
   &lt;mass&gt; is the ion's (charged) mass
   &lt;charge&gt; is the ion's charge e.g. 1,2,3
   &lt;ion-type&gt; is an integer representing the series where 0=a, 1=b, 2=c, 3=x, 4=y, 5=z, 6=p
-  &lt;bond-index&gt; is in [1...n), where n is peptide length. Consistent with standard mass spec terminology, where a y-1 and b-1 ions result from cleavage of
-  completely different bonds
+  &lt;peptide-bond-index&gt; is in [1...n), where n is peptide length. Consistent with standard mass spec terminology, where a y-1 and b-1 ions result from cleavage of
+  completely different bonds.
   &lt;NH3&gt; is the number of NH3 modifications (lost neutral molecules)
   &lt;H2O&gt; is the number of H2O modifications (lost neutral molecules)
   &lt;ISOTOPE&gt;  is the number of adjacent isotopic peaks
-  &lt;FLANK&gt; is number of SEQEUST-style flanking ions
+  &lt;FLANK&gt; is number of SEQUEST-style flanking ions
 </pre>
+<!-- FIXME: Change ion-type to the actual ion type. -->
+<!-- FIXME: Clarify the second sentence after "peptide-bond-index." -->
+<!-- FIXME: Clarify what ISOTOPE means. -->
 
 
 
@@ -82,14 +89,17 @@ Predict the the specified neutral loss peaks. 'none' indicates no
 neutral losses, 'h2o' indicates water loss only, 'nh3' indicates
 ammonia losses only, 'all' indicates all three kinds of
 losses. Default = all. 
+<!-- FIXME: Remove this option. -->
 
 <LI>
 <code>--isotope &lt;0|1|2&gt;</code> &ndash;
 Predict the given number of isotope peaks. Default = 0.
+<!-- FIXME: Clarify which types of peaks get isotope peaks. -->
 
 <LI>
 <code>--flanking &lt;T|F&gt;</code> &ndash; 
 Predict flanking peaks for b- and y-ions. Default = F.
+<!-- FIXME: Clarify exactly what value is used for the flank offset. -->
 
 <LI>
 <code>--max-ion-charge &lt;1|2|3|peptide&gt;</code> &ndash; 
@@ -98,6 +108,8 @@ Predict ions up to this charge-state. The integer options ('1', '2' and
 indicates that the ions should range up to the maximum charge-state of
 the peptide itself (thus, a +2 charge state peptide would have ions of
 +1 and +2). Default = peptide.
+<!-- FIXME: Change 'peptide' to predict up to 1 minus the number of --
+  -- charges on the precursor. -->
 
 <LI>
 <code>--nh3 &lt;int&gt;</code> &ndash; 
@@ -111,6 +123,8 @@ respectively, in the NH3 column of the output. Default = 1.
 <code>--h2o &lt;int&gt;</code> &ndash; 
 Include in the predicted peaks, b/y ions with the loss of 1 to n water
 molecules.  See <code>--nh3</code> for an example.  Default = 0.
+
+<!-- FIXME: Add --a-ion T|F -->
 
 <LI>
 <code>--fragment-mass &lt;average|mono&gt;</code>
