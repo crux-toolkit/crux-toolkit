@@ -3,10 +3,11 @@
  * \brief Object for representing a single peptide.
  ****************************************************************************/
 #include "Peptide.h"
+#include "PeptideSrc.h"
 #include <string.h>
 
 #include <set>
-
+#include <vector>
 #include "MatchFileReader.h"
 
 using namespace std;
@@ -36,18 +37,12 @@ using namespace std;
       
  */
 
-/**
- * static global variable
- * determines if the peptide src are created by link lists or array
- * if true, peptides are implented with link list peptide src, else array
- */
-bool Peptide::PEPTIDE_SRC_USE_LINK_LIST;
 
 // the struct to be printed and read; possible fix for adding a field to the peptide
 struct PRINT_PEPTIDE_T {
   unsigned char length; ///< The length of the peptide
   FLOAT_T peptide_mass;   ///< The peptide's mass.
-  PeptideSrc* peptide_src; ///< a linklist of peptide_src   
+  vector<PeptideSrc*>* peptide_src; ///< a vector of peptide_src  
   MODIFIED_AA_T* modified_seq; ///< peptide sequence with modifications
 };
 
@@ -65,7 +60,7 @@ struct residue_iterator {
 
 /**
  * \struct peptide_src_iterator
- * \brief Object to iterate over the peptide_srcs linklist in a peptide
+ * \brief Object to iterate over the peptide_srcs Vector in a peptide
  */
 struct peptide_src_iterator{
   Peptide*  peptide; ///< The peptide whose peptide_srcs to iterate over.
@@ -80,7 +75,7 @@ struct peptide_src_iterator{
 void Peptide::init() {
   length_ = 0;
   peptide_mass_ = 0;
-  peptide_src_ = NULL;
+  peptide_srcs_.clear();
   modified_seq_ = NULL;
   decoy_modified_seq_ = NULL;
 }
@@ -107,7 +102,7 @@ int Peptide::getSizeOf(){
 /**
  * \returns A new peptide object, populated with the user specified parameters.
  */
-Peptide::Peptide(
+  Peptide::Peptide(
   unsigned char length,     ///< The length of the peptide -in
   FLOAT_T peptide_mass,       ///< The neutral mass of the peptide -in
   Protein* parent_protein, ///< the parent_protein of this peptide -in
@@ -118,19 +113,12 @@ Peptide::Peptide(
   setLength(length);
   setPeptideMass(peptide_mass);
   // FIXME: find the level of digest for this specific protein
-
-  if ( PEPTIDE_SRC_USE_LINK_LIST) {
-    peptide_src_ =
-      new PeptideSrc(NON_SPECIFIC_DIGEST, parent_protein, start_idx );
-  } else {
-    peptide_src_ = new PeptideSrc[1];
-    peptide_src_[0] = 
-      PeptideSrc(NON_SPECIFIC_DIGEST, parent_protein, start_idx);
-  }
+  peptide_srcs_.push_back(new PeptideSrc(NON_SPECIFIC_DIGEST, parent_protein, start_idx ));
 
   modified_seq_ = NULL;
   decoy_modified_seq_ = NULL;
 }
+
   
 /**
  * \brief Allocates a new peptide giving it the values of the source
@@ -148,26 +136,8 @@ Peptide::Peptide(
   } else {
     length_ = src->length_;
     peptide_mass_ = src->peptide_mass_;
-
-    if( PEPTIDE_SRC_USE_LINK_LIST ){
-      peptide_src_ = new PeptideSrc();
-      PeptideSrc::copy(src->peptide_src_, peptide_src_);
-    }else{ // use array
-      // if you don't allocate this correctly, it doesn't get freed correctly
-      // first count the number of peptide srcs
-      PeptideSrc* cur_src = src->peptide_src_;
-      int src_count = 0;
-      while(cur_src != NULL){
-        src_count++;
-        cur_src = cur_src->getNextAssociation();
-      }
-
-      peptide_src_ = PeptideSrc::newArray(src_count); //alloc mem
-      PeptideSrc::copyArray(src->peptide_src_, 
-                            peptide_src_,
-                            src_count);
-    }
-
+    PeptideSrc::copy(src->peptide_srcs_,peptide_srcs_);
+  
     if( src->modified_seq_ == NULL ){
       modified_seq_ = NULL;
     }else{
@@ -178,6 +148,7 @@ Peptide::Peptide(
     }else{
       decoy_modified_seq_ = copy_mod_aa_seq(src->decoy_modified_seq_,
                                                       src->length_);
+   
     }
   }
 }
@@ -186,7 +157,6 @@ Peptide::Peptide(
  * Merge two identical peptides, copy all peptide_src into one of the peptide
  * peptide_dest, peptide_bye must have at least one peptide src
  * frees the peptide_bye, once the peptide_src are re-linked to the peptide_dest
- * Assumes that both peptides use linklist implemenation for peptide_src
  * \returns true if merge is successful else false
  */
 bool Peptide::mergePeptides(
@@ -194,23 +164,25 @@ bool Peptide::mergePeptides(
   Peptide* peptide_bye ///< the peptide to be merged  -in
   ) {
 
-  PeptideSrc* current_src = peptide_dest->peptide_src_;
-  PeptideSrc* next_src = current_src->getNextAssociation();
-  
+  vector<PeptideSrc*>& dest_srcs = peptide_dest->peptide_srcs_;
+  vector<PeptideSrc*>& bye_srcs = peptide_bye->peptide_srcs_;
   // do both peptides have at least one peptide_src?
-  if(current_src == NULL || peptide_bye->peptide_src_ == NULL){
+  if(dest_srcs.empty() || bye_srcs.empty()){
     carp(CARP_ERROR, "failed to merge two peptides");
     return false;
   }
 
-  // find the end of the peptide src link list..
-  while(next_src != NULL){
-    current_src = next_src;
-    next_src =  current_src->getNextAssociation();
+  for(vector<PeptideSrc*>::iterator iter=bye_srcs.begin();
+    iter!=bye_srcs.end();
+    iter++
+  ){
+   
+    dest_srcs.push_back(*iter);
   }
-  current_src->setNextAssociation(peptide_bye->peptide_src_);
+
   // peptide_dest now points to the src's, don't delete them
-  peptide_bye->peptide_src_ = NULL;
+  bye_srcs.clear();
+  
   delete peptide_bye;
 
   return true;
@@ -227,25 +199,22 @@ bool Peptide::mergePeptidesCopySrc(
   Peptide* peptide_giver
   ){
 
-  if( peptide_dest == NULL || peptide_giver == NULL ){
-    carp(CARP_FATAL, "Cannot merge NULL peptides.");
+  vector<PeptideSrc*>& dest_srcs = peptide_dest->peptide_srcs_;
+  vector<PeptideSrc*>& giver_srcs = peptide_giver->peptide_srcs_;
+
+  // do both peptides have at least one peptide_src?
+  if(dest_srcs.empty() || giver_srcs.empty()){
+    carp(CARP_ERROR, "failed to merge two peptides");
+    return false;
   }
-
-  // find the last peptide src for destination
-  PeptideSrc* dest_src = peptide_dest->peptide_src_;
-  PeptideSrc* dest_next = dest_src->getNextAssociation();
-
-  while( dest_next != NULL ){
-    dest_src = dest_next;
-    dest_next = dest_src->getNextAssociation();
+ 
+  for(vector<PeptideSrc*>::iterator iter=giver_srcs.begin();
+    iter != giver_srcs.end();
+    iter++
+  ){
+    PeptideSrc* new_src = new PeptideSrc(*(*iter));
+    dest_srcs.push_back(new_src);
   }
-
-  // copy the giver peptide_src's to the dest (allocate first src)
-  PeptideSrc* temp_src = new PeptideSrc();
-  PeptideSrc* giver_src = peptide_giver->peptide_src_;
-
-  PeptideSrc::copy(giver_src, temp_src);
-  dest_src->setNextAssociation(temp_src);
 
   return true;
 }
@@ -253,22 +222,11 @@ bool Peptide::mergePeptidesCopySrc(
 /**
  * Frees an allocated peptide object.
  * Depending on peptide_src implementation determines how to free srcs
- * This decision is made by global variable PEPTIDE_SRC_USE_LINK_LIST
  */
 Peptide::~Peptide() {
-
-  if( peptide_src_ ){
-    // check which implementation peptide_src uses
-    if(!PEPTIDE_SRC_USE_LINK_LIST){
-      // array implementation
-      delete [] peptide_src_;
-    }
-    else{
-      // link list implementation
-      PeptideSrc::free(peptide_src_);
-    }
-  }
-
+  
+   PeptideSrc::free(peptide_srcs_);
+   
   if(modified_seq_){
     free(modified_seq_);
   }
@@ -277,18 +235,8 @@ Peptide::~Peptide() {
   }
 }
 
-/* Public functions--Getters and Setters */
+// Public functions--Getters and Setters 
 
-/**
- * sets the peptide src implementation in the peptide object
- * This should be set only once and not be altered
- */
-void Peptide::setPeptideSrcImplementation(
-  bool use_link_list ///< does the peptide use link list peptide src
-  )
-{  
-  PEPTIDE_SRC_USE_LINK_LIST = use_link_list; 
-}
                             
 /* mass-related getters and setters */
 
@@ -337,62 +285,31 @@ FLOAT_T Peptide::getMz(
 /**
  * sets the peptide_src field in the peptide
  * this method should be ONLY used when the peptide has no existing list of peptide_src
- * use add_peptide_peptide_src method to add to existing list
- * must pass on a heap allocated peptide_src object
+ * must pass on a heap allocated peptide_srcs_ object
  * does not copy in the object, just the pointer to the object.
  */
 void Peptide::setPeptideSrc(
-  PeptideSrc* new_association ///< new peptide_src -in
+  PeptideSrc*  new_association ///< new peptide_src -in
   ) {
 
-  peptide_src_ = new_association;
+  assert(peptide_srcs_.empty());
+  peptide_srcs_.push_back(new_association);
 }
 
 /**
  * this method adds the new_association to the end of the existing peptide's 
- * linklist of peptide_srcs
  * if no prior existing list, adds it at the front
- * must pass on a heap allocated peptide_src object
+ * must pass on a heap allocated peptide_srcs_ object
  * does not copy in the object, just the pointer to the object.
  */
 void Peptide::addPeptideSrc(
   PeptideSrc* new_association ///< new peptide_src -in
   ) {
 
-  PeptideSrc* add_association = peptide_src_;
-  PEPTIDE_SRC_ITERATOR_T* iterator = NULL;
-  
-  // is the peptide src list empty?
-  if(add_association == NULL){
-    peptide_src_ = new_association;
-    return;
-  }
-
-  // create peptide src iterator
-  iterator = new_peptide_src_iterator(this);
-
-  // find the last peptide_src object in the list
-  while(peptide_src_iterator_has_next(iterator)){
-    add_association = peptide_src_iterator_next(iterator);
-  }
-  
-  add_association->setNextAssociation(new_association);
-  free_peptide_src_iterator(iterator);
-}
-
-/**
- * this method adds the peptide src array to an EMPTY peptide
- * only used in index.c, when the peptide src count for  peptide is known
- * Any existing peptide_src will lose it's reference
- */
-void Peptide::addPeptideSrcArray(
-  PeptideSrc* peptide_src_array ///< new peptide_src -in
-  ) {
-
-  // should be empty peptide src list
-  peptide_src_ = peptide_src_array;
+  peptide_srcs_.push_back(new_association);
 
 }
+
 
 // TODO: why do we need both of these?
 /**
@@ -400,24 +317,39 @@ void Peptide::addPeptideSrcArray(
  */
 PeptideSrc* Peptide::getPeptideSrc() {
 
-  return peptide_src_;
+  
+  return peptide_srcs_.at(0);
 }
+/**
+ *returns the pepide_srcs_
+ */
+
+vector<PeptideSrc*>& Peptide::getPeptideSrcVector() {
+  return peptide_srcs_;
+}
+
+/**
+ *Return the begining of the peptide_srcs_
+ */
+PeptideSrcIterator Peptide::getPeptideSrcBegin() {
+
+  return peptide_srcs_.begin();
+}
+/**
+ *Return the end of the peptide_srcs_
+ */
+
+PeptideSrcIterator Peptide::getPeptideSrcEnd() {
+  return peptide_srcs_.end();
+}
+
 
 /**
  * \returns The number of peptide sources (i.e. proteins) the peptide has.
  */
 int Peptide::getNumPeptideSrc(){
 
-  int num_proteins = 0;
-  PEPTIDE_SRC_ITERATOR_T* src_itr = new_peptide_src_iterator(this);
-  while(peptide_src_iterator_has_next(src_itr)){
-    peptide_src_iterator_next(src_itr);
-    ++num_proteins;
-  }
-  
-  free_peptide_src_iterator(src_itr);
-
-  return num_proteins;
+  return peptide_srcs_.size();
 }
 
 /**
@@ -425,7 +357,7 @@ int Peptide::getNumPeptideSrc(){
  */
 Database* Peptide::getFirstSrcDatabase() {
 
-  return peptide_src_->getParentProtein()->getDatabase();
+  return peptide_srcs_.at(0)->getParentProtein()->getDatabase();
 }
 
 // set by peptide_src?
@@ -434,7 +366,7 @@ Database* Peptide::getFirstSrcDatabase() {
  */
 Protein* Peptide::getParentProtein() {
 
-  return peptide_src_->getParentProtein();
+  return peptide_srcs_.at(0)->getParentProtein();
 }
 
 /**
@@ -488,7 +420,8 @@ static bool equal_peptides(
  */
 char* Peptide::getSequence() {
 
-  if(peptide_src_ == NULL){
+  //Check that the peptide has parent(s)
+  if(peptide_srcs_.empty()   ){
     carp(CARP_ERROR, "Cannot get sequence from peptide with no peptide src.");
     return NULL;
   }
@@ -513,14 +446,15 @@ char* Peptide::getSequence() {
  */
 char* Peptide::getUnshuffledSequence() {
 
-  if(peptide_src_ == NULL){
+  //check  parent(s) protein of the peptide not be empty 
+  if(peptide_srcs_.empty()){
     carp(CARP_ERROR, "Cannot get sequence from peptide with no peptide src.");
     return NULL;
   }
 
   char* parent_sequence = 
-    peptide_src_->getParentProtein()->getSequencePointer();
-  int start_idx = peptide_src_->getStartIdx();
+    getPeptideSrc()->getParentProtein()->getSequencePointer();
+  int start_idx = getPeptideSrc()->getStartIdx();
 
   char* copy_sequence = copy_string_part(&parent_sequence[start_idx-1],
                                          length_);
@@ -539,12 +473,12 @@ char* Peptide::getUnshuffledSequence() {
  */
 char* Peptide::getSequencePointer() {
 
-  if(peptide_src_ == NULL){
+  if(peptide_srcs_.empty()){
     carp(CARP_FATAL, "ERROR: no peptide_src to retrieve peptide sequence pointer\n");
   }
   char* parent_sequence = 
-    peptide_src_->getParentProtein()->getSequencePointer();
-  int start_idx = peptide_src_->getStartIdx();
+    getPeptideSrc()->getParentProtein()->getSequencePointer();
+  int start_idx = getPeptideSrc()->getStartIdx();
 
   char* pointer_peptide_sequence = &parent_sequence[start_idx-1];
   
@@ -564,12 +498,12 @@ char* Peptide::getSequencePointer() {
  */
 char* Peptide::getSequenceSqt() {
 
-  if(peptide_src_ == NULL){
-    carp(CARP_ERROR, "Cannot get sequence from NULL peptide src.");
+  if(peptide_srcs_.empty()){
+    carp(CARP_ERROR, "Cannot get sequence from no peptide srcs.");
     return NULL;
   }
   
-  char* seq = getSequenceFromPeptideSrcSqt(peptide_src_);
+  char* seq = getSequenceFromPeptideSrcSqt(peptide_srcs_.at(0));
 
   return seq;
 }
@@ -588,13 +522,15 @@ char* Peptide::getSequenceSqt() {
  * \returns A newly allocated string with the sqt-formated peptide sequence.
  */
 char* Peptide::getSequenceFromPeptideSrcSqt(
- PeptideSrc* peptide_src ///< peptide_src -in 
+ PeptideSrc* peptide_src ///< peptide_srcs_ -in 
  ) {
 
   char* copy_sequence = NULL;
   Protein* protein = peptide_src->getParentProtein();
+
   // get peptide start idx of protein in prarent protein
   int start_idx = peptide_src->getStartIdx();
+
   // parent protein length
   int protein_length = protein->getLength();
 
@@ -641,11 +577,11 @@ char* Peptide::getSequenceFromPeptideSrcSqt(
 char Peptide::getCTermFlankingAA() {
 
   // get protein seq
-  Protein* protein = peptide_src_->getParentProtein();
+  Protein* protein = getPeptideSrc()->getParentProtein();
   char* protein_seq = protein->getSequencePointer();
 
   // get peptide start idx, protein index starts at 1
-  int start_index = peptide_src_->getStartIdx();
+  int start_index = getPeptideSrc()->getStartIdx();
 
   char aa = '-';
   // if not at beginning, return char
@@ -665,12 +601,12 @@ char Peptide::getCTermFlankingAA() {
 char Peptide::getNTermFlankingAA() {
 
   // get protein seq and length
-  Protein* protein = peptide_src_->getParentProtein();
+  Protein* protein = getPeptideSrc()->getParentProtein();
   char* protein_seq = protein->getSequencePointer();
   int protein_length = protein->getLength();
 
   // get peptide end idx, protein index starts at 1
-  int start_index = peptide_src_->getStartIdx();
+  int start_index = getPeptideSrc()->getStartIdx();
   int end_index = start_index + length_ - 1;
 
   char aa = '-';
@@ -946,13 +882,15 @@ int Peptide::getMissedCleavageSites() {
 int Peptide::getCDistance(){
 
   int min_index = MAX_PROTEIN_SEQ_LENGTH;
-  PeptideSrc* cur_src = peptide_src_;
-  while( cur_src != NULL ){
+  for(vector<PeptideSrc*>::iterator iter= peptide_srcs_.begin();
+       iter!= peptide_srcs_.end();
+       ++iter
+      ){
+    PeptideSrc* cur_src = *iter;
     int index = cur_src->getStartIdx();
     if( index < min_index ){
       min_index = index;
     }
-    cur_src = cur_src->getNextAssociation();
   }
   return min_index - 1;
 }
@@ -968,10 +906,12 @@ int Peptide::getNDistance(){
 
   int min_index = MAX_PROTEIN_SEQ_LENGTH;
   int peptide_length = getLength();
-  PeptideSrc* cur_src = peptide_src_;
 
-  while( cur_src != NULL ){
-    // get protein length
+  for(vector<PeptideSrc*>::iterator iter= peptide_srcs_.begin();
+       iter!= peptide_srcs_.end();
+       ++iter
+      ){
+    PeptideSrc* cur_src = *iter;
     int protein_length = cur_src->getParentProtein()->getLength();
     // get index of end
     int start_index = cur_src->getStartIdx();
@@ -979,9 +919,8 @@ int Peptide::getNDistance(){
     int cidx = protein_length - (start_index + peptide_length - 1);
     if( cidx < min_index){
       min_index = cidx;
-    }
-    cur_src = cur_src->getNextAssociation();
   }
+  }  
   return min_index;
 
 }
@@ -996,9 +935,9 @@ char* Peptide::getHashValue() {
   char* hash_value = NULL;
   int peptide_length_space = get_number_digits(length_);
   unsigned int protein_idx = 
-    peptide_src_->getParentProtein()->getProteinIdx();
+    getPeptideSrc()->getParentProtein()->getProteinIdx();
   int protein_idx_space = get_number_digits(protein_idx);
-  int peptide_start_idx = peptide_src_->getStartIdx();
+  int peptide_start_idx = getPeptideSrc()->getStartIdx();
   int peptide_start_idx_space = get_number_digits(peptide_start_idx);
   int status;
   int space = peptide_length_space + protein_idx_space + peptide_start_idx_space + 1;
@@ -1205,7 +1144,7 @@ MODIFIED_AA_T* Peptide::generateReversedModSequence() {
 /**
  * Compare peptide sequence
  * \returns true if peptide sequence is identical else false
- */
+ */ 
 bool Peptide::compareSequence(
   Peptide* peptide_one,  ///< the peptide sequence to compare  -out
   Peptide* peptide_two  ///< the peptide sequence to compare  -out
@@ -1218,8 +1157,8 @@ bool Peptide::compareSequence(
   }
   else{
     int current_idx = 0;
-    char* start_one = peptide_one->peptide_src_->getSequencePointer();
-    char* start_two = peptide_two->peptide_src_->getSequencePointer();
+    char* start_one = peptide_one->getPeptideSrc()->getSequencePointer();
+    char* start_two = peptide_two->getPeptideSrc()->getSequencePointer();
     
     while(current_idx < peptide_one->length_){
       if(start_one[current_idx] != start_two[current_idx]){
@@ -1250,8 +1189,8 @@ int Peptide::triCompareSequence(
     short_len = peptide_two->length_;
   }
 
-  char* seq_one = peptide_one->peptide_src_->getSequencePointer();
-  char* seq_two = peptide_two->peptide_src_->getSequencePointer();
+  char* seq_one = peptide_one->getPeptideSrc()->getSequencePointer();
+  char* seq_two = peptide_two->getPeptideSrc()->getSequencePointer();
     
   // stop comparing as soon as they differ
   int pep_idx = 0;
@@ -1301,8 +1240,8 @@ bool Peptide::lessThan(
     short_len = peptide_two->length_;
   }
 
-  char* seq_one = peptide_one->peptide_src_->getSequencePointer();
-  char* seq_two = peptide_two->peptide_src_->getSequencePointer();
+  char* seq_one = peptide_one->getPeptideSrc()->getSequencePointer();
+  char* seq_two = peptide_two->getPeptideSrc()->getSequencePointer();
     
   // stop comparing as soon as they differ
   int pep_idx = 0;
@@ -1445,7 +1384,6 @@ void Peptide::printInFormat(
   ) {
 
   Protein* parent = NULL;
-  PeptideSrc* next_src = peptide_src_;
   char* id = NULL;
   int start_idx = 0;
   char* sequence = NULL;
@@ -1464,38 +1402,15 @@ void Peptide::printInFormat(
     }
   }
 
-  // iterate over all peptide src
-  while(next_src != NULL){
-    parent = next_src->getParentProtein();    
-    id = parent->getIdPointer();
+  for(vector<PeptideSrc*>::iterator iter=peptide_srcs_.begin();
+      iter!=peptide_srcs_.end(); 
+      ++iter
+      ){
+    PeptideSrc* next_src= *iter; 
+    parent=next_src->getParentProtein();
+     id = parent->getIdPointer();
     start_idx = next_src->getStartIdx();
-    
     fprintf(file, "\t%s\t%d\t%d", id, start_idx, length_);
-  
-    // print trypticity of peptide??
-/*
-    if(trypticity_opt){
-      // TODO: change this to switch statement with only one get() call
-      if(get_peptide_src_peptide_type(next_src) == TRYPTIC){
-        fprintf(file, "\t%s", "TRYPTIC");
-      }
-      else if(get_peptide_src_peptide_type(next_src) == PARTIALLY_TRYPTIC){
-        fprintf(file, "\t%s", "PARTIALLY_TRYPTIC");
-      }
-      else if(get_peptide_src_peptide_type(next_src) == N_TRYPTIC){
-        fprintf(file, "\t%s", "N_TRYPTIC");
-      }
-      else if(get_peptide_src_peptide_type(next_src) == C_TRYPTIC){
-        fprintf(file, "\t%s", "C_TRYPTIC");
-      }
-      else if(get_peptide_src_peptide_type(next_src) == NOT_TRYPTIC){
-        fprintf(file, "\t%s", "NOT_TRYPTIC");
-      }
-      else if(get_peptide_src_peptide_type(next_src) == ANY_TRYPTIC){
-        fprintf(file, "\t%s", "ANY_TRYPTIC");
-      }
-    }
-*/
     // print peptide sequence?
     if(flag_out){
       fprintf(file, "\t%s\n", sequence);
@@ -1503,8 +1418,7 @@ void Peptide::printInFormat(
     else{
       fprintf(file, "\n");
     }
-    next_src = next_src->getNextAssociation();    
-  }
+ }
 
   // free sequence if allocated
   if(flag_out){
@@ -1624,52 +1538,48 @@ bool Peptide::serialize(
   FILE* text_file     ///< the ASCII output file (may be NULL)
   ) {
 
-  PEPTIDE_SRC_ITERATOR_T* iterator = 
-    new_peptide_src_iterator(this);
   PeptideSrc* peptide_src = NULL;
   int num_src = 0;
   
   char* seq = getSequence();
-  carp(CARP_DETAILED_DEBUG, "Serializing peptide %s, len %i, mass %.2f", 
-       seq, length_, peptide_mass_);
-
+  carp(CARP_DETAILED_DEBUG, "Serializing peptide %s, len %i, mass %.2f src:%i", 
+       seq, length_, peptide_mass_, peptide_srcs_.size());
+  
   // there must be at least one peptide src
-  if(!peptide_src_iterator_has_next(iterator)){
+  if(peptide_srcs_.empty()){
     carp(CARP_WARNING, "No peptide source.");
     return false;
   }
 
   // count the number of sources
-  while(peptide_src_iterator_has_next(iterator)){
-    peptide_src = peptide_src_iterator_next(iterator);
-
-    ++num_src;
-  }
-  free_peptide_src_iterator(iterator);
-  iterator = new_peptide_src_iterator(this);
+  num_src = peptide_srcs_.size();
 
   // write the peptide struct
   // for compatibility create an old-style struct to write in a block
   PRINT_PEPTIDE_T p;
   p.length = length_;
   p.peptide_mass = peptide_mass_;
-  p.peptide_src = peptide_src_;
+  p.peptide_src = &peptide_srcs_;
   p.modified_seq = modified_seq_;
-  fwrite(&p, sizeof(PRINT_PEPTIDE_T), 1, file);
+  if (fwrite(&p, sizeof(PRINT_PEPTIDE_T), 1, file) != 1) {
+    carp(CARP_ERROR, 
+	 "Failed to write peptide structure:%s", 
+	 strerror(ferror(file)));
+  }
 
   // write peptide src count
   fwrite(&num_src, sizeof(int), 1, file);
 
   // for each peptide src, serialize
-  while(peptide_src_iterator_has_next(iterator)){
-    peptide_src = peptide_src_iterator_next(iterator);
+  for (PeptideSrcIterator iterator = getPeptideSrcBegin();
+       iterator != getPeptideSrcEnd();
+       ++iterator) {
+
+    peptide_src = *iterator;
 
     // serialize the peptide src
     peptide_src->serialize(file);
-    
-    ++num_src;
   }
-  free_peptide_src_iterator(iterator);
   
   // write the number of MODIFIED_AA_T's to serialize
   int mod_seq_length = length_ + 1;
@@ -1704,11 +1614,10 @@ bool Peptide::serialize(
  * appears incorrect.
  *
  * \returns A newly allocated peptide or NULL
- */
+ */ 
 Peptide* Peptide::parseTabDelimited(
   MatchFileReader& file, ///< the tab delimited peptide file -in
-  Database* database,///< the database containing the peptides -in
-  bool use_array,  ///< should I use array peptide_src or link list -in  
+  Database* database,///< the database containing the peptides -in 
   Database* decoy_database ///< database with decoy peptides
   ) {
 
@@ -1735,7 +1644,7 @@ Peptide* Peptide::parseTabDelimited(
     peptide->peptide_mass_ = file.getFloat(PEPTIDE_MASS_COL);
   
     if(!PeptideSrc::parseTabDelimited(peptide, file, database, 
-                                      use_array, decoy_database)){
+                           decoy_database)){
       carp(CARP_ERROR, "Failed to parse peptide src.");
       delete peptide;
       return NULL;
@@ -1744,7 +1653,6 @@ Peptide* Peptide::parseTabDelimited(
   carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
 
   return peptide;
-
 }
 
 /**
@@ -1760,11 +1668,10 @@ Peptide* Peptide::parseTabDelimited(
  */
 Peptide* Peptide::parse(
   FILE* file, ///< the serialized peptide file -in
-  Database* database, ///< the database containing the peptides -in
-  bool use_array  ///< should I use array peptide_src or link list -in  
+  Database* database ///< the database containing the peptides -in
   )
 {  
-  carp(CARP_DETAILED_DEBUG, "Parsing peptide");
+  carp(CARP_DETAILED_DEBUG, "Peptide::parse() : begin");
   
   // the new peptide to be given values in file
   Peptide* peptide = new Peptide();
@@ -1772,8 +1679,11 @@ Peptide* Peptide::parse(
   // read peptide struct
   // for compatibility create an old-style struct to read in a block
   PRINT_PEPTIDE_T p;
-  if(fread(&p, sizeof(PRINT_PEPTIDE_T), 1, file) != 1){
-    carp(CARP_DETAILED_DEBUG, "Did not read peptide struct from file");
+  int ret;
+  if((ret = fread(&p, sizeof(PRINT_PEPTIDE_T), 1, file)) != 1){
+    carp(CARP_DETAILED_DEBUG, "Did not read peptide struct from file %i",ret);
+    carp(CARP_DETAILED_DEBUG, "eof:%i",feof(file));
+    carp(CARP_DETAILED_DEBUG, "error: %s",strerror(ferror(file)));
     // there is no peptide
     delete peptide;
     return NULL;
@@ -1781,11 +1691,11 @@ Peptide* Peptide::parse(
   // copy values to the peptide  
   peptide->length_ = p.length;
   peptide->peptide_mass_ = p.peptide_mass;
-  peptide->peptide_src_ = p.peptide_src ;
+
   peptide->modified_seq_ = p.modified_seq ;
 
   
-  if(!PeptideSrc::parse(peptide, file, database, use_array)){
+  if(!PeptideSrc::parse(peptide, file, database)){
     carp(CARP_ERROR, "Failed to parse peptide src.");
     delete peptide;
     return NULL;
@@ -1814,6 +1724,11 @@ Peptide* Peptide::parse(
     }
   }
   
+  carp(CARP_DEBUG, " sequence:%s",peptide->getSequence());
+  carp(CARP_DEBUG, " length:%i", peptide->getLength());
+  carp(CARP_DEBUG, " num src:%i", peptide->getNumPeptideSrc());
+  carp(CARP_DEBUG, " mass:%f", peptide->peptide_mass_);
+
   carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
   
   return peptide;
@@ -1828,7 +1743,7 @@ Peptide* Peptide::parse(
  * once, parses peptide, checks values, and returns or keeps looking.
  * To get the peptide_src for this peptide, caller uses 
  * fseek(file, peptide_src_file_location, SEEK_SET);
- * parse_peptide_src(peptide, file, database, use_array);
+ * parse_peptide_src(peptide, file, database);
  *
  * Assumes that the peptide has been written to file using
  * serialize_peptide().  
@@ -1855,7 +1770,7 @@ bool Peptide::parseNoSrc(
   }
   length_ = p.length;
   peptide_mass_ = p.peptide_mass;
-  peptide_src_ = p.peptide_src ;
+
   modified_seq_ = p.modified_seq ;
 
   carp(CARP_DETAILED_DEBUG, "read peptide len %i, mass %.2f", length_, peptide_mass_);
@@ -1868,7 +1783,7 @@ bool Peptide::parseNoSrc(
   read = fread(&num_peptide_src, sizeof(int), 1, file);
   if( num_peptide_src < 1 || read != 1){
     carp(CARP_DETAILED_DEBUG, "Num peptide src is %i and num read is %i", num_peptide_src, read);
-    carp(CARP_ERROR, "Peptide must have at least one peptide src.");
+    carp(CARP_FATAL, "Peptide must have at least one peptide src.");
     return false;
   }
 
@@ -1887,8 +1802,8 @@ bool Peptide::parseNoSrc(
   num_read = fread(modified_seq_, sizeof(MODIFIED_AA_T), 
                    mod_seq_len, file);
 
-  // we didn't ad any peptide_src, make sure it's still NULL
-  peptide_src_ = NULL;
+  // we didn't ad any peptide_src, make sure it's still empty
+  peptide_srcs_.clear();
 
   return true;
 }
@@ -1908,11 +1823,11 @@ int Peptide::getProteinInfo(vector<string>& protein_ids,
   protein_ids.clear();
   protein_descriptions.clear();
 
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
-    new_peptide_src_iterator(this);
-
-  while(peptide_src_iterator_has_next(peptide_src_iterator)){
-    PeptideSrc* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+  for(PeptideSrcIterator iter = getPeptideSrcBegin(); 
+      iter!=getPeptideSrcEnd();
+      ++iter
+   ){
+    PeptideSrc* peptide_src = *iter; 
     Protein* protein = peptide_src->getParentProtein();
     protein_ids.push_back(protein->getIdPointer());
 
@@ -1924,9 +1839,7 @@ int Peptide::getProteinInfo(vector<string>& protein_ids,
     replace(description.begin(), description.end(), '>', ']');
     protein_descriptions.push_back(description);
 
-  } // next protein
-
-  free_peptide_src_iterator(peptide_src_iterator);
+  } 
 
   return protein_ids.size();
 }
@@ -1985,66 +1898,6 @@ char residue_iterator_next(
   return residue_iterator->sequence[residue_iterator->residue_idx - 1];
 }
 
-
-/**
- * Protein peptide association Iterator
- */
-
-/**
- * Instantiates a new peptide_src_iterator from a peptide.
- * \returns a PeptideSrc object.
- */
-PEPTIDE_SRC_ITERATOR_T* new_peptide_src_iterator(
-  Peptide* peptide ///< peptide's fields to iterate -in
-  )
-{
-  PEPTIDE_SRC_ITERATOR_T* association_iterator =
-    (PEPTIDE_SRC_ITERATOR_T*)mycalloc(1,sizeof(PEPTIDE_SRC_ITERATOR_T));
-  association_iterator->peptide = peptide;
-  association_iterator->current = peptide->getPeptideSrc();
-  return association_iterator;
-}
-
-/**
- * Frees an allocated peptide_src_iterator object.
- */
-void free_peptide_src_iterator(
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator ///< free this object -in
-  )
-{
-  free(peptide_src_iterator);
-
-}
-
-/**
- * The basic iterator functions.
- * \returns true if there are additional peptide_srcs to iterate over, false if not.
- */
-bool peptide_src_iterator_has_next(
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
-  )
-{
-  return !(peptide_src_iterator->current == NULL);
-}
-
-/**
- * \returns The next peptide_srcs in the peptide.
- */
-PeptideSrc* peptide_src_iterator_next(
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
-  )
-{
-  PeptideSrc* previous = peptide_src_iterator->current;
-  if(peptide_src_iterator->current != NULL){
-    peptide_src_iterator->current = 
-      peptide_src_iterator->current->getNextAssociation();
-  }
-  else{
-    carp(CARP_FATAL, "ERROR: no more peptide_srcs to iterate\n");
-  }
-  return previous;
-}
-
 /**
  * \brief Builds a comma delimited string listing the 
  * protein id(peptide start index) for the sources of 
@@ -2056,14 +1909,15 @@ string Peptide::getProteinIdsLocations() {
 
   set<string> protein_ids_locations;
 
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
-    new_peptide_src_iterator(this);
-
+ 
   std::ostringstream protein_field_stream;
+  
+   
 
-  if (peptide_src_iterator_has_next(peptide_src_iterator)) {
-    while(peptide_src_iterator_has_next(peptide_src_iterator)){
-      PeptideSrc* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    if (!peptide_srcs_.empty()) {
+      for( PeptideSrcIterator iter = getPeptideSrcBegin();
+	   iter!=getPeptideSrcEnd();++iter){
+      PeptideSrc* peptide_src =*iter;
       Protein* protein = peptide_src->getParentProtein();
       char* protein_id = protein->getId();
       int peptide_loc = peptide_src->getStartIdx();
@@ -2073,7 +1927,7 @@ string Peptide::getProteinIdsLocations() {
       protein_ids_locations.insert(protein_loc_stream.str());
     }
   }
-  free(peptide_src_iterator);
+
 
   set<string>::iterator result_iter = protein_ids_locations.begin();
   string protein_field_string = *result_iter;
@@ -2095,15 +1949,14 @@ string Peptide::getProteinIdsLocations() {
  */
 char* Peptide::getProteinIds() {
 
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
-    new_peptide_src_iterator(this);
   char *protein_field = NULL;
 
-  if (peptide_src_iterator_has_next(peptide_src_iterator)) {
+  if (!peptide_srcs_.empty()) {
 
     // Peptide has at least one parent.
     
-    PeptideSrc* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    PeptideSrcIterator iter = getPeptideSrcBegin();
+    PeptideSrc* peptide_src = *iter;
     Protein* protein = peptide_src->getParentProtein();
 
     const int allocation_factor = 1;
@@ -2123,9 +1976,8 @@ char* Peptide::getProteinIds() {
     delete protein_id;
 
     // Following proteins in list have leading ','
-
-    while(peptide_src_iterator_has_next(peptide_src_iterator)){
-      peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    for (;iter != getPeptideSrcEnd(); ++iter) {
+      peptide_src = *iter;
       protein = peptide_src->getParentProtein();
       protein_id = protein->getId();
       protein_id_len = strlen(protein_id);
@@ -2141,7 +1993,7 @@ char* Peptide::getProteinIds() {
         protein_field_free += allocation_factor * (protein_id_len + 1);
         protein_field_tail = protein_field + tail_offset;
       }
-
+    
       *protein_field_tail = ',';
       ++protein_field_tail;
       --protein_field_free;
@@ -2151,8 +2003,6 @@ char* Peptide::getProteinIds() {
       delete protein_id;
     }
   }
-
-  free(peptide_src_iterator);
 
   return protein_field;
 }
@@ -2166,15 +2016,13 @@ char* Peptide::getProteinIds() {
  */
 char* Peptide::getFlankingAAs() {
 
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
-    new_peptide_src_iterator(this);
   char *flanking_field = NULL;
 
-  if (peptide_src_iterator_has_next(peptide_src_iterator)) {
+  if (!peptide_srcs_.empty()) {
 
     // Peptide has at least one parent.
-    
-    PeptideSrc* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+     PeptideSrcIterator iter = getPeptideSrcBegin();
+    PeptideSrc* peptide_src = *iter;
     Protein* protein = peptide_src->getParentProtein();
 
     int protein_length = protein->getLength();
@@ -2203,9 +2051,12 @@ char* Peptide::getFlankingAAs() {
     *flanking_field_tail = 0;
 
     flanking_str_len = 3; // leadinng ',', left and right flanking AA
-    while(peptide_src_iterator_has_next(peptide_src_iterator)){
 
-      peptide_src = peptide_src_iterator_next(peptide_src_iterator);
+    //start from second peptide_src 
+    iter++;
+    for(;iter!=getPeptideSrcEnd();++iter){
+
+      peptide_src = *iter;
       protein = peptide_src->getParentProtein();
       protein_length = protein->getLength();
       peptide_length = getLength();
@@ -2224,7 +2075,7 @@ char* Peptide::getFlankingAAs() {
         flanking_field_free += (allocation_factor * flanking_str_len);
         flanking_field_tail = flanking_field + tail_offset;
       } 
-      
+         
       // Following flanking AA in list have leading ','
       *flanking_field_tail = ',';
       ++flanking_field_tail;
@@ -2243,10 +2094,9 @@ char* Peptide::getFlankingAAs() {
 
   }
 
-  free(peptide_src_iterator);
-
   return flanking_field;
 }
+
 
 /*
  * Local Variables:

@@ -369,8 +369,7 @@ Peptide* void_index_peptide_iterator_next(
  */
 BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
   Index* index, ///< The index object which we are iterating over -in
-  FILE* file, ///< the bin to parse peptides
-  bool use_array  ///< use array peptide_src or link list -in
+  FILE* file ///< the bin to parse peptides
   );
 
 /**

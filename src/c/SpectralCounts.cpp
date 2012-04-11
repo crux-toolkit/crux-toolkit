@@ -2,6 +2,7 @@
 #include "SpectralCounts.h"
 #include "crux-utils.h"
 #include "OutputFiles.h"
+#include "Peptide.h"
 #include "ProteinPeptideIterator.h"
 #include "SpectrumCollectionFactory.h"
 #include "MatchCollectionIterator.h"
@@ -163,11 +164,10 @@ void SpectralCounts::getProteinToPeptides(){
   for (PeptideToScore::iterator pep_it = peptide_scores_.begin();
        pep_it != peptide_scores_.end(); ++pep_it){
     Peptide* peptide = pep_it->first;
-    PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator =
-      new_peptide_src_iterator(peptide);
-    while( peptide_src_iterator_has_next(peptide_src_iterator)) {
-      PeptideSrc* peptide_src = 
-        peptide_src_iterator_next(peptide_src_iterator);
+    for(PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
+	iter!= peptide->getPeptideSrcEnd();
+	++iter) {
+      PeptideSrc* peptide_src = *iter; 
       Protein* protein = peptide_src->getParentProtein();
       if (protein_supporting_peptides_.find(protein) == 
           protein_supporting_peptides_.end()){
@@ -176,7 +176,6 @@ void SpectralCounts::getProteinToPeptides(){
       }
       protein_supporting_peptides_[protein].insert(peptide);
     }
-    free(peptide_src_iterator);
   }
 }
 
@@ -210,8 +209,6 @@ void SpectralCounts::getProteinToMetaProtein(){
  */
 void SpectralCounts::getProteinScoresDNSAF() {
 
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = NULL;
-
   //calculate unique scores (unique peptides).
   for (PeptideToScore::iterator pep_it = peptide_scores_unique_.begin();
     pep_it != peptide_scores_unique_.end();
@@ -219,10 +216,10 @@ void SpectralCounts::getProteinScoresDNSAF() {
 
     Peptide* peptide = pep_it->first;
     FLOAT_T pep_score = pep_it->second;
-    peptide_src_iterator = new_peptide_src_iterator(peptide);
-    while( peptide_src_iterator_has_next(peptide_src_iterator)) {
-      PeptideSrc* peptide_src = 
-        peptide_src_iterator_next(peptide_src_iterator);
+    for(PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
+	iter!=peptide->getPeptideSrcEnd();
+	++iter) {
+      PeptideSrc* peptide_src = *iter;
       Protein* protein = peptide_src->getParentProtein();
       if (protein_scores_unique_.find(protein) == protein_scores_unique_.end()){
         protein_scores_unique_[protein] = 0;
@@ -230,8 +227,7 @@ void SpectralCounts::getProteinScoresDNSAF() {
       }
 
       protein_scores_unique_[protein] += pep_score;
-    }
-    free(peptide_src_iterator);    
+    }   
   }
 
   //Handle shared peptides
@@ -248,27 +244,28 @@ void SpectralCounts::getProteinScoresDNSAF() {
     ++pep_it) {
     Peptide* peptide = pep_it->first;
     FLOAT_T shared_pep_score = pep_it->second;
-    peptide_src_iterator = new_peptide_src_iterator(peptide);
+
     double unique_sum = 0.0;
    
-    peptide_src_iterator = new_peptide_src_iterator(peptide);
-    while( peptide_src_iterator_has_next(peptide_src_iterator)) {
-      PeptideSrc* peptide_src = 
-      peptide_src_iterator_next(peptide_src_iterator);
+    for(PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
+	iter!=peptide->getPeptideSrcEnd();
+	++iter){
+      PeptideSrc* peptide_src = *iter;
       
       Protein* protein = peptide_src->getParentProtein();
       if (protein_scores_unique_.find(protein) != protein_scores_unique_.end()) {
         unique_sum += protein_scores_unique_[protein];
       }
         
-    }
-    free(peptide_src_iterator);    
+    }   
   
     if (unique_sum != 0) {
-      peptide_src_iterator = new_peptide_src_iterator(peptide);
-      while (peptide_src_iterator_has_next(peptide_src_iterator)) {
-        PeptideSrc* peptide_src = 
-        peptide_src_iterator_next(peptide_src_iterator);
+     
+      for(PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
+	  iter!=peptide->getPeptideSrcEnd();
+	  ++iter){
+
+        PeptideSrc* peptide_src = *iter;
       
         Protein* protein = peptide_src->getParentProtein();
         if (protein_scores_unique_.find(protein) != protein_scores_unique_.end()) {
@@ -278,7 +275,6 @@ void SpectralCounts::getProteinScoresDNSAF() {
           protein_scores_shared_[protein] += d_factor * shared_pep_score;
         }
       }
-      free(peptide_src_iterator);
     }
   }
 
@@ -315,18 +311,16 @@ void SpectralCounts::getProteinScores(){
          pep_it != peptide_scores_.end(); ++pep_it){
       Peptide* peptide = pep_it->first;
       FLOAT_T pep_score = pep_it->second;
-      PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator =
-        new_peptide_src_iterator(peptide);
-      while( peptide_src_iterator_has_next(peptide_src_iterator)) {
-        PeptideSrc* peptide_src = 
-          peptide_src_iterator_next(peptide_src_iterator);
+      for (PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
+	   iter!=peptide->getPeptideSrcEnd();
+	   ++iter) {
+	PeptideSrc* peptide_src =*iter;
         Protein* protein = peptide_src->getParentProtein();
         if (protein_scores_.find(protein) == protein_scores_.end()){
-          protein_scores_.insert(make_pair(protein, 0.0));
-        }
+	  protein_scores_.insert(make_pair(protein, 0.0));
+	}
         protein_scores_[protein] += pep_score;
       }
-      free(peptide_src_iterator);
     }
   }
 }

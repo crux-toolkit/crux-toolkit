@@ -29,9 +29,6 @@ IndexPeptideIterator::IndexPeptideIterator(
   carp(CARP_DETAILED_DEBUG, "Creating new %sindex iterator", 
        ((is_decoy) ? "decoy " : ""));
 
-  // set peptide implementation to array peptide_src
-  // this determines which peptide free method to use
-  Peptide::setPeptideSrcImplementation(false);
 
   // initialize a new index_peptide_iterator object
   index_ = NULL;
@@ -226,7 +223,7 @@ bool IndexPeptideIterator::findPeptideInCurrentIndexFile()
     pep_end = ftell(cur_file);
     fseek(cur_file, src_loc, SEEK_SET);
     Database* database = index_->getDatabase(is_decoy_);
-    if( ! PeptideSrc::parse(peptide, cur_file, database, true) ){
+    if( ! PeptideSrc::parse(peptide, cur_file, database) ){
       carp(CARP_ERROR, "Could not parse peptide src");
       file_finished = true; // maybe we could read more, but unlikly
     }

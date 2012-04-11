@@ -60,15 +60,12 @@ bool XLinkSite::hasSite(
   switch (type_) {
     case XLINKSITE_NTERM:
       if (idx == 0) {
-        
-        PeptideSrc* src = peptide->getPeptideSrc();
-        while (src != NULL) {
-          carp(CARP_DEBUG,"nterm peptide start_idx:%d",src->getStartIdx());
-          if (src->getStartIdx() == 1) {
-            return true;
-          }
-          src = src->getNextAssociation();
-        }
+	vector<PeptideSrc*>& srcs = peptide->getPeptideSrcVector();
+	for (size_t idx = 0; idx < srcs.size(); idx++ ) {
+	  if (srcs[idx]->getStartIdx() == 1) {
+	    return true;
+	  }
+	}
       }
       return false;
       break;
