@@ -5,6 +5,9 @@
  * standard index iterator, it filters by digestion type
  *****************************************************************************/
 #include "IndexFilteredPeptideIterator.h"
+#include <vector>
+
+using namespace std;
 
 /**
  * Instantiates a new index_filtered_peptide_iterator from a index.
@@ -53,24 +56,21 @@ bool IndexFilteredPeptideIterator::hasNext(){
 bool IndexFilteredPeptideIterator::setup()
 {
   Peptide* peptide = NULL;
-  PeptideSrc* src = NULL;
   DIGEST_T required_digestion = index_->getSearchConstraint()->getDigest();
   bool match = false;
   
   // initialize index_filered
   while(IndexPeptideIterator::hasNext()){
     peptide = IndexPeptideIterator::next();
-    src = peptide->getPeptideSrc();
+    vector<PeptideSrc*>& srcs = peptide->getPeptideSrcVector();
     // mass, length has been already checked in index_peptide_iterator
     // check if peptide type matches the constraint
     // find at least one peptide_src for which cleavage is correct
-    while(src != NULL){
-      if(src->getDigest() >= required_digestion){
+    for (size_t idx = 0; idx < srcs.size(); idx++) {
+      if(srcs[idx]->getDigest() >= required_digestion){
         match = true;
         break;
       }
-      // check the next peptide src
-      src = src->getNextAssociation();
     }
     
     // add more filters to the peptides here, if they don't meet

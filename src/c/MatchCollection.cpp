@@ -2546,7 +2546,6 @@ void MatchCollection::updateProteinCounters(
   Peptide* peptide  ///< peptide information to update counters -in
   )
 {
-  PEPTIDE_SRC_ITERATOR_T* src_iterator = NULL;
   PeptideSrc* peptide_src = NULL;
   Protein* protein = NULL;
   unsigned int protein_idx = 0;
@@ -2569,11 +2568,12 @@ void MatchCollection::updateProteinCounters(
     unique = true;
   }
   // first update protein counter
-  src_iterator = new_peptide_src_iterator(peptide);
-  
   // iterate overall parent proteins
-  while(peptide_src_iterator_has_next(src_iterator)){
-    peptide_src = peptide_src_iterator_next(src_iterator);
+  for (PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
+       iter != peptide->getPeptideSrcEnd();
+       ++iter) {
+
+    peptide_src = *iter;
     protein = peptide_src->getParentProtein();
     protein_idx = protein->getProteinIdx();
     
@@ -2585,7 +2585,6 @@ void MatchCollection::updateProteinCounters(
       ++post_protein_peptide_counter_[protein_idx];
     }
   }  
-  free_peptide_src_iterator(src_iterator);
 }
 
 /**

@@ -613,30 +613,28 @@ void Match::printSqt(
           );
   free(sequence);
   
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
-    new_peptide_src_iterator(peptide);
   PeptideSrc* peptide_src = NULL;
   char* protein_id = NULL;
   Protein* protein = NULL;
   const char* rand = "";
-  
-  while(peptide_src_iterator_has_next(peptide_src_iterator)){
-    peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-    protein = peptide_src->getParentProtein();
-    protein_id = protein->getId();
 
-    // only prepend "rand_" if we are doing a fasta search
-    if( null_peptide_ 
-        && (protein->getDatabase()->getDecoyType() == NO_DECOYS) ){
-      rand = "rand_";
-    }
+  for(PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
+      iter != peptide->getPeptideSrcEnd();
+      ++iter){
+               peptide_src = *iter;
+               protein = peptide_src->getParentProtein();
+               protein_id = protein->getId();
+
+               // only prepend "rand_" if we are doing a fasta search
+               if( null_peptide_ 
+                   && (protein->getDatabase()->getDecoyType() == NO_DECOYS) ){
+                    rand = "rand_";
+                  }
     
-    // print match info (locus line), add rand_ to locus name for decoys
-    fprintf(file, "L\t%s%s\n", rand, protein_id);      
-    free(protein_id);
-  }
-  
-  free_peptide_src_iterator(peptide_src_iterator);
+      // print match info (locus line), add rand_ to locus name for decoys
+      fprintf(file, "L\t%s%s\n", rand, protein_id);      
+      free(protein_id);
+     }
   
   return;
 }
@@ -1120,7 +1118,6 @@ Match* Match::parseTabDelimited(
 
   Peptide* peptide = Peptide::parseTabDelimited(result_file, 
                                                 database, 
-                                                true, 
                                                 decoy_database);
   if(peptide == NULL){
     carp(CARP_ERROR, "Failed to parse peptide (tab delimited)");

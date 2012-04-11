@@ -14,6 +14,7 @@
 #include <set>
 #include "utils.h"
 #include "objects.h"
+#include "Peptide.h"
 #include "SpectrumCollection.h"
 #include "OutputFiles.h"
 

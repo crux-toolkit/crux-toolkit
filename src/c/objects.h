@@ -93,12 +93,6 @@ class PeptideConstraint;
  */
 typedef struct residue_iterator RESIDUE_ITERATOR_T;
 
-/**
- * \typedef PEPTIDE_SRC_ITERATOR_T 
- * \brief An object to iterate over the protein peptide associations in a peptide
- */
-typedef struct peptide_src_iterator PEPTIDE_SRC_ITERATOR_T;
-
 // REPLACE PEPTIDE_TYPE_T with DIGEST_T and ENZYME_T
 /**
  * \enum _digest_type
@@ -271,6 +265,7 @@ typedef enum _window_type WINDOW_TYPE_T;
  * \brief object for mapping a peptide to it's parent protein.
  */
 class PeptideSrc;
+
 
 /**
  * \class Protein
@@ -524,6 +519,12 @@ class MatchIterator;
 class MatchCollectionIterator;
 
 /**
+ *\typedef  PeptideSrcIterator 
+ *\brief An object to iterate over the PeptideSrc in a peptide  
+ */
+typedef std::vector<PeptideSrc*>::iterator  PeptideSrcIterator; 
+
+/**
  * The enum for algorithm type (PERCOLATOR, CZAR, ALL)
  */
 enum _algorithm {PERCOLATOR_ALGORITHM, 
@@ -758,6 +759,8 @@ typedef std::map<Protein*, MetaProtein, bool(*)(Protein*, Protein*) > ProteinToM
  * \brief Mapping of MetaProtein to ranks to the rank asigned to it
  */
 typedef std::map<MetaProtein, int, bool(*)(MetaProtein, MetaProtein) > MetaToRank;
+
+								    
 
 #endif
 

@@ -26,10 +26,6 @@ DatabasePeptideIterator::DatabasePeptideIterator(
   bool is_decoy ///< return decoy instead of target peptides
   )
 {
-  // set peptide implementation to linklist peptide_src
-  // this determines which peptide free method to use
-  Peptide::setPeptideSrcImplementation(true);
-
   Protein* next_protein = NULL;
 
   // Initialize

@@ -41,12 +41,12 @@ class Peptide {
    * determines if the peptide src are created by link lists or array
    * if true, peptides are implented with link list peptide src, else array
    */
-  static bool PEPTIDE_SRC_USE_LINK_LIST;
 
   /* Private data types */
   unsigned char length_; ///< The length of the peptide
   FLOAT_T peptide_mass_;   ///< The peptide's mass.
-  PeptideSrc* peptide_src_; ///< a linklist of peptide_src   
+  std:: vector<PeptideSrc*> peptide_srcs_; ///< a vector of peptide_srcs_
+
   MODIFIED_AA_T* modified_seq_; ///< peptide sequence with modifications
   MODIFIED_AA_T* decoy_modified_seq_; ///< randomized peptide sequence
 
@@ -122,13 +122,7 @@ class Peptide {
   /*  Getters and Setters  */
   
   /*  Get-set:  mass */
-  /**
-   * sets the peptide src implementation in the peptide object
-   * This should be set only once and not be altered
-   */
-  static void setPeptideSrcImplementation(
-    bool use_link_list ///< does the peptide use link list peptide src
-    );
+
 
   /**
    * sets the peptide mass
@@ -187,9 +181,17 @@ class Peptide {
     );
 
   /**
-   * returns a point to the peptide_protein_association field of the peptide
+   * returns a pointer to the first PeptideSrc object of the peptide
    */
   PeptideSrc* getPeptideSrc();
+
+  /**
+   * returns a point to the peptide_protein_association field of the peptide
+   */
+  std::vector<PeptideSrc*>& getPeptideSrcVector();
+
+  PeptideSrcIterator getPeptideSrcBegin();
+  PeptideSrcIterator getPeptideSrcEnd();
 
   /**
    * get the peptide->first peptide_src->parent protein->database
@@ -574,7 +576,6 @@ class Peptide {
   static Peptide* parseTabDelimited(
     MatchFileReader& file, ///< the tab delimited peptide file -in
     Database* database,///< the database containing the peptides -in
-    bool use_array,  ///< should I use array peptide_src or link list -in  
     Database* decoy_database = NULL ///< optional database with decoy peptides
     );
 
@@ -591,8 +592,7 @@ class Peptide {
    */
   static Peptide* parse(
     FILE* file, ///< the serialized peptide file -in
-    Database* database,///< the database containing the peptides -in
-    bool use_array  ///< should I use array peptide_src or link list -in  
+    Database* database ///< the database containing the peptides -in
     );
 
   /**
@@ -684,41 +684,6 @@ bool residue_iterator_has_next(
 char residue_iterator_next(
   RESIDUE_ITERATOR_T* residue_iterator  ///< the query iterator -in
   );
-
-/**
- * Protein peptide association Iterator
- */
-
-/**
- * Instantiates a new peptide_src_iterator from a peptide.
- * \returns a PeptideSrc object.
- */
-PEPTIDE_SRC_ITERATOR_T* new_peptide_src_iterator(
-  Peptide* peptide ///< peptide's fields to iterate -in
-  );
-
-/**
- * Frees an allocated peptide_src_iterator object.
- */
-void free_peptide_src_iterator(
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator ///< free this object -in
-  );
-
-/**
- * The basic iterator functions.
- * \returns true if there are additional peptide_srcs to iterate over, false if not.
- */
-bool peptide_src_iterator_has_next(
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
-  );
-
-/**
- * \returns The next peptide_srcs in the peptide.
- */
-PeptideSrc* peptide_src_iterator_next(
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator///< the query iterator -in
-  );
-
 
 #endif
 

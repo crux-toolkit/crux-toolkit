@@ -132,8 +132,6 @@ struct bin_peptide_iterator{
   FILE* index_file; ///< The current file stream that we are reading from
   bool has_next; ///< Is there another peptide?
   Peptide* peptide; ///< the next peptide to return
-  bool use_array; 
-  ///< Use array peptide_src or link list peptide_src when parsing peptides
 };    
 
 
@@ -1472,10 +1470,9 @@ bool initialize_bin_peptide_iterator(
 
   FILE* file = bin_peptide_iterator->index_file;
   Database* database = bin_peptide_iterator->database;// not decoy
-  bool use_src_array = bin_peptide_iterator->use_array;
 
   // allocate peptide to used to parse
-  Peptide* peptide = Peptide::parse(file, database, use_src_array);
+  Peptide* peptide = Peptide::parse(file, database);
 
   if( peptide == NULL ){
     bin_peptide_iterator->peptide = NULL;
@@ -1497,19 +1494,9 @@ bool initialize_bin_peptide_iterator(
 BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
   Index* index, ///< The index object which we are iterating over -in
   FILE* file, ///< the bin to parse peptides
-  bool use_array,  ///< use array peptide_src or link list when parsing peptides -in
   Database* database ///< the index's database to use (target/decoy)
   )
 {
-  if(use_array){
-    // set peptide implementation to array peptide_src
-    // this determines which peptide free method to use
-    Peptide::setPeptideSrcImplementation(false);
-  }
-  else{// use link list
-    Peptide::setPeptideSrcImplementation(true);
-  }
-
   // allocate a new index_peptide_iterator object
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator =
     (BIN_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(BIN_PEPTIDE_ITERATOR_T));
@@ -1518,7 +1505,6 @@ BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
   bin_peptide_iterator->index = index;
   bin_peptide_iterator->database = database;
   bin_peptide_iterator->index_file = file;
-  bin_peptide_iterator->use_array = use_array;
     
   if(!initialize_bin_peptide_iterator(bin_peptide_iterator)){
     carp(CARP_WARNING, "failed to initalize bin peptide iterator");
@@ -1600,7 +1586,7 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
 {
   // set peptide implementation to array peptide_src
   // this determines which peptide free method to use
-  Peptide::setPeptideSrcImplementation(false);
+  //  Peptide::setPeptideSrcImplementation(false);
   
   // create database sorted peptide iterator
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator =
@@ -1611,9 +1597,8 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
   rewind(file);
 
   // create bin_peptide_iterator
-  // use link list peptide_src implementation to merge peptides
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator =
-    new_bin_peptide_iterator(index, file, false, database);
+    new_bin_peptide_iterator(index, file, database);
 
   // create a sorted peptide iterator that will sort all the peptides 
   // from bin peptide_iterator

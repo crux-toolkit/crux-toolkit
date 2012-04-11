@@ -535,24 +535,23 @@ void get_protein_ids_locations(
   set<string>& protein_ids_locations ///< set of protein_id(peptide start index). -out
   ) {
 
-  PEPTIDE_SRC_ITERATOR_T* peptide_src_iterator = 
-    new_peptide_src_iterator(peptide);
-
   std::ostringstream protein_field_stream;
 
-  if (peptide_src_iterator_has_next(peptide_src_iterator)) {
-    while(peptide_src_iterator_has_next(peptide_src_iterator)){
-      PeptideSrc* peptide_src = peptide_src_iterator_next(peptide_src_iterator);
-      Protein* protein = peptide_src->getParentProtein();
-      char* protein_id = protein->getId();
-      int peptide_loc = peptide_src->getStartIdx();
-      std::ostringstream protein_loc_stream;
-      protein_loc_stream << protein_id << "(" << peptide_loc << ")";
-      free(protein_id);
-      protein_ids_locations.insert(protein_loc_stream.str());
-    }
+  for (PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
+       iter != peptide->getPeptideSrcEnd();
+       ++iter) {
+
+    PeptideSrc* peptide_src = *iter;
+    Protein* protein = peptide_src->getParentProtein();
+    char* protein_id = protein->getId();
+    int peptide_loc = peptide_src->getStartIdx();
+    std::ostringstream protein_loc_stream;
+    protein_loc_stream << protein_id << "(" << peptide_loc << ")";
+    free(protein_id);
+    protein_ids_locations.insert(protein_loc_stream.str());
+    
   }
-  free(peptide_src_iterator);
+
 }
 
 /**

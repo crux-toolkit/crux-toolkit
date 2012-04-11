@@ -597,7 +597,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
 {  
   unsigned int peptide_idx = 0;
   unsigned int unique_peptide_count = peptide_count;
-
+  carp(CARP_DEBUG,"new_sorted_peptide_iterator_bin: peptide count:%i",peptide_count);
   SORTED_PEPTIDE_ITERATOR_T* sorted_peptide_iterator =
     (SORTED_PEPTIDE_ITERATOR_T*)mycalloc(1, sizeof(SORTED_PEPTIDE_ITERATOR_T));
 
@@ -617,6 +617,7 @@ SORTED_PEPTIDE_ITERATOR_T* new_sorted_peptide_iterator_bin(
     }
     
     // store peptide in peptide array
+    carp(CARP_DEBUG, "new_sorted_peptide_iterator_bin: getting next peptide");
     sorted_peptide_iterator->peptide_array[peptide_idx] = 
       bin_peptide_iterator_next(bin_peptide_iterator);
     
