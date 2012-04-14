@@ -53,7 +53,7 @@ class Barista : public CruxApplication
     max_fdr(0),
     max_peptides(0),   
     max_fdr_psm(0),
-    max_fdr_pep(0){}
+    max_fdr_pep(0){srand(seed);}
   ~Barista(){clear();}
   void clear();
   void print_description();
