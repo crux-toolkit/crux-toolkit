@@ -1566,7 +1566,8 @@ void Barista :: setup_for_reporting_results()
   PepScores::fillFeaturesFull(peptrainset, d);
   d.clear_labels_prot_training();
   
-  int fdr_trn = getOverFDRProtParsimonious(trainset,max_net_prot,selectionfdr);
+  int fdr_trn = getOverFDRProt(trainset,max_net_prot,selectionfdr);
+  fdr_trn = getOverFDRProtParsimonious(trainset,max_net_prot,selectionfdr);
 #ifdef CRUX
   carp(CARP_INFO, "total proteins parsimonious at q<%.2f: %d", selectionfdr, fdr_trn);
 #else
@@ -2182,8 +2183,9 @@ void Barista :: setup_for_training(int trn_to_tst)
 
 int Barista :: run()
 {
+  
   setup_for_training(2);
-  //srand(seed);
+  
   train_net(selectionfdr, trainset.size());
 
   net.copy(max_net_prot);
@@ -2224,9 +2226,9 @@ int Barista :: run_tries()
 
 int Barista :: run_tries_multi_task()
 {
-  setup_for_training(2);
-  //srand(seed);
-  
+  srand(seed);
+  setup_for_training(0);
+    
 #ifdef CRUX
   carp(CARP_INFO, "training the model");
 #else

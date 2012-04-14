@@ -16,6 +16,7 @@ ProtScores::ProtScores()
     neg=0;
     pos=0;
     posNow=0;
+
 }
 
 ProtScores::~ProtScores()
