@@ -33,6 +33,7 @@ double Barista :: check_gradients_hinge_one_net(int protind, int label)
   double n = pow(num_pep,alpha);
   for(unsigned int i = 0; i < max_psm_inds.size() ; i++)
     sm+= max_psm_scores[i];
+
   sm /= n;
 
   //if(sm < 1)
@@ -1866,7 +1867,7 @@ double Barista :: get_protein_score(int protind)
   assert((int)max_psm_scores.size() == num_pep);
   
   double sm = 0.0;
-  double n = pow(num_all_pep,alpha);
+  int n = (int)pow(num_all_pep,alpha);
   for(unsigned int i = 0; i < max_psm_inds.size() ; i++)
     sm+= max_psm_scores[i];
   sm /= n;
@@ -1897,6 +1898,9 @@ void Barista :: calc_gradients(int protind, int label)
 double Barista :: train_hinge(int protind, int label)
 {
   double sm = get_protein_score(protind);
+  
+  
+    
   double err = max(0.0,1.0-sm*label);
 
   if(sm*label < 1)
@@ -2004,7 +2008,8 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 {
   for (int k = 0; k < nepochs; k++)
     {
-      if(verbose > 0)
+      //fdebug << "epoch " << k << endl;
+    if(verbose > 0)
 	cout << "epoch " << k << endl;
       double err_sum = 0.0;
       for(int i = 0; i < trainset.size(); i++)
@@ -2013,15 +2018,20 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 	  int protind = trainset[ind].protind;
 	  int label = trainset[ind].label;
 	  err_sum += train_hinge(protind,label);
-
+	  	  
 	  ind = rand()%interval;
 	  int psmind = psmtrainset[ind].psmind;
 	  label = psmtrainset[ind].label;
 	  train_hinge_psm(psmind,label);
-
-	}
-      
+	 
+	}      
       int fdr_trn = getOverFDRProt(trainset,net,selectionfdr);
+      
+      //fdebug << fixed;
+      //for(int j = 0; j < trainset.size(); j++)
+	//fdebug << j << " " << trainset[j].protind << " " << setprecision(16) << trainset[j].score << endl;
+	//fdebug << j << " " << trainset[j].protind  << endl;
+      
       if(verbose > 0)
 	{
 	  if(interval == trainset.size())
@@ -2144,7 +2154,7 @@ void Barista :: setup_for_training(int trn_to_tst)
 
   num_features = d.get_num_features();
   int has_bias = 1;
-  int is_lin = 0;
+  int is_lin = 1;
   if(is_lin)
     num_hu = 1;
   net.initialize(num_features, num_hu, is_lin, has_bias);
@@ -2183,8 +2193,8 @@ void Barista :: setup_for_training(int trn_to_tst)
 
 int Barista :: run()
 {
-  
-  setup_for_training(2);
+  srand(seed);
+  setup_for_training(0);
   
   train_net(selectionfdr, trainset.size());
 
@@ -2229,6 +2239,8 @@ int Barista :: run_tries_multi_task()
   srand(seed);
   setup_for_training(0);
     
+  //fdebug.open("debug.txt");
+
 #ifdef CRUX
   carp(CARP_INFO, "training the model");
 #else
@@ -2249,16 +2261,19 @@ int Barista :: run_tries_multi_task()
     }
     
   //net.copy(max_net_prot);
+  
   int interval= getOverFDRPSM(psmtrainset,max_net_psm,0.01)*2;
   if(interval > psmtrainset.size())
     interval = psmtrainset.size()/4;
   if(interval < 50)
     interval = psmtrainset.size()/4;
   train_net_multi_task(selectionfdr, interval);
-    
+  
   //report_all_fdr_counts();
   report_all_results_xml_tab();
   
+  //fdebug.close();
+
    return 0;
 
 }
@@ -2698,7 +2713,7 @@ int Barista::main(int argc, char **argv) {
     return 1;
 
   run_tries_multi_task();
-  if(skip_cleanup_flag != 1)
+   if(skip_cleanup_flag != 1)
     sqtp.clean_up(out_dir);
   
   return 0;

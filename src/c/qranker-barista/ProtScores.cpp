@@ -1,12 +1,11 @@
 #include "ProtScores.h"
 
 
-
-inline bool operator>(const ProtScoreHolder &one, const ProtScoreHolder &other) 
-    {return (one.score>other.score);}
+//inline bool operator<(const ProtScoreHolder &one, const ProtScoreHolder &other) 
+//{return (one.score<other.score);}
 
 inline bool operator<(const ProtScoreHolder &one, const ProtScoreHolder &other) 
-    {return (one.score<other.score);}
+{return (one.score<other.score) || (one.score == other.score && one.protind < other.protind);}
 
 
 
@@ -16,7 +15,6 @@ ProtScores::ProtScores()
     neg=0;
     pos=0;
     posNow=0;
-
 }
 
 ProtScores::~ProtScores()
@@ -186,6 +184,22 @@ int ProtScores::calcOverFDR(double fdr) {
   sort(scores.begin(),scores.end());
   reverse(scores.begin(),scores.end());
   
+  /*
+  ProtScoreHolder s;
+  for(int i = scores.size()-1; i > 0; i--)
+    {
+      if(scores[i].score == scores[i-1].score)
+	{
+	  if(scores[i].protind < scores[i-1].protind)
+	    {
+	      s = scores[i];
+	      scores[i] = scores[i-1];
+	      scores[i-1] = scores[i];
+	    }
+	}
+    }
+  */
+
   int positives=0,nulls=0;
   double efp=0.0,q;
   posNow = 0;
