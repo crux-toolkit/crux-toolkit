@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <cstdio>
+#include <iomanip>
 #ifdef CRUX
 #include "CruxApplication.h"
 #include "carp.h"
@@ -33,7 +34,7 @@ class Barista : public CruxApplication
 {
  public:
   Barista() 
-    : verbose(0),
+    : verbose(1),
     skip_cleanup_flag(0),
     overwrite_flag(0),
     feature_file_flag(0),
@@ -53,7 +54,7 @@ class Barista : public CruxApplication
     max_fdr(0),
     max_peptides(0),   
     max_fdr_psm(0),
-    max_fdr_pep(0){srand(seed);}
+    max_fdr_pep(0){}
   ~Barista(){clear();}
   void clear();
   void print_description();
@@ -169,6 +170,8 @@ class Barista : public CruxApplication
   NeuralNet max_net_pep;
   int max_fdr_pep;
   
+  ofstream fdebug;
+
 };
 
 

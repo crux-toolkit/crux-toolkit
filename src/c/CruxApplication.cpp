@@ -71,6 +71,7 @@ void CruxApplication::initialize(
   carp(CARP_INFO, "Beginning %s.", 
        this->getName().c_str());
 
+  
   // Set seed for random number generation 
   if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
     time_t seconds; // use current time to seed
@@ -80,7 +81,7 @@ void CruxApplication::initialize(
   else{
     srandom((unsigned int)atoi(get_string_parameter_pointer("seed")));
   }
-
+  
   // Start the timer.
   wall_clock();
 
