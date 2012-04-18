@@ -52,10 +52,8 @@ int PredictPeptideIons::main(int argc, char** argv) {
 
   /* Define optional and required command line arguments */
   const char* option_list[] = {
-    "version",
     "primary-ions",
     "precursor-ions",
-    "neutral-losses",
     "isotope",
     "flanking",
     "max-ion-charge",
@@ -86,6 +84,7 @@ int PredictPeptideIons::main(int argc, char** argv) {
   int isotope_count = get_int_parameter("isotope");
   bool is_flanking = get_boolean_parameter("flanking");
   const char* max_ion_charge = get_string_parameter_pointer("max-ion-charge");
+
   int nh3_count = get_int_parameter("nh3");
   int h2o_count = get_int_parameter("h2o");
 
@@ -106,7 +105,8 @@ int PredictPeptideIons::main(int argc, char** argv) {
    }
 
    is_modification = (nh3_count || 
-                      h2o_count || 
+                      h2o_count ||
+                      isotope_count || 
                       is_flanking);
 
    neutral_loss_count[NH3] = nh3_count;
@@ -114,8 +114,13 @@ int PredictPeptideIons::main(int argc, char** argv) {
    neutral_loss_count[FLANK] = (int)is_flanking;
    neutral_loss_count[ISOTOPE] = isotope_count;
 
-  int max_charge = get_max_ion_charge_parameter("max-ion-charge");
-  max_charge = min(max_charge, charge_state);
+  int max_charge = -1;
+  if (strcmp(max_ion_charge,"peptide") == 0) {
+    max_charge = max(1,charge_state-1);
+  } else {
+    max_charge = min(atoi(max_ion_charge), charge_state);
+  }
+
   // create ion_constraint
   MASS_TYPE_T frag_masses = get_mass_type_parameter("fragment-mass");
   
@@ -145,7 +150,7 @@ int PredictPeptideIons::main(int argc, char** argv) {
     Peptide::calcSequenceMass(peptide_sequence, AVERAGE),
     Peptide::calcSequenceMass(peptide_sequence, MONO));
   printf("# CHARGE: %d\n", charge_state);
-  printf("# MAX-ION-CHRAGE: %s\n", max_ion_charge);
+  printf("# MAX-ION-CHARGE: %s\n", max_ion_charge);
   printf("# NH3 modification: %d\n", neutral_loss_count[NH3]);
   printf("# H2O modification: %d\n", neutral_loss_count[H2O] );
   printf("# ISOTOPE modification: %d\n", neutral_loss_count[ISOTOPE] );

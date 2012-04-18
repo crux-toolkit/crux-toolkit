@@ -426,6 +426,15 @@ char* hardklor_hardklor_algorithm_type_to_string(
   return type_str;
 }
 
+
+char* ion_type_to_string(ION_TYPE_T type) {
+
+  char* type_str = my_copy_string(ion_type_strings[type]);
+  return type_str;
+
+}
+
+
 /*
  * The string version of SCORER_TYPE_T
  */

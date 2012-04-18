@@ -225,7 +225,7 @@ void IonSeries::print(
   }
   
   // print header
-  fprintf(file, "m/z\tmass\tcharge\tion-series\tpeptide-bond-index\tNH3\tH2O\tISOTOPE\tFLANK\n");
+  fprintf(file, "m/z\tmass\tcharge\tion-series\tpeptide-bond-index\tnh3\th2o\tisotope\tflank\n");
   
   
   // print each ion in the ion series
@@ -651,12 +651,19 @@ bool IonSeries::generateIonsNoModification(
  * The loss_limit array in the ion_series must be populated prior to this method call
  *\returns true if the ion can lose the mod_type modification, else false
  */
-bool IonSeries::canIonLoseModification(
+bool IonSeries::canIonGenerateModification(
   Ion* ion, ///< the ion to check if can lose nh3 -in
   ION_MODIFICATION_T mod_type, ///< generate ions of this modification_type -in/out
   int increment  ///< the add/loss of the modification
   )
 {
+
+  //Make sure that an ion can have 0 or 1 modifications.
+  if (ion->getTotalModificationCount() == 1) {
+    return false;
+  }
+  
+
   int cleavage_idx = ion->getCleavageIdx();
 
   // check for NH3 modification
@@ -773,7 +780,7 @@ bool IonSeries::generateIons(
     working_ion = ions_[ion_idx];
     
     // can this ion generate a mod_type modification?, if not skip to next ion
-    if(!(canIonLoseModification(working_ion, mod_type, type_increment))){      
+    if(!(canIonGenerateModification(working_ion, mod_type, type_increment))){      
       continue;
     }
      
@@ -790,7 +797,7 @@ bool IonSeries::generateIons(
       addIon(new_ion);
      
       // can this ion generate a mod_type modification for the next count of modification?, 
-      if(!(this->canIonLoseModification(working_ion, mod_type, 
+      if(!(this->canIonGenerateModification(working_ion, mod_type, 
               (type_idx += type_increment)))){
         break;
       }
@@ -830,7 +837,7 @@ bool IonSeries::generateIonsFlank()
     }
 
     // can this ion generate a mod_type modification?, if not skip to next ion
-    if(!canIonLoseModification(working_ion, FLANK, type_increment)){      
+    if(!canIonGenerateModification(working_ion, FLANK, type_increment)){      
       continue;
     }
      

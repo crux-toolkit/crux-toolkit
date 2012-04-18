@@ -403,7 +403,7 @@ typedef struct bin_peptide_iterator BIN_PEPTIDE_ITERATOR_T;
 typedef struct bin_sorted_peptide_iterator BIN_SORTED_PEPTIDE_ITERATOR_T;
 
 /**
- * \class ProtienIndex
+ * \class ProteinIndex
  * \brief Object to store the protein relation to the fasta file
  */
 class ProteinIndex;
@@ -597,8 +597,6 @@ typedef struct our_hash HASH_T;
  * \brief HASH_ITERATOR_T iterator for keys in a hash
  */
 typedef struct hash_iterator HASH_ITERATOR_T;
-
-
 
 /**
  * Identifying which set the PSM belongs to
