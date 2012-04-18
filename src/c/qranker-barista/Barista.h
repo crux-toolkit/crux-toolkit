@@ -34,7 +34,7 @@ class Barista : public CruxApplication
 {
  public:
   Barista() 
-    : verbose(1),
+    : verbose(0),
     skip_cleanup_flag(0),
     overwrite_flag(0),
     feature_file_flag(0),
