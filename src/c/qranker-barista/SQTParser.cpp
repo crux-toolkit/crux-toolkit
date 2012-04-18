@@ -10,6 +10,7 @@ SQTParser :: SQTParser()
     num_mixed_labels(0),
     num_features(0),
     num_spec_features(0),
+    use_quadratic_features(1),
     num_spectra(0),
     num_psm(0),
     num_pos_psm(0),
@@ -426,8 +427,11 @@ void SQTParser :: fill_graphs_and_save_data(string &out_dir)
   //write out data summary
   fname << out_dir << "/summary";
   ofstream f_summary(fname.str().c_str());
+  int num_total_features = num_features+num_spec_features;
+  if(use_quadratic_features)
+    num_total_features += num_features;
   //psm info
-  f_summary << num_features+num_spec_features << " " << num_psm << " " << num_pos_psm << " " << num_neg_psm << endl;
+  f_summary << num_total_features << " " << num_psm << " " << num_pos_psm << " " << num_neg_psm << endl;
   //peptide info
   f_summary << num_pep << " " << num_pos_pep << " " << num_neg_pep << endl;
   //protein info
@@ -635,9 +639,23 @@ void SQTParser :: extract_features(sqt_match &m, int hits_read, int final_hits,e
 	  f_psm.write((char*)x, sizeof(double)*num_features);
 	  f_psm.write((char*)xs, sizeof(double)*num_spec_features);
 
+	  if(use_quadratic_features)
+	    {
+	      for(int i = 0; i < num_features; i++)
+		x[i] *= x[i];
+	      f_psm.write((char*)x, sizeof(double)*num_features);
+	    }
 	}
       else
-	f_psm.write((char*)x, sizeof(double)*num_features);
+	{
+	  f_psm.write((char*)x, sizeof(double)*num_features);
+	  if(use_quadratic_features)
+	    {
+	      for(int i = 0; i < num_features; i++)
+		x[i] *= x[i];
+	      f_psm.write((char*)x, sizeof(double)*num_features);
+	    }
+	}
 
      
       //write psm tables

@@ -131,6 +131,7 @@ class SQTParser{
   //summary of the dataset
   int num_features;
   int num_spec_features;
+  int use_quadratic_features;
   int num_spectra;
   int num_psm;
   int num_pos_psm;
