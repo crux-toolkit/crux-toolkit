@@ -158,7 +158,7 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 	   ++ion) {
 
 	  if (ion -> getIonType() == B_ION || ion -> getIonType() == Y_ION) {
-	    Peak * peak = spectrum->getNearestPeak(ion->getMZ(MONO), 
+	    Peak * peak = spectrum->getMaxIntensityPeak(ion->getMZ(MONO), 
                                                     bin_width);
 	    if (peak != NULL) {
               if (matched.find(peak) == matched.end()) {

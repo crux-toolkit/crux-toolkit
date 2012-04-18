@@ -297,6 +297,19 @@ class Spectrum{
      );
   
   /**
+   * \returns The PEAK_T within 'max' of 'mz' in 'spectrum'
+   * that is the maximum intensity.
+   * NULL if no peak within 'max'
+   * This should lazily create the data structures within the
+   * spectrum object that it needs.
+   */
+  Peak* getMaxIntensityPeak(
+    FLOAT_T mz, ///< the mz of the peak to find
+    FLOAT_T max ///< the maximum distance to get intensity -in
+  );
+
+
+  /**
    * \returns The sum of intensities in all peaks.
    */
   double getTotalEnergy();
