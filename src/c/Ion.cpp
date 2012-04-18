@@ -249,9 +249,15 @@ void Ion::print(
   )
 {
   // print all fields of ion
-  fprintf(file, "%.2f\t%.2f\t%d\t%d\t%d", 
+
+
+  char* type_str = ion_type_to_string(type_);
+
+  fprintf(file, "%.2f\t%.2f\t%d\t%s\t%d", 
       ion_mass_z_, (ion_mass_z_)*charge_, charge_, 
-      (int)type_, cleavage_idx_);
+      type_str, cleavage_idx_);
+
+  free(type_str);
 
   // iterate over all modification counts
   int mod_idx;
@@ -984,6 +990,17 @@ int Ion::getSingleModificationCount(
   )
 {
   return modification_counts_[mod_type];
+}
+
+int Ion::getTotalModificationCount() {
+  int total = 0;
+
+  for (int idx=NH3;idx < ALL_MODIFICATION;idx++) {
+    total += modification_counts_[idx];
+  }
+
+  return total;
+
 }
 
 

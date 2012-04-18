@@ -80,7 +80,7 @@ class IonSeries {
    * The loss_limit array in the ion_series must be populated prior to this method call
    *\returns TRUE if the ion can lose the mod_type modification, else FALSE
    */
-  bool canIonLoseModification(
+  bool canIonGenerateModification(
     Ion* ion, ///< the ion to check if can lose nh3 -in
     ION_MODIFICATION_T mod_type, ///< generate ions of this modification_type -in/out
     int increment  ///< the add/loss of the modification

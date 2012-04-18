@@ -391,6 +391,7 @@ bool string_to_scorer_type(char*, SCORER_TYPE_T*);
 const char* scorer_type_to_string(SCORER_TYPE_T);
 bool string_to_ion_type(char* , ION_TYPE_T*);
 bool ion_type_to_string(ION_TYPE_T, char*);
+char* ion_type_to_string(ION_TYPE_T type);
 
 // new style of type_to_string and string_to_type functions
 // requires an invalid value for each enum
@@ -416,7 +417,6 @@ char* mass_format_type_to_string(MASS_FORMAT_T type);
 HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(char* name);
 char* hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
 char* hardklor_hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
-
 
 /**
  * \brief Open either the index or fasta file and prepare it for

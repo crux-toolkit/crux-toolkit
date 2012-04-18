@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Apr  4 14:44:07 2012
+H	StartTime	Thu Apr 12 15:45:58 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2678,16 +2678,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1489.7319	0.99464184	56.186016	2	0.39247712	3	4	24	8	NVGVFTLQEELLK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK	8
 159	2	745.7500	1489.4827	1486.6195	1.0068936	10.493883	7	0.0039789644	4	2	26	8	SPQGNTLNNEPGMK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	8
 159	2	745.7500	1489.4827	1488.7063	1.094299	17.715406	4	-0.0051191286	5	3	24	8	FHENISLPVASFK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	8
-INFO: CPU: n020.grid.gs.washington.edu
-INFO: Wed Apr  4 14:44:07 PDT 2012
+INFO: CPU: arginine.gs.washington.edu
+INFO: Thu Apr 12 15:45:58 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 7.84 s
+INFO: Elapsed time: 5.04 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 7.84 s
+INFO: Elapsed time: 5.06 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -2728,15 +2728,11 @@ isotope=0
 # Available for crux search-for-matches
 precursor-window-type-decoy=mass
 
-# The ion series to predict (b,y,by). Default='by' (both b and y ions).
+# The ion series to predict (b,y,by,bya). Default='by' (both b and y
+# ions).
 # Only available for crux-predict-peptide-ions.  Set automatically to
 # 'by' for searching.
 primary-ions=by
-
-# Predict neutral loss ions (none, h20, nh3, all). Default='all'.
-# Only available for crux-predict-peptide-ions. Set to 'all' for sp and
-# xcorr scoring.
-neutral-losses=all
 
 # Perform parsimony analysis on the proteins and report a parsimony rank
 # column in output file. Default=none. Can be
@@ -3429,7 +3425,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Apr  4 14:44:07 2012
+H	StartTime	Thu Apr 12 15:45:58 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

@@ -503,13 +503,13 @@ START_TEST (test_create){
   ion_series->predictIons();
 
   //check the number of ions predicted
-  fail_unless(ion_series->getNumIons() == 1830, "the total number of ions not predicted correctly_1");
-  fail_unless(ion_series->getNumIonsOneType(B_ION) == 330, "the B ion number of ions not predicted correctly");
-  fail_unless(ion_series->getNumIonsOneType(Y_ION) == 330, "the Y ion number of ions not predicted correctly");
-  fail_unless(ion_series->getNumIonsOneType(A_ION) == 288, "the A ion number of ions not predicted correctly");
-  fail_unless(ion_series->getNumIonsOneType(C_ION) == 288, "the C ion number of ions not predicted correctly");
-  fail_unless(ion_series->getNumIonsOneType(X_ION) == 288, "the X ion number of ions not predicted correctly");
-  fail_unless(ion_series->getNumIonsOneType(Z_ION) == 288, "the Z ion number of ions not predicted correctly");
+  fail_unless(ion_series->getNumIons() == 1578, "the total number of ions not predicted correctly_1");
+  fail_unless(ion_series->getNumIonsOneType(B_ION) == 288, "the B ion number of ions not predicted correctly");
+  fail_unless(ion_series->getNumIonsOneType(Y_ION) == 288, "the Y ion number of ions not predicted correctly");
+  fail_unless(ion_series->getNumIonsOneType(A_ION) == 246, "the A ion number of ions not predicted correctly");
+  fail_unless(ion_series->getNumIonsOneType(C_ION) == 246, "the C ion number of ions not predicted correctly");
+  fail_unless(ion_series->getNumIonsOneType(X_ION) == 246, "the X ion number of ions not predicted correctly");
+  fail_unless(ion_series->getNumIonsOneType(Z_ION) == 246, "the Z ion number of ions not predicted correctly");
   fail_unless(ion_series->getNumIonsOneType(P_ION) == 18, "the P ion number of ions not predicted correctly");
 
   //try copy ion series

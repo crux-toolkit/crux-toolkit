@@ -836,7 +836,7 @@ void initialize_parameters(void){
 
   // **** predict-peptide-ions options. ****
   set_ion_type_parameter("primary-ions", BY_ION,
-      "The ion series to predict (b,y,by). Default='by' (both b and y ions).",
+      "The ion series to predict (b,y,by,bya). Default='by' (both b and y ions).",
       "Only available for crux-predict-peptide-ions.  Set automatically to "
       "'by' for searching.", "true");
   set_boolean_parameter("precursor-ions", false,
@@ -844,10 +844,6 @@ void initialize_parameters(void){
       "(neutral-losses, multiple charge states) consistent with the "
       "other specified options. (T,F) Default=F.",
       "Only available for crux-predict-peptide-ions.", "true");
-  set_string_parameter("neutral-losses", "all", 
-      "Predict neutral loss ions (none, h20, nh3, all). Default='all'.",
-      "Only available for crux-predict-peptide-ions. Set to 'all' for "
-      "sp and xcorr scoring.", "true");
   set_int_parameter("isotope", 0, 0, 2,
       "Predict the given number of isotope peaks (0|1|2). Default=0.",
       "Only available for crux-predict-peptide-ion.  Automatically set to "
@@ -871,7 +867,6 @@ void initialize_parameters(void){
       "Predict peaks with the given maximum number of h2o neutral loss "
       "modifications. Default=0.",
       "Only available for crux-predict-peptide-ions.", "true");
-
 
   // ***** spectral-counts aguments *****
   set_string_parameter("input PSMs", NULL,
@@ -2009,7 +2004,7 @@ bool check_option_type_and_bounds(const char* name){
     if( !string_to_ion_type(value_str, &ion_type)){
       success = false;
       sprintf(die_str, "Illegal ion type '%s' for option '%s'.  "
-              "Must be b,y,by.", value_str, name);
+              "Must be b,y,by,bya.", value_str, name);
     }
     break;
   case WINDOW_TYPE_P:
@@ -2066,6 +2061,7 @@ bool check_option_type_and_bounds(const char* name){
               value_str, name);
     }
     break;
+
   case NUMBER_PARAMETER_TYPES:
     carp(CARP_FATAL, "Your param type '%s' wasn't found (code %i)", 
         type_str, (int)param_type);
