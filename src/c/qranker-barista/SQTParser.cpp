@@ -10,6 +10,7 @@ SQTParser :: SQTParser()
     num_mixed_labels(0),
     num_features(0),
     num_spec_features(0),
+    num_total_features(0),
     use_quadratic_features(1),
     num_spectra(0),
     num_psm(0),
@@ -427,9 +428,6 @@ void SQTParser :: fill_graphs_and_save_data(string &out_dir)
   //write out data summary
   fname << out_dir << "/summary";
   ofstream f_summary(fname.str().c_str());
-  int num_total_features = num_features+num_spec_features;
-  if(use_quadratic_features)
-    num_total_features += num_features;
   //psm info
   f_summary << num_total_features << " " << num_psm << " " << num_pos_psm << " " << num_neg_psm << endl;
   //peptide info
@@ -638,26 +636,44 @@ void SQTParser :: extract_features(sqt_match &m, int hits_read, int final_hits,e
 	  //write out features
 	  f_psm.write((char*)x, sizeof(double)*num_features);
 	  f_psm.write((char*)xs, sizeof(double)*num_spec_features);
-
-	  if(use_quadratic_features)
-	    {
-	      for(int i = 0; i < num_features; i++)
-		x[i] *= x[i];
-	      f_psm.write((char*)x, sizeof(double)*num_features);
-	    }
 	}
       else
+	f_psm.write((char*)x, sizeof(double)*num_features);
+	  
+      num_total_features = num_features+num_spec_features;
+
+      if(use_quadratic_features)
 	{
-	  f_psm.write((char*)x, sizeof(double)*num_features);
-	  if(use_quadratic_features)
+	  //for(int i = 0; i < num_features; i++)
+	  //x[i] *= x[i];
+	  //f_psm.write((char*)x, sizeof(double)*num_features);
+	  //num_total_features += num_features;
+	  double *b = new double[1];
+	  for(int i = 0; i < num_features; i++)
 	    {
-	      for(int i = 0; i < num_features; i++)
-		x[i] *= x[i];
-	      f_psm.write((char*)x, sizeof(double)*num_features);
+	      for(int j = i; j < num_features; j++)
+		{
+		  b[0] = x[i]*x[j];
+		  f_psm.write((char*)b, sizeof(double));
+		  num_total_features++;
+		}
 	    }
+	  if(num_spec_features > 0)
+	    {
+	      for(int i = 0; i < num_spec_features; i++)
+		{
+		  for(int j = i; j < num_spec_features; j++)
+		    {
+		      b[0] = xs[i]*xs[j];
+		      f_psm.write((char*)b, sizeof(double));
+		      num_total_features++;
+		    }
+		}
+	    }
+	
 	}
 
-     
+
       //write psm tables
       double deltaCN = m.delta_cn[i];
       f_psmind_to_deltaCn.write((char*)(&deltaCN),sizeof(double));
