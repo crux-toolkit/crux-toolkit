@@ -2431,6 +2431,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
       carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
       carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
       
+      sqtp.set_use_quadratic_features(1);
       if(!sqtp.run())
 	carp(CARP_FATAL, "Could not proceed with training.");
       sqtp.clear();

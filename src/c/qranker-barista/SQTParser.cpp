@@ -11,7 +11,7 @@ SQTParser :: SQTParser()
     num_features(0),
     num_spec_features(0),
     num_total_features(0),
-    use_quadratic_features(1),
+    use_quadratic_features(0),
     num_spectra(0),
     num_psm(0),
     num_pos_psm(0),
