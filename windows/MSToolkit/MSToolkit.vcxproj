@@ -167,13 +167,112 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugPercolator|Win32'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugQRanker|Win32'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <SourcePath>
+    </SourcePath>
+    <ExcludePath />
+    <LibraryPath>
+    </LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugSearch|Win32'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleasePercolator|Win32'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugPercolator|x64'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugQRanker|x64'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <SourcePath>
+    </SourcePath>
+    <ExcludePath />
+    <LibraryPath>
+    </LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugSearch|x64'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleasePercolator|x64'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ExecutablePath>$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(FrameworkSDKDir)\lib\win64;$(MSBuildToolsPath32);$(FxCopDir);$(PATH);</ExecutablePath>
+    <ReferencePath />
+    <IncludePath>..\..\src\external\MSToolkit\include;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <LibraryPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -184,7 +283,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -195,7 +294,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -206,7 +305,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -217,7 +316,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -228,7 +327,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -239,7 +338,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -250,7 +349,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -262,8 +361,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CallingConvention>
+      </CallingConvention>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -277,7 +378,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -292,7 +393,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -307,7 +408,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COMPILED_FROM_DSP;SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src\c\MSToolkit\zLib;..\..\src\c\MSToolkit\RAMP;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -317,46 +418,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\c\MSToolkit\CMSReader.cpp" />
-    <ClCompile Include="..\..\src\c\MSToolkit\CSpectrum.cpp" />
-    <ClCompile Include="..\..\src\c\MSToolkit\MSConvertFile.cpp" />
-    <ClCompile Include="..\..\src\c\MSToolkit\MSObject.cpp" />
-    <ClCompile Include="..\..\src\c\MSToolkit\MSReader.cpp" />
-    <ClCompile Include="..\..\src\c\MSToolkit\RAMP\ramp.cpp" />
-    <ClCompile Include="..\..\src\c\MSToolkit\RAMP\ramp_base64.cpp" />
-    <ClCompile Include="..\..\src\c\MSToolkit\Spectrum.cpp" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\adler32.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\compress.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\crc32.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\deflate.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\gzio.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\infback.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\inffast.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\inflate.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\inftrees.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\trees.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\uncompr.c" />
-    <ClCompile Include="..\..\src\c\MSToolkit\zLib\zutil.c" />
+    <ClCompile Include="..\..\src\external\MSToolkit\src\MSToolkit\MSObject.cpp" />
+    <ClCompile Include="..\..\src\external\MSToolkit\src\MSToolkit\MSReader.cpp" />
+    <ClCompile Include="..\..\src\external\MSToolkit\src\MSToolkit\Spectrum.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\c\MSToolkit\CMSReader.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\CSpectrum.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\MSObject.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\MSReader.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\MSToolkitTypes.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\RAMP\ramp.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\RAMP\ramp_base64.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\Spectrum.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\crc32.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\deflate.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\inffast.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\inffixed.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\inflate.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\inftrees.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\trees.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\zconf.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\zlib.h" />
-    <ClInclude Include="..\..\src\c\MSToolkit\zLib\zutil.h" />
+    <ClInclude Include="..\..\src\external\MSToolkit\include\MSObject.h" />
+    <ClInclude Include="..\..\src\external\MSToolkit\include\MSReader.h" />
+    <ClInclude Include="..\..\src\external\MSToolkit\include\MSToolkitTypes.h" />
+    <ClInclude Include="..\..\src\external\MSToolkit\include\mzParser.h" />
+    <ClInclude Include="..\..\src\external\MSToolkit\include\Spectrum.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

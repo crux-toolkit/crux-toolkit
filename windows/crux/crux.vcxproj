@@ -162,63 +162,99 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugSearch|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugPercolator|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugQRanker|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugSearch|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugPercolator|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugQRanker|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleasePercolator|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleasePercolator|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\src\c\qranker-barista;..\..\src\c\percolator;..\..\src\c\xlink</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\percolator;..\..\src\c\qranker-barista;..\..\src\c\xlink;..\..\src\c;..\..\src\c\bullseye;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
+    <ReferencePath />
+    <SourcePath />
+    <ExcludePath />
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -226,12 +262,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugSearch|Win32'">
@@ -240,12 +276,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugPercolator|Win32'">
@@ -254,12 +290,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugQRanker|Win32'">
@@ -268,12 +304,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -282,12 +318,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugSearch|x64'">
@@ -296,12 +332,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugPercolator|x64'">
@@ -310,12 +346,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugQRanker|x64'">
@@ -324,12 +360,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -340,14 +376,14 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleasePercolator|Win32'">
@@ -358,14 +394,14 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -376,14 +412,14 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleasePercolator|x64'">
@@ -394,14 +430,14 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SEARCH_ENABLED;USE_DOUBLES;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ArrayLibrary.lib;crux_library.lib;mstoolkit.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>mstoolkit.lib;ArrayLibrary.lib;percolator.lib;posterior_error.lib;qranker_barista.lib;xlink.lib;hardklor.lib;bullseye.lib;ws2_32.lib;crux_library.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -409,6 +445,38 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\c\crux-main.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ArrayLibrary\ArrayLibrary.vcxproj">
+      <Project>{2119492e-9189-4f46-bada-723692e67d30}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\bullseye\bullseye.vcxproj">
+      <Project>{901db888-e4a4-4ed1-9db6-30deabf099f7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\crux-library\crux-library.vcxproj">
+      <Project>{c4bcbcf8-e852-46cf-af83-65353359b218}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\hardklor\hardklor.vcxproj">
+      <Project>{0e756a7f-b135-4e0b-a8c0-bed01c60c0bb}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\MSToolkit\MSToolkit.vcxproj">
+      <Project>{af642c17-5942-4a4a-90a6-ad75da06481e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\percolator\percolator.vcxproj">
+      <Project>{ee63e11d-5bcd-4e4a-a1e6-d514bb8be38d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\posterior_error\posterior_error.vcxproj">
+      <Project>{671ccd4c-c27c-41f7-bba4-39fa197170b1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\q-ranker\q-ranker.vcxproj">
+      <Project>{c7be0db9-3d01-4f2a-b7f0-534f7a4bc8bb}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\xlink\xlink.vcxproj">
+      <Project>{f2853a94-c9d3-4ac2-8c50-31f88b052216}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
