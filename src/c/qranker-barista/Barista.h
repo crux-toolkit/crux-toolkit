@@ -43,7 +43,7 @@ class Barista : public CruxApplication
     fileroot(""), 
     seed(0), 
     selectionfdr(0.01), 
-    nepochs(8), 
+    nepochs(20), 
     num_features(0), 
     num_hu(3), 
     mu(0.05),
@@ -68,7 +68,7 @@ class Barista : public CruxApplication
   int run_tries_multi_task();
   double train_hinge(int protind, int label);
   double train_hinge_psm(int psmind, int label);
-  void train_net(double selectionfdr, int interval);
+  void train_net(double selectionfdr);
   void train_net_multi_task(double selectionfdr, int interval);
 
   void calc_gradients(int protind, int label);
