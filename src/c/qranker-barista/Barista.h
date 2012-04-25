@@ -34,7 +34,7 @@ class Barista : public CruxApplication
 {
  public:
   Barista() 
-    : verbose(0),
+    : verbose(1),
     skip_cleanup_flag(0),
     overwrite_flag(0),
     feature_file_flag(0),
@@ -43,7 +43,7 @@ class Barista : public CruxApplication
     fileroot(""), 
     seed(0), 
     selectionfdr(0.01), 
-    nepochs(20), 
+    nepochs(8), 
     num_features(0), 
     num_hu(3), 
     mu(0.05),
@@ -63,19 +63,21 @@ class Barista : public CruxApplication
   void setup_for_training(int trn_to_tst);
   void setup_for_reporting_results();
   int run();
+
   int run_tries();
   int run_tries_multi_task();
-  void train_net(double selectionfdr, int interval);
-  void train_net_multi_task(double selectionfdr, int interval);
-  double get_protein_score(int protind);
-  void calc_gradients(int protind, int label);
   double train_hinge(int protind, int label);
   double train_hinge_psm(int psmind, int label);
+  void train_net(double selectionfdr, int interval);
+  void train_net_multi_task(double selectionfdr, int interval);
+
+  void calc_gradients(int protind, int label);
 
   int getOverFDRProt(ProtScores &set, NeuralNet &n, double fdr);
+  int getOverFDRProt(ProtScores &set, double fdr);
+
+  double get_protein_score(int protind);
   double get_protein_score(int protind, NeuralNet &n);
-  int getOverFDRProtMax(ProtScores &set, NeuralNet &n, double fdr);
-  double get_protein_score_max(int protind, NeuralNet &n);
   double get_protein_score_parsimonious(int protind, NeuralNet &n);
   int getOverFDRProtParsimonious(ProtScores &set, NeuralNet &n, double fdr);
   void computePEP();

@@ -1751,8 +1751,6 @@ void Barista :: report_all_fdr_counts()
 
 
 /*******************************************************************************/
-
-
 double Barista :: get_protein_score(int protind, NeuralNet &n)
 {
   int num_pep = d.protind2num_pep(protind);
@@ -1784,41 +1782,6 @@ double Barista :: get_protein_score(int protind, NeuralNet &n)
   return sm;
 }
 
-
-double Barista :: get_protein_score_max(int protind, NeuralNet &n)
-{
-  int num_pep = d.protind2num_pep(protind);
-  int *pepinds = d.protind2pepinds(protind);
-  double sm = 0.0;
-  double div = 1;
-  vector<double> scores;
-
-  for (int i = 0; i < num_pep; i++)
-    {
-      int pepind = pepinds[i];
-      double pep_sc = get_peptide_score(pepind,n);
-      scores.push_back(pep_sc);
-    }
-  sort(scores.begin(),scores.end());
-  reverse(scores.begin(),scores.end());
-  sm += scores[0];
-  sm /= div;
-  return sm;
-}
-
-int Barista :: getOverFDRProtMax(ProtScores &set, NeuralNet &n, double fdr)
-{
-  double r = 0.0;
-  for(int i = 0; i < set.size(); i++)
-    {
-      int protind = set[i].protind;
-      r = get_protein_score_max(protind,n);
-      set[i].score = r;
-    }
-  return set.calcOverFDR(fdr);
-  
-}
-
 int Barista :: getOverFDRProt(ProtScores &set, NeuralNet &n, double fdr)
 {
   double r = 0.0;
@@ -1832,8 +1795,21 @@ int Barista :: getOverFDRProt(ProtScores &set, NeuralNet &n, double fdr)
   
 }
 
+int Barista :: getOverFDRProt(ProtScores &set, double fdr)
+{
+  double r = 0.0;
+  for(int i = 0; i < set.size(); i++)
+    {
+      int protind = set[i].protind;
+      r = get_protein_score(protind);
+      set[i].score = r;
+    }
+  return set.calcOverFDR(fdr);
+  
+}
 
 
+/*
 double Barista :: get_protein_score(int protind)
 {
   int num_pep = d.protind2num_pep(protind);
@@ -1867,7 +1843,7 @@ double Barista :: get_protein_score(int protind)
   assert((int)max_psm_scores.size() == num_pep);
   
   double sm = 0.0;
-  int n = (int)pow(num_all_pep,alpha);
+  double n = pow(num_all_pep,alpha);
   for(unsigned int i = 0; i < max_psm_inds.size() ; i++)
     sm+= max_psm_scores[i];
   sm /= n;
@@ -1894,12 +1870,78 @@ void Barista :: calc_gradients(int protind, int label)
     }
   delete[] gc;
 }
+*/
+
+
+double Barista :: get_protein_score(int protind)
+{
+  int num_pep = d.protind2num_pep(protind);
+  int num_all_pep = d.protind2num_all_pep(protind);
+  int *pepinds = d.protind2pepinds(protind);
+  max_psm_inds.erase(max_psm_inds.begin(),max_psm_inds.end());
+  max_psm_scores.erase(max_psm_scores.begin(),max_psm_scores.end());
+  int psm_count = 0;
+  //for (int i = 0; i < num_pep; i++)
+  for (int i = 0; i < 1; i++)
+    {
+      int pepind = pepinds[i];
+      int num_psms = d.pepind2num_psm(pepind);
+      int *psminds = d.pepind2psminds(pepind);
+      double max_sc = -1000000.0;
+      int max_ind = 0;
+      //for (int j = 0; j < num_psms; j++)
+      for (int j = 0; j < 1; j++)
+	{
+	  double *feat = d.psmind2features(psminds[j]);
+	  double *sc = net_clones[psm_count].fprop(feat);
+	  if(sc[0] > max_sc)
+	    {
+	      max_sc = sc[0];
+	      max_ind = j;
+	    }
+	  psm_count++;
+	}
+      max_psm_inds.push_back(max_ind);
+      max_psm_scores.push_back(max_sc);
+    }
+  //assert((int)max_psm_inds.size() == num_pep);
+  //assert((int)max_psm_scores.size() == num_pep);
+  
+  double sm = 0.0;
+  double n = pow(num_all_pep,alpha);
+  for(unsigned int i = 0; i < max_psm_inds.size() ; i++)
+    sm+= max_psm_scores[i];
+  sm /= n;
+  return sm;
+}
+
+void Barista :: calc_gradients(int protind, int label)
+{
+  int num_pep = d.protind2num_pep(protind);
+  int num_all_pep = d.protind2num_all_pep(protind);
+  int *pepinds = d.protind2pepinds(protind);
+  double n = pow(num_all_pep,alpha);
+
+  double *gc = new double[1];
+  gc[0] = -label/n;
+  int psm_count = 0;
+  //for(int i = 0; i < num_pep; i++)
+  for(int i = 0; i < 1; i++)
+    {
+      int pepind = pepinds[i];
+      int num_psms = d.pepind2num_psm(pepind);
+      int clone_ind = psm_count+max_psm_inds[i];
+      net_clones[clone_ind].bprop(gc);
+      psm_count += num_psms;
+    }
+  delete[] gc;
+}
+
+
 
 double Barista :: train_hinge(int protind, int label)
 {
   double sm = get_protein_score(protind);
-  
-  
     
   double err = max(0.0,1.0-sm*label);
 
@@ -1931,23 +1973,29 @@ double Barista :: train_hinge_psm(int psmind, int label)
   return err;
 }
 
-
-
 void Barista :: train_net(double selectionfdr, int interval)
 {
   for (int k = 0; k < nepochs; k++)
     {
-      if(verbose > 0)
+      //fdebug << "epoch " << k << endl;
+    if(verbose > 0)
 	cout << "epoch " << k << endl;
       double err_sum = 0.0;
       for(int i = 0; i < trainset.size(); i++)
 	{
-	  int ind = rand()%interval;
+	  int ind = rand()%trainset.size();
 	  int protind = trainset[ind].protind;
 	  int label = trainset[ind].label;
 	  err_sum += train_hinge(protind,label);
-	}
-      int fdr_trn = getOverFDRProt(trainset,net,selectionfdr);
+	}      
+      //int fdr_trn = getOverFDRProt(trainset,net,selectionfdr);
+      int fdr_trn = getOverFDRProt(trainset,selectionfdr);
+      
+      //fdebug << fixed;
+      //for(int j = 0; j < trainset.size(); j++)
+	//fdebug << j << " " << trainset[j].protind << " " << setprecision(16) << trainset[j].score << endl;
+	//fdebug << j << " " << trainset[j].protind  << endl;
+      
       if(verbose > 0)
 	{
 	  if(interval == trainset.size())
@@ -1963,10 +2011,17 @@ void Barista :: train_net(double selectionfdr, int interval)
 	  max_fdr = fdr_trn;
 	  if(verbose == 0)
 	    {
+#ifdef CRUX
+	      if(testset.size() > 0)
+		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d %d", selectionfdr, max_fdr, getOverFDRProt(testset,max_net_prot,selectionfdr));
+	      else
+		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d", selectionfdr, max_fdr);
+#else
 	      cout << "q< " << selectionfdr << ": max non-parsimonious so far " << max_fdr;
 	      if(testset.size() > 0)
 		cout << " " << getOverFDRProt(testset,max_net_prot,selectionfdr);
 	      cout << endl;
+#endif
 	    }
 	}
       if(verbose > 0)
@@ -1976,8 +2031,7 @@ void Barista :: train_net(double selectionfdr, int interval)
 	    cout << " " << getOverFDRProt(testset,max_net_prot,selectionfdr);
 	  cout << endl;
 	}
-      //cout << "max prot " << getOverFDRProtMax(trainset,max_net_prot,selectionfdr) << endl;
-      if(1)
+      if(0)
 	{
 	  int fdr_trn_psm = getOverFDRPSM(psmtrainset, net, selectionfdr); 
 	  if(fdr_trn_psm > max_fdr_psm)
@@ -1986,7 +2040,7 @@ void Barista :: train_net(double selectionfdr, int interval)
 	      max_fdr_psm = fdr_trn_psm;
 	    }
 	}
-      if(1)
+      if(0)
 	{
 	  int fdr_trn_pep = getOverFDRPep(peptrainset, net, selectionfdr); 
 	  if(fdr_trn_pep > max_fdr_pep)
@@ -2002,6 +2056,7 @@ void Barista :: train_net(double selectionfdr, int interval)
       cout << "max psms so far at q<" << selectionfdr << ": " << max_fdr_psm << endl;
     }
 }
+
 
 
 void Barista :: train_net_multi_task(double selectionfdr, int interval)
@@ -2026,6 +2081,7 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 	 
 	}      
       int fdr_trn = getOverFDRProt(trainset,net,selectionfdr);
+      //int fdr_trn = getOverFDRProt(trainset,selectionfdr);
       
       //fdebug << fixed;
       //for(int j = 0; j < trainset.size(); j++)
@@ -2197,15 +2253,7 @@ int Barista :: run()
   setup_for_training(0);
   
   train_net(selectionfdr, trainset.size());
-
-  net.copy(max_net_prot);
-  int interval= getOverFDRProt(trainset,max_net_prot,0.1)*2;
-  if(interval > trainset.size())
-    interval=trainset.size()/2;
-  train_net(selectionfdr, interval);
   
-  report_all_results();
-
   return 0;
 
 }
@@ -2213,9 +2261,9 @@ int Barista :: run()
 
 int Barista :: run_tries()
 {
-  setup_for_training(2);
-  //srand(seed);
-  
+  srand(seed);
+  setup_for_training(0);
+    
   int tries = 3;
   vector<double> mu_choices;
   mu_choices.resize(3,0.0);
@@ -2232,7 +2280,6 @@ int Barista :: run_tries()
   return 0;
 
 }
-
 
 int Barista :: run_tries_multi_task()
 {
@@ -2277,6 +2324,8 @@ int Barista :: run_tries_multi_task()
    return 0;
 
 }
+
+
 
 void Barista :: print_description()
 {
@@ -2713,7 +2762,9 @@ int Barista::main(int argc, char **argv) {
   if(!crux_set_command_line_options(argc,argv))
     return 1;
 
-  run_tries_multi_task();
+
+  run();
+  //run_tries_multi_task();
    if(skip_cleanup_flag != 1)
     sqtp.clean_up(out_dir);
   
